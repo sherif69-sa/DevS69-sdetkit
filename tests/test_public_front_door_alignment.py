@@ -45,7 +45,6 @@ def test_front_door_pages_share_same_primary_outcome_sentence() -> None:
         assert expected_outcome in content, f"missing shared primary outcome phrase in {page}"
 
 
-
 def test_front_door_and_reference_docs_keep_canonical_path_obvious() -> None:
     pages = (README, DOCS_INDEX, DOCS_CLI, DOCS_COMMAND_SURFACE, DOCS_VERSIONING)
 
@@ -53,7 +52,6 @@ def test_front_door_and_reference_docs_keep_canonical_path_obvious() -> None:
         content = _text(page)
         for command in CANONICAL_PATH:
             assert command in content, f"missing canonical path command in {page}: {command}"
-
 
 
 def test_secondary_material_is_explicitly_demoted_from_front_door() -> None:

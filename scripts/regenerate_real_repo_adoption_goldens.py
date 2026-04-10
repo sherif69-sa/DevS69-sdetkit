@@ -52,7 +52,9 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def _write_summary(build_dir: Path, golden_dir: Path | None = None) -> None:
-    summary = build_lane_proof_summary(fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT, build_dir=build_dir)
+    summary = build_lane_proof_summary(
+        fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT, build_dir=build_dir
+    )
     summary_path = build_dir / SUMMARY_FILE
     summary_path.write_text(json.dumps(summary, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     if golden_dir is not None:
@@ -86,7 +88,10 @@ def _check_goldens() -> int:
         )
         if generated != golden:
             mismatches.append(golden_artifact.name)
-        if build_rc.read_text(encoding="utf-8").strip() != golden_rc.read_text(encoding="utf-8").strip():
+        if (
+            build_rc.read_text(encoding="utf-8").strip()
+            != golden_rc.read_text(encoding="utf-8").strip()
+        ):
             mismatches.append(golden_rc.name)
 
     _write_summary(BUILD_DIR)

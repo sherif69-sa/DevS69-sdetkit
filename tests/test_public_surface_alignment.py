@@ -63,16 +63,18 @@ def test_pages_workflow_enforces_alignment_check_before_mkdocs_build() -> None:
 
     assert "python scripts/check_public_surface_alignment.py" in command_blob
     assert "python -m mkdocs build --strict" in command_blob
-    assert command_blob.index("python scripts/check_public_surface_alignment.py") < command_blob.index(
-        "python -m mkdocs build --strict"
-    )
+    assert command_blob.index(
+        "python scripts/check_public_surface_alignment.py"
+    ) < command_blob.index("python -m mkdocs build --strict")
 
 
 def test_mkdocs_nav_demotes_archive_to_last_section() -> None:
     text = (REPO_ROOT / "mkdocs.yml").read_text(encoding="utf-8")
     nav_block = text.split("\nnav:\n", 1)[1].split("\nexclude_docs:", 1)[0]
     labels = [
-        match.group(1) for line in nav_block.splitlines() if (match := re.match(r"^  - ([^:]+):", line))
+        match.group(1)
+        for line in nav_block.splitlines()
+        if (match := re.match(r"^  - ([^:]+):", line))
     ]
 
     assert labels[:3] == [

@@ -46,6 +46,8 @@ Context: [real-repo adoption fixture + golden artifacts](real-repo-adoption.md)
 
 ## What to run first
 
+### Fast start
+
 Canonical first-proof commands (same as README and first-run guides):
 
 ```bash
@@ -112,3 +114,17 @@ If you need context after the canonical first-proof path is working:
 Historical and transition-era documentation is preserved for traceability, but intentionally demoted in primary navigation.
 
 - [Archive index](archive/index.md)
+
+<div class="quick-jump" markdown>
+
+[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy reports](#legacy-reports)
+
+</div>
+
+## Legacy reports
+
+### Top journeys
+
+- Run first command in under 60 seconds
+- Validate docs links and anchors before publishing
+- Ship a first contribution with deterministic quality gates

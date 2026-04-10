@@ -18,8 +18,12 @@ CANONICAL_FIRST_PROOF_DOCS = (
     Path("docs/real-repo-adoption.md"),
 )
 
-CANONICAL_FAST_COMMAND = "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json"
-CANONICAL_RELEASE_COMMAND = "python -m sdetkit gate release --format json --out build/release-preflight.json"
+CANONICAL_FAST_COMMAND = (
+    "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json"
+)
+CANONICAL_RELEASE_COMMAND = (
+    "python -m sdetkit gate release --format json --out build/release-preflight.json"
+)
 NON_CANONICAL_RELEASE_STABLE_JSON = (
     "python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json"
 )
@@ -193,9 +197,8 @@ def test_policy_chain_contract_keeps_canonical_first_time_primary() -> None:
     assert "first_time_recommended=True" in contract
     assert "first_time_recommended=False" in contract
     assert "Compatibility surfaces remain supported" in versioning
-    assert (
-        "does **not** make them the primary first-time recommendation"
-        in " ".join(versioning.split())
+    assert "does **not** make them the primary first-time recommendation" in " ".join(
+        versioning.split()
     )
 
     policy_chain = " ".join((stability, versioning, contract)).lower()
@@ -258,13 +261,11 @@ def test_canonical_public_docs_lock_first_proof_command_contract() -> None:
     for path in CANONICAL_FIRST_PROOF_DOCS:
         text = path.read_text(encoding="utf-8")
         assert CANONICAL_FAST_COMMAND in text, f"missing canonical fast command in {path}"
-        assert (
-            CANONICAL_RELEASE_COMMAND in text
-        ), f"missing canonical release command in {path}"
+        assert CANONICAL_RELEASE_COMMAND in text, f"missing canonical release command in {path}"
 
-        assert (
-            NON_CANONICAL_RELEASE_STABLE_JSON not in text
-        ), f"non-supported release --stable-json drifted into {path}"
+        assert NON_CANONICAL_RELEASE_STABLE_JSON not in text, (
+            f"non-supported release --stable-json drifted into {path}"
+        )
 
 
 def test_canonical_public_docs_lock_first_artifact_paths() -> None:

@@ -22,8 +22,12 @@ from real_repo_adoption_projection import (  # noqa: E402
 
 GOLDEN_ROOT = REPO_ROOT / "artifacts" / "adoption" / "real-repo-golden"
 CANONICAL_REPLAY_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "adoption-real-repo-canonical.yml"
-CANONICAL_FAST_COMMAND = "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json"
-CANONICAL_RELEASE_COMMAND = "python -m sdetkit gate release --format json --out build/release-preflight.json"
+CANONICAL_FAST_COMMAND = (
+    "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json"
+)
+CANONICAL_RELEASE_COMMAND = (
+    "python -m sdetkit gate release --format json --out build/release-preflight.json"
+)
 CANONICAL_DOCTOR_COMMAND = "python -m sdetkit doctor --format json --out build/doctor.json"
 CANONICAL_SUMMARY_COMMAND = "python ../../../scripts/real_repo_adoption_projection.py --fixture-root . --repo-root ../../.. --build-dir build --out build/adoption-proof-summary.json"
 NON_CANONICAL_RELEASE_STABLE_JSON = (
@@ -40,7 +44,9 @@ def test_real_repo_fixture_has_canonical_structure() -> None:
         "README.md",
     )
 
-    missing = [rel_path for rel_path in required_fixture_paths if not (FIXTURE_ROOT / rel_path).is_file()]
+    missing = [
+        rel_path for rel_path in required_fixture_paths if not (FIXTURE_ROOT / rel_path).is_file()
+    ]
     assert not missing, f"missing canonical fixture files: {missing}"
 
 
@@ -108,25 +114,43 @@ def _run_fixture_command(args: list[str], out_path: Path, rc_path: Path) -> dict
 
 
 def test_real_repo_fixture_output_matches_golden_contract_projection(tmp_path: Path) -> None:
-    actual_gate = _run_fixture_command(["gate", "fast", "--stable-json"], tmp_path / "gate-fast.json", tmp_path / "gate-fast.rc")
-    actual_release = _run_fixture_command(["gate", "release"], tmp_path / "release-preflight.json", tmp_path / "release-preflight.rc")
-    actual_doctor = _run_fixture_command(["doctor"], tmp_path / "doctor.json", tmp_path / "doctor.rc")
+    actual_gate = _run_fixture_command(
+        ["gate", "fast", "--stable-json"], tmp_path / "gate-fast.json", tmp_path / "gate-fast.rc"
+    )
+    actual_release = _run_fixture_command(
+        ["gate", "release"], tmp_path / "release-preflight.json", tmp_path / "release-preflight.rc"
+    )
+    actual_doctor = _run_fixture_command(
+        ["doctor"], tmp_path / "doctor.json", tmp_path / "doctor.rc"
+    )
 
     golden_gate = json.loads((GOLDEN_ROOT / "gate-fast.json").read_text(encoding="utf-8"))
-    golden_release = json.loads((GOLDEN_ROOT / "release-preflight.json").read_text(encoding="utf-8"))
+    golden_release = json.loads(
+        (GOLDEN_ROOT / "release-preflight.json").read_text(encoding="utf-8")
+    )
     golden_doctor = json.loads((GOLDEN_ROOT / "doctor.json").read_text(encoding="utf-8"))
 
-    assert project_gate_contract(actual_gate, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT) == project_gate_contract(golden_gate, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT)
-    assert project_release_contract(actual_release, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT) == project_release_contract(golden_release, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT)
+    assert project_gate_contract(
+        actual_gate, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT
+    ) == project_gate_contract(golden_gate, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT)
+    assert project_release_contract(
+        actual_release, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT
+    ) == project_release_contract(golden_release, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT)
     assert project_doctor_contract(actual_doctor) == project_doctor_contract(golden_doctor)
 
 
 def test_real_repo_summary_matches_golden_projection(tmp_path: Path) -> None:
-    _run_fixture_command(["gate", "fast", "--stable-json"], tmp_path / "gate-fast.json", tmp_path / "gate-fast.rc")
-    _run_fixture_command(["gate", "release"], tmp_path / "release-preflight.json", tmp_path / "release-preflight.rc")
+    _run_fixture_command(
+        ["gate", "fast", "--stable-json"], tmp_path / "gate-fast.json", tmp_path / "gate-fast.rc"
+    )
+    _run_fixture_command(
+        ["gate", "release"], tmp_path / "release-preflight.json", tmp_path / "release-preflight.rc"
+    )
     _run_fixture_command(["doctor"], tmp_path / "doctor.json", tmp_path / "doctor.rc")
 
-    generated = build_lane_proof_summary(fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT, build_dir=tmp_path)
+    generated = build_lane_proof_summary(
+        fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT, build_dir=tmp_path
+    )
     golden = json.loads((GOLDEN_ROOT / "adoption-proof-summary.json").read_text(encoding="utf-8"))
     assert generated == golden
 
@@ -164,7 +188,8 @@ def test_canonical_replay_workflow_contract_is_stable() -> None:
         (
             step
             for step in replay_steps
-            if isinstance(step, dict) and str(step.get("uses", "")).startswith("actions/upload-artifact@")
+            if isinstance(step, dict)
+            and str(step.get("uses", "")).startswith("actions/upload-artifact@")
         ),
         None,
     )
@@ -174,14 +199,16 @@ def test_canonical_replay_workflow_contract_is_stable() -> None:
 
     upload_paths = str(upload_with.get("path", ""))
     for rel_path in expected_build_files:
-        assert (
-            f"examples/adoption/real-repo/{rel_path}" in upload_paths
-        ), f"workflow drifted: missing uploaded artifact path for `{rel_path}`"
+        assert f"examples/adoption/real-repo/{rel_path}" in upload_paths, (
+            f"workflow drifted: missing uploaded artifact path for `{rel_path}`"
+        )
 
 
 def test_real_repo_proof_docs_and_goldens_match_canonical_command_contract() -> None:
     real_repo_doc = (REPO_ROOT / "docs" / "real-repo-adoption.md").read_text(encoding="utf-8")
-    ci_walkthrough_doc = (REPO_ROOT / "docs" / "ci-artifact-walkthrough.md").read_text(encoding="utf-8")
+    ci_walkthrough_doc = (REPO_ROOT / "docs" / "ci-artifact-walkthrough.md").read_text(
+        encoding="utf-8"
+    )
     fixture_readme = (FIXTURE_ROOT / "README.md").read_text(encoding="utf-8")
     golden_readme = (GOLDEN_ROOT / "README.md").read_text(encoding="utf-8")
 

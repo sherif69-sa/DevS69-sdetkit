@@ -103,13 +103,17 @@ def test_projection_helper_canonical_truth_model_is_explicit() -> None:
         "gate_release": (2, False),
         "doctor": (0, True),
     }
-    observed = {spec["id"]: (spec["expected_rc"], spec["expected_ok"]) for spec in CANONICAL_LANE_SPEC}
+    observed = {
+        spec["id"]: (spec["expected_rc"], spec["expected_ok"]) for spec in CANONICAL_LANE_SPEC
+    }
     assert observed == expected
 
 
 def test_projection_summary_marks_all_expectations_met_for_current_golden_set() -> None:
     golden_dir = REPO_ROOT / "artifacts" / "adoption" / "real-repo-golden"
-    generated = build_lane_proof_summary(fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT, build_dir=golden_dir)
+    generated = build_lane_proof_summary(
+        fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT, build_dir=golden_dir
+    )
     saved = json.loads((golden_dir / "adoption-proof-summary.json").read_text(encoding="utf-8"))
     assert generated == saved
     assert saved["all_expectations_met"] is True

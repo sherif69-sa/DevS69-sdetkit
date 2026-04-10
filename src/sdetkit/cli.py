@@ -9,6 +9,17 @@ from typing import cast
 
 from .public_surface_contract import render_root_help_groups
 
+expansion_automation_41 = import_module("sdetkit.expansion_automation_41")
+optimization_closeout_42 = import_module("sdetkit.optimization_closeout_42")
+acceleration_closeout_43 = import_module("sdetkit.acceleration_closeout_43")
+scale_closeout_44 = import_module("sdetkit.scale_closeout_44")
+expansion_closeout_45 = import_module("sdetkit.expansion_closeout_45")
+optimization_closeout_46 = import_module("sdetkit.optimization_closeout_46")
+reliability_closeout_47 = import_module("sdetkit.reliability_closeout_47")
+objection_closeout_48 = import_module("sdetkit.objection_closeout_48")
+weekly_review_closeout_49 = import_module("sdetkit.weekly_review_closeout_49")
+execution_prioritization_closeout_50 = import_module("sdetkit.execution_prioritization_closeout_50")
+
 LEGACY_NAMESPACE_COMMANDS: tuple[str, ...] = (
     "weekly-review-lane",
     "phase1-hardening",
@@ -198,7 +209,9 @@ Then use stability-aware command discovery:
         sub, "release", help_text="[Public / stable] Release Confidence Kit (primary surface)"
     )
     _add_passthrough_subcommand(
-        sub, "intelligence", help_text="[Advanced but supported] Test Intelligence Kit (primary surface)"
+        sub,
+        "intelligence",
+        help_text="[Advanced but supported] Test Intelligence Kit (primary surface)",
     )
     _add_passthrough_subcommand(
         sub,

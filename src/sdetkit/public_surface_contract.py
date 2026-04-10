@@ -29,7 +29,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     ),
     CommandFamilyContract(
         name="umbrella-kits",
-        role="Umbrella kits are fully supported expansion surfaces for release, intelligence, integration, and forensics workflows after the canonical first proof path.",
+        role="Umbrella kits are fully supported expansion surfaces for release, intelligence, integration, and forensics workflows after the canonical first-time path.",
         stability_tier="Advanced but supported",
         first_time_recommended=False,
         transition_legacy_oriented=False,
