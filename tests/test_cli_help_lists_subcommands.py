@@ -16,6 +16,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     out = r.stdout
     assert "kv" in out
     assert "inspect" in out
+    assert "inspect-compare" in out
     assert "apiget" in out
     assert "doctor" in out
     assert "patch" in out

@@ -41,6 +41,10 @@ def _read_manifest(path: Path) -> dict[str, Any]:
     return loaded
 
 
+def load_workspace_manifest(workspace_root: Path) -> dict[str, Any]:
+    return _read_manifest(workspace_root / "manifest.json")
+
+
 def record_workspace_run(
     *,
     workspace_root: Path,
@@ -76,19 +80,50 @@ def record_workspace_run(
     runs = manifest.get("runs", [])
     if not isinstance(runs, list):
         runs = []
+    normalized_runs: list[dict[str, Any]] = []
+    max_run_order = 0
+    for idx, item in enumerate(runs):
+        if not isinstance(item, dict):
+            continue
+        run_order = int(item.get("run_order", idx + 1))
+        max_run_order = max(max_run_order, run_order)
+        normalized = dict(item)
+        normalized["run_order"] = run_order
+        normalized_runs.append(normalized)
+    runs = normalized_runs
     entry = {
         "workflow": workflow,
         "scope": scope,
         "run_hash": run_hash,
         "record_path": run_dir.relative_to(workspace_root).as_posix() + "/record.json",
+        "run_order": max_run_order + 1,
     }
-    if entry not in runs:
+    existing = next(
+        (
+            item
+            for item in runs
+            if str(item.get("workflow", "")) == workflow
+            and str(item.get("scope", "")) == scope
+            and str(item.get("run_hash", "")) == run_hash
+        ),
+        None,
+    )
+    if existing is None:
         runs.append(entry)
+    else:
+        entry = {
+            "workflow": str(existing.get("workflow", workflow)),
+            "scope": str(existing.get("scope", scope)),
+            "run_hash": str(existing.get("run_hash", run_hash)),
+            "record_path": str(existing.get("record_path", entry["record_path"])),
+            "run_order": int(existing.get("run_order", entry["run_order"])),
+        }
     runs = sorted(
         runs,
         key=lambda item: (
             str(item.get("workflow", "")),
             str(item.get("scope", "")),
+            int(item.get("run_order", 0)),
             str(item.get("run_hash", "")),
         ),
     )
