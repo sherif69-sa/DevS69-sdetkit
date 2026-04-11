@@ -93,6 +93,40 @@ def test_cli_review_command_outputs_json(tmp_path: Path) -> None:
     assert "operator_summary" in payload
 
 
+def test_cli_review_command_outputs_operator_json_contract_only(tmp_path: Path) -> None:
+    data = tmp_path / "events.csv"
+    out_dir = tmp_path / "out"
+    data.write_text("id,type\nE1,open\n", encoding="utf-8")
+
+    run = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "sdetkit",
+            "review",
+            str(data),
+            "--workspace-root",
+            str(tmp_path / "workspace"),
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "operator-json",
+            "--no-workspace",
+        ],
+        text=True,
+        capture_output=True,
+    )
+
+    assert run.returncode == 0
+    payload = json.loads(run.stdout)
+    assert payload["contract_version"] == "sdetkit.review.contract.v1"
+    assert "situation" in payload
+    assert "actions" in payload
+    assert "workflow" not in payload
+    artifact_payload = json.loads((out_dir / "review-operator-summary.json").read_text(encoding="utf-8"))
+    assert payload == artifact_payload
+
+
 def test_review_profiles_change_judgment_and_artifacts_for_same_input(tmp_path: Path) -> None:
     workspace = tmp_path / "workspace"
     data = tmp_path / "events.csv"

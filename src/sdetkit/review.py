@@ -1158,7 +1158,12 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         choices=sorted(REVIEW_PROFILES),
         help="Review operating profile: release, triage, forensics, monitor.",
     )
-    p.add_argument("--format", choices=["text", "json"], default="text")
+    p.add_argument(
+        "--format",
+        choices=["text", "json", "operator-json"],
+        default="text",
+        help="Output format: text (operator narrative), json (full review payload), or operator-json (operator summary contract only).",
+    )
     p.add_argument(
         "--interactive",
         action="store_true",
@@ -1184,7 +1189,12 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write(str(exc) + "\n")
         return EXIT_FINDINGS
 
-    output = json.dumps(payload, sort_keys=True) if ns.format == "json" else _render_text(payload)
+    if ns.format == "json":
+        output = json.dumps(payload, sort_keys=True)
+    elif ns.format == "operator-json":
+        output = json.dumps(payload.get("operator_summary", {}), sort_keys=True)
+    else:
+        output = _render_text(payload)
     sys.stdout.write(output + ("\n" if not output.endswith("\n") else ""))
     if ns.interactive:
         _run_interactive_review(payload)
