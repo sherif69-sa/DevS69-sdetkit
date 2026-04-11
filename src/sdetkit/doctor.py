@@ -16,6 +16,7 @@ from typing import Any
 
 from . import _toml, upgrade_audit
 from .bools import coerce_bool
+from .evidence_workspace import record_workspace_run
 from .import_hazards import find_stdlib_shadowing
 from .security import SecurityError, safe_path
 
@@ -2245,6 +2246,16 @@ def main(argv: list[str] | None = None) -> int:
         default="all",
         help="Filter evidence output to failed, actionable, or all checks (default: all).",
     )
+    parser.add_argument(
+        "--workspace-root",
+        default=".sdetkit/workspace",
+        help="Shared evidence workspace root for inspect/doctor run records.",
+    )
+    parser.add_argument(
+        "--no-workspace",
+        action="store_true",
+        help="Disable shared workspace run recording.",
+    )
 
     ns = parser.parse_args(list(argv) if argv is not None else None)
     if ns.format == "markdown":
@@ -2848,6 +2859,35 @@ def main(argv: list[str] | None = None) -> int:
                 sys.stdout.write(_stable_json(fail_payload))
             sys.stderr.write(f"doctor: evidence write failed: {evidence_error}\n")
             return EXIT_FAILED
+
+    if not ns.no_workspace:
+        workspace_artifacts: dict[str, str] = {}
+        if ns.out:
+            workspace_artifacts["doctor_output"] = str(ns.out)
+        if isinstance(ns.evidence_dir, str) and ns.evidence_dir.strip():
+            evidence_dir = Path(ns.evidence_dir.strip())
+            workspace_artifacts["doctor_evidence_json"] = (
+                evidence_dir / "doctor-evidence.json"
+            ).as_posix()
+            workspace_artifacts["doctor_evidence_markdown"] = (
+                evidence_dir / "doctor-evidence.md"
+            ).as_posix()
+            workspace_artifacts["doctor_evidence_manifest"] = (
+                evidence_dir / "doctor-evidence-manifest.json"
+            ).as_posix()
+        workspace_entry = record_workspace_run(
+            workspace_root=Path(ns.workspace_root),
+            workflow="doctor",
+            scope=root.name or "repo",
+            payload=data,
+            artifacts=workspace_artifacts,
+            recommendations=list(data.get("recommendations", [])),
+        )
+        data["workspace"] = workspace_entry
+        if is_json:
+            output = _stable_json(data)
+            if ns.out:
+                Path(ns.out).write_text(output, encoding="utf-8")
 
     sys.stdout.write(output)
 
