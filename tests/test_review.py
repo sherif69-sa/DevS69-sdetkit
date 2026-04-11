@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from sdetkit import review
+from sdetkit.review_engine import plan_adaptive_probes
 
 
 def test_review_repeated_run_tracks_changes_and_compare_artifacts(tmp_path: Path) -> None:
@@ -194,6 +195,7 @@ def test_review_tracks_ranked_with_supporting_and_conflicting_evidence(tmp_path:
     assert "verification_steps" in tracks[0]
     assert isinstance(tracks[0]["conflicting_evidence"], list)
     assert "probe_impact" in tracks[0]
+    assert isinstance(payload["evidence_edges"], list)
 
 
 def test_review_contradiction_cluster_triggers_probe_selection(tmp_path: Path) -> None:
@@ -211,3 +213,31 @@ def test_review_contradiction_cluster_triggers_probe_selection(tmp_path: Path) -
     assert clusters
     probe_ids = {row["probe_id"] for row in payload["adaptive_review"]["executed_probes"]}
     assert "probe:inspect-compare" in probe_ids
+    budget = payload["adaptive_review"]["probe_budget"]
+    assert budget["total"] == 100
+    assert budget["spent"] > 0
+    assert budget["remaining"] >= 0
+    registry = payload["adaptive_review"]["probe_registry"]
+    assert any(row["probe_id"] == "probe:inspect-compare" for row in registry)
+    inspect_compare = next(
+        row for row in payload["adaptive_review"]["executed_probes"] if row["probe_id"] == "probe:inspect-compare"
+    )
+    assert inspect_compare["cost"] == 55
+    assert inspect_compare["bounded_contract"]["max_runtime_seconds"] == 20
+    assert inspect_compare["chain"]["enabled"] is True
+
+
+def test_probe_budget_skips_when_budget_is_exhausted() -> None:
+    decision = plan_adaptive_probes(
+        detection={"workspace_like": True, "data_like": True},
+        profile_name="forensics",
+        findings=[{"priority": 90, "kind": "inspect"}],
+        contradiction_graph={"flat_contradictions": [{"id": "c1"}], "clusters": [{"cluster_id": "x"}]},
+        has_previous_review=True,
+        changed=[{"kind": "status", "message": "changed"}],
+        budget_total=70,
+        confidence_score=0.2,
+        confidence_threshold=0.45,
+    )
+    assert decision["executed_probes"]
+    assert any(row["skip_reason"] == "probe budget exhausted by higher-value probes" for row in decision["skipped_probes"])

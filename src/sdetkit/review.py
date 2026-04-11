@@ -19,6 +19,7 @@ from .review_engine import (
     build_contradiction_graph,
     build_contradiction_clusters,
     build_staged_plan,
+    build_typed_evidence_edges,
     decide_escalation,
     decide_stop,
     investigation_confidence,
@@ -551,9 +552,13 @@ def run_review(
         contradiction_graph=contradiction_graph,
         has_previous_review=False,
         changed=[],
+        confidence_score=baseline_confidence,
+        confidence_threshold=selected_profile.confidence_medium,
     )
     adaptive_plan["executed_probes"] = probe_decision["executed_probes"]
     adaptive_plan["skipped_probes"] = probe_decision["skipped_probes"]
+    adaptive_plan["probe_registry"] = probe_decision["registry"]
+    adaptive_plan["probe_budget"] = probe_decision["budget"]
 
     if inspect_payload and "inspect-compare" in deepen_checks and escalation.needed and not no_workspace:
         scope = _review_scope_for_target(target)
@@ -729,6 +734,8 @@ def run_review(
         contradiction_graph=contradiction_graph,
         has_previous_review=bool(previous_review),
         changed=payload["changed_since_previous"],
+        confidence_score=float(review_judgment.get("confidence", {}).get("score", 0.0)),
+        confidence_threshold=selected_profile.confidence_medium,
     )
     existing_probe_results = {
         str(row.get("probe_id")): row
@@ -741,6 +748,8 @@ def run_review(
         merged_executed.append(existing if existing else row)
     adaptive_plan["executed_probes"] = merged_executed
     adaptive_plan["skipped_probes"] = probe_decision["skipped_probes"]
+    adaptive_plan["probe_registry"] = probe_decision["registry"]
+    adaptive_plan["probe_budget"] = probe_decision["budget"]
     likely_tracks = rank_likely_issue_tracks(
         findings=weighted_findings,
         conflicts=weighted_conflicts,
@@ -774,6 +783,12 @@ def run_review(
                     "adjusted_likelihood": update.get("adjusted_likelihood"),
                 }
                 break
+    payload["evidence_edges"] = build_typed_evidence_edges(
+        executed_probes=[row for row in adaptive_plan.get("executed_probes", []) if isinstance(row, dict)],
+        conflicts=weighted_conflicts,
+        findings=weighted_findings,
+        tracks=payload["likely_issue_tracks"],
+    )
     final_confidence = investigation_confidence(
         source_workflows=source_workflows,
         findings=weighted_findings,
