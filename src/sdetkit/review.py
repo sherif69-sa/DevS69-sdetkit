@@ -5,6 +5,7 @@ import contextlib
 import io
 import json
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -14,9 +15,105 @@ from .inspect_compare import run_compare
 from .inspect_data import run_inspect
 from .judgment import build_judgment, load_latest_previous_payload
 
-SCHEMA_VERSION = "sdetkit.review.v1"
+SCHEMA_VERSION = "sdetkit.review.v2"
 EXIT_OK = 0
 EXIT_FINDINGS = 2
+
+
+@dataclass(frozen=True)
+class ReviewProfile:
+    name: str
+    summary_style: str
+    max_text_matters: int
+    doctor_weight: float
+    inspect_weight: float
+    compare_weight: float
+    inspect_project_weight: float
+    contradiction_weight: int
+    urgency_now_threshold: int
+    urgency_next_threshold: int
+    fail_threshold: int
+    watch_threshold: int
+    contradiction_fail_count: int
+    contradiction_watch_count: int
+    confidence_high: float
+    confidence_medium: float
+
+
+REVIEW_PROFILES: dict[str, ReviewProfile] = {
+    "release": ReviewProfile(
+        name="release",
+        summary_style="release-gate",
+        max_text_matters=5,
+        doctor_weight=1.25,
+        inspect_weight=1.0,
+        compare_weight=1.0,
+        inspect_project_weight=1.1,
+        contradiction_weight=18,
+        urgency_now_threshold=65,
+        urgency_next_threshold=35,
+        fail_threshold=60,
+        watch_threshold=30,
+        contradiction_fail_count=1,
+        contradiction_watch_count=1,
+        confidence_high=0.75,
+        confidence_medium=0.45,
+    ),
+    "triage": ReviewProfile(
+        name="triage",
+        summary_style="triage-board",
+        max_text_matters=3,
+        doctor_weight=0.9,
+        inspect_weight=1.15,
+        compare_weight=0.8,
+        inspect_project_weight=1.0,
+        contradiction_weight=12,
+        urgency_now_threshold=75,
+        urgency_next_threshold=45,
+        fail_threshold=72,
+        watch_threshold=42,
+        contradiction_fail_count=2,
+        contradiction_watch_count=1,
+        confidence_high=0.8,
+        confidence_medium=0.55,
+    ),
+    "forensics": ReviewProfile(
+        name="forensics",
+        summary_style="evidence-ledger",
+        max_text_matters=7,
+        doctor_weight=0.85,
+        inspect_weight=1.25,
+        compare_weight=1.35,
+        inspect_project_weight=1.15,
+        contradiction_weight=25,
+        urgency_now_threshold=55,
+        urgency_next_threshold=25,
+        fail_threshold=52,
+        watch_threshold=24,
+        contradiction_fail_count=1,
+        contradiction_watch_count=1,
+        confidence_high=0.85,
+        confidence_medium=0.6,
+    ),
+    "monitor": ReviewProfile(
+        name="monitor",
+        summary_style="signal-watch",
+        max_text_matters=4,
+        doctor_weight=0.8,
+        inspect_weight=0.95,
+        compare_weight=1.2,
+        inspect_project_weight=0.9,
+        contradiction_weight=10,
+        urgency_now_threshold=80,
+        urgency_next_threshold=55,
+        fail_threshold=82,
+        watch_threshold=40,
+        contradiction_fail_count=2,
+        contradiction_watch_count=1,
+        confidence_high=0.7,
+        confidence_medium=0.4,
+    ),
+}
 
 
 def _safe_slug(value: str) -> str:
@@ -57,6 +154,60 @@ def _detect_mode(target: Path) -> dict[str, bool]:
         "policy_project": policy_project,
         "data_like": data_like,
         "workspace_like": workspace_like,
+    }
+
+
+def _coerce_profile(name: str) -> ReviewProfile:
+    normalized = name.strip().lower()
+    if normalized not in REVIEW_PROFILES:
+        valid = ", ".join(sorted(REVIEW_PROFILES))
+        raise ValueError(f"review: unsupported profile '{name}'. expected one of: {valid}")
+    return REVIEW_PROFILES[normalized]
+
+
+def _weighted_priority(item: dict[str, Any], profile: ReviewProfile) -> int:
+    base = int(item.get("priority", 0))
+    kind = str(item.get("kind", "")).strip().lower()
+    weight = 1.0
+    if kind == "doctor":
+        weight = profile.doctor_weight
+    elif kind == "inspect":
+        weight = profile.inspect_weight
+    elif kind == "inspect-compare":
+        weight = profile.compare_weight
+    elif kind == "inspect-project":
+        weight = profile.inspect_project_weight
+    return max(0, min(100, int(round(base * weight))))
+
+
+def _profile_confidence_level(score: float, profile: ReviewProfile) -> str:
+    if score >= profile.confidence_high:
+        return "high"
+    if score >= profile.confidence_medium:
+        return "medium"
+    return "low"
+
+
+def _profile_tier(priority: int, profile: ReviewProfile) -> str:
+    if priority >= profile.urgency_now_threshold:
+        return "now"
+    if priority >= profile.urgency_next_threshold:
+        return "next"
+    return "monitor"
+
+
+def _workflows_for_profile(detection: dict[str, bool], profile: ReviewProfile) -> dict[str, bool]:
+    run_doctor = detection["repo_like"] and profile.name in {"release", "triage", "monitor"}
+    run_inspect = detection["data_like"] and not detection["policy_project"]
+    run_project = detection["policy_project"]
+    run_compare = run_inspect and profile.name in {"release", "forensics", "monitor"}
+    run_history = detection["workspace_like"] or profile.name in {"monitor", "forensics"}
+    return {
+        "doctor": run_doctor,
+        "inspect": run_inspect,
+        "inspect_project": run_project,
+        "inspect_compare": run_compare,
+        "workspace_history": run_history,
     }
 
 
@@ -122,6 +273,7 @@ def run_review(
     target: Path,
     out_dir: Path,
     workspace_root: Path,
+    profile: str = "release",
     no_workspace: bool = False,
 ) -> tuple[int, dict[str, Any], Path, Path]:
     target = target.resolve()
@@ -129,6 +281,8 @@ def run_review(
         raise ValueError(f"review: path does not exist: {target}")
 
     detection = _detect_mode(target)
+    selected_profile = _coerce_profile(profile)
+    workflow_plan = _workflows_for_profile(detection, selected_profile)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     source_workflows: list[dict[str, Any]] = []
@@ -140,7 +294,7 @@ def run_review(
     artifact_index: dict[str, str] = {}
 
     # deterministic order: doctor -> inspect -> inspect-compare -> inspect-project -> history
-    if detection["repo_like"]:
+    if workflow_plan["doctor"]:
         doctor_out = out_dir / "doctor"
         doctor_out.mkdir(parents=True, exist_ok=True)
         prev_cwd = Path.cwd()
@@ -185,7 +339,7 @@ def run_review(
         supporting.append({"kind": "doctor_ok", "value": bool(doctor_payload.get("ok", False))})
 
     inspect_payload: dict[str, Any] | None = None
-    if detection["data_like"] and not detection["policy_project"]:
+    if workflow_plan["inspect"]:
         inspect_out = out_dir / "inspect"
         inspect_rc, inspect_payload, inspect_json_path, inspect_txt_path = run_inspect(
             input_path=target,
@@ -220,7 +374,7 @@ def run_review(
                 }
             )
 
-    if detection["policy_project"]:
+    if workflow_plan["inspect_project"]:
         project_out = out_dir / "inspect-project"
         rc = inspect_project.main(
             [
@@ -252,7 +406,7 @@ def run_review(
                 }
             )
 
-    if inspect_payload and not no_workspace:
+    if inspect_payload and workflow_plan["inspect_compare"] and not no_workspace:
         scope = _review_scope_for_target(target)
         previous_inspect, _ = load_latest_previous_payload(
             workspace_root=workspace_root,
@@ -291,7 +445,7 @@ def run_review(
                     }
                 )
 
-    if detection["workspace_like"]:
+    if workflow_plan["workspace_history"] and detection["workspace_like"]:
         manifest = load_workspace_manifest(target / ".sdetkit" / "workspace")
         supporting.append({"kind": "workspace_runs", "value": len(manifest.get("runs", []))})
         source_workflows.append({"workflow": "workspace-history", "status": "ok"})
@@ -316,22 +470,68 @@ def run_review(
             }
         )
 
+    weighted_findings = [{**item, "priority": _weighted_priority(item, selected_profile)} for item in findings]
+    weighted_conflicts = [
+        {
+            **item,
+            "priority": selected_profile.contradiction_weight,
+        }
+        for item in conflicting
+    ]
+    contradiction_count = len(conflicting)
+    contradiction_boost = contradiction_count * selected_profile.contradiction_weight
+    effective_max_priority = max([0, *(int(item.get("priority", 0)) for item in weighted_findings)]) + contradiction_boost
     completeness = min(1.0, max(0.2, len(source_workflows) / 5.0))
     stability = 0.7 if conflicting else 0.85
-    workflow_ok = len(findings) == 0
-    blocking = any(int(item.get("priority", 0)) >= 60 for item in findings) or bool(conflicting)
+    workflow_ok = len(weighted_findings) == 0
+    blocking = effective_max_priority >= selected_profile.fail_threshold or contradiction_count >= selected_profile.contradiction_fail_count
 
     review_judgment = build_judgment(
         workflow="review",
-        findings=findings,
+        findings=weighted_findings,
         supporting_evidence=supporting,
-        conflicting_evidence=conflicting,
+        conflicting_evidence=weighted_conflicts,
         completeness=completeness,
         stability=stability,
         previous_summary=None,
         workflow_ok=workflow_ok,
         blocking=blocking,
     )
+    if effective_max_priority >= selected_profile.fail_threshold or contradiction_count >= selected_profile.contradiction_fail_count:
+        profile_status = "fail"
+    elif effective_max_priority >= selected_profile.watch_threshold or contradiction_count >= selected_profile.contradiction_watch_count:
+        profile_status = "watch"
+    else:
+        profile_status = "pass"
+    profile_severity = "low"
+    if profile_status == "watch":
+        profile_severity = "medium"
+    if profile_status == "fail":
+        profile_severity = "high"
+    review_judgment["status"] = profile_status
+    review_judgment["severity"] = profile_severity
+    review_judgment["profile"] = selected_profile.name
+    review_judgment["profile_thresholds"] = {
+        "fail_threshold": selected_profile.fail_threshold,
+        "watch_threshold": selected_profile.watch_threshold,
+        "contradiction_fail_count": selected_profile.contradiction_fail_count,
+        "contradiction_watch_count": selected_profile.contradiction_watch_count,
+        "effective_max_priority": effective_max_priority,
+    }
+    confidence = dict(review_judgment.get("confidence", {}))
+    confidence["level"] = _profile_confidence_level(float(confidence.get("score", 0.0)), selected_profile)
+    confidence["profile_thresholds"] = {
+        "high": selected_profile.confidence_high,
+        "medium": selected_profile.confidence_medium,
+    }
+    review_judgment["confidence"] = confidence
+    profile_recs: list[dict[str, Any]] = []
+    for rec in review_judgment.get("recommendations", []):
+        if not isinstance(rec, dict):
+            continue
+        priority = int(rec.get("priority", 0))
+        profile_recs.append({**rec, "tier": _profile_tier(priority, selected_profile)})
+    review_judgment["recommendations"] = profile_recs
 
     prioritized_actions.extend(review_judgment.get("recommendations", []))
     review_scope = _review_scope_for_target(target)
@@ -347,6 +547,16 @@ def run_review(
         "schema_version": SCHEMA_VERSION,
         "tool": "sdetkit",
         "workflow": "review",
+        "profile": {
+            "name": selected_profile.name,
+            "summary_style": selected_profile.summary_style,
+            "orchestration_depth": "deep" if selected_profile.name in {"release", "forensics"} else "focused",
+            "workflow_plan": workflow_plan,
+            "urgency_thresholds": {
+                "now": selected_profile.urgency_now_threshold,
+                "next": selected_profile.urgency_next_threshold,
+            },
+        },
         "path": target.as_posix(),
         "status": review_judgment.get("status"),
         "severity": review_judgment.get("severity"),
@@ -354,7 +564,7 @@ def run_review(
         "review_status": "PASS" if workflow_ok else "ATTENTION",
         "top_matters": review_judgment.get("top_judgment", {}).get("what_matters_most", []),
         "supporting_evidence": supporting,
-        "conflicting_evidence": conflicting,
+        "conflicting_evidence": weighted_conflicts,
         "healthy_controls": healthy_controls,
         "changed_since_previous": [],
         "prioritized_actions": prioritized_actions[:8],
@@ -392,14 +602,19 @@ def run_review(
 
 
 def _render_text(payload: dict[str, Any]) -> str:
+    profile = payload.get("profile", {})
+    max_matters = 5
+    if isinstance(profile, dict):
+        max_matters = int(REVIEW_PROFILES.get(str(profile.get("name", "")), REVIEW_PROFILES["release"]).max_text_matters)
     lines = [
         f"SDETKit review: {payload['review_status']}",
+        f"profile: {profile.get('name', 'release')} style: {profile.get('summary_style', 'release-gate')}",
         f"path: {payload['path']}",
         f"status: {payload['status']} severity: {payload['severity']}",
         f"confidence: {payload.get('confidence', {}).get('score')}",
         "top_matters:",
     ]
-    for item in payload.get("top_matters", [])[:5]:
+    for item in payload.get("top_matters", [])[:max_matters]:
         if not isinstance(item, dict):
             continue
         lines.append(f"- [{item.get('priority', 0)}] {item.get('kind')}: {item.get('message')}")
@@ -435,6 +650,12 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("path", help="Repo/data/project/workspace path to review")
     p.add_argument("--workspace-root", default=".sdetkit/workspace", help="Shared workspace root")
     p.add_argument("--out-dir", default=None, help="Output directory (default: .sdetkit/review/<path-slug>)")
+    p.add_argument(
+        "--profile",
+        default="release",
+        choices=sorted(REVIEW_PROFILES),
+        help="Review operating profile: release, triage, forensics, monitor.",
+    )
     p.add_argument("--format", choices=["text", "json"], default="text")
     p.add_argument("--no-workspace", action="store_true", help="Disable workspace history recording")
     return p
@@ -449,6 +670,7 @@ def main(argv: list[str] | None = None) -> int:
             target=target,
             out_dir=out_dir,
             workspace_root=Path(ns.workspace_root),
+            profile=ns.profile,
             no_workspace=ns.no_workspace,
         )
     except ValueError as exc:

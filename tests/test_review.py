@@ -82,3 +82,36 @@ def test_cli_review_command_outputs_json(tmp_path: Path) -> None:
     payload = json.loads(run.stdout)
     assert payload["workflow"] == "review"
     assert payload["path"].endswith("events.csv")
+
+
+def test_review_profiles_change_judgment_and_artifacts_for_same_input(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    data = tmp_path / "events.csv"
+    out_release = tmp_path / "out-release"
+    out_monitor = tmp_path / "out-monitor"
+    data.write_text("id,type\nE1,open\nE1,open\n", encoding="utf-8")
+
+    release_rc, release_payload, _, _ = review.run_review(
+        target=data,
+        out_dir=out_release,
+        workspace_root=workspace,
+        profile="release",
+    )
+    monitor_rc, monitor_payload, _, _ = review.run_review(
+        target=data,
+        out_dir=out_monitor,
+        workspace_root=workspace,
+        profile="monitor",
+    )
+
+    assert release_rc == 2
+    assert monitor_rc == 2
+    assert release_payload["status"] == "fail"
+    assert monitor_payload["status"] == "watch"
+    assert release_payload["profile"]["name"] == "release"
+    assert monitor_payload["profile"]["name"] == "monitor"
+    assert "inspect_compare_json" in release_payload["artifact_index"]
+    assert "inspect_compare_json" in monitor_payload["artifact_index"]
+    release_now = [item for item in release_payload["prioritized_actions"] if item.get("tier") == "now"]
+    monitor_now = [item for item in monitor_payload["prioritized_actions"] if item.get("tier") == "now"]
+    assert len(release_now) >= len(monitor_now)
