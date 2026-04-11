@@ -272,6 +272,15 @@ Then use stability-aware command discovery:
     inspect_project_parser.add_argument("--out-dir", default=None)
     inspect_project_parser.add_argument("--format", choices=["text", "json"], default=None)
     inspect_project_parser.add_argument("--no-workspace", action="store_true")
+    review_parser = sub.add_parser(
+        "review",
+        help="[Public / stable] Front-door workflow that orchestrates doctor/inspect/judgment/history",
+    )
+    review_parser.add_argument("path")
+    review_parser.add_argument("--workspace-root", default=None)
+    review_parser.add_argument("--out-dir", default=None)
+    review_parser.add_argument("--format", choices=["text", "json"], default=None)
+    review_parser.add_argument("--no-workspace", action="store_true")
 
     ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
     _add_apiget_args(ag)
@@ -1300,6 +1309,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         if ns.no_workspace:
             forwarded.append("--no-workspace")
         return _run_module_main("sdetkit.inspect_project", forwarded)
+    if ns.cmd == "review":
+        forwarded = [ns.path]
+        if ns.workspace_root:
+            forwarded.extend(["--workspace-root", ns.workspace_root])
+        if ns.out_dir:
+            forwarded.extend(["--out-dir", ns.out_dir])
+        if ns.format:
+            forwarded.extend(["--format", ns.format])
+        if ns.no_workspace:
+            forwarded.append("--no-workspace")
+        return _run_module_main("sdetkit.review", forwarded)
 
     if ns.cmd == "patch":
         return _run_module_main("sdetkit.patch", ns.args)
