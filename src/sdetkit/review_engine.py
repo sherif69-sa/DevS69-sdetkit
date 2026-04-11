@@ -179,6 +179,157 @@ def build_contradiction_graph(
     )
 
 
+def build_contradiction_clusters(
+    *,
+    findings: list[dict[str, Any]],
+    detection: dict[str, bool] | None = None,
+) -> dict[str, Any]:
+    flat = build_contradiction_graph(findings=findings, detection=detection)
+    findings_by_kind: dict[str, list[dict[str, Any]]] = {}
+    for item in findings:
+        kind = str(item.get("kind", "unknown"))
+        findings_by_kind.setdefault(kind, []).append(item)
+    nodes: list[dict[str, Any]] = []
+    for kind, items in sorted(findings_by_kind.items()):
+        nodes.append(
+            {
+                "node_id": f"signal:{kind}",
+                "kind": kind,
+                "count": len(items),
+                "max_priority": max(int(entry.get("priority", 0)) for entry in items),
+            }
+        )
+    edges: list[dict[str, Any]] = []
+    for item in flat:
+        conflict_id = str(item.get("id", "conflict:unknown"))
+        for node in nodes:
+            edges.append(
+                {
+                    "edge_id": f"{conflict_id}->{node['node_id']}",
+                    "relation": "conflicts_with",
+                    "from": conflict_id,
+                    "to": node["node_id"],
+                    "weight": max(1, int(node.get("count", 1))),
+                }
+            )
+    clusters: list[dict[str, Any]] = []
+    if flat:
+        clusters.append(
+            {
+                "cluster_id": "cluster:cross-surface",
+                "kind": "cross_surface_disagreement",
+                "importance": min(100, 35 + len(flat) * 20 + len(nodes) * 8),
+                "contradictions": flat,
+                "signals": [node["kind"] for node in nodes],
+            }
+        )
+    elif len(nodes) >= 2:
+        clusters.append(
+            {
+                "cluster_id": "cluster:multi-signal-tension",
+                "kind": "multi_signal_tension",
+                "importance": min(100, 30 + len(nodes) * 10),
+                "contradictions": [],
+                "signals": [node["kind"] for node in nodes],
+            }
+        )
+    return {
+        "version": "sdetkit.contradiction-graph.v1",
+        "nodes": nodes,
+        "edges": edges,
+        "clusters": clusters,
+        "flat_contradictions": flat,
+    }
+
+
+def plan_adaptive_probes(
+    *,
+    detection: dict[str, bool],
+    profile_name: str,
+    findings: list[dict[str, Any]],
+    contradiction_graph: dict[str, Any],
+    has_previous_review: bool,
+    changed: list[dict[str, Any]],
+    max_probes: int = 2,
+) -> dict[str, list[dict[str, Any]]]:
+    contradictory = len(contradiction_graph.get("flat_contradictions", []))
+    cluster_pressure = len(contradiction_graph.get("clusters", []))
+    finding_pressure = sum(max(0, int(item.get("priority", 0))) for item in findings)
+    history_pressure = len([row for row in changed if str(row.get("kind")) in {"status", "severity"}])
+    candidates = [
+        {
+            "probe_id": "probe:inspect-compare",
+            "requires": "inspect_compare_available",
+            "score": (35 if contradictory else 0)
+            + (cluster_pressure * 12)
+            + (finding_pressure // 6)
+            + (15 if has_previous_review else 0),
+            "reason": "Resolve whether recent evidence drift explains current contradictions/findings.",
+        },
+        {
+            "probe_id": "probe:workspace-history",
+            "requires": "workspace_like",
+            "score": (20 if contradictory else 0) + (history_pressure * 20) + (10 if profile_name == "forensics" else 0),
+            "reason": "Use repeated-run history to verify whether risk is persistent or newly introduced.",
+        },
+    ]
+    executed: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    for row in sorted(candidates, key=lambda item: (-int(item["score"]), str(item["probe_id"]))):
+        requires = str(row["requires"])
+        enabled = bool(detection.get("workspace_like")) if requires == "workspace_like" else bool(
+            detection.get("data_like")
+        )
+        should_run = enabled and int(row["score"]) >= 25 and len(executed) < max_probes
+        target = executed if should_run else skipped
+        target.append(
+            {
+                "probe_id": row["probe_id"],
+                "score": int(row["score"]),
+                "reason": row["reason"],
+                "requires": requires,
+                "status": "planned" if should_run else "skipped",
+                "skip_reason": "" if should_run else ("probe preconditions missing or score below threshold"),
+            }
+        )
+    return {"executed_probes": executed, "skipped_probes": skipped}
+
+
+def apply_probe_result_feedback(
+    *,
+    findings: list[dict[str, Any]],
+    conflicts: list[dict[str, Any]],
+    likely_tracks: list[dict[str, Any]],
+    executed_probes: list[dict[str, Any]],
+) -> dict[str, Any]:
+    probe_pressure = len(executed_probes)
+    confidence_delta = 0.08 if probe_pressure > 0 and not findings and not conflicts else -0.03 * probe_pressure
+    status = "stable" if confidence_delta >= 0 else "risk-intensified"
+    track_updates: list[dict[str, Any]] = []
+    for track in likely_tracks[:3]:
+        if not isinstance(track, dict):
+            continue
+        base = float(track.get("likelihood", 0.0))
+        adjusted = round(max(0.0, min(0.99, base + (0.06 if confidence_delta < 0 else -0.04))), 2)
+        track_updates.append(
+            {
+                "track_id": str(track.get("track_id", "")),
+                "base_likelihood": base,
+                "adjusted_likelihood": adjusted,
+            }
+        )
+    return {
+        "confidence_delta": round(confidence_delta, 2),
+        "status": status,
+        "track_updates": track_updates,
+        "judgment_note": (
+            "Probe outcomes reduced uncertainty in critical tracks."
+            if confidence_delta >= 0
+            else "Probe outcomes found additional pressure that increases risk confidence."
+        ),
+    }
+
+
 def summarize_history_delta(previous: dict[str, Any] | None, current: dict[str, Any]) -> list[dict[str, Any]]:
     if not isinstance(previous, dict):
         return [{"kind": "baseline", "message": "No previous review run found for this scope."}]

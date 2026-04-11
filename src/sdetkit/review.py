@@ -15,11 +15,14 @@ from .inspect_compare import run_compare
 from .inspect_data import run_inspect
 from .judgment import build_judgment, load_latest_previous_payload
 from .review_engine import (
+    apply_probe_result_feedback,
     build_contradiction_graph,
+    build_contradiction_clusters,
     build_staged_plan,
     decide_escalation,
     decide_stop,
     investigation_confidence,
+    plan_adaptive_probes,
     profile_confidence_level,
     profile_priority_tier,
     profile_weighted_priority,
@@ -523,7 +526,8 @@ def run_review(
             )
 
     # contradictions as first-class product output (baseline signal set)
-    conflicting.extend(build_contradiction_graph(findings=findings, detection=detection))
+    contradiction_graph = build_contradiction_clusters(findings=findings, detection=detection)
+    conflicting.extend(contradiction_graph.get("flat_contradictions", []))
 
     baseline_confidence = investigation_confidence(
         source_workflows=source_workflows,
@@ -540,6 +544,16 @@ def run_review(
     adaptive_plan["escalation"] = escalation.as_dict()
     deepen_checks = list(deepen_stage.get("checks_planned", []))
     deepen_stage["ran"] = escalation.needed
+    probe_decision = plan_adaptive_probes(
+        detection=detection,
+        profile_name=selected_profile.name,
+        findings=findings,
+        contradiction_graph=contradiction_graph,
+        has_previous_review=False,
+        changed=[],
+    )
+    adaptive_plan["executed_probes"] = probe_decision["executed_probes"]
+    adaptive_plan["skipped_probes"] = probe_decision["skipped_probes"]
 
     if inspect_payload and "inspect-compare" in deepen_checks and escalation.needed and not no_workspace:
         scope = _review_scope_for_target(target)
@@ -582,12 +596,20 @@ def run_review(
                         "message": "inspect-compare detected drift",
                     }
                 )
+            for row in adaptive_plan.get("executed_probes", []):
+                if isinstance(row, dict) and row.get("probe_id") == "probe:inspect-compare":
+                    row["status"] = "executed"
+                    row["result"] = "findings" if compare_rc != 0 else "ok"
 
     if "workspace-history" in deepen_checks and escalation.needed and detection["workspace_like"]:
         manifest = load_workspace_manifest(target / ".sdetkit" / "workspace")
         supporting.append({"kind": "workspace_runs", "value": len(manifest.get("runs", []))})
         source_workflows.append({"workflow": "workspace-history", "status": "ok"})
         deepen_stage["checks_run"].append({"check": "workspace-history", "status": "ok"})
+        for row in adaptive_plan.get("executed_probes", []):
+            if isinstance(row, dict) and row.get("probe_id") == "probe:workspace-history":
+                row["status"] = "executed"
+                row["result"] = "ok"
 
     weighted_findings = [{**item, "priority": profile_weighted_priority(item, selected_profile)} for item in findings]
     weighted_conflicts = [
@@ -700,17 +722,64 @@ def run_review(
         "detection": detection,
     }
     payload["changed_since_previous"] = summarize_history_delta(previous_review, payload)
+    probe_decision = plan_adaptive_probes(
+        detection=detection,
+        profile_name=selected_profile.name,
+        findings=weighted_findings,
+        contradiction_graph=contradiction_graph,
+        has_previous_review=bool(previous_review),
+        changed=payload["changed_since_previous"],
+    )
+    existing_probe_results = {
+        str(row.get("probe_id")): row
+        for row in adaptive_plan.get("executed_probes", [])
+        if isinstance(row, dict) and row.get("status") == "executed"
+    }
+    merged_executed: list[dict[str, Any]] = []
+    for row in probe_decision["executed_probes"]:
+        existing = existing_probe_results.get(str(row.get("probe_id")))
+        merged_executed.append(existing if existing else row)
+    adaptive_plan["executed_probes"] = merged_executed
+    adaptive_plan["skipped_probes"] = probe_decision["skipped_probes"]
     likely_tracks = rank_likely_issue_tracks(
         findings=weighted_findings,
         conflicts=weighted_conflicts,
         changed=payload["changed_since_previous"],
     )
     payload["likely_issue_tracks"] = likely_tracks
+    payload["contradiction_graph"] = contradiction_graph
+    probe_feedback = apply_probe_result_feedback(
+        findings=weighted_findings,
+        conflicts=weighted_conflicts,
+        likely_tracks=likely_tracks,
+        executed_probes=[row for row in adaptive_plan.get("executed_probes", []) if row.get("status") == "executed"],
+    )
+    payload["adaptive_review"]["probe_feedback"] = probe_feedback
+    payload["adaptive_review"]["probe_rationale"] = [
+        {
+            "probe_id": row.get("probe_id"),
+            "why_chosen": row.get("reason"),
+        }
+        for row in adaptive_plan.get("executed_probes", [])
+        if isinstance(row, dict)
+    ]
+    for update in probe_feedback.get("track_updates", []):
+        if not isinstance(update, dict):
+            continue
+        for track in payload["likely_issue_tracks"]:
+            if isinstance(track, dict) and track.get("track_id") == update.get("track_id"):
+                track["likelihood"] = update.get("adjusted_likelihood", track.get("likelihood"))
+                track["probe_impact"] = {
+                    "base_likelihood": update.get("base_likelihood"),
+                    "adjusted_likelihood": update.get("adjusted_likelihood"),
+                }
+                break
     final_confidence = investigation_confidence(
         source_workflows=source_workflows,
         findings=weighted_findings,
         conflicts=weighted_conflicts,
     )
+    final_confidence = round(max(0.0, min(1.0, final_confidence + float(probe_feedback.get("confidence_delta", 0.0)))), 2)
     adaptive_plan["stop_decision"] = decide_stop(
         final_confidence=final_confidence,
         confidence_threshold=selected_profile.confidence_medium,
@@ -815,6 +884,11 @@ def _render_text(payload: dict[str, Any]) -> str:
             lines.append(f"- {action.get('action')}")
     if payload.get("conflicting_evidence"):
         lines.append(f"conflicts: {len(payload['conflicting_evidence'])}")
+    graph = payload.get("contradiction_graph", {})
+    if isinstance(graph, dict):
+        clusters = graph.get("clusters", [])
+        if isinstance(clusters, list) and clusters:
+            lines.append(f"contradiction_clusters: {len(clusters)}")
     adaptive = payload.get("adaptive_review", {})
     if isinstance(adaptive, dict):
         escalation = adaptive.get("escalation", {})
@@ -823,6 +897,7 @@ def _render_text(payload: dict[str, Any]) -> str:
         lines.append(f"- escalation_needed: {escalation.get('needed')}")
         for reason in escalation.get("reasons", [])[:3]:
             lines.append(f"  - reason: {reason}")
+        lines.append(f"- probes_executed: {len([p for p in adaptive.get('executed_probes', []) if p.get('status') == 'executed'])}")
         lines.append(f"- stop: {stop.get('stop')}")
         lines.append(f"- stop_reason: {stop.get('reason')}")
     tracks = payload.get("likely_issue_tracks", [])

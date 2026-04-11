@@ -58,6 +58,7 @@ def test_review_repo_plus_data_surfaces_cross_surface_conflict(tmp_path: Path) -
     assert payload["detection"]["repo_like"] is True
     assert payload["detection"]["data_like"] is True
     assert payload["conflicting_evidence"]
+    assert payload["contradiction_graph"]["clusters"]
     assert payload["adaptive_review"]["escalation"]["needed"] is True
 
 
@@ -173,6 +174,7 @@ def test_review_clean_evidence_stops_early_without_deepen_stage(tmp_path: Path) 
     assert payload["adaptive_review"]["escalation"]["needed"] is False
     assert payload["adaptive_review"]["stop_decision"]["stop"] is True
     assert "inspect_compare_json" not in payload["artifact_index"]
+    assert payload["adaptive_review"]["executed_probes"] == []
 
 
 def test_review_tracks_ranked_with_supporting_and_conflicting_evidence(tmp_path: Path) -> None:
@@ -191,3 +193,21 @@ def test_review_tracks_ranked_with_supporting_and_conflicting_evidence(tmp_path:
     assert tracks[0]["supporting_evidence"]
     assert "verification_steps" in tracks[0]
     assert isinstance(tracks[0]["conflicting_evidence"], list)
+    assert "probe_impact" in tracks[0]
+
+
+def test_review_contradiction_cluster_triggers_probe_selection(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    out = tmp_path / "out"
+    workspace = tmp_path / "workspace"
+    repo.mkdir()
+    (repo / "pyproject.toml").write_text("[project]\nname='demo'\nversion='0.1.0'\n", encoding="utf-8")
+    (repo / "events.csv").write_text("id,type\nE1,open\nE1,open\n", encoding="utf-8")
+
+    rc, payload, _, _ = review.run_review(target=repo, out_dir=out, workspace_root=workspace)
+
+    assert rc == 2
+    clusters = payload["contradiction_graph"]["clusters"]
+    assert clusters
+    probe_ids = {row["probe_id"] for row in payload["adaptive_review"]["executed_probes"]}
+    assert "probe:inspect-compare" in probe_ids
