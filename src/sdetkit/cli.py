@@ -280,7 +280,15 @@ Then use stability-aware command discovery:
     review_parser.add_argument("--workspace-root", default=None)
     review_parser.add_argument("--out-dir", default=None)
     review_parser.add_argument("--profile", choices=["release", "triage", "forensics", "monitor"], default=None)
-    review_parser.add_argument("--format", choices=["text", "json", "operator-json"], default=None)
+    review_parser.add_argument(
+        "--format",
+        choices=["text", "json", "operator-json"],
+        default=None,
+        help=(
+            "Output format: json for full payload/debug automation; "
+            "operator-json for the stable operator-facing integration contract."
+        ),
+    )
     review_parser.add_argument("--interactive", action="store_true")
     review_parser.add_argument("--no-workspace", action="store_true")
 

@@ -81,6 +81,31 @@ Context: [`docs/real-repo-adoption.md`](docs/real-repo-adoption.md)
 - Canonical CI rollout path: [`docs/recommended-ci-flow.md`](docs/recommended-ci-flow.md)
 - Canonical artifact decoder: [`docs/ci-artifact-walkthrough.md`](docs/ci-artifact-walkthrough.md)
 
+## Review command format quick guide (operator adoption)
+
+Use `sdetkit review` when you need one front-door decision pass over doctor/inspect/compare/project/history.
+
+- Use `--format json` when you need the **full review payload** (deep debugging, custom analytics, or internal tooling that consumes all sections).
+- Use `--format operator-json` when you need the **stable operator-facing integration contract** for CI jobs, dashboards, and operator automations.
+- For operator integrations, prefer `operator-json` as the long-lived parsing surface.
+
+Short deterministic examples:
+
+```bash
+python -m sdetkit review . --no-workspace --format json
+python -m sdetkit review . --no-workspace --format operator-json
+```
+
+Practical machine-consumption examples:
+
+```bash
+# Full payload: inspect status + top-level counts for deeper triage scripts
+python -m sdetkit review . --no-workspace --format json | jq '{status, severity, findings: (.top_matters | length)}'
+
+# Stable operator contract: gate on operator-facing situation/actions fields
+python -m sdetkit review . --no-workspace --format operator-json | jq '{status: .situation.status, severity: .situation.severity, now_actions: (.actions.now | length)}'
+```
+
 ## Who this is for / not for
 
 **Best fit**
