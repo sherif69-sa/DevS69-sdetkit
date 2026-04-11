@@ -292,6 +292,13 @@ Then use stability-aware command discovery:
     review_parser.add_argument("--interactive", action="store_true")
     review_parser.add_argument("--no-workspace", action="store_true")
 
+    serve_parser = sub.add_parser(
+        "serve",
+        help="[Public / stable] Run local API server for deterministic review automation",
+    )
+    serve_parser.add_argument("--host", default=None)
+    serve_parser.add_argument("--port", type=int, default=None)
+
     ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
     _add_apiget_args(ag)
 
@@ -1334,6 +1341,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         if ns.no_workspace:
             forwarded.append("--no-workspace")
         return _run_module_main("sdetkit.review", forwarded)
+
+    if ns.cmd == "serve":
+        forwarded: list[str] = []
+        if ns.host:
+            forwarded.extend(["--host", ns.host])
+        if ns.port is not None:
+            forwarded.extend(["--port", str(ns.port)])
+        return _run_module_main("sdetkit.serve", forwarded)
 
     if ns.cmd == "patch":
         return _run_module_main("sdetkit.patch", ns.args)
