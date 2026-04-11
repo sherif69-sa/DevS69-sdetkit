@@ -116,6 +116,134 @@ REVIEW_PROFILES: dict[str, ReviewProfile] = {
 }
 
 
+def _sorted_findings(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    ranked = [item for item in items if isinstance(item, dict)]
+    return sorted(
+        ranked,
+        key=lambda item: (
+            -int(item.get("priority", 0)),
+            str(item.get("kind", "")),
+            str(item.get("id", "")),
+        ),
+    )
+
+
+def _profile_packet_filename(profile_name: str) -> str:
+    if profile_name == "release":
+        return "release-decision.json"
+    if profile_name == "triage":
+        return "incident-board.json"
+    if profile_name == "forensics":
+        return "evidence-ledger.json"
+    return "trend-watch.json"
+
+
+def _build_profile_packet(payload: dict[str, Any]) -> dict[str, Any]:
+    profile = str(payload.get("profile", {}).get("name", "release"))
+    findings = _sorted_findings([item for item in payload.get("top_matters", []) if isinstance(item, dict)])
+    contradictions = _sorted_findings(
+        [item for item in payload.get("conflicting_evidence", []) if isinstance(item, dict)]
+    )
+    now_actions = [
+        item
+        for item in payload.get("prioritized_actions", [])
+        if isinstance(item, dict) and str(item.get("tier")) == "now"
+    ]
+    next_actions = [
+        item
+        for item in payload.get("prioritized_actions", [])
+        if isinstance(item, dict) and str(item.get("tier")) == "next"
+    ]
+    monitor_actions = [
+        item
+        for item in payload.get("prioritized_actions", [])
+        if isinstance(item, dict) and str(item.get("tier")) == "monitor"
+    ]
+    changed = [item for item in payload.get("changed_since_previous", []) if isinstance(item, dict)]
+    healthy_controls = [str(item) for item in payload.get("healthy_controls", [])]
+    status = str(payload.get("status", "pass"))
+
+    if profile == "release":
+        blockers = [item for item in findings if int(item.get("priority", 0)) >= 60]
+        return {
+            "packet_type": "release_gate",
+            "profile": "release",
+            "decision": "block" if status == "fail" else ("watch" if status == "watch" else "ship"),
+            "decision_rationale": {
+                "status": status,
+                "severity": payload.get("severity"),
+                "blocking_findings_count": len(blockers),
+                "contradictions_count": len(contradictions),
+            },
+            "controls": {
+                "healthy_controls": healthy_controls,
+                "source_workflows_run": payload.get("source_workflows_run", []),
+            },
+            "blockers": blockers,
+            "now_actions": now_actions,
+        }
+    if profile == "triage":
+        board_items = findings[:5]
+        return {
+            "packet_type": "incident_board",
+            "profile": "triage",
+            "board_status": status,
+            "top_incidents": board_items,
+            "sort_queue": {
+                "now": now_actions[:5],
+                "next": next_actions[:5],
+            },
+            "verification_queue": contradictions[:5],
+            "snapshot": {
+                "findings_count": len(findings),
+                "contradictions_count": len(contradictions),
+                "healthy_controls_count": len(healthy_controls),
+            },
+        }
+    if profile == "forensics":
+        return {
+            "packet_type": "evidence_ledger",
+            "profile": "forensics",
+            "ledger_status": status,
+            "supporting_evidence": payload.get("supporting_evidence", []),
+            "conflicting_evidence": contradictions,
+            "contradiction_matrix": [
+                {
+                    "id": str(item.get("id", "")),
+                    "kind": str(item.get("kind", "")),
+                    "priority": int(item.get("priority", 0)),
+                    "message": str(item.get("message", "")),
+                }
+                for item in contradictions
+            ],
+            "historical_deltas": changed,
+            "prioritized_actions": {
+                "now": now_actions,
+                "next": next_actions,
+                "monitor": monitor_actions,
+            },
+            "findings": findings,
+        }
+    return {
+        "packet_type": "trend_watch",
+        "profile": "monitor",
+        "watch_status": status,
+        "trend_signals": changed,
+        "watchlist": {
+            "active_findings": findings[:8],
+            "monitor_actions": monitor_actions[:8],
+        },
+        "continuity": {
+            "has_previous_review": payload.get("history", {}).get("has_previous_review", False),
+            "previous_review_run_hash": payload.get("history", {}).get("previous_review_run_hash"),
+            "workspace_runs": [
+                item for item in payload.get("supporting_evidence", []) if item.get("kind") == "workspace_runs"
+            ],
+        },
+        "volatility_flags": contradictions,
+    }
+
+
 def _safe_slug(value: str) -> str:
     out: list[str] = []
     for ch in value.lower():
@@ -579,9 +707,17 @@ def run_review(
         "detection": detection,
     }
     payload["changed_since_previous"] = _summarize_changed(previous_review, payload)
+    profile_packet = _build_profile_packet(payload)
+    payload["profile"]["packet_type"] = profile_packet["packet_type"]
+    payload["profile"]["output_strategy"] = profile_packet["packet_type"]
+    payload["profile_packet"] = profile_packet
 
     json_path = out_dir / "review.json"
     txt_path = out_dir / "review.txt"
+    packet_json_path = out_dir / _profile_packet_filename(selected_profile.name)
+    artifact_index["profile_packet_json"] = packet_json_path.as_posix()
+    payload["artifact_index"] = artifact_index
+    packet_json_path.write_text(json.dumps(profile_packet, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     json_path.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     txt_path.write_text(_render_text(payload), encoding="utf-8")
 
@@ -603,34 +739,59 @@ def run_review(
 
 def _render_text(payload: dict[str, Any]) -> str:
     profile = payload.get("profile", {})
+    profile_name = str(profile.get("name", "release")) if isinstance(profile, dict) else "release"
     max_matters = 5
     if isinstance(profile, dict):
         max_matters = int(REVIEW_PROFILES.get(str(profile.get("name", "")), REVIEW_PROFILES["release"]).max_text_matters)
-    lines = [
+    lines: list[str] = [
         f"SDETKit review: {payload['review_status']}",
-        f"profile: {profile.get('name', 'release')} style: {profile.get('summary_style', 'release-gate')}",
+        f"profile: {profile_name} style: {profile.get('summary_style', 'release-gate')}",
         f"path: {payload['path']}",
         f"status: {payload['status']} severity: {payload['severity']}",
         f"confidence: {payload.get('confidence', {}).get('score')}",
-        "top_matters:",
     ]
+    if profile_name == "release":
+        lines.append("release_gate_decision:")
+        lines.append(f"- decision: {payload.get('profile_packet', {}).get('decision', 'watch')}")
+        lines.append("blockers:")
+    elif profile_name == "triage":
+        lines.append("incident_board:")
+        lines.append("top_incidents:")
+    elif profile_name == "forensics":
+        lines.append("evidence_ledger:")
+        lines.append("findings:")
+    else:
+        lines.append("trend_watch:")
+        lines.append("active_signals:")
+
     for item in payload.get("top_matters", [])[:max_matters]:
         if not isinstance(item, dict):
             continue
         lines.append(f"- [{item.get('priority', 0)}] {item.get('kind')}: {item.get('message')}")
-    lines.append("what_to_do_now:")
+    if profile_name == "triage":
+        lines.append("next_actions_now:")
+    elif profile_name == "monitor":
+        lines.append("watch_actions_now:")
+    else:
+        lines.append("what_to_do_now:")
     for action in payload.get("prioritized_actions", []):
         if not isinstance(action, dict):
             continue
         if str(action.get("tier")) == "now":
             lines.append(f"- {action.get('action')}")
-    lines.append("what_to_do_next:")
+    if profile_name == "forensics":
+        lines.append("analysis_queue_next:")
+    else:
+        lines.append("what_to_do_next:")
     for action in payload.get("prioritized_actions", []):
         if not isinstance(action, dict):
             continue
         if str(action.get("tier")) == "next":
             lines.append(f"- {action.get('action')}")
-    lines.append("what_to_monitor:")
+    if profile_name == "monitor":
+        lines.append("watchlist:")
+    else:
+        lines.append("what_to_monitor:")
     for action in payload.get("prioritized_actions", []):
         if not isinstance(action, dict):
             continue
