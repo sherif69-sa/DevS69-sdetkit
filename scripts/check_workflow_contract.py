@@ -13,6 +13,7 @@ REQUIRED_SECTIONS = [
     "## Default ignore list (to reduce context switching)",
     "## Quick run checklist",
     "## PR clean policy (every PR)",
+    "## Security + quality + review guard",
 ]
 
 REQUIRED_COMMANDS = [
@@ -27,6 +28,7 @@ REQUIRED_COMMANDS = [
     "python scripts/start_session.py --size <small|medium|large> --run",
     "python -m sdetkit review . --no-workspace --format operator-json",
     "cat .sdetkit/pr-clean-report.json",
+    "python scripts/security_quality_review_guard.py --run",
 ]
 
 

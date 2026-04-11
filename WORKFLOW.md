@@ -120,3 +120,13 @@ Profile intent:
 - **large**: medium + doctor + coverage + review
 
 
+
+
+## Security + quality + review guard
+
+Run this before opening bigger PRs to enforce a single combined guardrail:
+
+```bash
+python scripts/security_quality_review_guard.py
+python scripts/security_quality_review_guard.py --run
+```
