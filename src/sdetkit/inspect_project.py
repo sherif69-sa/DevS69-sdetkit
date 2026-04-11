@@ -10,6 +10,13 @@ from .evidence_workspace import record_workspace_run
 from .inspect_compare import run_compare
 from .inspect_data import run_inspect
 from .judgment import build_judgment, load_latest_previous_payload
+from .review_engine import (
+    build_contradiction_graph,
+    decide_escalation,
+    decide_stop,
+    investigation_confidence,
+    rank_likely_issue_tracks,
+)
 
 SCHEMA_VERSION = "sdetkit.inspect.project.v1"
 EXIT_OK = 0
@@ -407,10 +414,20 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
 
-    conflicting_evidence: list[dict[str, Any]] = []
     inspect_fail_scopes = len({f["scope"] for f in ordered_findings if f["kind"].startswith("inspect")})
     compare_fail_scopes = len({f["scope"] for f in ordered_findings if f["kind"].startswith("compare")})
-    if inspect_fail_scopes == 0 and compare_fail_scopes > 0:
+    contradiction_inputs: list[dict[str, Any]] = []
+    if inspect_fail_scopes > 0:
+        contradiction_inputs.append({"kind": "inspect"})
+    if compare_fail_scopes > 0:
+        contradiction_inputs.append({"kind": "compare"})
+    conflicting_evidence = build_contradiction_graph(
+        findings=contradiction_inputs,
+        detection={"repo_like": compare_fail_scopes > 0},
+        doctor_kind="inspect",
+        inspect_kind="compare",
+    )
+    if inspect_fail_scopes == 0 and compare_fail_scopes > 0 and not conflicting_evidence:
         conflicting_evidence.append(
             {
                 "id": "inspect-project:compare-without-inspect-failures",
@@ -469,6 +486,30 @@ def main(argv: list[str] | None = None) -> int:
         workflow_ok=project_ok,
         blocking=blocking,
     )
+    adaptive_confidence = investigation_confidence(
+        source_workflows=[{"workflow": "inspect", "status": "ok"} for _ in inspect_runs]
+        + [{"workflow": "inspect-compare", "status": "ok"} for _ in compare_runs],
+        findings=finding_items,
+        conflicts=conflicting_evidence,
+    )
+    adaptive_escalation = decide_escalation(
+        findings=finding_items,
+        conflicts=conflicting_evidence,
+        baseline_confidence=adaptive_confidence,
+        confidence_threshold=0.55,
+        force_deepen=False,
+    )
+    adaptive_stop = decide_stop(
+        final_confidence=adaptive_confidence,
+        confidence_threshold=0.55,
+        findings_count=len(finding_items),
+        conflicts_count=len(conflicting_evidence),
+    )
+    likely_issue_tracks = rank_likely_issue_tracks(
+        findings=finding_items,
+        conflicts=conflicting_evidence,
+        changed=[],
+    )
 
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
@@ -488,6 +529,11 @@ def main(argv: list[str] | None = None) -> int:
         "compare_runs": compare_runs,
         "findings": ordered_findings,
         "judgment": judgment,
+        "adaptive": {
+            "escalation": adaptive_escalation.as_dict(),
+            "stop_decision": adaptive_stop.as_dict(),
+            "likely_issue_tracks": likely_issue_tracks,
+        },
         "evidence": {
             "machine_readable": "inspect-project.json",
             "human_readable": "inspect-project.txt",
