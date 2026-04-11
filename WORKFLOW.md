@@ -130,3 +130,13 @@ Run this before opening bigger PRs to enforce a single combined guardrail:
 python scripts/security_quality_review_guard.py
 python scripts/security_quality_review_guard.py --run
 ```
+
+
+## Interactive error triage assistant
+
+When CI/local failures happen frequently, pipe logs to the assistant for concrete remediation steps:
+
+```bash
+python scripts/review_error_assistant.py --format text < ci-fail.log
+python scripts/review_error_assistant.py --format json < ci-fail.log
+```

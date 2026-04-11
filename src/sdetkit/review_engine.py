@@ -724,3 +724,76 @@ def rank_likely_issue_tracks(
     if changed:
         tracks[0]["historical_context"] = changed[:3]
     return sorted(tracks, key=lambda item: (-int(item.get("priority", 0)), str(item.get("track_id", ""))))[:5]
+
+ERROR_TRIAGE_RULES: tuple[dict[str, str], ...] = (
+    {
+        "id": "ruff-import-order",
+        "match": "I001",
+        "category": "lint",
+        "recommendation": "Run `python -m ruff check --fix <paths>` then re-run `python -m ruff check src tests`.",
+    },
+    {
+        "id": "ruff-unused-import",
+        "match": "F401",
+        "category": "lint",
+        "recommendation": "Remove unused imports or run `python -m ruff check --fix <paths>` and re-run lint.",
+    },
+    {
+        "id": "repo-trailing-whitespace",
+        "match": "trailing_whitespace",
+        "category": "repo-hygiene",
+        "recommendation": "Strip trailing spaces in flagged files, then run `python -m sdetkit repo check --format json --force`.",
+    },
+    {
+        "id": "gha-unpinned-action",
+        "match": "unpinned_action",
+        "category": "security",
+        "recommendation": "Pin GitHub Actions to full commit SHAs and verify with enterprise repo check profile.",
+    },
+    {
+        "id": "wheel-not-found",
+        "match": "*.whl is not a valid wheel filename",
+        "category": "packaging",
+        "recommendation": "Build wheel first (`python -m build`) and install using an explicit discovered wheel path.",
+    },
+    {
+        "id": "gate-problems-found",
+        "match": "gate: problems found",
+        "category": "quality-gate",
+        "recommendation": "Open gate JSON artifact, inspect `failed_steps`, fix top failing step, then rerun gate.",
+    },
+)
+
+
+def triage_error_log(text: str) -> dict[str, Any]:
+    lowered = text.lower()
+    hits: list[dict[str, Any]] = []
+    for rule in ERROR_TRIAGE_RULES:
+        marker = str(rule["match"]).lower()
+        if marker in lowered:
+            hits.append(
+                {
+                    "id": rule["id"],
+                    "category": rule["category"],
+                    "match": rule["match"],
+                    "recommendation": rule["recommendation"],
+                }
+            )
+
+    deduped: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for row in hits:
+        rid = str(row["id"])
+        if rid in seen:
+            continue
+        seen.add(rid)
+        deduped.append(row)
+
+    return {
+        "schema_version": "sdetkit.review.error-triage.v1",
+        "matched_rules": deduped,
+        "summary": {
+            "matches": len(deduped),
+            "ok": len(deduped) == 0,
+        },
+    }

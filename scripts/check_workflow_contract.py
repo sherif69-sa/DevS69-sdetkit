@@ -14,6 +14,7 @@ REQUIRED_SECTIONS = [
     "## Quick run checklist",
     "## PR clean policy (every PR)",
     "## Security + quality + review guard",
+    "## Interactive error triage assistant",
 ]
 
 REQUIRED_COMMANDS = [
@@ -29,6 +30,7 @@ REQUIRED_COMMANDS = [
     "python -m sdetkit review . --no-workspace --format operator-json",
     "cat .sdetkit/pr-clean-report.json",
     "python scripts/security_quality_review_guard.py --run",
+    "python scripts/review_error_assistant.py --format json < ci-fail.log",
 ]
 
 
