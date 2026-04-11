@@ -246,6 +246,22 @@ Then use stability-aware command discovery:
         help="Validate an inspect rules JSON file and exit.",
     )
     inspect_parser.add_argument("args", nargs=argparse.REMAINDER)
+    inspect_compare_parser = sub.add_parser(
+        "inspect-compare",
+        help="[Advanced but supported] Compare inspect baseline/previous runs and drift evidence",
+    )
+    inspect_compare_parser.add_argument("--left", default=None)
+    inspect_compare_parser.add_argument("--right", default=None)
+    inspect_compare_parser.add_argument("--left-run", default=None)
+    inspect_compare_parser.add_argument("--right-run", default=None)
+    inspect_compare_parser.add_argument("--scope", default=None)
+    inspect_compare_parser.add_argument("--latest-vs-previous", action="store_true")
+    inspect_compare_parser.add_argument("--workspace-root", default=None)
+    inspect_compare_parser.add_argument("--workflow", default=None)
+    inspect_compare_parser.add_argument("--format", choices=["text", "json"], default=None)
+    inspect_compare_parser.add_argument("--out-dir", default=None)
+    inspect_compare_parser.add_argument("--no-workspace", action="store_true")
+    inspect_compare_parser.add_argument("args", nargs=argparse.REMAINDER)
 
     ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
     _add_apiget_args(ag)
@@ -1236,6 +1252,31 @@ def main(argv: Sequence[str] | None = None) -> int:
         if ns.rules_lint:
             inspect_args = ["--rules-lint", ns.rules_lint, *inspect_args]
         return _run_module_main("sdetkit.inspect_data", inspect_args)
+    if ns.cmd == "inspect-compare":
+        forwarded = list(ns.args)
+        if ns.left:
+            forwarded = ["--left", ns.left, *forwarded]
+        if ns.right:
+            forwarded = ["--right", ns.right, *forwarded]
+        if ns.left_run:
+            forwarded = ["--left-run", ns.left_run, *forwarded]
+        if ns.right_run:
+            forwarded = ["--right-run", ns.right_run, *forwarded]
+        if ns.scope:
+            forwarded = ["--scope", ns.scope, *forwarded]
+        if ns.latest_vs_previous:
+            forwarded = ["--latest-vs-previous", *forwarded]
+        if ns.workspace_root:
+            forwarded = ["--workspace-root", ns.workspace_root, *forwarded]
+        if ns.workflow:
+            forwarded = ["--workflow", ns.workflow, *forwarded]
+        if ns.format:
+            forwarded = ["--format", ns.format, *forwarded]
+        if ns.out_dir:
+            forwarded = ["--out-dir", ns.out_dir, *forwarded]
+        if ns.no_workspace:
+            forwarded = ["--no-workspace", *forwarded]
+        return _run_module_main("sdetkit.inspect_compare", forwarded)
 
     if ns.cmd == "patch":
         return _run_module_main("sdetkit.patch", ns.args)
