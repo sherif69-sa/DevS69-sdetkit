@@ -7,7 +7,6 @@
     "python -m sdetkit doctor"
   ],
   "public_stable_front_door_commands": [
-    "review",
     "gate",
     "doctor",
     "release"

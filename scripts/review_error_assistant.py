@@ -12,7 +12,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Analyze recurring CI/local errors and recommend real-world fixes.",
     )
-    p.add_argument("--in", dest="in_path", default=None, help="Path to error log text. Defaults to stdin.")
+    p.add_argument(
+        "--in", dest="in_path", default=None, help="Path to error log text. Defaults to stdin."
+    )
     p.add_argument("--format", choices=("json", "text"), default="text")
     return p
 

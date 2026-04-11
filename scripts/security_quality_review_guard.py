@@ -6,7 +6,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 CHECKS: tuple[tuple[str, list[str]], ...] = (
     (
         "repo_default",
@@ -48,7 +47,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Unified guard for security + quality + review readiness.",
     )
-    p.add_argument("--run", action="store_true", help="Execute checks. Without this flag, print plan only.")
+    p.add_argument(
+        "--run", action="store_true", help="Execute checks. Without this flag, print plan only."
+    )
     p.add_argument("--report", default="build/security-quality-review-guard.json")
     return p
 
