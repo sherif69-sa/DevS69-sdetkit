@@ -11,11 +11,7 @@ from sdetkit import inspect_data
 def test_inspect_single_csv_reports_findings(tmp_path: Path) -> None:
     csv_path = tmp_path / "orders.csv"
     csv_path.write_text(
-        "id,amount,status\n"
-        "100,10,ok\n"
-        "100,10,ok\n"
-        "101,,ok\n"
-        "102, 11,pending\n",
+        "id,amount,status\n100,10,ok\n100,10,ok\n101,,ok\n102, 11,pending\n",
         encoding="utf-8",
     )
 
@@ -76,10 +72,7 @@ def test_cli_inspect_command_executes(tmp_path: Path) -> None:
 def test_inspect_applies_file_rules_and_emits_deterministic_evidence(tmp_path: Path) -> None:
     csv_path = tmp_path / "orders.csv"
     csv_path.write_text(
-        "id,status\n"
-        "A1,ok\n"
-        "A1,ok\n"
-        "A2,pending\n",
+        "id,status\nA1,ok\nA1,ok\nA2,pending\n",
         encoding="utf-8",
     )
     rules_path = tmp_path / "rules.json"
@@ -115,8 +108,14 @@ def test_inspect_applies_file_rules_and_emits_deterministic_evidence(tmp_path: P
     payload = json.loads((tmp_path / "out" / "inspect.json").read_text(encoding="utf-8"))
     report = payload["file_reports"][0]
     assert payload["summary"]["diagnostics"]["failed_rule_checks"] >= 1
-    assert any(item["rule_type"] == "required_columns" and item["ok"] is False for item in report["rule_checks"])
-    assert any(item["rule_type"] == "duplicate_keys" and item["ok"] is False for item in report["rule_checks"])
+    assert any(
+        item["rule_type"] == "required_columns" and item["ok"] is False
+        for item in report["rule_checks"]
+    )
+    assert any(
+        item["rule_type"] == "duplicate_keys" and item["ok"] is False
+        for item in report["rule_checks"]
+    )
     assert any(item["signal"] == "duplicate_key" for item in report["suspicious_record_evidence"])
 
 
@@ -148,7 +147,9 @@ def test_inspect_applies_cross_file_rules(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    rc = inspect_data.main([str(tmp_path), "--rules", str(rules), "--out-dir", str(tmp_path / "artifacts")])
+    rc = inspect_data.main(
+        [str(tmp_path), "--rules", str(rules), "--out-dir", str(tmp_path / "artifacts")]
+    )
     assert rc == 2
     payload = json.loads((tmp_path / "artifacts" / "inspect.json").read_text(encoding="utf-8"))
     assert payload["summary"]["diagnostics"]["failed_rule_checks"] >= 1
@@ -213,7 +214,10 @@ def test_inspect_rejects_invalid_file_rule_shape(tmp_path: Path) -> None:
         capture_output=True,
     )
     assert run.returncode == 2
-    assert "inspect: invalid files['events.csv'].required_columns: must be an array of strings" in run.stderr
+    assert (
+        "inspect: invalid files['events.csv'].required_columns: must be an array of strings"
+        in run.stderr
+    )
 
 
 def test_inspect_rules_template_outputs_canonical_shape() -> None:

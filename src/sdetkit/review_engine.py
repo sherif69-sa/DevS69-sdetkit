@@ -34,7 +34,9 @@ def derive_probe_score_history_inputs(
     avg_cost = float(aggregates.get("avg_cost", 0.0))
     saturation = float(aggregates.get("repeat_hit_saturation", 0.0))
     track_payoff_map = aggregates.get("track_payoff", {}) if isinstance(aggregates, dict) else {}
-    track_payoff = float(track_payoff_map.get(current_track, avg_usefulness if avg_usefulness > 0 else 0.5))
+    track_payoff = float(
+        track_payoff_map.get(current_track, avg_usefulness if avg_usefulness > 0 else 0.5)
+    )
 
     usefulness_delta = int(round((avg_usefulness - 0.5) * 40)) if has_history else 0
     cost_penalty = int(round((avg_cost / 100.0) * 12)) if has_history else 0
@@ -42,9 +44,17 @@ def derive_probe_score_history_inputs(
     track_delta = int(round((track_payoff - 0.5) * 20)) if has_history else 0
     history_delta = usefulness_delta + track_delta - cost_penalty - saturation_penalty
     score_inputs = [
-        {"input": "history_avg_usefulness", "value": _round2(avg_usefulness), "weight": "((value-0.5)*40)"},
+        {
+            "input": "history_avg_usefulness",
+            "value": _round2(avg_usefulness),
+            "weight": "((value-0.5)*40)",
+        },
         {"input": "history_avg_cost", "value": _round2(avg_cost), "weight": "-((value/100)*12)"},
-        {"input": "history_repeat_hit_saturation", "value": _round2(saturation), "weight": "-(value*18)"},
+        {
+            "input": "history_repeat_hit_saturation",
+            "value": _round2(saturation),
+            "weight": "-(value*18)",
+        },
         {
             "input": f"history_track_payoff[{current_track}]",
             "value": _round2(track_payoff),
@@ -101,7 +111,11 @@ def apply_probe_memory_update(
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     memory: dict[str, Any] = {"schema_version": "sdetkit.review.probe-memory.v1", "probes": {}}
     if isinstance(previous_memory, dict):
-        memory["probes"] = previous_memory.get("probes", {}) if isinstance(previous_memory.get("probes"), dict) else {}
+        memory["probes"] = (
+            previous_memory.get("probes", {})
+            if isinstance(previous_memory.get("probes"), dict)
+            else {}
+        )
     probes = memory["probes"]
     run_updates: list[dict[str, Any]] = []
     for outcome in sorted(normalized_outcomes, key=lambda item: str(item.get("probe_id", ""))):
@@ -132,7 +146,10 @@ def apply_probe_memory_update(
         for row in history:
             track = str(row.get("context_track", "stability"))
             track_buckets.setdefault(track, []).append(float(row.get("usefulness", 0.0)))
-        track_payoff = {track: _round2(sum(values) / len(values)) for track, values in sorted(track_buckets.items())}
+        track_payoff = {
+            track: _round2(sum(values) / len(values))
+            for track, values in sorted(track_buckets.items())
+        }
 
         aggregates = {
             "runs": len(history),
@@ -146,7 +163,9 @@ def apply_probe_memory_update(
         probe_entry["outcomes"] = history
         probe_entry["aggregates"] = aggregates
         probes[probe_id] = probe_entry
-        run_updates.append({"probe_id": probe_id, "aggregates": aggregates, "latest_outcome": outcome})
+        run_updates.append(
+            {"probe_id": probe_id, "aggregates": aggregates, "latest_outcome": outcome}
+        )
 
     summary = {
         "normalized_outcomes": normalized_outcomes,
@@ -216,7 +235,9 @@ def profile_priority_tier(priority: int, profile: Any) -> str:
     return "monitor"
 
 
-def build_staged_plan(*, profile_name: str, stages: tuple[Any, ...], workflow_plan: dict[str, bool]) -> dict[str, Any]:
+def build_staged_plan(
+    *, profile_name: str, stages: tuple[Any, ...], workflow_plan: dict[str, bool]
+) -> dict[str, Any]:
     stage_rows: list[dict[str, Any]] = []
     for stage in stages:
         checks = [name for name in stage.checks if workflow_plan.get(name.replace("-", "_"), False)]
@@ -284,7 +305,9 @@ def decide_stop(
     findings_count: int,
     conflicts_count: int,
 ) -> AdaptiveStopDecision:
-    can_stop = final_confidence >= confidence_threshold and findings_count == 0 and conflicts_count == 0
+    can_stop = (
+        final_confidence >= confidence_threshold and findings_count == 0 and conflicts_count == 0
+    )
     return AdaptiveStopDecision(
         stop=can_stop,
         confidence_score=final_confidence,
@@ -326,7 +349,11 @@ def build_contradiction_graph(
         )
     return sorted(
         graph,
-        key=lambda item: (str(item.get("kind", "")), str(item.get("id", "")), str(item.get("message", ""))),
+        key=lambda item: (
+            str(item.get("kind", "")),
+            str(item.get("id", "")),
+            str(item.get("message", "")),
+        ),
     )
 
 
@@ -410,7 +437,9 @@ def plan_adaptive_probes(
     contradictory = len(contradiction_graph.get("flat_contradictions", []))
     cluster_pressure = len(contradiction_graph.get("clusters", []))
     finding_pressure = sum(max(0, int(item.get("priority", 0))) for item in findings)
-    history_pressure = len([row for row in changed if str(row.get("kind")) in {"status", "severity"}])
+    history_pressure = len(
+        [row for row in changed if str(row.get("kind")) in {"status", "severity"}]
+    )
     current_track = "risk_pressure" if contradictory > 0 or finding_pressure > 0 else "stability"
     registry = [
         ProbeDefinition(
@@ -419,7 +448,11 @@ def plan_adaptive_probes(
             min_score=25,
             cost=55,
             max_chain_depth=2,
-            bounded_contract={"max_runtime_seconds": 20, "max_artifacts": 2, "max_input_payloads": 2},
+            bounded_contract={
+                "max_runtime_seconds": 20,
+                "max_artifacts": 2,
+                "max_input_payloads": 2,
+            },
             reason="Resolve whether recent evidence drift explains current contradictions/findings.",
         ),
         ProbeDefinition(
@@ -428,7 +461,11 @@ def plan_adaptive_probes(
             min_score=25,
             cost=30,
             max_chain_depth=2,
-            bounded_contract={"max_runtime_seconds": 10, "max_artifacts": 1, "max_manifest_entries": 200},
+            bounded_contract={
+                "max_runtime_seconds": 10,
+                "max_artifacts": 1,
+                "max_manifest_entries": 200,
+            },
             reason="Use repeated-run history to verify whether risk is persistent or newly introduced.",
         ),
     ]
@@ -438,20 +475,34 @@ def plan_adaptive_probes(
         score_inputs: list[dict[str, Any]] = []
         if probe.probe_id == "probe:inspect-compare":
             score += 35 if contradictory else 0
-            score_inputs.append({"input": "contradictions_present", "value": contradictory, "weight": 35})
+            score_inputs.append(
+                {"input": "contradictions_present", "value": contradictory, "weight": 35}
+            )
             score += cluster_pressure * 12
-            score_inputs.append({"input": "cluster_pressure", "value": cluster_pressure, "weight": 12})
+            score_inputs.append(
+                {"input": "cluster_pressure", "value": cluster_pressure, "weight": 12}
+            )
             score += finding_pressure // 6
-            score_inputs.append({"input": "finding_pressure", "value": finding_pressure, "weight": "1/6"})
+            score_inputs.append(
+                {"input": "finding_pressure", "value": finding_pressure, "weight": "1/6"}
+            )
             score += 15 if has_previous_review else 0
-            score_inputs.append({"input": "has_previous_review", "value": has_previous_review, "weight": 15})
+            score_inputs.append(
+                {"input": "has_previous_review", "value": has_previous_review, "weight": 15}
+            )
         elif probe.probe_id == "probe:workspace-history":
             score += 20 if contradictory else 0
-            score_inputs.append({"input": "contradictions_present", "value": contradictory, "weight": 20})
+            score_inputs.append(
+                {"input": "contradictions_present", "value": contradictory, "weight": 20}
+            )
             score += history_pressure * 20
-            score_inputs.append({"input": "history_pressure", "value": history_pressure, "weight": 20})
+            score_inputs.append(
+                {"input": "history_pressure", "value": history_pressure, "weight": 20}
+            )
             score += 10 if profile_name == "forensics" else 0
-            score_inputs.append({"input": "forensics_profile", "value": profile_name == "forensics", "weight": 10})
+            score_inputs.append(
+                {"input": "forensics_profile", "value": profile_name == "forensics", "weight": 10}
+            )
             score += 8 if confidence_score < confidence_threshold else 0
             score_inputs.append(
                 {
@@ -487,13 +538,17 @@ def plan_adaptive_probes(
     chain_enabled = contradictory > 0 or cluster_pressure > 0
     for row in sorted(candidates, key=lambda item: (-int(item["score"]), str(item["probe_id"]))):
         requires = str(row["requires"])
-        enabled = bool(detection.get("workspace_like")) if requires == "workspace_like" else bool(
-            detection.get("data_like")
+        enabled = (
+            bool(detection.get("workspace_like"))
+            if requires == "workspace_like"
+            else bool(detection.get("data_like"))
         )
         affordable = (budget_spent + int(row["cost"])) <= budget_total
         enough_score = int(row["score"]) >= int(row["min_score"])
         within_chain = chain_depth < int(row["max_chain_depth"])
-        should_run = enabled and enough_score and len(executed) < max_probes and affordable and within_chain
+        should_run = (
+            enabled and enough_score and len(executed) < max_probes and affordable and within_chain
+        )
         target = executed if should_run else skipped
         if should_run:
             budget_spent += int(row["cost"])
@@ -618,7 +673,9 @@ def apply_probe_result_feedback(
     executed_probes: list[dict[str, Any]],
 ) -> dict[str, Any]:
     probe_pressure = len(executed_probes)
-    confidence_delta = 0.08 if probe_pressure > 0 and not findings and not conflicts else -0.03 * probe_pressure
+    confidence_delta = (
+        0.08 if probe_pressure > 0 and not findings and not conflicts else -0.03 * probe_pressure
+    )
     status = "stable" if confidence_delta >= 0 else "risk-intensified"
     track_updates: list[dict[str, Any]] = []
     for track in likely_tracks[:3]:
@@ -645,7 +702,9 @@ def apply_probe_result_feedback(
     }
 
 
-def summarize_history_delta(previous: dict[str, Any] | None, current: dict[str, Any]) -> list[dict[str, Any]]:
+def summarize_history_delta(
+    previous: dict[str, Any] | None, current: dict[str, Any]
+) -> list[dict[str, Any]]:
     if not isinstance(previous, dict):
         return [{"kind": "baseline", "message": "No previous review run found for this scope."}]
     changes: list[dict[str, Any]] = []
@@ -654,11 +713,18 @@ def summarize_history_delta(previous: dict[str, Any] | None, current: dict[str, 
     prev_now = len([a for a in prev_actions if isinstance(a, dict) and a.get("tier") == "now"])
     cur_now = len([a for a in cur_actions if isinstance(a, dict) and a.get("tier") == "now"])
     if prev_now != cur_now:
-        changes.append({"kind": "action_pressure", "message": f"immediate_actions changed {prev_now} -> {cur_now}"})
+        changes.append(
+            {
+                "kind": "action_pressure",
+                "message": f"immediate_actions changed {prev_now} -> {cur_now}",
+            }
+        )
     prev_status = str(previous.get("status", ""))
     cur_status = str(current.get("status", ""))
     if prev_status != cur_status:
-        changes.append({"kind": "status", "message": f"status changed {prev_status} -> {cur_status}"})
+        changes.append(
+            {"kind": "status", "message": f"status changed {prev_status} -> {cur_status}"}
+        )
     prev_sev = str(previous.get("severity", ""))
     cur_sev = str(current.get("severity", ""))
     if prev_sev != cur_sev:
@@ -683,7 +749,9 @@ def rank_likely_issue_tracks(
             {
                 "track_id": f"track-{idx}:{kind}",
                 "track": f"{kind}-stabilization",
-                "likelihood": round(min(0.95, 0.25 + (top_priority / 120.0) + (len(items) * 0.05)), 2),
+                "likelihood": round(
+                    min(0.95, 0.25 + (top_priority / 120.0) + (len(items) * 0.05)), 2
+                ),
                 "priority": top_priority,
                 "supporting_evidence": [
                     {
@@ -702,9 +770,17 @@ def rank_likely_issue_tracks(
                     "Confirm healthy controls remain preserved after applying changes.",
                 ],
                 "recommended_next_moves": [
-                    str(items[0].get("next_action", "Investigate and remediate top evidence on this track."))
+                    str(
+                        items[0].get(
+                            "next_action", "Investigate and remediate top evidence on this track."
+                        )
+                    )
                 ],
-                "blockers": ["Conflicting evidence unresolved." if conflicts else "No active blockers currently detected."],
+                "blockers": [
+                    "Conflicting evidence unresolved."
+                    if conflicts
+                    else "No active blockers currently detected."
+                ],
             }
         )
     if not tracks:
@@ -714,16 +790,27 @@ def rank_likely_issue_tracks(
                 "track": "control-integrity",
                 "likelihood": 0.2,
                 "priority": 10,
-                "supporting_evidence": [{"id": "baseline", "message": "No high-signal findings in baseline layer.", "priority": 0}],
+                "supporting_evidence": [
+                    {
+                        "id": "baseline",
+                        "message": "No high-signal findings in baseline layer.",
+                        "priority": 0,
+                    }
+                ],
                 "conflicting_evidence": [],
                 "verification_steps": ["Run lightweight spot-checks on recent changed areas."],
-                "recommended_next_moves": ["Continue with monitor-tier controls and next scheduled review."],
+                "recommended_next_moves": [
+                    "Continue with monitor-tier controls and next scheduled review."
+                ],
                 "blockers": [],
             }
         )
     if changed:
         tracks[0]["historical_context"] = changed[:3]
-    return sorted(tracks, key=lambda item: (-int(item.get("priority", 0)), str(item.get("track_id", ""))))[:5]
+    return sorted(
+        tracks, key=lambda item: (-int(item.get("priority", 0)), str(item.get("track_id", "")))
+    )[:5]
+
 
 ERROR_TRIAGE_RULES: tuple[dict[str, str], ...] = (
     {

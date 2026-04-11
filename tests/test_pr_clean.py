@@ -39,7 +39,10 @@ def test_pr_clean_large_plan_includes_release_quality_and_review(tmp_path) -> No
     assert "[gate_release] PYTHONPATH=src python -m sdetkit gate release" in proc.stdout
     assert "[doctor] PYTHONPATH=src python -m sdetkit doctor" in proc.stdout
     assert "[coverage] bash quality.sh cov" in proc.stdout
-    assert "[review] PYTHONPATH=src python -m sdetkit review . --no-workspace --format operator-json" in proc.stdout
+    assert (
+        "[review] PYTHONPATH=src python -m sdetkit review . --no-workspace --format operator-json"
+        in proc.stdout
+    )
 
     data = json.loads(report.read_text(encoding="utf-8"))
     assert data["profile"] == "large"

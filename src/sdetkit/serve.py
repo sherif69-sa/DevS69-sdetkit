@@ -21,7 +21,9 @@ def _default_out_dir(target: Path) -> Path:
     return Path(".sdetkit") / "review" / review._safe_slug(target.resolve().name)
 
 
-def _build_error(*, code: str, message: str, details: dict[str, Any] | None = None) -> dict[str, Any]:
+def _build_error(
+    *, code: str, message: str, details: dict[str, Any] | None = None
+) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "status": "error",
         "contract_version": SERVE_CONTRACT_VERSION,
@@ -37,7 +39,9 @@ def _build_error(*, code: str, message: str, details: dict[str, Any] | None = No
 
 def _parse_review_request(body: bytes) -> dict[str, Any]:
     if not body:
-        raise RequestValidationError("Request body must be valid JSON object with a required 'path' field.")
+        raise RequestValidationError(
+            "Request body must be valid JSON object with a required 'path' field."
+        )
     try:
         raw = json.loads(body.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -57,7 +61,9 @@ def _parse_review_request(body: bytes) -> dict[str, Any]:
 
     response_mode = raw.get("response_mode", "full")
     if response_mode not in {"full", "operator-summary"}:
-        raise RequestValidationError("Field 'response_mode' must be either 'full' or 'operator-summary'.")
+        raise RequestValidationError(
+            "Field 'response_mode' must be either 'full' or 'operator-summary'."
+        )
 
     no_workspace = raw.get("no_workspace", False)
     if not isinstance(no_workspace, bool):
@@ -106,7 +112,11 @@ def _run_review_request(req: dict[str, Any]) -> dict[str, Any]:
         "artifacts": {
             "review_json": json_path.as_posix(),
             "review_text": txt_path.as_posix(),
-            **(payload.get("artifact_index", {}) if isinstance(payload.get("artifact_index", {}), dict) else {}),
+            **(
+                payload.get("artifact_index", {})
+                if isinstance(payload.get("artifact_index", {}), dict)
+                else {}
+            ),
         },
     }
     if "workspace" in payload:

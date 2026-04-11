@@ -1570,15 +1570,27 @@ def _select_evidence_rows(
         selected_ids = actionable_ids
     elif include == "all":
         selected_ids = {
-            str(row.get("id", ""))
-            for row in diagnostics_rows
-            if str(row.get("id", "")).strip()
+            str(row.get("id", "")) for row in diagnostics_rows if str(row.get("id", "")).strip()
         }
     if profile == "ci":
-        allowed = {"pyproject", "ci_workflows", "security_files", "pre_commit", "deps", "clean_tree"}
+        allowed = {
+            "pyproject",
+            "ci_workflows",
+            "security_files",
+            "pre_commit",
+            "deps",
+            "clean_tree",
+        }
         selected_ids = {check_id for check_id in selected_ids if check_id in allowed}
     elif profile == "release":
-        allowed = {"pyproject", "clean_tree", "release_meta", "repo_readiness", "upgrade_audit", "ci_workflows"}
+        allowed = {
+            "pyproject",
+            "clean_tree",
+            "release_meta",
+            "repo_readiness",
+            "upgrade_audit",
+            "ci_workflows",
+        }
         selected_ids = {check_id for check_id in selected_ids if check_id in allowed}
     filtered_failed = [row for row in failed_checks if row.get("id") in selected_ids]
     filtered_controls = [row for row in passing_controls if row.get("id") in selected_ids]
@@ -1886,9 +1898,7 @@ def _write_evidence(
         json.dumps(evidence_payload, sort_keys=True, indent=2) + "\n",
         encoding="utf-8",
     )
-    (evidence_dir / "doctor-evidence.md").write_text(
-        "\n".join(evidence_lines), encoding="utf-8"
-    )
+    (evidence_dir / "doctor-evidence.md").write_text("\n".join(evidence_lines), encoding="utf-8")
     (evidence_dir / "doctor-evidence-manifest.json").write_text(
         json.dumps(manifest_payload, sort_keys=True, indent=2) + "\n",
         encoding="utf-8",
@@ -2775,7 +2785,7 @@ def main(argv: list[str] | None = None) -> int:
 
     finding_items = [
         {
-            "id": f"doctor:{row.get('id','unknown')}",
+            "id": f"doctor:{row.get('id', 'unknown')}",
             "kind": str(row.get("id", "check")),
             "severity": str(row.get("severity", "medium")),
             "priority": 70 if str(row.get("severity", "medium")) == "high" else 45,

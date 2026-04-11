@@ -135,7 +135,9 @@ def test_doctor_evidence_profile_and_include_filter(tmp_path: Path, monkeypatch,
     assert all(row["id"] in {"ci_workflows", "security_files"} for row in evidence["failed_checks"])
 
 
-def test_doctor_evidence_fails_for_non_actionable_check_selection(tmp_path: Path, monkeypatch, capsys):
+def test_doctor_evidence_fails_for_non_actionable_check_selection(
+    tmp_path: Path, monkeypatch, capsys
+):
     root = tmp_path / "repo"
     root.mkdir()
     monkeypatch.chdir(root)

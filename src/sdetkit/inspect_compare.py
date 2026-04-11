@@ -41,7 +41,9 @@ def _read_workspace_record_payload(record_path: Path) -> dict[str, Any]:
     return payload
 
 
-def _resolve_workspace_record_path(*, workspace_root: Path, workflow: str, scope: str, run_hash: str) -> Path:
+def _resolve_workspace_record_path(
+    *, workspace_root: Path, workflow: str, scope: str, run_hash: str
+) -> Path:
     manifest = load_workspace_manifest(workspace_root)
     runs = manifest.get("runs", [])
     if not isinstance(runs, list):
@@ -63,7 +65,9 @@ def _resolve_workspace_record_path(*, workspace_root: Path, workflow: str, scope
     )
 
 
-def _resolve_latest_previous_record_paths(*, workspace_root: Path, workflow: str, scope: str) -> tuple[Path, Path]:
+def _resolve_latest_previous_record_paths(
+    *, workspace_root: Path, workflow: str, scope: str
+) -> tuple[Path, Path]:
     manifest = load_workspace_manifest(workspace_root)
     runs = manifest.get("runs", [])
     if not isinstance(runs, list):
@@ -89,7 +93,9 @@ def _resolve_latest_previous_record_paths(*, workspace_root: Path, workflow: str
     for item in candidates:
         by_hash[item["run_hash"]] = item
 
-    ordered = sorted(by_hash.values(), key=lambda row: (int(row["run_order"]), str(row["run_hash"])))
+    ordered = sorted(
+        by_hash.values(), key=lambda row: (int(row["run_order"]), str(row["run_hash"]))
+    )
     if len(ordered) < 2:
         raise ValueError(
             "compare: latest-vs-previous requires at least two distinct recorded runs for "
@@ -119,7 +125,9 @@ def _report_key(report: dict[str, Any]) -> str:
     return Path(str(report.get("path", "unknown"))).name
 
 
-def _build_id_drift(left_reports: dict[str, dict[str, Any]], right_reports: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+def _build_id_drift(
+    left_reports: dict[str, dict[str, Any]], right_reports: dict[str, dict[str, Any]]
+) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for key in sorted(set(left_reports) & set(right_reports)):
         left_ids = set(str(v) for v in left_reports[key].get("record_ids", []) if str(v))
@@ -139,7 +147,9 @@ def _build_id_drift(left_reports: dict[str, dict[str, Any]], right_reports: dict
     return out
 
 
-def _build_schema_drift(left_reports: dict[str, dict[str, Any]], right_reports: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+def _build_schema_drift(
+    left_reports: dict[str, dict[str, Any]], right_reports: dict[str, dict[str, Any]]
+) -> list[dict[str, Any]]:
     drift: list[dict[str, Any]] = []
     for key in sorted(set(left_reports) & set(right_reports)):
         left_cols = set(left_reports[key].get("schema_overview", {}).get("columns", []))
@@ -190,7 +200,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         "diagnostic_deltas:",
     ]
     for key, value in payload["diagnostic_deltas"].items():
-        lines.append(f"- {key}: baseline={value['baseline']} compare={value['compare']} delta={value['delta']}")
+        lines.append(
+            f"- {key}: baseline={value['baseline']} compare={value['compare']} delta={value['delta']}"
+        )
     judgment = payload.get("judgment", {})
     if isinstance(judgment, dict):
         lines.append(
@@ -212,17 +224,35 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         prog="sdetkit inspect-compare",
         description="Compare inspect evidence snapshots for baseline drift diagnostics.",
     )
-    p.add_argument("--left", default=None, help="Path to baseline inspect.json or workspace record.json")
-    p.add_argument("--right", default=None, help="Path to compare inspect.json or workspace record.json")
+    p.add_argument(
+        "--left", default=None, help="Path to baseline inspect.json or workspace record.json"
+    )
+    p.add_argument(
+        "--right", default=None, help="Path to compare inspect.json or workspace record.json"
+    )
     p.add_argument("--left-run", default=None, help="Workspace run hash for baseline inspect run")
     p.add_argument("--right-run", default=None, help="Workspace run hash for compare inspect run")
-    p.add_argument("--scope", default=None, help="Workspace scope (required for --left-run/--right-run)")
-    p.add_argument("--latest-vs-previous", action="store_true", help="Compare latest workspace run against previous run for a scope")
-    p.add_argument("--workspace-root", default=".sdetkit/workspace", help="Shared evidence workspace root")
+    p.add_argument(
+        "--scope", default=None, help="Workspace scope (required for --left-run/--right-run)"
+    )
+    p.add_argument(
+        "--latest-vs-previous",
+        action="store_true",
+        help="Compare latest workspace run against previous run for a scope",
+    )
+    p.add_argument(
+        "--workspace-root", default=".sdetkit/workspace", help="Shared evidence workspace root"
+    )
     p.add_argument("--workflow", default="inspect", help="Workspace workflow to resolve runs from")
     p.add_argument("--format", choices=["text", "json"], default="text")
-    p.add_argument("--out-dir", default=None, help="Directory for compare artifacts (default: .sdetkit/inspect-compare/<scope-or-input>)")
-    p.add_argument("--no-workspace", action="store_true", help="Disable shared workspace run recording")
+    p.add_argument(
+        "--out-dir",
+        default=None,
+        help="Directory for compare artifacts (default: .sdetkit/inspect-compare/<scope-or-input>)",
+    )
+    p.add_argument(
+        "--no-workspace", action="store_true", help="Disable shared workspace run recording"
+    )
     return p
 
 
@@ -273,8 +303,12 @@ def _resolve_pair(ns: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any
         left_loaded = _load_json(left_path)
         right_loaded = _load_json(right_path)
 
-        left_payload = left_loaded.get("payload") if left_path.name == "record.json" else left_loaded
-        right_payload = right_loaded.get("payload") if right_path.name == "record.json" else right_loaded
+        left_payload = (
+            left_loaded.get("payload") if left_path.name == "record.json" else left_loaded
+        )
+        right_payload = (
+            right_loaded.get("payload") if right_path.name == "record.json" else right_loaded
+        )
         if not isinstance(left_payload, dict) or not isinstance(right_payload, dict):
             raise ValueError("compare: expected inspect payload object for --left/--right")
         return left_payload, right_payload, left_path.as_posix(), right_path.as_posix()
@@ -360,11 +394,17 @@ def run_compare(
     if schema_drift:
         recommendations.append("Schema drift detected; update ingest contracts or mapping rules.")
     if id_drift:
-        recommendations.append("Record ID drift detected; validate disappear/appear sets for data loss risk.")
+        recommendations.append(
+            "Record ID drift detected; validate disappear/appear sets for data loss risk."
+        )
     if duplicate_row_delta > 0 or duplicate_record_id_delta > 0:
-        recommendations.append("Duplicate signals increased; investigate export or dedupe regressions.")
+        recommendations.append(
+            "Duplicate signals increased; investigate export or dedupe regressions."
+        )
     if right_coverage_gap > left_coverage_gap:
-        recommendations.append("Expected ID coverage regressed; restore baseline coverage before promotion.")
+        recommendations.append(
+            "Expected ID coverage regressed; restore baseline coverage before promotion."
+        )
     if not recommendations:
         recommendations.append("No meaningful drift detected; compare run is baseline-compatible.")
 
@@ -512,7 +552,11 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_FINDINGS
 
     out_scope = ns.scope or _safe_slug(Path(left_label).name + "-vs-" + Path(right_label).name)
-    out_dir = Path(ns.out_dir) if ns.out_dir else Path(".sdetkit") / "inspect-compare" / _safe_slug(out_scope)
+    out_dir = (
+        Path(ns.out_dir)
+        if ns.out_dir
+        else Path(".sdetkit") / "inspect-compare" / _safe_slug(out_scope)
+    )
     try:
         rc, payload, _, _ = run_compare(
             left_payload=left_payload,

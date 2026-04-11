@@ -30,7 +30,9 @@ def test_inspect_compare_with_two_paths_reports_drift(tmp_path: Path) -> None:
     )
 
     assert rc == 2
-    payload = json.loads((tmp_path / "compare" / "inspect-compare.json").read_text(encoding="utf-8"))
+    payload = json.loads(
+        (tmp_path / "compare" / "inspect-compare.json").read_text(encoding="utf-8")
+    )
     assert payload["summary"]["id_drift_files"] == 1
     assert payload["summary"]["drift_score"] >= 1
     assert payload["judgment"]["schema_version"] == "sdetkit.judgment.v1"
@@ -98,7 +100,9 @@ def test_inspect_compare_workspace_run_pair(tmp_path: Path) -> None:
         ]
     )
     assert rc == 2
-    payload = json.loads((tmp_path / "compare" / "inspect-compare.json").read_text(encoding="utf-8"))
+    payload = json.loads(
+        (tmp_path / "compare" / "inspect-compare.json").read_text(encoding="utf-8")
+    )
     assert payload["summary"]["duplicate_row_groups_delta"] == 1
 
 

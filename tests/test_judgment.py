@@ -46,7 +46,9 @@ def test_judgment_contradictions_raise_priority() -> None:
             }
         ],
         supporting_evidence=[{"kind": "id_drift", "value": 1}],
-        conflicting_evidence=[{"id": "c1", "kind": "cross_surface_disagreement", "message": "conflict"}],
+        conflicting_evidence=[
+            {"id": "c1", "kind": "cross_surface_disagreement", "message": "conflict"}
+        ],
         completeness=1.0,
         stability=0.4,
         workflow_ok=False,
@@ -60,7 +62,15 @@ def test_judgment_contradictions_raise_priority() -> None:
 def test_judgment_non_ok_without_blocking_is_watch() -> None:
     payload = build_judgment(
         workflow="inspect",
-        findings=[{"id": "f1", "kind": "minor", "severity": "medium", "priority": 10, "why_it_matters": "minor"}],
+        findings=[
+            {
+                "id": "f1",
+                "kind": "minor",
+                "severity": "medium",
+                "priority": 10,
+                "why_it_matters": "minor",
+            }
+        ],
         supporting_evidence=[{"kind": "minor", "value": 1}],
         conflicting_evidence=[],
         completeness=1.0,
@@ -74,7 +84,15 @@ def test_judgment_non_ok_without_blocking_is_watch() -> None:
 def test_judgment_guideline_matrix_for_key_scenarios() -> None:
     fail_payload = build_judgment(
         workflow="review",
-        findings=[{"id": "f1", "kind": "risk", "severity": "high", "priority": 75, "why_it_matters": "risk"}],
+        findings=[
+            {
+                "id": "f1",
+                "kind": "risk",
+                "severity": "high",
+                "priority": 75,
+                "why_it_matters": "risk",
+            }
+        ],
         supporting_evidence=[{"kind": "risk", "value": 1}],
         conflicting_evidence=[],
         completeness=0.8,
@@ -87,7 +105,15 @@ def test_judgment_guideline_matrix_for_key_scenarios() -> None:
 
     watch_payload = build_judgment(
         workflow="review",
-        findings=[{"id": "f1", "kind": "minor", "severity": "low", "priority": 15, "why_it_matters": "minor"}],
+        findings=[
+            {
+                "id": "f1",
+                "kind": "minor",
+                "severity": "low",
+                "priority": 15,
+                "why_it_matters": "minor",
+            }
+        ],
         supporting_evidence=[],
         conflicting_evidence=[{"id": "c1", "kind": "disagreement"}],
         completeness=0.4,

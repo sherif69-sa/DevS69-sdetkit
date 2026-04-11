@@ -139,7 +139,9 @@ def record_workspace_run(
     manifest["runs"] = runs
     manifest["latest"] = {k: latest[k] for k in sorted(latest)}
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    manifest_path.write_text(
+        json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
 
     latest_dir = workspace_root / "latest" / workflow_slug
     latest_dir.mkdir(parents=True, exist_ok=True)

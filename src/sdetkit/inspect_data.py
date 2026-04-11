@@ -404,7 +404,9 @@ def _analyze_file(path: Path, *, root: Path, file_rules: dict[str, Any]) -> dict
                 json.dumps(item.get("details", {}), sort_keys=True),
             ),
         )[:50],
-        "extracted_id_sets": {name: sorted(values) for name, values in sorted(extracted_sets.items())},
+        "extracted_id_sets": {
+            name: sorted(values) for name, values in sorted(extracted_sets.items())
+        },
         "confidence": confidence,
         "recommendations": _recommendations(diagnostics, record_id_field is not None),
         "notes": notes,
@@ -504,7 +506,11 @@ def _rule_cross_file_checks(
         right_ids = set(right.get("extracted_id_sets", {}).get(right_column, []))
         left_only = sorted(left_ids - right_ids)
         right_only = sorted(right_ids - left_ids)
-        ok = len(left_only) == 0 if mode == "left_subset" else len(left_only) == 0 and len(right_only) == 0
+        ok = (
+            len(left_only) == 0
+            if mode == "left_subset"
+            else len(left_only) == 0 and len(right_only) == 0
+        )
         results.append(
             {
                 "rule_type": "cross_file_match",
@@ -610,7 +616,9 @@ def _validate_rules_payload(rules_payload: dict[str, Any]) -> str | None:
 
     file_rules = rules_payload.get("files", {})
     if not isinstance(file_rules, dict):
-        return "inspect: invalid rules payload: 'files' must be an object keyed by file name or path"
+        return (
+            "inspect: invalid rules payload: 'files' must be an object keyed by file name or path"
+        )
     for file_key, item in sorted(file_rules.items()):
         key = str(file_key)
         if not key:
@@ -658,8 +666,7 @@ def _validate_rules_payload(rules_payload: dict[str, Any]) -> str | None:
             value = item.get(field)
             if not isinstance(value, str) or not value.strip():
                 return (
-                    "inspect: invalid cross_file_rules["
-                    f"{idx}].{field}: must be a non-empty string"
+                    f"inspect: invalid cross_file_rules[{idx}].{field}: must be a non-empty string"
                 )
     return None
 
@@ -671,8 +678,7 @@ def _load_rules_payload(path: str) -> tuple[dict[str, Any] | None, str | None]:
         return None, f"inspect: rules file does not exist: {path}"
     except json.JSONDecodeError as exc:
         return None, (
-            "inspect: invalid rules file JSON at "
-            f"line {exc.lineno}, column {exc.colno}: {exc.msg}"
+            f"inspect: invalid rules file JSON at line {exc.lineno}, column {exc.colno}: {exc.msg}"
         )
     if not isinstance(loaded, dict):
         return None, "inspect: invalid rules payload: top-level JSON value must be an object"
@@ -707,37 +713,39 @@ def run_inspect(
     file_rules = loaded_rules.get("files", {})
     cross_file_rules = loaded_rules.get("cross_file_rules", [])
     reports = [
-        _analyze_file(path, root=target if target.is_dir() else target.parent, file_rules=file_rules)
+        _analyze_file(
+            path, root=target if target.is_dir() else target.parent, file_rules=file_rules
+        )
         for path in files
     ]
     cross_file = _cross_file_diagnostics(reports)
     cross_file_rule_results = _rule_cross_file_checks(reports, cross_file_rules)
 
-    summary = {
+    diagnostics_summary: dict[str, int] = {
+        "suspicious_rows": sum(int(r["diagnostics"]["suspicious_row_count"]) for r in reports),
+        "missing_value_columns": sum(
+            int(r["diagnostics"]["missing_value_columns"]) for r in reports
+        ),
+        "duplicate_row_groups": sum(int(r["diagnostics"]["duplicate_row_groups"]) for r in reports),
+        "inconsistent_type_columns": sum(
+            int(r["diagnostics"]["inconsistent_type_columns"]) for r in reports
+        ),
+        "duplicate_record_ids": sum(
+            int(r["diagnostics"]["duplicate_record_id_count"]) for r in reports
+        ),
+        "cross_file_mismatches": len(cross_file),
+        "failed_rule_checks": sum(int(r["diagnostics"]["failed_rule_checks"]) for r in reports)
+        + sum(1 for item in cross_file_rule_results if not bool(item.get("ok", False))),
+    }
+
+    summary: dict[str, Any] = {
         "files_analyzed": len(reports),
         "total_records": sum(int(r["row_count"]) for r in reports),
         "skipped_file_count": len(skipped),
-        "diagnostics": {
-            "suspicious_rows": sum(int(r["diagnostics"]["suspicious_row_count"]) for r in reports),
-            "missing_value_columns": sum(
-                int(r["diagnostics"]["missing_value_columns"]) for r in reports
-            ),
-            "duplicate_row_groups": sum(
-                int(r["diagnostics"]["duplicate_row_groups"]) for r in reports
-            ),
-            "inconsistent_type_columns": sum(
-                int(r["diagnostics"]["inconsistent_type_columns"]) for r in reports
-            ),
-            "duplicate_record_ids": sum(
-                int(r["diagnostics"]["duplicate_record_id_count"]) for r in reports
-            ),
-            "cross_file_mismatches": len(cross_file),
-            "failed_rule_checks": sum(int(r["diagnostics"]["failed_rule_checks"]) for r in reports)
-            + sum(1 for item in cross_file_rule_results if not bool(item.get("ok", False))),
-        },
+        "diagnostics": diagnostics_summary,
     }
 
-    findings_score = sum(int(v) for v in summary["diagnostics"].values())
+    findings_score = sum(diagnostics_summary.values())
     confidence = max(0.0, round(1.0 - min(findings_score, 30) / 30.0, 2))
     recommendations: list[str] = []
     for report in reports:
@@ -745,7 +753,9 @@ def run_inspect(
             if rec not in recommendations:
                 recommendations.append(rec)
     if cross_file:
-        recommendations.append("Align record IDs across related exports before trusting combined metrics.")
+        recommendations.append(
+            "Align record IDs across related exports before trusting combined metrics."
+        )
 
     previous_payload = None
     previous_hash = None
@@ -758,22 +768,26 @@ def run_inspect(
         )
 
     finding_items: list[dict[str, Any]] = []
-    for key, value in summary["diagnostics"].items():
-        if int(value) <= 0:
+    for key, value in diagnostics_summary.items():
+        if value <= 0:
             continue
         finding_items.append(
             {
                 "id": f"inspect:{key}",
                 "kind": key,
-                "severity": "high" if key in {"cross_file_mismatches", "failed_rule_checks"} else "medium",
-                "priority": min(50, int(value) * 8),
+                "severity": "high"
+                if key in {"cross_file_mismatches", "failed_rule_checks"}
+                else "medium",
+                "priority": min(50, value * 8),
                 "why_it_matters": f"{key} surfaced {value} time(s) in this run.",
-                "next_action": recommendations[0] if recommendations else "Review evidence anomalies.",
+                "next_action": recommendations[0]
+                if recommendations
+                else "Review evidence anomalies.",
                 "message": f"{key}={value}",
             }
         )
     conflicting_evidence: list[dict[str, Any]] = []
-    if cross_file and summary["diagnostics"].get("missing_value_columns", 0) == 0:
+    if cross_file and diagnostics_summary.get("missing_value_columns", 0) == 0:
         conflicting_evidence.append(
             {
                 "id": "inspect:cross-file-vs-local",
@@ -784,16 +798,16 @@ def run_inspect(
 
     supporting_evidence = [
         {"kind": key, "value": int(value)}
-        for key, value in sorted(summary["diagnostics"].items())
-        if int(value) > 0
+        for key, value in sorted(diagnostics_summary.items())
+        if value > 0
     ]
     stability = 0.7
     previous_summary = None
     if isinstance(previous_payload, dict):
         prev_diag = previous_payload.get("summary", {}).get("diagnostics", {})
         if isinstance(prev_diag, dict):
-            prev_total = sum(int(prev_diag.get(k, 0)) for k in summary["diagnostics"])
-            cur_total = sum(int(v) for v in summary["diagnostics"].values())
+            prev_total = sum(int(prev_diag.get(k, 0)) for k in diagnostics_summary)
+            cur_total = sum(diagnostics_summary.values())
             if cur_total > prev_total:
                 stability = 0.35
                 previous_summary = "regressing"
@@ -805,8 +819,8 @@ def run_inspect(
 
     inspect_ok = findings_score == 0
     blocking = (
-        int(summary["diagnostics"].get("cross_file_mismatches", 0)) > 0
-        or int(summary["diagnostics"].get("failed_rule_checks", 0)) > 0
+        diagnostics_summary.get("cross_file_mismatches", 0) > 0
+        or diagnostics_summary.get("failed_rule_checks", 0) > 0
     )
     judgment = build_judgment(
         workflow="inspect",
@@ -899,7 +913,9 @@ def main(argv: list[str] | None = None) -> int:
             sys.stderr.write(error + "\n")
             return EXIT_FINDINGS
         rules_payload = loaded if loaded is not None else {}
-    out_dir = Path(ns.out_dir) if ns.out_dir else Path(".sdetkit") / "inspect" / _safe_slug(target.name)
+    out_dir = (
+        Path(ns.out_dir) if ns.out_dir else Path(".sdetkit") / "inspect" / _safe_slug(target.name)
+    )
     try:
         rc, payload, _, _ = run_inspect(
             input_path=target,

@@ -46,7 +46,9 @@ def test_inspect_records_shared_workspace_and_reuses_run_hash(tmp_path: Path) ->
     assert len(runs) == 1
     assert runs[0]["run_hash"] == run_hash
     assert (workspace / runs[0]["record_path"]).exists()
-    latest = json.loads((workspace / "latest" / "inspect" / "orders.csv.json").read_text(encoding="utf-8"))
+    latest = json.loads(
+        (workspace / "latest" / "inspect" / "orders.csv.json").read_text(encoding="utf-8")
+    )
     assert latest["run_hash"] == run_hash
 
 
