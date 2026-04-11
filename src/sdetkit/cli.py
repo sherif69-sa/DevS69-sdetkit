@@ -345,6 +345,11 @@ Then use stability-aware command discovery:
     _add_passthrough_subcommand(
         sub, "feature-registry", help_text="Inspect feature-registry entries and filters"
     )
+    _add_passthrough_subcommand(
+        sub,
+        "contract",
+        help_text="[Public / stable] Runtime/install integration contract surfaces for adopters",
+    )
 
     rpt = sub.add_parser("report", help="Reporting workflows and output packs")
     rpt.add_argument("args", nargs=argparse.REMAINDER)
@@ -803,6 +808,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if argv and argv[0] == "report":
         return _run_module_main("sdetkit.report", list(argv[1:]))
+
+    if argv and argv[0] == "contract":
+        return _run_module_main("sdetkit.contract", list(argv[1:]))
 
     if argv and argv[0] == "maintenance":
         return _run_module_main("sdetkit.maintenance", list(argv[1:]))
