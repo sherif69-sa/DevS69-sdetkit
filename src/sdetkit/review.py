@@ -1162,7 +1162,10 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--format",
         choices=["text", "json", "operator-json"],
         default="text",
-        help="Output format: text (operator narrative), json (full review payload), or operator-json (operator summary contract only).",
+        help=(
+            "Output format: text (operator narrative), json (full payload for deep/debug automation), "
+            "or operator-json (stable operator-facing integration contract; preferred for CI/operator parsers)."
+        ),
     )
     p.add_argument(
         "--interactive",
