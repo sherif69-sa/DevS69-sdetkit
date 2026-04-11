@@ -14,6 +14,18 @@ from .evidence_workspace import load_workspace_manifest, record_workspace_run
 from .inspect_compare import run_compare
 from .inspect_data import run_inspect
 from .judgment import build_judgment, load_latest_previous_payload
+from .review_engine import (
+    build_contradiction_graph,
+    build_staged_plan,
+    decide_escalation,
+    decide_stop,
+    investigation_confidence,
+    profile_confidence_level,
+    profile_priority_tier,
+    profile_weighted_priority,
+    rank_likely_issue_tracks,
+    summarize_history_delta,
+)
 
 SCHEMA_VERSION = "sdetkit.review.v2"
 EXIT_OK = 0
@@ -313,37 +325,6 @@ def _coerce_profile(name: str) -> ReviewProfile:
     return REVIEW_PROFILES[normalized]
 
 
-def _weighted_priority(item: dict[str, Any], profile: ReviewProfile) -> int:
-    base = int(item.get("priority", 0))
-    kind = str(item.get("kind", "")).strip().lower()
-    weight = 1.0
-    if kind == "doctor":
-        weight = profile.doctor_weight
-    elif kind == "inspect":
-        weight = profile.inspect_weight
-    elif kind == "inspect-compare":
-        weight = profile.compare_weight
-    elif kind == "inspect-project":
-        weight = profile.inspect_project_weight
-    return max(0, min(100, int(round(base * weight))))
-
-
-def _profile_confidence_level(score: float, profile: ReviewProfile) -> str:
-    if score >= profile.confidence_high:
-        return "high"
-    if score >= profile.confidence_medium:
-        return "medium"
-    return "low"
-
-
-def _profile_tier(priority: int, profile: ReviewProfile) -> str:
-    if priority >= profile.urgency_now_threshold:
-        return "now"
-    if priority >= profile.urgency_next_threshold:
-        return "next"
-    return "monitor"
-
-
 def _workflows_for_profile(detection: dict[str, bool], profile: ReviewProfile) -> dict[str, bool]:
     run_doctor = detection["repo_like"] and profile.name in {"release", "triage", "monitor"}
     run_inspect = detection["data_like"] and not detection["policy_project"]
@@ -357,78 +338,6 @@ def _workflows_for_profile(detection: dict[str, bool], profile: ReviewProfile) -
         "inspect_compare": run_compare,
         "workspace_history": run_history,
     }
-
-
-def _stage_checks_for_plan(workflow_plan: dict[str, bool], stage: ReviewStage) -> list[str]:
-    return [name for name in stage.checks if workflow_plan.get(name.replace("-", "_"), False)]
-
-
-def _investigation_confidence(*, source_workflows: list[dict[str, Any]], findings: list[dict[str, Any]], conflicts: list[dict[str, Any]]) -> float:
-    coverage = min(1.0, max(0.25, len(source_workflows) / 4.0))
-    evidence_consistency = 1.0 - min(0.75, len(conflicts) * 0.2)
-    risk_pressure = min(0.7, len(findings) * 0.15)
-    score = (coverage * 0.5) + (evidence_consistency * 0.35) + ((1.0 - risk_pressure) * 0.15)
-    return round(max(0.0, min(1.0, score)), 2)
-
-
-def _build_issue_tracks(*, findings: list[dict[str, Any]], conflicts: list[dict[str, Any]], changed: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    tracks: list[dict[str, Any]] = []
-    by_kind: dict[str, list[dict[str, Any]]] = {}
-    for item in findings:
-        kind = str(item.get("kind", "finding"))
-        by_kind.setdefault(kind, []).append(item)
-    for idx, (kind, items) in enumerate(sorted(by_kind.items()), start=1):
-        top_priority = max(int(entry.get("priority", 0)) for entry in items)
-        tracks.append(
-            {
-                "track_id": f"track-{idx}:{kind}",
-                "track": f"{kind}-stabilization",
-                "likelihood": round(min(0.95, 0.25 + (top_priority / 120.0) + (len(items) * 0.05)), 2),
-                "priority": top_priority,
-                "supporting_evidence": [
-                    {
-                        "id": str(entry.get("id", "")),
-                        "message": str(entry.get("message", "")),
-                        "priority": int(entry.get("priority", 0)),
-                    }
-                    for entry in sorted(items, key=lambda row: -int(row.get("priority", 0)))[:3]
-                ],
-                "conflicting_evidence": [
-                    {
-                        "id": str(conflict.get("id", "")),
-                        "message": str(conflict.get("message", "")),
-                    }
-                    for conflict in conflicts[:3]
-                ],
-                "verification_steps": [
-                    "Re-run targeted review workflow for this track after remediation.",
-                    "Confirm healthy controls remain preserved after applying changes.",
-                ],
-                "recommended_next_moves": [
-                    str(items[0].get("next_action", "Investigate and remediate top evidence on this track.")),
-                ],
-                "blockers": [
-                    "Conflicting evidence unresolved." if conflicts else "No active blockers currently detected."
-                ],
-            }
-        )
-    if not tracks:
-        tracks.append(
-            {
-                "track_id": "track-0:control-integrity",
-                "track": "control-integrity",
-                "likelihood": 0.2,
-                "priority": 10,
-                "supporting_evidence": [{"id": "baseline", "message": "No high-signal findings in baseline layer.", "priority": 0}],
-                "conflicting_evidence": [],
-                "verification_steps": ["Run lightweight spot-checks on recent changed areas."],
-                "recommended_next_moves": ["Continue with monitor-tier controls and next scheduled review."],
-                "blockers": [],
-            }
-        )
-    if changed:
-        tracks[0]["historical_context"] = changed[:3]
-    return sorted(tracks, key=lambda item: (-int(item.get("priority", 0)), str(item.get("track_id", ""))))[:5]
 
 
 def _run_doctor(target: Path, out_dir: Path, workspace_root: Path, no_workspace: bool) -> tuple[int, dict[str, Any], Path]:
@@ -462,32 +371,6 @@ def _review_scope_for_target(target: Path) -> str:
     return _safe_slug(target.resolve().as_posix())
 
 
-def _summarize_changed(previous: dict[str, Any] | None, current: dict[str, Any]) -> list[dict[str, Any]]:
-    if not isinstance(previous, dict):
-        return [{"kind": "baseline", "message": "No previous review run found for this scope."}]
-    changes: list[dict[str, Any]] = []
-    prev_actions = previous.get("prioritized_actions", [])
-    cur_actions = current.get("prioritized_actions", [])
-    prev_now = len([a for a in prev_actions if isinstance(a, dict) and a.get("tier") == "now"])
-    cur_now = len([a for a in cur_actions if isinstance(a, dict) and a.get("tier") == "now"])
-    if prev_now != cur_now:
-        changes.append(
-            {
-                "kind": "action_pressure",
-                "message": f"immediate_actions changed {prev_now} -> {cur_now}",
-            }
-        )
-    prev_status = str(previous.get("status", ""))
-    cur_status = str(current.get("status", ""))
-    if prev_status != cur_status:
-        changes.append({"kind": "status", "message": f"status changed {prev_status} -> {cur_status}"})
-    prev_sev = str(previous.get("severity", ""))
-    cur_sev = str(current.get("severity", ""))
-    if prev_sev != cur_sev:
-        changes.append({"kind": "severity", "message": f"severity changed {prev_sev} -> {cur_sev}"})
-    return changes or [{"kind": "stable", "message": "No material review-level changes detected."}]
-
-
 def run_review(
     *,
     target: Path,
@@ -512,22 +395,14 @@ def run_review(
     healthy_controls: list[str] = []
     prioritized_actions: list[dict[str, Any]] = []
     artifact_index: dict[str, str] = {}
-    adaptive_plan: dict[str, Any] = {
-        "version": "sdetkit.review-plan.v1",
-        "profile": selected_profile.name,
-        "stages": [],
-        "escalation": {"needed": False, "reasons": [], "confidence_gate": None},
-        "stop_decision": {},
-    }
-
-    baseline_checks = _stage_checks_for_plan(workflow_plan, BASELINE_STAGES[0])
-    baseline_stage: dict[str, Any] = {
-        "name": BASELINE_STAGES[0].name,
-        "intent": BASELINE_STAGES[0].intent,
-        "checks_planned": baseline_checks,
-        "checks_run": [],
-    }
-    adaptive_plan["stages"].append(baseline_stage)
+    adaptive_plan = build_staged_plan(
+        profile_name=selected_profile.name,
+        stages=BASELINE_STAGES,
+        workflow_plan=workflow_plan,
+    )
+    baseline_stage = adaptive_plan["stages"][0]
+    deepen_stage = adaptive_plan["stages"][1]
+    baseline_checks = list(baseline_stage.get("checks_planned", []))
 
     if "doctor" in baseline_checks:
         doctor_out = out_dir / "doctor"
@@ -648,59 +523,25 @@ def run_review(
             )
 
     # contradictions as first-class product output (baseline signal set)
-    has_doctor_failure = any(f.get("kind") == "doctor" for f in findings)
-    has_inspect_failure = any(f.get("kind") == "inspect" for f in findings)
-    if has_doctor_failure and not has_inspect_failure:
-        conflicting.append(
-            {
-                "id": "review:conflict:repo-vs-data",
-                "kind": "cross_surface_disagreement",
-                "message": "Repo controls fail while local evidence diagnostics appear healthy.",
-            }
-        )
-    if has_inspect_failure and not has_doctor_failure and detection["repo_like"]:
-        conflicting.append(
-            {
-                "id": "review:conflict:data-vs-repo",
-                "kind": "cross_surface_disagreement",
-                "message": "Repo controls pass while evidence diagnostics show anomalies.",
-            }
-        )
+    conflicting.extend(build_contradiction_graph(findings=findings, detection=detection))
 
-    baseline_confidence = _investigation_confidence(
+    baseline_confidence = investigation_confidence(
         source_workflows=source_workflows,
         findings=findings,
         conflicts=conflicting,
     )
-    should_deepen_reasons: list[str] = []
-    if findings:
-        should_deepen_reasons.append("high-signal findings present in baseline layer")
-    if conflicting:
-        should_deepen_reasons.append("contradictory evidence requires disambiguation")
-    if baseline_confidence < selected_profile.confidence_medium:
-        should_deepen_reasons.append(
-            f"baseline confidence {baseline_confidence} below profile medium threshold {selected_profile.confidence_medium}"
-        )
-    if selected_profile.name == "forensics":
-        should_deepen_reasons.append("forensics profile enforces deep evidence collection")
+    escalation = decide_escalation(
+        findings=findings,
+        conflicts=conflicting,
+        baseline_confidence=baseline_confidence,
+        confidence_threshold=selected_profile.confidence_medium,
+        force_deepen=selected_profile.name == "forensics",
+    )
+    adaptive_plan["escalation"] = escalation.as_dict()
+    deepen_checks = list(deepen_stage.get("checks_planned", []))
+    deepen_stage["ran"] = escalation.needed
 
-    adaptive_plan["escalation"] = {
-        "needed": bool(should_deepen_reasons),
-        "reasons": should_deepen_reasons,
-        "confidence_gate": baseline_confidence,
-    }
-
-    deepen_checks = _stage_checks_for_plan(workflow_plan, BASELINE_STAGES[1])
-    deepen_stage: dict[str, Any] = {
-        "name": BASELINE_STAGES[1].name,
-        "intent": BASELINE_STAGES[1].intent,
-        "checks_planned": deepen_checks,
-        "checks_run": [],
-        "ran": bool(should_deepen_reasons),
-    }
-    adaptive_plan["stages"].append(deepen_stage)
-
-    if inspect_payload and "inspect-compare" in deepen_checks and bool(should_deepen_reasons) and not no_workspace:
+    if inspect_payload and "inspect-compare" in deepen_checks and escalation.needed and not no_workspace:
         scope = _review_scope_for_target(target)
         previous_inspect, _ = load_latest_previous_payload(
             workspace_root=workspace_root,
@@ -742,13 +583,13 @@ def run_review(
                     }
                 )
 
-    if "workspace-history" in deepen_checks and bool(should_deepen_reasons) and detection["workspace_like"]:
+    if "workspace-history" in deepen_checks and escalation.needed and detection["workspace_like"]:
         manifest = load_workspace_manifest(target / ".sdetkit" / "workspace")
         supporting.append({"kind": "workspace_runs", "value": len(manifest.get("runs", []))})
         source_workflows.append({"workflow": "workspace-history", "status": "ok"})
         deepen_stage["checks_run"].append({"check": "workspace-history", "status": "ok"})
 
-    weighted_findings = [{**item, "priority": _weighted_priority(item, selected_profile)} for item in findings]
+    weighted_findings = [{**item, "priority": profile_weighted_priority(item, selected_profile)} for item in findings]
     weighted_conflicts = [
         {
             **item,
@@ -797,7 +638,7 @@ def run_review(
         "effective_max_priority": effective_max_priority,
     }
     confidence = dict(review_judgment.get("confidence", {}))
-    confidence["level"] = _profile_confidence_level(float(confidence.get("score", 0.0)), selected_profile)
+    confidence["level"] = profile_confidence_level(float(confidence.get("score", 0.0)), selected_profile)
     confidence["profile_thresholds"] = {
         "high": selected_profile.confidence_high,
         "medium": selected_profile.confidence_medium,
@@ -808,7 +649,7 @@ def run_review(
         if not isinstance(rec, dict):
             continue
         priority = int(rec.get("priority", 0))
-        profile_recs.append({**rec, "tier": _profile_tier(priority, selected_profile)})
+        profile_recs.append({**rec, "tier": profile_priority_tier(priority, selected_profile)})
     review_judgment["recommendations"] = profile_recs
 
     prioritized_actions.extend(review_judgment.get("recommendations", []))
@@ -858,33 +699,24 @@ def run_review(
         },
         "detection": detection,
     }
-    payload["changed_since_previous"] = _summarize_changed(previous_review, payload)
-    likely_tracks = _build_issue_tracks(
+    payload["changed_since_previous"] = summarize_history_delta(previous_review, payload)
+    likely_tracks = rank_likely_issue_tracks(
         findings=weighted_findings,
         conflicts=weighted_conflicts,
         changed=payload["changed_since_previous"],
     )
     payload["likely_issue_tracks"] = likely_tracks
-    final_confidence = _investigation_confidence(
+    final_confidence = investigation_confidence(
         source_workflows=source_workflows,
         findings=weighted_findings,
         conflicts=weighted_conflicts,
     )
-    can_stop = (
-        final_confidence >= selected_profile.confidence_medium
-        and len(weighted_conflicts) == 0
-        and len(weighted_findings) == 0
-    )
-    adaptive_plan["stop_decision"] = {
-        "stop": can_stop,
-        "confidence_score": final_confidence,
-        "confidence_threshold": selected_profile.confidence_medium,
-        "reason": (
-            "confidence sufficient and no unresolved contradictions"
-            if can_stop
-            else "continue investigation in next run or remediation cycle"
-        ),
-    }
+    adaptive_plan["stop_decision"] = decide_stop(
+        final_confidence=final_confidence,
+        confidence_threshold=selected_profile.confidence_medium,
+        findings_count=len(weighted_findings),
+        conflicts_count=len(weighted_conflicts),
+    ).as_dict()
     profile_packet = _build_profile_packet(payload)
     payload["profile"]["packet_type"] = profile_packet["packet_type"]
     payload["profile"]["output_strategy"] = profile_packet["packet_type"]
