@@ -17,8 +17,8 @@ from typing import Any
 from . import _toml, upgrade_audit
 from .bools import coerce_bool
 from .evidence_workspace import record_workspace_run
-from .judgment import build_judgment, load_latest_previous_payload
 from .import_hazards import find_stdlib_shadowing
+from .judgment import build_judgment, load_latest_previous_payload
 from .security import SecurityError, safe_path
 
 SEVERITY_ORDER = {"low": 1, "medium": 2, "high": 3}

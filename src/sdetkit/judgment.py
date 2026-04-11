@@ -8,6 +8,47 @@ SCHEMA_VERSION = "sdetkit.judgment.v1"
 
 _SEVERITY_ORDER = {"low": 1, "medium": 2, "high": 3, "critical": 4}
 
+JUDGMENT_GUIDELINES: tuple[dict[str, str], ...] = (
+    {
+        "id": "guideline-contradictions-first",
+        "when": "conflicting evidence exists",
+        "judgment": "force now-tier contradiction resolution before promotion",
+    },
+    {
+        "id": "guideline-blocking-risk",
+        "when": "status is fail or priority pressure is high",
+        "judgment": "treat as fail and prioritize immediate remediation",
+    },
+    {
+        "id": "guideline-watch-low-confidence",
+        "when": "status is watch with low confidence",
+        "judgment": "continue monitor lane and gather more evidence",
+    },
+    {
+        "id": "guideline-pass-high-confidence",
+        "when": "status is pass with high confidence",
+        "judgment": "allow promotion and keep routine monitoring",
+    },
+    {
+        "id": "guideline-pass-cautious",
+        "when": "status is pass with non-high confidence",
+        "judgment": "allow promotion with explicit follow-up checks",
+    },
+)
+
+
+def _select_guideline(*, status: str, priority_score: int, confidence_level: str, has_contradictions: bool) -> dict[str, str]:
+    if has_contradictions:
+        return dict(JUDGMENT_GUIDELINES[0])
+    if status == "fail" or priority_score >= 60:
+        return dict(JUDGMENT_GUIDELINES[1])
+    if status == "watch" and confidence_level == "low":
+        return dict(JUDGMENT_GUIDELINES[2])
+    if status == "pass" and confidence_level == "high":
+        return dict(JUDGMENT_GUIDELINES[3])
+    return dict(JUDGMENT_GUIDELINES[4])
+
+
 
 def _severity_from_score(score: int) -> str:
     if score >= 80:
@@ -136,6 +177,12 @@ def build_judgment(
         for item in top
     ]
     next_move = recommendations[0]["action"] if recommendations else "No immediate action required."
+    guideline = _select_guideline(
+        status=status,
+        priority_score=priority_score,
+        confidence_level=str(confidence.get("level", "low")),
+        has_contradictions=bool(contradictions),
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "workflow": workflow,
@@ -168,6 +215,8 @@ def build_judgment(
         },
         "contradictions": contradictions,
         "confidence": confidence,
+        "judgment_guideline": guideline,
+        "guideline_catalog": list(JUDGMENT_GUIDELINES),
         "recommendations": recommendations,
     }
 

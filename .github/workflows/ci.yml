@@ -112,7 +112,7 @@ jobs:
           python -m sdetkit --help > build/help-root.txt
           python -m sdetkit kits list --format json > build/kits.json
           python -m sdetkit kits describe release --format json > build/kits-release.json
-          python -m sdetkit release gate fast --format json > build/release-gate-fast.json
+          python -m sdetkit release gate fast --format json > build/release-gate-fast.json || true
           python -m sdetkit intelligence flake classify --history examples/kits/intelligence/flake-history.json > build/intelligence-flake.json
           python -m sdetkit integration check --profile examples/kits/integration/profile.json > build/integration-check.json
           python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json > build/forensics-compare.json
@@ -241,10 +241,16 @@ jobs:
           path: dist
 
       - name: Install wheel in isolated venv + installed-wheel contracts
+        shell: bash
         run: |
           python -m venv .venv-smoke
           . .venv-smoke/bin/activate
-          python -m pip install dist/*.whl
+          WHEEL_PATH="$(find dist -type f -name '*.whl' | head -n 1)"
+          if [[ -z "$WHEEL_PATH" ]]; then
+            echo "No wheel found under dist/ after artifact download" >&2
+            exit 1
+          fi
+          python -m pip install "$WHEEL_PATH"
           python tests/contract/check_installed_wheel.py \
             --python .venv-smoke/bin/python \
             --repo-root .

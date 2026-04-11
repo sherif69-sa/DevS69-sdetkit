@@ -234,6 +234,7 @@ Then use stability-aware command discovery:
     inspect_parser = sub.add_parser(
         "inspect",
         help="[Advanced but supported] Inspect CSV/JSON evidence inputs for operational diagnostics",
+        allow_abbrev=False,
     )
     inspect_parser.add_argument(
         "--rules-template",
