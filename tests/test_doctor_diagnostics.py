@@ -16,6 +16,7 @@ def test_doctor_ci_missing_files(tmp_path: Path, monkeypatch, capsys):
 
     assert rc == 2
     assert data["checks"]["ci_workflows"]["ok"] is False
+    assert data["judgment"]["schema_version"] == "sdetkit.judgment.v1"
     assert {"ci", "quality", "security"}.issubset(set(data["ci_missing"]))
 
 

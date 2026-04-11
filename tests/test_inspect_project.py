@@ -97,6 +97,7 @@ def test_inspect_project_cli_repeat_is_stable(tmp_path: Path) -> None:
     manifest1 = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
     assert payload1["workflow"] == "inspect-project"
     assert payload1["ok"] is True
+    assert payload1["judgment"]["schema_version"] == "sdetkit.judgment.v1"
     assert manifest1["scopes"][0]["scope"] == "core-data"
 
     second = subprocess.run(cmd, text=True, capture_output=True)

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .evidence_workspace import load_workspace_manifest, record_workspace_run
+from .judgment import build_judgment, load_latest_previous_payload
 
 SCHEMA_VERSION = "sdetkit.inspect.compare.v1"
 EXIT_OK = 0
@@ -190,6 +191,15 @@ def _render_text(payload: dict[str, Any]) -> str:
     ]
     for key, value in payload["diagnostic_deltas"].items():
         lines.append(f"- {key}: baseline={value['baseline']} compare={value['compare']} delta={value['delta']}")
+    judgment = payload.get("judgment", {})
+    if isinstance(judgment, dict):
+        lines.append(
+            "judgment_summary: "
+            f"status={judgment.get('status')} severity={judgment.get('severity')} confidence={judgment.get('confidence', {}).get('score')}"
+        )
+        contradictions = judgment.get("contradictions", [])
+        if isinstance(contradictions, list) and contradictions:
+            lines.append(f"judgment_contradictions: {len(contradictions)}")
     lines.append("recommendations:")
     for rec in payload["recommendations"]:
         lines.append(f"- {rec}")
@@ -358,11 +368,82 @@ def run_compare(
     if not recommendations:
         recommendations.append("No meaningful drift detected; compare run is baseline-compatible.")
 
+    conflicting_evidence: list[dict[str, Any]] = []
+    if (files_added or files_removed) and not schema_drift and not id_drift:
+        conflicting_evidence.append(
+            {
+                "id": "compare:file-set-vs-schema",
+                "kind": "cross_surface_disagreement",
+                "message": "File set changed but schema/id drift stayed flat.",
+            }
+        )
+
+    finding_items: list[dict[str, Any]] = []
+    for kind, value in (
+        ("files_added", len(files_added)),
+        ("files_removed", len(files_removed)),
+        ("schema_drift", len(schema_drift)),
+        ("id_drift", len(id_drift)),
+        ("signal_drift", len(signal_drift)),
+    ):
+        if value <= 0:
+            continue
+        finding_items.append(
+            {
+                "id": f"inspect-compare:{kind}",
+                "kind": kind,
+                "severity": "high" if kind in {"schema_drift", "id_drift"} else "medium",
+                "priority": min(55, value * 10),
+                "why_it_matters": f"{kind} changed in {value} area(s) versus baseline.",
+                "next_action": recommendations[0] if recommendations else "Review drift deltas.",
+                "message": f"{kind}={value}",
+            }
+        )
+    supporting_evidence = [
+        {"kind": key, "delta": int(value.get("delta", 0))}
+        for key, value in sorted(diagnostic_deltas.items())
+        if isinstance(value, dict) and int(value.get("delta", 0)) != 0
+    ]
+
+    previous_payload, _ = (None, None)
+    previous_summary = None
+    stability = 0.7
+    if record_workspace:
+        previous_payload, _ = load_latest_previous_payload(
+            workspace_root=workspace_root,
+            workflow="inspect-compare",
+            scope=str(out_scope),
+        )
+    if isinstance(previous_payload, dict):
+        prev = int(previous_payload.get("summary", {}).get("drift_score", 0))
+        if drift_score > prev:
+            stability = 0.35
+            previous_summary = "regressing"
+        elif drift_score < prev:
+            stability = 0.85
+            previous_summary = "improving"
+        else:
+            pass
+
+    compare_ok = drift_score == 0
+    blocking = bool(schema_drift or id_drift or (right_coverage_gap > left_coverage_gap))
+    judgment = build_judgment(
+        workflow="inspect-compare",
+        findings=finding_items,
+        supporting_evidence=supporting_evidence,
+        conflicting_evidence=conflicting_evidence,
+        completeness=1.0,
+        stability=stability,
+        previous_summary=previous_summary,
+        workflow_ok=compare_ok,
+        blocking=blocking,
+    )
+
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "tool": "sdetkit",
         "workflow": "inspect-compare",
-        "ok": drift_score == 0,
+        "ok": compare_ok,
         "baseline": {
             "label": left_label,
             "summary": left_payload.get("summary", {}),
@@ -390,6 +471,7 @@ def run_compare(
         "id_drift": id_drift,
         "diagnostic_deltas": diagnostic_deltas,
         "signal_drift": signal_drift,
+        "judgment": judgment,
         "recommendations": recommendations,
         "evidence": {
             "machine_readable": "inspect-compare.json",

@@ -29,6 +29,8 @@ def test_inspect_single_csv_reports_findings(tmp_path: Path) -> None:
     assert payload["summary"]["diagnostics"]["duplicate_record_ids"] == 1
     assert payload["workflow"] == "inspect"
     assert payload["tool"] == "sdetkit"
+    assert payload["judgment"]["schema_version"] == "sdetkit.judgment.v1"
+    assert payload["judgment"]["status"] in {"watch", "fail"}
 
 
 def test_inspect_folder_detects_cross_file_id_mismatch(tmp_path: Path) -> None:

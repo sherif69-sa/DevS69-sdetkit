@@ -17,6 +17,7 @@ from typing import Any
 from . import _toml, upgrade_audit
 from .bools import coerce_bool
 from .evidence_workspace import record_workspace_run
+from .judgment import build_judgment, load_latest_previous_payload
 from .import_hazards import find_stdlib_shadowing
 from .security import SecurityError, safe_path
 
@@ -2749,7 +2750,72 @@ def main(argv: list[str] | None = None) -> int:
         selected_checks=data["selected_checks"],
         hints=data["hints"],
     )
-    data["ok"] = bool(gate_ok)
+
+    scope_name = root.name or "repo"
+    previous_payload = None
+    previous_summary = None
+    stability = 0.7
+    if not ns.no_workspace:
+        previous_payload, _ = load_latest_previous_payload(
+            workspace_root=Path(ns.workspace_root),
+            workflow="doctor",
+            scope=scope_name,
+        )
+    if isinstance(previous_payload, dict):
+        prev_score = int(previous_payload.get("score", 0))
+        cur_score = int(data.get("score", 0))
+        if cur_score < prev_score:
+            stability = 0.35
+            previous_summary = "regressing"
+        elif cur_score > prev_score:
+            stability = 0.85
+            previous_summary = "improving"
+        else:
+            pass
+
+    finding_items = [
+        {
+            "id": f"doctor:{row.get('id','unknown')}",
+            "kind": str(row.get("id", "check")),
+            "severity": str(row.get("severity", "medium")),
+            "priority": 70 if str(row.get("severity", "medium")) == "high" else 45,
+            "why_it_matters": str(row.get("summary", "")),
+            "next_action": str((row.get("fix") or ["Review doctor findings"])[0]),
+            "message": str(row.get("summary", "")),
+        }
+        for row in data.get("next_actions", [])[:10]
+        if isinstance(row, dict)
+    ]
+    contradictory = []
+    surface = _surface_consistency(data, data.get("checks", {}))
+    if isinstance(surface, dict) and not bool(surface.get("ok", True)):
+        contradictory.append(
+            {
+                "id": "doctor:surface-consistency",
+                "kind": "cross_surface_disagreement",
+                "message": "Doctor cross-surface aliases disagree with check outcomes.",
+            }
+        )
+    supporting = [
+        {"kind": "failed_check", "id": item.get("id"), "severity": item.get("severity")}
+        for item in data.get("next_actions", [])
+        if isinstance(item, dict)
+    ]
+    doctor_ok = bool(gate_ok)
+    blocking = any(str(item.get("severity", "")) == "high" for item in data.get("next_actions", []))
+    data["judgment"] = build_judgment(
+        workflow="doctor",
+        findings=finding_items,
+        supporting_evidence=supporting,
+        conflicting_evidence=contradictory,
+        completeness=1.0 if data.get("selected_checks") else 0.4,
+        stability=stability,
+        previous_summary=previous_summary,
+        workflow_ok=doctor_ok,
+        blocking=blocking,
+    )
+
+    data["ok"] = doctor_ok
     if failed_checks:
         data["failed_checks"] = failed_checks
     if isinstance(getattr(ns, "apply_plan", None), str) and ns.apply_plan:
@@ -2765,11 +2831,23 @@ def main(argv: list[str] | None = None) -> int:
         is_json = False
     else:
         lines = [f"doctor score: {data['score']}%"]
+        judgment = data.get("judgment", {})
+        if isinstance(judgment, dict):
+            lines.append(
+                "judgment_summary: "
+                f"status={judgment.get('status')} severity={judgment.get('severity')} confidence={judgment.get('confidence', {}).get('score')}"
+            )
         checks = data.get("checks", {})
         for key in sorted(checks):
             item = checks[key]
             marker = "OK" if item.get("ok") else "FAIL"
             lines.append(f"[{marker}] {key}: {item.get('summary') or ''}")
+        top = judgment.get("top_judgment", {}) if isinstance(judgment, dict) else {}
+        if isinstance(top, dict) and top.get("next_move"):
+            lines.append(f"judgment_next_move: {top.get('next_move')}")
+        contradictions = judgment.get("contradictions", []) if isinstance(judgment, dict) else []
+        if isinstance(contradictions, list) and contradictions:
+            lines.append(f"judgment_contradictions: {len(contradictions)}")
         lines.append("recommendations:")
         for rec in data.get("recommendations", []):
             lines.append(f"- {rec}")
