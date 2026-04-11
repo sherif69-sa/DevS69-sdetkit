@@ -241,3 +241,72 @@ def test_probe_budget_skips_when_budget_is_exhausted() -> None:
     )
     assert decision["executed_probes"]
     assert any(row["skip_reason"] == "probe budget exhausted by higher-value probes" for row in decision["skipped_probes"])
+
+
+def test_probe_memory_artifact_written_and_exposed(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    repo = tmp_path / "repo"
+    data = repo / "events.csv"
+    out = tmp_path / "out"
+    repo.mkdir(parents=True, exist_ok=True)
+    (repo / "pyproject.toml").write_text("[project]\nname='demo'\nversion='0.1.0'\n", encoding="utf-8")
+    data.write_text("id,type\nE1,open\nE1,open\n", encoding="utf-8")
+
+    rc, payload, _, _ = review.run_review(target=repo, out_dir=out, workspace_root=workspace)
+
+    assert rc in {0, 2}
+    probe_memory = payload["adaptive_review"]["probe_memory"]
+    assert probe_memory["schema_version"] == "sdetkit.review.probe-memory.v1"
+    assert isinstance(probe_memory["normalized_outcomes"], list)
+    artifact = Path(probe_memory["workspace_artifact"])
+    assert artifact.exists()
+    stored = json.loads(artifact.read_text(encoding="utf-8"))
+    assert stored["schema_version"] == "sdetkit.review.probe-memory.v1"
+    assert "probe:inspect-compare" in stored.get("probes", {})
+
+
+def test_probe_memory_history_adjusts_next_run_score_inputs(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    repo = tmp_path / "repo"
+    data = repo / "events.csv"
+    out = tmp_path / "out"
+    repo.mkdir(parents=True, exist_ok=True)
+    (repo / "pyproject.toml").write_text("[project]\nname='demo'\nversion='0.1.0'\n", encoding="utf-8")
+    data.write_text("id,type\nE1,open\nE1,open\n", encoding="utf-8")
+
+    rc1, payload1, _, _ = review.run_review(target=repo, out_dir=out, workspace_root=workspace)
+    assert rc1 in {0, 2}
+    first_probe = next(
+        row for row in payload1["adaptive_review"]["executed_probes"] if row["probe_id"] == "probe:inspect-compare"
+    )
+    first_score = first_probe["score"]
+
+    rc2, payload2, _, _ = review.run_review(target=repo, out_dir=out, workspace_root=workspace)
+    assert rc2 in {0, 2}
+    second_probe = next(row for row in payload2["adaptive_review"]["skipped_probes"] if row["probe_id"] == "probe:inspect-compare")
+    second_score = second_probe["score"]
+
+    assert second_score != first_score
+    history_inputs = {row["input"] for row in second_probe["score_inputs"]}
+    assert "history_avg_usefulness" in history_inputs
+    assert "history_repeat_hit_saturation" in history_inputs
+
+
+def test_review_executed_probe_list_contains_only_executed_rows(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    repo = tmp_path / "repo"
+    out1 = tmp_path / "out1"
+    out2 = tmp_path / "out2"
+    repo.mkdir(parents=True, exist_ok=True)
+    (repo / "pyproject.toml").write_text("[project]\nname='demo'\nversion='0.1.0'\n", encoding="utf-8")
+    (repo / "events.csv").write_text("id,type\nE1,open\n", encoding="utf-8")
+
+    review.run_review(target=repo, out_dir=out1, workspace_root=workspace)
+    (repo / "events.csv").write_text("id,type\nE1,open\nE1,open\n", encoding="utf-8")
+    _, payload, _, _ = review.run_review(target=repo, out_dir=out2, workspace_root=workspace)
+
+    assert all(row.get("status") == "executed" for row in payload["adaptive_review"]["executed_probes"])
+    assert any(row.get("probe_id") == "probe:inspect-compare" for row in payload["adaptive_review"]["skipped_probes"])
+    moved = [row for row in payload["adaptive_review"]["skipped_probes"] if row.get("probe_id") == "probe:inspect-compare"]
+    assert moved
+    assert moved[0]["skip_reason"] == "probe planned but not executed in deepen stage"
