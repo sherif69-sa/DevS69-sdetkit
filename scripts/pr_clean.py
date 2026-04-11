@@ -100,7 +100,9 @@ def main(argv: list[str] | None = None) -> int:
         "profile": profile.name,
         "run": bool(ns.run),
         "ok": True,
-        "steps": [{"id": step.id, "cmd": step.cmd, "rc": None, "ok": None} for step in profile.steps],
+        "steps": [
+            {"id": step.id, "cmd": step.cmd, "rc": None, "ok": None} for step in profile.steps
+        ],
     }
 
     if not ns.run:

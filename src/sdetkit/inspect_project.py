@@ -17,6 +17,7 @@ from .review_engine import (
     investigation_confidence,
     rank_likely_issue_tracks,
 )
+from .security import SecurityError, safe_path
 
 SCHEMA_VERSION = "sdetkit.inspect.project.v1"
 EXIT_OK = 0
@@ -112,10 +113,14 @@ def _resolve_rules_payload(project_dir: Path, policy: dict[str, Any]) -> dict[st
     return {}
 
 
-def _materialize_scope(project_dir: Path, scope: dict[str, Any], run_root: Path) -> tuple[list[Path], Path]:
+def _materialize_scope(
+    project_dir: Path, scope: dict[str, Any], run_root: Path
+) -> tuple[list[Path], Path]:
     include_patterns = sorted(str(p) for p in scope.get("include", []) if str(p).strip())
     if not include_patterns:
-        raise ValueError(f"inspect-project: scope {scope.get('name', 'unknown')!r} has no include patterns")
+        raise ValueError(
+            f"inspect-project: scope {scope.get('name', 'unknown')!r} has no include patterns"
+        )
     discovered: set[Path] = set()
     for pattern in include_patterns:
         for candidate in project_dir.glob(pattern):
@@ -134,15 +139,20 @@ def _materialize_scope(project_dir: Path, scope: dict[str, Any], run_root: Path)
         dst = scope_dir / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_bytes(src.read_bytes())
-        manifest_rows.append({"source": rel.as_posix(), "copied_to": dst.relative_to(run_root).as_posix()})
+        manifest_rows.append(
+            {"source": rel.as_posix(), "copied_to": dst.relative_to(run_root).as_posix()}
+        )
     (scope_dir / "scope-input-manifest.json").write_text(
-        json.dumps({"scope": scope["name"], "files": manifest_rows}, sort_keys=True, indent=2) + "\n",
+        json.dumps({"scope": scope["name"], "files": manifest_rows}, sort_keys=True, indent=2)
+        + "\n",
         encoding="utf-8",
     )
     return files, scope_dir
 
 
-def _threshold_failures(compare_summary: dict[str, Any], thresholds: dict[str, Any]) -> list[dict[str, Any]]:
+def _threshold_failures(
+    compare_summary: dict[str, Any], thresholds: dict[str, Any]
+) -> list[dict[str, Any]]:
     failures: list[dict[str, Any]] = []
     for key in sorted(thresholds):
         limit = int(thresholds.get(key, 0))
@@ -192,9 +202,17 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         description="Run reusable project inspection policy packs over dataset families.",
     )
     p.add_argument("project_dir", help="Directory containing evidence and policy pack")
-    p.add_argument("--policy", default="inspect-project.json", help="Policy JSON file relative to project_dir")
-    p.add_argument("--workspace-root", default=".sdetkit/workspace", help="Shared evidence workspace root")
-    p.add_argument("--out-dir", default=None, help="Project output directory (default .sdetkit/inspect-project/<project-name>)")
+    p.add_argument(
+        "--policy", default="inspect-project.json", help="Policy JSON file relative to project_dir"
+    )
+    p.add_argument(
+        "--workspace-root", default=".sdetkit/workspace", help="Shared evidence workspace root"
+    )
+    p.add_argument(
+        "--out-dir",
+        default=None,
+        help="Project output directory (default .sdetkit/inspect-project/<project-name>)",
+    )
     p.add_argument("--format", choices=["text", "json"], default="text")
     p.add_argument("--no-workspace", action="store_true", help="Disable shared workspace recording")
     return p
@@ -202,9 +220,16 @@ def _build_arg_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     ns = _build_arg_parser().parse_args(argv)
-    project_dir = Path(ns.project_dir).resolve()
+    try:
+        project_dir = safe_path(Path.cwd(), ns.project_dir, allow_absolute=True).resolve()
+        workspace_root = safe_path(Path.cwd(), ns.workspace_root, allow_absolute=True)
+    except SecurityError as exc:
+        sys.stderr.write(f"inspect-project: path rejected: {exc}\n")
+        return EXIT_FINDINGS
     if not project_dir.exists() or not project_dir.is_dir():
-        sys.stderr.write(f"inspect-project: project_dir does not exist or is not a directory: {project_dir}\n")
+        sys.stderr.write(
+            f"inspect-project: project_dir does not exist or is not a directory: {project_dir}\n"
+        )
         return EXIT_FINDINGS
 
     policy_path = project_dir / ns.policy
@@ -223,7 +248,14 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write(error + "\n")
         return EXIT_FINDINGS
 
-    out_dir = Path(ns.out_dir) if ns.out_dir else Path(".sdetkit") / "inspect-project" / _safe_slug(project_dir.name)
+    if ns.out_dir:
+        try:
+            out_dir = safe_path(Path.cwd(), ns.out_dir, allow_absolute=True)
+        except SecurityError as exc:
+            sys.stderr.write(f"inspect-project: out-dir rejected: {exc}\n")
+            return EXIT_FINDINGS
+    else:
+        out_dir = Path(".sdetkit") / "inspect-project" / _safe_slug(project_dir.name)
     outputs_cfg = policy.get("outputs", {}) if isinstance(policy.get("outputs"), dict) else {}
     project_subdir = str(outputs_cfg.get("project_subdir", "")).strip()
     scope_dir_name = str(outputs_cfg.get("scope_dir", "scopes")).strip() or "scopes"
@@ -244,10 +276,16 @@ def main(argv: list[str] | None = None) -> int:
     findings: list[dict[str, Any]] = []
 
     compare_cfg = policy.get("compare", {}) if isinstance(policy.get("compare"), dict) else {}
-    thresholds = compare_cfg.get("thresholds", {}) if isinstance(compare_cfg.get("thresholds"), dict) else {}
+    thresholds = (
+        compare_cfg.get("thresholds", {}) if isinstance(compare_cfg.get("thresholds"), dict) else {}
+    )
     baseline_mode = str(compare_cfg.get("baseline", "latest_vs_previous"))
-    precedence_cfg = policy.get("precedence", {}) if isinstance(policy.get("precedence"), dict) else {}
-    weights_cfg = precedence_cfg.get("weights", {}) if isinstance(precedence_cfg.get("weights"), dict) else {}
+    precedence_cfg = (
+        policy.get("precedence", {}) if isinstance(policy.get("precedence"), dict) else {}
+    )
+    weights_cfg = (
+        precedence_cfg.get("weights", {}) if isinstance(precedence_cfg.get("weights"), dict) else {}
+    )
 
     for scope in scopes:
         scope = dict(scope)
@@ -273,7 +311,7 @@ def main(argv: list[str] | None = None) -> int:
                 input_path=scope_input_dir,
                 out_dir=inspect_out,
                 rules_payload=rules_payload,
-                workspace_root=Path(ns.workspace_root),
+                workspace_root=workspace_root,
                 record_workspace=not ns.no_workspace,
                 workspace_scope=scope_slug,
             )
@@ -320,8 +358,8 @@ def main(argv: list[str] | None = None) -> int:
             current_record = Path(inspect_payload.get("workspace", {}).get("record_path", ""))
             if ns.no_workspace or not current_record:
                 continue
-            current_record_abs = Path(ns.workspace_root) / current_record
-            manifest = _load_json(Path(ns.workspace_root) / "manifest.json")
+            current_record_abs = workspace_root / current_record
+            manifest = _load_json(workspace_root / "manifest.json")
             runs = [
                 item
                 for item in manifest.get("runs", [])
@@ -341,7 +379,7 @@ def main(argv: list[str] | None = None) -> int:
                 previous = item
             if previous is None:
                 continue
-            left_record = Path(ns.workspace_root) / str(previous.get("record_path", ""))
+            left_record = workspace_root / str(previous.get("record_path", ""))
             left_payload = _load_json(left_record).get("payload")
             right_payload = _load_json(current_record_abs).get("payload")
             if not isinstance(left_payload, dict) or not isinstance(right_payload, dict):
@@ -353,7 +391,7 @@ def main(argv: list[str] | None = None) -> int:
                 right_label=f"workspace:{current_record_abs.as_posix()}",
                 out_dir=compare_out,
                 out_scope=compare_scope,
-                workspace_root=Path(ns.workspace_root),
+                workspace_root=workspace_root,
                 record_workspace=not ns.no_workspace,
             )
             compare_runs.append(
@@ -402,7 +440,9 @@ def main(argv: list[str] | None = None) -> int:
         [
             {
                 **item,
-                "priority": int(weights_cfg.get(str(item.get("kind", "")), int(item.get("priority", 0)))),
+                "priority": int(
+                    weights_cfg.get(str(item.get("kind", "")), int(item.get("priority", 0)))
+                ),
             }
             for item in findings
         ],
@@ -414,8 +454,12 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
 
-    inspect_fail_scopes = len({f["scope"] for f in ordered_findings if f["kind"].startswith("inspect")})
-    compare_fail_scopes = len({f["scope"] for f in ordered_findings if f["kind"].startswith("compare")})
+    inspect_fail_scopes = len(
+        {f["scope"] for f in ordered_findings if f["kind"].startswith("inspect")}
+    )
+    compare_fail_scopes = len(
+        {f["scope"] for f in ordered_findings if f["kind"].startswith("compare")}
+    )
     contradiction_inputs: list[dict[str, Any]] = []
     if inspect_fail_scopes > 0:
         contradiction_inputs.append({"kind": "inspect"})
@@ -437,7 +481,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     finding_items = [
         {
-            "id": f"inspect-project:{idx+1}",
+            "id": f"inspect-project:{idx + 1}",
             "kind": str(item.get("kind", "finding")),
             "severity": "high" if str(item.get("kind", "")).startswith("compare") else "medium",
             "priority": min(70, 100 - int(item.get("priority", 0)) * 2),
@@ -457,7 +501,7 @@ def main(argv: list[str] | None = None) -> int:
     stability = 0.7
     if not ns.no_workspace:
         previous_payload, _ = load_latest_previous_payload(
-            workspace_root=Path(ns.workspace_root),
+            workspace_root=workspace_root,
             workflow="inspect-project",
             scope=_safe_slug(project_dir.name),
         )
@@ -562,13 +606,17 @@ def main(argv: list[str] | None = None) -> int:
     inspect_project_json = run_root / "inspect-project.json"
     inspect_project_txt = run_root / "inspect-project.txt"
     manifest_json = run_root / "manifest.json"
-    inspect_project_json.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    inspect_project_json.write_text(
+        json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
     inspect_project_txt.write_text(_render_text(payload), encoding="utf-8")
-    manifest_json.write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    manifest_json.write_text(
+        json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
 
     if not ns.no_workspace:
         workspace_entry = record_workspace_run(
-            workspace_root=Path(ns.workspace_root),
+            workspace_root=workspace_root,
             workflow="inspect-project",
             scope=_safe_slug(project_dir.name),
             payload=payload,
@@ -580,7 +628,9 @@ def main(argv: list[str] | None = None) -> int:
             recommendations=[f["message"] for f in ordered_findings[:10]],
         )
         payload["workspace"] = workspace_entry
-        inspect_project_json.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+        inspect_project_json.write_text(
+            json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+        )
 
     output = json.dumps(payload, sort_keys=True) if ns.format == "json" else _render_text(payload)
     sys.stdout.write(output + ("\n" if not output.endswith("\n") else ""))

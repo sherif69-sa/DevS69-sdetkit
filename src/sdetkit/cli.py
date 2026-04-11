@@ -280,7 +280,9 @@ Then use stability-aware command discovery:
     review_parser.add_argument("path")
     review_parser.add_argument("--workspace-root", default=None)
     review_parser.add_argument("--out-dir", default=None)
-    review_parser.add_argument("--profile", choices=["release", "triage", "forensics", "monitor"], default=None)
+    review_parser.add_argument(
+        "--profile", choices=["release", "triage", "forensics", "monitor"], default=None
+    )
     review_parser.add_argument(
         "--format",
         choices=["text", "json", "operator-json"],
@@ -1352,12 +1354,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_module_main("sdetkit.review", forwarded)
 
     if ns.cmd == "serve":
-        forwarded: list[str] = []
+        serve_args: list[str] = []
         if ns.host:
-            forwarded.extend(["--host", ns.host])
+            serve_args.extend(["--host", ns.host])
         if ns.port is not None:
-            forwarded.extend(["--port", str(ns.port)])
-        return _run_module_main("sdetkit.serve", forwarded)
+            serve_args.extend(["--port", str(ns.port)])
+        return _run_module_main("sdetkit.serve", serve_args)
 
     if ns.cmd == "patch":
         return _run_module_main("sdetkit.patch", ns.args)

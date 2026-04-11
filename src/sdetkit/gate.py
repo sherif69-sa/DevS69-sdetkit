@@ -168,9 +168,12 @@ def _fast_recommendations(steps: list[dict[str, Any]], failed_steps: list[str]) 
         step_id = str(step.get("id", ""))
         if step_id not in failed_steps:
             continue
-        if step_id in {"ruff_fix", "ruff_format_apply", "ruff", "ruff_format"} and _contains_missing_module(
-            step, "ruff"
-        ):
+        if step_id in {
+            "ruff_fix",
+            "ruff_format_apply",
+            "ruff",
+            "ruff_format",
+        } and _contains_missing_module(step, "ruff"):
             recommendations.append(
                 "Ruff is missing in this environment. Install dev tooling: python -m pip install -e .[dev,test]."
             )
@@ -219,7 +222,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
 
     selected_steps = [step_id for step_id in AVAILABLE_STEPS if should_run(step_id)]
     if not selected_steps:
-        payload: dict[str, Any] = {
+        empty_payload: dict[str, Any] = {
             "profile": "fast",
             "root": str(root),
             "ok": False,
@@ -231,13 +234,13 @@ def _run_fast(ns: argparse.Namespace) -> int:
             ],
         }
         text = (
-            _stable_json(payload)
+            _stable_json(empty_payload)
             if ns.format == "json" and ns.stable_json
-            else json.dumps(payload, sort_keys=True) + "\n"
+            else json.dumps(empty_payload, sort_keys=True) + "\n"
             if ns.format == "json"
-            else _format_md(payload)
+            else _format_md(empty_payload)
             if ns.format == "md"
-            else _format_text(payload)
+            else _format_text(empty_payload)
         )
         _write_output(text, ns.out)
         return 2
@@ -353,7 +356,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
         )
 
     failed = [s["id"] for s in steps if not s.get("ok", False)]
-    payload: dict[str, Any] = {
+    gate_payload: dict[str, Any] = {
         "profile": "fast",
         "root": str(root),
         "ok": not bool(failed),
@@ -362,21 +365,21 @@ def _run_fast(ns: argparse.Namespace) -> int:
     }
     recommendations = _fast_recommendations(steps, failed)
     if recommendations:
-        payload["recommendations"] = recommendations
+        gate_payload["recommendations"] = recommendations
 
     if ns.format == "json":
         if getattr(ns, "stable_json", False):
-            rendered = _stable_json(_normalize_gate_payload(payload))
+            rendered = _stable_json(_normalize_gate_payload(gate_payload))
         else:
-            rendered = json.dumps(payload, sort_keys=True) + "\n"
+            rendered = json.dumps(gate_payload, sort_keys=True) + "\n"
     elif ns.format == "md":
-        rendered = _format_md(payload)
+        rendered = _format_md(gate_payload)
     else:
-        rendered = _format_text(payload)
+        rendered = _format_text(gate_payload)
 
     _write_output(rendered, ns.out)
 
-    if payload["ok"]:
+    if gate_payload["ok"]:
         return 0
     sys.stderr.write("gate: problems found\n")
     return 2
@@ -513,7 +516,11 @@ def _run_release(ns: argparse.Namespace) -> int:
                 "Inspect available release checks by running: python -m sdetkit gate release --dry-run --format json.",
             ],
         }
-        rendered = json.dumps(payload, sort_keys=True) + "\n" if ns.format == "json" else _format_release_text(payload)
+        rendered = (
+            json.dumps(payload, sort_keys=True) + "\n"
+            if ns.format == "json"
+            else _format_release_text(payload)
+        )
         _write_output(rendered, ns.out)
         return 2
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -55,7 +56,8 @@ def normalize_cmd(parts: list[str], *, fixture_root: Path, repo_root: Path) -> l
         if part in {fixture_root_str, repo_root_str}:
             normalized.append("<repo>")
             continue
-        if part.endswith("/python") or part.endswith("\\python.exe"):
+        basename = Path(part).name.lower()
+        if re.fullmatch(r"python(\d+(?:\.\d+)*)?(\.exe)?", basename):
             normalized.append("python")
             continue
         normalized.append(part.replace(fixture_root_str, "<repo>").replace(repo_root_str, "<repo>"))

@@ -1570,15 +1570,27 @@ def _select_evidence_rows(
         selected_ids = actionable_ids
     elif include == "all":
         selected_ids = {
-            str(row.get("id", ""))
-            for row in diagnostics_rows
-            if str(row.get("id", "")).strip()
+            str(row.get("id", "")) for row in diagnostics_rows if str(row.get("id", "")).strip()
         }
     if profile == "ci":
-        allowed = {"pyproject", "ci_workflows", "security_files", "pre_commit", "deps", "clean_tree"}
+        allowed = {
+            "pyproject",
+            "ci_workflows",
+            "security_files",
+            "pre_commit",
+            "deps",
+            "clean_tree",
+        }
         selected_ids = {check_id for check_id in selected_ids if check_id in allowed}
     elif profile == "release":
-        allowed = {"pyproject", "clean_tree", "release_meta", "repo_readiness", "upgrade_audit", "ci_workflows"}
+        allowed = {
+            "pyproject",
+            "clean_tree",
+            "release_meta",
+            "repo_readiness",
+            "upgrade_audit",
+            "ci_workflows",
+        }
         selected_ids = {check_id for check_id in selected_ids if check_id in allowed}
     filtered_failed = [row for row in failed_checks if row.get("id") in selected_ids]
     filtered_controls = [row for row in passing_controls if row.get("id") in selected_ids]
@@ -1886,9 +1898,7 @@ def _write_evidence(
         json.dumps(evidence_payload, sort_keys=True, indent=2) + "\n",
         encoding="utf-8",
     )
-    (evidence_dir / "doctor-evidence.md").write_text(
-        "\n".join(evidence_lines), encoding="utf-8"
-    )
+    (evidence_dir / "doctor-evidence.md").write_text("\n".join(evidence_lines), encoding="utf-8")
     (evidence_dir / "doctor-evidence-manifest.json").write_text(
         json.dumps(manifest_payload, sort_keys=True, indent=2) + "\n",
         encoding="utf-8",
@@ -2775,7 +2785,7 @@ def main(argv: list[str] | None = None) -> int:
 
     finding_items = [
         {
-            "id": f"doctor:{row.get('id','unknown')}",
+            "id": f"doctor:{row.get('id', 'unknown')}",
             "kind": str(row.get("id", "check")),
             "severity": str(row.get("severity", "medium")),
             "priority": 70 if str(row.get("severity", "medium")) == "high" else 45,
@@ -2910,16 +2920,32 @@ def main(argv: list[str] | None = None) -> int:
         if is_json:
             output = _stable_json(data)
 
+    out_path: Path | None = None
+    out_path_display: str | None = None
     if ns.out:
-        Path(ns.out).write_text(output, encoding="utf-8")
-        data["output_path"] = str(ns.out)
+        try:
+            out_path = safe_path(root, str(ns.out), allow_absolute=True)
+        except SecurityError as exc:
+            sys.stderr.write(f"doctor: --out rejected: {exc}\n")
+            return EXIT_FAILED
+        out_path.write_text(output, encoding="utf-8")
+        out_path_display = str(ns.out)
+        data["output_path"] = out_path_display
     else:
         data["output_path"] = ""
+
+    evidence_dir: Path | None = None
+    if isinstance(ns.evidence_dir, str) and ns.evidence_dir.strip():
+        try:
+            evidence_dir = safe_path(root, ns.evidence_dir.strip(), allow_absolute=True)
+        except SecurityError as exc:
+            sys.stderr.write(f"doctor: --evidence-dir rejected: {exc}\n")
+            return EXIT_FAILED
 
     if isinstance(ns.evidence_dir, str) and ns.evidence_dir.strip():
         evidence_ok, evidence_error = _write_evidence(
             root,
-            Path(ns.evidence_dir.strip()),
+            evidence_dir if evidence_dir is not None else Path(ns.evidence_dir.strip()),
             data,
             profile=str(getattr(ns, "evidence_profile", "full")),
             include=str(getattr(ns, "evidence_include", "all")),
@@ -2939,11 +2965,21 @@ def main(argv: list[str] | None = None) -> int:
             return EXIT_FAILED
 
     if not ns.no_workspace:
+        try:
+            validated_workspace_root = safe_path(root, str(ns.workspace_root), allow_absolute=True)
+        except SecurityError as exc:
+            sys.stderr.write(f"doctor: --workspace-root rejected: {exc}\n")
+            return EXIT_FAILED
+        requested_workspace_root = Path(str(ns.workspace_root))
+        workspace_root = (
+            validated_workspace_root
+            if requested_workspace_root.is_absolute()
+            else requested_workspace_root
+        )
         workspace_artifacts: dict[str, str] = {}
-        if ns.out:
-            workspace_artifacts["doctor_output"] = str(ns.out)
-        if isinstance(ns.evidence_dir, str) and ns.evidence_dir.strip():
-            evidence_dir = Path(ns.evidence_dir.strip())
+        if out_path_display is not None:
+            workspace_artifacts["doctor_output"] = out_path_display
+        if evidence_dir is not None:
             workspace_artifacts["doctor_evidence_json"] = (
                 evidence_dir / "doctor-evidence.json"
             ).as_posix()
@@ -2954,7 +2990,7 @@ def main(argv: list[str] | None = None) -> int:
                 evidence_dir / "doctor-evidence-manifest.json"
             ).as_posix()
         workspace_entry = record_workspace_run(
-            workspace_root=Path(ns.workspace_root),
+            workspace_root=workspace_root,
             workflow="doctor",
             scope=root.name or "repo",
             payload=data,
@@ -2964,8 +3000,8 @@ def main(argv: list[str] | None = None) -> int:
         data["workspace"] = workspace_entry
         if is_json:
             output = _stable_json(data)
-            if ns.out:
-                Path(ns.out).write_text(output, encoding="utf-8")
+            if out_path is not None:
+                out_path.write_text(output, encoding="utf-8")
 
     sys.stdout.write(output)
 

@@ -64,11 +64,11 @@ def _runtime_payload(repo_root: Path) -> dict[str, Any]:
             "dockerfile": "Dockerfile.runtime",
             "default_entrypoint": "sdetkit",
             "example_contract_check": (
-                "docker run --rm -v \"$PWD\":/workspace -w /workspace sdetkit-runtime "
+                'docker run --rm -v "$PWD":/workspace -w /workspace sdetkit-runtime '
                 "contract runtime --format json"
             ),
             "example_review_operator_json": (
-                "docker run --rm -v \"$PWD\":/workspace -w /workspace sdetkit-runtime "
+                'docker run --rm -v "$PWD":/workspace -w /workspace sdetkit-runtime '
                 "review . --no-workspace --format operator-json"
             ),
         },
@@ -104,7 +104,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="SDETKit runtime/integration contracts")
     sub = parser.add_subparsers(dest="action", required=True)
 
-    runtime = sub.add_parser("runtime", help="Show adopter-focused install/run integration contract")
+    runtime = sub.add_parser(
+        "runtime", help="Show adopter-focused install/run integration contract"
+    )
     runtime.add_argument("--format", choices=["text", "json"], default="text")
     runtime.add_argument("--repo-root", default=".")
 

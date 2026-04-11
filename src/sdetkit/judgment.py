@@ -37,7 +37,9 @@ JUDGMENT_GUIDELINES: tuple[dict[str, str], ...] = (
 )
 
 
-def _select_guideline(*, status: str, priority_score: int, confidence_level: str, has_contradictions: bool) -> dict[str, str]:
+def _select_guideline(
+    *, status: str, priority_score: int, confidence_level: str, has_contradictions: bool
+) -> dict[str, str]:
     if has_contradictions:
         return dict(JUDGMENT_GUIDELINES[0])
     if status == "fail" or priority_score >= 60:
@@ -47,7 +49,6 @@ def _select_guideline(*, status: str, priority_score: int, confidence_level: str
     if status == "pass" and confidence_level == "high":
         return dict(JUDGMENT_GUIDELINES[3])
     return dict(JUDGMENT_GUIDELINES[4])
-
 
 
 def _severity_from_score(score: int) -> str:
@@ -87,8 +88,12 @@ def _top_findings(findings: list[dict[str, Any]], *, limit: int = 3) -> list[dic
     )[:limit]
 
 
-def _build_confidence(*, completeness: float, consistency: float, stability: float, drivers: list[str]) -> dict[str, Any]:
-    score = max(0.0, min(1.0, round((completeness * 0.4) + (consistency * 0.4) + (stability * 0.2), 2)))
+def _build_confidence(
+    *, completeness: float, consistency: float, stability: float, drivers: list[str]
+) -> dict[str, Any]:
+    score = max(
+        0.0, min(1.0, round((completeness * 0.4) + (consistency * 0.4) + (stability * 0.2), 2))
+    )
     return {
         "score": score,
         "level": _level_from_confidence(score),
@@ -96,7 +101,9 @@ def _build_confidence(*, completeness: float, consistency: float, stability: flo
     }
 
 
-def _recommendations_from_findings(findings: list[dict[str, Any]], *, contradictions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _recommendations_from_findings(
+    findings: list[dict[str, Any]], *, contradictions: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     recs: list[dict[str, Any]] = []
     for idx, finding in enumerate(_top_findings(findings, limit=5), start=1):
         priority = int(finding.get("priority", 0))
@@ -110,8 +117,14 @@ def _recommendations_from_findings(findings: list[dict[str, Any]], *, contradict
                 "id": f"rec-{idx}",
                 "tier": tier,
                 "priority": priority,
-                "action": str(finding.get("next_action", "Investigate high-signal evidence and update controls.")),
-                "rationale": str(finding.get("why_it_matters", "High-signal finding requires follow-up.")),
+                "action": str(
+                    finding.get(
+                        "next_action", "Investigate high-signal evidence and update controls."
+                    )
+                ),
+                "rationale": str(
+                    finding.get("why_it_matters", "High-signal finding requires follow-up.")
+                ),
                 "depends_on": list(finding.get("depends_on", [])),
             }
         )
@@ -147,7 +160,9 @@ def build_judgment(
     priority_score = min(100, sum(int(item.get("priority", 0)) for item in top))
     consistency = 1.0
     if supporting_evidence or conflicting_evidence:
-        consistency = len(supporting_evidence) / max(1, len(supporting_evidence) + len(conflicting_evidence))
+        consistency = len(supporting_evidence) / max(
+            1, len(supporting_evidence) + len(conflicting_evidence)
+        )
     drivers = [
         f"completeness={round(completeness, 2)}",
         f"consistency={round(consistency, 2)}",
@@ -221,7 +236,9 @@ def build_judgment(
     }
 
 
-def load_latest_previous_payload(*, workspace_root: Path, workflow: str, scope: str) -> tuple[dict[str, Any] | None, str | None]:
+def load_latest_previous_payload(
+    *, workspace_root: Path, workflow: str, scope: str
+) -> tuple[dict[str, Any] | None, str | None]:
     manifest_path = workspace_root / "manifest.json"
     if not manifest_path.exists():
         return None, None
@@ -238,7 +255,9 @@ def load_latest_previous_payload(*, workspace_root: Path, workflow: str, scope: 
     ]
     if not filtered:
         return None, None
-    latest = sorted(filtered, key=lambda item: (int(item.get("run_order", 0)), str(item.get("run_hash", ""))))[-1]
+    latest = sorted(
+        filtered, key=lambda item: (int(item.get("run_order", 0)), str(item.get("run_hash", "")))
+    )[-1]
     record_path = workspace_root / str(latest.get("record_path", ""))
     if not record_path.exists():
         return None, None

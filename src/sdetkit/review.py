@@ -31,6 +31,7 @@ from .review_engine import (
     rank_likely_issue_tracks,
     summarize_history_delta,
 )
+from .security import SecurityError, safe_path
 
 SCHEMA_VERSION = "sdetkit.review.v3"
 REVIEW_CONTRACT_VERSION = "sdetkit.review.contract.v1"
@@ -178,7 +179,9 @@ def _profile_packet_filename(profile_name: str) -> str:
 
 def _build_profile_packet(payload: dict[str, Any]) -> dict[str, Any]:
     profile = str(payload.get("profile", {}).get("name", "release"))
-    findings = _sorted_findings([item for item in payload.get("top_matters", []) if isinstance(item, dict)])
+    findings = _sorted_findings(
+        [item for item in payload.get("top_matters", []) if isinstance(item, dict)]
+    )
     contradictions = _sorted_findings(
         [item for item in payload.get("conflicting_evidence", []) if isinstance(item, dict)]
     )
@@ -275,7 +278,9 @@ def _build_profile_packet(payload: dict[str, Any]) -> dict[str, Any]:
             "has_previous_review": payload.get("history", {}).get("has_previous_review", False),
             "previous_review_run_hash": payload.get("history", {}).get("previous_review_run_hash"),
             "workspace_runs": [
-                item for item in payload.get("supporting_evidence", []) if item.get("kind") == "workspace_runs"
+                item
+                for item in payload.get("supporting_evidence", [])
+                if item.get("kind") == "workspace_runs"
             ],
         },
         "volatility_flags": contradictions,
@@ -344,7 +349,9 @@ def _finalize_probe_lifecycle(adaptive_plan: dict[str, Any]) -> None:
             continue
         moved = dict(row)
         moved["status"] = "skipped"
-        moved["skip_reason"] = str(row.get("skip_reason", "")) or "probe planned but not executed in deepen stage"
+        moved["skip_reason"] = (
+            str(row.get("skip_reason", "")) or "probe planned but not executed in deepen stage"
+        )
         if probe_id and probe_id in skipped_ids:
             continue
         skipped_out.append(moved)
@@ -411,7 +418,9 @@ def _workflows_for_profile(detection: dict[str, bool], profile: ReviewProfile) -
     }
 
 
-def _run_doctor(target: Path, out_dir: Path, workspace_root: Path, no_workspace: bool) -> tuple[int, dict[str, Any], Path]:
+def _run_doctor(
+    target: Path, out_dir: Path, workspace_root: Path, no_workspace: bool
+) -> tuple[int, dict[str, Any], Path]:
     doctor_json = out_dir / "doctor.json"
     args = [
         "--json",
@@ -433,7 +442,7 @@ def _run_doctor(target: Path, out_dir: Path, workspace_root: Path, no_workspace:
         try:
             rc = doctor.main(args)
         except SystemExit as exc:
-            rc = int(exc.code)
+            rc = int(exc.code) if isinstance(exc.code, int) else 1
     payload = _load_json(doctor_json)
     return int(rc), payload, doctor_json
 
@@ -450,7 +459,12 @@ def run_review(
     profile: str = "release",
     no_workspace: bool = False,
 ) -> tuple[int, dict[str, Any], Path, Path]:
-    target = target.resolve()
+    try:
+        target = safe_path(Path.cwd(), target.as_posix(), allow_absolute=True).resolve()
+        out_dir = safe_path(Path.cwd(), out_dir.as_posix(), allow_absolute=True)
+        workspace_root = safe_path(Path.cwd(), workspace_root.as_posix(), allow_absolute=True)
+    except SecurityError as exc:
+        raise ValueError(f"review: path rejected: {exc}") from exc
     if not target.exists():
         raise ValueError(f"review: path does not exist: {target}")
 
@@ -459,10 +473,14 @@ def run_review(
     workflow_plan = _workflows_for_profile(detection, selected_profile)
     review_scope = _review_scope_for_target(target)
     out_dir.mkdir(parents=True, exist_ok=True)
-    probe_memory = _load_probe_memory(workspace_root=workspace_root, scope=review_scope) if not no_workspace else {
-        "schema_version": "sdetkit.review.probe-memory.v1",
-        "probes": {},
-    }
+    probe_memory = (
+        _load_probe_memory(workspace_root=workspace_root, scope=review_scope)
+        if not no_workspace
+        else {
+            "schema_version": "sdetkit.review.probe-memory.v1",
+            "probes": {},
+        }
+    )
 
     source_workflows: list[dict[str, Any]] = []
     supporting: list[dict[str, Any]] = []
@@ -541,7 +559,12 @@ def run_review(
         inspect_status = "ok" if inspect_rc == 0 else "findings"
         source_workflows.append({"workflow": "inspect", "status": inspect_status})
         baseline_stage["checks_run"].append({"check": "inspect", "status": inspect_status})
-        supporting.append({"kind": "inspect_files", "value": inspect_payload.get("summary", {}).get("files_analyzed", 0)})
+        supporting.append(
+            {
+                "kind": "inspect_files",
+                "value": inspect_payload.get("summary", {}).get("files_analyzed", 0),
+            }
+        )
         if inspect_rc == 0:
             healthy_controls.append("inspect evidence diagnostics are stable")
         else:
@@ -575,16 +598,21 @@ def run_review(
                 str(project_out),
                 "--format",
                 "json",
-                *( ["--no-workspace"] if no_workspace else []),
+                *(["--no-workspace"] if no_workspace else []),
             ]
         )
-        payload = _load_json(project_out / "inspect-project.json")
+        project_payload = _load_json(project_out / "inspect-project.json")
         artifact_index["inspect_project_json"] = (project_out / "inspect-project.json").as_posix()
         artifact_index["inspect_project_txt"] = (project_out / "inspect-project.txt").as_posix()
         project_status = "ok" if rc == 0 else "findings"
         source_workflows.append({"workflow": "inspect-project", "status": project_status})
         baseline_stage["checks_run"].append({"check": "inspect-project", "status": project_status})
-        supporting.append({"kind": "inspect_project_scopes", "value": payload.get("summary", {}).get("scopes", 0)})
+        supporting.append(
+            {
+                "kind": "inspect_project_scopes",
+                "value": project_payload.get("summary", {}).get("scopes", 0),
+            }
+        )
         if rc != 0:
             findings.append(
                 {
@@ -633,7 +661,12 @@ def run_review(
     adaptive_plan["probe_registry"] = probe_decision["registry"]
     adaptive_plan["probe_budget"] = probe_decision["budget"]
 
-    if inspect_payload and "inspect-compare" in deepen_checks and escalation.needed and not no_workspace:
+    if (
+        inspect_payload
+        and "inspect-compare" in deepen_checks
+        and escalation.needed
+        and not no_workspace
+    ):
         scope = _review_scope_for_target(target)
         previous_inspect, _ = load_latest_previous_payload(
             workspace_root=workspace_root,
@@ -689,7 +722,9 @@ def run_review(
                 row["status"] = "executed"
                 row["result"] = "ok"
 
-    weighted_findings = [{**item, "priority": profile_weighted_priority(item, selected_profile)} for item in findings]
+    weighted_findings = [
+        {**item, "priority": profile_weighted_priority(item, selected_profile)} for item in findings
+    ]
     weighted_conflicts = [
         {
             **item,
@@ -699,11 +734,17 @@ def run_review(
     ]
     contradiction_count = len(conflicting)
     contradiction_boost = contradiction_count * selected_profile.contradiction_weight
-    effective_max_priority = max([0, *(int(item.get("priority", 0)) for item in weighted_findings)]) + contradiction_boost
+    effective_max_priority = (
+        max([0, *(int(item.get("priority", 0)) for item in weighted_findings)])
+        + contradiction_boost
+    )
     completeness = min(1.0, max(0.2, len(source_workflows) / 5.0))
     stability = 0.7 if conflicting else 0.85
     workflow_ok = len(weighted_findings) == 0
-    blocking = effective_max_priority >= selected_profile.fail_threshold or contradiction_count >= selected_profile.contradiction_fail_count
+    blocking = (
+        effective_max_priority >= selected_profile.fail_threshold
+        or contradiction_count >= selected_profile.contradiction_fail_count
+    )
 
     review_judgment = build_judgment(
         workflow="review",
@@ -716,9 +757,15 @@ def run_review(
         workflow_ok=workflow_ok,
         blocking=blocking,
     )
-    if effective_max_priority >= selected_profile.fail_threshold or contradiction_count >= selected_profile.contradiction_fail_count:
+    if (
+        effective_max_priority >= selected_profile.fail_threshold
+        or contradiction_count >= selected_profile.contradiction_fail_count
+    ):
         profile_status = "fail"
-    elif effective_max_priority >= selected_profile.watch_threshold or contradiction_count >= selected_profile.contradiction_watch_count:
+    elif (
+        effective_max_priority >= selected_profile.watch_threshold
+        or contradiction_count >= selected_profile.contradiction_watch_count
+    ):
         profile_status = "watch"
     else:
         profile_status = "pass"
@@ -738,7 +785,9 @@ def run_review(
         "effective_max_priority": effective_max_priority,
     }
     confidence = dict(review_judgment.get("confidence", {}))
-    confidence["level"] = profile_confidence_level(float(confidence.get("score", 0.0)), selected_profile)
+    confidence["level"] = profile_confidence_level(
+        float(confidence.get("score", 0.0)), selected_profile
+    )
     confidence["profile_thresholds"] = {
         "high": selected_profile.confidence_high,
         "medium": selected_profile.confidence_medium,
@@ -769,7 +818,9 @@ def run_review(
         "profile": {
             "name": selected_profile.name,
             "summary_style": selected_profile.summary_style,
-            "orchestration_depth": "deep" if selected_profile.name in {"release", "forensics"} else "focused",
+            "orchestration_depth": "deep"
+            if selected_profile.name in {"release", "forensics"}
+            else "focused",
             "workflow_plan": workflow_plan,
             "urgency_thresholds": {
                 "now": selected_profile.urgency_now_threshold,
@@ -836,7 +887,11 @@ def run_review(
         findings=weighted_findings,
         conflicts=weighted_conflicts,
         likely_tracks=likely_tracks,
-        executed_probes=[row for row in adaptive_plan.get("executed_probes", []) if row.get("status") == "executed"],
+        executed_probes=[
+            row
+            for row in adaptive_plan.get("executed_probes", [])
+            if row.get("status") == "executed"
+        ],
     )
     payload["adaptive_review"]["probe_feedback"] = probe_feedback
     payload["adaptive_review"]["probe_rationale"] = [
@@ -848,7 +903,9 @@ def run_review(
         if isinstance(row, dict)
     ]
     normalized_probe_outcomes = normalize_probe_execution_outcomes(
-        executed_probes=[row for row in adaptive_plan.get("executed_probes", []) if isinstance(row, dict)],
+        executed_probes=[
+            row for row in adaptive_plan.get("executed_probes", []) if isinstance(row, dict)
+        ],
         findings=weighted_findings,
         conflicts=weighted_conflicts,
     )
@@ -873,7 +930,9 @@ def run_review(
                 }
                 break
     payload["evidence_edges"] = build_typed_evidence_edges(
-        executed_probes=[row for row in adaptive_plan.get("executed_probes", []) if isinstance(row, dict)],
+        executed_probes=[
+            row for row in adaptive_plan.get("executed_probes", []) if isinstance(row, dict)
+        ],
         conflicts=weighted_conflicts,
         findings=weighted_findings,
         tracks=payload["likely_issue_tracks"],
@@ -883,7 +942,9 @@ def run_review(
         findings=weighted_findings,
         conflicts=weighted_conflicts,
     )
-    final_confidence = round(max(0.0, min(1.0, final_confidence + float(probe_feedback.get("confidence_delta", 0.0)))), 2)
+    final_confidence = round(
+        max(0.0, min(1.0, final_confidence + float(probe_feedback.get("confidence_delta", 0.0)))), 2
+    )
     adaptive_plan["stop_decision"] = decide_stop(
         final_confidence=final_confidence,
         confidence_threshold=selected_profile.confidence_medium,
@@ -908,10 +969,18 @@ def run_review(
     artifact_index["review_tracks_json"] = review_tracks_path.as_posix()
     payload["artifact_index"] = artifact_index
     payload["operator_summary"]["artifacts"] = artifact_index
-    packet_json_path.write_text(json.dumps(profile_packet, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    operator_json_path.write_text(json.dumps(payload["operator_summary"], sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    review_plan_path.write_text(json.dumps(adaptive_plan, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    review_tracks_path.write_text(json.dumps({"tracks": likely_tracks}, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    packet_json_path.write_text(
+        json.dumps(profile_packet, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
+    operator_json_path.write_text(
+        json.dumps(payload["operator_summary"], sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
+    review_plan_path.write_text(
+        json.dumps(adaptive_plan, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
+    review_tracks_path.write_text(
+        json.dumps({"tracks": likely_tracks}, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
     json_path.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     txt_path.write_text(_render_text(payload), encoding="utf-8")
 
@@ -929,7 +998,11 @@ def run_review(
             scope=review_scope,
             payload=payload,
             artifacts={"review_json": json_path.as_posix(), "review_text": txt_path.as_posix()},
-            recommendations=[str(item.get("action", "")) for item in payload.get("prioritized_actions", []) if isinstance(item, dict)],
+            recommendations=[
+                str(item.get("action", ""))
+                for item in payload.get("prioritized_actions", [])
+                if isinstance(item, dict)
+            ],
         )
         payload["workspace"] = workspace_entry
         json_path.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
@@ -946,7 +1019,11 @@ def _render_text(payload: dict[str, Any]) -> str:
     profile_name = str(profile.get("name", "release")) if isinstance(profile, dict) else "release"
     max_matters = 5
     if isinstance(profile, dict):
-        max_matters = int(REVIEW_PROFILES.get(str(profile.get("name", "")), REVIEW_PROFILES["release"]).max_text_matters)
+        max_matters = int(
+            REVIEW_PROFILES.get(
+                str(profile.get("name", "")), REVIEW_PROFILES["release"]
+            ).max_text_matters
+        )
     lines: list[str] = [
         f"SDETKit review: {payload['review_status']}",
         f"profile: {profile_name} style: {profile.get('summary_style', 'release-gate')}",
@@ -1035,7 +1112,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         lines.append(f"- escalation_needed: {escalation.get('needed')}")
         for reason in escalation.get("reasons", [])[:3]:
             lines.append(f"  - reason: {reason}")
-        lines.append(f"- probes_executed: {len([p for p in adaptive.get('executed_probes', []) if p.get('status') == 'executed'])}")
+        lines.append(
+            f"- probes_executed: {len([p for p in adaptive.get('executed_probes', []) if p.get('status') == 'executed'])}"
+        )
         lines.append(f"- stop: {stop.get('stop')}")
         lines.append(f"- stop_reason: {stop.get('reason')}")
     tracks = payload.get("likely_issue_tracks", [])
@@ -1059,7 +1138,9 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
     executed_probes = []
     if isinstance(adaptive, dict):
         executed_probes = [
-            row for row in adaptive.get("executed_probes", []) if isinstance(row, dict) and row.get("status") == "executed"
+            row
+            for row in adaptive.get("executed_probes", [])
+            if isinstance(row, dict) and row.get("status") == "executed"
         ]
     thresholds = payload.get("judgment", {}).get("profile_thresholds", {})
     if not isinstance(thresholds, dict):
@@ -1082,7 +1163,9 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
             f"Top likely issue track is '{top_track.get('track')}' with likelihood {top_track.get('likelihood')}."
         )
     if conflicts:
-        rationale.append(f"{len(conflicts)} contradiction signal(s) require verification before full trust.")
+        rationale.append(
+            f"{len(conflicts)} contradiction signal(s) require verification before full trust."
+        )
     actions = [row for row in payload.get("prioritized_actions", []) if isinstance(row, dict)]
     return {
         "contract_version": REVIEW_CONTRACT_VERSION,
@@ -1096,7 +1179,9 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
             "executed_probes_count": len(executed_probes),
         },
         "judgment_rationale": rationale,
-        "changed_since_previous": [row for row in payload.get("changed_since_previous", []) if isinstance(row, dict)][:5],
+        "changed_since_previous": [
+            row for row in payload.get("changed_since_previous", []) if isinstance(row, dict)
+        ][:5],
         "actions": {
             "now": [row for row in actions if row.get("tier") == "now"][:5],
             "next": [row for row in actions if row.get("tier") == "next"][:5],
@@ -1124,7 +1209,9 @@ def _run_interactive_review(payload: dict[str, Any]) -> None:
         "8": ("artifacts", operator.get("artifacts", {})),
     }
     sys.stdout.write("SDETKit interactive review navigator\n")
-    sys.stdout.write("Choose section: [1] situation [2] why [3] changed [4] actions [5] tracks [6] contradictions [7] probes [8] artifacts [q] quit\n")
+    sys.stdout.write(
+        "Choose section: [1] situation [2] why [3] changed [4] actions [5] tracks [6] contradictions [7] probes [8] artifacts [q] quit\n"
+    )
     while True:
         sys.stdout.write("> ")
         sys.stdout.flush()
@@ -1150,7 +1237,9 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("path", help="Repo/data/project/workspace path to review")
     p.add_argument("--workspace-root", default=".sdetkit/workspace", help="Shared workspace root")
-    p.add_argument("--out-dir", default=None, help="Output directory (default: .sdetkit/review/<path-slug>)")
+    p.add_argument(
+        "--out-dir", default=None, help="Output directory (default: .sdetkit/review/<path-slug>)"
+    )
     p.add_argument(
         "--profile",
         default="release",
@@ -1171,19 +1260,30 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Open an interactive operator navigator after review completes.",
     )
-    p.add_argument("--no-workspace", action="store_true", help="Disable workspace history recording")
+    p.add_argument(
+        "--no-workspace", action="store_true", help="Disable workspace history recording"
+    )
     return p
 
 
 def main(argv: list[str] | None = None) -> int:
     ns = _build_arg_parser().parse_args(argv)
-    target = Path(ns.path)
-    out_dir = Path(ns.out_dir) if ns.out_dir else Path(".sdetkit") / "review" / _safe_slug(target.resolve().name)
+    try:
+        target = safe_path(Path.cwd(), ns.path, allow_absolute=True)
+        out_dir = (
+            safe_path(Path.cwd(), ns.out_dir, allow_absolute=True)
+            if ns.out_dir
+            else Path(".sdetkit") / "review" / _safe_slug(target.resolve().name)
+        )
+        workspace_root = safe_path(Path.cwd(), ns.workspace_root, allow_absolute=True)
+    except SecurityError as exc:
+        sys.stderr.write(f"review: path rejected: {exc}\n")
+        return EXIT_FINDINGS
     try:
         rc, payload, _, _ = run_review(
             target=target,
             out_dir=out_dir,
-            workspace_root=Path(ns.workspace_root),
+            workspace_root=workspace_root,
             profile=ns.profile,
             no_workspace=ns.no_workspace,
         )

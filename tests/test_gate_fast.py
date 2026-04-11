@@ -287,4 +287,3 @@ def test_gate_fast_fails_when_no_steps_are_enabled(tmp_path: Path) -> None:
     assert payload["failed_steps"] == ["configuration"]
     assert payload["steps"] == []
     assert payload["recommendations"][0].startswith("No gate steps are enabled.")
-

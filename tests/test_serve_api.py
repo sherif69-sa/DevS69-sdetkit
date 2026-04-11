@@ -11,7 +11,9 @@ from sdetkit import cli, serve
 
 def _post_json(url: str, payload: dict[str, object]) -> tuple[int, dict[str, object]]:
     data = json.dumps(payload, sort_keys=True).encode("utf-8")
-    req = urllib.request.Request(url, data=data, method="POST", headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(
+        url, data=data, method="POST", headers={"Content-Type": "application/json"}
+    )
     with urllib.request.urlopen(req) as resp:  # noqa: S310 - local server in test
         body = json.loads(resp.read().decode("utf-8"))
         return int(resp.status), body
