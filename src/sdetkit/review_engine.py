@@ -5,6 +5,17 @@ from typing import Any
 
 
 @dataclass(frozen=True)
+class ProbeDefinition:
+    probe_id: str
+    requires: str
+    min_score: int
+    cost: int
+    max_chain_depth: int
+    bounded_contract: dict[str, Any]
+    reason: str
+
+
+@dataclass(frozen=True)
 class AdaptiveEscalationDecision:
     needed: bool
     reasons: tuple[str, ...]
@@ -251,37 +262,105 @@ def plan_adaptive_probes(
     has_previous_review: bool,
     changed: list[dict[str, Any]],
     max_probes: int = 2,
-) -> dict[str, list[dict[str, Any]]]:
+    budget_total: int = 100,
+    confidence_score: float = 0.0,
+    confidence_threshold: float = 0.7,
+) -> dict[str, Any]:
     contradictory = len(contradiction_graph.get("flat_contradictions", []))
     cluster_pressure = len(contradiction_graph.get("clusters", []))
     finding_pressure = sum(max(0, int(item.get("priority", 0))) for item in findings)
     history_pressure = len([row for row in changed if str(row.get("kind")) in {"status", "severity"}])
-    candidates = [
-        {
-            "probe_id": "probe:inspect-compare",
-            "requires": "inspect_compare_available",
-            "score": (35 if contradictory else 0)
-            + (cluster_pressure * 12)
-            + (finding_pressure // 6)
-            + (15 if has_previous_review else 0),
-            "reason": "Resolve whether recent evidence drift explains current contradictions/findings.",
-        },
-        {
-            "probe_id": "probe:workspace-history",
-            "requires": "workspace_like",
-            "score": (20 if contradictory else 0) + (history_pressure * 20) + (10 if profile_name == "forensics" else 0),
-            "reason": "Use repeated-run history to verify whether risk is persistent or newly introduced.",
-        },
+    registry = [
+        ProbeDefinition(
+            probe_id="probe:inspect-compare",
+            requires="inspect_compare_available",
+            min_score=25,
+            cost=55,
+            max_chain_depth=2,
+            bounded_contract={"max_runtime_seconds": 20, "max_artifacts": 2, "max_input_payloads": 2},
+            reason="Resolve whether recent evidence drift explains current contradictions/findings.",
+        ),
+        ProbeDefinition(
+            probe_id="probe:workspace-history",
+            requires="workspace_like",
+            min_score=25,
+            cost=30,
+            max_chain_depth=2,
+            bounded_contract={"max_runtime_seconds": 10, "max_artifacts": 1, "max_manifest_entries": 200},
+            reason="Use repeated-run history to verify whether risk is persistent or newly introduced.",
+        ),
     ]
+    candidates: list[dict[str, Any]] = []
+    for probe in registry:
+        score = 0
+        score_inputs: list[dict[str, Any]] = []
+        if probe.probe_id == "probe:inspect-compare":
+            score += 35 if contradictory else 0
+            score_inputs.append({"input": "contradictions_present", "value": contradictory, "weight": 35})
+            score += cluster_pressure * 12
+            score_inputs.append({"input": "cluster_pressure", "value": cluster_pressure, "weight": 12})
+            score += finding_pressure // 6
+            score_inputs.append({"input": "finding_pressure", "value": finding_pressure, "weight": "1/6"})
+            score += 15 if has_previous_review else 0
+            score_inputs.append({"input": "has_previous_review", "value": has_previous_review, "weight": 15})
+        elif probe.probe_id == "probe:workspace-history":
+            score += 20 if contradictory else 0
+            score_inputs.append({"input": "contradictions_present", "value": contradictory, "weight": 20})
+            score += history_pressure * 20
+            score_inputs.append({"input": "history_pressure", "value": history_pressure, "weight": 20})
+            score += 10 if profile_name == "forensics" else 0
+            score_inputs.append({"input": "forensics_profile", "value": profile_name == "forensics", "weight": 10})
+            score += 8 if confidence_score < confidence_threshold else 0
+            score_inputs.append(
+                {
+                    "input": "confidence_gap",
+                    "value": round(confidence_threshold - confidence_score, 2),
+                    "weight": 8,
+                }
+            )
+        candidates.append(
+            {
+                "probe_id": probe.probe_id,
+                "requires": probe.requires,
+                "score": score,
+                "score_inputs": score_inputs,
+                "reason": probe.reason,
+                "cost": probe.cost,
+                "min_score": probe.min_score,
+                "max_chain_depth": probe.max_chain_depth,
+                "bounded_contract": probe.bounded_contract,
+            }
+        )
     executed: list[dict[str, Any]] = []
     skipped: list[dict[str, Any]] = []
+    budget_spent = 0
+    chain_depth = 0
+    chain_enabled = contradictory > 0 or cluster_pressure > 0
     for row in sorted(candidates, key=lambda item: (-int(item["score"]), str(item["probe_id"]))):
         requires = str(row["requires"])
         enabled = bool(detection.get("workspace_like")) if requires == "workspace_like" else bool(
             detection.get("data_like")
         )
-        should_run = enabled and int(row["score"]) >= 25 and len(executed) < max_probes
+        affordable = (budget_spent + int(row["cost"])) <= budget_total
+        enough_score = int(row["score"]) >= int(row["min_score"])
+        within_chain = chain_depth < int(row["max_chain_depth"])
+        should_run = enabled and enough_score and len(executed) < max_probes and affordable and within_chain
         target = executed if should_run else skipped
+        if should_run:
+            budget_spent += int(row["cost"])
+            chain_depth += 1 if chain_enabled else 0
+        skip_reason = ""
+        if not should_run:
+            if not enabled:
+                skip_reason = "probe preconditions missing"
+            elif not enough_score:
+                skip_reason = "probe score below deterministic minimum"
+            elif not affordable:
+                skip_reason = "probe budget exhausted by higher-value probes"
+            elif not within_chain:
+                skip_reason = "probe chain depth limit reached"
+            else:
+                skip_reason = "probe count limit reached"
         target.append(
             {
                 "probe_id": row["probe_id"],
@@ -289,10 +368,97 @@ def plan_adaptive_probes(
                 "reason": row["reason"],
                 "requires": requires,
                 "status": "planned" if should_run else "skipped",
-                "skip_reason": "" if should_run else ("probe preconditions missing or score below threshold"),
+                "skip_reason": skip_reason,
+                "score_inputs": row["score_inputs"],
+                "cost": int(row["cost"]),
+                "budget_before": budget_spent - int(row["cost"]) if should_run else budget_spent,
+                "budget_after": budget_spent if should_run else budget_spent,
+                "bounded_contract": row["bounded_contract"],
+                "chain": {
+                    "enabled": chain_enabled,
+                    "step": chain_depth if should_run else None,
+                    "max_depth": int(row["max_chain_depth"]),
+                },
             }
         )
-    return {"executed_probes": executed, "skipped_probes": skipped}
+    return {
+        "executed_probes": executed,
+        "skipped_probes": skipped,
+        "registry": [
+            {
+                "probe_id": row["probe_id"],
+                "requires": row["requires"],
+                "min_score": int(row["min_score"]),
+                "cost": int(row["cost"]),
+                "bounded_contract": row["bounded_contract"],
+            }
+            for row in sorted(candidates, key=lambda item: str(item["probe_id"]))
+        ],
+        "budget": {
+            "total": budget_total,
+            "spent": budget_spent,
+            "remaining": max(0, budget_total - budget_spent),
+            "max_probes": max_probes,
+            "chain_enabled": chain_enabled,
+            "stop_reason": (
+                "budget exhausted"
+                if budget_spent >= budget_total
+                else "confidence sufficient"
+                if confidence_score >= confidence_threshold
+                else "probe selection completed"
+            ),
+        },
+    }
+
+
+def build_typed_evidence_edges(
+    *,
+    executed_probes: list[dict[str, Any]],
+    conflicts: list[dict[str, Any]],
+    findings: list[dict[str, Any]],
+    tracks: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    edges: list[dict[str, Any]] = []
+    for probe in executed_probes:
+        if not isinstance(probe, dict):
+            continue
+        probe_id = str(probe.get("probe_id", "probe:unknown"))
+        result = str(probe.get("result", "unknown"))
+        if conflicts:
+            for conflict in conflicts[:2]:
+                edges.append(
+                    {
+                        "edge_id": f"{probe_id}->{conflict.get('id', 'conflict:unknown')}",
+                        "relation": "conflicts",
+                        "from": probe_id,
+                        "to": str(conflict.get("id", "conflict:unknown")),
+                        "why": "Probe result observed contradictory signal pressure.",
+                    }
+                )
+        if findings and result == "findings":
+            for finding in findings[:2]:
+                edges.append(
+                    {
+                        "edge_id": f"{probe_id}->{finding.get('id', 'finding:unknown')}",
+                        "relation": "supports",
+                        "from": probe_id,
+                        "to": str(finding.get("id", "finding:unknown")),
+                        "why": "Probe result reinforced an active finding.",
+                    }
+                )
+        if tracks and result == "ok":
+            first_track = tracks[0]
+            if isinstance(first_track, dict):
+                edges.append(
+                    {
+                        "edge_id": f"{probe_id}->{first_track.get('track_id', 'track:unknown')}",
+                        "relation": "neutral",
+                        "from": probe_id,
+                        "to": str(first_track.get("track_id", "track:unknown")),
+                        "why": "Probe completed without adding risk pressure.",
+                    }
+                )
+    return sorted(edges, key=lambda item: str(item.get("edge_id", "")))
 
 
 def apply_probe_result_feedback(
