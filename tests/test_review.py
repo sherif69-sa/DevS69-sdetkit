@@ -36,6 +36,9 @@ def test_review_repeated_run_tracks_changes_and_compare_artifacts(tmp_path: Path
     assert payload2["history"]["has_previous_review"] is True
     assert payload2["changed_since_previous"][0]["kind"] in {"status", "severity", "action_pressure", "stable"}
     assert "inspect_compare_json" in payload2["artifact_index"]
+    assert payload2["adaptive_review"]["escalation"]["needed"] is True
+    assert "review_plan_json" in payload2["artifact_index"]
+    assert "review_tracks_json" in payload2["artifact_index"]
 
 
 def test_review_repo_plus_data_surfaces_cross_surface_conflict(tmp_path: Path) -> None:
@@ -55,6 +58,7 @@ def test_review_repo_plus_data_surfaces_cross_surface_conflict(tmp_path: Path) -
     assert payload["detection"]["repo_like"] is True
     assert payload["detection"]["data_like"] is True
     assert payload["conflicting_evidence"]
+    assert payload["adaptive_review"]["escalation"]["needed"] is True
 
 
 def test_cli_review_command_outputs_json(tmp_path: Path) -> None:
@@ -114,8 +118,8 @@ def test_review_profiles_change_judgment_and_artifacts_for_same_input(tmp_path: 
     assert monitor_payload["profile"]["packet_type"] == "trend_watch"
     assert release_payload["artifact_index"]["profile_packet_json"].endswith("release-decision.json")
     assert monitor_payload["artifact_index"]["profile_packet_json"].endswith("trend-watch.json")
-    assert "inspect_compare_json" in release_payload["artifact_index"]
-    assert "inspect_compare_json" in monitor_payload["artifact_index"]
+    assert "review_plan_json" in release_payload["artifact_index"]
+    assert "review_tracks_json" in monitor_payload["artifact_index"]
     release_now = [item for item in release_payload["prioritized_actions"] if item.get("tier") == "now"]
     monitor_now = [item for item in monitor_payload["prioritized_actions"] if item.get("tier") == "now"]
     assert len(release_now) >= len(monitor_now)
@@ -149,3 +153,41 @@ def test_review_profile_packets_and_text_are_profile_specific(tmp_path: Path) ->
         assert payload["artifact_index"]["profile_packet_json"] == packet_path.as_posix()
         text = txt_path.read_text(encoding="utf-8")
         assert marker in text
+        assert "adaptive_review:" in text
+        assert "likely_issue_tracks:" in text
+
+
+def test_review_clean_evidence_stops_early_without_deepen_stage(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    data = tmp_path / "clean.csv"
+    out = tmp_path / "out-clean"
+    data.write_text("id,status\nA1,ok\n", encoding="utf-8")
+
+    rc, payload, _, _ = review.run_review(
+        target=data,
+        out_dir=out,
+        workspace_root=workspace,
+    )
+
+    assert rc == 0
+    assert payload["adaptive_review"]["escalation"]["needed"] is False
+    assert payload["adaptive_review"]["stop_decision"]["stop"] is True
+    assert "inspect_compare_json" not in payload["artifact_index"]
+
+
+def test_review_tracks_ranked_with_supporting_and_conflicting_evidence(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    workspace = tmp_path / "workspace"
+    out = tmp_path / "out"
+    repo.mkdir()
+    (repo / "pyproject.toml").write_text("[project]\nname='demo'\nversion='0.1.0'\n", encoding="utf-8")
+    (repo / "events.csv").write_text("id,type\nE1,open\nE1,open\n", encoding="utf-8")
+
+    rc, payload, _, _ = review.run_review(target=repo, out_dir=out, workspace_root=workspace)
+
+    assert rc == 2
+    tracks = payload["likely_issue_tracks"]
+    assert tracks
+    assert tracks[0]["supporting_evidence"]
+    assert "verification_steps" in tracks[0]
+    assert isinstance(tracks[0]["conflicting_evidence"], list)
