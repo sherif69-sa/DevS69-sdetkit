@@ -59,6 +59,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "release-narrative" not in out
     assert "trust-assets" in out
     assert "feature-registry" in out
+    assert "contract" in out
     assert "trust-signal-upgrade" not in out
     assert "objection-handling" in out
     assert "faq-objections" not in out

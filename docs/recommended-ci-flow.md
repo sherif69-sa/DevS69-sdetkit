@@ -42,6 +42,9 @@ jobs:
       - name: Install project + CI extras
         run: python -m pip install -e .[dev,test,docs]
 
+      - name: Runtime contract preflight (stable install/run surface)
+        run: python -m sdetkit contract runtime --format json
+
       - name: Fast gate
         run: bash ci.sh quick --skip-docs --artifact-dir build
 
@@ -104,6 +107,16 @@ jobs:
 - `build/release-preflight.json`
 - `build/gate-fast.json`
 - `build/security-enforce.json`
+
+## Optional containerized invocation path
+
+If your org runs CLI tools in containers, use `Dockerfile.runtime` and keep command invocation stable:
+
+```bash
+docker build -f Dockerfile.runtime -t sdetkit-runtime .
+docker run --rm -v "$PWD":/workspace -w /workspace sdetkit-runtime contract runtime --format json
+docker run --rm -v "$PWD":/workspace -w /workspace sdetkit-runtime review . --no-workspace --format operator-json
+```
 
 Current workflow upload names in this repo:
 - `ci-gate-diagnostics-py3.11`

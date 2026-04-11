@@ -1,0 +1,20 @@
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /opt/sdetkit
+
+RUN groupadd -r sdetkit && useradd -r -g sdetkit -u 10001 sdetkit
+
+COPY pyproject.toml README.md LICENSE /opt/sdetkit/
+COPY src /opt/sdetkit/src
+
+RUN python -m pip install --no-cache-dir --upgrade pip \
+ && python -m pip install --no-cache-dir .
+
+USER sdetkit
+WORKDIR /workspace
+
+ENTRYPOINT ["sdetkit"]
+CMD ["--help"]

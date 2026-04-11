@@ -47,6 +47,22 @@ python -m pip install .
 python -m sdetkit --help
 ```
 
+## Runtime contract check (adopters and CI)
+
+Use the adopter-focused runtime contract command to discover stable install/run surfaces:
+
+```bash
+python -m sdetkit contract runtime --format json
+```
+
+This prints:
+- `runtime_contract_version` (versioned install/run contract identifier)
+- canonical first path commands
+- stable machine output contract details for `review --format operator-json`
+- container runtime invocation examples
+
+Use this as a first CI/script check before running gates.
+
 ## External repository usage (canonical handoff)
 
 From the root of the repository you want to gate:

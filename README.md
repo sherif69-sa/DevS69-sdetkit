@@ -120,6 +120,7 @@ python -m sdetkit review . --no-workspace --format operator-json | jq '{status: 
 ## Start here (canonical first path)
 
 - Install (canonical): [`docs/install.md`](docs/install.md)
+- Container runtime adoption: [`docs/container-runtime.md`](docs/container-runtime.md)
 - Blank repo proof in 60 seconds (recommended first run): [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
 - Guided run (same canonical path): [`docs/ready-to-use.md`](docs/ready-to-use.md)
 - Release-confidence model (why this product exists): [`docs/release-confidence.md`](docs/release-confidence.md)
