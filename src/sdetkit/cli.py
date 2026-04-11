@@ -281,6 +281,7 @@ Then use stability-aware command discovery:
     review_parser.add_argument("--out-dir", default=None)
     review_parser.add_argument("--profile", choices=["release", "triage", "forensics", "monitor"], default=None)
     review_parser.add_argument("--format", choices=["text", "json"], default=None)
+    review_parser.add_argument("--interactive", action="store_true")
     review_parser.add_argument("--no-workspace", action="store_true")
 
     ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
@@ -1320,6 +1321,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             forwarded.extend(["--profile", ns.profile])
         if ns.format:
             forwarded.extend(["--format", ns.format])
+        if ns.interactive:
+            forwarded.append("--interactive")
         if ns.no_workspace:
             forwarded.append("--no-workspace")
         return _run_module_main("sdetkit.review", forwarded)
