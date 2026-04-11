@@ -56,10 +56,17 @@ def record_workspace_run(
     artifacts: dict[str, str],
     recommendations: list[str],
 ) -> dict[str, Any]:
+    raw_workspace_root = workspace_root
     try:
-        workspace_root = safe_path(Path.cwd(), workspace_root.as_posix(), allow_absolute=True)
+        validated_workspace_root = safe_path(
+            Path.cwd(), raw_workspace_root.as_posix(), allow_absolute=True
+        )
     except SecurityError as exc:
         raise ValueError(f"workspace root rejected: {exc}") from exc
+    if raw_workspace_root.is_absolute():
+        workspace_root = validated_workspace_root
+    else:
+        workspace_root = validated_workspace_root.relative_to(Path.cwd().resolve())
 
     workflow_slug = _safe_slug(workflow)
     scope_slug = _safe_slug(scope)

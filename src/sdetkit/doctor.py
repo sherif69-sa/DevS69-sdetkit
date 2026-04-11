@@ -2921,6 +2921,7 @@ def main(argv: list[str] | None = None) -> int:
             output = _stable_json(data)
 
     out_path: Path | None = None
+    out_path_display: str | None = None
     if ns.out:
         try:
             out_path = safe_path(root, str(ns.out), allow_absolute=True)
@@ -2928,7 +2929,8 @@ def main(argv: list[str] | None = None) -> int:
             sys.stderr.write(f"doctor: --out rejected: {exc}\n")
             return EXIT_FAILED
         out_path.write_text(output, encoding="utf-8")
-        data["output_path"] = out_path.as_posix()
+        out_path_display = str(ns.out)
+        data["output_path"] = out_path_display
     else:
         data["output_path"] = ""
 
@@ -2964,13 +2966,19 @@ def main(argv: list[str] | None = None) -> int:
 
     if not ns.no_workspace:
         try:
-            workspace_root = safe_path(root, str(ns.workspace_root), allow_absolute=True)
+            validated_workspace_root = safe_path(root, str(ns.workspace_root), allow_absolute=True)
         except SecurityError as exc:
             sys.stderr.write(f"doctor: --workspace-root rejected: {exc}\n")
             return EXIT_FAILED
+        requested_workspace_root = Path(str(ns.workspace_root))
+        workspace_root = (
+            validated_workspace_root
+            if requested_workspace_root.is_absolute()
+            else requested_workspace_root
+        )
         workspace_artifacts: dict[str, str] = {}
-        if out_path is not None:
-            workspace_artifacts["doctor_output"] = out_path.as_posix()
+        if out_path_display is not None:
+            workspace_artifacts["doctor_output"] = out_path_display
         if evidence_dir is not None:
             workspace_artifacts["doctor_evidence_json"] = (
                 evidence_dir / "doctor-evidence.json"
