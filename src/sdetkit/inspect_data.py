@@ -14,6 +14,30 @@ EXIT_OK = 0
 EXIT_FINDINGS = 2
 SUPPORTED_EXTENSIONS = {".csv", ".json"}
 SUPPORTED_CROSS_FILE_MODES = {"left_subset", "exact_match"}
+RULES_TEMPLATE: dict[str, Any] = {
+    "files": {
+        "orders.csv": {
+            "required_columns": ["id", "status", "amount"],
+            "key_columns": ["id"],
+            "schema_expectations": {"amount": ["numeric_string"], "status": ["string"]},
+            "id_column": "id",
+            "expected_ids": ["A100", "A101"],
+        },
+        "snapshot.json": {
+            "id_column": "entity_id",
+        },
+    },
+    "cross_file_rules": [
+        {
+            "name": "orders_covered_by_snapshot",
+            "left_file": "orders.csv",
+            "left_id_column": "id",
+            "right_file": "snapshot.json",
+            "right_id_column": "entity_id",
+            "mode": "left_subset",
+        }
+    ],
+}
 
 
 def _safe_slug(value: str) -> str:
@@ -525,7 +549,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         prog="sdetkit inspect",
         description="Inspect CSV/JSON business evidence and emit deterministic diagnostics.",
     )
-    p.add_argument("path", help="CSV/JSON file or folder containing evidence files")
+    p.add_argument("path", nargs="?", help="CSV/JSON file or folder containing evidence files")
     p.add_argument("--format", choices=["text", "json"], default="text")
     p.add_argument(
         "--out-dir",
@@ -535,15 +559,56 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--rules",
         default=None,
-        help="Optional JSON file with file-level and cross-file inspect rule expectations.",
+        help="Optional JSON rules file. Use --rules-template for the canonical shape.",
+    )
+    p.add_argument(
+        "--rules-template",
+        action="store_true",
+        help="Print a canonical inspect rules JSON template and exit.",
     )
     return p
 
 
 def _validate_rules_payload(rules_payload: dict[str, Any]) -> str | None:
+    unknown_top_level = sorted(k for k in rules_payload if k not in {"files", "cross_file_rules"})
+    if unknown_top_level:
+        return (
+            "inspect: invalid rules payload: unknown top-level key(s): "
+            + ", ".join(repr(key) for key in unknown_top_level)
+            + "; expected only 'files' and 'cross_file_rules'"
+        )
+
     file_rules = rules_payload.get("files", {})
     if not isinstance(file_rules, dict):
         return "inspect: invalid rules payload: 'files' must be an object keyed by file name or path"
+    for file_key, item in sorted(file_rules.items()):
+        key = str(file_key)
+        if not key:
+            return "inspect: invalid file rule key: empty file key is not allowed"
+        if not isinstance(item, dict):
+            return f"inspect: invalid files[{key!r}]: each file rule must be an object"
+        required_columns = item.get("required_columns")
+        if required_columns is not None and not isinstance(required_columns, list):
+            return f"inspect: invalid files[{key!r}].required_columns: must be an array of strings"
+        key_columns = item.get("key_columns")
+        if key_columns is not None and not isinstance(key_columns, list):
+            return f"inspect: invalid files[{key!r}].key_columns: must be an array of strings"
+        schema_expectations = item.get("schema_expectations")
+        if schema_expectations is not None and not isinstance(schema_expectations, dict):
+            return f"inspect: invalid files[{key!r}].schema_expectations: must be an object"
+        if isinstance(schema_expectations, dict):
+            for col_name, allowed_types in sorted(schema_expectations.items()):
+                if not isinstance(allowed_types, list):
+                    return (
+                        "inspect: invalid files["
+                        f"{key!r}].schema_expectations[{str(col_name)!r}]: must be an array of type tags"
+                    )
+        id_column = item.get("id_column")
+        if id_column is not None and (not isinstance(id_column, str) or not id_column.strip()):
+            return f"inspect: invalid files[{key!r}].id_column: must be a non-empty string"
+        expected_ids = item.get("expected_ids")
+        if expected_ids is not None and not isinstance(expected_ids, list):
+            return f"inspect: invalid files[{key!r}].expected_ids: must be an array"
 
     cross_file_rules = rules_payload.get("cross_file_rules", [])
     if not isinstance(cross_file_rules, list):
@@ -559,11 +624,30 @@ def _validate_rules_payload(rules_payload: dict[str, Any]) -> str | None:
                 f"inspect: invalid cross_file_rules[{idx}].mode: {mode!r}; "
                 f"supported values: {supported}"
             )
+        for field in ("left_file", "right_file", "left_id_column", "right_id_column"):
+            value = item.get(field)
+            if not isinstance(value, str) or not value.strip():
+                return (
+                    "inspect: invalid cross_file_rules["
+                    f"{idx}].{field}: must be a non-empty string"
+                )
     return None
 
 
 def main(argv: list[str] | None = None) -> int:
     ns = _build_arg_parser().parse_args(argv)
+    if ns.rules and ns.rules_template:
+        sys.stderr.write("inspect: --rules and --rules-template cannot be used together\n")
+        return EXIT_FINDINGS
+
+    if ns.rules_template:
+        sys.stdout.write(json.dumps(RULES_TEMPLATE, indent=2, sort_keys=True) + "\n")
+        return EXIT_OK
+
+    if not ns.path:
+        sys.stderr.write("inspect: missing input path (or use --rules-template)\n")
+        return EXIT_FINDINGS
+
     target = Path(ns.path).resolve()
     if not target.exists():
         sys.stderr.write(f"inspect: input path does not exist: {target}\n")
@@ -576,7 +660,17 @@ def main(argv: list[str] | None = None) -> int:
 
     rules_payload: dict[str, Any] = {}
     if ns.rules:
-        loaded = json.loads(Path(ns.rules).read_text(encoding="utf-8"))
+        try:
+            loaded = json.loads(Path(ns.rules).read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            sys.stderr.write(f"inspect: rules file does not exist: {ns.rules}\n")
+            return EXIT_FINDINGS
+        except json.JSONDecodeError as exc:
+            sys.stderr.write(
+                "inspect: invalid rules file JSON at "
+                f"line {exc.lineno}, column {exc.colno}: {exc.msg}\n"
+            )
+            return EXIT_FINDINGS
         if not isinstance(loaded, dict):
             sys.stderr.write("inspect: invalid rules payload: top-level JSON value must be an object\n")
             return EXIT_FINDINGS

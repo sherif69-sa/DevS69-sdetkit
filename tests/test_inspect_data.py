@@ -190,3 +190,49 @@ def test_inspect_rejects_invalid_rules_mode(tmp_path: Path) -> None:
         "inspect: invalid cross_file_rules[0].mode: 'sideways'; supported values: exact_match, left_subset"
         in run.stderr
     )
+
+
+def test_inspect_rejects_invalid_file_rule_shape(tmp_path: Path) -> None:
+    data = tmp_path / "events.csv"
+    data.write_text("id,type\nA1,open\n", encoding="utf-8")
+    rules = tmp_path / "invalid-file-rules.json"
+    rules.write_text(
+        json.dumps(
+            {
+                "files": {"events.csv": {"required_columns": "id"}},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    run = subprocess.run(
+        [sys.executable, "-m", "sdetkit", "inspect", str(data), "--rules", str(rules)],
+        text=True,
+        capture_output=True,
+    )
+    assert run.returncode == 2
+    assert "inspect: invalid files['events.csv'].required_columns: must be an array of strings" in run.stderr
+
+
+def test_inspect_rules_template_outputs_canonical_shape() -> None:
+    run = subprocess.run(
+        [sys.executable, "-m", "sdetkit", "inspect", "--rules-template"],
+        text=True,
+        capture_output=True,
+    )
+    assert run.returncode == 0
+    assert run.stderr == ""
+    payload = json.loads(run.stdout)
+    assert sorted(payload) == ["cross_file_rules", "files"]
+    assert "orders.csv" in payload["files"]
+    assert payload["cross_file_rules"][0]["mode"] == "left_subset"
+
+
+def test_inspect_help_mentions_rules_template() -> None:
+    run = subprocess.run(
+        [sys.executable, "-m", "sdetkit", "inspect", "--help"],
+        text=True,
+        capture_output=True,
+    )
+    assert run.returncode == 0
+    assert "--rules-template" in run.stdout
