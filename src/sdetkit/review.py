@@ -305,12 +305,16 @@ def _probe_memory_path(*, workspace_root: Path, scope: str) -> Path:
 
 
 def _load_probe_memory(*, workspace_root: Path, scope: str) -> dict[str, Any]:
+    default = {"schema_version": "sdetkit.review.probe-memory.v1", "probes": {}}
     path = _probe_memory_path(workspace_root=workspace_root, scope=scope)
     if not path.exists():
-        return {"schema_version": "sdetkit.review.probe-memory.v1", "probes": {}}
-    loaded = json.loads(path.read_text(encoding="utf-8"))
+        return default
+    try:
+        loaded = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return default
     if not isinstance(loaded, dict):
-        return {"schema_version": "sdetkit.review.probe-memory.v1", "probes": {}}
+        return default
     probes = loaded.get("probes", {})
     loaded["probes"] = probes if isinstance(probes, dict) else {}
     loaded["schema_version"] = "sdetkit.review.probe-memory.v1"
@@ -328,17 +332,35 @@ def _finalize_probe_lifecycle(adaptive_plan: dict[str, Any]) -> None:
     executed_rows = adaptive_plan.get("executed_probes", [])
     skipped_rows = adaptive_plan.get("skipped_probes", [])
     executed_out: list[dict[str, Any]] = []
-    skipped_out: list[dict[str, Any]] = [row for row in skipped_rows if isinstance(row, dict)]
+    skipped_out: list[dict[str, Any]] = []
+    skipped_ids: set[str] = set()
     for row in executed_rows if isinstance(executed_rows, list) else []:
         if not isinstance(row, dict):
             continue
+        probe_id = str(row.get("probe_id", ""))
         if str(row.get("status", "")) == "executed":
             executed_out.append(row)
+            skipped_ids.add(probe_id)
             continue
         moved = dict(row)
         moved["status"] = "skipped"
         moved["skip_reason"] = str(row.get("skip_reason", "")) or "probe planned but not executed in deepen stage"
+        if probe_id and probe_id in skipped_ids:
+            continue
         skipped_out.append(moved)
+        if probe_id:
+            skipped_ids.add(probe_id)
+    for row in skipped_rows if isinstance(skipped_rows, list) else []:
+        if not isinstance(row, dict):
+            continue
+        probe_id = str(row.get("probe_id", ""))
+        if probe_id and probe_id in skipped_ids:
+            continue
+        skipped_out.append(row)
+        if probe_id:
+            skipped_ids.add(probe_id)
+    executed_out = sorted(executed_out, key=lambda item: str(item.get("probe_id", "")))
+    skipped_out = sorted(skipped_out, key=lambda item: str(item.get("probe_id", "")))
     adaptive_plan["executed_probes"] = executed_out
     adaptive_plan["skipped_probes"] = skipped_out
 

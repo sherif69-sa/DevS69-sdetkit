@@ -310,3 +310,49 @@ def test_review_executed_probe_list_contains_only_executed_rows(tmp_path: Path) 
     moved = [row for row in payload["adaptive_review"]["skipped_probes"] if row.get("probe_id") == "probe:inspect-compare"]
     assert moved
     assert moved[0]["skip_reason"] == "probe planned but not executed in deepen stage"
+
+
+def test_review_no_workspace_reruns_are_deterministic(tmp_path: Path) -> None:
+    data = tmp_path / "events.csv"
+    out_dir = tmp_path / "out"
+    workspace = tmp_path / "workspace"
+    data.write_text("id,type\nE1,open\nE1,open\n", encoding="utf-8")
+
+    rc1, payload1, _, _ = review.run_review(
+        target=data,
+        out_dir=out_dir,
+        workspace_root=workspace,
+        no_workspace=True,
+    )
+    rc2, payload2, _, _ = review.run_review(
+        target=data,
+        out_dir=out_dir,
+        workspace_root=workspace,
+        no_workspace=True,
+    )
+
+    assert rc1 == rc2
+    assert payload1["status"] == payload2["status"]
+    assert payload1["top_matters"] == payload2["top_matters"]
+    assert payload1["prioritized_actions"] == payload2["prioritized_actions"]
+    assert payload1["adaptive_review"]["executed_probes"] == payload2["adaptive_review"]["executed_probes"]
+    assert payload1["adaptive_review"]["skipped_probes"] == payload2["adaptive_review"]["skipped_probes"]
+
+
+def test_review_recovers_from_corrupt_probe_memory(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    repo = tmp_path / "repo"
+    out = tmp_path / "out"
+    repo.mkdir()
+    (repo / "pyproject.toml").write_text("[project]\nname='demo'\nversion='0.1.0'\n", encoding="utf-8")
+    (repo / "events.csv").write_text("id,type\nE1,open\nE1,open\n", encoding="utf-8")
+    scope = review._review_scope_for_target(repo)
+    probe_mem = workspace / "probe-memory" / "review" / f"{scope}.json"
+    probe_mem.parent.mkdir(parents=True, exist_ok=True)
+    probe_mem.write_text("{not-json", encoding="utf-8")
+
+    rc, payload, _, _ = review.run_review(target=repo, out_dir=out, workspace_root=workspace)
+
+    assert rc in {0, 2}
+    assert payload["adaptive_review"]["probe_memory"]["schema_version"] == "sdetkit.review.probe-memory.v1"
+    assert isinstance(payload["adaptive_review"]["probe_memory"]["normalized_outcomes"], list)
