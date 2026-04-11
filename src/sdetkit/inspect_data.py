@@ -9,10 +9,11 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = "sdetkit.inspect.v1"
+SCHEMA_VERSION = "sdetkit.inspect.v2"
 EXIT_OK = 0
 EXIT_FINDINGS = 2
 SUPPORTED_EXTENSIONS = {".csv", ".json"}
+SUPPORTED_CROSS_FILE_MODES = {"left_subset", "exact_match"}
 
 
 def _safe_slug(value: str) -> str:
@@ -104,7 +105,146 @@ def _find_record_id_field(rows: list[dict[str, Any]]) -> str | None:
     return None
 
 
-def _analyze_file(path: Path) -> dict[str, Any]:
+def _relative_key(path: Path, *, root: Path) -> str:
+    try:
+        return path.relative_to(root).as_posix()
+    except ValueError:
+        return path.name
+
+
+def _matches_file_rule(path: Path, *, root: Path, rule_key: str) -> bool:
+    return rule_key in {path.name, path.as_posix(), _relative_key(path, root=root)}
+
+
+def _normalize_value_set(values: list[Any]) -> set[str]:
+    return {str(v) for v in values if not _missing(v)}
+
+
+def _apply_file_rules(
+    *,
+    path: Path,
+    root: Path,
+    rows: list[dict[str, Any]],
+    columns: list[str],
+    rules: dict[str, Any] | None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, set[str]]]:
+    if not rules:
+        return [], [], {}
+
+    rule_results: list[dict[str, Any]] = []
+    suspicious_evidence: list[dict[str, Any]] = []
+    extracted_sets: dict[str, set[str]] = {}
+
+    required_columns = sorted(str(v) for v in rules.get("required_columns", []) if str(v))
+    if required_columns:
+        missing_required = sorted(col for col in required_columns if col not in columns)
+        rule_results.append(
+            {
+                "rule_type": "required_columns",
+                "ok": len(missing_required) == 0,
+                "missing_columns": missing_required,
+            }
+        )
+
+    key_columns = [str(v) for v in rules.get("key_columns", []) if str(v)]
+    if key_columns:
+        duplicate_counts: Counter[str] = Counter()
+        key_samples: dict[str, dict[str, Any]] = {}
+        key_first_index: dict[str, int] = {}
+        for idx, row in enumerate(rows):
+            key_payload = {k: row.get(k) for k in key_columns}
+            if any(_missing(v) for v in key_payload.values()):
+                continue
+            key_hash = _row_fingerprint(key_payload)
+            duplicate_counts[key_hash] += 1
+            key_samples.setdefault(key_hash, key_payload)
+            key_first_index.setdefault(key_hash, idx)
+        duplicate_key_groups = [
+            {
+                "first_row_index": key_first_index[h],
+                "duplicate_count": count,
+                "key_values": key_samples[h],
+            }
+            for h, count in sorted(duplicate_counts.items())
+            if count > 1
+        ]
+        rule_results.append(
+            {
+                "rule_type": "duplicate_keys",
+                "ok": len(duplicate_key_groups) == 0,
+                "key_columns": key_columns,
+                "duplicate_groups": duplicate_key_groups[:20],
+            }
+        )
+        for group in duplicate_key_groups[:20]:
+            suspicious_evidence.append(
+                {
+                    "signal": "duplicate_key",
+                    "row_index": group["first_row_index"],
+                    "details": group["key_values"],
+                }
+            )
+
+    schema_expectations = rules.get("schema_expectations", {})
+    if isinstance(schema_expectations, dict) and schema_expectations:
+        expectation_violations: list[dict[str, Any]] = []
+        for col in sorted(schema_expectations):
+            allowed = sorted(str(v) for v in schema_expectations[col] if str(v))
+            if col not in columns:
+                expectation_violations.append(
+                    {
+                        "column": col,
+                        "error": "column_missing",
+                        "allowed_types": allowed,
+                    }
+                )
+                continue
+            unexpected: Counter[str] = Counter()
+            for row in rows:
+                tag = _infer_type_tag(row.get(col))
+                if tag not in set(allowed):
+                    unexpected[tag] += 1
+            if unexpected:
+                expectation_violations.append(
+                    {
+                        "column": col,
+                        "unexpected_type_counts": dict(sorted(unexpected.items())),
+                        "allowed_types": allowed,
+                    }
+                )
+        rule_results.append(
+            {
+                "rule_type": "schema_expectations",
+                "ok": len(expectation_violations) == 0,
+                "violations": expectation_violations,
+            }
+        )
+
+    id_column = rules.get("id_column")
+    if isinstance(id_column, str) and id_column:
+        observed_ids = _normalize_value_set([row.get(id_column) for row in rows])
+        extracted_sets[id_column] = observed_ids
+        expected_ids = rules.get("expected_ids", [])
+        if isinstance(expected_ids, list):
+            expected_set = _normalize_value_set(expected_ids)
+            missing_expected = sorted(expected_set - observed_ids)
+            unexpected_observed = sorted(observed_ids - expected_set)
+            rule_results.append(
+                {
+                    "rule_type": "expected_id_coverage",
+                    "ok": len(missing_expected) == 0,
+                    "id_column": id_column,
+                    "missing_expected_count": len(missing_expected),
+                    "missing_expected_examples": missing_expected[:20],
+                    "unexpected_observed_count": len(unexpected_observed),
+                    "unexpected_observed_examples": unexpected_observed[:20],
+                }
+            )
+
+    return rule_results, suspicious_evidence, extracted_sets
+
+
+def _analyze_file(path: Path, *, root: Path, file_rules: dict[str, Any]) -> dict[str, Any]:
     ext = path.suffix.lower()
     if ext == ".csv":
         rows, notes = _read_csv_records(path)
@@ -189,12 +329,27 @@ def _analyze_file(path: Path) -> dict[str, Any]:
             record_id: count for record_id, count in sorted(id_counter.items()) if count > 1
         }
 
+    rules_for_file: dict[str, Any] | None = None
+    for rule_key, rule_value in sorted(file_rules.items()):
+        if _matches_file_rule(path, root=root, rule_key=str(rule_key)):
+            rules_for_file = rule_value if isinstance(rule_value, dict) else None
+            break
+    rule_results, suspicious_rule_evidence, extracted_sets = _apply_file_rules(
+        path=path,
+        root=root,
+        rows=rows,
+        columns=columns,
+        rules=rules_for_file,
+    )
+    failed_rule_count = sum(1 for item in rule_results if not bool(item.get("ok", False)))
+
     diagnostics = {
         "suspicious_row_count": len(suspicious_rows),
         "missing_value_columns": len(missing_columns),
         "duplicate_row_groups": len(duplicate_rows),
         "inconsistent_type_columns": len(inconsistent_type_columns),
         "duplicate_record_id_count": len(duplicate_record_ids),
+        "failed_rule_checks": failed_rule_count,
     }
 
     findings = sum(int(value) for value in diagnostics.values())
@@ -213,6 +368,16 @@ def _analyze_file(path: Path) -> dict[str, Any]:
         "record_id_field": record_id_field,
         "record_id_duplicates": duplicate_record_ids,
         "record_ids": sorted(record_ids),
+        "rule_checks": rule_results,
+        "suspicious_record_evidence": sorted(
+            suspicious_rule_evidence,
+            key=lambda item: (
+                str(item.get("signal", "")),
+                int(item.get("row_index", -1)),
+                json.dumps(item.get("details", {}), sort_keys=True),
+            ),
+        )[:50],
+        "extracted_id_sets": {name: sorted(values) for name, values in sorted(extracted_sets.items())},
         "confidence": confidence,
         "recommendations": _recommendations(diagnostics, record_id_field is not None),
         "notes": notes,
@@ -275,6 +440,61 @@ def _cross_file_diagnostics(reports: list[dict[str, Any]]) -> list[dict[str, Any
     return mismatches
 
 
+def _rule_cross_file_checks(
+    reports: list[dict[str, Any]], rules: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    by_path: dict[str, dict[str, Any]] = {}
+    by_name: dict[str, dict[str, Any]] = {}
+    for report in reports:
+        by_path[report["path"]] = report
+        by_name[Path(report["path"]).name] = report
+
+    results: list[dict[str, Any]] = []
+    for idx, rule in enumerate(rules):
+        if not isinstance(rule, dict):
+            continue
+        left_file = str(rule.get("left_file", ""))
+        right_file = str(rule.get("right_file", ""))
+        left_column = str(rule.get("left_id_column", ""))
+        right_column = str(rule.get("right_id_column", ""))
+        mode = str(rule.get("mode", "left_subset"))
+        name = str(rule.get("name", f"cross_rule_{idx + 1}"))
+        left = by_path.get(left_file) or by_name.get(left_file)
+        right = by_path.get(right_file) or by_name.get(right_file)
+        if not left or not right:
+            results.append(
+                {
+                    "rule_type": "cross_file_match",
+                    "name": name,
+                    "ok": False,
+                    "error": "file_not_found",
+                    "left_file": left_file,
+                    "right_file": right_file,
+                }
+            )
+            continue
+        left_ids = set(left.get("extracted_id_sets", {}).get(left_column, []))
+        right_ids = set(right.get("extracted_id_sets", {}).get(right_column, []))
+        left_only = sorted(left_ids - right_ids)
+        right_only = sorted(right_ids - left_ids)
+        ok = len(left_only) == 0 if mode == "left_subset" else len(left_only) == 0 and len(right_only) == 0
+        results.append(
+            {
+                "rule_type": "cross_file_match",
+                "name": name,
+                "mode": mode,
+                "ok": ok,
+                "left_file": left["path"],
+                "right_file": right["path"],
+                "left_only_count": len(left_only),
+                "right_only_count": len(right_only),
+                "left_only_examples": left_only[:20],
+                "right_only_examples": right_only[:20],
+            }
+        )
+    return results
+
+
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
         f"SDETKit inspect: {'OK' if payload['ok'] else 'FINDINGS'}",
@@ -312,7 +532,34 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Directory for artifact outputs (default: .sdetkit/inspect/<input-name>).",
     )
+    p.add_argument(
+        "--rules",
+        default=None,
+        help="Optional JSON file with file-level and cross-file inspect rule expectations.",
+    )
     return p
+
+
+def _validate_rules_payload(rules_payload: dict[str, Any]) -> str | None:
+    file_rules = rules_payload.get("files", {})
+    if not isinstance(file_rules, dict):
+        return "inspect: invalid rules payload: 'files' must be an object keyed by file name or path"
+
+    cross_file_rules = rules_payload.get("cross_file_rules", [])
+    if not isinstance(cross_file_rules, list):
+        return "inspect: invalid rules payload: 'cross_file_rules' must be an array"
+
+    for idx, item in enumerate(cross_file_rules):
+        if not isinstance(item, dict):
+            return f"inspect: invalid cross_file_rules[{idx}]: each rule must be an object"
+        mode = item.get("mode", "left_subset")
+        if str(mode) not in SUPPORTED_CROSS_FILE_MODES:
+            supported = ", ".join(sorted(SUPPORTED_CROSS_FILE_MODES))
+            return (
+                f"inspect: invalid cross_file_rules[{idx}].mode: {mode!r}; "
+                f"supported values: {supported}"
+            )
+    return None
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -327,8 +574,25 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write("inspect: no supported evidence files found (expected .csv or .json)\n")
         return EXIT_FINDINGS
 
-    reports = [_analyze_file(path) for path in files]
+    rules_payload: dict[str, Any] = {}
+    if ns.rules:
+        loaded = json.loads(Path(ns.rules).read_text(encoding="utf-8"))
+        if not isinstance(loaded, dict):
+            sys.stderr.write("inspect: invalid rules payload: top-level JSON value must be an object\n")
+            return EXIT_FINDINGS
+        rules_payload = loaded
+        validation_error = _validate_rules_payload(rules_payload)
+        if validation_error:
+            sys.stderr.write(validation_error + "\n")
+            return EXIT_FINDINGS
+    file_rules = rules_payload.get("files", {}) if isinstance(rules_payload, dict) else {}
+    cross_file_rules = (
+        rules_payload.get("cross_file_rules", []) if isinstance(rules_payload, dict) else []
+    )
+
+    reports = [_analyze_file(path, root=target if target.is_dir() else target.parent, file_rules=file_rules) for path in files]
     cross_file = _cross_file_diagnostics(reports)
+    cross_file_rule_results = _rule_cross_file_checks(reports, cross_file_rules)
 
     summary = {
         "files_analyzed": len(reports),
@@ -347,6 +611,8 @@ def main(argv: list[str] | None = None) -> int:
                 int(r["diagnostics"]["duplicate_record_id_count"]) for r in reports
             ),
             "cross_file_mismatches": len(cross_file),
+            "failed_rule_checks": sum(int(r["diagnostics"]["failed_rule_checks"]) for r in reports)
+            + sum(1 for item in cross_file_rule_results if not bool(item.get("ok", False))),
         },
     }
 
@@ -369,6 +635,7 @@ def main(argv: list[str] | None = None) -> int:
         "summary": summary,
         "file_reports": reports,
         "cross_file_mismatches": cross_file,
+        "cross_file_rule_checks": cross_file_rule_results,
         "recommendations": recommendations,
         "confidence": confidence,
         "evidence": {
