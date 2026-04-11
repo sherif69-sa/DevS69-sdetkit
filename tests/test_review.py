@@ -110,8 +110,42 @@ def test_review_profiles_change_judgment_and_artifacts_for_same_input(tmp_path: 
     assert monitor_payload["status"] == "watch"
     assert release_payload["profile"]["name"] == "release"
     assert monitor_payload["profile"]["name"] == "monitor"
+    assert release_payload["profile"]["packet_type"] == "release_gate"
+    assert monitor_payload["profile"]["packet_type"] == "trend_watch"
+    assert release_payload["artifact_index"]["profile_packet_json"].endswith("release-decision.json")
+    assert monitor_payload["artifact_index"]["profile_packet_json"].endswith("trend-watch.json")
     assert "inspect_compare_json" in release_payload["artifact_index"]
     assert "inspect_compare_json" in monitor_payload["artifact_index"]
     release_now = [item for item in release_payload["prioritized_actions"] if item.get("tier") == "now"]
     monitor_now = [item for item in monitor_payload["prioritized_actions"] if item.get("tier") == "now"]
     assert len(release_now) >= len(monitor_now)
+
+
+def test_review_profile_packets_and_text_are_profile_specific(tmp_path: Path) -> None:
+    data = tmp_path / "events.csv"
+    workspace = tmp_path / "workspace"
+    data.write_text("id,type\nE1,open\nE1,open\n", encoding="utf-8")
+    profiles = {
+        "release": ("release-decision.json", "release_gate_decision:"),
+        "triage": ("incident-board.json", "incident_board:"),
+        "forensics": ("evidence-ledger.json", "evidence_ledger:"),
+        "monitor": ("trend-watch.json", "trend_watch:"),
+    }
+
+    for profile, (packet_name, marker) in profiles.items():
+        out_dir = tmp_path / f"out-{profile}"
+        rc, payload, _, txt_path = review.run_review(
+            target=data,
+            out_dir=out_dir,
+            workspace_root=workspace,
+            profile=profile,
+        )
+        assert rc == 2
+        packet_path = out_dir / packet_name
+        assert packet_path.exists()
+        packet_payload = json.loads(packet_path.read_text(encoding="utf-8"))
+        assert packet_payload["profile"] == profile
+        assert packet_payload["packet_type"] == payload["profile"]["packet_type"]
+        assert payload["artifact_index"]["profile_packet_json"] == packet_path.as_posix()
+        text = txt_path.read_text(encoding="utf-8")
+        assert marker in text
