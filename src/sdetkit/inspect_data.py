@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from .evidence_workspace import record_workspace_run
+from .judgment import build_judgment, load_latest_previous_payload
 
 SCHEMA_VERSION = "sdetkit.inspect.v2"
 EXIT_OK = 0
@@ -539,6 +540,18 @@ def _render_text(payload: dict[str, Any]) -> str:
                 f"- {item['left_path']} vs {item['right_path']}: "
                 f"left_only={item['left_only_count']} right_only={item['right_only_count']}"
             )
+    judgment = payload.get("judgment", {})
+    if isinstance(judgment, dict):
+        lines.append("judgment_summary:")
+        lines.append(
+            f"- status={judgment.get('status')} severity={judgment.get('severity')} confidence={judgment.get('confidence', {}).get('score')}"
+        )
+        top = judgment.get("top_judgment", {})
+        if isinstance(top, dict):
+            lines.append(f"- next_move: {top.get('next_move', '')}")
+        contradictions = judgment.get("contradictions", [])
+        if isinstance(contradictions, list) and contradictions:
+            lines.append(f"- contradictions: {len(contradictions)}")
     lines.append("recommendations:")
     for rec in payload["recommendations"]:
         lines.append(f"- {rec}")
@@ -734,18 +747,92 @@ def run_inspect(
     if cross_file:
         recommendations.append("Align record IDs across related exports before trusting combined metrics.")
 
+    previous_payload = None
+    previous_hash = None
+    scope_name = workspace_scope if workspace_scope else _safe_slug(target.name)
+    if record_workspace:
+        previous_payload, previous_hash = load_latest_previous_payload(
+            workspace_root=workspace_root,
+            workflow="inspect",
+            scope=scope_name,
+        )
+
+    finding_items: list[dict[str, Any]] = []
+    for key, value in summary["diagnostics"].items():
+        if int(value) <= 0:
+            continue
+        finding_items.append(
+            {
+                "id": f"inspect:{key}",
+                "kind": key,
+                "severity": "high" if key in {"cross_file_mismatches", "failed_rule_checks"} else "medium",
+                "priority": min(50, int(value) * 8),
+                "why_it_matters": f"{key} surfaced {value} time(s) in this run.",
+                "next_action": recommendations[0] if recommendations else "Review evidence anomalies.",
+                "message": f"{key}={value}",
+            }
+        )
+    conflicting_evidence: list[dict[str, Any]] = []
+    if cross_file and summary["diagnostics"].get("missing_value_columns", 0) == 0:
+        conflicting_evidence.append(
+            {
+                "id": "inspect:cross-file-vs-local",
+                "kind": "cross_surface_disagreement",
+                "message": "Cross-file mismatches exist despite clean local missing-value signal.",
+            }
+        )
+
+    supporting_evidence = [
+        {"kind": key, "value": int(value)}
+        for key, value in sorted(summary["diagnostics"].items())
+        if int(value) > 0
+    ]
+    stability = 0.7
+    previous_summary = None
+    if isinstance(previous_payload, dict):
+        prev_diag = previous_payload.get("summary", {}).get("diagnostics", {})
+        if isinstance(prev_diag, dict):
+            prev_total = sum(int(prev_diag.get(k, 0)) for k in summary["diagnostics"])
+            cur_total = sum(int(v) for v in summary["diagnostics"].values())
+            if cur_total > prev_total:
+                stability = 0.35
+                previous_summary = "regressing"
+            elif cur_total < prev_total:
+                stability = 0.85
+                previous_summary = "improving"
+            else:
+                stability = 0.7
+
+    inspect_ok = findings_score == 0
+    blocking = (
+        int(summary["diagnostics"].get("cross_file_mismatches", 0)) > 0
+        or int(summary["diagnostics"].get("failed_rule_checks", 0)) > 0
+    )
+    judgment = build_judgment(
+        workflow="inspect",
+        findings=finding_items,
+        supporting_evidence=supporting_evidence,
+        conflicting_evidence=conflicting_evidence,
+        completeness=1.0 if summary["files_analyzed"] > 0 else 0.3,
+        stability=stability,
+        previous_summary=previous_summary,
+        workflow_ok=inspect_ok,
+        blocking=blocking,
+    )
+
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "tool": "sdetkit",
         "workflow": "inspect",
         "input_path": target.as_posix(),
-        "ok": findings_score == 0,
+        "ok": inspect_ok,
         "summary": summary,
         "file_reports": reports,
         "cross_file_mismatches": cross_file,
         "cross_file_rule_checks": cross_file_rule_results,
         "recommendations": recommendations,
         "confidence": confidence,
+        "judgment": judgment,
         "evidence": {
             "machine_readable": "inspect.json",
             "human_readable": "inspect.txt",
@@ -759,7 +846,6 @@ def run_inspect(
     txt_path.write_text(_render_text(payload), encoding="utf-8")
 
     if record_workspace:
-        scope_name = workspace_scope if workspace_scope else _safe_slug(target.name)
         workspace_entry = record_workspace_run(
             workspace_root=workspace_root,
             workflow="inspect",

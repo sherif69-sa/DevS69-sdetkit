@@ -9,6 +9,7 @@ from typing import Any
 from .evidence_workspace import record_workspace_run
 from .inspect_compare import run_compare
 from .inspect_data import run_inspect
+from .judgment import build_judgment, load_latest_previous_payload
 
 SCHEMA_VERSION = "sdetkit.inspect.project.v1"
 EXIT_OK = 0
@@ -166,6 +167,14 @@ def _render_text(payload: dict[str, Any]) -> str:
             f"- {item['scope']} [{item['kind']}] priority={item['priority']} "
             f"message={item['message']}"
         )
+    judgment = payload.get("judgment", {})
+    if isinstance(judgment, dict):
+        lines.append(
+            f"judgment: status={judgment.get('status')} severity={judgment.get('severity')} confidence={judgment.get('confidence', {}).get('score')}"
+        )
+        contradictions = judgment.get("contradictions", [])
+        if isinstance(contradictions, list) and contradictions:
+            lines.append(f"judgment_contradictions: {len(contradictions)}")
     lines.append("")
     return "\n".join(lines)
 
@@ -398,23 +407,87 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
 
+    conflicting_evidence: list[dict[str, Any]] = []
+    inspect_fail_scopes = len({f["scope"] for f in ordered_findings if f["kind"].startswith("inspect")})
+    compare_fail_scopes = len({f["scope"] for f in ordered_findings if f["kind"].startswith("compare")})
+    if inspect_fail_scopes == 0 and compare_fail_scopes > 0:
+        conflicting_evidence.append(
+            {
+                "id": "inspect-project:compare-without-inspect-failures",
+                "kind": "cross_surface_disagreement",
+                "message": "Inspect scope checks passed while compare drift still failed.",
+            }
+        )
+    finding_items = [
+        {
+            "id": f"inspect-project:{idx+1}",
+            "kind": str(item.get("kind", "finding")),
+            "severity": "high" if str(item.get("kind", "")).startswith("compare") else "medium",
+            "priority": min(70, 100 - int(item.get("priority", 0)) * 2),
+            "why_it_matters": str(item.get("message", "")),
+            "next_action": str(item.get("message", "")),
+            "message": str(item.get("message", "")),
+        }
+        for idx, item in enumerate(ordered_findings[:10])
+    ]
+    supporting_evidence = [
+        {"kind": "inspect_scope", "scope": row.get("scope"), "ok": row.get("inspect_ok")}
+        for row in inspect_runs
+    ]
+
+    previous_payload, _ = (None, None)
+    previous_summary = None
+    stability = 0.7
+    if not ns.no_workspace:
+        previous_payload, _ = load_latest_previous_payload(
+            workspace_root=Path(ns.workspace_root),
+            workflow="inspect-project",
+            scope=_safe_slug(project_dir.name),
+        )
+    if isinstance(previous_payload, dict):
+        prev_findings = int(previous_payload.get("summary", {}).get("total_findings", 0))
+        cur_findings = len(ordered_findings)
+        if cur_findings > prev_findings:
+            stability = 0.35
+            previous_summary = "regressing"
+        elif cur_findings < prev_findings:
+            stability = 0.85
+            previous_summary = "improving"
+        else:
+            pass
+
+    project_ok = len(ordered_findings) == 0
+    blocking = compare_fail_scopes > 0
+    judgment = build_judgment(
+        workflow="inspect-project",
+        findings=finding_items,
+        supporting_evidence=supporting_evidence,
+        conflicting_evidence=conflicting_evidence,
+        completeness=1.0 if scopes else 0.4,
+        stability=stability,
+        previous_summary=previous_summary,
+        workflow_ok=project_ok,
+        blocking=blocking,
+    )
+
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "tool": "sdetkit",
         "workflow": "inspect-project",
         "project_dir": project_dir.as_posix(),
         "policy_path": policy_path.as_posix(),
-        "ok": len(ordered_findings) == 0,
+        "ok": project_ok,
         "policy": policy,
         "summary": {
             "scopes": len(scopes),
-            "inspect_fail_scopes": len({f["scope"] for f in ordered_findings if f["kind"].startswith("inspect")}),
-            "compare_fail_scopes": len({f["scope"] for f in ordered_findings if f["kind"].startswith("compare")}),
+            "inspect_fail_scopes": inspect_fail_scopes,
+            "compare_fail_scopes": compare_fail_scopes,
             "total_findings": len(ordered_findings),
         },
         "inspect_runs": inspect_runs,
         "compare_runs": compare_runs,
         "findings": ordered_findings,
+        "judgment": judgment,
         "evidence": {
             "machine_readable": "inspect-project.json",
             "human_readable": "inspect-project.txt",
