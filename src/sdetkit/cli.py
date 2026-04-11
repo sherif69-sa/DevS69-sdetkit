@@ -279,6 +279,7 @@ Then use stability-aware command discovery:
     review_parser.add_argument("path")
     review_parser.add_argument("--workspace-root", default=None)
     review_parser.add_argument("--out-dir", default=None)
+    review_parser.add_argument("--profile", choices=["release", "triage", "forensics", "monitor"], default=None)
     review_parser.add_argument("--format", choices=["text", "json"], default=None)
     review_parser.add_argument("--no-workspace", action="store_true")
 
@@ -1315,6 +1316,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             forwarded.extend(["--workspace-root", ns.workspace_root])
         if ns.out_dir:
             forwarded.extend(["--out-dir", ns.out_dir])
+        if ns.profile:
+            forwarded.extend(["--profile", ns.profile])
         if ns.format:
             forwarded.extend(["--format", ns.format])
         if ns.no_workspace:
