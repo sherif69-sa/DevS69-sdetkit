@@ -236,3 +236,65 @@ def test_inspect_help_mentions_rules_template() -> None:
     )
     assert run.returncode == 0
     assert "--rules-template" in run.stdout
+
+
+def test_inspect_rules_lint_valid_rules(tmp_path: Path) -> None:
+    rules = tmp_path / "valid-rules.json"
+    rules.write_text(
+        json.dumps({"files": {"events.csv": {"id_column": "id"}}}),
+        encoding="utf-8",
+    )
+    run = subprocess.run(
+        [sys.executable, "-m", "sdetkit", "inspect", "--rules-lint", str(rules)],
+        text=True,
+        capture_output=True,
+    )
+    assert run.returncode == 0
+    assert run.stdout == "inspect: rules lint OK\n"
+    assert run.stderr == ""
+
+
+def test_inspect_rules_lint_invalid_rules(tmp_path: Path) -> None:
+    rules = tmp_path / "invalid-rules.json"
+    rules.write_text(
+        json.dumps({"cross_file_rules": [{"mode": "sideways"}]}),
+        encoding="utf-8",
+    )
+    run = subprocess.run(
+        [sys.executable, "-m", "sdetkit", "inspect", "--rules-lint", str(rules)],
+        text=True,
+        capture_output=True,
+    )
+    assert run.returncode == 2
+    assert run.stdout == ""
+    assert (
+        run.stderr
+        == "inspect: rules lint FAILED: inspect: invalid cross_file_rules[0].mode: 'sideways'; "
+        "supported values: exact_match, left_subset\n"
+    )
+
+
+def test_inspect_rules_lint_works_without_dataset_path(tmp_path: Path) -> None:
+    rules = tmp_path / "valid-rules.json"
+    rules.write_text(
+        json.dumps({"files": {"events.csv": {"required_columns": ["id"]}}}),
+        encoding="utf-8",
+    )
+    run = subprocess.run(
+        [sys.executable, "-m", "sdetkit", "inspect", "--rules-lint", str(rules)],
+        text=True,
+        capture_output=True,
+    )
+    assert run.returncode == 0
+    assert "missing input path" not in run.stderr
+
+
+def test_inspect_requires_path_in_normal_mode() -> None:
+    run = subprocess.run(
+        [sys.executable, "-m", "sdetkit", "inspect"],
+        text=True,
+        capture_output=True,
+    )
+    assert run.returncode == 2
+    assert run.stdout == ""
+    assert run.stderr == "inspect: missing input path (or use --rules-template)\n"

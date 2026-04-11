@@ -566,6 +566,11 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print a canonical inspect rules JSON template and exit.",
     )
+    p.add_argument(
+        "--rules-lint",
+        default=None,
+        help="Validate an inspect rules JSON file and exit (no dataset scan).",
+    )
     return p
 
 
@@ -634,14 +639,46 @@ def _validate_rules_payload(rules_payload: dict[str, Any]) -> str | None:
     return None
 
 
+def _load_rules_payload(path: str) -> tuple[dict[str, Any] | None, str | None]:
+    try:
+        loaded = json.loads(Path(path).read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return None, f"inspect: rules file does not exist: {path}"
+    except json.JSONDecodeError as exc:
+        return None, (
+            "inspect: invalid rules file JSON at "
+            f"line {exc.lineno}, column {exc.colno}: {exc.msg}"
+        )
+    if not isinstance(loaded, dict):
+        return None, "inspect: invalid rules payload: top-level JSON value must be an object"
+    validation_error = _validate_rules_payload(loaded)
+    if validation_error:
+        return None, validation_error
+    return loaded, None
+
+
 def main(argv: list[str] | None = None) -> int:
     ns = _build_arg_parser().parse_args(argv)
     if ns.rules and ns.rules_template:
         sys.stderr.write("inspect: --rules and --rules-template cannot be used together\n")
         return EXIT_FINDINGS
+    if ns.rules_lint and ns.rules_template:
+        sys.stderr.write("inspect: --rules-lint and --rules-template cannot be used together\n")
+        return EXIT_FINDINGS
+    if ns.rules_lint and ns.rules:
+        sys.stderr.write("inspect: --rules-lint and --rules cannot be used together\n")
+        return EXIT_FINDINGS
 
     if ns.rules_template:
         sys.stdout.write(json.dumps(RULES_TEMPLATE, indent=2, sort_keys=True) + "\n")
+        return EXIT_OK
+
+    if ns.rules_lint:
+        _, error = _load_rules_payload(ns.rules_lint)
+        if error:
+            sys.stderr.write(f"inspect: rules lint FAILED: {error}\n")
+            return EXIT_FINDINGS
+        sys.stdout.write("inspect: rules lint OK\n")
         return EXIT_OK
 
     if not ns.path:
@@ -660,25 +697,11 @@ def main(argv: list[str] | None = None) -> int:
 
     rules_payload: dict[str, Any] = {}
     if ns.rules:
-        try:
-            loaded = json.loads(Path(ns.rules).read_text(encoding="utf-8"))
-        except FileNotFoundError:
-            sys.stderr.write(f"inspect: rules file does not exist: {ns.rules}\n")
+        loaded, error = _load_rules_payload(ns.rules)
+        if error:
+            sys.stderr.write(error + "\n")
             return EXIT_FINDINGS
-        except json.JSONDecodeError as exc:
-            sys.stderr.write(
-                "inspect: invalid rules file JSON at "
-                f"line {exc.lineno}, column {exc.colno}: {exc.msg}\n"
-            )
-            return EXIT_FINDINGS
-        if not isinstance(loaded, dict):
-            sys.stderr.write("inspect: invalid rules payload: top-level JSON value must be an object\n")
-            return EXIT_FINDINGS
-        rules_payload = loaded
-        validation_error = _validate_rules_payload(rules_payload)
-        if validation_error:
-            sys.stderr.write(validation_error + "\n")
-            return EXIT_FINDINGS
+        rules_payload = loaded if loaded is not None else {}
     file_rules = rules_payload.get("files", {}) if isinstance(rules_payload, dict) else {}
     cross_file_rules = (
         rules_payload.get("cross_file_rules", []) if isinstance(rules_payload, dict) else []

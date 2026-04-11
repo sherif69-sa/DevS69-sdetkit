@@ -240,6 +240,11 @@ Then use stability-aware command discovery:
         action="store_true",
         help="Print a canonical inspect rules JSON template and exit.",
     )
+    inspect_parser.add_argument(
+        "--rules-lint",
+        default=None,
+        help="Validate an inspect rules JSON file and exit.",
+    )
     inspect_parser.add_argument("args", nargs=argparse.REMAINDER)
 
     ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
@@ -1228,6 +1233,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         inspect_args = list(ns.args)
         if ns.rules_template:
             inspect_args = ["--rules-template", *inspect_args]
+        if ns.rules_lint:
+            inspect_args = ["--rules-lint", ns.rules_lint, *inspect_args]
         return _run_module_main("sdetkit.inspect_data", inspect_args)
 
     if ns.cmd == "patch":
