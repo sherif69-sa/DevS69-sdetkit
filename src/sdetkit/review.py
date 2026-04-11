@@ -15,6 +15,7 @@ from .inspect_compare import run_compare
 from .inspect_data import run_inspect
 from .judgment import build_judgment, load_latest_previous_payload
 from .review_engine import (
+    apply_probe_memory_update,
     apply_probe_result_feedback,
     build_contradiction_graph,
     build_contradiction_clusters,
@@ -23,6 +24,7 @@ from .review_engine import (
     decide_escalation,
     decide_stop,
     investigation_confidence,
+    normalize_probe_execution_outcomes,
     plan_adaptive_probes,
     profile_confidence_level,
     profile_priority_tier,
@@ -298,6 +300,49 @@ def _load_json(path: Path) -> dict[str, Any]:
     return loaded
 
 
+def _probe_memory_path(*, workspace_root: Path, scope: str) -> Path:
+    return workspace_root / "probe-memory" / "review" / f"{_safe_slug(scope)}.json"
+
+
+def _load_probe_memory(*, workspace_root: Path, scope: str) -> dict[str, Any]:
+    path = _probe_memory_path(workspace_root=workspace_root, scope=scope)
+    if not path.exists():
+        return {"schema_version": "sdetkit.review.probe-memory.v1", "probes": {}}
+    loaded = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(loaded, dict):
+        return {"schema_version": "sdetkit.review.probe-memory.v1", "probes": {}}
+    probes = loaded.get("probes", {})
+    loaded["probes"] = probes if isinstance(probes, dict) else {}
+    loaded["schema_version"] = "sdetkit.review.probe-memory.v1"
+    return loaded
+
+
+def _write_probe_memory(*, workspace_root: Path, scope: str, memory: dict[str, Any]) -> str:
+    path = _probe_memory_path(workspace_root=workspace_root, scope=scope)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(memory, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    return path.as_posix()
+
+
+def _finalize_probe_lifecycle(adaptive_plan: dict[str, Any]) -> None:
+    executed_rows = adaptive_plan.get("executed_probes", [])
+    skipped_rows = adaptive_plan.get("skipped_probes", [])
+    executed_out: list[dict[str, Any]] = []
+    skipped_out: list[dict[str, Any]] = [row for row in skipped_rows if isinstance(row, dict)]
+    for row in executed_rows if isinstance(executed_rows, list) else []:
+        if not isinstance(row, dict):
+            continue
+        if str(row.get("status", "")) == "executed":
+            executed_out.append(row)
+            continue
+        moved = dict(row)
+        moved["status"] = "skipped"
+        moved["skip_reason"] = str(row.get("skip_reason", "")) or "probe planned but not executed in deepen stage"
+        skipped_out.append(moved)
+    adaptive_plan["executed_probes"] = executed_out
+    adaptive_plan["skipped_probes"] = skipped_out
+
+
 def _detect_mode(target: Path) -> dict[str, bool]:
     is_dir = target.is_dir()
     repo_like = is_dir and ((target / ".git").exists() or (target / "pyproject.toml").exists())
@@ -390,7 +435,12 @@ def run_review(
     detection = _detect_mode(target)
     selected_profile = _coerce_profile(profile)
     workflow_plan = _workflows_for_profile(detection, selected_profile)
+    review_scope = _review_scope_for_target(target)
     out_dir.mkdir(parents=True, exist_ok=True)
+    probe_memory = _load_probe_memory(workspace_root=workspace_root, scope=review_scope) if not no_workspace else {
+        "schema_version": "sdetkit.review.probe-memory.v1",
+        "probes": {},
+    }
 
     source_workflows: list[dict[str, Any]] = []
     supporting: list[dict[str, Any]] = []
@@ -554,6 +604,7 @@ def run_review(
         changed=[],
         confidence_score=baseline_confidence,
         confidence_threshold=selected_profile.confidence_medium,
+        probe_memory=probe_memory,
     )
     adaptive_plan["executed_probes"] = probe_decision["executed_probes"]
     adaptive_plan["skipped_probes"] = probe_decision["skipped_probes"]
@@ -680,7 +731,6 @@ def run_review(
     review_judgment["recommendations"] = profile_recs
 
     prioritized_actions.extend(review_judgment.get("recommendations", []))
-    review_scope = _review_scope_for_target(target)
     previous_review = None
     previous_hash = None
     if not no_workspace:
@@ -736,6 +786,7 @@ def run_review(
         changed=payload["changed_since_previous"],
         confidence_score=float(review_judgment.get("confidence", {}).get("score", 0.0)),
         confidence_threshold=selected_profile.confidence_medium,
+        probe_memory=probe_memory,
     )
     existing_probe_results = {
         str(row.get("probe_id")): row
@@ -750,6 +801,7 @@ def run_review(
     adaptive_plan["skipped_probes"] = probe_decision["skipped_probes"]
     adaptive_plan["probe_registry"] = probe_decision["registry"]
     adaptive_plan["probe_budget"] = probe_decision["budget"]
+    _finalize_probe_lifecycle(adaptive_plan)
     likely_tracks = rank_likely_issue_tracks(
         findings=weighted_findings,
         conflicts=weighted_conflicts,
@@ -772,6 +824,20 @@ def run_review(
         for row in adaptive_plan.get("executed_probes", [])
         if isinstance(row, dict)
     ]
+    normalized_probe_outcomes = normalize_probe_execution_outcomes(
+        executed_probes=[row for row in adaptive_plan.get("executed_probes", []) if isinstance(row, dict)],
+        findings=weighted_findings,
+        conflicts=weighted_conflicts,
+    )
+    updated_probe_memory, probe_memory_update = apply_probe_memory_update(
+        previous_memory=probe_memory,
+        normalized_outcomes=normalized_probe_outcomes,
+    )
+    payload["adaptive_review"]["probe_memory"] = {
+        "schema_version": updated_probe_memory.get("schema_version"),
+        "normalized_outcomes": normalized_probe_outcomes,
+        "updates": probe_memory_update.get("updates", []),
+    }
     for update in probe_feedback.get("track_updates", []):
         if not isinstance(update, dict):
             continue
@@ -820,6 +886,13 @@ def run_review(
     review_tracks_path.write_text(json.dumps({"tracks": likely_tracks}, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     json_path.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     txt_path.write_text(_render_text(payload), encoding="utf-8")
+
+    if not no_workspace:
+        payload["adaptive_review"]["probe_memory"]["workspace_artifact"] = _write_probe_memory(
+            workspace_root=workspace_root,
+            scope=review_scope,
+            memory=updated_probe_memory,
+        )
 
     if not no_workspace:
         workspace_entry = record_workspace_run(

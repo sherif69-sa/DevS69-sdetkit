@@ -15,6 +15,146 @@ class ProbeDefinition:
     reason: str
 
 
+def _round2(value: float) -> float:
+    return round(float(value), 2)
+
+
+def derive_probe_score_history_inputs(
+    *,
+    probe_id: str,
+    probe_memory: dict[str, Any] | None,
+    current_track: str,
+) -> tuple[list[dict[str, Any]], int]:
+    memory = probe_memory if isinstance(probe_memory, dict) else {}
+    probes = memory.get("probes", {})
+    probe_stats = probes.get(probe_id, {}) if isinstance(probes, dict) else {}
+    aggregates = probe_stats.get("aggregates", {}) if isinstance(probe_stats, dict) else {}
+    has_history = int(aggregates.get("runs", 0)) > 0
+    avg_usefulness = float(aggregates.get("avg_usefulness", 0.0))
+    avg_cost = float(aggregates.get("avg_cost", 0.0))
+    saturation = float(aggregates.get("repeat_hit_saturation", 0.0))
+    track_payoff_map = aggregates.get("track_payoff", {}) if isinstance(aggregates, dict) else {}
+    track_payoff = float(track_payoff_map.get(current_track, avg_usefulness if avg_usefulness > 0 else 0.5))
+
+    usefulness_delta = int(round((avg_usefulness - 0.5) * 40)) if has_history else 0
+    cost_penalty = int(round((avg_cost / 100.0) * 12)) if has_history else 0
+    saturation_penalty = int(round(saturation * 18)) if has_history else 0
+    track_delta = int(round((track_payoff - 0.5) * 20)) if has_history else 0
+    history_delta = usefulness_delta + track_delta - cost_penalty - saturation_penalty
+    score_inputs = [
+        {"input": "history_avg_usefulness", "value": _round2(avg_usefulness), "weight": "((value-0.5)*40)"},
+        {"input": "history_avg_cost", "value": _round2(avg_cost), "weight": "-((value/100)*12)"},
+        {"input": "history_repeat_hit_saturation", "value": _round2(saturation), "weight": "-(value*18)"},
+        {
+            "input": f"history_track_payoff[{current_track}]",
+            "value": _round2(track_payoff),
+            "weight": "((value-0.5)*20)",
+        },
+        {"input": "history_net_delta", "value": history_delta, "weight": "derived"},
+    ]
+    return score_inputs, history_delta
+
+
+def normalize_probe_execution_outcomes(
+    *,
+    executed_probes: list[dict[str, Any]],
+    findings: list[dict[str, Any]],
+    conflicts: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    findings_count = len(findings)
+    conflicts_count = len(conflicts)
+    context_track = "risk_pressure" if findings_count > 0 or conflicts_count > 0 else "stability"
+    normalized: list[dict[str, Any]] = []
+    for probe in sorted(executed_probes, key=lambda row: str(row.get("probe_id", ""))):
+        if not isinstance(probe, dict):
+            continue
+        if str(probe.get("status", "")) != "executed":
+            continue
+        probe_id = str(probe.get("probe_id", "probe:unknown"))
+        result = str(probe.get("result", "unknown"))
+        cost = int(probe.get("cost", 0))
+        if result == "findings":
+            usefulness = 0.85 if findings_count > 0 or conflicts_count > 0 else 0.7
+        elif result == "ok":
+            usefulness = 0.7 if findings_count == 0 and conflicts_count == 0 else 0.45
+        else:
+            usefulness = 0.3
+        normalized.append(
+            {
+                "probe_id": probe_id,
+                "result": result,
+                "status": "executed",
+                "cost": cost,
+                "usefulness": _round2(usefulness),
+                "cost_normalized": _round2(min(1.0, max(0.0, cost / 100.0))),
+                "hit_key": f"{result}:{context_track}",
+                "context_track": context_track,
+            }
+        )
+    return normalized
+
+
+def apply_probe_memory_update(
+    *,
+    previous_memory: dict[str, Any] | None,
+    normalized_outcomes: list[dict[str, Any]],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    memory: dict[str, Any] = {"schema_version": "sdetkit.review.probe-memory.v1", "probes": {}}
+    if isinstance(previous_memory, dict):
+        memory["probes"] = previous_memory.get("probes", {}) if isinstance(previous_memory.get("probes"), dict) else {}
+    probes = memory["probes"]
+    run_updates: list[dict[str, Any]] = []
+    for outcome in sorted(normalized_outcomes, key=lambda item: str(item.get("probe_id", ""))):
+        probe_id = str(outcome.get("probe_id", "probe:unknown"))
+        probe_entry = probes.get(probe_id, {}) if isinstance(probes.get(probe_id), dict) else {}
+        history = probe_entry.get("outcomes", [])
+        if not isinstance(history, list):
+            history = []
+        history = [row for row in history if isinstance(row, dict)]
+        history.append(outcome)
+        history = history[-30:]
+
+        uses = [float(row.get("usefulness", 0.0)) for row in history]
+        costs = [int(row.get("cost", 0)) for row in history]
+        avg_usefulness = _round2(sum(uses) / len(uses))
+        avg_cost = _round2(sum(costs) / len(costs))
+
+        tail_result = str(history[-1].get("result", "unknown"))
+        repeat_hits = 1
+        for row in reversed(history[:-1]):
+            if str(row.get("result", "")) == tail_result:
+                repeat_hits += 1
+            else:
+                break
+        saturation = _round2(min(1.0, max(0.0, (repeat_hits - 1) / 3.0)))
+
+        track_buckets: dict[str, list[float]] = {}
+        for row in history:
+            track = str(row.get("context_track", "stability"))
+            track_buckets.setdefault(track, []).append(float(row.get("usefulness", 0.0)))
+        track_payoff = {track: _round2(sum(values) / len(values)) for track, values in sorted(track_buckets.items())}
+
+        aggregates = {
+            "runs": len(history),
+            "avg_usefulness": avg_usefulness,
+            "avg_cost": avg_cost,
+            "repeat_hit_result": tail_result,
+            "repeat_hit_count": repeat_hits,
+            "repeat_hit_saturation": saturation,
+            "track_payoff": track_payoff,
+        }
+        probe_entry["outcomes"] = history
+        probe_entry["aggregates"] = aggregates
+        probes[probe_id] = probe_entry
+        run_updates.append({"probe_id": probe_id, "aggregates": aggregates, "latest_outcome": outcome})
+
+    summary = {
+        "normalized_outcomes": normalized_outcomes,
+        "updates": run_updates,
+    }
+    return memory, summary
+
+
 @dataclass(frozen=True)
 class AdaptiveEscalationDecision:
     needed: bool
@@ -265,11 +405,13 @@ def plan_adaptive_probes(
     budget_total: int = 100,
     confidence_score: float = 0.0,
     confidence_threshold: float = 0.7,
+    probe_memory: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     contradictory = len(contradiction_graph.get("flat_contradictions", []))
     cluster_pressure = len(contradiction_graph.get("clusters", []))
     finding_pressure = sum(max(0, int(item.get("priority", 0))) for item in findings)
     history_pressure = len([row for row in changed if str(row.get("kind")) in {"status", "severity"}])
+    current_track = "risk_pressure" if contradictory > 0 or finding_pressure > 0 else "stability"
     registry = [
         ProbeDefinition(
             probe_id="probe:inspect-compare",
@@ -318,6 +460,13 @@ def plan_adaptive_probes(
                     "weight": 8,
                 }
             )
+        history_inputs, history_delta = derive_probe_score_history_inputs(
+            probe_id=probe.probe_id,
+            probe_memory=probe_memory,
+            current_track=current_track,
+        )
+        score += history_delta
+        score_inputs.extend(history_inputs)
         candidates.append(
             {
                 "probe_id": probe.probe_id,
