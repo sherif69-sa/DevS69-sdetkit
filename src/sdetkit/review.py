@@ -17,7 +17,6 @@ from .judgment import build_judgment, load_latest_previous_payload
 from .review_engine import (
     apply_probe_memory_update,
     apply_probe_result_feedback,
-    build_contradiction_graph,
     build_contradiction_clusters,
     build_staged_plan,
     build_typed_evidence_edges,

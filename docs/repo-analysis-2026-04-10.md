@@ -14,17 +14,17 @@ This is a quick structural and quality snapshot of the DevS69 SDETKit repository
 
 ## High-level architecture read
 
-1. **Product intent is clear and opinionated.**  
+1. **Product intent is clear and opinionated.**
    The repository is centered around deterministic release-confidence decisions with a canonical first path: `gate fast -> gate release -> doctor`.
 
-2. **Codebase is broad and mature.**  
+2. **Codebase is broad and mature.**
    Current repository-level counts from local scan:
    - **649** Python files
    - **183** Python modules under `src/sdetkit/`
    - **278** `test_*.py` files under `tests/`
    - **685** Markdown docs under `docs/`
 
-3. **The CLI surface is very large.**  
+3. **The CLI surface is very large.**
    Root help exposes a substantial command catalog (core gates + many advanced/supporting lanes), indicating this is both a product CLI and an automation platform.
 
 ## Operational findings
