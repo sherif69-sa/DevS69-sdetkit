@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .security import SecurityError, safe_path
+
 WORKSPACE_SCHEMA_VERSION = "sdetkit.evidence.workspace.v1"
 
 
@@ -54,6 +56,11 @@ def record_workspace_run(
     artifacts: dict[str, str],
     recommendations: list[str],
 ) -> dict[str, Any]:
+    try:
+        workspace_root = safe_path(Path.cwd(), workspace_root.as_posix(), allow_absolute=True)
+    except SecurityError as exc:
+        raise ValueError(f"workspace root rejected: {exc}") from exc
+
     workflow_slug = _safe_slug(workflow)
     scope_slug = _safe_slug(scope)
     canonical_payload = _stable_json_text(payload)

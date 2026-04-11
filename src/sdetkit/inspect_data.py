@@ -11,6 +11,7 @@ from typing import Any
 
 from .evidence_workspace import record_workspace_run
 from .judgment import build_judgment, load_latest_previous_payload
+from .security import SecurityError, safe_path
 
 SCHEMA_VERSION = "sdetkit.inspect.v2"
 EXIT_OK = 0
@@ -697,7 +698,12 @@ def run_inspect(
     record_workspace: bool = True,
     workspace_scope: str | None = None,
 ) -> tuple[int, dict[str, Any], Path, Path]:
-    target = input_path.resolve()
+    try:
+        target = safe_path(Path.cwd(), input_path.as_posix(), allow_absolute=True).resolve()
+        out_dir = safe_path(Path.cwd(), out_dir.as_posix(), allow_absolute=True)
+        workspace_root = safe_path(Path.cwd(), workspace_root.as_posix(), allow_absolute=True)
+    except SecurityError as exc:
+        raise ValueError(f"inspect: path rejected: {exc}") from exc
     if not target.exists():
         raise ValueError(f"inspect: input path does not exist: {target}")
 
@@ -904,7 +910,11 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write("inspect: missing input path (or use --rules-template)\n")
         return EXIT_FINDINGS
 
-    target = Path(ns.path).resolve()
+    try:
+        target = safe_path(Path.cwd(), ns.path, allow_absolute=True).resolve()
+    except SecurityError as exc:
+        sys.stderr.write(f"inspect: path rejected: {exc}\n")
+        return EXIT_FINDINGS
 
     rules_payload: dict[str, Any] = {}
     if ns.rules:
@@ -913,15 +923,22 @@ def main(argv: list[str] | None = None) -> int:
             sys.stderr.write(error + "\n")
             return EXIT_FINDINGS
         rules_payload = loaded if loaded is not None else {}
-    out_dir = (
-        Path(ns.out_dir) if ns.out_dir else Path(".sdetkit") / "inspect" / _safe_slug(target.name)
-    )
+    try:
+        out_dir = (
+            safe_path(Path.cwd(), ns.out_dir, allow_absolute=True)
+            if ns.out_dir
+            else (Path(".sdetkit") / "inspect" / _safe_slug(target.name))
+        )
+        workspace_root = safe_path(Path.cwd(), ns.workspace_root, allow_absolute=True)
+    except SecurityError as exc:
+        sys.stderr.write(f"inspect: path rejected: {exc}\n")
+        return EXIT_FINDINGS
     try:
         rc, payload, _, _ = run_inspect(
             input_path=target,
             out_dir=out_dir,
             rules_payload=rules_payload,
-            workspace_root=Path(ns.workspace_root),
+            workspace_root=workspace_root,
             record_workspace=not ns.no_workspace,
         )
     except ValueError as exc:

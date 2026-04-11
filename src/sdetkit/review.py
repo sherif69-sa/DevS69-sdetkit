@@ -31,6 +31,7 @@ from .review_engine import (
     rank_likely_issue_tracks,
     summarize_history_delta,
 )
+from .security import SecurityError, safe_path
 
 SCHEMA_VERSION = "sdetkit.review.v3"
 REVIEW_CONTRACT_VERSION = "sdetkit.review.contract.v1"
@@ -458,7 +459,12 @@ def run_review(
     profile: str = "release",
     no_workspace: bool = False,
 ) -> tuple[int, dict[str, Any], Path, Path]:
-    target = target.resolve()
+    try:
+        target = safe_path(Path.cwd(), target.as_posix(), allow_absolute=True).resolve()
+        out_dir = safe_path(Path.cwd(), out_dir.as_posix(), allow_absolute=True)
+        workspace_root = safe_path(Path.cwd(), workspace_root.as_posix(), allow_absolute=True)
+    except SecurityError as exc:
+        raise ValueError(f"review: path rejected: {exc}") from exc
     if not target.exists():
         raise ValueError(f"review: path does not exist: {target}")
 
@@ -1262,17 +1268,22 @@ def _build_arg_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     ns = _build_arg_parser().parse_args(argv)
-    target = Path(ns.path)
-    out_dir = (
-        Path(ns.out_dir)
-        if ns.out_dir
-        else Path(".sdetkit") / "review" / _safe_slug(target.resolve().name)
-    )
+    try:
+        target = safe_path(Path.cwd(), ns.path, allow_absolute=True)
+        out_dir = (
+            safe_path(Path.cwd(), ns.out_dir, allow_absolute=True)
+            if ns.out_dir
+            else Path(".sdetkit") / "review" / _safe_slug(target.resolve().name)
+        )
+        workspace_root = safe_path(Path.cwd(), ns.workspace_root, allow_absolute=True)
+    except SecurityError as exc:
+        sys.stderr.write(f"review: path rejected: {exc}\n")
+        return EXIT_FINDINGS
     try:
         rc, payload, _, _ = run_review(
             target=target,
             out_dir=out_dir,
-            workspace_root=Path(ns.workspace_root),
+            workspace_root=workspace_root,
             profile=ns.profile,
             no_workspace=ns.no_workspace,
         )

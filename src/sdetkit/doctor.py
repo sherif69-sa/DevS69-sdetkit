@@ -2920,16 +2920,30 @@ def main(argv: list[str] | None = None) -> int:
         if is_json:
             output = _stable_json(data)
 
+    out_path: Path | None = None
     if ns.out:
-        Path(ns.out).write_text(output, encoding="utf-8")
-        data["output_path"] = str(ns.out)
+        try:
+            out_path = safe_path(root, str(ns.out), allow_absolute=True)
+        except SecurityError as exc:
+            sys.stderr.write(f"doctor: --out rejected: {exc}\n")
+            return EXIT_FAILED
+        out_path.write_text(output, encoding="utf-8")
+        data["output_path"] = out_path.as_posix()
     else:
         data["output_path"] = ""
+
+    evidence_dir: Path | None = None
+    if isinstance(ns.evidence_dir, str) and ns.evidence_dir.strip():
+        try:
+            evidence_dir = safe_path(root, ns.evidence_dir.strip(), allow_absolute=True)
+        except SecurityError as exc:
+            sys.stderr.write(f"doctor: --evidence-dir rejected: {exc}\n")
+            return EXIT_FAILED
 
     if isinstance(ns.evidence_dir, str) and ns.evidence_dir.strip():
         evidence_ok, evidence_error = _write_evidence(
             root,
-            Path(ns.evidence_dir.strip()),
+            evidence_dir if evidence_dir is not None else Path(ns.evidence_dir.strip()),
             data,
             profile=str(getattr(ns, "evidence_profile", "full")),
             include=str(getattr(ns, "evidence_include", "all")),
@@ -2949,11 +2963,15 @@ def main(argv: list[str] | None = None) -> int:
             return EXIT_FAILED
 
     if not ns.no_workspace:
+        try:
+            workspace_root = safe_path(root, str(ns.workspace_root), allow_absolute=True)
+        except SecurityError as exc:
+            sys.stderr.write(f"doctor: --workspace-root rejected: {exc}\n")
+            return EXIT_FAILED
         workspace_artifacts: dict[str, str] = {}
-        if ns.out:
-            workspace_artifacts["doctor_output"] = str(ns.out)
-        if isinstance(ns.evidence_dir, str) and ns.evidence_dir.strip():
-            evidence_dir = Path(ns.evidence_dir.strip())
+        if out_path is not None:
+            workspace_artifacts["doctor_output"] = out_path.as_posix()
+        if evidence_dir is not None:
             workspace_artifacts["doctor_evidence_json"] = (
                 evidence_dir / "doctor-evidence.json"
             ).as_posix()
@@ -2964,7 +2982,7 @@ def main(argv: list[str] | None = None) -> int:
                 evidence_dir / "doctor-evidence-manifest.json"
             ).as_posix()
         workspace_entry = record_workspace_run(
-            workspace_root=Path(ns.workspace_root),
+            workspace_root=workspace_root,
             workflow="doctor",
             scope=root.name or "repo",
             payload=data,
@@ -2974,8 +2992,8 @@ def main(argv: list[str] | None = None) -> int:
         data["workspace"] = workspace_entry
         if is_json:
             output = _stable_json(data)
-            if ns.out:
-                Path(ns.out).write_text(output, encoding="utf-8")
+            if out_path is not None:
+                out_path.write_text(output, encoding="utf-8")
 
     sys.stdout.write(output)
 
