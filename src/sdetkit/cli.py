@@ -262,6 +262,16 @@ Then use stability-aware command discovery:
     inspect_compare_parser.add_argument("--out-dir", default=None)
     inspect_compare_parser.add_argument("--no-workspace", action="store_true")
     inspect_compare_parser.add_argument("args", nargs=argparse.REMAINDER)
+    inspect_project_parser = sub.add_parser(
+        "inspect-project",
+        help="[Advanced but supported] Run reusable inspection policy packs over project datasets",
+    )
+    inspect_project_parser.add_argument("project_dir")
+    inspect_project_parser.add_argument("--policy", default=None)
+    inspect_project_parser.add_argument("--workspace-root", default=None)
+    inspect_project_parser.add_argument("--out-dir", default=None)
+    inspect_project_parser.add_argument("--format", choices=["text", "json"], default=None)
+    inspect_project_parser.add_argument("--no-workspace", action="store_true")
 
     ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
     _add_apiget_args(ag)
@@ -1277,6 +1287,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if ns.no_workspace:
             forwarded = ["--no-workspace", *forwarded]
         return _run_module_main("sdetkit.inspect_compare", forwarded)
+    if ns.cmd == "inspect-project":
+        forwarded = [ns.project_dir]
+        if ns.policy:
+            forwarded.extend(["--policy", ns.policy])
+        if ns.workspace_root:
+            forwarded.extend(["--workspace-root", ns.workspace_root])
+        if ns.out_dir:
+            forwarded.extend(["--out-dir", ns.out_dir])
+        if ns.format:
+            forwarded.extend(["--format", ns.format])
+        if ns.no_workspace:
+            forwarded.append("--no-workspace")
+        return _run_module_main("sdetkit.inspect_project", forwarded)
 
     if ns.cmd == "patch":
         return _run_module_main("sdetkit.patch", ns.args)

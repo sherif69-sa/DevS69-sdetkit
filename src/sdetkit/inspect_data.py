@@ -669,57 +669,34 @@ def _load_rules_payload(path: str) -> tuple[dict[str, Any] | None, str | None]:
     return loaded, None
 
 
-def main(argv: list[str] | None = None) -> int:
-    ns = _build_arg_parser().parse_args(argv)
-    if ns.rules and ns.rules_template:
-        sys.stderr.write("inspect: --rules and --rules-template cannot be used together\n")
-        return EXIT_FINDINGS
-    if ns.rules_lint and ns.rules_template:
-        sys.stderr.write("inspect: --rules-lint and --rules-template cannot be used together\n")
-        return EXIT_FINDINGS
-    if ns.rules_lint and ns.rules:
-        sys.stderr.write("inspect: --rules-lint and --rules cannot be used together\n")
-        return EXIT_FINDINGS
-
-    if ns.rules_template:
-        sys.stdout.write(json.dumps(RULES_TEMPLATE, indent=2, sort_keys=True) + "\n")
-        return EXIT_OK
-
-    if ns.rules_lint:
-        _, error = _load_rules_payload(ns.rules_lint)
-        if error:
-            sys.stderr.write(f"inspect: rules lint FAILED: {error}\n")
-            return EXIT_FINDINGS
-        sys.stdout.write("inspect: rules lint OK\n")
-        return EXIT_OK
-
-    if not ns.path:
-        sys.stderr.write("inspect: missing input path (or use --rules-template)\n")
-        return EXIT_FINDINGS
-
-    target = Path(ns.path).resolve()
+def run_inspect(
+    *,
+    input_path: Path,
+    out_dir: Path,
+    rules_payload: dict[str, Any] | None = None,
+    workspace_root: Path = Path(".sdetkit/workspace"),
+    record_workspace: bool = True,
+    workspace_scope: str | None = None,
+) -> tuple[int, dict[str, Any], Path, Path]:
+    target = input_path.resolve()
     if not target.exists():
-        sys.stderr.write(f"inspect: input path does not exist: {target}\n")
-        return EXIT_FINDINGS
+        raise ValueError(f"inspect: input path does not exist: {target}")
 
     files, skipped = _discover_supported_files(target)
     if not files:
-        sys.stderr.write("inspect: no supported evidence files found (expected .csv or .json)\n")
-        return EXIT_FINDINGS
+        raise ValueError("inspect: no supported evidence files found (expected .csv or .json)")
 
-    rules_payload: dict[str, Any] = {}
-    if ns.rules:
-        loaded, error = _load_rules_payload(ns.rules)
-        if error:
-            sys.stderr.write(error + "\n")
-            return EXIT_FINDINGS
-        rules_payload = loaded if loaded is not None else {}
-    file_rules = rules_payload.get("files", {}) if isinstance(rules_payload, dict) else {}
-    cross_file_rules = (
-        rules_payload.get("cross_file_rules", []) if isinstance(rules_payload, dict) else []
-    )
+    loaded_rules = rules_payload if isinstance(rules_payload, dict) else {}
+    validation_error = _validate_rules_payload(loaded_rules)
+    if validation_error:
+        raise ValueError(validation_error)
 
-    reports = [_analyze_file(path, root=target if target.is_dir() else target.parent, file_rules=file_rules) for path in files]
+    file_rules = loaded_rules.get("files", {})
+    cross_file_rules = loaded_rules.get("cross_file_rules", [])
+    reports = [
+        _analyze_file(path, root=target if target.is_dir() else target.parent, file_rules=file_rules)
+        for path in files
+    ]
     cross_file = _cross_file_diagnostics(reports)
     cross_file_rule_results = _rule_cross_file_checks(reports, cross_file_rules)
 
@@ -732,7 +709,9 @@ def main(argv: list[str] | None = None) -> int:
             "missing_value_columns": sum(
                 int(r["diagnostics"]["missing_value_columns"]) for r in reports
             ),
-            "duplicate_row_groups": sum(int(r["diagnostics"]["duplicate_row_groups"]) for r in reports),
+            "duplicate_row_groups": sum(
+                int(r["diagnostics"]["duplicate_row_groups"]) for r in reports
+            ),
             "inconsistent_type_columns": sum(
                 int(r["diagnostics"]["inconsistent_type_columns"]) for r in reports
             ),
@@ -773,18 +752,18 @@ def main(argv: list[str] | None = None) -> int:
         },
     }
 
-    out_dir = Path(ns.out_dir) if ns.out_dir else Path(".sdetkit") / "inspect" / _safe_slug(target.name)
     out_dir.mkdir(parents=True, exist_ok=True)
     json_path = out_dir / "inspect.json"
     txt_path = out_dir / "inspect.txt"
     json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     txt_path.write_text(_render_text(payload), encoding="utf-8")
 
-    if not ns.no_workspace:
+    if record_workspace:
+        scope_name = workspace_scope if workspace_scope else _safe_slug(target.name)
         workspace_entry = record_workspace_run(
-            workspace_root=Path(ns.workspace_root),
+            workspace_root=workspace_root,
             workflow="inspect",
-            scope=_safe_slug(target.name),
+            scope=scope_name,
             payload=payload,
             artifacts={
                 "inspect_json": json_path.as_posix(),
@@ -794,10 +773,62 @@ def main(argv: list[str] | None = None) -> int:
         )
         payload["workspace"] = workspace_entry
         json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return (EXIT_OK if payload["ok"] else EXIT_FINDINGS), payload, json_path, txt_path
+
+
+def main(argv: list[str] | None = None) -> int:
+    ns = _build_arg_parser().parse_args(argv)
+    if ns.rules and ns.rules_template:
+        sys.stderr.write("inspect: --rules and --rules-template cannot be used together\n")
+        return EXIT_FINDINGS
+    if ns.rules_lint and ns.rules_template:
+        sys.stderr.write("inspect: --rules-lint and --rules-template cannot be used together\n")
+        return EXIT_FINDINGS
+    if ns.rules_lint and ns.rules:
+        sys.stderr.write("inspect: --rules-lint and --rules cannot be used together\n")
+        return EXIT_FINDINGS
+
+    if ns.rules_template:
+        sys.stdout.write(json.dumps(RULES_TEMPLATE, indent=2, sort_keys=True) + "\n")
+        return EXIT_OK
+
+    if ns.rules_lint:
+        _, error = _load_rules_payload(ns.rules_lint)
+        if error:
+            sys.stderr.write(f"inspect: rules lint FAILED: {error}\n")
+            return EXIT_FINDINGS
+        sys.stdout.write("inspect: rules lint OK\n")
+        return EXIT_OK
+
+    if not ns.path:
+        sys.stderr.write("inspect: missing input path (or use --rules-template)\n")
+        return EXIT_FINDINGS
+
+    target = Path(ns.path).resolve()
+
+    rules_payload: dict[str, Any] = {}
+    if ns.rules:
+        loaded, error = _load_rules_payload(ns.rules)
+        if error:
+            sys.stderr.write(error + "\n")
+            return EXIT_FINDINGS
+        rules_payload = loaded if loaded is not None else {}
+    out_dir = Path(ns.out_dir) if ns.out_dir else Path(".sdetkit") / "inspect" / _safe_slug(target.name)
+    try:
+        rc, payload, _, _ = run_inspect(
+            input_path=target,
+            out_dir=out_dir,
+            rules_payload=rules_payload,
+            workspace_root=Path(ns.workspace_root),
+            record_workspace=not ns.no_workspace,
+        )
+    except ValueError as exc:
+        sys.stderr.write(str(exc) + "\n")
+        return EXIT_FINDINGS
 
     output = json.dumps(payload, sort_keys=True) if ns.format == "json" else _render_text(payload)
     sys.stdout.write(output + ("\n" if not output.endswith("\n") else ""))
-    return EXIT_OK if payload["ok"] else EXIT_FINDINGS
+    return rc
 
 
 if __name__ == "__main__":  # pragma: no cover

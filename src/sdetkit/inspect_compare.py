@@ -274,15 +274,17 @@ def _resolve_pair(ns: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any
     )
 
 
-def main(argv: list[str] | None = None) -> int:
-    ns = _build_arg_parser().parse_args(argv)
-
-    try:
-        left_payload, right_payload, left_label, right_label = _resolve_pair(ns)
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
-        sys.stderr.write(str(exc) + "\n")
-        return EXIT_FINDINGS
-
+def run_compare(
+    *,
+    left_payload: dict[str, Any],
+    right_payload: dict[str, Any],
+    left_label: str,
+    right_label: str,
+    out_dir: Path,
+    out_scope: str,
+    workspace_root: Path = Path(".sdetkit/workspace"),
+    record_workspace: bool = True,
+) -> tuple[int, dict[str, Any], Path, Path]:
     left_reports = {
         _report_key(item): item
         for item in left_payload.get("file_reports", [])
@@ -302,8 +304,7 @@ def main(argv: list[str] | None = None) -> int:
     left_diag = left_payload.get("summary", {}).get("diagnostics", {})
     right_diag = right_payload.get("summary", {}).get("diagnostics", {})
     if not isinstance(left_diag, dict) or not isinstance(right_diag, dict):
-        sys.stderr.write("compare: inspect payload missing summary.diagnostics object\n")
-        return EXIT_FINDINGS
+        raise ValueError("compare: inspect payload missing summary.diagnostics object")
     diagnostic_deltas = _diagnostics_delta(left_diag, right_diag)
 
     left_coverage_gap = sum(_coverage_gap(r) for r in left_reports.values())
@@ -396,17 +397,15 @@ def main(argv: list[str] | None = None) -> int:
         },
     }
 
-    out_scope = ns.scope or _safe_slug(Path(left_label).name + "-vs-" + Path(right_label).name)
-    out_dir = Path(ns.out_dir) if ns.out_dir else Path(".sdetkit") / "inspect-compare" / _safe_slug(out_scope)
     out_dir.mkdir(parents=True, exist_ok=True)
     json_path = out_dir / "inspect-compare.json"
     txt_path = out_dir / "inspect-compare.txt"
     json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     txt_path.write_text(_render_text(payload), encoding="utf-8")
 
-    if not ns.no_workspace:
+    if record_workspace:
         workspace_entry = record_workspace_run(
-            workspace_root=Path(ns.workspace_root),
+            workspace_root=workspace_root,
             workflow="inspect-compare",
             scope=str(out_scope),
             payload=payload,
@@ -418,10 +417,38 @@ def main(argv: list[str] | None = None) -> int:
         )
         payload["workspace"] = workspace_entry
         json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return (EXIT_OK if payload["ok"] else EXIT_FINDINGS), payload, json_path, txt_path
+
+
+def main(argv: list[str] | None = None) -> int:
+    ns = _build_arg_parser().parse_args(argv)
+
+    try:
+        left_payload, right_payload, left_label, right_label = _resolve_pair(ns)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        sys.stderr.write(str(exc) + "\n")
+        return EXIT_FINDINGS
+
+    out_scope = ns.scope or _safe_slug(Path(left_label).name + "-vs-" + Path(right_label).name)
+    out_dir = Path(ns.out_dir) if ns.out_dir else Path(".sdetkit") / "inspect-compare" / _safe_slug(out_scope)
+    try:
+        rc, payload, _, _ = run_compare(
+            left_payload=left_payload,
+            right_payload=right_payload,
+            left_label=left_label,
+            right_label=right_label,
+            out_dir=out_dir,
+            out_scope=str(out_scope),
+            workspace_root=Path(ns.workspace_root),
+            record_workspace=not ns.no_workspace,
+        )
+    except ValueError as exc:
+        sys.stderr.write(str(exc) + "\n")
+        return EXIT_FINDINGS
 
     output = json.dumps(payload, sort_keys=True) if ns.format == "json" else _render_text(payload)
     sys.stdout.write(output + ("\n" if not output.endswith("\n") else ""))
-    return EXIT_OK if payload["ok"] else EXIT_FINDINGS
+    return rc
 
 
 if __name__ == "__main__":  # pragma: no cover
