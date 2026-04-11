@@ -33,7 +33,8 @@ from .review_engine import (
     summarize_history_delta,
 )
 
-SCHEMA_VERSION = "sdetkit.review.v2"
+SCHEMA_VERSION = "sdetkit.review.v3"
+REVIEW_CONTRACT_VERSION = "sdetkit.review.contract.v1"
 EXIT_OK = 0
 EXIT_FINDINGS = 2
 
@@ -763,6 +764,7 @@ def run_review(
         )
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
+        "contract_version": REVIEW_CONTRACT_VERSION,
         "tool": "sdetkit",
         "workflow": "review",
         "profile": {
@@ -893,17 +895,22 @@ def run_review(
     payload["profile"]["packet_type"] = profile_packet["packet_type"]
     payload["profile"]["output_strategy"] = profile_packet["packet_type"]
     payload["profile_packet"] = profile_packet
+    payload["operator_summary"] = _build_operator_summary(payload)
 
     json_path = out_dir / "review.json"
     txt_path = out_dir / "review.txt"
     packet_json_path = out_dir / _profile_packet_filename(selected_profile.name)
+    operator_json_path = out_dir / "review-operator-summary.json"
     review_plan_path = out_dir / "review-plan.json"
     review_tracks_path = out_dir / "review-tracks.json"
     artifact_index["profile_packet_json"] = packet_json_path.as_posix()
+    artifact_index["operator_summary_json"] = operator_json_path.as_posix()
     artifact_index["review_plan_json"] = review_plan_path.as_posix()
     artifact_index["review_tracks_json"] = review_tracks_path.as_posix()
     payload["artifact_index"] = artifact_index
+    payload["operator_summary"]["artifacts"] = artifact_index
     packet_json_path.write_text(json.dumps(profile_packet, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    operator_json_path.write_text(json.dumps(payload["operator_summary"], sort_keys=True, indent=2) + "\n", encoding="utf-8")
     review_plan_path.write_text(json.dumps(adaptive_plan, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     review_tracks_path.write_text(json.dumps({"tracks": likely_tracks}, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     json_path.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
@@ -933,6 +940,9 @@ def run_review(
 
 
 def _render_text(payload: dict[str, Any]) -> str:
+    operator = payload.get("operator_summary", {})
+    if not isinstance(operator, dict):
+        operator = {}
     profile = payload.get("profile", {})
     profile_name = str(profile.get("name", "release")) if isinstance(profile, dict) else "release"
     max_matters = 5
@@ -963,6 +973,25 @@ def _render_text(payload: dict[str, Any]) -> str:
         if not isinstance(item, dict):
             continue
         lines.append(f"- [{item.get('priority', 0)}] {item.get('kind')}: {item.get('message')}")
+    snapshot = operator.get("situation", {})
+    if isinstance(snapshot, dict):
+        lines.append("operator_snapshot:")
+        lines.append(f"- findings: {snapshot.get('findings_count', 0)}")
+        lines.append(f"- contradictions: {snapshot.get('contradictions_count', 0)}")
+        lines.append(f"- likely_tracks: {snapshot.get('likely_tracks_count', 0)}")
+        lines.append(f"- probes_executed: {snapshot.get('executed_probes_count', 0)}")
+    changed = operator.get("changed_since_previous", [])
+    if isinstance(changed, list) and changed:
+        lines.append("what_changed:")
+        for row in changed[:3]:
+            if not isinstance(row, dict):
+                continue
+            lines.append(f"- {row.get('kind')}: {row.get('message')}")
+    why = operator.get("judgment_rationale", [])
+    if isinstance(why, list) and why:
+        lines.append("why_this_judgment:")
+        for row in why[:4]:
+            lines.append(f"- {row}")
     if profile_name == "triage":
         lines.append("next_actions_now:")
     elif profile_name == "monitor":
@@ -1023,6 +1052,98 @@ def _render_text(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
+    tracks = [row for row in payload.get("likely_issue_tracks", []) if isinstance(row, dict)]
+    conflicts = [row for row in payload.get("conflicting_evidence", []) if isinstance(row, dict)]
+    findings = [row for row in payload.get("top_matters", []) if isinstance(row, dict)]
+    adaptive = payload.get("adaptive_review", {})
+    executed_probes = []
+    if isinstance(adaptive, dict):
+        executed_probes = [
+            row for row in adaptive.get("executed_probes", []) if isinstance(row, dict) and row.get("status") == "executed"
+        ]
+    thresholds = payload.get("judgment", {}).get("profile_thresholds", {})
+    if not isinstance(thresholds, dict):
+        thresholds = {}
+    effective_priority = thresholds.get("effective_max_priority", 0)
+    rationale: list[str] = []
+    rationale.append(
+        f"Status is '{payload.get('status')}' because effective priority reached "
+        f"{effective_priority} "
+        f"and contradictions count is {len(conflicts)}."
+    )
+    confidence = payload.get("confidence", {})
+    if isinstance(confidence, dict):
+        rationale.append(
+            f"Confidence is {confidence.get('score')} ({confidence.get('level', 'unknown')}) from available workflow evidence."
+        )
+    if tracks:
+        top_track = tracks[0]
+        rationale.append(
+            f"Top likely issue track is '{top_track.get('track')}' with likelihood {top_track.get('likelihood')}."
+        )
+    if conflicts:
+        rationale.append(f"{len(conflicts)} contradiction signal(s) require verification before full trust.")
+    actions = [row for row in payload.get("prioritized_actions", []) if isinstance(row, dict)]
+    return {
+        "contract_version": REVIEW_CONTRACT_VERSION,
+        "situation": {
+            "status": payload.get("status"),
+            "severity": payload.get("severity"),
+            "confidence_score": payload.get("confidence", {}).get("score"),
+            "findings_count": len(findings),
+            "contradictions_count": len(conflicts),
+            "likely_tracks_count": len(tracks),
+            "executed_probes_count": len(executed_probes),
+        },
+        "judgment_rationale": rationale,
+        "changed_since_previous": [row for row in payload.get("changed_since_previous", []) if isinstance(row, dict)][:5],
+        "actions": {
+            "now": [row for row in actions if row.get("tier") == "now"][:5],
+            "next": [row for row in actions if row.get("tier") == "next"][:5],
+            "monitor": [row for row in actions if row.get("tier") == "monitor"][:5],
+        },
+        "contradictions": conflicts[:5],
+        "tracks": tracks[:5],
+        "probes": executed_probes[:5],
+        "artifacts": payload.get("artifact_index", {}),
+    }
+
+
+def _run_interactive_review(payload: dict[str, Any]) -> None:
+    operator = payload.get("operator_summary", {})
+    if not isinstance(operator, dict):
+        operator = {}
+    sections = {
+        "1": ("situation", operator.get("situation", {})),
+        "2": ("why_this_judgment", operator.get("judgment_rationale", [])),
+        "3": ("what_changed", operator.get("changed_since_previous", [])),
+        "4": ("actions", operator.get("actions", {})),
+        "5": ("likely_tracks", operator.get("tracks", [])),
+        "6": ("contradictions", operator.get("contradictions", [])),
+        "7": ("probes", operator.get("probes", [])),
+        "8": ("artifacts", operator.get("artifacts", {})),
+    }
+    sys.stdout.write("SDETKit interactive review navigator\n")
+    sys.stdout.write("Choose section: [1] situation [2] why [3] changed [4] actions [5] tracks [6] contradictions [7] probes [8] artifacts [q] quit\n")
+    while True:
+        sys.stdout.write("> ")
+        sys.stdout.flush()
+        choice = sys.stdin.readline()
+        if choice is None:
+            break
+        value = choice.strip().lower()
+        if value in {"q", "quit", "exit", ""}:
+            break
+        selected = sections.get(value)
+        if not selected:
+            sys.stdout.write("unknown option\n")
+            continue
+        name, body = selected
+        sys.stdout.write(f"[{name}]\n")
+        sys.stdout.write(json.dumps(body, sort_keys=True, indent=2) + "\n")
+
+
 def _build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sdetkit review",
@@ -1038,6 +1159,11 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         help="Review operating profile: release, triage, forensics, monitor.",
     )
     p.add_argument("--format", choices=["text", "json"], default="text")
+    p.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Open an interactive operator navigator after review completes.",
+    )
     p.add_argument("--no-workspace", action="store_true", help="Disable workspace history recording")
     return p
 
@@ -1060,6 +1186,8 @@ def main(argv: list[str] | None = None) -> int:
 
     output = json.dumps(payload, sort_keys=True) if ns.format == "json" else _render_text(payload)
     sys.stdout.write(output + ("\n" if not output.endswith("\n") else ""))
+    if ns.interactive:
+        _run_interactive_review(payload)
     return rc
 
 

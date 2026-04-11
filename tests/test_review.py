@@ -88,6 +88,9 @@ def test_cli_review_command_outputs_json(tmp_path: Path) -> None:
     payload = json.loads(run.stdout)
     assert payload["workflow"] == "review"
     assert payload["path"].endswith("events.csv")
+    assert payload["schema_version"] == "sdetkit.review.v3"
+    assert payload["contract_version"] == "sdetkit.review.contract.v1"
+    assert "operator_summary" in payload
 
 
 def test_review_profiles_change_judgment_and_artifacts_for_same_input(tmp_path: Path) -> None:
@@ -157,6 +160,56 @@ def test_review_profile_packets_and_text_are_profile_specific(tmp_path: Path) ->
         assert marker in text
         assert "adaptive_review:" in text
         assert "likely_issue_tracks:" in text
+        assert "operator_snapshot:" in text
+
+
+def test_review_operator_summary_artifact_written(tmp_path: Path) -> None:
+    data = tmp_path / "events.csv"
+    workspace = tmp_path / "workspace"
+    out_dir = tmp_path / "out"
+    data.write_text("id,type\nE1,open\nE1,open\n", encoding="utf-8")
+
+    rc, payload, _, _ = review.run_review(
+        target=data,
+        out_dir=out_dir,
+        workspace_root=workspace,
+    )
+
+    assert rc == 2
+    artifact_path = Path(payload["artifact_index"]["operator_summary_json"])
+    assert artifact_path.exists()
+    operator_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    assert operator_payload["contract_version"] == "sdetkit.review.contract.v1"
+    assert "judgment_rationale" in operator_payload
+    assert "actions" in operator_payload
+
+
+def test_cli_review_interactive_navigator_outputs_selected_section(tmp_path: Path) -> None:
+    data = tmp_path / "events.csv"
+    data.write_text("id,type\nE1,open\n", encoding="utf-8")
+
+    run = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "sdetkit",
+            "review",
+            str(data),
+            "--workspace-root",
+            str(tmp_path / "workspace"),
+            "--format",
+            "text",
+            "--interactive",
+            "--no-workspace",
+        ],
+        input="1\nq\n",
+        text=True,
+        capture_output=True,
+    )
+
+    assert run.returncode == 0
+    assert "SDETKit interactive review navigator" in run.stdout
+    assert "[situation]" in run.stdout
 
 
 def test_review_clean_evidence_stops_early_without_deepen_stage(tmp_path: Path) -> None:
