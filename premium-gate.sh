@@ -301,8 +301,13 @@ run_plan() {
 
   local quality_title quality_cmd
   if [[ "$MODE" == "full" ]]; then
-    quality_title="Quality (full verification)"
-    quality_cmd="bash quality.sh verify"
+    if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+      quality_title="Quality (premerge strict changed-files)"
+      quality_cmd="bash quality.sh premerge"
+    else
+      quality_title="Quality (full verification)"
+      quality_cmd="bash quality.sh verify"
+    fi
   else
     quality_title="Quality (fast/smoke)"
     quality_cmd="bash quality.sh ci"
