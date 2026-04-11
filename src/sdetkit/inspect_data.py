@@ -9,6 +9,8 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from .evidence_workspace import record_workspace_run
+
 SCHEMA_VERSION = "sdetkit.inspect.v2"
 EXIT_OK = 0
 EXIT_FINDINGS = 2
@@ -571,6 +573,16 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Validate an inspect rules JSON file and exit (no dataset scan).",
     )
+    p.add_argument(
+        "--workspace-root",
+        default=".sdetkit/workspace",
+        help="Shared evidence workspace root for inspect/doctor run records.",
+    )
+    p.add_argument(
+        "--no-workspace",
+        action="store_true",
+        help="Disable shared workspace run recording.",
+    )
     return p
 
 
@@ -767,6 +779,21 @@ def main(argv: list[str] | None = None) -> int:
     txt_path = out_dir / "inspect.txt"
     json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     txt_path.write_text(_render_text(payload), encoding="utf-8")
+
+    if not ns.no_workspace:
+        workspace_entry = record_workspace_run(
+            workspace_root=Path(ns.workspace_root),
+            workflow="inspect",
+            scope=_safe_slug(target.name),
+            payload=payload,
+            artifacts={
+                "inspect_json": json_path.as_posix(),
+                "inspect_text": txt_path.as_posix(),
+            },
+            recommendations=list(payload.get("recommendations", [])),
+        )
+        payload["workspace"] = workspace_entry
+        json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     output = json.dumps(payload, sort_keys=True) if ns.format == "json" else _render_text(payload)
     sys.stdout.write(output + ("\n" if not output.endswith("\n") else ""))
