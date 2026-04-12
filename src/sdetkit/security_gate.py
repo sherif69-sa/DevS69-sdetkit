@@ -44,6 +44,9 @@ SKIP_DIRS = {
     ".pytest_cache",
     ".sdetkit",
 }
+SKIP_PATH_PREFIXES = (
+    "docs/artifacts/",
+)
 TEXT_EXTENSIONS = {
     ".py",
     ".md",
@@ -471,6 +474,9 @@ def _iter_files(root: Path) -> list[Path]:
             continue
         if any(part in SKIP_DIRS for part in p.parts):
             continue
+        rel = p.relative_to(root).as_posix()
+        if any(rel.startswith(prefix) for prefix in SKIP_PATH_PREFIXES):
+            continue
         if not _should_scan_file(p):
             continue
         try:
@@ -856,8 +862,9 @@ def _to_text(findings: list[Finding], *, sbom_components: int = 0) -> str:
 
 
 def _to_sarif(findings: list[Finding]) -> dict[str, Any]:
+    reportable = [f for f in findings if f.severity in {"warn", "error"}]
     rules = []
-    for rid in sorted({f.rule_id for f in findings}):
+    for rid in sorted({f.rule_id for f in reportable}):
         meta = RULES[rid]
         rules.append(
             {
@@ -874,7 +881,7 @@ def _to_sarif(findings: list[Finding]) -> dict[str, Any]:
             }
         )
     results = []
-    for f in findings:
+    for f in reportable:
         results.append(
             {
                 "ruleId": f.rule_id,

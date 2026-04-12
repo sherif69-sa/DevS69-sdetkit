@@ -69,12 +69,25 @@ def test_security_gate_helper_paths_and_rendering(tmp_path: Path) -> None:
     secret_line = "api_" + "key=ABCDEFGH\n"
     findings = sg._scan_text_patterns("src/a.py", secret_line)
     assert any(x.rule_id == "SEC_SECRET_PATTERN" for x in findings)
+    findings.append(
+        sg.Finding(
+            rule_id="SEC_DEBUG_PRINT",
+            severity="info",
+            path="src/a.py",
+            line=2,
+            column=1,
+            message="debug print",
+            suggestion="",
+            fingerprint="fp-debug",
+        )
+    )
 
     payload = sg._to_json_payload(findings)
     assert "findings" in payload and "counts" in payload
     assert "findings:" in sg._to_text(findings, sbom_components=2).lower()
     sarif = sg._to_sarif(findings)
     assert sarif["runs"][0]["tool"]["driver"]["name"] == "sdetkit-security-gate"
+    assert all(result["level"] != "note" for result in sarif["runs"][0]["results"])
 
     assert sg._severity_trips(findings, "warn") is True
     assert sg._severity_trips([], "error") is False
@@ -185,6 +198,10 @@ def test_security_gate_iter_files_skips_generated_dirs(tmp_path: Path) -> None:
     )
     (tmp_path / "site").mkdir()
     (tmp_path / "site" / "generated.py").write_text("import os\nos.system('x')\n", encoding="utf-8")
+    (tmp_path / "docs" / "artifacts" / "run").mkdir(parents=True)
+    (tmp_path / "docs" / "artifacts" / "run" / "generated.json").write_text(
+        '{"token":"abc123"}\n', encoding="utf-8"
+    )
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "good.py").write_text("print('ok')\n", encoding="utf-8")
 
@@ -194,3 +211,4 @@ def test_security_gate_iter_files_skips_generated_dirs(tmp_path: Path) -> None:
     assert all(not item.startswith(".nox/") for item in files)
     assert all(not item.startswith(".venv/") for item in files)
     assert all(not item.startswith("site/") for item in files)
+    assert all(not item.startswith("docs/artifacts/") for item in files)
