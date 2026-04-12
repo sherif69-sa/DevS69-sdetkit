@@ -394,6 +394,11 @@ def test_probe_registry_expands_scenarios_and_recommendations() -> None:
     assert ai_packet["available"] is True
     assert ai_packet["probe_catalog"] == decision["recommendation_catalog"]
     assert ai_packet["recommended_prompts"]
+    playbook_workflows = {row["workflow"] for row in ai_packet["repo_playbooks"]}
+    assert {"doctor", "gate-fast", "gate-release", "review", "inspect-project"}.issubset(
+        playbook_workflows
+    )
+    assert ai_packet["alignment_contract"]["doctor_first"] is True
 
 
 def test_probe_memory_artifact_written_and_exposed(tmp_path: Path) -> None:

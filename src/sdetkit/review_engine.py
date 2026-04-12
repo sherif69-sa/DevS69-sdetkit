@@ -690,6 +690,39 @@ def plan_adaptive_probes(
         "schema_version": "sdetkit.review.ai-assistant.v1",
         "available": True,
         "intent": "help operators choose, run, and interpret adaptive review probes",
+        "repo_scope": "all-surfaces",
+        "repo_playbooks": [
+            {
+                "workflow": "doctor",
+                "purpose": "Validate policy/dev/repo readiness before remediation rollout.",
+                "recommended_command": "python -m sdetkit doctor --format json",
+            },
+            {
+                "workflow": "gate-fast",
+                "purpose": "Verify fast quality controls after high-priority fixes.",
+                "recommended_command": "python -m sdetkit gate fast --format json --stable-json",
+            },
+            {
+                "workflow": "gate-release",
+                "purpose": "Validate merge/release truth before promotion.",
+                "recommended_command": "python -m sdetkit gate release --format json",
+            },
+            {
+                "workflow": "review",
+                "purpose": "Correlate cross-surface findings with contradiction-aware prioritization.",
+                "recommended_command": "python -m sdetkit review . --format operator-json",
+            },
+            {
+                "workflow": "inspect-project",
+                "purpose": "Deepen repo-wide file and policy diagnostics for root-cause analysis.",
+                "recommended_command": "python -m sdetkit inspect-project . --format json",
+            },
+        ],
+        "alignment_contract": {
+            "doctor_first": True,
+            "gate_alignment_required": True,
+            "triage_rule": "doctor + gate-fast must be reviewed before gate-release promotion",
+        },
         "query_context": {
             "profile": profile_name,
             "confidence_score": round(float(confidence_score), 2),
@@ -703,6 +736,7 @@ def plan_adaptive_probes(
             "Explain the highest-value remediation based on current findings.",
             "Summarize tradeoffs for running skipped probes under current budget.",
             "Generate a step-by-step execution plan for the top probe.",
+            "How should doctor and gate results be aligned before release promotion?",
         ],
         "probe_catalog": recommendation_catalog,
     }
