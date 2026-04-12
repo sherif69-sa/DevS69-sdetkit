@@ -389,6 +389,11 @@ def test_probe_registry_expands_scenarios_and_recommendations() -> None:
     }.issubset(registry_ids)
     recommendations = {row["probe_id"] for row in decision["recommendation_catalog"]}
     assert recommendations == registry_ids
+    ai_packet = decision["ai_assistant"]
+    assert ai_packet["schema_version"] == "sdetkit.review.ai-assistant.v1"
+    assert ai_packet["available"] is True
+    assert ai_packet["probe_catalog"] == decision["recommendation_catalog"]
+    assert ai_packet["recommended_prompts"]
 
 
 def test_probe_memory_artifact_written_and_exposed(tmp_path: Path) -> None:

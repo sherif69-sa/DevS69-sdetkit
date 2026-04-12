@@ -676,6 +676,36 @@ def plan_adaptive_probes(
                 },
             }
         )
+    recommendation_catalog = [
+        {
+            "probe_id": row["probe_id"],
+            "when_to_use": row["reason"],
+            "requires": row["requires"],
+            "cost": int(row["cost"]),
+            "min_score": int(row["min_score"]),
+        }
+        for row in sorted(candidates, key=lambda item: str(item["probe_id"]))
+    ]
+    ai_assistant_packet = {
+        "schema_version": "sdetkit.review.ai-assistant.v1",
+        "available": True,
+        "intent": "help operators choose, run, and interpret adaptive review probes",
+        "query_context": {
+            "profile": profile_name,
+            "confidence_score": round(float(confidence_score), 2),
+            "confidence_threshold": round(float(confidence_threshold), 2),
+            "detection": {k: bool(v) for k, v in sorted(detection.items())},
+            "contradictions": contradictory,
+            "cluster_pressure": cluster_pressure,
+        },
+        "recommended_prompts": [
+            "Which probe should run first and why?",
+            "Explain the highest-value remediation based on current findings.",
+            "Summarize tradeoffs for running skipped probes under current budget.",
+            "Generate a step-by-step execution plan for the top probe.",
+        ],
+        "probe_catalog": recommendation_catalog,
+    }
     return {
         "executed_probes": executed,
         "skipped_probes": skipped,
@@ -689,16 +719,8 @@ def plan_adaptive_probes(
             }
             for row in sorted(candidates, key=lambda item: str(item["probe_id"]))
         ],
-        "recommendation_catalog": [
-            {
-                "probe_id": row["probe_id"],
-                "when_to_use": row["reason"],
-                "requires": row["requires"],
-                "cost": int(row["cost"]),
-                "min_score": int(row["min_score"]),
-            }
-            for row in sorted(candidates, key=lambda item: str(item["probe_id"]))
-        ],
+        "recommendation_catalog": recommendation_catalog,
+        "ai_assistant": ai_assistant_packet,
         "budget": {
             "total": budget_total,
             "spent": budget_spent,
