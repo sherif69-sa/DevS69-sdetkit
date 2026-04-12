@@ -318,6 +318,7 @@ def test_review_operator_summary_artifact_written(tmp_path: Path) -> None:
     assert operator_payload["adaptive_database"]["schema_version"] == (
         "sdetkit.review.adaptive-database.v1"
     )
+    assert operator_payload["doctor_gate_contract"]["enforced_each_run"] is True
 
 
 def test_cli_review_interactive_navigator_outputs_selected_section(tmp_path: Path) -> None:
@@ -505,6 +506,8 @@ def test_review_adaptive_database_and_ai_handoff_contract(tmp_path: Path) -> Non
     ai_packet = payload["adaptive_review"]["ai_assistant"]
     assert ai_packet["workflow_alignment"]["review_adaptive_enabled"] is True
     assert ai_packet["reviewer_engine_contract"]["five_heads_required"] is True
+    assert ai_packet["doctor_gate_contract"]["doctor_first"] is True
+    assert payload["doctor_gate_contract"]["gate_fast_required_for_promotion"] is True
 
 
 def test_probe_memory_artifact_written_and_exposed(tmp_path: Path) -> None:

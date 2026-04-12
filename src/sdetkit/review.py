@@ -1080,12 +1080,26 @@ def run_review(
         "code_scanning_included": "code_scanning" in payload,
         "work_id": str(payload.get("request_context", {}).get("work_id", "")),
     }
+    doctor_gate_contract = {
+        "schema_version": "sdetkit.review.doctor-gate-contract.v1",
+        "enforced_each_run": True,
+        "doctor_first": True,
+        "gate_fast_required_for_promotion": True,
+        "canonical_sequence": [
+            "python -m sdetkit doctor --format json",
+            "python -m sdetkit gate fast --format json --stable-json",
+            "python -m sdetkit gate release --format json",
+            "python -m sdetkit review . --format operator-json",
+        ],
+    }
+    payload["doctor_gate_contract"] = doctor_gate_contract
     payload["adaptive_database"] = {
         "schema_version": "sdetkit.review.adaptive-database.v1",
         "scope": review_scope,
         "five_heads_overview": payload["five_heads"].get("overall", {}),
         "top5_actions": top5_actions,
         "workflow_alignment": workflow_alignment,
+        "doctor_gate_contract": doctor_gate_contract,
         "probe_memory_updates": payload["adaptive_review"]["probe_memory"].get("updates", []),
     }
     ai_assistant = payload["adaptive_review"].get("ai_assistant", {})
@@ -1096,6 +1110,7 @@ def run_review(
             "five_heads_required": True,
             "top5_actions_required": True,
         }
+        ai_assistant["doctor_gate_contract"] = doctor_gate_contract
         payload["adaptive_review"]["ai_assistant"] = ai_assistant
     payload["operator_summary"] = _build_operator_summary(payload)
 
@@ -1360,6 +1375,7 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
         },
         "code_scanning": payload.get("code_scanning", {}),
         "adaptive_database": payload.get("adaptive_database", {}),
+        "doctor_gate_contract": payload.get("doctor_gate_contract", {}),
         "artifacts": payload.get("artifact_index", {}),
     }
 
