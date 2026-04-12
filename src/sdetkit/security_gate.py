@@ -860,9 +860,8 @@ def _to_text(findings: list[Finding], *, sbom_components: int = 0) -> str:
 
 
 def _to_sarif(findings: list[Finding]) -> dict[str, Any]:
-    reportable = [f for f in findings if f.severity in {"warn", "error"}]
     rules = []
-    for rid in sorted({f.rule_id for f in reportable}):
+    for rid in sorted({f.rule_id for f in findings}):
         meta = RULES[rid]
         rules.append(
             {
@@ -879,7 +878,7 @@ def _to_sarif(findings: list[Finding]) -> dict[str, Any]:
             }
         )
     results = []
-    for f in reportable:
+    for f in findings:
         results.append(
             {
                 "ruleId": f.rule_id,

@@ -87,7 +87,9 @@ def test_security_gate_helper_paths_and_rendering(tmp_path: Path) -> None:
     assert "findings:" in sg._to_text(findings, sbom_components=2).lower()
     sarif = sg._to_sarif(findings)
     assert sarif["runs"][0]["tool"]["driver"]["name"] == "sdetkit-security-gate"
-    assert all(result["level"] != "note" for result in sarif["runs"][0]["results"])
+    assert any(result["level"] == "note" for result in sarif["runs"][0]["results"])
+    rendered_sarif = json.loads(sg._render(findings, "sarif", include_info=False))
+    assert all(result["level"] != "note" for result in rendered_sarif["runs"][0]["results"])
 
     assert sg._severity_trips(findings, "warn") is True
     assert sg._severity_trips([], "error") is False
