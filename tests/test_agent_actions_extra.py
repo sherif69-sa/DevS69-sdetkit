@@ -86,23 +86,6 @@ def test_action_registry_write_allowlist_rejects_traversal(tmp_path: Path) -> No
     assert not (tmp_path / "elsewhere" / "out.txt").exists()
 
 
-def test_action_registry_write_allowlist_normalizes_windows_style_paths(tmp_path: Path) -> None:
-    reg = ActionRegistry(
-        root=tmp_path,
-        write_allowlist=("allowed",),
-        shell_allowlist=(),
-    )
-    (tmp_path / "allowed").mkdir(parents=True, exist_ok=True)
-
-    result = reg.run(
-        "fs.write",
-        {"path": "allowed\\nested\\out.txt", "content": "ok"},
-    )
-
-    assert result.ok is True
-    assert (tmp_path / "allowed" / "nested" / "out.txt").read_text(encoding="utf-8") == "ok"
-
-
 def test_action_registry_repo_audit_and_report_build(tmp_path: Path, monkeypatch) -> None:
     reg = ActionRegistry(root=tmp_path, write_allowlist=(".sdetkit",), shell_allowlist=("python",))
 

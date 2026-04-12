@@ -88,7 +88,7 @@ class ActionRegistry:
 
     def _is_write_allowed(self, rel: str) -> bool:
         try:
-            normalized = self._safe_rel(rel).relative_to(self._resolved_root).as_posix()
+            normalized = self._safe_rel(rel).relative_to(self.root.resolve()).as_posix()
         except ValueError:
             return False
         return any(

@@ -35,4 +35,4 @@ def test_run_release_dry_run_json(monkeypatch, tmp_path: Path, capsys) -> None:
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["dry_run"] is True
-    assert len(payload["steps"]) == 3
+    assert len(payload["steps"]) == 4

@@ -305,6 +305,63 @@ def _load_json(path: Path) -> dict[str, Any]:
     return loaded
 
 
+def _summarize_code_scanning(path: Path) -> dict[str, Any]:
+    loaded = _load_json(path)
+    by_severity = {"critical": 0, "high": 0, "medium": 0, "low": 0, "unknown": 0}
+    total = 0
+    tool = "generic"
+    schema = "generic-json"
+    alerts: list[dict[str, Any]] = []
+    if isinstance(loaded.get("runs"), list):
+        schema = "sarif"
+        for run in loaded["runs"]:
+            if not isinstance(run, dict):
+                continue
+            driver = run.get("tool", {}).get("driver", {})
+            if isinstance(driver, dict) and driver.get("name"):
+                tool = str(driver.get("name"))
+            for result in (
+                run.get("results", []) if isinstance(run.get("results", []), list) else []
+            ):
+                if not isinstance(result, dict):
+                    continue
+                level = str(result.get("level", "warning")).lower()
+                if level == "error":
+                    sev = "high"
+                elif level in {"warning", "warn"}:
+                    sev = "medium"
+                elif level in {"note", "info"}:
+                    sev = "low"
+                else:
+                    sev = "unknown"
+                by_severity[sev] += 1
+                total += 1
+                alerts.append({"severity": sev, "rule_id": str(result.get("ruleId", ""))})
+    else:
+        raw_alerts = loaded.get("alerts", [])
+        if isinstance(raw_alerts, list):
+            for row in raw_alerts:
+                if not isinstance(row, dict):
+                    continue
+                sev = str(row.get("severity", "unknown")).lower()
+                if sev not in by_severity:
+                    sev = "unknown"
+                by_severity[sev] += 1
+                total += 1
+                alerts.append({"severity": sev, "rule_id": str(row.get("rule_id", ""))})
+    blocking = by_severity["critical"] + by_severity["high"]
+    return {
+        "schema_version": "sdetkit.review.code-scanning.v1",
+        "source": path.as_posix(),
+        "format": schema,
+        "tool": tool,
+        "total_alerts": total,
+        "blocking_alerts": blocking,
+        "by_severity": by_severity,
+        "sample_alerts": alerts[:10],
+    }
+
+
 def _probe_memory_path(*, workspace_root: Path, scope: str) -> Path:
     return workspace_root / "probe-memory" / "review" / f"{_safe_slug(scope)}.json"
 
@@ -458,11 +515,24 @@ def run_review(
     workspace_root: Path,
     profile: str = "release",
     no_workspace: bool = False,
+    work_id: str | None = None,
+    work_context: dict[str, str] | None = None,
+    code_scan_json: Path | None = None,
 ) -> tuple[int, dict[str, Any], Path, Path]:
     try:
         target = safe_path(Path.cwd(), target.as_posix(), allow_absolute=True).resolve()
         out_dir = safe_path(Path.cwd(), out_dir.as_posix(), allow_absolute=True)
         workspace_root = safe_path(Path.cwd(), workspace_root.as_posix(), allow_absolute=True)
+        if code_scan_json is not None:
+            scan_root = target if target.is_dir() else target.parent
+            if code_scan_json.is_absolute() or len(code_scan_json.parts) != 1:
+                raise ValueError("review: code scanning file must be a single relative file name")
+            code_scan_json = safe_path(scan_root, code_scan_json.name, allow_absolute=False)
+            scan_root_real = scan_root.resolve()
+            code_scan_real = code_scan_json.resolve()
+            if code_scan_real != scan_root_real and scan_root_real not in code_scan_real.parents:
+                raise ValueError("review: code scanning file escapes scan root")
+            code_scan_json = code_scan_real
     except SecurityError as exc:
         raise ValueError(f"review: path rejected: {exc}") from exc
     if not target.exists():
@@ -497,6 +567,45 @@ def run_review(
     baseline_stage = adaptive_plan["stages"][0]
     deepen_stage = adaptive_plan["stages"][1]
     baseline_checks = list(baseline_stage.get("checks_planned", []))
+    code_scanning_summary: dict[str, Any] | None = None
+    if code_scan_json is not None:
+        if not code_scan_json.exists():
+            raise ValueError(f"review: code scanning file does not exist: {code_scan_json}")
+        code_scanning_summary = _summarize_code_scanning(code_scan_json)
+        artifact_index["code_scan_json"] = code_scan_json.as_posix()
+        supporting.append(
+            {"kind": "code_scanning_alerts_total", "value": code_scanning_summary["total_alerts"]}
+        )
+        supporting.append(
+            {
+                "kind": "code_scanning_blocking_alerts",
+                "value": code_scanning_summary["blocking_alerts"],
+            }
+        )
+        if int(code_scanning_summary["blocking_alerts"]) > 0:
+            findings.append(
+                {
+                    "id": "review:code-scanning",
+                    "kind": "code-scanning",
+                    "severity": "high",
+                    "priority": 75,
+                    "why_it_matters": "code scanning reported blocking security alerts",
+                    "next_action": "Fix or explicitly triage blocking code scanning alerts.",
+                    "message": (
+                        f"code scanning found {code_scanning_summary['blocking_alerts']} "
+                        "blocking alert(s)"
+                    ),
+                }
+            )
+            prioritized_actions.append(
+                {
+                    "tier": "now",
+                    "priority": 75,
+                    "action": "Resolve high/critical code scanning alerts before promotion.",
+                }
+            )
+        else:
+            healthy_controls.append("code scanning reports no high/critical alerts")
 
     if "doctor" in baseline_checks:
         doctor_out = out_dir / "doctor"
@@ -660,6 +769,7 @@ def run_review(
     adaptive_plan["skipped_probes"] = probe_decision["skipped_probes"]
     adaptive_plan["probe_registry"] = probe_decision["registry"]
     adaptive_plan["probe_budget"] = probe_decision["budget"]
+    adaptive_plan["ai_assistant"] = probe_decision["ai_assistant"]
 
     if (
         inspect_payload
@@ -849,7 +959,13 @@ def run_review(
             "previous_review_run_hash": previous_hash,
         },
         "detection": detection,
+        "request_context": {
+            "work_id": (work_id or "").strip(),
+            "work_context": dict(work_context or {}),
+        },
     }
+    if code_scanning_summary is not None:
+        payload["code_scanning"] = code_scanning_summary
     payload["changed_since_previous"] = summarize_history_delta(previous_review, payload)
     probe_decision = plan_adaptive_probes(
         detection=detection,
@@ -875,6 +991,7 @@ def run_review(
     adaptive_plan["skipped_probes"] = probe_decision["skipped_probes"]
     adaptive_plan["probe_registry"] = probe_decision["registry"]
     adaptive_plan["probe_budget"] = probe_decision["budget"]
+    adaptive_plan["ai_assistant"] = probe_decision["ai_assistant"]
     _finalize_probe_lifecycle(adaptive_plan)
     likely_tracks = rank_likely_issue_tracks(
         findings=weighted_findings,
@@ -956,6 +1073,53 @@ def run_review(
     payload["profile"]["output_strategy"] = profile_packet["packet_type"]
     payload["profile_packet"] = profile_packet
     payload["five_heads"] = _build_five_head_engine(payload)
+    top5_actions = [
+        str(item.get("action", ""))
+        for item in payload.get("prioritized_actions", [])
+        if isinstance(item, dict) and str(item.get("action", "")).strip()
+    ][:5]
+    workflow_alignment = {
+        "doctor_included": any(
+            isinstance(row, dict) and str(row.get("workflow")) == "doctor"
+            for row in payload.get("source_workflows_run", [])
+        ),
+        "review_adaptive_enabled": True,
+        "gate_fast_recommended": True,
+        "code_scanning_included": "code_scanning" in payload,
+        "work_id": str(payload.get("request_context", {}).get("work_id", "")),
+    }
+    doctor_gate_contract = {
+        "schema_version": "sdetkit.review.doctor-gate-contract.v1",
+        "enforced_each_run": True,
+        "doctor_first": True,
+        "gate_fast_required_for_promotion": True,
+        "canonical_sequence": [
+            "python -m sdetkit doctor --format json",
+            "python -m sdetkit gate fast --format json --stable-json",
+            "python -m sdetkit gate release --format json",
+            "python -m sdetkit review . --format operator-json",
+        ],
+    }
+    payload["doctor_gate_contract"] = doctor_gate_contract
+    payload["adaptive_database"] = {
+        "schema_version": "sdetkit.review.adaptive-database.v1",
+        "scope": review_scope,
+        "five_heads_overview": payload["five_heads"].get("overall", {}),
+        "top5_actions": top5_actions,
+        "workflow_alignment": workflow_alignment,
+        "doctor_gate_contract": doctor_gate_contract,
+        "probe_memory_updates": payload["adaptive_review"]["probe_memory"].get("updates", []),
+    }
+    ai_assistant = payload["adaptive_review"].get("ai_assistant", {})
+    if isinstance(ai_assistant, dict):
+        ai_assistant["workflow_alignment"] = workflow_alignment
+        ai_assistant["top5_actions"] = top5_actions
+        ai_assistant["reviewer_engine_contract"] = {
+            "five_heads_required": True,
+            "top5_actions_required": True,
+        }
+        ai_assistant["doctor_gate_contract"] = doctor_gate_contract
+        payload["adaptive_review"]["ai_assistant"] = ai_assistant
     payload["operator_summary"] = _build_operator_summary(payload)
 
     json_path = out_dir / "review.json"
@@ -1032,6 +1196,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"status: {payload['status']} severity: {payload['severity']}",
         f"confidence: {payload.get('confidence', {}).get('score')}",
     ]
+    request_context = payload.get("request_context", {})
+    if isinstance(request_context, dict) and request_context.get("work_id"):
+        lines.append(f"work_id: {request_context.get('work_id')}")
     if profile_name == "release":
         lines.append("release_gate_decision:")
         lines.append(f"- decision: {payload.get('profile_packet', {}).get('decision', 'watch')}")
@@ -1180,6 +1347,12 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
             f"{len(conflicts)} contradiction signal(s) require verification before full trust."
         )
     actions = [row for row in payload.get("prioritized_actions", []) if isinstance(row, dict)]
+    request_context = payload.get("request_context", {})
+    if not isinstance(request_context, dict):
+        request_context = {}
+    raw_work_context = request_context.get("work_context", {})
+    if not isinstance(raw_work_context, dict):
+        raw_work_context = {}
     return {
         "contract_version": REVIEW_CONTRACT_VERSION,
         "situation": {
@@ -1204,6 +1377,13 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "tracks": tracks[:5],
         "probes": executed_probes[:5],
         "five_heads": payload.get("five_heads", {}),
+        "request_context": {
+            "work_id": str(request_context.get("work_id", "")).strip(),
+            "work_context": {str(k): str(v) for k, v in raw_work_context.items() if str(k).strip()},
+        },
+        "code_scanning": payload.get("code_scanning", {}),
+        "adaptive_database": payload.get("adaptive_database", {}),
+        "doctor_gate_contract": payload.get("doctor_gate_contract", {}),
         "artifacts": payload.get("artifact_index", {}),
     }
 
@@ -1334,7 +1514,37 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--no-workspace", action="store_true", help="Disable workspace history recording"
     )
+    p.add_argument(
+        "--work-id",
+        default="",
+        help="Optional external work identifier (ticket/story/incident id) to stamp into review outputs.",
+    )
+    p.add_argument(
+        "--work-context",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="Optional context pair for AI/fix handoff metadata; repeat per key.",
+    )
+    p.add_argument(
+        "--code-scan-json",
+        default=None,
+        help="Optional JSON/SARIF code scanning report to fold into adaptive review and AI guidance.",
+    )
     return p
+
+
+def _parse_work_context(entries: list[str]) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for entry in entries:
+        raw = str(entry).strip()
+        if not raw:
+            continue
+        key, sep, value = raw.partition("=")
+        if not sep or not key.strip():
+            raise ValueError(f"review: invalid --work-context entry '{entry}' (expected KEY=VALUE)")
+        out[key.strip()] = value.strip()
+    return out
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1351,12 +1561,16 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write(f"review: path rejected: {exc}\n")
         return EXIT_FINDINGS
     try:
+        work_context = _parse_work_context(list(ns.work_context))
         rc, payload, _, _ = run_review(
             target=target,
             out_dir=out_dir,
             workspace_root=workspace_root,
             profile=ns.profile,
             no_workspace=ns.no_workspace,
+            work_id=str(ns.work_id or "").strip(),
+            work_context=work_context,
+            code_scan_json=Path(ns.code_scan_json) if ns.code_scan_json else None,
         )
     except ValueError as exc:
         sys.stderr.write(str(exc) + "\n")

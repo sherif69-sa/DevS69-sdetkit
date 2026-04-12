@@ -15,6 +15,7 @@ def test_gate_release_dry_run_lists_steps(monkeypatch, tmp_path: Path, capsys) -
     assert payload["root"] == "<repo>"
     assert [step["id"] for step in payload["steps"]] == [
         "doctor_release",
+        "code_scanning",
         "playbooks_validate",
         "gate_fast",
     ]
@@ -39,12 +40,14 @@ def test_gate_release_runs_expected_commands(monkeypatch, tmp_path: Path, capsys
     assert "stderr" not in payload["steps"][0]
     assert [step["id"] for step in payload["steps"]] == [
         "doctor_release",
+        "code_scanning",
         "playbooks_validate",
         "gate_fast",
     ]
     assert calls[0][3:] == ["doctor", "--release-full", "--format", "json"]
-    assert calls[1][3:] == ["playbooks", "validate", "--recommended", "--format", "json"]
-    assert calls[2][3:6] == ["gate", "fast", "--root"]
+    assert calls[1][3:5] == ["security", "scan"]
+    assert calls[2][3:] == ["playbooks", "validate", "--recommended", "--format", "json"]
+    assert calls[3][3:6] == ["gate", "fast", "--root"]
 
 
 def test_gate_release_passes_playbook_selection_flags(monkeypatch, tmp_path: Path, capsys) -> None:
@@ -60,7 +63,7 @@ def test_gate_release_passes_playbook_selection_flags(monkeypatch, tmp_path: Pat
     rc = gate.main(["release", "--format", "json", "--playbooks-legacy"])
     assert rc == 0
     _ = json.loads(capsys.readouterr().out)
-    assert calls[1][3:] == ["playbooks", "validate", "--legacy", "--format", "json"]
+    assert calls[2][3:] == ["playbooks", "validate", "--legacy", "--format", "json"]
 
 
 def test_gate_release_passes_playbooks_all_selection(monkeypatch, tmp_path: Path, capsys) -> None:
@@ -76,7 +79,7 @@ def test_gate_release_passes_playbooks_all_selection(monkeypatch, tmp_path: Path
     rc = gate.main(["release", "--format", "json", "--playbooks-all"])
     assert rc == 0
     _ = json.loads(capsys.readouterr().out)
-    assert calls[1][3:] == ["playbooks", "validate", "--all", "--format", "json"]
+    assert calls[2][3:] == ["playbooks", "validate", "--all", "--format", "json"]
 
 
 def test_gate_release_passes_named_playbooks(monkeypatch, tmp_path: Path, capsys) -> None:
@@ -102,7 +105,7 @@ def test_gate_release_passes_named_playbooks(monkeypatch, tmp_path: Path, capsys
     )
     assert rc == 0
     _ = json.loads(capsys.readouterr().out)
-    assert calls[1][3:] == [
+    assert calls[2][3:] == [
         "playbooks",
         "validate",
         "--name",
@@ -128,11 +131,11 @@ def test_gate_release_adds_recommendation_for_failed_step(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:
     def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
-        is_gate_fast = cmd[3:5] == ["gate", "fast"]
+        is_scan = cmd[3:5] == ["security", "scan"]
         return {
             "cmd": cmd,
-            "rc": 1 if is_gate_fast else 0,
-            "ok": not is_gate_fast,
+            "rc": 1 if is_scan else 0,
+            "ok": not is_scan,
             "duration_ms": 1,
             "stdout": "",
             "stderr": "failed",
@@ -144,10 +147,30 @@ def test_gate_release_adds_recommendation_for_failed_step(
     rc = gate.main(["release", "--format", "json"])
     assert rc == 2
     payload = json.loads(capsys.readouterr().out)
-    assert payload["failed_steps"] == ["gate_fast"]
+    assert payload["failed_steps"] == ["code_scanning"]
     assert payload["recommendations"] == [
-        "Inspect fast gate evidence: python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json."
+        "Inspect security scanning output: python -m sdetkit security scan --format sarif --output build/code-scanning.sarif --fail-on high."
     ]
+
+
+def test_gate_release_carries_request_context_and_ai_handoff(tmp_path: Path, capsys) -> None:
+    rc = gate.main(
+        [
+            "release",
+            "--dry-run",
+            "--format",
+            "json",
+            "--work-id",
+            "PR-717",
+            "--work-context",
+            "owner=platform",
+        ]
+    )
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["request_context"]["work_id"] == "PR-717"
+    assert payload["request_context"]["work_context"]["owner"] == "platform"
+    assert "recommended_review_command" in payload["ai_assistance"]
 
 
 def test_gate_release_fails_when_no_checks_are_enabled(monkeypatch, tmp_path: Path, capsys) -> None:
