@@ -130,7 +130,7 @@ def test_serve_review_accepts_code_scan_json_and_returns_summary(tmp_path: Path)
                 "profile": "release",
                 "response_mode": "full",
                 "no_workspace": True,
-                "code_scan_json": str(scan),
+                "code_scan_json": "scan.json",
             },
         )
         assert status == 200

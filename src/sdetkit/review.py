@@ -525,14 +525,9 @@ def run_review(
         workspace_root = safe_path(Path.cwd(), workspace_root.as_posix(), allow_absolute=True)
         if code_scan_json is not None:
             scan_root = target if target.is_dir() else target.parent
-            resolved_scan = code_scan_json.expanduser().resolve()
-            try:
-                relative_scan = resolved_scan.relative_to(scan_root.resolve())
-            except ValueError as exc:
-                raise ValueError(
-                    "review: code scanning file must be inside the review target root"
-                ) from exc
-            code_scan_json = safe_path(scan_root, relative_scan.as_posix(), allow_absolute=False)
+            if code_scan_json.is_absolute():
+                raise ValueError("review: code scanning file must be a relative path")
+            code_scan_json = safe_path(scan_root, code_scan_json.as_posix(), allow_absolute=False)
     except SecurityError as exc:
         raise ValueError(f"review: path rejected: {exc}") from exc
     if not target.exists():

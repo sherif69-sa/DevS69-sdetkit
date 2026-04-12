@@ -198,17 +198,18 @@ def test_cli_review_code_scan_report_influences_adaptive_security_context(tmp_pa
             "-m",
             "sdetkit",
             "review",
-            str(data),
+            "events.csv",
             "--workspace-root",
-            str(tmp_path / "workspace"),
+            "workspace",
             "--format",
             "json",
             "--code-scan-json",
-            str(scan),
+            "scan.sarif",
             "--no-workspace",
         ],
         text=True,
         capture_output=True,
+        cwd=tmp_path,
     )
     assert run.returncode == 2
     payload = json.loads(run.stdout)
@@ -223,19 +224,17 @@ def test_review_rejects_code_scan_path_outside_target_root(tmp_path: Path) -> No
     target_dir.mkdir()
     data = target_dir / "events.csv"
     data.write_text("id,type\nE1,open\n", encoding="utf-8")
-    outside = tmp_path / "outside.json"
-    outside.write_text(json.dumps({"alerts": []}), encoding="utf-8")
     try:
         review.run_review(
             target=target_dir,
             out_dir=tmp_path / "out",
             workspace_root=tmp_path / "workspace",
-            code_scan_json=outside,
+            code_scan_json=Path("/tmp/outside.json"),
             no_workspace=True,
         )
         raise AssertionError("expected review.run_review to reject outside code scan path")
     except ValueError as exc:
-        assert "inside the review target root" in str(exc)
+        assert "must be a relative path" in str(exc)
 
 
 def test_review_profiles_change_judgment_and_artifacts_for_same_input(tmp_path: Path) -> None:
