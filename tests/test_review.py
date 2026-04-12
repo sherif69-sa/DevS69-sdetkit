@@ -98,6 +98,7 @@ def test_cli_review_command_outputs_json(tmp_path: Path) -> None:
     assert payload["schema_version"] == "sdetkit.review.v3"
     assert payload["contract_version"] == "sdetkit.review.contract.v1"
     assert "operator_summary" in payload
+    assert payload["five_heads"]["schema_version"] == "sdetkit.review.five-heads.v1"
 
 
 def test_cli_review_command_outputs_operator_json_contract_only(tmp_path: Path) -> None:
@@ -210,6 +211,7 @@ def test_review_profile_packets_and_text_are_profile_specific(tmp_path: Path) ->
         assert "adaptive_review:" in text
         assert "likely_issue_tracks:" in text
         assert "operator_snapshot:" in text
+        assert "five_heads:" in text
 
 
 def test_review_operator_summary_artifact_written(tmp_path: Path) -> None:
@@ -231,6 +233,7 @@ def test_review_operator_summary_artifact_written(tmp_path: Path) -> None:
     assert operator_payload["contract_version"] == "sdetkit.review.contract.v1"
     assert "judgment_rationale" in operator_payload
     assert "actions" in operator_payload
+    assert "five_heads" in operator_payload
 
 
 def test_cli_review_interactive_navigator_outputs_selected_section(tmp_path: Path) -> None:

@@ -955,6 +955,7 @@ def run_review(
     payload["profile"]["packet_type"] = profile_packet["packet_type"]
     payload["profile"]["output_strategy"] = profile_packet["packet_type"]
     payload["profile_packet"] = profile_packet
+    payload["five_heads"] = _build_five_head_engine(payload)
     payload["operator_summary"] = _build_operator_summary(payload)
 
     json_path = out_dir / "review.json"
@@ -1056,6 +1057,18 @@ def _render_text(payload: dict[str, Any]) -> str:
         lines.append(f"- contradictions: {snapshot.get('contradictions_count', 0)}")
         lines.append(f"- likely_tracks: {snapshot.get('likely_tracks_count', 0)}")
         lines.append(f"- probes_executed: {snapshot.get('executed_probes_count', 0)}")
+    five_heads = payload.get("five_heads", {})
+    if isinstance(five_heads, dict):
+        heads = five_heads.get("heads", {})
+        if isinstance(heads, dict) and heads:
+            lines.append("five_heads:")
+            for head_name in sorted(heads):
+                head = heads.get(head_name, {})
+                if not isinstance(head, dict):
+                    continue
+                lines.append(
+                    f"- {head_name}: score={head.get('score')} status={head.get('status')} signal={head.get('signal')}"
+                )
     changed = operator.get("changed_since_previous", [])
     if isinstance(changed, list) and changed:
         lines.append("what_changed:")
@@ -1190,7 +1203,57 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "contradictions": conflicts[:5],
         "tracks": tracks[:5],
         "probes": executed_probes[:5],
+        "five_heads": payload.get("five_heads", {}),
         "artifacts": payload.get("artifact_index", {}),
+    }
+
+
+def _build_five_head_engine(payload: dict[str, Any]) -> dict[str, Any]:
+    findings = [row for row in payload.get("top_matters", []) if isinstance(row, dict)]
+    conflicts = [row for row in payload.get("conflicting_evidence", []) if isinstance(row, dict)]
+    controls = [str(row) for row in payload.get("healthy_controls", [])]
+    tracks = [row for row in payload.get("likely_issue_tracks", []) if isinstance(row, dict)]
+
+    def _score(base: int, penalty: int) -> int:
+        return max(0, min(100, base - penalty))
+
+    doctor_hits = sum(1 for row in findings if str(row.get("kind")) == "doctor")
+    inspect_hits = sum(1 for row in findings if str(row.get("kind", "")).startswith("inspect"))
+    high_priority = sum(1 for row in findings if int(row.get("priority", 0)) >= 60)
+    contradiction_penalty = len(conflicts) * 9
+
+    heads = {
+        "quality": {
+            "score": _score(92, doctor_hits * 10 + high_priority * 4),
+            "signal": "doctor+lint+test pressure",
+        },
+        "reliability": {
+            "score": _score(90, inspect_hits * 8 + contradiction_penalty),
+            "signal": "drift+stability contradictions",
+        },
+        "security": {
+            "score": _score(88, contradiction_penalty + (0 if "security_files" in controls else 6)),
+            "signal": "governance+policy controls",
+        },
+        "delivery": {
+            "score": _score(90, high_priority * 8 + len(tracks) * 3),
+            "signal": "priority queue heat",
+        },
+        "evidence": {
+            "score": _score(94, len(conflicts) * 7 + (0 if controls else 10)),
+            "signal": "supporting vs conflicting evidence",
+        },
+    }
+    for row in heads.values():
+        score = int(row["score"])
+        row["status"] = "strong" if score >= 80 else ("watch" if score >= 60 else "critical")
+    return {
+        "schema_version": "sdetkit.review.five-heads.v1",
+        "heads": heads,
+        "overall": {
+            "score": round(sum(int(row["score"]) for row in heads.values()) / 5.0, 1),
+            "status": payload.get("status", "watch"),
+        },
     }
 
 
