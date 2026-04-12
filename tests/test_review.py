@@ -360,6 +360,37 @@ def test_probe_budget_skips_when_budget_is_exhausted() -> None:
     )
 
 
+def test_probe_registry_expands_scenarios_and_recommendations() -> None:
+    decision = plan_adaptive_probes(
+        detection={
+            "workspace_like": True,
+            "data_like": True,
+            "repo_like": True,
+            "inspect_compare_available": True,
+        },
+        profile_name="release",
+        findings=[
+            {"priority": 80, "kind": "doctor"},
+            {"priority": 65, "kind": "inspect-project"},
+        ],
+        contradiction_graph={"flat_contradictions": [{"id": "c1"}], "clusters": [{"cluster_id": "x"}]},
+        has_previous_review=True,
+        changed=[{"kind": "status", "message": "changed"}],
+        confidence_score=0.3,
+        confidence_threshold=0.6,
+    )
+    registry_ids = {row["probe_id"] for row in decision["registry"]}
+    assert {
+        "probe:inspect-compare",
+        "probe:workspace-history",
+        "probe:doctor-delta",
+        "probe:inspect-project-focus",
+        "probe:artifact-integrity",
+    }.issubset(registry_ids)
+    recommendations = {row["probe_id"] for row in decision["recommendation_catalog"]}
+    assert recommendations == registry_ids
+
+
 def test_probe_memory_artifact_written_and_exposed(tmp_path: Path) -> None:
     workspace = tmp_path / "workspace"
     repo = tmp_path / "repo"
