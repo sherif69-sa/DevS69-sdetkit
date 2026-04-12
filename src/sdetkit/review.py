@@ -1222,7 +1222,7 @@ def _build_five_head_engine(payload: dict[str, Any]) -> dict[str, Any]:
     high_priority = sum(1 for row in findings if int(row.get("priority", 0)) >= 60)
     contradiction_penalty = len(conflicts) * 9
 
-    heads = {
+    heads: dict[str, dict[str, Any]] = {
         "quality": {
             "score": _score(92, doctor_hits * 10 + high_priority * 4),
             "signal": "doctor+lint+test pressure",
@@ -1244,14 +1244,22 @@ def _build_five_head_engine(payload: dict[str, Any]) -> dict[str, Any]:
             "signal": "supporting vs conflicting evidence",
         },
     }
+
+    def _coerce_score(value: Any) -> int:
+        if isinstance(value, bool):
+            return int(value)
+        if isinstance(value, (int, float)):
+            return int(value)
+        return 0
+
     for row in heads.values():
-        score = int(row["score"])
+        score = _coerce_score(row.get("score"))
         row["status"] = "strong" if score >= 80 else ("watch" if score >= 60 else "critical")
     return {
         "schema_version": "sdetkit.review.five-heads.v1",
         "heads": heads,
         "overall": {
-            "score": round(sum(int(row["score"]) for row in heads.values()) / 5.0, 1),
+            "score": round(sum(_coerce_score(row.get("score")) for row in heads.values()) / 5.0, 1),
             "status": payload.get("status", "watch"),
         },
     }

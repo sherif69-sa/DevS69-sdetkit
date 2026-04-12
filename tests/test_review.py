@@ -373,7 +373,10 @@ def test_probe_registry_expands_scenarios_and_recommendations() -> None:
             {"priority": 80, "kind": "doctor"},
             {"priority": 65, "kind": "inspect-project"},
         ],
-        contradiction_graph={"flat_contradictions": [{"id": "c1"}], "clusters": [{"cluster_id": "x"}]},
+        contradiction_graph={
+            "flat_contradictions": [{"id": "c1"}],
+            "clusters": [{"cluster_id": "x"}],
+        },
         has_previous_review=True,
         changed=[{"kind": "status", "message": "changed"}],
         confidence_score=0.3,
