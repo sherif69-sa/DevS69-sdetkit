@@ -205,3 +205,53 @@ def test_action_registry_can_write_expand_artifact(tmp_path: Path) -> None:
     assert payload["worker_launch_pack"][0]["launch_command"].startswith(
         "python -m sdetkit agent templates run "
     )
+
+
+def test_action_registry_builds_adaptive_review_kb(tmp_path: Path) -> None:
+    reg = ActionRegistry(
+        root=tmp_path,
+        write_allowlist=(".sdetkit/agent/workdir",),
+        shell_allowlist=(),
+    )
+    history_dir = tmp_path / ".sdetkit" / "agent" / "history"
+    history_dir.mkdir(parents=True, exist_ok=True)
+    (history_dir / "a.json").write_text(
+        json.dumps(
+            {
+                "steps": [
+                    {"action": "fs.write", "ok": False, "payload": {"error": "write denied"}},
+                    {"action": "repo.audit", "ok": True},
+                    {"action": "fs.write", "ok": False, "payload": {"error": "write denied"}},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    (history_dir / "b.json").write_text(
+        json.dumps(
+            {
+                "steps": [
+                    {"action": "shell.run", "ok": False, "payload": {"error": "command denied"}},
+                    {"action": "fs.write", "ok": False, "payload": {"error": "write denied"}},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = reg.run(
+        "review.adaptive",
+        {
+            "history_dir": ".sdetkit/agent/history",
+            "output": ".sdetkit/agent/workdir/adaptive-review-kb.json",
+            "limit": 5,
+        },
+    )
+
+    assert result.ok is True
+    output = tmp_path / ".sdetkit" / "agent" / "workdir" / "adaptive-review-kb.json"
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["records"] == 2
+    assert payload["recurring_failures"][0] == {"action": "fs.write", "count": 3}
+    assert payload["top_errors"][0] == {"error": "write denied", "count": 3}
+    assert payload["recommendations"]

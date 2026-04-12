@@ -3,9 +3,11 @@ from __future__ import annotations
 import json
 import shlex
 import subprocess
+from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
-from pathlib import Path
+from datetime import UTC, datetime
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from sdetkit import repo
@@ -50,6 +52,7 @@ class ActionRegistry:
         shell_allowlist: tuple[str, ...],
     ) -> None:
         self.root = root
+        self._resolved_root = self.root.resolve()
         self.write_allowlist = write_allowlist
         self.shell_allowlist = shell_allowlist
         self._handlers: dict[str, ActionHandler] = {
@@ -61,6 +64,7 @@ class ActionRegistry:
             "kits.blueprint": self._kits_blueprint,
             "kits.optimize": self._kits_optimize,
             "kits.expand": self._kits_expand,
+            "review.adaptive": self._review_adaptive,
         }
 
     def run(self, name: str, params: dict[str, Any]) -> ActionResult:
@@ -70,13 +74,17 @@ class ActionRegistry:
         return handler(params)
 
     def _safe_rel(self, rel: str) -> Path:
-        candidate = Path(rel)
+        candidate = Path(rel.replace("\\", "/"))
         if candidate.is_absolute():
             raise ValueError("absolute paths are not allowed")
         resolved = (self.root / candidate).resolve()
-        if self.root.resolve() not in resolved.parents and resolved != self.root.resolve():
+        if self._resolved_root not in resolved.parents and resolved != self._resolved_root:
             raise ValueError("path escapes repository root")
         return resolved
+
+    @staticmethod
+    def _normalize_allowlist_entry(entry: str) -> str:
+        return str(PurePosixPath(entry.replace("\\", "/").lstrip("/")))
 
     def _is_write_allowed(self, rel: str) -> bool:
         try:
@@ -84,8 +92,9 @@ class ActionRegistry:
         except ValueError:
             return False
         return any(
-            normalized == item or normalized.startswith(item.rstrip("/") + "/")
-            for item in self.write_allowlist
+            normalized == allowed or normalized.startswith(allowed.rstrip("/") + "/")
+            for allowed in (self._normalize_allowlist_entry(item) for item in self.write_allowlist)
+            if allowed not in {"", "."}
         )
 
     def _fs_read(self, params: dict[str, Any]) -> ActionResult:
@@ -300,6 +309,79 @@ class ActionRegistry:
                 "recommended_workers": len(_dict_list(payload.get("recommended_workers"))),
             },
         )
+
+    def _review_adaptive(self, params: dict[str, Any]) -> ActionResult:
+        output = str(params.get("output", ".sdetkit/agent/workdir/adaptive-review-kb.json"))
+        history_dir = str(params.get("history_dir", ".sdetkit/agent/history"))
+        limit = int(params.get("limit", 10) or 10)
+        if not self._is_write_allowed(output):
+            return ActionResult(
+                "review.adaptive",
+                False,
+                {
+                    "error": "write denied by allowlist",
+                    "path": output,
+                    "allowlist": list(self.write_allowlist),
+                },
+            )
+        try:
+            history_root = self._safe_rel(history_dir)
+            target = self._safe_rel(output)
+            payload = self._build_adaptive_review_payload(history_root=history_root, limit=limit)
+            atomic_write_text(
+                target, json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+            )
+        except (OSError, ValueError) as exc:
+            return ActionResult("review.adaptive", False, {"error": str(exc), "path": output})
+        return ActionResult(
+            "review.adaptive",
+            True,
+            {
+                "output": output,
+                "history_dir": history_dir,
+                "records": int(payload.get("records", 0)),
+                "recurring_failures": len(_dict_list(payload.get("recurring_failures"))),
+            },
+        )
+
+    def _build_adaptive_review_payload(self, *, history_root: Path, limit: int) -> dict[str, Any]:
+        action_counter: Counter[str] = Counter()
+        error_counter: Counter[str] = Counter()
+        records = 0
+        if history_root.exists():
+            for item in sorted(history_root.glob("*.json")):
+                try:
+                    raw = json.loads(item.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    continue
+                if not isinstance(raw, dict):
+                    continue
+                records += 1
+                for step in _dict_list(raw.get("steps")):
+                    if bool(step.get("ok", False)):
+                        continue
+                    action_name = str(step.get("action", "")).strip() or "unknown"
+                    action_counter[action_name] += 1
+                    step_payload = _dict_value(step.get("payload"))
+                    err = str(step_payload.get("error", "")).strip()
+                    if err:
+                        error_counter[err] += 1
+        top_actions = sorted(action_counter.items(), key=lambda row: (-row[1], row[0]))[:limit]
+        top_errors = sorted(error_counter.items(), key=lambda row: (-row[1], row[0]))[:limit]
+        recommendations = [
+            f"Automate remediation playbook for `{name}` failures (seen {count} times)."
+            for name, count in top_actions
+        ][:limit]
+        return {
+            "schema_version": "1.0",
+            "generated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+            "records": records,
+            "recurring_failures": [
+                {"action": name, "count": count} for name, count in top_actions
+            ],
+            "top_errors": [{"error": message, "count": count} for message, count in top_errors],
+            "recommendations": recommendations,
+        }
 
 
 def maybe_parse_action_task(task: str) -> tuple[str, dict[str, Any]] | None:

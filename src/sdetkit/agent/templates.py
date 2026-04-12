@@ -9,6 +9,7 @@ import shlex
 import subprocess
 import tarfile
 import tempfile
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -292,6 +293,47 @@ def _run_shell(cmd: str, cwd: Path) -> dict[str, Any]:
     }
 
 
+def _adaptive_review_payload(*, history_dir: Path, limit: int) -> dict[str, Any]:
+    action_counter: Counter[str] = Counter()
+    error_counter: Counter[str] = Counter()
+    records = 0
+    if history_dir.exists():
+        for item in sorted(history_dir.glob("*.json")):
+            try:
+                raw = json.loads(item.read_text(encoding="utf-8"))
+            except ValueError:
+                continue
+            if not isinstance(raw, dict):
+                continue
+            records += 1
+            steps = raw.get("steps")
+            if not isinstance(steps, list):
+                continue
+            for step in steps:
+                if not isinstance(step, dict) or bool(step.get("ok", False)):
+                    continue
+                action_name = str(step.get("action", "")).strip() or "unknown"
+                action_counter[action_name] += 1
+                payload = step.get("payload")
+                if isinstance(payload, dict):
+                    err = str(payload.get("error", "")).strip()
+                    if err:
+                        error_counter[err] += 1
+    top_actions = sorted(action_counter.items(), key=lambda row: (-row[1], row[0]))[:limit]
+    top_errors = sorted(error_counter.items(), key=lambda row: (-row[1], row[0]))[:limit]
+    return {
+        "schema_version": "1.0",
+        "generated_at": dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z"),
+        "records": records,
+        "recurring_failures": [{"action": action, "count": count} for action, count in top_actions],
+        "top_errors": [{"error": err, "count": count} for err, count in top_errors],
+        "recommendations": [
+            f"Automate remediation playbook for `{action}` failures (seen {count} times)."
+            for action, count in top_actions
+        ],
+    }
+
+
 def _as_bool(value: Any) -> bool:
     if isinstance(value, bool):
         return value
@@ -423,6 +465,18 @@ def run_template(
                 history_dir=root / ".sdetkit" / "history", output=output, fmt=fmt, since=None
             )
             payload = {"output": output.as_posix(), "format": fmt}
+            artifacts.append(output.as_posix())
+        elif step.action == "review.adaptive":
+            history_dir = Path(str(params.get("history_dir", root / ".sdetkit" / "agent" / "history")))
+            output = Path(str(params.get("output", output_dir / "adaptive-review-kb.json")))
+            limit = int(params.get("limit", 10) or 10)
+            adaptive_payload = _adaptive_review_payload(history_dir=history_dir, limit=limit)
+            _write_json(output, adaptive_payload)
+            payload = {
+                "output": output.as_posix(),
+                "records": adaptive_payload.get("records", 0),
+                "recurring_failures": len(adaptive_payload.get("recurring_failures", [])),
+            }
             artifacts.append(output.as_posix())
         elif step.action == "fs.write":
             target = Path(str(params.get("path")))

@@ -1,0 +1,46 @@
+metadata:
+  id: path-traversal-autofix-worker
+  title: Path Traversal Auto-Remediation Worker
+  version: 1.0.0
+  description: Detect path-handling risk, build adaptive reviewer knowledge, and emit remediation artifacts for agent/bot execution loops.
+inputs:
+  profile:
+    default: strict
+    description: Repo audit profile used for security scanning.
+  goal:
+    default: "prevent path traversal and harden file handling"
+    description: Goal statement passed into optimization and expansion planners.
+workflow:
+  - id: audit
+    action: repo.audit
+    with:
+      profile: ${{inputs.profile}}
+      changed_only: false
+      output_json: ${{run.output_dir}}/path-traversal-repo-audit.json
+      output_sarif: ${{run.output_dir}}/path-traversal-repo-audit.sarif.json
+  - id: optimize
+    action: kits.optimize
+    with:
+      goal: ${{inputs.goal}}
+      output: ${{run.output_dir}}/path-traversal-optimize.json
+  - id: expand
+    action: kits.expand
+    with:
+      goal: ${{inputs.goal}}
+      output: ${{run.output_dir}}/path-traversal-expand.json
+  - id: adaptive-review
+    action: review.adaptive
+    with:
+      history_dir: .sdetkit/agent/history
+      output: ${{run.output_dir}}/path-traversal-adaptive-review-kb.json
+      limit: 10
+  - id: dashboard
+    action: report.build
+    with:
+      output: ${{run.output_dir}}/path-traversal-dashboard.html
+      format: html
+  - id: bundle
+    action: artifacts.bundle
+    with:
+      source_dir: ${{run.output_dir}}
+      output: ${{run.output_dir}}/path-traversal-autofix-bundle.tar
