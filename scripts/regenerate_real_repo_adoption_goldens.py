@@ -33,9 +33,13 @@ CANONICAL_COMMANDS = tuple(
 
 
 def _reset_fixture_workspace() -> None:
-    workspace_dir = FIXTURE_ROOT / ".sdetkit"
-    if workspace_dir.exists():
-        shutil.rmtree(workspace_dir)
+    transient_dirs = (
+        FIXTURE_ROOT / ".sdetkit",
+        FIXTURE_ROOT / "runs",
+    )
+    for transient_dir in transient_dirs:
+        if transient_dir.exists():
+            shutil.rmtree(transient_dir)
 
 
 def _run_command(cmd: list[str], expected_output: Path, rc_output: Path) -> None:
