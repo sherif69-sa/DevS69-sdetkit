@@ -139,6 +139,33 @@ Artifacts:
 
 - Denied action captured in history run record.
 
+## Recipe 9: run adaptive path-traversal auto-remediation worker
+
+Command:
+
+```bash
+sdetkit agent templates run path-traversal-autofix-worker --set profile=strict --set goal="prevent path traversal and auto-remediate via agents" --output-dir .sdetkit/agent/template-runs/path-traversal-autofix
+```
+
+Expected output:
+
+- JSON run record with status and deterministic action payloads.
+- Security findings count from `repo.audit`, plus JSON + SARIF audit artifacts for attachment to PR/CI evidence.
+- Generated optimize/expand artifacts that can be consumed by follow-up bot workflows.
+- Adaptive reviewer knowledge base with recurring failures and top error patterns for AI-driven remediation.
+- A deterministic tar bundle artifact that can be auto-attached in downstream automation.
+
+Artifacts:
+
+- `.sdetkit/agent/template-runs/path-traversal-autofix/run-record.json`
+- `.sdetkit/agent/template-runs/path-traversal-autofix/path-traversal-optimize.json`
+- `.sdetkit/agent/template-runs/path-traversal-autofix/path-traversal-expand.json`
+- `.sdetkit/agent/template-runs/path-traversal-autofix/path-traversal-adaptive-review-kb.json`
+- `.sdetkit/agent/template-runs/path-traversal-autofix/path-traversal-dashboard.html`
+- `.sdetkit/agent/template-runs/path-traversal-autofix/path-traversal-repo-audit.json`
+- `.sdetkit/agent/template-runs/path-traversal-autofix/path-traversal-repo-audit.sarif.json`
+- `.sdetkit/agent/template-runs/path-traversal-autofix/path-traversal-autofix-bundle.tar`
+
 ## Common mistakes and fixes
 
 - Wrong config path:

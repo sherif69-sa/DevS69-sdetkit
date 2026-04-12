@@ -217,3 +217,27 @@ def test_template_run_supports_new_alignment_workers(tmp_path: Path) -> None:
     assert (alignment_out / "automation-check.json").exists()
     assert (alignment_out / "templates.json").exists()
     assert (alignment_out / "bundle.tar").exists()
+
+
+def test_template_run_supports_path_traversal_autofix_worker(tmp_path: Path) -> None:
+    repo_root = Path.cwd()
+    template = template_by_id(repo_root, "path-traversal-autofix-worker")
+    output_dir = tmp_path / "path-traversal-autofix"
+    record = run_template(
+        repo_root,
+        template=template,
+        set_values={},
+        output_dir=output_dir,
+    )
+
+    assert record["status"] == "ok"
+    assert (output_dir / "path-traversal-optimize.json").exists()
+    assert (output_dir / "path-traversal-expand.json").exists()
+    kb_path = output_dir / "path-traversal-adaptive-review-kb.json"
+    assert kb_path.exists()
+    assert (output_dir / "path-traversal-repo-audit.json").exists()
+    assert (output_dir / "path-traversal-repo-audit.sarif.json").exists()
+    assert (output_dir / "path-traversal-autofix-bundle.tar").exists()
+    payload = json.loads(kb_path.read_text(encoding="utf-8"))
+    assert "recurring_failures" in payload
+    assert "top_errors" in payload
