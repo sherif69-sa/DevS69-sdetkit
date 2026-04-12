@@ -5,33 +5,13 @@
       "artifact": "build/gate-fast.json",
       "artifact_contract": {
         "failed_steps": [
-          "doctor",
           "ci_templates",
+          "doctor",
           "pytest"
         ],
         "ok": false,
         "profile": "fast",
         "steps": [
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "sdetkit",
-              "doctor",
-              "--dev",
-              "--ci",
-              "--deps",
-              "--clean-tree",
-              "--repo",
-              "--fail-on",
-              "high",
-              "--format",
-              "json"
-            ],
-            "id": "doctor",
-            "ok": false,
-            "rc": 2
-          },
           {
             "cmd": [
               "python",
@@ -53,26 +33,21 @@
             "cmd": [
               "python",
               "-m",
-              "ruff",
-              "check",
-              "."
+              "sdetkit",
+              "doctor",
+              "--dev",
+              "--ci",
+              "--deps",
+              "--clean-tree",
+              "--repo",
+              "--fail-on",
+              "high",
+              "--format",
+              "json"
             ],
-            "id": "ruff",
-            "ok": true,
-            "rc": 0
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "ruff",
-              "format",
-              "--check",
-              "."
-            ],
-            "id": "ruff_format",
-            "ok": true,
-            "rc": 0
+            "id": "doctor",
+            "ok": false,
+            "rc": 2
           },
           {
             "cmd": [
@@ -99,6 +74,31 @@
             "id": "pytest",
             "ok": false,
             "rc": 4
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "ruff",
+              "check",
+              "."
+            ],
+            "id": "ruff",
+            "ok": true,
+            "rc": 0
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "ruff",
+              "format",
+              "--check",
+              "."
+            ],
+            "id": "ruff_format",
+            "ok": true,
+            "rc": 0
           }
         ]
       },
@@ -155,21 +155,6 @@
               "python",
               "-m",
               "sdetkit",
-              "playbooks",
-              "validate",
-              "--recommended",
-              "--format",
-              "json"
-            ],
-            "id": "playbooks_validate",
-            "ok": true,
-            "rc": 0
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "sdetkit",
               "gate",
               "fast",
               "--root",
@@ -180,6 +165,21 @@
             "id": "gate_fast",
             "ok": false,
             "rc": 2
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "sdetkit",
+              "playbooks",
+              "validate",
+              "--recommended",
+              "--format",
+              "json"
+            ],
+            "id": "playbooks_validate",
+            "ok": true,
+            "rc": 0
           }
         ]
       },

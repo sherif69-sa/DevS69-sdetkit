@@ -79,19 +79,21 @@ def normalize_cmd(parts: list[str], *, fixture_root: Path, repo_root: Path) -> l
 def project_gate_contract(
     payload: dict[str, Any], *, fixture_root: Path, repo_root: Path
 ) -> dict[str, Any]:
+    projected_steps = [
+        {
+            "id": step["id"],
+            "ok": step["ok"],
+            "rc": step["rc"],
+            "cmd": normalize_cmd(step["cmd"], fixture_root=fixture_root, repo_root=repo_root),
+        }
+        for step in payload["steps"]
+    ]
+    projected_steps.sort(key=lambda step: step["id"])
     return {
         "ok": payload["ok"],
-        "failed_steps": payload["failed_steps"],
+        "failed_steps": sorted(payload["failed_steps"]),
         "profile": payload["profile"],
-        "steps": [
-            {
-                "id": step["id"],
-                "ok": step["ok"],
-                "rc": step["rc"],
-                "cmd": normalize_cmd(step["cmd"], fixture_root=fixture_root, repo_root=repo_root),
-            }
-            for step in payload["steps"]
-        ],
+        "steps": projected_steps,
     }
 
 

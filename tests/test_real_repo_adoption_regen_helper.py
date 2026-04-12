@@ -105,6 +105,43 @@ def test_projection_helper_projects_doctor_contract_with_sorted_failed_checks() 
     }
 
 
+def test_projection_helper_projects_gate_contract_with_stable_ordering() -> None:
+    payload = {
+        "ok": False,
+        "failed_steps": ["pytest", "doctor"],
+        "profile": "fast",
+        "steps": [
+            {"id": "pytest", "ok": False, "rc": 4, "cmd": ["/tmp/venv/bin/python", "-m", "pytest"]},
+            {
+                "id": "doctor",
+                "ok": False,
+                "rc": 2,
+                "cmd": [
+                    f"/home/runner/work/{REPO_ROOT.name}/{REPO_ROOT.name}/.venv/bin/python",
+                    "-m",
+                    "sdetkit",
+                    "doctor",
+                ],
+            },
+        ],
+    }
+    projected = project_contract_for_artifact(
+        "gate-fast.json",
+        payload,
+        fixture_root=FIXTURE_ROOT,
+        repo_root=REPO_ROOT,
+    )
+    assert projected == {
+        "ok": False,
+        "failed_steps": ["doctor", "pytest"],
+        "profile": "fast",
+        "steps": [
+            {"id": "doctor", "ok": False, "rc": 2, "cmd": ["python", "-m", "sdetkit", "doctor"]},
+            {"id": "pytest", "ok": False, "rc": 4, "cmd": ["python", "-m", "pytest"]},
+        ],
+    }
+
+
 def test_projection_helper_canonical_truth_model_is_explicit() -> None:
     expected = {
         "gate_fast": (2, False),
