@@ -468,6 +468,45 @@ def plan_adaptive_probes(
             },
             reason="Use repeated-run history to verify whether risk is persistent or newly introduced.",
         ),
+        ProbeDefinition(
+            probe_id="probe:doctor-delta",
+            requires="workspace_like",
+            min_score=22,
+            cost=25,
+            max_chain_depth=3,
+            bounded_contract={
+                "max_runtime_seconds": 12,
+                "max_artifacts": 1,
+                "max_history_windows": 3,
+            },
+            reason="Validate whether doctor findings are newly introduced or part of a recurring baseline trend.",
+        ),
+        ProbeDefinition(
+            probe_id="probe:inspect-project-focus",
+            requires="repo_like",
+            min_score=24,
+            cost=35,
+            max_chain_depth=3,
+            bounded_contract={
+                "max_runtime_seconds": 18,
+                "max_artifacts": 2,
+                "max_project_files": 2000,
+            },
+            reason="Deepen repo-surface investigation to isolate policy/readiness gaps driving current risk.",
+        ),
+        ProbeDefinition(
+            probe_id="probe:artifact-integrity",
+            requires="repo_like",
+            min_score=20,
+            cost=20,
+            max_chain_depth=3,
+            bounded_contract={
+                "max_runtime_seconds": 8,
+                "max_artifacts": 1,
+                "max_manifest_entries": 400,
+            },
+            reason="Validate that expected review artifacts and evidence links are present and consistent.",
+        ),
     ]
     candidates: list[dict[str, Any]] = []
     for probe in registry:
@@ -511,6 +550,57 @@ def plan_adaptive_probes(
                     "weight": 8,
                 }
             )
+        elif probe.probe_id == "probe:doctor-delta":
+            doctor_pressure = len(
+                [item for item in findings if str(item.get("kind", "")) == "doctor"]
+            )
+            score += doctor_pressure * 18
+            score_inputs.append(
+                {"input": "doctor_pressure", "value": doctor_pressure, "weight": 18}
+            )
+            score += history_pressure * 10
+            score_inputs.append(
+                {"input": "history_pressure", "value": history_pressure, "weight": 10}
+            )
+            score += 8 if has_previous_review else 0
+            score_inputs.append(
+                {"input": "has_previous_review", "value": has_previous_review, "weight": 8}
+            )
+        elif probe.probe_id == "probe:inspect-project-focus":
+            inspect_pressure = len(
+                [item for item in findings if str(item.get("kind", "")) == "inspect-project"]
+            )
+            score += inspect_pressure * 16
+            score_inputs.append(
+                {"input": "inspect_project_pressure", "value": inspect_pressure, "weight": 16}
+            )
+            score += cluster_pressure * 8
+            score_inputs.append(
+                {"input": "cluster_pressure", "value": cluster_pressure, "weight": 8}
+            )
+            score += finding_pressure // 8
+            score_inputs.append(
+                {"input": "finding_pressure", "value": finding_pressure, "weight": "1/8"}
+            )
+            score += 6 if profile_name in {"release", "forensics"} else 0
+            score_inputs.append(
+                {
+                    "input": "release_or_forensics_profile",
+                    "value": profile_name in {"release", "forensics"},
+                    "weight": 6,
+                }
+            )
+        elif probe.probe_id == "probe:artifact-integrity":
+            score += cluster_pressure * 7
+            score_inputs.append(
+                {"input": "cluster_pressure", "value": cluster_pressure, "weight": 7}
+            )
+            score += len(changed) * 6
+            score_inputs.append({"input": "change_count", "value": len(changed), "weight": 6})
+            score += 10 if contradictory else 0
+            score_inputs.append(
+                {"input": "contradictions_present", "value": contradictory, "weight": 10}
+            )
         history_inputs, history_delta = derive_probe_score_history_inputs(
             probe_id=probe.probe_id,
             probe_memory=probe_memory,
@@ -538,11 +628,12 @@ def plan_adaptive_probes(
     chain_enabled = contradictory > 0 or cluster_pressure > 0
     for row in sorted(candidates, key=lambda item: (-int(item["score"]), str(item["probe_id"]))):
         requires = str(row["requires"])
-        enabled = (
-            bool(detection.get("workspace_like"))
-            if requires == "workspace_like"
-            else bool(detection.get("data_like"))
-        )
+        if requires == "inspect_compare_available":
+            enabled = bool(detection.get("inspect_compare_available")) or bool(
+                detection.get("data_like")
+            )
+        else:
+            enabled = bool(detection.get(requires))
         affordable = (budget_spent + int(row["cost"])) <= budget_total
         enough_score = int(row["score"]) >= int(row["min_score"])
         within_chain = chain_depth < int(row["max_chain_depth"])
@@ -585,6 +676,70 @@ def plan_adaptive_probes(
                 },
             }
         )
+    recommendation_catalog = [
+        {
+            "probe_id": row["probe_id"],
+            "when_to_use": row["reason"],
+            "requires": row["requires"],
+            "cost": int(row["cost"]),
+            "min_score": int(row["min_score"]),
+        }
+        for row in sorted(candidates, key=lambda item: str(item["probe_id"]))
+    ]
+    ai_assistant_packet = {
+        "schema_version": "sdetkit.review.ai-assistant.v1",
+        "available": True,
+        "intent": "help operators choose, run, and interpret adaptive review probes",
+        "repo_scope": "all-surfaces",
+        "repo_playbooks": [
+            {
+                "workflow": "doctor",
+                "purpose": "Validate policy/dev/repo readiness before remediation rollout.",
+                "recommended_command": "python -m sdetkit doctor --format json",
+            },
+            {
+                "workflow": "gate-fast",
+                "purpose": "Verify fast quality controls after high-priority fixes.",
+                "recommended_command": "python -m sdetkit gate fast --format json --stable-json",
+            },
+            {
+                "workflow": "gate-release",
+                "purpose": "Validate merge/release truth before promotion.",
+                "recommended_command": "python -m sdetkit gate release --format json",
+            },
+            {
+                "workflow": "review",
+                "purpose": "Correlate cross-surface findings with contradiction-aware prioritization.",
+                "recommended_command": "python -m sdetkit review . --format operator-json",
+            },
+            {
+                "workflow": "inspect-project",
+                "purpose": "Deepen repo-wide file and policy diagnostics for root-cause analysis.",
+                "recommended_command": "python -m sdetkit inspect-project . --format json",
+            },
+        ],
+        "alignment_contract": {
+            "doctor_first": True,
+            "gate_alignment_required": True,
+            "triage_rule": "doctor + gate-fast must be reviewed before gate-release promotion",
+        },
+        "query_context": {
+            "profile": profile_name,
+            "confidence_score": round(float(confidence_score), 2),
+            "confidence_threshold": round(float(confidence_threshold), 2),
+            "detection": {k: bool(v) for k, v in sorted(detection.items())},
+            "contradictions": contradictory,
+            "cluster_pressure": cluster_pressure,
+        },
+        "recommended_prompts": [
+            "Which probe should run first and why?",
+            "Explain the highest-value remediation based on current findings.",
+            "Summarize tradeoffs for running skipped probes under current budget.",
+            "Generate a step-by-step execution plan for the top probe.",
+            "How should doctor and gate results be aligned before release promotion?",
+        ],
+        "probe_catalog": recommendation_catalog,
+    }
     return {
         "executed_probes": executed,
         "skipped_probes": skipped,
@@ -598,6 +753,8 @@ def plan_adaptive_probes(
             }
             for row in sorted(candidates, key=lambda item: str(item["probe_id"]))
         ],
+        "recommendation_catalog": recommendation_catalog,
+        "ai_assistant": ai_assistant_packet,
         "budget": {
             "total": budget_total,
             "spent": budget_spent,

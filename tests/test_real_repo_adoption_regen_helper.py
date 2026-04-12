@@ -68,11 +68,19 @@ def test_projection_helper_normalizes_repo_paths_and_python_binary() -> None:
             "/tmp/venv/bin/python",
             f"{FIXTURE_ROOT}/subdir",
             f"{REPO_ROOT}/scripts/run.py",
+            f"/home/runner/work/{REPO_ROOT.name}/{REPO_ROOT.name}/scripts/run.py",
         ],
         fixture_root=FIXTURE_ROOT,
         repo_root=REPO_ROOT,
     )
-    assert normalized == ["<repo>", "<repo>", "python", "<repo>/subdir", "<repo>/scripts/run.py"]
+    assert normalized == [
+        "<repo>",
+        "<repo>",
+        "python",
+        "<repo>/subdir",
+        "<repo>/scripts/run.py",
+        "<repo>/scripts/run.py",
+    ]
 
 
 def test_projection_helper_projects_doctor_contract_with_sorted_failed_checks() -> None:
@@ -94,6 +102,42 @@ def test_projection_helper_projects_doctor_contract_with_sorted_failed_checks() 
         "ok": False,
         "quality": {"failed_check_ids": ["a", "b"], "score": 91},
         "recommendations": [{"id": "fix-1"}],
+    }
+
+
+def test_projection_helper_projects_gate_contract_with_stable_ordering() -> None:
+    payload = {
+        "ok": False,
+        "failed_steps": ["pytest", "doctor"],
+        "profile": "fast",
+        "steps": [
+            {"id": "pytest", "ok": False, "rc": 4, "cmd": ["/tmp/venv/bin/python", "-m", "pytest"]},
+            {
+                "id": "doctor",
+                "ok": False,
+                "rc": 2,
+                "cmd": [
+                    f"/home/runner/work/{REPO_ROOT.name}/{REPO_ROOT.name}/.venv/bin/python",
+                    "-m",
+                    "sdetkit",
+                    "doctor",
+                ],
+            },
+        ],
+    }
+    projected = project_contract_for_artifact(
+        "gate-fast.json",
+        payload,
+        fixture_root=FIXTURE_ROOT,
+        repo_root=REPO_ROOT,
+    )
+    assert projected == {
+        "ok": False,
+        "profile": "fast",
+        "steps": [
+            {"id": "doctor", "cmd": ["python", "-m", "sdetkit", "doctor"]},
+            {"id": "pytest", "cmd": ["python", "-m", "pytest"]},
+        ],
     }
 
 

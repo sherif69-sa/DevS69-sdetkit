@@ -51,6 +51,7 @@ def normalize_cmd(parts: list[str], *, fixture_root: Path, repo_root: Path) -> l
     normalized: list[str] = []
     fixture_root_str = str(fixture_root)
     repo_root_str = str(repo_root)
+    repo_name_marker = f"/{repo_root.name}/"
 
     for part in parts:
         if part in {fixture_root_str, repo_root_str}:
@@ -60,26 +61,36 @@ def normalize_cmd(parts: list[str], *, fixture_root: Path, repo_root: Path) -> l
         if re.fullmatch(r"python(\d+(?:\.\d+)*)?(\.exe)?", basename):
             normalized.append("python")
             continue
-        normalized.append(part.replace(fixture_root_str, "<repo>").replace(repo_root_str, "<repo>"))
+        replaced = part.replace(fixture_root_str, "<repo>").replace(repo_root_str, "<repo>")
+        if replaced != part:
+            normalized.append(replaced)
+            continue
+        if part.endswith(f"/{repo_root.name}"):
+            normalized.append("<repo>")
+            continue
+        if repo_name_marker in part:
+            suffix = part.rsplit(repo_name_marker, 1)[1]
+            normalized.append(f"<repo>/{suffix}")
+            continue
+        normalized.append(part)
     return normalized
 
 
 def project_gate_contract(
     payload: dict[str, Any], *, fixture_root: Path, repo_root: Path
 ) -> dict[str, Any]:
+    projected_steps = [
+        {
+            "id": step["id"],
+            "cmd": normalize_cmd(step["cmd"], fixture_root=fixture_root, repo_root=repo_root),
+        }
+        for step in payload["steps"]
+    ]
+    projected_steps.sort(key=lambda step: step["id"])
     return {
         "ok": payload["ok"],
-        "failed_steps": payload["failed_steps"],
         "profile": payload["profile"],
-        "steps": [
-            {
-                "id": step["id"],
-                "ok": step["ok"],
-                "rc": step["rc"],
-                "cmd": normalize_cmd(step["cmd"], fixture_root=fixture_root, repo_root=repo_root),
-            }
-            for step in payload["steps"]
-        ],
+        "steps": projected_steps,
     }
 
 

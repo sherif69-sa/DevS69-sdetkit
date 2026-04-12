@@ -98,6 +98,7 @@ def test_cli_review_command_outputs_json(tmp_path: Path) -> None:
     assert payload["schema_version"] == "sdetkit.review.v3"
     assert payload["contract_version"] == "sdetkit.review.contract.v1"
     assert "operator_summary" in payload
+    assert payload["five_heads"]["schema_version"] == "sdetkit.review.five-heads.v1"
 
 
 def test_cli_review_command_outputs_operator_json_contract_only(tmp_path: Path) -> None:
@@ -210,6 +211,7 @@ def test_review_profile_packets_and_text_are_profile_specific(tmp_path: Path) ->
         assert "adaptive_review:" in text
         assert "likely_issue_tracks:" in text
         assert "operator_snapshot:" in text
+        assert "five_heads:" in text
 
 
 def test_review_operator_summary_artifact_written(tmp_path: Path) -> None:
@@ -231,6 +233,7 @@ def test_review_operator_summary_artifact_written(tmp_path: Path) -> None:
     assert operator_payload["contract_version"] == "sdetkit.review.contract.v1"
     assert "judgment_rationale" in operator_payload
     assert "actions" in operator_payload
+    assert "five_heads" in operator_payload
 
 
 def test_cli_review_interactive_navigator_outputs_selected_section(tmp_path: Path) -> None:
@@ -355,6 +358,50 @@ def test_probe_budget_skips_when_budget_is_exhausted() -> None:
         row["skip_reason"] == "probe budget exhausted by higher-value probes"
         for row in decision["skipped_probes"]
     )
+
+
+def test_probe_registry_expands_scenarios_and_recommendations() -> None:
+    decision = plan_adaptive_probes(
+        detection={
+            "workspace_like": True,
+            "data_like": True,
+            "repo_like": True,
+            "inspect_compare_available": True,
+        },
+        profile_name="release",
+        findings=[
+            {"priority": 80, "kind": "doctor"},
+            {"priority": 65, "kind": "inspect-project"},
+        ],
+        contradiction_graph={
+            "flat_contradictions": [{"id": "c1"}],
+            "clusters": [{"cluster_id": "x"}],
+        },
+        has_previous_review=True,
+        changed=[{"kind": "status", "message": "changed"}],
+        confidence_score=0.3,
+        confidence_threshold=0.6,
+    )
+    registry_ids = {row["probe_id"] for row in decision["registry"]}
+    assert {
+        "probe:inspect-compare",
+        "probe:workspace-history",
+        "probe:doctor-delta",
+        "probe:inspect-project-focus",
+        "probe:artifact-integrity",
+    }.issubset(registry_ids)
+    recommendations = {row["probe_id"] for row in decision["recommendation_catalog"]}
+    assert recommendations == registry_ids
+    ai_packet = decision["ai_assistant"]
+    assert ai_packet["schema_version"] == "sdetkit.review.ai-assistant.v1"
+    assert ai_packet["available"] is True
+    assert ai_packet["probe_catalog"] == decision["recommendation_catalog"]
+    assert ai_packet["recommended_prompts"]
+    playbook_workflows = {row["workflow"] for row in ai_packet["repo_playbooks"]}
+    assert {"doctor", "gate-fast", "gate-release", "review", "inspect-project"}.issubset(
+        playbook_workflows
+    )
+    assert ai_packet["alignment_contract"]["doctor_first"] is True
 
 
 def test_probe_memory_artifact_written_and_exposed(tmp_path: Path) -> None:

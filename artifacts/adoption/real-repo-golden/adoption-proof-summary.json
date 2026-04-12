@@ -4,14 +4,24 @@
     {
       "artifact": "build/gate-fast.json",
       "artifact_contract": {
-        "failed_steps": [
-          "doctor",
-          "ci_templates",
-          "pytest"
-        ],
         "ok": false,
         "profile": "fast",
         "steps": [
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "sdetkit",
+              "ci",
+              "validate-templates",
+              "--root",
+              "<repo>",
+              "--format",
+              "json",
+              "--strict"
+            ],
+            "id": "ci_templates"
+          },
           {
             "cmd": [
               "python",
@@ -28,51 +38,7 @@
               "--format",
               "json"
             ],
-            "id": "doctor",
-            "ok": false,
-            "rc": 2
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "sdetkit",
-              "ci",
-              "validate-templates",
-              "--root",
-              "<repo>",
-              "--format",
-              "json",
-              "--strict"
-            ],
-            "id": "ci_templates",
-            "ok": false,
-            "rc": 2
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "ruff",
-              "check",
-              "."
-            ],
-            "id": "ruff",
-            "ok": true,
-            "rc": 0
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "ruff",
-              "format",
-              "--check",
-              "."
-            ],
-            "id": "ruff_format",
-            "ok": true,
-            "rc": 0
+            "id": "doctor"
           },
           {
             "cmd": [
@@ -81,9 +47,7 @@
               "mypy",
               "src"
             ],
-            "id": "mypy",
-            "ok": true,
-            "rc": 0
+            "id": "mypy"
           },
           {
             "cmd": [
@@ -96,9 +60,28 @@
               "tests/test_doctor_surgical.py",
               "tests/test_baseline_umbrella.py"
             ],
-            "id": "pytest",
-            "ok": false,
-            "rc": 4
+            "id": "pytest"
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "ruff",
+              "check",
+              "."
+            ],
+            "id": "ruff"
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "ruff",
+              "format",
+              "--check",
+              "."
+            ],
+            "id": "ruff_format"
           }
         ]
       },
@@ -129,10 +112,6 @@
       "artifact": "build/release-preflight.json",
       "artifact_contract": {
         "dry_run": false,
-        "failed_steps": [
-          "doctor_release",
-          "gate_fast"
-        ],
         "ok": false,
         "profile": "release",
         "steps": [
@@ -146,24 +125,7 @@
               "--format",
               "json"
             ],
-            "id": "doctor_release",
-            "ok": false,
-            "rc": 2
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "sdetkit",
-              "playbooks",
-              "validate",
-              "--recommended",
-              "--format",
-              "json"
-            ],
-            "id": "playbooks_validate",
-            "ok": true,
-            "rc": 0
+            "id": "doctor_release"
           },
           {
             "cmd": [
@@ -177,9 +139,20 @@
               "--format",
               "json"
             ],
-            "id": "gate_fast",
-            "ok": false,
-            "rc": 2
+            "id": "gate_fast"
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "sdetkit",
+              "playbooks",
+              "validate",
+              "--recommended",
+              "--format",
+              "json"
+            ],
+            "id": "playbooks_validate"
           }
         ]
       },
