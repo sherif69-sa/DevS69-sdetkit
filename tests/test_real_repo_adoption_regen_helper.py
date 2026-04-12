@@ -133,11 +133,10 @@ def test_projection_helper_projects_gate_contract_with_stable_ordering() -> None
     )
     assert projected == {
         "ok": False,
-        "failed_steps": ["doctor", "pytest"],
         "profile": "fast",
         "steps": [
-            {"id": "doctor", "ok": False, "rc": 2, "cmd": ["python", "-m", "sdetkit", "doctor"]},
-            {"id": "pytest", "ok": False, "rc": 4, "cmd": ["python", "-m", "pytest"]},
+            {"id": "doctor", "cmd": ["python", "-m", "sdetkit", "doctor"]},
+            {"id": "pytest", "cmd": ["python", "-m", "pytest"]},
         ],
     }
 

@@ -82,8 +82,6 @@ def project_gate_contract(
     projected_steps = [
         {
             "id": step["id"],
-            "ok": step["ok"],
-            "rc": step["rc"],
             "cmd": normalize_cmd(step["cmd"], fixture_root=fixture_root, repo_root=repo_root),
         }
         for step in payload["steps"]
@@ -91,7 +89,6 @@ def project_gate_contract(
     projected_steps.sort(key=lambda step: step["id"])
     return {
         "ok": payload["ok"],
-        "failed_steps": sorted(payload["failed_steps"]),
         "profile": payload["profile"],
         "steps": projected_steps,
     }
