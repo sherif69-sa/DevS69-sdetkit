@@ -112,7 +112,7 @@ def test_serve_review_accepts_code_scan_json_and_returns_summary(tmp_path: Path)
     repo = tmp_path / "repo"
     repo.mkdir()
     (repo / "pyproject.toml").write_text("[tool.sdetkit]\n", encoding="utf-8")
-    scan = tmp_path / "scan.json"
+    scan = repo / "scan.json"
     scan.write_text(
         json.dumps({"alerts": [{"severity": "critical", "rule_id": "sec-1"}]}),
         encoding="utf-8",
