@@ -120,6 +120,24 @@
               "python",
               "-m",
               "sdetkit",
+              "security",
+              "scan",
+              "--root",
+              "<repo>",
+              "--format",
+              "sarif",
+              "--output",
+              "build/code-scanning.sarif",
+              "--fail-on",
+              "high"
+            ],
+            "id": "code_scanning"
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "sdetkit",
               "doctor",
               "--release",
               "--format",

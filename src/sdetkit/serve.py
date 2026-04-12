@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -76,6 +77,28 @@ def _parse_review_request(body: bytes) -> dict[str, Any]:
     out_dir = raw.get("out_dir")
     if out_dir is not None and (not isinstance(out_dir, str) or not out_dir.strip()):
         raise RequestValidationError("Field 'out_dir' must be a non-empty string when provided.")
+    work_id = raw.get("work_id", "")
+    if not isinstance(work_id, str):
+        raise RequestValidationError("Field 'work_id' must be a string when provided.")
+    work_context = raw.get("work_context", {})
+    if not isinstance(work_context, dict):
+        raise RequestValidationError("Field 'work_context' must be an object when provided.")
+    normalized_work_context: dict[str, str] = {}
+    for key, value in work_context.items():
+        normalized_work_context[str(key)] = str(value)
+    code_scan_json = raw.get("code_scan_json")
+    if code_scan_json is not None and (
+        not isinstance(code_scan_json, str) or not code_scan_json.strip()
+    ):
+        raise RequestValidationError(
+            "Field 'code_scan_json' must be a non-empty string when provided."
+        )
+    if isinstance(code_scan_json, str):
+        code_scan_json = code_scan_json.strip()
+        if not re.fullmatch(r"[A-Za-z0-9._-]{1,255}", code_scan_json):
+            raise RequestValidationError(
+                "Field 'code_scan_json' must be a simple file name (no directory separators)."
+            )
 
     return {
         "path": path,
@@ -84,6 +107,9 @@ def _parse_review_request(body: bytes) -> dict[str, Any]:
         "no_workspace": no_workspace,
         "workspace_root": workspace_root,
         "out_dir": out_dir,
+        "work_id": work_id.strip(),
+        "work_context": normalized_work_context,
+        "code_scan_json": code_scan_json if isinstance(code_scan_json, str) else None,
     }
 
 
@@ -99,6 +125,11 @@ def _run_review_request(req: dict[str, Any]) -> dict[str, Any]:
         workspace_root=Path(req["workspace_root"]),
         profile=req["profile"],
         no_workspace=bool(req["no_workspace"]),
+        work_id=str(req.get("work_id", "")).strip(),
+        work_context=dict(req.get("work_context", {})),
+        code_scan_json=Path(str(req["code_scan_json"]).strip())
+        if req.get("code_scan_json")
+        else None,
     )
     operator_summary = payload.get("operator_summary", {})
     result: dict[str, Any] = {

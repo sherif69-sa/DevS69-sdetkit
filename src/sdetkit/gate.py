@@ -108,6 +108,26 @@ def _parse_step_filter(raw: str | None) -> set[str]:
     return {item for item in items if item}
 
 
+def _parse_context_entries(entries: list[str] | None) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for entry in entries or []:
+        raw = str(entry).strip()
+        if not raw:
+            continue
+        key, sep, value = raw.partition("=")
+        if not sep or not key.strip():
+            raise ValueError(f"gate: invalid --work-context entry '{entry}' (expected KEY=VALUE)")
+        out[key.strip()] = value.strip()
+    return out
+
+
+def _request_context(ns: argparse.Namespace) -> dict[str, Any]:
+    return {
+        "work_id": str(getattr(ns, "work_id", "") or "").strip(),
+        "work_context": _parse_context_entries(list(getattr(ns, "work_context", []) or [])),
+    }
+
+
 def _format_text(payload: dict[str, Any]) -> str:
     ok = coerce_bool(payload.get("ok"), default=False)
     lines: list[str] = []
@@ -220,11 +240,17 @@ def _run_fast(ns: argparse.Namespace) -> int:
             return False
         return step_id not in skip
 
+    try:
+        request_context = _request_context(ns)
+    except ValueError as exc:
+        sys.stderr.write(str(exc) + "\n")
+        return 2
     selected_steps = [step_id for step_id in AVAILABLE_STEPS if should_run(step_id)]
     if not selected_steps:
         empty_payload: dict[str, Any] = {
             "profile": "fast",
             "root": str(root),
+            "request_context": request_context,
             "ok": False,
             "steps": [],
             "failed_steps": ["configuration"],
@@ -359,6 +385,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
     gate_payload: dict[str, Any] = {
         "profile": "fast",
         "root": str(root),
+        "request_context": request_context,
         "ok": not bool(failed),
         "failed_steps": failed,
         "steps": steps,
@@ -439,6 +466,10 @@ def _release_recommendations(failed_steps: list[str]) -> list[str]:
         "doctor_release": "Inspect release readiness output: python -m sdetkit doctor --release --format json --out build/doctor-release.json.",
         "playbooks_validate": "Run playbook validation directly for details: python -m sdetkit playbooks validate --recommended --format json.",
         "gate_fast": "Inspect fast gate evidence: python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json.",
+        "code_scanning": (
+            "Inspect security scanning output: python -m sdetkit security scan --format sarif "
+            "--output build/code-scanning.sarif --fail-on high."
+        ),
     }
     return [mapping[s] for s in failed_steps if s in mapping]
 
@@ -458,6 +489,7 @@ def _normalize_release_steps(steps: list[dict[str, Any]], root: Path) -> list[di
 
 
 def _release_commands(ns: argparse.Namespace, root: Path) -> list[tuple[str, list[str]]]:
+    code_scan_out = str(Path(getattr(ns, "code_scan_out", "build/code-scanning.sarif")))
     doctor_cmd = [sys.executable, "-m", "sdetkit", "doctor", "--release", "--format", "json"]
     if ns.release_full:
         doctor_cmd = [
@@ -472,6 +504,25 @@ def _release_commands(ns: argparse.Namespace, root: Path) -> list[tuple[str, lis
 
     return [
         ("doctor_release", doctor_cmd),
+        (
+            "code_scanning",
+            [
+                sys.executable,
+                "-m",
+                "sdetkit",
+                "security",
+                "scan",
+                "--root",
+                str(root),
+                "--format",
+                "sarif",
+                "--output",
+                code_scan_out,
+                "--fail-on",
+                "high",
+                *(["--include-info"] if getattr(ns, "code_scan_include_info", False) else []),
+            ],
+        ),
         (
             "playbooks_validate",
             [
@@ -502,11 +553,17 @@ def _release_commands(ns: argparse.Namespace, root: Path) -> list[tuple[str, lis
 
 def _run_release(ns: argparse.Namespace) -> int:
     root = Path(ns.root).resolve()
+    try:
+        request_context = _request_context(ns)
+    except ValueError as exc:
+        sys.stderr.write(str(exc) + "\n")
+        return 2
     commands = _release_commands(ns, root)
     if not commands:
         payload: dict[str, Any] = {
             "profile": "release",
             "root": "<repo>",
+            "request_context": request_context,
             "dry_run": bool(ns.dry_run),
             "ok": False,
             "failed_steps": ["configuration"],
@@ -537,10 +594,19 @@ def _run_release(ns: argparse.Namespace) -> int:
     payload = {
         "profile": "release",
         "root": "<repo>",
+        "request_context": request_context,
         "dry_run": bool(ns.dry_run),
         "ok": not bool(failed),
         "failed_steps": failed,
         "steps": steps,
+        "ai_assistance": {
+            "recommended_review_command": (
+                "python -m sdetkit review . --format operator-json "
+                f"--work-id {request_context['work_id'] or '<work-id>'} "
+                f"--code-scan-json {Path(getattr(ns, 'code_scan_out', 'build/code-scanning.sarif')).as_posix()}"
+            ),
+            "adoption_focus": "doctor + gate + review adaptive alignment for every PR",
+        },
     }
     recommendations = _release_recommendations(failed)
     if recommendations:
@@ -694,6 +760,13 @@ def main(argv: list[str] | None = None) -> int:
     playbook_group.add_argument("--playbooks-legacy", action="store_true")
     playbook_group.add_argument("--playbooks-aliases", action="store_true")
     release.add_argument("--playbook-name", action="append", default=[])
+    release.add_argument("--work-id", default="")
+    release.add_argument("--work-context", action="append", default=[])
+    release.add_argument("--code-scan-out", default="build/code-scanning.sarif")
+    release.add_argument("--code-scan-include-info", action="store_true")
+
+    fast.add_argument("--work-id", default="")
+    fast.add_argument("--work-context", action="append", default=[])
 
     ns = parser.parse_args(list(argv) if argv is not None else None)
 

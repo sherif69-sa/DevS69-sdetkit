@@ -294,6 +294,9 @@ Then use stability-aware command discovery:
     )
     review_parser.add_argument("--interactive", action="store_true")
     review_parser.add_argument("--no-workspace", action="store_true")
+    review_parser.add_argument("--work-id", default=None)
+    review_parser.add_argument("--work-context", action="append", default=None)
+    review_parser.add_argument("--code-scan-json", default=None)
 
     serve_parser = sub.add_parser(
         "serve",
@@ -1351,6 +1354,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             forwarded.append("--interactive")
         if ns.no_workspace:
             forwarded.append("--no-workspace")
+        if ns.work_id:
+            forwarded.extend(["--work-id", ns.work_id])
+        for entry in ns.work_context or []:
+            forwarded.extend(["--work-context", entry])
+        if ns.code_scan_json:
+            forwarded.extend(["--code-scan-json", ns.code_scan_json])
         return _run_module_main("sdetkit.review", forwarded)
 
     if ns.cmd == "serve":
