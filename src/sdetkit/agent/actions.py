@@ -79,7 +79,10 @@ class ActionRegistry:
         return resolved
 
     def _is_write_allowed(self, rel: str) -> bool:
-        normalized = rel.replace("\\", "/").lstrip("/")
+        try:
+            normalized = self._safe_rel(rel).relative_to(self.root.resolve()).as_posix()
+        except ValueError:
+            return False
         return any(
             normalized == item or normalized.startswith(item.rstrip("/") + "/")
             for item in self.write_allowlist
