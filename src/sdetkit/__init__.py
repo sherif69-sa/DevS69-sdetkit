@@ -92,7 +92,7 @@ def __getattr__(name: str) -> Any:
         return _main_module
     try:
         return import_module(f".{name}", __name__)
-    except Exception:
+    except ImportError:
         pass
 
     pkg_dir = Path(__file__).resolve().parent

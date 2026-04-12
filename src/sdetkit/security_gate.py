@@ -44,6 +44,7 @@ SKIP_DIRS = {
     ".pytest_cache",
     ".sdetkit",
 }
+SKIP_PATH_PREFIXES = ("docs/artifacts/",)
 TEXT_EXTENSIONS = {
     ".py",
     ".md",
@@ -470,6 +471,9 @@ def _iter_files(root: Path) -> list[Path]:
         if resolved != resolved_root and resolved_root not in resolved.parents:
             continue
         if any(part in SKIP_DIRS for part in p.parts):
+            continue
+        rel = p.relative_to(root).as_posix()
+        if any(rel.startswith(prefix) for prefix in SKIP_PATH_PREFIXES):
             continue
         if not _should_scan_file(p):
             continue
