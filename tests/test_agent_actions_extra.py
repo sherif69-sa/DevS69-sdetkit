@@ -67,6 +67,25 @@ def test_action_registry_success_paths(tmp_path: Path, monkeypatch) -> None:
     assert shell_res.payload["stdout"] == "ok"
 
 
+def test_action_registry_write_allowlist_rejects_traversal(tmp_path: Path) -> None:
+    reg = ActionRegistry(
+        root=tmp_path,
+        write_allowlist=("allowed",),
+        shell_allowlist=(),
+    )
+    (tmp_path / "allowed").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "elsewhere").mkdir(parents=True, exist_ok=True)
+
+    result = reg.run(
+        "fs.write",
+        {"path": "allowed/../elsewhere/out.txt", "content": "blocked"},
+    )
+
+    assert result.ok is False
+    assert "write denied by allowlist" in str(result.payload.get("error", ""))
+    assert not (tmp_path / "elsewhere" / "out.txt").exists()
+
+
 def test_action_registry_repo_audit_and_report_build(tmp_path: Path, monkeypatch) -> None:
     reg = ActionRegistry(root=tmp_path, write_allowlist=(".sdetkit",), shell_allowlist=("python",))
 
