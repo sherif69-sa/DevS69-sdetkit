@@ -32,7 +32,14 @@ CANONICAL_COMMANDS = tuple(
 )
 
 
+def _reset_fixture_workspace() -> None:
+    workspace_dir = FIXTURE_ROOT / ".sdetkit"
+    if workspace_dir.exists():
+        shutil.rmtree(workspace_dir)
+
+
 def _run_command(cmd: list[str], expected_output: Path, rc_output: Path) -> None:
+    _reset_fixture_workspace()
     proc = subprocess.run(cmd, cwd=FIXTURE_ROOT, text=True, capture_output=True, check=False)
     rc_output.write_text(f"{proc.returncode}\n", encoding="utf-8")
 
@@ -67,6 +74,7 @@ def _regenerate_goldens() -> int:
         shutil.copyfile(build_artifact, golden_artifact)
         shutil.copyfile(build_rc, golden_rc)
     _write_summary(BUILD_DIR, GOLDEN_DIR)
+    _reset_fixture_workspace()
     return 0
 
 
@@ -108,9 +116,11 @@ def _check_goldens() -> int:
             "run `python scripts/regenerate_real_repo_adoption_goldens.py` to intentionally refresh checked-in goldens.",
             file=sys.stderr,
         )
+        _reset_fixture_workspace()
         return 1
 
     print("real-repo adoption goldens are up to date.")
+    _reset_fixture_workspace()
     return 0
 
 
