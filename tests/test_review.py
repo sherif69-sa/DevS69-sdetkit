@@ -234,7 +234,7 @@ def test_review_rejects_code_scan_path_outside_target_root(tmp_path: Path) -> No
         )
         raise AssertionError("expected review.run_review to reject outside code scan path")
     except ValueError as exc:
-        assert "must be a relative path" in str(exc)
+        assert "single relative file name" in str(exc)
 
 
 def test_review_profiles_change_judgment_and_artifacts_for_same_input(tmp_path: Path) -> None:

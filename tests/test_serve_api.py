@@ -102,6 +102,20 @@ def test_serve_health_review_operator_mode_and_validation(tmp_path: Path) -> Non
             assert exc.code == 400
             err = json.loads(exc.read().decode("utf-8"))
             assert err["error"]["code"] == "validation_error"
+
+        bad_scan_req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/v1/review",
+            data=json.dumps({"path": str(repo), "code_scan_json": "nested/scan.json"}).encode(
+                "utf-8"
+            ),
+            method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            urllib.request.urlopen(bad_scan_req)  # noqa: S310
+            raise AssertionError("expected code_scan_json validation error")
+        except urllib.error.HTTPError as exc:
+            assert exc.code == 400
     finally:
         server.shutdown()
         server.server_close()
