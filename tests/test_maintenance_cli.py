@@ -307,6 +307,34 @@ def test_clean_tree_check_paths(monkeypatch, tmp_path: Path) -> None:
     assert dirty.ok is False
     assert dirty.details["count"] == 1
 
+    monkeypatch.setattr(
+        clean_tree_check,
+        "run_cmd",
+        lambda _cmd, cwd: SimpleNamespace(
+            returncode=0,
+            stdout="?? .sdetkit/out/maintenance.json\n M foo.py\n",
+            stderr="",
+        ),
+    )
+    mixed = clean_tree_check.run(ctx)
+    assert mixed.ok is False
+    assert mixed.details["count"] == 1
+    assert mixed.details["ignored_count"] == 1
+
+    monkeypatch.setattr(
+        clean_tree_check,
+        "run_cmd",
+        lambda _cmd, cwd: SimpleNamespace(
+            returncode=0,
+            stdout="?? .sdetkit/out/maintenance.json\n",
+            stderr="",
+        ),
+    )
+    ignored_only = clean_tree_check.run(ctx)
+    assert ignored_only.ok is True
+    assert ignored_only.details["count"] == 0
+    assert ignored_only.details["ignored_count"] == 1
+
 
 def test_custom_example_and_tests_check(monkeypatch, tmp_path: Path) -> None:
     ctx = MaintenanceContext(
