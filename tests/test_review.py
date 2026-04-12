@@ -137,6 +137,87 @@ def test_cli_review_command_outputs_operator_json_contract_only(tmp_path: Path) 
     assert payload == artifact_payload
 
 
+def test_cli_review_supports_work_id_and_context_for_ai_handoff(tmp_path: Path) -> None:
+    data = tmp_path / "events.csv"
+    data.write_text("id,type\nE1,open\n", encoding="utf-8")
+    run = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "sdetkit",
+            "review",
+            str(data),
+            "--workspace-root",
+            str(tmp_path / "workspace"),
+            "--format",
+            "operator-json",
+            "--work-id",
+            "INC-4821",
+            "--work-context",
+            "owner=platform",
+            "--work-context",
+            "component=review",
+            "--no-workspace",
+        ],
+        text=True,
+        capture_output=True,
+    )
+    assert run.returncode == 0
+    payload = json.loads(run.stdout)
+    assert payload["request_context"]["work_id"] == "INC-4821"
+    assert payload["request_context"]["work_context"] == {
+        "owner": "platform",
+        "component": "review",
+    }
+
+
+def test_cli_review_code_scan_report_influences_adaptive_security_context(tmp_path: Path) -> None:
+    data = tmp_path / "events.csv"
+    scan = tmp_path / "scan.sarif"
+    data.write_text("id,type\nE1,open\n", encoding="utf-8")
+    scan.write_text(
+        json.dumps(
+            {
+                "version": "2.1.0",
+                "runs": [
+                    {
+                        "tool": {"driver": {"name": "CodeQL"}},
+                        "results": [
+                            {"ruleId": "py/sql-injection", "level": "error"},
+                            {"ruleId": "py/logging", "level": "warning"},
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    run = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "sdetkit",
+            "review",
+            str(data),
+            "--workspace-root",
+            str(tmp_path / "workspace"),
+            "--format",
+            "json",
+            "--code-scan-json",
+            str(scan),
+            "--no-workspace",
+        ],
+        text=True,
+        capture_output=True,
+    )
+    assert run.returncode == 2
+    payload = json.loads(run.stdout)
+    assert payload["code_scanning"]["tool"] == "CodeQL"
+    assert payload["code_scanning"]["blocking_alerts"] == 1
+    assert payload["adaptive_review"]["ai_assistant"]["available"] is True
+    assert "code_scan_json" in payload["artifact_index"]
+
+
 def test_review_profiles_change_judgment_and_artifacts_for_same_input(tmp_path: Path) -> None:
     workspace = tmp_path / "workspace"
     data = tmp_path / "events.csv"
@@ -234,6 +315,9 @@ def test_review_operator_summary_artifact_written(tmp_path: Path) -> None:
     assert "judgment_rationale" in operator_payload
     assert "actions" in operator_payload
     assert "five_heads" in operator_payload
+    assert operator_payload["adaptive_database"]["schema_version"] == (
+        "sdetkit.review.adaptive-database.v1"
+    )
 
 
 def test_cli_review_interactive_navigator_outputs_selected_section(tmp_path: Path) -> None:
@@ -402,6 +486,25 @@ def test_probe_registry_expands_scenarios_and_recommendations() -> None:
         playbook_workflows
     )
     assert ai_packet["alignment_contract"]["doctor_first"] is True
+
+
+def test_review_adaptive_database_and_ai_handoff_contract(tmp_path: Path) -> None:
+    data = tmp_path / "events.csv"
+    data.write_text("id,type\nE1,open\nE1,open\n", encoding="utf-8")
+    rc, payload, _, _ = review.run_review(
+        target=data,
+        out_dir=tmp_path / "out",
+        workspace_root=tmp_path / "workspace",
+        work_id="WI-555",
+        work_context={"owner": "qa"},
+        no_workspace=True,
+    )
+    assert rc == 2
+    assert payload["adaptive_database"]["schema_version"] == "sdetkit.review.adaptive-database.v1"
+    assert len(payload["adaptive_database"]["top5_actions"]) <= 5
+    ai_packet = payload["adaptive_review"]["ai_assistant"]
+    assert ai_packet["workflow_alignment"]["review_adaptive_enabled"] is True
+    assert ai_packet["reviewer_engine_contract"]["five_heads_required"] is True
 
 
 def test_probe_memory_artifact_written_and_exposed(tmp_path: Path) -> None:
