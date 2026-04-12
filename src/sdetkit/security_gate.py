@@ -44,9 +44,7 @@ SKIP_DIRS = {
     ".pytest_cache",
     ".sdetkit",
 }
-SKIP_PATH_PREFIXES = (
-    "docs/artifacts/",
-)
+SKIP_PATH_PREFIXES = ("docs/artifacts/",)
 TEXT_EXTENSIONS = {
     ".py",
     ".md",
