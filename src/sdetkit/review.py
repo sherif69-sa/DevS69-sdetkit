@@ -320,7 +320,9 @@ def _summarize_code_scanning(path: Path) -> dict[str, Any]:
             driver = run.get("tool", {}).get("driver", {})
             if isinstance(driver, dict) and driver.get("name"):
                 tool = str(driver.get("name"))
-            for result in run.get("results", []) if isinstance(run.get("results", []), list) else []:
+            for result in (
+                run.get("results", []) if isinstance(run.get("results", []), list) else []
+            ):
                 if not isinstance(result, dict):
                     continue
                 level = str(result.get("level", "warning")).lower()
@@ -567,7 +569,10 @@ def run_review(
             {"kind": "code_scanning_alerts_total", "value": code_scanning_summary["total_alerts"]}
         )
         supporting.append(
-            {"kind": "code_scanning_blocking_alerts", "value": code_scanning_summary["blocking_alerts"]}
+            {
+                "kind": "code_scanning_blocking_alerts",
+                "value": code_scanning_summary["blocking_alerts"],
+            }
         )
         if int(code_scanning_summary["blocking_alerts"]) > 0:
             findings.append(
@@ -1351,11 +1356,7 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "five_heads": payload.get("five_heads", {}),
         "request_context": {
             "work_id": str(request_context.get("work_id", "")).strip(),
-            "work_context": {
-                str(k): str(v)
-                for k, v in raw_work_context.items()
-                if str(k).strip()
-            },
+            "work_context": {str(k): str(v) for k, v in raw_work_context.items() if str(k).strip()},
         },
         "code_scanning": payload.get("code_scanning", {}),
         "adaptive_database": payload.get("adaptive_database", {}),

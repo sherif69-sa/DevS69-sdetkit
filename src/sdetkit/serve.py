@@ -86,7 +86,9 @@ def _parse_review_request(body: bytes) -> dict[str, Any]:
     for key, value in work_context.items():
         normalized_work_context[str(key)] = str(value)
     code_scan_json = raw.get("code_scan_json")
-    if code_scan_json is not None and (not isinstance(code_scan_json, str) or not code_scan_json.strip()):
+    if code_scan_json is not None and (
+        not isinstance(code_scan_json, str) or not code_scan_json.strip()
+    ):
         raise RequestValidationError(
             "Field 'code_scan_json' must be a non-empty string when provided."
         )
