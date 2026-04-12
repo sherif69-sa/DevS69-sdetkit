@@ -68,11 +68,19 @@ def test_projection_helper_normalizes_repo_paths_and_python_binary() -> None:
             "/tmp/venv/bin/python",
             f"{FIXTURE_ROOT}/subdir",
             f"{REPO_ROOT}/scripts/run.py",
+            f"/home/runner/work/{REPO_ROOT.name}/{REPO_ROOT.name}/scripts/run.py",
         ],
         fixture_root=FIXTURE_ROOT,
         repo_root=REPO_ROOT,
     )
-    assert normalized == ["<repo>", "<repo>", "python", "<repo>/subdir", "<repo>/scripts/run.py"]
+    assert normalized == [
+        "<repo>",
+        "<repo>",
+        "python",
+        "<repo>/subdir",
+        "<repo>/scripts/run.py",
+        "<repo>/scripts/run.py",
+    ]
 
 
 def test_projection_helper_projects_doctor_contract_with_sorted_failed_checks() -> None:
