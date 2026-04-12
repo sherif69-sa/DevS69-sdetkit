@@ -528,6 +528,11 @@ def run_review(
             if code_scan_json.is_absolute() or len(code_scan_json.parts) != 1:
                 raise ValueError("review: code scanning file must be a single relative file name")
             code_scan_json = safe_path(scan_root, code_scan_json.name, allow_absolute=False)
+            scan_root_real = scan_root.resolve()
+            code_scan_real = code_scan_json.resolve()
+            if code_scan_real != scan_root_real and scan_root_real not in code_scan_real.parents:
+                raise ValueError("review: code scanning file escapes scan root")
+            code_scan_json = code_scan_real
     except SecurityError as exc:
         raise ValueError(f"review: path rejected: {exc}") from exc
     if not target.exists():
