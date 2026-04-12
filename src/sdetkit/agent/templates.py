@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import hashlib
 import io
+import json
 import os
 import re
 import shlex
@@ -467,7 +468,9 @@ def run_template(
             payload = {"output": output.as_posix(), "format": fmt}
             artifacts.append(output.as_posix())
         elif step.action == "review.adaptive":
-            history_dir = Path(str(params.get("history_dir", root / ".sdetkit" / "agent" / "history")))
+            history_dir = Path(
+                str(params.get("history_dir", root / ".sdetkit" / "agent" / "history"))
+            )
             output = Path(str(params.get("output", output_dir / "adaptive-review-kb.json")))
             limit = int(params.get("limit", 10) or 10)
             adaptive_payload = _adaptive_review_payload(history_dir=history_dir, limit=limit)

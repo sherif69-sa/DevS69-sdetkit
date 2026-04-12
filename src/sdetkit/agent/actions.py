@@ -376,9 +376,7 @@ class ActionRegistry:
             "schema_version": "1.0",
             "generated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
             "records": records,
-            "recurring_failures": [
-                {"action": name, "count": count} for name, count in top_actions
-            ],
+            "recurring_failures": [{"action": name, "count": count} for name, count in top_actions],
             "top_errors": [{"error": message, "count": count} for message, count in top_errors],
             "recommendations": recommendations,
         }
