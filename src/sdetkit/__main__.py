@@ -40,11 +40,9 @@ def _cassette_get(argv: list[str]) -> int:
     if ns.insecure:
         sys.stderr.write("warning: TLS verification disabled (--insecure)\n")
 
-    client_opts = {
-        "timeout": default_http_timeout(ns.timeout),
-        "follow_redirects": bool(ns.follow_redirects),
-        "verify": not bool(ns.insecure),
-    }
+    timeout = default_http_timeout(ns.timeout)
+    follow_redirects = bool(ns.follow_redirects)
+    verify = not bool(ns.insecure)
 
     if ns.replay:
         try:
@@ -58,12 +56,17 @@ def _cassette_get(argv: list[str]) -> int:
         except (SecurityError, ValueError, OSError) as exc:
             sys.stderr.write(str(exc) + "\n")
             return 2
-        transport = CassetteReplayTransport(cass)
-        with httpx.Client(transport=transport, **client_opts) as client:
+        replay_transport = CassetteReplayTransport(cass)
+        with httpx.Client(
+            transport=replay_transport,
+            timeout=timeout,
+            follow_redirects=follow_redirects,
+            verify=verify,
+        ) as client:
             r = client.get(ns.url)
             r.raise_for_status()
             sys.stdout.write(json.dumps(r.json(), ensure_ascii=True))
-        f = getattr(transport, "assert_exhausted", None)
+        f = getattr(replay_transport, "assert_exhausted", None)
         if callable(f):
             f()
         return 0
@@ -81,8 +84,13 @@ def _cassette_get(argv: list[str]) -> int:
             return 2
         cass = Cassette()
         inner = httpx.HTTPTransport()
-        transport = CassetteRecordTransport(cass, inner)
-        with httpx.Client(transport=transport, **client_opts) as client:
+        record_transport = CassetteRecordTransport(cass, inner)
+        with httpx.Client(
+            transport=record_transport,
+            timeout=timeout,
+            follow_redirects=follow_redirects,
+            verify=verify,
+        ) as client:
             r = client.get(ns.url)
             r.raise_for_status()
             sys.stdout.write(json.dumps(r.json(), ensure_ascii=True))
@@ -90,7 +98,11 @@ def _cassette_get(argv: list[str]) -> int:
         atomic_write_text(record_path, payload)
         return 0
 
-    with httpx.Client(**client_opts) as client:
+    with httpx.Client(
+        timeout=timeout,
+        follow_redirects=follow_redirects,
+        verify=verify,
+    ) as client:
         r = client.get(ns.url)
         r.raise_for_status()
         sys.stdout.write(json.dumps(r.json(), ensure_ascii=True))
