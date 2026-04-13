@@ -5,7 +5,9 @@ import os
 import threading
 import urllib.error
 import urllib.request
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Any, cast
 
 from sdetkit import cli, serve
 
@@ -68,13 +70,14 @@ def test_serve_health_review_operator_mode_and_validation(tmp_path: Path) -> Non
         )
         assert status == 200
         assert response["status"] == "ok"
-        result = response["result"]
+        result = cast(dict[str, Any], response["result"])
         assert "payload" not in result
-        assert result["operator_summary"]["contract_version"] == "sdetkit.review.contract.v1"
-        assert result["operator_summary"]["request_context"]["work_id"] == "TASK-99"
-        assert result["operator_summary"]["request_context"]["work_context"]["lane"] == (
-            "adaptive-review"
-        )
+        operator_summary = cast(dict[str, Any], result["operator_summary"])
+        request_context = cast(dict[str, Any], operator_summary["request_context"])
+        work_context = cast(dict[str, Any], request_context["work_context"])
+        assert operator_summary["contract_version"] == "sdetkit.review.contract.v1"
+        assert request_context["work_id"] == "TASK-99"
+        assert work_context["lane"] == ("adaptive-review")
 
         _, response2 = _post_json(
             f"http://127.0.0.1:{port}/v1/review",
@@ -88,7 +91,8 @@ def test_serve_health_review_operator_mode_and_validation(tmp_path: Path) -> Non
                 "work_context": {"owner": "ops", "lane": "adaptive-review"},
             },
         )
-        assert response2["result"]["operator_summary"] == result["operator_summary"]
+        result2 = cast(dict[str, Any], response2["result"])
+        assert result2["operator_summary"] == result["operator_summary"]
 
         bad_req = urllib.request.Request(
             f"http://127.0.0.1:{port}/v1/review",
@@ -149,9 +153,12 @@ def test_serve_review_accepts_code_scan_json_and_returns_summary(tmp_path: Path)
             },
         )
         assert status == 200
-        payload = response["result"]["payload"]
-        assert payload["code_scanning"]["blocking_alerts"] == 1
-        assert payload["artifact_index"]["code_scan_json"] == str(scan)
+        result = cast(dict[str, Any], response["result"])
+        payload = cast(dict[str, Any], result["payload"])
+        code_scanning = cast(dict[str, Any], payload["code_scanning"])
+        artifact_index = cast(dict[str, Any], payload["artifact_index"])
+        assert code_scanning["blocking_alerts"] == 1
+        assert artifact_index["code_scan_json"] == str(scan)
     finally:
         server.shutdown()
         server.server_close()
@@ -182,9 +189,84 @@ def test_serve_observability_endpoint_reports_artifact_snapshot(tmp_path: Path) 
             payload = json.loads(resp.read().decode("utf-8"))
         assert resp.status == 200
         assert payload["status"] == "ok"
+        assert payload["observability_contract_version"] == "2"
+        assert payload["captured_at"].endswith("Z")
+        assert "freshness_summary" in payload
         assert "adoption_scorecard" in payload["observability"]
+        adoption = payload["observability"]["adoption_scorecard"]
+        assert adoption["artifact_mtime"].endswith("Z")
+        assert isinstance(adoption["freshness_age_seconds"], int)
+        assert adoption["stale"] in {True, False}
+        assert adoption["stale_threshold_seconds"] == 86400
+        missing = payload["observability"]["operator_onboarding_summary"]
+        assert missing["state"] == "missing"
+        assert missing["freshness_age_seconds"] is None
+        assert missing["stale"] is True
+        assert payload["freshness_summary"]["present"] >= 2
+        assert payload["freshness_summary"]["missing"] >= 1
     finally:
         os.chdir(cwd)
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
+
+
+def test_serve_observability_marks_stale_artifacts(tmp_path: Path) -> None:
+    out = tmp_path / ".sdetkit" / "out"
+    out.mkdir(parents=True)
+    path = out / "golden-path-health.json"
+    path.write_text(json.dumps({"overall_ok": True}), encoding="utf-8")
+    stale_epoch = (datetime.now(tz=UTC) - timedelta(days=2)).timestamp()
+    os.utime(path, (stale_epoch, stale_epoch))
+
+    cwd = Path.cwd()
+    os.chdir(tmp_path)
+    server = serve.build_server(host="127.0.0.1", port=0)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    port = int(server.server_address[1])
+    try:
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/v1/observability") as resp:  # noqa: S310
+            payload = json.loads(resp.read().decode("utf-8"))
+        golden = payload["observability"]["golden_path_health"]
+        assert golden["state"] == "present"
+        assert golden["freshness_age_seconds"] >= 172800
+        assert golden["stale"] is True
+    finally:
+        os.chdir(cwd)
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_serve_observability_allows_stale_threshold_overrides(tmp_path: Path, monkeypatch) -> None:
+    out = tmp_path / ".sdetkit" / "out"
+    out.mkdir(parents=True)
+    path = out / "adoption-scorecard.json"
+    path.write_text(json.dumps({"score": 90, "band": "excellent"}), encoding="utf-8")
+    stale_epoch = (datetime.now(tz=UTC) - timedelta(seconds=120)).timestamp()
+    os.utime(path, (stale_epoch, stale_epoch))
+
+    monkeypatch.setenv("SDETKIT_OBSERVABILITY_STALE_SECONDS", "60")
+    payload = serve._observability_snapshot(tmp_path)
+    adoption = payload["observability"]["adoption_scorecard"]
+    assert adoption["stale_threshold_seconds"] == 60
+    assert adoption["stale"] is True
+
+    monkeypatch.setenv("SDETKIT_OBSERVABILITY_STALE_ADOPTION_SCORECARD_SECONDS", "300")
+    payload2 = serve._observability_snapshot(tmp_path)
+    adoption2 = payload2["observability"]["adoption_scorecard"]
+    assert adoption2["stale_threshold_seconds"] == 300
+    assert adoption2["stale"] is False
+
+
+def test_serve_observability_ignores_invalid_threshold_env(tmp_path: Path, monkeypatch) -> None:
+    out = tmp_path / ".sdetkit" / "out"
+    out.mkdir(parents=True)
+    path = out / "adoption-scorecard.json"
+    path.write_text(json.dumps({"score": 90}), encoding="utf-8")
+
+    monkeypatch.setenv("SDETKIT_OBSERVABILITY_STALE_SECONDS", "invalid")
+    payload = serve._observability_snapshot(tmp_path)
+    adoption = payload["observability"]["adoption_scorecard"]
+    assert adoption["stale_threshold_seconds"] == 86400

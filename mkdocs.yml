@@ -125,8 +125,11 @@ nav:
       - Legacy command migration map: legacy-command-migration-map.md
       - Golden-path health signal: golden-path-health.md
       - Adoption scorecard: adoption-scorecard.md
+      - Legacy burn-down program: legacy-burndown.md
+      - Operational maturity v2 rollout: operational-maturity-v2-rollout.md
       - Operator onboarding wizard: operator-onboarding-wizard.md
       - Primary docs map: primary-docs-map.md
+      - Docs nav cleanup progress: docs-nav-cleanup-progress.md
       - Determinism checklist: determinism-checklist.md
       - Determinism contract: determinism-contract.md
       - Stability levels (current policy): stability-levels.md
@@ -187,5 +190,9 @@ exclude_docs: |
   artifacts/**
   roadmap/reports/**
   impact-*-*-report.md
+  big-upgrade-report-*.md
+  ultra-upgrade-report-*.md
+  agentos-*.md
+  automation-templates-engine.md
   integrations-*.md
   !integrations-and-extension-boundary.md

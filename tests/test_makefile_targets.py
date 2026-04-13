@@ -31,11 +31,32 @@ def test_makefile_has_legacy_command_analyzer_target() -> None:
     assert "python scripts/legacy_command_analyzer.py --format json" in text
 
 
+def test_makefile_has_legacy_burndown_target() -> None:
+    root = Path(__file__).resolve().parents[1]
+    text = (root / "Makefile").read_text(encoding="utf-8")
+    assert "legacy-burndown: venv" in text
+    assert "python scripts/legacy_burndown.py --format json" in text
+
+
 def test_makefile_has_adoption_scorecard_target() -> None:
     root = Path(__file__).resolve().parents[1]
     text = (root / "Makefile").read_text(encoding="utf-8")
     assert "adoption-scorecard: venv" in text
     assert "python scripts/adoption_scorecard.py --format json" in text
+
+
+def test_makefile_has_adoption_scorecard_contract_target() -> None:
+    root = Path(__file__).resolve().parents[1]
+    text = (root / "Makefile").read_text(encoding="utf-8")
+    assert "adoption-scorecard-contract: venv" in text
+    assert "python scripts/check_adoption_scorecard_v2_contract.py --format json" in text
+
+
+def test_makefile_has_observability_contract_target() -> None:
+    root = Path(__file__).resolve().parents[1]
+    text = (root / "Makefile").read_text(encoding="utf-8")
+    assert "observability-contract: venv" in text
+    assert "python scripts/check_observability_v2_contract.py --format json" in text
 
 
 def test_makefile_has_operator_onboarding_wizard_target() -> None:

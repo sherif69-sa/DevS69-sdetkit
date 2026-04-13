@@ -109,4 +109,6 @@ def write_index(path: Path) -> None:
     import json
 
     payload = build_index()
-    path.write_text(json.dumps(payload, ensure_ascii=True, sort_keys=False, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, ensure_ascii=True, sort_keys=False, indent=2) + "\n", encoding="utf-8"
+    )

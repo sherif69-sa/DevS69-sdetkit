@@ -20,13 +20,19 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         == doctor.EVIDENCE_MANIFEST_SCHEMA_VERSION
     )
     assert entries["review-json"]["schema_version"] == review.SCHEMA_VERSION
-    assert entries["checks-verdict-json"]["schema_version"] == check_artifacts.VERDICT_SCHEMA_VERSION
-    assert entries["checks-fix-plan-json"]["schema_version"] == check_artifacts.FIX_PLAN_SCHEMA_VERSION
+    assert (
+        entries["checks-verdict-json"]["schema_version"] == check_artifacts.VERDICT_SCHEMA_VERSION
+    )
+    assert (
+        entries["checks-fix-plan-json"]["schema_version"] == check_artifacts.FIX_PLAN_SCHEMA_VERSION
+    )
     assert (
         entries["checks-risk-summary-json"]["schema_version"]
         == check_artifacts.RISK_SUMMARY_SCHEMA_VERSION
     )
-    assert entries["checks-evidence-zip"]["schema_version"] == check_artifacts.EVIDENCE_SCHEMA_VERSION
+    assert (
+        entries["checks-evidence-zip"]["schema_version"] == check_artifacts.EVIDENCE_SCHEMA_VERSION
+    )
 
 
 def test_artifact_contract_index_includes_canonical_gate_artifacts() -> None:
