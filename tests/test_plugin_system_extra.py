@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from sdetkit import plugin_system as ps
@@ -63,47 +64,51 @@ def test_discover_entrypoints_and_registry_dedupe(monkeypatch, tmp_path: Path) -
     assert records[0].source == "registry"
 
 
-def test_discovery_failures_silent_by_default(monkeypatch, tmp_path: Path, capsys) -> None:
-    eps = _EPSet([_EP("ok", lambda: "entry-ok"), _EP("bad-ep", None, boom=True)])
+def test_discover_plugin_debug_logs_failures(monkeypatch, tmp_path: Path, capsys) -> None:
+    eps = _EPSet([_EP("z", None, boom=True)])
     monkeypatch.setattr(ps.metadata, "entry_points", lambda: eps)
 
     cfg = tmp_path / ".sdetkit/plugins.toml"
     cfg.parent.mkdir(parents=True)
-    cfg.write_text('[plugins]\nok = "json:loads"\nbad-reg = "oops"\n', encoding="utf-8")
+    cfg.write_text('[plugins]\nbad = "oops"\n', encoding="utf-8")
+
+    records = ps.discover("g", "plugins", root=tmp_path, debug=True)
+    assert records == []
+    err = capsys.readouterr().err
+    lines = [json.loads(line) for line in err.strip().splitlines()]
+    assert len(lines) == 2
+    assert lines[0]["source"] == "entrypoint"
+    assert lines[0]["group"] == "g"
+    assert lines[0]["name"] == "z"
+    assert lines[1]["source"] == "registry"
+    assert lines[1]["section"] == "plugins"
+    assert lines[1]["name"] == "bad"
+    assert lines[1]["ref"] == "oops"
+
+
+def test_discover_plugin_failures_silent_by_default(monkeypatch, tmp_path: Path, capsys) -> None:
+    eps = _EPSet([_EP("z", None, boom=True)])
+    monkeypatch.setattr(ps.metadata, "entry_points", lambda: eps)
+
+    cfg = tmp_path / ".sdetkit/plugins.toml"
+    cfg.parent.mkdir(parents=True)
+    cfg.write_text('[plugins]\nbad = "oops"\n', encoding="utf-8")
 
     records = ps.discover("g", "plugins", root=tmp_path)
-    assert [r.name for r in records] == ["ok"]
+    assert records == []
     assert capsys.readouterr().err == ""
 
 
-def test_discovery_failures_emit_diagnostics_in_debug_mode(
-    monkeypatch, tmp_path: Path, capsys
-) -> None:
-    eps = _EPSet([_EP("ok", lambda: "entry-ok"), _EP("bad-ep", None, boom=True)])
+def test_discover_plugin_debug_enabled_by_env(monkeypatch, tmp_path: Path, capsys) -> None:
+    eps = _EPSet([_EP("z", None, boom=True)])
     monkeypatch.setattr(ps.metadata, "entry_points", lambda: eps)
+    monkeypatch.setenv("SDETKIT_PLUGIN_DEBUG", "YeS")
 
     cfg = tmp_path / ".sdetkit/plugins.toml"
     cfg.parent.mkdir(parents=True)
-    cfg.write_text('[plugins]\nok = "json:loads"\nbad-reg = "oops"\n', encoding="utf-8")
+    cfg.write_text('[plugins]\nbad = "oops"\n', encoding="utf-8")
 
-    records = ps.discover("g", "plugins", root=tmp_path, debug=True)
-    assert [r.name for r in records] == ["ok"]
-
-    err = capsys.readouterr().err
-    assert '"event": "plugin_discovery_load_failure"' in err
-    assert '"source": "entrypoint"' in err
-    assert '"source": "registry"' in err
-    assert '"group": "g"' in err
-    assert '"section": "plugins"' in err
-    assert '"name": "bad-ep"' in err
-    assert '"name": "bad-reg"' in err
-
-
-def test_discovery_debug_env_var(monkeypatch, tmp_path: Path, capsys) -> None:
-    eps = _EPSet([_EP("bad-ep", None, boom=True)])
-    monkeypatch.setattr(ps.metadata, "entry_points", lambda: eps)
-    monkeypatch.setenv("SDETKIT_PLUGIN_DEBUG", "yes")
-
-    ps.discover("g", "plugins", root=tmp_path)
-    err = capsys.readouterr().err
-    assert '"source": "entrypoint"' in err
+    records = ps.discover("g", "plugins", root=tmp_path)
+    assert records == []
+    lines = [json.loads(line) for line in capsys.readouterr().err.strip().splitlines()]
+    assert {line["source"] for line in lines} == {"entrypoint", "registry"}
