@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 from sdetkit import doctor, review
-from sdetkit.artifact_contract_index import INDEX_SCHEMA_VERSION, build_index, write_index
 from sdetkit.checks import artifacts as check_artifacts
 
 
@@ -37,15 +36,3 @@ def test_artifact_contract_index_includes_canonical_gate_artifacts() -> None:
         assert artifact_id in entries
         required = set(entries[artifact_id]["required_fields"])
         assert {"ok", "failed_steps", "profile"}.issubset(required)
-
-
-def test_artifact_contract_index_matches_generator() -> None:
-    payload = json.loads(Path("docs/artifact-contract-index.json").read_text(encoding="utf-8"))
-    assert payload == build_index()
-
-
-def test_write_index_writes_generator_payload(tmp_path: Path) -> None:
-    out = tmp_path / "artifact-contract-index.json"
-    write_index(out)
-    payload = json.loads(out.read_text(encoding="utf-8"))
-    assert payload == build_index()

@@ -30,36 +30,8 @@
       "path": "build/doctor.json",
       "produced_by": "python -m sdetkit doctor --format json --out build/doctor.json",
       "schema_version": "sdetkit.doctor.v2",
-      "required_fields": [
-        "schema_version",
-        "ok",
-        "checks"
-      ],
+      "required_fields": ["schema_version", "ok", "checks"],
       "stability": "public"
-    },
-    {
-      "id": "doctor-evidence-json",
-      "path": "build/doctor-evidence.json",
-      "produced_by": "python -m sdetkit doctor --emit-evidence --format json --out build/doctor.json",
-      "schema_version": "sdetkit.doctor.evidence.v2",
-      "required_fields": [
-        "schema_version",
-        "doctor_schema_version",
-        "summary"
-      ],
-      "stability": "advanced"
-    },
-    {
-      "id": "doctor-evidence-manifest-json",
-      "path": "build/doctor-evidence-manifest.json",
-      "produced_by": "python -m sdetkit doctor --emit-evidence --format json --out build/doctor.json",
-      "schema_version": "sdetkit.doctor.evidence.manifest.v1",
-      "required_fields": [
-        "schema_version",
-        "doctor_schema_version",
-        "artifacts"
-      ],
-      "stability": "advanced"
     },
     {
       "id": "review-json",
@@ -115,11 +87,7 @@
       "path": "build/risk-summary.json",
       "produced_by": "python -m sdetkit gate release --format json --out build/release-preflight.json",
       "schema_version": "sdetkit.artifacts.risk-summary.v1",
-      "required_fields": [
-        "schema_version",
-        "risk",
-        "summary"
-      ],
+      "required_fields": ["schema_version", "risk", "summary"],
       "stability": "public"
     },
     {
@@ -127,9 +95,7 @@
       "path": "build/evidence.zip",
       "produced_by": "python -m sdetkit gate release --format json --out build/release-preflight.json",
       "schema_version": "sdetkit.artifacts.evidence.v1",
-      "required_fields": [
-        "schema_version"
-      ],
+      "required_fields": ["schema_version"],
       "stability": "public"
     }
   ]

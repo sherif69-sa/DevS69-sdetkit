@@ -97,7 +97,6 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 - Need compact navigation: [Docs map (compact)](docs-map.md)
 - Need current references: [CLI reference](cli.md), [API](api.md), and [repo audit reference](repo-audit.md)
 - Need artifact contract inventory: [Artifact contract index](artifact-contract-index.json)
-  - Refresh command: `python scripts/generate_artifact_contract_index.py`
 - Need contributor workflow: [Contributing](contributing.md)
 - Need boundary guidance: [Stability levels](stability-levels.md) for adopters and contributors
 

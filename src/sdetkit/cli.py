@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import time
 from collections.abc import Sequence
 from importlib import import_module, metadata
 from typing import cast
@@ -37,6 +38,82 @@ LEGACY_NAMESPACE_COMMANDS: tuple[str, ...] = (
     "optimization-closeout-foundation",
 )
 
+LEGACY_COMMAND_MODULES: dict[str, str] = {
+    "weekly-review-lane": "sdetkit.weekly_review_28",
+    "phase1-hardening": "sdetkit.phase1_hardening_29",
+    "phase1-wrap": "sdetkit.phase1_wrap_30",
+    "phase2-kickoff": "sdetkit.phase2_kickoff_31",
+    "release-cadence": "sdetkit.release_cadence_32",
+    "demo-asset": "sdetkit.demo_asset_33",
+    "demo-asset2": "sdetkit.demo_asset2_34",
+    "kpi-instrumentation": "sdetkit.kpi_instrumentation_35",
+    "distribution-closeout": "sdetkit.distribution_closeout_36",
+    "experiment-lane": "sdetkit.experiment_lane_37",
+    "distribution-batch": "sdetkit.distribution_batch_38",
+    "playbook-post": "sdetkit.playbook_post_39",
+    "scale-lane": "sdetkit.scale_lane_40",
+    "expansion-automation": "sdetkit.expansion_automation_41",
+    "optimization-closeout-foundation": "sdetkit.optimization_closeout_42",
+    "acceleration-closeout": "sdetkit.acceleration_closeout_43",
+    "scale-closeout": "sdetkit.scale_closeout_44",
+    "expansion-closeout": "sdetkit.expansion_closeout_45",
+    "optimization-closeout": "sdetkit.optimization_closeout_46",
+    "reliability-closeout": "sdetkit.reliability_closeout_47",
+    "objection-closeout": "sdetkit.objection_closeout_48",
+    "weekly-review-closeout": "sdetkit.weekly_review_closeout_49",
+    "execution-prioritization-closeout": "sdetkit.execution_prioritization_closeout_50",
+    "case-snippet-closeout": "sdetkit.case_snippet_closeout_51",
+    "narrative-closeout": "sdetkit.narrative_closeout_52",
+    "docs-loop-closeout": "sdetkit.docs_loop_closeout_53",
+    "contributor-activation-closeout": "sdetkit.contributor_activation_closeout_55",
+    "stabilization-closeout": "sdetkit.stabilization_closeout_56",
+    "kpi-deep-audit-closeout": "sdetkit.kpi_deep_audit_closeout_57",
+    "phase2-hardening-closeout": "sdetkit.phase2_hardening_closeout_58",
+    "phase3-preplan-closeout": "sdetkit.phase3_preplan_closeout_59",
+    "phase2-wrap-handoff-closeout": "sdetkit.phase2_wrap_handoff_closeout_60",
+    "phase3-kickoff-closeout": "sdetkit.phase3_kickoff_closeout_61",
+    "community-program-closeout": "sdetkit.community_program_closeout_62",
+    "onboarding-activation-closeout": "sdetkit.onboarding_activation_closeout_63",
+    "integration-expansion-closeout": "sdetkit.integration_expansion_closeout_64",
+    "weekly-review-closeout-2": "sdetkit.weekly_review_closeout_65",
+    "integration-expansion2-closeout": "sdetkit.integration_expansion2_closeout_66",
+    "integration-expansion3-closeout": "sdetkit.integration_expansion3_closeout_67",
+    "integration-expansion4-closeout": "sdetkit.integration_expansion4_closeout_68",
+    "case-study-prep1-closeout": "sdetkit.case_study_prep1_closeout_69",
+    "case-study-prep2-closeout": "sdetkit.case_study_prep2_closeout_70",
+    "case-study-prep3-closeout": "sdetkit.case_study_prep3_closeout_71",
+    "case-study-prep4-closeout": "sdetkit.case_study_prep4_closeout_72",
+    "case-study-launch-closeout": "sdetkit.case_study_launch_closeout_73",
+    "distribution-scaling-closeout": "sdetkit.distribution_scaling_closeout_74",
+    "trust-assets-refresh-closeout": "sdetkit.trust_assets_refresh_closeout_75",
+    "contributor-recognition-closeout": "sdetkit.contributor_recognition_closeout_76",
+    "community-touchpoint-closeout": "sdetkit.community_touchpoint_closeout_77",
+    "ecosystem-priorities-closeout": "sdetkit.ecosystem_priorities_closeout_78",
+    "scale-upgrade-closeout": "sdetkit.scale_upgrade_closeout_79",
+    "partner-outreach-closeout": "sdetkit.partner_outreach_closeout_80",
+    "growth-campaign-closeout": "sdetkit.growth_campaign_closeout_81",
+    "integration-feedback-closeout": "sdetkit.integration_feedback_closeout_82",
+    "trust-faq-expansion-closeout": "sdetkit.trust_faq_expansion_closeout_83",
+    "evidence-narrative-closeout": "sdetkit.evidence_narrative_closeout_84",
+    "release-prioritization-closeout": "sdetkit.release_prioritization_closeout_85",
+    "launch-readiness-closeout": "sdetkit.launch_readiness_closeout_86",
+    "governance-handoff-closeout": "sdetkit.governance_handoff_closeout_87",
+    "governance-priorities-closeout": "sdetkit.governance_priorities_closeout_88",
+    "governance-scale-closeout": "sdetkit.governance_scale_closeout_89",
+    "phase3-wrap-publication-closeout": "sdetkit.phase3_wrap_publication_closeout_90",
+    "continuous-upgrade-closeout-1": "sdetkit.continuous_upgrade_closeout_1",
+    "continuous-upgrade-closeout-2": "sdetkit.continuous_upgrade_closeout_2",
+    "continuous-upgrade-closeout-3": "sdetkit.continuous_upgrade_closeout_3",
+    "continuous-upgrade-closeout-4": "sdetkit.continuous_upgrade_closeout_4",
+    "continuous-upgrade-closeout-5": "sdetkit.continuous_upgrade_closeout_5",
+    "continuous-upgrade-closeout-6": "sdetkit.continuous_upgrade_closeout_6",
+    "continuous-upgrade-closeout-7": "sdetkit.continuous_upgrade_closeout_7",
+    "continuous-upgrade-closeout-8": "sdetkit.continuous_upgrade_closeout_8",
+    "continuous-upgrade-closeout-9": "sdetkit.continuous_upgrade_closeout_9",
+    "continuous-upgrade-closeout-10": "sdetkit.continuous_upgrade_closeout_10",
+    "continuous-upgrade-closeout-11": "sdetkit.continuous_upgrade_closeout_11",
+}
+
 
 def _tool_version() -> str:
     try:
@@ -59,8 +136,25 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
 
 
 def _run_module_main(module_name: str, args: Sequence[str]) -> int:
+    started = time.perf_counter()
+    arg_list = list(args)
     module = import_module(module_name)
-    return cast(int, module.main(list(args)))
+    rc = cast(int, module.main(arg_list))
+    _emit_cli_timing(
+        f"event=dispatch module={module_name} argc={len(arg_list)} elapsed_ms={(time.perf_counter() - started) * 1000.0:.3f}"
+    )
+    return rc
+
+
+def _cli_timing_enabled() -> bool:
+    raw = os.environ.get("SDETKIT_CLI_TIMING", "")
+    return str(raw).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _emit_cli_timing(message: str) -> None:
+    if not _cli_timing_enabled():
+        return
+    sys.stderr.write(f"[sdetkit.cli.timing] {message}\n")
 
 
 def _is_hidden_cmd(name: str) -> bool:
@@ -153,6 +247,7 @@ def _add_passthrough_subcommand(
 def _build_root_parser(
     *, show_hidden_commands: bool = False
 ) -> tuple[argparse.ArgumentParser, object]:
+    started = time.perf_counter()
     help_description = """\
 DevS69 SDETKit is an operator-grade SDET platform for deterministic release confidence
 and shipping readiness.
@@ -758,6 +853,9 @@ Then use stability-aware command discovery:
     tsa.add_argument("args", nargs=argparse.REMAINDER)
     if not show_hidden_commands:
         _filter_hidden_subcommands(p)
+    _emit_cli_timing(
+        f"event=parser-build show_hidden={str(show_hidden_commands).lower()} elapsed_ms={(time.perf_counter() - started) * 1000.0:.3f}"
+    )
     return p, sub
 
 
@@ -862,249 +960,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "kpi-report":
         return _run_module_main("sdetkit.kpi_report", list(argv[1:]))
 
-    if argv and argv[0] in {"weekly-review-lane"}:
-        return _run_module_main("sdetkit.weekly_review_28", list(argv[1:]))
-
-    if argv and argv[0] == "phase1-hardening":
-        return _run_module_main("sdetkit.phase1_hardening_29", list(argv[1:]))
-
-    if argv and argv[0] == "phase1-wrap":
-        return _run_module_main("sdetkit.phase1_wrap_30", list(argv[1:]))
-
-    if argv and argv[0] == "phase2-kickoff":
-        return _run_module_main("sdetkit.phase2_kickoff_31", list(argv[1:]))
-
-    if argv and argv[0] == "release-cadence":
-        return _run_module_main("sdetkit.release_cadence_32", list(argv[1:]))
-
-    if argv and argv[0] == "demo-asset":
-        return _run_module_main("sdetkit.demo_asset_33", list(argv[1:]))
-
-    if argv and argv[0] == "demo-asset2":
-        return _run_module_main("sdetkit.demo_asset2_34", list(argv[1:]))
-
-    if argv and argv[0] == "kpi-instrumentation":
-        return _run_module_main("sdetkit.kpi_instrumentation_35", list(argv[1:]))
-
-    if argv and argv[0] in {"distribution-closeout"}:
-        return _run_module_main("sdetkit.distribution_closeout_36", list(argv[1:]))
-
-    if argv and argv[0] in {"experiment-lane"}:
-        return _run_module_main("sdetkit.experiment_lane_37", list(argv[1:]))
-
-    if argv and argv[0] in {"distribution-batch"}:
-        return _run_module_main("sdetkit.distribution_batch_38", list(argv[1:]))
-
-    if argv and argv[0] == "playbook-post":
-        return _run_module_main("sdetkit.playbook_post_39", list(argv[1:]))
-
-    if argv and argv[0] in {"scale-lane"}:
-        return _run_module_main("sdetkit.scale_lane_40", list(argv[1:]))
-
-    if argv and argv[0] == "expansion-automation":
-        return _run_module_main("sdetkit.expansion_automation_41", list(argv[1:]))
-
-    if argv and argv[0] in {"optimization-closeout-foundation"}:
-        return _run_module_main("sdetkit.optimization_closeout_42", list(argv[1:]))
-
-    if argv and argv[0] == "acceleration-closeout":
-        return _run_module_main("sdetkit.acceleration_closeout_43", list(argv[1:]))
-
-    if argv and argv[0] == "scale-closeout":
-        return _run_module_main("sdetkit.scale_closeout_44", list(argv[1:]))
-
-    if argv and argv[0] == "expansion-closeout":
-        return _run_module_main("sdetkit.expansion_closeout_45", list(argv[1:]))
-
-    if argv and argv[0] in {"optimization-closeout"}:
-        return _run_module_main("sdetkit.optimization_closeout_46", list(argv[1:]))
-
-    if argv and argv[0] == "reliability-closeout":
-        return _run_module_main("sdetkit.reliability_closeout_47", list(argv[1:]))
-    if argv and argv[0] == "objection-closeout":
-        return _run_module_main("sdetkit.objection_closeout_48", list(argv[1:]))
-    if argv and argv[0] in {
-        "weekly-review-closeout",
-    }:
-        return _run_module_main("sdetkit.weekly_review_closeout_49", list(argv[1:]))
-    if argv and argv[0] in {
-        "execution-prioritization-closeout",
-    }:
-        return _run_module_main("sdetkit.execution_prioritization_closeout_50", list(argv[1:]))
-    if argv and argv[0] in {"case-snippet-closeout"}:
-        return _run_module_main("sdetkit.case_snippet_closeout_51", list(argv[1:]))
-    if argv and argv[0] in {"narrative-closeout"}:
-        return _run_module_main("sdetkit.narrative_closeout_52", list(argv[1:]))
-    if argv and argv[0] in {"docs-loop-closeout"}:
-        return _run_module_main("sdetkit.docs_loop_closeout_53", list(argv[1:]))
-    if argv and argv[0] in {
-        "contributor-activation-closeout",
-    }:
-        return _run_module_main("sdetkit.contributor_activation_closeout_55", list(argv[1:]))
-
-    if argv and argv[0] in {"stabilization-closeout"}:
-        return _run_module_main("sdetkit.stabilization_closeout_56", list(argv[1:]))
-
-    if argv and argv[0] in {"kpi-deep-audit-closeout"}:
-        return _run_module_main("sdetkit.kpi_deep_audit_closeout_57", list(argv[1:]))
-
-    if argv and argv[0] in {"phase2-hardening-closeout"}:
-        return _run_module_main("sdetkit.phase2_hardening_closeout_58", list(argv[1:]))
-
-    if argv and argv[0] in {"phase3-preplan-closeout"}:
-        return _run_module_main("sdetkit.phase3_preplan_closeout_59", list(argv[1:]))
-
-    if argv and argv[0] in {"phase2-wrap-handoff-closeout"}:
-        return _run_module_main("sdetkit.phase2_wrap_handoff_closeout_60", list(argv[1:]))
-
-    if argv and argv[0] in {"phase3-kickoff-closeout"}:
-        return _run_module_main("sdetkit.phase3_kickoff_closeout_61", list(argv[1:]))
-
-    if argv and argv[0] in {"community-program-closeout"}:
-        return _run_module_main("sdetkit.community_program_closeout_62", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "onboarding-activation-closeout",
-    }:
-        return _run_module_main("sdetkit.onboarding_activation_closeout_63", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "integration-expansion-closeout",
-    }:
-        return _run_module_main("sdetkit.integration_expansion_closeout_64", list(argv[1:]))
-
-    if argv and argv[0] in {"weekly-review-closeout-2"}:
-        return _run_module_main("sdetkit.weekly_review_closeout_65", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "integration-expansion2-closeout",
-    }:
-        return _run_module_main("sdetkit.integration_expansion2_closeout_66", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "integration-expansion3-closeout",
-    }:
-        return _run_module_main("sdetkit.integration_expansion3_closeout_67", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "integration-expansion4-closeout",
-    }:
-        return _run_module_main("sdetkit.integration_expansion4_closeout_68", list(argv[1:]))
-
-    if argv and argv[0] in {"case-study-prep1-closeout"}:
-        return _run_module_main("sdetkit.case_study_prep1_closeout_69", list(argv[1:]))
-
-    if argv and argv[0] in {"case-study-prep2-closeout"}:
-        return _run_module_main("sdetkit.case_study_prep2_closeout_70", list(argv[1:]))
-
-    if argv and argv[0] in {"case-study-prep3-closeout"}:
-        return _run_module_main("sdetkit.case_study_prep3_closeout_71", list(argv[1:]))
-
-    if argv and argv[0] in {"case-study-prep4-closeout"}:
-        return _run_module_main("sdetkit.case_study_prep4_closeout_72", list(argv[1:]))
-
-    if argv and argv[0] in {"case-study-launch-closeout"}:
-        return _run_module_main("sdetkit.case_study_launch_closeout_73", list(argv[1:]))
-
-    if argv and argv[0] in {"distribution-scaling-closeout"}:
-        return _run_module_main("sdetkit.distribution_scaling_closeout_74", list(argv[1:]))
-
-    if argv and argv[0] in {"trust-assets-refresh-closeout"}:
-        return _run_module_main("sdetkit.trust_assets_refresh_closeout_75", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "contributor-recognition-closeout",
-    }:
-        return _run_module_main("sdetkit.contributor_recognition_closeout_76", list(argv[1:]))
-
-    if argv and argv[0] in {"community-touchpoint-closeout"}:
-        return _run_module_main("sdetkit.community_touchpoint_closeout_77", list(argv[1:]))
-
-    if argv and argv[0] in {"ecosystem-priorities-closeout"}:
-        return _run_module_main("sdetkit.ecosystem_priorities_closeout_78", list(argv[1:]))
-
-    if argv and argv[0] in {"scale-upgrade-closeout"}:
-        return _run_module_main("sdetkit.scale_upgrade_closeout_79", list(argv[1:]))
-
-    if argv and argv[0] in {"partner-outreach-closeout"}:
-        return _run_module_main("sdetkit.partner_outreach_closeout_80", list(argv[1:]))
-
-    if argv and argv[0] in {"growth-campaign-closeout"}:
-        return _run_module_main("sdetkit.growth_campaign_closeout_81", list(argv[1:]))
-
-    if argv and argv[0] in {"integration-feedback-closeout"}:
-        return _run_module_main("sdetkit.integration_feedback_closeout_82", list(argv[1:]))
-
-    if argv and argv[0] in {"trust-faq-expansion-closeout"}:
-        return _run_module_main("sdetkit.trust_faq_expansion_closeout_83", list(argv[1:]))
-
-    if argv and argv[0] in {"evidence-narrative-closeout"}:
-        return _run_module_main("sdetkit.evidence_narrative_closeout_84", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "release-prioritization-closeout",
-    }:
-        return _run_module_main("sdetkit.release_prioritization_closeout_85", list(argv[1:]))
-
-    if argv and argv[0] in {"launch-readiness-closeout"}:
-        return _run_module_main("sdetkit.launch_readiness_closeout_86", list(argv[1:]))
-
-    if argv and argv[0] in {"governance-handoff-closeout"}:
-        return _run_module_main("sdetkit.governance_handoff_closeout_87", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "governance-priorities-closeout",
-    }:
-        return _run_module_main("sdetkit.governance_priorities_closeout_88", list(argv[1:]))
-
-    if argv and argv[0] in {"governance-scale-closeout"}:
-        return _run_module_main("sdetkit.governance_scale_closeout_89", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "phase3-wrap-publication-closeout",
-    }:
-        return _run_module_main("sdetkit.phase3_wrap_publication_closeout_90", list(argv[1:]))
-
-    if argv and argv[0] == "continuous-upgrade-closeout-1":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_1", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "continuous-upgrade-closeout-2",
-    }:
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_2", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "continuous-upgrade-closeout-3",
-    }:
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_3", list(argv[1:]))
-
-    if argv and argv[0] in {
-        "continuous-upgrade-closeout-4",
-    }:
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_4", list(argv[1:]))
-    if argv and argv[0] in {
-        "continuous-upgrade-closeout-5",
-    }:
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_5", list(argv[1:]))
-    if argv and argv[0] in {
-        "continuous-upgrade-closeout-6",
-    }:
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_6", list(argv[1:]))
-    if argv and argv[0] in {
-        "continuous-upgrade-closeout-7",
-    }:
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_7", list(argv[1:]))
-    if argv and argv[0] == "continuous-upgrade-closeout-8":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_8", list(argv[1:]))
-
-    if argv and argv[0] == "continuous-upgrade-closeout-9":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_9", list(argv[1:]))
-
-    if argv and argv[0] == "continuous-upgrade-closeout-10":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_10", list(argv[1:]))
-
-    if argv and argv[0] == "continuous-upgrade-closeout-11":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_11", list(argv[1:]))
+    if argv:
+        legacy_module = LEGACY_COMMAND_MODULES.get(str(argv[0]))
+        if legacy_module:
+            return _run_module_main(legacy_module, list(argv[1:]))
 
     if argv and argv[0] == "objection-handling":
         return _run_module_main("sdetkit.objection_handling", list(argv[1:]))
@@ -1442,193 +1301,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_module_main("sdetkit.kpi_audit", ns.args)
     if ns.cmd == "kpi-report":
         return _run_module_main("sdetkit.kpi_report", ns.args)
-
-    if ns.cmd in {"distribution-closeout"}:
-        return _run_module_main("sdetkit.distribution_closeout_36", ns.args)
-
-    if ns.cmd in {"experiment-lane"}:
-        return _run_module_main("sdetkit.experiment_lane_37", ns.args)
-
-    if ns.cmd in {"distribution-batch"}:
-        return _run_module_main("sdetkit.distribution_batch_38", ns.args)
-
-    if ns.cmd == "playbook-post":
-        return _run_module_main("sdetkit.playbook_post_39", ns.args)
-
-    if ns.cmd in {"scale-lane"}:
-        return _run_module_main("sdetkit.scale_lane_40", ns.args)
-
-    if ns.cmd in {"expansion-automation"}:
-        return _run_module_main("sdetkit.expansion_automation_41", ns.args)
-
-    if ns.cmd in {"optimization-closeout-foundation"}:
-        return _run_module_main("sdetkit.optimization_closeout_42", ns.args)
-
-    if ns.cmd in {"acceleration-closeout"}:
-        return _run_module_main("sdetkit.acceleration_closeout_43", ns.args)
-
-    if ns.cmd in {"scale-closeout"}:
-        return _run_module_main("sdetkit.scale_closeout_44", ns.args)
-
-    if ns.cmd in {"expansion-closeout"}:
-        return _run_module_main("sdetkit.expansion_closeout_45", ns.args)
-
-    if ns.cmd in {"optimization-closeout"}:
-        return _run_module_main("sdetkit.optimization_closeout_46", ns.args)
-
-    if ns.cmd in {"reliability-closeout"}:
-        return _run_module_main("sdetkit.reliability_closeout_47", ns.args)
-    if ns.cmd in {"objection-closeout"}:
-        return _run_module_main("sdetkit.objection_closeout_48", ns.args)
-    if ns.cmd in {
-        "weekly-review-closeout",
-    }:
-        return _run_module_main("sdetkit.weekly_review_closeout_49", ns.args)
-    if ns.cmd in {"execution-prioritization-closeout"}:
-        return _run_module_main("sdetkit.execution_prioritization_closeout_50", ns.args)
-    if ns.cmd in {"case-snippet-closeout"}:
-        return _run_module_main("sdetkit.case_snippet_closeout_51", ns.args)
-    if ns.cmd in {"narrative-closeout"}:
-        return _run_module_main("sdetkit.narrative_closeout_52", ns.args)
-    if ns.cmd in {"docs-loop-closeout"}:
-        return _run_module_main("sdetkit.docs_loop_closeout_53", ns.args)
-    if ns.cmd in {"contributor-activation-closeout"}:
-        return _run_module_main("sdetkit.contributor_activation_closeout_55", ns.args)
-
-    if ns.cmd in {"stabilization-closeout"}:
-        return _run_module_main("sdetkit.stabilization_closeout_56", ns.args)
-
-    if ns.cmd in {"kpi-deep-audit-closeout"}:
-        return _run_module_main("sdetkit.kpi_deep_audit_closeout_57", ns.args)
-
-    if ns.cmd in {"phase2-hardening-closeout"}:
-        return _run_module_main("sdetkit.phase2_hardening_closeout_58", ns.args)
-
-    if ns.cmd in {"phase3-preplan-closeout"}:
-        return _run_module_main("sdetkit.phase3_preplan_closeout_59", ns.args)
-
-    if ns.cmd in {"phase2-wrap-handoff-closeout"}:
-        return _run_module_main("sdetkit.phase2_wrap_handoff_closeout_60", ns.args)
-
-    if ns.cmd in {"phase3-kickoff-closeout"}:
-        return _run_module_main("sdetkit.phase3_kickoff_closeout_61", ns.args)
-
-    if ns.cmd in {"community-program-closeout"}:
-        return _run_module_main("sdetkit.community_program_closeout_62", ns.args)
-
-    if ns.cmd in {"onboarding-activation-closeout"}:
-        return _run_module_main("sdetkit.onboarding_activation_closeout_63", ns.args)
-
-    if ns.cmd in {"integration-expansion-closeout"}:
-        return _run_module_main("sdetkit.integration_expansion_closeout_64", ns.args)
-
-    if ns.cmd in {"weekly-review-closeout-2"}:
-        return _run_module_main("sdetkit.weekly_review_closeout_65", ns.args)
-
-    if ns.cmd in {"integration-expansion2-closeout"}:
-        return _run_module_main("sdetkit.integration_expansion2_closeout_66", ns.args)
-
-    if ns.cmd in {"integration-expansion3-closeout"}:
-        return _run_module_main("sdetkit.integration_expansion3_closeout_67", ns.args)
-
-    if ns.cmd in {"integration-expansion4-closeout"}:
-        return _run_module_main("sdetkit.integration_expansion4_closeout_68", ns.args)
-
-    if ns.cmd in {"case-study-prep1-closeout"}:
-        return _run_module_main("sdetkit.case_study_prep1_closeout_69", ns.args)
-
-    if ns.cmd in {"case-study-prep2-closeout"}:
-        return _run_module_main("sdetkit.case_study_prep2_closeout_70", ns.args)
-
-    if ns.cmd == "case-study-prep3-closeout":
-        return _run_module_main("sdetkit.case_study_prep3_closeout_71", ns.args)
-
-    if ns.cmd == "case-study-prep4-closeout":
-        return _run_module_main("sdetkit.case_study_prep4_closeout_72", ns.args)
-
-    if ns.cmd == "case-study-launch-closeout":
-        return _run_module_main("sdetkit.case_study_launch_closeout_73", ns.args)
-
-    if ns.cmd == "distribution-scaling-closeout":
-        return _run_module_main("sdetkit.distribution_scaling_closeout_74", ns.args)
-
-    if ns.cmd == "trust-assets-refresh-closeout":
-        return _run_module_main("sdetkit.trust_assets_refresh_closeout_75", ns.args)
-
-    if ns.cmd == "contributor-recognition-closeout":
-        return _run_module_main("sdetkit.contributor_recognition_closeout_76", ns.args)
-
-    if ns.cmd == "community-touchpoint-closeout":
-        return _run_module_main("sdetkit.community_touchpoint_closeout_77", ns.args)
-
-    if ns.cmd == "ecosystem-priorities-closeout":
-        return _run_module_main("sdetkit.ecosystem_priorities_closeout_78", ns.args)
-
-    if ns.cmd == "scale-upgrade-closeout":
-        return _run_module_main("sdetkit.scale_upgrade_closeout_79", ns.args)
-
-    if ns.cmd == "partner-outreach-closeout":
-        return _run_module_main("sdetkit.partner_outreach_closeout_80", ns.args)
-
-    if ns.cmd in {"growth-campaign-closeout"}:
-        return _run_module_main("sdetkit.growth_campaign_closeout_81", ns.args)
-
-    if ns.cmd in {"integration-feedback-closeout"}:
-        return _run_module_main("sdetkit.integration_feedback_closeout_82", ns.args)
-
-    if ns.cmd in {"trust-faq-expansion-closeout"}:
-        return _run_module_main("sdetkit.trust_faq_expansion_closeout_83", ns.args)
-
-    if ns.cmd in {"evidence-narrative-closeout"}:
-        return _run_module_main("sdetkit.evidence_narrative_closeout_84", ns.args)
-
-    if ns.cmd in {"release-prioritization-closeout"}:
-        return _run_module_main("sdetkit.release_prioritization_closeout_85", ns.args)
-
-    if ns.cmd in {"launch-readiness-closeout"}:
-        return _run_module_main("sdetkit.launch_readiness_closeout_86", ns.args)
-
-    if ns.cmd in {"governance-handoff-closeout"}:
-        return _run_module_main("sdetkit.governance_handoff_closeout_87", ns.args)
-
-    if ns.cmd in {"governance-priorities-closeout"}:
-        return _run_module_main("sdetkit.governance_priorities_closeout_88", ns.args)
-
-    if ns.cmd in {"governance-scale-closeout"}:
-        return _run_module_main("sdetkit.governance_scale_closeout_89", ns.args)
-
-    if ns.cmd in {"phase3-wrap-publication-closeout"}:
-        return _run_module_main("sdetkit.phase3_wrap_publication_closeout_90", ns.args)
-
-    if ns.cmd == "continuous-upgrade-closeout-1":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_1", ns.args)
-
-    if ns.cmd == "continuous-upgrade-closeout-2":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_2", ns.args)
-
-    if ns.cmd == "continuous-upgrade-closeout-3":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_3", ns.args)
-
-    if ns.cmd == "continuous-upgrade-closeout-4":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_4", ns.args)
-    if ns.cmd == "continuous-upgrade-closeout-5":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_5", ns.args)
-    if ns.cmd == "continuous-upgrade-closeout-6":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_6", ns.args)
-    if ns.cmd == "continuous-upgrade-closeout-7":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_7", ns.args)
-
-    if ns.cmd == "continuous-upgrade-closeout-8":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_8", ns.args)
-
-    if ns.cmd == "continuous-upgrade-closeout-9":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_9", ns.args)
-
-    if ns.cmd == "continuous-upgrade-closeout-10":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_10", ns.args)
-
-    if ns.cmd == "continuous-upgrade-closeout-11":
-        return _run_module_main("sdetkit.continuous_upgrade_closeout_11", ns.args)
 
     if ns.cmd == "objection-handling":
         return _run_module_main("sdetkit.objection_handling", ns.args)

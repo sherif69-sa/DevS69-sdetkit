@@ -42,3 +42,20 @@ def test_canonical_and_legacy_commands_dispatch(
     assert cli.main([canonical, "--format", "json"]) == 0
     assert cli.main([legacy, "--format", "json"]) == 0
     assert calls == [["--format", "json"], ["--format", "json"]]
+
+
+def test_legacy_namespace_commands_are_present_in_central_mapping() -> None:
+    assert set(cli.LEGACY_NAMESPACE_COMMANDS).issubset(set(cli.LEGACY_COMMAND_MODULES))
+
+
+def test_legacy_dispatch_uses_central_mapping(monkeypatch) -> None:
+    captured: list[tuple[str, list[str]]] = []
+
+    def _fake_run(module_name: str, args: list[str]) -> int:
+        captured.append((module_name, list(args)))
+        return 0
+
+    monkeypatch.setattr(cli, "_run_module_main", _fake_run)
+
+    assert cli.main(["phase1-hardening", "--format", "json"]) == 0
+    assert captured == [("sdetkit.phase1_hardening_29", ["--format", "json"])]

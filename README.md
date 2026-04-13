@@ -176,6 +176,7 @@ artifacts/     # generated evidence packs
 ## Documentation and references
 
 - Docs hub: [`docs/index.md`](docs/index.md)
+- Architecture quick map for contributors: [`ARCHITECTURE.md`](ARCHITECTURE.md)
 - Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - Release process: [`RELEASE.md`](RELEASE.md)
 - Git workflow (branch tracking + ahead/behind): [`docs/git-workflow.md`](docs/git-workflow.md)

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=82.0.1", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -41,8 +41,8 @@ Changelog = "https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CHANGELOG.m
 
 [project.optional-dependencies]
 dev = [
-  "build==1.4.2",
-  "mypy==1.20.0",
+  "build==1.4.3",
+  "mypy==1.20.1",
   "pre-commit==4.5.1",
   "ruff==0.15.10",
   "twine==6.2.0"
@@ -59,7 +59,7 @@ docs = [
   "mkdocs-material==9.7.6"
 ]
 packaging = [
-  "build==1.4.2",
+  "build==1.4.3",
   "check-wheel-contents==0.6.3",
   "twine==6.2.0"
 ]
@@ -112,7 +112,6 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
-  "sdetkit.__main__",
   "sdetkit.apiget",
   "sdetkit.patch",
 ]
