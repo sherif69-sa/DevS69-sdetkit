@@ -161,6 +161,40 @@ def _run_review_request(req: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _observability_snapshot(root: Path) -> dict[str, Any]:
+    artifacts = {
+        "golden_path_health": root / ".sdetkit" / "out" / "golden-path-health.json",
+        "canonical_path_drift": root / ".sdetkit" / "out" / "canonical-path-drift.json",
+        "legacy_command_analyzer": root / ".sdetkit" / "out" / "legacy-command-analyzer.json",
+        "adoption_scorecard": root / ".sdetkit" / "out" / "adoption-scorecard.json",
+        "operator_onboarding_summary": root / ".sdetkit" / "out" / "operator-onboarding-summary.json",
+    }
+    checks: dict[str, dict[str, Any]] = {}
+    for key, path in artifacts.items():
+        if not path.exists():
+            checks[key] = {"state": "missing", "path": str(path)}
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            checks[key] = {"state": "invalid-json", "path": str(path)}
+            continue
+        checks[key] = {
+            "state": "present",
+            "path": str(path),
+            "overall_ok": payload.get("overall_ok"),
+            "overall_ready": payload.get("overall_ready"),
+            "score": payload.get("score"),
+            "band": payload.get("band"),
+        }
+    return {
+        "status": "ok",
+        "contract_version": SERVE_CONTRACT_VERSION,
+        "service": "sdetkit",
+        "observability": checks,
+    }
+
+
 def _make_handler() -> type[BaseHTTPRequestHandler]:
     class SdetkitHandler(BaseHTTPRequestHandler):
         server_version = "SDETKitServe/1.0"
@@ -177,6 +211,9 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
             return
 
         def do_GET(self) -> None:  # noqa: N802
+            if self.path == "/v1/observability":
+                self._send_json(HTTPStatus.OK, _observability_snapshot(Path(".")))
+                return
             if self.path != "/healthz":
                 self._send_json(
                     HTTPStatus.NOT_FOUND,
@@ -193,6 +230,7 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
                     "endpoints": {
                         "health": "/healthz",
                         "review": "/v1/review",
+                        "observability": "/v1/observability",
                     },
                 },
             )

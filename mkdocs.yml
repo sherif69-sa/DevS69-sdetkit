@@ -122,6 +122,11 @@ nav:
       - Release confidence architecture note: architecture/umbrella-kits.md
       - Command surface inventory: command-surface.md
       - Capability map and command taxonomy: command-taxonomy.md
+      - Legacy command migration map: legacy-command-migration-map.md
+      - Golden-path health signal: golden-path-health.md
+      - Adoption scorecard: adoption-scorecard.md
+      - Operator onboarding wizard: operator-onboarding-wizard.md
+      - Primary docs map: primary-docs-map.md
       - Determinism checklist: determinism-checklist.md
       - Determinism contract: determinism-contract.md
       - Stability levels (current policy): stability-levels.md

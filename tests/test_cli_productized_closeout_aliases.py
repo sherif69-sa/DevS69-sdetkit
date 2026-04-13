@@ -59,3 +59,40 @@ def test_legacy_dispatch_uses_central_mapping(monkeypatch) -> None:
 
     assert cli.main(["phase1-hardening", "--format", "json"]) == 0
     assert captured == [("sdetkit.phase1_hardening_29", ["--format", "json"])]
+
+
+def test_legacy_dispatch_emits_migration_hint(monkeypatch, capsys) -> None:
+    def _fake_run(module_name: str, args: list[str]) -> int:
+        return 0
+
+    monkeypatch.setattr(cli, "_run_module_main", _fake_run)
+
+    assert cli.main(["phase1-hardening"]) == 0
+    err = capsys.readouterr().err
+    assert "[legacy-hint]" in err
+    assert "phase1-hardening" in err
+    assert "gate fast -> gate release -> doctor" in err
+
+
+def test_legacy_dispatch_can_disable_migration_hint(monkeypatch, capsys) -> None:
+    def _fake_run(module_name: str, args: list[str]) -> int:
+        return 0
+
+    monkeypatch.setattr(cli, "_run_module_main", _fake_run)
+    monkeypatch.setenv("SDETKIT_LEGACY_HINTS", "0")
+
+    assert cli.main(["phase1-hardening"]) == 0
+    err = capsys.readouterr().err
+    assert "[legacy-hint]" not in err
+
+
+def test_legacy_dispatch_can_disable_migration_hint_per_invocation(monkeypatch, capsys) -> None:
+    def _fake_run(module_name: str, args: list[str]) -> int:
+        return 0
+
+    monkeypatch.setattr(cli, "_run_module_main", _fake_run)
+    monkeypatch.delenv("SDETKIT_LEGACY_HINTS", raising=False)
+
+    assert cli.main(["--no-legacy-hint", "phase1-hardening"]) == 0
+    err = capsys.readouterr().err
+    assert "[legacy-hint]" not in err

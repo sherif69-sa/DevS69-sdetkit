@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import time
@@ -157,6 +158,94 @@ def _emit_cli_timing(message: str) -> None:
     sys.stderr.write(f"[sdetkit.cli.timing] {message}\n")
 
 
+def _legacy_hints_enabled() -> bool:
+    raw = os.environ.get("SDETKIT_LEGACY_HINTS", "1")
+    return str(raw).strip().lower() not in {"0", "false", "no", "off"}
+
+
+def _legacy_preferred_surface(command: str) -> str:
+    if command.startswith("weekly-review"):
+        return "python -m sdetkit weekly-review"
+    if command.startswith(("phase1-", "phase2-", "phase3-")):
+        return "python -m sdetkit playbooks --help"
+    if command.endswith("-closeout"):
+        return "python -m sdetkit playbooks --help"
+    return "python -m sdetkit kits list"
+
+
+def _legacy_deprecation_horizon(command: str) -> str:
+    if command.startswith(("phase1-", "phase2-", "phase3-")):
+        return "transition lane: migrate within 1-2 release cycles"
+    if command.endswith("-closeout"):
+        return "transition lane: migrate within 1-2 release cycles"
+    if command.startswith("weekly-review"):
+        return "compatibility lane: review migration quarterly"
+    return "compatibility lane: migrate when feasible"
+
+
+def _legacy_migration_hint(command: str) -> str:
+    preferred = _legacy_preferred_surface(command)
+    horizon = _legacy_deprecation_horizon(command)
+    return (
+        f"[legacy-hint] '{command}' is a compatibility lane. "
+        f"Preferred next surface: {preferred}. "
+        f"Deprecation horizon: {horizon}. "
+        "Canonical release-confidence path: python -m sdetkit gate fast -> gate release -> doctor."
+    )
+
+
+def _emit_legacy_migration_hint(command: str) -> None:
+    if not _legacy_hints_enabled():
+        return
+    sys.stderr.write(_legacy_migration_hint(command) + "\n")
+
+
+def _extract_global_flag(argv: Sequence[str], flag: str) -> tuple[list[str], bool]:
+    args = list(argv)
+    found = False
+    filtered: list[str] = []
+    for token in args:
+        if token == flag:
+            found = True
+            continue
+        filtered.append(token)
+    return filtered, found
+
+
+def _legacy_migrate_hint(argv: Sequence[str]) -> int:
+    parser = argparse.ArgumentParser(prog="sdetkit legacy migrate-hint")
+    parser.add_argument("--format", choices=["text", "json"], default="text")
+    parser.add_argument("--all", action="store_true")
+    parser.add_argument("command", nargs="?")
+    ns = parser.parse_args(list(argv))
+    if not ns.command and not ns.all:
+        sys.stderr.write("legacy error: expected command name after migrate-hint (or pass --all)\n")
+        return 2
+    if ns.command and ns.all:
+        sys.stderr.write("legacy error: use either <command> or --all for migrate-hint\n")
+        return 2
+    commands = [str(ns.command)] if ns.command else list(LEGACY_NAMESPACE_COMMANDS)
+    items = [
+        {
+            "command": command,
+            "preferred_surface": _legacy_preferred_surface(command),
+            "deprecation_horizon": _legacy_deprecation_horizon(command),
+            "canonical_path": ["gate fast", "gate release", "doctor"],
+            "hint": _legacy_migration_hint(command),
+        }
+        for command in commands
+    ]
+    if ns.format == "json":
+        if len(items) == 1:
+            payload = {"schema_version": "1", "mode": "single", **items[0]}
+        else:
+            payload = {"schema_version": "1", "mode": "all", "count": len(items), "items": items}
+        sys.stdout.write(json.dumps(payload, sort_keys=True) + "\n")
+        return 0
+    sys.stdout.write("\n".join(item["hint"] for item in items) + "\n")
+    return 0
+
+
 def _is_hidden_cmd(name: str) -> bool:
     if name == "playbooks":
         return False
@@ -277,6 +366,11 @@ Then use stability-aware command discovery:
         "--show-hidden",
         action="store_true",
         help="Include hidden/legacy playbook commands in `sdetkit --help` output.",
+    )
+    p.add_argument(
+        "--no-legacy-hint",
+        action="store_true",
+        help="Suppress legacy migration hints for this invocation.",
     )
     sub = p.add_subparsers(
         dest="cmd",
@@ -864,6 +958,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
+    argv, no_legacy_hint = _extract_global_flag(argv, "--no-legacy-hint")
+
     if argv:
         argv = list(argv)
         argv[0] = _resolve_non_day_playbook_alias(str(argv[0]))
@@ -875,6 +971,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         if argv[1] == "list":
             sys.stdout.write("\n".join(LEGACY_NAMESPACE_COMMANDS) + "\n")
             return 0
+        if argv[1] == "migrate-hint":
+            return _legacy_migrate_hint(list(argv[2:]))
         return main(list(argv[1:]))
 
     if argv and argv[0] == "cassette-get":
@@ -963,6 +1061,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv:
         legacy_module = LEGACY_COMMAND_MODULES.get(str(argv[0]))
         if legacy_module:
+            if not no_legacy_hint:
+                _emit_legacy_migration_hint(str(argv[0]))
             return _run_module_main(legacy_module, list(argv[1:]))
 
     if argv and argv[0] == "objection-handling":
@@ -1111,6 +1211,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         if ns.args[0] == "list":
             sys.stdout.write("\n".join(LEGACY_NAMESPACE_COMMANDS) + "\n")
             return 0
+        if ns.args[0] == "migrate-hint":
+            return _legacy_migrate_hint(list(ns.args[1:]))
         return main(list(ns.args))
 
     if ns.cmd == "kits":
