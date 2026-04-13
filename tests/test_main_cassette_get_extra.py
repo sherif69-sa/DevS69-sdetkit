@@ -36,6 +36,14 @@ class _Client:
         return _Resp({"ok": True})
 
 
+class _ClientCaptureKwargs(_Client):
+    last_kwargs: dict[str, object] | None = None
+
+    def init_(self, *args, **kwargs) -> None:
+        type(self).last_kwargs = dict(kwargs)
+        super().init_(*args, **kwargs)
+
+
 def test_cassette_get_record_refuses_overwrite_without_force(tmp_path: Path, capsys) -> None:
     existing = tmp_path / "cassette.json"
     existing.write_text("{}", encoding="utf-8")
@@ -234,3 +242,59 @@ def test_cassette_get_record_safe_path_security_error(
     io = capsys.readouterr()
     assert rc == 2
     assert "blocked path" in io.err
+
+
+def test_cassette_get_plain_mode_passes_explicit_httpx_options(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import httpx
+
+    monkeypatch.setattr(httpx, "Client", _ClientCaptureKwargs)
+    _ClientCaptureKwargs.last_kwargs = None
+
+    rc = mainmod._cassette_get(["https://example.invalid", "--insecure", "--follow-redirects"])
+
+    assert rc == 0
+    assert _ClientCaptureKwargs.last_kwargs is not None
+    assert _ClientCaptureKwargs.last_kwargs["verify"] is False
+    assert _ClientCaptureKwargs.last_kwargs["follow_redirects"] is True
+    assert "timeout" in _ClientCaptureKwargs.last_kwargs
+
+
+def test_cassette_get_replay_mode_passes_transport_and_explicit_options(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import httpx
+
+    import sdetkit.cassette as cassette_mod
+
+    class _ReplayTransport:
+        def init_(self, _cass) -> None:
+            pass
+
+        def assert_exhausted(self) -> None:
+            return None
+
+    monkeypatch.setattr(httpx, "Client", _ClientCaptureKwargs)
+    monkeypatch.setattr(cassette_mod.Cassette, "load", staticmethod(lambda *_a, **_k: object()))
+    monkeypatch.setattr(cassette_mod, "CassetteReplayTransport", _ReplayTransport)
+    _ClientCaptureKwargs.last_kwargs = None
+
+    p = tmp_path / "replay.json"
+    p.write_text("{}", encoding="utf-8")
+
+    rc = mainmod._cassette_get(
+        [
+            "https://example.invalid",
+            "--replay",
+            str(p),
+            "--allow-absolute-path",
+            "--follow-redirects",
+        ]
+    )
+
+    assert rc == 0
+    assert _ClientCaptureKwargs.last_kwargs is not None
+    assert _ClientCaptureKwargs.last_kwargs["follow_redirects"] is True
+    assert _ClientCaptureKwargs.last_kwargs["verify"] is True
+    assert "transport" in _ClientCaptureKwargs.last_kwargs
