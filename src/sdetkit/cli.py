@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-import time
 from collections.abc import Sequence
 from importlib import import_module, metadata
 from typing import cast
@@ -60,25 +59,8 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
 
 
 def _run_module_main(module_name: str, args: Sequence[str]) -> int:
-    started = time.perf_counter()
-    arg_list = list(args)
     module = import_module(module_name)
-    rc = cast(int, module.main(arg_list))
-    _emit_cli_timing(
-        f"event=dispatch module={module_name} argc={len(arg_list)} elapsed_ms={(time.perf_counter() - started) * 1000.0:.3f}"
-    )
-    return rc
-
-
-def _cli_timing_enabled() -> bool:
-    raw = os.environ.get("SDETKIT_CLI_TIMING", "")
-    return str(raw).strip().lower() in {"1", "true", "yes", "on"}
-
-
-def _emit_cli_timing(message: str) -> None:
-    if not _cli_timing_enabled():
-        return
-    sys.stderr.write(f"[sdetkit.cli.timing] {message}\n")
+    return cast(int, module.main(list(args)))
 
 
 def _is_hidden_cmd(name: str) -> bool:
@@ -171,7 +153,6 @@ def _add_passthrough_subcommand(
 def _build_root_parser(
     *, show_hidden_commands: bool = False
 ) -> tuple[argparse.ArgumentParser, object]:
-    started = time.perf_counter()
     help_description = """\
 DevS69 SDETKit is an operator-grade SDET platform for deterministic release confidence
 and shipping readiness.
@@ -777,9 +758,6 @@ Then use stability-aware command discovery:
     tsa.add_argument("args", nargs=argparse.REMAINDER)
     if not show_hidden_commands:
         _filter_hidden_subcommands(p)
-    _emit_cli_timing(
-        f"event=parser-build show_hidden={str(show_hidden_commands).lower()} elapsed_ms={(time.perf_counter() - started) * 1000.0:.3f}"
-    )
     return p, sub
 
 
