@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import time
+from datetime import UTC, datetime
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -12,6 +15,7 @@ from . import review
 
 SERVE_CONTRACT_VERSION = "sdetkit.serve.contract.v1"
 _MAX_BODY_BYTES = 1_048_576
+_OBS_DEFAULT_STALE_SECONDS = 24 * 60 * 60
 
 
 class RequestValidationError(ValueError):
@@ -167,18 +171,53 @@ def _observability_snapshot(root: Path) -> dict[str, Any]:
         "canonical_path_drift": root / ".sdetkit" / "out" / "canonical-path-drift.json",
         "legacy_command_analyzer": root / ".sdetkit" / "out" / "legacy-command-analyzer.json",
         "adoption_scorecard": root / ".sdetkit" / "out" / "adoption-scorecard.json",
-        "operator_onboarding_summary": root / ".sdetkit" / "out" / "operator-onboarding-summary.json",
+        "operator_onboarding_summary": root
+        / ".sdetkit"
+        / "out"
+        / "operator-onboarding-summary.json",
     }
+    captured_epoch = time.time()
+    captured_at = datetime.fromtimestamp(captured_epoch, tz=UTC).isoformat().replace("+00:00", "Z")
     checks: dict[str, dict[str, Any]] = {}
+    summary = {"present": 0, "missing": 0, "invalid_json": 0, "stale": 0, "fresh": 0}
     for key, path in artifacts.items():
+        stale_threshold_seconds = _resolve_stale_threshold_seconds(key)
         if not path.exists():
-            checks[key] = {"state": "missing", "path": str(path)}
+            summary["missing"] += 1
+            summary["stale"] += 1
+            checks[key] = {
+                "state": "missing",
+                "path": str(path),
+                "artifact_mtime": None,
+                "freshness_age_seconds": None,
+                "stale": True,
+                "stale_threshold_seconds": stale_threshold_seconds,
+            }
             continue
+        artifact_mtime_epoch = path.stat().st_mtime
+        freshness_age_seconds = max(0, int(captured_epoch - artifact_mtime_epoch))
+        artifact_mtime = (
+            datetime.fromtimestamp(artifact_mtime_epoch, tz=UTC).isoformat().replace("+00:00", "Z")
+        )
+        stale = freshness_age_seconds > stale_threshold_seconds
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
-            checks[key] = {"state": "invalid-json", "path": str(path)}
+            summary["invalid_json"] += 1
+            summary["stale"] += 1 if stale else 0
+            summary["fresh"] += 0 if stale else 1
+            checks[key] = {
+                "state": "invalid-json",
+                "path": str(path),
+                "artifact_mtime": artifact_mtime,
+                "freshness_age_seconds": freshness_age_seconds,
+                "stale": stale,
+                "stale_threshold_seconds": stale_threshold_seconds,
+            }
             continue
+        summary["present"] += 1
+        summary["stale"] += 1 if stale else 0
+        summary["fresh"] += 0 if stale else 1
         checks[key] = {
             "state": "present",
             "path": str(path),
@@ -186,13 +225,47 @@ def _observability_snapshot(root: Path) -> dict[str, Any]:
             "overall_ready": payload.get("overall_ready"),
             "score": payload.get("score"),
             "band": payload.get("band"),
+            "artifact_mtime": artifact_mtime,
+            "freshness_age_seconds": freshness_age_seconds,
+            "stale": stale,
+            "stale_threshold_seconds": stale_threshold_seconds,
         }
     return {
         "status": "ok",
         "contract_version": SERVE_CONTRACT_VERSION,
+        "observability_contract_version": "2",
         "service": "sdetkit",
+        "captured_at": captured_at,
+        "freshness_summary": summary,
         "observability": checks,
     }
+
+
+def _parse_positive_int_env(name: str) -> int | None:
+    raw = os.getenv(name)
+    if raw is None:
+        return None
+    try:
+        value = int(raw.strip())
+    except ValueError:
+        return None
+    if value <= 0:
+        return None
+    return value
+
+
+def _resolve_stale_threshold_seconds(key: str) -> int:
+    per_artifact_key = key.upper()
+    per_artifact_key = re.sub(r"[^A-Z0-9]+", "_", per_artifact_key).strip("_")
+    artifact_override = _parse_positive_int_env(
+        f"SDETKIT_OBSERVABILITY_STALE_{per_artifact_key}_SECONDS"
+    )
+    if artifact_override is not None:
+        return artifact_override
+    global_override = _parse_positive_int_env("SDETKIT_OBSERVABILITY_STALE_SECONDS")
+    if global_override is not None:
+        return global_override
+    return _OBS_DEFAULT_STALE_SECONDS
 
 
 def _make_handler() -> type[BaseHTTPRequestHandler]:

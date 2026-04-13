@@ -10,7 +10,20 @@ from typing import Any
 
 def _run_canonical(repo_root: Path, python_bin: str) -> list[dict[str, Any]]:
     commands = [
-        ("gate_fast", [python_bin, "-m", "sdetkit", "gate", "fast", "--format", "json", "--out", "build/gate-fast.json"]),
+        (
+            "gate_fast",
+            [
+                python_bin,
+                "-m",
+                "sdetkit",
+                "gate",
+                "fast",
+                "--format",
+                "json",
+                "--out",
+                "build/gate-fast.json",
+            ],
+        ),
         (
             "gate_release",
             [
@@ -25,7 +38,19 @@ def _run_canonical(repo_root: Path, python_bin: str) -> list[dict[str, Any]]:
                 "build/release-preflight.json",
             ],
         ),
-        ("doctor", [python_bin, "-m", "sdetkit", "doctor", "--format", "json", "--out", "build/doctor.json"]),
+        (
+            "doctor",
+            [
+                python_bin,
+                "-m",
+                "sdetkit",
+                "doctor",
+                "--format",
+                "json",
+                "--out",
+                "build/doctor.json",
+            ],
+        ),
     ]
     results: list[dict[str, Any]] = []
     for step_id, cmd in commands:
@@ -60,7 +85,12 @@ def _build_summary(repo_root: Path) -> dict[str, Any]:
     actions: list[str] = []
     for key, path in artifact_map.items():
         state, ok, failed_steps = _load_artifact(path)
-        checks[key] = {"path": str(path.relative_to(repo_root)), "state": state, "ok": ok, "failed_steps": failed_steps}
+        checks[key] = {
+            "path": str(path.relative_to(repo_root)),
+            "state": state,
+            "ok": ok,
+            "failed_steps": failed_steps,
+        }
         if state != "present":
             actions.append(f"Run canonical step for {key}: missing artifact.")
         elif ok is False:
@@ -68,7 +98,12 @@ def _build_summary(repo_root: Path) -> dict[str, Any]:
     overall_ready = all(item["ok"] is True for item in checks.values())
     if overall_ready:
         actions.append("Canonical onboarding path is green.")
-    return {"schema_version": "1", "overall_ready": overall_ready, "checks": checks, "actions": actions}
+    return {
+        "schema_version": "1",
+        "overall_ready": overall_ready,
+        "checks": checks,
+        "actions": actions,
+    }
 
 
 def main(argv: list[str] | None = None) -> int:

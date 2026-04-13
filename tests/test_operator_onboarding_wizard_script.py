@@ -9,7 +9,13 @@ from pathlib import Path
 def _run(repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     project_root = Path(__file__).resolve().parents[1]
     return subprocess.run(
-        [sys.executable, "scripts/operator_onboarding_wizard.py", "--repo-root", str(repo_root), *args],
+        [
+            sys.executable,
+            "scripts/operator_onboarding_wizard.py",
+            "--repo-root",
+            str(repo_root),
+            *args,
+        ],
         cwd=project_root,
         text=True,
         capture_output=True,
@@ -30,7 +36,9 @@ def test_operator_onboarding_wizard_reports_ready_with_green_artifacts(tmp_path:
     assert payload["checks"]["gate_fast"]["ok"] is True
 
 
-def test_operator_onboarding_wizard_reports_not_ready_when_missing_artifacts(tmp_path: Path) -> None:
+def test_operator_onboarding_wizard_reports_not_ready_when_missing_artifacts(
+    tmp_path: Path,
+) -> None:
     out = tmp_path / "summary.json"
     proc = _run(tmp_path, "--out", str(out), "--format", "json")
     assert proc.returncode == 2

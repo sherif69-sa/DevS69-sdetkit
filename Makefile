@@ -1,6 +1,6 @@
 # --- dev targets (bootstrap) ---
 
-.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer adoption-scorecard operator-onboarding-wizard primary-docs-map
+.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
@@ -73,9 +73,18 @@ canonical-path-drift: venv
 legacy-command-analyzer: venv
 	@bash -lc '. .venv/bin/activate && python scripts/legacy_command_analyzer.py --format json'
 
+legacy-burndown: venv
+	@bash -lc '. .venv/bin/activate && python scripts/legacy_burndown.py --format json'
+
 
 adoption-scorecard: venv
 	@bash -lc '. .venv/bin/activate && python scripts/adoption_scorecard.py --format json'
+
+adoption-scorecard-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_adoption_scorecard_v2_contract.py --format json'
+
+observability-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_observability_v2_contract.py --format json'
 
 
 operator-onboarding-wizard: venv
