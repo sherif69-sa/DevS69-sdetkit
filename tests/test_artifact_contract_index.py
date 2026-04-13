@@ -9,10 +9,15 @@ from sdetkit.checks import artifacts as check_artifacts
 
 def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
     payload = json.loads(Path("docs/artifact-contract-index.json").read_text(encoding="utf-8"))
-    assert payload["schema_version"] == "sdetkit.artifact-contract-index.v1"
+    assert payload["schema_version"] == INDEX_SCHEMA_VERSION
 
     entries = {item["id"]: item for item in payload["artifacts"]}
     assert entries["doctor-json"]["schema_version"] == doctor.SCHEMA_VERSION
+    assert entries["doctor-evidence-json"]["schema_version"] == doctor.EVIDENCE_SCHEMA_VERSION
+    assert (
+        entries["doctor-evidence-manifest-json"]["schema_version"]
+        == doctor.EVIDENCE_MANIFEST_SCHEMA_VERSION
+    )
     assert entries["review-json"]["schema_version"] == review.SCHEMA_VERSION
     assert entries["checks-verdict-json"]["schema_version"] == check_artifacts.VERDICT_SCHEMA_VERSION
     assert entries["checks-fix-plan-json"]["schema_version"] == check_artifacts.FIX_PLAN_SCHEMA_VERSION

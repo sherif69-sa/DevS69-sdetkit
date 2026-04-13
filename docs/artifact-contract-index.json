@@ -6,7 +6,11 @@
       "path": "build/gate-fast.json",
       "produced_by": "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json",
       "schema_version": null,
-      "required_fields": ["ok", "failed_steps", "profile"],
+      "required_fields": [
+        "ok",
+        "failed_steps",
+        "profile"
+      ],
       "stability": "public"
     },
     {
@@ -14,7 +18,11 @@
       "path": "build/release-preflight.json",
       "produced_by": "python -m sdetkit gate release --format json --out build/release-preflight.json",
       "schema_version": null,
-      "required_fields": ["ok", "failed_steps", "profile"],
+      "required_fields": [
+        "ok",
+        "failed_steps",
+        "profile"
+      ],
       "stability": "public"
     },
     {
@@ -30,7 +38,23 @@
       "path": "build/review.json",
       "produced_by": "python -m sdetkit review . --no-workspace --format json --out build/review.json",
       "schema_version": "sdetkit.review.v3",
-      "required_fields": ["schema_version", "status", "severity"],
+      "required_fields": [
+        "schema_version",
+        "status",
+        "severity"
+      ],
+      "stability": "advanced"
+    },
+    {
+      "id": "review-operator-json",
+      "path": "build/review-operator.json",
+      "produced_by": "python -m sdetkit review . --no-workspace --format operator-json --out build/review-operator.json",
+      "schema_version": null,
+      "required_fields": [
+        "situation",
+        "actions",
+        "artifacts"
+      ],
       "stability": "advanced"
     },
     {
@@ -38,7 +62,12 @@
       "path": "build/verdict.json",
       "produced_by": "python -m sdetkit gate release --format json --out build/release-preflight.json",
       "schema_version": "sdetkit.artifacts.verdict.v1",
-      "required_fields": ["schema_version", "ok", "summary", "check_results_summary"],
+      "required_fields": [
+        "schema_version",
+        "ok",
+        "summary",
+        "check_results_summary"
+      ],
       "stability": "public"
     },
     {
@@ -46,7 +75,11 @@
       "path": "build/fix-plan.json",
       "produced_by": "python -m sdetkit gate release --format json --out build/release-preflight.json",
       "schema_version": "sdetkit.artifacts.fix-plan.v1",
-      "required_fields": ["schema_version", "generated_from", "actions"],
+      "required_fields": [
+        "schema_version",
+        "generated_from",
+        "actions"
+      ],
       "stability": "public"
     },
     {
