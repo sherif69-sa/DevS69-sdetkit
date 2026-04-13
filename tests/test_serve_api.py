@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import threading
 import urllib.error
 import urllib.request
@@ -152,6 +153,38 @@ def test_serve_review_accepts_code_scan_json_and_returns_summary(tmp_path: Path)
         assert payload["code_scanning"]["blocking_alerts"] == 1
         assert payload["artifact_index"]["code_scan_json"] == str(scan)
     finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_serve_observability_endpoint_reports_artifact_snapshot(tmp_path: Path) -> None:
+    out = tmp_path / ".sdetkit" / "out"
+    out.mkdir(parents=True)
+    (out / "adoption-scorecard.json").write_text(
+        json.dumps({"score": 75, "band": "strong", "overall_ok": True}),
+        encoding="utf-8",
+    )
+    (out / "golden-path-health.json").write_text(
+        json.dumps({"overall_ok": True}),
+        encoding="utf-8",
+    )
+
+    cwd = Path.cwd()
+    os.chdir(tmp_path)
+    server = serve.build_server(host="127.0.0.1", port=0)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    port = int(server.server_address[1])
+    try:
+        status_url = f"http://127.0.0.1:{port}/v1/observability"
+        with urllib.request.urlopen(status_url) as resp:  # noqa: S310
+            payload = json.loads(resp.read().decode("utf-8"))
+        assert resp.status == 200
+        assert payload["status"] == "ok"
+        assert "adoption_scorecard" in payload["observability"]
+    finally:
+        os.chdir(cwd)
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)

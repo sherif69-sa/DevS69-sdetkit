@@ -1,6 +1,6 @@
 # --- dev targets (bootstrap) ---
 
-.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry
+.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer adoption-scorecard operator-onboarding-wizard primary-docs-map
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
@@ -60,3 +60,27 @@ upgrade-audit: venv
 
 upgrade-audit-ci: venv
 	@bash -lc 'set -euo pipefail; . .venv/bin/activate && python scripts/upgrade_audit.py --fail-on high'
+
+
+golden-path-health: venv
+	@bash -lc '. .venv/bin/activate && python scripts/golden_path_health.py --out .sdetkit/out/golden-path-health.json'
+
+
+canonical-path-drift: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_canonical_path_drift.py --format json'
+
+
+legacy-command-analyzer: venv
+	@bash -lc '. .venv/bin/activate && python scripts/legacy_command_analyzer.py --format json'
+
+
+adoption-scorecard: venv
+	@bash -lc '. .venv/bin/activate && python scripts/adoption_scorecard.py --format json'
+
+
+operator-onboarding-wizard: venv
+	@bash -lc '. .venv/bin/activate && python scripts/operator_onboarding_wizard.py --format json'
+
+
+primary-docs-map: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_primary_docs_map.py --format json'

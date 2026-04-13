@@ -55,6 +55,38 @@ Transition-era and archived lanes remain available for compatibility, but they a
 - canonical rename map: [public-surface-rename-map](public-surface-rename-map.md)
 - historical material: [archive index](archive/index.md)
 
+## Legacy migration hints (runtime behavior)
+
+When a legacy compatibility command is invoked, the CLI can emit a migration hint to stderr with a preferred next surface and a canonical-path reminder.
+
+Controls:
+
+- **Default behavior:** hints are enabled.
+- **Environment toggle:** set `SDETKIT_LEGACY_HINTS=0` (also `false|no|off`) to disable.
+- **Per-invocation override:** pass `--no-legacy-hint` for one command run.
+
+Examples:
+
+```bash
+# one command only (preferred in CI scripts when needed)
+python -m sdetkit --no-legacy-hint phase1-hardening
+
+# shell/session level behavior
+SDETKIT_LEGACY_HINTS=0 python -m sdetkit phase1-hardening
+```
+
+For migration planning and lane mapping, see [Legacy command migration map](legacy-command-migration-map.md).
+
+You can also query migration guidance directly:
+
+```bash
+python -m sdetkit legacy migrate-hint phase1-hardening
+python -m sdetkit legacy migrate-hint --format json phase1-hardening
+python -m sdetkit legacy migrate-hint --all --format json
+```
+
+JSON output includes `schema_version`, `mode`, and migration recommendation fields (including `deprecation_horizon`) for automation parsing.
+
 ## Contract expectations
 
 Public kit commands are contract-oriented:
