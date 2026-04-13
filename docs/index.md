@@ -96,6 +96,7 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 - Need fast troubleshooting: [First failure triage](first-failure-triage.md), [Adoption troubleshooting](adoption-troubleshooting.md), [Remediation cookbook](remediation-cookbook.md)
 - Need compact navigation: [Docs map (compact)](docs-map.md)
 - Need current references: [CLI reference](cli.md), [API](api.md), and [repo audit reference](repo-audit.md)
+- Need artifact contract inventory: [Artifact contract index](artifact-contract-index.json)
 - Need contributor workflow: [Contributing](contributing.md)
 - Need boundary guidance: [Stability levels](stability-levels.md) for adopters and contributors
 

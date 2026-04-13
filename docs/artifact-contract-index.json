@@ -1,0 +1,69 @@
+{
+  "schema_version": "sdetkit.artifact-contract-index.v1",
+  "artifacts": [
+    {
+      "id": "gate-fast-json",
+      "path": "build/gate-fast.json",
+      "produced_by": "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json",
+      "schema_version": null,
+      "required_fields": ["ok", "failed_steps", "profile"],
+      "stability": "public"
+    },
+    {
+      "id": "release-preflight-json",
+      "path": "build/release-preflight.json",
+      "produced_by": "python -m sdetkit gate release --format json --out build/release-preflight.json",
+      "schema_version": null,
+      "required_fields": ["ok", "failed_steps", "profile"],
+      "stability": "public"
+    },
+    {
+      "id": "doctor-json",
+      "path": "build/doctor.json",
+      "produced_by": "python -m sdetkit doctor --format json --out build/doctor.json",
+      "schema_version": "sdetkit.doctor.v2",
+      "required_fields": ["schema_version", "ok", "checks"],
+      "stability": "public"
+    },
+    {
+      "id": "review-json",
+      "path": "build/review.json",
+      "produced_by": "python -m sdetkit review . --no-workspace --format json --out build/review.json",
+      "schema_version": "sdetkit.review.v3",
+      "required_fields": ["schema_version", "status", "severity"],
+      "stability": "advanced"
+    },
+    {
+      "id": "checks-verdict-json",
+      "path": "build/verdict.json",
+      "produced_by": "python -m sdetkit gate release --format json --out build/release-preflight.json",
+      "schema_version": "sdetkit.artifacts.verdict.v1",
+      "required_fields": ["schema_version", "ok", "summary", "check_results_summary"],
+      "stability": "public"
+    },
+    {
+      "id": "checks-fix-plan-json",
+      "path": "build/fix-plan.json",
+      "produced_by": "python -m sdetkit gate release --format json --out build/release-preflight.json",
+      "schema_version": "sdetkit.artifacts.fix-plan.v1",
+      "required_fields": ["schema_version", "generated_from", "actions"],
+      "stability": "public"
+    },
+    {
+      "id": "checks-risk-summary-json",
+      "path": "build/risk-summary.json",
+      "produced_by": "python -m sdetkit gate release --format json --out build/release-preflight.json",
+      "schema_version": "sdetkit.artifacts.risk-summary.v1",
+      "required_fields": ["schema_version", "risk", "summary"],
+      "stability": "public"
+    },
+    {
+      "id": "checks-evidence-zip",
+      "path": "build/evidence.zip",
+      "produced_by": "python -m sdetkit gate release --format json --out build/release-preflight.json",
+      "schema_version": "sdetkit.artifacts.evidence.v1",
+      "required_fields": ["schema_version"],
+      "stability": "public"
+    }
+  ]
+}
