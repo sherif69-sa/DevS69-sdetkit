@@ -13,7 +13,15 @@ def test_run_apiget_with_cassette_strips_cassette_flags() -> None:
         return 0
 
     rc = apiget_dispatch.run_apiget_with_cassette(
-        ["apiget", "https://x", "--cassette", "file.json", "--cassette-mode=record", "--timeout", "5"],
+        [
+            "apiget",
+            "https://x",
+            "--cassette",
+            "file.json",
+            "--cassette-mode=record",
+            "--timeout",
+            "5",
+        ],
         cassette=None,
         cassette_mode=None,
         run_module_main=_runner,

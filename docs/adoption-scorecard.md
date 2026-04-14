@@ -11,7 +11,7 @@ Scorecard v2 keeps backward-compatible top-level fields (`score`, `band`, `dimen
 - **ops**: legacy density + reduction trend vs baseline
 - **quality**: canonical drift guard + test signal
 
-`dimensions` remains a legacy compatibility view (`0..25`).  
+`dimensions` remains a legacy compatibility view (`0..25`).
 `graded_dimensions` is the v2 score (`0..100`) per dimension with explicit `weights`.
 
 ## Generate scorecard

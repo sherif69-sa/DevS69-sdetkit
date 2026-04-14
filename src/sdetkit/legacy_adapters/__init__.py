@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from .closeout import LEGACY_CLOSEOUT_COMMAND_MODULES
 from .continuous_upgrade import LEGACY_CONTINUOUS_UPGRADE_COMMAND_MODULES
-from .foundation import LEGACY_FOUNDATION_COMMAND_MODULES, LEGACY_NAMESPACE_COMMANDS
+from .foundation import (
+    LEGACY_FOUNDATION_COMMAND_MODULES,
+)
+from .foundation import (
+    LEGACY_NAMESPACE_COMMANDS as LEGACY_NAMESPACE_COMMANDS,
+)
 
 LEGACY_COMMAND_MODULES: dict[str, str] = {
     **LEGACY_FOUNDATION_COMMAND_MODULES,

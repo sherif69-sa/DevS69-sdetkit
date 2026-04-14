@@ -565,9 +565,13 @@ def _build_explain_payload(data: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(action, dict):
             continue
         severity = str(action.get("severity", "medium"))
-        weighted = round(min(0.99, max(0.05, base_confidence * severity_weight.get(severity, 0.7))), 2)
+        weighted = round(
+            min(0.99, max(0.05, base_confidence * severity_weight.get(severity, 0.7))), 2
+        )
         fix_list = action.get("fix", [])
-        first_fix = fix_list[0] if isinstance(fix_list, list) and fix_list else "Review check output"
+        first_fix = (
+            fix_list[0] if isinstance(fix_list, list) and fix_list else "Review check output"
+        )
         explain_steps.append(
             {
                 "priority": index,

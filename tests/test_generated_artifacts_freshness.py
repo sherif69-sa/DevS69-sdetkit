@@ -4,7 +4,9 @@ import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 
-_SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "check_generated_artifacts_freshness.py"
+_SCRIPT_PATH = (
+    Path(__file__).resolve().parents[1] / "scripts" / "check_generated_artifacts_freshness.py"
+)
 _SPEC = importlib.util.spec_from_file_location("check_generated_artifacts_freshness", _SCRIPT_PATH)
 assert _SPEC and _SPEC.loader
 freshness = importlib.util.module_from_spec(_SPEC)

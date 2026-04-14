@@ -58,7 +58,9 @@ def run_baseline(
     ok = not failed
     payload: dict[str, object] = {"ok": ok, "steps": steps, "failed_steps": failed}
     if bns.format == "json":
-        sys.stdout.write(json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True) + "\n")
+        sys.stdout.write(
+            json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True) + "\n"
+        )
     else:
         lines: list[str] = []
         lines.append(f"baseline: {'OK' if ok else 'FAIL'}")

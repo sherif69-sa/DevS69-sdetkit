@@ -10,7 +10,9 @@ def dispatch_release_subcommand(
     run_module_main: Callable[[str, Sequence[str]], int],
 ) -> int:
     if not args:
-        sys.stderr.write("release error: expected subcommand (gate|doctor|security|evidence|repo)\n")
+        sys.stderr.write(
+            "release error: expected subcommand (gate|doctor|security|evidence|repo)\n"
+        )
         return 2
     subcmd = args[0]
     rest = list(args[1:])
@@ -24,5 +26,7 @@ def dispatch_release_subcommand(
         return run_module_main("sdetkit.evidence", rest)
     if subcmd == "repo":
         return run_module_main("sdetkit.repo", rest)
-    sys.stderr.write("release error: supported subcommands are gate|doctor|security|evidence|repo\n")
+    sys.stderr.write(
+        "release error: supported subcommands are gate|doctor|security|evidence|repo\n"
+    )
     return 2
