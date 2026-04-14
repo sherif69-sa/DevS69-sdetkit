@@ -840,15 +840,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ns.cmd == "integration":
         return _run_module_main("sdetkit.integration", ns.args)
 
-    if ns.cmd == "author":
-        return _run_module_main("sdetkit.author_problem", ns.args)
-
-    if ns.cmd == "forensics":
-        return _run_module_main("sdetkit.forensics", ns.args)
-
-    if ns.cmd == "kv":
-        return _run_module_main("sdetkit.kvcli", ns.args)
-
     if ns.cmd == "inspect":
         return _run_module_main("sdetkit.inspect_data", build_inspect_forwarded_args(ns, ns.args))
     if ns.cmd == "inspect-compare":

@@ -42,3 +42,19 @@ def test_dispatch_parsed_shortcut_unknown_command() -> None:
         run_module_main=lambda _module, _args: 0,
     )
     assert rc is None
+
+
+def test_dispatch_parsed_shortcut_author_command() -> None:
+    calls: list[tuple[str, list[str]]] = []
+
+    def _runner(module: str, args) -> int:
+        calls.append((module, list(args)))
+        return 9
+
+    rc = parsed_shortcuts.dispatch_parsed_shortcut(
+        "author",
+        ["--help"],
+        run_module_main=_runner,
+    )
+    assert rc == 9
+    assert calls == [("sdetkit.author_problem", ["--help"])]
