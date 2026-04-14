@@ -741,12 +741,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         return _playbooks_main(list(ns.args))
 
-    if ns.cmd == "legacy":
-        legacy_result = handle_legacy_namespace(["legacy", *list(ns.args)])
-        if legacy_result is not None:
-            return legacy_result
-        return main(list(ns.args))
-
     if ns.cmd == "kits":
         return _run_module_main("sdetkit.kits", ns.args)
 
