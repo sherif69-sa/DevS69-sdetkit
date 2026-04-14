@@ -9,11 +9,11 @@ from importlib import import_module
 from typing import cast
 
 from .argv_flags import extract_global_flag
+from .cli_shortcuts import dispatch_preparse_shortcut
 from .cli_timing import emit_cli_timing
 from .help_surface import filter_hidden_subcommands, hide_help_subcommands
-from .legacy_cli import emit_legacy_migration_hint, run_legacy_migrate_hint
+from .legacy_cli import run_legacy_migrate_hint
 from .legacy_commands import (
-    LEGACY_COMMAND_MODULES,
     LEGACY_NAMESPACE_COMMANDS,
 )
 from .legacy_namespace import handle_legacy_namespace
@@ -708,136 +708,13 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         return _ci_main(list(argv[1:]))
 
-    if argv and argv[0] == "patch":
-        return _run_module_main("sdetkit.patch", list(argv[1:]))
-
-    if argv and argv[0] == "repo":
-        return _run_module_main("sdetkit.repo", list(argv[1:]))
-
-    if argv and argv[0] == "dev":
-        return _run_module_main("sdetkit.repo", ["dev", *list(argv[1:])])
-
-    if argv and argv[0] == "report":
-        return _run_module_main("sdetkit.report", list(argv[1:]))
-
-    if argv and argv[0] == "contract":
-        return _run_module_main("sdetkit.contract", list(argv[1:]))
-
-    if argv and argv[0] == "maintenance":
-        return _run_module_main("sdetkit.maintenance", list(argv[1:]))
-
-    if argv and argv[0] == "agent":
-        return _run_module_main("sdetkit.agent.cli", list(argv[1:]))
-
-    if argv and argv[0] == "security":
-        return _run_module_main("sdetkit.security_gate", list(argv[1:]))
-
-    if argv and argv[0] == "ops":
-        return _run_module_main("sdetkit.ops", list(argv[1:]))
-
-    if argv and argv[0] == "notify":
-        return _run_module_main("sdetkit.notify", list(argv[1:]))
-
-    if argv and argv[0] == "policy":
-        return _run_module_main("sdetkit.policy", list(argv[1:]))
-
-    if argv and argv[0] == "evidence":
-        return _run_module_main("sdetkit.evidence", list(argv[1:]))
-
-    if argv and argv[0] == "onboarding":
-        return _run_module_main("sdetkit.onboarding", list(argv[1:]))
-
-    if argv and argv[0] == "onboarding-optimization":
-        return _run_module_main("sdetkit.onboarding_optimization", list(argv[1:]))
-
-    if argv and argv[0] == "phase-boost":
-        return _run_module_main("sdetkit.phase_boost", list(argv[1:]))
-
-    if argv and argv[0] == "production-readiness":
-        return _run_module_main("sdetkit.production_readiness", list(argv[1:]))
-
-    if argv and argv[0] == "community-activation":
-        return _run_module_main("sdetkit.community_activation", list(argv[1:]))
-
-    if argv and argv[0] == "external-contribution":
-        return _run_module_main("sdetkit.external_contribution", list(argv[1:]))
-
-    if argv and argv[0] == "kpi-audit":
-        return _run_module_main("sdetkit.kpi_audit", list(argv[1:]))
-    if argv and argv[0] == "kpi-report":
-        return _run_module_main("sdetkit.kpi_report", list(argv[1:]))
-
-    if argv:
-        legacy_module = LEGACY_COMMAND_MODULES.get(str(argv[0]))
-        if legacy_module:
-            if not no_legacy_hint:
-                emit_legacy_migration_hint(str(argv[0]))
-            return _run_module_main(legacy_module, list(argv[1:]))
-
-    if argv and argv[0] == "objection-handling":
-        return _run_module_main("sdetkit.objection_handling", list(argv[1:]))
-
-    if argv and argv[0] == "first-contribution":
-        return _run_module_main("sdetkit.first_contribution", list(argv[1:]))
-
-    if argv and argv[0] == "demo":
-        return _run_module_main("sdetkit.demo", list(argv[1:]))
-
-    if argv and argv[0] == "contributor-funnel":
-        return _run_module_main("sdetkit.contributor_funnel", list(argv[1:]))
-
-    if argv and argv[0] in {"evidence-assets", "proof"}:
-        return _run_module_main("sdetkit.proof", list(argv[1:]))
-
-    if argv and argv[0] == "triage-templates":
-        return _run_module_main("sdetkit.triage_templates", list(argv[1:]))
-
-    if argv and argv[0] in {"docs-quality", "docs-qa"}:
-        return _run_module_main("sdetkit.docs_qa", list(argv[1:]))
-
-    if argv and argv[0] == "weekly-review":
-        return _run_module_main("sdetkit.weekly_review", list(argv[1:]))
-
-    if argv and argv[0] in {"docs-governance", "docs-nav"}:
-        return _run_module_main("sdetkit.docs_navigation", list(argv[1:]))
-    if argv and argv[0] == "roadmap":
-        return _run_module_main("sdetkit.roadmap", list(argv[1:]))
-
-    if argv and argv[0] == "startup-readiness":
-        return _run_module_main("sdetkit.startup_readiness", list(argv[1:]))
-
-    if argv and argv[0] == "upgrade-hub":
-        return _run_module_main("sdetkit.upgrade_hub", list(argv[1:]))
-
-    if argv and argv[0] == "sdet-package":
-        return _run_module_main("sdetkit.sdet_package", list(argv[1:]))
-
-    if argv and argv[0] == "enterprise-readiness":
-        return _run_module_main("sdetkit.enterprise_readiness", list(argv[1:]))
-
-    if argv and argv[0] in {"github-actions-onboarding", "github-actions-quickstart"}:
-        return _run_module_main("sdetkit.github_actions_quickstart", list(argv[1:]))
-
-    if argv and argv[0] in {"gitlab-ci-onboarding", "gitlab-ci-quickstart"}:
-        return _run_module_main("sdetkit.gitlab_ci_quickstart", list(argv[1:]))
-
-    if argv and argv[0] in {"contribution-quality-report", "quality-contribution-delta"}:
-        return _run_module_main("sdetkit.quality_contribution_delta", list(argv[1:]))
-
-    if argv and argv[0] == "reliability-evidence-pack":
-        return _run_module_main("sdetkit.reliability_evidence_pack", list(argv[1:]))
-
-    if argv and argv[0] == "release-readiness":
-        return _run_module_main("sdetkit.release_readiness", list(argv[1:]))
-
-    if argv and argv[0] == "release-communications":
-        return _run_module_main("sdetkit.release_communications", list(argv[1:]))
-
-    if argv and argv[0] == "trust-assets":
-        return _run_module_main("sdetkit.trust_assets", list(argv[1:]))
-
-    if argv and argv[0] == "feature-registry":
-        return _run_module_main("sdetkit.feature_registry_cli", list(argv[1:]))
+    preparse_result = dispatch_preparse_shortcut(
+        argv,
+        no_legacy_hint=no_legacy_hint,
+        run_module_main=_run_module_main,
+    )
+    if preparse_result is not None:
+        return preparse_result
 
     show_hidden_commands = "--show-hidden" in argv
     p, sub = _build_root_parser(show_hidden_commands=show_hidden_commands)
