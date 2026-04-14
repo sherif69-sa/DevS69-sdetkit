@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 from importlib import import_module
+from typing import cast
 
 
 def resolve_non_day_playbook_alias(cmd: str) -> str:
     """Resolve product/legacy playbook names to a parser-backed command."""
     try:
         playbooks_cli = import_module("sdetkit.playbooks_cli")
-        cmd_to_mod, alias_to_canonical = playbooks_cli._build_registry(playbooks_cli._pkg_dir())
+        cmd_to_mod, alias_to_canonical = cast(
+            tuple[dict[str, str], dict[str, str]],
+            playbooks_cli._build_registry(playbooks_cli._pkg_dir()),
+        )
     except Exception:
         return cmd
 

@@ -2,7 +2,21 @@ from __future__ import annotations
 
 import os
 
-from .legacy_adapters import LEGACY_COMMAND_MODULES, LEGACY_NAMESPACE_COMMANDS
+from .legacy_adapters import (
+    LEGACY_COMMAND_MODULES as LEGACY_COMMAND_MODULES,
+)
+from .legacy_adapters import (
+    LEGACY_NAMESPACE_COMMANDS as LEGACY_NAMESPACE_COMMANDS,
+)
+
+__all__ = [
+    "LEGACY_COMMAND_MODULES",
+    "LEGACY_NAMESPACE_COMMANDS",
+    "legacy_hints_enabled",
+    "legacy_preferred_surface",
+    "legacy_deprecation_horizon",
+    "legacy_migration_hint",
+]
 
 
 def legacy_hints_enabled() -> bool:

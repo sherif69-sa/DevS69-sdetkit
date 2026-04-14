@@ -33,7 +33,7 @@ def run_legacy_migrate_hint(argv: Sequence[str]) -> int:
         sys.stderr.write("legacy error: use either <command> or --all for migrate-hint\n")
         return 2
     commands = [str(ns.command)] if ns.command else list(LEGACY_NAMESPACE_COMMANDS)
-    items = [
+    items: list[dict[str, object]] = [
         {
             "command": command,
             "preferred_surface": legacy_preferred_surface(command),
@@ -45,10 +45,10 @@ def run_legacy_migrate_hint(argv: Sequence[str]) -> int:
     ]
     if ns.format == "json":
         if len(items) == 1:
-            payload = {"schema_version": "1", "mode": "single", **items[0]}
+            payload: dict[str, object] = {"schema_version": "1", "mode": "single", **items[0]}
         else:
             payload = {"schema_version": "1", "mode": "all", "count": len(items), "items": items}
         sys.stdout.write(json.dumps(payload, sort_keys=True) + "\n")
         return 0
-    sys.stdout.write("\n".join(item["hint"] for item in items) + "\n")
+    sys.stdout.write("\n".join(str(item["hint"]) for item in items) + "\n")
     return 0

@@ -44,7 +44,20 @@ def test_golden_path_health_reports_ok_when_all_artifacts_are_ok(tmp_path: Path)
 
 def test_golden_path_health_reports_failure_when_artifact_missing(tmp_path: Path) -> None:
     out = tmp_path / "golden-path-health.json"
-    proc = _run(tmp_path, "--out", str(out))
+    missing_gate_fast = tmp_path / "missing-gate-fast.json"
+    missing_gate_release = tmp_path / "missing-gate-release.json"
+    missing_doctor = tmp_path / "missing-doctor.json"
+    proc = _run(
+        tmp_path,
+        "--gate-fast",
+        str(missing_gate_fast),
+        "--gate-release",
+        str(missing_gate_release),
+        "--doctor",
+        str(missing_doctor),
+        "--out",
+        str(out),
+    )
     assert proc.returncode == 2
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["overall_ok"] is False
