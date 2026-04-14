@@ -16,6 +16,7 @@ from .legacy_commands import (
     LEGACY_COMMAND_MODULES,
     LEGACY_NAMESPACE_COMMANDS,
 )
+from .legacy_namespace import handle_legacy_namespace
 from .parser_helpers import add_passthrough_subcommand as _add_passthrough_subcommand
 from .playbook_aliases import resolve_non_day_playbook_alias
 from .public_surface_contract import render_root_help_groups
@@ -678,14 +679,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         argv[0] = resolve_non_day_playbook_alias(str(argv[0]))
 
     if argv and argv[0] == "legacy":
-        if len(argv) == 1:
-            sys.stderr.write("legacy error: expected a legacy command name\n")
-            return 2
-        if argv[1] == "list":
-            sys.stdout.write("\n".join(LEGACY_NAMESPACE_COMMANDS) + "\n")
-            return 0
-        if argv[1] == "migrate-hint":
-            return run_legacy_migrate_hint(list(argv[2:]))
+        legacy_result = handle_legacy_namespace(argv)
+        if legacy_result is not None:
+            return legacy_result
         return main(list(argv[1:]))
 
     if argv and argv[0] == "cassette-get":
