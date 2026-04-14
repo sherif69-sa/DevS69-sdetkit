@@ -12,6 +12,7 @@ from .argv_flags import extract_global_flag
 from .baseline_dispatch import run_baseline
 from .cli_shortcuts import dispatch_preparse_shortcut
 from .cli_timing import emit_cli_timing
+from .core_preparse_dispatch import dispatch_core_preparse
 from .help_surface import filter_hidden_subcommands, hide_help_subcommands
 from .inspect_compare_forwarding import build_inspect_compare_forwarded_args
 from .inspect_forwarding import build_inspect_forwarded_args
@@ -689,29 +690,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             return legacy_result
         return main(list(argv[1:]))
 
-    if argv and argv[0] == "cassette-get":
-        from .__main__ import _cassette_get
-
-        try:
-            return _cassette_get(list(argv[1:]))
-        except Exception as e:
-            print(str(e), file=sys.stderr)
-            return 2
-
-    if argv and argv[0] == "doctor":
-        from .doctor import main as _doctor_main
-
-        return _doctor_main(list(argv[1:]))
-
-    if argv and argv[0] == "gate":
-        from .gate import main as _gate_main
-
-        return _gate_main(list(argv[1:]))
-
-    if argv and argv[0] == "ci":
-        from .ci import main as _ci_main
-
-        return _ci_main(list(argv[1:]))
+    core_preparse_result = dispatch_core_preparse(argv)
+    if core_preparse_result is not None:
+        return core_preparse_result
 
     preparse_result = dispatch_preparse_shortcut(
         argv,
