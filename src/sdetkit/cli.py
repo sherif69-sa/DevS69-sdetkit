@@ -834,12 +834,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return 2
 
-    if ns.cmd == "intelligence":
-        return _run_module_main("sdetkit.intelligence", ns.args)
-
-    if ns.cmd == "integration":
-        return _run_module_main("sdetkit.integration", ns.args)
-
     if ns.cmd == "inspect":
         return _run_module_main("sdetkit.inspect_data", build_inspect_forwarded_args(ns, ns.args))
     if ns.cmd == "inspect-compare":

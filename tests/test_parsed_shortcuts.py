@@ -58,3 +58,19 @@ def test_dispatch_parsed_shortcut_author_command() -> None:
     )
     assert rc == 9
     assert calls == [("sdetkit.author_problem", ["--help"])]
+
+
+def test_dispatch_parsed_shortcut_integration_command() -> None:
+    calls: list[tuple[str, list[str]]] = []
+
+    def _runner(module: str, args) -> int:
+        calls.append((module, list(args)))
+        return 4
+
+    rc = parsed_shortcuts.dispatch_parsed_shortcut(
+        "integration",
+        ["topology-check"],
+        run_module_main=_runner,
+    )
+    assert rc == 4
+    assert calls == [("sdetkit.integration", ["topology-check"])]
