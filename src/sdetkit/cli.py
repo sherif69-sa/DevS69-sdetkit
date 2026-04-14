@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 import time
 from collections.abc import Sequence
 from importlib import import_module
 from typing import cast
 
+from .apiget_dispatch import run_apiget_with_cassette
 from .argv_flags import extract_global_flag
 from .cli_shortcuts import dispatch_preparse_shortcut
 from .cli_timing import emit_cli_timing
@@ -947,42 +947,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         return parsed_shortcut_result
 
     if ns.cmd == "apiget":
-        raw_args = list(argv)
-        rest = raw_args[1:]
-        cassette = getattr(ns, "cassette", None)
-        cassette_mode = getattr(ns, "cassette_mode", None) or "auto"
-        clean: list[str] = []
-        it = iter(rest)
-        for a in it:
-            if a.startswith("--cassette="):
-                continue
-            if a == "--cassette":
-                next(it, None)
-                continue
-            if a.startswith("--cassette-mode="):
-                continue
-            if a == "--cassette-mode":
-                next(it, None)
-                continue
-            clean.append(a)
-        rest = clean
-        if not cassette:
-            return _run_module_main("sdetkit.apiget", rest)
-        old_cassette = os.environ.get("SDETKIT_CASSETTE")
-        old_mode = os.environ.get("SDETKIT_CASSETTE_MODE")
-        try:
-            os.environ["SDETKIT_CASSETTE"] = str(cassette)
-            os.environ["SDETKIT_CASSETTE_MODE"] = str(cassette_mode)
-            return _run_module_main("sdetkit.apiget", rest)
-        finally:
-            if old_cassette is None:
-                os.environ.pop("SDETKIT_CASSETTE", None)
-            else:
-                os.environ["SDETKIT_CASSETTE"] = old_cassette
-            if old_mode is None:
-                os.environ.pop("SDETKIT_CASSETTE_MODE", None)
-            else:
-                os.environ["SDETKIT_CASSETTE_MODE"] = old_mode
+        return run_apiget_with_cassette(
+            list(argv),
+            cassette=getattr(ns, "cassette", None),
+            cassette_mode=getattr(ns, "cassette_mode", None),
+            run_module_main=_run_module_main,
+        )
     raise SystemExit(2)
 
 
