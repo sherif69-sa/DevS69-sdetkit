@@ -18,3 +18,14 @@ def test_emit_cli_timing_writes_to_stderr(monkeypatch, capsys) -> None:
     cli_timing.emit_cli_timing("event=test")
     captured = capsys.readouterr()
     assert "[sdetkit.cli.timing] event=test" in captured.err
+
+
+def test_loaded_module_count_reports_positive_value() -> None:
+    assert cli_timing.loaded_module_count() > 0
+
+
+def test_emit_cli_startup_snapshot_writes_module_count(monkeypatch, capsys) -> None:
+    monkeypatch.setenv("SDETKIT_CLI_TIMING", "1")
+    cli_timing.emit_cli_startup_snapshot("gate")
+    captured = capsys.readouterr()
+    assert "event=startup command=gate modules_loaded=" in captured.err

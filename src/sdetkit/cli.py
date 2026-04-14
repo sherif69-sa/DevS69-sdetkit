@@ -11,7 +11,7 @@ from .apiget_dispatch import run_apiget_with_cassette
 from .argv_flags import extract_global_flag
 from .baseline_dispatch import run_baseline
 from .cli_shortcuts import dispatch_preparse_shortcut
-from .cli_timing import emit_cli_timing
+from .cli_timing import emit_cli_startup_snapshot, emit_cli_timing, loaded_module_count
 from .core_preparse_dispatch import dispatch_core_preparse
 from .help_surface import filter_hidden_subcommands, hide_help_subcommands
 from .inspect_compare_forwarding import build_inspect_compare_forwarded_args
@@ -48,7 +48,7 @@ def _run_module_main(module_name: str, args: Sequence[str]) -> int:
     module = import_module(module_name)
     rc = cast(int, module.main(arg_list))
     emit_cli_timing(
-        f"event=dispatch module={module_name} argc={len(arg_list)} elapsed_ms={(time.perf_counter() - started) * 1000.0:.3f}"
+        f"event=dispatch module={module_name} argc={len(arg_list)} elapsed_ms={(time.perf_counter() - started) * 1000.0:.3f} modules_loaded={loaded_module_count()}"
     )
     return rc
 
@@ -683,6 +683,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv:
         argv = list(argv)
         argv[0] = resolve_non_day_playbook_alias(str(argv[0]))
+
+    emit_cli_startup_snapshot(argv[0] if argv else None)
 
     if argv and argv[0] == "legacy":
         legacy_result = handle_legacy_namespace(argv)
