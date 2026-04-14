@@ -1,0 +1,5 @@
+{"repo":"checkout-service","team":"commerce","lane":"scale","timestamp":"2026-04-11T17:00:00Z","gate_fast_ok":true,"gate_release_ok":true,"doctor_ok":true,"failed_steps_count":0}
+{"repo":"pricing-service","team":"commerce","lane":"regulated","timestamp":"2026-04-11T17:00:00Z","gate_fast_ok":true,"gate_release_ok":false,"doctor_ok":true,"failed_steps_count":2}
+{"repo":"growth-api","team":"growth","lane":"startup","timestamp":"2026-04-11T17:00:00Z","gate_fast_ok":true,"gate_release_ok":true,"doctor_ok":true,"failed_steps_count":0}
+{"repo":"identity-service","team":"platform","lane":"regulated","timestamp":"2026-04-11T17:00:00Z","gate_fast_ok":false,"gate_release_ok":false,"doctor_ok":true,"failed_steps_count":3}
+{"repo":"notifications","team":"eng-productivity","lane":"scale","timestamp":"2026-04-11T17:00:00Z","gate_fast_ok":true,"gate_release_ok":true,"doctor_ok":false,"failed_steps_count":1}
