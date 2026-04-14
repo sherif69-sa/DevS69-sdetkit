@@ -21,6 +21,7 @@ from .parsed_shortcuts import dispatch_parsed_shortcut
 from .parser_helpers import add_passthrough_subcommand as _add_passthrough_subcommand
 from .playbook_aliases import resolve_non_day_playbook_alias
 from .public_surface_contract import render_root_help_groups
+from .repo_init_forwarding import build_repo_init_forwarded_args
 from .versioning import tool_version
 
 
@@ -919,24 +920,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_module_main("sdetkit.serve", serve_args)
 
     if ns.cmd == "init":
-        forwarded = [
-            "init",
-            "--preset",
-            ns.preset,
-            "--root",
-            ns.root,
-            "--format",
-            ns.format,
-        ]
-        if ns.dry_run:
-            forwarded.append("--dry-run")
-        if ns.force:
-            forwarded.append("--force")
-        if ns.diff:
-            forwarded.append("--diff")
-        if ns.write_config:
-            forwarded.append("--write-config")
-        return _run_module_main("sdetkit.repo", forwarded)
+        return _run_module_main("sdetkit.repo", build_repo_init_forwarded_args(ns))
 
     parsed_shortcut_result = dispatch_parsed_shortcut(
         str(ns.cmd),
