@@ -12,6 +12,7 @@ from .argv_flags import extract_global_flag
 from .cli_shortcuts import dispatch_preparse_shortcut
 from .cli_timing import emit_cli_timing
 from .help_surface import filter_hidden_subcommands, hide_help_subcommands
+from .inspect_project_forwarding import build_inspect_project_forwarded_args
 from .legacy_cli import run_legacy_migrate_hint
 from .legacy_commands import (
     LEGACY_NAMESPACE_COMMANDS,
@@ -879,18 +880,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             forwarded = ["--no-workspace", *forwarded]
         return _run_module_main("sdetkit.inspect_compare", forwarded)
     if ns.cmd == "inspect-project":
-        forwarded = [ns.project_dir]
-        if ns.policy:
-            forwarded.extend(["--policy", ns.policy])
-        if ns.workspace_root:
-            forwarded.extend(["--workspace-root", ns.workspace_root])
-        if ns.out_dir:
-            forwarded.extend(["--out-dir", ns.out_dir])
-        if ns.format:
-            forwarded.extend(["--format", ns.format])
-        if ns.no_workspace:
-            forwarded.append("--no-workspace")
-        return _run_module_main("sdetkit.inspect_project", forwarded)
+        return _run_module_main("sdetkit.inspect_project", build_inspect_project_forwarded_args(ns))
     if ns.cmd == "review":
         return _run_module_main("sdetkit.review", build_review_forwarded_args(ns))
 
