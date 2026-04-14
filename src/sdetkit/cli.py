@@ -16,10 +16,6 @@ from .help_surface import filter_hidden_subcommands, hide_help_subcommands
 from .inspect_compare_forwarding import build_inspect_compare_forwarded_args
 from .inspect_forwarding import build_inspect_forwarded_args
 from .inspect_project_forwarding import build_inspect_project_forwarded_args
-from .legacy_cli import run_legacy_migrate_hint
-from .legacy_commands import (
-    LEGACY_NAMESPACE_COMMANDS,
-)
 from .legacy_namespace import handle_legacy_namespace
 from .parsed_shortcuts import dispatch_parsed_shortcut
 from .parser_helpers import add_passthrough_subcommand as _add_passthrough_subcommand
