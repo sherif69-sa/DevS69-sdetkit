@@ -22,6 +22,7 @@ from .parser_helpers import add_passthrough_subcommand as _add_passthrough_subco
 from .playbook_aliases import resolve_non_day_playbook_alias
 from .public_surface_contract import render_root_help_groups
 from .repo_init_forwarding import build_repo_init_forwarded_args
+from .review_forwarding import build_review_forwarded_args
 from .serve_forwarding import build_serve_args
 from .versioning import tool_version
 
@@ -891,26 +892,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             forwarded.append("--no-workspace")
         return _run_module_main("sdetkit.inspect_project", forwarded)
     if ns.cmd == "review":
-        forwarded = [ns.path]
-        if ns.workspace_root:
-            forwarded.extend(["--workspace-root", ns.workspace_root])
-        if ns.out_dir:
-            forwarded.extend(["--out-dir", ns.out_dir])
-        if ns.profile:
-            forwarded.extend(["--profile", ns.profile])
-        if ns.format:
-            forwarded.extend(["--format", ns.format])
-        if ns.interactive:
-            forwarded.append("--interactive")
-        if ns.no_workspace:
-            forwarded.append("--no-workspace")
-        if ns.work_id:
-            forwarded.extend(["--work-id", ns.work_id])
-        for entry in ns.work_context or []:
-            forwarded.extend(["--work-context", entry])
-        if ns.code_scan_json:
-            forwarded.extend(["--code-scan-json", ns.code_scan_json])
-        return _run_module_main("sdetkit.review", forwarded)
+        return _run_module_main("sdetkit.review", build_review_forwarded_args(ns))
 
     if ns.cmd == "serve":
         return _run_module_main("sdetkit.serve", build_serve_args(ns))
