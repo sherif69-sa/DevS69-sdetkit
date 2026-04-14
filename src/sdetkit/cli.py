@@ -13,6 +13,7 @@ from .cli_shortcuts import dispatch_preparse_shortcut
 from .cli_timing import emit_cli_timing
 from .help_surface import filter_hidden_subcommands, hide_help_subcommands
 from .inspect_compare_forwarding import build_inspect_compare_forwarded_args
+from .inspect_forwarding import build_inspect_forwarded_args
 from .inspect_project_forwarding import build_inspect_project_forwarded_args
 from .legacy_cli import run_legacy_migrate_hint
 from .legacy_commands import (
@@ -849,12 +850,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_module_main("sdetkit.kvcli", ns.args)
 
     if ns.cmd == "inspect":
-        inspect_args = list(ns.args)
-        if ns.rules_template:
-            inspect_args = ["--rules-template", *inspect_args]
-        if ns.rules_lint:
-            inspect_args = ["--rules-lint", ns.rules_lint, *inspect_args]
-        return _run_module_main("sdetkit.inspect_data", inspect_args)
+        return _run_module_main("sdetkit.inspect_data", build_inspect_forwarded_args(ns, ns.args))
     if ns.cmd == "inspect-compare":
         return _run_module_main(
             "sdetkit.inspect_compare",
