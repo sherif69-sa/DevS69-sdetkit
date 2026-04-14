@@ -12,6 +12,7 @@ from .argv_flags import extract_global_flag
 from .cli_shortcuts import dispatch_preparse_shortcut
 from .cli_timing import emit_cli_timing
 from .help_surface import filter_hidden_subcommands, hide_help_subcommands
+from .inspect_compare_forwarding import build_inspect_compare_forwarded_args
 from .inspect_project_forwarding import build_inspect_project_forwarded_args
 from .legacy_cli import run_legacy_migrate_hint
 from .legacy_commands import (
@@ -855,30 +856,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             inspect_args = ["--rules-lint", ns.rules_lint, *inspect_args]
         return _run_module_main("sdetkit.inspect_data", inspect_args)
     if ns.cmd == "inspect-compare":
-        forwarded = list(ns.args)
-        if ns.left:
-            forwarded = ["--left", ns.left, *forwarded]
-        if ns.right:
-            forwarded = ["--right", ns.right, *forwarded]
-        if ns.left_run:
-            forwarded = ["--left-run", ns.left_run, *forwarded]
-        if ns.right_run:
-            forwarded = ["--right-run", ns.right_run, *forwarded]
-        if ns.scope:
-            forwarded = ["--scope", ns.scope, *forwarded]
-        if ns.latest_vs_previous:
-            forwarded = ["--latest-vs-previous", *forwarded]
-        if ns.workspace_root:
-            forwarded = ["--workspace-root", ns.workspace_root, *forwarded]
-        if ns.workflow:
-            forwarded = ["--workflow", ns.workflow, *forwarded]
-        if ns.format:
-            forwarded = ["--format", ns.format, *forwarded]
-        if ns.out_dir:
-            forwarded = ["--out-dir", ns.out_dir, *forwarded]
-        if ns.no_workspace:
-            forwarded = ["--no-workspace", *forwarded]
-        return _run_module_main("sdetkit.inspect_compare", forwarded)
+        return _run_module_main(
+            "sdetkit.inspect_compare",
+            build_inspect_compare_forwarded_args(ns, ns.args),
+        )
     if ns.cmd == "inspect-project":
         return _run_module_main("sdetkit.inspect_project", build_inspect_project_forwarded_args(ns))
     if ns.cmd == "review":
