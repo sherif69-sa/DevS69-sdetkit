@@ -9,6 +9,7 @@ from typing import cast
 
 from .apiget_dispatch import run_apiget_with_cassette
 from .argv_flags import extract_global_flag
+from .baseline_dispatch import run_baseline
 from .cli_shortcuts import dispatch_preparse_shortcut
 from .cli_timing import emit_cli_timing
 from .help_surface import filter_hidden_subcommands, hide_help_subcommands
@@ -733,65 +734,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     ns = p.parse_args(argv)
 
     if ns.cmd == "baseline":
-        import io
-        import json
-        from contextlib import redirect_stderr, redirect_stdout
-
-        bp = argparse.ArgumentParser(prog="sdetkit baseline")
-        bp.add_argument("action", choices=["write", "check"])
-        bp.add_argument("--format", choices=["text", "json"], default="text")
-        bp.add_argument("--diff", action="store_true")
-        bp.add_argument("--diff-context", type=int, default=3)
-        bns, extra = bp.parse_known_args(list(getattr(ns, "args", [])))
-        if extra and extra[0] == "--":
-            extra = extra[1:]
-
-        from sdetkit import doctor, gate
-
-        steps: list[dict[str, object]] = []
-        failed: list[str] = []
-
-        diff_args: list[str] = []
-        if getattr(bns, "diff", False):
-            diff_args.append("--diff")
-            diff_args.extend(["--diff-context", str(getattr(bns, "diff_context", 3))])
-        for sid, fn in [
-            ("doctor_baseline", doctor.main),
-            ("gate_baseline", gate.main),
-        ]:
-            buf_out = io.StringIO()
-            buf_err = io.StringIO()
-            with redirect_stdout(buf_out), redirect_stderr(buf_err):
-                rc = fn(["baseline", bns.action] + diff_args + (["--"] + extra if extra else []))
-            step = {
-                "id": sid,
-                "rc": rc,
-                "ok": rc == 0,
-                "stdout": buf_out.getvalue(),
-                "stderr": buf_err.getvalue(),
-            }
-            steps.append(step)
-            if rc != 0:
-                failed.append(sid)
-
-        ok = not failed
-        payload: dict[str, object] = {"ok": ok, "steps": steps, "failed_steps": failed}
-        if bns.format == "json":
-            sys.stdout.write(
-                json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True) + "\n"
-            )
-        else:
-            lines: list[str] = []
-            lines.append(f"baseline: {'OK' if ok else 'FAIL'}")
-            for s in steps:
-                marker = "OK" if s.get("ok") else "FAIL"
-                lines.append(f"[{marker}] {s.get('id')} rc={s.get('rc')}")
-            if failed:
-                lines.append("failed_steps:")
-                for f in failed:
-                    lines.append(f"- {f}")
-            sys.stdout.write("\n".join(lines) + "\n")
-        return 0 if ok else 2
+        return run_baseline(list(getattr(ns, "args", [])))
 
     if ns.cmd == "playbooks":
         from .playbooks_cli import main as _playbooks_main
