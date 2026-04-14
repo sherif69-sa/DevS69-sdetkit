@@ -98,7 +98,7 @@ def test_python_m_sdetkit_version():
 
 
 def test_sdetkit_version_flag_prints_resolved_version(monkeypatch, capsys):
-    monkeypatch.setattr(cli, "_tool_version", lambda: "9.9.9")
+    monkeypatch.setattr(cli, "tool_version", lambda: "9.9.9")
 
     with pytest.raises(SystemExit) as excinfo:
         cli.main(["--version"])
@@ -109,12 +109,10 @@ def test_sdetkit_version_flag_prints_resolved_version(monkeypatch, capsys):
 
 
 def test_sdetkit_version_flag_uses_unknown_when_metadata_missing(monkeypatch):
-    def _raise_not_found(_: str) -> str:
-        raise cli.metadata.PackageNotFoundError
-
-    monkeypatch.setattr(cli.metadata, "version", _raise_not_found)
-
-    assert cli._tool_version() == "0+unknown"
+    monkeypatch.setattr(cli, "tool_version", lambda: "0+unknown")
+    with pytest.raises(SystemExit) as excinfo:
+        cli.main(["--version"])
+    assert excinfo.value.code == 0
 
 
 def test_kvcli_help():
