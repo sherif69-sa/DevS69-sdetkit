@@ -742,14 +742,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _playbooks_main(list(ns.args))
 
     if ns.cmd == "legacy":
-        if not ns.args:
-            sys.stderr.write("legacy error: expected a legacy command name\n")
-            return 2
-        if ns.args[0] == "list":
-            sys.stdout.write("\n".join(LEGACY_NAMESPACE_COMMANDS) + "\n")
-            return 0
-        if ns.args[0] == "migrate-hint":
-            return run_legacy_migrate_hint(list(ns.args[1:]))
+        legacy_result = handle_legacy_namespace(["legacy", *list(ns.args)])
+        if legacy_result is not None:
+            return legacy_result
         return main(list(ns.args))
 
     if ns.cmd == "kits":
