@@ -120,7 +120,16 @@ def main() -> int:
 
     from .cli import main as cli_main
 
-    return int(cli_main() or 0)
+    try:
+        return int(cli_main() or 0)
+    except SystemExit as exc:
+        code = exc.code
+        if code is None:
+            return 0
+        if isinstance(code, int):
+            return int(code)
+        sys.stderr.write(f"{code}\n")
+        return 1
 
 
 if __name__ == "__main__":
