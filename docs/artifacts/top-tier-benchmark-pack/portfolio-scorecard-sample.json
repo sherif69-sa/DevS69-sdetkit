@@ -1,0 +1,67 @@
+{
+  "total_repos": 5,
+  "risk_counts": {
+    "low": 2,
+    "high": 2,
+    "medium": 1
+  },
+  "pct_low_risk": 40.0,
+  "pct_release_gate_failure": 40.0,
+  "repos": [
+    {
+      "repo": "identity-service",
+      "team": "platform",
+      "lane": "regulated",
+      "timestamp": "2026-04-11T17:00:00Z",
+      "gate_fast_ok": false,
+      "gate_release_ok": false,
+      "doctor_ok": true,
+      "failed_steps_count": 3,
+      "risk_level": "high"
+    },
+    {
+      "repo": "pricing-service",
+      "team": "commerce",
+      "lane": "regulated",
+      "timestamp": "2026-04-11T17:00:00Z",
+      "gate_fast_ok": true,
+      "gate_release_ok": false,
+      "doctor_ok": true,
+      "failed_steps_count": 2,
+      "risk_level": "high"
+    },
+    {
+      "repo": "checkout-service",
+      "team": "commerce",
+      "lane": "scale",
+      "timestamp": "2026-04-11T17:00:00Z",
+      "gate_fast_ok": true,
+      "gate_release_ok": true,
+      "doctor_ok": true,
+      "failed_steps_count": 0,
+      "risk_level": "low"
+    },
+    {
+      "repo": "growth-api",
+      "team": "growth",
+      "lane": "startup",
+      "timestamp": "2026-04-11T17:00:00Z",
+      "gate_fast_ok": true,
+      "gate_release_ok": true,
+      "doctor_ok": true,
+      "failed_steps_count": 0,
+      "risk_level": "low"
+    },
+    {
+      "repo": "notifications",
+      "team": "eng-productivity",
+      "lane": "scale",
+      "timestamp": "2026-04-11T17:00:00Z",
+      "gate_fast_ok": true,
+      "gate_release_ok": true,
+      "doctor_ok": false,
+      "failed_steps_count": 1,
+      "risk_level": "medium"
+    }
+  ]
+}
