@@ -24,6 +24,7 @@ from .parsed_shortcuts import dispatch_parsed_shortcut
 from .parser_helpers import add_passthrough_subcommand as _add_passthrough_subcommand
 from .playbook_aliases import resolve_non_day_playbook_alias
 from .public_surface_contract import render_root_help_groups
+from .release_dispatch import dispatch_release_subcommand
 from .repo_init_forwarding import build_repo_init_forwarded_args
 from .review_forwarding import build_review_forwarded_args
 from .serve_forwarding import build_serve_args
@@ -812,27 +813,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_module_main("sdetkit.kits", ns.args)
 
     if ns.cmd == "release":
-        if not ns.args:
-            sys.stderr.write(
-                "release error: expected subcommand (gate|doctor|security|evidence|repo)\n"
-            )
-            return 2
-        subcmd = ns.args[0]
-        rest = ns.args[1:]
-        if subcmd == "gate":
-            return _run_module_main("sdetkit.gate", rest)
-        if subcmd == "doctor":
-            return _run_module_main("sdetkit.doctor", rest)
-        if subcmd == "security":
-            return _run_module_main("sdetkit.security_gate", rest)
-        if subcmd == "evidence":
-            return _run_module_main("sdetkit.evidence", rest)
-        if subcmd == "repo":
-            return _run_module_main("sdetkit.repo", rest)
-        sys.stderr.write(
-            "release error: supported subcommands are gate|doctor|security|evidence|repo\n"
-        )
-        return 2
+        return dispatch_release_subcommand(ns.args, run_module_main=_run_module_main)
 
     if ns.cmd == "inspect":
         return _run_module_main("sdetkit.inspect_data", build_inspect_forwarded_args(ns, ns.args))
