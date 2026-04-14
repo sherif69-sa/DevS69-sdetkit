@@ -1,126 +1,32 @@
 from __future__ import annotations
 
 import argparse
-import json
-import os
 import sys
 import time
 from collections.abc import Sequence
-from importlib import import_module, metadata
+from importlib import import_module
 from typing import cast
 
+from .apiget_dispatch import run_apiget_with_cassette
+from .argv_flags import extract_global_flag
+from .baseline_dispatch import run_baseline
+from .cli_shortcuts import dispatch_preparse_shortcut
+from .cli_timing import emit_cli_startup_snapshot, emit_cli_timing, loaded_module_count
+from .core_preparse_dispatch import dispatch_core_preparse
+from .help_surface import filter_hidden_subcommands, hide_help_subcommands
+from .inspect_compare_forwarding import build_inspect_compare_forwarded_args
+from .inspect_forwarding import build_inspect_forwarded_args
+from .inspect_project_forwarding import build_inspect_project_forwarded_args
+from .legacy_namespace import handle_legacy_namespace
+from .parsed_shortcuts import dispatch_parsed_shortcut
+from .parser_helpers import add_passthrough_subcommand as _add_passthrough_subcommand
+from .playbook_aliases import resolve_non_day_playbook_alias
 from .public_surface_contract import render_root_help_groups
-
-expansion_automation_41 = import_module("sdetkit.expansion_automation_41")
-optimization_closeout_42 = import_module("sdetkit.optimization_closeout_42")
-acceleration_closeout_43 = import_module("sdetkit.acceleration_closeout_43")
-scale_closeout_44 = import_module("sdetkit.scale_closeout_44")
-expansion_closeout_45 = import_module("sdetkit.expansion_closeout_45")
-optimization_closeout_46 = import_module("sdetkit.optimization_closeout_46")
-reliability_closeout_47 = import_module("sdetkit.reliability_closeout_47")
-objection_closeout_48 = import_module("sdetkit.objection_closeout_48")
-weekly_review_closeout_49 = import_module("sdetkit.weekly_review_closeout_49")
-execution_prioritization_closeout_50 = import_module("sdetkit.execution_prioritization_closeout_50")
-
-LEGACY_NAMESPACE_COMMANDS: tuple[str, ...] = (
-    "weekly-review-lane",
-    "phase1-hardening",
-    "phase1-wrap",
-    "phase2-kickoff",
-    "release-cadence",
-    "demo-asset",
-    "demo-asset2",
-    "kpi-instrumentation",
-    "experiment-lane",
-    "distribution-batch",
-    "playbook-post",
-    "scale-lane",
-    "expansion-automation",
-    "optimization-closeout-foundation",
-)
-
-LEGACY_COMMAND_MODULES: dict[str, str] = {
-    "weekly-review-lane": "sdetkit.weekly_review_28",
-    "phase1-hardening": "sdetkit.phase1_hardening_29",
-    "phase1-wrap": "sdetkit.phase1_wrap_30",
-    "phase2-kickoff": "sdetkit.phase2_kickoff_31",
-    "release-cadence": "sdetkit.release_cadence_32",
-    "demo-asset": "sdetkit.demo_asset_33",
-    "demo-asset2": "sdetkit.demo_asset2_34",
-    "kpi-instrumentation": "sdetkit.kpi_instrumentation_35",
-    "distribution-closeout": "sdetkit.distribution_closeout_36",
-    "experiment-lane": "sdetkit.experiment_lane_37",
-    "distribution-batch": "sdetkit.distribution_batch_38",
-    "playbook-post": "sdetkit.playbook_post_39",
-    "scale-lane": "sdetkit.scale_lane_40",
-    "expansion-automation": "sdetkit.expansion_automation_41",
-    "optimization-closeout-foundation": "sdetkit.optimization_closeout_42",
-    "acceleration-closeout": "sdetkit.acceleration_closeout_43",
-    "scale-closeout": "sdetkit.scale_closeout_44",
-    "expansion-closeout": "sdetkit.expansion_closeout_45",
-    "optimization-closeout": "sdetkit.optimization_closeout_46",
-    "reliability-closeout": "sdetkit.reliability_closeout_47",
-    "objection-closeout": "sdetkit.objection_closeout_48",
-    "weekly-review-closeout": "sdetkit.weekly_review_closeout_49",
-    "execution-prioritization-closeout": "sdetkit.execution_prioritization_closeout_50",
-    "case-snippet-closeout": "sdetkit.case_snippet_closeout_51",
-    "narrative-closeout": "sdetkit.narrative_closeout_52",
-    "docs-loop-closeout": "sdetkit.docs_loop_closeout_53",
-    "contributor-activation-closeout": "sdetkit.contributor_activation_closeout_55",
-    "stabilization-closeout": "sdetkit.stabilization_closeout_56",
-    "kpi-deep-audit-closeout": "sdetkit.kpi_deep_audit_closeout_57",
-    "phase2-hardening-closeout": "sdetkit.phase2_hardening_closeout_58",
-    "phase3-preplan-closeout": "sdetkit.phase3_preplan_closeout_59",
-    "phase2-wrap-handoff-closeout": "sdetkit.phase2_wrap_handoff_closeout_60",
-    "phase3-kickoff-closeout": "sdetkit.phase3_kickoff_closeout_61",
-    "community-program-closeout": "sdetkit.community_program_closeout_62",
-    "onboarding-activation-closeout": "sdetkit.onboarding_activation_closeout_63",
-    "integration-expansion-closeout": "sdetkit.integration_expansion_closeout_64",
-    "weekly-review-closeout-2": "sdetkit.weekly_review_closeout_65",
-    "integration-expansion2-closeout": "sdetkit.integration_expansion2_closeout_66",
-    "integration-expansion3-closeout": "sdetkit.integration_expansion3_closeout_67",
-    "integration-expansion4-closeout": "sdetkit.integration_expansion4_closeout_68",
-    "case-study-prep1-closeout": "sdetkit.case_study_prep1_closeout_69",
-    "case-study-prep2-closeout": "sdetkit.case_study_prep2_closeout_70",
-    "case-study-prep3-closeout": "sdetkit.case_study_prep3_closeout_71",
-    "case-study-prep4-closeout": "sdetkit.case_study_prep4_closeout_72",
-    "case-study-launch-closeout": "sdetkit.case_study_launch_closeout_73",
-    "distribution-scaling-closeout": "sdetkit.distribution_scaling_closeout_74",
-    "trust-assets-refresh-closeout": "sdetkit.trust_assets_refresh_closeout_75",
-    "contributor-recognition-closeout": "sdetkit.contributor_recognition_closeout_76",
-    "community-touchpoint-closeout": "sdetkit.community_touchpoint_closeout_77",
-    "ecosystem-priorities-closeout": "sdetkit.ecosystem_priorities_closeout_78",
-    "scale-upgrade-closeout": "sdetkit.scale_upgrade_closeout_79",
-    "partner-outreach-closeout": "sdetkit.partner_outreach_closeout_80",
-    "growth-campaign-closeout": "sdetkit.growth_campaign_closeout_81",
-    "integration-feedback-closeout": "sdetkit.integration_feedback_closeout_82",
-    "trust-faq-expansion-closeout": "sdetkit.trust_faq_expansion_closeout_83",
-    "evidence-narrative-closeout": "sdetkit.evidence_narrative_closeout_84",
-    "release-prioritization-closeout": "sdetkit.release_prioritization_closeout_85",
-    "launch-readiness-closeout": "sdetkit.launch_readiness_closeout_86",
-    "governance-handoff-closeout": "sdetkit.governance_handoff_closeout_87",
-    "governance-priorities-closeout": "sdetkit.governance_priorities_closeout_88",
-    "governance-scale-closeout": "sdetkit.governance_scale_closeout_89",
-    "phase3-wrap-publication-closeout": "sdetkit.phase3_wrap_publication_closeout_90",
-    "continuous-upgrade-closeout-1": "sdetkit.continuous_upgrade_closeout_1",
-    "continuous-upgrade-closeout-2": "sdetkit.continuous_upgrade_closeout_2",
-    "continuous-upgrade-closeout-3": "sdetkit.continuous_upgrade_closeout_3",
-    "continuous-upgrade-closeout-4": "sdetkit.continuous_upgrade_closeout_4",
-    "continuous-upgrade-closeout-5": "sdetkit.continuous_upgrade_closeout_5",
-    "continuous-upgrade-closeout-6": "sdetkit.continuous_upgrade_closeout_6",
-    "continuous-upgrade-closeout-7": "sdetkit.continuous_upgrade_closeout_7",
-    "continuous-upgrade-closeout-8": "sdetkit.continuous_upgrade_closeout_8",
-    "continuous-upgrade-closeout-9": "sdetkit.continuous_upgrade_closeout_9",
-    "continuous-upgrade-closeout-10": "sdetkit.continuous_upgrade_closeout_10",
-    "continuous-upgrade-closeout-11": "sdetkit.continuous_upgrade_closeout_11",
-}
-
-
-def _tool_version() -> str:
-    try:
-        return metadata.version("sdetkit")
-    except metadata.PackageNotFoundError:
-        return "0+unknown"
+from .release_dispatch import dispatch_release_subcommand
+from .repo_init_forwarding import build_repo_init_forwarded_args
+from .review_forwarding import build_review_forwarded_args
+from .serve_forwarding import build_serve_args
+from .versioning import tool_version
 
 
 def _add_apiget_args(p: argparse.ArgumentParser) -> None:
@@ -141,196 +47,10 @@ def _run_module_main(module_name: str, args: Sequence[str]) -> int:
     arg_list = list(args)
     module = import_module(module_name)
     rc = cast(int, module.main(arg_list))
-    _emit_cli_timing(
-        f"event=dispatch module={module_name} argc={len(arg_list)} elapsed_ms={(time.perf_counter() - started) * 1000.0:.3f}"
+    emit_cli_timing(
+        f"event=dispatch module={module_name} argc={len(arg_list)} elapsed_ms={(time.perf_counter() - started) * 1000.0:.3f} modules_loaded={loaded_module_count()}"
     )
     return rc
-
-
-def _cli_timing_enabled() -> bool:
-    raw = os.environ.get("SDETKIT_CLI_TIMING", "")
-    return str(raw).strip().lower() in {"1", "true", "yes", "on"}
-
-
-def _emit_cli_timing(message: str) -> None:
-    if not _cli_timing_enabled():
-        return
-    sys.stderr.write(f"[sdetkit.cli.timing] {message}\n")
-
-
-def _legacy_hints_enabled() -> bool:
-    raw = os.environ.get("SDETKIT_LEGACY_HINTS", "1")
-    return str(raw).strip().lower() not in {"0", "false", "no", "off"}
-
-
-def _legacy_preferred_surface(command: str) -> str:
-    if command.startswith("weekly-review"):
-        return "python -m sdetkit weekly-review"
-    if command.startswith(("phase1-", "phase2-", "phase3-")):
-        return "python -m sdetkit playbooks --help"
-    if command.endswith("-closeout"):
-        return "python -m sdetkit playbooks --help"
-    return "python -m sdetkit kits list"
-
-
-def _legacy_deprecation_horizon(command: str) -> str:
-    if command.startswith(("phase1-", "phase2-", "phase3-")):
-        return "transition lane: migrate within 1-2 release cycles"
-    if command.endswith("-closeout"):
-        return "transition lane: migrate within 1-2 release cycles"
-    if command.startswith("weekly-review"):
-        return "compatibility lane: review migration quarterly"
-    return "compatibility lane: migrate when feasible"
-
-
-def _legacy_migration_hint(command: str) -> str:
-    preferred = _legacy_preferred_surface(command)
-    horizon = _legacy_deprecation_horizon(command)
-    return (
-        f"[legacy-hint] '{command}' is a compatibility lane. "
-        f"Preferred next surface: {preferred}. "
-        f"Deprecation horizon: {horizon}. "
-        "Canonical release-confidence path: python -m sdetkit gate fast -> gate release -> doctor."
-    )
-
-
-def _emit_legacy_migration_hint(command: str) -> None:
-    if not _legacy_hints_enabled():
-        return
-    sys.stderr.write(_legacy_migration_hint(command) + "\n")
-
-
-def _extract_global_flag(argv: Sequence[str], flag: str) -> tuple[list[str], bool]:
-    args = list(argv)
-    found = False
-    filtered: list[str] = []
-    for token in args:
-        if token == flag:
-            found = True
-            continue
-        filtered.append(token)
-    return filtered, found
-
-
-def _legacy_migrate_hint(argv: Sequence[str]) -> int:
-    parser = argparse.ArgumentParser(prog="sdetkit legacy migrate-hint")
-    parser.add_argument("--format", choices=["text", "json"], default="text")
-    parser.add_argument("--all", action="store_true")
-    parser.add_argument("command", nargs="?")
-    ns = parser.parse_args(list(argv))
-    if not ns.command and not ns.all:
-        sys.stderr.write("legacy error: expected command name after migrate-hint (or pass --all)\n")
-        return 2
-    if ns.command and ns.all:
-        sys.stderr.write("legacy error: use either <command> or --all for migrate-hint\n")
-        return 2
-    commands = [str(ns.command)] if ns.command else list(LEGACY_NAMESPACE_COMMANDS)
-    items = [
-        {
-            "command": command,
-            "preferred_surface": _legacy_preferred_surface(command),
-            "deprecation_horizon": _legacy_deprecation_horizon(command),
-            "canonical_path": ["gate fast", "gate release", "doctor"],
-            "hint": _legacy_migration_hint(command),
-        }
-        for command in commands
-    ]
-    if ns.format == "json":
-        if len(items) == 1:
-            payload = {"schema_version": "1", "mode": "single", **items[0]}
-        else:
-            payload = {"schema_version": "1", "mode": "all", "count": len(items), "items": items}
-        sys.stdout.write(json.dumps(payload, sort_keys=True) + "\n")
-        return 0
-    sys.stdout.write("\n".join(item["hint"] for item in items) + "\n")
-    return 0
-
-
-def _is_hidden_cmd(name: str) -> bool:
-    if name == "playbooks":
-        return False
-    if name == "legacy":
-        return False
-    if name in {
-        "docs-qa",
-        "docs-nav",
-        "github-actions-quickstart",
-        "gitlab-ci-quickstart",
-        "quality-contribution-delta",
-        "proof",
-    }:
-        return True
-    if name in LEGACY_NAMESPACE_COMMANDS:
-        return True
-    if name.startswith("impact") and len(name) > 3 and name[3].isdigit():
-        return True
-    if name.endswith("-closeout"):
-        return True
-    return False
-
-
-def _filter_hidden_subcommands(parser: argparse.ArgumentParser) -> None:
-    for action in parser._actions:
-        if not hasattr(action, "_choices_actions"):
-            continue
-        filtered = []
-        for choice_action in list(getattr(action, "_choices_actions", [])):
-            name = getattr(choice_action, "dest", "")
-            help_text = getattr(choice_action, "help", None)
-            if help_text == argparse.SUPPRESS:
-                continue
-            if _is_hidden_cmd(name):
-                continue
-            filtered.append(choice_action)
-        action._choices_actions = filtered
-
-
-def _hide_help_subcommands(sub) -> None:
-    actions = getattr(sub, "_choices_actions", None)
-    if not isinstance(actions, list):
-        return
-    filtered = []
-    for a in actions:
-        n = getattr(a, "name", "")
-        if isinstance(n, str) and _is_hidden_cmd(n):
-            continue
-        filtered.append(a)
-    sub._choices_actions = filtered
-
-
-def _resolve_non_day_playbook_alias(cmd: str) -> str:
-    """Resolve product/legacy playbook names to a parser-backed command."""
-    try:
-        from . import playbooks_cli
-
-        cmd_to_mod, alias_to_canonical = playbooks_cli._build_registry(playbooks_cli._pkg_dir())
-    except Exception:
-        return cmd
-
-    if cmd in alias_to_canonical and cmd in cmd_to_mod and not cmd.startswith("impact"):
-        return alias_to_canonical[cmd]
-
-    return cmd
-
-
-def _add_passthrough_subcommand(
-    sub,
-    name: str,
-    *,
-    help_text: str | None = None,
-    aliases: list[str] | None = None,
-    default_cmd: str | None = None,
-):
-    kwargs: dict[str, object] = {}
-    if help_text is not None:
-        kwargs["help"] = help_text
-    if aliases:
-        kwargs["aliases"] = aliases
-    parser = sub.add_parser(name, **kwargs)
-    if default_cmd is not None:
-        parser.set_defaults(cmd=default_cmd)
-    parser.add_argument("args", nargs=argparse.REMAINDER)
-    return parser
 
 
 def _build_root_parser(
@@ -361,7 +81,7 @@ Then use stability-aware command discovery:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=help_epilog,
     )
-    p.add_argument("--version", action="version", version=_tool_version())
+    p.add_argument("--version", action="version", version=tool_version())
     p.add_argument(
         "--show-hidden",
         action="store_true",
@@ -946,8 +666,8 @@ Then use stability-aware command discovery:
     tsa = sub.add_parser("trust-assets", help="Trust assets playbook")
     tsa.add_argument("args", nargs=argparse.REMAINDER)
     if not show_hidden_commands:
-        _filter_hidden_subcommands(p)
-    _emit_cli_timing(
+        filter_hidden_subcommands(p)
+    emit_cli_timing(
         f"event=parser-build show_hidden={str(show_hidden_commands).lower()} elapsed_ms={(time.perf_counter() - started) * 1000.0:.3f}"
     )
     return p, sub
@@ -958,551 +678,87 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
-    argv, no_legacy_hint = _extract_global_flag(argv, "--no-legacy-hint")
+    argv, no_legacy_hint = extract_global_flag(argv, "--no-legacy-hint")
 
     if argv:
         argv = list(argv)
-        argv[0] = _resolve_non_day_playbook_alias(str(argv[0]))
+        argv[0] = resolve_non_day_playbook_alias(str(argv[0]))
+
+    emit_cli_startup_snapshot(argv[0] if argv else None)
 
     if argv and argv[0] == "legacy":
-        if len(argv) == 1:
-            sys.stderr.write("legacy error: expected a legacy command name\n")
-            return 2
-        if argv[1] == "list":
-            sys.stdout.write("\n".join(LEGACY_NAMESPACE_COMMANDS) + "\n")
-            return 0
-        if argv[1] == "migrate-hint":
-            return _legacy_migrate_hint(list(argv[2:]))
+        legacy_result = handle_legacy_namespace(argv)
+        if legacy_result is not None:
+            return legacy_result
         return main(list(argv[1:]))
 
-    if argv and argv[0] == "cassette-get":
-        from .__main__ import _cassette_get
+    core_preparse_result = dispatch_core_preparse(argv)
+    if core_preparse_result is not None:
+        return core_preparse_result
 
-        try:
-            return _cassette_get(list(argv[1:]))
-        except Exception as e:
-            print(str(e), file=sys.stderr)
-            return 2
-
-    if argv and argv[0] == "doctor":
-        from .doctor import main as _doctor_main
-
-        return _doctor_main(list(argv[1:]))
-
-    if argv and argv[0] == "gate":
-        from .gate import main as _gate_main
-
-        return _gate_main(list(argv[1:]))
-
-    if argv and argv[0] == "ci":
-        from .ci import main as _ci_main
-
-        return _ci_main(list(argv[1:]))
-
-    if argv and argv[0] == "patch":
-        return _run_module_main("sdetkit.patch", list(argv[1:]))
-
-    if argv and argv[0] == "repo":
-        return _run_module_main("sdetkit.repo", list(argv[1:]))
-
-    if argv and argv[0] == "dev":
-        return _run_module_main("sdetkit.repo", ["dev", *list(argv[1:])])
-
-    if argv and argv[0] == "report":
-        return _run_module_main("sdetkit.report", list(argv[1:]))
-
-    if argv and argv[0] == "contract":
-        return _run_module_main("sdetkit.contract", list(argv[1:]))
-
-    if argv and argv[0] == "maintenance":
-        return _run_module_main("sdetkit.maintenance", list(argv[1:]))
-
-    if argv and argv[0] == "agent":
-        return _run_module_main("sdetkit.agent.cli", list(argv[1:]))
-
-    if argv and argv[0] == "security":
-        return _run_module_main("sdetkit.security_gate", list(argv[1:]))
-
-    if argv and argv[0] == "ops":
-        return _run_module_main("sdetkit.ops", list(argv[1:]))
-
-    if argv and argv[0] == "notify":
-        return _run_module_main("sdetkit.notify", list(argv[1:]))
-
-    if argv and argv[0] == "policy":
-        return _run_module_main("sdetkit.policy", list(argv[1:]))
-
-    if argv and argv[0] == "evidence":
-        return _run_module_main("sdetkit.evidence", list(argv[1:]))
-
-    if argv and argv[0] == "onboarding":
-        return _run_module_main("sdetkit.onboarding", list(argv[1:]))
-
-    if argv and argv[0] == "onboarding-optimization":
-        return _run_module_main("sdetkit.onboarding_optimization", list(argv[1:]))
-
-    if argv and argv[0] == "phase-boost":
-        return _run_module_main("sdetkit.phase_boost", list(argv[1:]))
-
-    if argv and argv[0] == "production-readiness":
-        return _run_module_main("sdetkit.production_readiness", list(argv[1:]))
-
-    if argv and argv[0] == "community-activation":
-        return _run_module_main("sdetkit.community_activation", list(argv[1:]))
-
-    if argv and argv[0] == "external-contribution":
-        return _run_module_main("sdetkit.external_contribution", list(argv[1:]))
-
-    if argv and argv[0] == "kpi-audit":
-        return _run_module_main("sdetkit.kpi_audit", list(argv[1:]))
-    if argv and argv[0] == "kpi-report":
-        return _run_module_main("sdetkit.kpi_report", list(argv[1:]))
-
-    if argv:
-        legacy_module = LEGACY_COMMAND_MODULES.get(str(argv[0]))
-        if legacy_module:
-            if not no_legacy_hint:
-                _emit_legacy_migration_hint(str(argv[0]))
-            return _run_module_main(legacy_module, list(argv[1:]))
-
-    if argv and argv[0] == "objection-handling":
-        return _run_module_main("sdetkit.objection_handling", list(argv[1:]))
-
-    if argv and argv[0] == "first-contribution":
-        return _run_module_main("sdetkit.first_contribution", list(argv[1:]))
-
-    if argv and argv[0] == "demo":
-        return _run_module_main("sdetkit.demo", list(argv[1:]))
-
-    if argv and argv[0] == "contributor-funnel":
-        return _run_module_main("sdetkit.contributor_funnel", list(argv[1:]))
-
-    if argv and argv[0] in {"evidence-assets", "proof"}:
-        return _run_module_main("sdetkit.proof", list(argv[1:]))
-
-    if argv and argv[0] == "triage-templates":
-        return _run_module_main("sdetkit.triage_templates", list(argv[1:]))
-
-    if argv and argv[0] in {"docs-quality", "docs-qa"}:
-        return _run_module_main("sdetkit.docs_qa", list(argv[1:]))
-
-    if argv and argv[0] == "weekly-review":
-        return _run_module_main("sdetkit.weekly_review", list(argv[1:]))
-
-    if argv and argv[0] in {"docs-governance", "docs-nav"}:
-        return _run_module_main("sdetkit.docs_navigation", list(argv[1:]))
-    if argv and argv[0] == "roadmap":
-        return _run_module_main("sdetkit.roadmap", list(argv[1:]))
-
-    if argv and argv[0] == "startup-readiness":
-        return _run_module_main("sdetkit.startup_readiness", list(argv[1:]))
-
-    if argv and argv[0] == "upgrade-hub":
-        return _run_module_main("sdetkit.upgrade_hub", list(argv[1:]))
-
-    if argv and argv[0] == "sdet-package":
-        return _run_module_main("sdetkit.sdet_package", list(argv[1:]))
-
-    if argv and argv[0] == "enterprise-readiness":
-        return _run_module_main("sdetkit.enterprise_readiness", list(argv[1:]))
-
-    if argv and argv[0] in {"github-actions-onboarding", "github-actions-quickstart"}:
-        return _run_module_main("sdetkit.github_actions_quickstart", list(argv[1:]))
-
-    if argv and argv[0] in {"gitlab-ci-onboarding", "gitlab-ci-quickstart"}:
-        return _run_module_main("sdetkit.gitlab_ci_quickstart", list(argv[1:]))
-
-    if argv and argv[0] in {"contribution-quality-report", "quality-contribution-delta"}:
-        return _run_module_main("sdetkit.quality_contribution_delta", list(argv[1:]))
-
-    if argv and argv[0] == "reliability-evidence-pack":
-        return _run_module_main("sdetkit.reliability_evidence_pack", list(argv[1:]))
-
-    if argv and argv[0] == "release-readiness":
-        return _run_module_main("sdetkit.release_readiness", list(argv[1:]))
-
-    if argv and argv[0] == "release-communications":
-        return _run_module_main("sdetkit.release_communications", list(argv[1:]))
-
-    if argv and argv[0] == "trust-assets":
-        return _run_module_main("sdetkit.trust_assets", list(argv[1:]))
-
-    if argv and argv[0] == "feature-registry":
-        return _run_module_main("sdetkit.feature_registry_cli", list(argv[1:]))
+    preparse_result = dispatch_preparse_shortcut(
+        argv,
+        no_legacy_hint=no_legacy_hint,
+        run_module_main=_run_module_main,
+    )
+    if preparse_result is not None:
+        return preparse_result
 
     show_hidden_commands = "--show-hidden" in argv
     p, sub = _build_root_parser(show_hidden_commands=show_hidden_commands)
 
     if not show_hidden_commands:
-        _hide_help_subcommands(sub)
+        hide_help_subcommands(sub)
 
     ns = p.parse_args(argv)
 
     if ns.cmd == "baseline":
-        import io
-        import json
-        from contextlib import redirect_stderr, redirect_stdout
-
-        bp = argparse.ArgumentParser(prog="sdetkit baseline")
-        bp.add_argument("action", choices=["write", "check"])
-        bp.add_argument("--format", choices=["text", "json"], default="text")
-        bp.add_argument("--diff", action="store_true")
-        bp.add_argument("--diff-context", type=int, default=3)
-        bns, extra = bp.parse_known_args(list(getattr(ns, "args", [])))
-        if extra and extra[0] == "--":
-            extra = extra[1:]
-
-        from sdetkit import doctor, gate
-
-        steps: list[dict[str, object]] = []
-        failed: list[str] = []
-
-        diff_args: list[str] = []
-        if getattr(bns, "diff", False):
-            diff_args.append("--diff")
-            diff_args.extend(["--diff-context", str(getattr(bns, "diff_context", 3))])
-        for sid, fn in [
-            ("doctor_baseline", doctor.main),
-            ("gate_baseline", gate.main),
-        ]:
-            buf_out = io.StringIO()
-            buf_err = io.StringIO()
-            with redirect_stdout(buf_out), redirect_stderr(buf_err):
-                rc = fn(["baseline", bns.action] + diff_args + (["--"] + extra if extra else []))
-            step = {
-                "id": sid,
-                "rc": rc,
-                "ok": rc == 0,
-                "stdout": buf_out.getvalue(),
-                "stderr": buf_err.getvalue(),
-            }
-            steps.append(step)
-            if rc != 0:
-                failed.append(sid)
-
-        ok = not failed
-        payload: dict[str, object] = {"ok": ok, "steps": steps, "failed_steps": failed}
-        if bns.format == "json":
-            sys.stdout.write(
-                json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True) + "\n"
-            )
-        else:
-            lines: list[str] = []
-            lines.append(f"baseline: {'OK' if ok else 'FAIL'}")
-            for s in steps:
-                marker = "OK" if s.get("ok") else "FAIL"
-                lines.append(f"[{marker}] {s.get('id')} rc={s.get('rc')}")
-            if failed:
-                lines.append("failed_steps:")
-                for f in failed:
-                    lines.append(f"- {f}")
-            sys.stdout.write("\n".join(lines) + "\n")
-        return 0 if ok else 2
+        return run_baseline(list(getattr(ns, "args", [])))
 
     if ns.cmd == "playbooks":
         from .playbooks_cli import main as _playbooks_main
 
         return _playbooks_main(list(ns.args))
 
-    if ns.cmd == "legacy":
-        if not ns.args:
-            sys.stderr.write("legacy error: expected a legacy command name\n")
-            return 2
-        if ns.args[0] == "list":
-            sys.stdout.write("\n".join(LEGACY_NAMESPACE_COMMANDS) + "\n")
-            return 0
-        if ns.args[0] == "migrate-hint":
-            return _legacy_migrate_hint(list(ns.args[1:]))
-        return main(list(ns.args))
-
     if ns.cmd == "kits":
         return _run_module_main("sdetkit.kits", ns.args)
 
     if ns.cmd == "release":
-        if not ns.args:
-            sys.stderr.write(
-                "release error: expected subcommand (gate|doctor|security|evidence|repo)\n"
-            )
-            return 2
-        subcmd = ns.args[0]
-        rest = ns.args[1:]
-        if subcmd == "gate":
-            return _run_module_main("sdetkit.gate", rest)
-        if subcmd == "doctor":
-            return _run_module_main("sdetkit.doctor", rest)
-        if subcmd == "security":
-            return _run_module_main("sdetkit.security_gate", rest)
-        if subcmd == "evidence":
-            return _run_module_main("sdetkit.evidence", rest)
-        if subcmd == "repo":
-            return _run_module_main("sdetkit.repo", rest)
-        sys.stderr.write(
-            "release error: supported subcommands are gate|doctor|security|evidence|repo\n"
-        )
-        return 2
-
-    if ns.cmd == "intelligence":
-        return _run_module_main("sdetkit.intelligence", ns.args)
-
-    if ns.cmd == "integration":
-        return _run_module_main("sdetkit.integration", ns.args)
-
-    if ns.cmd == "author":
-        return _run_module_main("sdetkit.author_problem", ns.args)
-
-    if ns.cmd == "forensics":
-        return _run_module_main("sdetkit.forensics", ns.args)
-
-    if ns.cmd == "kv":
-        return _run_module_main("sdetkit.kvcli", ns.args)
+        return dispatch_release_subcommand(ns.args, run_module_main=_run_module_main)
 
     if ns.cmd == "inspect":
-        inspect_args = list(ns.args)
-        if ns.rules_template:
-            inspect_args = ["--rules-template", *inspect_args]
-        if ns.rules_lint:
-            inspect_args = ["--rules-lint", ns.rules_lint, *inspect_args]
-        return _run_module_main("sdetkit.inspect_data", inspect_args)
+        return _run_module_main("sdetkit.inspect_data", build_inspect_forwarded_args(ns, ns.args))
     if ns.cmd == "inspect-compare":
-        forwarded = list(ns.args)
-        if ns.left:
-            forwarded = ["--left", ns.left, *forwarded]
-        if ns.right:
-            forwarded = ["--right", ns.right, *forwarded]
-        if ns.left_run:
-            forwarded = ["--left-run", ns.left_run, *forwarded]
-        if ns.right_run:
-            forwarded = ["--right-run", ns.right_run, *forwarded]
-        if ns.scope:
-            forwarded = ["--scope", ns.scope, *forwarded]
-        if ns.latest_vs_previous:
-            forwarded = ["--latest-vs-previous", *forwarded]
-        if ns.workspace_root:
-            forwarded = ["--workspace-root", ns.workspace_root, *forwarded]
-        if ns.workflow:
-            forwarded = ["--workflow", ns.workflow, *forwarded]
-        if ns.format:
-            forwarded = ["--format", ns.format, *forwarded]
-        if ns.out_dir:
-            forwarded = ["--out-dir", ns.out_dir, *forwarded]
-        if ns.no_workspace:
-            forwarded = ["--no-workspace", *forwarded]
-        return _run_module_main("sdetkit.inspect_compare", forwarded)
+        return _run_module_main(
+            "sdetkit.inspect_compare",
+            build_inspect_compare_forwarded_args(ns, ns.args),
+        )
     if ns.cmd == "inspect-project":
-        forwarded = [ns.project_dir]
-        if ns.policy:
-            forwarded.extend(["--policy", ns.policy])
-        if ns.workspace_root:
-            forwarded.extend(["--workspace-root", ns.workspace_root])
-        if ns.out_dir:
-            forwarded.extend(["--out-dir", ns.out_dir])
-        if ns.format:
-            forwarded.extend(["--format", ns.format])
-        if ns.no_workspace:
-            forwarded.append("--no-workspace")
-        return _run_module_main("sdetkit.inspect_project", forwarded)
+        return _run_module_main("sdetkit.inspect_project", build_inspect_project_forwarded_args(ns))
     if ns.cmd == "review":
-        forwarded = [ns.path]
-        if ns.workspace_root:
-            forwarded.extend(["--workspace-root", ns.workspace_root])
-        if ns.out_dir:
-            forwarded.extend(["--out-dir", ns.out_dir])
-        if ns.profile:
-            forwarded.extend(["--profile", ns.profile])
-        if ns.format:
-            forwarded.extend(["--format", ns.format])
-        if ns.interactive:
-            forwarded.append("--interactive")
-        if ns.no_workspace:
-            forwarded.append("--no-workspace")
-        if ns.work_id:
-            forwarded.extend(["--work-id", ns.work_id])
-        for entry in ns.work_context or []:
-            forwarded.extend(["--work-context", entry])
-        if ns.code_scan_json:
-            forwarded.extend(["--code-scan-json", ns.code_scan_json])
-        return _run_module_main("sdetkit.review", forwarded)
+        return _run_module_main("sdetkit.review", build_review_forwarded_args(ns))
 
     if ns.cmd == "serve":
-        serve_args: list[str] = []
-        if ns.host:
-            serve_args.extend(["--host", ns.host])
-        if ns.port is not None:
-            serve_args.extend(["--port", str(ns.port)])
-        return _run_module_main("sdetkit.serve", serve_args)
-
-    if ns.cmd == "patch":
-        return _run_module_main("sdetkit.patch", ns.args)
+        return _run_module_main("sdetkit.serve", build_serve_args(ns))
 
     if ns.cmd == "init":
-        forwarded = [
-            "init",
-            "--preset",
-            ns.preset,
-            "--root",
-            ns.root,
-            "--format",
-            ns.format,
-        ]
-        if ns.dry_run:
-            forwarded.append("--dry-run")
-        if ns.force:
-            forwarded.append("--force")
-        if ns.diff:
-            forwarded.append("--diff")
-        if ns.write_config:
-            forwarded.append("--write-config")
-        return _run_module_main("sdetkit.repo", forwarded)
+        return _run_module_main("sdetkit.repo", build_repo_init_forwarded_args(ns))
 
-    if ns.cmd == "repo":
-        return _run_module_main("sdetkit.repo", ns.args)
-
-    if ns.cmd == "dev":
-        return _run_module_main("sdetkit.repo", ["dev", *ns.args])
-
-    if ns.cmd == "feature-registry":
-        return _run_module_main("sdetkit.feature_registry_cli", ns.args)
-
-    if ns.cmd == "report":
-        return _run_module_main("sdetkit.report", ns.args)
-
-    if ns.cmd == "maintenance":
-        return _run_module_main("sdetkit.maintenance", ns.args)
-
-    if ns.cmd == "agent":
-        return _run_module_main("sdetkit.agent.cli", ns.args)
-
-    if ns.cmd == "security":
-        return _run_module_main("sdetkit.security_gate", ns.args)
-
-    if ns.cmd == "ops":
-        return _run_module_main("sdetkit.ops", ns.args)
-
-    if ns.cmd == "notify":
-        return _run_module_main("sdetkit.notify", ns.args)
-
-    if ns.cmd == "policy":
-        return _run_module_main("sdetkit.policy", ns.args)
-
-    if ns.cmd == "evidence":
-        return _run_module_main("sdetkit.evidence", ns.args)
-
-    if ns.cmd == "onboarding":
-        return _run_module_main("sdetkit.onboarding", ns.args)
-
-    if ns.cmd == "onboarding-optimization":
-        return _run_module_main("sdetkit.onboarding_optimization", ns.args)
-
-    if ns.cmd == "community-activation":
-        return _run_module_main("sdetkit.community_activation", ns.args)
-
-    if ns.cmd == "external-contribution":
-        return _run_module_main("sdetkit.external_contribution", ns.args)
-
-    if ns.cmd == "kpi-audit":
-        return _run_module_main("sdetkit.kpi_audit", ns.args)
-    if ns.cmd == "kpi-report":
-        return _run_module_main("sdetkit.kpi_report", ns.args)
-
-    if ns.cmd == "objection-handling":
-        return _run_module_main("sdetkit.objection_handling", ns.args)
-
-    if ns.cmd == "demo":
-        return _run_module_main("sdetkit.demo", ns.args)
-
-    if ns.cmd == "first-contribution":
-        return _run_module_main("sdetkit.first_contribution", ns.args)
-
-    if ns.cmd == "contributor-funnel":
-        return _run_module_main("sdetkit.contributor_funnel", ns.args)
-
-    if ns.cmd == "evidence-assets":
-        return _run_module_main("sdetkit.proof", ns.args)
-
-    if ns.cmd == "triage-templates":
-        return _run_module_main("sdetkit.triage_templates", ns.args)
-
-    if ns.cmd == "docs-quality":
-        return _run_module_main("sdetkit.docs_qa", ns.args)
-
-    if ns.cmd == "weekly-review":
-        return _run_module_main("sdetkit.weekly_review", ns.args)
-
-    if ns.cmd == "docs-governance":
-        return _run_module_main("sdetkit.docs_navigation", ns.args)
-    if ns.cmd == "roadmap":
-        return _run_module_main("sdetkit.roadmap", ns.args)
-
-    if ns.cmd == "startup-readiness":
-        return _run_module_main("sdetkit.startup_readiness", ns.args)
-
-    if ns.cmd == "upgrade-hub":
-        return _run_module_main("sdetkit.upgrade_hub", ns.args)
-
-    if ns.cmd == "sdet-package":
-        return _run_module_main("sdetkit.sdet_package", ns.args)
-
-    if ns.cmd == "enterprise-readiness":
-        return _run_module_main("sdetkit.enterprise_readiness", ns.args)
-
-    if ns.cmd == "github-actions-onboarding":
-        return _run_module_main("sdetkit.github_actions_quickstart", ns.args)
-
-    if ns.cmd == "gitlab-ci-onboarding":
-        return _run_module_main("sdetkit.gitlab_ci_quickstart", ns.args)
-
-    if ns.cmd == "contribution-quality-report":
-        return _run_module_main("sdetkit.quality_contribution_delta", ns.args)
-
-    if ns.cmd == "reliability-evidence-pack":
-        return _run_module_main("sdetkit.reliability_evidence_pack", ns.args)
-
-    if ns.cmd == "release-readiness":
-        return _run_module_main("sdetkit.release_readiness", ns.args)
-
-    if ns.cmd == "release-communications":
-        return _run_module_main("sdetkit.release_communications", ns.args)
-
-    if ns.cmd == "trust-assets":
-        return _run_module_main("sdetkit.trust_assets", ns.args)
+    parsed_shortcut_result = dispatch_parsed_shortcut(
+        str(ns.cmd),
+        list(getattr(ns, "args", [])),
+        run_module_main=_run_module_main,
+    )
+    if parsed_shortcut_result is not None:
+        return parsed_shortcut_result
 
     if ns.cmd == "apiget":
-        raw_args = list(argv)
-        rest = raw_args[1:]
-        cassette = getattr(ns, "cassette", None)
-        cassette_mode = getattr(ns, "cassette_mode", None) or "auto"
-        clean: list[str] = []
-        it = iter(rest)
-        for a in it:
-            if a.startswith("--cassette="):
-                continue
-            if a == "--cassette":
-                next(it, None)
-                continue
-            if a.startswith("--cassette-mode="):
-                continue
-            if a == "--cassette-mode":
-                next(it, None)
-                continue
-            clean.append(a)
-        rest = clean
-        if not cassette:
-            return _run_module_main("sdetkit.apiget", rest)
-        old_cassette = os.environ.get("SDETKIT_CASSETTE")
-        old_mode = os.environ.get("SDETKIT_CASSETTE_MODE")
-        try:
-            os.environ["SDETKIT_CASSETTE"] = str(cassette)
-            os.environ["SDETKIT_CASSETTE_MODE"] = str(cassette_mode)
-            return _run_module_main("sdetkit.apiget", rest)
-        finally:
-            if old_cassette is None:
-                os.environ.pop("SDETKIT_CASSETTE", None)
-            else:
-                os.environ["SDETKIT_CASSETTE"] = old_cassette
-            if old_mode is None:
-                os.environ.pop("SDETKIT_CASSETTE_MODE", None)
-            else:
-                os.environ["SDETKIT_CASSETTE_MODE"] = old_mode
+        return run_apiget_with_cassette(
+            list(argv),
+            cassette=getattr(ns, "cassette", None),
+            cassette_mode=getattr(ns, "cassette_mode", None),
+            run_module_main=_run_module_main,
+        )
     raise SystemExit(2)
 
 

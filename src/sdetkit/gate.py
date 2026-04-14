@@ -101,6 +101,53 @@ def _write_output(text: str, out: str | None) -> None:
         sys.stdout.write(text)
 
 
+def _load_json_payload(path: str) -> dict[str, Any]:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"gate trend: expected JSON object in {path}")
+    return payload
+
+
+def _run_trend(ns: argparse.Namespace) -> int:
+    baseline = _load_json_payload(str(ns.baseline))
+    current = _load_json_payload(str(ns.current))
+
+    baseline_ok = coerce_bool(baseline.get("ok"), default=False)
+    current_ok = coerce_bool(current.get("ok"), default=False)
+    baseline_failed = len(list(baseline.get("failed_steps", []) or []))
+    current_failed = len(list(current.get("failed_steps", []) or []))
+
+    payload = {
+        "ok": True,
+        "baseline": str(ns.baseline),
+        "current": str(ns.current),
+        "baseline_ok": baseline_ok,
+        "current_ok": current_ok,
+        "failed_steps_baseline": baseline_failed,
+        "failed_steps_current": current_failed,
+        "failed_steps_delta": current_failed - baseline_failed,
+        "status_delta": "improved"
+        if current_ok and not baseline_ok
+        else "regressed"
+        if baseline_ok and not current_ok
+        else "unchanged",
+    }
+    if str(ns.format) == "json":
+        _write_output(json.dumps(payload, ensure_ascii=True, sort_keys=True) + "\n", ns.out)
+        return 0
+
+    lines = [
+        "gate trend",
+        f"baseline_ok={baseline_ok} current_ok={current_ok} status_delta={payload['status_delta']}",
+        (
+            "failed_steps "
+            f"baseline={baseline_failed} current={current_failed} delta={payload['failed_steps_delta']}"
+        ),
+    ]
+    _write_output("\n".join(lines) + "\n", ns.out)
+    return 0
+
+
 def _parse_step_filter(raw: str | None) -> set[str]:
     if not raw:
         return set()
@@ -768,12 +815,20 @@ def main(argv: list[str] | None = None) -> int:
     fast.add_argument("--work-id", default="")
     fast.add_argument("--work-context", action="append", default=[])
 
+    trend = sub.add_parser("trend")
+    trend.add_argument("--baseline", required=True, help="Baseline gate JSON artifact path.")
+    trend.add_argument("--current", required=True, help="Current gate JSON artifact path.")
+    trend.add_argument("--format", choices=["text", "json"], default="text")
+    trend.add_argument("--out", "--output", default=None)
+
     ns = parser.parse_args(list(argv) if argv is not None else None)
 
     if ns.cmd == "fast":
         return _run_fast(ns)
     if ns.cmd == "release":
         return _run_release(ns)
+    if ns.cmd == "trend":
+        return _run_trend(ns)
 
     sys.stderr.write("unknown gate command\n")
     return 2

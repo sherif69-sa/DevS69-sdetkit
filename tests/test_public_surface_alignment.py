@@ -44,6 +44,9 @@ def test_public_command_surface_contract_is_machine_readable_and_stable() -> Non
     ]
     assert contract["public_stable_front_door_commands"] == ["gate", "doctor", "release"]
     assert contract["advanced_supported_next_step"] == "python -m sdetkit kits list"
+    assert contract["tier_a_contract_commands"] == ["gate", "doctor", "release"]
+    assert "kits" in contract["tier_b_contract_commands"]
+    assert "legacy" in contract["best_effort_compatibility_commands"]
 
 
 def test_root_help_groups_include_machine_readable_contract_commands() -> None:
@@ -52,6 +55,8 @@ def test_root_help_groups_include_machine_readable_contract_commands() -> None:
     for command in contract["public_stable_front_door_commands"]:
         assert command in help_groups
     assert "gate fast -> gate release -> doctor" in help_groups
+    assert "Tier A (public/stable): gate, doctor, release" in help_groups
+    assert "Remaining lanes: best-effort compatibility" in help_groups
     assert contract["advanced_supported_next_step"] in help_groups
 
 

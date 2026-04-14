@@ -87,6 +87,9 @@ jobs:
           python scripts/check_public_surface_alignment.py
           python -m pytest -q tests/test_cli_help_discoverability_contract.py tests/test_public_surface_alignment.py
 
+      - name: Generated artifact freshness guard
+        run: python scripts/check_generated_artifacts_freshness.py
+
       - name: Pre-merge changed-files strict gate
         if: ${{ github.event_name == 'pull_request' }}
         env:

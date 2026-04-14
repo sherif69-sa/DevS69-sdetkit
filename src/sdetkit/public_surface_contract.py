@@ -112,6 +112,9 @@ def render_root_help_groups() -> str:
     )
     canonical = canonical_obj if isinstance(canonical_obj, list) else []
     next_step = contract.get("advanced_supported_next_step", "python -m sdetkit kits list")
+    tier_a = contract.get("tier_a_contract_commands", [])
+    tier_b = contract.get("tier_b_contract_commands", [])
+    best_effort = contract.get("best_effort_compatibility_commands", [])
     canonical_summary = " -> ".join(
         cmd.replace("python -m sdetkit ", "") if isinstance(cmd, str) else str(cmd)
         for cmd in canonical
@@ -121,6 +124,16 @@ def render_root_help_groups() -> str:
         "",
         "  Canonical first-time path (public / stable):",
         f"    {canonical_summary}",
+        "",
+        "  Frozen command contracts:",
+        f"    Tier A (public/stable): {', '.join(tier_a) if isinstance(tier_a, list) else ''}",
+        f"    Tier B (advanced/supported): {', '.join(tier_b) if isinstance(tier_b, list) else ''}",
+        "    Remaining lanes: best-effort compatibility (subject to change).",
+        (
+            f"      {', '.join(best_effort)}"
+            if isinstance(best_effort, list)
+            else "      legacy compatibility lanes"
+        ),
         "",
         "  Then expand deliberately:",
     ]

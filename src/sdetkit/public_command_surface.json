@@ -12,6 +12,27 @@
     "release"
   ],
   "advanced_supported_next_step": "python -m sdetkit kits list",
+  "tier_a_contract_commands": [
+    "gate",
+    "doctor",
+    "release"
+  ],
+  "tier_b_contract_commands": [
+    "kits",
+    "review",
+    "inspect",
+    "inspect-compare",
+    "serve",
+    "repo"
+  ],
+  "best_effort_compatibility_commands": [
+    "legacy",
+    "cassette-get",
+    "policy",
+    "report",
+    "evidence",
+    "security"
+  ],
   "required_policy_tiers": [
     "Public / stable",
     "Advanced but supported",

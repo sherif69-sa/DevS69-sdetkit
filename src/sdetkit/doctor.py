@@ -552,6 +552,40 @@ def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _build_explain_payload(data: dict[str, Any]) -> dict[str, Any]:
+    judgment = data.get("judgment", {}) if isinstance(data.get("judgment"), dict) else {}
+    confidence_obj = judgment.get("confidence", {}) if isinstance(judgment, dict) else {}
+    confidence_score = confidence_obj.get("score") if isinstance(confidence_obj, dict) else 0
+    base_confidence = (
+        float(confidence_score) / 100.0 if isinstance(confidence_score, (int, float)) else 0.0
+    )
+    explain_steps: list[dict[str, Any]] = []
+    severity_weight = {"high": 0.95, "medium": 0.75, "low": 0.6}
+    for index, action in enumerate(data.get("next_actions", []), start=1):
+        if not isinstance(action, dict):
+            continue
+        severity = str(action.get("severity", "medium"))
+        weighted = round(min(0.99, max(0.05, base_confidence * severity_weight.get(severity, 0.7))), 2)
+        fix_list = action.get("fix", [])
+        first_fix = fix_list[0] if isinstance(fix_list, list) and fix_list else "Review check output"
+        explain_steps.append(
+            {
+                "priority": index,
+                "check_id": str(action.get("id", "unknown")),
+                "severity": severity,
+                "confidence": weighted,
+                "reason": str(action.get("summary", "")),
+                "recommended_fix": str(first_fix),
+            }
+        )
+    return {
+        "mode": "doctor-explain",
+        "overall_ok": bool(data.get("ok")),
+        "summary": "Prioritized remediation plan generated from current doctor findings.",
+        "steps": explain_steps,
+    }
+
+
 def _calculate_score(checks: list[bool]) -> int:
     if not checks:
         return 100
@@ -2039,6 +2073,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="doctor")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--format", choices=["text", "json", "md", "markdown"], default="text")
+    parser.add_argument(
+        "--explain",
+        action="store_true",
+        help="Emit prioritized remediation guidance with confidence scoring.",
+    )
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument("--ascii", action="store_true")
     parser.add_argument("--ci", action="store_true")
@@ -2832,6 +2871,8 @@ def main(argv: list[str] | None = None) -> int:
         data["post_plan_ok"] = coerce_bool(data.get("ok"), default=False) and coerce_bool(
             data.get("plan_ok"), default=False
         )
+    if getattr(ns, "explain", False):
+        data["explain"] = _build_explain_payload(data)
 
     if ns.format == "json" or ns.json:
         output = json.dumps(data, sort_keys=True) + "\n"
@@ -2866,6 +2907,16 @@ def main(argv: list[str] | None = None) -> int:
             lines.append("hints:")
             for hint in hints:
                 lines.append(f"- {hint}")
+        if getattr(ns, "explain", False):
+            explain = data.get("explain", {})
+            if isinstance(explain, dict):
+                lines.append("explain:")
+                for step in explain.get("steps", []):
+                    if not isinstance(step, dict):
+                        continue
+                    lines.append(
+                        f"- p{step.get('priority')} {step.get('check_id')} confidence={step.get('confidence')}: {step.get('recommended_fix')}"
+                    )
         output = "\n".join(lines) + "\n"
         is_json = False
 
