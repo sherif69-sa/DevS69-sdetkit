@@ -22,6 +22,7 @@ from .parser_helpers import add_passthrough_subcommand as _add_passthrough_subco
 from .playbook_aliases import resolve_non_day_playbook_alias
 from .public_surface_contract import render_root_help_groups
 from .repo_init_forwarding import build_repo_init_forwarded_args
+from .serve_forwarding import build_serve_args
 from .versioning import tool_version
 
 
@@ -912,12 +913,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _run_module_main("sdetkit.review", forwarded)
 
     if ns.cmd == "serve":
-        serve_args: list[str] = []
-        if ns.host:
-            serve_args.extend(["--host", ns.host])
-        if ns.port is not None:
-            serve_args.extend(["--port", str(ns.port)])
-        return _run_module_main("sdetkit.serve", serve_args)
+        return _run_module_main("sdetkit.serve", build_serve_args(ns))
 
     if ns.cmd == "init":
         return _run_module_main("sdetkit.repo", build_repo_init_forwarded_args(ns))
