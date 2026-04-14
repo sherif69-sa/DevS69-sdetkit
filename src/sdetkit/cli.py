@@ -17,6 +17,7 @@ from .legacy_commands import (
     LEGACY_NAMESPACE_COMMANDS,
 )
 from .legacy_namespace import handle_legacy_namespace
+from .parsed_shortcuts import dispatch_parsed_shortcut
 from .parser_helpers import add_passthrough_subcommand as _add_passthrough_subcommand
 from .playbook_aliases import resolve_non_day_playbook_alias
 from .public_surface_contract import render_root_help_groups
@@ -917,9 +918,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             serve_args.extend(["--port", str(ns.port)])
         return _run_module_main("sdetkit.serve", serve_args)
 
-    if ns.cmd == "patch":
-        return _run_module_main("sdetkit.patch", ns.args)
-
     if ns.cmd == "init":
         forwarded = [
             "init",
@@ -940,117 +938,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             forwarded.append("--write-config")
         return _run_module_main("sdetkit.repo", forwarded)
 
-    if ns.cmd == "repo":
-        return _run_module_main("sdetkit.repo", ns.args)
-
-    if ns.cmd == "dev":
-        return _run_module_main("sdetkit.repo", ["dev", *ns.args])
-
-    if ns.cmd == "feature-registry":
-        return _run_module_main("sdetkit.feature_registry_cli", ns.args)
-
-    if ns.cmd == "report":
-        return _run_module_main("sdetkit.report", ns.args)
-
-    if ns.cmd == "maintenance":
-        return _run_module_main("sdetkit.maintenance", ns.args)
-
-    if ns.cmd == "agent":
-        return _run_module_main("sdetkit.agent.cli", ns.args)
-
-    if ns.cmd == "security":
-        return _run_module_main("sdetkit.security_gate", ns.args)
-
-    if ns.cmd == "ops":
-        return _run_module_main("sdetkit.ops", ns.args)
-
-    if ns.cmd == "notify":
-        return _run_module_main("sdetkit.notify", ns.args)
-
-    if ns.cmd == "policy":
-        return _run_module_main("sdetkit.policy", ns.args)
-
-    if ns.cmd == "evidence":
-        return _run_module_main("sdetkit.evidence", ns.args)
-
-    if ns.cmd == "onboarding":
-        return _run_module_main("sdetkit.onboarding", ns.args)
-
-    if ns.cmd == "onboarding-optimization":
-        return _run_module_main("sdetkit.onboarding_optimization", ns.args)
-
-    if ns.cmd == "community-activation":
-        return _run_module_main("sdetkit.community_activation", ns.args)
-
-    if ns.cmd == "external-contribution":
-        return _run_module_main("sdetkit.external_contribution", ns.args)
-
-    if ns.cmd == "kpi-audit":
-        return _run_module_main("sdetkit.kpi_audit", ns.args)
-    if ns.cmd == "kpi-report":
-        return _run_module_main("sdetkit.kpi_report", ns.args)
-
-    if ns.cmd == "objection-handling":
-        return _run_module_main("sdetkit.objection_handling", ns.args)
-
-    if ns.cmd == "demo":
-        return _run_module_main("sdetkit.demo", ns.args)
-
-    if ns.cmd == "first-contribution":
-        return _run_module_main("sdetkit.first_contribution", ns.args)
-
-    if ns.cmd == "contributor-funnel":
-        return _run_module_main("sdetkit.contributor_funnel", ns.args)
-
-    if ns.cmd == "evidence-assets":
-        return _run_module_main("sdetkit.proof", ns.args)
-
-    if ns.cmd == "triage-templates":
-        return _run_module_main("sdetkit.triage_templates", ns.args)
-
-    if ns.cmd == "docs-quality":
-        return _run_module_main("sdetkit.docs_qa", ns.args)
-
-    if ns.cmd == "weekly-review":
-        return _run_module_main("sdetkit.weekly_review", ns.args)
-
-    if ns.cmd == "docs-governance":
-        return _run_module_main("sdetkit.docs_navigation", ns.args)
-    if ns.cmd == "roadmap":
-        return _run_module_main("sdetkit.roadmap", ns.args)
-
-    if ns.cmd == "startup-readiness":
-        return _run_module_main("sdetkit.startup_readiness", ns.args)
-
-    if ns.cmd == "upgrade-hub":
-        return _run_module_main("sdetkit.upgrade_hub", ns.args)
-
-    if ns.cmd == "sdet-package":
-        return _run_module_main("sdetkit.sdet_package", ns.args)
-
-    if ns.cmd == "enterprise-readiness":
-        return _run_module_main("sdetkit.enterprise_readiness", ns.args)
-
-    if ns.cmd == "github-actions-onboarding":
-        return _run_module_main("sdetkit.github_actions_quickstart", ns.args)
-
-    if ns.cmd == "gitlab-ci-onboarding":
-        return _run_module_main("sdetkit.gitlab_ci_quickstart", ns.args)
-
-    if ns.cmd == "contribution-quality-report":
-        return _run_module_main("sdetkit.quality_contribution_delta", ns.args)
-
-    if ns.cmd == "reliability-evidence-pack":
-        return _run_module_main("sdetkit.reliability_evidence_pack", ns.args)
-
-    if ns.cmd == "release-readiness":
-        return _run_module_main("sdetkit.release_readiness", ns.args)
-
-    if ns.cmd == "release-communications":
-        return _run_module_main("sdetkit.release_communications", ns.args)
-
-    if ns.cmd == "trust-assets":
-        return _run_module_main("sdetkit.trust_assets", ns.args)
+    parsed_shortcut_result = dispatch_parsed_shortcut(
+        str(ns.cmd),
+        list(getattr(ns, "args", [])),
+        run_module_main=_run_module_main,
+    )
+    if parsed_shortcut_result is not None:
+        return parsed_shortcut_result
 
     if ns.cmd == "apiget":
         raw_args = list(argv)
