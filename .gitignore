@@ -47,3 +47,6 @@ sdet_check.json
 src/sdetkit.egg-info/
 
 .tmp/
+
+# top-tier reporting scratch bundle
+/docs/artifacts/top-tier-bundle/

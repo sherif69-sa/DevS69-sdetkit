@@ -1,0 +1,58 @@
+{
+  "schema_name": "sdetkit.portfolio.aggregate",
+  "schema_version": "1.0.0",
+  "generated_at": "2026-04-17T10:00:00Z",
+  "window": {
+    "start_date": "2026-04-11",
+    "end_date": "2026-04-17"
+  },
+  "totals": {
+    "repo_count_total": 3,
+    "repo_count_reporting": 3,
+    "high_risk_repo_count": 1,
+    "medium_risk_repo_count": 1,
+    "low_risk_repo_count": 1,
+    "release_gate_failure_rate_percent": 33.33
+  },
+  "repos": [
+    {
+      "repo_id": "growth-api",
+      "team": "growth",
+      "lane": "startup",
+      "risk_tier": "high",
+      "release_confidence_ok": false,
+      "gate_fast_ok": true,
+      "gate_release_ok": false,
+      "doctor_ok": true,
+      "failed_steps_count": 2,
+      "evidence_window_end": "2026-04-17",
+      "source_timestamp": "2026-04-17T09:05:00Z"
+    },
+    {
+      "repo_id": "checkout-service",
+      "team": "checkout",
+      "lane": "scale",
+      "risk_tier": "low",
+      "release_confidence_ok": true,
+      "gate_fast_ok": true,
+      "gate_release_ok": true,
+      "doctor_ok": true,
+      "failed_steps_count": 0,
+      "evidence_window_end": "2026-04-17",
+      "source_timestamp": "2026-04-17T09:00:00Z"
+    },
+    {
+      "repo_id": "identity-platform",
+      "team": "platform",
+      "lane": "regulated",
+      "risk_tier": "medium",
+      "release_confidence_ok": false,
+      "gate_fast_ok": true,
+      "gate_release_ok": true,
+      "doctor_ok": false,
+      "failed_steps_count": 1,
+      "evidence_window_end": "2026-04-17",
+      "source_timestamp": "2026-04-17T09:10:00Z"
+    }
+  ]
+}

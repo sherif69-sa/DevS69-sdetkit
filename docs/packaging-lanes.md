@@ -76,3 +76,18 @@ Choose the smallest lane that still meets your risk and compliance obligations.
 | Fast onboarding + value proof | Startup |
 | Cross-team consistency | Scale |
 | Audit readiness + strict escalation | Regulated |
+
+## WS1 execution acceptance checklist
+
+Use this checklist when executing **Point 2 (WS1 packaging execution)** in the CTO workflow.
+
+- [x] Startup/Scale/Regulated lane definitions are published.
+- [x] Each lane includes a command path and minimum controls.
+- [x] KPI emphasis is declared per lane.
+- [x] Role quickstarts are linked for execution by owner role.
+
+Evidence links:
+
+- [Role-based quickstarts](role-based-quickstarts.md)
+- [Top-tier KPI schema](kpi-schema.md)
+- [Top-tier program dashboard](top-tier-program-dashboard.md)

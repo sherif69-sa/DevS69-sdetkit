@@ -76,6 +76,46 @@ Context: [`docs/real-repo-adoption.md`](docs/real-repo-adoption.md)
 
 ## Canonical local-to-CI journey
 
+## Top-tier reporting sample pipeline
+
+Run the end-to-end seeded reporting flow (portfolio scorecard -> KPI snapshot -> contract checks -> bundle promotion):
+
+```bash
+make top-tier-reporting
+```
+
+Run the CI-equivalent local lane (build + freshness check + reporting contract tests):
+
+```bash
+make top-tier-reporting-ci
+```
+
+Run the merge-ready lane (CI-equivalent lane + workflow/docs/readme guard tests):
+
+```bash
+make top-tier-reporting-merge-ready
+```
+
+Optional date/window overrides:
+
+```bash
+make top-tier-reporting DATE_TAG=2026-04-17 WINDOW_START=2026-04-11 WINDOW_END=2026-04-17 GENERATED_AT=2026-04-17T10:00:00Z
+```
+
+Primary artifacts produced under `docs/artifacts/`:
+
+- `portfolio-scorecard-sample-<date>.json`
+- `kpi-weekly-from-portfolio-<date>.json`
+- `kpi-weekly-contract-check-<date>.json`
+- `top-tier-contract-check-<date>.json`
+- `top-tier-bundle-manifest-<date>.json`
+- `top-tier-bundle-manifest-check-<date>.json`
+- `top-tier-artifact-set-check-<date>.json`
+- `top-tier-freshness-check-<date>.json`
+
+See: [`docs/portfolio-reporting-recipe.md`](docs/portfolio-reporting-recipe.md), [`docs/kpi-schema.md`](docs/kpi-schema.md), and [`docs/top-tier-reporting-troubleshooting.md`](docs/top-tier-reporting-troubleshooting.md).
+
+
 - Canonical first proof: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
 - Canonical real-repo fixture proof: [`docs/real-repo-adoption.md`](docs/real-repo-adoption.md)
 - Canonical CI rollout path: [`docs/recommended-ci-flow.md`](docs/recommended-ci-flow.md)

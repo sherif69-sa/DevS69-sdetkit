@@ -47,3 +47,17 @@ This policy defines compatibility guarantees for the SDETKit CLI and core artifa
 | CLI compatibility | Architecture + QA governance | Monthly |
 | Artifact schema policy | Platform engineering | Monthly |
 | Deprecation announcements | Product + DX | Every release |
+
+## WS3 execution acceptance checklist
+
+Use this checklist when executing **Point 4 (WS3 governance and lifecycle execution)** in the CTO workflow.
+
+- [x] Compatibility levels and command/schema policy are documented.
+- [x] Deprecation process and migration window expectations are documented.
+- [x] Support severity model and response SLOs are published.
+- [x] Policy ownership and review cadence are explicit.
+
+Evidence links:
+
+- [Support and escalation model](support-and-escalation-model.md)
+- [Top-tier program dashboard](top-tier-program-dashboard.md)

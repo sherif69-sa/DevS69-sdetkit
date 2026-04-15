@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "repo_count": 3,
+  "week_ending": "2026-04-17",
+  "checks": [
+    "repo_count_total_matches_repos",
+    "onboarding_rate_consistent",
+    "failed_release_rate_consistent",
+    "sample_size_consistent",
+    "week_alignment_consistent"
+  ]
+}

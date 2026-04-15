@@ -1,0 +1,3 @@
+{"repo":"checkout-service","team":"checkout","lane":"scale","timestamp":"2026-04-17T09:00:00Z","gate_fast_ok":true,"gate_release_ok":true,"doctor_ok":true,"failed_steps_count":0}
+{"repo":"growth-api","team":"growth","lane":"startup","timestamp":"2026-04-17T09:05:00Z","gate_fast_ok":true,"gate_release_ok":false,"doctor_ok":true,"failed_steps_count":2}
+{"repo":"identity-platform","team":"platform","lane":"regulated","timestamp":"2026-04-17T09:10:00Z","gate_fast_ok":true,"gate_release_ok":true,"doctor_ok":false,"failed_steps_count":1}
