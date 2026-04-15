@@ -98,6 +98,8 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 - Need leadership packaging guidance: [CTO full-package review](cto-full-package-review.md)
 - Need execution tracker input: `plans/top-tier-repo-execution-plan-2026-q2.json` (repo plan artifact)
 - Need weekly control plane: [Top-tier program dashboard](top-tier-program-dashboard.md)
+- Need point-by-point CTO execution lane? Use [CTO execution workflow (6-point)](cto-execution-workflow.md)
+- Need post-completion operating plan? Use [CTO Phase 2 launch plan](cto-phase2-launch-plan.md)
 - Need package lane definitions: [Packaging lanes](packaging-lanes.md)
 - Need governance policy table: [Policy compatibility matrix](policy-compatibility-matrix.md)
 - Need operating support model: [Support and escalation model](support-and-escalation-model.md)

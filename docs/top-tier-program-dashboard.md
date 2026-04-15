@@ -4,6 +4,8 @@ This dashboard is the weekly control plane for the **DevS69 SDETKit top-tier ful
 
 - Program plan source: `plans/top-tier-repo-execution-plan-2026-q2.json`
 - Leadership blueprint: [CTO full-package review](cto-full-package-review.md)
+- Execution workflow: [CTO execution workflow (6-point)](cto-execution-workflow.md)
+- Post-completion plan: [CTO Phase 2 launch plan](cto-phase2-launch-plan.md)
 - Reporting cadence: Monday planning, Wednesday risk review, Friday closeout
 
 ## Weekly status snapshot
@@ -11,7 +13,7 @@ This dashboard is the weekly control plane for the **DevS69 SDETKit top-tier ful
 | Field | Value |
 |---|---|
 | Week ending | 2026-04-17 |
-| Program status | Active |
+| Program status | Phase 1 closeout complete |
 | Delivery confidence | Green |
 | Top blocker count | 0 |
 | KPI movement | Seed baseline published |
