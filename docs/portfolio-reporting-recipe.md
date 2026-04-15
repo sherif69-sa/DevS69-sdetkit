@@ -109,3 +109,17 @@ Risk tier thresholds:
 - Output sample: [`docs/artifacts/portfolio-scorecard-sample-2026-04-17.json`](artifacts/portfolio-scorecard-sample-2026-04-17.json)
 
 Use these files as a template for weekly portfolio board generation and review.
+
+
+## Cross-artifact consistency check
+
+After generating KPI and portfolio outputs, run:
+
+```bash
+python scripts/check_top_tier_reporting_contract.py \
+  --portfolio-scorecard docs/artifacts/portfolio-scorecard-sample-2026-04-17.json \
+  --kpi-weekly docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json \
+  --out docs/artifacts/top-tier-contract-check-2026-04-17.json
+```
+
+This validates KPI values against portfolio totals and sample sizes.

@@ -59,6 +59,7 @@ python scripts/build_kpi_weekly_snapshot.py \
 python scripts/check_repo_layout.py
 python -m pytest -q tests/test_phase1_hardening.py
 python -m pytest -q tests/test_build_kpi_weekly_snapshot.py
+python scripts/check_top_tier_reporting_contract.py --portfolio-scorecard docs/artifacts/portfolio-scorecard-sample-2026-04-17.json --kpi-weekly docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json --out docs/artifacts/top-tier-contract-check-2026-04-17.json
 ```
 
 ## Ownership
