@@ -1,6 +1,6 @@
 # --- dev targets (bootstrap) ---
 
-.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map
+.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
@@ -93,3 +93,10 @@ operator-onboarding-wizard: venv
 
 primary-docs-map: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_primary_docs_map.py --format json'
+
+
+top-tier-reporting: venv
+	@bash -lc 'set -euo pipefail; . .venv/bin/activate && \
+	python scripts/build_portfolio_scorecard.py --in docs/artifacts/portfolio-input-sample-2026-04-17.jsonl --out docs/artifacts/portfolio-scorecard-sample-2026-04-17.json --schema-version 1.0.0 --window-start 2026-04-11 --window-end 2026-04-17 && \
+	python scripts/build_kpi_weekly_snapshot.py --portfolio-scorecard docs/artifacts/portfolio-scorecard-sample-2026-04-17.json --out docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json --week-ending 2026-04-17 --program-status green --rollback-count 0 && \
+	python scripts/check_top_tier_reporting_contract.py --portfolio-scorecard docs/artifacts/portfolio-scorecard-sample-2026-04-17.json --kpi-weekly docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json --out docs/artifacts/top-tier-contract-check-2026-04-17.json'

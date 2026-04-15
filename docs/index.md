@@ -113,6 +113,7 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 - Migrating older automation? Use [Legacy command migration map](legacy-command-migration-map.md)
 - Need canonical-path health status? Use [Golden-path health signal](golden-path-health.md)
 - Need drift enforcement? Run canonical path drift guard (`python scripts/check_canonical_path_drift.py --format json`)
+- Need top-tier reporting pipeline? Run `make top-tier-reporting`
 - Need legacy usage inventory? Run legacy command analyzer (`python scripts/legacy_command_analyzer.py --format json`)
 - Need one maturity number? Generate [Adoption scorecard](adoption-scorecard.md)
 - Need guided canonical triage? Use [Operator onboarding wizard](operator-onboarding-wizard.md)

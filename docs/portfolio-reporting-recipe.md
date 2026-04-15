@@ -110,6 +110,8 @@ Risk tier thresholds:
 
 Use these files as a template for weekly portfolio board generation and review.
 
+For the full end-to-end sample pipeline, run `make top-tier-reporting`.
+
 
 ## Cross-artifact consistency check
 
