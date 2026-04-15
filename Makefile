@@ -98,6 +98,7 @@ primary-docs-map: venv
 top-tier-reporting: venv
 	@bash -lc 'set -euo pipefail; . .venv/bin/activate && \
 	python scripts/build_top_tier_reporting_bundle.py --input docs/artifacts/portfolio-input-sample-2026-04-17.jsonl --out-dir docs/artifacts/top-tier-bundle --window-start 2026-04-11 --window-end 2026-04-17 --generated-at 2026-04-17T10:00:00Z --schema-version 1.0.0 --program-status green --rollback-count 0 --manifest-out docs/artifacts/top-tier-bundle-manifest-2026-04-17.json && \
+	python scripts/check_top_tier_bundle_manifest.py --manifest docs/artifacts/top-tier-bundle-manifest-2026-04-17.json --out docs/artifacts/top-tier-bundle-manifest-check-2026-04-17.json && \
 	cp docs/artifacts/top-tier-bundle/portfolio-scorecard.json docs/artifacts/portfolio-scorecard-sample-2026-04-17.json && \
 	cp docs/artifacts/top-tier-bundle/kpi-weekly.json docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json && \
 	cp docs/artifacts/top-tier-bundle/kpi-contract-check.json docs/artifacts/kpi-weekly-contract-check-2026-04-17.json && \

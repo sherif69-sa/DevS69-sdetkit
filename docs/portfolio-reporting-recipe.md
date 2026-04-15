@@ -128,6 +128,8 @@ CI automation option: `.github/workflows/top-tier-reporting-sample.yml`.
 
 Bundle manifest example: [`docs/artifacts/top-tier-bundle-manifest-2026-04-17.json`](artifacts/top-tier-bundle-manifest-2026-04-17.json).
 
+Bundle manifest check example: [`docs/artifacts/top-tier-bundle-manifest-check-2026-04-17.json`](artifacts/top-tier-bundle-manifest-check-2026-04-17.json).
+
 
 ## Cross-artifact consistency check
 

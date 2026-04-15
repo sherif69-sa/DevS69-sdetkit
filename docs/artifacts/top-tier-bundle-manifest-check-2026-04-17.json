@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "checked_count": 4,
+  "window": {
+    "start": "2026-04-11",
+    "end": "2026-04-17"
+  },
+  "artifacts": [
+    {
+      "key": "portfolio_scorecard",
+      "path": "docs/artifacts/top-tier-bundle/portfolio-scorecard.json",
+      "sha256": "f53d288ff0cd69b3dae55eca5dd295c8cfbd85671d0106b38cdf1c6b7dbac6f8"
+    },
+    {
+      "key": "kpi_weekly",
+      "path": "docs/artifacts/top-tier-bundle/kpi-weekly.json",
+      "sha256": "bf8be7cb76666b10f207aeb6b50bd71d0195d6d3a9429c31402bbe60f9fd2478"
+    },
+    {
+      "key": "kpi_contract_check",
+      "path": "docs/artifacts/top-tier-bundle/kpi-contract-check.json",
+      "sha256": "7b8a93b5af50e8d8adeb7154a44bf4020969969640bae7745e95ba70232e3bb2"
+    },
+    {
+      "key": "top_tier_contract_check",
+      "path": "docs/artifacts/top-tier-bundle/top-tier-contract-check.json",
+      "sha256": "edb53c3b9e9c60c120d53c4016b83fee123a88a5a89a47f447dc0a4ec18237da"
+    }
+  ]
+}
