@@ -55,6 +55,8 @@ def test_build_portfolio_scorecard_emits_versioned_contract(tmp_path: Path) -> N
         "2026-04-11",
         "--window-end",
         "2026-04-17",
+        "--generated-at",
+        "2026-04-17T10:00:00Z",
     ]
     subprocess.run(cmd, check=True)
 
@@ -62,6 +64,7 @@ def test_build_portfolio_scorecard_emits_versioned_contract(tmp_path: Path) -> N
 
     assert payload["schema_name"] == "sdetkit.portfolio.aggregate"
     assert payload["schema_version"] == "1.0.0"
+    assert payload["generated_at"] == "2026-04-17T10:00:00Z"
     assert payload["window"] == {"start_date": "2026-04-11", "end_date": "2026-04-17"}
 
     totals = payload["totals"]

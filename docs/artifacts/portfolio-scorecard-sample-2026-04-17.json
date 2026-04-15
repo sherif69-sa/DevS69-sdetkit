@@ -1,7 +1,7 @@
 {
   "schema_name": "sdetkit.portfolio.aggregate",
   "schema_version": "1.0.0",
-  "generated_at": "2026-04-15T05:51:43.186223Z",
+  "generated_at": "2026-04-17T10:00:00Z",
   "window": {
     "start_date": "2026-04-11",
     "end_date": "2026-04-17"

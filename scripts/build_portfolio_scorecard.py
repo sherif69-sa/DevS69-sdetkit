@@ -90,7 +90,7 @@ def _normalize_repo_row(record: dict[str, Any], *, window_end: str) -> dict[str,
 
 
 def _build_summary(
-    records: list[dict[str, Any]], *, schema_version: str, window_start: str, window_end: str
+    records: list[dict[str, Any]], *, schema_version: str, window_start: str, window_end: str, generated_at: str
 ) -> dict[str, Any]:
     repos = [_normalize_repo_row(record, window_end=window_end) for record in records]
     repos.sort(key=lambda x: (x.get("risk_tier", "unknown"), x.get("repo_id", "")))
@@ -102,7 +102,7 @@ def _build_summary(
     return {
         "schema_name": _SCHEMA_NAME,
         "schema_version": schema_version,
-        "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "generated_at": generated_at,
         "window": {
             "start_date": window_start,
             "end_date": window_end,
@@ -126,16 +126,19 @@ def main() -> int:
     ap.add_argument("--schema-version", default="1.0.0", help="Portfolio aggregate schema version")
     ap.add_argument("--window-start", required=True, help="Reporting window start date (YYYY-MM-DD)")
     ap.add_argument("--window-end", required=True, help="Reporting window end date (YYYY-MM-DD)")
+    ap.add_argument("--generated-at", default="", help="Optional generated_at timestamp (ISO-8601 UTC)")
     args = ap.parse_args()
 
     infile = Path(args.infile)
     outfile = Path(args.out)
     records = _load_records(infile)
+    generated_at = args.generated_at or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     summary = _build_summary(
         records,
         schema_version=args.schema_version,
         window_start=args.window_start,
         window_end=args.window_end,
+        generated_at=generated_at,
     )
 
     outfile.parent.mkdir(parents=True, exist_ok=True)
