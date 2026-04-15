@@ -103,6 +103,7 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 - Need operating support model: [Support and escalation model](support-and-escalation-model.md)
 - Need multi-repo aggregation: [Portfolio reporting recipe](portfolio-reporting-recipe.md)
 - Need leadership updates: [Executive weekly template](executive-weekly-template.md)
+- Need KPI contract: [Top-tier KPI schema](kpi-schema.md)
 - Need operator runbook: [Operations handbook](operations-handbook.md)
 - Need rollout gates: [Pilot to rollout guide](pilot-to-rollout-guide.md)
 - Need scale-phase assets: [P2 scale assets](p2-scale-assets.md)
