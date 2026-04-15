@@ -6,6 +6,7 @@ This page defines the weekly KPI contract for CTO/dashboard reporting and links 
 
 - JSON schema: [`docs/kpi-schema.v1.json`](kpi-schema.v1.json)
 - First seed baseline instance: [`docs/kpi-baseline-week-2026-04-17.md`](kpi-baseline-week-2026-04-17.md)
+- Generated KPI sample: [`docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json`](artifacts/kpi-weekly-from-portfolio-2026-04-17.json)
 
 ## KPI keys (required)
 
@@ -41,11 +42,23 @@ Each KPI key MUST use this shape:
 
 Compatibility expectation: downstream consumers should be able to parse all `1.x` payloads without breaking if they ignore unknown optional fields.
 
+## Build command (from portfolio scorecard)
+
+```bash
+python scripts/build_kpi_weekly_snapshot.py \
+  --portfolio-scorecard docs/artifacts/portfolio-scorecard-sample-2026-04-17.json \
+  --out docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json \
+  --week-ending 2026-04-17 \
+  --program-status green \
+  --rollback-count 0
+```
+
 ## Minimum weekly validation workflow
 
 ```bash
 python scripts/check_repo_layout.py
 python -m pytest -q tests/test_phase1_hardening.py
+python -m pytest -q tests/test_build_kpi_weekly_snapshot.py
 ```
 
 ## Ownership
