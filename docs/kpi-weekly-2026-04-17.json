@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "week_ending": "2026-04-17",
+  "program_status": "green",
+  "kpis": {
+    "first_time_success_onboarding_rate": {
+      "value": 0,
+      "unit": "percent",
+      "sample_size": 1,
+      "quality": "seed",
+      "source": "artifacts/adoption/real-repo-golden/release-preflight.json"
+    },
+    "median_release_decision_time": {
+      "value": null,
+      "unit": "n/a",
+      "sample_size": null,
+      "quality": "seed",
+      "source": "timing instrumentation pending"
+    },
+    "failed_release_gate_frequency": {
+      "value": 100,
+      "unit": "percent",
+      "sample_size": 1,
+      "quality": "seed",
+      "source": "artifacts/adoption/real-repo-golden/release-preflight.json"
+    },
+    "rollback_rate": {
+      "value": 0,
+      "unit": "count",
+      "sample_size": 0,
+      "quality": "seed",
+      "source": "no rollback incidents logged for week ending 2026-04-17"
+    },
+    "mean_time_to_triage_first_failure": {
+      "value": null,
+      "unit": "n/a",
+      "sample_size": null,
+      "quality": "seed",
+      "source": "incident timing fields pending"
+    },
+    "docs_to_adoption_conversion": {
+      "value": null,
+      "unit": "n/a",
+      "sample_size": null,
+      "quality": "seed",
+      "source": "docs telemetry pending"
+    }
+  }
+}

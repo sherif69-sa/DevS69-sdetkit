@@ -1,0 +1,48 @@
+name: Top-tier Reporting Sample Pipeline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 12 * * 5'
+
+permissions:
+  contents: read
+
+jobs:
+  top-tier-reporting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project + test dependencies
+        run: python -m pip install -c constraints-ci.txt -e .[dev,test]
+
+      - name: Run top-tier reporting pipeline
+        run: make top-tier-reporting
+
+      - name: Run reporting tests
+        run: |
+          python -m pytest -q \
+            tests/test_build_portfolio_scorecard.py \
+            tests/test_build_kpi_weekly_snapshot.py \
+            tests/test_check_top_tier_reporting_contract.py \
+            tests/test_check_top_tier_bundle_manifest.py
+
+      - name: Upload top-tier reporting artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: top-tier-reporting-sample
+          path: |
+            docs/artifacts/portfolio-scorecard-sample-2026-04-17.json
+            docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json
+            docs/artifacts/kpi-weekly-contract-check-2026-04-17.json
+            docs/artifacts/top-tier-contract-check-2026-04-17.json
+            docs/artifacts/top-tier-bundle-manifest-2026-04-17.json
+            docs/artifacts/top-tier-bundle-manifest-check-2026-04-17.json
+          retention-days: 28
