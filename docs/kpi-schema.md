@@ -7,6 +7,7 @@ This page defines the weekly KPI contract for CTO/dashboard reporting and links 
 - JSON schema: [`docs/kpi-schema.v1.json`](kpi-schema.v1.json)
 - First seed baseline instance: [`docs/kpi-baseline-week-2026-04-17.md`](kpi-baseline-week-2026-04-17.md)
 - Generated KPI sample: [`docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json`](artifacts/kpi-weekly-from-portfolio-2026-04-17.json)
+- KPI contract check report: [`docs/artifacts/kpi-weekly-contract-check-2026-04-17.json`](artifacts/kpi-weekly-contract-check-2026-04-17.json)
 
 ## KPI keys (required)
 
@@ -59,6 +60,7 @@ python scripts/build_kpi_weekly_snapshot.py \
 python scripts/check_repo_layout.py
 python -m pytest -q tests/test_phase1_hardening.py
 python -m pytest -q tests/test_build_kpi_weekly_snapshot.py
+python scripts/check_kpi_weekly_contract.py --schema docs/kpi-schema.v1.json --payload docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json --out docs/artifacts/kpi-weekly-contract-check-2026-04-17.json
 python scripts/check_top_tier_reporting_contract.py --portfolio-scorecard docs/artifacts/portfolio-scorecard-sample-2026-04-17.json --kpi-weekly docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json --out docs/artifacts/top-tier-contract-check-2026-04-17.json
 ```
 

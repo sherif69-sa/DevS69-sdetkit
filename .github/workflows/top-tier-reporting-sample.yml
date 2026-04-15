@@ -40,5 +40,6 @@ jobs:
           path: |
             docs/artifacts/portfolio-scorecard-sample-2026-04-17.json
             docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json
+            docs/artifacts/kpi-weekly-contract-check-2026-04-17.json
             docs/artifacts/top-tier-contract-check-2026-04-17.json
           retention-days: 28
