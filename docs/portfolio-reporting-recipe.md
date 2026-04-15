@@ -112,6 +112,17 @@ Use these files as a template for weekly portfolio board generation and review.
 
 For the full end-to-end sample pipeline, run `make top-tier-reporting`.
 
+Direct orchestrator option:
+
+```bash
+python scripts/build_top_tier_reporting_bundle.py \
+  --input docs/artifacts/portfolio-input-sample-2026-04-17.jsonl \
+  --out-dir docs/artifacts/top-tier-bundle \
+  --window-start 2026-04-11 \
+  --window-end 2026-04-17 \
+  --generated-at 2026-04-17T10:00:00Z
+```
+
 CI automation option: `.github/workflows/top-tier-reporting-sample.yml`.
 
 

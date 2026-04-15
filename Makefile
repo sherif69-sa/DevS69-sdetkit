@@ -97,7 +97,8 @@ primary-docs-map: venv
 
 top-tier-reporting: venv
 	@bash -lc 'set -euo pipefail; . .venv/bin/activate && \
-	python scripts/build_portfolio_scorecard.py --in docs/artifacts/portfolio-input-sample-2026-04-17.jsonl --out docs/artifacts/portfolio-scorecard-sample-2026-04-17.json --schema-version 1.0.0 --window-start 2026-04-11 --window-end 2026-04-17 --generated-at 2026-04-17T10:00:00Z && \
-	python scripts/build_kpi_weekly_snapshot.py --portfolio-scorecard docs/artifacts/portfolio-scorecard-sample-2026-04-17.json --out docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json --week-ending 2026-04-17 --program-status green --rollback-count 0 && \
-	python scripts/check_kpi_weekly_contract.py --schema docs/kpi-schema.v1.json --payload docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json --out docs/artifacts/kpi-weekly-contract-check-2026-04-17.json && \
-	python scripts/check_top_tier_reporting_contract.py --portfolio-scorecard docs/artifacts/portfolio-scorecard-sample-2026-04-17.json --kpi-weekly docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json --out docs/artifacts/top-tier-contract-check-2026-04-17.json'
+	python scripts/build_top_tier_reporting_bundle.py --input docs/artifacts/portfolio-input-sample-2026-04-17.jsonl --out-dir docs/artifacts/top-tier-bundle --window-start 2026-04-11 --window-end 2026-04-17 --generated-at 2026-04-17T10:00:00Z --schema-version 1.0.0 --program-status green --rollback-count 0 && \
+	cp docs/artifacts/top-tier-bundle/portfolio-scorecard.json docs/artifacts/portfolio-scorecard-sample-2026-04-17.json && \
+	cp docs/artifacts/top-tier-bundle/kpi-weekly.json docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json && \
+	cp docs/artifacts/top-tier-bundle/kpi-contract-check.json docs/artifacts/kpi-weekly-contract-check-2026-04-17.json && \
+	cp docs/artifacts/top-tier-bundle/top-tier-contract-check.json docs/artifacts/top-tier-contract-check-2026-04-17.json'
