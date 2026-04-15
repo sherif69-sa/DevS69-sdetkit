@@ -112,6 +112,8 @@ Use these files as a template for weekly portfolio board generation and review.
 
 For the full end-to-end sample pipeline, run `make top-tier-reporting`.
 
+CI automation option: `.github/workflows/top-tier-reporting-sample.yml`.
+
 
 ## Cross-artifact consistency check
 
