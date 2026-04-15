@@ -112,6 +112,12 @@ Use these files as a template for weekly portfolio board generation and review.
 
 For the full end-to-end sample pipeline, run `make top-tier-reporting`.
 
+You can override date/window values per run, for example:
+
+```bash
+make top-tier-reporting DATE_TAG=2026-04-17 WINDOW_START=2026-04-11 WINDOW_END=2026-04-17 GENERATED_AT=2026-04-17T10:00:00Z
+```
+
 Direct orchestrator option:
 
 ```bash
