@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -11,6 +13,13 @@ from pathlib import Path
 
 def _run(cmd: list[str]) -> None:
     subprocess.run(cmd, check=True)
+
+
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    h.update(path.read_bytes())
+    return h.hexdigest()
+
 
 
 def main() -> int:
@@ -23,6 +32,7 @@ def main() -> int:
     ap.add_argument("--schema-version", default="1.0.0")
     ap.add_argument("--program-status", default="green", choices=("green", "amber", "red"))
     ap.add_argument("--rollback-count", type=int, default=0)
+    ap.add_argument("--manifest-out", default="", help="Optional output path for bundle manifest JSON")
     args = ap.parse_args()
 
     out_dir = Path(args.out_dir)
@@ -93,6 +103,23 @@ def main() -> int:
             str(cross_contract_out),
         ]
     )
+
+    manifest = {
+        "ok": True,
+        "window": {"start": args.window_start, "end": args.window_end},
+        "program_status": args.program_status,
+        "artifacts": {
+            "portfolio_scorecard": {"path": str(portfolio_out), "sha256": _sha256(portfolio_out)},
+            "kpi_weekly": {"path": str(kpi_out), "sha256": _sha256(kpi_out)},
+            "kpi_contract_check": {"path": str(kpi_contract_out), "sha256": _sha256(kpi_contract_out)},
+            "top_tier_contract_check": {"path": str(cross_contract_out), "sha256": _sha256(cross_contract_out)},
+        },
+    }
+
+    if args.manifest_out:
+        manifest_path = Path(args.manifest_out)
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 
     print(f"wrote bundle to {out_dir}")
     return 0

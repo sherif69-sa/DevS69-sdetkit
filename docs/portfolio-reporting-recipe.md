@@ -120,10 +120,13 @@ python scripts/build_top_tier_reporting_bundle.py \
   --out-dir docs/artifacts/top-tier-bundle \
   --window-start 2026-04-11 \
   --window-end 2026-04-17 \
-  --generated-at 2026-04-17T10:00:00Z
+  --generated-at 2026-04-17T10:00:00Z \
+  --manifest-out docs/artifacts/top-tier-bundle-manifest-2026-04-17.json
 ```
 
 CI automation option: `.github/workflows/top-tier-reporting-sample.yml`.
+
+Bundle manifest example: [`docs/artifacts/top-tier-bundle-manifest-2026-04-17.json`](artifacts/top-tier-bundle-manifest-2026-04-17.json).
 
 
 ## Cross-artifact consistency check

@@ -65,6 +65,7 @@ Track weekly:
 - [Generated KPI weekly sample (from portfolio)](artifacts/kpi-weekly-from-portfolio-2026-04-17.json)
 - [KPI weekly contract check (2026-04-17)](artifacts/kpi-weekly-contract-check-2026-04-17.json)
 - [Top-tier reporting contract check (2026-04-17)](artifacts/top-tier-contract-check-2026-04-17.json)
+- [Top-tier bundle manifest (2026-04-17)](artifacts/top-tier-bundle-manifest-2026-04-17.json)
 - [Executive weekly report (2026-04-17)](executive-weekly-2026-04-17.md)
 - [Executive monthly report (2026-04)](executive-monthly-2026-04.md)
 - [Full release package checklist](full-release-package-checklist.md)
