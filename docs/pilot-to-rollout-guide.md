@@ -82,19 +82,3 @@ python scripts/build_portfolio_scorecard.py --in <normalized-input> --out <portf
 | No clear ownership | Repeated missed commitments | Assign DRI per workstream and publish weekly |
 | Data inconsistency | KPI disputes every week | Freeze schema for reporting window |
 | Escalation drift | Severity decisions differ by team | Enforce one support model + monthly calibration |
-
-## WS4 execution acceptance checklist
-
-Use this checklist when executing **Point 6 (WS4 commercialization + program closeout)** in the CTO workflow.
-
-- [x] Pilot/evaluation/production exit criteria are measurable and documented.
-- [x] Role-oriented onboarding references are published.
-- [x] Weekly + monthly executive reporting templates are documented.
-- [x] Rollout stage-gate command path is published.
-
-Evidence links:
-
-- [Role-based quickstarts](role-based-quickstarts.md)
-- [Executive weekly template](executive-weekly-template.md)
-- [Executive monthly template](executive-monthly-template.md)
-- [Top-tier program dashboard](top-tier-program-dashboard.md)

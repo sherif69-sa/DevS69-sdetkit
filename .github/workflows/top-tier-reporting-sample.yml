@@ -11,11 +11,6 @@ permissions:
 jobs:
   top-tier-reporting:
     runs-on: ubuntu-latest
-    env:
-      DATE_TAG: 2026-04-17
-      WINDOW_START: 2026-04-11
-      WINDOW_END: 2026-04-17
-      GENERATED_AT: 2026-04-17T10:00:00Z
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
@@ -28,25 +23,26 @@ jobs:
       - name: Install project + test dependencies
         run: python -m pip install -c constraints-ci.txt -e .[dev,test]
 
-      - name: Run top-tier reporting CI lane
+      - name: Run top-tier reporting pipeline
+        run: make top-tier-reporting
+
+      - name: Run reporting tests
         run: |
-          make top-tier-reporting-ci \
-            DATE_TAG="${DATE_TAG}" \
-            WINDOW_START="${WINDOW_START}" \
-            WINDOW_END="${WINDOW_END}" \
-            GENERATED_AT="${GENERATED_AT}"
+          python -m pytest -q \
+            tests/test_build_portfolio_scorecard.py \
+            tests/test_build_kpi_weekly_snapshot.py \
+            tests/test_check_top_tier_reporting_contract.py \
+            tests/test_check_top_tier_bundle_manifest.py
 
       - name: Upload top-tier reporting artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: top-tier-reporting-sample
           path: |
-            docs/artifacts/portfolio-scorecard-sample-${{ env.DATE_TAG }}.json
-            docs/artifacts/kpi-weekly-from-portfolio-${{ env.DATE_TAG }}.json
-            docs/artifacts/kpi-weekly-contract-check-${{ env.DATE_TAG }}.json
-            docs/artifacts/top-tier-contract-check-${{ env.DATE_TAG }}.json
-            docs/artifacts/top-tier-bundle-manifest-${{ env.DATE_TAG }}.json
-            docs/artifacts/top-tier-bundle-manifest-check-${{ env.DATE_TAG }}.json
-            docs/artifacts/top-tier-artifact-set-check-${{ env.DATE_TAG }}.json
-            docs/artifacts/top-tier-freshness-check-${{ env.DATE_TAG }}.json
+            docs/artifacts/portfolio-scorecard-sample-2026-04-17.json
+            docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json
+            docs/artifacts/kpi-weekly-contract-check-2026-04-17.json
+            docs/artifacts/top-tier-contract-check-2026-04-17.json
+            docs/artifacts/top-tier-bundle-manifest-2026-04-17.json
+            docs/artifacts/top-tier-bundle-manifest-check-2026-04-17.json
           retention-days: 28

@@ -158,30 +158,3 @@ To copy bundle outputs to canonical sample artifact names:
 ```bash
 python scripts/promote_top_tier_bundle.py --bundle-dir docs/artifacts/top-tier-bundle --date-tag 2026-04-17
 ```
-
-
-Need help debugging failures? See [Top-tier reporting troubleshooting](top-tier-reporting-troubleshooting.md).
-
-
-Artifact-set check example: [`docs/artifacts/top-tier-artifact-set-check-2026-04-17.json`](artifacts/top-tier-artifact-set-check-2026-04-17.json).
-
-Freshness check command (post-publish):
-
-```bash
-make reporting-freshness-check DATE_TAG=2026-04-17
-```
-
-## WS2 execution acceptance checklist
-
-Use this checklist when executing **Point 3 (WS2 portfolio reporting execution)** in the CTO workflow.
-
-- [x] Portfolio aggregation contract is documented and versioned.
-- [x] End-to-end sample pipeline command is documented (`make top-tier-reporting`).
-- [x] Contract checks and artifact-set checks are documented with sample outputs.
-- [x] CI workflow path is documented for scheduled/manual execution.
-
-Evidence links:
-
-- [Portfolio aggregation schema](portfolio-aggregation-schema.md)
-- [Top-tier reporting sample workflow](../.github/workflows/top-tier-reporting-sample.yml)
-- [Top-tier program dashboard](top-tier-program-dashboard.md)

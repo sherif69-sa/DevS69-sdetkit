@@ -84,18 +84,6 @@ Run the end-to-end seeded reporting flow (portfolio scorecard -> KPI snapshot ->
 make top-tier-reporting
 ```
 
-Run the CI-equivalent local lane (build + freshness check + reporting contract tests):
-
-```bash
-make top-tier-reporting-ci
-```
-
-Run the merge-ready lane (CI-equivalent lane + workflow/docs/readme guard tests):
-
-```bash
-make top-tier-reporting-merge-ready
-```
-
 Optional date/window overrides:
 
 ```bash
@@ -110,10 +98,8 @@ Primary artifacts produced under `docs/artifacts/`:
 - `top-tier-contract-check-<date>.json`
 - `top-tier-bundle-manifest-<date>.json`
 - `top-tier-bundle-manifest-check-<date>.json`
-- `top-tier-artifact-set-check-<date>.json`
-- `top-tier-freshness-check-<date>.json`
 
-See: [`docs/portfolio-reporting-recipe.md`](docs/portfolio-reporting-recipe.md), [`docs/kpi-schema.md`](docs/kpi-schema.md), and [`docs/top-tier-reporting-troubleshooting.md`](docs/top-tier-reporting-troubleshooting.md).
+See: [`docs/portfolio-reporting-recipe.md`](docs/portfolio-reporting-recipe.md) and [`docs/kpi-schema.md`](docs/kpi-schema.md).
 
 
 - Canonical first proof: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
