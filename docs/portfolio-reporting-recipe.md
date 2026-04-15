@@ -19,7 +19,34 @@ Per repository, collect:
 - `build/doctor.json`
 - repository metadata (team, service tier, lane)
 
-## Normalized record schema
+## Output contract (versioned)
+
+The scorecard output follows the portfolio aggregate contract:
+
+- Schema reference: [`docs/portfolio-aggregation-schema.md`](portfolio-aggregation-schema.md)
+- Script: `python scripts/build_portfolio_scorecard.py`
+
+### Top-level required fields
+
+- `schema_name`
+- `schema_version`
+- `generated_at`
+- `window.start_date`
+- `window.end_date`
+- `totals`
+- `repos`
+
+### `repos[]` required fields (minimum)
+
+- `repo_id`
+- `risk_tier`
+- `release_confidence_ok`
+- `gate_fast_ok`
+- `gate_release_ok`
+- `doctor_ok`
+- `evidence_window_end`
+
+## Input record example (normalized)
 
 ```json
 {
@@ -30,21 +57,28 @@ Per repository, collect:
   "gate_fast_ok": true,
   "gate_release_ok": true,
   "doctor_ok": true,
-  "failed_steps_count": 0,
-  "risk_level": "low"
+  "failed_steps_count": 0
 }
 ```
 
-## Aggregation steps
+## Build command
 
-1. **Collect artifacts** from each target repository for the same reporting window.
-2. **Normalize keys** into the schema above (especially `ok` and `failed_steps`).
-3. **Compute risk level** using consistent thresholds:
-   - `low`: all three checks pass
-   - `medium`: exactly one gate fails
-   - `high`: release gate fails or repeated failures
-4. **Publish portfolio table** grouped by team/lane.
-5. **Attach delta summary** from previous week.
+```bash
+python scripts/build_portfolio_scorecard.py \
+  --in docs/artifacts/portfolio-input.jsonl \
+  --out docs/artifacts/portfolio-scorecard-2026-04-17.json \
+  --schema-version 1.0.0 \
+  --window-start 2026-04-11 \
+  --window-end 2026-04-17
+```
+
+## Aggregation rules
+
+Risk tier thresholds:
+
+- `low`: all three checks pass and failed steps = 0
+- `medium`: partial failure without release-gate hard failure
+- `high`: release gate fails or repeated failures (`failed_steps_count >= 2`)
 
 ## Weekly portfolio scorecard template
 
@@ -55,18 +89,16 @@ Per repository, collect:
 
 ## Portfolio roll-up metrics
 
-- Total repos reporting
-- `% repos low risk`
-- `% repos with release gate failure`
-- Median failed-steps count
-- Week-over-week risk movement (up/down/no-change)
+- `repo_count_total`
+- `repo_count_reporting`
+- `high_risk_repo_count`
+- `medium_risk_repo_count`
+- `low_risk_repo_count`
+- `release_gate_failure_rate_percent`
 
 ## Operating notes
 
-- Keep one schema version per quarter to limit churn.
+- Keep one schema version per quarter unless breaking changes are required.
 - Use a strict reporting cutoff (e.g., Friday 17:00 UTC).
 - Flag missing data as `unknown` instead of implicitly passing.
-
-## Tooling support
-
-Use the adapter script `scripts/build_portfolio_scorecard.py` to generate a consolidated scorecard JSON from normalized records.
+- Attach the generated scorecard JSON to weekly leadership reviews.

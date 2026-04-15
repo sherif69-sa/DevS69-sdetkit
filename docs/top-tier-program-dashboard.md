@@ -21,7 +21,7 @@ This dashboard is the weekly control plane for the **DevS69 SDETKit top-tier ful
 | Workstream | Owner role | Current phase | Status | This-week deliverable | Evidence |
 |---|---|---|---|---|---|
 | WS1 Product packaging | Product + DX | Phase 1 | In progress | Publish packaging lanes | [Packaging lanes](packaging-lanes.md) |
-| WS2 Portfolio reporting | Platform engineering | Phase 1 | In progress | Define aggregation schema draft | [Portfolio aggregation schema](portfolio-aggregation-schema.md) |
+| WS2 Portfolio reporting | Platform engineering | Phase 1 | In progress | Publish portfolio reporting recipe | [Portfolio reporting recipe](portfolio-reporting-recipe.md) |
 | WS3 Governance and lifecycle | Architecture + QA governance | Phase 1 | In progress | Publish compatibility matrix | [Policy compatibility matrix](policy-compatibility-matrix.md) |
 | WS4 Commercialization enablement | PMM + Solutions | Phase 1 | In progress | Build role-based quickstart skeleton | [Role-based quickstarts](role-based-quickstarts.md) |
 | WS5 Reliability and release excellence | Release engineering | Phase 1 | In progress | Publish support/escalation model | [Support and escalation model](support-and-escalation-model.md) |
