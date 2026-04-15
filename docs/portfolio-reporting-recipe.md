@@ -143,3 +143,12 @@ python scripts/check_top_tier_reporting_contract.py \
 ```
 
 This validates KPI values against portfolio totals and sample sizes.
+
+
+## Promotion helper
+
+To copy bundle outputs to canonical sample artifact names:
+
+```bash
+python scripts/promote_top_tier_bundle.py --bundle-dir docs/artifacts/top-tier-bundle --date-tag 2026-04-17
+```
