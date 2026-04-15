@@ -107,6 +107,7 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 - Need KPI contract: [Top-tier KPI schema](kpi-schema.md)
 - Need operator runbook: [Operations handbook](operations-handbook.md)
 - Need rollout gates: [Pilot to rollout guide](pilot-to-rollout-guide.md)
+- Need release train gate: [Full release package checklist](full-release-package-checklist.md)
 - Need scale-phase assets: [P2 scale assets](p2-scale-assets.md)
 - Need current references: [CLI reference](cli.md), [API](api.md), and [repo audit reference](repo-audit.md)
 - Migrating older automation? Use [Legacy command migration map](legacy-command-migration-map.md)

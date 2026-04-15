@@ -64,6 +64,7 @@ Track weekly:
 - [KPI baseline snapshot (2026-04-17)](kpi-baseline-week-2026-04-17.md)
 - [Executive weekly report (2026-04-17)](executive-weekly-2026-04-17.md)
 - [Executive monthly report (2026-04)](executive-monthly-2026-04.md)
+- [Full release package checklist](full-release-package-checklist.md)
 
 ### KPI movement
 - _Up / down / no-change summary with one-line interpretation per KPI._
