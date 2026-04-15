@@ -102,3 +102,10 @@ Risk tier thresholds:
 - Use a strict reporting cutoff (e.g., Friday 17:00 UTC).
 - Flag missing data as `unknown` instead of implicitly passing.
 - Attach the generated scorecard JSON to weekly leadership reviews.
+
+## Worked sample artifacts
+
+- Input sample: [`docs/artifacts/portfolio-input-sample-2026-04-17.jsonl`](artifacts/portfolio-input-sample-2026-04-17.jsonl)
+- Output sample: [`docs/artifacts/portfolio-scorecard-sample-2026-04-17.json`](artifacts/portfolio-scorecard-sample-2026-04-17.json)
+
+Use these files as a template for weekly portfolio board generation and review.

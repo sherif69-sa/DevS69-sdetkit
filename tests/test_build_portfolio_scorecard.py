@@ -76,3 +76,28 @@ def test_build_portfolio_scorecard_emits_versioned_contract(tmp_path: Path) -> N
     assert repos["svc-a"]["release_confidence_ok"] is True
     assert repos["svc-b"]["risk_tier"] == "high"
     assert repos["svc-b"]["release_confidence_ok"] is False
+
+
+def test_portfolio_scorecard_sample_artifact_matches_contract_shape() -> None:
+    sample = Path("docs/artifacts/portfolio-scorecard-sample-2026-04-17.json")
+    payload = json.loads(sample.read_text())
+
+    assert payload["schema_name"] == "sdetkit.portfolio.aggregate"
+    assert payload["schema_version"] == "1.0.0"
+
+    totals = payload["totals"]
+    assert totals["repo_count_total"] == len(payload["repos"])
+    assert set(totals).issuperset(
+        {
+            "repo_count_total",
+            "repo_count_reporting",
+            "high_risk_repo_count",
+            "medium_risk_repo_count",
+            "low_risk_repo_count",
+        }
+    )
+
+    for row in payload["repos"]:
+        assert "repo_id" in row
+        assert row["risk_tier"] in {"low", "medium", "high"}
+        assert "evidence_window_end" in row

@@ -58,6 +58,7 @@ Track weekly:
 
 ### Completed
 - [Portfolio aggregation schema](portfolio-aggregation-schema.md)
+- [Portfolio scorecard sample (2026-04-17)](artifacts/portfolio-scorecard-sample-2026-04-17.json)
 - [Role-based quickstarts](role-based-quickstarts.md)
 - [KPI schema (v1)](kpi-schema.md)
 - [KPI baseline snapshot (2026-04-17)](kpi-baseline-week-2026-04-17.md)
