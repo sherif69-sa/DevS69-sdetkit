@@ -295,9 +295,27 @@ We will execute **one concrete deliverable at a time**, and each cycle will incl
 - Adaptive automation is now scenario-database-driven and doctor-aware.
 - Ready for next two execution tasks you requested.
 
+
+### Iteration 16 (adaptive first-run value hardening)
+
+**Goal:** Ensure doctor/reviewer adaptive runs provide high-value first-time hints from current warnings/failures.
+
+**Delivered:**
+- Enhanced `scripts/adaptive_postcheck.py` with `first_run_triage` synthesis from doctor failures + adaptive review actions.
+- Added `first_run_hints_present` check to scenario contract so runs must emit actionable hints.
+- Postcheck output now includes prioritized fix hints for immediate remediation by adopters.
+
+**Validation:**
+- `make adaptive-postcheck` passes with `ok=true` and includes first-run triage hints.
+- `python scripts/validate_enterprise_contracts.py` remains green.
+
+**Status:**
+- First-time adoption runs now return real actionable hints from live repo state.
+- Ready for the remaining two execution tasks.
+
 ## Next step (when user says `next`)
 
-Execute hardening step H5:
-- add scheduled CI workflow for adaptive scenario DB + postcheck generation,
-- persist run metadata and trend deltas for weekly ops reviews,
-- and enforce scenario threshold policy by branch profile.
+Execute hardening step H6:
+- schedule adaptive postcheck + doctor-aware hint generation in CI,
+- persist first-run triage outputs and trend deltas,
+- and enforce minimum hint quality gates for adoption workflows.

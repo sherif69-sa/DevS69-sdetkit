@@ -96,7 +96,7 @@ def _bool_check(name: str, passed: bool, details: str, severity: str = "required
     return {"check": name, "passed": passed, "details": details, "severity": severity}
 
 
-def _run_alignment_checks(payload: dict[str, Any], scenario: dict[str, Any]) -> list[dict[str, Any]]:
+def _run_alignment_checks(payload: dict[str, Any], scenario: dict[str, Any], first_run_triage: dict[str, Any]) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
     enabled = set(scenario.get("enabled_checks", []))
     warn_checks = set(scenario.get("warn_only_checks", []))
@@ -190,8 +190,75 @@ def _run_alignment_checks(payload: dict[str, Any], scenario: dict[str, Any]) -> 
             )
         )
 
+    if "first_run_hints_present" in enabled:
+        hint_count = int(first_run_triage.get("hint_count", 0))
+        checks.append(
+            _bool_check(
+                "first_run_hints_present",
+                hint_count > 0,
+                f"first-run triage should provide actionable hints when issues exist (hints={hint_count})",
+                severity_for("first_run_hints_present"),
+            )
+        )
+
     return checks
 
+
+
+
+def _build_first_run_triage(payload: dict[str, Any], doctor: dict[str, Any] | None) -> dict[str, Any]:
+    adaptive = payload.get("adaptive_database", {}) if isinstance(payload.get("adaptive_database"), dict) else {}
+    contract = adaptive.get("release_readiness_contract", {}) if isinstance(adaptive.get("release_readiness_contract"), dict) else {}
+
+    doctor_failed = []
+    if isinstance(doctor, dict):
+        raw_failed = doctor.get("failed_check_ids", [])
+        if isinstance(raw_failed, list):
+            doctor_failed = [str(x) for x in raw_failed]
+
+    top_actions: list[str] = []
+    raw_top_actions = payload.get("top_actions", [])
+    if isinstance(raw_top_actions, list):
+        top_actions.extend(str(x) for x in raw_top_actions[:5])
+
+    recommendation_engine = contract.get("recommendation_engine", {})
+    if isinstance(recommendation_engine, dict):
+        for lane in ("now", "next", "watchlist"):
+            rows = recommendation_engine.get(lane, [])
+            if isinstance(rows, list):
+                for row in rows[:3]:
+                    if isinstance(row, dict):
+                        action = row.get("action") or row.get("title") or row.get("summary")
+                        if action:
+                            top_actions.append(str(action))
+
+    dedup_actions: list[str] = []
+    seen: set[str] = set()
+    for item in top_actions:
+        if item not in seen:
+            seen.add(item)
+            dedup_actions.append(item)
+
+    fix_hints: list[dict[str, str]] = []
+    doctor_fix_map = {
+        "pyproject": "Ensure pyproject.toml is valid and includes project metadata required by doctor.",
+        "venv": "Create/activate .venv and install project deps before running gates.",
+        "dev_tools": "Install required dev tools (ruff/mypy/pytest) via bootstrap/install lanes.",
+    }
+    for key in doctor_failed:
+        hint = doctor_fix_map.get(key, f"Investigate failing doctor check: {key}")
+        fix_hints.append({"source": "doctor", "issue": key, "hint": hint})
+
+    for action in dedup_actions[:8]:
+        fix_hints.append({"source": "review", "issue": "adaptive_action", "hint": action})
+
+    status = "good" if not fix_hints else "needs-action"
+    return {
+        "status": status,
+        "doctor_failed_checks": doctor_failed,
+        "priority_hints": fix_hints,
+        "hint_count": len(fix_hints),
+    }
 
 def _default_out_path() -> str:
     date_tag = datetime.now(timezone.utc).date().isoformat()
@@ -212,8 +279,9 @@ def main() -> int:
 
     payload = _load_review_payload(args.repo, args.input_json)
     scenario = _load_scenario(args.scenario)
-    checks = _run_alignment_checks(payload, scenario)
     doctor = _doctor_summary(args.repo)
+    first_run_triage = _build_first_run_triage(payload, doctor)
+    checks = _run_alignment_checks(payload, scenario, first_run_triage)
     passed = sum(1 for c in checks if c.get("passed"))
     failed_required = sum(1 for c in checks if (not c.get("passed")) and c.get("severity") != "warn")
     failed_warn = sum(1 for c in checks if (not c.get("passed")) and c.get("severity") == "warn")
@@ -231,6 +299,7 @@ def main() -> int:
         },
         "checks": checks,
         "doctor": doctor,
+        "first_run_triage": first_run_triage,
     }
 
     out_path = Path(args.out or _default_out_path())
