@@ -49,6 +49,12 @@ EVIDENCE_PROFILES = ("ci", "release", "full")
 EVIDENCE_INCLUDES = ("failed", "actionable", "all")
 ENTERPRISE_RERUN_FAILED_COMMAND = "python -m sdetkit doctor --enterprise-rerun-failed --json"
 ENTERPRISE_RERUN_HIGH_COMMAND = "python -m sdetkit doctor --enterprise-rerun-high --json"
+DEFAULT_RELEASE_FRESHNESS_BUCKETS = (
+    "latest",
+    "recent",
+    "stale",
+    "unknown",
+)
 
 SUPPORTED_POLICY_CHECKS = {
     "ascii",
@@ -2410,7 +2416,9 @@ def main(argv: list[str] | None = None) -> int:
         "--upgrade-audit-release-freshness",
         dest="upgrade_audit_release_freshness",
         action="append",
-        choices=list(upgrade_audit.RELEASE_FRESHNESS_BUCKETS),
+        choices=list(
+            getattr(upgrade_audit, "RELEASE_FRESHNESS_BUCKETS", DEFAULT_RELEASE_FRESHNESS_BUCKETS)
+        ),
         default=None,
         help="Focus doctor upgrade-audit hints on selected target-release freshness buckets.",
     )

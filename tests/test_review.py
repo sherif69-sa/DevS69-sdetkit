@@ -59,6 +59,7 @@ def test_review_repo_plus_data_surfaces_cross_surface_conflict(tmp_path: Path) -
         target=repo,
         out_dir=tmp_path / "out",
         workspace_root=tmp_path / "workspace",
+        profile="forensics",
         no_workspace=True,
     )
 
@@ -337,7 +338,55 @@ def test_review_operator_summary_artifact_written(tmp_path: Path) -> None:
     assert operator_payload["adaptive_database"]["schema_version"] == (
         "sdetkit.review.adaptive-database.v1"
     )
+    assert operator_payload["review_contract_check"]["schema_version"] == (
+        "sdetkit.review.contract-check.v1"
+    )
     assert operator_payload["doctor_gate_contract"]["enforced_each_run"] is True
+    adaptive_db_artifact = Path(payload["artifact_index"]["adaptive_database_json"])
+    contract_check_artifact = Path(payload["artifact_index"]["review_contract_check_json"])
+    assert adaptive_db_artifact.exists()
+    assert contract_check_artifact.exists()
+    adaptive_db_payload = json.loads(adaptive_db_artifact.read_text(encoding="utf-8"))
+    contract_check_payload = json.loads(contract_check_artifact.read_text(encoding="utf-8"))
+    assert adaptive_db_payload["schema_version"] == "sdetkit.review.adaptive-database.v1"
+    assert contract_check_payload["status"] == "pass"
+    assert contract_check_payload["checks"]["gate_matches_blockers"] is True
+    release_readiness_json = Path(payload["artifact_index"]["release_readiness_json"])
+    release_readiness_md = Path(payload["artifact_index"]["release_readiness_md"])
+    recommendation_backlog_json = Path(payload["artifact_index"]["recommendation_backlog_json"])
+    assert release_readiness_json.exists()
+    assert release_readiness_md.exists()
+    assert recommendation_backlog_json.exists()
+    release_payload = json.loads(release_readiness_json.read_text(encoding="utf-8"))
+    assert release_payload["contract_id"]
+    assert release_payload["generated_at_utc"].endswith("Z")
+    assert release_payload["next_review_due_at_utc"].endswith("Z")
+    assert release_payload["gate_decision"] in {"ship", "hold"}
+    assert release_payload["risk_band"] in {"low", "medium", "high", "critical"}
+    assert isinstance(release_payload["risk_score"], int)
+    assert isinstance(release_payload["sla_review_hours"], int)
+    assert isinstance(release_payload["blocker_catalog"], list)
+    assert isinstance(release_payload["owner_summary"], list)
+    assert isinstance(release_payload["recommendation_engine"], dict)
+    assert isinstance(release_payload["recommendation_backlog"], list)
+    assert isinstance(release_payload["agent_orchestration"], list)
+    assert any(row.get("agent_id") == "release-ops-observer" for row in release_payload["agent_orchestration"] if isinstance(row, dict))
+    assert all("engine_signals" in row for row in release_payload["agent_orchestration"] if isinstance(row, dict))
+    if release_payload["blocker_catalog"]:
+        first_blocker = release_payload["blocker_catalog"][0]
+        assert "owner_team" in first_blocker
+        assert "response_sla_hours" in first_blocker
+    assert "trend" in release_payload
+    assert "blockers_delta" in release_payload["trend"]
+    assert "Release Readiness Contract" in release_readiness_md.read_text(encoding="utf-8")
+    assert "Contract ID" in release_readiness_md.read_text(encoding="utf-8")
+    assert "Trend:" in release_readiness_md.read_text(encoding="utf-8")
+    assert "Risk:" in release_readiness_md.read_text(encoding="utf-8")
+    assert "Blocker details" in release_readiness_md.read_text(encoding="utf-8")
+    assert "Owner summary" in release_readiness_md.read_text(encoding="utf-8")
+    assert "Recommendation engine" in release_readiness_md.read_text(encoding="utf-8")
+    assert "Backlog ranking" in release_readiness_md.read_text(encoding="utf-8")
+    assert "Agent playbook" in release_readiness_md.read_text(encoding="utf-8")
 
 
 def test_cli_review_interactive_navigator_outputs_selected_section(tmp_path: Path) -> None:
@@ -522,11 +571,73 @@ def test_review_adaptive_database_and_ai_handoff_contract(tmp_path: Path) -> Non
     assert rc == 2
     assert payload["adaptive_database"]["schema_version"] == "sdetkit.review.adaptive-database.v1"
     assert len(payload["adaptive_database"]["top5_actions"]) <= 5
+    assert "quality_matrix" in payload["adaptive_database"]
+    assert "findings_analytics" in payload["adaptive_database"]
+    assert "action_analytics" in payload["adaptive_database"]
+    assert "scalability_posture" in payload["adaptive_database"]
+    assert "release_readiness_contract" in payload["adaptive_database"]
+    assert payload["review_contract_check"]["status"] == "pass"
+    assert payload["adaptive_database"]["release_readiness_contract"]["gate_decision"] in {
+        "ship",
+        "hold",
+    }
     ai_packet = payload["adaptive_review"]["ai_assistant"]
     assert ai_packet["workflow_alignment"]["review_adaptive_enabled"] is True
     assert ai_packet["reviewer_engine_contract"]["five_heads_required"] is True
     assert ai_packet["doctor_gate_contract"]["doctor_first"] is True
     assert payload["doctor_gate_contract"]["gate_fast_required_for_promotion"] is True
+
+
+def test_review_includes_readiness_snapshot_for_repo_targets(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "pyproject.toml").write_text(
+        "[project]\nname='demo'\nversion='0.1.0'\n",
+        encoding="utf-8",
+    )
+    (repo / "docs").mkdir()
+    (repo / "docs" / "index.md").write_text("gate fast -> gate release -> doctor\n", encoding="utf-8")
+    (repo / "tests").mkdir()
+    for index in range(10):
+        (repo / "tests" / f"test_seed_{index}.py").write_text("def test_ok():\n    assert True\n")
+    (repo / "SECURITY.md").write_text("report a vulnerability here\n", encoding="utf-8")
+    (repo / "RELEASE.md").write_text("release checklist\n", encoding="utf-8")
+    (repo / "QUALITY_PLAYBOOK.md").write_text("quality gate\n", encoding="utf-8")
+    (repo / "requirements.lock").write_text("pkg==1.0\n", encoding="utf-8")
+    (repo / "poetry.lock").write_text("[[package]]\n", encoding="utf-8")
+    (repo / "CODE_OF_CONDUCT.md").write_text("be respectful\n", encoding="utf-8")
+    (repo / "SUPPORT.md").write_text("support policy\n", encoding="utf-8")
+    (repo / "CONTRIBUTING.md").write_text("contribution rules\n", encoding="utf-8")
+    (repo / "CHANGELOG.md").write_text("## 2026-04-16\n- initial\n", encoding="utf-8")
+    (repo / ".github" / "workflows").mkdir(parents=True)
+    (repo / ".github" / "workflows" / "ci.yml").write_text(
+        "steps:\n  - run: pytest -q\n  - run: ruff check .\n",
+        encoding="utf-8",
+    )
+    (repo / "artifacts").mkdir()
+
+    rc, payload, _, _ = review.run_review(
+        target=repo,
+        out_dir=tmp_path / "out",
+        workspace_root=tmp_path / "workspace",
+        profile="forensics",
+        no_workspace=True,
+    )
+
+    assert rc in {0, 2}
+    assert "readiness_json" in payload["artifact_index"]
+    snapshot = payload["adaptive_database"]["readiness_snapshot"]
+    assert snapshot["score"] >= 0.0
+    assert snapshot["artifact"] == payload["artifact_index"]["readiness_json"]
+    assert "operational_tier" in snapshot
+    assert "top_tier_ready" in snapshot
+    assert "check_scorecard" in snapshot
+    assert "failed_checks" in snapshot
+    assert "scenario_capacity" in snapshot
+    assert payload["adaptive_database"]["workflow_alignment"]["readiness_included"] is True
+    assert payload["adaptive_database"]["adaptive_alignment"]["engine"] == "five_heads"
+    assert payload["adaptive_database"]["scalability_posture"]["target_scenarios"] == 250
+    assert "next_24h_actions" in payload["adaptive_database"]["release_readiness_contract"]
 
 
 def test_probe_memory_artifact_written_and_exposed(tmp_path: Path) -> None:

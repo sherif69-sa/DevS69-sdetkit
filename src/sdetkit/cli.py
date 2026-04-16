@@ -267,6 +267,11 @@ Then use stability-aware command discovery:
         "gate",
         help_text="[Public / stable] Quick confidence and strict release gate checks",
     )
+    _add_passthrough_subcommand(
+        sub,
+        "readiness",
+        help_text="[Public / stable] Production readiness scorecard for investor/operator reviews",
+    )
 
     _add_passthrough_subcommand(sub, "ci", help_text="CI template and pipeline validation")
 
@@ -779,6 +784,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "serve":
         return _run_module_main("sdetkit.serve", build_serve_args(ns))
+
+    if ns.cmd == "readiness":
+        return _run_module_main("sdetkit.readiness", ns.args)
 
     if ns.cmd == "init":
         return _run_module_main("sdetkit.repo", build_repo_init_forwarded_args(ns))

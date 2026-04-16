@@ -2,14 +2,16 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import hashlib
 import io
 import json
 import sys
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from . import doctor, inspect_project
+from . import doctor, inspect_project, readiness
 from .evidence_workspace import load_workspace_manifest, record_workspace_run
 from .inspect_compare import run_compare
 from .inspect_data import run_inspect
@@ -504,6 +506,17 @@ def _run_doctor(
     return int(rc), payload, doctor_json
 
 
+def _run_readiness(target: Path, out_dir: Path) -> tuple[dict[str, Any], Path]:
+    readiness_root = target if target.is_dir() else target.parent
+    payload = readiness.build_readiness_report(readiness_root)
+    readiness_json = out_dir / "readiness.json"
+    readiness_json.write_text(
+        json.dumps(payload, sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return payload, readiness_json
+
+
 def _review_scope_for_target(target: Path) -> str:
     return _safe_slug(target.resolve().as_posix())
 
@@ -551,6 +564,14 @@ def run_review(
             "probes": {},
         }
     )
+    previous_review = None
+    previous_hash = None
+    if not no_workspace:
+        previous_review, previous_hash = load_latest_previous_payload(
+            workspace_root=workspace_root,
+            workflow="review",
+            scope=review_scope,
+        )
 
     source_workflows: list[dict[str, Any]] = []
     supporting: list[dict[str, Any]] = []
@@ -652,6 +673,65 @@ def run_review(
                 }
             )
         supporting.append({"kind": "doctor_ok", "value": bool(doctor_payload.get("ok", False))})
+
+    if detection["repo_like"]:
+        readiness_payload, readiness_json = _run_readiness(target, out_dir)
+        artifact_index["readiness_json"] = readiness_json.as_posix()
+        readiness_score = float(readiness_payload.get("score", 0.0))
+        readiness_tier = str(readiness_payload.get("tier", "needs-work"))
+        readiness_status = "ok" if readiness_score >= 75.0 else "findings"
+        source_workflows.append({"workflow": "readiness", "status": readiness_status})
+        baseline_stage["checks_run"].append({"check": "readiness", "status": readiness_status})
+        supporting.append({"kind": "readiness_score", "value": readiness_score})
+        supporting.append({"kind": "readiness_tier", "value": readiness_tier})
+        supporting.append(
+            {"kind": "readiness_operational_tier", "value": str(readiness_payload.get("operational_tier", "needs-work"))}
+        )
+        supporting.append(
+            {"kind": "readiness_top_tier_ready", "value": bool(readiness_payload.get("top_tier_ready", False))}
+        )
+        supporting.append(
+            {
+                "kind": "readiness_check_scorecard",
+                "value": dict(readiness_payload.get("check_scorecard", {})),
+            }
+        )
+        supporting.append(
+            {"kind": "readiness_failed_checks", "value": list(readiness_payload.get("failed_checks", []))}
+        )
+        supporting.append(
+            {
+                "kind": "readiness_scenario_capacity",
+                "value": dict(readiness_payload.get("scenario_capacity", {})),
+            }
+        )
+
+        if readiness_score >= 90.0:
+            healthy_controls.append("production-readiness scorecard indicates strong launch posture")
+        else:
+            findings.append(
+                {
+                    "id": "review:readiness",
+                    "kind": "readiness",
+                    "severity": "high" if readiness_score < 75.0 else "medium",
+                    "priority": 72 if readiness_score < 75.0 else 58,
+                    "why_it_matters": (
+                        "readiness scorecard indicates missing launch controls across governance/CI/release"
+                    ),
+                    "next_action": "Close top readiness actions before promotion decisions.",
+                    "message": f"readiness score is {readiness_score} ({readiness_tier})",
+                }
+            )
+            for idx, action in enumerate(readiness_payload.get("adaptive_actions", [])[:3]):
+                if not isinstance(action, dict):
+                    continue
+                prioritized_actions.append(
+                    {
+                        "tier": str(action.get("lane", "now" if readiness_score < 75.0 else "next")),
+                        "priority": int(action.get("priority", 72 - idx)),
+                        "action": str(action.get("action", "")),
+                    }
+                )
 
     inspect_payload: dict[str, Any] | None = None
     if "inspect" in baseline_checks:
@@ -775,6 +855,11 @@ def run_review(
         inspect_payload
         and "inspect-compare" in deepen_checks
         and escalation.needed
+        and (
+            not previous_review
+            or not detection.get("repo_like", False)
+            or bool(contradiction_graph.get("flat_contradictions"))
+        )
         and not no_workspace
     ):
         scope = _review_scope_for_target(target)
@@ -912,14 +997,6 @@ def run_review(
     review_judgment["recommendations"] = profile_recs
 
     prioritized_actions.extend(review_judgment.get("recommendations", []))
-    previous_review = None
-    previous_hash = None
-    if not no_workspace:
-        previous_review, previous_hash = load_latest_previous_payload(
-            workspace_root=workspace_root,
-            workflow="review",
-            scope=review_scope,
-        )
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "contract_version": REVIEW_CONTRACT_VERSION,
@@ -1086,6 +1163,7 @@ def run_review(
         "review_adaptive_enabled": True,
         "gate_fast_recommended": True,
         "code_scanning_included": "code_scanning" in payload,
+        "readiness_included": "readiness_json" in artifact_index,
         "work_id": str(payload.get("request_context", {}).get("work_id", "")),
     }
     doctor_gate_contract = {
@@ -1095,12 +1173,340 @@ def run_review(
         "gate_fast_required_for_promotion": True,
         "canonical_sequence": [
             "python -m sdetkit doctor --format json",
+            "python -m sdetkit readiness . --format json",
             "python -m sdetkit gate fast --format json --stable-json",
             "python -m sdetkit gate release --format json",
             "python -m sdetkit review . --format operator-json",
         ],
     }
     payload["doctor_gate_contract"] = doctor_gate_contract
+    findings_severity_counts: dict[str, int] = {}
+    findings_kind_counts: dict[str, int] = {}
+    for item in payload.get("findings", []):
+        if not isinstance(item, dict):
+            continue
+        sev = str(item.get("severity", "unknown"))
+        kind = str(item.get("kind", "unknown"))
+        findings_severity_counts[sev] = int(findings_severity_counts.get(sev, 0)) + 1
+        findings_kind_counts[kind] = int(findings_kind_counts.get(kind, 0)) + 1
+
+    action_tier_counts: dict[str, int] = {}
+    for item in payload.get("prioritized_actions", []):
+        if not isinstance(item, dict):
+            continue
+        tier = str(item.get("tier", "unknown"))
+        action_tier_counts[tier] = int(action_tier_counts.get(tier, 0)) + 1
+
+    release_blockers = [
+        str(item.get("id", "unknown"))
+        for item in payload.get("findings", [])
+        if isinstance(item, dict) and int(item.get("priority", 0)) >= 70
+    ]
+    blocker_catalog: list[dict[str, Any]] = []
+    owner_routing = {
+        "doctor": ("platform-quality", 24),
+        "readiness": ("release-management", 24),
+        "code-scanning": ("security", 8),
+        "inspect": ("qa-ops", 24),
+        "inspect-project": ("qa-ops", 24),
+    }
+    for item in payload.get("findings", []):
+        if not isinstance(item, dict) or int(item.get("priority", 0)) < 70:
+            continue
+        kind = str(item.get("kind", "unknown"))
+        owner_team, response_sla_hours = owner_routing.get(kind, ("release-management", 24))
+        blocker_catalog.append(
+            {
+                "id": str(item.get("id", "unknown")),
+                "kind": kind,
+                "severity": str(item.get("severity", "unknown")),
+                "priority": int(item.get("priority", 0)),
+                "why_it_matters": str(item.get("why_it_matters", "")),
+                "next_action": str(item.get("next_action", "")),
+                "owner_team": owner_team,
+                "response_sla_hours": response_sla_hours,
+            }
+        )
+    readiness_top_tier_ready = next(
+        (
+            bool(row.get("value", False))
+            for row in supporting
+            if isinstance(row, dict) and str(row.get("kind")) == "readiness_top_tier_ready"
+        ),
+        False,
+    )
+    if not readiness_top_tier_ready and "readiness:top-tier-gate" not in release_blockers:
+        release_blockers.append("readiness:top-tier-gate")
+        blocker_catalog.append(
+            {
+                "id": "readiness:top-tier-gate",
+                "kind": "readiness",
+                "severity": "high",
+                "priority": 72,
+                "why_it_matters": (
+                    "Top-tier readiness gate is not satisfied for current scenario-capacity target."
+                ),
+                "next_action": "Close readiness adaptive actions until top_tier_ready=true.",
+                "owner_team": "release-management",
+                "response_sla_hours": 24,
+            }
+        )
+    owner_summary_map: dict[str, dict[str, Any]] = {}
+    for row in blocker_catalog:
+        if not isinstance(row, dict):
+            continue
+        owner = str(row.get("owner_team", "release-management"))
+        item = owner_summary_map.setdefault(
+            owner,
+            {
+                "owner_team": owner,
+                "blocker_count": 0,
+                "max_priority": 0,
+                "min_response_sla_hours": 72,
+            },
+        )
+        item["blocker_count"] = int(item.get("blocker_count", 0)) + 1
+        item["max_priority"] = max(int(item.get("max_priority", 0)), int(row.get("priority", 0)))
+        item["min_response_sla_hours"] = min(
+            int(item.get("min_response_sla_hours", 72)),
+            int(row.get("response_sla_hours", 72)),
+        )
+    owner_summary = sorted(
+        owner_summary_map.values(),
+        key=lambda item: (-int(item.get("blocker_count", 0)), -int(item.get("max_priority", 0))),
+    )
+    owner_routes = [
+        {
+            "owner_team": str(item.get("owner_team", "")),
+            "priority_focus": int(item.get("max_priority", 0)),
+            "recommended_actions": [
+                str(row.get("next_action", ""))
+                for row in blocker_catalog
+                if isinstance(row, dict)
+                and str(row.get("owner_team", "")) == str(item.get("owner_team", ""))
+                and str(row.get("next_action", "")).strip()
+            ][:5],
+        }
+        for item in owner_summary
+        if isinstance(item, dict)
+    ]
+    next_24h_actions = [
+        str(item.get("action", ""))
+        for item in payload.get("prioritized_actions", [])
+        if isinstance(item, dict)
+        and str(item.get("tier", "")).strip().lower() == "now"
+        and str(item.get("action", "")).strip()
+    ][:5]
+    next_72h_actions = [
+        str(item.get("action", ""))
+        for item in payload.get("prioritized_actions", [])
+        if isinstance(item, dict)
+        and str(item.get("tier", "")).strip().lower() in {"next", "soon"}
+        and str(item.get("action", "")).strip()
+    ][:8]
+    release_ready_now = len(release_blockers) == 0
+    generated_at = datetime.now(timezone.utc)
+    generated_at_utc = generated_at.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    next_review_due = generated_at + (timedelta(hours=72) if release_ready_now else timedelta(hours=24))
+    next_review_due_utc = next_review_due.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    contract_material = {
+        "gate_decision": "ship" if release_ready_now else "hold",
+        "blockers": release_blockers,
+        "next_24h_actions": next_24h_actions,
+        "next_72h_actions": next_72h_actions,
+    }
+    contract_id = hashlib.sha256(
+        json.dumps(contract_material, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()[:16]
+    previous_release_contract: dict[str, Any] | None = None
+    if isinstance(previous_review, dict):
+        prev_adaptive = previous_review.get("adaptive_database", {})
+        if isinstance(prev_adaptive, dict):
+            prev_contract = prev_adaptive.get("release_readiness_contract", {})
+            if isinstance(prev_contract, dict):
+                previous_release_contract = prev_contract
+
+    prev_gate_decision = (
+        str(previous_release_contract.get("gate_decision", "unknown"))
+        if isinstance(previous_release_contract, dict)
+        else "unknown"
+    )
+    prev_blockers_count = (
+        len(previous_release_contract.get("blockers", []))
+        if isinstance(previous_release_contract, dict)
+        and isinstance(previous_release_contract.get("blockers", []), list)
+        else 0
+    )
+    release_trend = {
+        "has_previous_contract": bool(previous_release_contract),
+        "previous_gate_decision": prev_gate_decision,
+        "decision_changed": prev_gate_decision not in {"unknown", "ship" if release_ready_now else "hold"},
+        "previous_blockers_count": prev_blockers_count,
+        "current_blockers_count": len(release_blockers),
+        "blockers_delta": len(release_blockers) - prev_blockers_count,
+    }
+    high_priority_findings = len(
+        [
+            row
+            for row in payload.get("findings", [])
+            if isinstance(row, dict) and int(row.get("priority", 0)) >= 70
+        ]
+    )
+    release_risk_score = min(100, int((len(release_blockers) * 25) + (high_priority_findings * 10)))
+    release_risk_band = (
+        "critical" if release_risk_score >= 80 else "high" if release_risk_score >= 55 else "medium" if release_risk_score >= 30 else "low"
+    )
+    sla_review_hours = 8 if release_risk_band == "critical" else 24 if release_risk_band == "high" else 48 if release_risk_band == "medium" else 72
+    recommendation_engine = {
+        "now": next_24h_actions[:5],
+        "next_72h": next_72h_actions[:8],
+        "watchlist": [
+            str(item.get("action", ""))
+            for item in payload.get("prioritized_actions", [])
+            if isinstance(item, dict)
+            and str(item.get("tier", "")).strip().lower() in {"monitor", "later"}
+            and str(item.get("action", "")).strip()
+        ][:8],
+        "owner_routes": owner_routes,
+    }
+    backlog_candidates: list[tuple[str, str]] = []
+    backlog_candidates.extend([("now", action) for action in recommendation_engine["now"]])
+    backlog_candidates.extend([("next", action) for action in recommendation_engine["next_72h"]])
+    backlog_candidates.extend([("watch", action) for action in recommendation_engine["watchlist"]])
+    recommendation_backlog: list[dict[str, Any]] = []
+    seen_actions: set[str] = set()
+    for lane, action in backlog_candidates:
+        normalized_action = str(action).strip()
+        if not normalized_action or normalized_action in seen_actions:
+            continue
+        seen_actions.add(normalized_action)
+        matched_blocker = next(
+            (
+                row
+                for row in blocker_catalog
+                if isinstance(row, dict) and str(row.get("next_action", "")).strip() == normalized_action
+            ),
+            {},
+        )
+        owner_team = (
+            str(matched_blocker.get("owner_team", "release-management"))
+            if isinstance(matched_blocker, dict)
+            else "release-management"
+        )
+        urgency = 90 if lane == "now" else 65 if lane == "next" else 35
+        impact = (
+            85
+            if release_risk_band in {"critical", "high"}
+            else 70 if release_risk_band == "medium" else 55
+        )
+        effort = 3 if len(normalized_action) < 80 else 5
+        priority_index = round((impact + urgency) / max(effort, 1), 2)
+        recommendation_backlog.append(
+            {
+                "action": normalized_action,
+                "lane": lane,
+                "owner_team": owner_team,
+                "impact_score": impact,
+                "urgency_score": urgency,
+                "effort_score": effort,
+                "priority_index": priority_index,
+            }
+        )
+    recommendation_backlog.sort(
+        key=lambda item: float(item.get("priority_index", 0.0)),
+        reverse=True,
+    )
+    overall_engine = payload.get("five_heads", {}).get("overall", {})
+    if not isinstance(overall_engine, dict):
+        overall_engine = {}
+    contradiction_clusters = payload.get("contradiction_graph", {}).get("clusters", [])
+    if not isinstance(contradiction_clusters, list):
+        contradiction_clusters = []
+    executed_probes = payload.get("adaptive_review", {}).get("executed_probes", [])
+    if not isinstance(executed_probes, list):
+        executed_probes = []
+    engine_signals = {
+        "engine_score": float(overall_engine.get("score", 0.0)),
+        "engine_status": str(overall_engine.get("status", "unknown")),
+        "contradiction_clusters": len(contradiction_clusters),
+        "executed_probes": len([row for row in executed_probes if isinstance(row, dict)]),
+    }
+
+    agent_orchestration: list[dict[str, Any]] = [
+        {
+            "agent_id": "release-ops-observer",
+            "purpose": "Track release contract drift and artifact freshness across reruns.",
+            "when_to_use": "Always during release week.",
+            "engine_signals": engine_signals,
+            "suggested_commands": [
+                "python -m sdetkit review . --format operator-json",
+                "python -m sdetkit review . --format json",
+            ],
+        }
+    ]
+    if release_risk_band in {"critical", "high"}:
+        agent_orchestration.append(
+            {
+                "agent_id": "release-commander",
+                "purpose": "Drive blocker burn-down and enforce ship/hold cadence.",
+                "when_to_use": "High/critical release risk.",
+                "engine_signals": engine_signals,
+                "suggested_commands": [
+                    "python -m sdetkit doctor --format json",
+                    "python -m sdetkit gate release --format json",
+                ],
+            }
+        )
+    if any(str(item.get("id", "")).startswith("review:doctor") for item in payload.get("findings", []) if isinstance(item, dict)):
+        agent_orchestration.append(
+            {
+                "agent_id": "platform-quality-agent",
+                "purpose": "Resolve doctor hygiene/governance failures quickly.",
+                "when_to_use": "Doctor findings present.",
+                "engine_signals": engine_signals,
+                "suggested_commands": [
+                    "python -m sdetkit doctor --repo --ci --deps --clean-tree --format json",
+                ],
+            }
+        )
+    if "readiness:top-tier-gate" in release_blockers:
+        agent_orchestration.append(
+            {
+                "agent_id": "readiness-hardening-agent",
+                "purpose": "Close top-tier readiness gaps and scenario-capacity blockers.",
+                "when_to_use": "Top-tier readiness gate fails.",
+                "engine_signals": engine_signals,
+                "suggested_commands": [
+                    "python -m sdetkit readiness . --format json",
+                ],
+            }
+        )
+    if engine_signals["contradiction_clusters"] > 0 or engine_signals["executed_probes"] > 0:
+        agent_orchestration.append(
+            {
+                "agent_id": "adaptive-probe-agent",
+                "purpose": "Investigate contradiction clusters and tighten evidence confidence.",
+                "when_to_use": "Contradiction clusters or probe-heavy runs detected.",
+                "engine_signals": engine_signals,
+                "suggested_commands": [
+                    "python -m sdetkit inspect-compare --latest-vs-previous --format json",
+                    "python -m sdetkit review . --format json",
+                ],
+            }
+        )
+
+    readiness_scenario_snapshot = next(
+        (
+            dict(row.get("value", {}))
+            for row in supporting
+            if isinstance(row, dict) and str(row.get("kind")) == "readiness_scenario_capacity"
+        ),
+        {"target_scenarios": 250, "detected_scenarios": 0, "gap": 250, "status": "needs-expansion"},
+    )
+    detected_scenarios = int(readiness_scenario_snapshot.get("detected_scenarios", 0))
+    target_scenarios = int(readiness_scenario_snapshot.get("target_scenarios", 250))
+    scenario_runway_ratio = round((detected_scenarios / target_scenarios), 2) if target_scenarios else 0.0
+
     payload["adaptive_database"] = {
         "schema_version": "sdetkit.review.adaptive-database.v1",
         "scope": review_scope,
@@ -1108,6 +1514,145 @@ def run_review(
         "top5_actions": top5_actions,
         "workflow_alignment": workflow_alignment,
         "doctor_gate_contract": doctor_gate_contract,
+        "readiness_snapshot": {
+            "score": next(
+                (
+                    float(row.get("value", 0.0))
+                    for row in supporting
+                    if isinstance(row, dict) and str(row.get("kind")) == "readiness_score"
+                ),
+                0.0,
+            ),
+            "tier": next(
+                (
+                    str(row.get("value", "needs-work"))
+                    for row in supporting
+                    if isinstance(row, dict) and str(row.get("kind")) == "readiness_tier"
+                ),
+                "needs-work",
+            ),
+            "operational_tier": next(
+                (
+                    str(row.get("value", "needs-work"))
+                    for row in supporting
+                    if isinstance(row, dict) and str(row.get("kind")) == "readiness_operational_tier"
+                ),
+                "needs-work",
+            ),
+            "top_tier_ready": next(
+                (
+                    bool(row.get("value", False))
+                    for row in supporting
+                    if isinstance(row, dict) and str(row.get("kind")) == "readiness_top_tier_ready"
+                ),
+                False,
+            ),
+            "check_scorecard": next(
+                (
+                    dict(row.get("value", {}))
+                    for row in supporting
+                    if isinstance(row, dict) and str(row.get("kind")) == "readiness_check_scorecard"
+                ),
+                {"total_checks": 0, "passed_checks": 0, "missed_checks": 0, "pass_rate": 0.0},
+            ),
+            "failed_checks": next(
+                (
+                    list(row.get("value", []))
+                    for row in supporting
+                    if isinstance(row, dict) and str(row.get("kind")) == "readiness_failed_checks"
+                ),
+                [],
+            ),
+            "scenario_capacity": next(
+                (
+                    dict(row.get("value", {}))
+                    for row in supporting
+                    if isinstance(row, dict) and str(row.get("kind")) == "readiness_scenario_capacity"
+                ),
+                {
+                    "target_scenarios": 250,
+                    "detected_scenarios": 0,
+                    "gap": 250,
+                    "status": "needs-expansion",
+                },
+            ),
+            "artifact": artifact_index.get("readiness_json"),
+        },
+        "adaptive_alignment": {
+            "engine": "five_heads",
+            "doctor_included": workflow_alignment["doctor_included"],
+            "readiness_included": workflow_alignment["readiness_included"],
+            "scenario_target": 250,
+            "scenario_status": next(
+                (
+                    str(row.get("value", {}).get("status", "needs-expansion"))
+                    for row in supporting
+                    if isinstance(row, dict) and str(row.get("kind")) == "readiness_scenario_capacity"
+                ),
+                "needs-expansion",
+            ),
+        },
+        "quality_matrix": {
+            "workflow_status": str(payload.get("status", "unknown")),
+            "workflow_severity": str(payload.get("severity", "unknown")),
+            "confidence_score": float(payload.get("confidence", {}).get("score", 0.0)),
+            "findings_total": len(payload.get("findings", [])),
+            "conflicts_total": len(payload.get("conflicting_signals", [])),
+            "healthy_controls_total": len(payload.get("healthy_controls", [])),
+            "findings_by_severity": findings_severity_counts,
+        },
+        "findings_analytics": {
+            "by_severity": findings_severity_counts,
+            "by_kind": findings_kind_counts,
+            "high_priority_total": len(
+                [
+                    row
+                    for row in payload.get("findings", [])
+                    if isinstance(row, dict) and int(row.get("priority", 0)) >= 70
+                ]
+            ),
+        },
+        "action_analytics": {
+            "tiers": action_tier_counts,
+            "top_priorities": [
+                int(item.get("priority", 0))
+                for item in payload.get("prioritized_actions", [])
+                if isinstance(item, dict)
+            ][:10],
+        },
+        "scalability_posture": {
+            "scenario_capacity": readiness_scenario_snapshot,
+            "target_scenarios": target_scenarios,
+            "detected_scenarios": detected_scenarios,
+            "runway_ratio": scenario_runway_ratio,
+            "scale_mode": "top-tier-ready" if scenario_runway_ratio >= 1.0 else "expansion-required",
+        },
+        "release_readiness_contract": {
+            "contract_id": contract_id,
+            "generated_at_utc": generated_at_utc,
+            "next_review_due_at_utc": next_review_due_utc,
+            "ready_now": release_ready_now,
+            "gate_decision": "ship" if release_ready_now else "hold",
+            "blockers": release_blockers,
+            "blocker_catalog": blocker_catalog,
+            "owner_summary": owner_summary,
+            "recommendation_engine": recommendation_engine,
+            "recommendation_backlog": recommendation_backlog,
+            "agent_orchestration": agent_orchestration,
+            "trend": release_trend,
+            "risk_score": release_risk_score,
+            "risk_band": release_risk_band,
+            "sla_review_hours": sla_review_hours,
+            "next_24h_actions": next_24h_actions,
+            "next_72h_actions": next_72h_actions,
+            "recommended_sequence": [
+                "python -m sdetkit doctor --format json",
+                "python -m sdetkit readiness . --format json",
+                "python -m sdetkit gate fast --format json --stable-json",
+                "python -m sdetkit gate release --format json",
+                "python -m sdetkit review . --format operator-json",
+            ],
+        },
         "probe_memory_updates": payload["adaptive_review"]["probe_memory"].get("updates", []),
     }
     ai_assistant = payload["adaptive_review"].get("ai_assistant", {})
@@ -1120,6 +1665,7 @@ def run_review(
         }
         ai_assistant["doctor_gate_contract"] = doctor_gate_contract
         payload["adaptive_review"]["ai_assistant"] = ai_assistant
+    payload["review_contract_check"] = _build_review_contract_check(payload)
     payload["operator_summary"] = _build_operator_summary(payload)
 
     json_path = out_dir / "review.json"
@@ -1128,10 +1674,20 @@ def run_review(
     operator_json_path = out_dir / "review-operator-summary.json"
     review_plan_path = out_dir / "review-plan.json"
     review_tracks_path = out_dir / "review-tracks.json"
+    adaptive_db_path = out_dir / "adaptive-database.json"
+    review_contract_check_path = out_dir / "review-contract-check.json"
+    release_readiness_json_path = out_dir / "release-readiness.json"
+    release_readiness_md_path = out_dir / "release-readiness.md"
+    recommendation_backlog_json_path = out_dir / "recommendation-backlog.json"
     artifact_index["profile_packet_json"] = packet_json_path.as_posix()
     artifact_index["operator_summary_json"] = operator_json_path.as_posix()
     artifact_index["review_plan_json"] = review_plan_path.as_posix()
     artifact_index["review_tracks_json"] = review_tracks_path.as_posix()
+    artifact_index["adaptive_database_json"] = adaptive_db_path.as_posix()
+    artifact_index["review_contract_check_json"] = review_contract_check_path.as_posix()
+    artifact_index["release_readiness_json"] = release_readiness_json_path.as_posix()
+    artifact_index["release_readiness_md"] = release_readiness_md_path.as_posix()
+    artifact_index["recommendation_backlog_json"] = recommendation_backlog_json_path.as_posix()
     payload["artifact_index"] = artifact_index
     payload["operator_summary"]["artifacts"] = artifact_index
     packet_json_path.write_text(
@@ -1145,6 +1701,32 @@ def run_review(
     )
     review_tracks_path.write_text(
         json.dumps({"tracks": likely_tracks}, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
+    adaptive_db_path.write_text(
+        json.dumps(payload["adaptive_database"], sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    review_contract_check_path.write_text(
+        json.dumps(payload["review_contract_check"], sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    release_readiness_json_path.write_text(
+        json.dumps(payload["adaptive_database"]["release_readiness_contract"], sort_keys=True, indent=2)
+        + "\n",
+        encoding="utf-8",
+    )
+    release_readiness_md_path.write_text(
+        _render_release_readiness_markdown(payload["adaptive_database"]["release_readiness_contract"]),
+        encoding="utf-8",
+    )
+    recommendation_backlog_json_path.write_text(
+        json.dumps(
+            payload["adaptive_database"]["release_readiness_contract"].get("recommendation_backlog", []),
+            sort_keys=True,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
     )
     json_path.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     txt_path.write_text(_render_text(payload), encoding="utf-8")
@@ -1310,6 +1892,152 @@ def _render_text(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _render_release_readiness_markdown(contract: dict[str, Any]) -> str:
+    contract_id = str(contract.get("contract_id", "unknown"))
+    decision = str(contract.get("gate_decision", "hold")).strip().lower()
+    ready_now = bool(contract.get("ready_now", False))
+    generated_at = str(contract.get("generated_at_utc", ""))
+    next_due_at = str(contract.get("next_review_due_at_utc", ""))
+    risk_score = int(contract.get("risk_score", 0))
+    risk_band = str(contract.get("risk_band", "low"))
+    sla_hours = int(contract.get("sla_review_hours", 72))
+    blockers = [str(item) for item in contract.get("blockers", [])]
+    blocker_catalog = contract.get("blocker_catalog", [])
+    if not isinstance(blocker_catalog, list):
+        blocker_catalog = []
+    owner_summary = contract.get("owner_summary", [])
+    if not isinstance(owner_summary, list):
+        owner_summary = []
+    recommendation_engine = contract.get("recommendation_engine", {})
+    if not isinstance(recommendation_engine, dict):
+        recommendation_engine = {}
+    recommendation_backlog = contract.get("recommendation_backlog", [])
+    if not isinstance(recommendation_backlog, list):
+        recommendation_backlog = []
+    agent_orchestration = contract.get("agent_orchestration", [])
+    if not isinstance(agent_orchestration, list):
+        agent_orchestration = []
+    trend = contract.get("trend", {})
+    if not isinstance(trend, dict):
+        trend = {}
+    actions_24h = [str(item) for item in contract.get("next_24h_actions", [])]
+    actions_72h = [str(item) for item in contract.get("next_72h_actions", [])]
+    sequence = [str(item) for item in contract.get("recommended_sequence", [])]
+
+    lines = [
+        "# Release Readiness Contract",
+        "",
+        f"- Contract ID: `{contract_id}`",
+        f"- Gate decision: **{decision}**",
+        f"- Ready now: **{str(ready_now).lower()}**",
+        f"- Generated at (UTC): `{generated_at}`",
+        f"- Next review due (UTC): `{next_due_at}`",
+        f"- Risk: **{risk_band}** (`score={risk_score}`)",
+        f"- SLA review window: **{sla_hours}h**",
+        f"- Blockers: **{len(blockers)}**",
+        (
+            "- Trend: "
+            f"prev_decision=`{trend.get('previous_gate_decision', 'unknown')}`, "
+            f"decision_changed={trend.get('decision_changed', False)}, "
+            f"blockers_delta={trend.get('blockers_delta', 0)}"
+        ),
+        "",
+        "## Blockers",
+    ]
+    if blockers:
+        lines.extend([f"- {item}" for item in blockers])
+    else:
+        lines.append("- none")
+    if blocker_catalog:
+        lines.extend(["", "## Blocker details"])
+        for row in blocker_catalog[:8]:
+            if not isinstance(row, dict):
+                continue
+            lines.append(
+                "- "
+                f"{row.get('id')} "
+                f"(kind={row.get('kind')}, severity={row.get('severity')}, priority={row.get('priority')}, "
+                f"owner={row.get('owner_team')}, sla={row.get('response_sla_hours')}h)"
+            )
+            lines.append(f"  - why: {row.get('why_it_matters', '')}")
+            lines.append(f"  - next: {row.get('next_action', '')}")
+    if owner_summary:
+        lines.extend(["", "## Owner summary"])
+        for row in owner_summary:
+            if not isinstance(row, dict):
+                continue
+            lines.append(
+                "- "
+                f"{row.get('owner_team')}: blockers={row.get('blocker_count')}, "
+                f"max_priority={row.get('max_priority')}, "
+                f"min_sla_hours={row.get('min_response_sla_hours')}"
+            )
+    rec_now = recommendation_engine.get("now", [])
+    rec_next = recommendation_engine.get("next_72h", [])
+    rec_watch = recommendation_engine.get("watchlist", [])
+    owner_routes = recommendation_engine.get("owner_routes", [])
+    if not isinstance(rec_now, list):
+        rec_now = []
+    if not isinstance(rec_next, list):
+        rec_next = []
+    if not isinstance(rec_watch, list):
+        rec_watch = []
+    if not isinstance(owner_routes, list):
+        owner_routes = []
+    lines.extend(["", "## Recommendation engine"])
+    lines.append("### Now")
+    lines.extend([f"- {item}" for item in rec_now[:5]] or ["- none"])
+    lines.append("")
+    lines.append("### Next 72h")
+    lines.extend([f"- {item}" for item in rec_next[:8]] or ["- none"])
+    lines.append("")
+    lines.append("### Watchlist")
+    lines.extend([f"- {item}" for item in rec_watch[:8]] or ["- none"])
+    if owner_routes:
+        lines.extend(["", "### Owner routes"])
+        for row in owner_routes[:6]:
+            if not isinstance(row, dict):
+                continue
+            lines.append(f"- {row.get('owner_team')}: focus={row.get('priority_focus')}")
+            for action in row.get("recommended_actions", [])[:3]:
+                lines.append(f"  - {action}")
+    if recommendation_backlog:
+        lines.extend(["", "### Backlog ranking"])
+        for row in recommendation_backlog[:10]:
+            if not isinstance(row, dict):
+                continue
+            lines.append(
+                "- "
+                f"{row.get('action')} "
+                f"(lane={row.get('lane')}, owner={row.get('owner_team')}, "
+                f"priority_index={row.get('priority_index')})"
+            )
+    if agent_orchestration:
+        lines.extend(["", "## Agent playbook"])
+        for row in agent_orchestration:
+            if not isinstance(row, dict):
+                continue
+            lines.append(
+                f"- {row.get('agent_id')}: {row.get('purpose')} (when: {row.get('when_to_use')})"
+            )
+            for cmd in row.get("suggested_commands", [])[:3]:
+                lines.append(f"  - {cmd}")
+    lines.extend(["", "## Next 24h actions"])
+    if actions_24h:
+        lines.extend([f"- {item}" for item in actions_24h])
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Next 72h actions"])
+    if actions_72h:
+        lines.extend([f"- {item}" for item in actions_72h])
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Recommended execution sequence"])
+    lines.extend([f"{idx + 1}. {item}" for idx, item in enumerate(sequence)])
+    lines.append("")
+    return "\n".join(lines)
+
+
 def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
     tracks = [row for row in payload.get("likely_issue_tracks", []) if isinstance(row, dict)]
     conflicts = [row for row in payload.get("conflicting_evidence", []) if isinstance(row, dict)]
@@ -1383,8 +2111,64 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
         },
         "code_scanning": payload.get("code_scanning", {}),
         "adaptive_database": payload.get("adaptive_database", {}),
+        "review_contract_check": payload.get("review_contract_check", {}),
         "doctor_gate_contract": payload.get("doctor_gate_contract", {}),
         "artifacts": payload.get("artifact_index", {}),
+    }
+
+
+def _build_review_contract_check(payload: dict[str, Any]) -> dict[str, Any]:
+    release_contract = payload.get("adaptive_database", {}).get("release_readiness_contract", {})
+    if not isinstance(release_contract, dict):
+        release_contract = {}
+    recommendation_backlog = release_contract.get("recommendation_backlog", [])
+    if not isinstance(recommendation_backlog, list):
+        recommendation_backlog = []
+    blocker_catalog = release_contract.get("blocker_catalog", [])
+    if not isinstance(blocker_catalog, list):
+        blocker_catalog = []
+    owner_summary = release_contract.get("owner_summary", [])
+    if not isinstance(owner_summary, list):
+        owner_summary = []
+    agent_orchestration = release_contract.get("agent_orchestration", [])
+    if not isinstance(agent_orchestration, list):
+        agent_orchestration = []
+
+    gate_decision = str(release_contract.get("gate_decision", "hold"))
+    blockers = [str(item) for item in release_contract.get("blockers", [])]
+    issues: list[str] = []
+
+    if gate_decision == "ship" and blockers:
+        issues.append("gate_decision is ship but blockers are still present")
+    if gate_decision == "hold" and not blockers:
+        issues.append("gate_decision is hold but blockers list is empty")
+    if blockers and not blocker_catalog:
+        issues.append("blockers present but blocker_catalog is empty")
+    if blocker_catalog and not owner_summary:
+        issues.append("blocker_catalog present but owner_summary is empty")
+    if recommendation_backlog and not agent_orchestration:
+        issues.append("recommendation_backlog present but agent_orchestration is empty")
+
+    return {
+        "schema_version": "sdetkit.review.contract-check.v1",
+        "status": "pass" if not issues else "fail",
+        "checks": {
+            "gate_matches_blockers": not (gate_decision == "ship" and blockers)
+            and not (gate_decision == "hold" and not blockers),
+            "blocker_catalog_present_when_blocked": not blockers or bool(blocker_catalog),
+            "owner_summary_present_when_catalog_exists": not blocker_catalog or bool(owner_summary),
+            "agent_orchestration_present_when_backlog_exists": not recommendation_backlog
+            or bool(agent_orchestration),
+        },
+        "issues": issues,
+        "signals": {
+            "gate_decision": gate_decision,
+            "blockers_count": len(blockers),
+            "blocker_catalog_count": len(blocker_catalog),
+            "owner_summary_count": len(owner_summary),
+            "recommendation_backlog_count": len(recommendation_backlog),
+            "agent_orchestration_count": len(agent_orchestration),
+        },
     }
 
 
