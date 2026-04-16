@@ -101,6 +101,38 @@ Primary artifacts produced under `docs/artifacts/`:
 
 See: [`docs/portfolio-reporting-recipe.md`](docs/portfolio-reporting-recipe.md) and [`docs/kpi-schema.md`](docs/kpi-schema.md).
 
+## Production-readiness snapshot (investor/leadership brief)
+
+Generate a deterministic readiness scorecard that summarizes governance, CI, quality, and release evidence surfaces.
+The scorecard is content-aware (checks policy keywords and CI steps), so it is useful for real production triage:
+
+```bash
+python -m sdetkit readiness . --format text
+python -m sdetkit readiness . --format json
+```
+
+Use this output in due-diligence decks, internal operating reviews, or go-to-production checkpoint meetings.
+For repo targets, `sdetkit review` also publishes this snapshot into the review adaptive database (`adaptive_database.readiness_snapshot`).
+Readiness output includes pass/miss scorecards and achievement tiers so reviewers can track quality progression over time.
+Remediation recommendations are adaptive from scan evidence (lane/priority/rationale), not fixed static text.
+The readiness snapshot also tracks test scenario capacity against a 250-scenario target for scale readiness planning.
+For top-tier decisions, use `top_tier_ready` and `operational_tier` from readiness JSON.
+Review adaptive database also includes large-scale analytics blocks (`quality_matrix`, `findings_analytics`, `action_analytics`, `scalability_posture`) to power richer dashboards.
+For near-term launch operations, use `adaptive_database.release_readiness_contract` (`gate_decision`, blockers, next_24h_actions, next_72h_actions).
+`sdetkit review` now also emits a standalone `adaptive-database.json` artifact for direct dashboard ingestion.
+It also emits `release-readiness.json` and `release-readiness.md` for final launch call workflows.
+Release readiness contract now includes `contract_id`, `generated_at_utc`, and `next_review_due_at_utc` for traceable handoffs.
+It also includes a `trend` block so each run can compare decision/blocker movement vs the previous review.
+`release_readiness_contract` now includes `risk_score`, `risk_band`, and `sla_review_hours` for release-room prioritization.
+It also includes `blocker_catalog` for structured blocker triage (id/kind/severity/priority/next_action).
+Blocker catalog now includes `owner_team` and per-blocker `response_sla_hours` for clear routing.
+`release_readiness_contract.owner_summary` aggregates blocker workload by team for standup planning.
+`release_readiness_contract.recommendation_engine` now provides structured now/next/watchlist + owner-route recommendations.
+Review emits `recommendation-backlog.json` with scored recommendation backlog (`priority_index`) for execution sequencing.
+`release_readiness_contract.agent_orchestration` now suggests which specialist agents/playbooks to run based on current blockers and risk.
+Agent entries include `engine_signals` so orchestration decisions stay aligned with adaptive review outcomes.
+Review also emits `review-contract-check.json` with machine-readable reviewer contract consistency checks.
+
 
 - Canonical first proof: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
 - Canonical real-repo fixture proof: [`docs/real-repo-adoption.md`](docs/real-repo-adoption.md)

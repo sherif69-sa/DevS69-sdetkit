@@ -11,8 +11,6 @@ from collections.abc import Sequence
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-import httpx
-
 from .atomicio import atomic_write_text
 from .netclient import (
     CircuitOpenError,
@@ -30,6 +28,9 @@ from .security import (
     redact_url,
     safe_path,
 )
+from .optional_httpx import load_httpx
+
+httpx = load_httpx(feature="sdetkit apiget")
 
 
 def _is_sensitive_header(name: str) -> bool:

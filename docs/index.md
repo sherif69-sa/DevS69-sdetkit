@@ -118,6 +118,7 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 - Need top-tier reporting pipeline? Run `make top-tier-reporting`
 - Need legacy usage inventory? Run legacy command analyzer (`python scripts/legacy_command_analyzer.py --format json`)
 - Need one maturity number? Generate [Adoption scorecard](adoption-scorecard.md)
+- Need investor/leadership readiness posture? Use [Production readiness scorecard](production-readiness-scorecard.md)
 - Need guided canonical triage? Use [Operator onboarding wizard](operator-onboarding-wizard.md)
 - Need API snapshot? Query serve observability endpoint (`GET /v1/observability`)
 - Need docs IA guardrails? Use [Primary docs map](primary-docs-map.md)

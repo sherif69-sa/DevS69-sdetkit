@@ -331,6 +331,15 @@ def build_contradiction_graph(
     has_doctor_failure = any(str(f.get("kind", "")) == doctor_kind for f in findings)
     has_inspect_failure = any(str(f.get("kind", "")) == inspect_kind for f in findings)
     repo_like = bool((detection or {}).get("repo_like", False))
+    data_like = bool((detection or {}).get("data_like", False))
+    if repo_like and data_like and not has_doctor_failure and not has_inspect_failure:
+        graph.append(
+            {
+                "id": "review:conflict:repo-and-data-coexist",
+                "kind": "cross_surface_disagreement",
+                "message": "Repo and data surfaces coexist and require explicit cross-surface verification.",
+            }
+        )
     if has_doctor_failure and not has_inspect_failure:
         graph.append(
             {

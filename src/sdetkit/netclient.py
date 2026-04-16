@@ -9,9 +9,10 @@ from dataclasses import dataclass
 from typing import Any, Literal
 from urllib.parse import urljoin
 
-import httpx
-
+from .optional_httpx import load_httpx
 from .security import default_http_timeout, ensure_allowed_scheme
+
+httpx = load_httpx(feature="sdetkit network workflows")
 
 EventType = Literal[
     "attempt_start",
