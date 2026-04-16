@@ -1,0 +1,75 @@
+{
+  "plan_id": "sdetkit.workflow-consolidation.v1",
+  "generated_at_utc": "2026-04-16T00:00:00Z",
+  "current_workflow_count": 43,
+  "target_primary_workflow_count": 12,
+  "keep_primary": [
+    "ci.yml",
+    "quality.yml",
+    "security.yml",
+    "release.yml",
+    "repo-audit.yml",
+    "dependency-review.yml",
+    "pages.yml",
+    "docs-link-check.yml",
+    "weekly-maintenance.yml",
+    "versioning.yml",
+    "enterprise-gate.yml",
+    "top-tier-reporting-sample.yml"
+  ],
+  "merge_bundles": {
+    "security_bots": [
+      "ghas-alert-sla-bot.yml",
+      "ghas-campaign-bot.yml",
+      "ghas-codeql-hotspots-bot.yml",
+      "ghas-metrics-export-bot.yml",
+      "ghas-review-bot.yml",
+      "secret-protection-review-bot.yml",
+      "security-configuration-audit-bot.yml",
+      "security-maintenance-bot.yml",
+      "osv-scanner.yml",
+      "sbom.yml"
+    ],
+    "dependency_automation": [
+      "dependency-audit.yml",
+      "dependency-auto-merge.yml",
+      "dependency-radar-bot.yml",
+      "pre-commit-autoupdate.yml"
+    ],
+    "platform_operations": [
+      "repo-optimization-bot.yml",
+      "runtime-watchlist-bot.yml",
+      "worker-alignment-bot.yml",
+      "workflow-governance-bot.yml",
+      "integration-topology-radar-bot.yml",
+      "maintenance-on-demand.yml"
+    ],
+    "adoption_comms": [
+      "pr-helper-bot.yml",
+      "pr-quality-comment.yml",
+      "contributor-onboarding-bot.yml",
+      "docs-experience-bot.yml"
+    ]
+  },
+  "candidate_retire_or_absorb": [
+    "advanced-github-actions-reference-64.yml",
+    "adapter-smoke-bot.yml",
+    "adoption-real-repo-canonical.yml",
+    "premium-gate.yml",
+    "mutation-tests.yml",
+    "kpi-weekly.yml",
+    "release-readiness-radar-bot.yml"
+  ],
+  "phases": [
+    "baseline_and_parity",
+    "bundle_introduction",
+    "controlled_retirement",
+    "steady_state_governance"
+  ],
+  "success_targets": {
+    "max_primary_workflows": 12,
+    "duplicate_trigger_reduction_percent": 50,
+    "ci_minutes_reduction_percent": 20,
+    "no_coverage_regression": true
+  }
+}

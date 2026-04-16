@@ -1,0 +1,42 @@
+{
+  "contract_id": "sdetkit.core-command-contract.v1",
+  "version": "1.0.0",
+  "effective_date_utc": "2026-04-16T00:00:00Z",
+  "canonical_first_path": [
+    "python -m sdetkit gate fast",
+    "python -m sdetkit gate release",
+    "python -m sdetkit doctor"
+  ],
+  "tier_a_core_stable": {
+    "commands": [
+      "gate",
+      "doctor"
+    ],
+    "deprecation_window_minor_releases": 2,
+    "requires_migration_path": true,
+    "requires_docs_and_ci_update_before_removal": true
+  },
+  "tier_b_advanced_supported": {
+    "commands": [
+      "repo",
+      "review",
+      "inspect",
+      "serve",
+      "security",
+      "evidence"
+    ],
+    "deprecation_window_minor_releases": 1,
+    "requires_migration_note": true
+  },
+  "tier_c_experimental_legacy": {
+    "commands": [
+      "legacy"
+    ],
+    "compatibility": "best_effort",
+    "enterprise_hard_dependency": false
+  },
+  "policy": {
+    "enforce_tier_a_as_enterprise_front_door": true,
+    "require_explicit_opt_in_for_tier_c": true
+  }
+}

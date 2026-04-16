@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdetkit.dev/contracts/golden-template-catalog.v1.json",
+  "title": "Golden Template Catalog",
+  "type": "object",
+  "required": ["schema_version", "generated_at_utc", "templates"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "sdetkit.golden-template-catalog.v1"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "templates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "template_id",
+          "version",
+          "persona",
+          "lifecycle_stage",
+          "owner_team",
+          "support_channel",
+          "artifacts"
+        ],
+        "properties": {
+          "template_id": { "type": "string" },
+          "version": { "type": "string" },
+          "persona": {
+            "type": "string",
+            "enum": ["platform_engineer", "release_manager", "security_owner", "service_team"]
+          },
+          "lifecycle_stage": {
+            "type": "string",
+            "enum": ["draft", "candidate", "approved", "deprecated", "retired"]
+          },
+          "owner_team": { "type": "string" },
+          "support_channel": { "type": "string" },
+          "artifacts": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "notes": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

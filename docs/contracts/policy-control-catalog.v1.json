@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdetkit.dev/contracts/policy-control-catalog.v1.json",
+  "title": "Policy Control Catalog",
+  "type": "object",
+  "required": ["schema_version", "generated_at_utc", "controls"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "sdetkit.policy-control-catalog.v1"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "controls": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "control_id",
+          "domain",
+          "policy_rule_id",
+          "evidence_artifact",
+          "enforcement_level",
+          "owner_team"
+        ],
+        "properties": {
+          "control_id": { "type": "string" },
+          "domain": {
+            "type": "string",
+            "enum": ["security", "release", "quality", "governance", "reliability", "cost"]
+          },
+          "policy_rule_id": { "type": "string" },
+          "evidence_artifact": { "type": "string" },
+          "enforcement_level": {
+            "type": "string",
+            "enum": ["advisory", "required", "blocking"]
+          },
+          "owner_team": { "type": "string" },
+          "notes": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,43 @@
+{
+  "checks": [
+    {
+      "check": "adaptive_database_present",
+      "details": "adaptive_database must be present in review payload",
+      "passed": true,
+      "severity": "required"
+    },
+    {
+      "check": "release_readiness_contract_present",
+      "details": "release_readiness_contract should exist under adaptive_database",
+      "passed": true,
+      "severity": "required"
+    },
+    {
+      "check": "agent_orchestration_present_when_backlog_exists",
+      "details": "if recommendation backlog exists, agent orchestration should be non-empty",
+      "passed": true,
+      "severity": "required"
+    },
+    {
+      "check": "agent_entries_include_engine_signals",
+      "details": "each agent_orchestration row should include engine_signals list",
+      "passed": false,
+      "severity": "warn"
+    },
+    {
+      "check": "recommendation_backlog_sorted_desc",
+      "details": "recommendation backlog should be sorted by priority_index descending",
+      "passed": true,
+      "severity": "required"
+    }
+  ],
+  "generated_from": "runtime review command",
+  "schema_version": "sdetkit.adaptive-postcheck.v1",
+  "summary": {
+    "failed_required": 0,
+    "failed_warn": 1,
+    "ok": true,
+    "passed": 4,
+    "total": 5
+  }
+}

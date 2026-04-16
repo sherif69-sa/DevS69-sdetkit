@@ -1,0 +1,36 @@
+{
+  "contract_id": "sdetkit.support-lifecycle-policy.v1",
+  "version": "1.0.0",
+  "effective_date_utc": "2026-04-16T00:00:00Z",
+  "support_windows": {
+    "current_minor_releases_supported": 2,
+    "lts_months_supported": 12,
+    "legacy_support_mode": "no_active_fixes_security_exceptions_only"
+  },
+  "breaking_change_policy": {
+    "requires_deprecation_notice": true,
+    "requires_migration_path": true,
+    "requires_contract_validation_before_removal": true,
+    "deprecation_windows_minor_releases": {
+      "tier_a": 2,
+      "tier_b": 1,
+      "tier_c": 0
+    }
+  },
+  "release_communication_required": [
+    "support_line_status",
+    "deprecation_timeline",
+    "migration_guide_links",
+    "next_release_breaking_change_statement",
+    "upgrade_support_contact"
+  ],
+  "exception_policy": {
+    "security_emergency_override_allowed": true,
+    "required_fields": [
+      "approver",
+      "impacted_versions",
+      "expiry_date",
+      "remediation_plan"
+    ]
+  }
+}
