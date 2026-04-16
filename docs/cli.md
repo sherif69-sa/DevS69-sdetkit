@@ -22,6 +22,46 @@ Use this exact sequence first:
 
 This is the primary product path for first-time adoption and release-confidence proof. If a new visitor remembers only one thing, it should be this exact path.
 
+## Enterprise reliability workflow (step-by-step)
+
+After the canonical path succeeds, use the enterprise doctor profile for stricter release governance and focused remediation loops:
+
+1. Full enterprise scan:
+   - `python -m sdetkit doctor --enterprise --format md`
+2. Focused failed-check rerun from workspace history:
+   - `python -m sdetkit doctor --enterprise-rerun-failed --json`
+   - optional scope cap: `--enterprise-rerun-top <N>`
+3. Focused high-severity rerun from workspace history:
+   - `python -m sdetkit doctor --enterprise-rerun-high --json`
+   - optional scope cap: `--enterprise-rerun-top <N>`
+4. Repeat rerun/fix cycles until blockers are cleared and score stabilizes.
+5. Automation handoff (emit only suggested next-pass command):
+   - `python -m sdetkit doctor --enterprise-next-pass-only`
+   - CI-friendly status mode: `python -m sdetkit doctor --enterprise-next-pass-only --enterprise-next-pass-exit-code`
+     (returns exit code `2` when a follow-up pass is recommended, else `0`)
+   - plain output emits three lines: command/no-op, `reason: ...`, `alternates: ...`
+   - markdown-friendly output: `python -m sdetkit doctor --enterprise-next-pass-only --format md`
+   - when no follow-up is needed in markdown mode, output is `_no follow-up pass required_`
+   - markdown mode also emits a second line reason hint: `` `reason: <reason>` ``
+   - markdown mode also emits a third line alternates hint: `` `alternates: <cmds|none>` ``
+   - JSON handoff payload includes `schema_version=sdetkit.doctor.next_pass.v1`
+   - JSON handoff payload includes `has_next_pass` boolean for direct pipeline branching
+   - JSON handoff payload includes `next_pass_reason` (`none|blockers_present|failed_checks_present`)
+   - JSON handoff payload includes `alternate_commands` for fallback lane selection
+   - JSON handoff payload includes `exit_code_hint` (`0` no follow-up, `2` follow-up recommended)
+   - note: this handoff mode is standalone and cannot be combined with rerun flags.
+   - note: `--enterprise-next-pass-exit-code` only works with `--enterprise-next-pass-only`.
+
+If historical workspace payloads do not include per-check severity metadata, `--enterprise-rerun-high` falls back to rerunning recorded failed checks.
+
+Expected enterprise outputs include:
+
+- profile markers (`profile=enterprise`, `profile_mode=full_scan|rerun_failed|rerun_high`)
+- rerun scope metadata (`rerun_top`) when `--enterprise-rerun-top` is used
+- enterprise execution insights (maturity tier, blockers, optimization queue, next-pass reason)
+- next-pass command hint (`next_pass_command`) for the recommended focused rerun step
+- remediation bundle items for rapid operator follow-up
+
 ## Stability-aware command discovery
 
 After the canonical path is working, expand deliberately:

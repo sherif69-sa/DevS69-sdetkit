@@ -1,0 +1,73 @@
+{
+  "schema_version": "sdetkit.enterprise.execution-tracker.v1",
+  "objective": "Operationalize enterprise doctor workflow across remediation, CI handoff, and governance lanes.",
+  "updated_for": "2026-Q2",
+  "phases": [
+    {
+      "id": "phase-1-baseline",
+      "name": "Baseline Lockdown",
+      "status": "in_progress",
+      "success_metric": "Enterprise doctor run artifacts are generated and reviewed weekly.",
+      "tasks": [
+        {
+          "id": "baseline-capture",
+          "status": "in_progress",
+          "owner": "repo-ops",
+          "deliverable": "Initial enterprise baseline snapshots and scorecard"
+        },
+        {
+          "id": "policy-template",
+          "status": "pending",
+          "owner": "quality-governance",
+          "deliverable": "Versioned enterprise policy defaults"
+        }
+      ]
+    },
+    {
+      "id": "phase-2-remediation-loop",
+      "name": "Focused Remediation Loops",
+      "status": "in_progress",
+      "success_metric": "Rerun loops close high-severity blockers within one iteration window.",
+      "tasks": [
+        {
+          "id": "rerun-high-lane",
+          "status": "completed",
+          "owner": "repo-ops",
+          "deliverable": "--enterprise-rerun-high workflow"
+        },
+        {
+          "id": "next-pass-contract",
+          "status": "completed",
+          "owner": "automation-platform",
+          "deliverable": "next-pass JSON/markdown/plain contracts"
+        },
+        {
+          "id": "rerun-top-controls",
+          "status": "completed",
+          "owner": "repo-ops",
+          "deliverable": "--enterprise-rerun-top scoped reruns"
+        }
+      ]
+    },
+    {
+      "id": "phase-3-ci-governance",
+      "name": "CI Governance & Rollout",
+      "status": "pending",
+      "success_metric": "Pipelines branch on next-pass contract and report SLA trends.",
+      "tasks": [
+        {
+          "id": "pipeline-branching",
+          "status": "pending",
+          "owner": "automation-platform",
+          "deliverable": "Use has_next_pass/exit_code_hint in CI workflows"
+        },
+        {
+          "id": "slo-reporting",
+          "status": "pending",
+          "owner": "quality-governance",
+          "deliverable": "Monthly blocker recurrence and remediation latency report"
+        }
+      ]
+    }
+  ]
+}
