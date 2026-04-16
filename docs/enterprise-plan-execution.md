@@ -313,9 +313,27 @@ We will execute **one concrete deliverable at a time**, and each cycle will incl
 - First-time adoption runs now return real actionable hints from live repo state.
 - Ready for the remaining two execution tasks.
 
+
+### Iteration 17 (adaptive scenario expansion)
+
+**Goal:** Increase real scenario coverage beyond 1771 and improve adaptive fit across repo surfaces.
+
+**Delivered:**
+- Expanded scenario database builder to include class-based tests, parametrized test-case expansion, contract-validation scenarios, and workflow-execution scenarios.
+- Regenerated adaptive scenario database with **1894 total scenarios**.
+- Kept adaptive postcheck + first-run triage aligned against the expanded live scenario database.
+
+**Validation:**
+- `make adaptive-scenario-db` now reports 1894 scenarios.
+- `make adaptive-postcheck` and contract validation remain green.
+
+**Status:**
+- Scenario coverage increased and adaptive reviewer/engine fit improved repo-wide.
+- Ready for the final remaining execution task.
+
 ## Next step (when user says `next`)
 
-Execute hardening step H6:
-- schedule adaptive postcheck + doctor-aware hint generation in CI,
-- persist first-run triage outputs and trend deltas,
-- and enforce minimum hint quality gates for adoption workflows.
+Execute hardening step H7:
+- implement scheduled CI workflow for adaptive scenario DB + postcheck + trend summary,
+- persist outputs in versioned artifacts for adaptive database ingestion,
+- and enforce branch-profile scenarios (fast/balanced/strict) automatically.
