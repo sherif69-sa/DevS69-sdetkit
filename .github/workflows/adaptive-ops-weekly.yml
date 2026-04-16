@@ -1,0 +1,42 @@
+name: adaptive-ops-weekly
+
+on:
+  schedule:
+    - cron: "15 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      adaptive_scenario:
+        description: "Scenario profile (fast|balanced|strict)"
+        required: false
+        default: "balanced"
+
+jobs:
+  adaptive-ops:
+    runs-on: ubuntu-latest
+    env:
+      ADAPTIVE_SCENARIO: ${{ github.event.inputs.adaptive_scenario || 'balanced' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build adaptive ops bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATE_TAG="$(date -u +%F)"
+          make adaptive-ops-bundle DATE_TAG="$DATE_TAG" ADAPTIVE_SCENARIO="$ADAPTIVE_SCENARIO"
+
+      - name: Upload adaptive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: adaptive-ops-${{ github.run_id }}
+          path: |
+            docs/artifacts/adaptive-postcheck-*.json
+            docs/artifacts/adaptive-scenario-database-*.json
+            docs/artifacts/adaptive-ops-summary-*.md
+            docs/artifacts/adaptive-ops-summary-*.json

@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-04-16T17:27:17.601663+00:00",
+  "generated_at_utc": "2026-04-16T17:30:46.438210+00:00",
   "scenarios": [
     {
       "domain": "quality",
@@ -12968,6 +12968,13 @@
     {
       "domain": "reliability",
       "kind": "workflow_execution",
+      "scenario_id": "workflow::.github/workflows/adaptive-ops-weekly.yml",
+      "source": ".github/workflows/adaptive-ops-weekly.yml",
+      "status": "active"
+    },
+    {
+      "domain": "reliability",
+      "kind": "workflow_execution",
       "scenario_id": "workflow::.github/workflows/adoption-real-repo-canonical.yml",
       "source": ".github/workflows/adoption-real-repo-canonical.yml",
       "status": "active"
@@ -13266,17 +13273,17 @@
       "governance": 181,
       "quality": 1414,
       "release": 48,
-      "reliability": 178,
+      "reliability": 179,
       "security": 73
     },
     "kinds": {
       "contract_validation": 10,
       "parametrized_test_case": 50,
       "test_function": 1791,
-      "workflow_execution": 43
+      "workflow_execution": 44
     },
     "meets_target": true,
     "target_minimum": 500,
-    "total_scenarios": 1894
+    "total_scenarios": 1895
   }
 }

@@ -6,7 +6,7 @@ WINDOW_END ?= 2026-04-17
 GENERATED_AT ?= 2026-04-17T10:00:00Z
 ADAPTIVE_SCENARIO ?= balanced
 
-.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check adaptive-scenario-db adaptive-postcheck
+.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check adaptive-scenario-db adaptive-postcheck adaptive-ops-bundle
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
@@ -118,3 +118,7 @@ adaptive-postcheck: adaptive-scenario-db
 
 adaptive-scenario-db: venv
 	@bash -lc '. .venv/bin/activate && python scripts/build_adaptive_scenario_database.py . --out docs/artifacts/adaptive-scenario-database-$(DATE_TAG).json'
+
+
+adaptive-ops-bundle: adaptive-postcheck enterprise-contracts-check
+	@bash -lc '. .venv/bin/activate && python scripts/build_adaptive_ops_summary.py --out-md docs/artifacts/adaptive-ops-summary-$(DATE_TAG).md --out-json docs/artifacts/adaptive-ops-summary-$(DATE_TAG).json'
