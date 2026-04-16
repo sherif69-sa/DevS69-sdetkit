@@ -1,0 +1,16 @@
+{
+  "schema_version": "sdetkit.toolkit-reliability-snapshot.v1",
+  "generated_at_utc": "2026-04-16T10:00:00Z",
+  "window": {
+    "start": "2026-04-10",
+    "end": "2026-04-16"
+  },
+  "slos": {
+    "SLO-1": {"value": 0.03, "status": "pass"},
+    "SLO-2": {"value": 0.01, "status": "pass"},
+    "SLO-3": {"value": 18.7, "status": "pass"},
+    "SLO-4": {"value": 36.4, "status": "pass"},
+    "SLO-5": {"value": 0.0, "status": "pass"}
+  },
+  "overall_state": "green"
+}

@@ -1,0 +1,48 @@
+{
+  "profile_id": "enterprise-default-v1",
+  "version": "1.0.0",
+  "effective_date_utc": "2026-04-16T00:00:00Z",
+  "runtime_budget": {
+    "pr_lane": {
+      "target_minutes": 15,
+      "hard_limit_minutes": 20
+    },
+    "release_lane": {
+      "target_minutes": 30,
+      "hard_limit_minutes": 40
+    }
+  },
+  "required_checks": {
+    "pr_lane": [
+      "python -m sdetkit gate fast --format json --out build/gate-fast.json",
+      "python -m sdetkit repo audit . --profile enterprise --format json --output build/repo-audit-enterprise.json",
+      "python -m sdetkit readiness . --format json --output build/readiness.json"
+    ],
+    "release_lane": [
+      "python -m sdetkit gate release --format json --out build/release-preflight.json",
+      "python -m sdetkit doctor --release --format json --output build/doctor-release.json",
+      "python -m sdetkit repo audit . --profile enterprise --format json --output build/repo-audit-enterprise-release.json"
+    ]
+  },
+  "fail_policy": {
+    "fail_closed": [
+      "gate_fast",
+      "gate_release",
+      "repo_audit_enterprise"
+    ],
+    "soft_fail": [
+      "readiness",
+      "non_critical_info_findings"
+    ],
+    "exception_requirements": [
+      "owner",
+      "expiry_date",
+      "remediation_ticket"
+    ]
+  },
+  "promotion_criteria": {
+    "shadow_mode_days": 14,
+    "max_timeout_rate_percent": 5,
+    "requires_recurring_failure_playbooks": true
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "schema_version": "sdetkit.golden-template-catalog.v1",
+  "generated_at_utc": "2026-04-16T10:00:00Z",
+  "templates": [
+    {
+      "template_id": "golden-core-release-confidence",
+      "version": "1.0.0",
+      "persona": "service_team",
+      "lifecycle_stage": "approved",
+      "owner_team": "Platform QA",
+      "support_channel": "#platform-release-confidence",
+      "artifacts": [
+        "docs/core-command-contract.md",
+        "docs/enterprise-default-profile.md"
+      ]
+    },
+    {
+      "template_id": "golden-enterprise-governance",
+      "version": "1.0.0",
+      "persona": "security_owner",
+      "lifecycle_stage": "candidate",
+      "owner_team": "Security Engineering",
+      "support_channel": "#security-governance",
+      "artifacts": [
+        "docs/policy-as-code-controls-integration.md",
+        "docs/contracts/policy-control-catalog.v1.json"
+      ]
+    },
+    {
+      "template_id": "golden-ci-cost-reliability",
+      "version": "1.0.0",
+      "persona": "platform_engineer",
+      "lifecycle_stage": "candidate",
+      "owner_team": "Platform Operations",
+      "support_channel": "#ci-observability",
+      "artifacts": [
+        "docs/ci-cost-telemetry-contract.md",
+        "docs/toolkit-reliability-slo.md"
+      ]
+    },
+    {
+      "template_id": "golden-rollout-ops",
+      "version": "1.0.0",
+      "persona": "release_manager",
+      "lifecycle_stage": "draft",
+      "owner_team": "Release Engineering",
+      "support_channel": "#release-ops",
+      "artifacts": [
+        "docs/workflow-consolidation-map.md",
+        "docs/module-rationalization-plan.md"
+      ]
+    }
+  ]
+}

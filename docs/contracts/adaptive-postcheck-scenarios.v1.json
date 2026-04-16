@@ -1,0 +1,45 @@
+{
+  "contract_id": "sdetkit.adaptive-postcheck-scenarios.v1",
+  "scenarios": {
+    "balanced": {
+      "enabled_checks": [
+        "adaptive_database_present",
+        "release_readiness_contract_present",
+        "agent_orchestration_present_when_backlog_exists",
+        "agent_entries_include_engine_signals",
+        "recommendation_backlog_sorted_desc",
+        "scenario_database_minimum_coverage",
+        "first_run_hints_present"
+      ],
+      "scenario_minimum": 500,
+      "warn_only_checks": [
+        "agent_entries_include_engine_signals"
+      ]
+    },
+    "fast": {
+      "enabled_checks": [
+        "adaptive_database_present",
+        "release_readiness_contract_present",
+        "agent_orchestration_present_when_backlog_exists",
+        "scenario_database_minimum_coverage",
+        "first_run_hints_present"
+      ],
+      "scenario_minimum": 500,
+      "warn_only_checks": []
+    },
+    "strict": {
+      "enabled_checks": [
+        "adaptive_database_present",
+        "release_readiness_contract_present",
+        "agent_orchestration_present_when_backlog_exists",
+        "agent_entries_include_engine_signals",
+        "recommendation_backlog_sorted_desc",
+        "scenario_database_minimum_coverage",
+        "first_run_hints_present"
+      ],
+      "scenario_minimum": 500,
+      "warn_only_checks": []
+    }
+  },
+  "version": "1.0.0"
+}

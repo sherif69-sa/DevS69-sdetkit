@@ -1,0 +1,72 @@
+{
+  "contract_id": "sdetkit.toolkit-reliability-slo.v1",
+  "version": "1.0.0",
+  "effective_date_utc": "2026-04-16T00:00:00Z",
+  "slos": [
+    {
+      "slo_id": "SLO-1",
+      "name": "false_positive_rate",
+      "sli_formula": "false_positive_failures / total_failures",
+      "target": {
+        "operator": "<=",
+        "value": 0.05,
+        "window": "weekly"
+      },
+      "breach_condition": "value > 0.05 for 2 consecutive weeks"
+    },
+    {
+      "slo_id": "SLO-2",
+      "name": "flaky_rate",
+      "sli_formula": "flaky_runs / total_runs",
+      "target": {
+        "operator": "<=",
+        "value": 0.02,
+        "window": "weekly"
+      },
+      "breach_condition": "value > 0.02 for 2 consecutive weeks"
+    },
+    {
+      "slo_id": "SLO-3",
+      "name": "pr_p95_minutes",
+      "sli_formula": "p95(duration_minutes where lane=pr)",
+      "target": {
+        "operator": "<=",
+        "value": 20,
+        "window": "weekly"
+      },
+      "breach_condition": "value > 20 for 2 consecutive weeks"
+    },
+    {
+      "slo_id": "SLO-4",
+      "name": "release_p95_minutes",
+      "sli_formula": "p95(duration_minutes where lane=release)",
+      "target": {
+        "operator": "<=",
+        "value": 40,
+        "window": "weekly"
+      },
+      "breach_condition": "value > 40 for 2 consecutive weeks"
+    },
+    {
+      "slo_id": "SLO-5",
+      "name": "contract_regression_rate",
+      "sli_formula": "contract_regression_runs / total_runs",
+      "target": {
+        "operator": "=",
+        "value": 0,
+        "window": "default_branch"
+      },
+      "breach_condition": "value > 0 on default branch"
+    }
+  ],
+  "error_budget_policy": {
+    "applies_to": ["SLO-1", "SLO-2", "SLO-3", "SLO-4"],
+    "zero_tolerance": ["SLO-5"],
+    "budget_breach_action": "pause_non_essential_rollout"
+  },
+  "weekly_review": {
+    "states": ["green", "yellow", "red"],
+    "requires_top_regressions": 3,
+    "requires_owner_and_due_date": true
+  }
+}

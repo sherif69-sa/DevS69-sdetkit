@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdetkit.dev/contracts/ci-cost-telemetry.v1.json",
+  "title": "CI Cost Telemetry Weekly Snapshot",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at_utc",
+    "window",
+    "repo",
+    "lanes",
+    "totals"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "sdetkit.ci-cost-telemetry.v1"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "window": {
+      "type": "object",
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "string", "format": "date" },
+        "end": { "type": "string", "format": "date" }
+      },
+      "additionalProperties": false
+    },
+    "repo": {
+      "type": "object",
+      "required": ["name", "default_branch"],
+      "properties": {
+        "name": { "type": "string" },
+        "default_branch": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "lanes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "lane_id",
+          "workflow_names",
+          "run_count",
+          "minutes_total",
+          "minutes_p50",
+          "minutes_p95",
+          "artifact_mb_total",
+          "failure_rate_percent"
+        ],
+        "properties": {
+          "lane_id": { "type": "string" },
+          "workflow_names": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "run_count": { "type": "integer", "minimum": 0 },
+          "minutes_total": { "type": "number", "minimum": 0 },
+          "minutes_p50": { "type": "number", "minimum": 0 },
+          "minutes_p95": { "type": "number", "minimum": 0 },
+          "artifact_mb_total": { "type": "number", "minimum": 0 },
+          "failure_rate_percent": { "type": "number", "minimum": 0, "maximum": 100 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "totals": {
+      "type": "object",
+      "required": ["minutes_total", "artifact_mb_total", "run_count_total"],
+      "properties": {
+        "minutes_total": { "type": "number", "minimum": 0 },
+        "artifact_mb_total": { "type": "number", "minimum": 0 },
+        "run_count_total": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

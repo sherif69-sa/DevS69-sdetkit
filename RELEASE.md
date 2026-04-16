@@ -120,3 +120,14 @@ python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-ur
 ```
 
 This repository does not auto-publish to TestPyPI in CI; this path is an optional rehearsal only.
+
+## Release checklist (required)
+
+Before pushing a release tag, maintainers must complete this checklist:
+
+- [ ] Version updated in `pyproject.toml`.
+- [ ] Matching version heading added in `CHANGELOG.md`.
+- [ ] `make release-preflight` completed successfully.
+- [ ] Post-release verify plan generated and install string validated.
+- [ ] Release tag `vX.Y.Z` pushed and workflow monitored to completion.
+- [ ] External install verification completed before public availability claims.

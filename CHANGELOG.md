@@ -8,15 +8,15 @@
 - doctor enterprise workflow: add `--enterprise`, `--enterprise-rerun-failed`, `--enterprise-rerun-high`, and `--enterprise-next-pass-only` modes with enterprise insights/remediation bundles in JSON+markdown output and workspace-driven focused reruns.
 
 # Changelog
-## [1.0.2]
+## [1.0.2] - 2026-04-16
 
 - Packaging: modernize license metadata.
 
 
-## v1.0.1
+## v1.0.1 - 2026-04-01
 - CI gate: run `sdetkit doctor --all` and `sdetkit repo check --profile enterprise` on every PR.
 
-## v1.0.0
+## v1.0.0 - 2026-03-20
 - Enterprise hardening: GitHub Actions pinned to commit SHAs.
 - Dependency hygiene: requirements pinned and lockfiles added.
 - Repo init/apply reliability: tolerate non-UTF-8 preset template files.

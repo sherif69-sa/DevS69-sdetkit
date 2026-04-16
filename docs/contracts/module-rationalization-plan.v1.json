@@ -1,0 +1,67 @@
+{
+  "plan_id": "sdetkit.module-rationalization.v1",
+  "generated_at_utc": "2026-04-16T00:00:00Z",
+  "scope": {
+    "path": "src/sdetkit",
+    "closeout_module_count": 56
+  },
+  "decisions": {
+    "merge_families": [
+      {
+        "family": "continuous_upgrade_closeout_1..11",
+        "action": "merge",
+        "target": "continuous_upgrade_closeout.py"
+      },
+      {
+        "family": "case_study_prep1..4_closeout",
+        "action": "merge",
+        "target": "case_study_prep_closeout.py"
+      },
+      {
+        "family": "integration_expansion2/3/4_closeout",
+        "action": "merge",
+        "target": "integration_expansion_closeout.py"
+      },
+      {
+        "family": "phase2/phase3 closeout modules",
+        "action": "merge",
+        "target": "phase_transition_closeout.py"
+      },
+      {
+        "family": "optimization_closeout_42/46",
+        "action": "merge",
+        "target": "optimization_closeout.py"
+      },
+      {
+        "family": "weekly_review_closeout_49/65",
+        "action": "merge",
+        "target": "weekly_review_closeout.py"
+      }
+    ],
+    "archive_candidates": [
+      "objection_closeout_48.py",
+      "partner_outreach_closeout_80.py",
+      "community_touchpoint_closeout_77.py",
+      "growth_campaign_closeout_81.py",
+      "trust_assets_refresh_closeout_75.py",
+      "trust_faq_expansion_closeout_83.py"
+    ],
+    "keep_candidates": [
+      "launch_readiness_closeout_86.py",
+      "release_prioritization_closeout_85.py",
+      "reliability_closeout_47.py",
+      "governance_scale_closeout_89.py"
+    ]
+  },
+  "compatibility_rules": {
+    "preserve_tier_a_behavior": true,
+    "shim_minor_releases": 2,
+    "require_output_schema_parity_tests": true,
+    "update_docs_before_visibility_change": true
+  },
+  "success_targets": {
+    "closeout_module_reduction_percent": 40,
+    "tier_a_regression_count": 0,
+    "default_surface_simplified": true
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "schema_version": "sdetkit.ci-cost-telemetry.v1",
+  "generated_at_utc": "2026-04-16T10:00:00Z",
+  "window": {
+    "start": "2026-04-10",
+    "end": "2026-04-16"
+  },
+  "repo": {
+    "name": "DevS69-sdetkit",
+    "default_branch": "main"
+  },
+  "lanes": [
+    {
+      "lane_id": "pr",
+      "workflow_names": ["ci.yml", "quality.yml", "repo-audit.yml"],
+      "run_count": 142,
+      "minutes_total": 980.5,
+      "minutes_p50": 6.2,
+      "minutes_p95": 18.7,
+      "artifact_mb_total": 2214.4,
+      "failure_rate_percent": 6.1
+    },
+    {
+      "lane_id": "security",
+      "workflow_names": ["security.yml", "dependency-review.yml"],
+      "run_count": 58,
+      "minutes_total": 311.3,
+      "minutes_p50": 3.9,
+      "minutes_p95": 11.5,
+      "artifact_mb_total": 702.1,
+      "failure_rate_percent": 4.3
+    },
+    {
+      "lane_id": "release",
+      "workflow_names": ["release.yml", "enterprise-gate.yml"],
+      "run_count": 9,
+      "minutes_total": 182.9,
+      "minutes_p50": 19.6,
+      "minutes_p95": 36.4,
+      "artifact_mb_total": 488.0,
+      "failure_rate_percent": 0.0
+    }
+  ],
+  "totals": {
+    "minutes_total": 1474.7,
+    "artifact_mb_total": 3404.5,
+    "run_count_total": 209
+  }
+}

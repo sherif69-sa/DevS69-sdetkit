@@ -54,3 +54,7 @@ Provide enough detail for deterministic triage:
 - suggested mitigations or fix direction (if known).
 
 For additional hardening context, see [docs/security.md](docs/security.md).
+
+## Vulnerability handling statement
+
+A reported **vulnerability** is triaged privately first, severity-ranked, and routed to coordinated disclosure with tracked remediation ownership.

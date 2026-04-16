@@ -1,0 +1,62 @@
+{
+  "schema_version": "sdetkit.policy-control-catalog.v1",
+  "generated_at_utc": "2026-04-16T10:00:00Z",
+  "controls": [
+    {
+      "control_id": "CTRL-SEC-001",
+      "domain": "security",
+      "policy_rule_id": "security_policy_keywords",
+      "evidence_artifact": "SECURITY.md",
+      "enforcement_level": "required",
+      "owner_team": "Security Engineering"
+    },
+    {
+      "control_id": "CTRL-REL-001",
+      "domain": "release",
+      "policy_rule_id": "release_checklist_present",
+      "evidence_artifact": "RELEASE.md",
+      "enforcement_level": "required",
+      "owner_team": "Release Engineering"
+    },
+    {
+      "control_id": "CTRL-REL-002",
+      "domain": "release",
+      "policy_rule_id": "changelog_dated_entries",
+      "evidence_artifact": "CHANGELOG.md",
+      "enforcement_level": "required",
+      "owner_team": "Release Engineering"
+    },
+    {
+      "control_id": "CTRL-QLT-001",
+      "domain": "quality",
+      "policy_rule_id": "gate_artifacts_present",
+      "evidence_artifact": "build/gate-fast.json",
+      "enforcement_level": "blocking",
+      "owner_team": "Platform QA"
+    },
+    {
+      "control_id": "CTRL-OPS-001",
+      "domain": "governance",
+      "policy_rule_id": "repo_audit_enterprise_pass",
+      "evidence_artifact": "build/repo-audit-enterprise.json",
+      "enforcement_level": "blocking",
+      "owner_team": "Platform Engineering"
+    },
+    {
+      "control_id": "CTRL-RLY-001",
+      "domain": "reliability",
+      "policy_rule_id": "weekly_reliability_snapshot_present",
+      "evidence_artifact": "docs/artifacts/toolkit-reliability-snapshot-2026-04-16.json",
+      "enforcement_level": "advisory",
+      "owner_team": "Developer Experience"
+    },
+    {
+      "control_id": "CTRL-CST-001",
+      "domain": "cost",
+      "policy_rule_id": "weekly_ci_cost_snapshot_present",
+      "evidence_artifact": "docs/artifacts/ci-cost-telemetry-sample-2026-04-16.json",
+      "enforcement_level": "advisory",
+      "owner_team": "Platform Operations"
+    }
+  ]
+}

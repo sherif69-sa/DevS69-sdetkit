@@ -1,0 +1,18 @@
+{
+  "schema_version": "sdetkit.support-lifecycle-policy.v1",
+  "generated_at_utc": "2026-04-16T10:00:00Z",
+  "release_lines": {
+    "current": "1.0",
+    "lts": "1.0-lts",
+    "legacy": ["0.9"]
+  },
+  "deprecations": [
+    {
+      "item": "legacy transition command aliases",
+      "announced_in": "1.0.2",
+      "removal_target": "1.2.0",
+      "migration_guide": "docs/legacy-command-migration-map.md"
+    }
+  ],
+  "upgrade_support_contact": "#sdetkit-upgrades"
+}
