@@ -1,0 +1,68 @@
+name: Enterprise Next-Pass Handoff
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  enterprise-doctor:
+    runs-on: ubuntu-latest
+    outputs:
+      has_next_pass: ${{ steps.parse.outputs.has_next_pass }}
+      next_pass_command: ${{ steps.parse.outputs.next_pass_command }}
+      next_pass_reason: ${{ steps.parse.outputs.next_pass_reason }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install sdetkit
+        run: pip install .
+      - name: Generate next-pass payload
+        run: python -m sdetkit doctor --enterprise-next-pass-only --json --out next-pass.json
+      - name: Parse payload
+        id: parse
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import uuid
+          from pathlib import Path
+
+          payload = json.loads(Path('next-pass.json').read_text(encoding='utf-8'))
+          out = Path(os.environ['GITHUB_OUTPUT'])
+
+          def write_output(handle, key: str, value: object) -> None:
+              text = str(value)
+              if '\n' in text:
+                  marker = f"SDETKIT_{uuid.uuid4().hex}"
+                  while marker in text:
+                      marker = f"SDETKIT_{uuid.uuid4().hex}"
+                  handle.write(f"{key}<<{marker}\n")
+                  handle.write(text)
+                  handle.write("\n")
+                  handle.write(f"{marker}\n")
+                  return
+              handle.write(f"{key}={text}\n")
+
+          with out.open('a', encoding='utf-8') as handle:
+              write_output(handle, "has_next_pass", str(payload.get('has_next_pass', False)).lower())
+              write_output(handle, "next_pass_command", payload.get('next_pass_command', ''))
+              write_output(handle, "next_pass_reason", payload.get('next_pass_reason', 'none'))
+          PY
+
+  enterprise-follow-up:
+    needs: enterprise-doctor
+    if: needs.enterprise-doctor.outputs.has_next_pass == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install sdetkit
+        run: pip install .
+      - name: Execute recommended follow-up pass
+        run: ${{ needs.enterprise-doctor.outputs.next_pass_command }}

@@ -5,6 +5,7 @@
 - add GHAS alert SLA + metrics export bots, wire them into maintenance coverage checks, and refresh GHAS automation docs.
 - add Name 86 launch readiness closeout lane command, docs, checks, and tests (`name86-launch-readiness-closeout`).
 - upgrade audit: parse modern `pyproject.toml` `[dependency-groups]` declarations, including `{include-group = "..."}` expansions.
+- doctor enterprise workflow: add `--enterprise`, `--enterprise-rerun-failed`, `--enterprise-rerun-high`, and `--enterprise-next-pass-only` modes with enterprise insights/remediation bundles in JSON+markdown output and workspace-driven focused reruns.
 
 # Changelog
 ## [1.0.2]

@@ -44,8 +44,11 @@ EXIT_OK = 0
 EXIT_FAILED = 2
 EVIDENCE_SCHEMA_VERSION = "sdetkit.doctor.evidence.v2"
 EVIDENCE_MANIFEST_SCHEMA_VERSION = "sdetkit.doctor.evidence.manifest.v1"
+NEXT_PASS_SCHEMA_VERSION = "sdetkit.doctor.next_pass.v1"
 EVIDENCE_PROFILES = ("ci", "release", "full")
 EVIDENCE_INCLUDES = ("failed", "actionable", "all")
+ENTERPRISE_RERUN_FAILED_COMMAND = "python -m sdetkit doctor --enterprise-rerun-failed --json"
+ENTERPRISE_RERUN_HIGH_COMMAND = "python -m sdetkit doctor --enterprise-rerun-high --json"
 
 SUPPORTED_POLICY_CHECKS = {
     "ascii",
@@ -490,6 +493,38 @@ def _parse_check_csv(value: str | None) -> list[str]:
         if s:
             out.append(s)
     return out
+
+
+def _resolve_rerun_failed_checks(
+    *, workspace_root: Path, scope: str, severity: str | None = None
+) -> list[str]:
+    previous_payload, _ = load_latest_previous_payload(
+        workspace_root=workspace_root,
+        workflow="doctor",
+        scope=scope,
+    )
+    if not isinstance(previous_payload, dict):
+        return []
+    failed: list[str] = []
+    next_actions = previous_payload.get("next_actions", [])
+    if isinstance(next_actions, list):
+        for item in next_actions:
+            if not isinstance(item, dict):
+                continue
+            check_id = str(item.get("id", "")).strip()
+            item_severity = str(item.get("severity", "")).strip().lower()
+            if severity and item_severity != severity:
+                continue
+            if check_id in CHECK_ORDER:
+                failed.append(check_id)
+    if not failed:
+        failed_checks = previous_payload.get("failed_checks", [])
+        if isinstance(failed_checks, list):
+            for check_id in failed_checks:
+                cid = str(check_id).strip()
+                if cid in CHECK_ORDER:
+                    failed.append(cid)
+    return sorted(set(failed), key=CHECK_ORDER.index)
 
 
 def _baseline_snapshot_path(root: Path) -> Path:
@@ -1481,6 +1516,45 @@ def _format_doctor_markdown(data: dict[str, Any]) -> str:
             lines.append(f"- {hint}")
     else:
         lines.append("- None")
+    enterprise = data.get("enterprise", {})
+    if isinstance(enterprise, dict):
+        lines.append("")
+        lines.append("#### Enterprise execution")
+        profile_mode = str(data.get("profile_mode", "")).strip()
+        if profile_mode:
+            lines.append(f"- profile mode: `{profile_mode}`")
+        lines.append(f"- maturity tier: `{enterprise.get('maturity_tier', 'unknown')}`")
+        lines.append(f"- blocker count: {enterprise.get('blocker_count', 0)}")
+        next_pass = str(enterprise.get("next_pass_command", "")).strip()
+        next_pass_reason = str(enterprise.get("next_pass_reason", "none")).strip() or "none"
+        lines.append(f"- next pass reason: `{next_pass_reason}`")
+        if next_pass:
+            lines.append(f"- next pass command: `{next_pass}`")
+        blockers = enterprise.get("blockers", [])
+        if isinstance(blockers, list) and blockers:
+            lines.append("- blockers:")
+            for blocker in blockers[:3]:
+                if not isinstance(blocker, dict):
+                    continue
+                lines.append(
+                    f"  - `{blocker.get('id', '')}`: {blocker.get('summary', '')}"
+                )
+        queue = enterprise.get("optimization_queue", [])
+        if isinstance(queue, list) and queue:
+            lines.append("- optimization queue:")
+            for item in queue[:3]:
+                if not isinstance(item, dict):
+                    continue
+                lines.append(
+                    f"  - `{item.get('check_id', '')}` ({item.get('severity', 'medium')}): {item.get('summary', '')}"
+                )
+        bundle = enterprise.get("remediation_bundle", [])
+        if isinstance(bundle, list) and bundle:
+            lines.append("- remediation bundle:")
+            for row in bundle[:3]:
+                if not isinstance(row, dict):
+                    continue
+                lines.append(f"  - `{row.get('check_id', '')}`: {row.get('action', '')}")
     return "\n".join(lines) + "\n"
 
 
@@ -1578,6 +1652,112 @@ def _structured_recommendations(data: dict[str, Any]) -> list[dict[str, Any]]:
                 continue
             rec["related_evidence_refs"] = sorted(str(ref) for ref in refs if str(ref).strip())[:5]
     return recs
+
+
+def _build_enterprise_insights(data: dict[str, Any]) -> dict[str, Any]:
+    checks = data.get("checks", {})
+    next_actions = data.get("next_actions", [])
+    if not isinstance(next_actions, list):
+        next_actions = []
+
+    blockers: list[dict[str, Any]] = []
+    optimization_queue: list[dict[str, Any]] = []
+    for item in next_actions:
+        if not isinstance(item, dict):
+            continue
+        check_id = str(item.get("id", "")).strip()
+        severity = str(item.get("severity", "medium")).strip() or "medium"
+        summary = str(item.get("summary", "")).strip()
+        fix = item.get("fix", [])
+        fix_list = [str(fix_item).strip() for fix_item in fix if str(fix_item).strip()]
+        if severity == "high":
+            blockers.append({"id": check_id, "summary": summary})
+        priority = SEVERITY_ORDER.get(severity, SEVERITY_ORDER["medium"]) * 100
+        check_item = checks.get(check_id, {})
+        if isinstance(check_item, dict):
+            evidence = check_item.get("evidence", [])
+            priority += len(evidence) if isinstance(evidence, list) else 0
+            priority += 5 if fix_list else 0
+        optimization_queue.append(
+            {
+                "check_id": check_id,
+                "severity": severity,
+                "priority": priority,
+                "summary": summary,
+                "first_fix": fix_list[0] if fix_list else "",
+            }
+        )
+
+    optimization_queue.sort(key=lambda row: (-int(row["priority"]), str(row["check_id"])))
+    upgrade_meta = (
+        data.get("checks", {}).get("upgrade_audit", {}).get("meta", {})
+        if isinstance(data.get("checks", {}), dict)
+        else {}
+    )
+    validation_commands: list[str] = []
+    if isinstance(upgrade_meta, dict):
+        validation_summary = upgrade_meta.get("validation_summary", [])
+        if isinstance(validation_summary, list):
+            for item in validation_summary:
+                if not isinstance(item, dict):
+                    continue
+                command = str(item.get("command", "")).strip()
+                if command and command not in validation_commands:
+                    validation_commands.append(command)
+
+    remediation_bundle: list[dict[str, Any]] = []
+    checks_map = data.get("checks", {})
+    for item in optimization_queue[:3]:
+        check_id = str(item.get("check_id", "")).strip()
+        check_row = checks_map.get(check_id, {}) if isinstance(checks_map, dict) else {}
+        fix_items = check_row.get("fix", []) if isinstance(check_row, dict) else []
+        fix_list = [str(fix).strip() for fix in fix_items if str(fix).strip()]
+        if not fix_list:
+            continue
+        remediation_bundle.append(
+            {
+                "check_id": check_id,
+                "severity": str(item.get("severity", "medium")),
+                "action": fix_list[0],
+                "validation": validation_commands[0] if validation_commands else "",
+                "owner_hint": "repo-ops",
+            }
+        )
+
+    score = int(data.get("score", 0))
+    if blockers:
+        maturity_tier = "at_risk"
+    elif score >= 95:
+        maturity_tier = "production_hardened"
+    elif score >= 80:
+        maturity_tier = "hardening"
+    else:
+        maturity_tier = "stabilizing"
+
+    next_pass_command = ""
+    next_pass_reason = "none"
+    alternate_commands: list[str] = []
+    if blockers:
+        next_pass_command = ENTERPRISE_RERUN_HIGH_COMMAND
+        next_pass_reason = "blockers_present"
+        alternate_commands = [ENTERPRISE_RERUN_HIGH_COMMAND, ENTERPRISE_RERUN_FAILED_COMMAND]
+    elif next_actions:
+        next_pass_command = ENTERPRISE_RERUN_FAILED_COMMAND
+        next_pass_reason = "failed_checks_present"
+        alternate_commands = [ENTERPRISE_RERUN_FAILED_COMMAND]
+
+    return {
+        "maturity_tier": maturity_tier,
+        "blocker_count": len(blockers),
+        "blockers": blockers[:5],
+        "optimization_queue": optimization_queue[:8],
+        "remediation_bundle": remediation_bundle,
+        "execution_commands": _evidence_next_commands(data),
+        "next_pass_command": next_pass_command,
+        "next_pass_reason": next_pass_reason,
+        "alternate_commands": alternate_commands,
+        "focus": "Resolve blockers first, then execute the optimization queue in priority order.",
+    }
 
 
 def _select_evidence_rows(
@@ -2264,11 +2444,54 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pyproject", action="store_true")
     parser.add_argument("--pr", action="store_true", help="print a PR-ready markdown summary")
     parser.add_argument("--all", action="store_true")
+    parser.add_argument(
+        "--enterprise",
+        action="store_true",
+        help=(
+            "Run the enterprise reliability profile (full checks + strict policy + "
+            "upgrade-audit optimization defaults)."
+        ),
+    )
     parser.add_argument("--release", action="store_true")
     parser.add_argument("--release-full", dest="release_full", action="store_true")
     parser.add_argument("--policy")
     parser.add_argument("--fail-on", choices=["low", "medium", "high"])
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument(
+        "--enterprise-rerun-failed",
+        action="store_true",
+        help="Rerun only failed checks from the latest doctor workspace run (implies --enterprise).",
+    )
+    parser.add_argument(
+        "--enterprise-rerun-high",
+        action="store_true",
+        help=(
+            "Rerun only high-severity failed checks from the latest doctor workspace run "
+            "(implies --enterprise)."
+        ),
+    )
+    parser.add_argument(
+        "--enterprise-rerun-top",
+        type=int,
+        default=None,
+        help="Limit enterprise rerun modes to top N selected checks (after severity/failure filtering).",
+    )
+    parser.add_argument(
+        "--enterprise-next-pass-only",
+        action="store_true",
+        help=(
+            "Print only the enterprise next-pass command hint for automation handoff "
+            "(implies --enterprise)."
+        ),
+    )
+    parser.add_argument(
+        "--enterprise-next-pass-exit-code",
+        action="store_true",
+        help=(
+            "When used with --enterprise-next-pass-only, return 2 if a follow-up pass is "
+            "recommended, else 0."
+        ),
+    )
     parser.add_argument("--out", default=None)
     parser.add_argument("--treat", action="store_true")
     parser.add_argument("--treat-only", dest="treat_only", action="store_true")
@@ -2330,6 +2553,58 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("unknown check id(s): " + ", ".join(unknown))
     only_set = set(only_raw)
     skip_set = set(skip_raw)
+    if ns.enterprise_rerun_failed and ns.enterprise_rerun_high:
+        parser.error("use only one of --enterprise-rerun-failed or --enterprise-rerun-high")
+    if ns.enterprise_next_pass_only and (ns.enterprise_rerun_failed or ns.enterprise_rerun_high):
+        parser.error(
+            "--enterprise-next-pass-only cannot be combined with rerun mode flags."
+        )
+    if ns.enterprise_next_pass_exit_code and not ns.enterprise_next_pass_only:
+        parser.error("--enterprise-next-pass-exit-code requires --enterprise-next-pass-only.")
+    if ns.enterprise_rerun_top is not None and not (ns.enterprise_rerun_failed or ns.enterprise_rerun_high):
+        parser.error("--enterprise-rerun-top requires --enterprise-rerun-failed or --enterprise-rerun-high.")
+    if ns.enterprise_rerun_top is not None and ns.enterprise_rerun_top <= 0:
+        parser.error("--enterprise-rerun-top must be >= 1.")
+    if ns.enterprise_rerun_failed or ns.enterprise_rerun_high:
+        if ns.no_workspace:
+            parser.error(
+                "enterprise rerun modes require workspace history (omit --no-workspace)."
+            )
+        scope_name = root.name or "repo"
+        rerun_severity = "high" if ns.enterprise_rerun_high else None
+        failed_only = _resolve_rerun_failed_checks(
+            workspace_root=Path(ns.workspace_root),
+            scope=scope_name,
+            severity=rerun_severity,
+        )
+        if not failed_only:
+            if ns.enterprise_rerun_high:
+                parser.error(
+                    "--enterprise-rerun-high found no high-severity failed checks in latest workspace doctor run."
+                )
+            parser.error("--enterprise-rerun-failed found no failed checks in latest workspace doctor run.")
+        if ns.enterprise_rerun_top is not None:
+            failed_only = failed_only[: ns.enterprise_rerun_top]
+        only_set = set(failed_only)
+        skip_set = set()
+        ns.enterprise = True
+    if ns.enterprise_next_pass_only:
+        ns.enterprise = True
+
+    if ns.enterprise:
+        ns.all = True
+        ns.release = True
+        ns.release_full = True
+        ns.dev = True
+        ns.repo_readiness = True
+        ns.pyproject = True
+        ns.strict = True
+        if ns.fail_on is None:
+            ns.fail_on = "medium"
+        if ns.upgrade_audit_top is None:
+            ns.upgrade_audit_top = 15
+        ns.upgrade_audit_used_in_repo_only = True
+        ns.upgrade_audit_outdated_only = True
 
     if only_set:
         ns.ascii = False
@@ -2458,6 +2733,14 @@ def main(argv: list[str] | None = None) -> int:
         "package": _package_info(),
         "checks": _baseline_checks(),
     }
+    if ns.enterprise:
+        data["profile"] = "enterprise"
+        data["profile_mode"] = "full_scan"
+        data["rerun_top"] = int(ns.enterprise_rerun_top) if ns.enterprise_rerun_top is not None else None
+        if ns.enterprise_rerun_failed:
+            data["profile_mode"] = "rerun_failed"
+        elif ns.enterprise_rerun_high:
+            data["profile_mode"] = "rerun_high"
     if ns.treat:
         data["treatments"] = treat_steps
         data["treatments_ok"] = data_treat_ok
@@ -2803,6 +3086,8 @@ def main(argv: list[str] | None = None) -> int:
         selected_checks=data["selected_checks"],
         hints=data["hints"],
     )
+    if ns.enterprise:
+        data["enterprise"] = _build_enterprise_insights(data)
 
     scope_name = root.name or "repo"
     previous_payload = None
@@ -2878,6 +3163,55 @@ def main(argv: list[str] | None = None) -> int:
     if getattr(ns, "explain", False):
         data["explain"] = _build_explain_payload(data)
 
+    if ns.enterprise_next_pass_only:
+        enterprise_raw = data.get("enterprise", {})
+        enterprise = enterprise_raw if isinstance(enterprise_raw, dict) else {}
+        next_pass = str(enterprise.get("next_pass_command", "")).strip()
+        next_pass_reason = str(enterprise.get("next_pass_reason", "none")).strip()
+        alternate_commands = enterprise.get("alternate_commands", [])
+        if not isinstance(alternate_commands, list):
+            alternate_commands = []
+        alternate_commands = [
+            str(command).strip() for command in alternate_commands if str(command).strip()
+        ]
+        if ns.format == "json" or ns.json:
+            payload = {
+                "schema_version": NEXT_PASS_SCHEMA_VERSION,
+                "workflow": "doctor",
+                "profile": "enterprise",
+                "profile_mode": str(data.get("profile_mode", "")),
+                "selected_checks": list(data.get("selected_checks", [])),
+                "next_pass_command": next_pass,
+                "next_pass_reason": next_pass_reason or "none",
+                "alternate_commands": alternate_commands,
+                "has_next_pass": bool(next_pass),
+                "exit_code_hint": 2 if next_pass else 0,
+                "message": "no follow-up pass required" if not next_pass else "next pass available",
+            }
+            output = json.dumps(payload, sort_keys=True) + "\n"
+            is_json = True
+        elif ns.format == "md":
+            first_line = f"`{next_pass}`" if next_pass else "_no follow-up pass required_"
+            alt_line = (
+                "`alternates: " + " | ".join(alternate_commands) + "`"
+                if alternate_commands
+                else "`alternates: none`"
+            )
+            output = first_line + "\n" + f"`reason: {next_pass_reason or 'none'}`" + "\n" + alt_line + "\n"
+            is_json = False
+        else:
+            first_line = next_pass or "no follow-up pass required"
+            alt_line = "alternates: " + (" | ".join(alternate_commands) if alternate_commands else "none")
+            output = first_line + "\n" + f"reason: {next_pass_reason or 'none'}" + "\n" + alt_line + "\n"
+            is_json = False
+        if ns.out:
+            Path(ns.out).write_text(output, encoding="utf-8")
+        else:
+            sys.stdout.write(output)
+        if ns.enterprise_next_pass_exit_code and next_pass:
+            return 2
+        return 0
+
     if ns.format == "json" or ns.json:
         output = json.dumps(data, sort_keys=True) + "\n"
         is_json = True
@@ -2911,6 +3245,45 @@ def main(argv: list[str] | None = None) -> int:
             lines.append("hints:")
             for hint in hints:
                 lines.append(f"- {hint}")
+        enterprise = data.get("enterprise", {})
+        if isinstance(enterprise, dict):
+            lines.append("enterprise:")
+            profile_mode = str(data.get("profile_mode", "")).strip()
+            if profile_mode:
+                lines.append(f"- profile_mode: {profile_mode}")
+            lines.append(f"- maturity_tier: {enterprise.get('maturity_tier')}")
+            lines.append(f"- blocker_count: {enterprise.get('blocker_count', 0)}")
+            next_pass = str(enterprise.get("next_pass_command", "")).strip()
+            next_pass_reason = str(enterprise.get("next_pass_reason", "none")).strip() or "none"
+            lines.append(f"- next_pass_reason: {next_pass_reason}")
+            if next_pass:
+                lines.append(f"- next_pass_command: {next_pass}")
+            blockers = enterprise.get("blockers", [])
+            if isinstance(blockers, list):
+                for blocker in blockers[:3]:
+                    if not isinstance(blocker, dict):
+                        continue
+                    lines.append(
+                        f"- blocker {blocker.get('id')}: {blocker.get('summary', '')}"
+                    )
+            queue = enterprise.get("optimization_queue", [])
+            if isinstance(queue, list) and queue:
+                lines.append("- optimization_queue:")
+                for item in queue[:3]:
+                    if not isinstance(item, dict):
+                        continue
+                    lines.append(
+                        f"  - {item.get('check_id')} ({item.get('severity')}): {item.get('summary', '')}"
+                    )
+            bundle = enterprise.get("remediation_bundle", [])
+            if isinstance(bundle, list) and bundle:
+                lines.append("- remediation_bundle:")
+                for row in bundle[:3]:
+                    if not isinstance(row, dict):
+                        continue
+                    lines.append(
+                        f"  - {row.get('check_id')}: {row.get('action', '')}"
+                    )
         if getattr(ns, "explain", False):
             explain = data.get("explain", {})
             if isinstance(explain, dict):
