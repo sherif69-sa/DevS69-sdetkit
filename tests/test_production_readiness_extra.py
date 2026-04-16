@@ -46,3 +46,18 @@ def test_main_markdown_and_text_output_modes(tmp_path: Path, capsys) -> None:
 
     assert text_rc == 0
     assert text_out.startswith("production-readiness")
+
+
+def test_phase_boost_check_accepts_supported_blueprint_variants(tmp_path: Path) -> None:
+    (tmp_path / "docs").mkdir(parents=True)
+    (tmp_path / "docs/production-s-class-90-day-boost.md").write_text(
+        "# phase boost\n", encoding="utf-8"
+    )
+
+    payload = pr.build_production_readiness_summary(tmp_path)
+
+    phase_boost = next(
+        c for c in payload["checks"] if c["check_id"] == "phase_boost_blueprint_present"
+    )
+    assert phase_boost["passed"] is True
+    assert phase_boost["evidence"] == "docs/production-s-class-90-day-boost.md"

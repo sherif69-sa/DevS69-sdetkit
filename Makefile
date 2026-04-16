@@ -5,8 +5,9 @@ WINDOW_START ?= 2026-04-11
 WINDOW_END ?= 2026-04-17
 GENERATED_AT ?= 2026-04-17T10:00:00Z
 ADAPTIVE_SCENARIO ?= balanced
+PORTFOLIO_MANIFEST ?= portfolio-manifest.json
 
-.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check adaptive-scenario-db adaptive-postcheck adaptive-ops-bundle
+.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-contract release-room portfolio-readiness premerge-release-room adaptive-scenario-db adaptive-postcheck adaptive-ops-bundle
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
@@ -110,6 +111,27 @@ top-tier-reporting: venv
 
 enterprise-contracts-check: venv
 	@bash -lc '. .venv/bin/activate && python scripts/validate_enterprise_contracts.py'
+
+enterprise-assessment: venv
+	@bash -lc '. .venv/bin/activate && python -m sdetkit enterprise-assessment --format json --production-profile'
+
+enterprise-assessment-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_enterprise_assessment_contract.py --summary docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json --format json'
+
+ship-readiness: venv
+	@bash -lc '. .venv/bin/activate && python -m sdetkit ship-readiness --strict --format json --out-dir build/ship-readiness'
+
+ship-readiness-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_ship_readiness_contract.py --summary build/ship-readiness/ship-readiness-summary.json --format json'
+
+release-room: enterprise-assessment ship-readiness ship-readiness-contract enterprise-assessment-contract
+	@bash -lc '. .venv/bin/activate && python scripts/render_release_room_summary.py --ship-summary build/ship-readiness/ship-readiness-summary.json --enterprise-summary docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json --out build/release-room-summary.md'
+
+portfolio-readiness: venv
+	@bash -lc '. .venv/bin/activate && python -m sdetkit portfolio-readiness --manifest $(PORTFOLIO_MANIFEST) --format json --out build/portfolio-readiness.json'
+
+premerge-release-room: venv
+	@bash -lc '. .venv/bin/activate && python scripts/premerge_release_room_gate.py . --strict --format json --out build/premerge-release-room-gate.json'
 
 
 adaptive-postcheck: adaptive-scenario-db
