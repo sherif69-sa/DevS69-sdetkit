@@ -6,6 +6,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+_PHASE_BOOST_BLUEPRINT_FILES = (
+    "docs/production-s-class-90-impact-boost.md",
+    "docs/production-s-class-90-day-boost.md",
+    "docs/production-s-class-90--boost.md",
+)
+
 
 @dataclass(frozen=True)
 class ReadinessCheck:
@@ -29,7 +35,15 @@ def _exists(root: Path, rel: str) -> bool:
     return (root / rel).exists()
 
 
+def _first_existing(root: Path, candidates: tuple[str, ...]) -> str | None:
+    for rel in candidates:
+        if _exists(root, rel):
+            return rel
+    return None
+
+
 def build_production_readiness_summary(root: Path) -> dict[str, Any]:
+    phase_boost_path = _first_existing(root, _PHASE_BOOST_BLUEPRINT_FILES)
     required_files = [
         "README.md",
         "CONTRIBUTING.md",
@@ -41,7 +55,7 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
         "docs/index.md",
         "docs/repo-audit.md",
         "docs/security.md",
-        "docs/production-s-class-90-impact-boost.md",
+        _PHASE_BOOST_BLUEPRINT_FILES[0],
         "tests/test_cli_sdetkit.py",
     ]
     required_workflows = [
@@ -89,9 +103,12 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
         ReadinessCheck(
             check_id="phase_boost_blueprint_present",
             weight=10,
-            passed=_exists(root, "docs/production-s-class-90-impact-boost.md"),
-            evidence="docs/production-s-class-90-impact-boost.md",
-            remediation="Add a concrete 90-impact execution blueprint and keep it versioned.",
+            passed=phase_boost_path is not None,
+            evidence=phase_boost_path or " / ".join(_PHASE_BOOST_BLUEPRINT_FILES),
+            remediation=(
+                "Add a concrete 90-impact execution blueprint and keep it versioned "
+                f"(accepted paths: {', '.join(_PHASE_BOOST_BLUEPRINT_FILES)})."
+            ),
         ),
         ReadinessCheck(
             check_id="tests_folder_present",

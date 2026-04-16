@@ -39,6 +39,9 @@ _MODULE_SHORTCUTS: tuple[tuple[tuple[str, ...], str], ...] = (
     (("upgrade-hub",), "sdetkit.upgrade_hub"),
     (("sdet-package",), "sdetkit.sdet_package"),
     (("enterprise-readiness",), "sdetkit.enterprise_readiness"),
+    (("enterprise-assessment", "assessment"), "sdetkit.enterprise_assessment"),
+    (("ship-readiness", "launch-ready"), "sdetkit.ship_readiness"),
+    (("portfolio-readiness", "portfolio"), "sdetkit.portfolio_readiness"),
     (
         ("github-actions-onboarding", "github-actions-quickstart"),
         "sdetkit.github_actions_quickstart",
