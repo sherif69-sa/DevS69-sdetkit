@@ -206,11 +206,20 @@ python -m sdetkit --help --show-hidden
 ### Repo health snapshot
 
 ```bash
+python -m pip install -r requirements-test.txt
+# tests require Python >= 3.11
+PYTHONPATH=src python -m sdetkit.test_bootstrap_contract --strict
+PYTHONPATH=src python -m sdetkit.test_bootstrap_validate --strict
+# optional CI-style evidence outputs:
+./ci.sh quick --artifact-dir .sdetkit/out
+make merge-ready
 PYTHONPATH=src pytest -q
 bash quality.sh cov
 ruff check .
 mutmut results
 ```
+
+For a focused preflight playbook (checks, artifact outputs, exit codes), see [`docs/test-bootstrap.md`](docs/test-bootstrap.md).
 
 ### Coverage hardening migration (staged)
 

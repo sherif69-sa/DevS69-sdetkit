@@ -58,6 +58,18 @@ if [[ "${VIRTUAL_ENV:-}" == "" ]]; then
   exit 2
 fi
 
+run_test_bootstrap_preflight() {
+  local contract_args=(--strict --format json)
+  local runtime_args=(--strict --format json)
+  if [[ "${artifact_dir}" != "" ]]; then
+    mkdir -p "$artifact_dir"
+    contract_args+=(--out "$artifact_dir/test-bootstrap-contract.json")
+    runtime_args+=(--out "$artifact_dir/test-bootstrap-runtime.json")
+  fi
+  PYTHONPATH=src python3 -m sdetkit.test_bootstrap_contract "${contract_args[@]}"
+  PYTHONPATH=src python3 -m sdetkit.test_bootstrap_validate "${runtime_args[@]}"
+}
+
 run_gate_fast() {
   gate_args=()
   if [[ "$run_network" -eq 1 ]]; then
@@ -124,11 +136,13 @@ run_operational_maturity_v2() {
 
 case "$mode" in
   quick)
+    run_test_bootstrap_preflight
     run_gate_fast
     run_flagship_contracts
     run_operational_maturity_v2
     ;;
   all)
+    run_test_bootstrap_preflight
     run_gate_fast
     run_flagship_contracts
     run_operational_maturity_v2

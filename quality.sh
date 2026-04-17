@@ -90,6 +90,10 @@ run_fmt() { need_cmd ruff; python -m ruff format .; }
 run_fmt_check() { need_cmd ruff; python -m ruff format --check .; }
 run_lint() { need_cmd ruff; python -m ruff check .; }
 run_type() { need_cmd mypy; python -m mypy --config-file pyproject.toml src; }
+run_test_bootstrap() {
+  PYTHONPATH=src python -m sdetkit.test_bootstrap_contract --strict
+  PYTHONPATH=src python -m sdetkit.test_bootstrap_validate --strict
+}
 run_doctor() { python -m sdetkit doctor --dev --ci --deps --repo --upgrade-audit --format md; }
 run_gate_fast() { python -m sdetkit gate fast; }
 run_premium_autofix() {
@@ -148,10 +152,11 @@ run_brutal() {
     echo "skip premium full gate: premium-gate.sh not found"
   fi
 }
-run_full_test() { need_cmd pytest; python -m pytest -q -o addopts=; }
-run_test() { need_cmd pytest; python -m pytest; }
+run_full_test() { need_cmd pytest; run_test_bootstrap; python -m pytest -q -o addopts=; }
+run_test() { need_cmd pytest; run_test_bootstrap; python -m pytest; }
 run_cov() {
   need_cmd pytest
+  run_test_bootstrap
   # Coverage profiles:
   # - full: complete repository visibility (informational)
   # - core (default): strict gate on critical, stable modules
