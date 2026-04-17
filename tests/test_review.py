@@ -576,6 +576,30 @@ def test_review_adaptive_database_and_ai_handoff_contract(tmp_path: Path) -> Non
     assert "action_analytics" in payload["adaptive_database"]
     assert "scalability_posture" in payload["adaptive_database"]
     assert "release_readiness_contract" in payload["adaptive_database"]
+    assert "aspect_database" in payload["adaptive_database"]
+    assert payload["adaptive_database"]["aspect_database"]["total_aspects"] >= 10
+    assert "execution_boost_plan" in payload["adaptive_database"]
+    assert len(payload["adaptive_database"]["execution_boost_plan"]["next_5_prompts_plan"]) == 5
+    assert len(payload["adaptive_database"]["execution_boost_plan"]["copy_ready_prompts"]) == 5
+    assert all(
+        row.get("final_prompt")
+        for row in payload["adaptive_database"]["execution_boost_plan"]["next_5_prompts_plan"]
+    )
+    statuses = {
+        row.get("implementation_status")
+        for row in payload["adaptive_database"]["execution_boost_plan"]["next_5_prompts_plan"]
+    }
+    assert statuses.issubset({"done", "in_progress", "pending"})
+    assert payload["adaptive_database"]["execution_boost_plan"]["implementation_summary"][
+        "total_steps"
+    ] == 5
+    assert "next_step" in payload["adaptive_database"]["execution_boost_plan"]
+    assert payload["adaptive_database"]["execution_boost_plan"]["next_step"]["status"] in {
+        "done",
+        "in_progress",
+        "pending",
+    }
+    assert isinstance(payload["adaptive_database"]["execution_boost_plan"]["autostart_lane"], list)
     assert payload["review_contract_check"]["status"] == "pass"
     assert payload["adaptive_database"]["release_readiness_contract"]["gate_decision"] in {
         "ship",
@@ -638,6 +662,16 @@ def test_review_includes_readiness_snapshot_for_repo_targets(tmp_path: Path) -> 
     assert payload["adaptive_database"]["adaptive_alignment"]["engine"] == "five_heads"
     assert payload["adaptive_database"]["scalability_posture"]["target_scenarios"] == 250
     assert "next_24h_actions" in payload["adaptive_database"]["release_readiness_contract"]
+    assert payload["adaptive_database"]["execution_boost_plan"]["next_5_prompts_plan"][0][
+        "prompt_index"
+    ] == 1
+    assert payload["adaptive_database"]["execution_boost_plan"]["next_5_prompts_plan"][4][
+        "prompt_index"
+    ] == 5
+    assert payload["adaptive_database"]["execution_boost_plan"]["implementation_summary"][
+        "total_steps"
+    ] == 5
+    assert payload["adaptive_database"]["execution_boost_plan"]["next_step"]["prompt_index"] >= 0
 
 
 def test_probe_memory_artifact_written_and_exposed(tmp_path: Path) -> None:
