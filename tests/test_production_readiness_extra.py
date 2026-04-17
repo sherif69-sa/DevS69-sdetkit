@@ -30,7 +30,12 @@ def test_render_text_includes_check_status_lines(tmp_path: Path) -> None:
     text = pr._render_text(payload)
 
     assert text.startswith("production-readiness\n")
+    assert "accomplished:" in text
+    assert "stage:" in text
     assert "checks:" in text
+    assert "main_aspects_ready:" in text
+    assert "job_done_ready:" in text
+    assert "main aspects:" in text
     assert "- [FAIL] governance_core_docs" in text
 
 
@@ -40,6 +45,8 @@ def test_main_markdown_and_text_output_modes(tmp_path: Path, capsys) -> None:
 
     assert markdown_rc == 0
     assert markdown_out.startswith("# Production readiness report")
+    assert "Category progress" in markdown_out
+    assert "Main aspects readiness" in markdown_out
 
     text_rc = pr.main(["--root", str(tmp_path), "--format", "text"])
     text_out = capsys.readouterr().out

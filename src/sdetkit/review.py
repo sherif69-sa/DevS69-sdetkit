@@ -1506,12 +1506,191 @@ def run_review(
     detected_scenarios = int(readiness_scenario_snapshot.get("detected_scenarios", 0))
     target_scenarios = int(readiness_scenario_snapshot.get("target_scenarios", 250))
     scenario_runway_ratio = round((detected_scenarios / target_scenarios), 2) if target_scenarios else 0.0
+    readiness_failed_checks = next(
+        (
+            list(row.get("value", []))
+            for row in supporting
+            if isinstance(row, dict) and str(row.get("kind")) == "readiness_failed_checks"
+        ),
+        [],
+    )
+    canonical_aspects: tuple[str, ...] = (
+        "governance_policy",
+        "security_posture",
+        "ci_quality",
+        "test_capacity",
+        "docs_operations",
+        "dependency_hygiene",
+        "release_management",
+        "doctor_hygiene",
+        "adaptive_reviewer_confidence",
+        "scalability_readiness",
+    )
+    encountered_sources: dict[str, set[str]] = {aspect: set() for aspect in canonical_aspects}
+    findings = [row for row in payload.get("findings", []) if isinstance(row, dict)]
+    for finding in findings:
+        kind = str(finding.get("kind", "")).lower()
+        if "doctor" in kind:
+            encountered_sources["doctor_hygiene"].add("finding.kind")
+        if "security" in kind:
+            encountered_sources["security_posture"].add("finding.kind")
+        if "ci" in kind or "lint" in kind:
+            encountered_sources["ci_quality"].add("finding.kind")
+        if "release" in kind or "gate" in kind:
+            encountered_sources["release_management"].add("finding.kind")
+        if "readiness" in kind:
+            encountered_sources["adaptive_reviewer_confidence"].add("finding.kind")
+    for check_id in readiness_failed_checks:
+        cid = str(check_id)
+        if "security" in cid:
+            encountered_sources["security_posture"].add("readiness.failed_check")
+        if "release" in cid or "changelog" in cid:
+            encountered_sources["release_management"].add("readiness.failed_check")
+        if "dependency" in cid:
+            encountered_sources["dependency_hygiene"].add("readiness.failed_check")
+        if "test" in cid or "scenario" in cid:
+            encountered_sources["test_capacity"].add("readiness.failed_check")
+        if "docs" in cid:
+            encountered_sources["docs_operations"].add("readiness.failed_check")
+        if "governance" in cid:
+            encountered_sources["governance_policy"].add("readiness.failed_check")
+    if workflow_alignment["doctor_included"]:
+        encountered_sources["doctor_hygiene"].add("workflow_alignment")
+    if workflow_alignment["readiness_included"]:
+        encountered_sources["adaptive_reviewer_confidence"].add("workflow_alignment")
+        encountered_sources["governance_policy"].add("workflow_alignment")
+    if scenario_runway_ratio < 1.0:
+        encountered_sources["scalability_readiness"].add("scenario_capacity")
+    else:
+        encountered_sources["scalability_readiness"].add("scenario_capacity_ready")
+    aspect_database = [
+        {
+            "aspect": aspect,
+            "encountered": bool(encountered_sources[aspect]),
+            "sources": sorted(encountered_sources[aspect]),
+            "priority": (
+                "now"
+                if aspect in {"doctor_hygiene", "security_posture", "release_management"}
+                else "next"
+            ),
+        }
+        for aspect in canonical_aspects
+    ]
+    next_5_prompts_plan = [
+        {
+            "prompt_index": 1,
+            "focus": "doctor baseline hardening",
+            "goal": "Stabilize doctor lane and remove high-severity hygiene blockers.",
+            "recommended_command": "python -m sdetkit doctor --repo --ci --deps --upgrade-audit --format json",
+            "final_prompt": (
+                "Run the doctor hardening pass now. Analyze all failed checks, rank blockers by risk, "
+                "and produce a step-by-step fix list with exact commands and expected outputs."
+            ),
+        },
+        {
+            "prompt_index": 2,
+            "focus": "adaptive reviewer evidence refresh",
+            "goal": "Re-run adaptive review and inspect contradiction clusters/probe confidence.",
+            "recommended_command": "python -m sdetkit review . --format json",
+            "final_prompt": (
+                "Re-run adaptive review and explain contradictions. Tell me which signals conflict, "
+                "what evidence is missing, and which probe should run next to increase confidence."
+            ),
+        },
+        {
+            "prompt_index": 3,
+            "focus": "readiness depth and scenario runway",
+            "goal": "Close readiness misses and expand automated scenario capacity toward target.",
+            "recommended_command": "python -m sdetkit readiness . --format json",
+            "final_prompt": (
+                "Use readiness output to build an execution backlog: top 5 actions, owners, ETA, "
+                "and measurable completion criteria to close production gaps."
+            ),
+        },
+        {
+            "prompt_index": 4,
+            "focus": "gate confidence rehearsal",
+            "goal": "Rehearse ship/no-ship evidence through canonical gate fast/release outputs.",
+            "recommended_command": "python -m sdetkit gate fast --format json --stable-json && python -m sdetkit gate release --format json",
+            "final_prompt": (
+                "Run gate fast and gate release and summarize go/no-go. Highlight failing steps, "
+                "root causes, and the shortest path to a passing release contract."
+            ),
+        },
+        {
+            "prompt_index": 5,
+            "focus": "release-room final review",
+            "goal": "Produce operator summary and confirm final gate decision with updated adaptive DB.",
+            "recommended_command": "python -m sdetkit review . --format operator-json",
+            "final_prompt": (
+                "Prepare the final release-room decision brief from operator-json: gate decision, "
+                "blockers, risk band, next 24h actions, and owner routing."
+            ),
+        },
+    ]
+    gate_fast_artifact_present = bool(artifact_index.get("gate_fast_json"))
+    gate_release_artifact_present = bool(artifact_index.get("gate_release_json"))
+    step_statuses = {
+        1: "done" if workflow_alignment["doctor_included"] else "pending",
+        2: "done",
+        3: "done" if workflow_alignment["readiness_included"] else "pending",
+        4: "done" if gate_fast_artifact_present and gate_release_artifact_present else "pending",
+        5: "in_progress",
+    }
+    for step in next_5_prompts_plan:
+        prompt_index = int(step.get("prompt_index", 0))
+        step["implementation_status"] = step_statuses.get(prompt_index, "pending")
+    implementation_summary = {
+        "completed_steps": sum(1 for step in next_5_prompts_plan if step["implementation_status"] == "done"),
+        "in_progress_steps": sum(
+            1 for step in next_5_prompts_plan if step["implementation_status"] == "in_progress"
+        ),
+        "pending_steps": sum(1 for step in next_5_prompts_plan if step["implementation_status"] == "pending"),
+        "total_steps": len(next_5_prompts_plan),
+    }
+    next_step = next(
+        (
+            {
+                "prompt_index": int(step.get("prompt_index", 0)),
+                "focus": str(step.get("focus", "")),
+                "recommended_command": str(step.get("recommended_command", "")),
+                "final_prompt": str(step.get("final_prompt", "")),
+                "status": str(step.get("implementation_status", "pending")),
+            }
+            for step in next_5_prompts_plan
+            if str(step.get("implementation_status")) in {"in_progress", "pending"}
+        ),
+        {
+            "prompt_index": 0,
+            "focus": "all_done",
+            "recommended_command": "",
+            "final_prompt": "All boost-plan prompts are completed.",
+            "status": "done",
+        },
+    )
+    autostart_lane = [
+        str(step.get("recommended_command", ""))
+        for step in next_5_prompts_plan
+        if str(step.get("implementation_status")) in {"in_progress", "pending"}
+    ]
 
     payload["adaptive_database"] = {
         "schema_version": "sdetkit.review.adaptive-database.v1",
         "scope": review_scope,
         "five_heads_overview": payload["five_heads"].get("overall", {}),
         "top5_actions": top5_actions,
+        "aspect_database": {
+            "catalog": aspect_database,
+            "encountered_total": sum(1 for row in aspect_database if row["encountered"]),
+            "total_aspects": len(aspect_database),
+        },
+        "execution_boost_plan": {
+            "next_5_prompts_plan": next_5_prompts_plan,
+            "copy_ready_prompts": [str(step.get("final_prompt", "")) for step in next_5_prompts_plan],
+            "implementation_summary": implementation_summary,
+            "next_step": next_step,
+            "autostart_lane": autostart_lane,
+        },
         "workflow_alignment": workflow_alignment,
         "doctor_gate_contract": doctor_gate_contract,
         "readiness_snapshot": {
