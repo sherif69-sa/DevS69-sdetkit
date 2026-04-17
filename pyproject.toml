@@ -49,6 +49,7 @@ dev = [
 ]
 test = [
   "hypothesis",
+  "PyYAML",
   "pytest",
   "pytest-asyncio",
   "pytest-cov",
@@ -137,6 +138,8 @@ sdetkit = "sdetkit.cli:main"
 sdkit = "sdetkit.cli:main"
 kvcli = "sdetkit._entrypoints:kvcli"
 apigetcli = "sdetkit._entrypoints:apigetcli"
+sdetkit-test-bootstrap-contract = "sdetkit.test_bootstrap_contract:main"
+sdetkit-test-bootstrap-validate = "sdetkit.test_bootstrap_validate:main"
 
 [project.entry-points."sdetkit.notify_adapters"]
 stdout = "sdetkit.notify_plugins:stdout_adapter"
