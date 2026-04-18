@@ -11,6 +11,7 @@ from pathlib import Path
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--status-json", required=True)
+    ap.add_argument("--out", default=None, help="Optional output path for next-actions JSON payload.")
     ap.add_argument("--format", choices=["text", "json"], default="text")
     ns = ap.parse_args()
 
@@ -70,6 +71,11 @@ def main() -> int:
         "actions_are_advisory": ok and len(deduped) > 0,
         "next_actions": deduped,
     }
+
+    if ns.out:
+        out_path = Path(ns.out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     if ns.format == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))

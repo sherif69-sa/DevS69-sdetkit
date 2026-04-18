@@ -37,6 +37,7 @@ build/release-preflight.json
 - [Release confidence flow](release-confidence-flow.md)
 - [First failure triage](first-failure-triage.md)
 - [Phase-by-phase execution plan](phase-by-phase-execution-plan.md)
+- [One-by-one phase execution](phase-execution-one-by-one.md)
 
 ## Reference / advanced
 

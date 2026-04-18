@@ -1,0 +1,104 @@
+{
+  "plan_id": "strategic-execution-model-2026",
+  "date": "2026-04-18",
+  "status": "active",
+  "program_objective": "Execute major upgrades one-by-one while preserving deterministic release confidence via the canonical path: gate fast -> gate release -> doctor.",
+  "current_phase": {
+    "id": 1,
+    "name": "Foundation Hardening & Truth Baseline",
+    "window": "Weeks 1-3",
+    "objective": "Create a trusted baseline so future upgrades are measurable, reproducible, and investor-defensible."
+  },
+  "control_loop": [
+    "Plan (scope + KPI + risks)",
+    "Build (deliverables + integration)",
+    "Validate (truth-lane + policy checks)",
+    "Operationalize (docs + automation + ownership)",
+    "Expand (open-option backlog to next phase)"
+  ],
+  "phase_sequence": [
+    {
+      "id": 1,
+      "name": "Foundation Hardening & Truth Baseline",
+      "objective": "Trusted operational baseline",
+      "deliverables": [
+        "Baseline Runbook v1",
+        "Environment Contract v1",
+        "Quality Debt Register",
+        "Ops Snapshot"
+      ],
+      "exit_criteria": [
+        "Stable baseline lane on standardized environment",
+        "Lint/test debt is not increasing",
+        "Artifact history supports trend interpretation"
+      ],
+      "now_actions": [
+        "Run make phase1-baseline",
+        "Run make phase1-status",
+        "Run make phase1-next",
+        "Run make phase1-complete once blockers are triaged"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Product Surface Simplification & Clarity",
+      "objective": "Instantly understandable product surface",
+      "deliverables": [
+        "Product Surface Map v2",
+        "Operator Essentials Guide",
+        "Migration Corridor Map",
+        "Docs Navigation Model v2"
+      ],
+      "exit_criteria": [
+        "New user reaches first success in one linear path",
+        "Reduced onboarding command confusion",
+        "Clear stable vs advanced boundaries"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Deterministic Quality Engine Expansion",
+      "objective": "Adaptive quality decision engine",
+      "deliverables": [
+        "Quality Engine Spec v2",
+        "Artifact Contract v2",
+        "Adaptive Profile Playbooks",
+        "Forensics Correlation Report"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Enterprise Trust, Governance, and Auditability",
+      "objective": "Enterprise buying confidence",
+      "deliverables": [
+        "Enterprise Assurance Bundle",
+        "Governance Contract Suite",
+        "Audit Trail Export",
+        "Support Operations Playbook"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Ecosystem & Integration Platformization",
+      "objective": "Low-friction integration platform",
+      "deliverables": [
+        "Plugin API Contract v1",
+        "Integration Accelerator Kits",
+        "Extension Certification Program",
+        "Partner Integration Guide"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Commercialization, Metrics, and Continuous Scale",
+      "objective": "Evidence-backed business outcomes",
+      "deliverables": [
+        "Commercial Readiness Dashboard",
+        "Value Proof Reports",
+        "Offering Architecture Map",
+        "Quarterly Strategic Plan"
+      ]
+    }
+  ],
+  "phase_handoff_rule": "Do not begin a new phase until the current phase exit criteria are met and validated with canonical artifacts."
+}
