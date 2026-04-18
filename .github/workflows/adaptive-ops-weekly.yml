@@ -17,10 +17,10 @@ jobs:
       ADAPTIVE_SCENARIO: ${{ github.event.inputs.adaptive_scenario || 'balanced' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -32,7 +32,7 @@ jobs:
           make adaptive-ops-bundle DATE_TAG="$DATE_TAG" ADAPTIVE_SCENARIO="$ADAPTIVE_SCENARIO"
 
       - name: Upload adaptive artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: adaptive-ops-${{ github.run_id }}
           path: |
