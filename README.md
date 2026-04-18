@@ -32,8 +32,8 @@ python -m pip install sdetkit==1.0.3
 Then run the canonical path:
 
 ```bash
-python -m sdetkit gate fast
-python -m sdetkit gate release
+python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
+python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor
 ```
 
