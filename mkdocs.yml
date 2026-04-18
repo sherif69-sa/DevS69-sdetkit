@@ -91,8 +91,10 @@ nav:
       - Decision guide: decision-guide.md
   - Getting started:
       - Install: install.md
+      - Quickstart (copy-paste): quickstart-copy-paste.md
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
       - Guided first run: ready-to-use.md
+      - Team adoption checklist: team-adoption-checklist.md
       - Adopt in your repository: adoption.md
       - Team rollout scenario: team-rollout-scenario.md
       - Container runtime: container-runtime.md
