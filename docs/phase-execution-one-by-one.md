@@ -28,6 +28,7 @@ make phase1-next-pass
 make phase1-blocker-register
 make phase1-do-it
 make phase1-gate-phase2
+make phase1-executive-report
 make phase1-retire-plan
 make phase1-complete
 make phase1-closeout
@@ -106,3 +107,6 @@ After Phase 1 is truly complete, run `make phase1-retire-plan` to archive Phase 
 
 
 Use `make phase1-gate-phase2` to decide if Phase 2 can start, based on finish signal + artifact contract.
+
+
+Use `make phase1-executive-report` to produce a one-page status for leadership handoff and phase decision meetings.
