@@ -166,6 +166,7 @@ artifacts/     # generated evidence packs
 - Docs hub: [`docs/index.md`](docs/index.md)
 - Architecture quick map for contributors: [`ARCHITECTURE.md`](ARCHITECTURE.md)
 - Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- Support and issue routing: [`SUPPORT.md`](SUPPORT.md)
 - Release process: [`RELEASE.md`](RELEASE.md)
 - Git workflow (branch tracking + ahead/behind): [`docs/git-workflow.md`](docs/git-workflow.md)
 - Enterprise readiness audit: [`docs/enterprise-readiness-audit-2026-04.md`](docs/enterprise-readiness-audit-2026-04.md)

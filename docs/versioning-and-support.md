@@ -10,6 +10,13 @@ Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate r
 This page is the operational policy for versioning, compatibility, support, and
 deprecation. It intentionally avoids guarantees we do not operationally enforce.
 
+## Quick support snapshot
+
+- **Supported Python floor:** **3.11+**
+- **Preferred install mode:** isolated environments (`venv` or `pipx`)
+- **First dependency target for adopters:** canonical command path artifacts and decision flow
+- **Support model:** best-effort public support (no contractual SLA stated in project policy)
+
 ## Scope and intent
 
 - This is a **current policy** for maintainers and adopters.
@@ -26,17 +33,48 @@ deprecation. It intentionally avoids guarantees we do not operationally enforce.
   - `MAJOR` for deliberate breaking changes.
 - Treat this as practical project policy, not a legal compatibility SLA.
 
-## Compatibility and support posture by tier
+## What adopters should depend on first
 
-- **Public / stable:** primary compatibility target and strongest change-control
-  expectation for release-confidence flows.
-- **Advanced but supported:** supported for production use, but docs/ergonomics
-  and integration-facing edges may iterate faster.
-- **Experimental / incubator:** opt-in and best-effort continuity; validate in
-  your own repo/CI before treating as a hard dependency.
+For release-confidence decisions, depend on this order first:
 
-This posture does not mean every command has the same change velocity.
-Compatibility expectations are intentionally tier-aware.
+1. Canonical commands and flow:
+   - `python -m sdetkit gate fast`
+   - `python -m sdetkit gate release`
+   - `python -m sdetkit doctor`
+2. Canonical artifact outputs used for triage and CI evidence:
+   - `build/gate-fast.json`
+   - `build/release-preflight.json`
+3. Public documentation for tier boundaries and command-surface intent.
+
+This ordering keeps integrations aligned with the most stable, adopter-facing contract.
+
+## Stability and support boundaries
+
+### Public / stable
+
+Intended as the strongest compatibility target and safest dependency surface for production adoption.
+
+You can generally treat these as the first surfaces to automate against:
+- canonical release-confidence flow
+- core evidence and decision lane behavior
+- user-facing docs describing canonical usage
+
+### Advanced but supported
+
+Supported for real production use, but expected to iterate faster than public/stable surfaces.
+
+Typical changes here may include:
+- docs/UX refinements
+- integration ergonomics
+- broader operational and rollout helpers
+
+Adopters can depend on this tier, but should expect more frequent incremental adjustments.
+
+### Experimental / incubator
+
+Opt-in and best-effort continuity only.
+
+Treat this tier as subject to faster change and require explicit local/CI validation before making it a hard dependency in organizational workflows.
 
 ## Canonical path vs compatibility lanes (visibility policy)
 
@@ -53,6 +91,17 @@ availability preserves transition continuity and advanced workflows, but does
 
 This section is guidance visibility only. It is **not** a new deprecation wave,
 removal announcement, or command-behavior change.
+
+## Best-effort / subject-to-change areas
+
+Without changing documented tier policy, adopters should treat the following as
+higher-iteration or best-effort compared with canonical public/stable paths:
+
+- experimental/incubator and transition-era lanes
+- hidden/legacy-oriented command families
+- secondary/advanced docs and rollout playbooks used after first-proof adoption
+
+When in doubt, anchor automations to canonical command flow + documented artifacts first.
 
 ## Deprecation approach (current)
 
@@ -77,6 +126,7 @@ path, or integration-facing interfaces), release notes should:
 
 ## Related references
 
+- [support.md](../SUPPORT.md)
 - [stability-levels.md](stability-levels.md)
 - [integrations-and-extension-boundary.md](integrations-and-extension-boundary.md)
 - [release-confidence.md](release-confidence.md)
