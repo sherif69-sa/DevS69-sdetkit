@@ -28,6 +28,7 @@ Use these after Tier 0 when you need remediation and operational triage depth:
 - `python scripts/validate_enterprise_contracts.py`
 - `python scripts/check_primary_docs_map.py`
 - `make phase1-baseline`
+- `make phase1-complete`
 - `make phase2-surface-clarity`
 - `make phase3-quality-contract`
 - `make phase4-governance-contract`

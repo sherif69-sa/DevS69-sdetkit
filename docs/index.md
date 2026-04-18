@@ -31,6 +31,7 @@ build/release-preflight.json
 - [Adopt in your repository](adoption.md)
 - [Team adoption checklist](team-adoption-checklist.md)
 - [Operator essentials](operator-essentials.md)
+- [Phase 1 execution checklist](phase1-execution-checklist.md)
 - [Recommended CI flow](recommended-ci-flow.md)
 - [CI artifact walkthrough](ci-artifact-walkthrough.md)
 - [Release confidence flow](release-confidence-flow.md)

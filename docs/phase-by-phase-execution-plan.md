@@ -24,6 +24,7 @@ Create a reproducible baseline lane that produces machine-readable evidence and 
 ### Execution package
 1. Run baseline lane via:
    - `make phase1-baseline`
+   - `make phase1-complete`
    - or `bash scripts/phase1_baseline_lane.sh`
 2. Capture outputs under `build/phase1-baseline/`:
    - `gate-fast.json`
@@ -42,6 +43,11 @@ Create a reproducible baseline lane that produces machine-readable evidence and 
 - Multi-Python matrix baseline evidence.
 - Profile-aware baseline (quick/standard/strict) comparisons.
 - Cross-repo baseline federation for portfolio reporting.
+
+### Closeout cleanup after completion
+- Freeze Phase 1 as complete in weekly reporting.
+- Keep baseline artifacts as immutable audit evidence.
+- Remove stale Phase 1 TODOs from active execution boards.
 
 ---
 
