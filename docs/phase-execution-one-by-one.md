@@ -24,6 +24,7 @@ make phase1-run-all
 make phase1-artifact-set
 make phase1-telemetry
 make phase1-finish-signal
+make phase1-next-pass
 make phase1-do-it
 make phase1-complete
 make phase1-closeout
@@ -90,3 +91,6 @@ Use `make phase1-finish-signal` to answer if Phase 1 is early / in_progress / ne
 
 
 If you want to run the full evidence pipeline now, use `make phase1-do-it`.
+
+
+Use `make phase1-next-pass` to generate a concise remediation card for the immediate next pass.
