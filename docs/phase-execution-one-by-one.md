@@ -21,6 +21,7 @@ make phase1-dashboard
 make phase1-weekly-pack
 make phase1-control-loop
 make phase1-run-all
+make phase1-telemetry
 make phase1-complete
 make phase1-closeout
 ```
@@ -74,3 +75,6 @@ Use `make phase1-ops-snapshot` each week to publish:
 
 
 For one-command orchestration, run `make phase1-run-all` (or `python scripts/phase1_run_all.py --include-closeout`).
+
+
+Use `make phase1-telemetry` after `phase1-run-all` to track run timing drift, pass-rate, and blocker categories over time.
