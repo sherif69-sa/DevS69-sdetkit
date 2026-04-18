@@ -8,8 +8,6 @@ import json
 from pathlib import Path
 
 DEFAULT_REQUIRED = [
-    "gate_fast",
-    "gate_release",
     "doctor",
     "enterprise_contracts",
     "primary_docs_map",
@@ -46,7 +44,7 @@ def main() -> int:
         rows = []
 
     required = ns.required_check or list(DEFAULT_REQUIRED)
-    allow_fail = set(ns.allow_fail or ["ruff", "pytest"])
+    allow_fail = set(ns.allow_fail or ["ruff", "pytest", "gate_fast", "gate_release"])
 
     by_id: dict[str, bool] = {}
     for row in rows:

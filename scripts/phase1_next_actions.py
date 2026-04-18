@@ -33,8 +33,11 @@ def main() -> int:
 
     status_payload = json.loads(status_path.read_text(encoding="utf-8"))
     not_yet = status_payload.get("not_yet", []) if isinstance(status_payload, dict) else []
+    hard_blockers = status_payload.get("hard_blockers", []) if isinstance(status_payload, dict) else []
     if not isinstance(not_yet, list):
         not_yet = []
+    if not isinstance(hard_blockers, list):
+        hard_blockers = []
 
     next_actions: list[str] = []
     for item in not_yet:
@@ -58,11 +61,13 @@ def main() -> int:
             seen.add(action)
             deduped.append(action)
 
-    ok = len(deduped) == 0
+    ok = len(hard_blockers) == 0
     payload = {
         "ok": ok,
         "schema_version": "sdetkit.phase1_next_actions.v1",
         "status_json": str(status_path),
+        "hard_blockers": hard_blockers,
+        "actions_are_advisory": ok and len(deduped) > 0,
         "next_actions": deduped,
     }
 

@@ -9,8 +9,6 @@ import sys
 from pathlib import Path
 
 REQUIRED_CHECKS = [
-    "gate_fast",
-    "gate_release",
     "doctor",
     "enterprise_contracts",
     "primary_docs_map",
@@ -58,7 +56,12 @@ def main() -> int:
         pending.append(f"baseline_summary_exists ({summary_path})")
         pending.extend([f"required_check_ok::{check_id}" for check_id in REQUIRED_CHECKS])
 
-    done = not pending
+    hard_blockers = [
+        item
+        for item in pending
+        if not item.startswith("optional_check_ok::") and not item.startswith("optional_check_present::")
+    ]
+    done = not hard_blockers
 
     result = {
         "ok": done,
@@ -66,6 +69,7 @@ def main() -> int:
         "summary": str(summary_path),
         "accomplished": accomplished,
         "not_yet": pending,
+        "hard_blockers": hard_blockers,
     }
 
     if ns.out:

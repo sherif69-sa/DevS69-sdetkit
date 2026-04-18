@@ -3,8 +3,9 @@ set -euo pipefail
 
 OUT_DIR="${1:-build/phase1-baseline}"
 mkdir -p "${OUT_DIR}" "${OUT_DIR}/logs"
+export PHASE1_OUT_DIR="${OUT_DIR}"
 
-PHASE1_OUT_DIR="${OUT_DIR}" python - <<'PY'
+python - <<'PY'
 import sys
 if sys.version_info < (3, 11):
     print(f"phase1-baseline: requires Python >=3.11 (detected {sys.version.split()[0]})")

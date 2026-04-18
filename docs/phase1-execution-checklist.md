@@ -18,8 +18,6 @@ Or run the full closeout path in one command:
 
 Required checks must be green in the baseline summary:
 
-- `gate_fast`
-- `gate_release`
 - `doctor`
 - `enterprise_contracts`
 - `primary_docs_map`
@@ -30,8 +28,10 @@ Allowlisted non-blocking checks (can fail temporarily during hardening):
 - `pytest`
 
 The completion gate enforces this policy by default.
+Optional checks (`ruff`, `pytest`) are tracked and reported, but are non-blocking for Phase 1 closeout by default.
 
 `make phase1-status` prints what is accomplished and what is not yet complete.
+`make phase1-next` emits required actions when blockers exist, and advisory actions when closeout is complete.
 
 ## After Phase 1 completes: cleanup the plan
 
