@@ -27,6 +27,7 @@ make phase1-finish-signal
 make phase1-next-pass
 make phase1-blocker-register
 make phase1-do-it
+make phase1-gate-phase2
 make phase1-retire-plan
 make phase1-complete
 make phase1-closeout
@@ -102,3 +103,6 @@ Use `make phase1-blocker-register` to produce a prioritized JSON/CSV blocker lis
 
 
 After Phase 1 is truly complete, run `make phase1-retire-plan` to archive Phase 1 planning state and keep flow-first operations as the repo default.
+
+
+Use `make phase1-gate-phase2` to decide if Phase 2 can start, based on finish signal + artifact contract.
