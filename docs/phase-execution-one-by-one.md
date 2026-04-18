@@ -27,6 +27,7 @@ make phase1-finish-signal
 make phase1-next-pass
 make phase1-blocker-register
 make phase1-do-it
+make phase1-retire-plan
 make phase1-complete
 make phase1-closeout
 ```
@@ -98,3 +99,6 @@ Use `make phase1-next-pass` to generate a concise remediation card for the immed
 
 
 Use `make phase1-blocker-register` to produce a prioritized JSON/CSV blocker list for assignment tracking.
+
+
+After Phase 1 is truly complete, run `make phase1-retire-plan` to archive Phase 1 planning state and keep flow-first operations as the repo default.
