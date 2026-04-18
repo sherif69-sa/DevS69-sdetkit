@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Utility for optional `httpx` loading in environments without network extras."""
+
+from __future__ import annotations
 
 import importlib
 import importlib.util

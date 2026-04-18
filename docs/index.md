@@ -30,17 +30,25 @@ build/release-preflight.json
 
 - [Adopt in your repository](adoption.md)
 - [Team adoption checklist](team-adoption-checklist.md)
+- [Operator essentials](operator-essentials.md)
+- [Phase 1 execution checklist](phase1-execution-checklist.md)
 - [Recommended CI flow](recommended-ci-flow.md)
 - [CI artifact walkthrough](ci-artifact-walkthrough.md)
 - [Release confidence flow](release-confidence-flow.md)
+- [First failure triage](first-failure-triage.md)
+- [Phase-by-phase execution plan](phase-by-phase-execution-plan.md)
 
 ## Reference / advanced
 
 - [CLI reference](cli.md)
 - [Doctor checks](doctor.md)
+- [Stability levels](stability-levels.md)
+- [Versioning and support posture](versioning-and-support.md)
+- [Integrations and extension boundary](integrations-and-extension-boundary.md)
 - [Why SDETKit for teams](why-sdetkit-for-teams.md)
 - [Use cases](use-cases.md)
 - [Release confidence ROI](release-confidence-roi.md)
+- [Repo health dashboard](repo-health-dashboard.md)
 
 ## Install and runtime notes
 
