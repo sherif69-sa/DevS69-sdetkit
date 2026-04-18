@@ -1,3 +1,5 @@
+- Compact week-1 team plan: [Team rollout playbook](team-rollout-playbook.md)
+
 # Adopt SDETKit in your repository (canonical)
 
 **Use this page if:** you are introducing SDETKit to a team-owned repository and need a staged rollout plan.

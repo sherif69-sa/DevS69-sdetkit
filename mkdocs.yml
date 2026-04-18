@@ -94,6 +94,7 @@ nav:
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
       - Guided first run: ready-to-use.md
       - Adopt in your repository: adoption.md
+      - Team rollout playbook: team-rollout-playbook.md
       - Team rollout scenario: team-rollout-scenario.md
       - Container runtime: container-runtime.md
       - Recommended CI flow: recommended-ci-flow.md
