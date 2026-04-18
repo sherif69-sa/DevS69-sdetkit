@@ -19,7 +19,7 @@ brutal: bootstrap
 	@bash -lc '. .venv/bin/activate && bash quality.sh brutal'
 
 venv:
-	@test -x .venv/bin/python || python3 -m venv .venv
+	@test -x .venv/bin/python || bash -lc 'set -euo pipefail; if [ -x "$$HOME/.pyenv/versions/3.11.14/bin/python" ]; then "$$HOME/.pyenv/versions/3.11.14/bin/python" -m venv .venv; else python3 -m venv .venv; fi'
 
 install: venv
 	@bash -lc '. .venv/bin/activate && python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .'
@@ -154,7 +154,7 @@ adaptive-scenario-db: venv
 adaptive-ops-bundle: adaptive-postcheck enterprise-contracts-check
 	@bash -lc '. .venv/bin/activate && python scripts/build_adaptive_ops_summary.py --out-md docs/artifacts/adaptive-ops-summary-$(DATE_TAG).md --out-json docs/artifacts/adaptive-ops-summary-$(DATE_TAG).json'
 
-phase1-baseline: venv
+phase1-baseline: install
 	@bash -lc '. .venv/bin/activate && bash scripts/phase1_baseline_lane.sh'
 
 phase1-status: venv
@@ -163,7 +163,7 @@ phase1-status: venv
 phase1-next: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase1_next_actions.py --status-json build/phase1-baseline/phase1-status.json --format json'
 
-phase1-complete: venv
+phase1-complete: install
 	@bash -lc '. .venv/bin/activate && bash scripts/phase1_baseline_lane.sh && python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json --require-logs && python scripts/phase1_completion_gate.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json'
 
 phase2-surface-clarity: venv
