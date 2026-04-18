@@ -27,6 +27,7 @@ make phase1-finish-signal
 make phase1-next-pass
 make phase1-blocker-register
 make phase1-do-it
+make phase1-flow-contract
 make phase1-gate-phase2
 make phase1-executive-report
 make phase1-retire-plan
@@ -110,3 +111,6 @@ Use `make phase1-gate-phase2` to decide if Phase 2 can start, based on finish si
 
 
 Use `make phase1-executive-report` to produce a one-page status for leadership handoff and phase decision meetings.
+
+
+Use `make phase1-flow-contract` to ensure the documented command path and Makefile targets stay in sync.
