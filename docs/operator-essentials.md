@@ -29,6 +29,7 @@ Use these after Tier 0 when you need remediation and operational triage depth:
 - `python scripts/check_primary_docs_map.py`
 - `make phase1-baseline`
 - `make phase1-status`
+- `make phase1-next`
 - `make phase1-complete`
 - `make phase2-surface-clarity`
 - `make phase3-quality-contract`

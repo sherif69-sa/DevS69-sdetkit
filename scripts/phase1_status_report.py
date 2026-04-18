@@ -20,6 +20,7 @@ REQUIRED_CHECKS = [
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--summary", default="build/phase1-baseline/phase1-baseline-summary.json")
+    ap.add_argument("--out", default=None, help="Optional output path for status JSON payload.")
     ap.add_argument("--format", choices=["text", "json"], default="text")
     ns = ap.parse_args()
 
@@ -66,6 +67,11 @@ def main() -> int:
         "accomplished": accomplished,
         "not_yet": pending,
     }
+
+    if ns.out:
+        out_path = Path(ns.out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     if ns.format == "json":
         print(json.dumps(result, indent=2, sort_keys=True))
