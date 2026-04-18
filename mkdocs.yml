@@ -85,6 +85,7 @@ nav:
   - Start here:
       - Overview: index.md
       - Why SDETKit for teams: why-sdetkit-for-teams.md
+      - Team use cases: use-cases.md
       - Start Here in 5 Minutes: start-here-5-minutes.md
       - Release confidence model: release-confidence.md
       - Decision guide: decision-guide.md
@@ -102,6 +103,8 @@ nav:
       - Before/after evidence example: before-after-evidence-example.md
       - Evidence showcase: evidence-showcase.md
       - Reporting and trends: reporting-and-trends.md
+      - Release confidence ROI: release-confidence-roi.md
+      - Adoption proof examples: adoption-proof-examples.md
       - Release confidence KPI pack: release-confidence-kpi-pack.md
       - Remediation cookbook: remediation-cookbook.md
       - Determinism checklist: determinism-checklist.md

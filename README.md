@@ -63,6 +63,9 @@ Decision rule:
 - Blank repo proof in 60 seconds: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
 - CI rollout path: [`docs/recommended-ci-flow.md`](docs/recommended-ci-flow.md)
 - Artifact decoder: [`docs/ci-artifact-walkthrough.md`](docs/ci-artifact-walkthrough.md)
+- Team use cases: [`docs/use-cases.md`](docs/use-cases.md)
+- Release confidence ROI: [`docs/release-confidence-roi.md`](docs/release-confidence-roi.md)
+- Adoption-proof examples: [`docs/adoption-proof-examples.md`](docs/adoption-proof-examples.md)
 
 ## Canonical local-to-CI journey
 
