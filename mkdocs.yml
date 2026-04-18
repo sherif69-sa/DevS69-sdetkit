@@ -82,64 +82,52 @@ extra_javascript:
   - javascripts/mermaid-init.js
 
 nav:
-  - Start here: index.md
-  - Canonical first-proof path (primary):
-      - Homepage: index.md
-      - Start Here in 5 Minutes (fast path): start-here-5-minutes.md
-      - Install (canonical): install.md
+  - Start here:
+      - Overview: index.md
+      - Why SDETKit for teams: why-sdetkit-for-teams.md
+      - Start Here in 5 Minutes: start-here-5-minutes.md
+      - Release confidence model: release-confidence.md
+      - Decision guide: decision-guide.md
+  - Getting started:
+      - Install: install.md
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
-      - First run quickstart (guided canonical path): ready-to-use.md
-      - Release confidence (canonical explainer): release-confidence.md
-      - Decision guide (is SDETKit a fit?): decision-guide.md
-      - Choose your path (30-second router): choose-your-path.md
+      - Guided first run: ready-to-use.md
+      - Adopt in your repository: adoption.md
+      - Team rollout scenario: team-rollout-scenario.md
+      - Container runtime: container-runtime.md
+      - Recommended CI flow: recommended-ci-flow.md
+  - Release confidence:
+      - CI artifact walkthrough: ci-artifact-walkthrough.md
+      - CI contract: ci-contract.md
       - Before/after evidence example: before-after-evidence-example.md
       - Evidence showcase: evidence-showcase.md
-  - Team adoption and CI rollout (primary):
-      - Adopt in your repository (canonical): adoption.md
-      - Team rollout scenario: team-rollout-scenario.md
-      - Example adoption flow: example-adoption-flow.md
-      - Adoption examples: adoption-examples.md
-      - Adoption troubleshooting: adoption-troubleshooting.md
-      - Recommended CI flow (canonical): recommended-ci-flow.md
-      - CI artifact walkthrough (canonical evidence decode): ci-artifact-walkthrough.md
-      - CI contract (reference): ci-contract.md
-      - Remediation cookbook: remediation-cookbook.md
       - Reporting and trends: reporting-and-trends.md
       - Release confidence KPI pack: release-confidence-kpi-pack.md
-      - Sample outputs (exploratory, non-canonical): sample-outputs.md
-  - Current reference and discoverability (secondary):
-      - Docs map (compact): docs-map.md
+      - Remediation cookbook: remediation-cookbook.md
+      - Determinism checklist: determinism-checklist.md
+      - Determinism contract: determinism-contract.md
+  - Reference:
       - CLI reference: cli.md
       - API: api.md
       - Doctor checks: doctor.md
       - Repo audit: repo-audit.md
-      - Security:
-          - Security gate: security-gate.md
-          - Security model: security-model.md
-          - Security hardening: security.md
-          - Policy-as-Code: policy.md
+      - Security gate: security-gate.md
+      - Security model: security-model.md
+      - Security hardening: security.md
+      - Policy-as-Code: policy.md
       - Feature registry: feature-registry.md
-      - Release confidence architecture note: architecture/umbrella-kits.md
       - Command surface inventory: command-surface.md
       - Capability map and command taxonomy: command-taxonomy.md
       - Legacy command migration map: legacy-command-migration-map.md
-      - Golden-path health signal: golden-path-health.md
-      - Adoption scorecard: adoption-scorecard.md
-      - Legacy burn-down program: legacy-burndown.md
-      - Operational maturity v2 rollout: operational-maturity-v2-rollout.md
-      - Operator onboarding wizard: operator-onboarding-wizard.md
-      - Primary docs map: primary-docs-map.md
-      - Docs nav cleanup progress: docs-nav-cleanup-progress.md
-      - Determinism checklist: determinism-checklist.md
-      - Determinism contract: determinism-contract.md
-      - Stability levels (current policy): stability-levels.md
-      - Versioning and support posture (current policy): versioning-and-support.md
-      - Integrations and extension boundary (current policy): integrations-and-extension-boundary.md
+      - Stability levels: stability-levels.md
+      - Versioning and support posture: versioning-and-support.md
+      - Integrations and extension boundary: integrations-and-extension-boundary.md
       - Release verification records: release-verification.md
+      - Docs map: docs-map.md
       - Roadmap: roadmap.md
       - Changelog: changelog.md
       - License: license.md
-  - Advanced (secondary):
+  - Advanced:
       - Contributing and maintenance:
           - Repo tour: repo-tour.md
           - First contribution quickstart: first-contribution-quickstart.md
@@ -150,7 +138,7 @@ nav:
           - PR automation for audit auto-fixes: pr-automation.md
           - Automation bots and maintenance control loop: automation-bots.md
           - n8n integration (PR webhook automation): n8n.md
-      - Kits (secondary umbrella):
+      - Kits:
           - Release Confidence Kit: kits/release-confidence.md
           - Test Intelligence Kit: kits/test-intelligence.md
           - Integration Assurance Kit: kits/integration-assurance.md
@@ -168,8 +156,8 @@ nav:
           - Plugins: plugins.md
           - Plugins, rule packs, and fix-audit: plugins-and-fix.md
       - Product and governance:
-          - Why not just separate tools? (system value): why-not-just-tools.md
-          - Product strategy (release confidence): product-strategy.md
+          - Why not just separate tools?: why-not-just-tools.md
+          - Product strategy: product-strategy.md
           - Productization map: productization-map.md
           - Design notes: design.md
           - Governance and org packs: governance-and-org-packs.md
@@ -182,10 +170,9 @@ nav:
           - 🔄 DevS69 Diff-to-Decision — Live Detail View: diff-flow-live.md
           - 🗺️ DevS69 Repo Map — Live Detail View: repo-map-live.md
           - DevS69 Visual HUD Showcase: hud-showcase.md
-  - Historical archive (non-primary):
+  - Archive:
       - Archive overview: archive/index.md
       - Transition-era material map: archive/transition-era-material.md
-
 exclude_docs: |
   artifacts/**
   roadmap/reports/**
