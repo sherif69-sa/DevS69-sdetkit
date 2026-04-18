@@ -108,6 +108,27 @@ def test_load_review_payload_raises_with_stdout_and_stderr_context(
     assert "stderr='module import failure'" in message
 
 
+def test_load_review_payload_truncates_stdout_snippet_in_error(monkeypatch, tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    very_long_stdout = "x" * 400
+
+    def _fake_run(*_args, **_kwargs):
+        return SimpleNamespace(
+            returncode=1,
+            stdout=very_long_stdout,
+            stderr="boom",
+        )
+
+    monkeypatch.setattr(adaptive_postcheck.subprocess, "run", _fake_run)
+    with pytest.raises(RuntimeError) as excinfo:
+        adaptive_postcheck._load_review_payload(str(repo_root), None)
+
+    message = str(excinfo.value)
+    assert ("stdout='" + ("x" * 200) + "'") in message
+    assert ("stdout='" + ("x" * 201)) not in message
+
+
 def test_main_writes_output_artifact_for_mocked_inputs(monkeypatch, tmp_path: Path) -> None:
     out_path = tmp_path / "adaptive-postcheck.json"
     payload = {"adaptive_database": {"release_readiness_contract": {}}}
