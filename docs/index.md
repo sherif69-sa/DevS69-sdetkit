@@ -24,10 +24,12 @@ build/release-preflight.json
 - [Start Here in 5 Minutes](start-here-5-minutes.md)
 - [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
 - [First run quickstart](ready-to-use.md)
+- [Quickstart (copy-paste)](quickstart-copy-paste.md)
 
 ## Team rollout / CI
 
 - [Adopt in your repository](adoption.md)
+- [Team adoption checklist](team-adoption-checklist.md)
 - [Recommended CI flow](recommended-ci-flow.md)
 - [CI artifact walkthrough](ci-artifact-walkthrough.md)
 - [Release confidence flow](release-confidence-flow.md)
