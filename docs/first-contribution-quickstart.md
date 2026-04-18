@@ -60,7 +60,7 @@ For docs-only changes:
 
 ```bash
 python -m pre_commit run -a
-mkdocs build
+NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q
 ```
 
 ## 4) Open your PR

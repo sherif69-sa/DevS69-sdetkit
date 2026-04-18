@@ -56,9 +56,12 @@ Deterministic artifacts improve release operations because they make decisions:
 
 ## How to start (canonical path)
 
-Install and run the canonical path:
+Install and run the canonical path (Python 3.11+, isolated env):
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
 python -m pip install sdetkit==1.0.3
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json

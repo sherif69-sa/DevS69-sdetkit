@@ -29,7 +29,7 @@ Use this page as a concise handoff, then follow the detailed path in [`CONTRIBUT
 ```bash
 python -m pre_commit run -a
 bash quality.sh cov
-mkdocs build
+NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q
 ```
 
 ## Feature registry governance (for command-surface changes)
