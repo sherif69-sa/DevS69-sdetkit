@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sdetkit"
-version = "1.0.2"
+version = "1.0.3"
 requires-python = ">=3.11"
 readme = "README.md"
 description = "Operator-grade release confidence and test intelligence platform: deterministic gates, evidence, integration assurance, and failure forensics."
@@ -147,3 +147,5 @@ telegram = "sdetkit.notify_plugins:telegram_adapter"
 whatsapp = "sdetkit.notify_plugins:whatsapp_adapter"
 
 [project.entry-points."sdetkit.ops_tasks"]
+[tool.setuptools.package-data]
+sdetkit = ["public_command_surface.json"]
