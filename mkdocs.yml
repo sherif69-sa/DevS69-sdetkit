@@ -96,6 +96,7 @@ nav:
       - Guided first run: ready-to-use.md
       - Team adoption checklist: team-adoption-checklist.md
       - Adopt in your repository: adoption.md
+      - Team rollout playbook: team-rollout-playbook.md
       - Team rollout scenario: team-rollout-scenario.md
       - Container runtime: container-runtime.md
       - Recommended CI flow: recommended-ci-flow.md
