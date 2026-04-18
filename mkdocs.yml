@@ -98,6 +98,7 @@ nav:
       - Container runtime: container-runtime.md
       - Recommended CI flow: recommended-ci-flow.md
   - Release confidence:
+      - Release confidence flow: release-confidence-flow.md
       - CI artifact walkthrough: ci-artifact-walkthrough.md
       - CI contract: ci-contract.md
       - Before/after evidence example: before-after-evidence-example.md
