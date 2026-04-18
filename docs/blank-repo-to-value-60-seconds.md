@@ -9,7 +9,10 @@ If you want the same path with more guidance, use [First run quickstart](ready-t
 ```bash
 mkdir my-repo && cd my-repo
 git init
-python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+python -m pip install sdetkit==1.0.3
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor

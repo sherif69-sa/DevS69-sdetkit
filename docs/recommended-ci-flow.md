@@ -61,7 +61,7 @@ jobs:
           python -m pre_commit run -a
           bash quality.sh registry
           bash quality.sh cov
-          NO_MKDOCS_2_WARNING=1 python -m mkdocs build
+          NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q
 
       - name: Upload CI diagnostics
         if: always()

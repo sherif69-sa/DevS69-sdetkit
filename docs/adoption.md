@@ -16,7 +16,10 @@ Move from local confidence checks to repeatable team gates with machine-readable
 Use [Install](install.md), then verify:
 
 ```bash
-python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+python -m pip install sdetkit==1.0.3
 python -m sdetkit --help
 python -m sdetkit gate --help
 ```

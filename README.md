@@ -23,11 +23,16 @@ Instead of stitching together separate scripts and tools for every repo, teams r
 
 ## Canonical first path (run this first)
 
-Install the released package:
+Install the released package in an isolated environment (Python 3.11+):
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
 python -m pip install sdetkit==1.0.3
 ```
+
+If you prefer an isolated global CLI install instead of a project venv, use `pipx install sdetkit==1.0.3`.
 
 Then run the canonical path:
 

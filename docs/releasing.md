@@ -21,7 +21,7 @@ Current baseline release: **v1.0.2**.
    bash quality.sh cov
    python -m build
    python -m twine check dist/*
-   mkdocs build
+   NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q
    ```
 
 4. Commit changes and open/merge a PR.
