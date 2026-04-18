@@ -1,22 +1,30 @@
+# Changelog
+
 ## Unreleased
 
-- release-confidence operating loop polish: added machine-readable public command surface enforcement, pre-merge changed-files strict gate, unified CI summary artifact, weekly KPI pack workflow (`sdetkit kpi-report`), and lazy root CLI command routing with legacy namespace support.
-- dependency upgrades: raised `twilio` floor to `>=9.10.4,<10` and aligned `tomli` to `2.4.1` across requirements and lock manifests.
-- add GHAS alert SLA + metrics export bots, wire them into maintenance coverage checks, and refresh GHAS automation docs.
-- add Name 86 launch readiness closeout lane command, docs, checks, and tests (`name86-launch-readiness-closeout`).
-- upgrade audit: parse modern `pyproject.toml` `[dependency-groups]` declarations, including `{include-group = "..."}` expansions.
-- doctor enterprise workflow: add `--enterprise`, `--enterprise-rerun-failed`, `--enterprise-rerun-high`, and `--enterprise-next-pass-only` modes with enterprise insights/remediation bundles in JSON+markdown output and workspace-driven focused reruns.
+## [1.0.3]
 
-# Changelog
-## [1.0.2] - 2026-04-16
+Released: 2026-04-18
+
+- release stabilization: align package version, changelog, and release verification with v1.0.3.
+- docs trust pass: replace enterprise contact placeholder and publish real content for key buyer-facing pages.
+- artifacts hygiene: remove public TODO values from the KPI dashboard seed artifact.
+
+## [1.0.2]
+
+Released: 2026-04-16
 
 - Packaging: modernize license metadata.
 
 
-## v1.0.1 - 2026-04-01
+## v1.0.1
+
+Released: 2026-04-01
 - CI gate: run `sdetkit doctor --all` and `sdetkit repo check --profile enterprise` on every PR.
 
-## v1.0.0 - 2026-03-20
+## v1.0.0
+
+Released: 2026-03-20
 - Enterprise hardening: GitHub Actions pinned to commit SHAs.
 - Dependency hygiene: requirements pinned and lockfiles added.
 - Repo init/apply reliability: tolerate non-UTF-8 preset template files.

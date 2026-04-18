@@ -14,4 +14,4 @@ such as:
 
 Using the open-source core does not require a separate commercial license.
 
-For enterprise support or custom offerings, contact: `<CONTACT_EMAIL_OR_URL>`
+For enterprise support or custom offerings, contact: `https://github.com/sherif69-sa`
