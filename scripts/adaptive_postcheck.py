@@ -8,16 +8,53 @@ changes, making automation adaptive rather than fixed-date/fixed-rule.
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
 import json
-from pathlib import Path
+import os
 import subprocess
 import sys
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
-
 
 ROOT = Path(__file__).resolve().parent.parent
 SCENARIO_PATH = ROOT / "docs/contracts/adaptive-postcheck-scenarios.v1.json"
+
+
+def _local_python_env(repo_root: str) -> dict[str, str]:
+    env = os.environ.copy()
+    existing = env.get("PYTHONPATH", "").strip()
+    candidate_root = Path(repo_root).resolve()
+    src_path = str((candidate_root / "src").resolve())
+    env["PYTHONPATH"] = (
+        src_path if not existing else f"{src_path}{os.pathsep}{existing}"
+    )
+    return env
+
+
+def _parse_json_stdout(text: str) -> dict[str, Any] | None:
+    raw = text.strip()
+    if not raw:
+        return None
+    try:
+        loaded = json.loads(raw)
+    except json.JSONDecodeError:
+        loaded = None
+    if isinstance(loaded, dict):
+        return loaded
+
+    for line in reversed(raw.splitlines()):
+        candidate = line.strip()
+        if not candidate:
+            continue
+        if not (candidate.startswith("{") and candidate.endswith("}")):
+            continue
+        try:
+            loaded = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(loaded, dict):
+            return loaded
+    return None
 
 
 def _load_review_payload(repo_root: str, input_json: str | None) -> dict[str, Any]:
@@ -34,15 +71,20 @@ def _load_review_payload(repo_root: str, input_json: str | None) -> dict[str, An
         "--format",
         "json",
     ]
-    result = subprocess.run(cmd, check=False, capture_output=True, text=True)
-    if result.stdout.strip():
-        try:
-            return json.loads(result.stdout)
-        except json.JSONDecodeError:
-            pass
+    result = subprocess.run(
+        cmd,
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=repo_root,
+        env=_local_python_env(repo_root),
+    )
+    parsed = _parse_json_stdout(result.stdout)
+    if isinstance(parsed, dict):
+        return parsed
     raise RuntimeError(
         "failed to load review payload from command; "
-        f"exit={result.returncode}, stderr={result.stderr.strip()!r}"
+        f"exit={result.returncode}, stdout={result.stdout.strip()[:200]!r}, stderr={result.stderr.strip()!r}"
     )
 
 
@@ -75,13 +117,15 @@ def _load_latest_scenario_database() -> dict[str, Any] | None:
 
 def _doctor_summary(repo_root: str) -> dict[str, Any] | None:
     cmd = [sys.executable, "-m", "sdetkit", "doctor", "--format", "json"]
-    result = subprocess.run(cmd, check=False, capture_output=True, text=True, cwd=repo_root)
-    if not result.stdout.strip():
-        return None
-    try:
-        payload = json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return None
+    result = subprocess.run(
+        cmd,
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=repo_root,
+        env=_local_python_env(repo_root),
+    )
+    payload = _parse_json_stdout(result.stdout)
     if not isinstance(payload, dict):
         return None
     return {
@@ -261,7 +305,7 @@ def _build_first_run_triage(payload: dict[str, Any], doctor: dict[str, Any] | No
     }
 
 def _default_out_path() -> str:
-    date_tag = datetime.now(timezone.utc).date().isoformat()
+    date_tag = datetime.now(UTC).date().isoformat()
     return f"docs/artifacts/adaptive-postcheck-{date_tag}.json"
 
 
