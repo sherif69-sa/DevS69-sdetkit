@@ -21,6 +21,7 @@ make phase1-dashboard
 make phase1-weekly-pack
 make phase1-control-loop
 make phase1-run-all
+make phase1-artifact-set
 make phase1-telemetry
 make phase1-complete
 make phase1-closeout
@@ -78,3 +79,6 @@ For one-command orchestration, run `make phase1-run-all` (or `python scripts/pha
 
 
 Use `make phase1-telemetry` after `phase1-run-all` to track run timing drift, pass-rate, and blocker categories over time.
+
+
+Use `make phase1-artifact-set` to enforce that all Phase 1 JSON/Markdown artifacts exist before closeout.
