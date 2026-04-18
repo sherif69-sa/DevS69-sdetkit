@@ -23,6 +23,7 @@ make phase1-control-loop
 make phase1-run-all
 make phase1-artifact-set
 make phase1-telemetry
+make phase1-finish-signal
 make phase1-complete
 make phase1-closeout
 ```
@@ -82,3 +83,6 @@ Use `make phase1-telemetry` after `phase1-run-all` to track run timing drift, pa
 
 
 Use `make phase1-artifact-set` to enforce that all Phase 1 JSON/Markdown artifacts exist before closeout.
+
+
+Use `make phase1-finish-signal` to answer if Phase 1 is early / in_progress / near_finish / complete.
