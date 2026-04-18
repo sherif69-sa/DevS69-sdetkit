@@ -8,16 +8,51 @@ changes, making automation adaptive rather than fixed-date/fixed-rule.
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
 import json
-from pathlib import Path
+import os
 import subprocess
 import sys
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
-
 
 ROOT = Path(__file__).resolve().parent.parent
 SCENARIO_PATH = ROOT / "docs/contracts/adaptive-postcheck-scenarios.v1.json"
+
+
+def _local_python_env(repo_root: str) -> dict[str, str]:
+    env = os.environ.copy()
+    existing = env.get("PYTHONPATH", "").strip()
+    candidate_root = Path(repo_root).resolve()
+    src_path = str((candidate_root / "src").resolve())
+    env["PYTHONPATH"] = src_path if not existing else f"{src_path}{os.pathsep}{existing}"
+    return env
+
+
+def _parse_json_stdout(text: str) -> dict[str, Any] | None:
+    raw = text.strip()
+    if not raw:
+        return None
+    try:
+        loaded = json.loads(raw)
+    except json.JSONDecodeError:
+        loaded = None
+    if isinstance(loaded, dict):
+        return loaded
+
+    for line in reversed(raw.splitlines()):
+        candidate = line.strip()
+        if not candidate:
+            continue
+        if not (candidate.startswith("{") and candidate.endswith("}")):
+            continue
+        try:
+            loaded = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(loaded, dict):
+            return loaded
+    return None
 
 
 def _load_review_payload(repo_root: str, input_json: str | None) -> dict[str, Any]:
@@ -34,15 +69,20 @@ def _load_review_payload(repo_root: str, input_json: str | None) -> dict[str, An
         "--format",
         "json",
     ]
-    result = subprocess.run(cmd, check=False, capture_output=True, text=True)
-    if result.stdout.strip():
-        try:
-            return json.loads(result.stdout)
-        except json.JSONDecodeError:
-            pass
+    result = subprocess.run(
+        cmd,
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=repo_root,
+        env=_local_python_env(repo_root),
+    )
+    parsed = _parse_json_stdout(result.stdout)
+    if isinstance(parsed, dict):
+        return parsed
     raise RuntimeError(
         "failed to load review payload from command; "
-        f"exit={result.returncode}, stderr={result.stderr.strip()!r}"
+        f"exit={result.returncode}, stdout={result.stdout.strip()[:200]!r}, stderr={result.stderr.strip()!r}"
     )
 
 
@@ -56,8 +96,6 @@ def _load_scenario(name: str) -> dict[str, Any]:
     if not isinstance(selected, dict):
         raise ValueError(f"scenario {name!r} is invalid")
     return selected
-
-
 
 
 def _latest_artifact(prefix: str) -> Path | None:
@@ -75,13 +113,15 @@ def _load_latest_scenario_database() -> dict[str, Any] | None:
 
 def _doctor_summary(repo_root: str) -> dict[str, Any] | None:
     cmd = [sys.executable, "-m", "sdetkit", "doctor", "--format", "json"]
-    result = subprocess.run(cmd, check=False, capture_output=True, text=True, cwd=repo_root)
-    if not result.stdout.strip():
-        return None
-    try:
-        payload = json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return None
+    result = subprocess.run(
+        cmd,
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=repo_root,
+        env=_local_python_env(repo_root),
+    )
+    payload = _parse_json_stdout(result.stdout)
     if not isinstance(payload, dict):
         return None
     return {
@@ -92,11 +132,15 @@ def _doctor_summary(repo_root: str) -> dict[str, Any] | None:
     }
 
 
-def _bool_check(name: str, passed: bool, details: str, severity: str = "required") -> dict[str, Any]:
+def _bool_check(
+    name: str, passed: bool, details: str, severity: str = "required"
+) -> dict[str, Any]:
     return {"check": name, "passed": passed, "details": details, "severity": severity}
 
 
-def _run_alignment_checks(payload: dict[str, Any], scenario: dict[str, Any], first_run_triage: dict[str, Any]) -> list[dict[str, Any]]:
+def _run_alignment_checks(
+    payload: dict[str, Any], scenario: dict[str, Any], first_run_triage: dict[str, Any]
+) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
     enabled = set(scenario.get("enabled_checks", []))
     warn_checks = set(scenario.get("warn_only_checks", []))
@@ -204,11 +248,19 @@ def _run_alignment_checks(payload: dict[str, Any], scenario: dict[str, Any], fir
     return checks
 
 
-
-
-def _build_first_run_triage(payload: dict[str, Any], doctor: dict[str, Any] | None) -> dict[str, Any]:
-    adaptive = payload.get("adaptive_database", {}) if isinstance(payload.get("adaptive_database"), dict) else {}
-    contract = adaptive.get("release_readiness_contract", {}) if isinstance(adaptive.get("release_readiness_contract"), dict) else {}
+def _build_first_run_triage(
+    payload: dict[str, Any], doctor: dict[str, Any] | None
+) -> dict[str, Any]:
+    adaptive = (
+        payload.get("adaptive_database", {})
+        if isinstance(payload.get("adaptive_database"), dict)
+        else {}
+    )
+    contract = (
+        adaptive.get("release_readiness_contract", {})
+        if isinstance(adaptive.get("release_readiness_contract"), dict)
+        else {}
+    )
 
     doctor_failed = []
     if isinstance(doctor, dict):
@@ -260,8 +312,9 @@ def _build_first_run_triage(payload: dict[str, Any], doctor: dict[str, Any] | No
         "hint_count": len(fix_hints),
     }
 
+
 def _default_out_path() -> str:
-    date_tag = datetime.now(timezone.utc).date().isoformat()
+    date_tag = datetime.now(UTC).date().isoformat()
     return f"docs/artifacts/adaptive-postcheck-{date_tag}.json"
 
 
@@ -269,7 +322,11 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("repo", nargs="?", default=".")
     ap.add_argument("--input-json", default=None, help="Path to existing review JSON payload")
-    ap.add_argument("--scenario", default="balanced", help="Scenario name from adaptive-postcheck-scenarios contract")
+    ap.add_argument(
+        "--scenario",
+        default="balanced",
+        help="Scenario name from adaptive-postcheck-scenarios contract",
+    )
     ap.add_argument(
         "--out",
         default=None,
@@ -283,7 +340,9 @@ def main() -> int:
     first_run_triage = _build_first_run_triage(payload, doctor)
     checks = _run_alignment_checks(payload, scenario, first_run_triage)
     passed = sum(1 for c in checks if c.get("passed"))
-    failed_required = sum(1 for c in checks if (not c.get("passed")) and c.get("severity") != "warn")
+    failed_required = sum(
+        1 for c in checks if (not c.get("passed")) and c.get("severity") != "warn"
+    )
     failed_warn = sum(1 for c in checks if (not c.get("passed")) and c.get("severity") == "warn")
 
     out_payload = {
