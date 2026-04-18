@@ -5,8 +5,9 @@ Use this checklist to execute and close Phase 1 before moving to later phases.
 ## Run order
 
 1. `make phase1-baseline`
-2. `python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json --require-logs`
-3. `python scripts/phase1_completion_gate.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json`
+2. `make phase1-status`
+3. `python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json --require-logs`
+4. `python scripts/phase1_completion_gate.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json`
 
 Or run the full closeout path in one command:
 
@@ -28,6 +29,8 @@ Allowlisted non-blocking checks (can fail temporarily during hardening):
 - `pytest`
 
 The completion gate enforces this policy by default.
+
+`make phase1-status` prints what is accomplished and what is not yet complete.
 
 ## After Phase 1 completes: cleanup the plan
 

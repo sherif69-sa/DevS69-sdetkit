@@ -13,6 +13,7 @@ REQUIRED_LINES = [
     "python -m sdetkit gate release",
     "python -m sdetkit doctor",
     "make phase1-baseline",
+    "make phase1-status",
     "make phase1-complete",
     "make phase2-surface-clarity",
     "make phase3-quality-contract",

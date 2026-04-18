@@ -24,6 +24,7 @@ Create a reproducible baseline lane that produces machine-readable evidence and 
 ### Execution package
 1. Run baseline lane via:
    - `make phase1-baseline`
+   - `make phase1-status`
    - `make phase1-complete`
    - or `bash scripts/phase1_baseline_lane.sh`
 2. Capture outputs under `build/phase1-baseline/`:
