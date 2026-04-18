@@ -25,9 +25,7 @@ def _local_python_env(repo_root: str) -> dict[str, str]:
     existing = env.get("PYTHONPATH", "").strip()
     candidate_root = Path(repo_root).resolve()
     src_path = str((candidate_root / "src").resolve())
-    env["PYTHONPATH"] = (
-        src_path if not existing else f"{src_path}{os.pathsep}{existing}"
-    )
+    env["PYTHONPATH"] = src_path if not existing else f"{src_path}{os.pathsep}{existing}"
     return env
 
 
@@ -100,8 +98,6 @@ def _load_scenario(name: str) -> dict[str, Any]:
     return selected
 
 
-
-
 def _latest_artifact(prefix: str) -> Path | None:
     candidates = sorted((ROOT / "docs/artifacts").glob(f"{prefix}*.json"))
     return candidates[-1] if candidates else None
@@ -136,11 +132,15 @@ def _doctor_summary(repo_root: str) -> dict[str, Any] | None:
     }
 
 
-def _bool_check(name: str, passed: bool, details: str, severity: str = "required") -> dict[str, Any]:
+def _bool_check(
+    name: str, passed: bool, details: str, severity: str = "required"
+) -> dict[str, Any]:
     return {"check": name, "passed": passed, "details": details, "severity": severity}
 
 
-def _run_alignment_checks(payload: dict[str, Any], scenario: dict[str, Any], first_run_triage: dict[str, Any]) -> list[dict[str, Any]]:
+def _run_alignment_checks(
+    payload: dict[str, Any], scenario: dict[str, Any], first_run_triage: dict[str, Any]
+) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
     enabled = set(scenario.get("enabled_checks", []))
     warn_checks = set(scenario.get("warn_only_checks", []))
@@ -248,11 +248,19 @@ def _run_alignment_checks(payload: dict[str, Any], scenario: dict[str, Any], fir
     return checks
 
 
-
-
-def _build_first_run_triage(payload: dict[str, Any], doctor: dict[str, Any] | None) -> dict[str, Any]:
-    adaptive = payload.get("adaptive_database", {}) if isinstance(payload.get("adaptive_database"), dict) else {}
-    contract = adaptive.get("release_readiness_contract", {}) if isinstance(adaptive.get("release_readiness_contract"), dict) else {}
+def _build_first_run_triage(
+    payload: dict[str, Any], doctor: dict[str, Any] | None
+) -> dict[str, Any]:
+    adaptive = (
+        payload.get("adaptive_database", {})
+        if isinstance(payload.get("adaptive_database"), dict)
+        else {}
+    )
+    contract = (
+        adaptive.get("release_readiness_contract", {})
+        if isinstance(adaptive.get("release_readiness_contract"), dict)
+        else {}
+    )
 
     doctor_failed = []
     if isinstance(doctor, dict):
@@ -304,6 +312,7 @@ def _build_first_run_triage(payload: dict[str, Any], doctor: dict[str, Any] | No
         "hint_count": len(fix_hints),
     }
 
+
 def _default_out_path() -> str:
     date_tag = datetime.now(UTC).date().isoformat()
     return f"docs/artifacts/adaptive-postcheck-{date_tag}.json"
@@ -313,7 +322,11 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("repo", nargs="?", default=".")
     ap.add_argument("--input-json", default=None, help="Path to existing review JSON payload")
-    ap.add_argument("--scenario", default="balanced", help="Scenario name from adaptive-postcheck-scenarios contract")
+    ap.add_argument(
+        "--scenario",
+        default="balanced",
+        help="Scenario name from adaptive-postcheck-scenarios contract",
+    )
     ap.add_argument(
         "--out",
         default=None,
@@ -327,7 +340,9 @@ def main() -> int:
     first_run_triage = _build_first_run_triage(payload, doctor)
     checks = _run_alignment_checks(payload, scenario, first_run_triage)
     passed = sum(1 for c in checks if c.get("passed"))
-    failed_required = sum(1 for c in checks if (not c.get("passed")) and c.get("severity") != "warn")
+    failed_required = sum(
+        1 for c in checks if (not c.get("passed")) and c.get("severity") != "warn"
+    )
     failed_warn = sum(1 for c in checks if (not c.get("passed")) and c.get("severity") == "warn")
 
     out_payload = {

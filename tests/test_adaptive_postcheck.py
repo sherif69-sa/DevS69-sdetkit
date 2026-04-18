@@ -21,7 +21,7 @@ def test_parse_json_stdout_accepts_clean_json_object() -> None:
 
 def test_parse_json_stdout_recovers_json_after_log_lines() -> None:
     payload = adaptive_postcheck._parse_json_stdout(
-        "warning: bootstrapping lane\ninfo: continuing\n{\"ok\": false, \"failed_required\": 1}\n"
+        'warning: bootstrapping lane\ninfo: continuing\n{"ok": false, "failed_required": 1}\n'
     )
     assert payload == {"ok": False, "failed_required": 1}
 
@@ -43,7 +43,7 @@ def test_load_review_payload_parses_noisy_subprocess_stdout(monkeypatch, tmp_pat
         captured.update(kwargs)
         return SimpleNamespace(
             returncode=2,
-            stdout="boot log\n{\"status\":\"watch\",\"findings_count\":3}\n",
+            stdout='boot log\n{"status":"watch","findings_count":3}\n',
             stderr="",
         )
 
@@ -137,7 +137,9 @@ def test_main_writes_output_artifact_for_mocked_inputs(monkeypatch, tmp_path: Pa
         "warn_only_checks": [],
     }
 
-    monkeypatch.setattr(adaptive_postcheck, "_load_review_payload", lambda *_args, **_kwargs: payload)
+    monkeypatch.setattr(
+        adaptive_postcheck, "_load_review_payload", lambda *_args, **_kwargs: payload
+    )
     monkeypatch.setattr(adaptive_postcheck, "_load_scenario", lambda *_args, **_kwargs: scenario)
     monkeypatch.setattr(adaptive_postcheck, "_doctor_summary", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(
