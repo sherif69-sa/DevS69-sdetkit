@@ -30,6 +30,7 @@ build/release-preflight.json
 - [Adopt in your repository](adoption.md)
 - [Recommended CI flow](recommended-ci-flow.md)
 - [CI artifact walkthrough](ci-artifact-walkthrough.md)
+- [Release confidence flow](release-confidence-flow.md)
 
 ## Reference / advanced
 
