@@ -7,7 +7,7 @@ GENERATED_AT ?= 2026-04-17T10:00:00Z
 ADAPTIVE_SCENARIO ?= balanced
 PORTFOLIO_MANIFEST ?= portfolio-manifest.json
 
-.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-contract release-room portfolio-readiness premerge-release-room adaptive-scenario-db adaptive-postcheck adaptive-ops-bundle test-bootstrap test-bootstrap-contract merge-ready
+.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-contract release-room portfolio-readiness premerge-release-room adaptive-scenario-db adaptive-postcheck adaptive-ops-bundle test-bootstrap test-bootstrap-contract merge-ready phase1-baseline phase2-surface-clarity phase3-quality-contract phase4-governance-contract phase5-ecosystem-contract phase6-metrics-contract
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
@@ -153,3 +153,21 @@ adaptive-scenario-db: venv
 
 adaptive-ops-bundle: adaptive-postcheck enterprise-contracts-check
 	@bash -lc '. .venv/bin/activate && python scripts/build_adaptive_ops_summary.py --out-md docs/artifacts/adaptive-ops-summary-$(DATE_TAG).md --out-json docs/artifacts/adaptive-ops-summary-$(DATE_TAG).json'
+
+phase1-baseline: venv
+	@bash -lc '. .venv/bin/activate && bash scripts/phase1_baseline_lane.sh'
+
+phase2-surface-clarity: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_operator_essentials_contract.py --format json'
+
+phase3-quality-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json'
+
+phase4-governance-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_phase4_governance_contract.py --format json'
+
+phase5-ecosystem-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_phase5_ecosystem_contract.py --format json'
+
+phase6-metrics-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_phase6_metrics_contract.py --format json'
