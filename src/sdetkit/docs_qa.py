@@ -63,7 +63,13 @@ def _iter_markdown_files(root: Path) -> list[Path]:
         files.append(readme)
     docs = root / "docs"
     if docs.exists():
-        files.extend(sorted(docs.rglob("*.md")))
+        files.extend(
+            sorted(
+                path
+                for path in docs.rglob("*.md")
+                if "artifacts" not in path.relative_to(docs).parts
+            )
+        )
     return files
 
 

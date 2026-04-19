@@ -187,4 +187,4 @@ Potential cost drivers to control:
 - **Confidence**: Medium-high for pilot success; medium for organization-wide scale until surface simplification and governance tightening are complete.
 - **Success criterion**: Demonstrate measurable cycle-time and defect/release improvements in pilot repos while keeping CI cost within predefined budget envelopes.
 
-- Execution tracker for step-by-step rollout: [`docs/enterprise-plan-execution.md`](docs/enterprise-plan-execution.md)
+- Execution tracker for step-by-step rollout: [`docs/enterprise-plan-execution.md`](enterprise-plan-execution.md)

@@ -111,7 +111,7 @@ def render_text(report: dict[str, object]) -> str:
 
 def main() -> int:
     args = parse_args()
-    repo_root = Path(args.repo_root).resolve()
+    repo_root = Path(getattr(args, "repo_root", ".")).resolve()
     report = build_report(repo_root)
     rendered = json.dumps(report, indent=2, sort_keys=True) if args.format == "json" else render_text(report)
     print(rendered)

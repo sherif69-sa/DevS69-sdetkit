@@ -15,7 +15,11 @@ def missing_modules(modules: Sequence[str] = REQUIRED_TEST_MODULES) -> list[str]
 
 
 def build_test_bootstrap_report() -> dict[str, object]:
-    current = (sys.version_info.major, sys.version_info.minor)
+    version = sys.version_info
+    if hasattr(version, "major") and hasattr(version, "minor"):
+        current = (int(version.major), int(version.minor))
+    else:
+        current = (int(version[0]), int(version[1]))
     missing = missing_modules()
     return {
         "ok": current >= MIN_TEST_PYTHON and not missing,

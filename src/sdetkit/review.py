@@ -2260,6 +2260,16 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
     raw_work_context = request_context.get("work_context", {})
     if not isinstance(raw_work_context, dict):
         raw_work_context = {}
+    adaptive_database = payload.get("adaptive_database", {})
+    if isinstance(adaptive_database, dict):
+        adaptive_database = dict(adaptive_database)
+        release_contract = adaptive_database.get("release_readiness_contract", {})
+        if isinstance(release_contract, dict):
+            release_contract = dict(release_contract)
+            release_contract.pop("generated_at_utc", None)
+            release_contract.pop("next_review_due_at_utc", None)
+            adaptive_database["release_readiness_contract"] = release_contract
+
     return {
         "contract_version": REVIEW_CONTRACT_VERSION,
         "situation": {
@@ -2289,7 +2299,7 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
             "work_context": {str(k): str(v) for k, v in raw_work_context.items() if str(k).strip()},
         },
         "code_scanning": payload.get("code_scanning", {}),
-        "adaptive_database": payload.get("adaptive_database", {}),
+        "adaptive_database": adaptive_database,
         "review_contract_check": payload.get("review_contract_check", {}),
         "doctor_gate_contract": payload.get("doctor_gate_contract", {}),
         "artifacts": payload.get("artifact_index", {}),
