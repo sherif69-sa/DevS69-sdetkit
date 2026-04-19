@@ -1,0 +1,71 @@
+name: phase3-quality-contract
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Makefile'
+      - 'scripts/check_phase3_quality_contract.py'
+      - 'scripts/build_phase3_trend_delta.py'
+      - 'scripts/phase3_persist_baseline_history.py'
+      - 'scripts/phase3_quality_engine.py'
+      - 'tests/test_phase3_*.py'
+
+jobs:
+  phase3-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .
+
+      - name: Seed baseline summary for contract lane
+        run: |
+          mkdir -p build/phase1-baseline
+          cat > build/phase1-baseline/phase1-baseline-summary.json <<'JSON'
+          {
+            "schema_version": "sdetkit.phase1_baseline.v1",
+            "generated_at_utc": "2026-04-19T00:00:00Z",
+            "out_dir": "build/phase1-baseline",
+            "ok": false,
+            "checks": [
+              {"id": "doctor", "ok": false, "rc": 1, "stdout_log": "build/phase1-baseline/logs/doctor.out.log", "stderr_log": "build/phase1-baseline/logs/doctor.err.log"},
+              {"id": "enterprise_contracts", "ok": true, "rc": 0, "stdout_log": "build/phase1-baseline/logs/enterprise_contracts.out.log", "stderr_log": "build/phase1-baseline/logs/enterprise_contracts.err.log"},
+              {"id": "primary_docs_map", "ok": true, "rc": 0, "stdout_log": "build/phase1-baseline/logs/primary_docs_map.out.log", "stderr_log": "build/phase1-baseline/logs/primary_docs_map.err.log"},
+              {"id": "pytest", "ok": false, "rc": 1, "stdout_log": "build/phase1-baseline/logs/pytest.out.log", "stderr_log": "build/phase1-baseline/logs/pytest.err.log"},
+              {"id": "ruff", "ok": true, "rc": 0, "stdout_log": "build/phase1-baseline/logs/ruff.out.log", "stderr_log": "build/phase1-baseline/logs/ruff.err.log"}
+            ]
+          }
+          JSON
+
+      - name: Run Phase 3 tests
+        run: |
+          pytest -q \
+            tests/test_phase3_quality_contract.py \
+            tests/test_phase3_trend_delta.py \
+            tests/test_phase3_remediation_payload_v2.py \
+            tests/test_phase3_next_pass_determinism.py \
+            tests/test_phase3_baseline_history_persist.py
+
+      - name: Run Phase 3 operational lane
+        run: |
+          make phase3-do-it
+
+      - name: Upload Phase 3 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase3-quality-artifacts
+          path: |
+            build/phase3-quality/*.json
+            build/phase3-quality/*.md
+            build/phase1-baseline/history/*.json
+          if-no-files-found: error
