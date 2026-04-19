@@ -52,7 +52,7 @@ This ordering keeps integrations aligned with the most stable, adopter-facing co
 
 ### Public / stable
 
-Intended as the strongest compatibility target and safest dependency surface for production adoption.
+Intended as the strongest compatibility target and primary compatibility target for production adoption.
 
 You can generally treat these as the first surfaces to automate against:
 - canonical release-confidence flow

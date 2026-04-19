@@ -7,7 +7,7 @@ GENERATED_AT ?= 2026-04-17T10:00:00Z
 ADAPTIVE_SCENARIO ?= balanced
 PORTFOLIO_MANIFEST ?= portfolio-manifest.json
 
-.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-contract release-room portfolio-readiness premerge-release-room adaptive-scenario-db adaptive-postcheck adaptive-ops-bundle test-bootstrap test-bootstrap-contract merge-ready phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-surface-clarity phase3-quality-contract phase3-do-it phase4-governance-contract phase5-ecosystem-contract phase6-metrics-contract
+.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-contract release-room portfolio-readiness premerge-release-room adaptive-scenario-db adaptive-postcheck adaptive-ops-bundle test-bootstrap test-bootstrap-contract merge-ready phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-complete phase2-progress phase2-surface-clarity phase3-quality-contract phase4-governance-contract phase5-ecosystem-contract phase6-metrics-contract
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
@@ -196,6 +196,9 @@ phase1-blocker-register: venv
 phase1-do-it: phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal
 	@bash -lc 'echo phase1-do-it: pipeline completed'
 
+phase1-workflow: phase1-do-it phase1-flow-contract phase1-gate-phase2 phase1-executive-report
+	@bash -lc 'echo phase1-workflow: operational workflow completed'
+
 phase1-flow-contract: venv
 	@bash -lc ' . .venv/bin/activate && python scripts/check_phase1_flow_contract.py --format json'
 
@@ -219,6 +222,30 @@ phase-current: venv
 
 phase-current-json: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase_sequential_executor.py --format json'
+
+phase2-start: phase2-workflow
+	@bash -lc 'echo phase2-start: implementation lane initialized'
+
+phase2-workflow: venv
+	@bash -lc '. .venv/bin/activate && python scripts/phase2_start_workflow.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/check_phase2_start_summary_contract.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/phase2_status_report.py --format json --out build/phase2-start/phase2-status.json'
+
+phase2-status: venv
+	@bash -lc '. .venv/bin/activate && python scripts/phase2_status_report.py --format json --out build/phase2-start/phase2-status.json'
+
+phase2-start-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_phase2_start_summary_contract.py --format json'
+
+phase2-seed: venv
+	@bash -lc '. .venv/bin/activate && python scripts/phase2_seed_prerequisites.py'
+
+phase2-complete: venv
+	@bash -lc '. .venv/bin/activate && python scripts/phase2_complete_workflow.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/phase2_progress_report.py --format json --out build/phase2-complete/phase2-progress.json'
+
+phase2-progress: venv
+	@bash -lc '. .venv/bin/activate && python scripts/phase2_progress_report.py --format json --out build/phase2-complete/phase2-progress.json'
 
 phase2-surface-clarity: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_operator_essentials_contract.py --format json'

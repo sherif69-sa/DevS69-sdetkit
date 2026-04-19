@@ -259,7 +259,18 @@ def discover_templates(root: Path) -> list[AutomationTemplate]:
     directory = root / "templates" / "automations"
     if not directory.exists():
         return []
-    templates = [parse_template(path) for path in sorted(directory.glob("*.yaml"))]
+    templates: list[AutomationTemplate] = []
+    for path in sorted(directory.glob("*.yaml")):
+        first_meaningful = ""
+        for raw_line in path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+            first_meaningful = line
+            break
+        if first_meaningful != "metadata:":
+            continue
+        templates.append(parse_template(path))
     ids = [item.metadata["id"] for item in templates]
     duplicates = {item for item in ids if ids.count(item) > 1}
     if duplicates:

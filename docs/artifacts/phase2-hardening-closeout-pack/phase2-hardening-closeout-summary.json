@@ -1,0 +1,124 @@
+{
+  "name": "phase2-hardening-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-phase2-hardening-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "kpi_deep_audit_summary": "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json",
+    "kpi_deep_audit_delivery_board": "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md"
+  },
+  "checks": [
+    {
+      "check_id": "readme_integration_link",
+      "weight": 8,
+      "passed": true,
+      "evidence": "docs/integrations-phase2-hardening-closeout.md"
+    },
+    {
+      "check_id": "readme_command_lane",
+      "weight": 4,
+      "passed": true,
+      "evidence": "README phase2-hardening-closeout command lane"
+    },
+    {
+      "check_id": "docs_index_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "impact-58-big-upgrade-report.md + integrations-phase2-hardening-closeout.md"
+    },
+    {
+      "check_id": "top10_strategy_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": " +  strategy chain"
+    },
+    {
+      "check_id": "kpi_deep_audit_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json"
+    },
+    {
+      "check_id": "kpi_deep_audit_delivery_board_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md"
+    },
+    {
+      "check_id": "kpi_deep_audit_quality_floor",
+      "weight": 15,
+      "passed": true,
+      "evidence": {
+        "kpi_deep_audit_score": 99,
+        "strict_pass": true,
+        "kpi_deep_audit_checks": 1
+      }
+    },
+    {
+      "check_id": "kpi_deep_audit_board_integrity",
+      "weight": 7,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_kpi_deep_audit": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": true,
+      "evidence": "#  \u2014 Phase-2 hardening closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 10,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 3,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 2,
+      "passed": true,
+      "evidence": "delivery board locked"
+    }
+  ],
+  "rollup": {
+    "kpi_deep_audit_activation_score": 99,
+    "kpi_deep_audit_checks": 1,
+    "kpi_deep_audit_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "57 continuity is strict-pass with activation score=99.",
+    "57 delivery board integrity validated with 5 checklist items.",
+    "Phase-2 hardening contract + quality checklist is fully locked for execution.",
+    " Phase-2 hardening closeout lane is fully complete and ready for  pre-plan lane."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

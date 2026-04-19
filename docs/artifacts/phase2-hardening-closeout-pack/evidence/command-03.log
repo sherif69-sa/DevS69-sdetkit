@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_phase2_hardening_closeout_contract.py --skip-evidence",
+  "returncode": 0,
+  "stdout": "phase2-hardening-closeout contract check passed\n",
+  "stderr": ""
+}
