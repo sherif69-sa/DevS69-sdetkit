@@ -61,7 +61,7 @@ def build_status(summary_path: Path, kickoff_pack_dir: Path) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate Phase 2 status report.")
     parser.add_argument("--summary", default="build/phase2-start/phase2-start-summary.json")
-    parser.add_argument("--kickoff-pack-dir", default="docs/artifacts/phase2-kickoff-pack")
+    parser.add_argument("--kickoff-pack-dir", default="build/phase2-workflow/phase2-kickoff-pack")
     parser.add_argument("--out", default="build/phase2-start/phase2-status.json")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args(argv)

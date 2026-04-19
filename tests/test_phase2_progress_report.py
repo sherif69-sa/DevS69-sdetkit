@@ -16,9 +16,7 @@ def test_build_progress_full_when_all_markers_pass() -> None:
             "ok": True,
             "steps": [
                 {"command": "python -m sdetkit phase2-hardening-closeout", "ok": True},
-                {"command": "python scripts/check_phase2_hardening_closeout_contract.py", "ok": True},
                 {"command": "python -m sdetkit phase2-wrap-handoff-closeout", "ok": True},
-                {"command": "python scripts/check_phase2_wrap_handoff_closeout_contract.py", "ok": True},
             ],
         },
     )

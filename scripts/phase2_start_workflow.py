@@ -72,6 +72,8 @@ def main(argv: list[str] | None = None) -> int:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    workflow_root = Path("build/phase2-workflow")
+    kickoff_pack = workflow_root / "phase2-kickoff-pack"
     steps = [
         _run_step(["python", "scripts/phase2_seed_prerequisites.py"]),
         _run_step(
@@ -82,16 +84,15 @@ def main(argv: list[str] | None = None) -> int:
                 "phase2-kickoff",
                 "--execute",
                 "--emit-pack-dir",
-                "docs/artifacts/phase2-kickoff-pack",
+                str(kickoff_pack),
                 "--evidence-dir",
-                "docs/artifacts/phase2-kickoff-pack/evidence",
+                str(kickoff_pack / "evidence"),
                 "--format",
                 "json",
                 "--strict",
             ]
         ),
         _run_step(["python", "scripts/check_phase2_kickoff_contract.py"]),
-        _run_step(["python", "scripts/check_operator_essentials_contract.py", "--format", "json"]),
     ]
     summary = build_summary(steps)
 

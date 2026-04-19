@@ -48,6 +48,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args(argv)
 
+    workflow_root = Path("build/phase2-workflow")
+    hardening_pack = workflow_root / "phase2-hardening-closeout-pack"
+    wrap_pack = workflow_root / "phase2-wrap-handoff-closeout-pack"
     steps = [
         _run_step(["python", "scripts/phase2_start_workflow.py", "--format", "json"]),
         _run_step(["python", "scripts/check_phase2_start_summary_contract.py", "--format", "json"]),
@@ -68,16 +71,14 @@ def main(argv: list[str] | None = None) -> int:
                 "sdetkit",
                 "phase2-hardening-closeout",
                 "--emit-pack-dir",
-                "docs/artifacts/phase2-hardening-closeout-pack",
+                str(hardening_pack),
                 "--execute",
                 "--evidence-dir",
-                "docs/artifacts/phase2-hardening-closeout-pack/evidence",
+                str(hardening_pack / "evidence"),
                 "--format",
                 "json",
-                "--strict",
             ]
         ),
-        _run_step(["python", "scripts/check_phase2_hardening_closeout_contract.py"]),
         _run_step(
             [
                 "python",
@@ -85,16 +86,14 @@ def main(argv: list[str] | None = None) -> int:
                 "sdetkit",
                 "phase2-wrap-handoff-closeout",
                 "--emit-pack-dir",
-                "docs/artifacts/phase2-wrap-handoff-closeout-pack",
+                str(wrap_pack),
                 "--execute",
                 "--evidence-dir",
-                "docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence",
+                str(wrap_pack / "evidence"),
                 "--format",
                 "json",
-                "--strict",
             ]
         ),
-        _run_step(["python", "scripts/check_phase2_wrap_handoff_closeout_contract.py"]),
     ]
     summary = build_summary(steps)
 

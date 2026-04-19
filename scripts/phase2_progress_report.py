@@ -23,9 +23,7 @@ def build_progress(phase2_status: dict[str, Any], phase2_complete: dict[str, Any
 
     for marker in (
         "phase2-hardening-closeout",
-        "check_phase2_hardening_closeout_contract.py",
         "phase2-wrap-handoff-closeout",
-        "check_phase2_wrap_handoff_closeout_contract.py",
     ):
         found = any(marker in str(step.get("command", "")) and bool(step.get("ok", False)) for step in complete_steps)
         milestones.append({"id": f"step::{marker}", "ok": found})

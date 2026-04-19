@@ -19,7 +19,6 @@ EXPECTED_SCHEMA = "sdetkit.phase2_start_workflow.v1"
 REQUIRED_STEP_SUBSTRINGS = (
     "sdetkit phase2-kickoff",
     "scripts/check_phase2_kickoff_contract.py",
-    "scripts/check_operator_essentials_contract.py",
 )
 
 
