@@ -26,6 +26,22 @@ def _write_doctor(path: Path, reason: str) -> Path:
     return path
 
 
+def _assert_contract_shape(payload: dict[str, object]) -> None:
+    required_keys = {
+        "schema_version",
+        "ok",
+        "decision",
+        "checks",
+        "failures",
+        "doctor_handoff_alignment",
+        "doctor_handoff_alignment_reason",
+        "doctor_alignment_mode",
+        "summary",
+        "summary_by_lane",
+    }
+    assert required_keys.issubset(payload)
+
+
 def test_phase3_quality_contract_positive_path(tmp_path: Path) -> None:
     summary = _write_summary(
         tmp_path / "phase1-summary.json",
@@ -50,6 +66,21 @@ def test_phase3_quality_contract_positive_path(tmp_path: Path) -> None:
 def test_phase3_quality_contract_missing_summary_fails(tmp_path: Path) -> None:
     rc = contract.main(["--summary", str(tmp_path / "missing.json"), "--format", "json"])
     assert rc == 1
+
+
+def test_phase3_quality_contract_missing_summary_has_lane_summary_values(tmp_path: Path, capsys) -> None:
+    rc = contract.main(["--summary", str(tmp_path / "missing.json"), "--format", "json"])
+    payload = json.loads(capsys.readouterr().out)
+
+    assert rc == 1
+    _assert_contract_shape(payload)
+    assert payload["decision"] == "fail"
+    lane_summary = payload["summary_by_lane"]
+    assert lane_summary["global"] == {"total": 1, "passed": 0, "failed": 1}
+    assert lane_summary["adaptive"] == {"total": 0, "passed": 0, "failed": 0}
+    assert lane_summary["remediation"] == {"total": 0, "passed": 0, "failed": 0}
+    assert lane_summary["trend"] == {"total": 0, "passed": 0, "failed": 0}
+    assert lane_summary["next_pass"] == {"total": 0, "passed": 0, "failed": 0}
 
 
 def test_phase3_quality_contract_missing_summary_text_includes_failure_header(
@@ -96,20 +127,8 @@ def test_phase3_quality_contract_json_shape_contains_required_top_level_fields(
     payload = json.loads(capsys.readouterr().out)
 
     assert rc == 0
-    required_keys = {
-        "schema_version",
-        "ok",
-        "decision",
-        "checks",
-        "failures",
-        "doctor_handoff_alignment",
-        "doctor_handoff_alignment_reason",
-        "doctor_alignment_mode",
-        "summary",
-        "summary_by_lane",
-        "artifacts",
-    }
-    assert required_keys.issubset(payload)
+    _assert_contract_shape(payload)
+    assert "artifacts" in payload
 
 
 def test_phase3_quality_contract_fails_when_doctor_handoff_mismatches(tmp_path: Path, capsys) -> None:
