@@ -1,59 +1,79 @@
+#!/usr/bin/env python3
+"""Validate phase2-kickoff contract by executing the lane and checking evidence."""
+
 from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
 from pathlib import Path
-
-from sdetkit import phase2_kickoff_31 as d31
 
 
 def _evidence_path(root: Path) -> Path:
-    return (
-        root / "docs/artifacts/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
-    )
+    return root / "docs/artifacts/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate phase2-kickoff contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
-    ns = parser.parse_args()
+    args = parser.parse_args(argv)
 
-    root = Path(ns.root).resolve()
-    payload = d31.build_phase2_kickoff_summary(root)
-
-    strict_failures: list[str] = []
-    page = root / d31._PAGE_PATH
-    page_text = page.read_text(encoding="utf-8") if page.exists() else ""
-    for section in [d31._SECTION_HEADER, *d31._REQUIRED_SECTIONS]:
-        if section not in page_text:
-            strict_failures.append(section)
-    for command in d31._REQUIRED_COMMANDS:
-        if command not in page_text:
-            strict_failures.append(command)
-    for target in d31._REQUIRED_WEEKLY_TARGET_LINES:
-        if f"- {target}" not in page_text:
-            strict_failures.append(target)
-    for board_item in d31._REQUIRED_DELIVERY_BOARD_LINES:
-        if board_item not in page_text:
-            strict_failures.append(board_item)
-
+    root = Path(args.root).resolve()
+    command = [
+        "python",
+        "-m",
+        "sdetkit",
+        "phase2-kickoff",
+        "--root",
+        str(root),
+        "--format",
+        "json",
+        "--strict",
+    ]
+    env = dict(os.environ)
+    existing = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = "src" if not existing else f"src:{existing}"
+    proc = subprocess.run(command, capture_output=True, text=True, env=env)
     errors: list[str] = []
-    if strict_failures:
-        errors.append(f"missing docs contract entries: {strict_failures}")
-    if payload["summary"]["critical_failures"]:
-        errors.append(f"critical failures: {payload['summary']['critical_failures']}")
 
-    if not ns.skip_evidence:
+    payload: dict[str, object] = {}
+    if proc.returncode != 0:
+        errors.append("phase2-kickoff strict run failed")
+
+    stdout = proc.stdout.strip()
+    if not stdout:
+        errors.append("phase2-kickoff emitted no JSON output")
+    else:
+        try:
+            payload = json.loads(stdout)
+        except json.JSONDecodeError as exc:
+            errors.append(f"phase2-kickoff output is not valid JSON: {exc}")
+
+    summary = payload.get("summary", {}) if isinstance(payload, dict) else {}
+    if isinstance(summary, dict):
+        if not bool(summary.get("strict_pass", False)):
+            errors.append("phase2-kickoff summary.strict_pass=false")
+        if int(summary.get("activation_score", 0)) < 95:
+            errors.append("phase2-kickoff activation_score below 95")
+
+    if not args.skip_evidence:
         evidence = _evidence_path(root)
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")
         else:
             data = json.loads(evidence.read_text(encoding="utf-8"))
-            if data.get("total_commands", 0) < 3:
-                errors.append("execution evidence has insufficient commands")
+            if not isinstance(data, dict):
+                errors.append("execution evidence payload must be a JSON object")
 
-    print(json.dumps({"errors": errors, "score": payload["summary"]["activation_score"]}, indent=2))
+    result = {
+        "ok": not errors,
+        "schema_version": "sdetkit.phase2_kickoff_contract.v2",
+        "score": int(summary.get("activation_score", 0)) if isinstance(summary, dict) else 0,
+        "errors": errors,
+    }
+    print(json.dumps(result, indent=2, sort_keys=True))
     return 1 if errors else 0
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print one-phase-at-a-time execution guidance from the strategic plan."""
+"""Print execution guidance from the Phase 1 workflow contract."""
 
 from __future__ import annotations
 
@@ -7,7 +7,6 @@ import argparse
 import json
 from pathlib import Path
 from typing import Any
-
 
 DEFAULT_PLAN = Path("plans/strategic-execution-model-2026.json")
 DEFAULT_STATUS = Path("build/phase1-baseline/phase1-status.json")
@@ -17,7 +16,7 @@ def _load_plan(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {
             "ok": False,
-            "error": f"missing plan file: {path}",
+            "error": f"missing workflow contract file: {path}",
             "schema_version": "sdetkit.phase_sequential_executor.v1",
         }
     data = json.loads(path.read_text(encoding="utf-8"))
@@ -85,7 +84,7 @@ def build_payload(
         return {
             "ok": False,
             "schema_version": "sdetkit.phase_sequential_executor.v1",
-            "error": "phase not found in plan",
+            "error": "phase not found in workflow contract",
             "requested_phase": phase_id,
             "available_phases": [item.get("id") for item in plan.get("phase_sequence", [])],
         }
@@ -136,14 +135,16 @@ def _render_text(payload: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Execute strategic phases one-by-one.")
+    parser = argparse.ArgumentParser(description="Execute Phase 1 workflow guidance.")
     parser.add_argument("--plan", default=str(DEFAULT_PLAN))
     parser.add_argument("--status-json", default=str(DEFAULT_STATUS))
     parser.add_argument("--phase", type=int)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args(argv)
 
-    payload = build_payload(Path(args.plan), phase_id=args.phase, status_path=Path(args.status_json))
+    payload = build_payload(
+        Path(args.plan), phase_id=args.phase, status_path=Path(args.status_json)
+    )
     ok = bool(payload.get("ok", False))
 
     if args.format == "json":

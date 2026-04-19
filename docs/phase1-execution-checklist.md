@@ -1,6 +1,14 @@
-# Phase 1 execution checklist and closeout cleanup
+# Phase 1 workflow runbook
 
-Use this checklist to execute and close Phase 1 before moving to later phases.
+Use this runbook to execute the live Phase 1 workflow and produce operational artifacts.
+
+## One-command execution
+
+Run the complete operational workflow:
+
+- `make phase1-workflow`
+
+This command runs the execution lane, validates the flow contract, computes the gate decision, and writes the executive report.
 
 ## Run order
 
@@ -37,14 +45,13 @@ Optional checks (`ruff`, `pytest`) are tracked and reported, but are non-blockin
 `make phase1-status` prints what is accomplished and what is not yet complete.
 `make phase1-next` emits required actions when blockers exist, and advisory actions when closeout is complete.
 
-## After Phase 1 completes: cleanup the plan
+## Workflow retention policy
 
-Immediately simplify the phased plan so execution stays focused:
+The repository keeps the Phase 1 workflow and its execution artifacts as the source of truth.
 
-1. Mark Phase 1 status as complete in your weekly status notes.
-2. Archive outdated Phase 1 TODO bullets that are no longer actionable.
-3. Keep only Phase 2+ next actions in the operator daily checklist.
-4. Keep baseline artifacts for audit history; do not delete run evidence.
+1. Keep baseline artifacts for audit history; do not delete run evidence.
+2. Keep `make phase1-status` and `make phase1-next` as the operational source of truth.
+3. Treat non-blocking checks (`ruff`, `pytest`) as advisory remediation until stabilized.
 
 ## Suggested evidence bundle for phase closeout
 
