@@ -82,14 +82,8 @@ extra_javascript:
   - javascripts/mermaid-init.js
 
 nav:
-  - Start here:
-      - Overview: index.md
-      - Why SDETKit for teams: why-sdetkit-for-teams.md
-      - Team use cases: use-cases.md
-      - Start Here in 5 Minutes: start-here-5-minutes.md
-      - Release confidence model: release-confidence.md
-      - Decision guide: decision-guide.md
-  - Getting started:
+  - Start here: index.md
+  - Canonical first-proof path (primary):
       - Install: install.md
       - Quickstart (copy-paste): quickstart-copy-paste.md
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
@@ -100,7 +94,12 @@ nav:
       - Team rollout scenario: team-rollout-scenario.md
       - Container runtime: container-runtime.md
       - Recommended CI flow: recommended-ci-flow.md
-  - Release confidence:
+  - Team adoption and CI rollout (primary):
+      - Why SDETKit for teams: why-sdetkit-for-teams.md
+      - Team use cases: use-cases.md
+      - Start Here in 5 Minutes: start-here-5-minutes.md
+      - Release confidence model: release-confidence.md
+      - Decision guide: decision-guide.md
       - Release confidence flow: release-confidence-flow.md
       - CI artifact walkthrough: ci-artifact-walkthrough.md
       - CI contract: ci-contract.md
@@ -113,7 +112,7 @@ nav:
       - Remediation cookbook: remediation-cookbook.md
       - Determinism checklist: determinism-checklist.md
       - Determinism contract: determinism-contract.md
-  - Reference:
+  - Current reference and discoverability (secondary):
       - CLI reference: cli.md
       - API: api.md
       - Doctor checks: doctor.md
@@ -177,7 +176,7 @@ nav:
           - 🔄 DevS69 Diff-to-Decision — Live Detail View: diff-flow-live.md
           - 🗺️ DevS69 Repo Map — Live Detail View: repo-map-live.md
           - DevS69 Visual HUD Showcase: hud-showcase.md
-  - Archive:
+  - Historical archive (non-primary):
       - Archive overview: archive/index.md
       - Transition-era material map: archive/transition-era-material.md
 exclude_docs: |

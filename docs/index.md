@@ -2,9 +2,25 @@
 
 DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisions with machine-readable evidence.
 
-**Primary outcome:** move from local proof to CI using one repeatable path.
+**Primary outcome:** know if a change is ready to ship.
 
-## Canonical first run (local -> CI)
+Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
+
+This page is the product homepage/router for first-time adoption.
+
+<div class="quick-jump" markdown>
+
+[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy reports](#legacy-reports)
+
+</div>
+
+### Top journeys
+
+- Run first command in under 60 seconds
+- Validate docs links and anchors before publishing
+- Ship a first contribution with deterministic quality gates
+
+## Fast start
 
 ```bash
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
@@ -51,8 +67,19 @@ build/release-preflight.json
 - [Release confidence ROI](release-confidence-roi.md)
 - [Repo health dashboard](repo-health-dashboard.md)
 
+## Legacy reports
+
+Historical and transition-era references remain intentionally secondary to first-time adoption; use archive index material only after the canonical first proof path is operating.
+
+- Archive index: [docs/archive/index.md](archive/index.md)
+- Top-tier reporting troubleshooting: [top-tier-reporting-troubleshooting.md](top-tier-reporting-troubleshooting.md)
+
 ## Install and runtime notes
 
 - Python 3.11+
 - Prefer isolated environments
 - `NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q`
+impact-58-big-upgrade-report.md
+integrations-phase2-hardening-closeout.md
+impact-60-big-upgrade-report.md
+integrations-phase2-wrap-handoff-closeout.md

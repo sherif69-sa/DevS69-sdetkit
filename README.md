@@ -23,6 +23,8 @@ Instead of stitching together separate scripts and tools for every repo, teams r
 
 ## Canonical first path (run this first)
 
+Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
+
 Install the released package in an isolated environment (Python 3.11+):
 
 ```bash
@@ -177,3 +179,14 @@ artifacts/     # generated evidence packs
 - Repo hygiene boundaries: [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md)
 - Ongoing repo status view: [`docs/repo-health-dashboard.md`](docs/repo-health-dashboard.md)
 - Historical archive index: [`docs/archive/index.md`](docs/archive/index.md)
+
+## Top-tier reporting sample pipeline
+
+Run `make top-tier-reporting` to generate a deterministic sample bundle and promotion artifacts.
+
+- Recipe: [`docs/portfolio-reporting-recipe.md`](docs/portfolio-reporting-recipe.md)
+- KPI schema: [`docs/kpi-schema.md`](docs/kpi-schema.md)
+phase2-hardening-closeout
+phase2-wrap-handoff-closeout
+docs/integrations-phase2-hardening-closeout.md
+docs/integrations-phase2-wrap-handoff-closeout.md

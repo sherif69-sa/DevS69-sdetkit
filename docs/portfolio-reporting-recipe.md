@@ -112,6 +112,8 @@ Use these files as a template for weekly portfolio board generation and review.
 
 For the full end-to-end sample pipeline, run `make top-tier-reporting`.
 
+Top-tier reporting troubleshooting: [top-tier-reporting-troubleshooting.md](top-tier-reporting-troubleshooting.md).
+
 You can override date/window values per run, for example:
 
 ```bash
