@@ -183,11 +183,20 @@ def main(argv: list[str] | None = None) -> int:
             "schema_version": "sdetkit.phase3_quality_contract.v1",
             "checks": checks,
             "failures": failures,
+            "doctor_handoff_alignment": "no-doctor",
+            "doctor_handoff_alignment_reason": "doctor_next_pass_unavailable",
+            "doctor_alignment_mode": args.doctor_alignment_mode,
+            "summary": _summarize_checks(checks),
+            "summary_by_lane": _summarize_checks_by_lane(checks),
+            "decision": "fail",
         }
         if args.format == "json":
             print(json.dumps(payload, indent=2, sort_keys=True))
         else:
             print("phase3-quality-contract: FAIL")
+            print("- decision: fail")
+            print("- doctor_handoff_alignment: no-doctor")
+            print("- doctor_handoff_alignment_reason: doctor_next_pass_unavailable")
             for item in failures:
                 print(f"- {item}")
         return 1

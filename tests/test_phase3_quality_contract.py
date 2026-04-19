@@ -52,6 +52,17 @@ def test_phase3_quality_contract_missing_summary_fails(tmp_path: Path) -> None:
     assert rc == 1
 
 
+def test_phase3_quality_contract_missing_summary_text_includes_failure_header(
+    tmp_path: Path, capsys
+) -> None:
+    rc = contract.main(["--summary", str(tmp_path / "missing.json"), "--format", "text"])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert "phase3-quality-contract: FAIL" in out
+    assert "- decision: fail" in out
+    assert "- doctor_handoff_alignment_reason: doctor_next_pass_unavailable" in out
+
+
 def test_phase3_quality_contract_auto_uses_history_previous_summary(tmp_path: Path, capsys) -> None:
     summary = _write_summary(
         tmp_path / "phase1-baseline-summary.json",
@@ -72,6 +83,33 @@ def test_phase3_quality_contract_auto_uses_history_previous_summary(tmp_path: Pa
     assert trend["status"] == "worsening"
     assert payload["summary_by_lane"]["adaptive"]["total"] >= 1
     assert payload["doctor_handoff_alignment_reason"] == "doctor_next_pass_unavailable"
+
+
+def test_phase3_quality_contract_json_shape_contains_required_top_level_fields(
+    tmp_path: Path, capsys
+) -> None:
+    summary = _write_summary(
+        tmp_path / "phase1-baseline-summary.json",
+        [{"id": "doctor", "ok": False, "rc": 1, "stdout_log": "a", "stderr_log": "b"}],
+    )
+    rc = contract.main(["--summary", str(summary), "--format", "json"])
+    payload = json.loads(capsys.readouterr().out)
+
+    assert rc == 0
+    required_keys = {
+        "schema_version",
+        "ok",
+        "decision",
+        "checks",
+        "failures",
+        "doctor_handoff_alignment",
+        "doctor_handoff_alignment_reason",
+        "doctor_alignment_mode",
+        "summary",
+        "summary_by_lane",
+        "artifacts",
+    }
+    assert required_keys.issubset(payload)
 
 
 def test_phase3_quality_contract_fails_when_doctor_handoff_mismatches(tmp_path: Path, capsys) -> None:
