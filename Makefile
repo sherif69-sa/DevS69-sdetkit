@@ -224,7 +224,7 @@ phase2-surface-clarity: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_operator_essentials_contract.py --format json'
 
 phase3-quality-contract: venv
-	@bash -lc '. .venv/bin/activate && python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.check_phase3_quality_contract --summary build/phase1-baseline/phase1-baseline-summary.json --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.check_phase3_quality_contract --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.phase3_persist_baseline_history --summary build/phase1-baseline/phase1-baseline-summary.json --format json'
 
 phase4-governance-contract: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_phase4_governance_contract.py --format json'
