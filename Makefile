@@ -7,7 +7,7 @@ GENERATED_AT ?= 2026-04-17T10:00:00Z
 ADAPTIVE_SCENARIO ?= balanced
 PORTFOLIO_MANIFEST ?= portfolio-manifest.json
 
-.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-contract release-room portfolio-readiness premerge-release-room adaptive-scenario-db adaptive-postcheck adaptive-premerge adaptive-ops-bundle test-bootstrap test-bootstrap-contract merge-ready phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-complete phase2-progress phase2-surface-clarity phase3-quality-contract phase4-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract
+.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-contract release-room portfolio-readiness premerge-release-room adaptive-scenario-db adaptive-postcheck adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-complete phase2-progress phase2-surface-clarity phase3-quality-contract phase4-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
@@ -157,6 +157,11 @@ adaptive-scenario-db: venv
 
 adaptive-ops-bundle: adaptive-postcheck enterprise-contracts-check
 	@bash -lc '. .venv/bin/activate && python scripts/build_adaptive_ops_summary.py --out-md docs/artifacts/adaptive-ops-summary-$(DATE_TAG).md --out-json docs/artifacts/adaptive-ops-summary-$(DATE_TAG).json'
+
+repo-alignment-check: venv
+	@bash -lc '. .venv/bin/activate && PYTHONPATH=src python scripts/adaptive_postcheck.py . --scenario strict --out build/repo-alignment/adaptive-postcheck.json --out-md build/repo-alignment/adaptive-postcheck.md --history-json build/repo-alignment/adaptive-history.json'
+	@bash -lc '. .venv/bin/activate && python scripts/validate_enterprise_contracts.py'
+	@bash -lc '. .venv/bin/activate && pytest -q'
 
 phase1-baseline: install
 	@bash -lc '. .venv/bin/activate && bash scripts/phase1_baseline_lane.sh'

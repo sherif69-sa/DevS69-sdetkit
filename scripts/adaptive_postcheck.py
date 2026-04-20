@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import subprocess
+import subprocess as _subprocess
 import sys
 import tempfile
 from datetime import UTC, datetime
@@ -20,6 +20,15 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent
 SCENARIO_PATH = ROOT / "docs/contracts/adaptive-postcheck-scenarios.v1.json"
 SCENARIO_DB_SCRIPT = ROOT / "scripts/build_adaptive_scenario_database.py"
+
+
+class _SubprocessFacade:
+    """Local subprocess facade so tests can monkeypatch run() without global side effects."""
+
+    run = staticmethod(_subprocess.run)
+
+
+subprocess = _SubprocessFacade()
 
 
 def _local_python_env(repo_root: str) -> dict[str, str]:
@@ -148,7 +157,11 @@ def _build_fresh_scenario_database(
 
 
 def _resolve_scenario_database(
-    *, minimum: int, minimum_matrix_rows: int, refresh_when_stale: bool, persist_refresh_artifact: bool
+    *,
+    minimum: int,
+    minimum_matrix_rows: int,
+    refresh_when_stale: bool,
+    persist_refresh_artifact: bool,
 ) -> tuple[dict[str, Any] | None, str]:
     scenario_db = _load_latest_scenario_database()
     source = "latest-artifact"
@@ -259,6 +272,7 @@ def _run_alignment_checks(
         )
 
     if "agent_entries_include_engine_signals" in enabled:
+
         def _has_signals(row: Any) -> bool:
             if not isinstance(row, dict):
                 return False
@@ -352,7 +366,10 @@ def _run_alignment_checks(
 
 
 def _build_follow_up_enhancements(
-    *, checks: list[dict[str, Any]], scenario_db: dict[str, Any] | None, plan_payload: dict[str, Any] | None
+    *,
+    checks: list[dict[str, Any]],
+    scenario_db: dict[str, Any] | None,
+    plan_payload: dict[str, Any] | None,
 ) -> list[dict[str, str]]:
     by_name = {str(row.get("check", "")): row for row in checks if isinstance(row, dict)}
     summary = (scenario_db or {}).get("summary", {})
@@ -727,7 +744,9 @@ def main() -> int:
     confidence_guidance = _confidence_band(confidence_score)
     confidence_trend = "insufficient-history"
     if args.history_json:
-        history = _update_confidence_history(history_path=Path(args.history_json), score=confidence_score)
+        history = _update_confidence_history(
+            history_path=Path(args.history_json), score=confidence_score
+        )
         confidence_trend = str(history.get("trend", "insufficient-history"))
     next_plan = _next_follow_up_plan(
         confidence_band=confidence_guidance["band"],
@@ -763,9 +782,9 @@ def main() -> int:
         "scenario_database": {
             "source": scenario_db_source,
             "total_scenarios": int(
-                ((scenario_db or {}).get("summary", {}) if isinstance(scenario_db, dict) else {}).get(
-                    "total_scenarios", 0
-                )
+                (
+                    (scenario_db or {}).get("summary", {}) if isinstance(scenario_db, dict) else {}
+                ).get("total_scenarios", 0)
             ),
             "domain_confidence": domain_confidence,
         },
