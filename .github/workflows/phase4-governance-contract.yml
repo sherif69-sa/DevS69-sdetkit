@@ -21,8 +21,8 @@ jobs:
   phase4-governance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - name: Install
@@ -58,7 +58,7 @@ jobs:
               raise SystemExit(f"artifact-set mismatch missing={missing} extra={extra}")
           PYCODE
       - name: Upload phase4 artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: phase4-governance-artifacts
           path: |
