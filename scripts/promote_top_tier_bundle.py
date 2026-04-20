@@ -25,10 +25,16 @@ def main() -> int:
     date = args.date_tag
 
     mappings = {
-        bundle / "portfolio-scorecard.json": Path(f"docs/artifacts/portfolio-scorecard-sample-{date}.json"),
+        bundle / "portfolio-scorecard.json": Path(
+            f"docs/artifacts/portfolio-scorecard-sample-{date}.json"
+        ),
         bundle / "kpi-weekly.json": Path(f"docs/artifacts/kpi-weekly-from-portfolio-{date}.json"),
-        bundle / "kpi-contract-check.json": Path(f"docs/artifacts/kpi-weekly-contract-check-{date}.json"),
-        bundle / "top-tier-contract-check.json": Path(f"docs/artifacts/top-tier-contract-check-{date}.json"),
+        bundle / "kpi-contract-check.json": Path(
+            f"docs/artifacts/kpi-weekly-contract-check-{date}.json"
+        ),
+        bundle / "top-tier-contract-check.json": Path(
+            f"docs/artifacts/top-tier-contract-check-{date}.json"
+        ),
     }
 
     for src, dst in mappings.items():

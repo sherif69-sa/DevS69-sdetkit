@@ -29,7 +29,11 @@ def _validate(schema: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]
     for key in required_top:
         _expect(key in payload, f"missing top-level required field '{key}'")
 
-    _expect(payload.get("schema_version") == schema.get("properties", {}).get("schema_version", {}).get("const"), "schema_version mismatch")
+    _expect(
+        payload.get("schema_version")
+        == schema.get("properties", {}).get("schema_version", {}).get("const"),
+        "schema_version mismatch",
+    )
 
     kpis = payload.get("kpis")
     _expect(isinstance(kpis, dict), "kpis must be object")

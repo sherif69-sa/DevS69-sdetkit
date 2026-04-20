@@ -38,7 +38,9 @@ def test_build_dashboard_ready_true(tmp_path: Path) -> None:
             ]
         },
     )
-    _write(snapshot, {"progress_percent": 100, "top_risk_item": None, "recommended_next_actions": []})
+    _write(
+        snapshot, {"progress_percent": 100, "top_risk_item": None, "recommended_next_actions": []}
+    )
 
     out = dash.build_dashboard(plan, status, summary, snapshot)
     assert out["ready_to_close"] is True

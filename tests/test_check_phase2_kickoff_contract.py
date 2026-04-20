@@ -15,7 +15,8 @@ class _Proc:
 
 def test_contract_passes_with_valid_payload_and_evidence(tmp_path: Path, monkeypatch) -> None:
     evidence = (
-        tmp_path / "build/phase2-workflow/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
+        tmp_path
+        / "build/phase2-workflow/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
     )
     evidence.parent.mkdir(parents=True, exist_ok=True)
     evidence.write_text(json.dumps({"total_commands": 3}), encoding="utf-8")

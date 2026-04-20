@@ -55,7 +55,9 @@ def test_main_writes_output_json(tmp_path: Path, monkeypatch, capsys) -> None:
 
     # Pre-create expected artifacts so run_gate can pass generated_artifacts checks.
     (tmp_path / "docs/artifacts/enterprise-assessment-pack").mkdir(parents=True)
-    (tmp_path / "docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json").write_text("{}")
+    (
+        tmp_path / "docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json"
+    ).write_text("{}")
     (tmp_path / "build/ship-readiness").mkdir(parents=True)
     (tmp_path / "build/ship-readiness/ship-readiness-summary.json").write_text("{}")
     (tmp_path / "build/release-room-summary.md").write_text("ok")

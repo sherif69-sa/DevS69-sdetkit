@@ -11,7 +11,10 @@ from pathlib import Path
 
 
 def _evidence_path(root: Path) -> Path:
-    return root / "build/phase2-workflow/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
+    return (
+        root
+        / "build/phase2-workflow/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
+    )
 
 
 def main(argv: list[str] | None = None) -> int:

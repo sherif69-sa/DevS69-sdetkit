@@ -19,5 +19,11 @@ def stub_enterprise_env(monkeypatch, *, clean_tree_ok: bool = True) -> None:
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )

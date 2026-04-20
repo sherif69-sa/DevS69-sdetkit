@@ -7,8 +7,8 @@ import os
 import shlex
 import subprocess
 import sys
-from datetime import datetime, timezone
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -56,7 +56,9 @@ def _contains(root: Path, rel: str, snippets: tuple[str, ...]) -> bool:
     return all(snippet in text for snippet in snippets)
 
 
-def _build_boost_plan(checks: list[AssessmentCheck], metrics: dict[str, int]) -> list[dict[str, str]]:
+def _build_boost_plan(
+    checks: list[AssessmentCheck], metrics: dict[str, int]
+) -> list[dict[str, str]]:
     plan: list[dict[str, str]] = []
     for check in checks:
         if check.passed:
@@ -147,7 +149,9 @@ def _compute_upgrade_contract(
     gate_decision = (
         "go"
         if strict_pass and (executed_all_green in (None, True))
-        else "conditional-go" if risk_band == "medium" else "no-go"
+        else "conditional-go"
+        if risk_band == "medium"
+        else "no-go"
     )
 
     return {
@@ -160,7 +164,9 @@ def _compute_upgrade_contract(
     }
 
 
-def _build_trend(summary: dict[str, Any], baseline_summary: dict[str, Any] | None) -> dict[str, Any]:
+def _build_trend(
+    summary: dict[str, Any], baseline_summary: dict[str, Any] | None
+) -> dict[str, Any]:
     if not baseline_summary:
         return {
             "has_baseline": False,
@@ -205,7 +211,11 @@ def build_enterprise_assessment(root: Path) -> dict[str, Any]:
             weight=20,
             passed=all(
                 _exists(root, rel)
-                for rel in ("RELEASE.md", "docs/release-readiness.md", ".github/workflows/release.yml")
+                for rel in (
+                    "RELEASE.md",
+                    "docs/release-readiness.md",
+                    ".github/workflows/release.yml",
+                )
             ),
             evidence="RELEASE docs + release readiness page + release workflow",
             impact="Prevents ad-hoc release cuts and missing publication checks.",
@@ -226,8 +236,7 @@ def build_enterprise_assessment(root: Path) -> dict[str, Any]:
             check_id="quality_automation_surface",
             weight=15,
             passed=all(
-                _exists(root, rel)
-                for rel in ("quality.sh", "Makefile", ".github/workflows/ci.yml")
+                _exists(root, rel) for rel in ("quality.sh", "Makefile", ".github/workflows/ci.yml")
             )
             and metrics["tests_count"] >= 50,
             evidence=f"quality.sh + Makefile + ci workflow + tests={metrics['tests_count']}",
@@ -239,7 +248,12 @@ def build_enterprise_assessment(root: Path) -> dict[str, Any]:
             weight=15,
             passed=all(
                 _exists(root, rel)
-                for rel in ("LICENSE", "SUPPORT.md", "ENTERPRISE_OFFERINGS.md", "docs/why-not-just-tools.md")
+                for rel in (
+                    "LICENSE",
+                    "SUPPORT.md",
+                    "ENTERPRISE_OFFERINGS.md",
+                    "docs/why-not-just-tools.md",
+                )
             ),
             evidence="License + support + enterprise offerings + differentiator docs",
             impact="Makes enterprise procurement and buyer evaluation easier.",
@@ -267,7 +281,9 @@ def build_enterprise_assessment(root: Path) -> dict[str, Any]:
     tier = (
         "enterprise-ready"
         if score >= 90 and not missing
-        else "pilot-ready" if score >= 75 else "not-ready"
+        else "pilot-ready"
+        if score >= 75
+        else "not-ready"
     )
     strict_pass = tier == "enterprise-ready"
     upgrade_contract = _compute_upgrade_contract(
@@ -517,9 +533,7 @@ def _execute_assessments(
         env = dict(os.environ)
         src_path = str(root / "src")
         env["PYTHONPATH"] = (
-            src_path
-            if not env.get("PYTHONPATH")
-            else f"{src_path}{os.pathsep}{env['PYTHONPATH']}"
+            src_path if not env.get("PYTHONPATH") else f"{src_path}{os.pathsep}{env['PYTHONPATH']}"
         )
         try:
             proc = subprocess.run(
@@ -602,7 +616,7 @@ def _risk_meets_fail_policy(risk_band: str, policy: str) -> bool:
 
 
 def _build_contract_metadata(payload: dict[str, Any]) -> dict[str, Any]:
-    generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    generated_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     digest = hashlib.sha1(
         json.dumps(
             {

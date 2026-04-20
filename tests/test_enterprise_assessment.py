@@ -91,7 +91,9 @@ def test_execute_mode_attaches_command_results_and_writes_evidence(
     )
 
     assert rc == 0
-    summary = json.loads((evidence_dir / "enterprise-assessment-execution-summary.json").read_text())
+    summary = json.loads(
+        (evidence_dir / "enterprise-assessment-execution-summary.json").read_text()
+    )
     assert summary["all_green"] is True
     assert len(summary["commands"]) == 4
     assert all(row["error_kind"] == "none" for row in summary["commands"])

@@ -25,16 +25,26 @@ def test_main_writes_outputs(tmp_path: Path) -> None:
     out_json = tmp_path / "out" / "register.json"
     out_csv = tmp_path / "out" / "register.csv"
 
-    _write(next_pass, {"blocking_required_checks": ["doctor"], "missing_control_loop_stages": ["build"]})
+    _write(
+        next_pass,
+        {"blocking_required_checks": ["doctor"], "missing_control_loop_stages": ["build"]},
+    )
     _write(loop, {"stages": []})
 
-    rc = reg.main([
-        "--next-pass", str(next_pass),
-        "--control-loop", str(loop),
-        "--out-json", str(out_json),
-        "--out-csv", str(out_csv),
-        "--format", "json",
-    ])
+    rc = reg.main(
+        [
+            "--next-pass",
+            str(next_pass),
+            "--control-loop",
+            str(loop),
+            "--out-json",
+            str(out_json),
+            "--out-csv",
+            str(out_csv),
+            "--format",
+            "json",
+        ]
+    )
     assert rc == 0
     assert out_json.exists()
     assert out_csv.exists()

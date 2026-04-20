@@ -2,12 +2,11 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
 import json
-from pathlib import Path
 import subprocess
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
-
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -25,11 +24,67 @@ def _run(cmd: list[str], cwd: Path) -> dict[str, Any]:
 
 def run_gate(repo_root: Path) -> dict[str, Any]:
     steps = [
-        ("enterprise_assessment", ["python", "-m", "sdetkit", "enterprise-assessment", "--format", "json", "--production-profile"]),
-        ("ship_readiness", ["python", "-m", "sdetkit", "ship-readiness", "--strict", "--format", "json", "--out-dir", "build/ship-readiness"]),
-        ("enterprise_contract", ["python", "scripts/check_enterprise_assessment_contract.py", "--summary", "docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json", "--format", "json"]),
-        ("ship_contract", ["python", "scripts/check_ship_readiness_contract.py", "--summary", "build/ship-readiness/ship-readiness-summary.json", "--format", "json"]),
-        ("release_room_summary", ["python", "scripts/render_release_room_summary.py", "--ship-summary", "build/ship-readiness/ship-readiness-summary.json", "--enterprise-summary", "docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json", "--out", "build/release-room-summary.md"]),
+        (
+            "enterprise_assessment",
+            [
+                "python",
+                "-m",
+                "sdetkit",
+                "enterprise-assessment",
+                "--format",
+                "json",
+                "--production-profile",
+            ],
+        ),
+        (
+            "ship_readiness",
+            [
+                "python",
+                "-m",
+                "sdetkit",
+                "ship-readiness",
+                "--strict",
+                "--format",
+                "json",
+                "--out-dir",
+                "build/ship-readiness",
+            ],
+        ),
+        (
+            "enterprise_contract",
+            [
+                "python",
+                "scripts/check_enterprise_assessment_contract.py",
+                "--summary",
+                "docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json",
+                "--format",
+                "json",
+            ],
+        ),
+        (
+            "ship_contract",
+            [
+                "python",
+                "scripts/check_ship_readiness_contract.py",
+                "--summary",
+                "build/ship-readiness/ship-readiness-summary.json",
+                "--format",
+                "json",
+            ],
+        ),
+        (
+            "release_room_summary",
+            [
+                "python",
+                "scripts/render_release_room_summary.py",
+                "--ship-summary",
+                "build/ship-readiness/ship-readiness-summary.json",
+                "--enterprise-summary",
+                "docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json",
+                "--out",
+                "build/release-room-summary.md",
+            ],
+        ),
     ]
 
     rows: list[dict[str, Any]] = []
@@ -39,14 +94,20 @@ def run_gate(repo_root: Path) -> dict[str, Any]:
         rows.append(result)
 
     generated = {
-        "enterprise_summary": (repo_root / "docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json").exists(),
+        "enterprise_summary": (
+            repo_root
+            / "docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json"
+        ).exists(),
         "ship_summary": (repo_root / "build/ship-readiness/ship-readiness-summary.json").exists(),
         "release_room_summary": (repo_root / "build/release-room-summary.md").exists(),
     }
 
     return {
         "schema_version": "sdetkit.premerge_release_room_gate.v1",
-        "generated_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "generated_at_utc": datetime.now(UTC)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z"),
         "steps": rows,
         "generated_artifacts": generated,
         "ok": all(step["ok"] for step in rows) and all(generated.values()),

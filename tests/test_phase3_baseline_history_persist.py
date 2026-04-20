@@ -23,7 +23,9 @@ def test_persist_history_saves_new_entry(tmp_path: Path) -> None:
     history = tmp_path / "history"
     _write_summary(summary, "2026-04-19T00:00:00Z")
 
-    rc = persist.main(["--summary", str(summary), "--history-dir", str(history), "--format", "json"])
+    rc = persist.main(
+        ["--summary", str(summary), "--history-dir", str(history), "--format", "json"]
+    )
 
     assert rc == 0
     entries = sorted(history.glob("phase1-baseline-summary-*.json"))
@@ -35,8 +37,12 @@ def test_persist_history_dedupes_identical_payload(tmp_path: Path) -> None:
     history = tmp_path / "history"
     _write_summary(summary, "2026-04-19T00:00:00Z")
 
-    rc1 = persist.main(["--summary", str(summary), "--history-dir", str(history), "--format", "json"])
-    rc2 = persist.main(["--summary", str(summary), "--history-dir", str(history), "--format", "json"])
+    rc1 = persist.main(
+        ["--summary", str(summary), "--history-dir", str(history), "--format", "json"]
+    )
+    rc2 = persist.main(
+        ["--summary", str(summary), "--history-dir", str(history), "--format", "json"]
+    )
 
     assert rc1 == 0
     assert rc2 == 0
@@ -49,11 +55,26 @@ def test_persist_history_prunes_old_entries(tmp_path: Path) -> None:
     history = tmp_path / "history"
 
     _write_summary(summary, "2026-04-19T00:00:00Z")
-    assert persist.main(["--summary", str(summary), "--history-dir", str(history), "--max-history", "2"]) == 0
+    assert (
+        persist.main(
+            ["--summary", str(summary), "--history-dir", str(history), "--max-history", "2"]
+        )
+        == 0
+    )
     _write_summary(summary, "2026-04-20T00:00:00Z")
-    assert persist.main(["--summary", str(summary), "--history-dir", str(history), "--max-history", "2"]) == 0
+    assert (
+        persist.main(
+            ["--summary", str(summary), "--history-dir", str(history), "--max-history", "2"]
+        )
+        == 0
+    )
     _write_summary(summary, "2026-04-21T00:00:00Z")
-    assert persist.main(["--summary", str(summary), "--history-dir", str(history), "--max-history", "2"]) == 0
+    assert (
+        persist.main(
+            ["--summary", str(summary), "--history-dir", str(history), "--max-history", "2"]
+        )
+        == 0
+    )
 
     entries = sorted(history.glob("phase1-baseline-summary-*.json"))
     assert len(entries) == 2

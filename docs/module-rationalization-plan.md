@@ -1,6 +1,6 @@
 # Module Rationalization Plan (P1.1)
 
-Status: Active proposal (v1)  
+Status: Active proposal (v1)
 Date: 2026-04-16
 
 ## Objective
@@ -32,17 +32,17 @@ Reduce long-term maintenance overhead from closeout-era module sprawl while pres
 
 ### Merge families (high ROI)
 
-1. `continuous_upgrade_closeout_1..11.py`  
+1. `continuous_upgrade_closeout_1..11.py`
    - Decision: **Merge** to a single orchestrator module (`continuous_upgrade_closeout.py`) with numeric mode selectors.
-2. `case_study_prep1..4_closeout_*.py`  
+2. `case_study_prep1..4_closeout_*.py`
    - Decision: **Merge** into a unified `case_study_prep_closeout.py` with phase selector.
-3. `integration_expansion2/3/4_closeout_*.py`  
+3. `integration_expansion2/3/4_closeout_*.py`
    - Decision: **Merge** into `integration_expansion_closeout.py` with stage profile.
-4. `phase2_*_closeout_*.py` + `phase3_*_closeout_*.py`  
+4. `phase2_*_closeout_*.py` + `phase3_*_closeout_*.py`
    - Decision: **Merge** into `phase_transition_closeout.py` with named step lanes.
-5. `optimization_closeout_42.py` + `optimization_closeout_46.py`  
+5. `optimization_closeout_42.py` + `optimization_closeout_46.py`
    - Decision: **Merge** into one optimized closeout lane.
-6. `weekly_review_closeout_49.py` + `weekly_review_closeout_65.py`  
+6. `weekly_review_closeout_49.py` + `weekly_review_closeout_65.py`
    - Decision: **Merge** to one weekly-review closeout implementation.
 
 ### Archive candidates (legacy namespace)

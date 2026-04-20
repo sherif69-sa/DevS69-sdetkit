@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdetkit import doctor
-
 from tests.doctor_test_support import stub_enterprise_env
 
 

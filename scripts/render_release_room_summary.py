@@ -88,7 +88,9 @@ def build_release_room_summary(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Render a release-room markdown summary from JSON artifacts.")
+    parser = argparse.ArgumentParser(
+        description="Render a release-room markdown summary from JSON artifacts."
+    )
     parser.add_argument("--ship-summary", type=Path, required=True)
     parser.add_argument("--enterprise-summary", type=Path, default=None)
     parser.add_argument("--out", type=Path, default=None)

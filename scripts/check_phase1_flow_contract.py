@@ -29,7 +29,9 @@ def _extract_doc_targets(doc_text: str) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Check Phase 1 flow contract between docs and Makefile.")
+    parser = argparse.ArgumentParser(
+        description="Check Phase 1 flow contract between docs and Makefile."
+    )
     parser.add_argument("--doc", default=str(DOC_PATH))
     parser.add_argument("--makefile", default=str(MAKEFILE_PATH))
     parser.add_argument("--format", choices=["text", "json"], default="text")

@@ -5,12 +5,12 @@ from __future__ import annotations
 
 import argparse
 import ast
-from collections import Counter
-from datetime import datetime, timezone
 import json
-from pathlib import Path
 import re
-from typing import Iterable
+from collections import Counter
+from collections.abc import Iterable
+from datetime import UTC, datetime
+from pathlib import Path
 
 
 def _domain_for_path(path: Path) -> str:
@@ -37,7 +37,9 @@ def _iter_test_nodes(tree: ast.AST) -> Iterable[tuple[list[str], ast.AST]]:
                 yield from walk(child)
             class_stack.pop()
             return
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith("test_"):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith(
+            "test_"
+        ):
             yield (class_stack.copy(), node)
         for child in ast.iter_child_nodes(node):
             yield from walk(child)
@@ -99,7 +101,7 @@ def _extract_test_scenarios(file: Path, repo_root: Path) -> list[dict]:
             for idx in range(case_count):
                 out.append(
                     {
-                        "scenario_id": f"{base_id}[case-{idx+1}]",
+                        "scenario_id": f"{base_id}[case-{idx + 1}]",
                         "domain": domain,
                         "source": rel,
                         "status": "active",
@@ -260,7 +262,7 @@ def build_db(repo_root: Path) -> dict:
 
     payload = {
         "schema_version": "sdetkit.adaptive-scenario-database.v1",
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "generated_at_utc": datetime.now(UTC).isoformat(),
         "summary": {
             "total_scenarios": len(scenario_entries),
             "domains": dict(sorted(domain_counts.items())),
@@ -284,7 +286,7 @@ def main() -> int:
     if args.out:
         out = Path(args.out)
     else:
-        date_tag = datetime.now(timezone.utc).date().isoformat()
+        date_tag = datetime.now(UTC).date().isoformat()
         out = repo_root / "docs/artifacts" / f"adaptive-scenario-database-{date_tag}.json"
 
     out.parent.mkdir(parents=True, exist_ok=True)

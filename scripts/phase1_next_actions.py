@@ -11,7 +11,9 @@ from pathlib import Path
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--status-json", required=True)
-    ap.add_argument("--out", default=None, help="Optional output path for next-actions JSON payload.")
+    ap.add_argument(
+        "--out", default=None, help="Optional output path for next-actions JSON payload."
+    )
     ap.add_argument("--format", choices=["text", "json"], default="text")
     ns = ap.parse_args()
 
@@ -34,7 +36,9 @@ def main() -> int:
 
     status_payload = json.loads(status_path.read_text(encoding="utf-8"))
     not_yet = status_payload.get("not_yet", []) if isinstance(status_payload, dict) else []
-    hard_blockers = status_payload.get("hard_blockers", []) if isinstance(status_payload, dict) else []
+    hard_blockers = (
+        status_payload.get("hard_blockers", []) if isinstance(status_payload, dict) else []
+    )
     if not isinstance(not_yet, list):
         not_yet = []
     if not isinstance(hard_blockers, list):

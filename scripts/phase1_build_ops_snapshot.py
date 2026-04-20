@@ -5,10 +5,9 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-
 
 RISK_WEIGHTS = {
     "doctor": 100,
@@ -22,7 +21,7 @@ RISK_WEIGHTS = {
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -58,7 +57,9 @@ def _debt_register(summary: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
-def build_ops_snapshot(summary: dict[str, Any], status: dict[str, Any], next_actions: dict[str, Any]) -> dict[str, Any]:
+def build_ops_snapshot(
+    summary: dict[str, Any], status: dict[str, Any], next_actions: dict[str, Any]
+) -> dict[str, Any]:
     debt = _debt_register(summary)
     accomplished = status.get("accomplished", []) if isinstance(status, dict) else []
     not_yet = status.get("not_yet", []) if isinstance(status, dict) else []
@@ -123,7 +124,9 @@ def _to_markdown(snapshot: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build Phase 1 ops snapshot from baseline artifacts.")
+    parser = argparse.ArgumentParser(
+        description="Build Phase 1 ops snapshot from baseline artifacts."
+    )
     parser.add_argument("--summary", default="build/phase1-baseline/phase1-baseline-summary.json")
     parser.add_argument("--status", default="build/phase1-baseline/phase1-status.json")
     parser.add_argument("--next-actions", default="build/phase1-baseline/phase1-next-actions.json")

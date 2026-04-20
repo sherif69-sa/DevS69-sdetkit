@@ -27,16 +27,31 @@ def test_kpi_snapshot_freshness_status_stale_unknown_and_fresh() -> None:
     stale = contract._build_kpi_snapshot(
         {
             "metric_snapshots": [{"metric_id": "kpi_a", "status": "red"}],
-            "metrics_contract": {"required_kpis": ["kpi_a"], "freshness_sla_days": 7, "linkage_guards": ["g1"]},
+            "metrics_contract": {
+                "required_kpis": ["kpi_a"],
+                "freshness_sla_days": 7,
+                "linkage_guards": ["g1"],
+            },
         }
     )
     unknown = contract._build_kpi_snapshot(
-        {"metric_snapshots": [], "metrics_contract": {"required_kpis": ["kpi_a"], "freshness_sla_days": 7, "linkage_guards": ["g1"]}}
+        {
+            "metric_snapshots": [],
+            "metrics_contract": {
+                "required_kpis": ["kpi_a"],
+                "freshness_sla_days": 7,
+                "linkage_guards": ["g1"],
+            },
+        }
     )
     fresh = contract._build_kpi_snapshot(
         {
             "metric_snapshots": [{"metric_id": "kpi_a", "status": "green"}],
-            "metrics_contract": {"required_kpis": ["kpi_a"], "freshness_sla_days": 7, "linkage_guards": ["g1"]},
+            "metrics_contract": {
+                "required_kpis": ["kpi_a"],
+                "freshness_sla_days": 7,
+                "linkage_guards": ["g1"],
+            },
         }
     )
 

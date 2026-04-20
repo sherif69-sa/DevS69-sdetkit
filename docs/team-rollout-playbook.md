@@ -61,4 +61,4 @@ Use a shared triage order so reviews stay fast and consistent:
 - [CI artifact walkthrough](ci-artifact-walkthrough.md)
 - [Team adoption checklist](team-adoption-checklist.md)
 - [Why SDETKit for teams](why-sdetkit-for-teams.md)
-- [Support](../SUPPORT.md)
+- [Support](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/SUPPORT.md)

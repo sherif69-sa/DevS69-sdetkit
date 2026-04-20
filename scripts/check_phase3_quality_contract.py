@@ -44,7 +44,9 @@ def _resolve_previous_summary(explicit: str | None, current_summary: Path) -> Pa
     return None
 
 
-def _evaluate_check_matrix(failures: list[str], doctor_alignment_status: str) -> list[dict[str, object]]:
+def _evaluate_check_matrix(
+    failures: list[str], doctor_alignment_status: str
+) -> list[dict[str, object]]:
     checks = [
         {
             "id": "adaptive_planning_schema",
@@ -68,10 +70,17 @@ def _evaluate_check_matrix(failures: list[str], doctor_alignment_status: str) ->
         },
         {
             "id": "next_pass_reason_code_contract",
-            "ok": not any("next_pass recommendation reason_code missing" in item for item in failures),
+            "ok": not any(
+                "next_pass recommendation reason_code missing" in item for item in failures
+            ),
         },
     ]
-    checks.append({"id": "doctor_handoff_alignment", "ok": doctor_alignment_status in {"aligned", "no-doctor"}})
+    checks.append(
+        {
+            "id": "doctor_handoff_alignment",
+            "ok": doctor_alignment_status in {"aligned", "no-doctor"},
+        }
+    )
     return checks
 
 
@@ -91,9 +100,17 @@ def _doctor_handoff_alignment(doctor_summary: dict[str, Any], next_pass: dict[st
     if doctor_reason == "none":
         return "aligned" if not first_reason or first_reason == "check_recovered" else "mismatch"
     if doctor_reason == "blockers_present":
-        return "aligned" if first_reason in {"critical_required_check_failed", "required_check_failed"} else "mismatch"
+        return (
+            "aligned"
+            if first_reason in {"critical_required_check_failed", "required_check_failed"}
+            else "mismatch"
+        )
     if doctor_reason == "failed_checks_present":
-        return "aligned" if first_reason in {"required_check_failed", "optional_check_failed"} else "mismatch"
+        return (
+            "aligned"
+            if first_reason in {"required_check_failed", "optional_check_failed"}
+            else "mismatch"
+        )
     return "no-doctor"
 
 
@@ -137,7 +154,9 @@ def _summarize_checks(checks: list[dict[str, object]]) -> dict[str, int]:
     return {"total": total, "passed": passed, "failed": failed}
 
 
-def _decision(*, failures: list[str], doctor_alignment_status: str, doctor_alignment_mode: str) -> str:
+def _decision(
+    *, failures: list[str], doctor_alignment_status: str, doctor_alignment_mode: str
+) -> str:
     if failures:
         return "fail"
     if doctor_alignment_mode == "warn" and doctor_alignment_status == "mismatch":
@@ -149,7 +168,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--summary", default="build/phase1-baseline/phase1-baseline-summary.json")
     parser.add_argument("--previous-summary", default=None)
-    parser.add_argument("--changed-paths", default=None, help="Optional newline-delimited changed paths file")
+    parser.add_argument(
+        "--changed-paths", default=None, help="Optional newline-delimited changed paths file"
+    )
     parser.add_argument(
         "--doctor-summary",
         default="build/phase1-baseline/doctor.json",
@@ -212,7 +233,9 @@ def main(argv: list[str] | None = None) -> int:
     next_pass = build_next_pass_handoff(remediation, adaptive)
     doctor_summary = load_json(doctor_summary_path) if doctor_summary_path else {}
     doctor_alignment_status = _doctor_handoff_alignment(doctor_summary, next_pass)
-    doctor_alignment_reason = _doctor_handoff_alignment_reason(doctor_alignment_status, doctor_summary)
+    doctor_alignment_reason = _doctor_handoff_alignment_reason(
+        doctor_alignment_status, doctor_summary
+    )
 
     _emit_payload(out_dir / "phase3-adaptive-planning.json", adaptive)
     _emit_payload(out_dir / "phase3-remediation-v2.json", remediation)
@@ -224,7 +247,9 @@ def main(argv: list[str] | None = None) -> int:
     doctor_mismatch_is_failure = (
         args.doctor_alignment_mode == "strict" and doctor_alignment_status == "mismatch"
     )
-    checks.append({"id": "phase3_payload_contract", "ok": not failures and not doctor_mismatch_is_failure})
+    checks.append(
+        {"id": "phase3_payload_contract", "ok": not failures and not doctor_mismatch_is_failure}
+    )
     if doctor_mismatch_is_failure:
         failures.append("doctor handoff alignment mismatch")
     if args.doctor_alignment_mode == "warn" and doctor_alignment_status == "mismatch":

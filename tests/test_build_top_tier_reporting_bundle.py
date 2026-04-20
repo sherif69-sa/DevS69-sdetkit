@@ -39,4 +39,6 @@ def test_build_top_tier_reporting_bundle_generates_outputs(tmp_path: Path) -> No
     assert kpi_check["ok"] is True
     assert cross_check["ok"] is True
     assert bundle_manifest["ok"] is True
-    assert bundle_manifest["artifacts"]["portfolio_scorecard"]["path"].endswith("portfolio-scorecard.json")
+    assert bundle_manifest["artifacts"]["portfolio_scorecard"]["path"].endswith(
+        "portfolio-scorecard.json"
+    )

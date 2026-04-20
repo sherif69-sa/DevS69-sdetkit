@@ -97,10 +97,14 @@ def _priority_for_reason(reason_code: str) -> tuple[str, int]:
     return "monitor", 90
 
 
-def build_adaptive_planning(summary: dict[str, Any], changed_paths: list[str] | None = None) -> dict[str, Any]:
+def build_adaptive_planning(
+    summary: dict[str, Any], changed_paths: list[str] | None = None
+) -> dict[str, Any]:
     check_rows = _checks(summary)
     normalized_paths = sorted({p.strip() for p in (changed_paths or []) if p and p.strip()})
-    impact_areas = sorted({IMPACT_AREA_BY_CHECK.get(str(row.get("id", "")), "other") for row in check_rows})
+    impact_areas = sorted(
+        {IMPACT_AREA_BY_CHECK.get(str(row.get("id", "")), "other") for row in check_rows}
+    )
 
     selection_rationale: list[dict[str, Any]] = []
     reason_counts = {code: 0 for code in REASON_CODES}
@@ -141,7 +145,9 @@ def build_adaptive_planning(summary: dict[str, Any], changed_paths: list[str] | 
         "optional_check_penalty": float((failed_count - required_failed_count) * -7),
         "signal_coverage_bonus": float(len(selection_rationale) * 1.5),
     }
-    confidence_breakdown["final_confidence"] = max(0.0, min(100.0, sum(confidence_breakdown.values())))
+    confidence_breakdown["final_confidence"] = max(
+        0.0, min(100.0, sum(confidence_breakdown.values()))
+    )
 
     return {
         "schema_version": ADAPTIVE_SCHEMA_VERSION,
@@ -172,7 +178,9 @@ def build_remediation_v2(summary: dict[str, Any], adaptive: dict[str, Any]) -> d
         action = {
             "action_id": f"phase3.{check_id}.{reason_code}",
             "summary": (
-                f"Re-run and remediate {check_id}" if not ok else f"Monitor {check_id} for regression"
+                f"Re-run and remediate {check_id}"
+                if not ok
+                else f"Monitor {check_id} for regression"
             ),
             "owner_hint": "repo-ops" if check_id in REQUIRED_CHECK_IDS else "service-owner",
             "blast_radius": IMPACT_AREA_BY_CHECK.get(check_id, "other"),
@@ -210,7 +218,9 @@ def build_remediation_v2(summary: dict[str, Any], adaptive: dict[str, Any]) -> d
     }
 
 
-def build_next_pass_handoff(remediation_v2: dict[str, Any], adaptive: dict[str, Any]) -> dict[str, Any]:
+def build_next_pass_handoff(
+    remediation_v2: dict[str, Any], adaptive: dict[str, Any]
+) -> dict[str, Any]:
     recommendations: list[dict[str, Any]] = []
     for lane in ("now", "next", "monitor"):
         lane_actions = remediation_v2.get("actions", {}).get(lane, [])
@@ -262,9 +272,13 @@ def build_next_pass_handoff(remediation_v2: dict[str, Any], adaptive: dict[str, 
     }
 
 
-def build_trend_delta(current_summary: dict[str, Any], previous_summary: dict[str, Any] | None) -> dict[str, Any]:
+def build_trend_delta(
+    current_summary: dict[str, Any], previous_summary: dict[str, Any] | None
+) -> dict[str, Any]:
     current_checks = _checks(current_summary)
-    current_failed = sorted(str(row.get("id", "")) for row in current_checks if not bool(row.get("ok", False)))
+    current_failed = sorted(
+        str(row.get("id", "")) for row in current_checks if not bool(row.get("ok", False))
+    )
 
     if not previous_summary:
         return {
@@ -329,14 +343,19 @@ def validate_sorted_actions(payload: dict[str, Any]) -> list[str]:
         if not isinstance(rows, list):
             failures.append(f"actions.{lane} must be a list")
             continue
-        sorted_rows = sorted(rows, key=lambda row: (int(row.get("priority", 0)), str(row.get("action_id", ""))))
+        sorted_rows = sorted(
+            rows, key=lambda row: (int(row.get("priority", 0)), str(row.get("action_id", "")))
+        )
         if rows != sorted_rows:
             failures.append(f"actions.{lane} is not deterministically sorted")
     return failures
 
 
 def validate_phase3_payloads(
-    adaptive: dict[str, Any], remediation_v2: dict[str, Any], trend: dict[str, Any], next_pass: dict[str, Any]
+    adaptive: dict[str, Any],
+    remediation_v2: dict[str, Any],
+    trend: dict[str, Any],
+    next_pass: dict[str, Any],
 ) -> list[str]:
     failures: list[str] = []
 
@@ -442,7 +461,13 @@ def validate_phase3_payloads(
         if not isinstance(row, dict):
             failures.append("next_pass recommendation row must be object")
             continue
-        for key in ("recommendation_id", "priority_tier", "priority", "reason_code", "command_hint"):
+        for key in (
+            "recommendation_id",
+            "priority_tier",
+            "priority",
+            "reason_code",
+            "command_hint",
+        ):
             if key not in row:
                 failures.append(f"next_pass recommendation missing {key}")
         if not str(row.get("reason_code", "")).strip():
@@ -474,5 +499,7 @@ def validate_phase3_payloads(
             if isinstance(r, dict)
         ]
         if stable_payload != mirror:
-            failures.append("next_pass stable_payload does not match deterministic recommendation slice")
+            failures.append(
+                "next_pass stable_payload does not match deterministic recommendation slice"
+            )
     return failures

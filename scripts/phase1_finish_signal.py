@@ -46,8 +46,12 @@ def build_finish_signal(control_loop: dict[str, Any], dashboard: dict[str, Any])
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Compute Phase 1 finish signal.")
-    parser.add_argument("--control-loop", default="build/phase1-baseline/phase1-control-loop-report.json")
-    parser.add_argument("--dashboard", default="build/phase1-baseline/phase1-completion-dashboard.json")
+    parser.add_argument(
+        "--control-loop", default="build/phase1-baseline/phase1-control-loop-report.json"
+    )
+    parser.add_argument(
+        "--dashboard", default="build/phase1-baseline/phase1-completion-dashboard.json"
+    )
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args(argv)
 

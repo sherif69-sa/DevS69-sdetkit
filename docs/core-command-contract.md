@@ -1,6 +1,6 @@
 # Core Command Contract (P0.1)
 
-Status: Active (v1)  
+Status: Active (v1)
 Effective date: 2026-04-16
 
 ## Purpose
@@ -66,7 +66,7 @@ For Tier C commands:
 
 ## Enforcement artifact
 
-Machine-readable starter manifest:  
+Machine-readable starter manifest:
 `docs/contracts/core-command-contract.v1.json`
 
 This manifest is intended to be consumed by future CI checks to detect unauthorized drift in the enterprise-stable command boundary.

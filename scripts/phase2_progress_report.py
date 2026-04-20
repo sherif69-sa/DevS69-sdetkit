@@ -9,7 +9,9 @@ from pathlib import Path
 from typing import Any
 
 
-def build_progress(phase2_status: dict[str, Any], phase2_complete: dict[str, Any]) -> dict[str, Any]:
+def build_progress(
+    phase2_status: dict[str, Any], phase2_complete: dict[str, Any]
+) -> dict[str, Any]:
     milestones: list[dict[str, Any]] = []
 
     status_ok = bool(phase2_status.get("ok", False))
@@ -25,7 +27,10 @@ def build_progress(phase2_status: dict[str, Any], phase2_complete: dict[str, Any
         "phase2-hardening-closeout",
         "phase2-wrap-handoff-closeout",
     ):
-        found = any(marker in str(step.get("command", "")) and bool(step.get("ok", False)) for step in complete_steps)
+        found = any(
+            marker in str(step.get("command", "")) and bool(step.get("ok", False))
+            for step in complete_steps
+        )
         milestones.append({"id": f"step::{marker}", "ok": found})
 
     total = len(milestones)
@@ -51,7 +56,9 @@ def _load(path: Path) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate Phase 2 progress report.")
     parser.add_argument("--phase2-status", default="build/phase2-start/phase2-status.json")
-    parser.add_argument("--phase2-complete", default="build/phase2-complete/phase2-complete-summary.json")
+    parser.add_argument(
+        "--phase2-complete", default="build/phase2-complete/phase2-complete-summary.json"
+    )
     parser.add_argument("--out", default="build/phase2-complete/phase2-progress.json")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args(argv)
@@ -64,7 +71,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
-        print(f"phase2-progress: {payload['completion_percent']}% ({payload['milestones_completed']}/{payload['milestones_total']})")
+        print(
+            f"phase2-progress: {payload['completion_percent']}% ({payload['milestones_completed']}/{payload['milestones_total']})"
+        )
     return 0 if payload["ok"] else 1
 
 

@@ -15,7 +15,9 @@ def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def build_next_pass_card(finish_signal: dict[str, Any], next_actions: dict[str, Any], control_loop: dict[str, Any]) -> dict[str, Any]:
+def build_next_pass_card(
+    finish_signal: dict[str, Any], next_actions: dict[str, Any], control_loop: dict[str, Any]
+) -> dict[str, Any]:
     status = finish_signal.get("status", "unknown")
     blockers = finish_signal.get("blocking_required_checks", [])
     if not isinstance(blockers, list):
@@ -81,9 +83,13 @@ def _to_markdown(payload: dict[str, Any]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Build Phase 1 next-pass remediation card.")
-    parser.add_argument("--finish-signal", default="build/phase1-baseline/phase1-finish-signal.json")
+    parser.add_argument(
+        "--finish-signal", default="build/phase1-baseline/phase1-finish-signal.json"
+    )
     parser.add_argument("--next-actions", default="build/phase1-baseline/phase1-next-actions.json")
-    parser.add_argument("--control-loop", default="build/phase1-baseline/phase1-control-loop-report.json")
+    parser.add_argument(
+        "--control-loop", default="build/phase1-baseline/phase1-control-loop-report.json"
+    )
     parser.add_argument("--out-json", default="build/phase1-baseline/phase1-next-pass-card.json")
     parser.add_argument("--out-md", default="build/phase1-baseline/phase1-next-pass-card.md")
     parser.add_argument("--format", choices=["text", "json"], default="text")

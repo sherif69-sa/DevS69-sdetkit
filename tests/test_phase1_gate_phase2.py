@@ -31,5 +31,7 @@ def test_main_success(tmp_path: Path) -> None:
     _write(finish, {"status": "complete", "gate_ok": True, "blocking_required_checks": []})
     _write(artifacts, {"ok": True, "missing": []})
 
-    rc = gate.main(["--finish-signal", str(finish), "--artifact-set", str(artifacts), "--format", "json"])
+    rc = gate.main(
+        ["--finish-signal", str(finish), "--artifact-set", str(artifacts), "--format", "json"]
+    )
     assert rc == 0

@@ -7,7 +7,7 @@ import shlex
 import subprocess
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -42,7 +42,9 @@ def _run_command(
 
     env = dict(os.environ)
     src_path = str(root / "src")
-    env["PYTHONPATH"] = src_path if not env.get("PYTHONPATH") else f"{src_path}{os.pathsep}{env['PYTHONPATH']}"
+    env["PYTHONPATH"] = (
+        src_path if not env.get("PYTHONPATH") else f"{src_path}{os.pathsep}{env['PYTHONPATH']}"
+    )
 
     attempts = 0
     result: dict[str, Any] = {}
@@ -182,7 +184,9 @@ def main(argv: list[str] | None = None) -> int:
         ("release_readiness", "python -m sdetkit release-readiness --format json"),
     ]
     if args.include_enterprise:
-        commands.append(("enterprise_assessment", "python -m sdetkit enterprise-assessment --format json"))
+        commands.append(
+            ("enterprise_assessment", "python -m sdetkit enterprise-assessment --format json")
+        )
 
     results: list[dict[str, Any]] = []
     for idx, (run_id, cmd) in enumerate(commands, start=1):
@@ -201,7 +205,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = {
         "contract": {
             "schema_version": "sdetkit.ship_readiness.v1",
-            "generated_at_utc": datetime.now(timezone.utc)
+            "generated_at_utc": datetime.now(UTC)
             .replace(microsecond=0)
             .isoformat()
             .replace("+00:00", "Z"),

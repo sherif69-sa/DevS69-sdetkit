@@ -11,12 +11,18 @@ def test_build_portfolio_readiness_ranks_highest_risk_first() -> None:
         {
             "repo": "repo-green",
             "ship_summary": {"summary": {"decision": "go", "blockers": []}},
-            "enterprise_summary": {"summary": {"score": 100}, "upgrade_contract": {"risk_band": "low"}},
+            "enterprise_summary": {
+                "summary": {"score": 100},
+                "upgrade_contract": {"risk_band": "low"},
+            },
         },
         {
             "repo": "repo-red",
             "ship_summary": {"summary": {"decision": "no-go", "blockers": ["a", "b"]}},
-            "enterprise_summary": {"summary": {"score": 70}, "upgrade_contract": {"risk_band": "high"}},
+            "enterprise_summary": {
+                "summary": {"score": 70},
+                "upgrade_contract": {"risk_band": "high"},
+            },
         },
     ]
 
@@ -33,7 +39,9 @@ def test_main_writes_json_output_and_supports_strict(tmp_path: Path, capsys) -> 
     manifest = tmp_path / "manifest.json"
     out = tmp_path / "out.json"
 
-    ship.write_text(json.dumps({"summary": {"decision": "no-go", "blockers": ["x"]}}), encoding="utf-8")
+    ship.write_text(
+        json.dumps({"summary": {"decision": "no-go", "blockers": ["x"]}}), encoding="utf-8"
+    )
     enterprise.write_text(
         json.dumps({"summary": {"score": 75}, "upgrade_contract": {"risk_band": "high"}}),
         encoding="utf-8",

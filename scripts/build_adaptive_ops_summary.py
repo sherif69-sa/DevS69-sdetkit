@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -77,7 +77,7 @@ def main() -> int:
 
     payload = {
         "schema_version": "sdetkit.adaptive-ops-summary.v1",
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "generated_at_utc": datetime.now(UTC).isoformat(),
         "scenario_db_path": scenario_path.as_posix(),
         "postcheck_path": postcheck_path.as_posix(),
         "scenario_db": _read_json(scenario_path),

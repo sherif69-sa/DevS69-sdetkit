@@ -1,6 +1,6 @@
 # Toolkit Reliability SLOs (P1.3)
 
-Status: Active proposal (v1)  
+Status: Active proposal (v1)
 Date: 2026-04-16
 
 ## Objective

@@ -44,7 +44,16 @@ def test_next_pass_contract_fails_on_missing_reason_code() -> None:
     failures = q.validate_phase3_payloads(
         adaptive,
         remediation,
-        {"schema_version": q.TREND_SCHEMA_VERSION, "compared_artifacts": {}, "status": "stable", "regressions": [], "improvements": [], "unchanged_signals": [], "recommended_immediate_actions": [], "generated_at": "2026-01-01T00:00:00Z"},
+        {
+            "schema_version": q.TREND_SCHEMA_VERSION,
+            "compared_artifacts": {},
+            "status": "stable",
+            "regressions": [],
+            "improvements": [],
+            "unchanged_signals": [],
+            "recommended_immediate_actions": [],
+            "generated_at": "2026-01-01T00:00:00Z",
+        },
         next_pass,
     )
 

@@ -8,11 +8,12 @@ import json
 from pathlib import Path
 from typing import Any
 
-
 _SCHEMA_VERSION = "1.0.0"
 
 
-def _metric(value: Any, unit: str, sample_size: int | None, quality: str, source: str) -> dict[str, Any]:
+def _metric(
+    value: Any, unit: str, sample_size: int | None, quality: str, source: str
+) -> dict[str, Any]:
     return {
         "value": value,
         "unit": unit,
@@ -36,8 +37,12 @@ def _build_payload(
     totals = dict(portfolio.get("totals", {}))
     total_repos = int(totals.get("repo_count_total", len(repos)))
 
-    release_confidence_pass = sum(1 for row in repos if bool(row.get("release_confidence_ok", False)))
-    onboarding_rate = round((release_confidence_pass / total_repos * 100), 2) if total_repos else 0.0
+    release_confidence_pass = sum(
+        1 for row in repos if bool(row.get("release_confidence_ok", False))
+    )
+    onboarding_rate = (
+        round((release_confidence_pass / total_repos * 100), 2) if total_repos else 0.0
+    )
 
     failed_release_gate_frequency = float(totals.get("release_gate_failure_rate_percent", 0.0))
 
@@ -60,7 +65,9 @@ def _build_payload(
                 "minutes" if median_release_decision_time is not None else "n/a",
                 total_repos if median_release_decision_time is not None else None,
                 "seed",
-                "timing instrumentation pending" if median_release_decision_time is None else source,
+                "timing instrumentation pending"
+                if median_release_decision_time is None
+                else source,
             ),
             "failed_release_gate_frequency": _metric(
                 failed_release_gate_frequency,
@@ -81,7 +88,9 @@ def _build_payload(
                 "minutes" if mean_time_to_triage_first_failure is not None else "n/a",
                 total_repos if mean_time_to_triage_first_failure is not None else None,
                 "seed",
-                "incident timing fields pending" if mean_time_to_triage_first_failure is None else source,
+                "incident timing fields pending"
+                if mean_time_to_triage_first_failure is None
+                else source,
             ),
             "docs_to_adoption_conversion": _metric(
                 docs_to_adoption_conversion,

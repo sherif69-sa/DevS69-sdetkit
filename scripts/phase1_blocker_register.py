@@ -9,7 +9,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-
 RISK_PRIORITY = {
     "doctor": 100,
     "enterprise_contracts": 95,
@@ -26,7 +25,9 @@ def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def build_blocker_register(next_pass: dict[str, Any], control_loop: dict[str, Any]) -> list[dict[str, Any]]:
+def build_blocker_register(
+    next_pass: dict[str, Any], control_loop: dict[str, Any]
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
 
     checks = next_pass.get("blocking_required_checks", [])
@@ -65,7 +66,9 @@ def build_blocker_register(next_pass: dict[str, Any], control_loop: dict[str, An
                         "blocker": sid,
                         "category": "control_loop_stage",
                         "priority": RISK_PRIORITY.get(sid, 50),
-                        "recommended_action": str(row.get("action_if_missing", "Run next phase1 action")),
+                        "recommended_action": str(
+                            row.get("action_if_missing", "Run next phase1 action")
+                        ),
                     }
                 )
 
@@ -76,7 +79,9 @@ def build_blocker_register(next_pass: dict[str, Any], control_loop: dict[str, An
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Build Phase 1 blocker register.")
     parser.add_argument("--next-pass", default="build/phase1-baseline/phase1-next-pass-card.json")
-    parser.add_argument("--control-loop", default="build/phase1-baseline/phase1-control-loop-report.json")
+    parser.add_argument(
+        "--control-loop", default="build/phase1-baseline/phase1-control-loop-report.json"
+    )
     parser.add_argument("--out-json", default="build/phase1-baseline/phase1-blocker-register.json")
     parser.add_argument("--out-csv", default="build/phase1-baseline/phase1-blocker-register.csv")
     parser.add_argument("--format", choices=["text", "json"], default="text")
@@ -111,7 +116,9 @@ def main(argv: list[str] | None = None) -> int:
     out_json.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     with out_csv.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["blocker", "category", "priority", "recommended_action"])
+        writer = csv.DictWriter(
+            f, fieldnames=["blocker", "category", "priority", "recommended_action"]
+        )
         writer.writeheader()
         writer.writerows(rows)
 

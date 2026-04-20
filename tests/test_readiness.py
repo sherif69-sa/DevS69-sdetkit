@@ -26,7 +26,9 @@ def _seed_repo(tmp_path):
     )
 
     for index in range(10):
-        (tmp_path / "tests" / f"test_sample_{index}.py").write_text("def test_ok():\n    assert True\n")
+        (tmp_path / "tests" / f"test_sample_{index}.py").write_text(
+            "def test_ok():\n    assert True\n"
+        )
 
 
 def _seed_scenario_capacity(tmp_path, count: int):

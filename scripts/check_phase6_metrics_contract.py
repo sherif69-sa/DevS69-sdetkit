@@ -67,7 +67,11 @@ def _sorted_unique(rows: list[str] | tuple[str, ...]) -> list[str]:
 
 
 def _is_non_empty_string_list(value: object) -> bool:
-    return isinstance(value, list) and bool(value) and all(isinstance(item, str) and item.strip() for item in value)
+    return (
+        isinstance(value, list)
+        and bool(value)
+        and all(isinstance(item, str) and item.strip() for item in value)
+    )
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -89,7 +93,9 @@ def _build_metrics_payload() -> dict[str, Any]:
     metric_snapshots = [
         {
             "metric_id": "adoption_rate",
-            "status": "green" if Path("build/phase5-ecosystem/phase5-ecosystem-contract.json").is_file() else "yellow",
+            "status": "green"
+            if Path("build/phase5-ecosystem/phase5-ecosystem-contract.json").is_file()
+            else "yellow",
             "value": 0.72,
             "unit": "ratio",
             "trend": "up",
@@ -100,7 +106,9 @@ def _build_metrics_payload() -> dict[str, Any]:
         },
         {
             "metric_id": "deployment_frequency",
-            "status": "green" if Path("build/phase1-baseline/phase1-baseline-summary.json").is_file() else "unknown",
+            "status": "green"
+            if Path("build/phase1-baseline/phase1-baseline-summary.json").is_file()
+            else "unknown",
             "value": 5,
             "unit": "deployments/week",
             "trend": "flat",
@@ -111,7 +119,9 @@ def _build_metrics_payload() -> dict[str, Any]:
         },
         {
             "metric_id": "lead_time_days",
-            "status": "green" if Path("build/phase3-quality/phase3-trend-delta.json").is_file() else "yellow",
+            "status": "green"
+            if Path("build/phase3-quality/phase3-trend-delta.json").is_file()
+            else "yellow",
             "value": 3.4,
             "unit": "days",
             "trend": "down",
@@ -177,17 +187,21 @@ def _build_metrics_payload() -> dict[str, Any]:
 def _build_kpi_snapshot(payload: dict[str, Any]) -> dict[str, Any]:
     contract = dict(payload.get("metrics_contract", {}))
     required_kpis = _sorted_unique(list(contract.get("required_kpis", [])))
-    observed_kpis = _sorted_unique([
-        str(row.get("metric_id", ""))
-        for row in payload.get("metric_snapshots", [])
-        if isinstance(row, dict) and str(row.get("metric_id", "")).strip()
-    ])
+    observed_kpis = _sorted_unique(
+        [
+            str(row.get("metric_id", ""))
+            for row in payload.get("metric_snapshots", [])
+            if isinstance(row, dict) and str(row.get("metric_id", "")).strip()
+        ]
+    )
     missing_kpis = _sorted_unique(sorted(set(required_kpis) - set(observed_kpis)))
 
     freshness_status = "unknown"
     metric_rows = [row for row in payload.get("metric_snapshots", []) if isinstance(row, dict)]
     if metric_rows:
-        freshness_status = "stale" if any(str(row.get("status", "")) == "red" for row in metric_rows) else "fresh"
+        freshness_status = (
+            "stale" if any(str(row.get("status", "")) == "red" for row in metric_rows) else "fresh"
+        )
 
     return {
         "schema_version": KPI_SNAPSHOT_SCHEMA_VERSION,
@@ -211,12 +225,16 @@ def _build_commercial_scorecard(payload: dict[str, Any]) -> dict[str, Any]:
 
     if missing:
         blockers.append(f"missing_evidence_surfaces:{','.join(missing)}")
-        recommendations.append("Generate missing required evidence surfaces before quarterly commercialization reporting.")
+        recommendations.append(
+            "Generate missing required evidence surfaces before quarterly commercialization reporting."
+        )
 
     reporting_audience = _sorted_unique(list(contract.get("reporting_audience", [])))
     if not reporting_audience:
         blockers.append("missing_reporting_audience")
-        recommendations.append("Populate commercialization_contract.reporting_audience with at least one audience.")
+        recommendations.append(
+            "Populate commercialization_contract.reporting_audience with at least one audience."
+        )
 
     if not required:
         commercialization_status = "missing"
@@ -239,7 +257,12 @@ def _build_commercial_scorecard(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _build_metrics_drift_alerts(payload: dict[str, Any], snapshot: dict[str, Any], scorecard: dict[str, Any], drift_threshold: int) -> dict[str, Any]:
+def _build_metrics_drift_alerts(
+    payload: dict[str, Any],
+    snapshot: dict[str, Any],
+    scorecard: dict[str, Any],
+    drift_threshold: int,
+) -> dict[str, Any]:
     alerts: list[str] = []
     drift_score = 0
 
@@ -271,7 +294,9 @@ def _build_metrics_drift_alerts(payload: dict[str, Any], snapshot: dict[str, Any
     }
 
 
-def _validate_deterministic_dict_list(payload: dict[str, Any], key: str, sort_key: str) -> list[str]:
+def _validate_deterministic_dict_list(
+    payload: dict[str, Any], key: str, sort_key: str
+) -> list[str]:
     rows = payload.get(key)
     if not isinstance(rows, list):
         return [f"{key} must be a list"]
@@ -293,7 +318,17 @@ def _validate_policy_and_contract_fields(payload: dict[str, Any]) -> list[str]:
         if not isinstance(row, dict):
             failures.append("metric_snapshots rows must be objects")
             continue
-        for key in ("metric_id", "status", "value", "unit", "trend", "reason_code", "evidence_refs", "owner_hint", "metric_domain"):
+        for key in (
+            "metric_id",
+            "status",
+            "value",
+            "unit",
+            "trend",
+            "reason_code",
+            "evidence_refs",
+            "owner_hint",
+            "metric_domain",
+        ):
             if key not in row:
                 failures.append(f"metric_snapshots missing key: {key}")
         if str(row.get("status", "")) not in ALLOWED_METRIC_STATUSES:
@@ -308,9 +343,13 @@ def _validate_policy_and_contract_fields(payload: dict[str, Any]) -> list[str]:
             failures.append(f"missing/invalid metric_snapshots.reason_code: {row.get('metric_id')}")
         evidence_refs = row.get("evidence_refs", [])
         if not _is_non_empty_string_list(evidence_refs):
-            failures.append(f"missing/invalid metric_snapshots.evidence_refs: {row.get('metric_id')}")
+            failures.append(
+                f"missing/invalid metric_snapshots.evidence_refs: {row.get('metric_id')}"
+            )
         elif list(evidence_refs) != sorted(str(item) for item in evidence_refs):
-            failures.append(f"metric_snapshots.evidence_refs must be sorted: {row.get('metric_id')}")
+            failures.append(
+                f"metric_snapshots.evidence_refs must be sorted: {row.get('metric_id')}"
+            )
         if str(row.get("metric_domain", "")) not in ALLOWED_METRIC_DOMAINS:
             failures.append(f"invalid metric_snapshots.metric_domain: {row.get('metric_id')}")
 
@@ -330,9 +369,13 @@ def _validate_policy_and_contract_fields(payload: dict[str, Any]) -> list[str]:
         if str(row.get("disposition", "")) not in ALLOWED_POLICY_DISPOSITIONS:
             failures.append(f"invalid scorecard_policies.disposition: {row.get('policy_id')}")
         if str(row.get("rationale_code", "")) not in RATIONALE_CODES:
-            failures.append(f"missing/invalid scorecard_policies.rationale_code: {row.get('policy_id')}")
+            failures.append(
+                f"missing/invalid scorecard_policies.rationale_code: {row.get('policy_id')}"
+            )
         if str(row.get("impact_tier", "")) not in ALLOWED_IMPACT_TIERS:
-            failures.append(f"missing/invalid scorecard_policies.impact_tier: {row.get('policy_id')}")
+            failures.append(
+                f"missing/invalid scorecard_policies.impact_tier: {row.get('policy_id')}"
+            )
 
     metrics_contract = payload.get("metrics_contract", {})
     if not isinstance(metrics_contract, dict):
@@ -360,7 +403,9 @@ def _validate_policy_and_contract_fields(payload: dict[str, Any]) -> list[str]:
         if not _is_non_empty_string_list(required_surfaces):
             failures.append("commercialization_contract.required_evidence_surfaces missing/empty")
         elif list(required_surfaces) != sorted(str(item) for item in required_surfaces):
-            failures.append("commercialization_contract.required_evidence_surfaces must be sorted list")
+            failures.append(
+                "commercialization_contract.required_evidence_surfaces must be sorted list"
+            )
         reporting_audience = commercialization_contract.get("reporting_audience")
         if not _is_non_empty_string_list(reporting_audience):
             failures.append("commercialization_contract.reporting_audience missing/empty")
@@ -390,24 +435,44 @@ def _validate_output_contracts(
             failures.append(f"metrics payload missing key: {key}")
 
     failures.extend(_validate_policy_and_contract_fields(metrics_payload))
-    failures.extend(_validate_deterministic_dict_list(metrics_payload, "metric_snapshots", "metric_id"))
-    failures.extend(_validate_deterministic_dict_list(metrics_payload, "scorecard_policies", "policy_id"))
+    failures.extend(
+        _validate_deterministic_dict_list(metrics_payload, "metric_snapshots", "metric_id")
+    )
+    failures.extend(
+        _validate_deterministic_dict_list(metrics_payload, "scorecard_policies", "policy_id")
+    )
 
     if str(metrics_payload.get("schema_version", "")) != SCHEMA_VERSION:
         failures.append(f"metrics payload schema_version must be {SCHEMA_VERSION}")
     if str(kpi_snapshot.get("schema_version", "")) != KPI_SNAPSHOT_SCHEMA_VERSION:
         failures.append(f"kpi snapshot schema_version must be {KPI_SNAPSHOT_SCHEMA_VERSION}")
     if str(commercial_scorecard.get("schema_version", "")) != COMMERCIAL_SCORECARD_SCHEMA_VERSION:
-        failures.append(f"commercial scorecard schema_version must be {COMMERCIAL_SCORECARD_SCHEMA_VERSION}")
+        failures.append(
+            f"commercial scorecard schema_version must be {COMMERCIAL_SCORECARD_SCHEMA_VERSION}"
+        )
     if str(drift_alerts.get("schema_version", "")) != METRICS_DRIFT_ALERTS_SCHEMA_VERSION:
-        failures.append(f"drift alerts schema_version must be {METRICS_DRIFT_ALERTS_SCHEMA_VERSION}")
+        failures.append(
+            f"drift alerts schema_version must be {METRICS_DRIFT_ALERTS_SCHEMA_VERSION}"
+        )
 
-    for key in ("schema_version", "required_kpis", "observed_kpis", "missing_kpis", "freshness_sla_days", "freshness_status", "generated_at"):
+    for key in (
+        "schema_version",
+        "required_kpis",
+        "observed_kpis",
+        "missing_kpis",
+        "freshness_sla_days",
+        "freshness_status",
+        "generated_at",
+    ):
         if key not in kpi_snapshot:
             failures.append(f"kpi snapshot missing key: {key}")
     for key in ("required_kpis", "observed_kpis", "missing_kpis"):
         rows = kpi_snapshot.get(key, [])
-        if not isinstance(rows, list) or not all(isinstance(item, str) and item.strip() for item in rows) or rows != sorted(rows):
+        if (
+            not isinstance(rows, list)
+            or not all(isinstance(item, str) and item.strip() for item in rows)
+            or rows != sorted(rows)
+        ):
             failures.append(f"kpi snapshot {key} must be sorted list")
     freshness_sla_days = kpi_snapshot.get("freshness_sla_days")
     if not isinstance(freshness_sla_days, int) or freshness_sla_days <= 0:
@@ -417,25 +482,50 @@ def _validate_output_contracts(
     if not str(kpi_snapshot.get("generated_at", "")).strip():
         failures.append("kpi snapshot generated_at missing/empty")
 
-    for key in ("schema_version", "commercialization_status", "reporting_readiness", "blockers", "recommended_actions", "generated_at"):
+    for key in (
+        "schema_version",
+        "commercialization_status",
+        "reporting_readiness",
+        "blockers",
+        "recommended_actions",
+        "generated_at",
+    ):
         if key not in commercial_scorecard:
             failures.append(f"commercial scorecard missing key: {key}")
-    if str(commercial_scorecard.get("commercialization_status", "")) not in ALLOWED_COMMERCIALIZATION_STATUSES:
+    if (
+        str(commercial_scorecard.get("commercialization_status", ""))
+        not in ALLOWED_COMMERCIALIZATION_STATUSES
+    ):
         failures.append("invalid commercialization_status")
     if str(commercial_scorecard.get("reporting_readiness", "")) not in ALLOWED_REPORTING_READINESS:
         failures.append("invalid reporting_readiness")
     for key in ("blockers", "recommended_actions"):
         rows = commercial_scorecard.get(key, [])
-        if not isinstance(rows, list) or not all(isinstance(item, str) and item.strip() for item in rows) or rows != sorted(rows):
+        if (
+            not isinstance(rows, list)
+            or not all(isinstance(item, str) and item.strip() for item in rows)
+            or rows != sorted(rows)
+        ):
             failures.append(f"commercial scorecard {key} must be sorted list")
     if not str(commercial_scorecard.get("generated_at", "")).strip():
         failures.append("commercial scorecard generated_at missing/empty")
 
-    for key in ("schema_version", "drift_status", "alerts", "drift_score", "drift_threshold", "generated_at"):
+    for key in (
+        "schema_version",
+        "drift_status",
+        "alerts",
+        "drift_score",
+        "drift_threshold",
+        "generated_at",
+    ):
         if key not in drift_alerts:
             failures.append(f"drift alerts missing key: {key}")
     alerts = drift_alerts.get("alerts", [])
-    if not isinstance(alerts, list) or not all(isinstance(item, str) and item.strip() for item in alerts) or alerts != sorted(alerts):
+    if (
+        not isinstance(alerts, list)
+        or not all(isinstance(item, str) and item.strip() for item in alerts)
+        or alerts != sorted(alerts)
+    ):
         failures.append("drift alerts must be sorted list")
     if str(drift_alerts.get("drift_status", "")) not in ALLOWED_DRIFT_STATUSES:
         failures.append("invalid drift_status")
@@ -467,15 +557,31 @@ def _build_gate_checks(failures: list[str]) -> list[dict[str, Any]]:
             ),
         },
         {"id": "kpi_snapshot_presence_schema", "ok": _ok(("kpi snapshot", "freshness_status"))},
-        {"id": "commercial_scorecard_presence_schema", "ok": _ok(("commercial scorecard", "commercialization_status", "reporting_readiness"))},
-        {"id": "drift_alerts_presence_schema", "ok": _ok(("drift alerts", "drift_status", "drift_score", "drift_threshold"))},
-        {"id": "deterministic_ordering", "ok": _ok(("not deterministically sorted", "must be sorted list"))},
-        {"id": "reason_rationale_vocabulary_enforced", "ok": _ok(("reason_code", "rationale_code"))},
+        {
+            "id": "commercial_scorecard_presence_schema",
+            "ok": _ok(("commercial scorecard", "commercialization_status", "reporting_readiness")),
+        },
+        {
+            "id": "drift_alerts_presence_schema",
+            "ok": _ok(("drift alerts", "drift_status", "drift_score", "drift_threshold")),
+        },
+        {
+            "id": "deterministic_ordering",
+            "ok": _ok(("not deterministically sorted", "must be sorted list")),
+        },
+        {
+            "id": "reason_rationale_vocabulary_enforced",
+            "ok": _ok(("reason_code", "rationale_code")),
+        },
     ]
 
 
 def _build_result_payload(
-    *, failures: list[str], metrics_payload: dict[str, Any], out_dir: Path, artifacts: dict[str, str]
+    *,
+    failures: list[str],
+    metrics_payload: dict[str, Any],
+    out_dir: Path,
+    artifacts: dict[str, str],
 ) -> dict[str, Any]:
     legacy_checks = list(metrics_payload.get("checks", []))
     return {
@@ -506,9 +612,13 @@ def main(argv: list[str] | None = None) -> int:
     metrics_payload = _build_metrics_payload()
     kpi_snapshot = _build_kpi_snapshot(metrics_payload)
     commercial_scorecard = _build_commercial_scorecard(metrics_payload)
-    drift_alerts = _build_metrics_drift_alerts(metrics_payload, kpi_snapshot, commercial_scorecard, drift_threshold)
+    drift_alerts = _build_metrics_drift_alerts(
+        metrics_payload, kpi_snapshot, commercial_scorecard, drift_threshold
+    )
 
-    failures = _validate_output_contracts(metrics_payload, kpi_snapshot, commercial_scorecard, drift_alerts)
+    failures = _validate_output_contracts(
+        metrics_payload, kpi_snapshot, commercial_scorecard, drift_alerts
+    )
 
     metrics_path = out_dir / "phase6-metrics-contract.json"
     kpi_path = out_dir / "phase6-kpi-snapshot.json"
@@ -531,9 +641,14 @@ def main(argv: list[str] | None = None) -> int:
     emitted_kpi = _read_json(kpi_path)
     emitted_scorecard = _read_json(scorecard_path)
     emitted_drift = _read_json(drift_path)
-    failures = _sorted_unique(failures + _validate_output_contracts(emitted_metrics, emitted_kpi, emitted_scorecard, emitted_drift))
+    failures = _sorted_unique(
+        failures
+        + _validate_output_contracts(emitted_metrics, emitted_kpi, emitted_scorecard, emitted_drift)
+    )
 
-    result = _build_result_payload(failures=failures, metrics_payload=metrics_payload, out_dir=out_dir, artifacts=artifacts)
+    result = _build_result_payload(
+        failures=failures, metrics_payload=metrics_payload, out_dir=out_dir, artifacts=artifacts
+    )
 
     if ns.format == "json":
         print(json.dumps(result, indent=2, sort_keys=True))

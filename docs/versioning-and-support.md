@@ -126,7 +126,7 @@ path, or integration-facing interfaces), release notes should:
 
 ## Related references
 
-- [support.md](../SUPPORT.md)
+- [support.md](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/SUPPORT.md)
 - [stability-levels.md](stability-levels.md)
 - [integrations-and-extension-boundary.md](integrations-and-extension-boundary.md)
 - [release-confidence.md](release-confidence.md)

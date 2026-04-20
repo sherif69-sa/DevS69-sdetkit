@@ -3,9 +3,8 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-
 
 _REQUIRED_PATTERNS = (
     "portfolio-scorecard-sample-{date}.json",
@@ -20,7 +19,7 @@ _REQUIRED_PATTERNS = (
 
 def _touch_with_date(path: Path, day: str) -> None:
     path.write_text("{}\n")
-    ts = datetime.strptime(day, "%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp()
+    ts = datetime.strptime(day, "%Y-%m-%d").replace(tzinfo=UTC).timestamp()
     path.touch()
     path.chmod(0o644)
     # Keep deterministic mtime for freshness checks.

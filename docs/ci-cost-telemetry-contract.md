@@ -1,6 +1,6 @@
 # CI Cost Telemetry Contract (P1.2)
 
-Status: Active proposal (v1)  
+Status: Active proposal (v1)
 Date: 2026-04-16
 
 ## Objective
@@ -18,7 +18,7 @@ This contract defines the minimum telemetry payload for each weekly reporting cy
 
 ## Data contract
 
-Machine-readable schema path:  
+Machine-readable schema path:
 `docs/contracts/ci-cost-telemetry.v1.json`
 
 ### Required top-level fields

@@ -33,7 +33,9 @@ def _risk_from_repo_signals(
     blocker_penalty = min(40, blocker_count * 10)
     risk_band_penalty = {"low": 0, "medium": 15, "high": 30}.get(str(enterprise_risk_band), 10)
     enterprise_score_penalty = max(0, 100 - int(enterprise_summary_block.get("score", 0))) // 4
-    risk_score = min(100, decision_penalty + blocker_penalty + risk_band_penalty + enterprise_score_penalty)
+    risk_score = min(
+        100, decision_penalty + blocker_penalty + risk_band_penalty + enterprise_score_penalty
+    )
 
     if risk_score >= 70:
         priority = "critical"
@@ -68,9 +70,11 @@ def build_portfolio_readiness(rows: list[dict[str, Any]]) -> dict[str, Any]:
         )
 
     repo_rows.sort(key=lambda r: r["risk_score"], reverse=True)
-    avg_risk = round(
-        sum(int(r["risk_score"]) for r in repo_rows) / len(repo_rows), 2
-    ) if repo_rows else 0.0
+    avg_risk = (
+        round(sum(int(r["risk_score"]) for r in repo_rows) / len(repo_rows), 2)
+        if repo_rows
+        else 0.0
+    )
     critical = [r for r in repo_rows if r["priority"] == "critical"]
     high = [r for r in repo_rows if r["priority"] == "high"]
     go_count = sum(1 for r in repo_rows if r["decision"] == "go")
@@ -133,7 +137,9 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--out", type=Path, default=None)
-    parser.add_argument("--strict", action="store_true", help="Exit non-zero if any critical repo exists.")
+    parser.add_argument(
+        "--strict", action="store_true", help="Exit non-zero if any critical repo exists."
+    )
     return parser
 
 

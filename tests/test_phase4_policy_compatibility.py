@@ -66,6 +66,9 @@ def test_policy_compatibility_validation_accepts_valid_payload() -> None:
             "deprecation_boundaries": ["notice"],
             "compatibility_guards": ["make phase4-governance-contract"],
         },
-        release_evidence_contract={"required_artifacts": ["docs/index.md"], "retention_window_days": 30},
+        release_evidence_contract={
+            "required_artifacts": ["docs/index.md"],
+            "retention_window_days": 30,
+        },
     )
     assert failures == []

@@ -1,6 +1,6 @@
 # Enterprise Default Profile Contract (P0.4)
 
-Status: Active (v1)  
+Status: Active (v1)
 Effective date: 2026-04-16
 
 ## Purpose

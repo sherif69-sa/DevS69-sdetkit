@@ -5,9 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-
 
 _REQUIRED_PATTERNS = (
     "portfolio-scorecard-sample-{date}.json",
@@ -21,7 +20,7 @@ _REQUIRED_PATTERNS = (
 
 
 def _parse_date(date_text: str) -> datetime:
-    return datetime.strptime(date_text, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    return datetime.strptime(date_text, "%Y-%m-%d").replace(tzinfo=UTC)
 
 
 def main() -> int:
@@ -37,7 +36,7 @@ def main() -> int:
     ap.add_argument("--out", default="", help="Optional JSON report output path")
     args = ap.parse_args()
 
-    reference = _parse_date(args.reference_date) if args.reference_date else datetime.now(timezone.utc)
+    reference = _parse_date(args.reference_date) if args.reference_date else datetime.now(UTC)
     artifacts_dir = Path(args.artifacts_dir)
 
     missing: list[str] = []
@@ -51,7 +50,7 @@ def main() -> int:
             missing.append(str(path))
             continue
 
-        mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
+        mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC)
         age_days = int((reference.date() - mtime.date()).days)
         entry = {"path": str(path), "mtime": mtime.date().isoformat(), "age_days": age_days}
         checked.append(entry)

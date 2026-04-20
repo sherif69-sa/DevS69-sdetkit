@@ -16,5 +16,14 @@ def test_main_ok_with_repo_files() -> None:
 
 
 def test_main_missing_inputs(tmp_path: Path) -> None:
-    rc = contract.main(["--doc", str(tmp_path / "missing.md"), "--makefile", str(tmp_path / "M"), "--format", "json"])
+    rc = contract.main(
+        [
+            "--doc",
+            str(tmp_path / "missing.md"),
+            "--makefile",
+            str(tmp_path / "M"),
+            "--format",
+            "json",
+        ]
+    )
     assert rc == 1

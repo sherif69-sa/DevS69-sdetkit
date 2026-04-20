@@ -17,7 +17,9 @@ def _resolve_previous_summary(explicit: str | None, current: Path) -> Path | Non
     if not history_dir.is_dir():
         return None
     candidates = sorted(
-        path for path in history_dir.glob("*.json") if path.is_file() and path.resolve() != current.resolve()
+        path
+        for path in history_dir.glob("*.json")
+        if path.is_file() and path.resolve() != current.resolve()
     )
     return candidates[-1] if candidates else None
 
@@ -45,10 +47,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--current", default="build/phase1-baseline/phase1-baseline-summary.json")
     parser.add_argument("--previous", default=None)
     parser.add_argument(
-        "--out-json", default="build/phase3-quality/phase3-trend-delta.json", help="Trend delta JSON output path."
+        "--out-json",
+        default="build/phase3-quality/phase3-trend-delta.json",
+        help="Trend delta JSON output path.",
     )
     parser.add_argument(
-        "--out-md", default="build/phase3-quality/phase3-trend-delta.md", help="Optional markdown companion output."
+        "--out-md",
+        default="build/phase3-quality/phase3-trend-delta.md",
+        help="Optional markdown companion output.",
     )
     parser.add_argument("--skip-md", action="store_true")
     parser.add_argument("--format", choices=["text", "json"], default="text")

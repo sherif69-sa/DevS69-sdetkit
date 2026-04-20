@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pathlib import Path
 import json
+from pathlib import Path
 
 from scripts import phase1_finish_signal as signal
 
@@ -14,7 +14,10 @@ def _write(path: Path, payload: dict) -> None:
 def test_build_finish_signal_near_finish() -> None:
     out = signal.build_finish_signal(
         {"completion_percent": 80},
-        {"ready_to_close": False, "completion_gate": {"ok": False, "failing_required_checks": ["doctor"]}},
+        {
+            "ready_to_close": False,
+            "completion_gate": {"ok": False, "failing_required_checks": ["doctor"]},
+        },
     )
     assert out["status"] == "near_finish"
 
@@ -29,6 +32,13 @@ def test_main_success(tmp_path: Path) -> None:
     control = tmp_path / "control.json"
     dash = tmp_path / "dash.json"
     _write(control, {"completion_percent": 100})
-    _write(dash, {"ready_to_close": True, "completion_gate": {"ok": True}, "next_step": "make phase1-closeout"})
+    _write(
+        dash,
+        {
+            "ready_to_close": True,
+            "completion_gate": {"ok": True},
+            "next_step": "make phase1-closeout",
+        },
+    )
     rc = signal.main(["--control-loop", str(control), "--dashboard", str(dash), "--format", "json"])
     assert rc == 0
