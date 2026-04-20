@@ -228,7 +228,7 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
     if not weekly_review_summary.exists() or not weekly_review_board.exists():
-        critical_failures.append("weekly_review_handoff_inputs")
+        critical_failures.append("weekly_review_inputs")
     if not weekly_review_strict:
         critical_failures.append("weekly_review_strict_baseline")
 

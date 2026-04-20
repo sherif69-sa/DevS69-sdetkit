@@ -161,7 +161,7 @@ def test_phase3_quality_contract_fails_when_doctor_handoff_mismatches(
     assert payload["doctor_handoff_alignment"] == "mismatch"
     assert (
         payload["doctor_handoff_alignment_reason"]
-        == "doctor_next_pass_conflicts_with_phase3_recommendation"
+        == "doctor_next_pass_mismatch"
     )
     assert "doctor handoff alignment mismatch" in payload["failures"]
     assert payload["summary"]["failed"] >= 1
@@ -196,7 +196,7 @@ def test_phase3_quality_contract_warn_mode_allows_doctor_mismatch(tmp_path: Path
     assert payload["doctor_alignment_mode"] == "warn"
     assert (
         payload["doctor_handoff_alignment_reason"]
-        == "doctor_next_pass_conflicts_with_phase3_recommendation"
+        == "doctor_next_pass_mismatch"
     )
     assert "doctor handoff alignment mismatch" not in payload["failures"]
 

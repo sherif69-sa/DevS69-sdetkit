@@ -3199,7 +3199,6 @@ def main(argv: list[str] | None = None) -> int:
                 "message": "no follow-up pass required" if not next_pass else "next pass available",
             }
             output = json.dumps(payload, sort_keys=True) + "\n"
-            is_json = True
         elif ns.format == "md":
             first_line = f"`{next_pass}`" if next_pass else "_no follow-up pass required_"
             alt_line = (
@@ -3215,7 +3214,6 @@ def main(argv: list[str] | None = None) -> int:
                 + alt_line
                 + "\n"
             )
-            is_json = False
         else:
             first_line = next_pass or "no follow-up pass required"
             alt_line = "alternates: " + (
@@ -3224,7 +3222,6 @@ def main(argv: list[str] | None = None) -> int:
             output = (
                 first_line + "\n" + f"reason: {next_pass_reason or 'none'}" + "\n" + alt_line + "\n"
             )
-            is_json = False
         if ns.out:
             Path(ns.out).write_text(output, encoding="utf-8")
         else:
@@ -3233,12 +3230,11 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         return 0
 
-    if ns.format == "json" or ns.json:
+    is_json = bool(ns.format == "json" or ns.json)
+    if is_json:
         output = json.dumps(data, sort_keys=True) + "\n"
-        is_json = True
     elif ns.format == "md" or ns.pr:
         output = _format_doctor_markdown(data)
-        is_json = False
     else:
         lines = [f"doctor score: {data['score']}%"]
         judgment = data.get("judgment", {})
@@ -3312,7 +3308,6 @@ def main(argv: list[str] | None = None) -> int:
                         f"- p{step.get('priority')} {step.get('check_id')} confidence={step.get('confidence')}: {step.get('recommended_fix')}"
                     )
         output = "\n".join(lines) + "\n"
-        is_json = False
 
     snap_base = data
     stable_text = _stable_json(snap_base)

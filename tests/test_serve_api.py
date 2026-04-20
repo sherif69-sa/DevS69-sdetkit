@@ -17,7 +17,7 @@ def _post_json(url: str, payload: dict[str, object]) -> tuple[int, dict[str, obj
     req = urllib.request.Request(
         url, data=data, method="POST", headers={"Content-Type": "application/json"}
     )
-    with urllib.request.urlopen(req) as resp:  # noqa: S310 - local server in test
+    with urllib.request.urlopen(req, timeout=5) as resp:  # noqa: S310 - local server in test
         body = json.loads(resp.read().decode("utf-8"))
         return int(resp.status), body
 
@@ -50,7 +50,7 @@ def test_serve_health_review_operator_mode_and_validation(tmp_path: Path) -> Non
     port = int(server.server_address[1])
 
     try:
-        with urllib.request.urlopen(f"http://127.0.0.1:{port}/healthz") as resp:  # noqa: S310
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/healthz", timeout=5) as resp:  # noqa: S310
             health = json.loads(resp.read().decode("utf-8"))
         assert resp.status == 200
         assert health["status"] == "ok"
@@ -101,7 +101,7 @@ def test_serve_health_review_operator_mode_and_validation(tmp_path: Path) -> Non
             headers={"Content-Type": "application/json"},
         )
         try:
-            urllib.request.urlopen(bad_req)  # noqa: S310
+            urllib.request.urlopen(bad_req, timeout=5)  # noqa: S310
             raise AssertionError("expected validation error")
         except urllib.error.HTTPError as exc:
             assert exc.code == 400
@@ -117,7 +117,7 @@ def test_serve_health_review_operator_mode_and_validation(tmp_path: Path) -> Non
             headers={"Content-Type": "application/json"},
         )
         try:
-            urllib.request.urlopen(bad_scan_req)  # noqa: S310
+            urllib.request.urlopen(bad_scan_req, timeout=5)  # noqa: S310
             raise AssertionError("expected code_scan_json validation error")
         except urllib.error.HTTPError as exc:
             assert exc.code == 400
@@ -185,7 +185,7 @@ def test_serve_observability_endpoint_reports_artifact_snapshot(tmp_path: Path) 
     port = int(server.server_address[1])
     try:
         status_url = f"http://127.0.0.1:{port}/v1/observability"
-        with urllib.request.urlopen(status_url) as resp:  # noqa: S310
+        with urllib.request.urlopen(status_url, timeout=5) as resp:  # noqa: S310
             payload = json.loads(resp.read().decode("utf-8"))
         assert resp.status == 200
         assert payload["status"] == "ok"
@@ -226,7 +226,7 @@ def test_serve_observability_marks_stale_artifacts(tmp_path: Path) -> None:
     thread.start()
     port = int(server.server_address[1])
     try:
-        with urllib.request.urlopen(f"http://127.0.0.1:{port}/v1/observability") as resp:  # noqa: S310
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/v1/observability", timeout=5) as resp:  # noqa: S310
             payload = json.loads(resp.read().decode("utf-8"))
         golden = payload["observability"]["golden_path_health"]
         assert golden["state"] == "present"

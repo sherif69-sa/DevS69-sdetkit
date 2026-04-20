@@ -283,7 +283,7 @@ def build_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
         "rollup": {
             "governance_handoff_activation_score": governance_handoff_score,
             "governance_handoff_checks": governance_handoff_check_count,
-            "governance_handoff_delivery_board_items": board_count,
+            "governance_handoff_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

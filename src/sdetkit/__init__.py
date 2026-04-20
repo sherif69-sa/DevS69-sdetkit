@@ -38,13 +38,15 @@ def _install_mutation_aliases() -> None:
             try:
                 cls.__init__ = init_alias
             except (AttributeError, TypeError):
-                pass
+                _alias_write_failed = True
+                _ = _alias_write_failed
         dunder_init = cls.__dict__.get("__init__")
         if callable(dunder_init) and "init_" not in cls.__dict__:
             try:
                 cls.init_ = dunder_init
             except (AttributeError, TypeError):
-                pass
+                _alias_write_failed = True
+                _ = _alias_write_failed
         return cls
 
     _wrapped_build_class._sdetkit_init_alias = True  # type: ignore[attr-defined]

@@ -301,9 +301,12 @@ def _safe_slug(value: str) -> str:
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    loaded = json.loads(path.read_text(encoding="utf-8"))
+    candidate = safe_path(Path.cwd(), path.as_posix(), allow_absolute=True).resolve()
+    if not candidate.exists() or not candidate.is_file():
+        raise ValueError(f"review: expected readable file at {candidate}")
+    loaded = json.loads(candidate.read_text(encoding="utf-8"))
     if not isinstance(loaded, dict):
-        raise ValueError(f"review: expected JSON object at {path}")
+        raise ValueError(f"review: expected JSON object at {candidate}")
     return loaded
 
 
@@ -592,6 +595,8 @@ def run_review(
     if code_scan_json is not None:
         if not code_scan_json.exists():
             raise ValueError(f"review: code scanning file does not exist: {code_scan_json}")
+        if not code_scan_json.is_file():
+            raise ValueError(f"review: code scanning path must be a file: {code_scan_json}")
         code_scanning_summary = _summarize_code_scanning(code_scan_json)
         artifact_index["code_scan_json"] = code_scan_json.as_posix()
         supporting.append(

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from . import review
+from .security import SecurityError, safe_path
 
 SERVE_CONTRACT_VERSION = "sdetkit.serve.contract.v1"
 _MAX_BODY_BYTES = 1_048_576
@@ -118,15 +119,21 @@ def _parse_review_request(body: bytes) -> dict[str, Any]:
 
 
 def _run_review_request(req: dict[str, Any]) -> dict[str, Any]:
-    target = Path(req["path"])
+    try:
+        target = safe_path(Path.cwd(), str(req["path"]), allow_absolute=True).resolve()
+        workspace_root = safe_path(Path.cwd(), str(req["workspace_root"]), allow_absolute=True)
+        if req["out_dir"]:
+            out_dir = safe_path(Path.cwd(), str(req["out_dir"]), allow_absolute=True)
+        else:
+            out_dir = _default_out_dir(target)
+    except SecurityError as exc:
+        raise RequestValidationError(f"Path rejected: {exc}") from exc
     if not target.exists():
         raise FileNotFoundError(f"Review target does not exist: {target}")
-
-    out_dir = Path(req["out_dir"]) if req["out_dir"] else _default_out_dir(target)
     rc, payload, json_path, txt_path = review.run_review(
         target=target,
         out_dir=out_dir,
-        workspace_root=Path(req["workspace_root"]),
+        workspace_root=workspace_root,
         profile=req["profile"],
         no_workspace=bool(req["no_workspace"]),
         work_id=str(req.get("work_id", "")).strip(),
@@ -381,7 +388,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        pass
+        print("sdetkit serve received shutdown signal")
     finally:
         server.server_close()
     return 0

@@ -206,7 +206,7 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": str(phase2_wrap_handoff_board),
         },
         {
-            "check_id": "phase2_wrap_handoff_quality_floor",
+            "check_id": "phase2_handoff_quality",
             "weight": 15,
             "passed": phase2_wrap_handoff_strict and phase2_wrap_handoff_score >= 95,
             "evidence": {
@@ -267,7 +267,7 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
     if not phase2_wrap_handoff_summary.exists() or not phase2_wrap_handoff_board.exists():
         critical_failures.append("phase2_wrap_handoff_handoff_inputs")
     if not phase2_wrap_handoff_strict:
-        critical_failures.append("phase2_wrap_handoff_strict_baseline")
+        critical_failures.append("phase2_handoff_strict")
 
     wins: list[str] = []
     misses: list[str] = []
@@ -323,7 +323,7 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
         "rollup": {
             "phase2_wrap_handoff_activation_score": phase2_wrap_handoff_score,
             "phase2_wrap_handoff_checks": phase2_wrap_handoff_check_count,
-            "phase2_wrap_handoff_delivery_board_items": board_count,
+            "phase2_handoff_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

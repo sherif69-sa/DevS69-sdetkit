@@ -225,7 +225,7 @@ def _build_reliability(payload: dict[str, Any]) -> dict[str, Any]:
         status = str(row.get("status", ""))
         if domain == "integration_playbook" and status != "pass":
             integration_status = "partial"
-            blockers.append("integration_playbook_check_failed")
+            blockers.append("integration_playbook_failed")
             recommended_actions.append(
                 "Update integration playbook evidence and rerun phase5 contract gate."
             )

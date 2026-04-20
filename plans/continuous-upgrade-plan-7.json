@@ -1,5 +1,5 @@
 {
-  "plan_id": "-continuous-upgrade-cycle7-001",
+  "plan_id": "continuous-upgrade-cycle7-001",
   "contributors": [
     "maintainers",
     "release-ops",
