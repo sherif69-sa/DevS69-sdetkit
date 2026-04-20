@@ -25,6 +25,25 @@ def _write_board(path: Path, title: str) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+
+
+def _phase1_baseline_seed() -> dict:
+    return {
+        "schema_version": "sdetkit.phase1_baseline.v1",
+        "generated_at_utc": "2026-04-19T00:00:00Z",
+        "out_dir": "build/phase1-baseline",
+        "ok": True,
+        "checks": [
+            {
+                "id": "seed_baseline",
+                "ok": True,
+                "rc": 0,
+                "stdout_log": "build/phase1-baseline/seed.stdout.log",
+                "stderr_log": "build/phase1-baseline/seed.stderr.log",
+            }
+        ],
+    }
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Seed minimal prerequisites for phase2 workflows.")
     parser.add_argument("--root", default=".")
@@ -58,11 +77,13 @@ def main(argv: list[str] | None = None) -> int:
         "Phase3 preplan board",
     )
 
+    _write_json(root / "build/phase1-baseline/phase1-baseline-summary.json", _phase1_baseline_seed())
+
     print(
         json.dumps(
             {
                 "ok": True,
-                "schema_version": "sdetkit.phase2_seed_prerequisites.v1",
+                "schema_version": "sdetkit.phase2_seed_prerequisites.v2",
                 "root": str(root),
             },
             indent=2,

@@ -373,3 +373,22 @@ def test_phase3_quality_contract_module_invocation_strict_mismatch_fails(tmp_pat
     assert completed.returncode == 1
     assert payload["decision"] == "fail"
     assert "doctor handoff alignment mismatch" in payload["failures"]
+
+
+def test_phase3_quality_contract_ignores_malformed_history_previous_summary(tmp_path: Path, capsys) -> None:
+    summary = _write_summary(
+        tmp_path / "phase1-baseline-summary.json",
+        [{"id": "doctor", "ok": True, "rc": 0, "stdout_log": "a", "stderr_log": "b"}],
+    )
+    bad_history = tmp_path / "history" / "phase1-baseline-summary-latest.json"
+    bad_history.parent.mkdir(parents=True, exist_ok=True)
+    bad_history.write_text("{not-json", encoding="utf-8")
+
+    out_dir = tmp_path / "phase3"
+    rc = contract.main(["--summary", str(summary), "--out-dir", str(out_dir), "--format", "json"])
+    payload = json.loads(capsys.readouterr().out)
+    trend = json.loads((out_dir / "phase3-trend-delta.json").read_text(encoding="utf-8"))
+
+    assert rc == 0
+    assert payload["ok"] is True
+    assert trend["status"] == "bootstrap"

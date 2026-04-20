@@ -1,0 +1,75 @@
+name: phase4-governance-contract
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/check_phase4_governance_contract.py'
+      - 'config/phase4_drift_scoring.json'
+      - 'docs/**'
+      - 'Makefile'
+      - '.github/workflows/phase4-governance-contract.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'scripts/check_phase4_governance_contract.py'
+      - 'config/phase4_drift_scoring.json'
+      - 'docs/**'
+      - 'Makefile'
+      - '.github/workflows/phase4-governance-contract.yml'
+jobs:
+  phase4-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install -e .
+      - name: Run phase4 contract
+        run: |
+          . .venv/bin/activate
+          make phase4-governance-contract
+      - name: Validate exact artifact set
+        run: |
+          python - <<'PYCODE'
+          from pathlib import Path
+          expected = {
+              "phase4-governance-contract.json",
+              "phase4-release-evidence.json",
+              "phase4-release-evidence.md",
+              "phase4-governance-adherence.json",
+              "phase4-compliance-overlay-pack.json",
+              "phase4-policy-as-code-template.json",
+              "phase4-governance-drift-alerts.json",
+              "phase4-governance-drift-alerts.md",
+              "phase4-compliance-overlay-security.json",
+              "phase4-compliance-overlay-privacy.json",
+              "phase4-compliance-overlay-regulated.json",
+          }
+          actual = {p.name for p in Path("build/phase4-governance").glob("*") if p.is_file()}
+          missing = sorted(expected - actual)
+          extra = sorted(actual - expected)
+          if missing or extra:
+              raise SystemExit(f"artifact-set mismatch missing={missing} extra={extra}")
+          PYCODE
+      - name: Upload phase4 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase4-governance-artifacts
+          path: |
+            build/phase4-governance/phase4-governance-contract.json
+            build/phase4-governance/phase4-release-evidence.json
+            build/phase4-governance/phase4-release-evidence.md
+            build/phase4-governance/phase4-governance-adherence.json
+            build/phase4-governance/phase4-compliance-overlay-pack.json
+            build/phase4-governance/phase4-policy-as-code-template.json
+            build/phase4-governance/phase4-governance-drift-alerts.json
+            build/phase4-governance/phase4-governance-drift-alerts.md
+            build/phase4-governance/phase4-compliance-overlay-security.json
+            build/phase4-governance/phase4-compliance-overlay-privacy.json
+            build/phase4-governance/phase4-compliance-overlay-regulated.json
