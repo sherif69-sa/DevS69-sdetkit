@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 
@@ -8,7 +9,8 @@ def test_phase4_governance_workflow_uploads_expected_artifacts() -> None:
     text = workflow.read_text(encoding="utf-8")
     assert "name: phase4-governance-contract" in text
     assert "make phase4-governance-contract" in text
-    assert "actions/upload-artifact@v4" in text
+    assert "actions/upload-artifact@" in text
+    assert re.search(r"actions/upload-artifact@[0-9a-f]{40}", text)
     assert "build/phase4-governance/phase4-governance-contract.json" in text
     assert "build/phase4-governance/phase4-release-evidence.json" in text
     assert "build/phase4-governance/phase4-release-evidence.md" in text
