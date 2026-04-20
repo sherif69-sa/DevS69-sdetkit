@@ -17,15 +17,17 @@ def test_adaptive_reviewer_matrix_has_expected_dimensions() -> None:
     mod = _load_module()
     rows = mod._generate_adaptive_reviewer_matrix()
 
-    assert len(rows) == 420
+    assert len(rows) == 7560
     assert rows[0]["kind"] == "adaptive_reviewer_matrix"
+    assert rows[0]["phase_id"] == 1
+    assert rows[0]["intelligence_mode"] == "reactive"
 
 
 def test_build_db_sets_higher_target_and_meets_it_for_repo() -> None:
     mod = _load_module()
     payload = mod.build_db(Path("."))
 
-    assert payload["summary"]["target_minimum"] == 2000
-    assert payload["summary"]["total_scenarios"] >= 2000
+    assert payload["summary"]["target_minimum"] == 3000
+    assert payload["summary"]["total_scenarios"] >= 3000
     assert payload["summary"]["meets_target"] is True
-    assert payload["summary"]["kinds"].get("adaptive_reviewer_matrix", 0) == 420
+    assert payload["summary"]["kinds"].get("adaptive_reviewer_matrix", 0) == 7560

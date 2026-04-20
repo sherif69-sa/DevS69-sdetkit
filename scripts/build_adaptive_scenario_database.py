@@ -210,19 +210,29 @@ def _generate_adaptive_reviewer_matrix() -> list[dict]:
         "saturated",
     ]
     decision_paths = ["go", "conditional-go", "no-go"]
+    phase_ids = [1, 2, 3, 4, 5, 6]
+    intelligence_modes = ["reactive", "guided", "predictive"]
     for domain in domains:
         for severity in severities:
             for state in reviewer_states:
                 for decision in decision_paths:
-                    out.append(
-                        {
-                            "scenario_id": f"adaptive-reviewer::{domain}::{severity}::{state}::{decision}",
-                            "domain": domain,
-                            "source": "synthetic/adaptive-reviewer-matrix",
-                            "status": "active",
-                            "kind": "adaptive_reviewer_matrix",
-                        }
-                    )
+                    for phase_id in phase_ids:
+                        for intelligence_mode in intelligence_modes:
+                            out.append(
+                                {
+                                    "scenario_id": (
+                                        "adaptive-reviewer::"
+                                        f"phase-{phase_id}::{domain}::{severity}::{state}::"
+                                        f"{decision}::{intelligence_mode}"
+                                    ),
+                                    "domain": domain,
+                                    "source": "synthetic/adaptive-reviewer-matrix",
+                                    "status": "active",
+                                    "kind": "adaptive_reviewer_matrix",
+                                    "phase_id": phase_id,
+                                    "intelligence_mode": intelligence_mode,
+                                }
+                            )
     return out
 
 
@@ -255,8 +265,8 @@ def build_db(repo_root: Path) -> dict:
             "total_scenarios": len(scenario_entries),
             "domains": dict(sorted(domain_counts.items())),
             "kinds": dict(sorted(kind_counts.items())),
-            "target_minimum": 2000,
-            "meets_target": len(scenario_entries) >= 2000,
+            "target_minimum": 3000,
+            "meets_target": len(scenario_entries) >= 3000,
         },
         "scenarios": scenario_entries,
     }

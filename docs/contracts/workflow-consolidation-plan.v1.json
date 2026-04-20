@@ -61,10 +61,12 @@
     "release-readiness-radar-bot.yml"
   ],
   "phases": [
-    "baseline_and_parity",
-    "bundle_introduction",
-    "controlled_retirement",
-    "steady_state_governance"
+    "phase1_baseline_and_parity",
+    "phase2_bundle_introduction",
+    "phase3_adaptive_reviewer_alignment",
+    "phase4_database_scale_up",
+    "phase5_intelligence_tuning",
+    "phase6_steady_state_governance"
   ],
   "success_targets": {
     "max_primary_workflows": 12,
