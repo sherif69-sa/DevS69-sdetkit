@@ -58,7 +58,10 @@ REMEDIATION_ACTION_KEYS = (
 def load_json(path: Path) -> dict[str, Any]:
     if not path.is_file():
         return {}
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
     return payload if isinstance(payload, dict) else {}
 
 
