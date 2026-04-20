@@ -6,7 +6,11 @@ from ..types import CheckAction, CheckResult, MaintenanceContext
 from ..utils import run_cmd
 
 CHECK_NAME = "clean_tree_check"
-_IGNORED_PREFIXES = (".sdetkit/",)
+_IGNORED_PREFIXES = (
+    ".sdetkit/",
+    "docs/artifacts/enterprise-assessment-pack/",
+    "sdet_check.json",
+)
 
 
 def _entry_path(entry: str) -> str:
