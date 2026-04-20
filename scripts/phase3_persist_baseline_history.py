@@ -30,7 +30,9 @@ def _generated_tag(payload: dict[str, Any]) -> str:
 
 
 def _history_files(history_dir: Path) -> list[Path]:
-    return sorted(path for path in history_dir.glob("phase1-baseline-summary-*.json") if path.is_file())
+    return sorted(
+        path for path in history_dir.glob("phase1-baseline-summary-*.json") if path.is_file()
+    )
 
 
 def main(argv: list[str] | None = None) -> int:

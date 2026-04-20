@@ -61,7 +61,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "json":
         print(json.dumps(result, indent=2, sort_keys=True))
     else:
-        print("phase2-start-summary-contract: OK" if result["ok"] else "phase2-start-summary-contract: FAIL")
+        print(
+            "phase2-start-summary-contract: OK"
+            if result["ok"]
+            else "phase2-start-summary-contract: FAIL"
+        )
         for item in errors:
             print(f"- {item}")
     return 0 if result["ok"] else 1

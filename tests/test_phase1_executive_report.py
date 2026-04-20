@@ -39,17 +39,28 @@ def test_main_writes_outputs(tmp_path: Path) -> None:
     _write(finish, {"status": "early", "completion_percent": 0})
     _write(gate, {"ready_for_phase2": False, "next_step": "make phase1-next"})
     _write(blockers, {"count": 0, "rows": []})
-    _write(telemetry, {"runs": 1, "pass_rate": 100.0, "avg_duration_ms": 100, "duration_drift_ms": 0})
+    _write(
+        telemetry, {"runs": 1, "pass_rate": 100.0, "avg_duration_ms": 100, "duration_drift_ms": 0}
+    )
 
-    rc = report.main([
-        "--finish", str(finish),
-        "--gate", str(gate),
-        "--blockers", str(blockers),
-        "--telemetry", str(telemetry),
-        "--out-json", str(out_json),
-        "--out-md", str(out_md),
-        "--format", "json",
-    ])
+    rc = report.main(
+        [
+            "--finish",
+            str(finish),
+            "--gate",
+            str(gate),
+            "--blockers",
+            str(blockers),
+            "--telemetry",
+            str(telemetry),
+            "--out-json",
+            str(out_json),
+            "--out-md",
+            str(out_md),
+            "--format",
+            "json",
+        ]
+    )
     assert rc == 0
     assert out_json.exists()
     assert out_md.exists()

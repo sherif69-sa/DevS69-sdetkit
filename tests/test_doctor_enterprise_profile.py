@@ -70,7 +70,13 @@ def test_doctor_enterprise_profile_respects_explicit_fail_on(tmp_path: Path, mon
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.chdir(root)
 
@@ -91,7 +97,13 @@ def test_doctor_enterprise_profile_surfaces_blockers(tmp_path: Path, monkeypatch
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.chdir(root)
 
@@ -120,7 +132,13 @@ def test_doctor_enterprise_rerun_failed_selects_only_failed_checks(
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.setattr(
         doctor,
@@ -157,7 +175,13 @@ def test_doctor_enterprise_markdown_includes_execution_section(tmp_path: Path, m
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.chdir(root)
 
@@ -249,7 +273,13 @@ def test_doctor_enterprise_rerun_high_selects_high_only(tmp_path: Path, monkeypa
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.setattr(
         doctor,
@@ -285,7 +315,13 @@ def test_doctor_enterprise_rerun_top_limits_selected_checks(tmp_path: Path, monk
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.setattr(
         doctor,
@@ -331,7 +367,13 @@ def test_doctor_enterprise_markdown_includes_profile_mode_for_rerun_high(
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.setattr(doctor, "_resolve_rerun_failed_checks", lambda **_kwargs: ["clean_tree"])
     monkeypatch.chdir(root)
@@ -353,7 +395,13 @@ def test_doctor_enterprise_next_pass_only_prints_command(tmp_path: Path, monkeyp
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.chdir(root)
 
@@ -378,7 +426,13 @@ def test_doctor_enterprise_next_pass_only_reports_no_follow_up(tmp_path: Path, m
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.chdir(root)
 
@@ -432,7 +486,13 @@ def test_doctor_enterprise_next_pass_only_json_reports_available_pass(
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.chdir(root)
 
@@ -504,7 +564,13 @@ def test_doctor_enterprise_next_pass_only_writes_out_file(tmp_path: Path, monkey
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.chdir(root)
 
@@ -531,7 +597,13 @@ def test_doctor_enterprise_next_pass_only_markdown_wraps_command(
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.chdir(root)
 
@@ -558,7 +630,13 @@ def test_doctor_enterprise_next_pass_only_markdown_no_follow_up_message(
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.chdir(root)
 
@@ -584,7 +662,13 @@ def test_doctor_enterprise_next_pass_only_can_return_exit_code_hint(
     monkeypatch.setattr(
         doctor,
         "_check_upgrade_audit",
-        lambda _root, **_kwargs: (True, "ok", [], [], {"packages_audited": 0, "actionable_packages": 0}),
+        lambda _root, **_kwargs: (
+            True,
+            "ok",
+            [],
+            [],
+            {"packages_audited": 0, "actionable_packages": 0},
+        ),
     )
     monkeypatch.chdir(root)
 

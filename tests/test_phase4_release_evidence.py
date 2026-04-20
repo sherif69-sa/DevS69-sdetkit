@@ -9,11 +9,13 @@ from scripts import check_phase4_governance_contract as contract
 def _write_baseline_docs(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "\n".join([
-            "# index",
-            "- [Versioning and support posture](versioning-and-support.md)",
-            "- [Stability levels](stability-levels.md)",
-        ])
+        "\n".join(
+            [
+                "# index",
+                "- [Versioning and support posture](versioning-and-support.md)",
+                "- [Stability levels](stability-levels.md)",
+            ]
+        )
         + "\n",
         encoding="utf-8",
     )
@@ -21,7 +23,11 @@ def _write_baseline_docs(root: Path) -> None:
         "make phase4-governance-contract\npython scripts/validate_enterprise_contracts.py\n",
         encoding="utf-8",
     )
-    for name in ("versioning-and-support.md", "stability-levels.md", "integrations-and-extension-boundary.md"):
+    for name in (
+        "versioning-and-support.md",
+        "stability-levels.md",
+        "integrations-and-extension-boundary.md",
+    ):
         (root / "docs" / name).write_text("ok\n", encoding="utf-8")
 
 
@@ -30,7 +36,9 @@ def test_release_evidence_complete_and_sorted(tmp_path: Path, monkeypatch) -> No
     monkeypatch.chdir(tmp_path)
     assert contract.main(["--format", "json", "--last-review-at", "2026-04-01"]) == 0
 
-    payload = json.loads((tmp_path / "build/phase4-governance/phase4-release-evidence.json").read_text())
+    payload = json.loads(
+        (tmp_path / "build/phase4-governance/phase4-release-evidence.json").read_text()
+    )
     assert payload["required_artifacts"] == sorted(payload["required_artifacts"])
     assert payload["discovered_artifacts"] == sorted(payload["discovered_artifacts"])
     assert payload["missing_artifacts"] == sorted(payload["missing_artifacts"])
@@ -43,7 +51,9 @@ def test_release_evidence_incomplete_when_required_missing(tmp_path: Path, monke
     monkeypatch.chdir(tmp_path)
     contract.main(["--format", "json", "--last-review-at", "2026-04-01"])
 
-    payload = json.loads((tmp_path / "build/phase4-governance/phase4-release-evidence.json").read_text())
+    payload = json.loads(
+        (tmp_path / "build/phase4-governance/phase4-release-evidence.json").read_text()
+    )
     assert payload["evidence_status"] == "incomplete"
     assert "docs/versioning-and-support.md" in payload["missing_artifacts"]
 

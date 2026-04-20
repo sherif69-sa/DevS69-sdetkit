@@ -34,7 +34,9 @@ def test_main_emits_summary_json_with_mocked_commands(tmp_path: Path, monkeypatc
     monkeypatch.setattr(sr.subprocess, "run", _fake_run)
 
     out_dir = tmp_path / "out"
-    rc = sr.main(["--root", str(tmp_path), "--out-dir", str(out_dir), "--format", "json", "--strict"])
+    rc = sr.main(
+        ["--root", str(tmp_path), "--out-dir", str(out_dir), "--format", "json", "--strict"]
+    )
 
     assert rc == 0
     payload = json.loads((out_dir / "ship-readiness-summary.json").read_text(encoding="utf-8"))

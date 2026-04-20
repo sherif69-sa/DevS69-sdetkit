@@ -1542,9 +1542,7 @@ def _format_doctor_markdown(data: dict[str, Any]) -> str:
             for blocker in blockers[:3]:
                 if not isinstance(blocker, dict):
                     continue
-                lines.append(
-                    f"  - `{blocker.get('id', '')}`: {blocker.get('summary', '')}"
-                )
+                lines.append(f"  - `{blocker.get('id', '')}`: {blocker.get('summary', '')}")
         queue = enterprise.get("optimization_queue", [])
         if isinstance(queue, list) and queue:
             lines.append("- optimization queue:")
@@ -2564,20 +2562,20 @@ def main(argv: list[str] | None = None) -> int:
     if ns.enterprise_rerun_failed and ns.enterprise_rerun_high:
         parser.error("use only one of --enterprise-rerun-failed or --enterprise-rerun-high")
     if ns.enterprise_next_pass_only and (ns.enterprise_rerun_failed or ns.enterprise_rerun_high):
-        parser.error(
-            "--enterprise-next-pass-only cannot be combined with rerun mode flags."
-        )
+        parser.error("--enterprise-next-pass-only cannot be combined with rerun mode flags.")
     if ns.enterprise_next_pass_exit_code and not ns.enterprise_next_pass_only:
         parser.error("--enterprise-next-pass-exit-code requires --enterprise-next-pass-only.")
-    if ns.enterprise_rerun_top is not None and not (ns.enterprise_rerun_failed or ns.enterprise_rerun_high):
-        parser.error("--enterprise-rerun-top requires --enterprise-rerun-failed or --enterprise-rerun-high.")
+    if ns.enterprise_rerun_top is not None and not (
+        ns.enterprise_rerun_failed or ns.enterprise_rerun_high
+    ):
+        parser.error(
+            "--enterprise-rerun-top requires --enterprise-rerun-failed or --enterprise-rerun-high."
+        )
     if ns.enterprise_rerun_top is not None and ns.enterprise_rerun_top <= 0:
         parser.error("--enterprise-rerun-top must be >= 1.")
     if ns.enterprise_rerun_failed or ns.enterprise_rerun_high:
         if ns.no_workspace:
-            parser.error(
-                "enterprise rerun modes require workspace history (omit --no-workspace)."
-            )
+            parser.error("enterprise rerun modes require workspace history (omit --no-workspace).")
         scope_name = root.name or "repo"
         rerun_severity = "high" if ns.enterprise_rerun_high else None
         failed_only = _resolve_rerun_failed_checks(
@@ -2590,7 +2588,9 @@ def main(argv: list[str] | None = None) -> int:
                 parser.error(
                     "--enterprise-rerun-high found no high-severity failed checks in latest workspace doctor run."
                 )
-            parser.error("--enterprise-rerun-failed found no failed checks in latest workspace doctor run.")
+            parser.error(
+                "--enterprise-rerun-failed found no failed checks in latest workspace doctor run."
+            )
         if ns.enterprise_rerun_top is not None:
             failed_only = failed_only[: ns.enterprise_rerun_top]
         only_set = set(failed_only)
@@ -2744,7 +2744,9 @@ def main(argv: list[str] | None = None) -> int:
     if ns.enterprise:
         data["profile"] = "enterprise"
         data["profile_mode"] = "full_scan"
-        data["rerun_top"] = int(ns.enterprise_rerun_top) if ns.enterprise_rerun_top is not None else None
+        data["rerun_top"] = (
+            int(ns.enterprise_rerun_top) if ns.enterprise_rerun_top is not None else None
+        )
         if ns.enterprise_rerun_failed:
             data["profile_mode"] = "rerun_failed"
         elif ns.enterprise_rerun_high:
@@ -3205,12 +3207,23 @@ def main(argv: list[str] | None = None) -> int:
                 if alternate_commands
                 else "`alternates: none`"
             )
-            output = first_line + "\n" + f"`reason: {next_pass_reason or 'none'}`" + "\n" + alt_line + "\n"
+            output = (
+                first_line
+                + "\n"
+                + f"`reason: {next_pass_reason or 'none'}`"
+                + "\n"
+                + alt_line
+                + "\n"
+            )
             is_json = False
         else:
             first_line = next_pass or "no follow-up pass required"
-            alt_line = "alternates: " + (" | ".join(alternate_commands) if alternate_commands else "none")
-            output = first_line + "\n" + f"reason: {next_pass_reason or 'none'}" + "\n" + alt_line + "\n"
+            alt_line = "alternates: " + (
+                " | ".join(alternate_commands) if alternate_commands else "none"
+            )
+            output = (
+                first_line + "\n" + f"reason: {next_pass_reason or 'none'}" + "\n" + alt_line + "\n"
+            )
             is_json = False
         if ns.out:
             Path(ns.out).write_text(output, encoding="utf-8")
@@ -3271,9 +3284,7 @@ def main(argv: list[str] | None = None) -> int:
                 for blocker in blockers[:3]:
                     if not isinstance(blocker, dict):
                         continue
-                    lines.append(
-                        f"- blocker {blocker.get('id')}: {blocker.get('summary', '')}"
-                    )
+                    lines.append(f"- blocker {blocker.get('id')}: {blocker.get('summary', '')}")
             queue = enterprise.get("optimization_queue", [])
             if isinstance(queue, list) and queue:
                 lines.append("- optimization_queue:")
@@ -3289,9 +3300,7 @@ def main(argv: list[str] | None = None) -> int:
                 for row in bundle[:3]:
                     if not isinstance(row, dict):
                         continue
-                    lines.append(
-                        f"  - {row.get('check_id')}: {row.get('action', '')}"
-                    )
+                    lines.append(f"  - {row.get('check_id')}: {row.get('action', '')}")
         if getattr(ns, "explain", False):
             explain = data.get("explain", {})
             if isinstance(explain, dict):

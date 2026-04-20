@@ -37,7 +37,11 @@ def main() -> int:
         accomplished.append(f"baseline_summary_exists ({summary_path})")
         payload = json.loads(summary_path.read_text(encoding="utf-8"))
         checks = payload.get("checks", []) if isinstance(payload, dict) else []
-        by_id = {str(row.get('id')): bool(row.get('ok', False)) for row in checks if isinstance(row, dict)}
+        by_id = {
+            str(row.get("id")): bool(row.get("ok", False))
+            for row in checks
+            if isinstance(row, dict)
+        }
         for check_id in REQUIRED_CHECKS:
             if by_id.get(check_id, False):
                 accomplished.append(f"required_check_ok::{check_id}")
@@ -59,7 +63,8 @@ def main() -> int:
     hard_blockers = [
         item
         for item in pending
-        if not item.startswith("optional_check_ok::") and not item.startswith("optional_check_present::")
+        if not item.startswith("optional_check_ok::")
+        and not item.startswith("optional_check_present::")
     ]
     done = not hard_blockers
 

@@ -52,7 +52,9 @@ def _write_phase5_prereqs(root: Path) -> None:
     (root / "src/sdetkit").mkdir(parents=True, exist_ok=True)
 
     (root / "docs/integrations-and-extension-boundary.md").write_text("ok\n", encoding="utf-8")
-    (root / "docs/operator-essentials.md").write_text("make phase5-ecosystem-contract\n", encoding="utf-8")
+    (root / "docs/operator-essentials.md").write_text(
+        "make phase5-ecosystem-contract\n", encoding="utf-8"
+    )
     (root / "src/sdetkit/plugin_system.py").write_text("# plugin system\n", encoding="utf-8")
     (root / "pyproject.toml").write_text("[project]\nname='x'\n", encoding="utf-8")
 
@@ -84,11 +86,17 @@ def test_phase5_ecosystem_contract_positive_path(tmp_path: Path, monkeypatch) ->
     rc = contract.main(["--format", "json"])
     assert rc == 0
 
-    payload = json.loads((tmp_path / "build/phase5-ecosystem/phase5-ecosystem-contract.json").read_text())
+    payload = json.loads(
+        (tmp_path / "build/phase5-ecosystem/phase5-ecosystem-contract.json").read_text()
+    )
     assert payload["schema_version"] == contract.SCHEMA_VERSION
     assert payload["legacy_schema_version"] == contract.LEGACY_SCHEMA_VERSION
-    assert payload["ecosystem_checks"] == sorted(payload["ecosystem_checks"], key=lambda row: row["check_id"])
-    assert payload["extension_policy"] == sorted(payload["extension_policy"], key=lambda row: row["policy_id"])
+    assert payload["ecosystem_checks"] == sorted(
+        payload["ecosystem_checks"], key=lambda row: row["check_id"]
+    )
+    assert payload["extension_policy"] == sorted(
+        payload["extension_policy"], key=lambda row: row["policy_id"]
+    )
     result = contract._build_result_payload(
         failures=[],
         ecosystem_payload=payload,
@@ -173,7 +181,9 @@ def test_phase5_main_json_result_includes_artifact_map(tmp_path: Path, monkeypat
 
 def test_phase5_cli_json_subprocess_smoke(tmp_path: Path) -> None:
     _write_phase5_prereqs(tmp_path)
-    proc = _run_phase5_subprocess(cwd=tmp_path, args=["--format", "json", "--out-dir", "build/phase5-ecosystem"])
+    proc = _run_phase5_subprocess(
+        cwd=tmp_path, args=["--format", "json", "--out-dir", "build/phase5-ecosystem"]
+    )
 
     assert proc.returncode == 0
     result = json.loads(proc.stdout)
@@ -195,7 +205,9 @@ def test_phase5_cli_subprocess_fails_with_unwritable_out_dir(tmp_path: Path) -> 
     blocked = tmp_path / "blocked-out-dir"
     blocked.write_text("not-a-directory\n", encoding="utf-8")
 
-    proc = _run_phase5_subprocess(cwd=tmp_path, args=["--format", "json", "--out-dir", str(blocked)])
+    proc = _run_phase5_subprocess(
+        cwd=tmp_path, args=["--format", "json", "--out-dir", str(blocked)]
+    )
 
     assert proc.returncode != 0
     assert proc.stderr

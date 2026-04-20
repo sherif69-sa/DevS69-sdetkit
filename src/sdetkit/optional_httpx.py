@@ -10,10 +10,7 @@ __all__ = ["load_httpx"]
 
 
 def _missing_message(feature: str) -> str:
-    return (
-        "httpx is required for "
-        f"{feature}; install optional network dependencies."
-    )
+    return f"httpx is required for {feature}; install optional network dependencies."
 
 
 def _build_missing_httpx_module(*, feature: str) -> Any:

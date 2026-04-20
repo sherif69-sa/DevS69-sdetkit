@@ -79,7 +79,9 @@ def parse_args() -> argparse.Namespace:
         )
     )
     parser.add_argument("--format", choices=("text", "json"), default="text", help="Output format.")
-    parser.add_argument("--strict", action="store_true", help="Exit non-zero when contract mismatches.")
+    parser.add_argument(
+        "--strict", action="store_true", help="Exit non-zero when contract mismatches."
+    )
     parser.add_argument(
         "--out",
         default="",
@@ -95,7 +97,9 @@ def parse_args() -> argparse.Namespace:
 
 def render_text(report: dict[str, object]) -> str:
     lines = [f"[bootstrap-contract] ok: {report['ok']}"]
-    lines.append(f"[bootstrap-contract] expected packages: {', '.join(report['expected_packages'])}")
+    lines.append(
+        f"[bootstrap-contract] expected packages: {', '.join(report['expected_packages'])}"
+    )
     if report["missing_from_requirements_test"]:
         lines.append(
             "[bootstrap-contract] missing from requirements-test.txt: "
@@ -113,7 +117,11 @@ def main() -> int:
     args = parse_args()
     repo_root = Path(getattr(args, "repo_root", ".")).resolve()
     report = build_report(repo_root)
-    rendered = json.dumps(report, indent=2, sort_keys=True) if args.format == "json" else render_text(report)
+    rendered = (
+        json.dumps(report, indent=2, sort_keys=True)
+        if args.format == "json"
+        else render_text(report)
+    )
     print(rendered)
     if args.out:
         out_path = Path(args.out)

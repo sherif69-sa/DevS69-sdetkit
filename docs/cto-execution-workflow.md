@@ -23,7 +23,7 @@ Lock the active scope and evidence sources before making additional delivery cha
 
 - blueprint: [`docs/cto-full-package-review.md`](cto-full-package-review.md)
 - control plane: [`docs/top-tier-program-dashboard.md`](top-tier-program-dashboard.md)
-- execution JSON: [`plans/top-tier-repo-execution-plan-2026-q2.json`](../plans/top-tier-repo-execution-plan-2026-q2.json)
+- execution JSON: [`plans/top-tier-repo-execution-plan-2026-q2.json`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/plans/top-tier-repo-execution-plan-2026-q2.json)
 
 ### Definition of done
 
@@ -51,7 +51,7 @@ Lock the active scope and evidence sources before making additional delivery cha
 - Evidence:
   - [Portfolio reporting recipe](portfolio-reporting-recipe.md)
   - [Portfolio aggregation schema](portfolio-aggregation-schema.md)
-  - [Top-tier reporting sample workflow](../.github/workflows/top-tier-reporting-sample.yml)
+  - [Top-tier reporting sample workflow](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/.github/workflows/top-tier-reporting-sample.yml)
 
 ## Point 4 — WS3 governance and lifecycle execution
 

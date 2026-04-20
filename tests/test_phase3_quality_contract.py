@@ -68,7 +68,9 @@ def test_phase3_quality_contract_missing_summary_fails(tmp_path: Path) -> None:
     assert rc == 1
 
 
-def test_phase3_quality_contract_missing_summary_has_lane_summary_values(tmp_path: Path, capsys) -> None:
+def test_phase3_quality_contract_missing_summary_has_lane_summary_values(
+    tmp_path: Path, capsys
+) -> None:
     rc = contract.main(["--summary", str(tmp_path / "missing.json"), "--format", "json"])
     payload = json.loads(capsys.readouterr().out)
 
@@ -131,7 +133,9 @@ def test_phase3_quality_contract_json_shape_contains_required_top_level_fields(
     assert "artifacts" in payload
 
 
-def test_phase3_quality_contract_fails_when_doctor_handoff_mismatches(tmp_path: Path, capsys) -> None:
+def test_phase3_quality_contract_fails_when_doctor_handoff_mismatches(
+    tmp_path: Path, capsys
+) -> None:
     summary = _write_summary(
         tmp_path / "phase1-baseline-summary.json",
         [{"id": "doctor", "ok": False, "rc": 1, "stdout_log": "a", "stderr_log": "b"}],
@@ -155,7 +159,10 @@ def test_phase3_quality_contract_fails_when_doctor_handoff_mismatches(tmp_path: 
     assert rc == 1
     assert payload["decision"] == "fail"
     assert payload["doctor_handoff_alignment"] == "mismatch"
-    assert payload["doctor_handoff_alignment_reason"] == "doctor_next_pass_conflicts_with_phase3_recommendation"
+    assert (
+        payload["doctor_handoff_alignment_reason"]
+        == "doctor_next_pass_conflicts_with_phase3_recommendation"
+    )
     assert "doctor handoff alignment mismatch" in payload["failures"]
     assert payload["summary"]["failed"] >= 1
 
@@ -187,7 +194,10 @@ def test_phase3_quality_contract_warn_mode_allows_doctor_mismatch(tmp_path: Path
     assert payload["decision"] == "warn"
     assert payload["doctor_handoff_alignment"] == "mismatch"
     assert payload["doctor_alignment_mode"] == "warn"
-    assert payload["doctor_handoff_alignment_reason"] == "doctor_next_pass_conflicts_with_phase3_recommendation"
+    assert (
+        payload["doctor_handoff_alignment_reason"]
+        == "doctor_next_pass_conflicts_with_phase3_recommendation"
+    )
     assert "doctor handoff alignment mismatch" not in payload["failures"]
 
 
@@ -255,7 +265,9 @@ def test_phase3_quality_contract_module_invocation_off_mode(tmp_path: Path) -> N
     assert payload["doctor_alignment_mode"] == "off"
 
 
-def test_phase3_quality_contract_text_format_includes_decision_lines(tmp_path: Path, capsys) -> None:
+def test_phase3_quality_contract_text_format_includes_decision_lines(
+    tmp_path: Path, capsys
+) -> None:
     summary = _write_summary(
         tmp_path / "phase1-baseline-summary.json",
         [{"id": "doctor", "ok": False, "rc": 1, "stdout_log": "a", "stderr_log": "b"}],
@@ -294,7 +306,9 @@ def test_phase3_quality_contract_doctor_reason_unrecognized(tmp_path: Path, caps
     assert payload["doctor_handoff_alignment_reason"] == "doctor_next_pass_reason_unrecognized"
 
 
-def test_phase3_quality_contract_doctor_reason_blockers_present_aligns(tmp_path: Path, capsys) -> None:
+def test_phase3_quality_contract_doctor_reason_blockers_present_aligns(
+    tmp_path: Path, capsys
+) -> None:
     summary = _write_summary(
         tmp_path / "phase1-baseline-summary.json",
         [{"id": "doctor", "ok": False, "rc": 1, "stdout_log": "a", "stderr_log": "b"}],
@@ -317,7 +331,9 @@ def test_phase3_quality_contract_doctor_reason_blockers_present_aligns(tmp_path:
     assert payload["doctor_handoff_alignment_reason"] == "doctor_next_pass_consistent"
 
 
-def test_phase3_quality_contract_doctor_reason_failed_checks_present_aligns(tmp_path: Path, capsys) -> None:
+def test_phase3_quality_contract_doctor_reason_failed_checks_present_aligns(
+    tmp_path: Path, capsys
+) -> None:
     summary = _write_summary(
         tmp_path / "phase1-baseline-summary.json",
         [{"id": "pytest", "ok": False, "rc": 1, "stdout_log": "a", "stderr_log": "b"}],
@@ -375,7 +391,9 @@ def test_phase3_quality_contract_module_invocation_strict_mismatch_fails(tmp_pat
     assert "doctor handoff alignment mismatch" in payload["failures"]
 
 
-def test_phase3_quality_contract_ignores_malformed_history_previous_summary(tmp_path: Path, capsys) -> None:
+def test_phase3_quality_contract_ignores_malformed_history_previous_summary(
+    tmp_path: Path, capsys
+) -> None:
     summary = _write_summary(
         tmp_path / "phase1-baseline-summary.json",
         [{"id": "doctor", "ok": True, "rc": 0, "stdout_log": "a", "stderr_log": "b"}],

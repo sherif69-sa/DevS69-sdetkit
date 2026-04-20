@@ -21,10 +21,11 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-
 def main() -> int:
     ap = argparse.ArgumentParser(description="Build top-tier reporting bundle")
-    ap.add_argument("--input", required=True, help="Normalized portfolio input file (JSON or JSONL)")
+    ap.add_argument(
+        "--input", required=True, help="Normalized portfolio input file (JSON or JSONL)"
+    )
     ap.add_argument("--out-dir", required=True, help="Output directory for generated artifacts")
     ap.add_argument("--window-start", required=True)
     ap.add_argument("--window-end", required=True)
@@ -32,7 +33,9 @@ def main() -> int:
     ap.add_argument("--schema-version", default="1.0.0")
     ap.add_argument("--program-status", default="green", choices=("green", "amber", "red"))
     ap.add_argument("--rollback-count", type=int, default=0)
-    ap.add_argument("--manifest-out", default="", help="Optional output path for bundle manifest JSON")
+    ap.add_argument(
+        "--manifest-out", default="", help="Optional output path for bundle manifest JSON"
+    )
     args = ap.parse_args()
 
     out_dir = Path(args.out_dir)
@@ -111,8 +114,14 @@ def main() -> int:
         "artifacts": {
             "portfolio_scorecard": {"path": str(portfolio_out), "sha256": _sha256(portfolio_out)},
             "kpi_weekly": {"path": str(kpi_out), "sha256": _sha256(kpi_out)},
-            "kpi_contract_check": {"path": str(kpi_contract_out), "sha256": _sha256(kpi_contract_out)},
-            "top_tier_contract_check": {"path": str(cross_contract_out), "sha256": _sha256(cross_contract_out)},
+            "kpi_contract_check": {
+                "path": str(kpi_contract_out),
+                "sha256": _sha256(kpi_contract_out),
+            },
+            "top_tier_contract_check": {
+                "path": str(cross_contract_out),
+                "sha256": _sha256(cross_contract_out),
+            },
         },
     }
 

@@ -44,11 +44,17 @@ def test_phase4_governance_contract_positive_path(tmp_path: Path, monkeypatch) -
     rc = contract.main(["--format", "json", "--last-review-at", "2026-04-01"])
     assert rc == 0
 
-    payload = json.loads((tmp_path / "build/phase4-governance/phase4-governance-contract.json").read_text())
+    payload = json.loads(
+        (tmp_path / "build/phase4-governance/phase4-governance-contract.json").read_text()
+    )
     assert payload["schema_version"] == "sdetkit.phase4_governance_contract.v2"
     assert payload["legacy_schema_version"] == "sdetkit.phase4_governance_contract.v1"
-    assert payload["governance_checks"] == sorted(payload["governance_checks"], key=lambda r: r["check_id"])
-    assert payload["policy_decisions"] == sorted(payload["policy_decisions"], key=lambda r: r["decision_id"])
+    assert payload["governance_checks"] == sorted(
+        payload["governance_checks"], key=lambda r: r["check_id"]
+    )
+    assert payload["policy_decisions"] == sorted(
+        payload["policy_decisions"], key=lambda r: r["decision_id"]
+    )
 
 
 def test_phase4_governance_contract_missing_docs_fails(tmp_path: Path, monkeypatch) -> None:
@@ -113,11 +119,27 @@ def test_phase4_validate_output_contracts_flags_unsorted_policy_decisions() -> N
             "schema_version": "sdetkit.phase4_governance_contract.v2",
             "governance_checks": [],
             "policy_decisions": [
-                {"decision_id": "z", "disposition": "accepted", "rationale_code": "audit_readiness", "impact_tier": "now"},
-                {"decision_id": "a", "disposition": "accepted", "rationale_code": "audit_readiness", "impact_tier": "now"},
+                {
+                    "decision_id": "z",
+                    "disposition": "accepted",
+                    "rationale_code": "audit_readiness",
+                    "impact_tier": "now",
+                },
+                {
+                    "decision_id": "a",
+                    "disposition": "accepted",
+                    "rationale_code": "audit_readiness",
+                    "impact_tier": "now",
+                },
             ],
-            "compatibility_contract": {"deprecation_boundaries": ["x"], "compatibility_guards": ["y"]},
-            "release_evidence_contract": {"required_artifacts": ["docs/index.md"], "retention_window_days": 10},
+            "compatibility_contract": {
+                "deprecation_boundaries": ["x"],
+                "compatibility_guards": ["y"],
+            },
+            "release_evidence_contract": {
+                "required_artifacts": ["docs/index.md"],
+                "retention_window_days": 10,
+            },
             "generated_at": "2026-04-19T00:00:00Z",
         },
         release_payload={
@@ -209,7 +231,9 @@ def test_phase4_validate_output_contracts_flags_compatibility_contract_type() ->
     assert "compatibility_contract must be an object" in failures
 
 
-def test_phase4_main_reports_malformed_governance_check_rows(tmp_path: Path, monkeypatch, capsys) -> None:
+def test_phase4_main_reports_malformed_governance_check_rows(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
     _write_baseline_docs(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -240,7 +264,10 @@ def test_phase4_main_reports_malformed_governance_check_rows(tmp_path: Path, mon
                 "deprecation_boundaries": ["notice"],
                 "compatibility_guards": ["make phase4-governance-contract"],
             },
-            "release_evidence_contract": {"required_artifacts": ["docs/index.md"], "retention_window_days": 90},
+            "release_evidence_contract": {
+                "required_artifacts": ["docs/index.md"],
+                "retention_window_days": 90,
+            },
             "generated_at": "2026-04-19T00:00:00Z",
             "ok": True,
             "checks": [],
@@ -262,9 +289,13 @@ def test_phase4_corrupt_emitted_contract_reports_schema_errors(tmp_path: Path, m
     assert contract.main(["--format", "json", "--last-review-at", "2026-04-01"]) == 0
 
     out_dir = tmp_path / "build/phase4-governance"
-    governance = json.loads((out_dir / "phase4-governance-contract.json").read_text(encoding="utf-8"))
+    governance = json.loads(
+        (out_dir / "phase4-governance-contract.json").read_text(encoding="utf-8")
+    )
     release = json.loads((out_dir / "phase4-release-evidence.json").read_text(encoding="utf-8"))
-    adherence = json.loads((out_dir / "phase4-governance-adherence.json").read_text(encoding="utf-8"))
+    adherence = json.loads(
+        (out_dir / "phase4-governance-adherence.json").read_text(encoding="utf-8")
+    )
 
     governance.pop("generated_at", None)
     governance["policy_decisions"] = "invalid"
@@ -274,7 +305,9 @@ def test_phase4_corrupt_emitted_contract_reports_schema_errors(tmp_path: Path, m
     assert "policy_decisions must be a list" in failures
 
 
-def test_phase4_governance_emits_overlay_template_and_drift_artifacts(tmp_path: Path, monkeypatch) -> None:
+def test_phase4_governance_emits_overlay_template_and_drift_artifacts(
+    tmp_path: Path, monkeypatch
+) -> None:
     _write_baseline_docs(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -282,14 +315,24 @@ def test_phase4_governance_emits_overlay_template_and_drift_artifacts(tmp_path: 
     assert rc == 0
 
     out_dir = tmp_path / "build/phase4-governance"
-    overlay = json.loads((out_dir / "phase4-compliance-overlay-pack.json").read_text(encoding="utf-8"))
-    template = json.loads((out_dir / "phase4-policy-as-code-template.json").read_text(encoding="utf-8"))
-    drift = json.loads((out_dir / "phase4-governance-drift-alerts.json").read_text(encoding="utf-8"))
+    overlay = json.loads(
+        (out_dir / "phase4-compliance-overlay-pack.json").read_text(encoding="utf-8")
+    )
+    template = json.loads(
+        (out_dir / "phase4-policy-as-code-template.json").read_text(encoding="utf-8")
+    )
+    drift = json.loads(
+        (out_dir / "phase4-governance-drift-alerts.json").read_text(encoding="utf-8")
+    )
 
     assert overlay["schema_version"] == "sdetkit.phase4_compliance_overlay_pack.v1"
-    assert [row["domain"] for row in overlay["overlays"]] == sorted([row["domain"] for row in overlay["overlays"]])
+    assert [row["domain"] for row in overlay["overlays"]] == sorted(
+        [row["domain"] for row in overlay["overlays"]]
+    )
     assert template["schema_version"] == "sdetkit.phase4_policy_as_code_template.v1"
-    assert [row["rule_id"] for row in template["rules"]] == sorted([row["rule_id"] for row in template["rules"]])
+    assert [row["rule_id"] for row in template["rules"]] == sorted(
+        [row["rule_id"] for row in template["rules"]]
+    )
     assert drift["schema_version"] == "sdetkit.phase4_governance_drift_alerts.v1"
     assert drift["alerts"] == sorted(drift["alerts"])
 
@@ -315,7 +358,9 @@ def test_phase4_drift_threshold_treats_due_only_as_healthy() -> None:
     assert drift["drift_status"] == "healthy"
 
 
-def test_phase4_end_to_end_artifacts_are_non_empty_json_objects(tmp_path: Path, monkeypatch) -> None:
+def test_phase4_end_to_end_artifacts_are_non_empty_json_objects(
+    tmp_path: Path, monkeypatch
+) -> None:
     _write_baseline_docs(tmp_path)
     monkeypatch.chdir(tmp_path)
     assert contract.main(["--format", "json", "--last-review-at", "2026-04-01"]) == 0
@@ -366,7 +411,9 @@ def test_phase4_drift_markdown_parity_with_json(tmp_path: Path, monkeypatch) -> 
     assert contract.main(["--format", "json", "--last-review-at", "2026-04-01"]) == 0
 
     out_dir = tmp_path / "build/phase4-governance"
-    drift = json.loads((out_dir / "phase4-governance-drift-alerts.json").read_text(encoding="utf-8"))
+    drift = json.loads(
+        (out_dir / "phase4-governance-drift-alerts.json").read_text(encoding="utf-8")
+    )
     md = (out_dir / "phase4-governance-drift-alerts.md").read_text(encoding="utf-8")
 
     assert f"`{drift['drift_status']}`" in md
@@ -393,19 +440,34 @@ def test_phase4_malformed_drift_config_falls_back_to_defaults(tmp_path: Path) ->
 def test_phase4_drift_threshold_cli_override(tmp_path: Path, monkeypatch) -> None:
     _write_baseline_docs(tmp_path)
     monkeypatch.chdir(tmp_path)
-    rc = contract.main(["--format", "json", "--drift-threshold", "1", "--last-review-at", "2026-04-01"])
+    rc = contract.main(
+        ["--format", "json", "--drift-threshold", "1", "--last-review-at", "2026-04-01"]
+    )
     assert rc == 0
 
-    drift = json.loads((tmp_path / "build/phase4-governance/phase4-governance-drift-alerts.json").read_text(encoding="utf-8"))
+    drift = json.loads(
+        (tmp_path / "build/phase4-governance/phase4-governance-drift-alerts.json").read_text(
+            encoding="utf-8"
+        )
+    )
     assert drift["drift_threshold"] == 1
 
 
 def test_phase4_negative_drift_threshold_is_clamped_to_zero(tmp_path: Path, monkeypatch) -> None:
     _write_baseline_docs(tmp_path)
     monkeypatch.chdir(tmp_path)
-    assert contract.main(["--format", "json", "--drift-threshold", "-1", "--last-review-at", "2026-04-01"]) == 0
+    assert (
+        contract.main(
+            ["--format", "json", "--drift-threshold", "-1", "--last-review-at", "2026-04-01"]
+        )
+        == 0
+    )
 
-    drift = json.loads((tmp_path / "build/phase4-governance/phase4-governance-drift-alerts.json").read_text(encoding="utf-8"))
+    drift = json.loads(
+        (tmp_path / "build/phase4-governance/phase4-governance-drift-alerts.json").read_text(
+            encoding="utf-8"
+        )
+    )
     assert drift["drift_threshold"] == 0
 
 

@@ -84,7 +84,11 @@ def main() -> int:
     if ns.format == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
-        print("operator-essentials-contract: OK" if payload["ok"] else "operator-essentials-contract: FAIL")
+        print(
+            "operator-essentials-contract: OK"
+            if payload["ok"]
+            else "operator-essentials-contract: FAIL"
+        )
         for check in checks:
             print(f"[{'OK' if check['ok'] else 'FAIL'}] {check['id']}")
         if failures:

@@ -7,7 +7,6 @@ import argparse
 import json
 from pathlib import Path
 
-
 _REQUIRED_PATTERNS = (
     "portfolio-scorecard-sample-{date}.json",
     "kpi-weekly-from-portfolio-{date}.json",
@@ -48,7 +47,10 @@ def main() -> int:
         "ok": not missing and not invalid_json,
         "date_tag": args.date_tag,
         "artifacts_dir": str(artifacts_dir),
-        "required": [str(artifacts_dir / pattern.format(date=args.date_tag)) for pattern in _REQUIRED_PATTERNS],
+        "required": [
+            str(artifacts_dir / pattern.format(date=args.date_tag))
+            for pattern in _REQUIRED_PATTERNS
+        ],
         "required_count": len(_REQUIRED_PATTERNS),
         "found_count": len(found),
         "missing_count": len(missing),

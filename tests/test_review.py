@@ -370,8 +370,16 @@ def test_review_operator_summary_artifact_written(tmp_path: Path) -> None:
     assert isinstance(release_payload["recommendation_engine"], dict)
     assert isinstance(release_payload["recommendation_backlog"], list)
     assert isinstance(release_payload["agent_orchestration"], list)
-    assert any(row.get("agent_id") == "release-ops-observer" for row in release_payload["agent_orchestration"] if isinstance(row, dict))
-    assert all("engine_signals" in row for row in release_payload["agent_orchestration"] if isinstance(row, dict))
+    assert any(
+        row.get("agent_id") == "release-ops-observer"
+        for row in release_payload["agent_orchestration"]
+        if isinstance(row, dict)
+    )
+    assert all(
+        "engine_signals" in row
+        for row in release_payload["agent_orchestration"]
+        if isinstance(row, dict)
+    )
     if release_payload["blocker_catalog"]:
         first_blocker = release_payload["blocker_catalog"][0]
         assert "owner_team" in first_blocker
@@ -590,9 +598,12 @@ def test_review_adaptive_database_and_ai_handoff_contract(tmp_path: Path) -> Non
         for row in payload["adaptive_database"]["execution_boost_plan"]["next_5_prompts_plan"]
     }
     assert statuses.issubset({"done", "in_progress", "pending"})
-    assert payload["adaptive_database"]["execution_boost_plan"]["implementation_summary"][
-        "total_steps"
-    ] == 5
+    assert (
+        payload["adaptive_database"]["execution_boost_plan"]["implementation_summary"][
+            "total_steps"
+        ]
+        == 5
+    )
     assert "next_step" in payload["adaptive_database"]["execution_boost_plan"]
     assert payload["adaptive_database"]["execution_boost_plan"]["next_step"]["status"] in {
         "done",
@@ -620,7 +631,9 @@ def test_review_includes_readiness_snapshot_for_repo_targets(tmp_path: Path) -> 
         encoding="utf-8",
     )
     (repo / "docs").mkdir()
-    (repo / "docs" / "index.md").write_text("gate fast -> gate release -> doctor\n", encoding="utf-8")
+    (repo / "docs" / "index.md").write_text(
+        "gate fast -> gate release -> doctor\n", encoding="utf-8"
+    )
     (repo / "tests").mkdir()
     for index in range(10):
         (repo / "tests" / f"test_seed_{index}.py").write_text("def test_ok():\n    assert True\n")
@@ -662,15 +675,24 @@ def test_review_includes_readiness_snapshot_for_repo_targets(tmp_path: Path) -> 
     assert payload["adaptive_database"]["adaptive_alignment"]["engine"] == "five_heads"
     assert payload["adaptive_database"]["scalability_posture"]["target_scenarios"] == 250
     assert "next_24h_actions" in payload["adaptive_database"]["release_readiness_contract"]
-    assert payload["adaptive_database"]["execution_boost_plan"]["next_5_prompts_plan"][0][
-        "prompt_index"
-    ] == 1
-    assert payload["adaptive_database"]["execution_boost_plan"]["next_5_prompts_plan"][4][
-        "prompt_index"
-    ] == 5
-    assert payload["adaptive_database"]["execution_boost_plan"]["implementation_summary"][
-        "total_steps"
-    ] == 5
+    assert (
+        payload["adaptive_database"]["execution_boost_plan"]["next_5_prompts_plan"][0][
+            "prompt_index"
+        ]
+        == 1
+    )
+    assert (
+        payload["adaptive_database"]["execution_boost_plan"]["next_5_prompts_plan"][4][
+            "prompt_index"
+        ]
+        == 5
+    )
+    assert (
+        payload["adaptive_database"]["execution_boost_plan"]["implementation_summary"][
+            "total_steps"
+        ]
+        == 5
+    )
     assert payload["adaptive_database"]["execution_boost_plan"]["next_step"]["prompt_index"] >= 0
 
 

@@ -38,8 +38,12 @@ def _validate(portfolio: dict[str, Any], kpi_payload: dict[str, Any]) -> dict[st
     missing = required_kpis - set(kpis)
     _expect(not missing, f"missing required KPI keys: {sorted(missing)}")
 
-    release_confidence_pass = sum(1 for row in repos if bool(row.get("release_confidence_ok", False)))
-    expected_onboarding_rate = round((release_confidence_pass / repo_count * 100), 2) if repo_count else 0.0
+    release_confidence_pass = sum(
+        1 for row in repos if bool(row.get("release_confidence_ok", False))
+    )
+    expected_onboarding_rate = (
+        round((release_confidence_pass / repo_count * 100), 2) if repo_count else 0.0
+    )
 
     actual_onboarding = _as_float(kpis["first_time_success_onboarding_rate"]["value"])
     _expect(
@@ -55,9 +59,14 @@ def _validate(portfolio: dict[str, Any], kpi_payload: dict[str, Any]) -> dict[st
     )
 
     sample_size = kpis["failed_release_gate_frequency"].get("sample_size")
-    _expect(sample_size == repo_count, f"failed_release_gate_frequency.sample_size must equal {repo_count}")
+    _expect(
+        sample_size == repo_count,
+        f"failed_release_gate_frequency.sample_size must equal {repo_count}",
+    )
 
-    evidence_window_end_values = {row.get("evidence_window_end") for row in repos if row.get("evidence_window_end")}
+    evidence_window_end_values = {
+        row.get("evidence_window_end") for row in repos if row.get("evidence_window_end")
+    }
     if evidence_window_end_values and kpi_payload.get("week_ending"):
         _expect(
             kpi_payload["week_ending"] in evidence_window_end_values,

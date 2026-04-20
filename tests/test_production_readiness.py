@@ -13,7 +13,9 @@ def test_production_readiness_summary_for_repo_has_high_score():
     assert payload["summary"]["stage"] == "production-ready"
     assert payload["summary"]["production_ready"] is True
     assert payload["summary"]["job_done_ready"] is True
-    assert payload["summary"]["main_aspects_ready_count"] == payload["summary"]["main_aspects_total"]
+    assert (
+        payload["summary"]["main_aspects_ready_count"] == payload["summary"]["main_aspects_total"]
+    )
     assert payload["summary"]["total_checks"] >= 8
     assert payload["main_aspects"]
     assert payload["category_breakdown"]

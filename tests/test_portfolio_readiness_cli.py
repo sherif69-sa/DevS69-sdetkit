@@ -41,7 +41,9 @@ def test_cli_portfolio_alias_text(tmp_path: Path, capsys) -> None:
     manifest = tmp_path / "manifest.json"
 
     ship.write_text(json.dumps({"summary": {"decision": "go", "blockers": []}}), encoding="utf-8")
-    manifest.write_text(json.dumps([{"repo": "repo-b", "ship_summary": str(ship)}]), encoding="utf-8")
+    manifest.write_text(
+        json.dumps([{"repo": "repo-b", "ship_summary": str(ship)}]), encoding="utf-8"
+    )
 
     rc = cli.main(["portfolio", "--manifest", str(manifest), "--format", "text"])
 

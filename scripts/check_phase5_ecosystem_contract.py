@@ -89,7 +89,11 @@ def _read_json(path: Path) -> dict[str, Any]:
 def _build_ecosystem_payload() -> dict[str, Any]:
     check_specs = [
         ("certification.criteria", "certification", "docs/integrations-and-extension-boundary.md"),
-        ("integration.playbook", "integration_playbook", "docs/integrations-and-extension-boundary.md"),
+        (
+            "integration.playbook",
+            "integration_playbook",
+            "docs/integrations-and-extension-boundary.md",
+        ),
         ("partner.packaging.surface", "partner_packaging", "docs/operator-essentials.md"),
         ("plugin.runtime.boundary", "plugin_reliability", "src/sdetkit/plugin_system.py"),
         ("portfolio.scorecards.source", "portfolio_scorecards", "docs/operator-essentials.md"),
@@ -140,14 +144,18 @@ def _build_ecosystem_payload() -> dict[str, Any]:
         "extension_policy": extension_policy,
         "plugin_reliability_contract": {
             "supported_extension_modes": _sorted_unique(["entry_points", "runtime_registry"]),
-            "failure_isolation_guards": _sorted_unique([
-                "plugin load errors stay non-blocking by default",
-                "per-plugin timeout and exception boundaries",
-            ]),
-            "compatibility_guards": _sorted_unique([
-                "make phase4-governance-contract",
-                "make phase5-ecosystem-contract",
-            ]),
+            "failure_isolation_guards": _sorted_unique(
+                [
+                    "plugin load errors stay non-blocking by default",
+                    "per-plugin timeout and exception boundaries",
+                ]
+            ),
+            "compatibility_guards": _sorted_unique(
+                [
+                    "make phase4-governance-contract",
+                    "make phase5-ecosystem-contract",
+                ]
+            ),
         },
         "partner_packaging_contract": {
             "required_artifacts": _sorted_unique(list(REQUIRED_PARTNER_ARTIFACTS)),
@@ -197,12 +205,16 @@ def _build_reliability(payload: dict[str, Any]) -> dict[str, Any]:
     blockers: list[str] = []
     recommended_actions: list[str] = []
 
-    failure_isolation_guards = _sorted_unique(list(plugin_contract.get("failure_isolation_guards", [])))
+    failure_isolation_guards = _sorted_unique(
+        list(plugin_contract.get("failure_isolation_guards", []))
+    )
     compatibility_guards = _sorted_unique(list(plugin_contract.get("compatibility_guards", [])))
 
     if not failure_isolation_guards or not compatibility_guards:
         blockers.append("extension_diagnostics_missing")
-        recommended_actions.append("Populate failure_isolation_guards and compatibility_guards in plugin_reliability_contract.")
+        recommended_actions.append(
+            "Populate failure_isolation_guards and compatibility_guards in plugin_reliability_contract."
+        )
 
     integration_status = "ready"
     certification_status = "ready"
@@ -214,7 +226,9 @@ def _build_reliability(payload: dict[str, Any]) -> dict[str, Any]:
         if domain == "integration_playbook" and status != "pass":
             integration_status = "partial"
             blockers.append("integration_playbook_check_failed")
-            recommended_actions.append("Update integration playbook evidence and rerun phase5 contract gate.")
+            recommended_actions.append(
+                "Update integration playbook evidence and rerun phase5 contract gate."
+            )
         if domain == "certification" and status != "pass":
             certification_status = "partial"
             blockers.append("certification_check_failed")
@@ -237,7 +251,9 @@ def _build_reliability(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _build_drift_alerts(ecosystem_payload: dict[str, Any], packaging: dict[str, Any], reliability: dict[str, Any]) -> dict[str, Any]:
+def _build_drift_alerts(
+    ecosystem_payload: dict[str, Any], packaging: dict[str, Any], reliability: dict[str, Any]
+) -> dict[str, Any]:
     alerts: list[str] = []
     drift_score = 0
 
@@ -252,12 +268,16 @@ def _build_drift_alerts(ecosystem_payload: dict[str, Any], packaging: dict[str, 
 
     missing_artifacts = list(packaging.get("missing_artifacts", []))
     if missing_artifacts:
-        alerts.append(f"partner_packaging_missing:{','.join(sorted(str(x) for x in missing_artifacts))}")
+        alerts.append(
+            f"partner_packaging_missing:{','.join(sorted(str(x) for x in missing_artifacts))}"
+        )
         drift_score += 1
 
     reliability_blockers = list(reliability.get("blockers", []))
     if reliability_blockers:
-        alerts.append(f"reliability_blockers:{','.join(sorted(str(x) for x in reliability_blockers))}")
+        alerts.append(
+            f"reliability_blockers:{','.join(sorted(str(x) for x in reliability_blockers))}"
+        )
         drift_score += 1
 
     return {
@@ -270,7 +290,9 @@ def _build_drift_alerts(ecosystem_payload: dict[str, Any], packaging: dict[str, 
     }
 
 
-def _validate_deterministic_dict_list(payload: dict[str, Any], key: str, sort_key: str) -> list[str]:
+def _validate_deterministic_dict_list(
+    payload: dict[str, Any], key: str, sort_key: str
+) -> list[str]:
     rows = payload.get(key)
     if not isinstance(rows, list):
         return [f"{key} must be a list"]
@@ -306,7 +328,9 @@ def _validate_policy_and_compatibility(ecosystem_payload: dict[str, Any]) -> lis
         if str(row.get("disposition", "")) not in ALLOWED_DISPOSITIONS:
             failures.append(f"invalid extension_policy.disposition: {row.get('policy_id')}")
         if str(row.get("rationale_code", "")) not in RATIONALE_CODES:
-            failures.append(f"missing/invalid extension_policy.rationale_code: {row.get('policy_id')}")
+            failures.append(
+                f"missing/invalid extension_policy.rationale_code: {row.get('policy_id')}"
+            )
         if str(row.get("impact_tier", "")) not in ALLOWED_IMPACT_TIERS:
             failures.append(f"missing/invalid extension_policy.impact_tier: {row.get('policy_id')}")
 
@@ -342,7 +366,9 @@ def _validate_output_contracts(
     if str(ecosystem_payload.get("schema_version", "")) != SCHEMA_VERSION:
         failures.append(f"ecosystem payload schema_version must be {SCHEMA_VERSION}")
     if str(packaging_payload.get("schema_version", "")) != PARTNER_PACKAGING_SCHEMA_VERSION:
-        failures.append(f"partner packaging schema_version must be {PARTNER_PACKAGING_SCHEMA_VERSION}")
+        failures.append(
+            f"partner packaging schema_version must be {PARTNER_PACKAGING_SCHEMA_VERSION}"
+        )
     if str(reliability_payload.get("schema_version", "")) != RELIABILITY_SCHEMA_VERSION:
         failures.append(f"reliability schema_version must be {RELIABILITY_SCHEMA_VERSION}")
     if str(drift_payload.get("schema_version", "")) != DRIFT_ALERTS_SCHEMA_VERSION:
@@ -360,8 +386,12 @@ def _validate_output_contracts(
             failures.append(f"ecosystem payload missing key: {key}")
 
     failures.extend(_validate_policy_and_compatibility(ecosystem_payload))
-    failures.extend(_validate_deterministic_dict_list(ecosystem_payload, "ecosystem_checks", "check_id"))
-    failures.extend(_validate_deterministic_dict_list(ecosystem_payload, "extension_policy", "policy_id"))
+    failures.extend(
+        _validate_deterministic_dict_list(ecosystem_payload, "ecosystem_checks", "check_id")
+    )
+    failures.extend(
+        _validate_deterministic_dict_list(ecosystem_payload, "extension_policy", "policy_id")
+    )
 
     for key in (
         "schema_version",
@@ -374,7 +404,12 @@ def _validate_output_contracts(
     ):
         if key not in packaging_payload:
             failures.append(f"partner packaging payload missing key: {key}")
-    for list_key in ("required_artifacts", "discovered_artifacts", "missing_artifacts", "support_surface"):
+    for list_key in (
+        "required_artifacts",
+        "discovered_artifacts",
+        "missing_artifacts",
+        "support_surface",
+    ):
         rows = packaging_payload.get(list_key, [])
         if (
             not isinstance(rows, list)
@@ -383,7 +418,9 @@ def _validate_output_contracts(
         ):
             failures.append(f"partner packaging {list_key} must be sorted list")
     if str(packaging_payload.get("packaging_status", "")) not in ALLOWED_PACKAGING_STATUSES:
-        failures.append(f"invalid partner packaging status: {packaging_payload.get('packaging_status')}")
+        failures.append(
+            f"invalid partner packaging status: {packaging_payload.get('packaging_status')}"
+        )
 
     for key in (
         "schema_version",
@@ -396,11 +433,20 @@ def _validate_output_contracts(
     ):
         if key not in reliability_payload:
             failures.append(f"reliability payload missing key: {key}")
-    if str(reliability_payload.get("plugin_reliability_status", "")) not in ALLOWED_PLUGIN_RELIABILITY_STATUSES:
+    if (
+        str(reliability_payload.get("plugin_reliability_status", ""))
+        not in ALLOWED_PLUGIN_RELIABILITY_STATUSES
+    ):
         failures.append("invalid plugin_reliability_status")
-    if str(reliability_payload.get("integration_playbook_status", "")) not in ALLOWED_INTEGRATION_PLAYBOOK_STATUSES:
+    if (
+        str(reliability_payload.get("integration_playbook_status", ""))
+        not in ALLOWED_INTEGRATION_PLAYBOOK_STATUSES
+    ):
         failures.append("invalid integration_playbook_status")
-    if str(reliability_payload.get("certification_readiness", "")) not in ALLOWED_CERTIFICATION_READINESS:
+    if (
+        str(reliability_payload.get("certification_readiness", ""))
+        not in ALLOWED_CERTIFICATION_READINESS
+    ):
         failures.append("invalid certification_readiness")
     for list_key in ("blockers", "recommended_actions"):
         rows = reliability_payload.get(list_key, [])
@@ -422,7 +468,11 @@ def _validate_output_contracts(
         if key not in drift_payload:
             failures.append(f"drift payload missing key: {key}")
     alerts = drift_payload.get("alerts", [])
-    if not isinstance(alerts, list) or not all(isinstance(item, str) and item.strip() for item in alerts) or alerts != sorted(alerts):
+    if (
+        not isinstance(alerts, list)
+        or not all(isinstance(item, str) and item.strip() for item in alerts)
+        or alerts != sorted(alerts)
+    ):
         failures.append("drift alerts must be sorted list")
     if str(drift_payload.get("drift_status", "")) not in ALLOWED_DRIFT_STATUSES:
         failures.append("invalid drift_status")
@@ -442,12 +492,35 @@ def _build_gate_checks(failures: list[str]) -> list[dict[str, Any]]:
         {"id": "schema_completeness", "ok": _ok(("payload missing key", "schema_version must"))},
         {
             "id": "ecosystem_policy_compatibility",
-            "ok": _ok(("plugin_reliability_contract", "partner_packaging_contract", "ecosystem_checks.", "extension_policy.")),
+            "ok": _ok(
+                (
+                    "plugin_reliability_contract",
+                    "partner_packaging_contract",
+                    "ecosystem_checks.",
+                    "extension_policy.",
+                )
+            ),
         },
         {"id": "partner_packaging_presence_schema", "ok": _ok(("partner packaging",))},
-        {"id": "reliability_presence_schema", "ok": _ok(("reliability ", "plugin_reliability_status", "integration_playbook_status", "certification_readiness"))},
-        {"id": "drift_alerts_presence_schema", "ok": _ok(("drift ", "drift_status", "drift_score", "drift_threshold"))},
-        {"id": "deterministic_ordering", "ok": _ok(("not deterministically sorted", "must be sorted list"))},
+        {
+            "id": "reliability_presence_schema",
+            "ok": _ok(
+                (
+                    "reliability ",
+                    "plugin_reliability_status",
+                    "integration_playbook_status",
+                    "certification_readiness",
+                )
+            ),
+        },
+        {
+            "id": "drift_alerts_presence_schema",
+            "ok": _ok(("drift ", "drift_status", "drift_score", "drift_threshold")),
+        },
+        {
+            "id": "deterministic_ordering",
+            "ok": _ok(("not deterministically sorted", "must be sorted list")),
+        },
         {
             "id": "reason_rationale_vocabulary_enforced",
             "ok": _ok(("reason_code", "rationale_code")),
@@ -488,7 +561,9 @@ def main(argv: list[str] | None = None) -> int:
     ecosystem_payload = _build_ecosystem_payload()
     partner_packaging_payload = _build_partner_packaging(ecosystem_payload)
     reliability_payload = _build_reliability(ecosystem_payload)
-    drift_payload = _build_drift_alerts(ecosystem_payload, partner_packaging_payload, reliability_payload)
+    drift_payload = _build_drift_alerts(
+        ecosystem_payload, partner_packaging_payload, reliability_payload
+    )
 
     failures = _validate_output_contracts(
         ecosystem_payload,
@@ -538,7 +613,9 @@ def main(argv: list[str] | None = None) -> int:
     if ns.format == "json":
         print(json.dumps(result, indent=2, sort_keys=True))
     else:
-        print("phase5-ecosystem-contract: OK" if result["ok"] else "phase5-ecosystem-contract: FAIL")
+        print(
+            "phase5-ecosystem-contract: OK" if result["ok"] else "phase5-ecosystem-contract: FAIL"
+        )
         for row in result["checks"]:
             print(f"[{'OK' if row.get('ok') else 'FAIL'}] {row.get('id')}")
         for failure in failures:

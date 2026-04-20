@@ -19,6 +19,7 @@ from .netclient import (
     SdetHttpClient,
     _link_next_url,
 )
+from .optional_httpx import load_httpx
 from .security import (
     SecurityError,
     default_http_timeout,
@@ -28,7 +29,6 @@ from .security import (
     redact_url,
     safe_path,
 )
-from .optional_httpx import load_httpx
 
 httpx = load_httpx(feature="sdetkit apiget")
 

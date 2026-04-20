@@ -7,7 +7,7 @@ import io
 import json
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -685,10 +685,16 @@ def run_review(
         supporting.append({"kind": "readiness_score", "value": readiness_score})
         supporting.append({"kind": "readiness_tier", "value": readiness_tier})
         supporting.append(
-            {"kind": "readiness_operational_tier", "value": str(readiness_payload.get("operational_tier", "needs-work"))}
+            {
+                "kind": "readiness_operational_tier",
+                "value": str(readiness_payload.get("operational_tier", "needs-work")),
+            }
         )
         supporting.append(
-            {"kind": "readiness_top_tier_ready", "value": bool(readiness_payload.get("top_tier_ready", False))}
+            {
+                "kind": "readiness_top_tier_ready",
+                "value": bool(readiness_payload.get("top_tier_ready", False)),
+            }
         )
         supporting.append(
             {
@@ -697,7 +703,10 @@ def run_review(
             }
         )
         supporting.append(
-            {"kind": "readiness_failed_checks", "value": list(readiness_payload.get("failed_checks", []))}
+            {
+                "kind": "readiness_failed_checks",
+                "value": list(readiness_payload.get("failed_checks", [])),
+            }
         )
         supporting.append(
             {
@@ -707,7 +716,9 @@ def run_review(
         )
 
         if readiness_score >= 90.0:
-            healthy_controls.append("production-readiness scorecard indicates strong launch posture")
+            healthy_controls.append(
+                "production-readiness scorecard indicates strong launch posture"
+            )
         else:
             findings.append(
                 {
@@ -727,7 +738,9 @@ def run_review(
                     continue
                 prioritized_actions.append(
                     {
-                        "tier": str(action.get("lane", "now" if readiness_score < 75.0 else "next")),
+                        "tier": str(
+                            action.get("lane", "now" if readiness_score < 75.0 else "next")
+                        ),
                         "priority": int(action.get("priority", 72 - idx)),
                         "action": str(action.get("action", "")),
                     }
@@ -1305,9 +1318,11 @@ def run_review(
         and str(item.get("action", "")).strip()
     ][:8]
     release_ready_now = len(release_blockers) == 0
-    generated_at = datetime.now(timezone.utc)
+    generated_at = datetime.now(UTC)
     generated_at_utc = generated_at.replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    next_review_due = generated_at + (timedelta(hours=72) if release_ready_now else timedelta(hours=24))
+    next_review_due = generated_at + (
+        timedelta(hours=72) if release_ready_now else timedelta(hours=24)
+    )
     next_review_due_utc = next_review_due.replace(microsecond=0).isoformat().replace("+00:00", "Z")
     contract_material = {
         "gate_decision": "ship" if release_ready_now else "hold",
@@ -1340,7 +1355,8 @@ def run_review(
     release_trend = {
         "has_previous_contract": bool(previous_release_contract),
         "previous_gate_decision": prev_gate_decision,
-        "decision_changed": prev_gate_decision not in {"unknown", "ship" if release_ready_now else "hold"},
+        "decision_changed": prev_gate_decision
+        not in {"unknown", "ship" if release_ready_now else "hold"},
         "previous_blockers_count": prev_blockers_count,
         "current_blockers_count": len(release_blockers),
         "blockers_delta": len(release_blockers) - prev_blockers_count,
@@ -1354,9 +1370,23 @@ def run_review(
     )
     release_risk_score = min(100, int((len(release_blockers) * 25) + (high_priority_findings * 10)))
     release_risk_band = (
-        "critical" if release_risk_score >= 80 else "high" if release_risk_score >= 55 else "medium" if release_risk_score >= 30 else "low"
+        "critical"
+        if release_risk_score >= 80
+        else "high"
+        if release_risk_score >= 55
+        else "medium"
+        if release_risk_score >= 30
+        else "low"
     )
-    sla_review_hours = 8 if release_risk_band == "critical" else 24 if release_risk_band == "high" else 48 if release_risk_band == "medium" else 72
+    sla_review_hours = (
+        8
+        if release_risk_band == "critical"
+        else 24
+        if release_risk_band == "high"
+        else 48
+        if release_risk_band == "medium"
+        else 72
+    )
     recommendation_engine = {
         "now": next_24h_actions[:5],
         "next_72h": next_72h_actions[:8],
@@ -1384,7 +1414,8 @@ def run_review(
             (
                 row
                 for row in blocker_catalog
-                if isinstance(row, dict) and str(row.get("next_action", "")).strip() == normalized_action
+                if isinstance(row, dict)
+                and str(row.get("next_action", "")).strip() == normalized_action
             ),
             {},
         )
@@ -1397,7 +1428,9 @@ def run_review(
         impact = (
             85
             if release_risk_band in {"critical", "high"}
-            else 70 if release_risk_band == "medium" else 55
+            else 70
+            if release_risk_band == "medium"
+            else 55
         )
         effort = 3 if len(normalized_action) < 80 else 5
         priority_index = round((impact + urgency) / max(effort, 1), 2)
@@ -1457,7 +1490,11 @@ def run_review(
                 ],
             }
         )
-    if any(str(item.get("id", "")).startswith("review:doctor") for item in payload.get("findings", []) if isinstance(item, dict)):
+    if any(
+        str(item.get("id", "")).startswith("review:doctor")
+        for item in payload.get("findings", [])
+        if isinstance(item, dict)
+    ):
         agent_orchestration.append(
             {
                 "agent_id": "platform-quality-agent",
@@ -1505,7 +1542,9 @@ def run_review(
     )
     detected_scenarios = int(readiness_scenario_snapshot.get("detected_scenarios", 0))
     target_scenarios = int(readiness_scenario_snapshot.get("target_scenarios", 250))
-    scenario_runway_ratio = round((detected_scenarios / target_scenarios), 2) if target_scenarios else 0.0
+    scenario_runway_ratio = (
+        round((detected_scenarios / target_scenarios), 2) if target_scenarios else 0.0
+    )
     readiness_failed_checks = next(
         (
             list(row.get("value", []))
@@ -1641,11 +1680,15 @@ def run_review(
         prompt_index = int(step.get("prompt_index", 0))
         step["implementation_status"] = step_statuses.get(prompt_index, "pending")
     implementation_summary = {
-        "completed_steps": sum(1 for step in next_5_prompts_plan if step["implementation_status"] == "done"),
+        "completed_steps": sum(
+            1 for step in next_5_prompts_plan if step["implementation_status"] == "done"
+        ),
         "in_progress_steps": sum(
             1 for step in next_5_prompts_plan if step["implementation_status"] == "in_progress"
         ),
-        "pending_steps": sum(1 for step in next_5_prompts_plan if step["implementation_status"] == "pending"),
+        "pending_steps": sum(
+            1 for step in next_5_prompts_plan if step["implementation_status"] == "pending"
+        ),
         "total_steps": len(next_5_prompts_plan),
     }
     next_step = next(
@@ -1686,7 +1729,9 @@ def run_review(
         },
         "execution_boost_plan": {
             "next_5_prompts_plan": next_5_prompts_plan,
-            "copy_ready_prompts": [str(step.get("final_prompt", "")) for step in next_5_prompts_plan],
+            "copy_ready_prompts": [
+                str(step.get("final_prompt", "")) for step in next_5_prompts_plan
+            ],
             "implementation_summary": implementation_summary,
             "next_step": next_step,
             "autostart_lane": autostart_lane,
@@ -1714,7 +1759,8 @@ def run_review(
                 (
                     str(row.get("value", "needs-work"))
                     for row in supporting
-                    if isinstance(row, dict) and str(row.get("kind")) == "readiness_operational_tier"
+                    if isinstance(row, dict)
+                    and str(row.get("kind")) == "readiness_operational_tier"
                 ),
                 "needs-work",
             ),
@@ -1746,7 +1792,8 @@ def run_review(
                 (
                     dict(row.get("value", {}))
                     for row in supporting
-                    if isinstance(row, dict) and str(row.get("kind")) == "readiness_scenario_capacity"
+                    if isinstance(row, dict)
+                    and str(row.get("kind")) == "readiness_scenario_capacity"
                 ),
                 {
                     "target_scenarios": 250,
@@ -1766,7 +1813,8 @@ def run_review(
                 (
                     str(row.get("value", {}).get("status", "needs-expansion"))
                     for row in supporting
-                    if isinstance(row, dict) and str(row.get("kind")) == "readiness_scenario_capacity"
+                    if isinstance(row, dict)
+                    and str(row.get("kind")) == "readiness_scenario_capacity"
                 ),
                 "needs-expansion",
             ),
@@ -1804,7 +1852,9 @@ def run_review(
             "target_scenarios": target_scenarios,
             "detected_scenarios": detected_scenarios,
             "runway_ratio": scenario_runway_ratio,
-            "scale_mode": "top-tier-ready" if scenario_runway_ratio >= 1.0 else "expansion-required",
+            "scale_mode": "top-tier-ready"
+            if scenario_runway_ratio >= 1.0
+            else "expansion-required",
         },
         "release_readiness_contract": {
             "contract_id": contract_id,
@@ -1890,17 +1940,23 @@ def run_review(
         encoding="utf-8",
     )
     release_readiness_json_path.write_text(
-        json.dumps(payload["adaptive_database"]["release_readiness_contract"], sort_keys=True, indent=2)
+        json.dumps(
+            payload["adaptive_database"]["release_readiness_contract"], sort_keys=True, indent=2
+        )
         + "\n",
         encoding="utf-8",
     )
     release_readiness_md_path.write_text(
-        _render_release_readiness_markdown(payload["adaptive_database"]["release_readiness_contract"]),
+        _render_release_readiness_markdown(
+            payload["adaptive_database"]["release_readiness_contract"]
+        ),
         encoding="utf-8",
     )
     recommendation_backlog_json_path.write_text(
         json.dumps(
-            payload["adaptive_database"]["release_readiness_contract"].get("recommendation_backlog", []),
+            payload["adaptive_database"]["release_readiness_contract"].get(
+                "recommendation_backlog", []
+            ),
             sort_keys=True,
             indent=2,
         )

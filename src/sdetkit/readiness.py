@@ -288,7 +288,9 @@ def build_readiness_report(repo_root: Path) -> dict[str, object]:
     tier = "excellent" if score >= 90 else "strong" if score >= 75 else "needs-work"
     achievement_level = "gold" if score >= 90 else "silver" if score >= 75 else "bronze"
 
-    failing = sorted((check for check in checks if not check["passed"]), key=lambda c: -int(c["weight"]))
+    failing = sorted(
+        (check for check in checks if not check["passed"]), key=lambda c: -int(c["weight"])
+    )
     adaptive_actions = [_adaptive_action_for_failure(check) for check in failing]
     scenario_capacity = _scan_test_scenario_capacity(repo_root)
     scenario_action = _adaptive_scenario_action(scenario_capacity)

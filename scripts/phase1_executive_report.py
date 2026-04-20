@@ -5,13 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -20,7 +20,12 @@ def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def build_report(finish: dict[str, Any], gate: dict[str, Any], blockers: dict[str, Any], telemetry: dict[str, Any]) -> dict[str, Any]:
+def build_report(
+    finish: dict[str, Any],
+    gate: dict[str, Any],
+    blockers: dict[str, Any],
+    telemetry: dict[str, Any],
+) -> dict[str, Any]:
     rows = blockers.get("rows", []) if isinstance(blockers, dict) else []
     if not isinstance(rows, list):
         rows = []
@@ -82,7 +87,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--finish", default="build/phase1-baseline/phase1-finish-signal.json")
     parser.add_argument("--gate", default="build/phase1-baseline/phase1-gate-phase2.json")
     parser.add_argument("--blockers", default="build/phase1-baseline/phase1-blocker-register.json")
-    parser.add_argument("--telemetry", default="build/phase1-baseline/phase1-telemetry-summary.json")
+    parser.add_argument(
+        "--telemetry", default="build/phase1-baseline/phase1-telemetry-summary.json"
+    )
     parser.add_argument("--out-json", default="build/phase1-baseline/phase1-executive-report.json")
     parser.add_argument("--out-md", default="build/phase1-baseline/phase1-executive-report.md")
     parser.add_argument("--format", choices=["text", "json"], default="text")

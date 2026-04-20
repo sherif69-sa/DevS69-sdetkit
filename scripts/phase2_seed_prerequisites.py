@@ -7,6 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
+
 def _write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -23,8 +24,6 @@ def _write_board(path: Path, title: str) -> None:
         "- [ ] item-5",
     ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
-
 
 
 def _phase1_baseline_seed() -> dict:
@@ -44,6 +43,7 @@ def _phase1_baseline_seed() -> dict:
         ],
     }
 
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Seed minimal prerequisites for phase2 workflows.")
     parser.add_argument("--root", default=".")
@@ -55,7 +55,9 @@ def main(argv: list[str] | None = None) -> int:
         root / "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json",
         {"summary": {"activation_score": 99, "strict_pass": True}, "checks": [{"id": "seed"}]},
     )
-    _write_board(root / "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md", "Phase2 backlog")
+    _write_board(
+        root / "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md", "Phase2 backlog"
+    )
 
     # phase2 hardening prerequisites
     _write_json(
@@ -77,7 +79,9 @@ def main(argv: list[str] | None = None) -> int:
         "Phase3 preplan board",
     )
 
-    _write_json(root / "build/phase1-baseline/phase1-baseline-summary.json", _phase1_baseline_seed())
+    _write_json(
+        root / "build/phase1-baseline/phase1-baseline-summary.json", _phase1_baseline_seed()
+    )
 
     print(
         json.dumps(

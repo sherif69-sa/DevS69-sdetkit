@@ -4,8 +4,8 @@ from pathlib import Path
 
 
 def test_phase3_operational_workflow_wired() -> None:
-    workflow = Path('.github/workflows/phase3-quality-contract.yml')
-    text = workflow.read_text(encoding='utf-8')
+    workflow = Path(".github/workflows/phase3-quality-contract.yml")
+    text = workflow.read_text(encoding="utf-8")
 
     assert "name: phase3-quality-contract" in text
     assert "make phase3-do-it" in text

@@ -1,6 +1,6 @@
 # Workflow Consolidation Map (P0.2)
 
-Status: Active proposal (v1)  
+Status: Active proposal (v1)
 Date: 2026-04-16
 
 ## Objective

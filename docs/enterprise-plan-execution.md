@@ -1,6 +1,6 @@
 # Enterprise Plan Execution Tracker
 
-Date started: 2026-04-16  
+Date started: 2026-04-16
 Execution mode: incremental delivery (one step per prompt: `next`)
 
 ## Operating agreement

@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 from sdetkit import doctor
-
 from tests.doctor_test_support import stub_enterprise_env
 
 
@@ -51,7 +50,9 @@ def test_next_pass_json_contract_with_follow_up(tmp_path: Path, monkeypatch, cap
     assert payload["next_pass_command"] == doctor.ENTERPRISE_RERUN_HIGH_COMMAND
 
 
-def test_next_pass_exit_code_flag_returns_zero_without_follow_up(tmp_path: Path, monkeypatch, capsys):
+def test_next_pass_exit_code_flag_returns_zero_without_follow_up(
+    tmp_path: Path, monkeypatch, capsys
+):
     root = tmp_path / "repo"
     root.mkdir()
     (root / "pyproject.toml").write_text("[project]\nname='x'\nversion='0.1.0'\n", encoding="utf-8")

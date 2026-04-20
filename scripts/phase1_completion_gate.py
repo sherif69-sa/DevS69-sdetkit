@@ -87,7 +87,9 @@ def main() -> int:
             if unknown_required:
                 print(f"- missing required checks: {', '.join(unknown_required)}")
             if blocked_nonrequired:
-                print(f"- blocked by non-allowlisted checks: {', '.join(sorted(blocked_nonrequired))}")
+                print(
+                    f"- blocked by non-allowlisted checks: {', '.join(sorted(blocked_nonrequired))}"
+                )
 
     return 0 if ok else 1
 

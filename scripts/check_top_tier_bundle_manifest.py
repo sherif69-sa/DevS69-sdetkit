@@ -9,7 +9,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-
 _REQUIRED_ARTIFACT_KEYS = (
     "portfolio_scorecard",
     "kpi_weekly",

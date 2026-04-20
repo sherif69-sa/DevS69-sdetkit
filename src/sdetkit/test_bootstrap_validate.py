@@ -53,7 +53,11 @@ def main() -> int:
     report = build_test_bootstrap_report()
     ok = bool(report["ok"])
 
-    rendered = json.dumps(report, indent=2, sort_keys=True) if args.format == "json" else render_text(report)
+    rendered = (
+        json.dumps(report, indent=2, sort_keys=True)
+        if args.format == "json"
+        else render_text(report)
+    )
     print(rendered)
     if args.out:
         out_path = Path(args.out)

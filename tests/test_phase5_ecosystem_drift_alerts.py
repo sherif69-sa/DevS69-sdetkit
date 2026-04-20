@@ -115,7 +115,10 @@ def test_phase5_drift_alerts_schema_version_and_numeric_types_fail() -> None:
     )
 
     assert f"ecosystem payload schema_version must be {contract.SCHEMA_VERSION}" in failures
-    assert f"partner packaging schema_version must be {contract.PARTNER_PACKAGING_SCHEMA_VERSION}" in failures
+    assert (
+        f"partner packaging schema_version must be {contract.PARTNER_PACKAGING_SCHEMA_VERSION}"
+        in failures
+    )
     assert f"reliability schema_version must be {contract.RELIABILITY_SCHEMA_VERSION}" in failures
     assert f"drift schema_version must be {contract.DRIFT_ALERTS_SCHEMA_VERSION}" in failures
     assert "drift_score must be int" in failures

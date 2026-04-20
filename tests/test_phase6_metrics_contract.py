@@ -37,9 +37,13 @@ def _write_phase6_prereqs(root: Path) -> None:
     (root / "build/phase1-baseline").mkdir(parents=True, exist_ok=True)
     (root / "build/phase3-quality").mkdir(parents=True, exist_ok=True)
     (root / "build/phase5-ecosystem").mkdir(parents=True, exist_ok=True)
-    (root / "build/phase1-baseline/phase1-baseline-summary.json").write_text("{}\n", encoding="utf-8")
+    (root / "build/phase1-baseline/phase1-baseline-summary.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
     (root / "build/phase3-quality/phase3-trend-delta.json").write_text("{}\n", encoding="utf-8")
-    (root / "build/phase5-ecosystem/phase5-ecosystem-contract.json").write_text("{}\n", encoding="utf-8")
+    (root / "build/phase5-ecosystem/phase5-ecosystem-contract.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
 
 
 def _run_phase6_subprocess(*, cwd: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
@@ -61,21 +65,37 @@ def phase6_workspace(tmp_path: Path, monkeypatch) -> Path:
 
 
 def test_phase6_metrics_contract_positive_path(phase6_workspace: Path, capsys) -> None:
-    tmp_path = phase6_workspace
 
     rc = contract.main(["--format", "json"])
     result = json.loads(capsys.readouterr().out)
 
     assert rc == 0
     assert result["ok"] is True
-    payload = json.loads((tmp_path / "build/phase6-metrics/phase6-metrics-contract.json").read_text(encoding="utf-8"))
+    payload = json.loads(
+        (phase6_workspace / "build/phase6-metrics/phase6-metrics-contract.json").read_text(
+            encoding="utf-8"
+        )
+    )
     assert payload["schema_version"] == contract.SCHEMA_VERSION
-    assert payload["metric_snapshots"] == sorted(payload["metric_snapshots"], key=lambda row: row["metric_id"])
-    assert payload["scorecard_policies"] == sorted(payload["scorecard_policies"], key=lambda row: row["policy_id"])
+    assert payload["metric_snapshots"] == sorted(
+        payload["metric_snapshots"], key=lambda row: row["metric_id"]
+    )
+    assert payload["scorecard_policies"] == sorted(
+        payload["scorecard_policies"], key=lambda row: row["policy_id"]
+    )
 
 
 def test_phase6_legacy_cli_args_are_accepted(phase6_workspace: Path) -> None:
-    rc = contract.main(["--format", "json", "--docs-index", "docs/index.md", "--operator-essentials", "docs/operator-essentials.md"])
+    rc = contract.main(
+        [
+            "--format",
+            "json",
+            "--docs-index",
+            "docs/index.md",
+            "--operator-essentials",
+            "docs/operator-essentials.md",
+        ]
+    )
     assert rc == 0
 
 
@@ -125,8 +145,15 @@ def test_phase6_missing_required_contract_keys_fail() -> None:
         {
             "metric_snapshots": [],
             "scorecard_policies": [],
-            "metrics_contract": {"required_kpis": [], "freshness_sla_days": 0, "linkage_guards": []},
-            "commercialization_contract": {"required_evidence_surfaces": [], "reporting_audience": []},
+            "metrics_contract": {
+                "required_kpis": [],
+                "freshness_sla_days": 0,
+                "linkage_guards": [],
+            },
+            "commercialization_contract": {
+                "required_evidence_surfaces": [],
+                "reporting_audience": [],
+            },
         }
     )
     assert "metrics_contract.required_kpis missing/empty" in failures
@@ -266,7 +293,6 @@ def test_phase6_main_fails_when_emitted_artifact_is_unreadable(
     corrupt_name: str,
     expected_gate_id: str,
 ) -> None:
-    tmp_path = phase6_workspace
 
     original_write_json = contract._write_json
 
@@ -286,7 +312,6 @@ def test_phase6_main_fails_when_emitted_artifact_is_unreadable(
 
 
 def test_phase6_main_positive_path_has_all_gate_checks_true(phase6_workspace: Path, capsys) -> None:
-    tmp_path = phase6_workspace
 
     rc = contract.main(["--format", "json"])
     result = json.loads(capsys.readouterr().out)

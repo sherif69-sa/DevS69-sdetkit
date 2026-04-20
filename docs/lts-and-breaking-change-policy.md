@@ -1,6 +1,6 @@
 # Long-Term Support (LTS) & Breaking-Change Policy (P2.3)
 
-Status: Active policy (v1)  
+Status: Active policy (v1)
 Effective date: 2026-04-16
 
 ## Objective

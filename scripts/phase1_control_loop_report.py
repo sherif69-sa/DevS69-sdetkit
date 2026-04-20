@@ -5,13 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -123,10 +123,18 @@ def _to_markdown(payload: dict[str, Any]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Build Phase 1 control loop report.")
     parser.add_argument("--plan", default="plans/strategic-execution-model-2026.json")
-    parser.add_argument("--baseline-summary", default="build/phase1-baseline/phase1-baseline-summary.json")
-    parser.add_argument("--dashboard", default="build/phase1-baseline/phase1-completion-dashboard.json")
-    parser.add_argument("--weekly-pack", default="build/phase1-baseline/weekly-pack/phase1-weekly-pack.json")
-    parser.add_argument("--out-json", default="build/phase1-baseline/phase1-control-loop-report.json")
+    parser.add_argument(
+        "--baseline-summary", default="build/phase1-baseline/phase1-baseline-summary.json"
+    )
+    parser.add_argument(
+        "--dashboard", default="build/phase1-baseline/phase1-completion-dashboard.json"
+    )
+    parser.add_argument(
+        "--weekly-pack", default="build/phase1-baseline/weekly-pack/phase1-weekly-pack.json"
+    )
+    parser.add_argument(
+        "--out-json", default="build/phase1-baseline/phase1-control-loop-report.json"
+    )
     parser.add_argument("--out-md", default="build/phase1-baseline/phase1-control-loop-report.md")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args(argv)

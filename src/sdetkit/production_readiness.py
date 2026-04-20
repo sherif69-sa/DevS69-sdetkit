@@ -195,7 +195,9 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
     stage = (
         "production-ready"
         if score >= 90
-        else "stabilizing" if score >= 75 else "foundation-building"
+        else "stabilizing"
+        if score >= 75
+        else "foundation-building"
     )
     category_breakdown = _category_progress(checks)
     main_aspects = _main_aspect_readiness(checks)
@@ -280,7 +282,15 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         status = "\u2705 pass" if c["passed"] else "\u274c fail"
         lines.append(f"| `{c['check_id']}` | {status} | {c['weight']} | {c['evidence']} |")
 
-    lines.extend(["", "## Category progress", "", "| Category | Score | Passed | Weight |", "|---|---:|---:|---:|"])
+    lines.extend(
+        [
+            "",
+            "## Category progress",
+            "",
+            "| Category | Score | Passed | Weight |",
+            "|---|---:|---:|---:|",
+        ]
+    )
     for category in payload.get("category_breakdown", []):
         lines.append(
             "| `{}` | {}% | {}/{} | {}/{} |".format(
@@ -293,7 +303,15 @@ def _render_markdown(payload: dict[str, Any]) -> str:
             )
         )
 
-    lines.extend(["", "## Main aspects readiness", "", "| Main aspect | Ready | Score | Passed checks |", "|---|---|---:|---:|"])
+    lines.extend(
+        [
+            "",
+            "## Main aspects readiness",
+            "",
+            "| Main aspect | Ready | Score | Passed checks |",
+            "|---|---|---:|---:|",
+        ]
+    )
     for aspect in payload.get("main_aspects", []):
         ready = "\u2705 ready" if aspect["ready"] else "\u274c gap"
         lines.append(

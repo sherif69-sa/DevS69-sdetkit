@@ -5,13 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _load_json(path: Path, default: Any) -> Any:
@@ -89,8 +89,12 @@ def summarize(history: list[dict[str, Any]]) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Update Phase 1 telemetry history.")
     parser.add_argument("--run-json", default="build/phase1-baseline/phase1-run-all.json")
-    parser.add_argument("--history-json", default="build/phase1-baseline/phase1-telemetry-history.json")
-    parser.add_argument("--summary-json", default="build/phase1-baseline/phase1-telemetry-summary.json")
+    parser.add_argument(
+        "--history-json", default="build/phase1-baseline/phase1-telemetry-history.json"
+    )
+    parser.add_argument(
+        "--summary-json", default="build/phase1-baseline/phase1-telemetry-summary.json"
+    )
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args(argv)
 
@@ -125,7 +129,9 @@ def main(argv: list[str] | None = None) -> int:
     }
     summary_path = Path(args.summary_json)
     summary_path.parent.mkdir(parents=True, exist_ok=True)
-    summary_path.write_text(json.dumps(summary_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    summary_path.write_text(
+        json.dumps(summary_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
     if args.format == "json":
         print(json.dumps(summary_payload, indent=2, sort_keys=True))

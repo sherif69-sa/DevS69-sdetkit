@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from importlib.util import module_from_spec, spec_from_file_location
 import json
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 
@@ -17,7 +17,9 @@ def _load_module():
 def test_alignment_checks_include_six_phase_and_intelligence_requirements() -> None:
     mod = _load_module()
 
-    scenario_db = {"summary": {"total_scenarios": 3200, "kinds": {"adaptive_reviewer_matrix": 7560}}}
+    scenario_db = {
+        "summary": {"total_scenarios": 3200, "kinds": {"adaptive_reviewer_matrix": 7560}}
+    }
     plan_payload = {"phases": ["p1", "p2", "p3", "p4", "p5", "p6"]}
 
     payload = {"adaptive_database": {"release_readiness_contract": {"recommendation_backlog": []}}}
@@ -31,7 +33,9 @@ def test_alignment_checks_include_six_phase_and_intelligence_requirements() -> N
         "warn_only_checks": [],
     }
 
-    checks = mod._run_alignment_checks(payload, scenario, {"hint_count": 1}, scenario_db, plan_payload)
+    checks = mod._run_alignment_checks(
+        payload, scenario, {"hint_count": 1}, scenario_db, plan_payload
+    )
     by_name = {row["check"]: row for row in checks}
 
     assert by_name["scenario_database_minimum_coverage"]["passed"] is True
@@ -41,7 +45,9 @@ def test_alignment_checks_include_six_phase_and_intelligence_requirements() -> N
 
 def test_alignment_check_accepts_alternate_signal_keys() -> None:
     mod = _load_module()
-    scenario_db = {"summary": {"total_scenarios": 3200, "kinds": {"adaptive_reviewer_matrix": 7560}}}
+    scenario_db = {
+        "summary": {"total_scenarios": 3200, "kinds": {"adaptive_reviewer_matrix": 7560}}
+    }
     plan_payload = {"phases": ["p1", "p2", "p3", "p4", "p5", "p6"]}
     payload = {
         "adaptive_database": {
@@ -64,7 +70,9 @@ def test_alignment_check_accepts_alternate_signal_keys() -> None:
         "scenario_minimum": 3000,
         "warn_only_checks": [],
     }
-    checks = mod._run_alignment_checks(payload, scenario, {"hint_count": 1}, scenario_db, plan_payload)
+    checks = mod._run_alignment_checks(
+        payload, scenario, {"hint_count": 1}, scenario_db, plan_payload
+    )
     by_name = {row["check"]: row for row in checks}
     assert by_name["agent_entries_include_engine_signals"]["passed"] is True
 

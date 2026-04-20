@@ -33,7 +33,9 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def retire_phase1_plan(status_json: Path, plan_json: Path, archive_dir: Path, flow_manifest: Path) -> dict[str, Any]:
+def retire_phase1_plan(
+    status_json: Path, plan_json: Path, archive_dir: Path, flow_manifest: Path
+) -> dict[str, Any]:
     closeout = closeout_phase1(status_json, plan_json, archive_dir)
     if not closeout.get("ok", False):
         return {

@@ -95,7 +95,9 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def _check_row(*, check_id: str, ok: bool, evidence_refs: list[str], policy_domain: str) -> dict[str, Any]:
+def _check_row(
+    *, check_id: str, ok: bool, evidence_refs: list[str], policy_domain: str
+) -> dict[str, Any]:
     return {
         "check_id": check_id,
         "status": "pass" if ok else "fail",
@@ -192,7 +194,9 @@ def _build_governance_payload(ns: argparse.Namespace) -> dict[str, Any]:
             "make phase4-governance-contract",
         ],
     }
-    compatibility_contract["supported_tiers"] = _sorted_unique(compatibility_contract["supported_tiers"])
+    compatibility_contract["supported_tiers"] = _sorted_unique(
+        compatibility_contract["supported_tiers"]
+    )
     compatibility_contract["deprecation_boundaries"] = _sorted_unique(
         compatibility_contract["deprecation_boundaries"]
     )
@@ -356,9 +360,13 @@ def _validate_policy_and_compatibility(
         if str(row.get("disposition", "")) not in ALLOWED_DECISION_DISPOSITIONS:
             failures.append(f"invalid policy_decisions.disposition: {row.get('decision_id')}")
         if str(row.get("rationale_code", "")) not in RATIONALE_CODES:
-            failures.append(f"missing/invalid policy_decisions.rationale_code: {row.get('decision_id')}")
+            failures.append(
+                f"missing/invalid policy_decisions.rationale_code: {row.get('decision_id')}"
+            )
         if str(row.get("impact_tier", "")) not in ALLOWED_IMPACT_TIERS:
-            failures.append(f"missing/invalid policy_decisions.impact_tier: {row.get('decision_id')}")
+            failures.append(
+                f"missing/invalid policy_decisions.impact_tier: {row.get('decision_id')}"
+            )
 
     if not compatibility_contract.get("deprecation_boundaries"):
         failures.append("compatibility_contract.deprecation_boundaries missing/empty")
@@ -374,7 +382,9 @@ def _validate_policy_and_compatibility(
     return _sorted_unique(failures)
 
 
-def _validate_deterministic_dict_list(payload: dict[str, Any], key: str, sort_key: str) -> list[str]:
+def _validate_deterministic_dict_list(
+    payload: dict[str, Any], key: str, sort_key: str
+) -> list[str]:
     rows = payload.get(key)
     if not isinstance(rows, list):
         return [f"{key} must be a list"]
@@ -423,13 +433,19 @@ def _validate_output_contracts(
                     dict(compatibility_contract) if isinstance(compatibility_contract, dict) else {}
                 ),
                 release_evidence_contract=(
-                    dict(release_evidence_contract) if isinstance(release_evidence_contract, dict) else {}
+                    dict(release_evidence_contract)
+                    if isinstance(release_evidence_contract, dict)
+                    else {}
                 ),
             )
         )
 
-    failures.extend(_validate_deterministic_dict_list(governance_payload, "governance_checks", "check_id"))
-    failures.extend(_validate_deterministic_dict_list(governance_payload, "policy_decisions", "decision_id"))
+    failures.extend(
+        _validate_deterministic_dict_list(governance_payload, "governance_checks", "check_id")
+    )
+    failures.extend(
+        _validate_deterministic_dict_list(governance_payload, "policy_decisions", "decision_id")
+    )
 
     for key in (
         "schema_version",
@@ -447,7 +463,9 @@ def _validate_output_contracts(
         if not isinstance(rows, list) or rows != sorted(rows):
             failures.append(f"release evidence {list_key} must be sorted list")
     if str(release_payload.get("evidence_status", "")) not in ALLOWED_EVIDENCE_STATUSES:
-        failures.append(f"invalid release evidence status: {release_payload.get('evidence_status')}")
+        failures.append(
+            f"invalid release evidence status: {release_payload.get('evidence_status')}"
+        )
 
     for key in (
         "schema_version",
@@ -466,9 +484,14 @@ def _validate_output_contracts(
             failures.append(f"adherence {list_key} must be sorted list")
     if str(adherence_payload.get("adherence_status", "")) not in ALLOWED_ADHERENCE_STATUSES:
         failures.append(f"invalid adherence status: {adherence_payload.get('adherence_status')}")
-    if not adherence_payload.get("last_review_at") and adherence_payload.get("adherence_status") != "unknown":
+    if (
+        not adherence_payload.get("last_review_at")
+        and adherence_payload.get("adherence_status") != "unknown"
+    ):
         failures.append("missing last_review_at must produce unknown adherence_status")
-    if not adherence_payload.get("last_review_at") and not adherence_payload.get("recommended_actions"):
+    if not adherence_payload.get("last_review_at") and not adherence_payload.get(
+        "recommended_actions"
+    ):
         failures.append("missing last_review_at must provide actionable recommendations")
 
     return _sorted_unique(failures)
@@ -556,7 +579,9 @@ def _build_governance_drift_alerts(
 
     missing_artifacts = release_payload.get("missing_artifacts", [])
     if isinstance(missing_artifacts, list) and missing_artifacts:
-        alerts.append(f"release_missing_artifacts:{','.join(sorted(str(x) for x in missing_artifacts))}")
+        alerts.append(
+            f"release_missing_artifacts:{','.join(sorted(str(x) for x in missing_artifacts))}"
+        )
         drift_score += int(scores.get("release_missing_artifacts", 0))
 
     adherence_status = str(adherence_payload.get("adherence_status", ""))
@@ -598,7 +623,14 @@ def _render_drift_alerts_markdown(payload: dict[str, Any]) -> str:
 
 def _validate_drift_alerts(payload: dict[str, Any]) -> list[str]:
     failures: list[str] = []
-    for key in ("schema_version", "drift_status", "alerts", "drift_score", "drift_threshold", "generated_at"):
+    for key in (
+        "schema_version",
+        "drift_status",
+        "alerts",
+        "drift_score",
+        "drift_threshold",
+        "generated_at",
+    ):
         if key not in payload:
             failures.append(f"drift alerts missing key: {key}")
     alerts = payload.get("alerts", [])
@@ -646,7 +678,9 @@ def main(argv: list[str] | None = None) -> int:
     _write_json(out_dir / "phase4-release-evidence.json", release_payload)
     release_md_path = out_dir / "phase4-release-evidence.md"
     if not ns.no_md:
-        release_md_path.write_text(_render_release_evidence_markdown(release_payload), encoding="utf-8")
+        release_md_path.write_text(
+            _render_release_evidence_markdown(release_payload), encoding="utf-8"
+        )
     _write_json(out_dir / "phase4-governance-adherence.json", adherence_payload)
     _write_json(out_dir / "phase4-compliance-overlay-pack.json", compliance_overlay)
     domain_overlay_paths = _emit_domain_overlay_files(out_dir, compliance_overlay)
@@ -698,7 +732,9 @@ def main(argv: list[str] | None = None) -> int:
         },
         {
             "id": "drift_alerts_schema",
-            "ok": not any(msg.startswith("drift alerts") or "drift_status" in msg for msg in failures),
+            "ok": not any(
+                msg.startswith("drift alerts") or "drift_status" in msg for msg in failures
+            ),
         },
     ]
 
@@ -723,7 +759,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.format == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
-        print("phase4-governance-contract: OK" if payload["ok"] else "phase4-governance-contract: FAIL")
+        print(
+            "phase4-governance-contract: OK"
+            if payload["ok"]
+            else "phase4-governance-contract: FAIL"
+        )
         for check in checks:
             print(f"[{'OK' if check['ok'] else 'FAIL'}] {check['id']}")
         for failure in failures:

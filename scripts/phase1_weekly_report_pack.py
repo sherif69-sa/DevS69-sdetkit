@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -19,7 +19,7 @@ ARTIFACT_INPUTS = {
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -70,7 +70,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     if isinstance(inventory, dict):
         for name, meta in inventory.items():
             if isinstance(meta, dict):
-                lines.append(f"- {name}: exists={meta.get('exists', False)} path={meta.get('path', '')}")
+                lines.append(
+                    f"- {name}: exists={meta.get('exists', False)} path={meta.get('path', '')}"
+                )
 
     lines.extend(["", "## Hard blockers"])
     blockers = payload.get("hard_blockers", [])

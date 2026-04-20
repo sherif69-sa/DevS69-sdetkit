@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +14,7 @@ ALLOW_FAIL = {"ruff", "pytest", "gate_fast", "gate_release"}
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -40,7 +40,9 @@ def _sequential_summary(plan_path: Path, status_path: Path) -> dict[str, Any]:
         "hard_blockers": status.get("hard_blockers", []) if isinstance(status, dict) else [],
     }
     total = progress["accomplished_count"] + progress["remaining_count"]
-    progress["progress_percent"] = round((progress["accomplished_count"] / total) * 100, 1) if total else 0
+    progress["progress_percent"] = (
+        round((progress["accomplished_count"] / total) * 100, 1) if total else 0
+    )
     return {
         "ok": bool(plan),
         "schema_version": "sdetkit.phase_sequential_executor.v1",
@@ -124,7 +126,9 @@ def build_dashboard(
             "top_risk_item": snapshot.get("top_risk_item"),
             "recommended_next_actions": snapshot.get("recommended_next_actions", []),
         },
-        "next_step": "make phase1-closeout" if ready else "make phase1-next && make phase1-ops-snapshot",
+        "next_step": "make phase1-closeout"
+        if ready
+        else "make phase1-next && make phase1-ops-snapshot",
     }
 
 
@@ -177,7 +181,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--status", default="build/phase1-baseline/phase1-status.json")
     parser.add_argument("--summary", default="build/phase1-baseline/phase1-baseline-summary.json")
     parser.add_argument("--snapshot", default="build/phase1-baseline/phase1-ops-snapshot.json")
-    parser.add_argument("--out-json", default="build/phase1-baseline/phase1-completion-dashboard.json")
+    parser.add_argument(
+        "--out-json", default="build/phase1-baseline/phase1-completion-dashboard.json"
+    )
     parser.add_argument("--out-md", default="build/phase1-baseline/phase1-completion-dashboard.md")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args(argv)
