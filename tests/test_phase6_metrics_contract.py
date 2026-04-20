@@ -23,6 +23,14 @@ EXPECTED_PHASE6_GATE_CHECK_IDS = [
     "deterministic_ordering",
     "reason_rationale_vocabulary_enforced",
 ]
+EXPECTED_PHASE6_WORKFLOW_TARGETS = [
+    "phase5-ecosystem-contract",
+    "phase6-start",
+    "phase6-status",
+    "phase6-progress",
+    "phase6-complete",
+    "phase6-metrics-contract",
+]
 
 
 def _write_phase6_prereqs(root: Path) -> None:
@@ -319,5 +327,22 @@ def test_phase6_regression_contracts_phase1_to_phase5_unchanged() -> None:
     assert phase5_contract.SCHEMA_VERSION == "sdetkit.phase5_ecosystem_contract.v2"
 
     makefile_text = Path("Makefile").read_text(encoding="utf-8")
-    for target in ("phase2-seed", "phase3-quality-contract", "phase4-governance-contract", "phase5-ecosystem-contract", "phase6-metrics-contract"):
+    for target in (
+        "phase2-seed",
+        "phase3-quality-contract",
+        "phase4-governance-contract",
+        "phase5-ecosystem-contract",
+        "phase6-start",
+        "phase6-status",
+        "phase6-progress",
+        "phase6-complete",
+        "phase6-metrics-contract",
+    ):
         assert target in makefile_text
+
+
+def test_phase6_workflow_targets_follow_existing_phase_pattern() -> None:
+    makefile_text = Path("Makefile").read_text(encoding="utf-8")
+    positions = [makefile_text.find(target) for target in EXPECTED_PHASE6_WORKFLOW_TARGETS]
+    assert all(pos >= 0 for pos in positions)
+    assert positions == sorted(positions)

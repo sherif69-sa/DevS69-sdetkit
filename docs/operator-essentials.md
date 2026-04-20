@@ -42,6 +42,10 @@ Use these after Tier 0 when you need remediation and operational triage depth:
 - `make phase3-quality-contract`
 - `make phase4-governance-contract`
 - `make phase5-ecosystem-contract`
+- `make phase6-start`
+- `make phase6-status`
+- `make phase6-progress`
+- `make phase6-complete`
 - `make phase6-metrics-contract`
 
 `make phase2-workflow` runs strict kickoff + contract checks and writes summary artifacts under `build/phase2-start/`.
