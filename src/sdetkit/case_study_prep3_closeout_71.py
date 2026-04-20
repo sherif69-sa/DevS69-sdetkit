@@ -138,7 +138,7 @@ def build_case_study_prep3_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "-71-big-upgrade-report.md + integrations-case-study-prep3-closeout.md",
         },
         {
-            "check_id": "top10_case_study_prep3_alignment",
+            "check_id": "top10_prep3_alignment",
             "weight": 5,
             "passed": ("" in top10_text and "" in top10_text),
             "evidence": "Case-study prep #3 + prep #4 strategy chain",

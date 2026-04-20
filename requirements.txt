@@ -20,12 +20,14 @@ build==1.4.3
 twine==6.2.0
 
 # Security/compliance tooling used in workflows
+pip==26.0.1
 pip-audit==2.10.0
 cyclonedx-bom==7.3.0
 
 # Docs
 mkdocs==1.6.1
 mkdocs-material==9.7.6
+pymdown-extensions==10.21.2
 
 # Backport for environments below Python 3.11
 # (kept for compatibility in ad-hoc environments)

@@ -1,112 +1,18 @@
 from __future__ import annotations
 
-import argparse
-import json
 import sys
-from pathlib import Path
 
+from . import cassette_get as _cassette_get_module
 from .atomicio import atomic_write_text
-from .security import SecurityError, default_http_timeout, ensure_allowed_scheme, safe_path
+from .security import SecurityError, safe_path
 
 
 def _cassette_get(argv: list[str]) -> int:
-    import httpx
-
-    from .cassette import Cassette, CassetteRecordTransport, CassetteReplayTransport
-
-    ap = argparse.ArgumentParser(prog="sdetkit cassette-get")
-    ap.add_argument("url")
-    g = ap.add_mutually_exclusive_group()
-    g.add_argument("--record", metavar="PATH")
-    g.add_argument("--replay", metavar="PATH")
-    ap.add_argument("--timeout", type=float, default=None)
-    ap.add_argument("--allow-scheme", action="append", default=None)
-    ap.add_argument("--follow-redirects", action="store_true")
-    ap.add_argument("--no-follow-redirects", dest="follow_redirects", action="store_false")
-    ap.set_defaults(follow_redirects=False)
-    ap.add_argument("--insecure", action="store_true")
-    ap.add_argument("--force", action="store_true")
-    ap.add_argument("--allow-absolute-path", action="store_true")
-    ns = ap.parse_args(argv)
-
-    allowed = {"http", "https"}
-    for s in ns.allow_scheme or []:
-        allowed.add(str(s).strip().lower())
-    try:
-        ensure_allowed_scheme(ns.url, allowed=allowed)
-    except SecurityError as exc:
-        sys.stderr.write(str(exc) + "\n")
-        return 2
-    if ns.insecure:
-        sys.stderr.write("warning: TLS verification disabled (--insecure)\n")
-
-    timeout = default_http_timeout(ns.timeout)
-    follow_redirects = bool(ns.follow_redirects)
-    verify = not bool(ns.insecure)
-
-    if ns.replay:
-        try:
-            replay_path = safe_path(
-                Path.cwd(), ns.replay, allow_absolute=bool(ns.allow_absolute_path)
-            )
-            if ns.allow_absolute_path:
-                cass = Cassette.load(replay_path, allow_absolute=True)
-            else:
-                cass = Cassette.load(replay_path)
-        except (SecurityError, ValueError, OSError) as exc:
-            sys.stderr.write(str(exc) + "\n")
-            return 2
-        replay_transport = CassetteReplayTransport(cass)
-        with httpx.Client(
-            transport=replay_transport,
-            timeout=timeout,
-            follow_redirects=follow_redirects,
-            verify=verify,
-        ) as client:
-            r = client.get(ns.url)
-            r.raise_for_status()
-            sys.stdout.write(json.dumps(r.json(), ensure_ascii=True))
-        f = getattr(replay_transport, "assert_exhausted", None)
-        if callable(f):
-            f()
-        return 0
-
-    if ns.record:
-        try:
-            record_path = safe_path(
-                Path.cwd(), ns.record, allow_absolute=bool(ns.allow_absolute_path)
-            )
-            if record_path.exists() and not ns.force:
-                sys.stderr.write("refusing to overwrite existing cassette (use --force)\n")
-                return 2
-        except SecurityError as exc:
-            sys.stderr.write(str(exc) + "\n")
-            return 2
-        cass = Cassette()
-        inner = httpx.HTTPTransport()
-        record_transport = CassetteRecordTransport(cass, inner)
-        with httpx.Client(
-            transport=record_transport,
-            timeout=timeout,
-            follow_redirects=follow_redirects,
-            verify=verify,
-        ) as client:
-            r = client.get(ns.url)
-            r.raise_for_status()
-            sys.stdout.write(json.dumps(r.json(), ensure_ascii=True))
-        payload = json.dumps(cass.to_json(), ensure_ascii=True, sort_keys=True, indent=2) + "\n"
-        atomic_write_text(record_path, payload)
-        return 0
-
-    with httpx.Client(
-        timeout=timeout,
-        follow_redirects=follow_redirects,
-        verify=verify,
-    ) as client:
-        r = client.get(ns.url)
-        r.raise_for_status()
-        sys.stdout.write(json.dumps(r.json(), ensure_ascii=True))
-    return 0
+    # Compatibility shim for tests that monkeypatch __main__ symbols directly.
+    _cassette_get_module.atomic_write_text = atomic_write_text
+    _cassette_get_module.safe_path = safe_path
+    _cassette_get_module.SecurityError = SecurityError
+    return _cassette_get_module.cassette_get(argv)
 
 
 def main() -> int:

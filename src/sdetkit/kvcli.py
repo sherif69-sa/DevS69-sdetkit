@@ -67,6 +67,7 @@ def _read_path(path: str) -> str:
         return Path(path).read_text(encoding="utf-8")
     except Exception:
         _die("cannot read file")
+    raise AssertionError("unreachable")
 
 
 def _usage() -> str:

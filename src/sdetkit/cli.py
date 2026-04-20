@@ -7,36 +7,6 @@ from collections.abc import Sequence
 from importlib import import_module
 from typing import cast
 
-from . import (
-    acceleration_closeout_43 as acceleration_closeout_43,
-)
-from . import (
-    execution_prioritization_closeout_50 as execution_prioritization_closeout_50,
-)
-from . import (
-    expansion_automation_41 as expansion_automation_41,
-)
-from . import (
-    expansion_closeout_45 as expansion_closeout_45,
-)
-from . import (
-    objection_closeout_48 as objection_closeout_48,
-)
-from . import (
-    optimization_closeout_42 as optimization_closeout_42,
-)
-from . import (
-    optimization_closeout_46 as optimization_closeout_46,
-)
-from . import (
-    reliability_closeout_47 as reliability_closeout_47,
-)
-from . import (
-    scale_closeout_44 as scale_closeout_44,
-)
-from . import (
-    weekly_review_closeout_49 as weekly_review_closeout_49,
-)
 from .apiget_dispatch import run_apiget_with_cassette
 from .argv_flags import extract_global_flag
 from .baseline_dispatch import run_baseline
@@ -47,12 +17,6 @@ from .help_surface import filter_hidden_subcommands, hide_help_subcommands
 from .inspect_compare_forwarding import build_inspect_compare_forwarded_args
 from .inspect_forwarding import build_inspect_forwarded_args
 from .inspect_project_forwarding import build_inspect_project_forwarded_args
-from .legacy_commands import (
-    LEGACY_COMMAND_MODULES as LEGACY_COMMAND_MODULES,
-)
-from .legacy_commands import (
-    LEGACY_NAMESPACE_COMMANDS as LEGACY_NAMESPACE_COMMANDS,
-)
 from .legacy_namespace import handle_legacy_namespace
 from .parsed_shortcuts import dispatch_parsed_shortcut
 from .parser_helpers import add_passthrough_subcommand as _add_passthrough_subcommand

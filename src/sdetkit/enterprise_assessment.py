@@ -617,7 +617,7 @@ def _risk_meets_fail_policy(risk_band: str, policy: str) -> bool:
 
 def _build_contract_metadata(payload: dict[str, Any]) -> dict[str, Any]:
     generated_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    digest = hashlib.sha1(
+    digest = hashlib.blake2s(
         json.dumps(
             {
                 "summary": payload.get("summary", {}),

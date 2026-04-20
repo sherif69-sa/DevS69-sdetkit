@@ -118,7 +118,7 @@ def _doctor_handoff_alignment_reason(status: str, doctor_summary: dict[str, Any]
     if status == "aligned":
         return "doctor_next_pass_consistent"
     if status == "mismatch":
-        return "doctor_next_pass_conflicts_with_phase3_recommendation"
+        return "doctor_next_pass_mismatch"
     enterprise = doctor_summary.get("enterprise", {})
     if isinstance(enterprise, dict) and str(enterprise.get("next_pass_reason", "")).strip():
         return "doctor_next_pass_reason_unrecognized"

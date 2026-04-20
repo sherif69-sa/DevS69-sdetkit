@@ -9,9 +9,11 @@ def dispatch_core_preparse(argv: Sequence[str]) -> int | None:
         return None
 
     if argv[0] == "cassette-get":
-        from .__main__ import _cassette_get
-
         try:
+            try:
+                from .__main__ import _cassette_get
+            except Exception:  # pragma: no cover - defensive fallback for partial imports
+                from .cassette_get import cassette_get as _cassette_get
             return _cassette_get(list(argv[1:]))
         except Exception as exc:
             print(str(exc), file=sys.stderr)
