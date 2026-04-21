@@ -192,7 +192,8 @@ jobs:
               await github.rest.issues.create({ owner, repo, title: mainTitle, body: mainBody, labels: [maintenanceLabel] });
             }
 
-            const enhancementTitle = '🧩 Monthly enhancement intake from user feedback';
+            const monthOf = weekOf.slice(0, 7);
+            const enhancementTitle = `🧩 Monthly enhancement intake from user feedback (${monthOf})`;
             const enhancementBody = [
               'This issue is auto-generated to ensure at least one enhancement candidate is always tracked.',
               '',
@@ -211,9 +212,19 @@ jobs:
               '- Link the final implementation PR back to this issue.',
             ].join('\n');
 
-            const enhancementIssues = openIssues.filter((issue) => hasLabel(issue, enhancementLabel));
+            const enhancementIssues = openIssues.filter(
+              (issue) => hasLabel(issue, enhancementLabel)
+                && issue.title.startsWith('🧩 Monthly enhancement intake from user feedback'),
+            );
+            for (const oldIssue of enhancementIssues) {
+              if (oldIssue.title !== enhancementTitle) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
             const existingEnhancement = enhancementIssues.find((i) => i.title === enhancementTitle);
-            if (!existingEnhancement) {
+            if (existingEnhancement) {
+              await github.rest.issues.update({ owner, repo, issue_number: existingEnhancement.number, body: enhancementBody });
+            } else {
               await github.rest.issues.create({
                 owner,
                 repo,
