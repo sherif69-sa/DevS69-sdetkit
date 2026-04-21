@@ -97,6 +97,20 @@ def test_kvcli_path_missing_exit_2(tmp_path):
     assert "traceback" not in p.stderr.lower()
 
 
+def test_kvcli_text_missing_value_reports_expected_one_argument():
+    p = run_kvcli("--text", "--path", "some.txt")
+    assert p.returncode == 2
+    assert p.stdout == ""
+    assert "argument --text: expected one argument" in p.stderr.lower()
+
+
+def test_kvcli_duplicates_missing_value_reports_expected_one_argument():
+    p = run_kvcli("--duplicates", "--strict")
+    assert p.returncode == 2
+    assert p.stdout == ""
+    assert "argument --duplicates: expected one argument" in p.stderr.lower()
+
+
 def test_kvcli_multiline_ignores_bad_lines_and_merges_last_wins():
     p = run_kvcli(input_text="a=1\nbadline\nb=2 a=3\n")
     assert p.returncode == 0
@@ -188,6 +202,22 @@ def test_build_comment_aware_parser_passes_duplicate_policy_for_modern_parser():
     assert parser("a=1 a=2") == {"a": "1"}
 
 
+def test_build_comment_aware_parser_does_not_mask_parser_typeerror():
+    import sdetkit.kvcli as kvcli
+
+    def broken_parser(
+        _line: str,
+        *,
+        allow_comments: bool = False,
+        duplicate_policy: str = "last",
+    ) -> dict[str, str]:
+        raise TypeError("boom")
+
+    parser = kvcli._build_comment_aware_parser(broken_parser)
+    with pytest.raises(TypeError, match="boom"):
+        parser("a=1")
+
+
 def test_kvcli_runner_supports_timeout(tmp_path):
     # Give subprocess startup enough headroom for highly parallel CI workers.
     p = run_kvcli("--text", "a=1", timeout=2.0)
@@ -205,7 +235,28 @@ def test_kvcli_duplicates_error_fails_on_duplicate_key():
     p = run_kvcli("--duplicates", "error", "--text", "a=1 a=2")
     assert p.returncode == 2
     assert p.stdout == ""
-    assert "invalid input" in p.stderr.lower()
+    assert "duplicate key" in p.stderr.lower()
+
+
+def test_kvcli_duplicates_first_preserves_first_value_across_lines():
+    p = run_kvcli("--duplicates", "first", input_text="a=1\na=2\n")
+    assert p.returncode == 0
+    assert p.stderr == ""
+    assert json.loads(p.stdout) == {"a": "1"}
+
+
+def test_kvcli_duplicates_error_fails_on_duplicate_key_across_lines():
+    p = run_kvcli("--duplicates", "error", input_text="a=1\na=2\n")
+    assert p.returncode == 2
+    assert p.stdout == ""
+    assert "duplicate key" in p.stderr.lower()
+
+
+def test_kvcli_duplicates_error_fails_even_when_other_lines_are_valid():
+    p = run_kvcli("--duplicates", "error", input_text="a=1\nb=2 b=3\nc=4\n")
+    assert p.returncode == 2
+    assert p.stdout == ""
+    assert "duplicate key" in p.stderr.lower()
 
 
 def test_kvcli_main_text_ok(capsys):

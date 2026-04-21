@@ -1,10 +1,11 @@
+import inspect
 import json
 import sys
 from collections.abc import Callable
 from typing import NoReturn
 
 from .bools import coerce_bool
-from .textutil import parse_kv_line
+from .textutil import DuplicateKeyError, parse_kv_line
 
 
 def _die(msg: str) -> NoReturn:
@@ -17,18 +18,28 @@ def _build_comment_aware_parser(
     *,
     duplicate_policy: str = "last",
 ) -> Callable[[str], dict[str, str]]:
+    supports_allow_comments = False
+    supports_duplicate_policy = False
+    try:
+        sig = inspect.signature(parser)
+        params = sig.parameters
+        supports_allow_comments = "allow_comments" in params
+        supports_duplicate_policy = "duplicate_policy" in params
+        if any(p.kind is inspect.Parameter.VAR_KEYWORD for p in params.values()):
+            supports_allow_comments = True
+            supports_duplicate_policy = True
+    except (TypeError, ValueError):
+        pass
+
     def _wrapped(line: str) -> dict[str, str]:
-        try:
-            return parser(
-                line,
-                allow_comments=True,
-                duplicate_policy=duplicate_policy,
-            )
-        except TypeError:
-            try:
-                return parser(line, allow_comments=True)
-            except TypeError:
-                return parser(line)
+        kwargs: dict[str, object] = {}
+        if supports_allow_comments:
+            kwargs["allow_comments"] = True
+        if supports_duplicate_policy:
+            kwargs["duplicate_policy"] = duplicate_policy
+        if kwargs:
+            return parser(line, **kwargs)
+        return parser(line)
 
     return _wrapped
 
@@ -45,13 +56,20 @@ def _process(raw: str, *, strict: bool, duplicates: str) -> int:
     for line_no, line in enumerate(raw.splitlines(), start=1):
         try:
             chunk = parse_line(line)
+        except DuplicateKeyError as exc:
+            _die(f"{exc} at line {line_no}")
         except ValueError:
             invalid_lines += 1
             if strict:
                 _die(f"invalid input at line {line_no}")
             continue
         if chunk:
-            data.update(chunk)
+            for key, value in chunk.items():
+                if duplicates == "error" and key in data:
+                    _die(f"duplicate key: {key} at line {line_no}")
+                if duplicates == "first" and key in data:
+                    continue
+                data[key] = value
 
     if raw.strip() != "" and (not data or (strict and invalid_lines > 0)):
         _die("invalid input")
@@ -103,6 +121,9 @@ def _parse_fast(argv: list[str]) -> dict[str, object]:
                 sys.stderr.write(_usage())
                 _die(f"argument {arg}: expected one argument")
             value = argv[i + 1]
+            if value.startswith("--"):
+                sys.stderr.write(_usage())
+                _die(f"argument {arg}: expected one argument")
             if arg == "--text":
                 text = value
             elif arg == "--path":
