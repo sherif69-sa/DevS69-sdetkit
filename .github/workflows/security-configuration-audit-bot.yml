@@ -97,10 +97,11 @@ jobs:
                 });
                 return Array.isArray(response.data) ? response.data.length : 0;
               } catch (error) {
-                notes.push(`${label} unavailable: ${error.message}`);
-                return 'unknown';
+                notes.push(`${label} unavailable: ${error.message}. Add GHAS_READ_TOKEN if broader security scopes are required.`);
+                return null;
               }
             }
+            const formatCount = (count) => (count === null ? 'unavailable' : count);
 
             const configuration = await fetchConfiguration();
             const codeAlerts = await fetchAlerts('/repos/{owner}/{repo}/code-scanning/alerts', 'Code scanning alerts');
@@ -137,9 +138,9 @@ jobs:
                 : '- Automatic dependency submission: unavailable.',
               '',
               '## Open alert snapshot',
-              `- Code scanning alerts: **${codeAlerts}**`,
-              `- Secret scanning alerts: **${secretAlerts}**`,
-              `- Dependabot alerts: **${dependabotAlerts}**`,
+              `- Code scanning alerts: **${formatCount(codeAlerts)}**`,
+              `- Secret scanning alerts: **${formatCount(secretAlerts)}**`,
+              `- Dependabot alerts: **${formatCount(dependabotAlerts)}**`,
               '',
               '## Suggested monthly follow-up',
               '- [ ] Confirm the repo still uses the intended GitHub-recommended or custom security configuration.',
