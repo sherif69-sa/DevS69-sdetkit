@@ -1,28 +1,28 @@
 # Phase-by-phase execution plan (major upgrade track)
 
-This plan is designed for large upgrades executed sequentially, with each phase intentionally kept extensible so future scope can expand without reworking the strategy.
+Run this plan in sequence and ship concrete outputs in every phase.
 
 ## Program guardrails
 
-- Keep canonical release-confidence path as the decision backbone: `gate fast -> gate release -> doctor`.
-- Preserve tier boundaries: Public/stable first, advanced/supporting next, transition/legacy secondary.
-- Ship measurable deltas per phase (artifacts, KPIs, contracts, docs updates).
+- Keep the decision backbone fixed: `gate fast -> gate release -> doctor`.
+- Keep tier boundaries clear: Public/stable first, advanced/supporting next, transition/legacy secondary.
+- Ship measurable deltas in each phase (artifacts, KPIs, contracts, docs updates).
 
 ---
 
-## Phase 1 — Baseline hardening and execution truth lane
+## Phase 1 — Build the baseline execution lane
 
-### Objective
-Create a reproducible baseline lane that produces machine-readable evidence and makes environment/tooling drift immediately visible.
+### Mission
+Stand up a baseline lane that always produces machine-readable evidence and immediately flags environment/tooling drift.
 
-### Scope
-- Environment contract hardening (Python/toolchain expectations).
-- Baseline lane automation and artifact capture.
-- Initial quality debt register (lint/test/contract failures).
-- Weekly baseline reporting.
+### Do this
+- Lock environment contracts (Python/toolchain expectations).
+- Automate the baseline lane and capture artifacts.
+- Create a quality debt register (lint/test/contract failures) with direct owners.
+- Publish a weekly baseline report.
 
-### Execution package
-1. Run baseline lane via:
+### Execute now
+1. Run the baseline lane:
    - `make phase1-baseline`
    - `make phase1-status`
    - `make phase1-next`
@@ -34,64 +34,65 @@ Create a reproducible baseline lane that produces machine-readable evidence and 
    - `doctor.json`
    - per-check logs and return codes
    - summary JSON + markdown
-3. Record blockers and convert into prioritized remediation tasks.
+3. Convert blockers into assigned remediation tasks with due dates.
+4. Execute the top remediation task in the same cycle and rerun `make phase1-status`.
 
-### Exit criteria
-- Baseline lane is deterministic in CI and local (same command path, same artifact contract).
-- All baseline steps produce logs and summary payloads.
-- Top blocking quality debt items are ranked and assigned.
+### Done when
+- CI and local runs are deterministic (same command path, same artifact contract).
+- Every baseline step emits logs and summary payloads.
+- Top blocking quality debt items are ranked, assigned, and reduced every cycle.
 
-### Open expansion vectors
+### Next upgrades
 - Multi-Python matrix baseline evidence.
 - Profile-aware baseline (quick/standard/strict) comparisons.
 - Cross-repo baseline federation for portfolio reporting.
 
-### Closeout cleanup after completion
+### Close out
 - Freeze Phase 1 as complete in weekly reporting.
 - Keep baseline artifacts as immutable audit evidence.
 - Remove stale Phase 1 TODOs from active execution boards.
 
 ---
 
-## Phase 2 — Surface clarity and command simplification
+## Phase 2 — Simplify surfaces and commands
 
-### Objective
-Reduce onboarding ambiguity while retaining advanced operational power.
+### Mission
+Cut onboarding confusion while preserving advanced operational power.
 
-### Scope
+### Do this
 - Streamline first-contact docs and help surfaces.
-- Strengthen command-family guidance by outcome.
+- Tighten command-family guidance by outcome.
 - Improve migration guidance for transition-era lanes.
 
-### Execution package
+### Execute now
 1. Build an "operator essentials" command map.
 2. Collapse repetitive docs paths into canonical flows.
 3. Add explicit migration tables for legacy/transition surfaces.
 4. Introduce docs consistency checks for start-here + CI + triage routes.
 
-### Exit criteria
-- New operator can reach first successful run with one unambiguous path.
-- Command discoverability reflects product tiers with minimal confusion.
+### Done when
+- A new operator reaches first successful run through one unambiguous path.
+- Command discoverability matches product tiers with minimal confusion.
 - Legacy routing is documented, predictable, and non-disruptive.
 
-### Open expansion vectors
+### Next upgrades
 - Persona-specific docs overlays (maintainer/operator/executive).
-- Interactive CLI discovery hints.
+- Interactive CLI onboarding workflows.
 - Auto-generated docs nav health score.
 
 ---
 
-## Phase 3 — Quality engine expansion and adaptive intelligence
+## Phase 3 — Expand the quality engine
 
-### Objective
-Evolve checks into a richer execution engine with stronger recommendation quality and evidence payloads.
+### Mission
+Upgrade checks into a stronger execution engine with better recommendations and richer evidence payloads.
 
-### Scope
-- Adaptive check planning maturity.
-- Enhanced remediation outputs.
-- Better run-report analytics and trend comparisons.
+### Do this
+- Mature adaptive check planning.
+- Improve remediation outputs.
+- Improve run-report analytics and trend comparisons.
 
-### Execution package
+### Execute now
 1. Extend adaptive planning signals (changed paths, reasons, risk areas).
 2. Enrich risk summary/fix plan payload contracts.
 3. Add trend deltas across successive baseline runs.
@@ -100,29 +101,29 @@ Evolve checks into a richer execution engine with stronger recommendation qualit
    - `make phase3-quality-contract`
    - `python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json`
 
-### Exit criteria
-- Faster mean-time-to-triage from machine-readable outputs.
-- Improved recommendation precision in failure scenarios.
-- Stable, versioned output contracts for operator tooling.
+### Done when
+- Mean-time-to-triage drops through machine-readable outputs.
+- Recommendation precision improves in failure scenarios.
+- Output contracts stay stable and versioned for operator tooling.
 
-### Open expansion vectors
+### Next upgrades
 - Intelligent check selection by repository topology.
 - Failure-family clustering and root-cause acceleration.
 - Fleet-level quality risk heatmaps.
 
 ---
 
-## Phase 4 — Enterprise trust and governance maturity
+## Phase 4 — Enforce enterprise governance
 
-### Objective
-Convert technical capability into enterprise-grade confidence through explicit governance and audit evidence.
+### Mission
+Turn technical capability into enterprise-grade confidence with explicit governance and audit evidence.
 
-### Scope
-- Contract governance hardening.
-- Policy enforcement and compatibility discipline.
-- Release-room evidence bundles.
+### Do this
+- Harden contract governance.
+- Enforce policy and compatibility discipline.
+- Produce release-room evidence bundles.
 
-### Execution package
+### Execute now
 1. Expand enterprise contract validations in CI gates.
 2. Standardize release-room summaries and evidence retention windows.
 3. Document compatibility/deprecation boundaries per tier.
@@ -131,29 +132,29 @@ Convert technical capability into enterprise-grade confidence through explicit g
    - `make phase4-governance-contract`
    - `python scripts/check_phase4_governance_contract.py --format json`
 
-### Exit criteria
+### Done when
 - Enterprise checks are reproducible and policy-aligned.
 - Governance evidence is available and auditable.
 - Compatibility expectations are clear to integrators.
 
-### Open expansion vectors
+### Next upgrades
 - Compliance overlay packs (domain-specific).
 - Policy-as-code templates for partner repos.
 - Automated governance drift alerts.
 
 ---
 
-## Phase 5 — Ecosystem/platform scaling
+## Phase 5 — Scale ecosystem integrations
 
-### Objective
+### Mission
 Scale integrations and extension surfaces without destabilizing core release-confidence guarantees.
 
-### Scope
-- Plugin/runtime extension reliability.
-- Integration playbook standardization.
-- Partner-ready packaging and support artifacts.
+### Do this
+- Improve plugin/runtime extension reliability.
+- Standardize integration playbooks.
+- Ship partner-ready packaging and support artifacts.
 
-### Execution package
+### Execute now
 1. Harden plugin onboarding and failure diagnostics.
 2. Expand integration quickstarts with contract-backed checks.
 3. Publish extension certification criteria.
@@ -162,29 +163,29 @@ Scale integrations and extension surfaces without destabilizing core release-con
    - `make phase5-ecosystem-contract`
    - `python scripts/check_phase5_ecosystem_contract.py --format json`
 
-### Exit criteria
+### Done when
 - Integrations remain optional, reliable, and version-aware.
 - Extension failures are visible and non-blocking by default.
-- Partner onboarding time decreases with repeatable playbooks.
+- Partner onboarding time drops through repeatable playbooks.
 
-### Open expansion vectors
+### Next upgrades
 - Marketplace-style extension catalog.
 - Hosted control-plane integrations.
 - Managed adoption analytics across organizations.
 
 ---
 
-## Phase 6 — Metrics, commercialization, and scale governance
+## Phase 6 — Operationalize metrics and commercialization
 
-### Objective
+### Mission
 Convert technical progress into repeatable business outcomes and reporting-ready metrics for operators, buyers, and investors.
 
-### Scope
-- KPI snapshot and scorecard generation.
-- Metrics contract validation for recurring reporting.
-- Commercialization-ready evidence surfaces.
+### Do this
+- Generate KPI snapshots and scorecards.
+- Validate metrics contracts for recurring reporting.
+- Publish commercialization-ready evidence surfaces.
 
-### Execution package
+### Execute now
 1. Build and publish periodic KPI snapshots.
 2. Standardize scorecard freshness and publishing cadence.
 3. Tie release-confidence outputs to adoption/operations metrics.
@@ -192,26 +193,26 @@ Convert technical progress into repeatable business outcomes and reporting-ready
    - `make phase6-metrics-contract`
    - `python scripts/check_phase6_metrics_contract.py --format json`
 
-### Exit criteria
+### Done when
 - KPI artifacts are generated on schedule and contract-validated.
-- Metrics signals are reproducible and linked to release-confidence behavior.
+- Metrics signals are reproducible and tied to release-confidence behavior.
 - Reporting surfaces are usable in quarterly portfolio/leadership reviews.
 
-### Open expansion vectors
+### Next upgrades
 - Trend anomaly alerts for KPI regressions.
 - Portfolio-level cross-repo reporting federation.
 - Commercial package variants with benchmark slices.
 
 ---
 
-## Phase control framework (used in every phase)
+## Phase control loop (run every phase)
 
-Each phase must run the same control loop:
+Run the same control loop in every phase:
 
-1. Plan: objective, scope, risks, target metrics.
-2. Execute: implement lane automation and deliverables.
-3. Validate: run contract checks + baseline verification.
+1. Plan: set targets, risks, and metrics.
+2. Execute: ship lane automation and deliverables.
+3. Validate: run contract checks and baseline verification.
 4. Publish: emit artifacts, summary, and decision memo.
-5. Expand: queue major follow-up upgrades for the next phase.
+5. Expand: queue the next major upgrades.
 
 This keeps the roadmap sequential while still open for large-scale iteration.

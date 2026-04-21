@@ -186,7 +186,3 @@ Run `make top-tier-reporting` to generate a deterministic sample bundle and prom
 
 - Recipe: [`docs/portfolio-reporting-recipe.md`](docs/portfolio-reporting-recipe.md)
 - KPI schema: [`docs/kpi-schema.md`](docs/kpi-schema.md)
-phase2-hardening-closeout
-phase2-wrap-handoff-closeout
-docs/integrations-phase2-hardening-closeout.md
-docs/integrations-phase2-wrap-handoff-closeout.md
