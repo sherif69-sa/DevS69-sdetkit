@@ -11,7 +11,7 @@ def _cassette_get(argv: list[str]) -> int:
     # Compatibility shim for tests that monkeypatch __main__ symbols directly.
     _cassette_get_module.atomic_write_text = atomic_write_text
     _cassette_get_module.safe_path = safe_path
-    _cassette_get_module.SecurityError = SecurityError
+    _cassette_get_module.SecurityError = SecurityError  # type: ignore[misc]
     return _cassette_get_module.cassette_get(argv)
 
 

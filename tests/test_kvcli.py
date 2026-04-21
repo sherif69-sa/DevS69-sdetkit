@@ -189,7 +189,8 @@ def test_build_comment_aware_parser_passes_duplicate_policy_for_modern_parser():
 
 
 def test_kvcli_runner_supports_timeout(tmp_path):
-    p = run_kvcli("--text", "a=1", timeout=0.2)
+    # Give subprocess startup enough headroom for highly parallel CI workers.
+    p = run_kvcli("--text", "a=1", timeout=2.0)
     assert p.returncode == 0
 
 

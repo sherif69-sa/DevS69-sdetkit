@@ -17,6 +17,12 @@ from .help_surface import filter_hidden_subcommands, hide_help_subcommands
 from .inspect_compare_forwarding import build_inspect_compare_forwarded_args
 from .inspect_forwarding import build_inspect_forwarded_args
 from .inspect_project_forwarding import build_inspect_project_forwarded_args
+from .legacy_commands import (
+    LEGACY_COMMAND_MODULES as _LEGACY_COMMAND_MODULES,
+)
+from .legacy_commands import (
+    LEGACY_NAMESPACE_COMMANDS as _LEGACY_NAMESPACE_COMMANDS,
+)
 from .legacy_namespace import handle_legacy_namespace
 from .parsed_shortcuts import dispatch_parsed_shortcut
 from .parser_helpers import add_passthrough_subcommand as _add_passthrough_subcommand
@@ -30,6 +36,30 @@ from .versioning import tool_version
 
 # Backward-compatible alias used by tests and downstream monkeypatching.
 _resolve_non_day_playbook_alias = resolve_non_day_playbook_alias
+LEGACY_COMMAND_MODULES = _LEGACY_COMMAND_MODULES
+LEGACY_NAMESPACE_COMMANDS = _LEGACY_NAMESPACE_COMMANDS
+
+_COMPAT_MODULE_ATTRS: dict[str, str] = {
+    "expansion_automation_41": "sdetkit.expansion_automation_41",
+    "optimization_closeout_42": "sdetkit.optimization_closeout_42",
+    "acceleration_closeout_43": "sdetkit.acceleration_closeout_43",
+    "scale_closeout_44": "sdetkit.scale_closeout_44",
+    "expansion_closeout_45": "sdetkit.expansion_closeout_45",
+    "optimization_closeout_46": "sdetkit.optimization_closeout_46",
+    "reliability_closeout_47": "sdetkit.reliability_closeout_47",
+    "objection_closeout_48": "sdetkit.objection_closeout_48",
+    "weekly_review_closeout_49": "sdetkit.weekly_review_closeout_49",
+    "execution_prioritization_closeout_50": "sdetkit.execution_prioritization_closeout_50",
+}
+
+
+def __getattr__(name: str) -> object:
+    module_name = _COMPAT_MODULE_ATTRS.get(name)
+    if module_name is None:
+        raise AttributeError(name)
+    module = import_module(module_name)
+    globals()[name] = module
+    return module
 
 
 def _add_apiget_args(p: argparse.ArgumentParser) -> None:
