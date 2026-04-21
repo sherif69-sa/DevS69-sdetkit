@@ -2,6 +2,6 @@ from __future__ import annotations
 
 from sdetkit.core._legacy_lane import run_lane
 
-COMPAT_NAMESPACE = "phases"
+_unused_compat_namespace = "phases"
 
 __all__ = ["run_lane"]
