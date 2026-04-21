@@ -45,6 +45,7 @@ jobs:
           from pathlib import Path
 
           build = Path("build")
+          repo_root = Path.cwd()
           runs = {
               "adapter-smoke-worker": json.loads((build / "adapter-smoke-worker-run.json").read_text(encoding="utf-8")),
               "dependency-radar-worker": json.loads((build / "dependency-radar-worker-run.json").read_text(encoding="utf-8")),
@@ -63,13 +64,20 @@ jobs:
               "## Worker run status",
           ]
 
+          def display_path(raw_artifact: str) -> str:
+              artifact = Path(raw_artifact)
+              try:
+                  return str(artifact.resolve().relative_to(repo_root))
+              except ValueError:
+                  return raw_artifact
+
           for worker_id, payload in runs.items():
               artifacts = payload.get("artifacts", [])
               lines.append(
                   f"- **{worker_id}** · status `{payload.get('status', 'unknown')}` · artifacts `{len(artifacts)}`"
               )
               if artifacts:
-                  lines.append(f"  - First artifact: `{artifacts[0]}`")
+                  lines.append(f"  - First artifact: `{display_path(artifacts[0])}`")
 
           lines.extend(
               [
