@@ -8,8 +8,140 @@ on:
 jobs:
   optimize:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       - name: Run optimize lane snapshot
         run: |
-          python -m sdetkit kits optimize "repo optimization control loop" --format json --limit 3
+          set -euo pipefail
+          mkdir -p build
+          python -m sdetkit kits optimize "repo optimization control loop" --format json --limit 3 > build/repo-optimization.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("build/repo-optimization.json").read_text(encoding="utf-8"))
+          score = payload.get("alignment_score", {})
+          next_boosts = payload.get("next_boosts") or []
+          missing_domains = payload.get("missing_domains") or []
+          search_queries = payload.get("search_queries") or []
+          opportunities = payload.get("innovation_opportunities") or []
+
+          lines = [
+              "# Repo optimization control loop",
+              "",
+              "This issue is auto-generated from the repo's optimize surface so recurring upgrade and maintenance lanes stay actionable.",
+              "",
+              "## Current alignment score",
+              f"- Alignment status: **{score.get('status', 'unknown')}**",
+              f"- Alignment score: **{score.get('score', 'n/a')}**",
+              "",
+              "## Next boosts",
+          ]
+
+          if next_boosts:
+              for boost in next_boosts:
+                  boost_id = boost.get("id", "unknown")
+                  commands = boost.get("commands") or []
+                  lines.append(f"- **{boost.get('title', boost_id)}** (`{boost_id}`)")
+                  if commands:
+                      lines.append(f"  - Commands: `{', '.join(commands)}`")
+                  summary = boost.get("summary")
+                  if summary:
+                      lines.append(f"  - {summary}")
+          else:
+              lines.append("- None returned by the optimizer payload.")
+
+          lines.extend(["", "## Innovation opportunities"])
+          if opportunities:
+              lines.extend([f"- `{item.get('id', 'unknown')}`" for item in opportunities])
+          else:
+              lines.append("- None")
+
+          lines.extend(["", "## Missing domains"])
+          lines.extend([f"- ⚠️ `{name}`" for name in missing_domains] or ["- None"])
+
+          lines.extend(["", "## Search missions"])
+          if search_queries:
+              for item in search_queries:
+                  lines.append(f"- `{item.get('topic', 'unknown')}`")
+                  if item.get("query"):
+                      lines.append(f"  - Query: `{item['query']}`")
+          else:
+              lines.append("- None")
+
+          lines.extend([
+              "",
+              "## Suggested follow-up",
+              "- [ ] Pick one `next boost` and open/refresh a scoped implementation issue or PR.",
+              "- [ ] Turn one search mission into a concrete research or docs lane.",
+              "- [ ] Keep this loop linked to the weekly maintenance checklist for traceability.",
+              "",
+              "## Artifact",
+              "- `build/repo-optimization.json`",
+          ])
+
+          Path("build/repo-optimization.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+      - name: Upload optimization artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: repo-optimization
+          path: |
+            build/repo-optimization.json
+            build/repo-optimization.md
+
+      - name: Publish optimization issue
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const weekOf = new Date().toISOString().slice(0, 10);
+            const title = `🧠 Repo optimization control loop (${weekOf})`;
+            const body = fs.readFileSync('build/repo-optimization.md', 'utf8');
+
+            const labels = [
+              { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
+              { name: 'enhancement', color: 'a2eeef', description: 'Feature work and product improvements' },
+              { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
+            ];
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: 'open',
+              labels: 'enhancement',
+              per_page: 100,
+            });
+            const priorIssues = openIssues
+              .filter((issue) => !issue.pull_request)
+              .filter((issue) => issue.title.startsWith('🧠 Repo optimization control loop'));
+            for (const oldIssue of priorIssues) {
+              if (oldIssue.title !== title) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
+
+            const existing = priorIssues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['maintenance', 'enhancement', 'priority:medium'],
+              });
+            }

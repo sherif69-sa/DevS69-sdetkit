@@ -124,10 +124,20 @@ jobs:
             const configuration = await fetchRepoSecurityConfiguration();
 
             const title = `🧭 GHAS campaign planner (${weekOf})`;
-            const mapToLines = (map, label) => {
+            const mapToLines = (map, label, preferredOrder = []) => {
               if (!map || map.size === 0) return [`- ${label}: none`];
-              return [...map.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0]))).map(([key, value]) => `- ${label} ${key}: **${value}**`);
+              const rank = new Map(preferredOrder.map((name, index) => [name, index]));
+              return [...map.entries()]
+                .sort((a, b) => {
+                  const left = rank.has(a[0]) ? rank.get(a[0]) : Number.MAX_SAFE_INTEGER;
+                  const right = rank.has(b[0]) ? rank.get(b[0]) : Number.MAX_SAFE_INTEGER;
+                  if (left !== right) return left - right;
+                  return String(a[0]).localeCompare(String(b[0]));
+                })
+                .map(([key, value]) => `- ${label} ${key}: **${value}**`);
             };
+            const severityOrder = ['critical', 'high', 'medium', 'low', 'warning', 'note', 'unknown'];
+            const ageOrder = ['0-6d', '7-13d', '14-29d', '30+d', 'unknown'];
 
             const body = [
               'This issue is auto-generated to turn open GHAS alerts into actionable remediation campaigns.',
@@ -144,13 +154,13 @@ jobs:
               `- Push-protection bypassed secret alerts: **${secretSummary.bypassed}**`,
               '',
               '### Code scanning by severity',
-              ...mapToLines(codeSummary.severityCounts, 'severity'),
+              ...mapToLines(codeSummary.severityCounts, 'severity', severityOrder),
               '',
               '### Code scanning by age',
-              ...mapToLines(codeSummary.ageCounts, 'age'),
+              ...mapToLines(codeSummary.ageCounts, 'age', ageOrder),
               '',
               '### Secret scanning by age',
-              ...mapToLines(secretSummary.ageCounts, 'age'),
+              ...mapToLines(secretSummary.ageCounts, 'age', ageOrder),
               '',
               '## Security configuration context',
               configuration
@@ -164,7 +174,7 @@ jobs:
                 : '- Secret protection status: unavailable from API response.',
               '',
               '## Suggested weekly execution lane',
-              '- [ ] Create or refresh a security campaign for any 14+  code scanning backlog.',
+              '- [ ] Create or refresh a security campaign for any 14+ day code scanning backlog.',
               '- [ ] Use Copilot Autofix suggestions where available, then validate fixes in CI before merge.',
               '- [ ] Group push-protection bypass secret alerts into a focused follow-up campaign and record owner/disposition.',
               '- [ ] Link the resulting issue or PR back to this planner for traceability.',
