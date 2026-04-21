@@ -1,20 +1,19 @@
-FROM public.ecr.aws/x8v8d7g8/mars-base:latest
+FROM python:3.12-slim
 
-WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-RUN groupadd -g 1001 app \
- && useradd -u 1001 -g app -m app
+WORKDIR /opt/sdetkit
 
-COPY requirements-test.txt /app/requirements-test.txt
+RUN groupadd -r sdetkit && useradd -r -g sdetkit -u 10001 sdetkit
 
-RUN python3 -m venv .venv \
- && . .venv/bin/activate \
- && python -m pip install -q -r /app/requirements-test.txt
+COPY pyproject.toml README.md LICENSE /opt/sdetkit/
+COPY src /opt/sdetkit/src
 
-ENV PYTHONPATH=src
+RUN python -m pip install --no-cache-dir --upgrade pip \
+ && python -m pip install --no-cache-dir -e .[test]
 
-COPY . .
+USER sdetkit
+WORKDIR /workspace
 
-USER app
-
-CMD ["/bin/bash", "-lc", ". .venv/bin/activate && pytest -q"]
+CMD ["pytest", "-q"]
