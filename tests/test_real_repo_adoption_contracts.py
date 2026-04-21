@@ -50,6 +50,21 @@ def test_real_repo_fixture_has_canonical_structure() -> None:
     assert not missing, f"missing canonical fixture files: {missing}"
 
 
+def test_real_repo_fixture_pytest_wiring_passes() -> None:
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q"],
+        cwd=FIXTURE_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert proc.returncode == 0, (
+        "expected fixture pytest wiring to pass from fixture root\n"
+        f"stdout:\n{proc.stdout}\n"
+        f"stderr:\n{proc.stderr}"
+    )
+
+
 def test_real_repo_golden_artifacts_exist() -> None:
     required_artifacts = (
         "gate-fast.json",

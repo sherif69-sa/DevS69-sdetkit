@@ -105,7 +105,7 @@ Head-5 now does more than report problems:
 - it refreshes artifacts like `doctor.json`, `maintenance.json`, and `security-check.json`,
 - and it records a pre/post score delta in `premium-summary.json`.
 
-Tothe smart script lane can automatically trigger:
+To use the smart script lane, you can automatically trigger:
 
 - `sdetkit gate fast --fix-only` when doctor/style/quality drift is detected,
 - `sdetkit doctor --json --out ...` to refresh doctor evidence after fixes,

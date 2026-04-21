@@ -1,4 +1,4 @@
-from app import add
+from app.main import add
 
 
 def test_add() -> None:
