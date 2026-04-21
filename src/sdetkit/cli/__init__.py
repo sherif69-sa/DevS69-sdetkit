@@ -18,6 +18,17 @@ def _load_legacy_cli_module() -> ModuleType:
     return module
 
 
+def _run_module_main(module_name: str, args: list[str]) -> int:
+    module = _load_legacy_cli_module()
+    return int(module._run_module_main(module_name, args))
+
+
+def __getattr__(name: str):
+    module = _load_legacy_cli_module()
+    return getattr(module, name)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     module = _load_legacy_cli_module()
+    module._run_module_main = _run_module_main
     return int(module.main(argv))
