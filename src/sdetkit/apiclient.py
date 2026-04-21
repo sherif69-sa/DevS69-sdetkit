@@ -5,6 +5,8 @@ import random
 import time
 import uuid
 from collections.abc import Awaitable, Callable
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from typing import Any
 from urllib.parse import urljoin
 
@@ -28,10 +30,20 @@ def _retry_after_seconds(headers: Any) -> float | None:
         v = None
     if not v:
         return None
+    raw = str(v).strip()
     try:
-        return float(int(str(v).strip()))
+        delay = float(int(raw))
+        return max(0.0, delay)
     except Exception:
+        pass
+    try:
+        parsed = parsedate_to_datetime(raw)
+    except (TypeError, ValueError):
         return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    delay = (parsed - datetime.now(timezone.utc)).total_seconds()
+    return max(0.0, delay)
 
 
 def _merge_headers(
