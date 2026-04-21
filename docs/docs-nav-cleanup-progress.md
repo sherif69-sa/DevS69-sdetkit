@@ -45,3 +45,44 @@ Scoped batch:
 Action taken:
 
 - moved this cluster to `exclude_docs` so warning inventory stays focused on active navigation pathways.
+
+## Batch completed: report + executive satellite trim
+
+Scoped batch:
+
+- `*-report.md`
+- `executive-*.md`
+- `cto-*.md`
+- `production-*.md`
+- `kpi-baseline-week-*.md`
+- `repo-*-20*.md`
+
+Action taken:
+
+- expanded `mkdocs.yml` `exclude_docs` patterns for non-primary report families and executive satellites,
+- kept canonical user pathways in nav unchanged,
+- preserved explicit exceptions (for example `integrations-and-extension-boundary.md`).
+
+Expected outcome:
+
+- lower warning noise in `mkdocs build` output,
+- clearer separation between primary operator docs and historical/report satellites.
+
+## Batch completed: operational playbook promotion
+
+Scoped batch:
+
+- `primary-docs-map.md`
+- `test-bootstrap.md`
+- `real-repo-adoption.md`
+- `operator-onboarding-wizard.md`
+
+Action taken:
+
+- promoted these pages into `mkdocs.yml` navigation under `Advanced > Execution programs`,
+- kept existing canonical entrypoints intact while improving operator discoverability.
+
+Expected outcome:
+
+- fewer warning-only pages in `mkdocs build` output for operational docs,
+- faster navigation to execution-critical runbooks.

@@ -134,6 +134,17 @@ nav:
       - Changelog: changelog.md
       - License: license.md
   - Advanced:
+      - Execution programs:
+          - Phase-by-phase execution plan: phase-by-phase-execution-plan.md
+          - Phase execution one-by-one: phase-execution-one-by-one.md
+          - Operator essentials: operator-essentials.md
+          - Repo health dashboard: repo-health-dashboard.md
+          - Portfolio reporting recipe: portfolio-reporting-recipe.md
+          - KPI schema: kpi-schema.md
+          - Primary docs map: primary-docs-map.md
+          - Test bootstrap playbook: test-bootstrap.md
+          - Real repo adoption: real-repo-adoption.md
+          - Operator onboarding wizard: operator-onboarding-wizard.md
       - Contributing and maintenance:
           - Repo tour: repo-tour.md
           - First contribution quickstart: first-contribution-quickstart.md
@@ -182,9 +193,15 @@ nav:
 exclude_docs: |
   artifacts/**
   roadmap/reports/**
+  *-report.md
   impact-*-*-report.md
   big-upgrade-report-*.md
   ultra-upgrade-report-*.md
+  executive-*.md
+  cto-*.md
+  production-*.md
+  kpi-baseline-week-*.md
+  repo-*-20*.md
   agentos-*.md
   automation-templates-engine.md
   integrations-*.md
