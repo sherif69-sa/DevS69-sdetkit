@@ -149,14 +149,16 @@ jobs:
               }
             }
 
-            const openIssues = await github.rest.issues.listForRepo({
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
               owner,
               repo,
               state: 'open',
               labels: 'automation',
               per_page: 100,
             });
-            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('🤖 Worker alignment radar'));
+            const priorIssues = openIssues
+              .filter((issue) => !issue.pull_request)
+              .filter((issue) => issue.title.startsWith('🤖 Worker alignment radar'));
 
             for (const oldIssue of priorIssues) {
               if (oldIssue.title !== title) {
