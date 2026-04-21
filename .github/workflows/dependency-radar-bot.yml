@@ -38,6 +38,14 @@ jobs:
           import json
           from pathlib import Path
 
+          repo_root = str(Path.cwd())
+
+          def relativize_repo_paths(text: str) -> str:
+              if not text:
+                  return text
+              normalized = text.replace(f"{repo_root}/", "")
+              return normalized.replace(repo_root, ".")
+
           data = json.loads(Path('build/dependency-radar.json').read_text(encoding='utf-8'))
           packages = data.get('packages', [])[:5]
           route_map = data.get('packages', [])[:3]
@@ -70,7 +78,7 @@ jobs:
           lines.extend([
               '',
               '## Runtime fast-follow watchlist',
-              Path('build/runtime-fast-follow.md').read_text(encoding='utf-8').strip(),
+              relativize_repo_paths(Path('build/runtime-fast-follow.md').read_text(encoding='utf-8').strip()),
               '',
               '## Recommended follow-up',
               '- [ ] Validate the hottest package lane before merging broad dependency refreshes.',

@@ -99,6 +99,51 @@ jobs:
               }
             }
 
+            const openIssues = (await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            })).filter((issue) => !issue.pull_request);
+            const recentIssues = [];
+            let recentIssuePages = 0;
+            for await (const response of github.paginate.iterator(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: 'all',
+              per_page: 100,
+            })) {
+              recentIssues.push(...response.data.filter((issue) => !issue.pull_request));
+              recentIssuePages += 1;
+              if (recentIssuePages >= 3) {
+                break;
+              }
+            }
+            const hasLabel = (issue, label) => issue.labels?.some((entry) => {
+              if (typeof entry === 'string') {
+                return entry === label;
+              }
+              return entry?.name === label;
+            });
+            const findIssueByPrefix = (prefix) => recentIssues.find((issue) => issue.title.startsWith(prefix));
+            const relatedIssueLinks = [
+              ['GHAS digest', '🛡️ GHAS weekly digest'],
+              ['GHAS campaign planner', '🧭 GHAS campaign planner'],
+              ['GHAS alert SLA tracker', '⏱️ GHAS alert SLA tracker'],
+              ['GHAS metrics snapshot', '📊 GHAS metrics snapshot'],
+              ['GHAS CodeQL hotspots', '🧪 GHAS CodeQL hotspots'],
+              ['GHAS configuration audit', '🧱 GHAS configuration audit'],
+              ['Workflow governance audit', '🧾 Workflow governance audit'],
+              ['Secret protection review', '🔑 Secret protection review'],
+              ['Repo optimization control loop', '🧠 Repo optimization control loop'],
+              ['Dependency radar', '📡 Dependency radar + runtime watchlist'],
+            ]
+              .map(([label, prefix]) => {
+                const issue = findIssueByPrefix(prefix);
+                return issue ? `- ${label}: ${issue.html_url}` : null;
+              })
+              .filter(Boolean);
+
             const mainTitle = `🔐 Weekly security + maintenance checklist (${weekOf})`;
             const mainBody = [
               'This issue is auto-generated to keep the repository secure and continuously updated.',
@@ -109,7 +154,7 @@ jobs:
               '- [ ] Review GitHub code scanning, Dependabot, and secret-scanning alerts and close/resolution as needed.',
               '- [ ] Review the weekly GHAS digest issue and assign owners to any open high-severity findings.',
               '- [ ] Review the GHAS campaign planner issue for Copilot Autofix opportunities, alert-age slices, and push-protection bypass follow-up.',
-              '- [ ] Review the GHAS alert SLA tracker and convert every 14+  breach into an owned issue or PR.',
+              '- [ ] Review the GHAS alert SLA tracker and convert every 14+ day breach into an owned issue or PR.',
               '- [ ] Review the GHAS metrics snapshot artifact before weekly reporting or roadmap updates.',
               '- [ ] Review the GHAS CodeQL hotspots issue and batch the top rule or file into one remediation lane.',
               '- [ ] Review the latest workflow governance audit for permissions/pinning drift.',
@@ -123,21 +168,17 @@ jobs:
               '- [ ] Link roadmap updates in `docs/roadmap.md`.',
               '- [ ] Review the dependency radar issue and select at least one validation-linked upgrade candidate.',
               '',
+              '## Related weekly issue links',
+              ...(relatedIssueLinks.length ? relatedIssueLinks : ['- No related weekly issues are currently open.']),
+              '',
               '## Quick links',
               `- Code scanning: https://github.com/${owner}/${repo}/security/code-scanning`,
               `- Dependabot: https://github.com/${owner}/${repo}/security/dependabot`,
               `- Actions: https://github.com/${owner}/${repo}/actions`,
             ].join('\n');
 
-            const maintenanceIssues = await github.rest.issues.listForRepo({
-              owner,
-              repo,
-              state: 'open',
-              labels: maintenanceLabel,
-              per_page: 100,
-            });
-
-            const previousMaintenance = maintenanceIssues.data.filter((i) => i.title.startsWith('🔐 Weekly security + maintenance checklist'));
+            const maintenanceIssues = openIssues.filter((issue) => hasLabel(issue, maintenanceLabel));
+            const previousMaintenance = maintenanceIssues.filter((i) => i.title.startsWith('🔐 Weekly security + maintenance checklist'));
             for (const oldIssue of previousMaintenance) {
               if (oldIssue.title !== mainTitle) {
                 await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
@@ -170,14 +211,8 @@ jobs:
               '- Link the final implementation PR back to this issue.',
             ].join('\n');
 
-            const enhancementIssues = await github.rest.issues.listForRepo({
-              owner,
-              repo,
-              state: 'open',
-              labels: enhancementLabel,
-              per_page: 100,
-            });
-            const existingEnhancement = enhancementIssues.data.find((i) => i.title === enhancementTitle);
+            const enhancementIssues = openIssues.filter((issue) => hasLabel(issue, enhancementLabel));
+            const existingEnhancement = enhancementIssues.find((i) => i.title === enhancementTitle);
             if (!existingEnhancement) {
               await github.rest.issues.create({
                 owner,
@@ -239,7 +274,12 @@ jobs:
                   });
                 }
 
-                const conclusion = latest.conclusion || latest.status || 'unknown';
+                const status = latest.status || 'unknown';
+                if (status !== 'completed') {
+                  continue;
+                }
+
+                const conclusion = latest.conclusion || 'unknown';
                 if (!['success', 'neutral', 'skipped'].includes(conclusion)) {
                   weakSpots.push({
                     area: `Workflow health: ${workflowFile}`,
@@ -256,14 +296,8 @@ jobs:
               }
             }
 
-            const staleOpenIssues = (await github.rest.issues.listForRepo({
-              owner,
-              repo,
-              state: 'open',
-              labels: maintenanceLabel,
-              per_page: 100,
-            })).data.filter((issue) => {
-              if (issue.pull_request) return false;
+            const staleOpenIssues = openIssues.filter((issue) => {
+              if (!hasLabel(issue, maintenanceLabel)) return false;
               const updatedAt = new Date(issue.updated_at).getTime();
               return Number.isFinite(updatedAt) && now - updatedAt > staleMs;
             });
@@ -271,7 +305,7 @@ jobs:
             if (staleOpenIssues.length > 0) {
               weakSpots.push({
                 area: 'Maintenance issue hygiene',
-                observation: `${staleOpenIssues.length} maintenance issue(s) have been open with no recent updates for 14+ names.`,
+                observation: `${staleOpenIssues.length} maintenance issue(s) have been open with no recent updates for 14+ days.`,
                 suggestion: 'Close outdated trackers or convert them into actionable implementation issues with owners.',
               });
             }
@@ -294,13 +328,11 @@ jobs:
               '- [ ] Link implemented fixes back to this report and `docs/roadmap.md`.',
             ].join('\n');
 
-            const weakOpen = (await github.rest.issues.listForRepo({
-              owner,
-              repo,
-              state: 'open',
-              labels: `${maintenanceLabel},${weakSpotLabel}`,
-              per_page: 100,
-            })).data.filter((i) => i.title.startsWith('🛠️ Weekly maintenance weak-spot report'));
+            const weakOpen = openIssues.filter(
+              (issue) => hasLabel(issue, maintenanceLabel)
+                && hasLabel(issue, weakSpotLabel)
+                && issue.title.startsWith('🛠️ Weekly maintenance weak-spot report'),
+            );
 
             for (const oldIssue of weakOpen) {
               if (oldIssue.title !== weakTitle) {

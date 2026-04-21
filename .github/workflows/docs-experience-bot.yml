@@ -136,7 +136,10 @@ jobs:
           )
           lines.extend([f'- ⚠️ `{path}`' for path in missing_nav_targets] or ['- None'])
           lines.extend(['', '## Orphan docs outside the primary nav'])
-          lines.extend([f'- `{path}`' for path in orphan_docs[:15]] or ['- None'])
+          shown_orphans = orphan_docs[:15]
+          if orphan_docs:
+              lines.append(f"- Showing first **{len(shown_orphans)}** of **{len(orphan_docs)}** orphan docs.")
+          lines.extend([f'- `{path}`' for path in shown_orphans] or ['- None'])
           lines.extend(['', '## Flagship docs needing attention'])
           lines.extend([f'- ⚠️ `{path}`' for path in missing_flagship_docs] or ['- None'])
           lines.extend(

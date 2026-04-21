@@ -113,7 +113,13 @@ jobs:
 
             const topRules = [...ruleCounts.values()].sort((a, b) => b.count - a.count || b.oldest_age_days - a.oldest_age_days).slice(0, 10);
             const topFiles = [...fileCounts.values()].sort((a, b) => b.count - a.count).slice(0, 10);
-            const severitySummary = [...severityCounts.values()].sort((a, b) => b.count - a.count);
+            const severityOrder = new Map(['critical', 'high', 'medium', 'low', 'warning', 'note', 'unknown'].map((name, index) => [name, index]));
+            const severitySummary = [...severityCounts.values()].sort((a, b) => {
+              const left = severityOrder.has(a.severity) ? severityOrder.get(a.severity) : Number.MAX_SAFE_INTEGER;
+              const right = severityOrder.has(b.severity) ? severityOrder.get(b.severity) : Number.MAX_SAFE_INTEGER;
+              if (left !== right) return left - right;
+              return b.count - a.count;
+            });
             const snapshot = {
               generated_at: new Date().toISOString(),
               repository: `${owner}/${repo}`,
@@ -141,7 +147,7 @@ jobs:
               '',
               '## Top rules to batch-fix',
               ...(topRules.length
-                ? topRules.map((item) => `- **${item.rule_name}** (\`${item.key}\`, ${item.tool}) — ${item.count} open alert(s), oldest ${item.oldest_age_days} (s)`)
+                ? topRules.map((item) => `- **${item.rule_name}** (\`${item.key}\`, ${item.tool}) — ${item.count} open alert(s), oldest ${item.oldest_age_days} day(s)`)
                 : ['- No open code scanning alerts were returned.']),
               '',
               '## Top files / paths',
@@ -156,7 +162,7 @@ jobs:
               '',
               '## Suggested follow-up',
               '- [ ] Batch the top rule into one remediation PR or issue cluster.',
-              '- [ ] Start with any 14+  hotspot that touches a hot-path file.',
+              '- [ ] Start with any 14+ day hotspot that touches a hot-path file.',
               '- [ ] Re-run the GHAS campaign planner after closing the top hotspot to verify backlog reduction.',
               '',
               '## Artifact',
