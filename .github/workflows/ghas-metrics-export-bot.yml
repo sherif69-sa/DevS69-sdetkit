@@ -51,6 +51,15 @@ jobs:
             };
             const notes = [];
             const dayMs = 24 * 60 * 60 * 1000;
+            const staleWorkflowDays = 14;
+
+            function ageInDays(isoAt) {
+              const at = new Date(isoAt || '').getTime();
+              if (!Number.isFinite(at)) {
+                return null;
+              }
+              return Math.max(0, Math.floor((Date.now() - at) / dayMs));
+            }
 
             async function fetchAlerts(path, label) {
               try {
@@ -122,10 +131,13 @@ jobs:
                   per_page: 1,
                 });
                 const latest = runs.data.workflow_runs?.[0];
+                const updatedAgeDays = ageInDays(latest?.updated_at);
                 workflowFreshness.push({
                   workflow: workflowFile,
                   latest_result: latest ? (latest.conclusion || latest.status || 'unknown') : 'no-runs',
                   updated_at: latest?.updated_at || null,
+                  updated_age_days: updatedAgeDays,
+                  stale_14d: updatedAgeDays !== null ? updatedAgeDays >= staleWorkflowDays : null,
                   url: latest?.html_url || `https://github.com/${owner}/${repo}/actions/workflows/${workflowFile}`,
                 });
               } catch (error) {
@@ -134,6 +146,8 @@ jobs:
                   workflow: workflowFile,
                   latest_result: 'inspection-failed',
                   updated_at: null,
+                  updated_age_days: null,
+                  stale_14d: null,
                   url: `https://github.com/${owner}/${repo}/actions/workflows/${workflowFile}`,
                 });
               }
@@ -193,9 +207,9 @@ jobs:
               `- Secret scanning: \`${JSON.stringify(snapshot.alerts.secret_scanning.age_buckets)}\``,
               '',
               '## Workflow freshness',
-              '| Workflow | Latest result | Updated at | Link |',
-              '| --- | --- | --- | --- |',
-              ...workflowFreshness.map((row) => `| ${row.workflow} | ${row.latest_result} | ${row.updated_at || 'n/a'} | [open](${row.url}) |`),
+              '| Workflow | Latest result | Updated at | Age (days) | 14d stale | Link |',
+              '| --- | --- | --- | --- | --- | --- |',
+              ...workflowFreshness.map((row) => `| ${row.workflow} | ${row.latest_result} | ${row.updated_at || 'n/a'} | ${row.updated_age_days ?? 'n/a'} | ${row.stale_14d === null ? 'n/a' : (row.stale_14d ? 'yes' : 'no')} | [open](${row.url}) |`),
               '',
               '## Artifact',
               '- Action artifact: `ghas-metrics-snapshot` (`build/ghas-metrics.json`)',

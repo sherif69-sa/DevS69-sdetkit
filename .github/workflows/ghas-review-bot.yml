@@ -40,6 +40,8 @@ jobs:
             }
 
             const fallbackNotes = [];
+            const dayMs = 24 * 60 * 60 * 1000;
+            const staleWorkflowDays = 14;
             const trackedWorkflows = [
               'security.yml',
               'osv-scanner.yml',
@@ -58,6 +60,13 @@ jobs:
             ];
 
             const workflowRows = [];
+            const ageInDays = (isoAt) => {
+              const at = new Date(isoAt || '').getTime();
+              if (!Number.isFinite(at)) {
+                return null;
+              }
+              return Math.max(0, Math.floor((Date.now() - at) / dayMs));
+            };
             for (const workflowFile of trackedWorkflows) {
               try {
                 const runs = await github.rest.actions.listWorkflowRuns({
@@ -67,10 +76,13 @@ jobs:
                   per_page: 1,
                 });
                 const latest = runs.data.workflow_runs?.[0];
+                const ageDays = ageInDays(latest?.updated_at);
                 workflowRows.push({
                   workflow: workflowFile,
                   status: latest ? (latest.conclusion || latest.status || 'unknown') : 'no-runs',
                   updatedAt: latest?.updated_at || 'n/a',
+                  ageDays,
+                  stale14d: ageDays !== null ? ageDays >= staleWorkflowDays : null,
                   url: latest?.html_url || `https://github.com/${owner}/${repo}/actions/workflows/${workflowFile}`,
                 });
               } catch (error) {
@@ -78,6 +90,8 @@ jobs:
                   workflow: workflowFile,
                   status: 'inspection-failed',
                   updatedAt: 'n/a',
+                  ageDays: null,
+                  stale14d: null,
                   url: `https://github.com/${owner}/${repo}/actions/workflows/${workflowFile}`,
                 });
                 fallbackNotes.push(`Unable to inspect ${workflowFile}: ${error.message}`);
@@ -162,9 +176,9 @@ jobs:
               `- Security overview: https://github.com/${owner}/${repo}/security`,
               '',
               '## Workflow freshness',
-              '| Workflow | Latest result | Updated at | Link |',
-              '| --- | --- | --- | --- |',
-              ...workflowRows.map((row) => `| ${row.workflow} | ${row.status} | ${row.updatedAt} | [open](${row.url}) |`),
+              '| Workflow | Latest result | Updated at | Age (days) | 14d stale | Link |',
+              '| --- | --- | --- | --- | --- | --- |',
+              ...workflowRows.map((row) => `| ${row.workflow} | ${row.status} | ${row.updatedAt} | ${row.ageDays ?? 'n/a'} | ${row.stale14d === null ? 'n/a' : (row.stale14d ? 'yes' : 'no')} | [open](${row.url}) |`),
               '',
               '## Required follow-up',
               '- [ ] Review every open GHAS alert and document disposition for anything that is still open at the end of the week.',

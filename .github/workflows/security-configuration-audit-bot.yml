@@ -97,10 +97,11 @@ jobs:
                 });
                 return Array.isArray(response.data) ? response.data.length : 0;
               } catch (error) {
-                notes.push(`${label} unavailable: ${error.message}`);
-                return 'unknown';
+                notes.push(`${label} unavailable: ${error.message}. Add GHAS_READ_TOKEN if broader security scopes are required.`);
+                return null;
               }
             }
+            const formatCount = (count) => (count === null ? 'unavailable' : count);
 
             const configuration = await fetchConfiguration();
             const codeAlerts = await fetchAlerts('/repos/{owner}/{repo}/code-scanning/alerts', 'Code scanning alerts');
@@ -137,9 +138,9 @@ jobs:
                 : '- Automatic dependency submission: unavailable.',
               '',
               '## Open alert snapshot',
-              `- Code scanning alerts: **${codeAlerts}**`,
-              `- Secret scanning alerts: **${secretAlerts}**`,
-              `- Dependabot alerts: **${dependabotAlerts}**`,
+              `- Code scanning alerts: **${formatCount(codeAlerts)}**`,
+              `- Secret scanning alerts: **${formatCount(secretAlerts)}**`,
+              `- Dependabot alerts: **${formatCount(dependabotAlerts)}**`,
               '',
               '## Suggested monthly follow-up',
               '- [ ] Confirm the repo still uses the intended GitHub-recommended or custom security configuration.',
@@ -150,14 +151,16 @@ jobs:
               ...(notes.length ? notes.map((note) => `- ${note}`) : ['- Configuration and alert APIs responded without fallback warnings.']),
             ].join('\n');
 
-            const openIssues = await github.rest.issues.listForRepo({
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
               owner,
               repo,
               state: 'open',
               labels: 'ghas',
               per_page: 100,
             });
-            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('🧱 GHAS configuration audit'));
+            const priorIssues = openIssues
+              .filter((issue) => !issue.pull_request)
+              .filter((issue) => issue.title.startsWith('🧱 GHAS configuration audit'));
 
             for (const oldIssue of priorIssues) {
               if (oldIssue.title !== title) {

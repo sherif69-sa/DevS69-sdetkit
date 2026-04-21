@@ -27,6 +27,9 @@ jobs:
           files = sorted(workflow_dir.glob('*.yml'))
           sha_pin = re.compile(r'@[0-9a-f]{40}(?:\s|$)', re.IGNORECASE)
           uses_re = re.compile(r'^\s*-?\s*uses:\s*(\S+)', re.MULTILINE)
+          schedule_event_re = re.compile(r'^\s*schedule:\s*$', re.MULTILINE)
+          dispatch_event_re = re.compile(r'^\s*workflow_dispatch:\s*$', re.MULTILINE)
+          pr_target_event_re = re.compile(r'^\s*pull_request_target:\s*$', re.MULTILINE)
 
           findings = []
           summary = {
@@ -49,7 +52,7 @@ jobs:
                       'message': 'Workflow does not declare a top-level permissions block.',
                   })
 
-              if 'schedule:' in text and 'workflow_dispatch:' not in text:
+              if schedule_event_re.search(text) and not dispatch_event_re.search(text):
                   summary['missing_dispatch'].append(path.name)
                   findings.append({
                       'type': 'missing_dispatch',
@@ -57,7 +60,7 @@ jobs:
                       'message': 'Scheduled workflow should also expose workflow_dispatch for manual recovery.',
                   })
 
-              if 'pull_request_target:' in text:
+              if pr_target_event_re.search(text):
                   summary['pr_target'].append(path.name)
                   findings.append({
                       'type': 'pr_target',
@@ -151,14 +154,16 @@ jobs:
               }
             }
 
-            const openIssues = await github.rest.issues.listForRepo({
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
               owner,
               repo,
               state: 'open',
               labels: 'maintenance',
               per_page: 100,
             });
-            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('🧾 Workflow governance audit'));
+            const priorIssues = openIssues
+              .filter((issue) => !issue.pull_request)
+              .filter((issue) => issue.title.startsWith('🧾 Workflow governance audit'));
 
             for (const oldIssue of priorIssues) {
               if (oldIssue.title !== title) {

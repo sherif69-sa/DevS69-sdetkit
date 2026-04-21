@@ -37,8 +37,15 @@ jobs:
           import json
           from pathlib import Path
 
+          repo_root = Path.cwd()
           payload = json.loads(Path("build/adapter-smoke-worker-run.json").read_text(encoding="utf-8"))
           artifacts = payload.get("artifacts", [])
+          def display_path(raw: str) -> str:
+              artifact = Path(raw)
+              try:
+                  return str(artifact.resolve().relative_to(repo_root))
+              except ValueError:
+                  return raw
 
           lines = [
               "# Adapter smoke pack",
@@ -48,16 +55,22 @@ jobs:
               "## Worker status",
               f"- Status: **{payload.get('status', 'unknown')}**",
               f"- Artifacts captured: **{len(artifacts)}**",
+              f"- First artifact: `{display_path(artifacts[0])}`" if artifacts else "- First artifact: none",
               "",
               "## Suggested follow-up",
               "- [ ] Review adapter route-map output before changing optional integration dependencies.",
               "- [ ] Keep adapter quickstarts aligned with environment variables and offline defaults.",
               "- [ ] Use the worker bundle as the baseline before expanding notify channels or plugins.",
               "",
+              "## Worker artifact highlights",
+          ]
+          lines.extend([f"- `{display_path(path)}`" for path in artifacts[:3]] or ["- None"])
+          lines.extend([
+              "",
               "## Artifacts",
               "- `build/adapter-smoke-worker-run.json`",
               "- `.sdetkit/agent/template-runs/adapter-smoke-worker`",
-          ]
+          ])
 
           Path("build/adapter-smoke.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
           PY
@@ -95,14 +108,16 @@ jobs:
               }
             }
 
-            const openIssues = await github.rest.issues.listForRepo({
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
               owner,
               repo,
               state: 'open',
               labels: 'automation',
               per_page: 100,
             });
-            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('📣 Adapter smoke pack'));
+            const priorIssues = openIssues
+              .filter((issue) => !issue.pull_request)
+              .filter((issue) => issue.title.startsWith('📣 Adapter smoke pack'));
 
             for (const oldIssue of priorIssues) {
               if (oldIssue.title !== title) {

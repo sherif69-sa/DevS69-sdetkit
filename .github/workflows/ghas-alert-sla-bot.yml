@@ -93,10 +93,16 @@ jobs:
                 .slice(0, 5);
             }
 
-            function mapLines(map, prefix) {
+            function mapLines(map, prefix, preferredOrder = []) {
               if (map.size === 0) return [`- ${prefix}: none`];
+              const rank = new Map(preferredOrder.map((name, index) => [name, index]));
               return [...map.entries()]
-                .sort((a, b) => String(a[0]).localeCompare(String(b[0])))
+                .sort((a, b) => {
+                  const left = rank.has(a[0]) ? rank.get(a[0]) : Number.MAX_SAFE_INTEGER;
+                  const right = rank.has(b[0]) ? rank.get(b[0]) : Number.MAX_SAFE_INTEGER;
+                  if (left !== right) return left - right;
+                  return String(a[0]).localeCompare(String(b[0]));
+                })
                 .map(([key, value]) => `- ${prefix} ${key}: **${value}**`);
             }
 
@@ -115,6 +121,7 @@ jobs:
 
             const secretBypassed = secretAlerts.filter((alert) => alert.push_protection_bypassed === true);
             const secretBypassedAged = secretBypassed.filter((alert) => ageDays(alert) >= 7).length;
+            const severityOrder = ['critical', 'high', 'medium', 'low', 'warning', 'note', 'unknown'];
             const highSeverityCodeAged = codeAlerts.filter((alert) => {
               const severity = alert.rule?.security_severity_level || alert.rule?.severity || 'unknown';
               return ['critical', 'high'].includes(String(severity).toLowerCase()) && ageDays(alert) >= 14;
@@ -123,6 +130,7 @@ jobs:
               const severity = alert.security_vulnerability?.severity || alert.severity || 'unknown';
               return ['critical', 'high'].includes(String(severity).toLowerCase()) && ageDays(alert) >= 14;
             }).length;
+            const oldCodeRules = topOldCodeRules(codeAlerts);
 
             const title = `⏱️ GHAS alert SLA tracker (${weekOf})`;
             const body = [
@@ -149,17 +157,17 @@ jobs:
               `- Push-protection bypassed secret alerts aged 7+ days: **${secretBypassedAged}**`,
               '',
               '## Severity slices',
-              ...mapLines(codeSeverity, 'Code scanning severity'),
-              ...mapLines(dependabotSeverity, 'Dependabot severity'),
+              ...mapLines(codeSeverity, 'Code scanning severity', severityOrder),
+              ...mapLines(dependabotSeverity, 'Dependabot severity', severityOrder),
               '',
               '## Older CodeQL rules to batch together',
-              ...(topOldCodeRules(codeAlerts).length
-                ? topOldCodeRules(codeAlerts).map(([rule, count]) => `- ${rule}: **${count}** alert(s) aged 14+ days`)
-                : ['- No code-scanning rules currently breach the 14- SLA window.']),
+              ...(oldCodeRules.length
+                ? oldCodeRules.map(([rule, count]) => `- ${rule}: **${count}** alert(s) aged 14+ days`)
+                : ['- No code-scanning rules currently breach the 14+ day SLA window.']),
               '',
               '## Suggested execution lane',
-              '- [ ] Convert every 14+  high-severity code or Dependabot alert into an owned issue or PR.',
-              '- [ ] Group 14+  CodeQL alerts by rule into one focused remediation batch and use Copilot Autofix when appropriate.',
+              '- [ ] Convert every 14+ day high-severity code or Dependabot alert into an owned issue or PR.',
+              '- [ ] Group 14+ day CodeQL alerts by rule into one focused remediation batch and use Copilot Autofix when appropriate.',
               '- [ ] Treat push-protection bypassed secret alerts as same-week work until resolved or explicitly dismissed.',
               '- [ ] Link resulting PRs or follow-up issues back to this SLA tracker for audit history.',
               '',
