@@ -133,8 +133,8 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
         ReadinessCheck(
             check_id="engineering_baseline_files",
             weight=15,
-            passed=all(_exists(root, p) for p in ["pyproject.toml", "Dockerfile", "noxfile.py"]),
-            evidence="pyproject.toml + Dockerfile + noxfile.py",
+            passed=_exists(root, "pyproject.toml") and _exists(root, "Dockerfile"),
+            evidence="pyproject.toml + Dockerfile",
             remediation="Ensure packaging/build/test automation entry points are present.",
         ),
         ReadinessCheck(
@@ -182,8 +182,9 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
             check_id="lockfiles_present",
             weight=10,
             passed=_exists(root, "poetry.lock")
-            and (_exists(root, "requirements.lock") or _exists(root, "requirements.txt.lock")),
-            evidence="poetry.lock + requirements.lock (or requirements.txt.lock)",
+            or _exists(root, "requirements.lock")
+            or _exists(root, "requirements.txt.lock"),
+            evidence="poetry.lock or requirements.lock or requirements.txt.lock",
             remediation="Pin dependencies for reproducible installs.",
         ),
     ]

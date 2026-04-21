@@ -9,9 +9,8 @@ from sdetkit import cli
 def test_baseline_write_and_check(tmp_path: Path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
 
-    import sdetkit.gate
-
     import sdetkit.doctor
+    import sdetkit.gate
 
     monkeypatch.setattr(sdetkit.doctor, "main", lambda argv=None: 0)
     monkeypatch.setattr(sdetkit.gate, "main", lambda argv=None: 0)
@@ -31,9 +30,8 @@ def test_baseline_write_and_check(tmp_path: Path, monkeypatch, capsys) -> None:
 def test_baseline_check_forwards_diff_flags(tmp_path: Path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
 
-    import sdetkit.gate
-
     import sdetkit.doctor
+    import sdetkit.gate
 
     calls: list[list[str]] = []
 
