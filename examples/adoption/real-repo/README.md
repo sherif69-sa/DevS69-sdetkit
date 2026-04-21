@@ -10,6 +10,17 @@ canonical SDETKit path from local run to CI artifact review.
 - intentional first-run gate failures for realistic triage proof
 - no customer claims, benchmark claims, or synthetic dashboards
 
+## Local test check
+
+Run from this directory:
+
+```bash
+pytest -q
+```
+
+The fixture is configured with `pythonpath = ["src"]` in `pyproject.toml`, so
+the tiny test imports resolve in a standard src-layout pytest run.
+
 ## Canonical commands
 
 Run from this directory:
