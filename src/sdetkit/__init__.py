@@ -5,7 +5,17 @@ from __future__ import annotations
 import importlib
 from types import ModuleType
 
-_SUBPACKAGES = ("readiness", "phases", "evidence", "intelligence", "cli", "core", "gates", "ops", "utils")
+_SUBPACKAGES = (
+    "readiness",
+    "phases",
+    "evidence",
+    "intelligence",
+    "cli",
+    "core",
+    "gates",
+    "ops",
+    "utils",
+)
 
 _ALIAS_MAP = {
     "gate": "sdetkit.gates.gate",

@@ -1,5 +1,13 @@
 # DevS69 SDETKit
 
+
+Primary outcome: know if a change is ready to ship.
+
+Canonical first path:
+- `python -m sdetkit gate fast`
+- `python -m sdetkit gate release`
+- `python -m sdetkit doctor`
+
 ![DevS69 SDETKit hero](docs/assets/devs69-hero.svg)
 
 [![Pages](https://img.shields.io/website?url=https%3A%2F%2Fsherif69-sa.github.io%2FDevS69-sdetkit%2F&up_message=live&down_message=down&label=Pages)](https://sherif69-sa.github.io/DevS69-sdetkit/)

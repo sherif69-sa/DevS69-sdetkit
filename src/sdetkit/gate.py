@@ -1,5 +1,9 @@
-"""Compatibility wrapper for historical `sdetkit.gate` imports."""
+"""Expose gates implementation as `sdetkit.gate`."""
+
+from __future__ import annotations
+
+import sys
 
 from sdetkit.gates import gate as _gate
 
-globals().update({k: v for k, v in _gate.__dict__.items() if not k.startswith('__')})
+sys.modules[__name__] = _gate
