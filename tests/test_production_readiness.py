@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
 
-from sdetkit import cli
 from sdetkit.production_readiness import build_production_readiness_summary
+
+from sdetkit import cli
 
 
 def test_production_readiness_summary_for_repo_has_high_score():

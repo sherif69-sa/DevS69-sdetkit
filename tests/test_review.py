@@ -5,8 +5,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from sdetkit import review
 from sdetkit.review_engine import plan_adaptive_probes
+
+from sdetkit import review
 
 
 def test_review_repeated_run_tracks_changes_and_compare_artifacts(tmp_path: Path) -> None:

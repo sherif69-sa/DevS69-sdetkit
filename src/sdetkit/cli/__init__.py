@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import importlib.util
+from collections.abc import Sequence
 from pathlib import Path
 from types import ModuleType
-from typing import Sequence
 
 
 def _load_legacy_cli_module() -> ModuleType:

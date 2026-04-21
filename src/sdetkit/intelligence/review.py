@@ -11,10 +11,11 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from . import doctor, inspect_project, readiness
-from .evidence_workspace import load_workspace_manifest, record_workspace_run
-from .inspect_compare import run_compare
-from .inspect_data import run_inspect
+from .. import doctor, inspect_project, readiness
+from ..evidence_workspace import load_workspace_manifest, record_workspace_run
+from ..inspect_compare import run_compare
+from ..inspect_data import run_inspect
+from ..security import SecurityError, safe_path
 from .judgment import build_judgment, load_latest_previous_payload
 from .review_engine import (
     apply_probe_memory_update,
@@ -33,7 +34,6 @@ from .review_engine import (
     rank_likely_issue_tracks,
     summarize_history_delta,
 )
-from ..security import SecurityError, safe_path
 
 SCHEMA_VERSION = "sdetkit.review.v3"
 REVIEW_CONTRACT_VERSION = "sdetkit.review.contract.v1"
