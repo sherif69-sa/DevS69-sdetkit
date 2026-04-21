@@ -33,7 +33,7 @@ from .review_engine import (
     rank_likely_issue_tracks,
     summarize_history_delta,
 )
-from .security import SecurityError, safe_path
+from ..security import SecurityError, safe_path
 
 SCHEMA_VERSION = "sdetkit.review.v3"
 REVIEW_CONTRACT_VERSION = "sdetkit.review.contract.v1"

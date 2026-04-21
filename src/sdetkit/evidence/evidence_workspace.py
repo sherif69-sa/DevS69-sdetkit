@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .security import SecurityError, safe_path
+from ..security import SecurityError, safe_path
 
 WORKSPACE_SCHEMA_VERSION = "sdetkit.evidence.workspace.v1"
 
