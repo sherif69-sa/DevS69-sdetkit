@@ -214,3 +214,23 @@ def test_security_gate_iter_files_skips_generated_dirs(tmp_path: Path) -> None:
     assert all(not item.startswith(".venv/") for item in files)
     assert all(not item.startswith("site/") for item in files)
     assert all(not item.startswith("docs/artifacts/") for item in files)
+
+
+def test_security_gate_allows_debug_print_in_allowlisted_src_modules(tmp_path: Path) -> None:
+    module = tmp_path / "src" / "sdetkit" / "onboarding.py"
+    module.parent.mkdir(parents=True)
+    module.write_text("print('debug')\n", encoding="utf-8")
+
+    findings = sg.scan_repo(tmp_path)
+
+    assert not any(f.rule_id == "SEC_DEBUG_PRINT" for f in findings)
+
+
+def test_security_gate_flags_debug_print_outside_allowlisted_src_modules(tmp_path: Path) -> None:
+    module = tmp_path / "src" / "sdetkit" / "non_allowlisted_module.py"
+    module.parent.mkdir(parents=True)
+    module.write_text("print('debug')\n", encoding="utf-8")
+
+    findings = sg.scan_repo(tmp_path)
+
+    assert any(f.rule_id == "SEC_DEBUG_PRINT" for f in findings)

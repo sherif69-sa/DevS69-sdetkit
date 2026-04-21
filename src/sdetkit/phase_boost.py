@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from datetime import date
 from pathlib import Path
 
@@ -36,8 +37,23 @@ def _parser() -> argparse.ArgumentParser:
     return p
 
 
+def _is_valid_iso_date(value: str) -> bool:
+    try:
+        parsed = date.fromisoformat(value)
+    except ValueError:
+        return False
+    return parsed.isoformat() == value
+
+
 def main(argv: list[str] | None = None) -> int:
     ns = _parser().parse_args(argv)
+    if not _is_valid_iso_date(ns.start_date):
+        print(
+            "error: --start-date must be a valid ISO date in YYYY-MM-DD format.",
+            file=sys.stderr,
+        )
+        return 2
+
     payload = build_phase_boost_payload(ns.repo_name, ns.start_date)
     md = _render_markdown(payload)
     print(md, end="")
