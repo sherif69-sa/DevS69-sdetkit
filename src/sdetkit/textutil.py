@@ -3,6 +3,10 @@ import shlex
 _DUPLICATE_POLICIES = {"last", "first", "error"}
 
 
+class DuplicateKeyError(ValueError):
+    """Raised when duplicate keys are disallowed by parser policy."""
+
+
 def normalize_line(line: str) -> str:
     return line.strip()
 
@@ -38,7 +42,7 @@ def parse_kv_line(
             raise ValueError("bad kv")
 
         if duplicate_policy == "error" and k in out:
-            raise ValueError(f"duplicate key: {k}")
+            raise DuplicateKeyError(f"duplicate key: {k}")
         if duplicate_policy == "first" and k in out:
             continue
 

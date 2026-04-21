@@ -50,3 +50,6 @@ src/sdetkit.egg-info/
 
 # top-tier reporting scratch bundle
 /docs/artifacts/top-tier-bundle/
+
+# enterprise assessment scratch bundle
+/docs/artifacts/enterprise-assessment-pack/

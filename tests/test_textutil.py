@@ -4,7 +4,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from sdetkit.textutil import normalize_line, parse_kv_line
+from sdetkit.textutil import DuplicateKeyError, normalize_line, parse_kv_line
 
 
 @pytest.mark.parametrize(
@@ -76,7 +76,7 @@ def test_parse_kv_line_duplicate_policy_first_keeps_first_value():
 
 
 def test_parse_kv_line_duplicate_policy_error_raises():
-    with pytest.raises(ValueError, match="duplicate key: a"):
+    with pytest.raises(DuplicateKeyError, match="duplicate key: a"):
         parse_kv_line("a=1 a=2", duplicate_policy="error")
 
 
