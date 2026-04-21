@@ -1,0 +1,85 @@
+name: Value proof report
+description: Share a real-world ship/no-ship outcome from SDETKit
+title: "[Proof]: "
+labels: ["proof", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing real usage proof. Keep this short and factual so maintainers can learn quickly.
+
+  - type: dropdown
+    id: signal
+    attributes:
+      label: Decision signal
+      description: What decision did SDETKit produce?
+      options:
+        - ship
+        - no-ship
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What was being changed or released?
+      placeholder: PR/release scope and repo context.
+    validations:
+      required: true
+
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Artifact paths
+      description: Include deterministic evidence files.
+      placeholder: |
+        - build/gate-fast.json
+        - build/release-preflight.json
+    validations:
+      required: true
+
+  - type: textarea
+    id: first-failing-step
+    attributes:
+      label: First failing step (if no-ship)
+      description: Which step failed first?
+      placeholder: gate_fast / gate_release / doctor / n/a
+    validations:
+      required: false
+
+  - type: textarea
+    id: action-taken
+    attributes:
+      label: Action taken
+      description: What change did you make after the signal?
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome after rerun
+      description: What happened after remediation and rerun?
+    validations:
+      required: true
+
+  - type: textarea
+    id: adaptive-reviewer-summary
+    attributes:
+      label: Adaptive reviewer summary (optional)
+      description: Paste `judgment_summary` / `judgment_next_move` if available.
+      placeholder: |
+        judgment_summary: status=pass severity=low confidence=0.97
+        judgment_next_move: No immediate action required.
+    validations:
+      required: false
+
+  - type: input
+    id: confidence
+    attributes:
+      label: Confidence score (optional)
+      description: Reviewer or operator confidence for this report.
+      placeholder: "0.00 - 1.00"
+    validations:
+      required: false
