@@ -36,12 +36,13 @@ AgentOS deny-by-default controls:
 - obvious path traversal / unsafe writes
 - secret leakage patterns
 - network calls without timeouts
-- debug prints in `src/`
+- debug prints in `src/` (except for an explicit allowlist of operational CLI modules)
 
 Allowlists:
 
 - inline: `# sdetkit: allow-security <RULE_ID>`
 - repo file: `tools/security_allowlist.json`
+- module-level debug print exceptions: `PRINT_ALLOWED_MODULE_SUFFIXES` in `src/sdetkit/security_gate.py`
 
 Baseline regression gate:
 

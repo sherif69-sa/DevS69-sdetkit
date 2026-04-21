@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import onboarding_optimization as otu
+from sdetkit import onboarding_optimization as onboarding_opt
 
 
 def _write_fixture(root: Path) -> None:
@@ -20,7 +20,7 @@ def _write_fixture(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/onboarding-optimization.md").write_text(
-        otu._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
+        onboarding_opt._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "src/sdetkit").mkdir(parents=True, exist_ok=True)
     (root / "src/sdetkit/onboarding.py").write_text(
@@ -31,7 +31,7 @@ def _write_fixture(root: Path) -> None:
 def test_onboarding_json(tmp_path: Path, capsys) -> None:
     _write_fixture(tmp_path)
 
-    rc = otu.main(["--root", str(tmp_path), "--format", "json", "--strict"])
+    rc = onboarding_opt.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
 
     out = json.loads(capsys.readouterr().out)
@@ -42,7 +42,7 @@ def test_onboarding_json(tmp_path: Path, capsys) -> None:
 def test_onboarding_emit_pack_and_execute(tmp_path: Path) -> None:
     _write_fixture(tmp_path)
 
-    rc = otu.main(
+    rc = onboarding_opt.main(
         [
             "--root",
             str(tmp_path),
@@ -85,7 +85,7 @@ def test_onboarding_strict_fails_when_sections_missing(tmp_path: Path) -> None:
         "# Onboarding optimization\n", encoding="utf-8"
     )
 
-    rc = otu.main(["--root", str(tmp_path), "--format", "json", "--strict"])
+    rc = onboarding_opt.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 1
 
 
