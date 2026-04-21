@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from . import review
-from .security import SecurityError, safe_path
+from ..security import SecurityError, safe_path
 
 SERVE_CONTRACT_VERSION = "sdetkit.serve.contract.v1"
 _MAX_BODY_BYTES = 1_048_576

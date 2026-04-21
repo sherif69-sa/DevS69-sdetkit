@@ -19,14 +19,14 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
-from . import _toml
-from .atomicio import atomic_write_text
-from .bools import coerce_bool
-from .doctor import _scan_non_ascii
-from .repo import run_repo_audit
-from .report import build_run_record
-from .security import safe_path
-from .security_gate import scan_repo
+from .. import _toml
+from ..atomicio import atomic_write_text
+from ..bools import coerce_bool
+from ..doctor import _scan_non_ascii
+from ..repo import run_repo_audit
+from ..report import build_run_record
+from ..security import safe_path
+from ..security_gate import scan_repo
 
 _UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
 _VAR_RE = re.compile(r"\$\{([^}]+)\}")
