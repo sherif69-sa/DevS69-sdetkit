@@ -13,3 +13,6 @@ contact_links:
   - name: Starter work inventory
     url: https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/docs/starter-work-inventory.md
     about: Concrete first-contribution categories mapped to this repository.
+  - name: Value proof reporting guide
+    url: https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/docs/value-proof-reporting.md
+    about: Share ship/no-ship evidence with the structured proof template.
