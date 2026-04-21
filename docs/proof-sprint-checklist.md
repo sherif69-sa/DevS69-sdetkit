@@ -8,7 +8,7 @@ Use this sprint to turn interest into visible proof, contributors, and stars.
 - Receive **3+ structured value-proof issues**
 - Improve star/contributor conversion with evidence-first updates
 
-If you need a zero-friction start, use [`docs/day1-proof-starter.md`](docs/day1-proof-starter.md).
+If you need a zero-friction start, use [`day1-proof-starter.md`](day1-proof-starter.md).
 
 ## Daily loop (10–20 minutes)
 

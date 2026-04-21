@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 
 import pytest
+from sdetkit.gate import _format_text as format_gate_text
 
 from sdetkit.bools import coerce_bool
-from sdetkit.gate import _format_text as format_gate_text
 from sdetkit.integration import _evaluate
 from sdetkit.ops import run_workflow
 from sdetkit.premium_gate_engine import AutoFixResult, _build_script_candidates

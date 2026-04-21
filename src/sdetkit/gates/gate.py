@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .bools import coerce_bool
+from ..bools import coerce_bool
 
 AVAILABLE_STEPS = [
     "ruff_fix",

@@ -6,7 +6,7 @@ import time
 import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from typing import Any, Literal
 from urllib.parse import urljoin
@@ -128,8 +128,8 @@ def _retry_after_seconds(headers: Any) -> float | None:
     except (TypeError, ValueError):
         return None
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
-    delay = (parsed - datetime.now(timezone.utc)).total_seconds()
+        parsed = parsed.replace(tzinfo=UTC)
+    delay = (parsed - datetime.now(UTC)).total_seconds()
     return max(0.0, delay)
 
 
