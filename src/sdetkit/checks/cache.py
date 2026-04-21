@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from dataclasses import asdict
 from pathlib import Path
 
@@ -98,20 +99,53 @@ class CheckCache:
     def _entry_path(self, key: str) -> Path:
         return self._base_dir / f"{key}.json"
 
+    def _is_ignored_path(self, repo_root: Path, path: Path) -> bool:
+        try:
+            parts = set(path.relative_to(repo_root).parts)
+        except ValueError:
+            return True
+        if parts & _IGNORED_PARTS:
+            return True
+        if ".sdetkit" in parts and "out" in parts:
+            return True
+        return False
+
+    def _iter_tree_files(self, root: Path):
+        for dirpath, dirnames, filenames in os.walk(root):
+            current = Path(dirpath)
+            rel_parts = current.relative_to(root).parts
+            if set(rel_parts) & _IGNORED_PARTS:
+                dirnames[:] = []
+                continue
+            if ".sdetkit" in rel_parts and "out" in rel_parts:
+                dirnames[:] = []
+                continue
+            if current.name == ".sdetkit":
+                dirnames[:] = [name for name in dirnames if name != "out"]
+            dirnames[:] = [name for name in dirnames if name not in _IGNORED_PARTS]
+            for filename in filenames:
+                yield current / filename
+
     def _iter_paths(self, repo_root: Path, changed_paths: tuple[str, ...]):
         if changed_paths:
+            seen: set[Path] = set()
             for rel in changed_paths:
                 path = repo_root / rel
                 if path.is_file():
-                    yield path
+                    seen.add(path)
+                    continue
+                if path.is_dir():
+                    if self._is_ignored_path(repo_root, path):
+                        continue
+                    for child in self._iter_tree_files(path):
+                        seen.add(child)
+            for path in sorted(seen):
+                if self._is_ignored_path(repo_root, path):
+                    continue
+                yield path
             return
 
-        for path in sorted(repo_root.rglob("*")):
-            if not path.is_file():
-                continue
-            parts = set(path.relative_to(repo_root).parts)
-            if parts & _IGNORED_PARTS:
-                continue
-            if ".sdetkit" in parts and "out" in parts:
+        for path in sorted(self._iter_tree_files(repo_root)):
+            if self._is_ignored_path(repo_root, path):
                 continue
             yield path
