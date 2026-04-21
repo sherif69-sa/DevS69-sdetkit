@@ -108,14 +108,16 @@ jobs:
               }
             }
 
-            const openIssues = await github.rest.issues.listForRepo({
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
               owner,
               repo,
               state: 'open',
               labels: 'dependencies',
               per_page: 100,
             });
-            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('⚡ Runtime fast-follow watchlist'));
+            const priorIssues = openIssues
+              .filter((issue) => !issue.pull_request)
+              .filter((issue) => issue.title.startsWith('⚡ Runtime fast-follow watchlist'));
 
             for (const oldIssue of priorIssues) {
               if (oldIssue.title !== title) {
