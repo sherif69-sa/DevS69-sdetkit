@@ -12,6 +12,8 @@ class _BadHeaders:
 
 def test_retry_after_seconds_defensive_paths() -> None:
     assert apiclient._retry_after_seconds({"Retry-After": "12"}) == 12.0
+    assert apiclient._retry_after_seconds({"Retry-After": "Wed, 21 Oct 2099 07:28:00 GMT"}) > 0.0
+    assert apiclient._retry_after_seconds({"Retry-After": "Wed, 21 Oct 2015 07:28:00 GMT"}) == 0.0
     assert apiclient._retry_after_seconds({"Retry-After": "oops"}) is None
     assert apiclient._retry_after_seconds(_BadHeaders()) is None
 
