@@ -257,6 +257,20 @@ jobs:
             const now = Date.now();
             const staleMs = 14 * 24 * 60 * 60 * 1000;
             const weakSpots = [];
+            const automatedMaintenancePrefixes = [
+              '🔐 Weekly security + maintenance checklist',
+              '🛠️ Weekly maintenance weak-spot report',
+              '🤖 Worker alignment radar',
+              '📚 Docs experience radar',
+              '📡 Dependency radar + runtime watchlist',
+              '⚡ Runtime fast-follow watchlist',
+              '📣 Adapter smoke pack',
+              '🕸️ Integration topology radar',
+              '🧾 Workflow governance audit',
+              '🧱 GHAS configuration audit',
+              '🧩 Monthly enhancement intake from user feedback',
+              '🧠 Repo optimization control loop',
+            ];
 
             for (const workflowFile of trackedWorkflows) {
               try {
@@ -309,6 +323,7 @@ jobs:
 
             const staleOpenIssues = openIssues.filter((issue) => {
               if (!hasLabel(issue, maintenanceLabel)) return false;
+              if (automatedMaintenancePrefixes.some((prefix) => issue.title.startsWith(prefix))) return false;
               const updatedAt = new Date(issue.updated_at).getTime();
               return Number.isFinite(updatedAt) && now - updatedAt > staleMs;
             });
