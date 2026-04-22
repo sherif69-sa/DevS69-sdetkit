@@ -19,3 +19,12 @@ def test_handle_legacy_namespace_requires_subcommand(capsys) -> None:
     assert rc == 2
     err = capsys.readouterr().err
     assert "expected a legacy command name" in err
+
+
+def test_handle_legacy_namespace_routes_migrate_hint(monkeypatch) -> None:
+    monkeypatch.setattr(legacy_namespace, "run_legacy_migrate_hint", lambda argv: 7)
+    assert legacy_namespace.handle_legacy_namespace(["legacy", "migrate-hint", "x"]) == 7
+
+
+def test_handle_legacy_namespace_unknown_subcommand_returns_none() -> None:
+    assert legacy_namespace.handle_legacy_namespace(["legacy", "unknown-subcmd"]) is None

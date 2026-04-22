@@ -69,3 +69,29 @@ def test_main_system_exit_text_returns_one_and_prints(
 
     assert entry.main() == 1
     assert capsys.readouterr().err == "bye\n"
+
+
+def test_cassette_get_helper_delegates_and_casts(monkeypatch: pytest.MonkeyPatch) -> None:
+    called: list[list[str]] = []
+
+    def _fake_cassette_get(argv: list[str]) -> str:
+        called.append(argv)
+        return "11"
+
+    monkeypatch.setitem(entry.sys.modules, "sdetkit.cassette_get", types.SimpleNamespace(cassette_get=_fake_cassette_get))
+
+    assert entry._cassette_get(["--flag", "value"]) == 11
+    assert called == [["--flag", "value"]]
+
+
+def test_run_cli_main_helper_delegates(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setitem(entry.sys.modules, "sdetkit.cli", types.SimpleNamespace(main=lambda: 4))
+
+    assert entry._run_cli_main() == 4
+
+
+def test_main_cli_string_code_is_cast_to_int(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(entry.sys, "argv", ["sdetkit"])
+    monkeypatch.setattr(entry, "_run_cli_main", lambda: "9")
+
+    assert entry.main() == 9

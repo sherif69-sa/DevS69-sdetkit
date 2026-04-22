@@ -73,3 +73,48 @@ def test_main_writes_output_file(monkeypatch, tmp_path):
     assert rc == 0
     assert out_file.exists()
     assert json.loads(out_file.read_text(encoding="utf-8"))["ok"] is True
+
+
+def test_parse_args_and_render_text_branches(monkeypatch):
+    monkeypatch.setattr(
+        contract.argparse,
+        "_sys",
+        __import__("sys"),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        __import__("sys"),
+        "argv",
+        ["prog", "--format", "text", "--strict", "--out", "x", "--repo-root", "repo"],
+    )
+    ns = contract.parse_args()
+    assert ns.format == "text"
+    assert ns.strict is True
+    assert ns.out == "x"
+    assert ns.repo_root == "repo"
+
+    text_out = contract.render_text(
+        {
+            "ok": False,
+            "expected_packages": ["httpx", "hypothesis", "pyyaml"],
+            "missing_from_requirements_test": ["pyyaml"],
+            "missing_from_pyproject_test_visible_deps": ["httpx"],
+        }
+    )
+    assert "missing from requirements-test.txt: pyyaml" in text_out
+    assert "missing from pyproject dependencies/test extra: httpx" in text_out
+
+
+def test_module_invocation_help_works(tmp_path):
+    import subprocess
+    import sys
+
+    proc = subprocess.run(
+        [sys.executable, "-m", "sdetkit.test_bootstrap_contract", "--help"],
+        text=True,
+        capture_output=True,
+        check=False,
+        cwd=str(tmp_path),
+    )
+    assert proc.returncode == 0
+    assert "Validate contract alignment" in proc.stdout
