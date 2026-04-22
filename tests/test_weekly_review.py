@@ -153,3 +153,11 @@ def test_weekly_review_markdown_output_is_structured(capsys):
     assert "## What shipped" in out
     assert "## KPI movement" in out
     assert "## Next-week focus" in out
+
+
+def test_weekly_review_text_output_branch(capsys):
+    rc = weekly_review.main(["--week", "1", "--format", "text"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "weekly review #1" in out
+    assert "% completion" in out
