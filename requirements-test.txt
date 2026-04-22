@@ -7,5 +7,5 @@ hypothesis==6.152.1
 PyYAML==6.0.3
 httpx==0.28.1
 ruff==0.15.11
-mypy==1.20.1
+mypy==1.20.2
 mutmut==3.5.0
