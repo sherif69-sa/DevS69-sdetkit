@@ -109,3 +109,46 @@ def test_run_autofix_returns_skipped_when_security_payload_missing(tmp_path: Pat
     assert len(results) == 1
     assert results[0].status == "skipped"
     assert "security-check.json" in results[0].message
+
+
+def test_payload_helpers_handle_bool_string_and_invalid_values() -> None:
+    payload = {"items": [1], "meta": {"ok": True}, "count_true": True, "count_text": "7", "count_bad": "x"}
+    assert eng._payload_list(payload, "items") == [1]
+    assert eng._payload_list(payload, "meta") == []
+    assert eng._payload_dict(payload, "meta") == {"ok": True}
+    assert eng._payload_dict(payload, "items") == {}
+    assert eng._payload_int(payload, "count_true") == 1
+    assert eng._payload_int(payload, "count_text") == 7
+    assert eng._payload_int(payload, "count_bad", default=9) == 9
+
+
+def test_apply_learned_guideline_actions_handles_missing_or_empty_db(tmp_path: Path) -> None:
+    payload = {"warnings": [], "recommendations": [], "manual_fix_plan": []}
+
+    missing_db = tmp_path / "missing.db"
+    assert eng._apply_learned_guideline_actions(payload, missing_db) == payload
+
+    empty_db = tmp_path / "empty.db"
+    eng._init_db(empty_db)
+    assert eng._apply_learned_guideline_actions(payload, empty_db) == payload
+
+
+def test_apply_learned_guideline_actions_adds_recommendations_and_plan(tmp_path: Path) -> None:
+    db_path = tmp_path / "learned.db"
+    eng.add_guideline(db_path, "security:SEC_X", "rotate credentials", ["security", "critical"])
+
+    payload = {
+        "warnings": [
+            {"source": "security", "category": "SEC_X", "severity": "critical", "message": "token leak"},
+            "ignore",
+        ],
+        "recommendations": ["ignore-non-dict"],
+        "manual_fix_plan": [],
+    }
+
+    updated = eng._apply_learned_guideline_actions(payload, db_path)
+
+    recs = updated.get("recommendations", [])
+    assert any(isinstance(item, dict) and item.get("category") == "learned-guideline" for item in recs)
+    plan = updated.get("manual_fix_plan", [])
+    assert any(isinstance(item, dict) and item.get("reason") == "Learned guideline match" for item in plan)
