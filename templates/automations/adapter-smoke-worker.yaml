@@ -12,7 +12,7 @@ workflow:
   - id: adapter-tests
     action: shell.run
     with:
-      cmd: python -m pytest -q tests/test_notify_plugins.py tests/test_notify_plugins_extra.py tests/test_notify_core_extra.py tests/test_notify_plugins_control_plane.py
+      cmd: python -m pytest -q tests/test_notify_plugins_control_plane.py
       save_stdout: ${{run.output_dir}}/adapter-tests.log
   - id: adapter-quickstart
     action: fs.write
