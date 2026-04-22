@@ -93,3 +93,19 @@ def test_serve_insights_api_initializes_and_runs_server(tmp_path: Path, monkeypa
     assert called["served"] is True
     assert eng._InsightsHandler.db_path == db_path
     assert eng._InsightsHandler.out_dir == out_dir
+
+
+def test_insights_handler_read_payload_non_object_json_returns_empty() -> None:
+    handler = object.__new__(eng._InsightsHandler)
+    body = json.dumps([1, 2, 3]).encode("utf-8")
+    handler.headers = {"Content-Length": str(len(body))}
+    handler.rfile = io.BytesIO(body)
+
+    assert handler._read_payload() == {}
+
+
+def test_run_autofix_returns_skipped_when_security_payload_missing(tmp_path: Path) -> None:
+    results = eng.run_autofix(tmp_path, tmp_path)
+    assert len(results) == 1
+    assert results[0].status == "skipped"
+    assert "security-check.json" in results[0].message
