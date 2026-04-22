@@ -28,6 +28,8 @@ def _load_legacy_cli_module() -> ModuleType:
         raise RuntimeError(f"Unable to load CLI module from {module_path}")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    if not hasattr(module, "_sdetkit_orig_run_module_main"):
+        module._sdetkit_orig_run_module_main = module._run_module_main
     _def_cached = module
     return module
 
@@ -41,7 +43,7 @@ def _sync_compat_bindings(module: Any) -> None:
 def _run_module_main(module_name: str, args: Sequence[str]) -> int:
     module = _load_legacy_cli_module()
     _sync_compat_bindings(module)
-    return int(module._run_module_main(module_name, list(args)))
+    return int(module._sdetkit_orig_run_module_main(module_name, list(args)))
 
 
 def __getattr__(name: str):
@@ -53,4 +55,5 @@ def __getattr__(name: str):
 def main(argv: Sequence[str] | None = None) -> int:
     module = _load_legacy_cli_module()
     _sync_compat_bindings(module)
+    module._run_module_main = globals().get("_run_module_main", _run_module_main)
     return int(module.main(argv))
