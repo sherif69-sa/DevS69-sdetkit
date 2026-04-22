@@ -600,7 +600,8 @@ def _execute_assessments(
                     "all_green": all(r["ok"] for r in rows),
                 },
                 indent=2,
-            ),
+            )
+            + "\n",
             encoding="utf-8",
         )
     return rows
@@ -674,7 +675,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.emit_pack_dir:
         args.emit_pack_dir.mkdir(parents=True, exist_ok=True)
         (args.emit_pack_dir / "enterprise-assessment-summary.json").write_text(
-            json.dumps(payload, indent=2), encoding="utf-8"
+            json.dumps(payload, indent=2) + "\n", encoding="utf-8"
         )
         (args.emit_pack_dir / "enterprise-assessment-report.md").write_text(
             _render_markdown(payload), encoding="utf-8"
