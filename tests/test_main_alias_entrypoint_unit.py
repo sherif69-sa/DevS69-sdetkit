@@ -70,8 +70,11 @@ def test_main_alias_cassette_get_helper_wires_module_globals(
 ) -> None:
     import sdetkit.cassette_get as mod
 
-    marker_write = lambda *_a, **_k: None
-    marker_safe = lambda p: p
+    def marker_write(*_a, **_k) -> None:
+        return None
+
+    def marker_safe(path):
+        return path
 
     class MarkerError(Exception):
         pass

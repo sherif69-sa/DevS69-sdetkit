@@ -41,8 +41,8 @@ def test_package_getattr_caches_loaded_module_for_future_attribute_access(monkey
     monkeypatch.delattr(sdetkit, "playbooks_cli", raising=False)
     monkeypatch.setattr(sdetkit.importlib, "import_module", _fake_import)
 
-    loaded = getattr(sdetkit, "playbooks_cli")
-    cached = getattr(sdetkit, "playbooks_cli")
+    loaded = sdetkit.playbooks_cli
+    cached = sdetkit.playbooks_cli
 
     assert loaded is marker
     assert cached is marker
