@@ -153,7 +153,73 @@ mutmut results
 ```
 
 
+### 4) Impact workflow map (3 steps aligned to phases 1→6)
+
+```bash
+python -m sdetkit doctor --format json --out build/doctor.json
+python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
+python -m sdetkit gate release --format json > build/release-preflight.json || true
+python scripts/impact_workflow_map.py
+```
+
+Outputs:
+- `build/impact-workflow-map.json` (machine-readable 3-step impact workflow)
+- `build/impact-workflow-map.md` (operator checklist for step 1, step 2, and final step 3)
+
+Run the implementation workflow (execution engine):
+
+```bash
+python scripts/impact_workflow_run.py --step all --dry-run --format json --out build/impact-workflow-run.json
+```
+
+Run only Step 1 with measurable accomplishment and phase readiness output:
+
+```bash
+python scripts/impact_workflow_run.py --step step_1 --format json --out build/impact-step1-progress.json
+```
+
+Run Step 2 with measurable accomplishment and phase readiness output:
+
+```bash
+python scripts/impact_workflow_run.py --step step_2 --format json --out build/impact-step2-progress.json
+```
+
+Run boost mode (recommended for your next pass) and always generate follow-up:
+
+```bash
+python scripts/impact_workflow_run.py --step all --boost --format json --out build/impact-workflow-run.json --follow-up-out build/impact-follow-up.md --next-plan-out build/impact-next-plan.json --adaptive-review-out build/impact-adaptive-review.json --intelligence-db build/impact-intelligence.db
+```
+
+Boost outputs:
+- `build/impact-follow-up.md` (human follow-up summary)
+- `build/impact-next-plan.json` (machine next actions: now / next / later)
+- `build/impact-adaptive-review.json` (adaptive reviewer with 5 intelligence heads)
+- `build/impact-intelligence.db` (database history for trend intelligence)
+- `build/impact-criteria-report.json` (adaptive+agent+database criteria alignment report)
+- `build/impact-trend-alert.json` (trend regression detector from intelligence DB)
+- `build/impact-step1-scorecard.json` (step 1 achievement percentage + status)
+- `build/impact-program-scorecard.json` (step 1/2/3 and overall program achievement)
+- `build/impact-step-scorecards.json` (detailed step_1/step_2/step_3 achieved percentages)
+
 ---
+
+Policy config:
+- `config/impact_policy.json` tunes trend-alert sensitivity (overall regression, per-head drop threshold, and minimum step/program score thresholds), with branch overrides (e.g., stricter `main`, lighter `feature/*`).
+
+Release-grade promotion guard (not just ad-hoc output):
+
+```bash
+python scripts/impact_release_guard.py --build-dir build --out build/impact-release-guard.json --format json
+```
+
+Guard output:
+- `build/impact-release-guard.json` (final release-ready vs blocked contract)
+
+---
+
+CI automation:
+- `.github/workflows/impact-release-control.yml` validates policy, runs the workflow + release guard, builds `build/impact-step1-scorecard.json` and `build/impact-step-scorecards.json`, renders `build/impact-pr-comment.md` (with status emoji, score delta, 3-run streak, weakest-head runbook, step-1 achieved%, step-2 achieved%, and step-3 achieved%), publishes it to GitHub Step Summary, and upserts a PR comment on every pull request.
+
 
 ## SDETKit vs ad-hoc release checks
 

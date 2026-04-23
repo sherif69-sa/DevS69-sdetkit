@@ -1,0 +1,119 @@
+name: impact-release-control
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  impact-release-control:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install package + test deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+          python -m pip install -r requirements-test.txt
+
+
+      - name: Validate impact policy
+        run: |
+          python scripts/impact_policy_validate.py \
+            --policy config/impact_policy.json \
+            --format json
+      - name: Execute impact workflow run
+        run: |
+          python scripts/impact_workflow_run.py \
+            --step all \
+            --boost \
+            --dry-run \
+            --format json \
+            --out build/impact-workflow-run.json \
+            --follow-up-out build/impact-follow-up.md \
+            --next-plan-out build/impact-next-plan.json \
+            --adaptive-review-out build/impact-adaptive-review.json \
+            --intelligence-db build/impact-intelligence.db \
+            --criteria-out build/impact-criteria-report.json
+
+
+      - name: Evaluate trend alert
+        run: |
+          python scripts/impact_trend_alert.py \
+            --db-path build/impact-intelligence.db \
+            --out build/impact-trend-alert.json \
+            --format json \
+            --branch "${{ github.ref_name }}"
+      - name: Enforce release guard
+        run: |
+          python scripts/impact_release_guard.py \
+            --build-dir build \
+            --policy config/impact_policy.json \
+            --out build/impact-release-guard.json \
+            --format json \
+            --branch "${{ github.ref_name }}"
+
+
+
+      - name: Build Step 1 achievement scorecard
+        run: |
+          python scripts/impact_step1_scorecard.py \
+            --build-dir build \
+            --out build/impact-step1-scorecard.json \
+            --format json
+
+
+      - name: Build step scorecards
+        run: |
+          python scripts/impact_step_scorecards.py \
+            --build-dir build \
+            --out build/impact-step-scorecards.json \
+            --format json
+      - name: Build program scorecard
+        run: |
+          python scripts/impact_program_scorecard.py \
+            --build-dir build \
+            --out build/impact-program-scorecard.json \
+            --format json
+      - name: Render PR comment draft
+        run: |
+          python scripts/render_impact_pr_comment.py \
+            --build-dir build \
+            --out build/impact-pr-comment.md
+
+      - name: Publish step summary
+        run: |
+          cat build/impact-pr-comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post or update PR comment
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/post_impact_pr_comment.py \
+            --repo "${{ github.repository }}" \
+            --pr-number "${{ github.event.pull_request.number }}" \
+            --comment-file build/impact-pr-comment.md
+      - name: Upload impact artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: impact-release-artifacts
+          path: |
+            build/impact-workflow-run.json
+            build/impact-follow-up.md
+            build/impact-next-plan.json
+            build/impact-adaptive-review.json
+            build/impact-intelligence.db
+            build/impact-criteria-report.json
+            build/impact-release-guard.json
+            build/impact-trend-alert.json
+            build/impact-pr-comment.md
+            build/impact-step1-scorecard.json
+            build/impact-program-scorecard.json
+            build/impact-step-scorecards.json
