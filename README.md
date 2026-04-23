@@ -1,35 +1,67 @@
 <div align="center">
-  <img src="docs/assets/devs69-hero.svg" alt="DevS69 SDETKit Hero" width="100%" />
+  <img src="docs/assets/logo-mark.svg" alt="DevS69 mark" width="68" />
   <h1>DevS69 SDETKit</h1>
-  <p><strong>Release-confidence CLI for deterministic ship / no-ship decisions.</strong></p>
-  <p>Same command path from local to CI, with machine-readable evidence artifacts.</p>
+  <p><strong>Deterministic release confidence for ship / no-ship decisions.</strong></p>
+  <p>Run one operator workflow from laptop to CI and produce machine-readable evidence for every release call.</p>
+  <p>
+    <a href="docs/start-here-5-minutes.md"><strong>Start in 5 minutes</strong></a>
+    ·
+    <a href="docs/recommended-ci-flow.md"><strong>Roll out in CI</strong></a>
+    ·
+    <a href="docs/ci-artifact-walkthrough.md"><strong>Decode artifacts</strong></a>
+  </p>
 </div>
 
-<hr />
+<p align="center">
+  <img src="docs/assets/devs69-hero.svg" alt="DevS69 SDETKit hero" width="100%" />
+</p>
 
-<h2>📦 Full Product Surface</h2>
+---
+
+## Why teams use SDETKit
+
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <h3>🧭 Deterministic decisions</h3>
+      <p>Every run resolves to a clear contract: <strong>SHIP</strong> or <strong>NO-SHIP</strong>.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>📦 Evidence, not opinion</h3>
+      <p>Artifacts are JSON-first and auditable by humans, bots, and CI systems.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>⚙️ Same path everywhere</h3>
+      <p>The same commands work locally, in pull requests, and in release pipelines.</p>
+    </td>
+  </tr>
+</table>
+
+---
+
+## Product surface
 
 <table>
   <tr>
     <td width="33%" align="center">
       <a href="docs/start-here-5-minutes.md"><img src="docs/assets/devs69-card-docs.svg" alt="Start Here" width="100%" /></a><br/>
       <strong>Start Here</strong><br/>
-      5-minute onboarding path
+      5-minute onboarding
     </td>
     <td width="33%" align="center">
-      <a href="docs/recommended-ci-flow.md"><img src="docs/assets/devs69-card-hud.svg" alt="CI Flow" width="100%" /></a><br/>
+      <a href="docs/recommended-ci-flow.md"><img src="docs/assets/devs69-card-hud.svg" alt="CI Rollout" width="100%" /></a><br/>
       <strong>CI Rollout</strong><br/>
-      Local-to-CI confidence lane
+      Local-to-CI deployment lane
     </td>
     <td width="33%" align="center">
-      <a href="docs/ci-artifact-walkthrough.md"><img src="docs/assets/devs69-card-diff-flow.svg" alt="Artifact Decoder" width="100%" /></a><br/>
+      <a href="docs/ci-artifact-walkthrough.md"><img src="docs/assets/devs69-card-diff-flow.svg" alt="Artifact Walkthrough" width="100%" /></a><br/>
       <strong>Artifact Decoder</strong><br/>
-      Understand pass/fail outputs
+      Understand every pass/fail signal
     </td>
   </tr>
   <tr>
     <td width="33%" align="center">
-      <a href="docs/why-sdetkit-for-teams.md"><img src="docs/assets/devs69-card-repo-map.svg" alt="Team Overview" width="100%" /></a><br/>
+      <a href="docs/why-sdetkit-for-teams.md"><img src="docs/assets/devs69-card-repo-map.svg" alt="For Teams" width="100%" /></a><br/>
       <strong>For Teams</strong><br/>
       Shared operator model
     </td>
@@ -41,14 +73,14 @@
     <td width="33%" align="center">
       <a href="docs/index.md"><img src="docs/assets/devs69-card-portal.svg" alt="Docs Hub" width="100%" /></a><br/>
       <strong>Docs Hub</strong><br/>
-      All guides in one place
+      Full documentation map
     </td>
   </tr>
 </table>
 
-<hr />
+---
 
-<h2>🚀 Quickstart (Canonical)</h2>
+## Operator quickstart (canonical)
 
 ```bash
 python -m venv .venv
@@ -61,7 +93,7 @@ python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor
 ```
 
-<h3>Expected artifacts</h3>
+### Generated evidence artifacts
 
 ```text
 build/
@@ -69,22 +101,19 @@ build/
 └── release-preflight.json
 ```
 
-<table>
-  <tr>
-    <td><strong>Decision Contract</strong></td>
-    <td><code>ok: true</code> in both artifacts → <strong>SHIP</strong></td>
-  </tr>
-  <tr>
-    <td><strong>Block Condition</strong></td>
-    <td><code>ok: false</code> or <code>failed_steps</code> present → <strong>NO-SHIP</strong></td>
-  </tr>
-</table>
+### Ship / no-ship decision contract
 
-<hr />
+| Signal | Interpretation | Decision |
+|---|---|---|
+| `gate-fast.json.ok == true` and `release-preflight.json.ok == true` | All required checks passed | ✅ **SHIP** |
+| Any `ok: false` | A gate failed | ❌ **NO-SHIP** |
+| `failed_steps` present in either artifact | Explicit failed release criteria | ❌ **NO-SHIP** |
 
-<h2>🧭 Operator Lanes</h2>
+---
 
-<h3>1) Release gate lane</h3>
+## Choose your lane
+
+### 1) Release gate lane (pre-merge / pre-release)
 
 ```bash
 python -m sdetkit gate fast
@@ -92,7 +121,7 @@ python -m sdetkit gate release
 python -m sdetkit doctor
 ```
 
-<h3>2) Review lane</h3>
+### 2) Review lane (operator + machine output)
 
 ```bash
 python -m sdetkit review . --no-workspace --format json
@@ -104,7 +133,7 @@ python -m sdetkit review . --no-workspace --format json | jq '{status, severity,
 python -m sdetkit review . --no-workspace --format operator-json | jq '{status: .situation.status, severity: .situation.severity, now_actions: (.actions.now | length)}'
 ```
 
-<h3>3) Health + quality lane</h3>
+### 3) Health + quality lane
 
 ```bash
 python -m pip install -r requirements-test.txt
@@ -118,9 +147,9 @@ ruff check .
 mutmut results
 ```
 
-<hr />
+---
 
-<h2>🔁 Visual decision flow</h2>
+## Decision flow at a glance
 
 ```mermaid
 flowchart TD
@@ -132,32 +161,31 @@ flowchart TD
     F --> A
 ```
 
-<hr />
+---
 
-<h2>📊 Coverage policy (current)</h2>
+## SDETKit vs ad-hoc release checks
 
-<table>
-  <tr>
-    <td><strong>Previous baseline</strong></td>
-    <td>fail-under <code>80</code></td>
-  </tr>
-  <tr>
-    <td><strong>Current default</strong></td>
-    <td><code>COV_MODE=standard</code> (fail-under <code>85</code>)</td>
-  </tr>
-  <tr>
-    <td><strong>Compatibility mode</strong></td>
-    <td><code>COV_FAIL_UNDER=80 bash quality.sh cov</code></td>
-  </tr>
-  <tr>
-    <td><strong>Strict target</strong></td>
-    <td><code>COV_MODE=strict</code> (fail-under <code>95</code>) by <strong>July 1, 2026</strong></td>
-  </tr>
-</table>
+| Capability | SDETKit | Ad-hoc scripts/manual checks |
+|---|---|---|
+| Deterministic ship/no-ship contract | ✅ First-class | ⚠️ Usually implicit |
+| Machine-readable release artifacts | ✅ JSON artifacts by default | ⚠️ Inconsistent |
+| Same workflow local + CI | ✅ Built-in | ⚠️ Often diverges |
+| Operator review outputs | ✅ `json` + `operator-json` lanes | ❌ Rare |
+| Fast diagnosis for blocked releases | ✅ `doctor` + `failed_steps` | ⚠️ Manual triage |
 
-<hr />
+---
 
-<h2>🧱 Project shape</h2>
+## Coverage policy
+
+| Policy level | Command | Threshold |
+|---|---|---|
+| Standard (default) | `COV_MODE=standard` | `fail-under 85` |
+| Compatibility mode | `COV_FAIL_UNDER=80 bash quality.sh cov` | `fail-under 80` |
+| Strict target (by July 1, 2026) | `COV_MODE=strict` | `fail-under 95` |
+
+---
+
+## Repository map
 
 ```text
 src/sdetkit/   # product code + CLI
@@ -169,9 +197,9 @@ scripts/       # repo helper scripts
 artifacts/     # generated evidence packs
 ```
 
-<hr />
+---
 
-<h2>📚 Full documentation map</h2>
+## Documentation map
 
 <table>
   <tr>
@@ -200,8 +228,9 @@ artifacts/     # generated evidence packs
   </tr>
 </table>
 
-<hr />
+---
 
 <div align="center">
-  <p><strong>DevS69 SDETKit</strong> — deterministic release confidence, with proof artifacts you can trust.</p>
+  <strong>DevS69 SDETKit</strong><br/>
+  Deterministic release confidence, with artifacts you can trust.
 </div>
