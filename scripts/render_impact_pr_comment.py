@@ -102,12 +102,12 @@ def render_comment(build_dir: Path) -> str:
         f"- Trend gate: `{trend_gate}`",
         f"- Weakest head: `{weakest_head}`",
         f"- Suggested runbook: `{runbook}`",
-        f"- Step 1 achieved: `{step1_pct}%` (`{step1_status}`)",
+        f"- Phase 1-2 achievement: `{step1_pct}%` (`{step1_status}`)",
         f"- Program achieved: `{program_overall}` (`{program_status}`)",
-        f"- Step 2 achieved: `{step2_pct}%` (`{step2_status}`)",
-        f"- Step 3 achieved: `{step3_pct}%` (`{step3_status}`)",
+        f"- Phase 3-4 achievement: `{step2_pct}%` (`{step2_status}`)",
+        f"- Phase 5-6 achievement: `{step3_pct}%` (`{step3_status}`)",
         "",
-        "### Now Actions",
+        "### Immediate Actions",
     ]
 
     if now_actions:
