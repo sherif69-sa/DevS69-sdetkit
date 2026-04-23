@@ -18,6 +18,15 @@
 
 ---
 
+DevS69 SDETKit is a **release-confidence CLI** for deterministic ship/no-ship decisions with machine-readable evidence.
+
+**Primary outcome:** know if a change is ready to ship.
+
+**Canonical first path:**
+- `python -m sdetkit gate fast`
+- `python -m sdetkit gate release`
+- `python -m sdetkit doctor`
+
 ## Why teams use SDETKit
 
 <table>
@@ -210,6 +219,26 @@ artifacts/     # generated evidence packs
     <td><a href="CONTRIBUTING.md">Contributing</a></td>
   </tr>
 </table>
+
+---
+
+## Top-tier reporting sample pipeline
+
+Generate a portfolio-ready reporting sample with:
+
+```bash
+make top-tier-reporting
+```
+
+See:
+- `docs/portfolio-reporting-recipe.md`
+- `docs/kpi-schema.md`
+
+---
+
+## Historical and transition-era references (secondary)
+
+These references remain available for compatibility and ongoing teams, but are intentionally secondary to first-time adoption.
 
 ---
 
