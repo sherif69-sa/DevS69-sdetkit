@@ -15,7 +15,7 @@ from .optional_httpx import load_httpx
 from .security import default_http_timeout, ensure_allowed_scheme
 
 httpx = load_httpx(feature="sdetkit network workflows")
-UTC = getattr(_dt, "UTC", _dt.timezone.utc)
+UTC = getattr(_dt, "UTC", _dt.timezone.utc)  # noqa: UP017
 datetime = _dt.datetime
 
 EventType = Literal[

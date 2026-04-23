@@ -17,7 +17,7 @@ from ..security import SecurityError, safe_path
 SERVE_CONTRACT_VERSION = "sdetkit.serve.contract.v1"
 _MAX_BODY_BYTES = 1_048_576
 _OBS_DEFAULT_STALE_SECONDS = 24 * 60 * 60
-UTC = getattr(_dt, "UTC", _dt.timezone.utc)
+UTC = getattr(_dt, "UTC", _dt.timezone.utc)  # noqa: UP017
 datetime = _dt.datetime
 
 

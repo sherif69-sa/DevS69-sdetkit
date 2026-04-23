@@ -100,7 +100,7 @@ COMMON_IMPORT_ALIASES = {
     "cyclonedx-bom": {"cyclonedx_py"},
     "pre-commit": {"pre_commit"},
 }
-DT_UTC = getattr(dt, "UTC", dt.timezone.utc)
+DT_UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
 
 
 def _parse_dep_name(raw_requirement: str) -> str:
