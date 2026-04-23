@@ -41,7 +41,7 @@ Changelog = "https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CHANGELOG.m
 
 [project.optional-dependencies]
 dev = [
-  "build==1.4.3",
+  "build==1.4.4",
   "mypy==1.20.2",
   "pre-commit==4.6.0",
   "ruff==0.15.11",
@@ -60,7 +60,7 @@ docs = [
   "mkdocs-material==9.7.6"
 ]
 packaging = [
-  "build==1.4.3",
+  "build==1.4.4",
   "check-wheel-contents==0.6.3",
   "twine==6.2.0"
 ]
