@@ -162,3 +162,47 @@ def test_adaptive_scenario_database_sample_accepts_valid_shape() -> None:
         payload, Path("docs/artifacts/adaptive-scenario-database-2026-04-23.json")
     )
     assert errors == []
+
+
+def test_adaptive_scenario_sample_with_fallback_prefers_valid_latest(monkeypatch) -> None:
+    latest = Path("/tmp/adaptive-scenario-database-latest.json")
+    payload = {"schema_version": "sdetkit.adaptive-scenario-database.v1", "summary": {"kinds": {}}}
+    monkeypatch.setattr(validate_enterprise_contracts, "_latest_sample", lambda _prefix: latest)
+    monkeypatch.setattr(validate_enterprise_contracts, "_load_json", lambda _path: payload)
+    monkeypatch.setattr(
+        validate_enterprise_contracts, "_validate_adaptive_scenario_database_sample", lambda *_args: []
+    )
+    monkeypatch.setattr(
+        validate_enterprise_contracts,
+        "_fresh_adaptive_scenario_database_sample",
+        lambda: (_ for _ in ()).throw(AssertionError("fresh sample should not be built")),
+    )
+
+    loaded, rel, errors = validate_enterprise_contracts._adaptive_scenario_sample_with_fallback()
+    assert loaded is payload
+    assert rel == latest
+    assert errors == []
+
+
+def test_adaptive_scenario_sample_with_fallback_builds_when_latest_invalid(monkeypatch) -> None:
+    latest = Path("/tmp/adaptive-scenario-database-latest.json")
+    stale_payload = {"schema_version": "sdetkit.adaptive-scenario-database.v1", "summary": {"kinds": {}}}
+    fresh_payload = {
+        "schema_version": "sdetkit.adaptive-scenario-database.v1",
+        "summary": {"kinds": {"adaptive_pr_reviewer_matrix": 1}},
+    }
+    monkeypatch.setattr(validate_enterprise_contracts, "_latest_sample", lambda _prefix: latest)
+    monkeypatch.setattr(validate_enterprise_contracts, "_load_json", lambda _path: stale_payload)
+    monkeypatch.setattr(
+        validate_enterprise_contracts,
+        "_validate_adaptive_scenario_database_sample",
+        lambda *_args: ["stale"],
+    )
+    monkeypatch.setattr(
+        validate_enterprise_contracts, "_fresh_adaptive_scenario_database_sample", lambda: fresh_payload
+    )
+
+    loaded, rel, errors = validate_enterprise_contracts._adaptive_scenario_sample_with_fallback()
+    assert loaded is fresh_payload
+    assert rel == Path("build/generated-adaptive-scenario-database.json")
+    assert errors == []

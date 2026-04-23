@@ -148,15 +148,37 @@ def _fresh_adaptive_scenario_database_sample() -> dict | list | None:
             pass
 
 
+def _adaptive_scenario_sample_with_fallback() -> tuple[dict | list | None, Path, list[str]]:
+    latest = _latest_sample("adaptive-scenario-database-")
+    if latest is not None:
+        try:
+            rel = latest.relative_to(ROOT)
+        except ValueError:
+            rel = latest
+        try:
+            payload = _load_json(latest)
+        except Exception as exc:  # pragma: no cover - defensive branch
+            return None, rel, [f"invalid json in {rel}: {exc}"]
+        if isinstance(payload, dict) and payload.get("schema_version") == "sdetkit.adaptive-scenario-database.v1":
+            semantic_errors = _validate_adaptive_scenario_database_sample(payload, rel)
+            if not semantic_errors:
+                return payload, rel, []
+
+    rel = Path("build/generated-adaptive-scenario-database.json")
+    payload = _fresh_adaptive_scenario_database_sample()
+    if payload is None:
+        return None, rel, ["failed to build fresh adaptive scenario database sample"]
+    return payload, rel, []
+
+
 def _validate_sample_families() -> list[str]:
     errors: list[str] = []
     for prefix, expected_schema in SAMPLE_FAMILIES.items():
         rel = None
         if prefix == "adaptive-scenario-database-":
-            payload = _fresh_adaptive_scenario_database_sample()
-            rel = Path("build/generated-adaptive-scenario-database.json")
-            if payload is None:
-                errors.append("failed to build fresh adaptive scenario database sample")
+            payload, rel, prep_errors = _adaptive_scenario_sample_with_fallback()
+            if prep_errors:
+                errors.extend(prep_errors)
                 continue
         else:
             p = _latest_sample(prefix)
