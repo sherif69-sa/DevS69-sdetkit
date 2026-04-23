@@ -1,66 +1,54 @@
-# DevS69 SDETKit
+<div align="center">
+  <img src="docs/assets/devs69-hero.svg" alt="DevS69 SDETKit Hero" width="100%" />
+  <h1>DevS69 SDETKit</h1>
+  <p><strong>Release-confidence CLI for deterministic ship / no-ship decisions.</strong></p>
+  <p>Same command path from local to CI, with machine-readable evidence artifacts.</p>
+</div>
 
+<hr />
 
-Primary outcome: know if a change is ready to ship.
+<h2>📦 Full Product Surface</h2>
 
-Canonical first path:
-- `python -m sdetkit gate fast`
-- `python -m sdetkit gate release`
-- `python -m sdetkit doctor`
+<table>
+  <tr>
+    <td width="33%" align="center">
+      <a href="docs/start-here-5-minutes.md"><img src="docs/assets/devs69-card-docs.svg" alt="Start Here" width="100%" /></a><br/>
+      <strong>Start Here</strong><br/>
+      5-minute onboarding path
+    </td>
+    <td width="33%" align="center">
+      <a href="docs/recommended-ci-flow.md"><img src="docs/assets/devs69-card-hud.svg" alt="CI Flow" width="100%" /></a><br/>
+      <strong>CI Rollout</strong><br/>
+      Local-to-CI confidence lane
+    </td>
+    <td width="33%" align="center">
+      <a href="docs/ci-artifact-walkthrough.md"><img src="docs/assets/devs69-card-diff-flow.svg" alt="Artifact Decoder" width="100%" /></a><br/>
+      <strong>Artifact Decoder</strong><br/>
+      Understand pass/fail outputs
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" align="center">
+      <a href="docs/why-sdetkit-for-teams.md"><img src="docs/assets/devs69-card-repo-map.svg" alt="Team Overview" width="100%" /></a><br/>
+      <strong>For Teams</strong><br/>
+      Shared operator model
+    </td>
+    <td width="33%" align="center">
+      <a href="docs/release-confidence-roi.md"><img src="docs/assets/devs69-card-exporters.svg" alt="ROI" width="100%" /></a><br/>
+      <strong>ROI</strong><br/>
+      Confidence economics
+    </td>
+    <td width="33%" align="center">
+      <a href="docs/index.md"><img src="docs/assets/devs69-card-portal.svg" alt="Docs Hub" width="100%" /></a><br/>
+      <strong>Docs Hub</strong><br/>
+      All guides in one place
+    </td>
+  </tr>
+</table>
 
-![DevS69 SDETKit hero](docs/assets/devs69-hero.svg)
+<hr />
 
-| Signal | Live status |
-|---|---|
-| Pages | [![Pages](https://img.shields.io/website?url=https%3A%2F%2Fsherif69-sa.github.io%2FDevS69-sdetkit%2F&up_message=live&down_message=down&label=Pages)](https://sherif69-sa.github.io/DevS69-sdetkit/) |
-| CI | [![CI](https://img.shields.io/github/actions/workflow/status/sherif69-sa/DevS69-sdetkit/ci.yml?branch=main&label=CI)](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml) |
-| Docs link check | [![Docs link check](https://img.shields.io/github/actions/workflow/status/sherif69-sa/DevS69-sdetkit/docs-link-check.yml?branch=main&label=Docs%20links)](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/docs-link-check.yml) |
-| Last commit | [![Last commit](https://img.shields.io/github/last-commit/sherif69-sa/DevS69-sdetkit/main?label=Last%20commit)](https://github.com/sherif69-sa/DevS69-sdetkit/commits/main) |
-| Latest release | [![Latest release](https://img.shields.io/github/v/release/sherif69-sa/DevS69-sdetkit?label=Latest%20release)](https://github.com/sherif69-sa/DevS69-sdetkit/releases) |
-| Open issues | [![Open issues](https://img.shields.io/github/issues/sherif69-sa/DevS69-sdetkit?label=Open%20issues)](https://github.com/sherif69-sa/DevS69-sdetkit/issues) |
-| Community | [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md) |
-
-
-DevS69 SDETKit is a release-confidence CLI: it gives engineering teams deterministic ship/no-ship decisions with machine-readable evidence, using one repeatable command path from local to CI.
-
-**Primary outcome:** know in minutes if a change is ready to ship.
-
-**Fast path:** [Live HUD](https://sherif69-sa.github.io/DevS69-sdetkit/command-hud-live/) · [Quickstart](#quickstart) · [CI rollout](docs/recommended-ci-flow.md)
-
-**Current stable release:** `1.0.3` (released on **April 18, 2026**).
-
-## Live product visualization
-
-[![DevS69 command HUD card](https://sherif69-sa.github.io/DevS69-sdetkit/assets/devs69-card-hud.svg)](https://sherif69-sa.github.io/DevS69-sdetkit/command-hud-live/)
-
-- Live HUD page: <https://sherif69-sa.github.io/DevS69-sdetkit/command-hud-live/>
-- HUD card asset: <https://sherif69-sa.github.io/DevS69-sdetkit/assets/devs69-card-hud.svg>
-
-## Live + auto-updated signals
-
-These pull directly from GitHub and auto-update whenever workflows, releases, or the default branch changes.
-
-- **Pages**: deployment/live website state
-- **CI**: workflow status on `main`
-- **Last commit**: latest default-branch push
-- **Latest release**: newest tagged release
-- **Open issues**: active backlog signal
-
-## Why people star SDETKit
-
-- ✅ One clear release decision: **ship / no-ship**
-- ✅ Same commands locally and in CI
-- ✅ JSON artifacts that make triage faster
-
-## Honest product stance
-
-We welcome all feedback, including low-star reviews. The goal is to respond with better clarity, better UX, and stronger reliability evidence—not defensiveness.
-
-If you felt friction, open an issue with the exact step where confidence dropped and we will treat it as a product input signal.
-
-## Quickstart
-
-Install and run:
+<h2>🚀 Quickstart (Canonical)</h2>
 
 ```bash
 python -m venv .venv
@@ -73,7 +61,7 @@ python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor
 ```
 
-Expected output:
+<h3>Expected artifacts</h3>
 
 ```text
 build/
@@ -81,154 +69,47 @@ build/
 └── release-preflight.json
 ```
 
-Decision:
-- `ok: true` in both artifacts -> **ship**
-- `ok: false` and/or `failed_steps` present -> **no-ship**, fix first failing step and rerun
+<table>
+  <tr>
+    <td><strong>Decision Contract</strong></td>
+    <td><code>ok: true</code> in both artifacts → <strong>SHIP</strong></td>
+  </tr>
+  <tr>
+    <td><strong>Block Condition</strong></td>
+    <td><code>ok: false</code> or <code>failed_steps</code> present → <strong>NO-SHIP</strong></td>
+  </tr>
+</table>
 
-## Use cases
+<hr />
 
-- PR readiness with objective evidence
-- Release room confidence checks
-- CI gate policies with machine-readable contracts
+<h2>🧭 Operator Lanes</h2>
 
-## Give it a free look
-
-- Open the live HUD: <https://sherif69-sa.github.io/DevS69-sdetkit/command-hud-live/>
-- Try the quickstart above
-- If it helps, ⭐ star the repo
-
-## Repo visual snapshot tool
-
-Need a cleaner way to *see* repo presentation quality in one place? Run:
+<h3>1) Release gate lane</h3>
 
 ```bash
-python scripts/render_repo_visual_snapshot.py
-# optional private screenshot capture (local only):
-python scripts/render_repo_visual_snapshot.py --capture-screenshot
+python -m sdetkit gate fast
+python -m sdetkit gate release
+python -m sdetkit doctor
 ```
 
-This generates `docs/artifacts/repo-visual-snapshot.md` and `docs/artifacts/repo-visual-snapshot.html`. If you pass `--capture-screenshot`, it also writes a **private local screenshot** at `.sdetkit/out/repo-visual-snapshot.png` (git-ignored) for a high-contrast dashboard preview that is not publicly committed.
-
-## Proof of value (live log)
-
-Want proof before investing time? See the ongoing evidence log:
-
-- [`docs/proof-log.md`](docs/proof-log.md) — real pass/fail outcomes, fixes, and cycle-time notes
-- [Open a Value proof report](https://github.com/sherif69-sa/DevS69-sdetkit/issues/new?template=value_proof_report.yml) — share your result with one structured issue
-- [Value proof reporting guide](docs/value-proof-reporting.md) — 1-minute guide for high-quality reports
-- [14-day proof sprint checklist](docs/proof-sprint-checklist.md) — run the upcoming execution loop day-by-day
-- [Day 1 proof starter](docs/day1-proof-starter.md) — copy/paste first run if you’re unsure where to begin
-- Adaptive reviewer mode: include `judgment_summary` + confidence in proof reports when available
-
-## Advanced details (optional)
-
-<details>
-<summary>Show decision flow, operator details, and artifact examples</summary>
-
-### Visual decision flow (local + CI)
-
-```mermaid
-flowchart TD
-    A[Run gate fast] --> B[Run gate release]
-    B --> C[Read release-preflight.json]
-    C -->|ok: true and no failed_steps| D[SHIP]
-    C -->|ok: false or failed_steps present| E[NO-SHIP]
-    E --> F[Open first failing artifact]
-    F --> G[Apply deterministic remediation]
-    G --> A
-```
-
-### Example release artifact shape
-
-```json
-{
-  "ok": false,
-  "failed_steps": ["gate_fast"],
-  "profile": "release"
-}
-```
-
-</details>
-
-## Where to go next
-
-- Start here in 5 minutes: [`docs/start-here-5-minutes.md`](docs/start-here-5-minutes.md)
-- Blank repo to value in 60 seconds: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
-- CI rollout path: [`docs/recommended-ci-flow.md`](docs/recommended-ci-flow.md)
-- Artifact decoder: [`docs/ci-artifact-walkthrough.md`](docs/ci-artifact-walkthrough.md)
-
-<details>
-<summary>More docs</summary>
-
-- Team overview: [`docs/why-sdetkit-for-teams.md`](docs/why-sdetkit-for-teams.md)
-- Team use cases: [`docs/use-cases.md`](docs/use-cases.md)
-- Release confidence ROI: [`docs/release-confidence-roi.md`](docs/release-confidence-roi.md)
-- Adoption-proof examples: [`docs/adoption-proof-examples.md`](docs/adoption-proof-examples.md)
-- Community growth playbook: [`docs/community-growth-playbook.md`](docs/community-growth-playbook.md)
-- Docs hub: [`docs/index.md`](docs/index.md)
-
-</details>
-
-## Canonical local-to-CI journey
-
-The same first-path commands should run locally and in CI so teams make release decisions from consistent evidence contracts.
-
-For a reproducible first-run acceptance proof in a fresh repo:
-
-```bash
-python -m pytest -q tests/test_external_first_run_contract.py
-```
-
-Context: [`docs/real-repo-adoption.md`](docs/real-repo-adoption.md)
-
-## Review command format quick guide (operator adoption)
-
-Use `sdetkit review` when you need one front-door decision pass over doctor/inspect/compare/project/history.
-
-- Use `--format json` when you need the **full review payload** (deep debugging, custom analytics, or internal tooling that consumes all sections).
-- Use `--format operator-json` when you need the **stable operator-facing integration contract** for CI jobs, dashboards, and operator automations.
-- For operator integrations, prefer `operator-json` as the long-lived parsing surface.
-
-Short deterministic examples:
+<h3>2) Review lane</h3>
 
 ```bash
 python -m sdetkit review . --no-workspace --format json
 python -m sdetkit review . --no-workspace --format operator-json
 ```
 
-Practical machine-consumption examples:
-
 ```bash
-# Full payload: inspect status + top-level counts for deeper triage scripts
 python -m sdetkit review . --no-workspace --format json | jq '{status, severity, findings: (.top_matters | length)}'
-
-# Stable operator contract: gate on operator-facing situation/actions fields
 python -m sdetkit review . --no-workspace --format operator-json | jq '{status: .situation.status, severity: .situation.severity, now_actions: (.actions.now | length)}'
 ```
 
-## Secondary surfaces (after canonical confidence path)
-
-These remain available and supported after the core release-confidence lane is trusted, but they are intentionally not the front-door recommendation.
-
-### Extended repo lanes
-
-```bash
-make bootstrap
-bash quality.sh ci
-python -m sdetkit kits list
-python -m sdetkit legacy list
-python -m sdetkit legacy <historical-command>
-python -m sdetkit --help --show-hidden
-```
-
-### Repo health snapshot
+<h3>3) Health + quality lane</h3>
 
 ```bash
 python -m pip install -r requirements-test.txt
-# tests require Python >= 3.11
 PYTHONPATH=src python -m sdetkit.test_bootstrap_contract --strict
 PYTHONPATH=src python -m sdetkit.test_bootstrap_validate --strict
-# optional CI-style evidence outputs:
 ./ci.sh quick --artifact-dir .sdetkit/out
 make merge-ready
 PYTHONPATH=src pytest -q
@@ -237,16 +118,46 @@ ruff check .
 mutmut results
 ```
 
-For a focused preflight playbook (checks, artifact outputs, exit codes), see [`docs/test-bootstrap.md`](docs/test-bootstrap.md).
+<hr />
 
-### Coverage hardening migration (staged)
+<h2>🔁 Visual decision flow</h2>
 
-- **Previous default:** `bash quality.sh cov` used `COV_FAIL_UNDER=80` when unset.
-- **New default (effective now):** `bash quality.sh cov` uses `COV_MODE=standard` (fail-under `85`).
-- **Temporary compatibility override:** `COV_FAIL_UNDER=80 bash quality.sh cov` (or `COV_MODE=legacy bash quality.sh cov`).
-- **Stricter enforcement target:** use `COV_MODE=strict` (fail-under `95`) for merge/release truth lanes by **July 1, 2026**.
+```mermaid
+flowchart TD
+    A[Run gate fast] --> B[Run gate release]
+    B --> C[Read release-preflight.json]
+    C -->|ok true and no failed_steps| D[SHIP]
+    C -->|ok false or failed_steps present| E[NO-SHIP]
+    E --> F[Fix first failing step]
+    F --> A
+```
 
-### Project layout
+<hr />
+
+<h2>📊 Coverage policy (current)</h2>
+
+<table>
+  <tr>
+    <td><strong>Previous baseline</strong></td>
+    <td>fail-under <code>80</code></td>
+  </tr>
+  <tr>
+    <td><strong>Current default</strong></td>
+    <td><code>COV_MODE=standard</code> (fail-under <code>85</code>)</td>
+  </tr>
+  <tr>
+    <td><strong>Compatibility mode</strong></td>
+    <td><code>COV_FAIL_UNDER=80 bash quality.sh cov</code></td>
+  </tr>
+  <tr>
+    <td><strong>Strict target</strong></td>
+    <td><code>COV_MODE=strict</code> (fail-under <code>95</code>) by <strong>July 1, 2026</strong></td>
+  </tr>
+</table>
+
+<hr />
+
+<h2>🧱 Project shape</h2>
 
 ```text
 src/sdetkit/   # product code + CLI
@@ -258,26 +169,39 @@ scripts/       # repo helper scripts
 artifacts/     # generated evidence packs
 ```
 
-## Documentation and references
+<hr />
 
-- Docs hub: [`docs/index.md`](docs/index.md)
-- Architecture quick map for contributors: [`ARCHITECTURE.md`](ARCHITECTURE.md)
-- Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- Support and issue routing: [`SUPPORT.md`](SUPPORT.md)
-- Release process: [`RELEASE.md`](RELEASE.md)
-- Git workflow (branch tracking + ahead/behind): [`docs/git-workflow.md`](docs/git-workflow.md)
-- Enterprise readiness audit: [`docs/enterprise-readiness-audit-2026-04.md`](docs/enterprise-readiness-audit-2026-04.md)
+<h2>📚 Full documentation map</h2>
 
-### Historical and transition-era references (secondary)
+<table>
+  <tr>
+    <td><a href="docs/start-here-5-minutes.md">Start in 5 minutes</a></td>
+    <td><a href="docs/blank-repo-to-value-60-seconds.md">Blank repo to value in 60 seconds</a></td>
+  </tr>
+  <tr>
+    <td><a href="docs/recommended-ci-flow.md">Recommended CI flow</a></td>
+    <td><a href="docs/ci-artifact-walkthrough.md">CI artifact walkthrough</a></td>
+  </tr>
+  <tr>
+    <td><a href="docs/why-sdetkit-for-teams.md">Why SDETKit for teams</a></td>
+    <td><a href="docs/use-cases.md">Use cases</a></td>
+  </tr>
+  <tr>
+    <td><a href="docs/release-confidence-roi.md">Release confidence ROI</a></td>
+    <td><a href="docs/adoption-proof-examples.md">Adoption proof examples</a></td>
+  </tr>
+  <tr>
+    <td><a href="docs/real-repo-adoption.md">Real repo adoption</a></td>
+    <td><a href="docs/test-bootstrap.md">Test bootstrap playbook</a></td>
+  </tr>
+  <tr>
+    <td><a href="docs/index.md">Docs hub</a></td>
+    <td><a href="CONTRIBUTING.md">Contributing</a></td>
+  </tr>
+</table>
 
-- Compare against ad hoc workflows: [`docs/sdetkit-vs-ad-hoc.md`](docs/sdetkit-vs-ad-hoc.md)
-- Repo hygiene boundaries: [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md)
-- Ongoing repo status view: [`docs/repo-health-dashboard.md`](docs/repo-health-dashboard.md)
-- Historical archive index: [`docs/archive/index.md`](docs/archive/index.md)
+<hr />
 
-## Top-tier reporting sample pipeline
-
-Run `make top-tier-reporting` to generate a deterministic sample bundle and promotion artifacts.
-
-- Recipe: [`docs/portfolio-reporting-recipe.md`](docs/portfolio-reporting-recipe.md)
-- KPI schema: [`docs/kpi-schema.md`](docs/kpi-schema.md)
+<div align="center">
+  <p><strong>DevS69 SDETKit</strong> — deterministic release confidence, with proof artifacts you can trust.</p>
+</div>
