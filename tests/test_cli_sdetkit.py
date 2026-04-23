@@ -117,6 +117,7 @@ def test_sdetkit_version_flag_uses_unknown_when_metadata_missing(monkeypatch):
 
 def test_kvcli_help():
     import subprocess
+    import sys
     import sysconfig
     from pathlib import Path
 
@@ -125,8 +126,9 @@ def test_kvcli_help():
     if not kv.exists():
         kv = scripts / "kvcli.exe"
 
+    cmd = [str(kv), "--help"] if kv.exists() else [sys.executable, "-m", "sdetkit.kvcli", "--help"]
     p = subprocess.run(
-        [str(kv) if kv.exists() else "kvcli", "--help"],
+        cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
@@ -137,6 +139,7 @@ def test_kvcli_help():
 
 def test_apigetcli_help():
     import subprocess
+    import sys
     import sysconfig
     from pathlib import Path
 
@@ -145,8 +148,13 @@ def test_apigetcli_help():
     if not apiget.exists():
         apiget = scripts / "apigetcli.exe"
 
+    cmd = (
+        [str(apiget), "--help"]
+        if apiget.exists()
+        else [sys.executable, "-m", "sdetkit.apiget", "--help"]
+    )
     p = subprocess.run(
-        [str(apiget) if apiget.exists() else "apigetcli", "--help"],
+        cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
