@@ -2,6 +2,20 @@ from __future__ import annotations
 
 import sys
 
+MIN_RUNTIME_PYTHON: tuple[int, int] = (3, 11)
+
+
+def _validate_runtime_python() -> str | None:
+    if sys.version_info >= MIN_RUNTIME_PYTHON:
+        return None
+    current = f"{sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]}"
+    required = f"{MIN_RUNTIME_PYTHON[0]}.{MIN_RUNTIME_PYTHON[1]}+"
+    return (
+        "sdetkit requires Python "
+        f"{required}. Detected {current}. "
+        "Use a 3.11+ interpreter before running the CLI."
+    )
+
 
 def _cassette_get(argv: list[str]) -> int:
     from .cassette_get import cassette_get
@@ -16,6 +30,11 @@ def _run_cli_main() -> int | None:
 
 
 def main() -> int:
+    version_error = _validate_runtime_python()
+    if version_error is not None:
+        sys.stderr.write(f"{version_error}\n")
+        return 2
+
     argv = sys.argv
     if len(argv) > 1 and argv[1] == "cassette-get":
         try:
