@@ -62,7 +62,9 @@ def test_impact_workflow_run_dry_run_all_steps(tmp_path: Path) -> None:
     assert head_count == 5
 
 
-def test_impact_workflow_run_step1_reports_accomplishment_and_phase_readiness(tmp_path: Path) -> None:
+def test_impact_workflow_run_step1_reports_accomplishment_and_phase_readiness(
+    tmp_path: Path,
+) -> None:
     out = tmp_path / "impact-step1.json"
     next_plan = tmp_path / "impact-step1-next-plan.json"
     proc = subprocess.run(

@@ -17,7 +17,6 @@ def _git(root: Path, *args: str) -> str:
 
 
 def _seed_repo(root: Path) -> None:
-
     (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
 
     (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)

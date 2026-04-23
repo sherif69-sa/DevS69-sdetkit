@@ -712,7 +712,6 @@ Then use stability-aware command discovery:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-
     if argv is None:
         argv = sys.argv[1:]
 

@@ -8,7 +8,6 @@ from sdetkit import phase2_wrap_handoff_closeout_60 as d60
 
 
 def _seed_repo(root: Path) -> None:
-
     (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
 
     (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)

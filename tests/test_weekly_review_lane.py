@@ -8,7 +8,6 @@ from sdetkit import weekly_review_28 as d28
 
 
 def _seed_repo(root: Path) -> None:
-
     (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
 
     (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)

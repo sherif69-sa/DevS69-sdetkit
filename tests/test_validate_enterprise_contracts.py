@@ -38,7 +38,7 @@ def test_adaptive_postcheck_contract_requires_new_checks() -> None:
                 "minimum_mistake_learning_event": 5,
                 "minimum_learning_signal_total": 10,
             },
-        }
+        },
     }
     errors = validate_enterprise_contracts._validate_adaptive_postcheck_contract(
         payload, "docs/contracts/adaptive-postcheck-scenarios.v1.json"
@@ -97,7 +97,7 @@ def test_adaptive_postcheck_contract_accepts_valid_profile_shape() -> None:
                 "minimum_mistake_learning_event": 5,
                 "minimum_learning_signal_total": 10,
             },
-        }
+        },
     }
     errors = validate_enterprise_contracts._validate_adaptive_postcheck_contract(
         payload, "docs/contracts/adaptive-postcheck-scenarios.v1.json"
@@ -169,7 +169,9 @@ def test_adaptive_scenario_sample_with_fallback_prefers_valid_latest(monkeypatch
     monkeypatch.setattr(validate_enterprise_contracts, "_latest_sample", lambda _prefix: latest)
     monkeypatch.setattr(validate_enterprise_contracts, "_load_json", lambda _path: payload)
     monkeypatch.setattr(
-        validate_enterprise_contracts, "_validate_adaptive_scenario_database_sample", lambda *_args: []
+        validate_enterprise_contracts,
+        "_validate_adaptive_scenario_database_sample",
+        lambda *_args: [],
     )
     monkeypatch.setattr(
         validate_enterprise_contracts,
@@ -185,7 +187,10 @@ def test_adaptive_scenario_sample_with_fallback_prefers_valid_latest(monkeypatch
 
 def test_adaptive_scenario_sample_with_fallback_builds_when_latest_invalid(monkeypatch) -> None:
     latest = Path("/tmp/adaptive-scenario-database-latest.json")
-    stale_payload = {"schema_version": "sdetkit.adaptive-scenario-database.v1", "summary": {"kinds": {}}}
+    stale_payload = {
+        "schema_version": "sdetkit.adaptive-scenario-database.v1",
+        "summary": {"kinds": {}},
+    }
     fresh_payload = {
         "schema_version": "sdetkit.adaptive-scenario-database.v1",
         "summary": {"kinds": {"adaptive_pr_reviewer_matrix": 1}},
@@ -198,7 +203,9 @@ def test_adaptive_scenario_sample_with_fallback_builds_when_latest_invalid(monke
         lambda *_args: ["stale"],
     )
     monkeypatch.setattr(
-        validate_enterprise_contracts, "_fresh_adaptive_scenario_database_sample", lambda: fresh_payload
+        validate_enterprise_contracts,
+        "_fresh_adaptive_scenario_database_sample",
+        lambda: fresh_payload,
     )
 
     loaded, rel, errors = validate_enterprise_contracts._adaptive_scenario_sample_with_fallback()

@@ -12,7 +12,9 @@ def _write_json(path: Path, payload: dict[str, object]) -> None:
 
 def test_impact_workflow_map_builds_three_step_phase_aligned_outputs(tmp_path: Path) -> None:
     _write_json(tmp_path / "gate-fast.json", {"ok": True, "failed_steps": []})
-    _write_json(tmp_path / "release-preflight.json", {"ok": False, "failed_steps": ["code_scanning"]})
+    _write_json(
+        tmp_path / "release-preflight.json", {"ok": False, "failed_steps": ["code_scanning"]}
+    )
     _write_json(tmp_path / "doctor.json", {"ok": True, "score": 92})
 
     quality = tmp_path / "quality.sh"

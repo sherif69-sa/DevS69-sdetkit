@@ -172,7 +172,11 @@ def test_main_writes_output_artifact_for_mocked_inputs(monkeypatch, tmp_path: Pa
 def test_build_owner_routing_maps_failing_checks_to_owners() -> None:
     checks = [
         {"check": "pr_outcome_feedback_present", "passed": False, "details": "missing feedback"},
-        {"check": "adaptive_database_present", "passed": False, "details": "missing adaptive payload"},
+        {
+            "check": "adaptive_database_present",
+            "passed": False,
+            "details": "missing adaptive payload",
+        },
         {"check": "intelligence_matrix_present", "passed": True, "details": "ok"},
     ]
     scenario = {
@@ -235,7 +239,9 @@ def test_run_alignment_checks_validates_pr_outcome_feedback_and_mistake_learning
             "adaptive_learning": {"learning_signal_total": 7, "precision_ready": False},
         }
     }
-    checks = adaptive_postcheck._run_alignment_checks(payload, scenario, first_run, scenario_db, None)
+    checks = adaptive_postcheck._run_alignment_checks(
+        payload, scenario, first_run, scenario_db, None
+    )
     by_name = {row["check"]: row for row in checks}
     assert by_name["pr_outcome_feedback_present"]["passed"] is False
     assert by_name["mistake_learning_signal_depth"]["passed"] is False
@@ -262,7 +268,9 @@ def test_run_alignment_checks_passes_new_feedback_depth_checks_when_counts_are_s
             "adaptive_learning": {"learning_signal_total": 17, "precision_ready": True},
         }
     }
-    checks = adaptive_postcheck._run_alignment_checks(payload, scenario, first_run, scenario_db, None)
+    checks = adaptive_postcheck._run_alignment_checks(
+        payload, scenario, first_run, scenario_db, None
+    )
     by_name = {row["check"]: row for row in checks}
     assert by_name["pr_outcome_feedback_present"]["passed"] is True
     assert by_name["mistake_learning_signal_depth"]["passed"] is True

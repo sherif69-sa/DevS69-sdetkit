@@ -8,7 +8,6 @@ from sdetkit import evidence_narrative_closeout_84 as d84
 
 
 def _seed_repo(root: Path) -> None:
-
     (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
 
     (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)

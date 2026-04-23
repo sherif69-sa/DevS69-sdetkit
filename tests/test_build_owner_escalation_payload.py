@@ -5,7 +5,9 @@ import json
 from pathlib import Path
 
 _SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "build_owner_escalation_payload.py"
-_SPEC = importlib.util.spec_from_file_location("build_owner_escalation_payload_script", _SCRIPT_PATH)
+_SPEC = importlib.util.spec_from_file_location(
+    "build_owner_escalation_payload_script", _SCRIPT_PATH
+)
 assert _SPEC is not None and _SPEC.loader is not None
 owner_escalation = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(owner_escalation)
@@ -24,9 +26,27 @@ def test_build_payload_summarizes_mixed_severities() -> None:
         {
             "scenario": "strict",
             "owner_routing": [
-                {"check": "c-medium", "owner": "team-b", "severity": "medium", "sla": "7d", "details": "m"},
-                {"check": "c-critical", "owner": "team-a", "severity": "critical", "sla": "24h", "details": "x"},
-                {"check": "c-high", "owner": "team-a", "severity": "high", "sla": "72h", "details": "y"},
+                {
+                    "check": "c-medium",
+                    "owner": "team-b",
+                    "severity": "medium",
+                    "sla": "7d",
+                    "details": "m",
+                },
+                {
+                    "check": "c-critical",
+                    "owner": "team-a",
+                    "severity": "critical",
+                    "sla": "24h",
+                    "details": "x",
+                },
+                {
+                    "check": "c-high",
+                    "owner": "team-a",
+                    "severity": "high",
+                    "sla": "72h",
+                    "details": "y",
+                },
             ],
         }
     )
@@ -41,9 +61,27 @@ def test_recommendations_group_by_owner_with_prioritized_actions() -> None:
         {
             "scenario": "balanced",
             "owner_routing": [
-                {"check": "check-2", "owner": "owner-x", "severity": "high", "sla": "72h", "details": "high route"},
-                {"check": "check-1", "owner": "owner-x", "severity": "critical", "sla": "24h", "details": "critical route"},
-                {"check": "check-3", "owner": "owner-y", "severity": "medium", "sla": "7d", "details": "medium route"},
+                {
+                    "check": "check-2",
+                    "owner": "owner-x",
+                    "severity": "high",
+                    "sla": "72h",
+                    "details": "high route",
+                },
+                {
+                    "check": "check-1",
+                    "owner": "owner-x",
+                    "severity": "critical",
+                    "sla": "24h",
+                    "details": "critical route",
+                },
+                {
+                    "check": "check-3",
+                    "owner": "owner-y",
+                    "severity": "medium",
+                    "sla": "7d",
+                    "details": "medium route",
+                },
             ],
         }
     )
@@ -60,9 +98,27 @@ def test_build_payload_is_deterministic_for_route_and_recommendation_ordering() 
     postcheck = {
         "scenario": "balanced",
         "owner_routing": [
-            {"check": "z-check", "owner": "owner-b", "severity": "high", "sla": "72h", "details": "z"},
-            {"check": "a-check", "owner": "owner-a", "severity": "critical", "sla": "24h", "details": "a"},
-            {"check": "m-check", "owner": "owner-a", "severity": "high", "sla": "72h", "details": "m"},
+            {
+                "check": "z-check",
+                "owner": "owner-b",
+                "severity": "high",
+                "sla": "72h",
+                "details": "z",
+            },
+            {
+                "check": "a-check",
+                "owner": "owner-a",
+                "severity": "critical",
+                "sla": "24h",
+                "details": "a",
+            },
+            {
+                "check": "m-check",
+                "owner": "owner-a",
+                "severity": "high",
+                "sla": "72h",
+                "details": "m",
+            },
         ],
     }
 
@@ -104,7 +160,13 @@ def test_build_payload_keeps_suggestion_and_follow_up_entries() -> None:
         {
             "scenario": "balanced",
             "owner_routing": [
-                {"check": "check-1", "owner": "owner-a", "severity": "high", "sla": "72h", "details": "route detail"}
+                {
+                    "check": "check-1",
+                    "owner": "owner-a",
+                    "severity": "high",
+                    "sla": "72h",
+                    "details": "route detail",
+                }
             ],
             "follow_up_enhancements": [
                 {
@@ -147,15 +209,29 @@ def test_suggestion_priority_ordering_is_ranked_not_lexicographic() -> None:
         {
             "scenario": "balanced",
             "owner_routing": [
-                {"check": "check-1", "owner": "owner-a", "severity": "high", "sla": "72h", "details": "route detail"}
+                {
+                    "check": "check-1",
+                    "owner": "owner-a",
+                    "severity": "high",
+                    "sla": "72h",
+                    "details": "route detail",
+                }
             ],
             "follow_up_enhancements": [
-                {"id": "p2-item", "priority": "P2", "feature": "Later", "next_command": "echo later"},
+                {
+                    "id": "p2-item",
+                    "priority": "P2",
+                    "feature": "Later",
+                    "next_command": "echo later",
+                },
                 {"id": "p0-item", "priority": "P0", "feature": "Now", "next_command": "echo now"},
             ],
         }
     )
-    assert [row["id"] for row in payload["recommendations"][0]["suggestions"]] == ["p0-item", "p2-item"]
+    assert [row["id"] for row in payload["recommendations"][0]["suggestions"]] == [
+        "p0-item",
+        "p2-item",
+    ]
 
 
 def test_suggestions_and_followups_are_preserved_without_routes() -> None:
@@ -164,10 +240,20 @@ def test_suggestions_and_followups_are_preserved_without_routes() -> None:
             "scenario": "balanced",
             "owner_routing": [],
             "follow_up_enhancements": [
-                {"id": "s1", "priority": "high", "feature": "Sync owners", "next_command": "make adaptive-ops-bundle"}
+                {
+                    "id": "s1",
+                    "priority": "high",
+                    "feature": "Sync owners",
+                    "next_command": "make adaptive-ops-bundle",
+                }
             ],
             "next_follow_up_plan": [
-                {"id": "f1", "priority": "P1", "task": "Run strict postcheck", "command": "make adaptive-postcheck"}
+                {
+                    "id": "f1",
+                    "priority": "P1",
+                    "task": "Run strict postcheck",
+                    "command": "make adaptive-postcheck",
+                }
             ],
         }
     )

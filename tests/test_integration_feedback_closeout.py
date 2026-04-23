@@ -8,7 +8,6 @@ from sdetkit import integration_feedback_closeout_82 as d82
 
 
 def _seed_repo(root: Path) -> None:
-
     (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
 
     (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)

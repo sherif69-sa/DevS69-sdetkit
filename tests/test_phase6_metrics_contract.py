@@ -65,7 +65,6 @@ def phase6_workspace(tmp_path: Path, monkeypatch) -> Path:
 
 
 def test_phase6_metrics_contract_positive_path(phase6_workspace: Path, capsys) -> None:
-
     rc = contract.main(["--format", "json"])
     result = json.loads(capsys.readouterr().out)
 
@@ -293,7 +292,6 @@ def test_phase6_main_fails_when_emitted_artifact_is_unreadable(
     corrupt_name: str,
     expected_gate_id: str,
 ) -> None:
-
     original_write_json = contract._write_json
 
     def _write_with_corruption(path: Path, payload: dict[str, object]) -> None:
@@ -312,7 +310,6 @@ def test_phase6_main_fails_when_emitted_artifact_is_unreadable(
 
 
 def test_phase6_main_positive_path_has_all_gate_checks_true(phase6_workspace: Path, capsys) -> None:
-
     rc = contract.main(["--format", "json"])
     result = json.loads(capsys.readouterr().out)
 
