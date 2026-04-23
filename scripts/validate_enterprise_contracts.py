@@ -77,7 +77,9 @@ def _validate_adaptive_postcheck_contract(payload: dict, rel: str) -> list[str]:
             for key in ("owner", "severity", "sla"):
                 value = row.get(key)
                 if not isinstance(value, str) or not value.strip():
-                    errors.append(f"{rel}: owner_routing[{check_name!r}].{key} must be a non-empty string")
+                    errors.append(
+                        f"{rel}: owner_routing[{check_name!r}].{key} must be a non-empty string"
+                    )
 
     scenarios = payload.get("scenarios", {})
     if not isinstance(scenarios, dict):
@@ -159,7 +161,10 @@ def _adaptive_scenario_sample_with_fallback() -> tuple[dict | list | None, Path,
             payload = _load_json(latest)
         except Exception as exc:  # pragma: no cover - defensive branch
             return None, rel, [f"invalid json in {rel}: {exc}"]
-        if isinstance(payload, dict) and payload.get("schema_version") == "sdetkit.adaptive-scenario-database.v1":
+        if (
+            isinstance(payload, dict)
+            and payload.get("schema_version") == "sdetkit.adaptive-scenario-database.v1"
+        ):
             semantic_errors = _validate_adaptive_scenario_database_sample(payload, rel)
             if not semantic_errors:
                 return payload, rel, []
@@ -198,9 +203,7 @@ def _validate_sample_families() -> list[str]:
 
         actual = payload.get("schema_version")
         if actual != expected_schema:
-            errors.append(
-                f"schema_version mismatch for {rel}: {actual!r} != {expected_schema!r}"
-            )
+            errors.append(f"schema_version mismatch for {rel}: {actual!r} != {expected_schema!r}")
             continue
 
         if expected_schema == "sdetkit.adaptive-scenario-database.v1":
@@ -241,7 +244,9 @@ def _validate_adaptive_scenario_database_sample(payload: dict, rel: Path) -> lis
 
     coverage = adaptive_learning.get("learning_coverage_score")
     if not isinstance(coverage, int) or coverage < 0 or coverage > 100:
-        errors.append(f"{rel}: summary.adaptive_learning.learning_coverage_score must be 0..100 int")
+        errors.append(
+            f"{rel}: summary.adaptive_learning.learning_coverage_score must be 0..100 int"
+        )
 
     precision_ready = adaptive_learning.get("precision_ready")
     if not isinstance(precision_ready, bool):

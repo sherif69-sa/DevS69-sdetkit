@@ -98,7 +98,9 @@ def _extract_follow_up_plan(postcheck: dict[str, Any]) -> list[dict[str, str]]:
 def _latest_postcheck_path() -> Path:
     matches = sorted(ARTIFACTS_DIR.glob("adaptive-postcheck-*.json"))
     if not matches:
-        raise SystemExit("missing adaptive postcheck artifact: docs/artifacts/adaptive-postcheck-*.json")
+        raise SystemExit(
+            "missing adaptive postcheck artifact: docs/artifacts/adaptive-postcheck-*.json"
+        )
     return matches[-1]
 
 
@@ -168,7 +170,9 @@ def _build_recommendations(
         severities = grouped[owner]
         prioritized_actions: list[dict[str, Any]] = []
         for severity in sorted(severities, key=lambda item: _SEVERITY_PRIORITY.get(item, 99)):
-            rows = sorted(severities[severity], key=lambda row: (row["check"], row["sla"], row["details"]))
+            rows = sorted(
+                severities[severity], key=lambda row: (row["check"], row["sla"], row["details"])
+            )
             priority, action = _ACTION_TEMPLATES.get(severity, _ACTION_TEMPLATES["medium"])
             prioritized_actions.append(
                 {
@@ -210,7 +214,10 @@ def build_payload(postcheck: dict[str, Any]) -> dict[str, Any]:
     follow_up_plan = _extract_follow_up_plan(postcheck)
     return {
         "schema_version": "sdetkit.owner-escalation-payload.v1",
-        "generated_at_utc": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "generated_at_utc": datetime.now(UTC)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z"),
         "summary": _build_summary(routes),
         "routes": routes,
         "recommendations": _build_recommendations(

@@ -22,7 +22,13 @@ def build_scorecard(build_dir: Path) -> dict[str, object]:
     security_score = float(review.get("heads", {}).get("security_head", {}).get("score", 0))
     reliability_score = float(review.get("heads", {}).get("reliability_head", {}).get("score", 0))
 
-    achieved = round((completion * 0.5) + (criteria_completion * 0.2) + (security_score * 0.15) + (reliability_score * 0.15), 2)
+    achieved = round(
+        (completion * 0.5)
+        + (criteria_completion * 0.2)
+        + (security_score * 0.15)
+        + (reliability_score * 0.15),
+        2,
+    )
 
     return {
         "schema_version": "sdetkit.impact-step1-scorecard.v1",
@@ -40,7 +46,9 @@ def build_scorecard(build_dir: Path) -> dict[str, object]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build Step 1 achievement scorecard from impact artifacts.")
+    parser = argparse.ArgumentParser(
+        description="Build Step 1 achievement scorecard from impact artifacts."
+    )
     parser.add_argument("--build-dir", default="build")
     parser.add_argument("--out", default="build/impact-step1-scorecard.json")
     parser.add_argument("--format", choices=("text", "json"), default="text")

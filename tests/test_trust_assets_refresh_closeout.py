@@ -8,7 +8,6 @@ from sdetkit import trust_assets_refresh_closeout_75 as d75
 
 
 def _seed_repo(root: Path) -> None:
-
     (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
 
     (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)

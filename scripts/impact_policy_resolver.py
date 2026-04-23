@@ -15,7 +15,11 @@ def resolve_policy_for_branch(policy: dict[str, object], branch: str) -> dict[st
         if fnmatch.fnmatch(branch, pattern):
             merged = dict(resolved)
             for key, value in override.items():
-                if key == "min_step_scores" and isinstance(value, dict) and isinstance(merged.get(key), dict):
+                if (
+                    key == "min_step_scores"
+                    and isinstance(value, dict)
+                    and isinstance(merged.get(key), dict)
+                ):
                     merged_steps = dict(merged[key])
                     merged_steps.update(value)
                     merged[key] = merged_steps

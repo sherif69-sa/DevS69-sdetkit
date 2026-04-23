@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import sqlite3
 from pathlib import Path
-
-import fnmatch
-
 
 HEADS = (
     "security_head",
@@ -29,7 +27,11 @@ def resolve_policy_for_branch(policy: dict[str, object], branch: str) -> dict[st
         if fnmatch.fnmatch(branch, pattern):
             merged = dict(resolved)
             for key, value in override.items():
-                if key == "min_step_scores" and isinstance(value, dict) and isinstance(merged.get(key), dict):
+                if (
+                    key == "min_step_scores"
+                    and isinstance(value, dict)
+                    and isinstance(merged.get(key), dict)
+                ):
                     merged_steps = dict(merged[key])
                     merged_steps.update(value)
                     merged[key] = merged_steps
@@ -105,7 +107,9 @@ def evaluate(db_path: Path, window: int, policy: dict[str, object]) -> dict[str,
     drop_threshold = float(policy.get("head_regression_drop_threshold", 5.0))
     head_alerts = _head_regressions(db_path, drop_threshold)
 
-    overall_ok = not (bool(policy.get("fail_on_overall_regression", True)) and streak == "regressing")
+    overall_ok = not (
+        bool(policy.get("fail_on_overall_regression", True)) and streak == "regressing"
+    )
     head_ok = not (bool(policy.get("fail_on_head_regression", True)) and len(head_alerts) > 0)
     ok = overall_ok and head_ok
 
@@ -120,7 +124,9 @@ def evaluate(db_path: Path, window: int, policy: dict[str, object]) -> dict[str,
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Evaluate trend alert from impact intelligence DB.")
+    parser = argparse.ArgumentParser(
+        description="Evaluate trend alert from impact intelligence DB."
+    )
     parser.add_argument("--db-path", default="build/impact-intelligence.db")
     parser.add_argument("--policy", default="config/impact_policy.json")
     parser.add_argument("--window", type=int, default=3)
@@ -140,7 +146,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
-        print(f"impact trend alert: streak={payload['streak']} head_alerts={len(payload['head_alerts'])} ok={payload['ok']}")
+        print(
+            f"impact trend alert: streak={payload['streak']} head_alerts={len(payload['head_alerts'])} ok={payload['ok']}"
+        )
     return 0 if payload["ok"] else 1
 
 

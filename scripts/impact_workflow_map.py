@@ -28,7 +28,10 @@ def _status(payload: dict[str, object]) -> bool | None:
 
 
 def build_impact_workflow(
-    gate_fast: dict[str, object], gate_release: dict[str, object], doctor: dict[str, object], quality_text: str
+    gate_fast: dict[str, object],
+    gate_release: dict[str, object],
+    doctor: dict[str, object],
+    quality_text: str,
 ) -> dict[str, object]:
     standard_cov, strict_cov, legacy_cov = _extract_coverage_targets(quality_text)
     release_failed_steps = gate_release.get("failed_steps")
@@ -135,7 +138,9 @@ def _render_markdown(plan: dict[str, object]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build a 3-step impact workflow map aligned to phases 1-6.")
+    parser = argparse.ArgumentParser(
+        description="Build a 3-step impact workflow map aligned to phases 1-6."
+    )
     parser.add_argument("--gate-fast", default="build/gate-fast.json")
     parser.add_argument("--gate-release", default="build/release-preflight.json")
     parser.add_argument("--doctor", default="build/doctor.json")

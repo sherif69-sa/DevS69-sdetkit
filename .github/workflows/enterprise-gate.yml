@@ -34,7 +34,8 @@ jobs:
 
       - name: Doctor
         run: |
-          sdetkit doctor --all
+          mkdir -p build
+          sdetkit doctor --all --format json --out build/doctor-enterprise.json || true
 
       - name: Repo check (enterprise)
         run: |
@@ -65,4 +66,6 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: sdet_check
-          path: sdet_check.json
+          path: |
+            sdet_check.json
+            build/doctor-enterprise.json

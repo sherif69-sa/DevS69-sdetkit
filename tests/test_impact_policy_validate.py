@@ -20,7 +20,14 @@ def test_impact_policy_validate_passes_for_repo_policy(tmp_path: Path) -> None:
     path.write_text(json.dumps(policy), encoding="utf-8")
 
     proc = subprocess.run(
-        [sys.executable, "scripts/impact_policy_validate.py", "--policy", str(path), "--format", "json"],
+        [
+            sys.executable,
+            "scripts/impact_policy_validate.py",
+            "--policy",
+            str(path),
+            "--format",
+            "json",
+        ],
         text=True,
         capture_output=True,
         check=False,
