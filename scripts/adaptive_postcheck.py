@@ -8,6 +8,7 @@ changes, making automation adaptive rather than fixed-date/fixed-rule.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
 import subprocess as _subprocess
@@ -812,6 +813,25 @@ def _default_out_path() -> str:
     return f"docs/artifacts/adaptive-postcheck-{date_tag}.json"
 
 
+def _write_owner_routing_csv(path: Path, rows: list[dict[str, str]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(
+            f, fieldnames=["check", "owner", "severity", "sla", "details"], extrasaction="ignore"
+        )
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(
+                {
+                    "check": row.get("check", ""),
+                    "owner": row.get("owner", ""),
+                    "severity": row.get("severity", ""),
+                    "sla": row.get("sla", ""),
+                    "details": row.get("details", ""),
+                }
+            )
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("repo", nargs="?", default=".")
@@ -845,6 +865,11 @@ def main() -> int:
         "--history-json",
         default=None,
         help="Optional confidence history JSON file; when provided, appends current score and emits trend.",
+    )
+    ap.add_argument(
+        "--owner-routing-csv",
+        default=None,
+        help="Optional CSV output for owner routing escalations.",
     )
     args = ap.parse_args()
 
@@ -941,6 +966,8 @@ def main() -> int:
         ),
         encoding="utf-8",
     )
+    if args.owner_routing_csv:
+        _write_owner_routing_csv(Path(args.owner_routing_csv), owner_routing)
 
     print(json.dumps(out_payload["summary"], sort_keys=True))
     return 0 if out_payload["summary"]["ok"] else 1

@@ -131,6 +131,7 @@ def test_load_review_payload_truncates_stdout_snippet_in_error(monkeypatch, tmp_
 
 def test_main_writes_output_artifact_for_mocked_inputs(monkeypatch, tmp_path: Path) -> None:
     out_path = tmp_path / "adaptive-postcheck.json"
+    csv_path = tmp_path / "owner-routing.csv"
     payload = {"adaptive_database": {"release_readiness_contract": {}}}
     scenario = {
         "enabled_checks": ["adaptive_database_present"],
@@ -145,7 +146,16 @@ def test_main_writes_output_artifact_for_mocked_inputs(monkeypatch, tmp_path: Pa
     monkeypatch.setattr(
         adaptive_postcheck.sys,
         "argv",
-        ["adaptive_postcheck.py", ".", "--scenario", "fast", "--out", str(out_path)],
+        [
+            "adaptive_postcheck.py",
+            ".",
+            "--scenario",
+            "fast",
+            "--out",
+            str(out_path),
+            "--owner-routing-csv",
+            str(csv_path),
+        ],
     )
 
     rc = adaptive_postcheck.main()
@@ -154,6 +164,9 @@ def test_main_writes_output_artifact_for_mocked_inputs(monkeypatch, tmp_path: Pa
     assert written["summary"]["ok"] is True
     assert written["summary"]["failed_required"] == 0
     assert written["owner_routing"] == []
+    csv_text = csv_path.read_text(encoding="utf-8")
+    assert "check,owner,severity,sla,details" in csv_text
+    assert len(csv_text.strip().splitlines()) == 1
 
 
 def test_build_owner_routing_maps_failing_checks_to_owners() -> None:
@@ -181,6 +194,25 @@ def test_build_owner_routing_maps_failing_checks_to_owners() -> None:
     by_check = {row["check"]: row for row in rows}
     assert by_check["pr_outcome_feedback_present"]["owner"] == "review-intelligence"
     assert by_check["adaptive_database_present"]["severity"] == "critical"
+
+
+def test_write_owner_routing_csv_writes_rows(tmp_path: Path) -> None:
+    out = tmp_path / "owner-routing.csv"
+    adaptive_postcheck._write_owner_routing_csv(
+        out,
+        [
+            {
+                "check": "pr_outcome_feedback_present",
+                "owner": "review-intelligence",
+                "severity": "high",
+                "sla": "72h",
+                "details": "missing feedback",
+            }
+        ],
+    )
+    text = out.read_text(encoding="utf-8")
+    assert "check,owner,severity,sla,details" in text
+    assert "pr_outcome_feedback_present,review-intelligence,high,72h,missing feedback" in text
 
 
 def test_run_alignment_checks_validates_pr_outcome_feedback_and_mistake_learning_depth() -> None:
