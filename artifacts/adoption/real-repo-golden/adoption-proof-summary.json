@@ -68,7 +68,8 @@
               "-m",
               "ruff",
               "check",
-              "."
+              "src",
+              "tests"
             ],
             "id": "ruff"
           },
@@ -79,7 +80,8 @@
               "ruff",
               "format",
               "--check",
-              "."
+              "src",
+              "tests"
             ],
             "id": "ruff_format"
           }
