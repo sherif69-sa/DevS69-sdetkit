@@ -4,7 +4,6 @@ import datetime as _dt
 import importlib.util
 import sys
 
-
 if not hasattr(_dt, "UTC"):
     _dt.UTC = _dt.timezone.utc  # type: ignore[attr-defined]
 

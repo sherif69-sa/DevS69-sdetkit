@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import asyncio
+import datetime as _dt
 import random
 import time
 import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-import datetime as _dt
 from email.utils import parsedate_to_datetime
 from typing import Any, Literal
 from urllib.parse import urljoin
