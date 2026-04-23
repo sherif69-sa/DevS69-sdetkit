@@ -1,5 +1,47 @@
 {
   "contract_id": "sdetkit.adaptive-postcheck-scenarios.v1",
+  "owner_routing": {
+    "adaptive_database_present": {
+      "owner": "platform-ops",
+      "severity": "critical",
+      "sla": "24h"
+    },
+    "release_readiness_contract_present": {
+      "owner": "release-governance",
+      "severity": "high",
+      "sla": "48h"
+    },
+    "pr_outcome_feedback_present": {
+      "owner": "review-intelligence",
+      "severity": "high",
+      "sla": "72h"
+    },
+    "mistake_learning_signal_depth": {
+      "owner": "quality-intelligence",
+      "severity": "high",
+      "sla": "72h"
+    },
+    "adaptive_learning_precision_ready": {
+      "owner": "review-intelligence",
+      "severity": "high",
+      "sla": "72h"
+    },
+    "scenario_database_minimum_coverage": {
+      "owner": "quality-intelligence",
+      "severity": "medium",
+      "sla": "7d"
+    },
+    "intelligence_matrix_present": {
+      "owner": "review-intelligence",
+      "severity": "medium",
+      "sla": "7d"
+    },
+    "first_run_hints_present": {
+      "owner": "developer-experience",
+      "severity": "medium",
+      "sla": "7d"
+    }
+  },
   "scenarios": {
     "balanced": {
       "enabled_checks": [
@@ -11,9 +53,15 @@
         "scenario_database_minimum_coverage",
         "six_phase_workflow_ready",
         "intelligence_matrix_present",
-        "first_run_hints_present"
+        "first_run_hints_present",
+        "pr_outcome_feedback_present",
+        "mistake_learning_signal_depth",
+        "adaptive_learning_precision_ready"
       ],
       "scenario_minimum": 3000,
+      "minimum_pr_outcome_feedback": 5,
+      "minimum_mistake_learning_event": 5,
+      "minimum_learning_signal_total": 10,
       "warn_only_checks": [
         "agent_entries_include_engine_signals"
       ]
@@ -26,9 +74,15 @@
         "scenario_database_minimum_coverage",
         "six_phase_workflow_ready",
         "intelligence_matrix_present",
-        "first_run_hints_present"
+        "first_run_hints_present",
+        "pr_outcome_feedback_present",
+        "mistake_learning_signal_depth",
+        "adaptive_learning_precision_ready"
       ],
       "scenario_minimum": 3000,
+      "minimum_pr_outcome_feedback": 3,
+      "minimum_mistake_learning_event": 3,
+      "minimum_learning_signal_total": 6,
       "warn_only_checks": []
     },
     "strict": {
@@ -41,9 +95,15 @@
         "scenario_database_minimum_coverage",
         "six_phase_workflow_ready",
         "intelligence_matrix_present",
-        "first_run_hints_present"
+        "first_run_hints_present",
+        "pr_outcome_feedback_present",
+        "mistake_learning_signal_depth",
+        "adaptive_learning_precision_ready"
       ],
       "scenario_minimum": 3000,
+      "minimum_pr_outcome_feedback": 5,
+      "minimum_mistake_learning_event": 5,
+      "minimum_learning_signal_total": 10,
       "warn_only_checks": []
     }
   },

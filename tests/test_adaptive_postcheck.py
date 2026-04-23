@@ -153,3 +153,114 @@ def test_main_writes_output_artifact_for_mocked_inputs(monkeypatch, tmp_path: Pa
     written = json.loads(out_path.read_text(encoding="utf-8"))
     assert written["summary"]["ok"] is True
     assert written["summary"]["failed_required"] == 0
+    assert written["owner_routing"] == []
+
+
+def test_build_owner_routing_maps_failing_checks_to_owners() -> None:
+    checks = [
+        {"check": "pr_outcome_feedback_present", "passed": False, "details": "missing feedback"},
+        {"check": "adaptive_database_present", "passed": False, "details": "missing adaptive payload"},
+        {"check": "intelligence_matrix_present", "passed": True, "details": "ok"},
+    ]
+    scenario = {
+        "owner_routing": {
+            "pr_outcome_feedback_present": {
+                "owner": "review-intelligence",
+                "severity": "high",
+                "sla": "72h",
+            },
+            "adaptive_database_present": {
+                "owner": "platform-ops",
+                "severity": "critical",
+                "sla": "24h",
+            },
+        }
+    }
+    rows = adaptive_postcheck._build_owner_routing(checks, scenario)
+    assert len(rows) == 2
+    by_check = {row["check"]: row for row in rows}
+    assert by_check["pr_outcome_feedback_present"]["owner"] == "review-intelligence"
+    assert by_check["adaptive_database_present"]["severity"] == "critical"
+
+
+def test_run_alignment_checks_validates_pr_outcome_feedback_and_mistake_learning_depth() -> None:
+    payload = {"adaptive_database": {"release_readiness_contract": {}}}
+    scenario = {
+        "enabled_checks": [
+            "pr_outcome_feedback_present",
+            "mistake_learning_signal_depth",
+            "adaptive_learning_precision_ready",
+        ],
+        "warn_only_checks": [],
+    }
+    first_run = {"hint_count": 1}
+    scenario_db = {
+        "summary": {
+            "kinds": {
+                "pr_outcome_feedback": 4,
+                "mistake_learning_event": 3,
+            },
+            "adaptive_learning": {"learning_signal_total": 7, "precision_ready": False},
+        }
+    }
+    checks = adaptive_postcheck._run_alignment_checks(payload, scenario, first_run, scenario_db, None)
+    by_name = {row["check"]: row for row in checks}
+    assert by_name["pr_outcome_feedback_present"]["passed"] is False
+    assert by_name["mistake_learning_signal_depth"]["passed"] is False
+    assert by_name["adaptive_learning_precision_ready"]["passed"] is False
+
+
+def test_run_alignment_checks_passes_new_feedback_depth_checks_when_counts_are_sufficient() -> None:
+    payload = {"adaptive_database": {"release_readiness_contract": {}}}
+    scenario = {
+        "enabled_checks": [
+            "pr_outcome_feedback_present",
+            "mistake_learning_signal_depth",
+            "adaptive_learning_precision_ready",
+        ],
+        "warn_only_checks": [],
+    }
+    first_run = {"hint_count": 2}
+    scenario_db = {
+        "summary": {
+            "kinds": {
+                "pr_outcome_feedback": 7,
+                "mistake_learning_event": 10,
+            },
+            "adaptive_learning": {"learning_signal_total": 17, "precision_ready": True},
+        }
+    }
+    checks = adaptive_postcheck._run_alignment_checks(payload, scenario, first_run, scenario_db, None)
+    by_name = {row["check"]: row for row in checks}
+    assert by_name["pr_outcome_feedback_present"]["passed"] is True
+    assert by_name["mistake_learning_signal_depth"]["passed"] is True
+    assert by_name["adaptive_learning_precision_ready"]["passed"] is True
+
+
+def test_run_alignment_checks_honors_scenario_specific_minimums() -> None:
+    payload = {"adaptive_database": {"release_readiness_contract": {}}}
+    scenario = {
+        "enabled_checks": [
+            "pr_outcome_feedback_present",
+            "mistake_learning_signal_depth",
+            "adaptive_learning_precision_ready",
+        ],
+        "minimum_pr_outcome_feedback": 3,
+        "minimum_mistake_learning_event": 3,
+        "minimum_learning_signal_total": 6,
+        "warn_only_checks": [],
+    }
+    scenario_db = {
+        "summary": {
+            "kinds": {
+                "pr_outcome_feedback": 3,
+                "mistake_learning_event": 3,
+            },
+            "adaptive_learning": {"learning_signal_total": 6, "precision_ready": True},
+        }
+    }
+    checks = adaptive_postcheck._run_alignment_checks(payload, scenario, {}, scenario_db, None)
+    by_name = {row["check"]: row for row in checks}
+    assert by_name["pr_outcome_feedback_present"]["passed"] is True
+    assert by_name["mistake_learning_signal_depth"]["passed"] is True
+    assert by_name["adaptive_learning_precision_ready"]["passed"] is True

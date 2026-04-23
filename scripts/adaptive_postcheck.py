@@ -106,6 +106,10 @@ def _load_scenario(name: str) -> dict[str, Any]:
     selected = scenarios[name]
     if not isinstance(selected, dict):
         raise ValueError(f"scenario {name!r} is invalid")
+    owner_routing = payload.get("owner_routing", {})
+    if isinstance(owner_routing, dict):
+        selected = dict(selected)
+        selected["owner_routing"] = owner_routing
     return selected
 
 
@@ -224,6 +228,9 @@ def _run_alignment_checks(
     checks: list[dict[str, Any]] = []
     enabled = set(scenario.get("enabled_checks", []))
     warn_checks = set(scenario.get("warn_only_checks", []))
+    min_pr_feedback = int(scenario.get("minimum_pr_outcome_feedback", 5))
+    min_mistake_events = int(scenario.get("minimum_mistake_learning_event", 5))
+    min_learning_signal_total = int(scenario.get("minimum_learning_signal_total", 10))
 
     def severity_for(check_name: str) -> str:
         return "warn" if check_name in warn_checks else "required"
@@ -362,6 +369,60 @@ def _run_alignment_checks(
             )
         )
 
+    if "pr_outcome_feedback_present" in enabled:
+        kinds = (scenario_db or {}).get("summary", {}).get("kinds", {})
+        feedback_count = 0
+        if isinstance(kinds, dict):
+            feedback_count = int(kinds.get("pr_outcome_feedback", 0))
+        checks.append(
+            _bool_check(
+                "pr_outcome_feedback_present",
+                feedback_count >= min_pr_feedback,
+                (
+                    "scenario database should include PR outcome feedback signals "
+                    f"(pr_outcome_feedback={feedback_count}, minimum={min_pr_feedback})"
+                ),
+                severity_for("pr_outcome_feedback_present"),
+            )
+        )
+
+    if "mistake_learning_signal_depth" in enabled:
+        kinds = (scenario_db or {}).get("summary", {}).get("kinds", {})
+        event_count = 0
+        if isinstance(kinds, dict):
+            event_count = int(kinds.get("mistake_learning_event", 0))
+        checks.append(
+            _bool_check(
+                "mistake_learning_signal_depth",
+                event_count >= min_mistake_events,
+                (
+                    "scenario database should include evidence-driven mistake-learning events "
+                    f"(mistake_learning_event={event_count}, minimum={min_mistake_events})"
+                ),
+                severity_for("mistake_learning_signal_depth"),
+            )
+        )
+
+    if "adaptive_learning_precision_ready" in enabled:
+        learning = (scenario_db or {}).get("summary", {}).get("adaptive_learning", {})
+        precision_ready = False
+        signal_total = 0
+        if isinstance(learning, dict):
+            precision_ready = bool(learning.get("precision_ready", False))
+            signal_total = int(learning.get("learning_signal_total", 0))
+        checks.append(
+            _bool_check(
+                "adaptive_learning_precision_ready",
+                precision_ready and signal_total >= min_learning_signal_total,
+                (
+                    "adaptive learning summary should be precision-ready "
+                    f"(learning_signal_total={signal_total}, minimum={min_learning_signal_total}, "
+                    f"precision_ready={precision_ready})"
+                ),
+                severity_for("adaptive_learning_precision_ready"),
+            )
+        )
+
     return checks
 
 
@@ -408,6 +469,36 @@ def _build_follow_up_enhancements(
                 "next_command": "make adaptive-scenario-db",
             }
         )
+    if not bool(by_name.get("pr_outcome_feedback_present", {}).get("passed", False)):
+        enhancements.append(
+            {
+                "id": "pr-feedback-ingestion",
+                "area": "reviewer",
+                "priority": "high",
+                "feature": "Ingest PR outcome feedback signals so adaptive routing learns from review outcomes.",
+                "next_command": "python scripts/build_adaptive_scenario_database.py --out docs/artifacts/adaptive-scenario-database-$(date +%F).json",
+            }
+        )
+    if not bool(by_name.get("mistake_learning_signal_depth", {}).get("passed", False)):
+        enhancements.append(
+            {
+                "id": "mistake-learning-depth",
+                "area": "database",
+                "priority": "high",
+                "feature": "Increase evidence-driven mistake-learning events from recent failed artifacts.",
+                "next_command": "make adaptive-ops-bundle",
+            }
+        )
+    if not bool(by_name.get("adaptive_learning_precision_ready", {}).get("passed", False)):
+        enhancements.append(
+            {
+                "id": "adaptive-learning-precision",
+                "area": "intelligence",
+                "priority": "high",
+                "feature": "Raise adaptive learning precision by increasing PR outcomes and mistake events coverage.",
+                "next_command": "make adaptive-ops-bundle",
+            }
+        )
     if phase_count == 6:
         enhancements.append(
             {
@@ -428,6 +519,7 @@ def _render_markdown_summary(
     checks: list[dict[str, Any]],
     follow_up_enhancements: list[dict[str, str]],
     scenario_database: dict[str, Any],
+    owner_routing: list[dict[str, str]],
 ) -> str:
     lines: list[str] = []
     lines.append("# Adaptive Postcheck Summary")
@@ -462,6 +554,16 @@ def _render_markdown_summary(
             f"- {icon} `{row.get('check', 'unknown')}` ({row.get('severity', 'required')}): {row.get('details', '')}"
         )
     lines.append("")
+    lines.append("## Owner Routing")
+    if not owner_routing:
+        lines.append("- No owner escalations required.")
+    else:
+        for row in owner_routing:
+            lines.append(
+                f"- `{row.get('check', 'unknown')}` -> **{row.get('owner', 'platform-ops')}** "
+                f"(severity={row.get('severity', 'medium')}, sla={row.get('sla', '7d')})"
+            )
+    lines.append("")
     lines.append("## Follow-up Enhancements")
     if not follow_up_enhancements:
         lines.append("- No additional enhancements recommended.")
@@ -476,6 +578,34 @@ def _render_markdown_summary(
                 lines.append(f"  - Next command: `{next_cmd}`")
     lines.append("")
     return "\n".join(lines) + "\n"
+
+
+def _build_owner_routing(checks: list[dict[str, Any]], scenario: dict[str, Any]) -> list[dict[str, str]]:
+    failing = [row for row in checks if isinstance(row, dict) and not bool(row.get("passed", False))]
+    owner_map: dict[str, tuple[str, str, str]] = {}
+    raw_owner_map = scenario.get("owner_routing", {})
+    if isinstance(raw_owner_map, dict):
+        for check_name, row in raw_owner_map.items():
+            if not isinstance(check_name, str) or not isinstance(row, dict):
+                continue
+            owner = str(row.get("owner", "platform-ops"))
+            severity = str(row.get("severity", "medium"))
+            sla = str(row.get("sla", "7d"))
+            owner_map[check_name] = (owner, severity, sla)
+    rows: list[dict[str, str]] = []
+    for row in failing:
+        check = str(row.get("check", "unknown"))
+        owner, severity, sla = owner_map.get(check, ("platform-ops", "medium", "7d"))
+        rows.append(
+            {
+                "check": check,
+                "owner": owner,
+                "severity": severity,
+                "sla": sla,
+                "details": str(row.get("details", "")),
+            }
+        )
+    return rows
 
 
 def _compute_confidence_score(
@@ -761,6 +891,7 @@ def main() -> int:
         1 for c in checks if (not c.get("passed")) and c.get("severity") != "warn"
     )
     failed_warn = sum(1 for c in checks if (not c.get("passed")) and c.get("severity") == "warn")
+    owner_routing = _build_owner_routing(checks, scenario)
 
     out_payload = {
         "schema_version": "sdetkit.adaptive-postcheck.v1",
@@ -791,6 +922,7 @@ def main() -> int:
         "follow_up_enhancements": follow_up_enhancements,
         "confidence_guidance": confidence_guidance,
         "next_follow_up_plan": next_plan,
+        "owner_routing": owner_routing,
     }
 
     out_path = Path(args.out or _default_out_path())
@@ -805,6 +937,7 @@ def main() -> int:
             checks=checks,
             follow_up_enhancements=follow_up_enhancements,
             scenario_database=out_payload["scenario_database"],
+            owner_routing=owner_routing,
         ),
         encoding="utf-8",
     )
