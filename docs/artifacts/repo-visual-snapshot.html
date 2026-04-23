@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1' />
+  <title>Repo Visual Snapshot</title>
+  <style>
+    body { font-family: Inter, Segoe UI, system-ui, sans-serif; margin: 0; background: #0b1020; color: #e6e9f4; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .hero { background: linear-gradient(135deg, #5b4bff, #0ea5a4); padding: 20px; border-radius: 14px; }
+    .hero h1 { margin: 0 0 8px 0; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 16px; }
+    .kpi { background: #131b33; border: 1px solid #273458; border-radius: 12px; padding: 12px; }
+    .progress { height: 10px; background: #1f2b4d; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+    .bar { height: 100%; width: 90%; background: linear-gradient(90deg, #10b981, #22d3ee); }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 20px; }
+    .card { background: #121a30; border: 1px solid #283659; border-radius: 12px; padding: 12px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; background: #121a30; border-radius: 12px; overflow: hidden; }
+    th, td { border-bottom: 1px solid #243256; text-align: left; padding: 10px; }
+    th { background: #192548; }
+    .chip { background: #243256; border-radius: 999px; padding: 2px 8px; }
+    a { color: #7dd3fc; }
+  </style>
+</head>
+<body>
+  <div class='wrap'>
+    <section class='hero'>
+      <h1>Repo Visual Snapshot</h1>
+      <p>A high-contrast dashboard for README signals, docs theme palette, and proof-map readability.</p>
+      <div class='progress'><div class='bar'></div></div>
+      <p>Readability score: <strong>18</strong>/20 · Grade <strong>A</strong></p>
+    </section>
+
+    <section class='kpis'>
+      <div class='kpi'><strong>Signal rows</strong><br />7</div>
+      <div class='kpi'><strong>Badge links</strong><br />7</div>
+      <div class='kpi'><strong>Palettes</strong><br />2</div>
+      <div class='kpi'><strong>Active streams</strong><br />2</div>
+    </section>
+
+    <h2>Signal cards</h2>
+    <section class='cards'>
+      <div class='card'><h3>Pages</h3><p>Status: ✅ linked badge</p><p><a href='https://sherif69-sa.github.io/DevS69-sdetkit/'>https://sherif69-sa.github.io/DevS69-sdetkit/</a></p></div>
+<div class='card'><h3>CI</h3><p>Status: ✅ linked badge</p><p><a href='https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml'>https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml</a></p></div>
+<div class='card'><h3>Docs link check</h3><p>Status: ✅ linked badge</p><p><a href='https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/docs-link-check.yml'>https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/docs-link-check.yml</a></p></div>
+<div class='card'><h3>Last commit</h3><p>Status: ✅ linked badge</p><p><a href='https://github.com/sherif69-sa/DevS69-sdetkit/commits/main'>https://github.com/sherif69-sa/DevS69-sdetkit/commits/main</a></p></div>
+<div class='card'><h3>Latest release</h3><p>Status: ✅ linked badge</p><p><a href='https://github.com/sherif69-sa/DevS69-sdetkit/releases'>https://github.com/sherif69-sa/DevS69-sdetkit/releases</a></p></div>
+<div class='card'><h3>Open issues</h3><p>Status: ✅ linked badge</p><p><a href='https://github.com/sherif69-sa/DevS69-sdetkit/issues'>https://github.com/sherif69-sa/DevS69-sdetkit/issues</a></p></div>
+<div class='card'><h3>Community</h3><p>Status: ✅ linked badge</p><p><a href='CONTRIBUTING.md'>CONTRIBUTING.md</a></p></div>
+    </section>
+
+    <h2>Docs theme palette</h2>
+    <table>
+      <thead><tr><th>Media</th><th>Scheme</th><th>Primary</th><th>Accent</th></tr></thead>
+      <tbody><tr><td>(prefers-color-scheme: light)</td><td>default</td><td><span class='chip'>deep purple</span></td><td><span class='chip'>teal</span></td></tr>
+<tr><td>(prefers-color-scheme: dark)</td><td>slate</td><td><span class='chip'>deep purple</span></td><td><span class='chip'>lime</span></td></tr></tbody>
+    </table>
+
+    <h2>Proof stream table</h2>
+    <table>
+      <thead><tr><th>Stream</th><th>Owner</th><th>KPI</th><th>Risk</th><th>Status</th></tr></thead>
+      <tbody><tr><td>Case Snippet Closeout</td><td>qa-lead</td><td>failed-checks:0</td><td>narrative-drift</td><td>active</td></tr>
+<tr><td>Case Snippet Proof Log</td><td>qa-lead</td><td>release-ok:true</td><td>evidence-lag</td><td>active</td></tr></tbody>
+    </table>
+  </div>
+</body>
+</html>
