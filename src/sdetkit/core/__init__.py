@@ -112,10 +112,15 @@ def __getattr__(name: str) -> Any:
         return import_module(f".{alias_target}", __name__)
 
     if name not in _missing_module_cache:
-        from . import playbooks_cli
+        playbooks_cli = import_module("sdetkit.playbooks_cli")
 
         class _CompatModule(ModuleType):
             def main(self, argv: list[str] | None = None) -> int:
+                from ._runtime import ensure_supported_python
+
+                unsupported_rc = ensure_supported_python(component="sdetkit core")
+                if unsupported_rc is not None:
+                    return unsupported_rc
                 args = list(argv or [])
                 cmd = name.replace("_", "-")
                 return playbooks_cli.main([cmd, *args])

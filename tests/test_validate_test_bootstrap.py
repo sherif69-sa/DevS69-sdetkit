@@ -17,7 +17,7 @@ def test_build_report_ok(monkeypatch):
 
 
 def test_build_report_detects_missing(monkeypatch):
-    monkeypatch.setattr(test_bootstrap.sys, "version_info", (3, 10, 0, "final", 0))
+    monkeypatch.setattr(test_bootstrap.sys, "version_info", (3, 9, 0, "final", 0))
     monkeypatch.setattr(
         test_bootstrap.importlib.util,
         "find_spec",
@@ -42,7 +42,7 @@ def test_render_json_output(monkeypatch, capsys):
         "build_test_bootstrap_report",
         lambda: {
             "ok": True,
-            "python": {"current": "3.12.2", "required": "3.11+", "supported": True},
+            "python": {"current": "3.12.2", "required": "3.10+", "supported": True},
             "dependencies": {
                 "required_modules": ["httpx", "yaml", "hypothesis"],
                 "missing_modules": [],
@@ -72,7 +72,7 @@ def test_main_writes_output_file(monkeypatch, tmp_path):
         "build_test_bootstrap_report",
         lambda: {
             "ok": True,
-            "python": {"current": "3.12.2", "required": "3.11+", "supported": True},
+            "python": {"current": "3.12.2", "required": "3.10+", "supported": True},
             "dependencies": {
                 "required_modules": ["httpx", "yaml", "hypothesis"],
                 "missing_modules": [],

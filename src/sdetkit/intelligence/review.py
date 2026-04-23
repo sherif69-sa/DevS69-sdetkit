@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import datetime as _dt
 import hashlib
 import io
 import json
 import sys
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -39,6 +39,9 @@ SCHEMA_VERSION = "sdetkit.review.v3"
 REVIEW_CONTRACT_VERSION = "sdetkit.review.contract.v1"
 EXIT_OK = 0
 EXIT_FINDINGS = 2
+UTC = getattr(_dt, "UTC", _dt.timezone.utc)  # noqa: UP017
+datetime = _dt.datetime
+timedelta = _dt.timedelta
 
 
 @dataclass(frozen=True)

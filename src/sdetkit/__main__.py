@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 
-MIN_RUNTIME_PYTHON: tuple[int, int] = (3, 11)
+MIN_RUNTIME_PYTHON: tuple[int, int] = (3, 10)
 
 
 def _validate_runtime_python() -> str | None:
@@ -13,7 +13,7 @@ def _validate_runtime_python() -> str | None:
     return (
         "sdetkit requires Python "
         f"{required}. Detected {current}. "
-        "Use a 3.11+ interpreter before running the CLI."
+        "Use a 3.10+ interpreter before running the CLI."
     )
 
 

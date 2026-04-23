@@ -24,13 +24,28 @@ def _text_from_markup_with_metadata(
     end: str,
     tab_size: int,
 ) -> Text:
-    text = Text.from_markup(markup)
+    try:
+        text = Text.from_markup(markup)
+    except TypeError:
+        text = _construct_with_init_alias(Text, markup)
     text.justify = justify
     text.overflow = overflow
     text.no_wrap = no_wrap
     text.end = end
     text.tab_size = tab_size
     return text
+
+
+def _construct_with_init_alias(factory, *args, **kwargs):
+    try:
+        return factory(*args, **kwargs)
+    except TypeError:
+        instance = factory()
+        init_alias = getattr(instance, "init_", None)
+        if callable(init_alias):
+            init_alias(*args, **kwargs)
+            return instance
+        raise
 
 
 def _build_case_data() -> tuple[list[dict[str, object]], list[dict[str, object]]]:
@@ -79,10 +94,10 @@ def _build_case_data() -> tuple[list[dict[str, object]], list[dict[str, object]]
         link = f"https://example.org/problem/{i:04d}" if i % 3 != 1 else ""
         meta = meta_templates[i % len(meta_templates)](i)
         meta.update(handler_templates[i % len(handler_templates)](i))
-        text = Text(plain, style=base_style)
+        text = _construct_with_init_alias(Text, plain, style=base_style)
         if link:
-            text.stylize(Style(link=link), 0, len(text))
-        text.stylize(Style(meta=meta), 0, len(text))
+            text.stylize(_construct_with_init_alias(Style, link=link), 0, len(text))
+        text.stylize(_construct_with_init_alias(Style, meta=meta), 0, len(text))
         if inner_style:
             start = 5 + (i % 4)
             end = len(plain) - (3 + (i % 5))

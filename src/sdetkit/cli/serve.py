@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import datetime as _dt
 import json
 import os
 import re
 import time
-from datetime import UTC, datetime
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -17,6 +17,8 @@ from ..security import SecurityError, safe_path
 SERVE_CONTRACT_VERSION = "sdetkit.serve.contract.v1"
 _MAX_BODY_BYTES = 1_048_576
 _OBS_DEFAULT_STALE_SECONDS = 24 * 60 * 60
+UTC = getattr(_dt, "UTC", _dt.timezone.utc)  # noqa: UP017
+datetime = _dt.datetime
 
 
 class RequestValidationError(ValueError):

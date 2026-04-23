@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sdetkit"
 version = "1.0.3"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 readme = "README.md"
 description = "Operator-grade release confidence and test intelligence platform: deterministic gates, evidence, integration assurance, and failure forensics."
 license = "Apache-2.0"
@@ -20,6 +20,7 @@ classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Topic :: Software Development :: Testing",
@@ -27,7 +28,8 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
-  "httpx>=0.28.1,<1"
+  "httpx>=0.28.1,<1",
+  "tomli>=2.0.1; python_version < '3.11'"
 ]
 [project.urls]
 Homepage = "https://github.com/sherif69-sa/DevS69-sdetkit"
