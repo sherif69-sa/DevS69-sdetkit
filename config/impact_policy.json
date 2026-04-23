@@ -1,0 +1,30 @@
+{
+  "schema_version": "sdetkit.impact-policy.v1",
+  "head_regression_drop_threshold": 5.0,
+  "fail_on_overall_regression": true,
+  "fail_on_head_regression": true,
+  "min_step_scores": {
+    "step_1": 85.0,
+    "step_2": 85.0,
+    "step_3": 85.0
+  },
+  "min_overall_program_score": 85.0,
+  "branch_overrides": {
+    "main": {
+      "min_overall_program_score": 90.0,
+      "min_step_scores": {
+        "step_1": 90.0,
+        "step_2": 90.0,
+        "step_3": 90.0
+      }
+    },
+    "feature/*": {
+      "min_overall_program_score": 80.0,
+      "min_step_scores": {
+        "step_1": 80.0,
+        "step_2": 80.0,
+        "step_3": 80.0
+      }
+    }
+  }
+}
