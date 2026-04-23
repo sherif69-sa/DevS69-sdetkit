@@ -4,7 +4,11 @@
   <p><strong>Deterministic release confidence for ship / no-ship decisions.</strong></p>
 </div>
 
-DevS69 SDETKit is a release-confidence CLI that helps teams run repeatable checks, produce machine-readable evidence, and decide whether a change is ready to ship.
+DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisions with machine-readable evidence.
+
+**Primary outcome:** know if a change is ready to ship.
+
+Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 
 ## Why teams use SDETKit
 
@@ -41,6 +45,10 @@ build/
 | Any `ok: false` | ❌ NO-SHIP |
 | `failed_steps` present in either artifact | ❌ NO-SHIP |
 
+Canonical gate commands: `python -m sdetkit gate fast`, `python -m sdetkit gate release`, and `python -m sdetkit doctor`.
+
+Secondary lanes cover review, quality, and CI automation once the primary gate decision is stable.
+
 ## Core operator lanes
 
 ### 1) Release gate lane
@@ -73,6 +81,8 @@ ruff check .
 ./ci.sh quick --artifact-dir .sdetkit/out
 make merge-ready
 ```
+
+Historical and transition-era references (secondary) are intentionally delayed until after the canonical first proof path is operating.
 
 ## Top-tier reporting sample pipeline
 
