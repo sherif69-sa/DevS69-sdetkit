@@ -8,10 +8,14 @@ family so the workflow stays active as new snapshots are produced.
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+SCENARIO_DB_SCRIPT = ROOT / "scripts/build_adaptive_scenario_database.py"
 
 CONTRACTS: tuple[str, ...] = (
     "docs/contracts/core-command-contract.v1.json",
@@ -120,32 +124,65 @@ def _latest_sample(prefix: str) -> Path | None:
     return candidates[-1] if candidates else None
 
 
+def _fresh_adaptive_scenario_database_sample() -> dict | list | None:
+    fd, path = tempfile.mkstemp(prefix="adaptive-scenario-database-", suffix=".json")
+    os.close(fd)
+    out_path = Path(path)
+    try:
+        result = subprocess.run(
+            [sys.executable, str(SCENARIO_DB_SCRIPT), ".", "--out", str(out_path)],
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=ROOT,
+        )
+        if result.returncode != 0:
+            return None
+        return _load_json(out_path)
+    except Exception:  # pragma: no cover - defensive branch
+        return None
+    finally:
+        try:
+            out_path.unlink(missing_ok=True)
+        except Exception:  # pragma: no cover - defensive branch
+            pass
+
+
 def _validate_sample_families() -> list[str]:
     errors: list[str] = []
     for prefix, expected_schema in SAMPLE_FAMILIES.items():
-        p = _latest_sample(prefix)
-        if p is None:
-            errors.append(f"missing sample artifact family: docs/artifacts/{prefix}*.json")
-            continue
-        try:
-            payload = _load_json(p)
-        except Exception as exc:  # pragma: no cover - defensive branch
-            errors.append(f"invalid json in {p.relative_to(ROOT)}: {exc}")
-            continue
+        rel = None
+        if prefix == "adaptive-scenario-database-":
+            payload = _fresh_adaptive_scenario_database_sample()
+            rel = Path("build/generated-adaptive-scenario-database.json")
+            if payload is None:
+                errors.append("failed to build fresh adaptive scenario database sample")
+                continue
+        else:
+            p = _latest_sample(prefix)
+            if p is None:
+                errors.append(f"missing sample artifact family: docs/artifacts/{prefix}*.json")
+                continue
+            rel = p.relative_to(ROOT)
+            try:
+                payload = _load_json(p)
+            except Exception as exc:  # pragma: no cover - defensive branch
+                errors.append(f"invalid json in {rel}: {exc}")
+                continue
 
         if not isinstance(payload, dict):
-            errors.append(f"unexpected payload type in {p.relative_to(ROOT)}")
+            errors.append(f"unexpected payload type in {rel}")
             continue
 
         actual = payload.get("schema_version")
         if actual != expected_schema:
             errors.append(
-                f"schema_version mismatch for {p.relative_to(ROOT)}: {actual!r} != {expected_schema!r}"
+                f"schema_version mismatch for {rel}: {actual!r} != {expected_schema!r}"
             )
             continue
 
         if expected_schema == "sdetkit.adaptive-scenario-database.v1":
-            errors.extend(_validate_adaptive_scenario_database_sample(payload, p.relative_to(ROOT)))
+            errors.extend(_validate_adaptive_scenario_database_sample(payload, rel))
     return errors
 
 
