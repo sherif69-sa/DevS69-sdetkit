@@ -9,21 +9,21 @@ def _load_core_main(monkeypatch):
     src_root = Path(__file__).resolve().parents[1] / "src" / "sdetkit" / "core"
     core_pkg = ModuleType("sdetkit.core")
     core_pkg.__path__ = [str(src_root)]  # type: ignore[attr-defined]
-    cassette_get_mod = ModuleType("sdetkit.core.cassette_get")
+    cassette_get_mod = ModuleType("sdetkit.cassette_get")
     cassette_get_mod.cassette_get = lambda argv: len(argv)  # type: ignore[attr-defined]
-    atomicio_mod = ModuleType("sdetkit.core.atomicio")
+    atomicio_mod = ModuleType("sdetkit.atomicio")
     atomicio_mod.atomic_write_text = lambda *_a, **_k: None  # type: ignore[attr-defined]
-    security_mod = ModuleType("sdetkit.core.security")
+    security_mod = ModuleType("sdetkit.security")
     security_mod.SecurityError = RuntimeError  # type: ignore[attr-defined]
     security_mod.safe_path = lambda p: p  # type: ignore[attr-defined]
-    cli_mod = ModuleType("sdetkit.core.cli")
+    cli_mod = ModuleType("sdetkit.cli")
     cli_mod.main = lambda: 0  # type: ignore[attr-defined]
 
     monkeypatch.setitem(__import__("sys").modules, "sdetkit.core", core_pkg)
-    monkeypatch.setitem(__import__("sys").modules, "sdetkit.core.cassette_get", cassette_get_mod)
-    monkeypatch.setitem(__import__("sys").modules, "sdetkit.core.atomicio", atomicio_mod)
-    monkeypatch.setitem(__import__("sys").modules, "sdetkit.core.security", security_mod)
-    monkeypatch.setitem(__import__("sys").modules, "sdetkit.core.cli", cli_mod)
+    monkeypatch.setitem(__import__("sys").modules, "sdetkit.cassette_get", cassette_get_mod)
+    monkeypatch.setitem(__import__("sys").modules, "sdetkit.atomicio", atomicio_mod)
+    monkeypatch.setitem(__import__("sys").modules, "sdetkit.security", security_mod)
+    monkeypatch.setitem(__import__("sys").modules, "sdetkit.cli", cli_mod)
 
     spec = importlib.util.spec_from_file_location("sdetkit.core.__main__", src_root / "__main__.py")
     assert spec and spec.loader
@@ -59,3 +59,9 @@ def test_core_main_cassette_get_exception_path(monkeypatch, capsys) -> None:
     monkeypatch.setattr(module.sys, "argv", ["prog", "cassette-get", "x"])
     assert module.main() == 2
     assert "kaboom" in capsys.readouterr().err
+
+
+def test_core_main_returns_error_for_unsupported_python(monkeypatch, capsys) -> None:
+    module, _ = _load_core_main(monkeypatch)
+    assert module._ensure_supported_python((3, 9)) == 2
+    assert "requires Python 3.10+" in capsys.readouterr().err

@@ -1,13 +1,23 @@
 from __future__ import annotations
 
 import sys
+from importlib import import_module
 
-from . import cassette_get as _cassette_get_module
-from .atomicio import atomic_write_text
-from .security import SecurityError, safe_path
+from sdetkit.core._runtime import ensure_supported_python
+
+
+def _ensure_supported_python(version_info: tuple[int, int] | None = None) -> int | None:
+    return ensure_supported_python(
+        component="sdetkit core",
+        version_info=version_info,
+    )
 
 
 def _cassette_get(argv: list[str]) -> int:
+    _cassette_get_module = import_module("sdetkit.cassette_get")
+    from sdetkit.atomicio import atomic_write_text
+    from sdetkit.security import SecurityError, safe_path
+
     # Compatibility shim for tests that monkeypatch __main__ symbols directly.
     _cassette_get_module.atomic_write_text = atomic_write_text
     _cassette_get_module.safe_path = safe_path
@@ -16,6 +26,10 @@ def _cassette_get(argv: list[str]) -> int:
 
 
 def main() -> int:
+    unsupported_rc = _ensure_supported_python()
+    if unsupported_rc is not None:
+        return unsupported_rc
+
     argv = sys.argv[1:]
     if argv and argv[0] == "cassette-get":
         try:
@@ -24,7 +38,7 @@ def main() -> int:
             sys.stderr.write(str(e) + "\n")
             return 2
 
-    from .cli import main as cli_main
+    from sdetkit.cli import main as cli_main
 
     try:
         return int(cli_main() or 0)

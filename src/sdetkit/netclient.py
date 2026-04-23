@@ -6,7 +6,7 @@ import time
 import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+import datetime as _dt
 from email.utils import parsedate_to_datetime
 from typing import Any, Literal
 from urllib.parse import urljoin
@@ -15,6 +15,8 @@ from .optional_httpx import load_httpx
 from .security import default_http_timeout, ensure_allowed_scheme
 
 httpx = load_httpx(feature="sdetkit network workflows")
+UTC = getattr(_dt, "UTC", _dt.timezone.utc)
+datetime = _dt.datetime
 
 EventType = Literal[
     "attempt_start",

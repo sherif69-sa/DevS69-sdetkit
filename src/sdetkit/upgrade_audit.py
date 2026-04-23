@@ -7,13 +7,13 @@ import fnmatch
 import json
 import re
 import sys
-import tomllib
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from ._toml import loads as toml_loads
 from .bools import coerce_bool
 
 REQ_NAME_RE = re.compile(r"^\s*([A-Za-z0-9_.-]+)")
@@ -100,6 +100,7 @@ COMMON_IMPORT_ALIASES = {
     "cyclonedx-bom": {"cyclonedx_py"},
     "pre-commit": {"pre_commit"},
 }
+DT_UTC = getattr(dt, "UTC", dt.timezone.utc)
 
 
 def _parse_dep_name(raw_requirement: str) -> str:
@@ -155,7 +156,7 @@ def _normalize_requirement_line(line: str) -> str | None:
 
 
 def _load_pyproject_dependencies(pyproject_path: Path) -> list[Dependency]:
-    data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    data = toml_loads(pyproject_path.read_text(encoding="utf-8"))
     project = data.get("project", {})
     deps: list[Dependency] = []
 
@@ -353,7 +354,7 @@ def _load_cache(cache_path: Path) -> dict[str, dict[str, str | float | None]]:
 def _persist_cache(cache_path: Path, cache: dict[str, dict[str, str | float | None]]) -> None:
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
-        "generated_at": dt.datetime.now(dt.UTC).isoformat(),
+        "generated_at": dt.datetime.now(DT_UTC).isoformat(),
         "packages": cache,
     }
     cache_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -370,7 +371,7 @@ def _cache_entry_fresh(
         return False
     if entry.get("include_prereleases") is not include_prereleases:
         return False
-    age_s = dt.datetime.now(dt.UTC).timestamp() - float(fetched_at)
+    age_s = dt.datetime.now(DT_UTC).timestamp() - float(fetched_at)
     return age_s <= max(ttl_hours, 0) * 3600
 
 
@@ -462,7 +463,7 @@ def _fetch_package_metadata(
         compatible_version, compatible_release_date, compatibility_status = None, None, "unknown"
 
     cache[package] = {
-        "fetched_at": dt.datetime.now(dt.UTC).timestamp(),
+        "fetched_at": dt.datetime.now(DT_UTC).timestamp(),
         "include_prereleases": include_prereleases,
         "latest_version": latest_version,
         "release_date": release_date,
@@ -529,7 +530,7 @@ def _collect_package_metadata(
 
 
 def _load_project_python_requires(pyproject_path: Path) -> str | None:
-    data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    data = toml_loads(pyproject_path.read_text(encoding="utf-8"))
     project = data.get("project", {})
     value = project.get("requires-python")
     return str(value).strip() if isinstance(value, str) and value.strip() else None
@@ -918,8 +919,8 @@ def _release_age_days(release_date: str | None) -> int | None:
     except ValueError:
         return None
     if uploaded.tzinfo is None:
-        uploaded = uploaded.replace(tzinfo=dt.UTC)
-    now = dt.datetime.now(dt.UTC)
+        uploaded = uploaded.replace(tzinfo=DT_UTC)
+    now = dt.datetime.now(DT_UTC)
     return max((now - uploaded).days, 0)
 
 

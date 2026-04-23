@@ -14,17 +14,20 @@ def test_core_dunder_getattr_exports_and_compat_module(monkeypatch) -> None:
     with pytest.raises(ModuleNotFoundError):
         core.__getattr__("register_scalar_function")
 
-    with pytest.raises(RecursionError):
-        core.__getattr__("main_")
+    main_module = core.__getattr__("main_")
+    assert hasattr(main_module, "main")
 
     calls: list[list[str]] = []
-    fake_playbooks = ModuleType("sdetkit.core.playbooks_cli")
+    fake_playbooks = ModuleType("sdetkit.playbooks_cli")
     fake_playbooks.main = lambda argv=None: calls.append(list(argv or [])) or 77  # type: ignore[attr-defined]
-    monkeypatch.setitem(__import__("sys").modules, "sdetkit.core.playbooks_cli", fake_playbooks)
+    monkeypatch.setitem(__import__("sys").modules, "sdetkit.playbooks_cli", fake_playbooks)
 
     compat = core.__getattr__("totally_missing_lane")
     assert compat.main(["--x"]) == 77
     assert calls[0][0] == "totally-missing-lane"
+    runtime_guard = __import__("sdetkit.core._runtime", fromlist=["ensure_supported_python"])
+    monkeypatch.setattr(runtime_guard, "ensure_supported_python", lambda **_k: 2)
+    assert compat.main(["--x"]) == 2
 
     closeout_mod = core.__getattr__("launch_readiness_closeout")
     assert hasattr(closeout_mod, "main")

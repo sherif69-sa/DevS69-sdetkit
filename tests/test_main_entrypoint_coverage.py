@@ -104,11 +104,11 @@ def test_main_cli_string_code_is_cast_to_int(monkeypatch: pytest.MonkeyPatch) ->
 def test_main_rejects_unsupported_python(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    monkeypatch.setattr(entry.sys, "version_info", (3, 10, 9))
+    monkeypatch.setattr(entry.sys, "version_info", (3, 9, 9))
     monkeypatch.setattr(entry.sys, "argv", ["sdetkit"])
 
     assert entry.main() == 2
     assert (
         capsys.readouterr().err
-        == "sdetkit requires Python 3.11+. Detected 3.10.9. Use a 3.11+ interpreter before running the CLI.\n"
+        == "sdetkit requires Python 3.10+. Detected 3.9.9. Use a 3.10+ interpreter before running the CLI.\n"
     )

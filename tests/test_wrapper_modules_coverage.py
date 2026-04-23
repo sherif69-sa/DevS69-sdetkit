@@ -134,19 +134,23 @@ def test_core_entrypoints_module_with_stubbed_dependencies(monkeypatch) -> None:
     core_pkg = ModuleType("sdetkit.core")
     core_pkg.__path__ = [str(src_root / "sdetkit" / "core")]  # type: ignore[attr-defined]
 
-    apiget_mod = ModuleType("sdetkit.core.apiget")
-    kvcli_mod = ModuleType("sdetkit.core.kvcli")
+    apiget_mod = ModuleType("sdetkit.apiget")
+    kvcli_mod = ModuleType("sdetkit.kvcli")
     apiget_mod.main = lambda: 21  # type: ignore[attr-defined]
-    kvcli_mod.main = lambda: 34  # type: ignore[attr-defined]
+    kvcli_mod.cli_entry = lambda: 34  # type: ignore[attr-defined]
 
     monkeypatch.setitem(importlib.sys.modules, "sdetkit.core", core_pkg)
-    monkeypatch.setitem(importlib.sys.modules, "sdetkit.core.apiget", apiget_mod)
-    monkeypatch.setitem(importlib.sys.modules, "sdetkit.core.kvcli", kvcli_mod)
+    monkeypatch.setitem(importlib.sys.modules, "sdetkit.apiget", apiget_mod)
+    monkeypatch.setitem(importlib.sys.modules, "sdetkit.kvcli", kvcli_mod)
     monkeypatch.delitem(importlib.sys.modules, "sdetkit.core._entrypoints", raising=False)
 
     mod = importlib.import_module("sdetkit.core._entrypoints")
     assert mod.apigetcli() == 21
     assert mod.kvcli() == 34
+
+    monkeypatch.setattr(mod, "ensure_supported_python", lambda **_k: 2)
+    assert mod.apigetcli() == 2
+    assert mod.kvcli() == 2
 
 
 def test_core_main_module_paths_with_stubbed_package(monkeypatch, capsys) -> None:
@@ -156,21 +160,21 @@ def test_core_main_module_paths_with_stubbed_package(monkeypatch, capsys) -> Non
     core_pkg = ModuleType("sdetkit.core")
     core_pkg.__path__ = [str(core_path)]  # type: ignore[attr-defined]
 
-    cassette_get_mod = ModuleType("sdetkit.core.cassette_get")
+    cassette_get_mod = ModuleType("sdetkit.cassette_get")
     cassette_get_mod.cassette_get = lambda argv: len(argv)  # type: ignore[attr-defined]
-    atomic_mod = ModuleType("sdetkit.core.atomicio")
+    atomic_mod = ModuleType("sdetkit.atomicio")
     atomic_mod.atomic_write_text = lambda *_a, **_k: None  # type: ignore[attr-defined]
-    security_mod = ModuleType("sdetkit.core.security")
+    security_mod = ModuleType("sdetkit.security")
     security_mod.SecurityError = RuntimeError  # type: ignore[attr-defined]
     security_mod.safe_path = lambda p: p  # type: ignore[attr-defined]
-    cli_mod = ModuleType("sdetkit.core.cli")
+    cli_mod = ModuleType("sdetkit.cli")
     cli_mod.main = lambda: 0  # type: ignore[attr-defined]
 
     monkeypatch.setitem(importlib.sys.modules, "sdetkit.core", core_pkg)
-    monkeypatch.setitem(importlib.sys.modules, "sdetkit.core.cassette_get", cassette_get_mod)
-    monkeypatch.setitem(importlib.sys.modules, "sdetkit.core.atomicio", atomic_mod)
-    monkeypatch.setitem(importlib.sys.modules, "sdetkit.core.security", security_mod)
-    monkeypatch.setitem(importlib.sys.modules, "sdetkit.core.cli", cli_mod)
+    monkeypatch.setitem(importlib.sys.modules, "sdetkit.cassette_get", cassette_get_mod)
+    monkeypatch.setitem(importlib.sys.modules, "sdetkit.atomicio", atomic_mod)
+    monkeypatch.setitem(importlib.sys.modules, "sdetkit.security", security_mod)
+    monkeypatch.setitem(importlib.sys.modules, "sdetkit.cli", cli_mod)
 
     spec = importlib.util.spec_from_file_location(
         "sdetkit.core.__main__", core_path / "__main__.py"
