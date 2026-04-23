@@ -41,39 +41,35 @@
 
 ## Product surface
 
+<p align="center"><strong>Choose a lane and move fast.</strong></p>
+
 <table>
   <tr>
-    <td width="33%" align="center">
-      <a href="docs/start-here-5-minutes.md"><img src="docs/assets/devs69-card-docs.svg" alt="Start Here" width="100%" /></a><br/>
-      <strong>Start Here</strong><br/>
-      5-minute onboarding
+    <td width="33%" align="center" valign="top">
+      <a href="docs/start-here-5-minutes.md"><img src="docs/assets/devs69-card-docs.svg" alt="Start Here lane" width="100%" /></a>
+      <p><a href="docs/start-here-5-minutes.md"><strong>Start Here →</strong></a><br/><sub>5-minute onboarding</sub></p>
     </td>
-    <td width="33%" align="center">
-      <a href="docs/recommended-ci-flow.md"><img src="docs/assets/devs69-card-hud.svg" alt="CI Rollout" width="100%" /></a><br/>
-      <strong>CI Rollout</strong><br/>
-      Local-to-CI deployment lane
+    <td width="33%" align="center" valign="top">
+      <a href="docs/recommended-ci-flow.md"><img src="docs/assets/devs69-card-hud.svg" alt="CI Rollout lane" width="100%" /></a>
+      <p><a href="docs/recommended-ci-flow.md"><strong>CI Rollout →</strong></a><br/><sub>Local-to-CI deployment lane</sub></p>
     </td>
-    <td width="33%" align="center">
-      <a href="docs/ci-artifact-walkthrough.md"><img src="docs/assets/devs69-card-diff-flow.svg" alt="Artifact Walkthrough" width="100%" /></a><br/>
-      <strong>Artifact Decoder</strong><br/>
-      Understand every pass/fail signal
+    <td width="33%" align="center" valign="top">
+      <a href="docs/ci-artifact-walkthrough.md"><img src="docs/assets/devs69-card-diff-flow.svg" alt="Artifact Decoder lane" width="100%" /></a>
+      <p><a href="docs/ci-artifact-walkthrough.md"><strong>Artifact Decoder →</strong></a><br/><sub>Understand every pass/fail signal</sub></p>
     </td>
   </tr>
   <tr>
-    <td width="33%" align="center">
-      <a href="docs/why-sdetkit-for-teams.md"><img src="docs/assets/devs69-card-repo-map.svg" alt="For Teams" width="100%" /></a><br/>
-      <strong>For Teams</strong><br/>
-      Shared operator model
+    <td width="33%" align="center" valign="top">
+      <a href="docs/why-sdetkit-for-teams.md"><img src="docs/assets/devs69-card-repo-map.svg" alt="For Teams lane" width="100%" /></a>
+      <p><a href="docs/why-sdetkit-for-teams.md"><strong>For Teams →</strong></a><br/><sub>Shared operator model</sub></p>
     </td>
-    <td width="33%" align="center">
-      <a href="docs/release-confidence-roi.md"><img src="docs/assets/devs69-card-exporters.svg" alt="ROI" width="100%" /></a><br/>
-      <strong>ROI</strong><br/>
-      Confidence economics
+    <td width="33%" align="center" valign="top">
+      <a href="docs/release-confidence-roi.md"><img src="docs/assets/devs69-card-exporters.svg" alt="ROI lane" width="100%" /></a>
+      <p><a href="docs/release-confidence-roi.md"><strong>ROI →</strong></a><br/><sub>Confidence economics</sub></p>
     </td>
-    <td width="33%" align="center">
-      <a href="docs/index.md"><img src="docs/assets/devs69-card-portal.svg" alt="Docs Hub" width="100%" /></a><br/>
-      <strong>Docs Hub</strong><br/>
-      Full documentation map
+    <td width="33%" align="center" valign="top">
+      <a href="docs/index.md"><img src="docs/assets/devs69-card-portal.svg" alt="Docs Hub lane" width="100%" /></a>
+      <p><a href="docs/index.md"><strong>Docs Hub →</strong></a><br/><sub>Full documentation map</sub></p>
     </td>
   </tr>
 </table>
@@ -147,19 +143,6 @@ ruff check .
 mutmut results
 ```
 
----
-
-## Decision flow at a glance
-
-```mermaid
-flowchart TD
-    A[Run gate fast] --> B[Run gate release]
-    B --> C[Read release-preflight.json]
-    C -->|ok true and no failed_steps| D[SHIP]
-    C -->|ok false or failed_steps present| E[NO-SHIP]
-    E --> F[Fix first failing step]
-    F --> A
-```
 
 ---
 
