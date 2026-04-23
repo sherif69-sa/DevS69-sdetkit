@@ -1,2 +1,3 @@
-stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag
-case-snippet-floor,qa-lead,docs-owner,2026-03-19T10:00:00Z,docs/integrations-case-snippet-closeout.md,python -m sdetkit case-snippet-closeout --format json --strict,failed-checks:0,narrative-drift
+stream_id,stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag,status
+case-snippet-floor,Case Snippet Closeout,qa-lead,docs-owner,2026-03-19T10:00:00Z,docs/integrations-case-snippet-closeout.md,python -m sdetkit case-snippet-closeout --format json --strict,failed-checks:0,narrative-drift,active
+case-snippet-proof,Case Snippet Proof Log,qa-lead,release-manager,2026-03-19T14:00:00Z,docs/proof-log.md,python -m sdetkit gate release --format json --out build/release-preflight.json,release-ok:true,evidence-lag,active

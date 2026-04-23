@@ -10,18 +10,24 @@ Canonical first path:
 
 ![DevS69 SDETKit hero](docs/assets/devs69-hero.svg)
 
-[![Pages](https://img.shields.io/website?url=https%3A%2F%2Fsherif69-sa.github.io%2FDevS69-sdetkit%2F&up_message=live&down_message=down&label=Pages)](https://sherif69-sa.github.io/DevS69-sdetkit/)
-[![CI](https://img.shields.io/github/actions/workflow/status/sherif69-sa/DevS69-sdetkit/ci.yml?branch=main&label=CI)](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml)
-[![Last commit](https://img.shields.io/github/last-commit/sherif69-sa/DevS69-sdetkit/main?label=Last%20commit)](https://github.com/sherif69-sa/DevS69-sdetkit/commits/main)
-[![Latest release](https://img.shields.io/github/v/release/sherif69-sa/DevS69-sdetkit?label=Latest%20release)](https://github.com/sherif69-sa/DevS69-sdetkit/releases)
-[![Open issues](https://img.shields.io/github/issues/sherif69-sa/DevS69-sdetkit?label=Open%20issues)](https://github.com/sherif69-sa/DevS69-sdetkit/issues)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+| Signal | Live status |
+|---|---|
+| Pages | [![Pages](https://img.shields.io/website?url=https%3A%2F%2Fsherif69-sa.github.io%2FDevS69-sdetkit%2F&up_message=live&down_message=down&label=Pages)](https://sherif69-sa.github.io/DevS69-sdetkit/) |
+| CI | [![CI](https://img.shields.io/github/actions/workflow/status/sherif69-sa/DevS69-sdetkit/ci.yml?branch=main&label=CI)](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml) |
+| Docs link check | [![Docs link check](https://img.shields.io/github/actions/workflow/status/sherif69-sa/DevS69-sdetkit/docs-link-check.yml?branch=main&label=Docs%20links)](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/docs-link-check.yml) |
+| Last commit | [![Last commit](https://img.shields.io/github/last-commit/sherif69-sa/DevS69-sdetkit/main?label=Last%20commit)](https://github.com/sherif69-sa/DevS69-sdetkit/commits/main) |
+| Latest release | [![Latest release](https://img.shields.io/github/v/release/sherif69-sa/DevS69-sdetkit?label=Latest%20release)](https://github.com/sherif69-sa/DevS69-sdetkit/releases) |
+| Open issues | [![Open issues](https://img.shields.io/github/issues/sherif69-sa/DevS69-sdetkit?label=Open%20issues)](https://github.com/sherif69-sa/DevS69-sdetkit/issues) |
+| Community | [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md) |
+
 
 DevS69 SDETKit is a release-confidence CLI: it gives engineering teams deterministic ship/no-ship decisions with machine-readable evidence, using one repeatable command path from local to CI.
 
 **Primary outcome:** know in minutes if a change is ready to ship.
 
 **Fast path:** [Live HUD](https://sherif69-sa.github.io/DevS69-sdetkit/command-hud-live/) · [Quickstart](#quickstart) · [CI rollout](docs/recommended-ci-flow.md)
+
+**Current stable release:** `1.0.3` (released on **April 18, 2026**).
 
 ## Live product visualization
 
@@ -45,6 +51,12 @@ These pull directly from GitHub and auto-update whenever workflows, releases, or
 - ✅ One clear release decision: **ship / no-ship**
 - ✅ Same commands locally and in CI
 - ✅ JSON artifacts that make triage faster
+
+## Honest product stance
+
+We welcome all feedback, including low-star reviews. The goal is to respond with better clarity, better UX, and stronger reliability evidence—not defensiveness.
+
+If you felt friction, open an issue with the exact step where confidence dropped and we will treat it as a product input signal.
 
 ## Quickstart
 
@@ -84,6 +96,18 @@ Decision:
 - Open the live HUD: <https://sherif69-sa.github.io/DevS69-sdetkit/command-hud-live/>
 - Try the quickstart above
 - If it helps, ⭐ star the repo
+
+## Repo visual snapshot tool
+
+Need a cleaner way to *see* repo presentation quality in one place? Run:
+
+```bash
+python scripts/render_repo_visual_snapshot.py
+# optional private screenshot capture (local only):
+python scripts/render_repo_visual_snapshot.py --capture-screenshot
+```
+
+This generates `docs/artifacts/repo-visual-snapshot.md` and `docs/artifacts/repo-visual-snapshot.html`. If you pass `--capture-screenshot`, it also writes a **private local screenshot** at `.sdetkit/out/repo-visual-snapshot.png` (git-ignored) for a high-contrast dashboard preview that is not publicly committed.
 
 ## Proof of value (live log)
 

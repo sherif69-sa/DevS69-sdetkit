@@ -29,15 +29,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
-      accent: cyan
+      primary: deep purple
+      accent: teal
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
-      accent: cyan
+      primary: deep purple
+      accent: lime
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
@@ -69,6 +69,8 @@ markdown_extensions:
       custom_checkbox: true
 
 extra:
+  status:
+    new: Recently updated
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/sherif69-sa/DevS69-sdetkit
