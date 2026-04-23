@@ -29,7 +29,9 @@ def build_scorecards(build_dir: Path) -> dict[str, object]:
         return float(steps.get(step, {}).get("completion_pct", 0))
 
     def head_score(name: str) -> float:
-        return float(heads.get(name, {}).get("score", 0)) if isinstance(heads.get(name), dict) else 0.0
+        return (
+            float(heads.get(name, {}).get("score", 0)) if isinstance(heads.get(name), dict) else 0.0
+        )
 
     criteria_pct = float(criteria.get("completion_pct", 0))
 
@@ -63,7 +65,9 @@ def build_scorecards(build_dir: Path) -> dict[str, object]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build step_1/step_2/step_3 scorecards from impact artifacts.")
+    parser = argparse.ArgumentParser(
+        description="Build step_1/step_2/step_3 scorecards from impact artifacts."
+    )
     parser.add_argument("--build-dir", default="build")
     parser.add_argument("--out", default="build/impact-step-scorecards.json")
     parser.add_argument("--format", choices=("text", "json"), default="text")
@@ -78,7 +82,9 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         s = payload["scorecards"]
-        print(f"step scorecards: s1={s['step_1']['achieved_pct']} s2={s['step_2']['achieved_pct']} s3={s['step_3']['achieved_pct']}")
+        print(
+            f"step scorecards: s1={s['step_1']['achieved_pct']} s2={s['step_2']['achieved_pct']} s3={s['step_3']['achieved_pct']}"
+        )
     return 0
 
 

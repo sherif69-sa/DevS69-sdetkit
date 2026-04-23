@@ -22,7 +22,9 @@ def build_scorecard(build_dir: Path) -> dict[str, object]:
     heads = review.get("heads", {}) if isinstance(review.get("heads"), dict) else {}
 
     def head_score(name: str) -> float:
-        return float(heads.get(name, {}).get("score", 0)) if isinstance(heads.get(name), dict) else 0.0
+        return (
+            float(heads.get(name, {}).get("score", 0)) if isinstance(heads.get(name), dict) else 0.0
+        )
 
     criteria_pct = float(criteria.get("completion_pct", 0))
 
@@ -30,9 +32,24 @@ def build_scorecard(build_dir: Path) -> dict[str, object]:
     step2_completion = float(steps.get("step_2", {}).get("completion_pct", 0))
     step3_completion = float(steps.get("step_3", {}).get("completion_pct", 0))
 
-    step1 = round((step1_completion * 0.55) + (_avg(head_score("security_head"), head_score("reliability_head")) * 0.35) + (criteria_pct * 0.10), 2)
-    step2 = round((step2_completion * 0.55) + (_avg(head_score("velocity_head"), head_score("governance_head")) * 0.35) + (criteria_pct * 0.10), 2)
-    step3 = round((step3_completion * 0.55) + (_avg(head_score("observability_head"), head_score("reliability_head")) * 0.35) + (criteria_pct * 0.10), 2)
+    step1 = round(
+        (step1_completion * 0.55)
+        + (_avg(head_score("security_head"), head_score("reliability_head")) * 0.35)
+        + (criteria_pct * 0.10),
+        2,
+    )
+    step2 = round(
+        (step2_completion * 0.55)
+        + (_avg(head_score("velocity_head"), head_score("governance_head")) * 0.35)
+        + (criteria_pct * 0.10),
+        2,
+    )
+    step3 = round(
+        (step3_completion * 0.55)
+        + (_avg(head_score("observability_head"), head_score("reliability_head")) * 0.35)
+        + (criteria_pct * 0.10),
+        2,
+    )
 
     overall = round(_avg(step1, step2, step3), 2)
     return {
@@ -58,7 +75,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
-        print(f"impact program scorecard: overall={payload['overall_score']} status={payload['status']}")
+        print(
+            f"impact program scorecard: overall={payload['overall_score']} status={payload['status']}"
+        )
     return 0
 
 

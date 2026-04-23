@@ -1,12 +1,9 @@
 from __future__ import annotations
 
 import argparse
-import json
-import sys
-from pathlib import Path
-
 import fnmatch
-
+import json
+from pathlib import Path
 
 REQUIRED_FILES = (
     "impact-workflow-run.json",
@@ -34,7 +31,11 @@ def resolve_policy_for_branch(policy: dict[str, object], branch: str) -> dict[st
         if fnmatch.fnmatch(branch, pattern):
             merged = dict(resolved)
             for key, value in override.items():
-                if key == "min_step_scores" and isinstance(value, dict) and isinstance(merged.get(key), dict):
+                if (
+                    key == "min_step_scores"
+                    and isinstance(value, dict)
+                    and isinstance(merged.get(key), dict)
+                ):
                     merged_steps = dict(merged[key])
                     merged_steps.update(value)
                     merged[key] = merged_steps
@@ -85,7 +86,10 @@ def evaluate_release_guard(build_dir: Path, policy_path: Path, branch: str) -> d
         "detail": str(next_plan.get("status")),
     }
     checks["criteria_ok"] = {"ok": bool(criteria.get("ok", False)), "detail": "criteria alignment"}
-    checks["trend_ok"] = {"ok": bool(trend.get("ok", False)), "detail": str(trend.get("streak", "unknown"))}
+    checks["trend_ok"] = {
+        "ok": bool(trend.get("ok", False)),
+        "detail": str(trend.get("streak", "unknown")),
+    }
     checks["review_quality"] = {
         "ok": float(review.get("overall_score", 0)) >= 80,
         "detail": f"overall_score={review.get('overall_score', 0)}",
@@ -97,12 +101,19 @@ def evaluate_release_guard(build_dir: Path, policy_path: Path, branch: str) -> d
         "detail": f"score={program.get('overall_score', 0)} min={min_overall}",
     }
 
-    step_scores = program.get("step_scores", {}) if isinstance(program.get("step_scores"), dict) else {}
-    min_steps = policy.get("min_step_scores", {}) if isinstance(policy.get("min_step_scores"), dict) else {}
+    step_scores = (
+        program.get("step_scores", {}) if isinstance(program.get("step_scores"), dict) else {}
+    )
+    min_steps = (
+        policy.get("min_step_scores", {}) if isinstance(policy.get("min_step_scores"), dict) else {}
+    )
     for step_name in ("step_1", "step_2", "step_3"):
         score = float(step_scores.get(step_name, 0))
         minimum = float(min_steps.get(step_name, 85.0))
-        checks[f"{step_name}_threshold"] = {"ok": score >= minimum, "detail": f"score={score} min={minimum}"}
+        checks[f"{step_name}_threshold"] = {
+            "ok": score >= minimum,
+            "detail": f"score={score} min={minimum}",
+        }
 
     ok = all(item["ok"] for item in checks.values())
     return {
@@ -114,7 +125,9 @@ def evaluate_release_guard(build_dir: Path, policy_path: Path, branch: str) -> d
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Release-grade guard for impact workflow artifacts.")
+    parser = argparse.ArgumentParser(
+        description="Release-grade guard for impact workflow artifacts."
+    )
     parser.add_argument("--build-dir", default="build")
     parser.add_argument("--policy", default="config/impact_policy.json")
     parser.add_argument("--out", default="build/impact-release-guard.json")

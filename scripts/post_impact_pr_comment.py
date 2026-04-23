@@ -10,7 +10,9 @@ from pathlib import Path
 MARKER = "<!-- impact-release-control -->"
 
 
-def _api_request(url: str, token: str, method: str = "GET", payload: dict[str, object] | None = None) -> dict[str, object] | list[dict[str, object]]:
+def _api_request(
+    url: str, token: str, method: str = "GET", payload: dict[str, object] | None = None
+) -> dict[str, object] | list[dict[str, object]]:
     data = None
     if payload is not None:
         data = json.dumps(payload).encode("utf-8")
@@ -44,7 +46,9 @@ def _find_existing_comment_id(comments: list[dict[str, object]]) -> int | None:
     return None
 
 
-def upsert_comment(repo: str, pr_number: int, token: str, comment_markdown: str, dry_run: bool) -> str:
+def upsert_comment(
+    repo: str, pr_number: int, token: str, comment_markdown: str, dry_run: bool
+) -> str:
     body = _compose_comment_body(comment_markdown)
     comments_url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
 

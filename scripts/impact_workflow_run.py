@@ -81,11 +81,15 @@ def _completion(total: int, passed: int) -> float:
     return round((passed / total) * 100.0, 2)
 
 
-def _step_readiness(step_key: str, command_results: list[dict[str, object]], step_ok: bool) -> dict[str, object]:
+def _step_readiness(
+    step_key: str, command_results: list[dict[str, object]], step_ok: bool
+) -> dict[str, object]:
     if step_key == "step_1":
         return {
             "phase_1_security_scan_ok": command_results[0]["ok"] if command_results else False,
-            "phase_2_release_gate_ok": command_results[1]["ok"] if len(command_results) > 1 else False,
+            "phase_2_release_gate_ok": command_results[1]["ok"]
+            if len(command_results) > 1
+            else False,
             "phase_alignment_ok": step_ok,
         }
     if step_key == "step_2":
@@ -97,14 +101,19 @@ def _step_readiness(step_key: str, command_results: list[dict[str, object]], ste
     if step_key == "step_3":
         return {
             "phase_5_release_doctor_ok": command_results[0]["ok"] if command_results else False,
-            "phase_6_reporting_bundle_ok": command_results[1]["ok"] if len(command_results) > 1 else False,
+            "phase_6_reporting_bundle_ok": command_results[1]["ok"]
+            if len(command_results) > 1
+            else False,
             "phase_alignment_ok": step_ok,
         }
     return {"phase_alignment_ok": step_ok}
 
 
 def _run_commands(commands: tuple[str, ...], dry_run: bool) -> list[dict[str, object]]:
-    return [({"command": cmd, "rc": 0, "ok": True, "dry_run": True} if dry_run else _run_command(cmd)) for cmd in commands]
+    return [
+        ({"command": cmd, "rc": 0, "ok": True, "dry_run": True} if dry_run else _run_command(cmd))
+        for cmd in commands
+    ]
 
 
 def _run_boost(dry_run: bool) -> dict[str, object]:
@@ -121,7 +130,9 @@ def _run_boost(dry_run: bool) -> dict[str, object]:
     }
 
 
-def run_workflow(selected_steps: tuple[WorkflowStep, ...], dry_run: bool, boost: bool) -> dict[str, object]:
+def run_workflow(
+    selected_steps: tuple[WorkflowStep, ...], dry_run: bool, boost: bool
+) -> dict[str, object]:
     steps_payload: list[dict[str, object]] = []
     overall_ok = True
     overall_total = 0
@@ -225,7 +236,9 @@ def _build_next_plan(payload: dict[str, object]) -> dict[str, object]:
         next_items.append("Run non-dry execution for the same scope and compare artifacts.")
         later.append("Automate this command in CI as required merge/release gate.")
     else:
-        later.append("After stabilizing failures, run --step all --boost for full-system confidence.")
+        later.append(
+            "After stabilizing failures, run --step all --boost for full-system confidence."
+        )
 
     return {
         "schema_version": "sdetkit.impact-next-plan.v1",
@@ -242,7 +255,11 @@ def _build_adaptive_review(payload: dict[str, object]) -> dict[str, object]:
     step2 = steps.get("step_2", {"phase_readiness": {}})
     step3 = steps.get("step_3", {"phase_readiness": {}})
     progress = float(payload["progress"]["completion_pct"])
-    boost_ok = bool(payload.get("boost", {}).get("ok", False)) if payload.get("boost", {}).get("enabled") else True
+    boost_ok = (
+        bool(payload.get("boost", {}).get("ok", False))
+        if payload.get("boost", {}).get("enabled")
+        else True
+    )
 
     heads = {
         "security_head": {
@@ -258,11 +275,15 @@ def _build_adaptive_review(payload: dict[str, object]) -> dict[str, object]:
             "rationale": "Execution completion indicates delivery velocity.",
         },
         "governance_head": {
-            "score": 100 if step2["phase_readiness"].get("phase_3_strict_checks_ok", False) and boost_ok else 55,
+            "score": 100
+            if step2["phase_readiness"].get("phase_3_strict_checks_ok", False) and boost_ok
+            else 55,
             "rationale": "Strict checks and boost discipline reflect governance quality.",
         },
         "observability_head": {
-            "score": 100 if step3["phase_readiness"].get("phase_6_reporting_bundle_ok", False) else 50,
+            "score": 100
+            if step3["phase_readiness"].get("phase_6_reporting_bundle_ok", False)
+            else 50,
             "rationale": "Reporting bundle health shows observability maturity.",
         },
     }
@@ -278,7 +299,9 @@ def _build_adaptive_review(payload: dict[str, object]) -> dict[str, object]:
     }
 
 
-def _persist_intelligence_db(db_path: Path, payload: dict[str, object], review: dict[str, object]) -> None:
+def _persist_intelligence_db(
+    db_path: Path, payload: dict[str, object], review: dict[str, object]
+) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(db_path) as conn:
         conn.execute(
@@ -329,8 +352,6 @@ def _persist_intelligence_db(db_path: Path, payload: dict[str, object], review: 
             )
 
 
-
-
 def _build_criteria_report(
     payload: dict[str, object],
     adaptive_review: dict[str, object],
@@ -344,7 +365,8 @@ def _build_criteria_report(
         "detail": str(adaptive_review.get("schema_version")),
     }
     checks["five_heads_present"] = {
-        "ok": isinstance(adaptive_review.get("heads"), dict) and len(adaptive_review.get("heads", {})) == 5,
+        "ok": isinstance(adaptive_review.get("heads"), dict)
+        and len(adaptive_review.get("heads", {})) == 5,
         "detail": f"heads={len(adaptive_review.get('heads', {})) if isinstance(adaptive_review.get('heads'), dict) else 0}",
     }
     checks["database_ready"] = {
@@ -370,11 +392,17 @@ def _build_criteria_report(
         "completion_pct": _completion(total, passed),
         "checks": checks,
     }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the 3-step impact workflow implementation.")
     parser.add_argument("--step", default="all", help="one of: all, step_1, step_2, step_3")
-    parser.add_argument("--dry-run", action="store_true", help="print/record commands without executing them")
-    parser.add_argument("--boost", action="store_true", help="run the boost lane after selected step(s)")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="print/record commands without executing them"
+    )
+    parser.add_argument(
+        "--boost", action="store_true", help="run the boost lane after selected step(s)"
+    )
     parser.add_argument("--format", choices=("json", "text"), default="text")
     parser.add_argument("--out", help="optional path for json output")
     parser.add_argument("--follow-up-out", default="build/impact-follow-up.md")
@@ -399,12 +427,16 @@ def main(argv: list[str] | None = None) -> int:
     next_plan = _build_next_plan(payload)
     next_plan_path = Path(args.next_plan_out)
     next_plan_path.parent.mkdir(parents=True, exist_ok=True)
-    next_plan_path.write_text(json.dumps(next_plan, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    next_plan_path.write_text(
+        json.dumps(next_plan, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
     adaptive_review = _build_adaptive_review(payload)
     adaptive_review_path = Path(args.adaptive_review_out)
     adaptive_review_path.parent.mkdir(parents=True, exist_ok=True)
-    adaptive_review_path.write_text(json.dumps(adaptive_review, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    adaptive_review_path.write_text(
+        json.dumps(adaptive_review, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
     db_path = Path(args.intelligence_db)
     _persist_intelligence_db(db_path, payload, adaptive_review)
@@ -412,7 +444,9 @@ def main(argv: list[str] | None = None) -> int:
     criteria = _build_criteria_report(payload, adaptive_review, next_plan, db_path)
     criteria_path = Path(args.criteria_out)
     criteria_path.parent.mkdir(parents=True, exist_ok=True)
-    criteria_path.write_text(json.dumps(criteria, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    criteria_path.write_text(
+        json.dumps(criteria, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
     if args.format == "json":
         text = json.dumps(payload, indent=2, sort_keys=True)
@@ -423,13 +457,17 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(text)
     else:
-        print(f"impact workflow run: ok={payload['ok']} completion={payload['progress']['completion_pct']}%")
+        print(
+            f"impact workflow run: ok={payload['ok']} completion={payload['progress']['completion_pct']}%"
+        )
         print(f"follow-up markdown: {follow_up_path}")
         print(f"next plan json: {next_plan_path}")
         print(f"adaptive review json: {adaptive_review_path}")
         print(f"intelligence db: {args.intelligence_db}")
         print(f"criteria report: {criteria_path}")
-        print(f"5-head score: {adaptive_review['overall_score']} weakest={adaptive_review['weakest_head']}")
+        print(
+            f"5-head score: {adaptive_review['overall_score']} weakest={adaptive_review['weakest_head']}"
+        )
 
     return 0 if payload["ok"] or args.dry_run else 1
 
