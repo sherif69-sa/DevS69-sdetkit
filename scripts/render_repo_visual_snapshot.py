@@ -138,13 +138,25 @@ def build_snapshot_markdown(data: SnapshotData) -> str:
         )
 
     lines.extend(
-        ["", "## Docs theme palette", "", "| Media query | Scheme | Primary | Accent |", "|---|---|---|---|"]
+        [
+            "",
+            "## Docs theme palette",
+            "",
+            "| Media query | Scheme | Primary | Accent |",
+            "|---|---|---|---|",
+        ]
     )
     for entry in data.palettes:
         lines.append(f"| {entry.media} | `{entry.scheme}` | `{entry.primary}` | `{entry.accent}` |")
 
     lines.extend(
-        ["", "## Proof map CSV view", "", "| Stream | Owner | KPI target | Risk | Status |", "|---|---|---|---|---|"]
+        [
+            "",
+            "## Proof map CSV view",
+            "",
+            "| Stream | Owner | KPI target | Risk | Status |",
+            "|---|---|---|---|---|",
+        ]
     )
     for row in data.proof_rows:
         lines.append(
@@ -294,7 +306,9 @@ def capture_private_screenshot(html_report: str, screenshot_path: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Render visual snapshot reports for repo presentation assets.")
+    parser = argparse.ArgumentParser(
+        description="Render visual snapshot reports for repo presentation assets."
+    )
     parser.add_argument("--readme", type=Path, default=Path("README.md"))
     parser.add_argument("--mkdocs", type=Path, default=Path("mkdocs.yml"))
     parser.add_argument(
@@ -302,8 +316,12 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         default=Path("docs/artifacts/case-snippet-closeout-pack/proof-map.csv"),
     )
-    parser.add_argument("--out-md", type=Path, default=Path("docs/artifacts/repo-visual-snapshot.md"))
-    parser.add_argument("--out-html", type=Path, default=Path("docs/artifacts/repo-visual-snapshot.html"))
+    parser.add_argument(
+        "--out-md", type=Path, default=Path("docs/artifacts/repo-visual-snapshot.md")
+    )
+    parser.add_argument(
+        "--out-html", type=Path, default=Path("docs/artifacts/repo-visual-snapshot.html")
+    )
     parser.add_argument(
         "--private-screenshot",
         type=Path,

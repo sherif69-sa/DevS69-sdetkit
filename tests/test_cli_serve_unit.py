@@ -25,7 +25,9 @@ def test_parse_review_request_normalizes_work_context_and_codescan() -> None:
 
 def test_parse_review_request_rejects_invalid_no_workspace_type() -> None:
     with pytest.raises(serve.RequestValidationError, match="no_workspace"):
-        serve._parse_review_request(json.dumps({"path": ".", "no_workspace": "false"}).encode("utf-8"))
+        serve._parse_review_request(
+            json.dumps({"path": ".", "no_workspace": "false"}).encode("utf-8")
+        )
 
 
 def test_run_review_request_wraps_security_error(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -114,7 +116,9 @@ def test_run_review_request_operator_summary_omits_payload_and_uses_default_out_
     assert Path(called["code_scan_json"]).name == "scan.json"
 
 
-def test_parse_positive_int_env_handles_non_positive_and_valid(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_parse_positive_int_env_handles_non_positive_and_valid(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("SDETKIT_OBSERVABILITY_STALE_SECONDS", "0")
     assert serve._parse_positive_int_env("SDETKIT_OBSERVABILITY_STALE_SECONDS") is None
 

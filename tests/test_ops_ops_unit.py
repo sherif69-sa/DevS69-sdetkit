@@ -47,7 +47,9 @@ def _write_run(history_dir: Path, run_id: str, results: dict[str, object]) -> No
     (run_dir / "results.json").write_text(json.dumps(results), encoding="utf-8")
 
 
-def test_diff_runs_normalizes_artifact_paths_and_findings_order(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_diff_runs_normalizes_artifact_paths_and_findings_order(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.chdir(tmp_path)
     history = tmp_path
     _write_run(
@@ -71,7 +73,9 @@ def test_diff_runs_normalizes_artifact_paths_and_findings_order(tmp_path: Path, 
                     "status": "ok",
                     "inputs": {},
                     "outputs": {
-                        "path": str(history / ".sdetkit" / "ops-history" / "run-a" / "artifacts" / "out.txt"),
+                        "path": str(
+                            history / ".sdetkit" / "ops-history" / "run-a" / "artifacts" / "out.txt"
+                        ),
                         "sha256": "x",
                     },
                     "findings": [],

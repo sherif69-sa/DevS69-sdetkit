@@ -14,7 +14,9 @@ def test_autolearn_from_payload_skips_invalid_recommendation_items(
 ) -> None:
     created: list[tuple[str, str, list[str], str]] = []
 
-    def _fake_add_guideline(db_path: Path, title: str, body: str, tags: list[str], source: str = "") -> int:
+    def _fake_add_guideline(
+        db_path: Path, title: str, body: str, tags: list[str], source: str = ""
+    ) -> int:
         created.append((title, body, tags, source))
         return len(created)
 
@@ -25,7 +27,12 @@ def test_autolearn_from_payload_skips_invalid_recommendation_items(
         {
             "recommendations": [
                 "ignore",
-                {"source": "doctor", "category": "policy", "message": "tighten rules", "severity": "high"},
+                {
+                    "source": "doctor",
+                    "category": "policy",
+                    "message": "tighten rules",
+                    "severity": "high",
+                },
                 {"source": "", "category": "", "message": ""},
             ]
         },
@@ -44,7 +51,9 @@ def test_insights_handler_read_payload_returns_empty_for_invalid_json() -> None:
     assert handler._read_payload() == {}
 
 
-def test_run_autofix_skips_non_dict_findings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_run_autofix_skips_non_dict_findings(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     (tmp_path / "security-check.json").write_text(
         json.dumps(
             {
@@ -61,7 +70,9 @@ def test_run_autofix_skips_non_dict_findings(tmp_path: Path, monkeypatch: pytest
     monkeypatch.setattr(
         eng,
         "_apply_autofix_for_finding",
-        lambda _root, finding: eng.AutoFixResult(str(finding.get("rule_id")), "b.py", "fixed", "ok"),
+        lambda _root, finding: eng.AutoFixResult(
+            str(finding.get("rule_id")), "b.py", "fixed", "ok"
+        ),
     )
 
     results = eng.run_autofix(tmp_path, tmp_path)
@@ -70,7 +81,9 @@ def test_run_autofix_skips_non_dict_findings(tmp_path: Path, monkeypatch: pytest
     assert results[0].rule_id == "SEC_X"
 
 
-def test_serve_insights_api_initializes_and_runs_server(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_serve_insights_api_initializes_and_runs_server(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     called: dict[str, object] = {}
 
     class _FakeServer:
@@ -112,7 +125,13 @@ def test_run_autofix_returns_skipped_when_security_payload_missing(tmp_path: Pat
 
 
 def test_payload_helpers_handle_bool_string_and_invalid_values() -> None:
-    payload = {"items": [1], "meta": {"ok": True}, "count_true": True, "count_text": "7", "count_bad": "x"}
+    payload = {
+        "items": [1],
+        "meta": {"ok": True},
+        "count_true": True,
+        "count_text": "7",
+        "count_bad": "x",
+    }
     assert eng._payload_list(payload, "items") == [1]
     assert eng._payload_list(payload, "meta") == []
     assert eng._payload_dict(payload, "meta") == {"ok": True}
@@ -139,7 +158,12 @@ def test_apply_learned_guideline_actions_adds_recommendations_and_plan(tmp_path:
 
     payload = {
         "warnings": [
-            {"source": "security", "category": "SEC_X", "severity": "critical", "message": "token leak"},
+            {
+                "source": "security",
+                "category": "SEC_X",
+                "severity": "critical",
+                "message": "token leak",
+            },
             "ignore",
         ],
         "recommendations": ["ignore-non-dict"],
@@ -149,6 +173,10 @@ def test_apply_learned_guideline_actions_adds_recommendations_and_plan(tmp_path:
     updated = eng._apply_learned_guideline_actions(payload, db_path)
 
     recs = updated.get("recommendations", [])
-    assert any(isinstance(item, dict) and item.get("category") == "learned-guideline" for item in recs)
+    assert any(
+        isinstance(item, dict) and item.get("category") == "learned-guideline" for item in recs
+    )
     plan = updated.get("manual_fix_plan", [])
-    assert any(isinstance(item, dict) and item.get("reason") == "Learned guideline match" for item in plan)
+    assert any(
+        isinstance(item, dict) and item.get("reason") == "Learned guideline match" for item in plan
+    )
