@@ -281,3 +281,9 @@ def test_canonical_public_docs_lock_first_artifact_paths() -> None:
         text = path.read_text(encoding="utf-8")
         for artifact in required_artifacts:
             assert artifact in text, f"missing canonical artifact path {artifact} in {path}"
+
+
+def test_case_snippet_proof_map_csv_has_eof_newline() -> None:
+    proof_map = Path("docs/artifacts/case-snippet-closeout-pack/proof-map.csv")
+    assert proof_map.is_file(), "proof map CSV is missing"
+    assert proof_map.read_bytes().endswith(b"\n"), "proof map CSV must end with a newline"
