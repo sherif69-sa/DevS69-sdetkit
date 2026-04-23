@@ -520,7 +520,7 @@ def _render_markdown_summary(
     checks: list[dict[str, Any]],
     follow_up_enhancements: list[dict[str, str]],
     scenario_database: dict[str, Any],
-    owner_routing: list[dict[str, str]],
+    owner_routing: list[dict[str, str]] | None = None,
 ) -> str:
     lines: list[str] = []
     lines.append("# Adaptive Postcheck Summary")
@@ -581,8 +581,12 @@ def _render_markdown_summary(
     return "\n".join(lines) + "\n"
 
 
-def _build_owner_routing(checks: list[dict[str, Any]], scenario: dict[str, Any]) -> list[dict[str, str]]:
-    failing = [row for row in checks if isinstance(row, dict) and not bool(row.get("passed", False))]
+def _build_owner_routing(
+    checks: list[dict[str, Any]], scenario: dict[str, Any]
+) -> list[dict[str, str]]:
+    failing = [
+        row for row in checks if isinstance(row, dict) and not bool(row.get("passed", False))
+    ]
     owner_map: dict[str, tuple[str, str, str]] = {}
     raw_owner_map = scenario.get("owner_routing", {})
     if isinstance(raw_owner_map, dict):
