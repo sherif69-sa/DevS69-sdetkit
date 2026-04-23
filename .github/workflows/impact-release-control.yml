@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
           python-version: '3.12'
 
@@ -50,17 +50,6 @@ jobs:
             --out build/impact-trend-alert.json \
             --format json \
             --branch "${{ github.ref_name }}"
-      - name: Enforce release guard
-        run: |
-          python scripts/impact_release_guard.py \
-            --build-dir build \
-            --policy config/impact_policy.json \
-            --out build/impact-release-guard.json \
-            --format json \
-            --branch "${{ github.ref_name }}"
-
-
-
       - name: Build Step 1 achievement scorecard
         run: |
           python scripts/impact_step1_scorecard.py \
@@ -81,6 +70,14 @@ jobs:
             --build-dir build \
             --out build/impact-program-scorecard.json \
             --format json
+      - name: Enforce release guard
+        run: |
+          python scripts/impact_release_guard.py \
+            --build-dir build \
+            --policy config/impact_policy.json \
+            --out build/impact-release-guard.json \
+            --format json \
+            --branch "${{ github.ref_name }}"
       - name: Render PR comment draft
         run: |
           python scripts/render_impact_pr_comment.py \
@@ -101,7 +98,7 @@ jobs:
             --pr-number "${{ github.event.pull_request.number }}" \
             --comment-file build/impact-pr-comment.md
       - name: Upload impact artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: impact-release-artifacts
           path: |

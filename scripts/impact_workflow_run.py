@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shlex
 import sqlite3
 import subprocess
 import sys
@@ -64,7 +65,7 @@ def _parse_step(value: str) -> tuple[WorkflowStep, ...]:
 
 
 def _run_command(cmd: str) -> dict[str, object]:
-    proc = subprocess.run(cmd, shell=True, text=True, capture_output=True, check=False)
+    proc = subprocess.run(shlex.split(cmd), text=True, capture_output=True, check=False)
     return {
         "command": cmd,
         "rc": proc.returncode,
