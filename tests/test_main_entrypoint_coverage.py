@@ -78,7 +78,11 @@ def test_cassette_get_helper_delegates_and_casts(monkeypatch: pytest.MonkeyPatch
         called.append(argv)
         return "11"
 
-    monkeypatch.setitem(entry.sys.modules, "sdetkit.cassette_get", types.SimpleNamespace(cassette_get=_fake_cassette_get))
+    monkeypatch.setitem(
+        entry.sys.modules,
+        "sdetkit.cassette_get",
+        types.SimpleNamespace(cassette_get=_fake_cassette_get),
+    )
 
     assert entry._cassette_get(["--flag", "value"]) == 11
     assert called == [["--flag", "value"]]

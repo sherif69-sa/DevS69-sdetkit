@@ -108,14 +108,21 @@ def test_insights_handler_404_and_empty_payload_paths(tmp_path: Path) -> None:
 
     try:
         empty_req = urllib.request.Request(
-            f"http://127.0.0.1:{port}/guidelines", data=b"", method="POST", headers={"Content-Type": "application/json"}
+            f"http://127.0.0.1:{port}/guidelines",
+            data=b"",
+            method="POST",
+            headers={"Content-Type": "application/json"},
         )
         with urllib.request.urlopen(empty_req, timeout=3) as resp:  # noqa: S310 local server
             created = json.loads(resp.read().decode("utf-8"))
             assert resp.status == 201
             assert int(created["id"]) >= 1
 
-        for method, path in (("GET", "/unknown"), ("POST", "/unknown"), ("PUT", "/guidelines/not-an-id")):
+        for method, path in (
+            ("GET", "/unknown"),
+            ("POST", "/unknown"),
+            ("PUT", "/guidelines/not-an-id"),
+        ):
             req = urllib.request.Request(
                 f"http://127.0.0.1:{port}{path}",
                 data=b"{}" if method in {"POST", "PUT"} else None,

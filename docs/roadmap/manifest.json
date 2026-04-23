@@ -621,7 +621,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.launch_readiness_closeout_86",
         "module_path": "src/sdetkit/launch_readiness_closeout_86.py",
-        "tests_referencing_module": 1
+        "tests_referencing_module": 2
       },
       {
         "contract_script_paths": [

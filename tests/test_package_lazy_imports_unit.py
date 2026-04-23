@@ -15,7 +15,9 @@ def test_package_getattr_re_raises_nested_module_not_found(monkeypatch: pytest.M
     assert excinfo.value.name == "some_dependency"
 
 
-def test_package_getattr_raises_attribute_error_after_all_candidates(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_package_getattr_raises_attribute_error_after_all_candidates(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     missing = set()
 
     def _fake_import(module_name: str):
@@ -30,7 +32,9 @@ def test_package_getattr_raises_attribute_error_after_all_candidates(monkeypatch
     assert "sdetkit.core.definitely_missing_module" in missing
 
 
-def test_package_getattr_caches_loaded_module_for_future_attribute_access(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_package_getattr_caches_loaded_module_for_future_attribute_access(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     calls: list[str] = []
     marker = object()
 

@@ -205,7 +205,9 @@ def test_main_handles_security_errors_for_project_and_out_dir(
 
     calls = {"n": 0}
 
-    def _safe_path_then_reject_out_dir(root: Path, user_path: str, *, allow_absolute: bool = False) -> Path:
+    def _safe_path_then_reject_out_dir(
+        root: Path, user_path: str, *, allow_absolute: bool = False
+    ) -> Path:
         calls["n"] += 1
         if calls["n"] <= 2:
             return Path(user_path) if Path(user_path).is_absolute() else (root / user_path)
