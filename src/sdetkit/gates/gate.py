@@ -33,6 +33,13 @@ FAST_DEFAULT_PYTEST_ARGS = [
 FAST_DEFAULT_RUFF_PATHS = ["src", "tests"]
 
 
+def _fast_ruff_targets(root: Path) -> list[str]:
+    existing = [path for path in FAST_DEFAULT_RUFF_PATHS if (root / path).exists()]
+    if existing:
+        return existing
+    return ["."]
+
+
 def _normalize_gate_payload(payload: dict[str, object]) -> dict[str, object]:
     out: dict[str, object] = dict(payload)
     root = out.get("root")
@@ -391,21 +398,23 @@ def _run_fast(ns: argparse.Namespace) -> int:
         )
 
     if not ns.no_ruff and should_run("ruff"):
+        ruff_targets = _fast_ruff_targets(root)
         steps.append(
             {
                 "id": "ruff",
                 **_run(
-                    [sys.executable, "-m", "ruff", "check", *FAST_DEFAULT_RUFF_PATHS],
+                    [sys.executable, "-m", "ruff", "check", *ruff_targets],
                     cwd=root,
                 ),
             }
         )
     if not ns.no_ruff and should_run("ruff_format"):
+        ruff_targets = _fast_ruff_targets(root)
         steps.append(
             {
                 "id": "ruff_format",
                 **_run(
-                    [sys.executable, "-m", "ruff", "format", "--check", *FAST_DEFAULT_RUFF_PATHS],
+                    [sys.executable, "-m", "ruff", "format", "--check", *ruff_targets],
                     cwd=root,
                 ),
             }

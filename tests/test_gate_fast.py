@@ -250,6 +250,8 @@ def test_gate_fast_default_ruff_scope_targets_src_and_tests(
         return {"cmd": cmd, "rc": 0, "ok": True, "duration_ms": 1, "stdout": "", "stderr": ""}
 
     monkeypatch.setattr(gate, "_run", fake_run)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "tests").mkdir()
     monkeypatch.chdir(tmp_path)
 
     rc = gate.main(
@@ -268,6 +270,36 @@ def test_gate_fast_default_ruff_scope_targets_src_and_tests(
     assert [s["id"] for s in payload["steps"]] == ["ruff", "ruff_format"]
     assert calls[0][3:] == ["check", "src", "tests"]
     assert calls[1][3:] == ["format", "--check", "src", "tests"]
+
+
+def test_gate_fast_ruff_scope_falls_back_to_repo_root_when_src_tests_absent(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
+        calls.append(cmd)
+        return {"cmd": cmd, "rc": 0, "ok": True, "duration_ms": 1, "stdout": "", "stderr": ""}
+
+    monkeypatch.setattr(gate, "_run", fake_run)
+    monkeypatch.chdir(tmp_path)
+
+    rc = gate.main(
+        [
+            "fast",
+            "--format",
+            "json",
+            "--no-doctor",
+            "--no-ci-templates",
+            "--no-mypy",
+            "--no-pytest",
+        ]
+    )
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert [s["id"] for s in payload["steps"]] == ["ruff", "ruff_format"]
+    assert calls[0][3:] == ["check", "."]
+    assert calls[1][3:] == ["format", "--check", "."]
 
 
 def test_gate_fast_adds_recommendation_for_missing_pytest(
