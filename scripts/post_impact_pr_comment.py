@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -50,22 +51,37 @@ def upsert_comment(repo: str, pr_number: int, token: str, comment_markdown: str,
     if dry_run:
         return "dry_run"
 
-    comments = _api_request(comments_url, token)
+    try:
+        comments = _api_request(comments_url, token)
+    except urllib.error.HTTPError as exc:
+        if exc.code == 403:
+            return "forbidden"
+        raise
     if not isinstance(comments, list):
         raise ValueError("unexpected GitHub API response while listing comments")
 
     existing_id = _find_existing_comment_id(comments)
     if existing_id is not None:
-        _api_request(
-            f"https://api.github.com/repos/{repo}/issues/comments/{existing_id}",
-            token,
-            method="PATCH",
-            payload={"body": body},
-        )
-        return "updated"
+        try:
+            _api_request(
+                f"https://api.github.com/repos/{repo}/issues/comments/{existing_id}",
+                token,
+                method="PATCH",
+                payload={"body": body},
+            )
+            return "updated"
+        except urllib.error.HTTPError as exc:
+            if exc.code == 403:
+                return "forbidden"
+            raise
 
-    _api_request(comments_url, token, method="POST", payload={"body": body})
-    return "created"
+    try:
+        _api_request(comments_url, token, method="POST", payload={"body": body})
+        return "created"
+    except urllib.error.HTTPError as exc:
+        if exc.code == 403:
+            return "forbidden"
+        raise
 
 
 def main(argv: list[str] | None = None) -> int:

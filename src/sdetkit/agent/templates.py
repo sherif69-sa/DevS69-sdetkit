@@ -8,6 +8,7 @@ import os
 import re
 import shlex
 import subprocess
+import sys
 import tarfile
 import tempfile
 from collections import Counter
@@ -295,7 +296,10 @@ def _captured_at() -> str:
 
 
 def _run_shell(cmd: str, cwd: Path) -> dict[str, Any]:
-    proc = subprocess.run(shlex.split(cmd), cwd=cwd, capture_output=True, text=True, check=False)
+    argv = shlex.split(cmd)
+    if argv and Path(argv[0]).name in {"python", "python3"}:
+        argv[0] = sys.executable
+    proc = subprocess.run(argv, cwd=cwd, capture_output=True, text=True, check=False)
     return {
         "cmd": cmd,
         "returncode": proc.returncode,

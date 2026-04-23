@@ -16,7 +16,7 @@ workflow:
   - id: doctor-upgrade-audit
     action: shell.run
     with:
-      cmd: python -m sdetkit doctor --upgrade-audit --upgrade-audit-offline --format md
+      cmd: python -m sdetkit intelligence upgrade-audit --format md --used-in-repo-only --offline --top 10
       save_stdout: ${{run.output_dir}}/doctor-upgrade-audit.md
   - id: summary
     action: fs.write
