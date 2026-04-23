@@ -259,6 +259,26 @@ We will execute **one concrete deliverable at a time**, and each cycle will incl
 - Adaptive post-check automation is live and database-ready.
 - Next hardening step: wire scheduled CI job to persist post-check outputs per run.
 
+## Owner escalation payload usage
+
+Generate a ticket-system-ready escalation payload from adaptive postcheck owner routing:
+
+```bash
+python scripts/build_owner_escalation_payload.py \
+  --postcheck build/adaptive-postcheck-fast.json \
+  --out build/owner-escalation-payload.json
+```
+
+Make shortcut:
+
+```bash
+make owner-escalation-payload
+```
+
+The generated payload preserves route escalation plus adaptive `suggestions` and `follow_up_plan`
+within owner recommendation groups for downstream ticketing/work-tracking systems.
+When no owner routes fail, suggestions/follow-ups are retained under an `unassigned` recommendation group.
+
 
 ### Iteration 14 (adaptive hardening)
 
