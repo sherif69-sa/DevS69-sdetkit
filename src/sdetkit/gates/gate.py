@@ -30,6 +30,7 @@ FAST_DEFAULT_PYTEST_ARGS = [
     "tests/test_doctor_surgical.py",
     "tests/test_baseline_umbrella.py",
 ]
+FAST_DEFAULT_RUFF_PATHS = ["src", "tests"]
 
 
 def _normalize_gate_payload(payload: dict[str, object]) -> dict[str, object]:
@@ -393,14 +394,20 @@ def _run_fast(ns: argparse.Namespace) -> int:
         steps.append(
             {
                 "id": "ruff",
-                **_run([sys.executable, "-m", "ruff", "check", "."], cwd=root),
+                **_run(
+                    [sys.executable, "-m", "ruff", "check", *FAST_DEFAULT_RUFF_PATHS],
+                    cwd=root,
+                ),
             }
         )
     if not ns.no_ruff and should_run("ruff_format"):
         steps.append(
             {
                 "id": "ruff_format",
-                **_run([sys.executable, "-m", "ruff", "format", "--check", "."], cwd=root),
+                **_run(
+                    [sys.executable, "-m", "ruff", "format", "--check", *FAST_DEFAULT_RUFF_PATHS],
+                    cwd=root,
+                ),
             }
         )
 

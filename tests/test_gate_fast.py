@@ -240,6 +240,36 @@ def test_gate_fast_full_pytest_uses_entire_suite(monkeypatch, tmp_path: Path, ca
     assert calls[0][3:] == ["-q"]
 
 
+def test_gate_fast_default_ruff_scope_targets_src_and_tests(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
+        calls.append(cmd)
+        return {"cmd": cmd, "rc": 0, "ok": True, "duration_ms": 1, "stdout": "", "stderr": ""}
+
+    monkeypatch.setattr(gate, "_run", fake_run)
+    monkeypatch.chdir(tmp_path)
+
+    rc = gate.main(
+        [
+            "fast",
+            "--format",
+            "json",
+            "--no-doctor",
+            "--no-ci-templates",
+            "--no-mypy",
+            "--no-pytest",
+        ]
+    )
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert [s["id"] for s in payload["steps"]] == ["ruff", "ruff_format"]
+    assert calls[0][3:] == ["check", "src", "tests"]
+    assert calls[1][3:] == ["format", "--check", "src", "tests"]
+
+
 def test_gate_fast_adds_recommendation_for_missing_pytest(
     monkeypatch, tmp_path: Path, capsys
 ) -> None:
