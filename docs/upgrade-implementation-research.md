@@ -14,7 +14,7 @@ The baseline inventory came from the repository's direct dependency audit comman
 
 ### Runtime and tooling baseline
 
-- Python support is `>=3.11` with CI lanes on 3.11 and 3.12.
+- Python support is `>=3.10` with CI lanes on 3.11 and 3.12.
 - Runtime direct dependency surface is intentionally small (`httpx`).
 - Most pinned dependencies are in `dev`, `docs`, and `packaging` extras.
 

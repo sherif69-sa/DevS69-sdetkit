@@ -37,7 +37,7 @@ def test_doctor_upgrade_audit_emits_priority_hints(tmp_path: Path, monkeypatch, 
     monkeypatch.setattr(
         doctor.upgrade_audit,
         "_load_project_python_requires",
-        lambda *_args, **_kwargs: ">=3.11",
+        lambda *_args, **_kwargs: ">=3.10",
     )
     monkeypatch.setattr(
         doctor.upgrade_audit,
@@ -112,7 +112,7 @@ def test_doctor_only_upgrade_audit_reports_drift_failure(
     )
     monkeypatch.setattr(doctor.upgrade_audit, "_load_dependencies", lambda *_args, **_kwargs: deps)
     monkeypatch.setattr(
-        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.11"
+        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.10"
     )
     monkeypatch.setattr(
         doctor.upgrade_audit,
@@ -174,7 +174,7 @@ def test_doctor_upgrade_audit_supports_query_and_action_filters(
     )
     monkeypatch.setattr(doctor.upgrade_audit, "_load_dependencies", lambda *_args, **_kwargs: deps)
     monkeypatch.setattr(
-        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.11"
+        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.10"
     )
     monkeypatch.setattr(
         doctor.upgrade_audit,
@@ -267,7 +267,7 @@ def test_doctor_upgrade_audit_supports_package_source_and_usage_filters(
     )
     monkeypatch.setattr(doctor.upgrade_audit, "_load_dependencies", lambda *_args, **_kwargs: deps)
     monkeypatch.setattr(
-        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.11"
+        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.10"
     )
     monkeypatch.setattr(
         doctor.upgrade_audit,
@@ -359,7 +359,7 @@ def test_doctor_upgrade_audit_supports_release_age_filters_and_freshness_hints(
     )
     monkeypatch.setattr(doctor.upgrade_audit, "_load_dependencies", lambda *_args, **_kwargs: deps)
     monkeypatch.setattr(
-        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.11"
+        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.10"
     )
     monkeypatch.setattr(
         doctor.upgrade_audit,
@@ -421,7 +421,7 @@ def test_upgrade_audit_json_and_markdown_include_release_freshness_sections() ->
         groups=["dev"],
         requirements=["ruff==0.15.6"],
         pinned_versions=["0.15.6"],
-        project_python_requires=">=3.11",
+        project_python_requires=">=3.10",
         current_version="0.15.6",
         target_version="0.15.6",
         target_release_date="2026-03-15T00:00:00+00:00",
@@ -453,7 +453,7 @@ def test_upgrade_audit_json_and_markdown_include_release_freshness_sections() ->
         groups=["default"],
         requirements=["httpx==0.28.1"],
         pinned_versions=["0.28.1"],
-        project_python_requires=">=3.11",
+        project_python_requires=">=3.10",
         current_version="0.28.1",
         target_version="0.28.1",
         target_release_date="2024-01-01T00:00:00+00:00",
@@ -533,7 +533,7 @@ def test_doctor_upgrade_audit_supports_lane_and_release_freshness_filters(
     )
     monkeypatch.setattr(doctor.upgrade_audit, "_load_dependencies", lambda *_args, **_kwargs: deps)
     monkeypatch.setattr(
-        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.11"
+        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.10"
     )
     monkeypatch.setattr(
         doctor.upgrade_audit,
@@ -624,7 +624,7 @@ def test_doctor_upgrade_audit_supports_validation_command_filters(
     )
     monkeypatch.setattr(doctor.upgrade_audit, "_load_dependencies", lambda *_args, **_kwargs: deps)
     monkeypatch.setattr(
-        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.11"
+        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.10"
     )
     monkeypatch.setattr(doctor.upgrade_audit, "_collect_repo_usage", lambda *_args, **_kwargs: {})
     monkeypatch.setattr(

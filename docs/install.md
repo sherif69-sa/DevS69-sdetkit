@@ -2,7 +2,7 @@
 
 Use this page to choose an install mode quickly before your first run.
 
-Python 3.11+ is required.
+Python 3.10+ is required.
 
 After install, continue with:
 - Fast onboarding: [Quickstart (copy-paste)](quickstart-copy-paste.md)
@@ -21,7 +21,7 @@ Do **not** rely on bare system `pip install ...` on Ubuntu/WSL; it may fail with
 ## Recommended: `venv` (project-local, first-time friendly)
 
 ```bash
-python3.11 -m venv .venv
+python3.10 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
 python -m pip install sdetkit==1.0.3
@@ -38,7 +38,7 @@ pipx run sdetkit --help
 ## Local source install (contributors in this repo)
 
 ```bash
-python3.11 -m venv .venv
+python3.10 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
 python -m pip install .

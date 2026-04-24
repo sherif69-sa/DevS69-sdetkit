@@ -1040,7 +1040,7 @@ def test_report_build_and_recommend_skip_unreadable_history_runs(tmp_path: Path)
     assert "runs analyzed: 1" in recommend.stdout
 
 
-def test_report_handles_corrupt_history_index_across_commands(tmp_path: Path) -> None:
+def test_report_ingest_rebuilds_unreadable_history_index(tmp_path: Path) -> None:
     runner = CliRunner()
     history = tmp_path / "history"
     history.mkdir(parents=True, exist_ok=True)
@@ -1082,12 +1082,12 @@ def test_report_handles_corrupt_history_index_across_commands(tmp_path: Path) ->
         ]
     )
     assert build.exit_code == 0
-    assert "warning: ignoring unreadable history index index.json" in build.stderr
+    assert "warning: ignoring unreadable history file index.json" in build.stderr
     assert "No audit history found." in out_md.read_text(encoding="utf-8")
 
     recommend = runner.invoke(["report", "recommend", "--history-dir", str(history)])
     assert recommend.exit_code == 0
-    assert "warning: ignoring unreadable history index index.json" in recommend.stderr
+    assert "warning: ignoring unreadable history file index.json" in recommend.stderr
     assert "runs analyzed: 0" in recommend.stdout
 
     run2 = tmp_path / "run2.json"
@@ -1108,7 +1108,7 @@ def test_report_handles_corrupt_history_index_across_commands(tmp_path: Path) ->
 
     ingest = runner.invoke(["report", "ingest", str(run2), "--history-dir", str(history)])
     assert ingest.exit_code == 0
-    assert "warning: ignoring unreadable history index index.json" in ingest.stderr
+    assert "warning: ignoring unreadable history file index.json" in ingest.stderr
 
     rewritten_index = json.loads(index_path.read_text(encoding="utf-8"))
     assert rewritten_index["schema_version"] == "sdetkit.audit.history.v1"

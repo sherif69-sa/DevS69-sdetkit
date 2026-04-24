@@ -513,7 +513,7 @@ def _history_runs(history_dir: Path) -> list[dict[str, Any]]:
     try:
         data = json.loads(index_path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
-        sys.stderr.write(f"warning: ignoring unreadable history index {index_path.name}: {exc}\n")
+        sys.stderr.write(f"warning: ignoring unreadable history file {index_path.name}: {exc}\n")
         return []
     if not isinstance(data, dict):
         return []

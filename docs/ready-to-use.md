@@ -6,7 +6,7 @@ If you only want the fastest proof with minimal text, use [Blank repo to value i
 
 ## Guided run (5 minutes)
 
-0. Install in the target external repo with Python 3.11+ (skip only if already installed):
+0. Install in the target external repo with Python 3.10+ (skip only if already installed):
 
 ```bash
 python -m venv .venv

@@ -66,7 +66,7 @@ These are strategic assets; the upgrade program should amplify them, not replace
 
 ## B1) First-run friction remains the highest conversion risk
 
-Current environment checks still show Python 3.11+ requirement failures under Python 3.10.
+Current environment checks still show Python 3.10+ requirement failures under Python 3.10.
 
 **Real-world impact:** trial users can churn before seeing value.
 
@@ -189,7 +189,7 @@ Commands executed during analysis:
 - ✅ `python - <<'PY' ... (file-type and total-file distribution scan) ... PY`
 - ✅ `python - <<'PY' ... (text-file and approximate word-count scan) ... PY`
 - ✅ `python - <<'PY' ... (src/tests file counts + LOC baseline) ... PY`
-- ⚠️ `python -m pytest -q --maxfail=1` (environment limitation: local Python is 3.10.19 while project requires Python 3.11+).
-- ⚠️ `PYTHONPATH=src python -m sdetkit --help | sed -n '1,80p'` (same environment limitation: Python 3.11+ required).
+- ⚠️ `python -m pytest -q --maxfail=1` (environment limitation: local Python is 3.10.19 while project requires Python 3.10+).
+- ⚠️ `PYTHONPATH=src python -m sdetkit --help | sed -n '1,80p'` (same environment limitation: Python 3.10+ required).
 
-Conclusion from validation: repository analysis metrics were reproducible in this environment, while full runtime/test verification remains blocked until a Python 3.11+ interpreter is used.
+Conclusion from validation: repository analysis metrics were reproducible in this environment, while full runtime/test verification remains blocked until a Python 3.10+ interpreter is used.

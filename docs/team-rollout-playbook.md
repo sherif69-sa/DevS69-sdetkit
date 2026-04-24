@@ -8,7 +8,7 @@ A compact week-1 rollout plan for teams adopting SDETKit in a real repository.
 ## Week 1 rollout plan
 
 ### 1. Establish the runtime baseline
-- Confirm Python 3.11+ is available on team machines and CI runners.
+- Confirm Python 3.10+ is available on team machines and CI runners.
 - Use an isolated environment (`venv` or `pipx`) to avoid system-Python drift.
 - Verify install and command discovery before rollout decisions.
 
@@ -47,7 +47,7 @@ Use a shared triage order so reviews stay fast and consistent:
 - Route release-confidence interpretation disputes to the team’s agreed reviewers.
 
 ## What good adoption looks like
-- Runtime baseline confirmed (Python 3.11+, isolated environment).
+- Runtime baseline confirmed (Python 3.10+, isolated environment).
 - Canonical local path runs and produces expected artifacts.
 - One CI lane is active and preserving artifacts.
 - Artifact review order is documented and followed.
