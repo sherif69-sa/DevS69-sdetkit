@@ -4,7 +4,7 @@
 
 **DevS69 is committed to a welcoming, harassment-free experience for everyone.**
 
-[Project Home](README.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Live Docs](https://sherif69-sa.github.io/DevS69-sdetkit/)
+[Project Home](../README.md) · [Contributing](../CONTRIBUTING.md) · [Security](../SECURITY.md) · [Live Docs](https://sherif69-sa.github.io/DevS69-sdetkit/)
 
 </div>
 

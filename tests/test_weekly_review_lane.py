@@ -26,7 +26,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text("impact-28-ultra-upgrade-report.md\n", encoding="utf-8")
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- ** — Weekly review #4:** document wins, misses, and corrective actions.\n",
+        "- **Weekly review #4:** document wins, misses, and corrective actions.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-weekly-review.md").write_text(
@@ -98,4 +98,5 @@ def test_lane28_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["weekly-review-lane", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert " weekly review summary" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert out.strip() == "weekly review summary"

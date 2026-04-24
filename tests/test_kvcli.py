@@ -185,6 +185,15 @@ def test_build_comment_aware_parser_supports_legacy_parser_signature():
     assert parser("x") == {"line": "x"}
 
 
+def test_kvcli_main_help_does_not_raise_attribute_error(capsys):
+    import sdetkit.kvcli as kvcli
+
+    with pytest.raises(SystemExit) as exc:
+        kvcli.main(["--help"])
+    assert exc.value.code == 0
+    assert "usage: kvcli" in capsys.readouterr().out
+
+
 def test_build_comment_aware_parser_enables_comments_for_modern_parser():
     import sdetkit.kvcli as kvcli
 

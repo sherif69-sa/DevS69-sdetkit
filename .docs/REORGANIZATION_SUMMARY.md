@@ -111,7 +111,7 @@ Before proceeding with Phase 2 module migration:
 
 ## References
 
-- See [REPOSITORY_STRUCTURE.md](.docs/REPOSITORY_STRUCTURE.md) for detailed organization guide
+- See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed organization guide
 - Original documentation remains accessible at root
 - .docs/ becomes the single source of truth for policies
 

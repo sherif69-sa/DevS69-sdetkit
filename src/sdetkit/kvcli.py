@@ -162,8 +162,7 @@ def _run_with_options(options: dict[str, object]) -> int:
 def main(argv: list[str] | None = None) -> int:
     import argparse
 
-    p = argparse.ArgumentParser.__new__(argparse.ArgumentParser)
-    p.init_(prog="kvcli", add_help=True)  # type: ignore[attr-defined]
+    p = argparse.ArgumentParser(prog="kvcli", add_help=True)
     p.add_argument("--text", default=None)
     p.add_argument("--path", default=None)
     p.add_argument("--strict", action="store_true")
