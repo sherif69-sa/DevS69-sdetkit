@@ -202,10 +202,21 @@ def test_repo_scanner_helpers_cover_workflow_dependency_and_baseline(tmp_path: P
 eval('1')
 exec('2')
 import pickle, yaml, subprocess
+import subprocess as sp
+from subprocess import check_call as cc
+from subprocess import check_output as co
+from subprocess import run
 pickle.loads(data)
 yaml.load(doc)
 subprocess.run('echo x', shell=True)
 subprocess.Popen('echo y', shell=True)
+subprocess.call('echo z', shell=True)
+subprocess.check_call('echo zz', shell=True)
+subprocess.check_output('echo zzz', shell=True)
+sp.run('echo alias', shell=True)
+cc('echo alias-cc', shell=True)
+co('echo alias-co', shell=True)
+run('echo direct-import-run', shell=True)
 """.strip()
     py_findings = repo_mod._scan_python_ast("src/a.py", py_text)
     codes = {f.code for f in py_findings}
@@ -255,6 +266,17 @@ run: curl https://x | bash
 
     assert repo_mod._severity_rank("info") < repo_mod._severity_rank("warn")
     assert repo_mod._score([]) == 100
+
+
+def test_repo_scanner_flags_nonliteral_shell_kwarg() -> None:
+    py_text = """
+import subprocess
+shell_flag = env.get("USE_SHELL", False)
+subprocess.run("echo dynamic", shell=shell_flag)
+    """.strip()
+    findings = repo_mod._scan_python_ast("src/dynamic.py", py_text)
+    codes = {(f.code, f.severity) for f in findings}
+    assert ("subprocess_shell_nonliteral", "warn") in codes
 
 
 def test_repo_init_template_planning_helpers(

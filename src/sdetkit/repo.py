@@ -905,6 +905,18 @@ def _scan_python_ast(rel: str, text: str) -> list[Finding]:
         tree = ast.parse(text)
     except SyntaxError:
         return out
+    subprocess_targets = {"run", "Popen", "call", "check_call", "check_output"}
+    subprocess_aliases = {"subprocess"}
+    direct_subprocess_imports: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name == "subprocess":
+                    subprocess_aliases.add(alias.asname or alias.name)
+        elif isinstance(node, ast.ImportFrom) and node.module == "subprocess":
+            for alias in node.names:
+                if alias.name in subprocess_targets:
+                    direct_subprocess_imports.add(alias.asname or alias.name)
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):
             name = ""
@@ -925,25 +937,44 @@ def _scan_python_ast(rel: str, text: str) -> list[Finding]:
                         remediation="use safer alternatives",
                     )
                 )
-            if name == "subprocess.run" or name == "subprocess.Popen":
+            is_subprocess_shell_call = False
+            if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
+                is_subprocess_shell_call = (
+                    node.func.value.id in subprocess_aliases and node.func.attr in subprocess_targets
+                )
+            elif isinstance(node.func, ast.Name):
+                is_subprocess_shell_call = node.func.id in direct_subprocess_imports
+            if is_subprocess_shell_call:
                 for kw in node.keywords:
-                    if (
-                        kw.arg == "shell"
-                        and isinstance(kw.value, ast.Constant)
-                        and kw.value.value is True
-                    ):
-                        out.append(
-                            Finding(
-                                "code_risk",
-                                "error",
-                                rel,
-                                node.lineno,
-                                node.col_offset + 1,
-                                "subprocess_shell_true",
-                                "subprocess with shell=True",
-                                remediation="pass argv list and keep shell=False",
+                    if kw.arg != "shell":
+                        continue
+                    if isinstance(kw.value, ast.Constant):
+                        if kw.value.value is True:
+                            out.append(
+                                Finding(
+                                    "code_risk",
+                                    "error",
+                                    rel,
+                                    node.lineno,
+                                    node.col_offset + 1,
+                                    "subprocess_shell_true",
+                                    "subprocess with shell=True",
+                                    remediation="pass argv list and keep shell=False",
+                                )
                             )
+                        continue
+                    out.append(
+                        Finding(
+                            "code_risk",
+                            "warn",
+                            rel,
+                            node.lineno,
+                            node.col_offset + 1,
+                            "subprocess_shell_nonliteral",
+                            "subprocess with non-literal shell argument",
+                            remediation="use shell=False literal or pass argv list",
                         )
+                    )
     return out
 
 

@@ -55,7 +55,7 @@ def test_main_markdown_and_text_output_modes(tmp_path: Path, capsys) -> None:
     assert text_out.startswith("production-readiness")
 
 
-def test_phase_boost_check_accepts_supported_blueprint_variants(tmp_path: Path) -> None:
+def test_phase_boost_check_accepts_canonical_blueprint_path(tmp_path: Path) -> None:
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/production-s-class-90-day-boost.md").write_text(
         "# phase boost\n", encoding="utf-8"

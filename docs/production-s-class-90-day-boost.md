@@ -9,7 +9,7 @@ Move the repository from "well-structured toolkit" to "first-class production en
 ## How to generate the program artifact
 
 ```bash
-python -m sdetkit phase-boost --repo-name DevS69-sdetkit --start-date 2026-03-01
+python -m sdetkit phase-boost --repo-name DevS69-sdetkit --start-date 2026-03-01 --output docs/artifacts/production-s-class-90-impact-plan.md --json-output docs/artifacts/production-s-class-90-impact-plan.json
 ```
 
 Default outputs:
