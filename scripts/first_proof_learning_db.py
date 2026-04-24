@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -88,7 +88,7 @@ def _build_rollup(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
     return {
         "schema_version": "sdetkit.first-proof-learning-rollup.v1",
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "summary": {
             "total_runs": total,
             "ship_runs": ship,
@@ -123,7 +123,7 @@ def main(argv: list[str] | None = None) -> int:
 
     summary = _read_json(args.summary)
     snapshot = Snapshot(
-        captured_at=datetime.now(timezone.utc).isoformat(),
+        captured_at=datetime.now(UTC).isoformat(),
         decision=str(summary.get("decision", "NO-SHIP")),
         ok=bool(summary.get("ok", False)),
         selected_python=str(summary.get("selected_python", "unknown")),

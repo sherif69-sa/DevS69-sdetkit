@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -86,7 +86,7 @@ def main(argv: list[str] | None = None) -> int:
 
     payload = {
         "schema_version": "sdetkit.first-proof-control-tower.v1",
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "first_proof_rollup_present": isinstance(rollup, dict),
         "adaptive_postcheck_present": isinstance(adaptive, dict),
         "first_proof_rollup": rollup,

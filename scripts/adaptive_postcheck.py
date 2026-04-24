@@ -14,7 +14,7 @@ import os
 import subprocess as _subprocess
 import sys
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -133,7 +133,7 @@ def _build_fresh_scenario_database(
     should_cleanup_out = False
     if out_path is None:
         if persist:
-            date_tag = datetime.now(timezone.utc).date().isoformat()
+            date_tag = datetime.now(UTC).date().isoformat()
             out_path = ROOT / "docs/artifacts" / f"adaptive-scenario-database-{date_tag}.json"
         else:
             fd, path = tempfile.mkstemp(prefix="adaptive-scenario-database-", suffix=".json")
@@ -714,7 +714,7 @@ def _update_confidence_history(
 
     entries.append(
         {
-            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+            "timestamp_utc": datetime.now(UTC).isoformat(),
             "score": int(score),
         }
     )
@@ -861,7 +861,7 @@ def _build_first_run_triage(
 
 
 def _default_out_path() -> str:
-    date_tag = datetime.now(timezone.utc).date().isoformat()
+    date_tag = datetime.now(UTC).date().isoformat()
     return f"docs/artifacts/adaptive-postcheck-{date_tag}.json"
 
 
