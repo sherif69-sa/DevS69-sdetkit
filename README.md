@@ -7,6 +7,7 @@
 DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisions with machine-readable evidence.
 
 **Primary outcome:** know if a change is ready to ship.
+**Runtime requirement:** Python 3.11+.
 
 Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 
@@ -123,6 +124,7 @@ python -m sdetkit review . --no-workspace --format operator-json
 ### 3) Quality lane
 
 ```bash
+make ci-deps-sync
 python -m pip install -r requirements-test.txt
 PYTHONPATH=src python -m sdetkit.test_bootstrap_contract --strict
 PYTHONPATH=src pytest -q
