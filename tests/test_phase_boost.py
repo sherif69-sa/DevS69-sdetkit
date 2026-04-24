@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 from sdetkit import cli, phase_boost
@@ -85,3 +86,16 @@ def test_phase_boost_main_json_output_contract(tmp_path: Path) -> None:
     assert payload["start_date"] == "2026-03-01"
     assert payload["goal"] == "S-class production readiness"
     assert isinstance(payload["phases"], list)
+
+
+def test_phase_boost_main_does_not_write_default_artifacts_without_flags(tmp_path: Path) -> None:
+    cwd = Path.cwd()
+    try:
+        os.chdir(tmp_path)
+        rc = phase_boost.main(["--repo-name", "repo-prod", "--start-date", "2026-03-01"])
+    finally:
+        os.chdir(cwd)
+
+    assert rc == 0
+    assert not (tmp_path / "docs/artifacts/production-s-class-90-impact-plan.md").exists()
+    assert not (tmp_path / "docs/artifacts/production-s-class-90-impact-plan.json").exists()

@@ -7,9 +7,7 @@ from pathlib import Path
 from typing import Any
 
 _PHASE_BOOST_BLUEPRINT_FILES = (
-    "docs/production-s-class-90-impact-boost.md",
     "docs/production-s-class-90-day-boost.md",
-    "docs/production-s-class-90--boost.md",
 )
 
 
