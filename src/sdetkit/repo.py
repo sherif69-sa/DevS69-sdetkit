@@ -940,7 +940,8 @@ def _scan_python_ast(rel: str, text: str) -> list[Finding]:
             is_subprocess_shell_call = False
             if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
                 is_subprocess_shell_call = (
-                    node.func.value.id in subprocess_aliases and node.func.attr in subprocess_targets
+                    node.func.value.id in subprocess_aliases
+                    and node.func.attr in subprocess_targets
                 )
             elif isinstance(node.func, ast.Name):
                 is_subprocess_shell_call = node.func.id in direct_subprocess_imports
