@@ -1,0 +1,25 @@
+{
+  "baseline": "2026-04-24T07:32:14Z",
+  "current": "2026-04-24T07:46:24Z",
+  "modules": [
+    {
+      "class_count_delta": 0,
+      "function_count_delta": 0,
+      "lines_of_code_delta": -6,
+      "path": "src/sdetkit/doctor.py"
+    },
+    {
+      "class_count_delta": 0,
+      "function_count_delta": 0,
+      "lines_of_code_delta": 1,
+      "path": "src/sdetkit/repo.py"
+    }
+  ],
+  "schema_version": "sdetkit.phase2-hotspot-delta.v1",
+  "summary": {
+    "module_count": 2,
+    "total_class_count_delta": 0,
+    "total_function_count_delta": 0,
+    "total_lines_of_code_delta": -5
+  }
+}

@@ -1,0 +1,85 @@
+name: First proof
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: first-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  first-proof:
+    name: first-proof (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    env:
+      FIRST_PROOF_BRANCH: ${{ github.ref_name }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .
+
+      - name: Run first-proof lane + contract validation
+        run: make first-proof-verify
+
+      - name: Summarize active first-proof threshold profile
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("build/first-proof/weekly-threshold-check.json")
+          if not path.is_file():
+              print("first-proof threshold profile: unavailable (missing build/first-proof/weekly-threshold-check.json)")
+              raise SystemExit(0)
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          print(
+              "first-proof threshold profile: "
+              f"branch={payload.get('branch','unknown')}, "
+              f"min_ship_rate={payload.get('min_ship_rate','?')}, "
+              f"min_total_runs={payload.get('min_total_runs','?')}, "
+              f"min_consecutive_breaches={payload.get('min_consecutive_breaches','?')}, "
+              f"fail_on_breach={payload.get('fail_on_breach', False)}"
+          )
+          PY
+
+      - name: Upload first-proof artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: first-proof-py${{ matrix.python-version }}
+          path: |
+            build/first-proof/gate-fast.json
+            build/first-proof/release-preflight.json
+            build/first-proof/doctor.json
+            build/first-proof/first-proof-summary.json
+            build/first-proof/first-proof-learning-db.jsonl
+            build/first-proof/first-proof-learning-rollup.json
+            build/first-proof/control-tower.json
+            build/first-proof/control-tower.md
+            build/first-proof/weekly-trend.json
+            build/first-proof/weekly-trend.md
+            build/first-proof/weekly-threshold-check.json
+            build/first-proof/*.stdout.log
+            build/first-proof/*.stderr.log
+          if-no-files-found: warn
+          retention-days: 14

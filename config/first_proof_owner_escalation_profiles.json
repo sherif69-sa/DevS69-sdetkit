@@ -1,0 +1,20 @@
+{
+  "schema_version": "sdetkit.first-proof-owner-escalation-profiles.v1",
+  "profiles": {
+    "default": {
+      "owner": "release-ops",
+      "severity": "high",
+      "sla": "3d"
+    },
+    "main": {
+      "owner": "release-ops",
+      "severity": "critical",
+      "sla": "24h"
+    },
+    "release": {
+      "owner": "release-governance",
+      "severity": "critical",
+      "sla": "24h"
+    }
+  }
+}

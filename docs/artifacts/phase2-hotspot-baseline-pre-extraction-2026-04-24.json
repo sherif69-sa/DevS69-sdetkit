@@ -1,0 +1,68 @@
+{
+  "generated_at_utc": "2026-04-24T07:32:14Z",
+  "modules": [
+    {
+      "class_count": 10,
+      "function_count": 127,
+      "largest_functions": [
+        {
+          "lines": 1446,
+          "name": "main"
+        },
+        {
+          "lines": 211,
+          "name": "run_checks"
+        },
+        {
+          "lines": 190,
+          "name": "run_repo_audit"
+        },
+        {
+          "lines": 125,
+          "name": "_resolve_repo_audit_policy"
+        },
+        {
+          "lines": 100,
+          "name": "_plan_repo_fix_audit"
+        }
+      ],
+      "lines_of_code": 4807,
+      "path": "src/sdetkit/repo.py"
+    },
+    {
+      "class_count": 0,
+      "function_count": 54,
+      "largest_functions": [
+        {
+          "lines": 1233,
+          "name": "main"
+        },
+        {
+          "lines": 226,
+          "name": "_write_evidence"
+        },
+        {
+          "lines": 219,
+          "name": "_build_hints"
+        },
+        {
+          "lines": 209,
+          "name": "_check_upgrade_audit"
+        },
+        {
+          "lines": 143,
+          "name": "_format_doctor_markdown"
+        }
+      ],
+      "lines_of_code": 3455,
+      "path": "src/sdetkit/doctor.py"
+    }
+  ],
+  "schema_version": "sdetkit.phase2-hotspot-baseline.v1",
+  "summary": {
+    "module_count": 2,
+    "total_class_count": 10,
+    "total_function_count": 181,
+    "total_lines_of_code": 8262
+  }
+}

@@ -50,7 +50,7 @@ dev = [
   "twine==6.2.0"
 ]
 test = [
-  "hypothesis",
+  "hypothesis==6.152.2",
   "PyYAML",
   "pytest",
   "pytest-asyncio",

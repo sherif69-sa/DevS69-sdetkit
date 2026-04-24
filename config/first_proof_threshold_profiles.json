@@ -1,0 +1,23 @@
+{
+  "schema_version": "sdetkit.first-proof-threshold-profiles.v1",
+  "profiles": {
+    "default": {
+      "min_ship_rate": 0.5,
+      "min_total_runs": 3,
+      "min_consecutive_breaches": 2,
+      "fail_on_breach": false
+    },
+    "main": {
+      "min_ship_rate": 0.6,
+      "min_total_runs": 5,
+      "min_consecutive_breaches": 2,
+      "fail_on_breach": true
+    },
+    "release": {
+      "min_ship_rate": 0.65,
+      "min_total_runs": 5,
+      "min_consecutive_breaches": 2,
+      "fail_on_breach": true
+    }
+  }
+}

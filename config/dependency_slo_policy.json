@@ -1,0 +1,8 @@
+{
+  "schema_version": "sdetkit.dependency-slo-policy.v1",
+  "thresholds": {
+    "critical_upgrade_signals_max": 0,
+    "high_priority_upgrade_signals_max": 2,
+    "actionable_packages_max": 12
+  }
+}

@@ -143,6 +143,56 @@ def _build_routes(postcheck: dict[str, Any]) -> list[dict[str, str]]:
     return sorted(routes, key=_severity_sort_key)
 
 
+def _load_threshold_policy(path: Path | None) -> dict[str, Any]:
+    if path is None or not path.is_file():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return payload if isinstance(payload, dict) else {}
+
+
+def _resolve_threshold_profile(policy: dict[str, Any], branch: str) -> dict[str, str]:
+    profiles = policy.get("profiles", {}) if isinstance(policy, dict) else {}
+    if not isinstance(profiles, dict):
+        profiles = {}
+    selected = profiles.get(branch)
+    if not isinstance(selected, dict):
+        selected = profiles.get("default", {})
+    if not isinstance(selected, dict):
+        selected = {}
+    return {
+        "owner": str(selected.get("owner", "release-ops")),
+        "severity": _normalize_severity(selected.get("severity", "high")),
+        "sla": str(selected.get("sla", "3d")),
+    }
+
+
+def _build_first_proof_threshold_route(
+    threshold_payload: dict[str, Any] | None, threshold_policy: dict[str, Any]
+) -> dict[str, str] | None:
+    if not isinstance(threshold_payload, dict):
+        return None
+    if not bool(threshold_payload.get("breach", False)):
+        return None
+    branch = str(threshold_payload.get("branch", "default"))
+    selected = _resolve_threshold_profile(threshold_policy, branch)
+    ship_rate = float(threshold_payload.get("ship_rate_last_7", 0.0))
+    min_ship_rate = float(threshold_payload.get("min_ship_rate", 0.0))
+    consecutive = int(threshold_payload.get("consecutive_no_ship", 0))
+    min_consecutive = int(threshold_payload.get("min_consecutive_breaches", 0))
+    return {
+        "check": "first_proof_ship_rate_threshold",
+        "owner": selected["owner"],
+        "severity": selected["severity"],
+        "sla": selected["sla"],
+        "details": (
+            "first-proof threshold breach: "
+            f"ship_rate_last_7={ship_rate:.2f} < min_ship_rate={min_ship_rate:.2f}, "
+            f"consecutive_no_ship={consecutive} (min={min_consecutive})"
+        ),
+        "source_scenario": "first-proof-threshold",
+    }
+
+
 def _build_summary(routes: list[dict[str, str]]) -> dict[str, int]:
     return {
         "total_routes": len(routes),
@@ -238,11 +288,40 @@ def main() -> int:
         default="build/owner-escalation-payload.json",
         help="Output escalation payload path.",
     )
+    parser.add_argument(
+        "--first-proof-threshold",
+        default=None,
+        help="Optional first-proof weekly-threshold-check JSON path.",
+    )
+    parser.add_argument(
+        "--first-proof-threshold-policy",
+        default="config/first_proof_owner_escalation_profiles.json",
+        help="Optional first-proof threshold owner/SLA policy JSON.",
+    )
     args = parser.parse_args()
 
     postcheck_path = Path(args.postcheck) if args.postcheck else _latest_postcheck_path()
     postcheck = json.loads(postcheck_path.read_text(encoding="utf-8"))
     payload = build_payload(postcheck)
+    threshold_payload = None
+    if args.first_proof_threshold:
+        threshold_path = Path(args.first_proof_threshold)
+        if threshold_path.is_file():
+            loaded = json.loads(threshold_path.read_text(encoding="utf-8"))
+            threshold_payload = loaded if isinstance(loaded, dict) else None
+    threshold_policy = _load_threshold_policy(Path(args.first_proof_threshold_policy))
+    threshold_route = _build_first_proof_threshold_route(threshold_payload, threshold_policy)
+    if threshold_route is not None:
+        payload["routes"] = sorted(
+            [*payload.get("routes", []), threshold_route],
+            key=_severity_sort_key,
+        )
+        payload["summary"] = _build_summary(payload["routes"])
+        payload["recommendations"] = _build_recommendations(
+            payload["routes"],
+            suggestions=_extract_suggestions(postcheck),
+            follow_up_plan=_extract_follow_up_plan(postcheck),
+        )
 
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)

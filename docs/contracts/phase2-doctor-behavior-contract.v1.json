@@ -1,0 +1,24 @@
+{
+  "contract_id": "sdetkit.phase2.doctor-behavior.v1",
+  "module": "src/sdetkit/doctor.py",
+  "objective": "Freeze doctor lane behavior before phase-2 decomposition.",
+  "cli_entrypoints": [
+    {
+      "command": "python -m sdetkit doctor --format json",
+      "expected_top_level_keys": [
+        "ok",
+        "score",
+        "quality"
+      ],
+      "must_not_change": [
+        "doctor command availability",
+        "json output mode"
+      ]
+    }
+  ],
+  "guardrails": [
+    "Maintain stable quality check identifiers for downstream automation.",
+    "Keep release mode doctor invocation compatibility."
+  ],
+  "version": "1.0.0"
+}
