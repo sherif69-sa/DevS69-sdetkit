@@ -37,7 +37,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--min-ship-rate", type=float, default=0.5)
     parser.add_argument("--min-total-runs", type=int, default=3)
     parser.add_argument("--min-consecutive-breaches", type=int, default=2)
-    parser.add_argument("--branch", default=None, help="Branch/profile name for threshold overrides.")
+    parser.add_argument(
+        "--branch", default=None, help="Branch/profile name for threshold overrides."
+    )
     parser.add_argument(
         "--profile-config",
         type=Path,
@@ -45,7 +47,9 @@ def main(argv: list[str] | None = None) -> int:
         help="Optional threshold profile config JSON.",
     )
     parser.add_argument("--fail-on-breach", action="store_true")
-    parser.add_argument("--out", type=Path, default=Path("build/first-proof/weekly-threshold-check.json"))
+    parser.add_argument(
+        "--out", type=Path, default=Path("build/first-proof/weekly-threshold-check.json")
+    )
     parser.add_argument("--format", choices=("text", "json"), default="text")
     args = parser.parse_args(argv)
 
@@ -94,7 +98,11 @@ def main(argv: list[str] | None = None) -> int:
             else (
                 "collect-more-data"
                 if not enough_data
-                else ("watch-consecutive-no-ship" if not consecutive_breach else "maintain-current-lane")
+                else (
+                    "watch-consecutive-no-ship"
+                    if not consecutive_breach
+                    else "maintain-current-lane"
+                )
             )
         ),
     }

@@ -63,7 +63,7 @@ first-proof-weekly-trend: venv
 first-proof-trend-threshold: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_trend_threshold.py --trend build/first-proof/weekly-trend.json --branch $(FIRST_PROOF_BRANCH) --profile-config config/first_proof_threshold_profiles.json --min-ship-rate 0.50 --min-total-runs 3 --min-consecutive-breaches 2 --out build/first-proof/weekly-threshold-check.json --format json'
 
-first-proof-tests: venv
+first-proof-tests: install
 	@bash -lc '. .venv/bin/activate && python -m pytest -q tests/test_first_proof_script.py tests/test_first_proof_contract.py tests/test_first_proof_learning_db.py tests/test_first_proof_weekly_trend.py tests/test_first_proof_control_tower.py tests/test_first_proof_trend_threshold.py tests/test_build_owner_escalation_payload.py'
 
 first-proof-verify: first-proof
@@ -245,7 +245,7 @@ phase1-blocker-register: venv
 phase1-execution-core: phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal
 	@bash -lc 'echo phase1-execution-core: pipeline completed'
 
-phase1-do-it: phase1-execution-core
+phase1-do-it: phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal
 	@bash -lc 'echo phase1-do-it is deprecated; use phase1-execution-core'
 
 phase1-workflow: phase1-execution-core phase1-flow-contract phase1-gate-phase2 phase1-executive-report
@@ -333,7 +333,7 @@ phase3-quality-contract: venv
 phase3-quality-report: phase3-quality-contract
 	@bash -lc '. .venv/bin/activate && python -m scripts.build_phase3_trend_delta --current build/phase1-baseline/phase1-baseline-summary.json --out-json build/phase3-quality/phase3-trend-delta.json --out-md build/phase3-quality/phase3-trend-delta.md --format json'
 
-phase3-do-it: phase3-quality-report
+phase3-do-it: phase3-quality-contract
 	@bash -lc 'echo "phase3-do-it is deprecated; use phase3-quality-report"'
 
 phase4-governance-contract: venv

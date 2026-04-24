@@ -73,7 +73,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _python_version_tuple(python_cmd: str) -> tuple[int, int] | None:
     proc = subprocess.run(
-        [python_cmd, "-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"],
+        [
+            python_cmd,
+            "-c",
+            "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')",
+        ],
         check=False,
         text=True,
         capture_output=True,

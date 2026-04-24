@@ -40,7 +40,10 @@ def build_payload(paths: list[Path]) -> dict[str, Any]:
     modules = [_module_metrics(path) for path in paths]
     return {
         "schema_version": "sdetkit.phase2-hotspot-baseline.v1",
-        "generated_at_utc": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "generated_at_utc": datetime.now(UTC)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z"),
         "modules": modules,
         "summary": {
             "module_count": len(modules),

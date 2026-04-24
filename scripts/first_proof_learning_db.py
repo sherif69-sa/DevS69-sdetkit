@@ -107,10 +107,16 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Append first-proof summary into learning DB and emit adaptive rollup."
     )
-    parser.add_argument("--summary", type=Path, default=Path("build/first-proof/first-proof-summary.json"))
-    parser.add_argument("--db", type=Path, default=Path("build/first-proof/first-proof-learning-db.jsonl"))
     parser.add_argument(
-        "--rollup-out", type=Path, default=Path("build/first-proof/first-proof-learning-rollup.json")
+        "--summary", type=Path, default=Path("build/first-proof/first-proof-summary.json")
+    )
+    parser.add_argument(
+        "--db", type=Path, default=Path("build/first-proof/first-proof-learning-db.jsonl")
+    )
+    parser.add_argument(
+        "--rollup-out",
+        type=Path,
+        default=Path("build/first-proof/first-proof-learning-rollup.json"),
     )
     parser.add_argument("--format", choices=("text", "json"), default="text")
     args = parser.parse_args(argv)
@@ -131,7 +137,9 @@ def main(argv: list[str] | None = None) -> int:
     rollup = _build_rollup(rows)
 
     args.rollup_out.parent.mkdir(parents=True, exist_ok=True)
-    args.rollup_out.write_text(json.dumps(rollup, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    args.rollup_out.write_text(
+        json.dumps(rollup, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
     result = {
         "ok": True,

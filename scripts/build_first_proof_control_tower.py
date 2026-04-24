@@ -23,7 +23,9 @@ def _render_md(payload: dict[str, Any]) -> str:
     lines = ["# First-Proof Control Tower", ""]
     lines.append(f"- Generated at: `{payload.get('generated_at', 'unknown')}`")
     lines.append(f"- Rollup present: `{bool(payload.get('first_proof_rollup_present', False))}`")
-    lines.append(f"- Adaptive postcheck present: `{bool(payload.get('adaptive_postcheck_present', False))}`")
+    lines.append(
+        f"- Adaptive postcheck present: `{bool(payload.get('adaptive_postcheck_present', False))}`"
+    )
     lines.append("")
     lines.append("## First-Proof Trend")
     lines.append(f"- Total runs: `{int(summary.get('total_runs', 0))}`")
@@ -36,7 +38,9 @@ def _render_md(payload: dict[str, Any]) -> str:
             if isinstance(row, dict):
                 lines.append(f"  - `{row.get('step', 'unknown')}`: `{int(row.get('count', 0))}`")
 
-    actions = (rollup.get("adaptive_reviewer", {}) if isinstance(rollup, dict) else {}).get("actions", [])
+    actions = (rollup.get("adaptive_reviewer", {}) if isinstance(rollup, dict) else {}).get(
+        "actions", []
+    )
     if isinstance(actions, list) and actions:
         lines.append("- Adaptive actions:")
         for action in actions[:5]:
@@ -57,7 +61,9 @@ def _render_md(payload: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build first-proof + adaptive reviewer control tower summary.")
+    parser = argparse.ArgumentParser(
+        description="Build first-proof + adaptive reviewer control tower summary."
+    )
     parser.add_argument(
         "--first-proof-rollup",
         type=Path,
@@ -68,7 +74,9 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         default=Path("build/adaptive-postcheck-min.json"),
     )
-    parser.add_argument("--out-json", type=Path, default=Path("build/first-proof/control-tower.json"))
+    parser.add_argument(
+        "--out-json", type=Path, default=Path("build/first-proof/control-tower.json")
+    )
     parser.add_argument("--out-md", type=Path, default=Path("build/first-proof/control-tower.md"))
     parser.add_argument("--format", choices=("text", "json"), default="text")
     args = parser.parse_args(argv)

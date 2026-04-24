@@ -87,7 +87,9 @@ def _to_markdown(delta: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build phase-2 hotspot delta from baseline/current metrics.")
+    parser = argparse.ArgumentParser(
+        description="Build phase-2 hotspot delta from baseline/current metrics."
+    )
     parser.add_argument("--baseline", type=Path, required=True)
     parser.add_argument("--current", type=Path, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
@@ -102,7 +104,11 @@ def main(argv: list[str] | None = None) -> int:
     args.out_json.write_text(json.dumps(delta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     args.out_md.write_text(_to_markdown(delta), encoding="utf-8")
 
-    print(json.dumps({"ok": True, "out_json": args.out_json.as_posix(), "out_md": args.out_md.as_posix()}))
+    print(
+        json.dumps(
+            {"ok": True, "out_json": args.out_json.as_posix(), "out_md": args.out_md.as_posix()}
+        )
+    )
     return 0
 
 

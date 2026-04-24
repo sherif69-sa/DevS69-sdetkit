@@ -206,4 +206,6 @@ def test_first_proof_contract_detects_decision_line_mismatch(tmp_path: Path) -> 
     proc = _run(summary_path)
     assert proc.returncode == 1
     result = json.loads(proc.stdout)
-    assert any("decision_line must match computed SHIP/NO-SHIP outcome" in row for row in result["errors"])
+    assert any(
+        "decision_line must match computed SHIP/NO-SHIP outcome" in row for row in result["errors"]
+    )

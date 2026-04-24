@@ -17,7 +17,9 @@ def test_first_proof_writes_decision_line_for_ship(monkeypatch, tmp_path: Path, 
     monkeypatch.setattr(first_proof, "_resolve_python", lambda _explicit: "python3.11")
     step_results = [
         first_proof.StepResult("gate-fast", ["cmd"], 0, "a.stdout.log", "a.stderr.log", "a.json"),
-        first_proof.StepResult("gate-release", ["cmd"], 0, "b.stdout.log", "b.stderr.log", "b.json"),
+        first_proof.StepResult(
+            "gate-release", ["cmd"], 0, "b.stdout.log", "b.stderr.log", "b.json"
+        ),
         first_proof.StepResult("doctor", ["cmd"], 0, "c.stdout.log", "c.stderr.log", "c.json"),
     ]
     monkeypatch.setattr(first_proof, "_run_step", lambda **_kwargs: step_results.pop(0))
@@ -35,7 +37,9 @@ def test_first_proof_writes_decision_line_for_no_ship(monkeypatch, tmp_path: Pat
     monkeypatch.setattr(first_proof, "_resolve_python", lambda _explicit: "python3.11")
     step_results = [
         first_proof.StepResult("gate-fast", ["cmd"], 0, "a.stdout.log", "a.stderr.log", "a.json"),
-        first_proof.StepResult("gate-release", ["cmd"], 1, "b.stdout.log", "b.stderr.log", "b.json"),
+        first_proof.StepResult(
+            "gate-release", ["cmd"], 1, "b.stdout.log", "b.stderr.log", "b.json"
+        ),
         first_proof.StepResult("doctor", ["cmd"], 0, "c.stdout.log", "c.stderr.log", "c.json"),
     ]
     monkeypatch.setattr(first_proof, "_run_step", lambda **_kwargs: step_results.pop(0))

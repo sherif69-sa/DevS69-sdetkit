@@ -53,7 +53,9 @@ def check_contract(payload: dict[str, Any]) -> list[str]:
         errors.append("selected_python must be a non-empty string")
 
     failed_steps = payload.get("failed_steps")
-    if not isinstance(failed_steps, list) or not all(isinstance(item, str) for item in failed_steps):
+    if not isinstance(failed_steps, list) or not all(
+        isinstance(item, str) for item in failed_steps
+    ):
         errors.append("failed_steps must be a list[str]")
 
     steps = payload.get("steps")
@@ -114,7 +116,9 @@ def check_contract(payload: dict[str, Any]) -> list[str]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate first-proof summary contract.")
-    parser.add_argument("--summary", type=Path, default=Path("build/first-proof/first-proof-summary.json"))
+    parser.add_argument(
+        "--summary", type=Path, default=Path("build/first-proof/first-proof-summary.json")
+    )
     parser.add_argument("--format", choices=("text", "json"), default="text")
     parser.add_argument(
         "--wait-seconds",

@@ -28,7 +28,16 @@ def test_control_tower_builds_outputs(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     adaptive.write_text(
-        json.dumps({"summary": {"ok": True, "confidence_score": 88, "failed_required": 0, "failed_warn": 1}}),
+        json.dumps(
+            {
+                "summary": {
+                    "ok": True,
+                    "confidence_score": 88,
+                    "failed_required": 0,
+                    "failed_warn": 1,
+                }
+            }
+        ),
         encoding="utf-8",
     )
 

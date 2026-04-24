@@ -193,7 +193,11 @@ def _load_workflow_consolidation_plan() -> dict[str, Any] | None:
 
 
 def _load_first_proof_learning_rollup(repo_root: str, path: str | None) -> dict[str, Any] | None:
-    candidate = Path(path) if path else Path(repo_root) / "build/first-proof/first-proof-learning-rollup.json"
+    candidate = (
+        Path(path)
+        if path
+        else Path(repo_root) / "build/first-proof/first-proof-learning-rollup.json"
+    )
     if not candidate.is_file():
         return None
     payload = json.loads(candidate.read_text(encoding="utf-8"))

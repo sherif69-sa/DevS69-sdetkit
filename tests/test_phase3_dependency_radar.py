@@ -12,8 +12,20 @@ _SPEC.loader.exec_module(phase3_radar)
 
 
 def test_build_radar_marks_breach_when_threshold_exceeded() -> None:
-    audit = {"summary": {"critical_upgrade_signals": 1, "high_priority_upgrade_signals": 0, "actionable_packages": 3}}
-    policy = {"thresholds": {"critical_upgrade_signals_max": 0, "high_priority_upgrade_signals_max": 2, "actionable_packages_max": 10}}
+    audit = {
+        "summary": {
+            "critical_upgrade_signals": 1,
+            "high_priority_upgrade_signals": 0,
+            "actionable_packages": 3,
+        }
+    }
+    policy = {
+        "thresholds": {
+            "critical_upgrade_signals_max": 0,
+            "high_priority_upgrade_signals_max": 2,
+            "actionable_packages_max": 10,
+        }
+    }
     radar = phase3_radar.build_radar(audit_payload=audit, policy=policy)
     assert radar["threshold_check"]["breach"] is True
     assert radar["threshold_check"]["reasons"]
@@ -24,14 +36,32 @@ def test_main_writes_radar_from_input_files(tmp_path: Path) -> None:
     policy = tmp_path / "policy.json"
     out = tmp_path / "radar.json"
     audit.write_text(
-        json.dumps({"summary": {"critical_upgrade_signals": 0, "high_priority_upgrade_signals": 1, "actionable_packages": 2}}),
+        json.dumps(
+            {
+                "summary": {
+                    "critical_upgrade_signals": 0,
+                    "high_priority_upgrade_signals": 1,
+                    "actionable_packages": 2,
+                }
+            }
+        ),
         encoding="utf-8",
     )
     policy.write_text(
-        json.dumps({"thresholds": {"critical_upgrade_signals_max": 0, "high_priority_upgrade_signals_max": 2, "actionable_packages_max": 10}}),
+        json.dumps(
+            {
+                "thresholds": {
+                    "critical_upgrade_signals_max": 0,
+                    "high_priority_upgrade_signals_max": 2,
+                    "actionable_packages_max": 10,
+                }
+            }
+        ),
         encoding="utf-8",
     )
-    rc = phase3_radar.main(["--audit-json", str(audit), "--policy-json", str(policy), "--out", str(out)])
+    rc = phase3_radar.main(
+        ["--audit-json", str(audit), "--policy-json", str(policy), "--out", str(out)]
+    )
     assert rc == 0
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["threshold_check"]["breach"] is False

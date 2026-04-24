@@ -26,7 +26,9 @@ def _load_upgrade_audit_payload(path: Path | None) -> dict[str, Any]:
         text=True,
     )
     if proc.returncode != 0:
-        raise RuntimeError(f"upgrade audit failed: exit={proc.returncode}, stderr={proc.stderr.strip()}")
+        raise RuntimeError(
+            f"upgrade audit failed: exit={proc.returncode}, stderr={proc.stderr.strip()}"
+        )
     payload = json.loads(proc.stdout)
     if not isinstance(payload, dict):
         raise ValueError("upgrade audit stdout must be JSON object")
@@ -78,8 +80,12 @@ def build_radar(*, audit_payload: dict[str, Any], policy: dict[str, Any]) -> dic
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build phase-3 dependency radar artifact with threshold checks.")
-    parser.add_argument("--audit-json", type=Path, default=None, help="Optional prebuilt upgrade audit JSON.")
+    parser = argparse.ArgumentParser(
+        description="Build phase-3 dependency radar artifact with threshold checks."
+    )
+    parser.add_argument(
+        "--audit-json", type=Path, default=None, help="Optional prebuilt upgrade audit JSON."
+    )
     parser.add_argument(
         "--policy-json",
         type=Path,
@@ -100,7 +106,11 @@ def main(argv: list[str] | None = None) -> int:
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(radar, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(json.dumps({"ok": True, "out": args.out.as_posix(), "breach": radar["threshold_check"]["breach"]}))
+    print(
+        json.dumps(
+            {"ok": True, "out": args.out.as_posix(), "breach": radar["threshold_check"]["breach"]}
+        )
+    )
     if args.fail_on_breach and bool(radar["threshold_check"]["breach"]):
         return 1
     return 0
