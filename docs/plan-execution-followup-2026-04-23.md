@@ -50,7 +50,7 @@ Implemented in this change:
 - Added `scripts/first_proof.py` to run canonical first-proof flow and generate summary/log artifacts.
 - Added `make first-proof` to run that script using project venv.
 - Added environment compatibility matrix doc.
-- Added automatic Python 3.11+ interpreter selection in `first_proof.py` for local runs started from older default interpreters.
+- Added automatic Python 3.10+ interpreter selection in `first_proof.py` for local runs started from older default interpreters.
 - Added strict/non-strict first-proof behavior: local smoke runs can complete with exit code 0, while `make first-proof` remains strict for CI.
 - Added `first-proof-verify` orchestration and contract-check wait support to avoid transient ordering races in parallel execution.
 - Added `--allow-missing` mode in contract checker for optional/parallel lanes that may not have produced summary files yet.

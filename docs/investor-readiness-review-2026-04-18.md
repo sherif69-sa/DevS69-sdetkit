@@ -7,7 +7,7 @@ DevS69 SDETKit is already positioned as a **deterministic release-confidence pro
 The highest-value gap is not product vision; it is **operational signal clarity**:
 - one docs navigation check was failing due to a missing index link,
 - lint backlog is non-trivial (34 findings in current environment),
-- local environment in this run was Python 3.10 while the project policy is Python 3.11+, reducing confidence in first-run reproducibility for external evaluators.
+- local environment in this run was Python 3.10 while the project policy is Python 3.10+, reducing confidence in first-run reproducibility for external evaluators.
 
 ## What is strong right now (investment-positive)
 
@@ -29,7 +29,7 @@ The highest-value gap is not product vision; it is **operational signal clarity*
 
 - `python scripts/validate_enterprise_contracts.py` -> **PASS**
 - `python scripts/check_primary_docs_map.py` -> **FAIL** (missing docs index link to troubleshooting page)
-- `PYTHONPATH=src pytest -q` -> **BLOCKED by environment** (Python 3.10.19 detected; project requires >=3.11)
+- `PYTHONPATH=src pytest -q` -> **BLOCKED by environment** (Python 3.10.19 detected; project requires >=3.10)
 - `ruff check .` -> **FAIL** (34 findings; 31 auto-fixable)
 
 ### Interpretation
@@ -46,7 +46,7 @@ The highest-value gap is not product vision; it is **operational signal clarity*
 
 ### Recommended next 7 days
 
-1. **Lock demo environment to Python 3.11+ in CI and local bootstrap docs**
+1. **Lock demo environment to Python 3.10+ in CI and local bootstrap docs**
    Prevents wasted cycles debugging version mismatches during external evaluations.
 
 2. **Run `ruff check . --fix` in staged lanes, then stabilize remaining issues**

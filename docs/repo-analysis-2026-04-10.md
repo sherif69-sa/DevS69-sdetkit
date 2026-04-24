@@ -32,7 +32,7 @@ This is a quick structural and quality snapshot of the DevS69 SDETKit repository
 ### 1) Strengths
 
 - **Strong front-door narrative** in `README.md` with explicit expected artifacts and triage order.
-- **Well-defined packaging posture** in `pyproject.toml` (Python 3.11+, explicit optional dependency groups, configured ruff/mypy/pytest).
+- **Well-defined packaging posture** in `pyproject.toml` (Python 3.10+, explicit optional dependency groups, configured ruff/mypy/pytest).
 - **Documented structure discipline** in `docs/project-structure.md` with concrete file-placement rules.
 
 ### 2) Current quality signal

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 
-MIN_RUNTIME_PYTHON: tuple[int, int] = (3, 10)
+from sdetkit.core._runtime import MIN_RUNTIME_PYTHON
 
 
 def _validate_runtime_python() -> str | None:

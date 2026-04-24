@@ -76,7 +76,7 @@ Historical and transition-era references remain intentionally secondary to first
 
 ## Install and runtime notes
 
-- Python 3.11+
+- Python 3.10+
 - Prefer isolated environments
 - `NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q`
 impact-58-big-upgrade-report.md

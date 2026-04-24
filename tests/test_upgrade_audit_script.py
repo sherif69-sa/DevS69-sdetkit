@@ -15,7 +15,7 @@ def _report(**overrides: object) -> upgrade_audit.PackageReport:
         "groups": ["default"],
         "requirements": ["pkg==1.0.0"],
         "pinned_versions": ["1.0.0"],
-        "project_python_requires": ">=3.11",
+        "project_python_requires": ">=3.10",
         "current_version": "1.0.0",
         "target_version": "1.0.0",
         "target_release_date": None,
@@ -244,7 +244,7 @@ def test_build_package_report_uses_compatible_target_when_latest_needs_newer_pyt
         deps,
         latest_version="0.30.0",
         release_date="2026-03-01T00:00:00Z",
-        project_python_requires=">=3.11",
+        project_python_requires=">=3.10",
         compatible_version="0.29.0",
         compatible_release_date="2026-02-01T00:00:00Z",
         compatibility_status="compatible-available",
@@ -1029,7 +1029,7 @@ def test_latest_compatible_release_skips_prereleases_by_default() -> None:
             "1.0.dev3": [
                 {
                     "upload_time_iso_8601": "2025-09-15T16:15:10.458000Z",
-                    "requires_python": ">=3.11",
+                    "requires_python": ">=3.10",
                 }
             ],
         },
@@ -1037,7 +1037,7 @@ def test_latest_compatible_release_skips_prereleases_by_default() -> None:
 
     compatible_version, release_date, status = upgrade_audit._latest_compatible_release(
         payload,
-        project_python_requires=">=3.11",
+        project_python_requires=">=3.10",
         include_prereleases=False,
     )
 
@@ -1059,7 +1059,7 @@ def test_latest_compatible_release_can_include_prereleases() -> None:
             "1.0.dev3": [
                 {
                     "upload_time_iso_8601": "2025-09-15T16:15:10.458000Z",
-                    "requires_python": ">=3.11",
+                    "requires_python": ">=3.10",
                 }
             ],
         },
@@ -1067,7 +1067,7 @@ def test_latest_compatible_release_can_include_prereleases() -> None:
 
     compatible_version, release_date, status = upgrade_audit._latest_compatible_release(
         payload,
-        project_python_requires=">=3.11",
+        project_python_requires=">=3.10",
         include_prereleases=True,
     )
 

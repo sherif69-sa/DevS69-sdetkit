@@ -4,7 +4,7 @@ Use this as a short rollout checklist for first-time team adoption.
 
 ## Runtime baseline
 
-- [ ] Python 3.11+ confirmed on developer machines and CI runners
+- [ ] Python 3.10+ confirmed on developer machines and CI runners
 - [ ] Team can create and activate isolated Python environments
 
 ## Install approach

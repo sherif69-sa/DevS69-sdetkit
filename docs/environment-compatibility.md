@@ -4,16 +4,16 @@ This is the execution baseline for the **first-proof** lane.
 
 ## Supported runtime
 
-- Python: **3.11+ required**
-- Recommended active versions: 3.11, 3.12, 3.13
-- Current known block: Python 3.10 is not supported by `sdetkit`
+- Python: **3.10+ required**
+- Recommended active versions: 3.10, 3.11, 3.12, 3.13
+- Current known block: Python 3.9 and lower are not supported by `sdetkit`
 
 ## First-proof dependencies
 
 - Virtual environment (`python -m venv .venv`)
 - Editable install (`pip install -e .`)
 - Test/docs dependencies for full local quality runs (`requirements-test.txt`, `requirements-docs.txt`)
-- `scripts/first_proof.py` auto-selects a Python 3.11+ interpreter by default when available.
+- `scripts/first_proof.py` auto-selects a Python 3.10+ interpreter by default when available.
 - `scripts/first_proof.py` defaults to non-strict exit behavior for local smoke runs; pass `--strict` (used by `make first-proof`) to enforce non-zero exit on gate failures.
 - `scripts/check_first_proof_summary_contract.py` supports `--wait-seconds` for parallel pipelines where summary writing may still be in progress.
 - For optional lanes where summary may not exist yet, use `--allow-missing` to return success with a JSON `skipped: true` record.
@@ -24,16 +24,16 @@ This is the execution baseline for the **first-proof** lane.
 
 For expanded failure signatures, see `docs/first-proof-troubleshooting.md`.
 
-### Symptom: `sdetkit requires Python 3.11+`
+### Symptom: `sdetkit requires Python 3.10+`
 
 Fix:
 
-1. Install Python 3.11+.
+1. Install Python 3.10+.
 2. Recreate the environment:
 
 ```bash
 rm -rf .venv
-python3.11 -m venv .venv
+python3.10 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
 python -m pip install -e .
@@ -53,7 +53,7 @@ make first-proof
 
 Run first-proof in matrix mode for at least:
 
-- Python 3.11
+- Python 3.10
 - Python 3.12
 - Python 3.13
 

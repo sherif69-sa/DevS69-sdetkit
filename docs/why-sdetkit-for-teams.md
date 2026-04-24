@@ -56,7 +56,7 @@ Deterministic artifacts improve release operations because they make decisions:
 
 ## How to start (canonical path)
 
-Install and run the canonical path (Python 3.11+, isolated env):
+Install and run the canonical path (Python 3.10+, isolated env):
 
 ```bash
 python -m venv .venv

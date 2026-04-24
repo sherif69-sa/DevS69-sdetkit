@@ -21,12 +21,12 @@ The summary now includes:
 
 Signature:
 
-- stderr contains: `requires Python 3.11+`
+- stderr contains: `requires Python 3.10+`
 
 Fix:
 
 ```bash
-python3.11 -m venv .venv
+python3.10 -m venv .venv
 source .venv/bin/activate
 python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .
 make first-proof
