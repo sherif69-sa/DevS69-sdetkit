@@ -41,6 +41,7 @@ from .plugins import (
     normalize_packs,
     select_rules,
 )
+from .phase2_utilities import parse_iso_date as _parse_iso_date_impl
 from .projects import ProjectsConfigError, discover_projects, resolve_project
 from .repo_adoption import build_init_payload, render_init_payload
 from .report import build_run_record, diff_runs, load_run_record
@@ -2641,9 +2642,9 @@ def _repo_audit_profile_defaults(profile: str) -> RepoAuditPolicy:
 
 def _parse_iso_date(raw: str, *, field: str) -> dt.date:
     try:
-        return dt.date.fromisoformat(raw)
+        return _parse_iso_date_impl(raw, field=field)
     except ValueError as exc:
-        raise RepoAuditConfigError(f"{field} must be ISO date YYYY-MM-DD") from exc
+        raise RepoAuditConfigError(str(exc)) from exc
 
 
 def _today_date() -> dt.date:

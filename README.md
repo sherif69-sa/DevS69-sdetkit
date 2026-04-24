@@ -10,6 +10,60 @@ DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisi
 
 Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 
+Need one command for first proof in this repository?
+
+```bash
+make first-proof
+```
+
+This now prints a single-line outcome marker for quick executive/operator scanning:
+
+```text
+FIRST_PROOF_DECISION=SHIP
+```
+
+This writes a consolidated artifact set in `build/first-proof/`:
+
+```text
+build/first-proof/
+├── gate-fast.json
+├── release-preflight.json
+├── doctor.json
+├── first-proof-summary.json
+├── first-proof-learning-db.jsonl
+├── first-proof-learning-rollup.json
+├── control-tower.json
+├── control-tower.md
+├── weekly-trend.json
+├── weekly-trend.md
+└── weekly-threshold-check.json
+```
+
+Troubleshooting: [`docs/first-proof-troubleshooting.md`](docs/first-proof-troubleshooting.md)
+Learning DB + adaptive reviewer alignment: [`docs/first-proof-learning-db.md`](docs/first-proof-learning-db.md)
+Rollback/remediation examples: [`docs/integrations/rollback-remediation-examples.md`](docs/integrations/rollback-remediation-examples.md)
+
+Release preflight now expects `build/first-proof/first-proof-summary.json` to exist and pass
+`check_first_proof_summary_contract.py`.
+
+For CI-equivalent validation (lane + contract + rollup + trend + first-proof tests):
+
+```bash
+make first-proof-verify
+```
+
+Professional phase entrypoints:
+
+```bash
+make plan-status
+make phase1-execute
+make phase2-execute
+make phase3-governance
+make phase4-credibility
+make phase1-execution-core
+make phase3-quality-report
+```
+
 ## Why teams use SDETKit
 
 - **Deterministic decisions**: every run ends in a clear SHIP / NO-SHIP outcome.

@@ -285,3 +285,32 @@ def test_suggestions_and_followups_are_preserved_without_routes() -> None:
 def test_generated_timestamp_uses_utc_z_suffix() -> None:
     payload = owner_escalation.build_payload({"scenario": "fast", "owner_routing": []})
     assert payload["generated_at_utc"].endswith("Z")
+
+
+def test_first_proof_threshold_route_uses_branch_profile() -> None:
+    threshold_payload = {
+        "breach": True,
+        "branch": "main",
+        "ship_rate_last_7": 0.2,
+        "min_ship_rate": 0.6,
+        "consecutive_no_ship": 2,
+        "min_consecutive_breaches": 2,
+    }
+    policy = {
+        "profiles": {
+            "default": {"owner": "release-ops", "severity": "high", "sla": "3d"},
+            "main": {"owner": "release-ops", "severity": "critical", "sla": "24h"},
+        }
+    }
+    route = owner_escalation._build_first_proof_threshold_route(threshold_payload, policy)
+    assert route is not None
+    assert route["check"] == "first_proof_ship_rate_threshold"
+    assert route["owner"] == "release-ops"
+    assert route["severity"] == "critical"
+    assert route["sla"] == "24h"
+
+
+def test_first_proof_threshold_route_is_none_when_no_breach() -> None:
+    threshold_payload = {"breach": False, "branch": "main"}
+    route = owner_escalation._build_first_proof_threshold_route(threshold_payload, {"profiles": {}})
+    assert route is None

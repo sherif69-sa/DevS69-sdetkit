@@ -14,7 +14,7 @@ import os
 import subprocess as _subprocess
 import sys
 import tempfile
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -133,7 +133,7 @@ def _build_fresh_scenario_database(
     should_cleanup_out = False
     if out_path is None:
         if persist:
-            date_tag = datetime.now(UTC).date().isoformat()
+            date_tag = datetime.now(timezone.utc).date().isoformat()
             out_path = ROOT / "docs/artifacts" / f"adaptive-scenario-database-{date_tag}.json"
         else:
             fd, path = tempfile.mkstemp(prefix="adaptive-scenario-database-", suffix=".json")
@@ -189,6 +189,14 @@ def _load_workflow_consolidation_plan() -> dict[str, Any] | None:
     if not plan_path.is_file():
         return None
     payload = json.loads(plan_path.read_text(encoding="utf-8"))
+    return payload if isinstance(payload, dict) else None
+
+
+def _load_first_proof_learning_rollup(repo_root: str, path: str | None) -> dict[str, Any] | None:
+    candidate = Path(path) if path else Path(repo_root) / "build/first-proof/first-proof-learning-rollup.json"
+    if not candidate.is_file():
+        return None
+    payload = json.loads(candidate.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else None
 
 
@@ -500,6 +508,16 @@ def _build_follow_up_enhancements(
                 "next_command": "make adaptive-ops-bundle",
             }
         )
+    if not bool(by_name.get("first_proof_ship_rate_threshold", {}).get("passed", True)):
+        enhancements.append(
+            {
+                "id": "first-proof-ship-rate-recovery",
+                "area": "first-proof",
+                "priority": "high",
+                "feature": "Improve first-proof SHIP rate by addressing top failed gate steps from learning rollup.",
+                "next_command": "make first-proof-verify",
+            }
+        )
     if phase_count == 6:
         enhancements.append(
             {
@@ -520,6 +538,7 @@ def _render_markdown_summary(
     checks: list[dict[str, Any]],
     follow_up_enhancements: list[dict[str, str]],
     scenario_database: dict[str, Any],
+    first_proof_learning: dict[str, Any] | None = None,
     owner_routing: list[dict[str, str]] | None = None,
 ) -> str:
     lines: list[str] = []
@@ -544,6 +563,29 @@ def _render_markdown_summary(
         for domain, score in sorted(scenario_database.get("domain_confidence", {}).items()):
             lines.append(f"- `{domain}`: `{int(score)}`")
         lines.append("")
+
+    if isinstance(first_proof_learning, dict):
+        fp_summary = first_proof_learning.get("summary", {})
+        if isinstance(fp_summary, dict):
+            lines.append("## First-Proof Learning")
+            lines.append(f"- Runs: `{int(fp_summary.get('total_runs', 0))}`")
+            lines.append(f"- SHIP rate: `{float(fp_summary.get('ship_rate', 0.0)):.2f}`")
+            top_failed = fp_summary.get("top_failed_steps", [])
+            if isinstance(top_failed, list) and top_failed:
+                lines.append("- Top failed steps:")
+                for row in top_failed[:5]:
+                    if isinstance(row, dict):
+                        lines.append(
+                            f"  - `{row.get('step', 'unknown')}`: `{int(row.get('count', 0))}`"
+                        )
+            adaptive = first_proof_learning.get("adaptive_reviewer", {})
+            if isinstance(adaptive, dict):
+                actions = adaptive.get("actions", [])
+                if isinstance(actions, list) and actions:
+                    lines.append("- Adaptive reviewer actions:")
+                    for action in actions[:5]:
+                        lines.append(f"  - {action}")
+            lines.append("")
 
     lines.append("")
     lines.append("## Check Results")
@@ -597,6 +639,8 @@ def _build_owner_routing(
             severity = str(row.get("severity", "medium"))
             sla = str(row.get("sla", "7d"))
             owner_map[check_name] = (owner, severity, sla)
+    owner_map.setdefault("first_proof_ship_rate_threshold", ("release-ops", "high", "3d"))
+    owner_map.setdefault("first_proof_learning_rollup_present", ("platform-ops", "medium", "7d"))
     rows: list[dict[str, str]] = []
     for row in failing:
         check = str(row.get("check", "unknown"))
@@ -666,7 +710,7 @@ def _update_confidence_history(
 
     entries.append(
         {
-            "timestamp_utc": datetime.now(UTC).isoformat(),
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "score": int(score),
         }
     )
@@ -813,7 +857,7 @@ def _build_first_run_triage(
 
 
 def _default_out_path() -> str:
-    date_tag = datetime.now(UTC).date().isoformat()
+    date_tag = datetime.now(timezone.utc).date().isoformat()
     return f"docs/artifacts/adaptive-postcheck-{date_tag}.json"
 
 
@@ -875,6 +919,11 @@ def main() -> int:
         default=None,
         help="Optional CSV output for owner routing escalations.",
     )
+    ap.add_argument(
+        "--first-proof-rollup",
+        default=None,
+        help="Optional first-proof learning rollup JSON path (default: build/first-proof/first-proof-learning-rollup.json).",
+    )
     args = ap.parse_args()
 
     payload = _load_review_payload(args.repo, args.input_json)
@@ -887,9 +936,38 @@ def main() -> int:
         persist_refresh_artifact=args.persist_refreshed_scenario_db,
     )
     plan_payload = _load_workflow_consolidation_plan()
+    first_proof_learning = _load_first_proof_learning_rollup(args.repo, args.first_proof_rollup)
     doctor = _doctor_summary(args.repo)
     first_run_triage = _build_first_run_triage(payload, doctor)
     checks = _run_alignment_checks(payload, scenario, first_run_triage, scenario_db, plan_payload)
+    if isinstance(first_proof_learning, dict):
+        fp_summary = first_proof_learning.get("summary", {})
+        total_runs = 0
+        ship_rate = 0.0
+        if isinstance(fp_summary, dict):
+            total_runs = int(fp_summary.get("total_runs", 0))
+            ship_rate = float(fp_summary.get("ship_rate", 0.0))
+        min_runs = int(scenario.get("minimum_first_proof_runs", 3))
+        min_ship_rate = float(scenario.get("minimum_first_proof_ship_rate", 0.5))
+        checks.append(
+            _bool_check(
+                "first_proof_learning_rollup_present",
+                total_runs > 0,
+                f"first-proof learning rollup runs={total_runs}",
+                "warn",
+            )
+        )
+        checks.append(
+            _bool_check(
+                "first_proof_ship_rate_threshold",
+                total_runs >= min_runs and ship_rate >= min_ship_rate,
+                (
+                    f"first-proof ship_rate={ship_rate:.2f}, total_runs={total_runs}, "
+                    f"required>= {min_ship_rate:.2f} over {min_runs} runs"
+                ),
+                "warn",
+            )
+        )
     follow_up_enhancements = _build_follow_up_enhancements(
         checks=checks,
         scenario_db=scenario_db,
@@ -952,6 +1030,7 @@ def main() -> int:
         "confidence_guidance": confidence_guidance,
         "next_follow_up_plan": next_plan,
         "owner_routing": owner_routing,
+        "first_proof_learning": first_proof_learning,
     }
 
     out_path = Path(args.out or _default_out_path())
@@ -966,6 +1045,7 @@ def main() -> int:
             checks=checks,
             follow_up_enhancements=follow_up_enhancements,
             scenario_database=out_payload["scenario_database"],
+            first_proof_learning=first_proof_learning,
             owner_routing=owner_routing,
         ),
         encoding="utf-8",

@@ -1,13 +1,15 @@
 # --- dev targets (bootstrap) ---
 
-DATE_TAG ?= 2026-04-17
+DATE_TAG ?= 2026-04-24
 WINDOW_START ?= 2026-04-11
 WINDOW_END ?= 2026-04-17
 GENERATED_AT ?= 2026-04-17T10:00:00Z
 ADAPTIVE_SCENARIO ?= balanced
 PORTFOLIO_MANIFEST ?= portfolio-manifest.json
+FIRST_PROOF_BRANCH ?= local
+PHASE2_BASELINE_PRE_EXTRACTION ?= docs/artifacts/phase2-hotspot-baseline-pre-extraction-$(DATE_TAG).json
 
-.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-contract release-room portfolio-readiness premerge-release-room adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-complete phase2-progress phase2-surface-clarity phase3-quality-contract phase4-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract
+.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-contract release-room portfolio-readiness premerge-release-room adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-contract first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-verify phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-execution-core phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-hotspot-baseline phase2-hotspot-delta phase2-complete phase2-progress phase2-surface-clarity phase3-dependency-radar phase3-quality-contract phase3-quality-report phase3-do-it phase4-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
@@ -32,6 +34,36 @@ test-bootstrap: install
 
 merge-ready: test-bootstrap
 	@bash -lc '. .venv/bin/activate && bash quality.sh verify'
+
+premerge-finalize: install
+	@bash -lc '. .venv/bin/activate && python -m pytest -q tests/test_first_proof_script.py tests/test_first_proof_contract.py tests/test_first_proof_learning_db.py tests/test_first_proof_weekly_trend.py tests/test_first_proof_control_tower.py tests/test_first_proof_trend_threshold.py tests/test_build_owner_escalation_payload.py tests/test_phase2_hotspot_baseline.py tests/test_phase2_hotspot_delta.py tests/test_phase2_utilities_extraction.py tests/test_phase3_dependency_radar.py'
+	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_summary_contract.py --summary build/first-proof/first-proof-summary.json --allow-missing --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/phase3_dependency_radar.py --policy-json config/dependency_slo_policy.json --out docs/artifacts/phase3-dependency-radar-$(DATE_TAG).json'
+	@bash -lc '. .venv/bin/activate && $(MAKE) plan-status'
+
+first-proof: venv
+	@bash -lc '. .venv/bin/activate && PYTHONPATH=src python scripts/first_proof.py --strict --format json --out-dir build/first-proof'
+
+first-proof-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_summary_contract.py --summary build/first-proof/first-proof-summary.json --wait-seconds 60 --format json'
+
+first-proof-learn: venv
+	@bash -lc '. .venv/bin/activate && python scripts/first_proof_learning_db.py --summary build/first-proof/first-proof-summary.json --db build/first-proof/first-proof-learning-db.jsonl --rollup-out build/first-proof/first-proof-learning-rollup.json --format json'
+
+first-proof-control-tower: venv
+	@bash -lc '. .venv/bin/activate && python scripts/build_first_proof_control_tower.py --first-proof-rollup build/first-proof/first-proof-learning-rollup.json --adaptive-postcheck build/adaptive-postcheck-min.json --out-json build/first-proof/control-tower.json --out-md build/first-proof/control-tower.md --format json'
+
+first-proof-weekly-trend: venv
+	@bash -lc '. .venv/bin/activate && python scripts/build_first_proof_weekly_trend.py --db build/first-proof/first-proof-learning-db.jsonl --adaptive-postcheck build/adaptive-postcheck-min.json --out-json build/first-proof/weekly-trend.json --out-md build/first-proof/weekly-trend.md --format json'
+
+first-proof-trend-threshold: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_trend_threshold.py --trend build/first-proof/weekly-trend.json --branch $(FIRST_PROOF_BRANCH) --profile-config config/first_proof_threshold_profiles.json --min-ship-rate 0.50 --min-total-runs 3 --min-consecutive-breaches 2 --out build/first-proof/weekly-threshold-check.json --format json'
+
+first-proof-tests: venv
+	@bash -lc '. .venv/bin/activate && python -m pytest -q tests/test_first_proof_script.py tests/test_first_proof_contract.py tests/test_first_proof_learning_db.py tests/test_first_proof_weekly_trend.py tests/test_first_proof_control_tower.py tests/test_first_proof_trend_threshold.py tests/test_build_owner_escalation_payload.py'
+
+first-proof-verify: first-proof
+	@bash -lc '. .venv/bin/activate && $(MAKE) first-proof-contract && $(MAKE) first-proof-learn && $(MAKE) first-proof-control-tower && $(MAKE) first-proof-weekly-trend && $(MAKE) first-proof-trend-threshold && $(MAKE) first-proof-tests'
 
 test: install
 	@bash -lc '. .venv/bin/activate && bash quality.sh test'
@@ -63,7 +95,7 @@ package-validate: venv
 
 
 release-preflight: venv
-	@bash -lc 'set -euo pipefail; . .venv/bin/activate && python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .[packaging] && python scripts/release_preflight.py && python -m sdetkit doctor --release --skip clean_tree --format md && $(MAKE) package-validate'
+	@bash -lc 'set -euo pipefail; . .venv/bin/activate && python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .[packaging] && python scripts/release_preflight.py && python scripts/check_first_proof_summary_contract.py --summary build/first-proof/first-proof-summary.json --format json && python -m sdetkit doctor --release --skip clean_tree --format md && $(MAKE) package-validate'
 
 
 release-verify-plan: venv
@@ -148,7 +180,7 @@ adaptive-postcheck: adaptive-scenario-db
 
 
 owner-escalation-payload: venv
-	@bash -lc '. .venv/bin/activate && python scripts/build_owner_escalation_payload.py --out build/owner-escalation-payload.json'
+	@bash -lc '. .venv/bin/activate && python scripts/build_owner_escalation_payload.py --out build/owner-escalation-payload.json --first-proof-threshold build/first-proof/weekly-threshold-check.json --first-proof-threshold-policy config/first_proof_owner_escalation_profiles.json'
 
 
 adaptive-premerge: adaptive-scenario-db
@@ -206,10 +238,13 @@ phase1-next-pass: venv
 phase1-blocker-register: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase1_blocker_register.py --format json'
 
-phase1-do-it: phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal
-	@bash -lc 'echo phase1-do-it: pipeline completed'
+phase1-execution-core: phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal
+	@bash -lc 'echo phase1-execution-core: pipeline completed'
 
-phase1-workflow: phase1-do-it phase1-flow-contract phase1-gate-phase2 phase1-executive-report
+phase1-do-it: phase1-execution-core
+	@bash -lc 'echo phase1-do-it is deprecated; use phase1-execution-core'
+
+phase1-workflow: phase1-execution-core phase1-flow-contract phase1-gate-phase2 phase1-executive-report
 	@bash -lc 'echo phase1-workflow: operational workflow completed'
 
 phase1-flow-contract: venv
@@ -236,6 +271,21 @@ phase-current: venv
 phase-current-json: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase_sequential_executor.py --format json'
 
+plan-status: phase-current-json
+	@bash -lc 'echo plan-status: use phase-current-json output as canonical status payload'
+
+phase1-execute: phase1-workflow
+	@bash -lc 'echo phase1-execute: canonical phase1 workflow complete'
+
+phase2-execute: phase2-workflow
+	@bash -lc 'echo phase2-execute: canonical phase2 workflow complete'
+
+phase3-governance: phase3-quality-contract
+	@bash -lc '. .venv/bin/activate && $(MAKE) phase3-dependency-radar'
+
+phase4-credibility: venv
+	@bash -lc 'echo phase4-credibility: reference packs and adoption walkthroughs are published under docs/'
+
 phase2-start: phase2-workflow
 	@bash -lc 'echo phase2-start: implementation lane initialized'
 
@@ -243,6 +293,7 @@ phase2-workflow: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase2_start_workflow.py --format json'
 	@bash -lc '. .venv/bin/activate && python scripts/check_phase2_start_summary_contract.py --format json'
 	@bash -lc '. .venv/bin/activate && python scripts/phase2_status_report.py --format json --out build/phase2-start/phase2-status.json'
+	@bash -lc '. .venv/bin/activate && $(MAKE) phase2-hotspot-baseline'
 
 phase2-status: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase2_status_report.py --format json --out build/phase2-start/phase2-status.json'
@@ -252,6 +303,12 @@ phase2-start-contract: venv
 
 phase2-seed: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase2_seed_prerequisites.py'
+
+phase2-hotspot-baseline: venv
+	@bash -lc '. .venv/bin/activate && python scripts/phase2_hotspot_baseline.py --paths src/sdetkit/repo.py src/sdetkit/doctor.py --out docs/artifacts/phase2-hotspot-baseline-$(DATE_TAG).json'
+
+phase2-hotspot-delta: venv
+	@bash -lc '. .venv/bin/activate && python scripts/phase2_hotspot_delta.py --baseline $(PHASE2_BASELINE_PRE_EXTRACTION) --current docs/artifacts/phase2-hotspot-baseline-$(DATE_TAG).json --out-json docs/artifacts/phase2-hotspot-delta-$(DATE_TAG).json --out-md docs/artifacts/phase2-hotspot-delta-$(DATE_TAG).md'
 
 phase2-complete: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase2_complete_workflow.py --format json'
@@ -263,11 +320,17 @@ phase2-progress: venv
 phase2-surface-clarity: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_operator_essentials_contract.py --format json'
 
-phase3-quality-contract: venv
-	@bash -lc '. .venv/bin/activate && python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.check_phase3_quality_contract --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.phase3_persist_baseline_history --summary build/phase1-baseline/phase1-baseline-summary.json --format json'
+phase3-dependency-radar: install
+	@bash -lc '. .venv/bin/activate && python scripts/phase3_dependency_radar.py --policy-json config/dependency_slo_policy.json --out docs/artifacts/phase3-dependency-radar-$(DATE_TAG).json'
 
-phase3-do-it: phase3-quality-contract
+phase3-quality-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.check_phase3_quality_contract --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.phase3_persist_baseline_history --summary build/phase1-baseline/phase1-baseline-summary.json --format json && $(MAKE) phase3-dependency-radar'
+
+phase3-quality-report: phase3-quality-contract
 	@bash -lc '. .venv/bin/activate && python -m scripts.build_phase3_trend_delta --current build/phase1-baseline/phase1-baseline-summary.json --out-json build/phase3-quality/phase3-trend-delta.json --out-md build/phase3-quality/phase3-trend-delta.md --format json'
+
+phase3-do-it: phase3-quality-report
+	@bash -lc 'echo phase3-do-it is deprecated; use phase3-quality-report'
 
 phase4-governance-contract: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_phase4_governance_contract.py --format json'

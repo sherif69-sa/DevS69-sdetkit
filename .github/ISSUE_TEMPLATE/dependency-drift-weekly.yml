@@ -1,0 +1,33 @@
+name: Dependency drift weekly
+description: Weekly issue template for dependency drift radar review.
+title: "[Dependency Drift][Weekly] YYYY-MM-DD"
+labels:
+  - dependencies
+  - weekly-review
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Review the latest dependency radar artifact and record actions.
+  - type: input
+    id: radar_artifact
+    attributes:
+      label: Radar artifact path
+      description: Path to latest phase3 dependency radar JSON.
+      placeholder: docs/artifacts/phase3-dependency-radar-YYYY-MM-DD.json
+    validations:
+      required: true
+  - type: textarea
+    id: priority_queue
+    attributes:
+      label: Priority queue (top 5)
+      description: List critical/high actionable packages and owners.
+    validations:
+      required: true
+  - type: textarea
+    id: remediation_plan
+    attributes:
+      label: Remediation plan
+      description: Commands/PRs planned this week.
+    validations:
+      required: true

@@ -19,6 +19,7 @@ from .bools import coerce_bool
 from .evidence_workspace import record_workspace_run
 from .import_hazards import find_stdlib_shadowing
 from .judgment import build_judgment, load_latest_previous_payload
+from .phase2_utilities import parse_check_csv as _parse_check_csv_impl
 from .security import SecurityError, safe_path
 
 SEVERITY_ORDER = {"low": 1, "medium": 2, "high": 3}
@@ -491,14 +492,7 @@ def _check_tools() -> tuple[list[str], list[str]]:
 
 
 def _parse_check_csv(value: str | None) -> list[str]:
-    if value is None:
-        return []
-    out: list[str] = []
-    for part in value.split(","):
-        s = part.strip()
-        if s:
-            out.append(s)
-    return out
+    return _parse_check_csv_impl(value)
 
 
 def _resolve_rerun_failed_checks(

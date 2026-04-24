@@ -40,6 +40,11 @@
       "owner": "developer-experience",
       "severity": "medium",
       "sla": "7d"
+    },
+    "first_proof_ship_rate_threshold": {
+      "owner": "release-ops",
+      "severity": "high",
+      "sla": "3d"
     }
   },
   "scenarios": {

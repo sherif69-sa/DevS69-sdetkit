@@ -1,0 +1,23 @@
+{
+  "contract_id": "sdetkit.phase2.repo-behavior.v1",
+  "module": "src/sdetkit/repo.py",
+  "objective": "Freeze behavior expectations before phase-2 decomposition.",
+  "cli_entrypoints": [
+    {
+      "command": "python -m sdetkit review . --no-workspace --format json",
+      "expected_top_level_keys": [
+        "status",
+        "findings_count"
+      ],
+      "must_not_change": [
+        "command shape",
+        "output JSON format option"
+      ]
+    }
+  ],
+  "guardrails": [
+    "Keep import-compatible wrappers for any extracted helpers.",
+    "Do not remove existing CLI flags in phase-2 extraction PRs."
+  ],
+  "version": "1.0.0"
+}
