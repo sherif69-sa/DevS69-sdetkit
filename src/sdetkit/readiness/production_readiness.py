@@ -6,9 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-_PHASE_BOOST_BLUEPRINT_FILES = (
-    "docs/production-s-class-90-day-boost.md",
-)
+_PHASE_BOOST_BLUEPRINT_FILES = ("docs/production-s-class-90-day-boost.md",)
 
 
 @dataclass(frozen=True)
