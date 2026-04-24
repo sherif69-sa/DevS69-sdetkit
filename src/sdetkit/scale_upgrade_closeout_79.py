@@ -107,9 +107,7 @@ def build_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
 
     board_text = _read_text(ecosystem_priorities_board)
     board_count = sum(1 for line in board_text.splitlines() if line.strip().startswith("- [ ]"))
-    board_has_ecosystem_priorities = (
-        "ecosystem priorities" in board_text.lower() or "" in board_text
-    )
+    board_has_ecosystem_priorities = "ecosystem priorities" in board_text.lower()
 
     plan_text = _read_text(plan_path)
 

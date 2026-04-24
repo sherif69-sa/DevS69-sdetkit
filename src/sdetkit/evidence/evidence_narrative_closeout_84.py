@@ -119,7 +119,7 @@ def build_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any]:
 
     board_text = _read_text(trust_faq_expansion_board)
     board_count = _checklist_count(board_text)
-    board_has_trust_faq_expansion = "trust faq expansion" in board_text.lower() or "" in board_text
+    board_has_trust_faq_expansion = "trust faq expansion" in board_text.lower()
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
