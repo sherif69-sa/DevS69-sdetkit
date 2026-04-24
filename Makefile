@@ -330,7 +330,7 @@ phase3-quality-report: phase3-quality-contract
 	@bash -lc '. .venv/bin/activate && python -m scripts.build_phase3_trend_delta --current build/phase1-baseline/phase1-baseline-summary.json --out-json build/phase3-quality/phase3-trend-delta.json --out-md build/phase3-quality/phase3-trend-delta.md --format json'
 
 phase3-do-it: phase3-quality-report
-	@bash -lc 'echo phase3-do-it is deprecated; use phase3-quality-report'
+	@bash -lc 'echo "phase3-do-it is deprecated; use phase3-quality-report"'
 
 phase4-governance-contract: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_phase4_governance_contract.py --format json'
