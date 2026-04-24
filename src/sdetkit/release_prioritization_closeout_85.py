@@ -19,10 +19,10 @@ _DAY84_BOARD_PATH = (
     "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/release-prioritization-plan.json"
-_SECTION_HEADER = "#  — Release prioritization closeout lane"
+_SECTION_HEADER = "# Release Prioritization Closeout — Release prioritization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Release Prioritization Closeout matters",
-    "## Required inputs ()",
+    "## Required inputs (Release prioritization closeout lane)",
     "## Command lane",
     "## Release prioritization contract",
     "## Release prioritization quality checklist",
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_release_prioritization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for  release prioritization execution and signoff.",
-    "The  lane references  outcomes, controls, and trust continuity signals.",
-    "Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    " closeout records release prioritization pack upgrades, storyline outcomes, and  launch priorities.",
+    "Single owner + backup reviewer are assigned for this release prioritization execution and signoff.",
+    "This lane references evidence narrative outcomes, controls, and trust continuity signals.",
+    "Every section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    "This closeout records release prioritization pack upgrades, storyline outcomes, and launch priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ]  evidence brief committed",
-    "- [ ]  release prioritization plan committed",
-    "- [ ]  narrative template upgrade ledger exported",
-    "- [ ]  storyline outcomes ledger exported",
-    "- [ ]  launch priorities drafted from  outcomes",
+    "- [ ] Release prioritization evidence brief committed",
+    "- [ ] Release prioritization plan committed",
+    "- [ ] Narrative template upgrade ledger exported",
+    "- [ ] Storyline outcomes ledger exported",
+    "- [ ] Launch priorities drafted from evidence narrative outcomes",
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -69,7 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = "#  — Release prioritization closeout lane\n\n closes with a major upgrade that converts  evidence narrative outcomes into a deterministic release prioritization operating lane.\n\n## Why Release Prioritization Closeout matters\n\n- Converts  evidence narrative outcomes into reusable release prioritization decisions across docs, release notes, and escalation playbooks.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into  launch priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json`\n- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md`\n- `docs/roadmap/plans/release-prioritization-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit release-prioritization-closeout --format json --strict\npython -m sdetkit release-prioritization-closeout --emit-pack-dir docs/artifacts/release-prioritization-closeout-pack --format json --strict\npython -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/artifacts/release-prioritization-closeout-pack/evidence --format json --strict\npython scripts/check_release_prioritization_closeout_contract.py\n```\n\n## Release prioritization contract\n\n- Single owner + backup reviewer are assigned for  release prioritization execution and signoff.\n- The  lane references  outcomes, controls, and trust continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records release prioritization pack upgrades, storyline outcomes, and  launch priorities.\n\n## Release prioritization quality checklist\n\n- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to narrative docs/templates + runnable command evidence\n- [ ] Scorecard captures release prioritization adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  evidence brief committed\n- [ ]  release prioritization plan committed\n- [ ]  narrative template upgrade ledger exported\n- [ ]  storyline outcomes ledger exported\n- [ ]  launch priorities drafted from  outcomes\n\n## Scoring model\n\n weights continuity + execution contract + release-priority artifact readiness for a 100-point activation score.\n"
+_DEFAULT_PAGE_TEMPLATE = "# Release Prioritization Closeout — Release prioritization closeout lane\n\nThis lane closes with a major upgrade that converts evidence narrative outcomes into a deterministic release prioritization operating lane.\n\n## Why Release Prioritization Closeout matters\n\n- Converts evidence narrative outcomes into reusable release prioritization decisions across docs, release notes, and escalation playbooks.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from this closeout into launch priorities.\n\n## Required inputs (Release prioritization closeout lane)\n\n- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json`\n- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md`\n- `docs/roadmap/plans/release-prioritization-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit release-prioritization-closeout --format json --strict\npython -m sdetkit release-prioritization-closeout --emit-pack-dir docs/artifacts/release-prioritization-closeout-pack --format json --strict\npython -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/artifacts/release-prioritization-closeout-pack/evidence --format json --strict\npython scripts/check_release_prioritization_closeout_contract.py\n```\n\n## Release prioritization contract\n\n- Single owner + backup reviewer are assigned for this release prioritization execution and signoff.\n- This lane references evidence narrative outcomes, controls, and trust continuity signals.\n- Every section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n- This closeout records release prioritization pack upgrades, storyline outcomes, and launch priorities.\n\n## Release prioritization quality checklist\n\n- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to narrative docs/templates + runnable command evidence\n- [ ] Scorecard captures release prioritization adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ] Release prioritization evidence brief committed\n- [ ] Release prioritization plan committed\n- [ ] Narrative template upgrade ledger exported\n- [ ] Storyline outcomes ledger exported\n- [ ] Launch priorities drafted from evidence narrative outcomes\n\n## Scoring model\n\nThis lane weights continuity + execution contract + release-priority artifact readiness for a 100-point activation score.\n"
 
 
 def _read_text(path: Path) -> str:
@@ -117,7 +117,7 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
 
     board_text = _read_text(evidence_narrative_board)
     board_count = _checklist_count(board_text)
-    board_has_evidence_narrative = "evidence narrative" in board_text.lower() or "" in board_text
+    board_has_evidence_narrative = "evidence narrative" in board_text.lower()
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]

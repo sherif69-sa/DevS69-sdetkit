@@ -123,9 +123,7 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
     board_text = _read_text(integration_feedback_board)
     board_count = _checklist_count(board_text)
-    board_has_integration_feedback = (
-        "integration feedback" in board_text.lower() or "" in board_text
-    )
+    board_has_integration_feedback = "integration feedback" in board_text.lower()
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]

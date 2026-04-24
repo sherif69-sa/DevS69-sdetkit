@@ -1,14 +1,14 @@
 # Release Prioritization Closeout — Release prioritization closeout lane
 
-Lane closes with a major upgrade that converts Lane evidence narrative outcomes into a deterministic release prioritization operating lane.
+This lane closes with a major upgrade that converts evidence narrative outcomes into a deterministic release prioritization operating lane.
 
 ## Why Release Prioritization Closeout matters
 
-- Converts Lane evidence narrative outcomes into reusable release prioritization decisions across docs, release notes, and escalation playbooks.
+- Converts evidence narrative outcomes into reusable release prioritization decisions across docs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Lane closeout into Lane launch priorities.
+- Creates a deterministic handoff from this closeout into launch priorities.
 
-## Required inputs (Lane)
+## Required inputs (Release prioritization closeout lane)
 
 - `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json`
 - `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_release_prioritization_closeout_contract.py
 
 ## Release prioritization contract
 
-- Single owner + backup reviewer are assigned for Lane release prioritization execution and signoff.
-- The Lane lane references Lane outcomes, controls, and trust continuity signals.
-- Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records release prioritization pack upgrades, storyline outcomes, and Lane launch priorities.
+- Single owner + backup reviewer are assigned for this release prioritization execution and signoff.
+- This lane references evidence narrative outcomes, controls, and trust continuity signals.
+- Every section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- This closeout records release prioritization pack upgrades, storyline outcomes, and launch priorities.
 
 ## Release prioritization quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_release_prioritization_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Lane evidence brief committed
-- [ ] Lane release prioritization plan committed
-- [ ] Lane narrative template upgrade ledger exported
-- [ ] Lane storyline outcomes ledger exported
-- [ ] Lane launch priorities drafted from Lane outcomes
+- [ ] Release prioritization evidence brief committed
+- [ ] Release prioritization plan committed
+- [ ] Narrative template upgrade ledger exported
+- [ ] Storyline outcomes ledger exported
+- [ ] Launch priorities drafted from evidence narrative outcomes
 
 ## Scoring model
 
-Lane weights continuity + execution contract + release-priority artifact readiness for a 100-point activation score.
+This lane weights continuity + execution contract + release-priority artifact readiness for a 100-point activation score.

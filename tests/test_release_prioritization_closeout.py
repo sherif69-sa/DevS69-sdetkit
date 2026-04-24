@@ -96,6 +96,50 @@ def test_lane85_json(tmp_path: Path, capsys) -> None:
     out = json.loads(capsys.readouterr().out)
     assert out["name"] == "release-prioritization-closeout"
     assert out["summary"]["activation_score"] >= 95
+    assert "Lane lane" not in d85._DEFAULT_PAGE_TEMPLATE
+    assert "## Required inputs ()" not in d85._DEFAULT_PAGE_TEMPLATE
+
+
+def test_lane85_board_keyword_required(tmp_path: Path, capsys) -> None:
+    _seed_repo(tmp_path)
+    board = (
+        tmp_path
+        / "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md"
+    )
+    board.write_text(
+        "\n".join(
+            [
+                "# release delivery board",
+                "- [ ] Release prioritization evidence brief committed",
+                "- [ ] Release prioritization plan committed",
+                "- [ ] Narrative template upgrade ledger exported",
+                "- [ ] Storyline outcomes ledger exported",
+                "- [ ] Launch priorities drafted from outcomes",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    rc = d85.main(["--root", str(tmp_path), "--format", "json", "--strict"])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    evidence_check = next(
+        c for c in out["checks"] if c["check_id"] == "evidence_narrative_board_integrity"
+    )
+    assert evidence_check["passed"] is False
+    assert out["summary"]["strict_pass"] is False
+
+
+def test_lane85_docs_page_matches_default_template() -> None:
+    docs_page = (
+        Path(__file__).resolve().parents[1] / "docs/integrations-release-prioritization-closeout.md"
+    )
+    page_text = docs_page.read_text(encoding="utf-8")
+    assert "Lane lane" not in page_text
+    assert "## Required inputs ()" not in page_text
+    assert d85._SECTION_HEADER in page_text
+    for line in d85._REQUIRED_CONTRACT_LINES:
+        assert line in page_text
 
 
 def test_lane85_emit_pack_and_execute(tmp_path: Path) -> None:

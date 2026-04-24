@@ -110,7 +110,7 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
 
     board_text = _read_text(partner_outreach_board)
     board_count = _checklist_count(board_text)
-    board_has_partner_outreach = "partner outreach" in board_text.lower() or "" in board_text
+    board_has_partner_outreach = "partner outreach" in board_text.lower()
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
