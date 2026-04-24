@@ -147,7 +147,7 @@ def _link_next_url(r: httpx.Response) -> str | None:
         return None
 
     for part in (p.strip() for p in link.split(",")):
-        if "rel=" not in part:
+        if "rel=" not in part.lower():
             continue
         segs = [s.strip() for s in part.split(";")]
         if not segs:
@@ -160,11 +160,14 @@ def _link_next_url(r: httpx.Response) -> str | None:
 
         rel = None
         for s in segs[1:]:
-            if s.startswith("rel="):
-                rel = s[4:].strip()
-                if rel.startswith('"') and rel.endswith('"') and len(rel) >= 2:
-                    rel = rel[1:-1]
-                break
+            name, sep, value = s.partition("=")
+            if sep != "=" or name.strip().lower() != "rel":
+                continue
+            rel = value.strip()
+            if rel.startswith('"') and rel.endswith('"') and len(rel) >= 2:
+                rel = rel[1:-1]
+            rel = rel.lower()
+            break
 
         if rel == "next":
             return str(urljoin(str(r.url), url))

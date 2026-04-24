@@ -61,6 +61,12 @@ def test_link_next_url_returns_none_when_no_next() -> None:
     assert netclient._link_next_url(r) is None
 
 
+def test_link_next_url_treats_rel_parameter_name_and_value_case_insensitively() -> None:
+    req = httpx.Request("GET", "https://example.test/base")
+    r = httpx.Response(200, request=req, headers={"Link": "<page2>; REL=NEXT"})
+    assert netclient._link_next_url(r) == "https://example.test/page2"
+
+
 @dataclass
 class SpyBreaker:
     allow_calls: int = 0
