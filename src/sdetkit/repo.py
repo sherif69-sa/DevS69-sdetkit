@@ -27,6 +27,7 @@ from . import _toml as _tomllib
 from .atomicio import atomic_write_text
 from .bools import coerce_bool
 from .ops_control import init_layout_at
+from .phase2_utilities import parse_iso_date as _parse_iso_date_impl
 from .plugins import (
     Finding as PluginFinding,
 )
@@ -41,7 +42,6 @@ from .plugins import (
     normalize_packs,
     select_rules,
 )
-from .phase2_utilities import parse_iso_date as _parse_iso_date_impl
 from .projects import ProjectsConfigError, discover_projects, resolve_project
 from .repo_adoption import build_init_payload, render_init_payload
 from .report import build_run_record, diff_runs, load_run_record

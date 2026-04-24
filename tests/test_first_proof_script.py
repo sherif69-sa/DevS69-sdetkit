@@ -5,7 +5,6 @@ import json
 import sys
 from pathlib import Path
 
-
 _SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "first_proof.py"
 _SPEC = importlib.util.spec_from_file_location("first_proof_script", _SCRIPT_PATH)
 assert _SPEC is not None and _SPEC.loader is not None

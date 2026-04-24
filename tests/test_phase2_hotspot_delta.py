@@ -4,7 +4,6 @@ import importlib.util
 import json
 from pathlib import Path
 
-
 _SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "phase2_hotspot_delta.py"
 _SPEC = importlib.util.spec_from_file_location("phase2_hotspot_delta_script", _SCRIPT_PATH)
 assert _SPEC is not None and _SPEC.loader is not None
