@@ -76,6 +76,9 @@ def test_lane60_json(tmp_path: Path, capsys) -> None:
     out = json.loads(capsys.readouterr().out)
     assert out["name"] == "phase2-wrap-handoff-closeout"
     assert out["summary"]["activation_score"] >= 95
+    assert "## Required inputs ()" not in d60._DEFAULT_PAGE_TEMPLATE
+    assert "The  lane references" not in d60._DEFAULT_PAGE_TEMPLATE
+    assert "## Why  matters" not in d60._DEFAULT_PAGE_TEMPLATE
 
 
 def test_lane60_emit_pack_and_execute(tmp_path: Path) -> None:
@@ -145,3 +148,9 @@ def test_lane60_cli_dispatch(tmp_path: Path, capsys) -> None:
     rc = cli.main(["phase2-wrap-handoff-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Phase 2 Wrap Handoff Closeout summary" in capsys.readouterr().out
+
+
+def test_lane60_docs_page_has_no_lane_lane_typo() -> None:
+    docs_page = Path(__file__).resolve().parents[1] / "docs/integrations-phase2-wrap-handoff-closeout.md"
+    page_text = docs_page.read_text(encoding="utf-8")
+    assert "Lane lane" not in page_text
