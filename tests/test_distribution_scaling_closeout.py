@@ -36,9 +36,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-distribution-scaling-closeout.md").write_text(
         d74._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-74-big-upgrade-report.md").write_text(
-        "# Lane report\n", encoding="utf-8"
-    )
+    (root / "docs/impact-74-big-upgrade-report.md").write_text("# Lane report\n", encoding="utf-8")
 
     summary = (
         root
@@ -98,13 +96,16 @@ def test_lane74_json(tmp_path: Path, capsys) -> None:
     assert out["name"] == "distribution-scaling-closeout"
     assert out["summary"]["activation_score"] >= 95
     assert (
-        next(c for c in out["checks"] if c["check_id"] == "top10_strategy_alignment")["passed"] is True
+        next(c for c in out["checks"] if c["check_id"] == "top10_strategy_alignment")["passed"]
+        is True
     )
 
 
 def test_lane74_top10_alignment_fails_when_markers_missing(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/top-10-github-strategy.md").write_text("unrelated content\n", encoding="utf-8")
+    (tmp_path / "docs/top-10-github-strategy.md").write_text(
+        "unrelated content\n", encoding="utf-8"
+    )
     rc = d74.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 1
     out = json.loads(capsys.readouterr().out)

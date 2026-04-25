@@ -297,12 +297,16 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
         wins.append(f"73 continuity is strict-pass with activation score={prior_closeout_score}.")
     else:
         misses.append("Lane strict continuity signal is missing.")
-        handoff_actions.append("Re-run Lane closeout command and restore strict baseline before Lane lock.")
+        handoff_actions.append(
+            "Re-run Lane closeout command and restore strict baseline before Lane lock."
+        )
 
     if board_count >= 5 and board_has_prior_closeout:
         wins.append(f"73 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append("Lane delivery board integrity is incomplete (needs >=5 items and Lane anchors).")
+        misses.append(
+            "Lane delivery board integrity is incomplete (needs >=5 items and Lane anchors)."
+        )
         handoff_actions.append("Repair Lane delivery board entries to include Lane anchors.")
 
     if not missing_scaling_plan_keys:
