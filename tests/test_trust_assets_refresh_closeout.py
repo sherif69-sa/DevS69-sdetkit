@@ -170,10 +170,12 @@ def test_lane75_emit_pack_and_execute(tmp_path: Path) -> None:
         / "artifacts/trust-assets-refresh-closeout-pack/evidence/trust-assets-refresh-execution-summary.json"
     ).exists()
     integration_brief = (
-        tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-integration-brief.md"
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-integration-brief.md"
     ).read_text(encoding="utf-8")
     delivery_board = (
-        tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
     ).read_text(encoding="utf-8")
     validation_commands = (
         tmp_path
@@ -232,7 +234,7 @@ def test_lane75_execute_failure_returns_nonzero_and_reports_failure(
     monkeypatch.setattr(
         d75_impl,
         "_EXECUTION_COMMANDS",
-        ["python -c \"import sys; sys.exit(3)\""],
+        ['python -c "import sys; sys.exit(3)"'],
     )
     rc = d75.main(
         [
