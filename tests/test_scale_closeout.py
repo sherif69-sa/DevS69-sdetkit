@@ -124,7 +124,9 @@ def test_lane44_cli_dispatch(tmp_path: Path, capsys) -> None:
 
 def test_lane44_alignment_checks_fail_when_top10_and_board_missing_markers(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/top-10-github-strategy.md").write_text("- unrelated strategy item\n", encoding="utf-8")
+    (tmp_path / "docs/top-10-github-strategy.md").write_text(
+        "- unrelated strategy item\n", encoding="utf-8"
+    )
     (tmp_path / "docs/artifacts/acceleration-closeout-pack/delivery-board.md").write_text(
         "# Delivery board\n- [ ] Task one\n- [ ] Task two\n- [ ] Task three\n- [ ] Task four\n- [ ] Task five\n",
         encoding="utf-8",
@@ -135,4 +137,3 @@ def test_lane44_alignment_checks_fail_when_top10_and_board_missing_markers(tmp_p
 
     assert checks["top10_scale_closeout_alignment"]["passed"] is False
     assert checks["acceleration_closeout_board_integrity"]["passed"] is False
-
