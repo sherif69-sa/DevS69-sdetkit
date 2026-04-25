@@ -150,6 +150,32 @@ Related docs:
 - [Portfolio reporting recipe](docs/portfolio-reporting-recipe.md)
 - [KPI schema](docs/kpi-schema.md)
 
+
+## Maintenance command center (issue noise control)
+
+To keep recurring bot-generated maintenance issues actionable, enable the rolling command-center workflow:
+
+```bash
+# Runs daily and can also be triggered manually
+.github/workflows/maintenance-issue-command-center.yml
+```
+
+It keeps only the top priority maintenance trackers open, consolidates lower-priority bot trackers into one rolling issue (`🧠 Maintenance command center (rolling)`), and appends each run's problems into `.sdetkit/maintenance/issue-learning-db.jsonl` with a rollup in `.sdetkit/maintenance/issue-learning-rollup.json`.
+
+The workflow also refreshes `doctor` + adaptive `review` signals (including five-head status/confidence) before updating the command center so remediation priorities learn over time.
+
+Dry-run test against the live issue queue (without closing/updating issues):
+
+```bash
+python tools/maintenance_command_center.py \
+  --owner sherif69-sa \
+  --repo DevS69-sdetkit \
+  --dry-run \
+  --doctor-json build/maintenance/doctor.json \
+  --review-json build/maintenance/review.json \
+  --plan-out build/maintenance/command-center-dry-run-plan.json
+```
+
 ## Documentation map
 
 - Start in 5 minutes: [docs/start-here-5-minutes.md](docs/start-here-5-minutes.md)

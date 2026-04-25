@@ -2,9 +2,6 @@ from __future__ import annotations
 
 from ._legacy_lane import run_lane
 
-_DEFAULT_PAGE_TEMPLATE = "# KPI audit ()\n\n## KPI audit\n"
-_DEFAULT_BASELINE = {"stars_per_week": 10, "ctr": 1.0, "discussions": 5, "prs": 4}
-_DEFAULT_CURRENT = {"stars_per_week": 12, "ctr": 1.1, "discussions": 6, "prs": 5}
 _CFG = {
     "name": "kpi-audit",
     "page_path": "docs/integrations-kpi-audit.md",
