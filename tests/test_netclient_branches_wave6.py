@@ -183,6 +183,26 @@ def test_get_json_list_paginated_max_pages_and_limit_exceeded() -> None:
             c.get_json_list_paginated("https://example.test/p", max_pages=1)
 
 
+def test_get_json_list_paginated_detects_cycle_back_to_origin_without_extra_fetch() -> None:
+    calls = {"n": 0}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        return httpx.Response(
+            200,
+            json=[1],
+            headers={"Link": '<https://example.test/p>; rel="next"'},
+            request=request,
+        )
+
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        c = SdetHttpClient(client)
+        with pytest.raises(RuntimeError, match="pagination impact"):
+            c.get_json_list_paginated("https://example.test/p")
+
+    assert calls["n"] == 1
+
+
 def test_get_json_list_paginated_envelope_validation_and_limit_exceeded() -> None:
     def handler_bad_obj(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json=[1], request=request)

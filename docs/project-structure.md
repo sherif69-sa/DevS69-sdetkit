@@ -29,7 +29,7 @@ This page is the quickest way to understand **where things are**, **where new fi
 | --- | --- | --- |
 | New contributor | `README.md` | `CONTRIBUTING.md`, `docs/project-structure.md` |
 | CLI user | `docs/cli.md` | `docs/doctor.md`, `docs/repo-audit.md` |
-| Maintainer | `quality.sh` | `scripts/bootstrap.sh`, `noxfile.py`, `Makefile` |
+| Maintainer | `quality.sh` | `scripts/bootstrap.sh`, `pyproject.toml`, `Makefile` |
 | Release owner | `RELEASE.md` | `docs/releasing.md`, `CHANGELOG.md` |
 | Docs editor | `docs/index.md` | `mkdocs.yml`, `docs/contributing.md` |
 

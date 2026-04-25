@@ -25,7 +25,7 @@ python scripts/check_phase2_hardening_closeout_contract.py
 ## Phase-2 hardening contract
 
 - Single owner + backup reviewer are assigned for Lane Phase-2 hardening execution and signal triage.
-- The Lane lane references Lane KPI deep-audit outcomes and unresolved risks.
+- The Lane references Lane KPI deep-audit outcomes and unresolved risks.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records hardening outcomes and Lane pre-plan priorities.
 

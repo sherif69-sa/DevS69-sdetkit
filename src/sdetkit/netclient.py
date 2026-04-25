@@ -467,7 +467,7 @@ class SdetHttpClient:
             raise ValueError("max_pages must be >= 1")
 
         out: list = []
-        seen: set[str] = set()
+        seen: set[str] = {str(url)}
         cur = url
 
         for _ in range(max_pages):
@@ -845,7 +845,7 @@ class SdetAsyncHttpClient:
             raise ValueError("max_pages must be >= 1")
 
         out: list = []
-        seen: set[str] = set()
+        seen: set[str] = {str(url)}
         cur = url
 
         for _ in range(max_pages):
