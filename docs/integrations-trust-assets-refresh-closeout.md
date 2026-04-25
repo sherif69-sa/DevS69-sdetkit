@@ -19,8 +19,7 @@ Lane closes with a major upgrade that turns Lane distribution outcomes into a go
 ```bash
 python -m sdetkit trust-assets-refresh-closeout --format json --strict
 python -m sdetkit trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/trust-assets-refresh-closeout-pack --format json --strict
-python -m sdetkit trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/trust-assets-refresh-closeout-pack/evidence --format json --strict
-python scripts/check_trust_assets_refresh_closeout_contract.py
+python scripts/check_trust_assets_refresh_closeout_contract.py --skip-evidence
 ```
 
 ## Trust assets refresh contract

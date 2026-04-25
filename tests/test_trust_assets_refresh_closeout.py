@@ -5,6 +5,7 @@ from pathlib import Path
 
 from sdetkit import cli
 from sdetkit import trust_assets_refresh_closeout_75 as d75
+from sdetkit.evidence import trust_assets_refresh_closeout_75 as d75_impl
 
 
 def _seed_repo(root: Path) -> None:
@@ -19,6 +20,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
+    (root / "scripts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-trust-assets-refresh-closeout.md\ntrust-assets-refresh-closeout\n",
         encoding="utf-8",
@@ -85,6 +87,13 @@ def _seed_repo(root: Path) -> None:
             },
             indent=2,
         ),
+        encoding="utf-8",
+    )
+    (root / "scripts/check_trust_assets_refresh_closeout_contract.py").write_text(
+        "from __future__ import annotations\n\n"
+        "import sys\n\n"
+        "if __name__ == '__main__':\n"
+        "    raise SystemExit(0)\n",
         encoding="utf-8",
     )
 
@@ -160,6 +169,23 @@ def test_lane75_emit_pack_and_execute(tmp_path: Path) -> None:
         tmp_path
         / "artifacts/trust-assets-refresh-closeout-pack/evidence/trust-assets-refresh-execution-summary.json"
     ).exists()
+    integration_brief = (
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-integration-brief.md"
+    ).read_text(encoding="utf-8")
+    delivery_board = (
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
+    ).read_text(encoding="utf-8")
+    validation_commands = (
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-validation-commands.md"
+    ).read_text(encoding="utf-8")
+    assert "#  " not in integration_brief
+    assert "#  " not in delivery_board
+    assert "# Validation commands" in validation_commands
+    for command in d75._EXECUTION_COMMANDS:
+        assert command in validation_commands
 
 
 def test_lane75_strict_fails_without_distribution_scaling_baseline(tmp_path: Path) -> None:
@@ -199,3 +225,28 @@ def test_lane75_cli_dispatch(tmp_path: Path, capsys) -> None:
     rc = cli.main(["trust-assets-refresh-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Trust Assets Refresh Closeout summary" in capsys.readouterr().out
+
+
+def test_lane75_execute_failure_returns_nonzero_and_reports_failure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _seed_repo(tmp_path)
+    monkeypatch.setattr(
+        d75_impl,
+        "_EXECUTION_COMMANDS",
+        ['python -c "import sys; sys.exit(3)"'],
+    )
+    rc = d75.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--execute",
+            "--format",
+            "json",
+            "--strict",
+        ]
+    )
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["execution"]["failed_count"] == 1
+    assert out["execution"]["failed_commands"] == [1]

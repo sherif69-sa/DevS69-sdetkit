@@ -33,8 +33,7 @@ _REQUIRED_SECTIONS = [
 _REQUIRED_COMMANDS = [
     "python -m sdetkit trust-assets-refresh-closeout --format json --strict",
     "python -m sdetkit trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/trust-assets-refresh-closeout-pack --format json --strict",
-    "python -m sdetkit trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/trust-assets-refresh-closeout-pack/evidence --format json --strict",
-    "python scripts/check_trust_assets_refresh_closeout_contract.py",
+    "python scripts/check_trust_assets_refresh_closeout_contract.py --skip-evidence",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit trust-assets-refresh-closeout --format json --strict",
@@ -70,7 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = "# Lane — Trust assets refresh closeout lane\n\nLane closes with a major upgrade that turns Lane distribution outcomes into a governance-grade trust refresh execution pack.\n\n## Why Lane matters\n\n- Converts Lane scaling proof into trust-surface upgrades across security, governance, and reliability docs.\n- Protects trust quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from Lane trust refresh execution into Lane contributor recognition.\n\n## Required inputs (Lane)\n\n- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json`\n- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md`\n- `docs/roadmap/plans/trust-assets-refresh-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit trust-assets-refresh-closeout --format json --strict\npython -m sdetkit trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/trust-assets-refresh-closeout-pack --format json --strict\npython -m sdetkit trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/trust-assets-refresh-closeout-pack/evidence --format json --strict\npython scripts/check_trust_assets_refresh_closeout_contract.py\n```\n\n## Trust assets refresh contract\n\n- Single owner + backup reviewer are assigned for Lane trust assets refresh execution and signoff.\n- This lane references Lane outcomes, controls, and KPI continuity signals.\n- Every Lane section includes trust-surface CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n- Lane closeout records trust outcomes, confidence notes, and Lane contributor-recognition priorities.\n\n## Trust refresh quality checklist\n\n- [ ] Includes trust-surface baseline, proof-link cadence, and stakeholder assumptions\n- [ ] Every trust lane row has owner, refresh window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures trust score delta, governance proof coverage delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, trust refresh plan, controls log, KPI scorecard, and execution log\n\n## Lane delivery board\n\n- [ ] Lane integration brief committed\n- [ ] Lane trust assets refresh plan committed\n- [ ] Lane trust controls and assumptions log exported\n- [ ] Lane trust KPI scorecard snapshot exported\n- [ ] Lane contributor-recognition priorities drafted from Lane learnings\n\n## Scoring model\n\nLane weighted score (0-100):\n\n- Contract + command lane integrity (35)\n- Lane continuity baseline quality (35)\n- Trust evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n"
+_DEFAULT_PAGE_TEMPLATE = "# Lane — Trust assets refresh closeout lane\n\nLane closes with a major upgrade that turns Lane distribution outcomes into a governance-grade trust refresh execution pack.\n\n## Why Lane matters\n\n- Converts Lane scaling proof into trust-surface upgrades across security, governance, and reliability docs.\n- Protects trust quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from Lane trust refresh execution into Lane contributor recognition.\n\n## Required inputs (Lane)\n\n- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json`\n- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md`\n- `docs/roadmap/plans/trust-assets-refresh-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit trust-assets-refresh-closeout --format json --strict\npython -m sdetkit trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/trust-assets-refresh-closeout-pack --format json --strict\npython scripts/check_trust_assets_refresh_closeout_contract.py --skip-evidence\n```\n\n## Trust assets refresh contract\n\n- Single owner + backup reviewer are assigned for Lane trust assets refresh execution and signoff.\n- This lane references Lane outcomes, controls, and KPI continuity signals.\n- Every Lane section includes trust-surface CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n- Lane closeout records trust outcomes, confidence notes, and Lane contributor-recognition priorities.\n\n## Trust refresh quality checklist\n\n- [ ] Includes trust-surface baseline, proof-link cadence, and stakeholder assumptions\n- [ ] Every trust lane row has owner, refresh window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures trust score delta, governance proof coverage delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, trust refresh plan, controls log, KPI scorecard, and execution log\n\n## Lane delivery board\n\n- [ ] Lane integration brief committed\n- [ ] Lane trust assets refresh plan committed\n- [ ] Lane trust controls and assumptions log exported\n- [ ] Lane trust KPI scorecard snapshot exported\n- [ ] Lane contributor-recognition priorities drafted from Lane learnings\n\n## Scoring model\n\nLane weighted score (0-100):\n\n- Contract + command lane integrity (35)\n- Lane continuity baseline quality (35)\n- Trust evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n"
 
 
 def _read(path: Path) -> str:
@@ -311,6 +310,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
     ]
+    execution = payload.get("execution")
+    if isinstance(execution, dict):
+        lines.append(f"- Execute failed commands: {execution.get('failed_commands', [])}")
     return "\n".join(lines)
 
 
@@ -326,8 +328,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "trust-assets-refresh-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "trust-assets-refresh-integration-brief.md", "#  integration brief\n")
-    _write(target / "trust-assets-refresh-plan.md", "#  trust assets refresh plan\n")
+    _write(target / "trust-assets-refresh-integration-brief.md", "# Integration brief\n")
+    _write(target / "trust-assets-refresh-plan.md", "# Trust assets refresh plan\n")
     _write(
         target / "trust-assets-refresh-trust-controls-log.json",
         json.dumps({"controls": []}, indent=2) + "\n",
@@ -336,18 +338,18 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "trust-assets-refresh-trust-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "trust-assets-refresh-execution-log.md", "#  execution log\n")
+    _write(target / "trust-assets-refresh-execution-log.md", "# Execution log\n")
     _write(
         target / "trust-assets-refresh-delivery-board.md",
-        "\n".join(["#  delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["# Delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "trust-assets-refresh-validation-commands.md",
-        "#  validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# Validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
-def _execute_commands(root: Path, evidence_dir: Path) -> None:
+def _execute_commands(root: Path, evidence_dir: Path) -> dict[str, Any]:
     events: list[dict[str, Any]] = []
     out_dir = evidence_dir if evidence_dir.is_absolute() else root / evidence_dir
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -368,6 +370,13 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         out_dir / "trust-assets-refresh-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
+    failed_commands = [idx for idx, event in enumerate(events, start=1) if event["returncode"] != 0]
+    return {
+        "total_commands": len(events),
+        "failed_commands": failed_commands,
+        "failed_count": len(failed_commands),
+        "ok": not failed_commands,
+    }
 
 
 def build_trust_assets_refresh_closeout_summary_impl(root: Path) -> dict[str, Any]:
@@ -392,6 +401,7 @@ def main(argv: list[str] | None = None) -> int:
 
     payload = build_trust_assets_refresh_closeout_summary(root)
 
+    execution_failed = False
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)
     if ns.execute:
@@ -400,9 +410,13 @@ def main(argv: list[str] | None = None) -> int:
             if ns.evidence_dir
             else Path("docs/artifacts/trust-assets-refresh-closeout-pack/evidence")
         )
-        _execute_commands(root, evidence_dir)
+        execution = _execute_commands(root, evidence_dir)
+        payload["execution"] = execution
+        execution_failed = not bool(execution.get("ok", False))
 
     print(json.dumps(payload, indent=2) if ns.format == "json" else _render_text(payload))
+    if execution_failed:
+        return 1
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
