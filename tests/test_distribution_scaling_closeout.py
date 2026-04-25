@@ -29,14 +29,16 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- ** — Distribution scaling:** convert  learnings into scaled channel operations.\n"
-        "- ** — Trust assets refresh:** turn  outcomes into governance-grade trust proof.\n",
+        "- **Lane — Distribution scaling:** convert Lane learnings into scaled channel operations.\n"
+        "- **Lane — Trust assets refresh:** turn Lane outcomes into governance-grade trust proof.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-distribution-scaling-closeout.md").write_text(
         d74._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-74-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
+    (root / "docs/impact-74-big-upgrade-report.md").write_text(
+        "# Lane report\n", encoding="utf-8"
+    )
 
     summary = (
         root
@@ -59,12 +61,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "#  delivery board",
-                "- [ ]  integration brief committed",
+                "# Lane delivery board",
+                "- [ ] Lane integration brief committed",
                 "- [ ]  published case-study narrative committed",
-                "- [ ]  controls and assumptions log exported",
-                "- [ ]  KPI scorecard snapshot exported",
-                "- [ ]  distribution scaling priorities drafted from  learnings",
+                "- [ ] Lane controls and assumptions log exported",
+                "- [ ] Lane KPI scorecard snapshot exported",
+                "- [ ] Lane distribution scaling priorities drafted from Lane learnings",
             ]
         )
         + "\n",
@@ -95,6 +97,19 @@ def test_lane74_json(tmp_path: Path, capsys) -> None:
     out = json.loads(capsys.readouterr().out)
     assert out["name"] == "distribution-scaling-closeout"
     assert out["summary"]["activation_score"] >= 95
+    assert (
+        next(c for c in out["checks"] if c["check_id"] == "top10_strategy_alignment")["passed"] is True
+    )
+
+
+def test_lane74_top10_alignment_fails_when_markers_missing(tmp_path: Path, capsys) -> None:
+    _seed_repo(tmp_path)
+    (tmp_path / "docs/top-10-github-strategy.md").write_text("unrelated content\n", encoding="utf-8")
+    rc = d74.main(["--root", str(tmp_path), "--format", "json", "--strict"])
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    check = next(c for c in out["checks"] if c["check_id"] == "top10_strategy_alignment")
+    assert check["passed"] is False
 
 
 def test_lane74_emit_pack_and_execute(tmp_path: Path) -> None:
