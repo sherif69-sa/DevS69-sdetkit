@@ -19,14 +19,14 @@ _DAY73_BOARD_PATH = (
     "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md"
 )
 _SCALING_PLAN_PATH = "docs/roadmap/plans/distribution-scaling-plan.json"
-_SECTION_HEADER = "#  — Distribution scaling closeout lane"
+_SECTION_HEADER = "# Lane — Distribution scaling closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why  matters",
-    "## Required inputs ()",
-    "##  command lane",
+    "## Why Lane matters",
+    "## Required inputs (Lane)",
+    "## Lane command lane",
     "## Distribution scaling contract",
     "## Distribution quality checklist",
-    "##  delivery board",
+    "## Lane delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_distribution_scaling_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for  distribution scaling execution and signoff.",
-    "The  lane references  publication outcomes, controls, and KPI continuity signals.",
-    "Every  section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    " closeout records distribution outcomes, confidence notes, and  trust refresh priorities.",
+    "Single owner + backup reviewer are assigned for Lane distribution scaling execution and signoff.",
+    "This lane references Lane publication outcomes, controls, and KPI continuity signals.",
+    "Every Lane section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    "Lane closeout records distribution outcomes, confidence notes, and Lane trust refresh priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes channel mix baseline, treatment cadence, and audience-segment assumptions",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, scaling plan, controls log, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ]  integration brief committed",
-    "- [ ]  distribution scaling plan committed",
-    "- [ ]  channel controls and assumptions log exported",
-    "- [ ]  KPI scorecard snapshot exported",
-    "- [ ]  trust refresh priorities drafted from  learnings",
+    "- [ ] Lane integration brief committed",
+    "- [ ] Lane distribution scaling plan committed",
+    "- [ ] Lane channel controls and assumptions log exported",
+    "- [ ] Lane KPI scorecard snapshot exported",
+    "- [ ] Lane trust refresh priorities drafted from Lane learnings",
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -69,7 +69,64 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = "#  — Distribution scaling closeout lane\n\n closes with a major upgrade that turns  published case-study outcomes into a scalable distribution execution pack with governance safeguards.\n\n## Why  matters\n\n- Converts  publication proof into repeatable multi-channel distribution operations.\n- Protects scaling quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  distribution scaling execution into  trust-asset refresh.\n\n## Required inputs ()\n\n- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json`\n- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md`\n- `docs/roadmap/plans/distribution-scaling-plan.json`\n\n##  command lane\n\n```bash\npython -m sdetkit distribution-scaling-closeout --format json --strict\npython -m sdetkit distribution-scaling-closeout --emit-pack-dir docs/artifacts/distribution-scaling-closeout-pack --format json --strict\npython -m sdetkit distribution-scaling-closeout --execute --evidence-dir docs/artifacts/distribution-scaling-closeout-pack/evidence --format json --strict\npython scripts/check_distribution_scaling_closeout_contract.py\n```\n\n## Distribution scaling contract\n\n- Single owner + backup reviewer are assigned for  distribution scaling execution and signoff.\n- The  lane references  publication outcomes, controls, and KPI continuity signals.\n- Every  section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records distribution outcomes, confidence notes, and  trust refresh priorities.\n\n## Distribution quality checklist\n\n- [ ] Includes channel mix baseline, treatment cadence, and audience-segment assumptions\n- [ ] Every channel plan row has owner, launch window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures CTR delta, qualified lead delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, scaling plan, controls log, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  integration brief committed\n- [ ]  distribution scaling plan committed\n- [ ]  channel controls and assumptions log exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  trust refresh priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Distribution evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n"
+_DEFAULT_PAGE_TEMPLATE = """# Lane — Distribution scaling closeout lane
+
+Lane closes with a major upgrade that turns Lane published case-study outcomes into a scalable distribution execution pack with governance safeguards.
+
+## Why Lane matters
+
+- Converts Lane publication proof into repeatable multi-channel distribution operations.
+- Protects scaling quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
+- Creates a deterministic handoff from Lane distribution scaling execution into Lane trust-asset refresh.
+
+## Required inputs (Lane)
+
+- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json`
+- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md`
+- `docs/roadmap/plans/distribution-scaling-plan.json`
+
+## Lane command lane
+
+```bash
+python -m sdetkit distribution-scaling-closeout --format json --strict
+python -m sdetkit distribution-scaling-closeout --emit-pack-dir docs/artifacts/distribution-scaling-closeout-pack --format json --strict
+python -m sdetkit distribution-scaling-closeout --execute --evidence-dir docs/artifacts/distribution-scaling-closeout-pack/evidence --format json --strict
+python scripts/check_distribution_scaling_closeout_contract.py
+```
+
+## Distribution scaling contract
+
+- Single owner + backup reviewer are assigned for Lane distribution scaling execution and signoff.
+- This lane references Lane publication outcomes, controls, and KPI continuity signals.
+- Every Lane section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records distribution outcomes, confidence notes, and Lane trust refresh priorities.
+
+## Distribution quality checklist
+
+- [ ] Includes channel mix baseline, treatment cadence, and audience-segment assumptions
+- [ ] Every channel plan row has owner, launch window, KPI threshold, and risk flag
+- [ ] CTA links point to docs + runnable command evidence
+- [ ] Scorecard captures CTR delta, qualified lead delta, confidence, and rollback owner
+- [ ] Artifact pack includes integration brief, scaling plan, controls log, KPI scorecard, and execution log
+
+## Lane delivery board
+
+- [ ] Lane integration brief committed
+- [ ] Lane distribution scaling plan committed
+- [ ] Lane channel controls and assumptions log exported
+- [ ] Lane KPI scorecard snapshot exported
+- [ ] Lane trust refresh priorities drafted from Lane learnings
+
+## Scoring model
+
+Lane weighted score (0-100):
+
+- Contract + command lane integrity (35)
+- Lane continuity baseline quality (35)
+- Distribution evidence data + delivery board completeness (30)
+
+Strict pass requires score >= 95 and zero critical failures.
+"""
 
 
 def _read(path: Path) -> str:
@@ -112,7 +169,9 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
     prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(
         prior_closeout_summary
     )
-    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, "")
+    board_count, board_has_prior_closeout = _count_board_items(
+        prior_closeout_board, "published case-study narrative"
+    )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -143,8 +202,10 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("" in top10_text and "" in top10_text),
-            "evidence": " +  strategy chain",
+            "passed": (
+                "Distribution scaling" in top10_text and "Trust assets refresh" in top10_text
+            ),
+            "evidence": "Distribution scaling + Trust assets refresh strategy chain",
         },
         {
             "check_id": "prior_closeout_summary_present",
@@ -235,26 +296,30 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
     if prior_closeout_strict:
         wins.append(f"73 continuity is strict-pass with activation score={prior_closeout_score}.")
     else:
-        misses.append(" strict continuity signal is missing.")
-        handoff_actions.append("Re-run  closeout command and restore strict baseline before  lock.")
+        misses.append("Lane strict continuity signal is missing.")
+        handoff_actions.append(
+            "Re-run Lane closeout command and restore strict baseline before Lane lock."
+        )
 
     if board_count >= 5 and board_has_prior_closeout:
         wins.append(f"73 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(" delivery board integrity is incomplete (needs >=5 items and  anchors).")
-        handoff_actions.append("Repair  delivery board entries to include  anchors.")
+        misses.append(
+            "Lane delivery board integrity is incomplete (needs >=5 items and Lane anchors)."
+        )
+        handoff_actions.append("Repair Lane delivery board entries to include Lane anchors.")
 
     if not missing_scaling_plan_keys:
-        wins.append(" distribution scaling dataset is available for launch execution.")
+        wins.append("Lane distribution scaling dataset is available for launch execution.")
     else:
-        misses.append(" distribution scaling dataset is missing required keys.")
+        misses.append("Lane distribution scaling dataset is missing required keys.")
         handoff_actions.append(
             "Update docs/roadmap/plans/distribution-scaling-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            " distribution scaling closeout lane is fully complete and ready for  trust refresh."
+            "Lane distribution scaling closeout lane is fully complete and ready for Lane trust refresh."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -315,8 +380,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "distribution-scaling-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "distribution-scaling-integration-brief.md", "#  integration brief\n")
-    _write(target / "distribution-scaling-plan.md", "#  distribution scaling plan\n")
+    _write(target / "distribution-scaling-integration-brief.md", "# Lane integration brief\n")
+    _write(target / "distribution-scaling-plan.md", "# Lane distribution scaling plan\n")
     _write(
         target / "distribution-scaling-channel-controls-log.json",
         json.dumps({"controls": []}, indent=2) + "\n",
@@ -325,14 +390,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "distribution-scaling-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "distribution-scaling-execution-log.md", "#  execution log\n")
+    _write(target / "distribution-scaling-execution-log.md", "# Lane execution log\n")
     _write(
         target / "distribution-scaling-delivery-board.md",
-        "\n".join(["#  delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["# Lane delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "distribution-scaling-validation-commands.md",
-        "#  validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# Lane validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -360,7 +425,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_distribution_scaling_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    "Compatibility alias for legacy -based builder name."
+    "Compatibility alias for legacy lane-based builder name."
     return build_distribution_scaling_closeout_summary(root)
 
 
