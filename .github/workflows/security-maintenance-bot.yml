@@ -30,7 +30,12 @@ jobs:
           version="8.24.2"
           arch="linux_x64"
           url="https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_${arch}.tar.gz"
-          curl -fsSL "$url" -o /tmp/gitleaks.tar.gz
+          curl --fail --show-error --silent --location \
+            --retry 6 \
+            --retry-all-errors \
+            --retry-delay 2 \
+            --retry-max-time 120 \
+            "$url" -o /tmp/gitleaks.tar.gz
           mkdir -p /tmp/gitleaks-bin
           tar -xzf /tmp/gitleaks.tar.gz -C /tmp/gitleaks-bin gitleaks
           chmod +x /tmp/gitleaks-bin/gitleaks
