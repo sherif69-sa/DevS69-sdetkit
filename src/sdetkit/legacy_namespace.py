@@ -18,4 +18,5 @@ def handle_legacy_namespace(argv: Sequence[str]) -> int | None:
         return 0
     if argv[1] == "migrate-hint":
         return run_legacy_migrate_hint(list(argv[2:]))
-    return None
+    sys.stderr.write(f"legacy error: unknown subcommand '{argv[1]}'\n")
+    return 2

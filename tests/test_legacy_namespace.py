@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from sdetkit import cli
 from sdetkit import legacy_namespace
 
 
@@ -26,5 +27,15 @@ def test_handle_legacy_namespace_routes_migrate_hint(monkeypatch) -> None:
     assert legacy_namespace.handle_legacy_namespace(["legacy", "migrate-hint", "x"]) == 7
 
 
-def test_handle_legacy_namespace_unknown_subcommand_returns_none() -> None:
-    assert legacy_namespace.handle_legacy_namespace(["legacy", "unknown-subcmd"]) is None
+def test_handle_legacy_namespace_unknown_subcommand_errors(capsys) -> None:
+    rc = legacy_namespace.handle_legacy_namespace(["legacy", "unknown-subcmd"])
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "legacy error: unknown subcommand 'unknown-subcmd'" in err
+
+
+def test_cli_main_unknown_legacy_subcommand_fails_fast(capsys) -> None:
+    rc = cli.main(["legacy", "unknown-subcmd"])
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "legacy error: unknown subcommand 'unknown-subcmd'" in err
