@@ -92,7 +92,8 @@ def _load_waivers(path: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]
         if expiry < dt.date.today():
             errs.append({"code": "waiver_expired", "message": f"waivers[{i}] is expired"})
             continue
-        if item.get("type") not in {
+        waiver_type = item.get("type")
+        if waiver_type not in {
             "security_rule_increase",
             "new_non_ascii",
             "new_stdlib_shadowing",
@@ -101,6 +102,28 @@ def _load_waivers(path: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]
                 {"code": "waiver_type_unknown", "message": f"waivers[{i}] has unsupported type"}
             )
             continue
+
+        if waiver_type == "security_rule_increase":
+            rule_id = item.get("rule_id")
+            if not isinstance(rule_id, str) or not rule_id.strip():
+                errs.append(
+                    {
+                        "code": "waiver_missing_required",
+                        "message": f"waivers[{i}] missing fields: rule_id",
+                    }
+                )
+                continue
+
+        if waiver_type in {"new_non_ascii", "new_stdlib_shadowing"}:
+            waiver_path = item.get("path")
+            if not isinstance(waiver_path, str) or not waiver_path.strip():
+                errs.append(
+                    {
+                        "code": "waiver_missing_required",
+                        "message": f"waivers[{i}] missing fields: path",
+                    }
+                )
+                continue
         out.append(item)
     return out, errs
 
