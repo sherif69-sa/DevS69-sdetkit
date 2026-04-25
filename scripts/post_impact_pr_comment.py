@@ -8,6 +8,7 @@ import urllib.request
 from pathlib import Path
 
 MARKER = "<!-- impact-release-control -->"
+DEFAULT_HTTP_TIMEOUT_SECONDS = 30
 
 
 def _api_request(
@@ -28,7 +29,7 @@ def _api_request(
             "User-Agent": "impact-release-control-bot",
         },
     )
-    with urllib.request.urlopen(req) as resp:  # noqa: S310
+    with urllib.request.urlopen(req, timeout=DEFAULT_HTTP_TIMEOUT_SECONDS) as resp:  # noqa: S310
         return json.loads(resp.read().decode("utf-8"))
 
 

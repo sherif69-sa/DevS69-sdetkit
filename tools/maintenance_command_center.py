@@ -12,6 +12,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+DEFAULT_HTTP_TIMEOUT_SECONDS = 30
+
 
 def _iso_now() -> str:
     return dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -47,7 +49,7 @@ class GitHubClient:
         if payload is not None:
             req.add_header("Content-Type", "application/json")
         try:
-            with urllib.request.urlopen(req) as resp:
+            with urllib.request.urlopen(req, timeout=DEFAULT_HTTP_TIMEOUT_SECONDS) as resp:
                 text = resp.read().decode("utf-8")
         except urllib.error.HTTPError as exc:
             body = exc.read().decode("utf-8", errors="replace")
