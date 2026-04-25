@@ -4,8 +4,8 @@ import argparse
 import datetime as dt
 import json
 import os
-import sys
 import re
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -14,7 +14,7 @@ from typing import Any
 
 
 def _iso_now() -> str:
-    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
+    return dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
 
 
 def _parse_iso(value: str) -> dt.datetime:
@@ -357,7 +357,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             client.ensure_label(**label)
 
-    now = dt.datetime.now(dt.timezone.utc)
+    now = dt.datetime.now(dt.UTC)
     now_iso = _iso_now()
 
     issues = client.list_open_issues()
