@@ -16,14 +16,15 @@ _DAY58_SUMMARY_PATH = (
     "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json"
 )
 _DAY58_BOARD_PATH = "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md"
-_SECTION_HEADER = "#  — Phase-2 wrap + handoff closeout lane"
+_LANE_NAME = "Phase 2 Wrap Handoff Closeout"
+_SECTION_HEADER = "# Phase 2 Wrap Handoff Closeout — Phase-2 wrap + handoff closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why  matters",
-    "## Required inputs ()",
-    "##  command lane",
+    "## Why Phase 2 Wrap Handoff Closeout matters",
+    "## Required inputs (Phase-3 pre-plan closeout)",
+    "## Phase 2 Wrap Handoff Closeout command lane",
     "## Phase-2 wrap + handoff contract",
     "## Phase-2 wrap + handoff quality checklist",
-    "##  delivery board",
+    "## Phase 2 Wrap Handoff Closeout delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -38,10 +39,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_phase2_wrap_handoff_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for  Phase-2 wrap + handoff execution and signal triage.",
-    "The  lane references  Phase-3 pre-plan outcomes and unresolved risks.",
-    "Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    " closeout records Phase-2 wrap outcomes and  execution priorities.",
+    "Single owner + backup reviewer are assigned for Phase-2 wrap + handoff execution and signal triage.",
+    "The closeout lane references Phase-3 pre-plan outcomes and unresolved risks.",
+    "Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    "This closeout records Phase-2 wrap outcomes and Phase-3 execution priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes priority digest, lane-level plan actions, and rollback strategy",
@@ -51,14 +52,69 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes wrap brief, risk ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ]  Phase-2 wrap + handoff brief committed",
-    "- [ ]  wrap reviewed with owner + backup",
-    "- [ ]  risk ledger exported",
-    "- [ ]  KPI scorecard snapshot exported",
-    "- [ ]  execution priorities drafted from  learnings",
+    "- [ ] Phase-2 wrap + handoff brief committed",
+    "- [ ] Wrap reviewed with owner + backup",
+    "- [ ] Risk ledger exported",
+    "- [ ] KPI scorecard snapshot exported",
+    "- [ ] Phase-3 execution priorities drafted from Phase-2 learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = "#  — Phase-2 wrap + handoff closeout lane\n\n closes with a major Phase-2 wrap + handoff upgrade that turns  pre-plan outcomes into deterministic  execution priorities.\n\n## Why  matters\n\n- Converts  pre-plan evidence into repeatable Phase-3 execution loops.\n- Protects quality with ownership, command proof, and KPI rollback guardrails.\n- Produces a deterministic handoff from  closeout into  execution planning.\n\n## Required inputs ()\n\n- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json`\n- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit phase2-wrap-handoff-closeout --format json --strict\npython -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict\npython -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence --format json --strict\npython scripts/check_phase2_wrap_handoff_closeout_contract.py\n```\n\n## Phase-2 wrap + handoff contract\n\n- Single owner + backup reviewer are assigned for  Phase-2 wrap + handoff execution and signal triage.\n- The  lane references  Phase-3 pre-plan outcomes and unresolved risks.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records Phase-2 wrap outcomes and  execution priorities.\n\n## Phase-2 wrap + handoff quality checklist\n\n- [ ] Includes priority digest, lane-level plan actions, and rollback strategy\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI\n- [ ] Artifact pack includes wrap brief, risk ledger, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  Phase-2 wrap + handoff brief committed\n- [ ]  wrap reviewed with owner + backup\n- [ ]  risk ledger exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  execution priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Phase-2 wrap + handoff contract lock + delivery board readiness: 15 points.\n"
+_DEFAULT_PAGE_TEMPLATE = """# Phase 2 Wrap Handoff Closeout — Phase-2 wrap + handoff closeout lane
+
+Phase 2 Wrap Handoff Closeout closes with a major Phase-2 wrap + handoff upgrade that turns Phase-3 pre-plan outcomes into deterministic Phase-3 execution priorities.
+
+## Why Phase 2 Wrap Handoff Closeout matters
+
+- Converts Phase-3 pre-plan evidence into repeatable Phase-3 execution loops.
+- Protects quality with ownership, command proof, and KPI rollback guardrails.
+- Produces a deterministic handoff from closeout into Phase-3 execution planning.
+
+## Required inputs (Phase-3 pre-plan closeout)
+
+- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json`
+- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md`
+
+## Phase 2 Wrap Handoff Closeout command lane
+
+```bash
+python -m sdetkit phase2-wrap-handoff-closeout --format json --strict
+python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict
+python -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence --format json --strict
+python scripts/check_phase2_wrap_handoff_closeout_contract.py
+```
+
+## Phase-2 wrap + handoff contract
+
+- Single owner + backup reviewer are assigned for Phase-2 wrap + handoff execution and signal triage.
+- The closeout lane references Phase-3 pre-plan outcomes and unresolved risks.
+- Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- This closeout records Phase-2 wrap outcomes and Phase-3 execution priorities.
+
+## Phase-2 wrap + handoff quality checklist
+
+- [ ] Includes priority digest, lane-level plan actions, and rollback strategy
+- [ ] Every section has owner, review window, KPI threshold, and risk flag
+- [ ] CTA links point to docs + runnable command evidence
+- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI
+- [ ] Artifact pack includes wrap brief, risk ledger, KPI scorecard, and execution log
+
+## Phase 2 Wrap Handoff Closeout delivery board
+
+- [ ] Phase-2 wrap + handoff brief committed
+- [ ] Wrap reviewed with owner + backup
+- [ ] Risk ledger exported
+- [ ] KPI scorecard snapshot exported
+- [ ] Phase-3 execution priorities drafted from Phase-2 learnings
+
+## Scoring model
+
+Phase 2 Wrap Handoff Closeout weighted score (0-100):
+
+- Contract + command lane completeness: 30 points.
+- Discoverability alignment (README/docs index/top-10): 20 points.
+- Phase-3 pre-plan continuity and strict baseline carryover: 35 points.
+- Phase-2 wrap + handoff contract lock + delivery board readiness: 15 points.
+"""
 
 
 def _read(path: Path) -> str:
@@ -106,7 +162,9 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
     phase3_preplan_score, phase3_preplan_strict, phase3_preplan_check_count = _load_phase3_preplan(
         phase3_preplan_summary
     )
-    board_count, board_has_phase3_preplan = _count_board_items(phase3_preplan_board, "")
+    board_count, board_has_phase3_preplan = _count_board_items(
+        phase3_preplan_board, "Phase-3 pre-plan"
+    )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -133,8 +191,8 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("" in top10_text and "" in top10_text),
-            "evidence": " +  strategy chain",
+            "passed": ("Phase-2 wrap + handoff" in top10_text and "Phase-3 kickoff" in top10_text),
+            "evidence": "Phase-2 wrap + handoff and Phase-3 kickoff strategy chain",
         },
         {
             "check_id": "phase3_preplan_summary_present",
@@ -217,18 +275,24 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if phase3_preplan_strict:
-        wins.append(f"59 continuity is strict-pass with activation score={phase3_preplan_score}.")
+        wins.append(
+            f"Phase-3 pre-plan continuity is strict-pass with activation score={phase3_preplan_score}."
+        )
     else:
-        misses.append(" strict continuity signal is missing.")
+        misses.append("Phase-3 pre-plan strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run  Phase-3 pre-plan closeout command and restore strict baseline before  lock."
+            "Re-run the Phase-3 pre-plan closeout command and restore strict baseline before lock."
         )
 
     if board_count >= 5 and board_has_phase3_preplan:
-        wins.append(f"59 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Phase-3 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append(" delivery board integrity is incomplete (needs >=5 items and  anchors).")
-        handoff_actions.append("Repair  delivery board entries to include  anchors.")
+        misses.append(
+            "Phase-3 delivery board integrity is incomplete (needs >=5 items and anchors)."
+        )
+        handoff_actions.append("Repair Phase-3 delivery board entries to include pre-plan anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append(
@@ -239,12 +303,12 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
             "Phase-2 wrap + handoff contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all  contract lines, quality checklist entries, and delivery board tasks in docs."
+            "Complete all contract lines, quality checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            " Phase-2 wrap + handoff closeout lane is fully complete and ready for  execution lane."
+            "Phase-2 wrap + handoff closeout lane is fully complete and ready for Phase-3 execution."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -283,7 +347,7 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Phase 2 Wrap Handoff Closeout summary (legacy: )",
+        f"{_LANE_NAME} summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -304,19 +368,20 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "phase2-wrap-handoff-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "phase2-wrap-handoff-brief.md", "#  Phase-2 wrap + handoff brief\n")
+    _write(target / "phase2-wrap-handoff-brief.md", "# Phase-2 wrap + handoff brief\n")
     _write(target / "phase2-wrap-handoff-risk-ledger.csv", "risk,owner,mitigation,status\n")
     _write(
         target / "phase2-wrap-handoff-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
     )
-    _write(target / "phase2-wrap-handoff-execution-log.md", "#  execution log\n")
+    _write(target / "phase2-wrap-handoff-execution-log.md", "# Execution log\n")
     _write(
         target / "phase2-wrap-handoff-delivery-board.md",
-        "\n".join(["#  delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["# Phase-2 wrap + handoff delivery board", *_REQUIRED_DELIVERY_BOARD_LINES])
+        + "\n",
     )
     _write(
         target / "phase2-wrap-handoff-validation-commands.md",
-        "#  validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# Validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 

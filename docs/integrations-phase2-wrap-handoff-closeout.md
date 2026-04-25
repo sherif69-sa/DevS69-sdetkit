@@ -25,7 +25,7 @@ python scripts/check_phase2_wrap_handoff_closeout_contract.py
 ## Phase-2 wrap + handoff contract
 
 - Single owner + backup reviewer are assigned for Lane Phase-2 wrap + handoff execution and signal triage.
-- The Lane lane references Lane Phase-3 pre-plan outcomes and unresolved risks.
+- The closeout lane references Phase-3 pre-plan outcomes and unresolved risks.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records Phase-2 wrap outcomes and Lane execution priorities.
 
