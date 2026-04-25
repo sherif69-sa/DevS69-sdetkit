@@ -26,7 +26,7 @@ python scripts/check_governance_priorities_closeout_contract.py
 ## Governance priorities contract
 
 - Single owner + backup reviewer are assigned for Lane governance priorities execution and signoff.
-- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- This lane references Lane outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records governance priorities pack upgrades, storyline outcomes, and Lane governance priorities.
 

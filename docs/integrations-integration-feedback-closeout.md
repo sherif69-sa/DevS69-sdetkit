@@ -26,7 +26,7 @@ python scripts/check_integration_feedback_closeout_contract.py
 ## Integration feedback contract
 
 - Single owner + backup reviewer are assigned for Lane integration feedback execution and signoff.
-- The Lane lane references Lane outcomes, controls, and campaign continuity signals.
+- This lane references Lane outcomes, controls, and campaign continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records docs-template upgrades, community touchpoint outcomes, and Lane trust FAQ priorities.
 

@@ -26,7 +26,7 @@ python scripts/check_case_study_launch_closeout_contract.py
 ## Case-study launch contract
 
 - Single owner + backup reviewer are assigned for Lane published case-study launch execution and signoff.
-- The Lane lane references Lane prep outputs, governance decisions, and KPI continuity signals.
+- This lane references Lane prep outputs, governance decisions, and KPI continuity signals.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records publication outcomes, evidence confidence notes, and Lane scaling priorities.
 

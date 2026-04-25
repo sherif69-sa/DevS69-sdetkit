@@ -25,7 +25,7 @@ python scripts/check_kpi_deep_audit_closeout_contract.py
 ## KPI deep audit contract
 
 - Single owner + backup reviewer are assigned for Lane KPI deep-audit execution and signal triage.
-- The Lane lane references Lane stabilization outcomes and unresolved risks.
+- This lane references Lane stabilization outcomes and unresolved risks.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records deep-audit outcomes and Lane execution priorities.
 

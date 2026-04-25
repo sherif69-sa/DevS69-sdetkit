@@ -26,7 +26,7 @@ python scripts/check_growth_campaign_closeout_contract.py
 ## Growth campaign contract
 
 - Single owner + backup reviewer are assigned for Lane growth campaign execution and signoff.
-- The Lane lane references Lane outcomes, controls, and KPI continuity signals.
+- This lane references Lane outcomes, controls, and KPI continuity signals.
 - Every Lane section includes campaign CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records campaign outcomes, confidence notes, and Lane execution priorities.
 

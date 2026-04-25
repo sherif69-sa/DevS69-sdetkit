@@ -26,7 +26,7 @@ python scripts/check_launch_readiness_closeout_contract.py
 ## Launch readiness contract
 
 - Single owner + backup reviewer are assigned for Lane launch readiness execution and signoff.
-- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- This lane references Lane outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records launch readiness pack upgrades, storyline outcomes, and Lane launch priorities.
 

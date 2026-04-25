@@ -25,7 +25,7 @@ python scripts/check_phase3_kickoff_closeout_contract.py
 ## Phase-3 kickoff execution contract
 
 - Single owner + backup reviewer are assigned for Lane Phase-3 kickoff execution and trust-signal triage.
-- The Lane lane references Lane Phase-2 wrap outcomes, risks, and KPI continuity evidence.
+- This lane references Lane Phase-2 wrap outcomes, risks, and KPI continuity evidence.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records Phase-3 baseline activation, trust KPI owners, and Lane community program priorities.
 

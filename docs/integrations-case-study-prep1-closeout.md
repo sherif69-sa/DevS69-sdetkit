@@ -26,7 +26,7 @@ python scripts/check_case_study_prep1_closeout_contract.py
 ## Case-study prep contract
 
 - Single owner + backup reviewer are assigned for Lane reliability case-study prep and signoff.
-- The Lane lane references Lane integration expansion outputs, governance decisions, and KPI continuity signals.
+- This lane references Lane integration expansion outputs, governance decisions, and KPI continuity signals.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records before/after reliability deltas, evidence confidence notes, and Lane prep priorities.
 

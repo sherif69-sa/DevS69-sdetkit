@@ -26,7 +26,7 @@ python scripts/check_trust_faq_expansion_closeout_contract.py
 ## Trust FAQ expansion contract
 
 - Single owner + backup reviewer are assigned for Lane trust FAQ expansion execution and signoff.
-- The Lane lane references Lane outcomes, controls, and campaign continuity signals.
+- This lane references Lane outcomes, controls, and campaign continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records trust FAQ content upgrades, escalation outcomes, and Lane evidence narrative priorities.
 

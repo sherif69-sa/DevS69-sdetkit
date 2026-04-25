@@ -26,7 +26,7 @@ python scripts/check_ecosystem_priorities_closeout_contract.py
 ## Ecosystem priorities contract
 
 - Single owner + backup reviewer are assigned for Lane ecosystem priorities execution and signoff.
-- The Lane lane references Lane outcomes, controls, and KPI continuity signals.
+- This lane references Lane outcomes, controls, and KPI continuity signals.
 - Every Lane section includes ecosystem CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records ecosystem outcomes, confidence notes, and Lane scale priorities.
 

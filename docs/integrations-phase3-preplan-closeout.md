@@ -25,7 +25,7 @@ python scripts/check_phase3_preplan_closeout_contract.py
 ## Phase-3 pre-plan contract
 
 - Single owner + backup reviewer are assigned for Lane Phase-3 pre-plan execution and signal triage.
-- The Lane lane references Lane Phase-2 hardening outcomes and unresolved risks.
+- This lane references Lane Phase-2 hardening outcomes and unresolved risks.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records pre-plan outcomes and Lane execution priorities.
 
