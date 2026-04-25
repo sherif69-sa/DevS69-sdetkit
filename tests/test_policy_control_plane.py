@@ -85,3 +85,95 @@ def test_policy_check_json_with_waiver(tmp_path: Path, monkeypatch, capsys) -> N
     payload = json.loads(capsys.readouterr().out)
     assert payload["schema_version"] == "sdetkit.policy.v2"
     assert payload["ok"] is True
+
+
+def test_policy_check_rejects_security_waiver_without_rule_id(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "app.py").write_text("print('ok')\n", encoding="utf-8")
+    base = tmp_path / "baseline.json"
+    assert policy.main(["snapshot", "--output", str(base)]) == 0
+    _ = capsys.readouterr()
+    waivers = tmp_path / "waivers.json"
+    waivers.write_text(
+        json.dumps(
+            {
+                "waivers": [
+                    {
+                        "type": "security_rule_increase",
+                        "owner": "release-engineering",
+                        "justification": "temporary acceptance",
+                        "expires_on": "2099-01-01",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert (
+        policy.main(
+            [
+                "check",
+                "--baseline",
+                str(base),
+                "--waivers",
+                str(waivers),
+                "--format",
+                "json",
+            ]
+        )
+        == 2
+    )
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["error"]["code"] == "waiver_validation_failed"
+    details = payload["error"]["detail"]
+    assert any("rule_id" in item["message"] for item in details)
+
+
+def test_policy_check_rejects_non_ascii_waiver_without_path(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "app.py").write_text("print('ok')\n", encoding="utf-8")
+    base = tmp_path / "baseline.json"
+    assert policy.main(["snapshot", "--output", str(base)]) == 0
+    _ = capsys.readouterr()
+    waivers = tmp_path / "waivers.json"
+    waivers.write_text(
+        json.dumps(
+            {
+                "waivers": [
+                    {
+                        "type": "new_non_ascii",
+                        "owner": "release-engineering",
+                        "justification": "temporary acceptance",
+                        "expires_on": "2099-01-01",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert (
+        policy.main(
+            [
+                "check",
+                "--baseline",
+                str(base),
+                "--waivers",
+                str(waivers),
+                "--format",
+                "json",
+            ]
+        )
+        == 2
+    )
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["error"]["code"] == "waiver_validation_failed"
+    details = payload["error"]["detail"]
+    assert any("path" in item["message"] for item in details)

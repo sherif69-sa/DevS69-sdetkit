@@ -16,9 +16,14 @@
   - `1`: policy regressions
   - `2`: usage/config/waiver validation error
 - Waiver support with required governance fields:
+  - `type` (`security_rule_increase` / `new_non_ascii` / `new_stdlib_shadowing`)
   - `owner`
   - `justification`
   - `expires_on` (`YYYY-MM-DD`)
+- Type-specific required fields:
+  - `security_rule_increase` requires `rule_id`
+  - `new_non_ascii` requires `path`
+  - `new_stdlib_shadowing` requires `path`
 - Unknown waiver types are rejected.
 
 ## Waiver model
