@@ -14,7 +14,7 @@ Lane closes with a major upgrade that turns Lane distribution outcomes into a go
 - `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md`
 - `docs/roadmap/plans/trust-assets-refresh-plan.json`
 
-## Lane command lane
+## Command lane
 
 ```bash
 python -m sdetkit trust-assets-refresh-closeout --format json --strict

@@ -98,6 +98,12 @@ def test_lane75_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
+def test_lane75_default_template_has_no_unresolved_placeholders() -> None:
+    assert "## Required inputs ()" not in d75._DEFAULT_PAGE_TEMPLATE
+    assert "## Why  matters" not in d75._DEFAULT_PAGE_TEMPLATE
+    assert "#  —" not in d75._DEFAULT_PAGE_TEMPLATE
+
+
 def test_lane75_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d75.main(
@@ -162,6 +168,29 @@ def test_lane75_strict_fails_without_distribution_scaling_baseline(tmp_path: Pat
         tmp_path
         / "docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json"
     ).unlink()
+    assert d75.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
+
+
+def test_lane75_board_anchor_is_enforced(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+    board = (
+        tmp_path
+        / "docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md"
+    )
+    board.write_text(
+        "\n".join(
+            [
+                "#  delivery board",
+                "- [ ] Lane integration brief committed",
+                "- [ ] Lane handoff notes captured",
+                "- [ ] Lane channel controls and assumptions log exported",
+                "- [ ] Lane KPI scorecard snapshot exported",
+                "- [ ] Lane trust refresh priorities drafted from Lane learnings",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     assert d75.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
