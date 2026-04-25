@@ -26,7 +26,7 @@ python scripts/check_trust_assets_refresh_closeout_contract.py
 ## Trust assets refresh contract
 
 - Single owner + backup reviewer are assigned for Lane trust assets refresh execution and signoff.
-- The Lane lane references Lane outcomes, controls, and KPI continuity signals.
+- This lane references Lane outcomes, controls, and KPI continuity signals.
 - Every Lane section includes trust-surface CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records trust outcomes, confidence notes, and Lane contributor-recognition priorities.
 

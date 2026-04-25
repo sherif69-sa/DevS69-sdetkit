@@ -26,7 +26,7 @@ python scripts/check_continuous_upgrade_closeout_contract.py
 ## Continuous upgrade contract
 
 - Single owner + backup reviewer are assigned for Lane continuous upgrade execution and signoff.
-- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- This lane references Lane outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records continuous upgrade outputs, report publication status, and backlog inputs.
 

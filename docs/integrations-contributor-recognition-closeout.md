@@ -26,7 +26,7 @@ python scripts/check_contributor_recognition_closeout_contract.py
 ## Contributor recognition contract
 
 - Single owner + backup reviewer are assigned for Lane contributor recognition execution and signoff.
-- The Lane lane references Lane outcomes, controls, and KPI continuity signals.
+- This lane references Lane outcomes, controls, and KPI continuity signals.
 - Every Lane section includes contributor CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records recognition outcomes, confidence notes, and Lane scale priorities.
 

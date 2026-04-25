@@ -38,6 +38,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "weekly-review" in out
     assert "first-contribution" in out
     assert "contributor-funnel" in out
+    assert "demo" in out
     assert "triage-templates" in out
     assert "docs-governance" in out
     assert "docs-nav" not in out

@@ -26,7 +26,7 @@ python scripts/check_phase3_wrap_publication_closeout_contract.py
 ## Phase-3 wrap publication contract
 
 - Single owner + backup reviewer are assigned for Lane phase-3 wrap publication execution and signoff.
-- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- This lane references Lane outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.
 

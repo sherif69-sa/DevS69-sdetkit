@@ -25,7 +25,7 @@ python scripts/check_community_program_closeout_contract.py
 ## Community program execution contract
 
 - Single owner + backup reviewer are assigned for Lane community office-hours execution and moderation safety.
-- The Lane lane references Lane Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.
+- This lane references Lane Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records office-hours cadence, participation rules, moderation SOPs, and Lane onboarding priorities.
 

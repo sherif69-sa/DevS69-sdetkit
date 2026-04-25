@@ -26,7 +26,7 @@ python scripts/check_partner_outreach_closeout_contract.py
 ## Partner outreach contract
 
 - Single owner + backup reviewer are assigned for Lane partner outreach execution and signoff.
-- The Lane lane references Lane outcomes, controls, and KPI continuity signals.
+- This lane references Lane outcomes, controls, and KPI continuity signals.
 - Every Lane section includes partner CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records partner onboarding outcomes, confidence notes, and Lane growth campaign priorities.
 

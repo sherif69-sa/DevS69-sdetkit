@@ -25,7 +25,7 @@ python scripts/check_contributor_activation_closeout_contract.py
 ## Contributor activation contract
 
 - Single owner + backup reviewer are assigned for Lane contributor-activation execution and KPI follow-up.
-- The Lane lane references Lane docs-loop wins and misses with deterministic contributor follow-up loops.
+- This lane references Lane docs-loop wins and misses with deterministic contributor follow-up loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
 - Lane closeout records contributor-activation learnings and Lane prioritization inputs.
 

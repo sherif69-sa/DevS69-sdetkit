@@ -26,7 +26,7 @@ python scripts/check_community_touchpoint_closeout_contract.py
 ## Community touchpoint contract
 
 - Single owner + backup reviewer are assigned for Lane community touchpoint execution and signoff.
-- The Lane lane references Lane outcomes, controls, and KPI continuity signals.
+- This lane references Lane outcomes, controls, and KPI continuity signals.
 - Every Lane section includes community CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records touchpoint outcomes, confidence notes, and Lane ecosystem priorities.
 

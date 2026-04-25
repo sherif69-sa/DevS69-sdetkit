@@ -94,20 +94,6 @@ def _main_aspect_readiness(checks: list[ReadinessCheck]) -> list[dict[str, Any]]
 
 def build_production_readiness_summary(root: Path) -> dict[str, Any]:
     phase_boost_path = _first_existing(root, _PHASE_BOOST_BLUEPRINT_FILES)
-    required_files = [
-        "README.md",
-        "CONTRIBUTING.md",
-        "SECURITY.md",
-        "CODE_OF_CONDUCT.md",
-        "pyproject.toml",
-        "Dockerfile",
-        "noxfile.py",
-        "docs/index.md",
-        "docs/repo-audit.md",
-        "docs/security.md",
-        _PHASE_BOOST_BLUEPRINT_FILES[0],
-        "tests/test_cli_sdetkit.py",
-    ]
     required_workflows = [
         ".github/workflows/ci.yml",
         ".github/workflows/quality.yml",
@@ -221,7 +207,6 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
             "job_done_ready": main_aspects_ready == len(main_aspects) and not missing_items,
             "main_aspects_ready_count": main_aspects_ready,
             "main_aspects_total": len(main_aspects),
-            "required_files_count": len(required_files),
             "required_workflows_count": len(required_workflows),
         },
         "main_aspects": main_aspects,

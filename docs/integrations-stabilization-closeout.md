@@ -25,7 +25,7 @@ python scripts/check_stabilization_closeout_contract.py
 ## Stabilization contract
 
 - Single owner + backup reviewer are assigned for Lane stabilization execution and KPI recovery.
-- The Lane lane references Lane contributor activation outcomes and unresolved risks.
+- This lane references Lane contributor activation outcomes and unresolved risks.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records stabilization outcomes and Lane deep-audit priorities.
 

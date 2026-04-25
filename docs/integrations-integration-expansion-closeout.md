@@ -25,7 +25,7 @@ python scripts/check_integration_expansion_closeout_contract.py
 ## Integration expansion contract
 
 - Single owner + backup reviewer are assigned for Lane advanced GitHub Actions workflow execution and rollout signoff.
-- The Lane lane references Lane onboarding outcomes, ownership handoff evidence, and KPI continuity signals.
+- This lane references Lane onboarding outcomes, ownership handoff evidence, and KPI continuity signals.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Lane review priorities.
 
