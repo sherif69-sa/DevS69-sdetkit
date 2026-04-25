@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from sdetkit import cli
-from sdetkit import legacy_namespace
+from sdetkit import cli, legacy_namespace
 
 
 def test_handle_legacy_namespace_returns_none_for_non_legacy() -> None:
@@ -32,6 +31,10 @@ def test_handle_legacy_namespace_unknown_subcommand_errors(capsys) -> None:
     assert rc == 2
     err = capsys.readouterr().err
     assert "legacy error: unknown subcommand 'unknown-subcmd'" in err
+
+
+def test_handle_legacy_namespace_known_legacy_command_passthrough() -> None:
+    assert legacy_namespace.handle_legacy_namespace(["legacy", "weekly-review-lane", "--help"]) is None
 
 
 def test_cli_main_unknown_legacy_subcommand_fails_fast(capsys) -> None:
