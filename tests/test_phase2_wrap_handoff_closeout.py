@@ -151,6 +151,8 @@ def test_lane60_cli_dispatch(tmp_path: Path, capsys) -> None:
 
 
 def test_lane60_docs_page_has_no_lane_lane_typo() -> None:
-    docs_page = Path(__file__).resolve().parents[1] / "docs/integrations-phase2-wrap-handoff-closeout.md"
+    docs_page = (
+        Path(__file__).resolve().parents[1] / "docs/integrations-phase2-wrap-handoff-closeout.md"
+    )
     page_text = docs_page.read_text(encoding="utf-8")
     assert "Lane lane" not in page_text

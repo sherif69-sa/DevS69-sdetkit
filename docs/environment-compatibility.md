@@ -7,7 +7,7 @@ This is the execution baseline for the **first-proof** lane.
 - Python: **3.10+ required**
 - Recommended active versions: 3.10, 3.11, 3.12, 3.13
 - Current known block: Python 3.9 and lower are not supported by `sdetkit`
-- Contributor tooling note: runtime compatibility is 3.10+, while local lint/type-check parity is best on Python 3.12 (matching project `ruff`/`mypy` config in `pyproject.toml`).
+- Contributor tooling note: runtime compatibility is 3.10+, while local lint/type-check parity is best on Python 3.11/3.12 (with the strictest mypy baseline aligned to 3.12 in `pyproject.toml`).
 
 ## First-proof dependencies
 

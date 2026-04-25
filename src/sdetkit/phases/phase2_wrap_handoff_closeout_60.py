@@ -191,9 +191,7 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": (
-                "Phase-2 wrap + handoff" in top10_text and "Phase-3 kickoff" in top10_text
-            ),
+            "passed": ("Phase-2 wrap + handoff" in top10_text and "Phase-3 kickoff" in top10_text),
             "evidence": "Phase-2 wrap + handoff and Phase-3 kickoff strategy chain",
         },
         {
@@ -291,7 +289,9 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
             f"Phase-3 delivery board integrity validated with {board_count} checklist items."
         )
     else:
-        misses.append("Phase-3 delivery board integrity is incomplete (needs >=5 items and anchors).")
+        misses.append(
+            "Phase-3 delivery board integrity is incomplete (needs >=5 items and anchors)."
+        )
         handoff_actions.append("Repair Phase-3 delivery board entries to include pre-plan anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -376,7 +376,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "phase2-wrap-handoff-execution-log.md", "# Execution log\n")
     _write(
         target / "phase2-wrap-handoff-delivery-board.md",
-        "\n".join(["# Phase-2 wrap + handoff delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["# Phase-2 wrap + handoff delivery board", *_REQUIRED_DELIVERY_BOARD_LINES])
+        + "\n",
     )
     _write(
         target / "phase2-wrap-handoff-validation-commands.md",
