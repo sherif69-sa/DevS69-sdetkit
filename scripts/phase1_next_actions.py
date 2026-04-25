@@ -48,7 +48,10 @@ def main() -> int:
     for item in not_yet:
         text = str(item)
         if text.startswith("python_version>=3.11"):
-            next_actions.append("Use Python 3.11+ environment then rerun: make phase1-baseline")
+            next_actions.append(
+                "Use Python 3.11+ for phase1 baseline checks (core CLI runtime supports 3.10+) "
+                "then rerun: make phase1-baseline"
+            )
         elif text == "optional_check_ok::ruff":
             next_actions.append("Run lint remediation: ruff check . --fix")
         elif text == "optional_check_ok::pytest":
