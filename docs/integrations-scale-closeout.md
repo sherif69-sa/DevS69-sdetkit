@@ -1,19 +1,19 @@
-# Lane — Scale closeout lane
+# Scale closeout lane
 
-Lane closes with a big scale upgrade that converts Lane acceleration evidence into deterministic scale loops.
+Scale closeout converts acceleration evidence into deterministic scale execution loops.
 
-## Why Lane matters
+## Why this lane matters
 
-- Converts Lane acceleration proof into a scale-first operating motion.
+- Converts acceleration proof into a scale-first operating motion.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from Lane outcomes into Lane expansion priorities.
+- Produces a deterministic handoff from scale outcomes into expansion priorities.
 
-## Required inputs (Lane)
+## Required inputs (acceleration closeout)
 
 - `docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json`
 - `docs/artifacts/acceleration-closeout-pack/delivery-board.md`
 
-## Lane command lane
+## Command lane
 
 ```bash
 python -m sdetkit scale-closeout --format json --strict
@@ -24,10 +24,10 @@ python scripts/check_scale_closeout_contract.py
 
 ## Scale closeout contract
 
-- Single owner + backup reviewer are assigned for Lane scale lane execution and KPI follow-up.
-- The Lane scale lane references Lane acceleration winners and misses with deterministic growth loops.
-- Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records scale learnings and Lane expansion priorities.
+- Single owner + backup reviewer are assigned for the scale lane execution and KPI follow-up.
+- The scale lane references acceleration winners and misses with deterministic growth loops.
+- Every section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Scale closeout records learnings and expansion priorities.
 
 ## Scale quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_scale_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes scale plan, growth matrix, KPI scorecard, and execution log
 
-## Lane delivery board
+## Delivery board
 
-- [ ] Lane scale plan draft committed
-- [ ] Lane review notes captured with owner + backup
-- [ ] Lane growth matrix exported
-- [ ] Lane KPI scorecard snapshot exported
-- [ ] Lane expansion priorities drafted from Lane learnings
+- [ ] Scale plan draft committed
+- [ ] Review notes captured with owner + backup
+- [ ] Growth matrix exported
+- [ ] KPI scorecard snapshot exported
+- [ ] Expansion priorities drafted from learnings
 
 ## Scoring model
 
-Lane weighted score (0-100):
+Weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Lane continuity and strict baseline carryover: 35 points.
+- Scale continuity and strict baseline carryover: 35 points.
 - Scale contract lock + delivery board readiness: 15 points.
