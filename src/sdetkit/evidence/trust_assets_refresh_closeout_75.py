@@ -144,7 +144,8 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": (
-                "Trust assets refresh" in top10_text and "Contributor recognition board" in top10_text
+                "Trust assets refresh" in top10_text
+                and "Contributor recognition board" in top10_text
             ),
             "evidence": "Trust assets refresh + Contributor recognition board strategy chain",
         },
@@ -247,7 +248,9 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
     if board_count >= 5 and board_has_distribution_scaling:
         wins.append(f"74 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append("74 delivery board integrity is incomplete (needs >=5 items and anchor evidence).")
+        misses.append(
+            "74 delivery board integrity is incomplete (needs >=5 items and anchor evidence)."
+        )
         handoff_actions.append(
             "Repair 74 delivery board entries to include the distribution scaling anchor."
         )
