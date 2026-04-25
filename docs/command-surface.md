@@ -35,7 +35,7 @@ This table is sourced from `src/sdetkit/public_surface_contract.py`.
 
 - Advanced kits and discovery: `sdetkit kits list`, `sdetkit kits describe <kit>`, then `release`, `intelligence`, `integration`, `forensics`
 - Compatibility aliases: `gate`, `doctor`, `security`, `repo`, `evidence`, `report`, `policy`
-- Supporting utilities and automation: `kv`, `apiget`, `cassette-get`, `patch`, `maintenance`, `dev`, `ci`, `ops`, `notify`, `agent`
+- Supporting utilities and automation: `kv`, `inspect`, `review`, `apiget`, `cassette-get`, `patch`, `maintenance`, `dev`, `ci`, `ops`, `notify`, `agent`, `feature-registry`
 
 ## Transition-era and historical lanes
 

@@ -98,7 +98,7 @@ def test_request_timeout_records_failure_and_raises_timeout_error() -> None:
     assert spy.success_calls == 0
 
 
-def test_request_request_error_then_success_records_failure_then_success() -> None:
+def test_request_error_then_success_records_failure_then_success() -> None:
     calls = {"n": 0}
 
     def handler(request: httpx.Request) -> httpx.Response:
