@@ -103,3 +103,45 @@ def test_cli_readiness_json_output(capsys):
     payload = json.loads(out)
     assert payload["schema_version"] == "sdetkit.readiness.v2"
     assert "checks" in payload
+
+
+def test_check_recent_changelog_uses_latest_date_not_first_match(tmp_path):
+    (tmp_path / "CHANGELOG.md").write_text(
+        "## 2024-01-01\n- old\n\n## 2026-02-12\n- latest\n\n## 2025-11-05\n- mid\n",
+        encoding="utf-8",
+    )
+
+    result = readiness._check_recent_changelog(tmp_path)
+
+    assert result.passed is True
+    assert result.evidence == "latest dated entry found: 2026-02-12"
+
+
+def test_scan_test_scenario_capacity_counts_only_top_level_test_defs(tmp_path):
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir()
+    (tests_dir / "test_mixed.py").write_text(
+        "\n".join(
+            [
+                "def test_top_level_one():",
+                "    assert True",
+                "",
+                "class TestSuite:",
+                "    def test_method_should_not_count(self):",
+                "        assert True",
+                "",
+                "def helper():",
+                "    def test_nested_should_not_count():",
+                "        assert True",
+                "    return test_nested_should_not_count",
+                "",
+                "async def test_async_should_not_count_with_current_regex():",
+                "    assert True",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    capacity = readiness._scan_test_scenario_capacity(tmp_path)
+
+    assert capacity["detected_scenarios"] == 1

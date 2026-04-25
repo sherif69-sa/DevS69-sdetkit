@@ -5,6 +5,7 @@ import json
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 
@@ -118,10 +119,16 @@ def _check_recent_changelog(root: Path) -> ReadinessResult:
     if not text:
         return ReadinessResult(False, "missing CHANGELOG.md")
 
-    match = re.search(r"20\d{2}-\d{2}-\d{2}", text)
-    if not match:
+    dates: list[date] = []
+    for token in re.findall(r"20\d{2}-\d{2}-\d{2}", text):
+        try:
+            dates.append(date.fromisoformat(token))
+        except ValueError:
+            continue
+    if not dates:
         return ReadinessResult(False, "no dated release entries found")
-    return ReadinessResult(True, f"latest dated entry found: {match.group(0)}")
+    latest = max(dates).isoformat()
+    return ReadinessResult(True, f"latest dated entry found: {latest}")
 
 
 def _scan_test_scenario_capacity(root: Path) -> dict[str, object]:

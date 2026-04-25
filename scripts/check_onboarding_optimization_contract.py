@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import onboarding_optimization as otu
+from sdetkit import onboarding_optimization as onb_opt
 
 
 def main() -> int:
@@ -14,15 +14,15 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = otu.build_onboarding_time_summary(root)
+    payload = onb_opt.build_onboarding_time_summary(root)
 
     strict_failures: list[str] = []
-    page = root / otu._PAGE_PATH
+    page = root / onb_opt._PAGE_PATH
     page_text = page.read_text(encoding="utf-8") if page.exists() else ""
-    for section in [otu._SECTION_HEADER, *otu._REQUIRED_SECTIONS]:
+    for section in [onb_opt._SECTION_HEADER, *onb_opt._REQUIRED_SECTIONS]:
         if section not in page_text:
             strict_failures.append(section)
-    for command in otu._REQUIRED_COMMANDS:
+    for command in onb_opt._REQUIRED_COMMANDS:
         if command not in page_text:
             strict_failures.append(command)
 
