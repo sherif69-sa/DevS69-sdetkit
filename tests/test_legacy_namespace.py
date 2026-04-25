@@ -34,7 +34,9 @@ def test_handle_legacy_namespace_unknown_subcommand_errors(capsys) -> None:
 
 
 def test_handle_legacy_namespace_known_legacy_command_passthrough() -> None:
-    assert legacy_namespace.handle_legacy_namespace(["legacy", "weekly-review-lane", "--help"]) is None
+    assert (
+        legacy_namespace.handle_legacy_namespace(["legacy", "weekly-review-lane", "--help"]) is None
+    )
 
 
 def test_cli_main_unknown_legacy_subcommand_fails_fast(capsys) -> None:
