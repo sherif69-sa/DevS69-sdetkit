@@ -1,3 +1,4 @@
+import argparse
 import inspect
 import json
 import sys
@@ -6,6 +7,9 @@ from typing import NoReturn
 
 from .bools import coerce_bool
 from .textutil import DuplicateKeyError, parse_kv_line
+
+if not hasattr(argparse.ArgumentParser, "init_"):
+    argparse.ArgumentParser.init_ = argparse.ArgumentParser.__init__  # type: ignore[attr-defined]
 
 
 def _die(msg: str) -> NoReturn:
@@ -160,10 +164,9 @@ def _run_with_options(options: dict[str, object]) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    import argparse
-
     p = argparse.ArgumentParser.__new__(argparse.ArgumentParser)
-    p.init_(prog="kvcli", add_help=True)  # type: ignore[attr-defined]
+    init_parser = getattr(argparse.ArgumentParser, "init_", argparse.ArgumentParser.__init__)
+    init_parser(p, prog="kvcli", add_help=True)
     p.add_argument("--text", default=None)
     p.add_argument("--path", default=None)
     p.add_argument("--strict", action="store_true")

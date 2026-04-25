@@ -4,7 +4,7 @@
 
 Thanks for helping improve **sdetkit**.
 
-[README](README.md) · [Quality Playbook](QUALITY_PLAYBOOK.md) · [Security Policy](SECURITY.md) · [Live Docs](https://sherif69-sa.github.io/DevS69-sdetkit/)
+[README](../README.md) · [Quality Playbook](../QUALITY_PLAYBOOK.md) · [Security Policy](../SECURITY.md) · [Live Docs](https://sherif69-sa.github.io/DevS69-sdetkit/)
 
 </div>
 
@@ -148,7 +148,7 @@ Coverage gate migration note:
 
 ## Pull request checklist
 
-Reference: [docs/premium-quality-gate.md](docs/premium-quality-gate.md)
+Reference: [docs/premium-quality-gate.md](../docs/premium-quality-gate.md)
 
 - [ ] `python -m pre_commit run -a` passes.
 - [ ] `bash quality.sh cov` passes (or explain why not run).

@@ -4,7 +4,7 @@
 
 Security is treated as a product feature in this repository.
 
-[README](README.md) · [Security Docs](docs/security.md) · [Support](SUPPORT.md) · [Live Docs](https://sherif69-sa.github.io/DevS69-sdetkit/)
+[README](../README.md) · [Security Docs](../docs/security.md) · [Support](../SUPPORT.md) · [Live Docs](https://sherif69-sa.github.io/DevS69-sdetkit/)
 
 </div>
 
@@ -20,7 +20,7 @@ Security is treated as a product feature in this repository.
 Please **do not open public issues** for suspected vulnerabilities.
 
 1. Use GitHub Security Advisories for this repository to submit a private report.
-2. If GitHub Security Advisories is unavailable, use the private contact channel listed in [SUPPORT.md](SUPPORT.md) and request private handling.
+2. If GitHub Security Advisories is unavailable, use the private contact channel listed in [SUPPORT.md](../SUPPORT.md) and request private handling.
 3. Include the details listed in [What to include in your report](#what-to-include-in-your-report).
 
 ## Response targets
@@ -53,7 +53,7 @@ Provide enough detail for deterministic triage:
 - proof-of-concept or sample payloads (sanitized),
 - suggested mitigations or fix direction (if known).
 
-For additional hardening context, see [docs/security.md](docs/security.md).
+For additional hardening context, see [docs/security.md](../docs/security.md).
 
 ## Vulnerability handling statement
 
