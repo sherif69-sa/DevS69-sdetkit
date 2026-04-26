@@ -34,5 +34,6 @@ def test_default_required_checks_match_workflow_contracts() -> None:
 
 def test_enforcement_workflow_uses_default_required_checks() -> None:
     text = ENFORCE_WORKFLOW.read_text(encoding="utf-8")
+    assert "pull_request_target:" in text
     for context in _MOD.DEFAULT_REQUIRED_CHECKS:
         assert f'--required-check "{context}"' in text
