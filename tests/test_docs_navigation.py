@@ -108,6 +108,29 @@ def test_docs_navigation_write_defaults_noop_when_already_clean(tmp_path):
     assert second == []
 
 
+def test_docs_navigation_write_defaults_repairs_existing_top_journeys_without_duplication(tmp_path):
+    (tmp_path / "docs").mkdir(parents=True)
+    content = (
+        "# Documentation Home\n\n"
+        + docs_navigation._DEFAULT_QUICK_JUMP_BLOCK
+        + "\n\n"
+        + docs_navigation._LEGACY_REPORTS_SECTION_HEADER
+        + "\n\n"
+        + "### Top journeys\n\n"
+        + "- Run first command in under 60 seconds\n"
+        + "\n## Next section\n"
+    )
+    (tmp_path / "docs/index.md").write_text(content, encoding="utf-8")
+
+    touched = docs_navigation._write_defaults(tmp_path)
+    assert touched == ["docs/index.md"]
+
+    repaired = (tmp_path / "docs/index.md").read_text(encoding="utf-8")
+    assert repaired.count("### Top journeys") == 1
+    for journey in docs_navigation._TOP_JOURNEYS:
+        assert f"- {journey}" in repaired
+
+
 def test_docs_navigation_markdown_output_file_written(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     content = (

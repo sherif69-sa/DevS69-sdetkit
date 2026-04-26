@@ -7,7 +7,7 @@
 | 8 | Good-first-issue accelerator pack | `docs/name-8-ultra-upgrade-report.md` | `docs/artifacts/name8-good-first-issues-sample.md` | shipped ✅ |
 | 9 | Triage-ready issue + PR templates | `docs/name-9-ultra-upgrade-report.md` | `docs/artifacts/name9-triage-templates-sample.md` | shipped ✅ |
 | 10 | First-contribution checklist | `docs/name-10-ultra-upgrade-report.md` | `docs/artifacts/name10-first-contribution-checklist-sample.md` | shipped ✅ |
-| 11 | Docs navigation tune-up | `docs/name-11-ultra-upgrade-report.md` | `docs/artifacts/name11-docs-navigation-sample.md` | shipped ✅ |
+| 11 | Docs navigation tune-up | `docs/impact-11-ultra-upgrade-report.md` | `docs/artifacts/name11-docs-navigation-sample.md` | shipped ✅ |
 | 12 | Startup/small-team workflow | `docs/startup-readiness-report.md` | `docs/artifacts/startup-readiness-sample.md` | shipped ✅ |
 | 13 | Enterprise/regulated workflow | `docs/enterprise-readiness-report.md` | `docs/artifacts/enterprise-readiness-sample.md` | shipped ✅ |
 
