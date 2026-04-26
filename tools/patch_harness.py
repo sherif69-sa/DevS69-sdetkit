@@ -10,5 +10,5 @@ if str(SRC) not in sys.path:
 
 from sdetkit.patch import main  # noqa: E402
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

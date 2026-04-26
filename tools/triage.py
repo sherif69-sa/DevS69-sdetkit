@@ -446,7 +446,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  pytest -q 2>&1 | tee {logp}")
                 return 2
 
-        run_now = bool(args.run) or (not args.parse_pytest_log and (bool(args.tee) or True))
+        run_now = bool(args.run) or (not args.parse_pytest_log)
         if not args.parse_pytest_log and run_now:
             rc, text = _run_pytest(args, root)
             if rc == 0:
@@ -495,5 +495,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())
