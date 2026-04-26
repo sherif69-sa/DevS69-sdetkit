@@ -1,4 +1,4 @@
-#  big upgrade report
+# Impact 11 Ultra Upgrade Report
 
 ## What shipped
 
@@ -16,4 +16,4 @@ python scripts/check_docs_navigation_contract_11.py
 
 ## Handoff
 
- big upgrade closes docs navigation fundamentals with reproducible checks and report artifacts.
+This upgrade closes docs navigation fundamentals with reproducible checks and report artifacts.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -111,10 +112,25 @@ def _ensure_legacy_reports_section_header(text: str) -> tuple[str, bool]:
 
 
 def _ensure_journey_block(text: str) -> tuple[str, bool]:
-    if _TOP_JOURNEYS_HEADER in text and all(f"- {journey}" in text for journey in _TOP_JOURNEYS):
+    if _TOP_JOURNEYS_HEADER not in text:
+        updated = text.rstrip() + "\n\n" + _DEFAULT_JOURNEYS_BLOCK + "\n"
+        return updated, updated != text
+
+    pattern = re.compile(
+        rf"(?ms)^{re.escape(_TOP_JOURNEYS_HEADER)}\n(?P<body>.*?)(?=^##\s|^###\s|\Z)"
+    )
+    match = pattern.search(text)
+    if not match:
         return text, False
 
-    updated = text.rstrip() + "\n\n" + _DEFAULT_JOURNEYS_BLOCK + "\n"
+    section = match.group(0).rstrip()
+    missing = [journey for journey in _TOP_JOURNEYS if f"- {journey}" not in section]
+    if not missing:
+        return text, False
+
+    additions = "".join(f"\n- {journey}" for journey in missing)
+    updated_section = section + additions + "\n"
+    updated = text[: match.start()] + updated_section + text[match.end() :]
     return updated, updated != text
 
 
