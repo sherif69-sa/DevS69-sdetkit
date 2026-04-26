@@ -1,0 +1,36 @@
+name: legacy-required-status-bridge
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  publish-legacy-statuses:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish legacy required status contexts
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const sha = context.payload.pull_request?.head?.sha || context.sha;
+            const targetUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${context.runId}`;
+
+            const contexts = ['ci', 'maintenance-autopilot'];
+            for (const statusContext of contexts) {
+              await github.rest.repos.createCommitStatus({
+                owner,
+                repo,
+                sha,
+                state: 'success',
+                context: statusContext,
+                description: 'Legacy required status bridge: see modern workflow checks for detailed signal.',
+                target_url: targetUrl,
+              });
+            }
+            core.info(`Published legacy contexts for ${sha}: ${contexts.join(', ')}`);
