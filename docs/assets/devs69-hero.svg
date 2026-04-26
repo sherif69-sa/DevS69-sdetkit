@@ -70,7 +70,7 @@
   </g>
 
   <rect x="980" y="122" width="170" height="44" rx="22" fill="#0B1D3B" stroke="#2D5EA3" opacity="0.95"/>
-  <text x="1065" y="151" text-anchor="middle" fill="#A7CBFF" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="700">v1.0.2</text>
+  <text x="1065" y="151" text-anchor="middle" fill="#A7CBFF" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="700">v1.0.3</text>
 
   <g filter="url(#softGlow)">
     <text x="640" y="210" text-anchor="middle" fill="url(#accent)" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="70" font-weight="850">DevS69 (sdetkit)</text>
