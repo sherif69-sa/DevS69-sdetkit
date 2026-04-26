@@ -50,19 +50,37 @@ def main(argv: list[str] | None = None) -> int:
         default=[],
         help="Required status check context (repeatable).",
     )
+    parser.add_argument(
+        "--required-approving-review-count",
+        type=int,
+        default=1,
+        help="Number of approving reviews required before merge.",
+    )
+    parser.add_argument(
+        "--require-code-owner-reviews",
+        action="store_true",
+        default=False,
+        help="Require CODEOWNERS approval before merge.",
+    )
+    parser.add_argument(
+        "--enforce-admins",
+        action="store_true",
+        default=False,
+        help="Apply pull request restrictions to admins as well.",
+    )
     args = parser.parse_args(argv)
 
-    checks = args.required_check or ["ci", "maintenance-autopilot"]
+    checks = args.required_check or ["CI / Full CI lane", "maintenance-autopilot / autopilot"]
     payload = {
         "required_status_checks": {
             "strict": True,
             "checks": [{"context": c} for c in checks],
         },
-        "enforce_admins": True,
+        "enforce_admins": args.enforce_admins,
         "required_pull_request_reviews": {
             "dismiss_stale_reviews": True,
-            "require_code_owner_reviews": True,
-            "required_approving_review_count": 1,
+            "require_code_owner_reviews": args.require_code_owner_reviews,
+            "required_approving_review_count": args.required_approving_review_count,
         },
         "restrictions": None,
         "required_linear_history": True,

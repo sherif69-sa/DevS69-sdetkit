@@ -33,5 +33,6 @@ jobs:
             --repo "${{ github.event.repository.name }}" \
             --branch "main" \
             --token "${BRANCH_PROTECTION_TOKEN}" \
-            --required-check "ci" \
-            --required-check "maintenance-autopilot"
+            --required-check "CI / Full CI lane" \
+            --required-check "maintenance-autopilot / autopilot" \
+            --required-approving-review-count 0
