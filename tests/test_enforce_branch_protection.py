@@ -107,4 +107,4 @@ def test_dry_run_prints_payload_and_skips_request(monkeypatch, capsys) -> None:
     assert rc == 0
     out = capsys.readouterr().out
     assert "required_status_checks" in out
-    assert "maintenance-autopilot / autopilot" in out
+    assert "maintenance-autopilot / autopilot (pull_request)" in out

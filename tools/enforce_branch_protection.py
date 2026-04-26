@@ -7,7 +7,10 @@ import urllib.request
 from typing import Any
 
 DEFAULT_HTTP_TIMEOUT_SECONDS = 30
-DEFAULT_REQUIRED_CHECKS = ("CI / Full CI lane", "maintenance-autopilot / autopilot")
+DEFAULT_REQUIRED_CHECKS = (
+    "CI / Full CI lane (pull_request)",
+    "maintenance-autopilot / autopilot (pull_request)",
+)
 
 
 def _request(

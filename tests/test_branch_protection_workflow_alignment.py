@@ -27,8 +27,8 @@ def test_default_required_checks_match_workflow_contracts() -> None:
     assert "autopilot:" in autopilot_text
 
     assert tuple(_MOD.DEFAULT_REQUIRED_CHECKS) == (
-        "CI / Full CI lane",
-        "maintenance-autopilot / autopilot",
+        "CI / Full CI lane (pull_request)",
+        "maintenance-autopilot / autopilot (pull_request)",
     )
 
 
