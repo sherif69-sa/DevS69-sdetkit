@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +45,43 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _append_jsonl(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(payload, sort_keys=True) + "\n")
+
+
+def _read_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        raw = line.strip()
+        if not raw:
+            continue
+        try:
+            item = json.loads(raw)
+        except ValueError:
+            continue
+        if isinstance(item, dict):
+            rows.append(item)
+    return rows
+
+
+POLICY_ACTIONS: dict[str, list[str]] = {
+    "baseline_pre_commit": ["python -m pre_commit run -a"],
+    "baseline_kpi_test": ["PYTHONPATH=src python -m pytest -q tests/test_kpi_audit.py"],
+    "baseline_ruff": ["ruff check src/sdetkit/kpi_audit.py tools/maintenance_command_center.py"],
+    "enterprise_repo_check": [
+        "PYTHONPATH=src python -m sdetkit repo check . --profile enterprise --format json --force"
+    ],
+    "security_actionable": [
+        "PYTHONPATH=src python -m sdetkit security check --root . --format json"
+    ],
+    "review_json": ["PYTHONPATH=src python -m sdetkit review . --no-workspace --format json"],
+}
+
+
 def _summary_from_plan(path: Path) -> dict[str, Any]:
     payload = _load_json(path)
     keep_open = payload.get("keep_open", [])
@@ -74,6 +112,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out-dir", default="build/maintenance/autopilot")
     parser.add_argument("--run-live-if-token", action="store_true")
     parser.add_argument("--token-env", default="GH_TOKEN")
+    parser.add_argument("--memory-db", default=".sdetkit/maintenance/failure-memory.jsonl")
     args = parser.parse_args(argv)
 
     out_dir = Path(args.out_dir)
@@ -234,6 +273,58 @@ def main(argv: list[str] | None = None) -> int:
         "follow_up_required": (warn_count + error_count) > 0,
     }
 
+    observed_failures: list[dict[str, Any]] = []
+    for step_name, step_payload in report.get("steps", {}).items():
+        if not isinstance(step_payload, dict):
+            continue
+        if bool(step_payload.get("ok", True)):
+            continue
+        observed_failures.append(
+            {
+                "failure_key": step_name,
+                "returncode": step_payload.get("returncode"),
+                "policy_actions": POLICY_ACTIONS.get(step_name, []),
+            }
+        )
+    if report["security"]["follow_up_required"]:
+        observed_failures.append(
+            {
+                "failure_key": "security_actionable",
+                "returncode": 1,
+                "policy_actions": POLICY_ACTIONS.get("security_actionable", []),
+            }
+        )
+
+    memory_db = Path(args.memory_db)
+    run_id = datetime.now(UTC).isoformat()
+    for item in observed_failures:
+        _append_jsonl(
+            memory_db,
+            {
+                "run_id": run_id,
+                "owner": args.owner,
+                "repo": args.repo,
+                **item,
+            },
+        )
+
+    history = _read_jsonl(memory_db)
+    score: dict[str, int] = {}
+    for item in history[-500:]:
+        key = str(item.get("failure_key", "")).strip()
+        if not key:
+            continue
+        score[key] = score.get(key, 0) + 1
+    top_now = sorted(score.items(), key=lambda pair: (-pair[1], pair[0]))[:5]
+    report["follow_up"] = {
+        "observed_failures_this_run": observed_failures,
+        "memory_db": str(memory_db),
+        "top_now": [
+            {"failure_key": key, "seen_runs": count, "policy_actions": POLICY_ACTIONS.get(key, [])}
+            for key, count in top_now
+        ],
+    }
+
     _write_json(out_dir / "autopilot-report.json", report)
 
     md = [
@@ -252,10 +343,23 @@ def main(argv: list[str] | None = None) -> int:
         f"- actionable findings: **{warn_count + error_count}**",
         f"- follow-up required: **{(warn_count + error_count) > 0}**",
         "",
-        "## Live run",
-        f"- attempted: **{report['live_run']['attempted']}**",
-        f"- executed: **{report['live_run']['executed']}**",
+        "## Failure memory + policy follow-up",
+        f"- memory db: `{memory_db}`",
+        f"- observed failures this run: **{len(observed_failures)}**",
+        "- top recurring failure keys:",
     ]
+    for item in report["follow_up"]["top_now"]:
+        md.append(f"  - `{item['failure_key']}` seen {item['seen_runs']} run(s)")
+        for action in item.get("policy_actions", []):
+            md.append(f"    - auto-policy: `{action}`")
+    md.extend(
+        [
+            "",
+            "## Live run",
+            f"- attempted: **{report['live_run']['attempted']}**",
+            f"- executed: **{report['live_run']['executed']}**",
+        ]
+    )
     if not report["live_run"]["executed"] and "reason" in report["live_run"]:
         md.append(f"- reason: `{report['live_run']['reason']}`")
     (out_dir / "autopilot-report.md").write_text("\n".join(md).strip() + "\n", encoding="utf-8")

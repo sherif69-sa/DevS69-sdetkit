@@ -49,6 +49,7 @@ jobs:
             build/maintenance/autopilot/command-center-dry-run-plan.json
             build/maintenance/autopilot/command-center-live-plan.json
             build/maintenance/autopilot/sdet_check.json
+            .sdetkit/maintenance/failure-memory.jsonl
 
       - name: Publish run summary
         run: |

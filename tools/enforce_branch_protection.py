@@ -37,7 +37,9 @@ def _request(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Apply branch protection policy to a GitHub branch.")
+    parser = argparse.ArgumentParser(
+        description="Apply branch protection policy to a GitHub branch."
+    )
     parser.add_argument("--owner", required=True)
     parser.add_argument("--repo", required=True)
     parser.add_argument("--branch", default="main")
@@ -70,10 +72,7 @@ def main(argv: list[str] | None = None) -> int:
         "lock_branch": False,
         "allow_fork_syncing": True,
     }
-    url = (
-        f"https://api.github.com/repos/{args.owner}/{args.repo}/branches/"
-        f"{args.branch}/protection"
-    )
+    url = f"https://api.github.com/repos/{args.owner}/{args.repo}/branches/{args.branch}/protection"
     _request(token=args.token, method="PUT", url=url, payload=payload)
     print(f"Branch protection enforced for {args.owner}/{args.repo}:{args.branch}")
     print(f"Required checks: {checks}")
