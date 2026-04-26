@@ -42,7 +42,7 @@ This artifact summarizes README live signals, docs palette settings, and proof m
 | Pages | https://sherif69-sa.github.io/DevS69-sdetkit/ |
 | CI | https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml |
 | Docs link check | https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/docs-link-check.yml |
-| Last commit | https://github.com/sherif69-sa/DevS69-sdetkit/commits/main |
+| Last commit | https://github.com/sherif69-sa/DevS69-sdetkit/commits |
 | Latest release | https://github.com/sherif69-sa/DevS69-sdetkit/releases |
 | Open issues | https://github.com/sherif69-sa/DevS69-sdetkit/issues |
 | Community | CONTRIBUTING.md |
