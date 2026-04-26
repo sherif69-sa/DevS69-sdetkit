@@ -1,6 +1,7 @@
 name: maintenance-autopilot
 
 on:
+  pull_request:
   schedule:
     - cron: "35 6 * * *"
   workflow_dispatch:
@@ -34,14 +35,23 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PYTHONPATH=src python tools/maintenance_autopilot.py \
-            --owner "${{ github.repository_owner }}" \
-            --repo "${{ github.event.repository.name }}" \
-            --run-live-if-token \
-            --auto-remediate-safe \
-            --max-remediation-attempts 3 \
-            --remediation-cooldown-runs 2 \
-            --out-dir build/maintenance/autopilot
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PYTHONPATH=src python tools/maintenance_autopilot.py \
+              --owner "${{ github.repository_owner }}" \
+              --repo "${{ github.event.repository.name }}" \
+              --max-remediation-attempts 3 \
+              --remediation-cooldown-runs 2 \
+              --out-dir build/maintenance/autopilot
+          else
+            PYTHONPATH=src python tools/maintenance_autopilot.py \
+              --owner "${{ github.repository_owner }}" \
+              --repo "${{ github.event.repository.name }}" \
+              --run-live-if-token \
+              --auto-remediate-safe \
+              --max-remediation-attempts 3 \
+              --remediation-cooldown-runs 2 \
+              --out-dir build/maintenance/autopilot
+          fi
 
       - name: Upload autopilot artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
@@ -64,6 +74,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Open/update security follow-up issue when actionable findings exist
+        if: github.event_name != 'pull_request'
         id: security_followup
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
@@ -124,7 +135,7 @@ jobs:
             }
 
       - name: Send webhook notification for actionable security follow-up
-        if: steps.security_followup.outputs.actionable != '0' && secrets.MAINTENANCE_WEBHOOK_URL != ''
+        if: github.event_name != 'pull_request' && steps.security_followup.outputs.actionable != '0' && secrets.MAINTENANCE_WEBHOOK_URL != ''
         env:
           WEBHOOK_URL: ${{ secrets.MAINTENANCE_WEBHOOK_URL }}
           ISSUE_NUMBER: ${{ steps.security_followup.outputs.issue_number }}
@@ -177,7 +188,7 @@ jobs:
           rm -f .github_output_tmp
 
       - name: Create pull request for successful auto-remediation
-        if: steps.remediation_changes.outputs.run_cpr == 'true'
+        if: github.event_name != 'pull_request' && steps.remediation_changes.outputs.run_cpr == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
         with:
           commit-message: "chore(maintenance): apply safe autopilot remediation"
