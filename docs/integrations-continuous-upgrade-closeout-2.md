@@ -1,6 +1,6 @@
 # Lane — Continuous upgrade closeout lane
 
-Lane starts the next impact by converting Lane publication outcomes into a deterministic continuous-upgrade lane.
+This lane starts the next impact by converting publication outcomes into a deterministic continuous-upgrade lane.
 
 ## Why Continuous Upgrade Lane Closeout matters
 
