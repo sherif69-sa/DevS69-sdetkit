@@ -77,20 +77,30 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Print resolved branch-protection payload and skip GitHub API write.",
     )
+    parser.add_argument(
+        "--disable-pr-reviews",
+        action="store_true",
+        help="Disable pull-request review requirements entirely.",
+    )
     args = parser.parse_args(argv)
 
     checks = args.required_check or list(DEFAULT_REQUIRED_CHECKS)
+    required_pull_request_reviews: dict[str, Any] | None
+    if args.disable_pr_reviews:
+        required_pull_request_reviews = None
+    else:
+        required_pull_request_reviews = {
+            "dismiss_stale_reviews": True,
+            "require_code_owner_reviews": args.require_code_owner_reviews,
+            "required_approving_review_count": args.required_approving_review_count,
+        }
     payload = {
         "required_status_checks": {
             "strict": True,
             "checks": [{"context": c} for c in checks],
         },
         "enforce_admins": args.enforce_admins,
-        "required_pull_request_reviews": {
-            "dismiss_stale_reviews": True,
-            "require_code_owner_reviews": args.require_code_owner_reviews,
-            "required_approving_review_count": args.required_approving_review_count,
-        },
+        "required_pull_request_reviews": required_pull_request_reviews,
         "restrictions": None,
         "required_linear_history": True,
         "allow_force_pushes": False,

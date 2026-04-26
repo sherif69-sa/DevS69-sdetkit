@@ -108,3 +108,26 @@ def test_dry_run_prints_payload_and_skips_request(monkeypatch, capsys) -> None:
     out = capsys.readouterr().out
     assert "required_status_checks" in out
     assert "maintenance-autopilot / autopilot (pull_request)" in out
+
+
+def test_disable_pr_reviews_sets_required_pull_request_reviews_to_null(monkeypatch, capsys) -> None:
+    def _fake_request(**_: Any) -> Any:
+        raise AssertionError("_request should not be called in dry-run mode")
+
+    monkeypatch.setattr(_MOD, "_request", _fake_request)
+
+    rc = _MOD.main(
+        [
+            "--owner",
+            "octo",
+            "--repo",
+            "hello",
+            "--token",
+            "x",
+            "--disable-pr-reviews",
+            "--dry-run",
+        ]
+    )
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert '"required_pull_request_reviews": null' in out
