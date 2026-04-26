@@ -1,0 +1,59 @@
+name: maintenance-autopilot
+
+on:
+  schedule:
+    - cron: "35 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  autopilot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project + dev/test extras
+        run: |
+          python -m pip install -c constraints-ci.txt -e .[dev,test]
+
+      - name: Run maintenance autopilot
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PYTHONPATH=src python tools/maintenance_autopilot.py \
+            --owner "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --run-live-if-token \
+            --out-dir build/maintenance/autopilot
+
+      - name: Upload autopilot artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: maintenance-autopilot
+          path: |
+            build/maintenance/autopilot/autopilot-report.json
+            build/maintenance/autopilot/autopilot-report.md
+            build/maintenance/autopilot/command-center-dry-run-plan.json
+            build/maintenance/autopilot/command-center-live-plan.json
+            build/maintenance/autopilot/sdet_check.json
+
+      - name: Publish run summary
+        run: |
+          {
+            echo "## Maintenance autopilot"
+            echo
+            cat build/maintenance/autopilot/autopilot-report.md
+          } >> "$GITHUB_STEP_SUMMARY"
