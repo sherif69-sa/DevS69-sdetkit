@@ -60,12 +60,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "#  delivery board",
-                "- [ ]  integration brief committed",
-                "- [ ]  advanced GitLab pipeline blueprint published",
-                "- [ ]  matrix and cache strategy exported",
-                "- [ ]  KPI scorecard snapshot exported",
-                "- [ ]  integration expansion priorities drafted from  learnings",
+                "# Delivery board",
+                "- [ ] integration-expansion2 integration brief committed",
+                "- [ ] Advanced GitLab pipeline blueprint published",
+                "- [ ] Matrix and cache strategy exported",
+                "- [ ] KPI scorecard snapshot exported",
+                "- [ ] Integration expansion priorities drafted from lane learnings",
             ]
         )
         + "\n",
@@ -180,3 +180,41 @@ def test_lane67_cli_dispatch(tmp_path: Path, capsys) -> None:
     rc = cli.main(["integration-expansion3-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Integration Expansion3 Closeout summary" in capsys.readouterr().out
+
+
+def test_lane67_strict_fails_when_top10_markers_missing(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+    (tmp_path / "docs/top-10-github-strategy.md").write_text(
+        "- **Platform strategy:** no lane markers here.\n",
+        encoding="utf-8",
+    )
+    assert d67.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
+
+
+def test_lane67_strict_fails_when_integration_expansion2_anchor_missing(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+    (
+        tmp_path
+        / "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
+    ).write_text(
+        "\n".join(
+            [
+                "# Delivery board",
+                "- [ ] Integration brief committed",
+                "- [ ] Advanced GitLab pipeline blueprint published",
+                "- [ ] Matrix and cache strategy exported",
+                "- [ ] KPI scorecard snapshot exported",
+                "- [ ] Integration expansion priorities drafted from lane learnings",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    assert d67.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
+
+
+def test_lane67_command_lane_parity_and_heading_hygiene() -> None:
+    assert d67._REQUIRED_COMMANDS == d67._EXECUTION_COMMANDS
+    assert "#  " not in d67._DEFAULT_PAGE_TEMPLATE
+    for command in d67._REQUIRED_COMMANDS:
+        assert command in d67._DEFAULT_PAGE_TEMPLATE
