@@ -6,8 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS_FILE = ROOT / "tools" / "enforce_branch_protection.py"
 ENFORCE_WORKFLOW = ROOT / ".github" / "workflows" / "enforce-branch-protection.yml"
-CI_WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
-AUTOPILOT_WORKFLOW = ROOT / ".github" / "workflows" / "maintenance-autopilot.yml"
+LEGACY_BRIDGE_WORKFLOW = ROOT / ".github" / "workflows" / "legacy-required-status-bridge.yml"
 
 _SPEC = importlib.util.spec_from_file_location("enforce_branch_protection", TOOLS_FILE)
 assert _SPEC and _SPEC.loader
@@ -16,19 +15,12 @@ _SPEC.loader.exec_module(_MOD)
 
 
 def test_default_required_checks_match_workflow_contracts() -> None:
-    ci_text = CI_WORKFLOW.read_text(encoding="utf-8")
-    autopilot_text = AUTOPILOT_WORKFLOW.read_text(encoding="utf-8")
-
-    assert "name: CI" in ci_text
-    assert "full-ci:" in ci_text
-    assert "name: Full CI lane" in ci_text
-
-    assert "name: maintenance-autopilot" in autopilot_text
-    assert "autopilot:" in autopilot_text
+    bridge_text = LEGACY_BRIDGE_WORKFLOW.read_text(encoding="utf-8")
+    assert "contexts = ['ci', 'maintenance-autopilot']" in bridge_text
 
     assert tuple(_MOD.DEFAULT_REQUIRED_CHECKS) == (
-        "CI / Full CI lane (pull_request)",
-        "maintenance-autopilot / autopilot (pull_request)",
+        "ci",
+        "maintenance-autopilot",
     )
 
 
