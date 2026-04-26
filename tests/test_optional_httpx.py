@@ -21,7 +21,13 @@ def test_load_httpx_returns_fallback_when_module_missing(monkeypatch) -> None:
         module.HTTPTransport()
         raise AssertionError("expected fallback HTTPTransport() to raise ModuleNotFoundError")
     except ModuleNotFoundError as exc:
-        assert "optional network dependencies" in str(exc)
+        assert "runtime dependencies" in str(exc)
+
+    try:
+        module.Response()
+        raise AssertionError("expected fallback Response() to raise ModuleNotFoundError")
+    except ModuleNotFoundError as exc:
+        assert "sdetkit apiget" in str(exc)
 
 
 def test_load_httpx_imports_module_when_available(monkeypatch) -> None:

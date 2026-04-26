@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 
 
-def test_integration_closeout_docs_do_not_contain_lane_lane_typo() -> None:
+def test_integration_closeout_docs_do_not_contain_lane_typo() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     offenders: list[str] = []
     pattern = re.compile(r"\blane\s+lane\b", re.IGNORECASE)
