@@ -4,8 +4,9 @@ import argparse
 import json
 import subprocess
 import sys
-import tomllib
 from pathlib import Path
+
+import tomllib
 
 
 def _project_meta(pyproject: Path) -> tuple[str, str]:

@@ -4,8 +4,9 @@ import argparse
 import json
 import re
 import sys
-import tomllib
 from pathlib import Path
+
+import tomllib
 
 
 def _load_version(pyproject_path: Path) -> str:
