@@ -57,3 +57,58 @@ jobs:
             echo
             cat build/maintenance/autopilot/autopilot-report.md
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open/update security follow-up issue when actionable findings exist
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const report = JSON.parse(fs.readFileSync('build/maintenance/autopilot/autopilot-report.json', 'utf8'));
+            const sec = report.security || {};
+            const actionable = Number(sec.actionable_findings || 0);
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${context.runId}`;
+            if (actionable <= 0) {
+              core.info('No actionable security findings. No follow-up issue update needed.');
+              return;
+            }
+
+            const title = '🚨 Maintenance security follow-up (autopilot)';
+            const body = [
+              'Autopilot detected actionable security findings.',
+              '',
+              `- warn: ${sec.warn ?? 0}`,
+              `- error: ${sec.error ?? 0}`,
+              `- actionable findings: ${actionable}`,
+              `- workflow run: ${runUrl}`,
+              '',
+              'Please triage and remediate, then rerun maintenance autopilot.',
+            ].join('\n');
+
+            const existing = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+              labels: 'maintenance,security',
+            });
+            const found = (existing.data || []).find((i) => i.title === title);
+            if (found) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: found.number,
+                body,
+              });
+              core.info(`Updated existing follow-up issue #${found.number}`);
+            } else {
+              const created = await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['maintenance', 'security'],
+              });
+              core.info(`Created follow-up issue #${created.data.number}`);
+            }

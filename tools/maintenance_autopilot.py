@@ -95,6 +95,22 @@ def main(argv: list[str] | None = None) -> int:
     report["steps"]["baseline_ruff"] = _run(
         ["ruff", "check", "src/sdetkit/kpi_audit.py", "tools/maintenance_command_center.py"]
     )
+    report["steps"]["baseline_security_check"] = _run(
+        [
+            sys.executable,
+            "-m",
+            "sdetkit",
+            "security",
+            "check",
+            "--root",
+            ".",
+            "--format",
+            "json",
+            "--out",
+            str(out_dir / "security-check.json"),
+        ],
+        env={**os.environ, "PYTHONPATH": "src"},
+    )
 
     # 2) Enterprise gate
     shutil.rmtree(".sdetkit/cache", ignore_errors=True)
@@ -205,6 +221,19 @@ def main(argv: list[str] | None = None) -> int:
         else:
             report["live_run"]["reason"] = f"missing token in env var {args.token_env}"
 
+    security_payload = _load_json(out_dir / "security-check.json")
+    security_counts = (
+        security_payload.get("counts", {}) if isinstance(security_payload, dict) else {}
+    )
+    warn_count = int(security_counts.get("warn", 0) or 0)
+    error_count = int(security_counts.get("error", 0) or 0)
+    report["security"] = {
+        "warn": warn_count,
+        "error": error_count,
+        "actionable_findings": warn_count + error_count,
+        "follow_up_required": (warn_count + error_count) > 0,
+    }
+
     _write_json(out_dir / "autopilot-report.json", report)
 
     md = [
@@ -216,6 +245,12 @@ def main(argv: list[str] | None = None) -> int:
         f"- dry-run defer: **{dry_summary['defer_count']}**",
         f"- dry-run keep_open numbers: `{dry_summary['keep_open_numbers']}`",
         f"- dry-run defer numbers: `{dry_summary['defer_numbers']}`",
+        "",
+        "## Security",
+        f"- warn: **{warn_count}**",
+        f"- error: **{error_count}**",
+        f"- actionable findings: **{warn_count + error_count}**",
+        f"- follow-up required: **{(warn_count + error_count) > 0}**",
         "",
         "## Live run",
         f"- attempted: **{report['live_run']['attempted']}**",
