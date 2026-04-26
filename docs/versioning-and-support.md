@@ -12,7 +12,7 @@ deprecation. It intentionally avoids guarantees we do not operationally enforce.
 
 ## Quick support snapshot
 
-- **Supported Python floor:** **3.11+**
+- **Supported Python floor:** **3.10+**
 - **Preferred install mode:** isolated environments (`venv` or `pipx`)
 - **First dependency target for adopters:** canonical command path artifacts and decision flow
 - **Support model:** best-effort public support (no contractual SLA stated in project policy)

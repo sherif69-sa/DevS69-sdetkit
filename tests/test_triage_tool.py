@@ -98,6 +98,22 @@ def test_parse_pytest_log_pass_only_returns_ok(tmp_path: Path) -> None:
     assert "no failures found in log" in out
 
 
+def test_pytest_mode_without_run_or_log_executes_pytest(tmp_path: Path, monkeypatch) -> None:
+    triage = _load_triage()
+
+    class R:
+        returncode = 0
+        stdout = "3 passed in 0.01s\n"
+
+    def fake_run(*a, **k):
+        return R()
+
+    monkeypatch.setattr(triage.subprocess, "run", fake_run)
+    rc, out = _run(triage, ["--path", str(tmp_path), "--mode", "pytest"], tmp_path)
+    assert rc == 0
+    assert "pytest ok" in out
+
+
 def test_run_pytest_success_writes_tee(tmp_path: Path, monkeypatch) -> None:
     triage = _load_triage()
 
