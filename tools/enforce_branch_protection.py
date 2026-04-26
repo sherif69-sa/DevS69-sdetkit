@@ -7,6 +7,7 @@ import urllib.request
 from typing import Any
 
 DEFAULT_HTTP_TIMEOUT_SECONDS = 30
+DEFAULT_REQUIRED_CHECKS = ("CI / Full CI lane", "maintenance-autopilot / autopilot")
 
 
 def _request(
@@ -68,9 +69,14 @@ def main(argv: list[str] | None = None) -> int:
         default=False,
         help="Apply pull request restrictions to admins as well.",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print resolved branch-protection payload and skip GitHub API write.",
+    )
     args = parser.parse_args(argv)
 
-    checks = args.required_check or ["CI / Full CI lane", "maintenance-autopilot / autopilot"]
+    checks = args.required_check or list(DEFAULT_REQUIRED_CHECKS)
     payload = {
         "required_status_checks": {
             "strict": True,
@@ -90,6 +96,9 @@ def main(argv: list[str] | None = None) -> int:
         "lock_branch": False,
         "allow_fork_syncing": True,
     }
+    if args.dry_run:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
     url = f"https://api.github.com/repos/{args.owner}/{args.repo}/branches/{args.branch}/protection"
     _request(token=args.token, method="PUT", url=url, payload=payload)
     print(f"Branch protection enforced for {args.owner}/{args.repo}:{args.branch}")
