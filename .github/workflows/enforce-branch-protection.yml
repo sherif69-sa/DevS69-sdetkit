@@ -1,7 +1,7 @@
 name: enforce-branch-protection
 
 on:
-  pull_request_target:
+  pull_request:
     branches: [main]
   schedule:
     - cron: "15 7 * * 1"
