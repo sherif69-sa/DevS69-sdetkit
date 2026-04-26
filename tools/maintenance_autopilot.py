@@ -69,20 +69,60 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-POLICY_ACTIONS: dict[str, list[str]] = {
-    "baseline_pre_commit": ["python -m pre_commit run -a"],
-    "baseline_kpi_test": ["PYTHONPATH=src python -m pytest -q tests/test_kpi_audit.py"],
-    "baseline_ruff": ["ruff check src/sdetkit/kpi_audit.py tools/maintenance_command_center.py"],
-    "enterprise_repo_check": [
-        "PYTHONPATH=src python -m sdetkit repo check . --profile enterprise --format json --force"
-    ],
-    "security_actionable": [
-        "PYTHONPATH=src python -m sdetkit security check --root . --format json"
-    ],
-    "review_json": ["PYTHONPATH=src python -m sdetkit review . --no-workspace --format json"],
+POLICY_RULES: dict[str, dict[str, Any]] = {
+    "baseline_pre_commit": {
+        "actions": ["python -m pre_commit run -a"],
+        "route": "auto",
+        "min_success_rate_for_auto": 0.5,
+    },
+    "baseline_kpi_test": {
+        "actions": ["PYTHONPATH=src python -m pytest -q tests/test_kpi_audit.py"],
+        "route": "review",
+        "min_success_rate_for_auto": 1.0,
+    },
+    "baseline_ruff": {
+        "actions": ["ruff check src/sdetkit/kpi_audit.py tools/maintenance_command_center.py"],
+        "route": "auto",
+        "min_success_rate_for_auto": 0.5,
+    },
+    "enterprise_repo_check": {
+        "actions": [
+            "PYTHONPATH=src python -m sdetkit repo check . --profile enterprise --format json --force"
+        ],
+        "route": "review",
+        "min_success_rate_for_auto": 1.0,
+    },
+    "security_actionable": {
+        "actions": ["PYTHONPATH=src python -m sdetkit security check --root . --format json"],
+        "route": "review",
+        "min_success_rate_for_auto": 1.0,
+    },
+    "review_json": {
+        "actions": ["PYTHONPATH=src python -m sdetkit review . --no-workspace --format json"],
+        "route": "review",
+        "min_success_rate_for_auto": 1.0,
+    },
 }
 
-SAFE_AUTOREMEDIATE_KEYS = {"baseline_pre_commit", "baseline_ruff"}
+
+def _policy_actions(key: str) -> list[str]:
+    rule = POLICY_RULES.get(key, {})
+    actions = rule.get("actions", [])
+    return actions if isinstance(actions, list) else []
+
+
+def _policy_route(key: str) -> str:
+    route = str(POLICY_RULES.get(key, {}).get("route", "review")).strip()
+    return route if route in {"auto", "review"} else "review"
+
+
+def _policy_min_success_rate(key: str) -> float:
+    raw = POLICY_RULES.get(key, {}).get("min_success_rate_for_auto", 1.0)
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        value = 1.0
+    return min(max(value, 0.0), 1.0)
 
 
 def _attempts_in_history(history: list[dict[str, Any]], failure_key: str) -> int:
@@ -106,6 +146,19 @@ def _runs_since_last_attempt(history: list[dict[str, Any]], failure_key: str) ->
         ):
             return len(seen_runs)
     return 10**9
+
+
+def _remediation_success_rate(history: list[dict[str, Any]], failure_key: str) -> float:
+    attempts = [
+        item
+        for item in history
+        if str(item.get("kind", "")) == "remediation_attempt"
+        and str(item.get("failure_key", "")) == failure_key
+    ]
+    if not attempts:
+        return 1.0
+    successes = sum(1 for item in attempts if bool(item.get("ok", False)))
+    return successes / len(attempts)
 
 
 def _summary_from_plan(path: Path) -> dict[str, Any]:
@@ -312,7 +365,7 @@ def main(argv: list[str] | None = None) -> int:
             {
                 "failure_key": step_name,
                 "returncode": step_payload.get("returncode"),
-                "policy_actions": POLICY_ACTIONS.get(step_name, []),
+                "policy_actions": _policy_actions(step_name),
             }
         )
     if report["security"]["follow_up_required"]:
@@ -320,7 +373,7 @@ def main(argv: list[str] | None = None) -> int:
             {
                 "failure_key": "security_actionable",
                 "returncode": 1,
-                "policy_actions": POLICY_ACTIONS.get("security_actionable", []),
+                "policy_actions": _policy_actions("security_actionable"),
             }
         )
 
@@ -351,7 +404,13 @@ def main(argv: list[str] | None = None) -> int:
         "observed_failures_this_run": observed_failures,
         "memory_db": str(memory_db),
         "top_now": [
-            {"failure_key": key, "seen_runs": count, "policy_actions": POLICY_ACTIONS.get(key, [])}
+            {
+                "failure_key": key,
+                "seen_runs": count,
+                "policy_actions": _policy_actions(key),
+                "policy_route": _policy_route(key),
+                "success_rate": _remediation_success_rate(history_before, key),
+            }
             for key, count in top_now
         ],
         "auto_remediation": [],
@@ -361,12 +420,23 @@ def main(argv: list[str] | None = None) -> int:
         remediation_results: list[dict[str, Any]] = []
         for item in observed_failures:
             key = str(item.get("failure_key", "")).strip()
-            if key not in SAFE_AUTOREMEDIATE_KEYS:
+            if _policy_route(key) != "auto":
                 remediation_results.append(
                     {
                         "failure_key": key,
                         "attempted": False,
-                        "reason": "not in SAFE_AUTOREMEDIATE_KEYS",
+                        "reason": "policy route is review",
+                    }
+                )
+                continue
+            success_rate = _remediation_success_rate(history_before, key)
+            min_rate = _policy_min_success_rate(key)
+            if success_rate < min_rate:
+                remediation_results.append(
+                    {
+                        "failure_key": key,
+                        "attempted": False,
+                        "reason": f"success rate below threshold ({success_rate:.2f} < {min_rate:.2f})",
                     }
                 )
                 continue
@@ -390,7 +460,7 @@ def main(argv: list[str] | None = None) -> int:
                     }
                 )
                 continue
-            actions = POLICY_ACTIONS.get(key, [])
+            actions = _policy_actions(key)
             if not actions:
                 remediation_results.append(
                     {
@@ -453,6 +523,10 @@ def main(argv: list[str] | None = None) -> int:
     ]
     for item in report["follow_up"]["top_now"]:
         md.append(f"  - `{item['failure_key']}` seen {item['seen_runs']} run(s)")
+        md.append(
+            f"    - route: `{item.get('policy_route', 'review')}`"
+            f" | success_rate: {float(item.get('success_rate', 1.0)):.2f}"
+        )
         for action in item.get("policy_actions", []):
             md.append(f"    - auto-policy: `{action}`")
     md.append("- auto-remediation attempts:")
