@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "maintenance-autopilot.yml"
+WORKFLOW = (
+    Path(__file__).resolve().parents[1] / ".github" / "workflows" / "maintenance-autopilot.yml"
+)
 
 
 def test_workflow_runs_on_pull_request() -> None:
@@ -16,7 +18,9 @@ def test_pull_request_branch_avoids_live_remediation_flags() -> None:
     assert 'if [ "${{ github.event_name }}" = "pull_request" ]; then' in text
     assert "--run-live-if-token" in text
     assert "--auto-remediate-safe" in text
-    pr_branch = text.split('if [ "${{ github.event_name }}" = "pull_request" ]; then', 1)[1].split("else", 1)[0]
+    pr_branch = text.split('if [ "${{ github.event_name }}" = "pull_request" ]; then', 1)[1].split(
+        "else", 1
+    )[0]
     assert "--run-live-if-token" not in pr_branch
     assert "--auto-remediate-safe" not in pr_branch
 
