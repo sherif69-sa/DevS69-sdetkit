@@ -243,13 +243,19 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
         )
     else:
         misses.append(" strict continuity signal is missing.")
-        handoff_actions.append("Re-run lane #66 closeout command and restore strict baseline before lane #67 lock.")
+        handoff_actions.append(
+            "Re-run lane #66 closeout command and restore strict baseline before lane #67 lock."
+        )
 
     if board_count >= 5 and board_has_integration_expansion2:
         wins.append(f"66 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append("Delivery board integrity is incomplete (needs >=5 items and integration-expansion2 anchors).")
-        handoff_actions.append("Repair lane #66 delivery board entries to include integration-expansion2 anchors.")
+        misses.append(
+            "Delivery board integrity is incomplete (needs >=5 items and integration-expansion2 anchors)."
+        )
+        handoff_actions.append(
+            "Repair lane #66 delivery board entries to include integration-expansion2 anchors."
+        )
 
     if not missing_jenkins_lines:
         wins.append(" Jenkins reference pipeline is available for integration expansion execution.")
