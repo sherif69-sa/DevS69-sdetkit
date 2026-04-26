@@ -85,6 +85,29 @@ POLICY_ACTIONS: dict[str, list[str]] = {
 SAFE_AUTOREMEDIATE_KEYS = {"baseline_pre_commit", "baseline_ruff"}
 
 
+def _attempts_in_history(history: list[dict[str, Any]], failure_key: str) -> int:
+    return sum(
+        1
+        for item in history
+        if str(item.get("kind", "")) == "remediation_attempt"
+        and str(item.get("failure_key", "")) == failure_key
+    )
+
+
+def _runs_since_last_attempt(history: list[dict[str, Any]], failure_key: str) -> int:
+    seen_runs: set[str] = set()
+    for item in reversed(history):
+        run_id = str(item.get("run_id", "")).strip()
+        if run_id:
+            seen_runs.add(run_id)
+        if (
+            str(item.get("kind", "")) == "remediation_attempt"
+            and str(item.get("failure_key", "")) == failure_key
+        ):
+            return len(seen_runs)
+    return 10**9
+
+
 def _summary_from_plan(path: Path) -> dict[str, Any]:
     payload = _load_json(path)
     keep_open = payload.get("keep_open", [])
@@ -117,6 +140,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--token-env", default="GH_TOKEN")
     parser.add_argument("--memory-db", default=".sdetkit/maintenance/failure-memory.jsonl")
     parser.add_argument("--auto-remediate-safe", action="store_true")
+    parser.add_argument("--max-remediation-attempts", type=int, default=3)
+    parser.add_argument("--remediation-cooldown-runs", type=int, default=2)
     args = parser.parse_args(argv)
 
     out_dir = Path(args.out_dir)
@@ -301,6 +326,7 @@ def main(argv: list[str] | None = None) -> int:
 
     memory_db = Path(args.memory_db)
     run_id = datetime.now(UTC).isoformat()
+    history_before = _read_jsonl(memory_db)
     for item in observed_failures:
         _append_jsonl(
             memory_db,
@@ -308,6 +334,7 @@ def main(argv: list[str] | None = None) -> int:
                 "run_id": run_id,
                 "owner": args.owner,
                 "repo": args.repo,
+                "kind": "observed_failure",
                 **item,
             },
         )
@@ -343,6 +370,26 @@ def main(argv: list[str] | None = None) -> int:
                     }
                 )
                 continue
+            attempts = _attempts_in_history(history_before, key)
+            if attempts >= args.max_remediation_attempts:
+                remediation_results.append(
+                    {
+                        "failure_key": key,
+                        "attempted": False,
+                        "reason": f"max attempts reached ({args.max_remediation_attempts})",
+                    }
+                )
+                continue
+            runs_since_last = _runs_since_last_attempt(history_before, key)
+            if runs_since_last <= args.remediation_cooldown_runs:
+                remediation_results.append(
+                    {
+                        "failure_key": key,
+                        "attempted": False,
+                        "reason": f"cooldown active ({runs_since_last} run(s) since last attempt)",
+                    }
+                )
+                continue
             actions = POLICY_ACTIONS.get(key, [])
             if not actions:
                 remediation_results.append(
@@ -359,11 +406,25 @@ def main(argv: list[str] | None = None) -> int:
             remediation_results.append(
                 {
                     "failure_key": key,
+                    "kind": "remediation_attempt",
                     "attempted": True,
                     "command": cmd,
                     "ok": bool(result.get("ok", False)),
                     "returncode": result.get("returncode"),
                 }
+            )
+            _append_jsonl(
+                memory_db,
+                {
+                    "run_id": run_id,
+                    "owner": args.owner,
+                    "repo": args.repo,
+                    "kind": "remediation_attempt",
+                    "failure_key": key,
+                    "command": cmd,
+                    "ok": bool(result.get("ok", False)),
+                    "returncode": result.get("returncode"),
+                },
             )
         report["follow_up"]["auto_remediation"] = remediation_results
 

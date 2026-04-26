@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   issues: write
+  pull-requests: write
 
 jobs:
   autopilot:
@@ -38,6 +39,8 @@ jobs:
             --repo "${{ github.event.repository.name }}" \
             --run-live-if-token \
             --auto-remediate-safe \
+            --max-remediation-attempts 3 \
+            --remediation-cooldown-runs 2 \
             --out-dir build/maintenance/autopilot
 
       - name: Upload autopilot artifacts
@@ -155,3 +158,34 @@ jobs:
           with urllib.request.urlopen(req, timeout=30) as resp:
               print(f"webhook status: {resp.status}")
           PY
+
+      - name: Detect successful auto-remediation changes
+        id: remediation_changes
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("build/maintenance/autopilot/autopilot-report.json").read_text(encoding="utf-8"))
+          items = report.get("follow_up", {}).get("auto_remediation", [])
+          has_success = any(bool(x.get("attempted")) and bool(x.get("ok")) for x in items if isinstance(x, dict))
+          print(f"run_cpr={'true' if has_success else 'false'}")
+          out = Path(".github_output_tmp")
+          out.write_text(f"run_cpr={'true' if has_success else 'false'}\n", encoding="utf-8")
+          PY
+          cat .github_output_tmp >> "$GITHUB_OUTPUT"
+          rm -f .github_output_tmp
+
+      - name: Create pull request for successful auto-remediation
+        if: steps.remediation_changes.outputs.run_cpr == 'true'
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
+        with:
+          commit-message: "chore(maintenance): apply safe autopilot remediation"
+          title: "chore(maintenance): safe autopilot remediation"
+          body: |
+            Automated safe remediation was applied by maintenance autopilot.
+
+            - workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - artifacts: maintenance-autopilot
+          branch: automation/maintenance-autopilot-remediation
+          base: main
