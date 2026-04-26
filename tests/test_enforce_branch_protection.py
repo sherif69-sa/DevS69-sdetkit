@@ -4,7 +4,6 @@ import importlib.util
 from pathlib import Path
 from typing import Any
 
-
 _MODULE_PATH = Path(__file__).resolve().parents[1] / "tools" / "enforce_branch_protection.py"
 _SPEC = importlib.util.spec_from_file_location("enforce_branch_protection", _MODULE_PATH)
 assert _SPEC and _SPEC.loader

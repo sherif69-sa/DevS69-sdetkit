@@ -3,7 +3,6 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS_FILE = ROOT / "tools" / "enforce_branch_protection.py"
 ENFORCE_WORKFLOW = ROOT / ".github" / "workflows" / "enforce-branch-protection.yml"
