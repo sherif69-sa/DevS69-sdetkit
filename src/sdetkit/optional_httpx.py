@@ -1,4 +1,8 @@
-"""Utility for optional `httpx` loading in environments without network extras."""
+"""Compatibility loader for `httpx`.
+
+`httpx` is a runtime dependency, but this module keeps a defensive fallback for
+degraded environments where imports are partially unavailable.
+"""
 
 from __future__ import annotations
 
@@ -10,7 +14,7 @@ __all__ = ["load_httpx"]
 
 
 def _missing_message(feature: str) -> str:
-    return f"httpx is required for {feature}; install optional network dependencies."
+    return f"httpx is required for {feature}; install runtime dependencies (for example: pip install -e .)."
 
 
 def _build_missing_httpx_module(*, feature: str) -> Any:
@@ -27,11 +31,12 @@ def _build_missing_httpx_module(*, feature: str) -> Any:
             pass
 
         class Response:
-            status_code = 0
+            def __init__(self, *args: Any, **kwargs: Any) -> None:
+                raise ModuleNotFoundError(message)
 
         class URL:
-            def __str__(self) -> str:
-                return ""
+            def __init__(self, *args: Any, **kwargs: Any) -> None:
+                raise ModuleNotFoundError(message)
 
         class Client:  # pragma: no cover - defensive fallback only
             def __init__(self, *args: Any, **kwargs: Any) -> None:
