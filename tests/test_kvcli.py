@@ -111,6 +111,15 @@ def test_kvcli_duplicates_missing_value_reports_expected_one_argument():
     assert "argument --duplicates: expected one argument" in p.stderr.lower()
 
 
+def test_kvcli_path_can_start_with_double_dash(tmp_path):
+    f = tmp_path / "--data.txt"
+    f.write_text("a=1\n", encoding="utf-8")
+    p = run_kvcli("--path", str(f))
+    assert p.returncode == 0
+    assert p.stderr == ""
+    assert json.loads(p.stdout) == {"a": "1"}
+
+
 def test_kvcli_multiline_ignores_bad_lines_and_merges_last_wins():
     p = run_kvcli(input_text="a=1\nbadline\nb=2 a=3\n")
     assert p.returncode == 0

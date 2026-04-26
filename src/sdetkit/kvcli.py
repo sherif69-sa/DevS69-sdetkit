@@ -8,8 +8,10 @@ from typing import NoReturn
 from .bools import coerce_bool
 from .textutil import DuplicateKeyError, parse_kv_line
 
-if not hasattr(argparse.ArgumentParser, "init_"):
-    argparse.ArgumentParser.init_ = argparse.ArgumentParser.__init__  # type: ignore[attr-defined]
+if not hasattr(argparse.ArgumentParser, "_sdetkit_orig_init"):
+    # Preserve the original constructor on the class so tests/monkeypatches that
+    # mutate __init__ later still have a deterministic initializer to call.
+    argparse.ArgumentParser._sdetkit_orig_init = argparse.ArgumentParser.__init__  # type: ignore[attr-defined]
 
 
 def _die(msg: str) -> NoReturn:
@@ -111,6 +113,7 @@ def _parse_fast(argv: list[str]) -> dict[str, object]:
     strict = False
     duplicates = "last"
     i = 0
+    recognized_flags = {"--help", "--strict", "--text", "--path", "--duplicates"}
     while i < len(argv):
         arg = argv[i]
         if arg == "--help":
@@ -125,7 +128,7 @@ def _parse_fast(argv: list[str]) -> dict[str, object]:
                 sys.stderr.write(_usage())
                 _die(f"argument {arg}: expected one argument")
             value = argv[i + 1]
-            if value.startswith("--"):
+            if value in recognized_flags:
                 sys.stderr.write(_usage())
                 _die(f"argument {arg}: expected one argument")
             if arg == "--text":
@@ -165,7 +168,11 @@ def _run_with_options(options: dict[str, object]) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser.__new__(argparse.ArgumentParser)
-    init_parser = getattr(argparse.ArgumentParser, "init_", argparse.ArgumentParser.__init__)
+    init_parser = getattr(
+        argparse.ArgumentParser,
+        "_sdetkit_orig_init",
+        getattr(argparse.ArgumentParser, "init_", argparse.ArgumentParser.__init__),
+    )
     init_parser(p, prog="kvcli", add_help=True)
     p.add_argument("--text", default=None)
     p.add_argument("--path", default=None)

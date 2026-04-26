@@ -37,3 +37,19 @@ def test_load_httpx_imports_module_when_available(monkeypatch) -> None:
 
     loaded = optional_httpx.load_httpx(feature="sdetkit apiget")
     assert loaded is expected
+
+
+def test_load_httpx_uses_fallback_when_importerror_after_find_spec(monkeypatch) -> None:
+    monkeypatch.setattr(optional_httpx.importlib.util, "find_spec", lambda _name: object())
+
+    def _raise(_name: str):
+        raise ImportError("broken install")
+
+    monkeypatch.setattr(optional_httpx.importlib, "import_module", _raise)
+    loaded = optional_httpx.load_httpx(feature="sdetkit apiget")
+    assert hasattr(loaded, "Client")
+    try:
+        loaded.Client()
+        raise AssertionError("expected fallback Client() to raise ModuleNotFoundError")
+    except ModuleNotFoundError as exc:
+        assert "sdetkit apiget" in str(exc)

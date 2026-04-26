@@ -63,5 +63,8 @@ def _build_missing_httpx_module(*, feature: str) -> Any:
 
 def load_httpx(*, feature: str = "network workflows") -> Any:
     if importlib.util.find_spec("httpx") is not None:
-        return importlib.import_module("httpx")
+        try:
+            return importlib.import_module("httpx")
+        except ImportError:
+            return _build_missing_httpx_module(feature=feature)
     return _build_missing_httpx_module(feature=feature)
