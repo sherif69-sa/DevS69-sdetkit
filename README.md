@@ -81,7 +81,7 @@ python -m pip install sdetkit==1.0.3
 
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
-python -m sdetkit doctor
+python -m sdetkit doctor --format json --out build/doctor.json
 ```
 
 Generated artifacts:
@@ -89,7 +89,8 @@ Generated artifacts:
 ```text
 build/
 ├── gate-fast.json
-└── release-preflight.json
+├── release-preflight.json
+└── doctor.json
 ```
 
 ## Ship / no-ship decision contract
