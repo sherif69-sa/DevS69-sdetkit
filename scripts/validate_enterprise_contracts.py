@@ -146,8 +146,9 @@ def _fresh_adaptive_scenario_database_sample() -> dict | list | None:
     finally:
         try:
             out_path.unlink(missing_ok=True)
-        except Exception:  # pragma: no cover - defensive branch
-            pass
+        except OSError:  # pragma: no cover - defensive branch
+            if out_path.exists():
+                raise
 
 
 def _adaptive_scenario_sample_with_fallback() -> tuple[dict | list | None, Path, list[str]]:

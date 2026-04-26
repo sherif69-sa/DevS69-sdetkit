@@ -122,9 +122,10 @@ def _retry_after_seconds(headers: Any) -> float | None:
     raw = str(v).strip()
     try:
         delay = float(int(raw))
+    except (TypeError, ValueError):
+        delay = None
+    if delay is not None:
         return max(0.0, delay)
-    except Exception:
-        pass
     try:
         parsed = parsedate_to_datetime(raw)
     except (TypeError, ValueError):

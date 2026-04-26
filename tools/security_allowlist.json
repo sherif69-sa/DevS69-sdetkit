@@ -371,6 +371,31 @@
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "path": "docs/artifacts/-trust-assets-refresh-closeout-pack/-trust-assets-refresh-closeout-summary.json"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "docs/contracts/module-rationalization-plan.v1.json"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "src/sdetkit/evidence/trust_faq_expansion_closeout_83.py"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "src/sdetkit/evidence/evidence_narrative_closeout_84.py"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "src/sdetkit/phases/phase3_preplan_closeout_59.py"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "src/sdetkit/phases/phase3_kickoff_closeout_61.py"
+    },
+    {
+      "rule_id": "SEC_SECRET_PATTERN",
+      "path": "src/sdetkit/test_bootstrap_contract.py",
+      "line": 29
     }
   ],
   "version": 1

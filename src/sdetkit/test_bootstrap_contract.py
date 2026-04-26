@@ -14,6 +14,7 @@ MODULE_TO_PACKAGE = {
     "yaml": "PyYAML",
 }
 
+# sdetkit: allow-security SEC_SECRET_PATTERN (requirement-token parser regex)
 _SPEC_SEP = re.compile(r"[<>=!~\[\]]")
 
 

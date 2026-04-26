@@ -1,0 +1,37 @@
+name: enforce-branch-protection
+
+on:
+  schedule:
+    - cron: "15 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  protect-main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Enforce branch protection
+        env:
+          BRANCH_PROTECTION_TOKEN: ${{ secrets.BRANCH_PROTECTION_TOKEN }}
+        run: |
+          if [ -z "${BRANCH_PROTECTION_TOKEN}" ]; then
+            echo "BRANCH_PROTECTION_TOKEN is not set; skipping enforcement."
+            exit 0
+          fi
+          python tools/enforce_branch_protection.py \
+            --owner "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --branch "main" \
+            --token "${BRANCH_PROTECTION_TOKEN}" \
+            --required-check "ci" \
+            --required-check "maintenance-autopilot"

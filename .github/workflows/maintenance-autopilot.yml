@@ -1,0 +1,191 @@
+name: maintenance-autopilot
+
+on:
+  schedule:
+    - cron: "35 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  autopilot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project + dev/test extras
+        run: |
+          python -m pip install -c constraints-ci.txt -e .[dev,test]
+
+      - name: Run maintenance autopilot
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PYTHONPATH=src python tools/maintenance_autopilot.py \
+            --owner "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --run-live-if-token \
+            --auto-remediate-safe \
+            --max-remediation-attempts 3 \
+            --remediation-cooldown-runs 2 \
+            --out-dir build/maintenance/autopilot
+
+      - name: Upload autopilot artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: maintenance-autopilot
+          path: |
+            build/maintenance/autopilot/autopilot-report.json
+            build/maintenance/autopilot/autopilot-report.md
+            build/maintenance/autopilot/command-center-dry-run-plan.json
+            build/maintenance/autopilot/command-center-live-plan.json
+            build/maintenance/autopilot/sdet_check.json
+            .sdetkit/maintenance/failure-memory.jsonl
+
+      - name: Publish run summary
+        run: |
+          {
+            echo "## Maintenance autopilot"
+            echo
+            cat build/maintenance/autopilot/autopilot-report.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open/update security follow-up issue when actionable findings exist
+        id: security_followup
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const report = JSON.parse(fs.readFileSync('build/maintenance/autopilot/autopilot-report.json', 'utf8'));
+            const sec = report.security || {};
+            const actionable = Number(sec.actionable_findings || 0);
+            core.setOutput('actionable', String(actionable));
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${context.runId}`;
+            if (actionable <= 0) {
+              core.info('No actionable security findings. No follow-up issue update needed.');
+              core.setOutput('issue_number', '');
+              return;
+            }
+
+            const title = '🚨 Maintenance security follow-up (autopilot)';
+            const body = [
+              'Autopilot detected actionable security findings.',
+              '',
+              `- warn: ${sec.warn ?? 0}`,
+              `- error: ${sec.error ?? 0}`,
+              `- actionable findings: ${actionable}`,
+              `- workflow run: ${runUrl}`,
+              '',
+              'Please triage and remediate, then rerun maintenance autopilot.',
+            ].join('\n');
+
+            const existing = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+              labels: 'maintenance,security',
+            });
+            const found = (existing.data || []).find((i) => i.title === title);
+            if (found) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: found.number,
+                body,
+              });
+              core.info(`Updated existing follow-up issue #${found.number}`);
+              core.setOutput('issue_number', String(found.number));
+            } else {
+              const created = await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['maintenance', 'security'],
+              });
+              core.info(`Created follow-up issue #${created.data.number}`);
+              core.setOutput('issue_number', String(created.data.number));
+            }
+
+      - name: Send webhook notification for actionable security follow-up
+        if: steps.security_followup.outputs.actionable != '0' && secrets.MAINTENANCE_WEBHOOK_URL != ''
+        env:
+          WEBHOOK_URL: ${{ secrets.MAINTENANCE_WEBHOOK_URL }}
+          ISSUE_NUMBER: ${{ steps.security_followup.outputs.issue_number }}
+          ACTIONABLE: ${{ steps.security_followup.outputs.actionable }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          run_url = f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}"
+          issue_number = os.environ.get("ISSUE_NUMBER", "").strip()
+          issue_url = ""
+          if issue_number:
+              issue_url = f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/issues/{issue_number}"
+
+          payload = {
+              "text": (
+                  "🚨 Maintenance autopilot detected actionable security findings\n"
+                  f"- actionable findings: {os.environ.get('ACTIONABLE', '0')}\n"
+                  f"- follow-up issue: {issue_url or 'updated/created in repo'}\n"
+                  f"- workflow run: {run_url}"
+              )
+          }
+          req = urllib.request.Request(
+              os.environ["WEBHOOK_URL"],
+              method="POST",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+          )
+          with urllib.request.urlopen(req, timeout=30) as resp:
+              print(f"webhook status: {resp.status}")
+          PY
+
+      - name: Detect successful auto-remediation changes
+        id: remediation_changes
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("build/maintenance/autopilot/autopilot-report.json").read_text(encoding="utf-8"))
+          items = report.get("follow_up", {}).get("auto_remediation", [])
+          has_success = any(bool(x.get("attempted")) and bool(x.get("ok")) for x in items if isinstance(x, dict))
+          print(f"run_cpr={'true' if has_success else 'false'}")
+          out = Path(".github_output_tmp")
+          out.write_text(f"run_cpr={'true' if has_success else 'false'}\n", encoding="utf-8")
+          PY
+          cat .github_output_tmp >> "$GITHUB_OUTPUT"
+          rm -f .github_output_tmp
+
+      - name: Create pull request for successful auto-remediation
+        if: steps.remediation_changes.outputs.run_cpr == 'true'
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
+        with:
+          commit-message: "chore(maintenance): apply safe autopilot remediation"
+          title: "chore(maintenance): safe autopilot remediation"
+          body: |
+            Automated safe remediation was applied by maintenance autopilot.
+
+            - workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - artifacts: maintenance-autopilot
+          branch: automation/maintenance-autopilot-remediation
+          base: main

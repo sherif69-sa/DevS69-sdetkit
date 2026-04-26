@@ -208,9 +208,12 @@ def test_main_handles_security_errors_for_project_and_out_dir(
     def _safe_path_then_reject_out_dir(
         root: Path, user_path: str, *, allow_absolute: bool = False
     ) -> Path:
+        _ = (root, user_path, allow_absolute)
         calls["n"] += 1
-        if calls["n"] <= 2:
-            return Path(user_path) if Path(user_path).is_absolute() else (root / user_path)
+        if calls["n"] == 1:
+            return project
+        if calls["n"] == 2:
+            return Path.cwd()
         raise inspect_project.SecurityError("bad out")
 
     monkeypatch.setattr(inspect_project, "safe_path", _safe_path_then_reject_out_dir)
