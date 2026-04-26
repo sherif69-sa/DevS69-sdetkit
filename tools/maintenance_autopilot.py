@@ -10,7 +10,9 @@ from pathlib import Path
 from typing import Any
 
 
-def _run(cmd: list[str], *, allow_fail: bool = False, env: dict[str, str] | None = None) -> dict[str, Any]:
+def _run(
+    cmd: list[str], *, allow_fail: bool = False, env: dict[str, str] | None = None
+) -> dict[str, Any]:
     proc = subprocess.run(cmd, capture_output=True, text=True, check=False, env=env)
     result = {
         "cmd": cmd,
@@ -163,7 +165,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if dry_summary["total_bot_trackers"] <= 0:
         raise RuntimeError("dry run returned no bot trackers")
-    if dry_summary["keep_open_count"] + dry_summary["defer_count"] != dry_summary["total_bot_trackers"]:
+    if (
+        dry_summary["keep_open_count"] + dry_summary["defer_count"]
+        != dry_summary["total_bot_trackers"]
+    ):
         raise RuntimeError("dry run keep/defer counts do not match total_bot_trackers")
 
     # 4) Optional live run
