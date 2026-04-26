@@ -45,7 +45,9 @@ def test_select_runs_window_validations_and_skips_bad_captured_at() -> None:
     assert out == []
 
 
-def test_tool_version_delegates_to_shared_versioning_helper(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_tool_version_delegates_to_shared_versioning_helper(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(r, "tool_version", lambda: "0+unknown")
     assert r._tool_version() == "0+unknown"
 
