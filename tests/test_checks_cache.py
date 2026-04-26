@@ -73,3 +73,21 @@ def test_compute_repo_fingerprint_ignores_outside_repo_hint_paths(tmp_path: Path
     with_outside_hint = cache.compute_repo_fingerprint(repo_root, ("../outside", "tracked.txt"))
 
     assert inside_only == with_outside_hint
+
+
+def test_compute_repo_fingerprint_ignores_absolute_outside_repo_hint_paths(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    (repo_root / "tracked.txt").write_text("ok\n", encoding="utf-8")
+    outside_file = tmp_path / "outside.txt"
+    outside_file.write_text("nope\n", encoding="utf-8")
+
+    cache = CheckCache(tmp_path / ".sdetkit-cache")
+    inside_only = cache.compute_repo_fingerprint(repo_root, ("tracked.txt",))
+
+    cache = CheckCache(tmp_path / ".sdetkit-cache")
+    with_outside_hint = cache.compute_repo_fingerprint(
+        repo_root, (str(outside_file), "tracked.txt")
+    )
+
+    assert inside_only == with_outside_hint

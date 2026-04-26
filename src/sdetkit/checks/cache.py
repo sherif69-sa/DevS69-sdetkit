@@ -127,10 +127,16 @@ class CheckCache:
                 yield current / filename
 
     def _iter_paths(self, repo_root: Path, changed_paths: tuple[str, ...]):
+        repo_root_resolved = repo_root.resolve()
         if changed_paths:
             seen: set[Path] = set()
             for rel in changed_paths:
-                path = repo_root / rel
+                hinted = Path(rel)
+                path = hinted if hinted.is_absolute() else (repo_root / hinted)
+                try:
+                    path.resolve().relative_to(repo_root_resolved)
+                except ValueError:
+                    continue
                 if path.is_file():
                     seen.add(path)
                     continue
