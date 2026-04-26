@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -81,6 +82,8 @@ POLICY_ACTIONS: dict[str, list[str]] = {
     "review_json": ["PYTHONPATH=src python -m sdetkit review . --no-workspace --format json"],
 }
 
+SAFE_AUTOREMEDIATE_KEYS = {"baseline_pre_commit", "baseline_ruff"}
+
 
 def _summary_from_plan(path: Path) -> dict[str, Any]:
     payload = _load_json(path)
@@ -113,6 +116,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--run-live-if-token", action="store_true")
     parser.add_argument("--token-env", default="GH_TOKEN")
     parser.add_argument("--memory-db", default=".sdetkit/maintenance/failure-memory.jsonl")
+    parser.add_argument("--auto-remediate-safe", action="store_true")
     args = parser.parse_args(argv)
 
     out_dir = Path(args.out_dir)
@@ -323,7 +327,45 @@ def main(argv: list[str] | None = None) -> int:
             {"failure_key": key, "seen_runs": count, "policy_actions": POLICY_ACTIONS.get(key, [])}
             for key, count in top_now
         ],
+        "auto_remediation": [],
     }
+
+    if args.auto_remediate_safe and observed_failures:
+        remediation_results: list[dict[str, Any]] = []
+        for item in observed_failures:
+            key = str(item.get("failure_key", "")).strip()
+            if key not in SAFE_AUTOREMEDIATE_KEYS:
+                remediation_results.append(
+                    {
+                        "failure_key": key,
+                        "attempted": False,
+                        "reason": "not in SAFE_AUTOREMEDIATE_KEYS",
+                    }
+                )
+                continue
+            actions = POLICY_ACTIONS.get(key, [])
+            if not actions:
+                remediation_results.append(
+                    {
+                        "failure_key": key,
+                        "attempted": False,
+                        "reason": "no policy actions configured",
+                    }
+                )
+                continue
+            cmd = actions[0]
+            env = {**os.environ, "PYTHONPATH": "src"}
+            result = _run(shlex.split(cmd), allow_fail=True, env=env)
+            remediation_results.append(
+                {
+                    "failure_key": key,
+                    "attempted": True,
+                    "command": cmd,
+                    "ok": bool(result.get("ok", False)),
+                    "returncode": result.get("returncode"),
+                }
+            )
+        report["follow_up"]["auto_remediation"] = remediation_results
 
     _write_json(out_dir / "autopilot-report.json", report)
 
@@ -352,6 +394,16 @@ def main(argv: list[str] | None = None) -> int:
         md.append(f"  - `{item['failure_key']}` seen {item['seen_runs']} run(s)")
         for action in item.get("policy_actions", []):
             md.append(f"    - auto-policy: `{action}`")
+    md.append("- auto-remediation attempts:")
+    for item in report["follow_up"].get("auto_remediation", []):
+        if not item.get("attempted"):
+            md.append(
+                f"  - `{item.get('failure_key', 'unknown')}` skipped ({item.get('reason', 'n/a')})"
+            )
+            continue
+        md.append(
+            f"  - `{item.get('failure_key', 'unknown')}` attempted: ok={item.get('ok')} rc={item.get('returncode')}"
+        )
     md.extend(
         [
             "",

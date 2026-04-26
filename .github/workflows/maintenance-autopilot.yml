@@ -37,6 +37,7 @@ jobs:
             --owner "${{ github.repository_owner }}" \
             --repo "${{ github.event.repository.name }}" \
             --run-live-if-token \
+            --auto-remediate-safe \
             --out-dir build/maintenance/autopilot
 
       - name: Upload autopilot artifacts
