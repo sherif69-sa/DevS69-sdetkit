@@ -59,6 +59,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Open/update security follow-up issue when actionable findings exist
+        id: security_followup
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
           script: |
@@ -68,9 +69,11 @@ jobs:
             const report = JSON.parse(fs.readFileSync('build/maintenance/autopilot/autopilot-report.json', 'utf8'));
             const sec = report.security || {};
             const actionable = Number(sec.actionable_findings || 0);
+            core.setOutput('actionable', String(actionable));
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${context.runId}`;
             if (actionable <= 0) {
               core.info('No actionable security findings. No follow-up issue update needed.');
+              core.setOutput('issue_number', '');
               return;
             }
 
@@ -102,6 +105,7 @@ jobs:
                 body,
               });
               core.info(`Updated existing follow-up issue #${found.number}`);
+              core.setOutput('issue_number', String(found.number));
             } else {
               const created = await github.rest.issues.create({
                 owner,
@@ -111,4 +115,41 @@ jobs:
                 labels: ['maintenance', 'security'],
               });
               core.info(`Created follow-up issue #${created.data.number}`);
+              core.setOutput('issue_number', String(created.data.number));
             }
+
+      - name: Send webhook notification for actionable security follow-up
+        if: steps.security_followup.outputs.actionable != '0' && secrets.MAINTENANCE_WEBHOOK_URL != ''
+        env:
+          WEBHOOK_URL: ${{ secrets.MAINTENANCE_WEBHOOK_URL }}
+          ISSUE_NUMBER: ${{ steps.security_followup.outputs.issue_number }}
+          ACTIONABLE: ${{ steps.security_followup.outputs.actionable }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          run_url = f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}"
+          issue_number = os.environ.get("ISSUE_NUMBER", "").strip()
+          issue_url = ""
+          if issue_number:
+              issue_url = f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/issues/{issue_number}"
+
+          payload = {
+              "text": (
+                  "🚨 Maintenance autopilot detected actionable security findings\n"
+                  f"- actionable findings: {os.environ.get('ACTIONABLE', '0')}\n"
+                  f"- follow-up issue: {issue_url or 'updated/created in repo'}\n"
+                  f"- workflow run: {run_url}"
+              )
+          }
+          req = urllib.request.Request(
+              os.environ["WEBHOOK_URL"],
+              method="POST",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+          )
+          with urllib.request.urlopen(req, timeout=30) as resp:
+              print(f"webhook status: {resp.status}")
+          PY
