@@ -2,7 +2,7 @@
 
 This project uses semantic versioning (`MAJOR.MINOR.PATCH`) and a tag-driven release workflow.
 
-Current baseline release: **v1.0.2**.
+Current baseline release: **v1.0.3**.
 
 ## Version bump rules
 

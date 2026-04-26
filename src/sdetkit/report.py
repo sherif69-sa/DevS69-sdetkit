@@ -13,6 +13,7 @@ from typing import Any, TypedDict
 from .atomicio import atomic_write_text, canonical_json_bytes, canonical_json_dumps
 from .bools import coerce_bool
 from .security import SecurityError, safe_path
+from .versioning import tool_version
 
 _UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
 RUN_SCHEMA = "sdetkit.audit.run.v1"
@@ -86,12 +87,7 @@ def _severity_rank(level: str) -> int:
 
 
 def _tool_version() -> str:
-    try:
-        from importlib import metadata
-
-        return metadata.version("sdetkit")
-    except Exception:
-        return "1.0.0"
+    return tool_version()
 
 
 def _captured_at() -> str | None:

@@ -45,11 +45,11 @@ def test_select_runs_window_validations_and_skips_bad_captured_at() -> None:
     assert out == []
 
 
-def test_tool_version_falls_back_to_default(monkeypatch: pytest.MonkeyPatch) -> None:
-    import importlib.metadata as md
-
-    monkeypatch.setattr(md, "version", lambda _n: (_ for _ in ()).throw(RuntimeError("nope")))
-    assert r._tool_version() == "1.0.0"
+def test_tool_version_delegates_to_shared_versioning_helper(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(r, "tool_version", lambda: "0+unknown")
+    assert r._tool_version() == "0+unknown"
 
 
 def test_captured_at_invalid_epoch_returns_none(monkeypatch: pytest.MonkeyPatch) -> None:
