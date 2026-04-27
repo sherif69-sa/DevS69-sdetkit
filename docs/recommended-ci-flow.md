@@ -107,6 +107,16 @@ jobs:
 - `build/release-preflight.json`
 - `build/gate-fast.json`
 - `build/security-enforce.json`
+- `build/gate-decision-summary.json` (recommended reviewer-friendly decision object)
+- `build/gate-decision-summary.md` (recommended human review handoff)
+
+Recommended summary generation step after gates:
+
+```bash
+python scripts/render_gate_decision_summary.py --release build/release-preflight.json --fast build/gate-fast.json --allow-missing-fast --format json --out build/gate-decision-summary.json
+python scripts/render_gate_decision_summary.py --release build/release-preflight.json --fast build/gate-fast.json --allow-missing-fast --format text --out build/gate-decision-summary.md
+python scripts/check_gate_decision_summary_contract.py --summary build/gate-decision-summary.json --release build/release-preflight.json --format json
+```
 
 ## Optional containerized invocation path
 

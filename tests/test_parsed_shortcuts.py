@@ -74,3 +74,51 @@ def test_dispatch_parsed_shortcut_integration_command() -> None:
     )
     assert rc == 4
     assert calls == [("sdetkit.integration", ["topology-check"])]
+
+
+def test_dispatch_parsed_shortcut_start_alias() -> None:
+    calls: list[tuple[str, list[str]]] = []
+
+    def _runner(module: str, args) -> int:
+        calls.append((module, list(args)))
+        return 3
+
+    rc = parsed_shortcuts.dispatch_parsed_shortcut(
+        "start",
+        ["--journey", "fast-start", "--format", "markdown"],
+        run_module_main=_runner,
+    )
+    assert rc == 3
+    assert calls == [("sdetkit.onboarding", ["--journey", "fast-start", "--format", "markdown"])]
+
+
+def test_dispatch_parsed_shortcut_adoption_alias() -> None:
+    calls: list[tuple[str, list[str]]] = []
+
+    def _runner(module: str, args) -> int:
+        calls.append((module, list(args)))
+        return 7
+
+    rc = parsed_shortcuts.dispatch_parsed_shortcut(
+        "adoption",
+        ["--format", "json"],
+        run_module_main=_runner,
+    )
+    assert rc == 7
+    assert calls == [("sdetkit.adoption", ["--format", "json"])]
+
+
+def test_dispatch_parsed_shortcut_fit_alias() -> None:
+    calls: list[tuple[str, list[str]]] = []
+
+    def _runner(module: str, args) -> int:
+        calls.append((module, list(args)))
+        return 8
+
+    rc = parsed_shortcuts.dispatch_parsed_shortcut(
+        "fit",
+        ["--format", "json"],
+        run_module_main=_runner,
+    )
+    assert rc == 8
+    assert calls == [("sdetkit.fit", ["--format", "json"])]
