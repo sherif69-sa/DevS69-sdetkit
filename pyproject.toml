@@ -46,11 +46,11 @@ dev = [
   "build==1.4.4",
   "mypy==1.20.2",
   "pre-commit==4.6.0",
-  "ruff==0.15.11",
+  "ruff==0.15.12",
   "twine==6.2.0"
 ]
 test = [
-  "hypothesis==6.152.2",
+  "hypothesis==6.152.3",
   "PyYAML",
   "pytest",
   "pytest-asyncio",
