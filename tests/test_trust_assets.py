@@ -139,7 +139,9 @@ def test_trust_signal_policy_link_matching_uses_target_not_link_text(tmp_path: P
 
     readme = tmp_path / "README.md"
     readme.write_text(
-        readme.read_text(encoding="utf-8").replace("[SECURITY.md](SECURITY.md)", "[Security policy](SECURITY.md)"),
+        readme.read_text(encoding="utf-8").replace(
+            "[SECURITY.md](SECURITY.md)", "[Security policy](SECURITY.md)"
+        ),
         encoding="utf-8",
     )
 

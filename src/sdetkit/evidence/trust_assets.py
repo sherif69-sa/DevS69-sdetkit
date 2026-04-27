@@ -172,8 +172,7 @@ def _evaluate_signals(root: Path, readme_text: str, docs_index_text: str) -> lis
         link_target = signal.get("readme_link_target")
         link_target_str = link_target if isinstance(link_target, str) else ""
         linked = (
-            bool(link_target_str)
-            and _normalize_link_target(link_target_str) in readme_link_targets
+            bool(link_target_str) and _normalize_link_target(link_target_str) in readme_link_targets
         )
         passed = exists and linked
         rows.append(
