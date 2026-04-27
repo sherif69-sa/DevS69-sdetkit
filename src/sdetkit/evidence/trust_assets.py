@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shlex
 import subprocess
 import sys
@@ -96,19 +97,19 @@ _POLICY_SIGNALS = [
     {
         "key": "security_doc_exists",
         "path": "SECURITY.md",
-        "readme_marker": "[Security Docs](docs/security.md)",
+        "readme_link_target": "SECURITY.md",
         "weight": 10,
     },
     {
         "key": "security_guide_exists",
         "path": "docs/security.md",
-        "readme_marker": "[Security docs](docs/security.md)",
+        "readme_link_target": "docs/security.md",
         "weight": 10,
     },
     {
         "key": "policy_baseline_exists",
         "path": "docs/policy-and-baselines.md",
-        "readme_marker": "[policy baselines](docs/policy-and-baselines.md)",
+        "readme_link_target": "docs/policy-and-baselines.md",
         "weight": 10,
     },
 ]
@@ -127,8 +128,28 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
+def _normalize_link_target(value: str) -> str:
+    clean = value.strip().strip("<>").replace("\\", "/")
+    clean = clean.split("#", 1)[0].split("?", 1)[0]
+    while clean.startswith("./"):
+        clean = clean[2:]
+    while clean.startswith("/"):
+        clean = clean[1:]
+    return clean.lower()
+
+
+def _extract_markdown_link_targets(readme_text: str) -> set[str]:
+    targets = set()
+    for match in re.finditer(r"\[[^\]]*\]\(([^)]+)\)", readme_text):
+        target = _normalize_link_target(match.group(1))
+        if target:
+            targets.add(target)
+    return targets
+
+
 def _evaluate_signals(root: Path, readme_text: str, docs_index_text: str) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
+    readme_link_targets = _extract_markdown_link_targets(readme_text)
 
     for signal in _BADGE_SIGNALS:
         marker = signal.get("marker")
@@ -148,9 +169,12 @@ def _evaluate_signals(root: Path, readme_text: str, docs_index_text: str) -> lis
         rel_path = signal.get("path")
         rel_path_str = rel_path if isinstance(rel_path, str) else ""
         exists = (root / rel_path_str).exists() if rel_path_str else False
-        readme_marker = signal.get("readme_marker")
-        readme_marker_str = readme_marker if isinstance(readme_marker, str) else ""
-        linked = bool(readme_marker_str) and readme_marker_str in readme_text
+        link_target = signal.get("readme_link_target")
+        link_target_str = link_target if isinstance(link_target, str) else ""
+        linked = (
+            bool(link_target_str)
+            and _normalize_link_target(link_target_str) in readme_link_targets
+        )
         passed = exists and linked
         rows.append(
             {
@@ -484,7 +508,7 @@ def main(argv: list[str] | None = None) -> int:
 
     payload = build_trust_signal_summary(root, readme_path=ns.readme, docs_index_path=ns.docs_index)
     payload["strict_failures"] = [*missing_sections, *missing_commands]
-    payload["score"] = 100.0 if not payload["strict_failures"] else 0.0
+    payload["score"] = float(payload["summary"]["trust_score"])
 
     if ns.emit_pack_dir:
         payload["emitted_pack_files"] = _emit_pack(root, root / ns.emit_pack_dir, payload)

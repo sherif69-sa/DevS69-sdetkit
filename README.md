@@ -189,5 +189,7 @@ python tools/maintenance_command_center.py \
 
 - Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Security: [SECURITY.md](SECURITY.md)
+- Security docs: [Security docs](docs/security.md)
+- Policy baselines: [policy baselines](docs/policy-and-baselines.md)
 - Quality playbook: [QUALITY_PLAYBOOK.md](QUALITY_PLAYBOOK.md)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)

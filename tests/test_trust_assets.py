@@ -28,7 +28,7 @@ def _write_repo_basics(root: Path, *, include_policy_link: bool = True) -> None:
                 "https://github.com/x/actions/workflows/mutation-tests.yml/badge.svg",
                 "https://github.com/x/actions/workflows/security.yml/badge.svg",
                 "https://github.com/x/actions/workflows/pages.yml/badge.svg",
-                "[Security Docs](docs/security.md)",
+                "[SECURITY.md](SECURITY.md)",
                 "[Security docs](docs/security.md)",
                 policy_link,
                 "[Trust assets](docs/trust-assets.md)",
@@ -120,6 +120,31 @@ def test_trust_signal_score_reduces_when_policy_link_missing(tmp_path: Path) -> 
     payload = tsu.build_trust_signal_summary(tmp_path)
     assert payload["summary"]["trust_score"] < 100.0
     assert payload["policy_checks"]["policy_baseline_exists"] is False
+
+
+def test_trust_signal_main_score_matches_summary_when_not_strict(tmp_path: Path, capsys) -> None:
+    _write_repo_basics(tmp_path, include_policy_link=False)
+    _write_trust_assets_page(tmp_path)
+
+    rc = tsu.main(["--root", str(tmp_path), "--format", "json"])
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["summary"]["trust_score"] < 100.0
+    assert payload["score"] == payload["summary"]["trust_score"]
+
+
+def test_trust_signal_policy_link_matching_uses_target_not_link_text(tmp_path: Path) -> None:
+    _write_repo_basics(tmp_path)
+    _write_trust_assets_page(tmp_path)
+
+    readme = tmp_path / "README.md"
+    readme.write_text(
+        readme.read_text(encoding="utf-8").replace("[SECURITY.md](SECURITY.md)", "[Security policy](SECURITY.md)"),
+        encoding="utf-8",
+    )
+
+    payload = tsu.build_trust_signal_summary(tmp_path)
+    assert payload["policy_checks"]["security_doc_exists"] is True
 
 
 def test_cli_dispatch(tmp_path: Path, capsys) -> None:
