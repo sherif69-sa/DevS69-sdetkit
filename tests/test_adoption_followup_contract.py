@@ -121,3 +121,43 @@ def test_adoption_followup_contract_checks_history_rollup(tmp_path: Path) -> Non
     assert proc.returncode == 0
     payload = json.loads(proc.stdout)
     assert payload["ok"] is True
+
+
+def test_adoption_followup_contract_detects_invalid_decision_context_and_rationale(tmp_path: Path) -> None:
+    followup = tmp_path / "adoption-followup.json"
+    followup.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.adoption_followup.v1",
+                "fit": "high",
+                "decision": "SHIP",
+                "next_command": "cmd-a",
+                "recommendations": [
+                    {"priority": "P0", "title": "A", "action": "cmd-a", "rationale": "   "},
+                ],
+                "decision_context": {
+                    "policy_profile": "custom",
+                    "fit_artifact_present": "yes",
+                    "summary_artifact_present": False,
+                    "escalation_thresholds": {
+                        "escalation_consecutive_no_ship": "2",
+                        "escalation_min_runs": 3,
+                        "escalation_min_p0_rate": "0.5",
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    proc = subprocess.run(
+        [sys.executable, str(SCRIPT), "--followup", str(followup), "--format", "json"],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert proc.returncode == 1
+    payload = json.loads(proc.stdout)
+    assert payload["ok"] is False
+    assert any("recommendations[1].rationale" in row for row in payload["errors"])
+    assert any("decision_context.policy_profile" in row for row in payload["errors"])
+    assert any("decision_context.fit_artifact_present" in row for row in payload["errors"])

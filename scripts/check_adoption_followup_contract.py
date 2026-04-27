@@ -29,6 +29,8 @@ def check_contract(payload: dict[str, Any]) -> list[str]:
 
     if payload.get("fit") not in {"unknown", "low", "medium", "high"}:
         errors.append("fit must be one of: unknown, low, medium, high")
+    if payload.get("decision") not in {"NO-DATA", "SHIP", "NO-SHIP"}:
+        errors.append("decision must be one of: NO-DATA, SHIP, NO-SHIP")
 
     next_command = payload.get("next_command")
     if not isinstance(next_command, str) or not next_command.strip():
@@ -56,6 +58,9 @@ def check_contract(payload: dict[str, Any]) -> list[str]:
             errors.append(f"recommendations[{idx}].title must be non-empty string")
         if not isinstance(action, str) or not action.strip():
             errors.append(f"recommendations[{idx}].action must be non-empty string")
+        rationale = rec.get("rationale")
+        if rationale is not None and (not isinstance(rationale, str) or not rationale.strip()):
+            errors.append(f"recommendations[{idx}].rationale must be non-empty string when provided")
         if current < last_priority:
             errors.append("recommendations must be sorted by priority (P0 -> P1 -> P2)")
         last_priority = max(last_priority, current)
@@ -63,6 +68,29 @@ def check_contract(payload: dict[str, Any]) -> list[str]:
     top_action = recommendations[0].get("action") if recommendations else None
     if isinstance(top_action, str) and isinstance(next_command, str) and top_action != next_command:
         errors.append("next_command must equal recommendations[0].action")
+
+    context = payload.get("decision_context")
+    if context is not None:
+        if not isinstance(context, dict):
+            errors.append("decision_context must be an object when provided")
+        else:
+            profile = context.get("policy_profile")
+            if profile not in {"conservative", "balanced", "aggressive"}:
+                errors.append("decision_context.policy_profile must be conservative|balanced|aggressive")
+            for key in ("fit_artifact_present", "summary_artifact_present"):
+                if key in context and not isinstance(context.get(key), bool):
+                    errors.append(f"decision_context.{key} must be boolean when provided")
+            thresholds = context.get("escalation_thresholds")
+            if thresholds is not None:
+                if not isinstance(thresholds, dict):
+                    errors.append("decision_context.escalation_thresholds must be object when provided")
+                else:
+                    if not isinstance(thresholds.get("escalation_consecutive_no_ship"), int):
+                        errors.append("decision_context.escalation_thresholds.escalation_consecutive_no_ship must be int")
+                    if not isinstance(thresholds.get("escalation_min_runs"), int):
+                        errors.append("decision_context.escalation_thresholds.escalation_min_runs must be int")
+                    if not isinstance(thresholds.get("escalation_min_p0_rate"), (int, float)):
+                        errors.append("decision_context.escalation_thresholds.escalation_min_p0_rate must be number")
 
     return errors
 
