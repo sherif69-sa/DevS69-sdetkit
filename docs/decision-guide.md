@@ -47,6 +47,7 @@ Rollup now includes escalation signals:
 - `escalation_reason` (`none|consecutive_no_ship|high_p0_rate`)
 
 You can tune escalation behavior in CLI mode with:
+- `--policy-profile` (`conservative|balanced|aggressive`)
 - `--escalation-consecutive-no-ship`
 - `--escalation-min-runs`
 - `--escalation-min-p0-rate`

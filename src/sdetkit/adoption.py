@@ -14,6 +14,15 @@ def _load_optional(path: Path) -> dict[str, Any] | None:
     return payload if isinstance(payload, dict) else None
 
 
+def _threshold_defaults(policy_profile: str) -> tuple[int, int, float]:
+    profile = str(policy_profile).strip().lower()
+    if profile == "conservative":
+        return (3, 4, 0.7)
+    if profile == "aggressive":
+        return (1, 2, 0.3)
+    return (2, 3, 0.5)
+
+
 def build_followup(
     *,
     fit_payload: dict[str, Any] | None,
@@ -249,10 +258,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--history", type=Path, default=None)
     parser.add_argument("--history-rollup-out", type=Path, default=None)
-    parser.add_argument("--escalation-consecutive-no-ship", type=int, default=2)
-    parser.add_argument("--escalation-min-runs", type=int, default=3)
-    parser.add_argument("--escalation-min-p0-rate", type=float, default=0.5)
+    parser.add_argument("--policy-profile", choices=["conservative", "balanced", "aggressive"], default="balanced")
+    parser.add_argument("--escalation-consecutive-no-ship", type=int, default=None)
+    parser.add_argument("--escalation-min-runs", type=int, default=None)
+    parser.add_argument("--escalation-min-p0-rate", type=float, default=None)
     args = parser.parse_args(argv)
+    default_no_ship, default_min_runs, default_min_p0 = _threshold_defaults(args.policy_profile)
+    escalation_consecutive_no_ship = (
+        default_no_ship if args.escalation_consecutive_no_ship is None else int(args.escalation_consecutive_no_ship)
+    )
+    escalation_min_runs = default_min_runs if args.escalation_min_runs is None else int(args.escalation_min_runs)
+    escalation_min_p0_rate = default_min_p0 if args.escalation_min_p0_rate is None else float(args.escalation_min_p0_rate)
 
     payload = build_followup(
         fit_payload=_load_optional(args.fit),
@@ -263,9 +279,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.history_rollup_out is not None and args.history is not None:
         rollup = _build_history_rollup(
             args.history,
-            escalation_consecutive_no_ship=max(1, int(args.escalation_consecutive_no_ship)),
-            escalation_min_runs=max(1, int(args.escalation_min_runs)),
-            escalation_min_p0_rate=max(0.0, min(1.0, float(args.escalation_min_p0_rate))),
+            escalation_consecutive_no_ship=max(1, escalation_consecutive_no_ship),
+            escalation_min_runs=max(1, escalation_min_runs),
+            escalation_min_p0_rate=max(0.0, min(1.0, escalation_min_p0_rate)),
         )
         args.history_rollup_out.parent.mkdir(parents=True, exist_ok=True)
         args.history_rollup_out.write_text(

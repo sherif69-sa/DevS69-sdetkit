@@ -342,9 +342,10 @@ Then use stability-aware command discovery:
     adp.add_argument("--out", default="")
     adp.add_argument("--history", default="")
     adp.add_argument("--history-rollup-out", default="")
-    adp.add_argument("--escalation-consecutive-no-ship", type=int, default=2)
-    adp.add_argument("--escalation-min-runs", type=int, default=3)
-    adp.add_argument("--escalation-min-p0-rate", type=float, default=0.5)
+    adp.add_argument("--policy-profile", choices=["conservative", "balanced", "aggressive"], default="balanced")
+    adp.add_argument("--escalation-consecutive-no-ship", type=int, default=None)
+    adp.add_argument("--escalation-min-runs", type=int, default=None)
+    adp.add_argument("--escalation-min-p0-rate", type=float, default=None)
 
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
@@ -844,16 +845,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             forwarded.extend(["--history", str(ns.history)])
         if str(ns.history_rollup_out):
             forwarded.extend(["--history-rollup-out", str(ns.history_rollup_out)])
-        forwarded.extend(
-            [
-                "--escalation-consecutive-no-ship",
-                str(ns.escalation_consecutive_no_ship),
-                "--escalation-min-runs",
-                str(ns.escalation_min_runs),
-                "--escalation-min-p0-rate",
-                str(ns.escalation_min_p0_rate),
-            ]
-        )
+        forwarded.extend(["--policy-profile", str(ns.policy_profile)])
+        if ns.escalation_consecutive_no_ship is not None:
+            forwarded.extend(["--escalation-consecutive-no-ship", str(ns.escalation_consecutive_no_ship)])
+        if ns.escalation_min_runs is not None:
+            forwarded.extend(["--escalation-min-runs", str(ns.escalation_min_runs)])
+        if ns.escalation_min_p0_rate is not None:
+            forwarded.extend(["--escalation-min-p0-rate", str(ns.escalation_min_p0_rate)])
         return _run_module_main("sdetkit.adoption", forwarded)
 
     if ns.cmd == "fit":

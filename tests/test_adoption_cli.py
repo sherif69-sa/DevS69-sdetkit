@@ -136,3 +136,30 @@ def test_adoption_cli_custom_thresholds(tmp_path: Path, capsys) -> None:
     assert rollup_payload["thresholds"]["escalation_consecutive_no_ship"] == 5
     assert rollup_payload["thresholds"]["escalation_min_runs"] == 1
     assert rollup_payload["thresholds"]["escalation_min_p0_rate"] == 0.1
+
+
+def test_adoption_cli_policy_profile_defaults(tmp_path: Path, capsys) -> None:
+    history = tmp_path / "history.jsonl"
+    rollup = tmp_path / "rollup.json"
+    rc = adoption.main(
+        [
+            "--fit",
+            str(tmp_path / "missing-fit.json"),
+            "--summary",
+            str(tmp_path / "missing-summary.json"),
+            "--format",
+            "json",
+            "--history",
+            str(history),
+            "--history-rollup-out",
+            str(rollup),
+            "--policy-profile",
+            "conservative",
+        ]
+    )
+    assert rc == 0
+    _ = capsys.readouterr()
+    rollup_payload = json.loads(rollup.read_text(encoding="utf-8"))
+    assert rollup_payload["thresholds"]["escalation_consecutive_no_ship"] == 3
+    assert rollup_payload["thresholds"]["escalation_min_runs"] == 4
+    assert rollup_payload["thresholds"]["escalation_min_p0_rate"] == 0.7
