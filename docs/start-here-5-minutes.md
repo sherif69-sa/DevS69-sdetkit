@@ -24,6 +24,26 @@ python -m sdetkit doctor
    - `failed_steps`
 3. Use terminal logs only after artifact triage.
 
+## Make review explicit (recommended)
+
+Generate a concise reviewer-ready summary from artifacts:
+
+```bash
+make gate-decision-summary
+```
+
+This writes:
+- `build/gate-decision-summary.json`
+- `build/gate-decision-summary.md`
+
+Use the markdown file in PR/release notes so teams review evidence, not only command output.
+
+Validate summary contract (recommended for CI/local guardrails):
+
+```bash
+make gate-decision-summary-contract
+```
+
 ## Troubleshooting (top links)
 
 - First failure triage: [first-failure-triage.md](first-failure-triage.md)

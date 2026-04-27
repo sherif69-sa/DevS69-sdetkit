@@ -79,6 +79,7 @@ After the canonical path is working, expand deliberately:
 These remain fully supported for existing automation and muscle memory:
 
 - `gate`, `doctor`, `security`, `repo`, `evidence`, `report`, `policy`
+- `start` (guided alias to `onboarding` for role/journey-based first-run help)
 
 ### Supporting utilities (secondary)
 

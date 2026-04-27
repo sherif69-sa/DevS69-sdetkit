@@ -6,6 +6,8 @@ DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisi
 
 Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 
+Guided alias for first-time users: `python -m sdetkit start --journey fast-start --format markdown`.
+
 This page is the product homepage/router for first-time adoption.
 
 <div class="quick-jump" markdown>
@@ -28,6 +30,8 @@ python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor
 ```
 
+New teams should stop here first, then inspect artifacts before exploring advanced commands.
+
 ## What you get
 
 ```text
@@ -41,6 +45,13 @@ build/release-preflight.json
 - [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
 - [First run quickstart](ready-to-use.md)
 - [Quickstart (copy-paste)](quickstart-copy-paste.md)
+
+## Keep first adoption simple
+
+- Start with only the canonical path (`gate fast` -> `gate release` -> `doctor`).
+- If you want a guided role/journey prompt, use `python -m sdetkit start --journey fast-start --format markdown`.
+- Generate a concise review handoff: `make gate-decision-summary`.
+- Delay full CLI exploration until the core path is stable in your repo.
 
 ## Team rollout / CI
 
@@ -79,7 +90,3 @@ Historical and transition-era references remain intentionally secondary to first
 - Python 3.10+
 - Prefer isolated environments
 - `NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q`
-impact-58-big-upgrade-report.md
-integrations-phase2-hardening-closeout.md
-impact-60-big-upgrade-report.md
-integrations-phase2-wrap-handoff-closeout.md

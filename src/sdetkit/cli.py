@@ -335,6 +335,16 @@ Then use stability-aware command discovery:
     onb = sub.add_parser("onboarding", help="Role-based onboarding playbook")
     onb.add_argument("args", nargs=argparse.REMAINDER)
 
+    sta = sub.add_parser(
+        "start",
+        help="[Public / stable] Guided start shortcut (role/journey onboarding entrypoint)",
+    )
+    sta.add_argument("--role", choices=["all", "sdet", "platform", "manager"], default="all")
+    sta.add_argument("--journey", choices=["all", "fast-start", "first-pr", "ci-rollout", "artifact-review"], default="fast-start")
+    sta.add_argument("--platform", choices=["all", "linux", "mac", "windows"], default="all")
+    sta.add_argument("--format", choices=["text", "markdown", "json"], default="markdown")
+    sta.add_argument("--output", default="")
+
     ono = sub.add_parser("onboarding-optimization", help="Onboarding optimization playbook")
     ono.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -783,6 +793,21 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "init":
         return _run_module_main("sdetkit.repo", build_repo_init_forwarded_args(ns))
+
+    if ns.cmd == "start":
+        forwarded = [
+            "--role",
+            str(ns.role),
+            "--journey",
+            str(ns.journey),
+            "--platform",
+            str(ns.platform),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.output):
+            forwarded.extend(["--output", str(ns.output)])
+        return _run_module_main("sdetkit.onboarding", forwarded)
 
     parsed_shortcut_result = dispatch_parsed_shortcut(
         str(ns.cmd),
