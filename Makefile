@@ -8,9 +8,10 @@ ADAPTIVE_SCENARIO ?= balanced
 PORTFOLIO_MANIFEST ?= portfolio-manifest.json
 FIRST_PROOF_BRANCH ?= local
 FIRST_PROOF_STRICT ?= false
+FIRST_PROOF_RELEASE_DRY_RUN ?= true
 PHASE2_BASELINE_PRE_EXTRACTION ?= docs/artifacts/phase2-hotspot-baseline-pre-extraction-$(DATE_TAG).json
 
-.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-contract release-room portfolio-readiness premerge-release-room adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-contract first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-verify phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-execution-core phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-hotspot-baseline phase2-hotspot-delta phase2-complete phase2-progress phase2-surface-clarity phase3-dependency-radar phase3-quality-contract phase3-quality-report phase3-do-it phase4-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility
+.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-fast ship-readiness-contract release-room release-room-fast portfolio-readiness premerge-release-room premerge-release-room-fast adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-local first-proof-contract first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-tests-local first-proof-verify first-proof-verify-local ops-followup ops-followup-contract ops-now ops-now-lite ops-next ops-premerge-next ops-premerge-next-fast phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-execution-core phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-hotspot-baseline phase2-hotspot-delta phase2-complete phase2-progress phase2-surface-clarity phase3-dependency-radar phase3-quality-contract phase3-quality-report phase3-do-it phase4-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility real-workflow-daily real-workflow-daily-fast real-workflow-weekly real-workflow-premerge real-workflow-premerge-fast real-workflow ops-daily ops-daily-fast ops-weekly ops-premerge ops-premerge-fast ops-workflow
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
@@ -52,7 +53,10 @@ premerge-finalize: install
 	@bash -lc '. .venv/bin/activate && $(MAKE) plan-status'
 
 first-proof: first-proof-install
-	@bash -lc '. .venv/bin/activate && PYTHONPATH=src python scripts/first_proof.py $(if $(filter true,$(FIRST_PROOF_STRICT)),--strict,) --format json --out-dir build/first-proof'
+	@bash -lc '. .venv/bin/activate && PYTHONPATH=src python scripts/first_proof.py $(if $(filter true,$(FIRST_PROOF_STRICT)),--strict,) $(if $(filter true,$(FIRST_PROOF_RELEASE_DRY_RUN)),--release-dry-run,) --format json --out-dir build/first-proof'
+
+first-proof-local: venv
+	@bash -lc '. .venv/bin/activate && PYTHONPATH=src python scripts/first_proof.py $(if $(filter true,$(FIRST_PROOF_STRICT)),--strict,) $(if $(filter true,$(FIRST_PROOF_RELEASE_DRY_RUN)),--release-dry-run,) --format json --out-dir build/first-proof'
 
 first-proof-contract: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_summary_contract.py --summary build/first-proof/first-proof-summary.json --wait-seconds 60 --format json'
@@ -72,8 +76,75 @@ first-proof-trend-threshold: venv
 first-proof-tests: install
 	@bash -lc '. .venv/bin/activate && python -m pytest -q tests/test_first_proof_script.py tests/test_first_proof_contract.py tests/test_first_proof_learning_db.py tests/test_first_proof_weekly_trend.py tests/test_first_proof_control_tower.py tests/test_first_proof_trend_threshold.py tests/test_build_owner_escalation_payload.py'
 
+first-proof-tests-local: venv
+	@bash -lc '. .venv/bin/activate && python -m pytest -q tests/test_first_proof_script.py tests/test_first_proof_contract.py tests/test_first_proof_learning_db.py tests/test_first_proof_weekly_trend.py tests/test_first_proof_control_tower.py tests/test_first_proof_trend_threshold.py tests/test_build_owner_escalation_payload.py'
+
 first-proof-verify: first-proof
 	@bash -lc '. .venv/bin/activate && $(MAKE) first-proof-contract && $(MAKE) first-proof-learn && $(MAKE) first-proof-control-tower && $(MAKE) first-proof-weekly-trend && $(MAKE) first-proof-trend-threshold && $(MAKE) first-proof-tests'
+
+first-proof-verify-local: first-proof-local
+	@bash -lc '. .venv/bin/activate && $(MAKE) first-proof-contract && $(MAKE) first-proof-learn && $(MAKE) first-proof-control-tower && $(MAKE) first-proof-weekly-trend && $(MAKE) first-proof-trend-threshold && $(MAKE) first-proof-tests-local'
+
+ops-followup: venv
+	@bash -lc '. .venv/bin/activate && python scripts/real_workflow_followup.py --format json --out-json build/ops/followup.json --out-md build/ops/followup.md --history build/ops/followup-history.jsonl --history-rollup-out build/ops/followup-history-rollup.json'
+
+ops-followup-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_real_workflow_followup_contract.py --followup build/ops/followup.json --history-rollup build/ops/followup-history-rollup.json --out build/ops/followup-contract-check.json --format json'
+
+ops-now-lite: ops-followup ops-followup-contract
+	@bash -lc 'echo ops-now-lite: follow-up generated + contract validated'
+	@bash -lc 'python -c "import json; from pathlib import Path; p = Path(\"build/ops/followup.json\"); payload = json.loads(p.read_text(encoding=\"utf-8\")) if p.exists() else {}; print(\"OPS_DECISION=\" + str(payload.get(\"decision\", \"NO-DATA\"))); print(\"OPS_NEXT_COMMAND=\" + str(payload.get(\"next_command\", \"make ops-daily\")))"'
+
+ops-now: real-workflow-daily
+	@bash -lc 'echo ops-now: full daily workflow completed'
+	@bash -lc 'python -c "import json; from pathlib import Path; p = Path(\"build/ops/followup.json\"); payload = json.loads(p.read_text(encoding=\"utf-8\")) if p.exists() else {}; print(\"OPS_DECISION=\" + str(payload.get(\"decision\", \"NO-DATA\"))); print(\"OPS_NEXT_COMMAND=\" + str(payload.get(\"next_command\", \"make ops-daily\")))"'
+
+ops-next: ops-now-lite
+	@bash -lc '. .venv/bin/activate && python scripts/ops_next.py --followup build/ops/followup.json --limit 3'
+
+ops-premerge-next:
+	@bash -lc '. .venv/bin/activate && $(MAKE) ops-premerge || true'
+	@bash -lc '. .venv/bin/activate && python scripts/ops_premerge_next.py --gate-json build/premerge-release-room-gate.json --limit 3'
+
+ops-premerge-next-fast:
+	@bash -lc '. .venv/bin/activate && $(MAKE) ops-premerge-fast || true'
+	@bash -lc '. .venv/bin/activate && python scripts/ops_premerge_next.py --gate-json build/premerge-release-room-gate.json --limit 3'
+
+real-workflow-daily: first-proof-verify ops-followup ops-followup-contract
+	@bash -lc 'echo real-workflow-daily: deterministic gate + learning loop + validated follow-up completed'
+
+real-workflow-daily-fast: first-proof-verify-local ops-followup ops-followup-contract
+	@bash -lc 'echo "real-workflow-daily-fast: deterministic gate + validated follow-up completed (no reinstall lane)"'
+
+real-workflow-weekly: adaptive-postcheck top-tier-reporting enterprise-contracts-check
+	@bash -lc 'echo real-workflow-weekly: reporting + contracts refreshed'
+
+real-workflow-premerge: premerge-release-room release-room
+	@bash -lc 'echo real-workflow-premerge: pre-merge gate + release room checks completed'
+
+real-workflow-premerge-fast: premerge-release-room-fast release-room-fast
+	@bash -lc 'echo "real-workflow-premerge-fast: pre-merge gate (release dry-run) + release room checks completed"'
+
+real-workflow: real-workflow-daily real-workflow-weekly
+	@bash -lc 'echo real-workflow: daily and weekly lanes completed'
+
+ops-daily: real-workflow-daily
+	@bash -lc 'echo ops-daily: alias completed'
+
+ops-daily-fast: real-workflow-daily-fast
+	@bash -lc 'echo ops-daily-fast: alias completed'
+
+ops-weekly: real-workflow-weekly
+	@bash -lc 'echo ops-weekly: alias completed'
+
+ops-premerge: real-workflow-premerge
+	@bash -lc 'echo ops-premerge: alias completed'
+
+ops-premerge-fast: real-workflow-premerge-fast
+	@bash -lc 'echo ops-premerge-fast: alias completed'
+
+ops-workflow: real-workflow
+	@bash -lc 'echo ops-workflow: alias completed'
 
 test: install
 	@bash -lc '. .venv/bin/activate && bash quality.sh test'
@@ -172,10 +243,16 @@ enterprise-assessment-contract: venv
 ship-readiness: venv
 	@bash -lc '. .venv/bin/activate && python -m sdetkit ship-readiness --strict --format json --out-dir build/ship-readiness'
 
+ship-readiness-fast: venv
+	@bash -lc '. .venv/bin/activate && python -m sdetkit ship-readiness --strict --release-dry-run --format json --out-dir build/ship-readiness'
+
 ship-readiness-contract: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_ship_readiness_contract.py --summary build/ship-readiness/ship-readiness-summary.json --format json'
 
 release-room: enterprise-assessment ship-readiness ship-readiness-contract enterprise-assessment-contract
+	@bash -lc '. .venv/bin/activate && python scripts/render_release_room_summary.py --ship-summary build/ship-readiness/ship-readiness-summary.json --enterprise-summary docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json --out build/release-room-summary.md'
+
+release-room-fast: enterprise-assessment ship-readiness-fast ship-readiness-contract enterprise-assessment-contract
 	@bash -lc '. .venv/bin/activate && python scripts/render_release_room_summary.py --ship-summary build/ship-readiness/ship-readiness-summary.json --enterprise-summary docs/artifacts/enterprise-assessment-pack/enterprise-assessment-summary.json --out build/release-room-summary.md'
 
 portfolio-readiness: venv
@@ -183,6 +260,9 @@ portfolio-readiness: venv
 
 premerge-release-room: venv
 	@bash -lc '. .venv/bin/activate && python scripts/premerge_release_room_gate.py . --strict --format json --out build/premerge-release-room-gate.json'
+
+premerge-release-room-fast: venv
+	@bash -lc '. .venv/bin/activate && python scripts/premerge_release_room_gate.py . --strict --ship-release-dry-run --format json --out build/premerge-release-room-gate.json'
 
 
 adaptive-postcheck: adaptive-scenario-db

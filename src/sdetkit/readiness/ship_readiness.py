@@ -165,6 +165,11 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--strict", action="store_true")
     parser.add_argument(
+        "--release-dry-run",
+        action="store_true",
+        help="Run gate release with --dry-run (useful for local premerge rehearsal lanes).",
+    )
+    parser.add_argument(
         "--include-enterprise",
         action="store_true",
         help="Also execute enterprise-assessment and include it in go/no-go contract.",
@@ -177,9 +182,12 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
+    gate_release_cmd = "python -m sdetkit gate release --format json"
+    if args.release_dry_run:
+        gate_release_cmd += " --dry-run"
     commands = [
         ("gate_fast", "python -m sdetkit gate fast --format json --stable-json"),
-        ("gate_release", "python -m sdetkit gate release --format json"),
+        ("gate_release", gate_release_cmd),
         ("doctor", "python -m sdetkit doctor --format json"),
         ("release_readiness", "python -m sdetkit release-readiness --format json"),
     ]

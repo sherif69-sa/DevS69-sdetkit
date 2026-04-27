@@ -49,3 +49,30 @@ def test_first_proof_writes_decision_line_for_no_ship(monkeypatch, tmp_path: Pat
     payload = json.loads((tmp_path / "first-proof-summary.json").read_text(encoding="utf-8"))
     assert payload["decision"] == "NO-SHIP"
     assert payload["decision_line"] == "FIRST_PROOF_DECISION=NO-SHIP"
+
+
+def test_first_proof_release_dry_run_flag_is_forwarded(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(first_proof, "_resolve_python", lambda _explicit: "python3.11")
+    captured_commands: list[list[str]] = []
+    step_results = [
+        first_proof.StepResult("gate-fast", ["cmd"], 0, "a.stdout.log", "a.stderr.log", "a.json"),
+        first_proof.StepResult(
+            "gate-release", ["cmd"], 0, "b.stdout.log", "b.stderr.log", "b.json"
+        ),
+        first_proof.StepResult("doctor", ["cmd"], 0, "c.stdout.log", "c.stderr.log", "c.json"),
+    ]
+
+    def _fake_run_step(**kwargs):
+        command = kwargs.get("command")
+        if isinstance(command, list):
+            captured_commands.append(command)
+        return step_results.pop(0)
+
+    monkeypatch.setattr(first_proof, "_run_step", _fake_run_step)
+
+    rc = first_proof.main(
+        ["first_proof.py", "--release-dry-run", "--out-dir", str(tmp_path), "--format", "json"]
+    )
+    assert rc == 0
+    gate_release_cmd = captured_commands[1]
+    assert "--dry-run" in gate_release_cmd

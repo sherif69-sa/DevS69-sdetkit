@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://devs69.dev/sdetkit/schemas/ops-followup.v1.json",
+  "title": "SDETKit ops follow-up payload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "decision",
+    "threshold_breach",
+    "recommendations",
+    "next_command"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "sdetkit.real-workflow-followup.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["SHIP", "NO-SHIP"]
+    },
+    "threshold_breach": {
+      "type": "boolean"
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["priority", "title", "action"],
+        "properties": {
+          "priority": {
+            "type": "string",
+            "enum": ["P0", "P1", "P2", "P3"]
+          },
+          "title": {"type": "string", "minLength": 1},
+          "action": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "next_command": {
+      "type": "string",
+      "enum": ["make ops-daily", "make ops-premerge"]
+    }
+  }
+}

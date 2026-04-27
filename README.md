@@ -42,6 +42,8 @@ build/first-proof/
 
 Troubleshooting: [`docs/first-proof-troubleshooting.md`](docs/first-proof-troubleshooting.md)
 Learning DB + adaptive reviewer alignment: [`docs/first-proof-learning-db.md`](docs/first-proof-learning-db.md)
+Real workflow operations: [`docs/real-workflow-operations.md`](docs/real-workflow-operations.md)
+Quick ops aliases: `make ops-daily` / `make ops-daily-fast` / `make ops-weekly` / `make ops-premerge` / `make ops-premerge-fast` / `make ops-premerge-next` / `make ops-premerge-next-fast` / `make ops-followup` / `make ops-now` / `make ops-now-lite` / `make ops-next`
 Rollback/remediation examples: [`docs/integrations/rollback-remediation-examples.md`](docs/integrations/rollback-remediation-examples.md)
 
 Release preflight now expects `build/first-proof/first-proof-summary.json` to exist and pass

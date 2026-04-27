@@ -96,3 +96,36 @@ def test_run_command_retries_timeout_once_then_succeeds(tmp_path: Path, monkeypa
 
     assert result["ok"] is True
     assert result["attempts"] == 2
+
+
+def test_main_release_dry_run_forwards_to_gate_release(tmp_path: Path, monkeypatch) -> None:
+    captured: list[list[str]] = []
+
+    class _FakeProc:
+        def __init__(self) -> None:
+            self.returncode = 0
+            self.stdout = "{}\n"
+            self.stderr = ""
+
+    def _fake_run(argv, **kwargs):  # type: ignore[no-untyped-def]
+        _ = kwargs
+        if isinstance(argv, list):
+            captured.append(argv)
+        return _FakeProc()
+
+    monkeypatch.setattr(sr.subprocess, "run", _fake_run)
+
+    rc = sr.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--out-dir",
+            str(tmp_path / "out"),
+            "--release-dry-run",
+            "--format",
+            "json",
+        ]
+    )
+    assert rc == 0
+    gate_release_argv = captured[1]
+    assert "--dry-run" in gate_release_argv

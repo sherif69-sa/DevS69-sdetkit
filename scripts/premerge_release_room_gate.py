@@ -22,7 +22,21 @@ def _run(cmd: list[str], cwd: Path) -> dict[str, Any]:
     }
 
 
-def run_gate(repo_root: Path) -> dict[str, Any]:
+def run_gate(repo_root: Path, *, ship_release_dry_run: bool = False) -> dict[str, Any]:
+    ship_readiness_cmd = [
+        "python",
+        "-m",
+        "sdetkit",
+        "ship-readiness",
+        "--strict",
+        "--format",
+        "json",
+        "--out-dir",
+        "build/ship-readiness",
+    ]
+    if ship_release_dry_run:
+        ship_readiness_cmd.append("--release-dry-run")
+
     steps = [
         (
             "enterprise_assessment",
@@ -38,17 +52,7 @@ def run_gate(repo_root: Path) -> dict[str, Any]:
         ),
         (
             "ship_readiness",
-            [
-                "python",
-                "-m",
-                "sdetkit",
-                "ship-readiness",
-                "--strict",
-                "--format",
-                "json",
-                "--out-dir",
-                "build/ship-readiness",
-            ],
+            ship_readiness_cmd,
         ),
         (
             "enterprise_contract",
@@ -120,10 +124,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", default="build/premerge-release-room-gate.json")
     parser.add_argument("--format", choices=["text", "json"], default="json")
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument(
+        "--ship-release-dry-run",
+        action="store_true",
+        help="Forward --release-dry-run to ship-readiness for local rehearsal lanes.",
+    )
     args = parser.parse_args(argv)
 
     repo_root = Path(args.repo).resolve()
-    payload = run_gate(repo_root)
+    payload = run_gate(repo_root, ship_release_dry_run=bool(args.ship_release_dry_run))
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
