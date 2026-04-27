@@ -57,11 +57,7 @@ def _suggest_fast_premerge(payload: dict[str, Any]) -> bool:
         return False
 
     ship_step = next(
-        (
-            step
-            for step in steps
-            if isinstance(step, dict) and step.get("id") == "ship_readiness"
-        ),
+        (step for step in steps if isinstance(step, dict) and step.get("id") == "ship_readiness"),
         None,
     )
     if not isinstance(ship_step, dict):

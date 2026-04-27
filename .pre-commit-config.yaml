@@ -21,6 +21,7 @@ repos:
         name: doctor --ascii
         entry: python -c 'import sys; sys.path.insert(0, "src"); from sdetkit import doctor; raise SystemExit(doctor.main(["--ascii"]))'
         language: python
+        additional_dependencies: [tomli]
         pass_filenames: false
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.19.1
