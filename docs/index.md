@@ -84,6 +84,8 @@ build/release-preflight.json
 - [Use cases](use-cases.md)
 - [Release confidence ROI](release-confidence-roi.md)
 - [Repo health dashboard](repo-health-dashboard.md)
+- [Business execution hub](business_execution/index.md)
+- [Merge readiness and execution checklist](business_execution/08-merge-readiness-checklist.md)
 
 ## Legacy reports
 
