@@ -88,6 +88,12 @@ def test_adoption_followup_contract_checks_history_rollup(tmp_path: Path) -> Non
                 "schema_version": "sdetkit.adoption_followup_history.v1",
                 "total_runs": 1,
                 "decision_counts": {"NO-DATA": 1},
+                "fit_counts": {"low": 1},
+                "p0_recommendation_runs": 1,
+                "p0_recommendation_rate": 1.0,
+                "max_consecutive_no_ship": 0,
+                "escalation_recommended": False,
+                "escalation_reason": "none",
             }
         ),
         encoding="utf-8",

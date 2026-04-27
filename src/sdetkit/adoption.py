@@ -134,17 +134,43 @@ def _build_history_rollup(history_path: Path) -> dict[str, Any]:
                 runs.append(payload)
     decision_counts: dict[str, int] = {}
     fit_counts: dict[str, int] = {}
+    p0_runs = 0
+    consecutive_no_ship = 0
+    max_consecutive_no_ship = 0
     for run in runs:
         decision = str(run.get("decision", "UNKNOWN"))
         decision_counts[decision] = decision_counts.get(decision, 0) + 1
         fit = str(run.get("fit", "unknown"))
         fit_counts[fit] = fit_counts.get(fit, 0) + 1
+        recs = run.get("recommendations", [])
+        if isinstance(recs, list) and any(
+            isinstance(item, dict) and str(item.get("priority")) == "P0" for item in recs
+        ):
+            p0_runs += 1
+        if decision == "NO-SHIP":
+            consecutive_no_ship += 1
+            max_consecutive_no_ship = max(max_consecutive_no_ship, consecutive_no_ship)
+        else:
+            consecutive_no_ship = 0
     latest = runs[-1] if runs else {}
+    total_runs = len(runs)
+    p0_rate = (p0_runs / total_runs) if total_runs else 0.0
+    escalation_recommended = max_consecutive_no_ship >= 2 or (total_runs >= 3 and p0_rate >= 0.5)
+    escalation_reason = "none"
+    if max_consecutive_no_ship >= 2:
+        escalation_reason = "consecutive_no_ship"
+    elif total_runs >= 3 and p0_rate >= 0.5:
+        escalation_reason = "high_p0_rate"
     return {
         "schema_version": "sdetkit.adoption_followup_history.v1",
-        "total_runs": len(runs),
+        "total_runs": total_runs,
         "decision_counts": decision_counts,
         "fit_counts": fit_counts,
+        "p0_recommendation_runs": p0_runs,
+        "p0_recommendation_rate": round(p0_rate, 3),
+        "max_consecutive_no_ship": max_consecutive_no_ship,
+        "escalation_recommended": escalation_recommended,
+        "escalation_reason": escalation_reason,
         "latest_next_command": latest.get("next_command", ""),
         "latest_generated_at": latest.get("generated_at", ""),
     }

@@ -81,6 +81,18 @@ def _check_rollup(path: Path) -> list[str]:
         errors.append("history rollup total_runs must be int")
     if not isinstance(payload.get("decision_counts"), dict):
         errors.append("history rollup decision_counts must be object")
+    if not isinstance(payload.get("fit_counts"), dict):
+        errors.append("history rollup fit_counts must be object")
+    if not isinstance(payload.get("p0_recommendation_runs"), int):
+        errors.append("history rollup p0_recommendation_runs must be int")
+    if not isinstance(payload.get("p0_recommendation_rate"), (int, float)):
+        errors.append("history rollup p0_recommendation_rate must be number")
+    if not isinstance(payload.get("max_consecutive_no_ship"), int):
+        errors.append("history rollup max_consecutive_no_ship must be int")
+    if not isinstance(payload.get("escalation_recommended"), bool):
+        errors.append("history rollup escalation_recommended must be boolean")
+    if payload.get("escalation_reason") not in {"none", "consecutive_no_ship", "high_p0_rate"}:
+        errors.append("history rollup escalation_reason must be none|consecutive_no_ship|high_p0_rate")
     return errors
 
 

@@ -37,6 +37,10 @@ The follow-up workflow now maintains:
 - `build/adoption-followup-history.jsonl`
 - `build/adoption-followup-history-rollup.json`
 
+Rollup now includes escalation signals:
+- `escalation_recommended`
+- `escalation_reason` (`none|consecutive_no_ship|high_p0_rate`)
+
 ## 2) When SDETKit is probably *not* worth it
 
 SDETKit may be unnecessary if:
