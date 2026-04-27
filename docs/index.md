@@ -52,6 +52,7 @@ build/release-preflight.json
 - Start with only the canonical path (`gate fast` -> `gate release` -> `doctor`).
 - If you want a guided role/journey prompt, use `python -m sdetkit start --journey fast-start --format markdown`.
 - Generate a concise review handoff: `make gate-decision-summary`.
+- Generate prioritized adoption actions: `make adoption-followup`.
 - Delay full CLI exploration until the core path is stable in your repo.
 
 ## Team rollout / CI

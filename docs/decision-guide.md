@@ -23,6 +23,12 @@ Quick fit signal command (risk-based recommendation):
 python scripts/recommend_sdetkit_fit.py --repo-size medium --team-size medium --release-frequency medium --change-failure-impact high --compliance-pressure medium --format json
 ```
 
+Convert fit + latest gate decision into prioritized follow-up actions:
+
+```bash
+make adoption-followup
+```
+
 ## 2) When SDETKit is probably *not* worth it
 
 SDETKit may be unnecessary if:
