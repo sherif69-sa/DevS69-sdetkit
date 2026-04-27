@@ -56,6 +56,7 @@ build/release-preflight.json
 - Or use CLI directly: `python -m sdetkit adoption --format json`.
 - Validate adoption action payload: `make adoption-followup-contract`.
 - Track follow-up trend over time via `build/adoption-followup-history-rollup.json`.
+- Run full loop with contracts: `make adoption-control-loop && make adoption-control-loop-contract`.
 - Delay full CLI exploration until the core path is stable in your repo.
 
 ## Team rollout / CI

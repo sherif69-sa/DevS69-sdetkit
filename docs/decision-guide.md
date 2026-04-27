@@ -28,6 +28,8 @@ Convert fit + latest gate decision into prioritized follow-up actions:
 ```bash
 make adoption-followup
 make adoption-followup-contract
+make adoption-control-loop
+make adoption-control-loop-contract
 python -m sdetkit adoption --format json
 ```
 
