@@ -33,4 +33,3 @@ Before merge/use:
 3. KPI threshold owners are named.
 4. First pilot cohort is identified.
 5. Execution checklist has an assigned accountable owner.
-

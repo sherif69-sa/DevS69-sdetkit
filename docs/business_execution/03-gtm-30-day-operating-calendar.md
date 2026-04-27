@@ -469,4 +469,3 @@ This calendar is “operationally done” when:
 2. KPI tracking is completed for all active opportunities.
 3. Pilot playbook is validated with at least one successful conversion.
 4. Next-cycle plan is informed by evidence, not intuition.
-

@@ -408,4 +408,3 @@ This ICP matrix is “done for v1” when:
 1. All pipeline targets are scored.
 2. Tiering drives weekly execution priorities.
 3. Conversion data feeds monthly calibration.
-

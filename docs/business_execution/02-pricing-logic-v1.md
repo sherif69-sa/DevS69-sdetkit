@@ -344,4 +344,3 @@ Pricing v1 is considered ready when:
 2. Value metric is selected and instrumented.
 3. Pilot terms are standardized.
 4. Objection library and discount guardrails are adopted by sales.
-

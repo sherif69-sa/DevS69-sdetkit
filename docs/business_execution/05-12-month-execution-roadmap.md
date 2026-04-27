@@ -45,7 +45,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables
@@ -99,7 +99,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables
@@ -153,7 +153,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables
@@ -207,7 +207,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables
@@ -261,7 +261,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables
@@ -315,7 +315,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables
@@ -369,7 +369,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables
@@ -423,7 +423,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables
@@ -477,7 +477,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables
@@ -531,7 +531,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables
@@ -585,7 +585,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables
@@ -639,7 +639,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 #### Work packages
 1. GTM execution package
 2. Pilot success package
-3. Commercial/package package
+3. Commercial and packaging workstream
 4. Measurement and governance package
 
 #### Key deliverables

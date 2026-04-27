@@ -65,4 +65,3 @@ Day 2-3:
 Day 4-5:
 - [ ] Draft pilot charter for top candidate.
 - [ ] Publish week-1 operating memo.
-
