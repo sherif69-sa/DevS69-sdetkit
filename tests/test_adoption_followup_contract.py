@@ -94,6 +94,11 @@ def test_adoption_followup_contract_checks_history_rollup(tmp_path: Path) -> Non
                 "max_consecutive_no_ship": 0,
                 "escalation_recommended": False,
                 "escalation_reason": "none",
+                "thresholds": {
+                    "escalation_consecutive_no_ship": 2,
+                    "escalation_min_runs": 3,
+                    "escalation_min_p0_rate": 0.5,
+                },
             }
         ),
         encoding="utf-8",

@@ -119,7 +119,13 @@ def _append_history(payload: dict[str, Any], history_path: Path) -> dict[str, An
     return stamped
 
 
-def _build_history_rollup(history_path: Path) -> dict[str, Any]:
+def _build_history_rollup(
+    history_path: Path,
+    *,
+    escalation_consecutive_no_ship: int,
+    escalation_min_runs: int,
+    escalation_min_p0_rate: float,
+) -> dict[str, Any]:
     runs: list[dict[str, Any]] = []
     if history_path.exists():
         for line in history_path.read_text(encoding="utf-8").splitlines():
@@ -155,11 +161,13 @@ def _build_history_rollup(history_path: Path) -> dict[str, Any]:
     latest = runs[-1] if runs else {}
     total_runs = len(runs)
     p0_rate = (p0_runs / total_runs) if total_runs else 0.0
-    escalation_recommended = max_consecutive_no_ship >= 2 or (total_runs >= 3 and p0_rate >= 0.5)
+    escalation_recommended = max_consecutive_no_ship >= escalation_consecutive_no_ship or (
+        total_runs >= escalation_min_runs and p0_rate >= escalation_min_p0_rate
+    )
     escalation_reason = "none"
-    if max_consecutive_no_ship >= 2:
+    if max_consecutive_no_ship >= escalation_consecutive_no_ship:
         escalation_reason = "consecutive_no_ship"
-    elif total_runs >= 3 and p0_rate >= 0.5:
+    elif total_runs >= escalation_min_runs and p0_rate >= escalation_min_p0_rate:
         escalation_reason = "high_p0_rate"
     return {
         "schema_version": "sdetkit.adoption_followup_history.v1",
@@ -171,6 +179,11 @@ def _build_history_rollup(history_path: Path) -> dict[str, Any]:
         "max_consecutive_no_ship": max_consecutive_no_ship,
         "escalation_recommended": escalation_recommended,
         "escalation_reason": escalation_reason,
+        "thresholds": {
+            "escalation_consecutive_no_ship": escalation_consecutive_no_ship,
+            "escalation_min_runs": escalation_min_runs,
+            "escalation_min_p0_rate": escalation_min_p0_rate,
+        },
         "latest_next_command": latest.get("next_command", ""),
         "latest_generated_at": latest.get("generated_at", ""),
     }
@@ -187,6 +200,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--history", type=Path, default=None)
     parser.add_argument("--history-rollup-out", type=Path, default=None)
+    parser.add_argument("--escalation-consecutive-no-ship", type=int, default=2)
+    parser.add_argument("--escalation-min-runs", type=int, default=3)
+    parser.add_argument("--escalation-min-p0-rate", type=float, default=0.5)
     args = parser.parse_args(argv)
 
     payload = build_followup(
@@ -196,7 +212,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.history is not None:
         payload = _append_history(payload, args.history)
     if args.history_rollup_out is not None and args.history is not None:
-        rollup = _build_history_rollup(args.history)
+        rollup = _build_history_rollup(
+            args.history,
+            escalation_consecutive_no_ship=max(1, int(args.escalation_consecutive_no_ship)),
+            escalation_min_runs=max(1, int(args.escalation_min_runs)),
+            escalation_min_p0_rate=max(0.0, min(1.0, float(args.escalation_min_p0_rate))),
+        )
         args.history_rollup_out.parent.mkdir(parents=True, exist_ok=True)
         args.history_rollup_out.write_text(
             json.dumps(rollup, indent=2, sort_keys=True) + "\n",

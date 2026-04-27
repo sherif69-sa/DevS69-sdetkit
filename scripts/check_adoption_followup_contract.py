@@ -93,6 +93,16 @@ def _check_rollup(path: Path) -> list[str]:
         errors.append("history rollup escalation_recommended must be boolean")
     if payload.get("escalation_reason") not in {"none", "consecutive_no_ship", "high_p0_rate"}:
         errors.append("history rollup escalation_reason must be none|consecutive_no_ship|high_p0_rate")
+    thresholds = payload.get("thresholds")
+    if not isinstance(thresholds, dict):
+        errors.append("history rollup thresholds must be object")
+    else:
+        if not isinstance(thresholds.get("escalation_consecutive_no_ship"), int):
+            errors.append("history rollup thresholds.escalation_consecutive_no_ship must be int")
+        if not isinstance(thresholds.get("escalation_min_runs"), int):
+            errors.append("history rollup thresholds.escalation_min_runs must be int")
+        if not isinstance(thresholds.get("escalation_min_p0_rate"), (int, float)):
+            errors.append("history rollup thresholds.escalation_min_p0_rate must be number")
     return errors
 
 

@@ -41,6 +41,11 @@ Rollup now includes escalation signals:
 - `escalation_recommended`
 - `escalation_reason` (`none|consecutive_no_ship|high_p0_rate`)
 
+You can tune escalation behavior in CLI mode with:
+- `--escalation-consecutive-no-ship`
+- `--escalation-min-runs`
+- `--escalation-min-p0-rate`
+
 ## 2) When SDETKit is probably *not* worth it
 
 SDETKit may be unnecessary if:

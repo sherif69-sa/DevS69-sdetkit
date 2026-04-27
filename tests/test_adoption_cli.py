@@ -70,6 +70,7 @@ def test_adoption_cli_history_and_rollup(tmp_path: Path, capsys) -> None:
     assert rollup_payload["total_runs"] >= 1
     assert "escalation_recommended" in rollup_payload
     assert rollup_payload["escalation_reason"] in {"none", "consecutive_no_ship", "high_p0_rate"}
+    assert rollup_payload["thresholds"]["escalation_consecutive_no_ship"] == 2
 
 
 def test_adoption_cli_rollup_escalation_on_consecutive_no_ship(tmp_path: Path, capsys) -> None:
@@ -101,3 +102,34 @@ def test_adoption_cli_rollup_escalation_on_consecutive_no_ship(tmp_path: Path, c
     assert rollup_payload["max_consecutive_no_ship"] >= 2
     assert rollup_payload["escalation_recommended"] is True
     assert rollup_payload["escalation_reason"] == "consecutive_no_ship"
+
+
+def test_adoption_cli_custom_thresholds(tmp_path: Path, capsys) -> None:
+    history = tmp_path / "history.jsonl"
+    rollup = tmp_path / "rollup.json"
+    rc = adoption.main(
+        [
+            "--fit",
+            str(tmp_path / "missing-fit.json"),
+            "--summary",
+            str(tmp_path / "missing-summary.json"),
+            "--format",
+            "json",
+            "--history",
+            str(history),
+            "--history-rollup-out",
+            str(rollup),
+            "--escalation-consecutive-no-ship",
+            "5",
+            "--escalation-min-runs",
+            "1",
+            "--escalation-min-p0-rate",
+            "0.1",
+        ]
+    )
+    assert rc == 0
+    _ = capsys.readouterr()
+    rollup_payload = json.loads(rollup.read_text(encoding="utf-8"))
+    assert rollup_payload["thresholds"]["escalation_consecutive_no_ship"] == 5
+    assert rollup_payload["thresholds"]["escalation_min_runs"] == 1
+    assert rollup_payload["thresholds"]["escalation_min_p0_rate"] == 0.1

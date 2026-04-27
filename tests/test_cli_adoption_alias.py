@@ -46,6 +46,12 @@ def test_adoption_command_forwards_to_adoption_module(monkeypatch) -> None:
                 "hist.jsonl",
                 "--history-rollup-out",
                 "hist-rollup.json",
+                "--escalation-consecutive-no-ship",
+                "2",
+                "--escalation-min-runs",
+                "3",
+                "--escalation-min-p0-rate",
+                "0.5",
             ],
         )
     ]
