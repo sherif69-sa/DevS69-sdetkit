@@ -17,6 +17,12 @@ SDETKit is usually a good fit when at least one of these is true:
 | Team standardizing local + CI decisions | You want one command path and consistent outputs across environments. |
 | Platform/release team with governance needs | You need evidence-backed release approvals with machine-readable outputs. |
 
+Quick fit signal command (risk-based recommendation):
+
+```bash
+python scripts/recommend_sdetkit_fit.py --repo-size medium --team-size medium --release-frequency medium --change-failure-impact high --compliance-pressure medium --format json
+```
+
 ## 2) When SDETKit is probably *not* worth it
 
 SDETKit may be unnecessary if:

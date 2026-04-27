@@ -45,6 +45,7 @@ build/release-preflight.json
 - [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
 - [First run quickstart](ready-to-use.md)
 - [Quickstart (copy-paste)](quickstart-copy-paste.md)
+- [Fit decision guide](decision-guide.md)
 
 ## Keep first adoption simple
 
