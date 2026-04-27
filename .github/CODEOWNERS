@@ -1,8 +1,2 @@
-# Default ownership for the repository
+# Default code owner for the entire repository
 * @sherif69-sa
-
-# CI/CD and release automation
-/.github/workflows/ @sherif69-sa
-
-# Packaging metadata
-/pyproject.toml @sherif69-sa
