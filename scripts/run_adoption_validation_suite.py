@@ -10,7 +10,9 @@ from typing import Any
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Run adoption-focused validation suite and emit summary.")
+    parser = argparse.ArgumentParser(
+        description="Run adoption-focused validation suite and emit summary."
+    )
     parser.add_argument(
         "--command",
         default=(

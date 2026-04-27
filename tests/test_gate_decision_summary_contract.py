@@ -103,4 +103,3 @@ def test_gate_decision_summary_contract_detects_mismatch(tmp_path: Path) -> None
     payload = json.loads(proc.stdout)
     assert payload["ok"] is False
     assert any("decision must match artifacts.release.ok" in row for row in payload["errors"])
-

@@ -112,7 +112,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     parser.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
     parser.add_argument("--release-frequency", choices=["low", "medium", "high"], default="low")
-    parser.add_argument("--change-failure-impact", choices=["low", "medium", "high"], default="medium")
+    parser.add_argument(
+        "--change-failure-impact", choices=["low", "medium", "high"], default="medium"
+    )
     parser.add_argument("--compliance-pressure", choices=["low", "medium", "high"], default="low")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--out", type=Path, default=None)
@@ -146,11 +148,15 @@ def main(argv: list[str] | None = None) -> int:
         **recommend_profile(score),
     }
     rendered = (
-        json.dumps(payload, indent=2, sort_keys=True) if args.format == "json" else _render_text(payload)
+        json.dumps(payload, indent=2, sort_keys=True)
+        if args.format == "json"
+        else _render_text(payload)
     )
     if args.out is not None:
         args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_text(rendered + ("\n" if not rendered.endswith("\n") else ""), encoding="utf-8")
+        args.out.write_text(
+            rendered + ("\n" if not rendered.endswith("\n") else ""), encoding="utf-8"
+        )
     print(rendered)
     return 0
 

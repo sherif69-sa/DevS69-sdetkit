@@ -43,15 +43,15 @@ def build_followup(
     else:
         fit = str(fit_payload.get("fit", "unknown"))
         if fit in {"high", "medium"}:
-                actions.append(
-                    {
-                        "priority": "P0",
-                        "title": "Adopt canonical gate lane in CI",
-                        "action": "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json && python -m sdetkit gate release --format json --out build/release-preflight.json",
-                        "rationale": "higher-risk profile benefits from consistent CI gating before expanding rollout",
-                        "_score": 80 if fit == "high" else 60,
-                    }
-                )
+            actions.append(
+                {
+                    "priority": "P0",
+                    "title": "Adopt canonical gate lane in CI",
+                    "action": "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json && python -m sdetkit gate release --format json --out build/release-preflight.json",
+                    "rationale": "higher-risk profile benefits from consistent CI gating before expanding rollout",
+                    "_score": 80 if fit == "high" else 60,
+                }
+            )
         else:
             actions.append(
                 {
@@ -77,15 +77,15 @@ def build_followup(
     else:
         decision = str(summary_payload.get("decision", "NO-DATA"))
         if decision == "NO-SHIP":
-                actions.append(
-                    {
-                        "priority": "P0",
-                        "title": "Remediate first failing release step",
-                        "action": "Inspect build/release-preflight.json failed_steps and fix first blocker before rerun.",
-                        "rationale": "shipping is currently blocked and remediation unblocks the control loop",
-                        "_score": 98,
-                    }
-                )
+            actions.append(
+                {
+                    "priority": "P0",
+                    "title": "Remediate first failing release step",
+                    "action": "Inspect build/release-preflight.json failed_steps and fix first blocker before rerun.",
+                    "rationale": "shipping is currently blocked and remediation unblocks the control loop",
+                    "_score": 98,
+                }
+            )
         else:
             actions.append(
                 {
@@ -134,7 +134,11 @@ def build_followup(
                 "rationale": str(item.get("rationale", "")),
             }
         )
-    top = normalized[0] if normalized else {"priority": "P2", "title": "No action", "action": "none", "rationale": ""}
+    top = (
+        normalized[0]
+        if normalized
+        else {"priority": "P2", "title": "No action", "action": "none", "rationale": ""}
+    )
     return {
         "schema_version": "sdetkit.adoption_followup.v1",
         "fit": fit,
@@ -262,17 +266,27 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--history", type=Path, default=None)
     parser.add_argument("--history-rollup-out", type=Path, default=None)
-    parser.add_argument("--policy-profile", choices=["conservative", "balanced", "aggressive"], default="balanced")
+    parser.add_argument(
+        "--policy-profile", choices=["conservative", "balanced", "aggressive"], default="balanced"
+    )
     parser.add_argument("--escalation-consecutive-no-ship", type=int, default=None)
     parser.add_argument("--escalation-min-runs", type=int, default=None)
     parser.add_argument("--escalation-min-p0-rate", type=float, default=None)
     args = parser.parse_args(argv)
     default_no_ship, default_min_runs, default_min_p0 = _threshold_defaults(args.policy_profile)
     escalation_consecutive_no_ship = (
-        default_no_ship if args.escalation_consecutive_no_ship is None else int(args.escalation_consecutive_no_ship)
+        default_no_ship
+        if args.escalation_consecutive_no_ship is None
+        else int(args.escalation_consecutive_no_ship)
     )
-    escalation_min_runs = default_min_runs if args.escalation_min_runs is None else int(args.escalation_min_runs)
-    escalation_min_p0_rate = default_min_p0 if args.escalation_min_p0_rate is None else float(args.escalation_min_p0_rate)
+    escalation_min_runs = (
+        default_min_runs if args.escalation_min_runs is None else int(args.escalation_min_runs)
+    )
+    escalation_min_p0_rate = (
+        default_min_p0
+        if args.escalation_min_p0_rate is None
+        else float(args.escalation_min_p0_rate)
+    )
 
     payload = build_followup(
         fit_payload=_load_optional(args.fit),
@@ -302,10 +316,16 @@ def main(argv: list[str] | None = None) -> int:
             json.dumps(rollup, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
-    rendered = json.dumps(payload, indent=2, sort_keys=True) if args.format == "json" else _to_markdown(payload)
+    rendered = (
+        json.dumps(payload, indent=2, sort_keys=True)
+        if args.format == "json"
+        else _to_markdown(payload)
+    )
     if args.out is not None:
         args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_text(rendered + ("\n" if not rendered.endswith("\n") else ""), encoding="utf-8")
+        args.out.write_text(
+            rendered + ("\n" if not rendered.endswith("\n") else ""), encoding="utf-8"
+        )
     print(rendered)
     return 0
 

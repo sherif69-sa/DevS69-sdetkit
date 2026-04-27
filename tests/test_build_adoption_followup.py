@@ -74,7 +74,10 @@ def test_build_adoption_followup_no_ship_adds_remediation(tmp_path: Path) -> Non
     payload = json.loads(proc.stdout)
     assert payload["fit"] == "high"
     assert payload["decision"] == "NO-SHIP"
-    assert any("remediate first failing release step" in row["title"].lower() for row in payload["recommendations"])
+    assert any(
+        "remediate first failing release step" in row["title"].lower()
+        for row in payload["recommendations"]
+    )
     assert payload["recommendations"][0]["title"] == "Remediate first failing release step"
 
 

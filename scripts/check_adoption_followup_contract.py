@@ -60,7 +60,9 @@ def check_contract(payload: dict[str, Any]) -> list[str]:
             errors.append(f"recommendations[{idx}].action must be non-empty string")
         rationale = rec.get("rationale")
         if rationale is not None and (not isinstance(rationale, str) or not rationale.strip()):
-            errors.append(f"recommendations[{idx}].rationale must be non-empty string when provided")
+            errors.append(
+                f"recommendations[{idx}].rationale must be non-empty string when provided"
+            )
         if current < last_priority:
             errors.append("recommendations must be sorted by priority (P0 -> P1 -> P2)")
         last_priority = max(last_priority, current)
@@ -76,21 +78,31 @@ def check_contract(payload: dict[str, Any]) -> list[str]:
         else:
             profile = context.get("policy_profile")
             if profile not in {"conservative", "balanced", "aggressive"}:
-                errors.append("decision_context.policy_profile must be conservative|balanced|aggressive")
+                errors.append(
+                    "decision_context.policy_profile must be conservative|balanced|aggressive"
+                )
             for key in ("fit_artifact_present", "summary_artifact_present"):
                 if key in context and not isinstance(context.get(key), bool):
                     errors.append(f"decision_context.{key} must be boolean when provided")
             thresholds = context.get("escalation_thresholds")
             if thresholds is not None:
                 if not isinstance(thresholds, dict):
-                    errors.append("decision_context.escalation_thresholds must be object when provided")
+                    errors.append(
+                        "decision_context.escalation_thresholds must be object when provided"
+                    )
                 else:
                     if not isinstance(thresholds.get("escalation_consecutive_no_ship"), int):
-                        errors.append("decision_context.escalation_thresholds.escalation_consecutive_no_ship must be int")
+                        errors.append(
+                            "decision_context.escalation_thresholds.escalation_consecutive_no_ship must be int"
+                        )
                     if not isinstance(thresholds.get("escalation_min_runs"), int):
-                        errors.append("decision_context.escalation_thresholds.escalation_min_runs must be int")
+                        errors.append(
+                            "decision_context.escalation_thresholds.escalation_min_runs must be int"
+                        )
                     if not isinstance(thresholds.get("escalation_min_p0_rate"), (int, float)):
-                        errors.append("decision_context.escalation_thresholds.escalation_min_p0_rate must be number")
+                        errors.append(
+                            "decision_context.escalation_thresholds.escalation_min_p0_rate must be number"
+                        )
 
     return errors
 
@@ -120,7 +132,9 @@ def _check_rollup(path: Path) -> list[str]:
     if not isinstance(payload.get("escalation_recommended"), bool):
         errors.append("history rollup escalation_recommended must be boolean")
     if payload.get("escalation_reason") not in {"none", "consecutive_no_ship", "high_p0_rate"}:
-        errors.append("history rollup escalation_reason must be none|consecutive_no_ship|high_p0_rate")
+        errors.append(
+            "history rollup escalation_reason must be none|consecutive_no_ship|high_p0_rate"
+        )
     thresholds = payload.get("thresholds")
     if not isinstance(thresholds, dict):
         errors.append("history rollup thresholds must be object")

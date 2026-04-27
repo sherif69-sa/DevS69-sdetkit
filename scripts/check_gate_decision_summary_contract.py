@@ -45,8 +45,10 @@ def check_contract(
         errors.append("validation_errors must be list[str]")
 
     checklist = summary_payload.get("reviewer_checklist")
-    if not isinstance(checklist, list) or not checklist or not all(
-        isinstance(item, str) and item.strip() for item in checklist
+    if (
+        not isinstance(checklist, list)
+        or not checklist
+        or not all(isinstance(item, str) and item.strip() for item in checklist)
     ):
         errors.append("reviewer_checklist must be a non-empty list[str]")
 
@@ -79,7 +81,9 @@ def check_contract(
         if isinstance(src_ok, bool) and isinstance(release_ok, bool) and src_ok != release_ok:
             errors.append("summary artifacts.release.ok must match release artifact ok")
         if isinstance(src_failed, list) and isinstance(release.get("failed_steps"), list):
-            if [str(item) for item in src_failed] != [str(item) for item in release["failed_steps"]]:
+            if [str(item) for item in src_failed] != [
+                str(item) for item in release["failed_steps"]
+            ]:
                 errors.append(
                     "summary artifacts.release.failed_steps must match release artifact failed_steps"
                 )

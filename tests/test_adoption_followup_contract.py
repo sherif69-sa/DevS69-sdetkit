@@ -64,7 +64,9 @@ def test_adoption_followup_contract_detects_priority_order_and_next_command(tmp_
     payload = json.loads(proc.stdout)
     assert payload["ok"] is False
     assert any("sorted by priority" in row for row in payload["errors"])
-    assert any("next_command must equal recommendations[0].action" in row for row in payload["errors"])
+    assert any(
+        "next_command must equal recommendations[0].action" in row for row in payload["errors"]
+    )
 
 
 def test_adoption_followup_contract_checks_history_rollup(tmp_path: Path) -> None:
@@ -123,7 +125,9 @@ def test_adoption_followup_contract_checks_history_rollup(tmp_path: Path) -> Non
     assert payload["ok"] is True
 
 
-def test_adoption_followup_contract_detects_invalid_decision_context_and_rationale(tmp_path: Path) -> None:
+def test_adoption_followup_contract_detects_invalid_decision_context_and_rationale(
+    tmp_path: Path,
+) -> None:
     followup = tmp_path / "adoption-followup.json"
     followup.write_text(
         json.dumps(

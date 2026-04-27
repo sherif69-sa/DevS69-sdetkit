@@ -342,7 +342,9 @@ Then use stability-aware command discovery:
     adp.add_argument("--out", default="")
     adp.add_argument("--history", default="")
     adp.add_argument("--history-rollup-out", default="")
-    adp.add_argument("--policy-profile", choices=["conservative", "balanced", "aggressive"], default="balanced")
+    adp.add_argument(
+        "--policy-profile", choices=["conservative", "balanced", "aggressive"], default="balanced"
+    )
     adp.add_argument("--escalation-consecutive-no-ship", type=int, default=None)
     adp.add_argument("--escalation-min-runs", type=int, default=None)
     adp.add_argument("--escalation-min-p0-rate", type=float, default=None)
@@ -361,7 +363,11 @@ Then use stability-aware command discovery:
         help="[Public / stable] Guided start shortcut (role/journey onboarding entrypoint)",
     )
     sta.add_argument("--role", choices=["all", "sdet", "platform", "manager"], default="all")
-    sta.add_argument("--journey", choices=["all", "fast-start", "first-pr", "ci-rollout", "artifact-review"], default="fast-start")
+    sta.add_argument(
+        "--journey",
+        choices=["all", "fast-start", "first-pr", "ci-rollout", "artifact-review"],
+        default="fast-start",
+    )
     sta.add_argument("--platform", choices=["all", "linux", "mac", "windows"], default="all")
     sta.add_argument("--format", choices=["text", "markdown", "json"], default="markdown")
     sta.add_argument("--output", default="")
@@ -847,7 +853,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             forwarded.extend(["--history-rollup-out", str(ns.history_rollup_out)])
         forwarded.extend(["--policy-profile", str(ns.policy_profile)])
         if ns.escalation_consecutive_no_ship is not None:
-            forwarded.extend(["--escalation-consecutive-no-ship", str(ns.escalation_consecutive_no_ship)])
+            forwarded.extend(
+                ["--escalation-consecutive-no-ship", str(ns.escalation_consecutive_no_ship)]
+            )
         if ns.escalation_min_runs is not None:
             forwarded.extend(["--escalation-min-runs", str(ns.escalation_min_runs)])
         if ns.escalation_min_p0_rate is not None:

@@ -77,7 +77,9 @@ def build_summary(
                 "present": fast_payload is not None,
                 "ok": fast_ok,
                 "failed_steps": fast_failed_steps,
-                "profile": None if fast_payload is None else str(fast_payload.get("profile", "fast")),
+                "profile": None
+                if fast_payload is None
+                else str(fast_payload.get("profile", "fast")),
             },
         },
         "reviewer_checklist": reviewers,
@@ -121,12 +123,16 @@ def _to_markdown(payload: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Render concise SHIP/NO-SHIP summary from gate artifacts.")
+    parser = argparse.ArgumentParser(
+        description="Render concise SHIP/NO-SHIP summary from gate artifacts."
+    )
     parser.add_argument("--release", type=Path, default=Path("build/release-preflight.json"))
     parser.add_argument("--fast", type=Path, default=Path("build/gate-fast.json"))
     parser.add_argument("--allow-missing-fast", action="store_true")
     parser.add_argument("--format", choices=("text", "json"), default="text")
-    parser.add_argument("--out", type=Path, default=None, help="Optional output file (.json or .md).")
+    parser.add_argument(
+        "--out", type=Path, default=None, help="Optional output file (.json or .md)."
+    )
     args = parser.parse_args(argv)
 
     try:

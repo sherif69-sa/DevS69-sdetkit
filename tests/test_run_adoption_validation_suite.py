@@ -11,7 +11,14 @@ SCRIPT = Path("scripts/run_adoption_validation_suite.py").resolve()
 def test_run_adoption_validation_suite_pass(tmp_path: Path) -> None:
     out = tmp_path / "summary.json"
     proc = subprocess.run(
-        [sys.executable, str(SCRIPT), "--command", f"{sys.executable} -c \"print('ok')\"", "--out", str(out)],
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--command",
+            f"{sys.executable} -c \"print('ok')\"",
+            "--out",
+            str(out),
+        ],
         check=False,
         text=True,
         capture_output=True,
@@ -26,7 +33,14 @@ def test_run_adoption_validation_suite_pass(tmp_path: Path) -> None:
 def test_run_adoption_validation_suite_fail(tmp_path: Path) -> None:
     out = tmp_path / "summary.json"
     proc = subprocess.run(
-        [sys.executable, str(SCRIPT), "--command", f"{sys.executable} -c \"import sys; sys.exit(3)\"", "--out", str(out)],
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--command",
+            f'{sys.executable} -c "import sys; sys.exit(3)"',
+            "--out",
+            str(out),
+        ],
         check=False,
         text=True,
         capture_output=True,

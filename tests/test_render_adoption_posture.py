@@ -16,11 +16,26 @@ def test_render_adoption_posture_escalate(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     rollup.write_text(
-        json.dumps({"total_runs": 5, "escalation_recommended": True, "escalation_reason": "consecutive_no_ship"}),
+        json.dumps(
+            {
+                "total_runs": 5,
+                "escalation_recommended": True,
+                "escalation_reason": "consecutive_no_ship",
+            }
+        ),
         encoding="utf-8",
     )
     proc = subprocess.run(
-        [sys.executable, str(SCRIPT), "--followup", str(followup), "--rollup", str(rollup), "--format", "json"],
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--followup",
+            str(followup),
+            "--rollup",
+            str(rollup),
+            "--format",
+            "json",
+        ],
         check=False,
         text=True,
         capture_output=True,
@@ -43,7 +58,16 @@ def test_render_adoption_posture_stable_markdown(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     proc = subprocess.run(
-        [sys.executable, str(SCRIPT), "--followup", str(followup), "--rollup", str(rollup), "--format", "md"],
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--followup",
+            str(followup),
+            "--rollup",
+            str(rollup),
+            "--format",
+            "md",
+        ],
         check=False,
         text=True,
         capture_output=True,

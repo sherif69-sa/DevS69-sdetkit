@@ -61,7 +61,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Render adoption posture from follow-up + rollup.")
     parser.add_argument("--followup", type=Path, default=Path("build/adoption-followup.json"))
-    parser.add_argument("--rollup", type=Path, default=Path("build/adoption-followup-history-rollup.json"))
+    parser.add_argument(
+        "--rollup", type=Path, default=Path("build/adoption-followup-history-rollup.json")
+    )
     parser.add_argument("--format", choices=("json", "md"), default="md")
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)
@@ -70,15 +72,26 @@ def main(argv: list[str] | None = None) -> int:
         followup = _load(args.followup)
         rollup = _load(args.rollup)
     except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
-        payload = {"ok": False, "error": str(exc), "followup": str(args.followup), "rollup": str(args.rollup)}
+        payload = {
+            "ok": False,
+            "error": str(exc),
+            "followup": str(args.followup),
+            "rollup": str(args.rollup),
+        }
         print(json.dumps(payload, indent=2, sort_keys=True))
         return 1
 
     posture = build_posture(followup, rollup)
-    rendered = json.dumps(posture, indent=2, sort_keys=True) if args.format == "json" else _to_markdown(posture)
+    rendered = (
+        json.dumps(posture, indent=2, sort_keys=True)
+        if args.format == "json"
+        else _to_markdown(posture)
+    )
     if args.out is not None:
         args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_text(rendered + ("\n" if not rendered.endswith("\n") else ""), encoding="utf-8")
+        args.out.write_text(
+            rendered + ("\n" if not rendered.endswith("\n") else ""), encoding="utf-8"
+        )
     print(rendered)
     return 0
 
