@@ -21,6 +21,7 @@ _PARSED_MODULE_SHORTCUTS: tuple[tuple[str, str], ...] = (
     ("evidence", "sdetkit.evidence"),
     ("onboarding", "sdetkit.onboarding"),
     ("adoption", "sdetkit.adoption"),
+    ("fit", "sdetkit.fit"),
     ("start", "sdetkit.onboarding"),
     ("onboarding-optimization", "sdetkit.onboarding_optimization"),
     ("community-activation", "sdetkit.community_activation"),

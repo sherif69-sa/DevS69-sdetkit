@@ -20,7 +20,7 @@ SDETKit is usually a good fit when at least one of these is true:
 Quick fit signal command (risk-based recommendation):
 
 ```bash
-python scripts/recommend_sdetkit_fit.py --repo-size medium --team-size medium --release-frequency medium --change-failure-impact high --compliance-pressure medium --format json
+python -m sdetkit fit --repo-size medium --team-size medium --release-frequency medium --change-failure-impact high --compliance-pressure medium --format json
 ```
 
 Convert fit + latest gate decision into prioritized follow-up actions:

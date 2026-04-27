@@ -94,7 +94,7 @@ gate-decision-summary-contract: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_gate_decision_summary_contract.py --summary build/gate-decision-summary.json --release build/release-preflight.json --allow-missing-release --format json'
 
 fit-check: venv
-	@bash -lc '. .venv/bin/activate && python scripts/recommend_sdetkit_fit.py --repo-size medium --team-size medium --release-frequency medium --change-failure-impact medium --compliance-pressure medium --format json --out build/sdetkit-fit-recommendation.json'
+	@bash -lc '. .venv/bin/activate && python -m sdetkit fit --repo-size medium --team-size medium --release-frequency medium --change-failure-impact medium --compliance-pressure medium --format json --out build/sdetkit-fit-recommendation.json'
 	@bash -lc 'echo fit-check: wrote build/sdetkit-fit-recommendation.json'
 
 adoption-followup: venv

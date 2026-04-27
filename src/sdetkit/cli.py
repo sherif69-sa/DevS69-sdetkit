@@ -341,6 +341,15 @@ Then use stability-aware command discovery:
     adp.add_argument("--format", choices=["json", "md"], default="json")
     adp.add_argument("--out", default="")
 
+    fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
+    fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
+    fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
+    fit.add_argument("--release-frequency", choices=["low", "medium", "high"], default="low")
+    fit.add_argument("--change-failure-impact", choices=["low", "medium", "high"], default="medium")
+    fit.add_argument("--compliance-pressure", choices=["low", "medium", "high"], default="low")
+    fit.add_argument("--format", choices=["text", "json"], default="text")
+    fit.add_argument("--out", default="")
+
     sta = sub.add_parser(
         "start",
         help="[Public / stable] Guided start shortcut (role/journey onboarding entrypoint)",
@@ -827,6 +836,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.out):
             forwarded.extend(["--out", str(ns.out)])
         return _run_module_main("sdetkit.adoption", forwarded)
+
+    if ns.cmd == "fit":
+        forwarded = [
+            "--repo-size",
+            str(ns.repo_size),
+            "--team-size",
+            str(ns.team_size),
+            "--release-frequency",
+            str(ns.release_frequency),
+            "--change-failure-impact",
+            str(ns.change_failure_impact),
+            "--compliance-pressure",
+            str(ns.compliance_pressure),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.out):
+            forwarded.extend(["--out", str(ns.out)])
+        return _run_module_main("sdetkit.fit", forwarded)
 
     parsed_shortcut_result = dispatch_parsed_shortcut(
         str(ns.cmd),
