@@ -157,6 +157,10 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         f"- Decision: `{payload['decision']}`",
         f"- Next command: `{payload['next_command']}`",
         f"- Why now: {decision_note}",
+        (
+            "- Policy profile: "
+            f"`{payload.get('decision_context', {}).get('policy_profile', 'balanced')}`"
+        ),
         "",
         "## Recommendations",
     ]
@@ -274,6 +278,16 @@ def main(argv: list[str] | None = None) -> int:
         fit_payload=_load_optional(args.fit),
         summary_payload=_load_optional(args.summary),
     )
+    payload["decision_context"] = {
+        "policy_profile": str(args.policy_profile),
+        "fit_artifact_present": args.fit.exists(),
+        "summary_artifact_present": args.summary.exists(),
+        "escalation_thresholds": {
+            "escalation_consecutive_no_ship": escalation_consecutive_no_ship,
+            "escalation_min_runs": escalation_min_runs,
+            "escalation_min_p0_rate": escalation_min_p0_rate,
+        },
+    }
     if args.history is not None:
         payload = _append_history(payload, args.history)
     if args.history_rollup_out is not None and args.history is not None:

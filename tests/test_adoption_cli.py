@@ -21,6 +21,9 @@ def test_adoption_cli_json_output_with_missing_inputs(tmp_path: Path, capsys) ->
     payload = json.loads(capsys.readouterr().out)
     assert payload["fit"] == "unknown"
     assert payload["decision"] == "NO-DATA"
+    assert payload["decision_context"]["policy_profile"] == "balanced"
+    assert payload["decision_context"]["fit_artifact_present"] is False
+    assert payload["decision_context"]["summary_artifact_present"] is False
 
 
 def test_adoption_cli_writes_markdown(tmp_path: Path, capsys) -> None:
@@ -44,6 +47,7 @@ def test_adoption_cli_writes_markdown(tmp_path: Path, capsys) -> None:
     assert "# Adoption follow-up" in rendered
     assert "Why now:" in rendered
     assert "Rationale:" in rendered
+    assert "Policy profile:" in rendered
 
 
 def test_adoption_cli_history_and_rollup(tmp_path: Path, capsys) -> None:
@@ -163,3 +167,8 @@ def test_adoption_cli_policy_profile_defaults(tmp_path: Path, capsys) -> None:
     assert rollup_payload["thresholds"]["escalation_consecutive_no_ship"] == 3
     assert rollup_payload["thresholds"]["escalation_min_runs"] == 4
     assert rollup_payload["thresholds"]["escalation_min_p0_rate"] == 0.7
+    latest = json.loads(history.read_text(encoding="utf-8").strip().splitlines()[-1])
+    ctx = latest["decision_context"]["escalation_thresholds"]
+    assert ctx["escalation_consecutive_no_ship"] == 3
+    assert ctx["escalation_min_runs"] == 4
+    assert ctx["escalation_min_p0_rate"] == 0.7
