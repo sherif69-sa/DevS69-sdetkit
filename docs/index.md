@@ -59,6 +59,7 @@ build/release-preflight.json
 - Run full loop with contracts: `make adoption-control-loop && make adoption-control-loop-contract`.
 - Render weekly posture snapshot: `make adoption-posture`.
 - Emit validation summary artifact: `make adoption-validate`.
+- Or run the full adoption bundle in one command: `make adoption-control-loop-full`.
 - Delay full CLI exploration until the core path is stable in your repo.
 
 ## Team rollout / CI

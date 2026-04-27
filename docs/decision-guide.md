@@ -36,6 +36,7 @@ make adoption-control-loop
 make adoption-control-loop-contract
 make adoption-posture
 make adoption-validate
+make adoption-control-loop-full
 python -m sdetkit adoption --format json
 ```
 
