@@ -19,7 +19,7 @@ def build_followup(
     fit_payload: dict[str, Any] | None,
     summary_payload: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    actions: list[dict[str, str]] = []
+    actions: list[dict[str, Any]] = []
     fit = "unknown"
     if fit_payload is None:
         actions.append(
@@ -27,24 +27,30 @@ def build_followup(
                 "priority": "P0",
                 "title": "Generate fit recommendation",
                 "action": "make fit-check",
+                "rationale": "fit artifact is missing so rollout depth cannot be selected confidently",
+                "_score": 100,
             }
         )
     else:
         fit = str(fit_payload.get("fit", "unknown"))
         if fit in {"high", "medium"}:
-            actions.append(
-                {
-                    "priority": "P0",
-                    "title": "Adopt canonical gate lane in CI",
-                    "action": "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json && python -m sdetkit gate release --format json --out build/release-preflight.json",
-                }
-            )
+                actions.append(
+                    {
+                        "priority": "P0",
+                        "title": "Adopt canonical gate lane in CI",
+                        "action": "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json && python -m sdetkit gate release --format json --out build/release-preflight.json",
+                        "rationale": "higher-risk profile benefits from consistent CI gating before expanding rollout",
+                        "_score": 80 if fit == "high" else 60,
+                    }
+                )
         else:
             actions.append(
                 {
                     "priority": "P1",
                     "title": "Run lightweight lane only",
                     "action": "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json",
+                    "rationale": "low-risk profile can start with lower-overhead signal collection",
+                    "_score": 40,
                 }
             )
 
@@ -54,44 +60,78 @@ def build_followup(
                 "priority": "P0",
                 "title": "Generate reviewer decision artifacts",
                 "action": "make gate-decision-summary && make gate-decision-summary-contract",
+                "rationale": "review handoff cannot be trusted until the decision summary and contract both exist",
+                "_score": 95,
             }
         )
         decision = "NO-DATA"
     else:
         decision = str(summary_payload.get("decision", "NO-DATA"))
         if decision == "NO-SHIP":
-            actions.append(
-                {
-                    "priority": "P0",
-                    "title": "Remediate first failing release step",
-                    "action": "Inspect build/release-preflight.json failed_steps and fix first blocker before rerun.",
-                }
-            )
+                actions.append(
+                    {
+                        "priority": "P0",
+                        "title": "Remediate first failing release step",
+                        "action": "Inspect build/release-preflight.json failed_steps and fix first blocker before rerun.",
+                        "rationale": "shipping is currently blocked and remediation unblocks the control loop",
+                        "_score": 98,
+                    }
+                )
         else:
             actions.append(
                 {
                     "priority": "P2",
                     "title": "Attach decision summary to PR/release thread",
                     "action": "Link build/gate-decision-summary.md in reviewer handoff notes.",
+                    "rationale": "decision already allows shipping; this improves traceability rather than unblocking risk",
+                    "_score": 20,
                 }
             )
+            if fit in {"high", "medium"}:
+                actions.append(
+                    {
+                        "priority": "P1",
+                        "title": "Run adoption control-loop before merge",
+                        "action": "make adoption-control-loop && make adoption-control-loop-contract",
+                        "rationale": "risk profile indicates value in enforcing follow-up and contract evidence each cycle",
+                        "_score": 55 if fit == "high" else 50,
+                    }
+                )
         if summary_payload.get("validation_errors"):
             actions.append(
                 {
                     "priority": "P0",
                     "title": "Clear summary validation errors",
                     "action": "Run make gate-decision-summary-contract and resolve listed mismatches.",
+                    "rationale": "contract mismatches undermine artifact reliability for reviewers and CI",
+                    "_score": 97,
                 }
             )
 
-    actions.sort(key=lambda item: {"P0": 0, "P1": 1, "P2": 2}.get(item["priority"], 9))
-    top = actions[0] if actions else {"priority": "P2", "title": "No action", "action": "none"}
+    actions.sort(
+        key=lambda item: (
+            {"P0": 0, "P1": 1, "P2": 2}.get(str(item.get("priority")), 9),
+            -int(item.get("_score", 0)),
+            str(item.get("title", "")),
+        )
+    )
+    normalized: list[dict[str, str]] = []
+    for item in actions:
+        normalized.append(
+            {
+                "priority": str(item["priority"]),
+                "title": str(item["title"]),
+                "action": str(item["action"]),
+                "rationale": str(item.get("rationale", "")),
+            }
+        )
+    top = normalized[0] if normalized else {"priority": "P2", "title": "No action", "action": "none", "rationale": ""}
     return {
         "schema_version": "sdetkit.adoption_followup.v1",
         "fit": fit,
         "decision": decision,
         "next_command": top["action"],
-        "recommendations": actions,
+        "recommendations": normalized,
     }
 
 

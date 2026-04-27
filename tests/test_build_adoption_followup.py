@@ -75,3 +75,52 @@ def test_build_adoption_followup_no_ship_adds_remediation(tmp_path: Path) -> Non
     assert payload["fit"] == "high"
     assert payload["decision"] == "NO-SHIP"
     assert any("remediate first failing release step" in row["title"].lower() for row in payload["recommendations"])
+    assert payload["recommendations"][0]["title"] == "Remediate first failing release step"
+
+
+def test_build_adoption_followup_ship_high_fit_promotes_control_loop(tmp_path: Path) -> None:
+    fit = tmp_path / "fit.json"
+    summary = tmp_path / "summary.json"
+    fit.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.fit_recommendation.v1",
+                "fit": "high",
+                "score": 16,
+                "next_steps": ["step-a"],
+            }
+        ),
+        encoding="utf-8",
+    )
+    summary.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.gate_decision_summary.v1",
+                "decision": "SHIP",
+                "validation_errors": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--fit",
+            str(fit),
+            "--summary",
+            str(summary),
+            "--format",
+            "json",
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert proc.returncode == 0
+    payload = json.loads(proc.stdout)
+    assert payload["fit"] == "high"
+    assert payload["decision"] == "SHIP"
+    assert payload["recommendations"][0]["title"] == "Adopt canonical gate lane in CI"
+    assert any("control-loop" in row["action"] for row in payload["recommendations"])
+    assert all("rationale" in row for row in payload["recommendations"])
