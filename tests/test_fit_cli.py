@@ -26,3 +26,5 @@ def test_fit_cli_json_output_high_profile(capsys) -> None:
     payload = json.loads(capsys.readouterr().out)
     assert payload["fit"] == "high"
     assert payload["score"] >= 14
+    assert payload["confidence"] == "high"
+    assert len(payload["risk_drivers"]) == 3

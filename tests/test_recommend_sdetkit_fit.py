@@ -35,6 +35,8 @@ def test_recommend_sdetkit_fit_high_profile_json() -> None:
     assert payload["fit"] == "high"
     assert payload["segment"] == "medium-to-high-stakes delivery"
     assert payload["score"] >= 14
+    assert payload["confidence"] == "high"
+    assert isinstance(payload["risk_drivers"], list) and payload["risk_drivers"]
 
 
 def test_recommend_sdetkit_fit_low_profile_text() -> None:
@@ -62,3 +64,5 @@ def test_recommend_sdetkit_fit_low_profile_text() -> None:
     assert proc.returncode == 0
     assert "SDETKIT_FIT=LOW" in proc.stdout
     assert "lightweight path" in proc.stdout
+    assert "confidence:" in proc.stdout
+    assert "risk_drivers:" in proc.stdout

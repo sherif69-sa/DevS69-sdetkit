@@ -9,6 +9,33 @@ _LEVEL = {"low": 1, "medium": 2, "high": 3}
 _SIZE = {"small": 1, "medium": 2, "large": 3}
 
 
+def _risk_drivers(
+    *,
+    repo_size: str,
+    team_size: str,
+    release_frequency: str,
+    change_failure_impact: str,
+    compliance_pressure: str,
+) -> list[str]:
+    drivers: list[tuple[int, str]] = [
+        (_LEVEL[change_failure_impact] * 2, f"change-failure impact is {change_failure_impact}"),
+        (_LEVEL[compliance_pressure] * 2, f"compliance pressure is {compliance_pressure}"),
+        (_SIZE[repo_size], f"repository size is {repo_size}"),
+        (_SIZE[team_size], f"team size is {team_size}"),
+        (_LEVEL[release_frequency], f"release frequency is {release_frequency}"),
+    ]
+    drivers.sort(key=lambda row: (-row[0], row[1]))
+    return [text for _, text in drivers[:3]]
+
+
+def _confidence(score: int) -> str:
+    if score >= 14:
+        return "high"
+    if score >= 10:
+        return "medium"
+    return "low"
+
+
 def _score(
     *,
     repo_size: str,
@@ -66,10 +93,14 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"SDETKIT_FIT={payload['fit'].upper()}",
         f"segment: {payload['segment']}",
         f"score: {payload['score']}",
+        f"confidence: {payload['confidence']}",
         f"recommendation: {payload['recommendation']}",
         "next_steps:",
     ]
     lines.extend(f"- {step}" for step in payload["next_steps"])
+    if payload.get("risk_drivers"):
+        lines.append("risk_drivers:")
+        lines.extend(f"- {row}" for row in payload["risk_drivers"])
     return "\n".join(lines)
 
 
@@ -97,6 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = {
         "schema_version": "sdetkit.fit_recommendation.v1",
         "score": score,
+        "confidence": _confidence(score),
         "inputs": {
             "repo_size": args.repo_size,
             "team_size": args.team_size,
@@ -104,6 +136,13 @@ def main(argv: list[str] | None = None) -> int:
             "change_failure_impact": args.change_failure_impact,
             "compliance_pressure": args.compliance_pressure,
         },
+        "risk_drivers": _risk_drivers(
+            repo_size=args.repo_size,
+            team_size=args.team_size,
+            release_frequency=args.release_frequency,
+            change_failure_impact=args.change_failure_impact,
+            compliance_pressure=args.compliance_pressure,
+        ),
         **recommend_profile(score),
     }
     rendered = (

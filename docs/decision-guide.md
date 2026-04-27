@@ -23,6 +23,10 @@ Quick fit signal command (risk-based recommendation):
 python -m sdetkit fit --repo-size medium --team-size medium --release-frequency medium --change-failure-impact high --compliance-pressure medium --format json
 ```
 
+The fit JSON includes:
+- `confidence` (`low|medium|high`)
+- `risk_drivers` (top weighted factors that shaped the recommendation)
+
 Convert fit + latest gate decision into prioritized follow-up actions:
 
 ```bash
