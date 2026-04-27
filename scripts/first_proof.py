@@ -67,6 +67,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Return a non-zero exit code when any first-proof step fails.",
     )
+    parser.add_argument(
+        "--release-dry-run",
+        action="store_true",
+        help="Run `gate release` in dry-run mode (useful for active local branches).",
+    )
     parser.add_argument("--format", choices=("text", "json"), default="text")
     return parser
 
@@ -155,20 +160,23 @@ def main(argv: list[str]) -> int:
             env=base_env,
         )
     )
+    gate_release_cmd = [
+        selected_python,
+        "-m",
+        "sdetkit",
+        "gate",
+        "release",
+        "--format",
+        "json",
+        "--out",
+        str(out_dir / "release-preflight.json"),
+    ]
+    if args.release_dry_run:
+        gate_release_cmd.append("--dry-run")
     steps.append(
         _run_step(
             name="gate-release",
-            command=[
-                selected_python,
-                "-m",
-                "sdetkit",
-                "gate",
-                "release",
-                "--format",
-                "json",
-                "--out",
-                str(out_dir / "release-preflight.json"),
-            ],
+            command=gate_release_cmd,
             out_dir=out_dir,
             artifact=str(out_dir / "release-preflight.json"),
             env=base_env,

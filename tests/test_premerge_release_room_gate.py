@@ -69,3 +69,28 @@ def test_main_writes_output_json(tmp_path: Path, monkeypatch, capsys) -> None:
     payload = json.loads(capsys.readouterr().out)
     assert payload["ok"] is True
     assert out.exists()
+
+
+def test_run_gate_forwards_ship_release_dry_run(tmp_path: Path, monkeypatch) -> None:
+    mod = _load_module()
+
+    captured_cmds: list[list[str]] = []
+
+    class _FakeProc:
+        def __init__(self) -> None:
+            self.returncode = 0
+            self.stdout = "{}\n"
+            self.stderr = ""
+
+    def _fake_run(cmd, **kwargs):  # type: ignore[no-untyped-def]
+        _ = kwargs
+        if isinstance(cmd, list):
+            captured_cmds.append(cmd)
+        return _FakeProc()
+
+    monkeypatch.setattr(mod.subprocess, "run", _fake_run)
+
+    payload = mod.run_gate(tmp_path, ship_release_dry_run=True)
+    assert payload["steps"]
+    ship_cmd = next(step["cmd"] for step in payload["steps"] if step["id"] == "ship_readiness")
+    assert "--release-dry-run" in ship_cmd
