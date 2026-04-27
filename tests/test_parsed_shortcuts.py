@@ -90,3 +90,19 @@ def test_dispatch_parsed_shortcut_start_alias() -> None:
     )
     assert rc == 3
     assert calls == [("sdetkit.onboarding", ["--journey", "fast-start", "--format", "markdown"])]
+
+
+def test_dispatch_parsed_shortcut_adoption_alias() -> None:
+    calls: list[tuple[str, list[str]]] = []
+
+    def _runner(module: str, args) -> int:
+        calls.append((module, list(args)))
+        return 7
+
+    rc = parsed_shortcuts.dispatch_parsed_shortcut(
+        "adoption",
+        ["--format", "json"],
+        run_module_main=_runner,
+    )
+    assert rc == 7
+    assert calls == [("sdetkit.adoption", ["--format", "json"])]

@@ -335,6 +335,12 @@ Then use stability-aware command discovery:
     onb = sub.add_parser("onboarding", help="Role-based onboarding playbook")
     onb.add_argument("args", nargs=argparse.REMAINDER)
 
+    adp = sub.add_parser("adoption", help="Adoption follow-up action planner")
+    adp.add_argument("--fit", default="build/sdetkit-fit-recommendation.json")
+    adp.add_argument("--summary", default="build/gate-decision-summary.json")
+    adp.add_argument("--format", choices=["json", "md"], default="json")
+    adp.add_argument("--out", default="")
+
     sta = sub.add_parser(
         "start",
         help="[Public / stable] Guided start shortcut (role/journey onboarding entrypoint)",
@@ -808,6 +814,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.output):
             forwarded.extend(["--output", str(ns.output)])
         return _run_module_main("sdetkit.onboarding", forwarded)
+
+    if ns.cmd == "adoption":
+        forwarded = [
+            "--fit",
+            str(ns.fit),
+            "--summary",
+            str(ns.summary),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.out):
+            forwarded.extend(["--out", str(ns.out)])
+        return _run_module_main("sdetkit.adoption", forwarded)
 
     parsed_shortcut_result = dispatch_parsed_shortcut(
         str(ns.cmd),

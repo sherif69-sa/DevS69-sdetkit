@@ -53,6 +53,7 @@ build/release-preflight.json
 - If you want a guided role/journey prompt, use `python -m sdetkit start --journey fast-start --format markdown`.
 - Generate a concise review handoff: `make gate-decision-summary`.
 - Generate prioritized adoption actions: `make adoption-followup`.
+- Or use CLI directly: `python -m sdetkit adoption --format json`.
 - Validate adoption action payload: `make adoption-followup-contract`.
 - Delay full CLI exploration until the core path is stable in your repo.
 

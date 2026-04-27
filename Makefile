@@ -98,8 +98,8 @@ fit-check: venv
 	@bash -lc 'echo fit-check: wrote build/sdetkit-fit-recommendation.json'
 
 adoption-followup: venv
-	@bash -lc '. .venv/bin/activate && python scripts/build_adoption_followup.py --fit build/sdetkit-fit-recommendation.json --summary build/gate-decision-summary.json --format json --out build/adoption-followup.json'
-	@bash -lc '. .venv/bin/activate && python scripts/build_adoption_followup.py --fit build/sdetkit-fit-recommendation.json --summary build/gate-decision-summary.json --format md --out build/adoption-followup.md > /dev/null'
+	@bash -lc '. .venv/bin/activate && python -m sdetkit adoption --fit build/sdetkit-fit-recommendation.json --summary build/gate-decision-summary.json --format json --out build/adoption-followup.json'
+	@bash -lc '. .venv/bin/activate && python -m sdetkit adoption --fit build/sdetkit-fit-recommendation.json --summary build/gate-decision-summary.json --format md --out build/adoption-followup.md > /dev/null'
 	@bash -lc 'echo adoption-followup: wrote build/adoption-followup.json and build/adoption-followup.md'
 
 adoption-followup-contract: venv

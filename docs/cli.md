@@ -80,6 +80,7 @@ These remain fully supported for existing automation and muscle memory:
 
 - `gate`, `doctor`, `security`, `repo`, `evidence`, `report`, `policy`
 - `start` (guided alias to `onboarding` for role/journey-based first-run help)
+- `adoption` (follow-up action planner from fit + gate decision artifacts)
 
 ### Supporting utilities (secondary)
 
