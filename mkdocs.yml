@@ -141,6 +141,16 @@ nav:
           - Phase execution one-by-one: phase-execution-one-by-one.md
           - Operator essentials: operator-essentials.md
           - Repo health dashboard: repo-health-dashboard.md
+          - Business execution hub: business_execution/index.md
+          - Business execution — program master plan: business_execution/00-program-master-plan.md
+          - Business execution — ICP scoring matrix: business_execution/01-icp-scoring-matrix.md
+          - Business execution — pricing logic v1: business_execution/02-pricing-logic-v1.md
+          - Business execution — GTM 30-day calendar: business_execution/03-gtm-30-day-operating-calendar.md
+          - Business execution — moat and category strategy: business_execution/04-moat-and-category-strategy.md
+          - Business execution — 12-month roadmap: business_execution/05-12-month-execution-roadmap.md
+          - Business execution — KPI operating system: business_execution/06-kpi-instrumentation-and-operating-system.md
+          - Business execution — design-partner playbook: business_execution/07-design-partner-and-sales-motion-playbook.md
+          - Business execution — merge readiness checklist: business_execution/08-merge-readiness-checklist.md
           - Portfolio reporting recipe: portfolio-reporting-recipe.md
           - KPI schema: kpi-schema.md
           - Primary docs map: primary-docs-map.md
