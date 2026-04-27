@@ -28,6 +28,7 @@ def test_enforcement_workflow_uses_default_required_checks() -> None:
     text = ENFORCE_WORKFLOW.read_text(encoding="utf-8")
     assert "pull_request:" in text
     assert "pull_request_target:" not in text
+    assert "--enforce-admins" in text
     assert "--disable-pr-reviews" in text
     for context in _MOD.DEFAULT_REQUIRED_CHECKS:
         assert f'--required-check "{context}"' in text
