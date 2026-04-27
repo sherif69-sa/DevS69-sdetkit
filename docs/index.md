@@ -58,6 +58,7 @@ build/release-preflight.json
 - Track follow-up trend over time via `build/adoption-followup-history-rollup.json`.
 - Run full loop with contracts: `make adoption-control-loop && make adoption-control-loop-contract`.
 - Render weekly posture snapshot: `make adoption-posture`.
+- Emit validation summary artifact: `make adoption-validate`.
 - Delay full CLI exploration until the core path is stable in your repo.
 
 ## Team rollout / CI
