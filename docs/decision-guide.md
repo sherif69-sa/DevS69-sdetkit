@@ -30,12 +30,15 @@ make adoption-followup
 make adoption-followup-contract
 make adoption-control-loop
 make adoption-control-loop-contract
+make adoption-posture
 python -m sdetkit adoption --format json
 ```
 
 The follow-up workflow now maintains:
 - `build/adoption-followup-history.jsonl`
 - `build/adoption-followup-history-rollup.json`
+- `build/adoption-posture.json`
+- `build/adoption-posture.md`
 
 Rollup now includes escalation signals:
 - `escalation_recommended`
