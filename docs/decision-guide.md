@@ -27,6 +27,7 @@ Convert fit + latest gate decision into prioritized follow-up actions:
 
 ```bash
 make adoption-followup
+make adoption-followup-contract
 ```
 
 ## 2) When SDETKit is probably *not* worth it
