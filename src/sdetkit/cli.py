@@ -335,6 +335,43 @@ Then use stability-aware command discovery:
     onb = sub.add_parser("onboarding", help="Role-based onboarding playbook")
     onb.add_argument("args", nargs=argparse.REMAINDER)
 
+    adp = sub.add_parser("adoption", help="Adoption follow-up action planner")
+    adp.add_argument("--fit", default="build/sdetkit-fit-recommendation.json")
+    adp.add_argument("--summary", default="build/gate-decision-summary.json")
+    adp.add_argument("--format", choices=["json", "md"], default="json")
+    adp.add_argument("--out", default="")
+    adp.add_argument("--history", default="")
+    adp.add_argument("--history-rollup-out", default="")
+    adp.add_argument(
+        "--policy-profile", choices=["conservative", "balanced", "aggressive"], default="balanced"
+    )
+    adp.add_argument("--escalation-consecutive-no-ship", type=int, default=None)
+    adp.add_argument("--escalation-min-runs", type=int, default=None)
+    adp.add_argument("--escalation-min-p0-rate", type=float, default=None)
+
+    fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
+    fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
+    fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
+    fit.add_argument("--release-frequency", choices=["low", "medium", "high"], default="low")
+    fit.add_argument("--change-failure-impact", choices=["low", "medium", "high"], default="medium")
+    fit.add_argument("--compliance-pressure", choices=["low", "medium", "high"], default="low")
+    fit.add_argument("--format", choices=["text", "json"], default="text")
+    fit.add_argument("--out", default="")
+
+    sta = sub.add_parser(
+        "start",
+        help="[Public / stable] Guided start shortcut (role/journey onboarding entrypoint)",
+    )
+    sta.add_argument("--role", choices=["all", "sdet", "platform", "manager"], default="all")
+    sta.add_argument(
+        "--journey",
+        choices=["all", "fast-start", "first-pr", "ci-rollout", "artifact-review"],
+        default="fast-start",
+    )
+    sta.add_argument("--platform", choices=["all", "linux", "mac", "windows"], default="all")
+    sta.add_argument("--format", choices=["text", "markdown", "json"], default="markdown")
+    sta.add_argument("--output", default="")
+
     ono = sub.add_parser("onboarding-optimization", help="Onboarding optimization playbook")
     ono.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -783,6 +820,66 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "init":
         return _run_module_main("sdetkit.repo", build_repo_init_forwarded_args(ns))
+
+    if ns.cmd == "start":
+        forwarded = [
+            "--role",
+            str(ns.role),
+            "--journey",
+            str(ns.journey),
+            "--platform",
+            str(ns.platform),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.output):
+            forwarded.extend(["--output", str(ns.output)])
+        return _run_module_main("sdetkit.onboarding", forwarded)
+
+    if ns.cmd == "adoption":
+        forwarded = [
+            "--fit",
+            str(ns.fit),
+            "--summary",
+            str(ns.summary),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.out):
+            forwarded.extend(["--out", str(ns.out)])
+        if str(ns.history):
+            forwarded.extend(["--history", str(ns.history)])
+        if str(ns.history_rollup_out):
+            forwarded.extend(["--history-rollup-out", str(ns.history_rollup_out)])
+        forwarded.extend(["--policy-profile", str(ns.policy_profile)])
+        if ns.escalation_consecutive_no_ship is not None:
+            forwarded.extend(
+                ["--escalation-consecutive-no-ship", str(ns.escalation_consecutive_no_ship)]
+            )
+        if ns.escalation_min_runs is not None:
+            forwarded.extend(["--escalation-min-runs", str(ns.escalation_min_runs)])
+        if ns.escalation_min_p0_rate is not None:
+            forwarded.extend(["--escalation-min-p0-rate", str(ns.escalation_min_p0_rate)])
+        return _run_module_main("sdetkit.adoption", forwarded)
+
+    if ns.cmd == "fit":
+        forwarded = [
+            "--repo-size",
+            str(ns.repo_size),
+            "--team-size",
+            str(ns.team_size),
+            "--release-frequency",
+            str(ns.release_frequency),
+            "--change-failure-impact",
+            str(ns.change_failure_impact),
+            "--compliance-pressure",
+            str(ns.compliance_pressure),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.out):
+            forwarded.extend(["--out", str(ns.out)])
+        return _run_module_main("sdetkit.fit", forwarded)
 
     parsed_shortcut_result = dispatch_parsed_shortcut(
         str(ns.cmd),

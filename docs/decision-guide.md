@@ -17,6 +17,53 @@ SDETKit is usually a good fit when at least one of these is true:
 | Team standardizing local + CI decisions | You want one command path and consistent outputs across environments. |
 | Platform/release team with governance needs | You need evidence-backed release approvals with machine-readable outputs. |
 
+Quick fit signal command (risk-based recommendation):
+
+```bash
+python -m sdetkit fit --repo-size medium --team-size medium --release-frequency medium --change-failure-impact high --compliance-pressure medium --format json
+```
+
+The fit JSON includes:
+- `confidence` (`low|medium|high`)
+- `risk_drivers` (top weighted factors that shaped the recommendation)
+
+Convert fit + latest gate decision into prioritized follow-up actions.
+
+Fast path (recommended):
+
+```bash
+make adoption-control-loop-full
+```
+
+Manual/debug path:
+
+```bash
+make adoption-followup
+make adoption-followup-contract
+make adoption-control-loop
+make adoption-control-loop-contract
+make adoption-posture
+make adoption-validate
+python -m sdetkit adoption --format json
+```
+
+The follow-up workflow now maintains:
+- `build/adoption-followup-history.jsonl`
+- `build/adoption-followup-history-rollup.json`
+- `build/adoption-posture.json`
+- `build/adoption-posture.md`
+- `build/adoption-validation-summary.json`
+
+Rollup now includes escalation signals:
+- `escalation_recommended`
+- `escalation_reason` (`none|consecutive_no_ship|high_p0_rate`)
+
+You can tune escalation behavior in CLI mode with:
+- `--policy-profile` (`conservative|balanced|aggressive`)
+- `--escalation-consecutive-no-ship`
+- `--escalation-min-runs`
+- `--escalation-min-p0-rate`
+
 ## 2) When SDETKit is probably *not* worth it
 
 SDETKit may be unnecessary if:
