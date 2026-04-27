@@ -4,7 +4,6 @@ import argparse
 import json
 from pathlib import Path
 
-
 REQUIRED = (
     "sdetkit-fit-recommendation.json",
     "gate-decision-summary.json",
