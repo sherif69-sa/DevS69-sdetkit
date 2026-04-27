@@ -136,17 +136,26 @@ def build_followup(
 
 
 def _to_markdown(payload: dict[str, Any]) -> str:
+    decision_note = {
+        "NO-SHIP": "Release is currently blocked; prioritize remediation and contract consistency.",
+        "SHIP": "Release is currently allowed; focus on reproducibility and evidence hygiene.",
+        "NO-DATA": "Decision artifacts are missing; generate summary + contract outputs first.",
+    }.get(str(payload.get("decision")), "Decision state unknown; verify gate artifacts.")
     lines = [
         "# Adoption follow-up",
         "",
         f"- Fit: `{payload['fit']}`",
         f"- Decision: `{payload['decision']}`",
         f"- Next command: `{payload['next_command']}`",
+        f"- Why now: {decision_note}",
         "",
         "## Recommendations",
     ]
     for idx, rec in enumerate(payload["recommendations"], start=1):
         lines.append(f"{idx}. **[{rec['priority']}] {rec['title']}** — `{rec['action']}`")
+        rationale = str(rec.get("rationale", "")).strip()
+        if rationale:
+            lines.append(f"   - Rationale: {rationale}")
     lines.append("")
     return "\n".join(lines)
 

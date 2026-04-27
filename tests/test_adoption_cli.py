@@ -40,7 +40,10 @@ def test_adoption_cli_writes_markdown(tmp_path: Path, capsys) -> None:
     assert rc == 0
     _ = capsys.readouterr()
     assert out.exists()
-    assert "# Adoption follow-up" in out.read_text(encoding="utf-8")
+    rendered = out.read_text(encoding="utf-8")
+    assert "# Adoption follow-up" in rendered
+    assert "Why now:" in rendered
+    assert "Rationale:" in rendered
 
 
 def test_adoption_cli_history_and_rollup(tmp_path: Path, capsys) -> None:
