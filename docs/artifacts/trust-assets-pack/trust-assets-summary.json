@@ -47,10 +47,10 @@
       "evidence": {
         "exists": true,
         "path": "SECURITY.md",
-        "readme_link": false
+        "readme_link": true
       },
       "key": "security_doc_exists",
-      "passed": false,
+      "passed": true,
       "weight": 10
     },
     {
@@ -58,10 +58,10 @@
       "evidence": {
         "exists": true,
         "path": "docs/security.md",
-        "readme_link": false
+        "readme_link": true
       },
       "key": "security_guide_exists",
-      "passed": false,
+      "passed": true,
       "weight": 10
     },
     {
@@ -69,10 +69,10 @@
       "evidence": {
         "exists": true,
         "path": "docs/policy-and-baselines.md",
-        "readme_link": false
+        "readme_link": true
       },
       "key": "policy_baseline_exists",
-      "passed": false,
+      "passed": true,
       "weight": 10
     },
     {
@@ -116,16 +116,15 @@
   },
   "name": "trust-assets",
   "policy_checks": {
-    "policy_baseline_exists": false,
-    "security_doc_exists": false,
-    "security_guide_exists": false
+    "policy_baseline_exists": true,
+    "security_doc_exists": true,
+    "security_guide_exists": true
   },
   "recommendations": [
     "Restore missing trust badges in README so reliability status is visible at a glance.",
-    "Ensure policy documents exist and are linked from README governance references.",
     "Keep CI/security/pages workflows and docs index trust references present for reviewers."
   ],
-  "score": 100.0,
+  "score": 48.0,
   "strict_failures": [],
   "summary": {
     "category_coverage": {
@@ -138,18 +137,16 @@
         "total": 4
       },
       "policy": {
-        "passed": 0,
+        "passed": 3,
         "total": 3
       }
     },
-    "critical_failures": [
-      "security_doc_exists"
-    ],
-    "failed_checks": 9,
+    "critical_failures": [],
+    "failed_checks": 6,
     "trust_label": "review",
-    "trust_score": 18.0,
+    "trust_score": 48.0,
     "weighted_points": {
-      "earned": 18,
+      "earned": 48,
       "total": 100
     }
   }

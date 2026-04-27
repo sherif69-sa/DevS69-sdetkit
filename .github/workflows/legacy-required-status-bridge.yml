@@ -2,6 +2,9 @@ name: legacy-required-status-bridge
 
 on:
   pull_request:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -9,10 +12,11 @@ permissions:
   statuses: write
 
 jobs:
-  publish-legacy-statuses:
+  publish-legacy-statuses-on-pr-open:
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Publish legacy required status contexts
+      - name: Publish pending legacy CI status for PR head
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
@@ -21,16 +25,55 @@ jobs:
             const sha = context.payload.pull_request?.head?.sha || context.sha;
             const targetUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${context.runId}`;
 
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha,
+              state: 'pending',
+              context: 'ci',
+              description: 'Waiting for CI workflow completion.',
+              target_url: targetUrl,
+            });
+
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha,
+              state: 'success',
+              context: 'maintenance-autopilot',
+              description: 'Legacy required status bridge: see maintenance workflow checks for detailed signal.',
+              target_url: targetUrl,
+            });
+
+            core.info(`Published pending/success legacy contexts for ${sha}: ci, maintenance-autopilot`);
+
+  publish-legacy-statuses-from-ci-workflow:
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.name == 'CI' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish CI legacy required status context from CI workflow result
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const sha = context.payload.workflow_run?.head_sha || context.sha;
+            const targetUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${context.runId}`;
+            const conclusion = context.payload.workflow_run?.conclusion || 'failure';
+            const ciState = conclusion === 'success' ? 'success' : 'failure';
+            const ciDescription = conclusion === 'success'
+              ? 'Legacy required status bridge: CI workflow passed.'
+              : `Legacy required status bridge: CI workflow concluded ${conclusion}.`;
+
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha,
+              state: ciState,
+              context: 'ci',
+              description: ciDescription,
+              target_url: targetUrl,
+            });
+
             const contexts = ['ci', 'maintenance-autopilot'];
-            for (const statusContext of contexts) {
-              await github.rest.repos.createCommitStatus({
-                owner,
-                repo,
-                sha,
-                state: 'success',
-                context: statusContext,
-                description: 'Legacy required status bridge: see modern workflow checks for detailed signal.',
-                target_url: targetUrl,
-              });
-            }
             core.info(`Published legacy contexts for ${sha}: ${contexts.join(', ')}`);
