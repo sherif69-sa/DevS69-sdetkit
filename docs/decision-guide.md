@@ -27,7 +27,15 @@ The fit JSON includes:
 - `confidence` (`low|medium|high`)
 - `risk_drivers` (top weighted factors that shaped the recommendation)
 
-Convert fit + latest gate decision into prioritized follow-up actions:
+Convert fit + latest gate decision into prioritized follow-up actions.
+
+Fast path (recommended):
+
+```bash
+make adoption-control-loop-full
+```
+
+Manual/debug path:
 
 ```bash
 make adoption-followup
@@ -36,7 +44,6 @@ make adoption-control-loop
 make adoption-control-loop-contract
 make adoption-posture
 make adoption-validate
-make adoption-control-loop-full
 python -m sdetkit adoption --format json
 ```
 

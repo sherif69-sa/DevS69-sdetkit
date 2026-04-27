@@ -49,18 +49,16 @@ build/release-preflight.json
 
 ## Keep first adoption simple
 
-- Start with only the canonical path (`gate fast` -> `gate release` -> `doctor`).
-- If you want a guided role/journey prompt, use `python -m sdetkit start --journey fast-start --format markdown`.
-- Generate a concise review handoff: `make gate-decision-summary`.
-- Generate prioritized adoption actions: `make adoption-followup`.
-- Or use CLI directly: `python -m sdetkit adoption --format json`.
-- Validate adoption action payload: `make adoption-followup-contract`.
-- Track follow-up trend over time via `build/adoption-followup-history-rollup.json`.
-- Run full loop with contracts: `make adoption-control-loop && make adoption-control-loop-contract`.
-- Render weekly posture snapshot: `make adoption-posture`.
-- Emit validation summary artifact: `make adoption-validate`.
-- Or run the full adoption bundle in one command: `make adoption-control-loop-full`.
-- Delay full CLI exploration until the core path is stable in your repo.
+1. Start with the canonical path (`gate fast` -> `gate release` -> `doctor`).
+2. Optional guided onboarding prompt: `python -m sdetkit start --journey fast-start --format markdown`.
+3. For reviewer handoff + adoption planning, prefer the one-command bundle:
+   - `make adoption-control-loop-full`
+4. Expand to individual sub-steps only when debugging or customizing:
+   - `make gate-decision-summary`
+   - `make adoption-followup`
+   - `make adoption-followup-contract`
+   - `make adoption-posture`
+   - `make adoption-validate`
 
 ## Team rollout / CI
 
