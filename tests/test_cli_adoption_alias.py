@@ -23,12 +23,29 @@ def test_adoption_command_forwards_to_adoption_module(monkeypatch) -> None:
             "md",
             "--out",
             "out.md",
+            "--history",
+            "hist.jsonl",
+            "--history-rollup-out",
+            "hist-rollup.json",
         ]
     )
     assert rc == 0
     assert captured == [
         (
             "sdetkit.adoption",
-            ["--fit", "fit.json", "--summary", "summary.json", "--format", "md", "--out", "out.md"],
+            [
+                "--fit",
+                "fit.json",
+                "--summary",
+                "summary.json",
+                "--format",
+                "md",
+                "--out",
+                "out.md",
+                "--history",
+                "hist.jsonl",
+                "--history-rollup-out",
+                "hist-rollup.json",
+            ],
         )
     ]

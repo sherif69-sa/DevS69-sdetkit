@@ -98,12 +98,12 @@ fit-check: venv
 	@bash -lc 'echo fit-check: wrote build/sdetkit-fit-recommendation.json'
 
 adoption-followup: venv
-	@bash -lc '. .venv/bin/activate && python -m sdetkit adoption --fit build/sdetkit-fit-recommendation.json --summary build/gate-decision-summary.json --format json --out build/adoption-followup.json'
-	@bash -lc '. .venv/bin/activate && python -m sdetkit adoption --fit build/sdetkit-fit-recommendation.json --summary build/gate-decision-summary.json --format md --out build/adoption-followup.md > /dev/null'
-	@bash -lc 'echo adoption-followup: wrote build/adoption-followup.json and build/adoption-followup.md'
+	@bash -lc '. .venv/bin/activate && python -m sdetkit adoption --fit build/sdetkit-fit-recommendation.json --summary build/gate-decision-summary.json --format json --out build/adoption-followup.json --history build/adoption-followup-history.jsonl --history-rollup-out build/adoption-followup-history-rollup.json'
+	@bash -lc '. .venv/bin/activate && python -m sdetkit adoption --fit build/sdetkit-fit-recommendation.json --summary build/gate-decision-summary.json --format md --out build/adoption-followup.md --history build/adoption-followup-history.jsonl --history-rollup-out build/adoption-followup-history-rollup.json > /dev/null'
+	@bash -lc 'echo adoption-followup: wrote build/adoption-followup.json, build/adoption-followup.md, build/adoption-followup-history.jsonl, and build/adoption-followup-history-rollup.json'
 
 adoption-followup-contract: venv
-	@bash -lc '. .venv/bin/activate && python scripts/check_adoption_followup_contract.py --followup build/adoption-followup.json --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/check_adoption_followup_contract.py --followup build/adoption-followup.json --history-rollup build/adoption-followup-history-rollup.json --format json'
 
 ops-followup: venv
 	@bash -lc '. .venv/bin/activate && python scripts/real_workflow_followup.py --format json --out-json build/ops/followup.json --out-md build/ops/followup.md --history build/ops/followup-history.jsonl --history-rollup-out build/ops/followup-history-rollup.json'

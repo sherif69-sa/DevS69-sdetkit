@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -110,6 +111,45 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _append_history(payload: dict[str, Any], history_path: Path) -> dict[str, Any]:
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    stamped = {"generated_at": datetime.now(UTC).isoformat(), **payload}
+    with history_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(stamped, sort_keys=True) + "\n")
+    return stamped
+
+
+def _build_history_rollup(history_path: Path) -> dict[str, Any]:
+    runs: list[dict[str, Any]] = []
+    if history_path.exists():
+        for line in history_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                payload = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(payload, dict):
+                runs.append(payload)
+    decision_counts: dict[str, int] = {}
+    fit_counts: dict[str, int] = {}
+    for run in runs:
+        decision = str(run.get("decision", "UNKNOWN"))
+        decision_counts[decision] = decision_counts.get(decision, 0) + 1
+        fit = str(run.get("fit", "unknown"))
+        fit_counts[fit] = fit_counts.get(fit, 0) + 1
+    latest = runs[-1] if runs else {}
+    return {
+        "schema_version": "sdetkit.adoption_followup_history.v1",
+        "total_runs": len(runs),
+        "decision_counts": decision_counts,
+        "fit_counts": fit_counts,
+        "latest_next_command": latest.get("next_command", ""),
+        "latest_generated_at": latest.get("generated_at", ""),
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="sdetkit adoption",
@@ -119,12 +159,23 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--summary", type=Path, default=Path("build/gate-decision-summary.json"))
     parser.add_argument("--format", choices=["json", "md"], default="json")
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument("--history", type=Path, default=None)
+    parser.add_argument("--history-rollup-out", type=Path, default=None)
     args = parser.parse_args(argv)
 
     payload = build_followup(
         fit_payload=_load_optional(args.fit),
         summary_payload=_load_optional(args.summary),
     )
+    if args.history is not None:
+        payload = _append_history(payload, args.history)
+    if args.history_rollup_out is not None and args.history is not None:
+        rollup = _build_history_rollup(args.history)
+        args.history_rollup_out.parent.mkdir(parents=True, exist_ok=True)
+        args.history_rollup_out.write_text(
+            json.dumps(rollup, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     rendered = json.dumps(payload, indent=2, sort_keys=True) if args.format == "json" else _to_markdown(payload)
     if args.out is not None:
         args.out.parent.mkdir(parents=True, exist_ok=True)

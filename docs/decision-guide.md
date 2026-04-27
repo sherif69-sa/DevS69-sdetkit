@@ -31,6 +31,10 @@ make adoption-followup-contract
 python -m sdetkit adoption --format json
 ```
 
+The follow-up workflow now maintains:
+- `build/adoption-followup-history.jsonl`
+- `build/adoption-followup-history-rollup.json`
+
 ## 2) When SDETKit is probably *not* worth it
 
 SDETKit may be unnecessary if:

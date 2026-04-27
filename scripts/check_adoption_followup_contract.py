@@ -67,9 +67,27 @@ def check_contract(payload: dict[str, Any]) -> list[str]:
     return errors
 
 
+def _check_rollup(path: Path) -> list[str]:
+    errors: list[str] = []
+    if not path.exists():
+        return [f"history rollup missing: {path}"]
+    try:
+        payload = _load(path)
+    except (ValueError, json.JSONDecodeError) as exc:
+        return [f"unable to load history rollup: {exc}"]
+    if payload.get("schema_version") != "sdetkit.adoption_followup_history.v1":
+        errors.append("history rollup schema_version must be sdetkit.adoption_followup_history.v1")
+    if not isinstance(payload.get("total_runs"), int):
+        errors.append("history rollup total_runs must be int")
+    if not isinstance(payload.get("decision_counts"), dict):
+        errors.append("history rollup decision_counts must be object")
+    return errors
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate adoption-followup contract.")
     parser.add_argument("--followup", type=Path, default=Path("build/adoption-followup.json"))
+    parser.add_argument("--history-rollup", type=Path, default=None)
     parser.add_argument("--format", choices=("text", "json"), default="text")
     args = parser.parse_args(argv)
 
@@ -85,6 +103,8 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     errors = check_contract(payload)
+    if args.history_rollup is not None:
+        errors.extend(_check_rollup(args.history_rollup))
     result = {"ok": not errors, "errors": errors, "followup": str(args.followup)}
     if args.format == "json":
         print(json.dumps(result, indent=2, sort_keys=True))
