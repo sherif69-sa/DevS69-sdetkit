@@ -40,4 +40,5 @@ jobs:
             --required-check "ci" \
             --required-check "maintenance-autopilot" \
             --required-approving-review-count 0 \
+            --enforce-admins \
             --disable-pr-reviews
