@@ -85,7 +85,6 @@ extra_javascript:
 
 nav:
   - Start here: index.md
-  - Choose your path: choose-your-path.md
   - Canonical first-proof path (primary):
       - Install: install.md
       - Quickstart (copy-paste): quickstart-copy-paste.md
