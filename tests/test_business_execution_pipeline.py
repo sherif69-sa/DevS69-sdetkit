@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
-from pathlib import Path
 import zipfile
+from pathlib import Path
 
 _SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "business_execution_pipeline.py"
 _SPEC = importlib.util.spec_from_file_location("business_execution_pipeline_script", _SCRIPT_PATH)
