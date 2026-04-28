@@ -12,7 +12,7 @@ This page is the product homepage/router for first-time adoption.
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy reports](#legacy-reports)
+[⚡ Fast start](#fast-start) · [🧭 Choose your path](choose-your-path.md) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy reports](#legacy-reports)
 
 </div>
 
@@ -32,12 +32,20 @@ python -m sdetkit doctor
 
 New teams should stop here first, then inspect artifacts before exploring advanced commands.
 
+Compatibility aliases still supported: `python -m sdetkit gate fast`, `python -m sdetkit gate release`, and `python -m sdetkit doctor`.
+
 ## What you get
 
 ```text
 build/gate-fast.json
 build/release-preflight.json
 ```
+
+## Pick your path first
+
+- [Choose your path (30-second router)](choose-your-path.md)
+- Equivalent namespace form: `python -m sdetkit release gate fast --format json --stable-json --out build/gate-fast.json`
+- Full release path: `python -m sdetkit release gate fast` -> `python -m sdetkit release gate release` -> `python -m sdetkit release doctor`
 
 ## Try it quickly
 
