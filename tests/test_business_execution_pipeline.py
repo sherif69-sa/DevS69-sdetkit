@@ -67,12 +67,8 @@ def test_pipeline_autodiscovers_canonical_input_files(tmp_path: Path, monkeypatc
 
     assert rc == 0
     payload = json.loads((out_dir / "business-execution-inputs.json").read_text(encoding="utf-8"))
-    assert payload["challenge_prompt"]["path"].endswith(
-        "workflow_execution_prompt.md"
-    )
-    assert payload["guidelines_zip"]["path"].endswith(
-        "workflow_execution_guidelines_bundle.zip"
-    )
+    assert payload["challenge_prompt"]["path"].endswith("workflow_execution_prompt.md")
+    assert payload["guidelines_zip"]["path"].endswith("workflow_execution_guidelines_bundle.zip")
 
 
 def test_pipeline_rejects_partial_external_input_pair(tmp_path: Path) -> None:
@@ -106,6 +102,8 @@ def test_pipeline_single_operator_mode_assigns_all_roles(tmp_path: Path) -> None
         ]
     )
     assert rc == 0
-    week1_payload = json.loads((out_dir / "business-execution-week1.json").read_text(encoding="utf-8"))
+    week1_payload = json.loads(
+        (out_dir / "business-execution-week1.json").read_text(encoding="utf-8")
+    )
     assert week1_payload["status"] == "go"
     assert set(week1_payload["owners"].values()) == {"Sherif"}

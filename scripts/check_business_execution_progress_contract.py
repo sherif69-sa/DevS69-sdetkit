@@ -50,7 +50,9 @@ def validate_progress_contract(payload: dict[str, Any]) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Validate business execution week-1 progress contract.")
+    parser = argparse.ArgumentParser(
+        description="Validate business execution week-1 progress contract."
+    )
     parser.add_argument(
         "--artifact",
         default="build/business-execution/business-execution-week1-progress.json",

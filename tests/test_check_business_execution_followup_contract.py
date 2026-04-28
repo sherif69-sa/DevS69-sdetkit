@@ -5,9 +5,13 @@ import json
 from pathlib import Path
 
 _SCRIPT_PATH = (
-    Path(__file__).resolve().parents[1] / "scripts" / "check_business_execution_followup_contract.py"
+    Path(__file__).resolve().parents[1]
+    / "scripts"
+    / "check_business_execution_followup_contract.py"
 )
-_SPEC = importlib.util.spec_from_file_location("check_business_execution_followup_contract_script", _SCRIPT_PATH)
+_SPEC = importlib.util.spec_from_file_location(
+    "check_business_execution_followup_contract_script", _SCRIPT_PATH
+)
 assert _SPEC is not None and _SPEC.loader is not None
 followup_contract = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(followup_contract)
@@ -22,7 +26,7 @@ def test_validate_followup_contract_passes() -> None:
         "pending_count": 1,
         "next_tasks": ["Task A"],
         "immediate_actions": ["Complete: Task A"],
-        "recommended_command": "python scripts/business_execution_progress.py --done \"Task A\"",
+        "recommended_command": 'python scripts/business_execution_progress.py --done "Task A"',
         "keep_moving": True,
         "history_records": 3,
         "decision_counts": {"none": 0, "watch": 2, "escalate": 1},
@@ -47,7 +51,7 @@ def test_main_fails_when_keep_moving_is_not_bool(tmp_path: Path) -> None:
                 "pending_count": 1,
                 "next_tasks": ["Task A"],
                 "immediate_actions": ["Complete: Task A"],
-                "recommended_command": "python scripts/business_execution_progress.py --done \"Task A\"",
+                "recommended_command": 'python scripts/business_execution_progress.py --done "Task A"',
                 "keep_moving": "yes",
                 "history_records": 1,
                 "decision_counts": {"none": 0, "watch": 1, "escalate": 0},

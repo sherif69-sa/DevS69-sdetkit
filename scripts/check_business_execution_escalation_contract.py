@@ -46,8 +46,12 @@ def validate_escalation_contract(payload: dict[str, Any]) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Validate business execution escalation artifact contract.")
-    parser.add_argument("--artifact", default="build/business-execution/business-execution-escalation.json")
+    parser = argparse.ArgumentParser(
+        description="Validate business execution escalation artifact contract."
+    )
+    parser.add_argument(
+        "--artifact", default="build/business-execution/business-execution-escalation.json"
+    )
     args = parser.parse_args(argv)
     payload = json.loads(Path(args.artifact).read_text(encoding="utf-8"))
     errors = validate_escalation_contract(payload)

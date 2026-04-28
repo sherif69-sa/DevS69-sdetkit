@@ -18,7 +18,9 @@ def test_build_escalation_payload_returns_watch_for_conditional_pass() -> None:
         "task_summary": {"completion_percent": 40.0},
     }
     next_payload = {"next_tasks": ["Task A", "Task B"]}
-    handoff = {"recommended_command": "python scripts/business_execution_progress.py --done \"Task A\""}
+    handoff = {
+        "recommended_command": 'python scripts/business_execution_progress.py --done "Task A"'
+    }
     payload = escalation_script.build_escalation_payload(week1, progress, next_payload, handoff)
     assert payload["decision"] == "watch"
     assert payload["pending_count"] == 2
@@ -43,11 +45,15 @@ def test_main_writes_escalation_artifacts(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     progress.write_text(
-        json.dumps({"gate_decision": {"status": "fail"}, "task_summary": {"completion_percent": 0.0}}),
+        json.dumps(
+            {"gate_decision": {"status": "fail"}, "task_summary": {"completion_percent": 0.0}}
+        ),
         encoding="utf-8",
     )
     next_json.write_text(json.dumps({"next_tasks": ["Assign owner"]}), encoding="utf-8")
-    handoff.write_text(json.dumps({"recommended_command": "make business-execution-start"}), encoding="utf-8")
+    handoff.write_text(
+        json.dumps({"recommended_command": "make business-execution-start"}), encoding="utf-8"
+    )
 
     rc = escalation_script.main(
         [
@@ -79,6 +85,8 @@ def test_build_escalation_payload_keeps_watch_when_only_owners_missing() -> None
         "task_summary": {"completion_percent": 60.0},
     }
     next_payload = {"next_tasks": ["Task A"]}
-    handoff = {"recommended_command": "python scripts/business_execution_progress.py --done \"Task A\""}
+    handoff = {
+        "recommended_command": 'python scripts/business_execution_progress.py --done "Task A"'
+    }
     payload = escalation_script.build_escalation_payload(week1, progress, next_payload, handoff)
     assert payload["decision"] == "watch"

@@ -47,7 +47,9 @@ def _file_meta(path: Path) -> dict[str, object]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Run business execution week-1 pipeline end-to-end.")
+    parser = argparse.ArgumentParser(
+        description="Run business execution week-1 pipeline end-to-end."
+    )
     parser.add_argument("--out-dir", default="build/business-execution")
     parser.add_argument("--start-date", default=None)
     parser.add_argument("--program-owner", default=None)
@@ -61,8 +63,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Assign one operator to all owner roles in the week-1 bootstrap.",
     )
     parser.add_argument("--done", action="append", default=[])
-    parser.add_argument("--challenge-prompt", default=None, help="Optional path to challenge prompt markdown.")
-    parser.add_argument("--guidelines-zip", default=None, help="Optional path to aligned guidelines zip.")
+    parser.add_argument(
+        "--challenge-prompt", default=None, help="Optional path to challenge prompt markdown."
+    )
+    parser.add_argument(
+        "--guidelines-zip", default=None, help="Optional path to aligned guidelines zip."
+    )
     args = parser.parse_args(argv)
 
     challenge_prompt = args.challenge_prompt
@@ -116,7 +122,9 @@ def main(argv: list[str] | None = None) -> int:
     inputs_json.write_text(json.dumps(input_manifest, indent=2) + "\n", encoding="utf-8")
 
     py = sys.executable
-    _run([py, _script("check_business_execution_inputs_contract.py"), "--artifact", str(inputs_json)])
+    _run(
+        [py, _script("check_business_execution_inputs_contract.py"), "--artifact", str(inputs_json)]
+    )
 
     start_cmd = [
         py,
@@ -160,7 +168,14 @@ def main(argv: list[str] | None = None) -> int:
     for done_item in args.done:
         progress_cmd.extend(["--done", done_item])
     _run(progress_cmd)
-    _run([py, _script("check_business_execution_progress_contract.py"), "--artifact", str(progress_json)])
+    _run(
+        [
+            py,
+            _script("check_business_execution_progress_contract.py"),
+            "--artifact",
+            str(progress_json),
+        ]
+    )
 
     _run(
         [
@@ -194,7 +209,14 @@ def main(argv: list[str] | None = None) -> int:
             str(handoff_md),
         ]
     )
-    _run([py, _script("check_business_execution_handoff_contract.py"), "--artifact", str(handoff_json)])
+    _run(
+        [
+            py,
+            _script("check_business_execution_handoff_contract.py"),
+            "--artifact",
+            str(handoff_json),
+        ]
+    )
 
     _run(
         [

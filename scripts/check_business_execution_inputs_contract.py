@@ -46,8 +46,12 @@ def validate_inputs_contract(payload: dict[str, Any]) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Validate business execution input manifest contract.")
-    parser.add_argument("--artifact", default="build/business-execution/business-execution-inputs.json")
+    parser = argparse.ArgumentParser(
+        description="Validate business execution input manifest contract."
+    )
+    parser.add_argument(
+        "--artifact", default="build/business-execution/business-execution-inputs.json"
+    )
     args = parser.parse_args(argv)
     payload = json.loads(Path(args.artifact).read_text(encoding="utf-8"))
     errors = validate_inputs_contract(payload)

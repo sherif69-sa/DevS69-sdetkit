@@ -15,10 +15,12 @@ def test_build_followup_payload_keeps_momentum() -> None:
     progress = {"gate_decision": {"status": "conditional-pass"}}
     next_payload = {
         "next_tasks": ["Task A", "Task B"],
-        "recommended_command": "python scripts/business_execution_progress.py --done \"Task A\"",
+        "recommended_command": 'python scripts/business_execution_progress.py --done "Task A"',
     }
     escalation = {"decision": "watch"}
-    payload = followup_script.build_followup_payload(progress, next_payload, escalation, window_hours=24)
+    payload = followup_script.build_followup_payload(
+        progress, next_payload, escalation, window_hours=24
+    )
     assert payload["keep_moving"] is True
     assert payload["pending_count"] == 2
     assert payload["immediate_actions"][0] == "Complete: Task A"

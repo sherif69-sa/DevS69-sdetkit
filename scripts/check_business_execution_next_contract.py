@@ -29,8 +29,12 @@ def validate_next_contract(payload: dict[str, Any]) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Validate business execution next-actions artifact contract.")
-    parser.add_argument("--artifact", default="build/business-execution/business-execution-week1-next.json")
+    parser = argparse.ArgumentParser(
+        description="Validate business execution next-actions artifact contract."
+    )
+    parser.add_argument(
+        "--artifact", default="build/business-execution/business-execution-week1-next.json"
+    )
     args = parser.parse_args(argv)
     payload = json.loads(Path(args.artifact).read_text(encoding="utf-8"))
     errors = validate_next_contract(payload)

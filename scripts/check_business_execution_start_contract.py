@@ -43,14 +43,18 @@ def validate_contract(payload: dict[str, Any]) -> list[str]:
         errors.append("next_action must be a non-empty string")
 
     if status == "go":
-        unresolved = [key for key in REQUIRED_OWNER_KEYS if str(owners.get(key, "")).upper() == "TBD"]
+        unresolved = [
+            key for key in REQUIRED_OWNER_KEYS if str(owners.get(key, "")).upper() == "TBD"
+        ]
         if unresolved:
             errors.append("status=go is invalid when owners are TBD")
     return errors
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Validate business execution week-1 artifact contract.")
+    parser = argparse.ArgumentParser(
+        description="Validate business execution week-1 artifact contract."
+    )
     parser.add_argument(
         "--artifact",
         default="build/business-execution/business-execution-week1.json",

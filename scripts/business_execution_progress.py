@@ -35,7 +35,9 @@ def build_progress(
             reason = "Owner assignment is incomplete."
         else:
             gate = "conditional-pass"
-            reason = "Owner assignment is incomplete, but execution can continue while assigning owners."
+            reason = (
+                "Owner assignment is incomplete, but execution can continue while assigning owners."
+            )
     elif completed == total and total > 0:
         gate = "pass"
         reason = "All week-1 execution tasks are complete."
@@ -85,7 +87,9 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Track business execution week-1 progress and gate status.")
+    parser = argparse.ArgumentParser(
+        description="Track business execution week-1 progress and gate status."
+    )
     parser.add_argument(
         "--week1",
         default="build/business-execution/business-execution-week1.json",
@@ -125,7 +129,9 @@ def main(argv: list[str] | None = None) -> int:
 
     week1_payload = json.loads(Path(args.week1).read_text(encoding="utf-8"))
     done_items = {item.strip() for item in args.done if item.strip()}
-    progress_payload = build_progress(week1_payload, done_items, owner_gate_mode=args.owner_gate_mode)
+    progress_payload = build_progress(
+        week1_payload, done_items, owner_gate_mode=args.owner_gate_mode
+    )
 
     out_json = Path(args.out_json)
     out_json.parent.mkdir(parents=True, exist_ok=True)

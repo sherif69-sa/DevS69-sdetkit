@@ -86,12 +86,22 @@ def render_horizon_md(payload: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Generate week-2 and day-90 execution horizon plan.")
+    parser = argparse.ArgumentParser(
+        description="Generate week-2 and day-90 execution horizon plan."
+    )
     parser.add_argument("--week1", default="build/business-execution/business-execution-week1.json")
-    parser.add_argument("--progress", default="build/business-execution/business-execution-week1-progress.json")
-    parser.add_argument("--followup", default="build/business-execution/business-execution-followup.json")
-    parser.add_argument("--out-json", default="build/business-execution/business-execution-horizon.json")
-    parser.add_argument("--out-md", default="build/business-execution/business-execution-horizon.md")
+    parser.add_argument(
+        "--progress", default="build/business-execution/business-execution-week1-progress.json"
+    )
+    parser.add_argument(
+        "--followup", default="build/business-execution/business-execution-followup.json"
+    )
+    parser.add_argument(
+        "--out-json", default="build/business-execution/business-execution-horizon.json"
+    )
+    parser.add_argument(
+        "--out-md", default="build/business-execution/business-execution-horizon.md"
+    )
     args = parser.parse_args(argv)
 
     week1 = json.loads(Path(args.week1).read_text(encoding="utf-8"))

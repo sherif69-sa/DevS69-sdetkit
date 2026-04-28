@@ -14,7 +14,10 @@ _SPEC.loader.exec_module(handoff_script)
 def test_build_handoff_includes_key_fields() -> None:
     payload = handoff_script.build_handoff(
         week1={"status": "go", "start_date": "2026-04-28"},
-        progress={"gate_decision": {"status": "conditional-pass"}, "task_summary": {"completion_percent": 50}},
+        progress={
+            "gate_decision": {"status": "conditional-pass"},
+            "task_summary": {"completion_percent": 50},
+        },
         rollup={"history_records": 3, "gate_counts": {"pass": 1, "conditional-pass": 1, "fail": 1}},
         next_payload={"next_tasks": ["A"], "recommended_command": "cmd"},
     )
@@ -24,13 +27,19 @@ def test_build_handoff_includes_key_fields() -> None:
 
 
 def test_main_writes_handoff_artifacts(tmp_path: Path) -> None:
-    (tmp_path / "week1.json").write_text(json.dumps({"status": "go", "start_date": "2026-04-28"}), encoding="utf-8")
+    (tmp_path / "week1.json").write_text(
+        json.dumps({"status": "go", "start_date": "2026-04-28"}), encoding="utf-8"
+    )
     (tmp_path / "progress.json").write_text(
-        json.dumps({"gate_decision": {"status": "pass"}, "task_summary": {"completion_percent": 100}}),
+        json.dumps(
+            {"gate_decision": {"status": "pass"}, "task_summary": {"completion_percent": 100}}
+        ),
         encoding="utf-8",
     )
     (tmp_path / "rollup.json").write_text(
-        json.dumps({"history_records": 1, "gate_counts": {"pass": 1, "conditional-pass": 0, "fail": 0}}),
+        json.dumps(
+            {"history_records": 1, "gate_counts": {"pass": 1, "conditional-pass": 0, "fail": 0}}
+        ),
         encoding="utf-8",
     )
     (tmp_path / "next.json").write_text(

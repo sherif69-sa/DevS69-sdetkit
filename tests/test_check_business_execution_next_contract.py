@@ -4,8 +4,12 @@ import importlib.util
 import json
 from pathlib import Path
 
-_SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "check_business_execution_next_contract.py"
-_SPEC = importlib.util.spec_from_file_location("check_business_execution_next_contract_script", _SCRIPT_PATH)
+_SCRIPT_PATH = (
+    Path(__file__).resolve().parents[1] / "scripts" / "check_business_execution_next_contract.py"
+)
+_SPEC = importlib.util.spec_from_file_location(
+    "check_business_execution_next_contract_script", _SCRIPT_PATH
+)
 assert _SPEC is not None and _SPEC.loader is not None
 next_contract = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(next_contract)
@@ -16,7 +20,7 @@ def test_validate_next_contract_passes() -> None:
         "schema_version": "sdetkit.business-execution-next.v1",
         "pending_count": 1,
         "next_tasks": ["A"],
-        "recommended_command": "python scripts/business_execution_progress.py --done \"A\"",
+        "recommended_command": 'python scripts/business_execution_progress.py --done "A"',
     }
     assert next_contract.validate_next_contract(payload) == []
 

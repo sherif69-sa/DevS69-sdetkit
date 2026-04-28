@@ -15,7 +15,7 @@ def test_build_continue_payload_prefers_checkpoint_when_due() -> None:
     followup = {
         "checkpoint_status": "due",
         "keep_moving": True,
-        "recommended_command": "python scripts/business_execution_progress.py --done \"Task A\"",
+        "recommended_command": 'python scripts/business_execution_progress.py --done "Task A"',
         "checkpoint_command": "make business-execution-followup",
     }
     payload = continue_script.build_continue_payload(followup)
@@ -32,7 +32,7 @@ def test_main_writes_continue_artifacts(tmp_path: Path) -> None:
             {
                 "checkpoint_status": "on-track",
                 "keep_moving": True,
-                "recommended_command": "python scripts/business_execution_progress.py --done \"Task A\"",
+                "recommended_command": 'python scripts/business_execution_progress.py --done "Task A"',
                 "checkpoint_command": "make business-execution-followup",
             }
         ),

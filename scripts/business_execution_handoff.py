@@ -59,16 +59,28 @@ def render_handoff_md(payload: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build business execution handoff summary from generated artifacts.")
+    parser = argparse.ArgumentParser(
+        description="Build business execution handoff summary from generated artifacts."
+    )
     parser.add_argument("--week1", default="build/business-execution/business-execution-week1.json")
-    parser.add_argument("--progress", default="build/business-execution/business-execution-week1-progress.json")
+    parser.add_argument(
+        "--progress", default="build/business-execution/business-execution-week1-progress.json"
+    )
     parser.add_argument(
         "--rollup",
         default="build/business-execution/business-execution-week1-progress-rollup.json",
     )
-    parser.add_argument("--next", dest="next_json", default="build/business-execution/business-execution-week1-next.json")
-    parser.add_argument("--out-json", default="build/business-execution/business-execution-handoff.json")
-    parser.add_argument("--out-md", default="build/business-execution/business-execution-handoff.md")
+    parser.add_argument(
+        "--next",
+        dest="next_json",
+        default="build/business-execution/business-execution-week1-next.json",
+    )
+    parser.add_argument(
+        "--out-json", default="build/business-execution/business-execution-handoff.json"
+    )
+    parser.add_argument(
+        "--out-md", default="build/business-execution/business-execution-handoff.md"
+    )
     args = parser.parse_args(argv)
 
     week1 = json.loads(Path(args.week1).read_text(encoding="utf-8"))

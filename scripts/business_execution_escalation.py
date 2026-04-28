@@ -113,11 +113,23 @@ def render_escalation_md(payload: dict[str, Any]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate business execution escalation artifact.")
     parser.add_argument("--week1", default="build/business-execution/business-execution-week1.json")
-    parser.add_argument("--progress", default="build/business-execution/business-execution-week1-progress.json")
-    parser.add_argument("--next", dest="next_json", default="build/business-execution/business-execution-week1-next.json")
-    parser.add_argument("--handoff", default="build/business-execution/business-execution-handoff.json")
-    parser.add_argument("--out-json", default="build/business-execution/business-execution-escalation.json")
-    parser.add_argument("--out-md", default="build/business-execution/business-execution-escalation.md")
+    parser.add_argument(
+        "--progress", default="build/business-execution/business-execution-week1-progress.json"
+    )
+    parser.add_argument(
+        "--next",
+        dest="next_json",
+        default="build/business-execution/business-execution-week1-next.json",
+    )
+    parser.add_argument(
+        "--handoff", default="build/business-execution/business-execution-handoff.json"
+    )
+    parser.add_argument(
+        "--out-json", default="build/business-execution/business-execution-escalation.json"
+    )
+    parser.add_argument(
+        "--out-md", default="build/business-execution/business-execution-escalation.md"
+    )
     args = parser.parse_args(argv)
 
     week1 = json.loads(Path(args.week1).read_text(encoding="utf-8"))

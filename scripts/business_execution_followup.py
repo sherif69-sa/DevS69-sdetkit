@@ -31,7 +31,10 @@ def build_followup_payload(
     if not immediate_actions:
         immediate_actions.append("No pending tasks. Keep monitoring execution health.")
 
-    keep_moving = gate_status in {"conditional-pass", "fail"} or escalation_decision in {"watch", "escalate"}
+    keep_moving = gate_status in {"conditional-pass", "fail"} or escalation_decision in {
+        "watch",
+        "escalate",
+    }
     recommended_command = next_payload.get("recommended_command")
     if not isinstance(recommended_command, str) or not recommended_command.strip():
         recommended_command = "make business-execution-pipeline"
@@ -84,10 +87,20 @@ def render_followup_md(payload: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Generate continuous follow-up actions from current execution artifacts.")
-    parser.add_argument("--progress", default="build/business-execution/business-execution-week1-progress.json")
-    parser.add_argument("--next", dest="next_json", default="build/business-execution/business-execution-week1-next.json")
-    parser.add_argument("--escalation", default="build/business-execution/business-execution-escalation.json")
+    parser = argparse.ArgumentParser(
+        description="Generate continuous follow-up actions from current execution artifacts."
+    )
+    parser.add_argument(
+        "--progress", default="build/business-execution/business-execution-week1-progress.json"
+    )
+    parser.add_argument(
+        "--next",
+        dest="next_json",
+        default="build/business-execution/business-execution-week1-next.json",
+    )
+    parser.add_argument(
+        "--escalation", default="build/business-execution/business-execution-escalation.json"
+    )
     parser.add_argument("--window-hours", type=int, default=24)
     parser.add_argument(
         "--history",
@@ -99,14 +112,20 @@ def main(argv: list[str] | None = None) -> int:
         default="build/business-execution/business-execution-followup-rollup.json",
         help="Write follow-up history rollup summary.",
     )
-    parser.add_argument("--out-json", default="build/business-execution/business-execution-followup.json")
-    parser.add_argument("--out-md", default="build/business-execution/business-execution-followup.md")
+    parser.add_argument(
+        "--out-json", default="build/business-execution/business-execution-followup.json"
+    )
+    parser.add_argument(
+        "--out-md", default="build/business-execution/business-execution-followup.md"
+    )
     args = parser.parse_args(argv)
 
     progress = json.loads(Path(args.progress).read_text(encoding="utf-8"))
     next_payload = json.loads(Path(args.next_json).read_text(encoding="utf-8"))
     escalation = json.loads(Path(args.escalation).read_text(encoding="utf-8"))
-    payload = build_followup_payload(progress, next_payload, escalation, window_hours=args.window_hours)
+    payload = build_followup_payload(
+        progress, next_payload, escalation, window_hours=args.window_hours
+    )
 
     history_path = Path(args.history)
     history_path.parent.mkdir(parents=True, exist_ok=True)

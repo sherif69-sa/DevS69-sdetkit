@@ -13,7 +13,10 @@ _SPEC.loader.exec_module(horizon_script)
 
 def test_build_horizon_payload_contains_week2_and_day90() -> None:
     week1 = {"status": "go"}
-    progress = {"task_summary": {"completed": 0, "completion_percent": 0.0}, "gate_decision": {"status": "conditional-pass"}}
+    progress = {
+        "task_summary": {"completed": 0, "completion_percent": 0.0},
+        "gate_decision": {"status": "conditional-pass"},
+    }
     followup = {"checkpoint_status": "on-track"}
     payload = horizon_script.build_horizon_payload(week1, progress, followup)
     assert payload["focus_mode"] == "foundation-build"
@@ -29,7 +32,12 @@ def test_main_writes_horizon_artifacts(tmp_path: Path) -> None:
     out_md = tmp_path / "horizon.md"
     week1.write_text(json.dumps({"status": "go"}), encoding="utf-8")
     progress.write_text(
-        json.dumps({"task_summary": {"completed": 4, "completion_percent": 66.7}, "gate_decision": {"status": "conditional-pass"}}),
+        json.dumps(
+            {
+                "task_summary": {"completed": 4, "completion_percent": 66.7},
+                "gate_decision": {"status": "conditional-pass"},
+            }
+        ),
         encoding="utf-8",
     )
     followup.write_text(json.dumps({"checkpoint_status": "on-track"}), encoding="utf-8")

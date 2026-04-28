@@ -52,7 +52,9 @@ def render_next_md(payload: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Generate concrete next actions from week-1 progress artifact.")
+    parser = argparse.ArgumentParser(
+        description="Generate concrete next actions from week-1 progress artifact."
+    )
     parser.add_argument(
         "--progress",
         default="build/business-execution/business-execution-week1-progress.json",

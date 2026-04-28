@@ -56,10 +56,18 @@ def render_continue_md(payload: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Select the next execution command from follow-up artifact.")
-    parser.add_argument("--followup", default="build/business-execution/business-execution-followup.json")
-    parser.add_argument("--out-json", default="build/business-execution/business-execution-continue.json")
-    parser.add_argument("--out-md", default="build/business-execution/business-execution-continue.md")
+    parser = argparse.ArgumentParser(
+        description="Select the next execution command from follow-up artifact."
+    )
+    parser.add_argument(
+        "--followup", default="build/business-execution/business-execution-followup.json"
+    )
+    parser.add_argument(
+        "--out-json", default="build/business-execution/business-execution-continue.json"
+    )
+    parser.add_argument(
+        "--out-md", default="build/business-execution/business-execution-continue.md"
+    )
     args = parser.parse_args(argv)
 
     followup = json.loads(Path(args.followup).read_text(encoding="utf-8"))

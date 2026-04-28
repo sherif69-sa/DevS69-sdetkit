@@ -4,8 +4,12 @@ import importlib.util
 import json
 from pathlib import Path
 
-_SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "check_business_execution_inputs_contract.py"
-_SPEC = importlib.util.spec_from_file_location("check_business_execution_inputs_contract_script", _SCRIPT_PATH)
+_SCRIPT_PATH = (
+    Path(__file__).resolve().parents[1] / "scripts" / "check_business_execution_inputs_contract.py"
+)
+_SPEC = importlib.util.spec_from_file_location(
+    "check_business_execution_inputs_contract_script", _SCRIPT_PATH
+)
 assert _SPEC is not None and _SPEC.loader is not None
 inputs_contract = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(inputs_contract)

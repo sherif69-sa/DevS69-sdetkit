@@ -5,7 +5,9 @@ import json
 from pathlib import Path
 
 _SCRIPT_PATH = (
-    Path(__file__).resolve().parents[1] / "scripts" / "check_business_execution_escalation_contract.py"
+    Path(__file__).resolve().parents[1]
+    / "scripts"
+    / "check_business_execution_escalation_contract.py"
 )
 _SPEC = importlib.util.spec_from_file_location(
     "check_business_execution_escalation_contract_script", _SCRIPT_PATH
