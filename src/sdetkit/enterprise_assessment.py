@@ -682,11 +682,11 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.format == "json":
-        print(json.dumps(payload, indent=2))
+        sys.stdout.write(json.dumps(payload, indent=2) + "\n")
     elif args.format == "markdown":
-        print(_render_markdown(payload), end="")
+        sys.stdout.write(_render_markdown(payload))
     else:
-        print(_render_text(payload), end="")
+        sys.stdout.write(_render_text(payload))
 
     if args.strict and not payload["summary"]["strict_pass"]:
         return 1

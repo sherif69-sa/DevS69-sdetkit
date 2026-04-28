@@ -6,6 +6,16 @@ import sys
 from pathlib import Path
 from typing import Any
 
+
+def _stdout(message: str) -> None:
+    sys.stdout.write(message + "\n")
+
+
+def _stderr(message: str) -> None:
+    sys.stderr.write(message + "\n")
+
+
+
 _REPORT_RE = re.compile(r"^impact-(\d+)-.*-report\.md$")
 _PLAN_RE = re.compile(r"^(?:impact|" + "d" + "ay" + r")(\d+)(?:-.*)?\.json$")
 _CLOSEOUT_RE = re.compile(r"^(?P<lane>[a-z0-9_]+)_closeout_(?P<id>\d+)\.py$")
@@ -257,7 +267,9 @@ def check_manifest(repo_root: Path | None = None) -> bool:
 def main(argv: list[str] | None = None) -> int:
     args = list(argv if argv is not None else sys.argv[1:])
     if not args or args[0] in {"-h", "--help"}:
-        print("usage: python -m sdetkit.roadmap_manifest {print|write|check|closeout-next [limit]}")
+        _stdout(
+            "usage: python -m sdetkit.roadmap_manifest {print|write|check|closeout-next [limit]}"
+        )
         return 0
 
     cmd = args[0]
@@ -266,16 +278,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if cmd == "write":
         p = write_manifest()
-        print(p.as_posix())
+        _stdout(p.as_posix())
         return 0
     if cmd == "check":
         ok = check_manifest()
         if ok:
             return 0
-        print(
-            "roadmap manifest is stale; run: python -m sdetkit.roadmap_manifest write",
-            file=sys.stderr,
-        )
+        _stderr("roadmap manifest is stale; run: python -m sdetkit.roadmap_manifest write")
         return 1
     if cmd == "closeout-next":
         limit = 10
@@ -283,14 +292,14 @@ def main(argv: list[str] | None = None) -> int:
             try:
                 limit = max(1, int(args[1]))
             except ValueError:
-                print(f"invalid limit: {args[1]}", file=sys.stderr)
+                _stderr(f"invalid limit: {args[1]}")
                 return 2
         rows = _next_closeout_calls(limit=limit)
         payload = {"next_calls": rows, "count": len(rows)}
         sys.stdout.write(json.dumps(payload, sort_keys=True, indent=2, ensure_ascii=True) + "\n")
         return 0
 
-    print("unknown command", file=sys.stderr)
+    _stderr("unknown command")
     return 2
 
 

@@ -2059,7 +2059,7 @@ def run(
     project_python_requires = _load_project_python_requires(pyproject_path)
 
     if not dependencies:
-        print("No dependencies found in the configured manifests.")
+        sys.stdout.write("No dependencies found in the configured manifests.\n")
         return 0
 
     by_package: dict[str, list[Dependency]] = {}
@@ -2387,7 +2387,7 @@ def _resolve_requirement_paths(args: argparse.Namespace) -> list[Path] | None:
     missing = [path for path in requirement_paths if not path.exists()]
     if missing:
         for path in missing:
-            print(f"error: requirements file not found: {path}", file=sys.stderr)
+            sys.stderr.write(f"error: requirements file not found: {path}\n")
         return None
     return list(requirement_paths)
 
@@ -2397,7 +2397,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if not args.pyproject.exists():
-        print(f"error: file not found: {args.pyproject}", file=sys.stderr)
+        sys.stderr.write(f"error: file not found: {args.pyproject}\n")
         return 2
 
     requirement_paths = _resolve_requirement_paths(args)

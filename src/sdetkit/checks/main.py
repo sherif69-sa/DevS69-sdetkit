@@ -60,6 +60,10 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _println(message: object = "") -> None:
+    sys.stdout.write(f"{message}\n")
+
+
 def _planner_hint(ns: argparse.Namespace) -> PlannerHint:
     return PlannerHint(
         profile=ns.profile,
@@ -70,58 +74,58 @@ def _planner_hint(ns: argparse.Namespace) -> PlannerHint:
 
 
 def _print_legacy_summary(payload: dict[str, object]) -> None:
-    print(f"[quality] final verdict contract: {payload['verdict_contract']}")
+    _println(f"[quality] final verdict contract: {payload['verdict_contract']}")
     profile_node = payload.get("profile")
     if isinstance(profile_node, dict):
         profile_used = profile_node.get("used") or profile_node.get("selected") or "unknown"
     else:
         profile_used = profile_node
-    print(f"[quality] profile used: {profile_used}")
+    _println(f"[quality] profile used: {profile_used}")
     checks_run = payload.get("checks_run")
     checks_skipped = payload.get("checks_skipped")
-    print(f"[quality] checks run: {len(checks_run) if isinstance(checks_run, list) else 0}")
-    print(
+    _println(f"[quality] checks run: {len(checks_run) if isinstance(checks_run, list) else 0}")
+    _println(
         f"[quality] checks skipped: {len(checks_skipped) if isinstance(checks_skipped, list) else 0}"
     )
     blocking = payload.get("blocking_failures", [])
     if isinstance(blocking, list) and blocking:
-        print("[quality] blocking failures:")
+        _println("[quality] blocking failures:")
         for item in blocking:
-            print(f"- {item}")
+            _println(f"- {item}")
     else:
-        print("[quality] blocking failures: none")
+        _println("[quality] blocking failures: none")
     advisory = payload.get("advisory_findings", [])
     if isinstance(advisory, list) and advisory:
-        print("[quality] advisory findings:")
+        _println("[quality] advisory findings:")
         for item in advisory:
-            print(f"- {item}")
+            _println(f"- {item}")
     else:
-        print("[quality] advisory findings: none")
+        _println("[quality] advisory findings: none")
     confidence = payload.get("confidence_level", payload.get("confidence", "unknown"))
-    print(f"[quality] confidence level: {confidence}")
-    print(f"[quality] merge/release recommendation: {payload['recommendation']}")
+    _println(f"[quality] confidence level: {confidence}")
+    _println(f"[quality] merge/release recommendation: {payload['recommendation']}")
     metadata = payload.get("metadata", {})
     if isinstance(metadata, dict):
         execution = metadata.get("execution", payload.get("execution", {}))
         if isinstance(execution, dict):
-            print(
+            _println(
                 f"[quality] execution: {execution.get('mode', 'sequential')} with {execution.get('workers', 1)} worker(s)"
             )
         json_out = metadata.get("json_output")
         md_out = metadata.get("markdown_output")
         if json_out:
-            print(f"[quality] verdict json: {json_out}")
+            _println(f"[quality] verdict json: {json_out}")
         if md_out:
-            print(f"[quality] summary md: {md_out}")
+            _println(f"[quality] summary md: {md_out}")
         fix_plan_out = metadata.get("fix_plan_output")
         risk_summary_out = metadata.get("risk_summary_output")
         evidence_out = metadata.get("evidence_output")
         if fix_plan_out:
-            print(f"[quality] fix plan json: {fix_plan_out}")
+            _println(f"[quality] fix plan json: {fix_plan_out}")
         if risk_summary_out:
-            print(f"[quality] risk summary json: {risk_summary_out}")
+            _println(f"[quality] risk summary json: {risk_summary_out}")
         if evidence_out:
-            print(f"[quality] evidence zip: {evidence_out}")
+            _println(f"[quality] evidence zip: {evidence_out}")
 
 
 def _artifact_paths(ns: argparse.Namespace, out_dir: Path) -> ArtifactPaths:
@@ -221,16 +225,16 @@ def main(argv: list[str] | None = None) -> int:
         if ns.format == "json":
             sys.stdout.write(json.dumps(payload, sort_keys=True, indent=2) + "\n")
         else:
-            print(f"profile: {plan.profile}")
-            print(f"requested: {plan.requested_profile}")
+            _println(f"profile: {plan.profile}")
+            _println(f"requested: {plan.requested_profile}")
             if plan.adaptive_reason:
-                print(f"adaptive reason: {plan.adaptive_reason}")
-            print("selected:")
+                _println(f"adaptive reason: {plan.adaptive_reason}")
+            _println("selected:")
             for item in plan.selected_checks:
-                print(f"- {item.id} [{item.target_mode}]")
-            print("skipped:")
+                _println(f"- {item.id} [{item.target_mode}]")
+            _println("skipped:")
             for skipped in plan.skipped_checks:
-                print(f"- {skipped.id}: {skipped.reason}")
+                _println(f"- {skipped.id}: {skipped.reason}")
         return 0
 
     runner = CheckRunner(registry.snapshot())

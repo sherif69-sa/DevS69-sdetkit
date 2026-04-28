@@ -25,3 +25,5 @@ def run(ctx: MaintenanceContext) -> CheckResult:
 
 
 CHECK_MODES = {"quick", "full"}
+
+__all__ = ["run", "CHECK_NAME", "CHECK_MODES"]

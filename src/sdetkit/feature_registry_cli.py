@@ -14,6 +14,15 @@ from .feature_registry import (
 )
 
 
+def _stdout(message: str) -> None:
+    sys.stdout.write(message + "\n")
+
+
+def _stderr(message: str) -> None:
+    sys.stderr.write(message + "\n")
+
+
+
 def _parse_count_expectations(items: list[str], *, label: str) -> tuple[dict[str, int], str | None]:
     out: dict[str, int] = {}
     for raw in items:
@@ -109,14 +118,11 @@ def main(argv: list[str] | None = None) -> int:
         {str(name).strip() for name in ns.expect_command if str(name).strip()} - commands
     )
     if missing_commands:
-        print(
-            "feature-registry: missing expected command(s): " + ", ".join(missing_commands),
-            file=sys.stderr,
-        )
+        _stderr("feature-registry: missing expected command(s): " + ", ".join(missing_commands))
         return 2
 
     if ns.fail_on_empty and not rows:
-        print("feature-registry: filtered result set is empty", file=sys.stderr)
+        _stderr("feature-registry: filtered result set is empty")
         return 1
     summary: dict[str, Any] = summarize_feature_registry(rows)
 
@@ -124,16 +130,15 @@ def main(argv: list[str] | None = None) -> int:
         list(ns.expect_tier_count), label="tier-count"
     )
     if tier_error is not None:
-        print(tier_error, file=sys.stderr)
+        _stderr(tier_error)
         return 2
     for tier, expected in tier_expectations.items():
         by_tier = summary.get("by_tier")
         tier_counts = by_tier if isinstance(by_tier, dict) else {}
         actual = int(tier_counts.get(tier, 0))
         if actual != expected:
-            print(
-                f"feature-registry: tier count mismatch for `{tier}` (expected {expected}, got {actual})",
-                file=sys.stderr,
+            _stderr(
+                f"feature-registry: tier count mismatch for `{tier}` (expected {expected}, got {actual})"
             )
             return 2
 
@@ -141,42 +146,40 @@ def main(argv: list[str] | None = None) -> int:
         list(ns.expect_status_count), label="status-count"
     )
     if status_error is not None:
-        print(status_error, file=sys.stderr)
+        _stderr(status_error)
         return 2
     for status, expected in status_expectations.items():
         by_status = summary.get("by_status")
         status_counts = by_status if isinstance(by_status, dict) else {}
         actual = int(status_counts.get(status, 0))
         if actual != expected:
-            print(
-                f"feature-registry: status count mismatch for `{status}` (expected {expected}, got {actual})",
-                file=sys.stderr,
+            _stderr(
+                f"feature-registry: status count mismatch for `{status}` (expected {expected}, got {actual})"
             )
             return 2
 
     if ns.expect_total is not None:
         if ns.expect_total < 0:
-            print("feature-registry: --expect-total must be >= 0", file=sys.stderr)
+            _stderr("feature-registry: --expect-total must be >= 0")
             return 2
         actual_total = int(summary.get("total", 0))
         if actual_total != ns.expect_total:
-            print(
-                f"feature-registry: total count mismatch (expected {ns.expect_total}, got {actual_total})",
-                file=sys.stderr,
+            _stderr(
+                f"feature-registry: total count mismatch (expected {ns.expect_total}, got {actual_total})"
             )
             return 2
 
     if ns.format == "json":
-        print(json.dumps([asdict(item) for item in rows], indent=2, sort_keys=True))
+        _stdout(json.dumps([asdict(item) for item in rows], indent=2, sort_keys=True))
         return 0
 
     if ns.format == "summary-json":
-        print(json.dumps(summary, indent=2, sort_keys=True))
+        _stdout(json.dumps(summary, indent=2, sort_keys=True))
         return 0
 
     if ns.format == "markdown":
-        print(render_feature_registry_docs_block(rows))
+        _stdout(render_feature_registry_docs_block(rows))
         return 0
 
-    print(render_feature_registry_table(rows))
+    _stdout(render_feature_registry_table(rows))
     return 0

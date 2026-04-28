@@ -8,6 +8,14 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
+def _stdout(message: str) -> None:
+    sys.stdout.write(message + "\n")
+
+
+def _stderr(message: str) -> None:
+    sys.stderr.write(message + "\n")
+
+
 @dataclass(frozen=True)
 class RoadmapEntry:
     impact: int
@@ -93,7 +101,7 @@ def get_entry(impact: int) -> RoadmapEntry | None:
 
 def main(argv: list[str]) -> int:
     if not argv or argv[0] in {"-h", "--help"}:
-        print("usage: sdetkit roadmap {list|show|open} [impact] [report|plan]")
+        _stdout("usage: sdetkit roadmap {list|show|open} [impact] [report|plan]")
         return 0
 
     cmd = argv[0]
@@ -104,22 +112,22 @@ def main(argv: list[str]) -> int:
         for entry in entries:
             r = "R" if entry.report_path else "-"
             p = "P" if entry.plan_path else "-"
-            print(f"{entry.impact:02d} {r} {p}")
+            _stdout(f"{entry.impact:02d} {r} {p}")
         return 0
 
     if cmd in {"show", "open"}:
         if not rest:
-            print("roadmap: missing impact", file=sys.stderr)
+            _stderr("roadmap: missing impact")
             return 2
         try:
             impact = int(rest[0])
         except ValueError:
-            print("roadmap: invalid impact", file=sys.stderr)
+            _stderr("roadmap: invalid impact")
             return 2
 
         e = get_entry(impact)
         if e is None:
-            print("roadmap: unknown impact", file=sys.stderr)
+            _stderr("roadmap: unknown impact")
             return 2
 
         if cmd == "show":
@@ -128,20 +136,20 @@ def main(argv: list[str]) -> int:
                 "report_path": e.report_path,
                 "plan_path": e.plan_path,
             }
-            print(json.dumps(payload, indent=2, sort_keys=True))
+            _stdout(json.dumps(payload, indent=2, sort_keys=True))
             return 0
 
         which = rest[1] if len(rest) > 1 else "report"
         rel = e.report_path if which != "plan" else e.plan_path
         if not rel:
-            print("roadmap: file not found", file=sys.stderr)
+            _stderr("roadmap: file not found")
             return 2
 
         abs_path = (_repo_root() / rel).resolve()
-        print(str(abs_path))
+        _stdout(str(abs_path))
         if os.environ.get("SDETKIT_ROADMAP_LAUNCH") == "1":
             webbrowser.open(abs_path.as_uri())
         return 0
 
-    print("roadmap: unknown command", file=sys.stderr)
+    _stderr("roadmap: unknown command")
     return 2

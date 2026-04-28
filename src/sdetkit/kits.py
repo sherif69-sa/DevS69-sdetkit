@@ -2,8 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
+
+
+def _stdout(message: str) -> None:
+    sys.stdout.write(message + "\n")
+
 
 SCHEMA_VERSION = "sdetkit.kits.catalog.v1"
 
@@ -370,16 +376,16 @@ def main(argv: list[str] | None = None) -> int:
         payload = discover_payload(root, ns.goal, ns.query, limit=ns.limit)
 
     if ns.format == "json":
-        print(json.dumps(payload))
+        _stdout(json.dumps(payload))
     elif ns.cmd == "discover":
-        print("Repo capability discovery + alignment")
-        print(f"surface visibility: {payload['surface_visibility']['full_help']}")
+        _stdout("Repo capability discovery + alignment")
+        _stdout(f"surface visibility: {payload['surface_visibility']['full_help']}")
     elif ns.cmd == "describe":
         kit = payload["kit"]
-        print(f"capabilities: {', '.join(kit['capabilities'])}")
-        print(f"typical inputs: {', '.join(kit['typical_inputs'])}")
-        print(f"key artifacts: {', '.join(kit['key_artifacts'])}")
-        print(f"learning path: {', '.join(kit['learning_path'])}")
+        _stdout(f"capabilities: {', '.join(kit['capabilities'])}")
+        _stdout(f"typical inputs: {', '.join(kit['typical_inputs'])}")
+        _stdout(f"key artifacts: {', '.join(kit['key_artifacts'])}")
+        _stdout(f"learning path: {', '.join(kit['learning_path'])}")
     else:
-        print(payload)
+        _stdout(payload)
     return 0
