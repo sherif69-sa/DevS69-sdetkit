@@ -96,6 +96,8 @@ def main(argv: list[str] | None = None) -> int:
     followup_md = out_dir / "business-execution-followup.md"
     followup_history_jsonl = out_dir / "business-execution-followup-history.jsonl"
     followup_rollup_json = out_dir / "business-execution-followup-rollup.json"
+    continue_json = out_dir / "business-execution-continue.json"
+    continue_md = out_dir / "business-execution-continue.md"
     inputs_json = out_dir / "business-execution-inputs.json"
 
     if challenge_prompt and not Path(challenge_prompt).exists():
@@ -244,6 +246,26 @@ def main(argv: list[str] | None = None) -> int:
             _script("check_business_execution_followup_contract.py"),
             "--artifact",
             str(followup_json),
+        ]
+    )
+    _run(
+        [
+            py,
+            _script("business_execution_continue.py"),
+            "--followup",
+            str(followup_json),
+            "--out-json",
+            str(continue_json),
+            "--out-md",
+            str(continue_md),
+        ]
+    )
+    _run(
+        [
+            py,
+            _script("check_business_execution_continue_contract.py"),
+            "--artifact",
+            str(continue_json),
         ]
     )
 

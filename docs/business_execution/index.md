@@ -52,6 +52,8 @@ make business-execution-escalation
 make business-execution-escalation-contract
 make business-execution-followup
 make business-execution-followup-contract
+make business-execution-continue
+make business-execution-continue-contract
 make business-execution-inputs-contract
 make business-execution-pipeline
 make business-execution-week1-pipeline
@@ -76,6 +78,8 @@ Default runtime outputs are written to:
 - `build/business-execution/business-execution-followup.md`
 - `build/business-execution/business-execution-followup-history.jsonl`
 - `build/business-execution/business-execution-followup-rollup.json`
+- `build/business-execution/business-execution-continue.json`
+- `build/business-execution/business-execution-continue.md`
 - `build/business-execution/business-execution-inputs.json`
 
 Or run directly with named owners:
@@ -172,6 +176,18 @@ Validate follow-up contract:
 
 ```bash
 python scripts/check_business_execution_followup_contract.py
+```
+
+Generate the next command decision artifact from follow-up:
+
+```bash
+python scripts/business_execution_continue.py
+```
+
+Validate continue-decision contract:
+
+```bash
+python scripts/check_business_execution_continue_contract.py
 ```
 
 Run the full pipeline (all generation + all contracts) in one command:
