@@ -9,7 +9,6 @@ import sys
 import zipfile
 from pathlib import Path
 
-
 DEFAULT_CHALLENGE_PROMPT = "workflow_execution_prompt.md"
 DEFAULT_GUIDELINES_ZIP = "workflow_execution_guidelines_bundle.zip"
 SCRIPT_DIR = Path(__file__).resolve().parent
