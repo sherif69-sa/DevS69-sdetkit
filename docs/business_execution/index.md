@@ -54,6 +54,8 @@ make business-execution-followup
 make business-execution-followup-contract
 make business-execution-continue
 make business-execution-continue-contract
+make business-execution-horizon
+make business-execution-horizon-contract
 make business-execution-inputs-contract
 make business-execution-pipeline
 make business-execution-week1-pipeline
@@ -80,6 +82,8 @@ Default runtime outputs are written to:
 - `build/business-execution/business-execution-followup-rollup.json`
 - `build/business-execution/business-execution-continue.json`
 - `build/business-execution/business-execution-continue.md`
+- `build/business-execution/business-execution-horizon.json`
+- `build/business-execution/business-execution-horizon.md`
 - `build/business-execution/business-execution-inputs.json`
 
 Or run directly with named owners:
@@ -188,6 +192,18 @@ Validate continue-decision contract:
 
 ```bash
 python scripts/check_business_execution_continue_contract.py
+```
+
+Generate week-2 and day-90 horizon plan:
+
+```bash
+python scripts/business_execution_horizon.py
+```
+
+Validate horizon-plan contract:
+
+```bash
+python scripts/check_business_execution_horizon_contract.py
 ```
 
 Run the full pipeline (all generation + all contracts) in one command:

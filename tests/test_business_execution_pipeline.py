@@ -46,6 +46,7 @@ def test_pipeline_writes_full_artifact_set(tmp_path: Path) -> None:
     assert (out_dir / "business-execution-followup-history.jsonl").exists()
     assert (out_dir / "business-execution-followup-rollup.json").exists()
     assert (out_dir / "business-execution-continue.json").exists()
+    assert (out_dir / "business-execution-horizon.json").exists()
     inputs = out_dir / "business-execution-inputs.json"
     assert inputs.exists()
     payload = json.loads(inputs.read_text(encoding="utf-8"))
