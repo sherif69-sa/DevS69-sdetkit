@@ -4,7 +4,7 @@ DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisi
 
 **Primary outcome:** know if a change is ready to ship.
 
-Canonical first path: `python -m sdetkit release gate fast` -> `python -m sdetkit release gate release` -> `python -m sdetkit release doctor`.
+Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 
 Guided alias for first-time users: `python -m sdetkit start --journey fast-start --format markdown`.
 
@@ -25,9 +25,9 @@ This page is the product homepage/router for first-time adoption.
 ## Fast start
 
 ```bash
-python -m sdetkit release gate fast --format json --stable-json --out build/gate-fast.json
-python -m sdetkit release gate release --format json --out build/release-preflight.json
-python -m sdetkit release doctor
+python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
+python -m sdetkit gate release --format json --out build/release-preflight.json
+python -m sdetkit doctor
 ```
 
 New teams should stop here first, then inspect artifacts before exploring advanced commands.
@@ -44,7 +44,7 @@ build/release-preflight.json
 ## Pick your path first
 
 - [Choose your path (30-second router)](choose-your-path.md)
-- Command alias: `python -m sdetkit release gate fast --format json --stable-json --out build/gate-fast.json`
+- Equivalent namespace form: `python -m sdetkit release gate fast --format json --stable-json --out build/gate-fast.json`
 - Full release path: `python -m sdetkit release gate fast` -> `python -m sdetkit release gate release` -> `python -m sdetkit release doctor`
 
 ## Try it quickly
@@ -57,7 +57,7 @@ build/release-preflight.json
 
 ## Keep first adoption simple
 
-1. Start with the canonical path (`release gate fast` -> `release gate release` -> `release doctor`).
+1. Start with the canonical path (`gate fast` -> `gate release` -> `doctor`).
 2. Optional guided onboarding prompt: `python -m sdetkit start --journey fast-start --format markdown`.
 3. For reviewer handoff + adoption planning, prefer the one-command bundle:
    - `make adoption-control-loop-full`
