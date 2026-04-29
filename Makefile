@@ -537,3 +537,13 @@ phase6-status: phase6-metrics-contract
 phase6-progress: phase6-metrics-contract
 
 phase6-complete: phase6-metrics-contract
+
+.PHONY: failure-plan failure-autofix failure-workflow
+failure-plan:
+	python scripts/build_failure_action_plan.py
+
+failure-autofix:
+	python scripts/failure_autofix_workflow.py --max-actions 5
+
+failure-workflow: failure-plan failure-autofix
+	@echo "failure workflow complete: see examples/kits/intelligence/failure-autofix-report.json"

@@ -1,13 +1,34 @@
 {
+  "generated_at": "2026-04-29T00:00:00Z",
+  "summary": {
+    "total_failures": 2,
+    "by_priority": {
+      "P1": 1,
+      "P2": 1
+    },
+    "security_related": 1
+  },
   "failures": [
     {
+      "id": "ISSUE-001",
+      "priority": "P1",
       "test_id": "tests/api/test_orders.py::test_retry_on_timeout",
       "message": "request timed out after 2.0s while waiting for upstream",
+      "category": "reliability",
+      "security_impact": "low",
+      "issue": "Request retries are timing out under upstream delay, which can hide traffic spikes and degrade API reliability.",
+      "fix_recommendation": "Increase timeout budget, add bounded exponential backoff retries, and emit timeout telemetry for alerting.",
       "fixture_scope": "session"
     },
     {
+      "id": "ISSUE-002",
+      "priority": "P2",
       "test_id": "tests/integration/test_checkout.py::test_payment_capture",
       "message": "connection reset by peer during network call",
+      "category": "network-stability",
+      "security_impact": "medium",
+      "issue": "Unstable checkout network sessions may cause duplicate submission risk if retry/idempotency controls are weak.",
+      "fix_recommendation": "Enforce idempotency keys for payment capture and add safe retry guards around transient connection resets.",
       "fixture_scope": "module"
     }
   ]
