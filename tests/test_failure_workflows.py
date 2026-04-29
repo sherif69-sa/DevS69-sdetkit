@@ -73,7 +73,7 @@ def test_failure_autofix_workflow_generates_report(tmp_path: Path) -> None:
                         "category": "reliability",
                         "security_impact": "medium",
                         "test_id": "tests/test_api.py::test_timeout",
-                        "reproduce_command": f"{sys.executable} -c \"print(\'ok\')\"",
+                        "reproduce_command": f"{sys.executable} -c \"print('ok')\"",
                     }
                 ]
             }

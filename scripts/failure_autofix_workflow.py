@@ -69,7 +69,9 @@ def _ripgrep_candidates(test_id: str) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan", default="examples/kits/intelligence/failure-action-plan.json")
-    parser.add_argument("--report", default="examples/kits/intelligence/failure-autofix-report.json")
+    parser.add_argument(
+        "--report", default="examples/kits/intelligence/failure-autofix-report.json"
+    )
     parser.add_argument("--max-actions", type=int, default=5)
     parser.add_argument("--timeout-seconds", type=int, default=90)
     args = parser.parse_args()
@@ -81,7 +83,9 @@ def main() -> int:
     for action in actions:
         cmd = str(action.get("reproduce_command", "")).strip()
         if not cmd:
-            results.append({"issue_id": action.get("issue_id"), "status": "skipped", "reason": "no command"})
+            results.append(
+                {"issue_id": action.get("issue_id"), "status": "skipped", "reason": "no command"}
+            )
             continue
 
         code, output = _run(cmd, args.timeout_seconds)
