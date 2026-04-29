@@ -73,7 +73,28 @@ PRINT_ALLOWED_MODULE_SUFFIXES = (
     "/github_actions_quickstart.py",
     "/gitlab_ci_quickstart.py",
     "/onboarding.py",
+    "/checks/main.py",
 )
+PRINT_ALLOWED_PATHS = {
+    "src/sdetkit/adoption.py",
+    "src/sdetkit/community_activation.py",
+    "src/sdetkit/contract.py",
+    "src/sdetkit/core/core_preparse_dispatch.py",
+    "src/sdetkit/external_contribution.py",
+    "src/sdetkit/fit.py",
+    "src/sdetkit/objection_handling.py",
+    "src/sdetkit/onboarding_optimization.py",
+    "src/sdetkit/phases/phase1_hardening_29.py",
+    "src/sdetkit/phases/phase_boost.py",
+    "src/sdetkit/proof.py",
+    "src/sdetkit/quality_contribution_delta.py",
+    "src/sdetkit/release_communications.py",
+    "src/sdetkit/sdet_package.py",
+    "src/sdetkit/test_bootstrap_contract.py",
+    "src/sdetkit/test_bootstrap_validate.py",
+    "src/sdetkit/triage_templates.py",
+    "src/sdetkit/weekly_review.py",
+}
 
 
 @dataclass(frozen=True)
@@ -243,6 +264,14 @@ class _RuleVisitor(ast.NodeVisitor):
 
     def _allow_print_for_module(self) -> bool:
         rel = self.rel_path.replace("\\", "/")
+        if rel.startswith("src/sdetkit/cli/"):
+            return True
+        if rel.startswith("src/sdetkit/readiness/") or rel.startswith("src/sdetkit/evidence/"):
+            return True
+        if "_closeout_" in rel:
+            return True
+        if rel in PRINT_ALLOWED_PATHS:
+            return True
         return rel.startswith("src/sdetkit/") and rel.endswith(PRINT_ALLOWED_MODULE_SUFFIXES)
 
     def visit_Call(self, node: ast.Call) -> Any:

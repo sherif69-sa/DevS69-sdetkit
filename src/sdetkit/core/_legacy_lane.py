@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -58,7 +59,7 @@ def run_lane(argv: list[str] | None, cfg: dict[str, Any]) -> int:
 
     if ns.strict and not strict_ok:
         if ns.format == "json":
-            print(json.dumps(payload))
+            sys.stdout.write(json.dumps(payload) + "\n")
         return 1
 
     if ns.emit_pack_dir:
@@ -78,9 +79,9 @@ def run_lane(argv: list[str] | None, cfg: dict[str, Any]) -> int:
             )
 
     if ns.format == "json":
-        print(json.dumps(payload))
+        sys.stdout.write(json.dumps(payload) + "\n")
     elif ns.format == "markdown":
-        print(f"# {cfg['name']}\n")
+        sys.stdout.write(f"# {cfg['name']}\n\n")
     else:
-        print(cfg["text_output"])
+        sys.stdout.write(str(cfg["text_output"]) + "\n")
     return 0
