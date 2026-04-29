@@ -195,3 +195,18 @@ python tools/maintenance_command_center.py \
 - Policy baselines: [policy baselines](docs/policy-and-baselines.md)
 - Quality playbook: [QUALITY_PLAYBOOK.md](QUALITY_PLAYBOOK.md)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
+
+## Failure remediation workflow (rank-1 SDET lane)
+Use these commands to run the full intelligence loop:
+
+```bash
+make failure-workflow
+```
+
+This will:
+1. Build a prioritized action plan from `examples/kits/intelligence/failures.json`.
+2. Execute reproduce commands and generate autofix recommendations.
+3. Emit a combined report at `examples/kits/intelligence/failure-autofix-report.json`.
+
+Manual steps are documented in:
+- `examples/kits/intelligence/failure-fix-playbook.md`
