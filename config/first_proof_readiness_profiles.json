@@ -1,0 +1,17 @@
+{
+  "conservative": {
+    "min_health_score": 90,
+    "require_followup_ready": true,
+    "require_execution_contract_ok": true
+  },
+  "standard": {
+    "min_health_score": 80,
+    "require_followup_ready": true,
+    "require_execution_contract_ok": true
+  },
+  "lenient": {
+    "min_health_score": 70,
+    "require_followup_ready": false,
+    "require_execution_contract_ok": true
+  }
+}

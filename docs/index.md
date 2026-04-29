@@ -50,6 +50,7 @@ build/release-preflight.json
 ## Try it quickly
 
 - [Start Here in 5 Minutes](start-here-5-minutes.md)
+- [Upgrade next commands (intent router)](upgrade-next-commands.md)
 - [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
 - [First run quickstart](ready-to-use.md)
 - [Quickstart (copy-paste)](quickstart-copy-paste.md)
@@ -73,7 +74,9 @@ build/release-preflight.json
 - [Adopt in your repository](adoption.md)
 - [Team adoption checklist](team-adoption-checklist.md)
 - [Operator essentials](operator-essentials.md)
+- [Operator onboarding (7-day)](operator-onboarding-7-day.md)
 - [Phase 1 execution checklist](phase1-execution-checklist.md)
+- [Next 10 follow-ups](next-10-followups.md)
 - [Recommended CI flow](recommended-ci-flow.md)
 - [CI artifact walkthrough](ci-artifact-walkthrough.md)
 - [Release confidence flow](release-confidence-flow.md)
