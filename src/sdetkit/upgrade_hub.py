@@ -2,8 +2,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
+
+
+def _stdout(message: str) -> None:
+    sys.stdout.write(message + "\n")
 
 
 def _safe_load_json(path: Path) -> dict[str, Any] | None:
@@ -132,17 +137,17 @@ def main(argv: list[str] | None = None) -> int:
     payload = build_upgrade_hub_summary(ns.root)
     payload["high_signal_hidden_features"] = payload["high_signal_hidden_features"][: ns.top]
     if ns.format == "json":
-        print(json.dumps(payload))
+        _stdout(json.dumps(payload))
     else:
         plans = payload["plan_inventory"]
-        print("upgrade-hub")
-        print(f"closeout modules: {payload['total_closeout_entries']}")
-        print(f"plans: {plans['valid_plan_files']}/{plans['total_plan_files']} valid")
+        _stdout("upgrade-hub")
+        _stdout(f"closeout modules: {payload['total_closeout_entries']}")
+        _stdout(f"plans: {plans['valid_plan_files']}/{plans['total_plan_files']} valid")
         if plans["owners"]:
-            print("owners: " + ", ".join(plans["owners"][:5]))
+            _stdout("owners: " + ", ".join(plans["owners"][:5]))
         top_candidates = plans["top_upgrade_candidates"][: ns.top]
         if top_candidates:
-            print("top plan upgrades:")
+            _stdout("top plan upgrades:")
             for candidate in top_candidates:
-                print(f"- {candidate['metric']}: +{candidate['delta']} ({candidate['plan']})")
+                _stdout(f"- {candidate['metric']}: +{candidate['delta']} ({candidate['plan']})")
     return 0

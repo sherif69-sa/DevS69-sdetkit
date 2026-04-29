@@ -226,12 +226,12 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     if args.format == "json":
-        print(json.dumps(payload, indent=2))
+        sys.stdout.write(json.dumps(payload, indent=2) + "\n")
     else:
-        print("ship-readiness")
-        print(f"decision: {payload['summary']['decision']}")
-        print(f"all_green: {payload['summary']['all_green']}")
-        print(f"blockers: {', '.join(payload['summary']['blockers']) or 'none'}")
+        sys.stdout.write("ship-readiness\n")
+        sys.stdout.write(f"decision: {payload['summary']['decision']}\n")
+        sys.stdout.write(f"all_green: {payload['summary']['all_green']}\n")
+        sys.stdout.write(f"blockers: {', '.join(payload['summary']['blockers']) or 'none'}\n")
 
     if args.strict and not payload["summary"]["all_green"]:
         return 1

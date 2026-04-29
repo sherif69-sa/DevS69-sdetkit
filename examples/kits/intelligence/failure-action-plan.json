@@ -1,0 +1,34 @@
+{
+  "source": "examples/kits/intelligence/failures.json",
+  "total_actions": 2,
+  "actions": [
+    {
+      "rank": 1,
+      "issue_id": "ISSUE-001",
+      "priority": "P1",
+      "owner": "sre-team",
+      "status": "planned",
+      "category": "reliability",
+      "test_id": "tests/api/test_orders.py::test_retry_on_timeout",
+      "security_impact": "low",
+      "next_step": "Increase timeout budget, add bounded exponential backoff retries, and emit timeout telemetry for alerting.",
+      "reproduce_command": "pytest -q tests/api/test_orders.py::test_retry_on_timeout",
+      "verify_command": "pytest -q tests/api/test_orders.py::test_retry_on_timeout --maxfail=1",
+      "definition_of_done": "Failing test passes consistently for 3 consecutive runs."
+    },
+    {
+      "rank": 2,
+      "issue_id": "ISSUE-002",
+      "priority": "P2",
+      "owner": "platform-network",
+      "status": "planned",
+      "category": "network-stability",
+      "test_id": "tests/integration/test_checkout.py::test_payment_capture",
+      "security_impact": "medium",
+      "next_step": "Enforce idempotency keys for payment capture and add safe retry guards around transient connection resets.",
+      "reproduce_command": "pytest -q tests/integration/test_checkout.py::test_payment_capture",
+      "verify_command": "pytest -q tests/integration/test_checkout.py::test_payment_capture --maxfail=1",
+      "definition_of_done": "Failing test passes consistently for 3 consecutive runs."
+    }
+  ]
+}

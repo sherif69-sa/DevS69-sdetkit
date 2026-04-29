@@ -32,14 +32,21 @@ When an enhancement is identified from customer or user feedback:
 2. Add one priority label: `priority:high`, `priority:medium`, or `priority:low`.
 3. Link the enhancement issue or PR back to this roadmap page and the main `ROADMAP.md` where appropriate.
 
-## Current enhancement candidate from maintenance intake
+## Current enhancement candidate from maintenance intake (April 2026)
 
-- **User pain point:** Automated maintenance issues were being reused without a clear week marker, making it difficult to tell whether checklist items were still current.
+- **User pain point:** The open issue queue is dominated by GHAS tracker issues, but maintainers lack a single documented triage lane that maps each tracker type to a concrete remediation action and expected PR artifact.
 - **Acceptance criteria:**
-  1. Weekly maintenance issue includes a date stamp in the title.
-  2. Previous weekly maintenance issues are automatically closed when a new week is created.
-  3. The security/maintenance automation runs weekly (not daily) to match the issue intent.
-- **Expected impact:** Cleaner issue triage, reduced stale maintenance noise, and clearer operational cadence for maintainers.
+  1. Roadmap guidance explicitly maps each open GHAS tracker type (weekly digest, SLA tracker, campaign planner, and hotspots) to a remediation action.
+  2. Each remediation action defines a concrete output artifact (issue comment update, linked remediation PR, or deferred command-center note).
+  3. The command-center issue remains the parent coordination lane for all weekly tracker follow-up.
+- **Expected impact:** Faster weekly triage, fewer orphaned tracker issues, and clearer auditability between automated GHAS signals and code changes.
+
+### GHAS tracker-to-action mapping
+
+- **GHAS weekly digest** → verify alert deltas and workflow freshness; capture disposition in the rolling command-center issue.
+- **GHAS alert SLA tracker** → prioritize 14+ day alerts into an owned remediation batch; link resulting PRs.
+- **GHAS campaign planner** → group aged alerts into campaign slices and record owner + expected completion window.
+- **GHAS CodeQL hotspots** → batch-fix the top rule/path hotspot and re-run the planner to validate backlog reduction.
 
 ## Continuous maintenance hardening loop
 

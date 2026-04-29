@@ -234,3 +234,28 @@ def test_security_gate_flags_debug_print_outside_allowlisted_src_modules(tmp_pat
     findings = sg.scan_repo(tmp_path)
 
     assert any(f.rule_id == "SEC_DEBUG_PRINT" for f in findings)
+
+
+def test_security_gate_allows_debug_print_in_closeout_modules(tmp_path: Path) -> None:
+    module = tmp_path / "src" / "sdetkit" / "alpha_closeout_99.py"
+    module.parent.mkdir(parents=True)
+    module.write_text("print('debug')\n", encoding="utf-8")
+
+    findings = sg.scan_repo(tmp_path)
+
+    assert not any(f.rule_id == "SEC_DEBUG_PRINT" for f in findings)
+
+
+def test_security_gate_allows_debug_print_in_readiness_and_evidence_modules(
+    tmp_path: Path,
+) -> None:
+    readiness_module = tmp_path / "src" / "sdetkit" / "readiness" / "custom_readiness.py"
+    readiness_module.parent.mkdir(parents=True)
+    readiness_module.write_text("print('debug')\n", encoding="utf-8")
+    evidence_module = tmp_path / "src" / "sdetkit" / "evidence" / "custom_evidence.py"
+    evidence_module.parent.mkdir(parents=True)
+    evidence_module.write_text("print('debug')\n", encoding="utf-8")
+
+    findings = sg.scan_repo(tmp_path)
+
+    assert not any(f.rule_id == "SEC_DEBUG_PRINT" for f in findings)
