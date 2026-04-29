@@ -25,6 +25,27 @@ def main(argv: list[str] | None = None) -> int:
     cfg = profiles[args.profile]
     errors: list[str] = []
 
+    decision = str(dashboard.get("decision", "NO-DATA"))
+    if decision != "SHIP":
+        payload = {
+            "ok": True,
+            "profile": args.profile,
+            "config": cfg,
+            "errors": [],
+            "enforced": False,
+            "decision": decision,
+            "note": "threshold gate skipped for non-SHIP decision",
+        }
+        out = Path(args.out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(f"{json.dumps(payload, indent=2, sort_keys=True)}\n", encoding="utf-8")
+        if args.format == "json":
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print(f"readiness-threshold: profile={args.profile} skipped decision={decision}")
+        return 0
+
+
     health_score = dashboard.get("health_score")
     if health_score is None or float(health_score) < float(cfg["min_health_score"]):
         errors.append(f"health_score<{cfg['min_health_score']}")
