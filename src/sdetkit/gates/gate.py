@@ -280,6 +280,15 @@ def _run_fast(ns: argparse.Namespace) -> int:
     root = Path(ns.root).resolve()
     only = _parse_step_filter(ns.only)
     skip = _parse_step_filter(ns.skip)
+    gate_profile = str(getattr(ns, "profile", "strict") or "strict")
+
+    # External adoption must prove SDETKit can install, run, and emit evidence
+    # before enforcing repo-specific quality policy. Keep strict as the default.
+    if gate_profile == "adoption" and not only:
+        ns.no_ci_templates = True
+        ns.no_ruff = True
+        ns.no_mypy = True
+        ns.no_pytest = True
 
     unknown = sorted((only | skip) - set(AVAILABLE_STEPS))
     if unknown:
@@ -350,30 +359,33 @@ def _run_fast(ns: argparse.Namespace) -> int:
             ns.no_pytest = True
 
     if not ns.no_doctor and should_run("doctor"):
-        fail_on = "medium" if ns.strict else "high"
-        steps.append(
-            {
-                "id": "doctor",
-                **_run(
-                    [
-                        sys.executable,
-                        "-m",
-                        "sdetkit",
-                        "doctor",
-                        "--dev",
-                        "--ci",
-                        "--deps",
-                        "--clean-tree",
-                        "--repo",
-                        "--fail-on",
-                        fail_on,
-                        "--format",
-                        "json",
-                    ],
-                    cwd=root,
-                ),
-            }
-        )
+        if gate_profile == "adoption":
+            doctor_cmd = [
+                sys.executable,
+                "-m",
+                "sdetkit",
+                "doctor",
+                "--format",
+                "json",
+            ]
+        else:
+            fail_on = "medium" if ns.strict else "high"
+            doctor_cmd = [
+                sys.executable,
+                "-m",
+                "sdetkit",
+                "doctor",
+                "--dev",
+                "--ci",
+                "--deps",
+                "--clean-tree",
+                "--repo",
+                "--fail-on",
+                fail_on,
+                "--format",
+                "json",
+            ]
+        steps.append({"id": "doctor", **_run(doctor_cmd, cwd=root)})
 
     if not ns.no_ci_templates and should_run("ci_templates"):
         steps.append(
@@ -447,6 +459,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
     failed = [s["id"] for s in steps if not s.get("ok", False)]
     gate_payload: dict[str, Any] = {
         "profile": "fast",
+        "gate_profile": gate_profile,
         "root": str(root),
         "request_context": request_context,
         "ok": not bool(failed),
@@ -553,6 +566,7 @@ def _normalize_release_steps(steps: list[dict[str, Any]], root: Path) -> list[di
 
 def _release_commands(ns: argparse.Namespace, root: Path) -> list[tuple[str, list[str]]]:
     code_scan_out = str(Path(getattr(ns, "code_scan_out", "build/code-scanning.sarif")))
+    gate_profile = str(getattr(ns, "profile", "strict") or "strict")
     doctor_cmd = [sys.executable, "-m", "sdetkit", "doctor", "--release", "--format", "json"]
     if ns.release_full:
         doctor_cmd = [
@@ -563,6 +577,30 @@ def _release_commands(ns: argparse.Namespace, root: Path) -> list[tuple[str, lis
             "--release-full",
             "--format",
             "json",
+        ]
+
+    if gate_profile == "adoption":
+        return [
+            (
+                "doctor_release",
+                [sys.executable, "-m", "sdetkit", "doctor", "--format", "json"],
+            ),
+            (
+                "gate_fast",
+                [
+                    sys.executable,
+                    "-m",
+                    "sdetkit",
+                    "gate",
+                    "fast",
+                    "--root",
+                    str(root),
+                    "--profile",
+                    "adoption",
+                    "--format",
+                    "json",
+                ],
+            ),
         ]
 
     return [
@@ -656,6 +694,7 @@ def _run_release(ns: argparse.Namespace) -> int:
 
     payload = {
         "profile": "release",
+        "gate_profile": str(getattr(ns, "profile", "strict") or "strict"),
         "root": "<repo>",
         "request_context": request_context,
         "dry_run": bool(ns.dry_run),
@@ -794,6 +833,7 @@ def main(argv: list[str] | None = None) -> int:
     fast.add_argument("--format", choices=["text", "json", "md"], default="text")
     fast.add_argument("--out", "--output", default=None)
     fast.add_argument("--stable-json", action="store_true")
+    fast.add_argument("--profile", choices=["strict", "adoption"], default="strict")
     fast.add_argument("--strict", action="store_true")
     fast.add_argument("--list-steps", action="store_true")
     fast.add_argument("--only", default=None)
@@ -817,6 +857,7 @@ def main(argv: list[str] | None = None) -> int:
     release.add_argument("--format", choices=["text", "json"], default="text")
     release.add_argument("--out", "--output", default=None)
     release.add_argument("--dry-run", action="store_true")
+    release.add_argument("--profile", choices=["strict", "adoption"], default="strict")
     release.add_argument("--release-full", action="store_true")
     playbook_group = release.add_mutually_exclusive_group()
     playbook_group.add_argument("--playbooks-all", action="store_true")
