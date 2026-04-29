@@ -54,6 +54,12 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("adapter", nargs="?", help="Adapter name (stdout, telegram, whatsapp, etc.)")
     p.add_argument("--message", default="", help="Message payload")
     p.add_argument("--dry-run", action="store_true", help="Print only; do not send")
+    p.add_argument(
+        "--real-send", action="store_true", help="Send through the live adapter when configured"
+    )
+    p.add_argument(
+        "--timeout", type=float, default=10.0, help="Network timeout for live adapter sends"
+    )
     p.add_argument("--list", action="store_true", help="List discovered adapters")
     return p
 
