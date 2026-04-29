@@ -45,25 +45,40 @@ def test_ops_bundle_trend_branch_split(tmp_path: Path) -> None:
     out = tmp_path / "trend.json"
 
     contract.write_text(json.dumps({"ok": True, "missing": []}), encoding="utf-8")
-    subprocess.run([
-        sys.executable,
-        "scripts/build_first_proof_ops_bundle_trend.py",
-        "--contract", str(contract),
-        "--history", str(history),
-        "--out", str(out),
-        "--branch", "main",
-    ], check=True)
+    subprocess.run(
+        [
+            sys.executable,
+            "scripts/build_first_proof_ops_bundle_trend.py",
+            "--contract",
+            str(contract),
+            "--history",
+            str(history),
+            "--out",
+            str(out),
+            "--branch",
+            "main",
+        ],
+        check=True,
+    )
 
     contract.write_text(json.dumps({"ok": False, "missing": ["x"]}), encoding="utf-8")
-    subprocess.run([
-        sys.executable,
-        "scripts/build_first_proof_ops_bundle_trend.py",
-        "--contract", str(contract),
-        "--history", str(history),
-        "--out", str(out),
-        "--branch", "feature/test",
-        "--format", "json",
-    ], check=True)
+    subprocess.run(
+        [
+            sys.executable,
+            "scripts/build_first_proof_ops_bundle_trend.py",
+            "--contract",
+            str(contract),
+            "--history",
+            str(history),
+            "--out",
+            str(out),
+            "--branch",
+            "feature/test",
+            "--format",
+            "json",
+        ],
+        check=True,
+    )
 
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["branch"] == "feature/test"

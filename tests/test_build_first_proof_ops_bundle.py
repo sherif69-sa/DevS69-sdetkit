@@ -10,7 +10,9 @@ def test_build_first_proof_ops_bundle(tmp_path: Path) -> None:
     artifact_dir = tmp_path / "first-proof"
     artifact_dir.mkdir(parents=True)
     (artifact_dir / "first-proof-summary.json").write_text(
-        json.dumps({"ok": True, "failed_steps": [], "steps": [{"name": "doctor", "returncode": 0}]}),
+        json.dumps(
+            {"ok": True, "failed_steps": [], "steps": [{"name": "doctor", "returncode": 0}]}
+        ),
         encoding="utf-8",
     )
     (artifact_dir / "first-proof-learning-rollup.json").write_text("{}\n", encoding="utf-8")

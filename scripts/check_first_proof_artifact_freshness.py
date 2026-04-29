@@ -15,7 +15,9 @@ REQUIRED = [
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Check first-proof artifact freshness and completeness.")
+    p = argparse.ArgumentParser(
+        description="Check first-proof artifact freshness and completeness."
+    )
     p.add_argument("--artifact-dir", default="build/first-proof")
     p.add_argument("--max-age-hours", type=int, default=48)
     p.add_argument("--out", default="build/first-proof/artifact-freshness.json")
@@ -38,7 +40,9 @@ def main(argv: list[str] | None = None) -> int:
         if exists:
             age_seconds = max(0.0, now - path.stat().st_mtime)
             fresh = age_seconds <= max_age_seconds
-        checks.append({"artifact": name, "exists": exists, "fresh": fresh, "age_seconds": age_seconds})
+        checks.append(
+            {"artifact": name, "exists": exists, "fresh": fresh, "age_seconds": age_seconds}
+        )
 
     missing = [c["artifact"] for c in checks if not c["exists"]]
     stale = [c["artifact"] for c in checks if c["exists"] and not c["fresh"]]

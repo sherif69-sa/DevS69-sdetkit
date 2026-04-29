@@ -17,11 +17,15 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     trend = json.loads(Path(args.trend).read_text(encoding="utf-8"))
-    history_rows = [
-        json.loads(line)
-        for line in Path(args.history).read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ] if Path(args.history).exists() else []
+    history_rows = (
+        [
+            json.loads(line)
+            for line in Path(args.history).read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        if Path(args.history).exists()
+        else []
+    )
 
     md = [
         "# Ops Bundle Contract Trend",
@@ -34,7 +38,9 @@ def main(argv: list[str] | None = None) -> int:
         "## Recent history",
     ]
     for row in history_rows[-10:]:
-        md.append(f"- {row.get('ts')} :: ok={row.get('ok')} missing_count={row.get('missing_count')}")
+        md.append(
+            f"- {row.get('ts')} :: ok={row.get('ok')} missing_count={row.get('missing_count')}"
+        )
 
     out = Path(args.out_md)
     out.parent.mkdir(parents=True, exist_ok=True)

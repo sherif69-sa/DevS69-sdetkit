@@ -12,7 +12,9 @@ def _load(path: Path) -> dict:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Render a single status line for upgrade follow-up workflows.")
+    p = argparse.ArgumentParser(
+        description="Render a single status line for upgrade follow-up workflows."
+    )
     p.add_argument("--artifact-dir", default="build/first-proof")
     p.add_argument("--onboarding", default="build/onboarding-next.json")
     p.add_argument("--out", default="build/first-proof/upgrade-status-line.txt")
@@ -29,10 +31,10 @@ def main(argv: list[str] | None = None) -> int:
     onboarding = _load(Path(args.onboarding))
 
     status = (
-        f"UPGRADE_STATUS decision={summary.get('decision','NO-DATA')} "
-        f"health={health.get('score','NA')} "
-        f"contract_ok={contract.get('ok','NA')} "
-        f"onboarding={onboarding.get('decision','NA')}"
+        f"UPGRADE_STATUS decision={summary.get('decision', 'NO-DATA')} "
+        f"health={health.get('score', 'NA')} "
+        f"contract_ok={contract.get('ok', 'NA')} "
+        f"onboarding={onboarding.get('decision', 'NA')}"
     )
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

@@ -19,25 +19,38 @@ def test_execution_contract_passes(tmp_path: Path) -> None:
         (tmp_path / name).write_text(json.dumps(payload), encoding="utf-8")
 
     out = tmp_path / "execution-contract.json"
-    subprocess.run([
-        sys.executable,
-        "scripts/check_first_proof_execution_contract.py",
-        "--artifact-dir", str(tmp_path),
-        "--out", str(out),
-        "--format", "json",
-    ], check=True)
+    subprocess.run(
+        [
+            sys.executable,
+            "scripts/check_first_proof_execution_contract.py",
+            "--artifact-dir",
+            str(tmp_path),
+            "--out",
+            str(out),
+            "--format",
+            "json",
+        ],
+        check=True,
+    )
 
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["ok"] is True
 
 
 def test_execution_contract_fails_on_missing(tmp_path: Path) -> None:
-    (tmp_path / "first-proof-summary.json").write_text(json.dumps({"decision": "NO-SHIP", "ok": False}), encoding="utf-8")
+    (tmp_path / "first-proof-summary.json").write_text(
+        json.dumps({"decision": "NO-SHIP", "ok": False}), encoding="utf-8"
+    )
     out = tmp_path / "execution-contract.json"
-    proc = subprocess.run([
-        sys.executable,
-        "scripts/check_first_proof_execution_contract.py",
-        "--artifact-dir", str(tmp_path),
-        "--out", str(out),
-    ], check=False)
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/check_first_proof_execution_contract.py",
+            "--artifact-dir",
+            str(tmp_path),
+            "--out",
+            str(out),
+        ],
+        check=False,
+    )
     assert proc.returncode == 1

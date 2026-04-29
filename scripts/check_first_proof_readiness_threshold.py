@@ -45,12 +45,13 @@ def main(argv: list[str] | None = None) -> int:
             print(f"readiness-threshold: profile={args.profile} skipped decision={decision}")
         return 0
 
-
     health_score = dashboard.get("health_score")
     if health_score is None or float(health_score) < float(cfg["min_health_score"]):
         errors.append(f"health_score<{cfg['min_health_score']}")
 
-    if bool(cfg.get("require_followup_ready", False)) and not bool(dashboard.get("followup_ready", False)):
+    if bool(cfg.get("require_followup_ready", False)) and not bool(
+        dashboard.get("followup_ready", False)
+    ):
         errors.append("followup_ready_required")
 
     if bool(cfg.get("require_execution_contract_ok", False)) and not bool(
@@ -72,7 +73,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
-        print(f"readiness-threshold: profile={args.profile} ok={payload['ok']} errors={len(errors)}")
+        print(
+            f"readiness-threshold: profile={args.profile} ok={payload['ok']} errors={len(errors)}"
+        )
     return 0 if payload["ok"] else 1
 
 

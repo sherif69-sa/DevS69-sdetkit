@@ -7,7 +7,9 @@ from pathlib import Path
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Append follow-up workflow summary to changelog artifact.")
+    p = argparse.ArgumentParser(
+        description="Append follow-up workflow summary to changelog artifact."
+    )
     p.add_argument("--dashboard", default="build/first-proof/dashboard.json")
     p.add_argument("--status-line", default="build/first-proof/upgrade-status-line.txt")
     p.add_argument("--out", default="build/first-proof/followup-changelog.jsonl")
@@ -17,8 +19,16 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
-    dashboard = json.loads(Path(args.dashboard).read_text(encoding="utf-8")) if Path(args.dashboard).exists() else {}
-    status_line = Path(args.status_line).read_text(encoding="utf-8").strip() if Path(args.status_line).exists() else ""
+    dashboard = (
+        json.loads(Path(args.dashboard).read_text(encoding="utf-8"))
+        if Path(args.dashboard).exists()
+        else {}
+    )
+    status_line = (
+        Path(args.status_line).read_text(encoding="utf-8").strip()
+        if Path(args.status_line).exists()
+        else ""
+    )
 
     entry = {
         "ts": datetime.now(timezone.utc).isoformat(),

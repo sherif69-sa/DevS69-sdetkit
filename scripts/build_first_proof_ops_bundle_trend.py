@@ -7,7 +7,9 @@ from datetime import datetime, timezone
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Track first-proof ops bundle contract trend over time.")
+    p = argparse.ArgumentParser(
+        description="Track first-proof ops bundle contract trend over time."
+    )
     p.add_argument("--contract", default="build/first-proof/ops-bundle-contract.json")
     p.add_argument("--history", default="build/first-proof/ops-bundle-contract-history.jsonl")
     p.add_argument("--out", default="build/first-proof/ops-bundle-contract-trend.json")

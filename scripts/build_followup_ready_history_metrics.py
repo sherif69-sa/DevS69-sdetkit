@@ -12,7 +12,9 @@ def _parse_ts(raw: str) -> datetime:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Track follow-up readiness history and remediation time metrics.")
+    p = argparse.ArgumentParser(
+        description="Track follow-up readiness history and remediation time metrics."
+    )
     p.add_argument("--followup", default="build/first-proof/followup-ready.json")
     p.add_argument("--history", default="build/first-proof/followup-ready-history.jsonl")
     p.add_argument("--out", default="build/first-proof/followup-ready-metrics.json")
@@ -30,7 +32,11 @@ def main(argv: list[str] | None = None) -> int:
     with hist_path.open("a", encoding="utf-8") as f:
         f.write(json.dumps(entry, sort_keys=True) + "\n")
 
-    rows = [json.loads(line) for line in hist_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    rows = [
+        json.loads(line)
+        for line in hist_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
 
     # remediation duration: time from a failed run to next successful run
     durations_hours: list[float] = []
@@ -48,7 +54,9 @@ def main(argv: list[str] | None = None) -> int:
         "ok": True,
         "history_runs": len(rows),
         "recent_ok": entry["ok"],
-        "median_time_to_remediate_hours": round(median(durations_hours), 4) if durations_hours else None,
+        "median_time_to_remediate_hours": round(median(durations_hours), 4)
+        if durations_hours
+        else None,
         "closed_incidents": len(durations_hours),
     }
 

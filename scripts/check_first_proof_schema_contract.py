@@ -13,7 +13,9 @@ REQUIRED = [
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Validate schema version consistency for first-proof artifacts.")
+    p = argparse.ArgumentParser(
+        description="Validate schema version consistency for first-proof artifacts."
+    )
     p.add_argument("--artifact-dir", default="build/first-proof")
     p.add_argument("--out", default="build/first-proof/schema-contract.json")
     p.add_argument("--format", choices=("text", "json"), default="text")
@@ -32,7 +34,9 @@ def main(argv: list[str] | None = None) -> int:
             continue
         payload = json.loads(path.read_text(encoding="utf-8"))
         if payload.get("schema_version") != SCHEMA_VERSION:
-            errors.append(f"{name}: schema_version={payload.get('schema_version')} expected={SCHEMA_VERSION}")
+            errors.append(
+                f"{name}: schema_version={payload.get('schema_version')} expected={SCHEMA_VERSION}"
+            )
 
     out_payload = {"ok": len(errors) == 0, "schema_version": SCHEMA_VERSION, "errors": errors}
     out = Path(args.out)

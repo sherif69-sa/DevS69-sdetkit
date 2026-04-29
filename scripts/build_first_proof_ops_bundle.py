@@ -24,60 +24,67 @@ def main(argv: list[str] | None = None) -> int:
     root = Path(args.artifact_dir)
     summary = root / "first-proof-summary.json"
 
-    _run([
-        sys.executable,
-        "scripts/build_first_proof_health_score.py",
-        "--summary",
-        str(summary),
-        "--out-json",
-        str(root / "health-score.json"),
-        "--out-md",
-        str(root / "health-score.md"),
-        "--format",
-        "json",
-    ])
+    _run(
+        [
+            sys.executable,
+            "scripts/build_first_proof_health_score.py",
+            "--summary",
+            str(summary),
+            "--out-json",
+            str(root / "health-score.json"),
+            "--out-md",
+            str(root / "health-score.md"),
+            "--format",
+            "json",
+        ]
+    )
 
-    _run([
-        sys.executable,
-        "scripts/doctor_remediate.py",
-        "--summary",
-        str(summary),
-        "--out-json",
-        str(root / "doctor-remediate.json"),
-        "--out-md",
-        str(root / "doctor-remediate.md"),
-        "--limit",
-        "3",
-        "--format",
-        "json",
-    ])
+    _run(
+        [
+            sys.executable,
+            "scripts/doctor_remediate.py",
+            "--summary",
+            str(summary),
+            "--out-json",
+            str(root / "doctor-remediate.json"),
+            "--out-md",
+            str(root / "doctor-remediate.md"),
+            "--limit",
+            "3",
+            "--format",
+            "json",
+        ]
+    )
 
-    _run([
-        sys.executable,
-        "scripts/operator_onboarding_next.py",
-        "--summary",
-        str(summary),
-        "--out-json",
-        "build/onboarding-next.json",
-        "--out-md",
-        "build/onboarding-next.md",
-        "--format",
-        "json",
-    ])
+    _run(
+        [
+            sys.executable,
+            "scripts/operator_onboarding_next.py",
+            "--summary",
+            str(summary),
+            "--out-json",
+            "build/onboarding-next.json",
+            "--out-md",
+            "build/onboarding-next.md",
+            "--format",
+            "json",
+        ]
+    )
 
-    _run([
-        sys.executable,
-        "scripts/check_first_proof_artifact_freshness.py",
-        "--artifact-dir",
-        str(root),
-        "--max-age-hours",
-        "48",
-        "--out",
-        str(root / "artifact-freshness.json"),
-        "--format",
-        "json",
-    ])
-
+    _run(
+        [
+            sys.executable,
+            "scripts/check_first_proof_artifact_freshness.py",
+            "--artifact-dir",
+            str(root),
+            "--max-age-hours",
+            "48",
+            "--out",
+            str(root / "artifact-freshness.json"),
+            "--format",
+            "json",
+        ]
+    )
 
     manifest = {
         "ok": True,
@@ -89,7 +96,9 @@ def main(argv: list[str] | None = None) -> int:
             "build/onboarding-next.json",
         ],
     }
-    (root / "ops-bundle-manifest.json").write_text(__import__("json").dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (root / "ops-bundle-manifest.json").write_text(
+        __import__("json").dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
     if args.format == "json":
         print(__import__("json").dumps(manifest, indent=2, sort_keys=True))

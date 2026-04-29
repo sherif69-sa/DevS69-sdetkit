@@ -29,14 +29,21 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
-    items = [{"id": i + 1, "title": title, "status": "pending"} for i, title in enumerate(FOLLOWUPS)]
+    items = [
+        {"id": i + 1, "title": title, "status": "pending"} for i, title in enumerate(FOLLOWUPS)
+    ]
     payload = {"count": len(items), "items": items}
 
     out_json = Path(args.out_json)
     out_json.parent.mkdir(parents=True, exist_ok=True)
     out_json.write_text(f"{json.dumps(payload, indent=2, sort_keys=True)}\n", encoding="utf-8")
 
-    md_lines = ["# Next 10 Follow-ups", "", "Planned follow-ups to continue polishing the upgrade lane.", ""]
+    md_lines = [
+        "# Next 10 Follow-ups",
+        "",
+        "Planned follow-ups to continue polishing the upgrade lane.",
+        "",
+    ]
     for item in items:
         md_lines.append(f"{item['id']}. [ ] {item['title']}")
     Path(args.out_md).write_text("\n".join(md_lines) + "\n", encoding="utf-8")

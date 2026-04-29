@@ -10,7 +10,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Cleanup stale first-proof artifacts using TTL policy.")
     p.add_argument("--artifact-dir", default="build/first-proof")
     p.add_argument("--ttl-hours", type=int, default=168)
-    p.add_argument("--dry-run", action="store_true", help="Report deletions without removing files.")
+    p.add_argument(
+        "--dry-run", action="store_true", help="Report deletions without removing files."
+    )
     p.add_argument("--out", default="build/first-proof/retention-cleanup.json")
     p.add_argument("--format", choices=("text", "json"), default="text")
     return p

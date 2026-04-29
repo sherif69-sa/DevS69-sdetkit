@@ -20,25 +20,38 @@ def test_cleanup_first_proof_artifacts_dry_run_and_delete(tmp_path: Path) -> Non
     os.utime(old_file, (old_ts, old_ts))
 
     out = artifact / "cleanup.json"
-    subprocess.run([
-        sys.executable,
-        "scripts/cleanup_first_proof_artifacts.py",
-        "--artifact-dir", str(artifact),
-        "--ttl-hours", "24",
-        "--dry-run",
-        "--out", str(out),
-        "--format", "json",
-    ], check=True)
+    subprocess.run(
+        [
+            sys.executable,
+            "scripts/cleanup_first_proof_artifacts.py",
+            "--artifact-dir",
+            str(artifact),
+            "--ttl-hours",
+            "24",
+            "--dry-run",
+            "--out",
+            str(out),
+            "--format",
+            "json",
+        ],
+        check=True,
+    )
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["deleted_count"] >= 1
     assert old_file.exists()
 
-    subprocess.run([
-        sys.executable,
-        "scripts/cleanup_first_proof_artifacts.py",
-        "--artifact-dir", str(artifact),
-        "--ttl-hours", "24",
-        "--out", str(out),
-    ], check=True)
+    subprocess.run(
+        [
+            sys.executable,
+            "scripts/cleanup_first_proof_artifacts.py",
+            "--artifact-dir",
+            str(artifact),
+            "--ttl-hours",
+            "24",
+            "--out",
+            str(out),
+        ],
+        check=True,
+    )
     assert not old_file.exists()
     assert new_file.exists()

@@ -67,7 +67,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
-        print(f"first-proof-dashboard: decision={payload['decision']} health={payload['health_score']}")
+        print(
+            f"first-proof-dashboard: decision={payload['decision']} health={payload['health_score']}"
+        )
     return 0
 
 

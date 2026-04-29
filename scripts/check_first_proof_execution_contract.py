@@ -15,7 +15,9 @@ REQUIRED = {
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Validate final first-proof execution artifact contract.")
+    p = argparse.ArgumentParser(
+        description="Validate final first-proof execution artifact contract."
+    )
     p.add_argument("--artifact-dir", default="build/first-proof")
     p.add_argument("--out", default="build/first-proof/execution-contract.json")
     p.add_argument("--format", choices=("text", "json"), default="text")

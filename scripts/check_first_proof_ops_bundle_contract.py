@@ -6,7 +6,9 @@ from pathlib import Path
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Validate first-proof ops bundle manifest and artifacts.")
+    p = argparse.ArgumentParser(
+        description="Validate first-proof ops bundle manifest and artifacts."
+    )
     p.add_argument("--manifest", default="build/first-proof/ops-bundle-manifest.json")
     p.add_argument("--out", default="build/first-proof/ops-bundle-contract.json")
     p.add_argument("--format", choices=("text", "json"), default="text")
@@ -22,7 +24,12 @@ def main(argv: list[str] | None = None) -> int:
     missing = [a for a in artifacts if not Path(a).exists()]
     ok = payload.get("bundle") == "first-proof-ops" and len(missing) == 0
 
-    out_payload = {"ok": ok, "manifest": str(manifest_path), "missing": missing, "artifacts": artifacts}
+    out_payload = {
+        "ok": ok,
+        "manifest": str(manifest_path),
+        "missing": missing,
+        "artifacts": artifacts,
+    }
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(f"{json.dumps(out_payload, indent=2, sort_keys=True)}\n", encoding="utf-8")

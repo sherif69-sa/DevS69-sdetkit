@@ -14,22 +14,31 @@ def test_render_ops_bundle_trend_report(tmp_path: Path) -> None:
     )
     history = tmp_path / "history.jsonl"
     history.write_text(
-        "\n".join([
-            json.dumps({"ts": "2026-01-01T00:00:00+00:00", "ok": True, "missing_count": 0}),
-            json.dumps({"ts": "2026-01-02T00:00:00+00:00", "ok": False, "missing_count": 1}),
-        ])
+        "\n".join(
+            [
+                json.dumps({"ts": "2026-01-01T00:00:00+00:00", "ok": True, "missing_count": 0}),
+                json.dumps({"ts": "2026-01-02T00:00:00+00:00", "ok": False, "missing_count": 1}),
+            ]
+        )
         + "\n",
         encoding="utf-8",
     )
     out = tmp_path / "trend.md"
-    subprocess.run([
-        sys.executable,
-        "scripts/render_ops_bundle_trend_report.py",
-        "--trend", str(trend),
-        "--history", str(history),
-        "--out-md", str(out),
-        "--format", "json",
-    ], check=True)
+    subprocess.run(
+        [
+            sys.executable,
+            "scripts/render_ops_bundle_trend_report.py",
+            "--trend",
+            str(trend),
+            "--history",
+            str(history),
+            "--out-md",
+            str(out),
+            "--format",
+            "json",
+        ],
+        check=True,
+    )
 
     content = out.read_text(encoding="utf-8")
     assert "recent pass rate" in content

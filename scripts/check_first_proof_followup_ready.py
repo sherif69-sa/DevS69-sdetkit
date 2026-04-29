@@ -6,7 +6,9 @@ from pathlib import Path
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Validate follow-up readiness for first-proof operator handoff.")
+    p = argparse.ArgumentParser(
+        description="Validate follow-up readiness for first-proof operator handoff."
+    )
     p.add_argument("--artifact-dir", default="build/first-proof")
     p.add_argument("--onboarding", default="build/onboarding-next.json")
     p.add_argument("--out", default="build/first-proof/followup-ready.json")
@@ -27,7 +29,9 @@ def main(argv: list[str] | None = None) -> int:
 
     execution_contract = {}
     if (root / "execution-contract.json").exists():
-        execution_contract = json.loads((root / "execution-contract.json").read_text(encoding="utf-8"))
+        execution_contract = json.loads(
+            (root / "execution-contract.json").read_text(encoding="utf-8")
+        )
 
     ok = len(missing) == 0 and bool(execution_contract.get("ok", False))
     payload = {

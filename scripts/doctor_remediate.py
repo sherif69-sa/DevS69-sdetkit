@@ -30,7 +30,9 @@ HINTS = {
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Generate top remediation actions from first-proof results.")
+    parser = argparse.ArgumentParser(
+        description="Generate top remediation actions from first-proof results."
+    )
     parser.add_argument("--summary", default="build/first-proof/first-proof-summary.json")
     parser.add_argument("--out-json", default="build/first-proof/doctor-remediate.json")
     parser.add_argument("--out-md", default="build/first-proof/doctor-remediate.md")
