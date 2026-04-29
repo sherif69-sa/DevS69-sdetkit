@@ -2,6 +2,8 @@
   "source_plan": "examples/kits/intelligence/failure-action-plan.json",
   "executed_actions": 2,
   "failed_actions": 2,
+  "passed_actions": 0,
+  "skipped_actions": 0,
   "results": [
     {
       "issue_id": "ISSUE-001",
@@ -38,7 +40,7 @@
         "Add circuit-breaker guardrail to prevent retry storms.",
         "Run security.sh after fix and block merge on new warnings/errors."
       ],
-      "output_preview": "ERROR: file or directory not found: tests/integration/test_checkout.py::test_payment_capture\n\n\nno tests ran in 0.22s"
+      "output_preview": "ERROR: file or directory not found: tests/integration/test_checkout.py::test_payment_capture\n\n\nno tests ran in 0.24s"
     }
   ]
 }

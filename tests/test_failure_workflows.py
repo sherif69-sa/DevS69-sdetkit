@@ -98,6 +98,8 @@ def test_failure_autofix_workflow_generates_report(tmp_path: Path) -> None:
 
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["executed_actions"] == 1
+    assert report["passed_actions"] == 1
+    assert report["failed_actions"] == 0
     assert report["results"][0]["status"] == "passed"
     assert report["results"][0]["issue_id"] == "ISSUE-01"
     assert report["results"][0]["auto_fix_suggestions"]

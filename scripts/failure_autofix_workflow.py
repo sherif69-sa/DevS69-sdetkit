@@ -14,13 +14,14 @@ def _load_plan(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _run(command: str) -> tuple[int, str]:
+def _run(command: str, timeout_seconds: int) -> tuple[int, str]:
     proc = subprocess.run(
         shlex.split(command),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
         check=False,
+        timeout=timeout_seconds,
     )
     return proc.returncode, proc.stdout
 
@@ -70,6 +71,7 @@ def main() -> int:
     parser.add_argument("--plan", default="examples/kits/intelligence/failure-action-plan.json")
     parser.add_argument("--report", default="examples/kits/intelligence/failure-autofix-report.json")
     parser.add_argument("--max-actions", type=int, default=5)
+    parser.add_argument("--timeout-seconds", type=int, default=90)
     args = parser.parse_args()
 
     plan = _load_plan(Path(args.plan))
@@ -82,7 +84,7 @@ def main() -> int:
             results.append({"issue_id": action.get("issue_id"), "status": "skipped", "reason": "no command"})
             continue
 
-        code, output = _run(cmd)
+        code, output = _run(cmd, args.timeout_seconds)
         results.append(
             {
                 "issue_id": action.get("issue_id"),
@@ -97,10 +99,15 @@ def main() -> int:
             }
         )
 
+    failed = sum(1 for item in results if item.get("status") == "failed")
+    passed = sum(1 for item in results if item.get("status") == "passed")
+    skipped = sum(1 for item in results if item.get("status") == "skipped")
     report = {
         "source_plan": args.plan,
         "executed_actions": len(results),
-        "failed_actions": sum(1 for item in results if item.get("status") == "failed"),
+        "failed_actions": failed,
+        "passed_actions": passed,
+        "skipped_actions": skipped,
         "results": results,
     }
     out_path = Path(args.report)
