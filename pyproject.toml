@@ -50,7 +50,7 @@ dev = [
   "twine==6.2.0"
 ]
 test = [
-  "hypothesis==6.152.2",
+  "hypothesis==6.152.4",
   "PyYAML",
   "pytest",
   "pytest-asyncio",
@@ -70,7 +70,7 @@ telegram = [
   "python-telegram-bot>=22.7,<23"
 ]
 whatsapp = [
-  "twilio>=9.10.4,<10"
+  "twilio>=9.10.5,<10"
 ]
 
 [tool.setuptools]
