@@ -22,7 +22,6 @@ def _stderr(message: str) -> None:
     sys.stderr.write(message + "\n")
 
 
-
 def _parse_count_expectations(items: list[str], *, label: str) -> tuple[dict[str, int], str | None]:
     out: dict[str, int] = {}
     for raw in items:

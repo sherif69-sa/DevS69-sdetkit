@@ -15,7 +15,6 @@ def _stderr(message: str) -> None:
     sys.stderr.write(message + "\n")
 
 
-
 _REPORT_RE = re.compile(r"^impact-(\d+)-.*-report\.md$")
 _PLAN_RE = re.compile(r"^(?:impact|" + "d" + "ay" + r")(\d+)(?:-.*)?\.json$")
 _CLOSEOUT_RE = re.compile(r"^(?P<lane>[a-z0-9_]+)_closeout_(?P<id>\d+)\.py$")
