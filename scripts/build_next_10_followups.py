@@ -4,7 +4,6 @@ import argparse
 import json
 from pathlib import Path
 
-
 FOLLOWUPS = [
     "Automate first-proof artifact retention cleanup with explicit TTL policy.",
     "Add CI job to publish execution-report.md and upgrade-status-line.txt as artifacts.",

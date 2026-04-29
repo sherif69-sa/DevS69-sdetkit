@@ -4,7 +4,6 @@ import argparse
 import json
 from pathlib import Path
 
-
 REQUIRED = {
     "first-proof-summary.json": ["decision", "ok"],
     "health-score.json": ["score", "decision"],

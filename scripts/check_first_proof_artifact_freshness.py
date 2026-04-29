@@ -5,7 +5,6 @@ import json
 import time
 from pathlib import Path
 
-
 REQUIRED = [
     "first-proof-summary.json",
     "health-score.json",
