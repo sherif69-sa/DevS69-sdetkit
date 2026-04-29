@@ -9,10 +9,11 @@ PORTFOLIO_MANIFEST ?= portfolio-manifest.json
 FIRST_PROOF_BRANCH ?= local
 FIRST_PROOF_STRICT ?= false
 FIRST_PROOF_RELEASE_DRY_RUN ?= true
+FIRST_PROOF_READINESS_PROFILE ?= lenient
 PHASE2_BASELINE_PRE_EXTRACTION ?= docs/artifacts/phase2-hotspot-baseline-pre-extraction-$(DATE_TAG).json
 BUSINESS_EXECUTION_OPERATOR ?= sherif69-sa
 
-.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-fast ship-readiness-contract release-room release-room-fast portfolio-readiness premerge-release-room premerge-release-room-fast adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-local first-proof-contract first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-tests-local first-proof-verify first-proof-verify-local gate-decision-summary gate-decision-summary-contract fit-check adoption-followup adoption-followup-contract adoption-control-loop adoption-control-loop-contract adoption-posture adoption-validate adoption-control-loop-full ops-followup ops-followup-contract ops-now ops-now-lite ops-next ops-premerge-next ops-premerge-next-fast phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-execution-core phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-hotspot-baseline phase2-hotspot-delta phase2-complete phase2-progress phase2-surface-clarity phase3-dependency-radar phase3-quality-contract phase3-quality-report phase3-do-it phase4-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility real-workflow-daily real-workflow-daily-fast real-workflow-weekly real-workflow-premerge real-workflow-premerge-fast real-workflow ops-daily ops-daily-fast ops-weekly ops-premerge ops-premerge-fast ops-workflow
+.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry upgrade-next onboarding-next doctor-remediate first-proof-freshness first-proof-ops-bundle-contract first-proof-ops-bundle-trend first-proof-ops-bundle-trend-report first-proof-execution-report first-proof-execution-contract first-proof-schema-contract upgrade-status-line first-proof-followup-ready followup-ready-metrics first-proof-dashboard first-proof-readiness-threshold followup-changelog plan-next-10 cleanup-first-proof-artifacts golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-fast ship-readiness-contract release-room release-room-fast portfolio-readiness premerge-release-room premerge-release-room-fast adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-local first-proof-contract first-proof-health-score first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-tests-local first-proof-verify first-proof-verify-local gate-decision-summary gate-decision-summary-contract fit-check adoption-followup adoption-followup-contract adoption-control-loop adoption-control-loop-contract adoption-posture adoption-validate adoption-control-loop-full ops-followup ops-followup-contract ops-now ops-now-lite ops-next ops-premerge-next ops-premerge-next-fast phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-execution-core phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-hotspot-baseline phase2-hotspot-delta phase2-complete phase2-progress phase2-surface-clarity phase3-dependency-radar phase3-quality-contract phase3-quality-report phase3-do-it phase4-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility real-workflow-daily real-workflow-daily-fast real-workflow-weekly real-workflow-premerge real-workflow-premerge-fast real-workflow ops-daily ops-daily-fast ops-weekly ops-premerge ops-premerge-fast ops-workflow
 .PHONY: business-execution-start business-execution-start-contract business-execution-go-gate business-execution-progress business-execution-progress-contract business-execution-next business-execution-next-contract business-execution-handoff business-execution-handoff-contract business-execution-escalation business-execution-escalation-contract business-execution-followup business-execution-followup-contract business-execution-continue business-execution-continue-contract business-execution-horizon business-execution-horizon-contract business-execution-inputs-contract business-execution-pipeline business-execution-week1-pipeline
 
 bootstrap: venv
@@ -63,6 +64,12 @@ first-proof-local: venv
 first-proof-contract: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_summary_contract.py --summary build/first-proof/first-proof-summary.json --wait-seconds 60 --format json'
 
+first-proof-health-score: venv
+	@bash -lc '. .venv/bin/activate && python scripts/build_first_proof_health_score.py --summary build/first-proof/first-proof-summary.json --out-json build/first-proof/health-score.json --out-md build/first-proof/health-score.md --format json'
+
+first-proof-freshness: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_artifact_freshness.py --artifact-dir build/first-proof --max-age-hours 48 --out build/first-proof/artifact-freshness.json --format json'
+
 first-proof-learn: venv
 	@bash -lc '. .venv/bin/activate && python scripts/first_proof_learning_db.py --summary build/first-proof/first-proof-summary.json --db build/first-proof/first-proof-learning-db.jsonl --rollup-out build/first-proof/first-proof-learning-rollup.json --format json'
 
@@ -82,10 +89,10 @@ first-proof-tests-local: venv
 	@bash -lc '. .venv/bin/activate && python -m pytest -q tests/test_first_proof_script.py tests/test_first_proof_contract.py tests/test_first_proof_learning_db.py tests/test_first_proof_weekly_trend.py tests/test_first_proof_control_tower.py tests/test_first_proof_trend_threshold.py tests/test_build_owner_escalation_payload.py'
 
 first-proof-verify: first-proof
-	@bash -lc '. .venv/bin/activate && $(MAKE) first-proof-contract && $(MAKE) first-proof-learn && $(MAKE) first-proof-control-tower && $(MAKE) first-proof-weekly-trend && $(MAKE) first-proof-trend-threshold && $(MAKE) first-proof-tests'
+	@bash -lc '. .venv/bin/activate && $(MAKE) first-proof-contract && $(MAKE) first-proof-learn && $(MAKE) first-proof-ops-bundle && $(MAKE) first-proof-ops-bundle-contract && $(MAKE) first-proof-ops-bundle-trend && $(MAKE) first-proof-ops-bundle-trend-report && $(MAKE) first-proof-execution-report && $(MAKE) first-proof-execution-contract && $(MAKE) first-proof-schema-contract && $(MAKE) upgrade-status-line && $(MAKE) first-proof-followup-ready && $(MAKE) followup-ready-metrics && $(MAKE) first-proof-dashboard && $(MAKE) first-proof-readiness-threshold && $(MAKE) followup-changelog && $(MAKE) first-proof-control-tower && $(MAKE) first-proof-weekly-trend && $(MAKE) first-proof-trend-threshold && $(MAKE) first-proof-tests'
 
 first-proof-verify-local: first-proof-local
-	@bash -lc '. .venv/bin/activate && $(MAKE) first-proof-contract && $(MAKE) first-proof-learn && $(MAKE) first-proof-control-tower && $(MAKE) first-proof-weekly-trend && $(MAKE) first-proof-trend-threshold && $(MAKE) first-proof-tests-local'
+	@bash -lc '. .venv/bin/activate && $(MAKE) first-proof-contract && $(MAKE) first-proof-learn && $(MAKE) first-proof-ops-bundle && $(MAKE) first-proof-ops-bundle-contract && $(MAKE) first-proof-ops-bundle-trend && $(MAKE) first-proof-ops-bundle-trend-report && $(MAKE) first-proof-execution-report && $(MAKE) first-proof-execution-contract && $(MAKE) first-proof-schema-contract && $(MAKE) upgrade-status-line && $(MAKE) first-proof-followup-ready && $(MAKE) followup-ready-metrics && $(MAKE) first-proof-dashboard && $(MAKE) first-proof-readiness-threshold && $(MAKE) followup-changelog && $(MAKE) first-proof-control-tower && $(MAKE) first-proof-weekly-trend && $(MAKE) first-proof-trend-threshold && $(MAKE) first-proof-tests-local'
 
 gate-decision-summary: venv
 	@bash -lc '. .venv/bin/activate && python scripts/render_gate_decision_summary.py --release build/release-preflight.json --fast build/gate-fast.json --allow-missing-fast --format json --out build/gate-decision-summary.json'
@@ -184,6 +191,15 @@ ops-premerge-fast: real-workflow-premerge-fast
 
 ops-workflow: real-workflow
 	@bash -lc 'echo ops-workflow: alias completed'
+
+upgrade-next:
+	@bash -lc 'echo "=== SDETKit Upgrade Next (Guided Path) ==="'
+	@bash -lc 'echo "1) make first-proof"'
+	@bash -lc 'echo "2) make first-proof-verify"'
+	@bash -lc 'echo "3) make ops-now-lite"'
+	@bash -lc 'echo "4) make ops-next"'
+	@bash -lc 'echo "5) make plan-status"'
+	@bash -lc 'echo "Docs: docs/upgrade-next-commands.md"'
 
 business-execution-start: venv
 	@bash -lc '. .venv/bin/activate && python scripts/business_execution_start.py --single-operator "$(BUSINESS_EXECUTION_OPERATOR)"'
@@ -437,19 +453,19 @@ phase1-workflow: phase1-execution-core phase1-flow-contract phase1-gate-phase2 p
 	@bash -lc 'echo phase1-workflow: operational workflow completed'
 
 phase1-flow-contract: venv
-	@bash -lc ' . .venv/bin/activate && python scripts/check_phase1_flow_contract.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/check_phase1_flow_contract.py --format json'
 
 phase1-gate-phase2: venv
-	@bash -lc ' . .venv/bin/activate && python scripts/phase1_gate_phase2.py --format json > build/phase1-baseline/phase1-gate-phase2.json'
+	@bash -lc '. .venv/bin/activate && python scripts/phase1_gate_phase2.py --format json > build/phase1-baseline/phase1-gate-phase2.json'
 
 phase1-executive-report: venv
-	@bash -lc ' . .venv/bin/activate && python scripts/phase1_executive_report.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/phase1_executive_report.py --format json'
 
 phase1-retire-plan: venv
-	@bash -lc ' . .venv/bin/activate && python scripts/phase1_retire_plan_into_flow.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/phase1_retire_plan_into_flow.py --format json'
 
 phase1-closeout: venv
-	@bash -lc ' . .venv/bin/activate && python scripts/phase1_closeout_and_prune_plan.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/phase1_closeout_and_prune_plan.py --format json'
 
 phase1-complete: install
 	@bash -lc '. .venv/bin/activate && bash scripts/phase1_baseline_lane.sh && python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json --require-logs && python scripts/phase1_completion_gate.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json'
@@ -547,3 +563,54 @@ failure-autofix:
 
 failure-workflow: failure-plan failure-autofix
 	@echo "failure workflow complete: see examples/kits/intelligence/failure-autofix-report.json"
+
+doctor-remediate: venv
+	@bash -lc '. .venv/bin/activate && python scripts/doctor_remediate.py --summary build/first-proof/first-proof-summary.json --out-json build/first-proof/doctor-remediate.json --out-md build/first-proof/doctor-remediate.md --limit 3 --format json'
+
+onboarding-next: venv
+	@bash -lc '. .venv/bin/activate && python scripts/operator_onboarding_next.py --summary build/first-proof/first-proof-summary.json --out-json build/onboarding-next.json --out-md build/onboarding-next.md --format json'
+
+first-proof-ops-bundle: venv
+	@bash -lc '. .venv/bin/activate && python scripts/build_first_proof_ops_bundle.py --artifact-dir build/first-proof --format json'
+
+first-proof-ops-bundle-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_ops_bundle_contract.py --manifest build/first-proof/ops-bundle-manifest.json --out build/first-proof/ops-bundle-contract.json --format json'
+
+first-proof-ops-bundle-trend: venv
+	@bash -lc '. .venv/bin/activate && python scripts/build_first_proof_ops_bundle_trend.py --contract build/first-proof/ops-bundle-contract.json --history build/first-proof/ops-bundle-contract-history.jsonl --out build/first-proof/ops-bundle-contract-trend.json --window 10 --branch $(FIRST_PROOF_BRANCH) --format json'
+
+first-proof-execution-report: venv
+	@bash -lc '. .venv/bin/activate && python scripts/render_first_proof_execution_report.py --artifact-dir build/first-proof --onboarding build/onboarding-next.json --out-json build/first-proof/execution-report.json --out-md build/first-proof/execution-report.md --format json'
+
+first-proof-execution-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_execution_contract.py --artifact-dir build/first-proof --out build/first-proof/execution-contract.json --format json'
+
+upgrade-status-line: venv
+	@bash -lc '. .venv/bin/activate && python scripts/render_upgrade_status_line.py --artifact-dir build/first-proof --onboarding build/onboarding-next.json --out build/first-proof/upgrade-status-line.txt --format text'
+
+first-proof-followup-ready: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_followup_ready.py --artifact-dir build/first-proof --onboarding build/onboarding-next.json --out build/first-proof/followup-ready.json --format json'
+
+plan-next-10: venv
+	@bash -lc '. .venv/bin/activate && python scripts/build_next_10_followups.py --out-json build/first-proof/next-10-followups.json --out-md docs/next-10-followups.md --format json'
+
+cleanup-first-proof-artifacts: venv
+	@bash -lc '. .venv/bin/activate && python scripts/cleanup_first_proof_artifacts.py --artifact-dir build/first-proof --ttl-hours 168 --dry-run --out build/first-proof/retention-cleanup.json --format json'
+
+followup-ready-metrics: venv
+	@bash -lc '. .venv/bin/activate && python scripts/build_followup_ready_history_metrics.py --followup build/first-proof/followup-ready.json --history build/first-proof/followup-ready-history.jsonl --out build/first-proof/followup-ready-metrics.json --format json'
+
+first-proof-ops-bundle-trend-report: venv
+	@bash -lc '. .venv/bin/activate && python scripts/render_ops_bundle_trend_report.py --trend build/first-proof/ops-bundle-contract-trend.json --history build/first-proof/ops-bundle-contract-history.jsonl --out-md build/first-proof/ops-bundle-contract-trend.md --format json'
+
+first-proof-schema-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_schema_contract.py --artifact-dir build/first-proof --out build/first-proof/schema-contract.json --format json'
+
+first-proof-dashboard: venv
+	@bash -lc '. .venv/bin/activate && python scripts/render_first_proof_dashboard.py --artifact-dir build/first-proof --onboarding build/onboarding-next.json --out-json build/first-proof/dashboard.json --out-md build/first-proof/dashboard.md --format json'
+
+followup-changelog: venv
+	@bash -lc '. .venv/bin/activate && python scripts/append_followup_changelog.py --dashboard build/first-proof/dashboard.json --status-line build/first-proof/upgrade-status-line.txt --out build/first-proof/followup-changelog.jsonl --format json'
+
+first-proof-readiness-threshold: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_readiness_threshold.py --dashboard build/first-proof/dashboard.json --profiles config/first_proof_readiness_profiles.json --profile $(FIRST_PROOF_READINESS_PROFILE) --out build/first-proof/readiness-threshold.json --format json'

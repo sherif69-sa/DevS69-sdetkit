@@ -1,0 +1,52 @@
+name: first-proof-artifact-publish
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "Makefile"
+      - "scripts/**"
+      - "src/**"
+      - "pyproject.toml"
+      - "requirements*.txt"
+
+jobs:
+  publish-first-proof-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Setup Python
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38
+        with:
+          python-version: "3.11"
+
+      - name: Install runtime deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -c constraints-ci.txt -e .
+
+      - name: Run first-proof verify (local lane)
+        run: make first-proof-verify-local
+
+      - name: Upload first-proof execution report
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        with:
+          name: first-proof-execution-report
+          path: |
+            build/first-proof/execution-report.json
+            build/first-proof/execution-report.md
+            build/first-proof/upgrade-status-line.txt
+            build/first-proof/followup-ready.json
+
+      - name: Upload first-proof ops pack
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        with:
+          name: first-proof-ops-pack
+          path: |
+            build/first-proof/health-score.json
+            build/first-proof/ops-bundle-contract.json
+            build/first-proof/ops-bundle-contract-trend.json
+            build/first-proof/retention-cleanup.json
