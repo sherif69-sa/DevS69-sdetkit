@@ -5,7 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 REQUIRED_PAYLOADS = {
     "first-proof-summary.json": {"decision": "SHIP", "ok": True},
     "health-score.json": {"score": 100, "decision": "GREEN"},

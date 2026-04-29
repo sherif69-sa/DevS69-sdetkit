@@ -5,7 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 REQUIRED = [
     "first-proof-summary.json",
     "health-score.json",

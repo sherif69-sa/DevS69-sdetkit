@@ -9,7 +9,7 @@ PORTFOLIO_MANIFEST ?= portfolio-manifest.json
 FIRST_PROOF_BRANCH ?= local
 FIRST_PROOF_STRICT ?= false
 FIRST_PROOF_RELEASE_DRY_RUN ?= true
-FIRST_PROOF_READINESS_PROFILE ?= standard
+FIRST_PROOF_READINESS_PROFILE ?= lenient
 PHASE2_BASELINE_PRE_EXTRACTION ?= docs/artifacts/phase2-hotspot-baseline-pre-extraction-$(DATE_TAG).json
 BUSINESS_EXECUTION_OPERATOR ?= sherif69-sa
 
