@@ -67,3 +67,23 @@ See also:
 For private inquiries (including commercial licensing permissions), use one of the channels below:
 - LinkedIn: https://www.linkedin.com/in/sherif-atef-b1077a124/
 - Email: sherif.atef6300@gmail.com
+
+## GitHub dependency snapshot submission failures
+
+If your workflow uses `actions/component-detection-dependency-submission-action` and fails with:
+
+- `HttpError: An error occurred while processing your request. Please try again later.`
+- `Failed to submit snapshot`
+
+this is usually a transient GitHub Dependency Graph API-side failure (the component scan can still succeed).
+
+Recommended mitigations:
+
+1. Ensure job permissions include:
+   - `contents: read`
+   - `dependency-graph: write`
+2. Add an exponential-backoff retry around the submission step.
+3. Keep the detector category/filter constrained (for Python: `detectorsCategories: Python`, `detectorsFilter: PipReport`) to reduce payload size and execution time.
+4. Keep `snapshot-sha` and `snapshot-ref` aligned to the triggering commit/ref.
+
+If the failure is intermittent, re-running the workflow usually succeeds once GitHub API capacity recovers.
