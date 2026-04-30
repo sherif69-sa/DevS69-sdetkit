@@ -304,6 +304,17 @@ Then use stability-aware command discovery:
         help_text="[Public / stable] Runtime/install integration contract surfaces for adopters",
     )
 
+    boost = sub.add_parser(
+        "boost",
+        help="[Advanced but supported] High-signal deterministic local repo intelligence scan",
+    )
+    boost_sub = boost.add_subparsers(dest="boost_cmd", required=False)
+    boost_scan = boost_sub.add_parser("scan", help="Run deterministic local boost scan")
+    boost_scan.add_argument("path")
+    boost_scan.add_argument("--minutes", type=int, default=5)
+    boost_scan.add_argument("--max-lines", type=int, default=100)
+    boost_scan.add_argument("--format", choices=["text", "operator-json"], default="text")
+
     rpt = sub.add_parser("report", help="Reporting workflows and output packs")
     rpt.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -861,6 +872,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         if ns.escalation_min_p0_rate is not None:
             forwarded.extend(["--escalation-min-p0-rate", str(ns.escalation_min_p0_rate)])
         return _run_module_main("sdetkit.adoption", forwarded)
+
+    if ns.cmd == "boost":
+        if getattr(ns, "boost_cmd", None) == "scan":
+            forwarded = [
+                "scan",
+                str(ns.path),
+                "--minutes",
+                str(ns.minutes),
+                "--max-lines",
+                str(ns.max_lines),
+                "--format",
+                str(ns.format),
+            ]
+            return _run_module_main("sdetkit.boost", forwarded)
+        return _run_module_main("sdetkit.boost", [])
 
     if ns.cmd == "fit":
         forwarded = [
