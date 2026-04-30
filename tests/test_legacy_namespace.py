@@ -14,11 +14,12 @@ def test_handle_legacy_namespace_lists_commands(capsys) -> None:
     assert "weekly-review-lane" in out
 
 
-def test_handle_legacy_namespace_requires_subcommand(capsys) -> None:
+def test_handle_legacy_namespace_noargs_shows_help(capsys) -> None:
     rc = legacy_namespace.handle_legacy_namespace(["legacy"])
-    assert rc == 2
-    err = capsys.readouterr().err
-    assert "expected a legacy command name" in err
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "usage: sdetkit legacy" in out
+    assert "migrate-hint" in out
 
 
 def test_handle_legacy_namespace_routes_migrate_hint(monkeypatch) -> None:
@@ -44,3 +45,32 @@ def test_cli_main_unknown_legacy_subcommand_fails_fast(capsys) -> None:
     assert rc == 2
     err = capsys.readouterr().err
     assert "legacy error: unknown subcommand 'unknown-subcmd'" in err
+
+
+def test_handle_legacy_namespace_help_shows_help(capsys) -> None:
+    rc = legacy_namespace.handle_legacy_namespace(["legacy", "--help"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "usage: sdetkit legacy" in out
+    assert "list" in out
+
+
+def test_cli_main_legacy_help_without_show_hidden(capsys) -> None:
+    rc = cli.main(["legacy", "--help"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "usage: sdetkit legacy" in out
+
+
+def test_cli_main_show_hidden_legacy_noargs_shows_help(capsys) -> None:
+    rc = cli.main(["--show-hidden", "legacy"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "usage: sdetkit legacy" in out
+
+
+def test_cli_main_show_hidden_legacy_help_shows_help(capsys) -> None:
+    rc = cli.main(["--show-hidden", "legacy", "--help"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "usage: sdetkit legacy" in out
