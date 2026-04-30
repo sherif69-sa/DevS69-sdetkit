@@ -83,4 +83,6 @@ def test_whatsapp_real_send_is_explicitly_not_implemented(monkeypatch, capsys) -
     rc = cli.main(["notify", "whatsapp", "--message", "hello", "--real-send"])
 
     assert rc == 2
-    assert "not implemented" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "not implemented" in out
+    assert "config-probe" in out

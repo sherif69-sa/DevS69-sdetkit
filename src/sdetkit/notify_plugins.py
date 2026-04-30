@@ -85,14 +85,23 @@ class WhatsAppAdapter:
     def send(self, args: argparse.Namespace) -> int:
         api_key = os.environ.get("SDETKIT_WHATSAPP_API_KEY")
         if not api_key:
-            sys.stdout.write("whatsapp adapter not configured: set SDETKIT_WHATSAPP_API_KEY.\n")
+            sys.stdout.write(
+                "whatsapp adapter is incubator/config-probe only: "
+                "set SDETKIT_WHATSAPP_API_KEY only for configuration checks; "
+                "real-send is not implemented.\n"
+            )
             return 2
 
         if getattr(args, "real_send", False):
-            sys.stdout.write("whatsapp real-send is not implemented yet.\n")
+            sys.stdout.write(
+                "whatsapp real-send is not implemented; use --dry-run or config-probe mode only.\n"
+            )
             return 2
 
-        sys.stdout.write("whatsapp adapter configured; use --dry-run in offline mode.\n")
+        sys.stdout.write(
+            "whatsapp adapter configured for incubator/config-probe mode; "
+            "use --dry-run for offline message preview.\n"
+        )
         return 0
 
 

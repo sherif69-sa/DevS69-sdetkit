@@ -113,3 +113,8 @@ Optional extras:
 pip install sdetkit[telegram]
 pip install sdetkit[whatsapp]
 ```
+
+Posture by adapter:
+
+- `telegram` is the live-send adapter. It stays offline unless credentials are configured and `--real-send` is passed.
+- `whatsapp` is incubator/config-probe only. The extra keeps the dependency boundary testable, but WhatsApp live-send is intentionally not implemented yet.
