@@ -58,7 +58,7 @@ premerge-finalize: install
 first-proof: first-proof-install
 	@bash -lc '. .venv/bin/activate && PYTHONPATH=src python scripts/first_proof.py $(if $(filter true,$(FIRST_PROOF_STRICT)),--strict,) $(if $(filter true,$(FIRST_PROOF_RELEASE_DRY_RUN)),--release-dry-run,) --format json --out-dir build/first-proof'
 
-first-proof-local: venv
+first-proof-local: install
 	@bash -lc '. .venv/bin/activate && PYTHONPATH=src python scripts/first_proof.py $(if $(filter true,$(FIRST_PROOF_STRICT)),--strict,) $(if $(filter true,$(FIRST_PROOF_RELEASE_DRY_RUN)),--release-dry-run,) --format json --out-dir build/first-proof'
 
 first-proof-contract: venv
@@ -85,7 +85,7 @@ first-proof-trend-threshold: venv
 first-proof-tests: install
 	@bash -lc '. .venv/bin/activate && python -m pytest -q tests/test_first_proof_script.py tests/test_first_proof_contract.py tests/test_first_proof_learning_db.py tests/test_first_proof_weekly_trend.py tests/test_first_proof_control_tower.py tests/test_first_proof_trend_threshold.py tests/test_build_owner_escalation_payload.py'
 
-first-proof-tests-local: venv
+first-proof-tests-local: install
 	@bash -lc '. .venv/bin/activate && python -m pytest -q tests/test_first_proof_script.py tests/test_first_proof_contract.py tests/test_first_proof_learning_db.py tests/test_first_proof_weekly_trend.py tests/test_first_proof_control_tower.py tests/test_first_proof_trend_threshold.py tests/test_build_owner_escalation_payload.py'
 
 first-proof-verify: first-proof
