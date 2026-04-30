@@ -1,5 +1,18 @@
 # Start here: deterministic release confidence
 
+<!-- product-proof-start -->
+## Live-adoption product proof
+
+The current package is backed by a committed live-adoption proof pack:
+
+- **Proof page:** [Live-adoption product proof](live-adoption-product-proof.md)
+- **Decision:** `SHIP with known STRICT_FINDINGS`
+- **Blocking failures:** `0`
+- **Known strict finding:** `legacy-noargs` compatibility behavior only
+- **Validated strengths:** first-proof, core gates, review JSON/operator JSON, wheel smoke, fixture surfaces, and docs front-door commands.
+
+<!-- product-proof-end -->
+
 DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisions with machine-readable evidence.
 
 **Primary outcome:** know if a change is ready to ship.

@@ -1,0 +1,66 @@
+{
+  "binary_bundle_policy": {
+    "committed": false,
+    "local_bundle_name": "devs69-sdetkit-product-proof-post-1072-20260430T100932Z.tar.gz",
+    "local_bundle_sha256": "454adf4f272f4bee405883342200827d9c680cebe894790650e8afeccb964e04",
+    "reason": "repo audit requires committed docs artifacts to be UTF-8 text"
+  },
+  "blocking_failures": 0,
+  "committed_evidence_files": [
+    "README.md",
+    "live-adoption-product-proof-summary.json",
+    "repo-full-analysis-summary.md",
+    "docs-core-proof-summary.md",
+    "fixture-surface-proof-summary.md",
+    "docs-example-proof-summary.md"
+  ],
+  "evidence_scope": "post-1072 live-adoption product proof",
+  "final_classification": "SHIP with known STRICT_FINDINGS",
+  "known_strict_findings": [
+    {
+      "blocking": false,
+      "classification": "STRICT_FINDINGS",
+      "id": "legacy-noargs",
+      "reason": "legacy compatibility lane has nonstandard no-args behavior"
+    }
+  ],
+  "proven_layers": [
+    {
+      "evidence": "FIRST_PROOF_DECISION=SHIP; health_score=100",
+      "layer": "first-proof lane",
+      "status": "SHIP"
+    },
+    {
+      "evidence": "gate fast, release dry-run, and doctor passed",
+      "layer": "core gates",
+      "status": "SHIP"
+    },
+    {
+      "evidence": "json and operator-json emit valid JSON with findings rc",
+      "layer": "review front door",
+      "status": "SHIP_WITH_FINDINGS_RC"
+    },
+    {
+      "evidence": "build, twine check, wheel install, CLI smoke, import smoke",
+      "layer": "package proof",
+      "status": "SHIP"
+    },
+    {
+      "evidence": "inspect/project/compare/patch/agent/serve/apiget fixture or shape probes passed",
+      "layer": "fixture surface proof",
+      "status": "SHIP"
+    },
+    {
+      "evidence": "curated docs-core command proof passed",
+      "layer": "docs front door",
+      "status": "SHIP"
+    },
+    {
+      "evidence": "command surface decision SHIP; blocking failures 0; legacy-noargs only",
+      "layer": "full repo analysis",
+      "status": "STRICT_FINDINGS"
+    }
+  ],
+  "repository_head": "4031d142ce57985b542f0aaf1298637309ab0318",
+  "schema_version": "devs69.sdetkit.live_adoption_product_proof.v1"
+}
