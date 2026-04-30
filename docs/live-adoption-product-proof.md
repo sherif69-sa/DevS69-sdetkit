@@ -2,6 +2,10 @@
 
 SDETKit is backed by committed UTF-8 live-adoption product proof evidence.
 
+!!! note "Snapshot record"
+    This page records the post-#1072 live-adoption proof snapshot. Follow-up productization work has since closed the `legacy-noargs` help/UX finding and clarified WhatsApp as incubator/config-probe only.
+
+
 ## Proof identity
 
 | Field | Value |
