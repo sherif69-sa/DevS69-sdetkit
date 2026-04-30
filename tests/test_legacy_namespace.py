@@ -46,6 +46,7 @@ def test_cli_main_unknown_legacy_subcommand_fails_fast(capsys) -> None:
     err = capsys.readouterr().err
     assert "legacy error: unknown subcommand 'unknown-subcmd'" in err
 
+
 def test_handle_legacy_namespace_help_shows_help(capsys) -> None:
     rc = legacy_namespace.handle_legacy_namespace(["legacy", "--help"])
     assert rc == 0
@@ -73,4 +74,3 @@ def test_cli_main_show_hidden_legacy_help_shows_help(capsys) -> None:
     assert rc == 0
     out = capsys.readouterr().out
     assert "usage: sdetkit legacy" in out
-
