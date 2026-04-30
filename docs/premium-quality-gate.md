@@ -58,6 +58,21 @@ Use these commands to quickly diagnose PR quality issues and unblock reviews.
 
 Use `bash premium-gate.sh` locally and in CI. The gate is now a self-contained **five-head engine** with explicit phases and runtime telemetry:
 
+### Five-head contract
+
+The five-head engine is a deterministic product signal, not an external AI call. It summarizes release posture across five named heads:
+
+| Head | Meaning |
+|---|---|
+| `quality` | test, lint, doctor, and validation pressure |
+| `reliability` | repeatability, workflow health, and runtime confidence |
+| `security` | security/audit posture and policy gate pressure |
+| `evidence` | supporting versus conflicting evidence quality |
+| `delivery` | priority queue heat and release-readiness pressure |
+
+`review --format operator-json` emits the same contract under top-level `five_heads` with schema version `sdetkit.review.five-heads.v1`. The premium gate renders the same posture for operator-facing markdown and step-index outputs. Status values are intended for deterministic triage and should be treated as release signals, not as a replacement for the underlying evidence artifacts.
+
+
 1. **Head-1 Foundation & Quality** (`bash quality.sh`)
 2. **Head-2 Source Truth & Style** (ruff format/lint)
 3. **Head-3 Operational Confidence** (CI + doctor + maintenance + integration topology contract + ops profile)
