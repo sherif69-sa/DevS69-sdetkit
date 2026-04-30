@@ -753,6 +753,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         argv = sys.argv[1:]
 
     argv, no_legacy_hint = extract_global_flag(argv, "--no-legacy-hint")
+    argv, show_hidden_commands = extract_global_flag(argv, "--show-hidden")
 
     if argv:
         argv = list(argv)
@@ -778,7 +779,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     if preparse_result is not None:
         return preparse_result
 
-    show_hidden_commands = "--show-hidden" in argv
     p, sub = _build_root_parser(show_hidden_commands=show_hidden_commands)
 
     if not show_hidden_commands:
