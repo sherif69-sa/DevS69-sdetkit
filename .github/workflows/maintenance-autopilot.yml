@@ -135,12 +135,16 @@ jobs:
             }
 
       - name: Send webhook notification for actionable security follow-up
-        if: github.event_name != 'pull_request' && steps.security_followup.outputs.actionable != '0' && secrets.MAINTENANCE_WEBHOOK_URL != ''
+        if: github.event_name != 'pull_request' && steps.security_followup.outputs.actionable != '0'
         env:
           WEBHOOK_URL: ${{ secrets.MAINTENANCE_WEBHOOK_URL }}
           ISSUE_NUMBER: ${{ steps.security_followup.outputs.issue_number }}
           ACTIONABLE: ${{ steps.security_followup.outputs.actionable }}
         run: |
+          if [ -z "${WEBHOOK_URL:-}" ]; then
+            echo "Webhook notification skipped: MAINTENANCE_WEBHOOK_URL is not configured."
+            exit 0
+          fi
           python - <<'PY'
           import json
           import os
