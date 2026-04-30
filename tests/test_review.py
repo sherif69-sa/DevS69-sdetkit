@@ -841,3 +841,36 @@ def test_review_recovers_from_corrupt_probe_memory(tmp_path: Path) -> None:
         == "sdetkit.review.probe-memory.v1"
     )
     assert isinstance(payload["adaptive_review"]["probe_memory"]["normalized_outcomes"], list)
+
+
+def test_cli_review_repo_skips_empty_json_file(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "pyproject.toml").write_text(
+        "[project]\nname='empty-json-fixture'\nversion='0.1.0'\n",
+        encoding="utf-8",
+    )
+    (repo / "empty.json").write_text("", encoding="utf-8")
+
+    run = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "sdetkit",
+            "review",
+            str(repo),
+            "--workspace-root",
+            str(tmp_path / "workspace"),
+            "--format",
+            "json",
+            "--no-workspace",
+        ],
+        text=True,
+        capture_output=True,
+    )
+
+    assert run.returncode in {0, 2}
+    assert run.stderr == ""
+    payload = json.loads(run.stdout)
+    assert payload["workflow"] == "review"
+    assert payload["path"].endswith("repo")
