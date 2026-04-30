@@ -8,10 +8,21 @@ import sys
 def test_boost_scan_operator_json_contract(tmp_path):
     (tmp_path / "README.md").write_text("# x\n", encoding="utf-8")
     (tmp_path / "tests").mkdir()
-    (tmp_path / "tests" / "test_smoke.py").write_text("def test_ok():\n    assert True\n", encoding="utf-8")
+    (tmp_path / "tests" / "test_smoke.py").write_text(
+        "def test_ok():\n    assert True\n", encoding="utf-8"
+    )
 
     proc = subprocess.run(
-        [sys.executable, "-m", "sdetkit", "boost", "scan", str(tmp_path), "--format", "operator-json"],
+        [
+            sys.executable,
+            "-m",
+            "sdetkit",
+            "boost",
+            "scan",
+            str(tmp_path),
+            "--format",
+            "operator-json",
+        ],
         capture_output=True,
         text=True,
         check=False,
