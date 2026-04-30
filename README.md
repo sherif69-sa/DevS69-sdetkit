@@ -11,6 +11,36 @@ DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisi
 
 Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 
+<!-- product-proof-start -->
+## Proven product proof
+
+SDETKit is a release-confidence and SDET evidence automation kit with committed live-adoption proof.
+
+Latest committed proof pack:
+
+- **Evidence:** `docs/artifacts/live-adoption/product-proof-post-1072/`
+- **Decision:** `SHIP with known STRICT_FINDINGS`
+- **Blocking failures:** `0`
+- **Known strict finding:** `legacy-noargs` compatibility behavior only
+
+Proven layers:
+
+| Layer | Proof |
+|---|---|
+| First-proof lane | `FIRST_PROOF_DECISION=SHIP`, health `100` |
+| Core gates | gate fast, release dry-run, and doctor passed |
+| Review front door | `json` and `operator-json` emit valid JSON with findings rc |
+| Package proof | build, twine check, wheel install, CLI smoke, import smoke |
+| Fixture proof | inspect/project/compare/patch/agent/serve/apiget shapes passed |
+| Docs proof | curated front-door docs commands passed |
+| Full repo analysis | command surface `SHIP`, blocking failures `0` |
+
+See: [`docs/live-adoption-product-proof.md`](docs/live-adoption-product-proof.md)
+<!-- product-proof-end -->
+
+
+
+
 Need one command for first proof in this repository?
 
 ```bash
@@ -159,6 +189,9 @@ Related docs:
 To keep recurring bot-generated maintenance issues actionable, enable the rolling command-center workflow:
 
 ```bash
+
+
+
 # Runs daily and can also be triggered manually
 .github/workflows/maintenance-issue-command-center.yml
 ```
