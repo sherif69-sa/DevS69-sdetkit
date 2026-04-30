@@ -7,8 +7,11 @@ from pathlib import Path
 from typing import Any
 
 
-def _stdout(message: str) -> None:
-    sys.stdout.write(message + "\n")
+def _stdout(message: object) -> None:
+    if isinstance(message, str):
+        sys.stdout.write(message + "\n")
+    else:
+        sys.stdout.write(json.dumps(message) + "\n")
 
 
 SCHEMA_VERSION = "sdetkit.kits.catalog.v1"
