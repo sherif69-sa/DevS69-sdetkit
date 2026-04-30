@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict, dataclass
 import json
+from dataclasses import asdict, dataclass
 from pathlib import Path
-
 
 SCHEMA_VERSION = "sdetkit.boost.scan.v1"
 TEXT_SUFFIXES = {".md", ".py", ".toml", ".yml", ".yaml", ".json", ".txt", ".ini", ".cfg"}
-IGNORED_DIRS = {".git", ".venv", "venv", "site", "htmlcov", ".mypy_cache", ".pytest_cache", "node_modules"}
+IGNORED_DIRS = {
+    ".git",
+    ".venv",
+    "venv",
+    "site",
+    "htmlcov",
+    ".mypy_cache",
+    ".pytest_cache",
+    "node_modules",
+}
 
 
 @dataclass(frozen=True)
@@ -92,8 +100,17 @@ def _workflow_surface(root: Path) -> tuple[list[Risk], list[Fix], list[str], dic
     files = [_rel(root, path) for path in workflows[:8]]
     signals: dict[str, object] = {"workflow_count": len(workflows)}
     if not workflows:
-        risks.append(Risk("No CI workflows detected", "major", ".github/workflows", "workflow_count=0"))
-        fixes.append(Fix("Add deterministic CI workflow coverage", "No workflow files were found.", ".github/workflows", 10))
+        risks.append(
+            Risk("No CI workflows detected", "major", ".github/workflows", "workflow_count=0")
+        )
+        fixes.append(
+            Fix(
+                "Add deterministic CI workflow coverage",
+                "No workflow files were found.",
+                ".github/workflows",
+                10,
+            )
+        )
         return risks, fixes, files, signals
     secret_if_hits: list[str] = []
     for path in workflows:
@@ -102,15 +119,33 @@ def _workflow_surface(root: Path) -> tuple[list[Risk], list[Fix], list[str], dic
             secret_if_hits.append(_rel(root, path))
     signals["workflow_secret_if_hits"] = len(secret_if_hits)
     if secret_if_hits:
-        risks.append(Risk("Workflow if expression uses direct secrets context", "major", secret_if_hits[0], "secrets_in_if"))
-        fixes.append(Fix("Move secret checks inside shell steps", "Workflow step if expressions should not directly reference secrets.", secret_if_hits[0], 9))
+        risks.append(
+            Risk(
+                "Workflow if expression uses direct secrets context",
+                "major",
+                secret_if_hits[0],
+                "secrets_in_if",
+            )
+        )
+        fixes.append(
+            Fix(
+                "Move secret checks inside shell steps",
+                "Workflow step if expressions should not directly reference secrets.",
+                secret_if_hits[0],
+                9,
+            )
+        )
     return risks, fixes, files, signals
 
 
 def _test_surface(root: Path) -> tuple[list[Risk], list[Fix], list[str], dict[str, object]]:
     tests_dir = root / "tests"
     test_files = sorted(tests_dir.rglob("test*.py")) if tests_dir.exists() else []
-    contract_hits = [path for path in test_files if any(word in path.name for word in ("contract", "review", "gate", "boost"))]
+    contract_hits = [
+        path
+        for path in test_files
+        if any(word in path.name for word in ("contract", "review", "gate", "boost"))
+    ]
     risks: list[Risk] = []
     fixes: list[Fix] = []
     signals: dict[str, object] = {
@@ -122,11 +157,34 @@ def _test_surface(root: Path) -> tuple[list[Risk], list[Fix], list[str], dict[st
         risks.append(Risk("No tests directory detected", "major", "tests/", "has_tests_dir=false"))
         fixes.append(Fix("Add focused test suite", "No tests directory was found.", "tests/", 10))
     elif len(test_files) < 3:
-        risks.append(Risk("Low test inventory", "moderate", "tests/", f"test_file_count={len(test_files)}"))
-        fixes.append(Fix("Expand high-signal test inventory", "Fewer than three test files were found.", "tests/", 7))
+        risks.append(
+            Risk("Low test inventory", "moderate", "tests/", f"test_file_count={len(test_files)}")
+        )
+        fixes.append(
+            Fix(
+                "Expand high-signal test inventory",
+                "Fewer than three test files were found.",
+                "tests/",
+                7,
+            )
+        )
     if test_files and not contract_hits:
-        risks.append(Risk("No obvious contract tests detected", "minor", "tests/", "contract_test_file_count=0"))
-        fixes.append(Fix("Add CLI and JSON contract tests", "The test suite lacks obvious contract test coverage.", "tests/", 5))
+        risks.append(
+            Risk(
+                "No obvious contract tests detected",
+                "minor",
+                "tests/",
+                "contract_test_file_count=0",
+            )
+        )
+        fixes.append(
+            Fix(
+                "Add CLI and JSON contract tests",
+                "The test suite lacks obvious contract test coverage.",
+                "tests/",
+                5,
+            )
+        )
     return risks, fixes, [_rel(root, p) for p in test_files[:8]], signals
 
 
@@ -142,27 +200,85 @@ def _docs_surface(root: Path) -> tuple[list[Risk], list[Fix], list[str], dict[st
         files.append("README.md")
     else:
         risks.append(Risk("Missing README.md", "major", "README.md", "has_readme=false"))
-        fixes.append(Fix("Add top-level operator quickstart", "README.md is missing.", "README.md", 10))
+        fixes.append(
+            Fix("Add top-level operator quickstart", "README.md is missing.", "README.md", 10)
+        )
     if mkdocs.exists():
         files.append("mkdocs.yml")
     elif docs_dir.exists():
-        risks.append(Risk("Docs exist without mkdocs.yml", "moderate", "mkdocs.yml", "has_docs_dir=true has_mkdocs=false"))
-        fixes.append(Fix("Add deterministic docs navigation", "Docs exist but mkdocs.yml is missing.", "mkdocs.yml", 7))
+        risks.append(
+            Risk(
+                "Docs exist without mkdocs.yml",
+                "moderate",
+                "mkdocs.yml",
+                "has_docs_dir=true has_mkdocs=false",
+            )
+        )
+        fixes.append(
+            Fix(
+                "Add deterministic docs navigation",
+                "Docs exist but mkdocs.yml is missing.",
+                "mkdocs.yml",
+                7,
+            )
+        )
     files.extend(_rel(root, p) for p in docs_files[:6])
-    return risks, fixes, files, {"has_readme": readme.exists(), "has_docs_dir": docs_dir.exists(), "has_mkdocs": mkdocs.exists(), "docs_file_count": len(docs_files)}
+    return (
+        risks,
+        fixes,
+        files,
+        {
+            "has_readme": readme.exists(),
+            "has_docs_dir": docs_dir.exists(),
+            "has_mkdocs": mkdocs.exists(),
+            "docs_file_count": len(docs_files),
+        },
+    )
 
 
 def _security_surface(root: Path) -> tuple[list[Risk], list[Fix], list[str], dict[str, object]]:
-    markers = [root / "SECURITY.md", root / "docs" / "security.md", root / ".github" / "dependabot.yml"]
+    markers = [
+        root / "SECURITY.md",
+        root / "docs" / "security.md",
+        root / ".github" / "dependabot.yml",
+    ]
     files = [_rel(root, path) for path in markers if path.exists()]
     if files:
         return [], [], files, {"security_marker_count": len(files)}
-    return [Risk("Security posture markers missing", "moderate", "SECURITY.md", "security_marker_count=0")], [Fix("Add security posture documentation", "No SECURITY.md or equivalent marker was found.", "SECURITY.md", 7)], [], {"security_marker_count": 0}
+    return (
+        [
+            Risk(
+                "Security posture markers missing",
+                "moderate",
+                "SECURITY.md",
+                "security_marker_count=0",
+            )
+        ],
+        [
+            Fix(
+                "Add security posture documentation",
+                "No SECURITY.md or equivalent marker was found.",
+                "SECURITY.md",
+                7,
+            )
+        ],
+        [],
+        {"security_marker_count": 0},
+    )
 
 
 def _evidence_surface(root: Path) -> tuple[list[Risk], list[Fix], list[str], dict[str, object]]:
     build = root / "build"
-    names = {"repo-check.json", "repo-check-default.json", "repo-check-enterprise.json", "gate-release.json", "review-operator.json", "review-operator-json.json", "premium-gate.json", "portfolio-scorecard.json"}
+    names = {
+        "repo-check.json",
+        "repo-check-default.json",
+        "repo-check-enterprise.json",
+        "gate-release.json",
+        "review-operator.json",
+        "review-operator-json.json",
+        "premium-gate.json",
+        "portfolio-scorecard.json",
+    }
     files: list[str] = []
     if build.exists():
         for path in sorted(build.rglob("*.json")):
@@ -171,7 +287,9 @@ def _evidence_surface(root: Path) -> tuple[list[Risk], list[Fix], list[str], dic
     return [], [], files[:12], {"evidence_file_count": len(files)}
 
 
-def _source_surface(root: Path, limit: int) -> tuple[list[Risk], list[Fix], list[str], dict[str, object]]:
+def _source_surface(
+    root: Path, limit: int
+) -> tuple[list[Risk], list[Fix], list[str], dict[str, object]]:
     source_dir = root / "src"
     source_files = sorted(source_dir.rglob("*.py")) if source_dir.exists() else []
     text_files = _limited_text_files(root, limit)
@@ -179,12 +297,29 @@ def _source_surface(root: Path, limit: int) -> tuple[list[Risk], list[Fix], list
     risks: list[Risk] = []
     fixes: list[Fix] = []
     if not source_files:
-        risks.append(Risk("No Python source files detected", "major", "src/", "source_file_count=0"))
-        fixes.append(Fix("Add Python source package or scan the repository root", "No Python source files were found under src/.", "src/", 10))
+        risks.append(
+            Risk("No Python source files detected", "major", "src/", "source_file_count=0")
+        )
+        fixes.append(
+            Fix(
+                "Add Python source package or scan the repository root",
+                "No Python source files were found under src/.",
+                "src/",
+                10,
+            )
+        )
     if markers["fixme"]:
         risks.append(Risk("FIXME markers present", "minor", "repo", f"fixme={markers['fixme']}"))
-        fixes.append(Fix("Triage FIXME markers", "FIXME markers were found in scanned text files.", "repo", 3))
-    signals = {"source_file_count": len(source_files), "text_files_scanned": len(text_files), **markers}
+        fixes.append(
+            Fix(
+                "Triage FIXME markers", "FIXME markers were found in scanned text files.", "repo", 3
+            )
+        )
+    signals = {
+        "source_file_count": len(source_files),
+        "text_files_scanned": len(text_files),
+        **markers,
+    }
     return risks, fixes, [_rel(root, p) for p in source_files[:8]], signals
 
 
@@ -193,8 +328,32 @@ def _package_surface(root: Path) -> tuple[list[Risk], list[Fix], list[str], dict
     requirements = root / "requirements.txt"
     files = [name for name in ("pyproject.toml", "requirements.txt") if (root / name).exists()]
     if pyproject.exists() or requirements.exists():
-        return [], [], files, {"has_pyproject": pyproject.exists(), "has_requirements": requirements.exists()}
-    return [Risk("No Python packaging metadata detected", "major", "pyproject.toml", "has_pyproject=false")], [Fix("Add Python packaging metadata", "No pyproject.toml or requirements.txt was found.", "pyproject.toml", 9)], files, {"has_pyproject": False, "has_requirements": False}
+        return (
+            [],
+            [],
+            files,
+            {"has_pyproject": pyproject.exists(), "has_requirements": requirements.exists()},
+        )
+    return (
+        [
+            Risk(
+                "No Python packaging metadata detected",
+                "major",
+                "pyproject.toml",
+                "has_pyproject=false",
+            )
+        ],
+        [
+            Fix(
+                "Add Python packaging metadata",
+                "No pyproject.toml or requirements.txt was found.",
+                "pyproject.toml",
+                9,
+            )
+        ],
+        files,
+        {"has_pyproject": False, "has_requirements": False},
+    )
 
 
 def _score(risks: list[Risk]) -> int:
@@ -213,18 +372,60 @@ def _decision(score: int, risks: list[Risk]) -> str:
 def _next_prs(risks: list[Risk], fixes: list[Fix]) -> list[dict[str, object]]:
     candidates: list[dict[str, object]] = []
     if any(risk.file.startswith(".github/workflows") for risk in risks):
-        candidates.append({"title": "ci-bootstrap", "reason": "Restore deterministic CI workflow coverage.", "files": [".github/workflows"], "priority": 10})
+        candidates.append(
+            {
+                "title": "ci-bootstrap",
+                "reason": "Restore deterministic CI workflow coverage.",
+                "files": [".github/workflows"],
+                "priority": 10,
+            }
+        )
     if any(risk.file.startswith("tests") for risk in risks):
-        candidates.append({"title": "contract-test-boost", "reason": "Expand high-signal CLI and JSON contract coverage.", "files": ["tests/"], "priority": 8})
+        candidates.append(
+            {
+                "title": "contract-test-boost",
+                "reason": "Expand high-signal CLI and JSON contract coverage.",
+                "files": ["tests/"],
+                "priority": 8,
+            }
+        )
     if any(risk.file in {"README.md", "mkdocs.yml"} for risk in risks):
-        candidates.append({"title": "docs-front-door", "reason": "Tighten adopter docs and navigation readiness.", "files": ["README.md", "docs/", "mkdocs.yml"], "priority": 7})
+        candidates.append(
+            {
+                "title": "docs-front-door",
+                "reason": "Tighten adopter docs and navigation readiness.",
+                "files": ["README.md", "docs/", "mkdocs.yml"],
+                "priority": 7,
+            }
+        )
     if any(risk.file == "SECURITY.md" for risk in risks):
-        candidates.append({"title": "security-posture", "reason": "Document security contact and vulnerability handling posture.", "files": ["SECURITY.md"], "priority": 7})
+        candidates.append(
+            {
+                "title": "security-posture",
+                "reason": "Document security contact and vulnerability handling posture.",
+                "files": ["SECURITY.md"],
+                "priority": 7,
+            }
+        )
     if not candidates and fixes:
         first = fixes[0]
-        candidates.append({"title": "release-hardening", "reason": first.reason, "files": [first.file], "priority": first.priority})
+        candidates.append(
+            {
+                "title": "release-hardening",
+                "reason": first.reason,
+                "files": [first.file],
+                "priority": first.priority,
+            }
+        )
     if not candidates:
-        candidates.append({"title": "policy-threshold-hardening", "reason": "No hard blockers found; raise confidence by tightening release gate evidence.", "files": ["src/", "tests/", "docs/"], "priority": 4})
+        candidates.append(
+            {
+                "title": "policy-threshold-hardening",
+                "reason": "No hard blockers found; raise confidence by tightening release gate evidence.",
+                "files": ["src/", "tests/", "docs/"],
+                "priority": 4,
+            }
+        )
     return sorted(candidates, key=lambda item: (-int(item["priority"]), str(item["title"])))[:8]
 
 
@@ -236,7 +437,14 @@ def build_scan(root: Path, minutes: int, max_lines: int) -> dict[str, object]:
     high_files: list[str] = []
     evidence_files: list[str] = []
     signals: dict[str, object] = {}
-    collectors = (_workflow_surface, _test_surface, _docs_surface, _security_surface, _evidence_surface, _package_surface)
+    collectors = (
+        _workflow_surface,
+        _test_surface,
+        _docs_surface,
+        _security_surface,
+        _evidence_surface,
+        _package_surface,
+    )
     for collector in collectors:
         local_risks, local_fixes, local_files, local_signals = collector(resolved)
         risks.extend(local_risks)
@@ -252,7 +460,10 @@ def build_scan(root: Path, minutes: int, max_lines: int) -> dict[str, object]:
     high_files.extend(source_files)
     signals.update(source_signals)
     signals["scan_budget_file_limit"] = scan_limit
-    risks = sorted(risks, key=lambda r: ({"major": 0, "moderate": 1, "minor": 2}.get(r.severity, 3), r.title, r.file))
+    risks = sorted(
+        risks,
+        key=lambda r: ({"major": 0, "moderate": 1, "minor": 2}.get(r.severity, 3), r.title, r.file),
+    )
     fixes = sorted(fixes, key=lambda f: (-f.priority, f.title, f.file))
     score = _score(risks)
     decision = _decision(score, risks)
@@ -264,7 +475,11 @@ def build_scan(root: Path, minutes: int, max_lines: int) -> dict[str, object]:
         "root": str(resolved),
         "decision": decision,
         "score": score,
-        "budget": {"minutes": int(minutes), "max_lines": int(max_lines), "scan_file_limit": scan_limit},
+        "budget": {
+            "minutes": int(minutes),
+            "max_lines": int(max_lines),
+            "scan_file_limit": scan_limit,
+        },
         "summary": f"{len(risk_dicts)} risk signal(s), {len(fix_dicts)} fix recommendation(s), {len(evidence_files)} evidence file(s).",
         "top_risks": risk_dicts[:8],
         "recommended_fixes": fix_dicts[:10],
@@ -285,11 +500,33 @@ def _render_section(lines: list[str], title: str, items: list[object], formatter
 
 
 def render_text(payload: dict[str, object], max_lines: int) -> str:
-    lines = ["Boost Scan Engine Report", f"decision: {payload['decision']}", f"score: {payload['score']}", f"summary: {payload['summary']}"]
-    _render_section(lines, "top risks", payload["top_risks"], lambda item: f"- {item['severity']}: {item['title']} ({item['file']})")
-    _render_section(lines, "recommended fixes", payload["recommended_fixes"], lambda item: f"- {item['title']} ({item['file']})")
-    _render_section(lines, "high-signal files", payload["high_signal_files"], lambda item: f"- {item}")
-    _render_section(lines, "next PR candidates", payload["next_pr_candidates"], lambda item: f"- {item['title']}: {item['reason']}")
+    lines = [
+        "Boost Scan Engine Report",
+        f"decision: {payload['decision']}",
+        f"score: {payload['score']}",
+        f"summary: {payload['summary']}",
+    ]
+    _render_section(
+        lines,
+        "top risks",
+        payload["top_risks"],
+        lambda item: f"- {item['severity']}: {item['title']} ({item['file']})",
+    )
+    _render_section(
+        lines,
+        "recommended fixes",
+        payload["recommended_fixes"],
+        lambda item: f"- {item['title']} ({item['file']})",
+    )
+    _render_section(
+        lines, "high-signal files", payload["high_signal_files"], lambda item: f"- {item}"
+    )
+    _render_section(
+        lines,
+        "next PR candidates",
+        payload["next_pr_candidates"],
+        lambda item: f"- {item['title']}: {item['reason']}",
+    )
     _render_section(lines, "evidence files", payload["evidence_files"], lambda item: f"- {item}")
     return "\n".join(lines[: max(1, int(max_lines))])
 

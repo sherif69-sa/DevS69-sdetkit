@@ -149,4 +149,3 @@ def test_boost_scan_help_discoverability() -> None:
     assert proc.returncode == 0
     assert "--minutes" in proc.stdout
     assert "--max-lines" in proc.stdout
-
