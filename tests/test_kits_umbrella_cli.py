@@ -159,3 +159,25 @@ def test_kits_radar_emits_dependency_dashboard_json() -> None:
     assert payload["headline_metrics"]["packages_audited"] >= 1
     assert payload["dashboard_cards"]
     assert payload["maintenance_lanes"]
+
+
+def test_top_level_kits_list_returns_catalog(capsys) -> None:
+    from sdetkit import cli
+
+    rc = cli.main(["kits", "list"])
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "sdetkit.kits.catalog.v1" in out
+    assert "release-confidence" in out
+
+
+def test_top_level_kits_list_json_returns_catalog(capsys) -> None:
+    from sdetkit import cli
+
+    rc = cli.main(["kits", "list", "--format", "json"])
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "sdetkit.kits.catalog.v1" in out
+    assert "release-confidence" in out
