@@ -57,7 +57,13 @@ def _safe_slug(value: str) -> str:
 
 def _read_json_records(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
     notes: list[str] = []
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    raw = path.read_text(encoding="utf-8")
+    if not raw.strip():
+        return [], [f"{path}: empty JSON file skipped"]
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return [], [f"{path}: invalid JSON skipped ({exc.msg})"]
     if isinstance(payload, list):
         rows = [row for row in payload if isinstance(row, dict)]
         dropped = len(payload) - len(rows)
