@@ -198,7 +198,7 @@ To keep recurring bot-generated maintenance issues actionable, enable the rollin
 
 It keeps only the top priority maintenance trackers open, consolidates lower-priority bot trackers into one rolling issue (`🧠 Maintenance command center (rolling)`), and appends each run's problems into `.sdetkit/maintenance/issue-learning-db.jsonl` with a rollup in `.sdetkit/maintenance/issue-learning-rollup.json`.
 
-The workflow also refreshes `doctor` + adaptive `review` signals (including five-head status/confidence) before updating the command center so remediation priorities learn over time.
+The workflow also refreshes `doctor` + adaptive `review` signals, including the deterministic five-head contract (`quality`, `reliability`, `security`, `evidence`, `delivery`), before updating the command center so remediation priorities learn over time.
 
 Dry-run test against the live issue queue (without closing/updating issues):
 
