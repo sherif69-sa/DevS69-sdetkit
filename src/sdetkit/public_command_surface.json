@@ -23,7 +23,8 @@
     "inspect",
     "inspect-compare",
     "serve",
-    "repo"
+    "repo",
+    "boost"
   ],
   "best_effort_compatibility_commands": [
     "legacy",

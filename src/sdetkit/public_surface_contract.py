@@ -64,6 +64,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
             "notify",
             "agent",
             "feature-registry",
+            "boost",
         ),
     ),
     CommandFamilyContract(

@@ -136,3 +136,17 @@ def test_policy_tier_vocabulary_matches_public_contract_and_docs() -> None:
     for tier in POLICY_TIERS:
         assert tier in contract_help
         assert tier in docs_text
+
+
+def test_boost_help_discoverability() -> None:
+    proc = _run("boost", "--help")
+    assert proc.returncode == 0
+    assert "scan" in proc.stdout
+
+
+def test_boost_scan_help_discoverability() -> None:
+    proc = _run("boost", "scan", "--help")
+    assert proc.returncode == 0
+    assert "--minutes" in proc.stdout
+    assert "--max-lines" in proc.stdout
+

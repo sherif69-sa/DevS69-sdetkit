@@ -138,6 +138,31 @@ Public kit commands are contract-oriented:
 - deterministic ordering and reproducible artifacts
 - stable exit-code lanes (`0` success, `1` policy/contract failure, `2` invalid input/usage)
 
+
+## Boost Scan Engine (advanced but supported)
+
+`boost scan` is a deterministic local-only repo intelligence surface that ranks important local signals into one concise operator report.
+
+Posture:
+
+- no external services
+- no network dependency
+- stable machine-readable output via `operator-json`
+
+Recommended first command:
+
+```bash
+python -m sdetkit boost scan . --minutes 5 --max-lines 100 --format text
+```
+
+Operator JSON contract example:
+
+```bash
+python -m sdetkit boost scan . --minutes 5 --max-lines 100 --format operator-json
+```
+
+The report includes decision, score, top risks, recommended fixes, high-signal files, next PR candidates, and evidence files.
+
 ## Related references
 
 - [Command surface inventory (stability-aware)](command-surface.md)
