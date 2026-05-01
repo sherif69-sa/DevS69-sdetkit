@@ -2297,14 +2297,32 @@ def _render_release_readiness_markdown(contract: dict[str, Any]) -> str:
 
 
 def _run_json_cmd(args: list[str]) -> dict[str, Any]:
-    proc = subprocess.run(args, check=False, capture_output=True, text=True)
+    proc = subprocess.run(
+        args,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    diagnostics = {
+        "command": args,
+        "rc": int(proc.returncode),
+        "stderr": (proc.stderr or "").strip()[:500],
+        "stdout_present": bool((proc.stdout or "").strip()),
+    }
     if proc.returncode != 0:
-        return {}
+        return {"_diagnostics": diagnostics}
     try:
         loaded = json.loads(proc.stdout or "{}")
     except json.JSONDecodeError:
-        return {}
-    return loaded if isinstance(loaded, dict) else {}
+        diagnostics["parse_error"] = "invalid json"
+        return {"_diagnostics": diagnostics}
+    if not isinstance(loaded, dict):
+        diagnostics["parse_error"] = "json root not object"
+        return {"_diagnostics": diagnostics}
+    loaded.setdefault("_diagnostics", diagnostics)
+    return loaded
 
 
 def _build_adaptive_review_v2(
@@ -2318,7 +2336,16 @@ def _build_adaptive_review_v2(
 ) -> dict[str, Any]:
     index_payload = (
         _run_json_cmd(
-            ["python", "-m", "sdetkit", "index", str(target), "--format", "operator-json"]
+            [
+                "python",
+                "-m",
+                "sdetkit",
+                "index",
+                "inspect",
+                str(target),
+                "--format",
+                "operator-json",
+            ]
         )
         if deep
         else {}
@@ -2353,42 +2380,72 @@ def _build_adaptive_review_v2(
             "operator-json",
         ]
     )
-    boost_payload = _run_json_cmd(
-        [
-            "python",
-            "-m",
-            "sdetkit",
-            "boost-scan",
-            str(target),
-            "--format",
-            "operator-json",
-            "--db",
-            str(db_path),
-        ]
-    )
+    boost_args = [
+        "python",
+        "-m",
+        "sdetkit",
+        "boost",
+        "scan",
+        str(target),
+        "--deep",
+        "--learn",
+        "--db",
+        str(db_path),
+        "--format",
+        "operator-json",
+    ]
+    if evidence_dir:
+        evidence_dir.mkdir(parents=True, exist_ok=True)
+        boost_evidence_dir = safe_path(evidence_dir, "boost", allow_absolute=False)
+        boost_evidence_dir.mkdir(parents=True, exist_ok=True)
+        boost_args.extend(["--evidence-dir", str(boost_evidence_dir)])
+    boost_payload = _run_json_cmd(boost_args)
     findings = [row for row in payload.get("top_matters", []) if isinstance(row, dict)]
     recommendations = list(
         dict.fromkeys(
             [str(row.get("next_action", "")) for row in findings if row.get("next_action")]
         )
     )
-    recurring = boost_payload.get("recurring_risks", []) if isinstance(boost_payload, dict) else []
+    recurring = []
+    if isinstance(boost_payload, dict):
+        recurring = boost_payload.get("recurring_risks", [])
+    if (not isinstance(recurring, list) or not recurring) and isinstance(explain_payload, dict):
+        recurring = explain_payload.get("recurring_risks", [])
     five_heads = (
         payload.get("five_heads", {}) if isinstance(payload.get("five_heads", {}), dict) else {}
     )
     heads = five_heads.get("heads", {}) if isinstance(five_heads.get("heads", {}), dict) else {}
+    index_ok = (
+        isinstance(index_payload, dict)
+        and "missing_signal" not in index_payload
+        and "_diagnostics" in index_payload
+        and int(index_payload.get("_diagnostics", {}).get("rc", 1)) == 0
+    )
+    boost_ok = (
+        isinstance(boost_payload, dict)
+        and "missing_signal" not in boost_payload
+        and "_diagnostics" in boost_payload
+        and int(boost_payload.get("_diagnostics", {}).get("rc", 1)) == 0
+    )
+    memory_ok = (
+        isinstance(history_payload, dict)
+        and "_diagnostics" in history_payload
+        and int(history_payload.get("_diagnostics", {}).get("rc", 1)) == 0
+    )
     out = {
         "schema_version": "sdetkit.review.adaptive.v1",
         "enabled": True,
         "root": str(target),
         "decision": str(payload.get("status", "attention")),
-        "confidence": "medium" if recurring else "degraded",
+        "confidence": "normal" if (index_ok and boost_ok and memory_ok) else "degraded",
         "summary": "Adaptive review combined review, index, memory, and boost-scan signals.",
         "adaptive_findings": findings[:8],
         "recurring_risks": recurring if isinstance(recurring, list) else [],
-        "memory_summary": history_payload or {"missing_signal": "history unavailable"},
-        "boost_summary": boost_payload or {"missing_signal": "boost unavailable"},
-        "index_summary": index_payload or {"missing_signal": "index unavailable"},
+        "memory_summary": history_payload
+        if memory_ok
+        else {"missing_signal": "history unavailable"},
+        "boost_summary": boost_payload if boost_ok else {"missing_signal": "boost unavailable"},
+        "index_summary": index_payload if index_ok else {"missing_signal": "index unavailable"},
         "five_head_alignment": {
             "schema_version_observed": five_heads.get("schema_version", ""),
             "heads_present": sorted(heads.keys()),
@@ -2398,12 +2455,33 @@ def _build_adaptive_review_v2(
             "quality_signal": heads.get("quality", {}),
             "security_signal": heads.get("security", {}),
         },
-        "recommended_fixes": recommendations[:10],
+        "recommended_fixes": (
+            boost_payload.get("recommended_fixes")
+            if isinstance(boost_payload, dict)
+            and isinstance(boost_payload.get("recommended_fixes"), list)
+            else recommendations
+        )[:10],
         "patch_candidates": boost_payload.get("patch_candidates", [])
         if isinstance(boost_payload, dict)
         else [],
         "evidence_files": [],
-        "signals": {"deep": deep, "learn": learn, "db": str(db_path), "explain": explain_payload},
+        "signals": {
+            "deep": deep,
+            "learn": learn,
+            "db": str(db_path),
+            "explain": explain_payload,
+            "helpers": {
+                "index": index_payload.get("_diagnostics", {})
+                if isinstance(index_payload, dict)
+                else {},
+                "boost": boost_payload.get("_diagnostics", {})
+                if isinstance(boost_payload, dict)
+                else {},
+                "history": history_payload.get("_diagnostics", {})
+                if isinstance(history_payload, dict)
+                else {},
+            },
+        },
     }
     if evidence_dir:
         evidence_dir.mkdir(parents=True, exist_ok=True)

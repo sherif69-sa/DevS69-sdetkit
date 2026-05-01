@@ -18,3 +18,7 @@ It is local-only: no network calls, no external services, and no secrets require
 - Adaptive payload schema: `sdetkit.review.adaptive.v1` in `operator-json` under `adaptive_review`.
 - Existing non-adaptive review output remains unchanged.
 - Do not commit `.db` files or generated evidence artifacts.
+
+- `--deep` runs the local repo index helper via `python -m sdetkit index inspect PATH --format operator-json`.
+- `--learn` uses adaptive memory plus boost scan v2 via `python -m sdetkit boost scan PATH --deep --learn --db DB --format operator-json`.
+- Review may return exit code `2` when findings/non-ship signals exist while still emitting valid `operator-json`.
