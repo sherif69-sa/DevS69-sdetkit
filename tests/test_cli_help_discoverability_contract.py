@@ -161,3 +161,16 @@ def test_index_help_discoverability() -> None:
     assert proc.returncode == 0
     assert "build" in proc.stdout
     assert "inspect" in proc.stdout
+
+
+def test_release_room_help_discoverability() -> None:
+    proc = _run("release-room", "--help")
+    assert proc.returncode == 0
+    assert "plan" in proc.stdout
+
+
+def test_release_room_plan_help_discoverability() -> None:
+    proc = _run("release-room", "plan", "--help")
+    assert proc.returncode == 0
+    assert "--max-lines" in proc.stdout
+    assert "--evidence-dir" in proc.stdout

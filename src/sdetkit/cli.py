@@ -313,6 +313,21 @@ Then use stability-aware command discovery:
         "boost",
         help="[Advanced but supported] High-signal deterministic local repo intelligence scan",
     )
+    release_room = sub.add_parser(
+        "release-room",
+        help="[Advanced but supported] Build local release-room execution plans",
+    )
+    release_room_sub = release_room.add_subparsers(dest="release_room_cmd", required=False)
+    release_room_plan = release_room_sub.add_parser(
+        "plan", help="Build deterministic release-room decision and next patch plan"
+    )
+    release_room_plan.add_argument("path")
+    release_room_plan.add_argument("--deep", action="store_true")
+    release_room_plan.add_argument("--learn", action="store_true")
+    release_room_plan.add_argument("--db", default=".sdetkit/adaptive.db")
+    release_room_plan.add_argument("--max-lines", type=int, default=100)
+    release_room_plan.add_argument("--format", choices=["text", "operator-json"], default="text")
+    release_room_plan.add_argument("--evidence-dir", default="")
     boost_sub = boost.add_subparsers(dest="boost_cmd", required=False)
     boost_scan = boost_sub.add_parser("scan", help="Run deterministic local boost scan")
     boost_scan.add_argument("path")
@@ -942,6 +957,26 @@ def main(argv: Sequence[str] | None = None) -> int:
                 forwarded.extend(["--evidence-dir", str(ns.evidence_dir)])
             return _run_module_main("sdetkit.boost", forwarded)
         return _run_module_main("sdetkit.boost", [])
+    if ns.cmd == "release-room":
+        if getattr(ns, "release_room_cmd", None) == "plan":
+            forwarded = [
+                "plan",
+                str(ns.path),
+                "--db",
+                str(ns.db),
+                "--max-lines",
+                str(ns.max_lines),
+                "--format",
+                str(ns.format),
+            ]
+            if bool(ns.deep):
+                forwarded.append("--deep")
+            if bool(ns.learn):
+                forwarded.append("--learn")
+            if str(ns.evidence_dir):
+                forwarded.extend(["--evidence-dir", str(ns.evidence_dir)])
+            return _run_module_main("sdetkit.release_room", forwarded)
+        return _run_module_main("sdetkit.release_room", [])
 
     if ns.cmd == "adaptive":
         if getattr(ns, "adaptive_cmd", None) == "init":
