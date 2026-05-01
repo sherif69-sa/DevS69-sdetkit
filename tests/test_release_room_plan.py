@@ -24,6 +24,24 @@ def test_operator_json_contract(tmp_path):
     assert proc.returncode == 0
     payload = json.loads(proc.stdout)
     assert payload["schema_version"] == "sdetkit.release_room.plan.v1"
+    required = {
+        "schema_version",
+        "repo_path",
+        "decision",
+        "confidence",
+        "source_status",
+        "top_risks",
+        "patch_candidates",
+        "recommended_fixes",
+        "validation_commands",
+        "evidence_paths",
+        "next_pr_recommendation",
+    }
+    assert required <= set(payload)
+    assert isinstance(payload["source_status"], dict)
+    assert isinstance(payload["validation_commands"], list)
+    assert isinstance(payload["evidence_paths"], list)
+    assert payload["next_pr_recommendation"]
     assert payload["decision"] in {"SHIP", "REVIEW", "NO-SHIP", "UNKNOWN"}
     assert isinstance(payload.get("patch_candidates"), list)
     assert isinstance(payload.get("signals"), dict)
@@ -83,7 +101,7 @@ def test_validation_plan_contains_required_commands(tmp_path):
         "operator-json",
     )
     payload = json.loads(proc.stdout)
-    joined = "\n".join(payload["validation_plan"])
+    joined = "\n".join(payload["validation_commands"])
     assert "pytest" in joined
     assert "ruff check" in joined
     assert "ruff format --check" in joined

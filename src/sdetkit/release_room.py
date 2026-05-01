@@ -182,6 +182,18 @@ def build_plan(
             if x
         ],
     }
+    payload["repo_path"] = str(root)
+    payload["source_status"] = {
+        name: {
+            "available": isinstance(signal.get("payload"), dict) and bool(signal.get("payload")),
+            "rc": signal.get("rc"),
+        }
+        for name, signal in payload.get("signals", {}).items()
+        if isinstance(signal, dict)
+    }
+    payload["validation_commands"] = list(payload.get("validation_plan", []))
+    payload["evidence_paths"] = list(payload.get("evidence_files", []))
+    payload["next_pr_recommendation"] = payload.get("next_pr", {})
     payload["operator_brief"] = render_text(payload, max_lines=max_lines)
     return payload
 
@@ -271,6 +283,7 @@ def main(argv: list[str] | None = None) -> int:
             out = safe_path(ed, name, allow_absolute=False)
             out.write_text(body, encoding="utf-8")
             payload["evidence_files"].append(out.as_posix())
+    payload["evidence_paths"] = list(payload.get("evidence_files", []))
     if ns.format == "operator-json":
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
