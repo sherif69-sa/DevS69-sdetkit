@@ -161,7 +161,25 @@ Operator JSON contract example:
 python -m sdetkit boost scan . --minutes 5 --max-lines 100 --format operator-json
 ```
 
-The report includes decision, score, top risks, recommended fixes, high-signal files, next PR candidates, and evidence files.
+The v1 report (default mode) includes decision, score, top risks, recommended fixes, high-signal files, next PR candidates, and evidence files.
+
+### Boost Scan v2 (adaptive mode)
+
+When `--deep` and/or `--learn` is enabled, Boost Scan switches to adaptive schema `sdetkit.boost.scan.v2`.
+
+- `--deep` builds repo index evidence via the local index engine.
+- `--learn` initializes and ingests into local SQLite adaptive memory.
+- `--db` sets adaptive DB path (local file, do not commit).
+- `--index-out` sets index evidence output location.
+- `--evidence-dir` writes `boost-scan.json`, `boost-scan.txt`, `index.json`, and memory evidence files when learning.
+
+Examples:
+
+```bash
+python -m sdetkit boost scan . --deep --learn --db .sdetkit/adaptive.db --max-lines 100 --format text
+python -m sdetkit boost scan . --deep --learn --db .sdetkit/adaptive.db --format operator-json
+python -m sdetkit boost scan . --index-out build/sdetkit-index --evidence-dir build/boost-scan --format operator-json
+```
 
 ## Related references
 

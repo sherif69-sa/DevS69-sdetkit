@@ -314,6 +314,11 @@ Then use stability-aware command discovery:
     boost_scan.add_argument("--minutes", type=int, default=5)
     boost_scan.add_argument("--max-lines", type=int, default=100)
     boost_scan.add_argument("--format", choices=["text", "operator-json"], default="text")
+    boost_scan.add_argument("--deep", action="store_true")
+    boost_scan.add_argument("--learn", action="store_true")
+    boost_scan.add_argument("--db", default=".sdetkit/adaptive.db")
+    boost_scan.add_argument("--index-out", default="build/sdetkit-index")
+    boost_scan.add_argument("--evidence-dir", default="")
     index = sub.add_parser(
         "index",
         help="[Advanced but supported] Build and inspect deterministic deep repo index evidence",
@@ -923,6 +928,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "--format",
                 str(ns.format),
             ]
+            if bool(ns.deep):
+                forwarded.append("--deep")
+            if bool(ns.learn):
+                forwarded.append("--learn")
+            forwarded.extend(["--db", str(ns.db), "--index-out", str(ns.index_out)])
+            if str(ns.evidence_dir):
+                forwarded.extend(["--evidence-dir", str(ns.evidence_dir)])
             return _run_module_main("sdetkit.boost", forwarded)
         return _run_module_main("sdetkit.boost", [])
 
