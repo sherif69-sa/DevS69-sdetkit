@@ -12,9 +12,12 @@ The repo index engine builds deterministic local evidence for Adaptive Power Eng
 
 ```bash
 python -m sdetkit index build PATH --out build/sdetkit-index
-python -m sdetkit index inspect build/sdetkit-index --format text
-python -m sdetkit index inspect build/sdetkit-index --format operator-json
+python -m sdetkit index inspect PATH --format text
+python -m sdetkit index inspect PATH --format operator-json
 ```
+
+Inspect accepts either a repo path or an index evidence directory.
+When given a repo path, evidence is (re)built under `PATH/build/sdetkit-index`.
 
 ## Evidence files
 

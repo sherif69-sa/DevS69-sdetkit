@@ -202,7 +202,14 @@ def build_index(root: Path, out_dir: Path) -> dict[str, object]:
 
 
 def inspect_index(path: Path) -> dict[str, object]:
-    out_dir = path
+    resolved = path.resolve()
+    candidate = resolved / "index.json"
+    if candidate.exists():
+        out_dir = resolved
+    else:
+        out_dir = resolved / "build" / "sdetkit-index"
+        build_index(resolved, out_dir)
+
     idx = json.loads((out_dir / "index.json").read_text(encoding="utf-8"))
     if idx.get("schema_version") != SCHEMA_VERSION:
         raise SystemExit("invalid index schema")
