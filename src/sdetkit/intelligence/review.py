@@ -2418,7 +2418,7 @@ def _build_adaptive_review_v2(
             "index.json": index_payload,
             "memory-history.json": history_payload,
             "memory-explain.json": explain_payload,
-        }
+            path = safe_path(evidence_dir, name, allow_absolute=False)
         for name, value in artifacts.items():
             path = safe_path(evidence_dir, name, allow_absolute=False)
             path.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n", encoding="utf-8")
