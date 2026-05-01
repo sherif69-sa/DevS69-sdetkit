@@ -314,6 +314,49 @@ Then use stability-aware command discovery:
     boost_scan.add_argument("--minutes", type=int, default=5)
     boost_scan.add_argument("--max-lines", type=int, default=100)
     boost_scan.add_argument("--format", choices=["text", "operator-json"], default="text")
+    boost_scan.add_argument("--deep", action="store_true")
+    boost_scan.add_argument("--learn", action="store_true")
+    boost_scan.add_argument("--db", default=".sdetkit/adaptive.db")
+    boost_scan.add_argument("--index-out", default="build/sdetkit-index")
+    boost_scan.add_argument("--evidence-dir", default="")
+    index = sub.add_parser(
+        "index",
+        help="[Advanced but supported] Build and inspect deterministic deep repo index evidence",
+    )
+    adaptive = sub.add_parser(
+        "adaptive",
+        help="[Advanced but supported] Local SQLite adaptive memory for cross-run repo intelligence",
+    )
+    adaptive_sub = adaptive.add_subparsers(dest="adaptive_cmd", required=False)
+    adaptive_init = adaptive_sub.add_parser(
+        "init", help="Initialize local adaptive memory database"
+    )
+    adaptive_init.add_argument("--db", default=".sdetkit/adaptive.db")
+    adaptive_ingest = adaptive_sub.add_parser(
+        "ingest", help="Ingest sdetkit index evidence into adaptive memory"
+    )
+    adaptive_ingest.add_argument("index_json")
+    adaptive_ingest.add_argument("--db", default=".sdetkit/adaptive.db")
+    adaptive_history = adaptive_sub.add_parser(
+        "history", help="Summarize adaptive memory run history"
+    )
+    adaptive_history.add_argument("--db", default=".sdetkit/adaptive.db")
+    adaptive_history.add_argument("--format", choices=["text", "operator-json"], default="text")
+    adaptive_explain = adaptive_sub.add_parser(
+        "explain", help="Explain adaptive memory signals for a path"
+    )
+    adaptive_explain.add_argument("path")
+    adaptive_explain.add_argument("--db", default=".sdetkit/adaptive.db")
+    adaptive_explain.add_argument("--format", choices=["text", "operator-json"], default="text")
+    index_sub = index.add_subparsers(dest="index_cmd", required=False)
+    index_build = index_sub.add_parser(
+        "build", help="Build deterministic local repo index evidence"
+    )
+    index_build.add_argument("path")
+    index_build.add_argument("--out", default="build/sdetkit-index")
+    index_inspect = index_sub.add_parser("inspect", help="Inspect local repo index evidence")
+    index_inspect.add_argument("path")
+    index_inspect.add_argument("--format", choices=["text", "operator-json"], default="text")
 
     rpt = sub.add_parser("report", help="Reporting workflows and output packs")
     rpt.add_argument("args", nargs=argparse.REMAINDER)
@@ -885,8 +928,43 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "--format",
                 str(ns.format),
             ]
+            if bool(ns.deep):
+                forwarded.append("--deep")
+            if bool(ns.learn):
+                forwarded.append("--learn")
+            forwarded.extend(["--db", str(ns.db), "--index-out", str(ns.index_out)])
+            if str(ns.evidence_dir):
+                forwarded.extend(["--evidence-dir", str(ns.evidence_dir)])
             return _run_module_main("sdetkit.boost", forwarded)
         return _run_module_main("sdetkit.boost", [])
+
+    if ns.cmd == "adaptive":
+        if getattr(ns, "adaptive_cmd", None) == "init":
+            return _run_module_main("sdetkit.adaptive", ["init", "--db", str(ns.db)])
+        if getattr(ns, "adaptive_cmd", None) == "ingest":
+            return _run_module_main(
+                "sdetkit.adaptive", ["ingest", str(ns.index_json), "--db", str(ns.db)]
+            )
+        if getattr(ns, "adaptive_cmd", None) == "history":
+            return _run_module_main(
+                "sdetkit.adaptive", ["history", "--db", str(ns.db), "--format", str(ns.format)]
+            )
+        if getattr(ns, "adaptive_cmd", None) == "explain":
+            return _run_module_main(
+                "sdetkit.adaptive",
+                ["explain", str(ns.path), "--db", str(ns.db), "--format", str(ns.format)],
+            )
+        return _run_module_main("sdetkit.adaptive", [])
+
+    if ns.cmd == "index":
+        if getattr(ns, "index_cmd", None) == "build":
+            return _run_module_main("sdetkit.index", ["build", str(ns.path), "--out", str(ns.out)])
+        if getattr(ns, "index_cmd", None) == "inspect":
+            return _run_module_main(
+                "sdetkit.index",
+                ["inspect", str(ns.path), "--format", str(ns.format)],
+            )
+        return _run_module_main("sdetkit.index", [])
 
     if ns.cmd == "fit":
         forwarded = [
