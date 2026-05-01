@@ -2300,9 +2300,11 @@ def _run_json_cmd(args: list[str]) -> dict[str, Any]:
     proc = subprocess.run(args, check=False, capture_output=True, text=True)
     if proc.returncode != 0:
         return {}
-    with contextlib.suppress(json.JSONDecodeError):
-        return json.loads(proc.stdout or "{}")
-    return {}
+    try:
+        loaded = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {}
+    return loaded if isinstance(loaded, dict) else {}
 
 
 def _build_adaptive_review_v2(
@@ -2418,7 +2420,7 @@ def _build_adaptive_review_v2(
             "memory-explain.json": explain_payload,
         }
         for name, value in artifacts.items():
-            path = evidence_dir / name
+            path = safe_path(evidence_dir, name, allow_absolute=False)
             path.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n", encoding="utf-8")
             out["evidence_files"].append(str(path))
     return out
