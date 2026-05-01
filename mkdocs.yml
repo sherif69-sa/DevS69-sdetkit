@@ -182,6 +182,7 @@ nav:
           - Evidence Pack: evidence.md
           - Ops Control Plane: ops.md
           - Tool server: tool-server.md
+          - Adaptive SQLite memory: adaptive-memory.md
           - IDE + pre-commit integration: ide-and-precommit.md
           - Omnichannel + MCP bridge: omnichannel-mcp-bridge.md
           - Plugins: plugins.md
