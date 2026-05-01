@@ -23,4 +23,14 @@ def build_review_forwarded_args(ns: argparse.Namespace) -> list[str]:
         forwarded.extend(["--work-context", entry])
     if ns.code_scan_json:
         forwarded.extend(["--code-scan-json", ns.code_scan_json])
+    if getattr(ns, "adaptive", False):
+        forwarded.append("--adaptive")
+    if getattr(ns, "deep", False):
+        forwarded.append("--deep")
+    if getattr(ns, "learn", False):
+        forwarded.append("--learn")
+    if getattr(ns, "db", None):
+        forwarded.extend(["--db", ns.db])
+    if getattr(ns, "evidence_dir", None):
+        forwarded.extend(["--evidence-dir", ns.evidence_dir])
     return forwarded

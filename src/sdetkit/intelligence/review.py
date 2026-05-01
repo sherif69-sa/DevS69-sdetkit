@@ -6,6 +6,7 @@ import datetime as _dt
 import hashlib
 import io
 import json
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -537,6 +538,11 @@ def run_review(
     work_id: str | None = None,
     work_context: dict[str, str] | None = None,
     code_scan_json: Path | None = None,
+    adaptive_mode: bool = False,
+    adaptive_deep: bool = False,
+    adaptive_learn: bool = False,
+    adaptive_db: Path | None = None,
+    adaptive_evidence_dir: Path | None = None,
 ) -> tuple[int, dict[str, Any], Path, Path]:
     try:
         target = safe_path(Path.cwd(), target.as_posix(), allow_absolute=True).resolve()
@@ -1171,6 +1177,15 @@ def run_review(
     payload["profile"]["output_strategy"] = profile_packet["packet_type"]
     payload["profile_packet"] = profile_packet
     payload["five_heads"] = _build_five_head_engine(payload)
+    if adaptive_mode:
+        payload["adaptive_review_v2"] = _build_adaptive_review_v2(
+            target=target,
+            payload=payload,
+            deep=adaptive_deep,
+            learn=adaptive_learn,
+            db_path=adaptive_db or Path(".sdetkit/adaptive.db"),
+            evidence_dir=adaptive_evidence_dir,
+        )
     top5_actions = [
         str(item.get("action", ""))
         for item in payload.get("prioritized_actions", [])
@@ -2281,6 +2296,131 @@ def _render_release_readiness_markdown(contract: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _run_json_cmd(args: list[str]) -> dict[str, Any]:
+    proc = subprocess.run(args, check=False, capture_output=True, text=True)
+    if proc.returncode != 0:
+        return {}
+    try:
+        loaded = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {}
+    return loaded if isinstance(loaded, dict) else {}
+
+
+def _build_adaptive_review_v2(
+    *,
+    target: Path,
+    payload: dict[str, Any],
+    deep: bool,
+    learn: bool,
+    db_path: Path,
+    evidence_dir: Path | None,
+) -> dict[str, Any]:
+    index_payload = (
+        _run_json_cmd(
+            ["python", "-m", "sdetkit", "index", str(target), "--format", "operator-json"]
+        )
+        if deep
+        else {}
+    )
+    if learn and deep:
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        _run_json_cmd(["python", "-m", "sdetkit", "adaptive", "init", "--db", str(db_path)])
+    history_payload = _run_json_cmd(
+        [
+            "python",
+            "-m",
+            "sdetkit",
+            "adaptive",
+            "history",
+            "--db",
+            str(db_path),
+            "--format",
+            "operator-json",
+        ]
+    )
+    explain_payload = _run_json_cmd(
+        [
+            "python",
+            "-m",
+            "sdetkit",
+            "adaptive",
+            "explain",
+            str(target),
+            "--db",
+            str(db_path),
+            "--format",
+            "operator-json",
+        ]
+    )
+    boost_payload = _run_json_cmd(
+        [
+            "python",
+            "-m",
+            "sdetkit",
+            "boost-scan",
+            str(target),
+            "--format",
+            "operator-json",
+            "--db",
+            str(db_path),
+        ]
+    )
+    findings = [row for row in payload.get("top_matters", []) if isinstance(row, dict)]
+    recommendations = list(
+        dict.fromkeys(
+            [str(row.get("next_action", "")) for row in findings if row.get("next_action")]
+        )
+    )
+    recurring = boost_payload.get("recurring_risks", []) if isinstance(boost_payload, dict) else []
+    five_heads = (
+        payload.get("five_heads", {}) if isinstance(payload.get("five_heads", {}), dict) else {}
+    )
+    heads = five_heads.get("heads", {}) if isinstance(five_heads.get("heads", {}), dict) else {}
+    out = {
+        "schema_version": "sdetkit.review.adaptive.v1",
+        "enabled": True,
+        "root": str(target),
+        "decision": str(payload.get("status", "attention")),
+        "confidence": "medium" if recurring else "degraded",
+        "summary": "Adaptive review combined review, index, memory, and boost-scan signals.",
+        "adaptive_findings": findings[:8],
+        "recurring_risks": recurring if isinstance(recurring, list) else [],
+        "memory_summary": history_payload or {"missing_signal": "history unavailable"},
+        "boost_summary": boost_payload or {"missing_signal": "boost unavailable"},
+        "index_summary": index_payload or {"missing_signal": "index unavailable"},
+        "five_head_alignment": {
+            "schema_version_observed": five_heads.get("schema_version", ""),
+            "heads_present": sorted(heads.keys()),
+            "delivery_signal": heads.get("delivery", {}),
+            "evidence_signal": heads.get("evidence", {}),
+            "reliability_signal": heads.get("reliability", {}),
+            "quality_signal": heads.get("quality", {}),
+            "security_signal": heads.get("security", {}),
+        },
+        "recommended_fixes": recommendations[:10],
+        "patch_candidates": boost_payload.get("patch_candidates", [])
+        if isinstance(boost_payload, dict)
+        else [],
+        "evidence_files": [],
+        "signals": {"deep": deep, "learn": learn, "db": str(db_path), "explain": explain_payload},
+    }
+    if evidence_dir:
+        evidence_dir.mkdir(parents=True, exist_ok=True)
+        artifacts = {
+            "adaptive-review.json": out,
+            "boost-v2.json": boost_payload,
+            "index.json": index_payload,
+            "memory-history.json": history_payload,
+            "memory-explain.json": explain_payload,
+        }
+        for name, value in artifacts.items():
+            path = safe_path(evidence_dir, name, allow_absolute=False)
+            path.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+            out["evidence_files"].append(str(path))
+    return out
+
+
 def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
     tracks = [row for row in payload.get("likely_issue_tracks", []) if isinstance(row, dict)]
     conflicts = [row for row in payload.get("conflicting_evidence", []) if isinstance(row, dict)]
@@ -2334,7 +2474,7 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
             release_contract.pop("next_review_due_at_utc", None)
             adaptive_database["release_readiness_contract"] = release_contract
 
-    return {
+    out = {
         "contract_version": REVIEW_CONTRACT_VERSION,
         "situation": {
             "status": payload.get("status"),
@@ -2368,6 +2508,10 @@ def _build_operator_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "doctor_gate_contract": payload.get("doctor_gate_contract", {}),
         "artifacts": payload.get("artifact_index", {}),
     }
+    adaptive_v2 = payload.get("adaptive_review_v2")
+    if isinstance(adaptive_v2, dict) and adaptive_v2:
+        out["adaptive_review"] = adaptive_v2
+    return out
 
 
 def _build_review_contract_check(payload: dict[str, Any]) -> dict[str, Any]:
@@ -2568,6 +2712,15 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional JSON/SARIF code scanning report to fold into adaptive review and AI guidance.",
     )
+    p.add_argument("--adaptive", action="store_true", help="Enable adaptive review v2 signals.")
+    p.add_argument("--deep", action="store_true", help="Use repo index signals in adaptive review.")
+    p.add_argument(
+        "--learn", action="store_true", help="Ingest adaptive memory during adaptive review."
+    )
+    p.add_argument("--db", default=".sdetkit/adaptive.db", help="Adaptive SQLite database path.")
+    p.add_argument(
+        "--evidence-dir", default=None, help="Optional adaptive evidence output directory."
+    )
     return p
 
 
@@ -2608,6 +2761,11 @@ def main(argv: list[str] | None = None) -> int:
             work_id=str(ns.work_id or "").strip(),
             work_context=work_context,
             code_scan_json=Path(ns.code_scan_json) if ns.code_scan_json else None,
+            adaptive_mode=bool(ns.adaptive),
+            adaptive_deep=bool(ns.deep),
+            adaptive_learn=bool(ns.learn),
+            adaptive_db=Path(ns.db) if ns.db else None,
+            adaptive_evidence_dir=Path(ns.evidence_dir) if ns.evidence_dir else None,
         )
     except ValueError as exc:
         sys.stderr.write(str(exc) + "\n")

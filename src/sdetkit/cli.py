@@ -239,6 +239,11 @@ Then use stability-aware command discovery:
     review_parser.add_argument("--work-id", default=None)
     review_parser.add_argument("--work-context", action="append", default=None)
     review_parser.add_argument("--code-scan-json", default=None)
+    review_parser.add_argument("--adaptive", action="store_true")
+    review_parser.add_argument("--deep", action="store_true")
+    review_parser.add_argument("--learn", action="store_true")
+    review_parser.add_argument("--db", default=None)
+    review_parser.add_argument("--evidence-dir", default=None)
 
     serve_parser = sub.add_parser(
         "serve",
