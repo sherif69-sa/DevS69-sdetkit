@@ -112,7 +112,6 @@ def build_plan(
     repo_findings = len(repo.get("payload", {}).get("findings", [])) if repo["ok"] else 1
     boost_score = int(boost.get("payload", {}).get("score", 0)) if boost["ok"] else 0
 
-    decision = "UNKNOWN"
     if not idx["ok"] or not boost["ok"] or not review["ok"]:
         decision = "NO-SHIP"
     elif repo_findings == 0 and not severe and boost_score >= 85:
