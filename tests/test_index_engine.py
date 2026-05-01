@@ -94,3 +94,37 @@ def test_ignored_directories_are_skipped(tmp_path: Path) -> None:
     assert "ok.py" in files
     assert ".git/hidden.py" not in files
     assert "node_modules/pkg.js" not in files
+
+
+def test_index_inspect_accepts_repo_root_operator_json(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "a.py").write_text("def run():\n    return 1\n", encoding="utf-8")
+
+    proc = _run("index", "inspect", str(repo), "--format", "operator-json")
+    assert proc.returncode == 0
+    payload = json.loads(proc.stdout)
+    assert payload["schema_version"] == "sdetkit.index.v1"
+
+
+def test_index_inspect_accepts_evidence_directory(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "a.py").write_text("def run():\n    return 1\n", encoding="utf-8")
+    out = tmp_path / "idx"
+    assert _run("index", "build", str(repo), "--out", str(out)).returncode == 0
+
+    proc = _run("index", "inspect", str(out), "--format", "text")
+    assert proc.returncode == 0
+    assert "Scanned files:" in proc.stdout
+
+
+def test_index_inspect_repo_root_text_includes_scanned_and_evidence(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "a.py").write_text("def run():\n    return 1\n", encoding="utf-8")
+
+    proc = _run("index", "inspect", str(repo), "--format", "text")
+    assert proc.returncode == 0
+    assert "Scanned files:" in proc.stdout
+    assert "Evidence files:" in proc.stdout
