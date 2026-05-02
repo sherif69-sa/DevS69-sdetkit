@@ -13,7 +13,7 @@ FIRST_PROOF_READINESS_PROFILE ?= lenient
 PHASE2_BASELINE_PRE_EXTRACTION ?= docs/artifacts/phase2-hotspot-baseline-pre-extraction-$(DATE_TAG).json
 BUSINESS_EXECUTION_OPERATOR ?= sherif69-sa
 
-.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry upgrade-next onboarding-next doctor-remediate first-proof-freshness first-proof-ops-bundle-contract first-proof-ops-bundle-trend first-proof-ops-bundle-trend-report first-proof-execution-report first-proof-execution-contract first-proof-schema-contract upgrade-status-line first-proof-followup-ready followup-ready-metrics first-proof-dashboard first-proof-readiness-threshold followup-changelog plan-next-10 cleanup-first-proof-artifacts golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-fast ship-readiness-contract release-room release-room-fast portfolio-readiness premerge-release-room premerge-release-room-fast adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-local first-proof-contract first-proof-health-score first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-tests-local first-proof-verify first-proof-verify-local gate-decision-summary gate-decision-summary-contract fit-check adoption-followup adoption-followup-contract adoption-control-loop adoption-control-loop-contract adoption-posture adoption-validate adoption-control-loop-full ops-followup ops-followup-contract ops-now ops-now-lite ops-next ops-premerge-next ops-premerge-next-fast phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-execution-core phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-hotspot-baseline phase2-hotspot-delta phase2-complete phase2-progress phase2-surface-clarity phase3-dependency-radar phase3-quality-contract phase3-quality-report phase3-do-it phase4-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility real-workflow-daily real-workflow-daily-fast real-workflow-weekly real-workflow-premerge real-workflow-premerge-fast real-workflow ops-daily ops-daily-fast ops-weekly ops-premerge ops-premerge-fast ops-workflow
+.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry upgrade-next operator-onramp operator-onramp-dry-run operator-onramp-verify onboarding-next doctor-remediate first-proof-freshness first-proof-ops-bundle-contract first-proof-ops-bundle-trend first-proof-ops-bundle-trend-report first-proof-execution-report first-proof-execution-contract first-proof-schema-contract upgrade-status-line first-proof-followup-ready followup-ready-metrics first-proof-dashboard first-proof-readiness-threshold followup-changelog plan-next-10 cleanup-first-proof-artifacts golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-fast ship-readiness-contract release-room release-room-fast portfolio-readiness premerge-release-room premerge-release-room-fast adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-local first-proof-contract first-proof-health-score first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-tests-local first-proof-verify first-proof-verify-local gate-decision-summary gate-decision-summary-contract fit-check adoption-followup adoption-followup-contract adoption-control-loop adoption-control-loop-contract adoption-posture adoption-validate adoption-control-loop-full ops-followup ops-followup-contract ops-now ops-now-lite ops-next ops-premerge-next ops-premerge-next-fast phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-execution-core phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-hotspot-baseline phase2-hotspot-delta phase2-complete phase2-progress phase2-surface-clarity phase3-dependency-radar phase3-quality-contract phase3-quality-report phase3-do-it phase4-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility real-workflow-daily real-workflow-daily-fast real-workflow-weekly real-workflow-premerge real-workflow-premerge-fast real-workflow ops-daily ops-daily-fast ops-weekly ops-premerge ops-premerge-fast ops-workflow
 .PHONY: business-execution-start business-execution-start-contract business-execution-go-gate business-execution-progress business-execution-progress-contract business-execution-next business-execution-next-contract business-execution-handoff business-execution-handoff-contract business-execution-escalation business-execution-escalation-contract business-execution-followup business-execution-followup-contract business-execution-continue business-execution-continue-contract business-execution-horizon business-execution-horizon-contract business-execution-inputs-contract business-execution-pipeline business-execution-week1-pipeline
 
 bootstrap: venv
@@ -194,12 +194,43 @@ ops-workflow: real-workflow
 
 upgrade-next:
 	@bash -lc 'echo "=== SDETKit Upgrade Next (Guided Path) ==="'
-	@bash -lc 'echo "1) make first-proof"'
-	@bash -lc 'echo "2) make first-proof-verify"'
-	@bash -lc 'echo "3) make ops-now-lite"'
-	@bash -lc 'echo "4) make ops-next"'
-	@bash -lc 'echo "5) make plan-status"'
+	@bash -lc 'echo "1) make first-proof            # establish deterministic SHIP/NO-SHIP baseline"'
+	@bash -lc 'echo "2) make first-proof-health-score # compute executive 0-100 readiness score"'
+	@bash -lc 'echo "3) make first-proof-verify     # run CI-equivalent verification lane"'
+	@bash -lc 'echo "4) make first-proof-freshness  # enforce evidence freshness/retention signal"'
+	@bash -lc 'echo "5) make doctor-remediate       # emit top blocker remediation hints"'
+	@bash -lc 'echo ""'
+	@bash -lc 'echo "Set UPGRADE_NEXT_RUN=1 to run commands 1-5 automatically."'
+	@bash -lc 'echo "Set UPGRADE_NEXT_DRY_RUN=1 to print commands only (no execution)."'
 	@bash -lc 'echo "Docs: docs/upgrade-next-commands.md"'
+	@bash -lc 'if [ "$${UPGRADE_NEXT_RUN:-0}" = "1" ]; then \
+		echo "Running guided path..."; \
+		if [ "$${UPGRADE_NEXT_DRY_RUN:-0}" = "1" ]; then \
+			echo "DRY RUN: make first-proof"; \
+			echo "DRY RUN: make first-proof-health-score"; \
+			echo "DRY RUN: make first-proof-verify"; \
+			echo "DRY RUN: make first-proof-freshness"; \
+			echo "DRY RUN: make doctor-remediate"; \
+		else \
+			$(MAKE) first-proof; \
+			$(MAKE) first-proof-health-score; \
+			$(MAKE) first-proof-verify; \
+			$(MAKE) first-proof-freshness; \
+			$(MAKE) doctor-remediate; \
+		fi; \
+		fi'
+
+operator-onramp: upgrade-next onboarding-next first-proof-dashboard
+	@bash -lc 'echo "operator-onramp completed: upgrade-next + onboarding-next + first-proof-dashboard"'
+	@bash -lc 'echo "Next docs: docs/operator-onboarding-7-day.md and docs/upgrade-next-commands.md"'
+
+operator-onramp-dry-run:
+	@bash -lc 'echo "DRY RUN: make upgrade-next"'
+	@bash -lc 'echo "DRY RUN: make onboarding-next"'
+	@bash -lc 'echo "DRY RUN: make first-proof-dashboard"'
+
+operator-onramp-verify: operator-onramp first-proof-schema-contract first-proof-execution-contract first-proof-followup-ready
+	@bash -lc 'echo "operator-onramp-verify completed: contracts + followup-ready passed"'
 
 business-execution-start: venv
 	@bash -lc '. .venv/bin/activate && python scripts/business_execution_start.py --single-operator "$(BUSINESS_EXECUTION_OPERATOR)"'

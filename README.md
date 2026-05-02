@@ -183,6 +183,17 @@ Related docs:
 - [Portfolio reporting recipe](docs/portfolio-reporting-recipe.md)
 - [KPI schema](docs/kpi-schema.md)
 
+## Upgrade next (intent router)
+
+For first-time operators who want a single guided lane, use:
+
+```bash
+make upgrade-next
+```
+
+This prints a deterministic "next 5 commands" path and links to:
+- [`docs/upgrade-next-commands.md`](docs/upgrade-next-commands.md)
+
 
 ## Maintenance command center (issue noise control)
 

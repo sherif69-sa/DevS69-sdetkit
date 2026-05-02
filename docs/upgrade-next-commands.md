@@ -1,4 +1,4 @@
-# Upgrade Next Commands (Intent → Command)
+# Upgrade Next Commands (Intent -> Command)
 
 Use this page when you know the goal but not the exact command.
 
@@ -51,6 +51,34 @@ make upgrade-next
 ```
 
 This prints the recommended "next 5 commands" sequence.
+
+To run those five commands automatically:
+
+```bash
+UPGRADE_NEXT_RUN=1 make upgrade-next
+```
+
+The guided five-command lane includes:
+- `first-proof-health-score` for an executive readiness score artifact (`build/first-proof/health-score.json`).
+- `first-proof-freshness` to confirm first-proof artifacts remain current and auditable.
+- `doctor-remediate` so the lane ends with top blocker fixes, not only status output.
+
+To preview the exact sequence without executing:
+
+```bash
+UPGRADE_NEXT_RUN=1 UPGRADE_NEXT_DRY_RUN=1 make upgrade-next
+```
+
+## I need one-command onboarding-by-default
+
+```bash
+make operator-onramp
+make operator-onramp-dry-run
+make operator-onramp-verify
+```
+
+This runs `upgrade-next`, builds `onboarding-next` artifacts, and renders the first-proof dashboard.
+`operator-onramp-verify` adds schema/execution/followup-ready contract checks.
 
 ## Notes
 
