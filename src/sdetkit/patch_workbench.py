@@ -127,7 +127,7 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "schema_version": SCHEMA_VERSION,
                     "error": f"unreadable release-room input: {exc}",
-                    "code": "PATCH_WORKBENCH_INPUT_UNREADABLE",
+                    "code": "input_unreadable",
                 },
                 sort_keys=True,
             )
@@ -141,7 +141,7 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "schema_version": SCHEMA_VERSION,
                     "error": f"invalid release-room JSON: {exc.msg}",
-                    "code": "PATCH_WORKBENCH_INPUT_INVALID_JSON",
+                    "code": "input_invalid_json",
                 },
                 sort_keys=True,
             )

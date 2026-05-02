@@ -75,7 +75,7 @@ def test_patch_workbench_missing_or_invalid_json_is_deterministic_error(tmp_path
     )
     assert missing.returncode != 0
     mp = json.loads(missing.stdout)
-    assert mp["code"] == "PATCH_WORKBENCH_INPUT_UNREADABLE"
+    assert mp["code"] == "input_unreadable"
 
     bad = tmp_path / "bad.json"
     bad.write_text("{", encoding="utf-8")
@@ -84,7 +84,7 @@ def test_patch_workbench_missing_or_invalid_json_is_deterministic_error(tmp_path
     )
     assert invalid.returncode != 0
     ip = json.loads(invalid.stdout)
-    assert ip["code"] == "PATCH_WORKBENCH_INPUT_INVALID_JSON"
+    assert ip["code"] == "input_invalid_json"
 
 
 def test_patch_workbench_does_not_modify_files(tmp_path: Path) -> None:
