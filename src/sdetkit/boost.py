@@ -8,6 +8,7 @@ from pathlib import Path
 from .adaptive_memory import _history_payload as adaptive_history_payload
 from .adaptive_memory import explain_path, ingest_index, init_db
 from .index import build_index
+from .risk_hygiene import classify_risks
 
 SCHEMA_VERSION = "sdetkit.boost.scan.v1"
 SCHEMA_VERSION_V2 = "sdetkit.boost.scan.v2"
@@ -272,6 +273,7 @@ def build_scan(
         for h in am.get("recurring_hotspots", [])
     ]
     candidates = _next_prs(risks, fixes)
+    hygiene = classify_risks(resolved, (recurring + risk_dicts))
     payload = {
         "schema_version": SCHEMA_VERSION_V2 if (deep or learn) else SCHEMA_VERSION,
         "tool": "sdetkit boost scan",
@@ -286,8 +288,8 @@ def build_scan(
         },
         "summary": f"{len(risk_dicts)} risk signal(s).",
         "trend": "stable",
-        "top_risks": (recurring + risk_dicts)[:8],
-        "new_risks": risk_dicts[:5],
+        "top_risks": hygiene["source_risks"][:8],
+        "new_risks": hygiene["source_risks"][:5],
         "recurring_risks": recurring[:8],
         "recommended_fixes": fix_dicts[:10],
         "patch_candidates": candidates,
@@ -301,6 +303,12 @@ def build_scan(
             "hotspots": (idx or {}).get("hotspots", [])[:8],
         },
         "signals": dict(sorted(signals.items())),
+        "risk_hygiene_summary": hygiene["risk_hygiene_summary"],
+        "source_risks": hygiene["source_risks"],
+        "generated_artifact_risks": hygiene["generated_artifact_risks"],
+        "suppressed_risks": hygiene["suppressed_risks"],
+        "suppression_reasons": hygiene["suppression_reasons"],
+        "workspace_noise_detected": hygiene["workspace_noise_detected"],
     }
     if evidence_dir:
         e = Path(evidence_dir)

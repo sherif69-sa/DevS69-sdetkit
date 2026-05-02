@@ -11,6 +11,7 @@ from .index import inspect_index
 from .intelligence.review import run_review
 from .repo import run_checks
 from .security import safe_path
+from .risk_hygiene import classify_risks
 
 SCHEMA_VERSION = "sdetkit.release_room.plan.v1"
 
@@ -136,6 +137,8 @@ def build_plan(
             str(patch_candidates[0].get("expected_validation", "python -m pytest -q"))
         )
 
+    raw_top_risks = boost.get("payload", {}).get("top_risks", [])
+    hygiene = classify_risks(resolved, raw_top_risks if isinstance(raw_top_risks, list) else [])
     payload = {
         "schema_version": SCHEMA_VERSION,
         "tool": "sdetkit release-room plan",
@@ -157,7 +160,7 @@ def build_plan(
             "repo_findings": repo_findings,
             "boost_score": boost_score,
         },
-        "top_risks": boost.get("payload", {}).get("top_risks", [])[:3],
+        "top_risks": hygiene["source_risks"][:3],
         "recurring_risks": mem_exp.get("payload", {}).get("recurring_hotspots", [])[:5]
         if mem_exp["ok"]
         else [],
@@ -169,6 +172,12 @@ def build_plan(
         "evidence_files": [],
         "next_pr": {"title": "release-room-next-patch", "focus": patch_candidates[:3]},
         "operator_brief": "",
+        "risk_hygiene_summary": hygiene["risk_hygiene_summary"],
+        "source_risks": hygiene["source_risks"],
+        "generated_artifact_risks": hygiene["generated_artifact_risks"],
+        "suppressed_risks": hygiene["suppressed_risks"],
+        "suppression_reasons": hygiene["suppression_reasons"],
+        "workspace_noise_detected": hygiene["workspace_noise_detected"],
         "diagnostics": [
             x
             for x in [
