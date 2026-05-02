@@ -230,6 +230,7 @@ def main(argv: list[str] | None = None) -> int:
             "--out",
             str(out_dir / "security-check.json"),
         ],
+        allow_fail=True,
         env={**os.environ, "PYTHONPATH": "src"},
     )
 

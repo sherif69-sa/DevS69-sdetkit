@@ -839,6 +839,12 @@ def _write_report(path: str, report: dict[str, Any], *, force: bool = False) -> 
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == "workbench":
+        from .patch_workbench import main as workbench_main
+
+        return int(workbench_main(argv[1:]))
+
     ap = argparse.ArgumentParser(prog="sdetkit patch")
     ap.add_argument("spec", help="json spec path, or '-' for stdin")
     ap.add_argument("--check", action="store_true")
