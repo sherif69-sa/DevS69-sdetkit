@@ -145,7 +145,12 @@ def test_tracked_generated_artifact_exception(tmp_path):
     p = tmp_path / ".sdetkit" / "tracked.txt"
     p.write_text("x", encoding="utf-8")
     subprocess.run(["git", "add", ".sdetkit/tracked.txt"], cwd=tmp_path, check=True)
-    subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, check=True, capture_output=True, text=True)
-    hygiene = classify_risks(tmp_path, [{"title": "t", "severity": "minor", "file": ".sdetkit/tracked.txt", "signal": "x"}])
+    subprocess.run(
+        ["git", "commit", "-m", "init"], cwd=tmp_path, check=True, capture_output=True, text=True
+    )
+    hygiene = classify_risks(
+        tmp_path,
+        [{"title": "t", "severity": "minor", "file": ".sdetkit/tracked.txt", "signal": "x"}],
+    )
     assert hygiene["generated_artifact_risks"]
     assert not hygiene["suppressed_risks"]

@@ -10,8 +10,8 @@ from .boost import build_scan
 from .index import inspect_index
 from .intelligence.review import run_review
 from .repo import run_checks
-from .security import safe_path
 from .risk_hygiene import classify_risks
+from .security import safe_path
 
 SCHEMA_VERSION = "sdetkit.release_room.plan.v1"
 
