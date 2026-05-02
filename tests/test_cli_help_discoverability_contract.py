@@ -174,3 +174,10 @@ def test_release_room_plan_help_discoverability() -> None:
     assert proc.returncode == 0
     assert "--max-lines" in proc.stdout
     assert "--evidence-dir" in proc.stdout
+
+
+def test_patch_workbench_help_discoverability() -> None:
+    proc = _run("patch", "workbench", "--help")
+    assert proc.returncode == 0
+    assert "--from-release-room" in proc.stdout
+    assert "--max-candidates" in proc.stdout
