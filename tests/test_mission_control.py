@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import pytest
 
@@ -24,12 +25,14 @@ def test_mission_control_run_writes_json_and_markdown(tmp_path):
 
     assert bundle["schema_version"] == "1"
     assert bundle["ok"] is True
+    assert bundle["mode"] == "plan"
     assert bundle["decision"] == "SHIP"
     assert bundle["risk_band"] == "low"
     assert bundle["repo"]["path"] == repo.resolve().as_posix()
     assert bundle["repo"]["branch"] == "unknown"
     assert bundle["repo"]["commit"] == "unknown"
     assert bundle["repo"]["dirty"] is False
+    assert bundle["executed_step_count"] == 0
     assert [step["id"] for step in bundle["steps"]] == [
         "gate_fast",
         "gate_release",
@@ -47,9 +50,120 @@ def test_mission_control_run_writes_json_and_markdown(tmp_path):
 
     brief = brief_path.read_text(encoding="utf-8")
     assert "# Mission Control" in brief
+    assert "Mode: plan" in brief
     assert "Decision: SHIP" in brief
     assert "gate_fast" in brief
     assert "release_room" in brief
+
+
+def test_mission_control_execute_writes_step_outputs(tmp_path, monkeypatch):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir = tmp_path / "out"
+    calls = []
+
+    def fake_run_step_process(args, *, cwd, timeout_seconds):
+        calls.append((list(args), cwd, timeout_seconds))
+        return 0, "step stdout\n", "", 17
+
+    monkeypatch.setattr(mission_control, "_run_step_process", fake_run_step_process)
+
+    rc = mission_control.main(
+        [
+            "run",
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(out_dir),
+            "--execute",
+        ]
+    )
+
+    assert rc == 0
+
+    bundle = json.loads((out_dir / "mission-control.json").read_text(encoding="utf-8"))
+    executed = [step for step in bundle["steps"] if step["executed"] is True]
+
+    assert bundle["mode"] == "execute"
+    assert bundle["ok"] is True
+    assert bundle["executed_step_count"] == 3
+    assert bundle["passed_step_count"] == 3
+    assert bundle["failed_step_count"] == 0
+    assert [step["id"] for step in executed] == ["gate_fast", "doctor", "readiness"]
+    assert all(step["status"] == "passed" for step in executed)
+    assert all(step["rc"] == 0 for step in executed)
+    assert len(calls) == 3
+
+    for step in executed:
+        stdout_path = Path(step["stdout_path"])
+        stderr_path = Path(step["stderr_path"])
+        assert stdout_path.read_text(encoding="utf-8") == "step stdout\n"
+        assert stderr_path.read_text(encoding="utf-8") == ""
+
+
+def test_mission_control_execute_include_release_adds_release_gate(tmp_path, monkeypatch):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir = tmp_path / "out"
+
+    def fake_run_step_process(args, *, cwd, timeout_seconds):
+        return 0, "ok\n", "", 5
+
+    monkeypatch.setattr(mission_control, "_run_step_process", fake_run_step_process)
+
+    rc = mission_control.main(
+        [
+            "run",
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(out_dir),
+            "--execute",
+            "--include-release",
+        ]
+    )
+
+    assert rc == 0
+
+    bundle = json.loads((out_dir / "mission-control.json").read_text(encoding="utf-8"))
+    executed_ids = [step["id"] for step in bundle["steps"] if step["executed"] is True]
+
+    assert executed_ids == ["gate_fast", "gate_release", "doctor", "readiness"]
+    assert bundle["executed_step_count"] == 4
+
+
+def test_mission_control_execute_failed_step_sets_no_ship(tmp_path, monkeypatch):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir = tmp_path / "out"
+
+    def fake_run_step_process(args, *, cwd, timeout_seconds):
+        if "doctor" in args:
+            return 1, "", "doctor failed\n", 9
+        return 0, "ok\n", "", 5
+
+    monkeypatch.setattr(mission_control, "_run_step_process", fake_run_step_process)
+
+    rc = mission_control.main(
+        [
+            "run",
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(out_dir),
+            "--execute",
+        ]
+    )
+
+    assert rc == 2
+
+    bundle = json.loads((out_dir / "mission-control.json").read_text(encoding="utf-8"))
+
+    assert bundle["ok"] is False
+    assert bundle["decision"] == "NO_SHIP"
+    assert bundle["risk_band"] == "high"
+    assert bundle["failed_step_count"] == 1
+    assert bundle["findings"][0]["code"] == "STEP_FAILED"
 
 
 def test_mission_control_summarize_prints_stable_counts(tmp_path, capsys):
@@ -68,7 +182,10 @@ def test_mission_control_summarize_prints_stable_counts(tmp_path, capsys):
     output = capsys.readouterr().out
     assert "decision=SHIP" in output
     assert "risk_band=low" in output
+    assert "mode=plan" in output
     assert "steps=6" in output
+    assert "executed_steps=0" in output
+    assert "failed_steps=0" in output
     assert "findings=0" in output
 
 
@@ -80,6 +197,8 @@ def test_mission_control_schema_lists_required_top_level_keys(capsys):
     payload = json.loads(capsys.readouterr().out)
     assert payload["schema_version"] == "1"
     assert "decision" in payload["required_top_level_keys"]
+    assert "mode" in payload["required_top_level_keys"]
+    assert "executed_step_count" in payload["required_top_level_keys"]
     assert "next_actions" in payload["required_top_level_keys"]
 
 
