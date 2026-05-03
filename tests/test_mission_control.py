@@ -94,6 +94,7 @@ def test_root_cli_dispatches_mission_control(tmp_path):
     assert (out_dir / "mission-control.json").exists()
     assert (out_dir / "mission-control.md").exists()
 
+
 def test_root_cli_forwards_mission_control_help(capsys):
     with pytest.raises(SystemExit) as exc:
         cli.main(["mission-control", "--help"])
