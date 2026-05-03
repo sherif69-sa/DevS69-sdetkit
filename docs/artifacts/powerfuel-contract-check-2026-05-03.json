@@ -1,0 +1,25 @@
+{
+  "status": "pass",
+  "checks": {
+    "baseline": {
+      "path": "docs/artifacts/powerfuel-baseline-2026-05-03.json",
+      "missing_fields": [],
+      "pass": true
+    },
+    "shadow": {
+      "path": "docs/artifacts/powerfuel-shadow-log-2026-05-03.json",
+      "missing_fields": [],
+      "pass": true
+    },
+    "weekly": {
+      "path": "docs/artifacts/powerfuel-weekly-report-2026-05-03.json",
+      "missing_fields": [],
+      "pass": true
+    },
+    "retirement": {
+      "path": "docs/artifacts/powerfuel-retirement-plan-2026-05-03.json",
+      "missing_fields": [],
+      "pass": true
+    }
+  }
+}

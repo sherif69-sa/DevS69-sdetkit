@@ -1,0 +1,16 @@
+{
+  "date": "2026-05-03",
+  "status": "consolidation-score-generated",
+  "score": 99,
+  "priority_lane": "high",
+  "inputs": {
+    "workflow_count": 53,
+    "duplicate_trigger_paths": 111,
+    "top_retirement_priority_score": 111,
+    "candidate_count": 53
+  },
+  "next_actions": [
+    "Focus parity checks on top-ranked retirement candidates.",
+    "Track score weekly; trend down as retirements complete."
+  ]
+}
