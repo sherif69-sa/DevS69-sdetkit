@@ -285,6 +285,7 @@ def test_mission_control_schema_lists_required_top_level_and_ledger_keys(capsys)
     assert "next_actions" in payload["required_top_level_keys"]
     assert "artifact_dir" in payload["ledger_record_keys"]
     assert "failure_rate" in payload["history_summary_keys"]
+    assert "Executive summary" in payload["report_sections"]
 
 
 def test_root_cli_dispatches_mission_control(tmp_path):
@@ -321,6 +322,7 @@ def test_root_cli_forwards_mission_control_help(capsys):
     assert "summarize" in output
     assert "schema" in output
     assert "history" in output
+    assert "report" in output
 
 
 def test_mission_control_history_summarizes_text_ledger(tmp_path, capsys):
@@ -430,3 +432,107 @@ def test_mission_control_history_missing_ledger_is_empty(tmp_path, capsys):
     assert "runs=0" in output
     assert "latest_decision=none" in output
     assert "failure_rate=0.0" in output
+
+
+def test_mission_control_report_writes_markdown_without_history(tmp_path, capsys):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir = tmp_path / "bundle"
+    report_path = tmp_path / "report.md"
+
+    assert (
+        mission_control.main(["run", "--repo", str(repo), "--out-dir", str(out_dir), "--no-ledger"])
+        == 0
+    )
+
+    capsys.readouterr()
+
+    rc = mission_control.main(
+        [
+            "report",
+            "--bundle",
+            str(out_dir / "mission-control.json"),
+            "--out",
+            str(report_path),
+        ]
+    )
+
+    assert rc == 0
+
+    output = capsys.readouterr().out
+    report = report_path.read_text(encoding="utf-8")
+
+    assert "wrote " in output
+    assert "decision=SHIP" in output
+    assert "# Mission Control Report" in report
+    assert "## Executive summary" in report
+    assert "- Decision: SHIP" in report
+    assert "- Risk band: low" in report
+    assert "## History summary" in report
+    assert "- not provided" in report
+    assert "## Artifacts" in report
+
+
+def test_mission_control_report_includes_history_summary(tmp_path, capsys):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    ledger_path = tmp_path / "runs" / "mission-control.jsonl"
+    out_dir_1 = tmp_path / "one"
+    out_dir_2 = tmp_path / "two"
+    report_path = tmp_path / "report.md"
+
+    assert (
+        mission_control.main(
+            [
+                "run",
+                "--repo",
+                str(repo),
+                "--out-dir",
+                str(out_dir_1),
+                "--ledger-path",
+                str(ledger_path),
+            ]
+        )
+        == 0
+    )
+    assert (
+        mission_control.main(
+            [
+                "run",
+                "--repo",
+                str(repo),
+                "--out-dir",
+                str(out_dir_2),
+                "--ledger-path",
+                str(ledger_path),
+            ]
+        )
+        == 0
+    )
+
+    capsys.readouterr()
+
+    rc = mission_control.main(
+        [
+            "report",
+            "--bundle",
+            str(out_dir_2 / "mission-control.json"),
+            "--history",
+            str(ledger_path),
+            "--out",
+            str(report_path),
+        ]
+    )
+
+    assert rc == 0
+
+    output = capsys.readouterr().out
+    report = report_path.read_text(encoding="utf-8")
+
+    assert "history_runs=2" in output
+    assert "- Runs: 2" in report
+    assert "- Ship: 2" in report
+    assert "- Latest decision: SHIP" in report
+    assert "- Latest risk band: low" in report
+    assert "- Failure rate: 0.0" in report
+    assert "- Most common failed step: none" in report

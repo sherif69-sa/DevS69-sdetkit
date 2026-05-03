@@ -578,6 +578,162 @@ def render_history_text(summary: dict[str, Any]) -> str:
     return "\n".join(f"{key}={summary[key]}" for key in keys)
 
 
+def _format_report_findings(bundle: dict[str, Any]) -> list[str]:
+    findings = bundle.get("findings", [])
+    if not isinstance(findings, list) or not findings:
+        return ["- none"]
+
+    lines = []
+    for finding in findings:
+        if not isinstance(finding, dict):
+            continue
+        severity = finding.get("severity", "unknown")
+        code = finding.get("code", "UNKNOWN")
+        message = finding.get("message", "")
+        lines.append(f"- {severity}: {code} - {message}")
+    return lines or ["- none"]
+
+
+def _format_report_steps(bundle: dict[str, Any]) -> list[str]:
+    steps = bundle.get("steps", [])
+    if not isinstance(steps, list) or not steps:
+        return ["- none"]
+
+    lines = []
+    for step in steps:
+        if not isinstance(step, dict):
+            continue
+        line = f"- {step.get('id', 'unknown')}: {step.get('status', 'unknown')}"
+        command = step.get("command")
+        if command:
+            line += f" - `{command}`"
+        if step.get("executed") is True:
+            line += (
+                f" (rc={step.get('rc', 'unknown')}, elapsed_ms={step.get('elapsed_ms', 'unknown')})"
+            )
+        lines.append(line)
+    return lines or ["- none"]
+
+
+def _format_report_next_actions(bundle: dict[str, Any]) -> list[str]:
+    actions = bundle.get("next_actions", [])
+    if not isinstance(actions, list) or not actions:
+        return ["- none"]
+
+    lines = []
+    for action in actions:
+        if not isinstance(action, dict):
+            continue
+        action_id = action.get("id", "unknown")
+        command = action.get("command", "")
+        reason = action.get("reason", "")
+        if command:
+            lines.append(f"- {action_id}: `{command}` — {reason}")
+        else:
+            lines.append(f"- {action_id}: {reason}")
+    return lines or ["- none"]
+
+
+def _format_report_artifacts(bundle: dict[str, Any]) -> list[str]:
+    artifacts = bundle.get("artifacts", [])
+    if not isinstance(artifacts, list) or not artifacts:
+        return ["- none"]
+
+    lines = []
+    for artifact in artifacts:
+        if not isinstance(artifact, dict):
+            continue
+        label = artifact.get("label", "artifact")
+        kind = artifact.get("kind", "file")
+        artifact_path = artifact.get("path", "")
+        lines.append(f"- {label} ({kind}): `{artifact_path}`")
+    return lines or ["- none"]
+
+
+def render_report_markdown(
+    bundle: dict[str, Any],
+    history_summary: dict[str, Any] | None = None,
+) -> str:
+    repo = bundle.get("repo", {})
+    if not isinstance(repo, dict):
+        repo = {}
+
+    lines = [
+        "# Mission Control Report",
+        "",
+        "## Executive summary",
+        "",
+        f"- Run ID: {bundle.get('run_id', 'unknown')}",
+        f"- Decision: {bundle.get('decision', 'unknown')}",
+        f"- Risk band: {bundle.get('risk_band', 'unknown')}",
+        f"- Mode: {bundle.get('mode', 'unknown')}",
+        f"- Generated: {bundle.get('generated_at_utc', 'unknown')}",
+        f"- Repository: {repo.get('path', 'unknown')}",
+        f"- Branch: {repo.get('branch', 'unknown')}",
+        f"- Commit: {repo.get('commit', 'unknown')}",
+        f"- Dirty: {str(repo.get('dirty', 'unknown')).lower()}",
+        "",
+        "## Execution",
+        "",
+        f"- Executed steps: {bundle.get('executed_step_count', 0)}",
+        f"- Passed steps: {bundle.get('passed_step_count', 0)}",
+        f"- Failed steps: {bundle.get('failed_step_count', 0)}",
+        "",
+        "## Steps",
+        "",
+        *_format_report_steps(bundle),
+        "",
+        "## Findings",
+        "",
+        *_format_report_findings(bundle),
+        "",
+        "## History summary",
+        "",
+    ]
+
+    if history_summary is None:
+        lines.append("- not provided")
+    else:
+        lines.extend(
+            [
+                f"- Ledger: `{history_summary.get('ledger_path', 'unknown')}`",
+                f"- Runs: {history_summary.get('runs', 0)}",
+                f"- Ship: {history_summary.get('ship', 0)}",
+                f"- Ship with findings: {history_summary.get('ship_with_findings', 0)}",
+                f"- No ship: {history_summary.get('no_ship', 0)}",
+                f"- Latest decision: {history_summary.get('latest_decision', 'none')}",
+                f"- Latest risk band: {history_summary.get('latest_risk_band', 'none')}",
+                f"- Failure rate: {history_summary.get('failure_rate', 0.0)}",
+                f"- Most common failed step: {history_summary.get('most_common_failed_step', 'none')}",
+            ]
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Next actions",
+            "",
+            *_format_report_next_actions(bundle),
+            "",
+            "## Artifacts",
+            "",
+            *_format_report_artifacts(bundle),
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def write_report(
+    bundle: dict[str, Any],
+    out_path: Path,
+    history_summary: dict[str, Any] | None = None,
+) -> Path:
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(render_report_markdown(bundle, history_summary), encoding="utf-8")
+    return out_path
+
+
 def _run(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     out_dir = Path(args.out_dir).resolve()
@@ -674,6 +830,15 @@ def _schema(_: argparse.Namespace) -> int:
             "failure_rate",
             "most_common_failed_step",
         ],
+        "report_sections": [
+            "Executive summary",
+            "Execution",
+            "Steps",
+            "Findings",
+            "History summary",
+            "Next actions",
+            "Artifacts",
+        ],
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
@@ -694,6 +859,33 @@ def _history(args: argparse.Namespace) -> int:
         print(json.dumps(summary, indent=2, sort_keys=True))
     else:
         print(render_history_text(summary))
+    return 0
+
+
+def _report(args: argparse.Namespace) -> int:
+    bundle_path = Path(args.bundle)
+    out_path = Path(args.out)
+
+    try:
+        bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"error=failed to read bundle: {exc}", file=sys.stderr)
+        return 2
+
+    history_summary = None
+    if args.history:
+        try:
+            history_summary = build_history_summary(Path(args.history))
+        except ValueError as exc:
+            print(f"error={exc}", file=sys.stderr)
+            return 2
+
+    written = write_report(bundle, out_path, history_summary)
+    print(f"wrote {written.resolve()}")
+    print(f"decision={bundle.get('decision', 'unknown')}")
+    print(f"risk_band={bundle.get('risk_band', 'unknown')}")
+    if history_summary is not None:
+        print(f"history_runs={history_summary['runs']}")
     return 0
 
 
@@ -726,6 +918,12 @@ def build_parser() -> argparse.ArgumentParser:
     history.add_argument("--ledger", default="")
     history.add_argument("--format", choices=["text", "json"], default="text")
     history.set_defaults(func=_history)
+
+    report = sub.add_parser("report", help="Write a Markdown release brief from a bundle")
+    report.add_argument("--bundle", required=True)
+    report.add_argument("--history", default="")
+    report.add_argument("--out", default="build/mission-control/report.md")
+    report.set_defaults(func=_report)
 
     return parser
 
