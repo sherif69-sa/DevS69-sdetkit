@@ -1,0 +1,7 @@
+{
+  "repos": [
+    {"name": "platform-api", "path": "repos/platform-api", "language": "python", "priority": 10, "depends_on": ["contracts"]},
+    {"name": "contracts", "path": "repos/contracts", "language": "go", "priority": 15},
+    {"name": "web-app", "path": "repos/web-app", "language": "node", "priority": 40, "depends_on": ["platform-api"]}
+  ]
+}

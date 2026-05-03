@@ -1,0 +1,13 @@
+{
+  "portfolios": [
+    {
+      "name": "sample-a",
+      "repo_graph": "examples/topology/enterprise-repo-graph.sample.json",
+      "schema": "schemas/repo-graph.schema.json",
+      "adapters": "config/portfolio_adapters.json",
+      "policy": "config/portfolio_policy.default.json",
+      "max_workers": 4,
+      "run": false
+    }
+  ]
+}

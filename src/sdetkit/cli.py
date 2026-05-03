@@ -297,6 +297,11 @@ Then use stability-aware command discovery:
     _add_passthrough_subcommand(
         sub, "repo", help_text="[Public / stable] Repository automation tasks"
     )
+    _add_passthrough_subcommand(
+        sub,
+        "portfolio-orchestrate",
+        help_text="[Advanced but supported] Multi-repo orchestration and portfolio risk reporting",
+    )
 
     _add_passthrough_subcommand(sub, "dev", help_text="Shortcut to `repo dev` workflows")
 
@@ -1024,6 +1029,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.out):
             forwarded.extend(["--out", str(ns.out)])
         return _run_module_main("sdetkit.fit", forwarded)
+    if ns.cmd == "portfolio-orchestrate":
+        return _run_module_main("sdetkit.portfolio_orchestrator", ns.args)
 
     parsed_shortcut_result = dispatch_parsed_shortcut(
         str(ns.cmd),
