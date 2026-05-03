@@ -58,4 +58,3 @@ on:
     assert payload["kpis"]["first_proof_success_rate"] == 1.0
     assert payload["kpis"]["time_to_first_proof_median_minutes"] == 20.0
     assert payload["trigger_counts"]["workflow_dispatch"] == 2
-
