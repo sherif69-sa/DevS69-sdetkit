@@ -161,6 +161,14 @@ def test_cli_writes_json_output(tmp_path, capsys):
 
     assert payload["diagnosis_count"] == 2
     assert payload["severity"] == "high"
+    assert payload["prescription_count"] == 2
+    assert payload["prescriptions"] == []
+    assert payload["next_commands"] == []
+    assert payload["verification_commands"] == []
+    assert payload["source"]["output_path"] == "[REDACTED]"
+    assert payload["diagnoses"][0]["diagnosis_id"].startswith("doctor.")
+    assert "evidence" not in payload["diagnoses"][0]
+    assert "prescriptions" not in payload["diagnoses"][0]
 
 
 def test_cli_prints_text_output(tmp_path, capsys):

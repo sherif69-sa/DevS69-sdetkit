@@ -45,4 +45,4 @@ Use text output for quick terminal summaries:
 python -m sdetkit.doctor_diagnosis --source build/doctor.json --format text
 ```
 
-This contract is the first Doctor Cortex layer. Future intelligence, adaptive review, five-head review, and Mission Control integration should enrich this diagnosis payload rather than rewriting the doctor core.
+This contract is the first Doctor Cortex layer. Future intelligence, adaptive review, five-head review, and Mission Control integration should enrich this diagnosis payload rather than rewriting the doctor core.\n\nCLI and file output use a public-safe projection of the diagnosis contract. The output preserves counts, statuses, severities, categories, and diagnosis ids, but omits raw evidence, raw fix text, nested prescriptions, and source output paths. This keeps generated diagnosis artifacts safe for CI logs, CodeQL-reviewed build output, and reports.\n

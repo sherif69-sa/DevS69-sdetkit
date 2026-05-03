@@ -336,9 +336,69 @@ def _json_contract(contract: dict[str, Any]) -> str:
     return json.dumps(contract, indent=2, sort_keys=True) + "\n"
 
 
+def _public_diagnosis(diagnosis: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "diagnosis_id": str(diagnosis.get("diagnosis_id", "")),
+        "title": str(diagnosis.get("title", "")),
+        "category": str(diagnosis.get("category", "general")),
+        "status": str(diagnosis.get("status", "info")),
+        "severity": str(diagnosis.get("severity", "low")),
+        "confidence": diagnosis.get("confidence", 0.0),
+        "summary": str(diagnosis.get("summary", "")),
+        "source": str(diagnosis.get("source", "doctor")),
+    }
+
+
+def _public_contract_for_output(contract: dict[str, Any]) -> dict[str, Any]:
+    source = _as_dict(contract.get("source"))
+    severity_counts = _as_dict(contract.get("severity_counts"))
+
+    return {
+        "schema_version": str(contract.get("schema_version", SCHEMA_VERSION)),
+        "source_schema_version": str(contract.get("source_schema_version", "unknown")),
+        "ok": bool(contract.get("ok", False)),
+        "status": str(contract.get("status", "unknown")),
+        "severity": str(contract.get("severity", "unknown")),
+        "confidence": contract.get("confidence", 0.0),
+        "score": contract.get("score", 0),
+        "diagnosis_count": int(contract.get("diagnosis_count", 0)),
+        "observation_count": int(contract.get("observation_count", 0)),
+        "prescription_count": int(contract.get("prescription_count", 0)),
+        "severity_counts": {
+            "critical": int(severity_counts.get("critical", 0)),
+            "high": int(severity_counts.get("high", 0)),
+            "medium": int(severity_counts.get("medium", 0)),
+            "low": int(severity_counts.get("low", 0)),
+            "info": int(severity_counts.get("info", 0)),
+        },
+        "diagnoses": [
+            _public_diagnosis(item)
+            for item in _as_list(contract.get("diagnoses"))
+            if isinstance(item, dict)
+        ],
+        "observations": [],
+        "prescriptions": [],
+        "next_commands": [],
+        "verification_commands": [],
+        "recommendations": [
+            "Public-safe diagnosis output written. Review the source doctor JSON for raw evidence."
+        ],
+        "judgment_next_move": "Review the source doctor JSON for detailed evidence.",
+        "source": {
+            "workflow": str(source.get("workflow", "doctor")),
+            "package": str(source.get("package", "unknown")),
+            "version": str(source.get("version", "unknown")),
+            "output_path": "[REDACTED]",
+        },
+    }
+
+
 def write_output(contract: dict[str, Any], out_path: Path | None, *, output_format: str) -> None:
+    public_contract = _public_contract_for_output(contract)
     rendered_contract = (
-        _json_contract(contract) if output_format == "json" else render_text(contract) + "\n"
+        _json_contract(public_contract)
+        if output_format == "json"
+        else render_text(public_contract) + "\n"
     )
 
     if out_path is None:
