@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["portfolios"],
+  "properties": {
+    "portfolios": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "repo_graph"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "repo_graph": { "type": "string", "minLength": 1 },
+          "schema": { "type": "string", "minLength": 1 },
+          "adapters": { "type": "string", "minLength": 1 },
+          "policy": { "type": "string", "minLength": 1 },
+          "policy_pack": { "type": "string", "minLength": 1 },
+          "policy_profile": { "type": "string" },
+          "policy_overrides": {
+            "oneOf": [
+              { "type": "object" },
+              { "type": "string", "minLength": 1 }
+            ]
+          },
+          "max_workers": { "type": "integer", "minimum": 1 },
+          "run": { "type": "boolean" },
+          "timeout_seconds": { "type": "integer", "minimum": 1 },
+          "retries": { "type": "integer", "minimum": 0 },
+          "max_failures": { "type": "integer", "minimum": 0 },
+          "transport": { "type": "string", "enum": ["local", "ssh", "container", "k8s-job"] },
+          "cancel_file": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

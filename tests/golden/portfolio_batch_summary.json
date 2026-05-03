@@ -1,0 +1,18 @@
+{
+  "no_ship": 1,
+  "ok": true,
+  "portfolios": 1,
+  "ship": 0,
+  "summaries": [
+    {
+      "decision": "NO_SHIP",
+      "failure_count": 0,
+      "name": "p1",
+      "reliability": 0,
+      "risk_score": 99,
+      "telemetry": {
+        "timings_ms": "<redacted>"
+      }
+    }
+  ]
+}

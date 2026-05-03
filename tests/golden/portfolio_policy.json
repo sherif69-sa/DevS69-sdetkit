@@ -1,0 +1,43 @@
+{
+  "artifact_schema_version": "portfolio.v1",
+  "decision": "NO_SHIP",
+  "ok": true,
+  "policy_name": "standard",
+  "profile": "standard",
+  "signals": {
+    "execution_reliability_score": 0,
+    "failure_count": 0,
+    "risk_score": 99,
+    "stopped_early": false
+  },
+  "trace": [
+    {
+      "actual": 99,
+      "limit": 35,
+      "pass": false,
+      "rule": "max_risk_score"
+    },
+    {
+      "actual": 0,
+      "limit": 80,
+      "pass": false,
+      "rule": "min_execution_reliability"
+    },
+    {
+      "actual": 0,
+      "limit": 0,
+      "pass": true,
+      "rule": "max_failures"
+    },
+    {
+      "actual": false,
+      "limit": false,
+      "pass": true,
+      "rule": "allow_stopped_early"
+    }
+  ],
+  "violations": [
+    "risk_score 99 > 35",
+    "reliability 0 < 80"
+  ]
+}

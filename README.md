@@ -76,6 +76,132 @@ Real workflow operations: [`docs/real-workflow-operations.md`](docs/real-workflo
 Quick ops aliases: `make ops-daily` / `make ops-daily-fast` / `make ops-weekly` / `make ops-premerge` / `make ops-premerge-fast` / `make ops-premerge-next` / `make ops-premerge-next-fast` / `make ops-followup` / `make ops-now` / `make ops-now-lite` / `make ops-next`
 Rollback/remediation examples: [`docs/integrations/rollback-remediation-examples.md`](docs/integrations/rollback-remediation-examples.md)
 
+## Multi-repo execution (new)
+
+You can now generate a deterministic multi-repo execution plan and portfolio risk report:
+
+```bash
+python -m sdetkit portfolio-orchestrate orchestrate \
+  --repo-graph examples/topology/enterprise-repo-graph.sample.json \
+  --schema schemas/repo-graph.schema.json \
+  --max-workers 4 \
+  --out build/portfolio-execution-plan.json
+
+python -m sdetkit portfolio-orchestrate validate-graph \
+  --repo-graph examples/topology/enterprise-repo-graph.sample.json \
+  --schema schemas/repo-graph.schema.json
+
+python -m sdetkit portfolio-orchestrate risk-report \
+  --plan build/portfolio-execution-plan.json \
+  --out build/portfolio-risk-report.json
+
+python -m sdetkit portfolio-orchestrate execute \
+  --plan build/portfolio-execution-plan.json \
+  --max-workers 8 \
+  --transport local \
+  --adapters config/portfolio_adapters.json \
+  --artifact-dir build/portfolio-workers \
+  --retries 1 \
+  --max-failures 3 \
+  --cancel-file .sdetkit/portfolio-cancel-targets.txt \
+  --out build/portfolio-execution-intents.json
+
+# Optional: execute adapter commands (not only dry-run intents)
+python -m sdetkit portfolio-orchestrate execute \
+  --plan build/portfolio-execution-plan.json \
+  --max-workers 8 \
+  --run \
+  --transport ssh \
+  --timeout-seconds 120 \
+  --out build/portfolio-execution-results.json
+
+python -m sdetkit portfolio-orchestrate score-execution \
+  --results build/portfolio-execution-results.json \
+  --out build/portfolio-execution-scorecard.json
+
+python -m sdetkit portfolio-orchestrate report \
+  --plan build/portfolio-execution-plan.json \
+  --risk build/portfolio-risk-report.json \
+  --score build/portfolio-execution-scorecard.json \
+  --out build/portfolio-report.md
+
+python -m sdetkit portfolio-orchestrate analyze-plan \
+  --plan build/portfolio-execution-plan.json \
+  --out build/portfolio-plan-analysis.json
+
+python -m sdetkit portfolio-orchestrate run-pipeline \
+  --repo-graph examples/topology/enterprise-repo-graph.sample.json \
+  --schema schemas/repo-graph.schema.json \
+  --adapters config/portfolio_adapters.json \
+  --max-workers 8 \
+  --policy config/portfolio_policy.default.json \
+  --history .sdetkit/portfolio-history.jsonl \
+  --out-dir build/portfolio-pipeline
+
+# Optional: run real adapter commands in the pipeline
+python -m sdetkit portfolio-orchestrate run-pipeline \
+  --repo-graph examples/topology/enterprise-repo-graph.sample.json \
+  --schema schemas/repo-graph.schema.json \
+  --adapters config/portfolio_adapters.json \
+  --max-workers 8 \
+  --run \
+  --transport ssh \
+  --timeout-seconds 120 \
+  --retries 1 \
+  --max-failures 3 \
+  --policy config/portfolio_policy.default.json \
+  --history .sdetkit/portfolio-history.jsonl \
+  --out-dir build/portfolio-pipeline-run
+
+python -m sdetkit portfolio-orchestrate evaluate-policy \
+  --risk build/portfolio-risk-report.json \
+  --score build/portfolio-execution-scorecard.json \
+  --execution build/portfolio-execution-results.json \
+  --policy config/portfolio_policy.default.json \
+  --out build/portfolio-policy-decision.json
+
+python -m sdetkit portfolio-orchestrate history-trend \
+  --history .sdetkit/portfolio-history.jsonl \
+  --out build/portfolio-history-trend.json
+
+python -m sdetkit portfolio-orchestrate dashboard \
+  --plan build/portfolio-execution-plan.json \
+  --risk build/portfolio-risk-report.json \
+  --score build/portfolio-execution-scorecard.json \
+  --execution build/portfolio-execution-results.json \
+  --policy build/portfolio-policy-decision.json \
+  --out build/portfolio-dashboard.html
+
+python -m sdetkit portfolio-orchestrate batch-run \
+  --manifest examples/topology/portfolio-batch.sample.json \
+  --max-parallel 4 \
+  --out-dir build/portfolio-batch
+
+# policy_overrides in batch manifests can be either an object:
+# "policy_overrides": {"max_risk_score": 25}
+# or a JSON string:
+# "policy_overrides": "{\"max_risk_score\": 25}"
+
+python -m sdetkit portfolio-orchestrate impact-plan \
+  --repo-graph examples/topology/enterprise-repo-graph.sample.json \
+  --changed-files examples/kits/intelligence/changed-files.txt \
+  --out build/portfolio-impact-plan.json
+
+python -m sdetkit portfolio-orchestrate batch-control-tower \
+  --history build/portfolio-batch/batch-history.jsonl \
+  --out build/portfolio-batch/control-tower.json
+
+python -m sdetkit portfolio-orchestrate cancel-worker \
+  --target api \
+  --cancel-file .sdetkit/portfolio-cancel-targets.txt
+```
+
+Execution rows now include Worker Contract-style fields (`worker`, `run_id`, `started_at`, `finished_at`, `inputs`, `result`, `escalation`) for consistent downstream automation.
+
+Reference contracts:
+- Worker contract: [`docs/contracts/worker-contract-v1.md`](docs/contracts/worker-contract-v1.md)
+- Repo graph schema: [`schemas/repo-graph.schema.json`](schemas/repo-graph.schema.json)
+
 Release preflight now expects `build/first-proof/first-proof-summary.json` to exist and pass
 `check_first_proof_summary_contract.py`.
 

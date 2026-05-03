@@ -1,0 +1,5 @@
+{
+  "python": ["python", "-m", "sdetkit", "gate", "fast", "--repo", "{repo_path}"],
+  "node": ["npm", "test", "--prefix", "{repo_path}"],
+  "go": ["go", "test", "./...", "{repo_path}"]
+}
