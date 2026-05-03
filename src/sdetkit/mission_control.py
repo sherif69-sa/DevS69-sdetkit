@@ -5,6 +5,7 @@ import json
 import subprocess
 import sys
 import time
+import uuid
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,11 @@ SCHEMA_VERSION = "1"
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def _run_id(generated_at: str) -> str:
+    stamp = generated_at.replace("-", "").replace(":", "").replace("Z", "")
+    return f"mc-{stamp}-{uuid.uuid4().hex[:12]}"
 
 
 def _run_text(args: Sequence[str], *, cwd: Path) -> tuple[int, str]:
@@ -42,6 +48,10 @@ def _git_value(repo: Path, args: Sequence[str], fallback: str) -> str:
 def _git_dirty(repo: Path) -> bool:
     rc, output = _run_text(["git", "status", "--short"], cwd=repo)
     return rc == 0 and bool(output.strip())
+
+
+def _default_ledger_path(repo: Path) -> Path:
+    return repo / ".sdetkit" / "runs" / "mission-control-runs.jsonl"
 
 
 def _command_steps() -> list[dict[str, Any]]:
@@ -264,6 +274,7 @@ def build_bundle(
     execute: bool = False,
     include_release: bool = False,
     timeout_seconds: int = 60,
+    ledger_path: Path | None = None,
 ) -> dict[str, Any]:
     repo = repo.resolve()
     out_dir = out_dir.resolve()
@@ -329,9 +340,18 @@ def build_bundle(
         _artifact(out_dir / "mission-control.md", "Mission Control operator brief", "markdown"),
     ]
     artifacts.extend(_step_artifacts(steps))
+    if ledger_path is not None:
+        artifacts.append(
+            _artifact(
+                ledger_path.resolve(),
+                "Mission Control run ledger",
+                "jsonl",
+            )
+        )
 
     return {
         "schema_version": SCHEMA_VERSION,
+        "run_id": _run_id(generated_at),
         "generated_at_utc": generated_at,
         "ok": failed_count == 0,
         "mode": "execute" if execute else "plan",
@@ -358,6 +378,7 @@ def render_markdown(bundle: dict[str, Any]) -> str:
     lines = [
         "# Mission Control",
         "",
+        f"Run ID: {bundle['run_id']}",
         f"Generated: {bundle['generated_at_utc']}",
         f"Mode: {bundle['mode']}",
         f"Decision: {bundle['decision']}",
@@ -406,19 +427,57 @@ def write_bundle(bundle: dict[str, Any], out_dir: Path) -> tuple[Path, Path]:
     return json_path, md_path
 
 
+def _ledger_record(bundle: dict[str, Any], out_dir: Path) -> dict[str, Any]:
+    repo = bundle["repo"]
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "run_id": bundle["run_id"],
+        "timestamp": bundle["generated_at_utc"],
+        "repo": repo["path"],
+        "branch": repo["branch"],
+        "commit": repo["commit"],
+        "mode": bundle["mode"],
+        "decision": bundle["decision"],
+        "risk_band": bundle["risk_band"],
+        "ok": bundle["ok"],
+        "executed_step_count": bundle["executed_step_count"],
+        "failed_step_count": bundle["failed_step_count"],
+        "artifact_dir": out_dir.resolve().as_posix(),
+    }
+
+
+def append_ledger(bundle: dict[str, Any], ledger_path: Path, out_dir: Path) -> Path:
+    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    record = _ledger_record(bundle, out_dir)
+    with ledger_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, sort_keys=True) + "\n")
+    return ledger_path
+
+
 def _run(args: argparse.Namespace) -> int:
-    repo = Path(args.repo)
-    out_dir = Path(args.out_dir)
+    repo = Path(args.repo).resolve()
+    out_dir = Path(args.out_dir).resolve()
+    ledger_path = None
+    if not bool(args.no_ledger):
+        if args.ledger_path:
+            ledger_path = Path(args.ledger_path).resolve()
+        else:
+            ledger_path = _default_ledger_path(repo).resolve()
+
     bundle = build_bundle(
         repo,
         out_dir,
         execute=bool(args.execute),
         include_release=bool(args.include_release),
         timeout_seconds=int(args.timeout_seconds),
+        ledger_path=ledger_path,
     )
     json_path, md_path = write_bundle(bundle, out_dir)
     print(f"wrote {json_path}")
     print(f"wrote {md_path}")
+    if ledger_path is not None:
+        ledger_written = append_ledger(bundle, ledger_path, out_dir)
+        print(f"wrote {ledger_written}")
     print(f"decision={bundle['decision']} risk_band={bundle['risk_band']}")
     return 0 if bundle["ok"] else 2
 
@@ -426,6 +485,7 @@ def _run(args: argparse.Namespace) -> int:
 def _summarize(args: argparse.Namespace) -> int:
     path = Path(args.bundle)
     bundle = json.loads(path.read_text(encoding="utf-8"))
+    print(f"run_id={bundle.get('run_id', 'unknown')}")
     print(f"decision={bundle['decision']}")
     print(f"risk_band={bundle['risk_band']}")
     print(f"repo={bundle['repo']['path']}")
@@ -442,6 +502,7 @@ def _schema(_: argparse.Namespace) -> int:
         "schema_version": SCHEMA_VERSION,
         "required_top_level_keys": [
             "schema_version",
+            "run_id",
             "generated_at_utc",
             "ok",
             "mode",
@@ -455,6 +516,21 @@ def _schema(_: argparse.Namespace) -> int:
             "findings",
             "artifacts",
             "next_actions",
+        ],
+        "ledger_record_keys": [
+            "schema_version",
+            "run_id",
+            "timestamp",
+            "repo",
+            "branch",
+            "commit",
+            "mode",
+            "decision",
+            "risk_band",
+            "ok",
+            "executed_step_count",
+            "failed_step_count",
+            "artifact_dir",
         ],
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
@@ -474,6 +550,8 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--execute", action="store_true")
     run.add_argument("--include-release", action="store_true")
     run.add_argument("--timeout-seconds", type=int, default=60)
+    run.add_argument("--ledger-path", default="")
+    run.add_argument("--no-ledger", action="store_true")
     run.set_defaults(func=_run)
 
     summarize = sub.add_parser("summarize", help="Summarize a mission-control.json bundle")
