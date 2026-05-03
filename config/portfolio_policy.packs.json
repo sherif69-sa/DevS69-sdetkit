@@ -1,0 +1,26 @@
+{
+  "default_profile": "standard",
+  "profiles": {
+    "standard": {
+      "name": "standard",
+      "max_risk_score": 35,
+      "min_execution_reliability": 80,
+      "max_failures": 0,
+      "allow_stopped_early": false
+    },
+    "regulated": {
+      "name": "regulated",
+      "max_risk_score": 25,
+      "min_execution_reliability": 90,
+      "max_failures": 0,
+      "allow_stopped_early": false
+    },
+    "critical-release": {
+      "name": "critical-release",
+      "max_risk_score": 15,
+      "min_execution_reliability": 95,
+      "max_failures": 0,
+      "allow_stopped_early": false
+    }
+  }
+}
