@@ -51,6 +51,7 @@ def _validate_against_schema(payload: dict[str, Any], schema_path: Path) -> None
         return
     jsonschema.validate(instance=payload, schema=schema_payload)
 
+
 def _validate_against_repo_schema(payload: dict[str, Any], schema_path: Path) -> None:
     _validate_against_schema(payload, schema_path)
     # Fallback path for environments without jsonschema dependency.
@@ -66,7 +67,9 @@ def _validate_batch_manifest_shape(payload: dict[str, Any]) -> None:
             raise ValueError("BATCH_MANIFEST_ITEM_INVALID: each portfolio entry must be an object")
         repo_graph = item.get("repo_graph")
         if not isinstance(repo_graph, str) or not repo_graph.strip():
-            raise ValueError("BATCH_MANIFEST_REPO_GRAPH_REQUIRED: repo_graph must be a non-empty string")
+            raise ValueError(
+                "BATCH_MANIFEST_REPO_GRAPH_REQUIRED: repo_graph must be a non-empty string"
+            )
 
 
 def _build_plan(graph: dict[str, object], max_workers: int) -> dict[str, object]:
@@ -101,7 +104,7 @@ def _build_plan(graph: dict[str, object], max_workers: int) -> dict[str, object]
             assert isinstance(deps, list)
             if any(str(dep) not in done for dep in deps):
                 continue
-            name = str(repo.get("name", f"repo-{len(done)+1}"))
+            name = str(repo.get("name", f"repo-{len(done) + 1}"))
             language = str(repo.get("language", "unknown"))
             lane = "gate+review" if language.lower() in {"python", "node", "go"} else "gate"
             plan_items.append(
@@ -132,11 +135,11 @@ def _build_plan(graph: dict[str, object], max_workers: int) -> dict[str, object]
 def _build_risk_report(plan: dict[str, object]) -> dict[str, object]:
     items = plan.get("execution_plan", [])
     assert isinstance(items, list)
-    high = sum(1 for item in items if isinstance(item, dict) and int(item.get("priority", 100)) <= 20)
+    high = sum(
+        1 for item in items if isinstance(item, dict) and int(item.get("priority", 100)) <= 20
+    )
     med = sum(
-        1
-        for item in items
-        if isinstance(item, dict) and 20 < int(item.get("priority", 100)) <= 60
+        1 for item in items if isinstance(item, dict) and 20 < int(item.get("priority", 100)) <= 60
     )
     low = sum(1 for item in items if isinstance(item, dict) and int(item.get("priority", 100)) > 60)
     score = max(0, 100 - (high * 10 + med * 4 + low))
@@ -298,7 +301,9 @@ def _parse_policy_overrides(value: str) -> dict[str, object]:
         return {}
     payload = json.loads(raw)
     if not isinstance(payload, dict):
-        raise ValueError(f"{ERR_POLICY_OVERRIDE_INVALID_TYPE}: policy overrides must be a JSON object")
+        raise ValueError(
+            f"{ERR_POLICY_OVERRIDE_INVALID_TYPE}: policy overrides must be a JSON object"
+        )
     return payload
 
 
@@ -368,9 +373,13 @@ def _evaluate_policy(
     trace: list[dict[str, object]] = []
     if risk_score > max_risk_score:
         violations.append(f"risk_score {risk_score} > {max_risk_score}")
-        trace.append({"rule": "max_risk_score", "actual": risk_score, "limit": max_risk_score, "pass": False})
+        trace.append(
+            {"rule": "max_risk_score", "actual": risk_score, "limit": max_risk_score, "pass": False}
+        )
     else:
-        trace.append({"rule": "max_risk_score", "actual": risk_score, "limit": max_risk_score, "pass": True})
+        trace.append(
+            {"rule": "max_risk_score", "actual": risk_score, "limit": max_risk_score, "pass": True}
+        )
     if reliability < min_execution_reliability:
         violations.append(f"reliability {reliability} < {min_execution_reliability}")
         trace.append(
@@ -392,14 +401,32 @@ def _evaluate_policy(
         )
     if failure_count > max_failures:
         violations.append(f"failure_count {failure_count} > {max_failures}")
-        trace.append({"rule": "max_failures", "actual": failure_count, "limit": max_failures, "pass": False})
+        trace.append(
+            {"rule": "max_failures", "actual": failure_count, "limit": max_failures, "pass": False}
+        )
     else:
-        trace.append({"rule": "max_failures", "actual": failure_count, "limit": max_failures, "pass": True})
+        trace.append(
+            {"rule": "max_failures", "actual": failure_count, "limit": max_failures, "pass": True}
+        )
     if stopped_early and not allow_stopped_early:
         violations.append("stopped_early is true")
-        trace.append({"rule": "allow_stopped_early", "actual": stopped_early, "limit": allow_stopped_early, "pass": False})
+        trace.append(
+            {
+                "rule": "allow_stopped_early",
+                "actual": stopped_early,
+                "limit": allow_stopped_early,
+                "pass": False,
+            }
+        )
     else:
-        trace.append({"rule": "allow_stopped_early", "actual": stopped_early, "limit": allow_stopped_early, "pass": True})
+        trace.append(
+            {
+                "rule": "allow_stopped_early",
+                "actual": stopped_early,
+                "limit": allow_stopped_early,
+                "pass": True,
+            }
+        )
     decision = "SHIP" if not violations else "NO_SHIP"
     return {
         "ok": True,
@@ -582,11 +609,15 @@ def _run_pipeline_bundle(
     t_stage = perf_counter()
     plan = _build_plan(graph, max_workers=max(1, int(max_workers)))
     timings_ms["build_plan_ms"] = int((perf_counter() - t_stage) * 1000)
-    (out_dir / "plan.json").write_text(json.dumps(_with_schema(plan), indent=2) + "\n", encoding="utf-8")
+    (out_dir / "plan.json").write_text(
+        json.dumps(_with_schema(plan), indent=2) + "\n", encoding="utf-8"
+    )
     t_stage = perf_counter()
     risk = _build_risk_report(plan)
     timings_ms["risk_report_ms"] = int((perf_counter() - t_stage) * 1000)
-    (out_dir / "risk.json").write_text(json.dumps(_with_schema(risk), indent=2) + "\n", encoding="utf-8")
+    (out_dir / "risk.json").write_text(
+        json.dumps(_with_schema(risk), indent=2) + "\n", encoding="utf-8"
+    )
     t_stage = perf_counter()
     execution = _execute_plan(
         plan,
@@ -607,7 +638,9 @@ def _run_pipeline_bundle(
     t_stage = perf_counter()
     score = _score_execution_results(execution)
     timings_ms["score_ms"] = int((perf_counter() - t_stage) * 1000)
-    (out_dir / "score.json").write_text(json.dumps(_with_schema(score), indent=2) + "\n", encoding="utf-8")
+    (out_dir / "score.json").write_text(
+        json.dumps(_with_schema(score), indent=2) + "\n", encoding="utf-8"
+    )
     t_stage = perf_counter()
     policy_payload = (
         _resolve_policy_profile(
@@ -641,7 +674,9 @@ def _run_pipeline_bundle(
     t_stage = perf_counter()
     trend = _build_history_trend(history_path)
     timings_ms["history_trend_ms"] = int((perf_counter() - t_stage) * 1000)
-    (out_dir / "history-trend.json").write_text(json.dumps(trend, indent=2) + "\n", encoding="utf-8")
+    (out_dir / "history-trend.json").write_text(
+        json.dumps(trend, indent=2) + "\n", encoding="utf-8"
+    )
     t_stage = perf_counter()
     analysis = _analyze_plan(plan)
     timings_ms["analysis_ms"] = int((perf_counter() - t_stage) * 1000)
@@ -683,11 +718,11 @@ def _render_batch_dashboard_html(summary: dict[str, object]) -> str:
                 continue
             rendered.append(
                 "<tr>"
-                f"<td>{item.get('name','')}</td>"
-                f"<td>{item.get('decision','')}</td>"
-                f"<td>{item.get('risk_score','')}</td>"
-                f"<td>{item.get('reliability','')}</td>"
-                f"<td>{item.get('failure_count','')}</td>"
+                f"<td>{item.get('name', '')}</td>"
+                f"<td>{item.get('decision', '')}</td>"
+                f"<td>{item.get('risk_score', '')}</td>"
+                f"<td>{item.get('reliability', '')}</td>"
+                f"<td>{item.get('failure_count', '')}</td>"
                 "</tr>"
             )
         rows_html = "\n".join(rendered)
@@ -849,7 +884,10 @@ def _execute_plan(
             "inputs": {"path": repo_path},
             "evidence": [],
             "result": {"returncode": 2},
-            "escalation": {"required": True, "reason": f"exception during adapter execution: {last_error}"},
+            "escalation": {
+                "required": True,
+                "reason": f"exception during adapter execution: {last_error}",
+            },
             "command": command,
             "error": last_error,
         }
@@ -907,19 +945,27 @@ def _parser() -> argparse.ArgumentParser:
     risk = sub.add_parser("risk-report", help="Generate a portfolio risk report from a plan")
     risk.add_argument("--plan", required=True)
     risk.add_argument("--out", required=True)
-    execute = sub.add_parser("execute", help="Build multi-worker adapter execution intents from a plan")
+    execute = sub.add_parser(
+        "execute", help="Build multi-worker adapter execution intents from a plan"
+    )
     execute.add_argument("--plan", required=True)
     execute.add_argument("--max-workers", type=int, default=4)
-    execute.add_argument("--run", action="store_true", help="Execute adapter commands instead of dry-run intents")
+    execute.add_argument(
+        "--run", action="store_true", help="Execute adapter commands instead of dry-run intents"
+    )
     execute.add_argument("--timeout-seconds", type=int, default=120)
     execute.add_argument("--adapters", default="config/portfolio_adapters.json")
     execute.add_argument("--artifact-dir", default="")
     execute.add_argument("--retries", type=int, default=0)
     execute.add_argument("--max-failures", type=int, default=0)
-    execute.add_argument("--transport", choices=["local", "ssh", "container", "k8s-job"], default="local")
+    execute.add_argument(
+        "--transport", choices=["local", "ssh", "container", "k8s-job"], default="local"
+    )
     execute.add_argument("--cancel-file", default=".sdetkit/portfolio-cancel-targets.txt")
     execute.add_argument("--out", required=True)
-    validate = sub.add_parser("validate-graph", help="Validate repo graph structure before orchestration")
+    validate = sub.add_parser(
+        "validate-graph", help="Validate repo graph structure before orchestration"
+    )
     validate.add_argument("--repo-graph", required=True)
     validate.add_argument("--schema", default="schemas/repo-graph.schema.json")
     score = sub.add_parser(
@@ -928,7 +974,9 @@ def _parser() -> argparse.ArgumentParser:
     )
     score.add_argument("--results", required=True)
     score.add_argument("--out", required=True)
-    report = sub.add_parser("report", help="Render markdown executive report from generated artifacts")
+    report = sub.add_parser(
+        "report", help="Render markdown executive report from generated artifacts"
+    )
     report.add_argument("--plan", default="")
     report.add_argument("--risk", default="")
     report.add_argument("--score", default="")
@@ -951,7 +999,9 @@ def _parser() -> argparse.ArgumentParser:
     pipeline.add_argument("--timeout-seconds", type=int, default=120)
     pipeline.add_argument("--retries", type=int, default=0)
     pipeline.add_argument("--max-failures", type=int, default=0)
-    pipeline.add_argument("--transport", choices=["local", "ssh", "container", "k8s-job"], default="local")
+    pipeline.add_argument(
+        "--transport", choices=["local", "ssh", "container", "k8s-job"], default="local"
+    )
     pipeline.add_argument("--policy", default="config/portfolio_policy.default.json")
     pipeline.add_argument("--policy-pack", default="config/portfolio_policy.packs.json")
     pipeline.add_argument("--policy-profile", default="")
@@ -970,7 +1020,9 @@ def _parser() -> argparse.ArgumentParser:
     policy.add_argument("--policy-profile", default="")
     policy.add_argument("--policy-overrides", default="")
     policy.add_argument("--out", required=True)
-    history = sub.add_parser("history-trend", help="Build trend metrics from pipeline history JSONL")
+    history = sub.add_parser(
+        "history-trend", help="Build trend metrics from pipeline history JSONL"
+    )
     history.add_argument("--history", default=".sdetkit/portfolio-history.jsonl")
     history.add_argument("--out", required=True)
     dashboard = sub.add_parser("dashboard", help="Render HTML dashboard from pipeline artifacts")
@@ -980,7 +1032,9 @@ def _parser() -> argparse.ArgumentParser:
     dashboard.add_argument("--execution", required=True)
     dashboard.add_argument("--policy", required=True)
     dashboard.add_argument("--out", required=True)
-    batch = sub.add_parser("batch-run", help="Run multiple portfolio pipelines from a batch manifest")
+    batch = sub.add_parser(
+        "batch-run", help="Run multiple portfolio pipelines from a batch manifest"
+    )
     batch.add_argument("--manifest", required=True)
     batch.add_argument("--max-parallel", type=int, default=2)
     batch.add_argument("--out-dir", required=True)
@@ -994,7 +1048,9 @@ def _parser() -> argparse.ArgumentParser:
     impact.add_argument("--repo-graph", required=True)
     impact.add_argument("--changed-files", required=True, help="newline-delimited changed files")
     impact.add_argument("--out", required=True)
-    tower = sub.add_parser("batch-control-tower", help="Render control-tower JSON from batch history")
+    tower = sub.add_parser(
+        "batch-control-tower", help="Render control-tower JSON from batch history"
+    )
     tower.add_argument("--history", required=True)
     tower.add_argument("--out", required=True)
 
@@ -1033,7 +1089,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.cmd == "impact-plan":
         graph = _load_repo_graph(Path(ns.repo_graph))
         repos = graph.get("repos", [])
-        changed = [line.strip() for line in Path(ns.changed_files).read_text(encoding="utf-8").splitlines() if line.strip()]
+        changed = [
+            line.strip()
+            for line in Path(ns.changed_files).read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
         selected: set[str] = set()
         owners: dict[str, list[str]] = {}
         if isinstance(repos, list):
@@ -1054,7 +1114,11 @@ def main(argv: list[str] | None = None) -> int:
                 if any(dep in changed_set for dep in deps) and repo not in changed_set:
                     changed_set.add(repo)
                     progress = True
-        reduced = [r for r in repos if isinstance(r, dict) and str(r.get("name")) in changed_set] if isinstance(repos, list) else []
+        reduced = (
+            [r for r in repos if isinstance(r, dict) and str(r.get("name")) in changed_set]
+            if isinstance(repos, list)
+            else []
+        )
         plan = _build_plan({"repos": reduced}, max_workers=4)
         Path(ns.out).write_text(json.dumps(_with_schema(plan), indent=2) + "\n", encoding="utf-8")
         return 0
@@ -1074,14 +1138,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if ns.cmd == "report":
         plan_payload = (
-            json.loads(Path(ns.plan).read_text(encoding="utf-8"))
-            if str(ns.plan).strip()
-            else None
+            json.loads(Path(ns.plan).read_text(encoding="utf-8")) if str(ns.plan).strip() else None
         )
         risk_payload = (
-            json.loads(Path(ns.risk).read_text(encoding="utf-8"))
-            if str(ns.risk).strip()
-            else None
+            json.loads(Path(ns.risk).read_text(encoding="utf-8")) if str(ns.risk).strip() else None
         )
         score_payload = (
             json.loads(Path(ns.score).read_text(encoding="utf-8"))
@@ -1137,7 +1197,11 @@ def main(argv: list[str] | None = None) -> int:
                 profile=str(ns.policy_profile) or None,
                 overrides=_parse_policy_overrides(str(ns.policy_overrides)),
             )
-        if not isinstance(risk, dict) or not isinstance(score, dict) or not isinstance(execution, dict):
+        if (
+            not isinstance(risk, dict)
+            or not isinstance(score, dict)
+            or not isinstance(execution, dict)
+        ):
             raise ValueError("risk/score/execution payloads must be JSON objects")
         evaluation = _evaluate_policy(
             risk=risk,
@@ -1183,6 +1247,7 @@ def main(argv: list[str] | None = None) -> int:
         assert isinstance(portfolios, list)
         out_root = Path(ns.out_dir)
         out_root.mkdir(parents=True, exist_ok=True)
+
         def _run_one(indexed: tuple[int, dict[str, object]]) -> dict[str, object]:
             _, item = indexed
             cfg = _normalize_batch_portfolio(item)
@@ -1223,7 +1288,9 @@ def main(argv: list[str] | None = None) -> int:
             "no_ship": len(summaries) - ship,
             "summaries": sorted(summaries, key=lambda x: str(x.get("name", ""))),
         }
-        (out_root / "batch-summary.json").write_text(json.dumps(aggregate, indent=2) + "\n", encoding="utf-8")
+        (out_root / "batch-summary.json").write_text(
+            json.dumps(aggregate, indent=2) + "\n", encoding="utf-8"
+        )
         batch_report = "\n".join(
             [
                 "# Portfolio Batch Report",

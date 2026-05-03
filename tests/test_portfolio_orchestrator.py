@@ -8,18 +8,18 @@ from sdetkit.portfolio_orchestrator import (
     _adapter_command_from_registry,
     _analyze_plan,
     _append_history_record,
+    _build_history_trend,
     _build_plan,
     _build_risk_report,
-    _build_history_trend,
-    _execute_plan,
     _evaluate_policy,
+    _execute_plan,
     _load_adapter_registry,
-    _score_execution_results,
-    _render_portfolio_report,
-    _render_portfolio_dashboard_html,
     _load_policy,
     _parse_policy_overrides,
+    _render_portfolio_dashboard_html,
+    _render_portfolio_report,
     _resolve_policy_profile,
+    _score_execution_results,
     _validate_against_repo_schema,
     _validate_repo_graph_shape,
 )
@@ -28,7 +28,13 @@ from sdetkit.portfolio_orchestrator import (
 def test_build_plan_orders_dependencies_before_dependents() -> None:
     graph = {
         "repos": [
-            {"name": "web", "path": "repos/web", "language": "node", "priority": 40, "depends_on": ["api"]},
+            {
+                "name": "web",
+                "path": "repos/web",
+                "language": "node",
+                "priority": 40,
+                "depends_on": ["api"],
+            },
             {"name": "api", "path": "repos/api", "language": "python", "priority": 10},
         ]
     }
@@ -40,7 +46,11 @@ def test_build_plan_orders_dependencies_before_dependents() -> None:
 
 
 def test_build_plan_rejects_unknown_dependency() -> None:
-    graph = {"repos": [{"name": "web", "path": "repos/web", "language": "node", "depends_on": ["missing"]}]}
+    graph = {
+        "repos": [
+            {"name": "web", "path": "repos/web", "language": "node", "depends_on": ["missing"]}
+        ]
+    }
     try:
         _build_plan(graph, max_workers=2)
     except ValueError as exc:
@@ -98,7 +108,11 @@ def test_execute_plan_writes_worker_artifacts(tmp_path: Path) -> None:
 
 
 def test_execute_plan_retries_failed_run() -> None:
-    plan = {"execution_plan": [{"repo": "api", "path": "repos/api", "language": "python", "depends_on": []}]}
+    plan = {
+        "execution_plan": [
+            {"repo": "api", "path": "repos/api", "language": "python", "depends_on": []}
+        ]
+    }
     registry = {"python": ["python", "-c", "import sys; sys.exit(1)"]}
     result = _execute_plan(plan, max_workers=1, run=True, adapter_registry=registry, retries=1)
     rows = result["results"]
@@ -134,7 +148,9 @@ def test_adapter_command_for_unknown_language() -> None:
 
 def test_adapter_registry_loading_and_resolution(tmp_path: Path) -> None:
     path = tmp_path / "adapters.json"
-    path.write_text(json.dumps({"python": ["python", "-m", "tool", "{repo_path}"]}), encoding="utf-8")
+    path.write_text(
+        json.dumps({"python": ["python", "-m", "tool", "{repo_path}"]}), encoding="utf-8"
+    )
     registry = _load_adapter_registry(path)
     cmd = _adapter_command_from_registry(registry, "python", "repos/api")
     assert cmd == ["python", "-m", "tool", "repos/api"]
@@ -233,14 +249,24 @@ def test_resolve_policy_profile_with_overrides(tmp_path: Path) -> None:
             {
                 "default_profile": "standard",
                 "profiles": {
-                    "standard": {"name": "standard", "max_risk_score": 35, "min_execution_reliability": 80},
-                    "regulated": {"name": "regulated", "max_risk_score": 20, "min_execution_reliability": 90},
+                    "standard": {
+                        "name": "standard",
+                        "max_risk_score": 35,
+                        "min_execution_reliability": 80,
+                    },
+                    "regulated": {
+                        "name": "regulated",
+                        "max_risk_score": 20,
+                        "min_execution_reliability": 90,
+                    },
                 },
             }
         ),
         encoding="utf-8",
     )
-    policy = _resolve_policy_profile(pack_path, profile="regulated", overrides={"max_risk_score": 10})
+    policy = _resolve_policy_profile(
+        pack_path, profile="regulated", overrides={"max_risk_score": 10}
+    )
     assert policy["profile"] == "regulated"
     assert policy["max_risk_score"] == 10
 
@@ -268,7 +294,9 @@ def test_render_dashboard_html() -> None:
         plan={"repos": 2, "max_workers": 2},
         risk={"portfolio_risk_score": 40},
         score={"execution_reliability_score": 85},
-        execution={"results": [{"repo": "api", "language": "python", "status": "ok", "mode": "run"}]},
+        execution={
+            "results": [{"repo": "api", "language": "python", "status": "ok", "mode": "run"}]
+        },
         policy={"decision": "SHIP"},
     )
     assert "Portfolio Orchestration Dashboard" in html

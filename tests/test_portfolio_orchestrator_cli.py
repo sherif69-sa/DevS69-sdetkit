@@ -12,7 +12,13 @@ def _sample_graph() -> dict[str, object]:
     return {
         "repos": [
             {"name": "api", "path": "repos/api", "language": "python", "priority": 10},
-            {"name": "web", "path": "repos/web", "language": "node", "priority": 40, "depends_on": ["api"]},
+            {
+                "name": "web",
+                "path": "repos/web",
+                "language": "node",
+                "priority": 40,
+                "depends_on": ["api"],
+            },
         ]
     }
 
@@ -23,10 +29,14 @@ def test_cli_validate_and_orchestrate(tmp_path: Path) -> None:
     out_path = tmp_path / "plan.json"
     graph_path.write_text(json.dumps(_sample_graph()), encoding="utf-8")
     schema_path.write_text(
-        json.dumps({"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}),
+        json.dumps(
+            {"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}
+        ),
         encoding="utf-8",
     )
-    assert main(["validate-graph", "--repo-graph", str(graph_path), "--schema", str(schema_path)]) == 0
+    assert (
+        main(["validate-graph", "--repo-graph", str(graph_path), "--schema", str(schema_path)]) == 0
+    )
     assert (
         main(
             [
@@ -131,14 +141,21 @@ def test_cli_run_pipeline(tmp_path: Path) -> None:
             {
                 "repos": [
                     {"name": "contracts", "path": "repos/contracts", "language": "go"},
-                    {"name": "api", "path": "repos/api", "language": "python", "depends_on": ["contracts"]},
+                    {
+                        "name": "api",
+                        "path": "repos/api",
+                        "language": "python",
+                        "depends_on": ["contracts"],
+                    },
                 ]
             }
         ),
         encoding="utf-8",
     )
     schema_path.write_text(
-        json.dumps({"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}),
+        json.dumps(
+            {"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}
+        ),
         encoding="utf-8",
     )
     adapters_path.write_text(
@@ -184,10 +201,14 @@ def test_cli_run_pipeline_with_run_mode(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     schema_path.write_text(
-        json.dumps({"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}),
+        json.dumps(
+            {"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}
+        ),
         encoding="utf-8",
     )
-    adapters_path.write_text(json.dumps({"python": ["echo", "ok", "{repo_path}"]}), encoding="utf-8")
+    adapters_path.write_text(
+        json.dumps({"python": ["echo", "ok", "{repo_path}"]}), encoding="utf-8"
+    )
     assert (
         main(
             [
@@ -223,10 +244,14 @@ def test_cli_run_pipeline_transport_option(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     schema_path.write_text(
-        json.dumps({"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}),
+        json.dumps(
+            {"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}
+        ),
         encoding="utf-8",
     )
-    adapters_path.write_text(json.dumps({"python": ["echo", "ok", "{repo_path}"]}), encoding="utf-8")
+    adapters_path.write_text(
+        json.dumps({"python": ["echo", "ok", "{repo_path}"]}), encoding="utf-8"
+    )
     assert (
         main(
             [
@@ -324,7 +349,9 @@ def test_cli_dashboard(tmp_path: Path) -> None:
     risk.write_text(json.dumps({"portfolio_risk_score": 30}), encoding="utf-8")
     score.write_text(json.dumps({"execution_reliability_score": 90}), encoding="utf-8")
     execution.write_text(
-        json.dumps({"results": [{"repo": "api", "language": "python", "status": "ok", "mode": "run"}]}),
+        json.dumps(
+            {"results": [{"repo": "api", "language": "python", "status": "ok", "mode": "run"}]}
+        ),
         encoding="utf-8",
     )
     policy.write_text(json.dumps({"decision": "SHIP"}), encoding="utf-8")
@@ -364,7 +391,9 @@ def test_cli_batch_run(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     schema.write_text(
-        json.dumps({"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}),
+        json.dumps(
+            {"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}
+        ),
         encoding="utf-8",
     )
     adapters.write_text(json.dumps({"python": ["echo", "ok", "{repo_path}"]}), encoding="utf-8")
@@ -441,7 +470,9 @@ def test_cli_batch_run_accepts_string_policy_overrides(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     schema.write_text(
-        json.dumps({"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}),
+        json.dumps(
+            {"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}
+        ),
         encoding="utf-8",
     )
     adapters.write_text(json.dumps({"python": ["echo", "ok", "{repo_path}"]}), encoding="utf-8")
@@ -455,7 +486,7 @@ def test_cli_batch_run_accepts_string_policy_overrides(tmp_path: Path) -> None:
                         "schema": str(schema),
                         "adapters": str(adapters),
                         "run": False,
-                        "policy_overrides": "{\"max_risk_score\": 0}",
+                        "policy_overrides": '{"max_risk_score": 0}',
                     }
                 ]
             }
@@ -490,7 +521,12 @@ def test_cli_impact_plan_and_control_tower(tmp_path: Path) -> None:
             {
                 "repos": [
                     {"name": "contracts", "path": "repos/contracts", "language": "go"},
-                    {"name": "api", "path": "repos/api", "language": "python", "depends_on": ["contracts"]},
+                    {
+                        "name": "api",
+                        "path": "repos/api",
+                        "language": "python",
+                        "depends_on": ["contracts"],
+                    },
                 ]
             }
         ),
@@ -533,10 +569,33 @@ def test_portfolio_outputs_match_committed_goldens(tmp_path: Path) -> None:
     schema = tmp_path / "schema.json"
     adapters = tmp_path / "adapters.json"
     out_dir = tmp_path / "pipeline-out"
-    graph.write_text(json.dumps({"repos": [{"name": "api", "path": "repos/api", "language": "python"}]}), encoding="utf-8")
-    schema.write_text(json.dumps({"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}), encoding="utf-8")
+    graph.write_text(
+        json.dumps({"repos": [{"name": "api", "path": "repos/api", "language": "python"}]}),
+        encoding="utf-8",
+    )
+    schema.write_text(
+        json.dumps(
+            {"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}
+        ),
+        encoding="utf-8",
+    )
     adapters.write_text(json.dumps({"python": ["echo", "ok", "{repo_path}"]}), encoding="utf-8")
-    assert main(["run-pipeline", "--repo-graph", str(graph), "--schema", str(schema), "--adapters", str(adapters), "--out-dir", str(out_dir)]) == 0
+    assert (
+        main(
+            [
+                "run-pipeline",
+                "--repo-graph",
+                str(graph),
+                "--schema",
+                str(schema),
+                "--adapters",
+                str(adapters),
+                "--out-dir",
+                str(out_dir),
+            ]
+        )
+        == 0
+    )
 
     execution = json.loads((out_dir / "execution.json").read_text(encoding="utf-8"))
     for row in execution.get("results", []):
@@ -546,7 +605,9 @@ def test_portfolio_outputs_match_committed_goldens(tmp_path: Path) -> None:
                     row[key] = "<redacted>"
             if isinstance(row.get("heartbeats"), list):
                 row["heartbeats"] = ["<redacted>"]
-    assert execution == json.loads((GOLDEN_DIR / "portfolio_execution.json").read_text(encoding="utf-8"))
+    assert execution == json.loads(
+        (GOLDEN_DIR / "portfolio_execution.json").read_text(encoding="utf-8")
+    )
 
     policy = json.loads((out_dir / "policy.json").read_text(encoding="utf-8"))
     assert policy == json.loads((GOLDEN_DIR / "portfolio_policy.json").read_text(encoding="utf-8"))
@@ -554,7 +615,19 @@ def test_portfolio_outputs_match_committed_goldens(tmp_path: Path) -> None:
     manifest = tmp_path / "batch.json"
     batch_out = tmp_path / "batch-out"
     manifest.write_text(
-        json.dumps({"portfolios": [{"name": "p1", "repo_graph": str(graph), "schema": str(schema), "adapters": str(adapters), "run": False}]}),
+        json.dumps(
+            {
+                "portfolios": [
+                    {
+                        "name": "p1",
+                        "repo_graph": str(graph),
+                        "schema": str(schema),
+                        "adapters": str(adapters),
+                        "run": False,
+                    }
+                ]
+            }
+        ),
         encoding="utf-8",
     )
     assert main(["batch-run", "--manifest", str(manifest), "--out-dir", str(batch_out)]) == 0
@@ -563,4 +636,6 @@ def test_portfolio_outputs_match_committed_goldens(tmp_path: Path) -> None:
         for item in summary["summaries"]:
             if isinstance(item, dict):
                 item["telemetry"] = {"timings_ms": "<redacted>"}
-    assert summary == json.loads((GOLDEN_DIR / "portfolio_batch_summary.json").read_text(encoding="utf-8"))
+    assert summary == json.loads(
+        (GOLDEN_DIR / "portfolio_batch_summary.json").read_text(encoding="utf-8")
+    )

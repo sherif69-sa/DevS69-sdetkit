@@ -14,15 +14,19 @@ def test_top_level_cli_portfolio_passthrough_validate_graph(tmp_path: Path) -> N
         encoding="utf-8",
     )
     schema_path.write_text(
-        json.dumps({"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}),
+        json.dumps(
+            {"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}
+        ),
         encoding="utf-8",
     )
-    rc = main([
-        "portfolio-orchestrate",
-        "validate-graph",
-        "--repo-graph",
-        str(graph_path),
-        "--schema",
-        str(schema_path),
-    ])
+    rc = main(
+        [
+            "portfolio-orchestrate",
+            "validate-graph",
+            "--repo-graph",
+            str(graph_path),
+            "--schema",
+            str(schema_path),
+        ]
+    )
     assert rc == 0
