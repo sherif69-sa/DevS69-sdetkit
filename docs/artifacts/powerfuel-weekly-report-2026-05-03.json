@@ -1,0 +1,77 @@
+{
+  "date": "2026-05-03",
+  "status": "weekly-report-published",
+  "generated_at": "2026-05-03T00:00:00Z",
+  "inputs": {
+    "baseline": "docs/artifacts/powerfuel-baseline-2026-05-03.json",
+    "shadow_log": "docs/artifacts/powerfuel-shadow-log-2026-05-03.json"
+  },
+  "scoreboard": {
+    "workflow_count": 53,
+    "duplicate_trigger_paths": 111,
+    "first_proof_success_rate": null,
+    "time_to_first_proof_median_minutes": null,
+    "consolidation_readiness_score": 99
+  },
+  "next_retirement_batch": [
+    {
+      "workflow": "dependency-audit.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 4,
+      "retirement_priority_score": 111
+    },
+    {
+      "workflow": "enforce-branch-protection.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 4,
+      "retirement_priority_score": 111
+    },
+    {
+      "workflow": "osv-scanner.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 4,
+      "retirement_priority_score": 111
+    },
+    {
+      "workflow": "security-maintenance-bot.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 4,
+      "retirement_priority_score": 111
+    },
+    {
+      "workflow": "security.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 4,
+      "retirement_priority_score": 111
+    }
+  ],
+  "decisions": [
+    "Run shadow-mode parity checks on top 5 retirement candidates before workflow removals.",
+    "Keep CI minute/PR KPI null until telemetry source is connected."
+  ]
+}

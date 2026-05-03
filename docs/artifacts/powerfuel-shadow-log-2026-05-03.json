@@ -1,0 +1,526 @@
+{
+  "date": "2026-05-03",
+  "status": "shadow-log-started",
+  "generated_at": "2026-05-03T00:00:00Z",
+  "inputs": {
+    "baseline": "docs/artifacts/powerfuel-baseline-2026-05-03.json",
+    "workflow_count": 53
+  },
+  "summary": {
+    "candidate_count": 53,
+    "top_duplicate_triggers": [
+      [
+        "workflow_dispatch",
+        45
+      ],
+      [
+        "schedule",
+        30
+      ],
+      [
+        "pull_request",
+        22
+      ],
+      [
+        "push",
+        18
+      ],
+      [
+        "release",
+        1
+      ]
+    ]
+  },
+  "retirement_candidates": [
+    {
+      "workflow": "dependency-audit.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 4,
+      "retirement_priority_score": 111
+    },
+    {
+      "workflow": "enforce-branch-protection.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 4,
+      "retirement_priority_score": 111
+    },
+    {
+      "workflow": "osv-scanner.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 4,
+      "retirement_priority_score": 111
+    },
+    {
+      "workflow": "security-maintenance-bot.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 4,
+      "retirement_priority_score": 111
+    },
+    {
+      "workflow": "security.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 4,
+      "retirement_priority_score": 111
+    },
+    {
+      "workflow": "maintenance-autopilot.yml",
+      "triggers": [
+        "pull_request",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 3,
+      "retirement_priority_score": 94
+    },
+    {
+      "workflow": "advanced-github-actions-reference-64.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 3,
+      "retirement_priority_score": 82
+    },
+    {
+      "workflow": "ci.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 3,
+      "retirement_priority_score": 82
+    },
+    {
+      "workflow": "docs-link-check.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 3,
+      "retirement_priority_score": 82
+    },
+    {
+      "workflow": "first-proof.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 3,
+      "retirement_priority_score": 82
+    },
+    {
+      "workflow": "repo-audit.yml",
+      "triggers": [
+        "pull_request",
+        "push",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 3,
+      "retirement_priority_score": 82
+    },
+    {
+      "workflow": "adapter-smoke-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "adaptive-ops-weekly.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "dependency-radar-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "docs-experience-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "ghas-alert-sla-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "ghas-campaign-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "ghas-codeql-hotspots-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "ghas-metrics-export-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "ghas-review-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "integration-topology-radar-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "kpi-weekly.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "maintenance-issue-command-center.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "mutation-tests.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "pre-commit-autoupdate.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "quality.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "release-readiness-radar-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "repo-optimization-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "runtime-watchlist-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "secret-protection-review-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "security-configuration-audit-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "top-tier-reporting-sample.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "weekly-maintenance.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "worker-alignment-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "workflow-governance-bot.yml",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 73
+    },
+    {
+      "workflow": "adoption-real-repo-canonical.yml",
+      "triggers": [
+        "pull_request",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 65
+    },
+    {
+      "workflow": "enterprise-gate.yml",
+      "triggers": [
+        "pull_request",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 65
+    },
+    {
+      "workflow": "impact-release-control.yml",
+      "triggers": [
+        "pull_request",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 65
+    },
+    {
+      "workflow": "legacy-required-status-bridge.yml",
+      "triggers": [
+        "pull_request",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 65
+    },
+    {
+      "workflow": "release.yml",
+      "triggers": [
+        "push",
+        "release",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 3,
+      "retirement_priority_score": 61
+    },
+    {
+      "workflow": "first-proof-artifact-publish.yml",
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 61
+    },
+    {
+      "workflow": "pages.yml",
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 61
+    },
+    {
+      "workflow": "phase3-quality-contract.yml",
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 61
+    },
+    {
+      "workflow": "sbom.yml",
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 61
+    },
+    {
+      "workflow": "maintenance-on-demand.yml",
+      "triggers": [
+        "workflow_dispatch"
+      ],
+      "trigger_count": 1,
+      "retirement_priority_score": 44
+    },
+    {
+      "workflow": "phase4-governance-contract.yml",
+      "triggers": [
+        "pull_request",
+        "push"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 38
+    },
+    {
+      "workflow": "premium-gate.yml",
+      "triggers": [
+        "pull_request",
+        "push"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 38
+    },
+    {
+      "workflow": "versioning.yml",
+      "triggers": [
+        "pull_request",
+        "push"
+      ],
+      "trigger_count": 2,
+      "retirement_priority_score": 38
+    },
+    {
+      "workflow": "contributor-onboarding-bot.yml",
+      "triggers": [
+        "pull_request"
+      ],
+      "trigger_count": 1,
+      "retirement_priority_score": 21
+    },
+    {
+      "workflow": "dependency-auto-merge.yml",
+      "triggers": [
+        "pull_request"
+      ],
+      "trigger_count": 1,
+      "retirement_priority_score": 21
+    },
+    {
+      "workflow": "dependency-review.yml",
+      "triggers": [
+        "pull_request"
+      ],
+      "trigger_count": 1,
+      "retirement_priority_score": 21
+    },
+    {
+      "workflow": "pr-quality-comment.yml",
+      "triggers": [
+        "pull_request"
+      ],
+      "trigger_count": 1,
+      "retirement_priority_score": 21
+    },
+    {
+      "workflow": "pr-helper-bot.yml",
+      "triggers": [],
+      "trigger_count": 0,
+      "retirement_priority_score": 0
+    }
+  ],
+  "notes": [
+    "Priority score is overlap-weighted by duplicated trigger frequency from the baseline artifact.",
+    "Use top-ranked candidates for shadow-mode parity and retirement batch planning."
+  ]
+}

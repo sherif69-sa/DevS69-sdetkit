@@ -4,6 +4,8 @@ DATE_TAG ?= 2026-04-24
 WINDOW_START ?= 2026-04-11
 WINDOW_END ?= 2026-04-17
 GENERATED_AT ?= 2026-04-17T10:00:00Z
+POWERFUEL_GENERATED_AT ?= 2026-05-03T00:00:00Z
+POWERFUEL_DATE_TAG ?= 2026-05-03
 ADAPTIVE_SCENARIO ?= balanced
 PORTFOLIO_MANIFEST ?= portfolio-manifest.json
 FIRST_PROOF_BRANCH ?= local
@@ -645,3 +647,33 @@ followup-changelog: venv
 
 first-proof-readiness-threshold: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_readiness_threshold.py --dashboard build/first-proof/dashboard.json --profiles config/first_proof_readiness_profiles.json --profile $(FIRST_PROOF_READINESS_PROFILE) --out build/first-proof/readiness-threshold.json --format json'
+
+.PHONY: powerfuel-plan-status powerfuel-shadow-log powerfuel-weekly-report powerfuel-retirement-plan powerfuel-contract powerfuel-consolidation-score
+powerfuel-plan-status: venv
+	@bash -lc 'echo "Powerfuel plan: docs/powerfuel-execution-plan-2026-05-03.md"'
+	@bash -lc 'echo "Powerfuel baseline: docs/artifacts/powerfuel-baseline-$(POWERFUEL_DATE_TAG).json"'
+	@bash -lc '. .venv/bin/activate && python scripts/build_powerfuel_baseline.py --date-tag $(POWERFUEL_DATE_TAG) --generated-at $(POWERFUEL_GENERATED_AT) --out docs/artifacts/powerfuel-baseline-$(POWERFUEL_DATE_TAG).json'
+	@bash -lc 'python -m json.tool docs/artifacts/powerfuel-baseline-$(POWERFUEL_DATE_TAG).json > /dev/null && echo "Powerfuel baseline JSON: valid"'
+
+powerfuel-shadow-log: powerfuel-plan-status
+	@bash -lc 'echo "Powerfuel shadow log: docs/artifacts/powerfuel-shadow-log-$(POWERFUEL_DATE_TAG).json"'
+	@bash -lc '. .venv/bin/activate && python scripts/build_powerfuel_shadow_log.py --date-tag $(POWERFUEL_DATE_TAG) --generated-at $(POWERFUEL_GENERATED_AT) --baseline docs/artifacts/powerfuel-baseline-$(POWERFUEL_DATE_TAG).json --out docs/artifacts/powerfuel-shadow-log-$(POWERFUEL_DATE_TAG).json'
+	@bash -lc 'python -m json.tool docs/artifacts/powerfuel-shadow-log-$(POWERFUEL_DATE_TAG).json > /dev/null && echo "Powerfuel shadow log JSON: valid"'
+
+powerfuel-consolidation-score: powerfuel-shadow-log
+	@bash -lc '. .venv/bin/activate && python scripts/build_powerfuel_consolidation_score.py --date-tag $(POWERFUEL_DATE_TAG) --baseline docs/artifacts/powerfuel-baseline-$(POWERFUEL_DATE_TAG).json --shadow docs/artifacts/powerfuel-shadow-log-$(POWERFUEL_DATE_TAG).json --out docs/artifacts/powerfuel-consolidation-score-$(POWERFUEL_DATE_TAG).json'
+	@bash -lc 'python -m json.tool docs/artifacts/powerfuel-consolidation-score-$(POWERFUEL_DATE_TAG).json > /dev/null && echo "Powerfuel consolidation score JSON: valid"'
+
+powerfuel-weekly-report: powerfuel-consolidation-score
+	@bash -lc 'echo "Powerfuel weekly report: docs/artifacts/powerfuel-weekly-report-$(POWERFUEL_DATE_TAG).json and .md"'
+	@bash -lc '. .venv/bin/activate && python scripts/build_powerfuel_weekly_report.py --date-tag $(POWERFUEL_DATE_TAG) --generated-at $(POWERFUEL_GENERATED_AT) --baseline docs/artifacts/powerfuel-baseline-$(POWERFUEL_DATE_TAG).json --shadow-log docs/artifacts/powerfuel-shadow-log-$(POWERFUEL_DATE_TAG).json --consolidation-score docs/artifacts/powerfuel-consolidation-score-$(POWERFUEL_DATE_TAG).json --out-json docs/artifacts/powerfuel-weekly-report-$(POWERFUEL_DATE_TAG).json --out-md docs/artifacts/powerfuel-weekly-report-$(POWERFUEL_DATE_TAG).md'
+	@bash -lc 'python -m json.tool docs/artifacts/powerfuel-weekly-report-$(POWERFUEL_DATE_TAG).json > /dev/null && echo "Powerfuel weekly report JSON: valid"'
+
+powerfuel-retirement-plan: powerfuel-shadow-log
+	@bash -lc 'echo "Powerfuel retirement plan: docs/artifacts/powerfuel-retirement-plan-$(POWERFUEL_DATE_TAG).json"'
+	@bash -lc '. .venv/bin/activate && python scripts/build_powerfuel_retirement_plan.py --date-tag $(POWERFUEL_DATE_TAG) --generated-at $(POWERFUEL_GENERATED_AT) --shadow-log docs/artifacts/powerfuel-shadow-log-$(POWERFUEL_DATE_TAG).json --batch-size 5 --out docs/artifacts/powerfuel-retirement-plan-$(POWERFUEL_DATE_TAG).json'
+	@bash -lc 'python -m json.tool docs/artifacts/powerfuel-retirement-plan-$(POWERFUEL_DATE_TAG).json > /dev/null && echo "Powerfuel retirement plan JSON: valid"'
+
+powerfuel-contract: powerfuel-consolidation-score powerfuel-weekly-report powerfuel-retirement-plan
+	@bash -lc '. .venv/bin/activate && python scripts/check_powerfuel_artifacts_contract.py --date-tag $(POWERFUEL_DATE_TAG) --baseline docs/artifacts/powerfuel-baseline-$(POWERFUEL_DATE_TAG).json --shadow docs/artifacts/powerfuel-shadow-log-$(POWERFUEL_DATE_TAG).json --weekly docs/artifacts/powerfuel-weekly-report-$(POWERFUEL_DATE_TAG).json --retirement docs/artifacts/powerfuel-retirement-plan-$(POWERFUEL_DATE_TAG).json --out docs/artifacts/powerfuel-contract-check-$(POWERFUEL_DATE_TAG).json'
+	@bash -lc 'python -m json.tool docs/artifacts/powerfuel-contract-check-$(POWERFUEL_DATE_TAG).json > /dev/null && echo "Powerfuel contract JSON: valid"'

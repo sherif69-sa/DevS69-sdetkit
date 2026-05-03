@@ -1,0 +1,56 @@
+{
+  "date": "2026-05-03",
+  "status": "retirement-plan-created",
+  "generated_at": "2026-05-03T00:00:00Z",
+  "inputs": {
+    "shadow_log": "docs/artifacts/powerfuel-shadow-log-2026-05-03.json",
+    "batch_size": 5,
+    "candidate_count": 53
+  },
+  "batch": [
+    {
+      "workflow": "dependency-audit.yml",
+      "retirement_priority_score": 111,
+      "parity_required": true,
+      "parity_check_command": "act -W .github/workflows/dependency-audit.yml || gh workflow run dependency-audit.yml",
+      "rollback_hint": "git checkout HEAD~1 -- .github/workflows/dependency-audit.yml",
+      "status": "pending-shadow-parity"
+    },
+    {
+      "workflow": "enforce-branch-protection.yml",
+      "retirement_priority_score": 111,
+      "parity_required": true,
+      "parity_check_command": "act -W .github/workflows/enforce-branch-protection.yml || gh workflow run enforce-branch-protection.yml",
+      "rollback_hint": "git checkout HEAD~1 -- .github/workflows/enforce-branch-protection.yml",
+      "status": "pending-shadow-parity"
+    },
+    {
+      "workflow": "osv-scanner.yml",
+      "retirement_priority_score": 111,
+      "parity_required": true,
+      "parity_check_command": "act -W .github/workflows/osv-scanner.yml || gh workflow run osv-scanner.yml",
+      "rollback_hint": "git checkout HEAD~1 -- .github/workflows/osv-scanner.yml",
+      "status": "pending-shadow-parity"
+    },
+    {
+      "workflow": "security-maintenance-bot.yml",
+      "retirement_priority_score": 111,
+      "parity_required": true,
+      "parity_check_command": "act -W .github/workflows/security-maintenance-bot.yml || gh workflow run security-maintenance-bot.yml",
+      "rollback_hint": "git checkout HEAD~1 -- .github/workflows/security-maintenance-bot.yml",
+      "status": "pending-shadow-parity"
+    },
+    {
+      "workflow": "security.yml",
+      "retirement_priority_score": 111,
+      "parity_required": true,
+      "parity_check_command": "act -W .github/workflows/security.yml || gh workflow run security.yml",
+      "rollback_hint": "git checkout HEAD~1 -- .github/workflows/security.yml",
+      "status": "pending-shadow-parity"
+    }
+  ],
+  "notes": [
+    "Run parity checks and compare gate/coverage artifacts before deleting workflow files.",
+    "Only mark status=ready-to-retire after parity evidence exists in weekly report."
+  ]
+}

@@ -1,0 +1,253 @@
+{
+  "date": "2026-05-03",
+  "status": "baseline-measured",
+  "generated_at": "2026-05-03T00:00:00Z",
+  "inputs": {
+    "workflows_dir": ".github/workflows",
+    "workflow_files": 53,
+    "first_proof_summary": "build/first-proof/first-proof-summary.json"
+  },
+  "kpis": {
+    "workflow_count": 53,
+    "duplicate_trigger_paths": 111,
+    "ci_minutes_per_merged_pr": null,
+    "first_proof_success_rate": null,
+    "time_to_first_proof_median_minutes": null,
+    "strict_finding_remediation_lead_time_hours": null,
+    "decision_reproducibility_rate": null
+  },
+  "trigger_counts": {
+    "workflow_dispatch": 45,
+    "schedule": 30,
+    "pull_request": 22,
+    "push": 18,
+    "release": 1
+  },
+  "workflow_trigger_map": {
+    "adapter-smoke-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "adaptive-ops-weekly.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "adoption-real-repo-canonical.yml": [
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "advanced-github-actions-reference-64.yml": [
+      "push",
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "ci.yml": [
+      "push",
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "contributor-onboarding-bot.yml": [
+      "pull_request"
+    ],
+    "dependency-audit.yml": [
+      "push",
+      "pull_request",
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "dependency-auto-merge.yml": [
+      "pull_request"
+    ],
+    "dependency-radar-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "dependency-review.yml": [
+      "pull_request"
+    ],
+    "docs-experience-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "docs-link-check.yml": [
+      "push",
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "enforce-branch-protection.yml": [
+      "push",
+      "pull_request",
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "enterprise-gate.yml": [
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "first-proof-artifact-publish.yml": [
+      "push",
+      "workflow_dispatch"
+    ],
+    "first-proof.yml": [
+      "push",
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "ghas-alert-sla-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "ghas-campaign-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "ghas-codeql-hotspots-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "ghas-metrics-export-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "ghas-review-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "impact-release-control.yml": [
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "integration-topology-radar-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "kpi-weekly.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "legacy-required-status-bridge.yml": [
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "maintenance-autopilot.yml": [
+      "pull_request",
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "maintenance-issue-command-center.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "maintenance-on-demand.yml": [
+      "workflow_dispatch"
+    ],
+    "mutation-tests.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "osv-scanner.yml": [
+      "push",
+      "pull_request",
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "pages.yml": [
+      "push",
+      "workflow_dispatch"
+    ],
+    "phase3-quality-contract.yml": [
+      "push",
+      "workflow_dispatch"
+    ],
+    "phase4-governance-contract.yml": [
+      "push",
+      "pull_request"
+    ],
+    "pr-helper-bot.yml": [],
+    "pr-quality-comment.yml": [
+      "pull_request"
+    ],
+    "pre-commit-autoupdate.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "premium-gate.yml": [
+      "push",
+      "pull_request"
+    ],
+    "quality.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "release-readiness-radar-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "release.yml": [
+      "push",
+      "workflow_dispatch",
+      "release"
+    ],
+    "repo-audit.yml": [
+      "push",
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "repo-optimization-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "runtime-watchlist-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "sbom.yml": [
+      "push",
+      "workflow_dispatch"
+    ],
+    "secret-protection-review-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "security-configuration-audit-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "security-maintenance-bot.yml": [
+      "push",
+      "pull_request",
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "security.yml": [
+      "push",
+      "pull_request",
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "top-tier-reporting-sample.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "versioning.yml": [
+      "push",
+      "pull_request"
+    ],
+    "weekly-maintenance.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "worker-alignment-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "workflow-governance-bot.yml": [
+      "workflow_dispatch",
+      "schedule"
+    ]
+  },
+  "notes": [
+    "CI-minute and remediation KPIs require CI telemetry/history and remain null until wired.",
+    "Duplicate trigger paths are estimated from top-level trigger key occurrences in workflow YAML files."
+  ]
+}
