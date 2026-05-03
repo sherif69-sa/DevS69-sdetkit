@@ -261,6 +261,19 @@ Then use stability-aware command discovery:
         help_text="[Public / stable] Deterministic repo and release-readiness checks",
     )
 
+    mission_control_parser = sub.add_parser(
+        "mission-control",
+        help="[Public / stable] Unified release-confidence evidence bundle",
+        add_help=False,
+    )
+    mission_control_parser.add_argument(
+        "-h",
+        "--help",
+        action="store_true",
+        dest="mission_control_help",
+    )
+    mission_control_parser.add_argument("args", nargs=argparse.REMAINDER)
+
     _add_passthrough_subcommand(
         sub,
         "gate",
@@ -878,6 +891,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "release":
         return dispatch_release_subcommand(ns.args, run_module_main=_run_module_main)
+
+    if ns.cmd == "mission-control":
+        forwarded = list(ns.args)
+        if bool(getattr(ns, "mission_control_help", False)):
+            forwarded.insert(0, "--help")
+        return _run_module_main("sdetkit.mission_control", forwarded)
 
     if ns.cmd == "inspect":
         return _run_module_main("sdetkit.inspect_data", build_inspect_forwarded_args(ns, ns.args))
