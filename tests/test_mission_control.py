@@ -1,8 +1,8 @@
 import json
 
 import pytest
-from sdetkit import cli
-from sdetkit import mission_control
+
+from sdetkit import cli, mission_control
 
 
 def test_mission_control_run_writes_json_and_markdown(tmp_path):

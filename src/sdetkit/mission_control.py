@@ -4,10 +4,10 @@ import argparse
 import json
 import subprocess
 import sys
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Sequence
-
+from typing import Any
 
 SCHEMA_VERSION = "1"
 
@@ -23,8 +23,7 @@ def _run_text(args: Sequence[str], *, cwd: Path) -> tuple[int, str]:
             cwd=str(cwd),
             check=False,
             text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
         )
     except OSError as exc:
         return 127, str(exc)
