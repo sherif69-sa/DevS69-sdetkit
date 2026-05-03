@@ -284,6 +284,7 @@ def test_mission_control_schema_lists_required_top_level_and_ledger_keys(capsys)
     assert "executed_step_count" in payload["required_top_level_keys"]
     assert "next_actions" in payload["required_top_level_keys"]
     assert "artifact_dir" in payload["ledger_record_keys"]
+    assert "failure_rate" in payload["history_summary_keys"]
 
 
 def test_root_cli_dispatches_mission_control(tmp_path):
@@ -319,3 +320,113 @@ def test_root_cli_forwards_mission_control_help(capsys):
     assert "run" in output
     assert "summarize" in output
     assert "schema" in output
+    assert "history" in output
+
+
+def test_mission_control_history_summarizes_text_ledger(tmp_path, capsys):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    ledger_path = tmp_path / "runs" / "mission-control.jsonl"
+
+    assert (
+        mission_control.main(
+            [
+                "run",
+                "--repo",
+                str(repo),
+                "--out-dir",
+                str(tmp_path / "one"),
+                "--ledger-path",
+                str(ledger_path),
+            ]
+        )
+        == 0
+    )
+    assert (
+        mission_control.main(
+            [
+                "run",
+                "--repo",
+                str(repo),
+                "--out-dir",
+                str(tmp_path / "two"),
+                "--ledger-path",
+                str(ledger_path),
+            ]
+        )
+        == 0
+    )
+
+    capsys.readouterr()
+
+    rc = mission_control.main(["history", "--ledger", str(ledger_path)])
+
+    assert rc == 0
+
+    output = capsys.readouterr().out
+    assert "runs=2" in output
+    assert "ship=2" in output
+    assert "ship_with_findings=0" in output
+    assert "no_ship=0" in output
+    assert "latest_decision=SHIP" in output
+    assert "latest_risk_band=low" in output
+    assert "failure_rate=0.0" in output
+    assert "most_common_failed_step=none" in output
+
+
+def test_mission_control_history_json_reports_failed_step(tmp_path, monkeypatch, capsys):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir = tmp_path / "failed"
+    ledger_path = tmp_path / "runs" / "mission-control.jsonl"
+
+    def fake_run_step_process(args, *, cwd, timeout_seconds):
+        if "doctor" in args:
+            return 1, "", "doctor failed\n", 9
+        return 0, "ok\n", "", 5
+
+    monkeypatch.setattr(mission_control, "_run_step_process", fake_run_step_process)
+
+    assert (
+        mission_control.main(
+            [
+                "run",
+                "--repo",
+                str(repo),
+                "--out-dir",
+                str(out_dir),
+                "--execute",
+                "--ledger-path",
+                str(ledger_path),
+            ]
+        )
+        == 2
+    )
+
+    capsys.readouterr()
+
+    rc = mission_control.main(["history", "--ledger", str(ledger_path), "--format", "json"])
+
+    assert rc == 0
+
+    summary = json.loads(capsys.readouterr().out)
+
+    assert summary["runs"] == 1
+    assert summary["no_ship"] == 1
+    assert summary["failed_runs"] == 1
+    assert summary["failure_rate"] == 1.0
+    assert summary["latest_decision"] == "NO_SHIP"
+    assert summary["most_common_failed_step"] == "doctor"
+
+
+def test_mission_control_history_missing_ledger_is_empty(tmp_path, capsys):
+    ledger_path = tmp_path / "missing.jsonl"
+
+    rc = mission_control.main(["history", "--ledger", str(ledger_path)])
+
+    assert rc == 0
+
+    output = capsys.readouterr().out
+    assert "runs=0" in output
+    assert "latest_decision=none" in output
+    assert "failure_rate=0.0" in output
