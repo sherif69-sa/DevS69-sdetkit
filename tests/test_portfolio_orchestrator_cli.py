@@ -5,6 +5,8 @@ from pathlib import Path
 
 from sdetkit.portfolio_orchestrator import main
 
+GOLDEN_DIR = Path(__file__).with_name("golden")
+
 
 def _sample_graph() -> dict[str, object]:
     return {
@@ -524,3 +526,41 @@ def test_cli_cancel_worker_registry(tmp_path: Path) -> None:
     cancel_file = tmp_path / "cancel.txt"
     assert main(["cancel-worker", "--target", "api", "--cancel-file", str(cancel_file)]) == 0
     assert "api" in cancel_file.read_text(encoding="utf-8")
+
+
+def test_portfolio_outputs_match_committed_goldens(tmp_path: Path) -> None:
+    graph = tmp_path / "graph.json"
+    schema = tmp_path / "schema.json"
+    adapters = tmp_path / "adapters.json"
+    out_dir = tmp_path / "pipeline-out"
+    graph.write_text(json.dumps({"repos": [{"name": "api", "path": "repos/api", "language": "python"}]}), encoding="utf-8")
+    schema.write_text(json.dumps({"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}), encoding="utf-8")
+    adapters.write_text(json.dumps({"python": ["echo", "ok", "{repo_path}"]}), encoding="utf-8")
+    assert main(["run-pipeline", "--repo-graph", str(graph), "--schema", str(schema), "--adapters", str(adapters), "--out-dir", str(out_dir)]) == 0
+
+    execution = json.loads((out_dir / "execution.json").read_text(encoding="utf-8"))
+    for row in execution.get("results", []):
+        if isinstance(row, dict):
+            for key in ("run_id", "started_at", "finished_at", "lease_id"):
+                if key in row:
+                    row[key] = "<redacted>"
+            if isinstance(row.get("heartbeats"), list):
+                row["heartbeats"] = ["<redacted>"]
+    assert execution == json.loads((GOLDEN_DIR / "portfolio_execution.json").read_text(encoding="utf-8"))
+
+    policy = json.loads((out_dir / "policy.json").read_text(encoding="utf-8"))
+    assert policy == json.loads((GOLDEN_DIR / "portfolio_policy.json").read_text(encoding="utf-8"))
+
+    manifest = tmp_path / "batch.json"
+    batch_out = tmp_path / "batch-out"
+    manifest.write_text(
+        json.dumps({"portfolios": [{"name": "p1", "repo_graph": str(graph), "schema": str(schema), "adapters": str(adapters), "run": False}]}),
+        encoding="utf-8",
+    )
+    assert main(["batch-run", "--manifest", str(manifest), "--out-dir", str(batch_out)]) == 0
+    summary = json.loads((batch_out / "batch-summary.json").read_text(encoding="utf-8"))
+    if isinstance(summary.get("summaries"), list):
+        for item in summary["summaries"]:
+            if isinstance(item, dict):
+                item["telemetry"] = {"timings_ms": "<redacted>"}
+    assert summary == json.loads((GOLDEN_DIR / "portfolio_batch_summary.json").read_text(encoding="utf-8"))

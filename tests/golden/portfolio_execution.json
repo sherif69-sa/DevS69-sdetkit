@@ -1,0 +1,40 @@
+{
+  "artifact_schema_version": "portfolio.v1",
+  "failure_count": 0,
+  "max_workers": 4,
+  "ok": true,
+  "results": [
+    {
+      "command": [
+        "echo",
+        "ok",
+        "repos/api"
+      ],
+      "escalation": {
+        "reason": "",
+        "required": false
+      },
+      "evidence": [],
+      "finished_at": "<redacted>",
+      "heartbeats": [
+        "<redacted>"
+      ],
+      "inputs": {
+        "path": "repos/api"
+      },
+      "language": "python",
+      "lease_id": "<redacted>",
+      "mode": "dry-run",
+      "repo": "api",
+      "result": {
+        "returncode": 0
+      },
+      "run_id": "<redacted>",
+      "started_at": "<redacted>",
+      "status": "queued",
+      "transport": "local",
+      "worker": "adapter-python"
+    }
+  ],
+  "stopped_early": false
+}
