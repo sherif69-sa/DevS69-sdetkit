@@ -40,15 +40,30 @@ def _validate_repo_graph_shape(payload: dict[str, Any]) -> None:
         names.add(name)
 
 
-def _validate_against_repo_schema(payload: dict[str, Any], schema_path: Path) -> None:
+def _validate_against_schema(payload: dict[str, Any], schema_path: Path) -> None:
     schema_payload = json.loads(schema_path.read_text(encoding="utf-8"))
     try:
         import jsonschema  # type: ignore
     except Exception:
-        # Fallback path for environments without jsonschema dependency.
-        _validate_repo_graph_shape(payload)
         return
     jsonschema.validate(instance=payload, schema=schema_payload)
+
+def _validate_against_repo_schema(payload: dict[str, Any], schema_path: Path) -> None:
+    _validate_against_schema(payload, schema_path)
+    # Fallback path for environments without jsonschema dependency.
+    _validate_repo_graph_shape(payload)
+
+
+def _validate_batch_manifest_shape(payload: dict[str, Any]) -> None:
+    portfolios = payload.get("portfolios")
+    if not isinstance(portfolios, list) or not portfolios:
+        raise ValueError("BATCH_MANIFEST_PORTFOLIOS_REQUIRED: portfolios must be a non-empty array")
+    for item in portfolios:
+        if not isinstance(item, dict):
+            raise ValueError("BATCH_MANIFEST_ITEM_INVALID: each portfolio entry must be an object")
+        repo_graph = item.get("repo_graph")
+        if not isinstance(repo_graph, str) or not repo_graph.strip():
+            raise ValueError("BATCH_MANIFEST_REPO_GRAPH_REQUIRED: repo_graph must be a non-empty string")
 
 
 def _build_plan(graph: dict[str, object], max_workers: int) -> dict[str, object]:
@@ -1096,9 +1111,12 @@ def main(argv: list[str] | None = None) -> int:
         manifest = json.loads(Path(ns.manifest).read_text(encoding="utf-8"))
         if not isinstance(manifest, dict):
             raise ValueError("batch manifest must be a JSON object")
+        batch_schema = Path("schemas/portfolio-batch.schema.json")
+        if batch_schema.exists():
+            _validate_against_schema(manifest, batch_schema)
+        _validate_batch_manifest_shape(manifest)
         portfolios = manifest.get("portfolios", [])
-        if not isinstance(portfolios, list):
-            raise ValueError("batch manifest must include array field 'portfolios'")
+        assert isinstance(portfolios, list)
         out_root = Path(ns.out_dir)
         out_root.mkdir(parents=True, exist_ok=True)
         def _run_one(indexed: tuple[int, dict[str, object]]) -> dict[str, object]:

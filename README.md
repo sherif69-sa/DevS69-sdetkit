@@ -111,6 +111,7 @@ python -m sdetkit portfolio-orchestrate execute \
   --plan build/portfolio-execution-plan.json \
   --max-workers 8 \
   --run \
+  --transport ssh \
   --timeout-seconds 120 \
   --out build/portfolio-execution-results.json
 
@@ -144,6 +145,7 @@ python -m sdetkit portfolio-orchestrate run-pipeline \
   --adapters config/portfolio_adapters.json \
   --max-workers 8 \
   --run \
+  --transport ssh \
   --timeout-seconds 120 \
   --retries 1 \
   --max-failures 3 \
@@ -174,6 +176,11 @@ python -m sdetkit portfolio-orchestrate batch-run \
   --manifest examples/topology/portfolio-batch.sample.json \
   --max-parallel 4 \
   --out-dir build/portfolio-batch
+
+# policy_overrides in batch manifests can be either an object:
+# "policy_overrides": {"max_risk_score": 25}
+# or a JSON string:
+# "policy_overrides": "{\"max_risk_score\": 25}"
 
 python -m sdetkit portfolio-orchestrate impact-plan \
   --repo-graph examples/topology/enterprise-repo-graph.sample.json \

@@ -6,7 +6,13 @@
       "schema": "schemas/repo-graph.schema.json",
       "adapters": "config/portfolio_adapters.json",
       "policy": "config/portfolio_policy.default.json",
+      "policy_pack": "config/portfolio_policy.packs.json",
+      "policy_profile": "standard",
+      "policy_overrides": {
+        "max_risk_score": 30
+      },
       "max_workers": 4,
+      "transport": "local",
       "run": false
     }
   ]

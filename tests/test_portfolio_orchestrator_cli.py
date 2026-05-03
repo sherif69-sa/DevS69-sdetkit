@@ -464,6 +464,18 @@ def test_cli_batch_run_accepts_string_policy_overrides(tmp_path: Path) -> None:
     assert policy["decision"] == "NO_SHIP"
 
 
+def test_cli_batch_run_rejects_manifest_missing_repo_graph(tmp_path: Path) -> None:
+    manifest = tmp_path / "batch-invalid.json"
+    out_dir = tmp_path / "batch-out"
+    manifest.write_text(json.dumps({"portfolios": [{"name": "p1"}]}), encoding="utf-8")
+    try:
+        main(["batch-run", "--manifest", str(manifest), "--out-dir", str(out_dir)])
+    except Exception as exc:
+        assert "repo_graph" in str(exc)
+    else:
+        raise AssertionError("expected ValueError")
+
+
 def test_cli_impact_plan_and_control_tower(tmp_path: Path) -> None:
     graph = tmp_path / "graph.json"
     changes = tmp_path / "changed.txt"
