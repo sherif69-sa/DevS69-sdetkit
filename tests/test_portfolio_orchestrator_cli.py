@@ -421,6 +421,7 @@ def test_cli_batch_run(tmp_path: Path) -> None:
     )
     summary = json.loads((out_dir / "batch-summary.json").read_text(encoding="utf-8"))
     assert summary["portfolios"] == 2
+    assert "timings_ms" in summary["summaries"][0]["telemetry"]
     assert (out_dir / "p1" / "dashboard.html").exists()
     assert (out_dir / "p2" / "dashboard.html").exists()
     assert (out_dir / "batch-report.md").exists()

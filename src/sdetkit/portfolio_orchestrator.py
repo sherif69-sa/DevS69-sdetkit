@@ -5,11 +5,14 @@ import json
 import subprocess
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from time import perf_counter
 from typing import Any
 
 ARTIFACT_SCHEMA_VERSION = "portfolio.v1"
+ERR_POLICY_OVERRIDE_INVALID_TYPE = "POLICY_OVERRIDE_INVALID_TYPE"
 
 
 def _load_repo_graph(path: Path) -> dict[str, object]:
@@ -295,7 +298,7 @@ def _parse_policy_overrides(value: str) -> dict[str, object]:
         return {}
     payload = json.loads(raw)
     if not isinstance(payload, dict):
-        raise ValueError("policy overrides must be a JSON object")
+        raise ValueError(f"{ERR_POLICY_OVERRIDE_INVALID_TYPE}: policy overrides must be a JSON object")
     return payload
 
 
@@ -305,6 +308,45 @@ def _coerce_policy_overrides(value: object) -> dict[str, object]:
     if isinstance(value, str):
         return _parse_policy_overrides(value)
     return {}
+
+
+@dataclass(frozen=True)
+class BatchPortfolioConfig:
+    name: str
+    repo_graph: Path
+    schema: Path
+    adapters: Path
+    policy: Path
+    policy_pack: Path
+    policy_profile: str
+    policy_overrides: dict[str, object]
+    max_workers: int
+    run: bool
+    timeout_seconds: int
+    retries: int
+    max_failures: int
+    transport: str
+    cancel_file: Path
+
+
+def _normalize_batch_portfolio(item: dict[str, object]) -> BatchPortfolioConfig:
+    return BatchPortfolioConfig(
+        name=str(item.get("name", "portfolio")),
+        repo_graph=Path(str(item.get("repo_graph"))),
+        schema=Path(str(item.get("schema", "schemas/repo-graph.schema.json"))),
+        adapters=Path(str(item.get("adapters", "config/portfolio_adapters.json"))),
+        policy=Path(str(item.get("policy", "config/portfolio_policy.default.json"))),
+        policy_pack=Path(str(item.get("policy_pack", "config/portfolio_policy.packs.json"))),
+        policy_profile=str(item.get("policy_profile", "")),
+        policy_overrides=_coerce_policy_overrides(item.get("policy_overrides", {})),
+        max_workers=max(1, int(item.get("max_workers", 4))),
+        run=bool(item.get("run", False)),
+        timeout_seconds=int(item.get("timeout_seconds", 120)),
+        retries=int(item.get("retries", 0)),
+        max_failures=int(item.get("max_failures", 0)),
+        transport=str(item.get("transport", "local")),
+        cancel_file=Path(str(item.get("cancel_file", ".sdetkit/portfolio-cancel-targets.txt"))),
+    )
 
 
 def _evaluate_policy(
@@ -529,14 +571,23 @@ def _run_pipeline_bundle(
     cancel_path: Path,
     out_dir: Path,
 ) -> dict[str, object]:
+    t0 = perf_counter()
+    timings_ms: dict[str, int] = {}
     out_dir.mkdir(parents=True, exist_ok=True)
+    t_stage = perf_counter()
     graph = _load_repo_graph(repo_graph)
     _validate_against_repo_schema(graph, schema)
     _validate_repo_graph_shape(graph)
+    timings_ms["load_and_validate_graph_ms"] = int((perf_counter() - t_stage) * 1000)
+    t_stage = perf_counter()
     plan = _build_plan(graph, max_workers=max(1, int(max_workers)))
+    timings_ms["build_plan_ms"] = int((perf_counter() - t_stage) * 1000)
     (out_dir / "plan.json").write_text(json.dumps(_with_schema(plan), indent=2) + "\n", encoding="utf-8")
+    t_stage = perf_counter()
     risk = _build_risk_report(plan)
+    timings_ms["risk_report_ms"] = int((perf_counter() - t_stage) * 1000)
     (out_dir / "risk.json").write_text(json.dumps(_with_schema(risk), indent=2) + "\n", encoding="utf-8")
+    t_stage = perf_counter()
     execution = _execute_plan(
         plan,
         max_workers=max(1, int(max_workers)),
@@ -549,11 +600,15 @@ def _run_pipeline_bundle(
         transport=transport,
         cancel_targets=_load_cancel_targets(cancel_path),
     )
+    timings_ms["execute_ms"] = int((perf_counter() - t_stage) * 1000)
     (out_dir / "execution.json").write_text(
         json.dumps(_with_schema(execution), indent=2) + "\n", encoding="utf-8"
     )
+    t_stage = perf_counter()
     score = _score_execution_results(execution)
+    timings_ms["score_ms"] = int((perf_counter() - t_stage) * 1000)
     (out_dir / "score.json").write_text(json.dumps(_with_schema(score), indent=2) + "\n", encoding="utf-8")
+    t_stage = perf_counter()
     policy_payload = (
         _resolve_policy_profile(
             policy_pack_path,
@@ -569,6 +624,7 @@ def _run_pipeline_bundle(
         execution=execution,
         policy=policy_payload,
     )
+    timings_ms["policy_eval_ms"] = int((perf_counter() - t_stage) * 1000)
     (out_dir / "policy.json").write_text(
         json.dumps(_with_schema(policy_eval), indent=2) + "\n", encoding="utf-8"
     )
@@ -582,12 +638,17 @@ def _run_pipeline_bundle(
             "failure_count": int(execution.get("failure_count", 0)),
         },
     )
+    t_stage = perf_counter()
     trend = _build_history_trend(history_path)
+    timings_ms["history_trend_ms"] = int((perf_counter() - t_stage) * 1000)
     (out_dir / "history-trend.json").write_text(json.dumps(trend, indent=2) + "\n", encoding="utf-8")
+    t_stage = perf_counter()
     analysis = _analyze_plan(plan)
+    timings_ms["analysis_ms"] = int((perf_counter() - t_stage) * 1000)
     (out_dir / "analysis.json").write_text(
         json.dumps(_with_schema(analysis), indent=2) + "\n", encoding="utf-8"
     )
+    t_stage = perf_counter()
     report = _render_portfolio_report(plan=plan, risk=risk, score=score)
     (out_dir / "report.md").write_text(report, encoding="utf-8")
     dashboard = _render_portfolio_dashboard_html(
@@ -598,11 +659,14 @@ def _run_pipeline_bundle(
         policy=policy_eval,
     )
     (out_dir / "dashboard.html").write_text(dashboard, encoding="utf-8")
+    timings_ms["render_outputs_ms"] = int((perf_counter() - t_stage) * 1000)
+    timings_ms["total_ms"] = int((perf_counter() - t0) * 1000)
     return {
         "decision": str(policy_eval.get("decision", "NO_SHIP")),
         "risk_score": int(risk.get("portfolio_risk_score", 100)),
         "reliability": int(score.get("execution_reliability_score", 0)),
         "failure_count": int(execution.get("failure_count", 0)),
+        "telemetry": {"timings_ms": timings_ms},
     }
 
 
@@ -1121,24 +1185,25 @@ def main(argv: list[str] | None = None) -> int:
         out_root.mkdir(parents=True, exist_ok=True)
         def _run_one(indexed: tuple[int, dict[str, object]]) -> dict[str, object]:
             _, item = indexed
-            name = str(item.get("name", "portfolio"))
+            cfg = _normalize_batch_portfolio(item)
+            name = cfg.name
             portfolio_out = out_root / name
             summary = _run_pipeline_bundle(
-                repo_graph=Path(str(item.get("repo_graph"))),
-                schema=Path(str(item.get("schema", "schemas/repo-graph.schema.json"))),
-                adapters=Path(str(item.get("adapters", "config/portfolio_adapters.json"))),
-                policy_path=Path(str(item.get("policy", "config/portfolio_policy.default.json"))),
-                policy_pack_path=Path(str(item.get("policy_pack", "config/portfolio_policy.packs.json"))),
-                policy_profile=str(item.get("policy_profile", "")),
-                policy_overrides=_coerce_policy_overrides(item.get("policy_overrides", {})),
-                max_workers=max(1, int(item.get("max_workers", 4))),
-                run=bool(item.get("run", False)),
-                timeout_seconds=int(item.get("timeout_seconds", 120)),
-                retries=int(item.get("retries", 0)),
-                max_failures=int(item.get("max_failures", 0)),
-                transport=str(item.get("transport", "local")),
+                repo_graph=cfg.repo_graph,
+                schema=cfg.schema,
+                adapters=cfg.adapters,
+                policy_path=cfg.policy,
+                policy_pack_path=cfg.policy_pack,
+                policy_profile=cfg.policy_profile,
+                policy_overrides=cfg.policy_overrides,
+                max_workers=cfg.max_workers,
+                run=cfg.run,
+                timeout_seconds=cfg.timeout_seconds,
+                retries=cfg.retries,
+                max_failures=cfg.max_failures,
+                transport=cfg.transport,
                 history_path=out_root / "batch-history.jsonl",
-                cancel_path=Path(str(item.get("cancel_file", ".sdetkit/portfolio-cancel-targets.txt"))),
+                cancel_path=cfg.cancel_file,
                 out_dir=portfolio_out,
             )
             summary["name"] = name

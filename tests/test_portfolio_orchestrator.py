@@ -249,7 +249,7 @@ def test_parse_policy_overrides_rejects_non_object() -> None:
     try:
         _parse_policy_overrides('["not-an-object"]')
     except ValueError as exc:
-        assert "JSON object" in str(exc)
+        assert "POLICY_OVERRIDE_INVALID_TYPE" in str(exc)
     else:
         raise AssertionError("expected ValueError")
 
