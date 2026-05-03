@@ -18,12 +18,18 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    baseline = load_json(Path(args.baseline) if args.baseline else artifact_path("baseline", args.date_tag))
+    baseline = load_json(
+        Path(args.baseline) if args.baseline else artifact_path("baseline", args.date_tag)
+    )
     shadow = load_json(Path(args.shadow) if args.shadow else artifact_path("shadow", args.date_tag))
 
     workflow_count = int((baseline.get("kpis", {}) or {}).get("workflow_count") or 0)
     dup_paths = int((baseline.get("kpis", {}) or {}).get("duplicate_trigger_paths") or 0)
-    candidates = shadow.get("retirement_candidates", []) if isinstance(shadow.get("retirement_candidates", []), list) else []
+    candidates = (
+        shadow.get("retirement_candidates", [])
+        if isinstance(shadow.get("retirement_candidates", []), list)
+        else []
+    )
     top_score = int(candidates[0].get("retirement_priority_score", 0)) if candidates else 0
 
     score = max(0, min(100, int((dup_paths * 0.5) + (top_score * 0.3) + (workflow_count * 0.2))))
@@ -46,7 +52,13 @@ def main() -> int:
         ],
     }
 
-    out = Path(args.out) if args.out else artifact_path("contract", args.date_tag).with_name(f"powerfuel-consolidation-score-{args.date_tag}.json")
+    out = (
+        Path(args.out)
+        if args.out
+        else artifact_path("contract", args.date_tag).with_name(
+            f"powerfuel-consolidation-score-{args.date_tag}.json"
+        )
+    )
     dump_json(out, payload)
     print(f"wrote {out}")
     return 0

@@ -14,12 +14,31 @@ def test_build_powerfuel_weekly_report_outputs_json_and_markdown(tmp_path: Path)
     score = tmp_path / "score.json"
 
     baseline.write_text(
-        json.dumps({"kpis": {"workflow_count": 10, "duplicate_trigger_paths": 4, "first_proof_success_rate": 1.0, "time_to_first_proof_median_minutes": 12.5}}),
+        json.dumps(
+            {
+                "kpis": {
+                    "workflow_count": 10,
+                    "duplicate_trigger_paths": 4,
+                    "first_proof_success_rate": 1.0,
+                    "time_to_first_proof_median_minutes": 12.5,
+                }
+            }
+        ),
         encoding="utf-8",
     )
     score.write_text(json.dumps({"score": 77}), encoding="utf-8")
     shadow.write_text(
-        json.dumps({"retirement_candidates": [{"workflow": "ci.yml", "retirement_priority_score": 10, "triggers": ["push", "pull_request"]}]}),
+        json.dumps(
+            {
+                "retirement_candidates": [
+                    {
+                        "workflow": "ci.yml",
+                        "retirement_priority_score": 10,
+                        "triggers": ["push", "pull_request"],
+                    }
+                ]
+            }
+        ),
         encoding="utf-8",
     )
 

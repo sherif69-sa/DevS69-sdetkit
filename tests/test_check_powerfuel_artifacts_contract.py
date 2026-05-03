@@ -13,10 +13,46 @@ def test_check_powerfuel_artifacts_contract_passes(tmp_path: Path) -> None:
     retirement = tmp_path / "retirement.json"
     out = tmp_path / "contract.json"
 
-    baseline.write_text(json.dumps({"date": "x", "status": "x", "generated_at": "x", "kpis": {}, "trigger_counts": {}, "workflow_trigger_map": {}}), encoding="utf-8")
-    shadow.write_text(json.dumps({"date": "x", "status": "x", "generated_at": "x", "summary": {}, "retirement_candidates": []}), encoding="utf-8")
-    weekly.write_text(json.dumps({"date": "x", "status": "x", "generated_at": "x", "scoreboard": {}, "next_retirement_batch": []}), encoding="utf-8")
-    retirement.write_text(json.dumps({"date": "x", "status": "x", "generated_at": "x", "batch": []}), encoding="utf-8")
+    baseline.write_text(
+        json.dumps(
+            {
+                "date": "x",
+                "status": "x",
+                "generated_at": "x",
+                "kpis": {},
+                "trigger_counts": {},
+                "workflow_trigger_map": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    shadow.write_text(
+        json.dumps(
+            {
+                "date": "x",
+                "status": "x",
+                "generated_at": "x",
+                "summary": {},
+                "retirement_candidates": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    weekly.write_text(
+        json.dumps(
+            {
+                "date": "x",
+                "status": "x",
+                "generated_at": "x",
+                "scoreboard": {},
+                "next_retirement_batch": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    retirement.write_text(
+        json.dumps({"date": "x", "status": "x", "generated_at": "x", "batch": []}), encoding="utf-8"
+    )
 
     subprocess.run(
         [

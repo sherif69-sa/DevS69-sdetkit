@@ -15,12 +15,16 @@ TRIGGERS = ("push", "pull_request", "workflow_dispatch", "schedule", "release")
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Build powerfuel baseline metrics from repository artifacts")
+    p = argparse.ArgumentParser(
+        description="Build powerfuel baseline metrics from repository artifacts"
+    )
     p.add_argument("--workflows-dir", default=".github/workflows")
     p.add_argument("--first-proof-summary", default="build/first-proof/first-proof-summary.json")
     p.add_argument("--date-tag", default="2026-05-03")
     p.add_argument("--out", default=None)
-    p.add_argument("--generated-at", default=None, help="ISO timestamp override for deterministic outputs")
+    p.add_argument(
+        "--generated-at", default=None, help="ISO timestamp override for deterministic outputs"
+    )
     return p.parse_args()
 
 

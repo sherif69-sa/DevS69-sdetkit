@@ -10,7 +10,9 @@ from powerfuel_common import artifact_path, dump_json, load_json
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Build Powerfuel workflow retirement plan from shadow-mode report")
+    p = argparse.ArgumentParser(
+        description="Build Powerfuel workflow retirement plan from shadow-mode report"
+    )
     p.add_argument("--date-tag", default="2026-05-03")
     p.add_argument("--shadow-log", default=None)
     p.add_argument("--batch-size", type=int, default=5)
@@ -21,9 +23,15 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    shadow_path = Path(args.shadow_log) if args.shadow_log else artifact_path("shadow", args.date_tag)
+    shadow_path = (
+        Path(args.shadow_log) if args.shadow_log else artifact_path("shadow", args.date_tag)
+    )
     payload = load_json(shadow_path)
-    candidates = payload.get("retirement_candidates", []) if isinstance(payload.get("retirement_candidates", []), list) else []
+    candidates = (
+        payload.get("retirement_candidates", [])
+        if isinstance(payload.get("retirement_candidates", []), list)
+        else []
+    )
     selected = candidates[: max(1, args.batch_size)]
 
     batch: list[dict[str, Any]] = []
@@ -44,7 +52,11 @@ def main() -> int:
         "date": args.date_tag,
         "status": "retirement-plan-created",
         "generated_at": args.generated_at or datetime.now(timezone.utc).isoformat(),
-        "inputs": {"shadow_log": str(shadow_path), "batch_size": args.batch_size, "candidate_count": len(candidates)},
+        "inputs": {
+            "shadow_log": str(shadow_path),
+            "batch_size": args.batch_size,
+            "candidate_count": len(candidates),
+        },
         "batch": batch,
         "notes": [
             "Run parity checks and compare gate/coverage artifacts before deleting workflow files.",

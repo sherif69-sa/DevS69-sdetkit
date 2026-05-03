@@ -18,7 +18,11 @@ def main() -> int:
     args = parse_args()
     baseline = load_json(artifact_path("baseline", args.date_tag))
     weekly = load_json(artifact_path("weekly", args.date_tag))
-    score = load_json(artifact_path("contract", args.date_tag).with_name(f"powerfuel-consolidation-score-{args.date_tag}.json"))
+    score = load_json(
+        artifact_path("contract", args.date_tag).with_name(
+            f"powerfuel-consolidation-score-{args.date_tag}.json"
+        )
+    )
     contract = load_json(artifact_path("contract", args.date_tag))
 
     lines = [
