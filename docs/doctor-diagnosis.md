@@ -20,9 +20,11 @@ severity
 confidence
 score
 diagnosis_count
+observation_count
 prescription_count
 severity_counts
 diagnoses
+observations
 prescriptions
 next_commands
 verification_commands
@@ -31,7 +33,11 @@ judgment_next_move
 source
 ```
 
-Each failed doctor check becomes a diagnosis with a stable id, category, severity, confidence, symptoms, evidence, prescriptions, next commands, and verification commands.
+Each failed doctor check becomes a diagnosis with a stable id, category, severity, confidence, safe symptoms, public-safe evidence metadata, prescriptions, next commands, and verification commands.
+
+Quality-only `failed_check_ids` are preserved as observations instead of diagnoses. Diagnosis records are reserved for concrete failed doctor checks so a passing doctor payload does not become a failing diagnosis payload because of auxiliary quality metadata.
+
+The adapter intentionally does not re-emit raw doctor evidence or raw fix text. Raw details remain in the source doctor JSON, while the diagnosis contract records counts and verification commands. This keeps the diagnosis output safe to store in build artifacts and reports.
 
 Use text output for quick terminal summaries:
 

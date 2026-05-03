@@ -56,10 +56,6 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
-def _as_string_list(value: Any) -> list[str]:
-    return [str(item) for item in _as_list(value)]
-
-
 def _severity(value: Any, *, fallback: str = "medium") -> str:
     candidate = str(value or fallback).lower()
     return candidate if candidate in _SEVERITY_RANK else fallback
@@ -95,8 +91,8 @@ def _title_from_check_id(check_id: str) -> str:
     return words[:1].upper() + words[1:] if words else "Doctor finding"
 
 
-def _payload_confidence(payload: dict[str, Any]) -> float:
-    judgment = _as_dict(payload.get("judgment"))
+def _payload_confidence(source_doc: dict[str, Any]) -> float:
+    judgment = _as_dict(source_doc.get("judgment"))
     confidence = _as_dict(judgment.get("confidence"))
     score = confidence.get("score", 0.75)
     try:
@@ -105,10 +101,10 @@ def _payload_confidence(payload: dict[str, Any]) -> float:
         return 0.75
 
 
-def _payload_status(payload: dict[str, Any], diagnoses: Sequence[dict[str, Any]]) -> str:
-    judgment = _as_dict(payload.get("judgment"))
+def _payload_status(source_doc: dict[str, Any], diagnoses: Sequence[dict[str, Any]]) -> str:
+    judgment = _as_dict(source_doc.get("judgment"))
     status = judgment.get("status")
-    if isinstance(status, str) and status:
+    if isinstance(status, str) and status and not diagnoses:
         return status
 
     if not diagnoses:
@@ -127,6 +123,42 @@ def _verification_commands(check_id: str) -> list[str]:
     return commands
 
 
+def _raw_count(check: dict[str, Any], key: str) -> int:
+    value = check.get(key)
+    return len(value) if isinstance(value, list) else 0
+
+
+def _safe_evidence(check_id: str, check: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "kind": "doctor_check",
+            "check_id": check_id,
+            "raw_evidence_count": _raw_count(check, "evidence"),
+            "raw_fix_count": _raw_count(check, "fix"),
+            "note": "Raw doctor evidence is intentionally kept in the source doctor JSON.",
+        }
+    ]
+
+
+def _safe_prescriptions(
+    check_id: str, check: dict[str, Any], severity: str
+) -> list[dict[str, Any]]:
+    fix_count = _raw_count(check, "fix")
+    if fix_count == 0:
+        return []
+
+    return [
+        {
+            "prescription_id": f"doctor.{check_id}.review_source_fixes",
+            "priority": _priority_from_severity(severity),
+            "safe_to_auto_apply": False,
+            "reason": f"Review the source doctor JSON for {fix_count} suggested fix item(s).",
+            "commands": [],
+            "verification_commands": _verification_commands(check_id),
+        }
+    ]
+
+
 def _diagnosis_from_check(
     check_id: str,
     check: dict[str, Any],
@@ -137,20 +169,7 @@ def _diagnosis_from_check(
         return None
 
     severity = _severity(check.get("severity"))
-    summary = str(check.get("summary") or f"{_title_from_check_id(check_id)} failed.")
-    evidence = _as_string_list(check.get("evidence"))
-    fixes = _as_string_list(check.get("fix"))
-    prescriptions = [
-        {
-            "prescription_id": f"doctor.{check_id}.fix_{index}",
-            "priority": _priority_from_severity(severity),
-            "safe_to_auto_apply": False,
-            "reason": fix,
-            "commands": [],
-            "verification_commands": _verification_commands(check_id),
-        }
-        for index, fix in enumerate(fixes, start=1)
-    ]
+    summary = f"Doctor check '{check_id}' reported a non-ok result."
 
     return {
         "diagnosis_id": f"doctor.{check_id}",
@@ -161,60 +180,34 @@ def _diagnosis_from_check(
         "confidence": confidence,
         "summary": summary,
         "symptoms": [summary],
-        "evidence": evidence,
-        "prescriptions": prescriptions,
+        "evidence": _safe_evidence(check_id, check),
+        "prescriptions": _safe_prescriptions(check_id, check, severity),
         "next_commands": _verification_commands(check_id)[:1],
         "verification_commands": _verification_commands(check_id),
         "source": "doctor",
     }
 
 
-def _missing_check_diagnoses(
-    payload: dict[str, Any],
-    known_check_ids: set[str],
-    *,
-    confidence: float,
-) -> list[dict[str, Any]]:
-    quality = _as_dict(payload.get("quality"))
+def _quality_observations(source_doc: dict[str, Any]) -> list[dict[str, Any]]:
+    quality = _as_dict(source_doc.get("quality"))
     failed_check_ids = sorted(
-        str(check_id)
-        for check_id in _as_list(quality.get("failed_check_ids"))
-        if str(check_id) not in known_check_ids
+        str(check_id) for check_id in _as_list(quality.get("failed_check_ids"))
     )
 
-    diagnoses = []
-    for check_id in failed_check_ids:
-        severity = _severity(
-            _as_dict(quality.get("failed_severity_breakdown")).get(check_id),
-            fallback="medium",
-        )
-        summary = f"{_title_from_check_id(check_id)} is reported as failed by doctor quality data."
-        diagnoses.append(
-            {
-                "diagnosis_id": f"doctor.{check_id}",
-                "title": _title_from_check_id(check_id),
-                "category": _CHECK_CATEGORIES.get(check_id, "general"),
-                "status": _status_from_severity(severity),
-                "severity": severity,
-                "confidence": confidence,
-                "summary": summary,
-                "symptoms": [summary],
-                "evidence": [],
-                "prescriptions": [],
-                "next_commands": ["python -m sdetkit doctor --format json"],
-                "verification_commands": [
-                    "python -m sdetkit doctor --format json",
-                    "python -m sdetkit gate fast",
-                ],
-                "source": "doctor.quality",
-            }
-        )
-    return diagnoses
+    return [
+        {
+            "observation_id": f"doctor.quality.{check_id}",
+            "check_id": check_id,
+            "summary": f"{_title_from_check_id(check_id)} appears in doctor quality failed_check_ids.",
+            "source": "doctor.quality",
+        }
+        for check_id in failed_check_ids
+    ]
 
 
-def _collect_diagnoses(payload: dict[str, Any]) -> list[dict[str, Any]]:
-    checks = _as_dict(payload.get("checks"))
-    confidence = _payload_confidence(payload)
+def _collect_diagnoses(source_doc: dict[str, Any]) -> list[dict[str, Any]]:
+    checks = _as_dict(source_doc.get("checks"))
+    confidence = _payload_confidence(source_doc)
     diagnoses = []
 
     for check_id in sorted(checks):
@@ -223,7 +216,6 @@ def _collect_diagnoses(payload: dict[str, Any]) -> list[dict[str, Any]]:
         if diagnosis is not None:
             diagnoses.append(diagnosis)
 
-    diagnoses.extend(_missing_check_diagnoses(payload, set(checks), confidence=confidence))
     return diagnoses
 
 
@@ -244,38 +236,48 @@ def _unique_commands(diagnoses: Sequence[dict[str, Any]], key: str) -> list[str]
     commands = []
     seen = set()
     for diagnosis in diagnoses:
-        for command in _as_string_list(diagnosis.get(key)):
-            if command not in seen:
-                seen.add(command)
-                commands.append(command)
+        for command in _as_list(diagnosis.get(key)):
+            command_text = str(command)
+            if command_text not in seen:
+                seen.add(command_text)
+                commands.append(command_text)
     return commands
 
 
-def build_diagnosis_payload(payload: dict[str, Any]) -> dict[str, Any]:
-    diagnoses = _collect_diagnoses(payload)
+def _safe_recommendations(
+    source_doc: dict[str, Any], diagnoses: Sequence[dict[str, Any]]
+) -> list[str]:
+    if diagnoses:
+        return ["Review diagnosis records and source doctor JSON before remediation."]
+    if source_doc.get("ok", True):
+        return ["No failed doctor checks were converted into diagnoses."]
+    return ["Run doctor with targeted checks to inspect source findings."]
+
+
+def build_diagnosis_payload(source_doc: dict[str, Any]) -> dict[str, Any]:
+    diagnoses = _collect_diagnoses(source_doc)
+    observations = _quality_observations(source_doc)
     prescriptions = _flatten_prescriptions(diagnoses)
     severities = [str(diagnosis.get("severity", "low")) for diagnosis in diagnoses]
     severity_counts = Counter(severities)
 
-    status = _payload_status(payload, diagnoses)
-    severity = _max_severity(
-        severities,
-        fallback=_severity(_as_dict(payload.get("judgment")).get("severity"), fallback="low"),
-    )
-
-    package = _as_dict(payload.get("package"))
-    judgment = _as_dict(payload.get("judgment"))
+    judgment = _as_dict(source_doc.get("judgment"))
     top_judgment = _as_dict(judgment.get("top_judgment"))
+    source_status = _payload_status(source_doc, diagnoses)
+    source_severity = _severity(judgment.get("severity"), fallback="low")
+    severity = _max_severity(severities, fallback=source_severity)
+    package = _as_dict(source_doc.get("package"))
 
     return {
         "schema_version": SCHEMA_VERSION,
-        "source_schema_version": str(payload.get("schema_version", "unknown")),
-        "ok": bool(payload.get("ok", not diagnoses)) and not diagnoses,
-        "status": status,
+        "source_schema_version": str(source_doc.get("schema_version", "unknown")),
+        "ok": bool(source_doc.get("ok", not diagnoses)) and not diagnoses,
+        "status": source_status,
         "severity": severity,
-        "confidence": _payload_confidence(payload),
-        "score": payload.get("score", 0),
+        "confidence": _payload_confidence(source_doc),
+        "score": source_doc.get("score", 0),
         "diagnosis_count": len(diagnoses),
+        "observation_count": len(observations),
         "prescription_count": len(prescriptions),
         "severity_counts": {
             "critical": severity_counts.get("critical", 0),
@@ -285,44 +287,43 @@ def build_diagnosis_payload(payload: dict[str, Any]) -> dict[str, Any]:
             "info": severity_counts.get("info", 0),
         },
         "diagnoses": diagnoses,
+        "observations": observations,
         "prescriptions": prescriptions,
         "next_commands": _unique_commands(diagnoses, "next_commands"),
         "verification_commands": _unique_commands(diagnoses, "verification_commands"),
-        "recommendations": _as_string_list(payload.get("recommendations")),
-        "judgment_next_move": top_judgment.get("next_move", ""),
+        "recommendations": _safe_recommendations(source_doc, diagnoses),
+        "judgment_next_move": str(top_judgment.get("next_move", "")),
         "source": {
             "workflow": "doctor",
             "package": package.get("name", "unknown"),
             "version": package.get("version", "unknown"),
-            "output_path": payload.get("output_path", ""),
+            "output_path": source_doc.get("output_path", ""),
         },
     }
 
 
-def load_payload(path: Path) -> dict[str, Any]:
-    if path.as_posix() == "-":
-        raw = sys.stdin.read()
-    else:
-        raw = path.read_text(encoding="utf-8")
-    payload = json.loads(raw)
-    if not isinstance(payload, dict):
+def load_source_document(path: Path) -> dict[str, Any]:
+    raw = sys.stdin.read() if path.as_posix() == "-" else path.read_text(encoding="utf-8")
+    source_doc = json.loads(raw)
+    if not isinstance(source_doc, dict):
         raise ValueError("doctor payload must be a JSON object")
-    return payload
+    return source_doc
 
 
-def render_text(payload: dict[str, Any]) -> str:
+def render_text(contract: dict[str, Any]) -> str:
     lines = [
-        f"schema_version={payload['schema_version']}",
-        f"source_schema_version={payload['source_schema_version']}",
-        f"ok={str(payload['ok']).lower()}",
-        f"status={payload['status']}",
-        f"severity={payload['severity']}",
-        f"confidence={payload['confidence']}",
-        f"score={payload['score']}",
-        f"diagnosis_count={payload['diagnosis_count']}",
-        f"prescription_count={payload['prescription_count']}",
+        f"schema_version={contract['schema_version']}",
+        f"source_schema_version={contract['source_schema_version']}",
+        f"ok={str(contract['ok']).lower()}",
+        f"status={contract['status']}",
+        f"severity={contract['severity']}",
+        f"confidence={contract['confidence']}",
+        f"score={contract['score']}",
+        f"diagnosis_count={contract['diagnosis_count']}",
+        f"observation_count={contract['observation_count']}",
+        f"prescription_count={contract['prescription_count']}",
     ]
-    for diagnosis in payload["diagnoses"]:
+    for diagnosis in contract["diagnoses"]:
         lines.append(
             "diagnosis={diagnosis_id} status={status} severity={severity} category={category}".format(
                 **diagnosis
@@ -331,18 +332,21 @@ def render_text(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def write_output(payload: dict[str, Any], out_path: Path | None, *, output_format: str) -> None:
-    if output_format == "json":
-        rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n"
-    else:
-        rendered = render_text(payload) + "\n"
+def _json_contract(contract: dict[str, Any]) -> str:
+    return json.dumps(contract, indent=2, sort_keys=True) + "\n"
+
+
+def write_output(contract: dict[str, Any], out_path: Path | None, *, output_format: str) -> None:
+    rendered_contract = (
+        _json_contract(contract) if output_format == "json" else render_text(contract) + "\n"
+    )
 
     if out_path is None:
-        print(rendered, end="")
+        sys.stdout.write(rendered_contract)
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(rendered, encoding="utf-8")
+    out_path.write_text(rendered_contract, encoding="utf-8")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -361,10 +365,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(list(argv if argv is not None else sys.argv[1:]))
 
     try:
-        source_payload = load_payload(Path(args.source))
-        diagnosis_payload = build_diagnosis_payload(source_payload)
+        source_doc = load_source_document(Path(args.source))
+        contract = build_diagnosis_payload(source_doc)
         write_output(
-            diagnosis_payload,
+            contract,
             Path(args.out) if args.out else None,
             output_format=args.format,
         )
