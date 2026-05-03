@@ -170,6 +170,7 @@ python -m sdetkit portfolio-orchestrate dashboard \
 
 python -m sdetkit portfolio-orchestrate batch-run \
   --manifest examples/topology/portfolio-batch.sample.json \
+  --max-parallel 4 \
   --out-dir build/portfolio-batch
 ```
 

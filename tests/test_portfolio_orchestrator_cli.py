@@ -369,8 +369,23 @@ def test_cli_batch_run(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
-    assert main(["batch-run", "--manifest", str(manifest), "--out-dir", str(out_dir)]) == 0
+    assert (
+        main(
+            [
+                "batch-run",
+                "--manifest",
+                str(manifest),
+                "--max-parallel",
+                "2",
+                "--out-dir",
+                str(out_dir),
+            ]
+        )
+        == 0
+    )
     summary = json.loads((out_dir / "batch-summary.json").read_text(encoding="utf-8"))
     assert summary["portfolios"] == 2
     assert (out_dir / "p1" / "dashboard.html").exists()
     assert (out_dir / "p2" / "dashboard.html").exists()
+    assert (out_dir / "batch-report.md").exists()
+    assert (out_dir / "batch-dashboard.html").exists()

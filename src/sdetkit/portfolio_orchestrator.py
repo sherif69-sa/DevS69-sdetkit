@@ -470,6 +470,37 @@ def _run_pipeline_bundle(
     }
 
 
+def _render_batch_dashboard_html(summary: dict[str, object]) -> str:
+    portfolios = int(summary.get("portfolios", 0))
+    ship = int(summary.get("ship", 0))
+    no_ship = int(summary.get("no_ship", 0))
+    rows = summary.get("summaries", [])
+    rows_html = ""
+    if isinstance(rows, list):
+        rendered = []
+        for item in rows:
+            if not isinstance(item, dict):
+                continue
+            rendered.append(
+                "<tr>"
+                f"<td>{item.get('name','')}</td>"
+                f"<td>{item.get('decision','')}</td>"
+                f"<td>{item.get('risk_score','')}</td>"
+                f"<td>{item.get('reliability','')}</td>"
+                f"<td>{item.get('failure_count','')}</td>"
+                "</tr>"
+            )
+        rows_html = "\n".join(rendered)
+    return f"""<!doctype html><html><head><meta charset='utf-8'/><title>Batch Dashboard</title></head>
+<body>
+<h1>Portfolio Batch Dashboard</h1>
+<p>Portfolios: {portfolios} | SHIP: {ship} | NO_SHIP: {no_ship}</p>
+<table border='1' cellpadding='6' cellspacing='0'>
+<thead><tr><th>Name</th><th>Decision</th><th>Risk</th><th>Reliability</th><th>Failures</th></tr></thead>
+<tbody>{rows_html}</tbody></table>
+</body></html>"""
+
+
 def _execute_plan(
     plan: dict[str, object],
     max_workers: int,
@@ -707,6 +738,7 @@ def _parser() -> argparse.ArgumentParser:
     dashboard.add_argument("--out", required=True)
     batch = sub.add_parser("batch-run", help="Run multiple portfolio pipelines from a batch manifest")
     batch.add_argument("--manifest", required=True)
+    batch.add_argument("--max-parallel", type=int, default=2)
     batch.add_argument("--out-dir", required=True)
 
     return p
@@ -850,11 +882,9 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError("batch manifest must include array field 'portfolios'")
         out_root = Path(ns.out_dir)
         out_root.mkdir(parents=True, exist_ok=True)
-        summaries: list[dict[str, object]] = []
-        for item in portfolios:
-            if not isinstance(item, dict):
-                continue
-            name = str(item.get("name", f"portfolio-{len(summaries)+1}"))
+        def _run_one(indexed: tuple[int, dict[str, object]]) -> dict[str, object]:
+            _, item = indexed
+            name = str(item.get("name", "portfolio"))
             portfolio_out = out_root / name
             summary = _run_pipeline_bundle(
                 repo_graph=Path(str(item.get("repo_graph"))),
@@ -870,16 +900,37 @@ def main(argv: list[str] | None = None) -> int:
                 out_dir=portfolio_out,
             )
             summary["name"] = name
-            summaries.append(summary)
+            return summary
+
+        valid = [(idx, item) for idx, item in enumerate(portfolios) if isinstance(item, dict)]
+        summaries: list[dict[str, object]] = []
+        with ThreadPoolExecutor(max_workers=max(1, int(ns.max_parallel))) as executor:
+            futures = [executor.submit(_run_one, pair) for pair in valid]
+            for future in as_completed(futures):
+                summaries.append(future.result())
         ship = sum(1 for x in summaries if str(x.get("decision")) == "SHIP")
         aggregate = {
             "ok": True,
             "portfolios": len(summaries),
             "ship": ship,
             "no_ship": len(summaries) - ship,
-            "summaries": summaries,
+            "summaries": sorted(summaries, key=lambda x: str(x.get("name", ""))),
         }
         (out_root / "batch-summary.json").write_text(json.dumps(aggregate, indent=2) + "\n", encoding="utf-8")
+        batch_report = "\n".join(
+            [
+                "# Portfolio Batch Report",
+                "",
+                f"- Portfolios: {aggregate['portfolios']}",
+                f"- SHIP: {aggregate['ship']}",
+                f"- NO_SHIP: {aggregate['no_ship']}",
+                "",
+            ]
+        )
+        (out_root / "batch-report.md").write_text(batch_report, encoding="utf-8")
+        (out_root / "batch-dashboard.html").write_text(
+            _render_batch_dashboard_html(aggregate), encoding="utf-8"
+        )
         print(f"Wrote batch artifacts: {out_root}")
         return 0
     plan_payload = json.loads(Path(ns.plan).read_text(encoding="utf-8"))
