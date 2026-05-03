@@ -864,6 +864,7 @@ def _parser() -> argparse.ArgumentParser:
     pipeline.add_argument("--timeout-seconds", type=int, default=120)
     pipeline.add_argument("--retries", type=int, default=0)
     pipeline.add_argument("--max-failures", type=int, default=0)
+    pipeline.add_argument("--transport", choices=["local", "ssh", "container", "k8s-job"], default="local")
     pipeline.add_argument("--policy", default="config/portfolio_policy.default.json")
     pipeline.add_argument("--policy-pack", default="config/portfolio_policy.packs.json")
     pipeline.add_argument("--policy-profile", default="")
@@ -1031,7 +1032,7 @@ def main(argv: list[str] | None = None) -> int:
             timeout_seconds=max(1, int(ns.timeout_seconds)),
             retries=max(0, int(ns.retries)),
             max_failures=max(0, int(ns.max_failures)),
-            transport="local",
+            transport=str(ns.transport),
             history_path=Path(ns.history),
             cancel_path=Path(ns.cancel_file),
             out_dir=out_dir,
@@ -1108,8 +1109,8 @@ def main(argv: list[str] | None = None) -> int:
                     if isinstance(item.get("policy_overrides", {}), dict)
                     else {}
                 ),
-                max_workers=int(item.get("max_workers", 4)),
-            run=bool(item.get("run", False)),
+                max_workers=max(1, int(item.get("max_workers", 4))),
+                run=bool(item.get("run", False)),
                 timeout_seconds=int(item.get("timeout_seconds", 120)),
                 retries=int(item.get("retries", 0)),
                 max_failures=int(item.get("max_failures", 0)),

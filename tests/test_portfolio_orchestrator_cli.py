@@ -211,6 +211,42 @@ def test_cli_run_pipeline_with_run_mode(tmp_path: Path) -> None:
     assert execution["ok"] is True
 
 
+def test_cli_run_pipeline_transport_option(tmp_path: Path) -> None:
+    graph_path = tmp_path / "graph.json"
+    schema_path = tmp_path / "schema.json"
+    adapters_path = tmp_path / "adapters.json"
+    out_dir = tmp_path / "pipeline-transport"
+    graph_path.write_text(
+        json.dumps({"repos": [{"name": "api", "path": "repos/api", "language": "python"}]}),
+        encoding="utf-8",
+    )
+    schema_path.write_text(
+        json.dumps({"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}),
+        encoding="utf-8",
+    )
+    adapters_path.write_text(json.dumps({"python": ["echo", "ok", "{repo_path}"]}), encoding="utf-8")
+    assert (
+        main(
+            [
+                "run-pipeline",
+                "--repo-graph",
+                str(graph_path),
+                "--schema",
+                str(schema_path),
+                "--adapters",
+                str(adapters_path),
+                "--transport",
+                "ssh",
+                "--out-dir",
+                str(out_dir),
+            ]
+        )
+        == 0
+    )
+    execution = json.loads((out_dir / "execution.json").read_text(encoding="utf-8"))
+    assert execution["results"][0]["transport"] == "ssh"
+
+
 def test_cli_evaluate_policy(tmp_path: Path) -> None:
     risk_path = tmp_path / "risk.json"
     score_path = tmp_path / "score.json"
