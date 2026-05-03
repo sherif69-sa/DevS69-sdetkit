@@ -94,3 +94,19 @@ Use JSON output for automation:
 ```bash
 python -m sdetkit mission-control history --ledger .sdetkit/runs/mission-control-runs.jsonl --format json
 ```
+
+## Report brief
+
+Use `report` to turn a Mission Control bundle into a Markdown release brief.
+
+```bash
+python -m sdetkit mission-control report   --bundle build/mission-control/mission-control.json   --out build/mission-control/report.md
+```
+
+Add `--history` to include ledger trend context in the same brief:
+
+```bash
+python -m sdetkit mission-control report   --bundle build/mission-control/mission-control.json   --history .sdetkit/runs/mission-control-runs.jsonl   --out build/mission-control/report.md
+```
+
+The report includes the executive decision, risk band, execution counts, step outcomes, findings, history summary, next actions, and artifact paths.
