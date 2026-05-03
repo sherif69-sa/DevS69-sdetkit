@@ -251,3 +251,10 @@ def test_execute_plan_contains_transport_and_lease() -> None:
     row = result["results"][0]
     assert row["transport"] == "ssh"
     assert str(row["lease_id"]).startswith("lease-")
+
+
+def test_execute_plan_respects_cancel_targets() -> None:
+    plan = {"execution_plan": [{"repo": "api", "path": "repos/api", "language": "python"}]}
+    result = _execute_plan(plan, max_workers=1, run=False, cancel_targets={"api"})
+    row = result["results"][0]
+    assert row["status"] == "canceled"

@@ -103,6 +103,7 @@ python -m sdetkit portfolio-orchestrate execute \
   --artifact-dir build/portfolio-workers \
   --retries 1 \
   --max-failures 3 \
+  --cancel-file .sdetkit/portfolio-cancel-targets.txt \
   --out build/portfolio-execution-intents.json
 
 # Optional: execute adapter commands (not only dry-run intents)
@@ -182,6 +183,10 @@ python -m sdetkit portfolio-orchestrate impact-plan \
 python -m sdetkit portfolio-orchestrate batch-control-tower \
   --history build/portfolio-batch/batch-history.jsonl \
   --out build/portfolio-batch/control-tower.json
+
+python -m sdetkit portfolio-orchestrate cancel-worker \
+  --target api \
+  --cancel-file .sdetkit/portfolio-cancel-targets.txt
 ```
 
 Execution rows now include Worker Contract-style fields (`worker`, `run_id`, `started_at`, `finished_at`, `inputs`, `result`, `escalation`) for consistent downstream automation.

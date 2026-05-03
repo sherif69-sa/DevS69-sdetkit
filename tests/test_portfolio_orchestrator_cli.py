@@ -432,3 +432,9 @@ def test_cli_impact_plan_and_control_tower(tmp_path: Path) -> None:
     assert main(["batch-control-tower", "--history", str(history), "--out", str(tower)]) == 0
     tower_payload = json.loads(tower.read_text(encoding="utf-8"))
     assert tower_payload["control_tower"]["runs"] == 1
+
+
+def test_cli_cancel_worker_registry(tmp_path: Path) -> None:
+    cancel_file = tmp_path / "cancel.txt"
+    assert main(["cancel-worker", "--target", "api", "--cancel-file", str(cancel_file)]) == 0
+    assert "api" in cancel_file.read_text(encoding="utf-8")

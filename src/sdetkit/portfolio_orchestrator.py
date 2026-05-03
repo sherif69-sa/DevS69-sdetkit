@@ -404,6 +404,23 @@ def _build_history_trend(path: Path) -> dict[str, object]:
     }
 
 
+def _load_cancel_targets(path: Path) -> set[str]:
+    if not path.exists():
+        return set()
+    out: set[str] = set()
+    for line in path.read_text(encoding="utf-8").splitlines():
+        value = line.strip()
+        if value:
+            out.add(value)
+    return out
+
+
+def _append_cancel_target(path: Path, target: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(f"{target}\n")
+
+
 def _with_schema(payload: dict[str, object]) -> dict[str, object]:
     out = dict(payload)
     out["artifact_schema_version"] = ARTIFACT_SCHEMA_VERSION
@@ -423,6 +440,7 @@ def _run_pipeline_bundle(
     max_failures: int,
     transport: str,
     history_path: Path,
+    cancel_path: Path,
     out_dir: Path,
 ) -> dict[str, object]:
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -443,6 +461,7 @@ def _run_pipeline_bundle(
         retries=max(0, int(retries)),
         max_failures=max(0, int(max_failures)),
         transport=transport,
+        cancel_targets=_load_cancel_targets(cancel_path),
     )
     (out_dir / "execution.json").write_text(
         json.dumps(_with_schema(execution), indent=2) + "\n", encoding="utf-8"
@@ -534,6 +553,7 @@ def _execute_plan(
     retries: int = 0,
     max_failures: int = 0,
     transport: str = "local",
+    cancel_targets: set[str] | None = None,
 ) -> dict[str, object]:
     items = plan.get("execution_plan", [])
     assert isinstance(items, list)
@@ -550,6 +570,25 @@ def _execute_plan(
         started_at = _utc_now()
         run_id = str(uuid.uuid4())
         lease_id = f"lease-{uuid.uuid4()}"
+        if cancel_targets is not None and repo in cancel_targets:
+            return {
+                "worker": f"adapter-{language.lower()}",
+                "run_id": run_id,
+                "repo": repo,
+                "language": language,
+                "status": "canceled",
+                "mode": "run" if run else "dry-run",
+                "transport": transport,
+                "lease_id": lease_id,
+                "heartbeats": [started_at],
+                "started_at": started_at,
+                "finished_at": _utc_now(),
+                "inputs": {"path": repo_path},
+                "evidence": [],
+                "result": {"returncode": 130},
+                "escalation": {"required": True, "reason": "canceled by target registry"},
+                "command": command,
+            }
         if not run:
             return {
                 "worker": f"adapter-{language.lower()}",
@@ -719,6 +758,7 @@ def _parser() -> argparse.ArgumentParser:
     execute.add_argument("--retries", type=int, default=0)
     execute.add_argument("--max-failures", type=int, default=0)
     execute.add_argument("--transport", choices=["local", "ssh", "container", "k8s-job"], default="local")
+    execute.add_argument("--cancel-file", default=".sdetkit/portfolio-cancel-targets.txt")
     execute.add_argument("--out", required=True)
     validate = sub.add_parser("validate-graph", help="Validate repo graph structure before orchestration")
     validate.add_argument("--repo-graph", required=True)
@@ -754,6 +794,7 @@ def _parser() -> argparse.ArgumentParser:
     pipeline.add_argument("--max-failures", type=int, default=0)
     pipeline.add_argument("--policy", default="config/portfolio_policy.default.json")
     pipeline.add_argument("--history", default=".sdetkit/portfolio-history.jsonl")
+    pipeline.add_argument("--cancel-file", default=".sdetkit/portfolio-cancel-targets.txt")
     pipeline.add_argument("--out-dir", required=True)
     policy = sub.add_parser(
         "evaluate-policy", help="Evaluate policy decision from risk/score/execution artifacts"
@@ -777,6 +818,9 @@ def _parser() -> argparse.ArgumentParser:
     batch.add_argument("--manifest", required=True)
     batch.add_argument("--max-parallel", type=int, default=2)
     batch.add_argument("--out-dir", required=True)
+    cancel = sub.add_parser("cancel-worker", help="Append a repo target to cancellation registry")
+    cancel.add_argument("--target", required=True, help="Repository name to cancel")
+    cancel.add_argument("--cancel-file", default=".sdetkit/portfolio-cancel-targets.txt")
     impact = sub.add_parser(
         "impact-plan",
         help="Compute affected repos from changed files and dependency graph, emit reduced plan",
@@ -815,6 +859,7 @@ def main(argv: list[str] | None = None) -> int:
             retries=max(0, int(ns.retries)),
             max_failures=max(0, int(ns.max_failures)),
             transport=str(ns.transport),
+            cancel_targets=_load_cancel_targets(Path(ns.cancel_file)),
         )
         Path(ns.out).write_text(json.dumps(execution, indent=2) + "\n", encoding="utf-8")
         print(f"Wrote execution intents: {ns.out}")
@@ -907,6 +952,7 @@ def main(argv: list[str] | None = None) -> int:
             max_failures=max(0, int(ns.max_failures)),
             transport="local",
             history_path=Path(ns.history),
+            cancel_path=Path(ns.cancel_file),
             out_dir=out_dir,
         )
         print(f"Wrote pipeline artifacts: {out_dir}")
@@ -975,6 +1021,7 @@ def main(argv: list[str] | None = None) -> int:
                 max_failures=int(item.get("max_failures", 0)),
                 transport=str(item.get("transport", "local")),
                 history_path=out_root / "batch-history.jsonl",
+                cancel_path=Path(str(item.get("cancel_file", ".sdetkit/portfolio-cancel-targets.txt"))),
                 out_dir=portfolio_out,
             )
             summary["name"] = name
@@ -1010,6 +1057,9 @@ def main(argv: list[str] | None = None) -> int:
             _render_batch_dashboard_html(aggregate), encoding="utf-8"
         )
         print(f"Wrote batch artifacts: {out_root}")
+        return 0
+    if ns.cmd == "cancel-worker":
+        _append_cancel_target(Path(ns.cancel_file), str(ns.target))
         return 0
     if ns.cmd == "batch-control-tower":
         trend = _build_history_trend(Path(ns.history))
