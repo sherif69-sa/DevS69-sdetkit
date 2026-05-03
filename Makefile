@@ -648,7 +648,7 @@ followup-changelog: venv
 first-proof-readiness-threshold: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_readiness_threshold.py --dashboard build/first-proof/dashboard.json --profiles config/first_proof_readiness_profiles.json --profile $(FIRST_PROOF_READINESS_PROFILE) --out build/first-proof/readiness-threshold.json --format json'
 
-.PHONY: powerfuel-plan-status powerfuel-shadow-log powerfuel-weekly-report powerfuel-retirement-plan powerfuel-contract powerfuel-consolidation-score
+.PHONY: powerfuel-plan-status powerfuel-shadow-log powerfuel-weekly-report powerfuel-retirement-plan powerfuel-contract powerfuel-consolidation-score powerfuel-merge-ready
 powerfuel-plan-status: venv
 	@bash -lc 'echo "Powerfuel plan: docs/powerfuel-execution-plan-2026-05-03.md"'
 	@bash -lc 'echo "Powerfuel baseline: docs/artifacts/powerfuel-baseline-$(POWERFUEL_DATE_TAG).json"'
@@ -677,3 +677,8 @@ powerfuel-retirement-plan: powerfuel-shadow-log
 powerfuel-contract: powerfuel-consolidation-score powerfuel-weekly-report powerfuel-retirement-plan
 	@bash -lc '. .venv/bin/activate && python scripts/check_powerfuel_artifacts_contract.py --date-tag $(POWERFUEL_DATE_TAG) --baseline docs/artifacts/powerfuel-baseline-$(POWERFUEL_DATE_TAG).json --shadow docs/artifacts/powerfuel-shadow-log-$(POWERFUEL_DATE_TAG).json --weekly docs/artifacts/powerfuel-weekly-report-$(POWERFUEL_DATE_TAG).json --retirement docs/artifacts/powerfuel-retirement-plan-$(POWERFUEL_DATE_TAG).json --out docs/artifacts/powerfuel-contract-check-$(POWERFUEL_DATE_TAG).json'
 	@bash -lc 'python -m json.tool docs/artifacts/powerfuel-contract-check-$(POWERFUEL_DATE_TAG).json > /dev/null && echo "Powerfuel contract JSON: valid"'
+
+
+powerfuel-merge-ready: powerfuel-contract
+	@bash -lc ' . .venv/bin/activate && python scripts/render_powerfuel_merge_ready.py --date-tag $(POWERFUEL_DATE_TAG) --out docs/artifacts/powerfuel-merge-ready-$(POWERFUEL_DATE_TAG).md'
+	@bash -lc 'echo "Powerfuel merge-ready summary: docs/artifacts/powerfuel-merge-ready-$(POWERFUEL_DATE_TAG).md"'
