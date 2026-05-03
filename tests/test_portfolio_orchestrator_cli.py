@@ -427,6 +427,43 @@ def test_cli_batch_run(tmp_path: Path) -> None:
     assert (out_dir / "batch-dashboard.html").exists()
 
 
+def test_cli_batch_run_accepts_string_policy_overrides(tmp_path: Path) -> None:
+    graph = tmp_path / "graph.json"
+    schema = tmp_path / "schema.json"
+    adapters = tmp_path / "adapters.json"
+    manifest = tmp_path / "batch.json"
+    out_dir = tmp_path / "batch-out"
+    graph.write_text(
+        json.dumps({"repos": [{"name": "api", "path": "repos/api", "language": "python"}]}),
+        encoding="utf-8",
+    )
+    schema.write_text(
+        json.dumps({"type": "object", "required": ["repos"], "properties": {"repos": {"type": "array"}}}),
+        encoding="utf-8",
+    )
+    adapters.write_text(json.dumps({"python": ["echo", "ok", "{repo_path}"]}), encoding="utf-8")
+    manifest.write_text(
+        json.dumps(
+            {
+                "portfolios": [
+                    {
+                        "name": "p1",
+                        "repo_graph": str(graph),
+                        "schema": str(schema),
+                        "adapters": str(adapters),
+                        "run": False,
+                        "policy_overrides": "{\"max_risk_score\": 0}",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert main(["batch-run", "--manifest", str(manifest), "--out-dir", str(out_dir)]) == 0
+    policy = json.loads((out_dir / "p1" / "policy.json").read_text(encoding="utf-8"))
+    assert policy["decision"] == "NO_SHIP"
+
+
 def test_cli_impact_plan_and_control_tower(tmp_path: Path) -> None:
     graph = tmp_path / "graph.json"
     changes = tmp_path / "changed.txt"

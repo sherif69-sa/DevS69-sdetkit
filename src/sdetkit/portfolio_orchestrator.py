@@ -284,6 +284,14 @@ def _parse_policy_overrides(value: str) -> dict[str, object]:
     return payload
 
 
+def _coerce_policy_overrides(value: object) -> dict[str, object]:
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        return _parse_policy_overrides(value)
+    return {}
+
+
 def _evaluate_policy(
     *,
     risk: dict[str, object],
@@ -1104,11 +1112,7 @@ def main(argv: list[str] | None = None) -> int:
                 policy_path=Path(str(item.get("policy", "config/portfolio_policy.default.json"))),
                 policy_pack_path=Path(str(item.get("policy_pack", "config/portfolio_policy.packs.json"))),
                 policy_profile=str(item.get("policy_profile", "")),
-                policy_overrides=(
-                    item.get("policy_overrides", {})
-                    if isinstance(item.get("policy_overrides", {}), dict)
-                    else {}
-                ),
+                policy_overrides=_coerce_policy_overrides(item.get("policy_overrides", {})),
                 max_workers=max(1, int(item.get("max_workers", 4))),
                 run=bool(item.get("run", False)),
                 timeout_seconds=int(item.get("timeout_seconds", 120)),
