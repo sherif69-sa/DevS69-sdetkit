@@ -6,7 +6,13 @@ import pytest
 from sdetkit import cli, mission_control
 
 
-def test_mission_control_run_writes_json_and_markdown(tmp_path):
+def _jsonl_records(path: Path):
+    return [
+        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
+    ]
+
+
+def test_mission_control_run_writes_json_markdown_and_ledger(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
     out_dir = tmp_path / "out"
@@ -17,13 +23,17 @@ def test_mission_control_run_writes_json_and_markdown(tmp_path):
 
     bundle_path = out_dir / "mission-control.json"
     brief_path = out_dir / "mission-control.md"
+    ledger_path = repo / ".sdetkit" / "runs" / "mission-control-runs.jsonl"
 
     assert bundle_path.exists()
     assert brief_path.exists()
+    assert ledger_path.exists()
 
     bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    records = _jsonl_records(ledger_path)
 
     assert bundle["schema_version"] == "1"
+    assert bundle["run_id"].startswith("mc-")
     assert bundle["ok"] is True
     assert bundle["mode"] == "plan"
     assert bundle["decision"] == "SHIP"
@@ -43,17 +53,82 @@ def test_mission_control_run_writes_json_and_markdown(tmp_path):
     ]
     assert bundle["steps"][-1]["status"] == "planned"
     assert bundle["findings"] == []
-    assert [artifact["path"] for artifact in bundle["artifacts"]] == [
-        (out_dir.resolve() / "mission-control.json").as_posix(),
-        (out_dir.resolve() / "mission-control.md").as_posix(),
-    ]
+    assert [artifact["kind"] for artifact in bundle["artifacts"]] == ["json", "markdown", "jsonl"]
+
+    assert len(records) == 1
+    assert records[0]["run_id"] == bundle["run_id"]
+    assert records[0]["mode"] == "plan"
+    assert records[0]["decision"] == "SHIP"
+    assert records[0]["artifact_dir"] == out_dir.resolve().as_posix()
 
     brief = brief_path.read_text(encoding="utf-8")
     assert "# Mission Control" in brief
+    assert f"Run ID: {bundle['run_id']}" in brief
     assert "Mode: plan" in brief
     assert "Decision: SHIP" in brief
     assert "gate_fast" in brief
     assert "release_room" in brief
+
+
+def test_mission_control_no_ledger_suppresses_ledger_artifact(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir = tmp_path / "out"
+
+    rc = mission_control.main(
+        ["run", "--repo", str(repo), "--out-dir", str(out_dir), "--no-ledger"]
+    )
+
+    assert rc == 0
+
+    bundle = json.loads((out_dir / "mission-control.json").read_text(encoding="utf-8"))
+
+    assert not (repo / ".sdetkit").exists()
+    assert [artifact["kind"] for artifact in bundle["artifacts"]] == ["json", "markdown"]
+
+
+def test_mission_control_custom_ledger_path_appends_runs(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir_1 = tmp_path / "out1"
+    out_dir_2 = tmp_path / "out2"
+    ledger_path = tmp_path / "runs" / "mission-control.jsonl"
+
+    assert (
+        mission_control.main(
+            [
+                "run",
+                "--repo",
+                str(repo),
+                "--out-dir",
+                str(out_dir_1),
+                "--ledger-path",
+                str(ledger_path),
+            ]
+        )
+        == 0
+    )
+    assert (
+        mission_control.main(
+            [
+                "run",
+                "--repo",
+                str(repo),
+                "--out-dir",
+                str(out_dir_2),
+                "--ledger-path",
+                str(ledger_path),
+            ]
+        )
+        == 0
+    )
+
+    records = _jsonl_records(ledger_path)
+
+    assert len(records) == 2
+    assert records[0]["run_id"] != records[1]["run_id"]
+    assert records[0]["artifact_dir"] == out_dir_1.resolve().as_posix()
+    assert records[1]["artifact_dir"] == out_dir_2.resolve().as_posix()
 
 
 def test_mission_control_execute_writes_step_outputs(tmp_path, monkeypatch):
@@ -76,6 +151,7 @@ def test_mission_control_execute_writes_step_outputs(tmp_path, monkeypatch):
             "--out-dir",
             str(out_dir),
             "--execute",
+            "--no-ledger",
         ]
     )
 
@@ -120,6 +196,7 @@ def test_mission_control_execute_include_release_adds_release_gate(tmp_path, mon
             str(out_dir),
             "--execute",
             "--include-release",
+            "--no-ledger",
         ]
     )
 
@@ -152,6 +229,7 @@ def test_mission_control_execute_failed_step_sets_no_ship(tmp_path, monkeypatch)
             "--out-dir",
             str(out_dir),
             "--execute",
+            "--no-ledger",
         ]
     )
 
@@ -171,7 +249,10 @@ def test_mission_control_summarize_prints_stable_counts(tmp_path, capsys):
     repo.mkdir()
     out_dir = tmp_path / "out"
 
-    assert mission_control.main(["run", "--repo", str(repo), "--out-dir", str(out_dir)]) == 0
+    assert (
+        mission_control.main(["run", "--repo", str(repo), "--out-dir", str(out_dir), "--no-ledger"])
+        == 0
+    )
 
     capsys.readouterr()
 
@@ -180,6 +261,7 @@ def test_mission_control_summarize_prints_stable_counts(tmp_path, capsys):
     assert rc == 0
 
     output = capsys.readouterr().out
+    assert "run_id=mc-" in output
     assert "decision=SHIP" in output
     assert "risk_band=low" in output
     assert "mode=plan" in output
@@ -189,17 +271,19 @@ def test_mission_control_summarize_prints_stable_counts(tmp_path, capsys):
     assert "findings=0" in output
 
 
-def test_mission_control_schema_lists_required_top_level_keys(capsys):
+def test_mission_control_schema_lists_required_top_level_and_ledger_keys(capsys):
     rc = mission_control.main(["schema"])
 
     assert rc == 0
 
     payload = json.loads(capsys.readouterr().out)
     assert payload["schema_version"] == "1"
+    assert "run_id" in payload["required_top_level_keys"]
     assert "decision" in payload["required_top_level_keys"]
     assert "mode" in payload["required_top_level_keys"]
     assert "executed_step_count" in payload["required_top_level_keys"]
     assert "next_actions" in payload["required_top_level_keys"]
+    assert "artifact_dir" in payload["ledger_record_keys"]
 
 
 def test_root_cli_dispatches_mission_control(tmp_path):
@@ -207,7 +291,17 @@ def test_root_cli_dispatches_mission_control(tmp_path):
     repo.mkdir()
     out_dir = tmp_path / "out"
 
-    rc = cli.main(["mission-control", "run", "--repo", str(repo), "--out-dir", str(out_dir)])
+    rc = cli.main(
+        [
+            "mission-control",
+            "run",
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(out_dir),
+            "--no-ledger",
+        ]
+    )
 
     assert rc == 0
     assert (out_dir / "mission-control.json").exists()

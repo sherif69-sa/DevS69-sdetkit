@@ -56,3 +56,25 @@ python -m sdetkit mission-control run --execute --include-release --out-dir buil
 ```
 
 When an executed step fails, the bundle records the failing return code, keeps the step output files, sets `ok` to false, and returns `NO_SHIP`.
+
+## Run ledger
+
+Each run appends a compact JSONL record to the local Mission Control ledger:
+
+```text
+.sdetkit/runs/mission-control-runs.jsonl
+```
+
+The ledger keeps the run id, timestamp, repository, branch, commit, mode, decision, risk band, step counts, and artifact directory. Use it to track release-confidence history without needing a remote service.
+
+Use `--ledger-path` when you want the ledger somewhere else:
+
+```bash
+python -m sdetkit mission-control run --ledger-path build/mission-control-runs.jsonl
+```
+
+Use `--no-ledger` for one-off smoke runs that should not append history:
+
+```bash
+python -m sdetkit mission-control run --execute --no-ledger
+```
