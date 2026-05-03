@@ -78,3 +78,19 @@ Use `--no-ledger` for one-off smoke runs that should not append history:
 ```bash
 python -m sdetkit mission-control run --execute --no-ledger
 ```
+
+## History summary
+
+Use `history` to summarize a Mission Control JSONL run ledger without starting a server or database.
+
+```bash
+python -m sdetkit mission-control history --ledger .sdetkit/runs/mission-control-runs.jsonl
+```
+
+The text summary reports run counts, decision counts, the latest decision and risk band, failed-run rate, and the most common failed step when matching bundle artifacts are still available.
+
+Use JSON output for automation:
+
+```bash
+python -m sdetkit mission-control history --ledger .sdetkit/runs/mission-control-runs.jsonl --format json
+```

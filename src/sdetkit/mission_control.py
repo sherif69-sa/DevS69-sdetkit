@@ -6,6 +6,7 @@ import subprocess
 import sys
 import time
 import uuid
+from collections import Counter
 from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
@@ -454,6 +455,129 @@ def append_ledger(bundle: dict[str, Any], ledger_path: Path, out_dir: Path) -> P
     return ledger_path
 
 
+def _load_ledger_records(ledger_path: Path) -> list[dict[str, Any]]:
+    if not ledger_path.exists():
+        return []
+
+    records: list[dict[str, Any]] = []
+    for line_number, line in enumerate(
+        ledger_path.read_text(encoding="utf-8").splitlines(), start=1
+    ):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        try:
+            record = json.loads(stripped)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"invalid JSONL record at line {line_number}: {exc}") from exc
+        if isinstance(record, dict):
+            records.append(record)
+    return records
+
+
+def _int_record_value(record: dict[str, Any], key: str) -> int:
+    value = record.get(key, 0)
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
+    return 0
+
+
+def _failed_step_ids_from_record(record: dict[str, Any]) -> list[str]:
+    artifact_dir = record.get("artifact_dir")
+    if not isinstance(artifact_dir, str) or not artifact_dir:
+        return ["unknown"] if _int_record_value(record, "failed_step_count") > 0 else []
+
+    bundle_path = Path(artifact_dir) / "mission-control.json"
+    if not bundle_path.exists():
+        return ["unknown"] if _int_record_value(record, "failed_step_count") > 0 else []
+
+    try:
+        bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return ["unknown"] if _int_record_value(record, "failed_step_count") > 0 else []
+
+    failed_steps = []
+    for step in bundle.get("steps", []):
+        if (
+            isinstance(step, dict)
+            and step.get("executed") is True
+            and step.get("status") == "failed"
+        ):
+            failed_steps.append(str(step.get("id", "unknown")))
+
+    if failed_steps:
+        return failed_steps
+    return ["unknown"] if _int_record_value(record, "failed_step_count") > 0 else []
+
+
+def build_history_summary(ledger_path: Path) -> dict[str, Any]:
+    ledger_path = ledger_path.resolve()
+    records = _load_ledger_records(ledger_path)
+    decision_counts = Counter(str(record.get("decision", "UNKNOWN")) for record in records)
+    failed_runs = sum(1 for record in records if _int_record_value(record, "failed_step_count") > 0)
+
+    failed_step_counts: Counter[str] = Counter()
+    for record in records:
+        failed_step_counts.update(_failed_step_ids_from_record(record))
+
+    latest = records[-1] if records else {}
+    runs = len(records)
+    known_decisions = {
+        "SHIP",
+        "SHIP_WITH_FINDINGS",
+        "NO_SHIP",
+    }
+    other_decisions = sum(
+        count for decision, count in decision_counts.items() if decision not in known_decisions
+    )
+
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "ledger_path": ledger_path.as_posix(),
+        "runs": runs,
+        "ship": decision_counts.get("SHIP", 0),
+        "ship_with_findings": decision_counts.get("SHIP_WITH_FINDINGS", 0),
+        "no_ship": decision_counts.get("NO_SHIP", 0),
+        "other_decisions": other_decisions,
+        "latest_run_id": latest.get("run_id", "none"),
+        "latest_timestamp": latest.get("timestamp", "none"),
+        "latest_decision": latest.get("decision", "none"),
+        "latest_risk_band": latest.get("risk_band", "none"),
+        "latest_mode": latest.get("mode", "none"),
+        "latest_artifact_dir": latest.get("artifact_dir", "none"),
+        "failed_runs": failed_runs,
+        "failure_rate": round(failed_runs / runs, 4) if runs else 0.0,
+        "most_common_failed_step": failed_step_counts.most_common(1)[0][0]
+        if failed_step_counts
+        else "none",
+    }
+
+
+def render_history_text(summary: dict[str, Any]) -> str:
+    keys = [
+        "ledger_path",
+        "runs",
+        "ship",
+        "ship_with_findings",
+        "no_ship",
+        "other_decisions",
+        "latest_run_id",
+        "latest_timestamp",
+        "latest_decision",
+        "latest_risk_band",
+        "latest_mode",
+        "latest_artifact_dir",
+        "failed_runs",
+        "failure_rate",
+        "most_common_failed_step",
+    ]
+    return "\n".join(f"{key}={summary[key]}" for key in keys)
+
+
 def _run(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     out_dir = Path(args.out_dir).resolve()
@@ -532,8 +656,44 @@ def _schema(_: argparse.Namespace) -> int:
             "failed_step_count",
             "artifact_dir",
         ],
+        "history_summary_keys": [
+            "schema_version",
+            "ledger_path",
+            "runs",
+            "ship",
+            "ship_with_findings",
+            "no_ship",
+            "other_decisions",
+            "latest_run_id",
+            "latest_timestamp",
+            "latest_decision",
+            "latest_risk_band",
+            "latest_mode",
+            "latest_artifact_dir",
+            "failed_runs",
+            "failure_rate",
+            "most_common_failed_step",
+        ],
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
+    return 0
+
+
+def _history(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    ledger_path = (
+        Path(args.ledger).resolve() if args.ledger else _default_ledger_path(repo).resolve()
+    )
+    try:
+        summary = build_history_summary(ledger_path)
+    except ValueError as exc:
+        print(f"error={exc}", file=sys.stderr)
+        return 2
+
+    if args.format == "json":
+        print(json.dumps(summary, indent=2, sort_keys=True))
+    else:
+        print(render_history_text(summary))
     return 0
 
 
@@ -560,6 +720,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     schema = sub.add_parser("schema", help="Print the Mission Control bundle schema summary")
     schema.set_defaults(func=_schema)
+
+    history = sub.add_parser("history", help="Summarize a Mission Control JSONL run ledger")
+    history.add_argument("--repo", default=".")
+    history.add_argument("--ledger", default="")
+    history.add_argument("--format", choices=["text", "json"], default="text")
+    history.set_defaults(func=_history)
 
     return parser
 
