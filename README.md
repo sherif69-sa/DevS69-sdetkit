@@ -98,6 +98,7 @@ python -m sdetkit portfolio-orchestrate risk-report \
 python -m sdetkit portfolio-orchestrate execute \
   --plan build/portfolio-execution-plan.json \
   --max-workers 8 \
+  --transport local \
   --adapters config/portfolio_adapters.json \
   --artifact-dir build/portfolio-workers \
   --retries 1 \
@@ -172,6 +173,15 @@ python -m sdetkit portfolio-orchestrate batch-run \
   --manifest examples/topology/portfolio-batch.sample.json \
   --max-parallel 4 \
   --out-dir build/portfolio-batch
+
+python -m sdetkit portfolio-orchestrate impact-plan \
+  --repo-graph examples/topology/enterprise-repo-graph.sample.json \
+  --changed-files examples/kits/intelligence/changed-files.txt \
+  --out build/portfolio-impact-plan.json
+
+python -m sdetkit portfolio-orchestrate batch-control-tower \
+  --history build/portfolio-batch/batch-history.jsonl \
+  --out build/portfolio-batch/control-tower.json
 ```
 
 Execution rows now include Worker Contract-style fields (`worker`, `run_id`, `started_at`, `finished_at`, `inputs`, `result`, `escalation`) for consistent downstream automation.

@@ -389,3 +389,46 @@ def test_cli_batch_run(tmp_path: Path) -> None:
     assert (out_dir / "p2" / "dashboard.html").exists()
     assert (out_dir / "batch-report.md").exists()
     assert (out_dir / "batch-dashboard.html").exists()
+
+
+def test_cli_impact_plan_and_control_tower(tmp_path: Path) -> None:
+    graph = tmp_path / "graph.json"
+    changes = tmp_path / "changed.txt"
+    out = tmp_path / "impact-plan.json"
+    history = tmp_path / "batch-history.jsonl"
+    tower = tmp_path / "tower.json"
+    graph.write_text(
+        json.dumps(
+            {
+                "repos": [
+                    {"name": "contracts", "path": "repos/contracts", "language": "go"},
+                    {"name": "api", "path": "repos/api", "language": "python", "depends_on": ["contracts"]},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    changes.write_text("repos/contracts/schema.proto\n", encoding="utf-8")
+    assert (
+        main(
+            [
+                "impact-plan",
+                "--repo-graph",
+                str(graph),
+                "--changed-files",
+                str(changes),
+                "--out",
+                str(out),
+            ]
+        )
+        == 0
+    )
+    impact = json.loads(out.read_text(encoding="utf-8"))
+    assert impact["repos"] == 2
+    history.write_text(
+        json.dumps({"decision": "SHIP", "risk_score": 20}) + "\n",
+        encoding="utf-8",
+    )
+    assert main(["batch-control-tower", "--history", str(history), "--out", str(tower)]) == 0
+    tower_payload = json.loads(tower.read_text(encoding="utf-8"))
+    assert tower_payload["control_tower"]["runs"] == 1

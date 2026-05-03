@@ -9,6 +9,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+ARTIFACT_SCHEMA_VERSION = "portfolio.v1"
+
 
 def _load_repo_graph(path: Path) -> dict[str, object]:
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -393,7 +395,19 @@ def _build_history_trend(path: Path) -> dict[str, object]:
         risk_scores.append(int(payload.get("risk_score", 100)))
     avg_risk = float(sum(risk_scores) / len(risk_scores)) if risk_scores else 0.0
     ship_rate = float(ship / runs) if runs else 0.0
-    return {"ok": True, "runs": runs, "ship_rate": ship_rate, "avg_risk_score": avg_risk}
+    return {
+        "ok": True,
+        "artifact_schema_version": ARTIFACT_SCHEMA_VERSION,
+        "runs": runs,
+        "ship_rate": ship_rate,
+        "avg_risk_score": avg_risk,
+    }
+
+
+def _with_schema(payload: dict[str, object]) -> dict[str, object]:
+    out = dict(payload)
+    out["artifact_schema_version"] = ARTIFACT_SCHEMA_VERSION
+    return out
 
 
 def _run_pipeline_bundle(
@@ -407,6 +421,7 @@ def _run_pipeline_bundle(
     timeout_seconds: int,
     retries: int,
     max_failures: int,
+    transport: str,
     history_path: Path,
     out_dir: Path,
 ) -> dict[str, object]:
@@ -415,9 +430,9 @@ def _run_pipeline_bundle(
     _validate_against_repo_schema(graph, schema)
     _validate_repo_graph_shape(graph)
     plan = _build_plan(graph, max_workers=max(1, int(max_workers)))
-    (out_dir / "plan.json").write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")
+    (out_dir / "plan.json").write_text(json.dumps(_with_schema(plan), indent=2) + "\n", encoding="utf-8")
     risk = _build_risk_report(plan)
-    (out_dir / "risk.json").write_text(json.dumps(risk, indent=2) + "\n", encoding="utf-8")
+    (out_dir / "risk.json").write_text(json.dumps(_with_schema(risk), indent=2) + "\n", encoding="utf-8")
     execution = _execute_plan(
         plan,
         max_workers=max(1, int(max_workers)),
@@ -427,17 +442,22 @@ def _run_pipeline_bundle(
         artifact_dir=out_dir / "workers",
         retries=max(0, int(retries)),
         max_failures=max(0, int(max_failures)),
+        transport=transport,
     )
-    (out_dir / "execution.json").write_text(json.dumps(execution, indent=2) + "\n", encoding="utf-8")
+    (out_dir / "execution.json").write_text(
+        json.dumps(_with_schema(execution), indent=2) + "\n", encoding="utf-8"
+    )
     score = _score_execution_results(execution)
-    (out_dir / "score.json").write_text(json.dumps(score, indent=2) + "\n", encoding="utf-8")
+    (out_dir / "score.json").write_text(json.dumps(_with_schema(score), indent=2) + "\n", encoding="utf-8")
     policy_eval = _evaluate_policy(
         risk=risk,
         score=score,
         execution=execution,
         policy=_load_policy(policy_path),
     )
-    (out_dir / "policy.json").write_text(json.dumps(policy_eval, indent=2) + "\n", encoding="utf-8")
+    (out_dir / "policy.json").write_text(
+        json.dumps(_with_schema(policy_eval), indent=2) + "\n", encoding="utf-8"
+    )
     _append_history_record(
         history_path,
         {
@@ -451,7 +471,9 @@ def _run_pipeline_bundle(
     trend = _build_history_trend(history_path)
     (out_dir / "history-trend.json").write_text(json.dumps(trend, indent=2) + "\n", encoding="utf-8")
     analysis = _analyze_plan(plan)
-    (out_dir / "analysis.json").write_text(json.dumps(analysis, indent=2) + "\n", encoding="utf-8")
+    (out_dir / "analysis.json").write_text(
+        json.dumps(_with_schema(analysis), indent=2) + "\n", encoding="utf-8"
+    )
     report = _render_portfolio_report(plan=plan, risk=risk, score=score)
     (out_dir / "report.md").write_text(report, encoding="utf-8")
     dashboard = _render_portfolio_dashboard_html(
@@ -511,6 +533,7 @@ def _execute_plan(
     artifact_dir: Path | None = None,
     retries: int = 0,
     max_failures: int = 0,
+    transport: str = "local",
 ) -> dict[str, object]:
     items = plan.get("execution_plan", [])
     assert isinstance(items, list)
@@ -526,6 +549,7 @@ def _execute_plan(
         )
         started_at = _utc_now()
         run_id = str(uuid.uuid4())
+        lease_id = f"lease-{uuid.uuid4()}"
         if not run:
             return {
                 "worker": f"adapter-{language.lower()}",
@@ -534,6 +558,9 @@ def _execute_plan(
                 "language": language,
                 "status": "queued",
                 "mode": "dry-run",
+                "transport": transport,
+                "lease_id": lease_id,
+                "heartbeats": [started_at],
                 "started_at": started_at,
                 "finished_at": _utc_now(),
                 "inputs": {"path": repo_path},
@@ -565,6 +592,9 @@ def _execute_plan(
                     "language": language,
                     "status": "ok",
                     "mode": "run",
+                    "transport": transport,
+                    "lease_id": lease_id,
+                    "heartbeats": [started_at, _utc_now()],
                     "attempts": attempt,
                     "started_at": started_at,
                     "finished_at": _utc_now(),
@@ -587,6 +617,9 @@ def _execute_plan(
                 "language": language,
                 "status": "fail",
                 "mode": "run",
+                "transport": transport,
+                "lease_id": lease_id,
+                "heartbeats": [started_at, _utc_now()],
                 "attempts": attempt,
                 "started_at": started_at,
                 "finished_at": _utc_now(),
@@ -609,6 +642,9 @@ def _execute_plan(
             "language": language,
             "status": "error",
             "mode": "run",
+            "transport": transport,
+            "lease_id": lease_id,
+            "heartbeats": [started_at, _utc_now()],
             "attempts": attempt,
             "started_at": started_at,
             "finished_at": _utc_now(),
@@ -682,6 +718,7 @@ def _parser() -> argparse.ArgumentParser:
     execute.add_argument("--artifact-dir", default="")
     execute.add_argument("--retries", type=int, default=0)
     execute.add_argument("--max-failures", type=int, default=0)
+    execute.add_argument("--transport", choices=["local", "ssh", "container", "k8s-job"], default="local")
     execute.add_argument("--out", required=True)
     validate = sub.add_parser("validate-graph", help="Validate repo graph structure before orchestration")
     validate.add_argument("--repo-graph", required=True)
@@ -740,6 +777,16 @@ def _parser() -> argparse.ArgumentParser:
     batch.add_argument("--manifest", required=True)
     batch.add_argument("--max-parallel", type=int, default=2)
     batch.add_argument("--out-dir", required=True)
+    impact = sub.add_parser(
+        "impact-plan",
+        help="Compute affected repos from changed files and dependency graph, emit reduced plan",
+    )
+    impact.add_argument("--repo-graph", required=True)
+    impact.add_argument("--changed-files", required=True, help="newline-delimited changed files")
+    impact.add_argument("--out", required=True)
+    tower = sub.add_parser("batch-control-tower", help="Render control-tower JSON from batch history")
+    tower.add_argument("--history", required=True)
+    tower.add_argument("--out", required=True)
 
     return p
 
@@ -767,9 +814,38 @@ def main(argv: list[str] | None = None) -> int:
             artifact_dir=Path(ns.artifact_dir) if str(ns.artifact_dir).strip() else None,
             retries=max(0, int(ns.retries)),
             max_failures=max(0, int(ns.max_failures)),
+            transport=str(ns.transport),
         )
         Path(ns.out).write_text(json.dumps(execution, indent=2) + "\n", encoding="utf-8")
         print(f"Wrote execution intents: {ns.out}")
+        return 0
+    if ns.cmd == "impact-plan":
+        graph = _load_repo_graph(Path(ns.repo_graph))
+        repos = graph.get("repos", [])
+        changed = [line.strip() for line in Path(ns.changed_files).read_text(encoding="utf-8").splitlines() if line.strip()]
+        selected: set[str] = set()
+        owners: dict[str, list[str]] = {}
+        if isinstance(repos, list):
+            for repo in repos:
+                if not isinstance(repo, dict):
+                    continue
+                name = str(repo.get("name", ""))
+                path = str(repo.get("path", ""))
+                deps = repo.get("depends_on", [])
+                owners[name] = [str(dep) for dep in deps] if isinstance(deps, list) else []
+                if any(path and cf.startswith(path) for cf in changed):
+                    selected.add(name)
+        changed_set = set(selected)
+        progress = True
+        while progress:
+            progress = False
+            for repo, deps in owners.items():
+                if any(dep in changed_set for dep in deps) and repo not in changed_set:
+                    changed_set.add(repo)
+                    progress = True
+        reduced = [r for r in repos if isinstance(r, dict) and str(r.get("name")) in changed_set] if isinstance(repos, list) else []
+        plan = _build_plan({"repos": reduced}, max_workers=4)
+        Path(ns.out).write_text(json.dumps(_with_schema(plan), indent=2) + "\n", encoding="utf-8")
         return 0
     if ns.cmd == "validate-graph":
         graph = _load_repo_graph(Path(ns.repo_graph))
@@ -829,6 +905,7 @@ def main(argv: list[str] | None = None) -> int:
             timeout_seconds=max(1, int(ns.timeout_seconds)),
             retries=max(0, int(ns.retries)),
             max_failures=max(0, int(ns.max_failures)),
+            transport="local",
             history_path=Path(ns.history),
             out_dir=out_dir,
         )
@@ -892,10 +969,11 @@ def main(argv: list[str] | None = None) -> int:
                 adapters=Path(str(item.get("adapters", "config/portfolio_adapters.json"))),
                 policy_path=Path(str(item.get("policy", "config/portfolio_policy.default.json"))),
                 max_workers=int(item.get("max_workers", 4)),
-                run=bool(item.get("run", False)),
+            run=bool(item.get("run", False)),
                 timeout_seconds=int(item.get("timeout_seconds", 120)),
                 retries=int(item.get("retries", 0)),
                 max_failures=int(item.get("max_failures", 0)),
+                transport=str(item.get("transport", "local")),
                 history_path=out_root / "batch-history.jsonl",
                 out_dir=portfolio_out,
             )
@@ -932,6 +1010,20 @@ def main(argv: list[str] | None = None) -> int:
             _render_batch_dashboard_html(aggregate), encoding="utf-8"
         )
         print(f"Wrote batch artifacts: {out_root}")
+        return 0
+    if ns.cmd == "batch-control-tower":
+        trend = _build_history_trend(Path(ns.history))
+        payload = _with_schema(
+            {
+                "ok": True,
+                "control_tower": {
+                    "runs": trend.get("runs", 0),
+                    "ship_rate": trend.get("ship_rate", 0.0),
+                    "avg_risk_score": trend.get("avg_risk_score", 0.0),
+                },
+            }
+        )
+        Path(ns.out).write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
         return 0
     plan_payload = json.loads(Path(ns.plan).read_text(encoding="utf-8"))
     if not isinstance(plan_payload, dict):
