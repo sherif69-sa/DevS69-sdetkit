@@ -110,3 +110,15 @@ python -m sdetkit mission-control report   --bundle build/mission-control/missio
 ```
 
 The report includes the executive decision, risk band, execution counts, step outcomes, findings, history summary, next actions, and artifact paths.
+
+## Doctor Cortex
+
+Mission Control can collect the public Doctor Cortex summaries during a run:
+
+```bash
+python -m sdetkit mission-control run --doctor-cortex --out-dir build/mission-control
+```
+
+The bundle records a `doctor_cortex` summary with diagnosis status, diagnosis count, prescription status, and prescription count. It also writes public-safe Doctor Cortex JSON artifacts in the Mission Control output directory.
+
+Mission Control stores only summary fields in the main bundle. Raw doctor evidence and raw fix text remain outside the Mission Control bundle.

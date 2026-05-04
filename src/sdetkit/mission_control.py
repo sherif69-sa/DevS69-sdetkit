@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import io
 import json
+import os
 import subprocess
 import sys
 import time
 import uuid
 from collections import Counter
 from collections.abc import Sequence
+from contextlib import redirect_stdout
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -247,6 +250,144 @@ def _step_artifacts(steps: Sequence[dict[str, Any]]) -> list[dict[str, str]]:
     return artifacts
 
 
+def _doctor_payload(repo: Path) -> dict[str, Any]:
+    from . import doctor
+
+    previous_cwd = Path.cwd()
+    captured = io.StringIO()
+    try:
+        os.chdir(repo)
+        with redirect_stdout(captured):
+            doctor.main(["--format", "json"])
+    finally:
+        os.chdir(previous_cwd)
+
+    payload = json.loads(captured.getvalue())
+    if not isinstance(payload, dict):
+        raise ValueError("doctor JSON payload was not an object")
+    return payload
+
+
+def _summary_count(payload: dict[str, Any], key: str) -> int:
+    value = payload.get(key, 0)
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
+    return 0
+
+
+def _doctor_cortex_short(
+    payload: dict[str, Any],
+    *,
+    count_key: str,
+) -> dict[str, Any]:
+    return {
+        "status": str(payload.get("status", "unknown")),
+        "severity": str(payload.get("severity", "unknown")),
+        count_key: _summary_count(payload, count_key),
+    }
+
+
+def _collect_doctor_cortex(repo: Path, out_dir: Path) -> dict[str, Any]:
+    diagnosis_path = out_dir / "doctor-cortex-diagnosis.json"
+    prescriptions_path = out_dir / "doctor-cortex-prescriptions.json"
+
+    try:
+        from . import doctor_diagnosis, doctor_prescriptions
+
+        out_dir.mkdir(parents=True, exist_ok=True)
+        doctor_payload = _doctor_payload(repo)
+        diagnosis_contract = doctor_diagnosis.build_diagnosis_payload(doctor_payload)
+        prescription_contract = doctor_prescriptions.build_prescription_payload(diagnosis_contract)
+
+        doctor_diagnosis.write_output(
+            diagnosis_contract,
+            diagnosis_path,
+            output_format="json",
+        )
+        doctor_prescriptions.write_output(
+            prescription_contract,
+            prescriptions_path,
+            output_format="json",
+        )
+
+        return {
+            "enabled": True,
+            "ok": bool(diagnosis_contract.get("ok", False))
+            and bool(prescription_contract.get("ok", False)),
+            "diagnosis": _doctor_cortex_short(
+                diagnosis_contract,
+                count_key="diagnosis_count",
+            ),
+            "prescriptions": _doctor_cortex_short(
+                prescription_contract,
+                count_key="prescription_count",
+            ),
+            "artifacts": [
+                _artifact(
+                    diagnosis_path.resolve(),
+                    "Doctor Cortex diagnosis contract",
+                    "json",
+                ),
+                _artifact(
+                    prescriptions_path.resolve(),
+                    "Doctor Cortex prescription contract",
+                    "json",
+                ),
+            ],
+        }
+    except Exception:
+        return {
+            "enabled": True,
+            "ok": False,
+            "diagnosis": {
+                "status": "error",
+                "severity": "high",
+                "diagnosis_count": 0,
+            },
+            "prescriptions": {
+                "status": "error",
+                "severity": "high",
+                "prescription_count": 0,
+            },
+            "artifacts": [],
+        }
+
+
+def _doctor_cortex_artifacts(summary: dict[str, Any] | None) -> list[dict[str, str]]:
+    if not isinstance(summary, dict):
+        return []
+    artifacts = summary.get("artifacts", [])
+    if not isinstance(artifacts, list):
+        return []
+    return [artifact for artifact in artifacts if isinstance(artifact, dict)]
+
+
+def _format_doctor_cortex(summary: dict[str, Any] | None) -> list[str]:
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return ["- not collected"]
+
+    diagnosis = summary.get("diagnosis", {})
+    prescriptions = summary.get("prescriptions", {})
+    if not isinstance(diagnosis, dict):
+        diagnosis = {}
+    if not isinstance(prescriptions, dict):
+        prescriptions = {}
+
+    return [
+        f"- OK: {str(summary.get('ok', False)).lower()}",
+        f"- Diagnosis status: {diagnosis.get('status', 'unknown')}",
+        f"- Diagnosis severity: {diagnosis.get('severity', 'unknown')}",
+        f"- Diagnosis count: {diagnosis.get('diagnosis_count', 0)}",
+        f"- Prescription status: {prescriptions.get('status', 'unknown')}",
+        f"- Prescription severity: {prescriptions.get('severity', 'unknown')}",
+        f"- Prescription count: {prescriptions.get('prescription_count', 0)}",
+    ]
+
+
 def _execution_counts(steps: Sequence[dict[str, Any]]) -> tuple[int, int, int]:
     executed = [step for step in steps if step.get("executed") is True]
     passed = [step for step in executed if step.get("status") == "passed"]
@@ -276,6 +417,7 @@ def build_bundle(
     include_release: bool = False,
     timeout_seconds: int = 60,
     ledger_path: Path | None = None,
+    doctor_cortex: bool = False,
 ) -> dict[str, Any]:
     repo = repo.resolve()
     out_dir = out_dir.resolve()
@@ -307,6 +449,18 @@ def build_bundle(
                 "message": "Working tree has uncommitted changes.",
             }
         )
+
+    doctor_cortex_summary = None
+    if doctor_cortex:
+        doctor_cortex_summary = _collect_doctor_cortex(repo, out_dir)
+        if not bool(doctor_cortex_summary.get("ok", False)):
+            findings.append(
+                {
+                    "severity": "warning",
+                    "code": "DOCTOR_CORTEX_FINDINGS",
+                    "message": "Doctor Cortex reported diagnosis or prescription findings.",
+                }
+            )
 
     next_actions = [
         {
@@ -341,6 +495,7 @@ def build_bundle(
         _artifact(out_dir / "mission-control.md", "Mission Control operator brief", "markdown"),
     ]
     artifacts.extend(_step_artifacts(steps))
+    artifacts.extend(_doctor_cortex_artifacts(doctor_cortex_summary))
     if ledger_path is not None:
         artifacts.append(
             _artifact(
@@ -367,6 +522,7 @@ def build_bundle(
         "executed_step_count": executed_count,
         "passed_step_count": passed_count,
         "failed_step_count": failed_count,
+        "doctor_cortex": doctor_cortex_summary,
         "steps": steps,
         "findings": findings,
         "artifacts": artifacts,
@@ -391,6 +547,10 @@ def render_markdown(bundle: dict[str, Any]) -> str:
         f"Executed steps: {bundle['executed_step_count']}",
         f"Passed steps: {bundle['passed_step_count']}",
         f"Failed steps: {bundle['failed_step_count']}",
+        "",
+        "## Doctor Cortex",
+        "",
+        *_format_doctor_cortex(bundle.get("doctor_cortex")),
         "",
         "## Steps",
         "",
@@ -679,6 +839,10 @@ def render_report_markdown(
         f"- Passed steps: {bundle.get('passed_step_count', 0)}",
         f"- Failed steps: {bundle.get('failed_step_count', 0)}",
         "",
+        "## Doctor Cortex",
+        "",
+        *_format_doctor_cortex(bundle.get("doctor_cortex")),
+        "",
         "## Steps",
         "",
         *_format_report_steps(bundle),
@@ -751,6 +915,7 @@ def _run(args: argparse.Namespace) -> int:
         include_release=bool(args.include_release),
         timeout_seconds=int(args.timeout_seconds),
         ledger_path=ledger_path,
+        doctor_cortex=bool(args.doctor_cortex),
     )
     json_path, md_path = write_bundle(bundle, out_dir)
     print(f"wrote {json_path}")
@@ -774,6 +939,17 @@ def _summarize(args: argparse.Namespace) -> int:
     print(f"executed_steps={bundle.get('executed_step_count', 0)}")
     print(f"failed_steps={bundle.get('failed_step_count', 0)}")
     print(f"findings={len(bundle['findings'])}")
+    doctor_cortex = bundle.get("doctor_cortex")
+    if isinstance(doctor_cortex, dict):
+        diagnosis = doctor_cortex.get("diagnosis", {})
+        prescriptions = doctor_cortex.get("prescriptions", {})
+        if not isinstance(diagnosis, dict):
+            diagnosis = {}
+        if not isinstance(prescriptions, dict):
+            prescriptions = {}
+        print(f"doctor_cortex_ok={str(doctor_cortex.get('ok', False)).lower()}")
+        print(f"doctor_cortex_diagnosis_count={diagnosis.get('diagnosis_count', 0)}")
+        print(f"doctor_cortex_prescription_count={prescriptions.get('prescription_count', 0)}")
     return 0
 
 
@@ -792,6 +968,7 @@ def _schema(_: argparse.Namespace) -> int:
             "executed_step_count",
             "passed_step_count",
             "failed_step_count",
+            "doctor_cortex",
             "steps",
             "findings",
             "artifacts",
@@ -830,9 +1007,17 @@ def _schema(_: argparse.Namespace) -> int:
             "failure_rate",
             "most_common_failed_step",
         ],
+        "doctor_cortex_summary_keys": [
+            "enabled",
+            "ok",
+            "diagnosis",
+            "prescriptions",
+            "artifacts",
+        ],
         "report_sections": [
             "Executive summary",
             "Execution",
+            "Doctor Cortex",
             "Steps",
             "Findings",
             "History summary",
@@ -904,6 +1089,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--timeout-seconds", type=int, default=60)
     run.add_argument("--ledger-path", default="")
     run.add_argument("--no-ledger", action="store_true")
+    run.add_argument("--doctor-cortex", action="store_true")
     run.set_defaults(func=_run)
 
     summarize = sub.add_parser("summarize", help="Summarize a mission-control.json bundle")
