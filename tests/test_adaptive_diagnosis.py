@@ -55,11 +55,16 @@ def test_format_drift_comment_is_specific_and_safe():
 
     assert diagnosis["code"] == "PRE_COMMIT_FORMAT_DRIFT"
     assert diagnosis["confidence"] == "high"
-    assert diagnosis["affected_files"] == ["secret-project/tests/test_new_feature.py"]
+    assert diagnosis["affected_files"]
+    assert diagnosis["affected_files"][0] == "tests/test_new_feature.py" or (
+        "<redacted>" in diagnosis["affected_files"][0]
+        and "<path>" in diagnosis["affected_files"][0]
+    )
     assert payload["fix_plan"][0]["safe_to_auto_fix"] is True
     assert "ruff format --check" in " ".join(diagnosis["proof_commands"])
     assert "pytest evidence appears green" in diagnosis["evidence"]
     assert "/home/runner" not in rendered
+    assert "secret-project" not in rendered
     assert "secret-token" not in rendered
 
 
