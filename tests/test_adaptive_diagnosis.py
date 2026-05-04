@@ -7,9 +7,7 @@ def _codes(payload):
     return [item["code"] for item in payload["diagnoses"]]
 
 
-def _doctor_record(
-    decision="SHIP", failed_step_count=0, diagnosis_count=0, prescription_count=0
-):
+def _doctor_record(decision="SHIP", failed_step_count=0, diagnosis_count=0, prescription_count=0):
     return {
         "decision": decision,
         "failed_step_count": failed_step_count,
