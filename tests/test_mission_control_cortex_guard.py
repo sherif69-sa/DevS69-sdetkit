@@ -58,11 +58,11 @@ def _assert_public_safe(text, tmp_path):
         "raw fix",
         "command",
         "mission-control-runs.jsonl",
-        "\"run_id\"",
-        "\"timestamp\"",
-        "\"samples\"",
-        "\"diagnosis\": {",
-        "\"prescriptions\": {",
+        '"run_id"',
+        '"timestamp"',
+        '"samples"',
+        '"diagnosis": {',
+        '"prescriptions": {',
     ]
     for token in forbidden:
         assert token not in text
