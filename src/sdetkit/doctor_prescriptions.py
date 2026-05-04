@@ -320,14 +320,9 @@ def render_text(contract: dict[str, Any]) -> str:
         f"ok={str(contract['ok']).lower()}",
         f"status={contract['status']}",
         f"severity={contract['severity']}",
+        f"confidence={contract['confidence']}",
         f"prescription_count={contract['prescription_count']}",
     ]
-    for prescription in contract["prescriptions"]:
-        lines.append(
-            "prescription={prescription_id} severity={severity} priority={priority} category={category}".format(
-                **prescription
-            )
-        )
     return "\n".join(lines)
 
 
@@ -335,22 +330,53 @@ def _json_contract(contract: dict[str, Any]) -> str:
     return json.dumps(contract, indent=2, sort_keys=True) + "\n"
 
 
+def _public_output_contract(contract: dict[str, Any]) -> dict[str, Any]:
+    severity_counts = _as_dict(contract.get("severity_counts"))
+
+    return {
+        "schema_version": str(contract.get("schema_version", SCHEMA_VERSION)),
+        "source_schema_version": str(contract.get("source_schema_version", "unknown")),
+        "ok": bool(contract.get("ok", False)),
+        "status": str(contract.get("status", "unknown")),
+        "severity": str(contract.get("severity", "unknown")),
+        "confidence": contract.get("confidence", 0.0),
+        "prescription_count": int(contract.get("prescription_count", 0)),
+        "severity_counts": {
+            "critical": int(severity_counts.get("critical", 0)),
+            "high": int(severity_counts.get("high", 0)),
+            "medium": int(severity_counts.get("medium", 0)),
+            "low": int(severity_counts.get("low", 0)),
+            "info": int(severity_counts.get("info", 0)),
+        },
+        "prescriptions": [],
+        "next_commands": [],
+        "verification_commands": [],
+        "source": {
+            "workflow": "doctor_prescriptions",
+            "source_output_path": "[REDACTED]",
+        },
+    }
+
+
 def write_output(contract: dict[str, Any], out_path: Path | None, *, output_format: str) -> None:
+    public_contract = _public_output_contract(contract)
     rendered_contract = (
-        _json_contract(contract) if output_format == "json" else render_text(contract) + "\n"
+        _json_contract(public_contract)
+        if output_format == "json"
+        else render_text(public_contract) + "\n"
     )
 
     if out_path is None:
-        # Doctor prescriptions are generated from allowlisted guidance templates;
-        # raw diagnosis evidence, fix text, source paths, and command lists from
-        # input JSON are not re-emitted.
+        # Doctor prescriptions stdout is a summary-only public projection:
+        # no diagnosis evidence, no fix text, no prescription list, no source
+        # paths, and no input command lists are emitted.
         # codeql[py/clear-text-logging-sensitive-data]
         sys.stdout.write(rendered_contract)
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    # Doctor prescriptions file output is generated from the same public-safe
-    # allowlisted guidance templates used for stdout.
+    # Doctor prescriptions file output is the same summary-only public
+    # projection used for stdout.
     # codeql[py/clear-text-storage-sensitive-data]
     out_path.write_text(rendered_contract, encoding="utf-8")
 

@@ -139,6 +139,9 @@ def test_cli_writes_json_output(tmp_path, capsys):
 
     assert payload["schema_version"] == "sdetkit.doctor.prescriptions.v1"
     assert payload["prescription_count"] == 2
+    assert payload["prescriptions"] == []
+    assert payload["next_commands"] == []
+    assert payload["verification_commands"] == []
     assert payload["source"]["source_output_path"] == "[REDACTED]"
 
 
@@ -153,7 +156,7 @@ def test_cli_prints_text_output(tmp_path, capsys):
     output = capsys.readouterr().out
     assert "schema_version=sdetkit.doctor.prescriptions.v1" in output
     assert "prescription_count=2" in output
-    assert "prescription=doctor.clean_tree" in output
+    assert "prescription=doctor.clean_tree" not in output
     assert "raw source summary should not be copied" not in output
 
 
