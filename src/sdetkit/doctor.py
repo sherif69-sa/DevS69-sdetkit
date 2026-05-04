@@ -2210,7 +2210,115 @@ def _evaluate_gate(checks: dict[str, dict[str, Any]], threshold: str) -> tuple[b
     return (not failed), failed
 
 
+def _split_cortex_args(argv: list[str]) -> tuple[bool, bool, str, str | None, list[str]]:
+    diagnose = False
+    prescribe = False
+    output_format = "text"
+    out_path: str | None = None
+    inner: list[str] = []
+
+    index = 0
+    while index < len(argv):
+        token = argv[index]
+        if token == "--diagnose":
+            diagnose = True
+            index += 1
+            continue
+        if token == "--prescribe":
+            prescribe = True
+            index += 1
+            continue
+        if token == "--json":
+            output_format = "json"
+            index += 1
+            continue
+        if token == "--format":
+            if index + 1 >= len(argv):
+                raise SystemExit(2)
+            output_format = argv[index + 1]
+            index += 2
+            continue
+        if token.startswith("--format="):
+            output_format = token.split("=", 1)[1]
+            index += 1
+            continue
+        if token == "--out":
+            if index + 1 >= len(argv):
+                raise SystemExit(2)
+            out_path = argv[index + 1]
+            index += 2
+            continue
+        if token.startswith("--out="):
+            out_path = token.split("=", 1)[1]
+            index += 1
+            continue
+        inner.append(token)
+        index += 1
+
+    return diagnose, prescribe, output_format, out_path, inner
+
+
+def _doctor_cortex_main(argv: list[str]) -> int | None:
+    diagnose, prescribe, output_format, out_path, inner_args = _split_cortex_args(argv)
+
+    if not diagnose and not prescribe:
+        return None
+    if diagnose and prescribe:
+        print("doctor: error: --diagnose and --prescribe are mutually exclusive", file=sys.stderr)
+        raise SystemExit(2)
+    if output_format == "md":
+        print(
+            "doctor: error: --diagnose/--prescribe support --format text or --format json",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    if output_format not in {"text", "json"}:
+        print("doctor: error: --format must be text or json for Cortex output", file=sys.stderr)
+        raise SystemExit(2)
+
+    import io
+    from contextlib import redirect_stdout
+
+    captured = io.StringIO()
+    with redirect_stdout(captured):
+        rc = main([*inner_args, "--format", "json"])
+
+    raw = captured.getvalue()
+    try:
+        doctor_payload = json.loads(raw)
+    except json.JSONDecodeError:
+        print("doctor: error: could not build Cortex contract from doctor JSON", file=sys.stderr)
+        return rc if rc else 2
+
+    from . import doctor_diagnosis
+
+    diagnosis_contract = doctor_diagnosis.build_diagnosis_payload(doctor_payload)
+    target_path = Path(out_path) if out_path else None
+
+    if prescribe:
+        from . import doctor_prescriptions
+
+        prescription_contract = doctor_prescriptions.build_prescription_payload(diagnosis_contract)
+        doctor_prescriptions.write_output(
+            prescription_contract,
+            target_path,
+            output_format=output_format,
+        )
+    else:
+        doctor_diagnosis.write_output(
+            diagnosis_contract,
+            target_path,
+            output_format=output_format,
+        )
+
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
+    cortex_rc = _doctor_cortex_main(list(argv) if argv is not None else sys.argv[1:])
+    if cortex_rc is not None:
+        return cortex_rc
+
     raw = list(argv) if argv is not None else None
     args0 = raw if raw is not None else list(sys.argv[1:])
     value_opts = {
@@ -2534,7 +2642,26 @@ def main(argv: list[str] | None = None) -> int:
         help="Disable shared workspace run recording.",
     )
 
+    parser.add_argument(
+        "--diagnose",
+        action="store_true",
+        help="emit the public Doctor diagnosis contract instead of the standard doctor report",
+    )
+
+    parser.add_argument(
+        "--prescribe",
+        action="store_true",
+        help="emit the public Doctor prescription contract instead of the standard doctor report",
+    )
+
     ns = parser.parse_args(list(argv) if argv is not None else None)
+
+    if ns.diagnose and ns.prescribe:
+        parser.error("--diagnose and --prescribe are mutually exclusive")
+
+    if (ns.diagnose or ns.prescribe) and ns.format == "md":
+        parser.error("--diagnose/--prescribe support --format text or --format json")
+
     if ns.format == "markdown":
         ns.format = "md"
     if ns.format == "json":
@@ -3178,6 +3305,33 @@ def main(argv: list[str] | None = None) -> int:
         alternate_commands = [
             str(command).strip() for command in alternate_commands if str(command).strip()
         ]
+        if ns.diagnose or ns.prescribe:
+            output_format = "json" if (ns.format == "json" or ns.json) else "text"
+            out_path = Path(ns.out) if ns.out else None
+
+            from . import doctor_diagnosis
+
+            diagnosis_contract = doctor_diagnosis.build_diagnosis_payload(data)
+
+            if ns.prescribe:
+                from . import doctor_prescriptions
+
+                prescription_contract = doctor_prescriptions.build_prescription_payload(
+                    diagnosis_contract
+                )
+                doctor_prescriptions.write_output(
+                    prescription_contract,
+                    out_path,
+                    output_format=output_format,
+                )
+            else:
+                doctor_diagnosis.write_output(
+                    diagnosis_contract,
+                    out_path,
+                    output_format=output_format,
+                )
+            return 0
+
         if ns.format == "json" or ns.json:
             payload = {
                 "schema_version": NEXT_PASS_SCHEMA_VERSION,
