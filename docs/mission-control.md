@@ -135,3 +135,5 @@ python -m sdetkit.mission_control_cortex_trend \
 ```
 
 The trend report is summary-only and redacts ledger and artifact paths.
+
+CLI and file output are public projections: they omit run ids, timestamps, ledger paths, artifact paths, and sample rows while keeping counts, statuses, and trend direction.

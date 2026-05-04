@@ -172,7 +172,19 @@ def test_cli_writes_json_and_text(tmp_path, capsys):
 
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["doctor_cortex_runs"] == 1
+    assert payload["source"]["ledger_path"] == "[REDACTED]"
+    assert payload["samples"] == []
+    assert "latest_run_id" not in payload
+    assert "latest_timestamp" not in payload
+    assert "latest_decision" not in payload
+    assert "latest_risk_band" not in payload
+    rendered = json.dumps(payload)
+    assert "one" not in rendered
+    assert out_dir.as_posix() not in rendered
 
     rc = mission_control_cortex_trend.main(["--ledger-path", str(ledger)])
     assert rc == 0
-    assert "doctor_cortex_runs=1" in capsys.readouterr().out
+    output_text = capsys.readouterr().out
+    assert "doctor_cortex_runs=1" in output_text
+    assert "latest_run_id" not in output_text
+    assert out_dir.as_posix() not in output_text

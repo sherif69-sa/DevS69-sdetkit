@@ -25,3 +25,5 @@ python -m sdetkit.mission_control_cortex_trend \
 The trend output is public-safe. It includes counts, statuses, trend direction, and run ids. It redacts the ledger path and does not emit raw doctor evidence, raw fix text, command lists, source paths, or artifact paths.
 
 The analyzer can read Doctor Cortex summaries embedded in future ledger records. For existing records, it can load `mission-control.json` from each record's artifact directory and extract the summary from the bundle.
+
+CLI and file output are public projections: they omit run ids, timestamps, ledger paths, artifact paths, and sample rows while keeping counts, statuses, and trend direction.

@@ -117,6 +117,54 @@ def _trend_direction(samples: Sequence[dict[str, Any]], key: str) -> str:
     return "stable"
 
 
+def _public_status(value: Any) -> str:
+    candidate = str(value or "unknown")
+    allowed = {
+        "action_required",
+        "error",
+        "fail",
+        "pass",
+        "unknown",
+        "watch",
+    }
+    return candidate if candidate in allowed else "unknown"
+
+
+def _public_trend(value: Any) -> str:
+    candidate = str(value or "insufficient_data")
+    allowed = {
+        "improving",
+        "insufficient_data",
+        "regressing",
+        "stable",
+    }
+    return candidate if candidate in allowed else "insufficient_data"
+
+
+def _public_output_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "source": {
+            "workflow": "mission_control",
+            "ledger_path": "[REDACTED]",
+        },
+        "runs": _as_int(payload.get("runs")),
+        "doctor_cortex_runs": _as_int(payload.get("doctor_cortex_runs")),
+        "doctor_cortex_ok": _as_int(payload.get("doctor_cortex_ok")),
+        "doctor_cortex_not_ok": _as_int(payload.get("doctor_cortex_not_ok")),
+        "latest_doctor_cortex_ok": bool(payload.get("latest_doctor_cortex_ok", False)),
+        "latest_diagnosis_status": _public_status(payload.get("latest_diagnosis_status")),
+        "latest_diagnosis_count": _as_int(payload.get("latest_diagnosis_count")),
+        "latest_prescription_status": _public_status(payload.get("latest_prescription_status")),
+        "latest_prescription_count": _as_int(payload.get("latest_prescription_count")),
+        "max_diagnosis_count": _as_int(payload.get("max_diagnosis_count")),
+        "max_prescription_count": _as_int(payload.get("max_prescription_count")),
+        "diagnosis_trend": _public_trend(payload.get("diagnosis_trend")),
+        "prescription_trend": _public_trend(payload.get("prescription_trend")),
+        "samples": [],
+    }
+
+
 def build_trend_payload(ledger_path: Path) -> dict[str, Any]:
     records = _load_records(ledger_path)
     samples = [
@@ -165,10 +213,6 @@ def render_text(payload: dict[str, Any]) -> str:
         "doctor_cortex_runs",
         "doctor_cortex_ok",
         "doctor_cortex_not_ok",
-        "latest_run_id",
-        "latest_timestamp",
-        "latest_decision",
-        "latest_risk_band",
         "latest_doctor_cortex_ok",
         "latest_diagnosis_status",
         "latest_diagnosis_count",
@@ -190,9 +234,6 @@ def render_markdown(payload: dict[str, Any]) -> str:
         f"- Doctor Cortex runs: {payload.get('doctor_cortex_runs', 0)}",
         f"- Doctor Cortex OK: {payload.get('doctor_cortex_ok', 0)}",
         f"- Doctor Cortex not OK: {payload.get('doctor_cortex_not_ok', 0)}",
-        f"- Latest run id: {payload.get('latest_run_id', '')}",
-        f"- Latest decision: {payload.get('latest_decision', '')}",
-        f"- Latest risk band: {payload.get('latest_risk_band', '')}",
         f"- Latest diagnosis status: {payload.get('latest_diagnosis_status', '')}",
         f"- Latest diagnosis count: {payload.get('latest_diagnosis_count', 0)}",
         f"- Latest prescription status: {payload.get('latest_prescription_status', '')}",
@@ -235,18 +276,21 @@ def _render(payload: dict[str, Any], output_format: str) -> str:
 
 
 def write_output(payload: dict[str, Any], out_path: Path | None, *, output_format: str) -> None:
-    rendered = _render(payload, output_format)
+    public_payload = _public_output_payload(payload)
+    rendered = _render(public_payload, output_format)
 
     if out_path is None:
-        # Public summary only: no raw doctor evidence, raw fix text, command
-        # lists, source paths, or artifact paths are emitted.
+        # Public projection only: no raw doctor evidence, raw fix text, command
+        # lists, ledger paths, artifact paths, run ids, timestamps, or samples
+        # are emitted.
         # codeql[py/clear-text-logging-sensitive-data]
         sys.stdout.write(rendered)
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    # Public summary only: no raw doctor evidence, raw fix text, command lists,
-    # source paths, or artifact paths are emitted.
+    # Public projection only: no raw doctor evidence, raw fix text, command
+    # lists, ledger paths, artifact paths, run ids, timestamps, or samples are
+    # emitted.
     # codeql[py/clear-text-storage-sensitive-data]
     out_path.write_text(rendered, encoding="utf-8")
 
