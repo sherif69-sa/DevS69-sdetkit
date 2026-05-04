@@ -89,9 +89,7 @@ def _diag(
 
 def _file_mentions(text: str) -> list[str]:
     found = re.findall(r"[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)+\.py", text)
-    return _safe_list(
-        [path for path in found if not path.startswith(("http/", "https/"))], 8
-    )
+    return _safe_list([path for path in found if not path.startswith(("http/", "https/"))], 8)
 
 
 def _append_log(text: str, diagnoses: list[dict[str, Any]]) -> None:
@@ -122,13 +120,9 @@ def _append_log(text: str, diagnoses: list[dict[str, Any]]) -> None:
             )
         )
     if "mypy" in lower and "error:" in lower:
-        _append_static(
-            "MYPY_TYPE_CONTRACT_DRIFT", "Type contract drift detected", files, diagnoses
-        )
+        _append_static("MYPY_TYPE_CONTRACT_DRIFT", "Type contract drift detected", files, diagnoses)
     if "ruff" in lower and "failed" in lower and not formatted:
-        _append_static(
-            "RUFF_LINT_FAILURE", "Ruff lint contract failed", files, diagnoses
-        )
+        _append_static("RUFF_LINT_FAILURE", "Ruff lint contract failed", files, diagnoses)
     if "modulenotfounderror" in lower or "importerror while importing" in lower:
         _append_pytest(
             text,
@@ -151,11 +145,7 @@ def _format_count(text: str) -> int:
     match = re.search(r"(\d+)\s+files?\s+reformatted", text)
     if match:
         return _as_int(match.group(1))
-    return (
-        1
-        if "files were modified by this hook" in text or "file reformatted" in text
-        else 0
-    )
+    return 1 if "files were modified by this hook" in text or "file reformatted" in text else 0
 
 
 def _first_test(text: str) -> str:
@@ -238,9 +228,7 @@ def _append_mission(bundle: dict[str, Any], diagnoses: list[dict[str, Any]]) -> 
                 "Developers often inspect one failing command and miss the higher-level decision.",
                 evidence,
                 ["Start with the first failed Mission Control step."],
-                [
-                    "PYTHONPATH=src python -m sdetkit mission-control --execute --doctor-cortex"
-                ],
+                ["PYTHONPATH=src python -m sdetkit mission-control --execute --doctor-cortex"],
                 "A no-ship decision can be bypassed if the team only checks local unit tests.",
                 "mission-control-no-ship",
             )
@@ -271,15 +259,11 @@ def _doctor_counts(record: dict[str, Any]) -> tuple[int, int] | None:
     prescriptions = _as_dict(cortex.get("prescriptions"))
     return (
         _as_int(cortex.get("diagnosis_count", diagnosis.get("diagnosis_count", 0))),
-        _as_int(
-            cortex.get("prescription_count", prescriptions.get("prescription_count", 0))
-        ),
+        _as_int(cortex.get("prescription_count", prescriptions.get("prescription_count", 0))),
     )
 
 
-def _append_history(
-    records: list[dict[str, Any]], diagnoses: list[dict[str, Any]]
-) -> None:
+def _append_history(records: list[dict[str, Any]], diagnoses: list[dict[str, Any]]) -> None:
     if not records:
         diagnoses.append(
             _diag(
@@ -368,9 +352,7 @@ def _append_adaptive(history: dict[str, Any], diagnoses: list[dict[str, Any]]) -
                 "Developers rarely notice an empty memory database if the file exists.",
                 ["adaptive_run_count=0"],
                 ["Populate adaptive memory after meaningful runs."],
-                [
-                    "PYTHONPATH=src python -m sdetkit adaptive history --format operator-json"
-                ],
+                ["PYTHONPATH=src python -m sdetkit adaptive history --format operator-json"],
                 "Recommendations remain weaker without prior context.",
                 "adaptive-memory-empty",
             )
@@ -386,9 +368,7 @@ def _append_adaptive(history: dict[str, Any], diagnoses: list[dict[str, Any]]) -
                 "Developers rarely remember every prior hotspot after many small PRs.",
                 [f"adaptive_run_count={runs}"],
                 ["Compare current changed files with adaptive history."],
-                [
-                    "PYTHONPATH=src python -m sdetkit adaptive history --format operator-json"
-                ],
+                ["PYTHONPATH=src python -m sdetkit adaptive history --format operator-json"],
                 "Prior context may be ignored and investigation work repeated.",
                 "adaptive-context",
                 repeat_count=runs,
@@ -557,9 +537,7 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
     records: list[dict[str, Any]] = []
-    for line_number, line in enumerate(
-        path.read_text(encoding="utf-8").splitlines(), start=1
-    ):
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         if not line.strip():
             continue
         try:
@@ -594,8 +572,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(list(argv if argv is not None else sys.argv[1:]))
     try:
         log_text = "\n".join(
-            Path(path).read_text(encoding="utf-8", errors="replace")
-            for path in args.log
+            Path(path).read_text(encoding="utf-8", errors="replace") for path in args.log
         )
         payload = analyze_evidence(
             log_text=log_text,
