@@ -40,7 +40,10 @@ def _ledger_row(tmp_path, index, sample):
 
 def _write_ledger(tmp_path, samples):
     ledger = tmp_path / "mission-control-runs.jsonl"
-    rows = [json.dumps(_ledger_row(tmp_path, index, sample)) for index, sample in enumerate(samples, start=1)]
+    rows = [
+        json.dumps(_ledger_row(tmp_path, index, sample))
+        for index, sample in enumerate(samples, start=1)
+    ]
     ledger.write_text("\n".join(rows) + ("\n" if rows else ""), encoding="utf-8")
     return ledger
 
