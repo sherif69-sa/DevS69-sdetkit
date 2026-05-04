@@ -56,9 +56,12 @@ def test_format_drift_comment_is_specific_and_safe():
     assert diagnosis["code"] == "PRE_COMMIT_FORMAT_DRIFT"
     assert diagnosis["confidence"] == "high"
     assert diagnosis["affected_files"]
-    assert diagnosis["affected_files"][0] == "tests/test_new_feature.py" or (
-        "<redacted>" in diagnosis["affected_files"][0]
-        and "<path>" in diagnosis["affected_files"][0]
+    assert (
+        diagnosis["affected_files"][0] == "tests/test_new_feature.py"
+        or (
+            "<redacted>" in diagnosis["affected_files"][0]
+            and "<path>" in diagnosis["affected_files"][0]
+        )
     )
     assert payload["fix_plan"][0]["safe_to_auto_fix"] is True
     assert "ruff format --check" in " ".join(diagnosis["proof_commands"])
@@ -144,7 +147,10 @@ def test_adaptive_memory_empty_and_reusable_context_change_comment():
 
 def test_text_and_markdown_render_operator_safe_content():
     payload = adaptive_diagnosis.analyze_evidence(
-        log_text="FAILED tests/test_case.py::test_case - AssertionError at /tmp/secret-path.py secret-token",
+        log_text=(
+            "FAILED tests/test_case.py::test_case - AssertionError at "
+            "/tmp/secret-path.py secret-token"
+        ),
         ledger_records=[{"decision": "SHIP"}],
     )
 
