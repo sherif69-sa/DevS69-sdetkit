@@ -2287,9 +2287,8 @@ def _doctor_cortex_main(argv: list[str]) -> int | None:
     try:
         doctor_payload = json.loads(raw)
     except json.JSONDecodeError:
-        if raw:
-            sys.stdout.write(raw)
-        return rc
+        print("doctor: error: could not build Cortex contract from doctor JSON", file=sys.stderr)
+        return rc if rc else 2
 
     from . import doctor_diagnosis
 
