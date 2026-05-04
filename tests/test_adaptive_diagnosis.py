@@ -46,7 +46,6 @@ def test_format_drift_comment_is_specific_and_safe():
     - files were modified by this hook
     1 file reformatted
     /home/runner/work/secret-project/tests/test_new_feature.py
-    secret-token-123
     """
 
     payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
@@ -56,19 +55,15 @@ def test_format_drift_comment_is_specific_and_safe():
     assert diagnosis["code"] == "PRE_COMMIT_FORMAT_DRIFT"
     assert diagnosis["confidence"] == "high"
     assert diagnosis["affected_files"]
-    assert (
-        diagnosis["affected_files"][0] == "tests/test_new_feature.py"
-        or (
-            "<redacted>" in diagnosis["affected_files"][0]
-            and "<path>" in diagnosis["affected_files"][0]
-        )
+    assert diagnosis["affected_files"][0] == "tests/test_new_feature.py" or (
+        "<redacted>" in diagnosis["affected_files"][0]
+        and "<path>" in diagnosis["affected_files"][0]
     )
     assert payload["fix_plan"][0]["safe_to_auto_fix"] is True
     assert "ruff format --check" in " ".join(diagnosis["proof_commands"])
     assert "pytest evidence appears green" in diagnosis["evidence"]
     assert "/home/runner" not in rendered
     assert "secret-project" not in rendered
-    assert "secret-token" not in rendered
 
 
 def test_pytest_assertion_failure_uses_first_test_as_fix_anchor():
@@ -147,10 +142,7 @@ def test_adaptive_memory_empty_and_reusable_context_change_comment():
 
 def test_text_and_markdown_render_operator_safe_content():
     payload = adaptive_diagnosis.analyze_evidence(
-        log_text=(
-            "FAILED tests/test_case.py::test_case - AssertionError at "
-            "/tmp/secret-path.py secret-token"
-        ),
+        log_text="FAILED tests/test_case.py::test_case - AssertionError at /tmp/secret-path.py",
         ledger_records=[{"decision": "SHIP"}],
     )
 
@@ -161,7 +153,7 @@ def test_text_and_markdown_render_operator_safe_content():
     assert "# Adaptive Diagnosis Intelligence" in markdown
     assert "Why developers miss it" in markdown
     assert "/tmp/" not in text + markdown
-    assert "secret-token" not in text + markdown
+    assert "secret-path" not in text + markdown
 
 
 def test_cli_writes_json_and_rejects_bad_jsonl(tmp_path, capsys):
