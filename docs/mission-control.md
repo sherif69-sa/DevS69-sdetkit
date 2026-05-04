@@ -122,3 +122,18 @@ python -m sdetkit mission-control run --doctor-cortex --out-dir build/mission-co
 The bundle records a `doctor_cortex` summary with diagnosis status, diagnosis count, prescription status, and prescription count. It also writes public-safe Doctor Cortex JSON artifacts in the Mission Control output directory.
 
 Mission Control stores only summary fields in the main bundle. Raw doctor evidence and raw fix text remain outside the Mission Control bundle.
+
+## Doctor Cortex trend
+
+Doctor Cortex trend can summarize diagnosis and prescription counts across a Mission Control ledger:
+
+```bash
+python -m sdetkit.mission_control_cortex_trend \
+  --ledger-path .sdetkit/runs/mission-control-runs.jsonl \
+  --format md \
+  --out build/doctor-cortex-trend.md
+```
+
+The trend report is summary-only and redacts ledger and artifact paths.
+
+CLI and file output are public projections: they omit run ids, timestamps, ledger paths, artifact paths, and sample rows while keeping counts, statuses, and trend direction.

@@ -452,6 +452,7 @@ def build_bundle(
 
     doctor_cortex_summary = None
     if doctor_cortex:
+        out_dir.mkdir(parents=True, exist_ok=True)
         doctor_cortex_summary = _collect_doctor_cortex(repo, out_dir)
         if not bool(doctor_cortex_summary.get("ok", False)):
             findings.append(
@@ -588,6 +589,28 @@ def write_bundle(bundle: dict[str, Any], out_dir: Path) -> tuple[Path, Path]:
     return json_path, md_path
 
 
+def _doctor_cortex_ledger_summary(bundle: dict[str, Any]) -> dict[str, Any] | None:
+    doctor_cortex = bundle.get("doctor_cortex")
+    if not isinstance(doctor_cortex, dict) or not doctor_cortex.get("enabled"):
+        return None
+
+    diagnosis = doctor_cortex.get("diagnosis", {})
+    prescriptions = doctor_cortex.get("prescriptions", {})
+    if not isinstance(diagnosis, dict):
+        diagnosis = {}
+    if not isinstance(prescriptions, dict):
+        prescriptions = {}
+
+    return {
+        "enabled": True,
+        "ok": bool(doctor_cortex.get("ok", False)),
+        "diagnosis_status": str(diagnosis.get("status", "unknown")),
+        "diagnosis_count": int(diagnosis.get("diagnosis_count", 0) or 0),
+        "prescription_status": str(prescriptions.get("status", "unknown")),
+        "prescription_count": int(prescriptions.get("prescription_count", 0) or 0),
+    }
+
+
 def _ledger_record(bundle: dict[str, Any], out_dir: Path) -> dict[str, Any]:
     repo = bundle["repo"]
     return {
@@ -604,6 +627,7 @@ def _ledger_record(bundle: dict[str, Any], out_dir: Path) -> dict[str, Any]:
         "executed_step_count": bundle["executed_step_count"],
         "failed_step_count": bundle["failed_step_count"],
         "artifact_dir": out_dir.resolve().as_posix(),
+        "doctor_cortex": _doctor_cortex_ledger_summary(bundle),
     }
 
 
