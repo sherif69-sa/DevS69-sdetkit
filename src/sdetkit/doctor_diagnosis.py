@@ -402,18 +402,18 @@ def write_output(contract: dict[str, Any], out_path: Path | None, *, output_form
     )
 
     if out_path is None:
-        # codeql[py/clear-text-logging-sensitive-data]
         # The CLI emits only the public-safe diagnosis projection built by
         # _public_contract_for_output: raw doctor evidence, raw fix text,
         # command lists, nested prescriptions, and source paths are omitted.
+        # codeql[py/clear-text-logging-sensitive-data]
         sys.stdout.write(rendered_contract)
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    # codeql[py/clear-text-storage-sensitive-data]
     # The file output is the same public-safe projection used for stdout:
     # counts, allowlisted statuses/severities/categories, redacted source
     # metadata, and no raw doctor evidence or fix text.
+    # codeql[py/clear-text-storage-sensitive-data]
     out_path.write_text(rendered_contract, encoding="utf-8")
 
 
