@@ -22,13 +22,13 @@ def _same_repo_event(path):
     path.write_text(json.dumps(payload), encoding="utf-8")
 
 
-def _safe_plan():
+def _safe_plan(fix_type="format_only", source_code="PRE_COMMIT_FORMAT_DRIFT"):
     return {
         "schema_version": "sdetkit.adaptive_safe_fix.v1",
         "safe_to_auto_fix": True,
-        "fix_type": "format_only",
+        "fix_type": fix_type,
         "requires_human_review": False,
-        "source_code": "PRE_COMMIT_FORMAT_DRIFT",
+        "source_code": source_code,
         "affected_files": ["src/sdetkit/example.py"],
     }
 
@@ -75,6 +75,44 @@ def test_commit_safe_fix_changes_pushes_same_repo_branch(tmp_path, monkeypatch):
     assert result["pushed"] is True
     assert calls[-1] == ["git", "push", "origin", "HEAD:feature/example"]
     assert (tmp_path / "adaptive-safe-commit-result.json").exists()
+
+
+def test_commit_safe_fix_changes_accepts_ruff_fixable_lint_plan(tmp_path, monkeypatch):
+    autopilot = _load_autopilot()
+    event_path = tmp_path / "event.json"
+    _same_repo_event(event_path)
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
+    monkeypatch.setenv("GITHUB_HEAD_REF", "feature/example")
+    monkeypatch.setenv("GITHUB_BASE_REF", "main")
+    monkeypatch.setenv("GITHUB_EVENT_PATH", str(event_path))
+    monkeypatch.setenv("GH_TOKEN", "token")
+    autopilot._ACTIVE_FAILURE_CONTEXT.update(
+        {
+            "commit_safe_fixes": True,
+            "token_env": "GH_TOKEN",
+            "owner": "sherif69-sa",
+            "repo": "DevS69-sdetkit",
+        }
+    )
+
+    calls = []
+
+    def runner(cmd):
+        calls.append(cmd)
+        if cmd == ["git", "diff", "--name-only"]:
+            return {"ok": True, "returncode": 0, "stdout": "src/sdetkit/example.py\n", "stderr": ""}
+        return {"ok": True, "returncode": 0, "stdout": "ok", "stderr": ""}
+
+    result = autopilot._commit_safe_fix_changes(
+        tmp_path,
+        _safe_plan(fix_type="ruff_fixable_lint", source_code="RUFF_FIXABLE_LINT"),
+        _success_result(),
+        git_runner=runner,
+    )
+
+    assert result["ok"] is True
+    assert result["pushed"] is True
+    assert calls[-1] == ["git", "push", "origin", "HEAD:feature/example"]
 
 
 def test_commit_safe_fix_changes_rejects_fork_pull_request(tmp_path, monkeypatch):

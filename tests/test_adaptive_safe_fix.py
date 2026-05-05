@@ -63,6 +63,36 @@ def test_formatter_drift_without_files_uses_placeholder_targets():
     assert plan["commands"][0].endswith("ruff format <touched-python-files>")
 
 
+def test_ruff_fixable_lint_builds_safe_file_scoped_plan():
+    plan = adaptive_safe_fix.build_plan(_payload(code="RUFF_FIXABLE_LINT"))
+
+    assert plan["safe_to_auto_fix"] is True
+    assert plan["fix_type"] == "ruff_fixable_lint"
+    assert plan["requires_human_review"] is False
+    assert plan["source_code"] == "RUFF_FIXABLE_LINT"
+    assert plan["commands"] == [
+        "PYTHONPATH=src python -m ruff check --fix src/sdetkit/example.py tests/test_example.py",
+        "PYTHONPATH=src python -m ruff format src/sdetkit/example.py tests/test_example.py",
+        "PYTHONPATH=src python -m ruff check src/sdetkit/example.py tests/test_example.py",
+        "PYTHONPATH=src python -m ruff format --check src/sdetkit/example.py tests/test_example.py",
+    ]
+    assert plan["proof_commands"][:2] == [
+        "PYTHONPATH=src python -m ruff check src/sdetkit/example.py tests/test_example.py",
+        "PYTHONPATH=src python -m ruff format --check src/sdetkit/example.py tests/test_example.py",
+    ]
+
+
+def test_ruff_fixable_lint_without_known_files_requires_review():
+    payload = _payload(code="RUFF_FIXABLE_LINT")
+    payload["diagnoses"][0]["affected_files"] = []
+
+    plan = adaptive_safe_fix.build_plan(payload)
+
+    assert plan["safe_to_auto_fix"] is False
+    assert plan["requires_human_review"] is True
+    assert plan["fix_type"] == "review_required"
+
+
 def test_non_formatter_diagnoses_require_human_review():
     for code in [
         "PYTEST_ASSERTION_FAILURE",

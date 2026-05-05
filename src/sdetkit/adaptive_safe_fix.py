@@ -8,6 +8,7 @@ from typing import Any
 SCHEMA_VERSION = "sdetkit.adaptive_safe_fix.v1"
 SOURCE_SCHEMA_VERSION = "sdetkit.adaptive.diagnosis.v1"
 SAFE_FORMAT_CODE = "PRE_COMMIT_FORMAT_DRIFT"
+SAFE_RUFF_FIXABLE_CODE = "RUFF_FIXABLE_LINT"
 ACTIONABLE_STATUSES = {"needs_attention", "needs_fix"}
 
 
@@ -32,9 +33,13 @@ def _load_diagnosis(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _format_targets(diagnosis: dict[str, Any]) -> str:
+def _target_files(diagnosis: dict[str, Any]) -> list[str]:
     files = [_safe_text(value) for value in _as_list(diagnosis.get("affected_files"))]
-    files = [value for value in files if value]
+    return [value for value in files if value]
+
+
+def _format_targets(diagnosis: dict[str, Any]) -> str:
+    files = _target_files(diagnosis)
     return " ".join(files) if files else "<touched-python-files>"
 
 
@@ -59,11 +64,25 @@ def _is_safe_format_plan(payload: dict[str, Any], diagnosis: dict[str, Any]) -> 
     return True
 
 
+def _is_safe_ruff_fixable_plan(payload: dict[str, Any], diagnosis: dict[str, Any]) -> bool:
+    status = str(payload.get("status", "unknown"))
+    if status not in ACTIONABLE_STATUSES:
+        return False
+    if diagnosis.get("code") != SAFE_RUFF_FIXABLE_CODE:
+        return False
+    if diagnosis.get("severity") not in {"low", "medium"}:
+        return False
+    if diagnosis.get("confidence") != "high":
+        return False
+    return bool(_target_files(diagnosis))
+
+
 def build_plan(payload: dict[str, Any]) -> dict[str, Any]:
     diagnosis = _first_diagnosis(payload)
     code = str(diagnosis.get("code", "UNKNOWN") or "UNKNOWN")
     targets = _format_targets(diagnosis)
     safe = _is_safe_format_plan(payload, diagnosis)
+    ruff_safe = _is_safe_ruff_fixable_plan(payload, diagnosis)
 
     if safe:
         commands = [
@@ -94,9 +113,40 @@ def build_plan(payload: dict[str, Any]) -> dict[str, Any]:
             "affected_files": _as_list(diagnosis.get("affected_files")),
         }
 
+    if ruff_safe:
+        commands = [
+            f"PYTHONPATH=src python -m ruff check --fix {targets}",
+            f"PYTHONPATH=src python -m ruff format {targets}",
+            f"PYTHONPATH=src python -m ruff check {targets}",
+            f"PYTHONPATH=src python -m ruff format --check {targets}",
+        ]
+        proof_commands = [
+            f"PYTHONPATH=src python -m ruff check {targets}",
+            f"PYTHONPATH=src python -m ruff format --check {targets}",
+            "PYTHONPATH=src python -m pytest -q <targeted-tests>",
+        ]
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "source_schema_version": str(payload.get("schema_version", "")),
+            "ok": True,
+            "source_status": str(payload.get("status", "unknown")),
+            "source_code": code,
+            "safe_to_auto_fix": True,
+            "fix_type": "ruff_fixable_lint",
+            "confidence": "high",
+            "requires_human_review": False,
+            "reason": (
+                "Ruff reported only narrow fixable lint with known affected files; "
+                "F401 and I001 are treated as safe mechanical fixes after proof."
+            ),
+            "commands": commands,
+            "proof_commands": proof_commands,
+            "affected_files": _as_list(diagnosis.get("affected_files")),
+        }
+
     reason = "No diagnosis was available to plan from."
     if diagnosis:
-        reason = f"{code} requires human review; this planner only auto-plans format-only drift."
+        reason = f"{code} requires human review; this planner only auto-plans formatter drift and narrow Ruff fixable lint."
     return {
         "schema_version": SCHEMA_VERSION,
         "source_schema_version": str(payload.get("schema_version", "")),

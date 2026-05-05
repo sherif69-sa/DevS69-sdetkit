@@ -13,6 +13,9 @@ SCHEMA_VERSION = "sdetkit.adaptive.diagnosis.v1"
 SEVERITY_SCORE = {"high": 30, "medium": 18, "low": 8, "info": 3}
 SEVERITY_RANK = {"high": 0, "medium": 1, "low": 2, "info": 3}
 CONFIDENCE_RANK = {"high": 0, "medium": 1, "low": 2}
+SAFE_RUFF_FIXABLE_RULES = {"F401", "I001"}
+SAFE_AUTO_FIX_CODES = {"PRE_COMMIT_FORMAT_DRIFT", "RUFF_FIXABLE_LINT"}
+RUFF_RULE_RE = re.compile(r"\b([A-Z]\d{3})\b")
 ABS_PATH_RE = re.compile(r"(?<![A-Za-z0-9_.-])(?:/[A-Za-z0-9_@%+=:,./-]+)+")
 WIN_PATH_RE = re.compile(r"[A-Za-z]:\\\\[^\s`'\"]+")
 
@@ -92,6 +95,60 @@ def _file_mentions(text: str) -> list[str]:
     return _safe_list([path for path in found if not path.startswith(("http/", "https/"))], 8)
 
 
+def _ruff_rule_codes(text: str) -> list[str]:
+    codes: list[str] = []
+    for code in RUFF_RULE_RE.findall(text):
+        if code not in codes:
+            codes.append(code)
+    return codes[:12]
+
+
+def _is_safe_ruff_fixable_lint(text: str, codes: Sequence[str]) -> bool:
+    lower = text.lower()
+    if not codes:
+        return False
+    if any(code not in SAFE_RUFF_FIXABLE_RULES for code in codes):
+        return False
+    return (
+        "fixable" in lower
+        or "[*]" in text
+        or "remove unused import" in lower
+        or "import block is un-sorted" in lower
+    )
+
+
+def _append_ruff_lint(text: str, files: Sequence[str], diagnoses: list[dict[str, Any]]) -> None:
+    codes = _ruff_rule_codes(text)
+    if files and _is_safe_ruff_fixable_lint(text, codes):
+        targets = " ".join(files)
+        rule_text = ", ".join(codes)
+        diagnoses.append(
+            _diag(
+                "RUFF_FIXABLE_LINT",
+                "medium",
+                "high",
+                "Ruff fixable lint can be mechanically remediated",
+                f"Ruff reported fixable mechanical lint ({rule_text}) in known files.",
+                "Developers often fix the visible import by hand and miss that Ruff can apply this narrow class safely.",
+                ["ruff fixable lint", f"ruff_rules={rule_text}", "safe_rules=F401,I001"],
+                [
+                    "Run ruff check --fix on affected files.",
+                    "Run ruff format on affected files.",
+                    "Re-run Ruff check and format check.",
+                ],
+                [
+                    f"PYTHONPATH=src python -m ruff check {targets}",
+                    f"PYTHONPATH=src python -m ruff format --check {targets}",
+                ],
+                "The PR stays red for a mechanical lint issue that the autopilot can safely prove.",
+                "ruff-fixable-lint",
+                files=files,
+            )
+        )
+        return
+    _append_static("RUFF_LINT_FAILURE", "Ruff lint contract failed", files, diagnoses)
+
+
 def _append_log(text: str, diagnoses: list[dict[str, Any]]) -> None:
     lower = text.lower()
     files = _file_mentions(text)
@@ -121,8 +178,8 @@ def _append_log(text: str, diagnoses: list[dict[str, Any]]) -> None:
         )
     if "mypy" in lower and "error:" in lower:
         _append_static("MYPY_TYPE_CONTRACT_DRIFT", "Type contract drift detected", files, diagnoses)
-    if "ruff" in lower and "failed" in lower and not formatted:
-        _append_static("RUFF_LINT_FAILURE", "Ruff lint contract failed", files, diagnoses)
+    if "ruff" in lower and ("failed" in lower or "fixable" in lower) and not formatted:
+        _append_ruff_lint(text, files, diagnoses)
     if "modulenotfounderror" in lower or "importerror while importing" in lower:
         _append_pytest(
             text,
@@ -414,6 +471,8 @@ def analyze_evidence(
 def _status_for(diagnoses: Sequence[dict[str, Any]]) -> str:
     if any(item.get("severity") == "high" for item in diagnoses):
         return "needs_fix"
+    if any(str(item.get("code", "")) in SAFE_AUTO_FIX_CODES for item in diagnoses):
+        return "needs_fix"
     if _risk_score(diagnoses) >= 30:
         return "needs_attention"
     return "monitor" if diagnoses else "clear"
@@ -446,7 +505,7 @@ def _payload(diagnoses: list[dict[str, Any]], status: str) -> dict[str, Any]:
             {
                 "code": item["code"],
                 "title": item["title"],
-                "safe_to_auto_fix": item["code"] == "PRE_COMMIT_FORMAT_DRIFT",
+                "safe_to_auto_fix": item["code"] in SAFE_AUTO_FIX_CODES,
                 "recommended_fix": item["recommended_fix"][:4],
                 "proof_commands": item["proof_commands"][:4],
             }

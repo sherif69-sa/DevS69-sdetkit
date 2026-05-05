@@ -187,7 +187,7 @@ def _write_safe_fix_artifacts_on_failure(out_dir: Path, diagnosis_payload: dict[
 
         if not (
             plan.get("safe_to_auto_fix") is True
-            and plan.get("fix_type") == "format_only"
+            and plan.get("fix_type") in {"format_only", "ruff_fixable_lint"}
             and plan.get("requires_human_review") is False
         ):
             return
@@ -310,10 +310,10 @@ def _commit_safe_fix_changes(
 
     if not (
         plan.get("safe_to_auto_fix") is True
-        and plan.get("fix_type") == "format_only"
+        and plan.get("fix_type") in {"format_only", "ruff_fixable_lint"}
         and plan.get("requires_human_review") is False
     ):
-        result["reason"] = "plan is not an approved format-only safe fix"
+        result["reason"] = "plan is not an approved safe mechanical fix"
         _write_safe_fix_commit_result(out_dir, result)
         return result
 
