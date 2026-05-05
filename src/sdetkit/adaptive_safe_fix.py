@@ -135,9 +135,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        plan = plan_from_file(
-            Path(args.diagnosis_json), Path(args.out) if args.out else None
-        )
+        plan = plan_from_file(Path(args.diagnosis_json), Path(args.out) if args.out else None)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"error={exc}")
         return 2

@@ -3,7 +3,9 @@ import json
 from sdetkit import adaptive_safe_fix
 
 
-def _payload(code="PRE_COMMIT_FORMAT_DRIFT", status="needs_fix", severity="medium", confidence="high"):
+def _payload(
+    code="PRE_COMMIT_FORMAT_DRIFT", status="needs_fix", severity="medium", confidence="high"
+):
     return {
         "schema_version": "sdetkit.adaptive.diagnosis.v1",
         "ok": False,
@@ -113,9 +115,7 @@ def test_cli_outputs_json_and_rejects_bad_schema(tmp_path, capsys):
     plan_path = tmp_path / "safe-fix-plan.json"
     diagnosis_path.write_text(json.dumps(_payload()), encoding="utf-8")
 
-    rc = adaptive_safe_fix.main(
-        [str(diagnosis_path), "--out", str(plan_path), "--format", "json"]
-    )
+    rc = adaptive_safe_fix.main([str(diagnosis_path), "--out", str(plan_path), "--format", "json"])
 
     assert rc == 0
     output = json.loads(capsys.readouterr().out)
