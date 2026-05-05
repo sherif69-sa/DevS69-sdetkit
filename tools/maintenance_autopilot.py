@@ -313,15 +313,15 @@ def _write_safe_fix_learning_outcome(
             remediation_result=remediation_result,
             commit_result=commit_result,
         )
-        summary = adaptive_diagnosis_memory.append_learning_records(
-            Path(".sdetkit/maintenance/adaptive-safe-fix-memory.jsonl"),
-            [record],
-        )
+        memory_path = Path(".sdetkit/maintenance/adaptive-safe-fix-memory.jsonl")
+        summary = adaptive_diagnosis_memory.append_learning_records(memory_path, [record])
+        rollup = adaptive_diagnosis_memory.build_safe_fix_memory_rollup(_read_jsonl(memory_path))
         summary["record_id"] = record.get("record_id", "")
         summary["fix_type"] = record.get("fix_type", "unknown")
         summary["remediation_status"] = record.get("remediation_status", "unknown")
         summary["commit_pushed"] = record.get("commit_pushed", False)
         _write_json(out_dir / "adaptive-safe-fix-learning-result.json", summary)
+        _write_json(out_dir / "adaptive-safe-fix-learning-rollup.json", rollup)
     except Exception as exc:
         _write_json(
             out_dir / "adaptive-safe-fix-learning-error.json",

@@ -9,6 +9,7 @@ from typing import Any
 
 SCHEMA_VERSION = "sdetkit.adaptive_diagnosis.memory.v1"
 RECORD_SCHEMA_VERSION = "sdetkit.adaptive_diagnosis.learning_record.v1"
+SAFE_FIX_ROLLUP_SCHEMA_VERSION = "sdetkit.adaptive_safe_fix.rollup.v1"
 SOURCE_SCHEMA_VERSION = "sdetkit.adaptive.diagnosis.v1"
 ACTIONABLE_STATUSES = {"needs_attention", "needs_fix"}
 
@@ -107,6 +108,81 @@ def build_safe_fix_learning_record(
         "commit_pushed": bool(commit.get("pushed", False)),
         "commit_reason": str(commit.get("reason", "")),
     }
+
+
+def _rate(numerator: int, denominator: int) -> float:
+    return round(numerator / denominator, 4) if denominator else 0.0
+
+
+def build_safe_fix_memory_rollup(records: list[dict[str, Any]]) -> dict[str, Any]:
+    groups: dict[tuple[str, str], dict[str, Any]] = {}
+    safe_fix_records = 0
+
+    for record in records:
+        row = _as_dict(record)
+        if row.get("source") != "adaptive_safe_fix":
+            continue
+
+        safe_fix_records += 1
+        fix_type = str(row.get("fix_type", "unknown"))
+        code = str(row.get("code", "UNKNOWN"))
+        key = (fix_type, code)
+        group = groups.setdefault(
+            key,
+            {
+                "fix_type": fix_type,
+                "code": code,
+                "records": 0,
+                "affected_file_count": 0,
+                "remediation_attempts": 0,
+                "remediation_successes": 0,
+                "commit_attempts": 0,
+                "commit_pushes": 0,
+                "latest_record_id": "",
+                "latest_learned_at_utc": "",
+                "latest_remediation_status": "unknown",
+                "latest_commit_reason": "",
+            },
+        )
+
+        group["records"] += 1
+        group["affected_file_count"] += _as_int(row.get("affected_file_count"))
+        if bool(row.get("remediation_attempted", False)):
+            group["remediation_attempts"] += 1
+        if bool(row.get("remediation_ok", False)):
+            group["remediation_successes"] += 1
+        if bool(row.get("commit_attempted", False)):
+            group["commit_attempts"] += 1
+        if bool(row.get("commit_pushed", False)):
+            group["commit_pushes"] += 1
+        group["latest_record_id"] = str(row.get("record_id", ""))
+        group["latest_learned_at_utc"] = str(row.get("learned_at_utc", ""))
+        group["latest_remediation_status"] = str(row.get("remediation_status", "unknown"))
+        group["latest_commit_reason"] = str(row.get("commit_reason", ""))
+
+    ordered_groups = []
+    for group in sorted(groups.values(), key=lambda item: (item["fix_type"], item["code"])):
+        group["remediation_success_rate"] = _rate(
+            _as_int(group["remediation_successes"]), _as_int(group["remediation_attempts"])
+        )
+        group["commit_push_rate"] = _rate(
+            _as_int(group["commit_pushes"]), _as_int(group["commit_attempts"])
+        )
+        ordered_groups.append(group)
+
+    return {
+        "schema_version": SAFE_FIX_ROLLUP_SCHEMA_VERSION,
+        "ok": True,
+        "source": "adaptive_safe_fix_memory",
+        "input_records": len(records),
+        "safe_fix_records": safe_fix_records,
+        "group_count": len(ordered_groups),
+        "groups": ordered_groups,
+    }
+
+
+def safe_fix_rollup_from_db(db_path: Path) -> dict[str, Any]:
+    return build_safe_fix_memory_rollup(_read_jsonl(db_path))
 
 
 def build_learning_records(

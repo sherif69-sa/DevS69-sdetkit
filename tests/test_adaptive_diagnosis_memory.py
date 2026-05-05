@@ -81,6 +81,86 @@ def test_build_safe_fix_learning_record_captures_remediation_and_commit_outcome(
     assert len(record["record_id"]) == 16
 
 
+def test_build_safe_fix_memory_rollup_groups_success_rates():
+    format_record = adaptive_diagnosis_memory.build_safe_fix_learning_record(
+        plan={
+            "schema_version": "sdetkit.adaptive_safe_fix.v1",
+            "source_status": "needs_fix",
+            "source_code": "PRE_COMMIT_FORMAT_DRIFT",
+            "safe_to_auto_fix": True,
+            "fix_type": "format_only",
+            "confidence": "high",
+            "requires_human_review": False,
+            "commands": ["PYTHONPATH=src python -m ruff format tests/test_case.py"],
+            "proof_commands": ["PYTHONPATH=src python -m ruff format --check tests/test_case.py"],
+            "affected_files": ["tests/test_case.py"],
+        },
+        remediation_result={"ok": True, "status": "success", "attempted": True, "command_count": 3},
+        commit_result={"ok": False, "attempted": False, "pushed": False, "reason": "disabled"},
+        learned_at_utc="2026-05-05T00:00:00Z",
+    )
+    ruff_record = adaptive_diagnosis_memory.build_safe_fix_learning_record(
+        plan={
+            "schema_version": "sdetkit.adaptive_safe_fix.v1",
+            "source_status": "needs_fix",
+            "source_code": "RUFF_FIXABLE_LINT",
+            "safe_to_auto_fix": True,
+            "fix_type": "ruff_fixable_lint",
+            "confidence": "high",
+            "requires_human_review": False,
+            "commands": ["PYTHONPATH=src python -m ruff check --fix tests/test_case.py"],
+            "proof_commands": ["PYTHONPATH=src python -m ruff check tests/test_case.py"],
+            "affected_files": ["tests/test_case.py", "src/sdetkit/example.py"],
+        },
+        remediation_result={"ok": True, "status": "success", "attempted": True, "command_count": 4},
+        commit_result={"ok": True, "attempted": True, "pushed": True, "reason": "pushed"},
+        learned_at_utc="2026-05-05T00:01:00Z",
+    )
+
+    rollup = adaptive_diagnosis_memory.build_safe_fix_memory_rollup(
+        [format_record, ruff_record, {"source": "adaptive_diagnosis"}]
+    )
+
+    assert rollup["schema_version"] == "sdetkit.adaptive_safe_fix.rollup.v1"
+    assert rollup["safe_fix_records"] == 2
+    assert rollup["group_count"] == 2
+    by_type = {group["fix_type"]: group for group in rollup["groups"]}
+    assert by_type["format_only"]["remediation_success_rate"] == 1.0
+    assert by_type["format_only"]["commit_push_rate"] == 0.0
+    assert by_type["ruff_fixable_lint"]["affected_file_count"] == 2
+    assert by_type["ruff_fixable_lint"]["commit_push_rate"] == 1.0
+    assert by_type["ruff_fixable_lint"]["latest_remediation_status"] == "success"
+
+
+def test_safe_fix_rollup_from_db_reads_jsonl(tmp_path):
+    db_path = tmp_path / "adaptive-safe-fix-memory.jsonl"
+    record = adaptive_diagnosis_memory.build_safe_fix_learning_record(
+        plan={
+            "schema_version": "sdetkit.adaptive_safe_fix.v1",
+            "source_code": "RUFF_FIXABLE_LINT",
+            "safe_to_auto_fix": True,
+            "fix_type": "ruff_fixable_lint",
+            "requires_human_review": False,
+            "affected_files": ["tests/test_case.py"],
+        },
+        remediation_result={"ok": False, "status": "failed", "attempted": True, "command_count": 2},
+        commit_result={
+            "ok": False,
+            "attempted": False,
+            "pushed": False,
+            "reason": "remediation failed",
+        },
+        learned_at_utc="2026-05-05T00:00:00Z",
+    )
+    adaptive_diagnosis_memory.append_learning_records(db_path, [record])
+
+    rollup = adaptive_diagnosis_memory.safe_fix_rollup_from_db(db_path)
+
+    assert rollup["safe_fix_records"] == 1
+    assert rollup["groups"][0]["remediation_success_rate"] == 0.0
+    assert rollup["groups"][0]["latest_remediation_status"] == "failed"
+
+
 def test_build_learning_records_from_actionable_diagnosis():
     records = adaptive_diagnosis_memory.build_learning_records(
         _diagnosis_payload(), learned_at_utc="2026-05-05T00:00:00Z"
