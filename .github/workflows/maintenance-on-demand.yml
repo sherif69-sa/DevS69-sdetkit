@@ -65,6 +65,25 @@ jobs:
               --format md || true
           fi
 
+      - name: Build maintenance priority rollup
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/maintenance.json ]; then
+            args=(--maintenance-json artifacts/maintenance.json)
+            if [ -f artifacts/annotation-hygiene-report.json ]; then
+              args+=(--annotation-report-json artifacts/annotation-hygiene-report.json)
+            fi
+            if [ -f artifacts/adaptive-safe-fix-learning-rollup.json ]; then
+              args+=(--safe-fix-rollup-json artifacts/adaptive-safe-fix-learning-rollup.json)
+            fi
+            python -m sdetkit.maintenance_priority_rollup \
+              "${args[@]}" \
+              --out-json artifacts/maintenance-priority-rollup.json \
+              --out-md artifacts/maintenance-priority-rollup.md \
+              --format md || true
+          fi
+
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
@@ -76,6 +95,8 @@ jobs:
             artifacts/maintenance_fixed.md
             artifacts/annotation-hygiene-report.json
             artifacts/annotation-hygiene-report.md
+            artifacts/maintenance-priority-rollup.json
+            artifacts/maintenance-priority-rollup.md
           if-no-files-found: ignore
 
       - name: Detect diff
@@ -147,6 +168,9 @@ jobs:
             const annotationMd = fs.existsSync('artifacts/annotation-hygiene-report.md')
               ? fs.readFileSync('artifacts/annotation-hygiene-report.md', 'utf8')
               : '';
+            const priorityMd = fs.existsSync('artifacts/maintenance-priority-rollup.md')
+              ? fs.readFileSync('artifacts/maintenance-priority-rollup.md', 'utf8')
+              : '';
 
             const rows = Object.entries(report.checks || {})
               .map(([name, item]) => `| ${name} | ${item.ok ? 'PASS' : 'FAIL'} | ${item.summary} |`)
@@ -163,6 +187,13 @@ jobs:
               rows || '| n/a | n/a | n/a |',
               '',
               md.length > 5000 ? `${md.slice(0, 5000)}\n\n... (truncated)` : md,
+              '',
+              priorityMd
+                ? '### Maintenance priority rollup'
+                : '',
+              priorityMd
+                ? (priorityMd.length > 3000 ? `${priorityMd.slice(0, 3000)}\n\n... (truncated)` : priorityMd)
+                : '',
               '',
               annotationMd
                 ? '### GitHub Actions annotation hygiene'
