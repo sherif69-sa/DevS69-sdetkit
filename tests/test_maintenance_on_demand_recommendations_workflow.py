@@ -9,9 +9,7 @@ def test_maintenance_on_demand_builds_recommendation_artifacts_after_memory_cont
     assert "Build adaptive maintenance recommendations" in text
     assert "python -m sdetkit.maintenance_recommendations" in text
     assert "if [ -f artifacts/maintenance-policy-memory-context.json ]; then" in text
-    assert (
-        "--memory-context-json artifacts/maintenance-policy-memory-context.json" in text
-    )
+    assert "--memory-context-json artifacts/maintenance-policy-memory-context.json" in text
     assert "--out-json artifacts/maintenance-recommendations.json" in text
     assert "--out-md artifacts/maintenance-recommendations.md" in text
     assert text.index("Build maintenance policy memory context") < text.index(
