@@ -35,7 +35,9 @@ def _runner_factory(results=None):
 
     def runner(parts, cwd):
         calls.append((list(parts), cwd))
-        result = queued.pop(0) if queued else {"ok": True, "returncode": 0, "stdout": "ok", "stderr": ""}
+        result = (
+            queued.pop(0) if queued else {"ok": True, "returncode": 0, "stdout": "ok", "stderr": ""}
+        )
         return dict(result)
 
     return calls, runner
