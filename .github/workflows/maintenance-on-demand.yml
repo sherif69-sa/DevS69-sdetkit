@@ -84,6 +84,18 @@ jobs:
               --format md || true
           fi
 
+      - name: Build maintenance policy decisions
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/maintenance-priority-rollup.json ]; then
+            python -m sdetkit.maintenance_policy_decisions \
+              --priority-rollup-json artifacts/maintenance-priority-rollup.json \
+              --out-json artifacts/maintenance-policy-decisions.json \
+              --out-md artifacts/maintenance-policy-decisions.md \
+              --format md || true
+          fi
+
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
@@ -97,6 +109,8 @@ jobs:
             artifacts/annotation-hygiene-report.md
             artifacts/maintenance-priority-rollup.json
             artifacts/maintenance-priority-rollup.md
+            artifacts/maintenance-policy-decisions.json
+            artifacts/maintenance-policy-decisions.md
           if-no-files-found: ignore
 
       - name: Detect diff
@@ -171,6 +185,9 @@ jobs:
             const priorityMd = fs.existsSync('artifacts/maintenance-priority-rollup.md')
               ? fs.readFileSync('artifacts/maintenance-priority-rollup.md', 'utf8')
               : '';
+            const policyMd = fs.existsSync('artifacts/maintenance-policy-decisions.md')
+              ? fs.readFileSync('artifacts/maintenance-policy-decisions.md', 'utf8')
+              : '';
 
             const rows = Object.entries(report.checks || {})
               .map(([name, item]) => `| ${name} | ${item.ok ? 'PASS' : 'FAIL'} | ${item.summary} |`)
@@ -187,6 +204,13 @@ jobs:
               rows || '| n/a | n/a | n/a |',
               '',
               md.length > 5000 ? `${md.slice(0, 5000)}\n\n... (truncated)` : md,
+              '',
+              policyMd
+                ? '### Maintenance policy decisions'
+                : '',
+              policyMd
+                ? (policyMd.length > 3000 ? `${policyMd.slice(0, 3000)}\n\n... (truncated)` : policyMd)
+                : '',
               '',
               priorityMd
                 ? '### Maintenance priority rollup'
