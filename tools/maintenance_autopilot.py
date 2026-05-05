@@ -7,11 +7,19 @@ import shlex
 import shutil
 import subprocess
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-_ACTIVE_FAILURE_CONTEXT: dict[str, Any] = {"out_dir": None, "report": None}
+_ACTIVE_FAILURE_CONTEXT: dict[str, Any] = {
+    "out_dir": None,
+    "report": None,
+    "commit_safe_fixes": False,
+    "token_env": "GH_TOKEN",
+    "owner": "",
+    "repo": "",
+}
 
 
 def _run(
@@ -191,6 +199,7 @@ def _write_safe_fix_artifacts_on_failure(out_dir: Path, diagnosis_payload: dict[
             adaptive_safe_remediation.render_markdown(result),
             encoding="utf-8",
         )
+        _commit_safe_fix_changes(out_dir, plan, result)
     except Exception as exc:
         _write_json(
             out_dir / "adaptive-safe-remediation-error.json",
@@ -200,6 +209,176 @@ def _write_safe_fix_artifacts_on_failure(out_dir: Path, diagnosis_payload: dict[
                 "error": str(exc),
             },
         )
+
+
+GitRunner = Callable[[list[str]], dict[str, Any]]
+
+
+def _run_git(cmd: list[str]) -> dict[str, Any]:
+    proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    return {
+        "cmd": cmd,
+        "returncode": proc.returncode,
+        "stdout": proc.stdout,
+        "stderr": proc.stderr,
+        "ok": proc.returncode == 0,
+    }
+
+
+def _safe_pr_push_target() -> tuple[bool, str, str]:
+    if _ACTIVE_FAILURE_CONTEXT.get("commit_safe_fixes") is not True:
+        return False, "commit-safe-fixes flag is disabled", ""
+
+    event_name = os.getenv("GITHUB_EVENT_NAME", "")
+    if event_name != "pull_request":
+        return False, f"event {event_name or '<empty>'} is not pull_request", ""
+
+    head_ref = os.getenv("GITHUB_HEAD_REF", "").strip()
+    base_ref = os.getenv("GITHUB_BASE_REF", "").strip()
+    if not head_ref:
+        return False, "missing GITHUB_HEAD_REF", ""
+    if head_ref in {"main", "master"} or head_ref == base_ref:
+        return False, "ref is protected or same as base", ""
+
+    token_env = str(_ACTIVE_FAILURE_CONTEXT.get("token_env", "GH_TOKEN"))
+    if not os.getenv(token_env, "").strip():
+        return False, f"missing token in {token_env}", ""
+
+    event_path = os.getenv("GITHUB_EVENT_PATH", "").strip()
+    if not event_path:
+        return False, "missing GITHUB_EVENT_PATH", ""
+
+    payload = _load_json(Path(event_path))
+    pull_request = payload.get("pull_request", {})
+    if not isinstance(pull_request, dict):
+        return False, "event payload has no pull_request object", ""
+
+    head = pull_request.get("head", {})
+    base = pull_request.get("base", {})
+    head_repo = head.get("repo", {}) if isinstance(head, dict) else {}
+    base_repo = base.get("repo", {}) if isinstance(base, dict) else {}
+    head_full_name = str(head_repo.get("full_name", "")) if isinstance(head_repo, dict) else ""
+    base_full_name = str(base_repo.get("full_name", "")) if isinstance(base_repo, dict) else ""
+    expected = f"{_ACTIVE_FAILURE_CONTEXT.get('owner')}/{_ACTIVE_FAILURE_CONTEXT.get('repo')}"
+
+    if head_full_name != expected or base_full_name != expected:
+        return False, "pull request is not a same-repository branch", ""
+
+    return True, "ok", head_ref
+
+
+def _allowed_safe_changed_files(plan: dict[str, Any]) -> set[str]:
+    values = plan.get("affected_files", [])
+    if not isinstance(values, list):
+        return set()
+    return {
+        str(value).strip()
+        for value in values
+        if str(value).strip() and "<" not in str(value) and ">" not in str(value)
+    }
+
+
+def _git_stdout_lines(result: dict[str, Any]) -> list[str]:
+    return [line.strip() for line in str(result.get("stdout", "")).splitlines() if line.strip()]
+
+
+def _write_safe_fix_commit_result(out_dir: Path, payload: dict[str, Any]) -> None:
+    _write_json(out_dir / "adaptive-safe-commit-result.json", payload)
+
+
+def _commit_safe_fix_changes(
+    out_dir: Path,
+    plan: dict[str, Any],
+    remediation_result: dict[str, Any],
+    *,
+    git_runner: GitRunner = _run_git,
+) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "schema_version": "sdetkit.maintenance.autopilot.safe_fix_commit.v1",
+        "ok": False,
+        "attempted": False,
+        "pushed": False,
+        "reason": "",
+        "changed_files": [],
+        "head_ref": "",
+    }
+
+    if not bool(remediation_result.get("ok", False)):
+        result["reason"] = "safe remediation did not succeed"
+        _write_safe_fix_commit_result(out_dir, result)
+        return result
+
+    if not (
+        plan.get("safe_to_auto_fix") is True
+        and plan.get("fix_type") == "format_only"
+        and plan.get("requires_human_review") is False
+    ):
+        result["reason"] = "plan is not an approved format-only safe fix"
+        _write_safe_fix_commit_result(out_dir, result)
+        return result
+
+    ok, reason, head_ref = _safe_pr_push_target()
+    result["head_ref"] = head_ref
+    if not ok:
+        result["reason"] = reason
+        _write_safe_fix_commit_result(out_dir, result)
+        return result
+
+    diff = git_runner(["git", "diff", "--name-only"])
+    if not bool(diff.get("ok", False)):
+        result["reason"] = "git diff failed"
+        result["stderr"] = str(diff.get("stderr", ""))[-2000:]
+        _write_safe_fix_commit_result(out_dir, result)
+        return result
+
+    changed_files = _git_stdout_lines(diff)
+    result["changed_files"] = changed_files
+    if not changed_files:
+        result["reason"] = "safe remediation produced no tracked file changes"
+        _write_safe_fix_commit_result(out_dir, result)
+        return result
+
+    allowed_files = _allowed_safe_changed_files(plan)
+    outside = [item for item in changed_files if item not in allowed_files]
+    if outside:
+        result["reason"] = "changed files are outside the safe fix plan"
+        result["outside_plan"] = outside
+        _write_safe_fix_commit_result(out_dir, result)
+        return result
+
+    result["attempted"] = True
+    commands = [
+        ["git", "config", "user.name", "github-actions[bot]"],
+        ["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"],
+        ["git", "add", "--", *changed_files],
+        ["git", "commit", "-m", "chore: apply safe mechanical fixes"],
+        ["git", "push", "origin", f"HEAD:{head_ref}"],
+    ]
+
+    command_results: list[dict[str, Any]] = []
+    for cmd in commands:
+        item = git_runner(cmd)
+        command_results.append(
+            {
+                "cmd": cmd,
+                "ok": bool(item.get("ok", False)),
+                "returncode": item.get("returncode"),
+                "stdout": str(item.get("stdout", ""))[-2000:],
+                "stderr": str(item.get("stderr", ""))[-2000:],
+            }
+        )
+        if not bool(item.get("ok", False)):
+            result["reason"] = f"command failed: {' '.join(cmd[:2])}"
+            result["commands"] = command_results
+            _write_safe_fix_commit_result(out_dir, result)
+            return result
+
+    result["ok"] = True
+    result["pushed"] = True
+    result["reason"] = "safe mechanical fix committed and pushed"
+    result["commands"] = command_results
+    _write_safe_fix_commit_result(out_dir, result)
+    return result
 
 
 POLICY_RULES: dict[str, dict[str, Any]] = {
@@ -326,6 +505,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--token-env", default="GH_TOKEN")
     parser.add_argument("--memory-db", default=".sdetkit/maintenance/failure-memory.jsonl")
     parser.add_argument("--auto-remediate-safe", action="store_true")
+    parser.add_argument("--commit-safe-fixes", action="store_true")
     parser.add_argument("--max-remediation-attempts", type=int, default=3)
     parser.add_argument("--remediation-cooldown-runs", type=int, default=2)
     args = parser.parse_args(argv)
@@ -342,6 +522,10 @@ def main(argv: list[str] | None = None) -> int:
 
     _ACTIVE_FAILURE_CONTEXT["out_dir"] = out_dir
     _ACTIVE_FAILURE_CONTEXT["report"] = report
+    _ACTIVE_FAILURE_CONTEXT["commit_safe_fixes"] = bool(args.commit_safe_fixes)
+    _ACTIVE_FAILURE_CONTEXT["token_env"] = args.token_env
+    _ACTIVE_FAILURE_CONTEXT["owner"] = args.owner
+    _ACTIVE_FAILURE_CONTEXT["repo"] = args.repo
 
     # 1) Baseline checks
     report["steps"]["baseline_pre_commit"] = _run([sys.executable, "-m", "pre_commit", "run", "-a"])
