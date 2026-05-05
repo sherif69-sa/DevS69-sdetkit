@@ -1,5 +1,4 @@
 import importlib.util
-from pathlib import Path
 
 from sdetkit import adaptive_safe_fix, adaptive_safe_remediation
 
