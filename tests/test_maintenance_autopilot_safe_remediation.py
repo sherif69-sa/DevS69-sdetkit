@@ -71,6 +71,14 @@ def test_write_safe_fix_artifacts_writes_safe_fix_learning_outcome(tmp_path, mon
     assert payload["remediation_status"] == "success"
     assert payload["commit_pushed"] is False
 
+    rollup_path = tmp_path / "adaptive-safe-fix-learning-rollup.json"
+    assert rollup_path.exists()
+    rollup = json.loads(rollup_path.read_text(encoding="utf-8"))
+    assert rollup["schema_version"] == "sdetkit.adaptive_safe_fix.rollup.v1"
+    assert rollup["safe_fix_records"] == 1
+    assert rollup["groups"][0]["fix_type"] == "format_only"
+    assert rollup["groups"][0]["remediation_success_rate"] == 1.0
+
 
 def test_autopilot_writes_safe_fix_plan_and_remediation_artifacts(tmp_path, monkeypatch):
     autopilot = _load_autopilot()
