@@ -96,6 +96,17 @@ jobs:
               --format md || true
           fi
 
+      - name: Restore maintenance policy decision history
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts .sdetkit/maintenance
+          if [ -f .sdetkit/maintenance/policy-decisions-history.jsonl ]; then
+            cp .sdetkit/maintenance/policy-decisions-history.jsonl artifacts/maintenance-policy-decisions-history.jsonl
+          else
+            : > artifacts/maintenance-policy-decisions-history.jsonl
+          fi
+
       - name: Build maintenance policy memory context
         if: always()
         shell: bash
@@ -138,6 +149,15 @@ jobs:
               --format md || true
           fi
 
+      - name: Persist maintenance policy decision history
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/maintenance-policy-decisions-history.jsonl ]; then
+            mkdir -p .sdetkit/maintenance
+            cp artifacts/maintenance-policy-decisions-history.jsonl .sdetkit/maintenance/policy-decisions-history.jsonl
+          fi
+
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
@@ -158,6 +178,7 @@ jobs:
             artifacts/maintenance-policy-decisions-history.jsonl
             artifacts/maintenance-policy-decision-history-summary.json
             artifacts/maintenance-policy-decision-history-summary.md
+            .sdetkit/maintenance/policy-decisions-history.jsonl
           if-no-files-found: ignore
 
       - name: Detect diff
@@ -193,6 +214,9 @@ jobs:
               "",
               "### Applied actions",
               *(applied or ["- none"]),
+              "",
+              "### Policy memory",
+              "- `.sdetkit/maintenance/policy-decisions-history.jsonl` is included when policy history changes during PR-mode maintenance.",
             ]) + "\n",
             encoding='utf-8',
           )
