@@ -57,6 +57,58 @@ def load_diagnosis(path: Path) -> dict[str, Any]:
     return payload
 
 
+def build_safe_fix_learning_record(
+    *,
+    plan: dict[str, Any],
+    remediation_result: dict[str, Any] | None = None,
+    commit_result: dict[str, Any] | None = None,
+    learned_at_utc: str | None = None,
+) -> dict[str, Any]:
+    remediation = _as_dict(remediation_result)
+    commit = _as_dict(commit_result)
+    affected_files = [str(value) for value in _as_list(plan.get("affected_files"))]
+    identity = {
+        "source": "adaptive_safe_fix",
+        "source_code": plan.get("source_code", "UNKNOWN"),
+        "fix_type": plan.get("fix_type", "unknown"),
+        "safe_to_auto_fix": bool(plan.get("safe_to_auto_fix", False)),
+        "remediation_status": remediation.get("status", "not_attempted"),
+        "commit_pushed": bool(commit.get("pushed", False)),
+    }
+    return {
+        "schema_version": RECORD_SCHEMA_VERSION,
+        "record_id": _record_hash(identity),
+        "learned_at_utc": learned_at_utc or _timestamp(),
+        "source": "adaptive_safe_fix",
+        "source_schema_version": str(plan.get("schema_version", "")),
+        "source_status": str(plan.get("source_status", "unknown")),
+        "source_confidence": str(plan.get("confidence", "unknown")),
+        "source_risk_score": 0,
+        "code": str(plan.get("source_code", "UNKNOWN")),
+        "signal": f"safe-fix-{plan.get('fix_type', 'unknown')}",
+        "severity": "info",
+        "confidence": str(plan.get("confidence", "unknown")),
+        "title": f"Safe fix outcome for {plan.get('fix_type', 'unknown')}",
+        "recommended_fix": _first(plan.get("commands")),
+        "proof_command": _first(plan.get("proof_commands")),
+        "risk_if_ignored": str(plan.get("reason", "")),
+        "repeat_count": 0,
+        "affected_files": affected_files,
+        "fix_type": str(plan.get("fix_type", "unknown")),
+        "safe_to_auto_fix": bool(plan.get("safe_to_auto_fix", False)),
+        "requires_human_review": bool(plan.get("requires_human_review", True)),
+        "affected_file_count": len(affected_files),
+        "remediation_attempted": bool(remediation.get("attempted", False)),
+        "remediation_ok": bool(remediation.get("ok", False)),
+        "remediation_status": str(remediation.get("status", "not_attempted")),
+        "remediation_command_count": _as_int(remediation.get("command_count")),
+        "commit_attempted": bool(commit.get("attempted", False)),
+        "commit_ok": bool(commit.get("ok", False)),
+        "commit_pushed": bool(commit.get("pushed", False)),
+        "commit_reason": str(commit.get("reason", "")),
+    }
+
+
 def build_learning_records(
     payload: dict[str, Any],
     *,

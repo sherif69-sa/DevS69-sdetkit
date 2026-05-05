@@ -190,6 +190,7 @@ def _write_safe_fix_artifacts_on_failure(out_dir: Path, diagnosis_payload: dict[
             and plan.get("fix_type") in {"format_only", "ruff_fixable_lint"}
             and plan.get("requires_human_review") is False
         ):
+            _write_safe_fix_learning_outcome(out_dir, plan)
             return
 
         result = adaptive_safe_remediation.run_plan(plan, cwd=Path.cwd())
@@ -199,7 +200,8 @@ def _write_safe_fix_artifacts_on_failure(out_dir: Path, diagnosis_payload: dict[
             adaptive_safe_remediation.render_markdown(result),
             encoding="utf-8",
         )
-        _commit_safe_fix_changes(out_dir, plan, result)
+        commit_result = _commit_safe_fix_changes(out_dir, plan, result)
+        _write_safe_fix_learning_outcome(out_dir, plan, result, commit_result)
     except Exception as exc:
         _write_json(
             out_dir / "adaptive-safe-remediation-error.json",
@@ -284,6 +286,51 @@ def _git_stdout_lines(result: dict[str, Any]) -> list[str]:
 
 def _write_safe_fix_commit_result(out_dir: Path, payload: dict[str, Any]) -> None:
     _write_json(out_dir / "adaptive-safe-commit-result.json", payload)
+
+
+def _write_safe_fix_learning_outcome(
+    out_dir: Path,
+    plan: dict[str, Any],
+    remediation_result: dict[str, Any] | None = None,
+    commit_result: dict[str, Any] | None = None,
+) -> None:
+    try:
+        from sdetkit import adaptive_diagnosis_memory
+    except Exception as exc:
+        _write_json(
+            out_dir / "adaptive-safe-fix-learning-error.json",
+            {
+                "schema_version": "sdetkit.maintenance.autopilot.safe_fix_learning_error.v1",
+                "ok": False,
+                "error": str(exc),
+            },
+        )
+        return
+
+    try:
+        record = adaptive_diagnosis_memory.build_safe_fix_learning_record(
+            plan=plan,
+            remediation_result=remediation_result,
+            commit_result=commit_result,
+        )
+        summary = adaptive_diagnosis_memory.append_learning_records(
+            Path(".sdetkit/maintenance/adaptive-safe-fix-memory.jsonl"),
+            [record],
+        )
+        summary["record_id"] = record.get("record_id", "")
+        summary["fix_type"] = record.get("fix_type", "unknown")
+        summary["remediation_status"] = record.get("remediation_status", "unknown")
+        summary["commit_pushed"] = record.get("commit_pushed", False)
+        _write_json(out_dir / "adaptive-safe-fix-learning-result.json", summary)
+    except Exception as exc:
+        _write_json(
+            out_dir / "adaptive-safe-fix-learning-error.json",
+            {
+                "schema_version": "sdetkit.maintenance.autopilot.safe_fix_learning_error.v1",
+                "ok": False,
+                "error": str(exc),
+            },
+        )
 
 
 def _commit_safe_fix_changes(
