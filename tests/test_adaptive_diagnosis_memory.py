@@ -36,6 +36,51 @@ def _diagnosis_payload(status="needs_fix"):
     }
 
 
+def test_build_safe_fix_learning_record_captures_remediation_and_commit_outcome():
+    record = adaptive_diagnosis_memory.build_safe_fix_learning_record(
+        plan={
+            "schema_version": "sdetkit.adaptive_safe_fix.v1",
+            "source_status": "needs_fix",
+            "source_code": "RUFF_FIXABLE_LINT",
+            "safe_to_auto_fix": True,
+            "fix_type": "ruff_fixable_lint",
+            "confidence": "high",
+            "requires_human_review": False,
+            "reason": "safe narrow lint",
+            "commands": ["PYTHONPATH=src python -m ruff check --fix tests/test_case.py"],
+            "proof_commands": ["PYTHONPATH=src python -m ruff check tests/test_case.py"],
+            "affected_files": ["tests/test_case.py"],
+        },
+        remediation_result={
+            "ok": True,
+            "status": "success",
+            "attempted": True,
+            "command_count": 4,
+        },
+        commit_result={
+            "ok": True,
+            "attempted": True,
+            "pushed": True,
+            "reason": "safe mechanical fix committed and pushed",
+        },
+        learned_at_utc="2026-05-05T00:00:00Z",
+    )
+
+    assert record["source"] == "adaptive_safe_fix"
+    assert record["code"] == "RUFF_FIXABLE_LINT"
+    assert record["fix_type"] == "ruff_fixable_lint"
+    assert record["affected_file_count"] == 1
+    assert record["remediation_attempted"] is True
+    assert record["remediation_ok"] is True
+    assert record["remediation_status"] == "success"
+    assert record["remediation_command_count"] == 4
+    assert record["commit_attempted"] is True
+    assert record["commit_ok"] is True
+    assert record["commit_pushed"] is True
+    assert record["learned_at_utc"] == "2026-05-05T00:00:00Z"
+    assert len(record["record_id"]) == 16
+
+
 def test_build_learning_records_from_actionable_diagnosis():
     records = adaptive_diagnosis_memory.build_learning_records(
         _diagnosis_payload(), learned_at_utc="2026-05-05T00:00:00Z"
