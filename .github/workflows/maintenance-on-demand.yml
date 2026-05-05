@@ -118,6 +118,26 @@ jobs:
               --format md || true
           fi
 
+      - name: Record maintenance policy decision history
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/maintenance-policy-decisions.json ]; then
+            args=(
+              --policy-decisions-json artifacts/maintenance-policy-decisions.json
+              --history-jsonl artifacts/maintenance-policy-decisions-history.jsonl
+              --run-id "${GITHUB_RUN_ID}"
+            )
+            if [ -f artifacts/maintenance-policy-memory-context.json ]; then
+              args+=(--memory-context-json artifacts/maintenance-policy-memory-context.json)
+            fi
+            python -m sdetkit.maintenance_policy_decision_history \
+              "${args[@]}" \
+              --out-json artifacts/maintenance-policy-decision-history-summary.json \
+              --out-md artifacts/maintenance-policy-decision-history-summary.md \
+              --format md || true
+          fi
+
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
@@ -135,6 +155,9 @@ jobs:
             artifacts/maintenance-policy-decisions.md
             artifacts/maintenance-policy-memory-context.json
             artifacts/maintenance-policy-memory-context.md
+            artifacts/maintenance-policy-decisions-history.jsonl
+            artifacts/maintenance-policy-decision-history-summary.json
+            artifacts/maintenance-policy-decision-history-summary.md
           if-no-files-found: ignore
 
       - name: Detect diff
@@ -215,6 +238,9 @@ jobs:
             const memoryContextMd = fs.existsSync('artifacts/maintenance-policy-memory-context.md')
               ? fs.readFileSync('artifacts/maintenance-policy-memory-context.md', 'utf8')
               : '';
+            const historyMd = fs.existsSync('artifacts/maintenance-policy-decision-history-summary.md')
+              ? fs.readFileSync('artifacts/maintenance-policy-decision-history-summary.md', 'utf8')
+              : '';
 
             const rows = Object.entries(report.checks || {})
               .map(([name, item]) => `| ${name} | ${item.ok ? 'PASS' : 'FAIL'} | ${item.summary} |`)
@@ -231,6 +257,13 @@ jobs:
               rows || '| n/a | n/a | n/a |',
               '',
               md.length > 5000 ? `${md.slice(0, 5000)}\n\n... (truncated)` : md,
+              '',
+              historyMd
+                ? '### Maintenance policy decision history'
+                : '',
+              historyMd
+                ? (historyMd.length > 3000 ? `${historyMd.slice(0, 3000)}\n\n... (truncated)` : historyMd)
+                : '',
               '',
               memoryContextMd
                 ? '### Maintenance policy memory context'
