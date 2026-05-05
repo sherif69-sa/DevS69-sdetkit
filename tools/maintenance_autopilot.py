@@ -11,7 +11,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-
 _ACTIVE_FAILURE_CONTEXT: dict[str, Any] = {"out_dir": None, "report": None}
 
 
@@ -71,6 +70,92 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
         if isinstance(item, dict):
             rows.append(item)
     return rows
+
+
+def _failure_key_for_command(cmd: list[str]) -> str:
+    joined = " ".join(cmd)
+    if "pre_commit" in joined:
+        return "baseline_pre_commit"
+    if "pytest" in joined and "test_kpi_audit.py" in joined:
+        return "baseline_kpi_test"
+    if "ruff" in joined:
+        return "baseline_ruff"
+    if "repo check" in joined:
+        return "enterprise_repo_check"
+    if "security check" in joined:
+        return "security_actionable"
+    if "review" in joined:
+        return "review_json"
+    return "runtime_failure"
+
+
+def _write_adaptive_diagnosis_on_failure(failure: dict[str, Any]) -> None:
+    out_dir = _ACTIVE_FAILURE_CONTEXT.get("out_dir")
+    report = _ACTIVE_FAILURE_CONTEXT.get("report")
+    if not isinstance(out_dir, Path) or not isinstance(report, dict):
+        return
+
+    try:
+        from sdetkit import adaptive_diagnosis
+    except Exception as exc:
+        _write_json(
+            out_dir / "adaptive-diagnosis-error.json",
+            {
+                "schema_version": "sdetkit.maintenance.autopilot.adaptive_diagnosis_error.v1",
+                "ok": False,
+                "error": str(exc),
+            },
+        )
+        return
+
+    cmd = [str(part) for part in failure.get("cmd", [])]
+    failure_key = _failure_key_for_command(cmd)
+    steps: list[dict[str, Any]] = []
+
+    for step_name, step_payload in report.get("steps", {}).items():
+        if not isinstance(step_payload, dict):
+            continue
+        if bool(step_payload.get("ok", True)):
+            continue
+        steps.append(
+            {
+                "id": str(step_name),
+                "status": "failed",
+                "rc": step_payload.get("returncode"),
+            }
+        )
+
+    steps.append(
+        {
+            "id": failure_key,
+            "status": "failed",
+            "rc": failure.get("returncode"),
+        }
+    )
+
+    log_text = "\n".join(
+        [
+            "command: " + " ".join(cmd),
+            str(failure.get("stdout", "")),
+            str(failure.get("stderr", "")),
+        ]
+    )
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text=log_text,
+        mission_control={
+            "decision": "NO_SHIP",
+            "failed_step_count": max(1, len(steps)),
+            "steps": steps,
+            "artifacts": ["adaptive-diagnosis.json", "adaptive-diagnosis.md"],
+        },
+        ledger_records=[],
+    )
+
+    _write_json(out_dir / "adaptive-diagnosis.json", payload)
+    (out_dir / "adaptive-diagnosis.md").write_text(
+        adaptive_diagnosis.render_markdown(payload),
+        encoding="utf-8",
+    )
 
 
 POLICY_RULES: dict[str, dict[str, Any]] = {
