@@ -96,6 +96,28 @@ jobs:
               --format md || true
           fi
 
+      - name: Build maintenance policy memory context
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/maintenance-policy-decisions.json ]; then
+            args=(--policy-decisions-json artifacts/maintenance-policy-decisions.json)
+            if [ -f artifacts/adaptive-safe-fix-learning-rollup.json ]; then
+              args+=(--safe-fix-rollup-json artifacts/adaptive-safe-fix-learning-rollup.json)
+            fi
+            if [ -f artifacts/annotation-hygiene-report.json ]; then
+              args+=(--annotation-report-json artifacts/annotation-hygiene-report.json)
+            fi
+            if [ -f artifacts/maintenance-policy-decisions-history.jsonl ]; then
+              args+=(--history-jsonl artifacts/maintenance-policy-decisions-history.jsonl)
+            fi
+            python -m sdetkit.maintenance_policy_memory_context \
+              "${args[@]}" \
+              --out-json artifacts/maintenance-policy-memory-context.json \
+              --out-md artifacts/maintenance-policy-memory-context.md \
+              --format md || true
+          fi
+
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
@@ -111,6 +133,8 @@ jobs:
             artifacts/maintenance-priority-rollup.md
             artifacts/maintenance-policy-decisions.json
             artifacts/maintenance-policy-decisions.md
+            artifacts/maintenance-policy-memory-context.json
+            artifacts/maintenance-policy-memory-context.md
           if-no-files-found: ignore
 
       - name: Detect diff
@@ -188,6 +212,9 @@ jobs:
             const policyMd = fs.existsSync('artifacts/maintenance-policy-decisions.md')
               ? fs.readFileSync('artifacts/maintenance-policy-decisions.md', 'utf8')
               : '';
+            const memoryContextMd = fs.existsSync('artifacts/maintenance-policy-memory-context.md')
+              ? fs.readFileSync('artifacts/maintenance-policy-memory-context.md', 'utf8')
+              : '';
 
             const rows = Object.entries(report.checks || {})
               .map(([name, item]) => `| ${name} | ${item.ok ? 'PASS' : 'FAIL'} | ${item.summary} |`)
@@ -204,6 +231,13 @@ jobs:
               rows || '| n/a | n/a | n/a |',
               '',
               md.length > 5000 ? `${md.slice(0, 5000)}\n\n... (truncated)` : md,
+              '',
+              memoryContextMd
+                ? '### Maintenance policy memory context'
+                : '',
+              memoryContextMd
+                ? (memoryContextMd.length > 3000 ? `${memoryContextMd.slice(0, 3000)}\n\n... (truncated)` : memoryContextMd)
+                : '',
               '',
               policyMd
                 ? '### Maintenance policy decisions'
