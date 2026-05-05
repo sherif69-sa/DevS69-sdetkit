@@ -12,6 +12,9 @@ from pathlib import Path
 from typing import Any
 
 
+_ACTIVE_FAILURE_CONTEXT: dict[str, Any] = {"out_dir": None, "report": None}
+
+
 def _run(
     cmd: list[str], *, allow_fail: bool = False, env: dict[str, str] | None = None
 ) -> dict[str, Any]:
@@ -24,6 +27,7 @@ def _run(
         "ok": proc.returncode == 0,
     }
     if not allow_fail and proc.returncode != 0:
+        _write_adaptive_diagnosis_on_failure(result)
         raise RuntimeError(
             f"command failed ({proc.returncode}): {' '.join(cmd)}\n"
             f"stdout:\n{proc.stdout}\n\nstderr:\n{proc.stderr}"
@@ -206,6 +210,9 @@ def main(argv: list[str] | None = None) -> int:
         "repo": args.repo,
         "steps": {},
     }
+
+    _ACTIVE_FAILURE_CONTEXT["out_dir"] = out_dir
+    _ACTIVE_FAILURE_CONTEXT["report"] = report
 
     # 1) Baseline checks
     report["steps"]["baseline_pre_commit"] = _run([sys.executable, "-m", "pre_commit", "run", "-a"])
