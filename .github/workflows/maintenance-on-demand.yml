@@ -53,6 +53,18 @@ jobs:
       - name: Run maintenance
         run: bash scripts/maintenance_ci.sh "${{ inputs.mode }}" "${{ inputs.fix && 'true' || 'false' }}" artifacts/maintenance
 
+      - name: Build annotation hygiene report
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/maintenance.json ]; then
+            python -m sdetkit.github_actions_annotation_hygiene_report \
+              --maintenance-json artifacts/maintenance.json \
+              --out-json artifacts/annotation-hygiene-report.json \
+              --out-md artifacts/annotation-hygiene-report.md \
+              --format md || true
+          fi
+
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
@@ -62,6 +74,8 @@ jobs:
             artifacts/maintenance.md
             artifacts/maintenance_fixed.json
             artifacts/maintenance_fixed.md
+            artifacts/annotation-hygiene-report.json
+            artifacts/annotation-hygiene-report.md
           if-no-files-found: ignore
 
       - name: Detect diff
@@ -130,6 +144,9 @@ jobs:
             const md = fs.existsSync('artifacts/maintenance.md')
               ? fs.readFileSync('artifacts/maintenance.md', 'utf8')
               : '';
+            const annotationMd = fs.existsSync('artifacts/annotation-hygiene-report.md')
+              ? fs.readFileSync('artifacts/annotation-hygiene-report.md', 'utf8')
+              : '';
 
             const rows = Object.entries(report.checks || {})
               .map(([name, item]) => `| ${name} | ${item.ok ? 'PASS' : 'FAIL'} | ${item.summary} |`)
@@ -146,6 +163,13 @@ jobs:
               rows || '| n/a | n/a | n/a |',
               '',
               md.length > 5000 ? `${md.slice(0, 5000)}\n\n... (truncated)` : md,
+              '',
+              annotationMd
+                ? '### GitHub Actions annotation hygiene'
+                : '',
+              annotationMd
+                ? (annotationMd.length > 3000 ? `${annotationMd.slice(0, 3000)}\n\n... (truncated)` : annotationMd)
+                : '',
             ].join('\n');
 
             let issueNumber = issueDefault;
