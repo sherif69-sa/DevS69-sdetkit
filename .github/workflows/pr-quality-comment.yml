@@ -44,43 +44,9 @@ jobs:
             --log quality.log \
             --format json \
             --out build/pr-quality/adaptive-diagnosis.json
-          python - <<'PY' > build/pr-quality/adaptive-diagnosis-comment.md
-          import json
-          from pathlib import Path
-
-          path = Path("build/pr-quality/adaptive-diagnosis.json")
-          if not path.exists():
-              raise SystemExit(0)
-
-          payload = json.loads(path.read_text(encoding="utf-8"))
-          if payload.get("status") in {"clear", "monitor"}:
-              raise SystemExit(0)
-
-          diagnoses = payload.get("diagnoses") or []
-          if not diagnoses:
-              raise SystemExit(0)
-
-          first = diagnoses[0]
-          fixes = first.get("recommended_fix") or []
-          commands = first.get("proof_commands") or []
-
-          print("### Adaptive Diagnosis")
-          print(f"- status: `{payload.get('status', 'unknown')}`")
-          print(f"- risk score: `{payload.get('risk_score', 'unknown')}`")
-          print(f"- confidence: `{payload.get('confidence', 'unknown')}`")
-          print(f"- primary issue: **{first.get('title', 'Unknown issue')}**")
-          print()
-          print("Why developers miss it:")
-          print(first.get("why_developers_miss_it", "No hidden-risk explanation available."))
-          if fixes:
-              print()
-              print("Recommended fix:")
-              print(f"- {fixes[0]}")
-          if commands:
-              print()
-              print("Proof command:")
-              print(f"- `{commands[0]}`")
-          PY
+          PYTHONPATH=src python -m sdetkit.pr_quality_comment \
+            build/pr-quality/adaptive-diagnosis.json \
+            > build/pr-quality/adaptive-diagnosis-comment.md
 
       - name: Build PR comment body
         run: |
