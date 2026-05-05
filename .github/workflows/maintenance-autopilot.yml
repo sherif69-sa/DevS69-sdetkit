@@ -39,6 +39,7 @@ jobs:
             PYTHONPATH=src python tools/maintenance_autopilot.py \
               --owner "${{ github.repository_owner }}" \
               --repo "${{ github.event.repository.name }}" \
+              --commit-safe-fixes \
               --max-remediation-attempts 3 \
               --remediation-cooldown-runs 2 \
               --out-dir build/maintenance/autopilot
