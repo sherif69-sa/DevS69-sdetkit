@@ -156,6 +156,50 @@ def _write_adaptive_diagnosis_on_failure(failure: dict[str, Any]) -> None:
         adaptive_diagnosis.render_markdown(payload),
         encoding="utf-8",
     )
+    _write_safe_fix_artifacts_on_failure(out_dir, payload)
+
+
+def _write_safe_fix_artifacts_on_failure(out_dir: Path, diagnosis_payload: dict[str, Any]) -> None:
+    try:
+        from sdetkit import adaptive_safe_fix, adaptive_safe_remediation
+    except Exception as exc:
+        _write_json(
+            out_dir / "adaptive-safe-remediation-error.json",
+            {
+                "schema_version": "sdetkit.maintenance.autopilot.safe_remediation_error.v1",
+                "ok": False,
+                "error": str(exc),
+            },
+        )
+        return
+
+    try:
+        plan = adaptive_safe_fix.build_plan(diagnosis_payload)
+        _write_json(out_dir / "safe-fix-plan.json", plan)
+
+        if not (
+            plan.get("safe_to_auto_fix") is True
+            and plan.get("fix_type") == "format_only"
+            and plan.get("requires_human_review") is False
+        ):
+            return
+
+        result = adaptive_safe_remediation.run_plan(plan, cwd=Path.cwd())
+        result["plan_path"] = (out_dir / "safe-fix-plan.json").as_posix()
+        _write_json(out_dir / "adaptive-safe-remediation-result.json", result)
+        (out_dir / "adaptive-safe-remediation-result.md").write_text(
+            adaptive_safe_remediation.render_markdown(result),
+            encoding="utf-8",
+        )
+    except Exception as exc:
+        _write_json(
+            out_dir / "adaptive-safe-remediation-error.json",
+            {
+                "schema_version": "sdetkit.maintenance.autopilot.safe_remediation_error.v1",
+                "ok": False,
+                "error": str(exc),
+            },
+        )
 
 
 POLICY_RULES: dict[str, dict[str, Any]] = {
