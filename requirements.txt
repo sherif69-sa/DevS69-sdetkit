@@ -20,7 +20,7 @@ build==1.5.0
 twine==6.2.0
 
 # Security/compliance tooling used in workflows
-pip==26.1
+pip==26.1.1
 pip-audit==2.10.0
 cyclonedx-bom==7.3.0
 
