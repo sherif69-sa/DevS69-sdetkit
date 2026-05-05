@@ -64,6 +64,59 @@ def test_format_drift_comment_is_specific_and_safe():
     assert "secret-project" not in rendered
 
 
+def test_ruff_fixable_lint_comment_is_specific_and_safe():
+    log_text = """
+    ruff check..............................................................Failed
+    tests/test_maintenance_autopilot_safe_remediation.py:2:21: F401 [*] `pathlib.Path` imported but unused
+    help: Remove unused import: `pathlib.Path`
+    Found 1 error.
+    [*] 1 fixable with the `--fix` option.
+    """
+
+    payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+    diagnosis = payload["diagnoses"][0]
+
+    assert payload["status"] == "needs_fix"
+    assert diagnosis["code"] == "RUFF_FIXABLE_LINT"
+    assert diagnosis["confidence"] == "high"
+    assert diagnosis["affected_files"] == ["tests/test_maintenance_autopilot_safe_remediation.py"]
+    assert "ruff_rules=F401" in diagnosis["evidence"]
+    assert payload["fix_plan"][0]["safe_to_auto_fix"] is True
+    assert "ruff check --fix" in " ".join(diagnosis["recommended_fix"])
+
+
+def test_ruff_import_sorting_is_specific_and_safe():
+    log_text = """
+    ruff check..............................................................Failed
+    src/sdetkit/adaptive_safe_fix.py:1:1: I001 [*] Import block is un-sorted or un-formatted
+    Found 1 error.
+    [*] 1 fixable with the `--fix` option.
+    """
+
+    payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+    diagnosis = payload["diagnoses"][0]
+
+    assert diagnosis["code"] == "RUFF_FIXABLE_LINT"
+    assert diagnosis["affected_files"] == ["src/sdetkit/adaptive_safe_fix.py"]
+    assert "ruff_rules=I001" in diagnosis["evidence"]
+    assert payload["fix_plan"][0]["safe_to_auto_fix"] is True
+
+
+def test_ruff_fixable_lint_keeps_logic_risk_rules_review_required():
+    log_text = """
+    ruff check..............................................................Failed
+    src/sdetkit/example.py:10:5: B006 [*] Do not use mutable data structures for argument defaults
+    Found 1 error.
+    [*] 1 fixable with the `--fix` option.
+    """
+
+    payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+    diagnosis = payload["diagnoses"][0]
+
+    assert diagnosis["code"] == "RUFF_LINT_FAILURE"
+    assert payload["fix_plan"][0]["safe_to_auto_fix"] is False
+
+
 def test_pytest_assertion_failure_uses_first_test_as_fix_anchor():
     log_text = """
     FAILED tests/test_widget.py::test_widget_contract - AssertionError

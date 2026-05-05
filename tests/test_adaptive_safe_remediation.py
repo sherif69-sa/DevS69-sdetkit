@@ -50,6 +50,48 @@ def test_validate_plan_accepts_format_only_allowlist():
     assert errors == []
 
 
+def test_validate_plan_accepts_ruff_fixable_lint_allowlist():
+    ok, errors = adaptive_safe_remediation.validate_plan(
+        _plan(
+            source_code="RUFF_FIXABLE_LINT",
+            fix_type="ruff_fixable_lint",
+            commands=[
+                "PYTHONPATH=src python -m ruff check --fix src/sdetkit/example.py",
+                "PYTHONPATH=src python -m ruff format src/sdetkit/example.py",
+                "PYTHONPATH=src python -m ruff check src/sdetkit/example.py",
+                "PYTHONPATH=src python -m ruff format --check src/sdetkit/example.py",
+            ],
+        )
+    )
+
+    assert ok is True
+    assert errors == []
+
+
+def test_validate_plan_rejects_ruff_fix_in_format_only_plan():
+    ok, errors = adaptive_safe_remediation.validate_plan(
+        _plan(commands=["PYTHONPATH=src python -m ruff check --fix src/sdetkit/example.py"])
+    )
+
+    assert ok is False
+    assert "ruff --fix is only allowed" in errors[0]
+
+
+def test_validate_plan_rejects_ruff_command_outside_affected_files():
+    ok, errors = adaptive_safe_remediation.validate_plan(
+        _plan(
+            source_code="RUFF_FIXABLE_LINT",
+            fix_type="ruff_fixable_lint",
+            commands=[
+                "PYTHONPATH=src python -m ruff check --fix tests/test_other.py",
+            ],
+        )
+    )
+
+    assert ok is False
+    assert "outside affected_files" in errors[0]
+
+
 def test_validate_plan_rejects_review_required_or_unsafe_commands():
     for plan in [
         _plan(safe_to_auto_fix=False),

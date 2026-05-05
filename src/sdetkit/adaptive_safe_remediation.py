@@ -10,6 +10,7 @@ from typing import Any
 
 SCHEMA_VERSION = "sdetkit.adaptive_safe_remediation.v1"
 PLAN_SCHEMA_VERSION = "sdetkit.adaptive_safe_fix.v1"
+SAFE_FIX_TYPES = {"format_only", "ruff_fixable_lint"}
 ALLOWED_PREFIXES = (
     ("PYTHONPATH=src", "python", "-m", "ruff", "format"),
     ("PYTHONPATH=src", "python", "-m", "ruff", "check"),
@@ -45,7 +46,34 @@ def _split_command(command: str) -> list[str]:
     return shlex.split(command)
 
 
-def _is_allowed_command(command: str) -> tuple[bool, str]:
+def _planned_files(plan: dict[str, Any]) -> set[str]:
+    return {
+        str(value).strip()
+        for value in _as_list(plan.get("affected_files"))
+        if str(value).strip() and "<" not in str(value) and ">" not in str(value)
+    }
+
+
+def _without_env_prefix(parts: Sequence[str]) -> list[str]:
+    remaining = list(parts)
+    while remaining and "=" in remaining[0] and not remaining[0].startswith("-"):
+        remaining.pop(0)
+    return remaining
+
+
+def _ruff_targets(parts: Sequence[str]) -> list[str]:
+    command = _without_env_prefix(parts)
+    if len(command) < 4 or command[:3] != ["python", "-m", "ruff"]:
+        return []
+    targets: list[str] = []
+    for part in command[4:]:
+        if part.startswith("-"):
+            continue
+        targets.append(part)
+    return targets
+
+
+def _is_allowed_command(command: str, fix_type: str, planned_files: set[str]) -> tuple[bool, str]:
     if _has_placeholder(command):
         return False, "command contains unresolved placeholder"
     try:
@@ -54,6 +82,13 @@ def _is_allowed_command(command: str) -> tuple[bool, str]:
         return False, f"command could not be parsed: {exc}"
     if not parts:
         return False, "command is empty"
+    if "--fix" in parts and fix_type != "ruff_fixable_lint":
+        return False, "ruff --fix is only allowed for ruff_fixable_lint plans"
+    targets = _ruff_targets(parts)
+    if targets:
+        outside = [target for target in targets if target not in planned_files]
+        if outside:
+            return False, "ruff command targets are outside affected_files"
     if any(part in BLOCKED_TOKENS for part in parts):
         return False, "command contains blocked mutation token"
     for prefix in ALLOWED_PREFIXES:
@@ -68,15 +103,17 @@ def validate_plan(plan: dict[str, Any]) -> tuple[bool, list[str]]:
         reasons.append("unsupported schema_version")
     if plan.get("safe_to_auto_fix") is not True:
         reasons.append("safe_to_auto_fix is not true")
-    if plan.get("fix_type") != "format_only":
-        reasons.append("fix_type is not format_only")
+    fix_type = str(plan.get("fix_type", ""))
+    if fix_type not in SAFE_FIX_TYPES:
+        reasons.append("fix_type is not an allowed safe mechanical fix")
     if plan.get("requires_human_review") is not False:
         reasons.append("requires_human_review is not false")
+    planned_files = _planned_files(plan)
     commands = [str(command) for command in _as_list(plan.get("commands"))]
     if not commands:
         reasons.append("no commands to run")
     for command in commands:
-        ok, reason = _is_allowed_command(command)
+        ok, reason = _is_allowed_command(command, fix_type, planned_files)
         if not ok:
             reasons.append(f"unsafe command `{command}`: {reason}")
     return not reasons, reasons
