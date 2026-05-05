@@ -35,6 +35,50 @@ jobs:
         run: |
           bash quality.sh cov 2>&1 | tee quality.log
 
+      - name: Build adaptive diagnosis
+        if: always()
+        continue-on-error: true
+        run: |
+          mkdir -p build/pr-quality
+          PYTHONPATH=src python -m sdetkit.adaptive_diagnosis \
+            --log quality.log \
+            --format json \
+            --out build/pr-quality/adaptive-diagnosis.json
+          python - <<'PY' > build/pr-quality/adaptive-diagnosis-comment.md
+          import json
+          from pathlib import Path
+
+          path = Path("build/pr-quality/adaptive-diagnosis.json")
+          if not path.exists():
+              raise SystemExit(0)
+
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          diagnoses = payload.get("diagnoses") or []
+          if not diagnoses:
+              raise SystemExit(0)
+
+          first = diagnoses[0]
+          fixes = first.get("recommended_fix") or []
+          commands = first.get("proof_commands") or []
+
+          print("### Adaptive Diagnosis")
+          print(f"- status: `{payload.get('status', 'unknown')}`")
+          print(f"- risk score: `{payload.get('risk_score', 'unknown')}`")
+          print(f"- confidence: `{payload.get('confidence', 'unknown')}`")
+          print(f"- primary issue: **{first.get('title', 'Unknown issue')}**")
+          print()
+          print("Why developers miss it:")
+          print(first.get("why_developers_miss_it", "No hidden-risk explanation available."))
+          if fixes:
+              print()
+              print("Recommended fix:")
+              print(f"- {fixes[0]}")
+          if commands:
+              print()
+              print("Proof command:")
+              print(f"- `{commands[0]}`")
+          PY
+
       - name: Build PR comment body
         id: body
         run: |
@@ -49,6 +93,10 @@ jobs:
               echo '✅ quality.sh cov passed'
               echo "- coverage: ${coverage_pct}%"
               echo '- checks: lint + tests + coverage gate are green for this PR run'
+              if [ -s build/pr-quality/adaptive-diagnosis-comment.md ]; then
+                echo ''
+                cat build/pr-quality/adaptive-diagnosis-comment.md
+              fi
               echo 'EOF'
             } >> "$GITHUB_OUTPUT"
           else
@@ -58,6 +106,10 @@ jobs:
               echo '❌ quality.sh cov failed (see workflow logs for details)'
               echo "- coverage (last reported): ${coverage_pct}%"
               echo '- suggested fix: run `python -m pip install -r requirements-test.txt -e . && bash quality.sh cov` locally'
+              if [ -s build/pr-quality/adaptive-diagnosis-comment.md ]; then
+                echo ''
+                cat build/pr-quality/adaptive-diagnosis-comment.md
+              fi
               echo 'EOF'
             } >> "$GITHUB_OUTPUT"
           fi
