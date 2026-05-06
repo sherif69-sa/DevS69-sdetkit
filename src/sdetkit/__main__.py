@@ -23,6 +23,12 @@ def _cassette_get(argv: list[str]) -> int:
     return int(cassette_get(argv))
 
 
+def _investigate(argv: list[str]) -> int:
+    from .investigate import main as investigate_main
+
+    return int(investigate_main(argv))
+
+
 def _run_cli_main() -> int | None:
     from sdetkit.cli import main as cli_main
 
@@ -39,6 +45,12 @@ def main() -> int:
     if len(argv) > 1 and argv[1] == "cassette-get":
         try:
             return _cassette_get(argv[2:])
+        except Exception as exc:  # pragma: no cover - defensive entrypoint handling
+            sys.stderr.write(f"{exc}\n")
+            return 2
+    if len(argv) > 1 and argv[1] == "investigate":
+        try:
+            return _investigate(argv[2:])
         except Exception as exc:  # pragma: no cover - defensive entrypoint handling
             sys.stderr.write(f"{exc}\n")
             return 2

@@ -157,6 +157,11 @@ Then use stability-aware command discovery:
     )
     _add_passthrough_subcommand(
         sub,
+        "investigate",
+        help_text="[Advanced but supported] Human-friendly adaptive investigation front door",
+    )
+    _add_passthrough_subcommand(
+        sub,
         "integration",
         help_text="[Advanced but supported] Integration Assurance Kit (primary surface)",
     )
