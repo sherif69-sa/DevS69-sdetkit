@@ -31,7 +31,10 @@ def test_maintenance_on_demand_uploads_action_category_artifacts():
 def test_maintenance_issue_comment_includes_action_categories_when_present():
     text = WORKFLOW.read_text(encoding="utf-8")
 
-    assert "const actionCategoriesMd = fs.existsSync('artifacts/maintenance-action-categories.md')" in text
+    assert (
+        "const actionCategoriesMd = fs.existsSync('artifacts/maintenance-action-categories.md')"
+        in text
+    )
     assert "### Maintenance action categories" in text
     assert "actionCategoriesMd.length > 3000" in text
 

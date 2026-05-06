@@ -148,7 +148,9 @@ def _category_item(item: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "rank": item.get("rank", ""),
-        "signal": _text(item.get("signal")) or _text(item.get("title")) or _text(item.get("memory_lookup_key")),
+        "signal": _text(item.get("signal"))
+        or _text(item.get("title"))
+        or _text(item.get("memory_lookup_key")),
         "source": _text(item.get("source")),
         "memory_lookup_key": _text(item.get("memory_lookup_key")),
         "diagnosis_class": diagnosis_class,
