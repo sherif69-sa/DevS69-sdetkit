@@ -48,7 +48,11 @@ def _first_proof_commands(first: dict[str, Any]) -> list[str]:
 
 
 def _next_command(proof_commands: list[str]) -> str:
-    return proof_commands[0] if proof_commands else "python -m sdetkit investigate failure --log <log> --format markdown"
+    return (
+        proof_commands[0]
+        if proof_commands
+        else "python -m sdetkit investigate failure --log <log> --format markdown"
+    )
 
 
 def _safe_fix_status(policy: dict[str, Any]) -> str:

@@ -68,13 +68,18 @@ def test_pr_investigation_summary_markdown_is_comment_ready():
 
 
 def test_pr_investigation_summary_blank_log_falls_back_to_review_required():
-    payload = build_pr_investigation_summary(log_text="", memory_seen_count=-3, memory_fixed_count=-1)
+    payload = build_pr_investigation_summary(
+        log_text="", memory_seen_count=-3, memory_fixed_count=-1
+    )
 
     assert payload["classification"] == "UNKNOWN_REVIEW_REQUIRED"
     assert payload["confidence"] == "medium"
     assert payload["safe_fix_status"] == "review required"
     assert payload["memory"] == {"seen_count": 0, "manual_fix_count": 0}
-    assert payload["next_command"] == "python -m sdetkit investigate failure --log <log> --format markdown"
+    assert (
+        payload["next_command"]
+        == "python -m sdetkit investigate failure --log <log> --format markdown"
+    )
 
 
 def test_write_pr_investigation_summary_json_and_markdown(tmp_path):
