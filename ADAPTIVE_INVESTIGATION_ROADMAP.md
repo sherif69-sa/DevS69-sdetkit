@@ -1451,6 +1451,165 @@ Why fifth:
 
 ---
 
+---
+
+## GitHub Project board mapping
+
+Use GitHub Project #2 as the execution board for this roadmap.
+
+Recommended project name:
+
+```text
+SDETKit Adaptive Investigation Roadmap
+```
+
+### Recommended views
+
+| View | Purpose | Group/sort by |
+|---|---|---|
+| Roadmap | Main execution board | Status |
+| Phases | See roadmap progress by phase | Phase |
+| Safety lane | Separate diagnostic-only work from future auto-fix work | Safety Route |
+| PR queue | Track the next small PRs to execute | Priority, Status |
+| Automation ladder | Track candidate/probation/policy/dry-run/auto-fix maturity | Safety Route |
+
+### Recommended fields
+
+| Field | Values |
+|---|---|
+| Status | Backlog, Ready, In Progress, In Review, Merged, Blocked, Later |
+| Phase | Phase 1 through Phase 18 |
+| Safety Route | Diagnostic Only, Review First, Safe Mechanical Candidate, Probation, Policy Proposal, Guarded PR Auto-Fix |
+| Priority | P0, P1, P2 |
+| Artifact Type | JSON, Markdown, CLI, Workflow, Memory, Policy, Tests |
+| Depends On | Linked issue or PR |
+| Proof Status | Missing, Partial, Complete, Not Required |
+| Automation Status | Not Eligible, Observe More, Candidate Later, Ready for Policy PR, Blocked |
+| Owner | Maintainer or automation lane owner |
+
+### Suggested initial project issues
+
+| Order | Issue title | Phase | Safety Route |
+|---:|---|---|---|
+| 1 | Expand adaptive diagnosis for local investigation failures | Phase 1 | Diagnostic Only |
+| 2 | Classify maintenance actions with adaptive diagnosis classes | Phase 2 | Diagnostic Only |
+| 3 | Publish maintenance proof checklist | Phase 3 | Diagnostic Only |
+| 4 | Publish maintenance signal trend summary | Phase 4 | Diagnostic Only |
+| 5 | Add failure investigation command | Phase 5 | Diagnostic Only |
+| 6 | Add repository investigation summary | Phase 6 | Diagnostic Only |
+| 7 | Add focused surface investigation | Phase 7 | Diagnostic Only |
+| 8 | Detect public API parity gaps | Phase 8 | Review First |
+| 9 | Write investigation candidate evidence | Phase 9 | Diagnostic Only |
+| 10 | Route investigation diagnoses through safe-fix policy | Phase 10 | Review First |
+| 11 | Publish investigation summaries for PR failures | Phase 11 | Diagnostic Only |
+| 12 | Record investigation outcome memory | Phase 12 | Diagnostic Only |
+| 13 | Publish safe-fix candidate registry | Phase 13 | Safe Mechanical Candidate |
+| 14 | Publish auto-fix probation report | Phase 14 | Probation |
+| 15 | Publish maintenance policy proposals | Phase 15 | Policy Proposal |
+| 16 | Publish auto-fix dry-run plan | Phase 16 | Policy Proposal |
+| 17 | Enable guarded PR-only auto-fix | Phase 17 | Guarded PR Auto-Fix |
+| 18 | Record auto-fix outcome memory | Phase 18 | Guarded PR Auto-Fix |
+
+### Board execution rules
+
+- Keep only one or two P0 items in progress at a time.
+- Do not move an item to `Ready` unless its dependency issue or PR is merged.
+- Do not move any auto-fix item past `Probation` unless proof, trend, candidate registry, and policy proposal artifacts exist.
+- Keep Phase 17 as a major milestone, not a near-term task. It should stay blocked until Phases 1-16 are stable.
+- Every issue should include the safety route and whether behavior is diagnostic-only, review-first, or an approved mechanical candidate.
+
+---
+
+## Definition of done for every roadmap PR
+
+Every PR in this roadmap should meet this checklist before merge.
+
+### Required for every PR
+
+```text
+- PR scope is one small roadmap step.
+- PR body explains why this step exists in the product spine.
+- JSON schema is added or updated if the PR emits machine-readable output.
+- Markdown output is added if the PR is operator-facing.
+- Deterministic tests are added for every new diagnosis, policy, artifact, or command path.
+- Existing behavior remains diagnostic-only unless the phase explicitly changes that.
+- No auto-fix behavior is enabled unless the PR is a later policy-approved auto-fix phase.
+- Rollback plan is included in the PR body.
+- ./scripts/pr_preflight.sh passes.
+```
+
+### Extra requirements for workflow PRs
+
+```text
+- Workflow YAML is validated by pre-commit.
+- Artifact upload paths are deterministic.
+- Reporting steps use safe failure behavior when they must not create or mask CI failures.
+- PR or maintenance comments stay truncation-safe.
+- Comment sections are ordered so high-level diagnosis appears before low-level details.
+```
+
+### Extra requirements for diagnosis/classification PRs
+
+```text
+- Every new diagnosis class has at least one positive fixture.
+- Unknown or ambiguous logs fall back to UNKNOWN_REVIEW_REQUIRED.
+- Confidence is deterministic and explainable.
+- Product/API/test/runtime/dependency/security/git-drift classes remain review-first.
+- Only approved mechanical classes may set safe-to-auto-fix signals.
+```
+
+### Extra requirements for memory/history PRs
+
+```text
+- Records have stable IDs or stable memory lookup keys.
+- Appends are idempotent where possible.
+- Repeated-signal rollups are deterministic.
+- Missing or malformed optional history files degrade safely.
+- Memory never overrides safety policy without explicit proof and policy gates.
+```
+
+### Extra requirements for safe-fix or auto-fix PRs
+
+```text
+- The PR states the exact allowed commands.
+- The PR states the exact allowed file/path scope.
+- The PR states forbidden paths.
+- The PR requires proof commands.
+- The PR includes rollback behavior.
+- The PR never pushes directly to main.
+- The PR never mutates fork PRs.
+- The PR records outcome memory.
+```
+
+---
+
+## Major milestone gate for guarded auto-fix
+
+Phase 17, guarded PR-only auto-fix, is a major milestone and must not start until the earlier investigation, proof, trend, candidate, probation, policy proposal, and dry-run layers are stable.
+
+Before Phase 17 starts, the project should have:
+
+```text
+- Stable diagnosis classes for local investigation failures.
+- Maintenance actions classified by diagnosis.
+- Proof checklist artifacts.
+- Signal trend artifacts.
+- Investigation CLI front door.
+- Repo and surface investigation summaries.
+- Parity detectors.
+- Investigation evidence writer.
+- Safe-fix policy routing.
+- PR/CI investigation summaries.
+- Investigation outcome memory.
+- Safe-fix candidate registry.
+- Auto-fix probation report.
+- Maintenance policy proposal generator.
+- Auto-fix dry-run planner.
+```
+
+Only after those layers are proven should guarded PR-only auto-fix move from `Blocked` to `Ready`.
+
+
 ## Final roadmap line
 
 ```text
