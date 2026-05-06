@@ -177,6 +177,18 @@ jobs:
               --format md || true
           fi
 
+      - name: Build maintenance proof checklist
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/maintenance-action-categories.json ]; then
+            python -m sdetkit.maintenance_proof_checklist \
+              --action-categories-json artifacts/maintenance-action-categories.json \
+              --out-json artifacts/maintenance-proof-checklist.json \
+              --out-md artifacts/maintenance-proof-checklist.md \
+              --format md || true
+          fi
+
       - name: Record maintenance policy decision history
         if: always()
         shell: bash
@@ -328,6 +340,9 @@ jobs:
             const actionCategoriesMd = fs.existsSync('artifacts/maintenance-action-categories.md')
               ? fs.readFileSync('artifacts/maintenance-action-categories.md', 'utf8')
               : '';
+            const proofChecklistMd = fs.existsSync('artifacts/maintenance-proof-checklist.md')
+              ? fs.readFileSync('artifacts/maintenance-proof-checklist.md', 'utf8')
+              : '';
             const historyMd = fs.existsSync('artifacts/maintenance-policy-decision-history-summary.md')
               ? fs.readFileSync('artifacts/maintenance-policy-decision-history-summary.md', 'utf8')
               : '';
@@ -347,6 +362,13 @@ jobs:
               rows || '| n/a | n/a | n/a |',
               '',
               md.length > 5000 ? `${md.slice(0, 5000)}\n\n... (truncated)` : md,
+              '',
+              proofChecklistMd
+                ? '### Maintenance proof checklist'
+                : '',
+              proofChecklistMd
+                ? (proofChecklistMd.length > 3000 ? `${proofChecklistMd.slice(0, 3000)}\n\n... (truncated)` : proofChecklistMd)
+                : '',
               '',
               actionCategoriesMd
                 ? '### Maintenance action categories'
