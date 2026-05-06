@@ -9,6 +9,7 @@ DRY_RUN_REQUIREMENTS = [
     "clean_worktree_required",
     "branch_only_changes",
     "no_direct_main_push",
+    "pr_only_guardrails",
     "rollback_plan_required",
     "post_run_evidence_required",
 ]
