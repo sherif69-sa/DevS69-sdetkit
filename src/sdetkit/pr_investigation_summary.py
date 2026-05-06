@@ -8,6 +8,11 @@ from sdetkit import adaptive_diagnosis
 from sdetkit.investigation_safe_fix_policy import route_investigation_safe_fix_policy
 
 SCHEMA_VERSION = "sdetkit.pr_investigation_summary.v1"
+UNKNOWN_REVIEW_DIAGNOSIS = {
+    "code": "UNKNOWN_REVIEW_REQUIRED",
+    "confidence": "medium",
+    "proof_commands": [],
+}
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -18,6 +23,23 @@ def _first_diagnosis(payload: dict[str, Any]) -> dict[str, Any]:
     diagnoses = _as_list(payload.get("diagnoses"))
     first = diagnoses[0] if diagnoses and isinstance(diagnoses[0], dict) else {}
     return first
+
+
+def _diagnosis_for_log(log_text: str) -> dict[str, Any]:
+    if not log_text.strip():
+        return {
+            "schema_version": adaptive_diagnosis.SCHEMA_VERSION,
+            "ok": False,
+            "status": "needs_attention",
+            "risk_score": 0,
+            "confidence": "medium",
+            "summary": "No failure log was provided for PR investigation.",
+            "diagnosis_count": 1,
+            "diagnoses": [UNKNOWN_REVIEW_DIAGNOSIS],
+            "fix_plan": [],
+            "learning_updates": [],
+        }
+    return adaptive_diagnosis.analyze_evidence(log_text=log_text)
 
 
 def _first_proof_commands(first: dict[str, Any]) -> list[str]:
@@ -44,7 +66,7 @@ def build_pr_investigation_summary(
     memory_seen_count: int = 0,
     memory_fixed_count: int = 0,
 ) -> dict[str, Any]:
-    diagnosis = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+    diagnosis = _diagnosis_for_log(log_text)
     first = _first_diagnosis(diagnosis)
     classification = str(first.get("code", "UNKNOWN_REVIEW_REQUIRED"))
     policy = route_investigation_safe_fix_policy(classification)
