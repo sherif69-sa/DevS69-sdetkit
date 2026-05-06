@@ -612,3 +612,135 @@ async def fetch_json_list_paginated_async(
         url = nxt
 
     raise RuntimeError("pagination limit exceeded")
+
+def fetch_json_list_paginated_envelope(
+    client: httpx.Client,
+    path: str,
+    retries: int = 1,
+    *,
+    timeout: float | httpx.Timeout | None = None,
+    headers: dict[str, str] | None = None,
+    trace_header: str | None = None,
+    request_id: str | None = None,
+    retry_on_429: bool = False,
+    backoff_base: float = 0.0,
+    backoff_factor: float = 2.0,
+    backoff_jitter: float = 0.0,
+    sleep: Callable[[float], None] | None = None,
+    items_key: str = "items",
+    next_key: str = "next",
+    max_pages: int = 100,
+) -> list:
+    if max_pages < 1:
+        raise ValueError("max_pages must be >= 1")
+    if not str(items_key).strip():
+        raise ValueError("items_key must not be empty")
+    if not str(next_key).strip():
+        raise ValueError("next_key must not be empty")
+
+    out = []
+    seen: set[str] = {str(path)}
+    nxt: str | None = path
+
+    for _ in range(max_pages):
+        if nxt is None:
+            return out
+
+        data = fetch_json_dict(
+            client,
+            nxt,
+            retries=retries,
+            timeout=timeout,
+            headers=headers,
+            trace_header=trace_header,
+            request_id=request_id,
+            retry_on_429=retry_on_429,
+            backoff_base=backoff_base,
+            backoff_factor=backoff_factor,
+            backoff_jitter=backoff_jitter,
+            sleep=sleep,
+        )
+        page_items = data.get(items_key)
+        if not isinstance(page_items, list):
+            raise ValueError(f"expected json array at key '{items_key}'")
+        out.extend(page_items)
+
+        nxt_raw = data.get(next_key)
+        if nxt_raw is None:
+            return out
+        if not isinstance(nxt_raw, str):
+            raise ValueError(f"expected string or null at key '{next_key}'")
+
+        nxt = nxt_raw
+        if nxt in seen:
+            raise RuntimeError("pagination cycle detected")
+        seen.add(nxt)
+
+    raise RuntimeError("pagination limit exceeded")
+
+
+async def fetch_json_list_paginated_envelope_async(
+    client: httpx.AsyncClient,
+    path: str,
+    retries: int = 1,
+    *,
+    timeout: float | httpx.Timeout | None = None,
+    headers: dict[str, str] | None = None,
+    trace_header: str | None = None,
+    request_id: str | None = None,
+    retry_on_429: bool = False,
+    backoff_base: float = 0.0,
+    backoff_factor: float = 2.0,
+    backoff_jitter: float = 0.0,
+    sleep: Callable[[float], Awaitable[None]] | None = None,
+    items_key: str = "items",
+    next_key: str = "next",
+    max_pages: int = 100,
+) -> list:
+    if max_pages < 1:
+        raise ValueError("max_pages must be >= 1")
+    if not str(items_key).strip():
+        raise ValueError("items_key must not be empty")
+    if not str(next_key).strip():
+        raise ValueError("next_key must not be empty")
+
+    out = []
+    seen: set[str] = {str(path)}
+    nxt: str | None = path
+
+    for _ in range(max_pages):
+        if nxt is None:
+            return out
+
+        data = await fetch_json_dict_async(
+            client,
+            nxt,
+            retries=retries,
+            timeout=timeout,
+            headers=headers,
+            trace_header=trace_header,
+            request_id=request_id,
+            retry_on_429=retry_on_429,
+            backoff_base=backoff_base,
+            backoff_factor=backoff_factor,
+            backoff_jitter=backoff_jitter,
+            sleep=sleep,
+        )
+        page_items = data.get(items_key)
+        if not isinstance(page_items, list):
+            raise ValueError(f"expected json array at key '{items_key}'")
+        out.extend(page_items)
+
+        nxt_raw = data.get(next_key)
+        if nxt_raw is None:
+            return out
+        if not isinstance(nxt_raw, str):
+            raise ValueError(f"expected string or null at key '{next_key}'")
+
+        nxt = nxt_raw
+        if nxt in seen:
+            raise RuntimeError("pagination cycle detected")
+        seen.add(nxt)
+
+    raise RuntimeError("pagination limit exceeded")
+
