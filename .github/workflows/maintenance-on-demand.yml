@@ -141,6 +141,18 @@ jobs:
               --format md || true
           fi
 
+      - name: Build maintenance recommendation eligibility
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/maintenance-recommendations.json ]; then
+            python -m sdetkit.maintenance_recommendation_eligibility \
+              --recommendations-json artifacts/maintenance-recommendations.json \
+              --out-json artifacts/maintenance-recommendation-eligibility.json \
+              --out-md artifacts/maintenance-recommendation-eligibility.md \
+              --format md || true
+          fi
+
       - name: Record maintenance policy decision history
         if: always()
         shell: bash
@@ -189,6 +201,8 @@ jobs:
             artifacts/maintenance-policy-memory-context.md
             artifacts/maintenance-recommendations.json
             artifacts/maintenance-recommendations.md
+            artifacts/maintenance-recommendation-eligibility.json
+            artifacts/maintenance-recommendation-eligibility.md
             artifacts/maintenance-policy-decisions-history.jsonl
             artifacts/maintenance-policy-decision-history-summary.json
             artifacts/maintenance-policy-decision-history-summary.md
@@ -279,6 +293,9 @@ jobs:
             const recommendationsMd = fs.existsSync('artifacts/maintenance-recommendations.md')
               ? fs.readFileSync('artifacts/maintenance-recommendations.md', 'utf8')
               : '';
+            const recommendationEligibilityMd = fs.existsSync('artifacts/maintenance-recommendation-eligibility.md')
+              ? fs.readFileSync('artifacts/maintenance-recommendation-eligibility.md', 'utf8')
+              : '';
             const historyMd = fs.existsSync('artifacts/maintenance-policy-decision-history-summary.md')
               ? fs.readFileSync('artifacts/maintenance-policy-decision-history-summary.md', 'utf8')
               : '';
@@ -298,6 +315,13 @@ jobs:
               rows || '| n/a | n/a | n/a |',
               '',
               md.length > 5000 ? `${md.slice(0, 5000)}\n\n... (truncated)` : md,
+              '',
+              recommendationEligibilityMd
+                ? '### Maintenance recommendation eligibility'
+                : '',
+              recommendationEligibilityMd
+                ? (recommendationEligibilityMd.length > 3000 ? `${recommendationEligibilityMd.slice(0, 3000)}\n\n... (truncated)` : recommendationEligibilityMd)
+                : '',
               '',
               recommendationsMd
                 ? '### Adaptive maintenance recommendations'
