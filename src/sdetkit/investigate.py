@@ -11,6 +11,7 @@ from typing import Any
 from sdetkit import adaptive_diagnosis
 from sdetkit.boost import build_scan
 from sdetkit.index import IGNORED_DIRS
+from sdetkit.investigation_evidence import build_investigation_evidence
 
 FAILURE_SCHEMA_VERSION = "sdetkit.investigate.failure.v1"
 REPO_SCHEMA_VERSION = "sdetkit.investigate.repo.v1"
@@ -433,6 +434,30 @@ def render_surface_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def render_evidence_markdown(payload: dict[str, Any]) -> str:
+    files = payload.get("files", {}) if isinstance(payload.get("files"), dict) else {}
+    lines = [
+        "# Investigation evidence",
+        "",
+        f"- classification: **{payload.get('classification', '')}**",
+        f"- surface: **{payload.get('surface', '')}**",
+        f"- diagnostic only: **{payload.get('diagnostic_only', True)}**",
+        f"- automation allowed: **{payload.get('automation_allowed', False)}**",
+        f"- proof status: **{payload.get('proof_status', '')}**",
+        "",
+        "## Generated files",
+        "",
+    ]
+    for key in sorted(files):
+        lines.append(f"- {key}: `{files[key]}`")
+    proof = payload.get("proof_commands", [])
+    if proof:
+        lines.extend(["", "## Proof commands", "", "```bash"])
+        lines.extend(str(command) for command in proof)
+        lines.append("```")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m sdetkit investigate")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -452,6 +477,14 @@ def build_parser() -> argparse.ArgumentParser:
     surface.add_argument("--surface", required=True, help="Surface name to investigate")
     surface.add_argument("--format", choices=["json", "markdown"], default="json")
     surface.add_argument("--out", default="", help="Optional output file")
+
+    evidence = sub.add_parser("evidence", help="Write investigation candidate evidence artifacts")
+    evidence.add_argument("--classification", required=True, help="Diagnosis classification")
+    evidence.add_argument("--surface", required=True, help="Surface name for the evidence bundle")
+    evidence.add_argument("--out-dir", required=True, help="Directory for generated evidence")
+    evidence.add_argument("--root", default=".", help="Repository root for context")
+    evidence.add_argument("--format", choices=["json", "markdown"], default="json")
+    evidence.add_argument("--out", default="", help="Optional output file")
 
     return parser
 
@@ -479,6 +512,18 @@ def main(argv: list[str] | None = None) -> int:
                 json.dumps(payload, indent=2, sort_keys=True) + "\n"
                 if args.format == "json"
                 else render_surface_markdown(payload)
+            )
+        elif args.cmd == "evidence":
+            payload = build_investigation_evidence(
+                args.classification,
+                args.surface,
+                args.out_dir,
+                root=args.root,
+            )
+            rendered = (
+                json.dumps(payload, indent=2, sort_keys=True) + "\n"
+                if args.format == "json"
+                else render_evidence_markdown(payload)
             )
         else:
             return 2
