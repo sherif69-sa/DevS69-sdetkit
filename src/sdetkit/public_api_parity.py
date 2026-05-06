@@ -42,7 +42,9 @@ def _is_test_file(rel: str) -> bool:
 
 def _surface_match(surface: str, rel: str, text: str) -> bool:
     normalized = surface.lower().replace("-", "_")
-    return normalized in rel.lower().replace("-", "_") or normalized in text.lower().replace("-", "_")
+    return normalized in rel.lower().replace("-", "_") or normalized in text.lower().replace(
+        "-", "_"
+    )
 
 
 def _read(path: Path) -> str:
@@ -86,9 +88,9 @@ def _class_methods(root: Path, files: list[str]) -> dict[str, dict[str, str]]:
             if not isinstance(node, ast.ClassDef) or node.name.startswith("_"):
                 continue
             for child in node.body:
-                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)) and not child.name.startswith(
-                    "_"
-                ):
+                if isinstance(
+                    child, (ast.FunctionDef, ast.AsyncFunctionDef)
+                ) and not child.name.startswith("_"):
                     classes[node.name][child.name] = f"{node.name}.{child.name}"
     return dict(classes)
 
@@ -100,7 +102,9 @@ def _module_functions(root: Path, files: list[str]) -> dict[str, str]:
         if tree is None:
             continue
         for node in tree.body:
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_"):
+            if isinstance(
+                node, (ast.FunctionDef, ast.AsyncFunctionDef)
+            ) and not node.name.startswith("_"):
                 functions[node.name] = node.name
     return functions
 
@@ -146,7 +150,9 @@ def _helper_needs_pair(name: str) -> bool:
     return any(token in low for token in HELPER_TOKENS)
 
 
-def _sync_async_helper_findings(functions: dict[str, str], classes: dict[str, dict[str, str]]) -> list[dict[str, str]]:
+def _sync_async_helper_findings(
+    functions: dict[str, str], classes: dict[str, dict[str, str]]
+) -> list[dict[str, str]]:
     findings: list[dict[str, str]] = []
     async_context = any("Async" in class_name for class_name in classes) or any(
         name.startswith("async_") for name in functions
@@ -185,7 +191,9 @@ def _cli_files(files: list[str]) -> list[str]:
     return [rel for rel in files if "cli" in Path(rel).stem.lower() or rel.endswith("__main__.py")]
 
 
-def _cli_backend_findings(root: Path, production_files: list[str], classes: dict[str, dict[str, str]]) -> list[dict[str, str]]:
+def _cli_backend_findings(
+    root: Path, production_files: list[str], classes: dict[str, dict[str, str]]
+) -> list[dict[str, str]]:
     cli_files = _cli_files(production_files)
     if not cli_files:
         return []
@@ -251,5 +259,7 @@ def detect_public_api_parity(root: str | Path, surface: str) -> dict[str, Any]:
         "public_symbols": symbols,
         "finding_count": len(findings),
         "counts_by_kind": dict(sorted(counts.items())),
-        "findings": sorted(findings, key=lambda item: (str(item.get("kind")), str(item.get("status")), str(item))),
+        "findings": sorted(
+            findings, key=lambda item: (str(item.get("kind")), str(item.get("status")), str(item))
+        ),
     }

@@ -71,16 +71,15 @@ def test_detects_helper_gap_when_surface_has_async_context(tmp_path):
 def test_detects_cli_backend_gap(tmp_path):
     _write(
         tmp_path / "src" / "sdetkit" / "release_room.py",
-        "class ReleaseRoom:\n"
-        "    def publish_summary(self):\n"
-        "        return {}\n",
+        "class ReleaseRoom:\n    def publish_summary(self):\n        return {}\n",
     )
     _write(
         tmp_path / "src" / "sdetkit" / "release_room_cli.py",
-        "def main():\n"
-        "    return 0\n",
+        "def main():\n    return 0\n",
     )
-    _write(tmp_path / "tests" / "test_release_room.py", "def test_release_room():\n    assert True\n")
+    _write(
+        tmp_path / "tests" / "test_release_room.py", "def test_release_room():\n    assert True\n"
+    )
 
     payload = detect_public_api_parity(tmp_path, "release_room")
 
@@ -93,8 +92,7 @@ def test_detects_cli_backend_gap(tmp_path):
 def test_detects_public_mode_without_matching_tests(tmp_path):
     _write(
         tmp_path / "src" / "sdetkit" / "diagnostics.py",
-        "def build_report():\n"
-        "    return {}\n",
+        "def build_report():\n    return {}\n",
     )
 
     payload = detect_public_api_parity(tmp_path, "diagnostics")
