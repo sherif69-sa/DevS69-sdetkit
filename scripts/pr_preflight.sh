@@ -10,7 +10,9 @@ python -m pytest \
   tests/test_maintenance_on_demand_policy_history_store_workflow.py \
   tests/test_maintenance_on_demand_recommendations_workflow.py \
   tests/test_maintenance_recommendation_eligibility.py \
-  tests/test_maintenance_on_demand_recommendation_eligibility_workflow.py
+  tests/test_maintenance_on_demand_recommendation_eligibility_workflow.py \
+  tests/test_maintenance_action_plan.py \
+  tests/test_maintenance_on_demand_action_plan_workflow.py
 
 python - <<'PY'
 from pathlib import Path
