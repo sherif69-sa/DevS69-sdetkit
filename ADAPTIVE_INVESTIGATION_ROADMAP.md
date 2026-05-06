@@ -1458,4 +1458,3 @@ detect → diagnose → recommend → plan → prove → classify → trend → 
 ```
 
 This is the product direction. Every PR should either strengthen one stage of this path or improve the evidence flow between stages.
-
