@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from sdetkit.investigation_safe_fix_policy import route_investigation_safe_fix_policy
+
 SCHEMA_VERSION = "sdetkit.investigation.evidence.v1"
 DEFAULT_PROOF_COMMANDS = {
     "MISSING_PUBLIC_API_PARITY": [
@@ -43,7 +45,14 @@ def _proof_commands(classification: str, surface: str) -> list[str]:
     return [command.format(surface=surface) for command in template]
 
 
+def _candidate_status(policy: dict[str, Any]) -> str:
+    if bool(policy.get("candidate_later")):
+        return "candidate_later_after_policy"
+    return "review_required"
+
+
 def _candidate_freeze_markdown(payload: dict[str, Any]) -> str:
+    policy = payload["safe_fix_policy"]
     lines = [
         "# Investigation candidate freeze",
         "",
@@ -53,15 +62,17 @@ def _candidate_freeze_markdown(payload: dict[str, Any]) -> str:
         f"- automation allowed: **{payload['automation_allowed']}**",
         f"- safe to auto-fix: **{payload['safe_to_auto_fix']}**",
         f"- requires human review: **{payload['requires_human_review']}**",
+        f"- policy route: **{policy['route']}**",
         "",
         "## Freeze decision",
         "",
-        "Review and prove this candidate before changing product behavior.",
+        policy["blocking_reason"],
     ]
     return "\n".join(lines).rstrip() + "\n"
 
 
 def _audit_result_markdown(payload: dict[str, Any]) -> str:
+    policy = payload["safe_fix_policy"]
     lines = [
         "# Investigation audit result",
         "",
@@ -69,10 +80,15 @@ def _audit_result_markdown(payload: dict[str, Any]) -> str:
         f"- surface: **{payload['surface']}**",
         f"- proof status: **{payload['proof_status']}**",
         f"- candidate status: **{payload['candidate_status']}**",
+        f"- policy route: **{policy['route']}**",
         "",
         "## Audit summary",
         "",
         payload["summary"],
+        "",
+        "## Safe-fix policy",
+        "",
+        policy["reason"],
     ]
     return "\n".join(lines).rstrip() + "\n"
 
@@ -95,6 +111,7 @@ def build_investigation_evidence(
     output_dir = Path(out_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     commands = _proof_commands(clean_classification, clean_surface)
+    policy = route_investigation_safe_fix_policy(clean_classification)
     payload = {
         "schema_version": SCHEMA_VERSION,
         "diagnostic_only": True,
@@ -107,8 +124,9 @@ def build_investigation_evidence(
         "root": Path(root).as_posix(),
         "out_dir": output_dir.as_posix(),
         "proof_status": "missing",
-        "candidate_status": "review_required",
+        "candidate_status": _candidate_status(policy),
         "summary": "Investigation evidence bundle created for human review.",
+        "safe_fix_policy": policy,
         "proof_commands": commands,
         "files": {
             "candidate_freeze": (output_dir / "CANDIDATE_FREEZE.md").as_posix(),
