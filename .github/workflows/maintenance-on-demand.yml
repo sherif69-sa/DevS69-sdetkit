@@ -189,6 +189,27 @@ jobs:
               --format md || true
           fi
 
+      - name: Build maintenance signal trends
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/maintenance-proof-checklist.json ]; then
+            args=(
+              --proof-checklist-json artifacts/maintenance-proof-checklist.json
+              --out-json artifacts/maintenance-signal-trends.json
+              --out-md artifacts/maintenance-signal-trends.md
+            )
+            if [ -f artifacts/maintenance-policy-decisions-history.jsonl ]; then
+              args+=(--history-jsonl artifacts/maintenance-policy-decisions-history.jsonl)
+            fi
+            if [ -f artifacts/adaptive-safe-fix-learning-rollup.json ]; then
+              args+=(--safe-fix-rollup-json artifacts/adaptive-safe-fix-learning-rollup.json)
+            fi
+            python -m sdetkit.maintenance_signal_trends \
+              "${args[@]}" \
+              --format md || true
+          fi
+
       - name: Record maintenance policy decision history
         if: always()
         shell: bash
@@ -343,6 +364,9 @@ jobs:
             const proofChecklistMd = fs.existsSync('artifacts/maintenance-proof-checklist.md')
               ? fs.readFileSync('artifacts/maintenance-proof-checklist.md', 'utf8')
               : '';
+            const signalTrendsMd = fs.existsSync('artifacts/maintenance-signal-trends.md')
+              ? fs.readFileSync('artifacts/maintenance-signal-trends.md', 'utf8')
+              : '';
             const historyMd = fs.existsSync('artifacts/maintenance-policy-decision-history-summary.md')
               ? fs.readFileSync('artifacts/maintenance-policy-decision-history-summary.md', 'utf8')
               : '';
@@ -362,6 +386,13 @@ jobs:
               rows || '| n/a | n/a | n/a |',
               '',
               md.length > 5000 ? `${md.slice(0, 5000)}\n\n... (truncated)` : md,
+              '',
+              signalTrendsMd
+                ? '### Maintenance signal trends'
+                : '',
+              signalTrendsMd
+                ? (signalTrendsMd.length > 3000 ? `${signalTrendsMd.slice(0, 3000)}\n\n... (truncated)` : signalTrendsMd)
+                : '',
               '',
               proofChecklistMd
                 ? '### Maintenance proof checklist'
