@@ -51,7 +51,11 @@ PROOF_BY_DIAGNOSIS = {
     },
     "GIT_BRANCH_DIVERGED": {
         "required_proof": "Attach fetch/rebase proof and rerun checks after the branch is synchronized.",
-        "proof_commands": ["git fetch origin <branch>", "git rebase origin/<branch>", "python -m pre_commit run -a"],
+        "proof_commands": [
+            "git fetch origin <branch>",
+            "git rebase origin/<branch>",
+            "python -m pre_commit run -a",
+        ],
         "required_artifacts": ["git rebase output", "pre-commit output"],
     },
     "REMOTE_BRANCH_DRIFT": {

@@ -31,7 +31,9 @@ def test_maintenance_on_demand_uploads_proof_checklist_artifacts():
 def test_maintenance_issue_comment_includes_proof_checklist_when_present():
     text = WORKFLOW.read_text(encoding="utf-8")
 
-    assert "const proofChecklistMd = fs.existsSync('artifacts/maintenance-proof-checklist.md')" in text
+    assert (
+        "const proofChecklistMd = fs.existsSync('artifacts/maintenance-proof-checklist.md')" in text
+    )
     assert "### Maintenance proof checklist" in text
     assert "proofChecklistMd.length > 3000" in text
 
