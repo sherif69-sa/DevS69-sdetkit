@@ -52,8 +52,14 @@ def _blockers_for(status: str, proposal: dict[str, Any]) -> list[str]:
         return ["Dry-run plan still requires human approval before execution."]
     if status == "BLOCK_POLICY_VIOLATION":
         return ["Auto-fix appears enabled before dry-run policy approval."]
-    reasons = proposal.get("blocking_reasons", []) if isinstance(proposal.get("blocking_reasons"), list) else []
-    return [str(reason) for reason in reasons] or ["Policy proposal is not ready for dry-run planning."]
+    reasons = (
+        proposal.get("blocking_reasons", [])
+        if isinstance(proposal.get("blocking_reasons"), list)
+        else []
+    )
+    return [str(reason) for reason in reasons] or [
+        "Policy proposal is not ready for dry-run planning."
+    ]
 
 
 def _plan_for_proposal(proposal: dict[str, Any]) -> dict[str, Any]:
@@ -109,8 +115,16 @@ def render_auto_fix_dry_run_plan_markdown(payload: dict[str, Any]) -> str:
         "|---|---|---:|---:|",
     ]
     for plan in plans:
-        commands = plan.get("dry_run_commands", []) if isinstance(plan.get("dry_run_commands"), list) else []
-        artifacts = plan.get("expected_artifacts", []) if isinstance(plan.get("expected_artifacts"), list) else []
+        commands = (
+            plan.get("dry_run_commands", [])
+            if isinstance(plan.get("dry_run_commands"), list)
+            else []
+        )
+        artifacts = (
+            plan.get("expected_artifacts", [])
+            if isinstance(plan.get("expected_artifacts"), list)
+            else []
+        )
         lines.append(
             "| `{key}` | {status} | {commands} | {artifacts} |".format(
                 key=plan.get("candidate_key", ""),

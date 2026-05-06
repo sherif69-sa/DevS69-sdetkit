@@ -39,11 +39,7 @@ def test_dry_run_plan_empty_proposals_has_no_plans():
 
 def test_dry_run_plan_maps_ready_policy_proposal_to_review_plan():
     payload = build_auto_fix_dry_run_plan(
-        {
-            "proposals": [
-                _proposal("diagnosis:PRE_COMMIT_FORMAT_DRIFT", "PROPOSE_POLICY_REVIEW")
-            ]
-        }
+        {"proposals": [_proposal("diagnosis:PRE_COMMIT_FORMAT_DRIFT", "PROPOSE_POLICY_REVIEW")]}
     )
     plan = payload["plans"][0]
 
@@ -66,11 +62,7 @@ def test_dry_run_plan_maps_ready_policy_proposal_to_review_plan():
 
 def test_dry_run_plan_maps_waiting_policy_proposal_to_not_ready():
     payload = build_auto_fix_dry_run_plan(
-        {
-            "proposals": [
-                _proposal("diagnosis:RUFF_FIXABLE_LINT", "WAIT_FOR_MORE_SUCCESSFUL_PROOF")
-            ]
-        }
+        {"proposals": [_proposal("diagnosis:RUFF_FIXABLE_LINT", "WAIT_FOR_MORE_SUCCESSFUL_PROOF")]}
     )
     plan = payload["plans"][0]
 
@@ -135,11 +127,7 @@ def test_dry_run_plan_sorts_plans_by_candidate_key():
 
 def test_dry_run_plan_markdown_is_operator_readable():
     payload = build_auto_fix_dry_run_plan(
-        {
-            "proposals": [
-                _proposal("diagnosis:PRE_COMMIT_FORMAT_DRIFT", "PROPOSE_POLICY_REVIEW")
-            ]
-        }
+        {"proposals": [_proposal("diagnosis:PRE_COMMIT_FORMAT_DRIFT", "PROPOSE_POLICY_REVIEW")]}
     )
 
     rendered = render_auto_fix_dry_run_plan_markdown(payload)
