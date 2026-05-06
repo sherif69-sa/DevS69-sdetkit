@@ -149,9 +149,193 @@ def _append_ruff_lint(text: str, files: Sequence[str], diagnoses: list[dict[str,
     _append_static("RUFF_LINT_FAILURE", "Ruff lint contract failed", files, diagnoses)
 
 
+def _append_local_investigation(
+    text: str, files: Sequence[str], diagnoses: list[dict[str, Any]]
+) -> bool:
+    lower = text.lower()
+
+    if "missing test dependencies" in lower or (
+        "modulenotfounderror" in lower
+        and any(name in lower for name in ("hypothesis", "yaml", "pytest", "respx", "httpx"))
+    ):
+        diagnoses.append(
+            _diag(
+                "MISSING_TEST_DEPENDENCY",
+                "medium",
+                "high",
+                "Test dependency is missing",
+                "The test run failed before exercising product behavior because a required test dependency is unavailable.",
+                "Developers often chase product code when collection failed because the environment is incomplete.",
+                ["missing test dependency"],
+                ["Install the declared test requirements and rerun the same focused test command."],
+                ["python -m pip install -r requirements-test.txt"],
+                "The failure can be misclassified as product logic when the test environment is incomplete.",
+                "missing-test-dependency",
+                files=files,
+            )
+        )
+        return True
+
+    if (
+        "cannot import name 'utc' from 'datetime'" in lower
+        or "cannot import name 'utc' from datetime" in lower
+    ):
+        diagnoses.append(
+            _diag(
+                "PYTHON_RUNTIME_COMPATIBILITY",
+                "high",
+                "high",
+                "Python runtime compatibility issue detected",
+                "The log shows use of datetime.UTC on a Python runtime that does not provide that symbol.",
+                "Developers often reproduce on a newer interpreter and miss older supported runtime lanes.",
+                ["datetime.UTC import failed"],
+                [
+                    "Replace the runtime-specific import with a compatibility-safe fallback and rerun supported Python lanes."
+                ],
+                ["python --version", "python -m pytest -q"],
+                "Supported older Python versions can remain broken even when newer CI lanes pass.",
+                "python-runtime-compatibility",
+                files=files,
+            )
+        )
+        return True
+
+    if "/mnt/c/" in lower and any(
+        token in lower
+        for token in ("pip", "venv", "site-packages", "keyboardinterrupt", "slow", "stuck")
+    ):
+        diagnoses.append(
+            _diag(
+                "LOCAL_ENVIRONMENT_FRICTION",
+                "medium",
+                "high",
+                "Local WSL filesystem friction detected",
+                "The log suggests Python packaging or virtualenv work is running from the Windows-mounted filesystem.",
+                "Developers often debug package tooling when the real issue is filesystem friction under WSL.",
+                ["wsl-mounted-filesystem", "python environment operation"],
+                [
+                    "Move the active clone or virtualenv to the native WSL filesystem and rerun the same command."
+                ],
+                ["cp -a /mnt/c/<repo> ~/<repo>", "python -m venv .venv"],
+                "Local environment friction can hide the real product signal and waste debugging time.",
+                "local-environment-friction",
+                files=files,
+            )
+        )
+        return True
+
+    if "takes no arguments" in lower and (
+        "init_" in text or "__init__" in text or "test double" in lower or "mock" in lower
+    ):
+        diagnoses.append(
+            _diag(
+                "BROKEN_TEST_DOUBLE",
+                "medium",
+                "high",
+                "Test double constructor is broken",
+                "The failure appears to happen before product code runs because a local test double cannot be instantiated.",
+                "Developers often treat this as product behavior until the traceback shows the fake object failed first.",
+                ["test double instantiation failed"],
+                ["Fix the test double constructor and rerun the focused test slice."],
+                ["python -m pytest -q <focused-test>"],
+                "A broken test harness can send the investigation toward the wrong product area.",
+                "broken-test-double",
+                files=files,
+            )
+        )
+        return True
+
+    if (
+        "attributeerror" in lower
+        and ("object has no attribute" in lower or "has no attribute" in lower)
+        and any(token in lower for token in ("async", "sync", "client", "helper", "parity"))
+    ):
+        diagnoses.append(
+            _diag(
+                "MISSING_PUBLIC_API_PARITY",
+                "high",
+                "high",
+                "Missing public API parity detected",
+                "A public surface appears to be missing a method or helper that an adjacent sync/async/client surface provides.",
+                "Developers often verify one public path and miss that a paired async or helper API is incomplete.",
+                ["attribute missing on public API surface"],
+                [
+                    "Add the missing public API parity and focused regression coverage for both surfaces."
+                ],
+                ["python -m pytest -q <focused-parity-test>"],
+                "Users can hit runtime AttributeError even though the sibling public API works.",
+                "missing-public-api-parity",
+                files=files,
+            )
+        )
+        return True
+
+    if "rejected" in lower and ("fetch first" in lower or "non-fast-forward" in lower):
+        diagnoses.append(
+            _diag(
+                "GIT_BRANCH_DIVERGED",
+                "medium",
+                "high",
+                "Git branch diverged from remote",
+                "The push was rejected because the remote branch contains work not present locally.",
+                "Developers often retry the push instead of rebasing onto the updated remote branch.",
+                ["push rejected", "fetch first"],
+                ["Fetch the remote branch, rebase locally, rerun proof, then push again."],
+                ["git fetch origin <branch>", "git rebase origin/<branch>", "git push"],
+                "A force push or stale branch can overwrite remote fixes or bot updates.",
+                "git-branch-diverged",
+                files=files,
+            )
+        )
+        return True
+
+    if "successfully rebased" in lower and "origin/" in lower:
+        diagnoses.append(
+            _diag(
+                "REMOTE_BRANCH_DRIFT",
+                "medium",
+                "high",
+                "Remote branch drift was resolved locally",
+                "The local branch had to be rebased on a newer remote branch before pushing.",
+                "Bot or remote updates can land between local proof and push.",
+                ["remote branch updated", "local rebase succeeded"],
+                ["Rerun proof after rebase before pushing."],
+                ["python -m pre_commit run -a", "git push"],
+                "Proof from before the rebase may no longer describe the pushed branch.",
+                "remote-branch-drift",
+                files=files,
+            )
+        )
+        return True
+
+    if "product logic failure" in lower or "deterministic product behavior failure" in lower:
+        diagnoses.append(
+            _diag(
+                "PRODUCT_LOGIC_FAILURE",
+                "high",
+                "medium",
+                "Product behavior failure requires review",
+                "The log explicitly identifies a deterministic product behavior or contract failure.",
+                "Developers often look for environment causes after a real behavior assertion has already identified the failing contract.",
+                ["deterministic product behavior failure"],
+                [
+                    "Reproduce the focused failing behavior and inspect the product contract before broad rewrites."
+                ],
+                ["PYTHONPATH=src python -m pytest -q <focused-test>"],
+                "A real behavior regression can be merged if it is mislabeled as infrastructure noise.",
+                "product-logic-failure",
+                files=files,
+            )
+        )
+        return True
+
+    return False
+
+
 def _append_log(text: str, diagnoses: list[dict[str, Any]]) -> None:
     lower = text.lower()
     files = _file_mentions(text)
+    handled_local = _append_local_investigation(text, files, diagnoses)
     formatted = _format_count(text)
     if formatted:
         evidence = ["ruff-format modified files", f"reformatted_file_count={formatted}"]
@@ -188,13 +372,30 @@ def _append_log(text: str, diagnoses: list[dict[str, Any]]) -> None:
             files,
             diagnoses,
         )
-    elif "assertionerror" in lower or re.search(r"FAILED\s+[^\s]+::", text):
+    elif not handled_local and ("assertionerror" in lower or re.search(r"FAILED\s+[^\s]+::", text)):
         _append_pytest(
             text,
             "PYTEST_ASSERTION_FAILURE",
             "Targeted test behavior failed",
             files,
             diagnoses,
+        )
+    if not diagnoses and text.strip():
+        diagnoses.append(
+            _diag(
+                "UNKNOWN_REVIEW_REQUIRED",
+                "medium",
+                "medium",
+                "Failure needs human review",
+                "The provided log contains failure-like text but did not match a known adaptive diagnosis family.",
+                "Unknown failures should not be guessed into a safe-fix route.",
+                ["unclassified-log-evidence"],
+                ["Inspect the first actionable traceback or failing command."],
+                ["python -m pre_commit run -a"],
+                "Unclassified failures can be unsafe to automate.",
+                "unknown-review-required",
+                files=files,
+            )
         )
 
 
