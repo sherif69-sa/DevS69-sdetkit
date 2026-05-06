@@ -165,6 +165,18 @@ jobs:
               --format md || true
           fi
 
+      - name: Build maintenance action categories
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/maintenance-action-plan.json ]; then
+            python -m sdetkit.maintenance_action_categories \
+              --action-plan-json artifacts/maintenance-action-plan.json \
+              --out-json artifacts/maintenance-action-categories.json \
+              --out-md artifacts/maintenance-action-categories.md \
+              --format md || true
+          fi
+
       - name: Record maintenance policy decision history
         if: always()
         shell: bash
@@ -313,6 +325,9 @@ jobs:
             const actionPlanMd = fs.existsSync('artifacts/maintenance-action-plan.md')
               ? fs.readFileSync('artifacts/maintenance-action-plan.md', 'utf8')
               : '';
+            const actionCategoriesMd = fs.existsSync('artifacts/maintenance-action-categories.md')
+              ? fs.readFileSync('artifacts/maintenance-action-categories.md', 'utf8')
+              : '';
             const historyMd = fs.existsSync('artifacts/maintenance-policy-decision-history-summary.md')
               ? fs.readFileSync('artifacts/maintenance-policy-decision-history-summary.md', 'utf8')
               : '';
@@ -332,6 +347,13 @@ jobs:
               rows || '| n/a | n/a | n/a |',
               '',
               md.length > 5000 ? `${md.slice(0, 5000)}\n\n... (truncated)` : md,
+              '',
+              actionCategoriesMd
+                ? '### Maintenance action categories'
+                : '',
+              actionCategoriesMd
+                ? (actionCategoriesMd.length > 3000 ? `${actionCategoriesMd.slice(0, 3000)}\n\n... (truncated)` : actionCategoriesMd)
+                : '',
               '',
               actionPlanMd
                 ? '### Maintenance action plan'
