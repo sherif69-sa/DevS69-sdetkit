@@ -237,3 +237,70 @@ def test_cli_writes_json_and_rejects_bad_jsonl(tmp_path, capsys):
 
     assert rc == 2
     assert "invalid JSONL at line 1" in capsys.readouterr().err
+
+
+def test_local_investigation_failure_classes_are_review_first():
+    cases = [
+        (
+            "MISSING_TEST_DEPENDENCY",
+            "Exit: Missing test dependencies: hypothesis, yaml. Install test requirements.",
+        ),
+        (
+            "PYTHON_RUNTIME_COMPATIBILITY",
+            "ImportError: cannot import name 'UTC' from 'datetime'",
+        ),
+        (
+            "LOCAL_ENVIRONMENT_FRICTION",
+            "pip stuck in /mnt/c/Users/Pika/repo/.venv/lib/python3.11/site-packages KeyboardInterrupt",
+        ),
+        (
+            "BROKEN_TEST_DOUBLE",
+            "TypeError: Resp() takes no arguments because test double defines init_ instead of __init__",
+        ),
+        (
+            "MISSING_PUBLIC_API_PARITY",
+            "AttributeError: SdetAsyncHttpClient object has no attribute get_json_list_paginated_envelope async parity",
+        ),
+        (
+            "GIT_BRANCH_DIVERGED",
+            "Updates were rejected because the remote contains work that you do not have locally. fetch first non-fast-forward",
+        ),
+        (
+            "REMOTE_BRANCH_DRIFT",
+            "Successfully rebased and updated refs/heads/feature/test from origin/feature/test",
+        ),
+        (
+            "PRODUCT_LOGIC_FAILURE",
+            "Product logic failure: deterministic product behavior failure in widget contract",
+        ),
+        (
+            "UNKNOWN_REVIEW_REQUIRED",
+            "command failed with unusual tool output that does not match known patterns",
+        ),
+    ]
+
+    for expected, log_text in cases:
+        payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+        diagnosis = payload["diagnoses"][0]
+        assert diagnosis["code"] == expected
+        assert payload["fix_plan"][0]["safe_to_auto_fix"] is False
+
+
+def test_safe_auto_fix_codes_remain_narrow_for_local_investigation_classes():
+    unsafe_logs = [
+        "Exit: Missing test dependencies: hypothesis, yaml.",
+        "ImportError: cannot import name 'UTC' from 'datetime'",
+        "TypeError: Resp() takes no arguments because test double defines init_ instead of __init__",
+        "AttributeError: SdetAsyncHttpClient object has no attribute get_json_list_paginated_envelope async parity",
+        "Product logic failure: deterministic product behavior failure in widget contract",
+    ]
+
+    for log_text in unsafe_logs:
+        payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+        assert payload["fix_plan"][0]["safe_to_auto_fix"] is False
+
+    safe_payload = adaptive_diagnosis.analyze_evidence(
+        log_text="ruff format failed\n1 file reformatted\n"
+    )
+    assert safe_payload["diagnoses"][0]["code"] == "PRE_COMMIT_FORMAT_DRIFT"
+    assert safe_payload["fix_plan"][0]["safe_to_auto_fix"] is True
