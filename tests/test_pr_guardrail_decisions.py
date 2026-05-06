@@ -5,7 +5,6 @@ from sdetkit.pr_guardrail_decisions import (
     render_pr_guardrail_decisions_markdown,
 )
 
-
 ALL_APPROVALS = [
     "human_reviewed_policy_pr",
     "dry_run_plan_approved",
@@ -47,11 +46,7 @@ def test_pr_guardrail_decisions_empty_plan_has_no_decisions():
 
 def test_pr_guardrail_decisions_ready_when_all_approvals_present():
     payload = build_pr_guardrail_decisions(
-        {
-            "plans": [
-                _plan("diagnosis:PRE_COMMIT_FORMAT_DRIFT", "READY_FOR_DRY_RUN_PLAN_REVIEW")
-            ]
-        },
+        {"plans": [_plan("diagnosis:PRE_COMMIT_FORMAT_DRIFT", "READY_FOR_DRY_RUN_PLAN_REVIEW")]},
         approvals=ALL_APPROVALS,
     )
     decision = payload["decisions"][0]
@@ -64,18 +59,17 @@ def test_pr_guardrail_decisions_ready_when_all_approvals_present():
     assert decision["requires_human_review"] is True
     assert decision["target_branch"] == "maintenance/pre-commit-format-drift"
     assert decision["missing_approvals"] == []
-    assert decision["review_commands"] == ["python -m pre_commit run -a", "./scripts/pr_preflight.sh"]
+    assert decision["review_commands"] == [
+        "python -m pre_commit run -a",
+        "./scripts/pr_preflight.sh",
+    ]
     assert decision["expected_artifacts"] == ["dry-run-command-log.txt", "dry-run-outcome.json"]
     assert decision["blockers"] == []
 
 
 def test_pr_guardrail_decisions_block_missing_approvals():
     payload = build_pr_guardrail_decisions(
-        {
-            "plans": [
-                _plan("diagnosis:PRE_COMMIT_FORMAT_DRIFT", "READY_FOR_DRY_RUN_PLAN_REVIEW")
-            ]
-        },
+        {"plans": [_plan("diagnosis:PRE_COMMIT_FORMAT_DRIFT", "READY_FOR_DRY_RUN_PLAN_REVIEW")]},
         approvals=["human_reviewed_policy_pr", "dry_run_plan_approved"],
     )
     decision = payload["decisions"][0]
@@ -145,11 +139,7 @@ def test_pr_guardrail_decisions_sort_by_candidate_key():
 
 def test_pr_guardrail_decisions_markdown_is_operator_readable():
     payload = build_pr_guardrail_decisions(
-        {
-            "plans": [
-                _plan("diagnosis:PRE_COMMIT_FORMAT_DRIFT", "READY_FOR_DRY_RUN_PLAN_REVIEW")
-            ]
-        },
+        {"plans": [_plan("diagnosis:PRE_COMMIT_FORMAT_DRIFT", "READY_FOR_DRY_RUN_PLAN_REVIEW")]},
         approvals=ALL_APPROVALS,
     )
 
