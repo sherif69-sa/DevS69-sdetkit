@@ -129,6 +129,18 @@ jobs:
               --format md || true
           fi
 
+      - name: Build adaptive maintenance recommendations
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/maintenance-policy-memory-context.json ]; then
+            python -m sdetkit.maintenance_recommendations \
+              --memory-context-json artifacts/maintenance-policy-memory-context.json \
+              --out-json artifacts/maintenance-recommendations.json \
+              --out-md artifacts/maintenance-recommendations.md \
+              --format md || true
+          fi
+
       - name: Record maintenance policy decision history
         if: always()
         shell: bash
@@ -175,6 +187,8 @@ jobs:
             artifacts/maintenance-policy-decisions.md
             artifacts/maintenance-policy-memory-context.json
             artifacts/maintenance-policy-memory-context.md
+            artifacts/maintenance-recommendations.json
+            artifacts/maintenance-recommendations.md
             artifacts/maintenance-policy-decisions-history.jsonl
             artifacts/maintenance-policy-decision-history-summary.json
             artifacts/maintenance-policy-decision-history-summary.md
@@ -262,6 +276,9 @@ jobs:
             const memoryContextMd = fs.existsSync('artifacts/maintenance-policy-memory-context.md')
               ? fs.readFileSync('artifacts/maintenance-policy-memory-context.md', 'utf8')
               : '';
+            const recommendationsMd = fs.existsSync('artifacts/maintenance-recommendations.md')
+              ? fs.readFileSync('artifacts/maintenance-recommendations.md', 'utf8')
+              : '';
             const historyMd = fs.existsSync('artifacts/maintenance-policy-decision-history-summary.md')
               ? fs.readFileSync('artifacts/maintenance-policy-decision-history-summary.md', 'utf8')
               : '';
@@ -281,6 +298,13 @@ jobs:
               rows || '| n/a | n/a | n/a |',
               '',
               md.length > 5000 ? `${md.slice(0, 5000)}\n\n... (truncated)` : md,
+              '',
+              recommendationsMd
+                ? '### Adaptive maintenance recommendations'
+                : '',
+              recommendationsMd
+                ? (recommendationsMd.length > 3000 ? `${recommendationsMd.slice(0, 3000)}\n\n... (truncated)` : recommendationsMd)
+                : '',
               '',
               historyMd
                 ? '### Maintenance policy decision history'
