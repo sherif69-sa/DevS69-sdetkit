@@ -3,8 +3,8 @@ import asyncio
 import httpx
 import pytest
 
-from sdetkit.netclient import SdetAsyncHttpClient, SdetHttpClient
 from sdetkit import apiclient
+from sdetkit.netclient import SdetAsyncHttpClient, SdetHttpClient
 
 
 def test_async_client_envelope_pagination_matches_sync_result():
@@ -24,12 +24,16 @@ def test_async_client_envelope_pagination_matches_sync_result():
             return httpx.Response(200, json={"items": [{"id": 1}], "next": "/p2"}, request=request)
         return httpx.Response(200, json={"items": [{"id": 2}], "next": None}, request=request)
 
-    with httpx.Client(transport=httpx.MockTransport(sync_handler), base_url="https://example.test") as raw:
+    with httpx.Client(
+        transport=httpx.MockTransport(sync_handler), base_url="https://example.test"
+    ) as raw:
         sync_client = SdetHttpClient(raw)
         sync_result = sync_client.get_json_list_paginated_envelope("/p1")
 
     async def run():
-        async with httpx.AsyncClient(transport=httpx.MockTransport(async_handler), base_url="https://example.test") as raw:
+        async with httpx.AsyncClient(
+            transport=httpx.MockTransport(async_handler), base_url="https://example.test"
+        ) as raw:
             async_client = SdetAsyncHttpClient(raw)
             return await async_client.get_json_list_paginated_envelope("/p1")
 
@@ -42,7 +46,9 @@ def test_async_client_envelope_pagination_validates_shape_and_cycle():
         async def handler(request):
             return httpx.Response(200, json=[{"id": 1}], request=request)
 
-        async with httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://example.test") as raw:
+        async with httpx.AsyncClient(
+            transport=httpx.MockTransport(handler), base_url="https://example.test"
+        ) as raw:
             client = SdetAsyncHttpClient(raw)
             return await client.get_json_list_paginated_envelope("/p1")
 
@@ -53,7 +59,9 @@ def test_async_client_envelope_pagination_validates_shape_and_cycle():
         async def handler(request):
             return httpx.Response(200, json={"items": {"id": 1}, "next": None}, request=request)
 
-        async with httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://example.test") as raw:
+        async with httpx.AsyncClient(
+            transport=httpx.MockTransport(handler), base_url="https://example.test"
+        ) as raw:
             client = SdetAsyncHttpClient(raw)
             return await client.get_json_list_paginated_envelope("/p1")
 
@@ -64,7 +72,9 @@ def test_async_client_envelope_pagination_validates_shape_and_cycle():
         async def handler(request):
             return httpx.Response(200, json={"items": [1], "next": "/p1"}, request=request)
 
-        async with httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://example.test") as raw:
+        async with httpx.AsyncClient(
+            transport=httpx.MockTransport(handler), base_url="https://example.test"
+        ) as raw:
             client = SdetAsyncHttpClient(raw)
             return await client.get_json_list_paginated_envelope("/p1")
 
@@ -86,7 +96,9 @@ def test_apiclient_envelope_helpers_follow_pages():
             return httpx.Response(200, json={"items": ["a"], "next": "/p2"}, request=request)
         return httpx.Response(200, json={"items": ["b"], "next": None}, request=request)
 
-    with httpx.Client(transport=httpx.MockTransport(sync_handler), base_url="https://example.test") as raw:
+    with httpx.Client(
+        transport=httpx.MockTransport(sync_handler), base_url="https://example.test"
+    ) as raw:
         assert apiclient.fetch_json_list_paginated_envelope(raw, "/p1") == ["a", "b"]
 
     async_calls = []
@@ -98,7 +110,9 @@ def test_apiclient_envelope_helpers_follow_pages():
         return httpx.Response(200, json={"items": ["b"], "next": None}, request=request)
 
     async def run():
-        async with httpx.AsyncClient(transport=httpx.MockTransport(async_handler), base_url="https://example.test") as raw:
+        async with httpx.AsyncClient(
+            transport=httpx.MockTransport(async_handler), base_url="https://example.test"
+        ) as raw:
             return await apiclient.fetch_json_list_paginated_envelope_async(raw, "/p1")
 
     assert asyncio.run(run()) == ["a", "b"]

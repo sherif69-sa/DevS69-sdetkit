@@ -613,6 +613,7 @@ async def fetch_json_list_paginated_async(
 
     raise RuntimeError("pagination limit exceeded")
 
+
 def fetch_json_list_paginated_envelope(
     client: httpx.Client,
     path: str,
@@ -743,4 +744,3 @@ async def fetch_json_list_paginated_envelope_async(
         seen.add(nxt)
 
     raise RuntimeError("pagination limit exceeded")
-
