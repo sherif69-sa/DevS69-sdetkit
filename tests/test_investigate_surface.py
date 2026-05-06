@@ -115,7 +115,9 @@ def test_surface_investigation_missing_root_returns_2(tmp_path, capsys):
 
 
 def test_surface_investigation_blank_surface_returns_2(tmp_path, capsys):
-    rc = investigate.main(["surface", "--root", str(tmp_path), "--surface", " ", "--format", "json"])
+    rc = investigate.main(
+        ["surface", "--root", str(tmp_path), "--surface", " ", "--format", "json"]
+    )
 
     assert rc == 2
     assert "surface name is required" in capsys.readouterr().err

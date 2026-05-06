@@ -223,14 +223,16 @@ def _public_symbols_for_file(root: Path, rel: str) -> list[dict[str, str]]:
         return []
     symbols: list[dict[str, str]] = []
     for node in tree.body:
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_"):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith(
+            "_"
+        ):
             symbols.append({"symbol": node.name, "kind": "function", "file": rel})
         elif isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
             symbols.append({"symbol": node.name, "kind": "class", "file": rel})
             for child in node.body:
-                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)) and not child.name.startswith(
-                    "_"
-                ):
+                if isinstance(
+                    child, (ast.FunctionDef, ast.AsyncFunctionDef)
+                ) and not child.name.startswith("_"):
                     symbols.append(
                         {"symbol": f"{node.name}.{child.name}", "kind": "method", "file": rel}
                     )
@@ -298,7 +300,9 @@ def _payload_for_surface(root: str, surface: str) -> dict[str, Any]:
         "test_files": test_files,
         "public_symbols": symbols,
         "parity_risks": risks,
-        "recommended_probe": "write focused parity repro" if risks else "review focused surface tests",
+        "recommended_probe": "write focused parity repro"
+        if risks
+        else "review focused surface tests",
     }
 
 
