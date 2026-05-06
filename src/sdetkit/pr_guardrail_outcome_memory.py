@@ -100,7 +100,9 @@ def summarize_pr_guardrail_outcome_memory(memory: dict[str, Any]) -> dict[str, A
     statuses = Counter(str(record.get("outcome_status", "")) for record in records)
     decisions = Counter(str(record.get("decision_status", "")) for record in records)
     merged_count = sum(1 for record in records if bool(record.get("merged")))
-    blocked_count = sum(1 for record in records if str(record.get("outcome_status", "")).startswith("blocked"))
+    blocked_count = sum(
+        1 for record in records if str(record.get("outcome_status", "")).startswith("blocked")
+    )
     return {
         "schema_version": SUMMARY_SCHEMA_VERSION,
         "automation_allowed": False,

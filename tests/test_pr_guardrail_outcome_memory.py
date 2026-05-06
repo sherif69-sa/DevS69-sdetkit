@@ -21,7 +21,12 @@ def test_build_pr_guardrail_outcome_record_normalizes_fields():
         outcome_status=" merged ",
         pr_number="1181",
         merged=True,
-        approvals=["dry_run_plan_approved", "human_reviewed_policy_pr", "human_reviewed_policy_pr", ""],
+        approvals=[
+            "dry_run_plan_approved",
+            "human_reviewed_policy_pr",
+            "human_reviewed_policy_pr",
+            "",
+        ],
         artifacts=["dry-run-outcome.json", "dry-run-command-log.txt", "dry-run-outcome.json"],
         blockers=[" ", "review completed"],
         elapsed_seconds="42",
