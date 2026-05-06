@@ -95,7 +95,9 @@ def build_safe_fix_candidate_registry(
 
 
 def render_safe_fix_candidate_registry_markdown(payload: dict[str, Any]) -> str:
-    candidates = payload.get("candidates", []) if isinstance(payload.get("candidates"), list) else []
+    candidates = (
+        payload.get("candidates", []) if isinstance(payload.get("candidates"), list) else []
+    )
     lines = [
         "# Safe-fix candidate registry",
         "",
