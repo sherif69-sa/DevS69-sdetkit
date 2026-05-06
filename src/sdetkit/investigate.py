@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import sys
 from collections import defaultdict
@@ -13,6 +14,7 @@ from sdetkit.index import IGNORED_DIRS
 
 FAILURE_SCHEMA_VERSION = "sdetkit.investigate.failure.v1"
 REPO_SCHEMA_VERSION = "sdetkit.investigate.repo.v1"
+SURFACE_SCHEMA_VERSION = "sdetkit.investigate.surface.v1"
 PYTHON_SOURCE_DIRS = {"src", "sdetkit"}
 
 
@@ -185,6 +187,121 @@ def _payload_for_repo(root: str) -> dict[str, Any]:
     }
 
 
+def _surface_text_match(surface: str, rel: str, text: str) -> bool:
+    normalized = surface.lower().replace("-", "_")
+    path_token = rel.lower().replace("-", "_")
+    if normalized in path_token:
+        return True
+    return normalized in text.lower().replace("-", "_")
+
+
+def _surface_files(root: Path, surface: str) -> tuple[list[str], list[str]]:
+    production_files: list[str] = []
+    test_files: list[str] = []
+    for path in _iter_repo_files(root):
+        rel = _rel(root, path)
+        if not rel.endswith(".py"):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            text = ""
+        if not _surface_text_match(surface, rel, text):
+            continue
+        if _is_source_file(rel):
+            production_files.append(rel)
+        elif _is_test_file(rel):
+            test_files.append(rel)
+    return sorted(production_files), sorted(test_files)
+
+
+def _public_symbols_for_file(root: Path, rel: str) -> list[dict[str, str]]:
+    path = root / rel
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8", errors="replace"))
+    except (OSError, SyntaxError):
+        return []
+    symbols: list[dict[str, str]] = []
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_"):
+            symbols.append({"symbol": node.name, "kind": "function", "file": rel})
+        elif isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
+            symbols.append({"symbol": node.name, "kind": "class", "file": rel})
+            for child in node.body:
+                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)) and not child.name.startswith(
+                    "_"
+                ):
+                    symbols.append(
+                        {"symbol": f"{node.name}.{child.name}", "kind": "method", "file": rel}
+                    )
+    return symbols
+
+
+def _public_symbols(root: Path, production_files: list[str]) -> list[str]:
+    rows: list[dict[str, str]] = []
+    for rel in production_files:
+        rows.extend(_public_symbols_for_file(root, rel))
+    return [row["symbol"] for row in sorted(rows, key=lambda r: (r["file"], r["symbol"]))]
+
+
+def _method_groups(symbols: list[str]) -> tuple[dict[str, str], dict[str, str]]:
+    sync_methods: dict[str, str] = {}
+    async_methods: dict[str, str] = {}
+    for symbol in symbols:
+        if "." not in symbol:
+            continue
+        class_name, method = symbol.split(".", 1)
+        if "Async" in class_name:
+            async_methods[method] = symbol
+        else:
+            sync_methods[method] = symbol
+    return sync_methods, async_methods
+
+
+def _parity_risks(symbols: list[str]) -> list[dict[str, str]]:
+    sync_methods, async_methods = _method_groups(symbols)
+    risks: list[dict[str, str]] = []
+    if not sync_methods or not async_methods:
+        return risks
+    for method, sync_symbol in sorted(sync_methods.items()):
+        if method not in async_methods:
+            risks.append(
+                {
+                    "kind": "sync_async_method_gap",
+                    "sync_symbol": sync_symbol,
+                    "async_symbol": method,
+                    "status": "missing",
+                }
+            )
+    return risks
+
+
+def _payload_for_surface(root: str, surface: str) -> dict[str, Any]:
+    root_path = Path(root).resolve()
+    if not root_path.exists() or not root_path.is_dir():
+        raise OSError(f"repository root does not exist: {root}")
+    clean_surface = surface.strip()
+    if not clean_surface:
+        raise OSError("surface name is required")
+    production_files, test_files = _surface_files(root_path, clean_surface)
+    symbols = _public_symbols(root_path, production_files)
+    risks = _parity_risks(symbols)
+    return {
+        "schema_version": SURFACE_SCHEMA_VERSION,
+        "ok": True,
+        "diagnostic_only": True,
+        "automation_allowed": False,
+        "command": "investigate surface",
+        "root": root_path.as_posix(),
+        "surface": clean_surface,
+        "production_files": production_files,
+        "test_files": test_files,
+        "public_symbols": symbols,
+        "parity_risks": risks,
+        "recommended_probe": "write focused parity repro" if risks else "review focused surface tests",
+    }
+
+
 def render_failure_markdown(payload: dict[str, Any]) -> str:
     proof = payload.get("proof_commands", [])
     actions = payload.get("next_actions", [])
@@ -271,6 +388,47 @@ def render_repo_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def render_surface_markdown(payload: dict[str, Any]) -> str:
+    prod = payload.get("production_files", [])
+    tests = payload.get("test_files", [])
+    symbols = payload.get("public_symbols", [])
+    risks = payload.get("parity_risks", [])
+    lines = [
+        "# Surface investigation",
+        "",
+        f"- surface: **{payload.get('surface', '')}**",
+        f"- diagnostic only: **{payload.get('diagnostic_only', True)}**",
+        f"- automation allowed: **{payload.get('automation_allowed', False)}**",
+        f"- production files: **{len(prod) if isinstance(prod, list) else 0}**",
+        f"- test files: **{len(tests) if isinstance(tests, list) else 0}**",
+        f"- parity risks: **{len(risks) if isinstance(risks, list) else 0}**",
+        "",
+        "## Public symbols",
+        "",
+    ]
+    if symbols:
+        for symbol in symbols[:20]:
+            lines.append(f"- `{symbol}`")
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Parity risks", ""])
+    if risks:
+        lines.extend(["| Kind | Sync symbol | Async symbol | Status |", "|---|---|---|---|"])
+        for risk in risks:
+            lines.append(
+                "| {kind} | `{sync}` | `{async_}` | {status} |".format(
+                    kind=risk.get("kind", ""),
+                    sync=risk.get("sync_symbol", ""),
+                    async_=risk.get("async_symbol", ""),
+                    status=risk.get("status", ""),
+                )
+            )
+    else:
+        lines.append("No parity risks were detected in this focused scan.")
+    lines.extend(["", "## Recommended probe", "", str(payload.get("recommended_probe", ""))])
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m sdetkit investigate")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -284,6 +442,12 @@ def build_parser() -> argparse.ArgumentParser:
     repo.add_argument("--root", default=".", help="Repository root to investigate")
     repo.add_argument("--format", choices=["json", "markdown"], default="json")
     repo.add_argument("--out", default="", help="Optional output file")
+
+    surface = sub.add_parser("surface", help="Summarize one focused repository surface")
+    surface.add_argument("--root", default=".", help="Repository root to investigate")
+    surface.add_argument("--surface", required=True, help="Surface name to investigate")
+    surface.add_argument("--format", choices=["json", "markdown"], default="json")
+    surface.add_argument("--out", default="", help="Optional output file")
 
     return parser
 
@@ -304,6 +468,13 @@ def main(argv: list[str] | None = None) -> int:
                 json.dumps(payload, indent=2, sort_keys=True) + "\n"
                 if args.format == "json"
                 else render_repo_markdown(payload)
+            )
+        elif args.cmd == "surface":
+            payload = _payload_for_surface(args.root, args.surface)
+            rendered = (
+                json.dumps(payload, indent=2, sort_keys=True) + "\n"
+                if args.format == "json"
+                else render_surface_markdown(payload)
             )
         else:
             return 2
