@@ -18,13 +18,34 @@ MECHANICAL_CANDIDATE_CLASSES = {
 REVIEW_FIRST_CLASSES = {
     "GIT_BRANCH_DIVERGED": ("command_guidance", "Git workflow drift needs explicit user sync."),
     "REMOTE_BRANCH_DRIFT": ("sync_guidance", "Remote branch drift needs explicit user sync."),
-    "MISSING_TEST_DEPENDENCY": ("environment_guidance", "Dependency issues are environment guidance, not code mutation."),
-    "PYTHON_RUNTIME_COMPATIBILITY": ("compatibility_pr", "Runtime compatibility changes need review."),
-    "LOCAL_ENVIRONMENT_FRICTION": ("environment_guidance", "Local environment friction is guidance-only."),
-    "BROKEN_TEST_DOUBLE": ("review_first_test_fix", "Broken test doubles need review before changing tests."),
-    "MISSING_PUBLIC_API_PARITY": ("review_first_product_fix", "Public API gaps are product changes."),
-    "PRODUCT_LOGIC_FAILURE": ("review_first_product_fix", "Product logic failures need human review."),
-    "UNKNOWN_REVIEW_REQUIRED": ("review_first_unknown", "Unknown classifications remain review-required."),
+    "MISSING_TEST_DEPENDENCY": (
+        "environment_guidance",
+        "Dependency issues are environment guidance, not code mutation.",
+    ),
+    "PYTHON_RUNTIME_COMPATIBILITY": (
+        "compatibility_pr",
+        "Runtime compatibility changes need review.",
+    ),
+    "LOCAL_ENVIRONMENT_FRICTION": (
+        "environment_guidance",
+        "Local environment friction is guidance-only.",
+    ),
+    "BROKEN_TEST_DOUBLE": (
+        "review_first_test_fix",
+        "Broken test doubles need review before changing tests.",
+    ),
+    "MISSING_PUBLIC_API_PARITY": (
+        "review_first_product_fix",
+        "Public API gaps are product changes.",
+    ),
+    "PRODUCT_LOGIC_FAILURE": (
+        "review_first_product_fix",
+        "Product logic failures need human review.",
+    ),
+    "UNKNOWN_REVIEW_REQUIRED": (
+        "review_first_unknown",
+        "Unknown classifications remain review-required.",
+    ),
 }
 
 
