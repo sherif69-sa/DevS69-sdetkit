@@ -22,7 +22,9 @@ def test_repo_investigation_wraps_boost_and_keeps_safety_flags(tmp_path):
     (src / "netclient.py").write_text("def get_json():\n    return {}\n", encoding="utf-8")
     tests = root / "tests"
     tests.mkdir()
-    (tests / "test_netclient.py").write_text("def test_get_json():\n    assert True\n", encoding="utf-8")
+    (tests / "test_netclient.py").write_text(
+        "def test_get_json():\n    assert True\n", encoding="utf-8"
+    )
     workflows = root / ".github" / "workflows"
     workflows.mkdir(parents=True)
     (workflows / "ci.yml").write_text("name: CI\n", encoding="utf-8")

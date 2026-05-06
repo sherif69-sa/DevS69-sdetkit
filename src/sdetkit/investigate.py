@@ -126,7 +126,9 @@ def _surface_reason(name: str, prod: list[str], tests: list[str]) -> str:
     if prod and tests:
         return f"{name} has production and test coverage signals for focused investigation."
     if prod:
-        return f"{name} is a production surface without an obvious matching test file in the summary."
+        return (
+            f"{name} is a production surface without an obvious matching test file in the summary."
+        )
     return f"{name} appears in tests and may point to a behavior surface worth narrowing."
 
 
@@ -226,7 +228,9 @@ def render_failure_markdown(payload: dict[str, Any]) -> str:
 
 def render_repo_markdown(payload: dict[str, Any]) -> str:
     shape = payload.get("repo_shape", {}) if isinstance(payload.get("repo_shape"), dict) else {}
-    surfaces = payload.get("top_surfaces", []) if isinstance(payload.get("top_surfaces"), list) else []
+    surfaces = (
+        payload.get("top_surfaces", []) if isinstance(payload.get("top_surfaces"), list) else []
+    )
     lines = [
         "# Repository investigation",
         "",
