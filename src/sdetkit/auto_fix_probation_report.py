@@ -27,7 +27,9 @@ def _blocking_reasons(candidate: dict[str, Any], probation_status: str) -> list[
     if probation_status == "NEEDS_MORE_OBSERVATION":
         reasons.append("Candidate has not met the required observation count.")
     elif probation_status == "NEEDS_MORE_SUCCESSFUL_PROOF":
-        reasons.append("Candidate has enough observations but not enough successful manual outcomes.")
+        reasons.append(
+            "Candidate has enough observations but not enough successful manual outcomes."
+        )
     elif probation_status == "READY_FOR_PROBATION_REVIEW":
         reasons.append("Candidate can be reviewed for a future policy PR, not executed now.")
     elif probation_status == "POLICY_VIOLATION":
@@ -68,9 +70,7 @@ def build_auto_fix_probation_report(registry: dict[str, Any]) -> dict[str, Any]:
 
 def render_auto_fix_probation_report_markdown(payload: dict[str, Any]) -> str:
     rows = (
-        payload.get("probation_rows", [])
-        if isinstance(payload.get("probation_rows"), list)
-        else []
+        payload.get("probation_rows", []) if isinstance(payload.get("probation_rows"), list) else []
     )
     lines = [
         "# Auto-fix probation report",
