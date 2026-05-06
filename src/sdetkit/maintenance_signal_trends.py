@@ -160,7 +160,9 @@ def _matching_safe_context(
     return {}
 
 
-def _trend(seen_count: int, recent_count: int, safe_fix_attempts: int, safe_fix_successes: int) -> str:
+def _trend(
+    seen_count: int, recent_count: int, safe_fix_attempts: int, safe_fix_successes: int
+) -> str:
     if safe_fix_attempts and safe_fix_successes >= safe_fix_attempts:
         return "previously_fixed"
     if seen_count >= 3 and recent_count >= 1:
