@@ -75,7 +75,9 @@ def test_policy_proposals_map_probation_statuses():
     assert by_key["diagnosis:PRE_COMMIT_FORMAT_DRIFT"]["proposal_status"] == "PROPOSE_POLICY_REVIEW"
     assert by_key["diagnosis:PRE_COMMIT_FORMAT_DRIFT"]["requires_human_review"] is True
     assert by_key["diagnosis:PRE_COMMIT_FORMAT_DRIFT"]["auto_fix_allowed_now"] is False
-    assert by_key["diagnosis:RUFF_FIXABLE_LINT"]["proposal_status"] == "WAIT_FOR_MORE_SUCCESSFUL_PROOF"
+    assert (
+        by_key["diagnosis:RUFF_FIXABLE_LINT"]["proposal_status"] == "WAIT_FOR_MORE_SUCCESSFUL_PROOF"
+    )
     assert by_key["diagnosis:UNKNOWN"]["proposal_status"] == "WAIT_FOR_MORE_OBSERVATION"
 
 
