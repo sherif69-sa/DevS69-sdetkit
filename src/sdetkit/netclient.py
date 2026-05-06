@@ -873,6 +873,54 @@ class SdetAsyncHttpClient:
 
         raise RuntimeError("pagination limit exceeded")
 
+    async def get_json_list_paginated_envelope(
+        self,
+        url: str,
+        *,
+        items_key: str = "items",
+        next_key: str = "next",
+        max_pages: int = 100,
+        timeout: float | httpx.Timeout | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> list:
+        if max_pages < 1:
+            raise ValueError("max_pages must be >= 1")
+        if not str(items_key).strip():
+            raise ValueError("items_key must not be empty")
+        if not str(next_key).strip():
+            raise ValueError("next_key must not be empty")
+
+        out = []
+        seen: set[str] = {str(url)}
+        nxt: str | None = url
+
+        for _ in range(max_pages):
+            if nxt is None:
+                return out
+
+            data = await self.get_json_dict(
+                nxt,
+                timeout=timeout,
+                headers=headers,
+            )
+            page_items = data.get(items_key)
+            if not isinstance(page_items, list):
+                raise ValueError(f"expected json array at key '{items_key}'")
+            out.extend(page_items)
+
+            nxt_raw = data.get(next_key)
+            if nxt_raw is None:
+                return out
+            if not isinstance(nxt_raw, str):
+                raise ValueError(f"expected string or null at key '{next_key}'")
+
+            nxt = nxt_raw
+            if nxt in seen:
+                raise RuntimeError("pagination cycle detected")
+            seen.add(nxt)
+
+        raise RuntimeError("pagination limit exceeded")
+
     async def _request_json(
         self,
         url: str,
