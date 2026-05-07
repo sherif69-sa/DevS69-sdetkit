@@ -485,8 +485,11 @@ def test_repository_front_doors_are_polished_and_consistent() -> None:
     assert "## Primary path" in docs_readme
     assert "[artifacts/README.md](artifacts/README.md)" in docs_readme
     assert "reviewed guarded policy" in docs_readme
-    assert "[Documentation directory README](README.md)" in docs_map
-    assert "New primary guides must be linked from [README.md](README.md)" in docs_map
+    assert "[Start here homepage](index.md)" in docs_map
+    assert (
+        "New primary guides must be linked from [Start here homepage](index.md) or this map."
+        in docs_map
+    )
 
 
 def test_project_docs_are_moved_under_docs_with_root_compatibility_pointers() -> None:
