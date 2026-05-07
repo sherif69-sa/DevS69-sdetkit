@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ROADMAP = REPO_ROOT / "docs" / "roadmap" / "big-brain-toolkit-roadmap.md"
 MKDOCS = REPO_ROOT / "mkdocs.yml"
