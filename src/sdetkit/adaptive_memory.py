@@ -4,8 +4,10 @@ import argparse
 import hashlib
 import json
 import sqlite3
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
+
+from sdetkit._datetime import UTC
 
 SCHEMA_VERSION = "sdetkit.adaptive.memory.v1"
 INDEX_SCHEMA_VERSION = "sdetkit.index.v1"

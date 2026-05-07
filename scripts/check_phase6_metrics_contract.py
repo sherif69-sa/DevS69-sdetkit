@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import datetime as _sdetkit_datetime
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+UTC = getattr(_sdetkit_datetime, "UTC", _sdetkit_datetime.timezone.utc)  # noqa: UP017
 SCHEMA_VERSION = "sdetkit.phase6_metrics_contract.v2"
 LEGACY_SCHEMA_VERSION = "sdetkit.phase6_metrics_contract.v1"
 KPI_SNAPSHOT_SCHEMA_VERSION = "sdetkit.phase6_kpi_snapshot.v1"

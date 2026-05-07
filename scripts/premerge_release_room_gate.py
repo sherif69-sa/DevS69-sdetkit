@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import argparse
+import datetime as _sdetkit_datetime
 import json
 import subprocess
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+UTC = getattr(_sdetkit_datetime, "UTC", _sdetkit_datetime.timezone.utc)  # noqa: UP017
 ROOT = Path(__file__).resolve().parent.parent
 
 

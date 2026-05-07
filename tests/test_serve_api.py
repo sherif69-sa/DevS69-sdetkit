@@ -5,11 +5,12 @@ import os
 import threading
 import urllib.error
 import urllib.request
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, cast
 
 from sdetkit import cli, serve
+from sdetkit._datetime import UTC
 
 
 def _post_json(url: str, payload: dict[str, object]) -> tuple[int, dict[str, object]]:

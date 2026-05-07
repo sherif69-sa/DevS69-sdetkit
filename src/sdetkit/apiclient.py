@@ -5,12 +5,14 @@ import random
 import time
 import uuid
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime
+from datetime import datetime
 from email.utils import parsedate_to_datetime
 from typing import Any
 from urllib.parse import urljoin
 
 import httpx
+
+from sdetkit._datetime import UTC
 
 
 def _backoff_delay(attempt: int, base: float, factor: float, jitter: float) -> float:

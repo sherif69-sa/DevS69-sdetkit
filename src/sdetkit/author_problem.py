@@ -10,9 +10,11 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from sdetkit._datetime import UTC
 
 from . import _toml
 from .atomicio import atomic_write_text, canonical_json_dumps

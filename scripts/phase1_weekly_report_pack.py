@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import datetime as _sdetkit_datetime
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+UTC = getattr(_sdetkit_datetime, "UTC", _sdetkit_datetime.timezone.utc)  # noqa: UP017
 ARTIFACT_INPUTS = {
     "status": "build/phase1-baseline/phase1-status.json",
     "next_actions": "build/phase1-baseline/phase1-next-actions.json",

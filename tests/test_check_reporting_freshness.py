@@ -3,8 +3,10 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
+
+from sdetkit._datetime import UTC
 
 _REQUIRED_PATTERNS = (
     "portfolio-scorecard-sample-{date}.json",

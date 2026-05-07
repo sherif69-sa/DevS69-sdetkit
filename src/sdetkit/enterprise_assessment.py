@@ -8,9 +8,11 @@ import shlex
 import subprocess
 import sys
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from sdetkit._datetime import UTC
 
 _CHECK_OWNERS = {
     "canonical_path_clarity": "product-docs",

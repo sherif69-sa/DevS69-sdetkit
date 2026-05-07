@@ -6,10 +6,12 @@ import subprocess
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from time import perf_counter
 from typing import Any
+
+from sdetkit._datetime import UTC
 
 ARTIFACT_SCHEMA_VERSION = "portfolio.v1"
 ERR_POLICY_OVERRIDE_INVALID_TYPE = "POLICY_OVERRIDE_INVALID_TYPE"
