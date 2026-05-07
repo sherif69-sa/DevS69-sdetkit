@@ -376,3 +376,16 @@ def test_investigation_and_autopilot_docs_preserve_diagnostic_safety_story() -> 
     assert "report-only by default" in docs["adaptive-diagnosis"]
     assert "explicit opt-in remediation lane" in docs["pr-automation"]
     assert "default quality-gate posture remains evidence-first" in docs["premium-quality-gate"]
+
+
+def test_readme_stays_concise_front_door() -> None:
+    readme = Path("README.md").read_text(encoding="utf-8")
+    line_count = len(readme.splitlines())
+
+    assert line_count <= 160
+    assert "## Start here" in readme
+    assert "## Documentation map" in readme
+    assert "## Advanced lanes live in docs" in readme
+    assert "python -m sdetkit portfolio-orchestrate" not in readme
+    assert "Quick ops aliases:" not in readme
+    assert "Maintenance command center (issue noise control)" not in readme
