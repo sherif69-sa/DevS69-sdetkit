@@ -37,6 +37,89 @@ def test_clear_payload_when_evidence_has_no_signals():
     assert payload["diagnoses"] == []
 
 
+def test_green_quality_log_does_not_create_unknown_review_required():
+    log_text = """
+    ✅ quality.sh cov passed
+    ruff check..............................................................Passed
+    ruff format --check.....................................................Passed
+    mypy....................................................................Passed
+    tests/test_widget.py::test_widget_contract PASSED
+    128 passed in 12.34s
+    Total coverage: 96.25%
+    """
+
+    payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+
+    assert payload["status"] == "clear"
+    assert payload["ok"] is True
+    assert payload["diagnosis_count"] == 0
+    assert "UNKNOWN_REVIEW_REQUIRED" not in _codes(payload)
+
+
+def test_unknown_failure_like_log_stays_review_first():
+    log_text = """
+    custom quality gate emitted an unrecognized integrity report
+    Process completed with exit code 42
+    """
+
+    payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+
+    assert payload["status"] in {"needs_attention", "needs_fix"}
+    assert payload["diagnoses"][0]["code"] == "UNKNOWN_REVIEW_REQUIRED"
+    diagnosis = payload["diagnoses"][0]
+    assert "matched_failure_signals=ci-exit-code" in diagnosis["evidence"]
+    assert "The CI step ended with a non-zero process exit code." in diagnosis["evidence"]
+    assert "candidate_scenarios=CI_STEP_EXIT_NONZERO" in diagnosis["evidence"]
+    assert any(
+        "Check candidate CI_STEP_EXIT_NONZERO" in fix for fix in diagnosis["recommended_fix"]
+    )
+    assert "python -m pre_commit run -a" in diagnosis["proof_commands"]
+    assert payload["fix_plan"][0]["safe_to_auto_fix"] is False
+
+
+def test_failure_signal_database_ignores_success_counters():
+    log_text = """
+    mypy....................................................................Passed
+    ruff check..............................................................Passed
+    Found 0 errors.
+    pytest summary: 0 failed, 128 passed, 0 errors
+    Process completed with exit code 0
+    """
+
+    payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+
+    assert payload["status"] == "clear"
+    assert payload["diagnosis_count"] == 0
+
+
+def test_failure_signal_database_covers_unclassified_failure_families():
+    cases = {
+        "error-prefix": "build tool Error: unexpected integrity result",
+        "gate-problems-found": "quality gate: problems found in custom policy",
+        "failed-steps": "summary failed_steps=custom_policy",
+        "coverage-failure": "coverage fail under configured threshold",
+        "package-manager-error": "npm ERR! lifecycle script failed",
+    }
+
+    for expected_signal, log_text in cases.items():
+        payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+
+        assert payload["diagnoses"][0]["code"] == "UNKNOWN_REVIEW_REQUIRED"
+        assert f"matched_failure_signals={expected_signal}" in payload["diagnoses"][0]["evidence"]
+        assert payload["fix_plan"][0]["safe_to_auto_fix"] is False
+
+
+def test_seeded_scenario_database_recommends_package_install_checks():
+    payload = adaptive_diagnosis.analyze_evidence(log_text="npm ERR! lifecycle script failed")
+    diagnosis = payload["diagnoses"][0]
+
+    assert "candidate_scenarios=PACKAGE_INSTALL_FAILURE" in diagnosis["evidence"]
+    assert any(
+        "Check candidate PACKAGE_INSTALL_FAILURE" in fix for fix in diagnosis["recommended_fix"]
+    )
+    assert "python -m pip install -r requirements-test.txt -e ." in diagnosis["proof_commands"]
+
+
 def test_format_drift_comment_is_specific_and_safe():
     log_text = """
     pytest rc=0 passed
@@ -188,6 +271,15 @@ def test_adaptive_memory_empty_and_reusable_context_change_comment():
     assert _codes(empty) == ["LEARNING_DB_EMPTY"]
     assert _codes(learned) == ["KNOWN_ADAPTIVE_PATTERN_AVAILABLE"]
     assert empty["diagnoses"][0]["diagnosis"] != learned["diagnoses"][0]["diagnosis"]
+    seeded_count = next(
+        item
+        for item in empty["diagnoses"][0]["evidence"]
+        if item.startswith("seeded_scenario_count=")
+    )
+    assert int(seeded_count.split("=", 1)[1]) >= 10
+    assert any(
+        "seeded scenario database" in fix for fix in empty["diagnoses"][0]["recommended_fix"]
+    )
     assert learned["diagnoses"][0]["repeat_count"] == 4
 
 

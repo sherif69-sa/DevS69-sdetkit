@@ -61,6 +61,21 @@ def test_render_empty_for_green_or_monitor_payloads():
     assert pr_quality_comment.render_adaptive_diagnosis_comment(payload) == ""
 
 
+def test_render_empty_for_clear_green_adaptive_payload():
+    payload = {
+        "schema_version": "sdetkit.adaptive.diagnosis.v1",
+        "ok": True,
+        "status": "clear",
+        "risk_score": 0,
+        "confidence": "low",
+        "diagnosis_count": 0,
+        "diagnoses": [],
+        "fix_plan": [],
+    }
+
+    assert pr_quality_comment.render_adaptive_diagnosis_comment(payload) == ""
+
+
 def test_cli_renders_comment_from_file(tmp_path, capsys):
     path = tmp_path / "adaptive-diagnosis.json"
     path.write_text(json.dumps(_payload()), encoding="utf-8")
