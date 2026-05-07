@@ -458,7 +458,11 @@ def test_docs_map_declares_tidy_information_architecture() -> None:
     ):
         assert area in docs_map
 
-    assert "[docs/artifacts/README.md](artifacts/README.md)" in docs_map
+    assert "[docs/artifacts/README.md](artifacts/README.md)" not in docs_map
+    assert (
+        "| Generated/sample artifacts | [Artifact reference](artifact-reference.md), "
+        "[Live-adoption product proof](live-adoption-product-proof.md) |"
+    ) in docs_map
     assert "Do not move historical/generated artifact packs" in docs_map
     assert "diagnostic/report-only by default" in docs_map
     assert "Docs map and organization" in docs_home

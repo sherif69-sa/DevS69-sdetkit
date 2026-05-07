@@ -24,7 +24,7 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 | Quality gates | [Premium quality gate](premium-quality-gate.md), [Security gate](security-gate.md), [Determinism checklist](determinism-checklist.md), [Determinism contract](determinism-contract.md) | Gate docs explain proof and policy, not broad default auto-fix. |
 | Artifact reference | [Artifact reference](artifact-reference.md), [CI artifact walkthrough](ci-artifact-walkthrough.md), [Evidence showcase](evidence-showcase.md) | Runtime artifacts live under `build/` and `.sdetkit/`; committed examples live under `docs/artifacts/`. |
 | Contributor / developer docs | [Repo tour](repo-tour.md), [Contributing](contributing.md), [Release process](project/release-process.md), [Test bootstrap](test-bootstrap.md), [Project structure](project-structure.md) | Keep implementation and contribution material secondary to the operator path. |
-| Generated/sample artifacts | [docs/artifacts/README.md](artifacts/README.md), [Live-adoption product proof](live-adoption-product-proof.md) | Historical packs are preserved for traceability and are not the current runbook. |
+| Generated/sample artifacts | [Artifact reference](artifact-reference.md), [Live-adoption product proof](live-adoption-product-proof.md) | Historical packs are preserved for traceability and are not the current runbook. |
 | Historical archive | [Archive overview](archive/index.md), [Transition-era material map](archive/transition-era-material.md) | Non-primary; use only after the canonical path is working. |
 
 ## Directory guide
