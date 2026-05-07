@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import datetime as _sdetkit_datetime
 import json
-from datetime import UTC, date, datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+UTC = getattr(_sdetkit_datetime, "UTC", _sdetkit_datetime.timezone.utc)  # noqa: UP017
 SCHEMA_VERSION = "sdetkit.phase4_governance_contract.v2"
 LEGACY_SCHEMA_VERSION = "sdetkit.phase4_governance_contract.v1"
 RELEASE_EVIDENCE_SCHEMA_VERSION = "sdetkit.phase4_release_evidence.v1"
@@ -59,7 +61,7 @@ REQUIRED_GOV_DOCS = [
     "docs/integrations-and-extension-boundary.md",
 ]
 REQUIRED_OPERATOR_LINES = [
-    "make phase4-governance-contract",
+    "make governance-contract-check",
     "python scripts/validate_enterprise_contracts.py",
 ]
 
@@ -190,8 +192,8 @@ def _build_governance_payload(ns: argparse.Namespace) -> dict[str, Any]:
             "Public CLI aliases remain available for one major cycle.",
         ],
         "compatibility_guards": [
-            "make phase3-quality-contract",
-            "make phase4-governance-contract",
+            "make quality-contract-check",
+            "make governance-contract-check",
         ],
     }
     compatibility_contract["supported_tiers"] = _sorted_unique(

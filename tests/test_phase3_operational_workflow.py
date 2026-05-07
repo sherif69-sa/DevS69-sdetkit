@@ -8,7 +8,7 @@ def test_phase3_operational_workflow_wired() -> None:
     text = workflow.read_text(encoding="utf-8")
 
     assert "name: phase3-quality-contract" in text
-    assert "make phase3-do-it" in text
+    assert "make quality-contract-run" in text
     assert "phase3-quality-artifacts" in text
     assert "build/phase3-quality/*.json" in text
     assert "build/phase1-baseline/history/*.json" in text

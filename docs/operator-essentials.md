@@ -93,10 +93,10 @@ These commands are kept here for rollout contract visibility, not as the first-t
 
 - `python scripts/validate_enterprise_contracts.py`
 - `python scripts/check_primary_docs_map.py`
-- `make phase1-baseline`
-- `make phase1-status`
-- `make phase1-next`
-- `make phase1-complete`
+- `make operations-baseline`
+- `make operations-status`
+- `make operations-next-action`
+- `make operations-complete`
 - `make phase2-start`
 - `make phase2-workflow`
 - `make phase2-status`
@@ -105,14 +105,14 @@ These commands are kept here for rollout contract visibility, not as the first-t
 - `make phase2-complete`
 - `make phase2-progress`
 - `make phase2-surface-clarity`
-- `make phase3-quality-contract`
-- `make phase4-governance-contract`
-- `make phase5-ecosystem-contract`
+- `make quality-contract-check`
+- `make governance-contract-check`
+- `make ecosystem-contract-check`
 - `make phase6-start`
 - `make phase6-status`
 - `make phase6-progress`
 - `make phase6-complete`
-- `make phase6-metrics-contract`
+- `make metrics-contract-check`
 
 ## Expansion trigger rules
 

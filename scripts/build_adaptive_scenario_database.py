@@ -5,12 +5,15 @@ from __future__ import annotations
 
 import argparse
 import ast
+import datetime as _sdetkit_datetime
 import json
 import re
 from collections import Counter
 from collections.abc import Iterable
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
+
+UTC = getattr(_sdetkit_datetime, "UTC", _sdetkit_datetime.timezone.utc)  # noqa: UP017
 
 
 def _domain_for_path(path: Path) -> str:

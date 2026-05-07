@@ -8,7 +8,7 @@ def test_phase4_governance_workflow_uploads_expected_artifacts() -> None:
     workflow = Path(".github/workflows/phase4-governance-contract.yml")
     text = workflow.read_text(encoding="utf-8")
     assert "name: phase4-governance-contract" in text
-    assert "make phase4-governance-contract" in text
+    assert "make governance-contract-check" in text
     assert "actions/upload-artifact@" in text
     assert re.search(r"actions/upload-artifact@[0-9a-f]{40}", text)
     assert "build/phase4-governance/phase4-governance-contract.json" in text

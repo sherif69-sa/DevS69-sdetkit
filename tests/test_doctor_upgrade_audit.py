@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from sdetkit import doctor
+from sdetkit._datetime import UTC
 
 
 def _iso_days_ago(days: int) -> str:

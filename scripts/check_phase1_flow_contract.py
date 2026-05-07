@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
-DOC_PATH = Path("docs/phase-execution-one-by-one.md")
+DOC_PATH = Path("docs/operations-execution-guide.md")
 MAKEFILE_PATH = Path("Makefile")
 
 

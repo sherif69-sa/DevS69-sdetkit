@@ -12,11 +12,13 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+_utc = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
+
 DEFAULT_HTTP_TIMEOUT_SECONDS = 30
 
 
 def _iso_now() -> str:
-    return dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return dt.datetime.now(_utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _parse_iso(value: str) -> dt.datetime:
@@ -391,7 +393,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             client.ensure_label(**label)
 
-    now = dt.datetime.now(dt.UTC)
+    now = dt.datetime.now(_utc)
     now_iso = _iso_now()
 
     issues = client.list_open_issues()

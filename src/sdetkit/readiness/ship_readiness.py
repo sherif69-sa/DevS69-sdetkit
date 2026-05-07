@@ -7,9 +7,11 @@ import shlex
 import subprocess
 import sys
 import time
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from sdetkit._datetime import UTC
 
 
 def _extract_json(stdout: str) -> dict[str, Any]:
