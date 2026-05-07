@@ -27,7 +27,10 @@ def test_failure_investigation_wraps_adaptive_diagnosis_without_autofix(tmp_path
         "Add the missing public API parity and focused regression coverage for both surfaces."
     ]
     assert payload["proof_commands"]
-    assert payload["memory_lookup_key"] == "diagnosis:MISSING_PUBLIC_API_PARITY:missing-public-api-parity"
+    assert (
+        payload["memory_lookup_key"]
+        == "diagnosis:MISSING_PUBLIC_API_PARITY:missing-public-api-parity"
+    )
 
 
 def test_failure_investigation_json_cli_writes_output(tmp_path, capsys):
