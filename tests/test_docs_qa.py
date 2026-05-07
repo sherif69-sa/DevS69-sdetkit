@@ -527,3 +527,13 @@ def test_project_docs_are_moved_under_docs_with_root_compatibility_pointers() ->
     assert "Release process: project/release-process.md" in mkdocs
     assert "Adaptive investigation roadmap: roadmap/adaptive-investigation-roadmap.md" in mkdocs
     assert "Product roadmap: roadmap/product-roadmap.md" in mkdocs
+
+
+def test_project_structure_explains_root_pointer_policy() -> None:
+    text = Path("docs/project-structure.md").read_text(encoding="utf-8")
+
+    assert "short compatibility pointers" in text
+    assert (
+        "Maintained long-form project docs live under `docs/project/` and `docs/roadmap/`" in text
+    )
+    assert "docs/project/release-process.md`, and `docs/roadmap/product-roadmap.md`" not in text

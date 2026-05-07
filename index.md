@@ -26,7 +26,7 @@ SDETKit is evidence-first. Investigation, diagnosis, recommendation, and plannin
 | `tests/` | Unit, workflow, docs, and contract tests. |
 | `docs/` | Human docs, operator runbooks, references, and generated/sample artifact labels. |
 | `docs/artifacts/` | Committed examples, proof packs, and historical closeout artifacts. |
-| `docs/project/` | Project-level architecture, workflow, quality, and enterprise documents moved out of the root. |
+| `docs/project/` | Project-level architecture, workflow, release, quality, and enterprise documents moved out of the root. |
 | `.github/workflows/` | CI, quality, maintenance, and artifact upload workflows. |
 | `scripts/`, `tools/` | Local validation and maintenance helpers. |
 | `examples/`, `schemas/`, `config/` | Example inputs, schema contracts, and default configuration. |
