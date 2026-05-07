@@ -14,6 +14,7 @@ _PARSED_MODULE_SHORTCUTS: tuple[tuple[str, str], ...] = (
     ("notify", "sdetkit.notify"),
     ("policy", "sdetkit.policy"),
     ("intelligence", "sdetkit.intelligence"),
+    ("investigate", "sdetkit.investigate"),
     ("integration", "sdetkit.integration"),
     ("author", "sdetkit.author_problem"),
     ("forensics", "sdetkit.forensics"),
