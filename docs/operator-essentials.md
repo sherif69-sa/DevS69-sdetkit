@@ -20,8 +20,13 @@ Expected first artifacts:
 Use these after Tier 0 when you need remediation and operational triage depth:
 
 - `python -m sdetkit review . --no-workspace --format operator-json`
+- `python -m sdetkit investigate failure --log build/quality.log --format markdown`
+- `python -m sdetkit investigate repo --root . --format json --out build/investigation/repo.json`
+- `python -m sdetkit investigate surface --root . --surface <surface> --format markdown`
 - `python -m sdetkit doctor --enterprise --format md`
 - `python -m sdetkit doctor --enterprise-next-pass-only --enterprise-next-pass-exit-code`
+
+See [Investigation operator guide](investigation-operator-guide.md) for the diagnostic-only investigation flow and safety interpretation.
 
 ## Tier 2 — Team rollout and CI alignment
 
