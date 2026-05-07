@@ -23,6 +23,34 @@ def _read_log(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")
 
 
+def _first_text(source: dict[str, Any], *keys: str) -> str:
+    for key in keys:
+        value = source.get(key)
+        if isinstance(value, str) and value.strip():
+            return value
+    return ""
+
+
+def _first_list(source: dict[str, Any], *keys: str) -> list[str]:
+    for key in keys:
+        value = source.get(key)
+        if isinstance(value, list):
+            items = [str(item) for item in value if str(item).strip()]
+            if items:
+                return items
+    return []
+
+
+def _failure_memory_lookup_key(first: dict[str, Any], classification: str) -> str:
+    explicit = _first_text(first, "memory_lookup_key")
+    if explicit:
+        return explicit
+    signal = _first_text(first, "learning_signal")
+    if signal:
+        return f"diagnosis:{classification}:{signal}"
+    return f"diagnosis:{classification}"
+
+
 def _payload_for_failure(log_text: str) -> dict[str, Any]:
     diagnosis_payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
     diagnoses = diagnosis_payload.get("diagnoses", [])
@@ -31,25 +59,25 @@ def _payload_for_failure(log_text: str) -> dict[str, Any]:
     fix_plan = diagnosis_payload.get("fix_plan", [])
     first_plan = fix_plan[0] if fix_plan and isinstance(fix_plan[0], dict) else {}
 
+    classification = str(first.get("code", "UNKNOWN_REVIEW_REQUIRED"))
+
     return {
         "schema_version": FAILURE_SCHEMA_VERSION,
         "ok": True,
         "diagnostic_only": True,
         "automation_allowed": False,
         "command": "investigate failure",
-        "classification": str(first.get("code", "UNKNOWN_REVIEW_REQUIRED")),
+        "classification": classification,
         "confidence": str(first.get("confidence", "medium")),
         "safe_to_auto_fix": bool(first_plan.get("safe_to_auto_fix", False)),
         "requires_human_review": bool(first_plan.get("requires_human_review", True)),
-        "summary": str(first.get("summary", "")),
-        "why_it_matters": str(first.get("why_it_matters", "")),
-        "next_actions": list(first.get("next_actions", []))
-        if isinstance(first.get("next_actions"), list)
-        else [],
-        "proof_commands": list(first.get("proof_commands", []))
-        if isinstance(first.get("proof_commands"), list)
-        else [],
-        "memory_lookup_key": str(first.get("memory_lookup_key", "")),
+        "summary": _first_text(first, "summary", "title", "diagnosis"),
+        "why_it_matters": _first_text(
+            first, "why_it_matters", "why_developers_miss_it", "risk_if_ignored"
+        ),
+        "next_actions": _first_list(first, "next_actions", "recommended_fix"),
+        "proof_commands": _first_list(first, "proof_commands"),
+        "memory_lookup_key": _failure_memory_lookup_key(first, classification),
         "diagnosis": diagnosis_payload,
     }
 
