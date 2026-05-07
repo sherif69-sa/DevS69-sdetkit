@@ -92,7 +92,7 @@ We will execute **one concrete deliverable at a time**, and each cycle will incl
 
 **Delivered:**
 - Updated `SECURITY.md` with explicit vulnerability handling statement.
-- Updated `RELEASE.md` with explicit required release checklist section.
+- Updated `docs/project/release-process.md` with explicit required release checklist section.
 - Updated `CHANGELOG.md` to include dated release headings.
 
 **Validation:**

@@ -30,7 +30,7 @@ This page is the quickest way to understand **where things are**, **where new fi
 | New contributor | `README.md` | `CONTRIBUTING.md`, `docs/project-structure.md` |
 | CLI user | `docs/cli.md` | `docs/doctor.md`, `docs/repo-audit.md` |
 | Maintainer | `quality.sh` | `scripts/bootstrap.sh`, `pyproject.toml`, `Makefile` |
-| Release owner | `RELEASE.md` | `docs/releasing.md`, `CHANGELOG.md` |
+| Release owner | `docs/project/release-process.md` | `docs/releasing.md`, `CHANGELOG.md` |
 | Docs editor | `docs/index.md` | `mkdocs.yml`, `docs/contributing.md` |
 
 ## Root directory guide
@@ -39,7 +39,7 @@ The repository root should stay reserved for **project-wide entrypoints and poli
 
 ### Keep at the root
 
-- project entry docs such as `README.md`, `CONTRIBUTING.md`, `RELEASE.md`, and `ROADMAP.md`
+- project entry docs such as `README.md`, `CONTRIBUTING.md`, `docs/project/release-process.md`, and `docs/roadmap/product-roadmap.md`
 - project-wide policy and trust files such as `SECURITY.md`, `SUPPORT.md`, and `CODE_OF_CONDUCT.md`
 - package/build configuration such as `pyproject.toml`, `mkdocs.yml`, `poetry.lock`, and `noxfile.py`
 - top-level workflow runners such as `quality.sh`, `ci.sh`, `premium-gate.sh`, and `security.sh`

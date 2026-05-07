@@ -21,7 +21,7 @@ This directory contains the human-facing SDETKit docs. Start with the primary op
 | `docs/contracts/` | Contract and schema references. |
 | `docs/integrations/` | Integration-specific guidance. |
 | `docs/kits/` | Kit-level capability docs. |
-| `docs/project/` | Project-level architecture, workflow, quality, and enterprise docs. |
+| `docs/project/` | Project-level architecture, workflow, release, quality, and enterprise docs. |
 | `docs/roadmap/` | Roadmap artifacts and reports. |
 
 ## Safety reminder

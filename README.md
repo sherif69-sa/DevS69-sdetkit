@@ -130,4 +130,5 @@ To keep this README readable, advanced command matrices live in focused guides:
 - Security docs: [docs/security.md](docs/security.md)
 - Policy baselines: [docs/policy-and-baselines.md](docs/policy-and-baselines.md)
 - Quality playbook: [docs/project/quality-playbook.md](docs/project/quality-playbook.md)
+- Release process: [docs/project/release-process.md](docs/project/release-process.md)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)

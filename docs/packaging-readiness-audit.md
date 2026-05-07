@@ -7,7 +7,7 @@ This audit captures **small, safe** productization improvements focused on adopt
 - Package metadata in `pyproject.toml`
 - Install guidance in `README.md`
 - External-adoption install guidance in `docs/adoption.md`
-- Release/versioning discoverability in `RELEASE.md`, `docs/releasing.md`, and changelog navigation
+- Release/versioning discoverability in `docs/project/release-process.md`, `docs/releasing.md`, and changelog navigation
 
 ## What is already good
 

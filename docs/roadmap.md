@@ -1,6 +1,6 @@
 # Roadmap
 
-See the repo roadmap in `ROADMAP.md` for product and release direction.
+See the repo roadmap in `docs/roadmap/product-roadmap.md` for product and release direction.
 
 ## Security and maintenance operations cadence
 
@@ -30,7 +30,7 @@ When an enhancement is identified from customer or user feedback:
 
 1. Create/confirm an issue labeled `enhancement`.
 2. Add one priority label: `priority:high`, `priority:medium`, or `priority:low`.
-3. Link the enhancement issue or PR back to this roadmap page and the main `ROADMAP.md` where appropriate.
+3. Link the enhancement issue or PR back to this roadmap page and the main `docs/roadmap/product-roadmap.md` where appropriate.
 
 ## Current enhancement candidate from maintenance intake (April 2026)
 

@@ -23,7 +23,7 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 | Maintenance / autopilot | [Artifact reference](artifact-reference.md#maintenance-autopilot-upload-set), [Operations handbook](operations-handbook.md), [Automation bots](automation-bots.md) | Treat plans, candidates, and safe-fix outputs as evidence until reviewed policy approves the next step. |
 | Quality gates | [Premium quality gate](premium-quality-gate.md), [Security gate](security-gate.md), [Determinism checklist](determinism-checklist.md), [Determinism contract](determinism-contract.md) | Gate docs explain proof and policy, not broad default auto-fix. |
 | Artifact reference | [Artifact reference](artifact-reference.md), [CI artifact walkthrough](ci-artifact-walkthrough.md), [Evidence showcase](evidence-showcase.md) | Runtime artifacts live under `build/` and `.sdetkit/`; committed examples live under `docs/artifacts/`. |
-| Contributor / developer docs | [Repo tour](repo-tour.md), [Contributing](contributing.md), [Test bootstrap](test-bootstrap.md), [Project structure](project-structure.md) | Keep implementation and contribution material secondary to the operator path. |
+| Contributor / developer docs | [Repo tour](repo-tour.md), [Contributing](contributing.md), [Release process](project/release-process.md), [Test bootstrap](test-bootstrap.md), [Project structure](project-structure.md) | Keep implementation and contribution material secondary to the operator path. |
 | Generated/sample artifacts | [docs/artifacts/README.md](artifacts/README.md), [Live-adoption product proof](live-adoption-product-proof.md) | Historical packs are preserved for traceability and are not the current runbook. |
 | Historical archive | [Archive overview](archive/index.md), [Transition-era material map](archive/transition-era-material.md) | Non-primary; use only after the canonical path is working. |
 
@@ -38,7 +38,7 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 | `docs/contracts/` | Formal contracts and schema-oriented references. | Link from the relevant feature doc instead of duplicating contract text. |
 | `docs/integrations/` | Integration packs and external workflow examples. | Keep platform-specific setup here. |
 | `docs/kits/` | Kit-level packaging and capability docs. | Use after the core operator path is trusted. |
-| `docs/project/` | Project-level architecture, workflow, quality, and enterprise docs. | Keep root copies as compatibility pointers only when checks or external links require them. |
+| `docs/project/` | Project-level architecture, workflow, release, quality, and enterprise docs. | Keep root copies as compatibility pointers only when checks or external links require them. |
 | `docs/roadmap/` | Roadmap artifacts and reports. | Keep roadmap/reporting secondary to current operator guidance. |
 
 ## Navigation rules for future cleanup

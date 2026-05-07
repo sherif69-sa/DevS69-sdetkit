@@ -495,7 +495,9 @@ def test_project_docs_are_moved_under_docs_with_root_compatibility_pointers() ->
         Path("docs/project/operator-workflow.md"),
         Path("docs/project/quality-playbook.md"),
         Path("docs/project/enterprise-offerings.md"),
+        Path("docs/project/release-process.md"),
         Path("docs/roadmap/adaptive-investigation-roadmap.md"),
+        Path("docs/roadmap/product-roadmap.md"),
     )
     for path in moved_docs:
         assert path.is_file(), f"missing moved project doc: {path}"
@@ -505,6 +507,8 @@ def test_project_docs_are_moved_under_docs_with_root_compatibility_pointers() ->
         Path("WORKFLOW.md"): "docs/project/operator-workflow.md",
         Path("QUALITY_PLAYBOOK.md"): "docs/project/quality-playbook.md",
         Path("ENTERPRISE_OFFERINGS.md"): "docs/project/enterprise-offerings.md",
+        Path("RELEASE.md"): "docs/project/release-process.md",
+        Path("ROADMAP.md"): "docs/roadmap/product-roadmap.md",
     }
     for pointer, target in root_pointers.items():
         text = pointer.read_text(encoding="utf-8")
@@ -520,4 +524,6 @@ def test_project_docs_are_moved_under_docs_with_root_compatibility_pointers() ->
     assert "docs/project/" in docs_readme
     assert "docs/project/" in root_index
     assert "Project documents: project/README.md" in mkdocs
+    assert "Release process: project/release-process.md" in mkdocs
     assert "Adaptive investigation roadmap: roadmap/adaptive-investigation-roadmap.md" in mkdocs
+    assert "Product roadmap: roadmap/product-roadmap.md" in mkdocs
