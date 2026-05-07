@@ -1,6 +1,6 @@
 # PR automation for audit auto-fixes
 
-`repo pr-fix` turns `repo fix-audit` results into a deterministic local branch and optional GitHub pull request.
+`repo pr-fix` turns `repo fix-audit` results into a deterministic local branch and optional GitHub pull request. This is an explicit opt-in remediation lane, not part of default investigation/reporting/planning behavior.
 
 ## Local branch workflow (offline)
 
@@ -31,7 +31,7 @@ This reuses the same fix planner while keeping work offline and without branch/c
 
 ## Open a PR on GitHub (explicit opt-in)
 
-Network access is only used when `--open-pr` is provided.
+Network access is only used when `--open-pr` is provided. Treat this as a guarded policy path: review the fix plan and generated diff before opening or merging the PR.
 
 ```bash
 export GITHUB_TOKEN=...

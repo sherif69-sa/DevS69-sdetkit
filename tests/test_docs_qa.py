@@ -287,3 +287,92 @@ def test_case_snippet_proof_map_csv_has_eof_newline() -> None:
     proof_map = Path("docs/artifacts/case-snippet-closeout-pack/proof-map.csv")
     assert proof_map.is_file(), "proof map CSV is missing"
     assert proof_map.read_bytes().endswith(b"\n"), "proof map CSV must end with a newline"
+
+
+def test_docs_information_architecture_exposes_investigation_and_artifacts() -> None:
+    docs_home = Path("docs/index.md").read_text(encoding="utf-8")
+    readme = Path("README.md").read_text(encoding="utf-8")
+    mkdocs = Path("mkdocs.yml").read_text(encoding="utf-8")
+
+    required_links = (
+        "artifact-reference.md",
+        "operator-essentials.md",
+        "investigation-operator-guide.md",
+        "adaptive-diagnosis.md",
+        "premium-quality-gate.md",
+        "remediation-cookbook.md",
+    )
+    for link in required_links:
+        assert link in docs_home, f"missing docs home navigation link: {link}"
+
+    for link in (
+        "docs/artifact-reference.md",
+        "docs/operator-essentials.md",
+        "docs/investigation-operator-guide.md",
+        "docs/adaptive-diagnosis.md",
+    ):
+        assert link in readme, f"missing README documentation map link: {link}"
+
+    assert "Artifact reference and generated sample map: artifact-reference.md" in mkdocs
+    assert "Investigation operator guide: investigation-operator-guide.md" in mkdocs
+    assert "Adaptive Diagnosis Intelligence: adaptive-diagnosis.md" in mkdocs
+
+
+def test_artifact_reference_documents_runtime_uploads_and_sample_boundary() -> None:
+    text = Path("docs/artifact-reference.md").read_text(encoding="utf-8")
+    workflow = Path(".github/workflows/maintenance-autopilot.yml").read_text(encoding="utf-8")
+
+    required_paths = (
+        "build/gate-fast.json",
+        "build/release-preflight.json",
+        "build/investigation/failure.json",
+        "build/maintenance/autopilot/autopilot-report.json",
+        "build/maintenance/autopilot/adaptive-diagnosis.json",
+        "build/maintenance/autopilot/safe-fix-plan.json",
+        ".sdetkit/maintenance/failure-memory.jsonl",
+        ".sdetkit/maintenance/adaptive-safe-fix-memory.jsonl",
+        "docs/artifacts/",
+        "artifact-contract-index.json",
+    )
+    for artifact_path in required_paths:
+        assert artifact_path in text, f"missing artifact reference path: {artifact_path}"
+
+    for uploaded_path in (
+        "build/maintenance/autopilot/autopilot-report.json",
+        "build/maintenance/autopilot/adaptive-diagnosis.json",
+        "build/maintenance/autopilot/safe-fix-plan.json",
+        ".sdetkit/maintenance/adaptive-safe-fix-memory.jsonl",
+    ):
+        assert uploaded_path in workflow
+        assert uploaded_path in text
+
+    assert "Generated/sample material" in text
+    assert "Runtime artifacts" in text
+
+
+def test_investigation_and_autopilot_docs_preserve_diagnostic_safety_story() -> None:
+    docs = {
+        "artifact-reference": Path("docs/artifact-reference.md").read_text(encoding="utf-8"),
+        "operator-essentials": Path("docs/operator-essentials.md").read_text(encoding="utf-8"),
+        "investigation-operator-guide": Path("docs/investigation-operator-guide.md").read_text(
+            encoding="utf-8"
+        ),
+        "adaptive-diagnosis": Path("docs/adaptive-diagnosis.md").read_text(encoding="utf-8"),
+        "pr-automation": Path("docs/pr-automation.md").read_text(encoding="utf-8"),
+        "premium-quality-gate": Path("docs/premium-quality-gate.md").read_text(encoding="utf-8"),
+    }
+
+    combined = "\n".join(docs.values()).lower()
+    assert "diagnostic/report-only by default" in combined
+    assert "explicit guarded" in combined
+    assert "guarded pr auto-fix" in combined
+    assert "auto-fix is generally allowed" not in combined
+
+    assert (
+        "does not create branches, push commits, open pull requests, or apply fixes"
+        in docs["investigation-operator-guide"]
+    )
+    assert "they do not approve mutation" in docs["operator-essentials"]
+    assert "report-only by default" in docs["adaptive-diagnosis"]
+    assert "explicit opt-in remediation lane" in docs["pr-automation"]
+    assert "default quality-gate posture remains evidence-first" in docs["premium-quality-gate"]

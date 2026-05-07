@@ -261,7 +261,7 @@ build/
 
 Canonical gate commands: `python -m sdetkit gate fast`, `python -m sdetkit gate release`, and `python -m sdetkit doctor`.
 
-Secondary lanes cover review, quality, and CI automation once the primary gate decision is stable.
+Secondary lanes cover review, investigation, quality, and CI automation once the primary gate decision is stable. Investigation/reporting/planning lanes are diagnostic-only by default; repository mutation requires explicit guarded policy and PR-only remediation controls.
 
 ## Core operator lanes
 
@@ -354,6 +354,10 @@ python tools/maintenance_command_center.py \
 - Start in 5 minutes: [docs/start-here-5-minutes.md](docs/start-here-5-minutes.md)
 - Recommended CI flow: [docs/recommended-ci-flow.md](docs/recommended-ci-flow.md)
 - Artifact walkthrough: [docs/ci-artifact-walkthrough.md](docs/ci-artifact-walkthrough.md)
+- Artifact reference and generated sample map: [docs/artifact-reference.md](docs/artifact-reference.md)
+- Operator essentials: [docs/operator-essentials.md](docs/operator-essentials.md)
+- Investigation operator guide: [docs/investigation-operator-guide.md](docs/investigation-operator-guide.md)
+- Adaptive diagnosis: [docs/adaptive-diagnosis.md](docs/adaptive-diagnosis.md)
 - CLI reference: [docs/cli.md](docs/cli.md)
 - Docs index: [docs/index.md](docs/index.md)
 

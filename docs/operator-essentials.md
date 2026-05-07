@@ -1,4 +1,4 @@
-# Operator essentials (Phase 2 surface-clarity baseline)
+# Operator essentials
 
 This page is the intentionally small command subset for day-to-day release-confidence operations.
 
@@ -26,7 +26,7 @@ Use these after Tier 0 when you need remediation and operational triage depth:
 - `python -m sdetkit doctor --enterprise --format md`
 - `python -m sdetkit doctor --enterprise-next-pass-only --enterprise-next-pass-exit-code`
 
-See [Investigation operator guide](investigation-operator-guide.md) for the diagnostic-only investigation flow and safety interpretation.
+See [Investigation operator guide](investigation-operator-guide.md) for the diagnostic-only investigation flow and safety interpretation, and [Artifact reference and generated sample map](artifact-reference.md) for the runtime/uploaded artifact paths. The investigate commands recommend proof and next actions only; they do not approve mutation.
 
 ## Tier 2 — Team rollout and CI alignment
 
@@ -73,6 +73,11 @@ Expand beyond this page only when all of the following are true:
 
 After operator essentials is stable, expand in this order:
 
-1. `kits` discovery and umbrella lanes (`release`, `intelligence`, `integration`, `forensics`)
-2. advanced inspection lanes (`inspect`, `inspect-compare`, `inspect-project`)
-3. migration/legacy compatibility lanes (only when required)
+1. Investigation and diagnosis: [Investigation operator guide](investigation-operator-guide.md) -> [Adaptive Diagnosis Intelligence](adaptive-diagnosis.md) -> [Remediation cookbook](remediation-cookbook.md).
+2. Artifact interpretation: [Artifact reference and generated sample map](artifact-reference.md) -> [CI artifact walkthrough](ci-artifact-walkthrough.md).
+3. Quality gates: [Premium quality gate](premium-quality-gate.md) -> [Security gate](security-gate.md) -> [Determinism checklist](determinism-checklist.md).
+4. `kits` discovery and umbrella lanes (`release`, `intelligence`, `integration`, `forensics`).
+5. Advanced inspection lanes (`inspect`, `inspect-compare`, `inspect-project`).
+6. Migration/legacy compatibility lanes (only when required).
+
+Keep the safety boundary intact while expanding: diagnose -> recommend -> plan -> prove can happen by default; candidate, probation, policy proposal, dry run, guarded PR auto-fix, and memory updates require the documented guarded lanes and review posture.

@@ -34,7 +34,7 @@ Your repo has lint and/or formatting debt. This is common on first adoption.
 python -m ruff check .
 python -m ruff format --check .
 
-# optional minimal auto-fix pass
+# optional scoped auto-fix pass; review the diff before committing
 python -m sdetkit gate fast --only ruff,ruff_format --fix
 ```
 

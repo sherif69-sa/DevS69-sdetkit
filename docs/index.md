@@ -25,7 +25,7 @@ This page is the product homepage/router for first-time adoption.
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🧭 Choose your path](choose-your-path.md) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy reports](#legacy-reports)
+[⚡ Fast start](#fast-start) · [🧭 Choose your path](choose-your-path.md) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [📦 Artifact reference](artifact-reference.md) · [🧑‍✈️ Operator guide](operator-essentials.md) · [🤝 Contribute](contributing.md) · [📚 Legacy reports](#legacy-reports)
 
 </div>
 
@@ -82,11 +82,25 @@ build/release-preflight.json
    - `make adoption-posture`
    - `make adoption-validate`
 
+## Docs information architecture
+
+Use this index as the primary human navigation map. The docs are organized around common operator jobs rather than historical delivery waves:
+
+- **Getting started:** first commands, first artifacts, and adoption quickstarts.
+- **Operator guide:** daily release-confidence commands and diagnostic-only investigation.
+- **Investigation / diagnosis:** failure triage, adaptive diagnosis, and proof selection.
+- **Maintenance / autopilot:** guarded workflow evidence, safe-fix audit trails, and PR-only remediation boundaries.
+- **Quality gates:** release, security, premium, and determinism gates.
+- **Artifact reference:** runtime artifact paths plus committed generated/sample artifact labels.
+- **Contributor / developer docs:** repo tour, contribution flow, tests, and release maintenance.
+
 ## Team rollout / CI
 
 - [Adopt in your repository](adoption.md)
 - [Team adoption checklist](team-adoption-checklist.md)
 - [Operator essentials](operator-essentials.md)
+- [Investigation operator guide](investigation-operator-guide.md)
+- [Artifact reference and generated sample map](artifact-reference.md)
 - [Operator onboarding (7-day)](operator-onboarding-7-day.md)
 - [Phase 1 execution checklist](phase1-execution-checklist.md)
 - [Next 10 follow-ups](next-10-followups.md)
@@ -97,9 +111,20 @@ build/release-preflight.json
 - [Phase-by-phase execution plan](phase-by-phase-execution-plan.md)
 - [One-by-one phase execution](phase-execution-one-by-one.md)
 
+## Investigation, maintenance, and quality gates
+
+- [Adaptive Diagnosis Intelligence](adaptive-diagnosis.md)
+- [Investigation operator guide](investigation-operator-guide.md)
+- [Maintenance/autopilot artifact map](artifact-reference.md#maintenance-autopilot-upload-set)
+- [Remediation cookbook](remediation-cookbook.md)
+- [Premium quality gate](premium-quality-gate.md)
+- [Security gate](security-gate.md)
+- [PR automation for audit auto-fixes](pr-automation.md)
+
 ## Reference / advanced
 
 - [CLI reference](cli.md)
+- [Artifact reference and generated sample map](artifact-reference.md)
 - [Doctor checks](doctor.md)
 - [Stability levels](stability-levels.md)
 - [Versioning and support posture](versioning-and-support.md)
