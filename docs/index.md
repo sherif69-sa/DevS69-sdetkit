@@ -25,7 +25,7 @@ This page is the product homepage/router for first-time adoption.
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🧭 Choose your path](choose-your-path.md) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [📦 Artifact reference](artifact-reference.md) · [🧑‍✈️ Operator guide](operator-essentials.md) · [🤝 Contribute](contributing.md) · [📚 Legacy reports](#legacy-reports)
+[⚡ Fast start](#fast-start) · [🧭 Choose your path](choose-your-path.md) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [📦 Artifact reference](artifact-reference.md) · [Operator guide](operator-essentials.md) · [🤝 Contribute](contributing.md) · [📚 Legacy reports](#legacy-reports)
 
 </div>
 

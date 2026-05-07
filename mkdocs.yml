@@ -85,15 +85,6 @@ extra_javascript:
 
 nav:
   - Start here: index.md
-  - Operator and evidence (primary):
-      - Docs map and organization: docs-map.md
-      - Operator essentials: operator-essentials.md
-      - Investigation operator guide: investigation-operator-guide.md
-      - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md
-      - Artifact reference and generated sample map: artifact-reference.md
-      - CI artifact walkthrough: ci-artifact-walkthrough.md
-      - Remediation cookbook: remediation-cookbook.md
-      - Premium quality gate: premium-quality-gate.md
   - Canonical first-proof path (primary):
       - Install: install.md
       - Quickstart (copy-paste): quickstart-copy-paste.md
@@ -123,6 +114,15 @@ nav:
       - Release confidence KPI pack: release-confidence-kpi-pack.md
       - Determinism checklist: determinism-checklist.md
       - Determinism contract: determinism-contract.md
+  - Operator and evidence (primary):
+      - Docs map and organization: docs-map.md
+      - Operator essentials: operator-essentials.md
+      - Investigation operator guide: investigation-operator-guide.md
+      - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md
+      - Artifact reference and generated sample map: artifact-reference.md
+      - CI artifact walkthrough: ci-artifact-walkthrough.md
+      - Remediation cookbook: remediation-cookbook.md
+      - Premium quality gate: premium-quality-gate.md
   - Current reference and discoverability (secondary):
       - CLI reference: cli.md
       - API: api.md
