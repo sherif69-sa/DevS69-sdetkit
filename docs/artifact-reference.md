@@ -51,6 +51,20 @@ Labels to use when reading that tree:
 
 ## Navigation from artifacts to action
 
+Use this table before opening raw logs. It maps the most common artifact signals to the next safe operator action.
+
+| If you see... | Open this artifact first | Next safe action | Mutation posture |
+| --- | --- | --- | --- |
+| A local release gate failed | `build/gate-fast.json` or `build/release-preflight.json` | Read `ok`, `failed_steps`, and the failing step output; then run `sdetkit investigate failure` on the captured log. | Diagnostic-only. |
+| A CI log or PR check failed | `build/investigation/failure.json` | Read `classification`, `summary`, `next_actions`, `proof_commands`, `diagnostic_only`, `automation_allowed`, and `requires_human_review`. | Diagnostic-only. |
+| The owning area is unclear | `build/investigation/repo.json` and the surface Markdown output | Use the repo/surface result to choose the smallest focused proof command. | Diagnostic-only. |
+| A maintenance-autopilot run uploaded artifacts | `build/maintenance/autopilot/autopilot-report.md` and `build/maintenance/autopilot/adaptive-diagnosis.md` | Summarize the diagnosis and proof commands in the PR or issue before considering remediation. | Diagnostic-only on pull requests. |
+| A safe-fix plan exists | `build/maintenance/autopilot/safe-fix-plan.json` | Review it as an audit plan; verify policy, branch, diff, and proof artifacts before any guarded lane runs. | Not approval to mutate. |
+| A pattern keeps recurring | `.sdetkit/maintenance/failure-memory.jsonl` and `.sdetkit/maintenance/adaptive-safe-fix-memory.jsonl` | Use memory to explain recurrence and decide whether a policy proposal is warranted. | Evidence for review, not auto-approval. |
+| You are reading committed samples | `docs/artifacts/` and [`live-adoption-product-proof.md`](live-adoption-product-proof.md) | Treat them as examples or historical proof packs; use runtime `build/` or `.sdetkit/` files for the current branch decision. | Not current-run evidence unless regenerated. |
+
+Quick rules:
+
 1. For ship/no-ship decisions, start with `build/gate-fast.json` and `build/release-preflight.json`.
 2. For a failed command or CI log, run `sdetkit investigate failure` and read `diagnostic_only`, `automation_allowed`, `safe_to_auto_fix`, and `requires_human_review`.
 3. For recurring maintenance failures, open the `maintenance-autopilot` upload and read the report, adaptive diagnosis, safe-fix plan, and learning memory together.

@@ -409,3 +409,23 @@ def test_operator_essentials_reads_like_day_to_day_runbook() -> None:
     assert "A safe-fix plan is not permission to apply a fix" in text
     assert "These commands are kept here for rollout contract visibility" in text
     assert text.index("## Day 0") < text.index("## Rollout and CI contract commands")
+
+
+def test_artifact_reference_maps_signals_to_safe_operator_actions() -> None:
+    text = Path("docs/artifact-reference.md").read_text(encoding="utf-8")
+
+    required_table_headers = (
+        "| If you see... | Open this artifact first | Next safe action | Mutation posture |",
+        "| A local release gate failed | `build/gate-fast.json` or `build/release-preflight.json` |",
+        "| A CI log or PR check failed | `build/investigation/failure.json` |",
+        "| A maintenance-autopilot run uploaded artifacts |",
+        "| A safe-fix plan exists | `build/maintenance/autopilot/safe-fix-plan.json` |",
+        "| A pattern keeps recurring | `.sdetkit/maintenance/failure-memory.jsonl` and `.sdetkit/maintenance/adaptive-safe-fix-memory.jsonl` |",
+        "| You are reading committed samples | `docs/artifacts/` and [`live-adoption-product-proof.md`](live-adoption-product-proof.md) |",
+    )
+    for expected in required_table_headers:
+        assert expected in text
+
+    assert "Not approval to mutate" in text
+    assert "Evidence for review, not auto-approval" in text
+    assert text.index("## Navigation from artifacts to action") < text.index("Quick rules:")
