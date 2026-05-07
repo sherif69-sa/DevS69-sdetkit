@@ -110,7 +110,7 @@ For this repository, `make first-proof` emits `FIRST_PROOF_DECISION=SHIP|NO-SHIP
 - Operations handbook: [docs/operations-handbook.md](docs/operations-handbook.md)
 - Remediation cookbook: [docs/remediation-cookbook.md](docs/remediation-cookbook.md)
 
-Historical and transition-era references are intentionally secondary. Open the docs index after the canonical first path is working.
+Historical and transition-era references (secondary) are intentionally secondary. Open the docs index after the canonical first path is working.
 
 ## Advanced lanes live in docs
 
@@ -121,6 +121,18 @@ To keep this README readable, advanced command matrices live in focused guides:
 - Maintenance and recurring operations: [docs/operations-handbook.md](docs/operations-handbook.md)
 - Rollback/remediation examples: [docs/integrations/rollback-remediation-examples.md](docs/integrations/rollback-remediation-examples.md)
 - Failure remediation workflow example: [examples/kits/intelligence/failure-fix-playbook.md](examples/kits/intelligence/failure-fix-playbook.md)
+
+## Top-tier reporting sample pipeline
+
+Run `make top-tier-reporting` for the sample reporting lane. See [docs/portfolio-reporting-recipe.md](docs/portfolio-reporting-recipe.md) and [docs/kpi-schema.md](docs/kpi-schema.md).
+
+## Upgrade next (intent router)
+
+Run `make upgrade-next` for the guided next-command router. Full details live in [docs/upgrade-next-commands.md](docs/upgrade-next-commands.md).
+
+## Real workflow operations
+
+Real workflow operations live in [docs/real-workflow-operations.md](docs/real-workflow-operations.md). Common aliases: `make ops-daily`, `make ops-daily-fast`, `make ops-weekly`, `make ops-premerge`, `make ops-premerge-fast`, `make ops-premerge-next`, `make ops-premerge-next-fast`, `make ops-followup`, `make ops-now`, `make ops-now-lite`, `make ops-next`.
 
 ## Project policies
 
