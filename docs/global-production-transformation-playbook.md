@@ -2,5 +2,5 @@
 
 This page is the global index for production transformation workflows.
 
-- Readiness: [Production readiness](production-readiness.md)
+- Readiness: [Release readiness](release-readiness.md)
 - Program framing: [World class quality program](world-class-quality-program.md)
