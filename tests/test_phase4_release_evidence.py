@@ -20,7 +20,7 @@ def _write_baseline_docs(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/operator-essentials.md").write_text(
-        "make phase4-governance-contract\npython scripts/validate_enterprise_contracts.py\n",
+        "make governance-contract-check\npython scripts/validate_enterprise_contracts.py\n",
         encoding="utf-8",
     )
     for name in (

@@ -23,10 +23,10 @@ Stand up a baseline lane that always produces machine-readable evidence and imme
 
 ### Execute now
 1. Run the baseline lane:
-   - `make phase1-baseline`
-   - `make phase1-status`
-   - `make phase1-next`
-   - `make phase1-complete`
+   - `make operations-baseline`
+   - `make operations-status`
+   - `make operations-next-action`
+   - `make operations-complete`
    - or `bash scripts/phase1_baseline_lane.sh`
 2. Capture outputs under `build/phase1-baseline/`:
    - `gate-fast.json`
@@ -35,7 +35,7 @@ Stand up a baseline lane that always produces machine-readable evidence and imme
    - per-check logs and return codes
    - summary JSON + markdown
 3. Convert blockers into assigned remediation tasks with due dates.
-4. Execute the top remediation task in the same cycle and rerun `make phase1-status`.
+4. Execute the top remediation task in the same cycle and rerun `make operations-status`.
 
 ### Done when
 - CI and local runs are deterministic (same command path, same artifact contract).
@@ -98,7 +98,7 @@ Upgrade checks into a stronger execution engine with better recommendations and 
 3. Add trend deltas across successive baseline runs.
 4. Improve doctor handoff signals for deterministic next-pass actions.
 5. Validate baseline summary schema with:
-   - `make phase3-quality-contract`
+   - `make quality-contract-check`
    - `python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json`
 
 ### Done when
@@ -129,7 +129,7 @@ Turn technical capability into enterprise-grade confidence with explicit governa
 3. Document compatibility/deprecation boundaries per tier.
 4. Track governance adherence with recurring reviews.
 5. Enforce governance docs contract with:
-   - `make phase4-governance-contract`
+   - `make governance-contract-check`
    - `python scripts/check_phase4_governance_contract.py --format json`
 
 ### Done when
@@ -160,7 +160,7 @@ Scale integrations and extension surfaces without destabilizing core release-con
 3. Publish extension certification criteria.
 4. Build portfolio scorecards from shared evidence contracts.
 5. Enforce ecosystem contract with:
-   - `make phase5-ecosystem-contract`
+   - `make ecosystem-contract-check`
    - `python scripts/check_phase5_ecosystem_contract.py --format json`
 
 ### Done when
@@ -190,7 +190,7 @@ Convert technical progress into repeatable business outcomes and reporting-ready
 2. Standardize scorecard freshness and publishing cadence.
 3. Tie release-confidence outputs to adoption/operations metrics.
 4. Enforce metrics contract with:
-   - `make phase6-metrics-contract`
+   - `make metrics-contract-check`
    - `python scripts/check_phase6_metrics_contract.py --format json`
 
 ### Done when

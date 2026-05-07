@@ -105,14 +105,14 @@ For a compact tree-level map, use [Docs map and organization](docs-map.md).
 - [Artifact reference and generated sample map](artifact-reference.md)
 - [Docs map and organization](docs-map.md)
 - [Operator onboarding (7-day)](operator-onboarding-7-day.md)
-- [Phase 1 execution checklist](phase1-execution-checklist.md)
+- [Phase 1 execution checklist](operations-execution-checklist.md)
 - [Next 10 follow-ups](next-10-followups.md)
 - [Recommended CI flow](recommended-ci-flow.md)
 - [CI artifact walkthrough](ci-artifact-walkthrough.md)
 - [Release confidence flow](release-confidence-flow.md)
 - [First failure triage](first-failure-triage.md)
-- [Phase-by-phase execution plan](phase-by-phase-execution-plan.md)
-- [One-by-one phase execution](phase-execution-one-by-one.md)
+- [Phase-by-phase execution plan](operations-execution-plan.md)
+- [One-by-one phase execution](operations-execution-guide.md)
 
 ## Investigation, maintenance, and quality gates
 

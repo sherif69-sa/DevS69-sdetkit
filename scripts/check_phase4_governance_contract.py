@@ -61,7 +61,7 @@ REQUIRED_GOV_DOCS = [
     "docs/integrations-and-extension-boundary.md",
 ]
 REQUIRED_OPERATOR_LINES = [
-    "make phase4-governance-contract",
+    "make governance-contract-check",
     "python scripts/validate_enterprise_contracts.py",
 ]
 
@@ -192,8 +192,8 @@ def _build_governance_payload(ns: argparse.Namespace) -> dict[str, Any]:
             "Public CLI aliases remain available for one major cycle.",
         ],
         "compatibility_guards": [
-            "make phase3-quality-contract",
-            "make phase4-governance-contract",
+            "make quality-contract-check",
+            "make governance-contract-check",
         ],
     }
     compatibility_contract["supported_tiers"] = _sorted_unique(
