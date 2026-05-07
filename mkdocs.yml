@@ -221,7 +221,7 @@ nav:
       - Archive overview: archive/index.md
       - Transition-era material map: archive/transition-era-material.md
 exclude_docs: |
-  README.md
+  /README.md
   artifacts/**
   roadmap/reports/**
   *-report.md
