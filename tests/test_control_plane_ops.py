@@ -26,8 +26,18 @@ def test_ops_plan_deterministic_order(tmp_path: Path, monkeypatch) -> None:
 def test_ops_cache_changes_on_file_change(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     ops_control.init_layout()
+
+    monkeypatch.setitem(
+        ops_control.BUILTIN_TASKS,
+        "cache-probe",
+        ops_control.TaskDef(
+            "cache-probe",
+            ("python3", "-c", "raise SystemExit(0)"),
+        ),
+    )
     (tmp_path / ".sdetkit" / "config.toml").write_text(
-        '[profiles]\ndefault=["doctor"]\nci=["doctor"]\nlocal=["doctor"]\n', encoding="utf-8"
+        '[profiles]\ndefault=["cache-probe"]\nci=["cache-probe"]\nlocal=["cache-probe"]\n',
+        encoding="utf-8",
     )
     (tmp_path / "sample.py").write_text("print('a')\n", encoding="utf-8")
     assert (

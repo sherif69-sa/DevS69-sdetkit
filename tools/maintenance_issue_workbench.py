@@ -11,11 +11,13 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+_utc = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
+
 DEFAULT_HTTP_TIMEOUT_SECONDS = 30
 
 
 def _utc_now() -> str:
-    return dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return dt.datetime.now(_utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 class GitHubIssueClient:

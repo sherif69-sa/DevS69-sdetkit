@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from sdetkit._datetime import UTC
 
 
 def _read_json(path: Path) -> dict[str, Any] | None:

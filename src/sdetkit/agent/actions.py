@@ -6,11 +6,12 @@ import subprocess
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Any
 
 from sdetkit import repo
+from sdetkit._datetime import UTC
 from sdetkit.atomicio import atomic_write_text
 from sdetkit.kits import blueprint_payload, expand_payload, optimize_payload
 from sdetkit.report import build_dashboard

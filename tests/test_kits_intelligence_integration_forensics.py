@@ -4,8 +4,10 @@ import json
 import subprocess
 import sys
 import zipfile
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
+
+from sdetkit._datetime import UTC
 
 
 def _run(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:

@@ -9,15 +9,17 @@ from __future__ import annotations
 
 import argparse
 import csv
+import datetime as _sdetkit_datetime
 import json
 import os
 import subprocess as _subprocess
 import sys
 import tempfile
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+UTC = getattr(_sdetkit_datetime, "UTC", _sdetkit_datetime.timezone.utc)  # noqa: UP017
 ROOT = Path(__file__).resolve().parent.parent
 SCENARIO_PATH = ROOT / "docs/contracts/adaptive-postcheck-scenarios.v1.json"
 SCENARIO_DB_SCRIPT = ROOT / "scripts/build_adaptive_scenario_database.py"

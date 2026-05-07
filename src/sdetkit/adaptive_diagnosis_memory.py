@@ -3,9 +3,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from sdetkit._datetime import UTC
 
 SCHEMA_VERSION = "sdetkit.adaptive_diagnosis.memory.v1"
 RECORD_SCHEMA_VERSION = "sdetkit.adaptive_diagnosis.learning_record.v1"

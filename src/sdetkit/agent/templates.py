@@ -21,6 +21,8 @@ from sdetkit.atomicio import atomic_write_text, canonical_json_bytes, canonical_
 from sdetkit.kits import expand_payload, optimize_payload
 from sdetkit.report import build_dashboard
 
+_utc = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
+
 
 class TemplateValidationError(ValueError):
     pass
@@ -339,7 +341,7 @@ def _adaptive_review_payload(*, history_dir: Path, limit: int) -> dict[str, Any]
     top_errors = sorted(error_counter.items(), key=lambda row: (-row[1], row[0]))[:limit]
     return {
         "schema_version": "1.0",
-        "generated_at": dt.datetime.now(dt.UTC).isoformat().replace("+00:00", "Z"),
+        "generated_at": dt.datetime.now(_utc).isoformat().replace("+00:00", "Z"),
         "records": records,
         "recurring_failures": [{"action": action, "count": count} for action, count in top_actions],
         "top_errors": [{"error": err, "count": count} for err, count in top_errors],
