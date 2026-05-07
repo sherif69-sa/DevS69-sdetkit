@@ -389,3 +389,23 @@ def test_readme_stays_concise_front_door() -> None:
     assert "python -m sdetkit portfolio-orchestrate" not in readme
     assert "Quick ops aliases:" not in readme
     assert "Maintenance command center (issue noise control)" not in readme
+
+
+def test_operator_essentials_reads_like_day_to_day_runbook() -> None:
+    text = Path("docs/operator-essentials.md").read_text(encoding="utf-8")
+
+    required_sections = (
+        "## Safety baseline",
+        "## Day 0 — First run and artifact handoff",
+        "## Day 1 — Failed CI or PR check triage",
+        "## Day 2 — Maintenance/autopilot artifact review",
+        "## Day 3 — Guarded remediation review",
+        "## Rollout and CI contract commands (secondary)",
+    )
+    for section in required_sections:
+        assert section in text
+
+    assert "they do not approve mutation" in text
+    assert "A safe-fix plan is not permission to apply a fix" in text
+    assert "These commands are kept here for rollout contract visibility" in text
+    assert text.index("## Day 0") < text.index("## Rollout and CI contract commands")
