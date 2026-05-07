@@ -22,7 +22,7 @@ def _write_baseline_docs(root: Path) -> None:
     (root / "docs/operator-essentials.md").write_text(
         "\n".join(
             [
-                "make phase4-governance-contract",
+                "make governance-contract-check",
                 "python scripts/validate_enterprise_contracts.py",
             ]
         )
@@ -262,7 +262,7 @@ def test_phase4_main_reports_malformed_governance_check_rows(
             "compatibility_contract": {
                 "supported_tiers": ["tier0"],
                 "deprecation_boundaries": ["notice"],
-                "compatibility_guards": ["make phase4-governance-contract"],
+                "compatibility_guards": ["make governance-contract-check"],
             },
             "release_evidence_contract": {
                 "required_artifacts": ["docs/index.md"],

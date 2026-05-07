@@ -35,8 +35,8 @@ use these canonical targets:
 - `make phase2-execute`
 - `make phase3-governance`
 - `make phase4-credibility`
-- `make phase1-execution-core`
-- `make phase3-quality-report`
+- `make operations-core-run`
+- `make quality-contract-report`
 
 Legacy phase aliases remain for compatibility with existing CI/docs history and will be retired
 only after consumers migrate.

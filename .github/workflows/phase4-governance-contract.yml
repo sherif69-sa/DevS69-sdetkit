@@ -33,7 +33,7 @@ jobs:
       - name: Run phase4 contract
         run: |
           . .venv/bin/activate
-          make phase4-governance-contract
+          make governance-contract-check
       - name: Validate exact artifact set
         run: |
           python - <<'PYCODE'
