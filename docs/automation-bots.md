@@ -222,7 +222,7 @@ It now:
 
 - runs `python -m sdetkit doctor --format json` and captures the result as part of the release snapshot,
 - reviews the presence of core release workflows such as `release.yml`, `pages.yml`, `versioning.yml`, and `docs-link-check.yml`,
-- audits key release trust assets including `CHANGELOG.md`, `ROADMAP.md`, `RELEASE.md`, and the public release docs,
+- audits key release trust assets including `CHANGELOG.md`, `docs/roadmap/product-roadmap.md`, `docs/project/release-process.md`, and the public release docs,
 - reuses the GitHub automation maintenance check to highlight any required workflow/config gaps,
 - opens a date-scoped `🚀 Release readiness radar (...)` issue,
 - uploads `build/release-readiness-radar.json` plus the raw doctor/maintenance payloads as workflow artifacts.

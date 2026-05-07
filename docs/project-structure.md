@@ -30,7 +30,7 @@ This page is the quickest way to understand **where things are**, **where new fi
 | New contributor | `README.md` | `CONTRIBUTING.md`, `docs/project-structure.md` |
 | CLI user | `docs/cli.md` | `docs/doctor.md`, `docs/repo-audit.md` |
 | Maintainer | `quality.sh` | `scripts/bootstrap.sh`, `pyproject.toml`, `Makefile` |
-| Release owner | `RELEASE.md` | `docs/releasing.md`, `CHANGELOG.md` |
+| Release owner | `docs/project/release-process.md` | `docs/releasing.md`, `CHANGELOG.md` |
 | Docs editor | `docs/index.md` | `mkdocs.yml`, `docs/contributing.md` |
 
 ## Root directory guide
@@ -39,10 +39,12 @@ The repository root should stay reserved for **project-wide entrypoints and poli
 
 ### Keep at the root
 
-- project entry docs such as `README.md`, `CONTRIBUTING.md`, `RELEASE.md`, and `ROADMAP.md`
-- project-wide policy and trust files such as `SECURITY.md`, `SUPPORT.md`, and `CODE_OF_CONDUCT.md`
+- concise entrypoints and policy files such as `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `SUPPORT.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `RELEASE.md`, and `ROADMAP.md`
+- short compatibility pointers such as `ARCHITECTURE.md`, `WORKFLOW.md`, `QUALITY_PLAYBOOK.md`, and `ENTERPRISE_OFFERINGS.md` while existing checks or external links still expect them
 - package/build configuration such as `pyproject.toml`, `mkdocs.yml`, `poetry.lock`, and `noxfile.py`
 - top-level workflow runners such as `quality.sh`, `ci.sh`, `premium-gate.sh`, and `security.sh`
+
+Maintained long-form project docs live under `docs/project/` and `docs/roadmap/`.
 
 ### Prefer subdirectories for everything else
 

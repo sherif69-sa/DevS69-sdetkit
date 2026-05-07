@@ -1,34 +1,95 @@
-# Operator essentials (Phase 2 surface-clarity baseline)
+# Operator essentials
 
-This page is the intentionally small command subset for day-to-day release-confidence operations.
+This is the day-to-day SDETKit runbook. Keep it small: prove the release decision first, investigate failures second, and only consider guarded remediation after the evidence is attached.
 
-If a team is new to SDETKit, start here first and expand only after this lane is trusted.
+If a team is new to SDETKit, start here first and expand only after this lane is deterministic in local and CI.
 
-## Tier 0 — First-run canonical path (always first)
+## Safety baseline
 
-1. `python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json`
-2. `python -m sdetkit gate release --format json --out build/release-preflight.json`
-3. `python -m sdetkit doctor`
+Investigation, reporting, recommendation, and planning paths are diagnostic-only by default. They recommend proof commands and next actions; they do not approve mutation.
+
+Use this rule for every lane on this page:
+
+```text
+prove first -> diagnose from artifacts -> remediate only through explicit guarded policy
+```
+
+## Day 0 — First run and artifact handoff
+
+Run the canonical release-confidence path first:
+
+```bash
+python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
+python -m sdetkit gate release --format json --out build/release-preflight.json
+python -m sdetkit doctor --format json --out build/doctor.json
+```
 
 Expected first artifacts:
 
 - `build/gate-fast.json`
 - `build/release-preflight.json`
+- `build/doctor.json`
 
-## Tier 1 — Core operational follow-up
+Read `ok` and `failed_steps` before raw logs. For artifact meanings, use [Artifact reference and generated sample map](artifact-reference.md).
 
-Use these after Tier 0 when you need remediation and operational triage depth:
+## Day 1 — Failed CI or PR check triage
 
-- `python -m sdetkit review . --no-workspace --format operator-json`
-- `python -m sdetkit investigate failure --log build/quality.log --format markdown`
-- `python -m sdetkit investigate repo --root . --format json --out build/investigation/repo.json`
-- `python -m sdetkit investigate surface --root . --surface <surface> --format markdown`
-- `python -m sdetkit doctor --enterprise --format md`
-- `python -m sdetkit doctor --enterprise-next-pass-only --enterprise-next-pass-exit-code`
+When a log, check, or gate fails, collect evidence without mutating the repository:
 
-See [Investigation operator guide](investigation-operator-guide.md) for the diagnostic-only investigation flow and safety interpretation.
+```bash
+python -m sdetkit review . --no-workspace --format operator-json
+python -m sdetkit investigate failure --log build/quality.log --format markdown
+python -m sdetkit investigate failure --log build/quality.log --format json --out build/investigation/failure.json
+```
 
-## Tier 2 — Team rollout and CI alignment
+Read these fields first in investigation output:
+
+- `classification`
+- `summary`
+- `next_actions`
+- `proof_commands`
+- `diagnostic_only`
+- `automation_allowed`
+- `requires_human_review`
+
+If the owner is unclear, narrow the repository surface:
+
+```bash
+python -m sdetkit investigate repo --root . --format json --out build/investigation/repo.json
+python -m sdetkit investigate surface --root . --surface <surface> --format markdown
+```
+
+See [Investigation operator guide](investigation-operator-guide.md) for the complete diagnostic-only flow.
+
+## Day 2 — Maintenance/autopilot artifact review
+
+For maintenance-autopilot runs, start with the uploaded artifact bundle rather than individual logs:
+
+1. Open `build/maintenance/autopilot/autopilot-report.md` for the run summary.
+2. Open `build/maintenance/autopilot/adaptive-diagnosis.md` for the failure explanation and proof commands.
+3. Open `build/maintenance/autopilot/safe-fix-plan.json` only as audit evidence.
+4. Check `.sdetkit/maintenance/failure-memory.jsonl` and `.sdetkit/maintenance/adaptive-safe-fix-memory.jsonl` for recurring patterns.
+
+A safe-fix plan is not permission to apply a fix. Treat candidate, probation, policy proposal, dry-run, and guardrail outputs as evidence until a reviewed policy path explicitly authorizes the next step.
+
+## Day 3 — Guarded remediation review
+
+Use remediation docs only after the diagnostic artifacts identify a specific failure class:
+
+- [Remediation cookbook](remediation-cookbook.md) for first-failure playbooks.
+- [Premium quality gate](premium-quality-gate.md) for guarded quality-gate remediation posture.
+- [PR automation for audit auto-fixes](pr-automation.md) for explicit opt-in PR-fix behavior.
+
+Before any mutation, confirm all of the following are true:
+
+1. The branch is not `main`.
+2. The policy path explicitly allows the guarded lane.
+3. The generated plan and diff are attached to the PR or workflow run.
+4. The proof command from the investigation output has been rerun on the reviewed branch.
+
+## Rollout and CI contract commands (secondary)
+
+These commands are kept here for rollout contract visibility, not as the first-time operator path:
 
 - `python scripts/validate_enterprise_contracts.py`
 - `python scripts/check_primary_docs_map.py`
@@ -53,26 +114,20 @@ See [Investigation operator guide](investigation-operator-guide.md) for the diag
 - `make phase6-complete`
 - `make phase6-metrics-contract`
 
-`make phase2-workflow` runs strict kickoff + contract checks and writes summary artifacts under `build/phase2-start/`.
-`make phase2-status` reports whether emitted Phase 2 kickoff artifacts are complete and contract-valid.
-`make phase2-start-contract` validates the generated summary contract (`phase2-start-summary.json`).
-`make phase2-seed` writes minimum prerequisite inputs so strict Phase 2 lanes can run in a fresh workspace.
-`make phase2-complete` runs startup + hardening closeout + wrap-handoff closeout in one executable chain.
-`make phase2-progress` reports % completion and milestone coverage for Phase 2 closeout.
-`make phase2-start` is the rollout alias for `make phase2-workflow`.
-
 ## Expansion trigger rules
 
 Expand beyond this page only when all of the following are true:
 
-1. Tier 0 commands are deterministic in local and CI.
-2. Release artifacts are being reviewed before raw logs.
-3. Blockers are triaged from machine-readable fields (`ok`, `failed_steps`) first.
+1. Day-0 commands are deterministic in local and CI.
+2. Release artifacts are reviewed before raw logs.
+3. Blockers are triaged from machine-readable fields (`ok`, `failed_steps`, `diagnostic_only`, `automation_allowed`) first.
 
 ## Next-step expansion map
 
 After operator essentials is stable, expand in this order:
 
-1. `kits` discovery and umbrella lanes (`release`, `intelligence`, `integration`, `forensics`)
-2. advanced inspection lanes (`inspect`, `inspect-compare`, `inspect-project`)
-3. migration/legacy compatibility lanes (only when required)
+1. Investigation and diagnosis: [Investigation operator guide](investigation-operator-guide.md) -> [Adaptive Diagnosis Intelligence](adaptive-diagnosis.md) -> [Remediation cookbook](remediation-cookbook.md).
+2. Artifact interpretation: [Artifact reference and generated sample map](artifact-reference.md) -> [CI artifact walkthrough](ci-artifact-walkthrough.md).
+3. Quality gates: [Premium quality gate](premium-quality-gate.md) -> [Security gate](security-gate.md) -> [Determinism checklist](determinism-checklist.md).
+4. Advanced inspection lanes (`inspect`, `inspect-compare`, `inspect-project`) only when needed.
+5. Migration/legacy compatibility lanes only when required.

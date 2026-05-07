@@ -287,3 +287,253 @@ def test_case_snippet_proof_map_csv_has_eof_newline() -> None:
     proof_map = Path("docs/artifacts/case-snippet-closeout-pack/proof-map.csv")
     assert proof_map.is_file(), "proof map CSV is missing"
     assert proof_map.read_bytes().endswith(b"\n"), "proof map CSV must end with a newline"
+
+
+def test_docs_information_architecture_exposes_investigation_and_artifacts() -> None:
+    docs_home = Path("docs/index.md").read_text(encoding="utf-8")
+    readme = Path("README.md").read_text(encoding="utf-8")
+    mkdocs = Path("mkdocs.yml").read_text(encoding="utf-8")
+
+    required_links = (
+        "artifact-reference.md",
+        "operator-essentials.md",
+        "investigation-operator-guide.md",
+        "adaptive-diagnosis.md",
+        "premium-quality-gate.md",
+        "remediation-cookbook.md",
+    )
+    for link in required_links:
+        assert link in docs_home, f"missing docs home navigation link: {link}"
+
+    for link in (
+        "docs/artifact-reference.md",
+        "docs/operator-essentials.md",
+        "docs/investigation-operator-guide.md",
+        "docs/adaptive-diagnosis.md",
+    ):
+        assert link in readme, f"missing README documentation map link: {link}"
+
+    assert "Artifact reference and generated sample map: artifact-reference.md" in mkdocs
+    assert "Investigation operator guide: investigation-operator-guide.md" in mkdocs
+    assert "Adaptive Diagnosis Intelligence: adaptive-diagnosis.md" in mkdocs
+
+
+def test_artifact_reference_documents_runtime_uploads_and_sample_boundary() -> None:
+    text = Path("docs/artifact-reference.md").read_text(encoding="utf-8")
+    workflow = Path(".github/workflows/maintenance-autopilot.yml").read_text(encoding="utf-8")
+
+    required_paths = (
+        "build/gate-fast.json",
+        "build/release-preflight.json",
+        "build/investigation/failure.json",
+        "build/maintenance/autopilot/autopilot-report.json",
+        "build/maintenance/autopilot/adaptive-diagnosis.json",
+        "build/maintenance/autopilot/safe-fix-plan.json",
+        ".sdetkit/maintenance/failure-memory.jsonl",
+        ".sdetkit/maintenance/adaptive-safe-fix-memory.jsonl",
+        "docs/artifacts/",
+        "artifact-contract-index.json",
+    )
+    for artifact_path in required_paths:
+        assert artifact_path in text, f"missing artifact reference path: {artifact_path}"
+
+    for uploaded_path in (
+        "build/maintenance/autopilot/autopilot-report.json",
+        "build/maintenance/autopilot/adaptive-diagnosis.json",
+        "build/maintenance/autopilot/safe-fix-plan.json",
+        ".sdetkit/maintenance/adaptive-safe-fix-memory.jsonl",
+    ):
+        assert uploaded_path in workflow
+        assert uploaded_path in text
+
+    assert "Generated/sample material" in text
+    assert "Runtime artifacts" in text
+
+
+def test_investigation_and_autopilot_docs_preserve_diagnostic_safety_story() -> None:
+    docs = {
+        "artifact-reference": Path("docs/artifact-reference.md").read_text(encoding="utf-8"),
+        "operator-essentials": Path("docs/operator-essentials.md").read_text(encoding="utf-8"),
+        "investigation-operator-guide": Path("docs/investigation-operator-guide.md").read_text(
+            encoding="utf-8"
+        ),
+        "adaptive-diagnosis": Path("docs/adaptive-diagnosis.md").read_text(encoding="utf-8"),
+        "pr-automation": Path("docs/pr-automation.md").read_text(encoding="utf-8"),
+        "premium-quality-gate": Path("docs/premium-quality-gate.md").read_text(encoding="utf-8"),
+    }
+
+    combined = "\n".join(docs.values()).lower()
+    assert "diagnostic/report-only by default" in combined
+    assert "explicit guarded" in combined
+    assert "guarded pr auto-fix" in combined
+    assert "auto-fix is generally allowed" not in combined
+
+    assert (
+        "does not create branches, push commits, open pull requests, or apply fixes"
+        in docs["investigation-operator-guide"]
+    )
+    assert "they do not approve mutation" in docs["operator-essentials"]
+    assert "report-only by default" in docs["adaptive-diagnosis"]
+    assert "explicit opt-in remediation lane" in docs["pr-automation"]
+    assert "default quality-gate posture remains evidence-first" in docs["premium-quality-gate"]
+
+
+def test_readme_stays_concise_front_door() -> None:
+    readme = Path("README.md").read_text(encoding="utf-8")
+    line_count = len(readme.splitlines())
+
+    assert line_count <= 160
+    assert "## Start here" in readme
+    assert "## Documentation map" in readme
+    assert "## Advanced lanes live in docs" in readme
+    assert "python -m sdetkit portfolio-orchestrate" not in readme
+    assert "Quick ops aliases:" not in readme
+    assert "Maintenance command center (issue noise control)" not in readme
+
+
+def test_operator_essentials_reads_like_day_to_day_runbook() -> None:
+    text = Path("docs/operator-essentials.md").read_text(encoding="utf-8")
+
+    required_sections = (
+        "## Safety baseline",
+        "## Day 0 — First run and artifact handoff",
+        "## Day 1 — Failed CI or PR check triage",
+        "## Day 2 — Maintenance/autopilot artifact review",
+        "## Day 3 — Guarded remediation review",
+        "## Rollout and CI contract commands (secondary)",
+    )
+    for section in required_sections:
+        assert section in text
+
+    assert "they do not approve mutation" in text
+    assert "A safe-fix plan is not permission to apply a fix" in text
+    assert "These commands are kept here for rollout contract visibility" in text
+    assert text.index("## Day 0") < text.index("## Rollout and CI contract commands")
+
+
+def test_artifact_reference_maps_signals_to_safe_operator_actions() -> None:
+    text = Path("docs/artifact-reference.md").read_text(encoding="utf-8")
+
+    required_table_headers = (
+        "| If you see... | Open this artifact first | Next safe action | Mutation posture |",
+        "| A local release gate failed | `build/gate-fast.json` or `build/release-preflight.json` |",
+        "| A CI log or PR check failed | `build/investigation/failure.json` |",
+        "| A maintenance-autopilot run uploaded artifacts |",
+        "| A safe-fix plan exists | `build/maintenance/autopilot/safe-fix-plan.json` |",
+        "| A pattern keeps recurring | `.sdetkit/maintenance/failure-memory.jsonl` and `.sdetkit/maintenance/adaptive-safe-fix-memory.jsonl` |",
+        "| You are reading committed samples | `docs/artifacts/` and [`live-adoption-product-proof.md`](live-adoption-product-proof.md) |",
+    )
+    for expected in required_table_headers:
+        assert expected in text
+
+    assert "Not approval to mutate" in text
+    assert "Evidence for review, not auto-approval" in text
+    assert text.index("## Navigation from artifacts to action") < text.index("Quick rules:")
+
+
+def test_docs_map_declares_tidy_information_architecture() -> None:
+    docs_map = Path("docs/docs-map.md").read_text(encoding="utf-8")
+    artifacts_readme = Path("docs/artifacts/README.md").read_text(encoding="utf-8")
+    docs_home = Path("docs/index.md").read_text(encoding="utf-8")
+    mkdocs = Path("mkdocs.yml").read_text(encoding="utf-8")
+
+    for section in (
+        "## Read in this order",
+        "## Information architecture",
+        "## Directory guide",
+        "## Navigation rules for future cleanup",
+    ):
+        assert section in docs_map
+
+    for area in (
+        "Getting started",
+        "Operator guide",
+        "Investigation / diagnosis",
+        "Maintenance / autopilot",
+        "Quality gates",
+        "Artifact reference",
+        "Contributor / developer docs",
+        "Generated/sample artifacts",
+        "Historical archive",
+    ):
+        assert area in docs_map
+
+    assert "[docs/artifacts/README.md](artifacts/README.md)" in docs_map
+    assert "Do not move historical/generated artifact packs" in docs_map
+    assert "diagnostic/report-only by default" in docs_map
+    assert "Docs map and organization" in docs_home
+    assert "Operator and evidence (primary):" in mkdocs
+    assert "Docs map and organization: docs-map.md" in mkdocs
+    assert "Generated and sample artifacts" in artifacts_readme
+    assert "Runtime evidence" in artifacts_readme
+    assert "do not authorize mutation" in artifacts_readme
+
+
+def test_repository_front_doors_are_polished_and_consistent() -> None:
+    readme = Path("README.md").read_text(encoding="utf-8")
+    root_index = Path("index.md").read_text(encoding="utf-8")
+    docs_readme = Path("docs/README.md").read_text(encoding="utf-8")
+    docs_map = Path("docs/docs-map.md").read_text(encoding="utf-8")
+
+    assert "## Repository layout" in readme
+    assert "docs/artifacts/" in readme
+    assert "DevS69 SDETKit project index" in root_index
+    assert "## First paths" in root_index
+    assert "[docs/operator-essentials.md](docs/operator-essentials.md)" in root_index
+    assert "diagnostic/report-only by default" in root_index
+    assert "# Documentation directory" in docs_readme
+    assert "## Primary path" in docs_readme
+    assert "[artifacts/README.md](artifacts/README.md)" in docs_readme
+    assert "reviewed guarded policy" in docs_readme
+    assert "[Documentation directory README](README.md)" in docs_map
+    assert "New primary guides must be linked from [README.md](README.md)" in docs_map
+
+
+def test_project_docs_are_moved_under_docs_with_root_compatibility_pointers() -> None:
+    moved_docs = (
+        Path("docs/project/architecture.md"),
+        Path("docs/project/operator-workflow.md"),
+        Path("docs/project/quality-playbook.md"),
+        Path("docs/project/enterprise-offerings.md"),
+        Path("docs/project/release-process.md"),
+        Path("docs/roadmap/adaptive-investigation-roadmap.md"),
+        Path("docs/roadmap/product-roadmap.md"),
+    )
+    for path in moved_docs:
+        assert path.is_file(), f"missing moved project doc: {path}"
+
+    root_pointers = {
+        Path("ARCHITECTURE.md"): "docs/project/architecture.md",
+        Path("WORKFLOW.md"): "docs/project/operator-workflow.md",
+        Path("QUALITY_PLAYBOOK.md"): "docs/project/quality-playbook.md",
+        Path("ENTERPRISE_OFFERINGS.md"): "docs/project/enterprise-offerings.md",
+        Path("RELEASE.md"): "docs/project/release-process.md",
+        Path("ROADMAP.md"): "docs/roadmap/product-roadmap.md",
+    }
+    for pointer, target in root_pointers.items():
+        text = pointer.read_text(encoding="utf-8")
+        assert target in text
+        assert len(text.splitlines()) <= 70
+
+    project_readme = Path("docs/project/README.md").read_text(encoding="utf-8")
+    docs_readme = Path("docs/README.md").read_text(encoding="utf-8")
+    root_index = Path("index.md").read_text(encoding="utf-8")
+    mkdocs = Path("mkdocs.yml").read_text(encoding="utf-8")
+
+    assert "Root compatibility pointers" in project_readme
+    assert "docs/project/" in docs_readme
+    assert "docs/project/" in root_index
+    assert "Project documents: project/README.md" in mkdocs
+    assert "Release process: project/release-process.md" in mkdocs
+    assert "Adaptive investigation roadmap: roadmap/adaptive-investigation-roadmap.md" in mkdocs
+    assert "Product roadmap: roadmap/product-roadmap.md" in mkdocs
+
+
+def test_project_structure_explains_root_pointer_policy() -> None:
+    text = Path("docs/project-structure.md").read_text(encoding="utf-8")
+
+    assert "short compatibility pointers" in text
+    assert (
+        "Maintained long-form project docs live under `docs/project/` and `docs/roadmap/`" in text
+    )
+    assert "docs/project/release-process.md`, and `docs/roadmap/product-roadmap.md`" not in text

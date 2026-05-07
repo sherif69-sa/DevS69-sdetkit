@@ -113,11 +113,11 @@ bash premium-gate.sh --mode engine-only --out-dir .sdetkit/out
 
 ## Smart remediation loop
 
-Head-5 now does more than report problems:
+Head-5 can run a guarded remediation loop when the operator explicitly enables that lane. The default quality-gate posture remains evidence-first: inspect artifacts, diagnose, recommend, and prove before mutation. When enabled, the remediation loop:
 
-- it applies the existing safe security auto-fixes,
-- it selects repo-safe remediation scripts based on the current warning mix,
-- it refreshes artifacts like `doctor.json`, `maintenance.json`, and `security-check.json`,
+- applies the existing narrow safe security auto-fixes,
+- selects repo-safe remediation scripts based on the current warning mix,
+- refreshes artifacts like `doctor.json`, `maintenance.json`, and `security-check.json`,
 - and it records a pre/post score delta in `premium-summary.json`.
 
 To use the smart script lane, you can automatically trigger:
@@ -127,7 +127,7 @@ To use the smart script lane, you can automatically trigger:
 - `sdetkit maintenance --mode full --fix --format json --out ...` for maintenance drift,
 - and `tools/triage.py --mode security ... --tee ...` to rebuild the baseline-aware security artifact after security auto-fixes.
 
-The engine can also ingest a repo-local JSON catalog at `.sdetkit/premium-remediation-scripts.json` (or a custom path passed via `--script-catalog` / `SDETKIT_PREMIUM_SCRIPT_CATALOG`). That lets maintainers register additional safe fix commands with trigger conditions such as failed steps, warning sources, and post-autofix follow-up runs without hard-coding every workflow into the engine.
+The engine can also ingest a repo-local JSON catalog at `.sdetkit/premium-remediation-scripts.json` (or a custom path passed via `--script-catalog` / `SDETKIT_PREMIUM_SCRIPT_CATALOG`). That lets maintainers register additional safe fix commands with trigger conditions such as failed steps, warning sources, and post-autofix follow-up runs without hard-coding every workflow into the engine. Registering a command is not blanket auto-fix approval; the guarded lane, reviewed policy, and proof artifacts still control whether it can run.
 
 
 ## Local insights API (editable guideline reference + commit learning)

@@ -1,6 +1,6 @@
 # Investigation operator guide
 
-Use the investigation front door when a CI log, PR check, or maintenance run needs human triage before any remediation is attempted.
+Use the investigation front door when a CI log, PR check, or maintenance run needs human triage before any remediation is attempted. Start here from [Operator essentials](operator-essentials.md), then use the [Artifact reference and generated sample map](artifact-reference.md) when you need exact runtime or workflow-uploaded paths.
 
 The investigation lane is intentionally report-only. It explains the failure, recommends the next proof command, and records the safety posture. It does not create branches, push commits, open pull requests, or apply fixes.
 
@@ -58,7 +58,7 @@ The surface result should help narrow the next focused test or proof command. It
 
 ## Maintenance autopilot artifacts
 
-Maintenance autopilot uploads the investigation and safe-fix audit artifacts when they are produced. Start with:
+Maintenance autopilot uploads the investigation and safe-fix audit artifacts when they are produced. The full upload map lives in [Artifact reference and generated sample map](artifact-reference.md#maintenance-autopilot-upload-set). Start with:
 
 - `build/maintenance/autopilot/autopilot-report.json`
 - `build/maintenance/autopilot/autopilot-report.md`

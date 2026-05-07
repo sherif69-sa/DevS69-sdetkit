@@ -4,7 +4,7 @@
 
 Thanks for helping improve **sdetkit**.
 
-[README](README.md) · [Quality Playbook](QUALITY_PLAYBOOK.md) · [Security Policy](SECURITY.md) · [Live Docs](https://sherif69-sa.github.io/DevS69-sdetkit/)
+[README](README.md) · [Quality Playbook](docs/project/quality-playbook.md) · [Security Policy](SECURITY.md) · [Live Docs](https://sherif69-sa.github.io/DevS69-sdetkit/)
 
 </div>
 

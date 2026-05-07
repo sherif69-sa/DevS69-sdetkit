@@ -11,225 +11,7 @@ DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisi
 
 Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 
-<!-- product-proof-start -->
-## Proven product proof
-
-SDETKit is a release-confidence and SDET evidence automation kit with committed live-adoption proof.
-
-Latest committed proof pack:
-
-- **Evidence:** `docs/artifacts/live-adoption/product-proof-post-1072/`
-- **Decision:** `SHIP with known STRICT_FINDINGS`
-- **Blocking failures:** `0`
-- **Known strict finding:** `legacy-noargs` compatibility behavior only
-
-Proven layers:
-
-| Layer | Proof |
-|---|---|
-| First-proof lane | `FIRST_PROOF_DECISION=SHIP`, health `100` |
-| Core gates | gate fast, release dry-run, and doctor passed |
-| Review front door | `json` and `operator-json` emit valid JSON with findings rc |
-| Package proof | build, twine check, wheel install, CLI smoke, import smoke |
-| Fixture proof | inspect/project/compare/patch/agent/serve/apiget shapes passed |
-| Docs proof | curated front-door docs commands passed |
-| Full repo analysis | command surface `SHIP`, blocking failures `0` |
-
-See: [`docs/live-adoption-product-proof.md`](docs/live-adoption-product-proof.md)
-<!-- product-proof-end -->
-
-
-
-
-Need one command for first proof in this repository?
-
-```bash
-make first-proof
-```
-
-This now prints a single-line outcome marker for quick executive/operator scanning:
-
-```text
-FIRST_PROOF_DECISION=SHIP
-```
-
-This writes a consolidated artifact set in `build/first-proof/`:
-
-```text
-build/first-proof/
-├── gate-fast.json
-├── release-preflight.json
-├── doctor.json
-├── first-proof-summary.json
-├── first-proof-learning-db.jsonl
-├── first-proof-learning-rollup.json
-├── control-tower.json
-├── control-tower.md
-├── weekly-trend.json
-├── weekly-trend.md
-└── weekly-threshold-check.json
-```
-
-Troubleshooting: [`docs/first-proof-troubleshooting.md`](docs/first-proof-troubleshooting.md)
-Learning DB + adaptive reviewer alignment: [`docs/first-proof-learning-db.md`](docs/first-proof-learning-db.md)
-Real workflow operations: [`docs/real-workflow-operations.md`](docs/real-workflow-operations.md)
-Quick ops aliases: `make ops-daily` / `make ops-daily-fast` / `make ops-weekly` / `make ops-premerge` / `make ops-premerge-fast` / `make ops-premerge-next` / `make ops-premerge-next-fast` / `make ops-followup` / `make ops-now` / `make ops-now-lite` / `make ops-next`
-Rollback/remediation examples: [`docs/integrations/rollback-remediation-examples.md`](docs/integrations/rollback-remediation-examples.md)
-
-## Multi-repo execution (new)
-
-You can now generate a deterministic multi-repo execution plan and portfolio risk report:
-
-```bash
-python -m sdetkit portfolio-orchestrate orchestrate \
-  --repo-graph examples/topology/enterprise-repo-graph.sample.json \
-  --schema schemas/repo-graph.schema.json \
-  --max-workers 4 \
-  --out build/portfolio-execution-plan.json
-
-python -m sdetkit portfolio-orchestrate validate-graph \
-  --repo-graph examples/topology/enterprise-repo-graph.sample.json \
-  --schema schemas/repo-graph.schema.json
-
-python -m sdetkit portfolio-orchestrate risk-report \
-  --plan build/portfolio-execution-plan.json \
-  --out build/portfolio-risk-report.json
-
-python -m sdetkit portfolio-orchestrate execute \
-  --plan build/portfolio-execution-plan.json \
-  --max-workers 8 \
-  --transport local \
-  --adapters config/portfolio_adapters.json \
-  --artifact-dir build/portfolio-workers \
-  --retries 1 \
-  --max-failures 3 \
-  --cancel-file .sdetkit/portfolio-cancel-targets.txt \
-  --out build/portfolio-execution-intents.json
-
-# Optional: execute adapter commands (not only dry-run intents)
-python -m sdetkit portfolio-orchestrate execute \
-  --plan build/portfolio-execution-plan.json \
-  --max-workers 8 \
-  --run \
-  --transport ssh \
-  --timeout-seconds 120 \
-  --out build/portfolio-execution-results.json
-
-python -m sdetkit portfolio-orchestrate score-execution \
-  --results build/portfolio-execution-results.json \
-  --out build/portfolio-execution-scorecard.json
-
-python -m sdetkit portfolio-orchestrate report \
-  --plan build/portfolio-execution-plan.json \
-  --risk build/portfolio-risk-report.json \
-  --score build/portfolio-execution-scorecard.json \
-  --out build/portfolio-report.md
-
-python -m sdetkit portfolio-orchestrate analyze-plan \
-  --plan build/portfolio-execution-plan.json \
-  --out build/portfolio-plan-analysis.json
-
-python -m sdetkit portfolio-orchestrate run-pipeline \
-  --repo-graph examples/topology/enterprise-repo-graph.sample.json \
-  --schema schemas/repo-graph.schema.json \
-  --adapters config/portfolio_adapters.json \
-  --max-workers 8 \
-  --policy config/portfolio_policy.default.json \
-  --history .sdetkit/portfolio-history.jsonl \
-  --out-dir build/portfolio-pipeline
-
-# Optional: run real adapter commands in the pipeline
-python -m sdetkit portfolio-orchestrate run-pipeline \
-  --repo-graph examples/topology/enterprise-repo-graph.sample.json \
-  --schema schemas/repo-graph.schema.json \
-  --adapters config/portfolio_adapters.json \
-  --max-workers 8 \
-  --run \
-  --transport ssh \
-  --timeout-seconds 120 \
-  --retries 1 \
-  --max-failures 3 \
-  --policy config/portfolio_policy.default.json \
-  --history .sdetkit/portfolio-history.jsonl \
-  --out-dir build/portfolio-pipeline-run
-
-python -m sdetkit portfolio-orchestrate evaluate-policy \
-  --risk build/portfolio-risk-report.json \
-  --score build/portfolio-execution-scorecard.json \
-  --execution build/portfolio-execution-results.json \
-  --policy config/portfolio_policy.default.json \
-  --out build/portfolio-policy-decision.json
-
-python -m sdetkit portfolio-orchestrate history-trend \
-  --history .sdetkit/portfolio-history.jsonl \
-  --out build/portfolio-history-trend.json
-
-python -m sdetkit portfolio-orchestrate dashboard \
-  --plan build/portfolio-execution-plan.json \
-  --risk build/portfolio-risk-report.json \
-  --score build/portfolio-execution-scorecard.json \
-  --execution build/portfolio-execution-results.json \
-  --policy build/portfolio-policy-decision.json \
-  --out build/portfolio-dashboard.html
-
-python -m sdetkit portfolio-orchestrate batch-run \
-  --manifest examples/topology/portfolio-batch.sample.json \
-  --max-parallel 4 \
-  --out-dir build/portfolio-batch
-
-# policy_overrides in batch manifests can be either an object:
-# "policy_overrides": {"max_risk_score": 25}
-# or a JSON string:
-# "policy_overrides": "{\"max_risk_score\": 25}"
-
-python -m sdetkit portfolio-orchestrate impact-plan \
-  --repo-graph examples/topology/enterprise-repo-graph.sample.json \
-  --changed-files examples/kits/intelligence/changed-files.txt \
-  --out build/portfolio-impact-plan.json
-
-python -m sdetkit portfolio-orchestrate batch-control-tower \
-  --history build/portfolio-batch/batch-history.jsonl \
-  --out build/portfolio-batch/control-tower.json
-
-python -m sdetkit portfolio-orchestrate cancel-worker \
-  --target api \
-  --cancel-file .sdetkit/portfolio-cancel-targets.txt
-```
-
-Execution rows now include Worker Contract-style fields (`worker`, `run_id`, `started_at`, `finished_at`, `inputs`, `result`, `escalation`) for consistent downstream automation.
-
-Reference contracts:
-- Worker contract: [`docs/contracts/worker-contract-v1.md`](docs/contracts/worker-contract-v1.md)
-- Repo graph schema: [`schemas/repo-graph.schema.json`](schemas/repo-graph.schema.json)
-
-Release preflight now expects `build/first-proof/first-proof-summary.json` to exist and pass
-`check_first_proof_summary_contract.py`.
-
-For CI-equivalent validation (lane + contract + rollup + trend + first-proof tests):
-
-```bash
-make first-proof-verify
-```
-
-Professional phase entrypoints:
-
-```bash
-make plan-status
-make phase1-execute
-make phase2-execute
-make phase3-governance
-make phase4-credibility
-make phase1-execution-core
-make phase3-quality-report
-```
-
-## Why teams use SDETKit
-
-- **Deterministic decisions**: every run ends in a clear SHIP / NO-SHIP outcome.
-- **Evidence first**: JSON artifacts can be audited by humans, bots, and CI.
-- **One workflow everywhere**: use the same commands locally and in pipelines.
-
-## Quick start (recommended)
+## Start here
 
 ```bash
 python -m venv .venv
@@ -242,7 +24,7 @@ python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor --format json --out build/doctor.json
 ```
 
-Generated artifacts:
+Generated first-run artifacts:
 
 ```text
 build/
@@ -251,132 +33,113 @@ build/
 └── doctor.json
 ```
 
-## Ship / no-ship decision contract
+## Decision contract
 
 | Signal | Decision |
-|---|---|
+| --- | --- |
 | `gate-fast.json.ok == true` and `release-preflight.json.ok == true` | ✅ SHIP |
 | Any `ok: false` | ❌ NO-SHIP |
 | `failed_steps` present in either artifact | ❌ NO-SHIP |
 
 Canonical gate commands: `python -m sdetkit gate fast`, `python -m sdetkit gate release`, and `python -m sdetkit doctor`.
 
-Secondary lanes cover review, quality, and CI automation once the primary gate decision is stable.
+Secondary lanes cover review, investigation, quality, maintenance, and CI automation once the primary gate decision is stable. Investigation/reporting/planning lanes are diagnostic-only by default; repository mutation requires explicit guarded policy and PR-only remediation controls.
+
+## What SDETKit gives teams
+
+- **Deterministic decisions:** every release-confidence run ends in an auditable SHIP / NO-SHIP signal.
+- **Evidence-first artifacts:** JSON and Markdown outputs can be reviewed by humans, bots, and CI.
+- **Diagnostic investigation:** `sdetkit investigate` explains failures and recommends proof commands without mutating the repository.
+- **Guarded automation path:** remediation and PR automation are explicit opt-in lanes, not the default behavior.
+- **One workflow everywhere:** use the same core commands locally, in CI, and during operator handoff.
 
 ## Core operator lanes
 
-### 1) Release gate lane
+| Lane | Command | Start here when... |
+| --- | --- | --- |
+| Release gate | `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor` | You need a ship/no-ship decision. |
+| Review | `python -m sdetkit review . --no-workspace --format operator-json` | You need operator-facing findings. |
+| Investigation | `python -m sdetkit investigate failure --log build/quality.log --format markdown` | A CI log or PR check needs triage before remediation. |
+| CI-ready | `./ci.sh quick --artifact-dir .sdetkit/out` and `make merge-ready` | You want a local CI-equivalent smoke path. |
+| First proof | `make first-proof` | You are validating this repository's full first-proof bundle. |
 
-```bash
-python -m sdetkit gate fast
-python -m sdetkit gate release
-python -m sdetkit doctor
-```
-
-### 2) Review lane
-
-```bash
-python -m sdetkit review . --no-workspace --format json
-python -m sdetkit review . --no-workspace --format operator-json
-```
-
-### 3) Quality lane
-
-```bash
-make ci-deps-sync
-python -m pip install -r requirements-test.txt
-PYTHONPATH=src python -m sdetkit.test_bootstrap_contract --strict
-PYTHONPATH=src pytest -q
-ruff check .
-```
-
-### 4) CI-ready lane (minimal)
-
-```bash
-./ci.sh quick --artifact-dir .sdetkit/out
-make merge-ready
-```
-
-Historical and transition-era references (secondary) are intentionally delayed until after the canonical first proof path is operating.
-
-## Top-tier reporting sample pipeline
-
-```bash
-make top-tier-reporting
-```
-
-Related docs:
-- [Portfolio reporting recipe](docs/portfolio-reporting-recipe.md)
-- [KPI schema](docs/kpi-schema.md)
-
-## Upgrade next (intent router)
-
-For first-time operators who want a single guided lane, use:
+For a guided command router, run:
 
 ```bash
 make upgrade-next
 ```
 
-This prints a deterministic "next 5 commands" path and links to:
-- [`docs/upgrade-next-commands.md`](docs/upgrade-next-commands.md)
+## Product proof
 
+<!-- product-proof-start -->
+SDETKit is backed by committed live-adoption proof.
 
-## Maintenance command center (issue noise control)
+- **Evidence:** `docs/artifacts/live-adoption/product-proof-post-1072/`
+- **Decision:** `SHIP with known STRICT_FINDINGS`
+- **Blocking failures:** `0`
+- **Known strict finding:** `legacy-noargs` compatibility behavior only
+- **Proof page:** [`docs/live-adoption-product-proof.md`](docs/live-adoption-product-proof.md)
+<!-- product-proof-end -->
 
-To keep recurring bot-generated maintenance issues actionable, enable the rolling command-center workflow:
+For this repository, `make first-proof` emits `FIRST_PROOF_DECISION=SHIP|NO-SHIP` and writes the consolidated bundle under `build/first-proof/`. Use [`docs/upgrade-next-commands.md`](docs/upgrade-next-commands.md), [`docs/first-proof-troubleshooting.md`](docs/first-proof-troubleshooting.md), and [`docs/first-proof-learning-db.md`](docs/first-proof-learning-db.md) for the full first-proof/ops command set.
 
-```bash
+## Repository layout
 
-
-
-# Runs daily and can also be triggered manually
-.github/workflows/maintenance-issue-command-center.yml
-```
-
-It keeps only the top priority maintenance trackers open, consolidates lower-priority bot trackers into one rolling issue (`🧠 Maintenance command center (rolling)`), and appends each run's problems into `.sdetkit/maintenance/issue-learning-db.jsonl` with a rollup in `.sdetkit/maintenance/issue-learning-rollup.json`.
-
-The workflow also refreshes `doctor` + adaptive `review` signals, including the deterministic five-head contract (`quality`, `reliability`, `security`, `evidence`, `delivery`), before updating the command center so remediation priorities learn over time.
-
-Dry-run test against the live issue queue (without closing/updating issues):
-
-```bash
-python tools/maintenance_command_center.py \
-  --owner sherif69-sa \
-  --repo DevS69-sdetkit \
-  --dry-run \
-  --doctor-json build/maintenance/doctor.json \
-  --review-json build/maintenance/review.json \
-  --plan-out build/maintenance/command-center-dry-run-plan.json
-```
+| Area | Purpose |
+| --- | --- |
+| `src/` | SDETKit Python package and CLI implementation. |
+| `tests/` | Unit, workflow, docs, and contract tests. |
+| `docs/` | Operator guides, artifact references, quality gates, and developer docs. |
+| `docs/artifacts/` | Committed generated/sample artifacts and historical proof packs. |
+| `docs/project/` | Project-level architecture, workflow, release, quality, and enterprise docs moved out of the root. |
+| `.github/workflows/` | CI, quality, maintenance, and artifact upload automation. |
 
 ## Documentation map
 
 - Start in 5 minutes: [docs/start-here-5-minutes.md](docs/start-here-5-minutes.md)
-- Recommended CI flow: [docs/recommended-ci-flow.md](docs/recommended-ci-flow.md)
-- Artifact walkthrough: [docs/ci-artifact-walkthrough.md](docs/ci-artifact-walkthrough.md)
-- CLI reference: [docs/cli.md](docs/cli.md)
 - Docs index: [docs/index.md](docs/index.md)
+- Operator essentials: [docs/operator-essentials.md](docs/operator-essentials.md)
+- Investigation operator guide: [docs/investigation-operator-guide.md](docs/investigation-operator-guide.md)
+- Adaptive diagnosis: [docs/adaptive-diagnosis.md](docs/adaptive-diagnosis.md)
+- Artifact reference and generated sample map: [docs/artifact-reference.md](docs/artifact-reference.md)
+- CI artifact walkthrough: [docs/ci-artifact-walkthrough.md](docs/ci-artifact-walkthrough.md)
+- Recommended CI flow: [docs/recommended-ci-flow.md](docs/recommended-ci-flow.md)
+- CLI reference: [docs/cli.md](docs/cli.md)
+- Portfolio reporting recipe: [docs/portfolio-reporting-recipe.md](docs/portfolio-reporting-recipe.md)
+- Portfolio readiness: [docs/portfolio-readiness.md](docs/portfolio-readiness.md)
+- Operations handbook: [docs/operations-handbook.md](docs/operations-handbook.md)
+- Remediation cookbook: [docs/remediation-cookbook.md](docs/remediation-cookbook.md)
+
+Historical and transition-era references (secondary) are intentionally secondary. Open the docs index after the canonical first path is working.
+
+## Advanced lanes live in docs
+
+To keep this README readable, advanced command matrices live in focused guides:
+
+- First-proof and operator command router: [docs/upgrade-next-commands.md](docs/upgrade-next-commands.md)
+- Multi-repo and portfolio posture: [docs/portfolio-readiness.md](docs/portfolio-readiness.md) and [docs/portfolio-reporting-recipe.md](docs/portfolio-reporting-recipe.md)
+- Maintenance and recurring operations: [docs/operations-handbook.md](docs/operations-handbook.md)
+- Rollback/remediation examples: [docs/integrations/rollback-remediation-examples.md](docs/integrations/rollback-remediation-examples.md)
+- Failure remediation workflow example: [examples/kits/intelligence/failure-fix-playbook.md](examples/kits/intelligence/failure-fix-playbook.md)
+
+## Top-tier reporting sample pipeline
+
+Run `make top-tier-reporting` for the sample reporting lane. See [docs/portfolio-reporting-recipe.md](docs/portfolio-reporting-recipe.md) and [docs/kpi-schema.md](docs/kpi-schema.md).
+
+## Upgrade next (intent router)
+
+Run `make upgrade-next` for the guided next-command router. Full details live in [docs/upgrade-next-commands.md](docs/upgrade-next-commands.md).
+
+## Real workflow operations
+
+Real workflow operations live in [docs/real-workflow-operations.md](docs/real-workflow-operations.md). Common aliases: `make ops-daily`, `make ops-daily-fast`, `make ops-weekly`, `make ops-premerge`, `make ops-premerge-fast`, `make ops-premerge-next`, `make ops-premerge-next-fast`, `make ops-followup`, `make ops-now`, `make ops-now-lite`, `make ops-next`.
 
 ## Project policies
 
 - Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Security: [SECURITY.md](SECURITY.md)
-- Security docs: [Security docs](docs/security.md)
-- Policy baselines: [policy baselines](docs/policy-and-baselines.md)
-- Quality playbook: [QUALITY_PLAYBOOK.md](QUALITY_PLAYBOOK.md)
+- Security docs: [docs/security.md](docs/security.md)
+- Policy baselines: [docs/policy-and-baselines.md](docs/policy-and-baselines.md)
+- Quality playbook: [docs/project/quality-playbook.md](docs/project/quality-playbook.md)
+- Release process: [docs/project/release-process.md](docs/project/release-process.md)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
-
-## Failure remediation workflow (rank-1 SDET lane)
-Use these commands to run the full intelligence loop:
-
-```bash
-make failure-workflow
-```
-
-This will:
-1. Build a prioritized action plan from `examples/kits/intelligence/failures.json`.
-2. Execute reproduce commands and generate autofix recommendations.
-3. Emit a combined report at `examples/kits/intelligence/failure-autofix-report.json`.
-
-Manual steps are documented in:
-- `examples/kits/intelligence/failure-fix-playbook.md`

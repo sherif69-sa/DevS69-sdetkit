@@ -1,8 +1,20 @@
 # Adaptive Diagnosis Intelligence
 
-Adaptive Diagnosis turns raw quality evidence into an operator-facing diagnosis. It is designed for the failure cases that are easy to miss in a large CI log: formatter drift after green tests, pytest failures hidden under summaries, repeated Mission Control failures, Doctor Cortex trend regressions, and adaptive-memory context that should change the recommendation.
+Adaptive Diagnosis turns raw quality evidence into an operator-facing diagnosis. For most operators, the preferred front door is `python -m sdetkit investigate failure`; use this module directly when you need to build or debug the diagnosis artifact itself. It is designed for the failure cases that are easy to miss in a large CI log: formatter drift after green tests, pytest failures hidden under summaries, repeated Mission Control failures, Doctor Cortex trend regressions, and adaptive-memory context that should change the recommendation.
 
 The goal is not to print a fixed comment. Each diagnosis is composed from the evidence that was provided: the current log text, Mission Control output, ledger history, Doctor Cortex counts, and optional adaptive memory. The output explains what happened, why developers often miss it, what to fix first, which command proves the fix, and which learning signal should be carried forward.
+
+## Safety and workflow position
+
+Adaptive Diagnosis sits in the diagnostic part of the chain:
+
+```text
+detect -> diagnose -> recommend -> plan -> prove
+```
+
+Its JSON and Markdown outputs can recommend fixes and proof commands, but they are report-only by default. Later stages such as classify, trend, candidate, probation, policy proposal, dry run, guarded PR auto-fix, and remember outcome require explicit guarded workflow policy and review.
+
+Use [Investigation operator guide](investigation-operator-guide.md) for day-to-day triage and [Artifact reference and generated sample map](artifact-reference.md) for uploaded artifact paths.
 
 ## Run it locally
 
@@ -154,8 +166,8 @@ The standalone engine is intentionally separate from the automations that will c
 4. Feed learning signals into adaptive memory.
 5. Add a safe fix planner for narrow cases such as format-only or import-order-only repairs.
 
-This keeps the system explainable while moving toward the larger SDETKit loop:
+This keeps the system explainable while moving toward the larger SDETKit loop without making mutation the default:
 
 ```text
-find -> diagnose -> recommend -> prove -> learn -> safely fix
+detect -> diagnose -> recommend -> plan -> prove -> classify -> trend -> candidate -> probation -> policy proposal -> dry run -> guarded PR auto-fix -> remember outcome
 ```
