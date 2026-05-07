@@ -30,24 +30,9 @@ jobs:
 
       - name: Seed baseline summary for contract lane
         run: |
-          mkdir -p build/phase1-baseline
-          cat > build/phase1-baseline/phase1-baseline-summary.json <<'JSON'
-          {
-            "schema_version": "sdetkit.phase1_baseline.v1",
-            "generated_at_utc": "2026-04-19T00:00:00Z",
-            "out_dir": "build/phase1-baseline",
-            "ok": false,
-            "checks": [
-              {"id": "doctor", "ok": false, "rc": 1, "stdout_log": "build/phase1-baseline/logs/doctor.out.log", "stderr_log": "build/phase1-baseline/logs/doctor.err.log"},
-              {"id": "enterprise_contracts", "ok": true, "rc": 0, "stdout_log": "build/phase1-baseline/logs/enterprise_contracts.out.log", "stderr_log": "build/phase1-baseline/logs/enterprise_contracts.err.log"},
-              {"id": "primary_docs_map", "ok": true, "rc": 0, "stdout_log": "build/phase1-baseline/logs/primary_docs_map.out.log", "stderr_log": "build/phase1-baseline/logs/primary_docs_map.err.log"},
-              {"id": "pytest", "ok": false, "rc": 1, "stdout_log": "build/phase1-baseline/logs/pytest.out.log", "stderr_log": "build/phase1-baseline/logs/pytest.err.log"},
-              {"id": "ruff", "ok": true, "rc": 0, "stdout_log": "build/phase1-baseline/logs/ruff.out.log", "stderr_log": "build/phase1-baseline/logs/ruff.err.log"}
-            ]
-          }
-          JSON
+          python scripts/seed_quality_baseline_summary_fixture.py --summary build/phase1-baseline/phase1-baseline-summary.json
 
-      - name: Run Phase 3 tests
+      - name: Run quality-contract tests
         run: |
           pytest -q \
             tests/test_phase3_quality_contract.py \
@@ -56,11 +41,11 @@ jobs:
             tests/test_phase3_next_pass_determinism.py \
             tests/test_phase3_baseline_history_persist.py
 
-      - name: Run Phase 3 operational lane
+      - name: Run quality-contract operational lane
         run: |
           make phase3-do-it
 
-      - name: Upload Phase 3 artifacts
+      - name: Upload quality-contract artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: phase3-quality-artifacts
