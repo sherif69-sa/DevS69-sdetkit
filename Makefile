@@ -686,3 +686,41 @@ powerfuel-contract: powerfuel-consolidation-score powerfuel-weekly-report powerf
 powerfuel-merge-ready: powerfuel-contract
 	@bash -lc ' . .venv/bin/activate && python scripts/render_powerfuel_merge_ready.py --date-tag $(POWERFUEL_DATE_TAG) --out docs/artifacts/powerfuel-merge-ready-$(POWERFUEL_DATE_TAG).md'
 	@bash -lc 'echo "Powerfuel merge-ready summary: docs/artifacts/powerfuel-merge-ready-$(POWERFUEL_DATE_TAG).md"'
+
+# Production workflow aliases. Keep legacy targets available for compatibility.
+.PHONY: quality-contract-check quality-contract-report quality-contract-run
+.PHONY: operations-baseline operations-status operations-next-action operations-snapshot operations-dashboard operations-weekly-pack operations-control-loop operations-run-all operations-artifact-set operations-telemetry operations-readiness-signal operations-remediation-plan operations-blocker-register operations-run operations-core-run operations-workflow operations-flow-contract operations-quality-gate operations-executive-report operations-cleanup-plan operations-complete operations-finalize operations-current operations-current-json
+.PHONY: governance-contract-check ecosystem-contract-check metrics-contract-check
+
+quality-contract-check: phase3-quality-contract
+quality-contract-report: phase3-quality-report
+quality-contract-run: phase3-do-it
+
+operations-baseline: phase1-baseline
+operations-status: phase1-status
+operations-next-action: phase1-next
+operations-snapshot: phase1-ops-snapshot
+operations-dashboard: phase1-dashboard
+operations-weekly-pack: phase1-weekly-pack
+operations-control-loop: phase1-control-loop
+operations-run-all: phase1-run-all
+operations-artifact-set: phase1-artifact-set
+operations-telemetry: phase1-telemetry
+operations-readiness-signal: phase1-finish-signal
+operations-remediation-plan: phase1-next-pass
+operations-blocker-register: phase1-blocker-register
+operations-run: phase1-do-it
+operations-core-run: phase1-execution-core
+operations-workflow: phase1-workflow
+operations-flow-contract: phase1-flow-contract
+operations-quality-gate: phase1-gate-phase2
+operations-executive-report: phase1-executive-report
+operations-cleanup-plan: phase1-retire-plan
+operations-complete: phase1-complete
+operations-finalize: phase1-closeout
+operations-current: phase-current
+operations-current-json: phase-current-json
+
+governance-contract-check: phase4-governance-contract
+ecosystem-contract-check: phase5-ecosystem-contract
+metrics-contract-check: phase6-metrics-contract
