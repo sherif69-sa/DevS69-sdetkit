@@ -85,6 +85,15 @@ extra_javascript:
 
 nav:
   - Start here: index.md
+  - Operator and evidence (primary):
+      - Docs map and organization: docs-map.md
+      - Operator essentials: operator-essentials.md
+      - Investigation operator guide: investigation-operator-guide.md
+      - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md
+      - Artifact reference and generated sample map: artifact-reference.md
+      - CI artifact walkthrough: ci-artifact-walkthrough.md
+      - Remediation cookbook: remediation-cookbook.md
+      - Premium quality gate: premium-quality-gate.md
   - Canonical first-proof path (primary):
       - Install: install.md
       - Quickstart (copy-paste): quickstart-copy-paste.md
@@ -104,8 +113,6 @@ nav:
       - Release confidence model: release-confidence.md
       - Decision guide: decision-guide.md
       - Release confidence flow: release-confidence-flow.md
-      - CI artifact walkthrough: ci-artifact-walkthrough.md
-      - Artifact reference and generated sample map: artifact-reference.md
       - CI contract: ci-contract.md
       - Before/after evidence example: before-after-evidence-example.md
       - Evidence showcase: evidence-showcase.md
@@ -114,7 +121,6 @@ nav:
       - Release confidence ROI: release-confidence-roi.md
       - Adoption proof examples: adoption-proof-examples.md
       - Release confidence KPI pack: release-confidence-kpi-pack.md
-      - Remediation cookbook: remediation-cookbook.md
       - Determinism checklist: determinism-checklist.md
       - Determinism contract: determinism-contract.md
   - Current reference and discoverability (secondary):
@@ -142,9 +148,6 @@ nav:
       - Execution programs:
           - Phase-by-phase execution plan: phase-by-phase-execution-plan.md
           - Phase execution one-by-one: phase-execution-one-by-one.md
-          - Operator essentials: operator-essentials.md
-          - Investigation operator guide: investigation-operator-guide.md
-          - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md
           - Repo health dashboard: repo-health-dashboard.md
           - Business execution hub: business_execution/index.md
           - Business execution — program master plan: business_execution/00-program-master-plan.md

@@ -94,6 +94,8 @@ Use this index as the primary human navigation map. The docs are organized aroun
 - **Artifact reference:** runtime artifact paths plus committed generated/sample artifact labels.
 - **Contributor / developer docs:** repo tour, contribution flow, tests, and release maintenance.
 
+For a compact tree-level map, use [Docs map and organization](docs-map.md).
+
 ## Team rollout / CI
 
 - [Adopt in your repository](adoption.md)
@@ -101,6 +103,7 @@ Use this index as the primary human navigation map. The docs are organized aroun
 - [Operator essentials](operator-essentials.md)
 - [Investigation operator guide](investigation-operator-guide.md)
 - [Artifact reference and generated sample map](artifact-reference.md)
+- [Docs map and organization](docs-map.md)
 - [Operator onboarding (7-day)](operator-onboarding-7-day.md)
 - [Phase 1 execution checklist](phase1-execution-checklist.md)
 - [Next 10 follow-ups](next-10-followups.md)

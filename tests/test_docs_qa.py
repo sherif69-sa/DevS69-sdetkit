@@ -429,3 +429,41 @@ def test_artifact_reference_maps_signals_to_safe_operator_actions() -> None:
     assert "Not approval to mutate" in text
     assert "Evidence for review, not auto-approval" in text
     assert text.index("## Navigation from artifacts to action") < text.index("Quick rules:")
+
+
+def test_docs_map_declares_tidy_information_architecture() -> None:
+    docs_map = Path("docs/docs-map.md").read_text(encoding="utf-8")
+    artifacts_readme = Path("docs/artifacts/README.md").read_text(encoding="utf-8")
+    docs_home = Path("docs/index.md").read_text(encoding="utf-8")
+    mkdocs = Path("mkdocs.yml").read_text(encoding="utf-8")
+
+    for section in (
+        "## Read in this order",
+        "## Information architecture",
+        "## Directory guide",
+        "## Navigation rules for future cleanup",
+    ):
+        assert section in docs_map
+
+    for area in (
+        "Getting started",
+        "Operator guide",
+        "Investigation / diagnosis",
+        "Maintenance / autopilot",
+        "Quality gates",
+        "Artifact reference",
+        "Contributor / developer docs",
+        "Generated/sample artifacts",
+        "Historical archive",
+    ):
+        assert area in docs_map
+
+    assert "[docs/artifacts/README.md](artifacts/README.md)" in docs_map
+    assert "Do not move historical/generated artifact packs" in docs_map
+    assert "diagnostic/report-only by default" in docs_map
+    assert "Docs map and organization" in docs_home
+    assert "Operator and evidence (primary):" in mkdocs
+    assert "Docs map and organization: docs-map.md" in mkdocs
+    assert "Generated and sample artifacts" in artifacts_readme
+    assert "Runtime evidence" in artifacts_readme
+    assert "do not authorize mutation" in artifacts_readme
