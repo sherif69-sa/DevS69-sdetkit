@@ -62,25 +62,21 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
   - whether fix was accepted,
   - recurrence count,
   - false-positive marker.
-- Add promotion/demotion rules:
-  - promote scenario when proof passes after its recommendation,
-  - demote scenario when operator marks false positive,
-  - increase risk when recurrence grows,
-  - lower confidence when evidence is thin.
-- Add `sdetkit adaptive learn summarize` to show top recurring scenarios and weakest lanes.
+- Add promotion/demotion rules: **Done:** summaries now promote scenarios when proof/fix feedback succeeds, demote false positives, increase risk for recurring failures, and lower confidence for thin evidence.
+- Add `sdetkit adaptive learn summarize` to show top recurring scenarios and weakest lanes. **Done:** the CLI now rolls JSONL diagnosis events into `top_recurring_scenarios` and `weakest_lanes`.
 
 ### Phase 3 — Build the trust-grade operator experience
 
 **Outcome:** anyone trying the repo can see why SDETKit is valuable in one run.
 
-- Add a single generated `build/sdetkit/operator-brief.md` containing:
+- Add a single generated `build/sdetkit/operator-brief.md` containing: **Done via `sdetkit adaptive brief`.**
   - gate result,
   - adaptive diagnosis,
   - scenario candidates,
   - first proof command,
   - safe-fix decision,
   - next owner action.
-- Add a short PR comment mode:
+- Add a short PR comment mode: **Done via `sdetkit adaptive brief --format comment`.**
   - green run: no fake adaptive block,
   - known safe mechanical issue: scoped auto-fix path,
   - unknown failure: review-first candidate scenarios and checks.
@@ -130,11 +126,11 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
 
 | Priority | Work item | Acceptance check |
 | --- | --- | --- |
-| P0 | Extract scenario DB to a schema-validated pack | Unit tests load built-in pack and reject invalid packs. |
-| P0 | Add learning event records for adaptive diagnosis | A JSONL event includes signals, candidates, selected code, proof command, and outcome placeholder. |
-| P0 | Add operator brief artifact | `python -m sdetkit.adaptive_diagnosis` can produce a concise Markdown brief. |
+| P0 | Extract scenario DB to a schema-validated pack | Done: built-in scenarios now load from `src/sdetkit/data/adaptive_scenarios.json`, validate through loader rules, and are documented against `schemas/adaptive-scenario-pack.schema.json`. |
+| P0 | Add learning event records for adaptive diagnosis | Done: `sdetkit adaptive learn record` writes JSONL events with matched signals, candidates, selected primary diagnosis, checks, proof commands, recurrence count, and outcome placeholders. |
+| P0 | Add operator brief artifact | Done: `python -m sdetkit adaptive brief` generates `build/sdetkit/operator-brief.md` from gate, diagnosis, learning, and safe-fix artifacts. |
 | P1 | Add fixture corpus for top scenarios | Tests cover at least 20 realistic log fixtures. |
-| P1 | Add candidate confidence calibration | Candidate ranking includes confidence reason and historical boost/demotion. |
+| P1 | Add candidate confidence calibration | Done: adaptive diagnosis can consume learning-summary calibration to boost/demote candidate scenario ranking and emit `candidate_calibration` evidence. |
 | P1 | Add docs demo gallery | Docs show green, safe-fix, unknown-review, and recurring-failure examples. |
 | P2 | Add org-level pack overlay | Local and org packs merge deterministically with built-in scenarios. |
 | P2 | Add portfolio rollup | Multiple adaptive diagnosis outputs roll into a top-risk scenario report. |

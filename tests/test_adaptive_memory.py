@@ -83,8 +83,72 @@ def test_adaptive_cli_help_discoverability() -> None:
     assert "ingest" in proc.stdout
     assert "history" in proc.stdout
     assert "explain" in proc.stdout
+    assert "learn" in proc.stdout
+    assert "brief" in proc.stdout
 
     assert _run("adaptive", "init", "--help").returncode == 0
     assert _run("adaptive", "ingest", "--help").returncode == 0
     assert _run("adaptive", "history", "--help").returncode == 0
     assert _run("adaptive", "explain", "--help").returncode == 0
+    assert _run("adaptive", "learn", "--help").returncode == 0
+    assert _run("adaptive", "learn", "record", "--help").returncode == 0
+    assert _run("adaptive", "learn", "summarize", "--help").returncode == 0
+    assert _run("adaptive", "brief", "--help").returncode == 0
+
+
+def test_adaptive_learn_record_and_summarize_cli(tmp_path: Path) -> None:
+    diagnosis = {
+        "schema_version": "sdetkit.adaptive.diagnosis.v1",
+        "status": "needs_fix",
+        "confidence": "high",
+        "risk_score": 40,
+        "diagnoses": [
+            {
+                "code": "PRE_COMMIT_FORMAT_DRIFT",
+                "severity": "medium",
+                "confidence": "high",
+                "title": "Formatter drift blocked pre-commit",
+                "evidence": [
+                    "matched_failure_signals=ruff-format-failure",
+                    "candidate_scenarios=RUFF_FORMAT_DRIFT",
+                ],
+                "recommended_fix": ["Run ruff format on touched files."],
+                "proof_commands": [
+                    "PYTHONPATH=src python -m ruff format --check tests/test_case.py"
+                ],
+                "risk_if_ignored": "CI stays red.",
+                "learning_signal": "formatting-drift-after-green-tests",
+                "repeat_count": 3,
+                "affected_files": ["tests/test_case.py"],
+            }
+        ],
+    }
+    diagnosis_path = tmp_path / "adaptive-diagnosis.json"
+    db_path = tmp_path / "adaptive-learning.jsonl"
+    diagnosis_path.write_text(json.dumps(diagnosis), encoding="utf-8")
+
+    record = _run(
+        "adaptive",
+        "learn",
+        "record",
+        str(diagnosis_path),
+        "--db",
+        str(db_path),
+        "--format",
+        "json",
+        "--proof-passed",
+        "--fix-accepted",
+    )
+    assert record.returncode == 0, record.stderr + record.stdout
+    assert json.loads(record.stdout)["appended_records"] == 1
+
+    summary = _run("adaptive", "learn", "summarize", "--db", str(db_path), "--format", "json")
+    assert summary.returncode == 0, summary.stderr + summary.stdout
+    payload = json.loads(summary.stdout)
+    assert payload["schema_version"] == "sdetkit.adaptive.learn.summary.v1"
+    assert payload["top_recurring_scenarios"][0]["code"] == "PRE_COMMIT_FORMAT_DRIFT"
+    assert payload["top_recurring_scenarios"][0]["calibration"]["primary_action"] == (
+        "promote_and_increase_risk"
+    )
+    assert payload["calibration_summary"]["promote"] == 1
+    assert payload["weakest_lanes"][0]["lane"] == "quality"

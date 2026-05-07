@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from collections import Counter
@@ -37,6 +38,7 @@ class SeededScenario:
     checks: tuple[str, ...]
     commands: tuple[str, ...]
     odds: tuple[str, ...] = ()
+    tags: tuple[str, ...] = ()
     risk_band: str = "medium"
     prior_weight: int = 1
 
@@ -189,328 +191,136 @@ FAILURE_LIKE_SIGNAL_DB = (
 )
 
 
-SEEDED_SCENARIO_DB = (
-    SeededScenario(
-        "PYTEST_BEHAVIOR_REGRESSION",
-        "Pytest behavior regression",
-        ("pytest-node-failed", "pytest-failed-count", "assertion-error"),
-        ("assertionerror", "failed tests/", "== failures =="),
-        (
-            "Open the first failing pytest node and read the assertion delta before editing product code.",
-            "Check whether fixtures, clocks, network fakes, or snapshots changed the expected contract.",
-        ),
-        ("PYTHONPATH=src python -m pytest -q <first-failing-test> -vv",),
-    ),
-    SeededScenario(
-        "PYTEST_COLLECTION_IMPORT_FAILURE",
-        "Pytest collection/import failure",
-        ("python-exception", "pytest-error-count", "traceback"),
-        ("modulenotfounderror", "importerror while importing", "collected 0 items / 1 error"),
-        (
-            "Inspect the first import exception and confirm the missing package or public API is declared.",
-            "Check pyproject/requirements extras before changing runtime behavior.",
-        ),
-        ("PYTHONPATH=src python -m pytest -q <failing-test-file> --collect-only",),
-    ),
-    SeededScenario(
-        "RUFF_FORMAT_DRIFT",
-        "Ruff format drift",
-        ("ruff-format-failure",),
-        ("would reformat", "files were modified by this hook", "file reformatted"),
-        (
-            "Run Ruff format on only touched Python files and verify the diff is format-only.",
-            "Re-run Ruff format check after formatting.",
-        ),
-        ("PYTHONPATH=src python -m ruff format --check <touched-python-files>",),
-    ),
-    SeededScenario(
-        "RUFF_LINT_CONTRACT",
-        "Ruff lint contract failure",
-        ("ruff-check-failure",),
-        ("ruff check", "[*]", "fixable with the --fix option"),
-        (
-            "Read the first Ruff rule code and separate safe mechanical F401/I001 from logic-risk rules.",
-            "Only allow scoped auto-fix for the narrow safe allowlist.",
-        ),
-        ("PYTHONPATH=src python -m ruff check <touched-python-files>",),
-    ),
-    SeededScenario(
-        "MYPY_CONTRACT_DRIFT",
-        "Mypy type contract drift",
-        ("mypy-error",),
-        ("mypy", "error:", "Found "),
-        (
-            "Open the first mypy error and identify whether the public contract or test double type drifted.",
-            "Avoid blanket ignores until the narrow type boundary is understood.",
-        ),
-        ("PYTHONPATH=src python -m mypy src tests",),
-    ),
-    SeededScenario(
-        "COVERAGE_GATE_REGRESSION",
-        "Coverage threshold regression",
-        ("coverage-failure",),
-        ("fail under", "total coverage", "coverage"),
-        (
-            "Compare missing coverage lines to the PR diff and add focused tests for changed behavior.",
-            "Do not lower the threshold unless the release owner explicitly approves policy change.",
-        ),
-        ("bash quality.sh cov",),
-    ),
-    SeededScenario(
-        "CI_STEP_EXIT_NONZERO",
-        "CI step exited non-zero",
-        ("ci-exit-code", "command-failed"),
-        ("exit code", "command failed"),
-        (
-            "Scroll above the exit-code footer and identify the first actionable tool failure.",
-            "Classify the failure before considering automation.",
-        ),
-        ("python -m pre_commit run -a",),
-    ),
-    SeededScenario(
-        "QUALITY_GATE_POLICY_FAILURE",
-        "Quality gate policy failure",
-        ("gate-problems-found", "failed-steps"),
-        ("gate: problems found", "failed_steps", "no_ship"),
-        (
-            "Read the structured failed step list and map it to the first failing artifact.",
-            "Check whether the policy failure is release-blocking or evidence-thin.",
-        ),
-        ("PYTHONPATH=src python -m sdetkit mission-control --execute --doctor-cortex",),
-    ),
-    SeededScenario(
-        "PACKAGE_INSTALL_FAILURE",
-        "Package install or script failure",
-        ("package-manager-error",),
-        ("npm err!", "pnpm err!", "yarn", "pip install", "resolutionimpossible"),
-        (
-            "Inspect the package-manager error block before retrying; dependency resolution may be the root cause.",
-            "Check lockfiles and declared test requirements for drift.",
-        ),
-        ("python -m pip install -r requirements-test.txt -e .",),
-    ),
-    SeededScenario(
-        "PRE_COMMIT_HOOK_FAILURE",
-        "Pre-commit hook failure",
-        ("explicit-failed",),
-        ("pre-commit", "hook", "files were modified by this hook"),
-        (
-            "Identify the exact hook that failed and whether it changed files or reported a contract issue.",
-            "If files changed, review the diff before committing generated changes.",
-        ),
-        ("python -m pre_commit run -a",),
-    ),
-    SeededScenario(
-        "RUNTIME_EXCEPTION",
-        "Runtime exception or traceback",
-        ("traceback", "python-exception", "error-prefix"),
-        ("traceback", "exception:", "error:"),
-        (
-            "Start at the last frame in the first traceback and identify the smallest product or test boundary.",
-            "Check whether the exception happens during setup, import, or exercised behavior.",
-        ),
-        ("PYTHONPATH=src python -m pytest -q <focused-test> -vv",),
-    ),
-    SeededScenario(
-        "LOCAL_ENVIRONMENT_FRICTION",
-        "Local environment friction",
-        ("command-failed",),
-        ("/mnt/c/", "keyboardinterrupt", "venv", "site-packages"),
-        (
-            "Separate local filesystem/package friction from product failures before changing code.",
-            "Re-run from a native Linux filesystem or clean virtual environment if needed.",
-        ),
-        ("python -m venv .venv",),
-    ),
-    SeededScenario(
-        "GIT_REMOTE_DRIFT",
-        "Git branch or remote drift",
-        ("error-prefix", "command-failed"),
-        ("non-fast-forward", "fetch first", "remote contains work", "rebase"),
-        (
-            "Fetch and compare remote branch state before pushing or rewriting commits.",
-            "Re-run proof after rebase because previous proof may be stale.",
-        ),
-        ("git fetch --all --prune", "git status --short --branch"),
-    ),
-    SeededScenario(
-        "ASYNC_EVENT_LOOP_MISMATCH",
-        "Async event loop or fixture mismatch",
-        ("python-exception", "pytest-error-count"),
-        (
-            "event loop is closed",
-            "pytest-asyncio",
-            "anyio",
-            "asyncio.run",
-            "attached to a different loop",
-        ),
-        (
-            "Check the async test marker, fixture scope, and client lifecycle before changing production async code.",
-            "Reproduce one async test with verbose traceback and no parallelism.",
-        ),
-        ("PYTHONPATH=src python -m pytest -q <async-test> -vv",),
-    ),
-    SeededScenario(
-        "SNAPSHOT_GOLDEN_DRIFT",
-        "Snapshot or golden-file drift",
-        ("pytest-node-failed", "assertion-error"),
-        ("snapshot", "golden", "approval", "received", "expected"),
-        (
-            "Inspect the expected/received diff and confirm whether the contract intentionally changed.",
-            "Update golden files only after a focused behavior test proves the new output.",
-        ),
-        ("PYTHONPATH=src python -m pytest -q <snapshot-test> -vv",),
-    ),
-    SeededScenario(
-        "PROPERTY_FUZZ_COUNTEREXAMPLE",
-        "Property-test counterexample",
-        ("assertion-error", "pytest-node-failed"),
-        ("hypothesis", "falsifying example", "counterexample", "seed="),
-        (
-            "Copy the minimized counterexample into a focused regression test before broad refactors.",
-            "Check whether shrinking revealed an input contract gap or product bug.",
-        ),
-        ("PYTHONPATH=src python -m pytest -q <property-test> --hypothesis-show-statistics",),
-    ),
-    SeededScenario(
-        "FLAKY_ORDER_DEPENDENCE",
-        "Order-dependent or parallel test flake",
-        ("pytest-failed-count", "command-failed"),
-        ("xdist", "randomly", "rerun", "flaky", "order dependent"),
-        (
-            "Re-run the failing test alone and then with the previous neighbor to expose hidden shared state.",
-            "Check global caches, monkeypatch cleanup, time/freezer state, and temporary directories.",
-        ),
-        ("PYTHONPATH=src python -m pytest -q <failing-test> --count=3",),
-    ),
-    SeededScenario(
-        "NETWORK_SERVICE_FLAKE",
-        "Network/API service flake",
-        ("python-exception", "command-failed"),
-        ("timeout", "connectionerror", "429", "rate limit", "dns", "tls"),
-        (
-            "Separate product failures from remote-service instability using mocks or recorded fixtures.",
-            "Check retry/backoff behavior and whether the test is marked network opt-in.",
-        ),
-        ("PYTHONPATH=src python -m pytest -q <network-test> -vv",),
-    ),
-    SeededScenario(
-        "AUTH_SECRET_CONFIGURATION",
-        "Auth or secret configuration failure",
-        ("error-prefix", "python-exception"),
-        ("unauthorized", "forbidden", "401", "403", "missing secret", "token"),
-        (
-            "Confirm whether the workflow has the needed secret scope without printing secret values.",
-            "Check permission blocks and environment names before changing auth code.",
-        ),
-        ("git status --short",),
-    ),
-    SeededScenario(
-        "DOCKER_SERVICE_BOOT_FAILURE",
-        "Docker service boot failure",
-        ("command-failed", "ci-exit-code"),
-        ("docker", "compose", "container exited", "healthcheck", "port is already allocated"),
-        (
-            "Inspect service logs and health checks before retrying the full workflow.",
-            "Check port collisions, image pull failures, and startup readiness waits.",
-        ),
-        ("docker compose ps", "docker compose logs --tail=200"),
-    ),
-    SeededScenario(
-        "DATABASE_MIGRATION_DRIFT",
-        "Database migration or schema drift",
-        ("python-exception", "error-prefix"),
-        ("migration", "alembic", "schema", "relation does not exist", "duplicate column"),
-        (
-            "Compare migration head, generated schema, and test database setup before editing models.",
-            "Confirm whether the failure is stale fixtures or a real migration gap.",
-        ),
-        ("PYTHONPATH=src python -m pytest -q <db-test> -vv",),
-    ),
-    SeededScenario(
-        "TIMEZONE_CLOCK_DRIFT",
-        "Timezone or clock-dependent failure",
-        ("assertion-error", "pytest-node-failed"),
-        ("timezone", "utc", "dst", "freezegun", "datetime", "today"),
-        (
-            "Check timezone assumptions, frozen clocks, and date boundaries before changing expected output.",
-            "Reproduce with UTC and the failing local timezone if available.",
-        ),
-        ("TZ=UTC PYTHONPATH=src python -m pytest -q <time-test> -vv",),
-    ),
-    SeededScenario(
-        "PLATFORM_PATH_CASE_DRIFT",
-        "Platform path/case sensitivity drift",
-        ("python-exception", "assertion-error"),
-        ("filenotfounderror", "permission denied", "case-sensitive", "path", "windows"),
-        (
-            "Check path casing, separators, permissions, and temp-directory cleanup across platforms.",
-            "Avoid hard-coded absolute paths in tests and generated artifacts.",
-        ),
-        ("PYTHONPATH=src python -m pytest -q <path-test> -vv",),
-    ),
-    SeededScenario(
-        "CACHE_ARTIFACT_POISONING",
-        "Cache or artifact poisoning",
-        ("command-failed", "error-prefix"),
-        ("cache", "artifact", "stale", "checksum", "hash mismatch"),
-        (
-            "Compare the failing run with a cache-cold run before changing product code.",
-            "Check cache keys include lockfiles, Python version, and relevant config files.",
-        ),
-        ("git diff -- pyproject.toml requirements-test.txt",),
-    ),
-    SeededScenario(
-        "DOCS_BUILD_CONTRACT",
-        "Docs build or link contract failure",
-        ("command-failed", "error-prefix"),
-        ("mkdocs", "sphinx", "markdown", "linkcheck", "broken link"),
-        (
-            "Open the first docs build error and check whether navigation, anchors, or generated files drifted.",
-            "Verify docs-only fixes do not mask product API drift.",
-        ),
-        ("PYTHONPATH=src python -m pytest -q tests/test_docs*.py",),
-    ),
-    SeededScenario(
-        "SECURITY_AUDIT_BLOCKER",
-        "Security audit blocker",
-        ("error-prefix", "gate-problems-found"),
-        ("vulnerability", "ghsa", "cve", "pip-audit", "bandit", "secret detected"),
-        (
-            "Treat security audit output as review-first; identify whether it is dependency, code, or secret exposure.",
-            "Check advisories and minimum patched versions before bumping packages.",
-        ),
-        ("python -m pip_audit",),
-    ),
-    SeededScenario(
-        "BUILD_BACKEND_FAILURE",
-        "Build backend or wheel failure",
-        ("package-manager-error", "python-exception"),
-        (
-            "building wheel",
-            "pyproject",
-            "setuptools",
-            "build backend",
-            "metadata-generation-failed",
-        ),
-        (
-            "Inspect build backend metadata errors and confirm declared build requirements.",
-            "Check whether a package only ships sdists for the active Python/platform.",
-        ),
-        ("python -m pip install -r requirements-test.txt -e .",),
-    ),
-    SeededScenario(
-        "RELEASE_VERSION_CONFLICT",
-        "Release/version metadata conflict",
-        ("error-prefix", "command-failed"),
-        ("version", "tag already exists", "duplicate release", "changelog", "twine"),
-        (
-            "Compare package version, git tags, changelog, and release artifact names.",
-            "Do not overwrite published artifacts; create a new version if release state escaped.",
-        ),
-        ("git tag --points-at HEAD", "python -m build --sdist --wheel"),
-    ),
-)
+BUILTIN_SCENARIO_PACK = "data/adaptive_scenarios.json"
+SCENARIO_PACK_SCHEMA_VERSION = "sdetkit.adaptive.scenario_pack.v1"
+VALID_RISK_BANDS = {"low", "medium", "high"}
+REQUIRED_SCENARIO_FIELDS = {
+    "code",
+    "title",
+    "signals",
+    "keywords",
+    "checks",
+    "commands",
+    "risk_band",
+    "prior_weight",
+}
+
+
+def _package_file(rel_path: str) -> Path:
+    return Path(__file__).resolve().parent / rel_path
+
+
+def _as_str_tuple(value: Any, field: str, code: str) -> tuple[str, ...]:
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"scenario {code}: {field} must be a non-empty list")
+    out: list[str] = []
+    for item in value:
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError(f"scenario {code}: {field} must contain non-empty strings")
+        text = item.strip()
+        if text not in out:
+            out.append(text)
+    return tuple(out)
+
+
+def _as_optional_str_tuple(value: Any, field: str, code: str) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if not isinstance(value, list):
+        raise ValueError(f"scenario {code}: {field} must be a list when provided")
+    out: list[str] = []
+    for item in value:
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError(f"scenario {code}: {field} must contain non-empty strings")
+        text = item.strip()
+        if text not in out:
+            out.append(text)
+    return tuple(out)
+
+
+def _scenario_from_row(row: Any, *, source: Path) -> SeededScenario:
+    if not isinstance(row, dict):
+        raise ValueError(f"scenario pack {source}: each scenario must be an object")
+    missing = sorted(REQUIRED_SCENARIO_FIELDS.difference(row))
+    raw_code = row.get("code", "UNKNOWN")
+    code = raw_code.strip() if isinstance(raw_code, str) else "UNKNOWN"
+    if missing:
+        raise ValueError(f"scenario {code}: missing required fields: {', '.join(missing)}")
+    if not code or not re.fullmatch(r"[A-Z0-9_]+", code):
+        raise ValueError(f"scenario {code}: code must be uppercase snake case")
+    title = row.get("title")
+    if not isinstance(title, str) or not title.strip():
+        raise ValueError(f"scenario {code}: title must be a non-empty string")
+    risk_band = row.get("risk_band")
+    if risk_band not in VALID_RISK_BANDS:
+        raise ValueError(f"scenario {code}: risk_band must be one of low, medium, high")
+    prior_weight = row.get("prior_weight")
+    if not isinstance(prior_weight, int) or isinstance(prior_weight, bool) or prior_weight < 1:
+        raise ValueError(f"scenario {code}: prior_weight must be a positive integer")
+    return SeededScenario(
+        code=code,
+        title=title.strip(),
+        signals=_as_str_tuple(row.get("signals"), "signals", code),
+        keywords=_as_str_tuple(row.get("keywords"), "keywords", code),
+        checks=_as_str_tuple(row.get("checks"), "checks", code),
+        commands=_as_str_tuple(row.get("commands"), "commands", code),
+        odds=_as_optional_str_tuple(row.get("odds"), "odds", code),
+        tags=_as_optional_str_tuple(row.get("tags"), "tags", code),
+        risk_band=str(risk_band),
+        prior_weight=prior_weight,
+    )
+
+
+def load_scenario_pack(path: Path) -> tuple[SeededScenario, ...]:
+    """Load and validate a versioned adaptive scenario pack."""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"scenario pack {path}: root must be an object")
+    if payload.get("schema_version") != SCENARIO_PACK_SCHEMA_VERSION:
+        raise ValueError(
+            f"scenario pack {path}: schema_version must be {SCENARIO_PACK_SCHEMA_VERSION}"
+        )
+    rows = payload.get("scenarios")
+    if not isinstance(rows, list) or not rows:
+        raise ValueError(f"scenario pack {path}: scenarios must be a non-empty list")
+    scenarios = [_scenario_from_row(row, source=path) for row in rows]
+    codes = [scenario.code for scenario in scenarios]
+    duplicate_codes = sorted(code for code, count in Counter(codes).items() if count > 1)
+    if duplicate_codes:
+        raise ValueError(
+            f"scenario pack {path}: duplicate scenario codes: {', '.join(duplicate_codes)}"
+        )
+    return tuple(sorted(scenarios, key=lambda scenario: scenario.code))
+
+
+def merge_scenario_packs(*packs: Sequence[SeededScenario]) -> tuple[SeededScenario, ...]:
+    """Merge packs deterministically, allowing later packs to override by scenario code."""
+    merged: dict[str, SeededScenario] = {}
+    for pack in packs:
+        for scenario in pack:
+            merged[scenario.code] = scenario
+    return tuple(merged[code] for code in sorted(merged))
+
+
+def _default_layer_paths(root: Path | None = None) -> list[Path]:
+    base = root or Path.cwd()
+    env_paths = [
+        Path(item)
+        for item in os.environ.get("SDETKIT_ADAPTIVE_SCENARIO_PACKS", "").split(os.pathsep)
+        if item
+    ]
+    candidates = [base / ".sdetkit" / "adaptive" / "scenarios.json", *env_paths]
+    return [path for path in candidates if path.exists()]
+
+
+def load_layered_scenarios(root: Path | None = None) -> tuple[SeededScenario, ...]:
+    """Load built-in scenarios plus repo/org/private overlay packs in deterministic order."""
+    packs = [load_scenario_pack(_package_file(BUILTIN_SCENARIO_PACK))]
+    packs.extend(load_scenario_pack(path) for path in _default_layer_paths(root))
+    return merge_scenario_packs(*packs)
+
+
+SEEDED_SCENARIO_DB = load_scenario_pack(_package_file(BUILTIN_SCENARIO_PACK))
 
 
 def _as_int(value: Any) -> int:
@@ -600,6 +410,57 @@ def _failure_like_signals(text: str) -> list[FailureSignal]:
     return [signal for signal in FAILURE_LIKE_SIGNAL_DB if signal.pattern.search(text)]
 
 
+def _scenario_calibration_map(
+    adaptive_history: dict[str, Any] | None = None,
+) -> dict[str, dict[str, Any]]:
+    history = _as_dict(adaptive_history)
+    rows = _as_list(history.get("top_recurring_scenarios"))
+    out: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        item = _as_dict(row)
+        code = str(item.get("code", "")).strip()
+        if code:
+            out[code] = _as_dict(item.get("calibration"))
+    return out
+
+
+def _calibration_score(calibration: dict[str, Any]) -> int:
+    if not calibration:
+        return 0
+    actions = {str(value) for value in _as_list(calibration.get("actions"))}
+    score = _as_int(calibration.get("confidence_delta")) * 2
+    risk_delta = _as_int(calibration.get("risk_delta"))
+    if risk_delta > 0:
+        score += min(4, max(1, risk_delta // 8))
+    elif risk_delta < 0:
+        score -= min(4, max(1, abs(risk_delta) // 8))
+    if "promote" in actions:
+        score += 4
+    if "increase_risk" in actions:
+        score += 2
+    if "demote" in actions:
+        score -= 8
+    if "lower_confidence" in actions:
+        score -= 3
+    return score
+
+
+def _candidate_calibration_evidence(
+    candidates: Sequence[SeededScenario], calibration_by_code: dict[str, dict[str, Any]]
+) -> str:
+    parts: list[str] = []
+    for scenario in candidates[:4]:
+        calibration = calibration_by_code.get(scenario.code, {})
+        if not calibration:
+            continue
+        parts.append(
+            f"{scenario.code}:{calibration.get('primary_action', 'observe')}:"
+            f"confidence_delta={_as_int(calibration.get('confidence_delta'))}:"
+            f"risk_delta={_as_int(calibration.get('risk_delta'))}"
+        )
+    return "candidate_calibration=" + ";".join(parts) if parts else ""
+
+
 def _looks_failure_like(text: str) -> bool:
     return bool(_failure_like_signals(text))
 
@@ -608,21 +469,29 @@ def _has_failure_signal(text: str, name: str) -> bool:
     return any(signal.name == name for signal in _failure_like_signals(text))
 
 
-def _failure_like_evidence(text: str) -> list[str]:
+def _failure_like_evidence(text: str, adaptive_history: dict[str, Any] | None = None) -> list[str]:
     signals = _failure_like_signals(text)
+    calibration_by_code = _scenario_calibration_map(adaptive_history)
     evidence = ["matched_failure_signals=" + ",".join(signal.name for signal in signals[:6])]
     evidence.extend(signal.description for signal in signals[:3])
-    candidates = _candidate_scenarios(text, signals)
+    candidates = _candidate_scenarios(text, signals, calibration_by_code=calibration_by_code)
     if candidates:
         evidence.append(
             "candidate_scenarios=" + ",".join(scenario.code for scenario in candidates[:4])
         )
         evidence.append(_candidate_odds_evidence(candidates))
+        calibration_evidence = _candidate_calibration_evidence(candidates, calibration_by_code)
+        if calibration_evidence:
+            evidence.append(calibration_evidence)
     return evidence
 
 
 def _candidate_scenarios(
-    text: str, signals: Sequence[FailureSignal] | None = None, *, limit: int = 4
+    text: str,
+    signals: Sequence[FailureSignal] | None = None,
+    *,
+    limit: int = 4,
+    calibration_by_code: dict[str, dict[str, Any]] | None = None,
 ) -> list[SeededScenario]:
     lower = text.lower()
     signal_names = {signal.name for signal in (signals or _failure_like_signals(text))}
@@ -632,6 +501,7 @@ def _candidate_scenarios(
         keyword_hits = sum(1 for keyword in scenario.keywords if keyword.lower() in lower)
         odds_hits = sum(1 for odd in scenario.odds if odd.lower() in lower)
         score = signal_hits * 3 + keyword_hits + odds_hits + max(0, scenario.prior_weight - 1)
+        score += _calibration_score(_as_dict((calibration_by_code or {}).get(scenario.code)))
         if score:
             scored.append((-score, scenario.code, scenario))
     scored.sort()
@@ -653,9 +523,13 @@ def _candidate_odds_evidence(candidates: Sequence[SeededScenario]) -> str:
     return "candidate_odds=" + ";".join(parts)
 
 
-def _candidate_checks(text: str, limit: int = 5) -> list[str]:
+def _candidate_checks(
+    text: str, limit: int = 5, adaptive_history: dict[str, Any] | None = None
+) -> list[str]:
     checks: list[str] = []
-    for scenario in _candidate_scenarios(text):
+    for scenario in _candidate_scenarios(
+        text, calibration_by_code=_scenario_calibration_map(adaptive_history)
+    ):
         checks.append(f"Check candidate {scenario.code}: {scenario.checks[0]}")
         for check in scenario.checks[1:2]:
             checks.append(check)
@@ -667,9 +541,13 @@ def _candidate_checks(text: str, limit: int = 5) -> list[str]:
     return checks[:limit]
 
 
-def _candidate_commands(text: str, limit: int = 4) -> list[str]:
+def _candidate_commands(
+    text: str, limit: int = 4, adaptive_history: dict[str, Any] | None = None
+) -> list[str]:
     commands: list[str] = []
-    for scenario in _candidate_scenarios(text):
+    for scenario in _candidate_scenarios(
+        text, calibration_by_code=_scenario_calibration_map(adaptive_history)
+    ):
         for command in scenario.commands:
             if command not in commands:
                 commands.append(command)
@@ -916,7 +794,9 @@ def _append_local_investigation(
     return False
 
 
-def _append_log(text: str, diagnoses: list[dict[str, Any]]) -> None:
+def _append_log(
+    text: str, diagnoses: list[dict[str, Any]], adaptive_history: dict[str, Any] | None = None
+) -> None:
     lower = text.lower()
     files = _file_mentions(text)
     handled_local = _append_local_investigation(text, files, diagnoses)
@@ -973,9 +853,9 @@ def _append_log(text: str, diagnoses: list[dict[str, Any]]) -> None:
                 "Failure needs human review",
                 "The provided log contains failure-like text but did not match a known adaptive diagnosis family.",
                 "Unknown failures should not be guessed into a safe-fix route.",
-                _failure_like_evidence(text),
-                _candidate_checks(text),
-                _candidate_commands(text),
+                _failure_like_evidence(text, adaptive_history),
+                _candidate_checks(text, adaptive_history=adaptive_history),
+                _candidate_commands(text, adaptive_history=adaptive_history),
                 "Unclassified failures can be unsafe to automate.",
                 "unknown-review-required",
                 files=files,
@@ -1250,7 +1130,7 @@ def analyze_evidence(
 ) -> dict[str, Any]:
     diagnoses: list[dict[str, Any]] = []
     if log_text:
-        _append_log(log_text, diagnoses)
+        _append_log(log_text, diagnoses, _as_dict(adaptive_history))
     _append_mission(_as_dict(mission_control), diagnoses)
     _append_history(list(ledger_records or []), diagnoses)
     _append_adaptive(_as_dict(adaptive_history), diagnoses)

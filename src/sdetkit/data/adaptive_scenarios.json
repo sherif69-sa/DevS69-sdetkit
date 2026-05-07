@@ -1,0 +1,686 @@
+{
+  "pack_id": "sdetkit.built_in.adaptive_scenarios",
+  "scenarios": [
+    {
+      "checks": [
+        "Open the first failing pytest node and read the assertion delta before editing product code.",
+        "Check whether fixtures, clocks, network fakes, or snapshots changed the expected contract."
+      ],
+      "code": "PYTEST_BEHAVIOR_REGRESSION",
+      "commands": [
+        "PYTHONPATH=src python -m pytest -q <first-failing-test> -vv"
+      ],
+      "keywords": [
+        "assertionerror",
+        "failed tests/",
+        "== failures =="
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "pytest-node-failed",
+        "pytest-failed-count",
+        "assertion-error"
+      ],
+      "title": "Pytest behavior regression"
+    },
+    {
+      "checks": [
+        "Inspect the first import exception and confirm the missing package or public API is declared.",
+        "Check pyproject/requirements extras before changing runtime behavior."
+      ],
+      "code": "PYTEST_COLLECTION_IMPORT_FAILURE",
+      "commands": [
+        "PYTHONPATH=src python -m pytest -q <failing-test-file> --collect-only"
+      ],
+      "keywords": [
+        "modulenotfounderror",
+        "importerror while importing",
+        "collected 0 items / 1 error"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "python-exception",
+        "pytest-error-count",
+        "traceback"
+      ],
+      "title": "Pytest collection/import failure"
+    },
+    {
+      "checks": [
+        "Run Ruff format on only touched Python files and verify the diff is format-only.",
+        "Re-run Ruff format check after formatting."
+      ],
+      "code": "RUFF_FORMAT_DRIFT",
+      "commands": [
+        "PYTHONPATH=src python -m ruff format --check <touched-python-files>"
+      ],
+      "keywords": [
+        "would reformat",
+        "files were modified by this hook",
+        "file reformatted"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "ruff-format-failure"
+      ],
+      "title": "Ruff format drift"
+    },
+    {
+      "checks": [
+        "Read the first Ruff rule code and separate safe mechanical F401/I001 from logic-risk rules.",
+        "Only allow scoped auto-fix for the narrow safe allowlist."
+      ],
+      "code": "RUFF_LINT_CONTRACT",
+      "commands": [
+        "PYTHONPATH=src python -m ruff check <touched-python-files>"
+      ],
+      "keywords": [
+        "ruff check",
+        "[*]",
+        "fixable with the --fix option"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "ruff-check-failure"
+      ],
+      "title": "Ruff lint contract failure"
+    },
+    {
+      "checks": [
+        "Open the first mypy error and identify whether the public contract or test double type drifted.",
+        "Avoid blanket ignores until the narrow type boundary is understood."
+      ],
+      "code": "MYPY_CONTRACT_DRIFT",
+      "commands": [
+        "PYTHONPATH=src python -m mypy src tests"
+      ],
+      "keywords": [
+        "mypy",
+        "error:",
+        "Found "
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "mypy-error"
+      ],
+      "title": "Mypy type contract drift"
+    },
+    {
+      "checks": [
+        "Compare missing coverage lines to the PR diff and add focused tests for changed behavior.",
+        "Do not lower the threshold unless the release owner explicitly approves policy change."
+      ],
+      "code": "COVERAGE_GATE_REGRESSION",
+      "commands": [
+        "bash quality.sh cov"
+      ],
+      "keywords": [
+        "fail under",
+        "total coverage",
+        "coverage"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "coverage-failure"
+      ],
+      "title": "Coverage threshold regression"
+    },
+    {
+      "checks": [
+        "Scroll above the exit-code footer and identify the first actionable tool failure.",
+        "Classify the failure before considering automation."
+      ],
+      "code": "CI_STEP_EXIT_NONZERO",
+      "commands": [
+        "python -m pre_commit run -a"
+      ],
+      "keywords": [
+        "exit code",
+        "command failed"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "ci-exit-code",
+        "command-failed"
+      ],
+      "title": "CI step exited non-zero"
+    },
+    {
+      "checks": [
+        "Read the structured failed step list and map it to the first failing artifact.",
+        "Check whether the policy failure is release-blocking or evidence-thin."
+      ],
+      "code": "QUALITY_GATE_POLICY_FAILURE",
+      "commands": [
+        "PYTHONPATH=src python -m sdetkit mission-control --execute --doctor-cortex"
+      ],
+      "keywords": [
+        "gate: problems found",
+        "failed_steps",
+        "no_ship"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "gate-problems-found",
+        "failed-steps"
+      ],
+      "title": "Quality gate policy failure"
+    },
+    {
+      "checks": [
+        "Inspect the package-manager error block before retrying; dependency resolution may be the root cause.",
+        "Check lockfiles and declared test requirements for drift."
+      ],
+      "code": "PACKAGE_INSTALL_FAILURE",
+      "commands": [
+        "python -m pip install -r requirements-test.txt -e ."
+      ],
+      "keywords": [
+        "npm err!",
+        "pnpm err!",
+        "yarn",
+        "pip install",
+        "resolutionimpossible"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "package-manager-error"
+      ],
+      "title": "Package install or script failure"
+    },
+    {
+      "checks": [
+        "Identify the exact hook that failed and whether it changed files or reported a contract issue.",
+        "If files changed, review the diff before committing generated changes."
+      ],
+      "code": "PRE_COMMIT_HOOK_FAILURE",
+      "commands": [
+        "python -m pre_commit run -a"
+      ],
+      "keywords": [
+        "pre-commit",
+        "hook",
+        "files were modified by this hook"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "explicit-failed"
+      ],
+      "title": "Pre-commit hook failure"
+    },
+    {
+      "checks": [
+        "Start at the last frame in the first traceback and identify the smallest product or test boundary.",
+        "Check whether the exception happens during setup, import, or exercised behavior."
+      ],
+      "code": "RUNTIME_EXCEPTION",
+      "commands": [
+        "PYTHONPATH=src python -m pytest -q <focused-test> -vv"
+      ],
+      "keywords": [
+        "traceback",
+        "exception:",
+        "error:"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "traceback",
+        "python-exception",
+        "error-prefix"
+      ],
+      "title": "Runtime exception or traceback"
+    },
+    {
+      "checks": [
+        "Separate local filesystem/package friction from product failures before changing code.",
+        "Re-run from a native Linux filesystem or clean virtual environment if needed."
+      ],
+      "code": "LOCAL_ENVIRONMENT_FRICTION",
+      "commands": [
+        "python -m venv .venv"
+      ],
+      "keywords": [
+        "/mnt/c/",
+        "keyboardinterrupt",
+        "venv",
+        "site-packages"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "command-failed"
+      ],
+      "title": "Local environment friction"
+    },
+    {
+      "checks": [
+        "Fetch and compare remote branch state before pushing or rewriting commits.",
+        "Re-run proof after rebase because previous proof may be stale."
+      ],
+      "code": "GIT_REMOTE_DRIFT",
+      "commands": [
+        "git fetch --all --prune",
+        "git status --short --branch"
+      ],
+      "keywords": [
+        "non-fast-forward",
+        "fetch first",
+        "remote contains work",
+        "rebase"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "error-prefix",
+        "command-failed"
+      ],
+      "title": "Git branch or remote drift"
+    },
+    {
+      "checks": [
+        "Check the async test marker, fixture scope, and client lifecycle before changing production async code.",
+        "Reproduce one async test with verbose traceback and no parallelism."
+      ],
+      "code": "ASYNC_EVENT_LOOP_MISMATCH",
+      "commands": [
+        "PYTHONPATH=src python -m pytest -q <async-test> -vv"
+      ],
+      "keywords": [
+        "event loop is closed",
+        "pytest-asyncio",
+        "anyio",
+        "asyncio.run",
+        "attached to a different loop"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "python-exception",
+        "pytest-error-count"
+      ],
+      "title": "Async event loop or fixture mismatch"
+    },
+    {
+      "checks": [
+        "Inspect the expected/received diff and confirm whether the contract intentionally changed.",
+        "Update golden files only after a focused behavior test proves the new output."
+      ],
+      "code": "SNAPSHOT_GOLDEN_DRIFT",
+      "commands": [
+        "PYTHONPATH=src python -m pytest -q <snapshot-test> -vv"
+      ],
+      "keywords": [
+        "snapshot",
+        "golden",
+        "approval",
+        "received",
+        "expected"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "pytest-node-failed",
+        "assertion-error"
+      ],
+      "title": "Snapshot or golden-file drift"
+    },
+    {
+      "checks": [
+        "Copy the minimized counterexample into a focused regression test before broad refactors.",
+        "Check whether shrinking revealed an input contract gap or product bug."
+      ],
+      "code": "PROPERTY_FUZZ_COUNTEREXAMPLE",
+      "commands": [
+        "PYTHONPATH=src python -m pytest -q <property-test> --hypothesis-show-statistics"
+      ],
+      "keywords": [
+        "hypothesis",
+        "falsifying example",
+        "counterexample",
+        "seed="
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "assertion-error",
+        "pytest-node-failed"
+      ],
+      "title": "Property-test counterexample"
+    },
+    {
+      "checks": [
+        "Re-run the failing test alone and then with the previous neighbor to expose hidden shared state.",
+        "Check global caches, monkeypatch cleanup, time/freezer state, and temporary directories."
+      ],
+      "code": "FLAKY_ORDER_DEPENDENCE",
+      "commands": [
+        "PYTHONPATH=src python -m pytest -q <failing-test> --count=3"
+      ],
+      "keywords": [
+        "xdist",
+        "randomly",
+        "rerun",
+        "flaky",
+        "order dependent"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "pytest-failed-count",
+        "command-failed"
+      ],
+      "title": "Order-dependent or parallel test flake"
+    },
+    {
+      "checks": [
+        "Separate product failures from remote-service instability using mocks or recorded fixtures.",
+        "Check retry/backoff behavior and whether the test is marked network opt-in."
+      ],
+      "code": "NETWORK_SERVICE_FLAKE",
+      "commands": [
+        "PYTHONPATH=src python -m pytest -q <network-test> -vv"
+      ],
+      "keywords": [
+        "timeout",
+        "connectionerror",
+        "429",
+        "rate limit",
+        "dns",
+        "tls"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "python-exception",
+        "command-failed"
+      ],
+      "title": "Network/API service flake"
+    },
+    {
+      "checks": [
+        "Confirm whether the workflow has the needed secret scope without printing secret values.",
+        "Check permission blocks and environment names before changing auth code."
+      ],
+      "code": "AUTH_SECRET_CONFIGURATION",
+      "commands": [
+        "git status --short"
+      ],
+      "keywords": [
+        "unauthorized",
+        "forbidden",
+        "401",
+        "403",
+        "missing secret",
+        "token"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "error-prefix",
+        "python-exception"
+      ],
+      "title": "Auth or secret configuration failure"
+    },
+    {
+      "checks": [
+        "Inspect service logs and health checks before retrying the full workflow.",
+        "Check port collisions, image pull failures, and startup readiness waits."
+      ],
+      "code": "DOCKER_SERVICE_BOOT_FAILURE",
+      "commands": [
+        "docker compose ps",
+        "docker compose logs --tail=200"
+      ],
+      "keywords": [
+        "docker",
+        "compose",
+        "container exited",
+        "healthcheck",
+        "port is already allocated"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "command-failed",
+        "ci-exit-code"
+      ],
+      "title": "Docker service boot failure"
+    },
+    {
+      "checks": [
+        "Compare migration head, generated schema, and test database setup before editing models.",
+        "Confirm whether the failure is stale fixtures or a real migration gap."
+      ],
+      "code": "DATABASE_MIGRATION_DRIFT",
+      "commands": [
+        "PYTHONPATH=src python -m pytest -q <db-test> -vv"
+      ],
+      "keywords": [
+        "migration",
+        "alembic",
+        "schema",
+        "relation does not exist",
+        "duplicate column"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "python-exception",
+        "error-prefix"
+      ],
+      "title": "Database migration or schema drift"
+    },
+    {
+      "checks": [
+        "Check timezone assumptions, frozen clocks, and date boundaries before changing expected output.",
+        "Reproduce with UTC and the failing local timezone if available."
+      ],
+      "code": "TIMEZONE_CLOCK_DRIFT",
+      "commands": [
+        "TZ=UTC PYTHONPATH=src python -m pytest -q <time-test> -vv"
+      ],
+      "keywords": [
+        "timezone",
+        "utc",
+        "dst",
+        "freezegun",
+        "datetime",
+        "today"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "assertion-error",
+        "pytest-node-failed"
+      ],
+      "title": "Timezone or clock-dependent failure"
+    },
+    {
+      "checks": [
+        "Check path casing, separators, permissions, and temp-directory cleanup across platforms.",
+        "Avoid hard-coded absolute paths in tests and generated artifacts."
+      ],
+      "code": "PLATFORM_PATH_CASE_DRIFT",
+      "commands": [
+        "PYTHONPATH=src python -m pytest -q <path-test> -vv"
+      ],
+      "keywords": [
+        "filenotfounderror",
+        "permission denied",
+        "case-sensitive",
+        "path",
+        "windows"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "python-exception",
+        "assertion-error"
+      ],
+      "title": "Platform path/case sensitivity drift"
+    },
+    {
+      "checks": [
+        "Compare the failing run with a cache-cold run before changing product code.",
+        "Check cache keys include lockfiles, Python version, and relevant config files."
+      ],
+      "code": "CACHE_ARTIFACT_POISONING",
+      "commands": [
+        "git diff -- pyproject.toml requirements-test.txt"
+      ],
+      "keywords": [
+        "cache",
+        "artifact",
+        "stale",
+        "checksum",
+        "hash mismatch"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "command-failed",
+        "error-prefix"
+      ],
+      "title": "Cache or artifact poisoning"
+    },
+    {
+      "checks": [
+        "Open the first docs build error and check whether navigation, anchors, or generated files drifted.",
+        "Verify docs-only fixes do not mask product API drift."
+      ],
+      "code": "DOCS_BUILD_CONTRACT",
+      "commands": [
+        "PYTHONPATH=src python -m pytest -q tests/test_docs*.py"
+      ],
+      "keywords": [
+        "mkdocs",
+        "sphinx",
+        "markdown",
+        "linkcheck",
+        "broken link"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "command-failed",
+        "error-prefix"
+      ],
+      "title": "Docs build or link contract failure"
+    },
+    {
+      "checks": [
+        "Treat security audit output as review-first; identify whether it is dependency, code, or secret exposure.",
+        "Check advisories and minimum patched versions before bumping packages."
+      ],
+      "code": "SECURITY_AUDIT_BLOCKER",
+      "commands": [
+        "python -m pip_audit"
+      ],
+      "keywords": [
+        "vulnerability",
+        "ghsa",
+        "cve",
+        "pip-audit",
+        "bandit",
+        "secret detected"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "error-prefix",
+        "gate-problems-found"
+      ],
+      "title": "Security audit blocker"
+    },
+    {
+      "checks": [
+        "Inspect build backend metadata errors and confirm declared build requirements.",
+        "Check whether a package only ships sdists for the active Python/platform."
+      ],
+      "code": "BUILD_BACKEND_FAILURE",
+      "commands": [
+        "python -m pip install -r requirements-test.txt -e ."
+      ],
+      "keywords": [
+        "building wheel",
+        "pyproject",
+        "setuptools",
+        "build backend",
+        "metadata-generation-failed"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "package-manager-error",
+        "python-exception"
+      ],
+      "title": "Build backend or wheel failure"
+    },
+    {
+      "checks": [
+        "Compare package version, git tags, changelog, and release artifact names.",
+        "Do not overwrite published artifacts; create a new version if release state escaped."
+      ],
+      "code": "RELEASE_VERSION_CONFLICT",
+      "commands": [
+        "git tag --points-at HEAD",
+        "python -m build --sdist --wheel"
+      ],
+      "keywords": [
+        "version",
+        "tag already exists",
+        "duplicate release",
+        "changelog",
+        "twine"
+      ],
+      "odds": [],
+      "prior_weight": 1,
+      "risk_band": "medium",
+      "signals": [
+        "error-prefix",
+        "command-failed"
+      ],
+      "title": "Release/version metadata conflict"
+    }
+  ],
+  "schema_version": "sdetkit.adaptive.scenario_pack.v1",
+  "title": "Built-in SDETKit adaptive scenario pack"
+}

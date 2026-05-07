@@ -152,4 +152,4 @@ whatsapp = "sdetkit.notify_plugins:whatsapp_adapter"
 
 [project.entry-points."sdetkit.ops_tasks"]
 [tool.setuptools.package-data]
-sdetkit = ["public_command_surface.json"]
+sdetkit = ["public_command_surface.json", "data/*.json"]

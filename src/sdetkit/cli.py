@@ -391,6 +391,37 @@ Then use stability-aware command discovery:
     adaptive_explain.add_argument("path")
     adaptive_explain.add_argument("--db", default=".sdetkit/adaptive.db")
     adaptive_explain.add_argument("--format", choices=["text", "operator-json"], default="text")
+    adaptive_learn = adaptive_sub.add_parser(
+        "learn", help="Record and summarize adaptive diagnosis learning events"
+    )
+    adaptive_learn_sub = adaptive_learn.add_subparsers(dest="adaptive_learn_cmd", required=True)
+    adaptive_learn_record = adaptive_learn_sub.add_parser(
+        "record", help="Record learning events from an adaptive diagnosis JSON artifact"
+    )
+    adaptive_learn_record.add_argument("diagnosis_json")
+    adaptive_learn_record.add_argument("--db", default=".sdetkit/adaptive-diagnosis-memory.jsonl")
+    adaptive_learn_record.add_argument("--include-monitor", action="store_true")
+    adaptive_learn_record.add_argument("--proof-passed", action="store_true")
+    adaptive_learn_record.add_argument("--proof-failed", action="store_true")
+    adaptive_learn_record.add_argument("--fix-accepted", action="store_true")
+    adaptive_learn_record.add_argument("--fix-rejected", action="store_true")
+    adaptive_learn_record.add_argument("--false-positive", action="store_true")
+    adaptive_learn_record.add_argument("--format", choices=["text", "json"], default="text")
+    adaptive_learn_summary = adaptive_learn_sub.add_parser(
+        "summarize", help="Summarize recurring scenarios and weakest adaptive lanes"
+    )
+    adaptive_learn_summary.add_argument("--db", default=".sdetkit/adaptive-diagnosis-memory.jsonl")
+    adaptive_learn_summary.add_argument("--format", choices=["text", "json"], default="text")
+    adaptive_brief = adaptive_sub.add_parser(
+        "brief",
+        help="Generate a concise operator brief from gate, diagnosis, and learning artifacts",
+    )
+    adaptive_brief.add_argument("--gate", default="")
+    adaptive_brief.add_argument("--diagnosis", default="")
+    adaptive_brief.add_argument("--learning-summary", default="")
+    adaptive_brief.add_argument("--safe-fix-plan", default="")
+    adaptive_brief.add_argument("--format", choices=["md", "json", "comment"], default="md")
+    adaptive_brief.add_argument("--out", default="build/sdetkit/operator-brief.md")
     index_sub = index.add_subparsers(dest="index_cmd", required=False)
     index_build = index_sub.add_parser(
         "build", help="Build deterministic local repo index evidence"
@@ -1023,6 +1054,43 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "sdetkit.adaptive",
                 ["explain", str(ns.path), "--db", str(ns.db), "--format", str(ns.format)],
             )
+        if getattr(ns, "adaptive_cmd", None) == "learn":
+            if getattr(ns, "adaptive_learn_cmd", None) == "record":
+                forwarded = [
+                    str(ns.diagnosis_json),
+                    "--db",
+                    str(ns.db),
+                    "--format",
+                    str(ns.format),
+                ]
+                if bool(ns.include_monitor):
+                    forwarded.append("--include-monitor")
+                for flag, enabled in (
+                    ("--proof-passed", bool(ns.proof_passed)),
+                    ("--proof-failed", bool(ns.proof_failed)),
+                    ("--fix-accepted", bool(ns.fix_accepted)),
+                    ("--fix-rejected", bool(ns.fix_rejected)),
+                    ("--false-positive", bool(ns.false_positive)),
+                ):
+                    if enabled:
+                        forwarded.append(flag)
+                return _run_module_main("sdetkit.adaptive_diagnosis_memory", forwarded)
+            if getattr(ns, "adaptive_learn_cmd", None) == "summarize":
+                return _run_module_main(
+                    "sdetkit.adaptive_diagnosis_memory",
+                    ["summarize", "--db", str(ns.db), "--format", str(ns.format)],
+                )
+        if getattr(ns, "adaptive_cmd", None) == "brief":
+            forwarded = ["--format", str(ns.format), "--out", str(ns.out)]
+            for flag, value in (
+                ("--gate", str(ns.gate)),
+                ("--diagnosis", str(ns.diagnosis)),
+                ("--learning-summary", str(ns.learning_summary)),
+                ("--safe-fix-plan", str(ns.safe_fix_plan)),
+            ):
+                if value:
+                    forwarded.extend([flag, value])
+            return _run_module_main("sdetkit.operator_brief", forwarded)
         return _run_module_main("sdetkit.adaptive", [])
 
     if ns.cmd == "index":

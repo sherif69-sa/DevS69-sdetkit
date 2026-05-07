@@ -20,7 +20,11 @@ def _diagnosis_payload(status="needs_fix"):
                 "title": "Formatter drift blocked pre-commit",
                 "diagnosis": "ruff-format changed files after tests passed.",
                 "why_developers_miss_it": "Developers often see green tests first.",
-                "evidence": ["ruff-format modified files"],
+                "evidence": [
+                    "matched_failure_signals=ruff-format-failure,explicit-failed",
+                    "candidate_scenarios=RUFF_FORMAT_DRIFT,PRE_COMMIT_HOOK_FAILURE",
+                    "ruff-format modified files",
+                ],
                 "recommended_fix": ["Run ruff format on touched files."],
                 "proof_commands": [
                     "PYTHONPATH=src python -m ruff format --check <touched-python-files>"
@@ -178,6 +182,17 @@ def test_build_learning_records_from_actionable_diagnosis():
     assert record["proof_command"].startswith("PYTHONPATH=src python -m ruff")
     assert record["repeat_count"] == 2
     assert record["affected_files"] == ["tests/test_case.py"]
+    assert record["matched_signals"] == ["ruff-format-failure", "explicit-failed"]
+    assert record["candidate_scenarios"] == ["RUFF_FORMAT_DRIFT", "PRE_COMMIT_HOOK_FAILURE"]
+    assert record["selected_primary_diagnosis"] is True
+    assert record["recommended_checks"] == ["Run ruff format on touched files."]
+    assert record["proof_commands"] == [
+        "PYTHONPATH=src python -m ruff format --check <touched-python-files>"
+    ]
+    assert record["proof_passed"] is None
+    assert record["fix_accepted"] is None
+    assert record["false_positive"] is False
+    assert record["lane"] == "quality"
     assert record["learned_at_utc"] == "2026-05-05T00:00:00Z"
     assert len(record["record_id"]) == 16
 
@@ -247,3 +262,129 @@ def test_cli_writes_summary_and_rejects_bad_schema(tmp_path, capsys):
 
     assert rc == 2
     assert "unsupported adaptive diagnosis schema" in capsys.readouterr().out
+
+
+def test_learning_summary_shows_recurring_scenarios_and_weakest_lanes(tmp_path):
+    db_path = tmp_path / "memory.jsonl"
+    records = adaptive_diagnosis_memory.build_learning_records(
+        _diagnosis_payload(), learned_at_utc="2026-05-05T00:00:00Z"
+    )
+    adaptive_diagnosis_memory.append_learning_records(db_path, records)
+
+    summary = adaptive_diagnosis_memory.learning_summary_from_db(db_path)
+
+    assert summary["schema_version"] == "sdetkit.adaptive.learn.summary.v1"
+    assert summary["diagnosis_records"] == 1
+    assert summary["top_recurring_scenarios"][0]["code"] == "PRE_COMMIT_FORMAT_DRIFT"
+    assert summary["top_recurring_scenarios"][0]["recurrence_count"] == 2
+    assert summary["weakest_lanes"][0]["lane"] == "quality"
+    assert summary["weakest_lanes"][0]["scenario_codes"] == ["PRE_COMMIT_FORMAT_DRIFT"]
+
+
+def test_summarize_cli_outputs_learning_summary(tmp_path, capsys):
+    diagnosis_path = tmp_path / "adaptive-diagnosis.json"
+    db_path = tmp_path / "memory.jsonl"
+    diagnosis_path.write_text(json.dumps(_diagnosis_payload()), encoding="utf-8")
+    assert adaptive_diagnosis_memory.main([str(diagnosis_path), "--db", str(db_path)]) == 0
+    capsys.readouterr()
+
+    rc = adaptive_diagnosis_memory.main(["summarize", "--db", str(db_path), "--format", "json"])
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["schema_version"] == "sdetkit.adaptive.learn.summary.v1"
+    assert payload["weakest_lanes"][0]["lane"] == "quality"
+
+
+def test_learning_summary_calibrates_promotion_and_risk_from_outcomes():
+    payload = _diagnosis_payload()
+    payload["diagnoses"][0]["repeat_count"] = 3
+    records = adaptive_diagnosis_memory.build_learning_records(
+        payload,
+        learned_at_utc="2026-05-05T00:00:00Z",
+        proof_passed=True,
+        fix_accepted=True,
+    )
+
+    summary = adaptive_diagnosis_memory.summarize_learning_records(records)
+    scenario = summary["top_recurring_scenarios"][0]
+
+    assert scenario["proof_passed_count"] == 1
+    assert scenario["fix_accepted_count"] == 1
+    assert scenario["calibration"]["primary_action"] == "promote_and_increase_risk"
+    assert scenario["calibration"]["calibrated_confidence"] == "high"
+    assert scenario["calibration"]["risk_delta"] > 0
+    assert "promote" in scenario["calibration"]["actions"]
+    assert summary["calibration_summary"] == {
+        "promote": 1,
+        "demote": 0,
+        "increase_risk": 1,
+        "lower_confidence": 0,
+    }
+
+
+def test_learning_summary_demotes_false_positive_and_lowers_thin_evidence():
+    payload = _diagnosis_payload()
+    payload["diagnoses"][0]["evidence"] = ["custom tool failed without classifier context"]
+    records = adaptive_diagnosis_memory.build_learning_records(
+        payload,
+        learned_at_utc="2026-05-05T00:00:00Z",
+        proof_passed=False,
+        fix_accepted=False,
+        false_positive=True,
+    )
+
+    summary = adaptive_diagnosis_memory.summarize_learning_records(records)
+    scenario = summary["top_recurring_scenarios"][0]
+
+    assert scenario["false_positive_count"] == 1
+    assert scenario["proof_failed_count"] == 1
+    assert scenario["fix_rejected_count"] == 1
+    assert scenario["calibration"]["primary_action"] == "demote"
+    assert scenario["calibration"]["calibrated_confidence"] == "low"
+    assert "lower_confidence" in scenario["calibration"]["actions"]
+    assert summary["calibration_summary"]["demote"] == 1
+    assert summary["calibration_summary"]["lower_confidence"] == 1
+
+
+def test_cli_record_accepts_operator_outcome_flags(tmp_path, capsys):
+    diagnosis_path = tmp_path / "adaptive-diagnosis.json"
+    db_path = tmp_path / "memory.jsonl"
+    diagnosis_path.write_text(json.dumps(_diagnosis_payload()), encoding="utf-8")
+
+    rc = adaptive_diagnosis_memory.main(
+        [
+            str(diagnosis_path),
+            "--db",
+            str(db_path),
+            "--proof-passed",
+            "--fix-accepted",
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    assert json.loads(capsys.readouterr().out)["appended_records"] == 1
+    row = json.loads(db_path.read_text(encoding="utf-8").strip())
+    assert row["proof_passed"] is True
+    assert row["fix_accepted"] is True
+
+
+def test_cli_rejects_conflicting_outcome_flags(tmp_path, capsys):
+    diagnosis_path = tmp_path / "adaptive-diagnosis.json"
+    db_path = tmp_path / "memory.jsonl"
+    diagnosis_path.write_text(json.dumps(_diagnosis_payload()), encoding="utf-8")
+
+    rc = adaptive_diagnosis_memory.main(
+        [
+            str(diagnosis_path),
+            "--db",
+            str(db_path),
+            "--proof-passed",
+            "--proof-failed",
+        ]
+    )
+
+    assert rc == 2
+    assert "outcome flags are mutually exclusive" in capsys.readouterr().out
