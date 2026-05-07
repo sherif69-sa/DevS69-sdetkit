@@ -6,6 +6,7 @@ import re
 import sys
 from collections import Counter
 from collections.abc import Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +19,498 @@ SAFE_AUTO_FIX_CODES = {"PRE_COMMIT_FORMAT_DRIFT", "RUFF_FIXABLE_LINT"}
 RUFF_RULE_RE = re.compile(r"\b([A-Z]\d{3})\b")
 ABS_PATH_RE = re.compile(r"(?<![A-Za-z0-9_.-])(?:/[A-Za-z0-9_@%+=:,./-]+)+")
 WIN_PATH_RE = re.compile(r"[A-Za-z]:\\\\[^\s`'\"]+")
+
+
+@dataclass(frozen=True)
+class FailureSignal:
+    name: str
+    pattern: re.Pattern[str]
+    description: str
+
+
+@dataclass(frozen=True)
+class SeededScenario:
+    code: str
+    title: str
+    signals: tuple[str, ...]
+    keywords: tuple[str, ...]
+    checks: tuple[str, ...]
+    commands: tuple[str, ...]
+    odds: tuple[str, ...] = ()
+    risk_band: str = "medium"
+    prior_weight: int = 1
+
+
+@dataclass(frozen=True)
+class OddsAxis:
+    name: str
+    values: tuple[str, ...]
+
+
+ODDS_EXPANSION_AXES = (
+    OddsAxis(
+        "runner", ("github-hosted", "self-hosted", "container", "local-wsl", "macos", "windows")
+    ),
+    OddsAxis("python", ("3.10", "3.11", "3.12", "3.13", "pypy", "pre-release")),
+    OddsAxis("architecture", ("x86_64", "arm64", "musllinux", "manylinux")),
+    OddsAxis(
+        "dependency_state",
+        (
+            "fresh-lock",
+            "stale-lock",
+            "resolver-backtrack",
+            "missing-extra",
+            "yanked-wheel",
+            "sdist-build",
+        ),
+    ),
+    OddsAxis(
+        "filesystem",
+        (
+            "case-sensitive",
+            "case-insensitive",
+            "long-path",
+            "permission-denied",
+            "mounted-volume",
+            "readonly",
+        ),
+    ),
+    OddsAxis(
+        "network",
+        (
+            "offline",
+            "rate-limited",
+            "tls-proxy",
+            "dns-flake",
+            "api-timeout",
+            "eventual-consistency",
+        ),
+    ),
+    OddsAxis("test_shape", ("unit", "integration", "async", "snapshot", "property", "mutation")),
+    OddsAxis(
+        "state", ("empty-db", "dirty-cache", "clock-skew", "timezone", "locale", "parallel-order")
+    ),
+    OddsAxis(
+        "change_type", ("api-contract", "typing", "formatting", "dependency", "workflow", "docs")
+    ),
+)
+
+
+FAILURE_LIKE_SIGNAL_DB = (
+    FailureSignal(
+        "explicit-failed", re.compile(r"\bFAILED\b"), "A tool emitted an explicit FAILED marker."
+    ),
+    FailureSignal("traceback", re.compile(r"\bTraceback\b"), "Python emitted a traceback."),
+    FailureSignal(
+        "assertion-error", re.compile(r"\bAssertionError\b"), "A behavior assertion failed."
+    ),
+    FailureSignal(
+        "error-prefix", re.compile(r"\b[Ee]rror:"), "A tool emitted an error-prefixed line."
+    ),
+    FailureSignal(
+        "ci-exit-code",
+        re.compile(r"Process completed with exit code (?!0\b)\d+"),
+        "The CI step ended with a non-zero process exit code.",
+    ),
+    FailureSignal(
+        "gate-problems-found",
+        re.compile(r"gate: problems found", re.IGNORECASE),
+        "A quality gate reported problems found.",
+    ),
+    FailureSignal("fail-token", re.compile(r"\bFAIL\b"), "A tool emitted an explicit FAIL token."),
+    FailureSignal(
+        "failed-steps",
+        re.compile(r"\bfailed_steps\b", re.IGNORECASE),
+        "Structured evidence included failed_steps.",
+    ),
+    FailureSignal(
+        "ruff-format-failure",
+        re.compile(
+            r"ruff format.*(?:failed|would reformat|files were modified)",
+            re.IGNORECASE | re.DOTALL,
+        ),
+        "Ruff format reported formatting drift or a failed format check.",
+    ),
+    FailureSignal(
+        "ruff-check-failure",
+        re.compile(
+            r"(?:^.*ruff check.*failed.*$|^Found [1-9]\d* errors?\.)", re.IGNORECASE | re.MULTILINE
+        ),
+        "Ruff check reported lint errors.",
+    ),
+    FailureSignal(
+        "mypy-error",
+        re.compile(
+            r"(?:^.*mypy.*failed.*$|^.+:\d+:\s+error:|^Found [1-9]\d* errors? in \d+ files?)",
+            re.IGNORECASE | re.MULTILINE,
+        ),
+        "Mypy reported type-checking errors.",
+    ),
+    FailureSignal(
+        "pytest-failures-section",
+        re.compile(r"=+ FAILURES =+"),
+        "Pytest printed a FAILURES section.",
+    ),
+    FailureSignal(
+        "pytest-failed-count",
+        re.compile(r"\b(?!0\s+failed)\d+\s+failed\b", re.IGNORECASE),
+        "Pytest reported one or more failed tests.",
+    ),
+    FailureSignal(
+        "pytest-error-count",
+        re.compile(r"\b(?!0\s+errors?)\d+\s+errors?\b", re.IGNORECASE),
+        "Pytest reported one or more erroring tests.",
+    ),
+    FailureSignal(
+        "pytest-node-failed",
+        re.compile(r"FAILED\s+[^\s]+::"),
+        "Pytest reported a failed node id.",
+    ),
+    FailureSignal(
+        "python-exception",
+        re.compile(r"\b(?:[A-Z][A-Za-z]+Error|Exception):"),
+        "A Python exception class appeared with details.",
+    ),
+    FailureSignal(
+        "command-failed",
+        re.compile(r"\bcommand failed\b", re.IGNORECASE),
+        "A command wrapper reported failure.",
+    ),
+    FailureSignal(
+        "coverage-failure",
+        re.compile(r"(?:coverage.*(?:fail|under)|fail under)", re.IGNORECASE),
+        "The coverage gate reported a threshold failure.",
+    ),
+    FailureSignal(
+        "package-manager-error",
+        re.compile(r"\b(?:npm ERR!|pnpm ERR!|yarn (?:run )?v?\d+.*error)", re.IGNORECASE),
+        "A package manager emitted an error marker.",
+    ),
+)
+
+
+SEEDED_SCENARIO_DB = (
+    SeededScenario(
+        "PYTEST_BEHAVIOR_REGRESSION",
+        "Pytest behavior regression",
+        ("pytest-node-failed", "pytest-failed-count", "assertion-error"),
+        ("assertionerror", "failed tests/", "== failures =="),
+        (
+            "Open the first failing pytest node and read the assertion delta before editing product code.",
+            "Check whether fixtures, clocks, network fakes, or snapshots changed the expected contract.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <first-failing-test> -vv",),
+    ),
+    SeededScenario(
+        "PYTEST_COLLECTION_IMPORT_FAILURE",
+        "Pytest collection/import failure",
+        ("python-exception", "pytest-error-count", "traceback"),
+        ("modulenotfounderror", "importerror while importing", "collected 0 items / 1 error"),
+        (
+            "Inspect the first import exception and confirm the missing package or public API is declared.",
+            "Check pyproject/requirements extras before changing runtime behavior.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <failing-test-file> --collect-only",),
+    ),
+    SeededScenario(
+        "RUFF_FORMAT_DRIFT",
+        "Ruff format drift",
+        ("ruff-format-failure",),
+        ("would reformat", "files were modified by this hook", "file reformatted"),
+        (
+            "Run Ruff format on only touched Python files and verify the diff is format-only.",
+            "Re-run Ruff format check after formatting.",
+        ),
+        ("PYTHONPATH=src python -m ruff format --check <touched-python-files>",),
+    ),
+    SeededScenario(
+        "RUFF_LINT_CONTRACT",
+        "Ruff lint contract failure",
+        ("ruff-check-failure",),
+        ("ruff check", "[*]", "fixable with the --fix option"),
+        (
+            "Read the first Ruff rule code and separate safe mechanical F401/I001 from logic-risk rules.",
+            "Only allow scoped auto-fix for the narrow safe allowlist.",
+        ),
+        ("PYTHONPATH=src python -m ruff check <touched-python-files>",),
+    ),
+    SeededScenario(
+        "MYPY_CONTRACT_DRIFT",
+        "Mypy type contract drift",
+        ("mypy-error",),
+        ("mypy", "error:", "Found "),
+        (
+            "Open the first mypy error and identify whether the public contract or test double type drifted.",
+            "Avoid blanket ignores until the narrow type boundary is understood.",
+        ),
+        ("PYTHONPATH=src python -m mypy src tests",),
+    ),
+    SeededScenario(
+        "COVERAGE_GATE_REGRESSION",
+        "Coverage threshold regression",
+        ("coverage-failure",),
+        ("fail under", "total coverage", "coverage"),
+        (
+            "Compare missing coverage lines to the PR diff and add focused tests for changed behavior.",
+            "Do not lower the threshold unless the release owner explicitly approves policy change.",
+        ),
+        ("bash quality.sh cov",),
+    ),
+    SeededScenario(
+        "CI_STEP_EXIT_NONZERO",
+        "CI step exited non-zero",
+        ("ci-exit-code", "command-failed"),
+        ("exit code", "command failed"),
+        (
+            "Scroll above the exit-code footer and identify the first actionable tool failure.",
+            "Classify the failure before considering automation.",
+        ),
+        ("python -m pre_commit run -a",),
+    ),
+    SeededScenario(
+        "QUALITY_GATE_POLICY_FAILURE",
+        "Quality gate policy failure",
+        ("gate-problems-found", "failed-steps"),
+        ("gate: problems found", "failed_steps", "no_ship"),
+        (
+            "Read the structured failed step list and map it to the first failing artifact.",
+            "Check whether the policy failure is release-blocking or evidence-thin.",
+        ),
+        ("PYTHONPATH=src python -m sdetkit mission-control --execute --doctor-cortex",),
+    ),
+    SeededScenario(
+        "PACKAGE_INSTALL_FAILURE",
+        "Package install or script failure",
+        ("package-manager-error",),
+        ("npm err!", "pnpm err!", "yarn", "pip install", "resolutionimpossible"),
+        (
+            "Inspect the package-manager error block before retrying; dependency resolution may be the root cause.",
+            "Check lockfiles and declared test requirements for drift.",
+        ),
+        ("python -m pip install -r requirements-test.txt -e .",),
+    ),
+    SeededScenario(
+        "PRE_COMMIT_HOOK_FAILURE",
+        "Pre-commit hook failure",
+        ("explicit-failed",),
+        ("pre-commit", "hook", "files were modified by this hook"),
+        (
+            "Identify the exact hook that failed and whether it changed files or reported a contract issue.",
+            "If files changed, review the diff before committing generated changes.",
+        ),
+        ("python -m pre_commit run -a",),
+    ),
+    SeededScenario(
+        "RUNTIME_EXCEPTION",
+        "Runtime exception or traceback",
+        ("traceback", "python-exception", "error-prefix"),
+        ("traceback", "exception:", "error:"),
+        (
+            "Start at the last frame in the first traceback and identify the smallest product or test boundary.",
+            "Check whether the exception happens during setup, import, or exercised behavior.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <focused-test> -vv",),
+    ),
+    SeededScenario(
+        "LOCAL_ENVIRONMENT_FRICTION",
+        "Local environment friction",
+        ("command-failed",),
+        ("/mnt/c/", "keyboardinterrupt", "venv", "site-packages"),
+        (
+            "Separate local filesystem/package friction from product failures before changing code.",
+            "Re-run from a native Linux filesystem or clean virtual environment if needed.",
+        ),
+        ("python -m venv .venv",),
+    ),
+    SeededScenario(
+        "GIT_REMOTE_DRIFT",
+        "Git branch or remote drift",
+        ("error-prefix", "command-failed"),
+        ("non-fast-forward", "fetch first", "remote contains work", "rebase"),
+        (
+            "Fetch and compare remote branch state before pushing or rewriting commits.",
+            "Re-run proof after rebase because previous proof may be stale.",
+        ),
+        ("git fetch --all --prune", "git status --short --branch"),
+    ),
+    SeededScenario(
+        "ASYNC_EVENT_LOOP_MISMATCH",
+        "Async event loop or fixture mismatch",
+        ("python-exception", "pytest-error-count"),
+        (
+            "event loop is closed",
+            "pytest-asyncio",
+            "anyio",
+            "asyncio.run",
+            "attached to a different loop",
+        ),
+        (
+            "Check the async test marker, fixture scope, and client lifecycle before changing production async code.",
+            "Reproduce one async test with verbose traceback and no parallelism.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <async-test> -vv",),
+    ),
+    SeededScenario(
+        "SNAPSHOT_GOLDEN_DRIFT",
+        "Snapshot or golden-file drift",
+        ("pytest-node-failed", "assertion-error"),
+        ("snapshot", "golden", "approval", "received", "expected"),
+        (
+            "Inspect the expected/received diff and confirm whether the contract intentionally changed.",
+            "Update golden files only after a focused behavior test proves the new output.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <snapshot-test> -vv",),
+    ),
+    SeededScenario(
+        "PROPERTY_FUZZ_COUNTEREXAMPLE",
+        "Property-test counterexample",
+        ("assertion-error", "pytest-node-failed"),
+        ("hypothesis", "falsifying example", "counterexample", "seed="),
+        (
+            "Copy the minimized counterexample into a focused regression test before broad refactors.",
+            "Check whether shrinking revealed an input contract gap or product bug.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <property-test> --hypothesis-show-statistics",),
+    ),
+    SeededScenario(
+        "FLAKY_ORDER_DEPENDENCE",
+        "Order-dependent or parallel test flake",
+        ("pytest-failed-count", "command-failed"),
+        ("xdist", "randomly", "rerun", "flaky", "order dependent"),
+        (
+            "Re-run the failing test alone and then with the previous neighbor to expose hidden shared state.",
+            "Check global caches, monkeypatch cleanup, time/freezer state, and temporary directories.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <failing-test> --count=3",),
+    ),
+    SeededScenario(
+        "NETWORK_SERVICE_FLAKE",
+        "Network/API service flake",
+        ("python-exception", "command-failed"),
+        ("timeout", "connectionerror", "429", "rate limit", "dns", "tls"),
+        (
+            "Separate product failures from remote-service instability using mocks or recorded fixtures.",
+            "Check retry/backoff behavior and whether the test is marked network opt-in.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <network-test> -vv",),
+    ),
+    SeededScenario(
+        "AUTH_SECRET_CONFIGURATION",
+        "Auth or secret configuration failure",
+        ("error-prefix", "python-exception"),
+        ("unauthorized", "forbidden", "401", "403", "missing secret", "token"),
+        (
+            "Confirm whether the workflow has the needed secret scope without printing secret values.",
+            "Check permission blocks and environment names before changing auth code.",
+        ),
+        ("git status --short",),
+    ),
+    SeededScenario(
+        "DOCKER_SERVICE_BOOT_FAILURE",
+        "Docker service boot failure",
+        ("command-failed", "ci-exit-code"),
+        ("docker", "compose", "container exited", "healthcheck", "port is already allocated"),
+        (
+            "Inspect service logs and health checks before retrying the full workflow.",
+            "Check port collisions, image pull failures, and startup readiness waits.",
+        ),
+        ("docker compose ps", "docker compose logs --tail=200"),
+    ),
+    SeededScenario(
+        "DATABASE_MIGRATION_DRIFT",
+        "Database migration or schema drift",
+        ("python-exception", "error-prefix"),
+        ("migration", "alembic", "schema", "relation does not exist", "duplicate column"),
+        (
+            "Compare migration head, generated schema, and test database setup before editing models.",
+            "Confirm whether the failure is stale fixtures or a real migration gap.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <db-test> -vv",),
+    ),
+    SeededScenario(
+        "TIMEZONE_CLOCK_DRIFT",
+        "Timezone or clock-dependent failure",
+        ("assertion-error", "pytest-node-failed"),
+        ("timezone", "utc", "dst", "freezegun", "datetime", "today"),
+        (
+            "Check timezone assumptions, frozen clocks, and date boundaries before changing expected output.",
+            "Reproduce with UTC and the failing local timezone if available.",
+        ),
+        ("TZ=UTC PYTHONPATH=src python -m pytest -q <time-test> -vv",),
+    ),
+    SeededScenario(
+        "PLATFORM_PATH_CASE_DRIFT",
+        "Platform path/case sensitivity drift",
+        ("python-exception", "assertion-error"),
+        ("filenotfounderror", "permission denied", "case-sensitive", "path", "windows"),
+        (
+            "Check path casing, separators, permissions, and temp-directory cleanup across platforms.",
+            "Avoid hard-coded absolute paths in tests and generated artifacts.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <path-test> -vv",),
+    ),
+    SeededScenario(
+        "CACHE_ARTIFACT_POISONING",
+        "Cache or artifact poisoning",
+        ("command-failed", "error-prefix"),
+        ("cache", "artifact", "stale", "checksum", "hash mismatch"),
+        (
+            "Compare the failing run with a cache-cold run before changing product code.",
+            "Check cache keys include lockfiles, Python version, and relevant config files.",
+        ),
+        ("git diff -- pyproject.toml requirements-test.txt",),
+    ),
+    SeededScenario(
+        "DOCS_BUILD_CONTRACT",
+        "Docs build or link contract failure",
+        ("command-failed", "error-prefix"),
+        ("mkdocs", "sphinx", "markdown", "linkcheck", "broken link"),
+        (
+            "Open the first docs build error and check whether navigation, anchors, or generated files drifted.",
+            "Verify docs-only fixes do not mask product API drift.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q tests/test_docs*.py",),
+    ),
+    SeededScenario(
+        "SECURITY_AUDIT_BLOCKER",
+        "Security audit blocker",
+        ("error-prefix", "gate-problems-found"),
+        ("vulnerability", "ghsa", "cve", "pip-audit", "bandit", "secret detected"),
+        (
+            "Treat security audit output as review-first; identify whether it is dependency, code, or secret exposure.",
+            "Check advisories and minimum patched versions before bumping packages.",
+        ),
+        ("python -m pip_audit",),
+    ),
+    SeededScenario(
+        "BUILD_BACKEND_FAILURE",
+        "Build backend or wheel failure",
+        ("package-manager-error", "python-exception"),
+        (
+            "building wheel",
+            "pyproject",
+            "setuptools",
+            "build backend",
+            "metadata-generation-failed",
+        ),
+        (
+            "Inspect build backend metadata errors and confirm declared build requirements.",
+            "Check whether a package only ships sdists for the active Python/platform.",
+        ),
+        ("python -m pip install -r requirements-test.txt -e .",),
+    ),
+    SeededScenario(
+        "RELEASE_VERSION_CONFLICT",
+        "Release/version metadata conflict",
+        ("error-prefix", "command-failed"),
+        ("version", "tag already exists", "duplicate release", "changelog", "twine"),
+        (
+            "Compare package version, git tags, changelog, and release artifact names.",
+            "Do not overwrite published artifacts; create a new version if release state escaped.",
+        ),
+        ("git tag --points-at HEAD", "python -m build --sdist --wheel"),
+    ),
+)
 
 
 def _as_int(value: Any) -> int:
@@ -101,6 +594,97 @@ def _ruff_rule_codes(text: str) -> list[str]:
         if code not in codes:
             codes.append(code)
     return codes[:12]
+
+
+def _failure_like_signals(text: str) -> list[FailureSignal]:
+    return [signal for signal in FAILURE_LIKE_SIGNAL_DB if signal.pattern.search(text)]
+
+
+def _looks_failure_like(text: str) -> bool:
+    return bool(_failure_like_signals(text))
+
+
+def _has_failure_signal(text: str, name: str) -> bool:
+    return any(signal.name == name for signal in _failure_like_signals(text))
+
+
+def _failure_like_evidence(text: str) -> list[str]:
+    signals = _failure_like_signals(text)
+    evidence = ["matched_failure_signals=" + ",".join(signal.name for signal in signals[:6])]
+    evidence.extend(signal.description for signal in signals[:3])
+    candidates = _candidate_scenarios(text, signals)
+    if candidates:
+        evidence.append(
+            "candidate_scenarios=" + ",".join(scenario.code for scenario in candidates[:4])
+        )
+        evidence.append(_candidate_odds_evidence(candidates))
+    return evidence
+
+
+def _candidate_scenarios(
+    text: str, signals: Sequence[FailureSignal] | None = None, *, limit: int = 4
+) -> list[SeededScenario]:
+    lower = text.lower()
+    signal_names = {signal.name for signal in (signals or _failure_like_signals(text))}
+    scored: list[tuple[int, str, SeededScenario]] = []
+    for scenario in SEEDED_SCENARIO_DB:
+        signal_hits = len(signal_names.intersection(scenario.signals))
+        keyword_hits = sum(1 for keyword in scenario.keywords if keyword.lower() in lower)
+        odds_hits = sum(1 for odd in scenario.odds if odd.lower() in lower)
+        score = signal_hits * 3 + keyword_hits + odds_hits + max(0, scenario.prior_weight - 1)
+        if score:
+            scored.append((-score, scenario.code, scenario))
+    scored.sort()
+    return [scenario for _, _, scenario in scored[:limit]]
+
+
+def _odds_space_size() -> int:
+    total = max(1, len(SEEDED_SCENARIO_DB)) * max(1, len(FAILURE_LIKE_SIGNAL_DB))
+    for axis in ODDS_EXPANSION_AXES:
+        total *= max(1, len(axis.values))
+    return total
+
+
+def _candidate_odds_evidence(candidates: Sequence[SeededScenario]) -> str:
+    parts = [
+        f"{scenario.code}:{scenario.risk_band}:prior={scenario.prior_weight}"
+        for scenario in candidates[:4]
+    ]
+    return "candidate_odds=" + ";".join(parts)
+
+
+def _candidate_checks(text: str, limit: int = 5) -> list[str]:
+    checks: list[str] = []
+    for scenario in _candidate_scenarios(text):
+        checks.append(f"Check candidate {scenario.code}: {scenario.checks[0]}")
+        for check in scenario.checks[1:2]:
+            checks.append(check)
+        if len(checks) >= limit:
+            break
+    checks.append(
+        "If no candidate fits, inspect the first actionable traceback or failing command manually."
+    )
+    return checks[:limit]
+
+
+def _candidate_commands(text: str, limit: int = 4) -> list[str]:
+    commands: list[str] = []
+    for scenario in _candidate_scenarios(text):
+        for command in scenario.commands:
+            if command not in commands:
+                commands.append(command)
+            if len(commands) >= limit:
+                return commands
+    return commands or ["python -m pre_commit run -a"]
+
+
+def _seeded_scenario_evidence() -> list[str]:
+    return [
+        f"seeded_scenario_count={len(SEEDED_SCENARIO_DB)}",
+        f"seeded_odds_space_size={_odds_space_size()}",
+        "seeded_scenario_examples="
+        + ",".join(scenario.code for scenario in SEEDED_SCENARIO_DB[:5]),
+    ]
 
 
 def _is_safe_ruff_fixable_lint(text: str, codes: Sequence[str]) -> bool:
@@ -362,7 +946,7 @@ def _append_log(text: str, diagnoses: list[dict[str, Any]]) -> None:
         )
     if "mypy" in lower and "error:" in lower:
         _append_static("MYPY_TYPE_CONTRACT_DRIFT", "Type contract drift detected", files, diagnoses)
-    if "ruff" in lower and ("failed" in lower or "fixable" in lower) and not formatted:
+    if "ruff" in lower and not formatted and _has_failure_signal(text, "ruff-check-failure"):
         _append_ruff_lint(text, files, diagnoses)
     if "modulenotfounderror" in lower or "importerror while importing" in lower:
         _append_pytest(
@@ -380,18 +964,18 @@ def _append_log(text: str, diagnoses: list[dict[str, Any]]) -> None:
             files,
             diagnoses,
         )
-    if not diagnoses and text.strip():
+    if not diagnoses and _looks_failure_like(text):
         diagnoses.append(
             _diag(
                 "UNKNOWN_REVIEW_REQUIRED",
-                "medium",
+                "high",
                 "medium",
                 "Failure needs human review",
                 "The provided log contains failure-like text but did not match a known adaptive diagnosis family.",
                 "Unknown failures should not be guessed into a safe-fix route.",
-                ["unclassified-log-evidence"],
-                ["Inspect the first actionable traceback or failing command."],
-                ["python -m pre_commit run -a"],
+                _failure_like_evidence(text),
+                _candidate_checks(text),
+                _candidate_commands(text),
                 "Unclassified failures can be unsafe to automate.",
                 "unknown-review-required",
                 files=files,
@@ -523,6 +1107,8 @@ def _doctor_counts(record: dict[str, Any]) -> tuple[int, int] | None:
 
 def _append_history(records: list[dict[str, Any]], diagnoses: list[dict[str, Any]]) -> None:
     if not records:
+        if not diagnoses:
+            return
         diagnoses.append(
             _diag(
                 "MISSION_CONTROL_HISTORY_MISSING",
@@ -606,10 +1192,13 @@ def _append_adaptive(history: dict[str, Any], diagnoses: list[dict[str, Any]]) -
                 "low",
                 "high",
                 "Adaptive memory is initialized but empty",
-                "Adaptive memory is available but does not contain prior runs.",
-                "Developers rarely notice an empty memory database if the file exists.",
-                ["adaptive_run_count=0"],
-                ["Populate adaptive memory after meaningful runs."],
+                "Adaptive memory has no run-specific records yet, but SDETKit starts with a seeded scenario database for common CI and quality failures.",
+                "Developers often treat an empty run history as zero intelligence even when a tested scenario catalog can guide the first investigation.",
+                ["adaptive_run_count=0", *_seeded_scenario_evidence()],
+                [
+                    "Use the seeded scenario database to classify the first failing signal before adding project-specific memory.",
+                    "Populate adaptive memory after meaningful runs so local patterns can outrank generic candidates.",
+                ],
                 ["PYTHONPATH=src python -m sdetkit adaptive history --format operator-json"],
                 "Recommendations remain weaker without prior context.",
                 "adaptive-memory-empty",
