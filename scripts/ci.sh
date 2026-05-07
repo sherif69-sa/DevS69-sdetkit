@@ -101,6 +101,15 @@ run_flagship_contracts() {
   python3 -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json >/dev/null
 }
 
+run_investigation_guardrail_slice() {
+  PYTHONPATH=src python3 -m pytest -q \
+    tests/test_investigate_cli.py \
+    tests/test_investigate_failure.py \
+    tests/test_investigation_chain_no_mutation.py \
+    tests/test_pr_guardrail_decisions.py \
+    tests/test_maintenance_autopilot_safe_commit.py
+}
+
 run_docs() {
   if [[ "$skip_docs" -eq 1 ]]; then
     return 0
@@ -138,12 +147,14 @@ case "$mode" in
   quick)
     run_test_bootstrap_preflight
     run_gate_fast
+    run_investigation_guardrail_slice
     run_flagship_contracts
     run_operational_maturity_v2
     ;;
   all)
     run_test_bootstrap_preflight
     run_gate_fast
+    run_investigation_guardrail_slice
     run_flagship_contracts
     run_operational_maturity_v2
     run_docs
