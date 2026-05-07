@@ -21,7 +21,7 @@ python -m sdetkit readiness . --format json
 
 - Security policy includes vulnerability/reporting language (`SECURITY.md`) — 12
 - Release process includes explicit checklist language (`RELEASE.md`) — 12
-- Quality playbook includes gate policy language (`QUALITY_PLAYBOOK.md`) — 8
+- Quality playbook includes gate policy language (`docs/project/quality-playbook.md`) — 8
 - CI workflow includes tests + lint/quality execution (`.github/workflows/ci.yml`) — 14
 - Baseline automated test breadth (`tests/test_*.py` count >= 10) — 10
 - Docs entrypoint includes canonical path (`docs/index.md`) — 8

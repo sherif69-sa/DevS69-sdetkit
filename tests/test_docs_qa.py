@@ -487,3 +487,37 @@ def test_repository_front_doors_are_polished_and_consistent() -> None:
     assert "reviewed guarded policy" in docs_readme
     assert "[Documentation directory README](README.md)" in docs_map
     assert "New primary guides must be linked from [README.md](README.md)" in docs_map
+
+
+def test_project_docs_are_moved_under_docs_with_root_compatibility_pointers() -> None:
+    moved_docs = (
+        Path("docs/project/architecture.md"),
+        Path("docs/project/operator-workflow.md"),
+        Path("docs/project/quality-playbook.md"),
+        Path("docs/project/enterprise-offerings.md"),
+        Path("docs/roadmap/adaptive-investigation-roadmap.md"),
+    )
+    for path in moved_docs:
+        assert path.is_file(), f"missing moved project doc: {path}"
+
+    root_pointers = {
+        Path("ARCHITECTURE.md"): "docs/project/architecture.md",
+        Path("WORKFLOW.md"): "docs/project/operator-workflow.md",
+        Path("QUALITY_PLAYBOOK.md"): "docs/project/quality-playbook.md",
+        Path("ENTERPRISE_OFFERINGS.md"): "docs/project/enterprise-offerings.md",
+    }
+    for pointer, target in root_pointers.items():
+        text = pointer.read_text(encoding="utf-8")
+        assert target in text
+        assert len(text.splitlines()) <= 70
+
+    project_readme = Path("docs/project/README.md").read_text(encoding="utf-8")
+    docs_readme = Path("docs/README.md").read_text(encoding="utf-8")
+    root_index = Path("index.md").read_text(encoding="utf-8")
+    mkdocs = Path("mkdocs.yml").read_text(encoding="utf-8")
+
+    assert "Root compatibility pointers" in project_readme
+    assert "docs/project/" in docs_readme
+    assert "docs/project/" in root_index
+    assert "Project documents: project/README.md" in mkdocs
+    assert "Adaptive investigation roadmap: roadmap/adaptive-investigation-roadmap.md" in mkdocs

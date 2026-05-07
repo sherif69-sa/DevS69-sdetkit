@@ -38,6 +38,7 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 | `docs/contracts/` | Formal contracts and schema-oriented references. | Link from the relevant feature doc instead of duplicating contract text. |
 | `docs/integrations/` | Integration packs and external workflow examples. | Keep platform-specific setup here. |
 | `docs/kits/` | Kit-level packaging and capability docs. | Use after the core operator path is trusted. |
+| `docs/project/` | Project-level architecture, workflow, quality, and enterprise docs. | Keep root copies as compatibility pointers only when checks or external links require them. |
 | `docs/roadmap/` | Roadmap artifacts and reports. | Keep roadmap/reporting secondary to current operator guidance. |
 
 ## Navigation rules for future cleanup

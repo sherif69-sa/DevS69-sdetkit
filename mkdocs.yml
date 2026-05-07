@@ -194,6 +194,12 @@ nav:
           - Plugins: plugins.md
           - Plugins, rule packs, and fix-audit: plugins-and-fix.md
       - Product and governance:
+          - Project documents: project/README.md
+          - Architecture: project/architecture.md
+          - Operator workflow: project/operator-workflow.md
+          - Quality playbook: project/quality-playbook.md
+          - Enterprise offerings: project/enterprise-offerings.md
+          - Adaptive investigation roadmap: roadmap/adaptive-investigation-roadmap.md
           - Why not just separate tools?: why-not-just-tools.md
           - Product strategy: product-strategy.md
           - Productization map: productization-map.md

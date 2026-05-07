@@ -1,17 +1,5 @@
-# Enterprise Offerings
+# Enterprise offerings
 
-DevS69 SDETKit core is open source under the Apache-2.0 license.
+The maintained enterprise offerings page lives in [`docs/project/enterprise-offerings.md`](docs/project/enterprise-offerings.md).
 
-Paid enterprise offerings may be offered separately around the open-source core,
-such as:
-
-- onboarding and implementation support
-- private policy packs
-- custom integrations
-- hosted dashboards or managed services
-- team training
-- premium support and SLAs
-
-Using the open-source core does not require a separate commercial license.
-
-For enterprise support or custom offerings, contact: `https://github.com/sherif69-sa`
+This root pointer is kept for compatibility with existing repository checks and external links.

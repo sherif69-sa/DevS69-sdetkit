@@ -92,6 +92,7 @@ For this repository, `make first-proof` emits `FIRST_PROOF_DECISION=SHIP|NO-SHIP
 | `tests/` | Unit, workflow, docs, and contract tests. |
 | `docs/` | Operator guides, artifact references, quality gates, and developer docs. |
 | `docs/artifacts/` | Committed generated/sample artifacts and historical proof packs. |
+| `docs/project/` | Project-level architecture, workflow, quality, and enterprise docs moved out of the root. |
 | `.github/workflows/` | CI, quality, maintenance, and artifact upload automation. |
 
 ## Documentation map
@@ -128,5 +129,5 @@ To keep this README readable, advanced command matrices live in focused guides:
 - Security: [SECURITY.md](SECURITY.md)
 - Security docs: [docs/security.md](docs/security.md)
 - Policy baselines: [docs/policy-and-baselines.md](docs/policy-and-baselines.md)
-- Quality playbook: [QUALITY_PLAYBOOK.md](QUALITY_PLAYBOOK.md)
+- Quality playbook: [docs/project/quality-playbook.md](docs/project/quality-playbook.md)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
