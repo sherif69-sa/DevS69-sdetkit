@@ -83,6 +83,17 @@ SDETKit is backed by committed live-adoption proof.
 
 For this repository, `make first-proof` emits `FIRST_PROOF_DECISION=SHIP|NO-SHIP` and writes the consolidated bundle under `build/first-proof/`. Use [`docs/upgrade-next-commands.md`](docs/upgrade-next-commands.md), [`docs/first-proof-troubleshooting.md`](docs/first-proof-troubleshooting.md), and [`docs/first-proof-learning-db.md`](docs/first-proof-learning-db.md) for the full first-proof/ops command set.
 
+
+## Repository layout
+
+| Area | Purpose |
+| --- | --- |
+| `src/` | SDETKit Python package and CLI implementation. |
+| `tests/` | Unit, workflow, docs, and contract tests. |
+| `docs/` | Operator guides, artifact references, quality gates, and developer docs. |
+| `docs/artifacts/` | Committed generated/sample artifacts and historical proof packs. |
+| `.github/workflows/` | CI, quality, maintenance, and artifact upload automation. |
+
 ## Documentation map
 
 - Start in 5 minutes: [docs/start-here-5-minutes.md](docs/start-here-5-minutes.md)

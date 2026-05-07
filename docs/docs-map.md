@@ -6,7 +6,7 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 
 | Step | Use this page | Why |
 | --- | --- | --- |
-| 1 | [Start here homepage](index.md) | Product homepage/router and canonical first path. |
+| 1 | [Documentation directory README](README.md) and [Start here homepage](index.md) | Directory landing page plus product homepage/router and canonical first path. |
 | 2 | [Start Here in 5 Minutes](start-here-5-minutes.md) | Quick first run without browsing the whole tree. |
 | 3 | [Operator essentials](operator-essentials.md) | Day-to-day runbook for first proof, failed CI triage, autopilot review, and guarded remediation review. |
 | 4 | [Artifact reference and generated sample map](artifact-reference.md) | Runtime artifacts, workflow uploads, generated/sample labels, and artifact-to-action guidance. |
@@ -31,7 +31,7 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 
 | Directory | Contents | Tidy rule |
 | --- | --- | --- |
-| `docs/` | Primary human docs and reference pages. | New primary guides must be linked from [index.md](index.md) or this map. |
+| `docs/` | Primary human docs and reference pages. | New primary guides must be linked from [README.md](README.md), [index.md](index.md), or this map. |
 | `docs/artifacts/` | Committed generated/sample artifacts, proof packs, and historical closeout material. | Label as generated/sample; do not treat as current runtime evidence. |
 | `docs/archive/` | Historical and transition-era docs. | Keep non-primary material here when it is no longer part of the operator path. |
 | `docs/business_execution/` | Business execution and GTM planning docs. | Keep business/program material out of first-run operator docs. |

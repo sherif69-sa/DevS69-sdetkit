@@ -467,3 +467,23 @@ def test_docs_map_declares_tidy_information_architecture() -> None:
     assert "Generated and sample artifacts" in artifacts_readme
     assert "Runtime evidence" in artifacts_readme
     assert "do not authorize mutation" in artifacts_readme
+
+
+def test_repository_front_doors_are_polished_and_consistent() -> None:
+    readme = Path("README.md").read_text(encoding="utf-8")
+    root_index = Path("index.md").read_text(encoding="utf-8")
+    docs_readme = Path("docs/README.md").read_text(encoding="utf-8")
+    docs_map = Path("docs/docs-map.md").read_text(encoding="utf-8")
+
+    assert "## Repository layout" in readme
+    assert "docs/artifacts/" in readme
+    assert "DevS69 SDETKit project index" in root_index
+    assert "## First paths" in root_index
+    assert "[docs/operator-essentials.md](docs/operator-essentials.md)" in root_index
+    assert "diagnostic/report-only by default" in root_index
+    assert "# Documentation directory" in docs_readme
+    assert "## Primary path" in docs_readme
+    assert "[artifacts/README.md](artifacts/README.md)" in docs_readme
+    assert "reviewed guarded policy" in docs_readme
+    assert "[Documentation directory README](README.md)" in docs_map
+    assert "New primary guides must be linked from [README.md](README.md)" in docs_map
