@@ -21,6 +21,13 @@ def test_failure_investigation_wraps_adaptive_diagnosis_without_autofix(tmp_path
     assert payload["safe_to_auto_fix"] is False
     assert payload["requires_human_review"] is True
     assert payload["diagnosis"]["diagnoses"][0]["code"] == "MISSING_PUBLIC_API_PARITY"
+    assert payload["summary"] == "Missing public API parity detected"
+    assert payload["why_it_matters"]
+    assert payload["next_actions"] == [
+        "Add the missing public API parity and focused regression coverage for both surfaces."
+    ]
+    assert payload["proof_commands"]
+    assert payload["memory_lookup_key"] == "diagnosis:MISSING_PUBLIC_API_PARITY:missing-public-api-parity"
 
 
 def test_failure_investigation_json_cli_writes_output(tmp_path, capsys):
