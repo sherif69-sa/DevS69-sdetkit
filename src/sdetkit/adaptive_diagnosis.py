@@ -36,6 +36,64 @@ class SeededScenario:
     keywords: tuple[str, ...]
     checks: tuple[str, ...]
     commands: tuple[str, ...]
+    odds: tuple[str, ...] = ()
+    risk_band: str = "medium"
+    prior_weight: int = 1
+
+
+@dataclass(frozen=True)
+class OddsAxis:
+    name: str
+    values: tuple[str, ...]
+
+
+ODDS_EXPANSION_AXES = (
+    OddsAxis(
+        "runner", ("github-hosted", "self-hosted", "container", "local-wsl", "macos", "windows")
+    ),
+    OddsAxis("python", ("3.10", "3.11", "3.12", "3.13", "pypy", "pre-release")),
+    OddsAxis("architecture", ("x86_64", "arm64", "musllinux", "manylinux")),
+    OddsAxis(
+        "dependency_state",
+        (
+            "fresh-lock",
+            "stale-lock",
+            "resolver-backtrack",
+            "missing-extra",
+            "yanked-wheel",
+            "sdist-build",
+        ),
+    ),
+    OddsAxis(
+        "filesystem",
+        (
+            "case-sensitive",
+            "case-insensitive",
+            "long-path",
+            "permission-denied",
+            "mounted-volume",
+            "readonly",
+        ),
+    ),
+    OddsAxis(
+        "network",
+        (
+            "offline",
+            "rate-limited",
+            "tls-proxy",
+            "dns-flake",
+            "api-timeout",
+            "eventual-consistency",
+        ),
+    ),
+    OddsAxis("test_shape", ("unit", "integration", "async", "snapshot", "property", "mutation")),
+    OddsAxis(
+        "state", ("empty-db", "dirty-cache", "clock-skew", "timezone", "locale", "parallel-order")
+    ),
+    OddsAxis(
+        "change_type", ("api-contract", "typing", "formatting", "dependency", "workflow", "docs")
+    ),
+)
 
 
 FAILURE_LIKE_SIGNAL_DB = (
@@ -275,6 +333,183 @@ SEEDED_SCENARIO_DB = (
         ),
         ("git fetch --all --prune", "git status --short --branch"),
     ),
+    SeededScenario(
+        "ASYNC_EVENT_LOOP_MISMATCH",
+        "Async event loop or fixture mismatch",
+        ("python-exception", "pytest-error-count"),
+        (
+            "event loop is closed",
+            "pytest-asyncio",
+            "anyio",
+            "asyncio.run",
+            "attached to a different loop",
+        ),
+        (
+            "Check the async test marker, fixture scope, and client lifecycle before changing production async code.",
+            "Reproduce one async test with verbose traceback and no parallelism.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <async-test> -vv",),
+    ),
+    SeededScenario(
+        "SNAPSHOT_GOLDEN_DRIFT",
+        "Snapshot or golden-file drift",
+        ("pytest-node-failed", "assertion-error"),
+        ("snapshot", "golden", "approval", "received", "expected"),
+        (
+            "Inspect the expected/received diff and confirm whether the contract intentionally changed.",
+            "Update golden files only after a focused behavior test proves the new output.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <snapshot-test> -vv",),
+    ),
+    SeededScenario(
+        "PROPERTY_FUZZ_COUNTEREXAMPLE",
+        "Property-test counterexample",
+        ("assertion-error", "pytest-node-failed"),
+        ("hypothesis", "falsifying example", "counterexample", "seed="),
+        (
+            "Copy the minimized counterexample into a focused regression test before broad refactors.",
+            "Check whether shrinking revealed an input contract gap or product bug.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <property-test> --hypothesis-show-statistics",),
+    ),
+    SeededScenario(
+        "FLAKY_ORDER_DEPENDENCE",
+        "Order-dependent or parallel test flake",
+        ("pytest-failed-count", "command-failed"),
+        ("xdist", "randomly", "rerun", "flaky", "order dependent"),
+        (
+            "Re-run the failing test alone and then with the previous neighbor to expose hidden shared state.",
+            "Check global caches, monkeypatch cleanup, time/freezer state, and temporary directories.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <failing-test> --count=3",),
+    ),
+    SeededScenario(
+        "NETWORK_SERVICE_FLAKE",
+        "Network/API service flake",
+        ("python-exception", "command-failed"),
+        ("timeout", "connectionerror", "429", "rate limit", "dns", "tls"),
+        (
+            "Separate product failures from remote-service instability using mocks or recorded fixtures.",
+            "Check retry/backoff behavior and whether the test is marked network opt-in.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <network-test> -vv",),
+    ),
+    SeededScenario(
+        "AUTH_SECRET_CONFIGURATION",
+        "Auth or secret configuration failure",
+        ("error-prefix", "python-exception"),
+        ("unauthorized", "forbidden", "401", "403", "missing secret", "token"),
+        (
+            "Confirm whether the workflow has the needed secret scope without printing secret values.",
+            "Check permission blocks and environment names before changing auth code.",
+        ),
+        ("git status --short",),
+    ),
+    SeededScenario(
+        "DOCKER_SERVICE_BOOT_FAILURE",
+        "Docker service boot failure",
+        ("command-failed", "ci-exit-code"),
+        ("docker", "compose", "container exited", "healthcheck", "port is already allocated"),
+        (
+            "Inspect service logs and health checks before retrying the full workflow.",
+            "Check port collisions, image pull failures, and startup readiness waits.",
+        ),
+        ("docker compose ps", "docker compose logs --tail=200"),
+    ),
+    SeededScenario(
+        "DATABASE_MIGRATION_DRIFT",
+        "Database migration or schema drift",
+        ("python-exception", "error-prefix"),
+        ("migration", "alembic", "schema", "relation does not exist", "duplicate column"),
+        (
+            "Compare migration head, generated schema, and test database setup before editing models.",
+            "Confirm whether the failure is stale fixtures or a real migration gap.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <db-test> -vv",),
+    ),
+    SeededScenario(
+        "TIMEZONE_CLOCK_DRIFT",
+        "Timezone or clock-dependent failure",
+        ("assertion-error", "pytest-node-failed"),
+        ("timezone", "utc", "dst", "freezegun", "datetime", "today"),
+        (
+            "Check timezone assumptions, frozen clocks, and date boundaries before changing expected output.",
+            "Reproduce with UTC and the failing local timezone if available.",
+        ),
+        ("TZ=UTC PYTHONPATH=src python -m pytest -q <time-test> -vv",),
+    ),
+    SeededScenario(
+        "PLATFORM_PATH_CASE_DRIFT",
+        "Platform path/case sensitivity drift",
+        ("python-exception", "assertion-error"),
+        ("filenotfounderror", "permission denied", "case-sensitive", "path", "windows"),
+        (
+            "Check path casing, separators, permissions, and temp-directory cleanup across platforms.",
+            "Avoid hard-coded absolute paths in tests and generated artifacts.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q <path-test> -vv",),
+    ),
+    SeededScenario(
+        "CACHE_ARTIFACT_POISONING",
+        "Cache or artifact poisoning",
+        ("command-failed", "error-prefix"),
+        ("cache", "artifact", "stale", "checksum", "hash mismatch"),
+        (
+            "Compare the failing run with a cache-cold run before changing product code.",
+            "Check cache keys include lockfiles, Python version, and relevant config files.",
+        ),
+        ("git diff -- pyproject.toml requirements-test.txt",),
+    ),
+    SeededScenario(
+        "DOCS_BUILD_CONTRACT",
+        "Docs build or link contract failure",
+        ("command-failed", "error-prefix"),
+        ("mkdocs", "sphinx", "markdown", "linkcheck", "broken link"),
+        (
+            "Open the first docs build error and check whether navigation, anchors, or generated files drifted.",
+            "Verify docs-only fixes do not mask product API drift.",
+        ),
+        ("PYTHONPATH=src python -m pytest -q tests/test_docs*.py",),
+    ),
+    SeededScenario(
+        "SECURITY_AUDIT_BLOCKER",
+        "Security audit blocker",
+        ("error-prefix", "gate-problems-found"),
+        ("vulnerability", "ghsa", "cve", "pip-audit", "bandit", "secret detected"),
+        (
+            "Treat security audit output as review-first; identify whether it is dependency, code, or secret exposure.",
+            "Check advisories and minimum patched versions before bumping packages.",
+        ),
+        ("python -m pip_audit",),
+    ),
+    SeededScenario(
+        "BUILD_BACKEND_FAILURE",
+        "Build backend or wheel failure",
+        ("package-manager-error", "python-exception"),
+        (
+            "building wheel",
+            "pyproject",
+            "setuptools",
+            "build backend",
+            "metadata-generation-failed",
+        ),
+        (
+            "Inspect build backend metadata errors and confirm declared build requirements.",
+            "Check whether a package only ships sdists for the active Python/platform.",
+        ),
+        ("python -m pip install -r requirements-test.txt -e .",),
+    ),
+    SeededScenario(
+        "RELEASE_VERSION_CONFLICT",
+        "Release/version metadata conflict",
+        ("error-prefix", "command-failed"),
+        ("version", "tag already exists", "duplicate release", "changelog", "twine"),
+        (
+            "Compare package version, git tags, changelog, and release artifact names.",
+            "Do not overwrite published artifacts; create a new version if release state escaped.",
+        ),
+        ("git tag --points-at HEAD", "python -m build --sdist --wheel"),
+    ),
 )
 
 
@@ -382,6 +617,7 @@ def _failure_like_evidence(text: str) -> list[str]:
         evidence.append(
             "candidate_scenarios=" + ",".join(scenario.code for scenario in candidates[:4])
         )
+        evidence.append(_candidate_odds_evidence(candidates))
     return evidence
 
 
@@ -394,11 +630,27 @@ def _candidate_scenarios(
     for scenario in SEEDED_SCENARIO_DB:
         signal_hits = len(signal_names.intersection(scenario.signals))
         keyword_hits = sum(1 for keyword in scenario.keywords if keyword.lower() in lower)
-        score = signal_hits * 3 + keyword_hits
+        odds_hits = sum(1 for odd in scenario.odds if odd.lower() in lower)
+        score = signal_hits * 3 + keyword_hits + odds_hits + max(0, scenario.prior_weight - 1)
         if score:
             scored.append((-score, scenario.code, scenario))
     scored.sort()
     return [scenario for _, _, scenario in scored[:limit]]
+
+
+def _odds_space_size() -> int:
+    total = max(1, len(SEEDED_SCENARIO_DB)) * max(1, len(FAILURE_LIKE_SIGNAL_DB))
+    for axis in ODDS_EXPANSION_AXES:
+        total *= max(1, len(axis.values))
+    return total
+
+
+def _candidate_odds_evidence(candidates: Sequence[SeededScenario]) -> str:
+    parts = [
+        f"{scenario.code}:{scenario.risk_band}:prior={scenario.prior_weight}"
+        for scenario in candidates[:4]
+    ]
+    return "candidate_odds=" + ";".join(parts)
 
 
 def _candidate_checks(text: str, limit: int = 5) -> list[str]:
@@ -429,6 +681,7 @@ def _candidate_commands(text: str, limit: int = 4) -> list[str]:
 def _seeded_scenario_evidence() -> list[str]:
     return [
         f"seeded_scenario_count={len(SEEDED_SCENARIO_DB)}",
+        f"seeded_odds_space_size={_odds_space_size()}",
         "seeded_scenario_examples="
         + ",".join(scenario.code for scenario in SEEDED_SCENARIO_DB[:5]),
     ]

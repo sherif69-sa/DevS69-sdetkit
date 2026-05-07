@@ -69,7 +69,14 @@ def test_unknown_failure_like_log_stays_review_first():
     diagnosis = payload["diagnoses"][0]
     assert "matched_failure_signals=ci-exit-code" in diagnosis["evidence"]
     assert "The CI step ended with a non-zero process exit code." in diagnosis["evidence"]
-    assert "candidate_scenarios=CI_STEP_EXIT_NONZERO" in diagnosis["evidence"]
+    assert any(
+        item.startswith("candidate_scenarios=") and "CI_STEP_EXIT_NONZERO" in item
+        for item in diagnosis["evidence"]
+    )
+    assert any(
+        item.startswith("candidate_odds=") and "CI_STEP_EXIT_NONZERO:medium" in item
+        for item in diagnosis["evidence"]
+    )
     assert any(
         "Check candidate CI_STEP_EXIT_NONZERO" in fix for fix in diagnosis["recommended_fix"]
     )
@@ -113,7 +120,14 @@ def test_seeded_scenario_database_recommends_package_install_checks():
     payload = adaptive_diagnosis.analyze_evidence(log_text="npm ERR! lifecycle script failed")
     diagnosis = payload["diagnoses"][0]
 
-    assert "candidate_scenarios=PACKAGE_INSTALL_FAILURE" in diagnosis["evidence"]
+    assert any(
+        item.startswith("candidate_scenarios=") and "PACKAGE_INSTALL_FAILURE" in item
+        for item in diagnosis["evidence"]
+    )
+    assert any(
+        item.startswith("candidate_odds=") and "PACKAGE_INSTALL_FAILURE:medium" in item
+        for item in diagnosis["evidence"]
+    )
     assert any(
         "Check candidate PACKAGE_INSTALL_FAILURE" in fix for fix in diagnosis["recommended_fix"]
     )
@@ -276,7 +290,13 @@ def test_adaptive_memory_empty_and_reusable_context_change_comment():
         for item in empty["diagnoses"][0]["evidence"]
         if item.startswith("seeded_scenario_count=")
     )
-    assert int(seeded_count.split("=", 1)[1]) >= 10
+    assert int(seeded_count.split("=", 1)[1]) >= 25
+    odds_size = next(
+        item
+        for item in empty["diagnoses"][0]["evidence"]
+        if item.startswith("seeded_odds_space_size=")
+    )
+    assert int(odds_size.split("=", 1)[1]) >= 1_000_000_000
     assert any(
         "seeded scenario database" in fix for fix in empty["diagnoses"][0]["recommended_fix"]
     )
