@@ -171,3 +171,94 @@ This keeps the system explainable while moving toward the larger SDETKit loop wi
 ```text
 detect -> diagnose -> recommend -> plan -> prove -> classify -> trend -> candidate -> probation -> policy proposal -> dry run -> guarded PR auto-fix -> remember outcome
 ```
+
+## Scenario packs and layered intelligence
+
+The seeded adaptive scenario catalog is now a versioned data pack instead of an embedded Python-only table. The built-in pack lives at `src/sdetkit/data/adaptive_scenarios.json` and follows `schemas/adaptive-scenario-pack.schema.json`.
+
+Each scenario must declare stable review fields: `code`, `title`, `signals`, `keywords`, `checks`, `commands`, `risk_band`, and `prior_weight`. Optional `odds` and `tags` fields let teams add confidence hints and governance labels without changing the diagnosis output contract.
+
+Layering is deterministic:
+
+1. SDETKit loads the built-in pack first.
+2. A repository can add `.sdetkit/adaptive/scenarios.json` for repo-local scenarios.
+3. Operators can set `SDETKIT_ADAPTIVE_SCENARIO_PACKS` to one or more `os.pathsep`-separated pack paths for organization or private overlays.
+4. Later layers override earlier scenarios by `code`, and the final merged pack is sorted by code for stable output.
+
+This keeps the default product useful on first run while allowing real teams to extend the brain with reviewable, schema-validated scenario data.
+
+## Learning event loop
+
+After writing an adaptive diagnosis JSON artifact, record it into the diagnosis learning JSONL database:
+
+```bash
+python -m sdetkit adaptive learn record build/adaptive-diagnosis.json \
+  --db .sdetkit/adaptive-diagnosis-memory.jsonl \
+  --format json
+```
+
+Summarize recurring scenarios and weak lanes:
+
+```bash
+python -m sdetkit adaptive learn summarize \
+  --db .sdetkit/adaptive-diagnosis-memory.jsonl \
+  --format json
+```
+
+Each learning event stores matched failure signals, candidate scenarios, the selected primary diagnosis marker, recommended checks, proof commands, recurrence count, and review placeholders for `proof_passed`, `fix_accepted`, and `false_positive`. The summarize command rolls those JSONL events into `top_recurring_scenarios` and `weakest_lanes` so follow-up work can prioritize the lanes causing repeated release friction.
+
+### Outcome calibration
+
+When operators have proof feedback, attach it while recording the learning event:
+
+```bash
+python -m sdetkit adaptive learn record build/adaptive-diagnosis.json \
+  --db .sdetkit/adaptive-diagnosis-memory.jsonl \
+  --proof-passed \
+  --fix-accepted
+```
+
+Use `--proof-failed`, `--fix-rejected`, or `--false-positive` when the recommendation did not hold. The learning summary applies deterministic promotion/demotion rules: confirmed proof promotes confidence, false positives demote confidence, repeated recurrence increases risk, and thin evidence lowers confidence until better signals are available.
+
+### Calibration-aware candidate ranking
+
+Pass an adaptive learning summary back into diagnosis when you want local outcomes to influence candidate ordering:
+
+```bash
+PYTHONPATH=src python -m sdetkit.adaptive_diagnosis \
+  --log build/quality.log \
+  --adaptive-history build/adaptive-learning-summary.json \
+  --format json \
+  --out build/adaptive-diagnosis.json
+```
+
+When the summary contains `top_recurring_scenarios[].calibration`, promoted scenarios receive a ranking boost, false positives are demoted, recurrence can raise risk priority, and thin-evidence scenarios are kept lower until better signals exist. Unknown-review evidence includes a `candidate_calibration=` line whenever calibration affected a visible candidate.
+
+## Operator brief artifact
+
+Generate the trust-grade handoff brief after gate, diagnosis, and optional learning artifacts exist:
+
+```bash
+python -m sdetkit adaptive brief \
+  --gate build/gate-fast.json \
+  --diagnosis build/adaptive-diagnosis.json \
+  --learning-summary build/adaptive-learning-summary.json \
+  --out build/sdetkit/operator-brief.md
+```
+
+The brief combines the gate result, adaptive diagnosis, candidate scenarios, candidate calibration, first proof command, safe-fix decision, and next owner action into one Markdown file for PR or release handoff.
+
+
+### PR comment mode
+
+Use compact PR comment mode when a bot should post a short, review-safe summary instead of the full operator brief:
+
+```bash
+python -m sdetkit adaptive brief \
+  --gate build/gate-fast.json \
+  --diagnosis build/adaptive-diagnosis.json \
+  --format comment \
+  --out build/sdetkit/operator-comment.md
+```
+
+Comment mode is intentionally concise: green runs avoid fake adaptive blocks, safe mechanical issues show a scoped guardrail path, and unknown failures stay review-first with candidate scenarios and the first proof command.

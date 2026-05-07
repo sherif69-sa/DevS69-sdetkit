@@ -47,3 +47,38 @@ Schema version: `sdetkit.adaptive.memory.v1`.
 ## Git hygiene
 
 Adaptive DB files are generated local artifacts. Do not commit `.db` outputs or build evidence.
+
+## Adaptive diagnosis learning loop
+
+The local SQLite adaptive memory remains the repo-shape memory. Adaptive diagnosis outcomes use a JSONL learning loop so CI artifacts can be appended and reviewed without requiring database migrations.
+
+Record an adaptive diagnosis artifact:
+
+```bash
+python -m sdetkit adaptive learn record build/adaptive-diagnosis.json \
+  --db .sdetkit/adaptive-diagnosis-memory.jsonl
+```
+
+Summarize recurring diagnosis scenarios and weakest lanes:
+
+```bash
+python -m sdetkit adaptive learn summarize \
+  --db .sdetkit/adaptive-diagnosis-memory.jsonl \
+  --format json
+```
+
+Use the summary to pick the next follow-up: fix high-recurrence scenarios first, then add proof outcomes (`proof_passed`, `fix_accepted`, `false_positive`) as operators confirm or reject recommendations.
+
+
+### Capturing operator feedback
+
+The learning record command accepts outcome flags so confirmed or rejected recommendations affect the next summary:
+
+```bash
+python -m sdetkit adaptive learn record build/adaptive-diagnosis.json \
+  --db .sdetkit/adaptive-diagnosis-memory.jsonl \
+  --proof-passed \
+  --fix-accepted
+```
+
+Use `--false-positive` to demote a scenario when an operator confirms the diagnosis was wrong. The summarize command exposes calibration actions (`promote`, `demote`, `increase_risk`, `lower_confidence`) per scenario and as a `calibration_summary` rollup.

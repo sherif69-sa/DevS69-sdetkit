@@ -416,3 +416,111 @@ def test_safe_auto_fix_codes_remain_narrow_for_local_investigation_classes():
     )
     assert safe_payload["diagnoses"][0]["code"] == "PRE_COMMIT_FORMAT_DRIFT"
     assert safe_payload["fix_plan"][0]["safe_to_auto_fix"] is True
+
+
+def _scenario_pack_payload(**overrides):
+    payload = {
+        "schema_version": "sdetkit.adaptive.scenario_pack.v1",
+        "pack_id": "test.pack",
+        "title": "Test pack",
+        "scenarios": [
+            {
+                "code": "TEST_SIGNAL",
+                "title": "Test signal",
+                "signals": ["error-prefix"],
+                "keywords": ["test signal"],
+                "checks": ["Check the test signal."],
+                "commands": ["python -m pytest -q tests/test_signal.py"],
+                "risk_band": "medium",
+                "prior_weight": 2,
+                "tags": ["test"],
+            }
+        ],
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_builtin_scenario_pack_is_schema_validated_data_product():
+    scenarios = adaptive_diagnosis.SEEDED_SCENARIO_DB
+    codes = [scenario.code for scenario in scenarios]
+
+    assert len(scenarios) >= 25
+    assert codes == sorted(codes)
+    assert "PACKAGE_INSTALL_FAILURE" in codes
+    assert all(scenario.checks and scenario.commands for scenario in scenarios)
+
+
+def test_scenario_pack_loader_rejects_malformed_pack(tmp_path):
+    pack_path = tmp_path / "bad-scenarios.json"
+    payload = _scenario_pack_payload()
+    del payload["scenarios"][0]["commands"]
+    pack_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    try:
+        adaptive_diagnosis.load_scenario_pack(pack_path)
+    except ValueError as exc:
+        assert "missing required fields: commands" in str(exc)
+    else:
+        raise AssertionError("expected malformed scenario pack to be rejected")
+
+
+def test_layered_scenario_packs_merge_deterministically(tmp_path):
+    local_dir = tmp_path / ".sdetkit" / "adaptive"
+    local_dir.mkdir(parents=True)
+    local_pack = local_dir / "scenarios.json"
+    local_pack.write_text(json.dumps(_scenario_pack_payload()), encoding="utf-8")
+
+    scenarios = adaptive_diagnosis.load_layered_scenarios(tmp_path)
+    codes = [scenario.code for scenario in scenarios]
+
+    assert codes == sorted(codes)
+    assert "TEST_SIGNAL" in codes
+    assert len(codes) == len(set(codes))
+
+
+def test_learning_calibration_reranks_unknown_candidate_scenarios():
+    adaptive_history = {
+        "schema_version": "sdetkit.adaptive.learn.summary.v1",
+        "top_recurring_scenarios": [
+            {
+                "code": "RELEASE_VERSION_CONFLICT",
+                "calibration": {
+                    "primary_action": "promote_and_increase_risk",
+                    "actions": ["promote", "increase_risk"],
+                    "confidence_delta": 2,
+                    "risk_delta": 12,
+                },
+            },
+            {
+                "code": "CACHE_ARTIFACT_POISONING",
+                "calibration": {
+                    "primary_action": "demote",
+                    "actions": ["demote"],
+                    "confidence_delta": -2,
+                    "risk_delta": -8,
+                },
+            },
+        ],
+    }
+
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text="Error: command failed",
+        adaptive_history=adaptive_history,
+    )
+    diagnosis = payload["diagnoses"][0]
+
+    assert diagnosis["code"] == "UNKNOWN_REVIEW_REQUIRED"
+    assert any(
+        item.startswith("candidate_scenarios=RELEASE_VERSION_CONFLICT")
+        for item in diagnosis["evidence"]
+    )
+    assert any(
+        item.startswith("candidate_calibration=RELEASE_VERSION_CONFLICT:promote_and_increase_risk")
+        for item in diagnosis["evidence"]
+    )
+    assert diagnosis["recommended_fix"][0].startswith("Check candidate RELEASE_VERSION_CONFLICT")
+    assert diagnosis["proof_commands"][:2] == [
+        "git tag --points-at HEAD",
+        "python -m build --sdist --wheel",
+    ]
