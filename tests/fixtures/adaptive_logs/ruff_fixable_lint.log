@@ -1,0 +1,4 @@
+ruff check failed
+Found 1 error.
+tests/test_imports.py:1:1: F401 [*] `os` imported but unused
+[*] 1 fixable with the `--fix` option.

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://devs69.github.io/sdetkit/schemas/adaptive-remediation-policy.schema.json",
+  "title": "SDETKit adaptive remediation policy",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "allowed_safe_fix_types",
+    "max_changed_files",
+    "required_proof_outcomes",
+    "allow_review_required_auto_fix"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "sdetkit.adaptive.remediation_policy.v1"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allowed_safe_fix_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "max_changed_files": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "required_proof_outcomes": {
+      "type": "array",
+      "items": {
+        "enum": ["proof_passed", "proof_failed", "reverted", "rejected"]
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "allow_review_required_auto_fix": {
+      "type": "boolean"
+    },
+    "blocked_auto_source_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}

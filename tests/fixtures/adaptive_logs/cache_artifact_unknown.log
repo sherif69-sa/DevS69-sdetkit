@@ -1,0 +1,3 @@
+Error: command failed after restoring cache key py310-main
+stale artifact restored from cache caused checksum mismatch
+Process completed with exit code 1

@@ -119,6 +119,14 @@ nav:
       - Operator essentials: operator-essentials.md
       - Investigation operator guide: investigation-operator-guide.md
       - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md
+      - Adaptive demo gallery: adaptive-demo-gallery.md
+      - Adaptive integration adapters: adaptive-integration-adapters.md
+      - Adaptive enterprise analytics: adaptive-enterprise-analytics.md
+      - Adaptive remediation policy: adaptive-remediation-policy.md
+      - Adaptive next-wave dashboard: adaptive-dashboard.md
+      - Adaptive anonymized learning import: adaptive-learning-import.md
+      - Adaptive hosted readiness boundary: adaptive-hosted-readiness-boundary.md
+      - Repo adoption scan: repo-adoption-scan.md
       - Artifact reference and generated sample map: artifact-reference.md
       - CI artifact walkthrough: ci-artifact-walkthrough.md
       - Remediation cookbook: remediation-cookbook.md
@@ -202,6 +210,8 @@ nav:
           - Enterprise offerings: project/enterprise-offerings.md
           - Adaptive investigation roadmap: roadmap/adaptive-investigation-roadmap.md
           - Big-brain toolkit roadmap: roadmap/big-brain-toolkit-roadmap.md
+          - Big-brain progress tracker: roadmap/big-brain-progress-tracker.md
+          - Adaptive next-wave roadmap: roadmap/adaptive-next-wave-roadmap.md
           - Product roadmap: roadmap/product-roadmap.md
           - Why not just separate tools?: why-not-just-tools.md
           - Product strategy: product-strategy.md

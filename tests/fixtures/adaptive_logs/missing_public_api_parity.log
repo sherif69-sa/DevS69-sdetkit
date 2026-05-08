@@ -1,0 +1,2 @@
+FAILED tests/test_async_client.py::test_async_parity
+AttributeError: SdetAsyncHttpClient object has no attribute get_json_list_paginated_envelope async parity

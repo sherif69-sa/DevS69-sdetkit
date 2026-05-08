@@ -1,0 +1,2 @@
+FAILED tests/test_client.py::test_fake_response
+TypeError: Resp() takes no arguments because test double defines init_ instead of __init__

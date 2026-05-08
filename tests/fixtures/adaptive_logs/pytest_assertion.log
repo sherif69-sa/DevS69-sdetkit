@@ -1,0 +1,2 @@
+FAILED tests/test_checkout.py::test_total_contract - AssertionError
+E   AssertionError: expected 42

@@ -1,0 +1,3 @@
+Error: mkdocs build failed
+WARNING - Documentation file 'missing.md' contains a link to 'gone.md' which is not found
+Process completed with exit code 1

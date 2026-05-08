@@ -1,0 +1,128 @@
+[
+  {
+    "file": "pytest_assertion.log",
+    "primary": "PYTEST_ASSERTION_FAILURE",
+    "proof_contains": "pytest -q tests/test_checkout.py::test_total_contract",
+    "safe": false
+  },
+  {
+    "file": "pytest_import_failure.log",
+    "primary": "PYTEST_IMPORT_FAILURE",
+    "proof_contains": "pytest -q unknown test",
+    "safe": false
+  },
+  {
+    "file": "missing_test_dependency.log",
+    "primary": "MISSING_TEST_DEPENDENCY",
+    "proof_contains": "pip install -r requirements-test.txt",
+    "safe": false
+  },
+  {
+    "file": "python_runtime_compatibility.log",
+    "primary": "PYTHON_RUNTIME_COMPATIBILITY",
+    "proof_contains": "python --version",
+    "safe": false
+  },
+  {
+    "file": "local_environment_friction.log",
+    "primary": "LOCAL_ENVIRONMENT_FRICTION",
+    "proof_contains": "python -m venv .venv",
+    "safe": false
+  },
+  {
+    "file": "broken_test_double.log",
+    "primary": "BROKEN_TEST_DOUBLE",
+    "proof_contains": "pytest -q <focused-test>",
+    "safe": false
+  },
+  {
+    "file": "missing_public_api_parity.log",
+    "primary": "MISSING_PUBLIC_API_PARITY",
+    "proof_contains": "pytest -q <focused-parity-test>",
+    "safe": false
+  },
+  {
+    "file": "git_branch_diverged.log",
+    "primary": "GIT_BRANCH_DIVERGED",
+    "proof_contains": "git fetch origin <branch>",
+    "safe": false
+  },
+  {
+    "file": "remote_branch_drift.log",
+    "primary": "REMOTE_BRANCH_DRIFT",
+    "proof_contains": "pre_commit run -a",
+    "safe": false
+  },
+  {
+    "file": "product_logic_failure.log",
+    "primary": "PRODUCT_LOGIC_FAILURE",
+    "proof_contains": "pytest -q <focused-test>",
+    "safe": false
+  },
+  {
+    "file": "format_drift.log",
+    "primary": "PRE_COMMIT_FORMAT_DRIFT",
+    "proof_contains": "ruff format --check <touched-python-files>",
+    "safe": true
+  },
+  {
+    "file": "ruff_fixable_lint.log",
+    "primary": "RUFF_FIXABLE_LINT",
+    "proof_contains": "ruff check tests/test_imports.py",
+    "safe": true
+  },
+  {
+    "file": "ruff_unsafe_lint.log",
+    "primary": "RUFF_LINT_FAILURE",
+    "proof_contains": "ruff check <touched-python-files>",
+    "safe": false
+  },
+  {
+    "file": "mypy_type_contract.log",
+    "primary": "MYPY_TYPE_CONTRACT_DRIFT",
+    "proof_contains": "ruff check <touched-python-files>",
+    "safe": false
+  },
+  {
+    "file": "package_install_unknown.log",
+    "primary": "UNKNOWN_REVIEW_REQUIRED",
+    "proof_contains": "pip install -r requirements-test.txt -e .",
+    "safe": false,
+    "candidate": "PACKAGE_INSTALL_FAILURE"
+  },
+  {
+    "file": "cache_artifact_unknown.log",
+    "primary": "UNKNOWN_REVIEW_REQUIRED",
+    "proof_contains": "git diff -- pyproject.toml requirements-test.txt",
+    "safe": false,
+    "candidate": "CACHE_ARTIFACT_POISONING"
+  },
+  {
+    "file": "docs_build_unknown.log",
+    "primary": "UNKNOWN_REVIEW_REQUIRED",
+    "proof_contains": "tests/test_docs*.py",
+    "safe": false,
+    "candidate": "DOCS_BUILD_CONTRACT"
+  },
+  {
+    "file": "release_version_unknown.log",
+    "primary": "UNKNOWN_REVIEW_REQUIRED",
+    "proof_contains": "git tag --points-at HEAD",
+    "safe": false,
+    "candidate": "RELEASE_VERSION_CONFLICT"
+  },
+  {
+    "file": "network_service_unknown.log",
+    "primary": "UNKNOWN_REVIEW_REQUIRED",
+    "proof_contains": "<network-test>",
+    "safe": false,
+    "candidate": "NETWORK_SERVICE_FLAKE"
+  },
+  {
+    "file": "coverage_gate_unknown.log",
+    "primary": "UNKNOWN_REVIEW_REQUIRED",
+    "proof_contains": "bash quality.sh cov",
+    "safe": false,
+    "candidate": "COVERAGE_GATE_REGRESSION"
+  }
+]

@@ -1,0 +1,2 @@
+Running pip install inside /mnt/c/work/repo/.venv/site-packages became slow and stuck
+KeyboardInterrupt while creating venv

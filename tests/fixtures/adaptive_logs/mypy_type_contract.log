@@ -1,0 +1,3 @@
+mypy failed
+src/app.py:12: error: Incompatible return value type (got "int", expected "str")
+Found 1 error in 1 file
