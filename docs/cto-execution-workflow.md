@@ -21,7 +21,7 @@ Lock the active scope and evidence sources before making additional delivery cha
 
 ### Inputs to lock
 
-- blueprint: [`docs/cto-full-package-review.md`](cto-full-package-review.md)
+- blueprint: `docs/cto-full-package-review.md`.
 - control plane: [`docs/top-tier-program-dashboard.md`](top-tier-program-dashboard.md)
 - execution JSON: [`plans/top-tier-repo-execution-plan-2026-q2.json`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/plans/top-tier-repo-execution-plan-2026-q2.json)
 
@@ -74,8 +74,8 @@ Lock the active scope and evidence sources before making additional delivery cha
 - Evidence:
   - [Pilot to rollout guide](pilot-to-rollout-guide.md)
   - [Role-based quickstarts](role-based-quickstarts.md)
-  - [Executive weekly template](executive-weekly-template.md)
-  - [Executive monthly template](executive-monthly-template.md)
+  - `docs/executive-weekly-template.md` — Executive weekly template
+  - `docs/executive-monthly-template.md` — Executive monthly template
 
 ---
 
@@ -83,4 +83,4 @@ Lock the active scope and evidence sources before making additional delivery cha
 
 After all six points are complete, continue with:
 
-- [CTO Phase 2 launch plan](cto-phase2-launch-plan.md)
+- `docs/cto-phase2-launch-plan.md`.

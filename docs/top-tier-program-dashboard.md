@@ -3,9 +3,9 @@
 This dashboard is the weekly control plane for the **DevS69 SDETKit top-tier full-package transformation**.
 
 - Program plan source: `plans/top-tier-repo-execution-plan-2026-q2.json`
-- Leadership blueprint: [CTO full-package review](cto-full-package-review.md)
-- Execution workflow: [CTO execution workflow (6-point)](cto-execution-workflow.md)
-- Post-completion plan: [CTO Phase 2 launch plan](cto-phase2-launch-plan.md)
+- Leadership blueprint: `docs/cto-full-package-review.md`.
+- Execution workflow: `docs/cto-execution-workflow.md`.
+- Post-completion plan: `docs/cto-phase2-launch-plan.md`.
 - Reporting cadence: Monday planning, Wednesday risk review, Friday closeout
 
 ## Weekly status snapshot
@@ -60,17 +60,17 @@ Track weekly:
 
 ### Completed
 - [Portfolio aggregation schema](portfolio-aggregation-schema.md)
-- [Portfolio scorecard sample (2026-04-17)](artifacts/portfolio-scorecard-sample-2026-04-17.json)
+- `docs/artifacts/portfolio-scorecard-sample-2026-04-17.json` — portfolio scorecard sample.
 - [Role-based quickstarts](role-based-quickstarts.md)
 - [KPI schema (v1)](kpi-schema.md)
-- [KPI baseline snapshot (2026-04-17)](kpi-baseline-week-2026-04-17.md)
-- [Generated KPI weekly sample (from portfolio)](artifacts/kpi-weekly-from-portfolio-2026-04-17.json)
-- [KPI weekly contract check (2026-04-17)](artifacts/kpi-weekly-contract-check-2026-04-17.json)
-- [Top-tier reporting contract check (2026-04-17)](artifacts/top-tier-contract-check-2026-04-17.json)
-- [Top-tier bundle manifest (2026-04-17)](artifacts/top-tier-bundle-manifest-2026-04-17.json)
-- [Top-tier bundle manifest check (2026-04-17)](artifacts/top-tier-bundle-manifest-check-2026-04-17.json)
-- [Executive weekly report (2026-04-17)](executive-weekly-2026-04-17.md)
-- [Executive monthly report (2026-04)](executive-monthly-2026-04.md)
+- `docs/kpi-baseline-week-2026-04-17.md` — KPI baseline snapshot.
+- `docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json` — generated KPI weekly sample.
+- `docs/artifacts/kpi-weekly-contract-check-2026-04-17.json` — KPI weekly contract check.
+- `docs/artifacts/top-tier-contract-check-2026-04-17.json` — top-tier contract check.
+- `docs/artifacts/top-tier-bundle-manifest-2026-04-17.json` — top-tier bundle manifest.
+- `docs/artifacts/top-tier-bundle-manifest-check-2026-04-17.json` — top-tier bundle manifest check.
+- `docs/executive-weekly-2026-04-17.md` — executive weekly report.
+- `docs/executive-monthly-2026-04.md` — executive monthly report.
 - [Full release package checklist](full-release-package-checklist.md)
 
 ### KPI movement
