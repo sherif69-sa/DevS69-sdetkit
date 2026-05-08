@@ -80,20 +80,20 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
   - green run: no fake adaptive block,
   - known safe mechanical issue: scoped auto-fix path,
   - unknown failure: review-first candidate scenarios and checks.
-- Add screenshots or sample PR comments in docs for the top 10 scenarios.
+- Add screenshots or sample PR comments in docs for the top 10 scenarios. **Done:** `docs/adaptive-demo-gallery.md` now shows green, safe-fix, unknown-review, recurring-learning, top-scenario, and portfolio rollup examples.
 
 ### Phase 4 — Expand safe remediation without weakening safety
 
 **Outcome:** more fixes are assisted, but unknown failures remain human-reviewed.
 
 - Keep current safe auto-fix route narrow.
-- Add a second lane: **assisted patch plan** for non-mechanical cases.
+- Add a second lane: **assisted patch plan** for non-mechanical cases. **Done:** `sdetkit adaptive patch-plan` emits review-only patch steps, guardrails, proof commands, and rollback notes without allowing mutation.
 - Require four gates before any non-format PR automation:
   - deterministic reproduction,
   - scenario confidence threshold,
   - changed-file scope limit,
-  - post-fix proof command.
-- Add fix-audit records for every automated change.
+  - post-fix proof command. **Done:** fix-audit summaries now flag missing proof, block failed proof, and emit release recommendations.
+- Add fix-audit records for every automated change. **Done:** `sdetkit adaptive fix-audit record` stores safe-fix and assisted patch-plan decisions with guardrails, proof commands, changed-file scope, rollback notes, and outcomes.
 
 ### Phase 5 — Make it enterprise-scale
 
@@ -106,12 +106,16 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
   - dependency drift hotspots,
   - remediation success rate,
   - mean time to first actionable proof.
-- Add governance controls:
+- Add governance controls: **Done:** `sdetkit adaptive enterprise-governance report` and `anonymize-learning` cover pack approvals, policy override boundaries, security-sensitive scenario isolation, and anonymized learning export.
   - pack approval workflow,
   - policy overrides,
   - security-sensitive scenario isolation,
   - anonymized learning export.
-- Add adapters for GitHub Actions, GitLab, Jenkins, and local-only operation.
+- Add adapters for GitHub Actions, GitLab, Jenkins, and local-only operation. **Done:** `sdetkit adaptive integration-adapter validate` checks required adaptive artifact inputs and provider upload targets.
+
+## Completion checkpoint
+
+The Big-Brain execution plan is now complete across the immediate backlog, Phase 4 safe-remediation expansion, and Phase 5 enterprise-scale lanes. CLI discoverability for every adaptive lane is covered by regression tests so the next work can move into a fresh roadmap wave without losing these command surfaces. The next wave is tracked in [`adaptive-next-wave-roadmap.md`](adaptive-next-wave-roadmap.md).
 
 ## Big-win differentiators to protect
 
@@ -129,11 +133,15 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
 | P0 | Extract scenario DB to a schema-validated pack | Done: built-in scenarios now load from `src/sdetkit/data/adaptive_scenarios.json`, validate through loader rules, and are documented against `schemas/adaptive-scenario-pack.schema.json`. |
 | P0 | Add learning event records for adaptive diagnosis | Done: `sdetkit adaptive learn record` writes JSONL events with matched signals, candidates, selected primary diagnosis, checks, proof commands, recurrence count, and outcome placeholders. |
 | P0 | Add operator brief artifact | Done: `python -m sdetkit adaptive brief` generates `build/sdetkit/operator-brief.md` from gate, diagnosis, learning, and safe-fix artifacts. |
-| P1 | Add fixture corpus for top scenarios | Tests cover at least 20 realistic log fixtures. |
+| P1 | Add fixture corpus for top scenarios | Done: `tests/fixtures/adaptive_logs/` covers 20 realistic log fixtures with expected primary diagnosis, first proof command, candidate scenario, and safe-fix posture assertions. |
 | P1 | Add candidate confidence calibration | Done: adaptive diagnosis can consume learning-summary calibration to boost/demote candidate scenario ranking and emit `candidate_calibration` evidence. |
-| P1 | Add docs demo gallery | Docs show green, safe-fix, unknown-review, and recurring-failure examples. |
-| P2 | Add org-level pack overlay | Local and org packs merge deterministically with built-in scenarios. |
-| P2 | Add portfolio rollup | Multiple adaptive diagnosis outputs roll into a top-risk scenario report. |
+| P1 | Add docs demo gallery | Done: `docs/adaptive-demo-gallery.md` shows green, safe-fix, unknown-review, recurring-learning, top-10 scenario, and portfolio rollup examples. |
+| P2 | Add org-level pack overlay | Done: layered packs emit source metadata, governance validation rejects unapproved duplicate-code overrides, and `docs/governance-and-org-packs.md` documents approval expectations. |
+| P2 | Add portfolio rollup | Done: `sdetkit adaptive portfolio-rollup` rolls multiple adaptive diagnosis outputs into a top-risk scenario report with recurrence by repo, candidate mentions, release recommendation, and next owner action. |
+
+## Progress tracking
+
+Current measurable progress, latest movement, next-PR recommendation, and follow-up queue are tracked in [`big-brain-progress-tracker.md`](big-brain-progress-tracker.md).
 
 ## Definition of “real big win”
 

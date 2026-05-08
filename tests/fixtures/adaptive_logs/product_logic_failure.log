@@ -1,0 +1,2 @@
+Product logic failure: deterministic product behavior failure in widget contract
+FAILED tests/test_widget.py::test_widget_contract

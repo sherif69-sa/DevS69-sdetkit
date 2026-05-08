@@ -49,6 +49,217 @@ class OddsAxis:
     values: tuple[str, ...]
 
 
+
+
+@dataclass(frozen=True)
+class FailureMatrixFamily:
+    name: str
+    signals: tuple[str, ...]
+    keywords: tuple[str, ...]
+    check: str
+    command: str
+    risk_band: str = "medium"
+
+
+MATRIX_ENVIRONMENTS = (
+    "linux",
+    "macos",
+    "windows",
+    "container",
+    "github_actions",
+    "gitlab_ci",
+    "jenkins",
+    "self_hosted",
+    "arm64",
+    "x86_64",
+    "wsl",
+    "docker_compose",
+    "kubernetes",
+    "air_gapped",
+    "proxy_network",
+    "readonly_workspace",
+)
+
+MATRIX_SYMPTOMS = (
+    "assertion_delta",
+    "fixture_missing",
+    "import_missing",
+    "timeout",
+    "flaky_rerun",
+    "permission_denied",
+    "cache_stale",
+    "lockfile_drift",
+    "version_conflict",
+    "schema_mismatch",
+    "api_parity",
+    "type_mismatch",
+    "format_drift",
+    "lint_unsafe",
+    "coverage_drop",
+    "docs_link",
+    "network_timeout",
+    "tls_proxy",
+    "rate_limit",
+    "disk_full",
+    "timezone",
+    "parallel_order",
+    "artifact_missing",
+    "release_duplicate",
+)
+
+MATRIX_FAMILIES = (
+    FailureMatrixFamily(
+        "pytest",
+        ("pytest-node-failed", "pytest-failed-count", "assertion-error"),
+        ("pytest", "failed", "assertionerror"),
+        "Reproduce the first failing pytest node and inspect the assertion delta.",
+        "PYTHONPATH=src python -m pytest -q <first-failing-test> -vv",
+        "high",
+    ),
+    FailureMatrixFamily(
+        "pytest_collection",
+        ("pytest-error-count", "python-exception"),
+        ("modulenotfounderror", "importerror while importing", "fixture"),
+        "Run collection-only on the failing test file and repair imports/fixtures first.",
+        "PYTHONPATH=src python -m pytest -q <failing-test-file> --collect-only",
+        "high",
+    ),
+    FailureMatrixFamily(
+        "ruff",
+        ("ruff-check-failure",),
+        ("ruff", "found", "fixable"),
+        "Identify whether the Ruff rule is safe mechanical or requires review.",
+        "PYTHONPATH=src python -m ruff check <touched-python-files>",
+    ),
+    FailureMatrixFamily(
+        "format",
+        ("ruff-format-failure",),
+        ("ruff format", "would reformat", "files were modified"),
+        "Run formatter locally and verify no product files changed unexpectedly.",
+        "PYTHONPATH=src python -m ruff format --check <touched-python-files>",
+    ),
+    FailureMatrixFamily(
+        "mypy",
+        ("mypy-error",),
+        ("mypy", "error:", "attr-defined", "arg-type", "union-attr"),
+        "Open the first mypy error and fix the declared type/API contract.",
+        "PYTHONPATH=src python -m mypy <module-or-package>",
+    ),
+    FailureMatrixFamily(
+        "coverage",
+        ("coverage-failure",),
+        ("coverage", "fail under", "threshold"),
+        "Find the missed file or branch that moved coverage below policy.",
+        "PYTHONPATH=src python -m pytest --cov",
+    ),
+    FailureMatrixFamily(
+        "package",
+        ("package-manager-error", "python-exception"),
+        ("pip", "npm err", "resolver", "wheel", "lockfile"),
+        "Recreate dependency resolution from a clean environment before editing product code.",
+        "python -m pip install -r requirements-test.txt -e .",
+        "high",
+    ),
+    FailureMatrixFamily(
+        "docs",
+        ("error-prefix", "command-failed"),
+        ("mkdocs", "docs", "link", "markdown"),
+        "Build docs in strict mode and fix the first broken page/link.",
+        "NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q",
+    ),
+    FailureMatrixFamily(
+        "git",
+        ("command-failed",),
+        ("git", "non-fast-forward", "rejected", "fetch first"),
+        "Fetch/rebase before retrying push and rerun proof after rebase.",
+        "git fetch origin <branch>",
+    ),
+    FailureMatrixFamily(
+        "ci",
+        ("ci-exit-code", "failed-steps"),
+        ("exit code", "failed_steps", "workflow"),
+        "Open the first failed CI step and map it back to the local proof command.",
+        "python -m sdetkit adaptive dashboard --format json",
+        "high",
+    ),
+    FailureMatrixFamily(
+        "network",
+        ("error-prefix", "command-failed"),
+        ("timeout", "dns", "tls", "rate limit", "connection"),
+        "Separate transient service/network failure from deterministic product failure.",
+        "python -m pytest -q <network-marked-tests> -vv",
+    ),
+    FailureMatrixFamily(
+        "runtime",
+        ("python-exception",),
+        ("python", "datetime.utc", "syntaxerror", "runtime"),
+        "Verify the failing interpreter and supported Python compatibility lane.",
+        "python --version",
+        "high",
+    ),
+    FailureMatrixFamily(
+        "cache",
+        ("error-prefix", "command-failed"),
+        ("cache", "artifact", "restore", "stale"),
+        "Clear or rebuild cache before changing product code.",
+        "PYTHONPATH=src python -m pytest -q --cache-clear",
+    ),
+    FailureMatrixFamily(
+        "release",
+        ("error-prefix", "command-failed"),
+        ("release", "tag", "version", "twine", "duplicate"),
+        "Compare version metadata, tags, and built artifacts before publishing.",
+        "git tag --points-at HEAD",
+        "high",
+    ),
+    FailureMatrixFamily(
+        "security",
+        ("gate-problems-found", "error-prefix"),
+        ("secret", "token", "bandit", "policy"),
+        "Treat security-policy failures as review-first and verify redaction before sharing logs.",
+        "python -m sdetkit security --help",
+        "high",
+    ),
+    FailureMatrixFamily(
+        "dashboard",
+        ("failed-steps", "error-prefix"),
+        ("artifact", "dashboard", "json", "contract"),
+        "Check local artifact contracts and regenerate deterministic dashboard evidence.",
+        "python -m sdetkit adaptive dashboard --format json",
+    ),
+)
+
+
+def _generated_scenario_matrix() -> tuple[SeededScenario, ...]:
+    scenarios: list[SeededScenario] = []
+    for family in MATRIX_FAMILIES:
+        for environment in MATRIX_ENVIRONMENTS:
+            for symptom in MATRIX_SYMPTOMS:
+                code = f"MATRIX_{family.name}_{environment}_{symptom}".upper()
+                title = (
+                    f"{family.name.replace('_', ' ').title()} failure on "
+                    f"{environment.replace('_', ' ')} with {symptom.replace('_', ' ')}"
+                )
+                scenarios.append(
+                    SeededScenario(
+                        code=code,
+                        title=title,
+                        signals=family.signals,
+                        keywords=tuple(dict.fromkeys((*family.keywords, environment, symptom))),
+                        checks=(
+                            family.check,
+                            f"Confirm whether environment={environment} changes reproduction.",
+                            f"Use symptom={symptom} to choose the narrowest proof command.",
+                        ),
+                        commands=(family.command,),
+                        odds=(environment, symptom, family.name),
+                        tags=("generated-matrix", "real-world-scale"),
+                        risk_band=family.risk_band,
+                        prior_weight=1,
+                    )
+                )
+    return tuple(sorted(scenarios, key=lambda scenario: scenario.code))
+
 ODDS_EXPANSION_AXES = (
     OddsAxis(
         "runner", ("github-hosted", "self-hosted", "container", "local-wsl", "macos", "windows")
@@ -193,6 +404,8 @@ FAILURE_LIKE_SIGNAL_DB = (
 
 BUILTIN_SCENARIO_PACK = "data/adaptive_scenarios.json"
 SCENARIO_PACK_SCHEMA_VERSION = "sdetkit.adaptive.scenario_pack.v1"
+SCENARIO_PACK_REPORT_SCHEMA_VERSION = "sdetkit.adaptive.scenario_pack_report.v1"
+APPROVED_OVERRIDE_TAG = "override-approved"
 VALID_RISK_BANDS = {"low", "medium", "high"}
 REQUIRED_SCENARIO_FIELDS = {
     "code",
@@ -302,6 +515,89 @@ def merge_scenario_packs(*packs: Sequence[SeededScenario]) -> tuple[SeededScenar
     return tuple(merged[code] for code in sorted(merged))
 
 
+def _scenario_layer_name(path: Path, index: int) -> str:
+    if index == 0:
+        return "builtin"
+    normalized = path.as_posix()
+    if normalized.endswith(".sdetkit/adaptive/scenarios.json"):
+        return "repo-local"
+    return f"overlay-{index}"
+
+
+def _scenario_layer_paths(root: Path | None = None) -> list[Path]:
+    return [_package_file(BUILTIN_SCENARIO_PACK), *_default_layer_paths(root)]
+
+
+def _scenario_layer_metadata(
+    *, path: Path, index: int, scenarios: Sequence[SeededScenario]
+) -> dict[str, Any]:
+    codes = [scenario.code for scenario in scenarios]
+    return {
+        "index": index,
+        "source": _scenario_layer_name(path, index),
+        "path": str(path),
+        "scenario_count": len(scenarios),
+        "codes": codes,
+    }
+
+
+def layered_scenario_pack_report(
+    root: Path | None = None, *, require_override_approval: bool = False
+) -> dict[str, Any]:
+    """Return deterministic scenario pack layer metadata and merged scenario codes.
+
+    Overrides are allowed for normal loading so existing local packs remain compatible.
+    Governance checks can set ``require_override_approval`` to reject overrides unless the
+    replacing scenario carries the explicit ``override-approved`` tag.
+    """
+    merged: dict[str, SeededScenario] = {}
+    seen_sources: dict[str, str] = {}
+    layers: list[dict[str, Any]] = []
+    overrides: list[dict[str, Any]] = []
+    for index, path in enumerate(_scenario_layer_paths(root)):
+        scenarios = load_scenario_pack(path)
+        source = _scenario_layer_name(path, index)
+        layers.append(_scenario_layer_metadata(path=path, index=index, scenarios=scenarios))
+        for scenario in scenarios:
+            previous_source = seen_sources.get(scenario.code)
+            if previous_source is not None:
+                approved = APPROVED_OVERRIDE_TAG in scenario.tags
+                override = {
+                    "code": scenario.code,
+                    "previous_source": previous_source,
+                    "source": source,
+                    "approved": approved,
+                    "approval_tag": APPROVED_OVERRIDE_TAG if approved else "",
+                }
+                overrides.append(override)
+                if require_override_approval and not approved:
+                    raise ValueError(
+                        f"scenario {scenario.code}: override from {source} requires "
+                        f"{APPROVED_OVERRIDE_TAG} tag"
+                    )
+            merged[scenario.code] = scenario
+            seen_sources[scenario.code] = source
+    merged_codes = sorted(merged)
+    return {
+        "schema_version": SCENARIO_PACK_REPORT_SCHEMA_VERSION,
+        "ok": True,
+        "layer_count": len(layers),
+        "scenario_count": len(merged_codes),
+        "layers": layers,
+        "overrides": sorted(overrides, key=lambda row: (row["code"], row["source"])),
+        "merged_codes": merged_codes,
+        "override_policy": {
+            "require_override_approval": require_override_approval,
+            "approval_tag": APPROVED_OVERRIDE_TAG,
+        },
+    }
+
+
+def validate_layered_scenario_packs(root: Path | None = None) -> dict[str, Any]:
+    """Validate layered packs using governance override policy."""
+    return layered_scenario_pack_report(root, require_override_approval=True)
+
+
 def _default_layer_paths(root: Path | None = None) -> list[Path]:
     base = root or Path.cwd()
     env_paths = [
@@ -315,12 +611,13 @@ def _default_layer_paths(root: Path | None = None) -> list[Path]:
 
 def load_layered_scenarios(root: Path | None = None) -> tuple[SeededScenario, ...]:
     """Load built-in scenarios plus repo/org/private overlay packs in deterministic order."""
-    packs = [load_scenario_pack(_package_file(BUILTIN_SCENARIO_PACK))]
-    packs.extend(load_scenario_pack(path) for path in _default_layer_paths(root))
+    packs = [SEEDED_SCENARIO_DB, *[load_scenario_pack(path) for path in _default_layer_paths(root)]]
     return merge_scenario_packs(*packs)
 
 
-SEEDED_SCENARIO_DB = load_scenario_pack(_package_file(BUILTIN_SCENARIO_PACK))
+CURATED_SCENARIO_DB = load_scenario_pack(_package_file(BUILTIN_SCENARIO_PACK))
+GENERATED_SCENARIO_DB = _generated_scenario_matrix()
+SEEDED_SCENARIO_DB = merge_scenario_packs(CURATED_SCENARIO_DB, GENERATED_SCENARIO_DB)
 
 
 def _as_int(value: Any) -> int:
@@ -360,6 +657,33 @@ def _safe_list(values: Sequence[Any], limit: int = 6) -> list[str]:
     return out
 
 
+def _operator_guidance(
+    *, code: str, diagnosis: str, fixes: Sequence[str], commands: Sequence[str], files: Sequence[str]
+) -> dict[str, Any]:
+    safe_to_auto_fix = code in SAFE_AUTO_FIX_CODES
+    safe_fixes = _safe_list(fixes, 5)
+    safe_commands = _safe_list(commands, 5)
+    safe_files = _safe_list(files, 8)
+    return {
+        "what_is_going_on": _safe(diagnosis, 700),
+        "what_to_fix_first": safe_fixes[0]
+        if safe_fixes
+        else "Start with the first concrete failing line in the captured evidence.",
+        "how_to_fix": safe_fixes,
+        "how_to_verify": safe_commands,
+        "affected_files": safe_files,
+        "automation_boundary": (
+            "safe_mechanical_fix_allowed_after_proof"
+            if safe_to_auto_fix
+            else "review_first_no_auto_mutation"
+        ),
+        "why_this_is_not_random": (
+            "Not random: generated from matched failure signals, affected files, and proof commands "
+            "in the current evidence; unknown or unsafe failures stay review-first."
+        ),
+    }
+
+
 def _diag(
     code: str,
     severity: str,
@@ -376,6 +700,9 @@ def _diag(
     repeat_count: int = 0,
     files: Sequence[str] = (),
 ) -> dict[str, Any]:
+    safe_fixes = _safe_list(fixes, 8)
+    safe_commands = _safe_list(commands, 8)
+    safe_files = _safe_list(files, 8)
     return {
         "code": code,
         "severity": severity,
@@ -384,12 +711,15 @@ def _diag(
         "diagnosis": _safe(diagnosis, 900),
         "why_developers_miss_it": _safe(why, 900),
         "evidence": _safe_list(evidence, 8),
-        "recommended_fix": _safe_list(fixes, 8),
-        "proof_commands": _safe_list(commands, 8),
+        "recommended_fix": safe_fixes,
+        "proof_commands": safe_commands,
         "risk_if_ignored": _safe(risk, 500),
         "learning_signal": _safe(signal, 160),
         "repeat_count": max(0, repeat_count),
-        "affected_files": _safe_list(files, 8),
+        "affected_files": safe_files,
+        "operator_guidance": _operator_guidance(
+            code=code, diagnosis=diagnosis, fixes=safe_fixes, commands=safe_commands, files=safe_files
+        ),
     }
 
 
@@ -501,6 +831,10 @@ def _candidate_scenarios(
         keyword_hits = sum(1 for keyword in scenario.keywords if keyword.lower() in lower)
         odds_hits = sum(1 for odd in scenario.odds if odd.lower() in lower)
         score = signal_hits * 3 + keyword_hits + odds_hits + max(0, scenario.prior_weight - 1)
+        if score and "generated-matrix" in scenario.tags:
+            score = max(1, score - 2)
+        elif score:
+            score += 20
         score += _calibration_score(_as_dict((calibration_by_code or {}).get(scenario.code)))
         if score:
             scored.append((-score, scenario.code, scenario))
@@ -559,6 +893,8 @@ def _candidate_commands(
 def _seeded_scenario_evidence() -> list[str]:
     return [
         f"seeded_scenario_count={len(SEEDED_SCENARIO_DB)}",
+        f"curated_scenario_count={len(CURATED_SCENARIO_DB)}",
+        f"generated_matrix_scenario_count={len(GENERATED_SCENARIO_DB)}",
         f"seeded_odds_space_size={_odds_space_size()}",
         "seeded_scenario_examples="
         + ",".join(scenario.code for scenario in SEEDED_SCENARIO_DB[:5]),
@@ -794,9 +1130,45 @@ def _append_local_investigation(
     return False
 
 
+
+
+def _failure_snippets(text: str, *, limit: int = 5) -> list[str]:
+    snippets: list[str] = []
+    marker = re.compile(
+        r"(FAILED|FAILURES|AssertionError|Traceback|Error:|error:|ruff|mypy|ModuleNotFoundError|ImportError|Process completed with exit code|Found [1-9])",
+        re.IGNORECASE,
+    )
+    for line in text.splitlines():
+        cleaned = _safe(line, 260)
+        if not cleaned or not marker.search(cleaned):
+            continue
+        if cleaned not in snippets:
+            snippets.append(cleaned)
+        if len(snippets) >= limit:
+            break
+    return snippets
+
+
+def _attach_log_context(diagnoses: list[dict[str, Any]], start_index: int, text: str) -> None:
+    snippets = _failure_snippets(text)
+    if not snippets:
+        return
+    for diagnosis in diagnoses[start_index:]:
+        guidance = _as_dict(diagnosis.get("operator_guidance"))
+        guidance["observed_failure_lines"] = snippets
+        guidance["matched_from_current_log"] = True
+        diagnosis["operator_guidance"] = guidance
+        evidence = _as_list(diagnosis.get("evidence"))
+        for index, snippet in enumerate(snippets[:3], start=1):
+            item = f"observed_failure_line_{index}={snippet}"
+            if item not in evidence:
+                evidence.append(item)
+        diagnosis["evidence"] = _safe_list(evidence, 8)
+
 def _append_log(
     text: str, diagnoses: list[dict[str, Any]], adaptive_history: dict[str, Any] | None = None
 ) -> None:
+    start_index = len(diagnoses)
     lower = text.lower()
     files = _file_mentions(text)
     handled_local = _append_local_investigation(text, files, diagnoses)
@@ -861,6 +1233,7 @@ def _append_log(
                 files=files,
             )
         )
+    _attach_log_context(diagnoses, start_index, text)
 
 
 def _format_count(text: str) -> int:
@@ -1181,6 +1554,14 @@ def _payload(diagnoses: list[dict[str, Any]], status: str) -> dict[str, Any]:
             }
             for item in diagnoses[:5]
         ],
+        "scenario_database": {
+            "curated_scenario_count": len(CURATED_SCENARIO_DB),
+            "generated_matrix_scenario_count": len(GENERATED_SCENARIO_DB),
+            "total_scenario_count": len(SEEDED_SCENARIO_DB),
+            "failure_signal_count": len(FAILURE_LIKE_SIGNAL_DB),
+            "odds_space_size": _odds_space_size(),
+            "generation_strategy": "curated_pack_plus_deterministic_real_world_failure_matrix",
+        },
         "learning_updates": [
             {
                 "signal": item["learning_signal"],
@@ -1227,6 +1608,19 @@ def _diagnosis_markdown(row: dict[str, Any]) -> list[str]:
         "Evidence:",
     ]
     lines += [f"- {value}" for value in _as_list(row.get("evidence"))]
+    guidance = _as_dict(row.get("operator_guidance"))
+    if guidance:
+        lines += ["", "Operator guidance:"]
+        lines += [
+            f"- What is going on: {guidance.get('what_is_going_on', '')}",
+            f"- Fix first: {guidance.get('what_to_fix_first', '')}",
+            f"- Automation boundary: {guidance.get('automation_boundary', '')}",
+            f"- Why this is not random: {guidance.get('why_this_is_not_random', '')}",
+        ]
+        observed = _as_list(guidance.get("observed_failure_lines"))
+        if observed:
+            lines += ["- Observed failure lines:"]
+            lines += [f"  - `{value}`" for value in observed[:5]]
     lines += ["", "Recommended fix:"]
     lines += [f"- {value}" for value in _as_list(row.get("recommended_fix"))]
     lines += ["", "Proof commands:"]

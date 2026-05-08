@@ -1,0 +1,4 @@
+ruff format failed
+1 file reformatted
+pytest passed rc=0
+tests/test_new_feature.py

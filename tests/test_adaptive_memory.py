@@ -85,6 +85,11 @@ def test_adaptive_cli_help_discoverability() -> None:
     assert "explain" in proc.stdout
     assert "learn" in proc.stdout
     assert "brief" in proc.stdout
+    assert "portfolio-rollup" in proc.stdout
+    assert "patch-plan" in proc.stdout
+    assert "fix-audit" in proc.stdout
+    assert "enterprise-governance" in proc.stdout
+    assert "integration-adapter" in proc.stdout
 
     assert _run("adaptive", "init", "--help").returncode == 0
     assert _run("adaptive", "ingest", "--help").returncode == 0
@@ -94,6 +99,16 @@ def test_adaptive_cli_help_discoverability() -> None:
     assert _run("adaptive", "learn", "record", "--help").returncode == 0
     assert _run("adaptive", "learn", "summarize", "--help").returncode == 0
     assert _run("adaptive", "brief", "--help").returncode == 0
+    assert _run("adaptive", "portfolio-rollup", "--help").returncode == 0
+    assert _run("adaptive", "patch-plan", "--help").returncode == 0
+    assert _run("adaptive", "fix-audit", "--help").returncode == 0
+    assert _run("adaptive", "fix-audit", "record", "--help").returncode == 0
+    assert _run("adaptive", "fix-audit", "summarize", "--help").returncode == 0
+    assert _run("adaptive", "enterprise-governance", "--help").returncode == 0
+    assert _run("adaptive", "enterprise-governance", "report", "--help").returncode == 0
+    assert _run("adaptive", "enterprise-governance", "anonymize-learning", "--help").returncode == 0
+    assert _run("adaptive", "integration-adapter", "--help").returncode == 0
+    assert _run("adaptive", "integration-adapter", "validate", "--help").returncode == 0
 
 
 def test_adaptive_learn_record_and_summarize_cli(tmp_path: Path) -> None:

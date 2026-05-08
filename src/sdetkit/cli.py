@@ -422,6 +422,133 @@ Then use stability-aware command discovery:
     adaptive_brief.add_argument("--safe-fix-plan", default="")
     adaptive_brief.add_argument("--format", choices=["md", "json", "comment"], default="md")
     adaptive_brief.add_argument("--out", default="build/sdetkit/operator-brief.md")
+    adaptive_portfolio = adaptive_sub.add_parser(
+        "portfolio-rollup",
+        help="Roll multiple adaptive diagnosis outputs into a top-risk portfolio report",
+    )
+    adaptive_portfolio.add_argument("diagnosis_json", nargs="+")
+    adaptive_portfolio.add_argument("--format", choices=["text", "json", "md"], default="text")
+    adaptive_portfolio.add_argument("--out", default="")
+    adaptive_patch_plan = adaptive_sub.add_parser(
+        "patch-plan",
+        help="Build a review-only assisted patch plan from an adaptive diagnosis artifact",
+    )
+    adaptive_patch_plan.add_argument("diagnosis_json")
+    adaptive_patch_plan.add_argument("--format", choices=["text", "json", "md"], default="text")
+    adaptive_patch_plan.add_argument("--out", default="")
+    adaptive_fix_audit = adaptive_sub.add_parser(
+        "fix-audit", help="Record and summarize adaptive remediation audit events"
+    )
+    adaptive_fix_audit_sub = adaptive_fix_audit.add_subparsers(
+        dest="adaptive_fix_audit_cmd", required=True
+    )
+    adaptive_fix_audit_record = adaptive_fix_audit_sub.add_parser(
+        "record", help="Append a remediation plan audit record"
+    )
+    adaptive_fix_audit_record.add_argument("plan_json")
+    adaptive_fix_audit_record.add_argument("--db", default=".sdetkit/adaptive-fix-audit.jsonl")
+    adaptive_fix_audit_record.add_argument(
+        "--outcome",
+        choices=["planned", "applied", "proof_passed", "proof_failed", "reverted", "rejected"],
+        default="planned",
+    )
+    adaptive_fix_audit_record.add_argument("--note", default="")
+    adaptive_fix_audit_record.add_argument("--format", choices=["text", "json"], default="text")
+    adaptive_fix_audit_summary = adaptive_fix_audit_sub.add_parser(
+        "summarize", help="Summarize adaptive remediation audit records"
+    )
+    adaptive_fix_audit_summary.add_argument("--db", default=".sdetkit/adaptive-fix-audit.jsonl")
+    adaptive_fix_audit_summary.add_argument("--format", choices=["text", "json"], default="text")
+    adaptive_analytics = adaptive_sub.add_parser(
+        "enterprise-analytics",
+        help="Build leadership metrics from portfolio rollup and fix-audit evidence",
+    )
+    adaptive_analytics.add_argument("--portfolio", required=True)
+    adaptive_analytics.add_argument("--fix-audit", required=True)
+    adaptive_analytics.add_argument("--format", choices=["text", "json"], default="text")
+    adaptive_analytics.add_argument("--out", default="")
+    adaptive_remediation_policy = adaptive_sub.add_parser(
+        "remediation-policy",
+        help="Validate safe remediation plans against configurable guardrails",
+    )
+    adaptive_remediation_policy_sub = adaptive_remediation_policy.add_subparsers(
+        dest="adaptive_remediation_policy_cmd", required=True
+    )
+    adaptive_remediation_policy_template = adaptive_remediation_policy_sub.add_parser(
+        "template", help="Print the default adaptive remediation policy"
+    )
+    adaptive_remediation_policy_template.add_argument(
+        "--format", choices=["text", "json"], default="json"
+    )
+    adaptive_remediation_policy_template.add_argument("--out", default="")
+    adaptive_remediation_policy_validate = adaptive_remediation_policy_sub.add_parser(
+        "validate", help="Validate a remediation plan against policy"
+    )
+    adaptive_remediation_policy_validate.add_argument("plan_json")
+    adaptive_remediation_policy_validate.add_argument(
+        "--policy", default="config/adaptive_remediation_policy.default.json"
+    )
+    adaptive_remediation_policy_validate.add_argument(
+        "--format", choices=["text", "json"], default="text"
+    )
+    adaptive_remediation_policy_validate.add_argument("--out", default="")
+    adaptive_dashboard = adaptive_sub.add_parser(
+        "dashboard", help="Build a static local dashboard from adaptive artifacts"
+    )
+    for flag in (
+        "diagnosis",
+        "brief",
+        "portfolio",
+        "fix-audit",
+        "governance",
+        "adapter",
+        "analytics",
+        "remediation-policy",
+    ):
+        adaptive_dashboard.add_argument(f"--{flag}", default="")
+    adaptive_dashboard.add_argument("--format", choices=["html", "json"], default="html")
+    adaptive_dashboard.add_argument("--out", default="build/sdetkit/adaptive-dashboard.html")
+    adaptive_learning_import = adaptive_sub.add_parser(
+        "learning-import", help="Validate anonymized cross-repo learning and emit calibration hints"
+    )
+    adaptive_learning_import.add_argument("learning_export")
+    adaptive_learning_import.add_argument("--format", choices=["text", "json"], default="text")
+    adaptive_learning_import.add_argument("--out", default="")
+    adaptive_enterprise = adaptive_sub.add_parser(
+        "enterprise-governance",
+        help="Build enterprise adaptive governance reports and anonymized exports",
+    )
+    adaptive_enterprise_sub = adaptive_enterprise.add_subparsers(
+        dest="adaptive_enterprise_cmd", required=True
+    )
+    adaptive_enterprise_report = adaptive_enterprise_sub.add_parser(
+        "report", help="Build adaptive enterprise governance report"
+    )
+    adaptive_enterprise_report.add_argument("--root", default=".")
+    adaptive_enterprise_report.add_argument("--format", choices=["text", "json"], default="text")
+    adaptive_enterprise_report.add_argument("--out", default="")
+    adaptive_enterprise_export = adaptive_enterprise_sub.add_parser(
+        "anonymize-learning", help="Anonymize adaptive JSONL records for export"
+    )
+    adaptive_enterprise_export.add_argument("jsonl_path")
+    adaptive_enterprise_export.add_argument("--format", choices=["text", "json"], default="json")
+    adaptive_enterprise_export.add_argument("--out", default="")
+    adaptive_adapter = adaptive_sub.add_parser(
+        "integration-adapter", help="Validate adaptive CI integration adapter artifact contracts"
+    )
+    adaptive_adapter_sub = adaptive_adapter.add_subparsers(
+        dest="adaptive_adapter_cmd", required=True
+    )
+    adaptive_adapter_validate = adaptive_adapter_sub.add_parser(
+        "validate", help="Validate adaptive integration adapter artifacts"
+    )
+    adaptive_adapter_validate.add_argument(
+        "--provider", choices=["github-actions", "gitlab", "jenkins", "local"], required=True
+    )
+    adaptive_adapter_validate.add_argument("--artifacts", required=True)
+    adaptive_adapter_validate.add_argument("--root", default=".")
+    adaptive_adapter_validate.add_argument("--format", choices=["text", "json"], default="text")
+    adaptive_adapter_validate.add_argument("--out", default="")
     index_sub = index.add_subparsers(dest="index_cmd", required=False)
     index_build = index_sub.add_parser(
         "build", help="Build deterministic local repo index evidence"
@@ -485,6 +612,14 @@ Then use stability-aware command discovery:
     fit.add_argument("--compliance-pressure", choices=["low", "medium", "high"], default="low")
     fit.add_argument("--format", choices=["text", "json"], default="text")
     fit.add_argument("--out", default="")
+
+    adopt_scan = sub.add_parser(
+        "adopt-scan", help="Scan a repo and produce an SDETKit adoption plan"
+    )
+    adopt_scan.add_argument("path", nargs="?", default=".")
+    adopt_scan.add_argument("--max-files", type=int, default=4000)
+    adopt_scan.add_argument("--format", choices=["text", "json"], default="text")
+    adopt_scan.add_argument("--out", default="")
 
     sta = sub.add_parser(
         "start",
@@ -1091,6 +1226,113 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if value:
                     forwarded.extend([flag, value])
             return _run_module_main("sdetkit.operator_brief", forwarded)
+        if getattr(ns, "adaptive_cmd", None) == "portfolio-rollup":
+            forwarded = [*map(str, ns.diagnosis_json), "--format", str(ns.format)]
+            if str(ns.out):
+                forwarded.extend(["--out", str(ns.out)])
+            return _run_module_main("sdetkit.adaptive_portfolio_rollup", forwarded)
+        if getattr(ns, "adaptive_cmd", None) == "patch-plan":
+            forwarded = [str(ns.diagnosis_json), "--format", str(ns.format)]
+            if str(ns.out):
+                forwarded.extend(["--out", str(ns.out)])
+            return _run_module_main("sdetkit.adaptive_patch_plan", forwarded)
+        if getattr(ns, "adaptive_cmd", None) == "fix-audit":
+            if getattr(ns, "adaptive_fix_audit_cmd", None) == "record":
+                forwarded = [
+                    "record",
+                    str(ns.plan_json),
+                    "--db",
+                    str(ns.db),
+                    "--outcome",
+                    str(ns.outcome),
+                    "--format",
+                    str(ns.format),
+                ]
+                if str(ns.note):
+                    forwarded.extend(["--note", str(ns.note)])
+                return _run_module_main("sdetkit.adaptive_fix_audit", forwarded)
+            if getattr(ns, "adaptive_fix_audit_cmd", None) == "summarize":
+                return _run_module_main(
+                    "sdetkit.adaptive_fix_audit",
+                    ["summarize", "--db", str(ns.db), "--format", str(ns.format)],
+                )
+        if getattr(ns, "adaptive_cmd", None) == "enterprise-analytics":
+            forwarded = [
+                "--portfolio",
+                str(ns.portfolio),
+                "--fix-audit",
+                str(ns.fix_audit),
+                "--format",
+                str(ns.format),
+            ]
+            if str(ns.out):
+                forwarded.extend(["--out", str(ns.out)])
+            return _run_module_main("sdetkit.adaptive_enterprise_analytics", forwarded)
+        if getattr(ns, "adaptive_cmd", None) == "remediation-policy":
+            if getattr(ns, "adaptive_remediation_policy_cmd", None) == "template":
+                forwarded = ["template", "--format", str(ns.format)]
+                if str(ns.out):
+                    forwarded.extend(["--out", str(ns.out)])
+                return _run_module_main("sdetkit.adaptive_remediation_policy", forwarded)
+            if getattr(ns, "adaptive_remediation_policy_cmd", None) == "validate":
+                forwarded = [
+                    "validate",
+                    str(ns.plan_json),
+                    "--policy",
+                    str(ns.policy),
+                    "--format",
+                    str(ns.format),
+                ]
+                if str(ns.out):
+                    forwarded.extend(["--out", str(ns.out)])
+                return _run_module_main("sdetkit.adaptive_remediation_policy", forwarded)
+        if getattr(ns, "adaptive_cmd", None) == "dashboard":
+            forwarded = ["--format", str(ns.format), "--out", str(ns.out)]
+            for flag, value in (
+                ("--diagnosis", str(ns.diagnosis)),
+                ("--brief", str(ns.brief)),
+                ("--portfolio", str(ns.portfolio)),
+                ("--fix-audit", str(ns.fix_audit)),
+                ("--governance", str(ns.governance)),
+                ("--adapter", str(ns.adapter)),
+                ("--analytics", str(ns.analytics)),
+                ("--remediation-policy", str(ns.remediation_policy)),
+            ):
+                if value:
+                    forwarded.extend([flag, value])
+            return _run_module_main("sdetkit.adaptive_dashboard", forwarded)
+        if getattr(ns, "adaptive_cmd", None) == "learning-import":
+            forwarded = [str(ns.learning_export), "--format", str(ns.format)]
+            if str(ns.out):
+                forwarded.extend(["--out", str(ns.out)])
+            return _run_module_main("sdetkit.adaptive_learning_import", forwarded)
+        if getattr(ns, "adaptive_cmd", None) == "enterprise-governance":
+            if getattr(ns, "adaptive_enterprise_cmd", None) == "report":
+                forwarded = ["report", "--root", str(ns.root), "--format", str(ns.format)]
+                if str(ns.out):
+                    forwarded.extend(["--out", str(ns.out)])
+                return _run_module_main("sdetkit.adaptive_enterprise_governance", forwarded)
+            if getattr(ns, "adaptive_enterprise_cmd", None) == "anonymize-learning":
+                forwarded = ["anonymize-learning", str(ns.jsonl_path), "--format", str(ns.format)]
+                if str(ns.out):
+                    forwarded.extend(["--out", str(ns.out)])
+                return _run_module_main("sdetkit.adaptive_enterprise_governance", forwarded)
+        if getattr(ns, "adaptive_cmd", None) == "integration-adapter":
+            if getattr(ns, "adaptive_adapter_cmd", None) == "validate":
+                forwarded = [
+                    "validate",
+                    "--provider",
+                    str(ns.provider),
+                    "--artifacts",
+                    str(ns.artifacts),
+                    "--root",
+                    str(ns.root),
+                    "--format",
+                    str(ns.format),
+                ]
+                if str(ns.out):
+                    forwarded.extend(["--out", str(ns.out)])
+                return _run_module_main("sdetkit.adaptive_integration_adapters", forwarded)
         return _run_module_main("sdetkit.adaptive", [])
 
     if ns.cmd == "index":
@@ -1102,6 +1344,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ["inspect", str(ns.path), "--format", str(ns.format)],
             )
         return _run_module_main("sdetkit.index", [])
+
+    if ns.cmd == "adopt-scan":
+        forwarded = [str(ns.path), "--max-files", str(ns.max_files), "--format", str(ns.format)]
+        if str(ns.out):
+            forwarded.extend(["--out", str(ns.out)])
+        return _run_module_main("sdetkit.repo_adoption_scan", forwarded)
 
     if ns.cmd == "fit":
         forwarded = [

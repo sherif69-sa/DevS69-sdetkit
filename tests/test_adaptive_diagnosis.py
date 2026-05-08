@@ -229,7 +229,7 @@ def test_pytest_assertion_failure_uses_first_test_as_fix_anchor():
     assert payload["status"] == "needs_fix"
     assert diagnosis["code"] == "PYTEST_ASSERTION_FAILURE"
     assert diagnosis["severity"] == "high"
-    assert diagnosis["evidence"] == [
+    assert diagnosis["evidence"][:2] == [
         "pytest failure",
         "first_failed_test=tests/test_widget.py::test_widget_contract",
     ]
@@ -445,7 +445,8 @@ def test_builtin_scenario_pack_is_schema_validated_data_product():
     scenarios = adaptive_diagnosis.SEEDED_SCENARIO_DB
     codes = [scenario.code for scenario in scenarios]
 
-    assert len(scenarios) >= 25
+    assert len(scenarios) >= 5000
+    assert len(adaptive_diagnosis.GENERATED_SCENARIO_DB) >= 5000
     assert codes == sorted(codes)
     assert "PACKAGE_INSTALL_FAILURE" in codes
     assert all(scenario.checks and scenario.commands for scenario in scenarios)
@@ -524,3 +525,135 @@ def test_learning_calibration_reranks_unknown_candidate_scenarios():
         "git tag --points-at HEAD",
         "python -m build --sdist --wheel",
     ]
+
+
+def test_layered_scenario_pack_report_emits_source_metadata(tmp_path):
+    local_dir = tmp_path / ".sdetkit" / "adaptive"
+    local_dir.mkdir(parents=True)
+    local_pack = local_dir / "scenarios.json"
+    local_pack.write_text(json.dumps(_scenario_pack_payload()), encoding="utf-8")
+
+    report = adaptive_diagnosis.layered_scenario_pack_report(tmp_path)
+
+    assert report["schema_version"] == "sdetkit.adaptive.scenario_pack_report.v1"
+    assert report["layer_count"] == 2
+    assert [layer["source"] for layer in report["layers"]] == ["builtin", "repo-local"]
+    assert "TEST_SIGNAL" in report["merged_codes"]
+    assert report["overrides"] == []
+
+
+def test_layered_scenario_pack_report_rejects_unapproved_overrides(tmp_path):
+    local_dir = tmp_path / ".sdetkit" / "adaptive"
+    local_dir.mkdir(parents=True)
+    local_pack = local_dir / "scenarios.json"
+    payload = _scenario_pack_payload()
+    payload["scenarios"][0]["code"] = "PACKAGE_INSTALL_FAILURE"
+    local_pack.write_text(json.dumps(payload), encoding="utf-8")
+
+    try:
+        adaptive_diagnosis.validate_layered_scenario_packs(tmp_path)
+    except ValueError as exc:
+        assert "PACKAGE_INSTALL_FAILURE" in str(exc)
+        assert "override-approved" in str(exc)
+    else:
+        raise AssertionError("expected unapproved scenario override to be rejected")
+
+
+def test_layered_scenario_pack_report_allows_approved_overrides(tmp_path):
+    local_dir = tmp_path / ".sdetkit" / "adaptive"
+    local_dir.mkdir(parents=True)
+    local_pack = local_dir / "scenarios.json"
+    payload = _scenario_pack_payload()
+    payload["scenarios"][0]["code"] = "PACKAGE_INSTALL_FAILURE"
+    payload["scenarios"][0]["title"] = "Approved package install override"
+    payload["scenarios"][0]["tags"] = ["test", "override-approved"]
+    local_pack.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = adaptive_diagnosis.validate_layered_scenario_packs(tmp_path)
+    scenarios = adaptive_diagnosis.load_layered_scenarios(tmp_path)
+    overridden = {scenario.code: scenario for scenario in scenarios}["PACKAGE_INSTALL_FAILURE"]
+
+    assert report["overrides"] == [
+        {
+            "code": "PACKAGE_INSTALL_FAILURE",
+            "previous_source": "builtin",
+            "source": "repo-local",
+            "approved": True,
+            "approval_tag": "override-approved",
+        }
+    ]
+    assert overridden.title == "Approved package install override"
+
+
+def test_adaptive_diagnosis_operator_guidance_uses_observed_failure_lines() -> None:
+    log_text = """
+    FAILED tests/test_real_checkout.py::test_checkout_total - AssertionError
+    E   AssertionError: expected 42 but got 41
+    Process completed with exit code 1
+    """
+
+    payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+    diagnosis = payload["diagnoses"][0]
+    guidance = diagnosis["operator_guidance"]
+
+    assert diagnosis["code"] == "PYTEST_ASSERTION_FAILURE"
+    assert guidance["matched_from_current_log"] is True
+    assert guidance["automation_boundary"] == "review_first_no_auto_mutation"
+    assert guidance["what_to_fix_first"] == "Reproduce the first failing test only."
+    assert any("test_real_checkout.py::test_checkout_total" in line for line in guidance["observed_failure_lines"])
+    assert any(item.startswith("observed_failure_line_1=") for item in diagnosis["evidence"])
+    assert "random" in guidance["why_this_is_not_random"]
+
+
+def test_adaptive_diagnosis_safe_mechanical_guidance_boundary() -> None:
+    log_text = """
+    ruff check..............................................................Failed
+    tests/test_api.py:2:21: F401 [*] `pathlib.Path` imported but unused
+    Found 1 error.
+    [*] 1 fixable with the `--fix` option.
+    """
+
+    payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+    guidance = payload["diagnoses"][0]["operator_guidance"]
+
+    assert payload["diagnoses"][0]["code"] == "RUFF_FIXABLE_LINT"
+    assert guidance["automation_boundary"] == "safe_mechanical_fix_allowed_after_proof"
+    assert guidance["affected_files"] == ["tests/test_api.py"]
+    assert "ruff check --fix" in " ".join(guidance["how_to_fix"])
+
+
+def test_adaptive_scenario_database_scales_to_real_world_matrix() -> None:
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text=(
+            "FAILED tests/test_api.py::test_contract - AssertionError\n"
+            "mypy src/app.py:10: error: Argument 1 has incompatible type [arg-type]\n"
+            "ruff check Failed Found 1 error.\n"
+            "npm ERR! lifecycle script failed\n"
+            "coverage fail under configured threshold\n"
+            "Process completed with exit code 1"
+        )
+    )
+
+    db = payload["scenario_database"]
+    assert db["curated_scenario_count"] >= 25
+    assert db["generated_matrix_scenario_count"] >= 5000
+    assert db["total_scenario_count"] >= 5000
+    codes = {diagnosis["code"] for diagnosis in payload["diagnoses"]}
+    assert "PYTEST_ASSERTION_FAILURE" in codes
+    assert "MYPY_TYPE_CONTRACT_DRIFT" in codes
+    assert any(
+        "observed_failure_line_" in evidence
+        for diagnosis in payload["diagnoses"]
+        for evidence in diagnosis["evidence"]
+    )
+
+
+def test_generated_matrix_candidates_are_not_fixed_three_scenarios() -> None:
+    candidates = adaptive_diagnosis._candidate_scenarios(
+        "github actions pytest timeout flaky_rerun Process completed with exit code 1",
+        limit=80,
+    )
+
+    assert len(adaptive_diagnosis.SEEDED_SCENARIO_DB) >= 5000
+    assert any(candidate.code.startswith("MATRIX_") for candidate in candidates)
+    assert len({candidate.code for candidate in candidates}) > 3

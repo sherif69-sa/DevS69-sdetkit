@@ -1,0 +1,9 @@
+{
+  "schema_version": "sdetkit.adaptive.remediation_policy.v1",
+  "name": "default-adaptive-remediation-policy",
+  "allowed_safe_fix_types": ["format_only", "ruff_fixable_lint"],
+  "max_changed_files": 8,
+  "required_proof_outcomes": ["proof_passed"],
+  "allow_review_required_auto_fix": false,
+  "blocked_auto_source_codes": ["UNKNOWN", "UNKNOWN_REVIEW_REQUIRED"]
+}

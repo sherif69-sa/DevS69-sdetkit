@@ -1,0 +1,3 @@
+npm ERR! command failed during package install
+pip install resolutionimpossible for internal-widget==9.9.9
+Process completed with exit code 1
