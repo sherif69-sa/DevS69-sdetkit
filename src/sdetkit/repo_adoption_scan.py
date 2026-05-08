@@ -7,7 +7,17 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "sdetkit.repo_adoption_scan.v1"
-SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "dist", "build", ".mypy_cache", ".ruff_cache", "__pycache__"}
+SKIP_DIRS = {
+    ".git",
+    ".venv",
+    "venv",
+    "node_modules",
+    "dist",
+    "build",
+    ".mypy_cache",
+    ".ruff_cache",
+    "__pycache__",
+}
 
 
 def _rel(path: Path, root: Path) -> str:
@@ -37,13 +47,19 @@ def _detect_stack(root: Path, files: list[Path]) -> dict[str, Any]:
     suffixes = {path.suffix.lower() for path in files}
     names = {path.name for path in files}
     return {
-        "python": _exists(root, "pyproject.toml", "setup.py", "requirements.txt") or ".py" in suffixes,
-        "javascript": _exists(root, "package.json", "pnpm-lock.yaml", "yarn.lock") or ".js" in suffixes or ".ts" in suffixes,
-        "docs": _exists(root, "mkdocs.yml", "docs") or any(part == "docs" for path in files for part in path.parts),
+        "python": _exists(root, "pyproject.toml", "setup.py", "requirements.txt")
+        or ".py" in suffixes,
+        "javascript": _exists(root, "package.json", "pnpm-lock.yaml", "yarn.lock")
+        or ".js" in suffixes
+        or ".ts" in suffixes,
+        "docs": _exists(root, "mkdocs.yml", "docs")
+        or any(part == "docs" for path in files for part in path.parts),
         "docker": _exists(root, "Dockerfile", "docker-compose.yml", "compose.yaml"),
         "github_actions": (root / ".github" / "workflows").exists(),
         "gitlab_ci": (root / ".gitlab-ci.yml").exists(),
-        "has_tests": any(path.parts and ("test" in path.name.lower() or "tests" in path.parts) for path in files),
+        "has_tests": any(
+            path.parts and ("test" in path.name.lower() or "tests" in path.parts) for path in files
+        ),
         "has_readme": "README.md" in names or "README.rst" in names,
         "has_license": "LICENSE" in names or "LICENSE.md" in names,
     }
@@ -52,19 +68,63 @@ def _detect_stack(root: Path, files: list[Path]) -> dict[str, Any]:
 def _adoption_gaps(root: Path, stack: dict[str, Any]) -> list[dict[str, Any]]:
     gaps: list[dict[str, Any]] = []
     if stack["python"] and not (root / "pyproject.toml").exists():
-        gaps.append({"code": "PYTHON_PROJECT_METADATA_MISSING", "severity": "medium", "fix": "Add pyproject.toml or document the Python build/test contract."})
-    if stack["python"] and not _exists(root, "requirements-test.txt", "requirements-dev.txt", "pyproject.toml"):
-        gaps.append({"code": "TEST_DEPENDENCY_CONTRACT_MISSING", "severity": "medium", "fix": "Declare test dependencies so CI and local proof are reproducible."})
+        gaps.append(
+            {
+                "code": "PYTHON_PROJECT_METADATA_MISSING",
+                "severity": "medium",
+                "fix": "Add pyproject.toml or document the Python build/test contract.",
+            }
+        )
+    if stack["python"] and not _exists(
+        root, "requirements-test.txt", "requirements-dev.txt", "pyproject.toml"
+    ):
+        gaps.append(
+            {
+                "code": "TEST_DEPENDENCY_CONTRACT_MISSING",
+                "severity": "medium",
+                "fix": "Declare test dependencies so CI and local proof are reproducible.",
+            }
+        )
     if not stack["has_tests"]:
-        gaps.append({"code": "TEST_SURFACE_MISSING", "severity": "high", "fix": "Add a minimal smoke/regression test surface before release gating."})
+        gaps.append(
+            {
+                "code": "TEST_SURFACE_MISSING",
+                "severity": "high",
+                "fix": "Add a minimal smoke/regression test surface before release gating.",
+            }
+        )
     if not (stack["github_actions"] or stack["gitlab_ci"]):
-        gaps.append({"code": "CI_CONTRACT_MISSING", "severity": "high", "fix": "Add CI that runs the canonical SDETKit gate and adaptive evidence commands."})
+        gaps.append(
+            {
+                "code": "CI_CONTRACT_MISSING",
+                "severity": "high",
+                "fix": "Add CI that runs the canonical SDETKit gate and adaptive evidence commands.",
+            }
+        )
     if stack["docs"] and not (root / "mkdocs.yml").exists():
-        gaps.append({"code": "DOCS_BUILD_CONTRACT_MISSING", "severity": "low", "fix": "Add mkdocs.yml or document the docs build command."})
+        gaps.append(
+            {
+                "code": "DOCS_BUILD_CONTRACT_MISSING",
+                "severity": "low",
+                "fix": "Add mkdocs.yml or document the docs build command.",
+            }
+        )
     if not stack["has_readme"]:
-        gaps.append({"code": "README_MISSING", "severity": "medium", "fix": "Add README quickstart, test command, and release proof instructions."})
+        gaps.append(
+            {
+                "code": "README_MISSING",
+                "severity": "medium",
+                "fix": "Add README quickstart, test command, and release proof instructions.",
+            }
+        )
     if not stack["has_license"]:
-        gaps.append({"code": "LICENSE_MISSING", "severity": "low", "fix": "Add or document the license/compliance policy."})
+        gaps.append(
+            {
+                "code": "LICENSE_MISSING",
+                "severity": "low",
+                "fix": "Add or document the license/compliance policy.",
+            }
+        )
     return gaps
 
 
@@ -81,7 +141,9 @@ def _recommended_commands(stack: dict[str, Any], gaps: list[dict[str, Any]]) -> 
     if stack["docs"]:
         commands.append("NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q")
     if gaps:
-        commands.append("python -m sdetkit adaptive dashboard --format html --out build/sdetkit/adaptive-dashboard.html")
+        commands.append(
+            "python -m sdetkit adaptive dashboard --format html --out build/sdetkit/adaptive-dashboard.html"
+        )
     return commands
 
 
@@ -117,7 +179,9 @@ def build_repo_adoption_scan(root: Path, *, max_files: int = 4000) -> dict[str, 
             "Fix high-severity adoption gaps before requiring release-room signoff.",
             "Publish build/sdetkit-review and adaptive dashboard artifacts in CI.",
         ],
-        "next_owner_action": gaps[0]["fix"] if gaps else "Adopt the canonical gate/review path in CI now.",
+        "next_owner_action": gaps[0]["fix"]
+        if gaps
+        else "Adopt the canonical gate/review path in CI now.",
     }
 
 
@@ -152,7 +216,11 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         payload = build_repo_adoption_scan(Path(args.path), max_files=int(args.max_files))
-        rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n" if args.format == "json" else render_text(payload)
+        rendered = (
+            json.dumps(payload, indent=2, sort_keys=True) + "\n"
+            if args.format == "json"
+            else render_text(payload)
+        )
         if args.out:
             out = Path(args.out)
             out.parent.mkdir(parents=True, exist_ok=True)

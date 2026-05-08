@@ -29,7 +29,9 @@ def test_repo_adoption_scan_ready_repo_has_canonical_commands(tmp_path: Path) ->
     (tmp_path / "README.md").write_text("# demo\n", encoding="utf-8")
     (tmp_path / "LICENSE").write_text("MIT\n", encoding="utf-8")
     (tmp_path / "tests").mkdir()
-    (tmp_path / "tests" / "test_smoke.py").write_text("def test_smoke(): assert True\n", encoding="utf-8")
+    (tmp_path / "tests" / "test_smoke.py").write_text(
+        "def test_smoke(): assert True\n", encoding="utf-8"
+    )
     workflow = tmp_path / ".github" / "workflows"
     workflow.mkdir(parents=True)
     (workflow / "ci.yml").write_text("name: ci\n", encoding="utf-8")
@@ -44,7 +46,9 @@ def test_repo_adoption_scan_ready_repo_has_canonical_commands(tmp_path: Path) ->
 
 def test_top_level_cli_adopt_scan_passthrough(tmp_path: Path) -> None:
     out = tmp_path / "adopt-scan.json"
-    (tmp_path / "package.json").write_text('{"scripts":{"test":"node test.js"}}\n', encoding="utf-8")
+    (tmp_path / "package.json").write_text(
+        '{"scripts":{"test":"node test.js"}}\n', encoding="utf-8"
+    )
 
     rc = top_level_main(["adopt-scan", str(tmp_path), "--format", "json", "--out", str(out)])
 

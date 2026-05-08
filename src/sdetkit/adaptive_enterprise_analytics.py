@@ -117,7 +117,9 @@ def _top_risky_repos(portfolio: dict[str, Any]) -> list[dict[str, Any]]:
                 "artifact_count": _as_int(item.get("artifact_count")),
             }
         )
-    return sorted(repos, key=lambda row: (-_as_int(row.get("risk_score")), str(row.get("repo"))))[:10]
+    return sorted(repos, key=lambda row: (-_as_int(row.get("risk_score")), str(row.get("repo"))))[
+        :10
+    ]
 
 
 def _proof_metrics(records: Sequence[dict[str, Any]]) -> dict[str, Any]:
@@ -156,7 +158,10 @@ def _proof_metrics(records: Sequence[dict[str, Any]]) -> dict[str, Any]:
     missing_proof = [
         row
         for row in pending_records
-        if not any(str(item.get("outcome")) in CLOSED_OUTCOMES for item in terminal_by_key.get(_record_key(row), []))
+        if not any(
+            str(item.get("outcome")) in CLOSED_OUTCOMES
+            for item in terminal_by_key.get(_record_key(row), [])
+        )
     ]
     remediation_decision_count = len(pending_records)
     proof_passed_count = outcomes.get("proof_passed", 0)
@@ -176,7 +181,9 @@ def _proof_metrics(records: Sequence[dict[str, Any]]) -> dict[str, Any]:
         "missing_proof_count": len(missing_proof),
         "remediation_success_rate": _rate(successful_closed_count, remediation_decision_count),
         "missing_proof_rate": _rate(len(missing_proof), remediation_decision_count),
-        "failed_proof_rate": _rate(proof_failed_count, max(1, proof_passed_count + proof_failed_count)),
+        "failed_proof_rate": _rate(
+            proof_failed_count, max(1, proof_passed_count + proof_failed_count)
+        ),
         "mean_time_to_proof_seconds": round(sum(proof_durations) / len(proof_durations), 2)
         if proof_durations
         else None,
@@ -199,13 +206,17 @@ def build_enterprise_analytics(
     portfolio_recommendation = str(portfolio.get("recommendation", "UNKNOWN"))
     if proof["proof_failed_count"] > 0 or portfolio_recommendation == "NO_SHIP":
         recommendation = "NO_SHIP"
-        next_owner_action = "Block release signoff; resolve failed proof or top portfolio risk first."
+        next_owner_action = (
+            "Block release signoff; resolve failed proof or top portfolio risk first."
+        )
     elif proof["missing_proof_count"] > 0 or portfolio_recommendation == "SHIP_WITH_CONTROLS":
         recommendation = "SHIP_WITH_CONTROLS"
         next_owner_action = "Ship only with explicit controls; collect missing proof and review top recurring sources."
     else:
         recommendation = "SHIP"
-        next_owner_action = "Proof and portfolio signals are complete; continue collecting analytics evidence."
+        next_owner_action = (
+            "Proof and portfolio signals are complete; continue collecting analytics evidence."
+        )
     return {
         "schema_version": SCHEMA_VERSION,
         "ok": recommendation != "NO_SHIP",
@@ -243,14 +254,18 @@ def render_text(payload: dict[str, Any]) -> str:
         lines.append(f"source_code={item.get('code')}|count={item.get('count')}")
     for row in _as_list(payload.get("top_risky_repos"))[:5]:
         item = _as_dict(row)
-        lines.append(f"repo={item.get('repo')}|risk={item.get('risk_score')}|status={item.get('max_status')}")
+        lines.append(
+            f"repo={item.get('repo')}|risk={item.get('risk_score')}|status={item.get('max_status')}"
+        )
     lines.append(f"next_owner_action={payload['next_owner_action']}")
     return "\n".join(lines) + "\n"
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m sdetkit.adaptive_enterprise_analytics")
-    parser.add_argument("--portfolio", required=True, help="Adaptive portfolio rollup JSON artifact")
+    parser.add_argument(
+        "--portfolio", required=True, help="Adaptive portfolio rollup JSON artifact"
+    )
     parser.add_argument("--fix-audit", required=True, help="Adaptive fix-audit JSONL records")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--out", default="")

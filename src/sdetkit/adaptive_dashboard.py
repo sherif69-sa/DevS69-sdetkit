@@ -46,7 +46,11 @@ def _load_artifact(path: Path) -> tuple[dict[str, Any] | None, str]:
             for line in text.splitlines():
                 if line.strip():
                     rows.append(json.loads(line))
-            return {"schema_version": "jsonl", "record_count": len(rows), "records": rows[-5:]}, "jsonl"
+            return {
+                "schema_version": "jsonl",
+                "record_count": len(rows),
+                "records": rows[-5:],
+            }, "jsonl"
         payload = json.loads(text)
         if isinstance(payload, dict):
             return payload, "json"
@@ -84,7 +88,9 @@ def _summary_fields(kind: str, payload: dict[str, Any]) -> dict[str, Any]:
         if key in payload:
             fields[key] = payload[key]
     if kind == "diagnosis":
-        fields["diagnosis_count"] = payload.get("diagnosis_count", len(_as_list(payload.get("diagnoses"))))
+        fields["diagnosis_count"] = payload.get(
+            "diagnosis_count", len(_as_list(payload.get("diagnoses")))
+        )
         first = _as_dict((_as_list(payload.get("diagnoses")) or [{}])[0])
         if first:
             fields["top_code"] = first.get("code", "UNKNOWN")
@@ -131,7 +137,9 @@ def build_dashboard(artifact_paths: dict[str, str], *, out_path: Path) -> dict[s
             continue
         payload, artifact_format = _load_artifact(path)
         if payload is None:
-            missing.append({"kind": kind, "label": label, "path": raw_path, "reason": artifact_format})
+            missing.append(
+                {"kind": kind, "label": label, "path": raw_path, "reason": artifact_format}
+            )
             artifacts.append(
                 {
                     "kind": kind,
@@ -223,15 +231,15 @@ def render_html(payload: dict[str, Any]) -> str:
     <h1>Adaptive next-wave dashboard</h1>
     <p>Deterministic local-only dashboard for adaptive diagnosis, remediation, governance, and analytics artifacts.</p>
     <div class="summary">
-      <span class="pill">schema: {html.escape(str(payload.get('schema_version')))}</span>
-      <span class="pill">present: {payload.get('present_artifact_count')} / {payload.get('artifact_count')}</span>
-      <span class="pill">missing: {payload.get('missing_artifact_count')}</span>
-      <span class="pill">local only: {str(payload.get('local_only')).lower()}</span>
+      <span class="pill">schema: {html.escape(str(payload.get("schema_version")))}</span>
+      <span class="pill">present: {payload.get("present_artifact_count")} / {payload.get("artifact_count")}</span>
+      <span class="pill">missing: {payload.get("missing_artifact_count")}</span>
+      <span class="pill">local only: {str(payload.get("local_only")).lower()}</span>
     </div>
-    <p><strong>Next owner action:</strong> {html.escape(str(payload.get('next_owner_action', '')))}</p>
+    <p><strong>Next owner action:</strong> {html.escape(str(payload.get("next_owner_action", "")))}</p>
   </header>
   <main class="grid">
-    {''.join(cards)}
+    {"".join(cards)}
   </main>
 </body>
 </html>
@@ -241,7 +249,9 @@ def render_html(payload: dict[str, Any]) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m sdetkit.adaptive_dashboard")
     for kind, label in ARTIFACT_SPECS:
-        parser.add_argument(f"--{kind.replace('_', '-')}", default="", help=f"Path to {label} artifact")
+        parser.add_argument(
+            f"--{kind.replace('_', '-')}", default="", help=f"Path to {label} artifact"
+        )
     parser.add_argument("--format", choices=["html", "json"], default="html")
     parser.add_argument("--out", default="build/sdetkit/adaptive-dashboard.html")
     return parser
@@ -253,7 +263,11 @@ def main(argv: list[str] | None = None) -> int:
     artifact_paths = {kind: str(getattr(args, kind)) for kind, _label in ARTIFACT_SPECS}
     try:
         payload = build_dashboard(artifact_paths, out_path=out_path)
-        rendered = json.dumps(payload, indent=2, sort_keys=True) + "\n" if args.format == "json" else render_html(payload)
+        rendered = (
+            json.dumps(payload, indent=2, sort_keys=True) + "\n"
+            if args.format == "json"
+            else render_html(payload)
+        )
         if args.out:
             out_path.parent.mkdir(parents=True, exist_ok=True)
             out_path.write_text(rendered, encoding="utf-8")

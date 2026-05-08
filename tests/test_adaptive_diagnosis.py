@@ -600,7 +600,10 @@ def test_adaptive_diagnosis_operator_guidance_uses_observed_failure_lines() -> N
     assert guidance["matched_from_current_log"] is True
     assert guidance["automation_boundary"] == "review_first_no_auto_mutation"
     assert guidance["what_to_fix_first"] == "Reproduce the first failing test only."
-    assert any("test_real_checkout.py::test_checkout_total" in line for line in guidance["observed_failure_lines"])
+    assert any(
+        "test_real_checkout.py::test_checkout_total" in line
+        for line in guidance["observed_failure_lines"]
+    )
     assert any(item.startswith("observed_failure_line_1=") for item in diagnosis["evidence"])
     assert "random" in guidance["why_this_is_not_random"]
 

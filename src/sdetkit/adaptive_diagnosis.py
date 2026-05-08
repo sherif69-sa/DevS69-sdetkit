@@ -49,8 +49,6 @@ class OddsAxis:
     values: tuple[str, ...]
 
 
-
-
 @dataclass(frozen=True)
 class FailureMatrixFamily:
     name: str
@@ -259,6 +257,7 @@ def _generated_scenario_matrix() -> tuple[SeededScenario, ...]:
                     )
                 )
     return tuple(sorted(scenarios, key=lambda scenario: scenario.code))
+
 
 ODDS_EXPANSION_AXES = (
     OddsAxis(
@@ -658,7 +657,12 @@ def _safe_list(values: Sequence[Any], limit: int = 6) -> list[str]:
 
 
 def _operator_guidance(
-    *, code: str, diagnosis: str, fixes: Sequence[str], commands: Sequence[str], files: Sequence[str]
+    *,
+    code: str,
+    diagnosis: str,
+    fixes: Sequence[str],
+    commands: Sequence[str],
+    files: Sequence[str],
 ) -> dict[str, Any]:
     safe_to_auto_fix = code in SAFE_AUTO_FIX_CODES
     safe_fixes = _safe_list(fixes, 5)
@@ -718,7 +722,11 @@ def _diag(
         "repeat_count": max(0, repeat_count),
         "affected_files": safe_files,
         "operator_guidance": _operator_guidance(
-            code=code, diagnosis=diagnosis, fixes=safe_fixes, commands=safe_commands, files=safe_files
+            code=code,
+            diagnosis=diagnosis,
+            fixes=safe_fixes,
+            commands=safe_commands,
+            files=safe_files,
         ),
     }
 
@@ -1130,8 +1138,6 @@ def _append_local_investigation(
     return False
 
 
-
-
 def _failure_snippets(text: str, *, limit: int = 5) -> list[str]:
     snippets: list[str] = []
     marker = re.compile(
@@ -1164,6 +1170,7 @@ def _attach_log_context(diagnoses: list[dict[str, Any]], start_index: int, text:
             if item not in evidence:
                 evidence.append(item)
         diagnosis["evidence"] = _safe_list(evidence, 8)
+
 
 def _append_log(
     text: str, diagnoses: list[dict[str, Any]], adaptive_history: dict[str, Any] | None = None

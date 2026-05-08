@@ -264,7 +264,11 @@ def main(argv: list[str] | None = None) -> int:
         else:
             payload = _load_json(path)
         result = build_learning_import(payload)
-        rendered = json.dumps(result, indent=2, sort_keys=True) + "\n" if args.format == "json" else render_text(result)
+        rendered = (
+            json.dumps(result, indent=2, sort_keys=True) + "\n"
+            if args.format == "json"
+            else render_text(result)
+        )
         if args.out:
             out_path = Path(args.out)
             out_path.parent.mkdir(parents=True, exist_ok=True)

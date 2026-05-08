@@ -4,7 +4,7 @@ import argparse
 import json
 import sys
 from collections import Counter
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -77,7 +77,7 @@ def build_audit_record(
     source_code = str(plan.get("source_code", "UNKNOWN") or "UNKNOWN")
     return {
         "schema_version": SCHEMA_VERSION,
-        "recorded_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "recorded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "outcome": outcome,
         "plan_kind": kind,
         "plan_schema_version": str(plan.get("schema_version", "")),

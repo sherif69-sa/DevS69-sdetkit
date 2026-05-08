@@ -67,8 +67,6 @@ def test_learning_import_rejects_private_fields_and_raw_paths() -> None:
     assert payload["calibration_hint_count"] == 0
 
 
-
-
 def test_learning_import_rejects_private_urls_hosts_and_emails() -> None:
     payload = adaptive_learning_import.build_learning_import(
         _export(
@@ -92,6 +90,7 @@ def test_learning_import_rejects_private_urls_hosts_and_emails() -> None:
     assert "PRIVATE_URL_PATTERN" in codes
     assert "PRIVATE_HOSTNAME_PATTERN" in codes
     assert "PRIVATE_EMAIL_PATTERN" in codes
+
 
 def test_learning_import_cli_and_top_level_passthrough(tmp_path: Path) -> None:
     export = tmp_path / "learning-export.json"
