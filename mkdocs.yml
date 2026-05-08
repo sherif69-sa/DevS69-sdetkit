@@ -101,6 +101,12 @@ nav:
       - Why SDETKit for teams: why-sdetkit-for-teams.md
       - Team use cases: use-cases.md
       - Start Here in 5 Minutes: start-here-5-minutes.md
+      - Role-based quickstarts: role-based-quickstarts.md
+      - "Quickstart: Platform engineer": quickstart-role-platform-engineer.md
+      - "Quickstart: QA governance": quickstart-role-qa-governance.md
+      - "Quickstart: Release owner": quickstart-role-release-owner.md
+      - Operator onboarding 7-day plan: operator-onboarding-7-day.md
+      - Onboarding optimization: onboarding-optimization.md
       - Release confidence model: release-confidence.md
       - Decision guide: decision-guide.md
       - Release confidence flow: release-confidence-flow.md
@@ -119,6 +125,7 @@ nav:
       - Operator essentials: operator-essentials.md
       - Investigation operator guide: investigation-operator-guide.md
       - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md
+      - Adaptive review: adaptive-review.md
       - Adaptive demo gallery: adaptive-demo-gallery.md
       - Adaptive integration adapters: adaptive-integration-adapters.md
       - Adaptive enterprise analytics: adaptive-enterprise-analytics.md
@@ -147,6 +154,10 @@ nav:
       - Stability levels: stability-levels.md
       - Versioning and support posture: versioning-and-support.md
       - Integrations and extension boundary: integrations-and-extension-boundary.md
+      - GitHub Actions reference pack: integrations/github-actions-reference-pack.md
+      - GitLab CI reference pack: integrations/gitlab-reference-pack.md
+      - Jenkins reference pack: integrations/jenkins-reference-pack.md
+      - Rollback and remediation examples: integrations/rollback-remediation-examples.md
       - Release verification records: release-verification.md
       - Docs map: docs-map.md
       - Roadmap: roadmap.md
