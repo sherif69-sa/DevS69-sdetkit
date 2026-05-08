@@ -10,20 +10,6 @@ DOCS = ROOT / "docs"
 MKDOCS = ROOT / "mkdocs.yml"
 
 
-class MkDocsInspectionLoader(yaml.SafeLoader):
-    pass
-
-
-def _ignore_python_name(loader: yaml.Loader, suffix: str, node: yaml.Node) -> str:
-    return suffix
-
-
-MkDocsInspectionLoader.add_multi_constructor(
-    "tag:yaml.org,2002:python/name:",
-    _ignore_python_name,
-)
-
-
 CURRENT_NAV_GROUPS = {
     "canonical_first_proof": (
         "day1-proof-starter.md",
@@ -72,10 +58,14 @@ CURRENT_NAV_GROUPS = {
 
 
 def _load_mkdocs() -> dict:
-    return yaml.load(
-        MKDOCS.read_text(encoding="utf-8"),
-        Loader=MkDocsInspectionLoader,
+    text = MKDOCS.read_text(encoding="utf-8")
+    text = text.replace(
+        "!!python/name:pymdownx.superfences.fence_code_format",
+        "pymdownx.superfences.fence_code_format",
     )
+    payload = yaml.safe_load(text)
+    assert isinstance(payload, dict)
+    return payload
 
 
 def _walk_nav(node: object) -> list[str]:
