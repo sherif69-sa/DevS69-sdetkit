@@ -88,11 +88,24 @@ nav:
   - Canonical first-proof path (primary):
       - Install: install.md
       - Quickstart (copy-paste): quickstart-copy-paste.md
+      - Day 1 proof starter: day1-proof-starter.md
+      - First-failure triage: first-failure-triage.md
+      - First-proof troubleshooting: first-proof-troubleshooting.md
+      - First-proof learning database: first-proof-learning-db.md
+      - First-proof benchmark narrative: first-proof-benchmark-narrative.md
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
       - Guided first run: ready-to-use.md
       - Team adoption checklist: team-adoption-checklist.md
       - Choose your path (30-second router): choose-your-path.md
       - Adopt in your repository: adoption.md
+      - Adoption examples: adoption-examples.md
+      - Adoption scorecard: adoption-scorecard.md
+      - Adoption troubleshooting: adoption-troubleshooting.md
+      - "Adoption walkthrough: small team": adoption-walkthrough-small-team.md
+      - "Adoption walkthrough: enterprise platform team": adoption-walkthrough-enterprise.md
+      - Example adoption flow: example-adoption-flow.md
+      - Pilot to rollout guide: pilot-to-rollout-guide.md
+      - Proof sprint checklist: proof-sprint-checklist.md
       - Team rollout playbook: team-rollout-playbook.md
       - Team rollout scenario: team-rollout-scenario.md
       - Container runtime: container-runtime.md
@@ -101,6 +114,12 @@ nav:
       - Why SDETKit for teams: why-sdetkit-for-teams.md
       - Team use cases: use-cases.md
       - Start Here in 5 Minutes: start-here-5-minutes.md
+      - Role-based quickstarts: role-based-quickstarts.md
+      - "Quickstart: Platform engineer": quickstart-role-platform-engineer.md
+      - "Quickstart: QA governance": quickstart-role-qa-governance.md
+      - "Quickstart: Release owner": quickstart-role-release-owner.md
+      - Operator onboarding 7-day plan: operator-onboarding-7-day.md
+      - Onboarding optimization: onboarding-optimization.md
       - Release confidence model: release-confidence.md
       - Decision guide: decision-guide.md
       - Release confidence flow: release-confidence-flow.md
@@ -117,8 +136,14 @@ nav:
   - Operator and evidence (primary):
       - Docs map and organization: docs-map.md
       - Operator essentials: operator-essentials.md
+      - Doctor Cortex CLI: doctor-cortex.md
+      - Doctor diagnosis contract: doctor-diagnosis.md
+      - Doctor prescriptions: doctor-prescriptions.md
+      - Golden-path health signal: golden-path-health.md
+      - Proof log: proof-log.md
       - Investigation operator guide: investigation-operator-guide.md
       - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md
+      - Adaptive review: adaptive-review.md
       - Adaptive demo gallery: adaptive-demo-gallery.md
       - Adaptive integration adapters: adaptive-integration-adapters.md
       - Adaptive enterprise analytics: adaptive-enterprise-analytics.md
@@ -147,8 +172,18 @@ nav:
       - Stability levels: stability-levels.md
       - Versioning and support posture: versioning-and-support.md
       - Integrations and extension boundary: integrations-and-extension-boundary.md
+      - GitHub Actions reference pack: integrations/github-actions-reference-pack.md
+      - GitLab CI reference pack: integrations/gitlab-reference-pack.md
+      - Jenkins reference pack: integrations/jenkins-reference-pack.md
+      - Rollback and remediation examples: integrations/rollback-remediation-examples.md
       - Release verification records: release-verification.md
       - Docs map: docs-map.md
+      - Docs navigation cleanup progress: docs-nav-cleanup-progress.md
+      - Environment compatibility matrix: environment-compatibility.md
+      - Git workflow branch tracking health: git-workflow.md
+      - Legacy required status bridge: ci-legacy-status-bridge.md
+      - Core command contract: core-command-contract.md
+      - CI cost telemetry contract: ci-cost-telemetry-contract.md
       - Roadmap: roadmap.md
       - Changelog: changelog.md
       - License: license.md
