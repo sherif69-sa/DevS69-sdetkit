@@ -179,6 +179,7 @@ nav:
       - Release verification records: release-verification.md
       - Docs map: docs-map.md
       - Docs navigation cleanup progress: docs-nav-cleanup-progress.md
+      - Archive navigation policy: archive-navigation-policy.md
       - Environment compatibility matrix: environment-compatibility.md
       - Git workflow branch tracking health: git-workflow.md
       - Legacy required status bridge: ci-legacy-status-bridge.md
