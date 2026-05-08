@@ -5,9 +5,9 @@ This page defines the weekly KPI contract for CTO/dashboard reporting and links 
 ## Contract artifacts
 
 - JSON schema: [`docs/kpi-schema.v1.json`](kpi-schema.v1.json)
-- First seed baseline instance: [`docs/kpi-baseline-week-2026-04-17.md`](kpi-baseline-week-2026-04-17.md)
-- Generated KPI sample: [`docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json`](artifacts/kpi-weekly-from-portfolio-2026-04-17.json)
-- KPI contract check report: [`docs/artifacts/kpi-weekly-contract-check-2026-04-17.json`](artifacts/kpi-weekly-contract-check-2026-04-17.json)
+- First seed baseline instance: `docs/kpi-baseline-week-2026-04-17.md`.
+- Generated KPI sample: `docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json`.
+- KPI contract check report: `docs/artifacts/kpi-weekly-contract-check-2026-04-17.json`.
 
 ## KPI keys (required)
 

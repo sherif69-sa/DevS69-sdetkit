@@ -105,8 +105,8 @@ Risk tier thresholds:
 
 ## Worked sample artifacts
 
-- Input sample: [`docs/artifacts/portfolio-input-sample-2026-04-17.jsonl`](artifacts/portfolio-input-sample-2026-04-17.jsonl)
-- Output sample: [`docs/artifacts/portfolio-scorecard-sample-2026-04-17.json`](artifacts/portfolio-scorecard-sample-2026-04-17.json)
+- Input sample: `docs/artifacts/portfolio-input-sample-2026-04-17.jsonl`.
+- Output sample: `docs/artifacts/portfolio-scorecard-sample-2026-04-17.json`.
 
 Use these files as a template for weekly portfolio board generation and review.
 
@@ -134,9 +134,9 @@ python scripts/build_top_tier_reporting_bundle.py \
 
 CI automation option: `.github/workflows/top-tier-reporting-sample.yml`.
 
-Bundle manifest example: [`docs/artifacts/top-tier-bundle-manifest-2026-04-17.json`](artifacts/top-tier-bundle-manifest-2026-04-17.json).
+Bundle manifest example: `docs/artifacts/top-tier-bundle-manifest-2026-04-17.json`.
 
-Bundle manifest check example: [`docs/artifacts/top-tier-bundle-manifest-check-2026-04-17.json`](artifacts/top-tier-bundle-manifest-check-2026-04-17.json).
+Bundle manifest check example: `docs/artifacts/top-tier-bundle-manifest-check-2026-04-17.json`.
 
 
 ## Cross-artifact consistency check
