@@ -172,6 +172,99 @@ def test_doctor_check_full_mode_and_bad_json(monkeypatch, tmp_path: Path, capsys
     capsys.readouterr()
 
 
+def test_doctor_check_uses_stable_snapshot_in_deterministic_mode(
+    monkeypatch, tmp_path: Path
+) -> None:
+    payloads = [
+        {
+            "ok": True,
+            "score": 90,
+            "schema_version": "sdetkit.doctor.v2",
+            "quality": {"passed_checks": 3, "failed_checks": 0, "skipped_checks": 1},
+            "hints": ["volatile hint"],
+            "next_actions": [{"id": "venv", "summary": "volatile action"}],
+            "judgment": {
+                "confidence": {"score": 35},
+                "evidence": {"stability": {"has_previous": True, "score": 0.35}},
+            },
+            "checks": {
+                "venv": {
+                    "ok": True,
+                    "severity": "low",
+                    "summary": "virtual environment is active",
+                    "evidence": [{"run_hash": "first"}],
+                }
+            },
+            "workspace": {
+                "run_hash": "first-root",
+                "record_path": "runs/doctor/scope/first-root/record.json",
+            },
+        },
+        {
+            "ok": True,
+            "score": 90,
+            "schema_version": "sdetkit.doctor.v2",
+            "quality": {"passed_checks": 3, "failed_checks": 0, "skipped_checks": 1},
+            "hints": [],
+            "next_actions": [],
+            "judgment": {
+                "confidence": {"score": 70},
+                "evidence": {"stability": {"has_previous": False, "score": 0.7}},
+            },
+            "checks": {
+                "venv": {
+                    "ok": True,
+                    "severity": "low",
+                    "summary": "virtual environment is active",
+                    "evidence": [],
+                }
+            },
+            "workspace": {
+                "run_hash": "second-root",
+                "record_path": "runs/doctor/scope/second-root/record.json",
+            },
+        },
+    ]
+
+    def _fake_main(_args: list[str]) -> int:
+        print(json.dumps(payloads.pop(0)))
+        return 0
+
+    monkeypatch.setattr(doctor_check.doctor, "main", _fake_main)
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="quick",
+        fix=False,
+        env={"SDETKIT_DETERMINISTIC": "1"},
+        logger=object(),
+    )
+
+    first = doctor_check.run(ctx).as_dict()
+    second = doctor_check.run(ctx).as_dict()
+
+    assert first == second
+    doctor_payload = first["details"]["doctor"]
+    assert doctor_payload == {
+        "ok": True,
+        "score": 90,
+        "schema_version": "sdetkit.doctor.v2",
+        "selected_checks": [],
+        "quality": {
+            "passed_checks": 3,
+            "failed_checks": 0,
+            "skipped_checks": 1,
+        },
+        "checks": {
+            "venv": {
+                "ok": True,
+                "severity": "low",
+                "summary": "virtual environment is active",
+            }
+        },
+    }
+
+
 def test_doctor_check_captures_quality_hints_and_hotspots(monkeypatch, tmp_path: Path) -> None:
     def _fake_main(args: list[str]) -> int:
         print(
