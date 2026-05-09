@@ -14,7 +14,11 @@ PYTEST_NODE_RE = re.compile(r"FAILED\s+([A-Za-z0-9_./:-]+::[^\s]+)(?:\s+-\s+(.+)
 MYPY_ERROR_RE = re.compile(r"^(.+?\.py):\d+:\s+error:\s+(.+)$", re.MULTILINE)
 PYTHON_EXCEPTION_RE = re.compile(r"\b([A-Z][A-Za-z]+Error|Exception):\s*(.+)")
 EXIT_CODE_RE = re.compile(r"Process completed with exit code (?!0\b)(\d+)")
-FILE_PATH_RE = re.compile(r"\b(?:src|tests)/[A-Za-z0-9_./-]+\.py\b")
+FILE_PATH_RE = re.compile(r"\b(?:src|tests|docs)/[A-Za-z0-9_./-]+\.(?:py|md)\b")
+HOOK_FAILURE_RE = re.compile(r"^(.+?)\.+Failed$", re.MULTILINE)
+HOOK_ID_RE = re.compile(r"- hook id:\s*([A-Za-z0-9_.-]+)")
+MKDOCS_ERROR_RE = re.compile(r"ERROR\s+-\s+(.+)")
+PYTEST_COLLECTION_RE = re.compile(r"ERROR collecting ([^\s]+)")
 
 
 @dataclass(frozen=True)
@@ -96,6 +100,42 @@ def _file_mentions(text: str) -> tuple[str, ...]:
     return _unique(FILE_PATH_RE.findall(text), limit=8)
 
 
+def _hook_failure(text: str) -> tuple[str, str] | None:
+    hook_id = HOOK_ID_RE.search(text)
+    failed = HOOK_FAILURE_RE.search(text)
+    if hook_id:
+        return _clean(hook_id.group(1)), _clean(failed.group(1)) if failed else _clean(
+            hook_id.group(1)
+        )
+    if failed and "hook id:" in text.lower():
+        return _clean(failed.group(1)), _clean(failed.group(1))
+    if failed and "ruff format" in failed.group(1).lower():
+        return "ruff-format", _clean(failed.group(1))
+    return None
+
+
+def _mkdocs_failure(text: str) -> str:
+    lowered = text.lower()
+    if "mkdocs" not in lowered and "documentation file" not in lowered:
+        return ""
+    match = MKDOCS_ERROR_RE.search(text)
+    if match:
+        return _clean(match.group(1))
+    if "strict mode" in lowered:
+        return "MkDocs strict mode failed"
+    return ""
+
+
+def _pytest_collection_failure(text: str) -> tuple[str, str] | None:
+    match = PYTEST_COLLECTION_RE.search(text)
+    if not match:
+        return None
+    owner = _clean(match.group(1))
+    exception = _python_exception(text)
+    actual = exception or f"ERROR collecting {owner}"
+    return owner, actual
+
+
 def _as_payload(report: CiFailureTriageReport) -> dict[str, Any]:
     return asdict(report)
 
@@ -106,8 +146,88 @@ def build_triage_report(text: str) -> CiFailureTriageReport:
     exits = _exit_lines(lines)
     pytest = _pytest_failure(text)
     mypy = _mypy_failure(text)
+    hook = _hook_failure(text)
+    mkdocs = _mkdocs_failure(text)
+    collection = _pytest_collection_failure(text)
     exception = _python_exception(text)
     owners = list(_file_mentions(text))
+
+    if collection is not None:
+        owner, actual = collection
+        if owner not in owners:
+            owners.insert(0, owner)
+        return CiFailureTriageReport(
+            schema_version=SCHEMA_VERSION,
+            classification="pytest_collection_failure",
+            blocker=True,
+            headline_failure=exits[-1] if exits else f"ERROR collecting {owner}",
+            actual_failure=actual,
+            root_cause_candidates=(
+                "pytest could not import or collect the test module",
+                "fix import/module availability before debugging assertions",
+            ),
+            likely_owner_files=_unique(owners),
+            contract_that_failed="pytest collection/import contract",
+            noise_to_ignore=_unique(["nonzero process exit is a wrapper"] if exits else []),
+            recommended_fix_shape=(
+                "Fix the missing import, package exposure, or test module collection path; "
+                "do not change assertion behavior first."
+            ),
+            verification_commands=(f"python -m pytest -q {owner} --collect-only -o addopts=",),
+            confidence="high",
+            next_best_action=f"run collection-only for {owner} and inspect the first import error",
+        )
+
+    if hook is not None:
+        hook_id, hook_title = hook
+        is_ruff_format = hook_id == "ruff-format" or "ruff format" in hook_title.lower()
+        classification = "formatting_drift" if is_ruff_format else "pre_commit_hook_failure"
+        contract = "ruff formatting contract" if is_ruff_format else "pre-commit hook contract"
+        command = (
+            "python -m ruff format --check ."
+            if is_ruff_format
+            else f"python -m pre_commit run {hook_id} --all-files"
+        )
+        return CiFailureTriageReport(
+            schema_version=SCHEMA_VERSION,
+            classification=classification,
+            blocker=True,
+            headline_failure=hook_title,
+            actual_failure=f"{hook_id} modified files or reported failure",
+            root_cause_candidates=(
+                "a pre-commit hook changed the worktree",
+                "accept hook edits and rerun the same proof before committing",
+            ),
+            likely_owner_files=_unique(owners),
+            contract_that_failed=contract,
+            noise_to_ignore=_unique(["nonzero process exit is a wrapper"] if exits else []),
+            recommended_fix_shape=(
+                "Accept the hook-produced file changes, rerun focused tests, then rerun pre-commit."
+            ),
+            verification_commands=(command, "python -m pre_commit run -a"),
+            confidence="high",
+            next_best_action=f"rerun {hook_id} after accepting generated formatting changes",
+        )
+
+    if mkdocs:
+        return CiFailureTriageReport(
+            schema_version=SCHEMA_VERSION,
+            classification="docs_contract_gap",
+            blocker=True,
+            headline_failure=mkdocs,
+            actual_failure=mkdocs,
+            root_cause_candidates=(
+                "MkDocs strict mode found a documentation contract problem",
+                "fix the first missing page/link before changing unrelated docs",
+            ),
+            likely_owner_files=_unique(owners),
+            contract_that_failed="MkDocs strict documentation contract",
+            noise_to_ignore=_unique(["nonzero process exit is a wrapper"] if exits else []),
+            recommended_fix_shape="Repair the first strict docs error and rebuild the docs locally.",
+            verification_commands=("NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict",),
+            confidence="high",
+            next_best_action="open the referenced docs page or missing link target",
+        )
 
     if pytest is not None:
         node, detail, owner = pytest

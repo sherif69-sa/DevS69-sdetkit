@@ -139,12 +139,16 @@ def test_ruff_format_failure_is_actionable_quality_signal() -> None:
         "Process completed with exit code 1\n"
     )
 
-    assert report.classification in {"quality_wrapper", "ci_failure_real_flake"}
+    assert report.classification == "formatting_drift"
     assert report.blocker is True
-    assert (
-        "exit code" in report.headline_failure.lower() or "ruff" in report.headline_failure.lower()
+    assert report.actual_failure == "ruff-format modified files or reported failure"
+    assert report.contract_that_failed == "ruff formatting contract"
+    assert report.noise_to_ignore == ("nonzero process exit is a wrapper",)
+    assert report.verification_commands == (
+        "python -m ruff format --check .",
+        "python -m pre_commit run -a",
     )
-    assert report.confidence in {"low", "medium"}
+    assert report.confidence == "high"
 
 
 def test_pre_commit_hook_failure_keeps_hook_as_actual_failure() -> None:
@@ -156,11 +160,16 @@ def test_pre_commit_hook_failure_keeps_hook_as_actual_failure() -> None:
         "Process completed with exit code 1\n"
     )
 
-    assert report.classification in {"quality_wrapper", "ci_failure_real_flake"}
+    assert report.classification == "pre_commit_hook_failure"
     assert report.blocker is True
-    assert (
-        "end-of-file-fixer" in report.actual_failure or "exit code" in report.actual_failure.lower()
+    assert report.actual_failure == "end-of-file-fixer modified files or reported failure"
+    assert report.contract_that_failed == "pre-commit hook contract"
+    assert report.noise_to_ignore == ("nonzero process exit is a wrapper",)
+    assert report.verification_commands == (
+        "python -m pre_commit run end-of-file-fixer --all-files",
+        "python -m pre_commit run -a",
     )
+    assert report.confidence == "high"
 
 
 def test_mkdocs_strict_failure_points_to_docs_contract() -> None:
@@ -171,12 +180,17 @@ def test_mkdocs_strict_failure_points_to_docs_contract() -> None:
         "Process completed with exit code 1\n"
     )
 
+    assert report.classification == "docs_contract_gap"
     assert report.blocker is True
-    assert report.classification in {"product_bug", "ci_failure_real_flake"}
-    assert "docs" in " ".join(report.likely_owner_files).lower() or report.confidence in {
-        "low",
-        "medium",
-    }
+    assert report.actual_failure == (
+        "Documentation file 'docs/index.md' contains a link to 'missing.md' which is not found"
+    )
+    assert report.contract_that_failed == "MkDocs strict documentation contract"
+    assert report.noise_to_ignore == ("nonzero process exit is a wrapper",)
+    assert report.verification_commands == (
+        "NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict",
+    )
+    assert report.confidence == "high"
 
 
 def test_import_error_collection_failure_points_to_pytest_collection() -> None:
@@ -187,7 +201,11 @@ def test_import_error_collection_failure_points_to_pytest_collection() -> None:
         "Process completed with exit code 2\n"
     )
 
-    assert report.classification == "product_bug"
+    assert report.classification == "pytest_collection_failure"
     assert report.blocker is True
     assert "ModuleNotFoundError" in report.actual_failure
-    assert report.contract_that_failed == "runtime command contract"
+    assert report.contract_that_failed == "pytest collection/import contract"
+    assert report.verification_commands == (
+        "python -m pytest -q tests/test_example.py --collect-only -o addopts=",
+    )
+    assert report.confidence == "high"
