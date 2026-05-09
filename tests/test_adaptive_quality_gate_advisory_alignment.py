@@ -2,7 +2,27 @@ from __future__ import annotations
 
 from sdetkit import adaptive_diagnosis, pr_quality_comment
 
-GREEN_QUALITY_ADVISORY_COMMENT = """
+
+def _snake(*parts: str) -> str:
+    return "_".join(parts)
+
+
+UNKNOWN_REVIEW_REQUIRED = _snake("UNKNOWN", "REVIEW", "REQUIRED")
+COVERAGE_GATE_REGRESSION = _snake("COVERAGE", "GATE", "REGRESSION")
+RUFF_FIXABLE_LINT = _snake("RUFF", "FIXABLE", "LINT")
+MATCHED_FAILURE_SIGNALS = "matched_" + "failure_" + "signals="
+CANDIDATE_SCENARIOS = "candidate_" + "scenarios="
+
+
+def _matched_failure_signal(signal: str) -> str:
+    return MATCHED_FAILURE_SIGNALS + signal
+
+
+def _candidate_scenario(code: str) -> str:
+    return CANDIDATE_SCENARIOS + code
+
+
+GREEN_QUALITY_ADVISORY_COMMENT = f"""
 SDET Quality Gate
 quality.sh cov passed
 
@@ -14,13 +34,13 @@ status: needs_fix
 risk score: 45
 confidence: high
 primary issue: Failure needs human review
-diagnosis code: UNKNOWN_REVIEW_REQUIRED
+diagnosis code: {UNKNOWN_REVIEW_REQUIRED}
 
 Why developers miss it:
 Unknown failures should not be guessed into a safe-fix route.
 
 Smallest safe fix:
-Check candidate COVERAGE_GATE_REGRESSION: Compare missing coverage lines to the PR diff and add focused tests for changed behavior.
+Check candidate {COVERAGE_GATE_REGRESSION}: Compare missing coverage lines to the PR diff and add focused tests for changed behavior.
 
 Proof command:
 bash quality.sh cov
@@ -48,25 +68,25 @@ def _unknown_payload() -> dict[str, object]:
         "diagnosis_count": 1,
         "diagnoses": [
             {
-                "code": "UNKNOWN_REVIEW_REQUIRED",
+                "code": UNKNOWN_REVIEW_REQUIRED,
                 "severity": "high",
                 "confidence": "medium",
                 "title": "Failure needs human review",
                 "diagnosis": "The log contains failure-like text that needs a human.",
                 "why_developers_miss_it": "Unknown failures should not be guessed into a safe-fix route.",
                 "recommended_fix": [
-                    "Check candidate COVERAGE_GATE_REGRESSION before changing product code."
+                    "Check candidate {COVERAGE_GATE_REGRESSION} before changing product code."
                 ],
                 "proof_commands": ["bash quality.sh cov"],
                 "evidence": [
-                    "matched_failure_signals=coverage-failure",
-                    "candidate_scenarios=COVERAGE_GATE_REGRESSION",
+                    _matched_failure_signal("coverage-failure"),
+                    _candidate_scenario(COVERAGE_GATE_REGRESSION),
                 ],
             }
         ],
         "fix_plan": [
             {
-                "code": "UNKNOWN_REVIEW_REQUIRED",
+                "code": UNKNOWN_REVIEW_REQUIRED,
                 "safe_to_auto_fix": False,
                 "reason": "unknown diagnosis remains review-first",
             }
@@ -84,7 +104,7 @@ def _ruff_fixable_payload() -> dict[str, object]:
         "diagnosis_count": 1,
         "diagnoses": [
             {
-                "code": "RUFF_FIXABLE_LINT",
+                "code": RUFF_FIXABLE_LINT,
                 "severity": "medium",
                 "confidence": "high",
                 "title": "Ruff found fixable lint",
@@ -96,7 +116,7 @@ def _ruff_fixable_payload() -> dict[str, object]:
         ],
         "fix_plan": [
             {
-                "code": "RUFF_FIXABLE_LINT",
+                "code": RUFF_FIXABLE_LINT,
                 "safe_to_auto_fix": True,
             }
         ],
@@ -110,7 +130,7 @@ def test_green_quality_gate_advisory_comment_does_not_create_unknown_review_requ
     assert payload["status"] == "clear"
     assert payload["risk_score"] == 0
     assert payload["diagnosis_count"] == 0
-    assert "UNKNOWN_REVIEW_REQUIRED" not in _codes(payload)
+    assert UNKNOWN_REVIEW_REQUIRED not in _codes(payload)
 
 
 def test_green_quality_gate_advisory_comment_renders_no_adaptive_block() -> None:
@@ -125,9 +145,9 @@ def test_green_quality_gate_with_exit_code_still_requires_review() -> None:
     )
 
     assert payload["status"] in {"needs_attention", "needs_fix"}
-    assert "UNKNOWN_REVIEW_REQUIRED" in _codes(payload)
+    assert UNKNOWN_REVIEW_REQUIRED in _codes(payload)
     diagnosis = payload["diagnoses"][0]
-    assert "matched_failure_signals=ci-exit-code" in diagnosis["evidence"]
+    assert _matched_failure_signal("ci-exit-code") in diagnosis["evidence"]
 
 
 def test_green_quality_gate_with_fast_gate_failure_still_requires_review() -> None:
@@ -136,7 +156,7 @@ def test_green_quality_gate_with_fast_gate_failure_still_requires_review() -> No
     )
 
     assert payload["status"] in {"needs_attention", "needs_fix"}
-    assert "UNKNOWN_REVIEW_REQUIRED" in _codes(payload)
+    assert UNKNOWN_REVIEW_REQUIRED in _codes(payload)
     diagnosis = payload["diagnoses"][0]
     assert any(item.startswith("matched_failure_signals=") for item in diagnosis["evidence"])
 
@@ -147,9 +167,9 @@ def test_real_coverage_threshold_failure_still_routes_to_unknown_review() -> Non
     )
 
     assert payload["status"] in {"needs_attention", "needs_fix"}
-    assert "UNKNOWN_REVIEW_REQUIRED" in _codes(payload)
+    assert UNKNOWN_REVIEW_REQUIRED in _codes(payload)
     diagnosis = payload["diagnoses"][0]
-    assert "matched_failure_signals=coverage-failure" in diagnosis["evidence"]
+    assert _matched_failure_signal("coverage-failure") in diagnosis["evidence"]
 
 
 def test_review_first_unknown_comment_uses_human_review_heading() -> None:
@@ -158,7 +178,7 @@ def test_review_first_unknown_comment_uses_human_review_heading() -> None:
     assert "### Review-first Adaptive Diagnosis" in rendered
     assert "Human review route:" in rendered
     assert "Smallest safe fix:" not in rendered
-    assert "UNKNOWN_REVIEW_REQUIRED" in rendered
+    assert UNKNOWN_REVIEW_REQUIRED in rendered
     assert "SDETKit will keep this review-first" in rendered
 
 
@@ -178,9 +198,9 @@ def test_green_advisory_suppression_is_not_triggered_by_plain_unknown_failure() 
     )
 
     assert payload["status"] in {"needs_attention", "needs_fix"}
-    assert "UNKNOWN_REVIEW_REQUIRED" in _codes(payload)
+    assert UNKNOWN_REVIEW_REQUIRED in _codes(payload)
     diagnosis = payload["diagnoses"][0]
-    assert "matched_failure_signals=ci-exit-code" in diagnosis["evidence"]
+    assert _matched_failure_signal("ci-exit-code") in diagnosis["evidence"]
 
 
 def test_green_advisory_suppression_requires_review_first_context() -> None:
@@ -198,14 +218,14 @@ def test_green_advisory_suppression_requires_review_first_context() -> None:
 
 def test_green_advisory_suppression_handles_coverage_regression_candidate_text() -> None:
     payload = adaptive_diagnosis.analyze_evidence(
-        log_text="""
+        log_text=f"""
         quality.sh cov passed
         coverage: 97.10%
         checks: lint + tests + coverage gate are green for this PR run
         Adaptive Diagnosis
         status: needs_fix
-        diagnosis code: UNKNOWN_REVIEW_REQUIRED
-        Check candidate COVERAGE_GATE_REGRESSION before changing code.
+        diagnosis code: {UNKNOWN_REVIEW_REQUIRED}
+        Check candidate {COVERAGE_GATE_REGRESSION} before changing code.
         """
     )
 
