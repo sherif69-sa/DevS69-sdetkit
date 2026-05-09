@@ -12,6 +12,20 @@ Goal: recover quickly, fix the right thing first, and avoid guessing.
 4. Run `gate release` after fast gate + security posture are stable.
 5. Use `doctor --release` when release prerequisites are unclear.
 
+## Saved CI log triage
+
+When a GitHub Actions job already failed, save the failed step log to a local file and ask the advisory triage command to summarize the real blocker:
+
+```bash
+python -m sdetkit triage-ci --log /tmp/failed-ci.log --format md
+```
+
+Use `--format json` when another tool needs the same report fields, or `--format text` for compact terminal output.
+
+The report is advisory only. It identifies the parsed blocker, likely owner files, wrapper noise to ignore, and verification commands. It does not edit files, lower gates, commit, push, or merge anything.
+
+Use it before patching when the loud final line is only a wrapper, such as a nonzero process exit after a pytest, mypy, MkDocs, coverage, or pre-commit failure.
+
 ## Fix-first matrix
 
 | What failed? | Check first | Fix before moving on | Run next |
