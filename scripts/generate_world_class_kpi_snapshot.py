@@ -6,6 +6,11 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+MISSING_METRIC_VALUE = "not_provided"
+MISSING_METRIC_STATUS = "missing_metric"
+MISSING_EVIDENCE_LINK = "evidence_pending"
+MISSING_DELTA_VALUE = "n/a"
+
 
 def _default_snapshot_date() -> str:
     return date.today().isoformat()
@@ -111,9 +116,9 @@ def _load_metrics_payload(path_value: str, flag_name: str) -> dict[str, dict[str
         if not isinstance(payload, dict):
             raise SystemExit(f"invalid {flag_name}: KPI '{kpi_id}' must map to an object")
         parsed[kpi_id] = {
-            "current_value": str(payload.get("current_value", "TODO")),
-            "status": str(payload.get("status", "TODO")),
-            "evidence_link": str(payload.get("evidence_link", "TODO")),
+            "current_value": str(payload.get("current_value", MISSING_METRIC_VALUE)),
+            "status": str(payload.get("status", MISSING_METRIC_STATUS)),
+            "evidence_link": str(payload.get("evidence_link", MISSING_EVIDENCE_LINK)),
             "previous_value": str(payload.get("previous_value", "")),
         }
     return parsed
@@ -141,7 +146,7 @@ def _load_metrics(
             "current_value": payload["current_value"],
             "delta": _format_delta(payload["current_value"], previous_value)
             if previous_value
-            else "TODO",
+            else MISSING_DELTA_VALUE,
             "status": payload["status"],
             "evidence_link": payload["evidence_link"],
         }
@@ -156,12 +161,20 @@ def _missing_kpi_ids(baseline: dict[str, Any], metrics: dict[str, dict[str, str]
     return [kpi_id for kpi_id in _baseline_kpi_ids(baseline) if kpi_id not in metrics]
 
 
+def _unknown_metric_ids(baseline: dict[str, Any], metrics: dict[str, dict[str, str]]) -> list[str]:
+    baseline_ids = set(_baseline_kpi_ids(baseline))
+    return sorted(kpi_id for kpi_id in metrics if kpi_id not in baseline_ids)
+
+
 def _validate_metrics_completeness(
     baseline: dict[str, Any], metrics: dict[str, dict[str, str]]
 ) -> None:
     missing = _missing_kpi_ids(baseline, metrics)
+    unknown = _unknown_metric_ids(baseline, metrics)
     if missing:
         raise SystemExit(f"strict metrics check failed: missing KPI values for {missing}")
+    if unknown:
+        raise SystemExit(f"strict metrics check failed: unknown KPI values for {unknown}")
 
 
 def _build_summary_payload(
@@ -179,7 +192,7 @@ def _build_summary_payload(
         kpi_id = str(kpi.get("id", "unknown"))
         target = str(kpi.get("target", "unknown"))
         metric_data = metrics.get(kpi_id)
-        current_value = metric_data["current_value"] if metric_data else "TODO"
+        current_value = metric_data["current_value"] if metric_data else MISSING_METRIC_VALUE
         target_eval = _evaluate_target_status(current_value, target)
         target_eval_counts[target_eval] += 1
         metric_entries.append(
@@ -188,21 +201,29 @@ def _build_summary_payload(
                 "lane": str(kpi.get("lane", "unknown")),
                 "target": target,
                 "current_value": current_value,
-                "delta": metric_data["delta"] if metric_data else "TODO",
-                "status": metric_data["status"] if metric_data else "TODO",
-                "evidence_link": metric_data["evidence_link"] if metric_data else "TODO",
+                "delta": metric_data["delta"] if metric_data else MISSING_DELTA_VALUE,
+                "status": metric_data["status"] if metric_data else MISSING_METRIC_STATUS,
+                "evidence_link": metric_data["evidence_link"]
+                if metric_data
+                else MISSING_EVIDENCE_LINK,
                 "covered": metric_data is not None,
                 "target_eval": target_eval,
             }
         )
+    covered_kpi_ids = [kpi_id for kpi_id in baseline_ids if kpi_id in metrics]
+    unknown_metric_ids = _unknown_metric_ids(baseline, metrics)
+
     return {
         "program": baseline.get("program", "unknown"),
         "dashboard": baseline.get("dashboard", "unknown"),
         "snapshot_date": snapshot_date,
         "baseline_kpi_count": len(baseline_ids),
         "provided_kpi_count": len(metrics),
-        "coverage_ratio": len(metrics) / len(baseline_ids) if baseline_ids else 0.0,
+        "covered_kpi_count": len(covered_kpi_ids),
+        "coverage_ratio": len(covered_kpi_ids) / len(baseline_ids) if baseline_ids else 0.0,
+        "missing_metric_count": len(missing),
         "missing_kpi_ids": missing,
+        "unknown_metric_ids": unknown_metric_ids,
         "target_eval_counts": target_eval_counts,
         "output_markdown": str(output_path),
         "kpis": metric_entries,
@@ -220,6 +241,11 @@ def _breach_kpi_ids(summary: dict[str, Any]) -> list[str]:
 def _render_snapshot(
     baseline: dict[str, Any], snapshot_date: str, metrics: dict[str, dict[str, str]]
 ) -> str:
+    baseline_ids = _baseline_kpi_ids(baseline)
+    covered_kpi_ids = [kpi_id for kpi_id in baseline_ids if kpi_id in metrics]
+    missing_kpi_ids = _missing_kpi_ids(baseline, metrics)
+    unknown_metric_ids = _unknown_metric_ids(baseline, metrics)
+
     lines: list[str] = []
     lines.append(f"# World-Class KPI Dashboard Weekly Snapshot — {snapshot_date}")
     lines.append("")
@@ -233,8 +259,10 @@ def _render_snapshot(
     lines.append(f"- Snapshot window: `{baseline.get('snapshot_window', 'unknown')}`")
     lines.append(f"- Review cadence: `{baseline.get('review_cadence', 'unknown')}`")
     lines.append(
-        f"- KPI coverage: `{len(metrics)}/{len(baseline.get('kpis', []))}` with provided metric values"
+        f"- KPI coverage: `{len(covered_kpi_ids)}/{len(baseline_ids)}` baseline KPI values covered"
     )
+    lines.append(f"- Missing KPI values: `{len(missing_kpi_ids)}`")
+    lines.append(f"- Extra KPI values not in baseline: `{len(unknown_metric_ids)}`")
     lines.append("")
     lines.append("## KPI scorecard")
     lines.append("")
@@ -247,10 +275,10 @@ def _render_snapshot(
         metric_data = metrics.get(
             kpi_id,
             {
-                "current_value": "TODO",
-                "delta": "TODO",
-                "status": "TODO",
-                "evidence_link": "TODO",
+                "current_value": MISSING_METRIC_VALUE,
+                "delta": MISSING_DELTA_VALUE,
+                "status": MISSING_METRIC_STATUS,
+                "evidence_link": MISSING_EVIDENCE_LINK,
             },
         )
         lines.append(
@@ -289,7 +317,9 @@ def _render_snapshot(
     lines.append(
         "- Use `--summary-json` to emit a machine-readable snapshot rollup with target evaluation and breach IDs."
     )
-    lines.append("- TODO: Attach raw export links for CI/SCM/security data.")
+    lines.append(
+        "- Raw export links for CI/SCM/security data should be attached when source systems publish them."
+    )
     lines.append("")
     return "\n".join(lines)
 
