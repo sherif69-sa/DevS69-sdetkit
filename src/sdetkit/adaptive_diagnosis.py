@@ -1172,6 +1172,63 @@ def _attach_log_context(diagnoses: list[dict[str, Any]], start_index: int, text:
         diagnosis["evidence"] = _safe_list(evidence, 8)
 
 
+GREEN_QUALITY_GATE_TOKENS = (
+    "quality.sh cov passed",
+    "quality gate passed",
+    "coverage gate are green",
+    "lint + tests + coverage gate are green",
+    "gate fast: ok",
+    "checks: lint + tests + coverage gate are green",
+)
+
+REVIEW_FIRST_ADVISORY_TOKENS = (
+    "adaptive diagnosis",
+    "unknown_review_required",
+    "failure needs human review",
+    "sdetkit will keep this review-first",
+    "current evidence is not safe for automatic remediation",
+    "auto-fix status",
+    "check candidate coverage_gate_regression",
+)
+
+HARD_FAILURE_TOKENS_IN_GREEN_GATE_CONTEXT = (
+    "process completed with exit code",
+    "gate fast: fail",
+    "quality.sh cov failed",
+    "coverage failed",
+    "fail under",
+    "failed_steps:",
+    "[fail]",
+    "traceback",
+    "assertionerror",
+    "error:",
+    "command failed",
+)
+
+
+def _has_green_quality_gate_signal(text: str) -> bool:
+    lowered = text.lower()
+    return any(token in lowered for token in GREEN_QUALITY_GATE_TOKENS)
+
+
+def _has_hard_failure_signal_in_green_context(text: str) -> bool:
+    lowered = text.lower()
+    return any(token in lowered for token in HARD_FAILURE_TOKENS_IN_GREEN_GATE_CONTEXT)
+
+
+def _has_review_first_advisory_signal(text: str) -> bool:
+    lowered = text.lower()
+    return any(token in lowered for token in REVIEW_FIRST_ADVISORY_TOKENS)
+
+
+def _looks_green_quality_advisory(text: str) -> bool:
+    if not _has_green_quality_gate_signal(text):
+        return False
+    if _has_hard_failure_signal_in_green_context(text):
+        return False
+    return _has_review_first_advisory_signal(text)
+
+
 def _append_log(
     text: str, diagnoses: list[dict[str, Any]], adaptive_history: dict[str, Any] | None = None
 ) -> None:
@@ -1223,7 +1280,7 @@ def _append_log(
             files,
             diagnoses,
         )
-    if not diagnoses and _looks_failure_like(text):
+    if not diagnoses and _looks_failure_like(text) and not _looks_green_quality_advisory(text):
         diagnoses.append(
             _diag(
                 "UNKNOWN_REVIEW_REQUIRED",
