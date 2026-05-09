@@ -160,7 +160,7 @@ def build_triage_report(text: str) -> CiFailureTriageReport:
             schema_version=SCHEMA_VERSION,
             classification="pytest_collection_failure",
             blocker=True,
-            headline_failure=exits[-1] if exits else f"ERROR collecting {owner}",
+            headline_failure=f"ERROR collecting {owner}",
             actual_failure=actual,
             root_cause_candidates=(
                 "pytest could not import or collect the test module",
@@ -268,7 +268,7 @@ def build_triage_report(text: str) -> CiFailureTriageReport:
             schema_version=SCHEMA_VERSION,
             classification="test_contract_failure",
             blocker=True,
-            headline_failure=exits[-1] if exits else f"{owner}: {detail}",
+            headline_failure=f"{owner}: {detail}",
             actual_failure=f"{owner}: {detail}",
             root_cause_candidates=("type/API contract mismatch",),
             likely_owner_files=_unique(owners),

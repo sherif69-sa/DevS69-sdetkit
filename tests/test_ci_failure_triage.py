@@ -52,6 +52,7 @@ def test_mypy_error_reports_owner_file_and_type_contract() -> None:
     assert report.classification == "test_contract_failure"
     assert report.likely_owner_files[0] == "src/sdetkit/example.py"
     assert report.contract_that_failed == "mypy type contract"
+    assert report.headline_failure == "src/sdetkit/example.py: Incompatible return value type"
     assert report.noise_to_ignore == ("nonzero process exit is a wrapper",)
 
 
@@ -203,6 +204,7 @@ def test_import_error_collection_failure_points_to_pytest_collection() -> None:
 
     assert report.classification == "pytest_collection_failure"
     assert report.blocker is True
+    assert report.headline_failure == "ERROR collecting tests/test_example.py"
     assert "ModuleNotFoundError" in report.actual_failure
     assert report.contract_that_failed == "pytest collection/import contract"
     assert report.verification_commands == (
