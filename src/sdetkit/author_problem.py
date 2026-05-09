@@ -25,6 +25,12 @@ _DEFAULT_WORKFLOW_PATH = Path(".sdetkit/workflows/platform_problem.yaml")
 _ALLOWED_TEST_METADATA_EDIT = "tests/conftest.py"
 _TOOLKIT_MOUNT = "/opt/sdetkit"
 _REPO_EXPORT_ROOT = Path("artifacts/platform_problem/latest")
+_NOVELTY_REVIEW_SOURCES = ("issues", "PRs", "releases", "docs", "discussions")
+_NOVELTY_REVIEW_GUIDANCE = (
+    "- Verify novelty against "
+    + ", ".join(_NOVELTY_REVIEW_SOURCES[:-1])
+    + f", and {_NOVELTY_REVIEW_SOURCES[-1]} before accepting a candidate."
+)
 _KNOWN_PYTEST_PACKAGES = (
     "pytest",
     "pytest-asyncio",
@@ -1423,7 +1429,7 @@ def _scaffold_novelty_gate(workdir: Path, inspection: RepoInspection, topic: str
         f"- candidate topic: {topic}",
         f"- metadata files: {', '.join(inspection.metadata_files) or 'none'}",
         f"- CI files: {', '.join(inspection.ci_files) or 'none'}",
-        "- TODO: compare against issues, PRs, releases, docs, and discussions before accepting a candidate.",
+        _NOVELTY_REVIEW_GUIDANCE,
     ]
     _append_note(workdir / "novelty_gate.txt", "## machine-notes", lines)
     _append_note(
