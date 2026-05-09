@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- CI triage advisor: add `sdetkit triage-ci` for advisory saved-log diagnosis, with fixture coverage, clearer failure classifications, readable text/markdown output, and first-failure operator docs.
+
 ## [1.0.3]
 
 Released: 2026-04-18
