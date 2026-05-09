@@ -43,7 +43,7 @@ Use `--format text|json|sarif` and optional `--output <path>`.
 
 `security fix` currently auto-fixes conservative patterns only:
 
-- `yaml.load(...)` -> `yaml.safe_load(...)`
+- PyYAML unsafe loader calls -> `yaml.safe_load(...)`
 - simple one-line requests timeout insertion
 
 Not auto-applied:
