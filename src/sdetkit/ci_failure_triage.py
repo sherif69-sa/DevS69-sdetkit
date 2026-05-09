@@ -305,7 +305,7 @@ def build_triage_report(text: str) -> CiFailureTriageReport:
             schema_version=SCHEMA_VERSION,
             classification="product_bug",
             blocker=True,
-            headline_failure=exits[-1] if exits else exception,
+            headline_failure=exception,
             actual_failure=exception,
             root_cause_candidates=("Python exception raised during CI command",),
             likely_owner_files=_unique(owners),

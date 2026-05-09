@@ -211,3 +211,19 @@ def test_import_error_collection_failure_points_to_pytest_collection() -> None:
         "python -m pytest -q tests/test_example.py --collect-only -o addopts=",
     )
     assert report.confidence == "high"
+
+
+def test_runtime_exception_headline_prefers_exception_over_exit_wrapper() -> None:
+    report = ci_failure_triage.build_triage_report(
+        "Traceback (most recent call last):\n"
+        '  File "src/sdetkit/example.py", line 12, in main\n'
+        "ValueError: invalid config shape\n"
+        "Process completed with exit code 1\n"
+    )
+
+    assert report.classification == "product_bug"
+    assert report.blocker is True
+    assert report.headline_failure == "ValueError: invalid config shape"
+    assert report.actual_failure == "ValueError: invalid config shape"
+    assert report.likely_owner_files == ("src/sdetkit/example.py",)
+    assert report.noise_to_ignore == ("nonzero process exit is a wrapper",)
