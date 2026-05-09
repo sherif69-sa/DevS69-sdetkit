@@ -227,3 +227,24 @@ def test_runtime_exception_headline_prefers_exception_over_exit_wrapper() -> Non
     assert report.actual_failure == "ValueError: invalid config shape"
     assert report.likely_owner_files == ("src/sdetkit/example.py",)
     assert report.noise_to_ignore == ("nonzero process exit is a wrapper",)
+
+
+def test_coverage_only_failure_marks_exit_as_wrapper_noise() -> None:
+    report = ci_failure_triage.build_triage_report(
+        "Required test coverage of 95% not reached. Total coverage: 94.7%\n"
+        "Process completed with exit code 1\n"
+    )
+
+    assert report.classification == "quality_wrapper"
+    assert report.blocker is True
+    assert (
+        report.headline_failure
+        == "Required test coverage of 95% not reached. Total coverage: 94.7%"
+    )
+    assert (
+        report.actual_failure == "Required test coverage of 95% not reached. Total coverage: 94.7%"
+    )
+    assert report.noise_to_ignore == (
+        "no earlier pytest node failure was found in the log",
+        "nonzero process exit is a wrapper",
+    )

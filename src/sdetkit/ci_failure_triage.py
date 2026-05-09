@@ -290,7 +290,12 @@ def build_triage_report(text: str) -> CiFailureTriageReport:
             root_cause_candidates=("coverage gate reported below-threshold evidence",),
             likely_owner_files=_unique(owners),
             contract_that_failed="coverage policy",
-            noise_to_ignore=_unique(["no earlier pytest node failure was found in the log"]),
+            noise_to_ignore=_unique(
+                [
+                    "no earlier pytest node failure was found in the log",
+                    *(["nonzero process exit is a wrapper"] if exits else []),
+                ]
+            ),
             recommended_fix_shape=(
                 "Inspect missed coverage or missing regression tests; do not lower the gate "
                 "unless policy intentionally changed."
