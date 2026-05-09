@@ -160,7 +160,7 @@ def build_triage_report(text: str) -> CiFailureTriageReport:
             schema_version=SCHEMA_VERSION,
             classification="pytest_collection_failure",
             blocker=True,
-            headline_failure=exits[-1] if exits else f"ERROR collecting {owner}",
+            headline_failure=f"ERROR collecting {owner}",
             actual_failure=actual,
             root_cause_candidates=(
                 "pytest could not import or collect the test module",
@@ -268,7 +268,7 @@ def build_triage_report(text: str) -> CiFailureTriageReport:
             schema_version=SCHEMA_VERSION,
             classification="test_contract_failure",
             blocker=True,
-            headline_failure=exits[-1] if exits else f"{owner}: {detail}",
+            headline_failure=f"{owner}: {detail}",
             actual_failure=f"{owner}: {detail}",
             root_cause_candidates=("type/API contract mismatch",),
             likely_owner_files=_unique(owners),
@@ -290,7 +290,12 @@ def build_triage_report(text: str) -> CiFailureTriageReport:
             root_cause_candidates=("coverage gate reported below-threshold evidence",),
             likely_owner_files=_unique(owners),
             contract_that_failed="coverage policy",
-            noise_to_ignore=_unique(["no earlier pytest node failure was found in the log"]),
+            noise_to_ignore=_unique(
+                [
+                    "no earlier pytest node failure was found in the log",
+                    *(["nonzero process exit is a wrapper"] if exits else []),
+                ]
+            ),
             recommended_fix_shape=(
                 "Inspect missed coverage or missing regression tests; do not lower the gate "
                 "unless policy intentionally changed."
@@ -305,7 +310,7 @@ def build_triage_report(text: str) -> CiFailureTriageReport:
             schema_version=SCHEMA_VERSION,
             classification="product_bug",
             blocker=True,
-            headline_failure=exits[-1] if exits else exception,
+            headline_failure=exception,
             actual_failure=exception,
             root_cause_candidates=("Python exception raised during CI command",),
             likely_owner_files=_unique(owners),

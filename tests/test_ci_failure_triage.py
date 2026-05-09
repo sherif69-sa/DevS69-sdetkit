@@ -52,6 +52,7 @@ def test_mypy_error_reports_owner_file_and_type_contract() -> None:
     assert report.classification == "test_contract_failure"
     assert report.likely_owner_files[0] == "src/sdetkit/example.py"
     assert report.contract_that_failed == "mypy type contract"
+    assert report.headline_failure == "src/sdetkit/example.py: Incompatible return value type"
     assert report.noise_to_ignore == ("nonzero process exit is a wrapper",)
 
 
@@ -163,6 +164,7 @@ def test_pre_commit_hook_failure_keeps_hook_as_actual_failure() -> None:
     assert report.classification == "pre_commit_hook_failure"
     assert report.blocker is True
     assert report.actual_failure == "end-of-file-fixer modified files or reported failure"
+    assert report.likely_owner_files == ("tests/test_ci_failure_triage.py",)
     assert report.contract_that_failed == "pre-commit hook contract"
     assert report.noise_to_ignore == ("nonzero process exit is a wrapper",)
     assert report.verification_commands == (
@@ -203,9 +205,47 @@ def test_import_error_collection_failure_points_to_pytest_collection() -> None:
 
     assert report.classification == "pytest_collection_failure"
     assert report.blocker is True
+    assert report.headline_failure == "ERROR collecting tests/test_example.py"
     assert "ModuleNotFoundError" in report.actual_failure
     assert report.contract_that_failed == "pytest collection/import contract"
     assert report.verification_commands == (
         "python -m pytest -q tests/test_example.py --collect-only -o addopts=",
     )
     assert report.confidence == "high"
+
+
+def test_runtime_exception_headline_prefers_exception_over_exit_wrapper() -> None:
+    report = ci_failure_triage.build_triage_report(
+        "Traceback (most recent call last):\n"
+        '  File "src/sdetkit/example.py", line 12, in main\n'
+        "ValueError: invalid config shape\n"
+        "Process completed with exit code 1\n"
+    )
+
+    assert report.classification == "product_bug"
+    assert report.blocker is True
+    assert report.headline_failure == "ValueError: invalid config shape"
+    assert report.actual_failure == "ValueError: invalid config shape"
+    assert report.likely_owner_files == ("src/sdetkit/example.py",)
+    assert report.noise_to_ignore == ("nonzero process exit is a wrapper",)
+
+
+def test_coverage_only_failure_marks_exit_as_wrapper_noise() -> None:
+    report = ci_failure_triage.build_triage_report(
+        "Required test coverage of 95% not reached. Total coverage: 94.7%\n"
+        "Process completed with exit code 1\n"
+    )
+
+    assert report.classification == "quality_wrapper"
+    assert report.blocker is True
+    assert (
+        report.headline_failure
+        == "Required test coverage of 95% not reached. Total coverage: 94.7%"
+    )
+    assert (
+        report.actual_failure == "Required test coverage of 95% not reached. Total coverage: 94.7%"
+    )
+    assert report.noise_to_ignore == (
+        "no earlier pytest node failure was found in the log",
+        "nonzero process exit is a wrapper",
+    )
