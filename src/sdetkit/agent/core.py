@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import sys
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -87,15 +88,36 @@ class RunRecord:
     cache: dict[str, Any]
 
 
+def _approval_relative_path(raw_path: str) -> str:
+    if raw_path.startswith(("\\\\", "//")):
+        return raw_path
+    rel = raw_path.replace("\\", "/")
+    while "//" in rel:
+        rel = rel.replace("//", "/")
+    return rel.lstrip("/")
+
+
+def _read_terminal_answer(prompt: str) -> str:
+    sys.stdout.write(prompt)
+    sys.stdout.flush()
+    return sys.stdin.readline()
+
+
 class ApprovalGate:
-    def __init__(self, *, auto_approve: bool = False) -> None:
+    def __init__(
+        self,
+        *,
+        auto_approve: bool = False,
+        answer_reader: Callable[[str], str] | None = None,
+    ) -> None:
         self.auto_approve = auto_approve
+        self._answer_reader = answer_reader or _read_terminal_answer
 
     def requires_approval(self, action: str, params: dict[str, Any]) -> bool:
         if action == "shell.run":
             return True
         if action == "fs.write":
-            rel = str(params.get("path", "")).replace("\\", "/").lstrip("/")
+            rel = _approval_relative_path(str(params.get("path", "")))
             return not (
                 rel == ".sdetkit/agent/workdir" or rel.startswith(".sdetkit/agent/workdir/")
             )
@@ -109,7 +131,7 @@ class ApprovalGate:
         if not sys.stdin.isatty():
             return False, "approval required (non-interactive)"
         prompt = f"approve dangerous action '{action}' with params={json.dumps(params, sort_keys=True)}? [y/N]: "
-        answer = input(prompt).strip().lower()
+        answer = self._answer_reader(prompt).strip().lower()
         if answer in {"y", "yes"}:
             return True, "approved"
         return False, "denied"
