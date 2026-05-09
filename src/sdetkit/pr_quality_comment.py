@@ -61,6 +61,39 @@ def _auto_fix_status(code: str, fix_plan: dict[str, Any]) -> str:
     return "SDETKit can auto-fix this only when the safe mechanical plan and proof gates pass."
 
 
+def diagnosis_comment_contract(payload: dict[str, Any]) -> dict[str, Any]:
+    status = str(payload.get("status", "unknown"))
+    diagnoses = _as_list(payload.get("diagnoses"))
+    if status in {"clear", "monitor"} or not diagnoses:
+        return {
+            "should_render": False,
+            "status": status,
+            "code": "",
+            "review_first": False,
+            "safe_to_auto_fix": False,
+            "heading": "",
+            "route_heading": "",
+            "reason": "No actionable adaptive diagnosis comment is needed.",
+        }
+
+    first = _as_dict(diagnoses[0])
+    code = str(first.get("code", "UNKNOWN"))
+    fix_plan = _matching_fix_plan(payload, code)
+    review_first = _is_review_first_diagnosis(code)
+    safe_to_auto_fix = fix_plan.get("safe_to_auto_fix") is True
+
+    return {
+        "should_render": True,
+        "status": status,
+        "code": code,
+        "review_first": review_first,
+        "safe_to_auto_fix": safe_to_auto_fix,
+        "heading": _diagnosis_heading(code),
+        "route_heading": _next_step_heading(code),
+        "reason": _auto_fix_status(code, fix_plan),
+    }
+
+
 def render_adaptive_diagnosis_comment(payload: dict[str, Any]) -> str:
     if payload.get("status") in {"clear", "monitor"}:
         return ""
