@@ -12,6 +12,57 @@ from ..types import CheckAction, CheckResult, MaintenanceContext
 CHECK_NAME = "doctor_check"
 
 
+def _deterministic_mode_enabled(ctx: MaintenanceContext) -> bool:
+    return str(ctx.env.get("SDETKIT_DETERMINISTIC", "")).strip() == "1"
+
+
+def _stable_scalar_mapping(value: object, keys: tuple[str, ...]) -> dict[str, object]:
+    if not isinstance(value, dict):
+        return {}
+    return {key: value[key] for key in keys if isinstance(value.get(key), str | int | float | bool)}
+
+
+def _stable_deterministic_doctor_payload(parsed: dict[str, object]) -> dict[str, object]:
+    checks: dict[str, object] = {}
+    raw_checks = parsed.get("checks", {})
+    if isinstance(raw_checks, dict):
+        for name, item in sorted(raw_checks.items()):
+            if not isinstance(item, dict):
+                continue
+            checks[str(name)] = _stable_scalar_mapping(
+                item,
+                ("ok", "severity", "summary", "skipped"),
+            )
+
+    quality = _stable_scalar_mapping(
+        parsed.get("quality", {}),
+        (
+            "passed_checks",
+            "failed_checks",
+            "skipped_checks",
+            "pass_rate",
+            "failed_checks",
+            "fix_count",
+            "hint_count",
+            "highest_failure_severity",
+        ),
+    )
+
+    selected_checks = parsed.get("selected_checks", [])
+    selected = (
+        sorted(str(item) for item in selected_checks) if isinstance(selected_checks, list) else []
+    )
+
+    return {
+        "ok": bool(parsed.get("ok", False)),
+        "score": int(parsed.get("score", 0) or 0),
+        "schema_version": str(parsed.get("schema_version", "")),
+        "selected_checks": selected,
+        "quality": quality,
+        "checks": checks,
+    }
+
+
 def run(ctx: MaintenanceContext) -> CheckResult:
     args = ["--format", "json", "--pyproject", "--dev"]
     if ctx.mode == "full":
@@ -46,6 +97,9 @@ def run(ctx: MaintenanceContext) -> CheckResult:
                 )
             ],
         )
+    if isinstance(parsed, dict) and _deterministic_mode_enabled(ctx):
+        parsed = _stable_deterministic_doctor_payload(parsed)
+
     quality = parsed.get("quality", {}) if isinstance(parsed, dict) else {}
     hints = parsed.get("hints", []) if isinstance(parsed, dict) else []
     quality_failed = int(quality.get("failed_checks", 0)) if isinstance(quality, dict) else 0
