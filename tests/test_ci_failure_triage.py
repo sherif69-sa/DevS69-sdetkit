@@ -128,3 +128,66 @@ def test_root_help_keeps_patch_and_triage_ci_commands(capsys) -> None:
     out = capsys.readouterr().out
     assert "triage-ci" in out
     assert "patch" in out
+
+
+def test_ruff_format_failure_is_actionable_quality_signal() -> None:
+    report = ci_failure_triage.build_triage_report(
+        "ruff format..............................................................Failed\n"
+        "- hook id: ruff-format\n"
+        "- files were modified by this hook\n"
+        "1 file reformatted, 1348 files left unchanged\n"
+        "Process completed with exit code 1\n"
+    )
+
+    assert report.classification in {"quality_wrapper", "ci_failure_real_flake"}
+    assert report.blocker is True
+    assert (
+        "exit code" in report.headline_failure.lower() or "ruff" in report.headline_failure.lower()
+    )
+    assert report.confidence in {"low", "medium"}
+
+
+def test_pre_commit_hook_failure_keeps_hook_as_actual_failure() -> None:
+    report = ci_failure_triage.build_triage_report(
+        "fix end of files.........................................................Failed\n"
+        "- hook id: end-of-file-fixer\n"
+        "- files were modified by this hook\n"
+        "Fixing tests/test_ci_failure_triage.py\n"
+        "Process completed with exit code 1\n"
+    )
+
+    assert report.classification in {"quality_wrapper", "ci_failure_real_flake"}
+    assert report.blocker is True
+    assert (
+        "end-of-file-fixer" in report.actual_failure or "exit code" in report.actual_failure.lower()
+    )
+
+
+def test_mkdocs_strict_failure_points_to_docs_contract() -> None:
+    report = ci_failure_triage.build_triage_report(
+        "INFO    -  Building documentation to directory: site\n"
+        "ERROR   -  Documentation file 'docs/index.md' contains a link to 'missing.md' which is not found\n"
+        "Aborted with 1 warnings in strict mode!\n"
+        "Process completed with exit code 1\n"
+    )
+
+    assert report.blocker is True
+    assert report.classification in {"product_bug", "ci_failure_real_flake"}
+    assert "docs" in " ".join(report.likely_owner_files).lower() or report.confidence in {
+        "low",
+        "medium",
+    }
+
+
+def test_import_error_collection_failure_points_to_pytest_collection() -> None:
+    report = ci_failure_triage.build_triage_report(
+        "ERROR collecting tests/test_example.py\n"
+        "ImportError while importing test module '/home/runner/work/repo/tests/test_example.py'.\n"
+        "ModuleNotFoundError: No module named 'sdetkit.missing_module'\n"
+        "Process completed with exit code 2\n"
+    )
+
+    assert report.classification == "product_bug"
+    assert report.blocker is True
+    assert "ModuleNotFoundError" in report.actual_failure
+    assert report.contract_that_failed == "runtime command contract"
