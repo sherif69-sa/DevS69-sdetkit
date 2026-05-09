@@ -292,6 +292,12 @@ Then use stability-aware command discovery:
 
     _add_passthrough_subcommand(sub, "ci", help_text="CI template and pipeline validation")
 
+    _add_passthrough_subcommand(
+        sub,
+        "triage-ci",
+        help_text="[Advanced but supported] Diagnose failed CI logs without applying fixes",
+    )
+
     _add_passthrough_subcommand(sub, "patch", help_text="Apply controlled file/text patches")
 
     _add_passthrough_subcommand(
@@ -1012,6 +1018,10 @@ Then use stability-aware command discovery:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    argv_list = list(sys.argv[1:] if argv is None else argv)
+    if argv_list and argv_list[0] == "triage-ci":
+        return _run_module_main("sdetkit.ci_failure_triage", argv_list[1:])
+    argv = argv_list
     if argv is None:
         argv = sys.argv[1:]
 

@@ -34,6 +34,7 @@ _PARSED_MODULE_SHORTCUTS: tuple[tuple[str, str], ...] = (
     ("first-contribution", "sdetkit.first_contribution"),
     ("contributor-funnel", "sdetkit.contributor_funnel"),
     ("evidence-assets", "sdetkit.proof"),
+    ("triage-ci", "sdetkit.ci_failure_triage"),
     ("triage-templates", "sdetkit.triage_templates"),
     ("docs-quality", "sdetkit.docs_qa"),
     ("weekly-review", "sdetkit.weekly_review"),
