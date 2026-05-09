@@ -8,7 +8,7 @@ Released: 2026-04-18
 
 - release stabilization: align package version, changelog, and release verification with v1.0.3.
 - docs trust pass: replace enterprise contact placeholder and publish real content for key buyer-facing pages.
-- artifacts hygiene: remove public TODO values from the KPI dashboard seed artifact.
+- artifacts hygiene: remove public placeholder values from the KPI dashboard seed artifact.
 
 ## [1.0.2]
 

@@ -50,7 +50,7 @@ Stand up a baseline lane that always produces machine-readable evidence and imme
 ### Close out
 - Freeze Phase 1 as complete in weekly reporting.
 - Keep baseline artifacts as immutable audit evidence.
-- Remove stale Phase 1 TODOs from active execution boards.
+- Remove stale Phase 1 open tasks from active execution boards.
 
 ---
 
