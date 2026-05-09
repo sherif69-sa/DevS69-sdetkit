@@ -363,7 +363,7 @@ def _render_text(report: CiFailureTriageReport) -> str:
         if isinstance(value, bool):
             rendered = "yes" if value else "no"
         elif isinstance(value, (list, tuple)):
-            rendered = ", ".join(str(item) for item in value) if value else "none"
+            rendered = "; ".join(str(item) for item in value) if value else "none"
         else:
             rendered = str(value)
         lines.append(f"{key}={rendered}")

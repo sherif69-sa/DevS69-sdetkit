@@ -269,3 +269,23 @@ def test_markdown_output_groups_operator_sections(tmp_path: Path, capsys) -> Non
     assert "## Recommended action" in out
     assert "classification: `test_failure`" in out
     assert "verification: python -m pytest -q tests/test_x.py::test_a -o addopts=" in out
+
+
+def test_text_output_uses_semicolon_list_separator(tmp_path: Path, capsys) -> None:
+    log = tmp_path / "ci.log"
+    log.write_text(
+        "ruff format..............................................................Failed\n"
+        "- hook id: ruff-format\n"
+        "- files were modified by this hook\n"
+        "Process completed with exit code 1\n",
+        encoding="utf-8",
+    )
+
+    rc = ci_failure_triage.main(["--log", str(log), "--format", "text"])
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert (
+        "verification_commands=python -m ruff format --check .; python -m pre_commit run -a" in out
+    )
+    assert "noise_to_ignore=nonzero process exit is a wrapper" in out
