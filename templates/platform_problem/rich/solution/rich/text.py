@@ -547,7 +547,7 @@ class Text(JupyterMixin):
         Returns:
             Style: A Style instance.
         """
-        # TODO: This is a little inefficient, it is only used by full justify
+        # This localized style lookup is only needed for full justification.
         if offset < 0:
             offset = len(self) + offset
         get_style = console.get_style
