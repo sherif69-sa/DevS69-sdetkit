@@ -164,6 +164,7 @@ def test_pre_commit_hook_failure_keeps_hook_as_actual_failure() -> None:
     assert report.classification == "pre_commit_hook_failure"
     assert report.blocker is True
     assert report.actual_failure == "end-of-file-fixer modified files or reported failure"
+    assert report.likely_owner_files == ("tests/test_ci_failure_triage.py",)
     assert report.contract_that_failed == "pre-commit hook contract"
     assert report.noise_to_ignore == ("nonzero process exit is a wrapper",)
     assert report.verification_commands == (
