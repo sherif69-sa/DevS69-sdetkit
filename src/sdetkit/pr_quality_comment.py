@@ -32,6 +32,25 @@ def _matching_fix_plan(payload: dict[str, Any], code: str) -> dict[str, Any]:
     )
 
 
+REVIEW_FIRST_DIAGNOSIS_CODES = {"UNKNOWN", "UNKNOWN_REVIEW_REQUIRED"}
+
+
+def _is_review_first_diagnosis(code: str) -> bool:
+    return code in REVIEW_FIRST_DIAGNOSIS_CODES
+
+
+def _diagnosis_heading(code: str) -> str:
+    if _is_review_first_diagnosis(code):
+        return "### Review-first Adaptive Diagnosis"
+    return "### Adaptive Diagnosis"
+
+
+def _next_step_heading(code: str) -> str:
+    if _is_review_first_diagnosis(code):
+        return "Human review route:"
+    return "Smallest safe fix:"
+
+
 def _auto_fix_status(code: str, fix_plan: dict[str, Any]) -> str:
     if fix_plan.get("safe_to_auto_fix") is not True:
         return "SDETKit will keep this review-first because the current evidence is not safe for automatic remediation."
@@ -57,7 +76,7 @@ def render_adaptive_diagnosis_comment(payload: dict[str, Any]) -> str:
     fix_plan = _matching_fix_plan(payload, code)
 
     lines = [
-        "### Adaptive Diagnosis",
+        _diagnosis_heading(code),
         f"- status: `{payload.get('status', 'unknown')}`",
         f"- risk score: `{payload.get('risk_score', 'unknown')}`",
         f"- confidence: `{payload.get('confidence', 'unknown')}`",
@@ -67,7 +86,7 @@ def render_adaptive_diagnosis_comment(payload: dict[str, Any]) -> str:
         "Why developers miss it:",
         str(first.get("why_developers_miss_it", "No hidden-risk explanation available.")),
         "",
-        "Smallest safe fix:",
+        _next_step_heading(code),
         f"- {_first_text(fixes, 'Inspect the first failing evidence item and apply the smallest safe change.')}",
         "",
         "Proof command:",
