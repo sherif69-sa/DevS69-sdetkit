@@ -371,18 +371,25 @@ def _render_text(report: CiFailureTriageReport) -> str:
 
 
 def _render_markdown(report: CiFailureTriageReport) -> str:
+    owner_files = ", ".join(report.likely_owner_files) or "none"
+    noise = ", ".join(report.noise_to_ignore) or "none"
+    verification = ", ".join(report.verification_commands) or "none"
     return (
         "# CI failure triage\n\n"
+        "## Summary\n\n"
         f"- classification: `{report.classification}`\n"
         f"- blocker: `{'yes' if report.blocker else 'no'}`\n"
+        f"- confidence: `{report.confidence}`\n\n"
+        "## Failure\n\n"
         f"- headline failure: {report.headline_failure}\n"
         f"- actual failure: {report.actual_failure}\n"
-        f"- contract that failed: {report.contract_that_failed}\n"
-        f"- likely owner files: {', '.join(report.likely_owner_files) or 'none'}\n"
-        f"- noise to ignore: {', '.join(report.noise_to_ignore) or 'none'}\n"
+        f"- contract that failed: {report.contract_that_failed}\n\n"
+        "## Ownership and noise\n\n"
+        f"- likely owner files: {owner_files}\n"
+        f"- noise to ignore: {noise}\n\n"
+        "## Recommended action\n\n"
         f"- recommended fix shape: {report.recommended_fix_shape}\n"
-        f"- verification: {', '.join(report.verification_commands) or 'none'}\n"
-        f"- confidence: `{report.confidence}`\n"
+        f"- verification: {verification}\n"
         f"- next best action: {report.next_best_action}\n"
     )
 

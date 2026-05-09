@@ -249,3 +249,23 @@ def test_coverage_only_failure_marks_exit_as_wrapper_noise() -> None:
         "no earlier pytest node failure was found in the log",
         "nonzero process exit is a wrapper",
     )
+
+
+def test_markdown_output_groups_operator_sections(tmp_path: Path, capsys) -> None:
+    log = tmp_path / "ci.log"
+    log.write_text(
+        "FAILED tests/test_x.py::test_a - AssertionError: nope\n"
+        "Process completed with exit code 1\n",
+        encoding="utf-8",
+    )
+
+    rc = ci_failure_triage.main(["--log", str(log), "--format", "md"])
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "## Summary" in out
+    assert "## Failure" in out
+    assert "## Ownership and noise" in out
+    assert "## Recommended action" in out
+    assert "classification: `test_failure`" in out
+    assert "verification: python -m pytest -q tests/test_x.py::test_a -o addopts=" in out
