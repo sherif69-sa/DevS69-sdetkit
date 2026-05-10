@@ -8,7 +8,9 @@ from typing import Any
 
 SCHEMA_VERSION = "sdetkit.github_actions.annotation_hygiene.v1"
 
-_NODE20_ACTION_RE = re.compile(r"(?P<action>[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[A-Za-z0-9_.:/-]+)")
+_NODE20_ACTION_RE = re.compile(
+    r"(?P<action>[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)+@[A-Za-z0-9_.:/-]+)"
+)
 _JOB_RE = re.compile(r"^(?P<job>[A-Za-z0-9_. -]+)$")
 
 
