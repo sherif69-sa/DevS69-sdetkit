@@ -54,6 +54,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
             "dev",
             "maintenance",
             "ci",
+            "triage-ci",
             "kv",
             "inspect",
             "review",
