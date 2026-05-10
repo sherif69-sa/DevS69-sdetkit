@@ -95,7 +95,7 @@ def _is_allowed_scanner_vocabulary(rel: str, line: str) -> bool:
         marker in lowered for marker in ("todo", "fixme", "xxx")
     ):
         return True
-    if rel.startswith("src/sdetkit/phases/phase1_hardening_29.py") and "_STALE_MARKERS" in line:
+    if rel.startswith("src/sdetkit/phases/phase1_hardening.py") and "_STALE_MARKERS" in line:
         return True
     return False
 

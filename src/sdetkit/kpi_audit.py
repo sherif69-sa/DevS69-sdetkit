@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ._legacy_lane import run_lane
+from ._legacy_workflow import run_lane
 
 # Public test/fixture defaults intentionally kept as module attributes.
 _DEFAULT_PAGE_TEMPLATE = "# KPI audit ()\n\n## KPI audit\n"

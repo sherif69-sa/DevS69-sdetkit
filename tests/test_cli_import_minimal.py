@@ -7,7 +7,7 @@ import sys
 def test_cli_import_does_not_eager_load_modules() -> None:
     modules = [
         "sdetkit.cli",
-        "sdetkit.expansion_automation_41",
+        "sdetkit.expansion_automation",
         "sdetkit.optimization_foundation",
         "sdetkit.acceleration",
         "sdetkit.scale",

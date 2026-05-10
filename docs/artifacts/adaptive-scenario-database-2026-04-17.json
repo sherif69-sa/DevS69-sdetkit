@@ -2349,7 +2349,7 @@
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_cli_help_discoverability_contract.py::test_root_help_exposes_legacy_namespace_but_hides_legacy_lanes",
+      "scenario_id": "tests/test_cli_help_discoverability_contract.py::test_root_help_exposes_legacy_namespace_but_hides_legacy_workflows",
       "source": "tests/test_cli_help_discoverability_contract.py",
       "status": "active"
     },
@@ -4638,36 +4638,36 @@
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_experiment_lane.py::test_lane37_distribution_json",
-      "source": "tests/test_experiment_lane.py",
+      "scenario_id": "tests/test_experiment_workflow.py::test_lane37_distribution_json",
+      "source": "tests/test_experiment_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_experiment_lane.py::test_lane37_emit_pack_and_execute",
-      "source": "tests/test_experiment_lane.py",
+      "scenario_id": "tests/test_experiment_workflow.py::test_lane37_emit_pack_and_execute",
+      "source": "tests/test_experiment_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_experiment_lane.py::test_lane37_strict_fails_when_lane36_inputs_missing",
-      "source": "tests/test_experiment_lane.py",
+      "scenario_id": "tests/test_experiment_workflow.py::test_lane37_strict_fails_when_lane36_inputs_missing",
+      "source": "tests/test_experiment_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_experiment_lane.py::test_lane37_strict_fails_when_lane36_board_is_not_ready",
-      "source": "tests/test_experiment_lane.py",
+      "scenario_id": "tests/test_experiment_workflow.py::test_lane37_strict_fails_when_lane36_board_is_not_ready",
+      "source": "tests/test_experiment_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_experiment_lane.py::test_lane37_cli_dispatch",
-      "source": "tests/test_experiment_lane.py",
+      "scenario_id": "tests/test_experiment_workflow.py::test_lane37_cli_dispatch",
+      "source": "tests/test_experiment_workflow.py",
       "status": "active"
     },
     {
@@ -11141,29 +11141,29 @@
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_scale_lane.py::test_lane40_scale_lane_json",
-      "source": "tests/test_scale_lane.py",
+      "scenario_id": "tests/test_scale_workflow.py::test_lane40_scale_lane_json",
+      "source": "tests/test_scale_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_scale_lane.py::test_lane40_emit_pack_and_execute",
-      "source": "tests/test_scale_lane.py",
+      "scenario_id": "tests/test_scale_workflow.py::test_lane40_emit_pack_and_execute",
+      "source": "tests/test_scale_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_scale_lane.py::test_lane40_strict_fails_when_lane39_inputs_missing",
-      "source": "tests/test_scale_lane.py",
+      "scenario_id": "tests/test_scale_workflow.py::test_lane40_strict_fails_when_lane39_inputs_missing",
+      "source": "tests/test_scale_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_scale_lane.py::test_lane40_cli_dispatch",
-      "source": "tests/test_scale_lane.py",
+      "scenario_id": "tests/test_scale_workflow.py::test_lane40_cli_dispatch",
+      "source": "tests/test_scale_workflow.py",
       "status": "active"
     },
     {
@@ -12856,29 +12856,29 @@
     {
       "domain": "reliability",
       "kind": "test_function",
-      "scenario_id": "tests/test_weekly_review_lane.py::test_lane28_weekly_review_json",
-      "source": "tests/test_weekly_review_lane.py",
+      "scenario_id": "tests/test_weekly_review_foundation.py::test_lane28_weekly_review_json",
+      "source": "tests/test_weekly_review_foundation.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "test_function",
-      "scenario_id": "tests/test_weekly_review_lane.py::test_lane28_emit_pack_and_execute",
-      "source": "tests/test_weekly_review_lane.py",
+      "scenario_id": "tests/test_weekly_review_foundation.py::test_lane28_emit_pack_and_execute",
+      "source": "tests/test_weekly_review_foundation.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "test_function",
-      "scenario_id": "tests/test_weekly_review_lane.py::test_lane28_strict_fails_when_sections_missing",
-      "source": "tests/test_weekly_review_lane.py",
+      "scenario_id": "tests/test_weekly_review_foundation.py::test_lane28_strict_fails_when_sections_missing",
+      "source": "tests/test_weekly_review_foundation.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "test_function",
-      "scenario_id": "tests/test_weekly_review_lane.py::test_lane28_cli_dispatch",
-      "source": "tests/test_weekly_review_lane.py",
+      "scenario_id": "tests/test_weekly_review_foundation.py::test_lane28_cli_dispatch",
+      "source": "tests/test_weekly_review_foundation.py",
       "status": "active"
     },
     {

@@ -13,7 +13,7 @@
 python -m sdetkit cycle29-phase1-hardening --format json --strict
 python -m sdetkit cycle29-phase1-hardening --emit-pack-dir docs/artifacts/cycle29-hardening-pack --format json --strict
 python -m sdetkit cycle29-phase1-hardening --execute --evidence-dir docs/artifacts/cycle29-hardening-pack/evidence --format json --strict
-python scripts/check_phase1_hardening_contract_29.py
+python scripts/check_phase1_hardening_contract.py
 ```
 
 ## Closeout criteria

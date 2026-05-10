@@ -16,7 +16,7 @@
       "stderr": ""
     },
     {
-      "command": "python scripts/check_scale_lane_contract.py --skip-evidence",
+      "command": "python scripts/check_scale_workflow_contract.py --skip-evidence",
       "returncode": 0,
       "stdout": "{\n  \"errors\": [],\n  \"score\": 100\n}\n",
       "stderr": ""

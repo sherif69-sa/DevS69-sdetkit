@@ -11,7 +11,7 @@
 ```bash
 python -m sdetkit docs-nav --format json --strict
 python -m sdetkit docs-nav --write-defaults --format json --strict
-python scripts/check_docs_navigation_contract_11.py
+python scripts/check_docs_navigation_contract.py
 ```
 
 ## Handoff

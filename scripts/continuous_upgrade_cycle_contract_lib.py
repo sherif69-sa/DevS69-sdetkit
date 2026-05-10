@@ -1,43 +1,44 @@
 from __future__ import annotations
 
 import importlib
-import json
-import sys
 from pathlib import Path
 
+from sdetkit.legacy_adapters import continuous_upgrade as continuous_upgrade_aliases
 
-def run_cycle_contract_check(cycle: int, root: str = ".", skip_evidence: bool = False) -> int:
-    repo_root = Path(root).resolve()
-    module = importlib.import_module(f"sdetkit.continuous_upgrade_cycle{cycle}_closeout")
-    build = getattr(module, f"build_continuous_upgrade_cycle{cycle}_closeout_summary")
-    payload = build(repo_root)
 
-    errors: list[str] = []
-    if not payload.get("summary", {}).get("strict_pass", False):
-        errors.append("summary.strict_pass is false")
-    if payload.get("summary", {}).get("activation_score", 0) < 95:
-        errors.append("activation_score below 95")
-    if payload.get("summary", {}).get("critical_failures"):
-        errors.append("critical_failures is not empty")
+def _load_continuous_upgrade_command_modules() -> dict[str, str]:
+    for value in vars(continuous_upgrade_aliases).values():
+        if isinstance(value, dict) and "continuous-upgrade-closeout-7" in value:
+            return {str(k): str(v) for k, v in value.items()}
+    raise RuntimeError("continuous upgrade legacy command map not found")
 
-    if not skip_evidence:
-        evidence = (
-            repo_root
-            / f"docs/artifacts/continuous-upgrade-cycle{cycle}-closeout-pack/evidence/cycle{cycle}-execution-summary.json"
-        )
-        if not evidence.exists():
-            errors.append(f"missing evidence summary: {evidence}")
-        else:
-            data = json.loads(evidence.read_text(encoding="utf-8"))
-            if int(data.get("total_commands", 0)) < 3:
-                errors.append("evidence total_commands below 3")
 
-    command = f"continuous-upgrade-cycle{cycle}"
-    if errors:
-        print(f"{command} contract check failed:", file=sys.stderr)
-        for error in errors:
-            print(f"- {error}", file=sys.stderr)
-        return 1
+COMMAND_MODULES = _load_continuous_upgrade_command_modules()
 
-    print(f"{command} contract check passed")
-    return 0
+
+def _build_summary_for_cycle(cycle: int, root: Path) -> dict:
+    command = f"continuous-upgrade-closeout-{cycle}"
+    module_name = COMMAND_MODULES[command]
+    module = importlib.import_module(module_name)
+
+    preferred = f"build_continuous_upgrade_cycle{cycle}_closeout_summary"
+    build = getattr(module, preferred, None)
+
+    if build is None:
+        candidates = [
+            getattr(module, name)
+            for name in dir(module)
+            if name.startswith("build_continuous_upgrade_") and name.endswith("_summary")
+        ]
+        if not candidates:
+            raise AttributeError(f"{module_name} has no continuous-upgrade summary builder")
+        build = candidates[0]
+
+    return build(root)
+
+
+def expected_evidence_path(cycle: int, root: Path) -> Path:
+    return (
+        root
+        / f"docs/artifacts/continuous-upgrade-cycle{cycle}-closeout-pack/evidence/cycle{cycle}-execution-summary.json"
+    )

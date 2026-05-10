@@ -24,7 +24,7 @@ Use this order to reduce decision fatigue during adoption:
 1. **First run (always):** `sdetkit gate fast` -> `sdetkit gate release` -> `sdetkit doctor`
 2. **Capability expansion:** `sdetkit kits list` then choose `release|intelligence|integration|forensics`
 3. **Operational depth:** move into stable supporting lanes (`security`, `repo`, `evidence`, `report`, `policy`)
-4. **Advanced/legacy lanes:** use playbooks or transition-era lanes only with explicit intent
+4. **Advanced/legacy workflows:** use playbooks or transition-era lanes only with explicit intent
 
 ## Layer 1: Canonical release-confidence path (public/stable first-run)
 
@@ -73,4 +73,4 @@ Use these intentionally; they are not the default first-run product surface.
 - For inventory/debugging only, use `sdetkit --help --show-hidden` to inspect the full long-tail surface.
 - For practical migration patterns, use [Legacy command migration map](legacy-command-migration-map.md).
 
-For a full command inventory (including hidden/legacy lanes), run `sdetkit --help --show-hidden`.
+For a full command inventory (including hidden/legacy workflows), run `sdetkit --help --show-hidden`.

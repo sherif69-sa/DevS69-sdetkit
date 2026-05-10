@@ -53,7 +53,7 @@ Legacy commands are supported for continuity but are not the preferred onboardin
 
 Contributor policy:
 
-- avoid adding new features only to legacy lanes,
+- avoid adding new features only to legacy workflows,
 - route new capability through stable/advanced surfaces first,
 - keep compatibility shims focused and observable.
 

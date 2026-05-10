@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import phase2_kickoff_31 as d31
+from sdetkit import phase2_kickoff as d31
 
 
 def _seed_repo(root: Path) -> None:
@@ -70,7 +70,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_lane31_kickoff_json(tmp_path: Path, capsys) -> None:
+def test_kickoff_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d31.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -79,7 +79,7 @@ def test_lane31_kickoff_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_lane31_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d31.main(
         [
@@ -110,14 +110,14 @@ def test_lane31_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_lane31_strict_fails_when_lane30_inputs_missing(tmp_path: Path) -> None:
+def test_strict_fails_when_workflow_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json").unlink()
     rc = d31.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_lane31_strict_fails_when_backlog_is_not_phase2_ready(tmp_path: Path) -> None:
+def test_strict_fails_when_backlog_is_not_phase2_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md").write_text(
         "- [ ]  baseline\n", encoding="utf-8"
@@ -126,7 +126,7 @@ def test_lane31_strict_fails_when_backlog_is_not_phase2_ready(tmp_path: Path) ->
     assert rc == 1
 
 
-def test_lane31_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["phase2-kickoff", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

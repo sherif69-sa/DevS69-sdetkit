@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ._legacy_lane import run_lane
+from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Reliability closeout\n\n## Reliability closeout\n"
 _CFG = {

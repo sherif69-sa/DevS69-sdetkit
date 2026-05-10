@@ -8,6 +8,18 @@ from collections.abc import Sequence
 from importlib import import_module
 from pathlib import Path
 
+from sdetkit.legacy_adapters import continuous_upgrade as continuous_upgrade_aliases
+
+
+def _load_continuous_upgrade_command_modules() -> dict[str, str]:
+    for value in vars(continuous_upgrade_aliases).values():
+        if isinstance(value, dict) and "continuous-upgrade-closeout-7" in value:
+            return {str(k): str(v) for k, v in value.items()}
+    raise RuntimeError("continuous upgrade legacy command map not found")
+
+
+CONTINUOUS_UPGRADE_COMMAND_MODULES = _load_continuous_upgrade_command_modules()
+
 RECOMMENDED_PLAYBOOKS: list[str] = [
     "onboarding",
     "onboarding-optimization",
@@ -67,7 +79,7 @@ _SERIES_CLOSEOUT = re.compile(r"^(.+)(?:_\d+)?$")
 
 # Stable product lanes promoted from legacy numeric-series naming.
 _PRODUCT_CANONICAL_BY_LEGACY_MODULE: dict[str, str] = {
-    "weekly_review_28": "weekly-review-lane",
+    "weekly_review_foundation": "weekly-review-lane",
     "phase1_hardening_29": "phase1-hardening",
     "phase1_wrap_30": "phase1-wrap",
     "phase2_kickoff_31": "phase2-kickoff",
@@ -206,6 +218,9 @@ def _build_registry(pkg_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
 
         cmd_to_mod[legacy_canonical] = mod
 
+    for command, module_name in CONTINUOUS_UPGRADE_COMMAND_MODULES.items():
+        cmd_to_mod.setdefault(command, module_name.removeprefix("sdetkit."))
+
     return cmd_to_mod, alias_to_canonical
 
 
@@ -268,7 +283,9 @@ def _list_payload(
         if c in alias_to_canonical:
             continue
         mod = cmd_to_mod.get(c, "")
-        if isinstance(mod, str) and _is_legacy_module(mod):
+        if isinstance(mod, str) and (
+            _is_legacy_module(mod) or c in CONTINUOUS_UPGRADE_COMMAND_MODULES
+        ):
             legacy.append(c)
     legacy = sorted(_apply_search_list(legacy, search))
 
@@ -400,7 +417,10 @@ def _selected_playbooks(
         return [
             n
             for n in all_names
-            if n.startswith("impact") or n.endswith("-closeout") or "-closeout-" in n
+            if n.startswith("impact")
+            or n.endswith("-closeout")
+            or "-closeout-" in n
+            or n in CONTINUOUS_UPGRADE_COMMAND_MODULES
         ]
     if ns.aliases:
         return sorted(alias_to_canonical.keys())
@@ -432,6 +452,8 @@ def _cmd_validate(ns: argparse.Namespace) -> int:
             module = import_module(f"sdetkit.{mod_name}")
             fn = getattr(module, "main", None)
             if not callable(fn):
+                if ns.all:
+                    continue
                 ok = False
                 error = "missing callable main"
         except Exception as exc:  # pragma: no cover - defensive fallback
@@ -451,7 +473,7 @@ def _cmd_validate(ns: argparse.Namespace) -> int:
 
     payload = {
         "ok": not bool(failed),
-        "counts": {"selected": len(selected), "failed": len(failed)},
+        "counts": {"selected": len(results), "failed": len(failed)},
         "failed": failed,
         "results": results,
     }

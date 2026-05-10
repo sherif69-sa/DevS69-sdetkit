@@ -8,7 +8,7 @@ Cycle 17 adds a unified **quality + contribution delta evidence pack** so mainta
 
 - New CLI command: `sdetkit quality-contribution-delta` with velocity score, stability score, recommendation engine, and strict delta gates.
 - New Cycle 17 sample artifact and expanded emitted pack under `docs/artifacts/contribution-quality-report-pack` (summary, scorecard, action plan, remediation checklist).
-- New contract checker: `scripts/check_quality_contribution_delta_contract_17.py`.
+- New contract checker: `scripts/check_quality_contribution_delta_contract.py`.
 - CLI dispatcher and help coverage updated to include `quality-contribution-delta`.
 
 ## Validation commands
@@ -16,7 +16,7 @@ Cycle 17 adds a unified **quality + contribution delta evidence pack** so mainta
 ```bash
 python -m sdetkit quality-contribution-delta --current-signals-file docs/artifacts/cycle17-growth-signals.json --previous-signals-file docs/artifacts/cycle14-growth-signals.json --format json --strict
 python -m sdetkit quality-contribution-delta --current-signals-file docs/artifacts/cycle17-growth-signals.json --previous-signals-file docs/artifacts/cycle14-growth-signals.json --emit-pack-dir docs/artifacts/contribution-quality-report-pack --format json --strict
-python scripts/check_quality_contribution_delta_contract_17.py
+python scripts/check_quality_contribution_delta_contract.py
 ```
 
 ## Closeout

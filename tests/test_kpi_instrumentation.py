@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import kpi_instrumentation_35 as d35
+from sdetkit import kpi_instrumentation as d35
 
 
 def _seed_repo(root: Path) -> None:
@@ -109,14 +109,14 @@ def test_kpi_instrumentation_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_kpi_instrumentation_strict_fails_when_lane34_inputs_missing(tmp_path: Path) -> None:
+def test_kpi_instrumentation_strict_fails_when_workflow_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/demo-asset2-pack/demo-asset2-summary.json").unlink()
     rc = d35.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_kpi_instrumentation_strict_fails_when_lane34_board_is_not_ready(tmp_path: Path) -> None:
+def test_kpi_instrumentation_strict_fails_when_workflow_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md").write_text(
         "- [ ]  KPI instrumentation backlog pre-scoped\n", encoding="utf-8"

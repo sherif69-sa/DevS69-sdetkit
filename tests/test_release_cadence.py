@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import release_cadence_32 as d32
+from sdetkit import release_cadence as d32
 
 
 def _seed_repo(root: Path) -> None:
@@ -104,14 +104,14 @@ def test_release_cadence_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_release_cadence_strict_fails_when_lane31_inputs_missing(tmp_path: Path) -> None:
+def test_release_cadence_strict_fails_when_workflow_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json").unlink()
     rc = d32.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_release_cadence_strict_fails_when_lane31_board_is_not_ready(tmp_path: Path) -> None:
+def test_release_cadence_strict_fails_when_workflow_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md").write_text(
         "- [ ]  release cadence checklist drafted\n", encoding="utf-8"

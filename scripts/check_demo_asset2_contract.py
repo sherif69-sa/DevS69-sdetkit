@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import demo_asset2_34 as d34
+from sdetkit import demo_asset2 as d34
 
 
 def main() -> int:

@@ -8,7 +8,7 @@ from sdetkit import cli
 @pytest.mark.parametrize(
     ("canonical", "legacy", "module_attr"),
     [
-        ("expansion-automation", "expansion-automation", "expansion_automation_41"),
+        ("expansion-automation", "expansion-automation", "expansion_automation"),
         (
             "optimization-closeout-foundation",
             "optimization-closeout-foundation",
@@ -58,7 +58,7 @@ def test_legacy_dispatch_uses_central_mapping(monkeypatch) -> None:
     monkeypatch.setattr(cli, "_run_module_main", _fake_run)
 
     assert cli.main(["phase1-hardening", "--format", "json"]) == 0
-    assert captured == [("sdetkit.phase1_hardening_29", ["--format", "json"])]
+    assert captured == [("sdetkit.phase1_hardening", ["--format", "json"])]
 
 
 def test_legacy_dispatch_emits_migration_hint(monkeypatch, capsys) -> None:

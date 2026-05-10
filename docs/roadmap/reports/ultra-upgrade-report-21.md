@@ -18,7 +18,7 @@ python -m pytest -q tests/test_weekly_review.py tests/test_cli_help_lists_subcom
 python -m sdetkit weekly-review --week 3 --format json --signals-file docs/artifacts/cycle21-growth-signals.json --previous-signals-file docs/artifacts/cycle14-growth-signals.json --strict
 python -m sdetkit weekly-review --week 3 --format markdown --signals-file docs/artifacts/cycle21-growth-signals.json --previous-signals-file docs/artifacts/cycle14-growth-signals.json --output docs/artifacts/cycle21-weekly-review-sample.md
 python -m sdetkit weekly-review --week 3 --emit-pack-dir docs/artifacts/cycle21-weekly-pack --signals-file docs/artifacts/cycle21-growth-signals.json --previous-signals-file docs/artifacts/cycle14-growth-signals.json --format json --strict
-python scripts/check_weekly_review_contract_21.py
+python scripts/check_weekly_review_completion_pack_contract.py
 ```
 
 ## Closeout

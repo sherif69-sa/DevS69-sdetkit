@@ -40,7 +40,7 @@ LEGACY_COMMAND_MODULES = _LEGACY_COMMAND_MODULES
 LEGACY_NAMESPACE_COMMANDS = _LEGACY_NAMESPACE_COMMANDS
 
 _COMPAT_MODULE_ATTRS: dict[str, str] = {
-    "expansion_automation_41": "sdetkit.expansion_automation_41",
+    "expansion_automation": "sdetkit.expansion_automation",
     "optimization_foundation": "sdetkit.optimization_foundation",
     "acceleration": "sdetkit.acceleration",
     "scale": "sdetkit.scale",

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ._legacy_lane import run_lane
+from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Weekly review closeout\n\n## Weekly review closeout\n"
 _CFG = {

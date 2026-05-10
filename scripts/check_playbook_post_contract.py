@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import playbook_post_39 as d39
+from sdetkit import playbook_post as d39
 
 
 def main() -> int:

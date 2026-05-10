@@ -57,7 +57,7 @@ def test_root_help_avoids_legacy_tier_labels() -> None:
     assert "Stable/Compatibility" not in proc.stdout
 
 
-def test_root_help_exposes_legacy_namespace_but_hides_legacy_lanes() -> None:
+def test_root_help_exposes_legacy_namespace_but_hides_legacy_workflows() -> None:
     proc = _run("--help")
     assert proc.returncode == 0
     assert "legacy" in proc.stdout

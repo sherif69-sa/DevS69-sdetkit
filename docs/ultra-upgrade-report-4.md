@@ -28,13 +28,13 @@ For Cycle 4, operators needed a single command that executes all built-in skills
   - Added Cycle 4 ultra docs entry and quick-jump link.
 - `docs/artifacts/cycle4-skills-sample.md`
   - Added skills/template inventory artifact for handoff traceability.
-- `scripts/check_skills_contract_4.py`
+- `scripts/check_skills_contract.py`
   - Added contract check to validate Cycle 4 docs + links.
 
 ## Validation checklist
 
 - `python -m pytest -q tests/test_agent_templates_cli.py`
-- `python scripts/check_skills_contract_4.py`
+- `python scripts/check_skills_contract.py`
 
 ## Artifact
 

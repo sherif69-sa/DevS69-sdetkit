@@ -380,7 +380,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> dict[str, Any]:
 
 
 def build_trust_assets_refresh_summary_impl(root: Path) -> dict[str, Any]:
-    "Compatibility alias for legacy lane-based builder name."
+    "Compatibility alias for legacy workflow-based builder name."
     return build_trust_assets_refresh_summary(root)
 
 

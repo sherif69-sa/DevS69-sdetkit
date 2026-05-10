@@ -31,7 +31,7 @@ This made weekly reporting manual and increased drift risk between what was deli
   - Added Cycle 7 report link and execution bullets.
 - `docs/cli.md`
   - Added `weekly-review` command reference and usage examples.
-- `scripts/check_weekly_review_contract_7.py`
+- `scripts/check_weekly_review_starter_contract.py`
   - Added Cycle 7 contract checker for README/docs/report/script wiring and artifact presence.
 - `docs/artifacts/cycle7-weekly-review-sample.md`
   - Added generated Cycle 7 weekly review artifact sample.
@@ -41,7 +41,7 @@ This made weekly reporting manual and increased drift risk between what was deli
 - `python -m sdetkit weekly-review --format text`
 - `python -m sdetkit weekly-review --format markdown --output docs/artifacts/cycle7-weekly-review-sample.md`
 - `python -m pytest -q tests/test_weekly_review.py tests/test_cli_help_lists_subcommands.py`
-- `python scripts/check_weekly_review_contract_7.py`
+- `python scripts/check_weekly_review_starter_contract.py`
 
 ## Artifact
 
