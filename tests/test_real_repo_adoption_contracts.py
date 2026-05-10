@@ -2,15 +2,27 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
+import pytest
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_ROOT = REPO_ROOT / "examples" / "adoption" / "real-repo"
+
+
+@pytest.fixture(autouse=True)
+def _clean_real_repo_sdetkit_workspace() -> Iterator[None]:
+    shutil.rmtree(FIXTURE_ROOT / ".sdetkit", ignore_errors=True)
+    yield
+    shutil.rmtree(FIXTURE_ROOT / ".sdetkit", ignore_errors=True)
+
+
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from real_repo_adoption_projection import (  # noqa: E402
