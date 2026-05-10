@@ -50,3 +50,55 @@ def test_doctor_diff_snapshot_fails_on_missing_file(tmp_path: Path, monkeypatch,
     data = json.loads(capsys.readouterr().out)
     assert rc == 2
     assert data["snapshot_diff_ok"] is False
+
+
+def test_doctor_diff_snapshot_reports_new_evidence_items(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "src").mkdir()
+    (tmp_path / "tools").mkdir()
+    (tmp_path / "src" / "old_ascii.py").write_text('MESSAGE = "old debt …"\n', encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    snap = tmp_path / "snap.json"
+    rc1 = doctor.main(
+        [
+            "--only",
+            "ascii",
+            "--fail-on",
+            "high",
+            "--format",
+            "json",
+            "--snapshot",
+            str(snap),
+        ]
+    )
+    assert rc1 == 0
+    capsys.readouterr()
+
+    (tmp_path / "tools" / "new_ascii.py").write_text('MESSAGE = "new debt …"\n', encoding="utf-8")
+
+    rc2 = doctor.main(
+        [
+            "--only",
+            "ascii",
+            "--fail-on",
+            "high",
+            "--format",
+            "json",
+            "--diff-snapshot",
+            str(snap),
+        ]
+    )
+    data = json.loads(capsys.readouterr().out)
+
+    assert rc2 == 2
+    assert data["snapshot_diff_ok"] is False
+    assert data["snapshot_new_evidence"] == [
+        {
+            "check": "ascii",
+            "message": "non-ASCII bytes detected",
+            "path": "tools/new_ascii.py",
+            "type": "non_ascii",
+        }
+    ]
