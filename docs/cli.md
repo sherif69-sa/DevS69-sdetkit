@@ -87,7 +87,9 @@ These remain fully supported for existing automation and muscle memory:
 
 Available utility lanes include:
 
-- `kv`, `apiget`, `cassette-get`, `patch`, `maintenance`, `ops`, `notify`, `agent`
+`triage-ci` reads a saved failed CI job log and emits an advisory report in text, JSON, or Markdown. Use it before patching when the final process-exit line is only wrapper noise.
+
+- `triage-ci`, `kv`, `apiget`, `cassette-get`, `patch`, `maintenance`, `ops`, `notify`, `agent`
 
 ## Transition-era and legacy-oriented material
 
