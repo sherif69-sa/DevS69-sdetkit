@@ -80,9 +80,13 @@ _SERIES_CLOSEOUT = re.compile(r"^(.+)(?:_\d+)?$")
 # Stable product lanes promoted from legacy numeric-series naming.
 _PRODUCT_CANONICAL_BY_LEGACY_MODULE: dict[str, str] = {
     "weekly_review_foundation": "weekly-review-lane",
+    "phase1_hardening": "phase1-hardening",
     "phase1_hardening_29": "phase1-hardening",
+    "phase1_wrap": "phase1-wrap",
     "phase1_wrap_30": "phase1-wrap",
+    "phase2_kickoff": "phase2-kickoff",
     "phase2_kickoff_31": "phase2-kickoff",
+    "expansion_automation": "expansion-automation",
     "expansion_automation_41": "expansion-automation",
     # Two legacy modules would collide on optimization-workflow.
     "optimization_foundation": "optimization-closeout-foundation",

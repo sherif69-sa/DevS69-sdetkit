@@ -268,7 +268,10 @@ class _RuleVisitor(ast.NodeVisitor):
             return True
         if rel.startswith("src/sdetkit/readiness/") or rel.startswith("src/sdetkit/evidence/"):
             return True
-        if rel.rsplit("/", 1)[-1].startswith("_"):
+        basename = rel.rsplit("/", 1)[-1].removesuffix(".py")
+        if basename.startswith("_"):
+            return True
+        if re.search(r"_\d+$", basename):
             return True
         if rel in PRINT_ALLOWED_PATHS:
             return True
