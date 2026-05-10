@@ -171,7 +171,9 @@ def _alias_for_series(mod: str) -> str | None:
     alias_cmd = _mod_to_cmd(alias_mod)
     if alias_cmd in RESERVED_NAMES:
         return None
-    return alias_cmd
+    if alias_cmd.endswith("-closeout"):
+        return alias_cmd
+    return f"{alias_cmd}-closeout"
 
 
 def _alias_for_series_module(mod: str) -> str | None:
@@ -452,7 +454,7 @@ def _cmd_validate(ns: argparse.Namespace) -> int:
             module = import_module(f"sdetkit.{mod_name}")
             fn = getattr(module, "main", None)
             if not callable(fn):
-                if ns.all:
+                if ns.all or ns.legacy:
                     continue
                 ok = False
                 error = "missing callable main"

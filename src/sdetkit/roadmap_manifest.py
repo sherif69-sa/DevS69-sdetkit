@@ -107,6 +107,41 @@ def _inventory(root: Path) -> dict[str, Any]:
             }
         )
 
+    if not entries:
+        for script in contract_candidates:
+            stem = script.stem
+            if not stem.startswith("check_"):
+                continue
+            lane = stem.removeprefix("check_")
+            for suffix in ("_workflow_contract", "_contract"):
+                if lane.endswith(suffix):
+                    lane = lane[: -len(suffix)]
+                    break
+            if not lane:
+                continue
+
+            module_path = src_dir / f"{lane}.py"
+            if not module_path.exists():
+                continue
+
+            tests_refs = 0
+            for _test_file, text in test_contents.items():
+                if lane in text:
+                    tests_refs += 1
+
+            entries.append(
+                {
+                    "id": 0,
+                    "lane": lane,
+                    "module": f"sdetkit.{lane}",
+                    "module_path": module_path.relative_to(root).as_posix(),
+                    "tests_referencing_module": tests_refs,
+                    "contract_scripts": 1,
+                    "contract_script_paths": [script.relative_to(root).as_posix()],
+                    "legacy_anchor_refs_in_module": 0,
+                }
+            )
+
     covered = [
         item
         for item in entries

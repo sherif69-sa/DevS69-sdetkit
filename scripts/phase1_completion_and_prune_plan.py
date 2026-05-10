@@ -114,6 +114,11 @@ def complete_phase1_flow(status_path: Path, plan_path: Path, archive_dir: Path) 
     }
 
 
+def phase1(status_path: Path, plan_path: Path, archive_dir: Path) -> dict[str, Any]:
+    """Compatibility wrapper for the historical Phase 1 completion helper."""
+    return complete_phase1_flow(status_path, plan_path, archive_dir)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Close Phase 1 and prune it from active plan.")
     parser.add_argument("--status-json", default="build/phase1-baseline/phase1-status.json")

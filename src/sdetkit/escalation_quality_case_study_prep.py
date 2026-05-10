@@ -179,9 +179,7 @@ def build_case_study_prep3_summary(root: Path) -> dict[str, Any]:
             "check_id": "page_header",
             "weight": 7,
             "passed": (
-                page_text.splitlines()[0].strip() == "# Case-study prep #3 closeout lane"
-                if page_text.strip()
-                else False
+                page_text.splitlines()[0].strip() == _SECTION_HEADER if page_text.strip() else False
             ),
             "evidence": page_text.splitlines()[0].strip() if page_text.strip() else "",
         },

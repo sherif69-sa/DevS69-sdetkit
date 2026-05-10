@@ -19,7 +19,11 @@ def _utc_now() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def build_command_plan(include_closeout: bool = False) -> list[list[str]]:
+def build_command_plan(
+    include_closeout: bool = False, *, include: bool | None = None
+) -> list[list[str]]:
+    if include is not None:
+        include_closeout = include
     commands = [
         ["make", "phase1-baseline"],
         ["make", "phase1-status"],
@@ -87,7 +91,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args(argv)
 
-    commands = build_command_plan(include_closeout=args.include_closeout)
+    commands = build_command_plan(include=args.include_closeout)
     executed = run_plan(commands)
 
     payload = {
