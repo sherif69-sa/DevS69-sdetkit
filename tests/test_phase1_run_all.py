@@ -6,20 +6,20 @@ from scripts import phase1_run_all as run_all
 
 
 def test_build_command_plan_default() -> None:
-    cmds = run_all.build_command_plan(include_closeout=False)
+    cmds = run_all.build_command_plan(include=False)
     assert cmds[0] == ["make", "phase1-baseline"]
     assert all(cmd != ["make", "phase1-closeout"] for cmd in cmds)
 
 
-def test_build_command_plan_with_closeout() -> None:
-    cmds = run_all.build_command_plan(include_closeout=True)
+def test_build_command_plan_with() -> None:
+    cmds = run_all.build_command_plan(include=True)
     assert cmds[-1] == ["make", "phase1-closeout"]
 
 
 def test_main_writes_outputs(tmp_path: Path) -> None:
     # Run only a safe command set by monkeypatching command plan.
     original = run_all.build_command_plan
-    run_all.build_command_plan = lambda include_closeout=False: [["python", "-c", "print('ok')"]]
+    run_all.build_command_plan = lambda include=False: [["python", "-c", "print('ok')"]]
     try:
         rc = run_all.main(
             [

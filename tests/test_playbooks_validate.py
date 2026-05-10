@@ -46,7 +46,7 @@ def test_playbooks_validate_aliases_are_only_alias_names(capsys) -> None:
     assert all(item["name"] != item["canonical"] for item in payload["results"])
 
 
-def test_playbooks_validate_aliases_include_non_closeout_day_aliases(capsys) -> None:
+def test_playbooks_validate_aliases_include_non_day_aliases(capsys) -> None:
     rc = playbooks_cli.main(["validate", "--aliases", "--format", "json"])
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)

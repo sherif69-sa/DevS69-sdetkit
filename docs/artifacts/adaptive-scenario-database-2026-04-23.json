@@ -80842,15 +80842,15 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_objection_closeout_contract.py",
-      "source": "scripts/check_objection_closeout_contract.py",
+      "scenario_id": "script::scripts/check_objection_handling_contract.py",
+      "source": "scripts/check_objection_handling_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_objection_closeout_contract_48.py",
-      "source": "scripts/check_objection_closeout_contract_48.py",
+      "scenario_id": "script::scripts/check_objection_handling_contract_48.py",
+      "source": "scripts/check_objection_handling_contract_48.py",
       "status": "active"
     },
     {
@@ -81353,29 +81353,29 @@
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_closeout_contract.py",
-      "source": "scripts/check_weekly_review_closeout_contract.py",
+      "scenario_id": "script::scripts/check_weekly_review_workflow_contract.py",
+      "source": "scripts/check_weekly_review_workflow_contract.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_closeout_contract_2.py",
-      "source": "scripts/check_weekly_review_closeout_contract_2.py",
+      "scenario_id": "script::scripts/check_weekly_review_workflow_contract_2.py",
+      "source": "scripts/check_weekly_review_workflow_contract_2.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_closeout_contract_49.py",
-      "source": "scripts/check_weekly_review_closeout_contract_49.py",
+      "scenario_id": "script::scripts/check_weekly_review_workflow_contract_49.py",
+      "source": "scripts/check_weekly_review_workflow_contract_49.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_closeout_contract_65.py",
-      "source": "scripts/check_weekly_review_closeout_contract_65.py",
+      "scenario_id": "script::scripts/check_weekly_review_workflow_contract_65.py",
+      "source": "scripts/check_weekly_review_workflow_contract_65.py",
       "status": "active"
     },
     {

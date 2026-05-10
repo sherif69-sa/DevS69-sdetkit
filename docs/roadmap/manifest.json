@@ -1,79 +1,7 @@
 {
   "closeout_alignment": {
-    "count": 56,
+    "count": 30,
     "entries": [
-      {
-        "contract_script_paths": [
-          "scripts/check_acceleration_closeout_contract_43.py"
-        ],
-        "contract_scripts": 1,
-        "id": 43,
-        "lane": "acceleration",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.acceleration_closeout_43",
-        "module_path": "src/sdetkit/acceleration_closeout_43.py",
-        "tests_referencing_module": 3
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_case_study_launch_closeout_contract_73.py"
-        ],
-        "contract_scripts": 1,
-        "id": 73,
-        "lane": "case_study_launch",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.case_study_launch_closeout_73",
-        "module_path": "src/sdetkit/case_study_launch_closeout_73.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_case_study_prep1_closeout_contract_69.py"
-        ],
-        "contract_scripts": 1,
-        "id": 69,
-        "lane": "case_study_prep1",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.case_study_prep1_closeout_69",
-        "module_path": "src/sdetkit/case_study_prep1_closeout_69.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_case_study_prep2_closeout_contract_70.py"
-        ],
-        "contract_scripts": 1,
-        "id": 70,
-        "lane": "case_study_prep2",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.case_study_prep2_closeout_70",
-        "module_path": "src/sdetkit/case_study_prep2_closeout_70.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_case_study_prep3_closeout_contract.py"
-        ],
-        "contract_scripts": 1,
-        "id": 71,
-        "lane": "case_study_prep3",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.case_study_prep3_closeout_71",
-        "module_path": "src/sdetkit/case_study_prep3_closeout_71.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_case_study_prep4_closeout_contract_72.py"
-        ],
-        "contract_scripts": 1,
-        "id": 72,
-        "lane": "case_study_prep4",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.case_study_prep4_closeout_72",
-        "module_path": "src/sdetkit/case_study_prep4_closeout_72.py",
-        "tests_referencing_module": 1
-      },
       {
         "contract_script_paths": [
           "scripts/check_community_program_closeout_contract_62.py"
@@ -82,21 +10,9 @@
         "id": 62,
         "lane": "community_program",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.community_program_closeout_62",
-        "module_path": "src/sdetkit/community_program_closeout_62.py",
+        "module": "sdetkit.community_program",
+        "module_path": "src/sdetkit/community_program.py",
         "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_community_touchpoint_closeout_contract.py"
-        ],
-        "contract_scripts": 1,
-        "id": 77,
-        "lane": "community_touchpoint",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.community_touchpoint_closeout_77",
-        "module_path": "src/sdetkit/community_touchpoint_closeout_77.py",
-        "tests_referencing_module": 2
       },
       {
         "contract_script_paths": [
@@ -108,7 +24,7 @@
           "scripts/check_docs_navigation_contract_11.py",
           "scripts/check_expansion_automation_contract_41.py",
           "scripts/check_first_contribution_contract_10.py",
-          "scripts/check_growth_campaign_closeout_contract_81.py",
+          "scripts/check_growth_campaign_contract_81.py",
           "scripts/check_phase1_artifact_set.py",
           "scripts/check_phase1_baseline_summary_contract.py",
           "scripts/check_phase1_flow_contract.py",
@@ -117,7 +33,7 @@
           "scripts/check_phase1_wrap_contract.py",
           "scripts/check_phase1_wrap_contract_30.py",
           "scripts/check_phase2_kickoff_contract_31.py",
-          "scripts/check_phase3_kickoff_closeout_contract_61.py",
+          "scripts/check_phase3_kickoff_contract_61.py",
           "scripts/check_quality_contribution_delta_contract_17.py",
           "scripts/check_weekly_review_contract_14.py",
           "scripts/check_weekly_review_contract_21.py"
@@ -126,8 +42,8 @@
         "id": 1,
         "lane": "continuous_upgrade",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.continuous_upgrade_closeout_1",
-        "module_path": "src/sdetkit/continuous_upgrade_closeout_1.py",
+        "module": "sdetkit.continuous_upgrade_foundation",
+        "module_path": "src/sdetkit/continuous_upgrade_foundation.py",
         "tests_referencing_module": 0
       },
       {
@@ -139,8 +55,8 @@
         "id": 10,
         "lane": "continuous_upgrade",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.continuous_upgrade_closeout_10",
-        "module_path": "src/sdetkit/continuous_upgrade_closeout_10.py",
+        "module": "sdetkit.continuous_upgrade_platform",
+        "module_path": "src/sdetkit/continuous_upgrade_platform.py",
         "tests_referencing_module": 0
       },
       {
@@ -152,8 +68,8 @@
         "id": 11,
         "lane": "continuous_upgrade",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.continuous_upgrade_closeout_11",
-        "module_path": "src/sdetkit/continuous_upgrade_closeout_11.py",
+        "module": "sdetkit.continuous_upgrade_readiness",
+        "module_path": "src/sdetkit/continuous_upgrade_readiness.py",
         "tests_referencing_module": 0
       },
       {
@@ -169,21 +85,21 @@
           "scripts/check_demo_asset2_contract_34.py",
           "scripts/check_integration_expansion2_closeout_contract.py",
           "scripts/check_integration_expansion2_closeout_contract_66.py",
-          "scripts/check_integration_feedback_closeout_contract_82.py",
+          "scripts/check_integration_feedback_contract_82.py",
           "scripts/check_kpi_audit_contract_27.py",
           "scripts/check_narrative_closeout_contract_52.py",
           "scripts/check_observability_v2_contract.py",
-          "scripts/check_optimization_closeout_contract_42.py",
+          "scripts/check_optimization_contract_42.py",
           "scripts/check_phase1_hardening_contract_29.py",
-          "scripts/check_phase2_hardening_closeout_contract.py",
-          "scripts/check_phase2_hardening_closeout_contract_58.py",
+          "scripts/check_phase2_hardening_contract.py",
+          "scripts/check_phase2_hardening_contract_58.py",
           "scripts/check_phase2_kickoff_contract.py",
           "scripts/check_phase2_kickoff_contract_31.py",
           "scripts/check_phase2_start_summary_contract.py",
           "scripts/check_phase2_wrap_handoff_closeout_contract.py",
           "scripts/check_phase2_wrap_handoff_closeout_contract_60.py",
           "scripts/check_release_cadence_contract_32.py",
-          "scripts/check_weekly_review_closeout_contract_2.py",
+          "scripts/check_weekly_review_workflow_contract_2.py",
           "scripts/check_weekly_review_contract_21.py",
           "scripts/check_weekly_review_contract_28.py"
         ],
@@ -191,105 +107,105 @@
         "id": 2,
         "lane": "continuous_upgrade",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.continuous_upgrade_closeout_2",
-        "module_path": "src/sdetkit/continuous_upgrade_closeout_2.py",
+        "module": "sdetkit.continuous_upgrade_baseline",
+        "module_path": "src/sdetkit/continuous_upgrade_baseline.py",
         "tests_referencing_module": 0
       },
       {
         "contract_script_paths": [
-          "scripts/check_acceleration_closeout_contract_43.py",
-          "scripts/check_case_study_launch_closeout_contract_73.py",
+          "scripts/check_acceleration_contract_43.py",
+          "scripts/check_case_study_launch_contract_73.py",
           "scripts/check_case_study_prep3_closeout_contract.py",
           "scripts/check_continuous_upgrade_contract_3.py",
           "scripts/check_demo_asset2_contract_34.py",
           "scripts/check_demo_asset_contract_33.py",
           "scripts/check_distribution_batch_contract_38.py",
           "scripts/check_distribution_closeout_contract_36.py",
-          "scripts/check_docs_loop_closeout_contract_53.py",
+          "scripts/check_docs_loop_contract_53.py",
           "scripts/check_experiment_lane_contract_37.py",
           "scripts/check_integration_expansion3_closeout_contract.py",
           "scripts/check_integration_expansion3_closeout_contract_67.py",
           "scripts/check_kpi_instrumentation_contract_35.py",
           "scripts/check_phase1_wrap_contract_30.py",
           "scripts/check_phase2_kickoff_contract_31.py",
-          "scripts/check_phase3_kickoff_closeout_contract.py",
-          "scripts/check_phase3_kickoff_closeout_contract_61.py",
-          "scripts/check_phase3_preplan_closeout_contract.py",
-          "scripts/check_phase3_preplan_closeout_contract_59.py",
+          "scripts/check_phase3_kickoff_contract.py",
+          "scripts/check_phase3_kickoff_contract_61.py",
+          "scripts/check_phase3_preplan_contract.py",
+          "scripts/check_phase3_preplan_contract_59.py",
           "scripts/check_phase3_quality_contract.py",
-          "scripts/check_phase3_wrap_publication_closeout_contract.py",
-          "scripts/check_phase3_wrap_publication_closeout_contract_90.py",
+          "scripts/check_phase3_wrap_publication_contract.py",
+          "scripts/check_phase3_wrap_publication_contract_90.py",
           "scripts/check_proof_contract_3.py",
           "scripts/check_release_cadence_contract_32.py",
-          "scripts/check_trust_faq_expansion_closeout_contract_83.py"
+          "scripts/check_trust_faq_expansion_contract_83.py"
         ],
         "contract_scripts": 25,
         "id": 3,
         "lane": "continuous_upgrade",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.continuous_upgrade_closeout_3",
-        "module_path": "src/sdetkit/continuous_upgrade_closeout_3.py",
+        "module": "sdetkit.continuous_upgrade_contracts",
+        "module_path": "src/sdetkit/continuous_upgrade_contracts.py",
         "tests_referencing_module": 0
       },
       {
         "contract_script_paths": [
-          "scripts/check_acceleration_closeout_contract_43.py",
+          "scripts/check_acceleration_contract_43.py",
           "scripts/check_case_study_prep4_closeout_contract.py",
           "scripts/check_case_study_prep4_closeout_contract_72.py",
           "scripts/check_continuous_upgrade_contract_4.py",
           "scripts/check_demo_asset2_contract_34.py",
           "scripts/check_distribution_scaling_closeout_contract_74.py",
-          "scripts/check_evidence_narrative_closeout_contract_84.py",
+          "scripts/check_evidence_narrative_contract_84.py",
           "scripts/check_expansion_automation_contract_41.py",
-          "scripts/check_expansion_closeout_contract_45.py",
+          "scripts/check_expansion_contract_45.py",
           "scripts/check_integration_expansion4_closeout_contract.py",
           "scripts/check_integration_expansion4_closeout_contract_68.py",
-          "scripts/check_integration_expansion_closeout_contract_64.py",
-          "scripts/check_objection_closeout_contract_48.py",
-          "scripts/check_optimization_closeout_contract_42.py",
-          "scripts/check_optimization_closeout_contract_46.py",
+          "scripts/check_integration_expansion_contract_64.py",
+          "scripts/check_objection_handling_contract.py",
+          "scripts/check_optimization_contract_42.py",
+          "scripts/check_optimization_contract_46.py",
           "scripts/check_phase4_governance_contract.py",
           "scripts/check_reliability_closeout_contract_47.py",
-          "scripts/check_scale_closeout_contract_44.py",
+          "scripts/check_scale_contract_44.py",
           "scripts/check_scale_lane_contract_40.py",
           "scripts/check_skills_contract_4.py",
-          "scripts/check_weekly_review_closeout_contract_49.py",
+          "scripts/check_weekly_review_workflow_contract.py",
           "scripts/check_weekly_review_contract_14.py"
         ],
         "contract_scripts": 22,
         "id": 4,
         "lane": "continuous_upgrade",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.continuous_upgrade_closeout_4",
-        "module_path": "src/sdetkit/continuous_upgrade_closeout_4.py",
+        "module": "sdetkit.continuous_upgrade_docs",
+        "module_path": "src/sdetkit/continuous_upgrade_docs.py",
         "tests_referencing_module": 0
       },
       {
         "contract_script_paths": [
           "scripts/check_community_activation_contract_25.py",
           "scripts/check_continuous_upgrade_contract_5.py",
-          "scripts/check_contributor_activation_closeout_contract_55.py",
-          "scripts/check_docs_loop_closeout_contract_53.py",
+          "scripts/check_contributor_activation_contract_55.py",
+          "scripts/check_docs_loop_contract_53.py",
           "scripts/check_execution_prioritization_closeout_contract_50.py",
-          "scripts/check_expansion_closeout_contract_45.py",
+          "scripts/check_expansion_contract_45.py",
           "scripts/check_kpi_deep_audit_closeout_contract_57.py",
           "scripts/check_kpi_instrumentation_contract_35.py",
           "scripts/check_narrative_closeout_contract_52.py",
-          "scripts/check_phase2_hardening_closeout_contract_58.py",
-          "scripts/check_phase3_preplan_closeout_contract_59.py",
+          "scripts/check_phase2_hardening_contract_58.py",
+          "scripts/check_phase3_preplan_contract_59.py",
           "scripts/check_phase5_ecosystem_contract.py",
           "scripts/check_platform_contract_5.py",
-          "scripts/check_release_prioritization_closeout_contract_85.py",
-          "scripts/check_stabilization_closeout_contract_56.py",
+          "scripts/check_release_prioritization_contract_85.py",
+          "scripts/check_stabilization_contract_56.py",
           "scripts/check_trust_assets_refresh_closeout_contract_75.py",
-          "scripts/check_weekly_review_closeout_contract_65.py"
+          "scripts/check_weekly_review_workflow_contract_65.py"
         ],
         "contract_scripts": 17,
         "id": 5,
         "lane": "continuous_upgrade",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.continuous_upgrade_closeout_5",
-        "module_path": "src/sdetkit/continuous_upgrade_closeout_5.py",
+        "module": "sdetkit.continuous_upgrade_quality",
+        "module_path": "src/sdetkit/continuous_upgrade_quality.py",
         "tests_referencing_module": 0
       },
       {
@@ -297,45 +213,45 @@
           "scripts/check_case_study_prep1_closeout_contract_69.py",
           "scripts/check_community_program_closeout_contract_62.py",
           "scripts/check_continuous_upgrade_contract_6.py",
-          "scripts/check_contributor_recognition_closeout_contract_76.py",
+          "scripts/check_contributor_recognition_contract_76.py",
           "scripts/check_conversion_contract_6.py",
           "scripts/check_distribution_closeout_contract_36.py",
           "scripts/check_integration_expansion2_closeout_contract_66.py",
           "scripts/check_integration_expansion3_closeout_contract_67.py",
           "scripts/check_integration_expansion4_closeout_contract_68.py",
-          "scripts/check_integration_expansion_closeout_contract_64.py",
-          "scripts/check_launch_readiness_closeout_contract_86.py",
-          "scripts/check_optimization_closeout_contract_46.py",
+          "scripts/check_integration_expansion_contract_64.py",
+          "scripts/check_launch_readiness_contract_86.py",
+          "scripts/check_optimization_contract_46.py",
           "scripts/check_phase2_wrap_handoff_closeout_contract_60.py",
-          "scripts/check_phase3_kickoff_closeout_contract_61.py",
+          "scripts/check_phase3_kickoff_contract_61.py",
           "scripts/check_phase6_metrics_contract.py",
-          "scripts/check_stabilization_closeout_contract_56.py",
-          "scripts/check_weekly_review_closeout_contract_65.py"
+          "scripts/check_stabilization_contract_56.py",
+          "scripts/check_weekly_review_workflow_contract_65.py"
         ],
         "contract_scripts": 17,
         "id": 6,
         "lane": "continuous_upgrade",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.continuous_upgrade_closeout_6",
-        "module_path": "src/sdetkit/continuous_upgrade_closeout_6.py",
+        "module": "sdetkit.continuous_upgrade_release",
+        "module_path": "src/sdetkit/continuous_upgrade_release.py",
         "tests_referencing_module": 0
       },
       {
         "contract_script_paths": [
-          "scripts/check_case_study_launch_closeout_contract_73.py",
+          "scripts/check_case_study_launch_contract_73.py",
           "scripts/check_case_study_prep2_closeout_contract_70.py",
           "scripts/check_case_study_prep4_closeout_contract_72.py",
           "scripts/check_continuous_upgrade_contract_7.py",
-          "scripts/check_contributor_recognition_closeout_contract_76.py",
+          "scripts/check_contributor_recognition_contract_76.py",
           "scripts/check_distribution_scaling_closeout_contract_74.py",
           "scripts/check_experiment_lane_contract_37.py",
-          "scripts/check_governance_handoff_closeout_contract_87.py",
+          "scripts/check_governance_handoff_contract_87.py",
           "scripts/check_integration_expansion3_closeout_contract_67.py",
           "scripts/check_kpi_audit_contract_27.py",
           "scripts/check_kpi_deep_audit_closeout_contract_57.py",
           "scripts/check_quality_contribution_delta_contract_17.py",
           "scripts/check_reliability_closeout_contract_47.py",
-          "scripts/check_scale_upgrade_closeout_contract_79.py",
+          "scripts/check_scale_upgrade_contract_79.py",
           "scripts/check_trust_assets_refresh_closeout_contract_75.py",
           "scripts/check_weekly_review_contract_7.py"
         ],
@@ -343,8 +259,8 @@
         "id": 7,
         "lane": "continuous_upgrade",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.continuous_upgrade_closeout_7",
-        "module_path": "src/sdetkit/continuous_upgrade_closeout_7.py",
+        "module": "sdetkit.continuous_upgrade_operations",
+        "module_path": "src/sdetkit/continuous_upgrade_operations.py",
         "tests_referencing_module": 0
       },
       {
@@ -352,27 +268,27 @@
           "scripts/check_continuous_upgrade_contract_8.py",
           "scripts/check_contributor_funnel_contract_8.py",
           "scripts/check_distribution_batch_contract_38.py",
-          "scripts/check_evidence_narrative_closeout_contract_84.py",
-          "scripts/check_governance_handoff_closeout_contract_87.py",
-          "scripts/check_governance_priorities_closeout_contract_88.py",
-          "scripts/check_governance_scale_closeout_contract_89.py",
-          "scripts/check_growth_campaign_closeout_contract_81.py",
+          "scripts/check_evidence_narrative_contract_84.py",
+          "scripts/check_governance_handoff_contract_87.py",
+          "scripts/check_governance_priorities_contract_88.py",
+          "scripts/check_governance_scale_contract_89.py",
+          "scripts/check_growth_campaign_contract_81.py",
           "scripts/check_integration_expansion4_closeout_contract_68.py",
-          "scripts/check_integration_feedback_closeout_contract_82.py",
-          "scripts/check_launch_readiness_closeout_contract_86.py",
-          "scripts/check_objection_closeout_contract_48.py",
+          "scripts/check_integration_feedback_contract_82.py",
+          "scripts/check_launch_readiness_contract_86.py",
+          "scripts/check_objection_handling_contract.py",
           "scripts/check_partner_outreach_closeout_contract_80.py",
-          "scripts/check_phase2_hardening_closeout_contract_58.py",
-          "scripts/check_release_prioritization_closeout_contract_85.py",
-          "scripts/check_trust_faq_expansion_closeout_contract_83.py",
+          "scripts/check_phase2_hardening_contract_58.py",
+          "scripts/check_release_prioritization_contract_85.py",
+          "scripts/check_trust_faq_expansion_contract_83.py",
           "scripts/check_weekly_review_contract_28.py"
         ],
         "contract_scripts": 17,
         "id": 8,
         "lane": "continuous_upgrade",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.continuous_upgrade_closeout_8",
-        "module_path": "src/sdetkit/continuous_upgrade_closeout_8.py",
+        "module": "sdetkit.continuous_upgrade_governance",
+        "module_path": "src/sdetkit/continuous_upgrade_governance.py",
         "tests_referencing_module": 0
       },
       {
@@ -380,44 +296,20 @@
           "scripts/check_case_study_prep1_closeout_contract_69.py",
           "scripts/check_continuous_upgrade_contract_9.py",
           "scripts/check_contribution_templates_contract_9.py",
-          "scripts/check_governance_scale_closeout_contract_89.py",
+          "scripts/check_governance_scale_contract_89.py",
           "scripts/check_phase1_hardening_contract_29.py",
-          "scripts/check_phase3_preplan_closeout_contract_59.py",
-          "scripts/check_phase3_wrap_publication_closeout_contract_90.py",
-          "scripts/check_scale_upgrade_closeout_contract_79.py",
-          "scripts/check_weekly_review_closeout_contract_49.py"
+          "scripts/check_phase3_preplan_contract_59.py",
+          "scripts/check_phase3_wrap_publication_contract_90.py",
+          "scripts/check_scale_upgrade_contract_79.py",
+          "scripts/check_weekly_review_workflow_contract.py"
         ],
         "contract_scripts": 9,
         "id": 9,
         "lane": "continuous_upgrade",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.continuous_upgrade_closeout_9",
-        "module_path": "src/sdetkit/continuous_upgrade_closeout_9.py",
+        "module": "sdetkit.continuous_upgrade_automation",
+        "module_path": "src/sdetkit/continuous_upgrade_automation.py",
         "tests_referencing_module": 0
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_contributor_activation_closeout_contract_55.py"
-        ],
-        "contract_scripts": 1,
-        "id": 55,
-        "lane": "contributor_activation",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.contributor_activation_closeout_55",
-        "module_path": "src/sdetkit/contributor_activation_closeout_55.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_contributor_recognition_closeout_contract_76.py"
-        ],
-        "contract_scripts": 1,
-        "id": 76,
-        "lane": "contributor_recognition",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.contributor_recognition_closeout_76",
-        "module_path": "src/sdetkit/contributor_recognition_closeout_76.py",
-        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -427,8 +319,8 @@
         "id": 36,
         "lane": "distribution",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.distribution_closeout_36",
-        "module_path": "src/sdetkit/distribution_closeout_36.py",
+        "module": "sdetkit.distribution",
+        "module_path": "src/sdetkit/distribution.py",
         "tests_referencing_module": 1
       },
       {
@@ -439,45 +331,21 @@
         "id": 74,
         "lane": "distribution_scaling",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.distribution_scaling_closeout_74",
-        "module_path": "src/sdetkit/distribution_scaling_closeout_74.py",
+        "module": "sdetkit.distribution_scaling",
+        "module_path": "src/sdetkit/distribution_scaling.py",
         "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
-          "scripts/check_docs_loop_closeout_contract_53.py"
-        ],
-        "contract_scripts": 1,
-        "id": 53,
-        "lane": "docs_loop",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.docs_loop_closeout_53",
-        "module_path": "src/sdetkit/docs_loop_closeout_53.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_ecosystem_priorities_closeout_contract.py"
-        ],
-        "contract_scripts": 1,
-        "id": 78,
-        "lane": "ecosystem_priorities",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.ecosystem_priorities_closeout_78",
-        "module_path": "src/sdetkit/ecosystem_priorities_closeout_78.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_evidence_narrative_closeout_contract_84.py"
+          "scripts/check_evidence_narrative_contract_84.py"
         ],
         "contract_scripts": 1,
         "id": 84,
         "lane": "evidence_narrative",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.evidence_narrative_closeout_84",
-        "module_path": "src/sdetkit/evidence_narrative_closeout_84.py",
-        "tests_referencing_module": 1
+        "module": "sdetkit.evidence_narrative",
+        "module_path": "src/sdetkit/evidence_narrative.py",
+        "tests_referencing_module": 0
       },
       {
         "contract_script_paths": [
@@ -487,81 +355,9 @@
         "id": 50,
         "lane": "execution_prioritization",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.execution_prioritization_closeout_50",
-        "module_path": "src/sdetkit/execution_prioritization_closeout_50.py",
+        "module": "sdetkit.execution_prioritization",
+        "module_path": "src/sdetkit/execution_prioritization.py",
         "tests_referencing_module": 3
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_expansion_closeout_contract_45.py"
-        ],
-        "contract_scripts": 1,
-        "id": 45,
-        "lane": "expansion",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.expansion_closeout_45",
-        "module_path": "src/sdetkit/expansion_closeout_45.py",
-        "tests_referencing_module": 3
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_governance_handoff_closeout_contract_87.py"
-        ],
-        "contract_scripts": 1,
-        "id": 87,
-        "lane": "governance_handoff",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.governance_handoff_closeout_87",
-        "module_path": "src/sdetkit/governance_handoff_closeout_87.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_governance_priorities_closeout_contract_88.py"
-        ],
-        "contract_scripts": 1,
-        "id": 88,
-        "lane": "governance_priorities",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.governance_priorities_closeout_88",
-        "module_path": "src/sdetkit/governance_priorities_closeout_88.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_governance_scale_closeout_contract_89.py"
-        ],
-        "contract_scripts": 1,
-        "id": 89,
-        "lane": "governance_scale",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.governance_scale_closeout_89",
-        "module_path": "src/sdetkit/governance_scale_closeout_89.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_growth_campaign_closeout_contract_81.py"
-        ],
-        "contract_scripts": 1,
-        "id": 81,
-        "lane": "growth_campaign",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.growth_campaign_closeout_81",
-        "module_path": "src/sdetkit/growth_campaign_closeout_81.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_integration_expansion2_closeout_contract_66.py"
-        ],
-        "contract_scripts": 1,
-        "id": 66,
-        "lane": "integration_expansion2",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.integration_expansion2_closeout_66",
-        "module_path": "src/sdetkit/integration_expansion2_closeout_66.py",
-        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -571,32 +367,8 @@
         "id": 67,
         "lane": "integration_expansion3",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.integration_expansion3_closeout_67",
-        "module_path": "src/sdetkit/integration_expansion3_closeout_67.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_integration_expansion4_closeout_contract_68.py"
-        ],
-        "contract_scripts": 1,
-        "id": 68,
-        "lane": "integration_expansion4",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.integration_expansion4_closeout_68",
-        "module_path": "src/sdetkit/integration_expansion4_closeout_68.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_integration_feedback_closeout_contract_82.py"
-        ],
-        "contract_scripts": 1,
-        "id": 82,
-        "lane": "integration_feedback",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.integration_feedback_closeout_82",
-        "module_path": "src/sdetkit/integration_feedback_closeout_82.py",
+        "module": "sdetkit.tekton_integration_expansion",
+        "module_path": "src/sdetkit/tekton_integration_expansion.py",
         "tests_referencing_module": 1
       },
       {
@@ -607,56 +379,32 @@
         "id": 57,
         "lane": "kpi_deep_audit",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.kpi_deep_audit_closeout_57",
-        "module_path": "src/sdetkit/kpi_deep_audit_closeout_57.py",
+        "module": "sdetkit.kpi_deep_audit",
+        "module_path": "src/sdetkit/kpi_deep_audit.py",
         "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
-          "scripts/check_launch_readiness_closeout_contract_86.py"
+          "scripts/check_launch_readiness_contract_86.py"
         ],
         "contract_scripts": 1,
         "id": 86,
         "lane": "launch_readiness",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.launch_readiness_closeout_86",
-        "module_path": "src/sdetkit/launch_readiness_closeout_86.py",
-        "tests_referencing_module": 2
+        "module": "sdetkit.launch_readiness",
+        "module_path": "src/sdetkit/launch_readiness.py",
+        "tests_referencing_module": 0
       },
       {
         "contract_script_paths": [
-          "scripts/check_objection_closeout_contract_48.py"
+          "scripts/check_objection_handling_contract.py"
         ],
         "contract_scripts": 1,
         "id": 48,
         "lane": "objection",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.objection_closeout_48",
-        "module_path": "src/sdetkit/objection_closeout_48.py",
-        "tests_referencing_module": 3
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_optimization_closeout_contract_42.py"
-        ],
-        "contract_scripts": 1,
-        "id": 42,
-        "lane": "optimization",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.optimization_closeout_42",
-        "module_path": "src/sdetkit/optimization_closeout_42.py",
-        "tests_referencing_module": 3
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_optimization_closeout_contract_46.py"
-        ],
-        "contract_scripts": 1,
-        "id": 46,
-        "lane": "optimization",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.optimization_closeout_46",
-        "module_path": "src/sdetkit/optimization_closeout_46.py",
+        "module": "sdetkit.objection_handling",
+        "module_path": "src/sdetkit/objection_handling.py",
         "tests_referencing_module": 3
       },
       {
@@ -667,21 +415,21 @@
         "id": 80,
         "lane": "partner_outreach",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.partner_outreach_closeout_80",
-        "module_path": "src/sdetkit/partner_outreach_closeout_80.py",
+        "module": "sdetkit.partner_outreach",
+        "module_path": "src/sdetkit/partner_outreach.py",
         "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase2_hardening_closeout_contract_58.py"
+          "scripts/check_phase2_hardening_contract_58.py"
         ],
         "contract_scripts": 1,
         "id": 58,
         "lane": "phase2_hardening",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase2_hardening_closeout_58",
-        "module_path": "src/sdetkit/phase2_hardening_closeout_58.py",
-        "tests_referencing_module": 1
+        "module": "sdetkit.phase2_hardening",
+        "module_path": "src/sdetkit/phase2_hardening.py",
+        "tests_referencing_module": 0
       },
       {
         "contract_script_paths": [
@@ -691,57 +439,45 @@
         "id": 60,
         "lane": "phase2_wrap_handoff",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase2_wrap_handoff_closeout_60",
-        "module_path": "src/sdetkit/phase2_wrap_handoff_closeout_60.py",
+        "module": "sdetkit.phase2_wrap_handoff",
+        "module_path": "src/sdetkit/phase2_wrap_handoff.py",
         "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase3_kickoff_closeout_contract_61.py"
+          "scripts/check_phase3_kickoff_contract_61.py"
         ],
         "contract_scripts": 1,
         "id": 61,
         "lane": "phase3_kickoff",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase3_kickoff_closeout_61",
-        "module_path": "src/sdetkit/phase3_kickoff_closeout_61.py",
-        "tests_referencing_module": 1
+        "module": "sdetkit.phase3_kickoff",
+        "module_path": "src/sdetkit/phase3_kickoff.py",
+        "tests_referencing_module": 0
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase3_preplan_closeout_contract_59.py"
+          "scripts/check_phase3_preplan_contract_59.py"
         ],
         "contract_scripts": 1,
         "id": 59,
         "lane": "phase3_preplan",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase3_preplan_closeout_59",
-        "module_path": "src/sdetkit/phase3_preplan_closeout_59.py",
-        "tests_referencing_module": 1
+        "module": "sdetkit.phase3_preplan",
+        "module_path": "src/sdetkit/phase3_preplan.py",
+        "tests_referencing_module": 0
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase3_wrap_publication_closeout_contract_90.py"
+          "scripts/check_phase3_wrap_publication_contract_90.py"
         ],
         "contract_scripts": 1,
         "id": 90,
         "lane": "phase3_wrap_publication",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase3_wrap_publication_closeout_90",
-        "module_path": "src/sdetkit/phase3_wrap_publication_closeout_90.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_release_prioritization_closeout_contract_85.py"
-        ],
-        "contract_scripts": 1,
-        "id": 85,
-        "lane": "release_prioritization",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.release_prioritization_closeout_85",
-        "module_path": "src/sdetkit/release_prioritization_closeout_85.py",
-        "tests_referencing_module": 1
+        "module": "sdetkit.phase3_wrap_publication",
+        "module_path": "src/sdetkit/phase3_wrap_publication.py",
+        "tests_referencing_module": 0
       },
       {
         "contract_script_paths": [
@@ -751,45 +487,9 @@
         "id": 47,
         "lane": "reliability",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.reliability_closeout_47",
-        "module_path": "src/sdetkit/reliability_closeout_47.py",
+        "module": "sdetkit.reliability",
+        "module_path": "src/sdetkit/reliability.py",
         "tests_referencing_module": 3
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_scale_closeout_contract_44.py"
-        ],
-        "contract_scripts": 1,
-        "id": 44,
-        "lane": "scale",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.scale_closeout_44",
-        "module_path": "src/sdetkit/scale_closeout_44.py",
-        "tests_referencing_module": 3
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_scale_upgrade_closeout_contract_79.py"
-        ],
-        "contract_scripts": 1,
-        "id": 79,
-        "lane": "scale_upgrade",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.scale_upgrade_closeout_79",
-        "module_path": "src/sdetkit/scale_upgrade_closeout_79.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_stabilization_closeout_contract_56.py"
-        ],
-        "contract_scripts": 1,
-        "id": 56,
-        "lane": "stabilization",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.stabilization_closeout_56",
-        "module_path": "src/sdetkit/stabilization_closeout_56.py",
-        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -799,49 +499,37 @@
         "id": 75,
         "lane": "trust_assets_refresh",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.trust_assets_refresh_closeout_75",
-        "module_path": "src/sdetkit/trust_assets_refresh_closeout_75.py",
+        "module": "sdetkit.trust_assets_refresh",
+        "module_path": "src/sdetkit/trust_assets_refresh.py",
         "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
-          "scripts/check_trust_faq_expansion_closeout_contract_83.py"
+          "scripts/check_trust_faq_expansion_contract_83.py"
         ],
         "contract_scripts": 1,
         "id": 83,
         "lane": "trust_faq_expansion",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.trust_faq_expansion_closeout_83",
-        "module_path": "src/sdetkit/trust_faq_expansion_closeout_83.py",
-        "tests_referencing_module": 1
+        "module": "sdetkit.trust_faq_expansion",
+        "module_path": "src/sdetkit/trust_faq_expansion.py",
+        "tests_referencing_module": 0
       },
       {
         "contract_script_paths": [
-          "scripts/check_weekly_review_closeout_contract_49.py"
+          "scripts/check_weekly_review_workflow_contract.py"
         ],
         "contract_scripts": 1,
         "id": 49,
         "lane": "weekly_review",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.weekly_review_closeout_49",
-        "module_path": "src/sdetkit/weekly_review_closeout_49.py",
+        "module": "sdetkit.weekly_review",
+        "module_path": "src/sdetkit/weekly_review.py",
         "tests_referencing_module": 4
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_weekly_review_closeout_contract_65.py"
-        ],
-        "contract_scripts": 1,
-        "id": 65,
-        "lane": "weekly_review",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.weekly_review_closeout_65",
-        "module_path": "src/sdetkit/weekly_review_closeout_65.py",
-        "tests_referencing_module": 1
       }
     ],
-    "fully_aligned_count": 45,
-    "readiness_percent": 80.36
+    "fully_aligned_count": 12,
+    "readiness_percent": 40.0
   },
   "phases": []
 }

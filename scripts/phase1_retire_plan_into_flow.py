@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Retire Phase 1 planning state and persist flow-first manifest after closeout."""
+"""Retire Phase 1 planning state and persist flow-first manifest after completion."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from scripts.phase1_closeout_and_prune_plan import closeout_phase1
+from scripts.phase1_completion_and_prune_plan import complete_phase1_flow
 
 FLOW_COMMANDS = [
     "make phase-current",
@@ -36,23 +36,23 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 def retire_phase1_plan(
     status_json: Path, plan_json: Path, archive_dir: Path, flow_manifest: Path
 ) -> dict[str, Any]:
-    closeout = closeout_phase1(status_json, plan_json, archive_dir)
-    if not closeout.get("ok", False):
+    completion = complete_phase1_flow(status_json, plan_json, archive_dir)
+    if not completion.get("ok", False):
         return {
             "ok": False,
             "schema_version": "sdetkit.phase1_retire_plan.v1",
-            "reason": closeout.get("reason", "closeout failed"),
-            "closeout": closeout,
+            "reason": completion.get("reason", "closeout failed"),
+            "completion": completion,
         }
 
     manifest = {
         "schema_version": "sdetkit.phase1_flow_manifest.v1",
         "phase1_plan_retired": True,
         "status_source": str(status_json),
-        "archived_plan": closeout.get("archived_plan"),
-        "active_plan": closeout.get("plan"),
+        "archived_plan": completion.get("archived_plan"),
+        "active_plan": completion.get("plan"),
         "flow_commands": FLOW_COMMANDS,
-        "next_phase": closeout.get("new_current_phase", {}),
+        "next_phase": completion.get("new_current_phase", {}),
     }
     _write_json(flow_manifest, manifest)
 
@@ -60,7 +60,7 @@ def retire_phase1_plan(
         "ok": True,
         "schema_version": "sdetkit.phase1_retire_plan.v1",
         "flow_manifest": str(flow_manifest),
-        "closeout": closeout,
+        "completion": completion,
     }
 
 

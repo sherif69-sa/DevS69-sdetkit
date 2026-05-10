@@ -7,7 +7,7 @@ from sdetkit import upgrade_hub
 
 def test_build_upgrade_hub_summary_includes_plan_inventory(tmp_path) -> None:
     (tmp_path / "src" / "sdetkit").mkdir(parents=True, exist_ok=True)
-    (tmp_path / "src" / "sdetkit" / "alpha_closeout_1.py").write_text("", encoding="utf-8")
+    (tmp_path / "src" / "sdetkit" / "alpha_1.py").write_text("", encoding="utf-8")
 
     plans_dir = tmp_path / "plans"
     plans_dir.mkdir(parents=True, exist_ok=True)
@@ -36,7 +36,7 @@ def test_build_upgrade_hub_summary_includes_plan_inventory(tmp_path) -> None:
 
 def test_upgrade_hub_main_text_mode_prints_plan_upgrade_lines(tmp_path, capsys) -> None:
     (tmp_path / "src" / "sdetkit").mkdir(parents=True, exist_ok=True)
-    (tmp_path / "src" / "sdetkit" / "beta_closeout_2.py").write_text("", encoding="utf-8")
+    (tmp_path / "src" / "sdetkit" / "beta_2.py").write_text("", encoding="utf-8")
 
     plans_dir = tmp_path / "plans"
     plans_dir.mkdir(parents=True, exist_ok=True)

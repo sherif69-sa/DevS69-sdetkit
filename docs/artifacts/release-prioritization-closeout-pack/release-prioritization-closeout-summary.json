@@ -3,7 +3,7 @@
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-release-prioritization-closeout.md",
+    "docs_page": "docs/integrations-release-prioritization-completion.md",
     "top10": "docs/top-10-github-strategy.md",
     "evidence_narrative_summary": "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json",
     "evidence_narrative_delivery_board": "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md",

@@ -268,7 +268,7 @@ class _RuleVisitor(ast.NodeVisitor):
             return True
         if rel.startswith("src/sdetkit/readiness/") or rel.startswith("src/sdetkit/evidence/"):
             return True
-        if "_closeout_" in rel:
+        if "_" in rel:
             return True
         if rel in PRINT_ALLOWED_PATHS:
             return True

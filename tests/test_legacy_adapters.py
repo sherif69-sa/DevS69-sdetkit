@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from sdetkit.legacy_adapters import LEGACY_COMMAND_MODULES, LEGACY_NAMESPACE_COMMANDS
-from sdetkit.legacy_adapters.closeout import LEGACY_CLOSEOUT_COMMAND_MODULES
 from sdetkit.legacy_adapters.continuous_upgrade import LEGACY_CONTINUOUS_UPGRADE_COMMAND_MODULES
 from sdetkit.legacy_adapters.foundation import LEGACY_FOUNDATION_COMMAND_MODULES
+from sdetkit.legacy_adapters.workflow_aliases import LEGACY_CLOSEOUT_COMMAND_MODULES
 
 
 def test_legacy_adapter_aggregation_preserves_all_mappings() -> None:

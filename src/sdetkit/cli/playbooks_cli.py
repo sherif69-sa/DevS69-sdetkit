@@ -63,7 +63,7 @@ RESERVED_NAMES: set[str] = (
 )
 
 _SERIES_PREFIX = re.compile("^(?:impact|)\\d+_")
-_SERIES_CLOSEOUT = re.compile(r"^(.+_closeout)(?:_\d+)?$")
+_SERIES_CLOSEOUT = re.compile(r"^(.+)(?:_\d+)?$")
 
 # Stable product lanes promoted from legacy numeric-series naming.
 _PRODUCT_CANONICAL_BY_LEGACY_MODULE: dict[str, str] = {
@@ -72,17 +72,17 @@ _PRODUCT_CANONICAL_BY_LEGACY_MODULE: dict[str, str] = {
     "phase1_wrap_30": "phase1-wrap",
     "phase2_kickoff_31": "phase2-kickoff",
     "expansion_automation_41": "expansion-automation",
-    # Two legacy modules would collide on optimization-closeout.
-    "optimization_closeout_42": "optimization-closeout-foundation",
-    "acceleration_closeout_43": "acceleration-closeout",
-    "scale_closeout_44": "scale-closeout",
-    "expansion_closeout_45": "expansion-closeout",
-    "optimization_closeout_46": "optimization-closeout",
-    "reliability_closeout_47": "reliability-closeout",
-    "objection_closeout_48": "objection-closeout",
-    "weekly_review_closeout_49": "weekly-review-closeout",
-    "execution_prioritization_closeout_50": "execution-prioritization-closeout",
-    "weekly_review_closeout_65": "weekly-review-closeout-2",
+    # Two legacy modules would collide on optimization-workflow.
+    "optimization_foundation": "optimization-closeout-foundation",
+    "acceleration": "acceleration-closeout",
+    "scale": "scale-closeout",
+    "expansion": "expansion-closeout",
+    "optimization": "optimization-closeout",
+    "reliability": "reliability-closeout",
+    "objection_handling": "objection-closeout",
+    "weekly_review": "weekly-review-closeout",
+    "execution_prioritization": "execution-prioritization-closeout",
+    "weekly_review_continuity": "weekly-review-closeout-2",
 }
 
 _PLAYBOOK_MODULE_BY_CANONICAL: dict[str, str] = {
@@ -127,9 +127,9 @@ def _pkg_dir() -> Path:
 def _is_legacy_module(mod: str) -> bool:
     if _SERIES_PREFIX.match(mod):
         return True
-    if mod.endswith("_closeout"):
+    if mod.endswith(""):
         return True
-    if re.search(r"_closeout_\d+$", mod):
+    if re.search(r"_\d+$", mod):
         return True
     if re.search(r"_\d+$", mod):
         return True
@@ -151,7 +151,7 @@ def _discover_legacy_modules(pkg_dir: Path) -> list[str]:
     return sorted(mods)
 
 
-def _alias_for_series_closeout(mod: str) -> str | None:
+def _alias_for_series(mod: str) -> str | None:
     m = _SERIES_CLOSEOUT.match(mod)
     if not m:
         return None
@@ -196,7 +196,7 @@ def _build_registry(pkg_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     for mod in _discover_legacy_modules(pkg_dir):
         legacy_canonical = (
             _PRODUCT_CANONICAL_BY_LEGACY_MODULE.get(mod)
-            or _alias_for_series_closeout(mod)
+            or _alias_for_series(mod)
             or _alias_for_series_module(mod)
             or _mod_to_cmd(mod)
         )

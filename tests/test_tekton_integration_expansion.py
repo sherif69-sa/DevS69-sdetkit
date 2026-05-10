@@ -1,0 +1,233 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from sdetkit import cli
+from sdetkit import tekton_integration_expansion as d67
+from tests.workflow_fixture_seed import seed_contract_anchors
+
+
+def _seed_repo(root: Path) -> None:
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
+    (root / "README.md").write_text(
+        "docs/integrations-integration-expansion3-workflow.md\nintegration-expansion3-closeout\n",
+        encoding="utf-8",
+    )
+    (root / "docs").mkdir(parents=True, exist_ok=True)
+    (root / "docs/index.md").write_text(
+        "impact-67-big-upgrade-report.md\nintegrations-integration-expansion3-workflow.md\n",
+        encoding="utf-8",
+    )
+    (root / "docs/top-10-github-strategy.md").write_text(
+        "- ** — Integration expansion #3:** publish advanced Jenkins implementation path.\n"
+        "- ** — Integration expansion #4:** publish self-hosted enterprise implementation path.\n",
+        encoding="utf-8",
+    )
+    (root / "docs/integrations-integration-expansion3-workflow.md").write_text(
+        d67._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
+    )
+    (root / "docs/impact-67-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
+
+    summary = (
+        root
+        / "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json"
+    )
+    summary.parent.mkdir(parents=True, exist_ok=True)
+    summary.write_text(
+        json.dumps(
+            {
+                "summary": {"activation_score": 100, "strict_pass": True},
+                "checks": [{"passed": True}],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    board = (
+        root
+        / "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
+    )
+    board.write_text(
+        "\n".join(
+            [
+                "# Delivery board",
+                "- [ ] integration-expansion2 integration brief committed",
+                "- [ ] Advanced GitLab pipeline blueprint published",
+                "- [ ] Matrix and cache strategy exported",
+                "- [ ] KPI scorecard snapshot exported",
+                "- [ ] Integration expansion priorities drafted from lane learnings",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    jenkins = root / "templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile"
+    jenkins.write_text(
+        "pipeline {\n"
+        "  agent any\n"
+        "  stages {\n"
+        "    stage('test') {\n"
+        "      matrix {\n"
+        "        stages {\n"
+        "          stage('unit') {\n"
+        "            steps { echo 'ok' }\n"
+        "          }\n"
+        "        }\n"
+        "      }\n"
+        "    }\n"
+        "  }\n"
+        "  parallel {\n"
+        "    stage('contract') { steps { echo 'x' } }\n"
+        "  }\n"
+        "  post {\n"
+        "    always { echo 'archive' }\n"
+        "  }\n"
+        "}\n",
+        encoding="utf-8",
+    )
+
+
+def test_integration_expansion3_json(tmp_path: Path, capsys) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    rc = d67.main(["--root", str(tmp_path), "--format", "json", "--strict"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["name"] == "integration-expansion3-closeout"
+    assert out["summary"]["activation_score"] >= 95
+
+
+def test_integration_expansion3_emit_pack_and_execute(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    rc = d67.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--emit-pack-dir",
+            "artifacts/integration-expansion3-closeout-pack",
+            "--execute",
+            "--evidence-dir",
+            "artifacts/integration-expansion3-closeout-pack/evidence",
+            "--format",
+            "json",
+            "--strict",
+        ]
+    )
+    assert rc == 0
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion3-closeout-pack/integration-expansion3-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion3-closeout-pack/integration-expansion3-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion3-closeout-pack/integration-expansion3-integration-brief.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion3-closeout-pack/integration-expansion3-jenkins-blueprint.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion3-closeout-pack/integration-expansion3-matrix-plan.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion3-closeout-pack/integration-expansion3-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion3-closeout-pack/integration-expansion3-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion3-closeout-pack/integration-expansion3-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion3-closeout-pack/evidence/integration-expansion3-execution-summary.json"
+    ).exists()
+
+
+def test_integration_expansion3_strict_fails_without_prereq_baseline(
+    tmp_path: Path,
+) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    (
+        tmp_path
+        / "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json"
+    ).unlink()
+    assert d67.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
+
+
+def test_integration_expansion3_cli_dispatch(tmp_path: Path, capsys) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    rc = cli.main(["integration-expansion3-closeout", "--root", str(tmp_path), "--format", "text"])
+    assert rc == 0
+    assert "Integration Expansion3 Closeout summary" in capsys.readouterr().out
+
+
+def test_integration_expansion3_strict_fails_when_top10_markers_missing(
+    tmp_path: Path,
+) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    (tmp_path / "docs/top-10-github-strategy.md").write_text(
+        "- **Platform strategy:** no lane markers here.\n",
+        encoding="utf-8",
+    )
+    assert d67.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
+
+
+def test_integration_expansion3_strict_fails_when_integration_expansion2_anchor_missing(
+    tmp_path: Path,
+) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    (
+        tmp_path
+        / "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
+    ).write_text(
+        "\n".join(
+            [
+                "# Delivery board",
+                "- [ ] Integration brief committed",
+                "- [ ] Advanced GitLab pipeline blueprint published",
+                "- [ ] Matrix and cache strategy exported",
+                "- [ ] KPI scorecard snapshot exported",
+                "- [ ] Integration expansion priorities drafted from lane learnings",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    assert d67.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
+
+
+def test_integration_expansion3_command_lane_parity_and_heading_hygiene() -> None:
+    assert d67._REQUIRED_COMMANDS == d67._EXECUTION_COMMANDS
+    assert "#  " not in d67._DEFAULT_PAGE_TEMPLATE
+    for command in d67._REQUIRED_COMMANDS:
+        assert command in d67._DEFAULT_PAGE_TEMPLATE

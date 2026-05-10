@@ -159,7 +159,7 @@ def test_cli_alias_resolver_fallback_and_hit(monkeypatch: pytest.MonkeyPatch) ->
         playbooks_cli,
         "_build_registry",
         lambda _pkg: (
-            {"weekly-review-closeout": "weekly_review_closeout_49"},
+            {"weekly-review-closeout": "weekly_review"},
             {"weekly-review-closeout": "weekly-review-closeout"},
         ),
     )
