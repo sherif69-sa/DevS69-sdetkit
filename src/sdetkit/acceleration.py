@@ -1,0 +1,460 @@
+from __future__ import annotations
+
+import argparse
+import json
+import shlex
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+_PAGE_PATH = "docs/integrations-acceleration-workflow.md"
+_TOP10_PATH = "docs/top-10-github-strategy.md"
+_OPTIMIZATION_CLOSEOUT_SUMMARY_PATH = (
+    "docs/artifacts/optimization-closeout-pack-42/optimization-closeout-summary-42.json"
+)
+_OPTIMIZATION_CLOSEOUT_BOARD_PATH = (
+    "docs/artifacts/optimization-closeout-pack-42/delivery-board-42.md"
+)
+_OPTIMIZATION_CLOSEOUT_FOUNDATION_SUMMARY_PATH = "docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json"
+_OPTIMIZATION_CLOSEOUT_FOUNDATION_BOARD_PATH = (
+    "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
+)
+_SECTION_HEADER = "# Acceleration closeout lane"
+_REQUIRED_SECTIONS = [
+    "## Why this lane matters",
+    "## Required inputs (optimization closeout foundation)",
+    "## Command lane",
+    "## Acceleration closeout contract",
+    "## Acceleration quality checklist",
+    "## Delivery board",
+    "## Scoring model",
+]
+_REQUIRED_COMMANDS = [
+    "python -m sdetkit acceleration-closeout --format json --strict",
+    "python -m sdetkit acceleration-closeout --emit-pack-dir docs/artifacts/acceleration-closeout-pack --format json --strict",
+    "python -m sdetkit acceleration-closeout --execute --evidence-dir docs/artifacts/acceleration-closeout-pack/evidence --format json --strict",
+    "python scripts/check_acceleration_contract.py",
+]
+_EXECUTION_COMMANDS = [
+    "python -m sdetkit acceleration-closeout --format json --strict",
+    "python -m sdetkit acceleration-closeout --emit-pack-dir docs/artifacts/acceleration-closeout-pack --format json --strict",
+    "python scripts/check_acceleration_contract.py --skip-evidence",
+]
+_REQUIRED_CONTRACT_LINES = [
+    "Single owner + backup reviewer are assigned for  acceleration lane execution and KPI follow-up.",
+    "The  acceleration lane references  optimization winners and misses with deterministic growth loops.",
+    "Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
+    " closeout records acceleration learnings and  scale priorities.",
+]
+_REQUIRED_QUALITY_LINES = [
+    "- [ ] Includes acceleration summary, growth matrix, and rollback strategy",
+    "- [ ] Every section has owner, publish window, KPI target, and risk flag",
+    "- [ ] CTA links point to docs + runnable command evidence",
+    "- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI",
+    "- [ ] Artifact pack includes acceleration plan, growth matrix, KPI scorecard, and execution log",
+]
+_REQUIRED_DELIVERY_BOARD_LINES = [
+    "- [ ]  acceleration plan draft committed",
+    "- [ ]  review notes captured with owner + backup",
+    "- [ ]  growth matrix exported",
+    "- [ ]  KPI scorecard snapshot exported",
+    "- [ ]  scale priorities drafted from  learnings",
+]
+
+_DEFAULT_PAGE_TEMPLATE = "# Acceleration closeout lane\n\nThis lane closes with a major acceleration upgrade that converts optimization evidence into deterministic improvement loops.\n\n## Why this lane matters\n\n- Converts  optimization proof into growth-first operating motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from acceleration outcomes into  scale priorities.\n\n## Required inputs (optimization closeout foundation)\n\n- `docs/artifacts/optimization-closeout-pack-42/optimization-closeout-summary-42.json`\n- `docs/artifacts/optimization-closeout-pack-42/delivery-board-42.md`\n\n## Command lane\n\n```bash\npython -m sdetkit acceleration-closeout --format json --strict\npython -m sdetkit acceleration-closeout --emit-pack-dir docs/artifacts/acceleration-closeout-pack --format json --strict\npython -m sdetkit acceleration-closeout --execute --evidence-dir docs/artifacts/acceleration-closeout-pack/evidence --format json --strict\npython scripts/check_acceleration_contract.py\n```\n\n## Acceleration closeout contract\n\n- Single owner + backup reviewer are assigned for  acceleration lane execution and KPI follow-up.\n- The  acceleration lane references  optimization winners and misses with deterministic growth loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records acceleration learnings and  scale priorities.\n\n## Acceleration quality checklist\n\n- [ ] Includes acceleration summary, growth matrix, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes acceleration plan, growth matrix, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  acceleration plan draft committed\n- [ ]  review notes captured with owner + backup\n- [ ]  growth matrix exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  scale priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Acceleration contract lock + delivery board readiness: 15 points.\n"
+
+
+def _read(path: Path) -> str:
+    return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
+def _load_json(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _load_optimization(path: Path) -> tuple[float, bool, int]:
+    data = _load_json(path)
+    if data is None:
+        return 0.0, False, 0
+    summary = data.get("summary")
+    checks = data.get("checks")
+    score = summary.get("activation_score") if isinstance(summary, dict) else None
+    strict_pass = summary.get("strict_pass") if isinstance(summary, dict) else False
+    check_count = len(checks) if isinstance(checks, list) else 0
+    resolved_score = float(score) if isinstance(score, (int, float)) else 0.0
+    return resolved_score, bool(strict_pass), check_count
+
+
+def _board_stats(path: Path) -> tuple[int, bool, bool]:
+    text = _read(path)
+    items = [line for line in text.splitlines() if line.strip().startswith("- [")]
+    return len(items), "Acceleration Closeout" in text, "Acceleration Closeout" in text
+
+
+def _contains_all_lines(text: str, expected: list[str]) -> list[str]:
+    return [line for line in expected if line not in text]
+
+
+def _resolve_existing_path(root: Path, primary: str, legacy: str) -> Path:
+    primary_path = root / primary
+    if primary_path.exists():
+        return primary_path
+    return root / legacy
+
+
+def build_acceleration_summary(root: Path) -> dict[str, Any]:
+    readme_path = "README.md"
+    docs_index_path = "docs/index.md"
+    docs_page_path = _PAGE_PATH
+    top10_path = _TOP10_PATH
+
+    page_path = root / docs_page_path
+    page_text = _read(page_path)
+    readme_text = _read(root / readme_path)
+    docs_index_text = _read(root / docs_index_path)
+    top10_text = _read(root / top10_path)
+
+    missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
+    missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
+    missing_contract_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES]
+    )
+    missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
+    missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
+
+    optimization_summary = _resolve_existing_path(
+        root, _OPTIMIZATION_CLOSEOUT_SUMMARY_PATH, _OPTIMIZATION_CLOSEOUT_FOUNDATION_SUMMARY_PATH
+    )
+    optimization_board = _resolve_existing_path(
+        root, _OPTIMIZATION_CLOSEOUT_BOARD_PATH, _OPTIMIZATION_CLOSEOUT_FOUNDATION_BOARD_PATH
+    )
+    optimization_score, optimization_strict, optimization_check_count = _load_optimization(
+        optimization_summary
+    )
+    board_count, board_has_optimization, board_has_acceleration = _board_stats(optimization_board)
+
+    checks: list[dict[str, Any]] = [
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
+        {
+            "check_id": "required_sections_present",
+            "weight": 10,
+            "passed": not missing_sections,
+            "evidence": {"missing_sections": missing_sections},
+        },
+        {
+            "check_id": "required_commands_present",
+            "weight": 10,
+            "passed": not missing_commands,
+            "evidence": {"missing_commands": missing_commands},
+        },
+        {
+            "check_id": "readme_acceleration_link",
+            "weight": 8,
+            "passed": "docs/integrations-acceleration-workflow.md" in readme_text,
+            "evidence": "docs/integrations-acceleration-workflow.md",
+        },
+        {
+            "check_id": "readme_acceleration_command",
+            "weight": 4,
+            "passed": "acceleration-closeout" in readme_text,
+            "evidence": "acceleration-closeout",
+        },
+        {
+            "check_id": "docs_index_acceleration_links",
+            "weight": 8,
+            "passed": (
+                "impact-43-big-upgrade-report.md" in docs_index_text
+                and "integrations-acceleration-workflow.md" in docs_index_text
+            ),
+            "evidence": "impact-43-big-upgrade-report.md + integrations-acceleration-workflow.md",
+        },
+        {
+            "check_id": "top10_acceleration_alignment",
+            "weight": 5,
+            "passed": (
+                "Acceleration Closeout" in top10_text and "Acceleration Closeout" in top10_text
+            ),
+            "evidence": "Acceleration Closeout strategy chain",
+        },
+        {
+            "check_id": "optimization_summary_present",
+            "weight": 10,
+            "passed": optimization_summary.exists(),
+            "evidence": str(optimization_summary),
+        },
+        {
+            "check_id": "optimization_delivery_board_present",
+            "weight": 8,
+            "passed": optimization_board.exists(),
+            "evidence": str(optimization_board),
+        },
+        {
+            "check_id": "optimization_quality_floor",
+            "weight": 10,
+            "passed": optimization_strict and optimization_score >= 95,
+            "evidence": {
+                "optimization_score": optimization_score,
+                "strict_pass": optimization_strict,
+                "optimization_checks": optimization_check_count,
+            },
+        },
+        {
+            "check_id": "optimization_board_integrity",
+            "weight": 7,
+            "passed": board_count >= 5 and board_has_optimization and board_has_acceleration,
+            "evidence": {
+                "board_items": board_count,
+                "contains_optimization": board_has_optimization,
+                "contains_acceleration": board_has_acceleration,
+            },
+        },
+        {
+            "check_id": "acceleration_contract_locked",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": {"missing_contract_lines": missing_contract_lines},
+        },
+        {
+            "check_id": "acceleration_quality_checklist_locked",
+            "weight": 3,
+            "passed": not missing_quality_lines,
+            "evidence": {"missing_quality_items": missing_quality_lines},
+        },
+        {
+            "check_id": "delivery_board_locked",
+            "weight": 2,
+            "passed": not missing_board_items,
+            "evidence": {"missing_board_items": missing_board_items},
+        },
+    ]
+
+    failed = [c for c in checks if not c["passed"]]
+    score = int(round(sum(c["weight"] for c in checks if c["passed"])))
+    critical_failures: list[str] = []
+    if not optimization_summary.exists() or not optimization_board.exists():
+        critical_failures.append("optimization_handoff_inputs")
+    if not optimization_strict:
+        critical_failures.append("optimization_strict_baseline")
+
+    wins: list[str] = []
+    misses: list[str] = []
+    handoff_actions: list[str] = []
+
+    if optimization_strict:
+        wins.append(f"42 continuity is strict-pass with activation score={optimization_score}.")
+    else:
+        misses.append(" strict continuity signal is missing.")
+        handoff_actions.append(
+            "Re-run the optimization closeout command and restore strict pass baseline before acceleration closeout lock."
+        )
+
+    if board_count >= 5 and board_has_optimization and board_has_acceleration:
+        wins.append(f"42 delivery board integrity validated with {board_count} checklist items.")
+    else:
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and /43 anchors).")
+        handoff_actions.append("Repair  delivery board entries to include  and  anchors.")
+
+    if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
+        wins.append(
+            "Acceleration execution contract + quality checklist is fully locked for execution."
+        )
+    else:
+        misses.append(
+            "Acceleration contract, quality checklist, or delivery board entries are missing."
+        )
+        handoff_actions.append(
+            "Complete all  acceleration contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
+
+    if not failed and not critical_failures:
+        wins.append(" acceleration closeout lane is fully complete and ready for  scale lane.")
+
+    return {
+        "name": "acceleration-closeout",
+        "inputs": {
+            "readme": readme_path,
+            "docs_index": docs_index_path,
+            "docs_page": docs_page_path,
+            "top10": top10_path,
+            "optimization_summary": str(optimization_summary.relative_to(root))
+            if optimization_summary.exists()
+            else str(optimization_summary),
+            "optimization_delivery_board": str(optimization_board.relative_to(root))
+            if optimization_board.exists()
+            else str(optimization_board),
+        },
+        "checks": checks,
+        "rollup": {
+            "optimization_activation_score": optimization_score,
+            "optimization_checks": optimization_check_count,
+            "optimization_delivery_board_items": board_count,
+        },
+        "summary": {
+            "activation_score": score,
+            "passed_checks": len(checks) - len(failed),
+            "failed_checks": len(failed),
+            "critical_failures": critical_failures,
+            "strict_pass": not failed and not critical_failures,
+        },
+        "wins": wins,
+        "misses": misses,
+        "handoff_actions": handoff_actions,
+    }
+
+
+def _render_text(payload: dict[str, Any]) -> str:
+    lines = [
+        "Acceleration closeout summary",
+        f"- Activation score: {payload['summary']['activation_score']}",
+        f"- Passed checks: {payload['summary']['passed_checks']}",
+        f"- Failed checks: {payload['summary']['failed_checks']}",
+        f"- Critical failures: {payload['summary']['critical_failures']}",
+        f"- 42 activation score: `{payload['rollup']['optimization_activation_score']}`",
+        f"- 42 checks evaluated: `{payload['rollup']['optimization_checks']}`",
+        f"- 42 delivery board checklist items: `{payload['rollup']['optimization_delivery_board_items']}`",
+    ]
+    if payload["wins"]:
+        lines.append("- Wins:")
+        lines.extend([f"  - {w}" for w in payload["wins"]])
+    if payload["misses"]:
+        lines.append("- Misses:")
+        lines.extend([f"  - {m}" for m in payload["misses"]])
+    return "\n".join(lines)
+
+
+def _write(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
+    target = root / pack_dir
+    target.mkdir(parents=True, exist_ok=True)
+    _write(target / "acceleration-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "acceleration-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "acceleration-plan.md",
+        "# Acceleration plan\n\n- Objective: close  with measurable quality and throughput gains.\n",
+    )
+    _write(
+        target / "growth-matrix.csv",
+        "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
+        "quality-floor,qa-lead,platform-owner,2026-03-12T10:00:00Z,docs/integrations-acceleration-workflow.md,python -m sdetkit acceleration-closeout --format json --strict,failed-checks:0,baseline-drift\n",
+    )
+    _write(
+        target / "acceleration-kpi-scorecard.json",
+        json.dumps(
+            {
+                "kpis": [
+                    {
+                        "id": "strict_pass",
+                        "baseline": 1,
+                        "current": int(payload["summary"]["strict_pass"]),
+                        "delta": int(payload["summary"]["strict_pass"]) - 1,
+                        "confidence": "high",
+                    }
+                ]
+            },
+            indent=2,
+        )
+        + "\n",
+    )
+    _write(
+        target / "execution-log.md",
+        "# Acceleration execution log\n\n- [ ] 2026-03-12: Record misses, wins, and  scale priorities.\n",
+    )
+    _write(
+        target / "delivery-board.md",
+        "# Acceleration delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "validation-commands.md",
+        "# Acceleration validation commands\n\n```bash\n"
+        + "\n".join(_EXECUTION_COMMANDS)
+        + "\n```\n",
+    )
+
+
+def _execute_commands(root: Path, evidence_dir: Path) -> None:
+    evidence_path = root / evidence_dir
+    evidence_path.mkdir(parents=True, exist_ok=True)
+    events: list[dict[str, Any]] = []
+    for index, command in enumerate(_EXECUTION_COMMANDS, start=1):
+        argv = shlex.split(command)
+        if argv and argv[0] == "python":
+            argv[0] = sys.executable
+        proc = subprocess.run(argv, cwd=root, text=True, capture_output=True, check=False)
+        event = {
+            "command": command,
+            "returncode": proc.returncode,
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+        }
+        events.append(event)
+        _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
+    _write(
+        evidence_path / "execution-summary.json",
+        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
+    )
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Acceleration closeout checks")
+    parser.add_argument("--root", default=".")
+    parser.add_argument("--format", choices=["text", "json"], default="text")
+    parser.add_argument("--strict", action="store_true")
+    parser.add_argument("--emit-pack-dir")
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--evidence-dir")
+    parser.add_argument("--ensure-doc", action="store_true")
+    return parser
+
+
+def build_acceleration_summary_impl(root: Path) -> dict[str, Any]:
+    "Compatibility alias for legacy -based builder name."
+    return build_acceleration_summary(root)
+
+
+def main(argv: list[str] | None = None) -> int:
+    ns = build_parser().parse_args(argv)
+    root = Path(ns.root).resolve()
+
+    if ns.ensure_doc:
+        page = root / _PAGE_PATH
+        if not page.exists():
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
+
+    payload = build_acceleration_summary(root)
+
+    if ns.emit_pack_dir:
+        _emit_pack(root, payload, Path(ns.emit_pack_dir))
+    if ns.execute:
+        evidence_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/acceleration-closeout-pack/evidence")
+        )
+        _execute_commands(root, evidence_dir)
+
+    if ns.format == "json":
+        print(json.dumps(payload, indent=2))
+    else:
+        print(_render_text(payload))
+
+    return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

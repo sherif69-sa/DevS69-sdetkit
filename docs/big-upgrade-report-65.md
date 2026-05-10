@@ -17,7 +17,7 @@ Close Cycle 65 with a high-signal weekly review lane that converts Cycle 64 inte
 python -m sdetkit cycle65-weekly-review-closeout --format json --strict
 python -m sdetkit cycle65-weekly-review-closeout --emit-pack-dir docs/artifacts/cycle65-weekly-review-closeout-pack --format json --strict
 python -m sdetkit cycle65-weekly-review-closeout --execute --evidence-dir docs/artifacts/cycle65-weekly-review-closeout-pack/evidence --format json --strict
-python scripts/check_weekly_review_closeout_contract.py
+python scripts/check_weekly_review_workflow_contract.py
 ```
 
 ## Outcome

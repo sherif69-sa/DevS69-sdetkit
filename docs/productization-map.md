@@ -96,7 +96,7 @@ Guided playbook workflows are included in this tier for rollout/use-case executi
 
 - `policy`, `report`, `maintenance`, `ops`, `notify`, `agent`, integration quickstarts.
 
-## Treat as incubator/legacy lane (explicit opt-in)
+## Treat as incubator/legacy workflow (explicit opt-in)
 
 - /impact/closeout command family and matching impact-report documentation.
 - Campaign-style command names where scope is phase-specific rather than evergreen.

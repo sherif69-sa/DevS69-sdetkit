@@ -236,8 +236,8 @@ def test_security_gate_flags_debug_print_outside_allowlisted_src_modules(tmp_pat
     assert any(f.rule_id == "SEC_DEBUG_PRINT" for f in findings)
 
 
-def test_security_gate_allows_debug_print_in_closeout_modules(tmp_path: Path) -> None:
-    module = tmp_path / "src" / "sdetkit" / "alpha_closeout_99.py"
+def test_security_gate_allows_debug_print_in_modules(tmp_path: Path) -> None:
+    module = tmp_path / "src" / "sdetkit" / "alpha_99.py"
     module.parent.mkdir(parents=True)
     module.write_text("print('debug')\n", encoding="utf-8")
 

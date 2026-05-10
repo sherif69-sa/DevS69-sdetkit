@@ -1,0 +1,98 @@
+from __future__ import annotations
+
+import pytest
+
+from sdetkit import cli
+
+
+@pytest.mark.parametrize(
+    ("canonical", "legacy", "module_attr"),
+    [
+        ("expansion-automation", "expansion-automation", "expansion_automation"),
+        (
+            "optimization-closeout-foundation",
+            "optimization-closeout-foundation",
+            "optimization_foundation",
+        ),
+        ("acceleration-closeout", "acceleration-closeout", "acceleration"),
+        ("scale-closeout", "scale-closeout", "scale"),
+        ("expansion-closeout", "expansion-closeout", "expansion"),
+        ("optimization-closeout", "optimization-closeout", "optimization"),
+        ("reliability-closeout", "reliability-closeout", "reliability"),
+        ("objection-closeout", "objection-closeout", "objection_handling"),
+        ("weekly-review-closeout", "weekly-review-closeout", "weekly_review"),
+        (
+            "execution-prioritization-closeout",
+            "execution-prioritization-closeout",
+            "execution_prioritization",
+        ),
+    ],
+)
+def test_canonical_and_legacy_commands_dispatch(
+    monkeypatch, canonical: str, legacy: str, module_attr: str
+) -> None:
+    calls: list[list[str]] = []
+
+    def _fake_main(argv: list[str]) -> int:
+        calls.append(list(argv))
+        return 0
+
+    monkeypatch.setattr(getattr(cli, module_attr), "main", _fake_main)
+
+    assert cli.main([canonical, "--format", "json"]) == 0
+    assert cli.main([legacy, "--format", "json"]) == 0
+    assert calls == [["--format", "json"], ["--format", "json"]]
+
+
+def test_legacy_namespace_commands_are_present_in_central_mapping() -> None:
+    assert set(cli.LEGACY_NAMESPACE_COMMANDS).issubset(set(cli.LEGACY_COMMAND_MODULES))
+
+
+def test_legacy_dispatch_uses_central_mapping(monkeypatch) -> None:
+    captured: list[tuple[str, list[str]]] = []
+
+    def _fake_run(module_name: str, args: list[str]) -> int:
+        captured.append((module_name, list(args)))
+        return 0
+
+    monkeypatch.setattr(cli, "_run_module_main", _fake_run)
+
+    assert cli.main(["phase1-hardening", "--format", "json"]) == 0
+    assert captured == [("sdetkit.phase1_hardening", ["--format", "json"])]
+
+
+def test_legacy_dispatch_emits_migration_hint(monkeypatch, capsys) -> None:
+    def _fake_run(module_name: str, args: list[str]) -> int:
+        return 0
+
+    monkeypatch.setattr(cli, "_run_module_main", _fake_run)
+
+    assert cli.main(["phase1-hardening"]) == 0
+    err = capsys.readouterr().err
+    assert "[legacy-hint]" in err
+    assert "phase1-hardening" in err
+    assert "gate fast -> gate release -> doctor" in err
+
+
+def test_legacy_dispatch_can_disable_migration_hint(monkeypatch, capsys) -> None:
+    def _fake_run(module_name: str, args: list[str]) -> int:
+        return 0
+
+    monkeypatch.setattr(cli, "_run_module_main", _fake_run)
+    monkeypatch.setenv("SDETKIT_LEGACY_HINTS", "0")
+
+    assert cli.main(["phase1-hardening"]) == 0
+    err = capsys.readouterr().err
+    assert "[legacy-hint]" not in err
+
+
+def test_legacy_dispatch_can_disable_migration_hint_per_invocation(monkeypatch, capsys) -> None:
+    def _fake_run(module_name: str, args: list[str]) -> int:
+        return 0
+
+    monkeypatch.setattr(cli, "_run_module_main", _fake_run)
+    monkeypatch.delenv("SDETKIT_LEGACY_HINTS", raising=False)
+
+    assert cli.main(["--no-legacy-hint", "phase1-hardening"]) == 0
+    err = capsys.readouterr().err
+    assert "[legacy-hint]" not in err

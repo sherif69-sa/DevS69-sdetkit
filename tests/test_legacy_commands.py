@@ -18,7 +18,7 @@ def test_legacy_preferred_surface_routes_weekly_review() -> None:
     assert legacy_preferred_surface("weekly-review-lane") == "python -m sdetkit weekly-review"
 
 
-def test_legacy_preferred_surface_routes_closeout_to_playbooks() -> None:
+def test_legacy_preferred_surface_routes_to_playbooks() -> None:
     assert legacy_preferred_surface("scale-closeout") == "python -m sdetkit playbooks --help"
 
 

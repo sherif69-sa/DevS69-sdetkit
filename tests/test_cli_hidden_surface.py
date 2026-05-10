@@ -1,7 +1,7 @@
 from sdetkit import cli
 
 
-def test_root_help_hides_closeout_commands_by_default() -> None:
+def test_root_help_hides_commands_by_default() -> None:
     help_text = cli._build_root_parser()[0].format_help()
     assert "docs-qa" not in help_text
     assert "proof" not in help_text

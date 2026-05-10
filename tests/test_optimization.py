@@ -1,0 +1,140 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from sdetkit import cli
+from sdetkit import optimization as d46
+from tests.workflow_fixture_seed import seed_contract_anchors
+
+
+def _seed_repo(root: Path) -> None:
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
+    (root / "README.md").write_text(
+        "docs/integrations-optimization-workflow.md\noptimization-closeout\n",
+        encoding="utf-8",
+    )
+    (root / "docs").mkdir(parents=True, exist_ok=True)
+    (root / "docs/index.md").write_text(
+        "impact-46-big-upgrade-report.md\nintegrations-optimization-workflow.md\n",
+        encoding="utf-8",
+    )
+    (root / "docs/top-10-github-strategy.md").write_text(
+        "- ** — Optimization lane continuation:** convert  expansion wins into optimization plays.\n"
+        "- ** — Reliability lane continuation:** convert  optimization wins into reliability plays.\n",
+        encoding="utf-8",
+    )
+    (root / "docs/integrations-optimization-workflow.md").write_text(
+        d46._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
+    )
+    (root / "docs/impact-46-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
+
+    summary = root / "docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json"
+    summary.parent.mkdir(parents=True, exist_ok=True)
+    summary.write_text(
+        json.dumps(
+            {
+                "summary": {"activation_score": 99, "strict_pass": True},
+                "checks": [{"check_id": "ok", "passed": True}],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    board = root / "docs/artifacts/expansion-closeout-pack/expansion-delivery-board.md"
+    board.write_text(
+        "\n".join(
+            [
+                "#  delivery board",
+                "- [ ]  expansion plan draft committed",
+                "- [ ]  review notes captured with owner + backup",
+                "- [ ]  growth matrix exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  optimization priorities drafted from  learnings",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def test_optimization_json(tmp_path: Path, capsys) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    rc = d46.main(["--root", str(tmp_path), "--format", "json", "--strict"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["name"] == "optimization-closeout"
+    assert out["summary"]["activation_score"] >= 95
+
+
+def test_optimization_emit_pack_and_execute(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    rc = d46.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--emit-pack-dir",
+            "artifacts/optimization-closeout-pack-46",
+            "--execute",
+            "--evidence-dir",
+            "artifacts/optimization-closeout-pack-46/evidence",
+            "--format",
+            "json",
+            "--strict",
+        ]
+    )
+    assert rc == 0
+    assert (
+        tmp_path / "artifacts/optimization-closeout-pack-46/optimization-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/optimization-closeout-pack-46/optimization-closeout-summary.md"
+    ).exists()
+    assert (tmp_path / "artifacts/optimization-closeout-pack-46/optimization-plan.md").exists()
+    assert (
+        tmp_path / "artifacts/optimization-closeout-pack-46/optimization-bottleneck-map.csv"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/optimization-closeout-pack-46/optimization-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/optimization-closeout-pack-46/optimization-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/optimization-closeout-pack-46/optimization-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/optimization-closeout-pack-46/optimization-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/optimization-closeout-pack-46/evidence/optimization-execution-summary.json"
+    ).exists()
+
+
+def test_optimization_strict_fails_when_expansion_inputs_missing(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    (tmp_path / "docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json").unlink()
+    rc = d46.main(["--root", str(tmp_path), "--strict", "--format", "json"])
+    assert rc == 1
+
+
+def test_optimization_cli_dispatch(tmp_path: Path, capsys) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    rc = cli.main(["optimization-closeout", "--root", str(tmp_path), "--format", "text"])
+    assert rc == 0
+    assert " optimization closeout summary" in capsys.readouterr().out

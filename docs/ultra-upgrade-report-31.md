@@ -11,7 +11,7 @@
 
 ```bash
 python -m pytest -q tests/test_phase2_kickoff.py tests/test_cli_help_lists_subcommands.py
-python scripts/check_phase2_kickoff_contract_31.py
+python scripts/check_phase2_kickoff_contract.py
 python -m sdetkit cycle31-phase2-kickoff --emit-pack-dir docs/artifacts/cycle31-phase2-pack --format json --strict
 python -m sdetkit cycle31-phase2-kickoff --execute --evidence-dir docs/artifacts/cycle31-phase2-pack/evidence --format json --strict
 python -m sdetkit cycle31-phase2-kickoff --format json --strict

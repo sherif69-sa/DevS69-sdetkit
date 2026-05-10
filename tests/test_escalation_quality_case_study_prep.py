@@ -1,0 +1,166 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from sdetkit import cli
+from sdetkit import escalation_quality_case_study_prep as d71
+from tests.workflow_fixture_seed import seed_contract_anchors
+
+
+def _seed_repo(root: Path) -> None:
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
+    (root / "README.md").write_text(
+        "docs/integrations-case-study-prep3-workflow.md\ncase-study-prep3-closeout\n",
+        encoding="utf-8",
+    )
+    (root / "docs").mkdir(parents=True, exist_ok=True)
+    (root / "docs/index.md").write_text(
+        "-71-big-upgrade-report.md\nintegrations-case-study-prep3-workflow.md\n",
+        encoding="utf-8",
+    )
+    (root / "docs/top-10-github-strategy.md").write_text(
+        "- ** — Case-study prep #3:** lock escalation-quality evidence and publication readiness handoff.\n"
+        "- ** — Weekly review #10:** assess integration adoption and feedback quality.\n",
+        encoding="utf-8",
+    )
+    (root / "docs/integrations-case-study-prep3-workflow.md").write_text(
+        d71._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
+    )
+    (root / "docs/big-upgrade-report-71.md").write_text("#  report\n", encoding="utf-8")
+
+    summary = (
+        root
+        / "docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-closeout-summary.json"
+    )
+    summary.parent.mkdir(parents=True, exist_ok=True)
+    summary.write_text(
+        json.dumps(
+            {
+                "summary": {"activation_score": 100, "strict_pass": True},
+                "checks": [{"passed": True}],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    board = (
+        root / "docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-delivery-board.md"
+    )
+    board.write_text(
+        "\n".join(
+            [
+                "#  delivery board",
+                "- [ ]  integration brief committed",
+                "- [ ]  triage-speed case-study narrative published",
+                "- [ ]  controls and assumptions log exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  case-study prep priorities drafted from  learnings",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    case_study = root / "docs/roadmap/plans/escalation-quality-case-study.json"
+    case_study.write_text(
+        json.dumps(
+            {
+                "case_id": "case-study-prep3-escalation-quality-001",
+                "metric": "escalation-quality-score",
+                "baseline": {"score": 61.4},
+                "after": {"score": 84.9},
+                "confidence": 0.91,
+                "owner": "quality-systems",
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_case_study_prep3_json(tmp_path: Path, capsys) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    rc = d71.main(["--root", str(tmp_path), "--format", "json", "--strict"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["name"] == "case-study-prep3-closeout"
+    assert out["summary"]["activation_score"] >= 95
+
+
+def test_case_study_prep3_emit_pack_and_execute(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    rc = d71.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--emit-pack-dir",
+            "artifacts/case-study-prep3-pack",
+            "--execute",
+            "--evidence-dir",
+            "artifacts/case-study-prep3-pack/evidence",
+            "--format",
+            "json",
+            "--strict",
+        ]
+    )
+    assert rc == 0
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-integration-brief.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-case-study-narrative.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-controls-log.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-kpi-scorecard.json"
+    ).exists()
+    assert (tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-execution-log.md").exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/case-study-prep3-pack/evidence/case-study-prep3-execution-summary.json"
+    ).exists()
+
+
+def test_case_study_prep3_strict_fails_without_prior(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    (
+        tmp_path
+        / "docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-closeout-summary.json"
+    ).unlink()
+    assert d71.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
+
+
+def test_case_study_prep3_cli_dispatch(tmp_path: Path, capsys) -> None:
+    _seed_repo(tmp_path)
+    seed_contract_anchors(tmp_path)
+    rc = cli.main(["case-study-prep3-closeout", "--root", str(tmp_path), "--format", "text"])
+    assert rc == 0
+    assert "Case Study Prep3 Closeout summary" in capsys.readouterr().out

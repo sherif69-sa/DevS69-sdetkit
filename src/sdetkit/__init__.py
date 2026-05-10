@@ -21,7 +21,7 @@ _ALIAS_MAP = {
     "gate": "sdetkit.gates.gate",
     "security_gate": "sdetkit.gates.security_gate",
     "playbooks_cli": "sdetkit.cli.playbooks_cli",
-    "playbook_post_39": "sdetkit.cli.playbook_post_39",
+    "playbook_post": "sdetkit.cli.playbook_post",
     "serve": "sdetkit.cli.serve",
     "review_engine": "sdetkit.intelligence.review_engine",
     "review": "sdetkit.intelligence.review",

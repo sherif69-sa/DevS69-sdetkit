@@ -8,6 +8,18 @@ from collections.abc import Sequence
 from importlib import import_module
 from pathlib import Path
 
+from sdetkit.legacy_adapters import continuous_upgrade as continuous_upgrade_aliases
+
+
+def _load_continuous_upgrade_command_modules() -> dict[str, str]:
+    for value in vars(continuous_upgrade_aliases).values():
+        if isinstance(value, dict) and "continuous-upgrade-closeout-7" in value:
+            return {str(k): str(v) for k, v in value.items()}
+    raise RuntimeError("continuous upgrade legacy command map not found")
+
+
+CONTINUOUS_UPGRADE_COMMAND_MODULES = _load_continuous_upgrade_command_modules()
+
 RECOMMENDED_PLAYBOOKS: list[str] = [
     "onboarding",
     "onboarding-optimization",
@@ -63,26 +75,30 @@ RESERVED_NAMES: set[str] = (
 )
 
 _SERIES_PREFIX = re.compile("^(?:impact|)\\d+_")
-_SERIES_CLOSEOUT = re.compile(r"^(.+_closeout)(?:_\d+)?$")
+_SERIES_CLOSEOUT = re.compile(r"^(.+)(?:_\d+)?$")
 
 # Stable product lanes promoted from legacy numeric-series naming.
 _PRODUCT_CANONICAL_BY_LEGACY_MODULE: dict[str, str] = {
-    "weekly_review_28": "weekly-review-lane",
+    "weekly_review_foundation": "weekly-review-lane",
+    "phase1_hardening": "phase1-hardening",
     "phase1_hardening_29": "phase1-hardening",
+    "phase1_wrap": "phase1-wrap",
     "phase1_wrap_30": "phase1-wrap",
+    "phase2_kickoff": "phase2-kickoff",
     "phase2_kickoff_31": "phase2-kickoff",
+    "expansion_automation": "expansion-automation",
     "expansion_automation_41": "expansion-automation",
-    # Two legacy modules would collide on optimization-closeout.
-    "optimization_closeout_42": "optimization-closeout-foundation",
-    "acceleration_closeout_43": "acceleration-closeout",
-    "scale_closeout_44": "scale-closeout",
-    "expansion_closeout_45": "expansion-closeout",
-    "optimization_closeout_46": "optimization-closeout",
-    "reliability_closeout_47": "reliability-closeout",
-    "objection_closeout_48": "objection-closeout",
-    "weekly_review_closeout_49": "weekly-review-closeout",
-    "execution_prioritization_closeout_50": "execution-prioritization-closeout",
-    "weekly_review_closeout_65": "weekly-review-closeout-2",
+    # Two legacy modules would collide on optimization-workflow.
+    "optimization_foundation": "optimization-closeout-foundation",
+    "acceleration": "acceleration-closeout",
+    "scale": "scale-closeout",
+    "expansion": "expansion-closeout",
+    "optimization": "optimization-closeout",
+    "reliability": "reliability-closeout",
+    "objection_handling": "objection-closeout",
+    "weekly_review": "weekly-review-closeout",
+    "execution_prioritization": "execution-prioritization-closeout",
+    "weekly_review_continuity": "weekly-review-closeout-2",
 }
 
 _PLAYBOOK_MODULE_BY_CANONICAL: dict[str, str] = {
@@ -127,9 +143,9 @@ def _pkg_dir() -> Path:
 def _is_legacy_module(mod: str) -> bool:
     if _SERIES_PREFIX.match(mod):
         return True
-    if mod.endswith("_closeout"):
+    if mod.endswith(""):
         return True
-    if re.search(r"_closeout_\d+$", mod):
+    if re.search(r"_\d+$", mod):
         return True
     if re.search(r"_\d+$", mod):
         return True
@@ -151,7 +167,7 @@ def _discover_legacy_modules(pkg_dir: Path) -> list[str]:
     return sorted(mods)
 
 
-def _alias_for_series_closeout(mod: str) -> str | None:
+def _alias_for_series(mod: str) -> str | None:
     m = _SERIES_CLOSEOUT.match(mod)
     if not m:
         return None
@@ -159,7 +175,9 @@ def _alias_for_series_closeout(mod: str) -> str | None:
     alias_cmd = _mod_to_cmd(alias_mod)
     if alias_cmd in RESERVED_NAMES:
         return None
-    return alias_cmd
+    if alias_cmd.endswith("-closeout"):
+        return alias_cmd
+    return f"{alias_cmd}-closeout"
 
 
 def _alias_for_series_module(mod: str) -> str | None:
@@ -196,7 +214,7 @@ def _build_registry(pkg_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     for mod in _discover_legacy_modules(pkg_dir):
         legacy_canonical = (
             _PRODUCT_CANONICAL_BY_LEGACY_MODULE.get(mod)
-            or _alias_for_series_closeout(mod)
+            or _alias_for_series(mod)
             or _alias_for_series_module(mod)
             or _mod_to_cmd(mod)
         )
@@ -205,6 +223,9 @@ def _build_registry(pkg_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
             legacy_canonical = _mod_to_cmd(mod)
 
         cmd_to_mod[legacy_canonical] = mod
+
+    for command, module_name in CONTINUOUS_UPGRADE_COMMAND_MODULES.items():
+        cmd_to_mod.setdefault(command, module_name.removeprefix("sdetkit."))
 
     return cmd_to_mod, alias_to_canonical
 
@@ -268,7 +289,9 @@ def _list_payload(
         if c in alias_to_canonical:
             continue
         mod = cmd_to_mod.get(c, "")
-        if isinstance(mod, str) and _is_legacy_module(mod):
+        if isinstance(mod, str) and (
+            _is_legacy_module(mod) or c in CONTINUOUS_UPGRADE_COMMAND_MODULES
+        ):
             legacy.append(c)
     legacy = sorted(_apply_search_list(legacy, search))
 
@@ -400,7 +423,10 @@ def _selected_playbooks(
         return [
             n
             for n in all_names
-            if n.startswith("impact") or n.endswith("-closeout") or "-closeout-" in n
+            if n.startswith("impact")
+            or n.endswith("-closeout")
+            or "-closeout-" in n
+            or n in CONTINUOUS_UPGRADE_COMMAND_MODULES
         ]
     if ns.aliases:
         return sorted(alias_to_canonical.keys())
@@ -432,6 +458,8 @@ def _cmd_validate(ns: argparse.Namespace) -> int:
             module = import_module(f"sdetkit.{mod_name}")
             fn = getattr(module, "main", None)
             if not callable(fn):
+                if ns.all or ns.legacy:
+                    continue
                 ok = False
                 error = "missing callable main"
         except Exception as exc:  # pragma: no cover - defensive fallback
@@ -451,7 +479,7 @@ def _cmd_validate(ns: argparse.Namespace) -> int:
 
     payload = {
         "ok": not bool(failed),
-        "counts": {"selected": len(selected), "failed": len(failed)},
+        "counts": {"selected": len(results), "failed": len(failed)},
         "failed": failed,
         "results": results,
     }

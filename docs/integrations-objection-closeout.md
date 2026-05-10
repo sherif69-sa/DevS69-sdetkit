@@ -19,7 +19,7 @@ Lane closes with a major objection-handling upgrade that converts Lane reliabili
 python -m sdetkit objection-closeout --format json --strict
 python -m sdetkit objection-closeout --emit-pack-dir docs/artifacts/objection-closeout-pack --format json --strict
 python -m sdetkit objection-closeout --execute --evidence-dir docs/artifacts/objection-closeout-pack/evidence --format json --strict
-python scripts/check_objection_closeout_contract.py
+python scripts/check_objection_handling_contract.py
 ```
 
 ## Objection closeout contract

@@ -14,11 +14,9 @@ def _touch(path: Path, text: str = "") -> None:
 
 
 def test_script_lane_match_and_heading_helpers() -> None:
-    assert rm._script_matches_closeout_lane(
-        Path("check_release_readiness_closeout_contract.py"), "release_readiness"
-    )
-    assert not rm._script_matches_closeout_lane(Path("check_release_contract.py"), "")
-    assert not rm._script_matches_closeout_lane(Path("check_ops_closeout.py"), "release_readiness")
+    assert rm._script_matches_lane(Path("check_release_readiness_contract.py"), "release_readiness")
+    assert not rm._script_matches_lane(Path("check_release_contract.py"), "")
+    assert not rm._script_matches_lane(Path("check_ops.py"), "release_readiness")
 
     assert rm._first_heading("\n# Title\ntext") == "Title"
     assert rm._first_heading("plain\n##\n") is None
@@ -40,34 +38,34 @@ def test_repo_root_resolution_walks_up_and_falls_back_to_cwd(
     assert rm._repo_root(outside) == tmp_path
 
 
-def test_closeout_inventory_uses_lane_matched_contract_candidates(tmp_path: Path) -> None:
+def test_inventory_uses_lane_matched_contract_candidates(tmp_path: Path) -> None:
     _touch(tmp_path / "pyproject.toml", "[project]\nname='x'\n")
-    _touch(tmp_path / "src/sdetkit/release_readiness_closeout_21.py", '"""day21 marker"""\n')
+    _touch(tmp_path / "src/sdetkit/release_readiness_21.py", '"""day21 marker"""\n')
     _touch(
-        tmp_path / "tests/test_release_readiness_closeout.py",
-        "from sdetkit import release_readiness_closeout_21\n",
+        tmp_path / "tests/test_release_readiness.py",
+        "from sdetkit import release_readiness_21\n",
     )
     # lane-match fallback candidate (no id in filename)
-    _touch(tmp_path / "scripts/check_release_readiness_closeout_contract.py", "print('ok')\n")
+    _touch(tmp_path / "scripts/check_release_readiness_contract.py", "print('ok')\n")
 
-    inv = rm._closeout_inventory(tmp_path)
+    inv = rm._inventory(tmp_path)
     assert inv["count"] == 1
     assert inv["fully_aligned_count"] == 1
     assert inv["entries"][0]["contract_scripts"] == 1
     assert inv["entries"][0]["tests_referencing_module"] == 1
 
 
-def test_next_closeout_calls_handles_non_list_inventory(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(rm, "_closeout_inventory", lambda _root: {"entries": "bad"})
-    assert rm._next_closeout_calls(limit=2) == []
+def test_next_calls_handles_non_list_inventory(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(rm, "_inventory", lambda _root: {"entries": "bad"})
+    assert rm._next_calls(limit=2) == []
 
 
-def test_next_closeout_calls_fallback_when_inventory_rows_are_aligned(
+def test_next_calls_fallback_when_inventory_rows_are_aligned(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
         rm,
-        "_closeout_inventory",
+        "_inventory",
         lambda _root: {
             "entries": [
                 {
@@ -82,7 +80,7 @@ def test_next_closeout_calls_fallback_when_inventory_rows_are_aligned(
             ]
         },
     )
-    rows = rm._next_closeout_calls(limit=1)
+    rows = rm._next_calls(limit=1)
     assert rows and rows[0]["next_call"].startswith("pytest -q -k")
 
 
@@ -110,7 +108,7 @@ def test_build_manifest_detects_duplicate_plan(tmp_path: Path) -> None:
         rm.build_manifest(repo_root=tmp_path)
 
 
-def test_main_covering_help_unknown_print_write_check_closeout_next(
+def test_main_covering_help_unknown_print_write_check_next(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     _touch(tmp_path / "pyproject.toml", "[project]\nname='x'\n")

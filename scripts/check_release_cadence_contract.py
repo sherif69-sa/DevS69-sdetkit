@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import release_cadence_32 as d32
+from sdetkit import release_cadence as d32
 
 
 def main() -> int:

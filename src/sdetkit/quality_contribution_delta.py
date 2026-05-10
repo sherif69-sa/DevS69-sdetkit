@@ -55,7 +55,7 @@ def _build_recommendations(
         notes.append("Recover week-two completion rate by rerunning missing -13 closeout checks.")
     if quality_deltas["artifact_coverage"] < 0:
         notes.append(
-            "Regenerate missing artifacts and attach pack evidence before sprint closeout."
+            "Regenerate missing artifacts and attach pack evidence before sprint workflow."
         )
     if contribution_deltas["traffic"] < 0:
         notes.append(

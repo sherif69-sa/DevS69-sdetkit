@@ -27,7 +27,7 @@ The previous Cycle 14 implementation only mirrored week-one coverage and did not
   - Upgraded Cycle 14 section with signal files, strict closeout run, and pack-generation command.
 - `docs/index.md`
   - Added Cycle 14 signal-driven command examples and links to closeout artifacts.
-- `scripts/check_weekly_review_contract_14.py`
+- `scripts/check_weekly_review_artifact_contract.py`
   - Hardened Cycle 14 contract checks to include growth-signal and pack-file expectations.
 - `docs/artifacts/cycle14-growth-signals.json`
   - Added sample week-two growth signals.
@@ -42,7 +42,7 @@ The previous Cycle 14 implementation only mirrored week-one coverage and did not
 - `python -m sdetkit weekly-review --week 2 --format markdown --signals-file docs/artifacts/cycle14-growth-signals.json --previous-signals-file docs/artifacts/cycle7-growth-signals.json --output docs/artifacts/cycle14-weekly-review-sample.md`
 - `python -m sdetkit weekly-review --week 2 --emit-pack-dir docs/artifacts/cycle14-weekly-pack --signals-file docs/artifacts/cycle14-growth-signals.json --previous-signals-file docs/artifacts/cycle7-growth-signals.json --format json --strict`
 - `python -m pytest -q tests/test_weekly_review.py tests/test_cli_help_lists_subcommands.py`
-- `python scripts/check_weekly_review_contract_14.py`
+- `python scripts/check_weekly_review_artifact_contract.py`
 
 ## Artifact
 

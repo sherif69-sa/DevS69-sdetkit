@@ -36,7 +36,7 @@
     "problem_solved": "Validates integration topologies and runtime compatibility.",
     "example": "python -m sdetkit integration check --profile examples/kits/integration/profile.json",
     "expected_output": "Prints an integration validation summary.",
-    "test_file": "tests/test_integration_feedback_closeout.py",
+    "test_file": "tests/test_integration_feedback.py",
     "docs_page": "docs/cli.md"
   },
   {

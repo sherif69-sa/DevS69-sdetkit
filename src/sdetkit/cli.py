@@ -40,16 +40,16 @@ LEGACY_COMMAND_MODULES = _LEGACY_COMMAND_MODULES
 LEGACY_NAMESPACE_COMMANDS = _LEGACY_NAMESPACE_COMMANDS
 
 _COMPAT_MODULE_ATTRS: dict[str, str] = {
-    "expansion_automation_41": "sdetkit.expansion_automation_41",
-    "optimization_closeout_42": "sdetkit.optimization_closeout_42",
-    "acceleration_closeout_43": "sdetkit.acceleration_closeout_43",
-    "scale_closeout_44": "sdetkit.scale_closeout_44",
-    "expansion_closeout_45": "sdetkit.expansion_closeout_45",
-    "optimization_closeout_46": "sdetkit.optimization_closeout_46",
-    "reliability_closeout_47": "sdetkit.reliability_closeout_47",
-    "objection_closeout_48": "sdetkit.objection_closeout_48",
-    "weekly_review_closeout_49": "sdetkit.weekly_review_closeout_49",
-    "execution_prioritization_closeout_50": "sdetkit.execution_prioritization_closeout_50",
+    "expansion_automation": "sdetkit.expansion_automation",
+    "optimization_foundation": "sdetkit.optimization_foundation",
+    "acceleration": "sdetkit.acceleration",
+    "scale": "sdetkit.scale",
+    "expansion": "sdetkit.expansion",
+    "optimization": "sdetkit.optimization",
+    "reliability": "sdetkit.reliability",
+    "objection_handling": "sdetkit.objection_handling",
+    "weekly_review": "sdetkit.weekly_review",
+    "execution_prioritization": "sdetkit.execution_prioritization",
 }
 
 

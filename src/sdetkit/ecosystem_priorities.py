@@ -1,0 +1,405 @@
+from __future__ import annotations
+
+import argparse
+import json
+import shlex
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+from .bools import coerce_bool
+
+_PAGE_PATH = "docs/integrations-ecosystem-priorities-workflow.md"
+_TOP10_PATH = "docs/top-10-github-strategy.md"
+_COMMUNITY_TOUCHPOINT_CLOSEOUT_SUMMARY_PATH = (
+    "docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json"
+)
+_COMMUNITY_TOUCHPOINT_CLOSEOUT_BOARD_PATH = (
+    "docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md"
+)
+_PLAN_PATH = "docs/roadmap/plans/ecosystem-priorities-plan.json"
+_SECTION_HEADER = "# Ecosystem priorities closeout lane"
+_REQUIRED_SECTIONS = [
+    "## Why Ecosystem Priorities Closeout matters",
+    "## Required inputs (handoff artifacts)",
+    "## Ecosystem priorities command lane",
+    "## Ecosystem priorities contract",
+    "## Ecosystem priorities quality checklist",
+    "## Ecosystem priorities delivery board",
+    "## Scoring model",
+]
+_REQUIRED_COMMANDS = [
+    "python -m sdetkit ecosystem-priorities-closeout --format json --strict",
+    "python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict",
+    "python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/ecosystem-priorities-closeout-pack/evidence --format json --strict",
+    "python scripts/check_ecosystem_priorities_contract.py",
+]
+_EXECUTION_COMMANDS = [
+    "python -m sdetkit ecosystem-priorities-closeout --format json --strict",
+    "python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict",
+    "python scripts/check_ecosystem_priorities_contract.py --skip-evidence",
+]
+_REQUIRED_CONTRACT_LINES = [
+    "Single owner + backup reviewer are assigned for  ecosystem priorities execution and signoff.",
+    "The  lane references  outcomes, controls, and KPI continuity signals.",
+    "Every  section includes ecosystem CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    " closeout records ecosystem outcomes, confidence notes, and  scale priorities.",
+]
+_REQUIRED_QUALITY_LINES = [
+    "- [ ] Includes ecosystem baseline, priority cadence, and stakeholder assumptions",
+    "- [ ] Every ecosystem lane row has owner, workstream window, KPI threshold, and risk flag",
+    "- [ ] CTA links point to docs + runnable command evidence",
+    "- [ ] Scorecard captures ecosystem score delta, touchpoint carryover delta, confidence, and rollback owner",
+    "- [ ] Artifact pack includes integration brief, ecosystem priorities plan, workstream ledger, KPI scorecard, and execution log",
+]
+_REQUIRED_DELIVERY_BOARD_LINES = [
+    "- [ ]  integration brief committed",
+    "- [ ]  ecosystem priorities plan committed",
+    "- [ ]  ecosystem workstream ledger exported",
+    "- [ ]  ecosystem KPI scorecard snapshot exported",
+    "- [ ]  scale priorities drafted from  learnings",
+]
+_REQUIRED_DATA_KEYS = [
+    '"plan_id"',
+    '"contributors"',
+    '"ecosystem_tracks"',
+    '"baseline"',
+    '"target"',
+    '"owner"',
+]
+
+_DEFAULT_PAGE_TEMPLATE = "# Ecosystem priorities closeout lane\n\n closes with a major upgrade that converts  community-touchpoint outcomes into an ecosystem-priorities execution pack.\n\n## Why Ecosystem Priorities Closeout matters\n\n- Turns  community-touchpoint outcomes into ecosystem-facing expansion proof across docs, governance, and release channels.\n- Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  ecosystem priorities into  scale priorities.\n\n## Required inputs (handoff artifacts)\n\n- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json`\n- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md`\n- `docs/roadmap/plans/ecosystem-priorities-plan.json`\n\n## Ecosystem priorities command lane\n\n```bash\npython -m sdetkit ecosystem-priorities-closeout --format json --strict\npython -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict\npython -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/ecosystem-priorities-closeout-pack/evidence --format json --strict\npython scripts/check_ecosystem_priorities_contract.py\n```\n\n## Ecosystem priorities contract\n\n- Single owner + backup reviewer are assigned for  ecosystem priorities execution and signoff.\n- The  lane references  outcomes, controls, and KPI continuity signals.\n- Every  section includes ecosystem CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records ecosystem outcomes, confidence notes, and  scale priorities.\n\n## Ecosystem priorities quality checklist\n\n- [ ] Includes ecosystem baseline, priority cadence, and stakeholder assumptions\n- [ ] Every ecosystem lane row has owner, workstream window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures ecosystem score delta, touchpoint carryover delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, ecosystem priorities plan, workstream ledger, KPI scorecard, and execution log\n\n## Ecosystem priorities delivery board\n\n- [ ]  integration brief committed\n- [ ]  ecosystem priorities plan committed\n- [ ]  ecosystem workstream ledger exported\n- [ ]  ecosystem KPI scorecard snapshot exported\n- [ ]  scale priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Ecosystem evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n"
+
+
+def _read(path: Path) -> str:
+    return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
+def _load_community_touchpoint(summary_path: Path) -> tuple[int, bool, int]:
+    if not summary_path.exists():
+        return 0, False, 0
+    data = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary = data.get("summary", {})
+    checks = data.get("checks", [])
+    return (
+        int(summary.get("activation_score", 0)),
+        coerce_bool(summary.get("strict_pass", False), default=False),
+        len(checks),
+    )
+
+
+def _count_board_items(board_path: Path, anchor: str) -> tuple[int, bool]:
+    if not board_path.exists():
+        return 0, False
+    text = board_path.read_text(encoding="utf-8")
+    items = [line for line in text.splitlines() if line.strip().startswith("- [")]
+    return len(items), (anchor in text)
+
+
+def build_ecosystem_priorities_summary(root: Path) -> dict[str, Any]:
+    readme_text = _read(root / "README.md")
+    docs_index_text = _read(root / "docs/index.md")
+    page_text = _read(root / _PAGE_PATH)
+    top10_text = _read(root / _TOP10_PATH)
+    plan_text = _read(root / _PLAN_PATH)
+
+    community_touchpoint_summary = root / _COMMUNITY_TOUCHPOINT_CLOSEOUT_SUMMARY_PATH
+    community_touchpoint_board = root / _COMMUNITY_TOUCHPOINT_CLOSEOUT_BOARD_PATH
+    community_touchpoint_score, community_touchpoint_strict, community_touchpoint_check_count = (
+        _load_community_touchpoint(community_touchpoint_summary)
+    )
+    board_count, board_has_community_touchpoint = _count_board_items(community_touchpoint_board, "")
+
+    missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
+    missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
+    missing_contract_lines = [x for x in _REQUIRED_CONTRACT_LINES if x not in page_text]
+    missing_quality_lines = [x for x in _REQUIRED_QUALITY_LINES if x not in page_text]
+    missing_board_items = [x for x in _REQUIRED_DELIVERY_BOARD_LINES if x not in page_text]
+    missing_plan_keys = [x for x in _REQUIRED_DATA_KEYS if x not in plan_text]
+
+    checks: list[dict[str, Any]] = [
+        {
+            "check_id": "readme_ecosystem_priorities_command",
+            "weight": 7,
+            "passed": ("ecosystem-priorities-closeout" in readme_text),
+            "evidence": "README ecosystem-priorities command lane",
+        },
+        {
+            "check_id": "docs_index_ecosystem_priorities_links",
+            "weight": 8,
+            "passed": (
+                "impact-78-big-upgrade-report.md" in docs_index_text
+                and "integrations-ecosystem-priorities-workflow.md" in docs_index_text
+            ),
+            "evidence": "impact-78-big-upgrade-report.md + integrations-ecosystem-priorities-workflow.md",
+        },
+        {
+            "check_id": "top10_ecosystem_priorities_alignment",
+            "weight": 5,
+            "passed": ("Community touchpoint + ecosystem priorities strategy chain" in top10_text),
+            "evidence": "Community touchpoint + ecosystem priorities strategy chain",
+        },
+        {
+            "check_id": "community_touchpoint_summary_present",
+            "weight": 10,
+            "passed": community_touchpoint_summary.exists(),
+            "evidence": str(community_touchpoint_summary),
+        },
+        {
+            "check_id": "community_touchpoint_delivery_board_present",
+            "weight": 7,
+            "passed": community_touchpoint_board.exists(),
+            "evidence": str(community_touchpoint_board),
+        },
+        {
+            "check_id": "community_touchpoint_quality_floor",
+            "weight": 13,
+            "passed": community_touchpoint_score >= 85,
+            "evidence": {
+                "community_touchpoint_score": community_touchpoint_score,
+                "strict_pass": community_touchpoint_strict,
+                "community_touchpoint_checks": community_touchpoint_check_count,
+            },
+        },
+        {
+            "check_id": "community_touchpoint_board_integrity",
+            "weight": 5,
+            "passed": board_count >= 5 and board_has_community_touchpoint,
+            "evidence": {
+                "board_items": board_count,
+                "contains_community_touchpoint": board_has_community_touchpoint,
+            },
+        },
+        {
+            "check_id": "page_header",
+            "weight": 7,
+            "passed": _SECTION_HEADER in page_text,
+            "evidence": _SECTION_HEADER,
+        },
+        {
+            "check_id": "required_sections",
+            "weight": 8,
+            "passed": not missing_sections,
+            "evidence": missing_sections or "all sections present",
+        },
+        {
+            "check_id": "required_commands",
+            "weight": 5,
+            "passed": not missing_commands,
+            "evidence": missing_commands or "all commands present",
+        },
+        {
+            "check_id": "contract_lock",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": missing_contract_lines or "contract locked",
+        },
+        {
+            "check_id": "quality_checklist_lock",
+            "weight": 5,
+            "passed": not missing_quality_lines,
+            "evidence": missing_quality_lines or "quality checklist locked",
+        },
+        {
+            "check_id": "delivery_board_lock",
+            "weight": 5,
+            "passed": not missing_board_items,
+            "evidence": missing_board_items or "delivery board locked",
+        },
+        {
+            "check_id": "ecosystem_plan_data_present",
+            "weight": 10,
+            "passed": not missing_plan_keys,
+            "evidence": missing_plan_keys or _PLAN_PATH,
+        },
+    ]
+
+    failed = [c for c in checks if not c["passed"]]
+    critical_failures: list[str] = []
+    if not community_touchpoint_summary.exists() or not community_touchpoint_board.exists():
+        critical_failures.append("community_touchpoint_handoff_inputs")
+
+    wins: list[str] = []
+    misses: list[str] = []
+    handoff_actions: list[str] = []
+
+    if community_touchpoint_score >= 85:
+        wins.append(
+            f"Community touchpoint continuity baseline is stable with activation score={community_touchpoint_score}."
+        )
+    else:
+        misses.append("Community touchpoint continuity baseline is below the floor (<85).")
+        handoff_actions.append(
+            "Re-run the closeout command and raise baseline quality above 85 before ecosystem priorities closeout lock."
+        )
+
+    if board_count >= 5 and board_has_community_touchpoint:
+        wins.append(
+            f"Community touchpoint delivery board integrity validated with {board_count} checklist items."
+        )
+    else:
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and  anchors).")
+        handoff_actions.append("Repair  delivery board entries to include  anchors.")
+
+    if not missing_plan_keys:
+        wins.append("Ecosystem priorities dataset is available for launch execution.")
+    else:
+        misses.append(" ecosystem priorities dataset is missing required keys.")
+        handoff_actions.append(
+            "Update docs/roadmap/plans/ecosystem-priorities-plan.json to restore required keys."
+        )
+
+    if not failed and not critical_failures:
+        wins.append(
+            "Ecosystem priorities closeout lane is fully complete and ready for scale priorities execution."
+        )
+
+    score = int(round(sum(c["weight"] for c in checks if c["passed"])))
+    return {
+        "name": "ecosystem-priorities-closeout",
+        "inputs": {
+            "readme": "README.md",
+            "docs_index": "docs/index.md",
+            "docs_page": _PAGE_PATH,
+            "top10": _TOP10_PATH,
+            "community_touchpoint_summary": str(community_touchpoint_summary.relative_to(root))
+            if community_touchpoint_summary.exists()
+            else str(community_touchpoint_summary),
+            "community_touchpoint_delivery_board": str(community_touchpoint_board.relative_to(root))
+            if community_touchpoint_board.exists()
+            else str(community_touchpoint_board),
+            "ecosystem_priorities_plan": _PLAN_PATH,
+        },
+        "checks": checks,
+        "rollup": {
+            "community_touchpoint_activation_score": community_touchpoint_score,
+            "community_touchpoint_checks": community_touchpoint_check_count,
+            "community_touchpoint_delivery_board_items": board_count,
+        },
+        "summary": {
+            "activation_score": score,
+            "passed_checks": len(checks) - len(failed),
+            "failed_checks": len(failed),
+            "critical_failures": critical_failures,
+            "strict_pass": not failed and not critical_failures,
+        },
+        "wins": wins,
+        "misses": misses,
+        "handoff_actions": handoff_actions,
+    }
+
+
+def _render_text(payload: dict[str, Any]) -> str:
+    lines = [
+        "Ecosystem Priorities Closeout summary",
+        f"- Activation score: {payload['summary']['activation_score']}",
+        f"- Passed checks: {payload['summary']['passed_checks']}",
+        f"- Failed checks: {payload['summary']['failed_checks']}",
+        f"- Critical failures: {payload['summary']['critical_failures']}",
+    ]
+    return "\n".join(lines)
+
+
+def _write(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
+    target = pack_dir if pack_dir.is_absolute() else root / pack_dir
+    _write(
+        target / "ecosystem-priorities-closeout-summary.json",
+        json.dumps(payload, indent=2) + "\n",
+    )
+    _write(target / "ecosystem-priorities-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "ecosystem-priorities-integration-brief.md",
+        "# Ecosystem priorities integration brief\n",
+    )
+    _write(target / "ecosystem-priorities-plan.md", "# Ecosystem priorities plan\n")
+    _write(
+        target / "ecosystem-priorities-workstream-ledger.json",
+        json.dumps({"workstreams": []}, indent=2) + "\n",
+    )
+    _write(
+        target / "ecosystem-priorities-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
+    _write(
+        target / "ecosystem-priorities-execution-log.md", "# Ecosystem priorities execution log\n"
+    )
+    _write(
+        target / "ecosystem-priorities-delivery-board.md",
+        "\n".join(["# Ecosystem priorities delivery board", *_REQUIRED_DELIVERY_BOARD_LINES])
+        + "\n",
+    )
+    _write(
+        target / "ecosystem-priorities-validation-commands.md",
+        "# Ecosystem priorities validation commands\n\n```bash\n"
+        + "\n".join(_EXECUTION_COMMANDS)
+        + "\n```\n",
+    )
+
+
+def _execute_commands(root: Path, evidence_dir: Path) -> None:
+    events: list[dict[str, Any]] = []
+    out_dir = evidence_dir if evidence_dir.is_absolute() else root / evidence_dir
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for idx, command in enumerate(_EXECUTION_COMMANDS, start=1):
+        argv = shlex.split(command)
+        if argv and argv[0] == "python":
+            argv[0] = sys.executable
+        result = subprocess.run(argv, cwd=root, capture_output=True, text=True)
+        event = {
+            "command": command,
+            "returncode": result.returncode,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
+        events.append(event)
+        _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
+    _write(
+        out_dir / "ecosystem-priorities-execution-summary.json",
+        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
+    )
+
+
+def build_ecosystem_priorities_summary_impl(root: Path) -> dict[str, Any]:
+    "Compatibility alias for legacy -based builder name."
+    return build_ecosystem_priorities_summary(root)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Ecosystem Priorities Closeout checks")
+    parser.add_argument("--root", default=".")
+    parser.add_argument("--format", choices=["json", "text"], default="text")
+    parser.add_argument("--strict", action="store_true")
+    parser.add_argument("--emit-pack-dir")
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--evidence-dir")
+    parser.add_argument("--write-default-doc", action="store_true")
+    ns = parser.parse_args(argv)
+
+    root = Path(ns.root).resolve()
+    if ns.write_default_doc:
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
+
+    payload = build_ecosystem_priorities_summary(root)
+
+    if ns.emit_pack_dir:
+        _emit_pack(root, Path(ns.emit_pack_dir), payload)
+    if ns.execute:
+        evidence_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/ecosystem-priorities-closeout-pack/evidence")
+        )
+        _execute_commands(root, evidence_dir)
+
+    print(json.dumps(payload, indent=2) if ns.format == "json" else _render_text(payload))
+    return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

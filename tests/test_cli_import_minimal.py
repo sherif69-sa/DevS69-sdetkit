@@ -4,19 +4,19 @@ import importlib
 import sys
 
 
-def test_cli_import_does_not_eager_load_closeout_modules() -> None:
+def test_cli_import_does_not_eager_load_modules() -> None:
     modules = [
         "sdetkit.cli",
-        "sdetkit.expansion_automation_41",
-        "sdetkit.optimization_closeout_42",
-        "sdetkit.acceleration_closeout_43",
-        "sdetkit.scale_closeout_44",
-        "sdetkit.expansion_closeout_45",
-        "sdetkit.optimization_closeout_46",
-        "sdetkit.reliability_closeout_47",
-        "sdetkit.objection_closeout_48",
-        "sdetkit.weekly_review_closeout_49",
-        "sdetkit.execution_prioritization_closeout_50",
+        "sdetkit.expansion_automation",
+        "sdetkit.optimization_foundation",
+        "sdetkit.acceleration",
+        "sdetkit.scale",
+        "sdetkit.expansion",
+        "sdetkit.optimization",
+        "sdetkit.reliability",
+        "sdetkit.objection_handling",
+        "sdetkit.weekly_review",
+        "sdetkit.execution_prioritization",
     ]
     saved: dict[str, object] = {}
     for name in modules:

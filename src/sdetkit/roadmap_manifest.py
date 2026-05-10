@@ -17,10 +17,10 @@ def _stderr(message: str) -> None:
 
 _REPORT_RE = re.compile(r"^impact-(\d+)-.*-report\.md$")
 _PLAN_RE = re.compile(r"^(?:impact|" + "d" + "ay" + r")(\d+)(?:-.*)?\.json$")
-_CLOSEOUT_RE = re.compile(r"^(?P<lane>[a-z0-9_]+)_closeout_(?P<id>\d+)\.py$")
+_CLOSEOUT_RE = re.compile(r"^(?P<lane>[a-z0-9_]+)_(?P<id>\d+)\.py$")
 
 
-def _script_matches_closeout_lane(script: Path, lane: str) -> bool:
+def _script_matches_lane(script: Path, lane: str) -> bool:
     lane_tokens = [tok for tok in lane.lower().split("_") if tok]
     if not lane_tokens:
         return False
@@ -50,7 +50,7 @@ def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _closeout_inventory(root: Path) -> dict[str, Any]:
+def _inventory(root: Path) -> dict[str, Any]:
     src_dir = root / "src" / "sdetkit"
     tests_dir = root / "tests"
     scripts_dir = root / "scripts"
@@ -60,12 +60,12 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
         test_file: test_file.read_text(encoding="utf-8", errors="replace")
         for test_file in test_files
     }
-    contract_candidates = sorted(scripts_dir.glob("check_*closeout_contract*.py"))
-    for path in sorted(src_dir.glob("*_closeout_*.py")):
+    contract_candidates = sorted(scripts_dir.glob("check_*contract*.py"))
+    for path in sorted(src_dir.glob("*_*.py")):
         m = _CLOSEOUT_RE.match(path.name)
         if not m:
             continue
-        closeout_id = int(m.group("id"))
+        id = int(m.group("id"))
         lane = m.group("lane")
         module_stem = path.stem
 
@@ -74,10 +74,10 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
             if module_stem in text:
                 tests_refs += 1
 
-        contract_scripts = sorted(scripts_dir.glob(f"check_*{closeout_id}*.py"))
+        contract_scripts = sorted(scripts_dir.glob(f"check_*{id}*.py"))
         if not contract_scripts:
             for candidate in contract_candidates:
-                if _script_matches_closeout_lane(candidate, lane):
+                if _script_matches_lane(candidate, lane):
                     contract_scripts.append(candidate)
             contract_scripts = sorted(
                 {script.resolve(): script for script in contract_scripts}.values()
@@ -85,16 +85,16 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
         contract_refs = len(contract_scripts)
 
         legacy_refs = 0
-        anchor_hint = ("d" + "ay") + str(closeout_id)
+        anchor_hint = ("d" + "ay") + str(id)
         for repo_file in [path]:
             text = repo_file.read_text(encoding="utf-8", errors="replace")
             lowered = text.lower()
-            if anchor_hint in lowered or (("d" + "ay") + f" {closeout_id}") in lowered:
+            if anchor_hint in lowered or (("d" + "ay") + f" {id}") in lowered:
                 legacy_refs += 1
 
         entries.append(
             {
-                "id": closeout_id,
+                "id": id,
                 "lane": lane,
                 "module": f"sdetkit.{module_stem}",
                 "module_path": path.relative_to(root).as_posix(),
@@ -106,6 +106,41 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
                 "legacy_anchor_refs_in_module": legacy_refs,
             }
         )
+
+    if not entries:
+        for script in contract_candidates:
+            stem = script.stem
+            if not stem.startswith("check_"):
+                continue
+            lane = stem.removeprefix("check_")
+            for suffix in ("_workflow_contract", "_contract"):
+                if lane.endswith(suffix):
+                    lane = lane[: -len(suffix)]
+                    break
+            if not lane:
+                continue
+
+            module_path = src_dir / f"{lane}.py"
+            if not module_path.exists():
+                continue
+
+            tests_refs = 0
+            for _test_file, text in test_contents.items():
+                if lane in text:
+                    tests_refs += 1
+
+            entries.append(
+                {
+                    "id": 0,
+                    "lane": lane,
+                    "module": f"sdetkit.{lane}",
+                    "module_path": module_path.relative_to(root).as_posix(),
+                    "tests_referencing_module": tests_refs,
+                    "contract_scripts": 1,
+                    "contract_script_paths": [script.relative_to(root).as_posix()],
+                    "legacy_anchor_refs_in_module": 0,
+                }
+            )
 
     covered = [
         item
@@ -120,9 +155,9 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
     }
 
 
-def _next_closeout_calls(repo_root: Path | None = None, *, limit: int = 10) -> list[dict[str, Any]]:
+def _next_calls(repo_root: Path | None = None, *, limit: int = 10) -> list[dict[str, Any]]:
     root = repo_root or _repo_root()
-    inventory = _closeout_inventory(root).get("entries", [])
+    inventory = _inventory(root).get("entries", [])
     if not isinstance(inventory, list):
         return []
 
@@ -137,7 +172,7 @@ def _next_closeout_calls(repo_root: Path | None = None, *, limit: int = 10) -> l
             continue
 
         lane = str(item.get("lane", "unknown"))
-        closeout_id = int(item.get("id", 0))
+        id = int(item.get("id", 0))
         module = str(item.get("module", "sdetkit.unknown"))
         script_paths = item.get("contract_script_paths", [])
         next_call = f"pytest -q -k {module.split('.')[-1]}"
@@ -146,7 +181,7 @@ def _next_closeout_calls(repo_root: Path | None = None, *, limit: int = 10) -> l
 
         backlog.append(
             {
-                "id": closeout_id,
+                "id": id,
                 "lane": lane,
                 "module": module,
                 "tests_referencing_module": tests_refs,
@@ -232,7 +267,7 @@ def build_manifest(repo_root: Path | None = None) -> dict[str, Any]:
                 e["plan_title"] = plan_title
 
     phase_entries = [items[k] for k in sorted(items)]
-    return {"phases": phase_entries, "closeout_alignment": _closeout_inventory(root)}
+    return {"phases": phase_entries, "alignment": _inventory(root)}
 
 
 def render_manifest_json(repo_root: Path | None = None) -> str:
@@ -293,7 +328,7 @@ def main(argv: list[str] | None = None) -> int:
             except ValueError:
                 _stderr(f"invalid limit: {args[1]}")
                 return 2
-        rows = _next_closeout_calls(limit=limit)
+        rows = _next_calls(limit=limit)
         payload = {"next_calls": rows, "count": len(rows)}
         sys.stdout.write(json.dumps(payload, sort_keys=True, indent=2, ensure_ascii=True) + "\n")
         return 0

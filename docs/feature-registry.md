@@ -33,7 +33,7 @@ Run `python scripts/sync_feature_registry_docs.py` after registry updates.
 | `doctor` | A | stable | Provides deterministic repo diagnostics and readiness scoring. | `python -m sdetkit doctor --format md` | `tests/test_cli_doctor.py` | [docs/doctor.md](doctor.md) |
 | `forensics` | A | stable | Compares runs and pinpoints failure deltas for root-cause analysis. | `python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json` | `tests/test_cli_sdetkit.py` | [docs/cli.md](cli.md) |
 | `gate` | A | stable | Runs fast and strict confidence checks for release control. | `python -m sdetkit gate fast` | `tests/test_gate_fast.py` | [docs/cli.md](cli.md) |
-| `integration` | A | stable | Validates integration topologies and runtime compatibility. | `python -m sdetkit integration check --profile examples/kits/integration/profile.json` | `tests/test_integration_feedback_closeout.py` | [docs/cli.md](cli.md) |
+| `integration` | A | stable | Validates integration topologies and runtime compatibility. | `python -m sdetkit integration check --profile examples/kits/integration/profile.json` | `tests/test_integration_feedback.py` | [docs/cli.md](cli.md) |
 | `intelligence` | A | stable | Analyzes failure trends and flaky behavior for triage. | `python -m sdetkit intelligence --help` | `tests/test_cli_sdetkit.py` | [docs/cli.md](cli.md) |
 | `kits` | A | stable | Discovers the curated umbrella surfaces for fast adoption. | `python -m sdetkit kits list` | `tests/test_cli_sdetkit.py` | [docs/cli.md](cli.md) |
 | `release` | A | stable | Runs release-confidence checks and gate workflows. | `python -m sdetkit release gate fast` | `tests/test_release_readiness.py` | [docs/release-readiness.md](release-readiness.md) |

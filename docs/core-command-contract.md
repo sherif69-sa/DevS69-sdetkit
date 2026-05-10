@@ -5,7 +5,7 @@ Effective date: 2026-04-16
 
 ## Purpose
 
-Define a minimal stable command surface for enterprise rollout so teams can depend on a predictable interface while broader/legacy lanes continue to evolve.
+Define a minimal stable command surface for enterprise rollout so teams can depend on a predictable interface while broader/legacy workflows continue to evolve.
 
 This contract is an implementation artifact for **P0.1** in `docs/enterprise-plan-execution.md`.
 

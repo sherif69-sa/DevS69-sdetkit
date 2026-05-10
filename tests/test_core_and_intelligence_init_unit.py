@@ -29,8 +29,8 @@ def test_core_dunder_getattr_exports_and_compat_module(monkeypatch) -> None:
     monkeypatch.setattr(runtime_guard, "ensure_supported_python", lambda **_k: 2)
     assert compat.main(["--x"]) == 2
 
-    closeout_mod = core.__getattr__("launch_readiness_closeout")
-    assert hasattr(closeout_mod, "main")
+    mod = core.__getattr__("launch_readiness")
+    assert hasattr(mod, "main")
 
 
 def test_core_mutation_alias_build_class_hook() -> None:
@@ -83,7 +83,7 @@ def test_core_getattr_lazy_exports_and_main_module(monkeypatch) -> None:
 
 def test_core_getattr_numbered_candidate_branch(monkeypatch) -> None:
     class _Candidate:
-        stem = "launch_readiness_closeout_86"
+        stem = "launch_readiness_86"
 
     class _Parent:
         def glob(self, _pattern):
@@ -102,10 +102,10 @@ def test_core_getattr_numbered_candidate_branch(monkeypatch) -> None:
     monkeypatch.setattr(core, "Path", _FakePath)
 
     def _fake_import(name, _pkg=None):
-        if name == ".launch_readiness_closeout":
+        if name == ".launch_readiness":
             raise ImportError("missing unsuffixed module")
         return name
 
     monkeypatch.setattr(core, "import_module", _fake_import)
-    loaded = core.__getattr__("launch_readiness_closeout")
-    assert loaded == ".launch_readiness_closeout_86"
+    loaded = core.__getattr__("launch_readiness")
+    assert loaded == ".launch_readiness_86"

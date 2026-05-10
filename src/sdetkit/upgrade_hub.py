@@ -97,25 +97,25 @@ def _build_plan_inventory(repo_root: Path) -> dict[str, Any]:
 def build_upgrade_hub_summary(root: str | Path) -> dict[str, Any]:
     repo_root = Path(root)
     src_root = repo_root / "src" / "sdetkit"
-    closeout_modules = list(src_root.glob("*_closeout_*.py"))
-    hidden = [p.stem for p in closeout_modules]
+    modules = list(src_root.glob("*_*.py"))
+    hidden = [p.stem for p in modules]
     lane_distribution = {
         "continuous_upgrade": sum(1 for x in hidden if "continuous_upgrade" in x) or 1,
         "weekly_review": sum(1 for x in hidden if "weekly_review" in x) or 1,
     }
     payload = {
         "name": "upgrade-hub",
-        "total_closeout_entries": len(closeout_modules),
+        "total_entries": len(modules),
         "lane_distribution": lane_distribution,
         "high_signal_hidden_features": [{"id": x} for x in hidden[:10]],
         "repo_inventory": {
-            "closeout_modules": len(closeout_modules),
+            "modules": len(modules),
             "contract_scripts": len(list((repo_root / "scripts").glob("check_*")))
             if (repo_root / "scripts").exists()
             else 1,
         },
         "cli_visibility": {"hidden_count": len(hidden)},
-        "playbooks_coverage": {"promoted_playbooks_count": max(1, len(closeout_modules) // 5)},
+        "playbooks_coverage": {"promoted_playbooks_count": max(1, len(modules) // 5)},
         "integration_opportunities": [{"id": "promote-high-signal-closeouts"}],
         "plan_inventory": _build_plan_inventory(repo_root),
         "actions": [
@@ -141,7 +141,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         plans = payload["plan_inventory"]
         _stdout("upgrade-hub")
-        _stdout(f"closeout modules: {payload['total_closeout_entries']}")
+        _stdout(f"closeout modules: {payload['total_entries']}")
         _stdout(f"plans: {plans['valid_plan_files']}/{plans['total_plan_files']} valid")
         if plans["owners"]:
             _stdout("owners: " + ", ".join(plans["owners"][:5]))

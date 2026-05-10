@@ -77918,8 +77918,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/_legacy_lane.py",
-      "source": "src/sdetkit/_legacy_lane.py",
+      "scenario_id": "module::src/sdetkit/_legacy_workflow.py",
+      "source": "src/sdetkit/_legacy_workflow.py",
       "status": "active"
     },
     {
@@ -78219,8 +78219,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/cli/_legacy_lane.py",
-      "source": "src/sdetkit/cli/_legacy_lane.py",
+      "scenario_id": "module::src/sdetkit/cli/_legacy_workflow.py",
+      "source": "src/sdetkit/cli/_legacy_workflow.py",
       "status": "active"
     },
     {
@@ -78261,8 +78261,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/cli/playbook_post_39.py",
-      "source": "src/sdetkit/cli/playbook_post_39.py",
+      "scenario_id": "module::src/sdetkit/cli/playbook_post.py",
+      "source": "src/sdetkit/cli/playbook_post.py",
       "status": "active"
     },
     {
@@ -78457,8 +78457,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/core/_legacy_lane.py",
-      "source": "src/sdetkit/core/_legacy_lane.py",
+      "scenario_id": "module::src/sdetkit/core/_legacy_workflow.py",
+      "source": "src/sdetkit/core/_legacy_workflow.py",
       "status": "active"
     },
     {
@@ -78527,22 +78527,22 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/demo_asset2_34.py",
-      "source": "src/sdetkit/demo_asset2_34.py",
+      "scenario_id": "module::src/sdetkit/demo_asset2.py",
+      "source": "src/sdetkit/demo_asset2.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/demo_asset_33.py",
-      "source": "src/sdetkit/demo_asset_33.py",
+      "scenario_id": "module::src/sdetkit/demo_asset.py",
+      "source": "src/sdetkit/demo_asset.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/distribution_batch_38.py",
-      "source": "src/sdetkit/distribution_batch_38.py",
+      "scenario_id": "module::src/sdetkit/distribution_batch.py",
+      "source": "src/sdetkit/distribution_batch.py",
       "status": "active"
     },
     {
@@ -78625,8 +78625,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/evidence/_legacy_lane.py",
-      "source": "src/sdetkit/evidence/_legacy_lane.py",
+      "scenario_id": "module::src/sdetkit/evidence/_legacy_workflow.py",
+      "source": "src/sdetkit/evidence/_legacy_workflow.py",
       "status": "active"
     },
     {
@@ -78716,8 +78716,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/expansion_automation_41.py",
-      "source": "src/sdetkit/expansion_automation_41.py",
+      "scenario_id": "module::src/sdetkit/expansion_automation.py",
+      "source": "src/sdetkit/expansion_automation.py",
       "status": "active"
     },
     {
@@ -78730,8 +78730,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/experiment_lane_37.py",
-      "source": "src/sdetkit/experiment_lane_37.py",
+      "scenario_id": "module::src/sdetkit/experiment_workflow.py",
+      "source": "src/sdetkit/experiment_workflow.py",
       "status": "active"
     },
     {
@@ -79003,8 +79003,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/kpi_instrumentation_35.py",
-      "source": "src/sdetkit/kpi_instrumentation_35.py",
+      "scenario_id": "module::src/sdetkit/kpi_instrumentation.py",
+      "source": "src/sdetkit/kpi_instrumentation.py",
       "status": "active"
     },
     {
@@ -79332,15 +79332,15 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/phase1_hardening_29.py",
-      "source": "src/sdetkit/phase1_hardening_29.py",
+      "scenario_id": "module::src/sdetkit/phase1_hardening.py",
+      "source": "src/sdetkit/phase1_hardening.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/phase1_wrap_30.py",
-      "source": "src/sdetkit/phase1_wrap_30.py",
+      "scenario_id": "module::src/sdetkit/phase1_wrap.py",
+      "source": "src/sdetkit/phase1_wrap.py",
       "status": "active"
     },
     {
@@ -79353,8 +79353,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/phase2_kickoff_31.py",
-      "source": "src/sdetkit/phase2_kickoff_31.py",
+      "scenario_id": "module::src/sdetkit/phase2_kickoff.py",
+      "source": "src/sdetkit/phase2_kickoff.py",
       "status": "active"
     },
     {
@@ -79402,8 +79402,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/phases/_legacy_lane.py",
-      "source": "src/sdetkit/phases/_legacy_lane.py",
+      "scenario_id": "module::src/sdetkit/phases/_legacy_workflow.py",
+      "source": "src/sdetkit/phases/_legacy_workflow.py",
       "status": "active"
     },
     {
@@ -79416,15 +79416,15 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/phases/phase1_hardening_29.py",
-      "source": "src/sdetkit/phases/phase1_hardening_29.py",
+      "scenario_id": "module::src/sdetkit/phases/phase1_hardening.py",
+      "source": "src/sdetkit/phases/phase1_hardening.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/phases/phase1_wrap_30.py",
-      "source": "src/sdetkit/phases/phase1_wrap_30.py",
+      "scenario_id": "module::src/sdetkit/phases/phase1_wrap.py",
+      "source": "src/sdetkit/phases/phase1_wrap.py",
       "status": "active"
     },
     {
@@ -79437,8 +79437,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/phases/phase2_kickoff_31.py",
-      "source": "src/sdetkit/phases/phase2_kickoff_31.py",
+      "scenario_id": "module::src/sdetkit/phases/phase2_kickoff.py",
+      "source": "src/sdetkit/phases/phase2_kickoff.py",
       "status": "active"
     },
     {
@@ -79486,8 +79486,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/playbook_post_39.py",
-      "source": "src/sdetkit/playbook_post_39.py",
+      "scenario_id": "module::src/sdetkit/playbook_post.py",
+      "source": "src/sdetkit/playbook_post.py",
       "status": "active"
     },
     {
@@ -79633,8 +79633,8 @@
     {
       "domain": "release",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/release_cadence_32.py",
-      "source": "src/sdetkit/release_cadence_32.py",
+      "scenario_id": "module::src/sdetkit/release_cadence.py",
+      "source": "src/sdetkit/release_cadence.py",
       "status": "active"
     },
     {
@@ -79752,8 +79752,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/scale_lane_40.py",
-      "source": "src/sdetkit/scale_lane_40.py",
+      "scenario_id": "module::src/sdetkit/scale_workflow.py",
+      "source": "src/sdetkit/scale_workflow.py",
       "status": "active"
     },
     {
@@ -79955,8 +79955,8 @@
     {
       "domain": "reliability",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/weekly_review_28.py",
-      "source": "src/sdetkit/weekly_review_28.py",
+      "scenario_id": "module::src/sdetkit/weekly_review_foundation.py",
+      "source": "src/sdetkit/weekly_review_foundation.py",
       "status": "active"
     },
     {
@@ -80254,8 +80254,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_community_activation_contract_25.py",
-      "source": "scripts/check_community_activation_contract_25.py",
+      "scenario_id": "script::scripts/check_community_activation_contract.py",
+      "source": "scripts/check_community_activation_contract.py",
       "status": "active"
     },
     {
@@ -80289,85 +80289,85 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_continuous_upgrade_contract_1.py",
-      "source": "scripts/check_continuous_upgrade_contract_1.py",
+      "scenario_id": "script::scripts/check_continuous_upgrade_foundation_contract.py",
+      "source": "scripts/check_continuous_upgrade_foundation_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_continuous_upgrade_contract_10.py",
-      "source": "scripts/check_continuous_upgrade_contract_10.py",
+      "scenario_id": "script::scripts/check_continuous_upgrade_platform_contract.py",
+      "source": "scripts/check_continuous_upgrade_platform_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_continuous_upgrade_contract_11.py",
-      "source": "scripts/check_continuous_upgrade_contract_11.py",
+      "scenario_id": "script::scripts/check_continuous_upgrade_readiness_contract.py",
+      "source": "scripts/check_continuous_upgrade_readiness_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_continuous_upgrade_contract_2.py",
-      "source": "scripts/check_continuous_upgrade_contract_2.py",
+      "scenario_id": "script::scripts/check_continuous_upgrade_baseline_contract.py",
+      "source": "scripts/check_continuous_upgrade_baseline_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_continuous_upgrade_contract_3.py",
-      "source": "scripts/check_continuous_upgrade_contract_3.py",
+      "scenario_id": "script::scripts/check_continuous_upgrade_contracts_contract.py",
+      "source": "scripts/check_continuous_upgrade_contracts_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_continuous_upgrade_contract_4.py",
-      "source": "scripts/check_continuous_upgrade_contract_4.py",
+      "scenario_id": "script::scripts/check_continuous_upgrade_docs_contract.py",
+      "source": "scripts/check_continuous_upgrade_docs_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_continuous_upgrade_contract_5.py",
-      "source": "scripts/check_continuous_upgrade_contract_5.py",
+      "scenario_id": "script::scripts/check_continuous_upgrade_quality_contract.py",
+      "source": "scripts/check_continuous_upgrade_quality_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_continuous_upgrade_contract_6.py",
-      "source": "scripts/check_continuous_upgrade_contract_6.py",
+      "scenario_id": "script::scripts/check_continuous_upgrade_release_contract.py",
+      "source": "scripts/check_continuous_upgrade_release_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_continuous_upgrade_contract_7.py",
-      "source": "scripts/check_continuous_upgrade_contract_7.py",
+      "scenario_id": "script::scripts/check_continuous_upgrade_operations_contract.py",
+      "source": "scripts/check_continuous_upgrade_operations_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_continuous_upgrade_contract_8.py",
-      "source": "scripts/check_continuous_upgrade_contract_8.py",
+      "scenario_id": "script::scripts/check_continuous_upgrade_governance_contract.py",
+      "source": "scripts/check_continuous_upgrade_governance_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_continuous_upgrade_contract_9.py",
-      "source": "scripts/check_continuous_upgrade_contract_9.py",
+      "scenario_id": "script::scripts/check_continuous_upgrade_automation_contract.py",
+      "source": "scripts/check_continuous_upgrade_automation_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_contribution_templates_contract_9.py",
-      "source": "scripts/check_contribution_templates_contract_9.py",
+      "scenario_id": "script::scripts/check_contribution_templates_contract.py",
+      "source": "scripts/check_contribution_templates_contract.py",
       "status": "active"
     },
     {
@@ -80387,8 +80387,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_contributor_funnel_contract_8.py",
-      "source": "scripts/check_contributor_funnel_contract_8.py",
+      "scenario_id": "script::scripts/check_contributor_funnel_contract.py",
+      "source": "scripts/check_contributor_funnel_contract.py",
       "status": "active"
     },
     {
@@ -80408,8 +80408,8 @@
     {
       "domain": "release",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_conversion_contract_6.py",
-      "source": "scripts/check_conversion_contract_6.py",
+      "scenario_id": "script::scripts/check_conversion_contract.py",
+      "source": "scripts/check_conversion_contract.py",
       "status": "active"
     },
     {
@@ -80422,8 +80422,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_demo_asset2_contract_34.py",
-      "source": "scripts/check_demo_asset2_contract_34.py",
+      "scenario_id": "script::scripts/check_demo_asset2_contract.py",
+      "source": "scripts/check_demo_asset2_contract.py",
       "status": "active"
     },
     {
@@ -80436,8 +80436,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_demo_asset_contract_33.py",
-      "source": "scripts/check_demo_asset_contract_33.py",
+      "scenario_id": "script::scripts/check_demo_asset_contract.py",
+      "source": "scripts/check_demo_asset_contract.py",
       "status": "active"
     },
     {
@@ -80450,8 +80450,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_distribution_batch_contract_38.py",
-      "source": "scripts/check_distribution_batch_contract_38.py",
+      "scenario_id": "script::scripts/check_distribution_batch_contract.py",
+      "source": "scripts/check_distribution_batch_contract.py",
       "status": "active"
     },
     {
@@ -80499,8 +80499,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_docs_navigation_contract_11.py",
-      "source": "scripts/check_docs_navigation_contract_11.py",
+      "scenario_id": "script::scripts/check_docs_navigation_contract.py",
+      "source": "scripts/check_docs_navigation_contract.py",
       "status": "active"
     },
     {
@@ -80555,8 +80555,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_expansion_automation_contract_41.py",
-      "source": "scripts/check_expansion_automation_contract_41.py",
+      "scenario_id": "script::scripts/check_expansion_automation_contract.py",
+      "source": "scripts/check_expansion_automation_contract.py",
       "status": "active"
     },
     {
@@ -80576,15 +80576,15 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_experiment_lane_contract.py",
-      "source": "scripts/check_experiment_lane_contract.py",
+      "scenario_id": "script::scripts/check_experiment_workflow_contract.py",
+      "source": "scripts/check_experiment_workflow_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_experiment_lane_contract_37.py",
-      "source": "scripts/check_experiment_lane_contract_37.py",
+      "scenario_id": "script::scripts/check_experiment_workflow_contract.py",
+      "source": "scripts/check_experiment_workflow_contract.py",
       "status": "active"
     },
     {
@@ -80611,8 +80611,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_first_contribution_contract_10.py",
-      "source": "scripts/check_first_contribution_contract_10.py",
+      "scenario_id": "script::scripts/check_first_contribution_contract.py",
+      "source": "scripts/check_first_contribution_contract.py",
       "status": "active"
     },
     {
@@ -80772,8 +80772,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_kpi_audit_contract_27.py",
-      "source": "scripts/check_kpi_audit_contract_27.py",
+      "scenario_id": "script::scripts/check_kpi_audit_contract.py",
+      "source": "scripts/check_kpi_audit_contract.py",
       "status": "active"
     },
     {
@@ -80800,8 +80800,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_kpi_instrumentation_contract_35.py",
-      "source": "scripts/check_kpi_instrumentation_contract_35.py",
+      "scenario_id": "script::scripts/check_kpi_instrumentation_contract.py",
+      "source": "scripts/check_kpi_instrumentation_contract.py",
       "status": "active"
     },
     {
@@ -80842,15 +80842,15 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_objection_closeout_contract.py",
-      "source": "scripts/check_objection_closeout_contract.py",
+      "scenario_id": "script::scripts/check_objection_handling_contract.py",
+      "source": "scripts/check_objection_handling_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_objection_closeout_contract_48.py",
-      "source": "scripts/check_objection_closeout_contract_48.py",
+      "scenario_id": "script::scripts/check_objection_handling_contract_48.py",
+      "source": "scripts/check_objection_handling_contract_48.py",
       "status": "active"
     },
     {
@@ -80954,8 +80954,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_phase1_hardening_contract_29.py",
-      "source": "scripts/check_phase1_hardening_contract_29.py",
+      "scenario_id": "script::scripts/check_phase1_hardening_contract.py",
+      "source": "scripts/check_phase1_hardening_contract.py",
       "status": "active"
     },
     {
@@ -80968,8 +80968,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_phase1_wrap_contract_30.py",
-      "source": "scripts/check_phase1_wrap_contract_30.py",
+      "scenario_id": "script::scripts/check_phase1_wrap_contract.py",
+      "source": "scripts/check_phase1_wrap_contract.py",
       "status": "active"
     },
     {
@@ -80996,8 +80996,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_phase2_kickoff_contract_31.py",
-      "source": "scripts/check_phase2_kickoff_contract_31.py",
+      "scenario_id": "script::scripts/check_phase2_kickoff_contract.py",
+      "source": "scripts/check_phase2_kickoff_contract.py",
       "status": "active"
     },
     {
@@ -81094,8 +81094,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_platform_contract_5.py",
-      "source": "scripts/check_platform_contract_5.py",
+      "scenario_id": "script::scripts/check_platform_contract.py",
+      "source": "scripts/check_platform_contract.py",
       "status": "active"
     },
     {
@@ -81115,8 +81115,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_proof_contract_3.py",
-      "source": "scripts/check_proof_contract_3.py",
+      "scenario_id": "script::scripts/check_proof_contract.py",
+      "source": "scripts/check_proof_contract.py",
       "status": "active"
     },
     {
@@ -81129,8 +81129,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_quality_contribution_delta_contract_17.py",
-      "source": "scripts/check_quality_contribution_delta_contract_17.py",
+      "scenario_id": "script::scripts/check_quality_contribution_delta_contract.py",
+      "source": "scripts/check_quality_contribution_delta_contract.py",
       "status": "active"
     },
     {
@@ -81143,8 +81143,8 @@
     {
       "domain": "release",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_release_cadence_contract_32.py",
-      "source": "scripts/check_release_cadence_contract_32.py",
+      "scenario_id": "script::scripts/check_release_cadence_contract.py",
+      "source": "scripts/check_release_cadence_contract.py",
       "status": "active"
     },
     {
@@ -81234,15 +81234,15 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_scale_lane_contract.py",
-      "source": "scripts/check_scale_lane_contract.py",
+      "scenario_id": "script::scripts/check_scale_workflow_contract.py",
+      "source": "scripts/check_scale_workflow_contract.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_scale_lane_contract_40.py",
-      "source": "scripts/check_scale_lane_contract_40.py",
+      "scenario_id": "script::scripts/check_scale_workflow_contract.py",
+      "source": "scripts/check_scale_workflow_contract.py",
       "status": "active"
     },
     {
@@ -81262,8 +81262,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_skills_contract_4.py",
-      "source": "scripts/check_skills_contract_4.py",
+      "scenario_id": "script::scripts/check_skills_contract.py",
+      "source": "scripts/check_skills_contract.py",
       "status": "active"
     },
     {
@@ -81353,29 +81353,29 @@
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_closeout_contract.py",
-      "source": "scripts/check_weekly_review_closeout_contract.py",
+      "scenario_id": "script::scripts/check_weekly_review_workflow_contract.py",
+      "source": "scripts/check_weekly_review_workflow_contract.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_closeout_contract_2.py",
-      "source": "scripts/check_weekly_review_closeout_contract_2.py",
+      "scenario_id": "script::scripts/check_weekly_review_workflow_contract_2.py",
+      "source": "scripts/check_weekly_review_workflow_contract_2.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_closeout_contract_49.py",
-      "source": "scripts/check_weekly_review_closeout_contract_49.py",
+      "scenario_id": "script::scripts/check_weekly_review_workflow_contract_49.py",
+      "source": "scripts/check_weekly_review_workflow_contract_49.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_closeout_contract_65.py",
-      "source": "scripts/check_weekly_review_closeout_contract_65.py",
+      "scenario_id": "script::scripts/check_weekly_review_workflow_contract_65.py",
+      "source": "scripts/check_weekly_review_workflow_contract_65.py",
       "status": "active"
     },
     {
@@ -81388,29 +81388,29 @@
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_contract_14.py",
-      "source": "scripts/check_weekly_review_contract_14.py",
+      "scenario_id": "script::scripts/check_weekly_review_artifact_contract.py",
+      "source": "scripts/check_weekly_review_artifact_contract.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_contract_21.py",
-      "source": "scripts/check_weekly_review_contract_21.py",
+      "scenario_id": "script::scripts/check_weekly_review_completion_pack_contract.py",
+      "source": "scripts/check_weekly_review_completion_pack_contract.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_contract_28.py",
-      "source": "scripts/check_weekly_review_contract_28.py",
+      "scenario_id": "script::scripts/check_weekly_review_foundation_contract.py",
+      "source": "scripts/check_weekly_review_foundation_contract.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/check_weekly_review_contract_7.py",
-      "source": "scripts/check_weekly_review_contract_7.py",
+      "scenario_id": "script::scripts/check_weekly_review_starter_contract.py",
+      "source": "scripts/check_weekly_review_starter_contract.py",
       "status": "active"
     },
     {
@@ -84860,7 +84860,7 @@
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_cli_help_discoverability_contract.py::test_root_help_exposes_legacy_namespace_but_hides_legacy_lanes",
+      "scenario_id": "tests/test_cli_help_discoverability_contract.py::test_root_help_exposes_legacy_namespace_but_hides_legacy_workflows",
       "source": "tests/test_cli_help_discoverability_contract.py",
       "status": "active"
     },
@@ -87345,36 +87345,36 @@
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_experiment_lane.py::test_lane37_cli_dispatch",
-      "source": "tests/test_experiment_lane.py",
+      "scenario_id": "tests/test_experiment_workflow.py::test_lane37_cli_dispatch",
+      "source": "tests/test_experiment_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_experiment_lane.py::test_lane37_distribution_json",
-      "source": "tests/test_experiment_lane.py",
+      "scenario_id": "tests/test_experiment_workflow.py::test_lane37_distribution_json",
+      "source": "tests/test_experiment_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_experiment_lane.py::test_lane37_emit_pack_and_execute",
-      "source": "tests/test_experiment_lane.py",
+      "scenario_id": "tests/test_experiment_workflow.py::test_lane37_emit_pack_and_execute",
+      "source": "tests/test_experiment_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_experiment_lane.py::test_lane37_strict_fails_when_lane36_board_is_not_ready",
-      "source": "tests/test_experiment_lane.py",
+      "scenario_id": "tests/test_experiment_workflow.py::test_lane37_strict_fails_when_lane36_board_is_not_ready",
+      "source": "tests/test_experiment_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_experiment_lane.py::test_lane37_strict_fails_when_lane36_inputs_missing",
-      "source": "tests/test_experiment_lane.py",
+      "scenario_id": "tests/test_experiment_workflow.py::test_lane37_strict_fails_when_lane36_inputs_missing",
+      "source": "tests/test_experiment_workflow.py",
       "status": "active"
     },
     {
@@ -89935,15 +89935,15 @@
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_legacy_lane_wrapper_unit.py::test_legacy_lane_wrapper_builds_all_when_missing",
-      "source": "tests/test_legacy_lane_wrapper_unit.py",
+      "scenario_id": "tests/test_legacy_workflow_wrapper_unit.py::test_legacy_workflow_wrapper_builds_all_when_missing",
+      "source": "tests/test_legacy_workflow_wrapper_unit.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_legacy_lane_wrapper_unit.py::test_legacy_lane_wrapper_uses_impl_all",
-      "source": "tests/test_legacy_lane_wrapper_unit.py",
+      "scenario_id": "tests/test_legacy_workflow_wrapper_unit.py::test_legacy_workflow_wrapper_uses_impl_all",
+      "source": "tests/test_legacy_workflow_wrapper_unit.py",
       "status": "active"
     },
     {
@@ -95668,29 +95668,29 @@
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_scale_lane.py::test_lane40_cli_dispatch",
-      "source": "tests/test_scale_lane.py",
+      "scenario_id": "tests/test_scale_workflow.py::test_lane40_cli_dispatch",
+      "source": "tests/test_scale_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_scale_lane.py::test_lane40_emit_pack_and_execute",
-      "source": "tests/test_scale_lane.py",
+      "scenario_id": "tests/test_scale_workflow.py::test_lane40_emit_pack_and_execute",
+      "source": "tests/test_scale_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_scale_lane.py::test_lane40_scale_lane_json",
-      "source": "tests/test_scale_lane.py",
+      "scenario_id": "tests/test_scale_workflow.py::test_lane40_scale_lane_json",
+      "source": "tests/test_scale_workflow.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_scale_lane.py::test_lane40_strict_fails_when_lane39_inputs_missing",
-      "source": "tests/test_scale_lane.py",
+      "scenario_id": "tests/test_scale_workflow.py::test_lane40_strict_fails_when_lane39_inputs_missing",
+      "source": "tests/test_scale_workflow.py",
       "status": "active"
     },
     {
@@ -97565,29 +97565,29 @@
     {
       "domain": "reliability",
       "kind": "test_function",
-      "scenario_id": "tests/test_weekly_review_lane.py::test_lane28_cli_dispatch",
-      "source": "tests/test_weekly_review_lane.py",
+      "scenario_id": "tests/test_weekly_review_foundation.py::test_lane28_cli_dispatch",
+      "source": "tests/test_weekly_review_foundation.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "test_function",
-      "scenario_id": "tests/test_weekly_review_lane.py::test_lane28_emit_pack_and_execute",
-      "source": "tests/test_weekly_review_lane.py",
+      "scenario_id": "tests/test_weekly_review_foundation.py::test_lane28_emit_pack_and_execute",
+      "source": "tests/test_weekly_review_foundation.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "test_function",
-      "scenario_id": "tests/test_weekly_review_lane.py::test_lane28_strict_fails_when_sections_missing",
-      "source": "tests/test_weekly_review_lane.py",
+      "scenario_id": "tests/test_weekly_review_foundation.py::test_lane28_strict_fails_when_sections_missing",
+      "source": "tests/test_weekly_review_foundation.py",
       "status": "active"
     },
     {
       "domain": "reliability",
       "kind": "test_function",
-      "scenario_id": "tests/test_weekly_review_lane.py::test_lane28_weekly_review_json",
-      "source": "tests/test_weekly_review_lane.py",
+      "scenario_id": "tests/test_weekly_review_foundation.py::test_lane28_weekly_review_json",
+      "source": "tests/test_weekly_review_foundation.py",
       "status": "active"
     },
     {
