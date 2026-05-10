@@ -83,7 +83,7 @@ def test_core_getattr_lazy_exports_and_main_module(monkeypatch) -> None:
 
 def test_core_getattr_numbered_candidate_branch(monkeypatch) -> None:
     class _Candidate:
-        stem = "launch_readiness"
+        stem = "launch_readiness_86"
 
     class _Parent:
         def glob(self, _pattern):
@@ -108,4 +108,4 @@ def test_core_getattr_numbered_candidate_branch(monkeypatch) -> None:
 
     monkeypatch.setattr(core, "import_module", _fake_import)
     loaded = core.__getattr__("launch_readiness")
-    assert loaded == ".launch_readiness"
+    assert loaded == ".launch_readiness_86"
