@@ -293,4 +293,4 @@ jobs:
         run: bash quality.sh cov
 
       - name: Docs build
-        run: NO_MKDOCS_2_WARNING=1 python -m mkdocs build
+        run: NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict

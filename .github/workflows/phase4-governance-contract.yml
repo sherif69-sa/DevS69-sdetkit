@@ -17,6 +17,9 @@ on:
       - 'docs/**'
       - 'Makefile'
       - '.github/workflows/phase4-governance-contract.yml'
+permissions:
+  contents: read
+
 jobs:
   phase4-governance:
     runs-on: ubuntu-latest
@@ -29,7 +32,7 @@ jobs:
         run: |
           python -m venv .venv
           . .venv/bin/activate
-          pip install -e .
+          python -m pip install -c constraints-ci.txt -e .
       - name: Run phase4 contract
         run: |
           . .venv/bin/activate
