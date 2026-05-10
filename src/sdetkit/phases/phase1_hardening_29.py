@@ -19,7 +19,7 @@ _CANONICAL_SUMMARY_MD = "phase1-hardening-summary.md"
 _CANONICAL_STALE_GAPS = "phase1-hardening-stale-gaps.json"
 _CANONICAL_VALIDATION_COMMANDS = "phase1-hardening-validation-commands.md"
 _CANONICAL_EXECUTION_SUMMARY = "phase1-hardening-execution-summary.json"
-_SECTION_HEADER = "#  — Phase-1 hardening"
+_SECTION_HEADER = "#  - Phase-1 hardening"
 _REQUIRED_SECTIONS = [
     "## Why  exists",
     "## Hardening scope",
@@ -39,7 +39,7 @@ _EXECUTION_COMMANDS = [
 ]
 _STALE_MARKERS = ["TODO", "TBD", "lorem ipsum", "coming soon"]
 
-_DEFAULT_PAGE_TEMPLATE = "#  — Phase-1 hardening\n\n closes Phase-1 by hardening top entry pages, removing stale guidance, and publishing a deterministic closeout lane.\n\n## Why  exists\n\n- Preserve trust by ensuring README + docs index + strategy pages are mutually consistent.\n- Close stale docs gaps before  phase wrap and handoff.\n- Produce a reviewable hardening artifact pack for maintainers.\n\n## Hardening scope\n\n- README entry-page checks and command-lane verification.\n- Docs index discoverability checks for  integration/report pages.\n- Strategy alignment checks against `docs/top-10-github-strategy.md`  objective.\n- Stale marker scans across top entry pages and recent integration docs.\n\n##  command lane\n\n```bash\npython -m sdetkit phase1-hardening --format json --strict\npython -m sdetkit phase1-hardening --emit-pack-dir docs/artifacts/phase1-hardening-pack --format json --strict\npython -m sdetkit phase1-hardening --execute --evidence-dir docs/artifacts/phase1-hardening-pack/evidence --format json --strict\npython scripts/check_phase1_hardening_contract.py\n```\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract and command-lane completeness: 35 points.\n- Entry-page discoverability + strategy alignment: 35 points.\n- Stale marker elimination in top pages: 20 points.\n- Artifact/report wiring for Phase-1 closeout: 10 points.\n\n## Entry page polish checklist\n\n- README includes  section and command lane.\n- Docs index links both integration guide and  report.\n- Top-10 strategy includes  hardening objective.\n- No stale placeholder markers in top entry pages.\n"
+_DEFAULT_PAGE_TEMPLATE = "#  - Phase-1 hardening\n\n closes Phase-1 by hardening top entry pages, removing stale guidance, and publishing a deterministic closeout lane.\n\n## Why  exists\n\n- Preserve trust by ensuring README + docs index + strategy pages are mutually consistent.\n- Close stale docs gaps before  phase wrap and handoff.\n- Produce a reviewable hardening artifact pack for maintainers.\n\n## Hardening scope\n\n- README entry-page checks and command-lane verification.\n- Docs index discoverability checks for  integration/report pages.\n- Strategy alignment checks against `docs/top-10-github-strategy.md`  objective.\n- Stale marker scans across top entry pages and recent integration docs.\n\n##  command lane\n\n```bash\npython -m sdetkit phase1-hardening --format json --strict\npython -m sdetkit phase1-hardening --emit-pack-dir docs/artifacts/phase1-hardening-pack --format json --strict\npython -m sdetkit phase1-hardening --execute --evidence-dir docs/artifacts/phase1-hardening-pack/evidence --format json --strict\npython scripts/check_phase1_hardening_contract.py\n```\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract and command-lane completeness: 35 points.\n- Entry-page discoverability + strategy alignment: 35 points.\n- Stale marker elimination in top pages: 20 points.\n- Artifact/report wiring for Phase-1 closeout: 10 points.\n\n## Entry page polish checklist\n\n- README includes  section and command lane.\n- Docs index links both integration guide and  report.\n- Top-10 strategy includes  hardening objective.\n- No stale placeholder markers in top entry pages.\n"
 
 
 def _read(path: Path) -> str:
@@ -121,8 +121,14 @@ def build_phase1_hardening_summary_impl(
         {
             "check_id": "top10_phase1_hardening_alignment",
             "weight": 11,
-            "passed": " — Phase-1 hardening" in top10_text,
-            "evidence": " — Phase-1 hardening",
+            "passed": any(
+                marker in top10_text
+                for marker in (
+                    " - Phase-1 hardening",
+                    " " + chr(0x2014) + " Phase-1 hardening",
+                )
+            ),
+            "evidence": " - Phase-1 hardening",
         },
         {
             "check_id": "report_exists",

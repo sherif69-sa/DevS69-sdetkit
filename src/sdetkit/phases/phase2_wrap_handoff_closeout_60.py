@@ -17,7 +17,7 @@ _DAY58_SUMMARY_PATH = (
 )
 _DAY58_BOARD_PATH = "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md"
 _LANE_NAME = "Phase 2 Wrap Handoff Closeout"
-_SECTION_HEADER = "# Phase 2 Wrap Handoff Closeout — Phase-2 wrap + handoff closeout lane"
+_SECTION_HEADER = "# Phase 2 Wrap Handoff Closeout - Phase-2 wrap + handoff closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Phase 2 Wrap Handoff Closeout matters",
     "## Required inputs (Phase-3 pre-plan closeout)",
@@ -59,7 +59,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Phase-3 execution priorities drafted from Phase-2 learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Phase 2 Wrap Handoff Closeout — Phase-2 wrap + handoff closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Phase 2 Wrap Handoff Closeout - Phase-2 wrap + handoff closeout lane
 
 Phase 2 Wrap Handoff Closeout closes with a major Phase-2 wrap + handoff upgrade that turns Phase-3 pre-plan outcomes into deterministic Phase-3 execution priorities.
 
