@@ -11,6 +11,9 @@ on:
       - "pyproject.toml"
       - "requirements*.txt"
 
+permissions:
+  contents: read
+
 jobs:
   publish-first-proof-artifacts:
     runs-on: ubuntu-latest

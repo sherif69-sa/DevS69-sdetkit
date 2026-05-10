@@ -75,7 +75,7 @@ jobs:
           COV_FAIL_UNDER: "95"
         run: |
           set -euo pipefail
-          python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .[packaging]
+          python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .[packaging]
           bash quality.sh cov
 
       - name: Build dist
