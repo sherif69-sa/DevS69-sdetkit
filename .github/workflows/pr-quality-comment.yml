@@ -25,7 +25,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
+          python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .
 
       - name: Run quality gate
         id: quality
@@ -69,7 +69,7 @@ jobs:
             {
               echo '❌ quality.sh cov failed (see workflow logs for details)'
               echo "- coverage (last reported): ${coverage_pct}%"
-              echo '- suggested fix: run `python -m pip install -r requirements-test.txt -e . && bash quality.sh cov` locally'
+              echo '- suggested fix: run `python -m pip install -c constraints-ci.txt -r requirements-test.txt -e . && bash quality.sh cov` locally'
               if [ -s build/pr-quality/adaptive-diagnosis-comment.md ]; then
                 echo ''
                 cat build/pr-quality/adaptive-diagnosis-comment.md
