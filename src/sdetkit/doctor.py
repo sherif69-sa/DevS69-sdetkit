@@ -587,6 +587,59 @@ def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _evidence_identity(item: dict[str, Any]) -> tuple[str, str, str]:
+    return (
+        str(item.get("type", "")),
+        str(item.get("path", "")),
+        str(item.get("message", "")),
+    )
+
+
+def _new_snapshot_evidence(snapshot_text: str, current: dict[str, Any]) -> list[dict[str, str]]:
+    try:
+        previous = json.loads(snapshot_text)
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(previous, dict):
+        return []
+
+    previous_checks = previous.get("checks")
+    current_checks = current.get("checks")
+    if not isinstance(previous_checks, dict) or not isinstance(current_checks, dict):
+        return []
+
+    new_items: list[dict[str, str]] = []
+    for check_id, check in sorted(current_checks.items()):
+        if not isinstance(check, dict):
+            continue
+        current_evidence = check.get("evidence", [])
+        if not isinstance(current_evidence, list):
+            continue
+
+        previous_check = previous_checks.get(check_id, {})
+        previous_evidence = (
+            previous_check.get("evidence", []) if isinstance(previous_check, dict) else []
+        )
+        previous_keys = {
+            _evidence_identity(item) for item in previous_evidence if isinstance(item, dict)
+        }
+
+        for item in current_evidence:
+            if not isinstance(item, dict):
+                continue
+            if _evidence_identity(item) in previous_keys:
+                continue
+
+            entry = {"check": str(check_id)}
+            for field in ("type", "path", "message"):
+                value = item.get(field)
+                if value is not None:
+                    entry[field] = str(value)
+            new_items.append(entry)
+
+    return new_items
+
+
 def _build_explain_payload(data: dict[str, Any]) -> dict[str, Any]:
     judgment = data.get("judgment", {}) if isinstance(data.get("judgment"), dict) else {}
     confidence_obj = judgment.get("confidence", {}) if isinstance(judgment, dict) else {}
@@ -3477,6 +3530,9 @@ def main(argv: list[str] | None = None) -> int:
 
         data["snapshot_diff_ok"] = diff_ok
         data["snapshot_diff_summary"] = diff_summary
+        new_evidence = _new_snapshot_evidence(snap_text, data) if snap_text else []
+        if new_evidence:
+            data["snapshot_new_evidence"] = new_evidence
 
         if getattr(ns, "diff", False) and not diff_ok:
             n = int(getattr(ns, "diff_context", 3) or 0)
