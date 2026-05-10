@@ -64,3 +64,37 @@ def test_cli_returns_zero_when_no_warnings(tmp_path, capsys):
 
     assert rc == 0
     assert "No GitHub Actions annotation hygiene findings" in capsys.readouterr().out
+
+
+def test_action_extraction_trims_sentence_punctuation() -> None:
+    payload = hygiene.analyze_annotations(
+        "release\n"
+        "Node.js 20 actions are deprecated. The following actions are running on "
+        "Node.js 20 and may not work as expected: "
+        "actions/component-detection-dependency-submission-action@374343effede691df3a5ffaf36b4e7acab919590.\n"
+    )
+
+    finding = next(
+        item for item in payload["findings"] if item["id"] == "github_actions_node20_deprecation"
+    )
+    assert (
+        finding["action"]
+        == "actions/component-detection-dependency-submission-action@374343effede691df3a5ffaf36b4e7acab919590"
+    )
+
+
+def test_action_extraction_preserves_nested_action_path() -> None:
+    payload = hygiene.analyze_annotations(
+        "release\n"
+        "Node.js 20 actions are deprecated. The following actions are running on "
+        "Node.js 20 and may not work as expected: "
+        "github/codeql-action/upload-sarif@374343effede691df3a5ffaf36b4e7acab919590.\n"
+    )
+
+    finding = next(
+        item for item in payload["findings"] if item["id"] == "github_actions_node20_deprecation"
+    )
+    assert (
+        finding["action"]
+        == "github/codeql-action/upload-sarif@374343effede691df3a5ffaf36b4e7acab919590"
+    )

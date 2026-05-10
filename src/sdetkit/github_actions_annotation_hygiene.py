@@ -8,7 +8,9 @@ from typing import Any
 
 SCHEMA_VERSION = "sdetkit.github_actions.annotation_hygiene.v1"
 
-_NODE20_ACTION_RE = re.compile(r"(?P<action>[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[A-Za-z0-9_.:/-]+)")
+_NODE20_ACTION_RE = re.compile(
+    r"(?P<action>[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)+@[A-Za-z0-9_.:/-]+)"
+)
 _JOB_RE = re.compile(r"^(?P<job>[A-Za-z0-9_. -]+)$")
 
 
@@ -33,7 +35,9 @@ def _nearest_job(lines: list[str], index: int) -> str:
 
 def _extract_action(line: str) -> str:
     match = _NODE20_ACTION_RE.search(line)
-    return match.group("action") if match else ""
+    if not match:
+        return ""
+    return match.group("action").rstrip(".,;:)")
 
 
 def analyze_annotations(text: str) -> dict[str, Any]:
