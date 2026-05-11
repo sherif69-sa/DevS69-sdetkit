@@ -68,16 +68,16 @@ def _mock_httpx(monkeypatch: pytest.MonkeyPatch) -> dict[str, int]:
     transport = httpx.MockTransport(handler)
 
     class PatchedClient(httpx.Client):
-        def init_(self, *args: Any, **kwargs: Any) -> None:
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
             kwargs.setdefault("transport", transport)
             kwargs.setdefault("base_url", "https://example.invalid")
-            super().init_(*args, **kwargs)
+            super().__init__(*args, **kwargs)
 
     class PatchedAsyncClient(httpx.AsyncClient):
-        def init_(self, *args: Any, **kwargs: Any) -> None:
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
             kwargs.setdefault("transport", transport)
             kwargs.setdefault("base_url", "https://example.invalid")
-            super().init_(*args, **kwargs)
+            super().__init__(*args, **kwargs)
 
     monkeypatch.setattr(httpx, "Client", PatchedClient)
     monkeypatch.setattr(httpx, "AsyncClient", PatchedAsyncClient)

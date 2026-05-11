@@ -9,7 +9,7 @@ from sdetkit.agent.providers import CachedProvider, FakeProvider, LocalHTTPProvi
 
 
 class _HTTPResponse:
-    def init_(self, payload: str) -> None:
+    def __init__(self, payload: str) -> None:
         self._payload = payload
 
     def __enter__(self):
