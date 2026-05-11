@@ -16,7 +16,7 @@ from sdetkit.agent.providers import CachedProvider
 
 
 class CountingProvider:
-    def init_(self) -> None:
+    def __init__(self) -> None:
         self.calls = 0
 
     def complete(self, *, role: str, task: str, context: dict[str, object]) -> str:
