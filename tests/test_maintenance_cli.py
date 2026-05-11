@@ -576,7 +576,7 @@ def test_security_check_uses_new_findings_when_baseline_exists(tmp_path: Path, m
 
 def test_security_check_requires_repeated_failure(tmp_path: Path, monkeypatch) -> None:
     class Result:
-        def init_(self, returncode: int, stdout: str) -> None:
+        def __init__(self, returncode: int, stdout: str) -> None:
             self.returncode = returncode
             self.stdout = stdout
             self.stderr = ""
@@ -608,7 +608,7 @@ def test_security_check_requires_repeated_failure(tmp_path: Path, monkeypatch) -
 
 def test_security_check_fix_mode_applies_fix_before_follow_up(tmp_path: Path, monkeypatch) -> None:
     class Result:
-        def init_(self, returncode: int, stdout: str = "", stderr: str = "") -> None:
+        def __init__(self, returncode: int, stdout: str = "", stderr: str = "") -> None:
             self.returncode = returncode
             self.stdout = stdout
             self.stderr = stderr
@@ -706,7 +706,7 @@ def test_security_check_repeated_fingerprint_fails(tmp_path: Path, monkeypatch) 
 
 def test_security_check_autofix_runs_when_env_enabled(tmp_path: Path, monkeypatch) -> None:
     class Result:
-        def init_(self, returncode: int, stdout: str = "", stderr: str = "") -> None:
+        def __init__(self, returncode: int, stdout: str = "", stderr: str = "") -> None:
             self.returncode = returncode
             self.stdout = stdout
             self.stderr = stderr
