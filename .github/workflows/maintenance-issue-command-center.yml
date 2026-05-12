@@ -25,6 +25,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install repo
+        run: python -m pip install -c constraints-ci.txt -e .
+
       - name: Build doctor + adaptive reviewer snapshots
         run: |
           mkdir -p build/maintenance

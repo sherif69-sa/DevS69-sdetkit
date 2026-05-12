@@ -27,6 +27,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install repo
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          python -m pip install -c constraints-ci.txt -e .[dev,test,docs]
+
       - name: Build adaptive ops bundle
         shell: bash
         run: |

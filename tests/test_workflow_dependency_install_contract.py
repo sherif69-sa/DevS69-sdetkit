@@ -76,3 +76,54 @@ def test_workflows_do_not_hard_code_repo_managed_precommit_versions() -> None:
         "aligned with pyproject.toml, requirements.txt, and constraints-ci.txt:\n"
         + "\n".join(offenders)
     )
+
+
+def test_active_workflows_that_run_repo_code_install_repo_dependencies() -> None:
+    reference_workflow_name_parts = ("advanced-github-actions-reference",)
+    repo_code_markers = (
+        "python -m sdetkit",
+        "PYTHONPATH=src python -m sdetkit",
+        "python scripts/",
+        "python tools/",
+        "bash quality.sh",
+        "bash premium-gate.sh",
+        "bash scripts/",
+        "make ",
+        "sdetkit ",
+    )
+    constrained_install_markers = (
+        "pip install -c constraints-ci.txt -e .",
+        "pip install -c constraints-ci.txt -e .[",
+        "pip install -c constraints-ci.txt -e '.[",
+        "pip install -c constraints-ci.txt -r requirements",
+        "pip install -c constraints-ci.txt pre-commit",
+    )
+    stdlib_only_markers = (
+        "Path('pyproject.toml')",
+        'Path("pyproject.toml")',
+        "grep -Eq",
+        "version=$(python - <<'PY'",
+    )
+    offenders: list[str] = []
+
+    for workflow_path in sorted(WORKFLOW_DIR.glob("*.yml")) + sorted(WORKFLOW_DIR.glob("*.yaml")):
+        if any(part in workflow_path.name for part in reference_workflow_name_parts):
+            continue
+
+        text = workflow_path.read_text(encoding="utf-8")
+        if "setup-python" not in text:
+            continue
+        if any(marker in text for marker in stdlib_only_markers):
+            continue
+        if not any(marker in text for marker in repo_code_markers):
+            continue
+        if any(marker in text for marker in constrained_install_markers):
+            continue
+
+        offenders.append(str(workflow_path))
+
+    assert not offenders, (
+        "Active workflows that run repo-owned Python, shell, Make, or CLI commands "
+        "after setup-python must install repo dependencies through constraints-ci.txt:\n"
+        + "\n".join(offenders)
+    )
