@@ -80,7 +80,7 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
   - green run: no fake adaptive block,
   - known safe mechanical issue: scoped auto-fix path,
   - unknown failure: review-first candidate scenarios and checks.
-- Add screenshots or sample PR comments in docs for the top 10 scenarios. **Done:** `docs/adaptive-demo-gallery.md` now shows green, safe-fix, unknown-review, recurring-learning, top-scenario, and portfolio rollup examples.
+- Add screenshots or sample PR comments in docs for the top 10 scenarios. **Done:** `docs/adaptive-product-proof-gallery.md` now shows green, safe-fix, unknown-review, recurring-learning, top-scenario, and portfolio rollup examples.
 
 ### Phase 4 — Expand safe remediation without weakening safety
 
@@ -135,7 +135,7 @@ The Big-Brain execution plan is now complete across the immediate backlog, Phase
 | P0 | Add operator brief artifact | Done: `python -m sdetkit adaptive brief` generates `build/sdetkit/operator-brief.md` from gate, diagnosis, learning, and safe-fix artifacts. |
 | P1 | Add fixture corpus for top scenarios | Done: `tests/fixtures/adaptive_logs/` covers 20 realistic log fixtures with expected primary diagnosis, first proof command, candidate scenario, and safe-fix posture assertions. |
 | P1 | Add candidate confidence calibration | Done: adaptive diagnosis can consume learning-summary calibration to boost/demote candidate scenario ranking and emit `candidate_calibration` evidence. |
-| P1 | Add docs demo gallery | Done: `docs/adaptive-demo-gallery.md` shows green, safe-fix, unknown-review, recurring-learning, top-10 scenario, and portfolio rollup examples. |
+| P1 | Add docs demo gallery | Done: `docs/adaptive-product-proof-gallery.md` shows green, safe-fix, unknown-review, recurring-learning, top-10 scenario, and portfolio rollup examples. |
 | P2 | Add org-level pack overlay | Done: layered packs emit source metadata, governance validation rejects unapproved duplicate-code overrides, and `docs/governance-and-org-packs.md` documents approval expectations. |
 | P2 | Add portfolio rollup | Done: `sdetkit adaptive portfolio-rollup` rolls multiple adaptive diagnosis outputs into a top-risk scenario report with recurrence by repo, candidate mentions, release recommendation, and next owner action. |
 

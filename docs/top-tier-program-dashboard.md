@@ -5,7 +5,7 @@ This dashboard is the weekly control plane for the **DevS69 SDETKit top-tier ful
 - Program plan source: `plans/top-tier-repo-execution-plan-2026-q2.json`
 - Leadership blueprint: `docs/cto-full-package-review.md`.
 - Execution workflow: `docs/cto-execution-workflow.md`.
-- Post-completion plan: `docs/cto-phase2-launch-plan.md`.
+- Post-completion plan: `docs/cto-workflow-readiness-launch-plan.md`.
 - Reporting cadence: Monday planning, Wednesday risk review, Friday closeout
 
 ## Weekly status snapshot

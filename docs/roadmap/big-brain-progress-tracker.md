@@ -21,7 +21,7 @@ This tracker keeps the Big-Brain Toolkit roadmap measurable after every follow-u
 | P0 | Add learning event records for adaptive diagnosis. | `sdetkit adaptive learn record` JSONL events. |
 | P0 | Add operator brief artifact. | `sdetkit adaptive brief` with Markdown, JSON, and PR comment outputs. |
 | P1 | Add candidate confidence calibration. | `candidate_calibration=...` evidence in adaptive diagnosis output. |
-| P1 | Add docs demo gallery. | `docs/adaptive-demo-gallery.md` with green, safe-fix, unknown-review, recurring-learning, and portfolio examples. |
+| P1 | Add docs demo gallery. | `docs/adaptive-product-proof-gallery.md` with green, safe-fix, unknown-review, recurring-learning, and portfolio examples. |
 | P1 | Add fixture corpus for top scenarios. | `tests/fixtures/adaptive_logs/` plus parametrized coverage for 20 realistic adaptive failure logs. |
 | P2 | Add portfolio rollup. | `sdetkit adaptive portfolio-rollup` with top-risk scenarios, recurrence by repo, and next owner action. |
 | P2 | Harden org-level pack overlay. | Layer metadata, override approval validation, and governance docs for org/private scenario packs. |
