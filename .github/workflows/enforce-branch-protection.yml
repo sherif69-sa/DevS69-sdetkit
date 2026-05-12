@@ -24,6 +24,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install repo
+        run: python -m pip install -c constraints-ci.txt -e .
+
       - name: Enforce branch protection
         env:
           BRANCH_PROTECTION_TOKEN: ${{ secrets.BRANCH_PROTECTION_TOKEN }}
