@@ -49,3 +49,33 @@ def test_full_ci_docs_build_is_strict() -> None:
 
     assert "NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict" in text
     assert "NO_MKDOCS_2_WARNING=1 python -m mkdocs build\n" not in text
+
+
+def test_active_workflows_declare_top_level_or_job_level_permissions() -> None:
+    workflow_dir = ROOT / ".github" / "workflows"
+    offenders = []
+
+    for workflow_path in sorted(workflow_dir.glob("*.yml")) + sorted(workflow_dir.glob("*.yaml")):
+        text = workflow_path.read_text(encoding="utf-8")
+        has_top_level_permissions = any(
+            line.startswith("permissions:") for line in text.splitlines()
+        )
+        has_job_level_permissions = any(
+            line.startswith("    permissions:") for line in text.splitlines()
+        )
+        if not has_top_level_permissions and not has_job_level_permissions:
+            offenders.append(workflow_path.name)
+
+    assert not offenders, (
+        "Active workflows must declare explicit top-level or job-level permissions "
+        "so GitHub token scope is intentional:\n" + "\n".join(offenders)
+    )
+
+
+def test_adaptive_and_quality_contract_workflows_use_read_only_permissions() -> None:
+    for workflow_name in [
+        "adaptive-ops-weekly.yml",
+        "phase3-quality-contract.yml",
+    ]:
+        text = _workflow(workflow_name)
+        assert "\npermissions:\n  contents: read\n\njobs:\n" in text
