@@ -1,4 +1,4 @@
-# Integration Expansion3 Closeout (legacy) — Integration expansion #3 closeout lane
+# Integration expansion 3 workflow
 
 Lane closes with a major integration upgrade that converts Lane integration outputs into an advanced Jenkins reference pipeline.
 

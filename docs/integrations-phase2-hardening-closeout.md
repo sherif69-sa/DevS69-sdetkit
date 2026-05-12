@@ -1,4 +1,4 @@
-# Phase 2 Hardening Closeout lane (Legacy)
+# Workflow hardening workflow
 
 Lane closes with a major Phase-2 hardening upgrade that turns Lane KPI deep-audit outcomes into deterministic execution hardening governance.
 

@@ -1,4 +1,4 @@
-# Integration Expansion Closeout (legacy) — Integration expansion #1 closeout lane
+# Integration expansion workflow
 
 Lane closes with a major integration upgrade that turns Lane onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
 

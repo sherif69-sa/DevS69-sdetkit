@@ -1,4 +1,4 @@
-# Role-based quickstarts (Phase 1 skeleton)
+# Role-based quickstarts
 
 These quickstarts provide role-specific entry points for the top-tier transformation.
 

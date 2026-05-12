@@ -1,4 +1,4 @@
-# Optimization Closeout Foundation — Optimization closeout lane
+# Optimization foundation workflow
 
 Optimization Closeout Foundation closes the lane with a major optimization upgrade that converts Lane expansion outcomes into deterministic remediation loops.
 

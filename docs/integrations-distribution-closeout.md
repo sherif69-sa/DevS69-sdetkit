@@ -1,4 +1,4 @@
-# Lane — Community distribution closeout
+# Community distribution workflow
 
 Lane closes the distribution lane by converting the Lane KPI story into channel-ready messaging, schedule commitments, and Lane experiments.
 

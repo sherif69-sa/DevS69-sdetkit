@@ -1,4 +1,4 @@
-# Lane — Optimization closeout lane
+# Optimization workflow
 
 Lane closes with a major optimization upgrade that converts Lane expansion evidence into deterministic improvement loops.
 

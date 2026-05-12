@@ -1,4 +1,4 @@
-# Community touchpoint closeout lane
+# Community touchpoint workflow
 
 Lane closes with a major upgrade that converts Lane contributor-recognition outcomes into a community-touchpoint execution pack.
 

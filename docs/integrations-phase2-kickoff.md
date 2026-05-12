@@ -1,4 +1,4 @@
-# Lane — Phase-2 kickoff baseline
+# Workflow readiness baseline
 
 Lane starts Phase-2 with a measurable baseline carried over from Lane and a fixed weekly growth target set.
 

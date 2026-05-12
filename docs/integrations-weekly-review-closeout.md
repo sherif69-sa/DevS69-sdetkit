@@ -1,4 +1,4 @@
-# Lane — Weekly review closeout lane
+# Weekly operations review workflow
 
 Lane closes with a major weekly-review upgrade that converts Lane objection evidence into deterministic prioritization and handoff loops.
 

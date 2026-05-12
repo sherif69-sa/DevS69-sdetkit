@@ -1,4 +1,4 @@
-# Phase3 Kickoff Closeout (legacy) — Phase-3 kickoff execution closeout lane
+# Quality governance kickoff workflow
 
 Lane ships a major Phase-3 kickoff upgrade that converts Lane wrap evidence into a strict baseline for ecosystem + trust execution.
 

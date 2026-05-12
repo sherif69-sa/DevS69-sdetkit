@@ -1,4 +1,4 @@
-# Lane — Objection closeout lane
+# Objection handling workflow
 
 Lane closes with a major objection-handling upgrade that converts Lane reliability evidence into deterministic documentation hardening loops.
 

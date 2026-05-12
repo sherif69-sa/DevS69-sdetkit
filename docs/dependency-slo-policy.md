@@ -1,4 +1,4 @@
-# Dependency SLO policy (Phase 3)
+# Dependency SLO policy
 
 This policy defines when dependency drift is advisory vs blocking for CI/routing.
 

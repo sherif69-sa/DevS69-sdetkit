@@ -1,4 +1,4 @@
-# Adaptive demo gallery
+# Adaptive product proof gallery
 
 Use this gallery when you want a quick, reviewer-friendly picture of what the Big-Brain adaptive lane should show in pull requests and release reviews.
 

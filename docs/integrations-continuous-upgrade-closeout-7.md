@@ -1,4 +1,4 @@
-# Lane — Continuous upgrade closeout lane
+# Continuous upgrade delivery workflow
 
 Lane closes with a major upgrade that converts Lane governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 

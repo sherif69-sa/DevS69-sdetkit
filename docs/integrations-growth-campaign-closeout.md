@@ -1,4 +1,4 @@
-# Growth Campaign Closeout — Growth campaign closeout lane
+# Growth campaign workflow
 
 Lane closes with a major upgrade that converts Lane partner outreach outcomes into a growth-campaign execution pack.
 

@@ -1,4 +1,4 @@
-# Jenkins reference pack (Phase 4)
+# Jenkins reference pack
 
 ## Goal
 

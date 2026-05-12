@@ -1,4 +1,4 @@
-# Lane — Contributor recognition closeout lane
+# Contributor recognition workflow
 
 Lane closes with a major upgrade that converts Lane trust refresh outcomes into a contributor-recognition execution pack.
 

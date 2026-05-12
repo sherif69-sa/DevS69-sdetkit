@@ -1,4 +1,4 @@
-# Lane — Phase-1 hardening
+# Operational readiness hardening
 
 Lane closes Phase-1 by hardening top entry pages, removing stale guidance, and publishing a deterministic closeout lane.
 

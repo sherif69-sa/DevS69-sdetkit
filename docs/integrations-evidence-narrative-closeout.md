@@ -1,4 +1,4 @@
-# Evidence Narrative Closeout — Evidence narrative closeout lane
+# Evidence narrative workflow
 
 Lane closes with a major upgrade that converts Lane trust FAQ outcomes into a deterministic evidence narrative operating lane.
 

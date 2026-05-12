@@ -1,4 +1,4 @@
-# CTO Phase 2 launch plan (post 1-6 completion)
+# CTO workflow readiness launch plan
 
 This plan starts immediately after completion of the 6-point CTO execution workflow.
 

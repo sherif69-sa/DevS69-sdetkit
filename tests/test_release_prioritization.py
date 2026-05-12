@@ -89,7 +89,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-release-prioritization.md").write_text(
-        """# Release Prioritization Closeout — Release prioritization closeout lane
+        """# Release prioritization workflow
 
 ## Why Release Prioritization Closeout matters
 

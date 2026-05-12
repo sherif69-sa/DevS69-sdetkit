@@ -1,4 +1,4 @@
-# Lane — Continuous upgrade closeout lane
+# Continuous upgrade delivery workflow
 
 This lane starts the next impact by converting publication outcomes into a deterministic continuous-upgrade lane.
 

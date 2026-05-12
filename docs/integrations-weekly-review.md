@@ -1,4 +1,4 @@
-# Weekly review #4 (Lane)
+# Weekly operations review
 
 Lane closes the weekly growth loop by consolidating Lane-27 outcomes into wins, misses, and corrective actions.
 

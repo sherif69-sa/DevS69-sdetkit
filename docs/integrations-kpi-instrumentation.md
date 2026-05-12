@@ -1,4 +1,4 @@
-# Lane — KPI instrumentation closeout
+# KPI instrumentation workflow
 
 Lane closes the week with a hardened KPI operating loop that ties growth narrative to measurable thresholds and owners.
 

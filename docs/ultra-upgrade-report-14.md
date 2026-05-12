@@ -1,4 +1,4 @@
-# Cycle 14 Ultra Upgrade Report — Weekly Review #2
+# Cycle 14 implementation report — Weekly operations review
 
 ## Upgrade title
 

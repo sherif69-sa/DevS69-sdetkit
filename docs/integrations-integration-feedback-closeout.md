@@ -1,4 +1,4 @@
-# Integration Feedback Closeout — Integration feedback loop closeout lane
+# Integration feedback workflow
 
 Lane closes with a major upgrade that folds Lane growth campaign outcomes into docs/template upgrades and community touchpoint execution.
 

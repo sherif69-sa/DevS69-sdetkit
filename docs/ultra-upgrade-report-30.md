@@ -1,4 +1,4 @@
-# Cycle 30 ultra upgrade report — Phase-1 wrap + Phase-2 handoff
+# Cycle 30 implementation report — Operational readiness handoff
 
 ## What shipped
 

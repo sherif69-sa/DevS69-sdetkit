@@ -1,4 +1,4 @@
-# Governance Scale Closeout — Governance scale closeout lane
+# Governance scale workflow
 
 Lane closes with a major upgrade that converts Lane governance handoff outcomes into a deterministic governance scale operating lane.
 

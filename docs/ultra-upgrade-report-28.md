@@ -1,4 +1,4 @@
-# Cycle 28 ultra upgrade report — weekly review #4 closeout
+# Cycle 28 implementation report — Weekly operations review
 
 ## What shipped
 

@@ -1,4 +1,4 @@
-# Release Prioritization Closeout — Release prioritization closeout lane
+# Release prioritization workflow
 
 This lane closes with a major upgrade that converts evidence narrative outcomes into a deterministic release prioritization operating lane.
 

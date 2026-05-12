@@ -1,4 +1,4 @@
-# Stabilization Closeout lane (Legacy)
+# Stabilization workflow
 
 Lane closes with a major stabilization upgrade that turns Lane contributor-activation outcomes into deterministic KPI recovery and follow-through.
 

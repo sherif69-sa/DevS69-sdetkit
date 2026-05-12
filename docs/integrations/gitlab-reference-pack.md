@@ -1,4 +1,4 @@
-# GitLab CI reference pack (Phase 4)
+# GitLab CI reference pack
 
 ## Goal
 

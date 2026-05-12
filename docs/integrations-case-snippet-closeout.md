@@ -1,4 +1,4 @@
-# Case Snippet Closeout lane (Legacy)
+# Case snippet delivery workflow
 
 Lane closes with a major case-snippet upgrade that converts Lane execution-prioritization evidence into a deterministic release-storytelling lane.
 

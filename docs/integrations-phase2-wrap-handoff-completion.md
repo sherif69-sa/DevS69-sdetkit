@@ -1,4 +1,4 @@
-# Phase 2 Wrap Handoff Closeout lane (Legacy)
+# Workflow readiness handoff
 
 Lane closes with a major Phase-2 wrap + handoff upgrade that turns Lane pre-plan outcomes into deterministic Lane execution priorities.
 

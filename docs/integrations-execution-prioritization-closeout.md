@@ -1,4 +1,4 @@
-# Lane — Execution prioritization closeout lane
+# Execution prioritization workflow
 
 Lane closes with a major execution-prioritization upgrade that converts Lane weekly-review evidence into a deterministic execution board and release-storytelling handoff.
 

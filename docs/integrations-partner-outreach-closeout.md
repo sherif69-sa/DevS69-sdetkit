@@ -1,4 +1,4 @@
-# Partner outreach closeout lane
+# Partner outreach workflow
 
 Lane closes with a major upgrade that converts Lane scale outcomes into a partner-outreach execution pack.
 

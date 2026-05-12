@@ -1,4 +1,4 @@
-# Cycle 25 ultra upgrade report — community activation closeout
+# Cycle 25 implementation report — Community activation
 
 ## What shipped
 

@@ -1,4 +1,4 @@
-# Contributor Activation Closeout lane (Legacy)
+# Contributor activation workflow
 
 Lane closes with a major contributor activation upgrade that turns Lane docs-loop evidence into a deterministic contributor follow-through lane.
 
