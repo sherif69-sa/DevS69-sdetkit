@@ -29,7 +29,7 @@ def _export_dir(root: Path) -> Path:
 
 
 class _FakeRunner(DockerCommandRunner):
-    def init_(self) -> None:
+    def __init__(self) -> None:
         self.calls: list[list[str]] = []
 
     def run(self, argv: list[str], *, cwd: Path | None = None):  # type: ignore[override]
