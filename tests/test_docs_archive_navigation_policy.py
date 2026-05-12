@@ -18,9 +18,6 @@ ARCHIVE_EXAMPLES = (
     "investor-readiness-review-2026-04-18.md",
     "plan-execution-followup-2026-04-23.md",
     "powerfuel-execution-plan-2026-05-03.md",
-    "roadmap/artifacts/weekly-pack-21/closeout-checklist-21.md",
-    "roadmap/artifacts/weekly-pack-21/contributor-response-plan-21.md",
-    "roadmap/artifacts/weekly-pack-21/release-narrative-brief-21.md",
 )
 
 ACTIVE_REFERENCE_EXAMPLES = (
