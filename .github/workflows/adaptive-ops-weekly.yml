@@ -10,6 +10,9 @@ on:
         required: false
         default: "balanced"
 
+permissions:
+  contents: read
+
 jobs:
   adaptive-ops:
     runs-on: ubuntu-latest

@@ -11,6 +11,9 @@ on:
       - 'scripts/phase3_quality_engine.py'
       - 'tests/test_phase3_*.py'
 
+permissions:
+  contents: read
+
 jobs:
   phase3-contract:
     runs-on: ubuntu-latest
