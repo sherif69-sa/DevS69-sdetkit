@@ -140,3 +140,121 @@ def test_non_test_owned_surfaces_stay_actionable_hygiene_clean() -> None:
     findings = _actionable_surface_findings()
 
     assert findings == {}
+
+
+def _professional_naming_debt_surfaces() -> set[str]:
+    scanned_roots = [
+        Path("README.md"),
+        Path("index.md"),
+        Path("mkdocs.yml"),
+        Path("docs"),
+        Path(".github/workflows"),
+    ]
+    legacy_tokens = (
+        "phase1",
+        "phase2",
+        "phase3",
+        "phase4",
+        "phase5",
+        "phase6",
+        "phase-1",
+        "phase-2",
+        "phase-3",
+        "phase-4",
+        "phase-5",
+        "phase-6",
+        "do-it",
+        "closeout",
+        "finish-signal",
+        "retire-plan",
+        "next-pass",
+        "gate-phase2",
+        "lesson",
+        "tutorial",
+        "education",
+        "demo",
+    )
+    ignored_path_parts = (
+        "docs/artifacts/",
+        "docs/archive/",
+        "docs/roadmap/reports/",
+        "docs/professional-naming-debt-register.md",
+        "docs/production-workflow-naming-audit.md",
+    )
+    ignored_path_prefixes = (
+        "docs/big-upgrade-report-",
+        "docs/continuous-upgrade-big-upgrade-report-",
+        "docs/day-",
+        "docs/impact-",
+        "docs/ultra-upgrade-report-",
+    )
+
+    offenders: set[str] = set()
+    for scan_root in scanned_roots:
+        paths = [scan_root] if scan_root.is_file() else sorted(scan_root.rglob("*"))
+        for path in paths:
+            if not path.is_file():
+                continue
+            rel = path.as_posix()
+            if any(part in rel for part in ignored_path_parts):
+                continue
+            if any(rel.startswith(prefix) for prefix in ignored_path_prefixes):
+                continue
+            if path.suffix.lower() not in {".md", ".yml", ".yaml"}:
+                continue
+
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            surfaces = [("path", rel)]
+
+            for line in text.splitlines():
+                stripped = line.strip()
+                if path.suffix.lower() == ".md" and stripped.startswith("# "):
+                    surfaces.append(("h1", stripped))
+                    break
+
+            if rel == "mkdocs.yml":
+                for line in text.splitlines():
+                    stripped = line.strip()
+                    if stripped.startswith("- ") and ":" in stripped:
+                        surfaces.append(("mkdocs-nav-label", stripped))
+
+            if rel.startswith(".github/workflows/"):
+                for line in text.splitlines():
+                    stripped = line.strip()
+                    if stripped.startswith("name:"):
+                        surfaces.append(("workflow-name", stripped))
+                        break
+
+            for surface_kind, surface_text in surfaces:
+                lower = surface_text.lower()
+                for token in legacy_tokens:
+                    if token in lower:
+                        offenders.add(f"{rel} :: {surface_kind} :: {token} :: {surface_text}")
+                        break
+
+    return offenders
+
+
+def test_public_surfaces_do_not_add_unreviewed_legacy_naming_debt() -> None:
+    """Prevent new amateur-looking public names while legacy debt is migrated safely."""
+
+    allowlist_path = Path("tests/fixtures/professional_naming_legacy_surfaces.txt")
+    allowed = {
+        line.strip()
+        for line in allowlist_path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    }
+    current = _professional_naming_debt_surfaces()
+
+    new_debt = sorted(current - allowed)
+    stale_allowlist = sorted(allowed - current)
+
+    assert not new_debt, (
+        "New public naming debt must use production wording or be explicitly "
+        "classified in tests/fixtures/professional_naming_legacy_surfaces.txt:\n"
+        + "\n".join(new_debt)
+    )
+    assert not stale_allowlist, (
+        "Professional naming allowlist contains stale entries. Remove entries "
+        "after renaming or reclassifying the surface:\n" + "\n".join(stale_allowlist)
+    )
