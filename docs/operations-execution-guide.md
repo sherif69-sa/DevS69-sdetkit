@@ -1,4 +1,4 @@
-# One-by-one phase execution (operator guide)
+# Sequential execution operator guide
 
 If you already completed planning for all 6 phases, execute only one phase at a time with this rule:
 

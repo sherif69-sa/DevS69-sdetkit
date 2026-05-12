@@ -1,4 +1,4 @@
-# Lane — Case-study prep #3 closeout lane
+# Case-study prep 3 evidence workflow
 
 Lane closes with a major upgrade that turns Lane integration outputs into a measurable escalation-quality case-study prep pack.
 

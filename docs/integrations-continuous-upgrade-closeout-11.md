@@ -1,4 +1,4 @@
-# Lane — Continuous upgrade closeout lane
+# Continuous upgrade delivery workflow
 
 Lane closes with a major upgrade that converts Lane continuous-upgrade outcomes into a deterministic next-impact execution lane.
 

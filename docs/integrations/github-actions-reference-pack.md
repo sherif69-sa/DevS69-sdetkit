@@ -1,4 +1,4 @@
-# GitHub Actions reference pack (Phase 4)
+# GitHub Actions reference pack
 
 ## Goal
 

@@ -1,4 +1,4 @@
-# Security suite (Phase 10)
+# Security suite
 
 The `security` pack adds deterministic, offline repository security checks designed for CI and local auditing.
 

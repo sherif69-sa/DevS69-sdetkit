@@ -1,4 +1,4 @@
-# Lane — Reliability closeout lane
+# Reliability evidence workflow
 
 Lane closes with a major reliability upgrade that converts Lane optimization evidence into deterministic hardening loops.
 

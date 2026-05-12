@@ -1,4 +1,4 @@
-# Lane — Expansion closeout lane
+# Expansion workflow
 
 Lane closes with a major expansion upgrade that converts Lane scale evidence into deterministic improvement loops.
 

@@ -1,4 +1,4 @@
-# Phase3 Preplan Closeout lane (Legacy)
+# Quality governance preplanning workflow
 
 Lane closes with a major Phase-3 pre-plan upgrade that turns Lane hardening outcomes into deterministic Lane execution priorities.
 

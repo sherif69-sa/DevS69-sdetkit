@@ -1,4 +1,4 @@
-# Lane — Phase-1 wrap and Phase-2 handoff
+# Operational readiness handoff
 
 Lane closes Phase-1 with a hard evidence wrap-up and locks the first Phase-2 execution backlog.
 

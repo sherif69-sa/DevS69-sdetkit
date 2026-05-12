@@ -1,4 +1,4 @@
-# Lane — Case-study launch closeout lane
+# Case-study launch evidence workflow
 
 Lane closes with a major upgrade that turns Lane publication-quality prep into a published case-study launch pack with rollout safeguards.
 

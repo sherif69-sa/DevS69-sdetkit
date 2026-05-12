@@ -1,4 +1,4 @@
-# Phase 1 workflow runbook
+# Operational workflow runbook
 
 Use this runbook to execute the live Phase 1 workflow and produce operational artifacts.
 

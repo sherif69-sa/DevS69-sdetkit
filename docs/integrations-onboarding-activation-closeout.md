@@ -1,4 +1,4 @@
-# Onboarding Activation Closeout (legacy) — Contributor onboarding activation closeout lane
+# Onboarding activation workflow
 
 Lane closes with a major onboarding activation upgrade that turns Lane community operations evidence into deterministic contributor activation, ownership handoffs, and roadmap voting execution.
 

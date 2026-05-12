@@ -1,4 +1,4 @@
-# Lane — Demo asset #2 production (repo audit)
+# Product proof audit workflow
 
 Lane closes the second distribution-ready demo asset by translating repository audit signals into clear, actionable proof.
 

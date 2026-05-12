@@ -1,4 +1,4 @@
-# Governance Priorities Closeout — Governance priorities closeout lane
+# Governance priorities workflow
 
 Lane closes with a major upgrade that converts Lane governance handoff outcomes into a deterministic governance priorities operating lane.
 

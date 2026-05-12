@@ -1,4 +1,4 @@
-# Lane — Trust assets refresh closeout lane
+# Trust assets refresh workflow
 
 Lane closes with a major upgrade that turns Lane distribution outcomes into a governance-grade trust refresh execution pack.
 

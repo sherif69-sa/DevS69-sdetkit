@@ -1,4 +1,4 @@
-# Cycle 11 — Continuous upgrade closeout lane report
+# Cycle 11 — Continuous upgrade delivery report
 
 ## Purpose
 Capture the active/public cycle 11 closeout surface with durable cycle-based wording.

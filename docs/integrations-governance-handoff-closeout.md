@@ -1,4 +1,4 @@
-# Governance Handoff Closeout — Governance handoff closeout lane
+# Governance handoff workflow
 
 Lane closes with a major upgrade that converts Lane launch readiness outcomes into a deterministic governance handoff operating lane.
 

@@ -1,4 +1,4 @@
-# Integration Expansion 2 Closeout (legacy) — Integration expansion #2 closeout lane
+# Integration expansion 2 workflow
 
 Lane closes with a major integration upgrade that converts Lane weekly review outcomes into an advanced GitLab CI reference pipeline.
 

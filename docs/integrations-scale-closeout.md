@@ -1,4 +1,4 @@
-# Scale closeout lane
+# Scale readiness workflow
 
 Scale closeout converts acceleration evidence into deterministic scale execution loops.
 

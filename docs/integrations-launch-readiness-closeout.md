@@ -1,4 +1,4 @@
-# Launch Readiness Closeout — Launch readiness closeout lane
+# Launch readiness workflow
 
 Lane closes with a major upgrade that converts Lane release prioritization outcomes into a deterministic launch readiness operating lane.
 

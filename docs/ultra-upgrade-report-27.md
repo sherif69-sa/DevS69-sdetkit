@@ -1,4 +1,4 @@
-# Cycle 27 ultra upgrade report — KPI audit closeout
+# Cycle 27 implementation report — KPI audit
 
 ## What shipped
 

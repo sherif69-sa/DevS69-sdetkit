@@ -1,4 +1,4 @@
-# KPI Deep Audit Closeout lane (Legacy)
+# KPI deep audit workflow
 
 Lane closes with a major KPI deep-audit upgrade that turns Lane stabilization outcomes into deterministic trendline governance.
 

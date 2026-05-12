@@ -1,4 +1,4 @@
-# Lane — Acceleration closeout lane
+# Acceleration delivery workflow
 
 Lane closes with a major acceleration upgrade that converts Lane optimization evidence into deterministic improvement loops.
 

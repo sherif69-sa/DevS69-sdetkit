@@ -1,4 +1,4 @@
-# Phase-by-phase execution plan (major upgrade track)
+# Execution plan for major upgrades
 
 Run this plan in sequence and ship concrete outputs in every phase.
 

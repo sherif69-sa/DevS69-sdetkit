@@ -1,4 +1,4 @@
-# Narrative Closeout lane (Legacy)
+# Narrative workflow
 
 Lane closes with a major narrative upgrade that converts Lane case-snippet evidence into a deterministic release-storytelling lane.
 

@@ -1,4 +1,4 @@
-# Scale upgrade closeout lane
+# Scale upgrade workflow
 
 Lane closes with a major upgrade that converts Lane ecosystem priorities into an enterprise-scale onboarding execution pack.
 

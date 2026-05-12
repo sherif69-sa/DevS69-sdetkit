@@ -4,135 +4,69 @@
 .github/workflows/phase3-quality-contract.yml :: workflow-name :: phase3 :: name: phase3-quality-contract
 .github/workflows/phase4-governance-contract.yml :: path :: phase4 :: .github/workflows/phase4-governance-contract.yml
 .github/workflows/phase4-governance-contract.yml :: workflow-name :: phase4 :: name: phase4-governance-contract
-docs/adaptive-demo-gallery.md :: h1 :: demo :: # Adaptive demo gallery
 docs/adaptive-demo-gallery.md :: path :: demo :: docs/adaptive-demo-gallery.md
 docs/cto-phase2-launch-plan.md :: path :: phase2 :: docs/cto-phase2-launch-plan.md
-docs/integrations-acceleration-closeout.md :: h1 :: closeout :: # Lane — Acceleration closeout lane
 docs/integrations-acceleration-closeout.md :: path :: closeout :: docs/integrations-acceleration-closeout.md
-docs/integrations-case-snippet-closeout.md :: h1 :: closeout :: # Case Snippet Closeout lane (Legacy)
 docs/integrations-case-snippet-closeout.md :: path :: closeout :: docs/integrations-case-snippet-closeout.md
-docs/integrations-case-study-launch-closeout.md :: h1 :: closeout :: # Lane — Case-study launch closeout lane
 docs/integrations-case-study-launch-closeout.md :: path :: closeout :: docs/integrations-case-study-launch-closeout.md
-docs/integrations-case-study-prep1-closeout.md :: h1 :: closeout :: # Lane — Case-study prep #1 closeout lane
 docs/integrations-case-study-prep1-closeout.md :: path :: closeout :: docs/integrations-case-study-prep1-closeout.md
-docs/integrations-case-study-prep2-closeout.md :: h1 :: closeout :: # Lane — Case-study prep #2 closeout lane
 docs/integrations-case-study-prep2-closeout.md :: path :: closeout :: docs/integrations-case-study-prep2-closeout.md
-docs/integrations-case-study-prep3-closeout.md :: h1 :: closeout :: # Lane — Case-study prep #3 closeout lane
 docs/integrations-case-study-prep3-closeout.md :: path :: closeout :: docs/integrations-case-study-prep3-closeout.md
-docs/integrations-case-study-prep4-closeout.md :: h1 :: closeout :: # Lane — Case-study prep #4 closeout lane
 docs/integrations-case-study-prep4-closeout.md :: path :: closeout :: docs/integrations-case-study-prep4-closeout.md
-docs/integrations-community-program-closeout.md :: h1 :: closeout :: # Community Program Closeout (legacy) — Community program setup closeout lane
 docs/integrations-community-program-closeout.md :: path :: closeout :: docs/integrations-community-program-closeout.md
-docs/integrations-community-touchpoint-closeout.md :: h1 :: closeout :: # Community touchpoint closeout lane
 docs/integrations-community-touchpoint-closeout.md :: path :: closeout :: docs/integrations-community-touchpoint-closeout.md
-docs/integrations-continuous-upgrade-closeout-1.md :: h1 :: closeout :: # Lane — Continuous upgrade closeout lane
 docs/integrations-continuous-upgrade-closeout-1.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-1.md
-docs/integrations-continuous-upgrade-closeout-10.md :: h1 :: closeout :: # Lane — Continuous upgrade closeout lane
 docs/integrations-continuous-upgrade-closeout-10.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-10.md
-docs/integrations-continuous-upgrade-closeout-11.md :: h1 :: closeout :: # Lane — Continuous upgrade closeout lane
 docs/integrations-continuous-upgrade-closeout-11.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-11.md
-docs/integrations-continuous-upgrade-closeout-2.md :: h1 :: closeout :: # Lane — Continuous upgrade closeout lane
 docs/integrations-continuous-upgrade-closeout-2.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-2.md
-docs/integrations-continuous-upgrade-closeout-3.md :: h1 :: closeout :: # Lane — Continuous upgrade closeout lane
 docs/integrations-continuous-upgrade-closeout-3.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-3.md
-docs/integrations-continuous-upgrade-closeout-4.md :: h1 :: closeout :: # Lane — Continuous upgrade closeout lane
 docs/integrations-continuous-upgrade-closeout-4.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-4.md
-docs/integrations-continuous-upgrade-closeout-5.md :: h1 :: closeout :: # Lane — Continuous upgrade closeout lane
 docs/integrations-continuous-upgrade-closeout-5.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-5.md
-docs/integrations-continuous-upgrade-closeout-6.md :: h1 :: closeout :: # Lane — Continuous upgrade closeout lane
 docs/integrations-continuous-upgrade-closeout-6.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-6.md
-docs/integrations-continuous-upgrade-closeout-7.md :: h1 :: closeout :: # Lane — Continuous upgrade closeout lane
 docs/integrations-continuous-upgrade-closeout-7.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-7.md
-docs/integrations-continuous-upgrade-closeout-8.md :: h1 :: closeout :: # Lane — Continuous upgrade closeout lane
 docs/integrations-continuous-upgrade-closeout-8.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-8.md
-docs/integrations-continuous-upgrade-closeout-9.md :: h1 :: closeout :: # Lane — Continuous upgrade closeout lane
 docs/integrations-continuous-upgrade-closeout-9.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-9.md
-docs/integrations-contributor-activation-closeout.md :: h1 :: closeout :: # Contributor Activation Closeout lane (Legacy)
 docs/integrations-contributor-activation-closeout.md :: path :: closeout :: docs/integrations-contributor-activation-closeout.md
-docs/integrations-contributor-recognition-closeout.md :: h1 :: closeout :: # Lane — Contributor recognition closeout lane
 docs/integrations-contributor-recognition-closeout.md :: path :: closeout :: docs/integrations-contributor-recognition-closeout.md
-docs/integrations-demo-asset.md :: h1 :: demo :: # Lane — Demo asset #1 production
 docs/integrations-demo-asset.md :: path :: demo :: docs/integrations-demo-asset.md
-docs/integrations-demo-asset2.md :: h1 :: demo :: # Lane — Demo asset #2 production (repo audit)
 docs/integrations-demo-asset2.md :: path :: demo :: docs/integrations-demo-asset2.md
-docs/integrations-distribution-closeout.md :: h1 :: closeout :: # Lane — Community distribution closeout
 docs/integrations-distribution-closeout.md :: path :: closeout :: docs/integrations-distribution-closeout.md
-docs/integrations-distribution-scaling-closeout.md :: h1 :: closeout :: # Lane — Distribution scaling closeout lane
 docs/integrations-distribution-scaling-closeout.md :: path :: closeout :: docs/integrations-distribution-scaling-closeout.md
-docs/integrations-docs-loop-closeout.md :: h1 :: closeout :: # Docs Loop Closeout lane (Legacy)
 docs/integrations-docs-loop-closeout.md :: path :: closeout :: docs/integrations-docs-loop-closeout.md
-docs/integrations-ecosystem-priorities-closeout.md :: h1 :: closeout :: # Ecosystem priorities closeout lane
 docs/integrations-ecosystem-priorities-closeout.md :: path :: closeout :: docs/integrations-ecosystem-priorities-closeout.md
-docs/integrations-evidence-narrative-closeout.md :: h1 :: closeout :: # Evidence Narrative Closeout — Evidence narrative closeout lane
 docs/integrations-evidence-narrative-closeout.md :: path :: closeout :: docs/integrations-evidence-narrative-closeout.md
-docs/integrations-execution-prioritization-closeout.md :: h1 :: closeout :: # Lane — Execution prioritization closeout lane
 docs/integrations-execution-prioritization-closeout.md :: path :: closeout :: docs/integrations-execution-prioritization-closeout.md
-docs/integrations-expansion-closeout.md :: h1 :: closeout :: # Lane — Expansion closeout lane
 docs/integrations-expansion-closeout.md :: path :: closeout :: docs/integrations-expansion-closeout.md
-docs/integrations-governance-handoff-closeout.md :: h1 :: closeout :: # Governance Handoff Closeout — Governance handoff closeout lane
 docs/integrations-governance-handoff-closeout.md :: path :: closeout :: docs/integrations-governance-handoff-closeout.md
-docs/integrations-governance-priorities-closeout.md :: h1 :: closeout :: # Governance Priorities Closeout — Governance priorities closeout lane
 docs/integrations-governance-priorities-closeout.md :: path :: closeout :: docs/integrations-governance-priorities-closeout.md
-docs/integrations-governance-scale-closeout.md :: h1 :: closeout :: # Governance Scale Closeout — Governance scale closeout lane
 docs/integrations-governance-scale-closeout.md :: path :: closeout :: docs/integrations-governance-scale-closeout.md
-docs/integrations-growth-campaign-closeout.md :: h1 :: closeout :: # Growth Campaign Closeout — Growth campaign closeout lane
 docs/integrations-growth-campaign-closeout.md :: path :: closeout :: docs/integrations-growth-campaign-closeout.md
-docs/integrations-integration-expansion-closeout.md :: h1 :: closeout :: # Integration Expansion Closeout (legacy) — Integration expansion #1 closeout lane
 docs/integrations-integration-expansion-closeout.md :: path :: closeout :: docs/integrations-integration-expansion-closeout.md
-docs/integrations-integration-expansion2-closeout.md :: h1 :: closeout :: # Integration Expansion 2 Closeout (legacy) — Integration expansion #2 closeout lane
 docs/integrations-integration-expansion2-closeout.md :: path :: closeout :: docs/integrations-integration-expansion2-closeout.md
-docs/integrations-integration-expansion3-closeout.md :: h1 :: closeout :: # Integration Expansion3 Closeout (legacy) — Integration expansion #3 closeout lane
 docs/integrations-integration-expansion3-closeout.md :: path :: closeout :: docs/integrations-integration-expansion3-closeout.md
-docs/integrations-integration-expansion4-closeout.md :: h1 :: closeout :: # Integration Expansion4 Closeout (legacy) — Integration expansion #4 closeout lane
 docs/integrations-integration-expansion4-closeout.md :: path :: closeout :: docs/integrations-integration-expansion4-closeout.md
-docs/integrations-integration-feedback-closeout.md :: h1 :: closeout :: # Integration Feedback Closeout — Integration feedback loop closeout lane
 docs/integrations-integration-feedback-closeout.md :: path :: closeout :: docs/integrations-integration-feedback-closeout.md
-docs/integrations-kpi-deep-audit-closeout.md :: h1 :: closeout :: # KPI Deep Audit Closeout lane (Legacy)
 docs/integrations-kpi-deep-audit-closeout.md :: path :: closeout :: docs/integrations-kpi-deep-audit-closeout.md
-docs/integrations-kpi-instrumentation.md :: h1 :: closeout :: # Lane — KPI instrumentation closeout
-docs/integrations-launch-readiness-closeout.md :: h1 :: closeout :: # Launch Readiness Closeout — Launch readiness closeout lane
 docs/integrations-launch-readiness-closeout.md :: path :: closeout :: docs/integrations-launch-readiness-closeout.md
-docs/integrations-narrative-closeout.md :: h1 :: closeout :: # Narrative Closeout lane (Legacy)
 docs/integrations-narrative-closeout.md :: path :: closeout :: docs/integrations-narrative-closeout.md
-docs/integrations-objection-closeout.md :: h1 :: closeout :: # Lane — Objection closeout lane
 docs/integrations-objection-closeout.md :: path :: closeout :: docs/integrations-objection-closeout.md
-docs/integrations-onboarding-activation-closeout.md :: h1 :: closeout :: # Onboarding Activation Closeout (legacy) — Contributor onboarding activation closeout lane
 docs/integrations-onboarding-activation-closeout.md :: path :: closeout :: docs/integrations-onboarding-activation-closeout.md
-docs/integrations-optimization-closeout-foundation.md :: h1 :: closeout :: # Optimization Closeout Foundation — Optimization closeout lane
 docs/integrations-optimization-closeout-foundation.md :: path :: closeout :: docs/integrations-optimization-closeout-foundation.md
-docs/integrations-optimization-closeout.md :: h1 :: closeout :: # Lane — Optimization closeout lane
 docs/integrations-optimization-closeout.md :: path :: closeout :: docs/integrations-optimization-closeout.md
-docs/integrations-partner-outreach-closeout.md :: h1 :: closeout :: # Partner outreach closeout lane
 docs/integrations-partner-outreach-closeout.md :: path :: closeout :: docs/integrations-partner-outreach-closeout.md
-docs/integrations-phase1-hardening.md :: h1 :: phase-1 :: # Lane — Phase-1 hardening
 docs/integrations-phase1-hardening.md :: path :: phase1 :: docs/integrations-phase1-hardening.md
-docs/integrations-phase1-wrap.md :: h1 :: phase-1 :: # Lane — Phase-1 wrap and Phase-2 handoff
 docs/integrations-phase1-wrap.md :: path :: phase1 :: docs/integrations-phase1-wrap.md
-docs/integrations-phase2-hardening-closeout.md :: h1 :: closeout :: # Phase 2 Hardening Closeout lane (Legacy)
 docs/integrations-phase2-hardening-closeout.md :: path :: phase2 :: docs/integrations-phase2-hardening-closeout.md
-docs/integrations-phase2-kickoff.md :: h1 :: phase-2 :: # Lane — Phase-2 kickoff baseline
 docs/integrations-phase2-kickoff.md :: path :: phase2 :: docs/integrations-phase2-kickoff.md
-docs/integrations-phase2-wrap-handoff-completion.md :: h1 :: closeout :: # Phase 2 Wrap Handoff Closeout lane (Legacy)
 docs/integrations-phase2-wrap-handoff-completion.md :: path :: phase2 :: docs/integrations-phase2-wrap-handoff-completion.md
-docs/integrations-phase3-kickoff-closeout.md :: h1 :: phase3 :: # Phase3 Kickoff Closeout (legacy) — Phase-3 kickoff execution closeout lane
 docs/integrations-phase3-kickoff-closeout.md :: path :: phase3 :: docs/integrations-phase3-kickoff-closeout.md
-docs/integrations-phase3-preplan-closeout.md :: h1 :: phase3 :: # Phase3 Preplan Closeout lane (Legacy)
 docs/integrations-phase3-preplan-closeout.md :: path :: phase3 :: docs/integrations-phase3-preplan-closeout.md
-docs/integrations-phase3-wrap-publication-closeout.md :: h1 :: phase3 :: # Phase3 Wrap Publication Closeout — Phase-3 wrap publication closeout lane
 docs/integrations-phase3-wrap-publication-closeout.md :: path :: phase3 :: docs/integrations-phase3-wrap-publication-closeout.md
-docs/integrations-release-prioritization-completion.md :: h1 :: closeout :: # Release Prioritization Closeout — Release prioritization closeout lane
-docs/integrations-reliability-closeout.md :: h1 :: closeout :: # Lane — Reliability closeout lane
 docs/integrations-reliability-closeout.md :: path :: closeout :: docs/integrations-reliability-closeout.md
-docs/integrations-scale-closeout.md :: h1 :: closeout :: # Scale closeout lane
 docs/integrations-scale-closeout.md :: path :: closeout :: docs/integrations-scale-closeout.md
-docs/integrations-scale-upgrade-closeout.md :: h1 :: closeout :: # Scale upgrade closeout lane
 docs/integrations-scale-upgrade-closeout.md :: path :: closeout :: docs/integrations-scale-upgrade-closeout.md
-docs/integrations-stabilization-closeout.md :: h1 :: closeout :: # Stabilization Closeout lane (Legacy)
 docs/integrations-stabilization-closeout.md :: path :: closeout :: docs/integrations-stabilization-closeout.md
-docs/integrations-trust-assets-refresh-closeout.md :: h1 :: closeout :: # Lane — Trust assets refresh closeout lane
 docs/integrations-trust-assets-refresh-closeout.md :: path :: closeout :: docs/integrations-trust-assets-refresh-closeout.md
-docs/integrations-trust-faq-expansion-closeout.md :: h1 :: closeout :: # Trust FAQ Expansion Closeout — Trust FAQ expansion loop closeout lane
 docs/integrations-trust-faq-expansion-closeout.md :: path :: closeout :: docs/integrations-trust-faq-expansion-closeout.md
-docs/integrations-weekly-review-closeout.md :: h1 :: closeout :: # Lane — Weekly review closeout lane
 docs/integrations-weekly-review-closeout.md :: path :: closeout :: docs/integrations-weekly-review-closeout.md
-mkdocs.yml :: mkdocs-nav-label :: demo :: - Adaptive demo gallery: adaptive-demo-gallery.md
+mkdocs.yml :: mkdocs-nav-label :: demo :: - Adaptive product proof gallery: adaptive-demo-gallery.md

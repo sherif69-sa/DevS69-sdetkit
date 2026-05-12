@@ -1,4 +1,4 @@
-# Phase3 Wrap Publication Closeout — Phase-3 wrap publication closeout lane
+# Publication readiness workflow
 
 Lane closes with a major upgrade that converts Lane governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 

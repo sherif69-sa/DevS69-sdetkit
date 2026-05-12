@@ -1,4 +1,4 @@
-# Lane — Demo asset #1 production
+# Product proof asset workflow
 
 Lane closes the first distribution-ready demo asset, turning Lane release readiness into externally consumable proof.
 

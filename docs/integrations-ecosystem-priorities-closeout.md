@@ -1,4 +1,4 @@
-# Ecosystem priorities closeout lane
+# Ecosystem priorities workflow
 
 Lane closes with a major upgrade that converts Lane community-touchpoint outcomes into an ecosystem-priorities execution pack.
 

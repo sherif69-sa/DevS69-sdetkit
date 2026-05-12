@@ -1,4 +1,4 @@
-# Trust FAQ Expansion Closeout — Trust FAQ expansion loop closeout lane
+# Trust FAQ expansion workflow
 
 Lane closes with a major upgrade that folds Lane integration feedback outcomes into trust FAQ coverage upgrades and escalation-readiness execution.
 

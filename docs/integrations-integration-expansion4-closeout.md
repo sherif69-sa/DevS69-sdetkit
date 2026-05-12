@@ -1,4 +1,4 @@
-# Integration Expansion4 Closeout (legacy) — Integration expansion #4 closeout lane
+# Integration expansion 4 workflow
 
 Lane closes with a major integration upgrade that converts Lane outputs into a self-hosted enterprise Tekton reference.
 

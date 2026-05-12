@@ -1,4 +1,4 @@
-# Lane — Distribution scaling closeout lane
+# Distribution scaling workflow
 
 Lane closes with a major upgrade that turns Lane published case-study outcomes into a scalable distribution execution pack with governance safeguards.
 

@@ -1,4 +1,4 @@
-# Community Program Closeout (legacy) — Community program setup closeout lane
+# Community program setup workflow
 
 Lane ships a major community-program upgrade that converts Lane kickoff evidence into a strict baseline for office-hours, participation, and moderation execution.
 

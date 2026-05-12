@@ -1,4 +1,4 @@
-# Rollback and remediation examples (Phase 4 trust pack)
+# Rollback and remediation examples
 
 ## Example 1: First-proof threshold breach on `main`
 
