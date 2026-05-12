@@ -69,4 +69,3 @@ docs/integrations-stabilization-closeout.md :: path :: closeout :: docs/integrat
 docs/integrations-trust-assets-refresh-closeout.md :: path :: closeout :: docs/integrations-trust-assets-refresh-closeout.md
 docs/integrations-trust-faq-expansion-closeout.md :: path :: closeout :: docs/integrations-trust-faq-expansion-closeout.md
 docs/integrations-weekly-review-closeout.md :: path :: closeout :: docs/integrations-weekly-review-closeout.md
-mkdocs.yml :: mkdocs-nav-label :: demo :: - Adaptive product proof gallery: adaptive-demo-gallery.md

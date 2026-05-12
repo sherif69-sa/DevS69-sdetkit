@@ -216,7 +216,8 @@ def _professional_naming_debt_surfaces() -> set[str]:
                 for line in text.splitlines():
                     stripped = line.strip()
                     if stripped.startswith("- ") and ":" in stripped:
-                        surfaces.append(("mkdocs-nav-label", stripped))
+                        label = stripped[2:].split(":", 1)[0].strip()
+                        surfaces.append(("mkdocs-nav-label", label))
 
             if rel.startswith(".github/workflows/"):
                 for line in text.splitlines():
