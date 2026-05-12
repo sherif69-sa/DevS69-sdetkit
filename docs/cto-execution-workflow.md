@@ -83,4 +83,4 @@ Lock the active scope and evidence sources before making additional delivery cha
 
 After all six points are complete, continue with:
 
-- `docs/cto-phase2-launch-plan.md`.
+- `docs/cto-workflow-readiness-launch-plan.md`.

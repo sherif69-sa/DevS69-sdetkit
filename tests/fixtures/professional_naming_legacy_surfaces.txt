@@ -4,8 +4,6 @@
 .github/workflows/phase3-quality-contract.yml :: workflow-name :: phase3 :: name: phase3-quality-contract
 .github/workflows/phase4-governance-contract.yml :: path :: phase4 :: .github/workflows/phase4-governance-contract.yml
 .github/workflows/phase4-governance-contract.yml :: workflow-name :: phase4 :: name: phase4-governance-contract
-docs/adaptive-demo-gallery.md :: path :: demo :: docs/adaptive-demo-gallery.md
-docs/cto-phase2-launch-plan.md :: path :: phase2 :: docs/cto-phase2-launch-plan.md
 docs/integrations-continuous-upgrade-closeout-1.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-1.md
 docs/integrations-continuous-upgrade-closeout-10.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-10.md
 docs/integrations-continuous-upgrade-closeout-11.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-11.md
