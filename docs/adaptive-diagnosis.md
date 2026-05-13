@@ -234,6 +234,33 @@ PYTHONPATH=src python -m sdetkit.adaptive_diagnosis \
 
 When the summary contains `top_recurring_scenarios[].calibration`, promoted scenarios receive a ranking boost, false positives are demoted, recurrence can raise risk priority, and thin-evidence scenarios are kept lower until better signals exist. Unknown-review evidence includes a `candidate_calibration=` line whenever calibration affected a visible candidate.
 
+## Unified failure intelligence bundle
+
+Use the failure bundle when a CI log needs one operator handoff artifact instead of several manually stitched commands:
+
+```bash
+python -m sdetkit adaptive failure-bundle \
+  --log build/quality.log \
+  --out-dir build/sdetkit/failure-intelligence \
+  --proof-failed \
+  --format text
+```
+
+The bundle writes:
+
+- `failure-intelligence-bundle.json`
+- `adaptive-diagnosis.json`
+- `adaptive-diagnosis-comment.md`
+- `adaptive-diagnosis-memory.jsonl`
+- `adaptive-learning-summary.json`
+- `adaptive-safe-fix-plan.json`
+- `adaptive-patch-plan.json`
+- `operator-brief.json`
+- `operator-brief.md`
+- `artifact-manifest.json`
+
+This command is still diagnostic and handoff-oriented. It does not apply fixes, create branches, push commits, or approve remediation. Known failure families become specific adaptive diagnoses; unknown failures remain review-first; green logs do not create fake adaptive blocks.
+
 ## Operator brief artifact
 
 Generate the trust-grade handoff brief after gate, diagnosis, and optional learning artifacts exist:
