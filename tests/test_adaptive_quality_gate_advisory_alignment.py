@@ -231,3 +231,33 @@ def test_green_advisory_suppression_handles_coverage_regression_candidate_text()
 
     assert payload["status"] == "clear"
     assert payload["diagnosis_count"] == 0
+
+
+REAL_GREEN_QUALITY_FINAL_VERDICT_LOG = """
+[quality] running coverage :: Coverage lane
+[bootstrap-contract] ok: True
+[bootstrap] python: 3.10.12 (required: 3.10+)
+[quality] coverage config: scope=core mode=standard fail-under=85 (COV_MODE=standard default)
+Required test coverage of 85% reached. Total coverage: 96.69%
+================ 3177 passed, 3 deselected in 287.49s (0:04:47) ================
+[quality] final verdict contract: sdetkit.final-verdict.v2
+[quality] profile used: standard
+[quality] checks run: 1
+[quality] checks skipped: 1
+[quality] blocking failures: none
+[quality] advisory findings:
+- coverage mode focuses on coverage gate
+[quality] confidence level: medium (standard validation)
+[quality] merge/release recommendation: ready-for-merge-review
+[quality] verdict json: .sdetkit/out/quality-verdict.json
+[quality] summary md: .sdetkit/out/quality-summary.md
+"""
+
+
+def test_green_quality_final_verdict_log_does_not_create_unknown_review_required() -> None:
+    payload = adaptive_diagnosis.analyze_evidence(log_text=REAL_GREEN_QUALITY_FINAL_VERDICT_LOG)
+
+    assert payload["status"] == "clear"
+    assert payload["diagnosis_count"] == 0
+    assert UNKNOWN_REVIEW_REQUIRED not in _codes(payload)
+    assert pr_quality_comment.render_adaptive_diagnosis_comment(payload) == ""
