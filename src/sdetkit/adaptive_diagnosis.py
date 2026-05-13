@@ -1229,12 +1229,73 @@ def _looks_green_quality_advisory(text: str) -> bool:
     return _has_review_first_advisory_signal(text)
 
 
+def _is_coverage_gate_regression(text: str) -> bool:
+    normalized = text.lower()
+    return "coverage" in normalized and (
+        "coverage gate failed" in normalized
+        or "coverage fail under" in normalized
+        or "fail under configured threshold" in normalized
+        or ("required test coverage" in normalized and "not reached" in normalized)
+    )
+
+
+def _append_coverage_gate_regression(
+    text: str,
+    files: Sequence[str],
+    diagnoses: list[dict[str, Any]],
+    adaptive_history: dict[str, Any] | None = None,
+) -> None:
+    evidence = _failure_like_evidence(text, adaptive_history)
+
+    coverage_match = re.search(
+        r"total coverage:\s*([0-9]+(?:\.[0-9]+)?)%",
+        text,
+        re.IGNORECASE,
+    )
+    if coverage_match:
+        evidence.append(f"total_coverage={coverage_match.group(1)}%")
+
+    threshold_match = re.search(
+        r"required test coverage of\s*([0-9]+(?:\.[0-9]+)?)%",
+        text,
+        re.IGNORECASE,
+    )
+    if threshold_match:
+        evidence.append(f"required_coverage={threshold_match.group(1)}%")
+
+    diagnoses.append(
+        _diag(
+            "COVERAGE_GATE_REGRESSION",
+            "high",
+            "high",
+            "Coverage gate regression",
+            "Coverage dropped below the configured fail-under threshold.",
+            (
+                "Coverage failures often show up as a generic quality failure, "
+                "but the fix needs to compare missing coverage lines to the PR diff."
+            ),
+            evidence,
+            [
+                "Compare missing coverage lines to the PR diff.",
+                "Add focused tests for changed behavior instead of lowering the coverage threshold.",
+                "Rerun the coverage gate locally after the targeted tests are added.",
+            ],
+            ["bash quality.sh cov"],
+            "A real coverage regression can merge untested behavior if treated as a generic CI failure.",
+            "coverage-gate-regression",
+            files=files,
+        )
+    )
+
+
 def _append_log(
     text: str, diagnoses: list[dict[str, Any]], adaptive_history: dict[str, Any] | None = None
 ) -> None:
     start_index = len(diagnoses)
     lower = text.lower()
     files = _file_mentions(text)
+    if _is_coverage_gate_regression(text):
+        _append_coverage_gate_regression(text, files, diagnoses, adaptive_history)
     handled_local = _append_local_investigation(text, files, diagnoses)
     formatted = _format_count(text)
     if formatted:

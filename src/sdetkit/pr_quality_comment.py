@@ -53,7 +53,9 @@ def _next_step_heading(code: str) -> str:
 
 def _auto_fix_status(code: str, fix_plan: dict[str, Any]) -> str:
     if fix_plan.get("safe_to_auto_fix") is not True:
-        return "SDETKit will keep this review-first because the current evidence is not safe for automatic remediation."
+        if _is_review_first_diagnosis(code):
+            return "SDETKit will keep this review-first because the current evidence is not safe for automatic remediation."
+        return "SDETKit will keep this as a human-reviewed adaptive diagnosis because the current evidence is not safe for automatic remediation."
     if code == "RUFF_FIXABLE_LINT":
         return "SDETKit can auto-fix this only when the safe plan, affected-file scope, remediation proof, and same-repo branch guards all pass."
     if code == "PRE_COMMIT_FORMAT_DRIFT":
