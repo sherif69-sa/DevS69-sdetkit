@@ -1558,6 +1558,49 @@ def _rank(item: dict[str, Any]) -> tuple[int, int, int, str]:
     )
 
 
+def _quality_final_verdict_is_green(log_text: str) -> bool:
+    """Return true when a quality.sh log contains an explicit final green verdict."""
+
+    normalized = log_text.lower()
+    has_green_final_verdict = (
+        "[quality] final verdict contract:" in normalized
+        and "[quality] blocking failures: none" in normalized
+        and "[quality] merge/release recommendation: ready-for-merge-review" in normalized
+    )
+    has_explicit_failure_signal = any(
+        marker in normalized
+        for marker in (
+            "[quality] blocking failures:",
+            "traceback",
+            " failed",
+            " error",
+            "no such file",
+            "coverage failure",
+            "quality.sh cov failed",
+        )
+        if marker != "[quality] blocking failures:"
+        or "[quality] blocking failures: none" not in normalized
+    )
+    return has_green_final_verdict and not has_explicit_failure_signal
+
+
+def _green_quality_final_verdict_payload() -> dict[str, Any]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "status": "clear",
+        "risk_score": 0,
+        "confidence": "high",
+        "primary_issue": "No blocking quality failures detected",
+        "diagnosis_count": 0,
+        "diagnoses": [],
+        "evidence": {
+            "quality_final_verdict": "green",
+            "blocking_failures": "none",
+            "merge_recommendation": "ready-for-merge-review",
+        },
+    }
+
+
 def analyze_evidence(
     *,
     log_text: str = "",
@@ -1565,6 +1608,9 @@ def analyze_evidence(
     ledger_records: Sequence[dict[str, Any]] | None = None,
     adaptive_history: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    if log_text and _quality_final_verdict_is_green(log_text):
+        return _green_quality_final_verdict_payload()
+
     diagnoses: list[dict[str, Any]] = []
     if log_text:
         _append_log(log_text, diagnoses, _as_dict(adaptive_history))
