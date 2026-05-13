@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "1"
+FAILURE_BUNDLE_SCHEMA_VERSION = "sdetkit.adaptive.failure_bundle.v1"
 
 
 def _utc_now() -> str:
@@ -366,6 +367,129 @@ def _doctor_cortex_artifacts(summary: dict[str, Any] | None) -> list[dict[str, s
     return [artifact for artifact in artifacts if isinstance(artifact, dict)]
 
 
+def _collect_adaptive_failure_bundle(bundle_path: Path | None) -> dict[str, Any] | None:
+    if bundle_path is None:
+        return None
+
+    resolved = bundle_path.resolve()
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return {
+            "enabled": True,
+            "ok": False,
+            "path": resolved.as_posix(),
+            "error": f"failed to read adaptive failure bundle: {exc}",
+            "artifacts": [],
+        }
+
+    if not isinstance(payload, dict):
+        return {
+            "enabled": True,
+            "ok": False,
+            "path": resolved.as_posix(),
+            "error": "adaptive failure bundle payload is not a JSON object",
+            "artifacts": [],
+        }
+
+    if str(payload.get("schema_version", "")) != FAILURE_BUNDLE_SCHEMA_VERSION:
+        return {
+            "enabled": True,
+            "ok": False,
+            "path": resolved.as_posix(),
+            "error": "unsupported adaptive failure bundle schema",
+            "artifacts": [],
+        }
+
+    raw_artifacts = payload.get("artifacts", {})
+    artifacts_map = raw_artifacts if isinstance(raw_artifacts, dict) else {}
+    artifact_specs = [
+        ("bundle_path", "Adaptive failure intelligence bundle", "json"),
+        ("diagnosis_json", "Adaptive failure diagnosis", "json"),
+        ("pr_comment_markdown", "Adaptive failure PR comment", "markdown"),
+        ("learning_summary_json", "Adaptive failure learning summary", "json"),
+        ("safe_fix_plan_json", "Adaptive failure safe-fix plan", "json"),
+        ("patch_plan_json", "Adaptive failure patch plan", "json"),
+        ("operator_brief_markdown", "Adaptive failure operator brief", "markdown"),
+        ("artifact_manifest_json", "Adaptive failure artifact manifest", "json"),
+    ]
+
+    artifacts: list[dict[str, str]] = []
+    seen: set[str] = set()
+    bundle_value = str(payload.get("bundle_path") or resolved.as_posix())
+    for key, label, kind in artifact_specs:
+        value = bundle_value if key == "bundle_path" else str(artifacts_map.get(key, ""))
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        artifacts.append(_artifact(Path(value).resolve(), label, kind))
+
+    status = str(payload.get("status", "unknown"))
+    review_first = bool(payload.get("review_first", False))
+    safe_to_auto_fix = bool(payload.get("safe_to_auto_fix", False))
+    diagnosis_count = int(payload.get("diagnosis_count", 0) or 0)
+    primary = str(payload.get("primary_diagnosis_code", "") or "")
+
+    return {
+        "enabled": True,
+        "ok": status in {"clear", "monitor"} and not review_first,
+        "path": resolved.as_posix(),
+        "schema_version": str(payload.get("schema_version", "")),
+        "status": status,
+        "primary_diagnosis_code": primary,
+        "diagnosis_count": diagnosis_count,
+        "review_first": review_first,
+        "safe_to_auto_fix": safe_to_auto_fix,
+        "operator_brief_markdown": str(artifacts_map.get("operator_brief_markdown", "")),
+        "artifacts": artifacts,
+    }
+
+
+def _adaptive_failure_bundle_artifacts(summary: dict[str, Any] | None) -> list[dict[str, str]]:
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return []
+    artifacts = summary.get("artifacts", [])
+    if not isinstance(artifacts, list):
+        return []
+    return [artifact for artifact in artifacts if isinstance(artifact, dict)]
+
+
+def _format_adaptive_failure_bundle(summary: dict[str, Any] | None) -> list[str]:
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return []
+    if summary.get("error"):
+        return [
+            "## Adaptive Failure Bundle",
+            "",
+            "- Status: error",
+            f"- Error: {summary.get('error')}",
+        ]
+    return [
+        "## Adaptive Failure Bundle",
+        "",
+        f"- Status: {summary.get('status', 'unknown')}",
+        f"- Primary diagnosis: {summary.get('primary_diagnosis_code', '') or 'none'}",
+        f"- Diagnosis count: {summary.get('diagnosis_count', 0)}",
+        f"- Review first: {str(summary.get('review_first', False)).lower()}",
+        f"- Safe to auto-fix: {str(summary.get('safe_to_auto_fix', False)).lower()}",
+        f"- Operator brief: `{summary.get('operator_brief_markdown', '')}`",
+    ]
+
+
+def _adaptive_failure_bundle_ledger_summary(bundle: dict[str, Any]) -> dict[str, Any] | None:
+    summary = bundle.get("adaptive_failure_bundle")
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return None
+    return {
+        "ok": bool(summary.get("ok", False)),
+        "status": str(summary.get("status", "unknown")),
+        "primary_diagnosis_code": str(summary.get("primary_diagnosis_code", "")),
+        "diagnosis_count": int(summary.get("diagnosis_count", 0) or 0),
+        "review_first": bool(summary.get("review_first", False)),
+        "safe_to_auto_fix": bool(summary.get("safe_to_auto_fix", False)),
+    }
+
+
 def _format_doctor_cortex(summary: dict[str, Any] | None) -> list[str]:
     if not isinstance(summary, dict) or not summary.get("enabled"):
         return ["- not collected"]
@@ -418,6 +542,7 @@ def build_bundle(
     timeout_seconds: int = 60,
     ledger_path: Path | None = None,
     doctor_cortex: bool = False,
+    failure_bundle: Path | None = None,
 ) -> dict[str, Any]:
     repo = repo.resolve()
     out_dir = out_dir.resolve()
@@ -491,12 +616,15 @@ def build_bundle(
         decision = "SHIP"
         risk_band = "low"
 
+    adaptive_failure_bundle_summary = _collect_adaptive_failure_bundle(failure_bundle)
+
     artifacts = [
         _artifact(out_dir / "mission-control.json", "Mission Control JSON bundle", "json"),
         _artifact(out_dir / "mission-control.md", "Mission Control operator brief", "markdown"),
     ]
     artifacts.extend(_step_artifacts(steps))
     artifacts.extend(_doctor_cortex_artifacts(doctor_cortex_summary))
+    artifacts.extend(_adaptive_failure_bundle_artifacts(adaptive_failure_bundle_summary))
     if ledger_path is not None:
         artifacts.append(
             _artifact(
@@ -524,6 +652,7 @@ def build_bundle(
         "passed_step_count": passed_count,
         "failed_step_count": failed_count,
         "doctor_cortex": doctor_cortex_summary,
+        "adaptive_failure_bundle": adaptive_failure_bundle_summary,
         "steps": steps,
         "findings": findings,
         "artifacts": artifacts,
@@ -552,6 +681,7 @@ def render_markdown(bundle: dict[str, Any]) -> str:
         "## Doctor Cortex",
         "",
         *_format_doctor_cortex(bundle.get("doctor_cortex")),
+        *_format_adaptive_failure_bundle(bundle.get("adaptive_failure_bundle")),
         "",
         "## Steps",
         "",
@@ -628,6 +758,7 @@ def _ledger_record(bundle: dict[str, Any], out_dir: Path) -> dict[str, Any]:
         "failed_step_count": bundle["failed_step_count"],
         "artifact_dir": out_dir.resolve().as_posix(),
         "doctor_cortex": _doctor_cortex_ledger_summary(bundle),
+        "adaptive_failure_bundle": _adaptive_failure_bundle_ledger_summary(bundle),
     }
 
 
@@ -866,6 +997,7 @@ def render_report_markdown(
         "## Doctor Cortex",
         "",
         *_format_doctor_cortex(bundle.get("doctor_cortex")),
+        *_format_adaptive_failure_bundle(bundle.get("adaptive_failure_bundle")),
         "",
         "## Steps",
         "",
@@ -940,6 +1072,7 @@ def _run(args: argparse.Namespace) -> int:
         timeout_seconds=int(args.timeout_seconds),
         ledger_path=ledger_path,
         doctor_cortex=bool(args.doctor_cortex),
+        failure_bundle=Path(args.failure_bundle).resolve() if str(args.failure_bundle) else None,
     )
     json_path, md_path = write_bundle(bundle, out_dir)
     print(f"wrote {json_path}")
@@ -974,6 +1107,25 @@ def _summarize(args: argparse.Namespace) -> int:
         print(f"doctor_cortex_ok={str(doctor_cortex.get('ok', False)).lower()}")
         print(f"doctor_cortex_diagnosis_count={diagnosis.get('diagnosis_count', 0)}")
         print(f"doctor_cortex_prescription_count={prescriptions.get('prescription_count', 0)}")
+    adaptive_failure_bundle = bundle.get("adaptive_failure_bundle")
+    if isinstance(adaptive_failure_bundle, dict):
+        summary_prefix = "adaptive" + "_failure" + "_bundle"
+        print(f"{summary_prefix}_ok={str(adaptive_failure_bundle.get('ok', False)).lower()}")
+        print(f"{summary_prefix}_status={adaptive_failure_bundle.get('status', 'unknown')}")
+        print(
+            f"{summary_prefix}_primary={adaptive_failure_bundle.get('primary_diagnosis_code', '')}"
+        )
+        print(
+            f"{summary_prefix}_diagnosis_count={adaptive_failure_bundle.get('diagnosis_count', 0)}"
+        )
+        print(
+            f"{summary_prefix}_review_first="
+            f"{str(adaptive_failure_bundle.get('review_first', False)).lower()}"
+        )
+        print(
+            f"{summary_prefix}_safe_to_auto_fix="
+            f"{str(adaptive_failure_bundle.get('safe_to_auto_fix', False)).lower()}"
+        )
     return 0
 
 
@@ -997,6 +1149,7 @@ def _schema(_: argparse.Namespace) -> int:
             "findings",
             "artifacts",
             "next_actions",
+            "adaptive_failure_bundle",
         ],
         "ledger_record_keys": [
             "schema_version",
@@ -1012,6 +1165,7 @@ def _schema(_: argparse.Namespace) -> int:
             "executed_step_count",
             "failed_step_count",
             "artifact_dir",
+            "adaptive_failure_bundle",
         ],
         "history_summary_keys": [
             "schema_version",
@@ -1114,6 +1268,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--ledger-path", default="")
     run.add_argument("--no-ledger", action="store_true")
     run.add_argument("--doctor-cortex", action="store_true")
+    run.add_argument("--failure-bundle", default="")
     run.set_defaults(func=_run)
 
     summarize = sub.add_parser("summarize", help="Summarize a mission-control.json bundle")
