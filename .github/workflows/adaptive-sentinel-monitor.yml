@@ -1,0 +1,74 @@
+name: Adaptive Sentinel Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  sentinel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements-test.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .
+
+      - name: Run adaptive sentinel monitor
+        run: |
+          mkdir -p build/sdetkit/sentinel
+          PYTHONPATH=src python -m sdetkit adaptive sentinel scan \
+            --root . \
+            --out-dir build/sdetkit/sentinel \
+            --format json \
+            --no-fail \
+            > build/sdetkit/sentinel/sentinel.stdout.json
+
+      - name: Write adaptive sentinel summary
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+
+          path = Path("build/sdetkit/sentinel/sentinel.json")
+          payload = {}
+          if path.exists():
+              payload = json.loads(path.read_text(encoding="utf-8"))
+
+          print("## Adaptive Sentinel Monitor")
+          print()
+          print(f"- state: `{payload.get('state', 'unknown')}`")
+          print(f"- ok: `{str(payload.get('ok', False)).lower()}`")
+          print(f"- finding count: `{payload.get('finding_count', 0)}`")
+          print(f"- sentinel json: `build/sdetkit/sentinel/sentinel.json`")
+          print(f"- sentinel markdown: `build/sdetkit/sentinel/sentinel.md`")
+          print()
+          print("### Top recommendations")
+          for command in payload.get("recommendations", [])[:5]:
+              print(f"- `{command}`")
+          if not payload.get("recommendations"):
+              print("- No sentinel recommendations were emitted.")
+          PY
+
+      - name: Upload adaptive sentinel monitor artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: adaptive-sentinel-monitor
+          path: |
+            build/sdetkit/sentinel/
+            .sdetkit/adaptive-sentinel/
+          if-no-files-found: ignore
