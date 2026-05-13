@@ -428,6 +428,20 @@ Then use stability-aware command discovery:
     adaptive_brief.add_argument("--safe-fix-plan", default="")
     adaptive_brief.add_argument("--format", choices=["md", "json", "comment"], default="md")
     adaptive_brief.add_argument("--out", default="build/sdetkit/operator-brief.md")
+    adaptive_failure_bundle = adaptive_sub.add_parser(
+        "failure-bundle",
+        help="Build a unified failure intelligence bundle from a failed log",
+    )
+    adaptive_failure_bundle.add_argument("--log", required=True)
+    adaptive_failure_bundle.add_argument("--out-dir", default="build/sdetkit/failure-intelligence")
+    adaptive_failure_bundle.add_argument("--out", default="")
+    adaptive_failure_bundle.add_argument("--memory-db", default="")
+    adaptive_failure_bundle.add_argument("--proof-passed", action="store_true")
+    adaptive_failure_bundle.add_argument("--proof-failed", action="store_true")
+    adaptive_failure_bundle.add_argument("--fix-accepted", action="store_true")
+    adaptive_failure_bundle.add_argument("--fix-rejected", action="store_true")
+    adaptive_failure_bundle.add_argument("--false-positive", action="store_true")
+    adaptive_failure_bundle.add_argument("--format", choices=["text", "json"], default="text")
     adaptive_portfolio = adaptive_sub.add_parser(
         "portfolio-rollup",
         help="Roll multiple adaptive diagnosis outputs into a top-risk portfolio report",
@@ -1225,6 +1239,29 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "sdetkit.adaptive_diagnosis_memory",
                     ["summarize", "--db", str(ns.db), "--format", str(ns.format)],
                 )
+        if getattr(ns, "adaptive_cmd", None) == "failure-bundle":
+            forwarded = [
+                "--log",
+                str(ns.log),
+                "--out-dir",
+                str(ns.out_dir),
+                "--format",
+                str(ns.format),
+            ]
+            if str(ns.out):
+                forwarded.extend(["--out", str(ns.out)])
+            if str(ns.memory_db):
+                forwarded.extend(["--memory-db", str(ns.memory_db)])
+            for attr, flag in [
+                ("proof_passed", "--proof-passed"),
+                ("proof_failed", "--proof-failed"),
+                ("fix_accepted", "--fix-accepted"),
+                ("fix_rejected", "--fix-rejected"),
+                ("false_positive", "--false-positive"),
+            ]:
+                if bool(getattr(ns, attr, False)):
+                    forwarded.append(flag)
+            return _run_module_main("sdetkit.adaptive_failure_bundle", forwarded)
         if getattr(ns, "adaptive_cmd", None) == "brief":
             forwarded = ["--format", str(ns.format), "--out", str(ns.out)]
             for flag, value in (

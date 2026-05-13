@@ -40,6 +40,12 @@ When a log, check, or gate fails, collect evidence without mutating the reposito
 python -m sdetkit review . --no-workspace --format operator-json
 python -m sdetkit investigate failure --log build/quality.log --format markdown
 python -m sdetkit investigate failure --log build/quality.log --format json --out build/investigation/failure.json
+
+# One-shot handoff bundle when the operator needs diagnosis, comment, learning, safe-fix boundary, and brief artifacts together.
+python -m sdetkit adaptive failure-bundle \
+  --log build/quality.log \
+  --out-dir build/sdetkit/failure-intelligence \
+  --proof-failed
 ```
 
 Read these fields first in investigation output:
