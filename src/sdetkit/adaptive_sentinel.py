@@ -12,6 +12,7 @@ from typing import Any
 SCHEMA_VERSION = "sdetkit.adaptive.sentinel.v1"
 EVENT_SCHEMA_VERSION = "sdetkit.adaptive.sentinel.event.v1"
 TREND_SCHEMA_VERSION = "sdetkit.adaptive.sentinel.trend_memory.v1"
+CONTROL_ROOM_SCHEMA_VERSION = "sdetkit.adaptive.sentinel.control_room.v1"
 
 STATE_RANK = {
     "healthy": 0,
@@ -877,6 +878,191 @@ def render_trend_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _finding_review_first(item: dict[str, Any]) -> bool:
+    haystack = " ".join(
+        [
+            str(item.get("source", "")),
+            str(item.get("title", "")),
+            str(item.get("summary", "")),
+            " ".join(str(value) for value in _as_list(item.get("evidence"))),
+        ]
+    ).lower()
+    return "review_first=true" in haystack or "review-first" in haystack
+
+
+def _control_room_active_threats(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for item in _as_list(payload.get("findings")):
+        finding = _as_dict(item)
+        source = str(finding.get("source", "unknown"))
+        state = str(finding.get("state", "healthy"))
+        if source == "sentinel" and state == "healthy":
+            continue
+        rows.append(
+            {
+                "source": source,
+                "state": state,
+                "title": str(finding.get("title", "Sentinel finding")),
+                "summary": str(finding.get("summary", "")),
+                "review_first": _finding_review_first(finding),
+                "evidence": [str(row) for row in _as_list(finding.get("evidence"))[:6]],
+                "recommended_commands": [
+                    str(command) for command in _as_list(finding.get("recommended_commands"))[:4]
+                ],
+            }
+        )
+
+    rows.sort(
+        key=lambda row: (
+            -STATE_RANK.get(str(row.get("state", "healthy")), 0),
+            str(row.get("source", "")),
+            str(row.get("title", "")),
+        )
+    )
+    return rows
+
+
+def _control_room_risk_surfaces(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    counts: dict[str, dict[str, Any]] = {}
+
+    def add(surface: str, *, risk: str = "warning", path: str = "") -> None:
+        row = counts.setdefault(
+            surface,
+            {"surface": surface, "count": 0, "highest_risk": risk, "sample_paths": []},
+        )
+        row["count"] = int(row["count"]) + 1
+        if STATE_RANK.get(risk, 0) > STATE_RANK.get(str(row["highest_risk"]), 0):
+            row["highest_risk"] = risk
+        if path and len(_as_list(row.get("sample_paths"))) < 5:
+            row["sample_paths"].append(path)
+
+    for item in _as_list(payload.get("protected_surface_changes")):
+        row = _as_dict(item)
+        add(
+            str(row.get("surface", "protected_surface")),
+            risk=str(row.get("risk_band", "warning")),
+            path=str(row.get("path", "")),
+        )
+
+    for item in _as_list(payload.get("findings")):
+        finding = _as_dict(item)
+        source = str(finding.get("source", "unknown"))
+        if source == "sentinel":
+            continue
+        add(source, risk=str(finding.get("state", "warning")))
+
+    rows = list(counts.values())
+    rows.sort(
+        key=lambda row: (
+            -STATE_RANK.get(str(row.get("highest_risk", "healthy")), 0),
+            -int(row.get("count", 0)),
+            str(row.get("surface", "")),
+        )
+    )
+    return rows[:12]
+
+
+def build_control_room(payload: dict[str, Any]) -> dict[str, Any]:
+    active_threats = _control_room_active_threats(payload)
+    review_first = [row for row in active_threats if bool(row.get("review_first"))]
+    risk_surfaces = _control_room_risk_surfaces(payload)
+    recommendations = [str(command) for command in _as_list(payload.get("recommendations"))[:8]]
+    artifacts = _as_dict(payload.get("artifacts"))
+
+    return {
+        "schema_version": CONTROL_ROOM_SCHEMA_VERSION,
+        "sentinel_schema_version": str(payload.get("schema_version", "")),
+        "state": str(payload.get("state", "unknown")),
+        "trend_state": str(payload.get("trend_state", "unknown")),
+        "threat_score": int(payload.get("threat_score", 0) or 0),
+        "active_threat_count": len(active_threats),
+        "review_first_count": len(review_first),
+        "top_risk_surface": str(risk_surfaces[0]["surface"]) if risk_surfaces else "none",
+        "top_risk_surfaces": risk_surfaces,
+        "active_threats": active_threats[:12],
+        "review_first_items": review_first[:8],
+        "exact_next_commands": recommendations,
+        "source_artifacts": {
+            key: str(value)
+            for key, value in sorted(artifacts.items())
+            if key
+            in {
+                "json",
+                "markdown",
+                "trend_memory_json",
+                "trend_memory_markdown",
+                "events_jsonl",
+            }
+        },
+        "automation_allowed_now": False,
+        "automation_reason": str(
+            payload.get(
+                "automation_reason",
+                "Adaptive sentinel is read-only: it watches, classifies, recommends, and records evidence.",
+            )
+        ),
+    }
+
+
+def render_control_room_markdown(payload: dict[str, Any]) -> str:
+    lines = [
+        "# Adaptive Sentinel Control Room",
+        "",
+        f"- State: **{payload.get('state', 'unknown')}**",
+        f"- Trend state: **{payload.get('trend_state', 'unknown')}**",
+        f"- Threat score: **{payload.get('threat_score', 0)}**",
+        f"- Active threats: **{payload.get('active_threat_count', 0)}**",
+        f"- Review-first items: **{payload.get('review_first_count', 0)}**",
+        f"- Top risk surface: **{payload.get('top_risk_surface', 'none')}**",
+        f"- Automation allowed now: **{payload.get('automation_allowed_now', False)}**",
+        "",
+        "## Active threats",
+    ]
+
+    threats = _as_list(payload.get("active_threats"))
+    if not threats:
+        lines.append("- No active Sentinel threats were detected.")
+    for item in threats[:10]:
+        row = _as_dict(item)
+        lines.extend(
+            [
+                f"- `{row.get('state', 'unknown')}` {row.get('source', 'unknown')}: {row.get('title', '')}",
+                f"  - summary: {row.get('summary', '')}",
+            ]
+        )
+        evidence = _as_list(row.get("evidence"))
+        if evidence:
+            lines.append("  - evidence:")
+            for value in evidence[:4]:
+                lines.append(f"    - `{value}`")
+
+    lines.extend(["", "## Top risk surfaces"])
+    surfaces = _as_list(payload.get("top_risk_surfaces"))
+    if not surfaces:
+        lines.append("- No risk surfaces detected.")
+    for item in surfaces[:8]:
+        row = _as_dict(item)
+        lines.append(
+            f"- `{row.get('surface', 'unknown')}` risk=`{row.get('highest_risk', 'unknown')}` count={row.get('count', 0)}"
+        )
+
+    lines.extend(["", "## Exact next commands"])
+    commands = _as_list(payload.get("exact_next_commands"))
+    if not commands:
+        lines.append("- No follow-up commands emitted.")
+    for command in commands:
+        lines.append(f"- `{command}`")
+
+    lines.extend(
+        [
+            "",
+            "## Automation boundary",
+            str(payload.get("automation_reason", "")),
+        ]
+    )
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def build_sentinel_scan(
     *,
     root: str | Path = ".",
@@ -970,12 +1156,20 @@ def build_sentinel_scan(
     payload["threat_score"] = int(trend_memory.get("threat_score", 0) or 0)
     payload["artifacts"]["trend_memory_json"] = (out_path / "trend-memory.json").as_posix()
     payload["artifacts"]["trend_memory_markdown"] = (out_path / "trend-memory.md").as_posix()
+    payload["artifacts"]["control_room_json"] = (out_path / "control-room.json").as_posix()
+    payload["artifacts"]["control_room_markdown"] = (out_path / "control-room.md").as_posix()
+    payload["control_room"] = build_control_room(payload)
 
     if write:
         _write_json(out_path / "sentinel.json", payload)
         _write_text(out_path / "sentinel.md", render_markdown(payload))
         _write_json(out_path / "trend-memory.json", trend_memory)
         _write_text(out_path / "trend-memory.md", render_trend_markdown(trend_memory))
+        _write_json(out_path / "control-room.json", payload["control_room"])
+        _write_text(
+            out_path / "control-room.md",
+            render_control_room_markdown(_as_dict(payload.get("control_room"))),
+        )
         if not event_path.is_absolute():
             event_path = root_path / event_path
         _append_jsonl(

@@ -418,3 +418,49 @@ def test_sentinel_ignores_clear_maintenance_autopilot_report(tmp_path: Path) -> 
     payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
 
     assert not any(item["source"] == "maintenance_autopilot" for item in payload["findings"])
+
+
+def test_sentinel_control_room_artifacts_summarize_active_threats(tmp_path: Path) -> None:
+    _failure_bundle(tmp_path)
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=True)
+
+    control_room = payload["control_room"]
+    assert control_room["schema_version"] == "sdetkit.adaptive.sentinel.control_room.v1"
+    assert control_room["state"] in {"warning", "critical"}
+    assert control_room["active_threat_count"] >= 1
+    assert control_room["review_first_count"] >= 1
+    assert control_room["automation_allowed_now"] is False
+    assert control_room["exact_next_commands"]
+    assert (tmp_path / "build/sdetkit/sentinel/control-room.json").exists()
+    assert (tmp_path / "build/sdetkit/sentinel/control-room.md").exists()
+    assert "control_room_json" in payload["artifacts"]
+    assert "control_room_markdown" in payload["artifacts"]
+
+
+def test_sentinel_control_room_summarizes_protected_surface(tmp_path: Path) -> None:
+    _init_git_repo(tmp_path)
+    (tmp_path / "constraints-ci.txt").write_text("pytest==8.0.0\n", encoding="utf-8")
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    control_room = payload["control_room"]
+    assert control_room["top_risk_surface"] == "dependency_contract"
+    assert control_room["top_risk_surfaces"][0]["highest_risk"] == "critical"
+    assert control_room["active_threat_count"] >= 1
+    assert any(
+        row["source"] == "protected_surface_changes" for row in control_room["active_threats"]
+    )
+
+
+def test_sentinel_control_room_markdown_lists_next_commands(tmp_path: Path) -> None:
+    _failure_bundle(tmp_path)
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    rendered = adaptive_sentinel.render_control_room_markdown(payload["control_room"])
+
+    assert "# Adaptive Sentinel Control Room" in rendered
+    assert "## Active threats" in rendered
+    assert "## Exact next commands" in rendered
+    assert "Automation boundary" in rendered
+    assert "investigate failure" in rendered or "doctor" in rendered
