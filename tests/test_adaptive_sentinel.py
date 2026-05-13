@@ -133,3 +133,133 @@ def test_sentinel_render_markdown_contains_boundary(tmp_path: Path) -> None:
     assert "# Adaptive Sentinel" in rendered
     assert "Recommended next commands" in rendered
     assert "read-only" in rendered
+
+
+def test_sentinel_trend_memory_escalates_recurring_unknown_review(tmp_path: Path) -> None:
+    _failure_bundle(tmp_path)
+    event_log = tmp_path / ".sdetkit/adaptive-sentinel/events.jsonl"
+    event_log.parent.mkdir(parents=True, exist_ok=True)
+    event_log.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.adaptive.sentinel.event.v1",
+                "created_at_utc": "2026-05-01T00:00:00Z",
+                "state": "critical",
+                "finding_count": 1,
+                "finding_fingerprints": [
+                    {
+                        "fingerprint": (
+                            "adaptive_failure_bundle|primary=UNKNOWN_REVIEW_REQUIRED|"
+                            "Adaptive failure bundle signal"
+                        ),
+                        "source": "adaptive_failure_bundle",
+                        "state": "critical",
+                        "title": "Adaptive failure bundle signal",
+                        "evidence_key": "primary=UNKNOWN_REVIEW_REQUIRED",
+                    }
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=True)
+
+    trend = payload["trend_memory"]
+    assert payload["trend_state"] == "critical"
+    assert payload["threat_score"] >= 90
+    assert trend["trend_state"] == "critical"
+    assert trend["escalated_finding_count"] == 1
+    assert trend["escalated_findings"][0]["reason"] == "persistent_unknown_review_required"
+    assert trend["escalated_findings"][0]["recurrence_count"] == 2
+    assert (tmp_path / "build/sdetkit/sentinel/trend-memory.json").exists()
+    assert (tmp_path / "build/sdetkit/sentinel/trend-memory.md").exists()
+
+
+def test_sentinel_trend_memory_marks_three_time_recurring_quality_failure(
+    tmp_path: Path,
+) -> None:
+    quality = tmp_path / ".sdetkit/out/quality-verdict.json"
+    quality.parent.mkdir(parents=True, exist_ok=True)
+    quality.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.final-verdict.v2",
+                "blocking_failures": "coverage",
+                "merge_release_recommendation": "do-not-merge",
+            }
+        ),
+        encoding="utf-8",
+    )
+    event_log = tmp_path / ".sdetkit/adaptive-sentinel/events.jsonl"
+    event_log.parent.mkdir(parents=True, exist_ok=True)
+    prior_event = {
+        "schema_version": "sdetkit.adaptive.sentinel.event.v1",
+        "state": "warning",
+        "finding_fingerprints": [
+            {
+                "fingerprint": "quality_verdict|blocking_failures=coverage|Quality verdict signal",
+                "source": "quality_verdict",
+                "state": "warning",
+                "title": "Quality verdict signal",
+                "evidence_key": "blocking_failures=coverage",
+            }
+        ],
+    }
+    event_log.write_text(
+        json.dumps(prior_event) + "\n" + json.dumps(prior_event) + "\n",
+        encoding="utf-8",
+    )
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    trend = payload["trend_memory"]
+    assert trend["trend_state"] == "critical"
+    assert trend["top_recurring_findings"][0]["reason"] == "quality_regression_loop"
+    assert trend["top_recurring_findings"][0]["recurrence_count"] == 3
+    assert payload["threat_score"] >= 90
+
+
+def test_sentinel_trend_memory_clear_scan_has_zero_threat_score(tmp_path: Path) -> None:
+    _failure_bundle(tmp_path, clear=True)
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    assert payload["state"] == "healthy"
+    assert payload["trend_state"] == "healthy"
+    assert payload["threat_score"] == 0
+    assert payload["trend_memory"]["recurring_finding_count"] == 0
+
+
+def test_sentinel_markdown_includes_trend_memory_section(tmp_path: Path) -> None:
+    _failure_bundle(tmp_path)
+    event_log = tmp_path / ".sdetkit/adaptive-sentinel/events.jsonl"
+    event_log.parent.mkdir(parents=True, exist_ok=True)
+    event_log.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.adaptive.sentinel.event.v1",
+                "state": "critical",
+                "finding_fingerprints": [
+                    {
+                        "fingerprint": (
+                            "adaptive_failure_bundle|primary=UNKNOWN_REVIEW_REQUIRED|"
+                            "Adaptive failure bundle signal"
+                        ),
+                        "source": "adaptive_failure_bundle",
+                        "state": "critical",
+                    }
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    rendered = adaptive_sentinel.render_markdown(payload)
+
+    assert "## Trend memory" in rendered
+    assert "persistent_unknown_review_required" in rendered
+    assert "threat score" in rendered
