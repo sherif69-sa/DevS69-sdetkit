@@ -46,6 +46,7 @@ EXIT_FAILED = 2
 EVIDENCE_SCHEMA_VERSION = "sdetkit.doctor.evidence.v2"
 EVIDENCE_MANIFEST_SCHEMA_VERSION = "sdetkit.doctor.evidence.manifest.v1"
 NEXT_PASS_SCHEMA_VERSION = "sdetkit.doctor.next_pass.v1"
+ADAPTIVE_FAILURE_BUNDLE_SCHEMA_VERSION = "sdetkit.adaptive.failure_bundle.v1"
 EVIDENCE_PROFILES = ("ci", "release", "full")
 EVIDENCE_INCLUDES = ("failed", "actionable", "all")
 ENTERPRISE_RERUN_FAILED_COMMAND = "python -m sdetkit doctor --enterprise-rerun-failed --json"
@@ -2263,6 +2264,56 @@ def _evaluate_gate(checks: dict[str, dict[str, Any]], threshold: str) -> tuple[b
     return (not failed), failed
 
 
+def _load_adaptive_failure_bundle_signal(path: Path) -> dict[str, Any]:
+    resolved = path.resolve()
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return {
+            "enabled": True,
+            "ok": False,
+            "path": resolved.as_posix(),
+            "error": f"failed to read adaptive failure bundle: {exc}",
+        }
+
+    if not isinstance(payload, dict):
+        return {
+            "enabled": True,
+            "ok": False,
+            "path": resolved.as_posix(),
+            "error": "adaptive failure bundle payload is not a JSON object",
+        }
+
+    schema_version = str(payload.get("schema_version", ""))
+    if schema_version != ADAPTIVE_FAILURE_BUNDLE_SCHEMA_VERSION:
+        return {
+            "enabled": True,
+            "ok": False,
+            "path": resolved.as_posix(),
+            "schema_version": schema_version,
+            "error": "unsupported adaptive failure bundle schema",
+        }
+
+    artifacts = payload.get("artifacts", {})
+    artifacts_map = artifacts if isinstance(artifacts, dict) else {}
+    status = str(payload.get("status", "unknown"))
+    review_first = bool(payload.get("review_first", False))
+    diagnosis_count = int(payload.get("diagnosis_count", 0) or 0)
+
+    return {
+        "enabled": True,
+        "ok": status in {"clear", "monitor"} and diagnosis_count == 0 and not review_first,
+        "path": resolved.as_posix(),
+        "schema_version": schema_version,
+        "status": status,
+        "primary_diagnosis_code": str(payload.get("primary_diagnosis_code", "") or ""),
+        "diagnosis_count": diagnosis_count,
+        "review_first": review_first,
+        "safe_to_auto_fix": bool(payload.get("safe_to_auto_fix", False)),
+        "operator_brief_markdown": str(artifacts_map.get("operator_brief_markdown", "")),
+    }
+
+
 def _split_cortex_args(argv: list[str]) -> tuple[bool, bool, str, str | None, list[str]]:
     diagnose = False
     prescribe = False
@@ -2293,6 +2344,16 @@ def _split_cortex_args(argv: list[str]) -> tuple[bool, bool, str, str | None, li
             continue
         if token.startswith("--format="):
             output_format = token.split("=", 1)[1]
+            index += 1
+            continue
+        if token == "--failure-bundle":
+            inner.append(token)
+            index += 1
+            inner.append(argv[index])
+            index += 1
+            continue
+        if token.startswith("--failure-bundle="):
+            inner.append(token)
             index += 1
             continue
         if token == "--out":
@@ -2344,6 +2405,20 @@ def _doctor_cortex_main(argv: list[str]) -> int | None:
         return rc if rc else 2
 
     from . import doctor_diagnosis
+
+    failure_bundle_path = ""
+    for index, token in enumerate(argv):
+        if token == "--failure-bundle" and index + 1 < len(argv):
+            failure_bundle_path = argv[index + 1]
+            break
+        if token.startswith("--failure-bundle="):
+            failure_bundle_path = token.split("=", 1)[1]
+            break
+
+    if failure_bundle_path and isinstance(doctor_payload, dict):
+        doctor_payload["adaptive_failure_bundle"] = _load_adaptive_failure_bundle_signal(
+            Path(failure_bundle_path)
+        )
 
     diagnosis_contract = doctor_diagnosis.build_diagnosis_payload(doctor_payload)
     target_path = Path(out_path) if out_path else None
@@ -2705,6 +2780,11 @@ def main(argv: list[str] | None = None) -> int:
         "--prescribe",
         action="store_true",
         help="emit the public Doctor prescription contract instead of the standard doctor report",
+    )
+    parser.add_argument(
+        "--failure-bundle",
+        default="",
+        help="Attach an adaptive failure intelligence bundle to Doctor Cortex diagnosis.",
     )
 
     ns = parser.parse_args(list(argv) if argv is not None else None)
@@ -3358,6 +3438,11 @@ def main(argv: list[str] | None = None) -> int:
         alternate_commands = [
             str(command).strip() for command in alternate_commands if str(command).strip()
         ]
+        if str(getattr(ns, "failure_bundle", "")):
+            data["adaptive_failure_bundle"] = _load_adaptive_failure_bundle_signal(
+                Path(str(ns.failure_bundle))
+            )
+
         if ns.diagnose or ns.prescribe:
             output_format = "json" if (ns.format == "json" or ns.json) else "text"
             out_path = Path(ns.out) if ns.out else None
