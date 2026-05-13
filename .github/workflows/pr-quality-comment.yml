@@ -47,12 +47,46 @@ jobs:
               --format text
           fi
 
+      - name: Run adaptive sentinel scan
+        if: always()
+        run: |
+          mkdir -p build/sdetkit/sentinel
+          PYTHONPATH=src python -m sdetkit adaptive sentinel scan \
+            --root . \
+            --out-dir build/sdetkit/sentinel \
+            --format text \
+            --no-fail
+
       - name: Build PR comment body
         run: |
           mkdir -p build/pr-quality
           coverage_line="$(grep -E 'Total coverage: [0-9]+\.[0-9]+%' quality.log | tail -n1 || true)"
           coverage_pct="$(echo "$coverage_line" | sed -E 's/.*Total coverage: ([0-9]+\.[0-9]+)%.*/\1/' || true)"
           [ -z "$coverage_pct" ] && coverage_pct="unknown"
+
+          sentinel_state="unknown"
+          if [ -s build/sdetkit/sentinel/sentinel.json ]; then
+            sentinel_state="$(python -c "import json; from pathlib import Path; p=Path('build/sdetkit/sentinel/sentinel.json'); print(json.loads(p.read_text(encoding='utf-8')).get('state', 'unknown'))" 2>/dev/null || echo unknown)"
+          fi
+
+          append_sentinel_summary() {
+            if [ "$sentinel_state" = "warning" ] || [ "$sentinel_state" = "critical" ]; then
+              echo ''
+              echo '### Adaptive Sentinel'
+              echo "- state: \`${sentinel_state}\`"
+              echo '- evidence: `build/sdetkit/sentinel/sentinel.json`'
+              echo '- markdown: `build/sdetkit/sentinel/sentinel.md`'
+              if [ -s build/sdetkit/sentinel/sentinel.md ]; then
+                echo ''
+                echo '**Recommended next commands:**'
+                awk '
+                  /^## Recommended next commands/ {flag=1; next}
+                  /^## Boundary/ {flag=0}
+                  flag && /^- `/ {print; count++; if (count >= 3) exit}
+                ' build/sdetkit/sentinel/sentinel.md || true
+              fi
+            fi
+          }
 
           if [ "${{ steps.quality.outcome }}" = "success" ]; then
             {
@@ -63,6 +97,7 @@ jobs:
                 echo ''
                 cat build/pr-quality/failure-intelligence/adaptive-diagnosis-comment.md
               fi
+              append_sentinel_summary
             } > build/pr-quality/pr-comment-body.md
           else
             {
@@ -73,6 +108,7 @@ jobs:
                 echo ''
                 cat build/pr-quality/failure-intelligence/adaptive-diagnosis-comment.md
               fi
+              append_sentinel_summary
             } > build/pr-quality/pr-comment-body.md
           fi
 
@@ -82,6 +118,16 @@ jobs:
         with:
           name: pr-quality-failure-intelligence
           path: build/pr-quality/failure-intelligence/
+          if-no-files-found: ignore
+
+      - name: Upload adaptive sentinel artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: pr-quality-adaptive-sentinel
+          path: |
+            build/sdetkit/sentinel/
+            .sdetkit/adaptive-sentinel/
           if-no-files-found: ignore
 
       - name: Comment on PR
