@@ -69,6 +69,200 @@ def _max_state(*states: str) -> str:
     return current
 
 
+PROTECTED_SURFACE_EXCLUDES = (
+    ".git/",
+    ".mypy_cache/",
+    ".pytest_cache/",
+    ".ruff_cache/",
+    ".sdetkit/",
+    "build/",
+    "dist/",
+    "htmlcov/",
+)
+
+
+def _is_noise_path(path: str) -> bool:
+    return path.startswith(PROTECTED_SURFACE_EXCLUDES)
+
+
+def _git_changed_paths(root: Path) -> list[str]:
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain=v1", "--untracked-files=all"],
+            cwd=root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            check=False,
+        )
+    except (OSError, ValueError):
+        return []
+
+    if result.returncode != 0:
+        return []
+
+    paths: list[str] = []
+    for raw in result.stdout.splitlines():
+        if len(raw) < 4:
+            continue
+        rel = raw[3:].strip()
+        if " -> " in rel:
+            rel = rel.split(" -> ", 1)[1].strip()
+        rel = rel.replace("\\", "/")
+        if rel and not _is_noise_path(rel):
+            paths.append(rel)
+
+    return sorted(set(paths))
+
+
+def _protected_surface_rule(path: str) -> dict[str, str] | None:
+    rel = path.replace("\\", "/")
+
+    if rel.startswith(".github/workflows/") and rel.endswith((".yml", ".yaml")):
+        return {
+            "surface": "workflow_automation",
+            "risk_band": "critical",
+            "reason": "GitHub Actions workflow changes can alter CI, permissions, secrets, and release behavior.",
+            "proof_command": "python -m pytest -q tests/test_workflow_alias_regression_guards.py -o addopts=",
+        }
+
+    dependency_files = {
+        "pyproject.toml",
+        "constraints-ci.txt",
+        "requirements.txt",
+        "requirements-test.txt",
+        "requirements-docs.txt",
+        ".pre-commit-config.yaml",
+    }
+    if rel in dependency_files or (rel.startswith("requirements-") and rel.endswith(".txt")):
+        return {
+            "surface": "dependency_contract",
+            "risk_band": "critical",
+            "reason": "Dependency and constraint changes can break reproducible installs.",
+            "proof_command": "python -m pip install -c constraints-ci.txt -e '.[dev,test]'",
+        }
+
+    if rel == "Makefile":
+        return {
+            "surface": "developer_workflow",
+            "risk_band": "warning",
+            "reason": "Make targets are operator-facing workflow contracts.",
+            "proof_command": "python -m pre_commit run -a",
+        }
+
+    if rel.startswith("scripts/release") or rel.startswith("scripts/check_release"):
+        return {
+            "surface": "release_supply_chain",
+            "risk_band": "critical",
+            "reason": "Release scripts affect package trust, version gates, and publish readiness.",
+            "proof_command": "python -m build",
+        }
+
+    security_paths = {
+        "src/sdetkit/security.py",
+        "src/sdetkit/security_gate.py",
+        "src/sdetkit/gates/security_gate.py",
+        "src/sdetkit/cli/security.py",
+        "tools/security_allowlist.json",
+        "tools/security.baseline.json",
+    }
+    if rel in security_paths or rel.startswith("docs/security"):
+        return {
+            "surface": "security_posture",
+            "risk_band": "critical",
+            "reason": "Security surfaces need review-first handling and scanner-noise separation.",
+            "proof_command": "python -m sdetkit security check --root . --format json",
+        }
+
+    diagnosis_paths = {
+        "src/sdetkit/adaptive_sentinel.py",
+        "src/sdetkit/adaptive_diagnosis.py",
+        "src/sdetkit/adaptive_failure_bundle.py",
+        "src/sdetkit/ci_failure_triage.py",
+        "src/sdetkit/doctor.py",
+        "src/sdetkit/doctor_diagnosis.py",
+        "src/sdetkit/doctor_prescriptions.py",
+        "src/sdetkit/investigate.py",
+        "src/sdetkit/mission_control.py",
+        "src/sdetkit/pr_quality_comment.py",
+        "tools/maintenance_autopilot.py",
+    }
+    if rel in diagnosis_paths:
+        return {
+            "surface": "diagnostic_intelligence",
+            "risk_band": "warning",
+            "reason": "Diagnosis-engine changes affect operator guidance and evidence routing.",
+            "proof_command": "python -m pytest -q tests/test_adaptive_sentinel.py -o addopts=",
+        }
+
+    if rel == "src/sdetkit/cli.py" or rel.startswith("src/sdetkit/core/"):
+        return {
+            "surface": "cli_routing",
+            "risk_band": "warning",
+            "reason": "CLI routing changes can break public commands and compatibility aliases.",
+            "proof_command": "python -m sdetkit --help",
+        }
+
+    return None
+
+
+def _protected_surface_changes(root: Path) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for rel in _git_changed_paths(root):
+        rule = _protected_surface_rule(rel)
+        if rule is None:
+            continue
+        rows.append(
+            {
+                "path": rel,
+                "surface": rule["surface"],
+                "risk_band": rule["risk_band"],
+                "reason": rule["reason"],
+                "proof_command": rule["proof_command"],
+            }
+        )
+
+    return sorted(rows, key=lambda row: (row["surface"], row["path"]))
+
+
+def _protected_surface_commands(changes: list[dict[str, str]]) -> list[str]:
+    commands = [
+        "python -m sdetkit adaptive sentinel scan --format json --no-fail",
+        "python -m pre_commit run -a",
+    ]
+    for row in changes:
+        command = row.get("proof_command", "")
+        if command and command not in commands:
+            commands.append(command)
+    return commands[:6]
+
+
+def _inspect_protected_surface_changes(
+    changes: list[dict[str, str]],
+) -> dict[str, Any] | None:
+    if not changes:
+        return None
+
+    surfaces = sorted({row["surface"] for row in changes})
+
+    evidence = [f"surfaces={','.join(surfaces)} changed_paths={len(changes)}"]
+    evidence.extend(
+        f"{row['path']} surface={row['surface']} risk={row['risk_band']}" for row in changes[:12]
+    )
+
+    return _finding(
+        source="protected_surface_changes",
+        title="Protected surface change detected",
+        summary=(
+            "Adaptive Sentinel detected changes to protected repo surfaces: "
+            f"{', '.join(surfaces)}. Treat this as review-first risk evidence."
+        ),
+        state="warning",
+        evidence=evidence,
+        commands=_protected_surface_commands(changes),
+    )
+
+
 def _artifact_candidates(root: Path) -> dict[str, list[Path]]:
     return {
         "adaptive_failure_bundle": [
@@ -602,6 +796,11 @@ def build_sentinel_scan(
             )
         )
 
+    protected_surface_changes = _protected_surface_changes(root_path)
+    protected_surface_finding = _inspect_protected_surface_changes(protected_surface_changes)
+    if protected_surface_finding is not None:
+        findings.append(protected_surface_finding)
+
     state = _max_state(*(str(item.get("state", "healthy")) for item in findings))
     if not findings:
         findings = [
@@ -636,6 +835,7 @@ def build_sentinel_scan(
         "sources": sources,
         "git": git_status,
         "findings": findings,
+        "protected_surface_changes": protected_surface_changes,
         "recommendations": recommendations,
         "artifacts": {
             "json": (out_path / "sentinel.json").as_posix(),
@@ -730,6 +930,17 @@ def render_markdown(payload: dict[str, Any]) -> str:
             lines.append("- evidence:")
             for row in evidence[:6]:
                 lines.append(f"  - `{row}`")
+    protected = _as_list(payload.get("protected_surface_changes"))
+    if protected:
+        lines.extend(["", "## Protected surface changes"])
+        for row in protected[:8]:
+            lines.append(
+                "- "
+                f"`{row.get('path', '')}` "
+                f"surface=`{row.get('surface', 'unknown')}` "
+                f"risk=`{row.get('risk_band', 'unknown')}`"
+            )
+
     trend = _as_dict(payload.get("trend_memory"))
     if trend:
         lines.extend(
