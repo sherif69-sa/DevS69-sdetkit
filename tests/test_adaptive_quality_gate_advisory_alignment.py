@@ -161,15 +161,25 @@ def test_green_quality_gate_with_fast_gate_failure_still_requires_review() -> No
     assert any(item.startswith("matched_failure_signals=") for item in diagnosis["evidence"])
 
 
-def test_real_coverage_threshold_failure_still_routes_to_unknown_review() -> None:
+def test_real_coverage_threshold_failure_routes_to_coverage_gate_regression() -> None:
     payload = adaptive_diagnosis.analyze_evidence(
-        log_text="coverage fail under configured threshold"
+        log_text=(
+            "[quality] coverage config: scope=core mode=standard fail-under=85\n"
+            "Required test coverage of 85% not reached. Total coverage: 81.42%\n"
+            "[quality] blocking failures: coverage gate failed\n"
+        )
     )
-
-    assert payload["status"] in {"needs_attention", "needs_fix"}
-    assert UNKNOWN_REVIEW_REQUIRED in _codes(payload)
     diagnosis = payload["diagnoses"][0]
+
+    assert payload["status"] == "needs_fix"
+    assert "COVERAGE_GATE_REGRESSION" in _codes(payload)
+    assert UNKNOWN_REVIEW_REQUIRED not in _codes(payload)
+    assert diagnosis["code"] == "COVERAGE_GATE_REGRESSION"
+    assert diagnosis["title"] == "Coverage gate regression"
     assert _matched_failure_signal("coverage-failure") in diagnosis["evidence"]
+    assert "required_coverage=85%" in diagnosis["evidence"]
+    assert "total_coverage=81.42%" in diagnosis["evidence"]
+    assert "bash quality.sh cov" in diagnosis["proof_commands"]
 
 
 def test_review_first_unknown_comment_uses_human_review_heading() -> None:
@@ -261,3 +271,43 @@ def test_green_quality_final_verdict_log_does_not_create_unknown_review_required
     assert payload["diagnosis_count"] == 0
     assert UNKNOWN_REVIEW_REQUIRED not in _codes(payload)
     assert pr_quality_comment.render_adaptive_diagnosis_comment(payload) == ""
+
+
+def test_coverage_gate_regression_comment_is_specific_not_review_first() -> None:
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text=(
+            "[quality] coverage config: scope=core mode=standard fail-under=85\n"
+            "Required test coverage of 85% not reached. Total coverage: 81.42%\n"
+            "[quality] blocking failures: coverage gate failed\n"
+        )
+    )
+
+    rendered = pr_quality_comment.render_adaptive_diagnosis_comment(payload)
+
+    assert "COVERAGE_GATE_REGRESSION" in rendered
+    assert "### Adaptive Diagnosis" in rendered
+    assert "### Review-first Adaptive Diagnosis" not in rendered
+    assert "keep this review-first" not in rendered
+    assert "human-reviewed adaptive diagnosis" in rendered
+
+
+def test_coverage_gate_regression_composes_with_other_failure_signals() -> None:
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text=(
+            "FAILED tests/test_api.py::test_contract - AssertionError\n"
+            "mypy src/app.py:10: error: Argument 1 has incompatible type [arg-type]\n"
+            "ruff check Failed Found 1 error.\n"
+            "[quality] coverage config: scope=core mode=standard fail-under=85\n"
+            "Required test coverage of 85% not reached. Total coverage: 81.42%\n"
+            "[quality] blocking failures: coverage gate failed\n"
+            "Process completed with exit code 1\n"
+        )
+    )
+
+    codes = {diagnosis["code"] for diagnosis in payload["diagnoses"]}
+
+    assert "COVERAGE_GATE_REGRESSION" in codes
+    assert "PYTEST_ASSERTION_FAILURE" in codes
+    assert "MYPY_TYPE_CONTRACT_DRIFT" in codes
+    assert "UNKNOWN_REVIEW_REQUIRED" not in codes
+    assert payload["scenario_database"]["total_scenario_count"] >= 5000

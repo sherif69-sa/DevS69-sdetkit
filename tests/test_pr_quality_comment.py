@@ -44,13 +44,16 @@ def test_render_ruff_fixable_lint_comment_explains_auto_fix_route():
     assert "Logic-risk Ruff findings remain review-first." in rendered
 
 
-def test_render_review_first_comment_when_fix_plan_is_not_safe():
+def test_render_human_review_comment_for_specific_non_auto_fix_diagnosis():
     rendered = pr_quality_comment.render_adaptive_diagnosis_comment(
         _payload(code="PYTEST_ASSERTION_FAILURE", safe_to_auto_fix=False)
     )
 
+    assert "### Adaptive Diagnosis" in rendered
+    assert "### Review-first Adaptive Diagnosis" not in rendered
     assert "diagnosis code: `PYTEST_ASSERTION_FAILURE`" in rendered
-    assert "review-first" in rendered
+    assert "human-reviewed adaptive diagnosis" in rendered
+    assert "keep this review-first" not in rendered
     assert "Ruff fixable lint route:" not in rendered
 
 

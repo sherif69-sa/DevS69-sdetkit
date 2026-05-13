@@ -104,7 +104,6 @@ def test_failure_signal_database_covers_unclassified_failure_families():
         "error-prefix": "build tool Error: unexpected integrity result",
         "gate-problems-found": "quality gate: problems found in custom policy",
         "failed-steps": "summary failed_steps=custom_policy",
-        "coverage-failure": "coverage fail under configured threshold",
         "package-manager-error": "npm ERR! lifecycle script failed",
     }
 
@@ -114,6 +113,17 @@ def test_failure_signal_database_covers_unclassified_failure_families():
         assert payload["diagnoses"][0]["code"] == "UNKNOWN_REVIEW_REQUIRED"
         assert f"matched_failure_signals={expected_signal}" in payload["diagnoses"][0]["evidence"]
         assert payload["fix_plan"][0]["safe_to_auto_fix"] is False
+
+
+def test_coverage_failure_signal_routes_to_specific_coverage_gate_regression():
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text="coverage fail under configured threshold"
+    )
+
+    codes = {diagnosis["code"] for diagnosis in payload["diagnoses"]}
+    assert "COVERAGE_GATE_REGRESSION" in codes
+    assert "UNKNOWN_REVIEW_REQUIRED" not in codes
+    assert "matched_failure_signals=coverage-failure" in payload["diagnoses"][0]["evidence"][0]
 
 
 def test_seeded_scenario_database_recommends_package_install_checks():
