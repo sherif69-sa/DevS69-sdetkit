@@ -27,6 +27,15 @@ _PRIORITY_BY_SEVERITY = {
 }
 
 _CHECK_GUIDANCE = {
+    "adaptive_failure_bundle": {
+        "action": "review_adaptive_failure_bundle",
+        "summary": "Review the adaptive failure bundle and operator brief before remediation.",
+        "why": "Adaptive failure bundle signals are diagnostic handoff evidence, not permission to auto-fix.",
+        "category": "adaptive_failure_bundle",
+        "verification_commands": [
+            "python -m sdetkit mission-control summarize --bundle build/mission-control/mission-control.json",
+        ],
+    },
     "ascii": {
         "category": "source_hygiene",
         "action": "rerun_ascii_doctor_check",

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "sdetkit.doctor.diagnosis.v1"
+ADAPTIVE_FAILURE_BUNDLE_SCHEMA_VERSION = "sdetkit.adaptive.failure_bundle.v1"
 
 _SEVERITY_RANK = {
     "info": 0,
@@ -209,6 +210,9 @@ def _collect_diagnoses(source_doc: dict[str, Any]) -> list[dict[str, Any]]:
     checks = _as_dict(source_doc.get("checks"))
     confidence = _payload_confidence(source_doc)
     diagnoses = []
+    adaptive_bundle_diagnosis = _diagnosis_from_adaptive_failure_bundle(source_doc)
+    if adaptive_bundle_diagnosis is not None:
+        diagnoses.append(adaptive_bundle_diagnosis)
 
     for check_id in sorted(checks):
         check = _as_dict(checks[check_id])
@@ -252,6 +256,71 @@ def _safe_recommendations(
     if source_doc.get("ok", True):
         return ["No failed doctor checks were converted into diagnoses."]
     return ["Run doctor with targeted checks to inspect source findings."]
+
+
+def _diagnosis_from_adaptive_failure_bundle(
+    source_doc: dict[str, Any],
+) -> dict[str, Any] | None:
+    summary = source_doc.get("adaptive_failure_bundle")
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return None
+
+    status = str(summary.get("status", "unknown"))
+    primary = str(summary.get("primary_diagnosis_code", "") or "")
+    diagnosis_count = int(summary.get("diagnosis_count", 0) or 0)
+    review_first = bool(summary.get("review_first", False))
+    safe_to_auto_fix = bool(summary.get("safe_to_auto_fix", False))
+    has_error = bool(summary.get("error"))
+
+    if (
+        not has_error
+        and status in {"clear", "monitor"}
+        and diagnosis_count == 0
+        and not review_first
+    ):
+        return None
+
+    severity = "high" if review_first or has_error or status == "needs_fix" else "medium"
+    primary_display = primary or "none"
+
+    return {
+        "diagnosis_id": "doctor.adaptive_failure_bundle",
+        "title": "Adaptive failure bundle requires review",
+        "category": "adaptive_failure_bundle",
+        "status": "fail" if severity == "high" else "warn",
+        "severity": severity,
+        "confidence": 0.93,
+        "summary": (
+            f"Adaptive failure bundle status={status}; primary={primary_display}; "
+            f"diagnosis_count={diagnosis_count}; review_first={str(review_first).lower()}; "
+            f"safe_to_auto_fix={str(safe_to_auto_fix).lower()}."
+        ),
+        "source": "adaptive_failure_bundle",
+        "evidence": [
+            f"status={status}",
+            f"primary={primary_display}",
+            f"diagnosis_count={diagnosis_count}",
+            f"review_first={str(review_first).lower()}",
+            f"safe_to_auto_fix={str(safe_to_auto_fix).lower()}",
+        ],
+        "proof_commands": [
+            "python -m sdetkit mission-control summarize --bundle build/mission-control/mission-control.json",
+        ],
+        "prescriptions": [
+            {
+                "prescription_id": "doctor.adaptive_failure_bundle.review_operator_brief",
+                "diagnosis_id": "doctor.adaptive_failure_bundle",
+                "action": "review_adaptive_failure_bundle",
+                "summary": "Review the adaptive failure bundle operator brief before remediation.",
+                "reason": "The adaptive failure bundle is advisory evidence and must remain review-first unless a safe-fix plan is explicitly proven.",
+                "severity": severity,
+                "priority": 92 if severity == "high" else 70,
+                "verification_commands": [
+                    "python -m sdetkit mission-control summarize --bundle build/mission-control/mission-control.json",
+                ],
+            }
+        ],
+    }
 
 
 def build_diagnosis_payload(source_doc: dict[str, Any]) -> dict[str, Any]:
