@@ -11,6 +11,7 @@ from typing import Any
 
 SCHEMA_VERSION = "sdetkit.adaptive.sentinel.v1"
 EVENT_SCHEMA_VERSION = "sdetkit.adaptive.sentinel.event.v1"
+TREND_SCHEMA_VERSION = "sdetkit.adaptive.sentinel.trend_memory.v1"
 
 STATE_RANK = {
     "healthy": 0,
@@ -373,6 +374,207 @@ def _rank_recommendations(findings: list[dict[str, Any]]) -> list[str]:
     return commands
 
 
+def _finding_fingerprints(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    evidence_prefixes = (
+        "primary=",
+        "classification=",
+        "decision=",
+        "blocking_failures=",
+        "failed_step_count=",
+        "diagnosis_count=",
+    )
+
+    for finding in findings:
+        item = _as_dict(finding)
+        source = str(item.get("source", "unknown"))
+        state = str(item.get("state", "healthy"))
+        title = str(item.get("title", "Sentinel finding"))
+        evidence = [str(row) for row in _as_list(item.get("evidence")) if isinstance(row, str)]
+
+        key = "none"
+        for prefix in evidence_prefixes:
+            match = next((row for row in evidence if row.startswith(prefix)), "")
+            if match:
+                key = match
+                break
+
+        fingerprint = f"{source}|{key}|{title}"
+        rows.append(
+            {
+                "fingerprint": fingerprint,
+                "source": source,
+                "state": state,
+                "title": title,
+                "evidence_key": key,
+            }
+        )
+
+    return rows
+
+
+def _read_event_history(path: Path, *, limit: int = 200) -> list[dict[str, Any]]:
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        return []
+    except OSError:
+        return []
+
+    events: list[dict[str, Any]] = []
+    for line in lines[-limit:]:
+        if not line.strip():
+            continue
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(payload, dict):
+            events.append(payload)
+    return events
+
+
+def _event_fingerprint_counts(events: list[dict[str, Any]]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for event in events:
+        for row in _as_list(event.get("finding_fingerprints")):
+            item = _as_dict(row)
+            fingerprint = str(item.get("fingerprint", ""))
+            if fingerprint:
+                counts[fingerprint] = counts.get(fingerprint, 0) + 1
+    return counts
+
+
+def _build_trend_memory(
+    *,
+    previous_events: list[dict[str, Any]],
+    current_state: str,
+    current_findings: list[dict[str, Any]],
+    created_at_utc: str,
+) -> dict[str, Any]:
+    previous_counts = _event_fingerprint_counts(previous_events)
+    recurring: list[dict[str, Any]] = []
+    escalated: list[dict[str, Any]] = []
+
+    for finding in current_findings:
+        fingerprint = str(finding.get("fingerprint", ""))
+        if not fingerprint:
+            continue
+
+        previous_count = previous_counts.get(fingerprint, 0)
+        recurrence_count = previous_count + 1
+        source = str(finding.get("source", "unknown"))
+        state = str(finding.get("state", "healthy"))
+        evidence_key = str(finding.get("evidence_key", "none"))
+
+        reason = ""
+        escalation_state = "watch"
+        if "UNKNOWN_REVIEW_REQUIRED" in fingerprint and recurrence_count >= 2:
+            reason = "persistent_unknown_review_required"
+            escalation_state = "critical"
+        elif source == "quality_verdict" and recurrence_count >= 3:
+            reason = "quality_regression_loop"
+            escalation_state = "critical"
+        elif state == "critical" and recurrence_count >= 2:
+            reason = "persistent_critical_signal"
+            escalation_state = "critical"
+        elif recurrence_count >= 3:
+            reason = "recurring_failure"
+            escalation_state = "warning"
+
+        if not reason:
+            continue
+
+        row = {
+            "fingerprint": fingerprint,
+            "source": source,
+            "state": state,
+            "evidence_key": evidence_key,
+            "recurrence_count": recurrence_count,
+            "previous_count": previous_count,
+            "reason": reason,
+            "trend_state": escalation_state,
+        }
+        recurring.append(row)
+        if escalation_state in {"warning", "critical"}:
+            escalated.append(row)
+
+    trend_state = _max_state(*(str(item.get("trend_state", "healthy")) for item in escalated))
+    if not escalated:
+        trend_state = "healthy"
+
+    max_recurrence = max(
+        [int(item.get("recurrence_count", 1) or 1) for item in recurring],
+        default=1,
+    )
+    base = STATE_RANK.get(current_state, 0) * 20
+    recurrence_bonus = max(0, max_recurrence - 1) * 15
+    critical_bonus = 25 if trend_state == "critical" else 0
+    threat_score = min(100, base + recurrence_bonus + critical_bonus)
+
+    if current_state == "healthy" and trend_state == "healthy":
+        threat_score = 0
+
+    return {
+        "schema_version": TREND_SCHEMA_VERSION,
+        "created_at_utc": created_at_utc,
+        "current_state": current_state,
+        "trend_state": trend_state,
+        "threat_score": threat_score,
+        "event_count": len(previous_events) + 1,
+        "previous_event_count": len(previous_events),
+        "current_finding_fingerprint_count": len(current_findings),
+        "recurring_finding_count": len(recurring),
+        "escalated_finding_count": len(escalated),
+        "top_recurring_findings": sorted(
+            recurring,
+            key=lambda item: (
+                int(item.get("recurrence_count", 0) or 0),
+                STATE_RANK.get(str(item.get("trend_state", "healthy")), 0),
+                str(item.get("source", "")),
+            ),
+            reverse=True,
+        )[:10],
+        "escalated_findings": sorted(
+            escalated,
+            key=lambda item: (
+                STATE_RANK.get(str(item.get("trend_state", "healthy")), 0),
+                int(item.get("recurrence_count", 0) or 0),
+            ),
+            reverse=True,
+        )[:10],
+    }
+
+
+def render_trend_markdown(payload: dict[str, Any]) -> str:
+    lines = [
+        "# Adaptive Sentinel Trend Memory",
+        "",
+        f"- Trend state: **{payload.get('trend_state', 'unknown')}**",
+        f"- Threat score: **{payload.get('threat_score', 0)}**",
+        f"- Event count: **{payload.get('event_count', 0)}**",
+        f"- Recurring findings: **{payload.get('recurring_finding_count', 0)}**",
+        f"- Escalated findings: **{payload.get('escalated_finding_count', 0)}**",
+        "",
+        "## Escalated findings",
+    ]
+    escalated = _as_list(payload.get("escalated_findings"))
+    if not escalated:
+        lines.append("- none")
+    for row in escalated:
+        item = _as_dict(row)
+        lines.extend(
+            [
+                f"- `{item.get('source', 'unknown')}`: "
+                f"{item.get('reason', 'recurring')} "
+                f"(recurrence={item.get('recurrence_count', 0)}, "
+                f"state={item.get('trend_state', 'unknown')})",
+                f"  - fingerprint: `{item.get('fingerprint', '')}`",
+            ]
+        )
+    return "\n".join(lines) + "\n"
+
+
 def build_sentinel_scan(
     *,
     root: str | Path = ".",
@@ -444,9 +646,28 @@ def build_sentinel_scan(
         "automation_reason": "Adaptive sentinel is read-only: it watches, classifies, recommends, and records evidence.",
     }
 
+    trend_event_path = Path(str(payload["artifacts"]["events_jsonl"]))
+    if not trend_event_path.is_absolute():
+        trend_event_path = root_path / trend_event_path
+
+    finding_fingerprints = _finding_fingerprints(findings)
+    trend_memory = _build_trend_memory(
+        previous_events=_read_event_history(trend_event_path),
+        current_state=state,
+        current_findings=finding_fingerprints,
+        created_at_utc=str(payload["created_at_utc"]),
+    )
+    payload["trend_memory"] = trend_memory
+    payload["trend_state"] = str(trend_memory.get("trend_state", "healthy"))
+    payload["threat_score"] = int(trend_memory.get("threat_score", 0) or 0)
+    payload["artifacts"]["trend_memory_json"] = (out_path / "trend-memory.json").as_posix()
+    payload["artifacts"]["trend_memory_markdown"] = (out_path / "trend-memory.md").as_posix()
+
     if write:
         _write_json(out_path / "sentinel.json", payload)
         _write_text(out_path / "sentinel.md", render_markdown(payload))
+        _write_json(out_path / "trend-memory.json", trend_memory)
+        _write_text(out_path / "trend-memory.md", render_trend_markdown(trend_memory))
         if not event_path.is_absolute():
             event_path = root_path / event_path
         _append_jsonl(
@@ -458,6 +679,9 @@ def build_sentinel_scan(
                 "ok": payload["ok"],
                 "finding_count": payload["finding_count"],
                 "recommendations": payload["recommendations"][:3],
+                "trend_state": payload["trend_state"],
+                "threat_score": payload["threat_score"],
+                "finding_fingerprints": finding_fingerprints,
                 "sentinel_json": payload["artifacts"]["json"],
             },
         )
@@ -471,6 +695,8 @@ def render_text(payload: dict[str, Any]) -> str:
         f"state={payload['state']}",
         f"ok={str(payload['ok']).lower()}",
         f"finding_count={payload['finding_count']}",
+        f"trend_state={payload.get('trend_state', 'healthy')}",
+        f"threat_score={payload.get('threat_score', 0)}",
     ]
     for command in _as_list(payload.get("recommendations"))[:5]:
         lines.append(f"recommendation={command}")
@@ -504,6 +730,27 @@ def render_markdown(payload: dict[str, Any]) -> str:
             lines.append("- evidence:")
             for row in evidence[:6]:
                 lines.append(f"  - `{row}`")
+    trend = _as_dict(payload.get("trend_memory"))
+    if trend:
+        lines.extend(
+            [
+                "",
+                "## Trend memory",
+                f"- trend state: **{trend.get('trend_state', 'unknown')}**",
+                f"- threat score: **{trend.get('threat_score', 0)}**",
+                f"- event count: **{trend.get('event_count', 0)}**",
+                f"- recurring findings: **{trend.get('recurring_finding_count', 0)}**",
+                f"- escalated findings: **{trend.get('escalated_finding_count', 0)}**",
+            ]
+        )
+        for row in _as_list(trend.get("escalated_findings"))[:5]:
+            item = _as_dict(row)
+            lines.append(
+                f"- escalation: `{item.get('reason', 'recurring')}` "
+                f"from `{item.get('source', 'unknown')}` "
+                f"(recurrence={item.get('recurrence_count', 0)})"
+            )
+
     lines.extend(["", "## Recommended next commands"])
     for command in _as_list(payload.get("recommendations")):
         lines.append(f"- `{command}`")
