@@ -442,6 +442,33 @@ Then use stability-aware command discovery:
     adaptive_failure_bundle.add_argument("--fix-rejected", action="store_true")
     adaptive_failure_bundle.add_argument("--false-positive", action="store_true")
     adaptive_failure_bundle.add_argument("--format", choices=["text", "json"], default="text")
+    adaptive_sentinel = adaptive_sub.add_parser(
+        "sentinel",
+        help="Run read-only adaptive sentinel scan/watch control loops",
+    )
+    adaptive_sentinel_sub = adaptive_sentinel.add_subparsers(
+        dest="adaptive_sentinel_cmd", required=True
+    )
+    adaptive_sentinel_scan = adaptive_sentinel_sub.add_parser(
+        "scan", help="Run one adaptive sentinel scan"
+    )
+    adaptive_sentinel_scan.add_argument("--root", default=".")
+    adaptive_sentinel_scan.add_argument("--out-dir", default="build/sdetkit/sentinel")
+    adaptive_sentinel_scan.add_argument("--event-log", default="")
+    adaptive_sentinel_scan.add_argument("--format", choices=["text", "json", "md"], default="text")
+    adaptive_sentinel_scan.add_argument("--no-write", action="store_true")
+    adaptive_sentinel_scan.add_argument("--no-fail", action="store_true")
+    adaptive_sentinel_watch = adaptive_sentinel_sub.add_parser(
+        "watch", help="Run repeated adaptive sentinel scans"
+    )
+    adaptive_sentinel_watch.add_argument("--root", default=".")
+    adaptive_sentinel_watch.add_argument("--out-dir", default="build/sdetkit/sentinel")
+    adaptive_sentinel_watch.add_argument("--event-log", default="")
+    adaptive_sentinel_watch.add_argument("--interval-seconds", type=float, default=5.0)
+    adaptive_sentinel_watch.add_argument("--iterations", type=int, default=3)
+    adaptive_sentinel_watch.add_argument("--format", choices=["text", "json", "md"], default="text")
+    adaptive_sentinel_watch.add_argument("--no-write", action="store_true")
+    adaptive_sentinel_watch.add_argument("--no-fail", action="store_true")
     adaptive_portfolio = adaptive_sub.add_parser(
         "portfolio-rollup",
         help="Roll multiple adaptive diagnosis outputs into a top-risk portfolio report",
@@ -1239,6 +1266,32 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "sdetkit.adaptive_diagnosis_memory",
                     ["summarize", "--db", str(ns.db), "--format", str(ns.format)],
                 )
+        if getattr(ns, "adaptive_cmd", None) == "sentinel":
+            forwarded = [
+                str(ns.adaptive_sentinel_cmd),
+                "--root",
+                str(ns.root),
+                "--out-dir",
+                str(ns.out_dir),
+                "--format",
+                str(ns.format),
+            ]
+            if str(ns.event_log):
+                forwarded.extend(["--event-log", str(ns.event_log)])
+            if getattr(ns, "adaptive_sentinel_cmd", None) == "watch":
+                forwarded.extend(
+                    [
+                        "--interval-seconds",
+                        str(ns.interval_seconds),
+                        "--iterations",
+                        str(ns.iterations),
+                    ]
+                )
+            if bool(getattr(ns, "no_write", False)):
+                forwarded.append("--no-write")
+            if bool(getattr(ns, "no_fail", False)):
+                forwarded.append("--no-fail")
+            return _run_module_main("sdetkit.adaptive_sentinel", forwarded)
         if getattr(ns, "adaptive_cmd", None) == "failure-bundle":
             forwarded = [
                 "--log",
