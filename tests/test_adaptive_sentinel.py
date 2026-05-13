@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 from sdetkit import adaptive_sentinel, cli
@@ -263,3 +264,73 @@ def test_sentinel_markdown_includes_trend_memory_section(tmp_path: Path) -> None
     assert "## Trend memory" in rendered
     assert "persistent_unknown_review_required" in rendered
     assert "threat score" in rendered
+
+
+def _init_git_repo(root: Path) -> None:
+    subprocess.run(
+        ["git", "init"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def test_sentinel_flags_protected_workflow_change(tmp_path: Path) -> None:
+    _init_git_repo(tmp_path)
+    workflow = tmp_path / ".github/workflows/security.yml"
+    workflow.parent.mkdir(parents=True)
+    workflow.write_text("name: Security\non: workflow_dispatch\n", encoding="utf-8")
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    protected = payload["protected_surface_changes"]
+    assert protected[0]["path"] == ".github/workflows/security.yml"
+    assert protected[0]["surface"] == "workflow_automation"
+    assert protected[0]["risk_band"] == "critical"
+    assert payload["state"] == "warning"
+    assert any(item["source"] == "protected_surface_changes" for item in payload["findings"])
+    assert any("pre_commit" in command for command in payload["recommendations"])
+
+
+def test_sentinel_flags_dependency_contract_change(tmp_path: Path) -> None:
+    _init_git_repo(tmp_path)
+    (tmp_path / "constraints-ci.txt").write_text("pytest==8.0.0\n", encoding="utf-8")
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    protected = payload["protected_surface_changes"]
+    assert protected[0]["path"] == "constraints-ci.txt"
+    assert protected[0]["surface"] == "dependency_contract"
+    assert payload["state"] == "warning"
+    assert any(
+        "pip install -c constraints-ci.txt" in command for command in payload["recommendations"]
+    )
+
+
+def test_sentinel_does_not_classify_normal_docs_as_protected_surface(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    docs = tmp_path / "docs/operator-note.md"
+    docs.parent.mkdir(parents=True)
+    docs.write_text("# note\n", encoding="utf-8")
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    assert payload["protected_surface_changes"] == []
+    assert not any(item["source"] == "protected_surface_changes" for item in payload["findings"])
+
+
+def test_sentinel_markdown_lists_protected_surface_changes(tmp_path: Path) -> None:
+    _init_git_repo(tmp_path)
+    workflow = tmp_path / ".github/workflows/quality.yml"
+    workflow.parent.mkdir(parents=True)
+    workflow.write_text("name: Quality\non: workflow_dispatch\n", encoding="utf-8")
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+    rendered = adaptive_sentinel.render_markdown(payload)
+
+    assert "## Protected surface changes" in rendered
+    assert ".github/workflows/quality.yml" in rendered
+    assert "workflow_automation" in rendered
