@@ -283,6 +283,9 @@ def _artifact_candidates(root: Path) -> dict[str, list[Path]]:
         "mission_control": [
             root / "build/mission-control/mission-control.json",
         ],
+        "maintenance_autopilot": [
+            root / "build/maintenance/autopilot/autopilot-report.json",
+        ],
         "quality_verdict": [
             root / ".sdetkit/out/quality-verdict.json",
         ],
@@ -544,6 +547,8 @@ def _inspect_sources(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, A
             finding = _inspect_doctor(path, payload, prescriptions=True)
         elif name == "mission_control":
             finding = _inspect_mission_control(path, payload)
+        elif name == "maintenance_autopilot":
+            finding = _inspect_maintenance_autopilot(path, payload)
         elif name == "quality_verdict":
             finding = _inspect_quality_verdict(path, payload)
 
@@ -551,6 +556,109 @@ def _inspect_sources(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, A
             findings.append(finding)
 
     return sources, findings
+
+
+def _step_failed(row: dict[str, Any]) -> bool:
+    status = str(row.get("status", "")).strip().lower()
+    if status in {"failed", "failure", "error", "blocked"}:
+        return True
+
+    rc = row.get("rc", row.get("returncode", row.get("exit_code")))
+    if rc is None or rc == "":
+        return False
+    try:
+        return int(rc) != 0
+    except (TypeError, ValueError):
+        return str(rc).strip() not in {"0", "passed", "pass", "success"}
+
+
+def _inspect_maintenance_autopilot(path: Path, payload: dict[str, Any]) -> dict[str, Any] | None:
+    security = _as_dict(payload.get("security"))
+    follow_up = _as_dict(payload.get("follow_up"))
+    steps = _as_dict(payload.get("steps"))
+
+    auto_remediation = _as_list(follow_up.get("auto_remediation"))
+    observed_failures = _as_list(follow_up.get("observed_failures"))
+    recurring = _as_list(follow_up.get("top_recurring_failure_keys"))
+    if not recurring:
+        recurring = _as_list(follow_up.get("top_recurring_failures"))
+
+    security_follow_up = bool(security.get("follow_up_required", False))
+
+    failed_steps: list[str] = []
+    for name, raw in sorted(steps.items()):
+        if isinstance(raw, dict) and _step_failed(raw):
+            failed_steps.append(str(name))
+
+    auto_statuses = [
+        str(
+            _as_dict(item).get(
+                "status",
+                _as_dict(item).get("result", _as_dict(item).get("outcome", "unknown")),
+            )
+        )
+        .strip()
+        .lower()
+        for item in auto_remediation
+    ]
+    auto_remediation_failed = any(
+        status in {"failed", "failure", "error", "blocked", "rejected"} for status in auto_statuses
+    )
+
+    if (
+        not security_follow_up
+        and not failed_steps
+        and not auto_remediation
+        and not observed_failures
+        and not recurring
+    ):
+        return None
+
+    state = (
+        "critical" if security_follow_up or failed_steps or auto_remediation_failed else "warning"
+    )
+
+    evidence = [
+        f"schema_version={payload.get('schema_version', 'unknown')}",
+        f"security_follow_up_required={str(security_follow_up).lower()}",
+        f"auto_remediation_attempts={len(auto_remediation)}",
+        f"observed_failure_count={len(observed_failures)}",
+        f"recurring_failure_count={len(recurring)}",
+        f"failed_step_count={len(failed_steps)}",
+    ]
+    evidence.extend(f"failed_step={name}" for name in failed_steps[:5])
+    for item in auto_remediation[:4]:
+        row = _as_dict(item)
+        key = str(row.get("failure_key", row.get("key", "unknown")))
+        status = str(row.get("status", row.get("result", row.get("outcome", "unknown"))))
+        evidence.append(f"auto_remediation={key} status={status}")
+    for item in observed_failures[:4]:
+        evidence.append(f"observed_failure={item}")
+
+    commands = [
+        "PYTHONPATH=src python tools/maintenance_autopilot.py --out-dir build/maintenance/autopilot",
+        "python -m sdetkit adaptive sentinel scan --format json --no-fail",
+    ]
+    if security_follow_up:
+        commands.insert(1, "PYTHONPATH=src python -m sdetkit security check --root . --format json")
+    if auto_remediation:
+        commands.append(
+            "Review build/maintenance/autopilot/autopilot-report.md before accepting remediation changes."
+        )
+
+    return _finding(
+        source="maintenance_autopilot",
+        title="Maintenance autopilot signal",
+        summary=(
+            "Maintenance autopilot emitted review-worthy control-loop evidence: "
+            f"security_follow_up={str(security_follow_up).lower()}, "
+            f"auto_remediation_attempts={len(auto_remediation)}, "
+            f"failed_steps={len(failed_steps)}."
+        ),
+        state=state,
+        evidence=evidence,
+        commands=commands[:6],
+    )
 
 
 def _rank_recommendations(findings: list[dict[str, Any]]) -> list[str]:

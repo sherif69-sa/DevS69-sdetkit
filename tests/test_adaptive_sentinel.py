@@ -334,3 +334,87 @@ def test_sentinel_markdown_lists_protected_surface_changes(tmp_path: Path) -> No
     assert "## Protected surface changes" in rendered
     assert ".github/workflows/quality.yml" in rendered
     assert "workflow_automation" in rendered
+
+
+def _maintenance_autopilot_report(root: Path, payload: dict[str, object]) -> Path:
+    report = root / "build/maintenance/autopilot/autopilot-report.json"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text(json.dumps(payload), encoding="utf-8")
+    return report
+
+
+def test_sentinel_flags_maintenance_autopilot_security_follow_up(tmp_path: Path) -> None:
+    _maintenance_autopilot_report(
+        tmp_path,
+        {
+            "schema_version": "sdetkit.maintenance.autopilot.v1",
+            "security": {"follow_up_required": True, "warn": 2, "error": 1},
+            "follow_up": {
+                "observed_failures": ["security_actionable"],
+                "auto_remediation": [],
+            },
+            "steps": {
+                "baseline_security_check": {"status": "failed", "rc": 1},
+            },
+        },
+    )
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    finding = next(
+        item for item in payload["findings"] if item["source"] == "maintenance_autopilot"
+    )
+    assert finding["state"] == "critical"
+    assert "security_follow_up_required=true" in finding["evidence"]
+    assert any("security check" in command for command in payload["recommendations"])
+    assert any("maintenance_autopilot.py" in command for command in payload["recommendations"])
+
+
+def test_sentinel_flags_maintenance_autopilot_auto_remediation_attempt(
+    tmp_path: Path,
+) -> None:
+    _maintenance_autopilot_report(
+        tmp_path,
+        {
+            "schema_version": "sdetkit.maintenance.autopilot.v1",
+            "security": {"follow_up_required": False},
+            "follow_up": {
+                "auto_remediation": [{"failure_key": "ruff_fixable_lint", "status": "applied"}],
+                "top_recurring_failure_keys": ["ruff_fixable_lint"],
+            },
+            "steps": {
+                "doctor_json": {"status": "passed", "rc": 0},
+            },
+        },
+    )
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    finding = next(
+        item for item in payload["findings"] if item["source"] == "maintenance_autopilot"
+    )
+    assert finding["state"] == "warning"
+    assert "auto_remediation_attempts=1" in finding["evidence"]
+    assert any("autopilot-report.md" in command for command in payload["recommendations"])
+
+
+def test_sentinel_ignores_clear_maintenance_autopilot_report(tmp_path: Path) -> None:
+    _maintenance_autopilot_report(
+        tmp_path,
+        {
+            "schema_version": "sdetkit.maintenance.autopilot.v1",
+            "security": {"follow_up_required": False},
+            "follow_up": {
+                "observed_failures": [],
+                "auto_remediation": [],
+                "top_recurring_failure_keys": [],
+            },
+            "steps": {
+                "doctor_json": {"status": "passed", "rc": 0},
+            },
+        },
+    )
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    assert not any(item["source"] == "maintenance_autopilot" for item in payload["findings"])
