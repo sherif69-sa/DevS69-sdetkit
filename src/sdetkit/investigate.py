@@ -8,7 +8,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from sdetkit import adaptive_diagnosis
+from sdetkit import adaptive_diagnosis, adaptive_failure_bundle
 from sdetkit.boost import build_scan
 from sdetkit.index import IGNORED_DIRS
 from sdetkit.investigation_evidence import build_investigation_evidence
@@ -335,6 +335,45 @@ def _payload_for_surface(root: str, surface: str) -> dict[str, Any]:
     }
 
 
+def _failure_bundle_handoff(bundle: dict[str, Any]) -> dict[str, Any]:
+    artifacts = bundle.get("artifacts", {})
+    artifacts_map = artifacts if isinstance(artifacts, dict) else {}
+    return {
+        "schema_version": str(bundle.get("schema_version", "")),
+        "bundle_path": str(bundle.get("bundle_path", "")),
+        "status": str(bundle.get("status", "unknown")),
+        "primary_diagnosis_code": str(bundle.get("primary_diagnosis_code", "") or ""),
+        "diagnosis_count": int(bundle.get("diagnosis_count", 0) or 0),
+        "review_first": bool(bundle.get("review_first", False)),
+        "safe_to_auto_fix": bool(bundle.get("safe_to_auto_fix", False)),
+        "artifacts": artifacts_map,
+    }
+
+
+def _attach_failure_bundle_handoff(
+    payload: dict[str, Any],
+    *,
+    log_path: str | Path,
+    out_dir: str | Path | None,
+) -> dict[str, Any]:
+    if not out_dir:
+        return payload
+
+    diagnosis = payload.get("diagnosis", {})
+    diagnosis_count = 0
+    if isinstance(diagnosis, dict):
+        diagnosis_count = int(diagnosis.get("diagnosis_count", 0) or 0)
+
+    bundle = adaptive_failure_bundle.build_failure_bundle(
+        log_path=Path(log_path),
+        out_dir=Path(out_dir),
+        proof_failed=bool(diagnosis_count),
+    )
+    updated = dict(payload)
+    updated["failure_bundle"] = _failure_bundle_handoff(bundle)
+    return updated
+
+
 def render_failure_markdown(payload: dict[str, Any]) -> str:
     proof = payload.get("proof_commands", [])
     actions = payload.get("next_actions", [])
@@ -372,6 +411,24 @@ def render_failure_markdown(payload: dict[str, Any]) -> str:
     key = str(payload.get("memory_lookup_key", "")).strip()
     if key:
         lines.extend(["", "## Memory lookup key", "", f"`{key}`"])
+
+    bundle = payload.get("failure_bundle")
+    if isinstance(bundle, dict):
+        lines.extend(
+            [
+                "",
+                "## Failure intelligence bundle",
+                f"- bundle path: `{bundle.get('bundle_path', '')}`",
+                f"- status: **{bundle.get('status', 'unknown')}**",
+                f"- primary diagnosis: **{bundle.get('primary_diagnosis_code', '') or 'none'}**",
+                f"- diagnosis count: **{bundle.get('diagnosis_count', 0)}**",
+                f"- review first: **{bundle.get('review_first', False)}**",
+                f"- safe to auto-fix: **{bundle.get('safe_to_auto_fix', False)}**",
+            ]
+        )
+        artifacts = bundle.get("artifacts", {})
+        if isinstance(artifacts, dict) and artifacts.get("operator_brief_markdown"):
+            lines.append(f"- operator brief: `{artifacts['operator_brief_markdown']}`")
 
     return "\n".join(lines).rstrip() + "\n"
 
@@ -494,6 +551,11 @@ def build_parser() -> argparse.ArgumentParser:
     failure.add_argument("--log", required=True, help="Path to a text log to investigate")
     failure.add_argument("--format", choices=["json", "markdown"], default="json")
     failure.add_argument("--out", default="", help="Optional output file")
+    failure.add_argument(
+        "--failure-bundle-out-dir",
+        default="",
+        help="Optional directory for a full adaptive failure intelligence bundle.",
+    )
 
     repo = sub.add_parser("repo", help="Summarize repository investigation surfaces")
     repo.add_argument("--root", default=".", help="Repository root to investigate")
@@ -521,7 +583,12 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.cmd == "failure":
-            payload = _payload_for_failure(_read_log(args.log))
+            log_text = _read_log(args.log)
+            payload = _attach_failure_bundle_handoff(
+                _payload_for_failure(log_text),
+                log_path=args.log,
+                out_dir=args.failure_bundle_out_dir or None,
+            )
             rendered = (
                 json.dumps(payload, indent=2, sort_keys=True) + "\n"
                 if args.format == "json"
