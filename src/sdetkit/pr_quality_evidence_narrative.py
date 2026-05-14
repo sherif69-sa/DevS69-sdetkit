@@ -381,6 +381,12 @@ def _green_proof_commands(
             surfaces.append(surface)
 
     commands: list[str] = []
+    for node in nodes:
+        surface = str(node.get("risk_surface", "unknown") or "unknown")
+        if surface == "security":
+            commands.extend(_string_list(node.get("recommended_commands")))
+            commands.extend(_string_list(node.get("proof_commands")))
+
     for surface in surfaces:
         commands.extend(_GREEN_PROOF_BY_SURFACE.get(surface, []))
 
@@ -467,12 +473,30 @@ def build_narrative(
         primary_title = str(failure.get("title") or failure.get("code") or "Quality failure")
     elif quality_ok and (changed_surfaces or primary_node):
         primary_kind = "review_signal"
-        primary_surface = (
-            changed_surfaces[0]
-            if changed_surfaces
-            else str(primary_node.get("risk_surface", "unknown") or "unknown")
+        primary_node_surface = (
+            str(primary_node.get("risk_surface", "unknown") or "unknown")
+            if primary_node
+            else "unknown"
         )
-        primary_title = f"{_surface_label(primary_surface)} evidence changed"
+        changed_surface = changed_surfaces[0] if changed_surfaces else ""
+        if (
+            primary_node
+            and primary_node_surface != "unknown"
+            and (
+                not changed_surface
+                or _SURFACE_PRIORITY.get(primary_node_surface, 0)
+                >= _SURFACE_PRIORITY.get(changed_surface, 0)
+            )
+        ):
+            primary_surface = primary_node_surface
+            primary_title = _human_finding_title(
+                primary_node,
+                changed_files=changed,
+                changed_surfaces=changed_surfaces,
+            )
+        else:
+            primary_surface = changed_surface or primary_node_surface
+            primary_title = f"{_surface_label(primary_surface)} evidence changed"
     elif primary_node:
         primary_kind = "review_signal"
         primary_surface = str(primary_node.get("risk_surface", "unknown") or "unknown")
