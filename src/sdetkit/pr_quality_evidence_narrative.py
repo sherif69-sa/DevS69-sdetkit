@@ -52,6 +52,37 @@ _SURFACE_REASON = {
 }
 
 
+_GREEN_PROOF_BY_SURFACE = {
+    "pr_quality": [
+        "python -m pytest -q tests/test_pr_quality_evidence_narrative.py tests/test_pr_quality_adaptive_sentinel_workflow.py tests/test_pr_quality_failure_bundle_workflow.py -o addopts=",
+    ],
+    "diagnostic_engine": [
+        "python -m pytest -q tests/test_evidence_graph.py tests/test_adaptive_sentinel.py -o addopts=",
+    ],
+    "quality": [
+        "python -m pytest -q tests/test_adaptive_quality_gate_advisory_alignment.py tests/test_adaptive_failure_bundle.py -o addopts=",
+    ],
+    "workflow": [
+        "python -m pytest -q tests/test_pr_quality_adaptive_sentinel_workflow.py tests/test_pr_quality_failure_bundle_workflow.py -o addopts=",
+    ],
+    "dependency": [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+    ],
+    "security": [
+        "python -m sdetkit security check --root . --format json",
+    ],
+    "release": [
+        "python -m build && python -m twine check dist/*",
+    ],
+    "package": [
+        "python -m build && python -m twine check dist/*",
+    ],
+    "docs": [
+        "NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict",
+    ],
+}
+
+
 def _read_text(path: Path | None) -> str:
     if path is None or not path.exists():
         return ""
@@ -217,6 +248,69 @@ def _surface_for_failure(failure: JsonObject) -> str:
     return "unknown"
 
 
+def _operator_relevant_nodes(nodes: list[JsonObject]) -> list[JsonObject]:
+    filtered: list[JsonObject] = []
+    for node in nodes:
+        title = str(node.get("title", "")).lower()
+        summary = str(node.get("summary", "")).lower()
+        if "working tree has local changes" in title:
+            continue
+        if "keep proof tied to the current diff" in summary:
+            continue
+        filtered.append(node)
+    return filtered
+
+
+def _surface_label(surface: str) -> str:
+    return {
+        "pr_quality": "PR Quality",
+        "diagnostic_engine": "Diagnostic intelligence",
+        "quality": "Quality gate",
+        "workflow": "Workflow",
+        "dependency": "Dependency",
+        "security": "Security",
+        "release": "Release",
+        "package": "Package",
+        "tests": "Test",
+        "docs": "Documentation",
+        "cli": "CLI",
+        "maintenance": "Maintenance",
+    }.get(surface, surface.replace("_", " ").title())
+
+
+def _dedupe(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if item and item not in seen:
+            seen.add(item)
+            out.append(item)
+    return out
+
+
+def _green_proof_commands(
+    *,
+    changed_surfaces: list[str],
+    changed_files: list[str],
+    nodes: list[JsonObject],
+) -> list[str]:
+    surfaces = list(changed_surfaces)
+    for node in nodes:
+        surface = str(node.get("risk_surface", "unknown") or "unknown")
+        if surface not in surfaces:
+            surfaces.append(surface)
+
+    commands: list[str] = []
+    for surface in surfaces:
+        commands.extend(_GREEN_PROOF_BY_SURFACE.get(surface, []))
+
+    if not commands and changed_files:
+        commands.append("python -m pytest -q tests/test_evidence_graph.py -o addopts=")
+
+    commands.append("python -m pre_commit run -a")
+    return _dedupe(commands)[:5]
+
+
 def _commands_from_failure(failure: JsonObject) -> list[str]:
     commands = _string_list(failure.get("proof_commands"))
     if commands:
@@ -272,7 +366,8 @@ def build_narrative(
     coverage = _coverage_percent(log_text)
     quality_ok = _quality_passed(quality_outcome, log_text)
     nodes = _graph_nodes(_read_json(evidence_graph))
-    primary_node = _primary_node(nodes)
+    relevant_nodes = _operator_relevant_nodes(nodes)
+    primary_node = _primary_node(relevant_nodes or nodes)
     changed = _load_changed_files(changed_files)
     changed_surfaces = _changed_file_surfaces(changed)
     failure_payload = _fallback_failure_bundle(failure_bundle)
@@ -290,6 +385,14 @@ def build_narrative(
         primary_kind = "actual_failure"
         primary_surface = _surface_for_failure(failure)
         primary_title = str(failure.get("title") or failure.get("code") or "Quality failure")
+    elif quality_ok and (changed_surfaces or primary_node):
+        primary_kind = "review_signal"
+        primary_surface = (
+            changed_surfaces[0]
+            if changed_surfaces
+            else str(primary_node.get("risk_surface", "unknown") or "unknown")
+        )
+        primary_title = f"{_surface_label(primary_surface)} evidence changed"
     elif primary_node:
         primary_kind = "review_signal"
         primary_surface = str(primary_node.get("risk_surface", "unknown") or "unknown")
@@ -299,14 +402,24 @@ def build_narrative(
         primary_surface = changed_surfaces[0] if changed_surfaces else "quality"
         primary_title = "Quality gate passed"
 
-    commands = _commands_from_failure(failure) if failure else _commands_from_nodes(nodes)
+    if failure:
+        commands = _commands_from_failure(failure)
+    elif quality_ok:
+        commands = _green_proof_commands(
+            changed_surfaces=changed_surfaces,
+            changed_files=changed,
+            nodes=relevant_nodes or nodes,
+        )
+    else:
+        commands = _commands_from_nodes(nodes)
+
     if not commands:
-        commands = ["python -m pre_commit run -a", "bash quality.sh cov"]
+        commands = ["python -m pre_commit run -a"]
 
     what_happened = _what_happened(
         quality_ok=quality_ok,
         coverage=coverage,
-        nodes=nodes,
+        nodes=relevant_nodes if quality_ok else nodes,
         changed_files=changed,
         changed_surfaces=changed_surfaces,
         failure=failure,
@@ -315,13 +428,13 @@ def build_narrative(
         quality_ok=quality_ok,
         primary_surface=primary_surface,
         failure=failure,
-        nodes=nodes,
+        nodes=relevant_nodes if quality_ok else nodes,
     )
     operator_action = _operator_action(
         quality_ok=quality_ok,
         primary_surface=primary_surface,
         failure=failure,
-        nodes=nodes,
+        nodes=relevant_nodes if quality_ok else nodes,
     )
     artifact_paths = _artifact_paths(
         quality_log=quality_log,
@@ -467,8 +580,6 @@ def render_markdown(
 ) -> str:
     status = "✅ quality.sh cov passed" if quality_ok else "❌ quality.sh cov failed"
     lines = [
-        "## SDET Quality Gate",
-        "",
         status,
         "",
         f"coverage: {coverage}%",
