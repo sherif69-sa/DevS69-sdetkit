@@ -115,6 +115,13 @@ def test_mission_control_run_summarizes_evidence_graph(tmp_path: Path) -> None:
     assert summary["critical_count"] == 1
     assert summary["automation_allowed_now"] is False
     assert summary["risk_surfaces"] == ["security"]
+    assert summary["top_blocker_surface"] == "security"
+    assert summary["top_blocker_title"] == "Security surface changed"
+    assert summary["top_blocker_action"] == "review"
+    assert summary["next_commands"] == [
+        "python -m pre_commit run -a",
+        "python -m pytest -q tests/test_owned_surface_hygiene_contract.py -o addopts=",
+    ]
     assert summary["source_count"] == 1
 
     labels = {artifact["label"] for artifact in bundle["artifacts"]}
@@ -127,6 +134,8 @@ def test_mission_control_run_summarizes_evidence_graph(tmp_path: Path) -> None:
     assert "Node count: 1" in markdown
     assert "Review-first nodes: 1" in markdown
     assert "Automation allowed now: false" in markdown
+    assert "Top blocker: Security surface changed" in markdown
+    assert "Top blocker surface: security" in markdown
 
 
 def test_mission_control_summarize_prints_evidence_graph(tmp_path: Path, capsys) -> None:
@@ -162,6 +171,9 @@ def test_mission_control_summarize_prints_evidence_graph(tmp_path: Path, capsys)
     assert _eg_line("review_first_count", 1) in output
     assert _eg_line("critical_count", 1) in output
     assert _eg_line("automation_allowed_now", "false") in output
+    assert _eg_line("top_blocker_surface", "security") in output
+    assert _eg_line("top_blocker_title", "Security surface changed") in output
+    assert _eg_line("top_blocker_action", "review") in output
 
 
 def test_mission_control_ledger_records_evidence_graph_summary(tmp_path: Path) -> None:
@@ -207,3 +219,99 @@ def test_mission_control_schema_mentions_evidence_graph(capsys) -> None:
     assert "evidence_graph" in payload["required_top_level_keys"]
     assert "evidence_graph" in payload["ledger_record_keys"]
     assert "Evidence Graph" in payload["report_sections"]
+
+
+def test_mission_control_evidence_graph_ranks_top_blocker(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir = tmp_path / "out"
+
+    graph_dir = tmp_path / "evidence-graph"
+    graph_dir.mkdir()
+    graph_path = graph_dir / "evidence-graph.json"
+    (graph_dir / "evidence-graph.md").write_text("# Evidence Graph\n", encoding="utf-8")
+    graph_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.evidence-graph.v1",
+                "nodes": [
+                    {
+                        "finding_id": "quality-coverage",
+                        "title": "Coverage gate regression",
+                        "summary": "Coverage dropped below threshold.",
+                        "risk_surface": "quality",
+                        "severity": "warning",
+                        "review_first": True,
+                        "safe_to_auto_fix": False,
+                        "recommended_commands": ["bash quality.sh cov"],
+                        "proof_commands": ["bash quality.sh cov"],
+                        "operator_action": "review",
+                        "automation_allowed_now": False,
+                    },
+                    {
+                        "finding_id": "dependency-resolver",
+                        "title": "Dependency resolver failed",
+                        "summary": "pip could not resolve constraints before tests ran.",
+                        "risk_surface": "dependency",
+                        "severity": "warning",
+                        "review_first": True,
+                        "safe_to_auto_fix": False,
+                        "recommended_commands": [
+                            "Reproduce the exact install lane.",
+                        ],
+                        "proof_commands": [
+                            "PYTHONPATH=src python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+                        ],
+                        "operator_action": "review",
+                        "automation_allowed_now": False,
+                    },
+                ],
+                "source_summary": [
+                    {
+                        "source": "failure_bundle",
+                        "path": "build/pr-quality/failure-intelligence/failure-bundle.json",
+                        "found": True,
+                        "status": "needs_fix",
+                        "findings_seen": 2,
+                        "findings_emitted": 2,
+                    }
+                ],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    rc = mission_control.main(
+        [
+            "run",
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(out_dir),
+            "--evidence-graph",
+            str(graph_path),
+            "--no-ledger",
+        ]
+    )
+
+    assert rc == 0
+    bundle = json.loads((out_dir / "mission-control.json").read_text(encoding="utf-8"))
+    summary = bundle["evidence_graph"]
+
+    assert summary["top_blocker_surface"] == "dependency"
+    assert summary["top_blocker_title"] == "Dependency resolver failed"
+    assert summary["top_blocker_action"] == "review"
+    assert summary["top_blocker_review_first"] is True
+    assert summary["next_commands"] == [
+        "PYTHONPATH=src python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+        "Reproduce the exact install lane.",
+    ]
+
+    markdown = (out_dir / "mission-control.md").read_text(encoding="utf-8")
+    assert "Top blocker: Dependency resolver failed" in markdown
+    assert "Top blocker surface: dependency" in markdown
+    assert "Top blocker action: review" in markdown
+    assert "PYTHONPATH=src python -m pip install -c constraints-ci.txt" in markdown
