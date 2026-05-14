@@ -604,3 +604,60 @@ def test_failed_narrative_ranks_tests_above_coverage_noise(tmp_path: Path) -> No
     assert payload["primary_signal"]["surface"] == "tests"
     assert "python -m pytest -q tests/test_real_bug.py::test_behavior -o addopts=" in markdown
     assert "bash quality.sh cov" not in markdown
+
+
+def test_green_narrative_prioritizes_security_review_graph_signal(tmp_path: Path) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    graph = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [
+                {
+                    "title": "Security review requires action in src/sdetkit/adaptive_diagnosis.py",
+                    "summary": "GitHub Advanced Security reported an unresolved review finding.",
+                    "risk_surface": "security",
+                    "severity": "warning",
+                    "review_first": True,
+                    "safe_to_auto_fix": False,
+                    "recommended_commands": [
+                        "Review unresolved GitHub Advanced Security comments on the PR.",
+                        "Fix the flagged surface or dismiss the false positive with a review reason.",
+                    ],
+                },
+                {
+                    "title": "PR Quality evidence changed",
+                    "summary": "The PR Quality evidence comment path changed.",
+                    "risk_surface": "pr_quality",
+                    "severity": "warning",
+                },
+            ],
+            "source_summary": [],
+        },
+    )
+    changed = _write(
+        tmp_path / "changed-files.txt",
+        "src/sdetkit/adaptive_diagnosis.py\n",
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=None,
+        evidence_graph=graph,
+        failure_bundle=None,
+        changed_files=changed,
+    )
+
+    markdown = str(payload["markdown"])
+    assert payload["primary_signal"]["surface"] == "security"
+    assert (
+        payload["primary_signal"]["title"]
+        == "Security review requires action in src/sdetkit/adaptive_diagnosis.py"
+    )
+    assert "Quality is green, so the review focus is not coverage." in markdown
+    assert "Review unresolved GitHub Advanced Security comments on the PR." in markdown
+    assert "Fix the flagged surface or dismiss the false positive with a review reason." in markdown

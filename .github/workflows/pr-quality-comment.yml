@@ -61,12 +61,55 @@ jobs:
             --format text \
             --no-fail
 
+      - name: Collect security review evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+        run: |
+          mkdir -p build/pr-quality/security-review
+          gh api graphql \
+            -F owner="$REPOSITORY_OWNER" \
+            -F repo="$REPOSITORY_NAME" \
+            -F number="$PR_NUMBER" \
+            -f query='
+              query($owner: String!, $repo: String!, $number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $number) {
+                    reviewThreads(first: 100) {
+                      nodes {
+                        isResolved
+                        isOutdated
+                        path
+                        line
+                        comments(first: 20) {
+                          nodes {
+                            author { login }
+                            body
+                            url
+                            createdAt
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ' > build/pr-quality/security-review/review-threads.json || echo '{"data":{}}' > build/pr-quality/security-review/review-threads.json
+
+          PYTHONPATH=src python -m sdetkit.security_review_evidence \
+            --review-threads-json build/pr-quality/security-review/review-threads.json \
+            --sentinel-control-room build/sdetkit/sentinel/control-room.json \
+            --merged-control-room build/sdetkit/sentinel/control-room-with-security-review.json \
+            --out-dir build/pr-quality/security-review
+
       - name: Build PR evidence graph
         if: always()
         run: |
           mkdir -p build/sdetkit/evidence-graph
           PYTHONPATH=src python -m sdetkit.evidence_graph \
-            --sentinel-control-room build/sdetkit/sentinel/control-room.json \
+            --sentinel-control-room build/sdetkit/sentinel/control-room-with-security-review.json \
             --out-dir build/sdetkit/evidence-graph
 
       - name: Build PR comment body
