@@ -288,3 +288,126 @@ def test_evidence_graph_classifies_diagnostic_artifacts_from_source_paths(
 
     assert graph["nodes"][0]["risk_surface"] == "diagnostic_engine"
     assert graph["nodes"][0]["review_first"] is True
+
+
+def test_evidence_graph_normalizes_failure_bundle_diagnoses(tmp_path: Path) -> None:
+    failure_bundle = tmp_path / "failure-bundle.json"
+    failure_bundle.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.adaptive.diagnosis.v1",
+                "diagnoses": [
+                    {
+                        "code": "PACKAGE_INSTALL_FAILURE",
+                        "title": "Dependency resolver failed",
+                        "diagnosis": "pip could not resolve constraints before tests could prove behavior.",
+                        "severity": "high",
+                        "confidence": "high",
+                        "affected_files": ["constraints-ci.txt", "requirements-test.txt"],
+                        "recommended_fix": [
+                            "Reproduce the exact install lane.",
+                            "Align the smallest dependency surface instead of changing product code.",
+                        ],
+                        "proof_commands": [
+                            "PYTHONPATH=src python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+                        ],
+                    },
+                    {
+                        "code": "SECURITY_FINDING_REVIEW_REQUIRED",
+                        "title": "Security finding requires review",
+                        "diagnosis": "A security-sensitive finding must be reviewed before treating coverage as the blocker.",
+                        "severity": "high",
+                        "confidence": "high",
+                        "recommended_fix": [
+                            "Inspect the security finding and affected surface.",
+                        ],
+                        "proof_commands": [
+                            "PYTHONPATH=src python -m pre_commit run -a",
+                        ],
+                    },
+                    {
+                        "code": "RELEASE_ARTIFACT_INVALID",
+                        "title": "Release artifact validation failed",
+                        "diagnosis": "The release/package validation log shows an artifact contract failure.",
+                        "severity": "high",
+                        "confidence": "high",
+                        "proof_commands": [
+                            "PYTHONPATH=src python -m build && PYTHONPATH=src python -m twine check dist/*",
+                        ],
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    graph = build_evidence_graph(failure_bundle=failure_bundle)
+
+    assert graph["source_summary"][-1]["source"] == "failure_bundle"
+    assert graph["source_summary"][-1]["found"] is True
+    assert graph["source_summary"][-1]["findings_seen"] == 3
+    assert graph["source_summary"][-1]["findings_emitted"] == 3
+
+    nodes = {node["title"]: node for node in graph["nodes"]}
+
+    dependency = nodes["Dependency resolver failed"]
+    assert dependency["source"] == "failure_bundle"
+    assert dependency["risk_surface"] == "dependency"
+    assert dependency["review_first"] is True
+    assert dependency["safe_to_auto_fix"] is False
+    assert dependency["owner_files"] == ["constraints-ci.txt", "requirements-test.txt"]
+    assert "PYTHONPATH=src python -m pip install -c constraints-ci.txt" in " ".join(
+        dependency["proof_commands"]
+    )
+    assert "Reproduce the exact install lane." in dependency["recommended_commands"]
+
+    security = nodes["Security finding requires review"]
+    assert security["risk_surface"] == "security"
+    assert security["review_first"] is True
+    assert security["safe_to_auto_fix"] is False
+
+    release = nodes["Release artifact validation failed"]
+    assert release["risk_surface"] == "release"
+    assert release["review_first"] is True
+    assert release["safe_to_auto_fix"] is False
+
+
+def test_evidence_graph_module_cli_accepts_failure_bundle(tmp_path: Path, capsys) -> None:
+    failure_bundle = tmp_path / "failure-bundle.json"
+    failure_bundle.write_text(
+        json.dumps(
+            {
+                "diagnoses": [
+                    {
+                        "code": "PACKAGE_INSTALL_FAILURE",
+                        "title": "Dependency resolver failed",
+                        "diagnosis": "pip dependency resolver failed.",
+                        "severity": "high",
+                        "proof_commands": [
+                            "PYTHONPATH=src python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+                        ],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rc = main(
+        [
+            "--failure-bundle",
+            str(failure_bundle),
+            "--out-dir",
+            str(tmp_path / "evidence-graph"),
+        ]
+    )
+
+    assert rc == 0
+    captured = capsys.readouterr().out
+    assert "evidence-graph.json" in captured
+
+    graph = json.loads(
+        (tmp_path / "evidence-graph" / "evidence-graph.json").read_text(encoding="utf-8")
+    )
+    assert graph["nodes"][0]["source"] == "failure_bundle"
+    assert graph["nodes"][0]["risk_surface"] == "dependency"
