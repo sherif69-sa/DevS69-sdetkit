@@ -22,17 +22,15 @@ def test_pr_quality_workflow_runs_adaptive_sentinel_after_failure_bundle() -> No
     assert "--no-fail" in text
 
 
-def test_pr_quality_workflow_comments_warning_or_critical_sentinel_summary() -> None:
+def test_pr_quality_workflow_passes_sentinel_control_room_to_adaptive_renderer() -> None:
     text = _workflow_text()
 
-    assert 'sentinel_state="unknown"' in text
-    assert 'sentinel_state" = "warning"' in text
-    assert 'sentinel_state" = "critical"' in text
-    assert "### Adaptive Sentinel" in text
-    assert "build/sdetkit/sentinel/sentinel.json" in text
-    assert "build/sdetkit/sentinel/sentinel.md" in text
-    assert "Recommended next commands" in text
-    assert text.count("append_sentinel_summary") >= 3
+    assert "python -m sdetkit.pr_quality_evidence_narrative" in text
+    assert "--sentinel-control-room build/sdetkit/sentinel/control-room.json" in text
+    assert "--evidence-graph build/sdetkit/evidence-graph/evidence-graph.json" in text
+    assert "--changed-files build/pr-quality/changed-files.txt" in text
+    assert "sentinel_state=" not in text
+    assert "append_sentinel_summary" not in text
 
 
 def test_pr_quality_workflow_uploads_adaptive_sentinel_artifacts() -> None:
@@ -52,12 +50,22 @@ def test_pr_quality_workflow_builds_evidence_graph_from_sentinel_control_room() 
     assert "python -m sdetkit.evidence_graph" in text
     assert "--sentinel-control-room build/sdetkit/sentinel/control-room.json" in text
     assert "--out-dir build/sdetkit/evidence-graph" in text
-    assert "### Evidence Graph" in text
-    assert "build/sdetkit/evidence-graph/evidence-graph.json" in text
-    assert "build/sdetkit/evidence-graph/evidence-graph.md" in text
+    assert "--evidence-graph build/sdetkit/evidence-graph/evidence-graph.json" in text
 
 
 def test_pr_quality_workflow_uploads_evidence_graph_artifacts() -> None:
     text = _workflow_text()
 
     assert "build/sdetkit/evidence-graph/" in text
+
+
+def test_pr_quality_workflow_delegates_comment_body_to_adaptive_renderer() -> None:
+    text = _workflow_text()
+
+    assert "python -m sdetkit.pr_quality_evidence_narrative" in text
+    assert "--quality-log quality.log" in text
+    assert "--quality-outcome" in text
+    assert "--changed-files build/pr-quality/changed-files.txt" in text
+    assert "--json-out build/pr-quality/pr-evidence-narrative.json" in text
+    assert "write_evidence_graph_summary" not in text
+    assert "append_evidence_graph_summary" not in text

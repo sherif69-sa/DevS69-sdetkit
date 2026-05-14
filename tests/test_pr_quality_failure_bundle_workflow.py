@@ -22,10 +22,11 @@ def test_pr_quality_workflow_uses_failure_bundle_handoff() -> None:
     assert "python -m sdetkit.pr_quality_comment" not in text
 
 
-def test_pr_quality_workflow_comments_from_bundle_comment_artifact() -> None:
+def test_pr_quality_workflow_passes_failure_bundle_to_adaptive_renderer() -> None:
     text = _workflow_text()
 
-    assert "build/pr-quality/failure-intelligence/adaptive-diagnosis-comment.md" in text
+    assert "--failure-bundle build/pr-quality/failure-intelligence/failure-bundle.json" in text
+    assert "python -m sdetkit.pr_quality_evidence_narrative" in text
     assert "build/pr-quality/adaptive-diagnosis-comment.md" not in text
 
 
@@ -47,13 +48,9 @@ def test_pr_quality_workflow_sets_failure_bundle_proof_from_quality_outcome() ->
     assert "steps.quality.outcome" in text
 
 
-def test_pr_quality_success_comment_does_not_reprint_adaptive_diagnosis() -> None:
+def test_pr_quality_workflow_does_not_inline_adaptive_comment_logic() -> None:
     text = _workflow_text()
-    comment_body = text.split("write_evidence_graph_summary", 1)[1]
-    success_block = comment_body.split(
-        'if [ "${{ steps.quality.outcome }}" = "success" ]; then',
-        1,
-    )[1].split("else", 1)[0]
 
-    assert "adaptive-diagnosis-comment.md" not in success_block
-    assert "append_adaptive_diagnosis_comment" not in success_block
+    assert "append_adaptive_diagnosis_comment" not in text
+    assert "adaptive-diagnosis-comment.md" not in text
+    assert "cat build/pr-quality/failure-intelligence" not in text
