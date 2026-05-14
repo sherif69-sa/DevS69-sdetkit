@@ -670,3 +670,115 @@ def test_generated_matrix_candidates_are_not_fixed_three_scenarios() -> None:
     assert len(adaptive_diagnosis.SEEDED_SCENARIO_DB) >= 5000
     assert any(candidate.code.startswith("MATRIX_") for candidate in candidates)
     assert len({candidate.code for candidate in candidates}) > 3
+
+
+def test_dependency_resolver_failure_is_specific_not_unknown():
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text="\n".join(
+            [
+                "ERROR: Cannot install -r requirements-test.txt because these package versions have conflicting dependencies.",
+                "ResolutionImpossible: for help visit https://pip.pypa.io/",
+                "Process completed with exit code 1",
+            ]
+        )
+    )
+
+    assert "PACKAGE_INSTALL_FAILURE" in _codes(payload)
+    assert "UNKNOWN_REVIEW_REQUIRED" not in _codes(payload)
+    diagnosis = payload["diagnoses"][0]
+    assert diagnosis["code"] == "PACKAGE_INSTALL_FAILURE"
+    assert "pip install -c constraints-ci.txt -r requirements-test.txt -e ." in " ".join(
+        diagnosis["proof_commands"]
+    )
+    assert payload["fix_plan"][0]["safe_to_auto_fix"] is False
+
+
+def test_security_gate_failure_is_specific_not_quality_noise():
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text="\n".join(
+            [
+                "sdetkit-security-gate / High entropy string",
+                "High-entropy string literal detected.",
+                "Process completed with exit code 1",
+            ]
+        )
+    )
+
+    assert "SECURITY_FINDING_REVIEW_REQUIRED" in _codes(payload)
+    assert "UNKNOWN_REVIEW_REQUIRED" not in _codes(payload)
+    diagnosis = payload["diagnoses"][0]
+    assert diagnosis["code"] == "SECURITY_FINDING_REVIEW_REQUIRED"
+    assert "pre_commit run -a" in " ".join(diagnosis["proof_commands"])
+
+
+def test_release_artifact_failure_is_specific_not_coverage_noise():
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text="\n".join(
+            [
+                "Run python -m build && python -m twine check dist/*",
+                "ERROR InvalidDistribution: Metadata is missing required fields",
+                "Process completed with exit code 1",
+                "Total coverage: 96.69%",
+            ]
+        )
+    )
+
+    assert "RELEASE_ARTIFACT_INVALID" in _codes(payload)
+    assert "UNKNOWN_REVIEW_REQUIRED" not in _codes(payload)
+    diagnosis = payload["diagnoses"][0]
+    assert diagnosis["code"] == "RELEASE_ARTIFACT_INVALID"
+    assert "twine check dist/*" in " ".join(diagnosis["proof_commands"])
+
+
+def test_workflow_contract_failure_is_specific():
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text="\n".join(
+            [
+                "Invalid workflow file: .github/workflows/pr-quality-comment.yml#L42",
+                "The workflow is not valid. .github/workflows/pr-quality-comment.yml (Line: 42, Col: 9): Unexpected value",
+                "Process completed with exit code 1",
+            ]
+        )
+    )
+
+    assert "WORKFLOW_CONTRACT_FAILURE" in _codes(payload)
+    assert "UNKNOWN_REVIEW_REQUIRED" not in _codes(payload)
+    diagnosis = payload["diagnoses"][0]
+    assert diagnosis["code"] == "WORKFLOW_CONTRACT_FAILURE"
+    assert "test_pr_quality_adaptive_sentinel_workflow.py" in " ".join(diagnosis["proof_commands"])
+
+
+def test_docs_build_failure_is_specific():
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text="\n".join(
+            [
+                "NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict",
+                "mkdocs.exceptions.ConfigurationError: Documentation file 'missing.md' not found in docs_dir",
+                "Process completed with exit code 1",
+            ]
+        )
+    )
+
+    assert "DOCS_BUILD_CONTRACT" in _codes(payload)
+    assert "UNKNOWN_REVIEW_REQUIRED" not in _codes(payload)
+    diagnosis = payload["diagnoses"][0]
+    assert diagnosis["code"] == "DOCS_BUILD_CONTRACT"
+    assert "mkdocs build --strict" in " ".join(diagnosis["proof_commands"])
+
+
+def test_cli_contract_failure_is_specific():
+    payload = adaptive_diagnosis.analyze_evidence(
+        log_text="\n".join(
+            [
+                "usage: sdetkit [-h] {investigate,adaptive,doctor} ...",
+                "sdetkit: error: unrecognized arguments: --broken-flag",
+                "Process completed with exit code 2",
+            ]
+        )
+    )
+
+    assert "CLI_CONTRACT_FAILURE" in _codes(payload)
+    assert "UNKNOWN_REVIEW_REQUIRED" not in _codes(payload)
+    diagnosis = payload["diagnoses"][0]
+    assert diagnosis["code"] == "CLI_CONTRACT_FAILURE"
+    assert "python -m sdetkit --help" in " ".join(diagnosis["proof_commands"])

@@ -85,10 +85,9 @@
   },
   {
     "file": "package_install_unknown.log",
-    "primary": "UNKNOWN_REVIEW_REQUIRED",
-    "proof_contains": "pip install -r requirements-test.txt -e .",
-    "safe": false,
-    "candidate": "PACKAGE_INSTALL_FAILURE"
+    "primary": "PACKAGE_INSTALL_FAILURE",
+    "proof_contains": "pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+    "safe": false
   },
   {
     "file": "cache_artifact_unknown.log",
@@ -99,10 +98,9 @@
   },
   {
     "file": "docs_build_unknown.log",
-    "primary": "UNKNOWN_REVIEW_REQUIRED",
-    "proof_contains": "tests/test_docs*.py",
-    "safe": false,
-    "candidate": "DOCS_BUILD_CONTRACT"
+    "primary": "DOCS_BUILD_CONTRACT",
+    "proof_contains": "mkdocs build --strict",
+    "safe": false
   },
   {
     "file": "release_version_unknown.log",
