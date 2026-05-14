@@ -27,3 +27,14 @@ def test_pr_quality_workflow_builds_graph_from_security_merged_control_room() ->
         "--sentinel-control-room build/sdetkit/sentinel/control-room-with-security-review.json"
         in text
     )
+
+
+def test_pr_quality_workflow_narrative_uses_security_merged_control_room() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    command_index = text.index("python -m sdetkit.pr_quality_evidence_narrative")
+    narrative_command = text[command_index : command_index + 1400]
+
+    assert (
+        "--sentinel-control-room build/sdetkit/sentinel/control-room-with-security-review.json"
+        in narrative_command
+    )

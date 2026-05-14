@@ -661,3 +661,36 @@ def test_green_narrative_prioritizes_security_review_graph_signal(tmp_path: Path
     assert "Quality is green, so the review focus is not coverage." in markdown
     assert "Review unresolved GitHub Advanced Security comments on the PR." in markdown
     assert "Fix the flagged surface or dismiss the false positive with a review reason." in markdown
+
+
+def test_green_narrative_reports_security_review_collection_status(tmp_path: Path) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    control_room = _write_json(
+        tmp_path / "control-room-with-security-review.json",
+        {
+            "schema_version": "sdetkit.adaptive.sentinel.control_room.v1",
+            "state": "healthy",
+            "active_threat_count": 0,
+            "active_threats": [],
+            "review_first_count": 0,
+            "automation_allowed_now": False,
+            "security_review_collection_status": "collected",
+            "security_review_finding_count": 0,
+            "security_review_state": "healthy",
+        },
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=control_room,
+        evidence_graph=None,
+        failure_bundle=None,
+        changed_files=None,
+    )
+
+    markdown = str(payload["markdown"])
+    assert "Security review evidence: collected; unresolved findings: 0." in markdown
