@@ -123,6 +123,22 @@ The bundle records a `doctor_cortex` summary with diagnosis status, diagnosis co
 
 Mission Control stores only summary fields in the main bundle. Raw doctor evidence and raw fix text remain outside the Mission Control bundle.
 
+## Evidence Graph
+
+Mission Control can consume a read-only cross-system evidence graph during a run:
+
+```bash
+python -m sdetkit mission-control run \
+  --evidence-graph build/sdetkit/evidence-graph/evidence-graph.json \
+  --out-dir build/mission-control
+```
+
+The bundle records an `evidence_graph` summary with node count, review-first count, critical count, risk surfaces, source count, and `automation_allowed_now`.
+
+If the graph contains active findings, Mission Control keeps the run advisory and reports `SHIP_WITH_FINDINGS`. It does not auto-fix, auto-commit, auto-push, auto-merge, or weaken checks.
+
+The artifact index links the graph JSON, graph Markdown report, and graph manifest when those files are present beside the input graph.
+
 ## Doctor Cortex trend
 
 Doctor Cortex trend can summarize diagnosis and prescription counts across a Mission Control ledger:

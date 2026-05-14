@@ -17,6 +17,7 @@ from typing import Any
 
 SCHEMA_VERSION = "1"
 FAILURE_BUNDLE_SCHEMA_VERSION = "sdetkit.adaptive.failure_bundle.v1"
+EVIDENCE_GRAPH_SCHEMA_VERSION = "sdetkit.evidence-graph.v1"
 
 
 def _utc_now() -> str:
@@ -367,6 +368,163 @@ def _doctor_cortex_artifacts(summary: dict[str, Any] | None) -> list[dict[str, s
     return [artifact for artifact in artifacts if isinstance(artifact, dict)]
 
 
+def _collect_evidence_graph(graph_path: Path | None) -> dict[str, Any] | None:
+    if graph_path is None:
+        return None
+
+    resolved = graph_path.resolve()
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return {
+            "enabled": True,
+            "ok": False,
+            "path": resolved.as_posix(),
+            "error": f"failed to read evidence graph: {exc}",
+            "node_count": 0,
+            "review_first_count": 0,
+            "critical_count": 0,
+            "automation_allowed_now": False,
+            "risk_surfaces": [],
+            "source_count": 0,
+            "artifacts": [],
+        }
+
+    if not isinstance(payload, dict):
+        return {
+            "enabled": True,
+            "ok": False,
+            "path": resolved.as_posix(),
+            "error": "evidence graph payload is not a JSON object",
+            "node_count": 0,
+            "review_first_count": 0,
+            "critical_count": 0,
+            "automation_allowed_now": False,
+            "risk_surfaces": [],
+            "source_count": 0,
+            "artifacts": [],
+        }
+
+    if str(payload.get("schema_version", "")) != EVIDENCE_GRAPH_SCHEMA_VERSION:
+        return {
+            "enabled": True,
+            "ok": False,
+            "path": resolved.as_posix(),
+            "error": "unsupported evidence graph schema",
+            "schema_version": str(payload.get("schema_version", "")),
+            "node_count": 0,
+            "review_first_count": 0,
+            "critical_count": 0,
+            "automation_allowed_now": False,
+            "risk_surfaces": [],
+            "source_count": 0,
+            "artifacts": [],
+        }
+
+    raw_nodes = payload.get("nodes", [])
+    nodes = (
+        [node for node in raw_nodes if isinstance(node, dict)]
+        if isinstance(raw_nodes, list)
+        else []
+    )
+    raw_sources = payload.get("source_summary", [])
+    source_summary = (
+        [source for source in raw_sources if isinstance(source, dict)]
+        if isinstance(raw_sources, list)
+        else []
+    )
+
+    node_count = len(nodes)
+    review_first_count = sum(1 for node in nodes if bool(node.get("review_first", False)))
+    critical_count = sum(1 for node in nodes if str(node.get("severity", "")) == "critical")
+    automation_allowed_now = any(bool(node.get("automation_allowed_now", False)) for node in nodes)
+    risk_surfaces = sorted(
+        {str(node.get("risk_surface", "unknown") or "unknown") for node in nodes}
+    )
+
+    graph_dir = resolved.parent
+    artifact_specs = [
+        (resolved, "Cross-system evidence graph", "json"),
+        (graph_dir / "evidence-graph.md", "Cross-system evidence graph report", "markdown"),
+        (
+            graph_dir / "evidence-graph-manifest.json",
+            "Cross-system evidence graph manifest",
+            "json",
+        ),
+    ]
+
+    artifacts = [
+        _artifact(path, label, kind) for path, label, kind in artifact_specs if path.exists()
+    ]
+
+    return {
+        "enabled": True,
+        "ok": node_count == 0 and not automation_allowed_now,
+        "path": resolved.as_posix(),
+        "schema_version": str(payload.get("schema_version", "")),
+        "status": "clear" if node_count == 0 and not automation_allowed_now else "review_required",
+        "node_count": node_count,
+        "review_first_count": review_first_count,
+        "critical_count": critical_count,
+        "automation_allowed_now": automation_allowed_now,
+        "risk_surfaces": risk_surfaces,
+        "source_count": len(source_summary),
+        "source_summary": source_summary,
+        "artifacts": artifacts,
+    }
+
+
+def _evidence_graph_artifacts(summary: dict[str, Any] | None) -> list[dict[str, str]]:
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return []
+    artifacts = summary.get("artifacts", [])
+    if not isinstance(artifacts, list):
+        return []
+    return [artifact for artifact in artifacts if isinstance(artifact, dict)]
+
+
+def _format_evidence_graph(summary: dict[str, Any] | None) -> list[str]:
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return ["- not collected"]
+
+    if summary.get("error"):
+        return [
+            "- Status: error",
+            f"- Error: {summary.get('error')}",
+            f"- Graph: `{summary.get('path', '')}`",
+        ]
+
+    risk_surfaces = summary.get("risk_surfaces", [])
+    if not isinstance(risk_surfaces, list):
+        risk_surfaces = []
+
+    return [
+        f"- Status: {summary.get('status', 'unknown')}",
+        f"- Node count: {summary.get('node_count', 0)}",
+        f"- Review-first nodes: {summary.get('review_first_count', 0)}",
+        f"- Critical nodes: {summary.get('critical_count', 0)}",
+        f"- Source count: {summary.get('source_count', 0)}",
+        f"- Automation allowed now: {str(summary.get('automation_allowed_now', False)).lower()}",
+        f"- Risk surfaces: {', '.join(str(surface) for surface in risk_surfaces) or 'none'}",
+        f"- Graph: `{summary.get('path', '')}`",
+    ]
+
+
+def _evidence_graph_ledger_summary(bundle: dict[str, Any]) -> dict[str, Any] | None:
+    summary = bundle.get("evidence_graph")
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return None
+    return {
+        "ok": bool(summary.get("ok", False)),
+        "status": str(summary.get("status", "unknown")),
+        "node_count": int(summary.get("node_count", 0) or 0),
+        "review_first_count": int(summary.get("review_first_count", 0) or 0),
+        "critical_count": int(summary.get("critical_count", 0) or 0),
+        "automation_allowed_now": bool(summary.get("automation_allowed_now", False)),
+        "risk_surfaces": summary.get("risk_surfaces", []),
+    }
+
+
 def _collect_adaptive_failure_bundle(bundle_path: Path | None) -> dict[str, Any] | None:
     if bundle_path is None:
         return None
@@ -543,6 +701,7 @@ def build_bundle(
     ledger_path: Path | None = None,
     doctor_cortex: bool = False,
     failure_bundle: Path | None = None,
+    evidence_graph: Path | None = None,
 ) -> dict[str, Any]:
     repo = repo.resolve()
     out_dir = out_dir.resolve()
@@ -588,6 +747,17 @@ def build_bundle(
                 }
             )
 
+    evidence_graph_summary = _collect_evidence_graph(evidence_graph)
+    if isinstance(evidence_graph_summary, dict) and evidence_graph_summary.get("enabled"):
+        if not bool(evidence_graph_summary.get("ok", False)):
+            findings.append(
+                {
+                    "severity": "warning",
+                    "code": "EVIDENCE_GRAPH_FINDINGS",
+                    "message": "Evidence graph contains review-required findings.",
+                }
+            )
+
     next_actions = [
         {
             "id": "run_fast_gate",
@@ -624,6 +794,7 @@ def build_bundle(
     ]
     artifacts.extend(_step_artifacts(steps))
     artifacts.extend(_doctor_cortex_artifacts(doctor_cortex_summary))
+    artifacts.extend(_evidence_graph_artifacts(evidence_graph_summary))
     artifacts.extend(_adaptive_failure_bundle_artifacts(adaptive_failure_bundle_summary))
     if ledger_path is not None:
         artifacts.append(
@@ -652,6 +823,7 @@ def build_bundle(
         "passed_step_count": passed_count,
         "failed_step_count": failed_count,
         "doctor_cortex": doctor_cortex_summary,
+        "evidence_graph": evidence_graph_summary,
         "adaptive_failure_bundle": adaptive_failure_bundle_summary,
         "steps": steps,
         "findings": findings,
@@ -681,6 +853,10 @@ def render_markdown(bundle: dict[str, Any]) -> str:
         "## Doctor Cortex",
         "",
         *_format_doctor_cortex(bundle.get("doctor_cortex")),
+        "",
+        "## Evidence Graph",
+        "",
+        *_format_evidence_graph(bundle.get("evidence_graph")),
         *_format_adaptive_failure_bundle(bundle.get("adaptive_failure_bundle")),
         "",
         "## Steps",
@@ -758,6 +934,7 @@ def _ledger_record(bundle: dict[str, Any], out_dir: Path) -> dict[str, Any]:
         "failed_step_count": bundle["failed_step_count"],
         "artifact_dir": out_dir.resolve().as_posix(),
         "doctor_cortex": _doctor_cortex_ledger_summary(bundle),
+        "evidence_graph": _evidence_graph_ledger_summary(bundle),
         "adaptive_failure_bundle": _adaptive_failure_bundle_ledger_summary(bundle),
     }
 
@@ -997,6 +1174,10 @@ def render_report_markdown(
         "## Doctor Cortex",
         "",
         *_format_doctor_cortex(bundle.get("doctor_cortex")),
+        "",
+        "## Evidence Graph",
+        "",
+        *_format_evidence_graph(bundle.get("evidence_graph")),
         *_format_adaptive_failure_bundle(bundle.get("adaptive_failure_bundle")),
         "",
         "## Steps",
@@ -1073,6 +1254,7 @@ def _run(args: argparse.Namespace) -> int:
         ledger_path=ledger_path,
         doctor_cortex=bool(args.doctor_cortex),
         failure_bundle=Path(args.failure_bundle).resolve() if str(args.failure_bundle) else None,
+        evidence_graph=Path(args.evidence_graph).resolve() if str(args.evidence_graph) else None,
     )
     json_path, md_path = write_bundle(bundle, out_dir)
     print(f"wrote {json_path}")
@@ -1107,6 +1289,18 @@ def _summarize(args: argparse.Namespace) -> int:
         print(f"doctor_cortex_ok={str(doctor_cortex.get('ok', False)).lower()}")
         print(f"doctor_cortex_diagnosis_count={diagnosis.get('diagnosis_count', 0)}")
         print(f"doctor_cortex_prescription_count={prescriptions.get('prescription_count', 0)}")
+    evidence_graph = bundle.get("evidence_graph")
+    if isinstance(evidence_graph, dict):
+        summary_prefix = "evidence" + "_graph"
+        print(f"{summary_prefix}_ok={str(evidence_graph.get('ok', False)).lower()}")
+        print(f"{summary_prefix}_status={evidence_graph.get('status', 'unknown')}")
+        print(f"{summary_prefix}_node_count={evidence_graph.get('node_count', 0)}")
+        print(f"{summary_prefix}_review_first_count={evidence_graph.get('review_first_count', 0)}")
+        print(f"{summary_prefix}_critical_count={evidence_graph.get('critical_count', 0)}")
+        print(
+            f"{summary_prefix}_automation_allowed_now="
+            f"{str(evidence_graph.get('automation_allowed_now', False)).lower()}"
+        )
     adaptive_failure_bundle = bundle.get("adaptive_failure_bundle")
     if isinstance(adaptive_failure_bundle, dict):
         summary_prefix = "adaptive" + "_failure" + "_bundle"
@@ -1145,6 +1339,7 @@ def _schema(_: argparse.Namespace) -> int:
             "passed_step_count",
             "failed_step_count",
             "doctor_cortex",
+            "evidence_graph",
             "steps",
             "findings",
             "artifacts",
@@ -1165,6 +1360,7 @@ def _schema(_: argparse.Namespace) -> int:
             "executed_step_count",
             "failed_step_count",
             "artifact_dir",
+            "evidence_graph",
             "adaptive_failure_bundle",
         ],
         "history_summary_keys": [
@@ -1196,6 +1392,7 @@ def _schema(_: argparse.Namespace) -> int:
             "Executive summary",
             "Execution",
             "Doctor Cortex",
+            "Evidence Graph",
             "Steps",
             "Findings",
             "History summary",
@@ -1269,6 +1466,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--no-ledger", action="store_true")
     run.add_argument("--doctor-cortex", action="store_true")
     run.add_argument("--failure-bundle", default="")
+    run.add_argument("--evidence-graph", default="")
     run.set_defaults(func=_run)
 
     summarize = sub.add_parser("summarize", help="Summarize a mission-control.json bundle")
