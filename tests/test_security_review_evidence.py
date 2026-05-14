@@ -125,3 +125,46 @@ def test_security_review_evidence_merges_with_sentinel_control_room(tmp_path: Pa
     assert merged["active_threat_count"] == 1
     assert merged["review_first_count"] == 1
     assert merged["active_threats"][0]["risk_surface"] == "security"
+
+
+def test_security_review_evidence_reports_collection_status(tmp_path: Path) -> None:
+    path = _write_json(tmp_path / "review-threads.json", _review_threads())
+
+    payload = security_review.build_security_review_evidence(path)
+
+    assert payload["collection_status"] == "collected"
+    assert payload["found"] is True
+    assert payload["active_threat_count"] == 0
+    assert "collection_status: collected" in security_review.render_markdown(payload)
+
+
+def test_security_review_evidence_reports_unavailable_when_payload_missing(tmp_path: Path) -> None:
+    payload = security_review.build_security_review_evidence(
+        tmp_path / "missing-review-threads.json"
+    )
+
+    assert payload["collection_status"] == "unavailable"
+    assert payload["found"] is False
+    assert payload["active_threat_count"] == 0
+
+
+def test_security_review_merge_exposes_collection_status(tmp_path: Path) -> None:
+    review_threads = _write_json(tmp_path / "review-threads.json", _review_threads())
+    sentinel = _write_json(
+        tmp_path / "control-room.json",
+        {
+            "schema_version": "sdetkit.adaptive.sentinel.control_room.v1",
+            "state": "healthy",
+            "active_threat_count": 0,
+            "active_threats": [],
+            "review_first_count": 0,
+            "automation_allowed_now": False,
+        },
+    )
+
+    security = security_review.build_security_review_evidence(review_threads)
+    merged = security_review.merge_with_sentinel_control_room(sentinel, security)
+
+    assert merged["security_review_collection_status"] == "collected"
+    assert merged["security_review_finding_count"] == 0
+    assert merged["security_review_state"] == "healthy"

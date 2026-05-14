@@ -546,6 +546,7 @@ def build_narrative(
         evidence_graph=evidence_graph,
         failure_bundle=failure_bundle,
     )
+    what_happened.extend(_security_review_status_lines_from_control_room(sentinel_control_room))
 
     payload: JsonObject = {
         "schema_version": SCHEMA_VERSION,
@@ -650,6 +651,27 @@ def _human_finding_title(
         return f"{_surface_label(surface)} evidence changed"
 
     return raw_title or "Evidence graph finding"
+
+
+def _security_review_status_lines_from_control_room(control_room: Path | None) -> list[str]:
+    if not control_room:
+        return []
+    payload = _read_json(control_room)
+    if not payload:
+        return [
+            "Security review evidence was unavailable; manually inspect Advanced Security review comments."
+        ]
+
+    if "security_review_collection_status" not in payload:
+        return []
+
+    status = str(payload.get("security_review_collection_status", "unknown"))
+    try:
+        count = int(payload.get("security_review_finding_count", 0) or 0)
+    except (TypeError, ValueError):
+        count = 0
+
+    return [f"Security review evidence: {status}; unresolved findings: {count}."]
 
 
 def _what_happened(

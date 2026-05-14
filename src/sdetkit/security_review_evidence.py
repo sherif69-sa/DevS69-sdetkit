@@ -153,11 +153,16 @@ def findings_from_review_threads(payload: JsonObject) -> list[JsonObject]:
 
 
 def build_security_review_evidence(review_threads: Path | None) -> JsonObject:
-    findings = findings_from_review_threads(_read_json(review_threads))
+    raw_payload = _read_json(review_threads)
+    found = bool(raw_payload)
+    findings = findings_from_review_threads(raw_payload)
     state = "warning" if findings else "healthy"
+    collection_status = "collected" if found else "unavailable"
     return {
         "schema_version": SCHEMA_VERSION,
         "state": state,
+        "collection_status": collection_status,
+        "found": found,
         "automation_allowed_now": False,
         "automation_reason": "Security review evidence is advisory/read-only and requires human fix or dismissal.",
         "active_threat_count": len(findings),
@@ -195,6 +200,11 @@ def merge_with_sentinel_control_room(
     base["active_threat_count"] = len(active)
     base["review_first_count"] = sum(1 for item in active if bool(item.get("review_first", False)))
     base["automation_allowed_now"] = False
+    base["security_review_collection_status"] = security_evidence.get(
+        "collection_status",
+        "unknown",
+    )
+    base["security_review_finding_count"] = len(security_findings)
 
     if security_findings:
         base["state"] = (
@@ -221,6 +231,7 @@ def render_markdown(payload: JsonObject) -> str:
         "# Security Review Evidence",
         "",
         f"state: {payload.get('state', 'unknown')}",
+        f"collection_status: {payload.get('collection_status', 'unknown')}",
         f"active_security_review_findings: {len(findings)}",
         "",
     ]
