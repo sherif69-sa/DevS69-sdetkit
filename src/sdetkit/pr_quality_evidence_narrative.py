@@ -482,6 +482,72 @@ def build_narrative(
     return payload
 
 
+_GENERIC_FINDING_TITLES = {
+    "adaptive failure bundle signal",
+    "failure bundle signal",
+    "evidence graph finding",
+    "working tree has local changes",
+}
+
+
+def _generic_finding_title(title: str) -> bool:
+    normalized = title.strip().lower()
+    return normalized in _GENERIC_FINDING_TITLES or normalized.endswith(" signal")
+
+
+def _changed_files_include(changed_files: list[str], *needles: str) -> bool:
+    lowered_files = [path.lower() for path in changed_files]
+    return any(needle.lower() in path for needle in needles for path in lowered_files)
+
+
+def _human_finding_title(
+    node: JsonObject,
+    *,
+    changed_files: list[str],
+    changed_surfaces: list[str],
+) -> str:
+    raw_title = str(node.get("title", "") or "").strip()
+    surface = str(node.get("risk_surface", "unknown") or "unknown")
+
+    if raw_title and not _generic_finding_title(raw_title):
+        return raw_title
+
+    if surface == "pr_quality" or _changed_files_include(
+        changed_files,
+        "pr-quality",
+        "pr_quality_evidence_narrative",
+    ):
+        return "PR Quality evidence changed"
+
+    if surface == "diagnostic_engine" or _changed_files_include(
+        changed_files,
+        "evidence_graph",
+        "evidence-graph",
+        "adaptive_sentinel",
+        "sentinel",
+        "mission_control",
+    ):
+        return "Diagnostic intelligence evidence changed"
+
+    if surface == "quality" or _changed_files_include(
+        changed_files,
+        "quality.sh",
+        "pre_commit",
+        "pre-commit",
+        "ruff",
+        "mypy",
+    ):
+        return "Quality gate evidence changed"
+
+    if surface in changed_surfaces:
+        return f"{_surface_label(surface)} evidence changed"
+
+    if surface != "unknown":
+        return f"{_surface_label(surface)} evidence changed"
+
+    return raw_title or "Evidence graph finding"
+
+
 def _what_happened(
     *,
     quality_ok: bool,
@@ -496,20 +562,27 @@ def _what_happened(
         lines.append(f"quality.sh cov passed with coverage {coverage}%.")
     else:
         lines.append(f"quality.sh cov did not pass; last reported coverage is {coverage}%.")
+
     if failure:
         lines.append(
             "The adaptive failure bundle selected "
             f"{failure.get('code', 'an actual failure')} as the primary blocker."
         )
+
     if changed_files:
         preview = ", ".join(changed_files[:5])
         suffix = "" if len(changed_files) <= 5 else f", plus {len(changed_files) - 5} more"
         lines.append(f"The PR diff includes {preview}{suffix}.")
+
     if changed_surfaces:
         lines.append(f"Diff-owned risk surfaces: {', '.join(changed_surfaces)}.")
+
     if nodes:
         titles = [
-            f"{node.get('title', 'finding')} [{node.get('risk_surface', 'unknown')}]"
+            (
+                f"{_human_finding_title(node, changed_files=changed_files, changed_surfaces=changed_surfaces)} "
+                f"[{node.get('risk_surface', 'unknown')}]"
+            )
             for node in nodes[:3]
         ]
         lines.append(
@@ -517,6 +590,7 @@ def _what_happened(
         )
     else:
         lines.append("Evidence graph emitted no active findings.")
+
     return lines
 
 

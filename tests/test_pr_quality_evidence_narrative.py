@@ -308,3 +308,119 @@ def test_failed_narrative_keeps_failure_bundle_commands(tmp_path: Path) -> None:
     assert payload["primary_signal"]["kind"] == "actual_failure"
     assert "Coverage gate regression" in markdown
     assert "bash quality.sh cov" in markdown
+
+
+def test_green_narrative_humanizes_generic_pr_quality_graph_title(tmp_path: Path) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    graph = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [
+                {
+                    "title": "Adaptive failure bundle signal",
+                    "summary": "The PR Quality evidence comment path changed.",
+                    "risk_surface": "pr_quality",
+                    "severity": "warning",
+                    "recommended_commands": [
+                        "python -m pytest -q tests/test_pr_quality_evidence_narrative.py -o addopts="
+                    ],
+                }
+            ],
+            "source_summary": [],
+        },
+    )
+    changed = _write(
+        tmp_path / "changed-files.txt",
+        ".github/workflows/pr-quality-comment.yml\nsrc/sdetkit/pr_quality_evidence_narrative.py\n",
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=None,
+        evidence_graph=graph,
+        failure_bundle=None,
+        changed_files=changed,
+    )
+
+    markdown = str(payload["markdown"])
+    assert "PR Quality evidence changed [pr_quality]" in markdown
+    assert "Adaptive failure bundle signal [pr_quality]" not in markdown
+
+
+def test_green_narrative_keeps_specific_non_generic_finding_title(tmp_path: Path) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    graph = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [
+                {
+                    "title": "Security-owned surface changed",
+                    "summary": "A protected security surface needs review.",
+                    "risk_surface": "security",
+                    "severity": "critical",
+                }
+            ],
+            "source_summary": [],
+        },
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=None,
+        evidence_graph=graph,
+        failure_bundle=None,
+        changed_files=None,
+    )
+
+    markdown = str(payload["markdown"])
+    assert "Security-owned surface changed [security]" in markdown
+    assert "Security evidence changed [security]" not in markdown
+
+
+def test_green_narrative_humanizes_diagnostic_graph_title_from_diff(tmp_path: Path) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    graph = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [
+                {
+                    "title": "Evidence graph finding",
+                    "summary": "The graph renderer changed.",
+                    "risk_surface": "diagnostic_engine",
+                    "severity": "warning",
+                }
+            ],
+            "source_summary": [],
+        },
+    )
+    changed = _write(
+        tmp_path / "changed-files.txt",
+        "src/sdetkit/evidence_graph.py\n",
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=None,
+        evidence_graph=graph,
+        failure_bundle=None,
+        changed_files=changed,
+    )
+
+    markdown = str(payload["markdown"])
+    assert "Diagnostic intelligence evidence changed [diagnostic_engine]" in markdown
+    assert "Evidence graph finding [diagnostic_engine]" not in markdown
