@@ -1288,12 +1288,250 @@ def _append_coverage_gate_regression(
     )
 
 
+def _contains_any(text: str, tokens: Sequence[str]) -> bool:
+    return any(token in text for token in tokens)
+
+
+def _append_multidomain_log_diagnoses(
+    text: str,
+    files: Sequence[str],
+    diagnoses: list[dict[str, Any]],
+) -> None:
+    lower = text.lower()
+
+    if _contains_any(
+        lower,
+        (
+            "resolutionimpossible",
+            "could not find a version that satisfies the requirement",
+            "no matching distribution found",
+            "dependency resolver",
+            "pip's dependency resolver",
+            "conflicting dependencies",
+        ),
+    ):
+        diagnoses.append(
+            _diag(
+                "PACKAGE_INSTALL_FAILURE",
+                "high",
+                "high",
+                "Dependency resolver failed",
+                "The install log shows a dependency resolver or package availability failure before tests could prove behavior.",
+                "Developers often chase coverage or test summaries even though the environment never installed correctly.",
+                [
+                    "matched failure signal: dependency resolver",
+                    *_failure_snippets(text, limit=3),
+                ],
+                [
+                    "Reproduce the exact install lane.",
+                    "Compare pyproject, requirements, constraints, and workflow install commands.",
+                    "Align the smallest dependency surface instead of changing product code.",
+                ],
+                [
+                    "PYTHONPATH=src python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+                    "PYTHONPATH=src python -m pip install -c constraints-ci.txt -e '.[dev,test]'",
+                ],
+                "CI cannot prove product behavior until dependencies resolve.",
+                "dependency-resolver-contract",
+                files=files,
+            )
+        )
+
+    if _contains_any(
+        lower,
+        (
+            "sdetkit-security-gate",
+            "high entropy string",
+            "secret exposure",
+            "secret-like token",
+            "vulnerability detected",
+            "critical vulnerability",
+            "security gate",
+        ),
+    ):
+        diagnoses.append(
+            _diag(
+                "SECURITY_FINDING_REVIEW_REQUIRED",
+                "high",
+                "high",
+                "Security finding requires review",
+                "The log reports a security-sensitive finding that must be reviewed before treating quality or coverage as the blocker.",
+                "Security findings can look like ordinary CI noise, but they protect trust boundaries and release eligibility.",
+                [
+                    "matched failure signal: security finding",
+                    *_failure_snippets(text, limit=3),
+                ],
+                [
+                    "Inspect the security finding and affected surface.",
+                    "Confirm whether the token or vulnerable dependency is real, generated, or test-only.",
+                    "Do not dismiss security evidence from the quality wrapper alone.",
+                ],
+                [
+                    "PYTHONPATH=src python -m pre_commit run -a",
+                ],
+                "Security-sensitive findings can block release even when tests and coverage pass.",
+                "security-review-required",
+                files=files,
+            )
+        )
+
+    if _contains_any(
+        lower,
+        (
+            "twine check",
+            "invaliddistribution",
+            "failed to build",
+            "build backend",
+            "python -m build",
+            "dist/*.whl",
+            "wheel contents",
+        ),
+    ):
+        diagnoses.append(
+            _diag(
+                "RELEASE_ARTIFACT_INVALID",
+                "high",
+                "high",
+                "Release artifact validation failed",
+                "The release/package validation log shows an artifact or build contract failure.",
+                "Release failures are often hidden behind generic quality wrappers, but the owner surface is packaging and distribution.",
+                [
+                    "matched failure signal: release artifact",
+                    *_failure_snippets(text, limit=3),
+                ],
+                [
+                    "Rebuild the package artifacts from a clean workspace.",
+                    "Run package metadata validation before changing tests or coverage.",
+                ],
+                [
+                    "rm -rf dist build/lib build/bdist.*",
+                    "PYTHONPATH=src python -m build && PYTHONPATH=src python -m twine check dist/*",
+                ],
+                "Invalid release artifacts can ship broken metadata or unusable packages.",
+                "release-artifact-contract",
+                files=files,
+            )
+        )
+
+    if _contains_any(
+        lower,
+        (
+            "invalid workflow file",
+            "workflow is not valid",
+            ".github/workflows",
+            "yaml syntax",
+            "mapping values are not allowed",
+            "the workflow is not valid",
+        ),
+    ):
+        diagnoses.append(
+            _diag(
+                "WORKFLOW_CONTRACT_FAILURE",
+                "high",
+                "high",
+                "GitHub Actions workflow contract failed",
+                "The log points to a workflow or YAML contract failure before product behavior could be trusted.",
+                "Workflow syntax and permission errors can masquerade as normal CI failures while preventing the right proof from running.",
+                [
+                    "matched failure signal: workflow contract",
+                    *_failure_snippets(text, limit=3),
+                ],
+                [
+                    "Inspect the changed workflow stanza.",
+                    "Validate YAML and rerun the targeted workflow contract tests.",
+                ],
+                [
+                    "PYTHONPATH=src python -m pytest -q tests/test_pr_quality_adaptive_sentinel_workflow.py -o addopts=",
+                    "PYTHONPATH=src python -m pre_commit run -a",
+                ],
+                "Broken workflow contracts can make CI evidence incomplete or misleading.",
+                "workflow-contract",
+                files=files,
+            )
+        )
+
+    if _contains_any(
+        lower,
+        (
+            "mkdocs build",
+            "mkdocs.exceptions",
+            "documentation file",
+            "not found in docs_dir",
+            "nav item",
+            "strict mode",
+        ),
+    ):
+        diagnoses.append(
+            _diag(
+                "DOCS_BUILD_CONTRACT",
+                "medium",
+                "high",
+                "Documentation build contract failed",
+                "The log shows a docs build, navigation, or strict-mode failure.",
+                "Docs failures often look harmless, but they break operator discoverability and release evidence.",
+                [
+                    "matched failure signal: docs build",
+                    *_failure_snippets(text, limit=3),
+                ],
+                [
+                    "Validate MkDocs navigation and referenced files.",
+                    "Fix the smallest docs/nav contract mismatch.",
+                ],
+                [
+                    "NO_MKDOCS_2_WARNING=1 PYTHONPATH=src python -m mkdocs build --strict",
+                    "PYTHONPATH=src python -m pytest -q tests/test_docs_qa.py tests/test_docs_nav_current_discoverability.py -o addopts=",
+                ],
+                "Broken docs navigation weakens operator handoff and release evidence.",
+                "docs-build-contract",
+                files=files,
+            )
+        )
+
+    if _contains_any(
+        lower,
+        (
+            "unrecognized arguments:",
+            "invalid choice:",
+            "no module named sdetkit.__main__",
+            "entry point",
+            "console_scripts",
+            "usage: sdetkit",
+        ),
+    ):
+        diagnoses.append(
+            _diag(
+                "CLI_CONTRACT_FAILURE",
+                "high",
+                "medium",
+                "CLI contract failed",
+                "The log shows a command-line contract or entry-point failure.",
+                "CLI failures break the operator path even when library tests or coverage appear healthy.",
+                [
+                    "matched failure signal: CLI contract",
+                    *_failure_snippets(text, limit=3),
+                ],
+                [
+                    "Reproduce the exact CLI command.",
+                    "Check command dispatch, parser wiring, and package entry points.",
+                ],
+                [
+                    "PYTHONPATH=src python -m sdetkit --help",
+                    "PYTHONPATH=src python -m pytest -q tests/test_cli_help_discoverability_contract.py tests/test_investigate_cli.py -o addopts=",
+                ],
+                "Broken CLI contracts block normal operator workflows.",
+                "cli-contract",
+                files=files,
+            )
+        )
+
+
 def _append_log(
     text: str, diagnoses: list[dict[str, Any]], adaptive_history: dict[str, Any] | None = None
 ) -> None:
     start_index = len(diagnoses)
     lower = text.lower()
     files = _file_mentions(text)
+    _append_multidomain_log_diagnoses(text, files, diagnoses)
     if _is_coverage_gate_regression(text):
         _append_coverage_gate_regression(text, files, diagnoses, adaptive_history)
     handled_local = _append_local_investigation(text, files, diagnoses)
