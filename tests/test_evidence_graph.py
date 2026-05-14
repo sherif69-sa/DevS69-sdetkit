@@ -201,3 +201,90 @@ def test_evidence_graph_docs_describe_advisory_artifacts() -> None:
     assert "automation_allowed_now=false" in docs
     assert "does not auto-fix" in docs
     assert "review_first=true" in docs
+
+
+def test_evidence_graph_classifies_quality_verdict_without_owner_files(
+    tmp_path: Path,
+) -> None:
+    control_room = tmp_path / "control-room.json"
+    control_room.write_text(
+        json.dumps(
+            {
+                "status": "attention_required",
+                "active_threats": [
+                    {
+                        "title": "Quality verdict signal",
+                        "summary": "blocking_failures=coverage",
+                        "severity": "warning",
+                        "recommended_commands": ["bash quality.sh cov"],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    graph = build_evidence_graph(sentinel_control_room=control_room)
+
+    assert graph["nodes"][0]["risk_surface"] == "quality"
+    assert graph["nodes"][0]["review_first"] is True
+
+
+def test_evidence_graph_classifies_pr_quality_workflow_signal(
+    tmp_path: Path,
+) -> None:
+    control_room = tmp_path / "control-room.json"
+    control_room.write_text(
+        json.dumps(
+            {
+                "status": "attention_required",
+                "active_threats": [
+                    {
+                        "title": "PR Quality comment workflow changed",
+                        "summary": "The PR Quality evidence comment path changed.",
+                        "severity": "warning",
+                        "owner_files": [".github/workflows/pr-quality-comment.yml"],
+                        "recommended_commands": [
+                            "python -m pytest -q tests/test_pr_quality_adaptive_sentinel_workflow.py -o addopts="
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    graph = build_evidence_graph(sentinel_control_room=control_room)
+
+    assert graph["nodes"][0]["risk_surface"] == "pr_quality"
+    assert graph["nodes"][0]["review_first"] is True
+
+
+def test_evidence_graph_classifies_diagnostic_artifacts_from_source_paths(
+    tmp_path: Path,
+) -> None:
+    control_room = tmp_path / "control-room.json"
+    control_room.write_text(
+        json.dumps(
+            {
+                "status": "attention_required",
+                "active_threats": [
+                    {
+                        "title": "Control-room evidence needs review",
+                        "summary": "Sentinel emitted a control-room finding.",
+                        "severity": "warning",
+                        "source_artifacts": [
+                            "build/sdetkit/sentinel/control-room.json",
+                            "build/sdetkit/evidence-graph/evidence-graph.json",
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    graph = build_evidence_graph(sentinel_control_room=control_room)
+
+    assert graph["nodes"][0]["risk_surface"] == "diagnostic_engine"
+    assert graph["nodes"][0]["review_first"] is True

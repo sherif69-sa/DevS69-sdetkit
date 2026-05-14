@@ -78,6 +78,8 @@ _REVIEW_FIRST_SURFACES = {
     "cli",
     "package",
     "diagnostic_engine",
+    "pr_quality",
+    "quality",
     "unknown",
 }
 
@@ -92,6 +94,8 @@ _VALID_SURFACES = {
     "package",
     "diagnostic_engine",
     "maintenance",
+    "pr_quality",
+    "quality",
     "unknown",
 }
 
@@ -360,7 +364,16 @@ def _normalize_finding(
     proof_commands = _string_list(
         finding.get("proof_commands") or finding.get("verification_commands")
     )
-    risk_surface = _risk_surface(finding, owner_files, title, summary)
+    risk_surface = _risk_surface(
+        source,
+        finding,
+        owner_files,
+        source_artifacts,
+        recommended_commands,
+        proof_commands,
+        title,
+        summary,
+    )
     review_first = _bool(
         finding.get("review_first"),
         default=risk_surface in _REVIEW_FIRST_SURFACES or severity == "critical",
@@ -435,17 +448,45 @@ def _severity(finding: JsonObject) -> str:
 
 
 def _risk_surface(
+    source: SourceName,
     finding: JsonObject,
     owner_files: list[str],
+    source_artifacts: list[str],
+    recommended_commands: list[str],
+    proof_commands: list[str],
     title: str,
     summary: str,
 ) -> str:
-    explicit = _text(finding, "risk_surface", "surface", "category", default="")
+    explicit = _text(finding, "risk_surface", "surface", "category", default="").lower()
     if explicit in _VALID_SURFACES:
         return explicit
 
-    haystack = " ".join([title, summary, *owner_files]).lower()
+    haystack = " ".join(
+        [
+            source,
+            title,
+            summary,
+            *owner_files,
+            *source_artifacts,
+            *recommended_commands,
+            *proof_commands,
+        ]
+    ).lower()
 
+    if "pr-quality-comment.yml" in haystack or "pr quality" in haystack or "pr-quality" in haystack:
+        return "pr_quality"
+    if (
+        "quality.sh" in haystack
+        or "coverage" in haystack
+        or "quality verdict" in haystack
+        or "cov passed" in haystack
+        or "cov failed" in haystack
+        or "pre_commit" in haystack
+        or "pre-commit" in haystack
+        or "ruff" in haystack
+        or "mypy" in haystack
+    ):
+        return "quality"
     if ".github/workflows" in haystack or "workflow" in haystack:
         return "workflow"
     if "requirements" in haystack or "constraints" in haystack:
@@ -462,7 +503,15 @@ def _risk_surface(
         return "docs"
     if "pyproject.toml" in haystack or "package" in haystack:
         return "package"
-    if "doctor" in haystack or "diagnos" in haystack:
+    if (
+        "doctor" in haystack
+        or "diagnos" in haystack
+        or "sentinel" in haystack
+        or "control-room" in haystack
+        or "evidence graph" in haystack
+        or "evidence-graph" in haystack
+        or "evidence_graph" in haystack
+    ):
         return "diagnostic_engine"
     if "maintenance" in haystack:
         return "maintenance"
