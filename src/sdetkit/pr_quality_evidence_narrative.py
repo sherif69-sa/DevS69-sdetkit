@@ -35,6 +35,23 @@ _SEVERITY_PRIORITY = {
     "unknown": 0,
 }
 
+_FAILURE_SURFACE_PRIORITY = {
+    "security": 100,
+    "dependency": 95,
+    "release": 90,
+    "package": 88,
+    "workflow": 82,
+    "cli": 78,
+    "tests": 75,
+    "pr_quality": 70,
+    "diagnostic_engine": 68,
+    "docs": 60,
+    "quality": 45,
+    "coverage": 30,
+    "unknown": 0,
+}
+
+
 _SURFACE_REASON = {
     "security": "Security evidence affects trust boundaries, credentials, permissions, or supply-chain exposure.",
     "dependency": "Dependency evidence affects whether the repo can install, resolve, and test reproducibly.",
@@ -200,26 +217,89 @@ def _fallback_failure_bundle(path: Path | None) -> JsonObject:
     return {}
 
 
+def _failure_text(failure: JsonObject) -> str:
+    return " ".join(
+        [
+            str(failure.get("code", "")),
+            str(failure.get("title", "")),
+            str(failure.get("diagnosis", "")),
+            str(failure.get("summary", "")),
+            str(failure.get("message", "")),
+            " ".join(_string_list(failure.get("evidence"))),
+            " ".join(_string_list(failure.get("proof_commands"))),
+            " ".join(_string_list(failure.get("recommended_fix"))),
+        ]
+    ).lower()
+
+
+def _failure_priority_surface(failure: JsonObject) -> str:
+    text = _failure_text(failure)
+
+    if any(token in text for token in ("security", "secret", "vulnerability", "cve")):
+        return "security"
+    if any(
+        token in text for token in ("dependency", "resolver", "pip", "constraints", "requirements")
+    ):
+        return "dependency"
+    if any(token in text for token in ("release", "publish", "twine", "dist/", "build backend")):
+        return "release"
+    if any(token in text for token in ("package", "wheel", "sdist", "metadata", "pyproject")):
+        return "package"
+    if any(token in text for token in ("workflow", "github actions", ".github/workflows", "yaml")):
+        return "workflow"
+    if any(token in text for token in ("cli", "argparse", "command", "entry point")):
+        return "cli"
+    if any(token in text for token in ("pytest", "assertion", "test failed", "regression test")):
+        return "tests"
+    if any(token in text for token in ("docs", "mkdocs", "documentation", "nav")):
+        return "docs"
+    if any(token in text for token in ("coverage", "coverage_gate", "coverage gate")):
+        return "coverage"
+    if any(token in text for token in ("ruff", "mypy", "pre-commit", "pre_commit", "quality")):
+        return "quality"
+    return _surface_for_failure(failure)
+
+
+def _failure_score(failure: JsonObject) -> tuple[int, int]:
+    surface = _failure_priority_surface(failure)
+    severity = str(failure.get("severity", failure.get("level", "unknown"))).lower()
+    severity_score = _SEVERITY_PRIORITY.get(severity, 0)
+    return (_FAILURE_SURFACE_PRIORITY.get(surface, 0), severity_score)
+
+
 def _primary_failure(payload: JsonObject) -> JsonObject:
     if not payload:
         return {}
-    diagnoses = _as_list(payload.get("diagnoses"))
-    if diagnoses and isinstance(diagnoses[0], dict):
-        return _as_dict(diagnoses[0])
+
+    candidates: list[JsonObject] = []
+
+    for item in _as_list(payload.get("diagnoses")):
+        if isinstance(item, dict):
+            candidates.append(_as_dict(item))
+
     diagnosis = _as_dict(payload.get("diagnosis"))
-    nested = _as_list(diagnosis.get("diagnoses"))
-    if nested and isinstance(nested[0], dict):
-        return _as_dict(nested[0])
+    for item in _as_list(diagnosis.get("diagnoses")):
+        if isinstance(item, dict):
+            candidates.append(_as_dict(item))
+
     code = str(payload.get("primary_diagnosis_code", "")).strip()
     if code:
-        return {
-            "code": code,
-            "title": str(payload.get("primary_diagnosis_title", code.replace("_", " ").title())),
-            "diagnosis": str(payload.get("summary", "")),
-            "recommended_fix": _string_list(payload.get("recommended_fix")),
-            "proof_commands": _string_list(payload.get("proof_commands")),
-        }
-    return {}
+        candidates.append(
+            {
+                "code": code,
+                "title": str(
+                    payload.get("primary_diagnosis_title", code.replace("_", " ").title())
+                ),
+                "diagnosis": str(payload.get("summary", "")),
+                "recommended_fix": _string_list(payload.get("recommended_fix")),
+                "proof_commands": _string_list(payload.get("proof_commands")),
+            }
+        )
+
+    if not candidates:
+        return {}
+
+    return max(candidates, key=_failure_score)
 
 
 def _surface_for_failure(failure: JsonObject) -> str:

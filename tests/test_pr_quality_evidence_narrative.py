@@ -424,3 +424,183 @@ def test_green_narrative_humanizes_diagnostic_graph_title_from_diff(tmp_path: Pa
     markdown = str(payload["markdown"])
     assert "Diagnostic intelligence evidence changed [diagnostic_engine]" in markdown
     assert "Evidence graph finding [diagnostic_engine]" not in markdown
+
+
+def test_failed_narrative_ranks_dependency_above_coverage_when_both_exist(
+    tmp_path: Path,
+) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov failed\nTotal coverage: 96.69%\nProcess completed with exit code 1\n",
+    )
+    bundle = _write_json(
+        tmp_path / "failure-bundle.json",
+        {
+            "diagnoses": [
+                {
+                    "code": "COVERAGE_GATE_REGRESSION",
+                    "title": "Coverage gate regression",
+                    "diagnosis": "Coverage dropped below threshold.",
+                    "proof_commands": ["bash quality.sh cov"],
+                },
+                {
+                    "code": "PACKAGE_INSTALL_FAILURE",
+                    "title": "Dependency resolver failed",
+                    "diagnosis": "pip could not resolve constraints-ci.txt.",
+                    "proof_commands": [
+                        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+                    ],
+                },
+            ]
+        },
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="failure",
+        sentinel_control_room=None,
+        evidence_graph=None,
+        failure_bundle=bundle,
+        changed_files=None,
+    )
+
+    markdown = str(payload["markdown"])
+    assert payload["primary_signal"]["title"] == "Dependency resolver failed"
+    assert payload["primary_signal"]["surface"] == "dependency"
+    assert "python -m pip install -c constraints-ci.txt" in markdown
+    assert "bash quality.sh cov" not in markdown
+
+
+def test_failed_narrative_ranks_security_above_dependency_and_coverage(
+    tmp_path: Path,
+) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov failed\nProcess completed with exit code 1\n",
+    )
+    bundle = _write_json(
+        tmp_path / "failure-bundle.json",
+        {
+            "diagnoses": [
+                {
+                    "code": "PACKAGE_INSTALL_FAILURE",
+                    "title": "Dependency resolver failed",
+                    "diagnosis": "pip could not resolve requirements.",
+                    "proof_commands": ["python -m pip install -e ."],
+                },
+                {
+                    "code": "SECRET_EXPOSURE",
+                    "title": "Secret exposure detected",
+                    "diagnosis": "A secret-like token was detected in a protected surface.",
+                    "severity": "critical",
+                    "proof_commands": ["python -m sdetkit security check --root . --format json"],
+                },
+                {
+                    "code": "COVERAGE_GATE_REGRESSION",
+                    "title": "Coverage gate regression",
+                    "diagnosis": "Coverage dropped below threshold.",
+                    "proof_commands": ["bash quality.sh cov"],
+                },
+            ]
+        },
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="failure",
+        sentinel_control_room=None,
+        evidence_graph=None,
+        failure_bundle=bundle,
+        changed_files=None,
+    )
+
+    markdown = str(payload["markdown"])
+    assert payload["primary_signal"]["title"] == "Secret exposure detected"
+    assert payload["primary_signal"]["surface"] == "security"
+    assert "python -m sdetkit security check --root . --format json" in markdown
+    assert "bash quality.sh cov" not in markdown
+
+
+def test_failed_narrative_ranks_release_above_quality_tooling(
+    tmp_path: Path,
+) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov failed\nProcess completed with exit code 1\n",
+    )
+    bundle = _write_json(
+        tmp_path / "failure-bundle.json",
+        {
+            "diagnoses": [
+                {
+                    "code": "RUFF_FORMAT_DRIFT",
+                    "title": "Ruff format drift",
+                    "diagnosis": "ruff format modified files.",
+                    "proof_commands": ["python -m pre_commit run -a"],
+                },
+                {
+                    "code": "RELEASE_ARTIFACT_INVALID",
+                    "title": "Release artifact failed twine check",
+                    "diagnosis": "twine check failed for dist/*.whl.",
+                    "proof_commands": ["python -m build && python -m twine check dist/*"],
+                },
+            ]
+        },
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="failure",
+        sentinel_control_room=None,
+        evidence_graph=None,
+        failure_bundle=bundle,
+        changed_files=None,
+    )
+
+    markdown = str(payload["markdown"])
+    assert payload["primary_signal"]["title"] == "Release artifact failed twine check"
+    assert payload["primary_signal"]["surface"] == "release"
+    assert "python -m build && python -m twine check dist/*" in markdown
+
+
+def test_failed_narrative_ranks_tests_above_coverage_noise(tmp_path: Path) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "FAILED tests/test_real_bug.py::test_behavior\nTotal coverage: 96.69%\n",
+    )
+    bundle = _write_json(
+        tmp_path / "failure-bundle.json",
+        {
+            "diagnoses": [
+                {
+                    "code": "COVERAGE_GATE_REGRESSION",
+                    "title": "Coverage gate regression",
+                    "diagnosis": "Coverage dropped below threshold.",
+                    "proof_commands": ["bash quality.sh cov"],
+                },
+                {
+                    "code": "TEST_ASSERTION_FAILURE",
+                    "title": "Behavior regression test failed",
+                    "diagnosis": "pytest assertion failed in tests/test_real_bug.py.",
+                    "proof_commands": [
+                        "python -m pytest -q tests/test_real_bug.py::test_behavior -o addopts="
+                    ],
+                },
+            ]
+        },
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="failure",
+        sentinel_control_room=None,
+        evidence_graph=None,
+        failure_bundle=bundle,
+        changed_files=None,
+    )
+
+    markdown = str(payload["markdown"])
+    assert payload["primary_signal"]["title"] == "Behavior regression test failed"
+    assert payload["primary_signal"]["surface"] == "tests"
+    assert "python -m pytest -q tests/test_real_bug.py::test_behavior -o addopts=" in markdown
+    assert "bash quality.sh cov" not in markdown
