@@ -21,6 +21,7 @@ SourceName = Literal[
     "dependency",
     "maintenance",
     "pr_quality",
+    "failure_bundle",
 ]
 
 JsonScalar = str | int | float | bool | None
@@ -114,6 +115,7 @@ def build_evidence_graph(
     *,
     sentinel_control_room: Path | None = None,
     mission_control: Path | None = None,
+    failure_bundle: Path | None = None,
 ) -> EvidenceGraph:
     nodes: list[EvidenceNode] = []
     source_summary: list[SourceSummary] = []
@@ -133,6 +135,14 @@ def build_evidence_graph(
     )
     nodes.extend(mission_nodes)
     source_summary.append(mission_summary)
+
+    failure_bundle_nodes, failure_bundle_summary = _normalize_source(
+        source="failure_bundle",
+        path=failure_bundle,
+        finding_keys=("diagnoses", "findings", "active_findings"),
+    )
+    nodes.extend(failure_bundle_nodes)
+    source_summary.append(failure_bundle_summary)
 
     nodes.sort(key=lambda node: (node["source"], node["finding_id"]))
 
@@ -268,6 +278,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Path to a Mission Control JSON artifact.",
     )
     parser.add_argument(
+        "--failure-bundle",
+        type=Path,
+        default=None,
+        help="Adaptive failure bundle or adaptive diagnosis JSON artifact to normalize.",
+    )
+    parser.add_argument(
         "--out-dir",
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
@@ -278,6 +294,7 @@ def main(argv: list[str] | None = None) -> int:
     graph = build_evidence_graph(
         sentinel_control_room=args.sentinel_control_room,
         mission_control=args.mission_control,
+        failure_bundle=args.failure_bundle,
     )
     manifest = write_evidence_graph(graph, output_dir=args.out_dir)
     print(json.dumps(manifest, indent=2, sort_keys=True))
@@ -354,12 +371,13 @@ def _normalize_finding(
         "message",
         default=title,
     )
-    owner_files = _string_list(finding.get("owner_files"))
+    owner_files = _string_list(finding.get("owner_files") or finding.get("affected_files"))
     source_artifacts = _string_list(finding.get("source_artifacts"))
     recommended_commands = _string_list(
         finding.get("recommended_commands")
         or finding.get("next_commands")
         or finding.get("commands")
+        or finding.get("recommended_fix")
     )
     proof_commands = _string_list(
         finding.get("proof_commands") or finding.get("verification_commands")
@@ -460,6 +478,18 @@ def _risk_surface(
     explicit = _text(finding, "risk_surface", "surface", "category", default="").lower()
     if explicit in _VALID_SURFACES:
         return explicit
+
+    code = _text(finding, "code", "diagnosis_code", "primary_diagnosis_code", default="").upper()
+    code_surfaces = {
+        "PACKAGE_INSTALL_FAILURE": "dependency",
+        "MISSING_TEST_DEPENDENCY": "dependency",
+        "SECURITY_FINDING_REVIEW_REQUIRED": "security",
+        "SECRET_EXPOSURE": "security",
+        "RELEASE_ARTIFACT_INVALID": "release",
+        "WORKFLOW_CONTRACT_FAILURE": "workflow",
+    }
+    if code in code_surfaces:
+        return code_surfaces[code]
 
     haystack = " ".join(
         [
