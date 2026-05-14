@@ -133,6 +133,7 @@ nav:
       - Release confidence KPI pack: release-confidence-kpi-pack.md
       - Determinism checklist: determinism-checklist.md
       - Determinism contract: determinism-contract.md
+  - Cross-System Evidence Graph: evidence-graph.md
   - Operator and evidence (primary):
       - Docs map and organization: docs-map.md
       - Operator essentials: operator-essentials.md

@@ -48,3 +48,7 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 3. Keep [Artifact reference](artifact-reference.md) as the source of truth for runtime and uploaded artifact paths.
 4. Do not move historical/generated artifact packs unless a separate migration map and link update are included.
 5. Preserve the safety story everywhere: diagnostic/report-only by default; mutation only through explicit guarded policy and PR-only controls.
+
+## Diagnostic intelligence
+
+- [Cross-System Evidence Graph](evidence-graph.md)
