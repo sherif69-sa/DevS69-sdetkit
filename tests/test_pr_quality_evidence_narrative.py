@@ -213,3 +213,98 @@ def test_renderer_includes_graph_markdown_evidence_when_present(tmp_path: Path) 
     markdown = str(payload["markdown"])
     assert "evidence-graph.json" in markdown
     assert "evidence-graph.md" in markdown
+
+
+def test_green_narrative_prefers_review_surface_proof_over_failure_commands(
+    tmp_path: Path,
+) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    graph = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [
+                {
+                    "title": "Working tree has local changes",
+                    "summary": "Sentinel detected uncommitted work; keep proof tied to the current diff.",
+                    "risk_surface": "diagnostic_engine",
+                    "severity": "warning",
+                    "recommended_commands": ["git status -sb", "git diff --stat"],
+                },
+                {
+                    "title": "Adaptive failure bundle signal",
+                    "summary": "The PR Quality evidence comment path changed.",
+                    "risk_surface": "pr_quality",
+                    "severity": "warning",
+                    "recommended_commands": [
+                        "python -m sdetkit investigate failure --log build/quality.log --format markdown",
+                        "python -m sdetkit doctor --diagnose --failure-bundle build/pr-quality/failure-intelligence/failure-intelligence-bundle.json --format json",
+                    ],
+                },
+            ],
+            "source_summary": [],
+        },
+    )
+    changed = _write(
+        tmp_path / "changed-files.txt",
+        ".github/workflows/pr-quality-comment.yml\nsrc/sdetkit/pr_quality_evidence_narrative.py\n",
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=None,
+        evidence_graph=graph,
+        failure_bundle=None,
+        changed_files=changed,
+    )
+
+    markdown = str(payload["markdown"])
+    assert markdown.startswith("✅ quality.sh cov passed")
+    assert "## SDET Quality Gate" not in markdown
+    assert payload["primary_signal"]["title"] == "PR Quality evidence changed"
+    assert payload["primary_signal"]["surface"] == "pr_quality"
+    assert "Quality is green, so the review focus is not coverage." in markdown
+    assert "python -m sdetkit investigate failure" not in markdown
+    assert "python -m sdetkit doctor --diagnose" not in markdown
+    assert "git status -sb" not in markdown
+    assert "git diff --stat" not in markdown
+    assert "tests/test_pr_quality_evidence_narrative.py" in markdown
+    assert "python -m pre_commit run -a" in markdown
+
+
+def test_failed_narrative_keeps_failure_bundle_commands(tmp_path: Path) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "coverage gate failed\nProcess completed with exit code 1\n",
+    )
+    bundle = _write_json(
+        tmp_path / "failure-bundle.json",
+        {
+            "diagnoses": [
+                {
+                    "code": "COVERAGE_GATE_REGRESSION",
+                    "title": "Coverage gate regression",
+                    "diagnosis": "Coverage dropped below the configured threshold.",
+                    "proof_commands": ["bash quality.sh cov"],
+                }
+            ]
+        },
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="failure",
+        sentinel_control_room=None,
+        evidence_graph=None,
+        failure_bundle=bundle,
+        changed_files=None,
+    )
+
+    markdown = str(payload["markdown"])
+    assert payload["primary_signal"]["kind"] == "actual_failure"
+    assert "Coverage gate regression" in markdown
+    assert "bash quality.sh cov" in markdown
