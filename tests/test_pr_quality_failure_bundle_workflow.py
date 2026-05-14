@@ -37,3 +37,23 @@ def test_pr_quality_workflow_uploads_failure_intelligence_bundle() -> None:
     assert "name: pr-quality-failure-intelligence" in text
     assert "path: build/pr-quality/failure-intelligence/" in text
     assert "if-no-files-found: ignore" in text
+
+
+def test_pr_quality_workflow_sets_failure_bundle_proof_from_quality_outcome() -> None:
+    text = _workflow_text()
+
+    assert 'proof_flag="--proof-failed"' in text
+    assert 'proof_flag="--proof-passed"' in text
+    assert "steps.quality.outcome" in text
+
+
+def test_pr_quality_success_comment_does_not_reprint_adaptive_diagnosis() -> None:
+    text = _workflow_text()
+    comment_body = text.split("write_evidence_graph_summary", 1)[1]
+    success_block = comment_body.split(
+        'if [ "${{ steps.quality.outcome }}" = "success" ]; then',
+        1,
+    )[1].split("else", 1)[0]
+
+    assert "adaptive-diagnosis-comment.md" not in success_block
+    assert "append_adaptive_diagnosis_comment" not in success_block

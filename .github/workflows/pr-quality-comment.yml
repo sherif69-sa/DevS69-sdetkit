@@ -40,10 +40,14 @@ jobs:
         run: |
           mkdir -p build/pr-quality/failure-intelligence
           if [ -f quality.log ]; then
+            proof_flag="--proof-failed"
+            if [ "${{ steps.quality.outcome }}" = "success" ]; then
+              proof_flag="--proof-passed"
+            fi
             PYTHONPATH=src python -m sdetkit adaptive failure-bundle \
               --log quality.log \
               --out-dir build/pr-quality/failure-intelligence \
-              --proof-failed \
+              "${proof_flag}" \
               --format text
           fi
 
@@ -57,6 +61,14 @@ jobs:
             --format text \
             --no-fail
 
+      - name: Build PR evidence graph
+        if: always()
+        run: |
+          mkdir -p build/sdetkit/evidence-graph
+          PYTHONPATH=src python -m sdetkit.evidence_graph \
+            --sentinel-control-room build/sdetkit/sentinel/control-room.json \
+            --out-dir build/sdetkit/evidence-graph
+
       - name: Build PR comment body
         run: |
           mkdir -p build/pr-quality
@@ -68,6 +80,58 @@ jobs:
           if [ -s build/sdetkit/sentinel/sentinel.json ]; then
             sentinel_state="$(python -c "import json; from pathlib import Path; p=Path('build/sdetkit/sentinel/sentinel.json'); print(json.loads(p.read_text(encoding='utf-8')).get('state', 'unknown'))" 2>/dev/null || echo unknown)"
           fi
+
+          write_evidence_graph_summary() {
+            python - <<'PY' > build/pr-quality/evidence-graph-summary.md
+          import json
+          from pathlib import Path
+
+          path = Path("build/sdetkit/evidence-graph/evidence-graph.json")
+          if not path.exists():
+              raise SystemExit(0)
+
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          nodes = payload.get("nodes", [])
+          if not isinstance(nodes, list) or not nodes:
+              raise SystemExit(0)
+
+          sources = payload.get("source_summary", [])
+          if not isinstance(sources, list):
+              sources = []
+
+          review_first = sum(
+              1 for node in nodes
+              if isinstance(node, dict) and bool(node.get("review_first", False))
+          )
+          critical = sum(
+              1 for node in nodes
+              if isinstance(node, dict) and str(node.get("severity", "")) == "critical"
+          )
+          surfaces = sorted(
+              {
+                  str(node.get("risk_surface", "unknown") or "unknown")
+                  for node in nodes
+                  if isinstance(node, dict)
+              }
+          )
+
+          print("### Evidence Graph")
+          print(f"- active findings: `{len(nodes)}`")
+          print(f"- review-first findings: `{review_first}`")
+          print(f"- critical findings: `{critical}`")
+          print(f"- source count: `{len(sources)}`")
+          print(f"- risk surfaces: `{', '.join(surfaces) or 'none'}`")
+          print("- graph: `build/sdetkit/evidence-graph/evidence-graph.json`")
+          print("- markdown: `build/sdetkit/evidence-graph/evidence-graph.md`")
+          PY
+          }
+
+          append_adaptive_diagnosis_comment() {
+            if [ -s build/pr-quality/failure-intelligence/adaptive-diagnosis-comment.md ]; then
+              echo ''
+              cat build/pr-quality/failure-intelligence/adaptive-diagnosis-comment.md
+            fi
+          }
 
           append_sentinel_summary() {
             if [ "$sentinel_state" = "warning" ] || [ "$sentinel_state" = "critical" ]; then
@@ -88,27 +152,31 @@ jobs:
             fi
           }
 
+          append_evidence_graph_summary() {
+            if [ -s build/pr-quality/evidence-graph-summary.md ]; then
+              echo ''
+              cat build/pr-quality/evidence-graph-summary.md
+            fi
+          }
+
+          write_evidence_graph_summary
+
           if [ "${{ steps.quality.outcome }}" = "success" ]; then
             {
               echo '✅ quality.sh cov passed'
               echo "- coverage: ${coverage_pct}%"
               echo '- checks: lint + tests + coverage gate are green for this PR run'
-              if [ -s build/pr-quality/failure-intelligence/adaptive-diagnosis-comment.md ]; then
-                echo ''
-                cat build/pr-quality/failure-intelligence/adaptive-diagnosis-comment.md
-              fi
               append_sentinel_summary
+              append_evidence_graph_summary
             } > build/pr-quality/pr-comment-body.md
           else
             {
               echo '❌ quality.sh cov failed (see workflow logs for details)'
               echo "- coverage (last reported): ${coverage_pct}%"
               echo '- suggested fix: run `python -m pip install -c constraints-ci.txt -r requirements-test.txt -e . && bash quality.sh cov` locally'
-              if [ -s build/pr-quality/failure-intelligence/adaptive-diagnosis-comment.md ]; then
-                echo ''
-                cat build/pr-quality/failure-intelligence/adaptive-diagnosis-comment.md
-              fi
+              append_adaptive_diagnosis_comment
               append_sentinel_summary
+              append_evidence_graph_summary
             } > build/pr-quality/pr-comment-body.md
           fi
 
