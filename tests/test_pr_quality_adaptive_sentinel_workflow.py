@@ -43,3 +43,21 @@ def test_pr_quality_workflow_uploads_adaptive_sentinel_artifacts() -> None:
     assert "name: pr-quality-adaptive-sentinel" in text
     assert "build/sdetkit/sentinel/" in text
     assert ".sdetkit/adaptive-sentinel/" in text
+
+
+def test_pr_quality_workflow_builds_evidence_graph_from_sentinel_control_room() -> None:
+    text = _workflow_text()
+
+    assert "Build PR evidence graph" in text
+    assert "python -m sdetkit.evidence_graph" in text
+    assert "--sentinel-control-room build/sdetkit/sentinel/control-room.json" in text
+    assert "--out-dir build/sdetkit/evidence-graph" in text
+    assert "### Evidence Graph" in text
+    assert "build/sdetkit/evidence-graph/evidence-graph.json" in text
+    assert "build/sdetkit/evidence-graph/evidence-graph.md" in text
+
+
+def test_pr_quality_workflow_uploads_evidence_graph_artifacts() -> None:
+    text = _workflow_text()
+
+    assert "build/sdetkit/evidence-graph/" in text
