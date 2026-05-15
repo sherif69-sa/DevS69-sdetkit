@@ -824,3 +824,96 @@ def test_green_narrative_keeps_pr_quality_primary_when_graph_only_has_pr_quality
     assert "Evidence graph top blocker:" not in markdown
     assert "tests/test_pr_quality_evidence_narrative.py" in markdown
     assert "python -m pre_commit run -a" in markdown
+
+
+def test_green_narrative_explains_raw_log_full_spine_proof_changes(tmp_path: Path) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    graph = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [
+                {
+                    "title": "PR Quality evidence changed",
+                    "summary": "The PR Quality evidence comment path changed.",
+                    "risk_surface": "pr_quality",
+                    "severity": "warning",
+                    "review_first": True,
+                    "operator_action": "review",
+                }
+            ],
+            "source_summary": [],
+        },
+    )
+    control_room = _write_json(
+        tmp_path / "control-room-with-security-review.json",
+        {
+            "schema_version": "sdetkit.adaptive.sentinel.control_room.v1",
+            "state": "healthy",
+            "active_threat_count": 0,
+            "active_threats": [],
+            "review_first_count": 0,
+            "automation_allowed_now": False,
+            "security_review_collection_status": "collected",
+            "security_review_finding_count": 0,
+            "security_review_state": "healthy",
+        },
+    )
+    changed = _write(
+        tmp_path / "changed-files.txt",
+        "tests/test_full_spine_raw_log_diagnosis_integration.py\n",
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=control_room,
+        evidence_graph=graph,
+        failure_bundle=None,
+        changed_files=changed,
+    )
+
+    markdown = str(payload["markdown"])
+    assert payload["primary_signal"]["kind"] == "integration_proof"
+    assert payload["primary_signal"]["surface"] == "tests"
+    assert payload["primary_signal"]["title"] == "Raw-log full-spine proof changed"
+    assert "This PR changes the raw-log full-spine regression proof." in markdown
+    assert "raw dependency, security, and release logs route through adaptive diagnosis" in markdown
+    assert "This is not a product failure and not a coverage issue." in markdown
+    assert "Confirm it starts from raw log text, not hand-written graph nodes." in markdown
+    assert "tests/test_full_spine_raw_log_diagnosis_integration.py" in markdown
+    assert "Security review evidence: collected; unresolved findings: 0." in markdown
+
+
+def test_green_narrative_explains_full_spine_real_blocker_proof_changes(tmp_path: Path) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    changed = _write(
+        tmp_path / "changed-files.txt",
+        "tests/test_full_spine_real_blocker_integration.py\n",
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=None,
+        evidence_graph=None,
+        failure_bundle=None,
+        changed_files=changed,
+    )
+
+    markdown = str(payload["markdown"])
+    assert payload["primary_signal"]["kind"] == "integration_proof"
+    assert payload["primary_signal"]["surface"] == "tests"
+    assert payload["primary_signal"]["title"] == "Full-spine real-blocker proof changed"
+    assert "real-blocker regression proof" in markdown
+    assert (
+        "blocker diagnoses flow through failure bundle, Evidence Graph, Mission Control, and PR Quality"
+        in markdown
+    )
+    assert "python -m pytest -q tests/test_full_spine_real_blocker_integration.py" in markdown
