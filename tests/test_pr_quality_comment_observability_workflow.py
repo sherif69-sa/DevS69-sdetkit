@@ -68,3 +68,36 @@ def test_pr_quality_comment_workflow_fails_loud_when_comment_not_visible() -> No
     assert "comment_status=missing" in text
     assert 'status not in {"posted", "updated"}' in text
     assert "PR Quality comment was not posted or updated" in text
+
+
+def test_pr_quality_comment_workflow_builds_check_intelligence_action_report() -> None:
+    text = _workflow_text()
+
+    assert "Build PR check intelligence action report" in text
+    assert "check-runs?per_page=100" in text
+    assert "build/pr-quality/checks/check-runs.json" in text
+    assert "PR Quality local quality gate" in text
+    assert "python -m sdetkit.check_intelligence" in text
+    assert "--review-threads-json build/pr-quality/security-review/review-threads.json" in text
+    assert "--out-dir build/pr-quality/check-intelligence" in text
+
+
+def test_pr_quality_comment_workflow_renders_comment_from_action_report() -> None:
+    text = _workflow_text()
+
+    assert "python -m sdetkit.pr_quality_evidence_narrative" in text
+    assert "--out build/pr-quality/pr-evidence-narrative.md" in text
+    assert "python -m sdetkit.pr_quality_action_report" in text
+    assert "--action-report build/pr-quality/check-intelligence/action-report.json" in text
+    assert (
+        "--check-intelligence build/pr-quality/check-intelligence/check-intelligence.json" in text
+    )
+    assert "--out build/pr-quality/pr-comment-body.md" in text
+
+
+def test_pr_quality_comment_workflow_uploads_check_intelligence_artifacts() -> None:
+    text = _workflow_text()
+
+    assert "build/pr-quality/checks/" in text
+    assert "build/pr-quality/check-intelligence/" in text
+    assert "build/pr-quality/pr-evidence-narrative.md" in text

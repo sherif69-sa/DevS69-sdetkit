@@ -290,9 +290,26 @@ def _security_review_summary(review_threads_json: Path | None) -> JsonObject:
     except Exception:
         findings = []
 
+    compact_findings = [
+        {
+            "title": _string(item.get("title")),
+            "summary": _string(item.get("summary") or item.get("message")),
+            "path": _string(item.get("path")),
+            "line": item.get("line", ""),
+            "comment_url": _string(item.get("comment_url") or item.get("url")),
+            "recommended_commands": [
+                str(command)
+                for command in _as_list(item.get("recommended_commands"))
+                if isinstance(command, str)
+            ],
+        }
+        for item in findings
+    ]
+
     return {
         "collected": True,
         "unresolved_findings": len(findings),
+        "findings": compact_findings,
         "source": review_threads_json.as_posix(),
     }
 
@@ -422,6 +439,58 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
     failed = _as_list(intelligence.get("failed_checks"))
     queued = _as_list(intelligence.get("queued_checks"))
     startup = _as_list(intelligence.get("startup_failures"))
+
+    security_review = _as_dict(intelligence.get("security_review"))
+    security_findings = [
+        _as_dict(item)
+        for item in _as_list(security_review.get("findings"))
+        if isinstance(item, dict)
+    ]
+    unresolved_security = int(security_review.get("unresolved_findings", 0) or 0)
+    if unresolved_security and not failed:
+        finding = security_findings[0] if security_findings else {}
+        commands = [
+            str(command)
+            for command in _as_list(finding.get("recommended_commands"))
+            if isinstance(command, str)
+        ]
+        return {
+            "schema_version": ACTION_REPORT_SCHEMA_VERSION,
+            "status": "review_required",
+            "primary_blocker": {
+                "check": "GitHub security review",
+                "title": _string(finding.get("title") or "Security review requires action"),
+                "surface": "security",
+                "impact": _string(
+                    finding.get("summary")
+                    or "An unresolved security review finding must be fixed or dismissed with a review reason."
+                ),
+                "code": "SECURITY_REVIEW_FINDING",
+                "url": _string(finding.get("comment_url")),
+                "path": _string(finding.get("path")),
+                "line": finding.get("line", ""),
+            },
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": "security review findings are review-first and cannot be auto-dismissed",
+            },
+            "recommended_actions": commands
+            or [
+                "Review unresolved GitHub Advanced Security comments on the PR.",
+                "Fix the flagged surface or dismiss the false positive with a review reason.",
+            ],
+            "proof_commands": [
+                "python -m sdetkit security check --root . --format json",
+                "python -m pre_commit run -a",
+            ],
+            "evidence": {
+                "failed_check_count": 0,
+                "queued_check_count": len(queued),
+                "startup_failure_count": len(startup),
+                "security_review": security_review,
+            },
+        }
 
     if failed:
         check = _primary_failed_check(intelligence)
