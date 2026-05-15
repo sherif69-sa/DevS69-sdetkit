@@ -368,6 +368,60 @@ def _doctor_cortex_artifacts(summary: dict[str, Any] | None) -> list[dict[str, s
     return [artifact for artifact in artifacts if isinstance(artifact, dict)]
 
 
+_EVIDENCE_GRAPH_SURFACE_PRIORITY = {
+    "security": 100,
+    "dependency": 90,
+    "release": 85,
+    "workflow": 80,
+    "cli": 75,
+    "tests": 70,
+    "docs": 60,
+    "diagnostic_engine": 50,
+    "pr_quality": 40,
+    "quality": 30,
+    "maintenance": 20,
+    "unknown": 0,
+}
+
+_EVIDENCE_GRAPH_SEVERITY_PRIORITY = {
+    "critical": 30,
+    "warning": 20,
+    "healthy": 0,
+}
+
+
+def _evidence_graph_node_score(node: dict[str, Any]) -> tuple[int, int, int, str]:
+    surface = str(node.get("risk_surface", "unknown") or "unknown")
+    severity = str(node.get("severity", "unknown") or "unknown")
+    review_first = 1 if bool(node.get("review_first", False)) else 0
+    return (
+        review_first,
+        _EVIDENCE_GRAPH_SEVERITY_PRIORITY.get(severity, 0),
+        _EVIDENCE_GRAPH_SURFACE_PRIORITY.get(surface, 0),
+        str(node.get("title", "")),
+    )
+
+
+def _evidence_graph_top_blocker(nodes: list[dict[str, Any]]) -> dict[str, Any]:
+    if not nodes:
+        return {}
+    return max(nodes, key=_evidence_graph_node_score)
+
+
+def _evidence_graph_next_commands(node: dict[str, Any]) -> list[str]:
+    commands: list[str] = []
+    for key in ("proof_commands", "recommended_commands"):
+        values = node.get(key)
+        if not isinstance(values, list):
+            continue
+        for value in values:
+            if isinstance(value, str) and value and value not in commands:
+                commands.append(value)
+            if len(commands) >= 5:
+                return commands
+    return commands
+
+
 def _collect_evidence_graph(graph_path: Path | None) -> dict[str, Any] | None:
     if graph_path is None:
         return None
@@ -441,6 +495,8 @@ def _collect_evidence_graph(graph_path: Path | None) -> dict[str, Any] | None:
     risk_surfaces = sorted(
         {str(node.get("risk_surface", "unknown") or "unknown") for node in nodes}
     )
+    top_blocker = _evidence_graph_top_blocker(nodes)
+    top_blocker_next_commands = _evidence_graph_next_commands(top_blocker)
 
     graph_dir = resolved.parent
     artifact_specs = [
@@ -468,6 +524,12 @@ def _collect_evidence_graph(graph_path: Path | None) -> dict[str, Any] | None:
         "critical_count": critical_count,
         "automation_allowed_now": automation_allowed_now,
         "risk_surfaces": risk_surfaces,
+        "top_blocker_title": str(top_blocker.get("title", "") or "none"),
+        "top_blocker_surface": str(top_blocker.get("risk_surface", "") or "none"),
+        "top_blocker_severity": str(top_blocker.get("severity", "") or "none"),
+        "top_blocker_action": str(top_blocker.get("operator_action", "") or "none"),
+        "top_blocker_review_first": bool(top_blocker.get("review_first", False)),
+        "next_commands": top_blocker_next_commands,
         "source_count": len(source_summary),
         "source_summary": source_summary,
         "artifacts": artifacts,
@@ -506,6 +568,10 @@ def _format_evidence_graph(summary: dict[str, Any] | None) -> list[str]:
         f"- Source count: {summary.get('source_count', 0)}",
         f"- Automation allowed now: {str(summary.get('automation_allowed_now', False)).lower()}",
         f"- Risk surfaces: {', '.join(str(surface) for surface in risk_surfaces) or 'none'}",
+        f"- Top blocker: {summary.get('top_blocker_title', 'none')}",
+        f"- Top blocker surface: {summary.get('top_blocker_surface', 'none')}",
+        f"- Top blocker action: {summary.get('top_blocker_action', 'none')}",
+        f"- Next commands: {'; '.join(str(command) for command in summary.get('next_commands', [])) or 'none'}",
         f"- Graph: `{summary.get('path', '')}`",
     ]
 
@@ -522,6 +588,10 @@ def _evidence_graph_ledger_summary(bundle: dict[str, Any]) -> dict[str, Any] | N
         "critical_count": int(summary.get("critical_count", 0) or 0),
         "automation_allowed_now": bool(summary.get("automation_allowed_now", False)),
         "risk_surfaces": summary.get("risk_surfaces", []),
+        "top_blocker_title": str(summary.get("top_blocker_title", "")),
+        "top_blocker_surface": str(summary.get("top_blocker_surface", "")),
+        "top_blocker_action": str(summary.get("top_blocker_action", "")),
+        "next_commands": summary.get("next_commands", []),
     }
 
 
@@ -1300,6 +1370,17 @@ def _summarize(args: argparse.Namespace) -> int:
         print(
             f"{summary_prefix}_automation_allowed_now="
             f"{str(evidence_graph.get('automation_allowed_now', False)).lower()}"
+        )
+        print(
+            f"{summary_prefix}_top_blocker_surface="
+            f"{evidence_graph.get('top_blocker_surface', 'none')}"
+        )
+        print(
+            f"{summary_prefix}_top_blocker_title={evidence_graph.get('top_blocker_title', 'none')}"
+        )
+        print(
+            f"{summary_prefix}_top_blocker_action="
+            f"{evidence_graph.get('top_blocker_action', 'none')}"
         )
     adaptive_failure_bundle = bundle.get("adaptive_failure_bundle")
     if isinstance(adaptive_failure_bundle, dict):

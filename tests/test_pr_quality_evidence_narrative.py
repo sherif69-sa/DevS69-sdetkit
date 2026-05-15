@@ -694,3 +694,133 @@ def test_green_narrative_reports_security_review_collection_status(tmp_path: Pat
 
     markdown = str(payload["markdown"])
     assert "Security review evidence: collected; unresolved findings: 0." in markdown
+
+
+def test_green_narrative_uses_evidence_graph_dependency_top_blocker(tmp_path: Path) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    graph = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [
+                {
+                    "title": "PR Quality evidence changed",
+                    "summary": "The PR Quality evidence comment path changed.",
+                    "risk_surface": "pr_quality",
+                    "severity": "warning",
+                    "review_first": True,
+                    "recommended_commands": [
+                        "python -m pytest -q tests/test_pr_quality_evidence_narrative.py -o addopts="
+                    ],
+                    "operator_action": "review",
+                },
+                {
+                    "title": "Dependency resolver failed",
+                    "summary": "pip could not resolve constraints before tests proved behavior.",
+                    "risk_surface": "dependency",
+                    "severity": "warning",
+                    "review_first": True,
+                    "safe_to_auto_fix": False,
+                    "proof_commands": [
+                        "PYTHONPATH=src python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+                    ],
+                    "recommended_commands": [
+                        "Reproduce the exact install lane.",
+                    ],
+                    "operator_action": "review",
+                },
+            ],
+            "source_summary": [],
+        },
+    )
+    control_room = _write_json(
+        tmp_path / "control-room-with-security-review.json",
+        {
+            "schema_version": "sdetkit.adaptive.sentinel.control_room.v1",
+            "state": "healthy",
+            "active_threat_count": 0,
+            "active_threats": [],
+            "review_first_count": 0,
+            "automation_allowed_now": False,
+            "security_review_collection_status": "collected",
+            "security_review_finding_count": 0,
+            "security_review_state": "healthy",
+        },
+    )
+    changed = _write(
+        tmp_path / "changed-files.txt",
+        "src/sdetkit/pr_quality_evidence_narrative.py\n",
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=control_room,
+        evidence_graph=graph,
+        failure_bundle=None,
+        changed_files=changed,
+    )
+
+    markdown = str(payload["markdown"])
+    assert payload["primary_signal"]["kind"] == "review_signal"
+    assert payload["primary_signal"]["surface"] == "dependency"
+    assert payload["primary_signal"]["title"] == "Dependency resolver failed"
+    assert payload["graph"]["top_blocker"]["surface"] == "dependency"
+    assert payload["graph"]["top_blocker"]["title"] == "Dependency resolver failed"
+    assert payload["graph"]["top_blocker"]["action"] == "review"
+    assert "Evidence graph top blocker: Dependency resolver failed [dependency]." in markdown
+    assert "Security review evidence: collected; unresolved findings: 0." in markdown
+    assert "PYTHONPATH=src python -m pip install -c constraints-ci.txt" in markdown
+    assert "Reproduce the exact install lane." in markdown
+
+
+def test_green_narrative_keeps_pr_quality_primary_when_graph_only_has_pr_quality(
+    tmp_path: Path,
+) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    graph = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [
+                {
+                    "title": "Adaptive failure bundle signal",
+                    "summary": "The PR Quality evidence comment path changed.",
+                    "risk_surface": "pr_quality",
+                    "severity": "warning",
+                    "review_first": True,
+                    "recommended_commands": [
+                        "python -m pytest -q tests/test_pr_quality_evidence_narrative.py -o addopts="
+                    ],
+                    "operator_action": "review",
+                }
+            ],
+            "source_summary": [],
+        },
+    )
+    changed = _write(
+        tmp_path / "changed-files.txt",
+        "src/sdetkit/pr_quality_evidence_narrative.py\n",
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=None,
+        evidence_graph=graph,
+        failure_bundle=None,
+        changed_files=changed,
+    )
+
+    markdown = str(payload["markdown"])
+    assert payload["primary_signal"]["surface"] == "pr_quality"
+    assert payload["primary_signal"]["title"] == "PR Quality evidence changed"
+    assert "Evidence graph top blocker:" not in markdown
+    assert "tests/test_pr_quality_evidence_narrative.py" in markdown
+    assert "python -m pre_commit run -a" in markdown

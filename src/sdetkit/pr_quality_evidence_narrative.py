@@ -69,6 +69,17 @@ _SURFACE_REASON = {
 }
 
 
+_REAL_BLOCKER_SURFACES = {
+    "security",
+    "dependency",
+    "release",
+    "workflow",
+    "cli",
+    "tests",
+    "docs",
+}
+
+
 _GREEN_PROOF_BY_SURFACE = {
     "pr_quality": [
         "python -m pytest -q tests/test_pr_quality_evidence_narrative.py tests/test_pr_quality_adaptive_sentinel_workflow.py tests/test_pr_quality_failure_bundle_workflow.py -o addopts=",
@@ -368,6 +379,17 @@ def _dedupe(items: list[str]) -> list[str]:
     return out
 
 
+def _commands_from_node(node: JsonObject) -> list[str]:
+    commands: list[str] = []
+    for key in ("proof_commands", "recommended_commands"):
+        for command in _string_list(node.get(key)):
+            if command not in commands:
+                commands.append(command)
+            if len(commands) >= 5:
+                return commands
+    return commands
+
+
 def _green_proof_commands(
     *,
     changed_surfaces: list[str],
@@ -381,11 +403,10 @@ def _green_proof_commands(
             surfaces.append(surface)
 
     commands: list[str] = []
-    for node in nodes:
+    for node in sorted(nodes, key=_node_score, reverse=True):
         surface = str(node.get("risk_surface", "unknown") or "unknown")
-        if surface == "security":
-            commands.extend(_string_list(node.get("recommended_commands")))
-            commands.extend(_string_list(node.get("proof_commands")))
+        if surface in _REAL_BLOCKER_SURFACES:
+            commands.extend(_commands_from_node(node))
 
     for surface in surfaces:
         commands.extend(_GREEN_PROOF_BY_SURFACE.get(surface, []))
@@ -560,6 +581,24 @@ def build_narrative(
             "critical_count": sum(
                 1 for node in nodes if str(node.get("severity", "")) == "critical"
             ),
+            "top_blocker": {
+                "title": _human_finding_title(
+                    primary_node,
+                    changed_files=changed,
+                    changed_surfaces=changed_surfaces,
+                )
+                if primary_node
+                else "none",
+                "surface": str(primary_node.get("risk_surface", "none") or "none")
+                if primary_node
+                else "none",
+                "action": str(primary_node.get("operator_action", "none") or "none")
+                if primary_node
+                else "none",
+                "review_first": bool(primary_node.get("review_first", False))
+                if primary_node
+                else False,
+            },
         },
         "primary_signal": {
             "kind": primary_kind,
@@ -704,6 +743,16 @@ def _what_happened(
         lines.append(f"Diff-owned risk surfaces: {', '.join(changed_surfaces)}.")
 
     if nodes:
+        top_node = _primary_node(nodes)
+        top_surface = str(top_node.get("risk_surface", "unknown") or "unknown")
+        top_title = _human_finding_title(
+            top_node,
+            changed_files=changed_files,
+            changed_surfaces=changed_surfaces,
+        )
+        if top_surface in _REAL_BLOCKER_SURFACES:
+            lines.append(f"Evidence graph top blocker: {top_title} [{top_surface}].")
+
         titles = [
             (
                 f"{_human_finding_title(node, changed_files=changed_files, changed_surfaces=changed_surfaces)} "
