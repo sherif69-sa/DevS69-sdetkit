@@ -201,3 +201,72 @@ def test_raw_release_log_flows_through_full_spine(tmp_path: Path) -> None:
         expected_title="Release artifact validation failed",
         expected_command_fragment="twine check",
     )
+
+
+def test_raw_workflow_log_flows_through_full_spine(tmp_path: Path) -> None:
+    _assert_raw_log_full_spine(
+        tmp_path=tmp_path,
+        surface="workflow",
+        raw_log="\n".join(
+            [
+                "Invalid workflow file: .github/workflows/pr-quality-comment.yml",
+                "You have an error in your yaml syntax on line 42",
+                "Process completed with exit code 1",
+            ]
+        ),
+        expected_code="WORKFLOW_CONTRACT_FAILURE",
+        expected_title="GitHub Actions workflow contract failed",
+        expected_command_fragment="pre_commit",
+    )
+
+
+def test_raw_cli_log_flows_through_full_spine(tmp_path: Path) -> None:
+    _assert_raw_log_full_spine(
+        tmp_path=tmp_path,
+        surface="cli",
+        raw_log="\n".join(
+            [
+                "python -m sdetkit mission-control summarize --bundle build/mission-control/mission-control.json",
+                "error: unrecognized arguments: --bundle",
+                "Process completed with exit code 2",
+            ]
+        ),
+        expected_code="CLI_CONTRACT_FAILURE",
+        expected_title="CLI contract failed",
+        expected_command_fragment="sdetkit",
+    )
+
+
+def test_raw_docs_log_flows_through_full_spine(tmp_path: Path) -> None:
+    _assert_raw_log_full_spine(
+        tmp_path=tmp_path,
+        surface="docs",
+        raw_log="\n".join(
+            [
+                "mkdocs build --strict",
+                "ERROR - Config value 'nav': The file docs/missing.md does not exist",
+                "Aborted with 1 Configuration Errors!",
+                "Process completed with exit code 1",
+            ]
+        ),
+        expected_code="DOCS_BUILD_CONTRACT",
+        expected_title="Documentation build contract failed",
+        expected_command_fragment="mkdocs build",
+    )
+
+
+def test_raw_pytest_log_flows_through_full_spine(tmp_path: Path) -> None:
+    _assert_raw_log_full_spine(
+        tmp_path=tmp_path,
+        surface="tests",
+        raw_log="\n".join(
+            [
+                "FAILED tests/test_real_behavior.py::test_behavior - AssertionError",
+                "E AssertionError: expected healthy state",
+                "Process completed with exit code 1",
+            ]
+        ),
+        expected_code="PYTEST_ASSERTION_FAILURE",
+        expected_title="Targeted test behavior failed",
+        expected_command_fragment="pytest",
+    )

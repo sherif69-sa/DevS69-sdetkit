@@ -82,6 +82,7 @@ _REVIEW_FIRST_SURFACES = {
     "pr_quality",
     "quality",
     "unknown",
+    "docs",
 }
 
 _VALID_SURFACES = {
@@ -487,6 +488,9 @@ def _risk_surface(
         "SECRET_EXPOSURE": "security",
         "RELEASE_ARTIFACT_INVALID": "release",
         "WORKFLOW_CONTRACT_FAILURE": "workflow",
+        "CLI_CONTRACT_FAILURE": "cli",
+        "DOCS_BUILD_CONTRACT": "docs",
+        "PYTEST_ASSERTION_FAILURE": "tests",
     }
     if code in code_surfaces:
         return code_surfaces[code]
