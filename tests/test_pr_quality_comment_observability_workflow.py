@@ -101,3 +101,13 @@ def test_pr_quality_comment_workflow_uploads_check_intelligence_artifacts() -> N
     assert "build/pr-quality/checks/" in text
     assert "build/pr-quality/check-intelligence/" in text
     assert "build/pr-quality/pr-evidence-narrative.md" in text
+
+
+def test_pr_quality_comment_workflow_marks_required_contexts_for_check_intelligence() -> None:
+    text = _workflow_text()
+
+    assert "required_status_checks/contexts" in text
+    assert "combined-status-raw.json" in text
+    assert "required-contexts.json" in text
+    assert '"required": context in required_contexts' in text
+    assert 'item["required"] = name in required_contexts' in text

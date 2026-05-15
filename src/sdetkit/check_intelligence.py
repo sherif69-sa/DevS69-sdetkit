@@ -148,6 +148,22 @@ def _is_startup_failure(record: JsonObject) -> bool:
     return _check_conclusion(record) == "startup_failure"
 
 
+def _check_required(record: JsonObject) -> bool:
+    value = record.get("required")
+    if isinstance(value, bool):
+        return value
+
+    value = record.get("is_required")
+    if isinstance(value, bool):
+        return value
+
+    value = record.get("required_status")
+    if isinstance(value, bool):
+        return value
+
+    return False
+
+
 def _record_url(record: JsonObject) -> str:
     for key in ("url", "html_url", "details_url"):
         value = _string(record.get(key))
@@ -333,6 +349,7 @@ def build_check_intelligence(
             "name": _check_name(record, index),
             "status": _check_status(record),
             "conclusion": _check_conclusion(record),
+            "required": _check_required(record),
             "url": _record_url(record),
         }
 
@@ -487,7 +504,21 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
             "evidence": {
                 "failed_check_count": 0,
                 "queued_check_count": len(queued),
+                "required_queued_check_count": len(
+                    [
+                        _as_dict(item)
+                        for item in queued
+                        if bool(_as_dict(item).get("required", False))
+                    ]
+                ),
                 "startup_failure_count": len(startup),
+                "required_startup_failure_count": len(
+                    [
+                        _as_dict(item)
+                        for item in startup
+                        if bool(_as_dict(item).get("required", False))
+                    ]
+                ),
                 "security_review": security_review,
             },
         }
@@ -525,37 +556,61 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
             "evidence": {
                 "failed_check_count": len(failed),
                 "queued_check_count": len(queued),
+                "required_queued_check_count": len(
+                    [
+                        _as_dict(item)
+                        for item in queued
+                        if bool(_as_dict(item).get("required", False))
+                    ]
+                ),
                 "startup_failure_count": len(startup),
+                "required_startup_failure_count": len(
+                    [
+                        _as_dict(item)
+                        for item in startup
+                        if bool(_as_dict(item).get("required", False))
+                    ]
+                ),
                 "security_review": intelligence.get("security_review", {}),
             },
         }
 
-    if queued or startup:
+    required_queued = [
+        _as_dict(item) for item in queued if bool(_as_dict(item).get("required", False))
+    ]
+    required_startup = [
+        _as_dict(item) for item in startup if bool(_as_dict(item).get("required", False))
+    ]
+
+    if required_queued or required_startup:
+        blocker = _as_dict((required_queued or required_startup)[0])
         return {
             "schema_version": ACTION_REPORT_SCHEMA_VERSION,
             "status": "incomplete",
             "primary_blocker": {
-                "check": _string(_as_dict((queued or startup)[0]).get("name")),
-                "title": "Checks are not complete",
+                "check": _string(blocker.get("name")),
+                "title": "Required checks are not complete",
                 "surface": "workflow",
                 "impact": "The PR cannot be treated as fully proven while required checks are queued, pending, or failed to start.",
                 "code": "CHECKS_INCOMPLETE",
-                "url": _string(_as_dict((queued or startup)[0]).get("url")),
+                "url": _string(blocker.get("url")),
             },
             "automation": {
                 "attempted": False,
                 "allowed": False,
-                "reason": "check completion is required before remediation or green signoff",
+                "reason": "required check completion is needed before remediation or green signoff",
             },
             "recommended_actions": [
-                "Wait for queued checks to complete or inspect the workflow-start issue.",
-                "Do not treat the PR as green until check intelligence is complete.",
+                "Wait for required queued checks to complete or inspect the workflow-start issue.",
+                "Do not treat the PR as green until required check intelligence is complete.",
             ],
             "proof_commands": [],
             "evidence": {
                 "failed_check_count": 0,
                 "queued_check_count": len(queued),
+                "required_queued_check_count": len(required_queued),
                 "startup_failure_count": len(startup),
+                "required_startup_failure_count": len(required_startup),
                 "security_review": intelligence.get("security_review", {}),
             },
         }
@@ -573,8 +628,10 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
         "proof_commands": [],
         "evidence": {
             "failed_check_count": 0,
-            "queued_check_count": 0,
-            "startup_failure_count": 0,
+            "queued_check_count": len(queued),
+            "required_queued_check_count": 0,
+            "startup_failure_count": len(startup),
+            "required_startup_failure_count": 0,
             "security_review": intelligence.get("security_review", {}),
         },
     }

@@ -135,30 +135,83 @@ jobs:
             > build/pr-quality/checks/check-runs-raw.json \
             || echo '{"check_runs":[]}' > build/pr-quality/checks/check-runs-raw.json
 
+          gh api \
+            "repos/$REPOSITORY_OWNER/$REPOSITORY_NAME/commits/$HEAD_SHA/status" \
+            > build/pr-quality/checks/combined-status-raw.json \
+            || echo '{"statuses":[]}' > build/pr-quality/checks/combined-status-raw.json
+
+          gh api \
+            "repos/$REPOSITORY_OWNER/$REPOSITORY_NAME/branches/${{ github.event.pull_request.base.ref }}/protection/required_status_checks/contexts" \
+            > build/pr-quality/checks/required-contexts.json \
+            || echo '[]' > build/pr-quality/checks/required-contexts.json
+
           python - <<'PY'
           import json
           import os
           from pathlib import Path
 
           raw_path = Path("build/pr-quality/checks/check-runs-raw.json")
+          status_path = Path("build/pr-quality/checks/combined-status-raw.json")
+          required_path = Path("build/pr-quality/checks/required-contexts.json")
+
           payload = json.loads(raw_path.read_text(encoding="utf-8"))
           runs = payload.get("check_runs")
           if not isinstance(runs, list):
               runs = []
 
+          statuses_payload = json.loads(status_path.read_text(encoding="utf-8"))
+          statuses = statuses_payload.get("statuses")
+          if not isinstance(statuses, list):
+              statuses = []
+
+          required_payload = json.loads(required_path.read_text(encoding="utf-8"))
+          required_contexts = set(required_payload if isinstance(required_payload, list) else [])
+
+          normalized = []
+          for run in runs:
+              if not isinstance(run, dict):
+                  continue
+              name = str(run.get("name") or "")
+              item = dict(run)
+              item["required"] = name in required_contexts
+              normalized.append(item)
+
+          state_to_conclusion = {
+              "success": "success",
+              "failure": "failure",
+              "error": "failure",
+              "pending": "",
+          }
+          for status in statuses:
+              if not isinstance(status, dict):
+                  continue
+              context = str(status.get("context") or "")
+              state = str(status.get("state") or "").lower()
+              normalized.append(
+                  {
+                      "name": context,
+                      "context": context,
+                      "status": "completed" if state in {"success", "failure", "error"} else "queued",
+                      "conclusion": state_to_conclusion.get(state, state),
+                      "url": status.get("target_url") or "",
+                      "required": context in required_contexts,
+                  }
+              )
+
           outcome = os.environ.get("QUALITY_OUTCOME", "failure")
           local_conclusion = "success" if outcome == "success" else "failure"
-          runs.append(
+          normalized.append(
               {
                   "name": "PR Quality local quality gate",
                   "status": "completed",
                   "conclusion": local_conclusion,
                   "log_path": "quality.log",
+                  "required": "PR Quality local quality gate" in required_contexts,
               }
           )
 
           Path("build/pr-quality/checks/check-runs.json").write_text(
-              json.dumps({"check_runs": runs}, indent=2, sort_keys=True) + "\n",
+              json.dumps({"check_runs": normalized}, indent=2, sort_keys=True) + "\n",
               encoding="utf-8",
           )
           PY
