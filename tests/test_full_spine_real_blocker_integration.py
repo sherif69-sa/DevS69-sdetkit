@@ -322,3 +322,73 @@ def test_release_failure_flows_through_full_spine(tmp_path: Path) -> None:
             "Run twine check before release publication.",
         ],
     )
+
+
+def test_workflow_failure_flows_through_full_spine(tmp_path: Path) -> None:
+    _assert_full_spine_blocker(
+        tmp_path=tmp_path,
+        code="WORKFLOW_CONTRACT_FAILURE",
+        title="Workflow contract failed",
+        diagnosis="The CI workflow contract failed before product behavior could be trusted.",
+        severity="high",
+        expected_surface="workflow",
+        affected_files=[".github/workflows/pr-quality-comment.yml"],
+        proof_commands=["PYTHONPATH=src python -m pre_commit run -a"],
+        recommended_fix=[
+            "Inspect the changed workflow contract.",
+            "Validate the workflow YAML and required permission surface.",
+        ],
+    )
+
+
+def test_cli_failure_flows_through_full_spine(tmp_path: Path) -> None:
+    _assert_full_spine_blocker(
+        tmp_path=tmp_path,
+        code="CLI_CONTRACT_FAILURE",
+        title="CLI contract failed",
+        diagnosis="The command-line entry point failed before the operator path could be trusted.",
+        severity="high",
+        expected_surface="cli",
+        affected_files=["src/sdetkit/cli.py"],
+        proof_commands=["PYTHONPATH=src python -m sdetkit --help"],
+        recommended_fix=[
+            "Reproduce the failing CLI command.",
+            "Repair the command contract before changing unrelated tests.",
+        ],
+    )
+
+
+def test_docs_failure_flows_through_full_spine(tmp_path: Path) -> None:
+    _assert_full_spine_blocker(
+        tmp_path=tmp_path,
+        code="DOCS_BUILD_CONTRACT",
+        title="Docs build contract failed",
+        diagnosis="The documentation build or navigation contract failed.",
+        severity="high",
+        expected_surface="docs",
+        affected_files=["docs/index.md", "mkdocs.yml"],
+        proof_commands=["PYTHONPATH=src mkdocs build --strict"],
+        recommended_fix=[
+            "Reproduce the strict docs build.",
+            "Repair navigation or referenced document paths.",
+        ],
+    )
+
+
+def test_tests_failure_flows_through_full_spine(tmp_path: Path) -> None:
+    _assert_full_spine_blocker(
+        tmp_path=tmp_path,
+        code="PYTEST_ASSERTION_FAILURE",
+        title="Behavior regression test failed",
+        diagnosis="A targeted pytest assertion failed in a behavior-owned test.",
+        severity="high",
+        expected_surface="tests",
+        affected_files=["tests/test_real_behavior.py"],
+        proof_commands=[
+            "PYTHONPATH=src python -m pytest -q tests/test_real_behavior.py::test_behavior -o addopts="
+        ],
+        recommended_fix=[
+            "Inspect the failing assertion and changed behavior surface.",
+            "Fix the product behavior or update the test only if the contract changed intentionally.",
+        ],
+    )
