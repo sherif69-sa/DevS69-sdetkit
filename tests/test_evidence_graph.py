@@ -411,3 +411,32 @@ def test_evidence_graph_module_cli_accepts_failure_bundle(tmp_path: Path, capsys
     )
     assert graph["nodes"][0]["source"] == "failure_bundle"
     assert graph["nodes"][0]["risk_surface"] == "dependency"
+
+
+def test_evidence_graph_marks_docs_contract_failures_review_first(tmp_path: Path) -> None:
+    failure_bundle = tmp_path / "failure-bundle.json"
+    failure_bundle.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.adaptive.diagnosis.v1",
+                "diagnoses": [
+                    {
+                        "code": "DOCS_BUILD_CONTRACT",
+                        "title": "Documentation build contract failed",
+                        "diagnosis": "The documentation build or navigation contract failed.",
+                        "severity": "high",
+                        "proof_commands": [
+                            "NO_MKDOCS_2_WARNING=1 PYTHONPATH=src python -m mkdocs build --strict"
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    graph = build_evidence_graph(failure_bundle=failure_bundle)
+
+    assert graph["nodes"][0]["risk_surface"] == "docs"
+    assert graph["nodes"][0]["review_first"] is True
+    assert graph["nodes"][0]["safe_to_auto_fix"] is False
