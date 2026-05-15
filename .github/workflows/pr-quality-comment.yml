@@ -118,6 +118,58 @@ jobs:
             --failure-bundle build/pr-quality/failure-intelligence/failure-bundle.json \
             --out-dir build/sdetkit/evidence-graph
 
+      - name: Build PR check intelligence action report
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          QUALITY_OUTCOME: ${{ steps.quality.outcome }}
+        run: |
+          mkdir -p build/pr-quality/checks build/pr-quality/check-intelligence
+
+          gh api \
+            "repos/$REPOSITORY_OWNER/$REPOSITORY_NAME/commits/$HEAD_SHA/check-runs?per_page=100" \
+            > build/pr-quality/checks/check-runs-raw.json \
+            || echo '{"check_runs":[]}' > build/pr-quality/checks/check-runs-raw.json
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          raw_path = Path("build/pr-quality/checks/check-runs-raw.json")
+          payload = json.loads(raw_path.read_text(encoding="utf-8"))
+          runs = payload.get("check_runs")
+          if not isinstance(runs, list):
+              runs = []
+
+          outcome = os.environ.get("QUALITY_OUTCOME", "failure")
+          local_conclusion = "success" if outcome == "success" else "failure"
+          runs.append(
+              {
+                  "name": "PR Quality local quality gate",
+                  "status": "completed",
+                  "conclusion": local_conclusion,
+                  "log_path": "quality.log",
+              }
+          )
+
+          Path("build/pr-quality/checks/check-runs.json").write_text(
+              json.dumps({"check_runs": runs}, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          PYTHONPATH=src python -m sdetkit.check_intelligence \
+            --checks-json build/pr-quality/checks/check-runs.json \
+            --logs-dir . \
+            --review-threads-json build/pr-quality/security-review/review-threads.json \
+            --out-dir build/pr-quality/check-intelligence
+
+
       - name: Initialize PR comment status
         if: always()
         env:
@@ -159,8 +211,14 @@ jobs:
             --evidence-graph build/sdetkit/evidence-graph/evidence-graph.json \
             --failure-bundle build/pr-quality/failure-intelligence/failure-bundle.json \
             --changed-files build/pr-quality/changed-files.txt \
-            --out build/pr-quality/pr-comment-body.md \
+            --out build/pr-quality/pr-evidence-narrative.md \
             --json-out build/pr-quality/pr-evidence-narrative.json
+
+          PYTHONPATH=src python -m sdetkit.pr_quality_action_report \
+            --action-report build/pr-quality/check-intelligence/action-report.json \
+            --check-intelligence build/pr-quality/check-intelligence/check-intelligence.json \
+            --evidence-narrative build/pr-quality/pr-evidence-narrative.json \
+            --out build/pr-quality/pr-comment-body.md
 
       - name: Upload failure intelligence bundle
         if: always()
@@ -190,6 +248,9 @@ jobs:
             build/pr-quality/pr-evidence-narrative.json
             build/pr-quality/changed-files.txt
             build/pr-quality/comment-status.json
+            build/pr-quality/checks/
+            build/pr-quality/check-intelligence/
+            build/pr-quality/pr-evidence-narrative.md
             build/sdetkit/evidence-graph/
           if-no-files-found: ignore
 
