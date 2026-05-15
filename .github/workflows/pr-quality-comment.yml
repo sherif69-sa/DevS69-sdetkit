@@ -9,9 +9,14 @@ permissions:
   pull-requests: write
   issues: write
 
+concurrency:
+  group: pr-quality-comment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
@@ -113,6 +118,32 @@ jobs:
             --failure-bundle build/pr-quality/failure-intelligence/failure-bundle.json \
             --out-dir build/sdetkit/evidence-graph
 
+      - name: Initialize PR comment status
+        if: always()
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p build/pr-quality
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          Path("build/pr-quality/comment-status.json").write_text(
+              json.dumps(
+                  {
+                      "status": "failed",
+                      "pr_number": int(os.environ["PR_NUMBER"]),
+                      "reason": "comment step did not complete",
+                  },
+                  indent=2,
+                  sort_keys=True,
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          PY
+
       - name: Build PR comment body
         run: |
           mkdir -p build/pr-quality
@@ -149,16 +180,109 @@ jobs:
             .sdetkit/adaptive-sentinel/
           if-no-files-found: ignore
 
+      - name: Upload PR quality comment artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: pr-quality-comment
+          path: |
+            build/pr-quality/pr-comment-body.md
+            build/pr-quality/pr-evidence-narrative.json
+            build/pr-quality/changed-files.txt
+            build/pr-quality/comment-status.json
+            build/sdetkit/evidence-graph/
+          if-no-files-found: ignore
+
       - name: Comment on PR
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
           script: |
             const fs = require('fs');
-            const text = fs.readFileSync('build/pr-quality/pr-comment-body.md', 'utf8');
-            const body = `### SDET Quality Gate\n${text}`;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body,
-            });
+            const path = require('path');
+
+            const statusPath = 'build/pr-quality/comment-status.json';
+            const writeStatus = (payload) => {
+              fs.mkdirSync(path.dirname(statusPath), { recursive: true });
+              fs.writeFileSync(
+                statusPath,
+                `${JSON.stringify(payload, null, 2)}\n`,
+                'utf8'
+              );
+            };
+
+            try {
+              const text = fs.readFileSync('build/pr-quality/pr-comment-body.md', 'utf8');
+              const body = `### SDET Quality Gate\n${text}`;
+              const marker = '### SDET Quality Gate';
+
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                per_page: 100,
+              });
+
+              const existing = comments.find((comment) =>
+                comment.user?.type === 'Bot' && comment.body?.startsWith(marker)
+              );
+
+              if (existing) {
+                const { data: updated } = await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body,
+                });
+                writeStatus({
+                  status: 'updated',
+                  pr_number: context.issue.number,
+                  comment_id: updated.id,
+                  comment_url: updated.html_url,
+                  reason: 'updated existing SDET Quality Gate comment',
+                });
+                core.info(`comment_status=updated comment_url=${updated.html_url}`);
+              } else {
+                const { data: created } = await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body,
+                });
+                writeStatus({
+                  status: 'posted',
+                  pr_number: context.issue.number,
+                  comment_id: created.id,
+                  comment_url: created.html_url,
+                  reason: 'posted SDET Quality Gate comment',
+                });
+                core.info(`comment_status=posted comment_url=${created.html_url}`);
+              }
+            } catch (error) {
+              writeStatus({
+                status: 'failed',
+                pr_number: context.issue.number,
+                reason: String(error && error.message ? error.message : error),
+              });
+              core.setFailed(`failed to post PR Quality comment: ${error && error.message ? error.message : error}`);
+            }
+
+      - name: Verify PR Quality comment visibility
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("build/pr-quality/comment-status.json")
+          if not path.exists():
+              raise SystemExit("comment_status=missing: build/pr-quality/comment-status.json was not written")
+
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          status = str(payload.get("status", "missing"))
+          reason = str(payload.get("reason", ""))
+          print(f"comment_status={status}")
+          print(f"comment_reason={reason}")
+
+          if status not in {"posted", "updated"}:
+              raise SystemExit(f"PR Quality comment was not posted or updated: status={status} reason={reason}")
+          PY
