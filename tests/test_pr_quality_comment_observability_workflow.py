@@ -121,3 +121,22 @@ def test_pr_quality_comment_workflow_persists_required_contexts_for_missing_stat
     assert '"required_contexts": sorted(required_contexts)' in text
     assert "required-contexts.json" in text
     assert "combined-status-raw.json" in text
+
+
+def test_pr_quality_comment_workflow_feeds_action_report_into_evidence_graph() -> None:
+    text = _workflow_text()
+
+    check_intelligence_step = text.index("Build PR check intelligence action report")
+    graph_step = text.index("Build PR evidence graph")
+    narrative_step = text.index("python -m sdetkit.pr_quality_evidence_narrative")
+
+    assert check_intelligence_step < graph_step < narrative_step
+    assert "python -m sdetkit.evidence_graph" in text
+    assert (
+        "--pr-quality-action-report build/pr-quality/check-intelligence/action-report.json" in text
+    )
+    assert (
+        "--sentinel-control-room build/sdetkit/sentinel/control-room-with-security-review.json"
+        in text
+    )
+    assert "--failure-bundle build/pr-quality/failure-intelligence/failure-bundle.json" in text
