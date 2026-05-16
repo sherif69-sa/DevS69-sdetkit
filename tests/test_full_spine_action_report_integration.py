@@ -144,10 +144,7 @@ def test_missing_required_context_action_report_flows_through_full_spine(
     assert pr_payload["primary_signal"]["title"] == "Required checks are not complete"
     assert pr_payload["graph"]["top_blocker"]["surface"] == "workflow"
     assert pr_payload["graph"]["top_blocker"]["title"] == "Required checks are not complete"
-    assert (
-        "Evidence graph top blocker: Required checks are not complete [workflow]."
-        in pr_markdown
-    )
+    assert "Evidence graph top blocker: Required checks are not complete [workflow]." in pr_markdown
     assert "Security review evidence: collected; unresolved findings: 0." in pr_markdown
     assert "gh pr checks --required" in pr_markdown
     assert "Wait for required queued checks to complete." in pr_markdown
