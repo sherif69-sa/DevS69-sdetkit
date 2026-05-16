@@ -173,6 +173,51 @@ def _command_lines(values: list[Any]) -> list[str]:
     return [f"- `{item}`" for item in items] or ["- none"]
 
 
+def _evidence_review_signal_lines(evidence_narrative: JsonObject) -> list[str]:
+    primary = _as_dict(evidence_narrative.get("primary_signal"))
+    graph = _as_dict(evidence_narrative.get("graph"))
+    top_blocker = _as_dict(graph.get("top_blocker"))
+
+    kind = _string(primary.get("kind") or "")
+    title = _string(primary.get("title") or top_blocker.get("title") or "")
+    surface = _string(primary.get("surface") or top_blocker.get("surface") or "unknown")
+    action = _string(top_blocker.get("action") or "")
+    top_title = _string(top_blocker.get("title") or "")
+    top_surface = _string(top_blocker.get("surface") or "")
+
+    has_review_signal = kind == "review_signal"
+    has_review_top_blocker = (
+        bool(top_title) and top_title != "none" and top_surface != "none" and action == "review"
+    )
+    if not has_review_signal and not has_review_top_blocker:
+        return []
+
+    lines = [
+        "- Review signal: `present`",
+        f"- Surface: `{surface or 'unknown'}`",
+        f"- Title: {title or top_title or 'Evidence graph finding'}",
+        f"- Graph nodes: `{_int(graph.get('node_count'))}`",
+        f"- Review-first nodes: `{_int(graph.get('review_first_count'))}`",
+        f"- Critical nodes: `{_int(graph.get('critical_count'))}`",
+    ]
+
+    if action:
+        lines.append(f"- Operator action: `{action}`")
+    if isinstance(top_blocker.get("review_first"), bool):
+        lines.append(f"- Review first: `{str(top_blocker.get('review_first')).lower()}`")
+
+    proof_commands = [
+        str(item)
+        for item in _as_list(evidence_narrative.get("next_proof"))
+        if isinstance(item, str) and item.strip()
+    ]
+    if proof_commands:
+        lines.extend(["- Next proof:"])
+        lines.extend(f"  - `{command}`" for command in proof_commands[:5])
+
+    return lines
+
+
 def render_comment_body(
     *,
     action_report: JsonObject,
@@ -192,6 +237,10 @@ def render_comment_body(
     quality = _quality_lines(evidence_narrative)
     if quality:
         lines.extend(["## Quality summary", "", *quality, ""])
+
+    evidence_review_signal = _evidence_review_signal_lines(evidence_narrative)
+    if evidence_review_signal:
+        lines.extend(["## Evidence review signal", "", *evidence_review_signal, ""])
 
     lines.extend(
         [
@@ -223,7 +272,17 @@ def render_comment_body(
     )
 
     if status == "green":
-        lines.extend(["## Merge assessment", "", "- No action required from SDETKit.", ""])
+        if evidence_review_signal:
+            lines.extend(
+                [
+                    "## Merge assessment",
+                    "",
+                    "- Evidence review signal present; review the listed surface before merge.",
+                    "",
+                ]
+            )
+        else:
+            lines.extend(["## Merge assessment", "", "- No action required from SDETKit.", ""])
 
     rendered = "\n".join(lines)
     for phrase in BANNED_EDUCATIONAL_PHRASES:

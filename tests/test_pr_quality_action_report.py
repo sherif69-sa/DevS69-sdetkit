@@ -289,3 +289,63 @@ def test_action_report_incomplete_comment_shows_missing_required_context() -> No
     assert "Required queued checks: `1`" in body
     assert "Missing required contexts: `1`" in body
     assert "Required context has not reported yet." in body
+
+
+def test_action_report_green_comment_surfaces_evidence_review_signal() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "workflow",
+            "title": "Required checks are not complete",
+        },
+        "graph": {
+            "node_count": 1,
+            "review_first_count": 1,
+            "critical_count": 1,
+            "top_blocker": {
+                "title": "Required checks are not complete",
+                "surface": "workflow",
+                "action": "review",
+                "review_first": True,
+            },
+        },
+        "next_proof": [
+            "gh pr checks --required",
+            "python -m pre_commit run -a",
+        ],
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=evidence_narrative,
+    )
+
+    assert "SDETKit Review Result: Green" in body
+    assert "## Evidence review signal" in body
+    assert "Review signal: `present`" in body
+    assert "Surface: `workflow`" in body
+    assert "Required checks are not complete" in body
+    assert "Operator action: `review`" in body
+    assert "`gh pr checks --required`" in body
+    assert "Evidence review signal present; review the listed surface before merge." in body
+    assert "No action required from SDETKit." not in body
+    assert "Quality is green, so the review focus is not coverage." not in body
+    assert "The comment must guide maintainers" not in body
+    assert "Confirm the graph findings match the changed files and artifacts." not in body
