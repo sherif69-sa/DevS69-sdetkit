@@ -111,3 +111,13 @@ def test_pr_quality_comment_workflow_marks_required_contexts_for_check_intellige
     assert "required-contexts.json" in text
     assert '"required": context in required_contexts' in text
     assert 'item["required"] = name in required_contexts' in text
+
+
+def test_pr_quality_comment_workflow_persists_required_contexts_for_missing_status_detection() -> (
+    None
+):
+    text = _workflow_text()
+
+    assert '"required_contexts": sorted(required_contexts)' in text
+    assert "required-contexts.json" in text
+    assert "combined-status-raw.json" in text

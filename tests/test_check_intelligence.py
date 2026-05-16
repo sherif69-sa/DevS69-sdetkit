@@ -300,3 +300,68 @@ def test_check_intelligence_blocks_green_on_required_queued_checks(tmp_path: Pat
     assert report["primary_blocker"]["check"] == "ci"
     assert report["primary_blocker"]["title"] == "Required checks are not complete"
     assert report["evidence"]["required_queued_check_count"] == 1
+
+
+def test_check_intelligence_synthesizes_missing_required_context_as_blocker(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "required_contexts": ["ci"],
+            "check_runs": [
+                {
+                    "name": "quality",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "required": False,
+                }
+            ],
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    report = check_intelligence.build_action_report(intelligence)
+
+    assert intelligence["checks_seen"] == 2
+    assert intelligence["required_contexts"] == ["ci"]
+    assert intelligence["missing_required_contexts"] == ["ci"]
+    assert intelligence["queued_checks"][0]["name"] == "ci"
+    assert intelligence["queued_checks"][0]["required"] is True
+    assert intelligence["queued_checks"][0]["missing_required_context"] is True
+
+    assert report["status"] == "incomplete"
+    assert report["primary_blocker"]["check"] == "ci"
+    assert report["primary_blocker"]["title"] == "Required checks are not complete"
+    assert report["evidence"]["queued_check_count"] == 1
+    assert report["evidence"]["required_queued_check_count"] == 1
+
+
+def test_check_intelligence_does_not_synthesize_required_context_when_reported(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "required_contexts": ["ci"],
+            "check_runs": [
+                {
+                    "name": "ci",
+                    "context": "ci",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "required": True,
+                }
+            ],
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    report = check_intelligence.build_action_report(intelligence)
+
+    assert intelligence["checks_seen"] == 1
+    assert intelligence["required_contexts"] == ["ci"]
+    assert intelligence["missing_required_contexts"] == []
+    assert intelligence["queued_checks"] == []
+    assert report["status"] == "green"
+    assert report["primary_blocker"] == {}

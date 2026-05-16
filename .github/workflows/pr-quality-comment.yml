@@ -211,7 +211,15 @@ jobs:
           )
 
           Path("build/pr-quality/checks/check-runs.json").write_text(
-              json.dumps({"check_runs": normalized}, indent=2, sort_keys=True) + "\n",
+              json.dumps(
+                  {
+                      "check_runs": normalized,
+                      "required_contexts": sorted(required_contexts),
+                  },
+                  indent=2,
+                  sort_keys=True,
+              )
+              + "\n",
               encoding="utf-8",
           )
           PY

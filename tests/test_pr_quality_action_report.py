@@ -245,3 +245,47 @@ def test_action_report_green_comment_reports_optional_queued_without_blocking() 
     assert "Primary blocker" in body
     assert "- none" in body
     assert "Checks are not complete" not in body
+
+
+def test_action_report_incomplete_comment_shows_missing_required_context() -> None:
+    action = {
+        "status": "incomplete",
+        "primary_blocker": {
+            "check": "ci",
+            "title": "Required checks are not complete",
+            "surface": "workflow",
+            "code": "CHECKS_INCOMPLETE",
+            "impact": "Required context has not reported yet.",
+        },
+        "automation": {
+            "attempted": False,
+            "allowed": False,
+            "reason": "required check completion is needed before remediation or green signoff",
+        },
+        "recommended_actions": ["Wait for required queued checks to complete."],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 2,
+        "missing_required_contexts": ["ci"],
+        "failed_checks": [],
+        "queued_checks": [
+            {
+                "name": "ci",
+                "status": "queued",
+                "required": True,
+                "missing_required_context": True,
+            }
+        ],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+
+    body = report.render_comment_body(action_report=action, check_intelligence=intelligence)
+
+    assert "SDETKit Review Result: Checks incomplete" in body
+    assert "Check/source: `ci`" in body
+    assert "Required queued checks: `1`" in body
+    assert "Missing required contexts: `1`" in body
+    assert "Required context has not reported yet." in body
