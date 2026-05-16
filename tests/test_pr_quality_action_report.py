@@ -410,3 +410,157 @@ def test_action_report_green_comment_distinguishes_proof_signal_from_review_sign
     assert "Review signal: `present`" not in body
     assert "Evidence review signal present; review the listed surface before merge." not in body
     assert "No action required from SDETKit." not in body
+
+
+def test_write_comment_body_preserves_evidence_review_signal_artifact(
+    tmp_path: Path,
+) -> None:
+    action_path = _write_json(
+        tmp_path / "build/pr-quality/check-intelligence/action-report.json",
+        {
+            "status": "green",
+            "primary_blocker": {},
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": "no remediation needed",
+            },
+            "recommended_actions": [],
+            "proof_commands": [],
+            "evidence": {},
+        },
+    )
+    intelligence_path = _write_json(
+        tmp_path / "build/pr-quality/check-intelligence/check-intelligence.json",
+        {
+            "checks_seen": 44,
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "security_review": {"collected": True, "unresolved_findings": 0},
+        },
+    )
+    narrative_path = _write_json(
+        tmp_path / "build/pr-quality/pr-evidence-narrative.json",
+        {
+            "quality": {"ok": True, "coverage_percent": "96.69%"},
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "workflow",
+                "title": "Required checks are not complete",
+            },
+            "graph": {
+                "node_count": 1,
+                "review_first_count": 1,
+                "critical_count": 1,
+                "top_blocker": {
+                    "title": "Required checks are not complete",
+                    "surface": "workflow",
+                    "action": "review",
+                    "review_first": True,
+                },
+            },
+            "next_proof": ["gh pr checks --required"],
+        },
+    )
+    out = tmp_path / "build/pr-quality/pr-comment-body.md"
+
+    result = report.write_comment_body(
+        action_report_path=action_path,
+        check_intelligence_path=intelligence_path,
+        evidence_narrative_path=narrative_path,
+        out=out,
+    )
+
+    body = out.read_text(encoding="utf-8")
+    assert result["out"] == out.as_posix()
+    assert result["status"] == "green"
+    assert "## Evidence review signal" in body
+    assert "Review signal: `present`" in body
+    assert "Surface: `workflow`" in body
+    assert "Required checks are not complete" in body
+    assert "Operator action: `review`" in body
+    assert "`gh pr checks --required`" in body
+    assert "Evidence review signal present; review the listed surface before merge." in body
+    assert "## Evidence proof signal" not in body
+    assert "No action required from SDETKit." not in body
+
+
+def test_write_comment_body_preserves_evidence_proof_signal_artifact(
+    tmp_path: Path,
+) -> None:
+    action_path = _write_json(
+        tmp_path / "build/pr-quality/check-intelligence/action-report.json",
+        {
+            "status": "green",
+            "primary_blocker": {},
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": "no remediation needed",
+            },
+            "recommended_actions": [],
+            "proof_commands": [],
+            "evidence": {},
+        },
+    )
+    intelligence_path = _write_json(
+        tmp_path / "build/pr-quality/check-intelligence/check-intelligence.json",
+        {
+            "checks_seen": 44,
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "security_review": {"collected": True, "unresolved_findings": 0},
+        },
+    )
+    narrative_path = _write_json(
+        tmp_path / "build/pr-quality/pr-evidence-narrative.json",
+        {
+            "quality": {"ok": True, "coverage_percent": "96.69%"},
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "pr_quality",
+                "title": "PR Quality evidence changed",
+            },
+            "graph": {
+                "node_count": 2,
+                "review_first_count": 0,
+                "critical_count": 0,
+                "top_blocker": {
+                    "title": "PR Quality evidence changed",
+                    "surface": "pr_quality",
+                    "action": "rerun_proof",
+                    "review_first": False,
+                },
+            },
+            "next_proof": [
+                "python -m pytest -q tests/test_pr_quality_evidence_narrative.py -o addopts=",
+                "python -m pre_commit run -a",
+            ],
+        },
+    )
+    out = tmp_path / "build/pr-quality/pr-comment-body.md"
+
+    result = report.write_comment_body(
+        action_report_path=action_path,
+        check_intelligence_path=intelligence_path,
+        evidence_narrative_path=narrative_path,
+        out=out,
+    )
+
+    body = out.read_text(encoding="utf-8")
+    assert result["out"] == out.as_posix()
+    assert result["status"] == "green"
+    assert "## Evidence proof signal" in body
+    assert "Proof signal: `present`" in body
+    assert "Surface: `pr_quality`" in body
+    assert "PR Quality evidence changed" in body
+    assert "Operator action: `rerun_proof`" in body
+    assert "Review-first nodes: `0`" in body
+    assert "Critical nodes: `0`" in body
+    assert "Evidence proof signal present; verify the listed proof before routine merge." in body
+    assert "## Evidence review signal" not in body
+    assert "Review signal: `present`" not in body
+    assert "Evidence review signal present; review the listed surface before merge." not in body
+    assert "No action required from SDETKit." not in body
