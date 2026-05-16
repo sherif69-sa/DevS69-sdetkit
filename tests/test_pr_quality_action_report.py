@@ -337,7 +337,8 @@ def test_action_report_green_comment_surfaces_evidence_review_signal() -> None:
         evidence_narrative=evidence_narrative,
     )
 
-    assert "SDETKit Review Result: Green" in body
+    assert "SDETKit Review Result: Green with evidence review" in body
+    assert "Status: `green`" in body
     assert "## Evidence review signal" in body
     assert "Review signal: `present`" in body
     assert "Surface: `workflow`" in body
@@ -397,7 +398,8 @@ def test_action_report_green_comment_distinguishes_proof_signal_from_review_sign
         evidence_narrative=evidence_narrative,
     )
 
-    assert "SDETKit Review Result: Green" in body
+    assert "SDETKit Review Result: Green with proof signal" in body
+    assert "Status: `green`" in body
     assert "## Evidence proof signal" in body
     assert "Proof signal: `present`" in body
     assert "Surface: `pr_quality`" in body
@@ -475,6 +477,8 @@ def test_write_comment_body_preserves_evidence_review_signal_artifact(
     body = out.read_text(encoding="utf-8")
     assert result["out"] == out.as_posix()
     assert result["status"] == "green"
+    assert "SDETKit Review Result: Green with evidence review" in body
+    assert "Status: `green`" in body
     assert "## Evidence review signal" in body
     assert "Review signal: `present`" in body
     assert "Surface: `workflow`" in body
@@ -552,6 +556,8 @@ def test_write_comment_body_preserves_evidence_proof_signal_artifact(
     body = out.read_text(encoding="utf-8")
     assert result["out"] == out.as_posix()
     assert result["status"] == "green"
+    assert "SDETKit Review Result: Green with proof signal" in body
+    assert "Status: `green`" in body
     assert "## Evidence proof signal" in body
     assert "Proof signal: `present`" in body
     assert "Surface: `pr_quality`" in body

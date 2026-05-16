@@ -51,6 +51,22 @@ def _status_title(status: str) -> str:
     }.get(status, status.replace("_", " ").title() or "Unknown")
 
 
+def _result_title(
+    status: str,
+    *,
+    evidence_signal_present: bool,
+    evidence_review_required: bool,
+) -> str:
+    base = _status_title(status)
+    if status != "green":
+        return base
+    if evidence_review_required:
+        return f"{base} with evidence review"
+    if evidence_signal_present:
+        return f"{base} with proof signal"
+    return base
+
+
 def _quality_lines(evidence_narrative: JsonObject) -> list[str]:
     quality = _as_dict(evidence_narrative.get("quality"))
     if not quality:
@@ -233,9 +249,17 @@ def render_comment_body(
 ) -> str:
     evidence_narrative = evidence_narrative or {}
     status = _string(action_report.get("status") or "unknown")
+    evidence_signal_heading, evidence_signal_lines, evidence_review_required = _evidence_signal(
+        evidence_narrative
+    )
 
     lines = [
-        f"## SDETKit Review Result: {_status_title(status)}",
+        "## SDETKit Review Result: "
+        + _result_title(
+            status,
+            evidence_signal_present=bool(evidence_signal_lines),
+            evidence_review_required=evidence_review_required,
+        ),
         "",
         f"Status: `{status}`",
         "",
@@ -245,9 +269,6 @@ def render_comment_body(
     if quality:
         lines.extend(["## Quality summary", "", *quality, ""])
 
-    evidence_signal_heading, evidence_signal_lines, evidence_review_required = _evidence_signal(
-        evidence_narrative
-    )
     if evidence_signal_lines:
         lines.extend(["## " + evidence_signal_heading, "", *evidence_signal_lines, ""])
 
