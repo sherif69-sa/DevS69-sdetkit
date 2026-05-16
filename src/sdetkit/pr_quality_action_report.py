@@ -82,8 +82,12 @@ def _evidence_lines(check_intelligence: JsonObject, action_report: JsonObject) -
         or _as_dict(action_report.get("evidence")).get("security_review")
     )
     failed_count = len(_as_list(check_intelligence.get("failed_checks")))
-    queued_count = len(_as_list(check_intelligence.get("queued_checks")))
-    startup_count = len(_as_list(check_intelligence.get("startup_failures")))
+    queued = [_as_dict(item) for item in _as_list(check_intelligence.get("queued_checks"))]
+    startup = [_as_dict(item) for item in _as_list(check_intelligence.get("startup_failures"))]
+    queued_count = len(queued)
+    startup_count = len(startup)
+    required_queued_count = len([item for item in queued if bool(item.get("required", False))])
+    required_startup_count = len([item for item in startup if bool(item.get("required", False))])
     checks_seen = _int(check_intelligence.get("checks_seen"))
     unresolved_security = _int(security.get("unresolved_findings"))
 
@@ -91,7 +95,9 @@ def _evidence_lines(check_intelligence: JsonObject, action_report: JsonObject) -
         f"- Checks seen: `{checks_seen}`",
         f"- Failed checks: `{failed_count}`",
         f"- Queued checks: `{queued_count}`",
+        f"- Required queued checks: `{required_queued_count}`",
         f"- Startup failures: `{startup_count}`",
+        f"- Required startup failures: `{required_startup_count}`",
     ]
 
     if security:

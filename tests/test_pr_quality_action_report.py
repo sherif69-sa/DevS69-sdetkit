@@ -213,3 +213,35 @@ def test_check_intelligence_promotes_unresolved_security_review_to_action_report
     assert "src/sdetkit/check_intelligence.py:314" in body
     assert "CodeQL reported an unused local variable." in body
     assert "python -m ruff check src tests" in body
+
+
+def test_action_report_green_comment_reports_optional_queued_without_blocking() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {
+            "queued_check_count": 1,
+            "required_queued_check_count": 0,
+            "startup_failure_count": 0,
+            "required_startup_failure_count": 0,
+        },
+    }
+    intelligence = {
+        "checks_seen": 42,
+        "failed_checks": [],
+        "queued_checks": [{"name": "Full CI lane", "status": "queued", "required": False}],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+
+    body = report.render_comment_body(action_report=action, check_intelligence=intelligence)
+
+    assert "SDETKit Review Result: Green" in body
+    assert "Queued checks: `1`" in body
+    assert "Required queued checks: `0`" in body
+    assert "Primary blocker" in body
+    assert "- none" in body
+    assert "Checks are not complete" not in body

@@ -145,6 +145,7 @@ def test_check_intelligence_treats_queued_checks_as_incomplete_not_green(
                     "name": "PR Quality Comment",
                     "status": "queued",
                     "conclusion": "",
+                    "required": True,
                     "url": "https://example.test/runs/queued",
                 }
             ]
@@ -157,6 +158,7 @@ def test_check_intelligence_treats_queued_checks_as_incomplete_not_green(
     assert intelligence["checks_seen"] == 1
     assert intelligence["failed_checks"] == []
     assert intelligence["queued_checks"][0]["name"] == "PR Quality Comment"
+    assert intelligence["queued_checks"][0]["required"] is True
     assert report["status"] == "incomplete"
     assert report["primary_blocker"]["surface"] == "workflow"
     assert report["automation"]["allowed"] is False
@@ -238,3 +240,63 @@ def test_check_intelligence_prioritizes_actionable_ruff_failure_over_ci_noise(
     assert report["primary_blocker"]["title"] == "Ruff lint contract failed"
     assert report["automation"]["allowed"] is False
     assert report["primary_blocker"]["code"] != "RELEASE_ARTIFACT_INVALID"
+
+
+def test_check_intelligence_does_not_block_green_on_optional_queued_checks(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "ci",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "required": True,
+                },
+                {
+                    "name": "Full CI lane",
+                    "status": "queued",
+                    "conclusion": "",
+                    "required": False,
+                    "url": "https://example.test/full-ci",
+                },
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    report = check_intelligence.build_action_report(intelligence)
+
+    assert intelligence["queued_checks"][0]["name"] == "Full CI lane"
+    assert intelligence["queued_checks"][0]["required"] is False
+    assert report["status"] == "green"
+    assert report["primary_blocker"] == {}
+    assert report["evidence"]["queued_check_count"] == 1
+    assert report["evidence"]["required_queued_check_count"] == 0
+
+
+def test_check_intelligence_blocks_green_on_required_queued_checks(tmp_path: Path) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "ci",
+                    "status": "queued",
+                    "conclusion": "",
+                    "required": True,
+                    "url": "https://example.test/ci",
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    report = check_intelligence.build_action_report(intelligence)
+
+    assert report["status"] == "incomplete"
+    assert report["primary_blocker"]["check"] == "ci"
+    assert report["primary_blocker"]["title"] == "Required checks are not complete"
+    assert report["evidence"]["required_queued_check_count"] == 1
