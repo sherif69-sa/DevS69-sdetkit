@@ -87,11 +87,13 @@ def test_pr_quality_comment_workflow_renders_comment_from_action_report() -> Non
 
     assert "python -m sdetkit.pr_quality_evidence_narrative" in text
     assert "--out build/pr-quality/pr-evidence-narrative.md" in text
+    assert "--json-out build/pr-quality/pr-evidence-narrative.json" in text
     assert "python -m sdetkit.pr_quality_action_report" in text
     assert "--action-report build/pr-quality/check-intelligence/action-report.json" in text
     assert (
         "--check-intelligence build/pr-quality/check-intelligence/check-intelligence.json" in text
     )
+    assert "--evidence-narrative build/pr-quality/pr-evidence-narrative.json" in text
     assert "--out build/pr-quality/pr-comment-body.md" in text
 
 
@@ -140,3 +142,16 @@ def test_pr_quality_comment_workflow_feeds_action_report_into_evidence_graph() -
         in text
     )
     assert "--failure-bundle build/pr-quality/failure-intelligence/failure-bundle.json" in text
+
+
+def test_pr_quality_comment_workflow_passes_evidence_narrative_into_final_comment() -> None:
+    text = _workflow_text()
+
+    narrative_step = text.index("python -m sdetkit.pr_quality_evidence_narrative")
+    narrative_json = text.index("--json-out build/pr-quality/pr-evidence-narrative.json")
+    action_report_step = text.index("python -m sdetkit.pr_quality_action_report")
+    evidence_arg = text.index("--evidence-narrative build/pr-quality/pr-evidence-narrative.json")
+    comment_out = text.index("--out build/pr-quality/pr-comment-body.md")
+
+    assert narrative_step < narrative_json < action_report_step
+    assert action_report_step < evidence_arg < comment_out
