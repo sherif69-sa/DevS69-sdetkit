@@ -88,6 +88,7 @@ def _evidence_lines(check_intelligence: JsonObject, action_report: JsonObject) -
     startup_count = len(startup)
     required_queued_count = len([item for item in queued if bool(item.get("required", False))])
     required_startup_count = len([item for item in startup if bool(item.get("required", False))])
+    missing_required_count = len(_as_list(check_intelligence.get("missing_required_contexts")))
     checks_seen = _int(check_intelligence.get("checks_seen"))
     unresolved_security = _int(security.get("unresolved_findings"))
 
@@ -96,6 +97,7 @@ def _evidence_lines(check_intelligence: JsonObject, action_report: JsonObject) -
         f"- Failed checks: `{failed_count}`",
         f"- Queued checks: `{queued_count}`",
         f"- Required queued checks: `{required_queued_count}`",
+        f"- Missing required contexts: `{missing_required_count}`",
         f"- Startup failures: `{startup_count}`",
         f"- Required startup failures: `{required_startup_count}`",
     ]

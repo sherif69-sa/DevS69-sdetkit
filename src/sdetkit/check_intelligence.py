@@ -330,6 +330,29 @@ def _security_review_summary(review_threads_json: Path | None) -> JsonObject:
     }
 
 
+def _required_contexts(payload: JsonObject) -> list[str]:
+    direct = payload.get("required_contexts")
+    if isinstance(direct, list):
+        return sorted({str(item).strip() for item in direct if str(item).strip()})
+
+    required_status_checks = _as_dict(payload.get("required_status_checks"))
+    contexts = required_status_checks.get("contexts")
+    if isinstance(contexts, list):
+        return sorted({str(item).strip() for item in contexts if str(item).strip()})
+
+    return []
+
+
+def _record_identities(record: JsonObject, *, index: int) -> set[str]:
+    identities = {
+        _check_name(record, index),
+        _string(record.get("context")),
+        _string(record.get("check_name")),
+        _string(record.get("name")),
+    }
+    return {item for item in identities if item}
+
+
 def build_check_intelligence(
     *,
     checks_json: Path,
@@ -338,13 +361,16 @@ def build_check_intelligence(
 ) -> JsonObject:
     payload = _read_json(checks_json)
     records = _iter_check_records(payload)
+    required_contexts = set(_required_contexts(payload))
 
     failed_checks: list[JsonObject] = []
     queued_checks: list[JsonObject] = []
     cancelled_checks: list[JsonObject] = []
     startup_failures: list[JsonObject] = []
+    seen_identities: set[str] = set()
 
     for index, record in enumerate(records):
+        seen_identities.update(_record_identities(record, index=index))
         check = {
             "name": _check_name(record, index),
             "status": _check_status(record),
@@ -366,9 +392,24 @@ def build_check_intelligence(
         if _is_startup_failure(record):
             startup_failures.append(check)
 
+    missing_required_contexts = sorted(required_contexts - seen_identities)
+    for context in missing_required_contexts:
+        queued_checks.append(
+            {
+                "name": context,
+                "status": "queued",
+                "conclusion": "",
+                "required": True,
+                "missing_required_context": True,
+                "url": "",
+            }
+        )
+
     return {
         "schema_version": CHECK_INTELLIGENCE_SCHEMA_VERSION,
-        "checks_seen": len(records),
+        "checks_seen": len(records) + len(missing_required_contexts),
+        "required_contexts": sorted(required_contexts),
+        "missing_required_contexts": missing_required_contexts,
         "failed_checks": failed_checks,
         "queued_checks": queued_checks,
         "cancelled_checks": cancelled_checks,
