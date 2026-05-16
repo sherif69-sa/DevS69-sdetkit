@@ -349,3 +349,64 @@ def test_action_report_green_comment_surfaces_evidence_review_signal() -> None:
     assert "Quality is green, so the review focus is not coverage." not in body
     assert "The comment must guide maintainers" not in body
     assert "Confirm the graph findings match the changed files and artifacts." not in body
+
+
+def test_action_report_green_comment_distinguishes_proof_signal_from_review_signal() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "pr_quality",
+            "title": "PR Quality evidence changed",
+        },
+        "graph": {
+            "node_count": 2,
+            "review_first_count": 0,
+            "critical_count": 0,
+            "top_blocker": {
+                "title": "PR Quality evidence changed",
+                "surface": "pr_quality",
+                "action": "rerun_proof",
+                "review_first": False,
+            },
+        },
+        "next_proof": [
+            "python -m pytest -q tests/test_pr_quality_evidence_narrative.py -o addopts=",
+            "python -m pre_commit run -a",
+        ],
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=evidence_narrative,
+    )
+
+    assert "SDETKit Review Result: Green" in body
+    assert "## Evidence proof signal" in body
+    assert "Proof signal: `present`" in body
+    assert "Surface: `pr_quality`" in body
+    assert "PR Quality evidence changed" in body
+    assert "Operator action: `rerun_proof`" in body
+    assert "Review-first nodes: `0`" in body
+    assert "Critical nodes: `0`" in body
+    assert "Evidence proof signal present; verify the listed proof before routine merge." in body
+    assert "## Evidence review signal" not in body
+    assert "Review signal: `present`" not in body
+    assert "Evidence review signal present; review the listed surface before merge." not in body
+    assert "No action required from SDETKit." not in body
