@@ -178,6 +178,10 @@ def test_action_report_cli_writes_comment_body(tmp_path: Path, capsys) -> None:
     printed = json.loads(capsys.readouterr().out)
     assert printed["out"] == out.as_posix()
     assert printed["status"] == "green"
+    assert printed["result_title"] == "Green"
+    assert printed["evidence_signal_kind"] == "none"
+    assert printed["evidence_signal_present"] is False
+    assert printed["evidence_review_required"] is False
     assert "SDETKit Review Result: Green" in out.read_text(encoding="utf-8")
 
 
@@ -477,6 +481,10 @@ def test_write_comment_body_preserves_evidence_review_signal_artifact(
     body = out.read_text(encoding="utf-8")
     assert result["out"] == out.as_posix()
     assert result["status"] == "green"
+    assert result["result_title"] == "Green with evidence review"
+    assert result["evidence_signal_kind"] == "review"
+    assert result["evidence_signal_present"] is True
+    assert result["evidence_review_required"] is True
     assert "SDETKit Review Result: Green with evidence review" in body
     assert "Status: `green`" in body
     assert "## Evidence review signal" in body
@@ -556,6 +564,10 @@ def test_write_comment_body_preserves_evidence_proof_signal_artifact(
     body = out.read_text(encoding="utf-8")
     assert result["out"] == out.as_posix()
     assert result["status"] == "green"
+    assert result["result_title"] == "Green with proof signal"
+    assert result["evidence_signal_kind"] == "proof"
+    assert result["evidence_signal_present"] is True
+    assert result["evidence_review_required"] is False
     assert "SDETKit Review Result: Green with proof signal" in body
     assert "Status: `green`" in body
     assert "## Evidence proof signal" in body

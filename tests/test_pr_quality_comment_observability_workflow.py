@@ -42,6 +42,7 @@ def test_pr_quality_comment_workflow_uploads_comment_artifacts() -> None:
 
     assert "Upload PR quality comment artifacts" in text
     assert "build/pr-quality/pr-comment-body.md" in text
+    assert "build/pr-quality/pr-comment-metadata.json" in text
     assert "build/pr-quality/pr-evidence-narrative.json" in text
     assert "build/pr-quality/changed-files.txt" in text
     assert "build/pr-quality/comment-status.json" in text
@@ -58,6 +59,12 @@ def test_pr_quality_comment_workflow_updates_or_posts_comment_and_records_status
     assert "comment_status=posted" in text
     assert "posted SDET Quality Gate comment" in text
     assert "updated existing SDET Quality Gate comment" in text
+    assert "readCommentMetadata" in text
+    assert "action_report_status: metadata.status || 'unknown'" in text
+    assert "comment_result_title: metadata.result_title || 'unknown'" in text
+    assert "evidence_signal_kind: metadata.evidence_signal_kind || 'unknown'" in text
+    assert "evidence_signal_present: Boolean(metadata.evidence_signal_present)" in text
+    assert "evidence_review_required: Boolean(metadata.evidence_review_required)" in text
 
 
 def test_pr_quality_comment_workflow_fails_loud_when_comment_not_visible() -> None:
@@ -95,6 +102,7 @@ def test_pr_quality_comment_workflow_renders_comment_from_action_report() -> Non
     )
     assert "--evidence-narrative build/pr-quality/pr-evidence-narrative.json" in text
     assert "--out build/pr-quality/pr-comment-body.md" in text
+    assert "> build/pr-quality/pr-comment-metadata.json" in text
 
 
 def test_pr_quality_comment_workflow_uploads_check_intelligence_artifacts() -> None:

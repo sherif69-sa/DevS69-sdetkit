@@ -349,9 +349,26 @@ def write_comment_body(
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(body, encoding="utf-8")
 
+    status = _string(action_report.get("status") or "unknown")
+    _heading, evidence_signal_lines, evidence_review_required = _evidence_signal(evidence_narrative)
+    if evidence_review_required:
+        evidence_signal_kind = "review"
+    elif evidence_signal_lines:
+        evidence_signal_kind = "proof"
+    else:
+        evidence_signal_kind = "none"
+
     return {
         "out": out.as_posix(),
-        "status": _string(action_report.get("status") or "unknown"),
+        "status": status,
+        "result_title": _result_title(
+            status,
+            evidence_signal_present=bool(evidence_signal_lines),
+            evidence_review_required=evidence_review_required,
+        ),
+        "evidence_signal_kind": evidence_signal_kind,
+        "evidence_signal_present": bool(evidence_signal_lines),
+        "evidence_review_required": evidence_review_required,
     }
 
 
