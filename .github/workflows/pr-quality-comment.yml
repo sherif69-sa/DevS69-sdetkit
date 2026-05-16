@@ -280,7 +280,8 @@ jobs:
             --action-report build/pr-quality/check-intelligence/action-report.json \
             --check-intelligence build/pr-quality/check-intelligence/check-intelligence.json \
             --evidence-narrative build/pr-quality/pr-evidence-narrative.json \
-            --out build/pr-quality/pr-comment-body.md
+            --out build/pr-quality/pr-comment-body.md \
+            > build/pr-quality/pr-comment-metadata.json
 
       - name: Upload failure intelligence bundle
         if: always()
@@ -307,6 +308,7 @@ jobs:
           name: pr-quality-comment
           path: |
             build/pr-quality/pr-comment-body.md
+            build/pr-quality/pr-comment-metadata.json
             build/pr-quality/pr-evidence-narrative.json
             build/pr-quality/changed-files.txt
             build/pr-quality/comment-status.json
@@ -324,11 +326,32 @@ jobs:
             const path = require('path');
 
             const statusPath = 'build/pr-quality/comment-status.json';
+            const readCommentMetadata = () => {
+              const metadataPath = 'build/pr-quality/pr-comment-metadata.json';
+              try {
+                if (!fs.existsSync(metadataPath)) {
+                  return {};
+                }
+                return JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+              } catch (error) {
+                core.warning(`failed to read PR Quality comment metadata: ${error && error.message ? error.message : error}`);
+                return {};
+              }
+            };
             const writeStatus = (payload) => {
+              const metadata = readCommentMetadata();
+              const enrichedPayload = {
+                ...payload,
+                action_report_status: metadata.status || 'unknown',
+                comment_result_title: metadata.result_title || 'unknown',
+                evidence_signal_kind: metadata.evidence_signal_kind || 'unknown',
+                evidence_signal_present: Boolean(metadata.evidence_signal_present),
+                evidence_review_required: Boolean(metadata.evidence_review_required),
+              };
               fs.mkdirSync(path.dirname(statusPath), { recursive: true });
               fs.writeFileSync(
                 statusPath,
-                `${JSON.stringify(payload, null, 2)}\n`,
+                `${JSON.stringify(enrichedPayload, null, 2)}\n`,
                 'utf8'
               );
             };
