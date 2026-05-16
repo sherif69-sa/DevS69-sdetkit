@@ -440,3 +440,102 @@ def test_evidence_graph_marks_docs_contract_failures_review_first(tmp_path: Path
     assert graph["nodes"][0]["risk_surface"] == "docs"
     assert graph["nodes"][0]["review_first"] is True
     assert graph["nodes"][0]["safe_to_auto_fix"] is False
+
+
+def test_evidence_graph_normalizes_pr_quality_action_report_primary_blocker(
+    tmp_path: Path,
+) -> None:
+    action_report = tmp_path / "action-report.json"
+    action_report.write_text(
+        json.dumps(
+            {
+                "status": "incomplete",
+                "primary_blocker": {
+                    "check": "ci",
+                    "title": "Required checks are not complete",
+                    "surface": "workflow",
+                    "code": "CHECKS_INCOMPLETE",
+                    "impact": "Required context has not reported yet.",
+                    "path": ".github/workflows/ci.yml",
+                },
+                "automation": {
+                    "attempted": False,
+                    "allowed": False,
+                    "reason": "required check completion is needed before remediation or green signoff",
+                },
+                "recommended_actions": ["Wait for required queued checks to complete."],
+                "proof_commands": ["gh pr checks --required"],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    graph = build_evidence_graph(pr_quality_action_report=action_report)
+
+    summary = graph["source_summary"][-1]
+    assert summary["source"] == "pr_quality"
+    assert summary["found"] is True
+    assert summary["status"] == "incomplete"
+    assert summary["findings_seen"] == 1
+    assert summary["findings_emitted"] == 1
+
+    node = graph["nodes"][0]
+    assert node["source"] == "pr_quality"
+    assert node["title"] == "Required checks are not complete"
+    assert node["summary"] == "Required context has not reported yet."
+    assert node["risk_surface"] == "workflow"
+    assert node["severity"] == "critical"
+    assert node["review_first"] is True
+    assert node["safe_to_auto_fix"] is False
+    assert node["automation_allowed_now"] is False
+    assert node["operator_action"] == "review"
+    assert node["owner_files"] == [".github/workflows/ci.yml"]
+    assert "Wait for required queued checks to complete." in node["recommended_commands"]
+    assert node["proof_commands"] == ["gh pr checks --required"]
+    assert node["source_artifacts"] == [action_report.as_posix()]
+
+
+def test_evidence_graph_module_cli_accepts_pr_quality_action_report(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    action_report = tmp_path / "action-report.json"
+    action_report.write_text(
+        json.dumps(
+            {
+                "status": "review_required",
+                "primary_blocker": {
+                    "check": "Fast CI lane py3.12",
+                    "title": "Ruff lint contract failed",
+                    "surface": "quality",
+                    "code": "RUFF_LINT_FAILURE",
+                    "impact": "CI is blocked by an unused local variable.",
+                    "path": "src/sdetkit/check_intelligence.py",
+                },
+                "recommended_actions": ["Remove the unused assignment and rerun Ruff."],
+                "proof_commands": ["python -m ruff check src tests"],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rc = main(
+        [
+            "--pr-quality-action-report",
+            action_report.as_posix(),
+            "--out-dir",
+            str(tmp_path / "evidence-graph"),
+        ]
+    )
+
+    assert rc == 0
+    captured = capsys.readouterr().out
+    assert "evidence-graph.json" in captured
+
+    graph = json.loads(
+        (tmp_path / "evidence-graph" / "evidence-graph.json").read_text(encoding="utf-8")
+    )
+    assert graph["nodes"][0]["source"] == "pr_quality"
+    assert graph["nodes"][0]["risk_surface"] == "quality"
+    assert graph["nodes"][0]["review_first"] is True
+    assert graph["nodes"][0]["automation_allowed_now"] is False
