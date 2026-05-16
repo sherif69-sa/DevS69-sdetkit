@@ -173,7 +173,7 @@ def _command_lines(values: list[Any]) -> list[str]:
     return [f"- `{item}`" for item in items] or ["- none"]
 
 
-def _evidence_review_signal_lines(evidence_narrative: JsonObject) -> list[str]:
+def _evidence_signal(evidence_narrative: JsonObject) -> tuple[str, list[str], bool]:
     primary = _as_dict(evidence_narrative.get("primary_signal"))
     graph = _as_dict(evidence_narrative.get("graph"))
     top_blocker = _as_dict(graph.get("top_blocker"))
@@ -184,21 +184,27 @@ def _evidence_review_signal_lines(evidence_narrative: JsonObject) -> list[str]:
     action = _string(top_blocker.get("action") or "")
     top_title = _string(top_blocker.get("title") or "")
     top_surface = _string(top_blocker.get("surface") or "")
+    review_first_count = _int(graph.get("review_first_count"))
+    critical_count = _int(graph.get("critical_count"))
+    top_review_first = bool(top_blocker.get("review_first", False))
 
-    has_review_signal = kind == "review_signal"
-    has_review_top_blocker = (
-        bool(top_title) and top_title != "none" and top_surface != "none" and action == "review"
+    has_narrative_signal = kind in {"review_signal", "integration_proof"}
+    has_top_blocker = bool(top_title) and top_title != "none" and top_surface != "none"
+    if not has_narrative_signal and not has_top_blocker:
+        return "", [], False
+
+    review_required = (
+        review_first_count > 0 or critical_count > 0 or action == "review" or top_review_first
     )
-    if not has_review_signal and not has_review_top_blocker:
-        return []
+    signal_label = "Review signal" if review_required else "Proof signal"
 
     lines = [
-        "- Review signal: `present`",
+        f"- {signal_label}: `present`",
         f"- Surface: `{surface or 'unknown'}`",
         f"- Title: {title or top_title or 'Evidence graph finding'}",
         f"- Graph nodes: `{_int(graph.get('node_count'))}`",
-        f"- Review-first nodes: `{_int(graph.get('review_first_count'))}`",
-        f"- Critical nodes: `{_int(graph.get('critical_count'))}`",
+        f"- Review-first nodes: `{review_first_count}`",
+        f"- Critical nodes: `{critical_count}`",
     ]
 
     if action:
@@ -215,7 +221,8 @@ def _evidence_review_signal_lines(evidence_narrative: JsonObject) -> list[str]:
         lines.extend(["- Next proof:"])
         lines.extend(f"  - `{command}`" for command in proof_commands[:5])
 
-    return lines
+    heading = "Evidence review signal" if review_required else "Evidence proof signal"
+    return heading, lines, review_required
 
 
 def render_comment_body(
@@ -238,9 +245,11 @@ def render_comment_body(
     if quality:
         lines.extend(["## Quality summary", "", *quality, ""])
 
-    evidence_review_signal = _evidence_review_signal_lines(evidence_narrative)
-    if evidence_review_signal:
-        lines.extend(["## Evidence review signal", "", *evidence_review_signal, ""])
+    evidence_signal_heading, evidence_signal_lines, evidence_review_required = _evidence_signal(
+        evidence_narrative
+    )
+    if evidence_signal_lines:
+        lines.extend(["## " + evidence_signal_heading, "", *evidence_signal_lines, ""])
 
     lines.extend(
         [
@@ -272,12 +281,21 @@ def render_comment_body(
     )
 
     if status == "green":
-        if evidence_review_signal:
+        if evidence_review_required:
             lines.extend(
                 [
                     "## Merge assessment",
                     "",
                     "- Evidence review signal present; review the listed surface before merge.",
+                    "",
+                ]
+            )
+        elif evidence_signal_lines:
+            lines.extend(
+                [
+                    "## Merge assessment",
+                    "",
+                    "- Evidence proof signal present; verify the listed proof before routine merge.",
                     "",
                 ]
             )
