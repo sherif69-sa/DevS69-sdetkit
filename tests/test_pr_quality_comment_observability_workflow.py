@@ -77,6 +77,21 @@ def test_pr_quality_comment_workflow_fails_loud_when_comment_not_visible() -> No
     assert "PR Quality comment was not posted or updated" in text
 
 
+def test_pr_quality_comment_workflow_logs_final_comment_signal_state() -> None:
+    text = _workflow_text()
+
+    assert "action_report_status = str(payload.get(" in text
+    assert "comment_result_title = str(payload.get(" in text
+    assert "evidence_signal_kind = str(payload.get(" in text
+    assert "evidence_signal_present = bool(payload.get(" in text
+    assert "evidence_review_required = bool(payload.get(" in text
+    assert 'print(f"action_report_status={action_report_status}")' in text
+    assert 'print(f"comment_result_title={comment_result_title}")' in text
+    assert 'print(f"evidence_signal_kind={evidence_signal_kind}")' in text
+    assert 'print(f"evidence_signal_present={str(evidence_signal_present).lower()}")' in text
+    assert 'print(f"evidence_review_required={str(evidence_review_required).lower()}")' in text
+
+
 def test_pr_quality_comment_workflow_builds_check_intelligence_action_report() -> None:
     text = _workflow_text()
 

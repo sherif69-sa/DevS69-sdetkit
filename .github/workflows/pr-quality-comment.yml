@@ -426,8 +426,19 @@ jobs:
           payload = json.loads(path.read_text(encoding="utf-8"))
           status = str(payload.get("status", "missing"))
           reason = str(payload.get("reason", ""))
+          action_report_status = str(payload.get("action_report_status", "unknown"))
+          comment_result_title = str(payload.get("comment_result_title", "unknown"))
+          evidence_signal_kind = str(payload.get("evidence_signal_kind", "unknown"))
+          evidence_signal_present = bool(payload.get("evidence_signal_present", False))
+          evidence_review_required = bool(payload.get("evidence_review_required", False))
+
           print(f"comment_status={status}")
           print(f"comment_reason={reason}")
+          print(f"action_report_status={action_report_status}")
+          print(f"comment_result_title={comment_result_title}")
+          print(f"evidence_signal_kind={evidence_signal_kind}")
+          print(f"evidence_signal_present={str(evidence_signal_present).lower()}")
+          print(f"evidence_review_required={str(evidence_review_required).lower()}")
 
           if status not in {"posted", "updated"}:
               raise SystemExit(f"PR Quality comment was not posted or updated: status={status} reason={reason}")
