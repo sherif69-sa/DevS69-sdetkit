@@ -442,4 +442,14 @@ jobs:
 
           if status not in {"posted", "updated"}:
               raise SystemExit(f"PR Quality comment was not posted or updated: status={status} reason={reason}")
+
+          if action_report_status == "unknown":
+              raise SystemExit("PR Quality comment signal metadata missing: action_report_status=unknown")
+          if comment_result_title == "unknown":
+              raise SystemExit("PR Quality comment signal metadata missing: comment_result_title=unknown")
+          if evidence_signal_kind not in {"none", "proof", "review"}:
+              raise SystemExit(
+                  "PR Quality comment signal metadata invalid: "
+                  f"evidence_signal_kind={evidence_signal_kind}"
+              )
           PY
