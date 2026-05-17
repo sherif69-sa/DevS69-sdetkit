@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from pytest import MonkeyPatch
+
 from sdetkit import adaptive_failure_bundle
 
 
@@ -162,3 +164,92 @@ def test_sdetkit_adaptive_failure_bundle_subprocess(tmp_path: Path) -> None:
     assert payload["primary_diagnosis_code"] == "PYTEST_ASSERTION_FAILURE"
     assert Path(payload["bundle_path"]).exists()
     assert Path(payload["artifacts"]["operator_brief_markdown"]).exists()
+
+
+def test_failure_bundle_exposes_complete_diagnosis_set_for_graph_consumers(
+    tmp_path: Path,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    diagnoses = [
+        {
+            "code": "PACKAGE_INSTALL_FAILURE",
+            "title": "Dependency resolver failed",
+            "diagnosis": "pip could not resolve constraints before tests could prove behavior.",
+            "severity": "high",
+            "confidence": "high",
+            "affected_files": ["constraints-ci.txt", "requirements-test.txt"],
+            "recommended_fix": ["Align the smallest dependency surface."],
+            "proof_commands": [
+                "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+            ],
+        },
+        {
+            "code": "SECURITY_FINDING_REVIEW_REQUIRED",
+            "title": "Security finding requires review",
+            "diagnosis": "A protected security surface emitted a review-first finding.",
+            "severity": "high",
+            "confidence": "high",
+            "affected_files": ["docs/security-posture.md"],
+            "recommended_fix": ["Inspect the security finding and affected surface."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+    ]
+
+    diagnosis = {
+        "schema_version": "sdetkit.adaptive.diagnosis.v1",
+        "ok": False,
+        "status": "needs_fix",
+        "risk_score": 100,
+        "confidence": "high",
+        "summary": "Primary issue: Dependency resolver failed. Fix this before release signoff.",
+        "diagnosis_count": len(diagnoses),
+        "diagnoses": diagnoses,
+        "fix_plan": [],
+        "scenario_database": {},
+        "scenario_codes": [],
+    }
+
+    def fake_analyze_evidence(*, log_text: str) -> dict[str, object]:
+        assert "synthetic multi-domain failure" in log_text
+        return diagnosis
+
+    monkeypatch.setattr(
+        adaptive_failure_bundle.adaptive_diagnosis,
+        "analyze_evidence",
+        fake_analyze_evidence,
+    )
+
+    log = _write(tmp_path / "failure.log", "synthetic multi-domain failure\n")
+    bundle = adaptive_failure_bundle.build_failure_bundle(
+        log_path=log,
+        out_dir=tmp_path / "bundle",
+        proof_failed=True,
+    )
+
+    assert bundle["primary_diagnosis_code"] == "PACKAGE_INSTALL_FAILURE"
+    assert bundle["primary_diagnosis_title"] == "Dependency resolver failed"
+    assert bundle["diagnosis_count"] == 2
+    assert bundle["diagnosis_codes"] == [
+        "PACKAGE_INSTALL_FAILURE",
+        "SECURITY_FINDING_REVIEW_REQUIRED",
+    ]
+    assert bundle["diagnoses"] == diagnoses
+    assert bundle["diagnosis"]["diagnoses"] == diagnoses
+
+    manifest = json.loads(
+        Path(bundle["artifacts"]["artifact_manifest_json"]).read_text(encoding="utf-8")
+    )
+    assert manifest["diagnosis_codes"] == bundle["diagnosis_codes"]
+
+    from sdetkit.evidence_graph import build_evidence_graph
+
+    graph = build_evidence_graph(failure_bundle=Path(str(bundle["bundle_path"])))
+    assert graph["source_summary"][-1]["source"] == "failure_bundle"
+    assert graph["source_summary"][-1]["findings_seen"] == 2
+    assert graph["source_summary"][-1]["findings_emitted"] == 2
+
+    nodes = {node["title"]: node for node in graph["nodes"]}
+    assert nodes["Dependency resolver failed"]["risk_surface"] == "dependency"
+    assert nodes["Dependency resolver failed"]["review_first"] is True
+    assert nodes["Security finding requires review"]["risk_surface"] == "security"
+    assert nodes["Security finding requires review"]["review_first"] is True
