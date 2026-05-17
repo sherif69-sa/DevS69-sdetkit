@@ -80,7 +80,8 @@ def build_failure_bundle(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     diagnosis = adaptive_diagnosis.analyze_evidence(log_text=log_text)
-    primary = _primary_diagnosis(diagnosis)
+    diagnoses = [_as_dict(item) for item in _as_list(diagnosis.get("diagnoses"))]
+    primary = diagnoses[0] if diagnoses else {}
     primary_code = str(primary.get("code", "") or "")
     review_first = primary_code in {"UNKNOWN", "UNKNOWN_REVIEW_REQUIRED"}
 
@@ -155,6 +156,9 @@ def build_failure_bundle(
         "artifacts": artifacts,
         "source_log": log_path.as_posix(),
         "primary_diagnosis_code": primary_code,
+        "diagnosis_codes": [
+            str(item.get("code", "") or "") for item in diagnoses if str(item.get("code", "") or "")
+        ],
         "review_first": review_first,
         "safe_to_auto_fix": bool(safe_fix_plan.get("safe_to_auto_fix", False)),
     }
@@ -167,7 +171,12 @@ def build_failure_bundle(
         "source_log": log_path.as_posix(),
         "status": str(diagnosis.get("status", "unknown")),
         "primary_diagnosis_code": primary_code,
-        "diagnosis_count": int(diagnosis.get("diagnosis_count", 0) or 0),
+        "primary_diagnosis_title": str(primary.get("title", "") or ""),
+        "diagnosis_count": len(diagnoses),
+        "diagnosis_codes": [
+            str(item.get("code", "") or "") for item in diagnoses if str(item.get("code", "") or "")
+        ],
+        "diagnoses": diagnoses,
         "review_first": review_first,
         "safe_to_auto_fix": bool(safe_fix_plan.get("safe_to_auto_fix", False)),
         "artifacts": artifacts,
