@@ -315,3 +315,118 @@ def test_mission_control_evidence_graph_ranks_top_blocker(tmp_path: Path) -> Non
     assert "Top blocker surface: dependency" in markdown
     assert "Top blocker action: review" in markdown
     assert "PYTHONPATH=src python -m pip install -c constraints-ci.txt" in markdown
+
+
+def test_mission_control_preserves_secondary_evidence_graph_blockers(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir = tmp_path / "out"
+
+    graph_dir = tmp_path / "evidence-graph"
+    graph_dir.mkdir()
+    graph_path = graph_dir / "evidence-graph.json"
+    graph_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.evidence-graph.v1",
+                "nodes": [
+                    {
+                        "finding_id": "security-review",
+                        "title": "Security finding requires review",
+                        "summary": "A protected security surface changed.",
+                        "risk_surface": "security",
+                        "severity": "critical",
+                        "review_first": True,
+                        "safe_to_auto_fix": False,
+                        "owner_files": ["docs/security-posture.md"],
+                        "source_artifacts": ["security-review.json"],
+                        "recommended_commands": [
+                            "python -m pre_commit run -a",
+                        ],
+                        "proof_commands": [
+                            "python -m pytest -q tests/test_owned_surface_hygiene_contract.py -o addopts=",
+                        ],
+                        "recurrence_state": "first_seen",
+                        "operator_action": "review",
+                        "automation_allowed_now": False,
+                    },
+                    {
+                        "finding_id": "dependency-resolver",
+                        "title": "Dependency resolver failed",
+                        "summary": "pip could not resolve constraints before tests could run.",
+                        "risk_surface": "dependency",
+                        "severity": "high",
+                        "review_first": True,
+                        "safe_to_auto_fix": False,
+                        "owner_files": ["constraints-ci.txt", "requirements-test.txt"],
+                        "source_artifacts": ["failure-bundle.json"],
+                        "recommended_commands": [
+                            "Reproduce the exact install lane.",
+                        ],
+                        "proof_commands": [
+                            "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+                        ],
+                        "recurrence_state": "first_seen",
+                        "operator_action": "review",
+                        "automation_allowed_now": False,
+                    },
+                    {
+                        "finding_id": "coverage-gate",
+                        "title": "Coverage gate regression",
+                        "summary": "Coverage dropped below threshold.",
+                        "risk_surface": "quality",
+                        "severity": "warning",
+                        "review_first": False,
+                        "safe_to_auto_fix": False,
+                        "owner_files": ["src/sdetkit/example.py"],
+                        "source_artifacts": ["quality.log"],
+                        "recommended_commands": ["python -m pytest -q --cov=sdetkit"],
+                        "proof_commands": [],
+                        "recurrence_state": "first_seen",
+                        "operator_action": "rerun_proof",
+                        "automation_allowed_now": False,
+                    },
+                ],
+                "source_summary": [{"source": "failure_bundle", "found": True}],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rc = mission_control.main(
+        [
+            "run",
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(out_dir),
+            "--evidence-graph",
+            str(graph_path),
+            "--no-ledger",
+        ]
+    )
+
+    assert rc == 0
+    bundle = json.loads((out_dir / "mission-control.json").read_text(encoding="utf-8"))
+    summary = bundle["evidence_graph"]
+
+    assert summary["top_blocker_title"] == "Security finding requires review"
+    assert summary["top_blocker_surface"] == "security"
+    assert summary["secondary_blocker_count"] == 2
+    assert [item["title"] for item in summary["secondary_blockers"]] == [
+        "Dependency resolver failed",
+        "Coverage gate regression",
+    ]
+    assert summary["secondary_blockers"][0]["risk_surface"] == "dependency"
+    assert summary["secondary_blockers"][0]["review_first"] is True
+    assert summary["secondary_blockers"][0]["next_commands"] == [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+        "Reproduce the exact install lane.",
+    ]
+
+    markdown = (out_dir / "mission-control.md").read_text(encoding="utf-8")
+    assert "Secondary blockers: 2" in markdown
+    assert "Secondary blocker: Dependency resolver failed [dependency; review]" in markdown
+    assert "Secondary blocker: Coverage gate regression [quality; rerun_proof]" in markdown

@@ -422,6 +422,33 @@ def _evidence_graph_next_commands(node: dict[str, Any]) -> list[str]:
     return commands
 
 
+def _evidence_graph_node_handoff(node: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "title": str(node.get("title", "") or "Untitled evidence graph finding"),
+        "risk_surface": str(node.get("risk_surface", "") or "unknown"),
+        "severity": str(node.get("severity", "") or "unknown"),
+        "operator_action": str(node.get("operator_action", "") or "rerun_proof"),
+        "review_first": bool(node.get("review_first", False)),
+        "next_commands": _evidence_graph_next_commands(node),
+    }
+
+
+def _evidence_graph_secondary_blockers(
+    nodes: list[dict[str, Any]],
+    top_blocker: dict[str, Any],
+    *,
+    limit: int = 3,
+) -> list[dict[str, Any]]:
+    secondary: list[dict[str, Any]] = []
+    for node in sorted(nodes, key=_evidence_graph_node_score, reverse=True):
+        if node is top_blocker:
+            continue
+        secondary.append(_evidence_graph_node_handoff(node))
+        if len(secondary) >= limit:
+            break
+    return secondary
+
+
 def _collect_evidence_graph(graph_path: Path | None) -> dict[str, Any] | None:
     if graph_path is None:
         return None
@@ -497,6 +524,7 @@ def _collect_evidence_graph(graph_path: Path | None) -> dict[str, Any] | None:
     )
     top_blocker = _evidence_graph_top_blocker(nodes)
     top_blocker_next_commands = _evidence_graph_next_commands(top_blocker)
+    secondary_blockers = _evidence_graph_secondary_blockers(nodes, top_blocker)
 
     graph_dir = resolved.parent
     artifact_specs = [
@@ -529,6 +557,8 @@ def _collect_evidence_graph(graph_path: Path | None) -> dict[str, Any] | None:
         "top_blocker_severity": str(top_blocker.get("severity", "") or "none"),
         "top_blocker_action": str(top_blocker.get("operator_action", "") or "none"),
         "top_blocker_review_first": bool(top_blocker.get("review_first", False)),
+        "secondary_blocker_count": len(secondary_blockers),
+        "secondary_blockers": secondary_blockers,
         "next_commands": top_blocker_next_commands,
         "source_count": len(source_summary),
         "source_summary": source_summary,
@@ -552,7 +582,7 @@ def _format_evidence_graph(summary: dict[str, Any] | None) -> list[str]:
     if summary.get("error"):
         return [
             "- Status: error",
-            f"- Error: {summary.get('error')}",
+            f"- Error: {summary.get('error', 'unknown')}",
             f"- Graph: `{summary.get('path', '')}`",
         ]
 
@@ -560,7 +590,7 @@ def _format_evidence_graph(summary: dict[str, Any] | None) -> list[str]:
     if not isinstance(risk_surfaces, list):
         risk_surfaces = []
 
-    return [
+    lines = [
         f"- Status: {summary.get('status', 'unknown')}",
         f"- Node count: {summary.get('node_count', 0)}",
         f"- Review-first nodes: {summary.get('review_first_count', 0)}",
@@ -571,9 +601,30 @@ def _format_evidence_graph(summary: dict[str, Any] | None) -> list[str]:
         f"- Top blocker: {summary.get('top_blocker_title', 'none')}",
         f"- Top blocker surface: {summary.get('top_blocker_surface', 'none')}",
         f"- Top blocker action: {summary.get('top_blocker_action', 'none')}",
-        f"- Next commands: {'; '.join(str(command) for command in summary.get('next_commands', [])) or 'none'}",
-        f"- Graph: `{summary.get('path', '')}`",
     ]
+
+    secondary_blockers = summary.get("secondary_blockers", [])
+    if isinstance(secondary_blockers, list) and secondary_blockers:
+        lines.append(f"- Secondary blockers: {len(secondary_blockers)}")
+        for blocker in secondary_blockers:
+            if not isinstance(blocker, dict):
+                continue
+            lines.append(
+                "- Secondary blocker: "
+                f"{blocker.get('title', 'Untitled evidence graph finding')} "
+                f"[{blocker.get('risk_surface', 'unknown')}; "
+                f"{blocker.get('operator_action', 'rerun_proof')}]"
+            )
+    else:
+        lines.append("- Secondary blockers: none")
+
+    lines.extend(
+        [
+            f"- Next commands: {'; '.join(str(command) for command in summary.get('next_commands', [])) or 'none'}",
+            f"- Graph: `{summary.get('path', '')}`",
+        ]
+    )
+    return lines
 
 
 def _evidence_graph_ledger_summary(bundle: dict[str, Any]) -> dict[str, Any] | None:
@@ -591,6 +642,8 @@ def _evidence_graph_ledger_summary(bundle: dict[str, Any]) -> dict[str, Any] | N
         "top_blocker_title": str(summary.get("top_blocker_title", "")),
         "top_blocker_surface": str(summary.get("top_blocker_surface", "")),
         "top_blocker_action": str(summary.get("top_blocker_action", "")),
+        "secondary_blocker_count": int(summary.get("secondary_blocker_count", 0) or 0),
+        "secondary_blockers": summary.get("secondary_blockers", []),
         "next_commands": summary.get("next_commands", []),
     }
 
@@ -1381,6 +1434,10 @@ def _summarize(args: argparse.Namespace) -> int:
         print(
             f"{summary_prefix}_top_blocker_action="
             f"{evidence_graph.get('top_blocker_action', 'none')}"
+        )
+        print(
+            f"{summary_prefix}_secondary_blocker_count="
+            f"{evidence_graph.get('secondary_blocker_count', 0)}"
         )
     adaptive_failure_bundle = bundle.get("adaptive_failure_bundle")
     if isinstance(adaptive_failure_bundle, dict):
