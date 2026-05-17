@@ -9,9 +9,14 @@ permissions:
   pull-requests: write
   issues: write
 
+concurrency:
+  group: pr-quality-comment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
@@ -104,6 +109,119 @@ jobs:
             --merged-control-room build/sdetkit/sentinel/control-room-with-security-review.json \
             --out-dir build/pr-quality/security-review
 
+      - name: Build PR check intelligence action report
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          QUALITY_OUTCOME: ${{ steps.quality.outcome }}
+        run: |
+          mkdir -p build/pr-quality/checks build/pr-quality/check-intelligence
+
+          gh api \
+            "repos/$REPOSITORY_OWNER/$REPOSITORY_NAME/commits/$HEAD_SHA/check-runs?per_page=100" \
+            > build/pr-quality/checks/check-runs-raw.json \
+            || echo '{"check_runs":[]}' > build/pr-quality/checks/check-runs-raw.json
+
+          gh api \
+            "repos/$REPOSITORY_OWNER/$REPOSITORY_NAME/commits/$HEAD_SHA/status" \
+            > build/pr-quality/checks/combined-status-raw.json \
+            || echo '{"statuses":[]}' > build/pr-quality/checks/combined-status-raw.json
+
+          gh api \
+            "repos/$REPOSITORY_OWNER/$REPOSITORY_NAME/branches/${{ github.event.pull_request.base.ref }}/protection/required_status_checks/contexts" \
+            > build/pr-quality/checks/required-contexts.json \
+            || echo '[]' > build/pr-quality/checks/required-contexts.json
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          raw_path = Path("build/pr-quality/checks/check-runs-raw.json")
+          status_path = Path("build/pr-quality/checks/combined-status-raw.json")
+          required_path = Path("build/pr-quality/checks/required-contexts.json")
+
+          payload = json.loads(raw_path.read_text(encoding="utf-8"))
+          runs = payload.get("check_runs")
+          if not isinstance(runs, list):
+              runs = []
+
+          statuses_payload = json.loads(status_path.read_text(encoding="utf-8"))
+          statuses = statuses_payload.get("statuses")
+          if not isinstance(statuses, list):
+              statuses = []
+
+          required_payload = json.loads(required_path.read_text(encoding="utf-8"))
+          required_contexts = set(required_payload if isinstance(required_payload, list) else [])
+
+          normalized = []
+          for run in runs:
+              if not isinstance(run, dict):
+                  continue
+              name = str(run.get("name") or "")
+              item = dict(run)
+              item["required"] = name in required_contexts
+              normalized.append(item)
+
+          state_to_conclusion = {
+              "success": "success",
+              "failure": "failure",
+              "error": "failure",
+              "pending": "",
+          }
+          for status in statuses:
+              if not isinstance(status, dict):
+                  continue
+              context = str(status.get("context") or "")
+              state = str(status.get("state") or "").lower()
+              normalized.append(
+                  {
+                      "name": context,
+                      "context": context,
+                      "status": "completed" if state in {"success", "failure", "error"} else "queued",
+                      "conclusion": state_to_conclusion.get(state, state),
+                      "url": status.get("target_url") or "",
+                      "required": context in required_contexts,
+                  }
+              )
+
+          outcome = os.environ.get("QUALITY_OUTCOME", "failure")
+          local_conclusion = "success" if outcome == "success" else "failure"
+          normalized.append(
+              {
+                  "name": "PR Quality local quality gate",
+                  "status": "completed",
+                  "conclusion": local_conclusion,
+                  "log_path": "quality.log",
+                  "required": "PR Quality local quality gate" in required_contexts,
+              }
+          )
+
+          Path("build/pr-quality/checks/check-runs.json").write_text(
+              json.dumps(
+                  {
+                      "check_runs": normalized,
+                      "required_contexts": sorted(required_contexts),
+                  },
+                  indent=2,
+                  sort_keys=True,
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          PYTHONPATH=src python -m sdetkit.check_intelligence \
+            --checks-json build/pr-quality/checks/check-runs.json \
+            --logs-dir . \
+            --review-threads-json build/pr-quality/security-review/review-threads.json \
+            --out-dir build/pr-quality/check-intelligence
+
+
       - name: Build PR evidence graph
         if: always()
         run: |
@@ -111,7 +229,34 @@ jobs:
           PYTHONPATH=src python -m sdetkit.evidence_graph \
             --sentinel-control-room build/sdetkit/sentinel/control-room-with-security-review.json \
             --failure-bundle build/pr-quality/failure-intelligence/failure-bundle.json \
+            --pr-quality-action-report build/pr-quality/check-intelligence/action-report.json \
             --out-dir build/sdetkit/evidence-graph
+
+      - name: Initialize PR comment status
+        if: always()
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p build/pr-quality
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          Path("build/pr-quality/comment-status.json").write_text(
+              json.dumps(
+                  {
+                      "status": "failed",
+                      "pr_number": int(os.environ["PR_NUMBER"]),
+                      "reason": "comment step did not complete",
+                  },
+                  indent=2,
+                  sort_keys=True,
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          PY
 
       - name: Build PR comment body
         run: |
@@ -128,8 +273,15 @@ jobs:
             --evidence-graph build/sdetkit/evidence-graph/evidence-graph.json \
             --failure-bundle build/pr-quality/failure-intelligence/failure-bundle.json \
             --changed-files build/pr-quality/changed-files.txt \
-            --out build/pr-quality/pr-comment-body.md \
+            --out build/pr-quality/pr-evidence-narrative.md \
             --json-out build/pr-quality/pr-evidence-narrative.json
+
+          PYTHONPATH=src python -m sdetkit.pr_quality_action_report \
+            --action-report build/pr-quality/check-intelligence/action-report.json \
+            --check-intelligence build/pr-quality/check-intelligence/check-intelligence.json \
+            --evidence-narrative build/pr-quality/pr-evidence-narrative.json \
+            --out build/pr-quality/pr-comment-body.md \
+            > build/pr-quality/pr-comment-metadata.json
 
       - name: Upload failure intelligence bundle
         if: always()
@@ -149,16 +301,145 @@ jobs:
             .sdetkit/adaptive-sentinel/
           if-no-files-found: ignore
 
+      - name: Upload PR quality comment artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: pr-quality-comment
+          path: |
+            build/pr-quality/pr-comment-body.md
+            build/pr-quality/pr-comment-metadata.json
+            build/pr-quality/pr-evidence-narrative.json
+            build/pr-quality/changed-files.txt
+            build/pr-quality/comment-status.json
+            build/pr-quality/checks/
+            build/pr-quality/check-intelligence/
+            build/pr-quality/pr-evidence-narrative.md
+            build/sdetkit/evidence-graph/
+          if-no-files-found: ignore
+
       - name: Comment on PR
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
           script: |
             const fs = require('fs');
-            const text = fs.readFileSync('build/pr-quality/pr-comment-body.md', 'utf8');
-            const body = `### SDET Quality Gate\n${text}`;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body,
-            });
+            const path = require('path');
+
+            const statusPath = 'build/pr-quality/comment-status.json';
+            const readCommentMetadata = () => {
+              const metadataPath = 'build/pr-quality/pr-comment-metadata.json';
+              try {
+                if (!fs.existsSync(metadataPath)) {
+                  return {};
+                }
+                return JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+              } catch (error) {
+                core.warning(`failed to read PR Quality comment metadata: ${error && error.message ? error.message : error}`);
+                return {};
+              }
+            };
+            const writeStatus = (payload) => {
+              const metadata = readCommentMetadata();
+              const enrichedPayload = {
+                ...payload,
+                action_report_status: metadata.status || 'unknown',
+                comment_result_title: metadata.result_title || 'unknown',
+                evidence_signal_kind: metadata.evidence_signal_kind || 'unknown',
+                evidence_signal_present: Boolean(metadata.evidence_signal_present),
+                evidence_review_required: Boolean(metadata.evidence_review_required),
+              };
+              fs.mkdirSync(path.dirname(statusPath), { recursive: true });
+              fs.writeFileSync(
+                statusPath,
+                `${JSON.stringify(enrichedPayload, null, 2)}\n`,
+                'utf8'
+              );
+            };
+
+            try {
+              const text = fs.readFileSync('build/pr-quality/pr-comment-body.md', 'utf8');
+              const body = `### SDET Quality Gate\n${text}`;
+              const marker = '### SDET Quality Gate';
+
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                per_page: 100,
+              });
+
+              const existing = comments.find((comment) =>
+                comment.user?.type === 'Bot' && comment.body?.startsWith(marker)
+              );
+
+              if (existing) {
+                const { data: updated } = await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body,
+                });
+                writeStatus({
+                  status: 'updated',
+                  pr_number: context.issue.number,
+                  comment_id: updated.id,
+                  comment_url: updated.html_url,
+                  reason: 'updated existing SDET Quality Gate comment',
+                });
+                core.info(`comment_status=updated comment_url=${updated.html_url}`);
+              } else {
+                const { data: created } = await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body,
+                });
+                writeStatus({
+                  status: 'posted',
+                  pr_number: context.issue.number,
+                  comment_id: created.id,
+                  comment_url: created.html_url,
+                  reason: 'posted SDET Quality Gate comment',
+                });
+                core.info(`comment_status=posted comment_url=${created.html_url}`);
+              }
+            } catch (error) {
+              writeStatus({
+                status: 'failed',
+                pr_number: context.issue.number,
+                reason: String(error && error.message ? error.message : error),
+              });
+              core.setFailed(`failed to post PR Quality comment: ${error && error.message ? error.message : error}`);
+            }
+
+      - name: Verify PR Quality comment visibility
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("build/pr-quality/comment-status.json")
+          if not path.exists():
+              raise SystemExit("comment_status=missing: build/pr-quality/comment-status.json was not written")
+
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          status = str(payload.get("status", "missing"))
+          reason = str(payload.get("reason", ""))
+          action_report_status = str(payload.get("action_report_status", "unknown"))
+          comment_result_title = str(payload.get("comment_result_title", "unknown"))
+          evidence_signal_kind = str(payload.get("evidence_signal_kind", "unknown"))
+          evidence_signal_present = bool(payload.get("evidence_signal_present", False))
+          evidence_review_required = bool(payload.get("evidence_review_required", False))
+
+          print(f"comment_status={status}")
+          print(f"comment_reason={reason}")
+          print(f"action_report_status={action_report_status}")
+          print(f"comment_result_title={comment_result_title}")
+          print(f"evidence_signal_kind={evidence_signal_kind}")
+          print(f"evidence_signal_present={str(evidence_signal_present).lower()}")
+          print(f"evidence_review_required={str(evidence_review_required).lower()}")
+
+          if status not in {"posted", "updated"}:
+              raise SystemExit(f"PR Quality comment was not posted or updated: status={status} reason={reason}")
+          PY
