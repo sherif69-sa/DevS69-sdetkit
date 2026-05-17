@@ -92,6 +92,15 @@ def test_pr_quality_comment_workflow_logs_final_comment_signal_state() -> None:
     assert 'print(f"evidence_review_required={str(evidence_review_required).lower()}")' in text
 
 
+def test_pr_quality_comment_workflow_requires_final_comment_signal_metadata() -> None:
+    text = _workflow_text()
+
+    assert "PR Quality comment signal metadata missing: action_report_status=unknown" in text
+    assert "PR Quality comment signal metadata missing: comment_result_title=unknown" in text
+    assert 'evidence_signal_kind not in {"none", "proof", "review"}' in text
+    assert "PR Quality comment signal metadata invalid: " in text
+
+
 def test_pr_quality_comment_workflow_builds_check_intelligence_action_report() -> None:
     text = _workflow_text()
 
