@@ -917,3 +917,80 @@ def test_green_narrative_explains_full_spine_real_blocker_proof_changes(tmp_path
         in markdown
     )
     assert "python -m pytest -q tests/test_full_spine_real_blocker_integration.py" in markdown
+
+
+def test_green_narrative_preserves_secondary_graph_blockers(tmp_path: Path) -> None:
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    graph = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [
+                {
+                    "title": "Security finding requires review",
+                    "summary": "A protected security surface changed.",
+                    "risk_surface": "security",
+                    "severity": "critical",
+                    "review_first": True,
+                    "operator_action": "review",
+                    "proof_commands": [
+                        "python -m pytest -q tests/test_owned_surface_hygiene_contract.py -o addopts="
+                    ],
+                    "recommended_commands": ["python -m pre_commit run -a"],
+                },
+                {
+                    "title": "Dependency resolver failed",
+                    "summary": "pip could not resolve constraints before tests could run.",
+                    "risk_surface": "dependency",
+                    "severity": "high",
+                    "review_first": True,
+                    "operator_action": "review",
+                    "proof_commands": [
+                        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+                    ],
+                    "recommended_commands": ["Reproduce the exact install lane."],
+                },
+                {
+                    "title": "Coverage gate regression",
+                    "summary": "Coverage dropped below threshold.",
+                    "risk_surface": "quality",
+                    "severity": "warning",
+                    "review_first": False,
+                    "operator_action": "rerun_proof",
+                    "recommended_commands": ["python -m pytest -q --cov=sdetkit"],
+                },
+            ],
+            "source_summary": [{"source": "failure_bundle", "found": True}],
+        },
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=None,
+        evidence_graph=graph,
+        failure_bundle=None,
+        changed_files=None,
+    )
+
+    markdown = str(payload["markdown"])
+    assert payload["graph"]["top_blocker"]["title"] == "Security finding requires review"
+    assert payload["graph"]["top_blocker"]["surface"] == "security"
+    assert payload["graph"]["secondary_blocker_count"] == 2
+    assert [item["title"] for item in payload["graph"]["secondary_blockers"]] == [
+        "Dependency resolver failed",
+        "Coverage gate regression",
+    ]
+    assert payload["graph"]["secondary_blockers"][0]["surface"] == "dependency"
+    assert payload["graph"]["secondary_blockers"][0]["review_first"] is True
+    assert payload["graph"]["secondary_blockers"][0]["next_proof"] == [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+        "Reproduce the exact install lane.",
+    ]
+
+    assert "### Secondary graph blockers" in markdown
+    assert "Dependency resolver failed [dependency; review]" in markdown
+    assert "Coverage gate regression [quality; rerun_proof]" in markdown
