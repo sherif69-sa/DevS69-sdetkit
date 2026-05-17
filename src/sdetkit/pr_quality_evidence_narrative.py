@@ -190,6 +190,60 @@ def _load_changed_files(path: Path | None) -> list[str]:
     return [line.strip() for line in _read_text(path).splitlines() if line.strip()]
 
 
+def _proof_signal_from_changed_files(changed_files: list[str]) -> JsonObject:
+    lowered = [path.lower() for path in changed_files]
+
+    if any("test_full_spine_raw_log_diagnosis_integration.py" in path for path in lowered):
+        return {
+            "kind": "integration_proof",
+            "surface": "tests",
+            "title": "Raw-log full-spine proof changed",
+            "what_happened": [
+                "This PR changes the raw-log full-spine regression proof.",
+                "The proof verifies that raw dependency, security, and release logs route through adaptive diagnosis, Evidence Graph, Mission Control, and PR Quality.",
+            ],
+            "why_it_matters": [
+                "This is not a product failure and not a coverage issue.",
+                "The review focus is whether the integration fixture starts from raw log text and proves the real evidence chain without weakening safety boundaries.",
+            ],
+            "operator_action": [
+                "Review the raw-log full-spine proof fixture.",
+                "Confirm it starts from raw log text, not hand-written graph nodes.",
+                "Confirm automation remains advisory/read-only.",
+            ],
+            "next_proof": [
+                "python -m pytest -q tests/test_full_spine_raw_log_diagnosis_integration.py tests/test_full_spine_real_blocker_integration.py -o addopts=",
+                "python -m pre_commit run -a",
+            ],
+        }
+
+    if any("test_full_spine_real_blocker_integration.py" in path for path in lowered):
+        return {
+            "kind": "integration_proof",
+            "surface": "tests",
+            "title": "Full-spine real-blocker proof changed",
+            "what_happened": [
+                "This PR changes the full-spine real-blocker regression proof.",
+                "The proof verifies that blocker diagnoses flow through failure bundle, Evidence Graph, Mission Control, and PR Quality.",
+            ],
+            "why_it_matters": [
+                "This is proof coverage for the evidence spine, not a product failure.",
+                "The review focus is whether real blocker classes remain protected end-to-end.",
+            ],
+            "operator_action": [
+                "Review the full-spine integration fixture.",
+                "Confirm blocker classes keep review-first safety boundaries.",
+                "Confirm proof commands remain evidence-derived and not auto-remediation.",
+            ],
+            "next_proof": [
+                "python -m pytest -q tests/test_full_spine_real_blocker_integration.py tests/test_pr_quality_evidence_narrative.py -o addopts=",
+                "python -m pre_commit run -a",
+            ],
+        }
+
+    return {}
+
+
 def _changed_file_surfaces(files: list[str]) -> list[str]:
     surfaces = {_surface_for_path(path) for path in files}
     surfaces.discard("unknown")
@@ -479,6 +533,7 @@ def build_narrative(
     changed_surfaces = _changed_file_surfaces(changed)
     failure_payload = _fallback_failure_bundle(failure_bundle)
     failure = _primary_failure(failure_payload) if not quality_ok else {}
+    proof_signal = _proof_signal_from_changed_files(changed) if quality_ok else {}
 
     surfaces = {
         str(node.get("risk_surface", "unknown") or "unknown")
@@ -492,6 +547,10 @@ def build_narrative(
         primary_kind = "actual_failure"
         primary_surface = _surface_for_failure(failure)
         primary_title = str(failure.get("title") or failure.get("code") or "Quality failure")
+    elif proof_signal:
+        primary_kind = str(proof_signal.get("kind", "integration_proof"))
+        primary_surface = str(proof_signal.get("surface", "tests"))
+        primary_title = str(proof_signal.get("title", "Integration proof changed"))
     elif quality_ok and (changed_surfaces or primary_node):
         primary_kind = "review_signal"
         primary_node_surface = (
@@ -529,6 +588,8 @@ def build_narrative(
 
     if failure:
         commands = _commands_from_failure(failure)
+    elif proof_signal:
+        commands = _string_list(proof_signal.get("next_proof"))
     elif quality_ok:
         commands = _green_proof_commands(
             changed_surfaces=changed_surfaces,
@@ -549,18 +610,26 @@ def build_narrative(
         changed_surfaces=changed_surfaces,
         failure=failure,
     )
+    if proof_signal:
+        what_happened.extend(_string_list(proof_signal.get("what_happened")))
+
     why_it_matters = _why_it_matters(
         quality_ok=quality_ok,
         primary_surface=primary_surface,
         failure=failure,
         nodes=relevant_nodes if quality_ok else nodes,
     )
+    if proof_signal:
+        why_it_matters = _string_list(proof_signal.get("why_it_matters"))
+
     operator_action = _operator_action(
         quality_ok=quality_ok,
         primary_surface=primary_surface,
         failure=failure,
         nodes=relevant_nodes if quality_ok else nodes,
     )
+    if proof_signal:
+        operator_action = _string_list(proof_signal.get("operator_action"))
     artifact_paths = _artifact_paths(
         quality_log=quality_log,
         sentinel_control_room=sentinel_control_room,

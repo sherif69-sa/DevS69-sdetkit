@@ -82,6 +82,7 @@ _REVIEW_FIRST_SURFACES = {
     "pr_quality",
     "quality",
     "unknown",
+    "docs",
 }
 
 _VALID_SURFACES = {
@@ -116,6 +117,7 @@ def build_evidence_graph(
     sentinel_control_room: Path | None = None,
     mission_control: Path | None = None,
     failure_bundle: Path | None = None,
+    pr_quality_action_report: Path | None = None,
 ) -> EvidenceGraph:
     nodes: list[EvidenceNode] = []
     source_summary: list[SourceSummary] = []
@@ -143,6 +145,13 @@ def build_evidence_graph(
     )
     nodes.extend(failure_bundle_nodes)
     source_summary.append(failure_bundle_summary)
+
+    if pr_quality_action_report is not None:
+        pr_quality_nodes, pr_quality_summary = _normalize_pr_quality_action_report(
+            pr_quality_action_report
+        )
+        nodes.extend(pr_quality_nodes)
+        source_summary.append(pr_quality_summary)
 
     nodes.sort(key=lambda node: (node["source"], node["finding_id"]))
 
@@ -284,6 +293,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Adaptive failure bundle or adaptive diagnosis JSON artifact to normalize.",
     )
     parser.add_argument(
+        "--pr-quality-action-report",
+        type=Path,
+        default=None,
+        help="Path to a PR Quality action-report JSON artifact.",
+    )
+    parser.add_argument(
         "--out-dir",
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
@@ -295,10 +310,101 @@ def main(argv: list[str] | None = None) -> int:
         sentinel_control_room=args.sentinel_control_room,
         mission_control=args.mission_control,
         failure_bundle=args.failure_bundle,
+        pr_quality_action_report=args.pr_quality_action_report,
     )
     manifest = write_evidence_graph(graph, output_dir=args.out_dir)
     print(json.dumps(manifest, indent=2, sort_keys=True))
     return 0
+
+
+def _normalize_pr_quality_action_report(
+    path: Path | None,
+) -> tuple[list[EvidenceNode], SourceSummary]:
+    source: SourceName = "pr_quality"
+
+    if path is None or not path.exists():
+        return [], {
+            "source": source,
+            "path": "" if path is None else path.as_posix(),
+            "found": False,
+            "status": "missing",
+            "findings_seen": 0,
+            "findings_emitted": 0,
+        }
+
+    payload = load_json_object(path)
+    status = str(payload.get("status", "unknown") or "unknown")
+    normalized_status = status.lower().strip()
+    primary_raw = payload.get("primary_blocker")
+
+    if (
+        normalized_status in {"green", "ok", "pass", "passed", "healthy", "clear"}
+        or not isinstance(primary_raw, dict)
+        or not primary_raw
+    ):
+        return [], {
+            "source": source,
+            "path": path.as_posix(),
+            "found": True,
+            "status": status,
+            "findings_seen": 0,
+            "findings_emitted": 0,
+        }
+
+    primary = cast(JsonObject, primary_raw)
+    finding: JsonObject = dict(primary)
+
+    title = str(
+        finding.get("title") or finding.get("check") or "PR Quality action report requires review"
+    )
+    summary = str(
+        finding.get("summary")
+        or finding.get("impact")
+        or "PR Quality action report emitted a review-required blocker."
+    )
+    finding["title"] = title
+    finding["summary"] = summary
+
+    if "risk_surface" not in finding and "surface" in finding:
+        finding["risk_surface"] = finding["surface"]
+
+    if not str(finding.get("severity") or "").strip():
+        finding["severity"] = (
+            "critical" if normalized_status in {"review_required", "incomplete"} else "warning"
+        )
+
+    path_value = finding.get("path")
+    if isinstance(path_value, str) and path_value.strip() and "owner_files" not in finding:
+        finding["owner_files"] = [path_value]
+
+    recommended_raw = payload.get("recommended_actions")
+    if isinstance(recommended_raw, list) and "recommended_commands" not in finding:
+        finding["recommended_commands"] = [
+            item for item in recommended_raw if isinstance(item, str) and item.strip()
+        ]
+
+    proof_raw = payload.get("proof_commands")
+    if isinstance(proof_raw, list) and "proof_commands" not in finding:
+        finding["proof_commands"] = [
+            item for item in proof_raw if isinstance(item, str) and item.strip()
+        ]
+
+    finding["source_artifacts"] = [path.as_posix()]
+    finding["review_first"] = True
+    finding["safe_to_auto_fix"] = False
+    finding["operator_action"] = "review"
+
+    node = _normalize_finding(source, finding, path)
+    nodes = [node] if node is not None else []
+
+    return nodes, {
+        "source": source,
+        "path": path.as_posix(),
+        "found": True,
+        "status": status,
+        "findings_seen": 1,
+        "findings_emitted": len(nodes),
+    }
 
 
 def _normalize_source(
@@ -487,6 +593,9 @@ def _risk_surface(
         "SECRET_EXPOSURE": "security",
         "RELEASE_ARTIFACT_INVALID": "release",
         "WORKFLOW_CONTRACT_FAILURE": "workflow",
+        "CLI_CONTRACT_FAILURE": "cli",
+        "DOCS_BUILD_CONTRACT": "docs",
+        "PYTEST_ASSERTION_FAILURE": "tests",
     }
     if code in code_surfaces:
         return code_surfaces[code]
