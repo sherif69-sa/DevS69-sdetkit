@@ -215,9 +215,20 @@ jobs:
           )
           PY
 
+          mkdir -p build/pr-quality/check-logs
+          PYTHONPATH=src python -m sdetkit.failed_check_log_collection \
+            --checks-json build/pr-quality/checks/check-runs.json \
+            --out-dir build/pr-quality/check-logs
+
+          bash build/pr-quality/check-logs/download-failed-check-logs.sh || true
+
+          PYTHONPATH=src python -m sdetkit.failed_check_log_collection \
+            --checks-json build/pr-quality/checks/check-runs.json \
+            --out-dir build/pr-quality/check-logs
+
           PYTHONPATH=src python -m sdetkit.check_intelligence \
             --checks-json build/pr-quality/checks/check-runs.json \
-            --logs-dir . \
+            --logs-dir build/pr-quality/check-logs/failed-check-logs \
             --review-threads-json build/pr-quality/security-review/review-threads.json \
             --out-dir build/pr-quality/check-intelligence
 
@@ -332,6 +343,7 @@ jobs:
             build/pr-quality/changed-files.txt
             build/pr-quality/comment-status.json
             build/pr-quality/checks/
+            build/pr-quality/check-logs/
             build/pr-quality/check-intelligence/
             build/pr-quality/pr-evidence-narrative.md
             build/sdetkit/evidence-graph/
