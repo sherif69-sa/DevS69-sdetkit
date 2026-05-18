@@ -86,3 +86,156 @@ def test_top_level_cli_adaptive_patch_plan_passthrough(tmp_path: Path) -> None:
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["status"] == "review_required"
     assert payload["guardrails"]["post_fix_proof_required"] is True
+
+
+def test_patch_plan_accepts_evidence_graph_input_review_first(tmp_path: Path) -> None:
+    graph = tmp_path / "evidence-graph.json"
+    graph.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.evidence-graph.v1",
+                "nodes": [
+                    {
+                        "finding_id": "security-review",
+                        "title": "Security finding requires review",
+                        "summary": "A protected security surface changed.",
+                        "risk_surface": "security",
+                        "severity": "critical",
+                        "review_first": True,
+                        "safe_to_auto_fix": False,
+                        "owner_files": ["src/sdetkit/adaptive_diagnosis.py"],
+                        "recommended_commands": [
+                            "Review the unresolved security finding.",
+                        ],
+                        "proof_commands": [
+                            "python -m sdetkit security check --root . --format json",
+                        ],
+                        "operator_action": "review",
+                        "automation_allowed_now": False,
+                    },
+                    {
+                        "finding_id": "dependency-resolver",
+                        "title": "Dependency resolver failed",
+                        "summary": "pip could not resolve constraints before tests could run.",
+                        "risk_surface": "dependency",
+                        "severity": "high",
+                        "review_first": True,
+                        "safe_to_auto_fix": False,
+                        "owner_files": ["constraints-ci.txt", "requirements-test.txt"],
+                        "recommended_commands": ["Reproduce the exact install lane."],
+                        "proof_commands": [
+                            "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+                        ],
+                        "operator_action": "review",
+                        "automation_allowed_now": False,
+                    },
+                ],
+                "source_summary": [{"source": "failure_bundle", "found": True}],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    plan = adaptive_patch_plan.patch_plan_from_file(graph)
+
+    assert plan["schema_version"] == "sdetkit.adaptive.patch_plan.v1"
+    assert plan["source_kind"] == "evidence_graph"
+    assert plan["source_schema_version"] == "sdetkit.evidence-graph.v1"
+    assert plan["status"] == "review_required"
+    assert plan["source_code"] == "security-review"
+    assert plan["safe_to_auto_fix"] is False
+    assert plan["dry_run_only"] is True
+    assert plan["requires_human_review"] is True
+    assert plan["guardrails"]["automation_mutation_allowed"] is False
+    assert plan["affected_files"] == ["src/sdetkit/adaptive_diagnosis.py"]
+    assert plan["recommended_commands"] == ["Review the unresolved security finding."]
+    assert plan["proof_commands"] == [
+        "python -m sdetkit security check --root . --format json",
+    ]
+    assert plan["patch_steps"][0]["action"] == "reproduce"
+    assert plan["patch_steps"][0]["mutation_allowed"] is False
+    assert plan["source_artifacts"] == [graph.as_posix()]
+
+
+def test_patch_plan_accepts_failure_bundle_input_review_first(tmp_path: Path) -> None:
+    bundle = tmp_path / "failure-bundle.json"
+    bundle.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.adaptive.failure_bundle.v1",
+                "status": "review_required",
+                "review_first": True,
+                "safe_to_auto_fix": False,
+                "primary_diagnosis_code": "PACKAGE_INSTALL_FAILURE",
+                "diagnosis_count": 1,
+                "diagnoses": [
+                    {
+                        "code": "PACKAGE_INSTALL_FAILURE",
+                        "title": "Dependency resolver failed",
+                        "diagnosis": "pip could not resolve constraints before tests could run.",
+                        "severity": "high",
+                        "confidence": "high",
+                        "affected_files": ["constraints-ci.txt", "requirements-test.txt"],
+                        "recommended_fix": ["Reproduce the exact install lane."],
+                        "proof_commands": [
+                            "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    plan = adaptive_patch_plan.patch_plan_from_file(bundle)
+
+    assert plan["source_kind"] == "failure_bundle"
+    assert plan["source_schema_version"] == "sdetkit.adaptive.failure_bundle.v1"
+    assert plan["source_status"] == "needs_attention"
+    assert plan["source_code"] == "PACKAGE_INSTALL_FAILURE"
+    assert plan["safe_to_auto_fix"] is False
+    assert plan["dry_run_only"] is True
+    assert plan["requires_human_review"] is True
+    assert plan["affected_files"] == ["constraints-ci.txt", "requirements-test.txt"]
+    assert plan["recommended_commands"] == ["Reproduce the exact install lane."]
+    assert plan["proof_commands"] == [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+    ]
+
+
+def test_patch_plan_cli_accepts_evidence_graph_markdown(tmp_path: Path) -> None:
+    graph = tmp_path / "evidence-graph.json"
+    out = tmp_path / "patch-plan.md"
+    graph.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.evidence-graph.v1",
+                "nodes": [
+                    {
+                        "finding_id": "dependency-resolver",
+                        "title": "Dependency resolver failed",
+                        "summary": "pip could not resolve constraints.",
+                        "risk_surface": "dependency",
+                        "severity": "high",
+                        "review_first": True,
+                        "owner_files": ["constraints-ci.txt"],
+                        "recommended_commands": ["Reproduce the exact install lane."],
+                        "proof_commands": [
+                            "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+                        ],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rc = adaptive_patch_plan.main([str(graph), "--format", "md", "--out", str(out)])
+
+    assert rc == 0
+    rendered = out.read_text(encoding="utf-8")
+    assert "Source kind: `evidence_graph`" in rendered
+    assert "Safe to auto-fix: `false`" in rendered
+    assert "Requires human review: `true`" in rendered
+    assert "Mutation allowed: `false`" in rendered
+    assert "Reproduce the exact install lane." in rendered
