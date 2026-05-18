@@ -14,7 +14,10 @@ def test_pr_quality_workflow_publishes_verified_operator_loop() -> None:
     assert "--evidence-graph build/sdetkit/evidence-graph/evidence-graph.json" in workflow
     assert "--failure-bundle build/pr-quality/failure-intelligence/failure-bundle.json" in workflow
     assert "--action-report build/pr-quality/check-intelligence/action-report.json" in workflow
-    assert "--check-intelligence build/pr-quality/check-intelligence/check-intelligence.json" in workflow
+    assert (
+        "--check-intelligence build/pr-quality/check-intelligence/check-intelligence.json"
+        in workflow
+    )
     assert "--out-dir build/sdetkit/operator-loop" in workflow
     assert "> build/sdetkit/operator-loop/operator-loop-stdout.json" in workflow
     assert "build/sdetkit/operator-loop/" in workflow
