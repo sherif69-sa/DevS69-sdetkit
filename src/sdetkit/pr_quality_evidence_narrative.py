@@ -269,6 +269,50 @@ def _primary_node(nodes: list[JsonObject]) -> JsonObject:
     return max(nodes, key=_node_score) if nodes else {}
 
 
+def _graph_node_handoff(
+    node: JsonObject,
+    *,
+    changed_files: list[str],
+    changed_surfaces: list[str],
+) -> JsonObject:
+    return {
+        "title": _human_finding_title(
+            node,
+            changed_files=changed_files,
+            changed_surfaces=changed_surfaces,
+        ),
+        "surface": str(node.get("risk_surface", "unknown") or "unknown"),
+        "severity": str(node.get("severity", "unknown") or "unknown"),
+        "action": str(node.get("operator_action", "rerun_proof") or "rerun_proof"),
+        "review_first": bool(node.get("review_first", False)),
+        "next_proof": _commands_from_node(node),
+    }
+
+
+def _secondary_graph_blockers(
+    nodes: list[JsonObject],
+    primary_node: JsonObject,
+    *,
+    changed_files: list[str],
+    changed_surfaces: list[str],
+    limit: int = 3,
+) -> list[JsonObject]:
+    secondary: list[JsonObject] = []
+    for node in sorted(nodes, key=_node_score, reverse=True):
+        if node is primary_node:
+            continue
+        secondary.append(
+            _graph_node_handoff(
+                node,
+                changed_files=changed_files,
+                changed_surfaces=changed_surfaces,
+            )
+        )
+        if len(secondary) >= limit:
+            break
+    return secondary
+
+
 def _fallback_failure_bundle(path: Path | None) -> JsonObject:
     if path is None:
         return {}
@@ -534,6 +578,13 @@ def build_narrative(
     failure_payload = _fallback_failure_bundle(failure_bundle)
     failure = _primary_failure(failure_payload) if not quality_ok else {}
     proof_signal = _proof_signal_from_changed_files(changed) if quality_ok else {}
+    narrative_nodes = relevant_nodes if quality_ok else nodes
+    secondary_graph_blockers = _secondary_graph_blockers(
+        narrative_nodes,
+        primary_node,
+        changed_files=changed,
+        changed_surfaces=changed_surfaces,
+    )
 
     surfaces = {
         str(node.get("risk_surface", "unknown") or "unknown")
@@ -668,6 +719,8 @@ def build_narrative(
                 if primary_node
                 else False,
             },
+            "secondary_blocker_count": len(secondary_graph_blockers),
+            "secondary_blockers": secondary_graph_blockers,
         },
         "primary_signal": {
             "kind": primary_kind,
@@ -691,6 +744,7 @@ def build_narrative(
         operator_action=operator_action,
         next_proof=commands,
         evidence=artifact_paths,
+        secondary_graph_blockers=secondary_graph_blockers,
     )
     return payload
 
@@ -895,12 +949,14 @@ def render_markdown(
     operator_action: list[str],
     next_proof: list[str],
     evidence: list[str],
+    secondary_graph_blockers: list[JsonObject] | None = None,
 ) -> str:
     status = "✅ quality.sh cov passed" if quality_ok else "❌ quality.sh cov failed"
+    if coverage:
+        status = f"{status} — coverage {coverage}%"
+
     lines = [
         status,
-        "",
-        f"coverage: {coverage}%",
         "",
         "## Adaptive release confidence",
         "",
@@ -920,16 +976,36 @@ def render_markdown(
         "",
         *_bullets(operator_action),
         "",
-        "### Next proof",
-        "",
-        *_code_bullets(next_proof),
-        "",
-        "### Evidence",
-        "",
-        *_code_bullets(evidence or ["No evidence artifacts were available."]),
-        "",
     ]
-    return "\n".join(lines).rstrip() + "\n"
+
+    if secondary_graph_blockers:
+        lines.extend(
+            [
+                "### Secondary graph blockers",
+                "",
+            ]
+        )
+        for blocker in secondary_graph_blockers:
+            lines.append(
+                "- "
+                f"{blocker.get('title', 'Untitled evidence graph finding')} "
+                f"[{blocker.get('surface', 'unknown')}; "
+                f"{blocker.get('action', 'rerun_proof')}]"
+            )
+        lines.append("")
+
+    lines.extend(
+        [
+            "### Next proof",
+            "",
+            *_code_bullets(next_proof),
+            "",
+            "### Evidence",
+            "",
+            *_code_bullets(evidence),
+        ]
+    )
+    return "\n".join(lines) + "\n"
 
 
 def _bullets(items: list[str]) -> list[str]:
