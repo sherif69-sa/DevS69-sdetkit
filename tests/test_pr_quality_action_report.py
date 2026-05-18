@@ -747,3 +747,62 @@ def test_action_report_surfaces_review_first_patch_plan_handoff() -> None:
     assert "Patch steps: `4`" in body
     assert "python -m sdetkit security check --root . --format json" in body
     assert "Review unresolved GitHub Advanced Security comments on the PR." in body
+
+
+def test_action_report_reconciles_cleared_security_review_signal() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 43,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "missing_required_contexts": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "security",
+            "title": "Security review requires action in tests/test_example.py",
+        },
+        "graph": {
+            "node_count": 3,
+            "review_first_count": 1,
+            "critical_count": 0,
+            "top_blocker": {
+                "title": "Security review requires action in tests/test_example.py",
+                "surface": "security",
+                "action": "review",
+                "review_first": True,
+            },
+        },
+        "next_proof": [
+            "Review unresolved GitHub Advanced Security comments on the PR.",
+            "Fix the flagged surface or dismiss the false positive with a review reason.",
+        ],
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=evidence_narrative,
+    )
+
+    assert "SDETKit Review Result: Green with proof signal" in body
+    assert "## Evidence proof signal" in body
+    assert "Security review cleared for changed code" in body
+    assert "latest security review has no unresolved PR-owned findings" in body
+    assert "Unresolved security findings: `0`" in body
+    assert "no fix or dismissal required for PR-owned security findings" in body
+    assert "SDETKit Review Result: Green with evidence review" not in body
+    assert "Evidence review signal present; quality gate passed" not in body
+    assert "human review required before merge" not in body
+    assert "Fix the flagged surface or dismiss the false positive" not in body

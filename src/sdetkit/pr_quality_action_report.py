@@ -189,6 +189,78 @@ def _command_lines(values: list[Any]) -> list[str]:
     return [f"- `{item}`" for item in items] or ["- none"]
 
 
+def _required_count(items: list[Any]) -> int:
+    return sum(1 for item in items if bool(_as_dict(item).get("required", False)))
+
+
+def _cleared_security_review_lines(
+    *,
+    check_intelligence: JsonObject,
+    action_report: JsonObject,
+    evidence_narrative: JsonObject,
+    evidence_review_required: bool,
+) -> list[str]:
+    if not evidence_review_required:
+        return []
+
+    primary = _as_dict(evidence_narrative.get("primary_signal"))
+    graph = _as_dict(evidence_narrative.get("graph"))
+    top_blocker = _as_dict(graph.get("top_blocker"))
+    surface = _string(primary.get("surface") or top_blocker.get("surface") or "")
+
+    if surface != "security":
+        return []
+
+    security = _as_dict(
+        check_intelligence.get("security_review")
+        or _as_dict(action_report.get("evidence")).get("security_review")
+    )
+    if security.get("collected") is not True:
+        return []
+
+    if _int(security.get("unresolved_findings")) != 0:
+        return []
+
+    failed = _as_list(check_intelligence.get("failed_checks"))
+    queued = _as_list(check_intelligence.get("queued_checks"))
+    startup = _as_list(check_intelligence.get("startup_failures"))
+    missing_required = _as_list(check_intelligence.get("missing_required_contexts"))
+
+    if failed or missing_required or _required_count(queued) or _required_count(startup):
+        return []
+
+    return [
+        "- Proof signal: `present`",
+        "- Surface: `security`",
+        "- Title: Security review cleared for changed code",
+        "- Review signal reconciliation: `latest security review has no unresolved PR-owned findings`",
+        "- Failed checks: `0`",
+        "- Unresolved security findings: `0`",
+        "- Security review action: `no fix or dismissal required for PR-owned security findings`",
+    ]
+
+
+def _reconciled_evidence_signal(
+    *,
+    check_intelligence: JsonObject,
+    action_report: JsonObject,
+    evidence_narrative: JsonObject,
+    heading: str,
+    lines: list[str],
+    review_required: bool,
+) -> tuple[str, list[str], bool]:
+    cleared_security = _cleared_security_review_lines(
+        check_intelligence=check_intelligence,
+        action_report=action_report,
+        evidence_narrative=evidence_narrative,
+        evidence_review_required=review_required,
+    )
+    if cleared_security:
+        return "Evidence proof signal", cleared_security, False
+
+    return heading, lines, review_required
+
+
 def _evidence_signal(evidence_narrative: JsonObject) -> tuple[str, list[str], bool]:
     primary = _as_dict(evidence_narrative.get("primary_signal"))
     graph = _as_dict(evidence_narrative.get("graph"))
@@ -323,6 +395,16 @@ def render_comment_body(
     evidence_signal_heading, evidence_signal_lines, evidence_review_required = _evidence_signal(
         evidence_narrative
     )
+    evidence_signal_heading, evidence_signal_lines, evidence_review_required = (
+        _reconciled_evidence_signal(
+            check_intelligence=check_intelligence,
+            action_report=action_report,
+            evidence_narrative=evidence_narrative,
+            heading=evidence_signal_heading,
+            lines=evidence_signal_lines,
+            review_required=evidence_review_required,
+        )
+    )
 
     lines = [
         "## SDETKit Review Result: "
@@ -426,6 +508,14 @@ def write_comment_body(
 
     status = _string(action_report.get("status") or "unknown")
     _heading, evidence_signal_lines, evidence_review_required = _evidence_signal(evidence_narrative)
+    _heading, evidence_signal_lines, evidence_review_required = _reconciled_evidence_signal(
+        check_intelligence=check_intelligence,
+        action_report=action_report,
+        evidence_narrative=evidence_narrative,
+        heading=_heading,
+        lines=evidence_signal_lines,
+        review_required=evidence_review_required,
+    )
     if evidence_review_required:
         evidence_signal_kind = "review"
     elif evidence_signal_lines:
