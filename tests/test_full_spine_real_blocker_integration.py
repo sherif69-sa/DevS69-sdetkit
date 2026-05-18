@@ -392,3 +392,155 @@ def test_tests_failure_flows_through_full_spine(tmp_path: Path) -> None:
             "Fix the product behavior or update the test only if the contract changed intentionally.",
         ],
     )
+
+
+def test_secondary_blockers_flow_through_full_evidence_spine(tmp_path: Path) -> None:
+    repo = tmp_path / "repo-secondary-blockers"
+    repo.mkdir()
+
+    failure_bundle = _write_json(
+        tmp_path / "build/full-spine/failure-bundle.json",
+        {
+            "schema_version": "sdetkit.adaptive.failure_bundle.v1",
+            "status": "review_required",
+            "review_first": True,
+            "safe_to_auto_fix": False,
+            "primary_diagnosis_code": "SECURITY_FINDING_REVIEW_REQUIRED",
+            "primary_diagnosis_title": "Security finding requires review",
+            "diagnosis_count": 3,
+            "diagnosis_codes": [
+                "SECURITY_FINDING_REVIEW_REQUIRED",
+                "PACKAGE_INSTALL_FAILURE",
+                "COVERAGE_GATE_REGRESSION",
+            ],
+            "diagnoses": [
+                {
+                    "code": "SECURITY_FINDING_REVIEW_REQUIRED",
+                    "title": "Security finding requires review",
+                    "diagnosis": "A protected security surface changed and must be reviewed.",
+                    "severity": "critical",
+                    "confidence": "high",
+                    "affected_files": ["src/sdetkit/adaptive_diagnosis.py"],
+                    "recommended_fix": ["Review the unresolved security finding."],
+                    "proof_commands": ["python -m sdetkit security check --root . --format json"],
+                },
+                {
+                    "code": "PACKAGE_INSTALL_FAILURE",
+                    "title": "Dependency resolver failed",
+                    "diagnosis": "pip could not resolve constraints before tests could prove behavior.",
+                    "severity": "high",
+                    "confidence": "high",
+                    "affected_files": ["constraints-ci.txt", "requirements-test.txt"],
+                    "recommended_fix": ["Reproduce the exact install lane."],
+                    "proof_commands": [
+                        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+                    ],
+                },
+                {
+                    "code": "COVERAGE_GATE_REGRESSION",
+                    "title": "Coverage gate regression",
+                    "diagnosis": "Coverage dropped below the configured threshold.",
+                    "severity": "warning",
+                    "confidence": "medium",
+                    "affected_files": ["src/sdetkit/example.py"],
+                    "recommended_fix": ["Inspect the missing behavioral coverage."],
+                    "proof_commands": ["bash quality.sh cov"],
+                },
+            ],
+        },
+    )
+
+    graph = build_evidence_graph(failure_bundle=failure_bundle)
+    graph_manifest = write_evidence_graph(
+        graph,
+        output_dir=tmp_path / "build/sdetkit/evidence-graph",
+    )
+    graph_path = Path(graph_manifest["graph_path"])
+    graph_payload = json.loads(graph_path.read_text(encoding="utf-8"))
+
+    graph_nodes_by_title = {node["title"]: node for node in graph_payload["nodes"]}
+    assert set(graph_nodes_by_title) == {
+        "Security finding requires review",
+        "Dependency resolver failed",
+        "Coverage gate regression",
+    }
+    assert graph_nodes_by_title["Security finding requires review"]["risk_surface"] == "security"
+    assert graph_nodes_by_title["Dependency resolver failed"]["risk_surface"] == "dependency"
+    assert graph_nodes_by_title["Coverage gate regression"]["risk_surface"] == "quality"
+
+    mission_out = tmp_path / "build/mission-control"
+    rc = mission_control.main(
+        [
+            "run",
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(mission_out),
+            "--evidence-graph",
+            str(graph_path),
+            "--failure-bundle",
+            str(failure_bundle),
+            "--no-ledger",
+        ]
+    )
+    assert rc == 0
+
+    mission_bundle = json.loads((mission_out / "mission-control.json").read_text(encoding="utf-8"))
+    mission_graph = mission_bundle["evidence_graph"]
+
+    assert mission_graph["node_count"] == 3
+    assert mission_graph["top_blocker_title"] == "Security finding requires review"
+    assert mission_graph["top_blocker_surface"] == "security"
+    assert mission_graph["top_blocker_review_first"] is True
+    assert mission_graph["secondary_blocker_count"] == 2
+    assert [item["title"] for item in mission_graph["secondary_blockers"]] == [
+        "Dependency resolver failed",
+        "Coverage gate regression",
+    ]
+    assert mission_graph["secondary_blockers"][0]["risk_surface"] == "dependency"
+    assert mission_graph["secondary_blockers"][0]["next_commands"] == [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+        "Reproduce the exact install lane.",
+    ]
+
+    mission_markdown = (mission_out / "mission-control.md").read_text(encoding="utf-8")
+    assert "Secondary blockers: 2" in mission_markdown
+    for blocker in mission_graph["secondary_blockers"]:
+        assert (
+            f"Secondary blocker: {blocker['title']} "
+            f"[{blocker['risk_surface']}; {blocker['operator_action']}]" in mission_markdown
+        )
+
+    quality_log = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    pr_payload = narrative.build_narrative(
+        quality_log=quality_log,
+        quality_outcome="success",
+        sentinel_control_room=None,
+        evidence_graph=graph_path,
+        failure_bundle=failure_bundle,
+        changed_files=None,
+    )
+    pr_markdown = str(pr_payload["markdown"])
+
+    assert pr_payload["quality"]["ok"] is True
+    assert pr_payload["primary_signal"]["kind"] == "review_signal"
+    assert pr_payload["primary_signal"]["surface"] == "security"
+    assert pr_payload["primary_signal"]["title"] == "Security finding requires review"
+    assert pr_payload["graph"]["top_blocker"]["title"] == "Security finding requires review"
+    assert pr_payload["graph"]["secondary_blocker_count"] == 2
+    assert [item["title"] for item in pr_payload["graph"]["secondary_blockers"]] == [
+        "Dependency resolver failed",
+        "Coverage gate regression",
+    ]
+    assert pr_payload["graph"]["secondary_blockers"][0]["surface"] == "dependency"
+    assert pr_payload["graph"]["secondary_blockers"][0]["next_proof"] == [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .",
+        "Reproduce the exact install lane.",
+    ]
+
+    assert "### Secondary graph blockers" in pr_markdown
+    for blocker in pr_payload["graph"]["secondary_blockers"]:
+        assert f"{blocker['title']} [{blocker['surface']}; {blocker['action']}]" in pr_markdown
