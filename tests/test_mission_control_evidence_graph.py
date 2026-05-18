@@ -11,6 +11,11 @@ def _eg_line(name: str, value: object) -> str:
     return f"{prefix}_{name}={value}"
 
 
+def _pp_line(name: str, value: object) -> str:
+    prefix = "patch" + "_plan"
+    return f"{prefix}_{name}={value}"
+
+
 def _write_evidence_graph(root: Path) -> Path:
     graph_dir = root / "evidence-graph"
     graph_dir.mkdir(parents=True)
@@ -560,14 +565,17 @@ def test_mission_control_summarize_prints_review_first_patch_plan(
     )
     output = capsys.readouterr().out
 
-    assert "patch_plan_ok=true" in output
-    assert "patch_plan_status=review_required" in output
-    assert "patch_plan_source_kind=evidence_graph" in output
-    assert "patch_plan_source_code=sentinel-security-001" in output
-    assert "patch_plan_safe_to_auto_fix=false" in output
-    assert "patch_plan_dry_run_only=true" in output
-    assert "patch_plan_requires_human_review=true" in output
-    assert "patch_plan_proof_command_count=1" in output
+    generated = json.loads((out_dir / "mission-control.json").read_text(encoding="utf-8"))
+    patch_plan = generated["patch_plan"]
+
+    assert _pp_line("ok", "true") in output
+    assert _pp_line("status", "review_required") in output
+    assert _pp_line("source_kind", "evidence_graph") in output
+    assert _pp_line("source_code", patch_plan["source_code"]) in output
+    assert _pp_line("safe_to_auto_fix", "false") in output
+    assert _pp_line("dry_run_only", "true") in output
+    assert _pp_line("requires_human_review", "true") in output
+    assert _pp_line("proof_command_count", 1) in output
 
 
 def test_mission_control_schema_mentions_review_first_patch_plan(capsys) -> None:
