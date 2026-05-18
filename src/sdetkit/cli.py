@@ -279,6 +279,25 @@ Then use stability-aware command discovery:
     )
     mission_control_parser.add_argument("args", nargs=argparse.REMAINDER)
 
+    operator_loop_parser = sub.add_parser(
+        "operator-loop",
+        help="[Public / stable] Build the operator evidence loop",
+        description=(
+            "Build the full review-first operator evidence loop from existing SDETKit artifacts."
+        ),
+    )
+    operator_loop_parser.add_argument("--repo", default=".")
+    operator_loop_parser.add_argument("--out-dir", default="build/sdetkit/operator-loop")
+    operator_loop_parser.add_argument("--quality-log", default=None)
+    operator_loop_parser.add_argument("--quality-outcome", default="unknown")
+    operator_loop_parser.add_argument("--sentinel-control-room", default=None)
+    operator_loop_parser.add_argument("--evidence-graph", default=None)
+    operator_loop_parser.add_argument("--failure-bundle", default=None)
+    operator_loop_parser.add_argument("--changed-files", default=None)
+    operator_loop_parser.add_argument("--action-report", default=None)
+    operator_loop_parser.add_argument("--check-intelligence", default=None)
+    operator_loop_parser.add_argument("--format", choices=["json", "markdown"], default="json")
+
     _add_passthrough_subcommand(
         sub,
         "gate",
@@ -1119,6 +1138,30 @@ def main(argv: Sequence[str] | None = None) -> int:
         if bool(getattr(ns, "mission_control_help", False)):
             forwarded.insert(0, "--help")
         return _run_module_main("sdetkit.mission_control", forwarded)
+
+    if ns.cmd == "operator-loop":
+        forwarded = [
+            "--repo",
+            str(ns.repo),
+            "--out-dir",
+            str(ns.out_dir),
+            "--quality-outcome",
+            str(ns.quality_outcome),
+            "--format",
+            str(ns.format),
+        ]
+        for flag, value in (
+            ("--quality-log", ns.quality_log),
+            ("--sentinel-control-room", ns.sentinel_control_room),
+            ("--evidence-graph", ns.evidence_graph),
+            ("--failure-bundle", ns.failure_bundle),
+            ("--changed-files", ns.changed_files),
+            ("--action-report", ns.action_report),
+            ("--check-intelligence", ns.check_intelligence),
+        ):
+            if value:
+                forwarded.extend([flag, str(value)])
+        return _run_module_main("sdetkit.operator_evidence_loop", forwarded)
 
     if ns.cmd == "inspect":
         return _run_module_main("sdetkit.inspect_data", build_inspect_forwarded_args(ns, ns.args))
