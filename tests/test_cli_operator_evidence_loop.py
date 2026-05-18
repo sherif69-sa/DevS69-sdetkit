@@ -101,8 +101,8 @@ def test_operator_loop_cli_command_builds_operator_artifacts(tmp_path: Path, cap
 
     assert rc == 0
     stdout = capsys.readouterr().out
-    assert "\"schema_version\": " in stdout
-    assert "\"classification\": " in stdout
+    assert '"schema_version": ' in stdout
+    assert '"classification": ' in stdout
 
     persisted = json.loads((out_dir / "operator-loop.json").read_text(encoding="utf-8"))
     assert persisted["schema_version"] == "sdetkit.operator.evidence_loop.v1"
