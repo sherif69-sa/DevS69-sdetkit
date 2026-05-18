@@ -771,6 +771,163 @@ def _adaptive_failure_bundle_ledger_summary(bundle: dict[str, Any]) -> dict[str,
     }
 
 
+def _review_first_patch_plan_values(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _collect_review_first_patch_plan(
+    *,
+    evidence_graph: Path | None,
+    failure_bundle: Path | None,
+    out_dir: Path,
+) -> dict[str, Any] | None:
+    source_path = evidence_graph or failure_bundle
+    if source_path is None:
+        return None
+
+    from . import adaptive_patch_plan
+
+    resolved = source_path.resolve()
+    plan_path = out_dir / "review-first-patch-plan.json"
+
+    try:
+        plan = adaptive_patch_plan.patch_plan_from_file(resolved, plan_path)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        return {
+            "enabled": True,
+            "ok": False,
+            "path": plan_path.resolve().as_posix(),
+            "source_path": resolved.as_posix(),
+            "error": f"failed to build review-first patch plan: {exc}",
+            "safe_to_auto_fix": False,
+            "dry_run_only": True,
+            "requires_human_review": True,
+            "artifacts": [],
+        }
+
+    safe_to_auto_fix = bool(plan.get("safe_to_auto_fix", False))
+    dry_run_only = bool(plan.get("dry_run_only", True))
+    requires_human_review = bool(plan.get("requires_human_review", True))
+    proof_commands = [
+        str(command)
+        for command in _review_first_patch_plan_values(plan.get("proof_commands"))
+        if str(command)
+    ]
+    recommended_commands = [
+        str(command)
+        for command in _review_first_patch_plan_values(plan.get("recommended_commands"))
+        if str(command)
+    ]
+    patch_steps = [
+        step
+        for step in _review_first_patch_plan_values(plan.get("patch_steps"))
+        if isinstance(step, dict)
+    ]
+
+    artifacts = []
+    if plan_path.exists():
+        artifacts.append(
+            _artifact(
+                plan_path.resolve(),
+                "Review-first adaptive patch plan",
+                "json",
+            )
+        )
+
+    return {
+        "enabled": True,
+        "ok": (not safe_to_auto_fix) and dry_run_only and requires_human_review,
+        "path": plan_path.resolve().as_posix(),
+        "source_path": resolved.as_posix(),
+        "schema_version": str(plan.get("schema_version", "")),
+        "status": str(plan.get("status", "unknown")),
+        "source_kind": str(plan.get("source_kind", "unknown")),
+        "source_schema_version": str(plan.get("source_schema_version", "unknown")),
+        "source_code": str(plan.get("source_code", "UNKNOWN")),
+        "safe_to_auto_fix": safe_to_auto_fix,
+        "dry_run_only": dry_run_only,
+        "requires_human_review": requires_human_review,
+        "proof_commands": proof_commands,
+        "recommended_commands": recommended_commands,
+        "patch_step_count": len(patch_steps),
+        "patch_steps": patch_steps,
+        "artifacts": artifacts,
+    }
+
+
+def _review_first_patch_plan_artifacts(summary: dict[str, Any] | None) -> list[dict[str, str]]:
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return []
+    artifacts = summary.get("artifacts", [])
+    if not isinstance(artifacts, list):
+        return []
+    return [artifact for artifact in artifacts if isinstance(artifact, dict)]
+
+
+def _format_review_first_patch_plan(summary: dict[str, Any] | None) -> list[str]:
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return []
+
+    if summary.get("error"):
+        return [
+            "## Review-first Patch Plan",
+            "",
+            "- Status: error",
+            f"- Error: {summary.get('error', 'unknown')}",
+            f"- Source: `{summary.get('source_path', '')}`",
+            "",
+        ]
+
+    lines = [
+        "## Review-first Patch Plan",
+        "",
+        f"- Status: {summary.get('status', 'unknown')}",
+        f"- Source kind: {summary.get('source_kind', 'unknown')}",
+        f"- Source code: {summary.get('source_code', 'UNKNOWN')}",
+        f"- Safe to auto-fix: {str(summary.get('safe_to_auto_fix', False)).lower()}",
+        f"- Dry run only: {str(summary.get('dry_run_only', True)).lower()}",
+        f"- Requires human review: {str(summary.get('requires_human_review', True)).lower()}",
+        f"- Patch steps: {summary.get('patch_step_count', 0)}",
+        f"- Artifact: `{summary.get('path', '')}`",
+        "",
+        "### Patch-plan proof commands",
+        "",
+    ]
+
+    proof_commands = summary.get("proof_commands", [])
+    if isinstance(proof_commands, list) and proof_commands:
+        lines.extend(f"- `{command}`" for command in proof_commands)
+    else:
+        lines.append("- `<add-focused-proof-command>`")
+
+    recommended_commands = summary.get("recommended_commands", [])
+    if isinstance(recommended_commands, list) and recommended_commands:
+        lines.extend(["", "### Patch-plan review commands", ""])
+        lines.extend(f"- `{command}`" for command in recommended_commands)
+
+    lines.append("")
+    return lines
+
+
+def _review_first_patch_plan_ledger_summary(bundle: dict[str, Any]) -> dict[str, Any] | None:
+    summary = bundle.get("patch_plan")
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return None
+
+    return {
+        "ok": bool(summary.get("ok", False)),
+        "status": str(summary.get("status", "unknown")),
+        "source_kind": str(summary.get("source_kind", "unknown")),
+        "source_code": str(summary.get("source_code", "UNKNOWN")),
+        "safe_to_auto_fix": bool(summary.get("safe_to_auto_fix", False)),
+        "dry_run_only": bool(summary.get("dry_run_only", True)),
+        "requires_human_review": bool(summary.get("requires_human_review", True)),
+        "proof_commands": summary.get("proof_commands", []),
+        "recommended_commands": summary.get("recommended_commands", []),
+        "patch_step_count": int(summary.get("patch_step_count", 0) or 0),
+    }
+
+
 def _format_doctor_cortex(summary: dict[str, Any] | None) -> list[str]:
     if not isinstance(summary, dict) or not summary.get("enabled"):
         return ["- not collected"]
@@ -910,6 +1067,11 @@ def build_bundle(
         risk_band = "low"
 
     adaptive_failure_bundle_summary = _collect_adaptive_failure_bundle(failure_bundle)
+    patch_plan_summary = _collect_review_first_patch_plan(
+        evidence_graph=evidence_graph,
+        failure_bundle=failure_bundle,
+        out_dir=out_dir,
+    )
 
     artifacts = [
         _artifact(out_dir / "mission-control.json", "Mission Control JSON bundle", "json"),
@@ -919,6 +1081,7 @@ def build_bundle(
     artifacts.extend(_doctor_cortex_artifacts(doctor_cortex_summary))
     artifacts.extend(_evidence_graph_artifacts(evidence_graph_summary))
     artifacts.extend(_adaptive_failure_bundle_artifacts(adaptive_failure_bundle_summary))
+    artifacts.extend(_review_first_patch_plan_artifacts(patch_plan_summary))
     if ledger_path is not None:
         artifacts.append(
             _artifact(
@@ -948,6 +1111,7 @@ def build_bundle(
         "doctor_cortex": doctor_cortex_summary,
         "evidence_graph": evidence_graph_summary,
         "adaptive_failure_bundle": adaptive_failure_bundle_summary,
+        "patch_plan": patch_plan_summary,
         "steps": steps,
         "findings": findings,
         "artifacts": artifacts,
@@ -981,6 +1145,7 @@ def render_markdown(bundle: dict[str, Any]) -> str:
         "",
         *_format_evidence_graph(bundle.get("evidence_graph")),
         *_format_adaptive_failure_bundle(bundle.get("adaptive_failure_bundle")),
+        *_format_review_first_patch_plan(bundle.get("patch_plan")),
         "",
         "## Steps",
         "",
@@ -1059,6 +1224,7 @@ def _ledger_record(bundle: dict[str, Any], out_dir: Path) -> dict[str, Any]:
         "doctor_cortex": _doctor_cortex_ledger_summary(bundle),
         "evidence_graph": _evidence_graph_ledger_summary(bundle),
         "adaptive_failure_bundle": _adaptive_failure_bundle_ledger_summary(bundle),
+        "patch_plan": _review_first_patch_plan_ledger_summary(bundle),
     }
 
 
@@ -1302,6 +1468,7 @@ def render_report_markdown(
         "",
         *_format_evidence_graph(bundle.get("evidence_graph")),
         *_format_adaptive_failure_bundle(bundle.get("adaptive_failure_bundle")),
+        *_format_review_first_patch_plan(bundle.get("patch_plan")),
         "",
         "## Steps",
         "",
@@ -1458,6 +1625,21 @@ def _summarize(args: argparse.Namespace) -> int:
             f"{summary_prefix}_safe_to_auto_fix="
             f"{str(adaptive_failure_bundle.get('safe_to_auto_fix', False)).lower()}"
         )
+    patch_plan = bundle.get("patch_plan")
+    if isinstance(patch_plan, dict):
+        print(f"patch_plan_ok={str(patch_plan.get('ok', False)).lower()}")
+        print(f"patch_plan_status={patch_plan.get('status', 'unknown')}")
+        print(f"patch_plan_source_kind={patch_plan.get('source_kind', 'unknown')}")
+        print(f"patch_plan_source_code={patch_plan.get('source_code', 'UNKNOWN')}")
+        print(
+            f"patch_plan_safe_to_auto_fix={str(patch_plan.get('safe_to_auto_fix', False)).lower()}"
+        )
+        print(f"patch_plan_dry_run_only={str(patch_plan.get('dry_run_only', True)).lower()}")
+        print(
+            "patch_plan_requires_human_review="
+            f"{str(patch_plan.get('requires_human_review', True)).lower()}"
+        )
+        print(f"patch_plan_proof_command_count={len(patch_plan.get('proof_commands', []))}")
     return 0
 
 
@@ -1483,6 +1665,7 @@ def _schema(_: argparse.Namespace) -> int:
             "artifacts",
             "next_actions",
             "adaptive_failure_bundle",
+            "patch_plan",
         ],
         "ledger_record_keys": [
             "schema_version",
@@ -1500,6 +1683,7 @@ def _schema(_: argparse.Namespace) -> int:
             "artifact_dir",
             "evidence_graph",
             "adaptive_failure_bundle",
+            "patch_plan",
         ],
         "history_summary_keys": [
             "schema_version",
@@ -1531,6 +1715,7 @@ def _schema(_: argparse.Namespace) -> int:
             "Execution",
             "Doctor Cortex",
             "Evidence Graph",
+            "Review-first Patch Plan",
             "Steps",
             "Findings",
             "History summary",
