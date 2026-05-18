@@ -297,6 +297,11 @@ Then use stability-aware command discovery:
     operator_loop_parser.add_argument("--action-report", default=None)
     operator_loop_parser.add_argument("--check-intelligence", default=None)
     operator_loop_parser.add_argument("--format", choices=["json", "markdown"], default="json")
+    operator_loop_parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Return non-zero when the generated operator loop is incomplete.",
+    )
 
     _add_passthrough_subcommand(
         sub,
@@ -1161,6 +1166,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         ):
             if value:
                 forwarded.extend([flag, str(value)])
+        if bool(ns.verify):
+            forwarded.append("--verify")
         return _run_module_main("sdetkit.operator_evidence_loop", forwarded)
 
     if ns.cmd == "inspect":

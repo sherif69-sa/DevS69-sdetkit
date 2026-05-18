@@ -163,3 +163,76 @@ def test_operator_evidence_loop_cli_writes_artifacts(tmp_path: Path, capsys) -> 
     assert persisted["classification"] == "review_required"
     assert (out_dir / "operator-loop.md").exists()
     assert (out_dir / "pr-quality-comment.md").exists()
+
+
+def test_operator_evidence_loop_verification_marks_complete_bundle(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    failure_bundle = _failure_bundle(tmp_path / "failure-bundle.json")
+    out_dir = tmp_path / "operator-loop"
+
+    payload = loop.build_operator_evidence_loop(
+        repo=repo,
+        out_dir=out_dir,
+        quality_log=quality,
+        quality_outcome="success",
+        failure_bundle=failure_bundle,
+    )
+
+    verification = payload["verification"]
+    assert verification["ok"] is True
+    assert verification["missing_artifacts"] == []
+    assert verification["checks"] == {
+        "advisory_boundary": True,
+        "comment": True,
+        "mission": True,
+        "patch_plan": True,
+        "required_artifacts": True,
+    }
+
+    markdown = (out_dir / "operator-loop.md").read_text(encoding="utf-8")
+    assert "## Verification" in markdown
+    assert "OK: `true`" in markdown
+    assert "Missing artifacts: `0`" in markdown
+
+
+def test_operator_evidence_loop_cli_verify_returns_success_for_complete_bundle(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    quality = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    failure_bundle = _failure_bundle(tmp_path / "failure-bundle.json")
+    out_dir = tmp_path / "operator-loop"
+
+    rc = loop.main(
+        [
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(out_dir),
+            "--quality-log",
+            str(quality),
+            "--quality-outcome",
+            "success",
+            "--failure-bundle",
+            str(failure_bundle),
+            "--format",
+            "json",
+            "--verify",
+        ]
+    )
+
+    assert rc == 0
+    stdout_payload = json.loads(capsys.readouterr().out)
+    assert stdout_payload["verification"]["ok"] is True
+    persisted = json.loads((out_dir / "operator-loop.json").read_text(encoding="utf-8"))
+    assert persisted["verification"]["ok"] is True

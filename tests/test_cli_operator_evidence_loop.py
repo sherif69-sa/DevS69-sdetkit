@@ -68,6 +68,7 @@ def test_operator_loop_help_forwards_to_operator_loop_module(capsys) -> None:
     out = capsys.readouterr().out
     assert "usage: sdetkit operator-loop" in out
     assert "--failure-bundle" in out
+    assert "--verify" in out
     assert "--quality-log" in out
 
 
@@ -96,6 +97,7 @@ def test_operator_loop_cli_command_builds_operator_artifacts(tmp_path: Path, cap
             str(failure_bundle),
             "--format",
             "json",
+            "--verify",
         ]
     )
 
@@ -108,6 +110,7 @@ def test_operator_loop_cli_command_builds_operator_artifacts(tmp_path: Path, cap
     assert persisted["schema_version"] == "sdetkit.operator.evidence_loop.v1"
     assert persisted["classification"] == "review_required"
     assert persisted["advisory_only"] is True
+    assert persisted["verification"]["ok"] is True
     assert (out_dir / "operator-loop.json").exists()
     assert (out_dir / "operator-loop.md").exists()
     assert (out_dir / "pr-quality-comment.md").exists()

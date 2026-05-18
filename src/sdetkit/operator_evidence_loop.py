@@ -164,6 +164,72 @@ def _classification(
     return "green"
 
 
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _artifact_exists(artifacts: JsonObject, *parts: str) -> bool:
+    value = artifacts.get(_artifact_key(*parts))
+    return bool(value) and Path(str(value)).exists()
+
+
+def _verify_operator_loop_payload(payload: JsonObject) -> JsonObject:
+    artifacts = _as_dict(payload.get("artifacts"))
+    required_artifacts = [
+        ("evidence", "graph", "json"),
+        ("mission", "control", "json"),
+        ("pr", "quality", "narrative", "json"),
+        ("pr", "quality", "narrative", "markdown"),
+        ("pr", "quality", "comment", "markdown"),
+        ("operator", "loop", "json"),
+        ("operator", "loop", "markdown"),
+    ]
+
+    missing = [
+        _artifact_key(*parts)
+        for parts in required_artifacts
+        if not _artifact_exists(artifacts, *parts)
+    ]
+
+    boundary = _as_dict(payload.get("automation_boundary"))
+    advisory_ok = payload.get("advisory_only") is True and all(
+        boundary.get(key) is False
+        for key in [
+            "executes_patch_commands",
+            "mutates_source",
+            "dismisses_security_findings",
+            "pushes_or_merges",
+        ]
+    )
+
+    comment_key = _artifact_key("pr", "quality", "comment", "markdown")
+    comment_path = Path(str(artifacts.get(comment_key, "")))
+    comment_ok = comment_path.exists() and "SDETKit Review Result" in comment_path.read_text(
+        encoding="utf-8"
+    )
+
+    mission_key = _artifact_key("mission", "control", "json")
+    mission_ok = bool(_read_json(Path(str(artifacts.get(mission_key, "")))))
+
+    patch_plan = _as_dict(payload.get("patch_plan"))
+    patch_plan_expected = payload.get("classification") == "review_required"
+    patch_plan_ok = bool(patch_plan) if patch_plan_expected else True
+
+    checks = {
+        "required_artifacts": not missing,
+        "advisory_boundary": advisory_ok,
+        "comment": comment_ok,
+        "mission": mission_ok,
+        "patch_plan": patch_plan_ok,
+    }
+
+    return {
+        "ok": all(checks.values()),
+        "missing_artifacts": missing,
+        "checks": checks,
+    }
+
+
 def _render_markdown(payload: JsonObject) -> str:
     artifacts = _as_dict(payload.get("artifacts"))
     mission_control_summary = _as_dict(payload.get("mission_control"))
@@ -195,6 +261,21 @@ def _render_markdown(payload: JsonObject) -> str:
         )
     else:
         lines.append("- none")
+
+    verification = _as_dict(payload.get("verification"))
+    if verification:
+        checks = _as_dict(verification.get("checks"))
+        lines.extend(
+            [
+                "",
+                "## Verification",
+                "",
+                f"- OK: `{str(bool(verification.get('ok', False))).lower()}`",
+                f"- Missing artifacts: `{len(_as_list(verification.get('missing_artifacts')))}`",
+            ]
+        )
+        for key in sorted(checks):
+            lines.append(f"- {key}: `{str(bool(checks[key])).lower()}`")
 
     lines.extend(["", "## Artifacts", ""])
     for key in sorted(artifacts):
@@ -313,6 +394,10 @@ def build_operator_evidence_loop(
 
     _write_json(loop_json, payload)
     _write_text(loop_markdown, _render_markdown(payload))
+
+    payload["verification"] = _verify_operator_loop_payload(payload)
+    _write_json(loop_json, payload)
+    _write_text(loop_markdown, _render_markdown(payload))
     return payload
 
 
@@ -332,6 +417,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--action-report", type=Path, default=None)
     parser.add_argument("--check-intelligence", type=Path, default=None)
     parser.add_argument("--format", choices=["json", "markdown"], default="json")
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Return a non-zero exit code when the generated operator loop is incomplete.",
+    )
     return parser
 
 
@@ -355,6 +445,8 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print(json.dumps(payload, indent=2, sort_keys=True))
 
+    if args.verify and not bool(_as_dict(payload.get("verification")).get("ok", False)):
+        return 1
     return 0
 
 
