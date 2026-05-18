@@ -430,3 +430,151 @@ def test_mission_control_preserves_secondary_evidence_graph_blockers(
     assert "Secondary blockers: 2" in markdown
     assert "Secondary blocker: Dependency resolver failed [dependency; review]" in markdown
     assert "Secondary blocker: Coverage gate regression [quality; rerun_proof]" in markdown
+
+
+def test_mission_control_surfaces_review_first_patch_plan_from_evidence_graph(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir = tmp_path / "out"
+    graph_path = _write_evidence_graph(tmp_path)
+
+    rc = mission_control.main(
+        [
+            "run",
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(out_dir),
+            "--evidence-graph",
+            str(graph_path),
+            "--no-ledger",
+        ]
+    )
+
+    assert rc == 0
+    bundle = json.loads((out_dir / "mission-control.json").read_text(encoding="utf-8"))
+    summary = bundle["patch_plan"]
+
+    assert summary["enabled"] is True
+    assert summary["ok"] is True
+    assert summary["status"] == "review_required"
+    assert summary["source_kind"] == "evidence_graph"
+    assert summary["source_schema_version"] == "sdetkit.evidence-graph.v1"
+    assert summary["source_code"] == "sentinel-security-001"
+    assert summary["safe_to_auto_fix"] is False
+    assert summary["dry_run_only"] is True
+    assert summary["requires_human_review"] is True
+    assert summary["proof_commands"] == ["python -m pre_commit run -a"]
+    assert summary["recommended_commands"] == [
+        "python -m pytest -q tests/test_owned_surface_hygiene_contract.py -o addopts="
+    ]
+    assert summary["patch_step_count"] == 4
+
+    plan_path = Path(summary["path"])
+    assert plan_path.exists()
+    plan = json.loads(plan_path.read_text(encoding="utf-8"))
+    assert plan["source_kind"] == "evidence_graph"
+    assert plan["safe_to_auto_fix"] is False
+    assert plan["dry_run_only"] is True
+    assert plan["requires_human_review"] is True
+
+    labels = {artifact["label"] for artifact in bundle["artifacts"]}
+    assert "Review-first adaptive patch plan" in labels
+
+    markdown = (out_dir / "mission-control.md").read_text(encoding="utf-8")
+    assert "## Review-first Patch Plan" in markdown
+    assert "Source kind: evidence_graph" in markdown
+    assert "Safe to auto-fix: false" in markdown
+    assert "Dry run only: true" in markdown
+    assert "Requires human review: true" in markdown
+    assert "python -m pre_commit run -a" in markdown
+
+
+def test_mission_control_ledger_records_review_first_patch_plan(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir = tmp_path / "out"
+    ledger_path = tmp_path / "runs" / "mission-control.jsonl"
+    graph_path = _write_evidence_graph(tmp_path)
+
+    rc = mission_control.main(
+        [
+            "run",
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(out_dir),
+            "--evidence-graph",
+            str(graph_path),
+            "--ledger-path",
+            str(ledger_path),
+        ]
+    )
+
+    assert rc == 0
+    records = _jsonl_records(ledger_path)
+    summary = records[0]["patch_plan"]
+
+    assert isinstance(summary, dict)
+    assert summary["ok"] is True
+    assert summary["status"] == "review_required"
+    assert summary["source_kind"] == "evidence_graph"
+    assert summary["source_code"] == "sentinel-security-001"
+    assert summary["safe_to_auto_fix"] is False
+    assert summary["dry_run_only"] is True
+    assert summary["requires_human_review"] is True
+    assert summary["proof_commands"] == ["python -m pre_commit run -a"]
+
+
+def test_mission_control_summarize_prints_review_first_patch_plan(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out_dir = tmp_path / "out"
+    graph_path = _write_evidence_graph(tmp_path)
+
+    assert (
+        mission_control.main(
+            [
+                "run",
+                "--repo",
+                str(repo),
+                "--out-dir",
+                str(out_dir),
+                "--evidence-graph",
+                str(graph_path),
+                "--no-ledger",
+            ]
+        )
+        == 0
+    )
+
+    assert (
+        mission_control.main(["summarize", "--bundle", str(out_dir / "mission-control.json")]) == 0
+    )
+    output = capsys.readouterr().out
+
+    assert "patch_plan_ok=true" in output
+    assert "patch_plan_status=review_required" in output
+    assert "patch_plan_source_kind=evidence_graph" in output
+    assert "patch_plan_source_code=sentinel-security-001" in output
+    assert "patch_plan_safe_to_auto_fix=false" in output
+    assert "patch_plan_dry_run_only=true" in output
+    assert "patch_plan_requires_human_review=true" in output
+    assert "patch_plan_proof_command_count=1" in output
+
+
+def test_mission_control_schema_mentions_review_first_patch_plan(capsys) -> None:
+    rc = mission_control.main(["schema"])
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert "patch_plan" in payload["required_top_level_keys"]
+    assert "patch_plan" in payload["ledger_record_keys"]
+    assert "Review-first Patch Plan" in payload["report_sections"]
