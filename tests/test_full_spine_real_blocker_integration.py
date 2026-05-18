@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import mission_control
+from sdetkit import pr_quality_action_report as report
 from sdetkit import pr_quality_evidence_narrative as narrative
 from sdetkit.evidence_graph import build_evidence_graph, write_evidence_graph
 
@@ -544,3 +545,145 @@ def test_secondary_blockers_flow_through_full_evidence_spine(tmp_path: Path) -> 
     assert "### Secondary graph blockers" in pr_markdown
     for blocker in pr_payload["graph"]["secondary_blockers"]:
         assert f"{blocker['title']} [{blocker['surface']}; {blocker['action']}]" in pr_markdown
+
+
+def test_patch_plan_handoff_flows_through_full_evidence_spine(tmp_path: Path) -> None:
+    repo = tmp_path / "repo-patch-plan-full-spine"
+    repo.mkdir()
+
+    failure_bundle = _write_json(
+        tmp_path / "build/full-spine-patch-plan/failure-bundle.json",
+        {
+            "schema_version": "sdetkit.adaptive.failure_bundle.v1",
+            "status": "review_required",
+            "review_first": True,
+            "safe_to_auto_fix": False,
+            "primary_diagnosis_code": "PACKAGE_INSTALL_FAILURE",
+            "primary_diagnosis_title": "Dependency resolver failed",
+            "diagnosis_count": 1,
+            "diagnosis_codes": ["PACKAGE_INSTALL_FAILURE"],
+            "diagnoses": [
+                {
+                    "code": "PACKAGE_INSTALL_FAILURE",
+                    "title": "Dependency resolver failed",
+                    "diagnosis": "pip could not resolve constraints before tests could prove behavior.",
+                    "severity": "high",
+                    "confidence": "high",
+                    "affected_files": ["constraints-ci.txt", "requirements-test.txt"],
+                    "recommended_fix": ["Reproduce the exact install lane."],
+                    "proof_commands": [
+                        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+                    ],
+                }
+            ],
+        },
+    )
+
+    graph = build_evidence_graph(failure_bundle=failure_bundle)
+    graph_manifest = write_evidence_graph(
+        graph,
+        output_dir=tmp_path / "build/full-spine-patch-plan/evidence-graph",
+    )
+    graph_path = Path(graph_manifest["graph_path"])
+
+    mission_out = tmp_path / "build/full-spine-patch-plan/mission-control"
+    rc = mission_control.main(
+        [
+            "run",
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(mission_out),
+            "--evidence-graph",
+            str(graph_path),
+            "--failure-bundle",
+            str(failure_bundle),
+            "--no-ledger",
+        ]
+    )
+    assert rc == 0
+
+    mission_bundle_path = mission_out / "mission-control.json"
+    mission_bundle = json.loads(mission_bundle_path.read_text(encoding="utf-8"))
+    mission_patch_plan = mission_bundle["patch_plan"]
+
+    assert mission_patch_plan["enabled"] is True
+    assert mission_patch_plan["ok"] is True
+    assert mission_patch_plan["status"] == "review_required"
+    assert mission_patch_plan["source_kind"] == "evidence_graph"
+    assert mission_patch_plan["source_code"] != "UNKNOWN"
+    assert mission_patch_plan["safe_to_auto_fix"] is False
+    assert mission_patch_plan["dry_run_only"] is True
+    assert mission_patch_plan["requires_human_review"] is True
+    assert mission_patch_plan["proof_commands"] == [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+    ]
+    assert mission_patch_plan["recommended_commands"] == ["Reproduce the exact install lane."]
+
+    quality_log = _write(
+        tmp_path / "quality.log",
+        "quality.sh cov passed\nTotal coverage: 96.69%\n",
+    )
+    pr_payload = narrative.build_narrative(
+        quality_log=quality_log,
+        quality_outcome="success",
+        sentinel_control_room=None,
+        evidence_graph=graph_path,
+        failure_bundle=failure_bundle,
+        mission_control=mission_bundle_path,
+        changed_files=None,
+    )
+    pr_markdown = str(pr_payload["markdown"])
+    pr_patch_plan = pr_payload["patch_plan"]
+
+    assert pr_patch_plan["enabled"] is True
+    assert pr_patch_plan["source_kind"] == mission_patch_plan["source_kind"]
+    assert pr_patch_plan["source_code"] == mission_patch_plan["source_code"]
+    assert pr_patch_plan["safe_to_auto_fix"] is False
+    assert pr_patch_plan["dry_run_only"] is True
+    assert pr_patch_plan["requires_human_review"] is True
+    assert pr_patch_plan["proof_commands"] == mission_patch_plan["proof_commands"]
+    assert pr_patch_plan["recommended_commands"] == mission_patch_plan["recommended_commands"]
+
+    assert "### Review-first patch plan" in pr_markdown
+    assert "Source kind: `evidence_graph`" in pr_markdown
+    assert f"Source code: `{mission_patch_plan['source_code']}`" in pr_markdown
+    assert "Safe to auto-fix: `false`" in pr_markdown
+    assert "Dry run only: `true`" in pr_markdown
+    assert "Requires human review: `true`" in pr_markdown
+    assert (
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ." in pr_markdown
+    )
+    assert "Reproduce the exact install lane." in pr_markdown
+
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=pr_payload,
+    )
+
+    assert "SDETKit Review Result: Green with evidence review" in body
+    assert "## Review-first patch plan" in body
+    assert "Source kind: `evidence_graph`" in body
+    assert f"Source code: `{mission_patch_plan['source_code']}`" in body
+    assert "Safe to auto-fix: `false`" in body
+    assert "Dry run only: `true`" in body
+    assert "Requires human review: `true`" in body
+    assert "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ." in body
+    assert "Reproduce the exact install lane." in body
