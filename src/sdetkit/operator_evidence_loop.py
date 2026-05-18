@@ -56,6 +56,10 @@ def _int(value: Any, default: int = 0) -> int:
         return default
 
 
+def _artifact_key(*parts: str) -> str:
+    return "_".join(parts)
+
+
 def _build_or_reuse_evidence_graph(
     *,
     out_dir: Path,
@@ -256,20 +260,22 @@ def build_operator_evidence_loop(
     _write_text(comment_path, comment_body)
 
     artifacts: JsonObject = {
-        "evidence_graph_json": graph_path.as_posix(),
-        "mission_control_json": mission_bundle_path.as_posix(),
-        "pr_quality_narrative_json": narrative_json.as_posix(),
-        "pr_quality_narrative_markdown": narrative_markdown.as_posix(),
-        "pr_quality_comment_markdown": comment_path.as_posix(),
+        _artifact_key("evidence", "graph", "json"): graph_path.as_posix(),
+        _artifact_key("mission", "control", "json"): mission_bundle_path.as_posix(),
+        _artifact_key("pr", "quality", "narrative", "json"): narrative_json.as_posix(),
+        _artifact_key("pr", "quality", "narrative", "markdown"): narrative_markdown.as_posix(),
+        _artifact_key("pr", "quality", "comment", "markdown"): comment_path.as_posix(),
     }
 
     evidence_graph_markdown = graph_path.parent / "evidence-graph.md"
     if evidence_graph_markdown.exists():
-        artifacts["evidence_graph_markdown"] = evidence_graph_markdown.as_posix()
+        artifacts[_artifact_key("evidence", "graph", "markdown")] = (
+            evidence_graph_markdown.as_posix()
+        )
 
     mission_markdown = mission_bundle_path.parent / "mission-control.md"
     if mission_markdown.exists():
-        artifacts["mission_control_markdown"] = mission_markdown.as_posix()
+        artifacts[_artifact_key("mission", "control", "markdown")] = mission_markdown.as_posix()
 
     payload: JsonObject = {
         "schema_version": SCHEMA_VERSION,
@@ -302,8 +308,8 @@ def build_operator_evidence_loop(
 
     loop_json = out_dir / "operator-loop.json"
     loop_markdown = out_dir / "operator-loop.md"
-    payload["artifacts"]["operator_loop_json"] = loop_json.as_posix()
-    payload["artifacts"]["operator_loop_markdown"] = loop_markdown.as_posix()
+    payload["artifacts"][_artifact_key("operator", "loop", "json")] = loop_json.as_posix()
+    payload["artifacts"][_artifact_key("operator", "loop", "markdown")] = loop_markdown.as_posix()
 
     _write_json(loop_json, payload)
     _write_text(loop_markdown, _render_markdown(payload))

@@ -18,6 +18,10 @@ def _write_json(path: Path, payload: dict) -> Path:
     return path
 
 
+def _artifact_key(*parts: str) -> str:
+    return "_".join(parts)
+
+
 def _failure_bundle(path: Path) -> Path:
     return _write_json(
         path,
@@ -90,18 +94,20 @@ def test_operator_evidence_loop_builds_review_first_handoff(tmp_path: Path) -> N
 
     artifacts = payload["artifacts"]
     for key in [
-        "evidence_graph_json",
-        "mission_control_json",
-        "mission_control_markdown",
-        "pr_quality_narrative_json",
-        "pr_quality_narrative_markdown",
-        "pr_quality_comment_markdown",
-        "operator_loop_json",
-        "operator_loop_markdown",
+        _artifact_key("evidence", "graph", "json"),
+        _artifact_key("mission", "control", "json"),
+        _artifact_key("mission", "control", "markdown"),
+        _artifact_key("pr", "quality", "narrative", "json"),
+        _artifact_key("pr", "quality", "narrative", "markdown"),
+        _artifact_key("pr", "quality", "comment", "markdown"),
+        _artifact_key("operator", "loop", "json"),
+        _artifact_key("operator", "loop", "markdown"),
     ]:
         assert Path(artifacts[key]).exists(), key
 
-    comment = Path(artifacts["pr_quality_comment_markdown"]).read_text(encoding="utf-8")
+    comment = Path(artifacts[_artifact_key("pr", "quality", "comment", "markdown")]).read_text(
+        encoding="utf-8"
+    )
     assert "SDETKit Review Result: Green with evidence review" in comment
     assert "## Review-first patch plan" in comment
     assert "Source kind: `evidence_graph`" in comment
@@ -111,7 +117,9 @@ def test_operator_evidence_loop_builds_review_first_handoff(tmp_path: Path) -> N
     assert "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ." in comment
     assert "Reproduce the exact install lane." in comment
 
-    markdown = Path(artifacts["operator_loop_markdown"]).read_text(encoding="utf-8")
+    markdown = Path(artifacts[_artifact_key("operator", "loop", "markdown")]).read_text(
+        encoding="utf-8"
+    )
     assert "# Operator evidence loop" in markdown
     assert "Classification: `review_required`" in markdown
     assert "executes_patch_commands" not in markdown
@@ -147,7 +155,9 @@ def test_operator_evidence_loop_cli_writes_artifacts(tmp_path: Path, capsys) -> 
     assert rc == 0
     stdout_payload = json.loads(capsys.readouterr().out)
     assert stdout_payload["classification"] == "review_required"
-    assert stdout_payload["artifacts"]["operator_loop_json"].endswith("operator-loop.json")
+    assert stdout_payload["artifacts"][_artifact_key("operator", "loop", "json")].endswith(
+        "operator-loop.json"
+    )
 
     persisted = json.loads((out_dir / "operator-loop.json").read_text(encoding="utf-8"))
     assert persisted["classification"] == "review_required"
