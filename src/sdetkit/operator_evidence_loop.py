@@ -7,10 +7,12 @@ import json
 from pathlib import Path
 from typing import Any
 
-from sdetkit import evidence_graph
-from sdetkit import mission_control
-from sdetkit import pr_quality_action_report
-from sdetkit import pr_quality_evidence_narrative
+from sdetkit import (
+    evidence_graph,
+    mission_control,
+    pr_quality_action_report,
+    pr_quality_evidence_narrative,
+)
 
 SCHEMA_VERSION = "sdetkit.operator.evidence_loop.v1"
 DEFAULT_OUTPUT_DIR = Path("build/sdetkit/operator-loop")
