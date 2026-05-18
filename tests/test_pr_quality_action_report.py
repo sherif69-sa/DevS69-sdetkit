@@ -673,3 +673,77 @@ def test_action_report_security_review_signal_explains_green_gate_review_route()
         in body
     )
     assert "No action required from SDETKit." not in body
+
+
+def test_action_report_surfaces_review_first_patch_plan_handoff() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "proof_signal",
+            "surface": "pr_quality",
+            "title": "PR Quality evidence changed",
+        },
+        "graph": {
+            "node_count": 2,
+            "review_first_count": 0,
+            "critical_count": 0,
+            "top_blocker": {
+                "title": "PR Quality evidence changed",
+                "surface": "pr_quality",
+                "action": "rerun_proof",
+                "review_first": False,
+            },
+        },
+        "patch_plan": {
+            "enabled": True,
+            "ok": True,
+            "status": "review_required",
+            "source_kind": "evidence_graph",
+            "source_code": "security-review",
+            "safe_to_auto_fix": False,
+            "dry_run_only": True,
+            "requires_human_review": True,
+            "proof_commands": ["python -m sdetkit security check --root . --format json"],
+            "recommended_commands": [
+                "Review unresolved GitHub Advanced Security comments on the PR."
+            ],
+            "patch_step_count": 4,
+        },
+        "next_proof": [
+            "python -m pytest -q tests/test_pr_quality_evidence_narrative.py -o addopts=",
+            "python -m pre_commit run -a",
+        ],
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=evidence_narrative,
+    )
+
+    assert "SDETKit Review Result: Green with proof signal" in body
+    assert "## Review-first patch plan" in body
+    assert "Status: `review_required`" in body
+    assert "Source kind: `evidence_graph`" in body
+    assert "Source code: `security-review`" in body
+    assert "Safe to auto-fix: `false`" in body
+    assert "Dry run only: `true`" in body
+    assert "Requires human review: `true`" in body
+    assert "Patch steps: `4`" in body
+    assert "python -m sdetkit security check --root . --format json" in body
+    assert "Review unresolved GitHub Advanced Security comments on the PR." in body

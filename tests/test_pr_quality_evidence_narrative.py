@@ -994,3 +994,145 @@ def test_green_narrative_preserves_secondary_graph_blockers(tmp_path: Path) -> N
     assert "### Secondary graph blockers" in markdown
     assert "Dependency resolver failed [dependency; review]" in markdown
     assert "Coverage gate regression [quality; rerun_proof]" in markdown
+
+
+def test_narrative_surfaces_review_first_patch_plan_from_mission_control(
+    tmp_path: Path,
+) -> None:
+    quality = _write(tmp_path / "quality.log", "quality.sh cov passed\nTotal coverage: 96.69%\n")
+    graph = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [
+                {
+                    "title": "PR Quality evidence changed",
+                    "summary": "The PR Quality evidence comment path changed.",
+                    "risk_surface": "pr_quality",
+                    "severity": "warning",
+                    "review_first": False,
+                    "recommended_commands": [
+                        "python -m pytest -q tests/test_pr_quality_evidence_narrative.py -o addopts="
+                    ],
+                    "operator_action": "rerun_proof",
+                }
+            ],
+            "source_summary": [],
+        },
+    )
+    mission_control = _write_json(
+        tmp_path / "mission-control.json",
+        {
+            "schema_version": "sdetkit.mission-control.v1",
+            "patch_plan": {
+                "enabled": True,
+                "ok": True,
+                "status": "review_required",
+                "source_kind": "evidence_graph",
+                "source_schema_version": "sdetkit.evidence-graph.v1",
+                "source_code": "security-review",
+                "safe_to_auto_fix": False,
+                "dry_run_only": True,
+                "requires_human_review": True,
+                "proof_commands": ["python -m sdetkit security check --root . --format json"],
+                "recommended_commands": [
+                    "Review unresolved GitHub Advanced Security comments on the PR."
+                ],
+                "patch_step_count": 4,
+                "path": "build/sdetkit/mission-control/review-first-patch-plan.json",
+            },
+        },
+    )
+    changed = _write(
+        tmp_path / "changed-files.txt",
+        "src/sdetkit/pr_quality_evidence_narrative.py\n",
+    )
+
+    payload = narrative.build_narrative(
+        quality_log=quality,
+        quality_outcome="success",
+        sentinel_control_room=None,
+        evidence_graph=graph,
+        failure_bundle=None,
+        mission_control=mission_control,
+        changed_files=changed,
+    )
+
+    patch_plan = payload["patch_plan"]
+    markdown = str(payload["markdown"])
+
+    assert patch_plan["enabled"] is True
+    assert patch_plan["status"] == "review_required"
+    assert patch_plan["source_kind"] == "evidence_graph"
+    assert patch_plan["source_code"] == "security-review"
+    assert patch_plan["safe_to_auto_fix"] is False
+    assert patch_plan["dry_run_only"] is True
+    assert patch_plan["requires_human_review"] is True
+    assert patch_plan["proof_commands"] == [
+        "python -m sdetkit security check --root . --format json"
+    ]
+    assert "### Review-first patch plan" in markdown
+    assert "Source kind: `evidence_graph`" in markdown
+    assert "Safe to auto-fix: `false`" in markdown
+    assert "Dry run only: `true`" in markdown
+    assert "Requires human review: `true`" in markdown
+    assert "python -m sdetkit security check --root . --format json" in markdown
+
+
+def test_narrative_cli_accepts_mission_control_patch_plan(tmp_path: Path) -> None:
+    quality = _write(tmp_path / "quality.log", "quality.sh cov passed\nTotal coverage: 96.69%\n")
+    graph = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [],
+            "source_summary": [],
+        },
+    )
+    mission_control = _write_json(
+        tmp_path / "mission-control.json",
+        {
+            "patch_plan": {
+                "enabled": True,
+                "ok": True,
+                "status": "review_required",
+                "source_kind": "failure_bundle",
+                "source_code": "PACKAGE_INSTALL_FAILURE",
+                "safe_to_auto_fix": False,
+                "dry_run_only": True,
+                "requires_human_review": True,
+                "proof_commands": [
+                    "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+                ],
+                "recommended_commands": ["Reproduce the exact install lane."],
+                "patch_step_count": 4,
+            },
+        },
+    )
+    out = tmp_path / "narrative.md"
+    json_out = tmp_path / "narrative.json"
+
+    rc = narrative.main(
+        [
+            "--quality-log",
+            str(quality),
+            "--quality-outcome",
+            "success",
+            "--evidence-graph",
+            str(graph),
+            "--mission-control",
+            str(mission_control),
+            "--out",
+            str(out),
+            "--json-out",
+            str(json_out),
+        ]
+    )
+
+    assert rc == 0
+    markdown = out.read_text(encoding="utf-8")
+    payload = json.loads(json_out.read_text(encoding="utf-8"))
+    assert payload["patch_plan"]["source_kind"] == "failure_bundle"
+    assert payload["patch_plan"]["source_code"] == "PACKAGE_INSTALL_FAILURE"
+    assert "Review-first patch plan" in payload["markdown"]
+    assert "Review-first patch plan" in markdown

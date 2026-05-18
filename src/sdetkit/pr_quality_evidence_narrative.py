@@ -477,6 +477,72 @@ def _dedupe(items: list[str]) -> list[str]:
     return out
 
 
+def _read_mission_control_patch_plan(mission_control: Path | None) -> JsonObject:
+    if mission_control is None:
+        return {}
+
+    try:
+        payload = json.loads(mission_control.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+    if not isinstance(payload, dict):
+        return {}
+
+    patch_plan = _as_dict(payload.get("patch_plan"))
+    if not patch_plan or not patch_plan.get("enabled"):
+        return {}
+
+    return {
+        "enabled": True,
+        "ok": bool(patch_plan.get("ok", False)),
+        "status": str(patch_plan.get("status", "unknown")),
+        "source_kind": str(patch_plan.get("source_kind", "unknown")),
+        "source_schema_version": str(patch_plan.get("source_schema_version", "unknown")),
+        "source_code": str(patch_plan.get("source_code", "UNKNOWN")),
+        "safe_to_auto_fix": bool(patch_plan.get("safe_to_auto_fix", False)),
+        "dry_run_only": bool(patch_plan.get("dry_run_only", True)),
+        "requires_human_review": bool(patch_plan.get("requires_human_review", True)),
+        "proof_commands": _string_list(patch_plan.get("proof_commands")),
+        "recommended_commands": _string_list(patch_plan.get("recommended_commands")),
+        "patch_step_count": int(patch_plan.get("patch_step_count", 0) or 0),
+        "path": str(patch_plan.get("path", "")),
+    }
+
+
+def _patch_plan_markdown_lines(patch_plan: JsonObject | None) -> list[str]:
+    plan = _as_dict(patch_plan)
+    if not plan or not plan.get("enabled"):
+        return []
+
+    lines = [
+        "### Review-first patch plan",
+        "",
+        f"- Status: `{plan.get('status', 'unknown')}`",
+        f"- Source kind: `{plan.get('source_kind', 'unknown')}`",
+        f"- Source code: `{plan.get('source_code', 'UNKNOWN')}`",
+        f"- Safe to auto-fix: `{str(plan.get('safe_to_auto_fix', False)).lower()}`",
+        f"- Dry run only: `{str(plan.get('dry_run_only', True)).lower()}`",
+        f"- Requires human review: `{str(plan.get('requires_human_review', True)).lower()}`",
+        f"- Patch steps: `{plan.get('patch_step_count', 0)}`",
+        "",
+    ]
+
+    proof_commands = _string_list(plan.get("proof_commands"))
+    if proof_commands:
+        lines.extend(["#### Patch-plan proof commands", ""])
+        lines.extend(f"- `{command}`" for command in proof_commands[:5])
+        lines.append("")
+
+    review_commands = _string_list(plan.get("recommended_commands"))
+    if review_commands:
+        lines.extend(["#### Patch-plan review commands", ""])
+        lines.extend(f"- `{command}`" for command in review_commands[:5])
+        lines.append("")
+
+    return lines
+
+
 def _commands_from_node(node: JsonObject) -> list[str]:
     commands: list[str] = []
     for key in ("proof_commands", "recommended_commands"):
@@ -565,6 +631,7 @@ def build_narrative(
     sentinel_control_room: Path | None,
     evidence_graph: Path | None,
     failure_bundle: Path | None,
+    mission_control: Path | None = None,
     changed_files: Path | None,
 ) -> JsonObject:
     log_text = _read_text(quality_log)
@@ -687,6 +754,7 @@ def build_narrative(
         evidence_graph=evidence_graph,
         failure_bundle=failure_bundle,
     )
+    patch_plan = _read_mission_control_patch_plan(mission_control)
     what_happened.extend(_security_review_status_lines_from_control_room(sentinel_control_room))
 
     payload: JsonObject = {
@@ -732,6 +800,7 @@ def build_narrative(
         "operator_action": operator_action,
         "next_proof": commands,
         "evidence": artifact_paths,
+        "patch_plan": patch_plan,
     }
     payload["markdown"] = render_markdown(
         quality_ok=quality_ok,
@@ -745,6 +814,7 @@ def build_narrative(
         next_proof=commands,
         evidence=artifact_paths,
         secondary_graph_blockers=secondary_graph_blockers,
+        patch_plan=patch_plan,
     )
     return payload
 
@@ -950,6 +1020,7 @@ def render_markdown(
     next_proof: list[str],
     evidence: list[str],
     secondary_graph_blockers: list[JsonObject] | None = None,
+    patch_plan: JsonObject | None = None,
 ) -> str:
     status = "✅ quality.sh cov passed" if quality_ok else "❌ quality.sh cov failed"
     if coverage:
@@ -994,6 +1065,10 @@ def render_markdown(
             )
         lines.append("")
 
+    patch_plan_lines = _patch_plan_markdown_lines(patch_plan)
+    if patch_plan_lines:
+        lines.extend(patch_plan_lines)
+
     lines.extend(
         [
             "### Next proof",
@@ -1031,6 +1106,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sentinel-control-room", type=Path, default=None)
     parser.add_argument("--evidence-graph", type=Path, default=None)
     parser.add_argument("--failure-bundle", type=Path, default=None)
+    parser.add_argument("--mission-control", type=Path, default=None)
     parser.add_argument("--changed-files", type=Path, default=None)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--json-out", type=Path, default=None)
@@ -1045,6 +1121,7 @@ def main(argv: list[str] | None = None) -> int:
         sentinel_control_room=args.sentinel_control_room,
         evidence_graph=args.evidence_graph,
         failure_bundle=args.failure_bundle,
+        mission_control=args.mission_control,
         changed_files=args.changed_files,
     )
     write_narrative(payload, out=args.out, json_out=args.json_out)

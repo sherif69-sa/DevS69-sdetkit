@@ -276,6 +276,42 @@ def _evidence_review_clarity_lines(
     return lines
 
 
+def _patch_plan_lines(evidence_narrative: JsonObject) -> list[str]:
+    patch_plan = _as_dict(evidence_narrative.get("patch_plan"))
+    if not patch_plan or not patch_plan.get("enabled"):
+        return []
+
+    lines = [
+        f"- Status: `{_string(patch_plan.get('status') or 'unknown')}`",
+        f"- Source kind: `{_string(patch_plan.get('source_kind') or 'unknown')}`",
+        f"- Source code: `{_string(patch_plan.get('source_code') or 'UNKNOWN')}`",
+        f"- Safe to auto-fix: `{str(bool(patch_plan.get('safe_to_auto_fix', False))).lower()}`",
+        f"- Dry run only: `{str(bool(patch_plan.get('dry_run_only', True))).lower()}`",
+        f"- Requires human review: `{str(bool(patch_plan.get('requires_human_review', True))).lower()}`",
+        f"- Patch steps: `{int(patch_plan.get('patch_step_count', 0) or 0)}`",
+    ]
+
+    proof_commands = [
+        str(command)
+        for command in _as_list(patch_plan.get("proof_commands"))
+        if isinstance(command, str) and command.strip()
+    ]
+    if proof_commands:
+        lines.extend(["- Proof commands:"])
+        lines.extend(f"  - `{command}`" for command in proof_commands[:5])
+
+    review_commands = [
+        str(command)
+        for command in _as_list(patch_plan.get("recommended_commands"))
+        if isinstance(command, str) and command.strip()
+    ]
+    if review_commands:
+        lines.extend(["- Review commands:"])
+        lines.extend(f"  - `{command}`" for command in review_commands[:5])
+
+    return lines
+
+
 def render_comment_body(
     *,
     action_report: JsonObject,
@@ -306,6 +342,10 @@ def render_comment_body(
 
     if evidence_signal_lines:
         lines.extend(["## " + evidence_signal_heading, "", *evidence_signal_lines, ""])
+
+    patch_plan = _patch_plan_lines(evidence_narrative)
+    if patch_plan:
+        lines.extend(["## Review-first patch plan", "", *patch_plan, ""])
 
     lines.extend(
         [
