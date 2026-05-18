@@ -228,6 +228,14 @@ def _evidence_signal(evidence_narrative: JsonObject) -> tuple[str, list[str], bo
     if isinstance(top_blocker.get("review_first"), bool):
         lines.append(f"- Review first: `{str(top_blocker.get('review_first')).lower()}`")
 
+    if review_required:
+        lines.extend(
+            _evidence_review_clarity_lines(
+                quality_ok=_as_dict(evidence_narrative.get("quality")).get("ok") is True,
+                surface=surface or top_surface or "unknown",
+            )
+        )
+
     proof_commands = [
         str(item)
         for item in _as_list(evidence_narrative.get("next_proof"))
@@ -239,6 +247,33 @@ def _evidence_signal(evidence_narrative: JsonObject) -> tuple[str, list[str], bo
 
     heading = "Evidence review signal" if review_required else "Evidence proof signal"
     return heading, lines, review_required
+
+
+def _evidence_review_clarity_lines(
+    *,
+    quality_ok: bool,
+    surface: str,
+) -> list[str]:
+    if not quality_ok:
+        return []
+
+    lines = [
+        "- Gate interpretation: `quality gate passed; evidence review still required`",
+        "- Failure status: `not a failed quality gate and not a failed required check`",
+        "- Merge impact: `human review required before merge`",
+        "- Automation boundary: `no auto-remediation or security dismissal attempted`",
+    ]
+
+    if surface == "security":
+        lines.append(
+            "- Security review action: `fix the PR-owned security finding or dismiss the false positive with a review reason`"
+        )
+    else:
+        lines.append(
+            f"- Review action: `review the listed {surface or 'unknown'} evidence before merge`"
+        )
+
+    return lines
 
 
 def render_comment_body(
@@ -307,7 +342,7 @@ def render_comment_body(
                 [
                     "## Merge assessment",
                     "",
-                    "- Evidence review signal present; review the listed surface before merge.",
+                    "- Evidence review signal present; quality gate passed, but review-first evidence requires human review before merge.",
                     "",
                 ]
             )
