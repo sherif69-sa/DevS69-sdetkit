@@ -348,8 +348,16 @@ def test_action_report_green_comment_surfaces_evidence_review_signal() -> None:
     assert "Surface: `workflow`" in body
     assert "Required checks are not complete" in body
     assert "Operator action: `review`" in body
+    assert "Gate interpretation: `quality gate passed; evidence review still required`" in body
+    assert "Failure status: `not a failed quality gate and not a failed required check`" in body
+    assert "Merge impact: `human review required before merge`" in body
+    assert "Automation boundary: `no auto-remediation or security dismissal attempted`" in body
+    assert "Review action: `review the listed workflow evidence before merge`" in body
     assert "`gh pr checks --required`" in body
-    assert "Evidence review signal present; review the listed surface before merge." in body
+    assert (
+        "Evidence review signal present; quality gate passed, but review-first evidence requires human review before merge."
+        in body
+    )
     assert "No action required from SDETKit." not in body
     assert "Quality is green, so the review focus is not coverage." not in body
     assert "The comment must guide maintainers" not in body
@@ -414,7 +422,10 @@ def test_action_report_green_comment_distinguishes_proof_signal_from_review_sign
     assert "Evidence proof signal present; verify the listed proof before routine merge." in body
     assert "## Evidence review signal" not in body
     assert "Review signal: `present`" not in body
-    assert "Evidence review signal present; review the listed surface before merge." not in body
+    assert (
+        "Evidence review signal present; quality gate passed, but review-first evidence requires human review before merge."
+        not in body
+    )
     assert "No action required from SDETKit." not in body
 
 
@@ -492,8 +503,16 @@ def test_write_comment_body_preserves_evidence_review_signal_artifact(
     assert "Surface: `workflow`" in body
     assert "Required checks are not complete" in body
     assert "Operator action: `review`" in body
+    assert "Gate interpretation: `quality gate passed; evidence review still required`" in body
+    assert "Failure status: `not a failed quality gate and not a failed required check`" in body
+    assert "Merge impact: `human review required before merge`" in body
+    assert "Automation boundary: `no auto-remediation or security dismissal attempted`" in body
+    assert "Review action: `review the listed workflow evidence before merge`" in body
     assert "`gh pr checks --required`" in body
-    assert "Evidence review signal present; review the listed surface before merge." in body
+    assert (
+        "Evidence review signal present; quality gate passed, but review-first evidence requires human review before merge."
+        in body
+    )
     assert "## Evidence proof signal" not in body
     assert "No action required from SDETKit." not in body
 
@@ -580,5 +599,77 @@ def test_write_comment_body_preserves_evidence_proof_signal_artifact(
     assert "Evidence proof signal present; verify the listed proof before routine merge." in body
     assert "## Evidence review signal" not in body
     assert "Review signal: `present`" not in body
-    assert "Evidence review signal present; review the listed surface before merge." not in body
+    assert (
+        "Evidence review signal present; quality gate passed, but review-first evidence requires human review before merge."
+        not in body
+    )
+    assert "No action required from SDETKit." not in body
+
+
+def test_action_report_security_review_signal_explains_green_gate_review_route() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 1},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "security",
+            "title": "Security review requires action in tests/test_example.py",
+        },
+        "graph": {
+            "node_count": 1,
+            "review_first_count": 1,
+            "critical_count": 0,
+            "top_blocker": {
+                "title": "Security review requires action in tests/test_example.py",
+                "surface": "security",
+                "action": "review",
+                "review_first": True,
+            },
+        },
+        "next_proof": [
+            "Review unresolved GitHub Advanced Security comments on the PR.",
+            "Fix the flagged surface or dismiss the false positive with a review reason.",
+            "python -m sdetkit security check --root . --format json",
+        ],
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=evidence_narrative,
+    )
+
+    assert "SDETKit Review Result: Green with evidence review" in body
+    assert "Status: `green`" in body
+    assert "Quality gate: `passed`" in body
+    assert "Failed checks: `0`" in body
+    assert "Unresolved security findings: `1`" in body
+    assert "Surface: `security`" in body
+    assert "Operator action: `review`" in body
+    assert "Gate interpretation: `quality gate passed; evidence review still required`" in body
+    assert "Failure status: `not a failed quality gate and not a failed required check`" in body
+    assert "Merge impact: `human review required before merge`" in body
+    assert "Automation boundary: `no auto-remediation or security dismissal attempted`" in body
+    assert (
+        "Security review action: `fix the PR-owned security finding or dismiss the false positive with a review reason`"
+        in body
+    )
+    assert (
+        "Evidence review signal present; quality gate passed, but review-first evidence requires human review before merge."
+        in body
+    )
     assert "No action required from SDETKit." not in body
