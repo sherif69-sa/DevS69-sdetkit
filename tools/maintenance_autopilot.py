@@ -430,6 +430,148 @@ def _commit_safe_fix_changes(
     return result
 
 
+BRIDGE_ONLY_MODE = "_".join(("pr", "quality", "safe", "bridge", "only"))
+
+
+def _bridge_as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _bridge_as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _safe_plan_from_pr_quality_check(check: dict[str, Any]) -> dict[str, Any]:
+    from sdetkit import adaptive_safe_fix
+
+    safe_remediation = _bridge_as_dict(check.get("safe_remediation"))
+    diagnosis = _bridge_as_dict(check.get("diagnosis"))
+    if check.get("safe_to_auto_fix") is not True:
+        return {}
+    if safe_remediation.get("safe_to_auto_fix") is not True:
+        return {}
+    if str(safe_remediation.get("strategy", "")) != "run_pre_commit":
+        return {}
+    if str(safe_remediation.get("category", "")) != "formatting_only":
+        return {}
+
+    affected_files = [
+        str(value).strip()
+        for value in _bridge_as_list(safe_remediation.get("affected_files"))
+        if str(value).strip() and "<" not in str(value) and ">" not in str(value)
+    ]
+    if not affected_files:
+        return {}
+
+    proof_commands = [
+        str(value).strip()
+        for value in _bridge_as_list(safe_remediation.get("proof_commands"))
+        if str(value).strip()
+    ] or [
+        "python -m pre_commit run -a",
+        "python -m ruff check src tests",
+        "python -m mypy src",
+    ]
+
+    return {
+        "schema_version": adaptive_safe_fix.SCHEMA_VERSION,
+        "source_schema_version": str(safe_remediation.get("schema_version", "")),
+        "source_code": str(
+            diagnosis.get("code")
+            or _bridge_as_dict(check.get("first_failure")).get("kind")
+            or "PRE_COMMIT_FORMAT_DRIFT"
+        ).upper(),
+        "title": "PR Quality approved formatting-only remediation",
+        "safe_to_auto_fix": True,
+        "fix_type": "format_only",
+        "requires_human_review": False,
+        "affected_files": sorted(set(affected_files)),
+        "reason": str(
+            safe_remediation.get("reason")
+            or "PR Quality classified this failure as formatting-only safe remediation."
+        ),
+        "commands": ["python -m pre_commit run -a"],
+        "proof_commands": proof_commands[:3],
+    }
+
+
+def _write_safe_fix_artifacts_from_check_intelligence(
+    out_dir: Path,
+    check_intelligence_path: Path,
+) -> dict[str, Any]:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    payload: dict[str, Any] = {
+        "schema_version": "sdetkit.maintenance.autopilot.pr_quality_safe_remediation_bridge.v1",
+        "ok": False,
+        "attempted": False,
+        "reason": "",
+        "check_intelligence_path": check_intelligence_path.as_posix(),
+    }
+
+    if not check_intelligence_path.exists():
+        payload["reason"] = "check intelligence file not found"
+        _write_json(out_dir / "pr-quality-safe-remediation-bridge.json", payload)
+        return payload
+
+    intelligence = _load_json(check_intelligence_path)
+    failed_checks = [
+        _bridge_as_dict(item)
+        for item in _bridge_as_list(intelligence.get("failed_checks"))
+        if isinstance(item, dict)
+    ]
+
+    if not failed_checks:
+        payload["ok"] = True
+        payload["reason"] = "no failed checks to remediate"
+        _write_json(out_dir / "pr-quality-safe-remediation-bridge.json", payload)
+        return payload
+
+    plans = [_safe_plan_from_pr_quality_check(check) for check in failed_checks]
+    eligible_plans = [plan for plan in plans if plan]
+
+    if len(eligible_plans) != len(failed_checks):
+        payload["reason"] = "one or more failed checks are review-first or lack affected files"
+        payload["failed_check_count"] = len(failed_checks)
+        payload["eligible_plan_count"] = len(eligible_plans)
+        _write_json(out_dir / "pr-quality-safe-remediation-bridge.json", payload)
+        return payload
+
+    affected_files: set[str] = set()
+    for plan in eligible_plans:
+        affected_files.update(str(value) for value in _bridge_as_list(plan.get("affected_files")))
+
+    merged_plan = dict(eligible_plans[0])
+    merged_plan["affected_files"] = sorted(affected_files)
+    merged_plan["reason"] = "All failed checks are PR Quality approved formatting-only remediation."
+    _write_json(out_dir / "safe-fix-plan.json", merged_plan)
+
+    from sdetkit import adaptive_safe_remediation
+
+    remediation_result = adaptive_safe_remediation.run_plan(merged_plan, cwd=Path.cwd())
+    remediation_result["plan_path"] = (out_dir / "safe-fix-plan.json").as_posix()
+    _write_json(out_dir / "adaptive-safe-remediation-result.json", remediation_result)
+    (out_dir / "adaptive-safe-remediation-result.md").write_text(
+        adaptive_safe_remediation.render_markdown(remediation_result),
+        encoding="utf-8",
+    )
+
+    commit_result = _commit_safe_fix_changes(out_dir, merged_plan, remediation_result)
+    payload.update(
+        {
+            "ok": bool(remediation_result.get("ok", False)),
+            "attempted": True,
+            "reason": "PR Quality safe-remediation bridge executed",
+            "remediation_ok": bool(remediation_result.get("ok", False)),
+            "commit_ok": bool(commit_result.get("ok", False)),
+            "commit_pushed": bool(commit_result.get("pushed", False)),
+            "affected_files": sorted(affected_files),
+        }
+    )
+    _write_json(out_dir / "pr-quality-safe-remediation-bridge.json", payload)
+    _write_safe_fix_learning_outcome(out_dir, merged_plan, remediation_result, commit_result)
+    return payload
+
+
 POLICY_RULES: dict[str, dict[str, Any]] = {
     "baseline_pre_commit": {
         "actions": ["python -m pre_commit run -a"],
@@ -555,6 +697,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--memory-db", default=".sdetkit/maintenance/failure-memory.jsonl")
     parser.add_argument("--auto-remediate-safe", action="store_true")
     parser.add_argument("--commit-safe-fixes", action="store_true")
+    parser.add_argument("--check-intelligence-json", default="")
+    parser.add_argument("--pr-quality-safe-bridge-only", action="store_true")
     parser.add_argument("--max-remediation-attempts", type=int, default=3)
     parser.add_argument("--remediation-cooldown-runs", type=int, default=2)
     args = parser.parse_args(argv)
@@ -576,6 +720,39 @@ def main(argv: list[str] | None = None) -> int:
     _ACTIVE_FAILURE_CONTEXT["owner"] = args.owner
     _ACTIVE_FAILURE_CONTEXT["repo"] = args.repo
 
+    if str(args.check_intelligence_json).strip():
+        report["steps"]["pr_quality_safe_remediation_bridge"] = (
+            _write_safe_fix_artifacts_from_check_intelligence(
+                out_dir,
+                Path(str(args.check_intelligence_json)),
+            )
+        )
+
+    if bool(args.pr_quality_safe_bridge_only):
+        report["mode"] = BRIDGE_ONLY_MODE
+        bridge = report["steps"].get("pr_quality_safe_remediation_bridge", {})
+        report["live_run"] = {
+            "attempted": False,
+            "executed": False,
+            "reason": "safe bridge only; skip the full maintenance baseline",
+        }
+        _write_json(out_dir / "autopilot-report.json", report)
+        (out_dir / "autopilot-report.md").write_text(
+            "\n".join(
+                [
+                    "# Maintenance autopilot report",
+                    "",
+                    f"- mode: `{BRIDGE_ONLY_MODE}`",
+                    f"- bridge attempted: `{bool(bridge.get('attempted', False))}`",
+                    f"- bridge reason: `{bridge.get('reason', 'n/a')}`",
+                ]
+            ).strip()
+            + "\n",
+            encoding="utf-8",
+        )
+        print(f"json: {out_dir / 'autopilot-report.json'}")
+        print(f"markdown: {out_dir / 'autopilot-report.md'}")
+        return 0
     # 1) Baseline checks
     report["steps"]["baseline_pre_commit"] = _run([sys.executable, "-m", "pre_commit", "run", "-a"])
     report["steps"]["baseline_kpi_test"] = _run(
