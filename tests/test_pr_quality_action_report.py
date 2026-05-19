@@ -806,3 +806,59 @@ def test_action_report_reconciles_cleared_security_review_signal() -> None:
     assert "Evidence review signal present; quality gate passed" not in body
     assert "human review required before merge" not in body
     assert "Fix the flagged surface or dismiss the false positive" not in body
+
+
+def test_action_report_comment_renders_failed_check_first_failure() -> None:
+    action = {
+        "status": "review_required",
+        "primary_blocker": {
+            "check": "Fast CI lane (py3.12)",
+            "title": "Type contract drift detected",
+            "surface": "quality",
+            "code": "MYPY_TYPE_CONTRACT_DRIFT",
+            "url": "https://github.example/check",
+            "impact": "Inspect the first failing line before broad rewrites.",
+            "first_failure": {
+                "line_number": 12,
+                "line": "src/sdetkit/example.py:10: error: Incompatible return value type",
+                "tool": "mypy",
+                "kind": "type_contract",
+            },
+            "first_failure_line": "src/sdetkit/example.py:10: error: Incompatible return value type",
+        },
+        "automation": {"attempted": False, "allowed": False, "reason": "review-first"},
+        "recommended_actions": ["Fix the first reported contract violation."],
+        "proof_commands": ["python -m mypy src"],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 1,
+        "failed_checks": [
+            {
+                "name": "Fast CI lane (py3.12)",
+                "safe_to_auto_fix": False,
+                "diagnosis": {
+                    "code": "MYPY_TYPE_CONTRACT_DRIFT",
+                    "title": "Type contract drift detected",
+                },
+                "first_failure": {
+                    "line_number": 12,
+                    "line": "src/sdetkit/example.py:10: error: Incompatible return value type",
+                    "tool": "mypy",
+                    "kind": "type_contract",
+                },
+            }
+        ],
+        "queued_checks": [],
+        "startup_failures": [],
+        "missing_required_contexts": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+
+    body = report.render_comment_body(action_report=action, check_intelligence=intelligence)
+
+    assert (
+        "First failure: `src/sdetkit/example.py:10: error: Incompatible return value type`" in body
+    )
+    assert "Failure location: `line 12`" in body
+    assert "Failure tool/kind: `mypy` / `type_contract`" in body

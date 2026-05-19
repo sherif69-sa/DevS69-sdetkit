@@ -139,6 +139,16 @@ def _failed_check_lines(check_intelligence: JsonObject) -> list[str]:
         title = _string(diagnosis.get("title") or "Unknown failure")
         safe = str(bool(item.get("safe_to_auto_fix", False))).lower()
         lines.append(f"- `{name}` -> {title} (`{code}`), safe_to_auto_fix=`{safe}`")
+        first_failure = _as_dict(item.get("first_failure"))
+        first_line = _string(first_failure.get("line"))
+        if first_line:
+            line_number = _int(first_failure.get("line_number"))
+            tool = _string(first_failure.get("tool") or "unknown")
+            kind = _string(first_failure.get("kind") or "unknown")
+            location = f"line {line_number}" if line_number else "line unknown"
+            lines.append(f"  - First failure: `{first_line}`")
+            lines.append(f"  - Failure location: `{location}`")
+            lines.append(f"  - Failure tool/kind: `{tool}` / `{kind}`")
     return lines
 
 
@@ -162,6 +172,16 @@ def _primary_blocker_lines(primary: JsonObject) -> list[str]:
     url = _string(primary.get("url"))
     if url:
         lines.append(f"- URL: {url}")
+    first_failure = _as_dict(primary.get("first_failure"))
+    first_line = _string(primary.get("first_failure_line") or first_failure.get("line"))
+    if first_line:
+        line_number = _int(first_failure.get("line_number"))
+        tool = _string(first_failure.get("tool") or "unknown")
+        kind = _string(first_failure.get("kind") or "unknown")
+        location = f"line {line_number}" if line_number else "line unknown"
+        lines.append(f"- First failure: `{first_line}`")
+        lines.append(f"- Failure location: `{location}`")
+        lines.append(f"- Failure tool/kind: `{tool}` / `{kind}`")
 
     impact = _string(primary.get("impact"))
     if impact:
