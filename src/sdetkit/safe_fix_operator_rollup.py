@@ -211,7 +211,9 @@ def render_markdown(rollup: JsonObject) -> str:
     files = [_as_dict(item) for item in _as_list(rollup.get("recurring_files"))]
     if files:
         for item in files[:10]:
-            lines.append(f"- `{_string(item.get('path'))}` seen `{int(item.get('count', 0) or 0)}` time(s)")
+            lines.append(
+                f"- `{_string(item.get('path'))}` seen `{int(item.get('count', 0) or 0)}` time(s)"
+            )
     else:
         lines.append("- none")
 
