@@ -115,9 +115,7 @@ def build_outcome(artifacts_dir: Path) -> JsonObject:
         commit.get("commit"),
     )
     committed = (
-        _truthy(bridge.get("commit_ok"))
-        or _truthy(commit.get("committed"))
-        or bool(commit_sha)
+        _truthy(bridge.get("commit_ok")) or _truthy(commit.get("committed")) or bool(commit_sha)
     )
     pushed = _truthy(bridge.get("commit_pushed")) or _truthy(commit.get("pushed"))
 
