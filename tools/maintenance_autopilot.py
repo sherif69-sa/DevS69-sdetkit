@@ -499,6 +499,7 @@ def _write_safe_fix_artifacts_from_check_intelligence(
     out_dir: Path,
     check_intelligence_path: Path,
 ) -> dict[str, Any]:
+    out_dir.mkdir(parents=True, exist_ok=True)
     payload: dict[str, Any] = {
         "schema_version": "sdetkit.maintenance.autopilot.pr_quality_safe_remediation_bridge.v1",
         "ok": False,

@@ -146,6 +146,7 @@ def test_autopilot_bridge_refuses_mixed_review_first_failures(
     assert result["failed_check_count"] == 2
     assert result["eligible_plan_count"] == 1
 
+
 def test_autopilot_bridge_only_mode_skips_full_baseline(
     tmp_path: Path,
     monkeypatch,
@@ -180,3 +181,16 @@ def test_autopilot_bridge_only_mode_skips_full_baseline(
     )
     assert "baseline_pre_commit" not in report["steps"]
 
+
+def test_autopilot_bridge_creates_missing_output_directory(tmp_path: Path) -> None:
+    autopilot = _load_autopilot()
+    check_intelligence = _write_json(tmp_path / "check-intelligence.json", {"failed_checks": []})
+    missing_out = tmp_path / "missing" / "safe-formatting-autopilot"
+
+    result = autopilot._write_safe_fix_artifacts_from_check_intelligence(
+        missing_out,
+        check_intelligence,
+    )
+
+    assert result["ok"] is True
+    assert (missing_out / "pr-quality-safe-remediation-bridge.json").exists()
