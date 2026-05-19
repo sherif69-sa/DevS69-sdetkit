@@ -149,6 +149,12 @@ def _failed_check_lines(check_intelligence: JsonObject) -> list[str]:
             lines.append(f"  - First failure: `{first_line}`")
             lines.append(f"  - Failure location: `{location}`")
             lines.append(f"  - Failure tool/kind: `{tool}` / `{kind}`")
+        safe_remediation = _as_dict(item.get("safe_remediation"))
+        if bool(safe_remediation.get("safe_to_auto_fix", False)):
+            strategy = _string(safe_remediation.get("strategy") or "unknown")
+            reason = _string(safe_remediation.get("reason") or "approved safe remediation")
+            lines.append(f"  - Safe remediation: `{strategy}`")
+            lines.append(f"  - Safe reason: `{reason}`")
     return lines
 
 
@@ -182,6 +188,12 @@ def _primary_blocker_lines(primary: JsonObject) -> list[str]:
         lines.append(f"- First failure: `{first_line}`")
         lines.append(f"- Failure location: `{location}`")
         lines.append(f"- Failure tool/kind: `{tool}` / `{kind}`")
+    safe_remediation = _as_dict(primary.get("safe_remediation"))
+    if bool(safe_remediation.get("safe_to_auto_fix", False)):
+        strategy = _string(safe_remediation.get("strategy") or "unknown")
+        reason = _string(safe_remediation.get("reason") or "approved safe remediation")
+        lines.append(f"- Safe remediation: `{strategy}`")
+        lines.append(f"- Safe reason: `{reason}`")
 
     impact = _string(primary.get("impact"))
     if impact:
