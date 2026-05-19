@@ -119,3 +119,37 @@ def test_failed_check_log_collection_cli_writes_manifest_and_script(
     assert stdout["failed_check_count"] == 1
     assert Path(stdout["manifest_path"]).exists()
     assert Path(stdout["download_script"]).exists()
+
+
+def test_failed_check_log_collection_prefers_actions_url_over_check_run_api_url(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "check-runs.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Fast CI lane (py3.11)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "url": "https://api.github.com/repos/acme/project/check-runs/76639814418",
+                    "details_url": "https://github.com/acme/project/actions/runs/26063321385/job/76628412038",
+                }
+            ]
+        },
+    )
+
+    manifest = logs.write_failed_check_log_artifacts(
+        checks_json=checks,
+        out_dir=tmp_path / "check-logs",
+    )
+
+    item = manifest["logs"][0]
+    assert item["url"] == "https://github.com/acme/project/actions/runs/26063321385/job/76628412038"
+    assert item["run_id"] == "26063321385"
+    assert item["job_id"] == "76628412038"
+    assert item["download_supported"] is True
+
+    script = Path(manifest["download_script"]).read_text(encoding="utf-8")
+    assert "gh run view 26063321385 --job 76628412038 --log-failed" in script
+    assert "api.github.com" not in script

@@ -25,9 +25,7 @@ _SUCCESS_CONCLUSIONS = {
     "success",
 }
 
-_ACTIONS_URL_PATTERN = re.compile(
-    r"/actions/runs/(?P<run_id>[0-9]+)(?:/job/(?P<job_id>[0-9]+))?"
-)
+_ACTIONS_URL_PATTERN = re.compile(r"/actions/runs/(?P<run_id>[0-9]+)(?:/job/(?P<job_id>[0-9]+))?")
 
 
 def _as_dict(value: Any) -> JsonObject:
@@ -104,7 +102,9 @@ def _is_failed(record: JsonObject) -> bool:
 
 
 def _record_url(record: JsonObject) -> str:
-    for key in ("url", "html_url", "details_url", "target_url"):
+    # GitHub check-runs include both an API URL and one or more human/action URLs.
+    # The API URL cannot be parsed by `gh run view`; prefer Actions/job URLs.
+    for key in ("details_url", "html_url", "target_url", "url"):
         value = _string(record.get(key))
         if value:
             return value
@@ -227,7 +227,7 @@ def render_download_script(manifest: JsonObject) -> str:
                     f"gh run view {quoted_run}{job_args} --log > {quoted_log} "
                     f"2>> {quoted_err} || true"
                 ),
-                f'if [ ! -s {quoted_log} ]; then rm -f {quoted_log}; fi',
+                f"if [ ! -s {quoted_log} ]; then rm -f {quoted_log}; fi",
                 "",
             ]
         )
