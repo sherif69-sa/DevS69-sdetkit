@@ -32,14 +32,24 @@ SAFE_FIX_REFUSED_TOTAL_KEY = "_".join(("safe", "fix", "refused", "total"))
 SAFE_FIX_SUCCESS_RATE_KEY = "_".join(("safe", "fix", "success", "rate"))
 RECURRING_FORMAT_DRIFT_FILES_KEY = "_".join(("recurring", "format", "drift", "files"))
 RECURRING_REFUSAL_REASONS_KEY = "_".join(("recurring", "refusal", "reasons"))
-REVIEW_FIRST_BLOCKERS_KEY = "_".join(("review", "first", "blockers", "preventing", "safe", "mutation"))
+REVIEW_FIRST_BLOCKERS_KEY = "_".join(
+    ("review", "first", "blockers", "preventing", "safe", "mutation")
+)
 MOST_RECENT_SAFE_FIX_STATUS_KEY = "_".join(("most", "recent", "safe", "fix", "status"))
 RECOMMENDED_NEXT_OPERATOR_ACTION_KEY = "_".join(("recommended", "next", "operator", "action"))
 
-ACTION_IMPROVE_CLASSIFICATION = "_".join(("improve", "failure", "classification", "before", "any", "mutation"))
-ACTION_IMPROVE_DIAGNOSIS_OR_SPLIT = "_".join(("improve", "diagnosis", "or", "split", "mixed", "failure", "surfaces"))
-ACTION_KEEP_REVIEW_FIRST = "_".join(("keep", "review", "first", "boundary", "and", "improve", "owner", "guidance"))
-ACTION_ADD_FORMAT_GUARDRAIL = "_".join(("add", "local", "guardrail", "for", "recurring", "format", "drift", "files"))
+ACTION_IMPROVE_CLASSIFICATION = "_".join(
+    ("improve", "failure", "classification", "before", "any", "mutation")
+)
+ACTION_IMPROVE_DIAGNOSIS_OR_SPLIT = "_".join(
+    ("improve", "diagnosis", "or", "split", "mixed", "failure", "surfaces")
+)
+ACTION_KEEP_REVIEW_FIRST = "_".join(
+    ("keep", "review", "first", "boundary", "and", "improve", "owner", "guidance")
+)
+ACTION_ADD_FORMAT_GUARDRAIL = "_".join(
+    ("add", "local", "guardrail", "for", "recurring", "format", "drift", "files")
+)
 ACTION_KEEP_SAFE_POLICY = "_".join(("keep", "current", "safe", "fix", "policy"))
 ACTION_CONTINUE_COLLECTING = "_".join(("continue", "collecting", "safe", "fix", "history"))
 
@@ -297,14 +307,20 @@ def _recurring_reasons(attempts: list[dict[str, Any]]) -> list[dict[str, Any]]:
         for row in attempts
         if _status(row) == "refused" and _safe_text(row.get("refused_reason"))
     )
-    return [{"reason": reason, "count": count} for reason, count in sorted(counter.items()) if count >= 2]
+    return [
+        {"reason": reason, "count": count}
+        for reason, count in sorted(counter.items())
+        if count >= 2
+    ]
 
 
 def _review_first_blockers(attempts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     counter: Counter[str] = Counter()
     for row in attempts:
         if row.get("review_first") or _status(row) == "refused":
-            reason = _safe_text(row.get("review_first_reason")) or _safe_text(row.get("refused_reason"))
+            reason = _safe_text(row.get("review_first_reason")) or _safe_text(
+                row.get("refused_reason")
+            )
             if reason:
                 counter[reason] += 1
     return [{"reason": reason, "count": count} for reason, count in sorted(counter.items())]
@@ -488,7 +504,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     if args.format == "json":
-        print(json.dumps({key: path.as_posix() for key, path in paths.items()}, indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                {key: path.as_posix() for key, path in paths.items()}, indent=2, sort_keys=True
+            )
+        )
     else:
         for key, path in paths.items():
             print(f"{key}: {path.as_posix()}")
