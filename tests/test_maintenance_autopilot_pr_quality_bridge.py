@@ -194,3 +194,71 @@ def test_autopilot_bridge_creates_missing_output_directory(tmp_path: Path) -> No
 
     assert result["ok"] is True
     assert (missing_out / "pr-quality-safe-remediation-bridge.json").exists()
+
+
+def test_autopilot_bridge_writes_safe_fix_outcome_and_attaches_check_intelligence(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    autopilot = _load_autopilot()
+    check_intelligence = _write_json(
+        tmp_path / "check-intelligence.json",
+        {
+            "failed_checks": [
+                {
+                    "name": "autopilot",
+                    "safe_to_auto_fix": True,
+                    "diagnosis": {"code": "PRE_COMMIT_FORMAT_DRIFT"},
+                    "safe_remediation": {
+                        "schema_version": "sdetkit.safe_remediation_eligibility.v1",
+                        "safe_to_auto_fix": True,
+                        "strategy": "run_pre_commit",
+                        "category": "formatting_only",
+                        "affected_files": ["tests/test_example.py"],
+                        "proof_commands": ["python -m pre_commit run -a"],
+                    },
+                }
+            ]
+        },
+    )
+
+    def fake_run_plan(plan, cwd):
+        return {
+            "schema_version": "sdetkit.adaptive_safe_remediation.v1",
+            "ok": True,
+            "safe_to_auto_fix": True,
+            "fix_type": "format_only",
+            "commands": [{"command": "python -m pre_commit run -a", "ok": True}],
+        }
+
+    def fake_commit(out_dir, plan, result):
+        return {
+            "ok": True,
+            "attempted": True,
+            "committed": True,
+            "pushed": True,
+            "commit_sha": "abc123",
+            "reason": "pushed",
+        }
+
+    monkeypatch.setattr(adaptive_safe_remediation, "run_plan", fake_run_plan)
+    monkeypatch.setattr(autopilot, "_commit_safe_fix_changes", fake_commit)
+
+    out_dir = tmp_path / "safe-formatting-autopilot"
+    result = autopilot._write_safe_fix_artifacts_from_check_intelligence(
+        out_dir,
+        check_intelligence,
+    )
+
+    assert result["attempted"] is True
+    assert result["commit_pushed"] is True
+
+    outcome = json.loads((out_dir / "safe-fix-outcome.json").read_text(encoding="utf-8"))
+    assert outcome["status"] == "pushed"
+    assert outcome["commit_sha"] == "abc123"
+    assert outcome["affected_files"] == ["tests/test_example.py"]
+
+    attached = json.loads(check_intelligence.read_text(encoding="utf-8"))
+    assert attached["safe_fix_outcome"]["status"] == "pushed"
+    assert attached["safe_fix_outcome"]["commit_sha"] == "abc123"
+    assert (out_dir / "safe-fix-outcome.md").exists()

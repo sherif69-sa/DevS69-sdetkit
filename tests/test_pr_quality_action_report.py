@@ -926,3 +926,49 @@ def test_action_report_comment_renders_safe_remediation_eligibility() -> None:
     assert (
         "Safe reason: `Failure is limited to deterministic formatting or whitespace hooks.`" in body
     )
+
+
+def test_action_report_comment_renders_safe_fix_outcome() -> None:
+    action = {
+        "status": "green",
+        "quality_gate": {"passed": True, "coverage": 96.69},
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+    }
+    intelligence = {
+        "summary": {
+            "failed_check_count": 0,
+            "queued_check_count": 0,
+            "required_queued_check_count": 0,
+            "missing_required_context_count": 0,
+            "startup_failure_count": 0,
+            "required_startup_failure_count": 0,
+            "security_review": {"collected": True, "unresolved_findings": 0},
+        },
+        "failed_checks": [],
+        "safe_fix_outcome": {
+            "status": "pushed",
+            "attempted": True,
+            "remediation_ok": True,
+            "committed": True,
+            "pushed": True,
+            "commit_sha": "abc123",
+            "affected_files": ["tests/test_example.py"],
+            "reason": "PR Quality safe-remediation bridge executed",
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+    }
+
+    body = report.render_comment_body(action_report=action, check_intelligence=intelligence)
+
+    assert "## Safe fix outcome" in body
+    assert "- Status: `pushed`" in body
+    assert "- Attempted: `true`" in body
+    assert "- Committed: `true`" in body
+    assert "- Pushed: `true`" in body
+    assert "- Commit SHA: `abc123`" in body
+    assert "`tests/test_example.py`" in body
+    assert "- Proof after fix:" in body
+    assert "`python -m pre_commit run -a`" in body

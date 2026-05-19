@@ -290,6 +290,20 @@ def _write_safe_fix_commit_result(out_dir: Path, payload: dict[str, Any]) -> Non
     _write_json(out_dir / "adaptive-safe-commit-result.json", payload)
 
 
+def _write_safe_fix_outcome_artifacts(
+    out_dir: Path,
+    check_intelligence_path: Path | None = None,
+) -> dict[str, Any]:
+    from sdetkit import safe_fix_outcome
+
+    outcome = safe_fix_outcome.write_outcome(out_dir)
+    if check_intelligence_path is not None and check_intelligence_path.exists():
+        check_intelligence = _load_json(check_intelligence_path)
+        check_intelligence["safe_fix_outcome"] = outcome
+        _write_json(check_intelligence_path, check_intelligence)
+    return outcome
+
+
 def _write_safe_fix_learning_outcome(
     out_dir: Path,
     plan: dict[str, Any],
@@ -511,6 +525,7 @@ def _write_safe_fix_artifacts_from_check_intelligence(
     if not check_intelligence_path.exists():
         payload["reason"] = "check intelligence file not found"
         _write_json(out_dir / "pr-quality-safe-remediation-bridge.json", payload)
+        _write_safe_fix_outcome_artifacts(out_dir, check_intelligence_path)
         return payload
 
     intelligence = _load_json(check_intelligence_path)
@@ -524,6 +539,7 @@ def _write_safe_fix_artifacts_from_check_intelligence(
         payload["ok"] = True
         payload["reason"] = "no failed checks to remediate"
         _write_json(out_dir / "pr-quality-safe-remediation-bridge.json", payload)
+        _write_safe_fix_outcome_artifacts(out_dir, check_intelligence_path)
         return payload
 
     plans = [_safe_plan_from_pr_quality_check(check) for check in failed_checks]
@@ -534,6 +550,7 @@ def _write_safe_fix_artifacts_from_check_intelligence(
         payload["failed_check_count"] = len(failed_checks)
         payload["eligible_plan_count"] = len(eligible_plans)
         _write_json(out_dir / "pr-quality-safe-remediation-bridge.json", payload)
+        _write_safe_fix_outcome_artifacts(out_dir, check_intelligence_path)
         return payload
 
     affected_files: set[str] = set()
@@ -564,11 +581,13 @@ def _write_safe_fix_artifacts_from_check_intelligence(
             "remediation_ok": bool(remediation_result.get("ok", False)),
             "commit_ok": bool(commit_result.get("ok", False)),
             "commit_pushed": bool(commit_result.get("pushed", False)),
+            "commit_sha": str(commit_result.get("commit_sha") or commit_result.get("sha") or ""),
             "affected_files": sorted(affected_files),
         }
     )
     _write_json(out_dir / "pr-quality-safe-remediation-bridge.json", payload)
     _write_safe_fix_learning_outcome(out_dir, merged_plan, remediation_result, commit_result)
+    _write_safe_fix_outcome_artifacts(out_dir, check_intelligence_path)
     return payload
 
 
