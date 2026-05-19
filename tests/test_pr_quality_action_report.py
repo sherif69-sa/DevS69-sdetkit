@@ -862,3 +862,67 @@ def test_action_report_comment_renders_failed_check_first_failure() -> None:
     )
     assert "Failure location: `line 12`" in body
     assert "Failure tool/kind: `mypy` / `type_contract`" in body
+
+
+def test_action_report_comment_renders_safe_remediation_eligibility() -> None:
+    action = {
+        "status": "review_required",
+        "primary_blocker": {
+            "check": "autopilot",
+            "title": "Formatter drift blocked pre-commit",
+            "surface": "quality",
+            "code": "PRE_COMMIT_FORMAT_DRIFT",
+            "first_failure": {
+                "line_number": 3,
+                "line": "- files were modified by this hook",
+                "tool": "pre_commit",
+                "kind": "format_drift",
+            },
+            "first_failure_line": "- files were modified by this hook",
+            "safe_to_auto_fix": True,
+            "safe_remediation": {
+                "safe_to_auto_fix": True,
+                "strategy": "run_pre_commit",
+                "reason": "Failure is limited to deterministic formatting or whitespace hooks.",
+            },
+        },
+        "automation": {"attempted": False, "allowed": True, "reason": "safe formatting only"},
+        "recommended_actions": ["Run pre-commit and commit formatting changes."],
+        "proof_commands": ["python -m pre_commit run -a"],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 1,
+        "failed_checks": [
+            {
+                "name": "autopilot",
+                "safe_to_auto_fix": True,
+                "diagnosis": {
+                    "code": "PRE_COMMIT_FORMAT_DRIFT",
+                    "title": "Formatter drift blocked pre-commit",
+                },
+                "first_failure": {
+                    "line_number": 3,
+                    "line": "- files were modified by this hook",
+                    "tool": "pre_commit",
+                    "kind": "format_drift",
+                },
+                "safe_remediation": {
+                    "safe_to_auto_fix": True,
+                    "strategy": "run_pre_commit",
+                    "reason": "Failure is limited to deterministic formatting or whitespace hooks.",
+                },
+            }
+        ],
+        "queued_checks": [],
+        "startup_failures": [],
+        "missing_required_contexts": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+
+    body = report.render_comment_body(action_report=action, check_intelligence=intelligence)
+
+    assert "Safe remediation: `run_pre_commit`" in body
+    assert (
+        "Safe reason: `Failure is limited to deterministic formatting or whitespace hooks.`" in body
+    )

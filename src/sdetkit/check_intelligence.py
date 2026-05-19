@@ -6,6 +6,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from sdetkit import safe_remediation_eligibility
+
 from . import adaptive_diagnosis
 
 CHECK_INTELLIGENCE_SCHEMA_VERSION = "sdetkit.pr_quality.check_intelligence.v1"
@@ -376,6 +378,12 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
     ]
 
     primary = diagnoses[0] if diagnoses else {}
+    safe_remediation = safe_remediation_eligibility.classify_check_failure(
+        name=name,
+        diagnosis=primary,
+        first_failure=first_failure,
+        log_text=log_text,
+    )
     return {
         "name": name,
         "status": _check_status(record),
@@ -384,15 +392,11 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
         "log_collected": bool(log_text.strip()),
         "first_failure": first_failure,
         "first_failure_line": _string(first_failure.get("line")),
+        "safe_remediation": safe_remediation,
         "diagnosis": primary,
         "diagnoses": diagnoses,
         "diagnosis_status": diagnosis.get("status", "unknown"),
-        "safe_to_auto_fix": bool(
-            _as_dict((_as_list(diagnosis.get("fix_plan")) or [{}])[0]).get(
-                "safe_to_auto_fix",
-                False,
-            )
-        ),
+        "safe_to_auto_fix": bool(safe_remediation.get("safe_to_auto_fix", False)),
     }
 
 
@@ -700,6 +704,8 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 "url": check.get("url", ""),
                 "first_failure": check.get("first_failure", {}),
                 "first_failure_line": check.get("first_failure_line", ""),
+                "safe_remediation": check.get("safe_remediation", {}),
+                "safe_to_auto_fix": check.get("safe_to_auto_fix", False),
             },
             "automation": {
                 "attempted": False,
