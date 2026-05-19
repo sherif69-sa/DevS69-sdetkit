@@ -131,17 +131,28 @@ def _surface_from_text(*values: Any) -> str:
 
     if any(token in haystack for token in ("security", "secret", "gitleaks", "codeql")):
         return "security"
-    if any(token in haystack for token in ("dependency", "dependencies", "resolver", "pip ", "osv")):
+    if any(
+        token in haystack for token in ("dependency", "dependencies", "resolver", "pip ", "osv")
+    ):
         return "dependency"
     if any(token in haystack for token in ("release", "twine", "wheel", "sdist", "build artifact")):
         return "release"
-    if any(token in haystack for token in ("mypy", "type_contract", "type contract", "incompatible return")):
+    if any(
+        token in haystack
+        for token in ("mypy", "type_contract", "type contract", "incompatible return")
+    ):
         return "type_contract"
-    if any(token in haystack for token in ("traceback", "runtime", "exception", "modulenotfound", "importerror")):
+    if any(
+        token in haystack
+        for token in ("traceback", "runtime", "exception", "modulenotfound", "importerror")
+    ):
         return "runtime"
     if any(token in haystack for token in ("pytest", "assertion", "test_failure", "test failure")):
         return "test"
-    if any(token in haystack for token in ("ruff", "format", "formatter", "whitespace", "trailing", "eof")):
+    if any(
+        token in haystack
+        for token in ("ruff", "format", "formatter", "whitespace", "trailing", "eof")
+    ):
         return "formatting"
     if any(token in haystack for token in ("coverage", "quality", "quality gate")):
         return "quality"
@@ -190,7 +201,9 @@ def _first_failure(record: Mapping[str, Any]) -> dict[str, Any]:
     if existing:
         return existing
 
-    line = _first_text(record.get("first_failure_line"), record.get("line"), record.get("actual_failure"))
+    line = _first_text(
+        record.get("first_failure_line"), record.get("line"), record.get("actual_failure")
+    )
     if not line:
         return {}
 
@@ -334,7 +347,9 @@ def _vector_from_record(
 ) -> dict[str, Any]:
     surface = _normal_surface(record)
     first_failure = _first_failure(record)
-    first_line = _first_text(first_failure.get("line"), record.get("first_failure_line"), record.get("summary"))
+    first_line = _first_text(
+        first_failure.get("line"), record.get("first_failure_line"), record.get("summary")
+    )
     affected_files = _affected_files(record)
     safe = _as_dict(record.get("safe_remediation"))
 
@@ -357,7 +372,9 @@ def _vector_from_record(
         LINE_NUMBER: int(first_failure.get("line_number", record.get("line_number", 0)) or 0),
         "tool": _first_text(first_failure.get("tool"), record.get("tool"), "unknown"),
         "kind": _first_text(first_failure.get("kind"), record.get("kind"), surface),
-        "confidence": _first_text(record.get("confidence"), _as_dict(record.get("diagnosis")).get("confidence"), "medium"),
+        "confidence": _first_text(
+            record.get("confidence"), _as_dict(record.get("diagnosis")).get("confidence"), "medium"
+        ),
         SAFE_FIX_CANDIDATE: safe_candidate,
         REVIEW_FIRST: review_first,
         REVIEW_FIRST_REASON: _review_first_reason(surface, record),
@@ -471,7 +488,9 @@ def _vectors_from_security_review(
             continue
         adapted = dict(row)
         adapted["surface"] = "security"
-        adapted["title"] = _first_text(row.get("title"), row.get("summary"), "Security review finding")
+        adapted["title"] = _first_text(
+            row.get("title"), row.get("summary"), "Security review finding"
+        )
         adapted["review_first"] = True
         adapted["safe_to_auto_fix"] = False
         vectors.append(
@@ -510,10 +529,16 @@ def _dedupe_vectors(vectors: list[dict[str, Any]]) -> list[dict[str, Any]]:
             merged[key] = dict(vector)
             continue
         existing[EVIDENCE_SOURCES] = sorted(
-            set(_string_list(existing.get(EVIDENCE_SOURCES)) + _string_list(vector.get(EVIDENCE_SOURCES)))
+            set(
+                _string_list(existing.get(EVIDENCE_SOURCES))
+                + _string_list(vector.get(EVIDENCE_SOURCES))
+            )
         )
         existing[PROOF_COMMANDS] = sorted(
-            set(_string_list(existing.get(PROOF_COMMANDS)) + _string_list(vector.get(PROOF_COMMANDS)))
+            set(
+                _string_list(existing.get(PROOF_COMMANDS))
+                + _string_list(vector.get(PROOF_COMMANDS))
+            )
         )
     return sorted(
         merged.values(),
@@ -586,7 +611,9 @@ def build_diagnostic_vector(
             record.get("failed") is True
             or record.get("review_first") is True
             or record.get("safe_to_auto_fix") is True
-            or _first_text(record.get("surface"), record.get("risk_surface"), record.get("first_failure_line"))
+            or _first_text(
+                record.get("surface"), record.get("risk_surface"), record.get("first_failure_line")
+            )
         ):
             vectors.append(
                 _vector_from_record(
@@ -605,7 +632,9 @@ def build_diagnostic_vector(
         "summary": {
             "diagnosis_count": len(vectors),
             "review_first_count": sum(1 for vector in vectors if vector.get(REVIEW_FIRST) is True),
-            "safe_fix_candidate_count": sum(1 for vector in vectors if vector.get(SAFE_FIX_CANDIDATE) is True),
+            "safe_fix_candidate_count": sum(
+                1 for vector in vectors if vector.get(SAFE_FIX_CANDIDATE) is True
+            ),
             "primary_surface": _string(primary.get(FAILURE_SURFACE)),
             "primary_action": _string(primary.get(RECOMMENDED_NEXT_ACTION)),
         },
@@ -726,7 +755,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     if args.format == "json":
-        print(json.dumps({"artifacts": artifacts, "summary": payload["summary"]}, indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                {"artifacts": artifacts, "summary": payload["summary"]}, indent=2, sort_keys=True
+            )
+        )
     else:
         for key, value in artifacts.items():
             print(f"{key}: {value}")

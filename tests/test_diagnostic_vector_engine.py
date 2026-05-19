@@ -60,8 +60,14 @@ def test_diagnostic_vector_builds_review_first_type_contract_from_check_intellig
     assert payload["summary"]["diagnosis_count"] == 1
     assert payload["summary"]["review_first_count"] == 1
     assert diagnosis[FAILURE_SURFACE] == "type_contract"
-    assert diagnosis[ACTUAL_FAILURE] == "src/sdetkit/example.py:10: error: Incompatible return value type"
-    assert diagnosis[FIRST_FAILURE_LINE] == "src/sdetkit/example.py:10: error: Incompatible return value type"
+    assert (
+        diagnosis[ACTUAL_FAILURE]
+        == "src/sdetkit/example.py:10: error: Incompatible return value type"
+    )
+    assert (
+        diagnosis[FIRST_FAILURE_LINE]
+        == "src/sdetkit/example.py:10: error: Incompatible return value type"
+    )
     assert diagnosis[REVIEW_FIRST] is True
     assert diagnosis[SAFE_FIX_CANDIDATE] is False
     assert diagnosis[AFFECTED_FILES] == ["src/sdetkit/example.py"]
@@ -92,9 +98,7 @@ def test_diagnostic_vector_uses_safe_fix_history_for_recurring_formatting_contex
     safe_fix_history = {
         "metrics": {
             "safe_fix_attempts_total": 3,
-            "recurring_format_drift_files": [
-                {"file": "src/sdetkit/repeated.py", "count": 2}
-            ],
+            "recurring_format_drift_files": [{"file": "src/sdetkit/repeated.py", "count": 2}],
         }
     }
 
