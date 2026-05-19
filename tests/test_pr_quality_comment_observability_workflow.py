@@ -217,3 +217,12 @@ def test_pr_quality_workflow_grants_contents_write_for_safe_branch_commit() -> N
 
     assert "permissions:" in permissions
     assert "contents: write" in permissions
+
+
+def test_pr_quality_workflow_uploads_safe_fix_outcome_artifacts() -> None:
+    text = _workflow_text()
+
+    assert "build/pr-quality/safe-formatting-autopilot/" in text
+    assert "Commit approved safe formatting fixes" in text
+    assert "Build PR comment body" in text
+    assert text.index("Commit approved safe formatting fixes") < text.index("Build PR comment body")

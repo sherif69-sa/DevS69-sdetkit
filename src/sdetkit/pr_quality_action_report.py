@@ -92,6 +92,35 @@ def _quality_lines(evidence_narrative: JsonObject) -> list[str]:
     return lines
 
 
+def _safe_fix_outcome_lines(outcome: JsonObject) -> list[str]:
+    if not outcome:
+        return ["- none"]
+
+    files = [_string(item) for item in _as_list(outcome.get("affected_files")) if _string(item)]
+    proof_commands = [
+        _string(item) for item in _as_list(outcome.get("proof_commands")) if _string(item)
+    ]
+
+    lines = [
+        f"- Status: `{_string(outcome.get('status') or 'unknown')}`",
+        f"- Attempted: `{str(bool(outcome.get('attempted', False))).lower()}`",
+        f"- Remediation OK: `{str(bool(outcome.get('remediation_ok', False))).lower()}`",
+        f"- Committed: `{str(bool(outcome.get('committed', False))).lower()}`",
+        f"- Pushed: `{str(bool(outcome.get('pushed', False))).lower()}`",
+        f"- Commit SHA: `{_string(outcome.get('commit_sha') or 'none')}`",
+        "- Files: " + (", ".join(f"`{item}`" for item in files) if files else "`none`"),
+        f"- Reason: {_string(outcome.get('reason') or 'none')}",
+    ]
+
+    if proof_commands:
+        lines.append("- Proof after fix:")
+        lines.extend(f"  - `{item}`" for item in proof_commands)
+    else:
+        lines.append("- Proof after fix: none")
+
+    return lines
+
+
 def _evidence_lines(check_intelligence: JsonObject, action_report: JsonObject) -> list[str]:
     security = _as_dict(
         check_intelligence.get("security_review")
@@ -421,8 +450,10 @@ def render_comment_body(
     action_report: JsonObject,
     check_intelligence: JsonObject,
     evidence_narrative: JsonObject | None = None,
+    safe_fix_outcome: JsonObject | None = None,
 ) -> str:
     evidence_narrative = evidence_narrative or {}
+    safe_fix_outcome = safe_fix_outcome or _as_dict(check_intelligence.get("safe_fix_outcome"))
     status = _string(action_report.get("status") or "unknown")
     evidence_signal_heading, evidence_signal_lines, evidence_review_required = _evidence_signal(
         evidence_narrative
@@ -470,6 +501,10 @@ def render_comment_body(
             "## Automation decision",
             "",
             *_automation_lines(action_report),
+            "",
+            "## Safe fix outcome",
+            "",
+            *_safe_fix_outcome_lines(_as_dict(safe_fix_outcome)),
             "",
             "## Evidence collected",
             "",
