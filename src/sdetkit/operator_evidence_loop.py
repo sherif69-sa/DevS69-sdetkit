@@ -12,6 +12,7 @@ from sdetkit import (
     mission_control,
     pr_quality_action_report,
     pr_quality_evidence_narrative,
+    safe_fix_operator_rollup,
 )
 
 SCHEMA_VERSION = "sdetkit.operator.evidence_loop.v1"
@@ -144,6 +145,34 @@ def _default_check_intelligence() -> JsonObject:
     }
 
 
+def _read_optional_json(path: Path | None) -> JsonObject:
+    if path is None or not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return _as_dict(payload)
+
+
+def _write_safe_fix_outcome_rollup(
+    *,
+    out_dir: Path,
+    check_intelligence: Path | None,
+) -> tuple[JsonObject, JsonObject]:
+    rollup_dir = out_dir / "safe-fix-outcome-rollup"
+    payload = _read_optional_json(check_intelligence)
+    rollup = safe_fix_operator_rollup.write_rollup(payload, rollup_dir)
+    return rollup, {
+        _artifact_key("safe", "fix", "outcome", "rollup", "json"): (
+            rollup_dir / "safe-fix-outcome-rollup.json"
+        ).as_posix(),
+        _artifact_key("safe", "fix", "outcome", "rollup", "markdown"): (
+            rollup_dir / "safe-fix-outcome-rollup.md"
+        ).as_posix(),
+    }
+
+
 def _classification(
     *,
     evidence_narrative: JsonObject,
@@ -230,10 +259,44 @@ def _verify_operator_loop_payload(payload: JsonObject) -> JsonObject:
     }
 
 
+def _safe_fix_rollup_lines(rollup: JsonObject) -> list[str]:
+    if not rollup:
+        return ["- not collected"]
+
+    recommendation = _as_dict(rollup.get("recommendation"))
+    lines = [
+        f"- Status: `{rollup.get('status', 'unknown')}`",
+        f"- Outcomes: `{_int(rollup.get('outcome_count'))}`",
+        f"- Attempted: `{_int(rollup.get('attempted_count'))}`",
+        f"- Committed: `{_int(rollup.get('committed_count'))}`",
+        f"- Pushed: `{_int(rollup.get('pushed_count'))}`",
+        f"- Safe candidates: `{_int(rollup.get('safe_candidate_count'))}`",
+        f"- Review-first blockers: `{_int(rollup.get('review_first_blocker_count'))}`",
+        f"- Recommendation: `{recommendation.get('action', 'unknown')}`",
+    ]
+
+    files = [_as_dict(item) for item in _as_list(rollup.get("recurring_files"))]
+    if files:
+        lines.append("- Recurring files:")
+        for item in files[:5]:
+            lines.append(f"  - `{item.get('path', '')}` seen `{_int(item.get('count'))}` time(s)")
+
+    reasons = [_as_dict(item) for item in _as_list(rollup.get("refusal_reasons"))]
+    if reasons:
+        lines.append("- Refusal reasons:")
+        for item in reasons[:5]:
+            lines.append(
+                f"  - `{item.get('reason', 'unknown')}` seen `{_int(item.get('count'))}` time(s)"
+            )
+
+    return lines
+
+
 def _render_markdown(payload: JsonObject) -> str:
     artifacts = _as_dict(payload.get("artifacts"))
     mission_control_summary = _as_dict(payload.get("mission_control"))
     patch_plan = _as_dict(payload.get("patch_plan"))
+    safe_fix_rollup = _as_dict(payload.get("safe_fix_outcome_rollup"))
 
     lines = [
         "# Operator evidence loop",
@@ -276,6 +339,15 @@ def _render_markdown(payload: JsonObject) -> str:
         )
         for key in sorted(checks):
             lines.append(f"- {key}: `{str(bool(checks[key])).lower()}`")
+
+    lines.extend(
+        [
+            "",
+            "## Safe-fix outcome rollup",
+            "",
+            *_safe_fix_rollup_lines(safe_fix_rollup),
+        ]
+    )
 
     lines.extend(["", "## Artifacts", ""])
     for key in sorted(artifacts):
@@ -358,6 +430,11 @@ def build_operator_evidence_loop(
     if mission_markdown.exists():
         artifacts[_artifact_key("mission", "control", "markdown")] = mission_markdown.as_posix()
 
+    safe_fix_rollup, safe_fix_rollup_artifacts = _write_safe_fix_outcome_rollup(
+        out_dir=out_dir,
+        check_intelligence=check_intelligence,
+    )
+
     payload: JsonObject = {
         "schema_version": SCHEMA_VERSION,
         "classification": _classification(
@@ -386,6 +463,8 @@ def build_operator_evidence_loop(
             "pushes_or_merges": False,
         },
     }
+    payload["safe_fix_outcome_rollup"] = safe_fix_rollup
+    _as_dict(payload.setdefault("artifacts", {})).update(safe_fix_rollup_artifacts)
 
     loop_json = out_dir / "operator-loop.json"
     loop_markdown = out_dir / "operator-loop.md"

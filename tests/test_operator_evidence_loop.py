@@ -236,3 +236,69 @@ def test_operator_evidence_loop_cli_verify_returns_success_for_complete_bundle(
     assert stdout_payload["verification"]["ok"] is True
     persisted = json.loads((out_dir / "operator-loop.json").read_text(encoding="utf-8"))
     assert persisted["verification"]["ok"] is True
+
+
+def test_operator_evidence_loop_surfaces_safe_fix_outcome_rollup(tmp_path: Path) -> None:
+    graph_path = tmp_path / "evidence-graph.json"
+    graph_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.evidence-graph.v1",
+                "nodes": [],
+                "source_summary": [],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    check_intelligence = tmp_path / "check-intelligence.json"
+    check_intelligence.write_text(
+        json.dumps(
+            {
+                "checks_seen": 1,
+                "failed_checks": [
+                    {
+                        "name": "autopilot",
+                        "safe_to_auto_fix": True,
+                    }
+                ],
+                "queued_checks": [],
+                "startup_failures": [],
+                "security_review": {"collected": True, "unresolved_findings": 0},
+                "safe_fix_outcome": {
+                    "status": "pushed",
+                    "attempted": True,
+                    "remediation_ok": True,
+                    "committed": True,
+                    "pushed": True,
+                    "affected_files": ["tests/test_example.py"],
+                    "reason": "PR Quality safe-remediation bridge executed",
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    out_dir = tmp_path / "operator-loop"
+    payload = loop.build_operator_evidence_loop(
+        repo=tmp_path,
+        out_dir=out_dir,
+        evidence_graph_path=graph_path,
+        check_intelligence=check_intelligence,
+        quality_outcome="success",
+    )
+
+    rollup = payload["safe_fix_outcome_rollup"]
+    assert rollup["status"] == "pushed"
+    assert rollup["pushed_count"] == 1
+    assert rollup["recommendation"]["action"] == "rerun_proof"
+
+    artifacts = payload["artifacts"]
+    assert Path(artifacts[_artifact_key("safe", "fix", "outcome", "rollup", "json")]).exists()
+    assert Path(artifacts[_artifact_key("safe", "fix", "outcome", "rollup", "markdown")]).exists()
+
+    markdown = (out_dir / "operator-loop.md").read_text(encoding="utf-8")
+    assert "## Safe-fix outcome rollup" in markdown
+    assert "Recommendation: `rerun_proof`" in markdown
+    assert "`tests/test_example.py`" in markdown
