@@ -81,7 +81,9 @@ def test_check_intelligence_extracts_first_failure_from_logs_dir(tmp_path: Path)
     )
 
     first_failure = intelligence["failed_checks"][0]["first_failure"]
-    assert first_failure["line"] == "src/sdetkit/example.py:10: error: Incompatible return value type"
+    assert (
+        first_failure["line"] == "src/sdetkit/example.py:10: error: Incompatible return value type"
+    )
     assert first_failure["line_number"] == 2
     assert first_failure["tool"] == "mypy"
     assert first_failure["kind"] == "type_contract"
@@ -108,6 +110,7 @@ def test_action_report_preserves_primary_blocker_first_failure(tmp_path: Path) -
     assert primary["first_failure_line"] == "Traceback (most recent call last):"
     assert primary["first_failure"]["tool"] == "python"
     assert primary["first_failure"]["kind"] == "runtime_failure"
+
 
 def test_check_intelligence_matches_slugged_log_file_for_check_name(tmp_path: Path) -> None:
     logs_dir = tmp_path / "logs"
@@ -139,4 +142,3 @@ def test_check_intelligence_matches_slugged_log_file_for_check_name(tmp_path: Pa
     assert failed["first_failure_line"] == (
         "src/sdetkit/example.py:10: error: Incompatible return value type"
     )
-
