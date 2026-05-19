@@ -187,39 +187,40 @@ def _record_log_text(record: JsonObject, logs_dir: Path | None, name: str) -> st
     if logs_dir is None or not logs_dir.exists():
         return ""
 
-    candidates = [
-        logs_dir / f"{_slug(name)}.log",
-        logs_dir / f"{_slug(name)}.txt",
+    slug = _slug(name)
+    compact_slug = slug.replace("-", "")
+    exact_candidates = [
+        logs_dir / f"{slug}.log",
+        logs_dir / f"{slug}.txt",
         logs_dir / f"{name}.log",
         logs_dir / f"{name}.txt",
     ]
-    for candidate in candidates:
-        if candidate.exists():
+    for candidate in exact_candidates:
+        if candidate.exists() and candidate.is_file():
             return candidate.read_text(encoding="utf-8", errors="ignore")
 
-    slug = _slug(name)
-    for candidate in sorted(logs_dir.glob("*")):
-        if candidate.is_file() and slug in _slug(candidate.stem):
+    name_tokens = {token for token in slug.split("-") if token}
+    readable_files = [candidate for candidate in sorted(logs_dir.rglob("*")) if candidate.is_file()]
+    for candidate in readable_files:
+        candidate_slug = _slug(candidate.stem)
+        candidate_compact = candidate_slug.replace("-", "")
+        candidate_tokens = {token for token in candidate_slug.split("-") if token}
+
+        if (
+            slug == candidate_slug
+            or slug in candidate_slug
+            or candidate_slug in slug
+            or compact_slug == candidate_compact
+            or compact_slug in candidate_compact
+            or candidate_compact in compact_slug
+            or (name_tokens and name_tokens.issubset(candidate_tokens))
+        ):
             return candidate.read_text(encoding="utf-8", errors="ignore")
+
+    if len(readable_files) == 1:
+        return readable_files[0].read_text(encoding="utf-8", errors="ignore")
 
     return ""
-
-
-_FAILURE_LINE_PATTERNS = (
-    "error:",
-    "failed",
-    "failure",
-    "traceback",
-    "assertionerror",
-    "modulenotfounderror",
-    "importerror",
-    "process completed with exit code",
-    "ruff",
-    "mypy",
-    "pytest",
-    "resolutionimpossible",
-    "cannot install",
-)
 
 
 def _failure_focused_log_text(text: str, *, context: int = 10, limit: int = 240) -> str:
@@ -245,10 +246,119 @@ def _failure_focused_log_text(text: str, *, context: int = 10, limit: int = 240)
     return "\n".join(lines[index] for index in ordered)
 
 
+_EXACT_FAILURE_PATTERNS = (
+    "files were modified by this hook",
+    "would reformat",
+    "failed",
+    "failure",
+    "error:",
+    "error ",
+    "runtimeerror",
+    "traceback",
+    "assertionerror",
+    "modulenotfounderror",
+    "importerror",
+    "process completed with exit code",
+    "no tests ran",
+    "found 1 error",
+    "found ",
+    "ruff",
+    "mypy",
+    "pytest",
+)
+
+
+_FAILURE_LINE_PATTERNS = _EXACT_FAILURE_PATTERNS
+
+
+def _failure_tool_for_line(line: str) -> str:
+    lowered = line.lower()
+    if "ruff" in lowered:
+        return "ruff"
+    if "mypy" in lowered or "type" in lowered:
+        return "mypy"
+    if "pytest" in lowered or "failed" in lowered or "assertionerror" in lowered:
+        return "pytest"
+    if "pre-commit" in lowered or "hook" in lowered:
+        return "pre_commit"
+    if "pip" in lowered or "resolutionimpossible" in lowered or "cannot install" in lowered:
+        return "dependency"
+    if "traceback" in lowered or "runtimeerror" in lowered:
+        return "python"
+    return "unknown"
+
+
+def _failure_kind_for_line(line: str) -> str:
+    lowered = line.lower()
+    if (
+        "ruff format" in lowered
+        or "ruff-format" in lowered
+        or "files were modified by this hook" in lowered
+        or "would reformat" in lowered
+    ):
+        return "format_drift"
+    if "mypy" in lowered or "type" in lowered or ": error:" in lowered:
+        return "type_contract"
+    if "assertionerror" in lowered or "pytest" in lowered:
+        return "test_failure"
+    if "traceback" in lowered or "runtimeerror" in lowered:
+        return "runtime_failure"
+    if "resolutionimpossible" in lowered or "cannot install" in lowered:
+        return "dependency_resolution"
+    if "failed" in lowered or "failure" in lowered:
+        return "failed_step"
+    if "error" in lowered:
+        return "error"
+    return "unknown"
+
+
+def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
+    lines = log_text.splitlines()
+    if not lines:
+        return {}
+
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        lowered = stripped.lower()
+        if not stripped:
+            continue
+        if not any(pattern in lowered for pattern in _EXACT_FAILURE_PATTERNS):
+            continue
+
+        if lowered.startswith("run ") and index + 1 < len(lines):
+            next_line = lines[index + 1].strip()
+            next_lowered = next_line.lower()
+            if next_line and any(pattern in next_lowered for pattern in _EXACT_FAILURE_PATTERNS):
+                stripped = next_line
+                lowered = next_lowered
+                index = index + 1
+
+        start = max(0, index - context)
+        end = min(len(lines), index + context + 1)
+        context_lines = [
+            {
+                "line_number": line_no + 1,
+                "text": lines[line_no].rstrip(),
+            }
+            for line_no in range(start, end)
+        ]
+
+        return {
+            "line_number": index + 1,
+            "line": stripped,
+            "tool": _failure_tool_for_line(stripped),
+            "kind": _failure_kind_for_line(stripped),
+            "context": context_lines,
+        }
+
+    return {}
+
+
 def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) -> JsonObject:
     name = _check_name(record, index)
     log_text = _record_log_text(record, logs_dir, name)
     focused_log_text = _failure_focused_log_text(log_text)
+    first_failure = _first_failure_summary(log_text)
     diagnostic_text = "\n".join(
         part
         for part in [
@@ -272,6 +382,8 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
         "conclusion": _check_conclusion(record),
         "url": _record_url(record),
         "log_collected": bool(log_text.strip()),
+        "first_failure": first_failure,
+        "first_failure_line": _string(first_failure.get("line")),
         "diagnosis": primary,
         "diagnoses": diagnoses,
         "diagnosis_status": diagnosis.get("status", "unknown"),
@@ -586,6 +698,8 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 ),
                 "code": code,
                 "url": check.get("url", ""),
+                "first_failure": check.get("first_failure", {}),
+                "first_failure_line": check.get("first_failure_line", ""),
             },
             "automation": {
                 "attempted": False,
