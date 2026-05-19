@@ -22,10 +22,13 @@ def test_pr_quality_comment_workflow_has_queue_safe_concurrency_and_timeout() ->
 
 def test_pr_quality_comment_workflow_has_comment_permissions() -> None:
     text = _workflow_text()
+    permissions = text.split("jobs:", 1)[0]
 
-    assert "contents: read" in text
-    assert "pull-requests: write" in text
-    assert "issues: write" in text
+    assert "contents: write" in permissions
+    assert "issues: write" in permissions
+    assert "pull-requests: write" in permissions
+    assert "checks: read" in permissions
+    assert "actions: read" in permissions
 
 
 def test_pr_quality_comment_workflow_writes_comment_status_before_posting() -> None:
@@ -187,3 +190,30 @@ def test_pr_quality_comment_workflow_passes_evidence_narrative_into_final_commen
 
     assert narrative_step < narrative_json < action_report_step
     assert action_report_step < evidence_arg < comment_out
+
+
+def test_pr_quality_workflow_runs_safe_formatting_autopilot_bridge() -> None:
+    text = Path(".github/workflows/pr-quality-comment.yml").read_text(encoding="utf-8")
+
+    check_intelligence = text.index("python -m sdetkit.check_intelligence")
+    bridge = text.index("Commit approved safe formatting fixes")
+    narrative = text.index("--out build/pr-quality/pr-evidence-narrative.md")
+
+    assert check_intelligence < bridge < narrative
+    assert "tools/maintenance_autopilot.py" in text
+    assert "--commit-safe-fixes" in text
+    assert (
+        "--check-intelligence-json build/pr-quality/check-intelligence/check-intelligence.json"
+        in text
+    )
+    assert "--pr-quality-safe-bridge-only" in text
+    assert "--out-dir build/pr-quality/safe-formatting-autopilot" in text
+    assert "build/pr-quality/safe-formatting-autopilot/" in text
+
+
+def test_pr_quality_workflow_grants_contents_write_for_safe_branch_commit() -> None:
+    text = Path(".github/workflows/pr-quality-comment.yml").read_text(encoding="utf-8")
+    permissions = text.split("jobs:", 1)[0]
+
+    assert "permissions:" in permissions
+    assert "contents: write" in permissions

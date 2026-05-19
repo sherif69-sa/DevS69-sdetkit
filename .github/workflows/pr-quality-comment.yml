@@ -5,10 +5,11 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: read
-  pull-requests: write
+  contents: write
   issues: write
-
+  pull-requests: write
+  checks: read
+  actions: read
 concurrency:
   group: pr-quality-comment-${{ github.event.pull_request.number }}
   cancel-in-progress: true
@@ -269,6 +270,18 @@ jobs:
           )
           PY
 
+      - name: Commit approved safe formatting fixes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PYTHONPATH=src python tools/maintenance_autopilot.py \
+            --owner "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --commit-safe-fixes \
+            --check-intelligence-json build/pr-quality/check-intelligence/check-intelligence.json \
+            --pr-quality-safe-bridge-only \
+            --out-dir build/pr-quality/safe-formatting-autopilot
+
       - name: Build PR comment body
         run: |
           mkdir -p build/pr-quality
@@ -345,6 +358,7 @@ jobs:
             build/pr-quality/checks/
             build/pr-quality/check-logs/
             build/pr-quality/check-intelligence/
+            build/pr-quality/safe-formatting-autopilot/
             build/pr-quality/pr-evidence-narrative.md
             build/sdetkit/evidence-graph/
             build/sdetkit/operator-loop/

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any
 
 SCHEMA_VERSION = "sdetkit.safe_remediation_eligibility.v1"
@@ -20,6 +21,26 @@ def _string(value: Any) -> str:
 
 def _lower(value: Any) -> str:
     return _string(value).lower()
+
+
+FILE_PATH_RE = re.compile(
+    r"(?P<path>(?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+\."
+    r"(?:py|pyi|toml|yaml|yml|md|rst|txt|json|cfg|ini))"
+)
+
+
+def _extract_affected_files(text: str) -> list[str]:
+    values: list[str] = []
+    seen: set[str] = set()
+    for match in FILE_PATH_RE.finditer(text):
+        value = match.group("path").strip().strip(":")
+        if not value or value in seen:
+            continue
+        if value.startswith(("http://", "https://")):
+            continue
+        seen.add(value)
+        values.append(value)
+    return values
 
 
 def _contains_any(text: str, needles: tuple[str, ...]) -> bool:
@@ -97,6 +118,16 @@ def classify_check_failure(
         if value
     )
 
+    raw_context = first_failure.get("context", [])
+    if not isinstance(raw_context, list):
+        raw_context = []
+    context_text = "\n".join(
+        _string(_as_dict(item).get("text")) for item in raw_context if isinstance(item, dict)
+    )
+    affected_files = _extract_affected_files(
+        "\n".join(value for value in (first_line, context_text, log_text) if value)
+    )
+
     if _contains_any(combined, UNSAFE_REVIEW_MARKERS) and not _contains_any(
         combined,
         SAFE_FORMAT_MARKERS,
@@ -116,6 +147,7 @@ def classify_check_failure(
             "safe_to_auto_fix": True,
             "strategy": FORMAT_SAFE_STRATEGY,
             "category": "formatting_only",
+            "affected_files": affected_files,
             "reason": "Failure is limited to deterministic formatting or whitespace hooks.",
             "proof_commands": [
                 "python -m pre_commit run -a",
