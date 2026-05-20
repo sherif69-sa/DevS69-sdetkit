@@ -173,3 +173,110 @@ def test_safe_fix_history_memory_writes_json_and_markdown_artifacts(tmp_path: Pa
     assert history["metrics"]["safe_fix_attempts_total"] == 1
     assert trends["metrics"]["safe_fix_success_rate"] == 1.0
     assert "Recommended next operator action" in markdown
+
+
+def test_safe_fix_history_memory_emits_owner_file_guardrail_advice() -> None:
+    from sdetkit.safe_fix_history_memory import build_safe_fix_history
+
+    _, trends, _ = build_safe_fix_history(
+        {
+            "outcomes": [
+                {
+                    "timestamp": "2026-05-10T00:00:00Z",
+                    "status": "pushed",
+                    "classification": "format_only",
+                    "affected_files": ["src/sdetkit/operator_brief.py"],
+                    "pushed": True,
+                },
+                {
+                    "timestamp": "2026-05-11T00:00:00Z",
+                    "status": "committed",
+                    "classification": "format_only",
+                    "affected_files": ["src/sdetkit/operator_brief.py"],
+                    "committed": True,
+                },
+            ]
+        },
+        observed_at="2026-05-20T00:00:00Z",
+    )
+
+    metrics = trends["metrics"]
+
+    assert metrics["format_drift_owner_files"] == [
+        {
+            "file": "src/sdetkit/operator_brief.py",
+            "count": 2,
+            "owner_signal": "recurring_format_drift",
+        }
+    ]
+    assert metrics["owner_file_guardrail_recommendations"] == [
+        {
+            "file": "src/sdetkit/operator_brief.py",
+            "count": 2,
+            "action": "add_owner_file_format_guardrail",
+            "reason": "file repeatedly required deterministic formatting safe fixes",
+        }
+    ]
+    assert metrics["local_dev_guardrail_recommendations"] == [
+        {
+            "file": "src/sdetkit/operator_brief.py",
+            "count": 2,
+            "action": "run_pre_commit_before_push",
+            "reason": "recurring format drift should be caught before CI",
+        }
+    ]
+    assert metrics["recurring_format_drift_guardrails"] == []
+    assert (
+        metrics["recommended_next_operator_action"]
+        == "add_local_guardrail_for_recurring_format_drift_files"
+    )
+
+
+def test_safe_fix_history_memory_escalates_three_time_recurring_format_drift() -> None:
+    from sdetkit.safe_fix_history_memory import build_safe_fix_history
+
+    _, trends, markdown = build_safe_fix_history(
+        {
+            "outcomes": [
+                {
+                    "timestamp": "2026-05-10T00:00:00Z",
+                    "status": "pushed",
+                    "classification": "format_only",
+                    "affected_files": ["tools/maintenance_autopilot.py"],
+                    "pushed": True,
+                },
+                {
+                    "timestamp": "2026-05-11T00:00:00Z",
+                    "status": "committed",
+                    "classification": "format_only",
+                    "affected_files": ["tools/maintenance_autopilot.py"],
+                    "committed": True,
+                },
+                {
+                    "timestamp": "2026-05-12T00:00:00Z",
+                    "status": "pushed",
+                    "classification": "format_only",
+                    "affected_files": ["tools/maintenance_autopilot.py"],
+                    "pushed": True,
+                },
+            ]
+        },
+        observed_at="2026-05-20T00:00:00Z",
+    )
+
+    metrics = trends["metrics"]
+
+    assert metrics["recurring_format_drift_guardrails"] == [
+        {
+            "file": "tools/maintenance_autopilot.py",
+            "count": 3,
+            "action": "escalate_recurring_format_drift",
+            "reason": "same file crossed recurring drift escalation threshold",
+        }
+    ]
+    assert (
+        metrics["recommended_next_operator_action"] == "escalate_recurring_format_drift_guardrails"
+    )
+    assert "Owner-file guardrail recommendations" in markdown
+    assert "Local developer guardrail recommendations" in markdown
+    assert "Recurring format drift guardrails" in markdown

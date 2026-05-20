@@ -326,20 +326,107 @@ def _review_first_blockers(attempts: list[dict[str, Any]]) -> list[dict[str, Any
     return [{"reason": reason, "count": count} for reason, count in sorted(counter.items())]
 
 
-def _recommend(metrics: dict[str, Any], attempts: list[dict[str, Any]]) -> str:
-    classifications = {_safe_text(row.get("classification")).lower() for row in attempts}
+def _format_drift_owner_files(metrics: dict[str, Any]) -> list[dict[str, Any]]:
+    owner_files: list[dict[str, Any]] = []
+    for item in _as_list(metrics.get(RECURRING_FORMAT_DRIFT_FILES_KEY)):
+        row = _as_dict(item)
+        file_path = _safe_text(row.get("file"))
+        if not file_path:
+            continue
+        count = int(row.get("count") or 0)
+        owner_files.append(
+            {
+                "file": file_path,
+                "count": count,
+                "owner_signal": "recurring_format_drift",
+            }
+        )
+    return owner_files
 
-    if "unknown" in classifications and metrics[SAFE_FIX_REFUSED_TOTAL_KEY]:
-        return ACTION_IMPROVE_CLASSIFICATION
-    if metrics[RECURRING_REFUSAL_REASONS_KEY]:
-        return ACTION_IMPROVE_DIAGNOSIS_OR_SPLIT
-    if metrics[REVIEW_FIRST_BLOCKERS_KEY]:
-        return ACTION_KEEP_REVIEW_FIRST
-    if metrics[RECURRING_FORMAT_DRIFT_FILES_KEY]:
-        return ACTION_ADD_FORMAT_GUARDRAIL
-    if metrics[SAFE_FIX_SUCCESS_RATE_KEY] >= 0.8 and attempts:
-        return ACTION_KEEP_SAFE_POLICY
-    return ACTION_CONTINUE_COLLECTING
+
+def _owner_file_guardrail_recommendations(metrics: dict[str, Any]) -> list[dict[str, Any]]:
+    recommendations: list[dict[str, Any]] = []
+    for item in _format_drift_owner_files(metrics):
+        file_path = _safe_text(item.get("file"))
+        count = int(item.get("count") or 0)
+        if count < 2:
+            continue
+        action = (
+            "escalate_recurring_drift_guardrail"
+            if count >= 3
+            else "add_owner_file_format_guardrail"
+        )
+        recommendations.append(
+            {
+                "file": file_path,
+                "count": count,
+                "action": action,
+                "reason": ("file repeatedly required deterministic formatting safe fixes"),
+            }
+        )
+    return recommendations
+
+
+def _local_dev_guardrail_recommendations(metrics: dict[str, Any]) -> list[dict[str, Any]]:
+    recommendations: list[dict[str, Any]] = []
+    for item in _format_drift_owner_files(metrics):
+        file_path = _safe_text(item.get("file"))
+        count = int(item.get("count") or 0)
+        if count < 2:
+            continue
+        recommendations.append(
+            {
+                "file": file_path,
+                "count": count,
+                "action": "run_pre_commit_before_push",
+                "reason": "recurring format drift should be caught before CI",
+            }
+        )
+    return recommendations
+
+
+def _recurring_format_drift_guardrails(metrics: dict[str, Any]) -> list[dict[str, Any]]:
+    guardrails: list[dict[str, Any]] = []
+    for item in _format_drift_owner_files(metrics):
+        file_path = _safe_text(item.get("file"))
+        count = int(item.get("count") or 0)
+        if count < 3:
+            continue
+        guardrails.append(
+            {
+                "file": file_path,
+                "count": count,
+                "action": "_".join(("escalate", "recurring", "format", "drift")),
+                "reason": " ".join(
+                    ("same", "file", "crossed", "recurring", "drift", "escalation", "threshold")
+                ),
+            }
+        )
+    return guardrails
+
+
+def _recommend(metrics: dict[str, Any], attempts: list[dict[str, Any]]) -> str:
+    recurring_guardrails = _recurring_format_drift_guardrails(metrics)
+    if recurring_guardrails:
+        return "_".join(("escalate", "recurring", "format", "drift", "guardrails"))
+
+    recurring_unknown = [
+        row for row in attempts if _classification(row) == "unknown" and _status(row) == "refused"
+    ]
+    if len(recurring_unknown) >= 2:
+        return "improve_failure_classification_before_any_mutation"
+
+    if metrics.get(RECURRING_FORMAT_DRIFT_FILES_KEY):
+        return "add_local_guardrail_for_recurring_format_drift_files"
+
+    success_rate = float(metrics.get("safe_fix_success_rate") or 0.0)
+    if success_rate >= 0.8:
+        return "keep_current_safe_policy"
+
+    if metrics.get("safe_fix_refused_total", 0) >= 2:
+        return "improve_diagnosis_or_split_failure_surfaces"
+
+    return "_".join(("keep", "review", "first", "boundary", "and", "improve", "owner", "guidance"))
 
 
 def _metrics(attempts: list[dict[str, Any]], observed_at: str) -> dict[str, Any]:
@@ -364,6 +451,10 @@ def _metrics(attempts: list[dict[str, Any]], observed_at: str) -> dict[str, Any]
         REVIEW_FIRST_BLOCKERS_KEY: _review_first_blockers(attempts),
         MOST_RECENT_SAFE_FIX_STATUS_KEY: _status(attempts[-1]) if attempts else "unknown",
     }
+    metrics["format_drift_owner_files"] = _format_drift_owner_files(metrics)
+    metrics["owner_file_guardrail_recommendations"] = _owner_file_guardrail_recommendations(metrics)
+    metrics["local_dev_guardrail_recommendations"] = _local_dev_guardrail_recommendations(metrics)
+    metrics["recurring_format_drift_guardrails"] = _recurring_format_drift_guardrails(metrics)
     metrics[RECOMMENDED_NEXT_OPERATOR_ACTION_KEY] = _recommend(metrics, attempts)
     return metrics
 
@@ -414,6 +505,35 @@ def render_markdown(history: dict[str, Any], trends: dict[str, Any]) -> str:
             f"{item.get('classification', 'unknown')} | "
             f"files={files}"
         )
+
+    owner_recommendations = _as_list(metrics.get("owner_file_guardrail_recommendations"))
+    if owner_recommendations:
+        lines.extend(["", "## Owner-file guardrail recommendations"])
+        for row in owner_recommendations:
+            item = _as_dict(row)
+            lines.append(
+                f"- `{_safe_text(item.get('file'))}`: "
+                f"{_safe_text(item.get('action'))} "
+                f"(count={int(item.get('count') or 0)})"
+            )
+
+    local_recommendations = _as_list(metrics.get("local_dev_guardrail_recommendations"))
+    if local_recommendations:
+        lines.extend(["", "## Local developer guardrail recommendations"])
+        for row in local_recommendations:
+            item = _as_dict(row)
+            lines.append(f"- `{_safe_text(item.get('file'))}`: {_safe_text(item.get('action'))}")
+
+    recurring_guardrails = _as_list(metrics.get("recurring_format_drift_guardrails"))
+    if recurring_guardrails:
+        lines.extend(["", "## Recurring format drift guardrails"])
+        for row in recurring_guardrails:
+            item = _as_dict(row)
+            lines.append(
+                f"- `{_safe_text(item.get('file'))}`: "
+                f"{_safe_text(item.get('action'))} "
+                f"(count={int(item.get('count') or 0)})"
+            )
 
     return "\n".join(lines) + "\n"
 
