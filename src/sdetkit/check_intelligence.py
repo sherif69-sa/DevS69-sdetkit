@@ -28,7 +28,6 @@ DEPENDENCY_AUDIT_OWNER_FILES = [
 
 
 def _extract_dependency_audit_evidence(log_text: str) -> JsonObject:
-    import re
 
     command = ""
     report_path = ""
@@ -580,7 +579,6 @@ def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
 
 
 def _dependency_audit_first_failure(log_text: str) -> JsonObject:
-    import re
 
     for index, raw_line in enumerate(log_text.splitlines(), 1):
         line = raw_line.strip()
