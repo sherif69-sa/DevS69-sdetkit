@@ -184,6 +184,28 @@ def _failed_check_lines(check_intelligence: JsonObject) -> list[str]:
             reason = _string(safe_remediation.get("reason") or "approved safe remediation")
             lines.append(f"  - Safe remediation: `{strategy}`")
             lines.append(f"  - Safe reason: `{reason}`")
+        formatter_files = [
+            _string(path) for path in _as_list(item.get("formatter_changed_files")) if _string(path)
+        ]
+        if formatter_files:
+            lines.append(
+                "  - Formatter changed files: "
+                + ", ".join(f"`{path}`" for path in formatter_files[:8])
+            )
+        if bool(item.get("stale_evidence", False)):
+            head_sha = _string(item.get("head_sha") or "unknown")
+            current_sha = _string(item.get("current_pr_head_sha") or "unknown")
+            lines.append(f"  - Evidence freshness: `stale` (`{head_sha}` != `{current_sha}`)")
+        outside_files = [
+            _string(path) for path in _as_list(item.get("outside_changed_files")) if _string(path)
+        ]
+        if outside_files:
+            lines.append(
+                "  - Outside PR changed set: "
+                + ", ".join(f"`{path}`" for path in outside_files[:8])
+            )
+        if bool(item.get("possible_changed_files_gate_fallout", False)):
+            lines.append("  - Gate fallout: possible changed-files base-resolution issue")
     return lines
 
 
@@ -223,6 +245,30 @@ def _primary_blocker_lines(primary: JsonObject) -> list[str]:
         reason = _string(safe_remediation.get("reason") or "approved safe remediation")
         lines.append(f"- Safe remediation: `{strategy}`")
         lines.append(f"- Safe reason: `{reason}`")
+
+    formatter_files = [
+        _string(path) for path in _as_list(primary.get("formatter_changed_files")) if _string(path)
+    ]
+    if formatter_files:
+        lines.append(
+            "- Formatter changed files: " + ", ".join(f"`{path}`" for path in formatter_files[:8])
+        )
+
+    if bool(primary.get("stale_evidence", False)):
+        head_sha = _string(primary.get("head_sha") or "unknown")
+        current_sha = _string(primary.get("current_pr_head_sha") or "unknown")
+        lines.append(f"- Evidence freshness: `stale` (`{head_sha}` != `{current_sha}`)")
+
+    outside_files = [
+        _string(path) for path in _as_list(primary.get("outside_changed_files")) if _string(path)
+    ]
+    if outside_files:
+        lines.append(
+            "- Outside PR changed set: " + ", ".join(f"`{path}`" for path in outside_files[:8])
+        )
+
+    if bool(primary.get("possible_changed_files_gate_fallout", False)):
+        lines.append("- Gate fallout: possible changed-files base-resolution issue")
 
     impact = _string(primary.get("impact"))
     if impact:
