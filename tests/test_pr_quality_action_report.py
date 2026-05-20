@@ -972,3 +972,111 @@ def test_action_report_comment_renders_safe_fix_outcome() -> None:
     assert "`tests/test_example.py`" in body
     assert "- Proof after fix:" in body
     assert "`python -m pre_commit run -a`" in body
+
+
+def test_action_report_comment_renders_freshness_formatter_and_gate_fallout_details() -> None:
+    from sdetkit.pr_quality_action_report import render_comment_body
+
+    action_report = {
+        "status": "review_required",
+        "primary_blocker": {
+            "check": "autopilot",
+            "title": "Formatter drift blocked pre-commit",
+            "surface": "quality",
+            "code": "PRE_COMMIT_FORMAT_DRIFT",
+            "first_failure": {"line": "- files were modified by this hook", "line_number": 30},
+            "first_failure_line": "- files were modified by this hook",
+            "formatter_changed_files": ["src/sdetkit/example.py"],
+            "stale_evidence": False,
+            "outside_changed_files": ["templates/platform_problem/rich/problem.py"],
+            "possible_changed_files_gate_fallout": True,
+            "safe_to_auto_fix": True,
+            "safe_remediation": {
+                "safe_to_auto_fix": True,
+                "strategy": "run_pre_commit",
+                "reason": "Failure is limited to deterministic formatting or whitespace hooks.",
+            },
+        },
+        "automation": {"attempted": False, "allowed": True, "reason": "safe formatting"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    check_intelligence = {
+        "failed_checks": [
+            {
+                "name": "autopilot",
+                "diagnosis": {
+                    "code": "PRE_COMMIT_FORMAT_DRIFT",
+                    "title": "Formatter drift blocked pre-commit",
+                },
+                "first_failure": {"line": "- files were modified by this hook", "line_number": 30},
+                "safe_to_auto_fix": True,
+                "formatter_changed_files": ["src/sdetkit/example.py"],
+                "outside_changed_files": ["templates/platform_problem/rich/problem.py"],
+                "possible_changed_files_gate_fallout": True,
+                "safe_remediation": {
+                    "safe_to_auto_fix": True,
+                    "strategy": "run_pre_commit",
+                    "reason": "Failure is limited to deterministic formatting or whitespace hooks.",
+                },
+            }
+        ],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {},
+    }
+
+    body = render_comment_body(
+        action_report=action_report,
+        check_intelligence=check_intelligence,
+    )
+
+    assert "Formatter changed files: `src/sdetkit/example.py`" in body
+    assert "Outside PR changed set: `templates/platform_problem/rich/problem.py`" in body
+    assert "Gate fallout: possible changed-files base-resolution issue" in body
+
+
+def test_action_report_comment_renders_remediation_refresh_loop_summary() -> None:
+    from sdetkit.pr_quality_action_report import render_comment_body
+
+    action_report = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    check_intelligence = {
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {},
+        "remediation_refresh": {
+            "safe_fix_attempted": True,
+            "safe_fix_committed": True,
+            "safe_fix_pushed": True,
+            "safe_fix_commit_sha": "new123",
+            "previous_head_sha": "old111",
+            "refreshed_head_sha": "new123",
+            "proof_after_fix_started": True,
+            "proof_after_fix_passed": True,
+            "proof_after_fix_failed": False,
+            "remaining_failed_checks": [],
+            "remaining_review_first_blockers": [],
+            "merge_assessment": "green_after_safe_fix",
+        },
+    }
+
+    body = render_comment_body(
+        action_report=action_report,
+        check_intelligence=check_intelligence,
+    )
+
+    assert "Remediation refresh" in body
+    assert "Safe fix pushed to branch." in body
+    assert "Refreshed head SHA: `new123`" in body
+    assert "Proof after fix result: `passed`" in body
+    assert "Remaining blockers: none" in body
+    assert "Merge assessment: `green_after_safe_fix`" in body

@@ -121,6 +121,57 @@ def _safe_fix_outcome_lines(outcome: JsonObject) -> list[str]:
     return lines
 
 
+def _remediation_refresh_lines(refresh: JsonObject) -> list[str]:
+    if not refresh:
+        return ["none"]
+
+    lines = [
+        f"- Safe fix pushed: `{str(bool(refresh.get('safe_fix_pushed', False))).lower()}`",
+        f"- Safe fix committed: `{str(bool(refresh.get('safe_fix_committed', False))).lower()}`",
+        f"- Safe fix commit SHA: `{_string(refresh.get('safe_fix_commit_sha') or 'none')}`",
+        f"- Previous head SHA: `{_string(refresh.get('previous_head_sha') or 'unknown')}`",
+        f"- Refreshed head SHA: `{_string(refresh.get('refreshed_head_sha') or 'unknown')}`",
+    ]
+
+    if bool(refresh.get("safe_fix_pushed", False)):
+        lines.append("- Safe fix pushed to branch.")
+
+    proof_after_fix_passed = bool(refresh.get("proof_after_fix_passed", False))
+    proof_after_fix_failed = bool(refresh.get("proof_after_fix_failed", False))
+    proof_after_fix_started = bool(refresh.get("proof_after_fix_started", False))
+    if proof_after_fix_passed:
+        proof_result = "passed"
+    elif proof_after_fix_failed:
+        proof_result = "failed"
+    elif proof_after_fix_started:
+        proof_result = "started"
+    else:
+        proof_result = "not_started"
+
+    lines.append(f"- Proof after fix result: `{proof_result}`")
+
+    failed = [
+        _string(item) for item in _as_list(refresh.get("remaining_failed_checks")) if _string(item)
+    ]
+    blockers = [
+        _string(item)
+        for item in _as_list(refresh.get("remaining_review_first_blockers"))
+        if _string(item)
+    ]
+    if failed:
+        lines.append("- Remaining failed checks: " + ", ".join(f"`{item}`" for item in failed[:8]))
+    else:
+        lines.append("- Remaining failed checks: none")
+
+    if blockers:
+        lines.append("- Remaining blockers: " + ", ".join(f"`{item}`" for item in blockers[:8]))
+    else:
+        lines.append("- Remaining blockers: none")
+
+    lines.append(f"- Merge assessment: `{_string(refresh.get('merge_assessment') or 'unknown')}`")
+    return lines
+
+
 def _evidence_lines(check_intelligence: JsonObject, action_report: JsonObject) -> list[str]:
     security = _as_dict(
         check_intelligence.get("security_review")
@@ -184,6 +235,28 @@ def _failed_check_lines(check_intelligence: JsonObject) -> list[str]:
             reason = _string(safe_remediation.get("reason") or "approved safe remediation")
             lines.append(f"  - Safe remediation: `{strategy}`")
             lines.append(f"  - Safe reason: `{reason}`")
+        formatter_files = [
+            _string(path) for path in _as_list(item.get("formatter_changed_files")) if _string(path)
+        ]
+        if formatter_files:
+            lines.append(
+                "  - Formatter changed files: "
+                + ", ".join(f"`{path}`" for path in formatter_files[:8])
+            )
+        if bool(item.get("stale_evidence", False)):
+            head_sha = _string(item.get("head_sha") or "unknown")
+            current_sha = _string(item.get("current_pr_head_sha") or "unknown")
+            lines.append(f"  - Evidence freshness: `stale` (`{head_sha}` != `{current_sha}`)")
+        outside_files = [
+            _string(path) for path in _as_list(item.get("outside_changed_files")) if _string(path)
+        ]
+        if outside_files:
+            lines.append(
+                "  - Outside PR changed set: "
+                + ", ".join(f"`{path}`" for path in outside_files[:8])
+            )
+        if bool(item.get("possible_changed_files_gate_fallout", False)):
+            lines.append("  - Gate fallout: possible changed-files base-resolution issue")
     return lines
 
 
@@ -223,6 +296,30 @@ def _primary_blocker_lines(primary: JsonObject) -> list[str]:
         reason = _string(safe_remediation.get("reason") or "approved safe remediation")
         lines.append(f"- Safe remediation: `{strategy}`")
         lines.append(f"- Safe reason: `{reason}`")
+
+    formatter_files = [
+        _string(path) for path in _as_list(primary.get("formatter_changed_files")) if _string(path)
+    ]
+    if formatter_files:
+        lines.append(
+            "- Formatter changed files: " + ", ".join(f"`{path}`" for path in formatter_files[:8])
+        )
+
+    if bool(primary.get("stale_evidence", False)):
+        head_sha = _string(primary.get("head_sha") or "unknown")
+        current_sha = _string(primary.get("current_pr_head_sha") or "unknown")
+        lines.append(f"- Evidence freshness: `stale` (`{head_sha}` != `{current_sha}`)")
+
+    outside_files = [
+        _string(path) for path in _as_list(primary.get("outside_changed_files")) if _string(path)
+    ]
+    if outside_files:
+        lines.append(
+            "- Outside PR changed set: " + ", ".join(f"`{path}`" for path in outside_files[:8])
+        )
+
+    if bool(primary.get("possible_changed_files_gate_fallout", False)):
+        lines.append("- Gate fallout: possible changed-files base-resolution issue")
 
     impact = _string(primary.get("impact"))
     if impact:
@@ -454,6 +551,7 @@ def render_comment_body(
 ) -> str:
     evidence_narrative = evidence_narrative or {}
     safe_fix_outcome = safe_fix_outcome or _as_dict(check_intelligence.get("safe_fix_outcome"))
+    remediation_refresh = _as_dict(check_intelligence.get("remediation_refresh"))
     status = _string(action_report.get("status") or "unknown")
     evidence_signal_heading, evidence_signal_lines, evidence_review_required = _evidence_signal(
         evidence_narrative
@@ -505,6 +603,8 @@ def render_comment_body(
             "## Safe fix outcome",
             "",
             *_safe_fix_outcome_lines(_as_dict(safe_fix_outcome)),
+            "Remediation refresh",
+            *_remediation_refresh_lines(_as_dict(remediation_refresh)),
             "",
             "## Evidence collected",
             "",
