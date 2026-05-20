@@ -290,6 +290,300 @@ def _write_safe_fix_commit_result(out_dir: Path, payload: dict[str, Any]) -> Non
     _write_json(out_dir / "adaptive-safe-commit-result.json", payload)
 
 
+REMEDIATION_EXECUTION_SCHEMA = "sdetkit.maintenance.autopilot.remediation_execution.v1"
+REMEDIATION_ALLOWED_STRATEGIES = {
+    "run_pre_commit",
+    "ruff_format",
+    "eof_fixer",
+    "trim_trailing_whitespace",
+}
+REMEDIATION_BLOCKED_CLASSIFICATIONS = {
+    "type_contract",
+    "runtime_exception",
+    "release_artifact",
+    "dependency_drift",
+    "security",
+    "docs_structural_change",
+    "workflow_contract",
+    "test_contract",
+    "quality_contract",
+    "unknown",
+}
+REMEDIATION_SAFE_PATH_PREFIXES = ("src/", "tests/", "tools/")
+
+
+def _remediation_string(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def _remediation_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes"}
+
+
+def _remediation_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _remediation_string_list(value: Any) -> list[str]:
+    return sorted(
+        {
+            _remediation_string(item)
+            for item in _remediation_list(value)
+            if _remediation_string(item)
+        }
+    )
+
+
+def _is_safe_repo_owned_path(path: str) -> bool:
+    clean = path.strip().replace("\\", "/")
+    if not clean or clean.startswith("/") or clean.startswith("~"):
+        return False
+    if clean in {".", ".."} or "/../" in f"/{clean}/":
+        return False
+    if "<" in clean or ">" in clean:
+        return False
+    return clean.startswith(REMEDIATION_SAFE_PATH_PREFIXES)
+
+
+def _remediation_commands_for_strategy(strategy: str, plan: dict[str, Any]) -> list[str]:
+    commands = _remediation_string_list(plan.get("commands_to_run"))
+    if commands:
+        return commands
+    if strategy == "run_pre_commit":
+        return ["python -m pre_commit run -a"]
+    if strategy == "ruff_format":
+        return ["python -m ruff format ."]
+    if strategy == "eof_fixer":
+        return ["python -m pre_commit run end-of-file-fixer -a"]
+    if strategy == "trim_trailing_whitespace":
+        return ["python -m pre_commit run trailing-whitespace -a"]
+    return []
+
+
+def _remediation_refusal_reason(plans: list[dict[str, Any]]) -> str:
+    if not plans:
+        return "remediation plan has no plans"
+
+    blocked = [
+        _remediation_string(plan.get("classification") or plan.get("failure_surface") or "unknown")
+        for plan in plans
+        if _remediation_string(
+            plan.get("classification") or plan.get("failure_surface") or "unknown"
+        )
+        in REMEDIATION_BLOCKED_CLASSIFICATIONS
+    ]
+    if blocked:
+        return "review-first remediation plans are not executable: " + ", ".join(
+            sorted(set(blocked))
+        )
+
+    non_executable = [
+        _remediation_string(plan.get("diagnosis_id") or plan.get("failure_surface") or "unknown")
+        for plan in plans
+        if plan.get("safe_to_auto_fix") is not True
+    ]
+    if non_executable:
+        return "one or more remediation plans are review-first or not executable"
+
+    strategies = {
+        _remediation_string(plan.get("allowed_strategy"))
+        for plan in plans
+        if _remediation_string(plan.get("allowed_strategy"))
+    }
+    disallowed = sorted(
+        strategy for strategy in strategies if strategy not in REMEDIATION_ALLOWED_STRATEGIES
+    )
+    if disallowed:
+        return "remediation strategy is not allowlisted: " + ", ".join(disallowed)
+
+    affected_files: list[str] = []
+    for plan in plans:
+        affected_files.extend(_remediation_string_list(plan.get("affected_files")))
+    if not affected_files:
+        return "remediation plan has no affected files"
+
+    unsafe = sorted(path for path in set(affected_files) if not _is_safe_repo_owned_path(path))
+    if unsafe:
+        return "remediation plan contains unsafe affected files: " + ", ".join(unsafe)
+
+    return ""
+
+
+def _safe_fix_plan_from_remediation_plans(plans: list[dict[str, Any]]) -> dict[str, Any]:
+    affected_files: set[str] = set()
+    commands: list[str] = []
+    proof_commands: set[str] = set()
+    strategies: set[str] = set()
+
+    for plan in plans:
+        strategy = _remediation_string(plan.get("allowed_strategy"))
+        strategies.add(strategy)
+        affected_files.update(_remediation_string_list(plan.get("affected_files")))
+        commands.extend(_remediation_commands_for_strategy(strategy, plan))
+        proof_commands.update(_remediation_string_list(plan.get("proof_commands")))
+
+    return {
+        "schema_version": "sdetkit.maintenance.autopilot.remediation_plan_bridge.v1",
+        "source": "remediation-plan",
+        "source_code": "REMEDIATION_PLAN_APPROVED_FORMATTING",
+        "title": "Approved remediation-plan formatting-only execution",
+        "safe_to_auto_fix": True,
+        "fix_type": "format_only",
+        "requires_human_review": False,
+        "commands": sorted(set(commands)) or ["python -m pre_commit run -a"],
+        "proof_commands": sorted(proof_commands),
+        "affected_files": sorted(affected_files),
+        "allowed_strategy": sorted(strategies),
+        "reason": "All remediation plans are approved formatting-only strategies.",
+    }
+
+
+def _render_remediation_execution_markdown(payload: dict[str, Any]) -> str:
+    lines = [
+        "# Remediation execution",
+        "",
+        f"- Attempted: `{str(bool(payload.get('attempted', False))).lower()}`",
+        f"- Allowed: `{str(bool(payload.get('allowed', False))).lower()}`",
+        f"- Refused reason: `{payload.get('refused_reason', '')}`",
+        f"- Executed strategy: `{payload.get('executed_strategy', 'none')}`",
+        f"- Committed: `{str(bool(payload.get('committed', False))).lower()}`",
+        f"- Pushed: `{str(bool(payload.get('pushed', False))).lower()}`",
+        f"- Commit SHA: `{payload.get('commit_sha', 'none')}`",
+        "",
+        "## Affected files",
+    ]
+    files = _remediation_string_list(payload.get("affected_files"))
+    if not files:
+        lines.append("- None")
+    else:
+        for file in files:
+            lines.append(f"- `{file}`")
+    blockers = _remediation_string_list(payload.get("remaining_review_first_blockers"))
+    lines.extend(["", "## Remaining review-first blockers"])
+    if not blockers:
+        lines.append("- None")
+    else:
+        for blocker in blockers:
+            lines.append(f"- `{blocker}`")
+    return "\n".join(lines).strip() + "\n"
+
+
+def _write_remediation_execution_artifacts(out_dir: Path, payload: dict[str, Any]) -> None:
+    _write_json(out_dir / "remediation-execution.json", payload)
+    (out_dir / "remediation-execution.md").write_text(
+        _render_remediation_execution_markdown(payload),
+        encoding="utf-8",
+    )
+
+
+def _write_remediation_execution_from_plan(
+    out_dir: Path,
+    remediation_plan_path: Path,
+) -> dict[str, Any]:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    payload: dict[str, Any] = {
+        "schema_version": REMEDIATION_EXECUTION_SCHEMA,
+        "ok": False,
+        "attempted": False,
+        "allowed": False,
+        "refused_reason": "",
+        "executed_strategy": "none",
+        "affected_files": [],
+        "command_results": [],
+        "committed": False,
+        "pushed": False,
+        "commit_sha": "none",
+        "proof_after_fix_commands": [],
+        "remaining_review_first_blockers": [],
+        "remediation_plan_path": remediation_plan_path.as_posix(),
+    }
+
+    if not remediation_plan_path.exists():
+        payload["refused_reason"] = "remediation plan file not found"
+        _write_remediation_execution_artifacts(out_dir, payload)
+        _write_json(
+            out_dir / "remediation-commit-result.json",
+            {"ok": False, "reason": payload["refused_reason"]},
+        )
+        return payload
+
+    remediation_payload = _load_json(remediation_plan_path)
+    plans = [
+        _bridge_as_dict(item)
+        for item in _bridge_as_list(remediation_payload.get("plans"))
+        if isinstance(item, dict)
+    ]
+    payload["plan_count"] = len(plans)
+    payload["remaining_review_first_blockers"] = [
+        _remediation_string(plan.get("diagnosis_id") or plan.get("failure_surface") or "unknown")
+        for plan in plans
+        if plan.get("safe_to_auto_fix") is not True
+        or _remediation_string(plan.get("classification")) in REMEDIATION_BLOCKED_CLASSIFICATIONS
+    ]
+
+    refusal = _remediation_refusal_reason(plans)
+    if refusal:
+        payload["refused_reason"] = refusal
+        payload["affected_files"] = sorted(
+            {
+                file
+                for plan in plans
+                for file in _remediation_string_list(plan.get("affected_files"))
+            }
+        )
+        _write_remediation_execution_artifacts(out_dir, payload)
+        _write_json(out_dir / "remediation-commit-result.json", {"ok": False, "reason": refusal})
+        return payload
+
+    merged_plan = _safe_fix_plan_from_remediation_plans(plans)
+    payload["allowed"] = True
+    payload["affected_files"] = _remediation_string_list(merged_plan.get("affected_files"))
+    payload["executed_strategy"] = ",".join(
+        _remediation_string_list(merged_plan.get("allowed_strategy"))
+    )
+    payload["proof_after_fix_commands"] = _remediation_string_list(
+        merged_plan.get("proof_commands")
+    )
+    _write_json(out_dir / "safe-fix-plan.json", merged_plan)
+
+    from sdetkit import adaptive_safe_remediation
+
+    remediation_result = adaptive_safe_remediation.run_plan(merged_plan, cwd=Path.cwd())
+    remediation_result["plan_path"] = (out_dir / "safe-fix-plan.json").as_posix()
+    _write_json(out_dir / "adaptive-safe-remediation-result.json", remediation_result)
+    (out_dir / "adaptive-safe-remediation-result.md").write_text(
+        adaptive_safe_remediation.render_markdown(remediation_result),
+        encoding="utf-8",
+    )
+
+    commit_result = _commit_safe_fix_changes(out_dir, merged_plan, remediation_result)
+    _write_json(out_dir / "remediation-commit-result.json", commit_result)
+
+    payload.update(
+        {
+            "ok": bool(remediation_result.get("ok", False)),
+            "attempted": True,
+            "remediation_ok": bool(remediation_result.get("ok", False)),
+            "command_results": _bridge_as_list(remediation_result.get("commands")),
+            "committed": bool(commit_result.get("committed", False)),
+            "pushed": bool(commit_result.get("pushed", False)),
+            "commit_sha": str(
+                commit_result.get("commit_sha") or commit_result.get("sha") or "none"
+            ),
+            "commit_ok": bool(commit_result.get("ok", False)),
+            "refused_reason": ""
+            if bool(remediation_result.get("ok", False))
+            else "safe remediation did not succeed",
+        }
+    )
+    _write_remediation_execution_artifacts(out_dir, payload)
+    _write_safe_fix_learning_outcome(out_dir, merged_plan, remediation_result, commit_result)
+    _write_safe_fix_outcome_artifacts(out_dir)
+    return payload
+
+
 def _write_safe_fix_outcome_artifacts(
     out_dir: Path,
     check_intelligence_path: Path | None = None,
@@ -717,6 +1011,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--auto-remediate-safe", action="store_true")
     parser.add_argument("--commit-safe-fixes", action="store_true")
     parser.add_argument("--check-intelligence-json", default="")
+    parser.add_argument("--remediation-plan-json", default="")
     parser.add_argument("--pr-quality-safe-bridge-only", action="store_true")
     parser.add_argument("--max-remediation-attempts", type=int, default=3)
     parser.add_argument("--remediation-cooldown-runs", type=int, default=2)
@@ -747,6 +1042,12 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
 
+    if str(args.remediation_plan_json).strip():
+        report["steps"]["remediation_plan_execution"] = _write_remediation_execution_from_plan(
+            out_dir,
+            Path(str(args.remediation_plan_json)),
+        )
+
     if bool(args.pr_quality_safe_bridge_only):
         report["mode"] = BRIDGE_ONLY_MODE
         bridge = report["steps"].get("pr_quality_safe_remediation_bridge", {})
@@ -764,6 +1065,8 @@ def main(argv: list[str] | None = None) -> int:
                     f"- mode: `{BRIDGE_ONLY_MODE}`",
                     f"- bridge attempted: `{bool(bridge.get('attempted', False))}`",
                     f"- bridge reason: `{bridge.get('reason', 'n/a')}`",
+                    f"- remediation execution attempted: `{bool(report['steps'].get('remediation_plan_execution', {}).get('attempted', False))}`",
+                    f"- remediation execution reason: `{report['steps'].get('remediation_plan_execution', {}).get('refused_reason', 'n/a')}`",
                 ]
             ).strip()
             + "\n",
