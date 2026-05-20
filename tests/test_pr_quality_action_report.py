@@ -1035,3 +1035,48 @@ def test_action_report_comment_renders_freshness_formatter_and_gate_fallout_deta
     assert "Formatter changed files: `src/sdetkit/example.py`" in body
     assert "Outside PR changed set: `templates/platform_problem/rich/problem.py`" in body
     assert "Gate fallout: possible changed-files base-resolution issue" in body
+
+
+def test_action_report_comment_renders_remediation_refresh_loop_summary() -> None:
+    from sdetkit.pr_quality_action_report import render_comment_body
+
+    action_report = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    check_intelligence = {
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {},
+        "remediation_refresh": {
+            "safe_fix_attempted": True,
+            "safe_fix_committed": True,
+            "safe_fix_pushed": True,
+            "safe_fix_commit_sha": "new123",
+            "previous_head_sha": "old111",
+            "refreshed_head_sha": "new123",
+            "proof_after_fix_started": True,
+            "proof_after_fix_passed": True,
+            "proof_after_fix_failed": False,
+            "remaining_failed_checks": [],
+            "remaining_review_first_blockers": [],
+            "merge_assessment": "green_after_safe_fix",
+        },
+    }
+
+    body = render_comment_body(
+        action_report=action_report,
+        check_intelligence=check_intelligence,
+    )
+
+    assert "Remediation refresh" in body
+    assert "Safe fix pushed to branch." in body
+    assert "Refreshed head SHA: `new123`" in body
+    assert "Proof after fix result: `passed`" in body
+    assert "Remaining blockers: none" in body
+    assert "Merge assessment: `green_after_safe_fix`" in body
