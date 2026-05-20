@@ -79,16 +79,14 @@ def _check_name(check: Mapping[str, Any]) -> str:
 
 def _failed_check_names(check_intelligence: Mapping[str, Any]) -> list[str]:
     names = [
-        _check_name(_as_dict(item))
-        for item in _as_list(check_intelligence.get("failed_checks"))
+        _check_name(_as_dict(item)) for item in _as_list(check_intelligence.get("failed_checks"))
     ]
     return sorted({name for name in names if name})
 
 
 def _queued_check_names(check_intelligence: Mapping[str, Any]) -> list[str]:
     names = [
-        _check_name(_as_dict(item))
-        for item in _as_list(check_intelligence.get("queued_checks"))
+        _check_name(_as_dict(item)) for item in _as_list(check_intelligence.get("queued_checks"))
     ]
     return sorted({name for name in names if name})
 
@@ -185,28 +183,37 @@ def build_remediation_refresh(
     safe_fix_attempted = _bool(outcome.get("attempted")) or _bool(outcome.get("safe_fix_attempted"))
     safe_fix_committed = _bool(outcome.get("committed")) or _bool(outcome.get("safe_fix_committed"))
     safe_fix_pushed = _bool(outcome.get("pushed")) or _bool(outcome.get("safe_fix_pushed"))
-    safe_fix_commit_sha = _first_head_sha(
-        outcome.get("commit_sha"),
-        outcome.get("safe_fix_commit_sha"),
-    ) or "none"
+    safe_fix_commit_sha = (
+        _first_head_sha(
+            outcome.get("commit_sha"),
+            outcome.get("safe_fix_commit_sha"),
+        )
+        or "none"
+    )
 
-    previous_head = _first_head_sha(
-        previous_head_sha,
-        outcome.get("previous_head_sha"),
-        outcome.get("head_sha"),
-        action_report.get("previous_head_sha"),
-        check_intelligence.get("previous_head_sha"),
-    ) or "unknown"
+    previous_head = (
+        _first_head_sha(
+            previous_head_sha,
+            outcome.get("previous_head_sha"),
+            outcome.get("head_sha"),
+            action_report.get("previous_head_sha"),
+            check_intelligence.get("previous_head_sha"),
+        )
+        or "unknown"
+    )
 
-    refreshed_head = _first_head_sha(
-        refreshed_head_sha,
-        check_intelligence.get("current_pr_head_sha"),
-        check_intelligence.get("pr_head_sha"),
-        action_report.get("current_pr_head_sha"),
-        action_report.get("refreshed_head_sha"),
-        outcome.get("refreshed_head_sha"),
-        safe_fix_commit_sha if safe_fix_commit_sha != "none" else "",
-    ) or "unknown"
+    refreshed_head = (
+        _first_head_sha(
+            refreshed_head_sha,
+            check_intelligence.get("current_pr_head_sha"),
+            check_intelligence.get("pr_head_sha"),
+            action_report.get("current_pr_head_sha"),
+            action_report.get("refreshed_head_sha"),
+            outcome.get("refreshed_head_sha"),
+            safe_fix_commit_sha if safe_fix_commit_sha != "none" else "",
+        )
+        or "unknown"
+    )
 
     remaining_failed_checks = _failed_check_names(check_intelligence)
     queued_checks = _queued_check_names(check_intelligence)
@@ -256,7 +263,9 @@ def build_remediation_refresh(
 
 
 def render_markdown(payload: Mapping[str, Any]) -> str:
-    failed = [_string(item) for item in _as_list(payload.get("remaining_failed_checks")) if _string(item)]
+    failed = [
+        _string(item) for item in _as_list(payload.get("remaining_failed_checks")) if _string(item)
+    ]
     blockers = [
         _string(item)
         for item in _as_list(payload.get("remaining_review_first_blockers"))
@@ -318,16 +327,16 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         payload = build_remediation_refresh(
-            action_report=_read_json(Path(args.action_report_json)) if args.action_report_json else {},
+            action_report=_read_json(Path(args.action_report_json))
+            if args.action_report_json
+            else {},
             check_intelligence=(
                 _read_json(Path(args.check_intelligence_json))
                 if args.check_intelligence_json
                 else {}
             ),
             safe_fix_outcome=(
-                _read_json(Path(args.safe_fix_outcome_json))
-                if args.safe_fix_outcome_json
-                else {}
+                _read_json(Path(args.safe_fix_outcome_json)) if args.safe_fix_outcome_json else {}
             ),
             previous_head_sha=args.previous_head_sha,
             refreshed_head_sha=args.refreshed_head_sha,
