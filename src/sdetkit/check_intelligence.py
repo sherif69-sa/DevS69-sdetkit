@@ -15,6 +15,64 @@ ACTION_REPORT_SCHEMA_VERSION = "sdetkit.pr_quality.action_report.v1"
 
 JsonObject = dict[str, Any]
 
+DEPENDENCY_AUDIT_VULNERABILITY = "DEPENDENCY_AUDIT_VULNERABILITY"
+DEPENDENCY_AUDIT_OWNER_FILES = [
+    "requirements-test.txt",
+    "requirements-docs.txt",
+    "requirements.txt",
+    "constraints-ci.txt",
+    "pyproject.toml",
+    ".github/workflows/",
+    ".github/scripts/check_pip_audit_baseline.py",
+]
+
+
+def _extract_dependency_audit_evidence(log_text: str) -> JsonObject:
+    import re
+
+    command = ""
+    report_path = ""
+    artifact_url = ""
+    ignored: list[str] = []
+    vulnerability_count = 0
+    package_count = 0
+
+    for raw_line in log_text.splitlines():
+        line = raw_line.strip()
+        if "pip-audit " in line and not command:
+            command = line
+            ignored = re.findall(r"--ignore-vuln\s+([A-Za-z0-9_.:-]+)", line)
+            report_match = re.search(r"(?:-o|--output)\s+(\S+)", line)
+            if report_match:
+                report_path = report_match.group(1)
+
+        if "path:" in line and "pip-audit-report" in line and not report_path:
+            report_path = line.split("path:", 1)[1].strip()
+
+        if "Artifact download URL:" in line and "artifact" in line.lower():
+            artifact_url = line.split("Artifact download URL:", 1)[1].strip()
+
+        summary_match = re.search(
+            r"Found\s+(\d+)\s+known\s+vulnerabilit(?:y|ies)\s+in\s+(\d+)\s+package",
+            line,
+            flags=re.IGNORECASE,
+        )
+        if summary_match:
+            vulnerability_count = int(summary_match.group(1))
+            package_count = int(summary_match.group(2))
+
+    if not vulnerability_count:
+        return {}
+
+    return {
+        "vulnerability_count": vulnerability_count,
+        "package_count": package_count,
+        "command": command,
+        "report_path": report_path,
+        "artifact_url": artifact_url,
+        "ignored_vulnerabilities": ignored,
+    }
+
 
 _FAILURE_CONCLUSIONS = {
     "action_required",
@@ -261,6 +319,7 @@ _EXACT_FAILURE_PATTERNS = (
     "modulenotfounderror",
     "importerror",
     "process completed with exit code",
+    "known vulnerability",
     "no tests ran",
     "found 1 error",
     "found ",
@@ -431,6 +490,8 @@ def _possible_changed_files_gate_fallout(record: JsonObject, log_text: str) -> b
 
 def _failure_tool_for_line(line: str) -> str:
     lowered = line.lower()
+    if "known vulnerabilit" in lowered and "package" in lowered:
+        return "pip-audit"
     if "ruff" in lowered:
         return "ruff"
     if "mypy" in lowered or "type" in lowered:
@@ -448,6 +509,8 @@ def _failure_tool_for_line(line: str) -> str:
 
 def _failure_kind_for_line(line: str) -> str:
     lowered = line.lower()
+    if "known vulnerabilit" in lowered and "package" in lowered:
+        return "dependency_vulnerability"
     if (
         "ruff format" in lowered
         or "ruff-format" in lowered
@@ -516,11 +579,34 @@ def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
     return {}
 
 
+def _dependency_audit_first_failure(log_text: str) -> JsonObject:
+    import re
+
+    for index, raw_line in enumerate(log_text.splitlines(), 1):
+        line = raw_line.strip()
+        if re.search(
+            r"Found\s+\d+\s+known\s+vulnerabilit(?:y|ies)\s+in\s+\d+\s+package",
+            line,
+            flags=re.IGNORECASE,
+        ):
+            return {
+                "line_number": index,
+                "line": line,
+                "tool": "pip-audit",
+                "kind": "dependency_vulnerability",
+                "context": [{"line_number": index, "text": raw_line.rstrip()}],
+            }
+    return {}
+
+
 def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) -> JsonObject:
     name = _check_name(record, index)
     log_text = _record_log_text(record, logs_dir, name)
     focused_log_text = _failure_focused_log_text(log_text)
     first_failure = _first_failure_summary(log_text)
+    dependency_audit = _extract_dependency_audit_evidence(log_text)
+    if dependency_audit:
+        first_failure = _dependency_audit_first_failure(log_text) or first_failure
     diagnostic_text = "\n".join(
         part
         for part in [
@@ -538,6 +624,25 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
     ]
 
     primary = diagnoses[0] if diagnoses else {}
+    if dependency_audit:
+        primary = {
+            "code": DEPENDENCY_AUDIT_VULNERABILITY,
+            "title": "Dependency audit reported vulnerable packages",
+            "diagnosis": (
+                f"pip-audit reported {dependency_audit.get('vulnerability_count')} "
+                f"known vulnerabilit"
+                f"{'y' if dependency_audit.get('vulnerability_count') == 1 else 'ies'} "
+                f"in {dependency_audit.get('package_count')} package"
+                f"{'' if dependency_audit.get('package_count') == 1 else 's'}."
+            ),
+            "recommended_fix": [
+                "Review pip-audit-report.json for package/advisory/fixed-version details.",
+                "Create a dependency-only PR if the finding is not baseline-approved.",
+            ],
+            "proof_commands": [
+                "python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .",
+            ],
+        }
     safe_remediation = safe_remediation_eligibility.classify_check_failure(
         name=name,
         diagnosis=primary,
@@ -570,6 +675,12 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
         "diagnoses": diagnoses,
         "diagnosis_status": diagnosis.get("status", "unknown"),
         "safe_to_auto_fix": bool(safe_remediation.get("safe_to_auto_fix", False)),
+        "review_first": bool(dependency_audit),
+        "surface": "dependency" if dependency_audit else _surface_for_diagnosis(primary),
+        "code": _string(primary.get("code")).upper(),
+        "title": _string(primary.get("title")),
+        "dependency_audit": dependency_audit,
+        "owner_files": DEPENDENCY_AUDIT_OWNER_FILES if dependency_audit else [],
     }
 
 
@@ -909,6 +1020,9 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 ),
                 "safe_remediation": check.get("safe_remediation", {}),
                 "safe_to_auto_fix": check.get("safe_to_auto_fix", False),
+                "review_first": bool(check.get("review_first", False)),
+                "dependency_audit": check.get("dependency_audit", {}),
+                "owner_files": check.get("owner_files", []),
             },
             "automation": {
                 "attempted": False,

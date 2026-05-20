@@ -305,6 +305,9 @@ def _primary_blocker_lines(primary: JsonObject) -> list[str]:
             "- Formatter changed files: " + ", ".join(f"`{path}`" for path in formatter_files[:8])
         )
 
+    if bool(primary.get("review_first", False)):
+        lines.append("- Review first: `true`")
+
     if bool(primary.get("stale_evidence", False)):
         head_sha = _string(primary.get("head_sha") or "unknown")
         current_sha = _string(primary.get("current_pr_head_sha") or "unknown")
@@ -321,9 +324,47 @@ def _primary_blocker_lines(primary: JsonObject) -> list[str]:
     if bool(primary.get("possible_changed_files_gate_fallout", False)):
         lines.append("- Gate fallout: possible changed-files base-resolution issue")
 
+    lines.extend(_dependency_audit_lines(primary))
+
     impact = _string(primary.get("impact"))
     if impact:
         lines.append(f"- Impact: {impact}")
+
+    return lines
+
+
+def _dependency_audit_lines(primary: JsonObject) -> list[str]:
+    audit = _as_dict(primary.get("dependency_audit"))
+    if not audit:
+        return []
+
+    lines = ["", "Dependency audit evidence"]
+    vulnerability_count = _int(audit.get("vulnerability_count"))
+    package_count = _int(audit.get("package_count"))
+    if vulnerability_count or package_count:
+        lines.append(f"- Vulnerabilities: {vulnerability_count}")
+        lines.append(f"- Packages: {package_count}")
+
+    command = _string(audit.get("command"))
+    if command:
+        lines.append(f"- Command: `{command}`")
+
+    report_path = _string(audit.get("report_path"))
+    if report_path:
+        lines.append(f"- Report: `{report_path}`")
+
+    artifact_url = _string(audit.get("artifact_url"))
+    if artifact_url:
+        lines.append(f"- Artifact: {artifact_url}")
+
+    ignored = [str(item) for item in _as_list(audit.get("ignored_vulnerabilities"))]
+    if ignored:
+        lines.append(f"- Ignored vulnerabilities: {', '.join(ignored)}")
+
+    owner_files = [str(item) for item in _as_list(primary.get("owner_files"))]
+    if owner_files:
+        lines.append("- Owner files:")
+        lines.extend(f"  - `{item}`" for item in owner_files)
 
     return lines
 
