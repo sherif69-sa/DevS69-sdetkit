@@ -289,10 +289,18 @@ _SETUP_NOISE_CONTAINS = (
     "pytest_addopts:",
     "##[group]",
     "##[endgroup]",
+    "using cached ",
     "collecting ",
+    "downloading ",
     "installing ",
+    "installing collected packages",
     "successfully installed",
     "requirement already satisfied",
+    "preparing metadata",
+    "building wheel",
+    "stored in directory",
+    "resolved ",
+    "looking in indexes",
 )
 
 
