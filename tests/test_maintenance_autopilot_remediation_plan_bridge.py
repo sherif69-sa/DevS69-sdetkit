@@ -48,7 +48,9 @@ def _formatting_plan(path: Path, *, affected_files: list[str] | None = None) -> 
     )
 
 
-def test_autopilot_executes_approved_formatting_remediation_plan(tmp_path: Path, monkeypatch) -> None:
+def test_autopilot_executes_approved_formatting_remediation_plan(
+    tmp_path: Path, monkeypatch
+) -> None:
     autopilot = _load_autopilot()
     remediation_plan = _formatting_plan(tmp_path / "remediation-plan.json")
     captured: dict[str, dict] = {}
@@ -159,7 +161,9 @@ def test_autopilot_refuses_unsafe_remediation_plan_files(tmp_path: Path, monkeyp
     assert "unsafe affected files" in result["refused_reason"]
 
 
-def test_autopilot_refuses_non_allowlisted_remediation_strategy(tmp_path: Path, monkeypatch) -> None:
+def test_autopilot_refuses_non_allowlisted_remediation_strategy(
+    tmp_path: Path, monkeypatch
+) -> None:
     autopilot = _load_autopilot()
     remediation_plan = _write_json(
         tmp_path / "remediation-plan.json",
@@ -191,7 +195,9 @@ def test_autopilot_refuses_non_allowlisted_remediation_strategy(tmp_path: Path, 
     assert "not allowlisted" in result["refused_reason"]
 
 
-def test_autopilot_remediation_plan_bridge_only_mode_skips_baseline(tmp_path: Path, monkeypatch) -> None:
+def test_autopilot_remediation_plan_bridge_only_mode_skips_baseline(
+    tmp_path: Path, monkeypatch
+) -> None:
     autopilot = _load_autopilot()
     remediation_plan = _formatting_plan(tmp_path / "remediation-plan.json")
 
