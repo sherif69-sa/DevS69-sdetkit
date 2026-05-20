@@ -253,3 +253,79 @@ def test_check_intelligence_marks_changed_files_gate_fallout(tmp_path: Path) -> 
 
     assert failed["possible_changed_files_gate_fallout"] is True
     assert failed["outside_changed_files"] == ["templates/platform_problem/rich/problem.py"]
+
+
+def test_check_intelligence_skips_pip_cache_install_noise_before_real_failure(
+    tmp_path: Path,
+) -> None:
+    from sdetkit.check_intelligence import build_check_intelligence
+
+    checks = tmp_path / "checks.json"
+    _write_json(
+        checks,
+        {
+            "check_runs": [
+                {
+                    "name": "Fast CI lane (py3.11)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "log": "\n".join(
+                        [
+                            "Using cached pytest-9.0.3-py3-none-any.whl.metadata (7.6 kB)",
+                            "Collecting pluggy<2,>=1.5",
+                            "Downloading pluggy-1.6.0-py3-none-any.whl",
+                            "Installing collected packages: pluggy, pytest",
+                            "Successfully installed pluggy-1.6.0 pytest-9.0.3",
+                            "FAILED tests/test_real_contract.py::test_real_contract - AssertionError: expected ready",
+                        ]
+                    ),
+                }
+            ]
+        },
+    )
+
+    intelligence = build_check_intelligence(checks_json=checks)
+    first_failure = intelligence["failed_checks"][0]["first_failure"]
+
+    assert first_failure["line"] == (
+        "FAILED tests/test_real_contract.py::test_real_contract - AssertionError: expected ready"
+    )
+    assert "Using cached pytest" not in first_failure["line"]
+
+
+def test_check_intelligence_skips_build_metadata_noise_before_real_mypy_failure(
+    tmp_path: Path,
+) -> None:
+    from sdetkit.check_intelligence import build_check_intelligence
+
+    checks = tmp_path / "checks.json"
+    _write_json(
+        checks,
+        {
+            "check_runs": [
+                {
+                    "name": "Fast CI lane (py3.12)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "log": "\n".join(
+                        [
+                            "Preparing metadata (pyproject.toml): started",
+                            "Preparing metadata (pyproject.toml): finished with status 'done'",
+                            "Building wheel for package (pyproject.toml): started",
+                            "Stored in directory: /tmp/pip-ephem-wheel-cache",
+                            "src/sdetkit/example.py:12: error: Incompatible return value type",
+                        ]
+                    ),
+                }
+            ]
+        },
+    )
+
+    intelligence = build_check_intelligence(checks_json=checks)
+    first_failure = intelligence["failed_checks"][0]["first_failure"]
+
+    assert (
+        first_failure["line"] == "src/sdetkit/example.py:12: error: Incompatible return value type"
+    )
+    assert first_failure["tool"] == "mypy"
+    assert first_failure["kind"] == "type_contract"
