@@ -273,6 +273,154 @@ _EXACT_FAILURE_PATTERNS = (
 _FAILURE_LINE_PATTERNS = _EXACT_FAILURE_PATTERNS
 
 
+_SETUP_NOISE_PREFIXES = (
+    "shell:",
+    "env:",
+    "pythonlocation",
+    "python_root_dir",
+    "python2_root_dir",
+    "python3_root_dir",
+    "pkg_config_path",
+    "ld_library_path",
+    "github_token",
+)
+
+_SETUP_NOISE_CONTAINS = (
+    "pytest_addopts:",
+    "##[group]",
+    "##[endgroup]",
+    "collecting ",
+    "installing ",
+    "successfully installed",
+    "requirement already satisfied",
+)
+
+
+def _is_setup_noise_line(line: str) -> bool:
+    lowered = line.strip().lower()
+    if not lowered:
+        return True
+    return lowered.startswith(_SETUP_NOISE_PREFIXES) or any(
+        token in lowered for token in _SETUP_NOISE_CONTAINS
+    )
+
+
+def _record_head_sha(record: JsonObject) -> str:
+    for key in ("headSha", "head_sha", "headRefOid", "head_ref_oid", "head_oid"):
+        value = _string(record.get(key))
+        if value:
+            return value
+
+    check_suite = _as_dict(record.get("check_suite") or record.get("checkSuite"))
+    for key in ("head_sha", "headSha"):
+        value = _string(check_suite.get(key))
+        if value:
+            return value
+
+    return ""
+
+
+def _record_current_pr_head_sha(record: JsonObject) -> str:
+    for key in ("current_pr_head_sha", "pr_head_sha", "currentHeadSha", "current_head_sha"):
+        value = _string(record.get(key))
+        if value:
+            return value
+
+    pull_request = _as_dict(record.get("pull_request") or record.get("pullRequest"))
+    head = _as_dict(pull_request.get("head"))
+    return _string(head.get("sha"))
+
+
+def _check_head_sha(check: JsonObject) -> str:
+    return _string(check.get("head_sha") or check.get("headSha"))
+
+
+def _check_current_pr_head_sha(check: JsonObject, fallback: str = "") -> str:
+    return _string(
+        check.get("current_pr_head_sha")
+        or check.get("pr_head_sha")
+        or check.get("currentHeadSha")
+        or fallback
+    )
+
+
+def _is_stale_check_evidence(check: JsonObject, *, current_pr_head_sha: str = "") -> bool:
+    if bool(check.get("stale_evidence") or check.get("stale")):
+        return True
+
+    head_sha = _check_head_sha(check)
+    expected_sha = _check_current_pr_head_sha(check, current_pr_head_sha)
+    return bool(head_sha and expected_sha and head_sha != expected_sha)
+
+
+def _path_like_tokens(text: str) -> list[str]:
+    import re as _re
+
+    paths = []
+    for raw in _re.findall(r"(?:src|tests|tools|docs|templates|\.github)/[A-Za-z0-9_./-]+", text):
+        token = raw.strip("`'\"()[]{}:,;")
+        if token:
+            paths.append(token)
+    return sorted(set(paths))
+
+
+def _formatter_changed_files(log_text: str) -> list[str]:
+    files: list[str] = []
+    for line in log_text.splitlines():
+        lowered = line.lower()
+        if (
+            "would reformat" in lowered
+            or "reformatted" in lowered
+            or "files were modified by this hook" in lowered
+        ):
+            files.extend(_path_like_tokens(line))
+
+    if files:
+        return sorted(set(files))
+
+    if "ruff format" not in log_text.lower() and "pre-commit" not in log_text.lower():
+        return []
+
+    return _path_like_tokens(log_text)
+
+
+def _referenced_failure_files(log_text: str) -> list[str]:
+    return _path_like_tokens(log_text)
+
+
+def _changed_files_from_record(record: JsonObject) -> list[str]:
+    files: list[str] = []
+    for key in (
+        "changed_files",
+        "pr_changed_files",
+        "affected_files",
+        "owner_files",
+        "files",
+    ):
+        for item in _as_list(record.get(key)):
+            value = _string(item)
+            if value:
+                files.append(value)
+    return sorted(set(files))
+
+
+def _outside_changed_files(record: JsonObject, log_text: str) -> list[str]:
+    changed = set(_changed_files_from_record(record))
+    if not changed:
+        return []
+
+    referenced = set(_referenced_failure_files(log_text))
+    return sorted(path for path in referenced if path not in changed)
+
+
+def _possible_changed_files_gate_fallout(record: JsonObject, log_text: str) -> bool:
+    lowered = log_text.lower()
+    outside = _outside_changed_files(record, log_text)
+    if outside:
+        return True
+    return "fatal: bad object" in lowered and "templates/platform_problem" in lowered
+
+
 def _failure_tool_for_line(line: str) -> str:
     lowered = line.lower()
     if "ruff" in lowered:
@@ -322,7 +470,7 @@ def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
     for index, line in enumerate(lines):
         stripped = line.strip()
         lowered = stripped.lower()
-        if not stripped:
+        if not stripped or _is_setup_noise_line(stripped):
             continue
         if not any(pattern in lowered for pattern in _EXACT_FAILURE_PATTERNS):
             continue
@@ -330,7 +478,11 @@ def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
         if lowered.startswith("run ") and index + 1 < len(lines):
             next_line = lines[index + 1].strip()
             next_lowered = next_line.lower()
-            if next_line and any(pattern in next_lowered for pattern in _EXACT_FAILURE_PATTERNS):
+            if (
+                next_line
+                and not _is_setup_noise_line(next_line)
+                and any(pattern in next_lowered for pattern in _EXACT_FAILURE_PATTERNS)
+            ):
                 stripped = next_line
                 lowered = next_lowered
                 index = index + 1
@@ -384,14 +536,27 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
         first_failure=first_failure,
         log_text=log_text,
     )
+    head_sha = _record_head_sha(record)
+    current_pr_head_sha = _record_current_pr_head_sha(record)
+    stale_evidence = bool(head_sha and current_pr_head_sha and head_sha != current_pr_head_sha)
     return {
         "name": name,
         "status": _check_status(record),
         "conclusion": _check_conclusion(record),
         "url": _record_url(record),
+        "head_sha": head_sha,
+        "current_pr_head_sha": current_pr_head_sha,
+        "stale_evidence": stale_evidence,
         "log_collected": bool(log_text.strip()),
         "first_failure": first_failure,
         "first_failure_line": _string(first_failure.get("line")),
+        "formatter_changed_files": _formatter_changed_files(log_text),
+        "referenced_files": _referenced_failure_files(log_text),
+        "outside_changed_files": _outside_changed_files(record, log_text),
+        "possible_changed_files_gate_fallout": _possible_changed_files_gate_fallout(
+            record,
+            log_text,
+        ),
         "safe_remediation": safe_remediation,
         "diagnosis": primary,
         "diagnoses": diagnoses,
@@ -539,10 +704,25 @@ def _primary_failed_check(intelligence: JsonObject) -> JsonObject:
     if not failed:
         return {}
 
-    def score(check: JsonObject) -> tuple[int, int]:
+    current_pr_head_sha = _string(
+        intelligence.get("current_pr_head_sha") or intelligence.get("pr_head_sha")
+    )
+
+    def score(check: JsonObject) -> tuple[int, int, int, int]:
         diagnosis = _as_dict(check.get("diagnosis"))
         safe = 1 if bool(check.get("safe_to_auto_fix", False)) else 0
         unsafe_priority = 0 if safe else 1
+        stale_priority = (
+            0
+            if _is_stale_check_evidence(
+                check,
+                current_pr_head_sha=current_pr_head_sha,
+            )
+            else 1
+        )
+        actionable_priority = (
+            0 if bool(check.get("possible_changed_files_gate_fallout", False)) else 1
+        )
         surface_priority = {
             "security": 100,
             "dependency": 95,
@@ -555,7 +735,12 @@ def _primary_failed_check(intelligence: JsonObject) -> JsonObject:
             "unknown": 0,
         }
         surface = _surface_for_diagnosis(diagnosis)
-        return (unsafe_priority, surface_priority.get(surface, 0))
+        return (
+            stale_priority,
+            actionable_priority,
+            unsafe_priority,
+            surface_priority.get(surface, 0),
+        )
 
     return max(failed, key=score)
 
@@ -704,6 +889,16 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 "url": check.get("url", ""),
                 "first_failure": check.get("first_failure", {}),
                 "first_failure_line": check.get("first_failure_line", ""),
+                "head_sha": check.get("head_sha", ""),
+                "current_pr_head_sha": check.get("current_pr_head_sha", ""),
+                "stale_evidence": check.get("stale_evidence", False),
+                "formatter_changed_files": check.get("formatter_changed_files", []),
+                "referenced_files": check.get("referenced_files", []),
+                "outside_changed_files": check.get("outside_changed_files", []),
+                "possible_changed_files_gate_fallout": check.get(
+                    "possible_changed_files_gate_fallout",
+                    False,
+                ),
                 "safe_remediation": check.get("safe_remediation", {}),
                 "safe_to_auto_fix": check.get("safe_to_auto_fix", False),
             },
