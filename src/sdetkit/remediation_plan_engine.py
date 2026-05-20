@@ -266,9 +266,7 @@ def plan_from_diagnosis(diagnosis: Mapping[str, Any]) -> dict[str, Any]:
     proof_commands = _string_list(diagnosis.get(PROOF_COMMANDS))
     executable = _is_formatting_executable(diagnosis)
     strategy = (
-        _strategy_for_executable_formatting(diagnosis)
-        if executable
-        else _review_strategy(surface)
+        _strategy_for_executable_formatting(diagnosis) if executable else _review_strategy(surface)
     )
 
     commands_to_run = _commands_for_strategy(strategy, proof_commands) if executable else []
@@ -407,7 +405,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     if args.format == "json":
-        print(json.dumps({"artifacts": artifacts, "summary": payload["summary"]}, indent=2, sort_keys=True))
+        print(
+            json.dumps(
+                {"artifacts": artifacts, "summary": payload["summary"]}, indent=2, sort_keys=True
+            )
+        )
     else:
         for key, value in artifacts.items():
             print(f"{key}: {value}")
