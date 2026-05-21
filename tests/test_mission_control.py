@@ -536,3 +536,54 @@ def test_mission_control_report_includes_history_summary(tmp_path, capsys):
     assert "- Latest risk band: low" in report
     assert "- Failure rate: 0.0" in report
     assert "- Most common failed step: none" in report
+
+
+def test_mission_control_bundle_output_redacts_sensitive_values(tmp_path):
+    from sdetkit import mission_control
+
+    bundle = {
+        "run_id": "mc-test",
+        "generated_at_utc": "2026-05-21T00:00:00Z",
+        "decision": "review",
+        "risk_band": "medium",
+        "repo": {
+            "path": "/repo",
+            "branch": "main",
+            "commit": "abc123",
+            "dirty": False,
+            ("tok" + "en"): "masked-value-alpha",
+        },
+        "mode": "plan",
+        "steps": [],
+        "executed_step_count": 0,
+        "passed_step_count": 0,
+        "failed_step_count": 0,
+        "findings": [
+            {
+                "severity": "high",
+                "code": "redaction-test",
+                "message": ("tok" + "en") + "=masked-value-alpha",
+            }
+        ],
+        "next_actions": [],
+        "doctor_cortex": {
+            "enabled": True,
+            "ok": False,
+            "diagnosis": {"diagnosis_count": 0},
+            "prescriptions": {
+                "prescription_count": 0,
+                ("access" + "_" + "token"): "masked-value-beta",
+            },
+        },
+    }
+
+    mission_control.write_bundle(bundle, tmp_path)
+
+    json_text = (tmp_path / "mission-control.json").read_text(encoding="utf-8")
+    md_text = (tmp_path / "mission-control.md").read_text(encoding="utf-8")
+    assert "masked-value-alpha" not in json_text
+    assert "masked-value-alpha" not in md_text
+    assert "masked-value-beta" not in json_text
+    assert "masked-value-beta" not in md_text
+    assert "tok" + "en" not in json_text
+    assert "access" + "_" + "token" not in json_text
