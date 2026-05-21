@@ -1166,3 +1166,39 @@ def test_pr_quality_action_report_renders_dependency_audit_evidence() -> None:
     assert "requirements-test.txt" in body
     assert "constraints-ci.txt" in body
     assert "review_first" in body or "Review first" in body
+
+
+def test_action_report_comment_shows_code_scanning_freshness_counts() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+        "code_scanning_review": {
+            "collected": True,
+            "open_alerts": 3,
+            "current_alerts": 1,
+            "stale_alerts": 2,
+            "unknown_freshness_alerts": 0,
+        },
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative={"quality": {"ok": True, "coverage_percent": "96.69%"}},
+    )
+
+    assert "Code scanning review collected: `true`" in body
+    assert "Open code scanning alerts: `3`" in body
+    assert "Current code scanning alerts: `1`" in body
+    assert "Stale code scanning alerts: `2`" in body
