@@ -365,3 +365,65 @@ def test_check_intelligence_does_not_synthesize_required_context_when_reported(
     assert intelligence["queued_checks"] == []
     assert report["status"] == "green"
     assert report["primary_blocker"] == {}
+
+
+def test_check_intelligence_codeql_failure_gets_security_review_actions(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "CodeQL",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "url": "https://example.test/check-runs/codeql",
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    report = check_intelligence.build_action_report(intelligence)
+
+    failed = intelligence["failed_checks"][0]
+    assert failed["diagnosis"]["code"] == "CODEQL_SECURITY_REVIEW_REQUIRED"
+    assert failed["surface"] == "security"
+
+    assert report["status"] == "review_required"
+    assert report["primary_blocker"]["surface"] == "security"
+    assert report["primary_blocker"]["code"] == "CODEQL_SECURITY_REVIEW_REQUIRED"
+    assert "GitHub Advanced Security" in " ".join(report["recommended_actions"])
+    assert "sdetkit security check" in " ".join(report["proof_commands"])
+
+
+def test_check_intelligence_validate_failure_gets_log_review_actions(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Validate (ubuntu-latest / py3.12)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "url": "https://example.test/check-runs/validate",
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    report = check_intelligence.build_action_report(intelligence)
+
+    failed = intelligence["failed_checks"][0]
+    assert failed["diagnosis"]["code"] == "VALIDATE_JOB_LOG_REVIEW"
+    assert failed["surface"] == "workflow"
+
+    assert report["status"] == "review_required"
+    assert report["primary_blocker"]["surface"] == "workflow"
+    assert report["primary_blocker"]["code"] == "VALIDATE_JOB_LOG_REVIEW"
+    assert "first non-setup failure line" in " ".join(report["recommended_actions"])
+    assert "python -m pre_commit run -a" in report["proof_commands"]
