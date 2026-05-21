@@ -283,14 +283,14 @@ def write_output(payload: dict[str, Any], out_path: Path | None, *, output_forma
         # Public projection only: no raw doctor evidence, raw fix text, command
         # lists, ledger paths, artifact paths, run ids, timestamps, or samples
         # are emitted.
-        sys.stdout.write(rendered)  # codeql[py/clear-text-logging-sensitive-data]
+        sys.stdout.write(rendered)  # lgtm[py/clear-text-logging-sensitive-data]
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     # Public projection only: no raw doctor evidence, raw fix text, command
     # lists, ledger paths, artifact paths, run ids, timestamps, or samples are
     # emitted.
-    out_path.write_text(rendered, encoding="utf-8")  # codeql[py/clear-text-storage-sensitive-data]
+    out_path.write_text(rendered, encoding="utf-8")  # lgtm[py/clear-text-storage-sensitive-data]
 
 
 def build_parser() -> argparse.ArgumentParser:

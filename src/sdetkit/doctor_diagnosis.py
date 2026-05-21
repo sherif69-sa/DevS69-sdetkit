@@ -474,7 +474,7 @@ def write_output(contract: dict[str, Any], out_path: Path | None, *, output_form
         # The CLI emits only the public-safe diagnosis projection built by
         # _public_contract_for_output: raw doctor evidence, raw fix text,
         # command lists, nested prescriptions, and source paths are omitted.
-        sys.stdout.write(rendered_contract)  # codeql[py/clear-text-logging-sensitive-data]
+        sys.stdout.write(rendered_contract)  # lgtm[py/clear-text-logging-sensitive-data]
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -483,7 +483,7 @@ def write_output(contract: dict[str, Any], out_path: Path | None, *, output_form
     # metadata, and no raw doctor evidence or fix text.
     out_path.write_text(
         rendered_contract, encoding="utf-8"
-    )  # codeql[py/clear-text-storage-sensitive-data]
+    )  # lgtm[py/clear-text-storage-sensitive-data]
 
 
 def build_parser() -> argparse.ArgumentParser:

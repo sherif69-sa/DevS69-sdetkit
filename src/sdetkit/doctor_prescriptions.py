@@ -379,7 +379,7 @@ def write_output(contract: dict[str, Any], out_path: Path | None, *, output_form
         # Doctor prescriptions stdout is a summary-only public projection:
         # no diagnosis evidence, no fix text, no prescription list, no source
         # paths, and no input command lists are emitted.
-        sys.stdout.write(rendered_contract)  # codeql[py/clear-text-logging-sensitive-data]
+        sys.stdout.write(rendered_contract)  # lgtm[py/clear-text-logging-sensitive-data]
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -387,7 +387,7 @@ def write_output(contract: dict[str, Any], out_path: Path | None, *, output_form
     # projection used for stdout.
     out_path.write_text(
         rendered_contract, encoding="utf-8"
-    )  # codeql[py/clear-text-storage-sensitive-data]
+    )  # lgtm[py/clear-text-storage-sensitive-data]
 
 
 def build_parser() -> argparse.ArgumentParser:
