@@ -67,7 +67,9 @@ def _diagnoses_by_id(diagnostic_vector: Mapping[str, Any]) -> dict[str, JsonObje
     return diagnoses
 
 
-def _plans(remediation_plan: Mapping[str, Any], diagnoses: Mapping[str, JsonObject]) -> list[JsonObject]:
+def _plans(
+    remediation_plan: Mapping[str, Any], diagnoses: Mapping[str, JsonObject]
+) -> list[JsonObject]:
     plan_rows = [_as_dict(item) for item in _as_list(remediation_plan.get("plans"))]
     if plan_rows:
         return [row for row in plan_rows if row]
@@ -213,7 +215,9 @@ def build_trajectory_records(
                 },
                 "fix": {
                     "allowed_strategy": action,
-                    "patch_files": _string_list(plan.get("affected_files")) if auto_fix_allowed else [],
+                    "patch_files": _string_list(plan.get("affected_files"))
+                    if auto_fix_allowed
+                    else [],
                     "blocked_reason": _string(plan.get("blocked_reason")),
                 },
                 "proof": {
