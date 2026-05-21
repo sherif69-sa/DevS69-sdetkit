@@ -36,6 +36,27 @@ def _read_json(path: Path | None) -> JsonObject:
     return _as_dict(payload)
 
 
+def _read_jsonl(path: Path | None) -> list[JsonObject]:
+    if path is None or not path.exists():
+        return []
+
+    records: list[JsonObject] = []
+    for line_number, raw_line in enumerate(
+        path.read_text(encoding="utf-8").splitlines(),
+        start=1,
+    ):
+        line = raw_line.strip()
+        if not line:
+            continue
+        payload = json.loads(line)
+        if not isinstance(payload, dict):
+            msg = f"expected JSON object on line {line_number} in {path}"
+            raise ValueError(msg)
+        records.append(payload)
+
+    return records
+
+
 def _string(value: Any) -> str:
     return str(value or "").strip()
 
@@ -409,6 +430,65 @@ def _command_lines(values: list[Any]) -> list[str]:
     return [f"- `{item}`" for item in items] or ["- none"]
 
 
+def _trajectory_summary(records: list[JsonObject] | None) -> JsonObject:
+    rows = [_as_dict(item) for item in records or [] if _as_dict(item)]
+    return {
+        "record_count": len(rows),
+        "review_first_count": sum(
+            1 for row in rows if _as_dict(row.get("decision")).get("review_first") is True
+        ),
+        "auto_fix_allowed_count": sum(
+            1 for row in rows if _as_dict(row.get("decision")).get("auto_fix_allowed") is True
+        ),
+    }
+
+
+def _trajectory_lines(records: list[JsonObject] | None) -> list[str]:
+    rows = [_as_dict(item) for item in records or [] if _as_dict(item)]
+    summary = _trajectory_summary(rows)
+    if not summary["record_count"]:
+        return []
+
+    final_result_counts: dict[str, int] = {}
+    for row in rows:
+        final_result = _string(row.get("final_result") or "unknown")
+        final_result_counts[final_result] = final_result_counts.get(final_result, 0) + 1
+
+    lines = [
+        f"- Records: `{summary['record_count']}`",
+        f"- Review-first decisions: `{summary['review_first_count']}`",
+        f"- Auto-fix allowed decisions: `{summary['auto_fix_allowed_count']}`",
+    ]
+
+    if final_result_counts:
+        rendered_counts = ", ".join(
+            f"`{name}`={count}" for name, count in sorted(final_result_counts.items())
+        )
+        lines.append(f"- Final results: {rendered_counts}")
+
+    lines.append("- Decisions:")
+    for row in rows[:5]:
+        decision = _as_dict(row.get("decision"))
+        diagnosis = _as_dict(row.get("diagnosis"))
+        diagnostic_id = _string(row.get("diagnostic_id") or row.get("diagnosis_id") or "unknown")
+        action = _string(row.get("action") or "unknown")
+        failure_class = _string(diagnosis.get("failure_class") or "unknown")
+        final_result = _string(row.get("final_result") or "unknown")
+        review_first = str(bool(decision.get("review_first", False))).lower()
+        auto_fix_allowed = str(bool(decision.get("auto_fix_allowed", False))).lower()
+        lines.append(
+            f"  - `{diagnostic_id}`: action=`{action}`, "
+            f"class=`{failure_class}`, review_first=`{review_first}`, "
+            f"auto_fix_allowed=`{auto_fix_allowed}`, result=`{final_result}`"
+        )
+
+    remaining = len(rows) - 5
+    if remaining > 0:
+        lines.append(f"  - ... `{remaining}` more")
+
+    return lines
+
+
 def _required_count(items: list[Any]) -> int:
     return sum(1 for item in items if bool(_as_dict(item).get("required", False)))
 
@@ -610,9 +690,11 @@ def render_comment_body(
     check_intelligence: JsonObject,
     evidence_narrative: JsonObject | None = None,
     safe_fix_outcome: JsonObject | None = None,
+    trajectory_records: list[JsonObject] | None = None,
 ) -> str:
     evidence_narrative = evidence_narrative or {}
     safe_fix_outcome = safe_fix_outcome or _as_dict(check_intelligence.get("safe_fix_outcome"))
+    trajectory_records = trajectory_records or []
     remediation_refresh = _as_dict(check_intelligence.get("remediation_refresh"))
     status = _string(action_report.get("status") or "unknown")
     evidence_signal_heading, evidence_signal_lines, evidence_review_required = _evidence_signal(
@@ -651,6 +733,10 @@ def render_comment_body(
     patch_plan = _patch_plan_lines(evidence_narrative)
     if patch_plan:
         lines.extend(["## Review-first patch plan", "", *patch_plan, ""])
+
+    trajectory = _trajectory_lines(trajectory_records)
+    if trajectory:
+        lines.extend(["## Trajectory summary", "", *trajectory, ""])
 
     lines.extend(
         [
@@ -722,6 +808,7 @@ def write_comment_body(
     check_intelligence_path: Path,
     out: Path,
     evidence_narrative_path: Path | None = None,
+    trajectory_jsonl_path: Path | None = None,
     failure_bundle_out_dir: Path | None = None,
     pr_number: int = 0,
     head_sha: str = "",
@@ -730,11 +817,13 @@ def write_comment_body(
     action_report = _read_json(action_report_path)
     check_intelligence = _read_json(check_intelligence_path)
     evidence_narrative = _read_json(evidence_narrative_path)
+    trajectory_records = _read_jsonl(trajectory_jsonl_path)
 
     body = render_comment_body(
         action_report=action_report,
         check_intelligence=check_intelligence,
         evidence_narrative=evidence_narrative,
+        trajectory_records=trajectory_records,
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(body, encoding="utf-8")
@@ -791,6 +880,7 @@ def write_comment_body(
     else:
         evidence_signal_kind = "none"
 
+    trajectory_summary = _trajectory_summary(trajectory_records)
     result: JsonObject = {
         "out": out.as_posix(),
         "status": status,
@@ -802,6 +892,10 @@ def write_comment_body(
         "evidence_signal_kind": evidence_signal_kind,
         "evidence_signal_present": bool(evidence_signal_lines),
         "evidence_review_required": evidence_review_required,
+        "trajectory_signal_present": trajectory_summary["record_count"] > 0,
+        "trajectory_record_count": trajectory_summary["record_count"],
+        "trajectory_review_first_count": trajectory_summary["review_first_count"],
+        "trajectory_auto_fix_allowed_count": trajectory_summary["auto_fix_allowed_count"],
     }
     if failure_bundle_result:
         result["failure_bundle"] = failure_bundle_result
@@ -813,6 +907,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--action-report", type=Path, required=True)
     parser.add_argument("--check-intelligence", type=Path, required=True)
     parser.add_argument("--evidence-narrative", type=Path)
+    parser.add_argument("--trajectory-jsonl", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--failure-bundle-out-dir", type=Path)
     parser.add_argument("--pr-number", type=int, default=0)
@@ -827,6 +922,7 @@ def main(argv: list[str] | None = None) -> int:
         action_report_path=args.action_report,
         check_intelligence_path=args.check_intelligence,
         evidence_narrative_path=args.evidence_narrative,
+        trajectory_jsonl_path=args.trajectory_jsonl,
         out=args.out,
         failure_bundle_out_dir=args.failure_bundle_out_dir,
         pr_number=args.pr_number,

@@ -1202,3 +1202,179 @@ def test_action_report_comment_shows_code_scanning_freshness_counts() -> None:
     assert "Open code scanning alerts: `3`" in body
     assert "Current code scanning alerts: `1`" in body
     assert "Stale code scanning alerts: `2`" in body
+
+
+def _trajectory_records() -> list[dict]:
+    return [
+        {
+            "schema_version": "sdetkit.trajectory.v1",
+            "diagnostic_id": "formatting-autopilot",
+            "action": "run_pre_commit",
+            "diagnosis": {
+                "failure_class": "formatter_only",
+                "risk_surface": "formatting",
+            },
+            "decision": {
+                "review_first": False,
+                "auto_fix_allowed": True,
+                "reason": "safe mechanical remediation candidate",
+            },
+            "final_result": "safe_fix_candidate",
+        },
+        {
+            "schema_version": "sdetkit.trajectory.v1",
+            "diagnostic_id": "release-review",
+            "action": "rebuild_release_artifacts",
+            "diagnosis": {
+                "failure_class": "release_artifact_invalid",
+                "risk_surface": "release",
+            },
+            "decision": {
+                "review_first": True,
+                "auto_fix_allowed": False,
+                "reason": "release failures require human review",
+            },
+            "final_result": "review_required",
+        },
+    ]
+
+
+def test_action_report_comment_surfaces_trajectory_summary() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 12,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        trajectory_records=_trajectory_records(),
+    )
+
+    assert "## Trajectory summary" in body
+    assert "Records: `2`" in body
+    assert "Review-first decisions: `1`" in body
+    assert "Auto-fix allowed decisions: `1`" in body
+    assert "`review_required`=1" in body
+    assert "`safe_fix_candidate`=1" in body
+    assert "`formatting-autopilot`: action=`run_pre_commit`" in body
+    assert "auto_fix_allowed=`true`" in body
+    assert "`release-review`: action=`rebuild_release_artifacts`" in body
+    assert "review_first=`true`" in body
+
+
+def test_write_comment_body_reads_trajectory_jsonl_and_reports_metadata(
+    tmp_path: Path,
+) -> None:
+    action_path = _write_json(
+        tmp_path / "action-report.json",
+        {
+            "status": "green",
+            "primary_blocker": {},
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": "no remediation needed",
+            },
+            "recommended_actions": [],
+            "proof_commands": [],
+            "evidence": {},
+        },
+    )
+    intelligence_path = _write_json(
+        tmp_path / "check-intelligence.json",
+        {
+            "checks_seen": 12,
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "security_review": {"collected": True, "unresolved_findings": 0},
+        },
+    )
+    trajectory_path = tmp_path / "trajectory.jsonl"
+    trajectory_path.write_text(
+        "\n".join(json.dumps(record, sort_keys=True) for record in _trajectory_records()) + "\n",
+        encoding="utf-8",
+    )
+    out = tmp_path / "comment.md"
+
+    result = report.write_comment_body(
+        action_report_path=action_path,
+        check_intelligence_path=intelligence_path,
+        trajectory_jsonl_path=trajectory_path,
+        out=out,
+    )
+
+    body = out.read_text(encoding="utf-8")
+    assert result["trajectory_signal_present"] is True
+    assert result["trajectory_record_count"] == 2
+    assert result["trajectory_review_first_count"] == 1
+    assert result["trajectory_auto_fix_allowed_count"] == 1
+    assert "## Trajectory summary" in body
+    assert "Records: `2`" in body
+
+
+def test_action_report_cli_accepts_trajectory_jsonl(tmp_path: Path, capsys) -> None:
+    action_path = _write_json(
+        tmp_path / "action-report.json",
+        {
+            "status": "green",
+            "primary_blocker": {},
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": "no remediation needed",
+            },
+            "recommended_actions": [],
+            "proof_commands": [],
+            "evidence": {},
+        },
+    )
+    intelligence_path = _write_json(
+        tmp_path / "check-intelligence.json",
+        {
+            "checks_seen": 12,
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "security_review": {"collected": True, "unresolved_findings": 0},
+        },
+    )
+    trajectory_path = tmp_path / "trajectory.jsonl"
+    trajectory_path.write_text(
+        "\n".join(json.dumps(record, sort_keys=True) for record in _trajectory_records()) + "\n",
+        encoding="utf-8",
+    )
+    out = tmp_path / "comment.md"
+
+    rc = report.main(
+        [
+            "--action-report",
+            str(action_path),
+            "--check-intelligence",
+            str(intelligence_path),
+            "--trajectory-jsonl",
+            str(trajectory_path),
+            "--out",
+            str(out),
+        ]
+    )
+
+    assert rc == 0
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["trajectory_signal_present"] is True
+    assert printed["trajectory_record_count"] == 2
+    assert printed["trajectory_review_first_count"] == 1
+    assert printed["trajectory_auto_fix_allowed_count"] == 1
+    assert "## Trajectory summary" in out.read_text(encoding="utf-8")
