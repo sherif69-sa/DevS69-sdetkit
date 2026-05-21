@@ -30,7 +30,12 @@ STALE_OR_CURRENT_SIGNAL = "_".join(("stale", "or", "current", "signal"))
 
 VECTOR_JSON = "diagnostic-vector.json"
 VECTOR_MD = "diagnostic-vector.md"
+FAILURE_VECTOR_JSON = "failure-vector.json"
 DEFAULT_OUT_DIR = str(Path("build") / "diagnostics")
+
+FAILURE_VECTOR_SCHEMA_VERSION = "sdetkit.failure_vector.v1"
+FAILURE_VECTOR = "failure_vector"
+FAILURE_VECTORS = "failure_vectors"
 
 REVIEW_FIRST_SURFACES = {
     "type_contract",
@@ -339,6 +344,160 @@ def _stale_signal(record: Mapping[str, Any]) -> str:
     return "unknown"
 
 
+def _exit_code(record: Mapping[str, Any]) -> int | str:
+    explicit = _first_text(record.get("exit_code"), record.get("status_code"))
+    if not explicit:
+        return "unknown"
+    try:
+        return int(explicit)
+    except ValueError:
+        return "unknown"
+
+
+def _failure_class(
+    surface: str, record: Mapping[str, Any], first_failure: Mapping[str, Any]
+) -> str:
+    explicit = _first_text(record.get("failure_class"), record.get("classification")).lower()
+    explicit = explicit.replace("-", "_").replace(" ", "_")
+    allowed = {
+        "formatter_only",
+        "lint",
+        "type",
+        "test",
+        "dependency",
+        "merge_conflict",
+        "flaky",
+        "infra",
+        "security",
+        "release",
+        "workflow",
+        "docs",
+        "cli",
+        "package",
+        "coverage",
+        "unknown",
+    }
+    if explicit in allowed:
+        return explicit
+
+    haystack = " ".join(
+        _string(value).lower()
+        for value in (
+            surface,
+            record.get("headline_failure"),
+            record.get("actual_failure"),
+            record.get("summary"),
+            first_failure.get("line"),
+            first_failure.get("tool"),
+            first_failure.get("kind"),
+        )
+        if _string(value)
+    )
+    if "merge conflict" in haystack:
+        return "merge_conflict"
+    if surface == "formatting" or "format" in haystack or "whitespace" in haystack:
+        return "formatter_only"
+    if surface == "type_contract" or "mypy" in haystack:
+        return "type"
+    if surface in {"test", "runtime"} or "pytest" in haystack or "assertion" in haystack:
+        return "test"
+    if surface == "quality" and "coverage" in haystack:
+        return "coverage"
+    if surface in {"dependency", "release", "security", "workflow", "docs", "cli", "package"}:
+        return surface
+    return "unknown"
+
+
+def _risk(surface: str, failure_class: str) -> str:
+    if surface == "formatting" and failure_class == "formatter_only":
+        return "low"
+    if surface in {"security", "dependency", "release", "workflow", "unknown"}:
+        return "high" if surface != "unknown" else "unknown"
+    if failure_class in {"merge_conflict", "security", "dependency", "release"}:
+        return "high"
+    return "medium"
+
+
+def _scope(record: Mapping[str, Any]) -> str:
+    explicit = _first_text(record.get("scope"), record.get("patch_scope"))
+    if explicit:
+        return explicit
+    if record.get("pr_owned_scope") is True:
+        return "pr_owned_only"
+    if record.get("pr_owned_scope") is False:
+        return "repo_wide"
+    return "unknown"
+
+
+def _reproducible_locally(record: Mapping[str, Any]) -> str:
+    explicit = _first_text(record.get("reproducible_locally"), record.get("local_repro"))
+    return explicit if explicit else "not_run"
+
+
+def _failing_test(first_line: str, record: Mapping[str, Any]) -> str:
+    explicit = _first_text(record.get("failing_test"), record.get("node_id"), record.get("test"))
+    if explicit:
+        return explicit
+    if first_line.startswith("FAILED "):
+        return first_line.split(" ", 1)[1].split(" - ", 1)[0].strip()
+    return "unknown"
+
+
+def _canonical_failure_vector(
+    *,
+    record: Mapping[str, Any],
+    source: str,
+    surface: str,
+    headline: str,
+    first_failure: Mapping[str, Any],
+    first_line: str,
+    affected_files: list[str],
+    safe_candidate: bool,
+    review_first: bool,
+    proof_commands: list[str],
+) -> dict[str, Any]:
+    failure_class = _failure_class(surface, record, first_failure)
+    local_repro_command = _first_text(
+        record.get("local_repro_command"),
+        record.get("repro_command"),
+        record.get("command"),
+        proof_commands[0] if proof_commands else "",
+        "unknown",
+    )
+    return {
+        "schema_version": FAILURE_VECTOR_SCHEMA_VERSION,
+        "source": source,
+        "check": _first_text(
+            record.get("check"), record.get("check_name"), record.get("name"), headline
+        ),
+        "command": _first_text(record.get("command"), "unknown"),
+        "exit_code": _exit_code(record),
+        "headline_failure": headline,
+        "actual_failure": first_line or headline,
+        "first_failing_line": first_line,
+        "failing_file": _first_text(
+            record.get("failing_file"), affected_files[0] if affected_files else "", "unknown"
+        ),
+        "failing_test": _failing_test(first_line, record),
+        "failure_class": failure_class,
+        "risk": _risk(surface, failure_class),
+        "risk_surface": surface,
+        "scope": _scope(record),
+        "reproducible_locally": _reproducible_locally(record),
+        "safe_fix_candidate": safe_candidate,
+        "review_first": review_first,
+        "affected_files": affected_files,
+        "owner_files": affected_files,
+        "log_url": _first_text(
+            record.get("log_url"), record.get("url"), record.get("html_url"), "none"
+        ),
+        "local_repro_command": local_repro_command,
+        "environment": _first_text(
+            record.get("environment"), record.get("runner"), source, "unknown"
+        ),
+    }
+
+
 def _vector_from_record(
     record: Mapping[str, Any],
     *,
@@ -362,6 +521,19 @@ def _vector_from_record(
     safe_candidate = bool(safe_to_auto_fix and not review_first and surface == "formatting")
     headline = _headline(record)
     diagnosis_id = _slug("|".join((surface, headline, first_line or source)))
+    proof_commands = _proof_commands(surface, record)
+    failure_vector = _canonical_failure_vector(
+        record=record,
+        source=source,
+        surface=surface,
+        headline=headline,
+        first_failure=first_failure,
+        first_line=first_line,
+        affected_files=affected_files,
+        safe_candidate=safe_candidate,
+        review_first=review_first,
+        proof_commands=proof_commands,
+    )
 
     return {
         DIAGNOSIS_ID: diagnosis_id,
@@ -381,7 +553,8 @@ def _vector_from_record(
         AFFECTED_FILES: affected_files,
         LIKELY_OWNER_FILES: affected_files,
         RECOMMENDED_NEXT_ACTION: _recommended_action(surface, safe_candidate, review_first),
-        PROOF_COMMANDS: _proof_commands(surface, record),
+        PROOF_COMMANDS: proof_commands,
+        FAILURE_VECTOR: failure_vector,
         HISTORY_CONTEXT: _history_context(
             surface=surface,
             affected_files=affected_files,
@@ -624,6 +797,11 @@ def build_diagnostic_vector(
             )
 
     vectors = _dedupe_vectors(vectors)
+    failure_vectors = [
+        dict(_as_dict(vector.get(FAILURE_VECTOR)))
+        for vector in vectors
+        if _as_dict(vector.get(FAILURE_VECTOR))
+    ]
     primary = vectors[0] if vectors else {}
 
     return {
@@ -635,10 +813,12 @@ def build_diagnostic_vector(
             "safe_fix_candidate_count": sum(
                 1 for vector in vectors if vector.get(SAFE_FIX_CANDIDATE) is True
             ),
+            "failure_vector_count": len(failure_vectors),
             "primary_surface": _string(primary.get(FAILURE_SURFACE)),
             "primary_action": _string(primary.get(RECOMMENDED_NEXT_ACTION)),
         },
         "diagnoses": vectors,
+        FAILURE_VECTORS: failure_vectors,
         "source_status": {
             "check_intelligence": bool(check_intelligence),
             "failed_check_logs": bool(failed_check_logs),
@@ -684,6 +864,10 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
                 f"- Actual failure: {diagnosis.get(ACTUAL_FAILURE, '')}",
                 f"- First failure line: {diagnosis.get(FIRST_FAILURE_LINE, '')}",
                 f"- Tool/kind: {diagnosis.get('tool', 'unknown')} / {diagnosis.get('kind', 'unknown')}",
+                "- Failure class/risk/scope: "
+                f"{_as_dict(diagnosis.get(FAILURE_VECTOR)).get('failure_class', 'unknown')} / "
+                f"{_as_dict(diagnosis.get(FAILURE_VECTOR)).get('risk', 'unknown')} / "
+                f"{_as_dict(diagnosis.get(FAILURE_VECTOR)).get('scope', 'unknown')}",
                 f"- Safe-fix candidate: {str(diagnosis.get(SAFE_FIX_CANDIDATE, False)).lower()}",
                 f"- Review-first: {str(diagnosis.get(REVIEW_FIRST, False)).lower()}",
                 f"- History context: {diagnosis.get(HISTORY_CONTEXT, 'unknown')}",
@@ -695,13 +879,29 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _failure_vector_document(payload: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "schema_version": FAILURE_VECTOR_SCHEMA_VERSION,
+        "generated_at": _string(payload.get("generated_at")),
+        "summary": _as_dict(payload.get("summary")),
+        FAILURE_VECTORS: [
+            dict(_as_dict(item))
+            for item in _as_list(payload.get(FAILURE_VECTORS))
+            if _as_dict(item)
+        ],
+    }
+
+
 def write_diagnostic_vector(payload: Mapping[str, Any], out_dir: Path) -> dict[str, str]:
     json_path = out_dir / VECTOR_JSON
+    failure_vector_path = out_dir / FAILURE_VECTOR_JSON
     markdown_path = out_dir / VECTOR_MD
     _write_json(json_path, payload)
+    _write_json(failure_vector_path, _failure_vector_document(payload))
     _write_text(markdown_path, render_markdown(payload))
     return {
         "diagnostic_vector_json": json_path.as_posix(),
+        "failure_vector_json": failure_vector_path.as_posix(),
         "diagnostic_vector_markdown": markdown_path.as_posix(),
     }
 

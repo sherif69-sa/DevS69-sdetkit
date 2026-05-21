@@ -5,6 +5,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+from sdetkit.current_head_failure_bundle import (
+    build_current_head_failure_bundle,
+    write_current_head_failure_bundle,
+)
+
 JsonObject = dict[str, Any]
 
 BANNED_EDUCATIONAL_PHRASES = (
@@ -701,6 +706,10 @@ def write_comment_body(
     check_intelligence_path: Path,
     out: Path,
     evidence_narrative_path: Path | None = None,
+    failure_bundle_out_dir: Path | None = None,
+    pr_number: int = 0,
+    head_sha: str = "",
+    base_sha: str = "",
 ) -> JsonObject:
     action_report = _read_json(action_report_path)
     check_intelligence = _read_json(check_intelligence_path)
@@ -713,6 +722,41 @@ def write_comment_body(
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(body, encoding="utf-8")
+
+    failure_bundle_result: JsonObject = {}
+    if failure_bundle_out_dir is not None:
+        bundle = build_current_head_failure_bundle(
+            pr_number=pr_number,
+            head_sha=head_sha
+            or _string(check_intelligence.get("head_sha") or action_report.get("head_sha")),
+            base_sha=base_sha
+            or _string(check_intelligence.get("base_sha") or action_report.get("base_sha")),
+            check_intelligence=check_intelligence,
+            action_report=action_report,
+            diagnostic_vectors=_as_dict(
+                check_intelligence.get("diagnostic_vectors")
+                or action_report.get("diagnostic_vectors")
+            ),
+            remediation_plans=_as_dict(
+                check_intelligence.get("remediation_plans")
+                or action_report.get("remediation_plans")
+            ),
+            safe_fix_outcome=_as_dict(
+                check_intelligence.get("safe_fix_outcome") or action_report.get("safe_fix_outcome")
+            ),
+            refresh_summary=_as_dict(
+                check_intelligence.get("remediation_refresh")
+                or action_report.get("remediation_refresh")
+            ),
+        )
+        written_bundle_paths = write_current_head_failure_bundle(
+            bundle,
+            failure_bundle_out_dir,
+        )
+        failure_bundle_result = {
+            "out_dir": failure_bundle_out_dir.as_posix(),
+            "files": [item.as_posix() for item in written_bundle_paths],
+        }
 
     status = _string(action_report.get("status") or "unknown")
     _heading, evidence_signal_lines, evidence_review_required = _evidence_signal(evidence_narrative)
@@ -731,7 +775,7 @@ def write_comment_body(
     else:
         evidence_signal_kind = "none"
 
-    return {
+    result: JsonObject = {
         "out": out.as_posix(),
         "status": status,
         "result_title": _result_title(
@@ -743,6 +787,9 @@ def write_comment_body(
         "evidence_signal_present": bool(evidence_signal_lines),
         "evidence_review_required": evidence_review_required,
     }
+    if failure_bundle_result:
+        result["failure_bundle"] = failure_bundle_result
+    return result
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -751,6 +798,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--check-intelligence", type=Path, required=True)
     parser.add_argument("--evidence-narrative", type=Path)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--failure-bundle-out-dir", type=Path)
+    parser.add_argument("--pr-number", type=int, default=0)
+    parser.add_argument("--head-sha", default="")
+    parser.add_argument("--base-sha", default="")
     return parser
 
 
@@ -761,6 +812,10 @@ def main(argv: list[str] | None = None) -> int:
         check_intelligence_path=args.check_intelligence,
         evidence_narrative_path=args.evidence_narrative,
         out=args.out,
+        failure_bundle_out_dir=args.failure_bundle_out_dir,
+        pr_number=args.pr_number,
+        head_sha=args.head_sha,
+        base_sha=args.base_sha,
     )
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
