@@ -602,6 +602,11 @@ def run_review(
     baseline_checks = list(baseline_stage.get("checks_planned", []))
     code_scanning_summary: dict[str, Any] | None = None
     if code_scan_json is not None:
+        try:
+            code_scan_root = target if target.is_dir() else target.parent
+            code_scan_json = safe_path(code_scan_root, code_scan_json.as_posix())
+        except SecurityError as exc:
+            raise ValueError(f"review: unsafe code scanning path: {exc}") from exc
         if not code_scan_json.exists():
             raise ValueError(f"review: code scanning file does not exist: {code_scan_json}")
         if not code_scan_json.is_file():

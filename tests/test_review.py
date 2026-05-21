@@ -874,3 +874,50 @@ def test_cli_review_repo_skips_empty_json_file(tmp_path: Path) -> None:
     payload = json.loads(run.stdout)
     assert payload["workflow"] == "review"
     assert payload["path"].endswith("repo")
+
+
+def test_review_rejects_code_scanning_path_traversal(tmp_path):
+
+    from sdetkit.intelligence import review
+
+    outside_name = "outside-code-scan.json"
+    outside = tmp_path.parent / outside_name
+    outside.write_text("[]", encoding="utf-8")
+
+    try:
+        review.safe_path(tmp_path, ("/".join(("..", outside_name))))
+    except review.SecurityError as exc:
+        assert "unsafe path rejected" in str(exc)
+    else:
+        raise AssertionError("expected unsafe path to be rejected")
+
+
+def test_cli_review_rejects_code_scanning_path_traversal(tmp_path: Path) -> None:
+    data = tmp_path / "events.csv"
+    outside_name = "outside-code-scan.json"
+    outside = tmp_path.parent / outside_name
+    data.write_text("id,type\nE1,open\n", encoding="utf-8")
+    outside.write_text("[]", encoding="utf-8")
+
+    run = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "sdetkit",
+            "review",
+            "events.csv",
+            "--workspace-root",
+            "workspace",
+            "--format",
+            "json",
+            "--code-scan-json",
+            "/".join(("..", outside_name)),
+            "--no-workspace",
+        ],
+        text=True,
+        capture_output=True,
+        cwd=tmp_path,
+    )
+
+    assert run.returncode != 0
+    assert "code scanning file must be a single relative file name" in (run.stderr + run.stdout)
