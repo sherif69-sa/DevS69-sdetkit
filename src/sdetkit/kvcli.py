@@ -38,7 +38,8 @@ def _build_comment_aware_parser(
             supports_allow_comments = True
             supports_duplicate_policy = True
     except (TypeError, ValueError):
-        pass
+        supports_allow_comments = False
+        supports_duplicate_policy = False
 
     def _wrapped(line: str) -> dict[str, str]:
         kwargs: dict[str, object] = {}

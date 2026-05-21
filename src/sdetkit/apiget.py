@@ -69,7 +69,6 @@ def _merged_headers(client, extra, debug: bool) -> dict[str, str]:
             except Exception:
                 if debug:
                     traceback.print_exc()
-                pass
     return out
 
 
