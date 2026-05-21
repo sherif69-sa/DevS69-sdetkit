@@ -14,12 +14,12 @@ def _write_json(path: Path, payload: dict[str, object]) -> Path:
 def test_runtime_traceback_reports_exception_owner_and_exact_proof(tmp_path: Path) -> None:
     log = "\n".join(
         [
-            "Run if [ \"pull_request\" = \"pull_request\" ]; then",
+            'Run if [ "pull_request" = "pull_request" ]; then',
             "Traceback (most recent call last):",
-            "  File \"/home/runner/work/DevS69-sdetkit/DevS69-sdetkit/tools/maintenance_autopilot.py\", line 1429, in <module>",
+            '  File "/home/runner/work/DevS69-sdetkit/DevS69-sdetkit/tools/maintenance_autopilot.py", line 1429, in <module>',
             "    raise SystemExit(main())",
-            "  File \"/home/runner/work/DevS69-sdetkit/DevS69-sdetkit/tools/maintenance_autopilot.py\", line 1173, in main",
-            "    raise RuntimeError(\"dry run returned no bot trackers\")",
+            '  File "/home/runner/work/DevS69-sdetkit/DevS69-sdetkit/tools/maintenance_autopilot.py", line 1173, in main',
+            '    raise RuntimeError("dry run returned no bot trackers")',
             "RuntimeError: dry run returned no bot trackers",
             "Error: Process completed with exit code 1.",
         ]
@@ -81,8 +81,8 @@ def test_runtime_traceback_markdown_mentions_exact_exception_and_owner(tmp_path:
                     "log": "\n".join(
                         [
                             "Traceback (most recent call last):",
-                            "  File \"/repo/tools/maintenance_autopilot.py\", line 1173, in main",
-                            "    raise RuntimeError(\"dry run returned no bot trackers\")",
+                            '  File "/repo/tools/maintenance_autopilot.py", line 1173, in main',
+                            '    raise RuntimeError("dry run returned no bot trackers")',
                             "RuntimeError: dry run returned no bot trackers",
                         ]
                     ),
