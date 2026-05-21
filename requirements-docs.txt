@@ -4,4 +4,5 @@ pymdown-extensions==10.21.3
 pygments==2.20.0
 
 # Security scanner transitive dependency floors
+Markdown==3.10
 idna==3.15
