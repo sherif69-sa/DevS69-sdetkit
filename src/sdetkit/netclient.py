@@ -201,7 +201,7 @@ async def _emit_async(hook: Hook | AsyncHook | None, ev: ClientEvent) -> None:
         return
     r = hook(ev)
     if asyncio.iscoroutine(r):
-        await r
+        _ = await r
 
 
 class SdetHttpClient:
