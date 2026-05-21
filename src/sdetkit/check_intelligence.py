@@ -109,6 +109,7 @@ _DIAGNOSIS_SURFACES = {
     "RELEASE_ARTIFACT_INVALID": "release",
     "WORKFLOW_CONTRACT_FAILURE": "workflow",
     "CLI_CONTRACT_FAILURE": "cli",
+    "PYTHON_RUNTIME_EXCEPTION": "workflow",
     "DOCS_BUILD_CONTRACT": "docs",
     "PYTEST_ASSERTION_FAILURE": "tests",
     "PYTEST_IMPORT_FAILURE": "tests",
@@ -532,10 +533,101 @@ def _failure_kind_for_line(line: str) -> str:
     return "unknown"
 
 
+def _repo_relative_traceback_path(value: str) -> str:
+    matches = _path_like_tokens(value)
+    if not matches:
+        return value
+    for match in matches:
+        if match.endswith(".py"):
+            return match
+    return matches[0]
+
+
+def _context_lines_around(
+    lines: list[str], line_number: int, *, context: int = 3
+) -> list[JsonObject]:
+    if line_number <= 0:
+        return []
+    index = line_number - 1
+    start = max(0, index - context)
+    end = min(len(lines), index + context + 1)
+    return [
+        {
+            "line_number": line_no + 1,
+            "text": lines[line_no].rstrip(),
+        }
+        for line_no in range(start, end)
+    ]
+
+
+def _traceback_exception_summary(log_text: str) -> JsonObject:
+    lines = log_text.splitlines()
+    active = False
+    traceback_start = 0
+    last_frame: JsonObject = {}
+    summary: JsonObject = {}
+
+    for line_number, raw_line in enumerate(lines, 1):
+        line = raw_line.strip()
+        if "Traceback (most recent call last)" in line:
+            active = True
+            traceback_start = line_number
+            last_frame = {}
+            continue
+
+        if not active:
+            continue
+
+        frame_match = re.search(
+            r'File "([^"]+)", line (\d+), in ([A-Za-z_][A-Za-z0-9_]*)',
+            line,
+        )
+        if frame_match:
+            last_frame = {
+                "file": frame_match.group(1),
+                "line": int(frame_match.group(2)),
+                "function": frame_match.group(3),
+            }
+            continue
+
+        exception_match = re.search(
+            r"\b([A-Za-z_][A-Za-z0-9_.]*(?:Error|Exception)):\s*(.+)$",
+            line,
+        )
+        if exception_match:
+            owner_file = _repo_relative_traceback_path(str(last_frame.get("file", "")))
+            summary = {
+                "traceback_start_line": traceback_start,
+                "exception_line_number": line_number,
+                "exception_type": exception_match.group(1),
+                "exception_message": exception_match.group(2).strip(),
+                "owner_file": owner_file,
+                "owner_line": last_frame.get("line", ""),
+                "owner_function": last_frame.get("function", ""),
+            }
+            active = False
+
+    return summary
+
+
 def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
     lines = log_text.splitlines()
     if not lines:
         return {}
+
+    traceback_summary = _traceback_exception_summary(log_text)
+    if traceback_summary:
+        line_number = int(traceback_summary.get("exception_line_number", 0) or 0)
+        exception_type = _string(traceback_summary.get("exception_type"))
+        exception_message = _string(traceback_summary.get("exception_message"))
+        return {
+            "line_number": line_number,
+            "line": f"{exception_type}: {exception_message}",
+            "tool": "python",
+            "kind": "runtime_failure",
+            "context": _context_lines_around(lines, line_number, context=context),
+            "traceback": traceback_summary,
+        }
 
     for index, line in enumerate(lines):
         stripped = line.strip()
@@ -557,22 +649,12 @@ def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
                 lowered = next_lowered
                 index = index + 1
 
-        start = max(0, index - context)
-        end = min(len(lines), index + context + 1)
-        context_lines = [
-            {
-                "line_number": line_no + 1,
-                "text": lines[line_no].rstrip(),
-            }
-            for line_no in range(start, end)
-        ]
-
         return {
             "line_number": index + 1,
             "line": stripped,
             "tool": _failure_tool_for_line(stripped),
             "kind": _failure_kind_for_line(stripped),
-            "context": context_lines,
+            "context": _context_lines_around(lines, index + 1, context=context),
         }
 
     return {}
@@ -622,6 +704,35 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
     ]
 
     primary = diagnoses[0] if diagnoses else {}
+    runtime_traceback = _as_dict(first_failure.get("traceback"))
+    if runtime_traceback and (
+        not primary
+        or _string(primary.get("code")).upper() in {"UNKNOWN", "UNKNOWN_REVIEW_REQUIRED"}
+    ):
+        exception_type = _string(runtime_traceback.get("exception_type"))
+        exception_message = _string(runtime_traceback.get("exception_message"))
+        owner_file = _string(runtime_traceback.get("owner_file"))
+        owner_line = runtime_traceback.get("owner_line", "")
+        location = (
+            f"{owner_file}:{owner_line}"
+            if owner_file and owner_line
+            else owner_file or "unknown location"
+        )
+        primary = {
+            "code": "PYTHON_RUNTIME_EXCEPTION",
+            "title": "Python runtime exception",
+            "diagnosis": f"{exception_type}: {exception_message} at {location}.",
+            "recommended_fix": [
+                "Start at the reported owner file and line from the final traceback frame.",
+                "Patch the smallest product boundary that explains the exception.",
+                "Rerun the exact failed command before broader quality proof.",
+            ],
+            "proof_commands": [
+                "PYTHONPATH=src python tools/maintenance_autopilot.py --owner sherif69-sa --repo DevS69-sdetkit --commit-safe-fixes --max-remediation-attempts 3 --remediation-cooldown-runs 2 --out-dir build/maintenance/autopilot",
+                "python -m pre_commit run -a",
+                "python -m mypy src",
+            ],
+        }
     if dependency_audit:
         primary = {
             "code": DEPENDENCY_AUDIT_VULNERABILITY,
@@ -678,7 +789,15 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
         "code": _string(primary.get("code")).upper(),
         "title": _string(primary.get("title")),
         "dependency_audit": dependency_audit,
-        "owner_files": DEPENDENCY_AUDIT_OWNER_FILES if dependency_audit else [],
+        "owner_files": (
+            DEPENDENCY_AUDIT_OWNER_FILES
+            if dependency_audit
+            else (
+                [_string(runtime_traceback.get("owner_file"))]
+                if runtime_traceback and _string(runtime_traceback.get("owner_file"))
+                else []
+            )
+        ),
     }
 
 
