@@ -1169,12 +1169,15 @@ def main(argv: list[str] | None = None) -> int:
     dry_summary = _summary_from_plan(dry_plan)
     report["dry_run_summary"] = dry_summary
 
-    if dry_summary["total_bot_trackers"] <= 0:
-        raise RuntimeError("dry run returned no bot trackers")
-    if (
-        dry_summary["keep_open_count"] + dry_summary["defer_count"]
-        != dry_summary["total_bot_trackers"]
-    ):
+    total_bot_trackers = int(dry_summary["total_bot_trackers"])
+    if total_bot_trackers < 0:
+        raise RuntimeError("dry run returned negative bot tracker count")
+    if total_bot_trackers == 0:
+        report["dry_run_empty"] = {
+            "ok": True,
+            "reason": "dry run returned no bot trackers; no maintenance action required",
+        }
+    elif dry_summary["keep_open_count"] + dry_summary["defer_count"] != total_bot_trackers:
         raise RuntimeError("dry run keep/defer counts do not match total_bot_trackers")
 
     # 4) Optional live run
