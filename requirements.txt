@@ -32,3 +32,7 @@ pymdown-extensions==10.21.3
 # Backport for environments below Python 3.11
 # (kept for compatibility in ad-hoc environments)
 tomli==2.4.1; python_version < "3.11"
+
+# Security scanner transitive dependency floors
+idna==3.15
+lxml==6.1.1
