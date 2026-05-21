@@ -1124,7 +1124,8 @@ def _apply_baseline(findings: list[Finding], baseline: list[dict[str, Any]]) -> 
                 if dt.date.fromisoformat(exp) < today:
                     continue
             except ValueError:
-                pass
+                # Ignore malformed baseline expiry dates and keep the item active.
+                continue
         active.append(item)
 
     out: list[Finding] = []
