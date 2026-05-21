@@ -368,6 +368,53 @@ def _doctor_cortex_artifacts(summary: dict[str, Any] | None) -> list[dict[str, s
     return [artifact for artifact in artifacts if isinstance(artifact, dict)]
 
 
+def _doctor_cortex_public_status(value: Any) -> str:
+    if value == "pass":
+        return "pass"
+    if value == "fail":
+        return "fail"
+    if value == "error":
+        return "error"
+    if value == "warning":
+        return "warning"
+    return "unknown"
+
+
+def _doctor_cortex_public_severity(value: Any) -> str:
+    if value == "low":
+        return "low"
+    if value == "medium":
+        return "medium"
+    if value == "high":
+        return "high"
+    if value == "critical":
+        return "critical"
+    return "unknown"
+
+
+def _doctor_cortex_public_summary(summary: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(summary, dict) or not summary.get("enabled"):
+        return None
+
+    diagnosis = summary.get("diagnosis", {})
+    prescriptions = summary.get("prescriptions", {})
+    if not isinstance(diagnosis, dict):
+        diagnosis = {}
+    if not isinstance(prescriptions, dict):
+        prescriptions = {}
+
+    return {
+        "enabled": True,
+        "ok": bool(summary.get("ok", False)),
+        "diagnosis_status": _doctor_cortex_public_status(diagnosis.get("status")),
+        "diagnosis_severity": _doctor_cortex_public_severity(diagnosis.get("severity")),
+        "diagnosis_count": int(diagnosis.get("diagnosis_count", 0) or 0),
+        "prescription_status": _doctor_cortex_public_status(prescriptions.get("status")),
+        "prescription_severity": _doctor_cortex_public_severity(prescriptions.get("severity")),
+        "prescription_count": int(prescriptions.get("prescription_count", 0) or 0),
+    }
+
+
 _EVIDENCE_GRAPH_SURFACE_PRIORITY = {
     "security": 100,
     "dependency": 90,
@@ -939,14 +986,30 @@ def _format_doctor_cortex(summary: dict[str, Any] | None) -> list[str]:
     if not isinstance(prescriptions, dict):
         prescriptions = {}
 
+    diagnosis_status = summary.get("diagnosis_status", diagnosis.get("status", "unknown"))
+    diagnosis_severity = summary.get("diagnosis_severity", diagnosis.get("severity", "unknown"))
+    diagnosis_count = summary.get("diagnosis_count", diagnosis.get("diagnosis_count", 0))
+    prescription_status = summary.get(
+        "prescription_status",
+        prescriptions.get("status", "unknown"),
+    )
+    prescription_severity = summary.get(
+        "prescription_severity",
+        prescriptions.get("severity", "unknown"),
+    )
+    prescription_count = summary.get(
+        "prescription_count",
+        prescriptions.get("prescription_count", 0),
+    )
+
     return [
         f"- OK: {str(summary.get('ok', False)).lower()}",
-        f"- Diagnosis status: {diagnosis.get('status', 'unknown')}",
-        f"- Diagnosis severity: {diagnosis.get('severity', 'unknown')}",
-        f"- Diagnosis count: {diagnosis.get('diagnosis_count', 0)}",
-        f"- Prescription status: {prescriptions.get('status', 'unknown')}",
-        f"- Prescription severity: {prescriptions.get('severity', 'unknown')}",
-        f"- Prescription count: {prescriptions.get('prescription_count', 0)}",
+        f"- Diagnosis status: {diagnosis_status}",
+        f"- Diagnosis severity: {diagnosis_severity}",
+        f"- Diagnosis count: {diagnosis_count}",
+        f"- Prescription status: {prescription_status}",
+        f"- Prescription severity: {prescription_severity}",
+        f"- Prescription count: {prescription_count}",
     ]
 
 
@@ -1108,7 +1171,7 @@ def build_bundle(
         "executed_step_count": executed_count,
         "passed_step_count": passed_count,
         "failed_step_count": failed_count,
-        "doctor_cortex": doctor_cortex_summary,
+        "doctor_cortex": _doctor_cortex_public_summary(doctor_cortex_summary),
         "evidence_graph": evidence_graph_summary,
         "adaptive_failure_bundle": adaptive_failure_bundle_summary,
         "patch_plan": patch_plan_summary,
@@ -1198,9 +1261,9 @@ def _doctor_cortex_ledger_summary(bundle: dict[str, Any]) -> dict[str, Any] | No
     return {
         "enabled": True,
         "ok": bool(doctor_cortex.get("ok", False)),
-        "diagnosis_status": str(diagnosis.get("status", "unknown")),
+        "diagnosis_status": _doctor_cortex_public_status(diagnosis.get("status")),
         "diagnosis_count": int(diagnosis.get("diagnosis_count", 0) or 0),
-        "prescription_status": str(prescriptions.get("status", "unknown")),
+        "prescription_status": _doctor_cortex_public_status(prescriptions.get("status")),
         "prescription_count": int(prescriptions.get("prescription_count", 0) or 0),
     }
 
@@ -1570,15 +1633,12 @@ def _summarize(args: argparse.Namespace) -> int:
     print(f"findings={len(bundle['findings'])}")
     doctor_cortex = bundle.get("doctor_cortex")
     if isinstance(doctor_cortex, dict):
-        diagnosis = doctor_cortex.get("diagnosis", {})
-        prescriptions = doctor_cortex.get("prescriptions", {})
-        if not isinstance(diagnosis, dict):
-            diagnosis = {}
-        if not isinstance(prescriptions, dict):
-            prescriptions = {}
         print(f"doctor_cortex_ok={str(doctor_cortex.get('ok', False)).lower()}")
-        print(f"doctor_cortex_diagnosis_count={diagnosis.get('diagnosis_count', 0)}")
-        print(f"doctor_cortex_prescription_count={prescriptions.get('prescription_count', 0)}")
+        print(f"doctor_cortex_diagnosis_count={int(doctor_cortex.get('diagnosis_count', 0) or 0)}")
+        print(
+            "doctor_cortex_prescription_count="
+            f"{int(doctor_cortex.get('prescription_count', 0) or 0)}"
+        )
     evidence_graph = bundle.get("evidence_graph")
     if isinstance(evidence_graph, dict):
         summary_prefix = "evidence" + "_graph"
