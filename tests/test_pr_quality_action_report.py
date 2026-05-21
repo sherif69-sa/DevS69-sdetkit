@@ -1080,3 +1080,89 @@ def test_action_report_comment_renders_remediation_refresh_loop_summary() -> Non
     assert "Proof after fix result: `passed`" in body
     assert "Remaining blockers: none" in body
     assert "Merge assessment: `green_after_safe_fix`" in body
+
+
+def test_pr_quality_action_report_renders_dependency_audit_evidence() -> None:
+    from sdetkit import pr_quality_action_report as report
+
+    body = report.render_comment_body(
+        action_report={
+            "status": "review_required",
+            "quality_gate": "passed",
+            "coverage": 96.69,
+            "operator_action": "review",
+            "review_first": True,
+            "primary_blocker": {
+                "check_name": "audit",
+                "title": "Dependency audit reported vulnerable packages",
+                "surface": "dependency",
+                "code": "DEPENDENCY_AUDIT_VULNERABILITY",
+                "safe_to_auto_fix": False,
+                "review_first": True,
+                "first_failure": {
+                    "line": "Found 1 known vulnerability in 1 package",
+                    "line_number": 300,
+                    "tool": "pip-audit",
+                    "kind": "dependency_vulnerability",
+                },
+                "dependency_audit": {
+                    "vulnerability_count": 1,
+                    "package_count": 1,
+                    "command": "pip-audit --format json -o pip-audit-report.json -r requirements-test.txt -r requirements-docs.txt --ignore-vuln CVE-2026-4539",
+                    "report_path": "pip-audit-report.json",
+                    "artifact_url": "https://github.com/example/actions/runs/1/artifacts/2",
+                    "ignored_vulnerabilities": ["CVE-2026-4539"],
+                },
+                "owner_files": [
+                    "requirements-test.txt",
+                    "requirements-docs.txt",
+                    "constraints-ci.txt",
+                    "pyproject.toml",
+                    ".github/workflows/",
+                ],
+            },
+            "recommended_actions": [
+                "Review pip-audit-report.json for package/advisory/fixed-version details.",
+                "Create a dependency-only PR if the finding is not baseline-approved.",
+            ],
+            "required_proof": [
+                "python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .",
+            ],
+        },
+        check_intelligence={
+            "failed_checks": [
+                {
+                    "name": "audit",
+                    "surface": "dependency",
+                    "code": "DEPENDENCY_AUDIT_VULNERABILITY",
+                    "title": "Dependency audit reported vulnerable packages",
+                    "safe_to_auto_fix": False,
+                    "dependency_audit": {
+                        "vulnerability_count": 1,
+                        "package_count": 1,
+                        "report_path": "pip-audit-report.json",
+                        "artifact_url": "https://github.com/example/actions/runs/1/artifacts/2",
+                    },
+                }
+            ],
+            "checks_seen": 44,
+            "failed_checks_count": 1,
+            "queued_checks_count": 0,
+            "required_queued_checks_count": 0,
+            "missing_required_contexts_count": 0,
+            "startup_failures_count": 0,
+            "required_startup_failures_count": 0,
+            "security_review_collected": True,
+            "unresolved_security_findings": 0,
+        },
+        safe_fix_outcome={},
+    )
+
+    assert "Dependency audit reported vulnerable packages" in body
+    assert "DEPENDENCY_AUDIT_VULNERABILITY" in body
+    assert "Found 1 known vulnerability in 1 package" in body
+    assert "pip-audit-report.json" in body
+    assert "https://github.com/example/actions/runs/1/artifacts/2" in body
+    assert "requirements-test.txt" in body
+    assert "constraints-ci.txt" in body
+    assert "review_first" in body or "Review first" in body

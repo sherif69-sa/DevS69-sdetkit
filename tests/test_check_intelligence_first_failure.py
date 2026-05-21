@@ -329,3 +329,93 @@ def test_check_intelligence_skips_build_metadata_noise_before_real_mypy_failure(
     )
     assert first_failure["tool"] == "mypy"
     assert first_failure["kind"] == "type_contract"
+
+
+def test_check_intelligence_extracts_pip_audit_dependency_vulnerability_evidence(
+    tmp_path: Path,
+) -> None:
+    from sdetkit.check_intelligence import build_check_intelligence
+
+    checks = tmp_path / "checks.json"
+    _write_json(
+        checks,
+        {
+            "check_runs": [
+                {
+                    "name": "audit",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "log": "\n".join(
+                        [
+                            "##[group]Run python -m pip install -c constraints-ci.txt -e .",
+                            "python -m pip install -c constraints-ci.txt -e .",
+                            "pip-audit --format json -o pip-audit-report.json -r requirements-test.txt -r requirements-docs.txt --ignore-vuln CVE-2026-4539",
+                            "python .github/scripts/check_pip_audit_baseline.py",
+                            "Collecting pip-audit==2.10.0",
+                            "Using cached pip_audit-2.10.0-py3-none-any.whl.metadata (28 kB)",
+                            "Successfully installed pip-audit-2.10.0",
+                            "Found 1 known vulnerability in 1 package",
+                            "##[error]Process completed with exit code 1.",
+                            "name: pip-audit-report",
+                            "path: pip-audit-report.json",
+                            "Artifact download URL: https://github.com/example/actions/runs/1/artifacts/2",
+                        ]
+                    ),
+                }
+            ]
+        },
+    )
+
+    intelligence = build_check_intelligence(checks_json=checks)
+    failed = intelligence["failed_checks"][0]
+
+    assert failed["surface"] == "dependency"
+    assert failed["code"] == "DEPENDENCY_AUDIT_VULNERABILITY"
+    assert failed["title"] == "Dependency audit reported vulnerable packages"
+    assert failed["safe_to_auto_fix"] is False
+    assert failed["review_first"] is True
+    assert failed["first_failure"]["line"] == "Found 1 known vulnerability in 1 package"
+    assert failed["first_failure"]["tool"] == "pip-audit"
+    assert failed["first_failure"]["kind"] == "dependency_vulnerability"
+    assert failed["dependency_audit"]["vulnerability_count"] == 1
+    assert failed["dependency_audit"]["package_count"] == 1
+    assert failed["dependency_audit"]["report_path"] == "pip-audit-report.json"
+    assert failed["dependency_audit"]["artifact_url"].endswith("/artifacts/2")
+    assert failed["dependency_audit"]["ignored_vulnerabilities"] == ["CVE-2026-4539"]
+    assert failed["dependency_audit"]["command"].startswith("pip-audit --format json")
+    assert "constraints-ci.txt" in failed["owner_files"]
+    assert "requirements-test.txt" in failed["owner_files"]
+    assert "requirements-docs.txt" in failed["owner_files"]
+
+
+def test_check_intelligence_skips_pip_audit_install_noise_before_summary(tmp_path: Path) -> None:
+    from sdetkit.check_intelligence import build_check_intelligence
+
+    checks = tmp_path / "checks.json"
+    _write_json(
+        checks,
+        {
+            "check_runs": [
+                {
+                    "name": "audit",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "log": "\n".join(
+                        [
+                            "Collecting pip-audit==2.10.0",
+                            "Using cached pip_audit-2.10.0-py3-none-any.whl.metadata (28 kB)",
+                            "Installing collected packages: pip-audit",
+                            "Successfully installed pip-audit-2.10.0",
+                            "Found 2 known vulnerabilities in 1 package",
+                        ]
+                    ),
+                }
+            ]
+        },
+    )
+
+    intelligence = build_check_intelligence(checks_json=checks)
+    first_failure = intelligence["failed_checks"][0]["first_failure"]
+
+    assert first_failure["line"] == "Found 2 known vulnerabilities in 1 package"
+    assert "Using cached" not in first_failure["line"]
