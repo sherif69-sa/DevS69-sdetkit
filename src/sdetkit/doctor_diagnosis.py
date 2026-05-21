@@ -405,40 +405,74 @@ def _json_contract(contract: dict[str, Any]) -> str:
     return json.dumps(contract, indent=2, sort_keys=True) + "\n"
 
 
+def _public_output_status(value: Any) -> str:
+    candidate = str(value or "unknown").lower()
+    allowed = {"pass", "fail", "watch", "unknown", "error", "warning", "info"}
+    return candidate if candidate in allowed else "unknown"
+
+
+def _public_output_category(value: Any) -> str:
+    candidate = str(value or "general").lower()
+    allowed = set(_CHECK_CATEGORIES.values()) | {"adaptive_failure_bundle", "general"}
+    return candidate if candidate in allowed else "general"
+
+
+def _public_output_float(value: Any, *, fallback: float = 0.0) -> float:
+    try:
+        return round(float(value), 4)
+    except (TypeError, ValueError):
+        return fallback
+
+
+def _public_output_int(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _public_diagnosis_id(value: Any) -> str:
+    candidate = str(value or "")
+    allowed = {f"doctor.{check_id}" for check_id in _CHECK_CATEGORIES}
+    allowed.add("doctor.adaptive_failure_bundle")
+    return candidate if candidate in allowed else "doctor.unknown"
+
+
 def _public_diagnosis(diagnosis: dict[str, Any]) -> dict[str, Any]:
+    diagnosis_id = _public_diagnosis_id(diagnosis.get("diagnosis_id"))
+    check_id = diagnosis_id.split(".", 1)[1] if "." in diagnosis_id else "unknown"
     return {
-        "diagnosis_id": str(diagnosis.get("diagnosis_id", "")),
-        "title": str(diagnosis.get("title", "")),
-        "category": str(diagnosis.get("category", "general")),
-        "status": str(diagnosis.get("status", "info")),
-        "severity": str(diagnosis.get("severity", "low")),
-        "confidence": diagnosis.get("confidence", 0.0),
-        "summary": str(diagnosis.get("summary", "")),
-        "source": str(diagnosis.get("source", "doctor")),
+        "diagnosis_id": diagnosis_id,
+        "title": _title_from_check_id(check_id),
+        "category": _public_output_category(diagnosis.get("category")),
+        "status": _public_output_status(diagnosis.get("status")),
+        "severity": _severity(diagnosis.get("severity"), fallback="low"),
+        "confidence": _public_output_float(diagnosis.get("confidence")),
+        "summary": "Public-safe diagnosis summary. Review the source doctor JSON for raw evidence.",
+        "source": "doctor",
     }
 
 
 def _public_contract_for_output(contract: dict[str, Any]) -> dict[str, Any]:
-    source = _as_dict(contract.get("source"))
     severity_counts = _as_dict(contract.get("severity_counts"))
 
     return {
-        "schema_version": str(contract.get("schema_version", SCHEMA_VERSION)),
-        "source_schema_version": str(contract.get("source_schema_version", "unknown")),
+        "schema_version": SCHEMA_VERSION,
+        "source_schema_version": "redacted",
         "ok": bool(contract.get("ok", False)),
-        "status": str(contract.get("status", "unknown")),
-        "severity": str(contract.get("severity", "unknown")),
-        "confidence": contract.get("confidence", 0.0),
-        "score": contract.get("score", 0),
-        "diagnosis_count": int(contract.get("diagnosis_count", 0)),
-        "observation_count": int(contract.get("observation_count", 0)),
-        "prescription_count": int(contract.get("prescription_count", 0)),
+        "status": _public_output_status(contract.get("status")),
+        "severity": _severity(contract.get("severity"), fallback="low"),
+        "confidence": _public_output_float(contract.get("confidence")),
+        "score": _public_output_int(contract.get("score")),
+        "diagnosis_count": _public_output_int(contract.get("diagnosis_count")),
+        "observation_count": _public_output_int(contract.get("observation_count")),
+        "prescription_count": _public_output_int(contract.get("prescription_count")),
         "severity_counts": {
-            "critical": int(severity_counts.get("critical", 0)),
-            "high": int(severity_counts.get("high", 0)),
-            "medium": int(severity_counts.get("medium", 0)),
-            "low": int(severity_counts.get("low", 0)),
-            "info": int(severity_counts.get("info", 0)),
+            "critical": _public_output_int(severity_counts.get("critical")),
+            "high": _public_output_int(severity_counts.get("high")),
+            "medium": _public_output_int(severity_counts.get("medium")),
+            "low": _public_output_int(severity_counts.get("low")),
+            "info": _public_output_int(severity_counts.get("info")),
         },
         "diagnoses": [
             _public_diagnosis(item)
@@ -454,9 +488,9 @@ def _public_contract_for_output(contract: dict[str, Any]) -> dict[str, Any]:
         ],
         "judgment_next_move": "Review the source doctor JSON for detailed evidence.",
         "source": {
-            "workflow": str(source.get("workflow", "doctor")),
-            "package": str(source.get("package", "unknown")),
-            "version": str(source.get("version", "unknown")),
+            "workflow": "doctor",
+            "package": "[REDACTED]",
+            "version": "[REDACTED]",
             "output_path": "[REDACTED]",
         },
     }
@@ -464,25 +498,16 @@ def _public_contract_for_output(contract: dict[str, Any]) -> dict[str, Any]:
 
 def write_output(contract: dict[str, Any], out_path: Path | None, *, output_format: str) -> None:
     public_contract = _public_contract_for_output(contract)
-    rendered_contract = (
-        _json_contract(public_contract)
-        if output_format == "json"
-        else render_text(public_contract) + "\n"
-    )
+    if output_format == "json":
+        rendered_contract = _json_contract(public_contract)
+    else:
+        rendered_contract = render_text(public_contract) + "\n"
 
     if out_path is None:
-        # The CLI emits only the public-safe diagnosis projection built by
-        # _public_contract_for_output: raw doctor evidence, raw fix text,
-        # command lists, nested prescriptions, and source paths are omitted.
-        # codeql[py/clear-text-logging-sensitive-data]
         sys.stdout.write(rendered_contract)
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    # The file output is the same public-safe projection used for stdout:
-    # counts, allowlisted statuses/severities/categories, redacted source
-    # metadata, and no raw doctor evidence or fix text.
-    # codeql[py/clear-text-storage-sensitive-data]
     out_path.write_text(rendered_contract, encoding="utf-8")
 
 
