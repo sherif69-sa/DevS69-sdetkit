@@ -243,27 +243,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         f"- Diagnosis trend: {payload.get('diagnosis_trend', 'insufficient_data')}",
         f"- Prescription trend: {payload.get('prescription_trend', 'insufficient_data')}",
         "",
-        "## Samples",
-        "",
     ]
-
-    samples = _as_list(payload.get("samples"))
-    if not samples:
-        lines.append("- none")
-    else:
-        for sample in samples:
-            if not isinstance(sample, dict):
-                continue
-            lines.append(
-                "- {run_id}: ok={ok} diagnosis_count={diagnosis_count} "
-                "prescription_count={prescription_count}".format(
-                    run_id=sample.get("run_id", ""),
-                    ok=str(sample.get("ok", False)).lower(),
-                    diagnosis_count=sample.get("diagnosis_count", 0),
-                    prescription_count=sample.get("prescription_count", 0),
-                )
-            )
-
     return "\n".join(lines) + "\n"
 
 
@@ -280,18 +260,10 @@ def write_output(payload: dict[str, Any], out_path: Path | None, *, output_forma
     rendered = _render(public_payload, output_format)
 
     if out_path is None:
-        # Public projection only: no raw doctor evidence, raw fix text, command
-        # lists, ledger paths, artifact paths, run ids, timestamps, or samples
-        # are emitted.
-        # codeql[py/clear-text-logging-sensitive-data]
         sys.stdout.write(rendered)
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    # Public projection only: no raw doctor evidence, raw fix text, command
-    # lists, ledger paths, artifact paths, run ids, timestamps, or samples are
-    # emitted.
-    # codeql[py/clear-text-storage-sensitive-data]
     out_path.write_text(rendered, encoding="utf-8")
 
 

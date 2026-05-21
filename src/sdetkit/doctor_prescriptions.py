@@ -230,6 +230,26 @@ def _safe_category(value: Any, fallback: str) -> str:
     return candidate if candidate in allowed else fallback
 
 
+def _public_output_status(value: Any) -> str:
+    candidate = str(value or "unknown").lower()
+    allowed = {"action_required", "pass", "unknown"}
+    return candidate if candidate in allowed else "unknown"
+
+
+def _public_output_float(value: Any, *, fallback: float = 0.0) -> float:
+    try:
+        return round(float(value), 4)
+    except (TypeError, ValueError):
+        return fallback
+
+
+def _public_output_int(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
 def _guidance_for(check_id: str) -> dict[str, Any]:
     return _CHECK_GUIDANCE.get(check_id, _GENERIC_GUIDANCE)
 
@@ -343,19 +363,19 @@ def _public_output_contract(contract: dict[str, Any]) -> dict[str, Any]:
     severity_counts = _as_dict(contract.get("severity_counts"))
 
     return {
-        "schema_version": str(contract.get("schema_version", SCHEMA_VERSION)),
-        "source_schema_version": str(contract.get("source_schema_version", "unknown")),
+        "schema_version": SCHEMA_VERSION,
+        "source_schema_version": "sdetkit.doctor.diagnosis.v1",
         "ok": bool(contract.get("ok", False)),
-        "status": str(contract.get("status", "unknown")),
-        "severity": str(contract.get("severity", "unknown")),
-        "confidence": contract.get("confidence", 0.0),
-        "prescription_count": int(contract.get("prescription_count", 0)),
+        "status": _public_output_status(contract.get("status")),
+        "severity": _severity(contract.get("severity"), fallback="low"),
+        "confidence": _public_output_float(contract.get("confidence")),
+        "prescription_count": _public_output_int(contract.get("prescription_count")),
         "severity_counts": {
-            "critical": int(severity_counts.get("critical", 0)),
-            "high": int(severity_counts.get("high", 0)),
-            "medium": int(severity_counts.get("medium", 0)),
-            "low": int(severity_counts.get("low", 0)),
-            "info": int(severity_counts.get("info", 0)),
+            "critical": _public_output_int(severity_counts.get("critical")),
+            "high": _public_output_int(severity_counts.get("high")),
+            "medium": _public_output_int(severity_counts.get("medium")),
+            "low": _public_output_int(severity_counts.get("low")),
+            "info": _public_output_int(severity_counts.get("info")),
         },
         "prescriptions": [],
         "next_commands": [],
@@ -369,24 +389,16 @@ def _public_output_contract(contract: dict[str, Any]) -> dict[str, Any]:
 
 def write_output(contract: dict[str, Any], out_path: Path | None, *, output_format: str) -> None:
     public_contract = _public_output_contract(contract)
-    rendered_contract = (
-        _json_contract(public_contract)
-        if output_format == "json"
-        else render_text(public_contract) + "\n"
-    )
+    if output_format == "json":
+        rendered_contract = _json_contract(public_contract)
+    else:
+        rendered_contract = render_text(public_contract) + "\n"
 
     if out_path is None:
-        # Doctor prescriptions stdout is a summary-only public projection:
-        # no diagnosis evidence, no fix text, no prescription list, no source
-        # paths, and no input command lists are emitted.
-        # codeql[py/clear-text-logging-sensitive-data]
         sys.stdout.write(rendered_contract)
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    # Doctor prescriptions file output is the same summary-only public
-    # projection used for stdout.
-    # codeql[py/clear-text-storage-sensitive-data]
     out_path.write_text(rendered_contract, encoding="utf-8")
 
 
