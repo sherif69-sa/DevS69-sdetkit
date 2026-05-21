@@ -224,11 +224,11 @@ def write_output(payload: dict[str, Any], out_path: Path | None, *, output_forma
     rendered = _render(payload, output_format)
 
     if out_path is None:
-        sys.stdout.write(rendered)  # lgtm[py/clear-text-logging-sensitive-data]
+        sys.stdout.write(rendered)
         return
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(rendered, encoding="utf-8")  # lgtm[py/clear-text-storage-sensitive-data]
+    out_path.write_text(rendered, encoding="utf-8")
 
 
 def build_parser() -> argparse.ArgumentParser:
