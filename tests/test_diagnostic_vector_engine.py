@@ -176,3 +176,110 @@ def test_diagnostic_vector_cli_writes_json_and_markdown(tmp_path: Path, capsys) 
     assert payload["summary"]["diagnosis_count"] == 1
     assert "Diagnostic Vector" in markdown
     assert "diagnostic_vector_json" in stdout
+
+
+def test_diagnostic_vector_embeds_canonical_failure_vector_contract() -> None:
+    check_intelligence = {
+        "failed_checks": [
+            {
+                "name": "Validate (ubuntu-latest / py3.12)",
+                "command": "python -m pytest -q tests/test_widget.py -o addopts=",
+                "exit_code": 1,
+                "environment": "github_actions",
+                "log_url": "https://github.example/actions/runs/1/job/2",
+                "scope": "pr_owned_only",
+                "review_first": True,
+                "safe_to_auto_fix": False,
+                "diagnosis": {
+                    "title": "Pytest assertion failed",
+                    "surface": "test",
+                    "confidence": "high",
+                },
+                "first_failure": {
+                    "line": "FAILED tests/test_widget.py::test_widget_contract - AssertionError: expected stable evidence",
+                    "line_number": 88,
+                    "tool": "pytest",
+                    "kind": "test_failure",
+                },
+                "affected_files": ["tests/test_widget.py"],
+            }
+        ]
+    }
+
+    payload = build_diagnostic_vector(check_intelligence=check_intelligence)
+
+    diagnosis = payload["diagnoses"][0]
+    vector = diagnosis["failure_vector"]
+    assert payload["summary"]["failure_vector_count"] == 1
+    assert payload["failure_vectors"] == [vector]
+    assert vector["schema_version"] == "sdetkit.failure_vector.v1"
+    assert vector["check"] == "Validate (ubuntu-latest / py3.12)"
+    assert vector["command"] == "python -m pytest -q tests/test_widget.py -o addopts="
+    assert vector["exit_code"] == 1
+    assert vector["headline_failure"] == "Pytest assertion failed"
+    assert vector["actual_failure"].startswith("FAILED tests/test_widget.py::test_widget_contract")
+    assert vector["first_failing_line"].startswith(
+        "FAILED tests/test_widget.py::test_widget_contract"
+    )
+    assert vector["failing_file"] == "tests/test_widget.py"
+    assert vector["failing_test"] == "tests/test_widget.py::test_widget_contract"
+    assert vector["failure_class"] == "test"
+    assert vector["risk"] == "medium"
+    assert vector["risk_surface"] == "test"
+    assert vector["scope"] == "pr_owned_only"
+    assert vector["reproducible_locally"] == "not_run"
+    assert vector["safe_fix_candidate"] is False
+    assert vector["review_first"] is True
+    assert vector["affected_files"] == ["tests/test_widget.py"]
+    assert vector["owner_files"] == ["tests/test_widget.py"]
+    assert vector["log_url"] == "https://github.example/actions/runs/1/job/2"
+    assert vector["local_repro_command"] == "python -m pytest -q tests/test_widget.py -o addopts="
+    assert vector["environment"] == "github_actions"
+
+
+def test_diagnostic_vector_cli_writes_failure_vector_json(tmp_path: Path, capsys) -> None:
+    check_path = _write(
+        tmp_path / "check-intelligence.json",
+        {
+            "failed_checks": [
+                {
+                    "name": "pre-commit",
+                    "command": "python -m pre_commit run -a",
+                    "exit_code": 1,
+                    "first_failure": {
+                        "line": "ruff format..............................Failed",
+                        "line_number": 30,
+                        "tool": "ruff",
+                        "kind": "format_drift",
+                    },
+                    "safe_to_auto_fix": True,
+                    "safe_remediation": {
+                        "safe_to_auto_fix": True,
+                        "strategy": "run_pre_commit",
+                    },
+                    "affected_files": ["src/sdetkit/example.py"],
+                }
+            ]
+        },
+    )
+    out_dir = tmp_path / "diagnostics"
+
+    rc = main(
+        [
+            "--check-intelligence",
+            str(check_path),
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    stdout = json.loads(capsys.readouterr().out)
+    assert "failure_vector_json" in stdout["artifacts"]
+    failure_vector_doc = json.loads((out_dir / "failure-vector.json").read_text(encoding="utf-8"))
+    assert failure_vector_doc["schema_version"] == "sdetkit.failure_vector.v1"
+    assert failure_vector_doc["summary"]["failure_vector_count"] == 1
+    assert failure_vector_doc["failure_vectors"][0]["failure_class"] == "formatter_only"
+    assert failure_vector_doc["failure_vectors"][0]["safe_fix_candidate"] is True
