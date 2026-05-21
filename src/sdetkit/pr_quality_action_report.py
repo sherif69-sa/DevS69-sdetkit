@@ -192,6 +192,10 @@ def _evidence_lines(check_intelligence: JsonObject, action_report: JsonObject) -
     missing_required_count = len(_as_list(check_intelligence.get("missing_required_contexts")))
     checks_seen = _int(check_intelligence.get("checks_seen"))
     unresolved_security = _int(security.get("unresolved_findings"))
+    code_scanning = _as_dict(
+        check_intelligence.get("code_scanning_review")
+        or _as_dict(action_report.get("evidence")).get("code_scanning_review")
+    )
 
     lines = [
         f"- Checks seen: `{checks_seen}`",
@@ -207,6 +211,18 @@ def _evidence_lines(check_intelligence: JsonObject, action_report: JsonObject) -
         collected = "true" if bool(security.get("collected", False)) else "false"
         lines.append(f"- Security review collected: `{collected}`")
         lines.append(f"- Unresolved security findings: `{unresolved_security}`")
+
+    if code_scanning:
+        collected = "true" if bool(code_scanning.get("collected", False)) else "false"
+        lines.append(f"- Code scanning review collected: `{collected}`")
+        lines.append(f"- Open code scanning alerts: `{_int(code_scanning.get('open_alerts'))}`")
+        lines.append(
+            f"- Current code scanning alerts: `{_int(code_scanning.get('current_alerts'))}`"
+        )
+        lines.append(f"- Stale code scanning alerts: `{_int(code_scanning.get('stale_alerts'))}`")
+        unknown_count = _int(code_scanning.get("unknown_freshness_alerts"))
+        if unknown_count:
+            lines.append(f"- Unknown-freshness code scanning alerts: `{unknown_count}`")
 
     return lines
 

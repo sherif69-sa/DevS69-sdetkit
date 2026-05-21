@@ -912,6 +912,93 @@ def _security_review_summary(review_threads_json: Path | None) -> JsonObject:
     }
 
 
+def _open_code_scanning_alerts(payload: Any) -> list[JsonObject]:
+    raw_alerts = payload if isinstance(payload, list) else _as_list(_as_dict(payload).get("alerts"))
+    return [
+        _as_dict(item)
+        for item in raw_alerts
+        if _as_dict(item) and _string(_as_dict(item).get("state") or "open").lower() == "open"
+    ]
+
+
+def _code_scanning_review_summary(
+    alerts_json: Path | None,
+    *,
+    current_head_sha: str = "",
+) -> JsonObject:
+    if alerts_json is None or not alerts_json.exists():
+        return {
+            "collected": False,
+            "source": alerts_json.as_posix() if alerts_json else "",
+            "open_alerts": 0,
+            "current_alerts": 0,
+            "stale_alerts": 0,
+            "unknown_freshness_alerts": 0,
+            "current_head_sha": current_head_sha,
+            "rule_counts": {},
+            "findings": [],
+        }
+
+    payload = json.loads(alerts_json.read_text(encoding="utf-8"))
+    findings: list[JsonObject] = []
+    rule_counts: dict[str, int] = {}
+
+    for alert in _open_code_scanning_alerts(payload):
+        rule = _as_dict(alert.get("rule"))
+        instance = _as_dict(alert.get("most_recent_instance"))
+        location = _as_dict(instance.get("location"))
+        message = _as_dict(instance.get("message"))
+        commit_sha = _string(instance.get("commit_sha"))
+
+        if not commit_sha or not current_head_sha:
+            freshness = "unknown"
+        elif commit_sha == current_head_sha:
+            freshness = "current"
+        else:
+            freshness = "stale"
+
+        if freshness == "current":
+            action = "fix_current_alert_or_dismiss_reviewed_false_positive"
+        elif freshness == "stale":
+            action = "wait_for_code_scanning_refresh"
+        else:
+            action = "review_alert_freshness"
+
+        rule_id = _string(rule.get("id") or "unknown")
+        rule_counts[rule_id] = rule_counts.get(rule_id, 0) + 1
+
+        findings.append(
+            {
+                "number": alert.get("number", ""),
+                "rule_id": rule_id,
+                "severity": _string(
+                    rule.get("security_severity_level") or rule.get("severity") or "unknown"
+                ),
+                "path": _string(location.get("path")),
+                "line": _string(location.get("start_line")),
+                "commit_sha": commit_sha,
+                "current_head_sha": current_head_sha,
+                "freshness": freshness,
+                "recommended_action": action,
+                "message": _string(message.get("text")),
+            }
+        )
+
+    return {
+        "collected": True,
+        "source": alerts_json.as_posix(),
+        "open_alerts": len(findings),
+        "current_alerts": len([item for item in findings if item["freshness"] == "current"]),
+        "stale_alerts": len([item for item in findings if item["freshness"] == "stale"]),
+        "unknown_freshness_alerts": len(
+            [item for item in findings if item["freshness"] == "unknown"]
+        ),
+        "current_head_sha": current_head_sha,
+        "rule_counts": dict(sorted(rule_counts.items())),
+        "findings": findings,
+    }
+
+
 def _required_contexts(payload: JsonObject) -> list[str]:
     direct = payload.get("required_contexts")
     if isinstance(direct, list):
@@ -940,6 +1027,8 @@ def build_check_intelligence(
     checks_json: Path,
     logs_dir: Path | None = None,
     review_threads_json: Path | None = None,
+    code_scanning_alerts_json: Path | None = None,
+    current_head_sha: str = "",
 ) -> JsonObject:
     payload = _read_json(checks_json)
     records = _iter_check_records(payload)
@@ -997,6 +1086,11 @@ def build_check_intelligence(
         "cancelled_checks": cancelled_checks,
         "startup_failures": startup_failures,
         "security_review": _security_review_summary(review_threads_json),
+        "code_scanning_review": _code_scanning_review_summary(
+            code_scanning_alerts_json,
+            current_head_sha=current_head_sha,
+        ),
+        "current_head_sha": current_head_sha,
     }
 
 
@@ -1163,6 +1257,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                     ]
                 ),
                 "security_review": security_review,
+                "code_scanning_review": intelligence.get("code_scanning_review", {}),
             },
         }
 
@@ -1232,6 +1327,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                     ]
                 ),
                 "security_review": intelligence.get("security_review", {}),
+                "code_scanning_review": intelligence.get("code_scanning_review", {}),
             },
         }
 
@@ -1272,6 +1368,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 "startup_failure_count": len(startup),
                 "required_startup_failure_count": len(required_startup),
                 "security_review": intelligence.get("security_review", {}),
+                "code_scanning_review": intelligence.get("code_scanning_review", {}),
             },
         }
 
@@ -1293,6 +1390,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
             "startup_failure_count": len(startup),
             "required_startup_failure_count": 0,
             "security_review": intelligence.get("security_review", {}),
+            "code_scanning_review": intelligence.get("code_scanning_review", {}),
         },
     }
 
@@ -1372,6 +1470,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--checks-json", type=Path, required=True)
     parser.add_argument("--logs-dir", type=Path)
     parser.add_argument("--review-threads-json", type=Path)
+    parser.add_argument("--code-scanning-alerts-json", type=Path)
+    parser.add_argument("--current-head-sha", default="")
     parser.add_argument("--out-dir", type=Path, default=Path("build/pr-quality"))
     return parser
 
@@ -1382,6 +1482,8 @@ def main(argv: list[str] | None = None) -> int:
         checks_json=args.checks_json,
         logs_dir=args.logs_dir,
         review_threads_json=args.review_threads_json,
+        code_scanning_alerts_json=args.code_scanning_alerts_json,
+        current_head_sha=args.current_head_sha,
     )
     action_report = build_action_report(intelligence)
     artifacts = write_artifacts(

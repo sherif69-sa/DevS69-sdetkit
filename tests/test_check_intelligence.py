@@ -427,3 +427,71 @@ def test_check_intelligence_validate_failure_gets_log_review_actions(
     assert report["primary_blocker"]["code"] == "VALIDATE_JOB_LOG_REVIEW"
     assert "first non-setup failure line" in " ".join(report["recommended_actions"])
     assert "python -m pre_commit run -a" in report["proof_commands"]
+
+
+def test_check_intelligence_reports_code_scanning_freshness_counts(
+    tmp_path: Path,
+) -> None:
+    current_sha = "abc123"
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {"check_runs": [{"name": "CI", "status": "completed", "conclusion": "success"}]},
+    )
+    alerts = _write_json(
+        tmp_path / "alerts.json",
+        [
+            {
+                "number": 10,
+                "state": "open",
+                "rule": {"id": "py/example", "severity": "warning"},
+                "most_recent_instance": {
+                    "commit_sha": current_sha,
+                    "message": {"text": "Current alert"},
+                    "location": {"path": "src/sdetkit/example.py", "start_line": 12},
+                },
+            },
+            {
+                "number": 11,
+                "state": "open",
+                "rule": {"id": "py/example", "severity": "warning"},
+                "most_recent_instance": {
+                    "commit_sha": "old456",
+                    "message": {"text": "Stale alert"},
+                    "location": {"path": "src/sdetkit/old.py", "start_line": 20},
+                },
+            },
+            {
+                "number": 12,
+                "state": "dismissed",
+                "rule": {"id": "py/ignored", "severity": "note"},
+                "most_recent_instance": {
+                    "commit_sha": current_sha,
+                    "location": {"path": "src/sdetkit/ignored.py", "start_line": 1},
+                },
+            },
+        ],
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(
+        checks_json=checks,
+        code_scanning_alerts_json=alerts,
+        current_head_sha=current_sha,
+    )
+
+    review = intelligence["code_scanning_review"]
+    assert review["collected"] is True
+    assert review["open_alerts"] == 2
+    assert review["current_alerts"] == 1
+    assert review["stale_alerts"] == 1
+    assert review["unknown_freshness_alerts"] == 0
+    assert review["rule_counts"] == {"py/example": 2}
+    assert review["findings"][0]["freshness"] == "current"
+    assert review["findings"][0]["recommended_action"] == (
+        "fix_current_alert_or_dismiss_reviewed_false_positive"
+    )
+    assert review["findings"][1]["freshness"] == "stale"
+    assert review["findings"][1]["recommended_action"] == "wait_for_code_scanning_refresh"
+
+    action = check_intelligence.build_action_report(intelligence)
+    assert action["status"] == "green"
+    assert action["evidence"]["code_scanning_review"]["current_alerts"] == 1
