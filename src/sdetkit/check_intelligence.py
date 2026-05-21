@@ -118,6 +118,8 @@ _DIAGNOSIS_SURFACES = {
     "RUFF_LINT_FAILURE": "quality",
     "MYPY_TYPE_CONTRACT_DRIFT": "quality",
     "COVERAGE_GATE_REGRESSION": "quality",
+    "CODEQL_SECURITY_REVIEW_REQUIRED": "security",
+    "VALIDATE_JOB_LOG_REVIEW": "workflow",
 }
 
 
@@ -679,6 +681,65 @@ def _dependency_audit_first_failure(log_text: str) -> JsonObject:
     return {}
 
 
+def _is_unknown_diagnosis(diagnosis: JsonObject) -> bool:
+    code = _string(diagnosis.get("code")).upper()
+    title = _string(diagnosis.get("title")).lower()
+    return (
+        not diagnosis
+        or code in {"", "UNKNOWN", "UNKNOWN_REVIEW_REQUIRED"}
+        or title in {"", "unknown failure", "failure needs human review"}
+    )
+
+
+def _fallback_check_diagnosis(name: str, first_failure: JsonObject) -> JsonObject:
+    lowered = name.lower()
+    first_line = _string(first_failure.get("line"))
+
+    if "codeql" in lowered:
+        return {
+            "code": "CODEQL_SECURITY_REVIEW_REQUIRED",
+            "title": "CodeQL security analysis requires review",
+            "risk_surface": "security",
+            "diagnosis": (
+                "CodeQL failed or reported security evidence. Inspect current GitHub "
+                "Advanced Security comments and confirm whether each alert is current, "
+                "fixed, or a reviewed false positive."
+            ),
+            "recommended_fix": [
+                "Review unresolved GitHub Advanced Security comments on the PR.",
+                "For each alert, compare the alert commit SHA with the current PR head.",
+                "Fix current true positives or dismiss reviewed false positives with a short reason.",
+            ],
+            "proof_commands": [
+                "python -m sdetkit security check --root . --format json",
+                "python -m pre_commit run -a",
+            ],
+        }
+
+    if "validate" in lowered or "github actions advanced reference" in lowered:
+        line = first_line or "No exact failing line was collected from the Validate job log."
+        return {
+            "code": "VALIDATE_JOB_LOG_REVIEW",
+            "title": "Validate job needs exact log review",
+            "risk_surface": "workflow",
+            "diagnosis": (
+                "A Validate job failed before PR Quality could classify the exact product "
+                f"failure. First collected signal: {line}"
+            ),
+            "recommended_fix": [
+                "Open the failed Validate job log and extract the first non-setup failure line.",
+                "Patch the smallest affected product or test boundary.",
+                "Rerun the focused failed test or command before broad pre-commit proof.",
+            ],
+            "proof_commands": [
+                "python -m pre_commit run -a",
+                "python -m pytest -q tests/test_pr_quality_evidence_narrative.py tests/test_pr_quality_adaptive_sentinel_workflow.py tests/test_pr_quality_failure_bundle_workflow.py -o addopts=",
+            ],
+        }
+
+    return {}
+
+
 def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) -> JsonObject:
     name = _check_name(record, index)
     log_text = _record_log_text(record, logs_dir, name)
@@ -752,6 +813,10 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
                 "python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .",
             ],
         }
+    fallback = _fallback_check_diagnosis(name, first_failure)
+    if fallback and _is_unknown_diagnosis(primary):
+        primary = fallback
+
     safe_remediation = safe_remediation_eligibility.classify_check_failure(
         name=name,
         diagnosis=primary,
