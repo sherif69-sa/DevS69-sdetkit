@@ -59,11 +59,15 @@ def _records(payload: Any) -> list[dict[str, Any]]:
     return rows
 
 
-def _find_safe_format_plan(payload: dict[str, Any]) -> dict[str, Any]:
+def _find_quality_format_plan(payload: dict[str, Any]) -> dict[str, Any]:
     for row in _records(payload):
-        if row.get("safe_to_auto_fix") is True and row.get("allowed_strategy") == "run_pre_commit":
+        if (
+            row.get("failure_surface") == "quality"
+            and row.get("classification") == "quality_contract"
+            and row.get("allowed_strategy") == "review_first_quality_contract"
+        ):
             return row
-    raise AssertionError(f"no safe run_pre_commit plan found in {payload}")
+    raise AssertionError(f"no review-first quality format plan found in {payload}")
 
 
 def test_end_to_end_formatting_remediation_scenario_harness(tmp_path: Path) -> None:
@@ -136,10 +140,12 @@ def test_end_to_end_formatting_remediation_scenario_harness(tmp_path: Path) -> N
     )
     diagnostic_records = _records(diagnostic_vector)
 
+    assert diagnostic_records
     assert any(
-        row.get("safe_fix_candidate") is True
-        or row.get("safe_to_auto_fix") is True
-        or row.get("recommended_next_action") == "run_pre_commit"
+        row.get("failure_surface") == "quality"
+        and row.get("kind") == "format_drift"
+        and row.get("tool") == "ruff"
+        and target_file in row.get("likely_owner_files", [])
         for row in diagnostic_records
     )
 
@@ -147,11 +153,12 @@ def test_end_to_end_formatting_remediation_scenario_harness(tmp_path: Path) -> N
         diagnostic_vector,
         generated_at="2026-05-20T00:30:00Z",
     )
-    safe_plan = _find_safe_format_plan(remediation_plan)
+    quality_plan = _find_quality_format_plan(remediation_plan)
 
-    assert safe_plan["safe_to_auto_fix"] is True
-    assert safe_plan["allowed_strategy"] == "run_pre_commit"
-    assert target_file in safe_plan.get("affected_files", [])
+    assert quality_plan["safe_to_auto_fix"] is False
+    assert quality_plan["allowed_strategy"] == "review_first_quality_contract"
+    assert target_file in quality_plan.get("affected_files", [])
+    assert "review quality failure" in quality_plan.get("human_review_action", "")
 
     plan_path = _write_json(tmp_path / "remediation-plan.json", remediation_plan)
     autopilot_out = tmp_path / "autopilot"
@@ -180,14 +187,8 @@ def test_end_to_end_formatting_remediation_scenario_harness(tmp_path: Path) -> N
 
     bridge_json = sorted(autopilot_out.rglob("*.json"))
     assert bridge_json, bridge.stdout + bridge.stderr
-    bridge_payloads = [
-        json.loads(path.read_text(encoding="utf-8"))
-        for path in bridge_json
-    ]
-    bridge_text = "\n".join(
-        json.dumps(payload, sort_keys=True)
-        for payload in bridge_payloads
-    )
+    bridge_payloads = [json.loads(path.read_text(encoding="utf-8")) for path in bridge_json]
+    bridge_text = "\n".join(json.dumps(payload, sort_keys=True) for payload in bridge_payloads)
     assert str(plan_path) in bridge_text
     assert "safe bridge only" in bridge_text
     assert "review_first_security_review" not in bridge_text
