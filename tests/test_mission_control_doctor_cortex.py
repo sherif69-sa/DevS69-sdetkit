@@ -2,6 +2,8 @@ import json
 
 from sdetkit import mission_control
 
+HIDDEN_DOCTOR_DETAIL = "diagnostic" + "-detail-alpha"
+
 
 def _fake_doctor_cortex(repo, out_dir):
     diagnosis_path = out_dir / "doctor-cortex-diagnosis.json"
@@ -20,6 +22,7 @@ def _fake_doctor_cortex(repo, out_dir):
             "status": "pass",
             "severity": "low",
             "diagnosis_count": 0,
+            "detail": HIDDEN_DOCTOR_DETAIL,
         },
         "prescriptions": {
             "status": "pass",
@@ -67,38 +70,25 @@ def test_mission_control_run_includes_doctor_cortex(tmp_path, monkeypatch):
     assert bundle["doctor_cortex"] == {
         "enabled": True,
         "ok": True,
-        "diagnosis": {
-            "status": "pass",
-            "severity": "low",
-            "diagnosis_count": 0,
-        },
-        "prescriptions": {
-            "status": "pass",
-            "severity": "low",
-            "prescription_count": 0,
-        },
-        "artifacts": [
-            {
-                "label": "Doctor Cortex diagnosis contract",
-                "kind": "json",
-                "path": (out_dir / "doctor-cortex-diagnosis.json").as_posix(),
-            },
-            {
-                "label": "Doctor Cortex prescription contract",
-                "kind": "json",
-                "path": (out_dir / "doctor-cortex-prescriptions.json").as_posix(),
-            },
-        ],
+        "diagnosis_status": "pass",
+        "diagnosis_severity": "low",
+        "diagnosis_count": 0,
+        "prescription_status": "pass",
+        "prescription_severity": "low",
+        "prescription_count": 0,
     }
 
     labels = {artifact["label"] for artifact in bundle["artifacts"]}
     assert "Doctor Cortex diagnosis contract" in labels
     assert "Doctor Cortex prescription contract" in labels
 
+    json_text = (out_dir / "mission-control.json").read_text(encoding="utf-8")
     markdown = (out_dir / "mission-control.md").read_text(encoding="utf-8")
     assert "## Doctor Cortex" in markdown
     assert "Diagnosis count: 0" in markdown
     assert "Prescription count: 0" in markdown
+    assert HIDDEN_DOCTOR_DETAIL not in json_text
+    assert HIDDEN_DOCTOR_DETAIL not in markdown
 
 
 def test_mission_control_summarize_prints_doctor_cortex(tmp_path, monkeypatch, capsys):
@@ -129,6 +119,7 @@ def test_mission_control_summarize_prints_doctor_cortex(tmp_path, monkeypatch, c
     assert "doctor_cortex_ok=true" in output
     assert "doctor_cortex_diagnosis_count=0" in output
     assert "doctor_cortex_prescription_count=0" in output
+    assert HIDDEN_DOCTOR_DETAIL not in output
 
 
 def test_mission_control_report_includes_doctor_cortex_section(tmp_path, monkeypatch):
@@ -167,3 +158,4 @@ def test_mission_control_report_includes_doctor_cortex_section(tmp_path, monkeyp
     assert "## Doctor Cortex" in report
     assert "Diagnosis status: pass" in report
     assert "Prescription status: pass" in report
+    assert HIDDEN_DOCTOR_DETAIL not in report
