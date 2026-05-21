@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Objection closeout\n\n## Objection closeout\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "objection-closeout",
     "page_path": "docs/integrations-objection-workflow.md",
     "required_inputs": [

@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Continuous upgrade closeout 11\n\n## Continuous upgrade closeout\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "continuous-upgrade-closeout-11",
     "page_path": "docs/integrations-continuous-upgrade-closeout-11.md",
     "summary_json": "continuous-upgrade-closeout-11-summary.json",

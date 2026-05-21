@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# KPI instrumentation ()\n\n## KPI instrumentation\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "kpi-instrumentation",
     "page_path": "docs/integrations-kpi-instrumentation.md",
     "required_inputs": ["docs/artifacts/demo-asset2-pack/demo-asset2-summary.json"],

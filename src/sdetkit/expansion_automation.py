@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Expansion automation\n\n## Expansion automation\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "expansion-automation",
     "page_path": "docs/integrations-expansion-automation.md",
     "required_inputs": ["docs/artifacts/scale-lane-pack/scale-lane-summary.json"],

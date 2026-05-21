@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# KPI deep audit closeout\n\n## KPI deep audit closeout\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "kpi-deep-audit-closeout",
     "page_path": "docs/integrations-kpi-deep-audit-workflow.md",
     "required_inputs": [

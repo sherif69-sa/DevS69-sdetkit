@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Playbook post\n\n## Playbook post\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "playbook-post",
     "page_path": "docs/integrations-playbook-post.md",
     "required_inputs": ["docs/artifacts/distribution-batch-pack/distribution-batch-summary.json"],

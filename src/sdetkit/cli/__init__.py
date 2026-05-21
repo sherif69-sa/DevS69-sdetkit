@@ -15,13 +15,10 @@ from ..versioning import tool_version
 __all__ = ["import_module", "tool_version", "_run_module_main", "main"]
 
 
-_def_cached: ModuleType | None = None
-
-
 def _load_legacy_cli_module() -> ModuleType:
-    global _def_cached
-    if _def_cached is not None:
-        return _def_cached
+    cached = getattr(_load_legacy_cli_module, "_cached_module", None)
+    if isinstance(cached, ModuleType):
+        return cached
     module_path = Path(__file__).resolve().parent.parent / "cli.py"
     spec = importlib.util.spec_from_file_location("sdetkit._legacy_cli_module", module_path)
     if spec is None or spec.loader is None:
@@ -30,7 +27,7 @@ def _load_legacy_cli_module() -> ModuleType:
     spec.loader.exec_module(module)
     if not hasattr(module, "_sdetkit_orig_run_module_main"):
         module._sdetkit_orig_run_module_main = module._run_module_main
-    _def_cached = module
+    _load_legacy_cli_module._cached_module = module
     return module
 
 

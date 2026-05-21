@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Community program closeout ()\n\n## Community program closeout\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "community-program-closeout",
     "page_path": "docs/integrations-community-program-workflow.md",
     "required_inputs": [

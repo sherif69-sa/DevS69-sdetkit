@@ -6,6 +6,7 @@ _DEFAULT_PAGE_TEMPLATE = (
     "# Execution prioritization closeout\n\n## Execution prioritization closeout\n"
 )
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "execution-prioritization-closeout",
     "page_path": "docs/integrations-execution-prioritization-workflow.md",
     "required_inputs": [

@@ -33,7 +33,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_objection_handling_contract.py --skip-evidence",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# FAQ and objections
+_DEFAULT_PAGE_TEMPLATE = f"""{_SECTION_HEADER}
 
 Objection handling turns recurring adoption blockers into deterministic answers that teams can validate before launches.
 

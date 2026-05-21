@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Phase-2 kickoff ()\n\n## Phase-2 kickoff\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "phase2-kickoff",
     "page_path": "docs/integrations-phase2-kickoff.md",
     "required_inputs": [

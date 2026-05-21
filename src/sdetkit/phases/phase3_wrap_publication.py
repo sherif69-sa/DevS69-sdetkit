@@ -394,7 +394,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")
-    parser.add_argument("--emit-pack-dir")
+    parser.add_argument("--emit-pack-dir", help=f"Canonical pack dir: {_CANONICAL_PACK_DIR}")
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--evidence-dir")
     parser.add_argument("--write-default-doc", action="store_true")

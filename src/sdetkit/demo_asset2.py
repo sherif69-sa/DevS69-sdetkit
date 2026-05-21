@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Demo asset #2 ()\n\n## Demo asset #2\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "demo-asset2",
     "page_path": "docs/integrations-demo-asset2.md",
     "required_inputs": ["docs/artifacts/demo-asset-pack/demo-asset-summary.json"],

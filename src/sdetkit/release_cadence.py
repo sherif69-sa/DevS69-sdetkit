@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Release cadence ()\n\n## Release cadence\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "release-cadence",
     "page_path": "docs/integrations-release-cadence.md",
     "required_inputs": ["docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json"],
