@@ -282,26 +282,6 @@ jobs:
             --pr-quality-safe-bridge-only \
             --out-dir build/pr-quality/safe-formatting-autopilot
 
-      - name: Build PR trajectory artifact
-        if: always()
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPOSITORY: ${{ github.repository }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          mkdir -p build/pr-quality/trajectory
-          PYTHONPATH=src python -m sdetkit.trajectory_store \
-            --pr-quality-action-report build/pr-quality/check-intelligence/action-report.json \
-            --check-intelligence build/pr-quality/check-intelligence/check-intelligence.json \
-            --out build/pr-quality/trajectory/trajectory.jsonl \
-            --repo "$REPOSITORY" \
-            --branch "$HEAD_REF" \
-            --commit-sha "$HEAD_SHA" \
-            --pr-number "$PR_NUMBER" \
-            --format json \
-            > build/pr-quality/trajectory/trajectory-metadata.json
-
       - name: Build PR comment body
         run: |
           mkdir -p build/pr-quality
@@ -319,6 +299,19 @@ jobs:
             --changed-files build/pr-quality/changed-files.txt \
             --out build/pr-quality/pr-evidence-narrative.md \
             --json-out build/pr-quality/pr-evidence-narrative.json
+
+          mkdir -p build/pr-quality/trajectory
+          PYTHONPATH=src python -m sdetkit.trajectory_store \
+            --pr-quality-action-report build/pr-quality/check-intelligence/action-report.json \
+            --check-intelligence build/pr-quality/check-intelligence/check-intelligence.json \
+            --evidence-narrative build/pr-quality/pr-evidence-narrative.json \
+            --out build/pr-quality/trajectory/trajectory.jsonl \
+            --repo "${{ github.repository }}" \
+            --branch "${{ github.event.pull_request.head.ref }}" \
+            --commit-sha "${{ github.event.pull_request.head.sha }}" \
+            --pr-number "${{ github.event.pull_request.number }}" \
+            --format json \
+            > build/pr-quality/trajectory/trajectory-metadata.json
 
           PYTHONPATH=src python -m sdetkit.pr_quality_action_report \
             --action-report build/pr-quality/check-intelligence/action-report.json \
