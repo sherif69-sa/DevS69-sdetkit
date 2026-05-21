@@ -107,7 +107,7 @@ def test_action_report_preserves_primary_blocker_first_failure(tmp_path: Path) -
     report = check_intelligence.build_action_report(intelligence)
 
     primary = report["primary_blocker"]
-    assert primary["first_failure_line"] == "Traceback (most recent call last):"
+    assert primary["first_failure_line"] == "RuntimeError: command failed"
     assert primary["first_failure"]["tool"] == "python"
     assert primary["first_failure"]["kind"] == "runtime_failure"
 
