@@ -185,8 +185,11 @@ def test_pr_quality_comment_workflow_passes_evidence_narrative_into_final_commen
     narrative_step = text.index("python -m sdetkit.pr_quality_evidence_narrative")
     narrative_json = text.index("--json-out build/pr-quality/pr-evidence-narrative.json")
     action_report_step = text.index("python -m sdetkit.pr_quality_action_report")
-    evidence_arg = text.index("--evidence-narrative build/pr-quality/pr-evidence-narrative.json")
-    comment_out = text.index("--out build/pr-quality/pr-comment-body.md")
+    evidence_arg = text.index(
+        "--evidence-narrative build/pr-quality/pr-evidence-narrative.json",
+        action_report_step,
+    )
+    comment_out = text.index("--out build/pr-quality/pr-comment-body.md", action_report_step)
 
     assert narrative_step < narrative_json < action_report_step
     assert action_report_step < evidence_arg < comment_out
@@ -232,17 +235,18 @@ def test_pr_quality_comment_workflow_builds_and_passes_trajectory_artifact() -> 
     text = _workflow_text()
 
     check_intelligence = text.index("python -m sdetkit.check_intelligence")
-    trajectory = text.index("Build PR trajectory artifact")
+    evidence_narrative = text.index("python -m sdetkit.pr_quality_evidence_narrative")
+    trajectory = text.index("python -m sdetkit.trajectory_store")
     comment_body = text.index("python -m sdetkit.pr_quality_action_report")
 
-    assert check_intelligence < trajectory < comment_body
-    assert "python -m sdetkit.trajectory_store" in text
+    assert check_intelligence < evidence_narrative < trajectory < comment_body
     assert (
         "--pr-quality-action-report build/pr-quality/check-intelligence/action-report.json" in text
     )
     assert (
         "--check-intelligence build/pr-quality/check-intelligence/check-intelligence.json" in text
     )
+    assert "--evidence-narrative build/pr-quality/pr-evidence-narrative.json" in text
     assert "--out build/pr-quality/trajectory/trajectory.jsonl" in text
     assert "> build/pr-quality/trajectory/trajectory-metadata.json" in text
     assert "--trajectory-jsonl build/pr-quality/trajectory/trajectory.jsonl" in text

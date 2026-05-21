@@ -282,3 +282,200 @@ def test_pr_quality_trajectory_cli_writes_artifact(tmp_path: Path, capsys) -> No
     assert printed["summary"]["auto_fix_allowed_count"] == 1
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["action"] == "run_pre_commit"
+
+
+def _green_pr_quality_action_report() -> dict:
+    return {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {
+            "attempted": False,
+            "allowed": False,
+            "reason": "no remediation needed",
+        },
+        "recommended_actions": [],
+        "proof_commands": [],
+    }
+
+
+def _green_pr_quality_check_intelligence() -> dict:
+    return {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+    }
+
+
+def _evidence_review_narrative() -> dict:
+    return {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "pr_quality",
+            "title": "PR Quality evidence changed",
+        },
+        "graph": {
+            "node_count": 2,
+            "review_first_count": 1,
+            "critical_count": 0,
+            "top_blocker": {
+                "title": "PR Quality evidence changed",
+                "surface": "pr_quality",
+                "action": "review",
+                "review_first": True,
+            },
+        },
+        "next_proof": [
+            "python -m pytest -q tests/test_pr_quality_evidence_narrative.py -o addopts=",
+            "python -m pre_commit run -a",
+        ],
+    }
+
+
+def _evidence_proof_narrative() -> dict:
+    return {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "pr_quality",
+            "title": "PR Quality proof changed",
+        },
+        "graph": {
+            "node_count": 2,
+            "review_first_count": 0,
+            "critical_count": 0,
+            "top_blocker": {
+                "title": "PR Quality proof changed",
+                "surface": "pr_quality",
+                "action": "rerun_proof",
+                "review_first": False,
+            },
+        },
+        "next_proof": ["python -m pre_commit run -a"],
+    }
+
+
+def test_pr_quality_trajectory_records_capture_green_evidence_review_signal() -> None:
+    from sdetkit.trajectory_store import build_pr_quality_trajectory_records
+
+    records = build_pr_quality_trajectory_records(
+        action_report=_green_pr_quality_action_report(),
+        check_intelligence=_green_pr_quality_check_intelligence(),
+        evidence_narrative=_evidence_review_narrative(),
+        repo="sherif69-sa/DevS69-sdetkit",
+        branch="feature/trajectory-evidence-review-records",
+        commit_sha="abc123",
+        pr_number=1389,
+    )
+
+    assert len(records) == 1
+    record = records[0]
+    assert record["environment"]["source"] == "pr_quality"
+    assert record["diagnosis"]["failure_class"] == "evidence_review_signal"
+    assert record["diagnosis"]["risk_surface"] == "pr_quality"
+    assert record["decision"]["review_first"] is True
+    assert record["decision"]["auto_fix_allowed"] is False
+    assert record["action"] == "review"
+    assert record["final_result"] == "evidence_review_required"
+
+
+def test_pr_quality_trajectory_records_capture_green_evidence_proof_signal() -> None:
+    from sdetkit.trajectory_store import build_pr_quality_trajectory_records
+
+    records = build_pr_quality_trajectory_records(
+        action_report=_green_pr_quality_action_report(),
+        check_intelligence=_green_pr_quality_check_intelligence(),
+        evidence_narrative=_evidence_proof_narrative(),
+        repo="sherif69-sa/DevS69-sdetkit",
+        branch="feature/trajectory-evidence-review-records",
+        commit_sha="abc123",
+        pr_number=1389,
+    )
+
+    assert len(records) == 1
+    record = records[0]
+    assert record["diagnosis"]["failure_class"] == "evidence_proof_signal"
+    assert record["decision"]["review_first"] is False
+    assert record["decision"]["auto_fix_allowed"] is False
+    assert record["action"] == "rerun_proof"
+    assert record["response"]["response_type"] == "evidence_proof_signal"
+    assert record["final_result"] == "proof_signal"
+
+
+def test_pr_quality_trajectory_cli_writes_green_evidence_review_record(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    action_path = tmp_path / "action-report.json"
+    intelligence_path = tmp_path / "check-intelligence.json"
+    narrative_path = tmp_path / "pr-evidence-narrative.json"
+    out = tmp_path / "trajectory.jsonl"
+
+    action_path.write_text(json.dumps(_green_pr_quality_action_report()), encoding="utf-8")
+    intelligence_path.write_text(
+        json.dumps(_green_pr_quality_check_intelligence()),
+        encoding="utf-8",
+    )
+    narrative_path.write_text(json.dumps(_evidence_review_narrative()), encoding="utf-8")
+
+    rc = main(
+        [
+            "--pr-quality-action-report",
+            str(action_path),
+            "--check-intelligence",
+            str(intelligence_path),
+            "--evidence-narrative",
+            str(narrative_path),
+            "--out",
+            str(out),
+            "--repo",
+            "sherif69-sa/DevS69-sdetkit",
+            "--branch",
+            "feature/trajectory-evidence-review-records",
+            "--commit-sha",
+            "abc123",
+            "--pr-number",
+            "1389",
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["summary"]["record_count"] == 1
+    assert printed["summary"]["review_first_count"] == 1
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["action"] == "review"
+    assert payload["final_result"] == "evidence_review_required"
+
+
+def test_pr_quality_comment_can_show_green_evidence_review_trajectory_summary() -> None:
+    from sdetkit import pr_quality_action_report as report
+    from sdetkit.trajectory_store import build_pr_quality_trajectory_records
+
+    records = build_pr_quality_trajectory_records(
+        action_report=_green_pr_quality_action_report(),
+        check_intelligence=_green_pr_quality_check_intelligence(),
+        evidence_narrative=_evidence_review_narrative(),
+        repo="sherif69-sa/DevS69-sdetkit",
+        branch="feature/trajectory-evidence-review-records",
+        commit_sha="abc123",
+        pr_number=1389,
+    )
+
+    body = report.render_comment_body(
+        action_report=_green_pr_quality_action_report(),
+        check_intelligence=_green_pr_quality_check_intelligence(),
+        evidence_narrative=_evidence_review_narrative(),
+        trajectory_records=records,
+    )
+
+    assert "SDETKit Review Result: Green with evidence review" in body
+    assert "## Evidence review signal" in body
+    assert "## Trajectory summary" in body
+    assert "Records: `1`" in body
+    assert "Review-first decisions: `1`" in body
+    assert "`evidence_review_required`=1" in body
+    assert "`pr-quality-evidence-signal-evidence-review-signal`: action=`review`" in body

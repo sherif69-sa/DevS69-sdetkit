@@ -32,6 +32,13 @@ def _bool(value: Any) -> bool:
     return str(value).lower() in {"1", "true", "yes"}
 
 
+def _int(value: Any) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def _string_list(value: Any) -> list[str]:
     return sorted({_string(item) for item in _as_list(value) if _string(item)})
 
@@ -178,17 +185,70 @@ def _pr_quality_primary_as_check(action_report: Mapping[str, Any]) -> JsonObject
     }
 
 
+def _evidence_narrative_as_check(evidence_narrative: Mapping[str, Any]) -> JsonObject:
+    primary = _as_dict(evidence_narrative.get("primary_signal"))
+    graph = _as_dict(evidence_narrative.get("graph"))
+    top_blocker = _as_dict(graph.get("top_blocker"))
+
+    kind = _string(primary.get("kind"))
+    title = _string(primary.get("title") or top_blocker.get("title"))
+    surface = _string(primary.get("surface") or top_blocker.get("surface") or "unknown")
+    action = _string(top_blocker.get("action") or primary.get("action"))
+    top_title = _string(top_blocker.get("title"))
+    top_surface = _string(top_blocker.get("surface"))
+
+    has_narrative_signal = kind in {"review_signal", "integration_proof"}
+    has_top_blocker = bool(top_title) and top_title != "none" and top_surface != "none"
+    if not has_narrative_signal and not has_top_blocker:
+        return {}
+
+    review_required = (
+        _int(graph.get("review_first_count")) > 0
+        or _int(graph.get("critical_count")) > 0
+        or action == "review"
+        or _bool(top_blocker.get("review_first"))
+    )
+    signal_kind = "review" if review_required else "proof"
+    code = "EVIDENCE_REVIEW_SIGNAL" if review_required else "EVIDENCE_PROOF_SIGNAL"
+    action = action or ("review" if review_required else "rerun_proof")
+
+    return {
+        "name": "PR Quality evidence signal",
+        "surface": surface,
+        "code": code,
+        "title": title or "PR Quality evidence signal",
+        "safe_to_auto_fix": False,
+        "review_first": review_required,
+        "evidence_signal": True,
+        "evidence_signal_kind": signal_kind,
+        "operator_action": action,
+        "diagnosis": {
+            "code": code,
+            "title": title or "PR Quality evidence signal",
+            "risk_surface": surface,
+            "diagnosis": title or "PR Quality evidence signal",
+            "proof_commands": _string_list(evidence_narrative.get("next_proof")),
+            "confidence": "high" if review_required else "medium",
+        },
+    }
+
+
 def _pr_quality_checks(
     *,
     action_report: Mapping[str, Any],
     check_intelligence: Mapping[str, Any],
+    evidence_narrative: Mapping[str, Any] | None = None,
 ) -> list[JsonObject]:
     failed_checks = [_as_dict(item) for item in _as_list(check_intelligence.get("failed_checks"))]
     if failed_checks:
         return failed_checks
 
     primary = _pr_quality_primary_as_check(action_report)
-    return [primary] if primary else []
+    if primary:
+        return [primary]
+
+    evidence = _evidence_narrative_as_check(_as_dict(evidence_narrative))
+    return [evidence] if evidence else []
 
 
 def _pr_quality_action(
@@ -206,6 +266,7 @@ def build_pr_quality_trajectory_records(
     *,
     action_report: Mapping[str, Any],
     check_intelligence: Mapping[str, Any],
+    evidence_narrative: Mapping[str, Any] | None = None,
     safe_fix_outcome: Mapping[str, Any] | None = None,
     repo: str = "",
     branch: str = "",
@@ -222,6 +283,7 @@ def build_pr_quality_trajectory_records(
         _pr_quality_checks(
             action_report=action_report,
             check_intelligence=check_intelligence,
+            evidence_narrative=evidence_narrative,
         ),
         start=1,
     ):
@@ -239,7 +301,10 @@ def build_pr_quality_trajectory_records(
             or automation.get("allowed")
             or check.get("safe_to_auto_fix")
         )
-        review_first = _bool(check.get("review_first")) or not auto_fix_allowed
+        evidence_signal = _bool(check.get("evidence_signal"))
+        review_first = _bool(check.get("review_first")) or (
+            not auto_fix_allowed and not evidence_signal
+        )
         proof_commands = _string_list(diagnosis.get("proof_commands")) or default_proof_commands
         owner_files = (
             _string_list(check.get("owner_files"))
@@ -248,7 +313,7 @@ def build_pr_quality_trajectory_records(
             or _string_list(check.get("formatter_changed_files"))
         )
         patch_files = _string_list(check.get("formatter_changed_files")) if auto_fix_allowed else []
-        action = _pr_quality_action(
+        action = _string(check.get("operator_action")) or _pr_quality_action(
             surface=surface,
             safe_remediation=safe_remediation,
             auto_fix_allowed=auto_fix_allowed,
@@ -278,9 +343,15 @@ def build_pr_quality_trajectory_records(
                     "source": "pr_quality",
                 },
                 "response": {
-                    "response_type": "safe_fix_candidate"
-                    if auto_fix_allowed
-                    else f"{surface or 'unknown'}_review_required",
+                    "response_type": (
+                        "safe_fix_candidate"
+                        if auto_fix_allowed
+                        else (
+                            "evidence_proof_signal"
+                            if evidence_signal and not review_first
+                            else f"{surface or 'unknown'}_review_required"
+                        )
+                    ),
                     "exit_code": "unknown",
                     "first_failing_line": _first_failure_line(check),
                 },
@@ -315,9 +386,17 @@ def build_pr_quality_trajectory_records(
                     "quality_proof": "not_run",
                     "verifier_result": "not_run",
                 },
-                "final_result": _final_result(
-                    {"safe_to_auto_fix": auto_fix_allowed},
-                    outcome,
+                "final_result": (
+                    "evidence_review_required"
+                    if evidence_signal and review_first
+                    else (
+                        "proof_signal"
+                        if evidence_signal
+                        else _final_result(
+                            {"safe_to_auto_fix": auto_fix_allowed},
+                            outcome,
+                        )
+                    )
                 ),
                 "learned_pattern": "pr_quality_check_intelligence",
             }
@@ -453,6 +532,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--remediation-plan", default="")
     parser.add_argument("--pr-quality-action-report", default="")
     parser.add_argument("--check-intelligence", default="")
+    parser.add_argument("--evidence-narrative", default="")
     parser.add_argument("--safe-fix-outcome", default="")
     parser.add_argument("--out", default=DEFAULT_OUT)
     parser.add_argument("--repo", default="")
@@ -476,6 +556,7 @@ def main(argv: list[str] | None = None) -> int:
             records = build_pr_quality_trajectory_records(
                 action_report=_read_json(_optional_path(args.pr_quality_action_report)),
                 check_intelligence=_read_json(_optional_path(args.check_intelligence)),
+                evidence_narrative=_read_json(_optional_path(args.evidence_narrative)),
                 safe_fix_outcome=_read_json(_optional_path(args.safe_fix_outcome)),
                 repo=args.repo,
                 branch=args.branch,
