@@ -160,3 +160,125 @@ def test_trajectory_store_cli_writes_jsonl(tmp_path: Path, capsys) -> None:
     assert stdout["summary"]["record_count"] == 2
     assert stdout["summary"]["trajectory_jsonl"] == out.as_posix()
     assert len(out.read_text(encoding="utf-8").splitlines()) == 2
+
+
+def _pr_quality_action_report() -> dict:
+    return {
+        "status": "safe_fix_available",
+        "primary_blocker": {
+            "check": "autopilot",
+            "title": "Formatter drift blocked pre-commit",
+            "surface": "quality",
+            "code": "PRE_COMMIT_FORMAT_DRIFT",
+            "impact": "pre-commit changed a deterministic formatting file.",
+            "formatter_changed_files": ["tools/maintenance_autopilot.py"],
+            "safe_to_auto_fix": True,
+            "safe_remediation": {
+                "safe_to_auto_fix": True,
+                "strategy": "run_pre_commit",
+                "reason": "Failure is limited to deterministic formatting or whitespace hooks.",
+            },
+        },
+        "automation": {
+            "attempted": False,
+            "allowed": True,
+            "reason": "diagnosis is approved for narrow mechanical safe-fix planning",
+        },
+        "recommended_actions": ["Run pre-commit on the affected files."],
+        "proof_commands": ["python -m pre_commit run -a"],
+    }
+
+
+def _pr_quality_check_intelligence() -> dict:
+    return {
+        "checks_seen": 3,
+        "failed_checks": [
+            {
+                "name": "autopilot",
+                "safe_to_auto_fix": True,
+                "surface": "quality",
+                "code": "PRE_COMMIT_FORMAT_DRIFT",
+                "title": "Formatter drift blocked pre-commit",
+                "first_failure_line": "RuntimeError: command failed (1): python -m pre_commit run -a",
+                "formatter_changed_files": ["tools/maintenance_autopilot.py"],
+                "safe_remediation": {
+                    "safe_to_auto_fix": True,
+                    "strategy": "run_pre_commit",
+                    "reason": "Failure is limited to deterministic formatting or whitespace hooks.",
+                },
+                "diagnosis": {
+                    "code": "PRE_COMMIT_FORMAT_DRIFT",
+                    "title": "Formatter drift blocked pre-commit",
+                    "risk_surface": "quality",
+                    "diagnosis": "pre-commit formatting drift was detected.",
+                    "proof_commands": ["python -m pre_commit run -a"],
+                },
+            }
+        ],
+        "queued_checks": [],
+        "startup_failures": [],
+    }
+
+
+def test_pr_quality_trajectory_records_capture_safe_formatter_decision() -> None:
+    from sdetkit.trajectory_store import build_pr_quality_trajectory_records
+
+    records = build_pr_quality_trajectory_records(
+        action_report=_pr_quality_action_report(),
+        check_intelligence=_pr_quality_check_intelligence(),
+        repo="sherif69-sa/DevS69-sdetkit",
+        branch="feature/pr-quality-build-trajectory-artifact",
+        commit_sha="abc123",
+        pr_number=1388,
+    )
+
+    assert len(records) == 1
+    record = records[0]
+    assert record["environment"]["source"] == "pr_quality"
+    assert record["diagnosis"]["failure_class"] == "pre_commit_format_drift"
+    assert record["diagnosis"]["risk_surface"] == "quality"
+    assert record["decision"]["auto_fix_allowed"] is True
+    assert record["decision"]["review_first"] is False
+    assert record["action"] == "run_pre_commit"
+    assert record["fix"]["patch_files"] == ["tools/maintenance_autopilot.py"]
+    assert record["proof"]["commands"] == ["python -m pre_commit run -a"]
+    assert record["final_result"] == "safe_fix_candidate"
+
+
+def test_pr_quality_trajectory_cli_writes_artifact(tmp_path: Path, capsys) -> None:
+    action_path = tmp_path / "action-report.json"
+    intelligence_path = tmp_path / "check-intelligence.json"
+    out = tmp_path / "trajectory.jsonl"
+    action_path.write_text(json.dumps(_pr_quality_action_report()), encoding="utf-8")
+    intelligence_path.write_text(
+        json.dumps(_pr_quality_check_intelligence()),
+        encoding="utf-8",
+    )
+
+    rc = main(
+        [
+            "--pr-quality-action-report",
+            str(action_path),
+            "--check-intelligence",
+            str(intelligence_path),
+            "--out",
+            str(out),
+            "--repo",
+            "sherif69-sa/DevS69-sdetkit",
+            "--branch",
+            "feature/pr-quality-build-trajectory-artifact",
+            "--commit-sha",
+            "abc123",
+            "--pr-number",
+            "1388",
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["summary"]["record_count"] == 1
+    assert printed["summary"]["auto_fix_allowed_count"] == 1
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["action"] == "run_pre_commit"

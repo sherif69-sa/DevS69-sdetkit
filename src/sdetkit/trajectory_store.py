@@ -135,6 +135,197 @@ def _trajectory_id(*, repo: str, commit_sha: str, diagnosis_id: str, action: str
     return _slug(basis)
 
 
+def _failure_class(value: str) -> str:
+    return _slug(value).replace("-", "_")
+
+
+def _first_failure_line(check: Mapping[str, Any]) -> str:
+    first_failure = _as_dict(check.get("first_failure"))
+    return _string(check.get("first_failure_line") or first_failure.get("line"))
+
+
+def _pr_quality_primary_as_check(action_report: Mapping[str, Any]) -> JsonObject:
+    primary = _as_dict(action_report.get("primary_blocker"))
+    if not primary:
+        return {}
+
+    automation = _as_dict(action_report.get("automation"))
+    diagnosis = {
+        "code": _string(primary.get("code") or "UNKNOWN"),
+        "title": _string(primary.get("title") or "PR Quality review required"),
+        "risk_surface": _string(primary.get("surface") or "unknown"),
+        "diagnosis": _string(primary.get("impact")),
+        "proof_commands": _string_list(action_report.get("proof_commands")),
+        "recommended_fix": _string_list(action_report.get("recommended_actions")),
+    }
+
+    return {
+        "name": _string(primary.get("check") or "pr_quality"),
+        "url": _string(primary.get("url")),
+        "diagnosis": diagnosis,
+        "surface": _string(primary.get("surface") or "unknown"),
+        "code": _string(primary.get("code") or "UNKNOWN"),
+        "title": _string(primary.get("title") or "PR Quality review required"),
+        "safe_to_auto_fix": _bool(primary.get("safe_to_auto_fix"))
+        or _bool(automation.get("allowed")),
+        "review_first": _bool(primary.get("review_first")) or not _bool(automation.get("allowed")),
+        "safe_remediation": _as_dict(primary.get("safe_remediation")),
+        "first_failure": _as_dict(primary.get("first_failure")),
+        "first_failure_line": _string(primary.get("first_failure_line")),
+        "formatter_changed_files": _string_list(primary.get("formatter_changed_files")),
+        "referenced_files": _string_list(primary.get("referenced_files")),
+        "owner_files": _string_list(primary.get("owner_files")),
+    }
+
+
+def _pr_quality_checks(
+    *,
+    action_report: Mapping[str, Any],
+    check_intelligence: Mapping[str, Any],
+) -> list[JsonObject]:
+    failed_checks = [_as_dict(item) for item in _as_list(check_intelligence.get("failed_checks"))]
+    if failed_checks:
+        return failed_checks
+
+    primary = _pr_quality_primary_as_check(action_report)
+    return [primary] if primary else []
+
+
+def _pr_quality_action(
+    *,
+    surface: str,
+    safe_remediation: Mapping[str, Any],
+    auto_fix_allowed: bool,
+) -> str:
+    if auto_fix_allowed:
+        return _string(safe_remediation.get("strategy")) or "run_safe_remediation"
+    return f"review_{_failure_class(surface or 'unknown')}_failure"
+
+
+def build_pr_quality_trajectory_records(
+    *,
+    action_report: Mapping[str, Any],
+    check_intelligence: Mapping[str, Any],
+    safe_fix_outcome: Mapping[str, Any] | None = None,
+    repo: str = "",
+    branch: str = "",
+    commit_sha: str = "",
+    pr_number: int = 0,
+    generated_at: str = DEFAULT_GENERATED_AT,
+) -> list[JsonObject]:
+    outcome = _as_dict(safe_fix_outcome)
+    automation = _as_dict(action_report.get("automation"))
+    default_proof_commands = _string_list(action_report.get("proof_commands"))
+    records: list[JsonObject] = []
+
+    for index, check in enumerate(
+        _pr_quality_checks(
+            action_report=action_report,
+            check_intelligence=check_intelligence,
+        ),
+        start=1,
+    ):
+        diagnosis = _as_dict(check.get("diagnosis"))
+        safe_remediation = _as_dict(check.get("safe_remediation"))
+        code = _string(diagnosis.get("code") or check.get("code") or "UNKNOWN")
+        surface = _string(
+            check.get("surface")
+            or diagnosis.get("risk_surface")
+            or diagnosis.get("surface")
+            or "unknown"
+        )
+        auto_fix_allowed = _bool(check.get("safe_to_auto_fix")) and _bool(
+            safe_remediation.get("safe_to_auto_fix")
+            or automation.get("allowed")
+            or check.get("safe_to_auto_fix")
+        )
+        review_first = _bool(check.get("review_first")) or not auto_fix_allowed
+        proof_commands = _string_list(diagnosis.get("proof_commands")) or default_proof_commands
+        owner_files = (
+            _string_list(check.get("owner_files"))
+            or _string_list(diagnosis.get("owner_files"))
+            or _string_list(check.get("referenced_files"))
+            or _string_list(check.get("formatter_changed_files"))
+        )
+        patch_files = _string_list(check.get("formatter_changed_files")) if auto_fix_allowed else []
+        action = _pr_quality_action(
+            surface=surface,
+            safe_remediation=safe_remediation,
+            auto_fix_allowed=auto_fix_allowed,
+        )
+        diagnostic_id = _slug(_string(check.get("name") or f"pr-quality-{index}") + "-" + code)
+
+        records.append(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "trajectory_id": _trajectory_id(
+                    repo=repo,
+                    commit_sha=commit_sha,
+                    diagnosis_id=diagnostic_id,
+                    action=action,
+                ),
+                "repo": repo,
+                "branch": branch,
+                "commit_sha": commit_sha,
+                "pr_number": pr_number,
+                "attempt_number": 1,
+                "generated_at": generated_at,
+                "diagnostic_id": diagnostic_id,
+                "action": action,
+                "command": proof_commands[0] if proof_commands else "none",
+                "environment": {
+                    "runner": "github_actions",
+                    "source": "pr_quality",
+                },
+                "response": {
+                    "response_type": "safe_fix_candidate"
+                    if auto_fix_allowed
+                    else f"{surface or 'unknown'}_review_required",
+                    "exit_code": "unknown",
+                    "first_failing_line": _first_failure_line(check),
+                },
+                "diagnosis": {
+                    "failure_class": _failure_class(code),
+                    "risk_surface": surface or "unknown",
+                    "root_cause": _string(
+                        diagnosis.get("diagnosis") or diagnosis.get("title") or check.get("title")
+                    ),
+                    "owner_files": owner_files,
+                    "confidence": _string(diagnosis.get("confidence")) or "medium",
+                },
+                "decision": {
+                    "review_first": review_first,
+                    "auto_fix_allowed": auto_fix_allowed,
+                    "reason": _string(
+                        safe_remediation.get("reason")
+                        or automation.get("reason")
+                        or check.get("title")
+                    ),
+                },
+                "fix": {
+                    "allowed_strategy": action,
+                    "patch_files": patch_files,
+                    "blocked_reason": ""
+                    if auto_fix_allowed
+                    else _string(automation.get("reason") or "review-first diagnosis"),
+                },
+                "proof": {
+                    "commands": proof_commands,
+                    "focused_proof": "not_run",
+                    "quality_proof": "not_run",
+                    "verifier_result": "not_run",
+                },
+                "final_result": _final_result(
+                    {"safe_to_auto_fix": auto_fix_allowed},
+                    outcome,
+                ),
+                "learned_pattern": "pr_quality_check_intelligence",
+            }
+        )
+
+    return records
+
+
 def build_trajectory_records(
     *,
     diagnostic_vector: Mapping[str, Any],
@@ -258,8 +449,10 @@ def write_trajectory_records(records: list[Mapping[str, Any]], out: Path) -> Jso
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m sdetkit.trajectory_store")
-    parser.add_argument("--diagnostic-vector", required=True)
+    parser.add_argument("--diagnostic-vector", default="")
     parser.add_argument("--remediation-plan", default="")
+    parser.add_argument("--pr-quality-action-report", default="")
+    parser.add_argument("--check-intelligence", default="")
     parser.add_argument("--safe-fix-outcome", default="")
     parser.add_argument("--out", default=DEFAULT_OUT)
     parser.add_argument("--repo", default="")
@@ -279,16 +472,34 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
     try:
-        records = build_trajectory_records(
-            diagnostic_vector=_read_json(Path(args.diagnostic_vector)),
-            remediation_plan=_read_json(_optional_path(args.remediation_plan)),
-            safe_fix_outcome=_read_json(_optional_path(args.safe_fix_outcome)),
-            repo=args.repo,
-            branch=args.branch,
-            commit_sha=args.commit_sha,
-            pr_number=args.pr_number,
-            generated_at=args.generated_at,
-        )
+        if args.pr_quality_action_report or args.check_intelligence:
+            records = build_pr_quality_trajectory_records(
+                action_report=_read_json(_optional_path(args.pr_quality_action_report)),
+                check_intelligence=_read_json(_optional_path(args.check_intelligence)),
+                safe_fix_outcome=_read_json(_optional_path(args.safe_fix_outcome)),
+                repo=args.repo,
+                branch=args.branch,
+                commit_sha=args.commit_sha,
+                pr_number=args.pr_number,
+                generated_at=args.generated_at,
+            )
+        else:
+            if not args.diagnostic_vector:
+                msg = (
+                    "either --diagnostic-vector or "
+                    "--pr-quality-action-report/--check-intelligence is required"
+                )
+                raise ValueError(msg)
+            records = build_trajectory_records(
+                diagnostic_vector=_read_json(Path(args.diagnostic_vector)),
+                remediation_plan=_read_json(_optional_path(args.remediation_plan)),
+                safe_fix_outcome=_read_json(_optional_path(args.safe_fix_outcome)),
+                repo=args.repo,
+                branch=args.branch,
+                commit_sha=args.commit_sha,
+                pr_number=args.pr_number,
+                generated_at=args.generated_at,
+            )
         summary = write_trajectory_records(records, Path(args.out))
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"error={exc}")

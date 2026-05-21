@@ -282,6 +282,26 @@ jobs:
             --pr-quality-safe-bridge-only \
             --out-dir build/pr-quality/safe-formatting-autopilot
 
+      - name: Build PR trajectory artifact
+        if: always()
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          mkdir -p build/pr-quality/trajectory
+          PYTHONPATH=src python -m sdetkit.trajectory_store \
+            --pr-quality-action-report build/pr-quality/check-intelligence/action-report.json \
+            --check-intelligence build/pr-quality/check-intelligence/check-intelligence.json \
+            --out build/pr-quality/trajectory/trajectory.jsonl \
+            --repo "$REPOSITORY" \
+            --branch "$HEAD_REF" \
+            --commit-sha "$HEAD_SHA" \
+            --pr-number "$PR_NUMBER" \
+            --format json \
+            > build/pr-quality/trajectory/trajectory-metadata.json
+
       - name: Build PR comment body
         run: |
           mkdir -p build/pr-quality
@@ -304,6 +324,7 @@ jobs:
             --action-report build/pr-quality/check-intelligence/action-report.json \
             --check-intelligence build/pr-quality/check-intelligence/check-intelligence.json \
             --evidence-narrative build/pr-quality/pr-evidence-narrative.json \
+            --trajectory-jsonl build/pr-quality/trajectory/trajectory.jsonl \
             --out build/pr-quality/pr-comment-body.md \
             > build/pr-quality/pr-comment-metadata.json
 
@@ -359,6 +380,7 @@ jobs:
             build/pr-quality/check-logs/
             build/pr-quality/check-intelligence/
             build/pr-quality/safe-formatting-autopilot/
+            build/pr-quality/trajectory/
             build/pr-quality/pr-evidence-narrative.md
             build/sdetkit/evidence-graph/
             build/sdetkit/operator-loop/
@@ -393,6 +415,10 @@ jobs:
                 evidence_signal_kind: metadata.evidence_signal_kind || 'unknown',
                 evidence_signal_present: Boolean(metadata.evidence_signal_present),
                 evidence_review_required: Boolean(metadata.evidence_review_required),
+                trajectory_signal_present: Boolean(metadata.trajectory_signal_present),
+                trajectory_record_count: Number(metadata.trajectory_record_count || 0),
+                trajectory_review_first_count: Number(metadata.trajectory_review_first_count || 0),
+                trajectory_auto_fix_allowed_count: Number(metadata.trajectory_auto_fix_allowed_count || 0),
               };
               fs.mkdirSync(path.dirname(statusPath), { recursive: true });
               fs.writeFileSync(
@@ -477,6 +503,11 @@ jobs:
           evidence_signal_kind = str(payload.get("evidence_signal_kind", "unknown"))
           evidence_signal_present = bool(payload.get("evidence_signal_present", False))
           evidence_review_required = bool(payload.get("evidence_review_required", False))
+          trajectory_record_count = int(payload.get("trajectory_record_count", 0) or 0)
+          trajectory_review_first_count = int(payload.get("trajectory_review_first_count", 0) or 0)
+          trajectory_auto_fix_allowed_count = int(
+              payload.get("trajectory_auto_fix_allowed_count", 0) or 0
+          )
 
           print(f"comment_status={status}")
           print(f"comment_reason={reason}")
@@ -485,6 +516,9 @@ jobs:
           print(f"evidence_signal_kind={evidence_signal_kind}")
           print(f"evidence_signal_present={str(evidence_signal_present).lower()}")
           print(f"evidence_review_required={str(evidence_review_required).lower()}")
+          print(f"trajectory_record_count={trajectory_record_count}")
+          print(f"trajectory_review_first_count={trajectory_review_first_count}")
+          print(f"trajectory_auto_fix_allowed_count={trajectory_auto_fix_allowed_count}")
 
           if status not in {"posted", "updated"}:
               raise SystemExit(f"PR Quality comment was not posted or updated: status={status} reason={reason}")

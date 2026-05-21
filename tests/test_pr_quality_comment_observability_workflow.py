@@ -226,3 +226,41 @@ def test_pr_quality_workflow_uploads_safe_fix_outcome_artifacts() -> None:
     assert "Commit approved safe formatting fixes" in text
     assert "Build PR comment body" in text
     assert text.index("Commit approved safe formatting fixes") < text.index("Build PR comment body")
+
+
+def test_pr_quality_comment_workflow_builds_and_passes_trajectory_artifact() -> None:
+    text = _workflow_text()
+
+    check_intelligence = text.index("python -m sdetkit.check_intelligence")
+    trajectory = text.index("Build PR trajectory artifact")
+    comment_body = text.index("python -m sdetkit.pr_quality_action_report")
+
+    assert check_intelligence < trajectory < comment_body
+    assert "python -m sdetkit.trajectory_store" in text
+    assert (
+        "--pr-quality-action-report build/pr-quality/check-intelligence/action-report.json" in text
+    )
+    assert (
+        "--check-intelligence build/pr-quality/check-intelligence/check-intelligence.json" in text
+    )
+    assert "--out build/pr-quality/trajectory/trajectory.jsonl" in text
+    assert "> build/pr-quality/trajectory/trajectory-metadata.json" in text
+    assert "--trajectory-jsonl build/pr-quality/trajectory/trajectory.jsonl" in text
+    assert "build/pr-quality/trajectory/" in text
+
+
+def test_pr_quality_comment_workflow_exposes_trajectory_comment_metadata() -> None:
+    text = _workflow_text()
+
+    assert "trajectory_signal_present: Boolean(metadata.trajectory_signal_present)" in text
+    assert "trajectory_record_count: Number(metadata.trajectory_record_count || 0)" in text
+    assert (
+        "trajectory_review_first_count: Number(metadata.trajectory_review_first_count || 0)" in text
+    )
+    assert (
+        "trajectory_auto_fix_allowed_count: Number(metadata.trajectory_auto_fix_allowed_count || 0)"
+        in text
+    )
+    assert 'print(f"trajectory_record_count={trajectory_record_count}")' in text
+    assert 'print(f"trajectory_review_first_count={trajectory_review_first_count}")' in text
+    assert 'print(f"trajectory_auto_fix_allowed_count={trajectory_auto_fix_allowed_count}")' in text
