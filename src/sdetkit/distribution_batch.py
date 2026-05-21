@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Distribution batch\n\n## Distribution batch\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "distribution-batch",
     "page_path": "docs/integrations-distribution-batch.md",
     "required_inputs": ["docs/artifacts/experiment-lane-pack/experiment-lane-summary.json"],

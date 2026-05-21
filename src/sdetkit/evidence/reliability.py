@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Reliability closeout\n\n## Reliability closeout\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "reliability-closeout",
     "page_path": "docs/integrations-reliability-workflow.md",
     "required_inputs": [

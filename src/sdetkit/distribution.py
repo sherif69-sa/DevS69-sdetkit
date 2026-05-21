@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Distribution closeout\n\n## Distribution closeout\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "distribution-closeout",
     "page_path": "docs/integrations-distribution-workflow.md",
     "required_inputs": ["docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"],

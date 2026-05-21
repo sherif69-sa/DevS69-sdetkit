@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Weekly review closeout\n\n## Weekly review closeout\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "weekly-review-closeout",
     "page_path": "docs/integrations-weekly-review-workflow.md",
     "required_inputs": ["docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"],

@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Phase-1 wrap ()\n\n## Phase-1 wrap\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "phase1-wrap",
     "page_path": "docs/integrations-phase1-wrap.md",
     "required_inputs": [

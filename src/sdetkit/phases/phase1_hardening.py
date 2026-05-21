@@ -273,7 +273,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
     parser.add_argument("--strict", action="store_true")
-    parser.add_argument("--emit-pack-dir")
+    parser.add_argument(
+        "--emit-pack-dir",
+        help=f"Canonical pack dir: {_CANONICAL_PACK_DIR}; legacy pack dir: {_LEGACY_PACK_DIR}",
+    )
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--evidence-dir")
     parser.add_argument("--write-defaults", action="store_true")

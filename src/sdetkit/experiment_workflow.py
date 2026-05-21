@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Experiment lane\n\n## Experiment lane\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "experiment-lane",
     "page_path": "docs/integrations-experiment-lane.md",
     "required_inputs": [

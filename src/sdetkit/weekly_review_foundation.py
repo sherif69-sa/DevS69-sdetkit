@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Weekly review #4 ()\n\n## Weekly review lane\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "weekly-review-lane",
     "page_path": "docs/integrations-weekly-review.md",
     "required_inputs": [

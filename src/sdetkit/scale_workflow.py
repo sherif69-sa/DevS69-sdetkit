@@ -4,6 +4,7 @@ from ._legacy_workflow import run_lane
 
 _DEFAULT_PAGE_TEMPLATE = "# Scale lane\n\n## Scale lane\n"
 _CFG = {
+    "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "scale-lane",
     "page_path": "docs/integrations-scale-lane.md",
     "required_inputs": ["docs/artifacts/playbook-post-pack/playbook-post-summary.json"],
