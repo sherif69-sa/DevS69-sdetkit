@@ -939,36 +939,14 @@ def _format_doctor_cortex(summary: dict[str, Any] | None) -> list[str]:
     if not isinstance(prescriptions, dict):
         prescriptions = {}
 
-    diagnosis_status = summary.get("diagnosis_status", diagnosis.get("status", "unknown"))
-    diagnosis_severity = summary.get(
-        "diagnosis_severity",
-        diagnosis.get("severity", "unknown"),
-    )
-    diagnosis_count = summary.get(
-        "diagnosis_count",
-        diagnosis.get("diagnosis_count", 0),
-    )
-    prescription_status = summary.get(
-        "prescription_status",
-        prescriptions.get("status", "unknown"),
-    )
-    prescription_severity = summary.get(
-        "prescription_severity",
-        prescriptions.get("severity", "unknown"),
-    )
-    prescription_count = summary.get(
-        "prescription_count",
-        prescriptions.get("prescription_count", 0),
-    )
-
     return [
         f"- OK: {str(summary.get('ok', False)).lower()}",
-        f"- Diagnosis status: {diagnosis_status}",
-        f"- Diagnosis severity: {diagnosis_severity}",
-        f"- Diagnosis count: {diagnosis_count}",
-        f"- Prescription status: {prescription_status}",
-        f"- Prescription severity: {prescription_severity}",
-        f"- Prescription count: {prescription_count}",
+        f"- Diagnosis status: {diagnosis.get('status', 'unknown')}",
+        f"- Diagnosis severity: {diagnosis.get('severity', 'unknown')}",
+        f"- Diagnosis count: {diagnosis.get('diagnosis_count', 0)}",
+        f"- Prescription status: {prescriptions.get('status', 'unknown')}",
+        f"- Prescription severity: {prescriptions.get('severity', 'unknown')}",
+        f"- Prescription count: {prescriptions.get('prescription_count', 0)}",
     ]
 
 
@@ -1161,7 +1139,7 @@ def render_markdown(bundle: dict[str, Any]) -> str:
         "",
         "## Doctor Cortex",
         "",
-        "- Details omitted from markdown artifact to avoid clear-text storage of sensitive diagnostic/prescription content.",
+        *_format_doctor_cortex(bundle.get("doctor_cortex")),
         "",
         "## Evidence Graph",
         "",
@@ -1196,164 +1174,12 @@ def render_markdown(bundle: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _artifact_text(value: Any, fallback: str = "unknown") -> str:
-    if value is None:
-        return fallback
-    text = str(value).strip()
-    return text if text else fallback
-
-
-def _artifact_int(value: Any) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
-
-
-def _artifact_bool(value: Any) -> bool:
-    return bool(value)
-
-
-def _doctor_cortex_public_summary(value: Any) -> dict[str, Any]:
-    if not isinstance(value, dict) or not value.get("enabled"):
-        return {"enabled": False}
-
-    diagnosis = value.get("diagnosis", {})
-    prescriptions = value.get("prescriptions", {})
-    if not isinstance(diagnosis, dict):
-        diagnosis = {}
-    if not isinstance(prescriptions, dict):
-        prescriptions = {}
-
-    return {
-        "enabled": True,
-        "ok": _artifact_bool(value.get("ok")),
-        "diagnosis_status": _artifact_text(
-            value.get("diagnosis_status", diagnosis.get("status")),
-        ),
-        "diagnosis_count": _artifact_int(
-            value.get("diagnosis_count", diagnosis.get("diagnosis_count")),
-        ),
-        "prescription_status": _artifact_text(
-            value.get("prescription_status", prescriptions.get("status")),
-        ),
-        "prescription_count": _artifact_int(
-            value.get("prescription_count", prescriptions.get("prescription_count")),
-        ),
-    }
-
-
-def _artifact_list(value: Any) -> list[dict[str, str]]:
-    if not isinstance(value, list):
-        return []
-
-    out: list[dict[str, str]] = []
-    for item in value:
-        if not isinstance(item, dict):
-            continue
-        out.append(
-            {
-                "label": _artifact_text(item.get("label"), "artifact"),
-                "kind": _artifact_text(item.get("kind"), "unknown"),
-                "path": _artifact_text(item.get("path"), ""),
-            }
-        )
-    return out
-
-
-def _step_list(value: Any) -> list[dict[str, Any]]:
-    if not isinstance(value, list):
-        return []
-
-    out: list[dict[str, Any]] = []
-    for item in value:
-        if not isinstance(item, dict):
-            continue
-        step: dict[str, Any] = {
-            "id": _artifact_text(item.get("id"), "step"),
-            "label": _artifact_text(item.get("label"), "step"),
-            "command": _artifact_text(item.get("command"), ""),
-            "status": _artifact_text(item.get("status"), "unknown"),
-            "tier": _artifact_text(item.get("tier"), "unknown"),
-            "executable": _artifact_bool(item.get("executable")),
-        }
-        if "executed" in item:
-            step["executed"] = _artifact_bool(item.get("executed"))
-        if "rc" in item:
-            step["rc"] = _artifact_int(item.get("rc"))
-        if "elapsed_ms" in item:
-            step["elapsed_ms"] = _artifact_int(item.get("elapsed_ms"))
-        if "stdout_path" in item:
-            step["stdout_path"] = _artifact_text(item.get("stdout_path"), "")
-        if "stderr_path" in item:
-            step["stderr_path"] = _artifact_text(item.get("stderr_path"), "")
-        out.append(step)
-    return out
-
-
-def _finding_list(value: Any) -> list[dict[str, str]]:
-    if not isinstance(value, list):
-        return []
-
-    out: list[dict[str, str]] = []
-    for item in value:
-        if not isinstance(item, dict):
-            continue
-        code = _artifact_text(item.get("code"), "FINDING")
-        out.append(
-            {
-                "severity": _artifact_text(item.get("severity"), "warning"),
-                "code": code,
-                "message": f"{code} requires review.",
-            }
-        )
-    return out
-
-
-def _redacted_bundle_for_output(bundle: dict[str, Any]) -> dict[str, Any]:
-    repo = bundle.get("repo", {})
-    if not isinstance(repo, dict):
-        repo = {}
-
-    safe_bundle: dict[str, Any] = {
-        "schema_version": _artifact_text(bundle.get("schema_version"), SCHEMA_VERSION),
-        "run_id": _artifact_text(bundle.get("run_id")),
-        "generated_at_utc": _artifact_text(bundle.get("generated_at_utc")),
-        "ok": _artifact_bool(bundle.get("ok")),
-        "mode": _artifact_text(bundle.get("mode"), "plan"),
-        "decision": _artifact_text(bundle.get("decision"), "unknown"),
-        "risk_band": _artifact_text(bundle.get("risk_band"), "unknown"),
-        "repo": {
-            "path": _artifact_text(repo.get("path"), ""),
-            "branch": _artifact_text(repo.get("branch"), "unknown"),
-            "commit": _artifact_text(repo.get("commit"), "unknown"),
-            "dirty": _artifact_bool(repo.get("dirty")),
-        },
-        "executed_step_count": _artifact_int(bundle.get("executed_step_count")),
-        "passed_step_count": _artifact_int(bundle.get("passed_step_count")),
-        "failed_step_count": _artifact_int(bundle.get("failed_step_count")),
-        "doctor_cortex": _doctor_cortex_public_summary(bundle.get("doctor_cortex")),
-        "evidence_graph": _evidence_graph_ledger_summary(bundle) or {"enabled": False},
-        "adaptive_failure_bundle": _adaptive_failure_bundle_ledger_summary(bundle)
-        or {"enabled": False},
-        "patch_plan": _review_first_patch_plan_ledger_summary(bundle) or {"enabled": False},
-        "steps": _step_list(bundle.get("steps")),
-        "findings": _finding_list(bundle.get("findings")),
-        "artifacts": _artifact_list(bundle.get("artifacts")),
-        "next_actions": _step_list(bundle.get("next_actions")),
-    }
-    return safe_bundle
-
-
 def write_bundle(bundle: dict[str, Any], out_dir: Path) -> tuple[Path, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     json_path = out_dir / "mission-control.json"
     md_path = out_dir / "mission-control.md"
-    safe_bundle = _redacted_bundle_for_output(bundle)
-    json_payload = json.dumps(safe_bundle, indent=2, sort_keys=True) + "\n"
-    markdown_payload = render_markdown(safe_bundle)
-    json_path.write_text(json_payload, encoding="utf-8")
-    md_path.write_text(markdown_payload, encoding="utf-8")
+    json_path.write_text(json.dumps(bundle, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    md_path.write_text(render_markdown(bundle), encoding="utf-8")
     return json_path, md_path
 
 
@@ -1732,7 +1558,7 @@ def _run(args: argparse.Namespace) -> int:
 
 def _summarize(args: argparse.Namespace) -> int:
     path = Path(args.bundle)
-    bundle = _redacted_bundle_for_output(json.loads(path.read_text(encoding="utf-8")))
+    bundle = json.loads(path.read_text(encoding="utf-8"))
     print(f"run_id={bundle.get('run_id', 'unknown')}")
     print(f"decision={bundle['decision']}")
     print(f"risk_band={bundle['risk_band']}")

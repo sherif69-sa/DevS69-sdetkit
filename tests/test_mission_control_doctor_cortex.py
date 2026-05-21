@@ -67,10 +67,28 @@ def test_mission_control_run_includes_doctor_cortex(tmp_path, monkeypatch):
     assert bundle["doctor_cortex"] == {
         "enabled": True,
         "ok": True,
-        "diagnosis_status": "pass",
-        "diagnosis_count": 0,
-        "prescription_status": "pass",
-        "prescription_count": 0,
+        "diagnosis": {
+            "status": "pass",
+            "severity": "low",
+            "diagnosis_count": 0,
+        },
+        "prescriptions": {
+            "status": "pass",
+            "severity": "low",
+            "prescription_count": 0,
+        },
+        "artifacts": [
+            {
+                "label": "Doctor Cortex diagnosis contract",
+                "kind": "json",
+                "path": (out_dir / "doctor-cortex-diagnosis.json").as_posix(),
+            },
+            {
+                "label": "Doctor Cortex prescription contract",
+                "kind": "json",
+                "path": (out_dir / "doctor-cortex-prescriptions.json").as_posix(),
+            },
+        ],
     }
 
     labels = {artifact["label"] for artifact in bundle["artifacts"]}
@@ -79,7 +97,8 @@ def test_mission_control_run_includes_doctor_cortex(tmp_path, monkeypatch):
 
     markdown = (out_dir / "mission-control.md").read_text(encoding="utf-8")
     assert "## Doctor Cortex" in markdown
-    assert "Details omitted from markdown artifact" in markdown
+    assert "Diagnosis count: 0" in markdown
+    assert "Prescription count: 0" in markdown
 
 
 def test_mission_control_summarize_prints_doctor_cortex(tmp_path, monkeypatch, capsys):
