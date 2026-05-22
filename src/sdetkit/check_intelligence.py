@@ -918,25 +918,68 @@ def _open_code_scanning_alerts(payload: Any) -> list[JsonObject]:
     ]
 
 
+def _empty_code_scanning_review(
+    *,
+    collected: bool,
+    collection_status: str,
+    source: str,
+    collection_reason: str,
+    current_head_sha: str,
+) -> JsonObject:
+    return {
+        "collected": collected,
+        "collection_status": collection_status,
+        "collection_reason": collection_reason,
+        "source": source,
+        "open_alerts": 0,
+        "current_alerts": 0,
+        "stale_alerts": 0,
+        "unknown_freshness_alerts": 0,
+        "current_head_sha": current_head_sha,
+        "rule_counts": {},
+        "findings": [],
+    }
+
+
 def _code_scanning_review_summary(
     alerts_json: Path | None,
     *,
     current_head_sha: str = "",
 ) -> JsonObject:
-    if alerts_json is None or not alerts_json.exists():
-        return {
-            "collected": False,
-            "source": alerts_json.as_posix() if alerts_json else "",
-            "open_alerts": 0,
-            "current_alerts": 0,
-            "stale_alerts": 0,
-            "unknown_freshness_alerts": 0,
-            "current_head_sha": current_head_sha,
-            "rule_counts": {},
-            "findings": [],
-        }
+    if alerts_json is None:
+        return _empty_code_scanning_review(
+            collected=False,
+            collection_status="not_requested",
+            collection_reason="No code-scanning alert collection artifact was provided.",
+            source="",
+            current_head_sha=current_head_sha,
+        )
+
+    if not alerts_json.exists():
+        return _empty_code_scanning_review(
+            collected=False,
+            collection_status="unavailable",
+            collection_reason="The code-scanning alert collection artifact was not found.",
+            source=alerts_json.as_posix(),
+            current_head_sha=current_head_sha,
+        )
 
     payload = json.loads(alerts_json.read_text(encoding="utf-8"))
+    metadata = _as_dict(payload)
+    collection_status = _string(metadata.get("collection_status") or "collected").lower()
+    collection_reason = _string(metadata.get("collection_reason"))
+
+    if collection_status != "collected":
+        return _empty_code_scanning_review(
+            collected=False,
+            collection_status=collection_status or "unavailable",
+            collection_reason=(
+                collection_reason or "Code-scanning alert collection did not complete successfully."
+            ),
+            source=alerts_json.as_posix(),
+            current_head_sha=current_head_sha,
+        )
+
     findings: list[JsonObject] = []
     rule_counts: dict[str, int] = {}
 
@@ -983,6 +1026,8 @@ def _code_scanning_review_summary(
 
     return {
         "collected": True,
+        "collection_status": "collected",
+        "collection_reason": "",
         "source": alerts_json.as_posix(),
         "open_alerts": len(findings),
         "current_alerts": len([item for item in findings if item["freshness"] == "current"]),

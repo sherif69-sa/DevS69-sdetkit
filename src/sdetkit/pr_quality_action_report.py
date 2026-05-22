@@ -235,7 +235,16 @@ def _evidence_lines(check_intelligence: JsonObject, action_report: JsonObject) -
 
     if code_scanning:
         collected = "true" if bool(code_scanning.get("collected", False)) else "false"
+        collection_status = _string(
+            code_scanning.get("collection_status")
+            or ("collected" if collected == "true" else "unavailable")
+        )
+        collection_reason = _string(code_scanning.get("collection_reason"))
+
         lines.append(f"- Code scanning review collected: `{collected}`")
+        lines.append(f"- Code scanning collection status: `{collection_status}`")
+        if collection_reason:
+            lines.append(f"- Code scanning collection reason: {collection_reason}")
         lines.append(f"- Open code scanning alerts: `{_int(code_scanning.get('open_alerts'))}`")
         lines.append(
             f"- Current code scanning alerts: `{_int(code_scanning.get('current_alerts'))}`"
@@ -244,6 +253,24 @@ def _evidence_lines(check_intelligence: JsonObject, action_report: JsonObject) -
         unknown_count = _int(code_scanning.get("unknown_freshness_alerts"))
         if unknown_count:
             lines.append(f"- Unknown-freshness code scanning alerts: `{unknown_count}`")
+
+        findings = [
+            _as_dict(item)
+            for item in _as_list(code_scanning.get("findings"))
+            if isinstance(item, dict)
+        ]
+        for finding in findings[:5]:
+            freshness = _string(finding.get("freshness") or "unknown")
+            path = _string(finding.get("path") or "unknown")
+            line = _string(finding.get("line"))
+            location = f"{path}:{line}" if line else path
+            rule_id = _string(finding.get("rule_id") or "unknown")
+            severity = _string(finding.get("severity") or "unknown")
+            action = _string(finding.get("recommended_action") or "review_alert_freshness")
+            lines.append(
+                f"- Code scanning {freshness} finding: `{location}` "
+                f"(`{rule_id}`, severity=`{severity}`), action=`{action}`"
+            )
 
     return lines
 

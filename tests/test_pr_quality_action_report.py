@@ -1443,3 +1443,92 @@ def test_comment_does_not_clear_unresolved_security_review_evidence() -> None:
     assert "Unresolved security findings: `1`" in body
     assert "- File: `src/sdetkit/protected_verifier.py:141`" in body
     assert "Security review cleared for changed code" not in body
+
+
+def test_action_report_renders_current_code_scanning_alert_location() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 1,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+        "code_scanning_review": {
+            "collected": True,
+            "collection_status": "collected",
+            "collection_reason": "",
+            "open_alerts": 2,
+            "current_alerts": 1,
+            "stale_alerts": 1,
+            "unknown_freshness_alerts": 0,
+            "findings": [
+                {
+                    "freshness": "current",
+                    "path": "src/sdetkit/current.py",
+                    "line": "14",
+                    "rule_id": "py/example",
+                    "severity": "warning",
+                    "recommended_action": "fix_current_alert_or_dismiss_reviewed_false_positive",
+                },
+                {
+                    "freshness": "stale",
+                    "path": "src/sdetkit/old.py",
+                    "line": "20",
+                    "rule_id": "py/example",
+                    "severity": "warning",
+                    "recommended_action": "wait_for_code_scanning_refresh",
+                },
+            ],
+        },
+    }
+
+    body = report.render_comment_body(action_report=action, check_intelligence=intelligence)
+
+    assert "Code scanning review collected: `true`" in body
+    assert "Code scanning collection status: `collected`" in body
+    assert "Current code scanning alerts: `1`" in body
+    assert "Stale code scanning alerts: `1`" in body
+    assert "Code scanning current finding: `src/sdetkit/current.py:14`" in body
+    assert "action=`fix_current_alert_or_dismiss_reviewed_false_positive`" in body
+    assert "Code scanning stale finding: `src/sdetkit/old.py:20`" in body
+
+
+def test_action_report_renders_unavailable_code_scanning_collection() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 1,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+        "code_scanning_review": {
+            "collected": False,
+            "collection_status": "unavailable",
+            "collection_reason": "GitHub code-scanning alerts API was unavailable or not permitted.",
+            "open_alerts": 0,
+            "current_alerts": 0,
+            "stale_alerts": 0,
+            "unknown_freshness_alerts": 0,
+            "findings": [],
+        },
+    }
+
+    body = report.render_comment_body(action_report=action, check_intelligence=intelligence)
+
+    assert "Code scanning review collected: `false`" in body
+    assert "Code scanning collection status: `unavailable`" in body
+    assert "GitHub code-scanning alerts API was unavailable or not permitted." in body
