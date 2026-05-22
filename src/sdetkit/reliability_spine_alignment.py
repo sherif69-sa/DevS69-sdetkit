@@ -204,9 +204,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
             integration_points=(
                 "trajectory_history_report",
                 "patch_scorer",
-                "RepoMemory",
+                "repo_memory",
             ),
-            recommended_next_action="feed read-only PatchScorer evidence without expanding automation",
+            recommended_next_action="feed candidate patterns into patch_scorer and repo_memory without expanding automation",
         ),
         _component(
             module="current_head_failure_bundle",
@@ -300,21 +300,33 @@ def build_alignment_components() -> list[AlignmentComponent]:
             integration_points=(
                 "patch_scorer",
                 "protected_verifier",
-                "RepoMemory",
+                "repo_memory",
             ),
             gaps=(
                 "current fixtures replay structural evidence without isolated command execution",
                 "anti-cheat runtime checks and fresh-workspace execution remain future work",
             ),
-            recommended_next_action="feed proven scenario outcomes into RepoMemory before automation wiring",
+            recommended_next_action="feed proven scenario outcomes into repo_memory and add isolated proof next",
         ),
         _component(
-            module="RepoMemory",
-            role="persist repeated failure patterns and proven decisions",
-            status="planned",
-            stages=("history", "decision"),
-            gaps=("not implemented yet", "should remain local-first initially"),
-            recommended_next_action="build after trajectory pattern insights are proven",
+            module="repo_memory",
+            role="produce local repo-specific memory profiles from trajectory and benchmark evidence",
+            status="partially_aligned",
+            stages=("history", "decision", "reporting"),
+            existing_artifacts=(
+                "repo-memory-profile.json",
+                "repo-memory-profile.md",
+            ),
+            integration_points=(
+                "trajectory_pattern_insights",
+                "replayable_benchmark_harness",
+                "protected_verifier",
+            ),
+            gaps=(
+                "read-only profiles do not execute proof commands",
+                "flaky-test registry ingestion and persistent profile updates are not implemented",
+            ),
+            recommended_next_action="add isolated proof-command execution before any automation wiring",
         ),
     ]
 
@@ -352,7 +364,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/repo-memory-profiles",
+        "next_recommended_pr": "feature/protected-verifier-isolated-proof-runner",
     }
 
 
