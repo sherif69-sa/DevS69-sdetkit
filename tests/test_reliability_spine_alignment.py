@@ -28,6 +28,7 @@ def test_alignment_components_cover_current_reliability_spine() -> None:
     assert "protected_verifier" in modules
     assert "replayable_benchmark_harness" in modules
     assert "repo_memory" in modules
+    assert "isolated_proof_runner" in modules
 
 
 def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
@@ -35,9 +36,9 @@ def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
     status_counts = report["status_counts"]
 
     assert status_counts["aligned"] >= 8
-    assert status_counts["partially_aligned"] >= 8
+    assert status_counts["partially_aligned"] >= 9
     assert status_counts.get("planned", 0) == 0
-    assert report["next_recommended_pr"] == "feature/protected-verifier-isolated-proof-runner"
+    assert report["next_recommended_pr"] == "feature/protected-verifier-git-inventory-collector"
 
 
 def test_alignment_stage_counts_cover_every_spine_stage() -> None:
@@ -58,14 +59,16 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert "protected_verifier" in gaps_by_module
     assert "replayable_benchmark_harness" in gaps_by_module
     assert "repo_memory" in gaps_by_module
+    assert "isolated_proof_runner" in gaps_by_module
     assert any("protected_verifier" in gap for gap in gaps_by_module["maintenance_autopilot"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["patch_scorer"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["protected_verifier"])
+    assert any("git-backed collector" in gap for gap in gaps_by_module["isolated_proof_runner"])
+    assert any("network isolation" in gap for gap in gaps_by_module["isolated_proof_runner"])
     assert any(
-        "isolated command execution" in gap
-        for gap in gaps_by_module["replayable_benchmark_harness"]
+        "isolated_proof_runner" in gap for gap in gaps_by_module["replayable_benchmark_harness"]
     )
-    assert any("proof commands" in gap for gap in gaps_by_module["repo_memory"])
+    assert any("isolated_proof_runner" in gap for gap in gaps_by_module["repo_memory"])
 
 
 def test_alignment_markdown_renders_operator_audit() -> None:
@@ -82,6 +85,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert "`protected_verifier`: `partially_aligned`" in markdown
     assert "`replayable_benchmark_harness`: `partially_aligned`" in markdown
     assert "`repo_memory`: `partially_aligned`" in markdown
+    assert "`isolated_proof_runner`: `partially_aligned`" in markdown
 
 
 def test_alignment_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
@@ -105,7 +109,7 @@ def test_alignment_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     markdown = markdown_out.read_text(encoding="utf-8")
 
     assert printed["report"]["component_count"] == saved["component_count"]
-    assert saved["next_recommended_pr"] == "feature/protected-verifier-isolated-proof-runner"
+    assert saved["next_recommended_pr"] == "feature/protected-verifier-git-inventory-collector"
     assert "Reliability spine alignment audit" in markdown
 
 
@@ -151,6 +155,7 @@ def test_alignment_has_no_behavior_mutation_surfaces() -> None:
         "protected_verifier",
         "replayable_benchmark_harness",
         "repo_memory",
+        "isolated_proof_runner",
     }
 
     assert "maintenance_autopilot" not in report_modules

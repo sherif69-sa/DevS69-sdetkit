@@ -278,14 +278,37 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             integration_points=(
                 "patch_scorer",
+                "isolated_proof_runner",
                 "replayable_benchmark_harness",
                 "maintenance_autopilot",
             ),
             gaps=(
-                "structural proof does not establish semantic equivalence",
+                "git-derived changed-file inventory is not connected yet",
+                "structural and allowlisted command proof do not establish semantic equivalence",
                 "not wired into automation",
             ),
-            recommended_next_action="build replayable remediation scenarios before any automation wiring",
+            recommended_next_action="consume isolated proof evidence only after git-backed inventory is added",
+        ),
+        _component(
+            module="isolated_proof_runner",
+            role="execute allowlisted proof profiles in a disposable workspace copy and capture results",
+            status="partially_aligned",
+            stages=("proof", "verifier", "reporting"),
+            existing_artifacts=(
+                "verification-evidence.json",
+                "verification-evidence.md",
+            ),
+            integration_points=(
+                "protected_verifier",
+                "replayable_benchmark_harness",
+                "repo_memory",
+            ),
+            gaps=(
+                "changed-file inventory remains caller supplied until a git-backed collector exists",
+                "network isolation is reported but not enforced",
+                "benchmark scenarios do not yet replay live proof-runner output",
+            ),
+            recommended_next_action="add git-backed changed-file inventory before any automation connection",
         ),
         _component(
             module="replayable_benchmark_harness",
@@ -303,10 +326,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "repo_memory",
             ),
             gaps=(
-                "current fixtures replay structural evidence without isolated command execution",
-                "anti-cheat runtime checks and fresh-workspace execution remain future work",
+                "current fixtures do not yet replay isolated_proof_runner execution evidence",
+                "anti-cheat runtime checks and git-grounded inventory remain future work",
             ),
-            recommended_next_action="feed proven scenario outcomes into repo_memory and add isolated proof next",
+            recommended_next_action="replay git-grounded isolated proof evidence before automation wiring",
         ),
         _component(
             module="repo_memory",
@@ -323,10 +346,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "protected_verifier",
             ),
             gaps=(
-                "read-only profiles do not execute proof commands",
+                "profiles do not yet ingest isolated_proof_runner execution outcomes",
                 "flaky-test registry ingestion and persistent profile updates are not implemented",
             ),
-            recommended_next_action="add isolated proof-command execution before any automation wiring",
+            recommended_next_action="ingest git-grounded isolated proof outcomes before automation wiring",
         ),
     ]
 
@@ -364,7 +387,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/protected-verifier-isolated-proof-runner",
+        "next_recommended_pr": "feature/protected-verifier-git-inventory-collector",
     }
 
 
