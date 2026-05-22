@@ -26,10 +26,16 @@ def _review_threads(*threads: dict) -> dict:
     }
 
 
-def _thread(*, resolved: bool, body: str, author: str = "github-advanced-security") -> dict:
+def _thread(
+    *,
+    resolved: bool,
+    body: str,
+    author: str = "github-advanced-security",
+    outdated: bool = False,
+) -> dict:
     return {
         "isResolved": resolved,
-        "isOutdated": False,
+        "isOutdated": outdated,
         "path": "src/sdetkit/adaptive_diagnosis.py",
         "line": 1320,
         "comments": {
@@ -75,6 +81,27 @@ def test_security_review_evidence_ignores_resolved_threads(tmp_path: Path) -> No
     path = _write_json(
         tmp_path / "review-threads.json",
         _review_threads(_thread(resolved=True, body="sdetkit-security-gate / High entropy string")),
+    )
+
+    payload = security_review.build_security_review_evidence(path)
+
+    assert payload["state"] == "healthy"
+    assert payload["active_threat_count"] == 0
+    assert payload["active_threats"] == []
+
+
+def test_security_review_evidence_ignores_outdated_security_threads(
+    tmp_path: Path,
+) -> None:
+    path = _write_json(
+        tmp_path / "review-threads.json",
+        _review_threads(
+            _thread(
+                resolved=False,
+                outdated=True,
+                body="review requested",
+            )
+        ),
     )
 
     payload = security_review.build_security_review_evidence(path)

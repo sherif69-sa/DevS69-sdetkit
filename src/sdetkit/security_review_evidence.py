@@ -105,7 +105,7 @@ def _finding_id(thread: JsonObject, comment: JsonObject) -> str:
 def findings_from_review_threads(payload: JsonObject) -> list[JsonObject]:
     findings: list[JsonObject] = []
     for thread in _thread_nodes(payload):
-        if bool(thread.get("isResolved", False)):
+        if bool(thread.get("isResolved", False)) or bool(thread.get("isOutdated", False)):
             continue
 
         security_comments = [
