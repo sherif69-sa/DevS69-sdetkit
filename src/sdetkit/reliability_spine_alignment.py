@@ -189,8 +189,21 @@ def build_alignment_components() -> list[AlignmentComponent]:
             status="aligned",
             stages=("history", "reporting"),
             existing_artifacts=("trajectory history JSON/Markdown reports",),
-            integration_points=("trajectory_store",),
-            recommended_next_action="feed future pattern insights and RepoMemory",
+            integration_points=("trajectory_store", "trajectory_pattern_insights"),
+            recommended_next_action="feed trajectory pattern insights and later RepoMemory",
+        ),
+        _component(
+            module="trajectory_pattern_insights",
+            role="detect recurring review-first and safe-fix patterns from trajectory history",
+            status="aligned",
+            stages=("history", "decision", "reporting"),
+            existing_artifacts=("trajectory pattern insights JSON/Markdown reports",),
+            integration_points=(
+                "trajectory_history_report",
+                "PatchScorer",
+                "RepoMemory",
+            ),
+            recommended_next_action="feed a local PatchScorer prototype without expanding automation",
         ),
         _component(
             module="current_head_failure_bundle",
@@ -305,7 +318,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/trajectory-pattern-insights",
+        "next_recommended_pr": "feature/patch-scorer-prototype",
     }
 
 
