@@ -117,8 +117,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
             stages=("decision", "remediation_eligibility", "proof"),
             existing_artifacts=("remediation plans",),
             integration_points=("diagnostic_vector_engine", "trajectory_store", "patch_scorer"),
-            gaps=("needs ProtectedVerifier feedback before broader mutation use",),
-            recommended_next_action="feed plans through PatchScorer before protected proof",
+            gaps=(
+                "needs structural verifier results and later semantic proof before broader mutation use",
+            ),
+            recommended_next_action="feed plans through PatchScorer and protected_verifier reporting",
         ),
         _component(
             module="safe_remediation_eligibility",
@@ -140,9 +142,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             gaps=(
                 "PatchScorer exists but is not wired into automation yet",
-                "needs ProtectedVerifier before broader automation",
+                "protected_verifier exists only as read-only structural evaluation",
             ),
-            recommended_next_action="keep formatting-only until PatchScorer and ProtectedVerifier are wired",
+            recommended_next_action="keep formatting-only and unwired until stronger verification exists",
         ),
         _component(
             module="pr_quality_evidence_narrative",
@@ -257,21 +259,33 @@ def build_alignment_components() -> list[AlignmentComponent]:
             integration_points=(
                 "remediation_plan_engine",
                 "trajectory_pattern_insights",
-                "ProtectedVerifier",
+                "protected_verifier",
             ),
             gaps=(
                 "read-only prototype is not wired into maintenance_autopilot",
-                "requires ProtectedVerifier before eligible scores may influence automation",
+                "structural verification does not yet prove semantic equivalence",
             ),
-            recommended_next_action="build ProtectedVerifier prototype and keep automation unchanged",
+            recommended_next_action="feed candidates to protected_verifier without changing automation",
         ),
         _component(
-            module="ProtectedVerifier",
-            role="prove fixes without weakening tests, CI, security, or public behavior",
-            status="planned",
-            stages=("proof", "verifier"),
-            gaps=("not implemented yet",),
-            recommended_next_action="build after PatchScorer prototype",
+            module="protected_verifier",
+            role="verify PatchScorer candidate scope and captured proof results without authorizing mutation",
+            status="partially_aligned",
+            stages=("proof", "verifier", "reporting"),
+            existing_artifacts=(
+                "protected-verifier-result.json",
+                "protected-verifier-result.md",
+            ),
+            integration_points=(
+                "patch_scorer",
+                "ReplayableBenchmarkHarness",
+                "maintenance_autopilot",
+            ),
+            gaps=(
+                "structural proof does not establish semantic equivalence",
+                "not wired into automation",
+            ),
+            recommended_next_action="build replayable remediation scenarios before any automation wiring",
         ),
         _component(
             module="ReplayableBenchmarkHarness",
@@ -325,7 +339,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/protected-verifier-prototype",
+        "next_recommended_pr": "feature/replayable-remediation-scenario-harness",
     }
 
 

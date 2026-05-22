@@ -25,7 +25,7 @@ def test_alignment_components_cover_current_reliability_spine() -> None:
     assert "trajectory_pattern_insights" in modules
     assert "maintenance_autopilot" in modules
     assert "patch_scorer" in modules
-    assert "ProtectedVerifier" in modules
+    assert "protected_verifier" in modules
     assert "ReplayableBenchmarkHarness" in modules
     assert "RepoMemory" in modules
 
@@ -35,9 +35,9 @@ def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
     status_counts = report["status_counts"]
 
     assert status_counts["aligned"] >= 8
-    assert status_counts["partially_aligned"] >= 5
-    assert status_counts["planned"] >= 3
-    assert report["next_recommended_pr"] == "feature/protected-verifier-prototype"
+    assert status_counts["partially_aligned"] >= 6
+    assert status_counts["planned"] >= 2
+    assert report["next_recommended_pr"] == "feature/replayable-remediation-scenario-harness"
 
 
 def test_alignment_stage_counts_cover_every_spine_stage() -> None:
@@ -55,9 +55,10 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
 
     assert "maintenance_autopilot" in gaps_by_module
     assert "patch_scorer" in gaps_by_module
-    assert "ProtectedVerifier" in gaps_by_module
-    assert any("PatchScorer exists" in gap for gap in gaps_by_module["maintenance_autopilot"])
-    assert any("ProtectedVerifier" in gap for gap in gaps_by_module["patch_scorer"])
+    assert "protected_verifier" in gaps_by_module
+    assert any("protected_verifier" in gap for gap in gaps_by_module["maintenance_autopilot"])
+    assert any("semantic equivalence" in gap for gap in gaps_by_module["patch_scorer"])
+    assert any("semantic equivalence" in gap for gap in gaps_by_module["protected_verifier"])
 
 
 def test_alignment_markdown_renders_operator_audit() -> None:
@@ -71,6 +72,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert "`maintenance_autopilot`: `partially_aligned`" in markdown
     assert "`trajectory_pattern_insights`: `aligned`" in markdown
     assert "`patch_scorer`: `partially_aligned`" in markdown
+    assert "`protected_verifier`: `partially_aligned`" in markdown
 
 
 def test_alignment_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
@@ -94,7 +96,7 @@ def test_alignment_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     markdown = markdown_out.read_text(encoding="utf-8")
 
     assert printed["report"]["component_count"] == saved["component_count"]
-    assert saved["next_recommended_pr"] == "feature/protected-verifier-prototype"
+    assert saved["next_recommended_pr"] == "feature/replayable-remediation-scenario-harness"
     assert "Reliability spine alignment audit" in markdown
 
 
@@ -137,6 +139,7 @@ def test_alignment_has_no_behavior_mutation_surfaces() -> None:
         "trajectory_history_report",
         "pr_quality_action_report",
         "patch_scorer",
+        "protected_verifier",
     }
 
     assert "maintenance_autopilot" not in report_modules

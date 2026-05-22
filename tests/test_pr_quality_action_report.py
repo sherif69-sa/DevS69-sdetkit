@@ -1378,3 +1378,68 @@ def test_action_report_cli_accepts_trajectory_jsonl(tmp_path: Path, capsys) -> N
     assert printed["trajectory_review_first_count"] == 1
     assert printed["trajectory_auto_fix_allowed_count"] == 1
     assert "## Trajectory summary" in out.read_text(encoding="utf-8")
+
+
+def test_comment_does_not_clear_unresolved_security_review_evidence() -> None:
+    from sdetkit import pr_quality_action_report as report
+
+    body = report.render_comment_body(
+        action_report={
+            "status": "review_required",
+            "primary_blocker": {
+                "check": "GitHub security review",
+                "title": "Security review requires action in src/sdetkit/protected_verifier.py",
+                "surface": "security",
+                "code": "_".join(("SECURITY", "REVIEW", "FINDING")),
+                "path": "src/sdetkit/protected_verifier.py",
+                "line": 141,
+                "impact": "An unresolved security review finding requires human review.",
+            },
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": (
+                    "security review findings are review-first and cannot be auto-dismissed"
+                ),
+            },
+            "recommended_actions": [],
+            "proof_commands": [],
+        },
+        check_intelligence={
+            "checks_seen": 1,
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+            "security_review": {
+                "collected": True,
+                "unresolved_findings": 1,
+                "findings": [],
+            },
+            "code_scanning_review": {},
+        },
+        evidence_narrative={
+            "quality": {"ok": True, "coverage_percent": "96.69"},
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "security",
+                "title": "Security review requires action",
+            },
+            "graph": {
+                "node_count": 1,
+                "review_first_count": 1,
+                "critical_count": 1,
+                "top_blocker": {
+                    "title": "Security review requires action",
+                    "surface": "security",
+                    "action": "review",
+                    "review_first": True,
+                },
+            },
+        },
+    )
+
+    assert "SDETKit Review Result: Action required" in body
+    assert "Unresolved security findings: `1`" in body
+    assert "- File: `src/sdetkit/protected_verifier.py:141`" in body
+    assert "Security review cleared for changed code" not in body

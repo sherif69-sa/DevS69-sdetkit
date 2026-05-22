@@ -881,18 +881,15 @@ def _security_review_summary(review_threads_json: Path | None) -> JsonObject:
             "source": review_threads_json.as_posix(),
         }
 
-    try:
-        from .security_review_evidence import findings_from_review_threads
+    from .security_review_evidence import findings_from_review_threads
 
-        findings = findings_from_review_threads(review_threads_json)
-    except Exception:
-        findings = []
+    findings = findings_from_review_threads(_read_json(review_threads_json))
 
     compact_findings = [
         {
             "title": _string(item.get("title")),
             "summary": _string(item.get("summary") or item.get("message")),
-            "path": _string(item.get("path")),
+            "path": _string(item.get("path") or next(iter(_as_list(item.get("owner_files"))), "")),
             "line": item.get("line", ""),
             "comment_url": _string(item.get("comment_url") or item.get("url")),
             "recommended_commands": [
