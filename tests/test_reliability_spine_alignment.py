@@ -22,6 +22,7 @@ def test_alignment_components_cover_current_reliability_spine() -> None:
     assert "check_intelligence" in modules
     assert "trajectory_store" in modules
     assert "trajectory_history_report" in modules
+    assert "trajectory_pattern_insights" in modules
     assert "maintenance_autopilot" in modules
     assert "PatchScorer" in modules
     assert "ProtectedVerifier" in modules
@@ -36,7 +37,7 @@ def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
     assert status_counts["aligned"] >= 8
     assert status_counts["partially_aligned"] >= 4
     assert status_counts["planned"] >= 4
-    assert report["next_recommended_pr"] == "feature/trajectory-pattern-insights"
+    assert report["next_recommended_pr"] == "feature/patch-scorer-prototype"
 
 
 def test_alignment_stage_counts_cover_every_spine_stage() -> None:
@@ -68,6 +69,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert "## Components" in markdown
     assert "`check_intelligence`: `aligned`" in markdown
     assert "`maintenance_autopilot`: `partially_aligned`" in markdown
+    assert "`trajectory_pattern_insights`: `aligned`" in markdown
     assert "`PatchScorer`: `planned`" in markdown
 
 
@@ -92,7 +94,7 @@ def test_alignment_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     markdown = markdown_out.read_text(encoding="utf-8")
 
     assert printed["report"]["component_count"] == saved["component_count"]
-    assert saved["next_recommended_pr"] == "feature/trajectory-pattern-insights"
+    assert saved["next_recommended_pr"] == "feature/patch-scorer-prototype"
     assert "Reliability spine alignment audit" in markdown
 
 
