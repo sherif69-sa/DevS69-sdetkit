@@ -29,6 +29,7 @@ def test_pr_quality_comment_workflow_has_comment_permissions() -> None:
     assert "pull-requests: write" in permissions
     assert "checks: read" in permissions
     assert "actions: read" in permissions
+    assert "security-events: read" in permissions
 
 
 def test_pr_quality_comment_workflow_writes_comment_status_before_posting() -> None:
@@ -268,3 +269,19 @@ def test_pr_quality_comment_workflow_exposes_trajectory_comment_metadata() -> No
     assert 'print(f"trajectory_record_count={trajectory_record_count}")' in text
     assert 'print(f"trajectory_review_first_count={trajectory_review_first_count}")' in text
     assert 'print(f"trajectory_auto_fix_allowed_count={trajectory_auto_fix_allowed_count}")' in text
+
+
+def test_pr_quality_comment_workflow_collects_code_scanning_alert_visibility() -> None:
+    text = _workflow_text()
+
+    collection = text.index("Collect code scanning alert evidence")
+    intelligence = text.index("Build PR check intelligence action report")
+
+    assert collection < intelligence
+    assert "security-events: read" in text.split("jobs:", 1)[0]
+    assert "code-scanning/alerts?state=open&pr=$PR_NUMBER&per_page=100" in text
+    assert '"collection_status": os.environ["COLLECTION_STATUS"]' in text
+    assert "build/pr-quality/code-scanning/alerts.json" in text
+    assert "--code-scanning-alerts-json build/pr-quality/code-scanning/alerts.json" in text
+    assert '--current-head-sha "$HEAD_SHA"' in text
+    assert "build/pr-quality/code-scanning/" in text

@@ -562,3 +562,33 @@ def test_check_intelligence_preserves_unresolved_security_review_findings(
     assert report["primary_blocker"]["path"] == "src/sdetkit/protected_verifier.py"
     assert report["primary_blocker"]["code"] == "_".join(("SECURITY", "REVIEW", "FINDING"))
     assert report["automation"]["allowed"] is False
+
+
+def test_check_intelligence_reports_unavailable_code_scanning_collection(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {"check_runs": [{"name": "CI", "status": "completed", "conclusion": "success"}]},
+    )
+    alerts = _write_json(
+        tmp_path / "alerts.json",
+        {
+            "collection_status": "unavailable",
+            "collection_reason": "GitHub code-scanning alerts API was unavailable or not permitted.",
+            "alerts": [],
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(
+        checks_json=checks,
+        code_scanning_alerts_json=alerts,
+        current_head_sha="abc123",
+    )
+
+    review = intelligence["code_scanning_review"]
+    assert review["collected"] is False
+    assert review["collection_status"] == "unavailable"
+    assert "unavailable or not permitted" in review["collection_reason"]
+    assert review["current_alerts"] == 0
+    assert review["findings"] == []

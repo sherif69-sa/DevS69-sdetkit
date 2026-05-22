@@ -10,6 +10,7 @@ permissions:
   pull-requests: write
   checks: read
   actions: read
+  security-events: read
 concurrency:
   group: pr-quality-comment-${{ github.event.pull_request.number }}
   cancel-in-progress: true
@@ -109,6 +110,44 @@ jobs:
             --sentinel-control-room build/sdetkit/sentinel/control-room.json \
             --merged-control-room build/sdetkit/sentinel/control-room-with-security-review.json \
             --out-dir build/pr-quality/security-review
+
+      - name: Collect code scanning alert evidence
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+        run: |
+          mkdir -p build/pr-quality/code-scanning
+
+          collection_status="collected"
+          collection_reason=""
+          if ! gh api             -H "Accept: application/vnd.github+json"             "repos/$REPOSITORY_OWNER/$REPOSITORY_NAME/code-scanning/alerts?state=open&pr=$PR_NUMBER&per_page=100"             > build/pr-quality/code-scanning/alerts-raw.json; then
+            collection_status="unavailable"
+            collection_reason="GitHub code-scanning alerts API was unavailable or not permitted."
+            printf '[]\n' > build/pr-quality/code-scanning/alerts-raw.json
+          fi
+
+          COLLECTION_STATUS="$collection_status" COLLECTION_REASON="$collection_reason" python - <<'PYCODE'
+          import json
+          import os
+          from pathlib import Path
+
+          raw_path = Path("build/pr-quality/code-scanning/alerts-raw.json")
+          raw = json.loads(raw_path.read_text(encoding="utf-8"))
+          alerts = raw if isinstance(raw, list) else []
+
+          payload = {
+              "collection_status": os.environ["COLLECTION_STATUS"],
+              "collection_reason": os.environ["COLLECTION_REASON"],
+              "alerts": alerts,
+          }
+          Path("build/pr-quality/code-scanning/alerts.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PYCODE
 
       - name: Build PR check intelligence action report
         if: always()
@@ -231,6 +270,8 @@ jobs:
             --checks-json build/pr-quality/checks/check-runs.json \
             --logs-dir build/pr-quality/check-logs/failed-check-logs \
             --review-threads-json build/pr-quality/security-review/review-threads.json \
+            --code-scanning-alerts-json build/pr-quality/code-scanning/alerts.json \
+            --current-head-sha "$HEAD_SHA" \
             --out-dir build/pr-quality/check-intelligence
 
 
@@ -372,6 +413,8 @@ jobs:
             build/pr-quality/checks/
             build/pr-quality/check-logs/
             build/pr-quality/check-intelligence/
+            build/pr-quality/security-review/
+            build/pr-quality/code-scanning/
             build/pr-quality/safe-formatting-autopilot/
             build/pr-quality/trajectory/
             build/pr-quality/pr-evidence-narrative.md
