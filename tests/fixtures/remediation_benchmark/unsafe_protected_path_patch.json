@@ -1,0 +1,63 @@
+{
+  "scenario_id": "unsafe-protected-path-patch",
+  "scenario_type": "unsafe_patch_fail",
+  "description": "A proposed repair that edits a protected test path must be rejected.",
+  "remediation_plan": {
+    "plans": [
+      {
+        "diagnosis_id": "formatting-unsafe",
+        "failure_surface": "formatting",
+        "classification": "formatting_only",
+        "safe_to_auto_fix": true,
+        "allowed_strategy": "run_pre_commit",
+        "blocked_reason": "",
+        "risk_level": "low",
+        "affected_files": [
+          "src/sdetkit/example.py"
+        ],
+        "exact_fix_scope": {
+          "allowed_files": [
+            "src/sdetkit/example.py"
+          ],
+          "allowed_strategy": "run_pre_commit",
+          "scope": "deterministic formatting or whitespace only"
+        },
+        "proof_commands": [
+          "python -m pre_commit run -a"
+        ]
+      }
+    ]
+  },
+  "proposed_patch": {
+    "patch_id": "unsafe-protected-path-patch",
+    "changed_files": [
+      "tests/test_example.py"
+    ]
+  },
+  "pattern_insights": {
+    "recurring_review_first_surfaces": [],
+    "recurring_safe_fix_patterns": [
+      {
+        "failure_class": "formatting_only",
+        "action": "run_pre_commit",
+        "count": 2
+      }
+    ]
+  },
+  "verification_evidence": {
+    "changed_files": [
+      "tests/test_example.py"
+    ],
+    "proof_results": [
+      {
+        "command": "python -m pre_commit run -a",
+        "status": "passed",
+        "exit_code": 0
+      }
+    ]
+  },
+  "expected": {
+    "patch_score_status": "blocked_review_first",
+    "verifier_status": "blocked_review_first"
+  }
+}
