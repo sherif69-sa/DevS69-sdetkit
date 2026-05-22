@@ -278,7 +278,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             integration_points=(
                 "patch_scorer",
-                "ReplayableBenchmarkHarness",
+                "replayable_benchmark_harness",
                 "maintenance_autopilot",
             ),
             gaps=(
@@ -288,12 +288,25 @@ def build_alignment_components() -> list[AlignmentComponent]:
             recommended_next_action="build replayable remediation scenarios before any automation wiring",
         ),
         _component(
-            module="ReplayableBenchmarkHarness",
-            role="run local remediation scenarios with oracle/pass and nop/fail checks",
-            status="planned",
-            stages=("benchmark", "proof", "verifier"),
-            gaps=("not implemented yet",),
-            recommended_next_action="build after ProtectedVerifier has a local contract",
+            module="replayable_benchmark_harness",
+            role="replay fixture-backed nop, oracle, and unsafe patch scenarios through safety contracts",
+            status="partially_aligned",
+            stages=("benchmark", "proof", "verifier", "reporting"),
+            existing_artifacts=(
+                "benchmark-report.json",
+                "benchmark-report.md",
+                "fixture scenario JSON",
+            ),
+            integration_points=(
+                "patch_scorer",
+                "protected_verifier",
+                "RepoMemory",
+            ),
+            gaps=(
+                "current fixtures replay structural evidence without isolated command execution",
+                "anti-cheat runtime checks and fresh-workspace execution remain future work",
+            ),
+            recommended_next_action="feed proven scenario outcomes into RepoMemory before automation wiring",
         ),
         _component(
             module="RepoMemory",
@@ -339,7 +352,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/replayable-remediation-scenario-harness",
+        "next_recommended_pr": "feature/repo-memory-profiles",
     }
 
 

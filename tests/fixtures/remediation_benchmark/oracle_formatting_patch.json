@@ -1,0 +1,63 @@
+{
+  "scenario_id": "oracle-formatting-patch",
+  "scenario_type": "oracle_pass",
+  "description": "An approved formatting-only patch stays inside exact scope and supplies passing proof evidence.",
+  "remediation_plan": {
+    "plans": [
+      {
+        "diagnosis_id": "formatting-oracle",
+        "failure_surface": "formatting",
+        "classification": "formatting_only",
+        "safe_to_auto_fix": true,
+        "allowed_strategy": "run_pre_commit",
+        "blocked_reason": "",
+        "risk_level": "low",
+        "affected_files": [
+          "src/sdetkit/example.py"
+        ],
+        "exact_fix_scope": {
+          "allowed_files": [
+            "src/sdetkit/example.py"
+          ],
+          "allowed_strategy": "run_pre_commit",
+          "scope": "deterministic formatting or whitespace only"
+        },
+        "proof_commands": [
+          "python -m pre_commit run -a"
+        ]
+      }
+    ]
+  },
+  "proposed_patch": {
+    "patch_id": "oracle-formatting-patch",
+    "changed_files": [
+      "src/sdetkit/example.py"
+    ]
+  },
+  "pattern_insights": {
+    "recurring_review_first_surfaces": [],
+    "recurring_safe_fix_patterns": [
+      {
+        "failure_class": "formatting_only",
+        "action": "run_pre_commit",
+        "count": 2
+      }
+    ]
+  },
+  "verification_evidence": {
+    "changed_files": [
+      "src/sdetkit/example.py"
+    ],
+    "proof_results": [
+      {
+        "command": "python -m pre_commit run -a",
+        "status": "passed",
+        "exit_code": 0
+      }
+    ]
+  },
+  "expected": {
+    "patch_score_status": "candidate_for_protected_verification",
+    "verifier_status": "structurally_verified_candidate"
+  }
+}
