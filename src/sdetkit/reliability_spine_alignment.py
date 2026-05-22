@@ -116,12 +116,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
             status="partially_aligned",
             stages=("decision", "remediation_eligibility", "proof"),
             existing_artifacts=("remediation plans",),
-            integration_points=("diagnostic_vector_engine", "trajectory_store"),
-            gaps=(
-                "needs stronger feedback from trajectory history",
-                "needs PatchScorer before broader mutation use",
-            ),
-            recommended_next_action="connect plan decisions to PatchScorer and protected proof",
+            integration_points=("diagnostic_vector_engine", "trajectory_store", "patch_scorer"),
+            gaps=("needs ProtectedVerifier feedback before broader mutation use",),
+            recommended_next_action="feed plans through PatchScorer before protected proof",
         ),
         _component(
             module="safe_remediation_eligibility",
@@ -136,12 +133,16 @@ def build_alignment_components() -> list[AlignmentComponent]:
             role="bridge approved safe formatting fixes into PR branches",
             status="partially_aligned",
             stages=("remediation_eligibility", "proof"),
-            integration_points=("check_intelligence", "safe_remediation_eligibility"),
+            integration_points=(
+                "check_intelligence",
+                "safe_remediation_eligibility",
+                "patch_scorer",
+            ),
             gaps=(
-                "should remain formatting-only until PatchScorer exists",
+                "PatchScorer exists but is not wired into automation yet",
                 "needs ProtectedVerifier before broader automation",
             ),
-            recommended_next_action="do not expand beyond approved safe formatting fixes yet",
+            recommended_next_action="keep formatting-only until PatchScorer and ProtectedVerifier are wired",
         ),
         _component(
             module="pr_quality_evidence_narrative",
@@ -200,10 +201,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
             existing_artifacts=("trajectory pattern insights JSON/Markdown reports",),
             integration_points=(
                 "trajectory_history_report",
-                "PatchScorer",
+                "patch_scorer",
                 "RepoMemory",
             ),
-            recommended_next_action="feed a local PatchScorer prototype without expanding automation",
+            recommended_next_action="feed read-only PatchScorer evidence without expanding automation",
         ),
         _component(
             module="current_head_failure_bundle",
@@ -248,15 +249,21 @@ def build_alignment_components() -> list[AlignmentComponent]:
             recommended_next_action="harden unknown-failure classification without broad automation",
         ),
         _component(
-            module="PatchScorer",
-            role="score proposed patches for safety before trusting them",
-            status="planned",
-            stages=("decision", "proof", "verifier"),
-            gaps=(
-                "not implemented yet",
-                "needed before expanding safe remediation beyond formatting",
+            module="patch_scorer",
+            role="score proposed patch safety before any future automation consumes it",
+            status="partially_aligned",
+            stages=("decision", "remediation_eligibility", "proof"),
+            existing_artifacts=("patch-score.json", "patch-score.md"),
+            integration_points=(
+                "remediation_plan_engine",
+                "trajectory_pattern_insights",
+                "ProtectedVerifier",
             ),
-            recommended_next_action="build local prototype after pattern insights",
+            gaps=(
+                "read-only prototype is not wired into maintenance_autopilot",
+                "requires ProtectedVerifier before eligible scores may influence automation",
+            ),
+            recommended_next_action="build ProtectedVerifier prototype and keep automation unchanged",
         ),
         _component(
             module="ProtectedVerifier",
@@ -318,7 +325,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/patch-scorer-prototype",
+        "next_recommended_pr": "feature/protected-verifier-prototype",
     }
 
 
