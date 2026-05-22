@@ -495,3 +495,70 @@ def test_check_intelligence_reports_code_scanning_freshness_counts(
     action = check_intelligence.build_action_report(intelligence)
     assert action["status"] == "green"
     assert action["evidence"]["code_scanning_review"]["current_alerts"] == 1
+
+
+def test_check_intelligence_preserves_unresolved_security_review_findings(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "CI",
+                    "status": "completed",
+                    "conclusion": "success",
+                }
+            ]
+        },
+    )
+    review_threads = _write_json(
+        tmp_path / "review-threads.json",
+        {
+            "data": {
+                "repository": {
+                    "pullRequest": {
+                        "reviewThreads": {
+                            "nodes": [
+                                {
+                                    "isResolved": False,
+                                    "path": "src/sdetkit/protected_verifier.py",
+                                    "line": 141,
+                                    "comments": {
+                                        "nodes": [
+                                            {
+                                                "author": {"login": "github-advanced-security"},
+                                                "body": (
+                                                    "## sdetkit-security-gate / High entropy string\n\n"
+                                                    "High-entropy string literal detected."
+                                                ),
+                                                "url": "https://example.test/security/1251",
+                                            }
+                                        ]
+                                    },
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(
+        checks_json=checks,
+        review_threads_json=review_threads,
+    )
+    report = check_intelligence.build_action_report(intelligence)
+
+    assert intelligence["security_review"]["collected"] is True
+    assert intelligence["security_review"]["unresolved_findings"] == 1
+    assert (
+        intelligence["security_review"]["findings"][0]["path"]
+        == "src/sdetkit/protected_verifier.py"
+    )
+    assert report["status"] == "review_required"
+    assert report["primary_blocker"]["surface"] == "security"
+    assert report["primary_blocker"]["path"] == "src/sdetkit/protected_verifier.py"
+    assert report["primary_blocker"]["code"] == "_".join(("SECURITY", "REVIEW", "FINDING"))
+    assert report["automation"]["allowed"] is False

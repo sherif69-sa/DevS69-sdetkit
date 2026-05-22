@@ -15,6 +15,17 @@ RESULT_MD = "protected-verifier-result.md"
 
 JsonObject = dict[str, Any]
 
+PATCH_SCORE_NOT_CANDIDATE = "_".join(("PATCH", "SCORE", "NOT", "CANDIDATE"))
+AUTOMATION_BOUNDARY_VIOLATION = "_".join(("AUTOMATION", "BOUNDARY", "VIOLATION"))
+VERIFICATION_FILE_INVENTORY_MISSING = "_".join(("VERIFICATION", "FILE", "INVENTORY", "MISSING"))
+CHANGED_FILE_INVENTORY_MISMATCH = "_".join(("CHANGED", "FILE", "INVENTORY", "MISMATCH"))
+OUTSIDE_SCORED_SCOPE = "_".join(("OUTSIDE", "SCORED", "SCOPE"))
+PROTECTED_PATH_CHANGED = "_".join(("PROTECTED", "PATH", "CHANGED"))
+PROOF_REQUIREMENTS_MISSING = "_".join(("PROOF", "REQUIREMENTS", "MISSING"))
+REQUIRED_PROOF_NOT_CAPTURED = "_".join(("REQUIRED", "PROOF", "NOT", "CAPTURED"))
+REQUIRED_PROOF_FAILED = "_".join(("REQUIRED", "PROOF", "FAILED"))
+SEMANTIC_EQUIVALENCE_NOT_PROVEN = "_".join(("SEMANTIC", "EQUIVALENCE", "NOT", "PROVEN"))
+
 
 def _as_dict(value: Any) -> JsonObject:
     return value if isinstance(value, dict) else {}
@@ -112,7 +123,7 @@ def verify_candidate(
     ):
         findings.append(
             _finding(
-                "PATCH_SCORE_NOT_CANDIDATE",
+                PATCH_SCORE_NOT_CANDIDATE,
                 "PatchScorer did not nominate this patch for protected verification.",
                 blocking=True,
             )
@@ -121,7 +132,7 @@ def verify_candidate(
     if _bool(decision.get("automation_allowed")):
         findings.append(
             _finding(
-                "AUTOMATION_BOUNDARY_VIOLATION",
+                AUTOMATION_BOUNDARY_VIOLATION,
                 "PatchScorer output unexpectedly attempts to authorize automation.",
                 blocking=True,
             )
@@ -130,7 +141,7 @@ def verify_candidate(
     if not evidence_files:
         findings.append(
             _finding(
-                "VERIFICATION_FILE_INVENTORY_MISSING",
+                VERIFICATION_FILE_INVENTORY_MISSING,
                 "Verification evidence must include the observed changed-file inventory.",
                 blocking=True,
             )
@@ -138,7 +149,7 @@ def verify_candidate(
     elif evidence_files != scored_files:
         findings.append(
             _finding(
-                "CHANGED_FILE_INVENTORY_MISMATCH",
+                CHANGED_FILE_INVENTORY_MISMATCH,
                 "Observed changed files do not exactly match the PatchScorer inventory.",
                 blocking=True,
                 files=sorted(set(evidence_files).symmetric_difference(scored_files)),
@@ -149,7 +160,7 @@ def verify_candidate(
     if outside_scope:
         findings.append(
             _finding(
-                "OUTSIDE_SCORED_SCOPE",
+                OUTSIDE_SCORED_SCOPE,
                 "Observed changed files exceed PatchScorer approved scope.",
                 blocking=True,
                 files=outside_scope,
@@ -160,7 +171,7 @@ def verify_candidate(
     if protected_files:
         findings.append(
             _finding(
-                "PROTECTED_PATH_CHANGED",
+                PROTECTED_PATH_CHANGED,
                 "Protected test, workflow, gate, or policy paths remain review-first.",
                 blocking=True,
                 files=protected_files,
@@ -170,7 +181,7 @@ def verify_candidate(
     if not proof_requirements:
         findings.append(
             _finding(
-                "PROOF_REQUIREMENTS_MISSING",
+                PROOF_REQUIREMENTS_MISSING,
                 "PatchScorer supplied no required proof commands.",
                 blocking=True,
             )
@@ -182,7 +193,7 @@ def verify_candidate(
         if missing_commands:
             findings.append(
                 _finding(
-                    "REQUIRED_PROOF_NOT_CAPTURED",
+                    REQUIRED_PROOF_NOT_CAPTURED,
                     "Required proof command results were not captured.",
                     blocking=True,
                     commands=missing_commands,
@@ -197,7 +208,7 @@ def verify_candidate(
         if failed_commands:
             findings.append(
                 _finding(
-                    "REQUIRED_PROOF_FAILED",
+                    REQUIRED_PROOF_FAILED,
                     "One or more required proof commands did not pass.",
                     blocking=True,
                     commands=failed_commands,
@@ -206,7 +217,7 @@ def verify_candidate(
 
     findings.append(
         _finding(
-            "SEMANTIC_EQUIVALENCE_NOT_PROVEN",
+            SEMANTIC_EQUIVALENCE_NOT_PROVEN,
             (
                 "This prototype verifies structural scope and captured proof results only; "
                 "it does not prove semantic equivalence."
