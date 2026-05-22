@@ -493,7 +493,12 @@ def test_check_intelligence_reports_code_scanning_freshness_counts(
     assert review["findings"][1]["recommended_action"] == "wait_for_code_scanning_refresh"
 
     action = check_intelligence.build_action_report(intelligence)
-    assert action["status"] == "green"
+    assert action["status"] == "review_required"
+    assert action["primary_blocker"]["surface"] == "security"
+    assert action["primary_blocker"]["code"] == check_intelligence.CODE_SCANNING_CURRENT_ALERT
+    assert action["primary_blocker"]["path"] == "src/sdetkit/example.py"
+    assert action["primary_blocker"]["line"] == "12"
+    assert action["automation"]["allowed"] is False
     assert action["evidence"]["code_scanning_review"]["current_alerts"] == 1
 
 
@@ -592,3 +597,44 @@ def test_check_intelligence_reports_unavailable_code_scanning_collection(
     assert "unavailable or not permitted" in review["collection_reason"]
     assert review["current_alerts"] == 0
     assert review["findings"] == []
+
+
+def test_check_intelligence_keeps_stale_code_scanning_alert_visible_non_blocking(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {"check_runs": [{"name": "CI", "status": "completed", "conclusion": "success"}]},
+    )
+    alerts = _write_json(
+        tmp_path / "alerts.json",
+        {
+            "collection_status": "collected",
+            "alerts": [
+                {
+                    "number": 18,
+                    "state": "open",
+                    "html_url": "https://example.test/code-scanning/18",
+                    "rule": {"id": "py/stale-example", "severity": "warning"},
+                    "most_recent_instance": {
+                        "commit_sha": "previous-sha",
+                        "message": {"text": "Stale alert"},
+                        "location": {"path": "src/sdetkit/old.py", "start_line": 20},
+                    },
+                }
+            ],
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(
+        checks_json=checks,
+        code_scanning_alerts_json=alerts,
+        current_head_sha="current-sha",
+    )
+    action = check_intelligence.build_action_report(intelligence)
+
+    assert intelligence["code_scanning_review"]["collected"] is True
+    assert intelligence["code_scanning_review"]["current_alerts"] == 0
+    assert intelligence["code_scanning_review"]["stale_alerts"] == 1
+    assert action["status"] == "green"
+    assert action["primary_blocker"] == {}

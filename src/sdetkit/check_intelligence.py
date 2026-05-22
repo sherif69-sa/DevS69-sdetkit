@@ -16,6 +16,7 @@ ACTION_REPORT_SCHEMA_VERSION = "sdetkit.pr_quality.action_report.v1"
 JsonObject = dict[str, Any]
 
 DEPENDENCY_AUDIT_VULNERABILITY = "DEPENDENCY_AUDIT_VULNERABILITY"
+CODE_SCANNING_CURRENT_ALERT = "_".join(("CODE", "SCANNING", "CURRENT", "ALERT"))
 DEPENDENCY_AUDIT_OWNER_FILES = [
     "requirements-test.txt",
     "requirements-docs.txt",
@@ -1010,6 +1011,7 @@ def _code_scanning_review_summary(
         findings.append(
             {
                 "number": alert.get("number", ""),
+                "url": _string(alert.get("html_url") or alert.get("url")),
                 "rule_id": rule_id,
                 "severity": _string(
                     rule.get("security_severity_level") or rule.get("severity") or "unknown"
@@ -1300,6 +1302,82 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 ),
                 "security_review": security_review,
                 "code_scanning_review": intelligence.get("code_scanning_review", {}),
+            },
+        }
+
+    code_scanning_review = _as_dict(intelligence.get("code_scanning_review"))
+    current_code_scanning_findings = [
+        _as_dict(item)
+        for item in _as_list(code_scanning_review.get("findings"))
+        if isinstance(item, dict) and _string(_as_dict(item).get("freshness")).lower() == "current"
+    ]
+    if current_code_scanning_findings and not failed:
+        finding = current_code_scanning_findings[0]
+        path = _string(finding.get("path"))
+        line = _string(finding.get("line"))
+        location = f"{path}:{line}" if path and line else path
+        rule_id = _string(finding.get("rule_id") or "unknown")
+        severity = _string(finding.get("severity") or "unknown")
+        title = (
+            f"Current code scanning alert requires action in {location}"
+            if location
+            else "Current code scanning alert requires action"
+        )
+        message = _string(finding.get("message"))
+        impact = (
+            message
+            or "A current PR-owned code scanning alert must be fixed or dismissed with a review reason."
+        )
+        return {
+            "schema_version": ACTION_REPORT_SCHEMA_VERSION,
+            "status": "review_required",
+            "primary_blocker": {
+                "check": "GitHub code scanning",
+                "title": title,
+                "surface": "security",
+                "impact": impact,
+                "code": CODE_SCANNING_CURRENT_ALERT,
+                "url": _string(finding.get("url")),
+                "path": path,
+                "line": line,
+                "rule_id": rule_id,
+                "severity": severity,
+            },
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": (
+                    "current code-scanning alerts are review-first and cannot be auto-dismissed"
+                ),
+            },
+            "recommended_actions": [
+                "Review the current GitHub code scanning alert on the PR.",
+                "Fix the flagged surface or dismiss the reviewed false positive with a reason.",
+            ],
+            "proof_commands": [
+                "python -m sdetkit security check --root . --format json",
+                "python -m pre_commit run -a",
+            ],
+            "evidence": {
+                "failed_check_count": 0,
+                "queued_check_count": len(queued),
+                "required_queued_check_count": len(
+                    [
+                        _as_dict(item)
+                        for item in queued
+                        if bool(_as_dict(item).get("required", False))
+                    ]
+                ),
+                "startup_failure_count": len(startup),
+                "required_startup_failure_count": len(
+                    [
+                        _as_dict(item)
+                        for item in startup
+                        if bool(_as_dict(item).get("required", False))
+                    ]
+                ),
+                "security_review": security_review,
+                "code_scanning_review": code_scanning_review,
             },
         }
 

@@ -1532,3 +1532,47 @@ def test_action_report_renders_unavailable_code_scanning_collection() -> None:
     assert "Code scanning review collected: `false`" in body
     assert "Code scanning collection status: `unavailable`" in body
     assert "GitHub code-scanning alerts API was unavailable or not permitted." in body
+
+
+def test_action_report_promotes_current_code_scanning_alert_to_security_blocker() -> None:
+    intelligence = {
+        "checks_seen": 1,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+        "code_scanning_review": {
+            "collected": True,
+            "collection_status": "collected",
+            "collection_reason": "",
+            "open_alerts": 1,
+            "current_alerts": 1,
+            "stale_alerts": 0,
+            "unknown_freshness_alerts": 0,
+            "findings": [
+                {
+                    "freshness": "current",
+                    "url": "https://example.test/code-scanning/44",
+                    "path": "src/sdetkit/current.py",
+                    "line": "14",
+                    "rule_id": "py/example",
+                    "severity": "warning",
+                    "message": "Current code-scanning alert on changed code.",
+                    "recommended_action": "fix_current_alert_or_dismiss_reviewed_false_positive",
+                }
+            ],
+        },
+    }
+
+    action = check_intelligence.build_action_report(intelligence)
+    body = report.render_comment_body(action_report=action, check_intelligence=intelligence)
+
+    assert action["status"] == "review_required"
+    assert action["primary_blocker"]["surface"] == "security"
+    assert action["primary_blocker"]["code"] == check_intelligence.CODE_SCANNING_CURRENT_ALERT
+    assert action["automation"]["allowed"] is False
+    assert "SDETKit Review Result: Action required" in body
+    assert "Current code scanning alert requires action" in body
+    assert "src/sdetkit/current.py:14" in body
+    assert "Current code scanning alerts: `1`" in body
+    assert "Code scanning current finding: `src/sdetkit/current.py:14`" in body
