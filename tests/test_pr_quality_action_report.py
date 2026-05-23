@@ -1696,3 +1696,80 @@ def test_action_report_cli_reports_runtime_proof_metadata(tmp_path: Path, capsys
     assert printed["runtime_proof_collection_status"] == "collected"
     assert printed["runtime_guard_violation_count"] == 0
     assert "## Runtime proof artifacts" in out.read_text(encoding="utf-8")
+
+
+def test_action_report_renders_collected_live_benchmark_and_repo_memory() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {
+            "attempted": False,
+            "allowed": False,
+            "reason": "no remediation needed",
+        },
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 1,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+    }
+    runtime = {
+        "status": "collected",
+        "isolated_proof": {
+            "status": "passed",
+            "git_inventory_verified": True,
+            "runtime_guard_checked": True,
+            "runtime_guard_passed": True,
+            "runtime_guard_violation_count": 0,
+            "network_boundary_status": "not_requested",
+            "network_isolation_enforced": False,
+            "profiles_executed": 1,
+            "profiles_blocked": 0,
+        },
+        "live_benchmark": {
+            "collection_status": "collected",
+            "status": "passed",
+            "scenario_count": 6,
+            "passed_count": 6,
+            "git_inventory_verified_count": 5,
+            "expected_failed_evidence_count": 5,
+            "network_boundary_blocked_count": 1,
+            "anti_cheat_rejection_count": 2,
+            "network_isolation_enforced_count": 0,
+            "boundary_preserved": True,
+        },
+        "repo_memory": {
+            "collection_status": "collected",
+            "status": "live_proof_supported_memory",
+            "live_contract_proven": True,
+            "known_safe_candidate_count": 0,
+            "live_safe_candidate_count": 0,
+            "anti_cheat_rejection_scenario_count": 2,
+        },
+        "decision_boundary": {
+            "proof_commands_executed_by_renderer": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        runtime_proof_artifacts=runtime,
+    )
+
+    assert "Live benchmark collection status: `collected`" in body
+    assert "Live benchmark status: `passed`" in body
+    assert "Live benchmark scenarios: `6`" in body
+    assert "Live anti-cheat rejection scenarios: `2`" in body
+    assert "Live benchmark boundary preserved: `true`" in body
+    assert "RepoMemory collection status: `collected`" in body
+    assert "RepoMemory status: `live_proof_supported_memory`" in body
+    assert "RepoMemory live contract proven: `true`" in body
+    assert "Automation allowed by runtime artifacts: `false`" in body

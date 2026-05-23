@@ -148,3 +148,55 @@ def test_runtime_proof_cli_writes_summary_artifacts(tmp_path: Path, capsys) -> N
     assert saved["isolated_proof"]["runtime_guard_passed"] is True
     assert "Live benchmark evidence" in markdown
     assert "RepoMemory evidence" in markdown
+
+
+def test_runtime_proof_markdown_renders_collected_live_benchmark_and_memory() -> None:
+    summary = build_runtime_proof_artifacts(
+        isolated_proof=_isolated_proof(),
+        live_benchmark_report={
+            "status": "passed",
+            "report_mode": "git_grounded_isolated_proof",
+            "scenario_count": 6,
+            "passed_count": 6,
+            "failed_count": 0,
+            "live_evidence": {
+                "git_inventory_verified_count": 5,
+                "expected_failed_evidence_count": 5,
+                "network_boundary_blocked_count": 1,
+                "anti_cheat_rejection_count": 2,
+                "network_isolation_enforced_count": 0,
+            },
+            "safety_boundary": {
+                "automation_allowed_count": 0,
+                "merge_authorized_count": 0,
+                "semantic_equivalence_claimed_count": 0,
+                "preserved": True,
+            },
+        },
+        repo_memory_profile={
+            "profile_status": "live_proof_supported_memory",
+            "known_safe_candidate_count": 0,
+            "live_safe_candidate_count": 0,
+            "proof_provenance": {
+                "live_contract_proven": True,
+                "git_verified_scenario_count": 5,
+                "expected_failed_scenario_count": 5,
+                "network_boundary_blocked_scenario_count": 1,
+                "anti_cheat_rejection_scenario_count": 2,
+            },
+            "decision_boundary": {
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        },
+    )
+
+    markdown = render_markdown(summary)
+
+    assert "Scenarios: `6`" in markdown
+    assert "Passed: `6`" in markdown
+    assert "Anti-cheat rejection scenarios: `2`" in markdown
+    assert "Boundary preserved: `true`" in markdown
+    assert "Status: `live_proof_supported_memory`" in markdown
+    assert "Live contract proven: `true`" in markdown

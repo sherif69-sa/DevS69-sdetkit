@@ -92,17 +92,25 @@ def _live_benchmark_summary(report: Mapping[str, Any]) -> JsonObject:
         }
 
     live = _as_dict(payload.get("live_evidence"))
+    boundary = _as_dict(payload.get("safety_boundary"))
     return {
         "collection_status": COLLECTED,
         "status": _string(payload.get("status") or "unknown"),
         "report_mode": _string(payload.get("report_mode") or "unknown"),
         "scenario_count": _int(payload.get("scenario_count")),
         "passed_count": _int(payload.get("passed_count")),
+        "failed_count": _int(payload.get("failed_count")),
         "git_inventory_verified_count": _int(live.get("git_inventory_verified_count")),
         "expected_failed_evidence_count": _int(live.get("expected_failed_evidence_count")),
         "network_boundary_blocked_count": _int(live.get("network_boundary_blocked_count")),
         "anti_cheat_rejection_count": _int(live.get("anti_cheat_rejection_count")),
         "network_isolation_enforced_count": _int(live.get("network_isolation_enforced_count")),
+        "automation_allowed_count": _int(boundary.get("automation_allowed_count")),
+        "merge_authorized_count": _int(boundary.get("merge_authorized_count")),
+        "semantic_equivalence_claimed_count": _int(
+            boundary.get("semantic_equivalence_claimed_count")
+        ),
+        "boundary_preserved": _bool(boundary.get("preserved")),
     }
 
 
@@ -115,15 +123,24 @@ def _repo_memory_summary(profile: Mapping[str, Any]) -> JsonObject:
         }
 
     provenance = _as_dict(payload.get("proof_provenance"))
+    boundary = _as_dict(payload.get("decision_boundary"))
     return {
         "collection_status": COLLECTED,
         "status": _string(payload.get("profile_status") or "unknown"),
         "live_contract_proven": _bool(provenance.get("live_contract_proven")),
         "known_safe_candidate_count": _int(payload.get("known_safe_candidate_count")),
         "live_safe_candidate_count": _int(payload.get("live_safe_candidate_count")),
+        "git_verified_scenario_count": _int(provenance.get("git_verified_scenario_count")),
+        "expected_failed_scenario_count": _int(provenance.get("expected_failed_scenario_count")),
+        "network_boundary_blocked_scenario_count": _int(
+            provenance.get("network_boundary_blocked_scenario_count")
+        ),
         "anti_cheat_rejection_scenario_count": _int(
             provenance.get("anti_cheat_rejection_scenario_count")
         ),
+        "automation_allowed": _bool(boundary.get("automation_allowed")),
+        "merge_authorized": _bool(boundary.get("merge_authorized")),
+        "semantic_equivalence_proven": _bool(boundary.get("semantic_equivalence_proven")),
     }
 
 
@@ -220,11 +237,72 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
             "",
             f"- Collection status: `{_string(benchmark.get('collection_status'))}`",
             f"- Status: `{_string(benchmark.get('status'))}`",
+        ]
+    )
+    if benchmark.get("collection_status") == COLLECTED:
+        lines.extend(
+            [
+                f"- Report mode: `{_string(benchmark.get('report_mode'))}`",
+                f"- Scenarios: `{_int(benchmark.get('scenario_count'))}`",
+                f"- Passed: `{_int(benchmark.get('passed_count'))}`",
+                (
+                    "- Git inventory verified scenarios: "
+                    f"`{_int(benchmark.get('git_inventory_verified_count'))}`"
+                ),
+                (
+                    "- Expected failed-evidence scenarios: "
+                    f"`{_int(benchmark.get('expected_failed_evidence_count'))}`"
+                ),
+                (
+                    "- Network boundary blocked scenarios: "
+                    f"`{_int(benchmark.get('network_boundary_blocked_count'))}`"
+                ),
+                (
+                    "- Anti-cheat rejection scenarios: "
+                    f"`{_int(benchmark.get('anti_cheat_rejection_count'))}`"
+                ),
+                (
+                    "- Network isolation enforced scenarios: "
+                    f"`{_int(benchmark.get('network_isolation_enforced_count'))}`"
+                ),
+                (
+                    "- Boundary preserved: "
+                    f"`{str(_bool(benchmark.get('boundary_preserved'))).lower()}`"
+                ),
+            ]
+        )
+
+    lines.extend(
+        [
             "",
             "## RepoMemory evidence",
             "",
             f"- Collection status: `{_string(memory.get('collection_status'))}`",
             f"- Status: `{_string(memory.get('status'))}`",
+        ]
+    )
+    if memory.get("collection_status") == COLLECTED:
+        lines.extend(
+            [
+                (
+                    "- Live contract proven: "
+                    f"`{str(_bool(memory.get('live_contract_proven'))).lower()}`"
+                ),
+                (f"- Known safe candidates: `{_int(memory.get('known_safe_candidate_count'))}`"),
+                (f"- Live safe candidates: `{_int(memory.get('live_safe_candidate_count'))}`"),
+                (
+                    "- Git inventory verified scenarios: "
+                    f"`{_int(memory.get('git_verified_scenario_count'))}`"
+                ),
+                (
+                    "- Anti-cheat rejection scenarios: "
+                    f"`{_int(memory.get('anti_cheat_rejection_scenario_count'))}`"
+                ),
+            ]
+        )
+
+    lines.extend(
+        [
             "",
             "## Boundary",
             "",
@@ -285,6 +363,11 @@ def main(argv: list[str] | None = None) -> int:
                     "status": summary["status"],
                     "collected_components": summary["collected_components"],
                     "isolated_proof_status": summary["isolated_proof"]["status"],
+                    "live_benchmark_status": summary["live_benchmark"]["status"],
+                    "repo_memory_status": summary["repo_memory"]["status"],
+                    "anti_cheat_rejection_count": summary["live_benchmark"].get(
+                        "anti_cheat_rejection_count", 0
+                    ),
                     "artifacts": artifacts,
                 },
                 indent=2,

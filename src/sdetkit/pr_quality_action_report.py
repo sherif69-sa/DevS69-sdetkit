@@ -497,27 +497,93 @@ def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) ->
             "- Live benchmark collection status: "
             f"`{_string(benchmark.get('collection_status') or 'not_collected')}`"
         ),
-        (
-            "- RepoMemory collection status: "
-            f"`{_string(memory.get('collection_status') or 'not_collected')}`"
-        ),
-        (
-            "- Proof commands executed by renderer: "
-            f"`{str(bool(boundary.get('proof_commands_executed_by_renderer', False))).lower()}`"
-        ),
-        (
-            "- Automation allowed by runtime artifacts: "
-            f"`{str(bool(boundary.get('automation_allowed', False))).lower()}`"
-        ),
-        (
-            "- Merge authorized by runtime artifacts: "
-            f"`{str(bool(boundary.get('merge_authorized', False))).lower()}`"
-        ),
-        (
-            "- Semantic equivalence proven by runtime artifacts: "
-            f"`{str(bool(boundary.get('semantic_equivalence_proven', False))).lower()}`"
-        ),
+        f"- Live benchmark status: `{_string(benchmark.get('status') or 'not_collected')}`",
     ]
+
+    if benchmark.get("collection_status") == "collected":
+        lines.extend(
+            [
+                f"- Live benchmark scenarios: `{_int(benchmark.get('scenario_count'))}`",
+                f"- Live benchmark passed: `{_int(benchmark.get('passed_count'))}`",
+                (
+                    "- Live Git inventory verified scenarios: "
+                    f"`{_int(benchmark.get('git_inventory_verified_count'))}`"
+                ),
+                (
+                    "- Live expected failed-evidence scenarios: "
+                    f"`{_int(benchmark.get('expected_failed_evidence_count'))}`"
+                ),
+                (
+                    "- Live network boundary blocked scenarios: "
+                    f"`{_int(benchmark.get('network_boundary_blocked_count'))}`"
+                ),
+                (
+                    "- Live anti-cheat rejection scenarios: "
+                    f"`{_int(benchmark.get('anti_cheat_rejection_count'))}`"
+                ),
+                (
+                    "- Live network isolation enforced scenarios: "
+                    f"`{_int(benchmark.get('network_isolation_enforced_count'))}`"
+                ),
+                (
+                    "- Live benchmark boundary preserved: "
+                    f"`{str(bool(benchmark.get('boundary_preserved', False))).lower()}`"
+                ),
+            ]
+        )
+
+    lines.extend(
+        [
+            (
+                "- RepoMemory collection status: "
+                f"`{_string(memory.get('collection_status') or 'not_collected')}`"
+            ),
+            f"- RepoMemory status: `{_string(memory.get('status') or 'not_collected')}`",
+        ]
+    )
+
+    if memory.get("collection_status") == "collected":
+        lines.extend(
+            [
+                (
+                    "- RepoMemory live contract proven: "
+                    f"`{str(bool(memory.get('live_contract_proven', False))).lower()}`"
+                ),
+                (
+                    "- RepoMemory known safe candidates: "
+                    f"`{_int(memory.get('known_safe_candidate_count'))}`"
+                ),
+                (
+                    "- RepoMemory live safe candidates: "
+                    f"`{_int(memory.get('live_safe_candidate_count'))}`"
+                ),
+                (
+                    "- RepoMemory anti-cheat rejection scenarios: "
+                    f"`{_int(memory.get('anti_cheat_rejection_scenario_count'))}`"
+                ),
+            ]
+        )
+
+    lines.extend(
+        [
+            (
+                "- Proof commands executed by renderer: "
+                f"`{str(bool(boundary.get('proof_commands_executed_by_renderer', False))).lower()}`"
+            ),
+            (
+                "- Automation allowed by runtime artifacts: "
+                f"`{str(bool(boundary.get('automation_allowed', False))).lower()}`"
+            ),
+            (
+                "- Merge authorized by runtime artifacts: "
+                f"`{str(bool(boundary.get('merge_authorized', False))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence proven by runtime artifacts: "
+                f"`{str(bool(boundary.get('semantic_equivalence_proven', False))).lower()}`"
+            ),
+        ]
+    )
     return lines
 
 
@@ -1005,6 +1071,43 @@ def write_comment_body(
             )
             if runtime_proof_artifacts
             else 0
+        ),
+        "live_benchmark_collection_status": _string(
+            _as_dict(runtime_proof_artifacts.get("live_benchmark")).get("collection_status")
+            if runtime_proof_artifacts
+            else "not_collected"
+        ),
+        "live_benchmark_status": _string(
+            _as_dict(runtime_proof_artifacts.get("live_benchmark")).get("status")
+            if runtime_proof_artifacts
+            else "not_collected"
+        ),
+        "live_benchmark_scenario_count": _int(
+            _as_dict(runtime_proof_artifacts.get("live_benchmark")).get("scenario_count")
+            if runtime_proof_artifacts
+            else 0
+        ),
+        "anti_cheat_rejection_count": _int(
+            _as_dict(runtime_proof_artifacts.get("live_benchmark")).get(
+                "anti_cheat_rejection_count"
+            )
+            if runtime_proof_artifacts
+            else 0
+        ),
+        "repo_memory_collection_status": _string(
+            _as_dict(runtime_proof_artifacts.get("repo_memory")).get("collection_status")
+            if runtime_proof_artifacts
+            else "not_collected"
+        ),
+        "repo_memory_status": _string(
+            _as_dict(runtime_proof_artifacts.get("repo_memory")).get("status")
+            if runtime_proof_artifacts
+            else "not_collected"
+        ),
+        "repo_memory_live_contract_proven": bool(
+            _as_dict(runtime_proof_artifacts.get("repo_memory")).get("live_contract_proven", False)
+            if runtime_proof_artifacts
+            else False
         ),
     }
     if failure_bundle_result:
