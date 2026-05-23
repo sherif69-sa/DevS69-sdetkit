@@ -445,31 +445,7 @@ def main(argv: list[str] | None = None) -> int:
         repo_memory_profile=_read_json(args.repo_memory_profile),
         trusted_history_evidence=_read_json(args.trusted_history_evidence),
     )
-    artifacts = write_summary(summary, out_dir=args.out_dir)
-
-    if args.format == "json":
-        print(
-            json.dumps(
-                {
-                    "status": summary["status"],
-                    "collected_components": summary["collected_components"],
-                    "isolated_proof_status": summary["isolated_proof"]["status"],
-                    "live_benchmark_status": summary["live_benchmark"]["status"],
-                    "repo_memory_status": summary["repo_memory"]["status"],
-                    TRUSTED_HISTORY_STATUS: summary[TRUSTED_HISTORY]["status"],
-                    "anti_cheat_rejection_count": summary["live_benchmark"].get(
-                        "anti_cheat_rejection_count", 0
-                    ),
-                    "artifacts": artifacts,
-                },
-                indent=2,
-                sort_keys=True,
-            )
-        )
-    else:
-        for key, value in artifacts.items():
-            print(f"{key}: {value}")
-
+    write_summary(summary, out_dir=args.out_dir)
     return 0
 
 

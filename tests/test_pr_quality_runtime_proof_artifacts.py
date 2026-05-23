@@ -145,12 +145,14 @@ def test_runtime_proof_cli_writes_summary_artifacts(tmp_path: Path, capsys) -> N
     )
 
     assert rc == 0
-    printed = json.loads(capsys.readouterr().out)
+    captured = capsys.readouterr()
     saved = json.loads((out_dir / "runtime-proof-artifacts.json").read_text(encoding="utf-8"))
     markdown = (out_dir / "runtime-proof-artifacts.md").read_text(encoding="utf-8")
 
-    assert printed["status"] == COLLECTED
-    assert printed["collected_components"] == ["isolated_proof"]
+    assert captured.out == ""
+    assert captured.err == ""
+    assert saved["status"] == COLLECTED
+    assert saved["collected_components"] == ["isolated_proof"]
     assert saved["isolated_proof"]["runtime_guard_passed"] is True
     assert "Live benchmark evidence" in markdown
     assert "RepoMemory evidence" in markdown
@@ -284,9 +286,11 @@ def test_runtime_proof_cli_accepts_validated_trusted_history_input(
     )
 
     assert rc == 0
-    printed = json.loads(capsys.readouterr().out)
+    captured = capsys.readouterr()
     saved = json.loads((out_dir / "runtime-proof-artifacts.json").read_text(encoding="utf-8"))
 
-    assert printed["trusted_history_status"] == "trusted_history_verified"
+    assert captured.out == ""
+    assert captured.err == ""
+    assert saved[TRUSTED_HISTORY]["status"] == "trusted_history_verified"
     assert saved[TRUSTED_HISTORY]["record_count"] == 1
     assert saved[TRUSTED_HISTORY][BASE_ANCESTRY_VERIFIED] is True
