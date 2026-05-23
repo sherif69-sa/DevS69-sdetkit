@@ -8,6 +8,7 @@ from sdetkit.reliability_spine_alignment import (
     PR_QUALITY_LIVE_WORKSPACE_MODULE,
     REPO_MEMORY_PROFILE_HISTORY_MODULE,
     SPINE_STAGES,
+    TRUSTED_HISTORY_EVIDENCE_MODULE,
     build_alignment_components,
     build_alignment_report,
     main,
@@ -38,13 +39,14 @@ def test_alignment_components_cover_current_reliability_spine() -> None:
     assert "pr_quality_runtime_proof_artifacts" in modules
     assert PR_QUALITY_LIVE_WORKSPACE_MODULE in modules
     assert REPO_MEMORY_PROFILE_HISTORY_MODULE in modules
+    assert TRUSTED_HISTORY_EVIDENCE_MODULE in modules
 
 
 def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
     report = build_alignment_report()
     status_counts = report["status_counts"]
 
-    assert status_counts["aligned"] >= 11
+    assert status_counts["aligned"] >= 12
     assert status_counts["partially_aligned"] >= 12
     assert status_counts.get("planned", 0) == 0
     assert report["next_recommended_pr"] == NEXT_RECOMMENDED_PR
@@ -75,6 +77,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert "pr_quality_runtime_proof_artifacts" not in gaps_by_module
     assert PR_QUALITY_LIVE_WORKSPACE_MODULE not in gaps_by_module
     assert REPO_MEMORY_PROFILE_HISTORY_MODULE not in gaps_by_module
+    assert TRUSTED_HISTORY_EVIDENCE_MODULE not in gaps_by_module
     assert any("protected_verifier" in gap for gap in gaps_by_module["maintenance_autopilot"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["patch_scorer"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["protected_verifier"])
@@ -113,6 +116,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert "`pr_quality_runtime_proof_artifacts`: `aligned`" in markdown
     assert f"`{PR_QUALITY_LIVE_WORKSPACE_MODULE}`: `aligned`" in markdown
     assert f"`{REPO_MEMORY_PROFILE_HISTORY_MODULE}`: `aligned`" in markdown
+    assert f"`{TRUSTED_HISTORY_EVIDENCE_MODULE}`: `aligned`" in markdown
 
 
 def test_alignment_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
@@ -189,6 +193,7 @@ def test_alignment_has_no_behavior_mutation_surfaces() -> None:
         "pr_quality_runtime_proof_artifacts",
         PR_QUALITY_LIVE_WORKSPACE_MODULE,
         REPO_MEMORY_PROFILE_HISTORY_MODULE,
+        TRUSTED_HISTORY_EVIDENCE_MODULE,
     }
 
     assert "maintenance_autopilot" not in report_modules

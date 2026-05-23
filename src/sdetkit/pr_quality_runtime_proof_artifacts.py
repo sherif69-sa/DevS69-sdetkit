@@ -13,6 +13,12 @@ SUMMARY_MD = "runtime-proof-artifacts.md"
 
 COLLECTED = "collected"
 NOT_COLLECTED = "_".join(("not", "collected"))
+TRUSTED_HISTORY = "_".join(("trusted", "history"))
+BASE_ANCESTRY_VERIFIED = "_".join(("base", "ancestry", "verified"))
+LIVE_PROVEN_RECORD_COUNT = "_".join(("live", "contract", "proven", "record", "count"))
+PRIOR_HISTORY_READ_ONLY_INPUT = "_".join(("prior", "history", "is", "read", "only", "input"))
+PROOF_COMMANDS_EXECUTED_BY_READER = "_".join(("proof", "commands", "executed", "by", "reader"))
+TRUSTED_HISTORY_STATUS = "_".join(("trusted", "history", "status"))
 
 JsonObject = dict[str, Any]
 
@@ -144,15 +150,45 @@ def _repo_memory_summary(profile: Mapping[str, Any]) -> JsonObject:
     }
 
 
+def _trusted_history_summary(evidence: Mapping[str, Any]) -> JsonObject:
+    payload = _as_dict(evidence)
+    if not payload:
+        return {
+            "collection_status": NOT_COLLECTED,
+            "status": NOT_COLLECTED,
+        }
+
+    source = _as_dict(payload.get("source"))
+    history = _as_dict(payload.get("history"))
+    boundary = _as_dict(payload.get("decision_boundary"))
+    return {
+        "collection_status": COLLECTED,
+        "status": _string(payload.get("status") or "unknown"),
+        "source_workflow": _string(source.get("workflow") or "unknown"),
+        "source_run_id": _string(source.get("run_id") or "unknown"),
+        "latest_accepted_main_head": _string(history.get("latest_accepted_main_head") or "unknown"),
+        BASE_ANCESTRY_VERIFIED: _bool(source.get(BASE_ANCESTRY_VERIFIED)),
+        "record_count": _int(history.get("record_count")),
+        LIVE_PROVEN_RECORD_COUNT: _int(history.get(LIVE_PROVEN_RECORD_COUNT)),
+        PRIOR_HISTORY_READ_ONLY_INPUT: _bool(history.get(PRIOR_HISTORY_READ_ONLY_INPUT)),
+        PROOF_COMMANDS_EXECUTED_BY_READER: _bool(boundary.get(PROOF_COMMANDS_EXECUTED_BY_READER)),
+        "automation_allowed": _bool(boundary.get("automation_allowed")),
+        "merge_authorized": _bool(boundary.get("merge_authorized")),
+        "semantic_equivalence_proven": _bool(boundary.get("semantic_equivalence_proven")),
+    }
+
+
 def build_runtime_proof_artifacts(
     *,
     isolated_proof: Mapping[str, Any] | None = None,
     live_benchmark_report: Mapping[str, Any] | None = None,
     repo_memory_profile: Mapping[str, Any] | None = None,
+    trusted_history_evidence: Mapping[str, Any] | None = None,
 ) -> JsonObject:
     isolated = _isolated_proof_summary(isolated_proof or {})
     live_benchmark = _live_benchmark_summary(live_benchmark_report or {})
     repo_memory = _repo_memory_summary(repo_memory_profile or {})
+    trusted_history = _trusted_history_summary(trusted_history_evidence or {})
 
     collected_components = [
         name
@@ -160,6 +196,7 @@ def build_runtime_proof_artifacts(
             ("isolated_proof", isolated),
             ("live_benchmark", live_benchmark),
             ("repo_memory", repo_memory),
+            (TRUSTED_HISTORY, trusted_history),
         )
         if component["collection_status"] == COLLECTED
     ]
@@ -171,6 +208,7 @@ def build_runtime_proof_artifacts(
         "isolated_proof": isolated,
         "live_benchmark": live_benchmark,
         "repo_memory": repo_memory,
+        TRUSTED_HISTORY: trusted_history,
         "decision_boundary": {
             "reporting_only": True,
             "proof_commands_executed_by_renderer": False,
@@ -185,6 +223,7 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
     isolated = _as_dict(summary.get("isolated_proof"))
     benchmark = _as_dict(summary.get("live_benchmark"))
     memory = _as_dict(summary.get("repo_memory"))
+    trusted_history = _as_dict(summary.get(TRUSTED_HISTORY))
     boundary = _as_dict(summary.get("decision_boundary"))
 
     lines = [
@@ -304,6 +343,56 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
     lines.extend(
         [
             "",
+            "## Trusted accepted-main RepoMemory history",
+            "",
+            (f"- Collection status: `{_string(trusted_history.get('collection_status'))}`"),
+            f"- Status: `{_string(trusted_history.get('status'))}`",
+        ]
+    )
+    if trusted_history.get("collection_status") == COLLECTED:
+        lines.extend(
+            [
+                (f"- Source workflow: `{_string(trusted_history.get('source_workflow'))}`"),
+                (f"- Source run id: `{_string(trusted_history.get('source_run_id'))}`"),
+                (
+                    "- Latest accepted main head: "
+                    f"`{_string(trusted_history.get('latest_accepted_main_head'))}`"
+                ),
+                (
+                    "- Base ancestry verified: "
+                    f"`{str(_bool(trusted_history.get(BASE_ANCESTRY_VERIFIED))).lower()}`"
+                ),
+                f"- Records: `{_int(trusted_history.get('record_count'))}`",
+                (
+                    "- Live-contract-proven records: "
+                    f"`{_int(trusted_history.get(LIVE_PROVEN_RECORD_COUNT))}`"
+                ),
+                (
+                    "- Prior history is read-only input: "
+                    f"`{str(_bool(trusted_history.get(PRIOR_HISTORY_READ_ONLY_INPUT))).lower()}`"
+                ),
+                (
+                    "- Proof commands executed by trusted-history reader: "
+                    f"`{str(_bool(trusted_history.get(PROOF_COMMANDS_EXECUTED_BY_READER))).lower()}`"
+                ),
+                (
+                    "- Automation allowed by trusted history: "
+                    f"`{str(_bool(trusted_history.get('automation_allowed'))).lower()}`"
+                ),
+                (
+                    "- Merge authorized by trusted history: "
+                    f"`{str(_bool(trusted_history.get('merge_authorized'))).lower()}`"
+                ),
+                (
+                    "- Semantic equivalence proven by trusted history: "
+                    f"`{str(_bool(trusted_history.get('semantic_equivalence_proven'))).lower()}`"
+                ),
+            ]
+        )
+
+    lines.extend(
+        [
+            "",
             "## Boundary",
             "",
             (
@@ -342,6 +431,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--isolated-proof", type=Path)
     parser.add_argument("--live-benchmark-report", type=Path)
     parser.add_argument("--repo-memory-profile", type=Path)
+    parser.add_argument("--trusted-history-evidence", type=Path)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     return parser
@@ -353,31 +443,9 @@ def main(argv: list[str] | None = None) -> int:
         isolated_proof=_read_json(args.isolated_proof),
         live_benchmark_report=_read_json(args.live_benchmark_report),
         repo_memory_profile=_read_json(args.repo_memory_profile),
+        trusted_history_evidence=_read_json(args.trusted_history_evidence),
     )
-    artifacts = write_summary(summary, out_dir=args.out_dir)
-
-    if args.format == "json":
-        print(
-            json.dumps(
-                {
-                    "status": summary["status"],
-                    "collected_components": summary["collected_components"],
-                    "isolated_proof_status": summary["isolated_proof"]["status"],
-                    "live_benchmark_status": summary["live_benchmark"]["status"],
-                    "repo_memory_status": summary["repo_memory"]["status"],
-                    "anti_cheat_rejection_count": summary["live_benchmark"].get(
-                        "anti_cheat_rejection_count", 0
-                    ),
-                    "artifacts": artifacts,
-                },
-                indent=2,
-                sort_keys=True,
-            )
-        )
-    else:
-        for key, value in artifacts.items():
-            print(f"{key}: {value}")
-
+    write_summary(summary, out_dir=args.out_dir)
     return 0
 
 

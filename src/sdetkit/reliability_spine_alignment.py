@@ -12,10 +12,11 @@ SCHEMA_VERSION = "sdetkit.reliability_spine_alignment.v1"
 PR_QUALITY_LIVE_WORKSPACE_MODULE = "_".join(("pr", "quality", "live", "benchmark", "workspace"))
 REPLAYABLE_BENCHMARK_MODULE = "_".join(("replayable", "benchmark", "harness"))
 REPO_MEMORY_PROFILE_HISTORY_MODULE = "_".join(("repo", "memory", "profile", "history"))
+TRUSTED_HISTORY_EVIDENCE_MODULE = "_".join(("trusted", "history", "evidence"))
 NEXT_RECOMMENDED_PR = "/".join(
     (
         "feature",
-        "-".join(("pr", "quality", "trusted", "repo", "memory", "history", "visibility")),
+        "-".join(("repo", "memory", "flaky", "test", "registry", "ingestion")),
     )
 )
 
@@ -175,20 +176,20 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="pr_quality_action_report",
-            role="render operator-facing PR Quality status, evidence, trajectory, and runtime-proof summaries",
+            role="render operator-facing PR Quality status, evidence, trajectory, runtime-proof, and trusted-history summaries",
             status="aligned",
-            stages=("reporting", "trajectory", "proof"),
+            stages=("reporting", "trajectory", "proof", "history"),
             existing_artifacts=("pr-comment-body.md", "pr-comment-metadata.json"),
             integration_points=(
                 "check_intelligence",
                 "trajectory_store",
                 "pr_quality_runtime_proof_artifacts",
             ),
-            recommended_next_action="keep comments action-focused and no-authority boundaries explicit",
+            recommended_next_action="keep accepted-main history advisory-only and no-authority boundaries explicit",
         ),
         _component(
             module="pr_quality_runtime_proof_artifacts",
-            role="summarize isolated proof, live benchmark, and RepoMemory evidence for PR Quality visibility",
+            role="summarize isolated proof, live benchmark, RepoMemory, and trusted accepted-main history evidence for PR Quality visibility",
             status="aligned",
             stages=("proof", "benchmark", "history", "reporting"),
             existing_artifacts=(
@@ -203,9 +204,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 PR_QUALITY_LIVE_WORKSPACE_MODULE,
                 "replayable_benchmark_harness",
                 "repo_memory",
+                TRUSTED_HISTORY_EVIDENCE_MODULE,
                 "pr_quality_action_report",
             ),
-            recommended_next_action="keep runtime, benchmark, and memory visibility reporting-only",
+            recommended_next_action="keep runtime, benchmark, memory, and accepted-main history visibility reporting-only",
         ),
         _component(
             module=PR_QUALITY_LIVE_WORKSPACE_MODULE,
@@ -464,7 +466,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "successful network-isolation proof is unavailable until a backend is verified",
                 "flaky-test registry ingestion is not implemented",
             ),
-            recommended_next_action="surface trusted-main read-only history without expanding authority",
+            recommended_next_action="ingest read-only flaky-test history without expanding authority",
         ),
         _component(
             module=REPO_MEMORY_PROFILE_HISTORY_MODULE,
@@ -478,9 +480,27 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             integration_points=(
                 "repo_memory",
+                TRUSTED_HISTORY_EVIDENCE_MODULE,
                 "RepoMemory Profile History workflow",
             ),
-            recommended_next_action="keep trusted-main history advisory-only and visible before automation wiring",
+            recommended_next_action="keep trusted-main history immutable and advisory-only",
+        ),
+        _component(
+            module=TRUSTED_HISTORY_EVIDENCE_MODULE,
+            role="validate successful accepted-main RepoMemory history artifacts for advisory PR Quality visibility",
+            status="aligned",
+            stages=("evidence", "history", "reporting"),
+            existing_artifacts=(
+                "trusted-history-evidence.json",
+                "trusted-history-evidence.md",
+            ),
+            integration_points=(
+                REPO_MEMORY_PROFILE_HISTORY_MODULE,
+                "pr_quality_runtime_proof_artifacts",
+                "pr_quality_action_report",
+                "PR Quality workflow",
+            ),
+            recommended_next_action="keep accepted-main history reporting-only and independent of merge authority",
         ),
     ]
 

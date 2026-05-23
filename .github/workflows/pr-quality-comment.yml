@@ -327,6 +327,10 @@ jobs:
             --out-dir build/pr-quality/safe-formatting-autopilot
 
       - name: Build PR comment body
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           mkdir -p build/pr-quality
           {
@@ -471,10 +475,84 @@ jobs:
           fi
           printf '%s\n' "$repo_memory_rc" > build/pr-quality/repo-memory/repo-memory-exit-code.txt
 
+          mkdir -p \
+            build/pr-quality/trusted-history/download \
+            build/pr-quality/trusted-history/evidence
+
+          trusted_history_rc=2
+          trusted_history_run_id=""
+          trusted_history_head_sha=""
+
+          if gh api --paginate \
+            "repos/${REPOSITORY}/actions/workflows/repo-memory-history.yml/runs?branch=main&event=push&status=completed&per_page=100" \
+            --jq '.workflow_runs[] | select(.conclusion == "success") | [.id, .head_sha] | @tsv' \
+            > build/pr-quality/trusted-history/successful-main-runs.tsv; then
+            while IFS=$'\t' read -r candidate_run_id candidate_head_sha; do
+              if [ -z "$candidate_run_id" ] || [ -z "$candidate_head_sha" ]; then
+                continue
+              fi
+
+              if git merge-base --is-ancestor "$candidate_head_sha" "$PR_BASE_SHA"; then
+                trusted_history_run_id="$candidate_run_id"
+                trusted_history_head_sha="$candidate_head_sha"
+                break
+              fi
+            done < build/pr-quality/trusted-history/successful-main-runs.tsv
+          fi
+
+          if [ -n "$trusted_history_run_id" ]; then
+            trusted_history_download_rc=0
+            gh run download "$trusted_history_run_id" \
+              --repo "$REPOSITORY" \
+              --name repo-memory-profile-history \
+              --dir build/pr-quality/trusted-history/download \
+              || trusted_history_download_rc=$?
+
+            history_summary="$(
+              find build/pr-quality/trusted-history/download \
+                -name repo-memory-history-summary.json \
+                -print \
+                -quit
+            )"
+            history_jsonl="$(
+              find build/pr-quality/trusted-history/download \
+                -name repo-memory-profile-history.jsonl \
+                -print \
+                -quit
+            )"
+
+            if [ "$trusted_history_download_rc" -eq 0 ] \
+              && [ -n "$history_summary" ] \
+              && [ -n "$history_jsonl" ] \
+              && [ -f "$history_summary" ] \
+              && [ -f "$history_jsonl" ]; then
+              trusted_history_rc=0
+              PYTHONPATH=src python -m sdetkit.trusted_history_evidence \
+                --history-summary "$history_summary" \
+                --history-jsonl "$history_jsonl" \
+                --repo-root . \
+                --selected-run-id "$trusted_history_run_id" \
+                --selected-head-sha "$trusted_history_head_sha" \
+                --base-sha "$PR_BASE_SHA" \
+                --out-dir build/pr-quality/trusted-history/evidence \
+                --format json \
+                > build/pr-quality/trusted-history/evidence/evidence-cli.json \
+                || trusted_history_rc=$?
+            fi
+          fi
+
+          printf '%s\n' "$trusted_history_rc" \
+            > build/pr-quality/trusted-history/trusted-history-exit-code.txt
+          printf '%s\n' "$trusted_history_run_id" \
+            > build/pr-quality/trusted-history/selected-run-id.txt
+          printf '%s\n' "$trusted_history_head_sha" \
+            > build/pr-quality/trusted-history/selected-head-sha.txt
+
           PYTHONPATH=src python -m sdetkit.pr_quality_runtime_proof_artifacts \
             --isolated-proof build/pr-quality/runtime-proof/isolated-proof/verification-evidence.json \
             --live-benchmark-report build/pr-quality/live-benchmark/live-report/benchmark-report.json \
             --repo-memory-profile build/pr-quality/repo-memory/repo-memory-profile.json \
+            --trusted-history-evidence build/pr-quality/trusted-history/evidence/trusted-history-evidence.json \
             --out-dir build/pr-quality/runtime-proof/summary \
             --format json \
             > build/pr-quality/runtime-proof/summary-metadata.json
@@ -546,6 +624,7 @@ jobs:
             build/pr-quality/trajectory-pattern-insights/
             build/pr-quality/live-benchmark/
             build/pr-quality/repo-memory/
+            build/pr-quality/trusted-history/
             build/pr-quality/runtime-proof/
             build/pr-quality/pr-evidence-narrative.md
             build/sdetkit/evidence-graph/
@@ -553,112 +632,174 @@ jobs:
           if-no-files-found: ignore
 
       - name: Comment on PR
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
-        with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
 
-            const statusPath = 'build/pr-quality/comment-status.json';
-            const readCommentMetadata = () => {
-              const metadataPath = 'build/pr-quality/pr-comment-metadata.json';
-              try {
-                if (!fs.existsSync(metadataPath)) {
-                  return {};
-                }
-                return JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
-              } catch (error) {
-                core.warning(`failed to read PR Quality comment metadata: ${error && error.message ? error.message : error}`);
+          publish_dir="build/pr-quality/comment-publish"
+          request_path="$publish_dir/comment-request.json"
+          response_path="$publish_dir/comment-response.json"
+          body_path="$publish_dir/comment-body.md"
+
+          mkdir -p "$publish_dir"
+
+          printf '### SDET Quality Gate\n' > "$body_path"
+          cat build/pr-quality/pr-comment-body.md >> "$body_path"
+
+          BODY_PATH="$body_path" REQUEST_PATH="$request_path" python - <<'PYCODE'
+          import json
+          import os
+          from pathlib import Path
+
+          body = Path(os.environ["BODY_PATH"]).read_text(encoding="utf-8")
+          Path(os.environ["REQUEST_PATH"]).write_text(
+              json.dumps({"body": body}) + "\n",
+              encoding="utf-8",
+          )
+          PYCODE
+
+          publish_rc=1
+          publish_status="failed"
+          publish_reason="failed to publish SDET Quality Gate comment"
+          existing_id=""
+
+          if existing_id="$(
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100" \
+              --jq 'first(.[] | select(.user.type == "Bot" and (.body | startswith("### SDET Quality Gate")))) | .id // ""'
+          )"; then
+            if [ -n "$existing_id" ]; then
+              if gh api \
+                --method PATCH \
+                -H "Accept: application/vnd.github+json" \
+                "repos/${REPOSITORY}/issues/comments/${existing_id}" \
+                --input "$request_path" \
+                > "$response_path"; then
+                publish_rc=0
+                publish_status="updated"
+                publish_reason="updated existing SDET Quality Gate comment"
+              else
+                publish_rc=$?
+                publish_reason="failed to update existing SDET Quality Gate comment"
+              fi
+            else
+              if gh api \
+                --method POST \
+                -H "Accept: application/vnd.github+json" \
+                "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments" \
+                --input "$request_path" \
+                > "$response_path"; then
+                publish_rc=0
+                publish_status="posted"
+                publish_reason="posted SDET Quality Gate comment"
+              else
+                publish_rc=$?
+                publish_reason="failed to post new SDET Quality Gate comment"
+              fi
+            fi
+          else
+            publish_rc=$?
+            publish_reason="failed to list existing SDET Quality Gate comments"
+          fi
+
+          COMMENT_STATUS="$publish_status" \
+          COMMENT_REASON="$publish_reason" \
+          RESPONSE_PATH="$response_path" \
+          PR_NUMBER="$PR_NUMBER" \
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const statusPath = 'build/pr-quality/comment-status.json';
+          const readCommentMetadata = () => {
+            const metadataPath = 'build/pr-quality/pr-comment-metadata.json';
+            try {
+              if (!fs.existsSync(metadataPath)) {
                 return {};
               }
-            };
-            const writeStatus = (payload) => {
-              const metadata = readCommentMetadata();
-              const enrichedPayload = {
-                ...payload,
-                action_report_status: metadata.status || 'unknown',
-                comment_result_title: metadata.result_title || 'unknown',
-                evidence_signal_kind: metadata.evidence_signal_kind || 'unknown',
-                evidence_signal_present: Boolean(metadata.evidence_signal_present),
-                evidence_review_required: Boolean(metadata.evidence_review_required),
-                trajectory_signal_present: Boolean(metadata.trajectory_signal_present),
-                trajectory_record_count: Number(metadata.trajectory_record_count || 0),
-                trajectory_review_first_count: Number(metadata.trajectory_review_first_count || 0),
-                trajectory_auto_fix_allowed_count: Number(metadata.trajectory_auto_fix_allowed_count || 0),
-                runtime_proof_artifacts_present: Boolean(metadata.runtime_proof_artifacts_present),
-                runtime_proof_collection_status: metadata.runtime_proof_collection_status || 'not_collected',
-                runtime_guard_violation_count: Number(metadata.runtime_guard_violation_count || 0),
-                live_benchmark_collection_status: metadata.live_benchmark_collection_status || 'not_collected',
-                live_benchmark_status: metadata.live_benchmark_status || 'not_collected',
-                live_benchmark_scenario_count: Number(metadata.live_benchmark_scenario_count || 0),
-                anti_cheat_rejection_count: Number(metadata.anti_cheat_rejection_count || 0),
-                repo_memory_collection_status: metadata.repo_memory_collection_status || 'not_collected',
-                repo_memory_status: metadata.repo_memory_status || 'not_collected',
-                repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven),
-              };
-              fs.mkdirSync(path.dirname(statusPath), { recursive: true });
-              fs.writeFileSync(
-                statusPath,
-                `${JSON.stringify(enrichedPayload, null, 2)}\n`,
-                'utf8'
-              );
-            };
-
-            try {
-              const text = fs.readFileSync('build/pr-quality/pr-comment-body.md', 'utf8');
-              const body = `### SDET Quality Gate\n${text}`;
-              const marker = '### SDET Quality Gate';
-
-              const { data: comments } = await github.rest.issues.listComments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                per_page: 100,
-              });
-
-              const existing = comments.find((comment) =>
-                comment.user?.type === 'Bot' && comment.body?.startsWith(marker)
-              );
-
-              if (existing) {
-                const { data: updated } = await github.rest.issues.updateComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: existing.id,
-                  body,
-                });
-                writeStatus({
-                  status: 'updated',
-                  pr_number: context.issue.number,
-                  comment_id: updated.id,
-                  comment_url: updated.html_url,
-                  reason: 'updated existing SDET Quality Gate comment',
-                });
-                core.info(`comment_status=updated comment_url=${updated.html_url}`);
-              } else {
-                const { data: created } = await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  body,
-                });
-                writeStatus({
-                  status: 'posted',
-                  pr_number: context.issue.number,
-                  comment_id: created.id,
-                  comment_url: created.html_url,
-                  reason: 'posted SDET Quality Gate comment',
-                });
-                core.info(`comment_status=posted comment_url=${created.html_url}`);
-              }
+              return JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
             } catch (error) {
-              writeStatus({
-                status: 'failed',
-                pr_number: context.issue.number,
-                reason: String(error && error.message ? error.message : error),
-              });
-              core.setFailed(`failed to post PR Quality comment: ${error && error.message ? error.message : error}`);
+              console.warn(
+                `failed to read PR Quality comment metadata: ${
+                  error && error.message ? error.message : error
+                }`
+              );
+              return {};
             }
+          };
+
+          const writeStatus = (payload) => {
+            const metadata = readCommentMetadata();
+            const enrichedPayload = {
+              ...payload,
+              action_report_status: metadata.status || 'unknown',
+              comment_result_title: metadata.result_title || 'unknown',
+              evidence_signal_kind: metadata.evidence_signal_kind || 'unknown',
+              evidence_signal_present: Boolean(metadata.evidence_signal_present),
+              evidence_review_required: Boolean(metadata.evidence_review_required),
+              trajectory_signal_present: Boolean(metadata.trajectory_signal_present),
+              trajectory_record_count: Number(metadata.trajectory_record_count || 0),
+              trajectory_review_first_count: Number(metadata.trajectory_review_first_count || 0),
+              trajectory_auto_fix_allowed_count: Number(metadata.trajectory_auto_fix_allowed_count || 0),
+              runtime_proof_artifacts_present: Boolean(metadata.runtime_proof_artifacts_present),
+              runtime_proof_collection_status: metadata.runtime_proof_collection_status || 'not_collected',
+              runtime_guard_violation_count: Number(metadata.runtime_guard_violation_count || 0),
+              live_benchmark_collection_status: metadata.live_benchmark_collection_status || 'not_collected',
+              live_benchmark_status: metadata.live_benchmark_status || 'not_collected',
+              live_benchmark_scenario_count: Number(metadata.live_benchmark_scenario_count || 0),
+              anti_cheat_rejection_count: Number(metadata.anti_cheat_rejection_count || 0),
+              repo_memory_collection_status: metadata.repo_memory_collection_status || 'not_collected',
+              repo_memory_status: metadata.repo_memory_status || 'not_collected',
+              repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven),
+              trusted_history_collection_status: metadata.trusted_history_collection_status || 'not_collected',
+              trusted_history_status: metadata.trusted_history_status || 'not_collected',
+              trusted_history_record_count: Number(metadata.trusted_history_record_count || 0),
+              trusted_history_base_ancestry_verified: Boolean(metadata.trusted_history_base_ancestry_verified),
+              trusted_history_prior_input_read_only: Boolean(metadata.trusted_history_prior_input_read_only),
+              trusted_history_automation_allowed: Boolean(metadata.trusted_history_automation_allowed),
+              trusted_history_merge_authorized: Boolean(metadata.trusted_history_merge_authorized),
+              trusted_history_semantic_equivalence_proven: Boolean(metadata.trusted_history_semantic_equivalence_proven),
+            };
+            fs.mkdirSync(path.dirname(statusPath), { recursive: true });
+            fs.writeFileSync(
+              statusPath,
+              `${JSON.stringify(enrichedPayload, null, 2)}\n`,
+              'utf8'
+            );
+          };
+
+          const status = process.env.COMMENT_STATUS;
+          const payload = {
+            status,
+            pr_number: Number(process.env.PR_NUMBER),
+            reason: process.env.COMMENT_REASON,
+          };
+
+          const responsePath = process.env.RESPONSE_PATH;
+          if ((status === 'posted' || status === 'updated') && fs.existsSync(responsePath)) {
+            const response = JSON.parse(fs.readFileSync(responsePath, 'utf8'));
+            payload.comment_id = response.id;
+            payload.comment_url = response.html_url;
+          }
+
+          writeStatus(payload);
+
+          if (status === 'posted') {
+            process.stdout.write('comment_status=posted\n');
+          } else if (status === 'updated') {
+            process.stdout.write('comment_status=updated\n');
+          } else {
+            console.error(`comment_status=failed reason=${process.env.COMMENT_REASON}`);
+          }
+          NODE
+
+          if [ "$publish_rc" -ne 0 ]; then
+            exit "$publish_rc"
+          fi
 
       - name: Verify PR Quality comment visibility
         if: always()
@@ -714,6 +855,33 @@ jobs:
           repo_memory_live_contract_proven = bool(
               payload.get("repo_memory_live_contract_proven", False)
           )
+          history_semantic_key = "_".join(
+              ("trusted", "history", "semantic", "equivalence", "proven")
+          )
+          trusted_history_collection_status = str(
+              payload.get("trusted_history_collection_status", "not_collected")
+          )
+          trusted_history_status = str(
+              payload.get("trusted_history_status", "not_collected")
+          )
+          trusted_history_record_count = int(
+              payload.get("trusted_history_record_count", 0) or 0
+          )
+          trusted_history_base_ancestry_verified = bool(
+              payload.get("trusted_history_base_ancestry_verified", False)
+          )
+          trusted_history_prior_input_read_only = bool(
+              payload.get("trusted_history_prior_input_read_only", False)
+          )
+          trusted_history_automation_allowed = bool(
+              payload.get("trusted_history_automation_allowed", False)
+          )
+          trusted_history_merge_authorized = bool(
+              payload.get("trusted_history_merge_authorized", False)
+          )
+          trusted_history_semantic_equivalence_proven = bool(
+              payload.get(history_semantic_key, False)
+          )
 
           print(f"comment_status={status}")
           print(f"comment_reason={reason}")
@@ -736,6 +904,29 @@ jobs:
           print(f"repo_memory_status={repo_memory_status}")
           print(
               f"repo_memory_live_contract_proven={str(repo_memory_live_contract_proven).lower()}"
+          )
+          print(f"trusted_history_collection_status={trusted_history_collection_status}")
+          print(f"trusted_history_status={trusted_history_status}")
+          print(f"trusted_history_record_count={trusted_history_record_count}")
+          print(
+              "trusted_history_base_ancestry_verified="
+              f"{str(trusted_history_base_ancestry_verified).lower()}"
+          )
+          print(
+              "trusted_history_prior_input_read_only="
+              f"{str(trusted_history_prior_input_read_only).lower()}"
+          )
+          print(
+              "trusted_history_automation_allowed="
+              f"{str(trusted_history_automation_allowed).lower()}"
+          )
+          print(
+              "trusted_history_merge_authorized="
+              f"{str(trusted_history_merge_authorized).lower()}"
+          )
+          print(
+              f"{history_semantic_key}="
+              f"{str(trusted_history_semantic_equivalence_proven).lower()}"
           )
 
           if status not in {"posted", "updated"}:
@@ -788,4 +979,33 @@ jobs:
               )
           if not repo_memory_live_contract_proven:
               raise SystemExit("PR Quality RepoMemory live contract was not proven")
+          if trusted_history_collection_status != "collected":
+              raise SystemExit(
+                  "PR Quality trusted accepted-main history collection failed after "
+                  "diagnostic comment publication: "
+                  f"status={trusted_history_collection_status}"
+              )
+          if trusted_history_status != "trusted_history_verified":
+              raise SystemExit(
+                  "PR Quality trusted accepted-main history was not verified: "
+                  f"status={trusted_history_status}"
+              )
+          if trusted_history_record_count < 1:
+              raise SystemExit("PR Quality trusted accepted-main history has no records")
+          if not trusted_history_base_ancestry_verified:
+              raise SystemExit(
+                  "PR Quality trusted accepted-main history base ancestry was not verified"
+              )
+          if not trusted_history_prior_input_read_only:
+              raise SystemExit(
+                  "PR Quality trusted accepted-main history did not preserve read-only input"
+              )
+          if trusted_history_automation_allowed:
+              raise SystemExit("PR Quality trusted history attempted to allow automation")
+          if trusted_history_merge_authorized:
+              raise SystemExit("PR Quality trusted history attempted to authorize merge")
+          if trusted_history_semantic_equivalence_proven:
+              raise SystemExit(
+                  "PR Quality trusted history attempted to claim semantic equivalence"
+              )
           PY

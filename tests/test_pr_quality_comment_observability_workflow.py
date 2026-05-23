@@ -55,20 +55,29 @@ def test_pr_quality_comment_workflow_uploads_comment_artifacts() -> None:
 
 def test_pr_quality_comment_workflow_updates_or_posts_comment_and_records_status() -> None:
     text = _workflow_text()
+    publisher = text[
+        text.index("- name: Comment on PR") : text.index(
+            "- name: Verify PR Quality comment visibility"
+        )
+    ]
 
-    assert "listComments" in text
-    assert "updateComment" in text
-    assert "createComment" in text
-    assert "comment_status=updated" in text
-    assert "comment_status=posted" in text
-    assert "posted SDET Quality Gate comment" in text
-    assert "updated existing SDET Quality Gate comment" in text
-    assert "readCommentMetadata" in text
-    assert "action_report_status: metadata.status || 'unknown'" in text
-    assert "comment_result_title: metadata.result_title || 'unknown'" in text
-    assert "evidence_signal_kind: metadata.evidence_signal_kind || 'unknown'" in text
-    assert "evidence_signal_present: Boolean(metadata.evidence_signal_present)" in text
-    assert "evidence_review_required: Boolean(metadata.evidence_review_required)" in text
+    assert "GH_TOKEN: ${{ github.token }}" in publisher
+    assert "gh api" in publisher
+    assert "--method PATCH" in publisher
+    assert "--method POST" in publisher
+    assert "issues/comments/${existing_id}" in publisher
+    assert "issues/${PR_NUMBER}/comments" in publisher
+    assert "actions/github-script@" not in publisher
+    assert "comment_status=updated" in publisher
+    assert "comment_status=posted" in publisher
+    assert "posted SDET Quality Gate comment" in publisher
+    assert "updated existing SDET Quality Gate comment" in publisher
+    assert "readCommentMetadata" in publisher
+    assert "action_report_status: metadata.status || 'unknown'" in publisher
+    assert "comment_result_title: metadata.result_title || 'unknown'" in publisher
+    assert "evidence_signal_kind: metadata.evidence_signal_kind || 'unknown'" in publisher
+    assert "evidence_signal_present: Boolean(metadata.evidence_signal_present)" in publisher
+    assert "evidence_review_required: Boolean(metadata.evidence_review_required)" in publisher
 
 
 def test_pr_quality_comment_workflow_fails_loud_when_comment_not_visible() -> None:
@@ -453,3 +462,76 @@ def test_pr_quality_comment_workflow_exports_live_memory_metadata() -> None:
         "repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven)"
         in text
     )
+
+
+def test_pr_quality_comment_workflow_collects_trusted_main_history_from_accepted_base() -> None:
+    text = _workflow_text()
+
+    history_selection = text.index("actions/workflows/repo-memory-history.yml/runs")
+    validator = text.index("python -m sdetkit.trusted_history_evidence")
+    runtime_summary = text.index("python -m sdetkit.pr_quality_runtime_proof_artifacts")
+    final_comment = text.index("python -m sdetkit.pr_quality_action_report")
+
+    assert history_selection < validator < runtime_summary < final_comment
+    assert "actions: read" in text.split("jobs:", 1)[0]
+    assert "PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}" in text
+    assert "branch=main&event=push&status=completed" in text
+    assert 'select(.conclusion == "success")' in text
+    assert 'git merge-base --is-ancestor "$candidate_head_sha" "$PR_BASE_SHA"' in text
+    assert 'gh run download "$trusted_history_run_id"' in text
+    assert "--history-summary" in text
+    assert "--history-jsonl" in text
+    assert '--base-sha "$PR_BASE_SHA"' in text
+    assert (
+        "--trusted-history-evidence "
+        "build/pr-quality/trusted-history/evidence/trusted-history-evidence.json" in text
+    )
+    assert "build/pr-quality/trusted-history/" in text
+
+
+def test_pr_quality_comment_workflow_exports_trusted_history_visibility_metadata() -> None:
+    text = _workflow_text()
+
+    assert (
+        "trusted_history_collection_status: "
+        "metadata.trusted_history_collection_status || 'not_collected'" in text
+    )
+    assert "trusted_history_status: metadata.trusted_history_status || 'not_collected'" in text
+    assert (
+        "trusted_history_record_count: Number(metadata.trusted_history_record_count || 0)" in text
+    )
+    assert (
+        "trusted_history_base_ancestry_verified: "
+        "Boolean(metadata.trusted_history_base_ancestry_verified)" in text
+    )
+    assert (
+        "trusted_history_prior_input_read_only: "
+        "Boolean(metadata.trusted_history_prior_input_read_only)" in text
+    )
+    assert (
+        "trusted_history_automation_allowed: Boolean(metadata.trusted_history_automation_allowed)"
+        in text
+    )
+    assert (
+        "trusted_history_merge_authorized: Boolean(metadata.trusted_history_merge_authorized)"
+        in text
+    )
+    assert (
+        "trusted_history_semantic_equivalence_proven: "
+        "Boolean(metadata.trusted_history_semantic_equivalence_proven)" in text
+    )
+
+
+def test_pr_quality_comment_workflow_requires_trusted_history_visibility_after_posting() -> None:
+    text = _workflow_text()
+    verify_visibility = text[text.index("- name: Verify PR Quality comment visibility") :]
+
+    assert 'if trusted_history_collection_status != "collected":' in verify_visibility
+    assert 'if trusted_history_status != "trusted_history_verified":' in verify_visibility
+    assert "if trusted_history_record_count < 1:" in verify_visibility
+    assert "if not trusted_history_base_ancestry_verified:" in verify_visibility
+    assert "if not trusted_history_prior_input_read_only:" in verify_visibility
+    assert "if trusted_history_automation_allowed:" in verify_visibility
+    assert "if trusted_history_merge_authorized:" in verify_visibility
+    assert "if trusted_history_semantic_equivalence_proven:" in verify_visibility
+    assert "after diagnostic comment publication" in verify_visibility
