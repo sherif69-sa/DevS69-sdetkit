@@ -9,11 +9,13 @@ from typing import Any
 from sdetkit.replayable_benchmark_harness import (
     INVENTORY_CLAIM_MISMATCH_FAIL,
     LIVE_EVIDENCE_SOURCE,
+    NETWORK_BOUNDARY_BLOCKED_COUNT,
+    NETWORK_BOUNDARY_REQUIRED_FAIL,
     PROOF_MUTATION_FAIL,
     VERIFICATION_EVIDENCE_SOURCE,
 )
 
-SCHEMA_VERSION = "sdetkit.repo_memory.v2"
+SCHEMA_VERSION = "sdetkit.repo_memory.v3"
 DEFAULT_OUT_DIR = Path("build") / "repo-memory"
 PROFILE_JSON = "repo-memory-profile.json"
 PROFILE_MD = "repo-memory-profile.md"
@@ -276,7 +278,11 @@ def _live_benchmark_rejections(
     for item in _as_list(live_benchmark_report.get("scenarios")):
         scenario = _as_dict(item)
         scenario_type = _string(scenario.get("scenario_type"))
-        if scenario_type not in {INVENTORY_CLAIM_MISMATCH_FAIL, PROOF_MUTATION_FAIL}:
+        if scenario_type not in {
+            INVENTORY_CLAIM_MISMATCH_FAIL,
+            PROOF_MUTATION_FAIL,
+            NETWORK_BOUNDARY_REQUIRED_FAIL,
+        }:
             continue
         if (
             not _bool(scenario.get("passed"))
@@ -417,6 +423,9 @@ def build_repo_memory_profile(
             "expected_failed_scenario_count": _int(
                 live_evidence.get(EXPECTED_FAILED_EVIDENCE_COUNT)
             ),
+            "network_boundary_blocked_scenario_count": _int(
+                live_evidence.get(NETWORK_BOUNDARY_BLOCKED_COUNT)
+            ),
         },
         "failure_patterns": {
             "review_first": review_first,
@@ -444,7 +453,7 @@ def build_repo_memory_profile(
             ),
         },
         "recommended_next_action": (
-            "Add network-isolation and anti-cheat proof before any automation wiring."
+            "Register a verified containment backend or add anti-cheat proof before any automation wiring."
         ),
     }
 
@@ -493,6 +502,10 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
         (
             "- Expected failed-evidence scenarios: "
             f"`{_int(provenance.get('expected_failed_scenario_count'))}`"
+        ),
+        (
+            "- Network boundary blocked scenarios: "
+            f"`{_int(provenance.get('network_boundary_blocked_scenario_count'))}`"
         ),
         "",
         "## Command profile",

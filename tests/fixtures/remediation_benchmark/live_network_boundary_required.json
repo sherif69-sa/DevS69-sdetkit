@@ -1,0 +1,67 @@
+{
+  "description": "A valid candidate requires network containment, but no verified backend is registered, so proof execution must fail closed.",
+  "expected": {
+    "isolated_proof": {
+      "git_inventory_verified": true,
+      "inventory_claim_match": true,
+      "network_isolation_enforced": false,
+      "network_isolation_required": true,
+      "proof_execution_blocked": true,
+      "status": "failed"
+    },
+    "patch_score_status": "candidate_for_protected_verification",
+    "verifier_status": "blocked_review_first"
+  },
+  "isolated_proof": {
+    "inventory_mode": "staged_worktree",
+    "profiles": [
+      "ruff_src_tests"
+    ],
+    "require_network_isolation": true,
+    "timeout_seconds": 60
+  },
+  "pattern_insights": {
+    "recurring_review_first_surfaces": [],
+    "recurring_safe_fix_patterns": [
+      {
+        "action": "run_pre_commit",
+        "count": 2,
+        "failure_class": "formatting_only"
+      }
+    ]
+  },
+  "proposed_patch": {
+    "changed_files": [
+      "src/sdetkit/example.py"
+    ],
+    "patch_id": "oracle-formatting-patch"
+  },
+  "remediation_plan": {
+    "plans": [
+      {
+        "affected_files": [
+          "src/sdetkit/example.py"
+        ],
+        "allowed_strategy": "run_pre_commit",
+        "blocked_reason": "",
+        "classification": "formatting_only",
+        "diagnosis_id": "formatting-oracle",
+        "exact_fix_scope": {
+          "allowed_files": [
+            "src/sdetkit/example.py"
+          ],
+          "allowed_strategy": "run_pre_commit",
+          "scope": "deterministic formatting or whitespace only"
+        },
+        "failure_surface": "formatting",
+        "proof_commands": [
+          "python -m ruff check src tests"
+        ],
+        "risk_level": "low",
+        "safe_to_auto_fix": true
+      }
+    ]
+  },
+  "scenario_id": "live_network_boundary_required",
+  "scenario_type": "network_boundary_required_fail"
+}

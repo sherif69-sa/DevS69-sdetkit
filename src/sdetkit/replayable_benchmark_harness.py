@@ -9,17 +9,20 @@ from typing import Any
 
 from sdetkit.git_inventory_collector import STAGED_WORKTREE
 from sdetkit.isolated_proof_runner import INVENTORY_CLAIM_MATCH, run_isolated_proof
+from sdetkit.network_boundary import NETWORK_ISOLATION_ENFORCED, NETWORK_ISOLATION_REQUIRED
 from sdetkit.patch_scorer import score_patch
 from sdetkit.protected_verifier import verify_candidate
 
 SCHEMA_VERSION = "sdetkit.replayable_benchmark_harness.v1"
-ISOLATED_EVIDENCE_SCHEMA_VERSION = "sdetkit.replayable_benchmark_harness.isolated_evidence.v1"
+ISOLATED_EVIDENCE_SCHEMA_VERSION = "sdetkit.replayable_benchmark_harness.isolated_evidence.v2"
 DEFAULT_OUT_DIR = Path("build") / "replayable-benchmark-harness"
 REPORT_JSON = "benchmark-report.json"
 REPORT_MD = "benchmark-report.md"
 
 INVENTORY_CLAIM_MISMATCH_FAIL = "_".join(("inventory", "claim", "mismatch", "fail"))
 PROOF_MUTATION_FAIL = "_".join(("proof", "mutation", "fail"))
+NETWORK_BOUNDARY_REQUIRED_FAIL = "_".join(("network", "boundary", "required", "fail"))
+NETWORK_BOUNDARY_BLOCKED_COUNT = "_".join(("network", "boundary", "blocked", "count"))
 LIVE_EVIDENCE_SOURCE = "_".join(("git", "grounded", "isolated", "proof"))
 LIVE_EXECUTION_MODEL = "_".join(("git", "derived", "isolated", "proof", "evaluation"))
 VERIFICATION_EVIDENCE_SOURCE = "_".join(("verification", "evidence", "source"))
@@ -30,6 +33,7 @@ SCENARIO_TYPES = {
     "unsafe_patch_fail",
     INVENTORY_CLAIM_MISMATCH_FAIL,
     PROOF_MUTATION_FAIL,
+    NETWORK_BOUNDARY_REQUIRED_FAIL,
 }
 REQUIRED_SCENARIO_TYPES = (
     "nop_fail",
@@ -40,6 +44,7 @@ ISOLATED_EVIDENCE_REQUIRED_TYPES = (
     "oracle_pass",
     INVENTORY_CLAIM_MISMATCH_FAIL,
     PROOF_MUTATION_FAIL,
+    NETWORK_BOUNDARY_REQUIRED_FAIL,
 )
 
 JsonObject = dict[str, Any]
@@ -327,6 +332,7 @@ def evaluate_isolated_evidence_scenario(
         inventory_mode=_string(runtime.get("inventory_mode") or STAGED_WORKTREE),
         base_ref=_string(runtime.get("base_ref")),
         head_ref=_string(runtime.get("head_ref") or "HEAD"),
+        require_network_isolation=_bool(runtime.get("require_network_isolation")),
     )
     result = evaluate_scenario(
         scenario,
@@ -337,6 +343,10 @@ def evaluate_isolated_evidence_scenario(
     expected_status = _string(expected_runtime.get("status"))
     expected_git_verified = _bool(expected_runtime.get("git_inventory_verified"))
     expected_claim_match = _bool(expected_runtime.get("inventory_claim_match"))
+    expected_network_required = _bool(expected_runtime.get(NETWORK_ISOLATION_REQUIRED))
+    expected_network_enforced = _bool(expected_runtime.get(NETWORK_ISOLATION_ENFORCED))
+    expected_execution_blocked = _bool(expected_runtime.get("proof_execution_blocked"))
+    isolation = _as_dict(evidence.get("isolation"))
 
     result["checks"].extend(
         [
@@ -357,6 +367,27 @@ def evaluate_isolated_evidence_scenario(
                 passed=_bool(evidence.get(INVENTORY_CLAIM_MATCH)) == expected_claim_match,
                 expected=expected_claim_match,
                 actual=_bool(evidence.get(INVENTORY_CLAIM_MATCH)),
+            ),
+            _check(
+                name="isolated_network_requirement",
+                passed=_bool(isolation.get(NETWORK_ISOLATION_REQUIRED))
+                == expected_network_required,
+                expected=expected_network_required,
+                actual=_bool(isolation.get(NETWORK_ISOLATION_REQUIRED)),
+            ),
+            _check(
+                name="isolated_network_enforcement",
+                passed=_bool(isolation.get(NETWORK_ISOLATION_ENFORCED))
+                == expected_network_enforced,
+                expected=expected_network_enforced,
+                actual=_bool(isolation.get(NETWORK_ISOLATION_ENFORCED)),
+            ),
+            _check(
+                name="isolated_proof_execution_blocked",
+                passed=_bool(isolation.get("proof_execution_blocked"))
+                == expected_execution_blocked,
+                expected=expected_execution_blocked,
+                actual=_bool(isolation.get("proof_execution_blocked")),
             ),
             _check(
                 name="isolated_runner_automation_boundary",
@@ -557,6 +588,10 @@ def build_isolated_evidence_report(
                 INVENTORY_CLAIM_MISMATCH_FAIL,
             ),
             "proof_mutation_rejection_rate": _type_rate(results, PROOF_MUTATION_FAIL),
+            "network_boundary_rejection_rate": _type_rate(
+                results,
+                NETWORK_BOUNDARY_REQUIRED_FAIL,
+            ),
         },
         "live_evidence": {
             "scenario_count": len(results),
@@ -571,6 +606,21 @@ def build_isolated_evidence_report(
                 if _string(_as_dict(result.get("isolated_proof_evidence")).get("status"))
                 == "failed"
                 and result.get("passed") is True
+            ),
+            NETWORK_BOUNDARY_BLOCKED_COUNT: sum(
+                1
+                for result in results
+                if result.get("scenario_type") == NETWORK_BOUNDARY_REQUIRED_FAIL
+                and result.get("passed") is True
+            ),
+            "network_isolation_enforced_count": sum(
+                1
+                for result in results
+                if _bool(
+                    _as_dict(_as_dict(result.get("isolated_proof_evidence")).get("isolation")).get(
+                        NETWORK_ISOLATION_ENFORCED
+                    )
+                )
             ),
         },
         "safety_boundary": {
@@ -633,6 +683,10 @@ def render_markdown(report: Mapping[str, Any]) -> str:
                     "- Proof mutation rejection rate: "
                     f"`{float(required.get('proof_mutation_rejection_rate', 0.0) or 0.0):.4f}`"
                 ),
+                (
+                    "- Network boundary rejection rate: "
+                    f"`{float(required.get('network_boundary_rejection_rate', 0.0) or 0.0):.4f}`"
+                ),
                 "",
                 "## Live execution evidence",
                 "",
@@ -644,6 +698,14 @@ def render_markdown(report: Mapping[str, Any]) -> str:
                 (
                     "- Expected failed-evidence scenarios: "
                     f"`{_int(live_evidence.get('expected_failed_evidence_count'))}`"
+                ),
+                (
+                    "- Network boundary blocked scenarios: "
+                    f"`{_int(live_evidence.get(NETWORK_BOUNDARY_BLOCKED_COUNT))}`"
+                ),
+                (
+                    "- Network isolation enforced scenarios: "
+                    f"`{_int(live_evidence.get('network_isolation_enforced_count'))}`"
                 ),
                 "",
             ]
@@ -710,7 +772,8 @@ def render_markdown(report: Mapping[str, Any]) -> str:
                 "- This harness executes allowlisted proof profiles in disposable workspace copies.",
                 "- Git-derived inventory grounds each live scenario before verification.",
                 "- It does not apply patches, authorize automation, or authorize merge.",
-                "- Network isolation and semantic equivalence remain unproven.",
+                "- Required network isolation fails closed without a verified backend.",
+                "- Successful network isolation and semantic equivalence remain unproven.",
             ]
         )
     else:

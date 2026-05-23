@@ -311,6 +311,26 @@ def build_alignment_components() -> list[AlignmentComponent]:
             recommended_next_action="keep Git-derived evidence read-only until workflow proof is designed",
         ),
         _component(
+            module="network_boundary",
+            role="block proof execution when required network isolation lacks a verified runtime backend",
+            status="partially_aligned",
+            stages=("proof", "verifier", "reporting"),
+            existing_artifacts=(
+                "network-boundary.json",
+                "network-boundary.md",
+            ),
+            integration_points=(
+                "isolated_proof_runner",
+                "replayable_benchmark_harness",
+                "repo_memory",
+            ),
+            gaps=(
+                "no runtime containment backend has a verified network-isolation contract",
+                "the observed unshare probe is not sufficient to claim enforcement",
+            ),
+            recommended_next_action="register a backend only after successful containment proof",
+        ),
+        _component(
             module="isolated_proof_runner",
             role="execute allowlisted proof profiles in a disposable workspace copy and capture results",
             status="partially_aligned",
@@ -318,18 +338,20 @@ def build_alignment_components() -> list[AlignmentComponent]:
             existing_artifacts=(
                 "verification-evidence.json",
                 "verification-evidence.md",
+                "network-boundary.json",
             ),
             integration_points=(
                 "git_inventory_collector",
+                "network_boundary",
                 "protected_verifier",
                 "replayable_benchmark_harness",
                 "repo_memory",
             ),
             gaps=(
-                "network isolation is reported but not enforced",
-                "live benchmark coverage remains limited to allowlisted proof profiles",
+                "required network-isolated proof fails closed because no verified backend exists",
+                "successful network-isolated proof execution remains unavailable",
             ),
-            recommended_next_action="add network-isolation and anti-cheat proof before automation connection",
+            recommended_next_action="add anti-cheat proof while containment remains fail-closed",
         ),
         _component(
             module="replayable_benchmark_harness",
@@ -344,13 +366,17 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             integration_points=(
                 "git_inventory_collector",
+                "network_boundary",
                 "isolated_proof_runner",
                 "patch_scorer",
                 "protected_verifier",
                 "repo_memory",
             ),
-            gaps=("anti-cheat runtime checks and network isolation remain future work",),
-            recommended_next_action="add network-isolation and anti-cheat proof before automation wiring",
+            gaps=(
+                "required network-isolation rejection is benchmarked, but successful containment remains unavailable",
+                "anti-cheat runtime checks remain future work",
+            ),
+            recommended_next_action="add anti-cheat proof without weakening fail-closed containment",
         ),
         _component(
             module="repo_memory",
@@ -363,14 +389,15 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             integration_points=(
                 "trajectory_pattern_insights",
+                "network_boundary",
                 "replayable_benchmark_harness",
                 "protected_verifier",
             ),
             gaps=(
-                "network-isolation and anti-cheat proof outcomes are not yet available for memory",
+                "successful network-isolation proof is unavailable until a backend is verified",
                 "flaky-test registry ingestion and persistent profile updates are not implemented",
             ),
-            recommended_next_action="ingest anti-cheat and isolation proof only after those boundaries exist",
+            recommended_next_action="ingest anti-cheat proof only after its boundary exists",
         ),
     ]
 
@@ -408,7 +435,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/isolated-proof-network-boundary",
+        "next_recommended_pr": "feature/proof-anti-cheat-runtime-contracts",
     }
 
 
