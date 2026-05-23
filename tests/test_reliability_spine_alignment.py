@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit.reliability_spine_alignment import (
+    FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
     NEXT_RECOMMENDED_PR,
     PR_QUALITY_LIVE_WORKSPACE_MODULE,
     REPO_MEMORY_PROFILE_HISTORY_MODULE,
@@ -40,6 +41,7 @@ def test_alignment_components_cover_current_reliability_spine() -> None:
     assert PR_QUALITY_LIVE_WORKSPACE_MODULE in modules
     assert REPO_MEMORY_PROFILE_HISTORY_MODULE in modules
     assert TRUSTED_HISTORY_EVIDENCE_MODULE in modules
+    assert FLAKY_TEST_REGISTRY_EVIDENCE_MODULE in modules
 
 
 def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
@@ -78,6 +80,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert PR_QUALITY_LIVE_WORKSPACE_MODULE not in gaps_by_module
     assert REPO_MEMORY_PROFILE_HISTORY_MODULE not in gaps_by_module
     assert TRUSTED_HISTORY_EVIDENCE_MODULE not in gaps_by_module
+    assert FLAKY_TEST_REGISTRY_EVIDENCE_MODULE in gaps_by_module
     assert any("protected_verifier" in gap for gap in gaps_by_module["maintenance_autopilot"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["patch_scorer"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["protected_verifier"])
@@ -89,7 +92,11 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert any("containment" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert not any("PR Quality" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert any("network-isolation" in gap for gap in gaps_by_module["repo_memory"])
-    assert any("flaky-test registry" in gap for gap in gaps_by_module["repo_memory"])
+    assert any("flaky-test evidence producer" in gap for gap in gaps_by_module["repo_memory"])
+    assert any(
+        "trusted-main flaky-test evidence producer" in gap
+        for gap in gaps_by_module[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
+    )
     assert not any("persistent profile" in gap for gap in gaps_by_module["repo_memory"])
     assert any("verified" in gap for gap in gaps_by_module["network_boundary"])
     assert any("external filesystem" in gap for gap in gaps_by_module["proof_runtime_guard"])
@@ -117,6 +124,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert f"`{PR_QUALITY_LIVE_WORKSPACE_MODULE}`: `aligned`" in markdown
     assert f"`{REPO_MEMORY_PROFILE_HISTORY_MODULE}`: `aligned`" in markdown
     assert f"`{TRUSTED_HISTORY_EVIDENCE_MODULE}`: `aligned`" in markdown
+    assert f"`{FLAKY_TEST_REGISTRY_EVIDENCE_MODULE}`: `partially_aligned`" in markdown
 
 
 def test_alignment_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
@@ -194,6 +202,7 @@ def test_alignment_has_no_behavior_mutation_surfaces() -> None:
         PR_QUALITY_LIVE_WORKSPACE_MODULE,
         REPO_MEMORY_PROFILE_HISTORY_MODULE,
         TRUSTED_HISTORY_EVIDENCE_MODULE,
+        FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
     }
 
     assert "maintenance_autopilot" not in report_modules

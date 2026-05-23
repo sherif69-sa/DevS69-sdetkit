@@ -13,10 +13,11 @@ PR_QUALITY_LIVE_WORKSPACE_MODULE = "_".join(("pr", "quality", "live", "benchmark
 REPLAYABLE_BENCHMARK_MODULE = "_".join(("replayable", "benchmark", "harness"))
 REPO_MEMORY_PROFILE_HISTORY_MODULE = "_".join(("repo", "memory", "profile", "history"))
 TRUSTED_HISTORY_EVIDENCE_MODULE = "_".join(("trusted", "history", "evidence"))
+FLAKY_TEST_REGISTRY_EVIDENCE_MODULE = "_".join(("flaky", "test", "registry", "evidence"))
 NEXT_RECOMMENDED_PR = "/".join(
     (
         "feature",
-        "-".join(("repo", "memory", "flaky", "test", "registry", "ingestion")),
+        "-".join(("trusted", "flaky", "test", "registry", "producer")),
     )
 )
 
@@ -445,6 +446,21 @@ def build_alignment_components() -> list[AlignmentComponent]:
             recommended_next_action="keep live benchmark evidence reporting-only until containment is proven",
         ),
         _component(
+            module=FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
+            role="normalize read-only flaky-test classification evidence for advisory RepoMemory ingestion",
+            status="partially_aligned",
+            stages=("evidence", "history", "reporting"),
+            existing_artifacts=(
+                "flaky-test-registry-evidence.json",
+                "flaky-test-registry-evidence.md",
+            ),
+            integration_points=("intelligence flake classify", "repo_memory"),
+            gaps=(
+                "trusted-main flaky-test evidence producer and PR Quality visibility are not yet connected",
+            ),
+            recommended_next_action="connect only provenance-checked trusted-main instability evidence",
+        ),
+        _component(
             module="repo_memory",
             role="produce local repo-specific memory profiles from trajectory and benchmark evidence",
             status="partially_aligned",
@@ -464,9 +480,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             gaps=(
                 "successful network-isolation proof is unavailable until a backend is verified",
-                "flaky-test registry ingestion is not implemented",
+                "trusted-main flaky-test evidence producer and PR Quality visibility remain unconnected",
             ),
-            recommended_next_action="ingest read-only flaky-test history without expanding authority",
+            recommended_next_action="surface only provenance-checked flaky-test instability context without expanding authority",
         ),
         _component(
             module=REPO_MEMORY_PROFILE_HISTORY_MODULE,

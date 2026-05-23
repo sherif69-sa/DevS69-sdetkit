@@ -149,6 +149,45 @@ def _live_benchmark_report() -> dict:
     }
 
 
+def _flaky_registry_evidence() -> dict:
+    return {
+        "schema_version": "sdetkit.flaky_test_registry_evidence.v1",
+        "collection_status": "collected",
+        "status": "advisory_registry_collected",
+        "source": {
+            "kind": "operator_review_input",
+            "reference": "local-proof",
+            "classification_schema": "sdetkit.intelligence.flake.v1",
+            "input_read_only": True,
+            "commands_executed_by_reader": False,
+        },
+        "entries": [
+            {
+                "test_id": "tests/test_service.py::test_retry_path",
+                "fingerprint": "abcd1234",
+                "classification": "flaky",
+                "observed_runs": 3,
+                "observed_failures": 1,
+                "observed_passes": 2,
+                "decision": "instability_context_only",
+                "review_first": True,
+            }
+        ],
+        "summary": {
+            "entry_count": 1,
+            "flaky_test_count": 1,
+        },
+        "decision_boundary": {
+            "automatic_quarantine_allowed": False,
+            "automatic_rerun_allowed": False,
+            "current_failure_suppression_allowed": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+
 def _pattern_insights() -> dict:
     return {
         "schema_version": "sdetkit.trajectory_pattern_insights.v1",
@@ -175,7 +214,7 @@ def test_repo_memory_records_benchmark_supported_candidate_without_automation() 
         benchmark_report=_benchmark_report(),
     )
 
-    assert profile["schema_version"] == "sdetkit.repo_memory.v4"
+    assert profile["schema_version"] == "sdetkit.repo_memory.v5"
     assert profile["profile_status"] == "benchmark_supported_memory"
     assert profile["memory_mode"] == "read_only_profile"
     assert profile["inputs"]["benchmark_contract_proven"] is True
@@ -401,3 +440,125 @@ def test_repo_memory_cli_accepts_live_benchmark_report(tmp_path: Path, capsys) -
     assert "Live safe candidates: `1`" in markdown
     assert "Network boundary blocked scenarios: `1`" in markdown
     assert "Anti-cheat rejection scenarios: `2`" in markdown
+
+
+def test_repo_memory_ingests_flaky_test_registry_as_advisory_context_only() -> None:
+    profile = build_repo_memory_profile(
+        pattern_insights=_pattern_insights(),
+        benchmark_report=_benchmark_report(),
+        flaky_test_registry_evidence=_flaky_registry_evidence(),
+    )
+
+    flaky = profile["flaky_test_registry"]
+    assert flaky["collection_status"] == "collected"
+    assert flaky["status"] == "advisory_registry_collected"
+    assert flaky["entry_count"] == 1
+    assert flaky["entries"][0]["decision"] == "instability_context_only"
+    assert flaky["decision_boundary"]["automatic_quarantine_allowed"] is False
+    assert flaky["decision_boundary"]["current_failure_suppression_allowed"] is False
+    assert flaky["decision_boundary"]["automation_allowed"] is False
+
+    boundary = profile["decision_boundary"]
+    assert boundary["automation_allowed"] is False
+    assert boundary["merge_authorized"] is False
+    assert boundary["semantic_equivalence_proven"] is False
+
+
+def test_repo_memory_rejects_authority_expanding_flaky_test_registry() -> None:
+    evidence = _flaky_registry_evidence()
+    evidence["decision_boundary"]["current_failure_suppression_allowed"] = True
+
+    try:
+        build_repo_memory_profile(
+            pattern_insights=_pattern_insights(),
+            benchmark_report=_benchmark_report(),
+            flaky_test_registry_evidence=evidence,
+        )
+    except ValueError as exc:
+        assert "expands authority" in str(exc)
+    else:
+        raise AssertionError("expected authority-expanding flaky evidence to be rejected")
+
+
+def test_repo_memory_markdown_renders_flaky_history_no_authority_boundary() -> None:
+    markdown = render_markdown(
+        build_repo_memory_profile(
+            pattern_insights=_pattern_insights(),
+            benchmark_report=_benchmark_report(),
+            flaky_test_registry_evidence=_flaky_registry_evidence(),
+        )
+    )
+
+    assert "Status: `advisory_registry_collected`" in markdown
+    assert "Automatic quarantine allowed: `false`" in markdown
+    assert "Current failure suppression allowed: `false`" in markdown
+    assert "Automation allowed by flaky-test history: `false`" in markdown
+
+
+def test_repo_memory_rejects_hidden_entry_authority_and_bad_registry_schema() -> None:
+    hidden_authority = _flaky_registry_evidence()
+    hidden_authority["entries"][0]["automation_allowed"] = True
+
+    try:
+        build_repo_memory_profile(
+            pattern_insights=_pattern_insights(),
+            benchmark_report=_benchmark_report(),
+            flaky_test_registry_evidence=hidden_authority,
+        )
+    except ValueError as exc:
+        assert "entry expands authority" in str(exc)
+    else:
+        raise AssertionError("expected entry-level authority expansion to be rejected")
+
+    unsupported = _flaky_registry_evidence()
+    unsupported["schema_version"] = "unsupported.registry.v1"
+
+    try:
+        build_repo_memory_profile(
+            pattern_insights=_pattern_insights(),
+            benchmark_report=_benchmark_report(),
+            flaky_test_registry_evidence=unsupported,
+        )
+    except ValueError as exc:
+        assert "schema is not supported" in str(exc)
+    else:
+        raise AssertionError("expected unsupported registry schema to be rejected")
+
+
+def test_repo_memory_cli_accepts_advisory_flaky_registry_evidence(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    insights_path = tmp_path / "pattern-insights.json"
+    benchmark_path = tmp_path / "benchmark-report.json"
+    flaky_path = tmp_path / "flaky-test-registry-evidence.json"
+    out_dir = tmp_path / "repo-memory-with-flaky-context"
+
+    insights_path.write_text(json.dumps(_pattern_insights()), encoding="utf-8")
+    benchmark_path.write_text(json.dumps(_benchmark_report()), encoding="utf-8")
+    flaky_path.write_text(json.dumps(_flaky_registry_evidence()), encoding="utf-8")
+
+    rc = main(
+        [
+            "--pattern-insights",
+            str(insights_path),
+            "--benchmark-report",
+            str(benchmark_path),
+            "--flaky-test-registry-evidence",
+            str(flaky_path),
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    capsys.readouterr()
+    saved = json.loads((out_dir / "repo-memory-profile.json").read_text(encoding="utf-8"))
+    markdown = (out_dir / "repo-memory-profile.md").read_text(encoding="utf-8")
+
+    assert saved["flaky_test_registry"]["collection_status"] == "collected"
+    assert saved["flaky_test_registry"]["entry_count"] == 1
+    assert saved["flaky_test_registry"]["decision_boundary"]["automation_allowed"] is False
+    assert "Current failure suppression allowed: `false`" in markdown
