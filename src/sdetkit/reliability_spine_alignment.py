@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "sdetkit.reliability_spine_alignment.v1"
+PR_QUALITY_LIVE_WORKSPACE_MODULE = "_".join(("pr", "quality", "live", "benchmark", "workspace"))
+REPLAYABLE_BENCHMARK_MODULE = "_".join(("replayable", "benchmark", "harness"))
 
 SPINE_STAGES = (
     "evidence",
@@ -179,9 +181,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="pr_quality_runtime_proof_artifacts",
-            role="summarize current-PR isolated runtime proof artifacts for PR Quality visibility",
-            status="partially_aligned",
-            stages=("proof", "reporting"),
+            role="summarize isolated proof, live benchmark, and RepoMemory evidence for PR Quality visibility",
+            status="aligned",
+            stages=("proof", "benchmark", "history", "reporting"),
             existing_artifacts=(
                 "runtime-proof-artifacts.json",
                 "runtime-proof-artifacts.md",
@@ -191,13 +193,27 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "isolated_proof_runner",
                 "proof_runtime_guard",
                 "network_boundary",
+                PR_QUALITY_LIVE_WORKSPACE_MODULE,
+                "replayable_benchmark_harness",
+                "repo_memory",
                 "pr_quality_action_report",
             ),
-            gaps=(
-                "live benchmark artifacts are explicitly not collected in the PR Quality workflow",
-                "RepoMemory artifacts are explicitly not collected in the PR Quality workflow",
+            recommended_next_action="keep runtime, benchmark, and memory visibility reporting-only",
+        ),
+        _component(
+            module=PR_QUALITY_LIVE_WORKSPACE_MODULE,
+            role="prepare disposable Git scenario repositories for live PR Quality benchmark evidence",
+            status="aligned",
+            stages=("proof", "benchmark", "reporting"),
+            existing_artifacts=(
+                "workspace-manifest.json",
+                "workspace-manifest.md",
             ),
-            recommended_next_action="wire read-only benchmark and RepoMemory artifact inputs without automation",
+            integration_points=(
+                REPLAYABLE_BENCHMARK_MODULE,
+                "pr_quality_runtime_proof_artifacts",
+            ),
+            recommended_next_action="keep generated scenario repositories temporary and non-authoritative",
         ),
         _component(
             module="trajectory_store",
@@ -416,11 +432,8 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "protected_verifier",
                 "repo_memory",
             ),
-            gaps=(
-                "successful containment remains unavailable",
-                "live benchmark outcomes are not yet collected by the PR Quality workflow",
-            ),
-            recommended_next_action="wire benchmark artifacts into PR Quality as read-only evidence",
+            gaps=("successful containment remains unavailable",),
+            recommended_next_action="keep live benchmark evidence reporting-only until containment is proven",
         ),
         _component(
             module="repo_memory",
@@ -437,13 +450,13 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "proof_runtime_guard",
                 "replayable_benchmark_harness",
                 "protected_verifier",
+                "pr_quality_runtime_proof_artifacts",
             ),
             gaps=(
                 "successful network-isolation proof is unavailable until a backend is verified",
-                "RepoMemory profiles are not yet collected by the PR Quality workflow",
                 "flaky-test registry ingestion and persistent profile updates are not implemented",
             ),
-            recommended_next_action="surface read-only runtime-proof memory before automation wiring",
+            recommended_next_action="persist read-only historical profiles before automation wiring",
         ),
     ]
 
@@ -481,7 +494,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/pr-quality-live-benchmark-memory-artifacts",
+        "next_recommended_pr": "feature/repo-memory-persistent-profile-history",
     }
 
 

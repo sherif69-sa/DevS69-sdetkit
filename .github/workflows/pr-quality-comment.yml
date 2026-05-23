@@ -357,13 +357,73 @@ jobs:
             || runtime_proof_rc=$?
 
 
-          PYTHONPATH=src python -m sdetkit.pr_quality_runtime_proof_artifacts \
-            --isolated-proof build/pr-quality/runtime-proof/isolated-proof/verification-evidence.json \
-            --out-dir build/pr-quality/runtime-proof/summary \
-            --format json \
-            > build/pr-quality/runtime-proof/summary-metadata.json
-
           printf '%s\n' "$runtime_proof_rc" > build/pr-quality/runtime-proof/isolated-proof-exit-code.txt
+
+          mkdir -p \
+            build/pr-quality/live-benchmark/workspace \
+            build/pr-quality/live-benchmark/fixture-report \
+            build/pr-quality/live-benchmark/live-report
+
+          live_workspace_root="${RUNNER_TEMP}/sdetkit-pr-quality-live-benchmark-repositories"
+          rm -rf "$live_workspace_root"
+
+          live_workspace_rc=0
+          PYTHONPATH=src python -m sdetkit.pr_quality_live_benchmark_workspace \
+            --out-dir "$live_workspace_root" \
+            --format json \
+            > build/pr-quality/live-benchmark/workspace/workspace-cli.json \
+            || live_workspace_rc=$?
+          printf '%s\n' "$live_workspace_rc" \
+            > build/pr-quality/live-benchmark/workspace/workspace-exit-code.txt
+
+          live_benchmark_rc=2
+          if [ "$live_workspace_rc" -eq 0 ] && [ -s "$live_workspace_root/workspace-manifest.json" ]; then
+            cp "$live_workspace_root/workspace-manifest.json" \
+              build/pr-quality/live-benchmark/workspace/workspace-manifest.json
+            cp "$live_workspace_root/workspace-manifest.md" \
+              build/pr-quality/live-benchmark/workspace/workspace-manifest.md
+
+            mapfile -t live_args < <(
+              LIVE_WORKSPACE_ROOT="$live_workspace_root" python - <<'PYCODE'
+          import json
+          import os
+          from pathlib import Path
+
+          manifest = json.loads(
+              (Path(os.environ["LIVE_WORKSPACE_ROOT"]) / "workspace-manifest.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+          for item in manifest["scenarios"]:
+              print("--isolated-scenario")
+              print(item["fixture_path"])
+              print("--isolated-repo-root")
+              print(item["repo_root"])
+          PYCODE
+            )
+
+            live_benchmark_rc=0
+            PYTHONPATH=src python -m sdetkit.replayable_benchmark_harness \
+              "${live_args[@]}" \
+              --out-dir build/pr-quality/live-benchmark/live-report \
+              --format json \
+              > build/pr-quality/live-benchmark/live-report/live-report-cli.json \
+              || live_benchmark_rc=$?
+          fi
+          printf '%s\n' "$live_benchmark_rc" \
+            > build/pr-quality/live-benchmark/live-report/live-report-exit-code.txt
+
+          fixture_benchmark_rc=0
+          PYTHONPATH=src python -m sdetkit.replayable_benchmark_harness \
+            --scenario tests/fixtures/remediation_benchmark/nop_formatting_patch.json \
+            --scenario tests/fixtures/remediation_benchmark/oracle_formatting_patch.json \
+            --scenario tests/fixtures/remediation_benchmark/unsafe_protected_path_patch.json \
+            --out-dir build/pr-quality/live-benchmark/fixture-report \
+            --format json \
+            > build/pr-quality/live-benchmark/fixture-report/fixture-report-cli.json \
+            || fixture_benchmark_rc=$?
+          printf '%s\n' "$fixture_benchmark_rc" \
+            > build/pr-quality/live-benchmark/fixture-report/fixture-report-exit-code.txt
 
           PYTHONPATH=src python -m sdetkit.pr_quality_evidence_narrative \
             --quality-log quality.log \
@@ -387,6 +447,37 @@ jobs:
             --pr-number "${{ github.event.pull_request.number }}" \
             --format json \
             > build/pr-quality/trajectory/trajectory-metadata.json
+
+          mkdir -p build/pr-quality/trajectory-pattern-insights build/pr-quality/repo-memory
+          PYTHONPATH=src python -m sdetkit.trajectory_pattern_insights \
+            --trajectory-jsonl build/pr-quality/trajectory/trajectory.jsonl \
+            --json-out build/pr-quality/trajectory-pattern-insights/pattern-insights.json \
+            --markdown-out build/pr-quality/trajectory-pattern-insights/pattern-insights.md \
+            --format json \
+            > build/pr-quality/trajectory-pattern-insights/pattern-insights-cli.json
+
+          repo_memory_rc=2
+          if [ -s build/pr-quality/live-benchmark/fixture-report/benchmark-report.json ] \
+            && [ -s build/pr-quality/live-benchmark/live-report/benchmark-report.json ]; then
+            repo_memory_rc=0
+            PYTHONPATH=src python -m sdetkit.repo_memory \
+              --pattern-insights build/pr-quality/trajectory-pattern-insights/pattern-insights.json \
+              --benchmark-report build/pr-quality/live-benchmark/fixture-report/benchmark-report.json \
+              --live-benchmark-report build/pr-quality/live-benchmark/live-report/benchmark-report.json \
+              --out-dir build/pr-quality/repo-memory \
+              --format json \
+              > build/pr-quality/repo-memory/repo-memory-cli.json \
+              || repo_memory_rc=$?
+          fi
+          printf '%s\n' "$repo_memory_rc" > build/pr-quality/repo-memory/repo-memory-exit-code.txt
+
+          PYTHONPATH=src python -m sdetkit.pr_quality_runtime_proof_artifacts \
+            --isolated-proof build/pr-quality/runtime-proof/isolated-proof/verification-evidence.json \
+            --live-benchmark-report build/pr-quality/live-benchmark/live-report/benchmark-report.json \
+            --repo-memory-profile build/pr-quality/repo-memory/repo-memory-profile.json \
+            --out-dir build/pr-quality/runtime-proof/summary \
+            --format json \
+            > build/pr-quality/runtime-proof/summary-metadata.json
 
           PYTHONPATH=src python -m sdetkit.pr_quality_action_report \
             --action-report build/pr-quality/check-intelligence/action-report.json \
@@ -452,6 +543,9 @@ jobs:
             build/pr-quality/code-scanning/
             build/pr-quality/safe-formatting-autopilot/
             build/pr-quality/trajectory/
+            build/pr-quality/trajectory-pattern-insights/
+            build/pr-quality/live-benchmark/
+            build/pr-quality/repo-memory/
             build/pr-quality/runtime-proof/
             build/pr-quality/pr-evidence-narrative.md
             build/sdetkit/evidence-graph/
@@ -494,6 +588,13 @@ jobs:
                 runtime_proof_artifacts_present: Boolean(metadata.runtime_proof_artifacts_present),
                 runtime_proof_collection_status: metadata.runtime_proof_collection_status || 'not_collected',
                 runtime_guard_violation_count: Number(metadata.runtime_guard_violation_count || 0),
+                live_benchmark_collection_status: metadata.live_benchmark_collection_status || 'not_collected',
+                live_benchmark_status: metadata.live_benchmark_status || 'not_collected',
+                live_benchmark_scenario_count: Number(metadata.live_benchmark_scenario_count || 0),
+                anti_cheat_rejection_count: Number(metadata.anti_cheat_rejection_count || 0),
+                repo_memory_collection_status: metadata.repo_memory_collection_status || 'not_collected',
+                repo_memory_status: metadata.repo_memory_status || 'not_collected',
+                repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven),
               };
               fs.mkdirSync(path.dirname(statusPath), { recursive: true });
               fs.writeFileSync(
@@ -592,6 +693,27 @@ jobs:
           runtime_guard_violation_count = int(
               payload.get("runtime_guard_violation_count", 0) or 0
           )
+          live_benchmark_collection_status = str(
+              payload.get("live_benchmark_collection_status", "not_collected")
+          )
+          live_benchmark_status = str(
+              payload.get("live_benchmark_status", "not_collected")
+          )
+          live_benchmark_scenario_count = int(
+              payload.get("live_benchmark_scenario_count", 0) or 0
+          )
+          anti_cheat_rejection_count = int(
+              payload.get("anti_cheat_rejection_count", 0) or 0
+          )
+          repo_memory_collection_status = str(
+              payload.get("repo_memory_collection_status", "not_collected")
+          )
+          repo_memory_status = str(
+              payload.get("repo_memory_status", "not_collected")
+          )
+          repo_memory_live_contract_proven = bool(
+              payload.get("repo_memory_live_contract_proven", False)
+          )
 
           print(f"comment_status={status}")
           print(f"comment_reason={reason}")
@@ -606,6 +728,15 @@ jobs:
           print(f"runtime_proof_artifacts_present={str(runtime_proof_artifacts_present).lower()}")
           print(f"runtime_proof_collection_status={runtime_proof_collection_status}")
           print(f"runtime_guard_violation_count={runtime_guard_violation_count}")
+          print(f"live_benchmark_collection_status={live_benchmark_collection_status}")
+          print(f"live_benchmark_status={live_benchmark_status}")
+          print(f"live_benchmark_scenario_count={live_benchmark_scenario_count}")
+          print(f"anti_cheat_rejection_count={anti_cheat_rejection_count}")
+          print(f"repo_memory_collection_status={repo_memory_collection_status}")
+          print(f"repo_memory_status={repo_memory_status}")
+          print(
+              f"repo_memory_live_contract_proven={str(repo_memory_live_contract_proven).lower()}"
+          )
 
           if status not in {"posted", "updated"}:
               raise SystemExit(f"PR Quality comment was not posted or updated: status={status} reason={reason}")
@@ -629,4 +760,32 @@ jobs:
                   "PR Quality runtime proof collection failed after diagnostic comment publication: "
                   f"status={runtime_proof_collection_status}"
               )
+          if live_benchmark_collection_status != "collected":
+              raise SystemExit(
+                  "PR Quality live benchmark collection failed after diagnostic comment publication: "
+                  f"status={live_benchmark_collection_status}"
+              )
+          if live_benchmark_status != "passed":
+              raise SystemExit(
+                  "PR Quality live benchmark evidence failed: "
+                  f"status={live_benchmark_status}"
+              )
+          if live_benchmark_scenario_count != 6 or anti_cheat_rejection_count != 2:
+              raise SystemExit(
+                  "PR Quality live benchmark contract incomplete: "
+                  f"scenarios={live_benchmark_scenario_count} "
+                  f"anti_cheat_rejections={anti_cheat_rejection_count}"
+              )
+          if repo_memory_collection_status != "collected":
+              raise SystemExit(
+                  "PR Quality RepoMemory collection failed after diagnostic comment publication: "
+                  f"status={repo_memory_collection_status}"
+              )
+          if repo_memory_status != "live_proof_supported_memory":
+              raise SystemExit(
+                  "PR Quality RepoMemory live-proof status missing: "
+                  f"status={repo_memory_status}"
+              )
+          if not repo_memory_live_contract_proven:
+              raise SystemExit("PR Quality RepoMemory live contract was not proven")
           PY

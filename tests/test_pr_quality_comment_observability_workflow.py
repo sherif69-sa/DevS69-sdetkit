@@ -385,3 +385,71 @@ def test_pr_quality_comment_workflow_posts_runtime_diagnostic_before_failing_mis
     assert "if not runtime_proof_artifacts_present:" in verify_visibility
     assert 'if runtime_proof_collection_status != "collected":' in verify_visibility
     assert "after diagnostic comment publication" in verify_visibility
+
+
+def test_pr_quality_comment_workflow_builds_live_benchmark_and_repo_memory_artifacts() -> None:
+    text = _workflow_text()
+
+    workspace = text.index("python -m sdetkit.pr_quality_live_benchmark_workspace")
+    live_benchmark = text.index("python -m sdetkit.replayable_benchmark_harness")
+    trajectory = text.index("python -m sdetkit.trajectory_store")
+    patterns = text.index("python -m sdetkit.trajectory_pattern_insights")
+    memory = text.index("python -m sdetkit.repo_memory")
+    runtime_summary = text.index("python -m sdetkit.pr_quality_runtime_proof_artifacts")
+    action_report = text.index("python -m sdetkit.pr_quality_action_report")
+
+    assert (
+        workspace
+        < live_benchmark
+        < trajectory
+        < patterns
+        < memory
+        < runtime_summary
+        < action_report
+    )
+    assert "${RUNNER_TEMP}/sdetkit-pr-quality-live-benchmark-repositories" in text
+    assert (
+        "--live-benchmark-report build/pr-quality/live-benchmark/live-report/benchmark-report.json"
+        in text
+    )
+    assert "--repo-memory-profile build/pr-quality/repo-memory/repo-memory-profile.json" in text
+    assert "build/pr-quality/live-benchmark/" in text
+    assert "build/pr-quality/repo-memory/" in text
+    assert "build/pr-quality/trajectory-pattern-insights/" in text
+
+
+def test_pr_quality_comment_workflow_requires_live_memory_visibility_after_posting() -> None:
+    text = _workflow_text()
+    verify_visibility = text[text.index("- name: Verify PR Quality comment visibility") :]
+
+    assert "live_benchmark_collection_status" in verify_visibility
+    assert 'if live_benchmark_collection_status != "collected":' in verify_visibility
+    assert 'if live_benchmark_status != "passed":' in verify_visibility
+    assert "live_benchmark_scenario_count != 6" in verify_visibility
+    assert "anti_cheat_rejection_count != 2" in verify_visibility
+    assert 'if repo_memory_collection_status != "collected":' in verify_visibility
+    assert 'if repo_memory_status != "live_proof_supported_memory":' in verify_visibility
+    assert "if not repo_memory_live_contract_proven:" in verify_visibility
+
+
+def test_pr_quality_comment_workflow_exports_live_memory_metadata() -> None:
+    text = _workflow_text()
+
+    assert (
+        "live_benchmark_collection_status: metadata.live_benchmark_collection_status || 'not_collected'"
+        in text
+    )
+    assert "live_benchmark_status: metadata.live_benchmark_status || 'not_collected'" in text
+    assert (
+        "live_benchmark_scenario_count: Number(metadata.live_benchmark_scenario_count || 0)" in text
+    )
+    assert "anti_cheat_rejection_count: Number(metadata.anti_cheat_rejection_count || 0)" in text
+    assert (
+        "repo_memory_collection_status: metadata.repo_memory_collection_status || 'not_collected'"
+        in text
+    )
+    assert "repo_memory_status: metadata.repo_memory_status || 'not_collected'" in text
+    assert (
+        "repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven)"
+        in text
+    )
