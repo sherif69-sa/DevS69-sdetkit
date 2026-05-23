@@ -789,9 +789,9 @@ jobs:
           writeStatus(payload);
 
           if (status === 'posted') {
-            console.log('comment_status=posted');
+            process.stdout.write('comment_status=posted\n');
           } else if (status === 'updated') {
-            console.log('comment_status=updated');
+            process.stdout.write('comment_status=updated\n');
           } else {
             console.error(`comment_status=failed reason=${process.env.COMMENT_REASON}`);
           }
