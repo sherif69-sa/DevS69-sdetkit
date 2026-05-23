@@ -5,12 +5,16 @@ import subprocess
 from pathlib import Path
 
 from sdetkit.isolated_proof_runner import WORKSPACE_MUTATED_DURING_EXECUTION
+from sdetkit.proof_runtime_guard import EVIDENCE_SHADOW, UNCLAIMED_WRITE
 from sdetkit.replayable_benchmark_harness import (
+    ANTI_CHEAT_REJECTION_COUNT,
+    EVIDENCE_SHADOW_FAIL,
     INVENTORY_CLAIM_MISMATCH_FAIL,
     LIVE_EVIDENCE_SOURCE,
     LIVE_EXECUTION_MODEL,
     NETWORK_BOUNDARY_REQUIRED_FAIL,
     PROOF_MUTATION_FAIL,
+    UNCLAIMED_WRITE_FAIL,
     build_benchmark_report,
     build_isolated_evidence_report,
     load_scenarios,
@@ -25,6 +29,8 @@ LIVE_PATHS = [
     FIXTURES / "live_inventory_claim_mismatch.json",
     FIXTURES / "live_proof_mutation.json",
     FIXTURES / "live_network_boundary_required.json",
+    FIXTURES / "live_unclaimed_write.json",
+    FIXTURES / "live_evidence_shadow.json",
 ]
 FIXTURE_PATHS = [
     FIXTURES / "nop_formatting_patch.json",
@@ -45,7 +51,7 @@ def _git(root: Path, *args: str) -> str:
     return completed.stdout.strip()
 
 
-def _base_repo(tmp_path: Path, name: str, *, mutation_hook: bool = False) -> Path:
+def _base_repo(tmp_path: Path, name: str, *, hook_mode: str | None = None) -> Path:
     root = tmp_path / name
     source = root / "src" / "sdetkit"
     tests = root / "tests"
@@ -58,22 +64,41 @@ def _base_repo(tmp_path: Path, name: str, *, mutation_hook: bool = False) -> Pat
         encoding="utf-8",
     )
 
-    if mutation_hook:
+    if hook_mode:
         tools = root / "tools"
         tools.mkdir()
-        (tools / "mutate_example.py").write_text(
-            "from pathlib import Path\n"
-            'Path("src/sdetkit/example.py").write_text('
-            '"VALUE = 99\\n", encoding="utf-8")\n',
-            encoding="utf-8",
-        )
+
+        if hook_mode == "claimed_write":
+            script = (
+                "from pathlib import Path\n"
+                'Path("src/sdetkit/example.py").write_text('
+                '"VALUE = 99\\n", encoding="utf-8")\n'
+            )
+        elif hook_mode == "unclaimed_write":
+            script = (
+                "from pathlib import Path\n"
+                'Path("src/sdetkit/injected.py").write_text('
+                '"INJECTED = True\\n", encoding="utf-8")\n'
+            )
+        elif hook_mode == "evidence_shadow":
+            script = (
+                "from pathlib import Path\n"
+                'target = Path("build") / "-".join(("isolated", "proof", "runner")) '
+                '/ ("-".join(("verification", "evidence")) + ".json")\n'
+                "target.parent.mkdir(parents=True, exist_ok=True)\n"
+                'target.write_text(\'{"status": "passed"}\\n\', encoding="utf-8")\n'
+            )
+        else:
+            raise ValueError(f"unsupported hook mode: {hook_mode}")
+
+        (tools / "runtime_hook.py").write_text(script, encoding="utf-8")
         (root / ".pre-commit-config.yaml").write_text(
             "repos:\n"
             "  - repo: local\n"
             "    hooks:\n"
-            "      - id: mutate-example\n"
-            "        name: mutate example in copied workspace\n"
-            "        entry: python tools/mutate_example.py\n"
+            "      - id: runtime-guard-probe\n"
+            "        name: runtime guard probe\n"
+            "        entry: python tools/runtime_hook.py\n"
             "        language: system\n"
             "        pass_filenames: false\n"
             "        always_run: true\n",
@@ -101,7 +126,7 @@ def _scenario_runs(tmp_path: Path) -> list[tuple[dict, Path]]:
         encoding="utf-8",
     )
 
-    mutation_root = _base_repo(tmp_path, "mutation", mutation_hook=True)
+    mutation_root = _base_repo(tmp_path, "mutation", hook_mode="claimed_write")
     (mutation_root / "src" / "sdetkit" / "example.py").write_text(
         "VALUE = 2\n",
         encoding="utf-8",
@@ -113,11 +138,30 @@ def _scenario_runs(tmp_path: Path) -> list[tuple[dict, Path]]:
         encoding="utf-8",
     )
 
+    unclaimed_root = _base_repo(tmp_path, "unclaimed", hook_mode="unclaimed_write")
+    (unclaimed_root / "src" / "sdetkit" / "example.py").write_text(
+        "VALUE = 2\n",
+        encoding="utf-8",
+    )
+
+    shadow_root = _base_repo(tmp_path, "shadow", hook_mode="evidence_shadow")
+    (shadow_root / "src" / "sdetkit" / "example.py").write_text(
+        "VALUE = 2\n",
+        encoding="utf-8",
+    )
+
     scenarios = load_scenarios(LIVE_PATHS)
     return list(
         zip(
             scenarios,
-            [oracle_root, mismatch_root, mutation_root, network_root],
+            [
+                oracle_root,
+                mismatch_root,
+                mutation_root,
+                network_root,
+                unclaimed_root,
+                shadow_root,
+            ],
             strict=True,
         )
     )
@@ -128,11 +172,11 @@ def test_live_benchmark_proves_git_grounded_isolated_evidence_contract(
 ) -> None:
     report = build_isolated_evidence_report(_scenario_runs(tmp_path))
 
-    assert report["schema_version"] == "sdetkit.replayable_benchmark_harness.isolated_evidence.v2"
+    assert report["schema_version"] == "sdetkit.replayable_benchmark_harness.isolated_evidence.v3"
     assert report["report_mode"] == LIVE_EVIDENCE_SOURCE
     assert report["status"] == "passed"
-    assert report["scenario_count"] == 4
-    assert report["passed_count"] == 4
+    assert report["scenario_count"] == 6
+    assert report["passed_count"] == 6
 
     required = report["required_contract"]
     assert required["all_required_present"] is True
@@ -142,11 +186,12 @@ def test_live_benchmark_proves_git_grounded_isolated_evidence_contract(
     assert required["proof_mutation_rejection_rate"] == 1.0
 
     live = report["live_evidence"]
-    assert live["scenario_count"] == 4
-    assert live["git_inventory_verified_count"] == 3
-    assert live["expected_failed_evidence_count"] == 3
+    assert live["scenario_count"] == 6
+    assert live["git_inventory_verified_count"] == 5
+    assert live["expected_failed_evidence_count"] == 5
     assert live["network_boundary_blocked_count"] == 1
     assert live["network_isolation_enforced_count"] == 0
+    assert live[ANTI_CHEAT_REJECTION_COUNT] == 2
 
     boundary = report["safety_boundary"]
     assert boundary["execution_model"] == LIVE_EXECUTION_MODEL
@@ -202,6 +247,32 @@ def test_live_benchmark_rejects_mutating_allowlisted_proof(tmp_path: Path) -> No
     assert result["protected_verifier_result"]["decision"]["status"] == "blocked_review_first"
 
 
+def test_live_benchmark_rejects_unclaimed_workspace_write(tmp_path: Path) -> None:
+    report = build_isolated_evidence_report(_scenario_runs(tmp_path))
+    result = next(
+        item for item in report["scenarios"] if item["scenario_type"] == UNCLAIMED_WRITE_FAIL
+    )
+    proof = result["isolated_proof_evidence"]["proof_results"][0]
+
+    assert result["passed"] is True
+    assert proof["runtime_guard"]["status"] == UNCLAIMED_WRITE
+    assert proof["runtime_guard"]["unclaimed_mutated_files"] == ["src/sdetkit/injected.py"]
+    assert result["protected_verifier_result"]["decision"]["status"] == "blocked_review_first"
+
+
+def test_live_benchmark_rejects_reserved_evidence_shadow(tmp_path: Path) -> None:
+    report = build_isolated_evidence_report(_scenario_runs(tmp_path))
+    result = next(
+        item for item in report["scenarios"] if item["scenario_type"] == EVIDENCE_SHADOW_FAIL
+    )
+    proof = result["isolated_proof_evidence"]["proof_results"][0]
+
+    assert result["passed"] is True
+    assert proof["runtime_guard"]["status"] == EVIDENCE_SHADOW
+    assert proof["runtime_guard"]["reserved_evidence_shadowed_files"]
+    assert result["protected_verifier_result"]["decision"]["status"] == "blocked_review_first"
+
+
 def test_live_benchmark_rejects_required_unverified_network_boundary(
     tmp_path: Path,
 ) -> None:
@@ -231,9 +302,12 @@ def test_live_benchmark_markdown_renders_runtime_boundaries(tmp_path: Path) -> N
     assert "Inventory claim mismatch rejection rate: `1.0000`" in markdown
     assert "Proof mutation rejection rate: `1.0000`" in markdown
     assert "Network boundary rejection rate: `1.0000`" in markdown
-    assert "Git inventory verified scenarios: `3`" in markdown
+    assert "Unclaimed write rejection rate: `1.0000`" in markdown
+    assert "Evidence shadow rejection rate: `1.0000`" in markdown
+    assert "Git inventory verified scenarios: `5`" in markdown
     assert "Network boundary blocked scenarios: `1`" in markdown
     assert "Network isolation enforced scenarios: `0`" in markdown
+    assert "Anti-cheat rejection scenarios: `2`" in markdown
     assert "executes allowlisted proof profiles in disposable workspace copies" in markdown
     assert "Required network isolation fails closed without a verified backend." in markdown
 
@@ -260,7 +334,7 @@ def test_live_benchmark_cli_writes_runtime_report_artifacts(
 
     assert printed["status"] == "passed"
     assert saved["report_mode"] == LIVE_EVIDENCE_SOURCE
-    assert saved["live_evidence"]["git_inventory_verified_count"] == 3
+    assert saved["live_evidence"]["git_inventory_verified_count"] == 5
     assert "Git-grounded live-evidence contract" in markdown
 
 
@@ -289,8 +363,8 @@ def test_live_benchmark_outcomes_feed_read_only_repo_memory(tmp_path: Path) -> N
     assert profile["profile_status"] == LIVE_PROFILE_STATUS
     assert profile["live_safe_candidate_count"] == 1
     assert profile["safe_fix_history"][0]["proof_state"] == LIVE_PROOF_STATE
-    assert profile["proof_provenance"]["git_verified_scenario_count"] == 3
-    assert len(profile["failure_patterns"]["live_rejections"]) == 3
+    assert profile["proof_provenance"]["git_verified_scenario_count"] == 5
+    assert len(profile["failure_patterns"]["live_rejections"]) == 5
     assert profile["decision_boundary"]["automation_allowed"] is False
     assert profile["decision_boundary"]["merge_authorized"] is False
     assert profile["decision_boundary"]["semantic_equivalence_proven"] is False

@@ -7,15 +7,18 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit.replayable_benchmark_harness import (
+    ANTI_CHEAT_REJECTION_COUNT,
+    EVIDENCE_SHADOW_FAIL,
     INVENTORY_CLAIM_MISMATCH_FAIL,
     LIVE_EVIDENCE_SOURCE,
     NETWORK_BOUNDARY_BLOCKED_COUNT,
     NETWORK_BOUNDARY_REQUIRED_FAIL,
     PROOF_MUTATION_FAIL,
+    UNCLAIMED_WRITE_FAIL,
     VERIFICATION_EVIDENCE_SOURCE,
 )
 
-SCHEMA_VERSION = "sdetkit.repo_memory.v3"
+SCHEMA_VERSION = "sdetkit.repo_memory.v4"
 DEFAULT_OUT_DIR = Path("build") / "repo-memory"
 PROFILE_JSON = "repo-memory-profile.json"
 PROFILE_MD = "repo-memory-profile.md"
@@ -282,6 +285,8 @@ def _live_benchmark_rejections(
             INVENTORY_CLAIM_MISMATCH_FAIL,
             PROOF_MUTATION_FAIL,
             NETWORK_BOUNDARY_REQUIRED_FAIL,
+            UNCLAIMED_WRITE_FAIL,
+            EVIDENCE_SHADOW_FAIL,
         }:
             continue
         if (
@@ -379,7 +384,7 @@ def build_repo_memory_profile(
 
     unproven_boundaries = [
         "semantic equivalence",
-        "anti-cheat runtime validation",
+        "external filesystem and process escape prevention",
         "network-isolated proof execution",
         "broader remediation classes beyond formatting-only candidates",
     ]
@@ -426,6 +431,9 @@ def build_repo_memory_profile(
             "network_boundary_blocked_scenario_count": _int(
                 live_evidence.get(NETWORK_BOUNDARY_BLOCKED_COUNT)
             ),
+            "anti_cheat_rejection_scenario_count": _int(
+                live_evidence.get(ANTI_CHEAT_REJECTION_COUNT)
+            ),
         },
         "failure_patterns": {
             "review_first": review_first,
@@ -453,7 +461,7 @@ def build_repo_memory_profile(
             ),
         },
         "recommended_next_action": (
-            "Register a verified containment backend or add anti-cheat proof before any automation wiring."
+            "Surface runtime-proof and anti-cheat artifacts in PR Quality before any automation wiring."
         ),
     }
 
@@ -506,6 +514,10 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
         (
             "- Network boundary blocked scenarios: "
             f"`{_int(provenance.get('network_boundary_blocked_scenario_count'))}`"
+        ),
+        (
+            "- Anti-cheat rejection scenarios: "
+            f"`{_int(provenance.get('anti_cheat_rejection_scenario_count'))}`"
         ),
         "",
         "## Command profile",

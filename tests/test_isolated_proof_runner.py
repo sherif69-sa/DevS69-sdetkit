@@ -19,6 +19,13 @@ from sdetkit.network_boundary import (
     NETWORK_ISOLATION_REQUIRED,
     REQUIRED_UNAVAILABLE,
 )
+from sdetkit.proof_runtime_guard import (
+    CLAIMED_WRITE,
+    CLEAN,
+    EVIDENCE_SHADOW,
+    RUNTIME_GUARD_VIOLATION,
+    UNCLAIMED_WRITE,
+)
 from sdetkit.protected_verifier import verify_candidate
 
 
@@ -92,6 +99,8 @@ def test_isolated_runner_executes_allowlisted_profile_in_copied_workspace(
     assert evidence["changed_files_source"] == "caller_supplied_inventory_unverified"
     assert evidence["proof_results"][0]["command"] == "python -m pre_commit run -a"
     assert evidence["proof_results"][0]["status"] == "passed"
+    assert evidence["proof_results"][0]["runtime_guard"]["status"] == CLEAN
+    assert evidence["runtime_guard"]["passed"] is True
     assert evidence["isolation"]["source_workspace_used_as_command_cwd"] is False
     assert evidence["decision_boundary"]["automation_allowed"] is False
     assert evidence["decision_boundary"]["git_inventory_verified"] is False
@@ -191,6 +200,8 @@ def test_isolated_runner_fails_proof_when_command_mutates_copied_source(
     assert evidence["status"] == "failed"
     assert proof[WORKSPACE_MUTATED_DURING_EXECUTION] is True
     assert proof["workspace_mutated_files"] == ["src/sdetkit/example.py"]
+    assert proof["runtime_guard"]["status"] == CLAIMED_WRITE
+    assert proof["runtime_guard"][RUNTIME_GUARD_VIOLATION] is True
     assert (root / "src" / "sdetkit" / "example.py").read_text(encoding="utf-8") == "VALUE = 1\n"
 
 
@@ -393,3 +404,98 @@ def test_isolated_runner_required_network_rejection_blocks_protected_verifier(
     assert result["decision"]["status"] == "blocked_review_first"
     assert result["decision"]["automation_allowed"] is False
     assert result["decision"]["merge_authorized"] is False
+
+
+def test_isolated_runner_classifies_unclaimed_workspace_write(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _repo(tmp_path)
+
+    def fake_run(args: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        if args[0] != "git":
+            injected = Path(kwargs["cwd"]) / "src" / "sdetkit" / "injected.py"
+            injected.write_text("INJECTED = True\n", encoding="utf-8")
+        return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    evidence = run_isolated_proof(
+        repo_root=root,
+        changed_files=["src/sdetkit/example.py"],
+        profile_ids=["pre_commit_all"],
+    )
+
+    proof = evidence["proof_results"][0]
+    guard = proof["runtime_guard"]
+
+    assert evidence["status"] == "failed"
+    assert guard["status"] == UNCLAIMED_WRITE
+    assert guard["unclaimed_mutated_files"] == ["src/sdetkit/injected.py"]
+    assert guard[RUNTIME_GUARD_VIOLATION] is True
+    assert evidence["decision_boundary"]["runtime_guard_passed"] is False
+
+
+def test_isolated_runner_detects_reserved_evidence_shadow_in_ignored_build_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _repo(tmp_path)
+
+    def fake_run(args: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        if args[0] != "git":
+            target = (
+                Path(kwargs["cwd"])
+                / "build"
+                / "-".join(("isolated", "proof", "runner"))
+                / ("-".join(("verification", "evidence")) + ".json")
+            )
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text('{"status": "passed"}\n', encoding="utf-8")
+        return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    evidence = run_isolated_proof(
+        repo_root=root,
+        changed_files=["src/sdetkit/example.py"],
+        profile_ids=["pre_commit_all"],
+    )
+
+    proof = evidence["proof_results"][0]
+    guard = proof["runtime_guard"]
+
+    assert evidence["status"] == "failed"
+    assert proof[WORKSPACE_MUTATED_DURING_EXECUTION] is False
+    assert guard["status"] == EVIDENCE_SHADOW
+    assert guard["reserved_evidence_shadowed_files"]
+    assert guard[RUNTIME_GUARD_VIOLATION] is True
+    assert evidence["runtime_guard"]["violation_count"] == 1
+
+
+def test_isolated_runner_markdown_reports_runtime_guard_detection_boundary(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _repo(tmp_path)
+
+    def fake_run(args: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        if args[0] != "git":
+            injected = Path(kwargs["cwd"]) / "src" / "sdetkit" / "injected.py"
+            injected.write_text("INJECTED = True\n", encoding="utf-8")
+        return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    markdown = render_markdown(
+        run_isolated_proof(
+            repo_root=root,
+            changed_files=["src/sdetkit/example.py"],
+            profile_ids=["pre_commit_all"],
+        )
+    )
+
+    assert "Runtime guard checked: `true`" in markdown
+    assert "Runtime guard violations: `1`" in markdown
+    assert "runtime_guard=`unclaimed_write`" in markdown
+    assert "Runtime guard passed: `false`" in markdown

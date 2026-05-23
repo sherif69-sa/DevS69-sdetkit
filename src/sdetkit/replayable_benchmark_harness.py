@@ -14,7 +14,7 @@ from sdetkit.patch_scorer import score_patch
 from sdetkit.protected_verifier import verify_candidate
 
 SCHEMA_VERSION = "sdetkit.replayable_benchmark_harness.v1"
-ISOLATED_EVIDENCE_SCHEMA_VERSION = "sdetkit.replayable_benchmark_harness.isolated_evidence.v2"
+ISOLATED_EVIDENCE_SCHEMA_VERSION = "sdetkit.replayable_benchmark_harness.isolated_evidence.v3"
 DEFAULT_OUT_DIR = Path("build") / "replayable-benchmark-harness"
 REPORT_JSON = "benchmark-report.json"
 REPORT_MD = "benchmark-report.md"
@@ -23,6 +23,9 @@ INVENTORY_CLAIM_MISMATCH_FAIL = "_".join(("inventory", "claim", "mismatch", "fai
 PROOF_MUTATION_FAIL = "_".join(("proof", "mutation", "fail"))
 NETWORK_BOUNDARY_REQUIRED_FAIL = "_".join(("network", "boundary", "required", "fail"))
 NETWORK_BOUNDARY_BLOCKED_COUNT = "_".join(("network", "boundary", "blocked", "count"))
+UNCLAIMED_WRITE_FAIL = "_".join(("unclaimed", "write", "fail"))
+EVIDENCE_SHADOW_FAIL = "_".join(("evidence", "shadow", "fail"))
+ANTI_CHEAT_REJECTION_COUNT = "_".join(("anti", "cheat", "rejection", "count"))
 LIVE_EVIDENCE_SOURCE = "_".join(("git", "grounded", "isolated", "proof"))
 LIVE_EXECUTION_MODEL = "_".join(("git", "derived", "isolated", "proof", "evaluation"))
 VERIFICATION_EVIDENCE_SOURCE = "_".join(("verification", "evidence", "source"))
@@ -34,6 +37,8 @@ SCENARIO_TYPES = {
     INVENTORY_CLAIM_MISMATCH_FAIL,
     PROOF_MUTATION_FAIL,
     NETWORK_BOUNDARY_REQUIRED_FAIL,
+    UNCLAIMED_WRITE_FAIL,
+    EVIDENCE_SHADOW_FAIL,
 }
 REQUIRED_SCENARIO_TYPES = (
     "nop_fail",
@@ -45,6 +50,8 @@ ISOLATED_EVIDENCE_REQUIRED_TYPES = (
     INVENTORY_CLAIM_MISMATCH_FAIL,
     PROOF_MUTATION_FAIL,
     NETWORK_BOUNDARY_REQUIRED_FAIL,
+    UNCLAIMED_WRITE_FAIL,
+    EVIDENCE_SHADOW_FAIL,
 )
 
 JsonObject = dict[str, Any]
@@ -346,6 +353,7 @@ def evaluate_isolated_evidence_scenario(
     expected_network_required = _bool(expected_runtime.get(NETWORK_ISOLATION_REQUIRED))
     expected_network_enforced = _bool(expected_runtime.get(NETWORK_ISOLATION_ENFORCED))
     expected_execution_blocked = _bool(expected_runtime.get("proof_execution_blocked"))
+    expected_runtime_guard_status = _string(expected_runtime.get("runtime_guard_status"))
     isolation = _as_dict(evidence.get("isolation"))
 
     result["checks"].extend(
@@ -409,6 +417,22 @@ def evaluate_isolated_evidence_scenario(
             ),
         ]
     )
+
+    if expected_runtime_guard_status:
+        proof_results = [_as_dict(item) for item in _as_list(evidence.get("proof_results"))]
+        actual_guard_status = (
+            _string(_as_dict(proof_results[0].get("runtime_guard")).get("status"))
+            if proof_results
+            else ""
+        )
+        result["checks"].append(
+            _check(
+                name="isolated_runtime_guard_status",
+                passed=actual_guard_status == expected_runtime_guard_status,
+                expected=expected_runtime_guard_status,
+                actual=actual_guard_status,
+            )
+        )
 
     result["isolated_proof_evidence"] = evidence
     result["live_evidence_exercised"] = True
@@ -592,6 +616,14 @@ def build_isolated_evidence_report(
                 results,
                 NETWORK_BOUNDARY_REQUIRED_FAIL,
             ),
+            "unclaimed_write_rejection_rate": _type_rate(
+                results,
+                UNCLAIMED_WRITE_FAIL,
+            ),
+            "evidence_shadow_rejection_rate": _type_rate(
+                results,
+                EVIDENCE_SHADOW_FAIL,
+            ),
         },
         "live_evidence": {
             "scenario_count": len(results),
@@ -622,6 +654,12 @@ def build_isolated_evidence_report(
                     )
                 )
             ),
+            ANTI_CHEAT_REJECTION_COUNT: sum(
+                1
+                for result in results
+                if result.get("scenario_type") in {UNCLAIMED_WRITE_FAIL, EVIDENCE_SHADOW_FAIL}
+                and result.get("passed") is True
+            ),
         },
         "safety_boundary": {
             "execution_model": LIVE_EXECUTION_MODEL,
@@ -633,7 +671,7 @@ def build_isolated_evidence_report(
         "attempt_scored_count": sum(1 for item in results if item.get("attempt_scored") is True),
         "scenarios": results,
         "next_boundary": (
-            "Add anti-cheat and network-isolation proof before any automation wiring."
+            "Surface captured runtime-proof artifacts in PR Quality before any automation wiring."
         ),
     }
 
@@ -687,6 +725,14 @@ def render_markdown(report: Mapping[str, Any]) -> str:
                     "- Network boundary rejection rate: "
                     f"`{float(required.get('network_boundary_rejection_rate', 0.0) or 0.0):.4f}`"
                 ),
+                (
+                    "- Unclaimed write rejection rate: "
+                    f"`{float(required.get('unclaimed_write_rejection_rate', 0.0) or 0.0):.4f}`"
+                ),
+                (
+                    "- Evidence shadow rejection rate: "
+                    f"`{float(required.get('evidence_shadow_rejection_rate', 0.0) or 0.0):.4f}`"
+                ),
                 "",
                 "## Live execution evidence",
                 "",
@@ -706,6 +752,10 @@ def render_markdown(report: Mapping[str, Any]) -> str:
                 (
                     "- Network isolation enforced scenarios: "
                     f"`{_int(live_evidence.get('network_isolation_enforced_count'))}`"
+                ),
+                (
+                    "- Anti-cheat rejection scenarios: "
+                    f"`{_int(live_evidence.get(ANTI_CHEAT_REJECTION_COUNT))}`"
                 ),
                 "",
             ]

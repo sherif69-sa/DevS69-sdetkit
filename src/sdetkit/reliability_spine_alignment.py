@@ -331,6 +331,23 @@ def build_alignment_components() -> list[AlignmentComponent]:
             recommended_next_action="register a backend only after successful containment proof",
         ),
         _component(
+            module="proof_runtime_guard",
+            role="classify copied-workspace writes and reserved evidence shadowing during proof execution",
+            status="partially_aligned",
+            stages=("proof", "verifier", "reporting"),
+            existing_artifacts=("embedded runtime-guard evidence",),
+            integration_points=(
+                "isolated_proof_runner",
+                "replayable_benchmark_harness",
+                "repo_memory",
+            ),
+            gaps=(
+                "detects copied-workspace behavior but does not prevent external filesystem writes",
+                "process escape prevention remains unavailable",
+            ),
+            recommended_next_action="surface runtime-guard artifacts through PR Quality reporting",
+        ),
+        _component(
             module="isolated_proof_runner",
             role="execute allowlisted proof profiles in a disposable workspace copy and capture results",
             status="partially_aligned",
@@ -343,15 +360,16 @@ def build_alignment_components() -> list[AlignmentComponent]:
             integration_points=(
                 "git_inventory_collector",
                 "network_boundary",
+                "proof_runtime_guard",
                 "protected_verifier",
                 "replayable_benchmark_harness",
                 "repo_memory",
             ),
             gaps=(
-                "required network-isolated proof fails closed because no verified backend exists",
                 "successful network-isolated proof execution remains unavailable",
+                "external filesystem and process escape prevention remain unavailable",
             ),
-            recommended_next_action="add anti-cheat proof while containment remains fail-closed",
+            recommended_next_action="surface captured runtime-proof artifacts in PR Quality",
         ),
         _component(
             module="replayable_benchmark_harness",
@@ -367,16 +385,17 @@ def build_alignment_components() -> list[AlignmentComponent]:
             integration_points=(
                 "git_inventory_collector",
                 "network_boundary",
+                "proof_runtime_guard",
                 "isolated_proof_runner",
                 "patch_scorer",
                 "protected_verifier",
                 "repo_memory",
             ),
             gaps=(
-                "required network-isolation rejection is benchmarked, but successful containment remains unavailable",
-                "anti-cheat runtime checks remain future work",
+                "successful containment remains unavailable",
+                "runtime-proof outcomes are not yet surfaced through PR Quality artifacts",
             ),
-            recommended_next_action="add anti-cheat proof without weakening fail-closed containment",
+            recommended_next_action="publish runtime-proof artifacts without automation wiring",
         ),
         _component(
             module="repo_memory",
@@ -390,14 +409,16 @@ def build_alignment_components() -> list[AlignmentComponent]:
             integration_points=(
                 "trajectory_pattern_insights",
                 "network_boundary",
+                "proof_runtime_guard",
                 "replayable_benchmark_harness",
                 "protected_verifier",
             ),
             gaps=(
                 "successful network-isolation proof is unavailable until a backend is verified",
+                "runtime-proof memory is not yet surfaced through PR Quality reporting",
                 "flaky-test registry ingestion and persistent profile updates are not implemented",
             ),
-            recommended_next_action="ingest anti-cheat proof only after its boundary exists",
+            recommended_next_action="surface read-only runtime-proof memory before automation wiring",
         ),
     ]
 
@@ -435,7 +456,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/proof-anti-cheat-runtime-contracts",
+        "next_recommended_pr": "feature/pr-quality-runtime-proof-artifacts",
     }
 
 
