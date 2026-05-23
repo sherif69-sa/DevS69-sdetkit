@@ -453,3 +453,76 @@ def test_pr_quality_comment_workflow_exports_live_memory_metadata() -> None:
         "repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven)"
         in text
     )
+
+
+def test_pr_quality_comment_workflow_collects_trusted_main_history_from_accepted_base() -> None:
+    text = _workflow_text()
+
+    history_selection = text.index("actions/workflows/repo-memory-history.yml/runs")
+    validator = text.index("python -m sdetkit.trusted_history_evidence")
+    runtime_summary = text.index("python -m sdetkit.pr_quality_runtime_proof_artifacts")
+    final_comment = text.index("python -m sdetkit.pr_quality_action_report")
+
+    assert history_selection < validator < runtime_summary < final_comment
+    assert "actions: read" in text.split("jobs:", 1)[0]
+    assert "PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}" in text
+    assert "branch=main&event=push&status=completed" in text
+    assert 'select(.conclusion == "success")' in text
+    assert 'git merge-base --is-ancestor "$candidate_head_sha" "$PR_BASE_SHA"' in text
+    assert 'gh run download "$trusted_history_run_id"' in text
+    assert "--history-summary" in text
+    assert "--history-jsonl" in text
+    assert '--base-sha "$PR_BASE_SHA"' in text
+    assert (
+        "--trusted-history-evidence "
+        "build/pr-quality/trusted-history/evidence/trusted-history-evidence.json" in text
+    )
+    assert "build/pr-quality/trusted-history/" in text
+
+
+def test_pr_quality_comment_workflow_exports_trusted_history_visibility_metadata() -> None:
+    text = _workflow_text()
+
+    assert (
+        "trusted_history_collection_status: "
+        "metadata.trusted_history_collection_status || 'not_collected'" in text
+    )
+    assert "trusted_history_status: metadata.trusted_history_status || 'not_collected'" in text
+    assert (
+        "trusted_history_record_count: Number(metadata.trusted_history_record_count || 0)" in text
+    )
+    assert (
+        "trusted_history_base_ancestry_verified: "
+        "Boolean(metadata.trusted_history_base_ancestry_verified)" in text
+    )
+    assert (
+        "trusted_history_prior_input_read_only: "
+        "Boolean(metadata.trusted_history_prior_input_read_only)" in text
+    )
+    assert (
+        "trusted_history_automation_allowed: Boolean(metadata.trusted_history_automation_allowed)"
+        in text
+    )
+    assert (
+        "trusted_history_merge_authorized: Boolean(metadata.trusted_history_merge_authorized)"
+        in text
+    )
+    assert (
+        "trusted_history_semantic_equivalence_proven: "
+        "Boolean(metadata.trusted_history_semantic_equivalence_proven)" in text
+    )
+
+
+def test_pr_quality_comment_workflow_requires_trusted_history_visibility_after_posting() -> None:
+    text = _workflow_text()
+    verify_visibility = text[text.index("- name: Verify PR Quality comment visibility") :]
+
+    assert 'if trusted_history_collection_status != "collected":' in verify_visibility
+    assert 'if trusted_history_status != "trusted_history_verified":' in verify_visibility
+    assert "if trusted_history_record_count < 1:" in verify_visibility
+    assert "if not trusted_history_base_ancestry_verified:" in verify_visibility
+    assert "if not trusted_history_prior_input_read_only:" in verify_visibility
+    assert "if trusted_history_automation_allowed:" in verify_visibility
+    assert "if trusted_history_merge_authorized:" in verify_visibility
+    assert "if trusted_history_semantic_equivalence_proven:" in verify_visibility
+    assert "after diagnostic comment publication" in verify_visibility

@@ -12,6 +12,26 @@ from sdetkit.current_head_failure_bundle import (
 
 JsonObject = dict[str, Any]
 
+TRUSTED_HISTORY = "_".join(("trusted", "history"))
+BASE_ANCESTRY_VERIFIED = "_".join(("base", "ancestry", "verified"))
+LIVE_PROVEN_RECORD_COUNT = "_".join(("live", "contract", "proven", "record", "count"))
+PRIOR_HISTORY_READ_ONLY_INPUT = "_".join(("prior", "history", "is", "read", "only", "input"))
+PROOF_COMMANDS_EXECUTED_BY_READER = "_".join(("proof", "commands", "executed", "by", "reader"))
+TRUSTED_HISTORY_COLLECTION_STATUS = "_".join(("trusted", "history", "collection", "status"))
+TRUSTED_HISTORY_STATUS = "_".join(("trusted", "history", "status"))
+TRUSTED_HISTORY_RECORD_COUNT = "_".join(("trusted", "history", "record", "count"))
+TRUSTED_HISTORY_BASE_ANCESTRY_VERIFIED = "_".join(
+    ("trusted", "history", "base", "ancestry", "verified")
+)
+TRUSTED_HISTORY_PRIOR_INPUT_READ_ONLY = "_".join(
+    ("trusted", "history", "prior", "input", "read", "only")
+)
+TRUSTED_HISTORY_AUTOMATION_ALLOWED = "_".join(("trusted", "history", "automation", "allowed"))
+TRUSTED_HISTORY_MERGE_AUTHORIZED = "_".join(("trusted", "history", "merge", "authorized"))
+TRUSTED_HISTORY_SEMANTIC_EQUIVALENCE_PROVEN = "_".join(
+    ("trusted", "history", "semantic", "equivalence", "proven")
+)
+
 BANNED_EDUCATIONAL_PHRASES = (
     "Quality is green, so the review focus is not coverage.",
     "The comment must guide maintainers toward the changed risk surface.",
@@ -465,6 +485,7 @@ def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) ->
     isolated = _as_dict(summary.get("isolated_proof"))
     benchmark = _as_dict(summary.get("live_benchmark"))
     memory = _as_dict(summary.get("repo_memory"))
+    trusted_history = _as_dict(summary.get(TRUSTED_HISTORY))
     boundary = _as_dict(summary.get("decision_boundary"))
 
     lines = [
@@ -560,6 +581,58 @@ def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) ->
                 (
                     "- RepoMemory anti-cheat rejection scenarios: "
                     f"`{_int(memory.get('anti_cheat_rejection_scenario_count'))}`"
+                ),
+            ]
+        )
+
+    lines.extend(
+        [
+            (
+                "- Trusted history collection status: "
+                f"`{_string(trusted_history.get('collection_status') or 'not_collected')}`"
+            ),
+            (
+                "- Trusted history status: "
+                f"`{_string(trusted_history.get('status') or 'not_collected')}`"
+            ),
+        ]
+    )
+
+    if trusted_history.get("collection_status") == "collected":
+        lines.extend(
+            [
+                (
+                    "- Trusted history source workflow: "
+                    f"`{_string(trusted_history.get('source_workflow'))}`"
+                ),
+                (
+                    "- Trusted history latest accepted main head: "
+                    f"`{_string(trusted_history.get('latest_accepted_main_head'))}`"
+                ),
+                (
+                    "- Trusted history base ancestry verified: "
+                    f"`{str(bool(trusted_history.get(BASE_ANCESTRY_VERIFIED, False))).lower()}`"
+                ),
+                (f"- Trusted history records: `{_int(trusted_history.get('record_count'))}`"),
+                (
+                    "- Trusted history live-contract-proven records: "
+                    f"`{_int(trusted_history.get(LIVE_PROVEN_RECORD_COUNT))}`"
+                ),
+                (
+                    "- Trusted history prior input read-only: "
+                    f"`{str(bool(trusted_history.get(PRIOR_HISTORY_READ_ONLY_INPUT, False))).lower()}`"
+                ),
+                (
+                    "- Automation allowed by trusted history: "
+                    f"`{str(bool(trusted_history.get('automation_allowed', False))).lower()}`"
+                ),
+                (
+                    "- Merge authorized by trusted history: "
+                    f"`{str(bool(trusted_history.get('merge_authorized', False))).lower()}`"
+                ),
+                (
+                    "- Semantic equivalence proven by trusted history: "
+                    f"`{str(bool(trusted_history.get('semantic_equivalence_proven', False))).lower()}`"
                 ),
             ]
         )
@@ -1106,6 +1179,52 @@ def write_comment_body(
         ),
         "repo_memory_live_contract_proven": bool(
             _as_dict(runtime_proof_artifacts.get("repo_memory")).get("live_contract_proven", False)
+            if runtime_proof_artifacts
+            else False
+        ),
+        TRUSTED_HISTORY_COLLECTION_STATUS: _string(
+            _as_dict(runtime_proof_artifacts.get(TRUSTED_HISTORY)).get("collection_status")
+            if runtime_proof_artifacts
+            else "not_collected"
+        ),
+        TRUSTED_HISTORY_STATUS: _string(
+            _as_dict(runtime_proof_artifacts.get(TRUSTED_HISTORY)).get("status")
+            if runtime_proof_artifacts
+            else "not_collected"
+        ),
+        TRUSTED_HISTORY_RECORD_COUNT: _int(
+            _as_dict(runtime_proof_artifacts.get(TRUSTED_HISTORY)).get("record_count")
+            if runtime_proof_artifacts
+            else 0
+        ),
+        TRUSTED_HISTORY_BASE_ANCESTRY_VERIFIED: bool(
+            _as_dict(runtime_proof_artifacts.get(TRUSTED_HISTORY)).get(
+                BASE_ANCESTRY_VERIFIED, False
+            )
+            if runtime_proof_artifacts
+            else False
+        ),
+        TRUSTED_HISTORY_PRIOR_INPUT_READ_ONLY: bool(
+            _as_dict(runtime_proof_artifacts.get(TRUSTED_HISTORY)).get(
+                PRIOR_HISTORY_READ_ONLY_INPUT, False
+            )
+            if runtime_proof_artifacts
+            else False
+        ),
+        TRUSTED_HISTORY_AUTOMATION_ALLOWED: bool(
+            _as_dict(runtime_proof_artifacts.get(TRUSTED_HISTORY)).get("automation_allowed", False)
+            if runtime_proof_artifacts
+            else False
+        ),
+        TRUSTED_HISTORY_MERGE_AUTHORIZED: bool(
+            _as_dict(runtime_proof_artifacts.get(TRUSTED_HISTORY)).get("merge_authorized", False)
+            if runtime_proof_artifacts
+            else False
+        ),
+        TRUSTED_HISTORY_SEMANTIC_EQUIVALENCE_PROVEN: bool(
+            _as_dict(runtime_proof_artifacts.get(TRUSTED_HISTORY)).get(
+                "semantic_equivalence_proven", False
+            )
             if runtime_proof_artifacts
             else False
         ),

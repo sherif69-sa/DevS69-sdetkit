@@ -1773,3 +1773,127 @@ def test_action_report_renders_collected_live_benchmark_and_repo_memory() -> Non
     assert "RepoMemory status: `live_proof_supported_memory`" in body
     assert "RepoMemory live contract proven: `true`" in body
     assert "Automation allowed by runtime artifacts: `false`" in body
+
+
+def test_action_report_renders_trusted_main_history_as_advisory_only() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {
+            "attempted": False,
+            "allowed": False,
+            "reason": "no remediation needed",
+        },
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    runtime = {
+        "status": "collected",
+        report.TRUSTED_HISTORY: {
+            "collection_status": "collected",
+            "status": "trusted_history_verified",
+            "source_workflow": "RepoMemory Profile History",
+            "latest_accepted_main_head": "accepted-main-head",
+            report.BASE_ANCESTRY_VERIFIED: True,
+            "record_count": 1,
+            report.LIVE_PROVEN_RECORD_COUNT: 1,
+            report.PRIOR_HISTORY_READ_ONLY_INPUT: True,
+            report.PROOF_COMMANDS_EXECUTED_BY_READER: False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+        "decision_boundary": {
+            "proof_commands_executed_by_renderer": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        runtime_proof_artifacts=runtime,
+    )
+
+    assert "Trusted history collection status: `collected`" in body
+    assert "Trusted history status: `trusted_history_verified`" in body
+    assert "Trusted history source workflow: `RepoMemory Profile History`" in body
+    assert "Trusted history base ancestry verified: `true`" in body
+    assert "Trusted history records: `1`" in body
+    assert "Trusted history live-contract-proven records: `1`" in body
+    assert "Trusted history prior input read-only: `true`" in body
+    assert "Automation allowed by trusted history: `false`" in body
+    assert "Merge authorized by trusted history: `false`" in body
+    assert "Semantic equivalence proven by trusted history: `false`" in body
+
+
+def test_write_comment_body_exports_trusted_history_visibility_metadata(
+    tmp_path: Path,
+) -> None:
+    action_path = _write_json(
+        tmp_path / "action-report.json",
+        {
+            "status": "green",
+            "primary_blocker": {},
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": "no remediation needed",
+            },
+            "recommended_actions": [],
+            "proof_commands": [],
+            "evidence": {},
+        },
+    )
+    intelligence_path = _write_json(
+        tmp_path / "check-intelligence.json",
+        {
+            "checks_seen": 44,
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "security_review": {"collected": True, "unresolved_findings": 0},
+        },
+    )
+    runtime_path = _write_json(
+        tmp_path / "runtime-proof-artifacts.json",
+        {
+            "status": "collected",
+            report.TRUSTED_HISTORY: {
+                "collection_status": "collected",
+                "status": "trusted_history_verified",
+                "record_count": 1,
+                report.BASE_ANCESTRY_VERIFIED: True,
+                report.PRIOR_HISTORY_READ_ONLY_INPUT: True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        },
+    )
+
+    result = report.write_comment_body(
+        action_report_path=action_path,
+        check_intelligence_path=intelligence_path,
+        runtime_proof_artifacts_path=runtime_path,
+        out=tmp_path / "comment.md",
+    )
+
+    assert result[report.TRUSTED_HISTORY_COLLECTION_STATUS] == "collected"
+    assert result[report.TRUSTED_HISTORY_STATUS] == "trusted_history_verified"
+    assert result[report.TRUSTED_HISTORY_RECORD_COUNT] == 1
+    assert result[report.TRUSTED_HISTORY_BASE_ANCESTRY_VERIFIED] is True
+    assert result[report.TRUSTED_HISTORY_PRIOR_INPUT_READ_ONLY] is True
+    assert result[report.TRUSTED_HISTORY_AUTOMATION_ALLOWED] is False
+    assert result[report.TRUSTED_HISTORY_MERGE_AUTHORIZED] is False
+    assert result[report.TRUSTED_HISTORY_SEMANTIC_EQUIVALENCE_PROVEN] is False

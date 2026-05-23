@@ -4,8 +4,13 @@ import json
 from pathlib import Path
 
 from sdetkit.pr_quality_runtime_proof_artifacts import (
+    BASE_ANCESTRY_VERIFIED,
     COLLECTED,
+    LIVE_PROVEN_RECORD_COUNT,
     NOT_COLLECTED,
+    PRIOR_HISTORY_READ_ONLY_INPUT,
+    PROOF_COMMANDS_EXECUTED_BY_READER,
+    TRUSTED_HISTORY,
     build_runtime_proof_artifacts,
     main,
     render_markdown,
@@ -63,6 +68,7 @@ def test_runtime_proof_summary_records_actual_isolated_proof_only() -> None:
 
     assert summary["live_benchmark"]["collection_status"] == NOT_COLLECTED
     assert summary["repo_memory"]["collection_status"] == NOT_COLLECTED
+    assert summary[TRUSTED_HISTORY]["collection_status"] == NOT_COLLECTED
 
     boundary = summary["decision_boundary"]
     assert boundary["proof_commands_executed_by_renderer"] is False
@@ -116,7 +122,7 @@ def test_runtime_proof_markdown_reports_unwired_artifacts_honestly() -> None:
     assert "Runtime guard passed: `true`" in markdown
     assert "Runtime guard violations: `0`" in markdown
     assert "Network isolation enforced: `false`" in markdown
-    assert markdown.count("Collection status: `not_collected`") == 2
+    assert markdown.count("Collection status: `not_collected`") == 3
     assert "Proof commands executed by renderer: `false`" in markdown
     assert "Automation allowed: `false`" in markdown
     assert "Merge authorized: `false`" in markdown
@@ -200,3 +206,87 @@ def test_runtime_proof_markdown_renders_collected_live_benchmark_and_memory() ->
     assert "Boundary preserved: `true`" in markdown
     assert "Status: `live_proof_supported_memory`" in markdown
     assert "Live contract proven: `true`" in markdown
+
+
+def _trusted_history_evidence() -> dict:
+    return {
+        "collection_status": COLLECTED,
+        "status": "trusted_history_verified",
+        "source": {
+            "workflow": "RepoMemory Profile History",
+            "run_id": "trusted-run-1",
+            "head_sha": "accepted-main-head",
+            "base_sha": "pr-base-head",
+            BASE_ANCESTRY_VERIFIED: True,
+        },
+        "history": {
+            "record_count": 1,
+            LIVE_PROVEN_RECORD_COUNT: 1,
+            "latest_accepted_main_head": "accepted-main-head",
+            PRIOR_HISTORY_READ_ONLY_INPUT: True,
+        },
+        "decision_boundary": {
+            PROOF_COMMANDS_EXECUTED_BY_READER: False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+
+def test_runtime_proof_summary_renders_validated_trusted_main_history() -> None:
+    summary = build_runtime_proof_artifacts(
+        isolated_proof=_isolated_proof(),
+        trusted_history_evidence=_trusted_history_evidence(),
+    )
+
+    trusted = summary[TRUSTED_HISTORY]
+    assert summary["collected_components"] == ["isolated_proof", TRUSTED_HISTORY]
+    assert trusted["collection_status"] == COLLECTED
+    assert trusted["status"] == "trusted_history_verified"
+    assert trusted[BASE_ANCESTRY_VERIFIED] is True
+    assert trusted["record_count"] == 1
+    assert trusted[LIVE_PROVEN_RECORD_COUNT] == 1
+    assert trusted[PRIOR_HISTORY_READ_ONLY_INPUT] is True
+    assert trusted[PROOF_COMMANDS_EXECUTED_BY_READER] is False
+    assert trusted["automation_allowed"] is False
+    assert trusted["merge_authorized"] is False
+    assert trusted["semantic_equivalence_proven"] is False
+
+    markdown = render_markdown(summary)
+    assert "Trusted accepted-main RepoMemory history" in markdown
+    assert "Source workflow: `RepoMemory Profile History`" in markdown
+    assert "Base ancestry verified: `true`" in markdown
+    assert "Records: `1`" in markdown
+    assert "Live-contract-proven records: `1`" in markdown
+    assert "Prior history is read-only input: `true`" in markdown
+    assert "Automation allowed by trusted history: `false`" in markdown
+    assert "Merge authorized by trusted history: `false`" in markdown
+
+
+def test_runtime_proof_cli_accepts_validated_trusted_history_input(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    trusted_path = tmp_path / "trusted-history-evidence.json"
+    trusted_path.write_text(json.dumps(_trusted_history_evidence()), encoding="utf-8")
+    out_dir = tmp_path / "runtime-proof"
+
+    rc = main(
+        [
+            "--trusted-history-evidence",
+            str(trusted_path),
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    printed = json.loads(capsys.readouterr().out)
+    saved = json.loads((out_dir / "runtime-proof-artifacts.json").read_text(encoding="utf-8"))
+
+    assert printed["trusted_history_status"] == "trusted_history_verified"
+    assert saved[TRUSTED_HISTORY]["record_count"] == 1
+    assert saved[TRUSTED_HISTORY][BASE_ANCESTRY_VERIFIED] is True
