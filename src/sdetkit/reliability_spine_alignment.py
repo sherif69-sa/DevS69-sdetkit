@@ -278,16 +278,37 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             integration_points=(
                 "patch_scorer",
+                "git_inventory_collector",
                 "isolated_proof_runner",
                 "replayable_benchmark_harness",
                 "maintenance_autopilot",
             ),
             gaps=(
-                "git-derived changed-file inventory is not connected yet",
+                "git-derived inventory and allowlisted command proof are not yet replayed in benchmark scenarios",
                 "structural and allowlisted command proof do not establish semantic equivalence",
                 "not wired into automation",
             ),
-            recommended_next_action="consume isolated proof evidence only after git-backed inventory is added",
+            recommended_next_action="replay git-grounded isolated proof evidence in benchmark scenarios",
+        ),
+        _component(
+            module="git_inventory_collector",
+            role="derive changed-file inventories from fixed read-only Git queries",
+            status="partially_aligned",
+            stages=("evidence", "proof", "verifier"),
+            existing_artifacts=(
+                "git-inventory.json",
+                "git-inventory.md",
+            ),
+            integration_points=(
+                "isolated_proof_runner",
+                "protected_verifier",
+                "replayable_benchmark_harness",
+            ),
+            gaps=(
+                "not wired into workflow evidence collection",
+                "benchmark scenarios do not yet replay Git-derived inventory",
+            ),
+            recommended_next_action="feed Git-derived proof evidence through replayable benchmark scenarios",
         ),
         _component(
             module="isolated_proof_runner",
@@ -299,16 +320,16 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "verification-evidence.md",
             ),
             integration_points=(
+                "git_inventory_collector",
                 "protected_verifier",
                 "replayable_benchmark_harness",
                 "repo_memory",
             ),
             gaps=(
-                "changed-file inventory remains caller supplied until a git-backed collector exists",
                 "network isolation is reported but not enforced",
-                "benchmark scenarios do not yet replay live proof-runner output",
+                "benchmark scenarios do not yet replay Git-derived live proof-runner output",
             ),
-            recommended_next_action="add git-backed changed-file inventory before any automation connection",
+            recommended_next_action="replay Git-derived isolated proof evidence before any automation connection",
         ),
         _component(
             module="replayable_benchmark_harness",
@@ -326,10 +347,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "repo_memory",
             ),
             gaps=(
-                "current fixtures do not yet replay isolated_proof_runner execution evidence",
-                "anti-cheat runtime checks and git-grounded inventory remain future work",
+                "current fixtures do not yet replay git_inventory_collector and isolated_proof_runner evidence",
+                "anti-cheat runtime checks remain future work",
             ),
-            recommended_next_action="replay git-grounded isolated proof evidence before automation wiring",
+            recommended_next_action="replay Git-derived isolated proof evidence before automation wiring",
         ),
         _component(
             module="repo_memory",
@@ -387,7 +408,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/protected-verifier-git-inventory-collector",
+        "next_recommended_pr": "feature/replayable-benchmark-isolated-proof-evidence",
     }
 
 

@@ -13,7 +13,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = "sdetkit.isolated_proof_runner.v1"
+from sdetkit.git_inventory_collector import (
+    BASE_HEAD,
+    STAGED_WORKTREE,
+    collect_git_inventory,
+)
+
+SCHEMA_VERSION = "sdetkit.isolated_proof_runner.v2"
 DEFAULT_OUT_DIR = Path("build") / "isolated-proof-runner"
 EVIDENCE_JSON = "verification-evidence.json"
 EVIDENCE_MD = "verification-evidence.md"
@@ -23,6 +29,8 @@ MAX_CAPTURE_CHARS = 8000
 JsonObject = dict[str, Any]
 
 WORKSPACE_MUTATED_DURING_EXECUTION = "_".join(("workspace", "mutated", "during", "execution"))
+CLAIMED_CHANGED_FILES = "_".join(("claimed", "changed", "files"))
+INVENTORY_CLAIM_MATCH = "_".join(("inventory", "claim", "match"))
 
 IGNORED_NAMES = {
     ".git",
@@ -262,6 +270,9 @@ def run_isolated_proof(
     changed_files: list[str],
     profile_ids: list[str],
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    inventory_mode: str | None = None,
+    base_ref: str = "",
+    head_ref: str = "HEAD",
 ) -> JsonObject:
     if timeout_seconds < 1:
         raise ValueError("timeout_seconds must be at least 1")
@@ -278,6 +289,29 @@ def run_isolated_proof(
     if unknown_profiles:
         msg = f"unsupported proof profile: {', '.join(unknown_profiles)}"
         raise ValueError(msg)
+
+    claimed_changed_files = sorted(set(changed_files))
+    inventory: JsonObject = {}
+    effective_changed_files = claimed_changed_files
+    changed_files_source = "caller_supplied_inventory_unverified"
+    inventory_claim_match: bool | None = None
+    git_inventory_verified = False
+
+    if inventory_mode:
+        inventory = collect_git_inventory(
+            repo_root=source_root,
+            mode=inventory_mode,
+            base_ref=base_ref,
+            head_ref=head_ref,
+        )
+        effective_changed_files = _string_list(inventory.get("changed_files"))
+        changed_files_source = _string(inventory.get("changed_files_source"))
+        inventory_claim_match = (
+            not claimed_changed_files or claimed_changed_files == effective_changed_files
+        )
+        git_inventory_verified = (
+            _bool(inventory.get("git_inventory_verified")) and inventory_claim_match
+        )
 
     requested_profiles = list(dict.fromkeys(profile_ids))
     results: list[JsonObject] = []
@@ -297,12 +331,33 @@ def run_isolated_proof(
 
     passed_count = sum(1 for result in results if result["status"] == "passed")
     failed_count = len(results) - passed_count
+    inventory_failed = inventory_claim_match is False
+    status = "passed" if failed_count == 0 and not inventory_failed else "failed"
+
+    if not inventory_mode:
+        boundary_reason = (
+            "The runner executes allowlisted proof profiles in an isolated copy, "
+            "but changed-file inventory is not yet git-derived."
+        )
+    elif inventory_failed:
+        boundary_reason = (
+            "Git-derived inventory disagrees with the caller-declared changed-file claim; "
+            "verification evidence is blocked."
+        )
+    else:
+        boundary_reason = (
+            "The runner executes allowlisted proof profiles in an isolated copy "
+            "with Git-derived changed-file inventory; automation remains disabled."
+        )
 
     return {
         "schema_version": SCHEMA_VERSION,
-        "status": "passed" if failed_count == 0 else "failed",
-        "changed_files": sorted(set(changed_files)),
-        "changed_files_source": "caller_supplied_inventory_unverified",
+        "status": status,
+        "changed_files": effective_changed_files,
+        CLAIMED_CHANGED_FILES: claimed_changed_files,
+        "changed_files_source": changed_files_source,
+        INVENTORY_CLAIM_MATCH: inventory_claim_match,
+        "git_inventory": inventory,
         "requested_profiles": requested_profiles,
         "proof_results": results,
         "proof_summary": {
@@ -319,14 +374,11 @@ def run_isolated_proof(
             "network_isolation_enforced": False,
         },
         "decision_boundary": {
-            "git_inventory_verified": False,
+            "git_inventory_verified": git_inventory_verified,
             "automation_allowed": False,
             "merge_authorized": False,
             "semantic_equivalence_proven": False,
-            "reason": (
-                "The runner executes allowlisted proof profiles in an isolated copy, "
-                "but changed-file inventory is not yet git-derived."
-            ),
+            "reason": boundary_reason,
         },
     }
 
@@ -335,7 +387,10 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
     summary = _as_dict(evidence.get("proof_summary"))
     isolation = _as_dict(evidence.get("isolation"))
     boundary = _as_dict(evidence.get("decision_boundary"))
+    inventory = _as_dict(evidence.get("git_inventory"))
     results = [_as_dict(item) for item in _as_list(evidence.get("proof_results"))]
+    claim_value = evidence.get(INVENTORY_CLAIM_MATCH)
+    claim_status = "not_checked" if claim_value is None else str(_bool(claim_value)).lower()
 
     lines = [
         "# Isolated proof runner evidence",
@@ -346,6 +401,8 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
         f"- Profiles passed: `{_int(summary.get('passed_count'))}`",
         f"- Profiles failed: `{_int(summary.get('failed_count'))}`",
         f"- Changed-files source: `{_string(evidence.get('changed_files_source'))}`",
+        f"- Inventory claim matches: `{claim_status}`",
+        f"- Git inventory mode: `{_string(inventory.get('mode') or 'not_used')}`",
         "",
         "## Execution isolation",
         "",
@@ -397,7 +454,7 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
                 f"`{str(_bool(boundary.get('semantic_equivalence_proven'))).lower()}`"
             ),
             "- This runner does not accept arbitrary command strings.",
-            "- A later git-backed inventory collector must ground the changed-file list.",
+            "- Git-derived inventory is used only when explicitly requested and collected in-process.",
             "",
         ]
     )
@@ -423,6 +480,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m sdetkit.isolated_proof_runner")
     parser.add_argument("--repo-root", type=Path, required=True)
     parser.add_argument("--changed-file", action="append", default=[])
+    parser.add_argument("--inventory-mode", choices=[BASE_HEAD, STAGED_WORKTREE])
+    parser.add_argument("--base-ref", default="")
+    parser.add_argument("--head-ref", default="HEAD")
     parser.add_argument(
         "--profile",
         action="append",
@@ -444,6 +504,9 @@ def main(argv: list[str] | None = None) -> int:
             changed_files=args.changed_file,
             profile_ids=args.profile,
             timeout_seconds=args.timeout_seconds,
+            inventory_mode=args.inventory_mode,
+            base_ref=args.base_ref,
+            head_ref=args.head_ref,
         )
         artifacts = write_evidence(evidence, out_dir=args.out_dir)
     except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as exc:
