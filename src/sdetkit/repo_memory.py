@@ -18,7 +18,7 @@ from sdetkit.replayable_benchmark_harness import (
     VERIFICATION_EVIDENCE_SOURCE,
 )
 
-SCHEMA_VERSION = "sdetkit.repo_memory.v4"
+SCHEMA_VERSION = "sdetkit.repo_memory.v5"
 DEFAULT_OUT_DIR = Path("build") / "repo-memory"
 PROFILE_JSON = "repo-memory-profile.json"
 PROFILE_MD = "repo-memory-profile.md"
@@ -315,6 +315,123 @@ def _live_benchmark_rejections(
     return records
 
 
+def _flaky_test_registry(evidence: Mapping[str, Any]) -> JsonObject:
+    denied = {
+        "automatic_quarantine_allowed": False,
+        "automatic_rerun_allowed": False,
+        "current_failure_suppression_allowed": False,
+        "automation_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+    payload = _as_dict(evidence)
+    if not payload:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "entries": [],
+            "entry_count": 0,
+            "note": "No flaky-test evidence source is connected to RepoMemory yet.",
+            "decision_boundary": denied,
+        }
+
+    if _string(payload.get("schema_version")) != "sdetkit.flaky_test_registry_evidence.v1":
+        raise ValueError("flaky-test registry evidence schema is not supported")
+    if _string(payload.get("collection_status")) != "collected":
+        raise ValueError("flaky-test registry evidence must be collected before ingestion")
+    if _string(payload.get("status")) != "advisory_registry_collected":
+        raise ValueError("flaky-test registry evidence status is not supported")
+
+    source = _as_dict(payload.get("source"))
+    source_kind = _string(source.get("kind"))
+    source_reference = _string(source.get("reference"))
+    if source_kind not in {"operator_review_input", "trusted_main_artifact"}:
+        raise ValueError("flaky-test registry evidence source kind is not supported")
+    if not source_reference:
+        raise ValueError("flaky-test registry evidence source reference is required")
+    if not _bool(source.get("input_read_only")):
+        raise ValueError("flaky-test registry evidence input must be read-only")
+    if _bool(source.get("commands_executed_by_reader")):
+        raise ValueError("flaky-test registry evidence reader cannot execute commands")
+
+    boundary = _as_dict(payload.get("decision_boundary"))
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    if expanded:
+        raise ValueError("flaky-test registry evidence expands authority: " + ", ".join(expanded))
+
+    raw_entries = payload.get("entries")
+    if not isinstance(raw_entries, list):
+        raise ValueError("flaky-test registry evidence must contain an entries array")
+
+    entries: list[JsonObject] = []
+    for raw_item in raw_entries:
+        if not isinstance(raw_item, dict):
+            raise ValueError("flaky-test registry evidence contains a non-object entry")
+
+        item_expanded = [key for key in denied if _bool(raw_item.get(key))]
+        if item_expanded:
+            raise ValueError(
+                "flaky-test registry entry expands authority: " + ", ".join(item_expanded)
+            )
+
+        test_id = _string(raw_item.get("test_id"))
+        fingerprint = _string(raw_item.get("fingerprint"))
+        runs = _int(raw_item.get("observed_runs"))
+        failures = _int(raw_item.get("observed_failures"))
+        passes = _int(raw_item.get("observed_passes"))
+
+        if _string(raw_item.get("classification")) != "flaky":
+            raise ValueError("flaky-test registry entry must classify a flaky test")
+        if not test_id or not fingerprint:
+            raise ValueError("flaky-test registry entry requires test_id and fingerprint")
+        if runs < 2 or failures < 1 or passes < 1:
+            raise ValueError("flaky-test registry entry lacks mixed pass/fail observations")
+        if _string(raw_item.get("decision")) != "instability_context_only":
+            raise ValueError("flaky-test registry entry decision is not supported")
+        if not _bool(raw_item.get("review_first")):
+            raise ValueError("flaky-test registry entry must remain review-first")
+
+        entries.append(
+            {
+                "test_id": test_id,
+                "fingerprint": fingerprint,
+                "classification": "flaky",
+                "observed_runs": runs,
+                "observed_failures": failures,
+                "observed_passes": passes,
+                "decision": "instability_context_only",
+                "review_first": True,
+                **denied,
+            }
+        )
+
+    entries.sort(key=lambda item: (item["test_id"], item["fingerprint"]))
+    summary = _as_dict(payload.get("summary"))
+    if _int(summary.get("entry_count")) != len(entries):
+        raise ValueError("flaky-test registry evidence summary entry count is inconsistent")
+    if _int(summary.get("flaky_test_count")) != len(entries):
+        raise ValueError("flaky-test registry evidence summary flaky count is inconsistent")
+
+    return {
+        "collection_status": "collected",
+        "status": "advisory_registry_collected",
+        "source": {
+            "kind": source_kind,
+            "reference": source_reference,
+            "classification_schema": _string(source.get("classification_schema")),
+            "input_read_only": True,
+            "commands_executed_by_reader": False,
+        },
+        "entries": entries,
+        "entry_count": len(entries),
+        "note": (
+            "Flaky-test evidence is advisory context only and cannot suppress "
+            "a current failing contract."
+        ),
+        "decision_boundary": denied,
+    }
+
+
 def _escalation_rules() -> list[JsonObject]:
     return [
         {
@@ -341,6 +458,12 @@ def _escalation_rules() -> list[JsonObject]:
             "decision": "keep_advisory",
             "automation_allowed": False,
         },
+        {
+            "rule_id": "flaky_history_never_suppresses_current_failure",
+            "when": "read-only flaky-test instability evidence is collected",
+            "decision": "review_first",
+            "automation_allowed": False,
+        },
     ]
 
 
@@ -349,8 +472,10 @@ def build_repo_memory_profile(
     pattern_insights: Mapping[str, Any],
     benchmark_report: Mapping[str, Any],
     live_benchmark_report: Mapping[str, Any] | None = None,
+    flaky_test_registry_evidence: Mapping[str, Any] | None = None,
 ) -> JsonObject:
     live_report = dict(live_benchmark_report or {})
+    flaky_registry = _flaky_test_registry(flaky_test_registry_evidence or {})
     benchmark_proven = _benchmark_contract_proven(benchmark_report)
     live_proven = _live_contract_proven(live_report)
     safe_fix_history = _safe_fix_history(
@@ -443,11 +568,7 @@ def build_repo_memory_profile(
         "safe_fix_history": safe_fix_history,
         "known_safe_candidate_count": len(supported_candidates),
         "live_safe_candidate_count": len(live_supported_candidates),
-        "flaky_test_registry": {
-            "collection_status": "not_collected",
-            "entries": [],
-            "note": "No flaky-test evidence source is connected to RepoMemory yet.",
-        },
+        "flaky_test_registry": flaky_registry,
         "escalation_rules": _escalation_rules(),
         "unproven_boundaries": unproven_boundaries,
         "decision_boundary": {
@@ -581,7 +702,20 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
             "## Flaky test registry",
             "",
             f"- Collection status: `{_string(flaky.get('collection_status'))}`",
+            f"- Status: `{_string(flaky.get('status'))}`",
             f"- Entries: `{len(_as_list(flaky.get('entries')))}`",
+            (
+                "- Automatic quarantine allowed: "
+                f"`{str(_bool(_as_dict(flaky.get('decision_boundary')).get('automatic_quarantine_allowed'))).lower()}`"
+            ),
+            (
+                "- Current failure suppression allowed: "
+                f"`{str(_bool(_as_dict(flaky.get('decision_boundary')).get('current_failure_suppression_allowed'))).lower()}`"
+            ),
+            (
+                "- Automation allowed by flaky-test history: "
+                f"`{str(_bool(_as_dict(flaky.get('decision_boundary')).get('automation_allowed'))).lower()}`"
+            ),
             "",
             "## Escalation rules",
             "",
@@ -633,6 +767,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pattern-insights", type=Path, required=True)
     parser.add_argument("--benchmark-report", type=Path, required=True)
     parser.add_argument("--live-benchmark-report", type=Path)
+    parser.add_argument("--flaky-test-registry-evidence", type=Path)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     return parser
@@ -647,6 +782,11 @@ def main(argv: list[str] | None = None) -> int:
             benchmark_report=_read_json(args.benchmark_report),
             live_benchmark_report=(
                 _read_json(args.live_benchmark_report) if args.live_benchmark_report else None
+            ),
+            flaky_test_registry_evidence=(
+                _read_json(args.flaky_test_registry_evidence)
+                if args.flaky_test_registry_evidence
+                else None
             ),
         )
         artifacts = write_profile(profile, out_dir=args.out_dir)
