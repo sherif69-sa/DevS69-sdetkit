@@ -284,11 +284,11 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "maintenance_autopilot",
             ),
             gaps=(
-                "git-derived inventory and allowlisted command proof are not yet replayed in benchmark scenarios",
+                "Git-derived allowlisted proof is benchmarked only for limited live scenarios",
                 "structural and allowlisted command proof do not establish semantic equivalence",
                 "not wired into automation",
             ),
-            recommended_next_action="replay git-grounded isolated proof evidence in benchmark scenarios",
+            recommended_next_action="extend anti-cheat and isolation proof without changing automation",
         ),
         _component(
             module="git_inventory_collector",
@@ -306,9 +306,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             gaps=(
                 "not wired into workflow evidence collection",
-                "benchmark scenarios do not yet replay Git-derived inventory",
+                "base_head inventory is not yet exercised through PR workflow evidence",
             ),
-            recommended_next_action="feed Git-derived proof evidence through replayable benchmark scenarios",
+            recommended_next_action="keep Git-derived evidence read-only until workflow proof is designed",
         ),
         _component(
             module="isolated_proof_runner",
@@ -327,30 +327,33 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             gaps=(
                 "network isolation is reported but not enforced",
-                "benchmark scenarios do not yet replay Git-derived live proof-runner output",
+                "live benchmark coverage remains limited to allowlisted proof profiles",
             ),
-            recommended_next_action="replay Git-derived isolated proof evidence before any automation connection",
+            recommended_next_action="add network-isolation and anti-cheat proof before automation connection",
         ),
         _component(
             module="replayable_benchmark_harness",
-            role="replay fixture-backed nop, oracle, and unsafe patch scenarios through safety contracts",
+            role="replay fixture-backed and Git-grounded isolated-proof scenarios through safety contracts",
             status="partially_aligned",
             stages=("benchmark", "proof", "verifier", "reporting"),
             existing_artifacts=(
                 "benchmark-report.json",
                 "benchmark-report.md",
                 "fixture scenario JSON",
+                "Git-grounded isolated-proof scenario reports",
             ),
             integration_points=(
+                "git_inventory_collector",
+                "isolated_proof_runner",
                 "patch_scorer",
                 "protected_verifier",
                 "repo_memory",
             ),
             gaps=(
-                "current fixtures do not yet replay git_inventory_collector and isolated_proof_runner evidence",
-                "anti-cheat runtime checks remain future work",
+                "anti-cheat runtime checks and network isolation remain future work",
+                "RepoMemory does not yet ingest live Git-grounded benchmark outcomes",
             ),
-            recommended_next_action="replay Git-derived isolated proof evidence before automation wiring",
+            recommended_next_action="feed live benchmark outcomes into RepoMemory without automation wiring",
         ),
         _component(
             module="repo_memory",
@@ -367,10 +370,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "protected_verifier",
             ),
             gaps=(
-                "profiles do not yet ingest isolated_proof_runner execution outcomes",
+                "profiles do not yet ingest live Git-grounded benchmark outcomes",
                 "flaky-test registry ingestion and persistent profile updates are not implemented",
             ),
-            recommended_next_action="ingest git-grounded isolated proof outcomes before automation wiring",
+            recommended_next_action="ingest live benchmark outcomes before automation wiring",
         ),
     ]
 
@@ -408,7 +411,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/replayable-benchmark-isolated-proof-evidence",
+        "next_recommended_pr": "feature/repo-memory-live-proof-outcomes",
     }
 
 

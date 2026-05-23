@@ -7,23 +7,39 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from sdetkit.git_inventory_collector import STAGED_WORKTREE
+from sdetkit.isolated_proof_runner import INVENTORY_CLAIM_MATCH, run_isolated_proof
 from sdetkit.patch_scorer import score_patch
 from sdetkit.protected_verifier import verify_candidate
 
 SCHEMA_VERSION = "sdetkit.replayable_benchmark_harness.v1"
+ISOLATED_EVIDENCE_SCHEMA_VERSION = "sdetkit.replayable_benchmark_harness.isolated_evidence.v1"
 DEFAULT_OUT_DIR = Path("build") / "replayable-benchmark-harness"
 REPORT_JSON = "benchmark-report.json"
 REPORT_MD = "benchmark-report.md"
+
+INVENTORY_CLAIM_MISMATCH_FAIL = "_".join(("inventory", "claim", "mismatch", "fail"))
+PROOF_MUTATION_FAIL = "_".join(("proof", "mutation", "fail"))
+LIVE_EVIDENCE_SOURCE = "_".join(("git", "grounded", "isolated", "proof"))
+LIVE_EXECUTION_MODEL = "_".join(("git", "derived", "isolated", "proof", "evaluation"))
+VERIFICATION_EVIDENCE_SOURCE = "_".join(("verification", "evidence", "source"))
 
 SCENARIO_TYPES = {
     "nop_fail",
     "oracle_pass",
     "unsafe_patch_fail",
+    INVENTORY_CLAIM_MISMATCH_FAIL,
+    PROOF_MUTATION_FAIL,
 }
 REQUIRED_SCENARIO_TYPES = (
     "nop_fail",
     "oracle_pass",
     "unsafe_patch_fail",
+)
+ISOLATED_EVIDENCE_REQUIRED_TYPES = (
+    "oracle_pass",
+    INVENTORY_CLAIM_MISMATCH_FAIL,
+    PROOF_MUTATION_FAIL,
 )
 
 JsonObject = dict[str, Any]
@@ -52,6 +68,10 @@ def _int(value: Any, *, default: int = 0) -> int:
         return int(value)
     except (TypeError, ValueError):
         return default
+
+
+def _string_list(value: Any) -> list[str]:
+    return sorted({_string(item) for item in _as_list(value) if _string(item)})
 
 
 def _read_json_object(path: Path) -> JsonObject:
@@ -106,7 +126,11 @@ def _check(
     }
 
 
-def evaluate_scenario(scenario: Mapping[str, Any]) -> JsonObject:
+def evaluate_scenario(
+    scenario: Mapping[str, Any],
+    *,
+    verification_evidence_override: Mapping[str, Any] | None = None,
+) -> JsonObject:
     scenario_id = _string(scenario.get("scenario_id"))
     scenario_type = _string(scenario.get("scenario_type"))
     if not scenario_id:
@@ -118,7 +142,15 @@ def evaluate_scenario(scenario: Mapping[str, Any]) -> JsonObject:
     remediation_plan = _as_dict(scenario.get("remediation_plan"))
     proposed_patch = _as_dict(scenario.get("proposed_patch"))
     pattern_insights = _as_dict(scenario.get("pattern_insights"))
-    verification_evidence = _as_dict(scenario.get("verification_evidence"))
+    declared_verification_evidence = _as_dict(scenario.get("verification_evidence"))
+    verification_evidence = (
+        dict(verification_evidence_override)
+        if verification_evidence_override is not None
+        else declared_verification_evidence
+    )
+    evidence_source = (
+        LIVE_EVIDENCE_SOURCE if verification_evidence_override is not None else "fixture_declared"
+    )
     expected = _as_dict(scenario.get("expected"))
 
     if not remediation_plan or not proposed_patch or not verification_evidence:
@@ -208,7 +240,7 @@ def evaluate_scenario(scenario: Mapping[str, Any]) -> JsonObject:
                 ),
             ]
         )
-    else:
+    elif scenario_type in {"nop_fail", "unsafe_patch_fail"}:
         checks.extend(
             [
                 _check(
@@ -225,6 +257,23 @@ def evaluate_scenario(scenario: Mapping[str, Any]) -> JsonObject:
                 ),
             ]
         )
+    else:
+        checks.extend(
+            [
+                _check(
+                    name="live_failure_patch_remains_candidate",
+                    passed=patch_status == "candidate_for_protected_verification",
+                    expected="candidate_for_protected_verification",
+                    actual=patch_status,
+                ),
+                _check(
+                    name="live_failure_verification_rejected",
+                    passed=verifier_status == "blocked_review_first",
+                    expected="blocked_review_first",
+                    actual=verifier_status,
+                ),
+            ]
+        )
 
     passed = all(_bool(item.get("passed")) for item in checks)
     return {
@@ -235,10 +284,106 @@ def evaluate_scenario(scenario: Mapping[str, Any]) -> JsonObject:
         "passed": passed,
         "attempt_scored": True,
         "attempt_score": _int(patch_score.get("score")),
+        VERIFICATION_EVIDENCE_SOURCE: evidence_source,
         "checks": checks,
         "patch_score": patch_score,
         "protected_verifier_result": verifier_result,
     }
+
+
+def evaluate_isolated_evidence_scenario(
+    scenario: Mapping[str, Any],
+    *,
+    repo_root: Path,
+) -> JsonObject:
+    scenario_type = _string(scenario.get("scenario_type"))
+    if scenario_type not in ISOLATED_EVIDENCE_REQUIRED_TYPES:
+        raise ValueError(f"unsupported isolated-evidence scenario type: {scenario_type}")
+
+    runtime = _as_dict(scenario.get("isolated_proof"))
+    profiles = _string_list(runtime.get("profiles"))
+    if not profiles:
+        raise ValueError("isolated_proof profiles are required")
+
+    proposed_patch = _as_dict(scenario.get("proposed_patch"))
+    claimed_files = _string_list(proposed_patch.get("changed_files"))
+    expected_runtime = _as_dict(_as_dict(scenario.get("expected")).get("isolated_proof"))
+    required_expectations = {
+        "status",
+        "git_inventory_verified",
+        "inventory_claim_match",
+    }
+    if not required_expectations.issubset(expected_runtime):
+        raise ValueError(
+            "isolated proof expectations must include status, "
+            "git_inventory_verified, and inventory_claim_match"
+        )
+
+    evidence = run_isolated_proof(
+        repo_root=repo_root,
+        changed_files=claimed_files,
+        profile_ids=profiles,
+        timeout_seconds=_int(runtime.get("timeout_seconds"), default=60),
+        inventory_mode=_string(runtime.get("inventory_mode") or STAGED_WORKTREE),
+        base_ref=_string(runtime.get("base_ref")),
+        head_ref=_string(runtime.get("head_ref") or "HEAD"),
+    )
+    result = evaluate_scenario(
+        scenario,
+        verification_evidence_override=evidence,
+    )
+
+    boundary = _as_dict(evidence.get("decision_boundary"))
+    expected_status = _string(expected_runtime.get("status"))
+    expected_git_verified = _bool(expected_runtime.get("git_inventory_verified"))
+    expected_claim_match = _bool(expected_runtime.get("inventory_claim_match"))
+
+    result["checks"].extend(
+        [
+            _check(
+                name="isolated_evidence_status",
+                passed=_string(evidence.get("status")) == expected_status,
+                expected=expected_status,
+                actual=_string(evidence.get("status")),
+            ),
+            _check(
+                name="isolated_git_inventory_verified",
+                passed=_bool(boundary.get("git_inventory_verified")) == expected_git_verified,
+                expected=expected_git_verified,
+                actual=_bool(boundary.get("git_inventory_verified")),
+            ),
+            _check(
+                name="isolated_inventory_claim_match",
+                passed=_bool(evidence.get(INVENTORY_CLAIM_MATCH)) == expected_claim_match,
+                expected=expected_claim_match,
+                actual=_bool(evidence.get(INVENTORY_CLAIM_MATCH)),
+            ),
+            _check(
+                name="isolated_runner_automation_boundary",
+                passed=not _bool(boundary.get("automation_allowed")),
+                expected=False,
+                actual=_bool(boundary.get("automation_allowed")),
+            ),
+            _check(
+                name="isolated_runner_merge_boundary",
+                passed=not _bool(boundary.get("merge_authorized")),
+                expected=False,
+                actual=_bool(boundary.get("merge_authorized")),
+            ),
+            _check(
+                name="isolated_runner_semantic_boundary",
+                passed=not _bool(boundary.get("semantic_equivalence_proven")),
+                expected=False,
+                actual=_bool(boundary.get("semantic_equivalence_proven")),
+            ),
+        ]
+    )
+
+    result["isolated_proof_evidence"] = evidence
+    result["live_evidence_exercised"] = True
+    result["passed"] = all(_bool(item.get("passed")) for item in result["checks"])
+    result["status"] = "passed" if result["passed"] else "failed"
+    return result
 
 
 def _type_rate(results: list[JsonObject], scenario_type: str) -> float:
@@ -336,66 +481,247 @@ def build_benchmark_report(scenarios: list[Mapping[str, Any]]) -> JsonObject:
     }
 
 
+def build_isolated_evidence_report(
+    scenario_runs: list[tuple[Mapping[str, Any], Path]],
+) -> JsonObject:
+    results = [
+        evaluate_isolated_evidence_scenario(scenario, repo_root=repo_root)
+        for scenario, repo_root in scenario_runs
+    ]
+    type_counts = Counter(_string(item.get("scenario_type")) for item in results)
+    required_present = all(
+        type_counts.get(item, 0) >= 1 for item in ISOLATED_EVIDENCE_REQUIRED_TYPES
+    )
+    required_passed = all(
+        any(
+            result.get("scenario_type") == scenario_type and result.get("passed") is True
+            for result in results
+        )
+        for scenario_type in ISOLATED_EVIDENCE_REQUIRED_TYPES
+    )
+
+    verifier_decisions = [
+        _as_dict(_as_dict(result.get("protected_verifier_result")).get("decision"))
+        for result in results
+    ]
+    evidence_boundaries = [
+        _as_dict(_as_dict(result.get("isolated_proof_evidence")).get("decision_boundary"))
+        for result in results
+    ]
+
+    automation_allowed_count = sum(
+        1
+        for decision, boundary in zip(verifier_decisions, evidence_boundaries, strict=True)
+        if _bool(decision.get("automation_allowed")) or _bool(boundary.get("automation_allowed"))
+    )
+    merge_authorized_count = sum(
+        1
+        for decision, boundary in zip(verifier_decisions, evidence_boundaries, strict=True)
+        if _bool(decision.get("merge_authorized")) or _bool(boundary.get("merge_authorized"))
+    )
+    semantic_equivalence_claimed_count = sum(
+        1
+        for decision, boundary in zip(verifier_decisions, evidence_boundaries, strict=True)
+        if _bool(decision.get("semantic_equivalence_proven"))
+        or _bool(boundary.get("semantic_equivalence_proven"))
+    )
+    boundary_preserved = (
+        automation_allowed_count == 0
+        and merge_authorized_count == 0
+        and semantic_equivalence_claimed_count == 0
+    )
+    passed_count = sum(1 for item in results if item.get("passed") is True)
+    passed = (
+        bool(results)
+        and passed_count == len(results)
+        and required_present
+        and required_passed
+        and boundary_preserved
+    )
+
+    return {
+        "schema_version": ISOLATED_EVIDENCE_SCHEMA_VERSION,
+        "report_mode": LIVE_EVIDENCE_SOURCE,
+        "status": "passed" if passed else "failed",
+        "scenario_count": len(results),
+        "passed_count": passed_count,
+        "failed_count": len(results) - passed_count,
+        "scenario_type_counts": dict(sorted(type_counts.items())),
+        "required_contract": {
+            "required_scenario_types": list(ISOLATED_EVIDENCE_REQUIRED_TYPES),
+            "all_required_present": required_present,
+            "all_required_passed": required_passed,
+            "oracle_pass_rate": _type_rate(results, "oracle_pass"),
+            "claim_mismatch_rejection_rate": _type_rate(
+                results,
+                INVENTORY_CLAIM_MISMATCH_FAIL,
+            ),
+            "proof_mutation_rejection_rate": _type_rate(results, PROOF_MUTATION_FAIL),
+        },
+        "live_evidence": {
+            "scenario_count": len(results),
+            "git_inventory_verified_count": sum(
+                1
+                for boundary in evidence_boundaries
+                if _bool(boundary.get("git_inventory_verified"))
+            ),
+            "expected_failed_evidence_count": sum(
+                1
+                for result in results
+                if _string(_as_dict(result.get("isolated_proof_evidence")).get("status"))
+                == "failed"
+                and result.get("passed") is True
+            ),
+        },
+        "safety_boundary": {
+            "execution_model": LIVE_EXECUTION_MODEL,
+            "automation_allowed_count": automation_allowed_count,
+            "merge_authorized_count": merge_authorized_count,
+            "semantic_equivalence_claimed_count": semantic_equivalence_claimed_count,
+            "preserved": boundary_preserved,
+        },
+        "attempt_scored_count": sum(1 for item in results if item.get("attempt_scored") is True),
+        "scenarios": results,
+        "next_boundary": (
+            "Add anti-cheat and network-isolation proof before any automation wiring."
+        ),
+    }
+
+
 def render_markdown(report: Mapping[str, Any]) -> str:
     required = _as_dict(report.get("required_contract"))
     boundary = _as_dict(report.get("safety_boundary"))
+    live_evidence = _as_dict(report.get("live_evidence"))
     scenarios = [_as_dict(item) for item in _as_list(report.get("scenarios"))]
+    report_mode = _string(report.get("report_mode") or "fixture_declared")
+    is_live = report_mode == LIVE_EVIDENCE_SOURCE
 
     lines = [
         "# Replayable Benchmark Harness report",
         "",
         f"- Status: `{_string(report.get('status'))}`",
+        f"- Mode: `{report_mode}`",
         f"- Scenarios: `{_int(report.get('scenario_count'))}`",
         f"- Passed: `{_int(report.get('passed_count'))}`",
         f"- Failed: `{_int(report.get('failed_count'))}`",
         f"- Attempts scored: `{_int(report.get('attempt_scored_count'))}`",
         "",
-        "## Required benchmark contract",
-        "",
-        f"- All required scenarios present: `{str(_bool(required.get('all_required_present'))).lower()}`",
-        f"- All required scenarios passed: `{str(_bool(required.get('all_required_passed'))).lower()}`",
-        f"- NOP fail rate: `{float(required.get('nop_fail_rate', 0.0) or 0.0):.4f}`",
-        f"- Oracle pass rate: `{float(required.get('oracle_pass_rate', 0.0) or 0.0):.4f}`",
-        (
-            "- Unsafe patch rejection rate: "
-            f"`{float(required.get('unsafe_patch_rejection_rate', 0.0) or 0.0):.4f}`"
-        ),
-        "",
-        "## Safety boundary",
-        "",
-        f"- Execution model: `{_string(boundary.get('execution_model'))}`",
-        f"- Automation allowed count: `{_int(boundary.get('automation_allowed_count'))}`",
-        f"- Merge authorized count: `{_int(boundary.get('merge_authorized_count'))}`",
-        (
-            "- Semantic equivalence claimed count: "
-            f"`{_int(boundary.get('semantic_equivalence_claimed_count'))}`"
-        ),
-        f"- Boundary preserved: `{str(_bool(boundary.get('preserved'))).lower()}`",
-        "",
-        "## Scenario results",
-        "",
     ]
 
+    if is_live:
+        lines.extend(
+            [
+                "## Required Git-grounded live-evidence contract",
+                "",
+                (
+                    "- All required scenarios present: "
+                    f"`{str(_bool(required.get('all_required_present'))).lower()}`"
+                ),
+                (
+                    "- All required scenarios passed: "
+                    f"`{str(_bool(required.get('all_required_passed'))).lower()}`"
+                ),
+                (
+                    "- Oracle pass rate: "
+                    f"`{float(required.get('oracle_pass_rate', 0.0) or 0.0):.4f}`"
+                ),
+                (
+                    "- Inventory claim mismatch rejection rate: "
+                    f"`{float(required.get('claim_mismatch_rejection_rate', 0.0) or 0.0):.4f}`"
+                ),
+                (
+                    "- Proof mutation rejection rate: "
+                    f"`{float(required.get('proof_mutation_rejection_rate', 0.0) or 0.0):.4f}`"
+                ),
+                "",
+                "## Live execution evidence",
+                "",
+                f"- Scenarios executed: `{_int(live_evidence.get('scenario_count'))}`",
+                (
+                    "- Git inventory verified scenarios: "
+                    f"`{_int(live_evidence.get('git_inventory_verified_count'))}`"
+                ),
+                (
+                    "- Expected failed-evidence scenarios: "
+                    f"`{_int(live_evidence.get('expected_failed_evidence_count'))}`"
+                ),
+                "",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "## Required benchmark contract",
+                "",
+                (
+                    "- All required scenarios present: "
+                    f"`{str(_bool(required.get('all_required_present'))).lower()}`"
+                ),
+                (
+                    "- All required scenarios passed: "
+                    f"`{str(_bool(required.get('all_required_passed'))).lower()}`"
+                ),
+                (f"- NOP fail rate: `{float(required.get('nop_fail_rate', 0.0) or 0.0):.4f}`"),
+                (
+                    "- Oracle pass rate: "
+                    f"`{float(required.get('oracle_pass_rate', 0.0) or 0.0):.4f}`"
+                ),
+                (
+                    "- Unsafe patch rejection rate: "
+                    f"`{float(required.get('unsafe_patch_rejection_rate', 0.0) or 0.0):.4f}`"
+                ),
+                "",
+            ]
+        )
+
+    lines.extend(
+        [
+            "## Safety boundary",
+            "",
+            f"- Execution model: `{_string(boundary.get('execution_model'))}`",
+            f"- Automation allowed count: `{_int(boundary.get('automation_allowed_count'))}`",
+            f"- Merge authorized count: `{_int(boundary.get('merge_authorized_count'))}`",
+            (
+                "- Semantic equivalence claimed count: "
+                f"`{_int(boundary.get('semantic_equivalence_claimed_count'))}`"
+            ),
+            f"- Boundary preserved: `{str(_bool(boundary.get('preserved'))).lower()}`",
+            "",
+            "## Scenario results",
+            "",
+        ]
+    )
+
     for scenario in scenarios:
+        source = _string(scenario.get(VERIFICATION_EVIDENCE_SOURCE))
+        source_suffix = f", evidence=`{source}`" if source else ""
         lines.append(
             f"- `{_string(scenario.get('scenario_id'))}` "
             f"({_string(scenario.get('scenario_type'))}): "
             f"`{_string(scenario.get('status'))}`, "
             f"attempt_score=`{_int(scenario.get('attempt_score'))}`"
+            f"{source_suffix}"
         )
 
-    lines.extend(
-        [
-            "",
-            "## Boundary",
-            "",
-            "- This harness replays deterministic fixture evidence through PatchScorer and ProtectedVerifier.",
-            "- It does not apply patches or execute proof commands.",
-            "- It does not authorize automation or merge.",
-            f"- Next: {_string(report.get('next_boundary'))}",
-            "",
-        ]
-    )
+    lines.extend(["", "## Boundary", ""])
+    if is_live:
+        lines.extend(
+            [
+                "- This harness executes allowlisted proof profiles in disposable workspace copies.",
+                "- Git-derived inventory grounds each live scenario before verification.",
+                "- It does not apply patches, authorize automation, or authorize merge.",
+                "- Network isolation and semantic equivalence remain unproven.",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "- This harness replays deterministic fixture evidence through PatchScorer and ProtectedVerifier.",
+                "- It does not apply patches or execute proof commands.",
+                "- It does not authorize automation or merge.",
+            ]
+        )
+    lines.extend([f"- Next: {_string(report.get('next_boundary'))}", ""])
     return "\n".join(lines)
 
 
@@ -417,8 +743,22 @@ def build_parser() -> argparse.ArgumentParser:
         "--scenario",
         type=Path,
         action="append",
-        required=True,
+        default=[],
         help="Fixture-backed benchmark scenario JSON. May be supplied more than once.",
+    )
+    parser.add_argument(
+        "--isolated-scenario",
+        type=Path,
+        action="append",
+        default=[],
+        help="Git-grounded isolated-proof benchmark scenario JSON.",
+    )
+    parser.add_argument(
+        "--isolated-repo-root",
+        type=Path,
+        action="append",
+        default=[],
+        help="Repository root paired by position with --isolated-scenario.",
     )
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--format", choices=["text", "json"], default="text")
@@ -429,7 +769,21 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
     try:
-        report = build_benchmark_report(load_scenarios(args.scenario))
+        if args.isolated_scenario:
+            if args.scenario:
+                raise ValueError(
+                    "fixture --scenario and --isolated-scenario modes cannot be combined"
+                )
+            if len(args.isolated_scenario) != len(args.isolated_repo_root):
+                raise ValueError("each --isolated-scenario requires one --isolated-repo-root")
+            scenarios = load_scenarios(args.isolated_scenario)
+            report = build_isolated_evidence_report(
+                list(zip(scenarios, args.isolated_repo_root, strict=True))
+            )
+        else:
+            if not args.scenario:
+                raise ValueError("at least one --scenario is required")
+            report = build_benchmark_report(load_scenarios(args.scenario))
         artifacts = write_report(report, out_dir=args.out_dir)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"error={exc}")
