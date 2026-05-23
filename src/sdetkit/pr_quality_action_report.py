@@ -457,6 +457,70 @@ def _command_lines(values: list[Any]) -> list[str]:
     return [f"- `{item}`" for item in items] or ["- none"]
 
 
+def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) -> list[str]:
+    summary = _as_dict(runtime_proof_artifacts)
+    if not summary:
+        return []
+
+    isolated = _as_dict(summary.get("isolated_proof"))
+    benchmark = _as_dict(summary.get("live_benchmark"))
+    memory = _as_dict(summary.get("repo_memory"))
+    boundary = _as_dict(summary.get("decision_boundary"))
+
+    lines = [
+        f"- Collection status: `{_string(summary.get('status') or 'not_collected')}`",
+        f"- Isolated proof status: `{_string(isolated.get('status') or 'not_collected')}`",
+        (
+            "- Git inventory verified: "
+            f"`{str(bool(isolated.get('git_inventory_verified', False))).lower()}`"
+        ),
+        (
+            "- Runtime guard checked: "
+            f"`{str(bool(isolated.get('runtime_guard_checked', False))).lower()}`"
+        ),
+        (
+            "- Runtime guard passed: "
+            f"`{str(bool(isolated.get('runtime_guard_passed', False))).lower()}`"
+        ),
+        f"- Runtime guard violations: `{_int(isolated.get('runtime_guard_violation_count'))}`",
+        (
+            "- Network boundary status: "
+            f"`{_string(isolated.get('network_boundary_status') or 'not_collected')}`"
+        ),
+        (
+            "- Network isolation enforced: "
+            f"`{str(bool(isolated.get('network_isolation_enforced', False))).lower()}`"
+        ),
+        f"- Profiles executed: `{_int(isolated.get('profiles_executed'))}`",
+        f"- Profiles blocked: `{_int(isolated.get('profiles_blocked'))}`",
+        (
+            "- Live benchmark collection status: "
+            f"`{_string(benchmark.get('collection_status') or 'not_collected')}`"
+        ),
+        (
+            "- RepoMemory collection status: "
+            f"`{_string(memory.get('collection_status') or 'not_collected')}`"
+        ),
+        (
+            "- Proof commands executed by renderer: "
+            f"`{str(bool(boundary.get('proof_commands_executed_by_renderer', False))).lower()}`"
+        ),
+        (
+            "- Automation allowed by runtime artifacts: "
+            f"`{str(bool(boundary.get('automation_allowed', False))).lower()}`"
+        ),
+        (
+            "- Merge authorized by runtime artifacts: "
+            f"`{str(bool(boundary.get('merge_authorized', False))).lower()}`"
+        ),
+        (
+            "- Semantic equivalence proven by runtime artifacts: "
+            f"`{str(bool(boundary.get('semantic_equivalence_proven', False))).lower()}`"
+        ),
+    ]
+    return lines
+
+
 def _trajectory_summary(records: list[JsonObject] | None) -> JsonObject:
     rows = [_as_dict(item) for item in records or [] if _as_dict(item)]
     return {
@@ -718,6 +782,7 @@ def render_comment_body(
     evidence_narrative: JsonObject | None = None,
     safe_fix_outcome: JsonObject | None = None,
     trajectory_records: list[JsonObject] | None = None,
+    runtime_proof_artifacts: JsonObject | None = None,
 ) -> str:
     evidence_narrative = evidence_narrative or {}
     safe_fix_outcome = safe_fix_outcome or _as_dict(check_intelligence.get("safe_fix_outcome"))
@@ -764,6 +829,10 @@ def render_comment_body(
     trajectory = _trajectory_lines(trajectory_records)
     if trajectory:
         lines.extend(["## Trajectory summary", "", *trajectory, ""])
+
+    runtime_proof = _runtime_proof_artifact_lines(runtime_proof_artifacts)
+    if runtime_proof:
+        lines.extend(["## Runtime proof artifacts", "", *runtime_proof, ""])
 
     lines.extend(
         [
@@ -836,6 +905,7 @@ def write_comment_body(
     out: Path,
     evidence_narrative_path: Path | None = None,
     trajectory_jsonl_path: Path | None = None,
+    runtime_proof_artifacts_path: Path | None = None,
     failure_bundle_out_dir: Path | None = None,
     pr_number: int = 0,
     head_sha: str = "",
@@ -845,12 +915,14 @@ def write_comment_body(
     check_intelligence = _read_json(check_intelligence_path)
     evidence_narrative = _read_json(evidence_narrative_path)
     trajectory_records = _read_jsonl(trajectory_jsonl_path)
+    runtime_proof_artifacts = _read_json(runtime_proof_artifacts_path)
 
     body = render_comment_body(
         action_report=action_report,
         check_intelligence=check_intelligence,
         evidence_narrative=evidence_narrative,
         trajectory_records=trajectory_records,
+        runtime_proof_artifacts=runtime_proof_artifacts,
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(body, encoding="utf-8")
@@ -923,6 +995,17 @@ def write_comment_body(
         "trajectory_record_count": trajectory_summary["record_count"],
         "trajectory_review_first_count": trajectory_summary["review_first_count"],
         "trajectory_auto_fix_allowed_count": trajectory_summary["auto_fix_allowed_count"],
+        "runtime_proof_artifacts_present": bool(runtime_proof_artifacts),
+        "runtime_proof_collection_status": _string(
+            runtime_proof_artifacts.get("status") if runtime_proof_artifacts else "not_collected"
+        ),
+        "runtime_guard_violation_count": _int(
+            _as_dict(runtime_proof_artifacts.get("isolated_proof")).get(
+                "runtime_guard_violation_count"
+            )
+            if runtime_proof_artifacts
+            else 0
+        ),
     }
     if failure_bundle_result:
         result["failure_bundle"] = failure_bundle_result
@@ -935,6 +1018,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--check-intelligence", type=Path, required=True)
     parser.add_argument("--evidence-narrative", type=Path)
     parser.add_argument("--trajectory-jsonl", type=Path)
+    parser.add_argument("--runtime-proof-artifacts", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--failure-bundle-out-dir", type=Path)
     parser.add_argument("--pr-number", type=int, default=0)
@@ -950,6 +1034,7 @@ def main(argv: list[str] | None = None) -> int:
         check_intelligence_path=args.check_intelligence,
         evidence_narrative_path=args.evidence_narrative,
         trajectory_jsonl_path=args.trajectory_jsonl,
+        runtime_proof_artifacts_path=args.runtime_proof_artifacts,
         out=args.out,
         failure_bundle_out_dir=args.failure_bundle_out_dir,
         pr_number=args.pr_number,

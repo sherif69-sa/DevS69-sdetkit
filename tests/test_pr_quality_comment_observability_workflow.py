@@ -285,3 +285,49 @@ def test_pr_quality_comment_workflow_collects_code_scanning_alert_visibility() -
     assert "--code-scanning-alerts-json build/pr-quality/code-scanning/alerts.json" in text
     assert '--current-head-sha "$HEAD_SHA"' in text
     assert "build/pr-quality/code-scanning/" in text
+
+
+def test_pr_quality_comment_workflow_builds_current_pr_runtime_proof_artifact() -> None:
+    text = _workflow_text()
+
+    changed_files = text.index("> build/pr-quality/changed-files.txt")
+    isolated_proof = text.index("python -m sdetkit.isolated_proof_runner")
+    runtime_summary = text.index("python -m sdetkit.pr_quality_runtime_proof_artifacts")
+    final_comment = text.index("python -m sdetkit.pr_quality_action_report")
+
+    assert changed_files < isolated_proof < runtime_summary < final_comment
+    assert "--inventory-mode base_head" in text
+    assert '--base-ref "origin/${{ github.event.pull_request.base.ref }}"' in text
+    assert "--profile ruff_src_tests" in text
+    assert "--out-dir build/pr-quality/runtime-proof/isolated-proof" in text
+    assert (
+        "--isolated-proof build/pr-quality/runtime-proof/isolated-proof/verification-evidence.json"
+        in text
+    )
+    assert "--out-dir build/pr-quality/runtime-proof/summary" in text
+    assert (
+        "--runtime-proof-artifacts build/pr-quality/runtime-proof/summary/runtime-proof-artifacts.json"
+        in text
+    )
+    assert "build/pr-quality/runtime-proof/" in text
+
+
+def test_pr_quality_comment_workflow_exposes_runtime_proof_metadata() -> None:
+    text = _workflow_text()
+
+    assert (
+        "runtime_proof_artifacts_present: Boolean(metadata.runtime_proof_artifacts_present)" in text
+    )
+    assert (
+        "runtime_proof_collection_status: metadata.runtime_proof_collection_status || 'not_collected'"
+        in text
+    )
+    assert (
+        "runtime_guard_violation_count: Number(metadata.runtime_guard_violation_count || 0)" in text
+    )
+    assert (
+        'print(f"runtime_proof_artifacts_present={str(runtime_proof_artifacts_present).lower()}")'
+        in text
+    )
+    assert 'print(f"runtime_proof_collection_status={runtime_proof_collection_status}")' in text
+    assert 'print(f"runtime_guard_violation_count={runtime_guard_violation_count}")' in text
