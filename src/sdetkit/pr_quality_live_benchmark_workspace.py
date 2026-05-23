@@ -112,7 +112,11 @@ def _initialize_repository(root: Path, *, hook_mode: str | None) -> None:
 
     (source / "example.py").write_text("VALUE = 1\n", encoding="utf-8")
     (tests / "test_placeholder.py").write_text(
-        "def test_placeholder() -> None:\n    assert True\n",
+        "from pathlib import Path\n"
+        "\n"
+        "\n"
+        "def test_placeholder() -> None:\n"
+        "    assert Path(__file__).is_file()\n",
         encoding="utf-8",
     )
 
