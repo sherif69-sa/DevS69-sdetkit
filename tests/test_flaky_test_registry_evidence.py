@@ -129,7 +129,6 @@ def test_flaky_test_registry_cli_writes_deterministic_artifacts(tmp_path: Path, 
     assert "Automation allowed: `false`" in markdown
 
 
-
 def test_flaky_test_registry_rejects_missing_source_reference_and_malformed_report() -> None:
     with pytest.raises(ValueError, match="source reference is required"):
         build_flaky_test_registry_evidence(

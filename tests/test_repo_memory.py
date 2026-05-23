@@ -495,7 +495,6 @@ def test_repo_memory_markdown_renders_flaky_history_no_authority_boundary() -> N
     assert "Automation allowed by flaky-test history: `false`" in markdown
 
 
-
 def test_repo_memory_rejects_hidden_entry_authority_and_bad_registry_schema() -> None:
     hidden_authority = _flaky_registry_evidence()
     hidden_authority["entries"][0]["automation_allowed"] = True
