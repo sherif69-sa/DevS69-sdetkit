@@ -55,20 +55,29 @@ def test_pr_quality_comment_workflow_uploads_comment_artifacts() -> None:
 
 def test_pr_quality_comment_workflow_updates_or_posts_comment_and_records_status() -> None:
     text = _workflow_text()
+    publisher = text[
+        text.index("- name: Comment on PR") : text.index(
+            "- name: Verify PR Quality comment visibility"
+        )
+    ]
 
-    assert "listComments" in text
-    assert "updateComment" in text
-    assert "createComment" in text
-    assert "comment_status=updated" in text
-    assert "comment_status=posted" in text
-    assert "posted SDET Quality Gate comment" in text
-    assert "updated existing SDET Quality Gate comment" in text
-    assert "readCommentMetadata" in text
-    assert "action_report_status: metadata.status || 'unknown'" in text
-    assert "comment_result_title: metadata.result_title || 'unknown'" in text
-    assert "evidence_signal_kind: metadata.evidence_signal_kind || 'unknown'" in text
-    assert "evidence_signal_present: Boolean(metadata.evidence_signal_present)" in text
-    assert "evidence_review_required: Boolean(metadata.evidence_review_required)" in text
+    assert "GH_TOKEN: ${{ github.token }}" in publisher
+    assert "gh api" in publisher
+    assert "--method PATCH" in publisher
+    assert "--method POST" in publisher
+    assert "issues/comments/${existing_id}" in publisher
+    assert "issues/${PR_NUMBER}/comments" in publisher
+    assert "actions/github-script@" not in publisher
+    assert "comment_status=updated" in publisher
+    assert "comment_status=posted" in publisher
+    assert "posted SDET Quality Gate comment" in publisher
+    assert "updated existing SDET Quality Gate comment" in publisher
+    assert "readCommentMetadata" in publisher
+    assert "action_report_status: metadata.status || 'unknown'" in publisher
+    assert "comment_result_title: metadata.result_title || 'unknown'" in publisher
+    assert "evidence_signal_kind: metadata.evidence_signal_kind || 'unknown'" in publisher
+    assert "evidence_signal_present: Boolean(metadata.evidence_signal_present)" in publisher
+    assert "evidence_review_required: Boolean(metadata.evidence_review_required)" in publisher
 
 
 def test_pr_quality_comment_workflow_fails_loud_when_comment_not_visible() -> None:

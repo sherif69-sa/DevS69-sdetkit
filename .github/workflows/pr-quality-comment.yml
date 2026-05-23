@@ -632,120 +632,174 @@ jobs:
           if-no-files-found: ignore
 
       - name: Comment on PR
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
-        with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
 
-            const statusPath = 'build/pr-quality/comment-status.json';
-            const readCommentMetadata = () => {
-              const metadataPath = 'build/pr-quality/pr-comment-metadata.json';
-              try {
-                if (!fs.existsSync(metadataPath)) {
-                  return {};
-                }
-                return JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
-              } catch (error) {
-                core.warning(`failed to read PR Quality comment metadata: ${error && error.message ? error.message : error}`);
+          publish_dir="build/pr-quality/comment-publish"
+          request_path="$publish_dir/comment-request.json"
+          response_path="$publish_dir/comment-response.json"
+          body_path="$publish_dir/comment-body.md"
+
+          mkdir -p "$publish_dir"
+
+          printf '### SDET Quality Gate\n' > "$body_path"
+          cat build/pr-quality/pr-comment-body.md >> "$body_path"
+
+          BODY_PATH="$body_path" REQUEST_PATH="$request_path" python - <<'PYCODE'
+          import json
+          import os
+          from pathlib import Path
+
+          body = Path(os.environ["BODY_PATH"]).read_text(encoding="utf-8")
+          Path(os.environ["REQUEST_PATH"]).write_text(
+              json.dumps({"body": body}) + "\n",
+              encoding="utf-8",
+          )
+          PYCODE
+
+          publish_rc=1
+          publish_status="failed"
+          publish_reason="failed to publish SDET Quality Gate comment"
+          existing_id=""
+
+          if existing_id="$(
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100" \
+              --jq 'first(.[] | select(.user.type == "Bot" and (.body | startswith("### SDET Quality Gate")))) | .id // ""'
+          )"; then
+            if [ -n "$existing_id" ]; then
+              if gh api \
+                --method PATCH \
+                -H "Accept: application/vnd.github+json" \
+                "repos/${REPOSITORY}/issues/comments/${existing_id}" \
+                --input "$request_path" \
+                > "$response_path"; then
+                publish_rc=0
+                publish_status="updated"
+                publish_reason="updated existing SDET Quality Gate comment"
+              else
+                publish_rc=$?
+                publish_reason="failed to update existing SDET Quality Gate comment"
+              fi
+            else
+              if gh api \
+                --method POST \
+                -H "Accept: application/vnd.github+json" \
+                "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments" \
+                --input "$request_path" \
+                > "$response_path"; then
+                publish_rc=0
+                publish_status="posted"
+                publish_reason="posted SDET Quality Gate comment"
+              else
+                publish_rc=$?
+                publish_reason="failed to post new SDET Quality Gate comment"
+              fi
+            fi
+          else
+            publish_rc=$?
+            publish_reason="failed to list existing SDET Quality Gate comments"
+          fi
+
+          COMMENT_STATUS="$publish_status" \
+          COMMENT_REASON="$publish_reason" \
+          RESPONSE_PATH="$response_path" \
+          PR_NUMBER="$PR_NUMBER" \
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const statusPath = 'build/pr-quality/comment-status.json';
+          const readCommentMetadata = () => {
+            const metadataPath = 'build/pr-quality/pr-comment-metadata.json';
+            try {
+              if (!fs.existsSync(metadataPath)) {
                 return {};
               }
-            };
-            const writeStatus = (payload) => {
-              const metadata = readCommentMetadata();
-              const enrichedPayload = {
-                ...payload,
-                action_report_status: metadata.status || 'unknown',
-                comment_result_title: metadata.result_title || 'unknown',
-                evidence_signal_kind: metadata.evidence_signal_kind || 'unknown',
-                evidence_signal_present: Boolean(metadata.evidence_signal_present),
-                evidence_review_required: Boolean(metadata.evidence_review_required),
-                trajectory_signal_present: Boolean(metadata.trajectory_signal_present),
-                trajectory_record_count: Number(metadata.trajectory_record_count || 0),
-                trajectory_review_first_count: Number(metadata.trajectory_review_first_count || 0),
-                trajectory_auto_fix_allowed_count: Number(metadata.trajectory_auto_fix_allowed_count || 0),
-                runtime_proof_artifacts_present: Boolean(metadata.runtime_proof_artifacts_present),
-                runtime_proof_collection_status: metadata.runtime_proof_collection_status || 'not_collected',
-                runtime_guard_violation_count: Number(metadata.runtime_guard_violation_count || 0),
-                live_benchmark_collection_status: metadata.live_benchmark_collection_status || 'not_collected',
-                live_benchmark_status: metadata.live_benchmark_status || 'not_collected',
-                live_benchmark_scenario_count: Number(metadata.live_benchmark_scenario_count || 0),
-                anti_cheat_rejection_count: Number(metadata.anti_cheat_rejection_count || 0),
-                repo_memory_collection_status: metadata.repo_memory_collection_status || 'not_collected',
-                repo_memory_status: metadata.repo_memory_status || 'not_collected',
-                repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven),
-                trusted_history_collection_status: metadata.trusted_history_collection_status || 'not_collected',
-                trusted_history_status: metadata.trusted_history_status || 'not_collected',
-                trusted_history_record_count: Number(metadata.trusted_history_record_count || 0),
-                trusted_history_base_ancestry_verified: Boolean(metadata.trusted_history_base_ancestry_verified),
-                trusted_history_prior_input_read_only: Boolean(metadata.trusted_history_prior_input_read_only),
-                trusted_history_automation_allowed: Boolean(metadata.trusted_history_automation_allowed),
-                trusted_history_merge_authorized: Boolean(metadata.trusted_history_merge_authorized),
-                trusted_history_semantic_equivalence_proven: Boolean(metadata.trusted_history_semantic_equivalence_proven),
-              };
-              fs.mkdirSync(path.dirname(statusPath), { recursive: true });
-              fs.writeFileSync(
-                statusPath,
-                `${JSON.stringify(enrichedPayload, null, 2)}\n`,
-                'utf8'
-              );
-            };
-
-            try {
-              const text = fs.readFileSync('build/pr-quality/pr-comment-body.md', 'utf8');
-              const body = `### SDET Quality Gate\n${text}`;
-              const marker = '### SDET Quality Gate';
-
-              const { data: comments } = await github.rest.issues.listComments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                per_page: 100,
-              });
-
-              const existing = comments.find((comment) =>
-                comment.user?.type === 'Bot' && comment.body?.startsWith(marker)
-              );
-
-              if (existing) {
-                const { data: updated } = await github.rest.issues.updateComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: existing.id,
-                  body,
-                });
-                writeStatus({
-                  status: 'updated',
-                  pr_number: context.issue.number,
-                  comment_id: updated.id,
-                  comment_url: updated.html_url,
-                  reason: 'updated existing SDET Quality Gate comment',
-                });
-                core.info(`comment_status=updated comment_url=${updated.html_url}`);
-              } else {
-                const { data: created } = await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  body,
-                });
-                writeStatus({
-                  status: 'posted',
-                  pr_number: context.issue.number,
-                  comment_id: created.id,
-                  comment_url: created.html_url,
-                  reason: 'posted SDET Quality Gate comment',
-                });
-                core.info(`comment_status=posted comment_url=${created.html_url}`);
-              }
+              return JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
             } catch (error) {
-              writeStatus({
-                status: 'failed',
-                pr_number: context.issue.number,
-                reason: String(error && error.message ? error.message : error),
-              });
-              core.setFailed(`failed to post PR Quality comment: ${error && error.message ? error.message : error}`);
+              console.warn(
+                `failed to read PR Quality comment metadata: ${
+                  error && error.message ? error.message : error
+                }`
+              );
+              return {};
             }
+          };
+
+          const writeStatus = (payload) => {
+            const metadata = readCommentMetadata();
+            const enrichedPayload = {
+              ...payload,
+              action_report_status: metadata.status || 'unknown',
+              comment_result_title: metadata.result_title || 'unknown',
+              evidence_signal_kind: metadata.evidence_signal_kind || 'unknown',
+              evidence_signal_present: Boolean(metadata.evidence_signal_present),
+              evidence_review_required: Boolean(metadata.evidence_review_required),
+              trajectory_signal_present: Boolean(metadata.trajectory_signal_present),
+              trajectory_record_count: Number(metadata.trajectory_record_count || 0),
+              trajectory_review_first_count: Number(metadata.trajectory_review_first_count || 0),
+              trajectory_auto_fix_allowed_count: Number(metadata.trajectory_auto_fix_allowed_count || 0),
+              runtime_proof_artifacts_present: Boolean(metadata.runtime_proof_artifacts_present),
+              runtime_proof_collection_status: metadata.runtime_proof_collection_status || 'not_collected',
+              runtime_guard_violation_count: Number(metadata.runtime_guard_violation_count || 0),
+              live_benchmark_collection_status: metadata.live_benchmark_collection_status || 'not_collected',
+              live_benchmark_status: metadata.live_benchmark_status || 'not_collected',
+              live_benchmark_scenario_count: Number(metadata.live_benchmark_scenario_count || 0),
+              anti_cheat_rejection_count: Number(metadata.anti_cheat_rejection_count || 0),
+              repo_memory_collection_status: metadata.repo_memory_collection_status || 'not_collected',
+              repo_memory_status: metadata.repo_memory_status || 'not_collected',
+              repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven),
+              trusted_history_collection_status: metadata.trusted_history_collection_status || 'not_collected',
+              trusted_history_status: metadata.trusted_history_status || 'not_collected',
+              trusted_history_record_count: Number(metadata.trusted_history_record_count || 0),
+              trusted_history_base_ancestry_verified: Boolean(metadata.trusted_history_base_ancestry_verified),
+              trusted_history_prior_input_read_only: Boolean(metadata.trusted_history_prior_input_read_only),
+              trusted_history_automation_allowed: Boolean(metadata.trusted_history_automation_allowed),
+              trusted_history_merge_authorized: Boolean(metadata.trusted_history_merge_authorized),
+              trusted_history_semantic_equivalence_proven: Boolean(metadata.trusted_history_semantic_equivalence_proven),
+            };
+            fs.mkdirSync(path.dirname(statusPath), { recursive: true });
+            fs.writeFileSync(
+              statusPath,
+              `${JSON.stringify(enrichedPayload, null, 2)}\n`,
+              'utf8'
+            );
+          };
+
+          const status = process.env.COMMENT_STATUS;
+          const payload = {
+            status,
+            pr_number: Number(process.env.PR_NUMBER),
+            reason: process.env.COMMENT_REASON,
+          };
+
+          const responsePath = process.env.RESPONSE_PATH;
+          if ((status === 'posted' || status === 'updated') && fs.existsSync(responsePath)) {
+            const response = JSON.parse(fs.readFileSync(responsePath, 'utf8'));
+            payload.comment_id = response.id;
+            payload.comment_url = response.html_url;
+          }
+
+          writeStatus(payload);
+
+          if (status === 'posted') {
+            console.log('comment_status=posted');
+          } else if (status === 'updated') {
+            console.log('comment_status=updated');
+          } else {
+            console.error(`comment_status=failed reason=${process.env.COMMENT_REASON}`);
+          }
+          NODE
+
+          if [ "$publish_rc" -ne 0 ]; then
+            exit "$publish_rc"
+          fi
 
       - name: Verify PR Quality comment visibility
         if: always()
