@@ -283,28 +283,10 @@ def main(argv: list[str] | None = None) -> int:
             base_ancestry_verified=True,
         )
         write_evidence(evidence, out_dir=args.out_dir)
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
-        print(f"error={exc}")
+    except (OSError, ValueError, json.JSONDecodeError):
+        print("error=trusted_history_validation_failed")
         return 2
 
-    if args.format == "json":
-        print(
-            json.dumps(
-                {
-                    "status": evidence["status"],
-                    "collection_status": evidence["collection_status"],
-                    "record_count": evidence["history"]["record_count"],
-                    "evidence_written": True,
-                },
-                indent=2,
-                sort_keys=True,
-            )
-        )
-    else:
-        print(f"status: {evidence['status']}")
-        print(f"collection_status: {evidence['collection_status']}")
-        print(f"record_count: {evidence['history']['record_count']}")
-        print("evidence_written: true")
     return 0
 
 

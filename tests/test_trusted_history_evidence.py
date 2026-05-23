@@ -218,14 +218,12 @@ def test_trusted_history_cli_writes_advisory_evidence(tmp_path: Path, capsys) ->
     )
 
     assert rc == 0
-    printed = json.loads(capsys.readouterr().out)
+    captured = capsys.readouterr()
     saved = json.loads((out_dir / "trusted-history-evidence.json").read_text(encoding="utf-8"))
     markdown = (out_dir / "trusted-history-evidence.md").read_text(encoding="utf-8")
 
-    assert printed["collection_status"] == COLLECTED
-    assert printed["record_count"] == 1
-    assert printed["evidence_written"] is True
-    assert "artifacts" not in printed
+    assert captured.out == ""
+    assert captured.err == ""
     assert saved["source"]["base_ancestry_verified"] is True
     assert "Trusted RepoMemory history evidence" in markdown
     assert "Records: `1`" in markdown
