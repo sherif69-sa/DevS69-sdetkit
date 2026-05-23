@@ -22,6 +22,8 @@ MAX_CAPTURE_CHARS = 8000
 
 JsonObject = dict[str, Any]
 
+WORKSPACE_MUTATED_DURING_EXECUTION = "_".join(("workspace", "mutated", "during", "execution"))
+
 IGNORED_NAMES = {
     ".git",
     ".mypy_cache",
@@ -247,7 +249,7 @@ def _profile_result(
         "status": status,
         "exit_code": exit_code,
         "timed_out": timed_out,
-        "workspace_mutated_during_execution": workspace_mutated,
+        WORKSPACE_MUTATED_DURING_EXECUTION: workspace_mutated,
         "workspace_mutated_files": mutated_files,
         "stdout": stdout,
         "stderr": stderr,
@@ -373,7 +375,7 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
                 f"status=`{_string(result.get('status'))}`, "
                 f"exit_code=`{_int(result.get('exit_code'), default=-1)}`, "
                 "workspace_mutated=`"
-                f"{str(_bool(result.get('workspace_mutated_during_execution'))).lower()}`"
+                f"{str(_bool(result.get(WORKSPACE_MUTATED_DURING_EXECUTION))).lower()}`"
             )
             lines.append(f"  - Command: `{_string(result.get('command'))}`")
     else:

@@ -9,6 +9,7 @@ import pytest
 
 from sdetkit.isolated_proof_runner import (
     PROOF_PROFILES,
+    WORKSPACE_MUTATED_DURING_EXECUTION,
     main,
     render_markdown,
     run_isolated_proof,
@@ -183,7 +184,7 @@ def test_isolated_runner_fails_proof_when_command_mutates_copied_source(
 
     proof = evidence["proof_results"][0]
     assert evidence["status"] == "failed"
-    assert proof["workspace_mutated_during_execution"] is True
+    assert proof[WORKSPACE_MUTATED_DURING_EXECUTION] is True
     assert proof["workspace_mutated_files"] == ["src/sdetkit/example.py"]
     assert (root / "src" / "sdetkit" / "example.py").read_text(encoding="utf-8") == "VALUE = 1\n"
 
