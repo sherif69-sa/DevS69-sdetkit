@@ -10,17 +10,24 @@ from sdetkit.replayable_benchmark_harness import (
     LIVE_EVIDENCE_SOURCE,
     LIVE_EXECUTION_MODEL,
     PROOF_MUTATION_FAIL,
+    build_benchmark_report,
     build_isolated_evidence_report,
     load_scenarios,
     main,
     render_markdown,
 )
+from sdetkit.repo_memory import LIVE_PROFILE_STATUS, LIVE_PROOF_STATE, build_repo_memory_profile
 
 FIXTURES = Path("tests/fixtures/remediation_benchmark")
 LIVE_PATHS = [
     FIXTURES / "live_oracle_git_grounded.json",
     FIXTURES / "live_inventory_claim_mismatch.json",
     FIXTURES / "live_proof_mutation.json",
+]
+FIXTURE_PATHS = [
+    FIXTURES / "nop_formatting_patch.json",
+    FIXTURES / "oracle_formatting_patch.json",
+    FIXTURES / "unsafe_protected_path_patch.json",
 ]
 
 
@@ -221,3 +228,35 @@ def test_live_benchmark_cli_writes_runtime_report_artifacts(
     assert saved["report_mode"] == LIVE_EVIDENCE_SOURCE
     assert saved["live_evidence"]["git_inventory_verified_count"] == 2
     assert "Git-grounded live-evidence contract" in markdown
+
+
+def test_live_benchmark_outcomes_feed_read_only_repo_memory(tmp_path: Path) -> None:
+    live_report = build_isolated_evidence_report(_scenario_runs(tmp_path))
+    fixture_report = build_benchmark_report(load_scenarios(FIXTURE_PATHS))
+    pattern_insights = {
+        "schema_version": "sdetkit.trajectory_pattern_insights.v1",
+        "record_count": 3,
+        "recurring_safe_fix_patterns": [
+            {
+                "failure_class": "formatting_only",
+                "action": "run_pre_commit",
+                "count": 1,
+            }
+        ],
+        "recurring_review_first_surfaces": [],
+    }
+
+    profile = build_repo_memory_profile(
+        pattern_insights=pattern_insights,
+        benchmark_report=fixture_report,
+        live_benchmark_report=live_report,
+    )
+
+    assert profile["profile_status"] == LIVE_PROFILE_STATUS
+    assert profile["live_safe_candidate_count"] == 1
+    assert profile["safe_fix_history"][0]["proof_state"] == LIVE_PROOF_STATE
+    assert profile["proof_provenance"]["git_verified_scenario_count"] == 2
+    assert len(profile["failure_patterns"]["live_rejections"]) == 2
+    assert profile["decision_boundary"]["automation_allowed"] is False
+    assert profile["decision_boundary"]["merge_authorized"] is False
+    assert profile["decision_boundary"]["semantic_equivalence_proven"] is False

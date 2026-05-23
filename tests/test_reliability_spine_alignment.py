@@ -39,7 +39,7 @@ def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
     assert status_counts["aligned"] >= 8
     assert status_counts["partially_aligned"] >= 10
     assert status_counts.get("planned", 0) == 0
-    assert report["next_recommended_pr"] == "feature/repo-memory-live-proof-outcomes"
+    assert report["next_recommended_pr"] == "feature/isolated-proof-network-boundary"
 
 
 def test_alignment_stage_counts_cover_every_spine_stage() -> None:
@@ -68,7 +68,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert any("network isolation" in gap for gap in gaps_by_module["isolated_proof_runner"])
     assert any("workflow evidence" in gap for gap in gaps_by_module["git_inventory_collector"])
     assert any("anti-cheat" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
-    assert any("live Git-grounded" in gap for gap in gaps_by_module["repo_memory"])
+    assert any("network-isolation" in gap for gap in gaps_by_module["repo_memory"])
 
 
 def test_alignment_markdown_renders_operator_audit() -> None:
@@ -110,7 +110,7 @@ def test_alignment_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     markdown = markdown_out.read_text(encoding="utf-8")
 
     assert printed["report"]["component_count"] == saved["component_count"]
-    assert saved["next_recommended_pr"] == "feature/repo-memory-live-proof-outcomes"
+    assert saved["next_recommended_pr"] == "feature/isolated-proof-network-boundary"
     assert "Reliability spine alignment audit" in markdown
 
 

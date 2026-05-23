@@ -5,10 +5,16 @@ import json
 from pathlib import Path
 
 from sdetkit.replayable_benchmark_harness import (
+    INVENTORY_CLAIM_MISMATCH_FAIL,
+    LIVE_EVIDENCE_SOURCE,
+    PROOF_MUTATION_FAIL,
+    VERIFICATION_EVIDENCE_SOURCE,
     build_benchmark_report,
     load_scenarios,
 )
 from sdetkit.repo_memory import (
+    LIVE_PROFILE_STATUS,
+    LIVE_PROOF_STATE,
     build_repo_memory_profile,
     main,
     render_markdown,
@@ -24,6 +30,76 @@ SCENARIOS = [
 
 def _benchmark_report() -> dict:
     return build_benchmark_report(load_scenarios(SCENARIOS))
+
+
+def _live_benchmark_report() -> dict:
+    git_verified_key = "_".join(("git", "inventory", "verified"))
+    oracle = copy.deepcopy(
+        next(
+            item
+            for item in _benchmark_report()["scenarios"]
+            if item["scenario_type"] == "oracle_pass"
+        )
+    )
+    oracle[VERIFICATION_EVIDENCE_SOURCE] = LIVE_EVIDENCE_SOURCE
+    oracle["isolated_proof_evidence"] = {
+        "status": "passed",
+        "decision_boundary": {
+            git_verified_key: True,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    mismatch = copy.deepcopy(oracle)
+    mismatch["scenario_id"] = "live-inventory-mismatch"
+    mismatch["scenario_type"] = INVENTORY_CLAIM_MISMATCH_FAIL
+    mismatch["protected_verifier_result"]["decision"]["status"] = "blocked_review_first"
+    mismatch["isolated_proof_evidence"] = {
+        "status": "failed",
+        "decision_boundary": {
+            git_verified_key: False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    mutation = copy.deepcopy(oracle)
+    mutation["scenario_id"] = "live-proof-mutation"
+    mutation["scenario_type"] = PROOF_MUTATION_FAIL
+    mutation["protected_verifier_result"]["decision"]["status"] = "blocked_review_first"
+    mutation["isolated_proof_evidence"] = {
+        "status": "failed",
+        "decision_boundary": {
+            git_verified_key: True,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    return {
+        "schema_version": "sdetkit.replayable_benchmark_harness.isolated_evidence.v1",
+        "report_mode": LIVE_EVIDENCE_SOURCE,
+        "status": "passed",
+        "required_contract": {
+            "all_required_present": True,
+            "all_required_passed": True,
+        },
+        "live_evidence": {
+            "git_inventory_verified_count": 2,
+            "expected_failed_evidence_count": 2,
+        },
+        "safety_boundary": {
+            "automation_allowed_count": 0,
+            "merge_authorized_count": 0,
+            "semantic_equivalence_claimed_count": 0,
+            "preserved": True,
+        },
+        "scenarios": [oracle, mismatch, mutation],
+    }
 
 
 def _pattern_insights() -> dict:
@@ -52,7 +128,7 @@ def test_repo_memory_records_benchmark_supported_candidate_without_automation() 
         benchmark_report=_benchmark_report(),
     )
 
-    assert profile["schema_version"] == "sdetkit.repo_memory.v1"
+    assert profile["schema_version"] == "sdetkit.repo_memory.v2"
     assert profile["profile_status"] == "benchmark_supported_memory"
     assert profile["memory_mode"] == "read_only_profile"
     assert profile["inputs"]["benchmark_contract_proven"] is True
@@ -176,3 +252,98 @@ def test_repo_memory_cli_writes_profile_artifacts(tmp_path: Path, capsys) -> Non
     assert printed["known_safe_candidate_count"] == 1
     assert saved["decision_boundary"]["automation_allowed"] is False
     assert "# RepoMemory profile" in markdown
+
+
+def test_repo_memory_records_live_git_grounded_proof_outcomes_without_authority() -> None:
+    profile = build_repo_memory_profile(
+        pattern_insights=_pattern_insights(),
+        benchmark_report=_benchmark_report(),
+        live_benchmark_report=_live_benchmark_report(),
+    )
+
+    assert profile["profile_status"] == LIVE_PROFILE_STATUS
+    assert profile["inputs"]["live_contract_proven"] is True
+    assert profile["live_safe_candidate_count"] == 1
+
+    history = profile["safe_fix_history"][0]
+    assert history["proof_state"] == LIVE_PROOF_STATE
+    assert history["live_proof_supported"] is True
+    assert history["evidence_source"] == LIVE_EVIDENCE_SOURCE
+    assert history["automation_allowed"] is False
+
+    provenance = profile["proof_provenance"]
+    assert provenance["fixture_contract_proven"] is True
+    assert provenance["live_contract_proven"] is True
+    assert provenance["git_verified_scenario_count"] == 2
+    assert provenance["expected_failed_scenario_count"] == 2
+
+    live_rejections = profile["failure_patterns"]["live_rejections"]
+    assert {item["scenario_type"] for item in live_rejections} == {
+        INVENTORY_CLAIM_MISMATCH_FAIL,
+        PROOF_MUTATION_FAIL,
+    }
+    assert all(item["decision"] == "blocked_review_first" for item in live_rejections)
+    assert all(item["automation_allowed"] is False for item in live_rejections)
+
+    boundary = profile["decision_boundary"]
+    assert boundary["automation_allowed"] is False
+    assert boundary["merge_authorized"] is False
+    assert boundary["semantic_equivalence_proven"] is False
+
+
+def test_repo_memory_keeps_fixture_support_when_live_contract_is_invalid() -> None:
+    live_report = copy.deepcopy(_live_benchmark_report())
+    live_report["status"] = "failed"
+    live_report["required_contract"]["all_required_passed"] = False
+
+    profile = build_repo_memory_profile(
+        pattern_insights=_pattern_insights(),
+        benchmark_report=_benchmark_report(),
+        live_benchmark_report=live_report,
+    )
+
+    assert profile["profile_status"] == "benchmark_supported_memory"
+    assert profile["live_safe_candidate_count"] == 0
+    assert profile["failure_patterns"]["live_rejections"] == []
+
+    history = profile["safe_fix_history"][0]
+    assert history["proof_state"] == "benchmark_supported_candidate"
+    assert history["fixture_supported"] is True
+    assert history["live_proof_supported"] is False
+
+
+def test_repo_memory_cli_accepts_live_benchmark_report(tmp_path: Path, capsys) -> None:
+    insights_path = tmp_path / "pattern-insights.json"
+    benchmark_path = tmp_path / "benchmark-report.json"
+    live_path = tmp_path / "live-benchmark-report.json"
+    out_dir = tmp_path / "repo-memory-live"
+
+    insights_path.write_text(json.dumps(_pattern_insights()), encoding="utf-8")
+    benchmark_path.write_text(json.dumps(_benchmark_report()), encoding="utf-8")
+    live_path.write_text(json.dumps(_live_benchmark_report()), encoding="utf-8")
+
+    rc = main(
+        [
+            "--pattern-insights",
+            str(insights_path),
+            "--benchmark-report",
+            str(benchmark_path),
+            "--live-benchmark-report",
+            str(live_path),
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    printed = json.loads(capsys.readouterr().out)
+    saved = json.loads((out_dir / "repo-memory-profile.json").read_text(encoding="utf-8"))
+    markdown = (out_dir / "repo-memory-profile.md").read_text(encoding="utf-8")
+
+    assert printed["profile_status"] == LIVE_PROFILE_STATUS
+    assert printed["live_safe_candidate_count"] == 1
+    assert saved["proof_provenance"]["live_contract_proven"] is True
+    assert "Live Git-grounded contract proven: `true`" in markdown
+    assert "Live safe candidates: `1`" in markdown

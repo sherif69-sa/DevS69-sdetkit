@@ -349,11 +349,8 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "protected_verifier",
                 "repo_memory",
             ),
-            gaps=(
-                "anti-cheat runtime checks and network isolation remain future work",
-                "RepoMemory does not yet ingest live Git-grounded benchmark outcomes",
-            ),
-            recommended_next_action="feed live benchmark outcomes into RepoMemory without automation wiring",
+            gaps=("anti-cheat runtime checks and network isolation remain future work",),
+            recommended_next_action="add network-isolation and anti-cheat proof before automation wiring",
         ),
         _component(
             module="repo_memory",
@@ -370,10 +367,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "protected_verifier",
             ),
             gaps=(
-                "profiles do not yet ingest live Git-grounded benchmark outcomes",
+                "network-isolation and anti-cheat proof outcomes are not yet available for memory",
                 "flaky-test registry ingestion and persistent profile updates are not implemented",
             ),
-            recommended_next_action="ingest live benchmark outcomes before automation wiring",
+            recommended_next_action="ingest anti-cheat and isolation proof only after those boundaries exist",
         ),
     ]
 
@@ -411,7 +408,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/repo-memory-live-proof-outcomes",
+        "next_recommended_pr": "feature/isolated-proof-network-boundary",
     }
 
 
