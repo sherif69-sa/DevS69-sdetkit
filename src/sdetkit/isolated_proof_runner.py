@@ -18,8 +18,14 @@ from sdetkit.git_inventory_collector import (
     STAGED_WORKTREE,
     collect_git_inventory,
 )
+from sdetkit.network_boundary import (
+    NETWORK_ISOLATION_ENFORCED,
+    NETWORK_ISOLATION_REQUIRED,
+    PROOF_EXECUTION_ALLOWED,
+    assess_network_boundary,
+)
 
-SCHEMA_VERSION = "sdetkit.isolated_proof_runner.v2"
+SCHEMA_VERSION = "sdetkit.isolated_proof_runner.v3"
 DEFAULT_OUT_DIR = Path("build") / "isolated-proof-runner"
 EVIDENCE_JSON = "verification-evidence.json"
 EVIDENCE_MD = "verification-evidence.md"
@@ -273,6 +279,7 @@ def run_isolated_proof(
     inventory_mode: str | None = None,
     base_ref: str = "",
     head_ref: str = "HEAD",
+    require_network_isolation: bool = False,
 ) -> JsonObject:
     if timeout_seconds < 1:
         raise ValueError("timeout_seconds must be at least 1")
@@ -296,6 +303,10 @@ def run_isolated_proof(
     changed_files_source = "caller_supplied_inventory_unverified"
     inventory_claim_match: bool | None = None
     git_inventory_verified = False
+    network_boundary = assess_network_boundary(
+        require_network_isolation=require_network_isolation,
+    )
+    proof_execution_allowed = _bool(network_boundary.get(PROOF_EXECUTION_ALLOWED))
 
     if inventory_mode:
         inventory = collect_git_inventory(
@@ -316,25 +327,36 @@ def run_isolated_proof(
     requested_profiles = list(dict.fromkeys(profile_ids))
     results: list[JsonObject] = []
 
-    with tempfile.TemporaryDirectory(prefix="sdetkit-proof-") as temp_dir:
-        workspace = Path(temp_dir) / "workspace"
-        _prepare_isolated_workspace(source_root, workspace)
+    if proof_execution_allowed:
+        with tempfile.TemporaryDirectory(prefix="sdetkit-proof-") as temp_dir:
+            workspace = Path(temp_dir) / "workspace"
+            _prepare_isolated_workspace(source_root, workspace)
 
-        for profile_id in requested_profiles:
-            results.append(
-                _profile_result(
-                    profile=PROOF_PROFILES[profile_id],
-                    workspace=workspace,
-                    timeout_seconds=timeout_seconds,
+            for profile_id in requested_profiles:
+                results.append(
+                    _profile_result(
+                        profile=PROOF_PROFILES[profile_id],
+                        workspace=workspace,
+                        timeout_seconds=timeout_seconds,
+                    )
                 )
-            )
 
     passed_count = sum(1 for result in results if result["status"] == "passed")
     failed_count = len(results) - passed_count
+    blocked_count = 0 if proof_execution_allowed else len(requested_profiles)
     inventory_failed = inventory_claim_match is False
-    status = "passed" if failed_count == 0 and not inventory_failed else "failed"
+    status = (
+        "passed"
+        if proof_execution_allowed and failed_count == 0 and not inventory_failed
+        else "failed"
+    )
 
-    if not inventory_mode:
+    if not proof_execution_allowed:
+        boundary_reason = (
+            "Network-isolated proof was required, but no verified runtime "
+            "containment backend is available; proof execution was blocked."
+        )
+    elif not inventory_mode:
         boundary_reason = (
             "The runner executes allowlisted proof profiles in an isolated copy, "
             "but changed-file inventory is not yet git-derived."
@@ -358,10 +380,13 @@ def run_isolated_proof(
         "changed_files_source": changed_files_source,
         INVENTORY_CLAIM_MATCH: inventory_claim_match,
         "git_inventory": inventory,
+        "network_boundary": network_boundary,
         "requested_profiles": requested_profiles,
         "proof_results": results,
         "proof_summary": {
-            "requested_count": len(results),
+            "requested_count": len(requested_profiles),
+            "executed_count": len(results),
+            "blocked_count": blocked_count,
             "passed_count": passed_count,
             "failed_count": failed_count,
         },
@@ -371,10 +396,15 @@ def run_isolated_proof(
             "allowlisted_profiles_only": True,
             "timeout_seconds": timeout_seconds,
             "source_workspace_used_as_command_cwd": False,
-            "network_isolation_enforced": False,
+            NETWORK_ISOLATION_REQUIRED: _bool(network_boundary.get(NETWORK_ISOLATION_REQUIRED)),
+            NETWORK_ISOLATION_ENFORCED: _bool(network_boundary.get(NETWORK_ISOLATION_ENFORCED)),
+            "network_boundary_status": _string(network_boundary.get("status")),
+            "network_boundary_backend": _string(network_boundary.get("backend")),
+            "proof_execution_blocked": not proof_execution_allowed,
         },
         "decision_boundary": {
             "git_inventory_verified": git_inventory_verified,
+            "network_isolation_verified": _bool(network_boundary.get(NETWORK_ISOLATION_ENFORCED)),
             "automation_allowed": False,
             "merge_authorized": False,
             "semantic_equivalence_proven": False,
@@ -388,6 +418,7 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
     isolation = _as_dict(evidence.get("isolation"))
     boundary = _as_dict(evidence.get("decision_boundary"))
     inventory = _as_dict(evidence.get("git_inventory"))
+    network_boundary = _as_dict(evidence.get("network_boundary"))
     results = [_as_dict(item) for item in _as_list(evidence.get("proof_results"))]
     claim_value = evidence.get(INVENTORY_CLAIM_MATCH)
     claim_status = "not_checked" if claim_value is None else str(_bool(claim_value)).lower()
@@ -398,6 +429,8 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
         f"- Schema: `{_string(evidence.get('schema_version'))}`",
         f"- Status: `{_string(evidence.get('status'))}`",
         f"- Profiles requested: `{_int(summary.get('requested_count'))}`",
+        f"- Profiles executed: `{_int(summary.get('executed_count'))}`",
+        f"- Profiles blocked: `{_int(summary.get('blocked_count'))}`",
         f"- Profiles passed: `{_int(summary.get('passed_count'))}`",
         f"- Profiles failed: `{_int(summary.get('failed_count'))}`",
         f"- Changed-files source: `{_string(evidence.get('changed_files_source'))}`",
@@ -417,8 +450,17 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
             f"`{str(_bool(isolation.get('source_workspace_used_as_command_cwd'))).lower()}`"
         ),
         (
+            "- Network isolation required: "
+            f"`{str(_bool(isolation.get(NETWORK_ISOLATION_REQUIRED))).lower()}`"
+        ),
+        (
             "- Network isolation enforced: "
-            f"`{str(_bool(isolation.get('network_isolation_enforced'))).lower()}`"
+            f"`{str(_bool(isolation.get(NETWORK_ISOLATION_ENFORCED))).lower()}`"
+        ),
+        f"- Network boundary status: `{_string(network_boundary.get('status'))}`",
+        (
+            "- Proof execution blocked: "
+            f"`{str(_bool(isolation.get('proof_execution_blocked'))).lower()}`"
         ),
         "",
         "## Proof results",
@@ -483,6 +525,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--inventory-mode", choices=[BASE_HEAD, STAGED_WORKTREE])
     parser.add_argument("--base-ref", default="")
     parser.add_argument("--head-ref", default="HEAD")
+    parser.add_argument("--require-network-isolation", action="store_true")
     parser.add_argument(
         "--profile",
         action="append",
@@ -507,6 +550,7 @@ def main(argv: list[str] | None = None) -> int:
             inventory_mode=args.inventory_mode,
             base_ref=args.base_ref,
             head_ref=args.head_ref,
+            require_network_isolation=args.require_network_isolation,
         )
         artifacts = write_evidence(evidence, out_dir=args.out_dir)
     except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as exc:

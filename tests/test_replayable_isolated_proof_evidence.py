@@ -9,6 +9,7 @@ from sdetkit.replayable_benchmark_harness import (
     INVENTORY_CLAIM_MISMATCH_FAIL,
     LIVE_EVIDENCE_SOURCE,
     LIVE_EXECUTION_MODEL,
+    NETWORK_BOUNDARY_REQUIRED_FAIL,
     PROOF_MUTATION_FAIL,
     build_benchmark_report,
     build_isolated_evidence_report,
@@ -23,6 +24,7 @@ LIVE_PATHS = [
     FIXTURES / "live_oracle_git_grounded.json",
     FIXTURES / "live_inventory_claim_mismatch.json",
     FIXTURES / "live_proof_mutation.json",
+    FIXTURES / "live_network_boundary_required.json",
 ]
 FIXTURE_PATHS = [
     FIXTURES / "nop_formatting_patch.json",
@@ -105,11 +107,17 @@ def _scenario_runs(tmp_path: Path) -> list[tuple[dict, Path]]:
         encoding="utf-8",
     )
 
+    network_root = _base_repo(tmp_path, "network")
+    (network_root / "src" / "sdetkit" / "example.py").write_text(
+        "VALUE = 2\n",
+        encoding="utf-8",
+    )
+
     scenarios = load_scenarios(LIVE_PATHS)
     return list(
         zip(
             scenarios,
-            [oracle_root, mismatch_root, mutation_root],
+            [oracle_root, mismatch_root, mutation_root, network_root],
             strict=True,
         )
     )
@@ -120,11 +128,11 @@ def test_live_benchmark_proves_git_grounded_isolated_evidence_contract(
 ) -> None:
     report = build_isolated_evidence_report(_scenario_runs(tmp_path))
 
-    assert report["schema_version"] == "sdetkit.replayable_benchmark_harness.isolated_evidence.v1"
+    assert report["schema_version"] == "sdetkit.replayable_benchmark_harness.isolated_evidence.v2"
     assert report["report_mode"] == LIVE_EVIDENCE_SOURCE
     assert report["status"] == "passed"
-    assert report["scenario_count"] == 3
-    assert report["passed_count"] == 3
+    assert report["scenario_count"] == 4
+    assert report["passed_count"] == 4
 
     required = report["required_contract"]
     assert required["all_required_present"] is True
@@ -134,9 +142,11 @@ def test_live_benchmark_proves_git_grounded_isolated_evidence_contract(
     assert required["proof_mutation_rejection_rate"] == 1.0
 
     live = report["live_evidence"]
-    assert live["scenario_count"] == 3
-    assert live["git_inventory_verified_count"] == 2
-    assert live["expected_failed_evidence_count"] == 2
+    assert live["scenario_count"] == 4
+    assert live["git_inventory_verified_count"] == 3
+    assert live["expected_failed_evidence_count"] == 3
+    assert live["network_boundary_blocked_count"] == 1
+    assert live["network_isolation_enforced_count"] == 0
 
     boundary = report["safety_boundary"]
     assert boundary["execution_model"] == LIVE_EXECUTION_MODEL
@@ -192,6 +202,27 @@ def test_live_benchmark_rejects_mutating_allowlisted_proof(tmp_path: Path) -> No
     assert result["protected_verifier_result"]["decision"]["status"] == "blocked_review_first"
 
 
+def test_live_benchmark_rejects_required_unverified_network_boundary(
+    tmp_path: Path,
+) -> None:
+    report = build_isolated_evidence_report(_scenario_runs(tmp_path))
+    result = next(
+        item
+        for item in report["scenarios"]
+        if item["scenario_type"] == NETWORK_BOUNDARY_REQUIRED_FAIL
+    )
+    evidence = result["isolated_proof_evidence"]
+    isolation = evidence["isolation"]
+
+    assert result["passed"] is True
+    assert evidence["status"] == "failed"
+    assert evidence["proof_results"] == []
+    assert isolation["network_isolation_required"] is True
+    assert isolation["network_isolation_enforced"] is False
+    assert isolation["proof_execution_blocked"] is True
+    assert result["protected_verifier_result"]["decision"]["status"] == "blocked_review_first"
+
+
 def test_live_benchmark_markdown_renders_runtime_boundaries(tmp_path: Path) -> None:
     markdown = render_markdown(build_isolated_evidence_report(_scenario_runs(tmp_path)))
 
@@ -199,9 +230,12 @@ def test_live_benchmark_markdown_renders_runtime_boundaries(tmp_path: Path) -> N
     assert "Required Git-grounded live-evidence contract" in markdown
     assert "Inventory claim mismatch rejection rate: `1.0000`" in markdown
     assert "Proof mutation rejection rate: `1.0000`" in markdown
-    assert "Git inventory verified scenarios: `2`" in markdown
+    assert "Network boundary rejection rate: `1.0000`" in markdown
+    assert "Git inventory verified scenarios: `3`" in markdown
+    assert "Network boundary blocked scenarios: `1`" in markdown
+    assert "Network isolation enforced scenarios: `0`" in markdown
     assert "executes allowlisted proof profiles in disposable workspace copies" in markdown
-    assert "Network isolation and semantic equivalence remain unproven." in markdown
+    assert "Required network isolation fails closed without a verified backend." in markdown
 
 
 def test_live_benchmark_cli_writes_runtime_report_artifacts(
@@ -226,7 +260,7 @@ def test_live_benchmark_cli_writes_runtime_report_artifacts(
 
     assert printed["status"] == "passed"
     assert saved["report_mode"] == LIVE_EVIDENCE_SOURCE
-    assert saved["live_evidence"]["git_inventory_verified_count"] == 2
+    assert saved["live_evidence"]["git_inventory_verified_count"] == 3
     assert "Git-grounded live-evidence contract" in markdown
 
 
@@ -255,8 +289,8 @@ def test_live_benchmark_outcomes_feed_read_only_repo_memory(tmp_path: Path) -> N
     assert profile["profile_status"] == LIVE_PROFILE_STATUS
     assert profile["live_safe_candidate_count"] == 1
     assert profile["safe_fix_history"][0]["proof_state"] == LIVE_PROOF_STATE
-    assert profile["proof_provenance"]["git_verified_scenario_count"] == 2
-    assert len(profile["failure_patterns"]["live_rejections"]) == 2
+    assert profile["proof_provenance"]["git_verified_scenario_count"] == 3
+    assert len(profile["failure_patterns"]["live_rejections"]) == 3
     assert profile["decision_boundary"]["automation_allowed"] is False
     assert profile["decision_boundary"]["merge_authorized"] is False
     assert profile["decision_boundary"]["semantic_equivalence_proven"] is False

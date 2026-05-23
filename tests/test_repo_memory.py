@@ -7,6 +7,7 @@ from pathlib import Path
 from sdetkit.replayable_benchmark_harness import (
     INVENTORY_CLAIM_MISMATCH_FAIL,
     LIVE_EVIDENCE_SOURCE,
+    NETWORK_BOUNDARY_REQUIRED_FAIL,
     PROOF_MUTATION_FAIL,
     VERIFICATION_EVIDENCE_SOURCE,
     build_benchmark_report,
@@ -80,8 +81,22 @@ def _live_benchmark_report() -> dict:
         },
     }
 
+    network = copy.deepcopy(oracle)
+    network["scenario_id"] = "live-network-boundary-required"
+    network["scenario_type"] = NETWORK_BOUNDARY_REQUIRED_FAIL
+    network["protected_verifier_result"]["decision"]["status"] = "blocked_review_first"
+    network["isolated_proof_evidence"] = {
+        "status": "failed",
+        "decision_boundary": {
+            git_verified_key: True,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
     return {
-        "schema_version": "sdetkit.replayable_benchmark_harness.isolated_evidence.v1",
+        "schema_version": "sdetkit.replayable_benchmark_harness.isolated_evidence.v2",
         "report_mode": LIVE_EVIDENCE_SOURCE,
         "status": "passed",
         "required_contract": {
@@ -89,8 +104,9 @@ def _live_benchmark_report() -> dict:
             "all_required_passed": True,
         },
         "live_evidence": {
-            "git_inventory_verified_count": 2,
-            "expected_failed_evidence_count": 2,
+            "git_inventory_verified_count": 3,
+            "expected_failed_evidence_count": 3,
+            "network_boundary_blocked_count": 1,
         },
         "safety_boundary": {
             "automation_allowed_count": 0,
@@ -98,7 +114,7 @@ def _live_benchmark_report() -> dict:
             "semantic_equivalence_claimed_count": 0,
             "preserved": True,
         },
-        "scenarios": [oracle, mismatch, mutation],
+        "scenarios": [oracle, mismatch, mutation, network],
     }
 
 
@@ -128,7 +144,7 @@ def test_repo_memory_records_benchmark_supported_candidate_without_automation() 
         benchmark_report=_benchmark_report(),
     )
 
-    assert profile["schema_version"] == "sdetkit.repo_memory.v2"
+    assert profile["schema_version"] == "sdetkit.repo_memory.v3"
     assert profile["profile_status"] == "benchmark_supported_memory"
     assert profile["memory_mode"] == "read_only_profile"
     assert profile["inputs"]["benchmark_contract_proven"] is True
@@ -274,13 +290,15 @@ def test_repo_memory_records_live_git_grounded_proof_outcomes_without_authority(
     provenance = profile["proof_provenance"]
     assert provenance["fixture_contract_proven"] is True
     assert provenance["live_contract_proven"] is True
-    assert provenance["git_verified_scenario_count"] == 2
-    assert provenance["expected_failed_scenario_count"] == 2
+    assert provenance["git_verified_scenario_count"] == 3
+    assert provenance["expected_failed_scenario_count"] == 3
+    assert provenance["network_boundary_blocked_scenario_count"] == 1
 
     live_rejections = profile["failure_patterns"]["live_rejections"]
     assert {item["scenario_type"] for item in live_rejections} == {
         INVENTORY_CLAIM_MISMATCH_FAIL,
         PROOF_MUTATION_FAIL,
+        NETWORK_BOUNDARY_REQUIRED_FAIL,
     }
     assert all(item["decision"] == "blocked_review_first" for item in live_rejections)
     assert all(item["automation_allowed"] is False for item in live_rejections)
@@ -347,3 +365,4 @@ def test_repo_memory_cli_accepts_live_benchmark_report(tmp_path: Path, capsys) -
     assert saved["proof_provenance"]["live_contract_proven"] is True
     assert "Live Git-grounded contract proven: `true`" in markdown
     assert "Live safe candidates: `1`" in markdown
+    assert "Network boundary blocked scenarios: `1`" in markdown

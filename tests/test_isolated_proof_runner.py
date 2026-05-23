@@ -14,6 +14,11 @@ from sdetkit.isolated_proof_runner import (
     render_markdown,
     run_isolated_proof,
 )
+from sdetkit.network_boundary import (
+    NETWORK_ISOLATION_ENFORCED,
+    NETWORK_ISOLATION_REQUIRED,
+    REQUIRED_UNAVAILABLE,
+)
 from sdetkit.protected_verifier import verify_candidate
 
 
@@ -324,3 +329,67 @@ def test_isolated_runner_blocks_caller_claim_mismatch_against_git_inventory(
     assert evidence["decision_boundary"]["git_inventory_verified"] is False
     assert "disagrees" in evidence["decision_boundary"]["reason"]
     assert evidence["decision_boundary"]["automation_allowed"] is False
+
+
+def test_isolated_runner_blocks_required_network_isolation_before_execution(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _repo(tmp_path)
+
+    def unexpected_run(*_args: Any, **_kwargs: Any) -> None:
+        raise AssertionError("proof subprocess must not run without verified containment")
+
+    monkeypatch.setattr(subprocess, "run", unexpected_run)
+
+    evidence = run_isolated_proof(
+        repo_root=root,
+        changed_files=["src/sdetkit/example.py"],
+        profile_ids=["ruff_src_tests"],
+        require_network_isolation=True,
+    )
+
+    assert evidence["status"] == "failed"
+    assert evidence["proof_results"] == []
+    assert evidence["proof_summary"]["requested_count"] == 1
+    assert evidence["proof_summary"]["executed_count"] == 0
+    assert evidence["proof_summary"]["blocked_count"] == 1
+
+    isolation = evidence["isolation"]
+    assert isolation[NETWORK_ISOLATION_REQUIRED] is True
+    assert isolation[NETWORK_ISOLATION_ENFORCED] is False
+    assert isolation["network_boundary_status"] == REQUIRED_UNAVAILABLE
+    assert isolation["proof_execution_blocked"] is True
+
+    boundary = evidence["decision_boundary"]
+    assert boundary["network_isolation_verified"] is False
+    assert boundary["automation_allowed"] is False
+    assert boundary["merge_authorized"] is False
+
+
+def test_isolated_runner_required_network_rejection_blocks_protected_verifier(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _repo(tmp_path)
+
+    def unexpected_run(*_args: Any, **_kwargs: Any) -> None:
+        raise AssertionError("proof subprocess must not run without verified containment")
+
+    monkeypatch.setattr(subprocess, "run", unexpected_run)
+
+    evidence = run_isolated_proof(
+        repo_root=root,
+        changed_files=["src/sdetkit/example.py"],
+        profile_ids=["pre_commit_all"],
+        require_network_isolation=True,
+    )
+    result = verify_candidate(
+        patch_score=_candidate_score(),
+        verification_evidence=evidence,
+    )
+
+    assert evidence["status"] == "failed"
+    assert result["decision"]["status"] == "blocked_review_first"
+    assert result["decision"]["automation_allowed"] is False
+    assert result["decision"]["merge_authorized"] is False
