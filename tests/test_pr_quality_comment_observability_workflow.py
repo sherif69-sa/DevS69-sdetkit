@@ -331,3 +331,57 @@ def test_pr_quality_comment_workflow_exposes_runtime_proof_metadata() -> None:
     )
     assert 'print(f"runtime_proof_collection_status={runtime_proof_collection_status}")' in text
     assert 'print(f"runtime_guard_violation_count={runtime_guard_violation_count}")' in text
+
+
+def test_pr_quality_comment_workflow_does_not_mask_quality_gate_failure_with_tee() -> None:
+    text = _workflow_text()
+
+    quality_step = text[
+        text.index("- name: Run quality gate") : text.index(
+            "- name: Build adaptive failure intelligence bundle"
+        )
+    ]
+
+    assert "set -o pipefail" in quality_step
+    assert "bash quality.sh cov 2>&1 | tee quality.log" in quality_step
+
+
+def test_pr_quality_comment_workflow_checks_out_history_for_runtime_proof_merge_base() -> None:
+    text = _workflow_text()
+
+    checkout = text[
+        text.index("- uses: actions/checkout@") : text.index("- uses: actions/setup-python@")
+    ]
+
+    assert "fetch-depth: 0" in checkout
+    assert "--inventory-mode base_head" in text
+    assert '--base-ref "origin/${{ github.event.pull_request.base.ref }}"' in text
+
+
+def test_pr_quality_comment_workflow_posts_runtime_diagnostic_before_failing_missing_collection() -> (
+    None
+):
+    text = _workflow_text()
+
+    build_comment = text[
+        text.index("- name: Build PR comment body") : text.index(
+            "- name: Build verified operator evidence loop"
+        )
+    ]
+    verify_visibility = text[text.index("- name: Verify PR Quality comment visibility") :]
+
+    assert "runtime_proof_rc=0" in build_comment
+    assert "|| runtime_proof_rc=$?" in build_comment
+    assert "isolated-proof-exit-code.txt" in build_comment
+    assert (
+        "test -s build/pr-quality/runtime-proof/isolated-proof/verification-evidence.json"
+        not in build_comment
+    )
+    assert (
+        "runtime proof artifact collection failed: isolated proof not collected"
+        not in build_comment
+    )
+
+    assert "if not runtime_proof_artifacts_present:" in verify_visibility
+    assert 'if runtime_proof_collection_status != "collected":' in verify_visibility
+    assert "after diagnostic comment publication" in verify_visibility
