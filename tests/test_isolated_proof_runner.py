@@ -245,3 +245,82 @@ def test_isolated_runner_cli_writes_evidence_artifacts(
     assert saved["proof_results"][0]["command"] == "python -m mypy src"
     assert saved["decision_boundary"]["automation_allowed"] is False
     assert "# Isolated proof runner evidence" in markdown
+
+
+def test_isolated_runner_uses_git_derived_inventory_for_protected_verifier(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from sdetkit import isolated_proof_runner as runner
+    from sdetkit.git_inventory_collector import (
+        GIT_DERIVED_STAGED_WORKTREE,
+        STAGED_WORKTREE,
+    )
+
+    root = _repo(tmp_path)
+
+    def fake_inventory(**_kwargs: Any) -> dict[str, Any]:
+        return {
+            "status": "collected",
+            "mode": STAGED_WORKTREE,
+            "changed_files": ["src/sdetkit/example.py"],
+            "changed_files_source": GIT_DERIVED_STAGED_WORKTREE,
+            "git_inventory_verified": True,
+        }
+
+    monkeypatch.setattr(runner, "collect_git_inventory", fake_inventory)
+    monkeypatch.setattr(subprocess, "run", _setup_success_or_profile_success)
+
+    evidence = run_isolated_proof(
+        repo_root=root,
+        changed_files=["src/sdetkit/example.py"],
+        profile_ids=["pre_commit_all"],
+        inventory_mode=STAGED_WORKTREE,
+    )
+    result = verify_candidate(
+        patch_score=_candidate_score(),
+        verification_evidence=evidence,
+    )
+
+    assert evidence["status"] == "passed"
+    assert evidence["changed_files_source"] == GIT_DERIVED_STAGED_WORKTREE
+    assert evidence["decision_boundary"]["git_inventory_verified"] is True
+    assert result["decision"]["status"] == "structurally_verified_candidate"
+    assert result["decision"]["automation_allowed"] is False
+    assert result["decision"]["merge_authorized"] is False
+
+
+def test_isolated_runner_blocks_caller_claim_mismatch_against_git_inventory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from sdetkit import isolated_proof_runner as runner
+    from sdetkit.git_inventory_collector import STAGED_WORKTREE
+
+    root = _repo(tmp_path)
+
+    monkeypatch.setattr(
+        runner,
+        "collect_git_inventory",
+        lambda **_kwargs: {
+            "status": "collected",
+            "mode": STAGED_WORKTREE,
+            "changed_files": ["src/sdetkit/unplanned.py"],
+            "changed_files_source": "_".join(("git", "derived", "staged", "worktree")),
+            "git_inventory_verified": True,
+        },
+    )
+    monkeypatch.setattr(subprocess, "run", _setup_success_or_profile_success)
+
+    evidence = run_isolated_proof(
+        repo_root=root,
+        changed_files=["src/sdetkit/example.py"],
+        profile_ids=["pre_commit_all"],
+        inventory_mode=STAGED_WORKTREE,
+    )
+
+    assert evidence["status"] == "failed"
+    assert evidence["changed_files"] == ["src/sdetkit/unplanned.py"]
+    assert evidence["decision_boundary"]["git_inventory_verified"] is False
+    assert "disagrees" in evidence["decision_boundary"]["reason"]
+    assert evidence["decision_boundary"]["automation_allowed"] is False
