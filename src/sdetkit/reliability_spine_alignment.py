@@ -11,6 +11,13 @@ from typing import Any
 SCHEMA_VERSION = "sdetkit.reliability_spine_alignment.v1"
 PR_QUALITY_LIVE_WORKSPACE_MODULE = "_".join(("pr", "quality", "live", "benchmark", "workspace"))
 REPLAYABLE_BENCHMARK_MODULE = "_".join(("replayable", "benchmark", "harness"))
+REPO_MEMORY_PROFILE_HISTORY_MODULE = "_".join(("repo", "memory", "profile", "history"))
+NEXT_RECOMMENDED_PR = "/".join(
+    (
+        "feature",
+        "-".join(("pr", "quality", "trusted", "repo", "memory", "history", "visibility")),
+    )
+)
 
 SPINE_STAGES = (
     "evidence",
@@ -451,12 +458,29 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "replayable_benchmark_harness",
                 "protected_verifier",
                 "pr_quality_runtime_proof_artifacts",
+                REPO_MEMORY_PROFILE_HISTORY_MODULE,
             ),
             gaps=(
                 "successful network-isolation proof is unavailable until a backend is verified",
-                "flaky-test registry ingestion and persistent profile updates are not implemented",
+                "flaky-test registry ingestion is not implemented",
             ),
-            recommended_next_action="persist read-only historical profiles before automation wiring",
+            recommended_next_action="surface trusted-main read-only history without expanding authority",
+        ),
+        _component(
+            module=REPO_MEMORY_PROFILE_HISTORY_MODULE,
+            role="record trusted-main RepoMemory profile snapshots through an immutable artifact history chain",
+            status="aligned",
+            stages=("history", "reporting"),
+            existing_artifacts=(
+                "repo-memory-profile-history.jsonl",
+                "repo-memory-history-summary.json",
+                "repo-memory-history-summary.md",
+            ),
+            integration_points=(
+                "repo_memory",
+                "RepoMemory Profile History workflow",
+            ),
+            recommended_next_action="keep trusted-main history advisory-only and visible before automation wiring",
         ),
     ]
 
@@ -494,7 +518,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/repo-memory-persistent-profile-history",
+        "next_recommended_pr": NEXT_RECOMMENDED_PR,
     }
 
 

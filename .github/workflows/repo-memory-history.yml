@@ -1,0 +1,265 @@
+name: RepoMemory Profile History
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: repo-memory-profile-history-main
+  cancel-in-progress: false
+
+jobs:
+  record:
+    name: Record trusted main RepoMemory history
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout trusted main revision
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements-test.txt
+
+      - name: Install trusted-main evidence dependencies
+        run: |
+          python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .
+
+      - name: Build trusted-main live RepoMemory profile
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p \
+            build/repo-memory-history/fixture-report \
+            build/repo-memory-history/live-report \
+            build/repo-memory-history/pattern-insights \
+            build/repo-memory-history/profile
+
+          live_root="${RUNNER_TEMP}/sdetkit-repo-memory-history-live-repositories"
+          rm -rf "$live_root"
+
+          PYTHONPATH=src python -m sdetkit.pr_quality_live_benchmark_workspace \
+            --out-dir "$live_root" \
+            --format json \
+            > build/repo-memory-history/live-workspace-cli.json
+
+          PYTHONPATH=src python -m sdetkit.replayable_benchmark_harness \
+            --scenario tests/fixtures/remediation_benchmark/nop_formatting_patch.json \
+            --scenario tests/fixtures/remediation_benchmark/oracle_formatting_patch.json \
+            --scenario tests/fixtures/remediation_benchmark/unsafe_protected_path_patch.json \
+            --out-dir build/repo-memory-history/fixture-report \
+            --format json \
+            > build/repo-memory-history/fixture-report-cli.json
+
+          mapfile -t live_args < <(
+            LIVE_ROOT="$live_root" python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          manifest = json.loads(
+              (Path(os.environ["LIVE_ROOT"]) / "workspace-manifest.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+          for item in manifest["scenarios"]:
+              print("--isolated-scenario")
+              print(item["fixture_path"])
+              print("--isolated-repo-root")
+              print(item["repo_root"])
+          PY
+          )
+
+          PYTHONPATH=src python -m sdetkit.replayable_benchmark_harness \
+            "${live_args[@]}" \
+            --out-dir build/repo-memory-history/live-report \
+            --format json \
+            > build/repo-memory-history/live-report-cli.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = {
+              "schema_version": "sdetkit.trajectory_pattern_insights.v1",
+              "record_count": 0,
+              "recurring_safe_fix_patterns": [],
+              "recurring_review_first_surfaces": [],
+              "source": "trusted_main_snapshot",
+          }
+          Path("build/repo-memory-history/pattern-insights/pattern-insights.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          PYTHONPATH=src python -m sdetkit.repo_memory \
+            --pattern-insights build/repo-memory-history/pattern-insights/pattern-insights.json \
+            --benchmark-report build/repo-memory-history/fixture-report/benchmark-report.json \
+            --live-benchmark-report build/repo-memory-history/live-report/benchmark-report.json \
+            --out-dir build/repo-memory-history/profile \
+            --format json \
+            > build/repo-memory-history/profile-cli.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          profile = json.loads(
+              Path("build/repo-memory-history/profile/repo-memory-profile.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          assert profile["profile_status"] == "live_proof_supported_memory"
+          assert profile["inputs"]["live_contract_proven"] is True
+          assert profile["proof_provenance"]["git_verified_scenario_count"] == 5
+          assert profile["proof_provenance"]["expected_failed_scenario_count"] == 5
+          assert profile["proof_provenance"]["network_boundary_blocked_scenario_count"] == 1
+          assert profile["proof_provenance"]["anti_cheat_rejection_scenario_count"] == 2
+
+          boundary = profile["decision_boundary"]
+          assert boundary["automation_allowed"] is False
+          assert boundary["merge_authorized"] is False
+          assert boundary["semantic_equivalence_proven"] is False
+
+          print("Trusted-main RepoMemory live profile passed.")
+          PY
+
+      - name: Select prior trusted main history artifact
+        id: prior
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p build/repo-memory-history/prior-download
+
+          prior_run_id=""
+          prior_head_sha=""
+
+          while IFS=$'\t' read -r candidate_run_id candidate_head_sha; do
+            if [ -z "$candidate_run_id" ] || [ "$candidate_run_id" = "${GITHUB_RUN_ID}" ]; then
+              continue
+            fi
+
+            if git merge-base --is-ancestor "$candidate_head_sha" "$GITHUB_SHA"; then
+              prior_run_id="$candidate_run_id"
+              prior_head_sha="$candidate_head_sha"
+              break
+            fi
+          done < <(
+            gh api --paginate \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/repo-memory-history.yml/runs?branch=main&event=push&status=completed&per_page=100" \
+              --jq '.workflow_runs[] | select(.conclusion == "success") | [.id, .head_sha] | @tsv'
+          )
+
+          if [ -z "$prior_run_id" ]; then
+            echo "prior_history_jsonl=" >> "$GITHUB_OUTPUT"
+            echo "prior_run_id=" >> "$GITHUB_OUTPUT"
+            echo "prior_head_sha=" >> "$GITHUB_OUTPUT"
+            echo "No prior successful trusted-main history artifact found; starting initial history chain."
+            exit 0
+          fi
+
+          gh run download "$prior_run_id" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name repo-memory-profile-history \
+            --dir build/repo-memory-history/prior-download
+
+          prior_history_jsonl="$(
+            find build/repo-memory-history/prior-download \
+              -name repo-memory-profile-history.jsonl \
+              -print \
+              -quit
+          )"
+
+          if [ -z "$prior_history_jsonl" ] || [ ! -f "$prior_history_jsonl" ]; then
+            echo "Prior trusted-main run was selected but supplied no history JSONL artifact."
+            exit 1
+          fi
+
+          echo "prior_history_jsonl=$prior_history_jsonl" >> "$GITHUB_OUTPUT"
+          echo "prior_run_id=$prior_run_id" >> "$GITHUB_OUTPUT"
+          echo "prior_head_sha=$prior_head_sha" >> "$GITHUB_OUTPUT"
+
+          echo "Selected prior trusted-main history run: $prior_run_id"
+          echo "Selected prior trusted-main history head: $prior_head_sha"
+
+      - name: Record trusted main RepoMemory profile history
+        shell: bash
+        env:
+          PRIOR_HISTORY_JSONL: ${{ steps.prior.outputs.prior_history_jsonl }}
+        run: |
+          set -euo pipefail
+
+          args=(
+            --profile-json build/repo-memory-history/profile/repo-memory-profile.json
+            --source-run-id "${GITHUB_RUN_ID}"
+            --source-head-sha "${GITHUB_SHA}"
+            --out-dir build/repo-memory-history/output
+            --format json
+          )
+
+          if [ -n "$PRIOR_HISTORY_JSONL" ]; then
+            args+=(--prior-history-jsonl "$PRIOR_HISTORY_JSONL")
+          fi
+
+          PYTHONPATH=src python -m sdetkit.repo_memory_profile_history \
+            "${args[@]}" \
+            > build/repo-memory-history/history-cli.json
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          summary = json.loads(
+              Path(
+                  "build/repo-memory-history/output/repo-memory-history-summary.json"
+              ).read_text(encoding="utf-8")
+          )
+
+          assert summary["status"] == "history_recorded"
+          assert summary["record_count"] >= 1
+          assert summary["live_contract_proven_record_count"] >= 1
+          assert summary["latest_record"]["source_run_id"] == os.environ["GITHUB_RUN_ID"]
+          assert summary["latest_record"]["source_head_sha"] == os.environ["GITHUB_SHA"]
+          assert summary["latest_record"]["profile_status"] == "live_proof_supported_memory"
+          assert summary["latest_record"]["live_contract_proven"] is True
+
+          boundary = summary["decision_boundary"]
+          assert boundary["automation_allowed"] is False
+          assert boundary["merge_authorized"] is False
+          assert boundary["semantic_equivalence_proven"] is False
+          assert boundary["prior_history_is_read_only_input"] is True
+
+          print("Trusted-main RepoMemory history snapshot passed.")
+          PY
+
+      - name: Upload trusted main RepoMemory history artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: repo-memory-profile-history
+          path: |
+            build/repo-memory-history/output/
+            build/repo-memory-history/profile/
+            build/repo-memory-history/live-report/
+            build/repo-memory-history/fixture-report/
+            build/repo-memory-history/pattern-insights/
+          if-no-files-found: error
+          retention-days: 90
