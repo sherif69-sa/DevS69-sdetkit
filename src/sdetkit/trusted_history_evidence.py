@@ -282,7 +282,7 @@ def main(argv: list[str] | None = None) -> int:
             base_sha=args.base_sha,
             base_ancestry_verified=True,
         )
-        artifacts = write_evidence(evidence, out_dir=args.out_dir)
+        write_evidence(evidence, out_dir=args.out_dir)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"error={exc}")
         return 2
@@ -294,15 +294,17 @@ def main(argv: list[str] | None = None) -> int:
                     "status": evidence["status"],
                     "collection_status": evidence["collection_status"],
                     "record_count": evidence["history"]["record_count"],
-                    "artifacts": artifacts,
+                    "evidence_written": True,
                 },
                 indent=2,
                 sort_keys=True,
             )
         )
     else:
-        for key, value in artifacts.items():
-            print(f"{key}: {value}")
+        print(f"status: {evidence['status']}")
+        print(f"collection_status: {evidence['collection_status']}")
+        print(f"record_count: {evidence['history']['record_count']}")
+        print("evidence_written: true")
     return 0
 
 

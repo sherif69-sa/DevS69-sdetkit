@@ -224,6 +224,8 @@ def test_trusted_history_cli_writes_advisory_evidence(tmp_path: Path, capsys) ->
 
     assert printed["collection_status"] == COLLECTED
     assert printed["record_count"] == 1
+    assert printed["evidence_written"] is True
+    assert "artifacts" not in printed
     assert saved["source"]["base_ancestry_verified"] is True
     assert "Trusted RepoMemory history evidence" in markdown
     assert "Records: `1`" in markdown
