@@ -331,6 +331,32 @@ jobs:
             git diff --name-only "origin/${{ github.event.pull_request.base.ref }}"...HEAD || git diff --name-only HEAD~1..HEAD || true
           } > build/pr-quality/changed-files.txt
 
+          mkdir -p build/pr-quality/runtime-proof/isolated-proof
+          mapfile -t changed_files < build/pr-quality/changed-files.txt
+          claim_args=()
+          for changed_file in "${changed_files[@]}"; do
+            if [ -n "$changed_file" ]; then
+              claim_args+=(--changed-file "$changed_file")
+            fi
+          done
+
+          PYTHONPATH=src python -m sdetkit.isolated_proof_runner \
+            --repo-root . \
+            --inventory-mode base_head \
+            --base-ref "origin/${{ github.event.pull_request.base.ref }}" \
+            --head-ref HEAD \
+            "${claim_args[@]}" \
+            --profile ruff_src_tests \
+            --out-dir build/pr-quality/runtime-proof/isolated-proof \
+            --format json \
+            > build/pr-quality/runtime-proof/isolated-proof-cli.json || true
+
+          PYTHONPATH=src python -m sdetkit.pr_quality_runtime_proof_artifacts \
+            --isolated-proof build/pr-quality/runtime-proof/isolated-proof/verification-evidence.json \
+            --out-dir build/pr-quality/runtime-proof/summary \
+            --format json \
+            > build/pr-quality/runtime-proof/summary-metadata.json
+
           PYTHONPATH=src python -m sdetkit.pr_quality_evidence_narrative \
             --quality-log quality.log \
             --quality-outcome "${{ steps.quality.outcome }}" \
@@ -359,6 +385,7 @@ jobs:
             --check-intelligence build/pr-quality/check-intelligence/check-intelligence.json \
             --evidence-narrative build/pr-quality/pr-evidence-narrative.json \
             --trajectory-jsonl build/pr-quality/trajectory/trajectory.jsonl \
+            --runtime-proof-artifacts build/pr-quality/runtime-proof/summary/runtime-proof-artifacts.json \
             --out build/pr-quality/pr-comment-body.md \
             > build/pr-quality/pr-comment-metadata.json
 
@@ -417,6 +444,7 @@ jobs:
             build/pr-quality/code-scanning/
             build/pr-quality/safe-formatting-autopilot/
             build/pr-quality/trajectory/
+            build/pr-quality/runtime-proof/
             build/pr-quality/pr-evidence-narrative.md
             build/sdetkit/evidence-graph/
             build/sdetkit/operator-loop/
@@ -455,6 +483,9 @@ jobs:
                 trajectory_record_count: Number(metadata.trajectory_record_count || 0),
                 trajectory_review_first_count: Number(metadata.trajectory_review_first_count || 0),
                 trajectory_auto_fix_allowed_count: Number(metadata.trajectory_auto_fix_allowed_count || 0),
+                runtime_proof_artifacts_present: Boolean(metadata.runtime_proof_artifacts_present),
+                runtime_proof_collection_status: metadata.runtime_proof_collection_status || 'not_collected',
+                runtime_guard_violation_count: Number(metadata.runtime_guard_violation_count || 0),
               };
               fs.mkdirSync(path.dirname(statusPath), { recursive: true });
               fs.writeFileSync(
@@ -544,6 +575,15 @@ jobs:
           trajectory_auto_fix_allowed_count = int(
               payload.get("trajectory_auto_fix_allowed_count", 0) or 0
           )
+          runtime_proof_artifacts_present = bool(
+              payload.get("runtime_proof_artifacts_present", False)
+          )
+          runtime_proof_collection_status = str(
+              payload.get("runtime_proof_collection_status", "not_collected")
+          )
+          runtime_guard_violation_count = int(
+              payload.get("runtime_guard_violation_count", 0) or 0
+          )
 
           print(f"comment_status={status}")
           print(f"comment_reason={reason}")
@@ -555,6 +595,9 @@ jobs:
           print(f"trajectory_record_count={trajectory_record_count}")
           print(f"trajectory_review_first_count={trajectory_review_first_count}")
           print(f"trajectory_auto_fix_allowed_count={trajectory_auto_fix_allowed_count}")
+          print(f"runtime_proof_artifacts_present={str(runtime_proof_artifacts_present).lower()}")
+          print(f"runtime_proof_collection_status={runtime_proof_collection_status}")
+          print(f"runtime_guard_violation_count={runtime_guard_violation_count}")
 
           if status not in {"posted", "updated"}:
               raise SystemExit(f"PR Quality comment was not posted or updated: status={status} reason={reason}")

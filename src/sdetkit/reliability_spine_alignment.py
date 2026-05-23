@@ -166,12 +166,38 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="pr_quality_action_report",
-            role="render operator-facing PR Quality status, evidence, and trajectory summaries",
+            role="render operator-facing PR Quality status, evidence, trajectory, and runtime-proof summaries",
             status="aligned",
-            stages=("reporting", "trajectory"),
+            stages=("reporting", "trajectory", "proof"),
             existing_artifacts=("pr-comment-body.md", "pr-comment-metadata.json"),
-            integration_points=("check_intelligence", "trajectory_store"),
-            recommended_next_action="keep comments action-focused and non-educational",
+            integration_points=(
+                "check_intelligence",
+                "trajectory_store",
+                "pr_quality_runtime_proof_artifacts",
+            ),
+            recommended_next_action="keep comments action-focused and no-authority boundaries explicit",
+        ),
+        _component(
+            module="pr_quality_runtime_proof_artifacts",
+            role="summarize current-PR isolated runtime proof artifacts for PR Quality visibility",
+            status="partially_aligned",
+            stages=("proof", "reporting"),
+            existing_artifacts=(
+                "runtime-proof-artifacts.json",
+                "runtime-proof-artifacts.md",
+            ),
+            integration_points=(
+                "git_inventory_collector",
+                "isolated_proof_runner",
+                "proof_runtime_guard",
+                "network_boundary",
+                "pr_quality_action_report",
+            ),
+            gaps=(
+                "live benchmark artifacts are explicitly not collected in the PR Quality workflow",
+                "RepoMemory artifacts are explicitly not collected in the PR Quality workflow",
+            ),
+            recommended_next_action="wire read-only benchmark and RepoMemory artifact inputs without automation",
         ),
         _component(
             module="trajectory_store",
@@ -305,10 +331,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "replayable_benchmark_harness",
             ),
             gaps=(
-                "not wired into workflow evidence collection",
-                "base_head inventory is not yet exercised through PR workflow evidence",
+                "workflow visibility uses Git-derived inventory only for a narrow allowlisted Ruff proof profile",
             ),
-            recommended_next_action="keep Git-derived evidence read-only until workflow proof is designed",
+            recommended_next_action="keep Git-derived workflow proof read-only and narrowly scoped",
         ),
         _component(
             module="network_boundary",
@@ -345,7 +370,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "detects copied-workspace behavior but does not prevent external filesystem writes",
                 "process escape prevention remains unavailable",
             ),
-            recommended_next_action="surface runtime-guard artifacts through PR Quality reporting",
+            recommended_next_action="keep runtime-guard visibility reporting-only",
         ),
         _component(
             module="isolated_proof_runner",
@@ -369,7 +394,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "successful network-isolated proof execution remains unavailable",
                 "external filesystem and process escape prevention remain unavailable",
             ),
-            recommended_next_action="surface captured runtime-proof artifacts in PR Quality",
+            recommended_next_action="expand visibility only through read-only artifact collection",
         ),
         _component(
             module="replayable_benchmark_harness",
@@ -393,9 +418,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             gaps=(
                 "successful containment remains unavailable",
-                "runtime-proof outcomes are not yet surfaced through PR Quality artifacts",
+                "live benchmark outcomes are not yet collected by the PR Quality workflow",
             ),
-            recommended_next_action="publish runtime-proof artifacts without automation wiring",
+            recommended_next_action="wire benchmark artifacts into PR Quality as read-only evidence",
         ),
         _component(
             module="repo_memory",
@@ -415,7 +440,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             gaps=(
                 "successful network-isolation proof is unavailable until a backend is verified",
-                "runtime-proof memory is not yet surfaced through PR Quality reporting",
+                "RepoMemory profiles are not yet collected by the PR Quality workflow",
                 "flaky-test registry ingestion and persistent profile updates are not implemented",
             ),
             recommended_next_action="surface read-only runtime-proof memory before automation wiring",
@@ -456,7 +481,7 @@ def build_alignment_report(
         "stage_counts": dict(sorted(stage_counts.items())),
         "components": [_component_payload(component) for component in rows],
         "gaps": gaps,
-        "next_recommended_pr": "feature/pr-quality-runtime-proof-artifacts",
+        "next_recommended_pr": "feature/pr-quality-live-benchmark-memory-artifacts",
     }
 
 

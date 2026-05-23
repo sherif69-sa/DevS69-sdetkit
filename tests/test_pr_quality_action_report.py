@@ -1576,3 +1576,123 @@ def test_action_report_promotes_current_code_scanning_alert_to_security_blocker(
     assert "src/sdetkit/current.py:14" in body
     assert "Current code scanning alerts: `1`" in body
     assert "Code scanning current finding: `src/sdetkit/current.py:14`" in body
+
+
+def test_action_report_renders_runtime_proof_artifacts_without_authority() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    runtime = {
+        "status": "collected",
+        "isolated_proof": {
+            "status": "passed",
+            "git_inventory_verified": True,
+            "runtime_guard_checked": True,
+            "runtime_guard_passed": True,
+            "runtime_guard_violation_count": 0,
+            "network_boundary_status": "not_requested",
+            "network_isolation_enforced": False,
+            "profiles_executed": 1,
+            "profiles_blocked": 0,
+        },
+        "live_benchmark": {"collection_status": "not_collected"},
+        "repo_memory": {"collection_status": "not_collected"},
+        "decision_boundary": {
+            "proof_commands_executed_by_renderer": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        runtime_proof_artifacts=runtime,
+    )
+
+    assert "## Runtime proof artifacts" in body
+    assert "Isolated proof status: `passed`" in body
+    assert "Git inventory verified: `true`" in body
+    assert "Runtime guard passed: `true`" in body
+    assert "Runtime guard violations: `0`" in body
+    assert "Network isolation enforced: `false`" in body
+    assert "Live benchmark collection status: `not_collected`" in body
+    assert "RepoMemory collection status: `not_collected`" in body
+    assert "Proof commands executed by renderer: `false`" in body
+    assert "Automation allowed by runtime artifacts: `false`" in body
+    assert "Merge authorized by runtime artifacts: `false`" in body
+
+
+def test_action_report_cli_reports_runtime_proof_metadata(tmp_path: Path, capsys) -> None:
+    action_path = _write_json(
+        tmp_path / "action-report.json",
+        {
+            "status": "green",
+            "primary_blocker": {},
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": "no remediation needed",
+            },
+            "recommended_actions": [],
+            "proof_commands": [],
+        },
+    )
+    intelligence_path = _write_json(
+        tmp_path / "check-intelligence.json",
+        {
+            "checks_seen": 1,
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+        },
+    )
+    runtime_path = _write_json(
+        tmp_path / "runtime-proof-artifacts.json",
+        {
+            "status": "collected",
+            "isolated_proof": {
+                "status": "passed",
+                "runtime_guard_violation_count": 0,
+            },
+            "decision_boundary": {
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        },
+    )
+    out = tmp_path / "comment.md"
+
+    rc = report.main(
+        [
+            "--action-report",
+            str(action_path),
+            "--check-intelligence",
+            str(intelligence_path),
+            "--runtime-proof-artifacts",
+            str(runtime_path),
+            "--out",
+            str(out),
+        ]
+    )
+
+    assert rc == 0
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["runtime_proof_artifacts_present"] is True
+    assert printed["runtime_proof_collection_status"] == "collected"
+    assert printed["runtime_guard_violation_count"] == 0
+    assert "## Runtime proof artifacts" in out.read_text(encoding="utf-8")
