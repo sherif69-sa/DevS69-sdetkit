@@ -360,7 +360,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.evidence_narrative",
         "module_path": "src/sdetkit/evidence_narrative.py",
-        "tests_referencing_module": 12
+        "tests_referencing_module": 13
       },
       {
         "contract_script_paths": [
@@ -720,7 +720,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.proof",
         "module_path": "src/sdetkit/proof.py",
-        "tests_referencing_module": 91
+        "tests_referencing_module": 113
       },
       {
         "contract_script_paths": [
@@ -792,7 +792,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.reliability",
         "module_path": "src/sdetkit/reliability.py",
-        "tests_referencing_module": 28
+        "tests_referencing_module": 29
       },
       {
         "contract_script_paths": [

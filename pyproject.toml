@@ -51,6 +51,7 @@ dev = [
 ]
 test = [
   "hypothesis==6.152.9",
+  "pre-commit==4.6.0",
   "PyYAML",
   "pytest",
   "pytest-asyncio",

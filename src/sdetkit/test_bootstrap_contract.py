@@ -11,6 +11,7 @@ from .test_bootstrap import REQUIRED_TEST_MODULES
 MODULE_TO_PACKAGE = {
     "httpx": "httpx",
     "hypothesis": "hypothesis",
+    "pre_commit": "pre-commit",
     "yaml": "PyYAML",
 }
 
@@ -26,8 +27,8 @@ def extract_requirement_name(line: str) -> str:
     raw = line.strip()
     if not raw or raw.startswith("#"):
         return ""
-    token = _SPEC_SEP.split(raw, maxsplit=1)[0].strip()
-    return normalize_package_name(token)
+    requirement_name = _SPEC_SEP.split(raw, maxsplit=1)[0].strip()
+    return normalize_package_name(requirement_name)
 
 
 def load_requirements_packages(path: Path) -> set[str]:

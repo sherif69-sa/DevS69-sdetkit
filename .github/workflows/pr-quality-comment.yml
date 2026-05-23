@@ -21,6 +21,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
           python-version: "3.12"
@@ -40,6 +42,7 @@ jobs:
         env:
           COV_FAIL_UNDER: "95"
         run: |
+          set -o pipefail
           bash quality.sh cov 2>&1 | tee quality.log
 
       - name: Build adaptive failure intelligence bundle
@@ -340,6 +343,7 @@ jobs:
             fi
           done
 
+          runtime_proof_rc=0
           PYTHONPATH=src python -m sdetkit.isolated_proof_runner \
             --repo-root . \
             --inventory-mode base_head \
@@ -349,13 +353,17 @@ jobs:
             --profile ruff_src_tests \
             --out-dir build/pr-quality/runtime-proof/isolated-proof \
             --format json \
-            > build/pr-quality/runtime-proof/isolated-proof-cli.json || true
+            > build/pr-quality/runtime-proof/isolated-proof-cli.json \
+            || runtime_proof_rc=$?
+
 
           PYTHONPATH=src python -m sdetkit.pr_quality_runtime_proof_artifacts \
             --isolated-proof build/pr-quality/runtime-proof/isolated-proof/verification-evidence.json \
             --out-dir build/pr-quality/runtime-proof/summary \
             --format json \
             > build/pr-quality/runtime-proof/summary-metadata.json
+
+          printf '%s\n' "$runtime_proof_rc" > build/pr-quality/runtime-proof/isolated-proof-exit-code.txt
 
           PYTHONPATH=src python -m sdetkit.pr_quality_evidence_narrative \
             --quality-log quality.log \
@@ -610,5 +618,15 @@ jobs:
               raise SystemExit(
                   "PR Quality comment signal metadata invalid: "
                   f"evidence_signal_kind={evidence_signal_kind}"
+              )
+
+          if not runtime_proof_artifacts_present:
+              raise SystemExit(
+                  "PR Quality runtime proof artifacts missing from rendered comment metadata"
+              )
+          if runtime_proof_collection_status != "collected":
+              raise SystemExit(
+                  "PR Quality runtime proof collection failed after diagnostic comment publication: "
+                  f"status={runtime_proof_collection_status}"
               )
           PY

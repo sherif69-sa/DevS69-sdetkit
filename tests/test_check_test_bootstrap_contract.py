@@ -21,7 +21,9 @@ def test_build_report_flags_missing(tmp_path):
 
     assert report["ok"] is False
     assert "pyyaml" in report["missing_from_requirements_test"]
+    assert "pre-commit" in report["missing_from_requirements_test"]
     assert "httpx" in report["missing_from_pyproject_test_visible_deps"]
+    assert "pre-commit" in report["missing_from_pyproject_test_visible_deps"]
 
 
 def test_main_json_success(monkeypatch, capsys):
@@ -35,7 +37,7 @@ def test_main_json_success(monkeypatch, capsys):
         "build_report",
         lambda repo_root: {
             "ok": True,
-            "expected_packages": ["httpx", "hypothesis", "pyyaml"],
+            "expected_packages": ["httpx", "hypothesis", "pre-commit", "pyyaml"],
             "missing_from_requirements_test": [],
             "missing_from_pyproject_test_visible_deps": [],
             "paths": {"requirements_test": "requirements-test.txt", "pyproject": "pyproject.toml"},
@@ -61,7 +63,7 @@ def test_main_writes_output_file(monkeypatch, tmp_path):
         "build_report",
         lambda repo_root: {
             "ok": True,
-            "expected_packages": ["httpx", "hypothesis", "pyyaml"],
+            "expected_packages": ["httpx", "hypothesis", "pre-commit", "pyyaml"],
             "missing_from_requirements_test": [],
             "missing_from_pyproject_test_visible_deps": [],
             "paths": {"requirements_test": "requirements-test.txt", "pyproject": "pyproject.toml"},
@@ -96,7 +98,7 @@ def test_parse_args_and_render_text_branches(monkeypatch):
     text_out = contract.render_text(
         {
             "ok": False,
-            "expected_packages": ["httpx", "hypothesis", "pyyaml"],
+            "expected_packages": ["httpx", "hypothesis", "pre-commit", "pyyaml"],
             "missing_from_requirements_test": ["pyyaml"],
             "missing_from_pyproject_test_visible_deps": ["httpx"],
         }
