@@ -24,8 +24,14 @@ from sdetkit.network_boundary import (
     PROOF_EXECUTION_ALLOWED,
     assess_network_boundary,
 )
+from sdetkit.proof_runtime_guard import (
+    CLEAN,
+    RESERVED_EVIDENCE_PATHS,
+    RUNTIME_GUARD_VIOLATION,
+    assess_runtime_guard,
+)
 
-SCHEMA_VERSION = "sdetkit.isolated_proof_runner.v3"
+SCHEMA_VERSION = "sdetkit.isolated_proof_runner.v4"
 DEFAULT_OUT_DIR = Path("build") / "isolated-proof-runner"
 EVIDENCE_JSON = "verification-evidence.json"
 EVIDENCE_MD = "verification-evidence.md"
@@ -147,6 +153,24 @@ def _snapshot_workspace(workspace: Path) -> dict[str, str]:
     return snapshot
 
 
+def _snapshot_reserved_evidence(workspace: Path) -> dict[str, str]:
+    snapshot: dict[str, str] = {}
+    for relative_text in RESERVED_EVIDENCE_PATHS:
+        path = workspace / relative_text
+        if not path.exists() and not path.is_symlink():
+            continue
+
+        digest = hashlib.sha256()
+        if path.is_symlink():
+            digest.update(os.readlink(path).encode("utf-8", errors="replace"))
+        elif path.is_dir():
+            digest.update(b"<directory>")
+        else:
+            digest.update(path.read_bytes())
+        snapshot[relative_text] = digest.hexdigest()
+    return snapshot
+
+
 def _changed_paths(before: Mapping[str, str], after: Mapping[str, str]) -> list[str]:
     paths = set(before) | set(after)
     return sorted(path for path in paths if before.get(path) != after.get(path))
@@ -225,8 +249,10 @@ def _profile_result(
     profile: ProofProfile,
     workspace: Path,
     timeout_seconds: int,
+    expected_changed_files: list[str],
 ) -> JsonObject:
     before = _snapshot_workspace(workspace)
+    reserved_before = _snapshot_reserved_evidence(workspace)
     argv = [sys.executable, *profile.argv_suffix]
 
     try:
@@ -251,10 +277,23 @@ def _profile_result(
         stderr = _capture_text(exc.stderr)
 
     after = _snapshot_workspace(workspace)
+    reserved_after = _snapshot_reserved_evidence(workspace)
     mutated_files = _changed_paths(before, after)
+    reserved_shadowed_files = _changed_paths(reserved_before, reserved_after)
     workspace_mutated = bool(mutated_files)
+    runtime_guard = assess_runtime_guard(
+        expected_changed_files=expected_changed_files,
+        mutated_files=mutated_files,
+        reserved_evidence_changed_files=reserved_shadowed_files,
+    )
 
-    status = "passed" if exit_code == 0 and not timed_out and not workspace_mutated else "failed"
+    status = (
+        "passed"
+        if exit_code == 0
+        and not timed_out
+        and not _bool(runtime_guard.get(RUNTIME_GUARD_VIOLATION))
+        else "failed"
+    )
 
     return {
         "profile_id": profile.profile_id,
@@ -265,6 +304,8 @@ def _profile_result(
         "timed_out": timed_out,
         WORKSPACE_MUTATED_DURING_EXECUTION: workspace_mutated,
         "workspace_mutated_files": mutated_files,
+        "reserved_evidence_shadowed_files": reserved_shadowed_files,
+        "runtime_guard": runtime_guard,
         "stdout": stdout,
         "stderr": stderr,
     }
@@ -338,9 +379,20 @@ def run_isolated_proof(
                         profile=PROOF_PROFILES[profile_id],
                         workspace=workspace,
                         timeout_seconds=timeout_seconds,
+                        expected_changed_files=effective_changed_files,
                     )
                 )
 
+    guard_status_counts: dict[str, int] = {}
+    runtime_guard_violation_count = 0
+    for result in results:
+        guard = _as_dict(result.get("runtime_guard"))
+        guard_status = _string(guard.get("status") or CLEAN)
+        guard_status_counts[guard_status] = guard_status_counts.get(guard_status, 0) + 1
+        if _bool(guard.get(RUNTIME_GUARD_VIOLATION)):
+            runtime_guard_violation_count += 1
+
+    runtime_guard_checked = bool(results)
     passed_count = sum(1 for result in results if result["status"] == "passed")
     failed_count = len(results) - passed_count
     blocked_count = 0 if proof_execution_allowed else len(requested_profiles)
@@ -355,6 +407,11 @@ def run_isolated_proof(
         boundary_reason = (
             "Network-isolated proof was required, but no verified runtime "
             "containment backend is available; proof execution was blocked."
+        )
+    elif runtime_guard_violation_count:
+        boundary_reason = (
+            "The copied-workspace runtime guard detected proof-side mutation or "
+            "reserved evidence shadowing; verification evidence is blocked."
         )
     elif not inventory_mode:
         boundary_reason = (
@@ -381,6 +438,14 @@ def run_isolated_proof(
         INVENTORY_CLAIM_MATCH: inventory_claim_match,
         "git_inventory": inventory,
         "network_boundary": network_boundary,
+        "runtime_guard": {
+            "checked": runtime_guard_checked,
+            "passed": runtime_guard_checked and runtime_guard_violation_count == 0,
+            "violation_count": runtime_guard_violation_count,
+            "status_counts": dict(sorted(guard_status_counts.items())),
+            "external_filesystem_containment_enforced": False,
+            "process_escape_prevention_enforced": False,
+        },
         "requested_profiles": requested_profiles,
         "proof_results": results,
         "proof_summary": {
@@ -405,6 +470,7 @@ def run_isolated_proof(
         "decision_boundary": {
             "git_inventory_verified": git_inventory_verified,
             "network_isolation_verified": _bool(network_boundary.get(NETWORK_ISOLATION_ENFORCED)),
+            "runtime_guard_passed": runtime_guard_checked and runtime_guard_violation_count == 0,
             "automation_allowed": False,
             "merge_authorized": False,
             "semantic_equivalence_proven": False,
@@ -419,6 +485,7 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
     boundary = _as_dict(evidence.get("decision_boundary"))
     inventory = _as_dict(evidence.get("git_inventory"))
     network_boundary = _as_dict(evidence.get("network_boundary"))
+    runtime_guard = _as_dict(evidence.get("runtime_guard"))
     results = [_as_dict(item) for item in _as_list(evidence.get("proof_results"))]
     claim_value = evidence.get(INVENTORY_CLAIM_MATCH)
     claim_status = "not_checked" if claim_value is None else str(_bool(claim_value)).lower()
@@ -436,6 +503,8 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
         f"- Changed-files source: `{_string(evidence.get('changed_files_source'))}`",
         f"- Inventory claim matches: `{claim_status}`",
         f"- Git inventory mode: `{_string(inventory.get('mode') or 'not_used')}`",
+        f"- Runtime guard checked: `{str(_bool(runtime_guard.get('checked'))).lower()}`",
+        f"- Runtime guard violations: `{_int(runtime_guard.get('violation_count'))}`",
         "",
         "## Execution isolation",
         "",
@@ -474,7 +543,9 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
                 f"status=`{_string(result.get('status'))}`, "
                 f"exit_code=`{_int(result.get('exit_code'), default=-1)}`, "
                 "workspace_mutated=`"
-                f"{str(_bool(result.get(WORKSPACE_MUTATED_DURING_EXECUTION))).lower()}`"
+                f"{str(_bool(result.get(WORKSPACE_MUTATED_DURING_EXECUTION))).lower()}`, "
+                "runtime_guard=`"
+                f"{_string(_as_dict(result.get('runtime_guard')).get('status'))}`"
             )
             lines.append(f"  - Command: `{_string(result.get('command'))}`")
     else:
@@ -488,6 +559,10 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
             (
                 "- Git-derived file inventory verified: "
                 f"`{str(_bool(boundary.get('git_inventory_verified'))).lower()}`"
+            ),
+            (
+                "- Runtime guard passed: "
+                f"`{str(_bool(boundary.get('runtime_guard_passed'))).lower()}`"
             ),
             f"- Automation allowed: `{str(_bool(boundary.get('automation_allowed'))).lower()}`",
             f"- Merge authorized: `{str(_bool(boundary.get('merge_authorized'))).lower()}`",

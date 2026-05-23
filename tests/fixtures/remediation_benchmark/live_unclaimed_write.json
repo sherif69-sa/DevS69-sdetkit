@@ -1,0 +1,64 @@
+{
+  "description": "An allowlisted proof writes a new source file outside the Git-derived candidate claim and must be rejected.",
+  "expected": {
+    "isolated_proof": {
+      "git_inventory_verified": true,
+      "inventory_claim_match": true,
+      "runtime_guard_status": "unclaimed_write",
+      "status": "failed"
+    },
+    "patch_score_status": "candidate_for_protected_verification",
+    "verifier_status": "blocked_review_first"
+  },
+  "isolated_proof": {
+    "inventory_mode": "staged_worktree",
+    "profiles": [
+      "pre_commit_all"
+    ],
+    "timeout_seconds": 60
+  },
+  "pattern_insights": {
+    "recurring_review_first_surfaces": [],
+    "recurring_safe_fix_patterns": [
+      {
+        "action": "run_pre_commit",
+        "count": 2,
+        "failure_class": "formatting_only"
+      }
+    ]
+  },
+  "proposed_patch": {
+    "changed_files": [
+      "src/sdetkit/example.py"
+    ],
+    "patch_id": "oracle-formatting-patch"
+  },
+  "remediation_plan": {
+    "plans": [
+      {
+        "affected_files": [
+          "src/sdetkit/example.py"
+        ],
+        "allowed_strategy": "run_pre_commit",
+        "blocked_reason": "",
+        "classification": "formatting_only",
+        "diagnosis_id": "formatting-oracle",
+        "exact_fix_scope": {
+          "allowed_files": [
+            "src/sdetkit/example.py"
+          ],
+          "allowed_strategy": "run_pre_commit",
+          "scope": "deterministic formatting or whitespace only"
+        },
+        "failure_surface": "formatting",
+        "proof_commands": [
+          "python -m pre_commit run -a"
+        ],
+        "risk_level": "low",
+        "safe_to_auto_fix": true
+      }
+    ]
+  },
+  "scenario_id": "live-unclaimed-write",
+  "scenario_type": "unclaimed_write_fail"
+}
