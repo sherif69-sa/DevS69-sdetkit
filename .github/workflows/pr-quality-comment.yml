@@ -152,6 +152,21 @@ jobs:
           )
           PYCODE
 
+
+      - name: Diagnose security findings read-only
+        if: always()
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          mkdir -p build/pr-quality/security-diagnosis
+          PYTHONPATH=src python -m sdetkit.security_finding_diagnosis \
+            --review-threads-json build/pr-quality/security-review/review-threads.json \
+            --code-scanning-alerts-json build/pr-quality/code-scanning/alerts.json \
+            --current-head-sha "$HEAD_SHA" \
+            --root . \
+            --out-dir build/pr-quality/security-diagnosis \
+            --format json
+
       - name: Build PR check intelligence action report
         if: always()
         env:
@@ -619,6 +634,7 @@ jobs:
             build/pr-quality/check-intelligence/
             build/pr-quality/security-review/
             build/pr-quality/code-scanning/
+            build/pr-quality/security-diagnosis/
             build/pr-quality/safe-formatting-autopilot/
             build/pr-quality/trajectory/
             build/pr-quality/trajectory-pattern-insights/

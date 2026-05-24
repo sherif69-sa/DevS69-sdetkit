@@ -8,6 +8,7 @@ from sdetkit.reliability_spine_alignment import (
     NEXT_RECOMMENDED_PR,
     PR_QUALITY_LIVE_WORKSPACE_MODULE,
     REPO_MEMORY_PROFILE_HISTORY_MODULE,
+    SECURITY_FINDING_DIAGNOSIS_MODULE,
     SPINE_STAGES,
     TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
     TRUSTED_HISTORY_EVIDENCE_MODULE,
@@ -46,6 +47,7 @@ def test_alignment_components_cover_current_reliability_spine() -> None:
     assert FLAKY_TEST_REGISTRY_EVIDENCE_MODULE in modules
     assert TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE in modules
     assert TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE in modules
+    assert SECURITY_FINDING_DIAGNOSIS_MODULE in modules
 
 
 def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
@@ -87,6 +89,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE not in gaps_by_module
     assert TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE not in gaps_by_module
     assert FLAKY_TEST_REGISTRY_EVIDENCE_MODULE in gaps_by_module
+    assert SECURITY_FINDING_DIAGNOSIS_MODULE in gaps_by_module
     assert any("protected_verifier" in gap for gap in gaps_by_module["maintenance_autopilot"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["patch_scorer"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["protected_verifier"])
@@ -106,6 +109,12 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert not any("persistent profile" in gap for gap in gaps_by_module["repo_memory"])
     assert any("verified" in gap for gap in gaps_by_module["network_boundary"])
     assert any("external filesystem" in gap for gap in gaps_by_module["proof_runtime_guard"])
+    assert any(
+        "operator narrative" in gap for gap in gaps_by_module[SECURITY_FINDING_DIAGNOSIS_MODULE]
+    )
+    assert any(
+        "automatic dismissals" in gap for gap in gaps_by_module[SECURITY_FINDING_DIAGNOSIS_MODULE]
+    )
 
 
 def test_alignment_markdown_renders_operator_audit() -> None:
@@ -133,6 +142,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert f"`{FLAKY_TEST_REGISTRY_EVIDENCE_MODULE}`: `partially_aligned`" in markdown
     assert f"`{TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE}`: `aligned`" in markdown
     assert f"`{TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE}`: `aligned`" in markdown
+    assert f"`{SECURITY_FINDING_DIAGNOSIS_MODULE}`: `partially_aligned`" in markdown
 
 
 def test_alignment_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
@@ -213,6 +223,7 @@ def test_alignment_has_no_behavior_mutation_surfaces() -> None:
         FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
         TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
         TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE,
+        SECURITY_FINDING_DIAGNOSIS_MODULE,
     }
 
     assert "maintenance_autopilot" not in report_modules

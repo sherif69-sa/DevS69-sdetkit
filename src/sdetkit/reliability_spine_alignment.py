@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import Counter
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
@@ -18,10 +19,11 @@ TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE = "_".join(
     ("trusted", "flaky", "test", "registry", "producer")
 )
 TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE = "_".join(("trusted", "test", "observation", "capture"))
+SECURITY_FINDING_DIAGNOSIS_MODULE = "_".join(("security", "finding", "diagnosis"))
 NEXT_RECOMMENDED_PR = "/".join(
     (
         "feature",
-        "-".join(("trusted", "flaky", "test", "observation", "history")),
+        "-".join(("security", "diagnosis", "pr", "quality", "visibility")),
     )
 )
 
@@ -293,6 +295,26 @@ def build_alignment_components() -> list[AlignmentComponent]:
             stages=("evidence", "decision", "reporting"),
             integration_points=("check_intelligence", "pr_quality_action_report"),
             recommended_next_action="keep security findings review-first",
+        ),
+        _component(
+            module=SECURITY_FINDING_DIAGNOSIS_MODULE,
+            role="diagnose current and stale security findings into sanitized fix-or-review proposals without authorizing action",
+            status="partially_aligned",
+            stages=("evidence", "diagnosis", "decision", "reporting"),
+            existing_artifacts=(
+                "security-finding-diagnosis.json",
+                "security-finding-diagnosis.md",
+            ),
+            integration_points=(
+                "security_review_evidence",
+                "check_intelligence",
+                "PR Quality workflow",
+            ),
+            gaps=(
+                "diagnosis artifacts are uploaded but are not yet rendered in the PR Quality operator narrative",
+                "automatic security fixes and automatic dismissals remain intentionally disallowed",
+            ),
+            recommended_next_action="surface sanitized security diagnosis proposals in PR Quality while preserving human authority",
         ),
         _component(
             module="adaptive_diagnosis",
@@ -699,10 +721,12 @@ def main(argv: list[str] | None = None) -> int:
         markdown_out=args.markdown_out,
     )
 
-    if args.format == "json":
-        print(json.dumps({"report": report}, indent=2, sort_keys=True))
-    else:
-        print(render_alignment_markdown(report))
+    rendered = (
+        json.dumps({"report": report}, indent=2, sort_keys=True)
+        if args.format == "json"
+        else render_alignment_markdown(report).rstrip("\n")
+    )
+    sys.stdout.write(rendered + "\n")
 
     return 0
 
