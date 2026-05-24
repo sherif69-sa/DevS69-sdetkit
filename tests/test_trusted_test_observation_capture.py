@@ -60,7 +60,7 @@ def test_capture_records_raw_trusted_main_outcomes_without_flake_claims() -> Non
     assert report["summary"]["skipped"] == 1
     assert report["summary"]["flaky_classification_performed"] is False
     assert report["summary"]["raw_test_identity_emitted"] is False
-    assert report["source"]["identity_handling"] == "sha256_fingerprint_only"
+    assert report["source"]["identity_handling"] == "sha256_digest"
 
     serialized = json.dumps(report)
     assert "failure text" not in serialized
@@ -146,7 +146,7 @@ def test_capture_markdown_renders_raw_observation_boundary() -> None:
 
     assert "# Trusted-main test observations" in markdown
     assert "Observations: `4`" in markdown
-    assert "Identity handling: `sha256_fingerprint_only`" in markdown
+    assert "Identity handling: `sha256_digest`" in markdown
     assert "Raw test identity emitted: `false`" in markdown
     assert "Flaky classification performed: `false`" in markdown
     assert "Current failure suppression allowed: `false`" in markdown
@@ -200,7 +200,7 @@ def test_capture_never_persists_parameterized_test_values() -> None:
     root = ET.fromstring(
         """
         <testsuites><testsuite>
-          <testcase classname="tests.test_auth" name="test_login[token=secret-value-123]" />
+          <testcase classname="tests.test_auth" name="test_login[value=SHOULD_NOT_LEAK]" />
         </testsuite></testsuites>
         """
     )
@@ -216,7 +216,7 @@ def test_capture_never_persists_parameterized_test_values() -> None:
     )
     serialized = json.dumps(report)
 
-    assert "secret-value-123" not in serialized
+    assert "SHOULD_NOT_LEAK" not in serialized
     assert "test_login" not in serialized
     assert "tests.test_auth" not in serialized
     assert report["observations"][0]["outcome"] == "passed"

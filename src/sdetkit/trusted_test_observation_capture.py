@@ -62,7 +62,7 @@ def _validate_trusted_main_source(
         "event_name": event,
         "ref_name": ref,
         "input_kind": "junit_xml",
-        "identity_handling": "sha256_fingerprint_only",
+        "identity_handling": "sha256_digest",
         "input_read_only": True,
         "commands_executed_by_reader": False,
         "trusted_main": True,
