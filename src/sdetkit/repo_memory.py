@@ -610,8 +610,8 @@ def build_repo_memory_profile(
             ),
         },
         "recommended_next_action": (
-            "Establish trusted per-test observation capture before surfacing "
-            "populated flaky-test history in PR Quality."
+            "Establish trusted accepted-main observation history and classification "
+            "handoff before surfacing populated flaky-test history in PR Quality."
         ),
     }
 

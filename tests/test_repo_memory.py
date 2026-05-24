@@ -587,7 +587,7 @@ def test_repo_memory_ingests_trusted_main_no_observation_registry_without_claims
     assert flaky["source"]["observations_collected"] is False
     assert flaky["decision_boundary"]["automation_allowed"] is False
     assert flaky["decision_boundary"]["merge_authorized"] is False
-    assert "trusted per-test observation capture" in profile["recommended_next_action"]
+    assert "trusted accepted-main observation history" in profile["recommended_next_action"]
 
 
 def test_repo_memory_rejects_unsupported_flaky_classification_schema() -> None:
