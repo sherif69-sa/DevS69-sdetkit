@@ -638,3 +638,136 @@ def test_check_intelligence_keeps_stale_code_scanning_alert_visible_non_blocking
     assert intelligence["code_scanning_review"]["stale_alerts"] == 1
     assert action["status"] == "green"
     assert action["primary_blocker"] == {}
+
+
+def test_check_intelligence_associates_collector_log_for_dotted_matrix_version(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Validate (ubuntu-latest / py3.13)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                }
+            ]
+        },
+    )
+    logs_dir = tmp_path / "logs"
+    _write(
+        logs_dir / "15-validate-ubuntu-latest-py3-13.log",
+        "\n".join(
+            [
+                "Validate (ubuntu-latest / py3.13) FAILED "
+                "tests/test_workflow_contract.py::test_uploads_bundle - AssertionError",
+                "Validate (ubuntu-latest / py3.13) 1 failed, 20 passed in 1.00s",
+                "Validate (ubuntu-latest / py3.13) Process completed with exit code 1.",
+            ]
+        ),
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(
+        checks_json=checks,
+        logs_dir=logs_dir,
+    )
+
+    failed = intelligence["failed_checks"][0]
+    assert failed["log_collected"] is True
+    assert failed["first_failure"]["tool"] == "pytest"
+    assert failed["first_failure"]["kind"] == "test_failure"
+    assert "tests/test_workflow_contract.py" in failed["first_failure"]["line"]
+    assert failed["safe_to_auto_fix"] is False
+
+
+def test_check_intelligence_skips_cache_miss_and_pytest_invocation_before_failed_node(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Validate (macos-latest / py3.13)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                }
+            ]
+        },
+    )
+    logs_dir = tmp_path / "logs"
+    _write(
+        logs_dir / "09-validate-macos-latest-py3-13.log",
+        "\n".join(
+            [
+                "Validate (macos-latest / py3.13) Cache not found for input keys: macOS-py3.13-abcdef",
+                "Validate (macos-latest / py3.13) ##[group]Run python -m pytest -q",
+                "Validate (macos-latest / py3.13) python -m pytest -q",
+                "Validate (macos-latest / py3.13) FAILED tests/test_widget.py::test_contract - AssertionError",
+                "Validate (macos-latest / py3.13) 1 failed, 20 passed in 1.00s",
+            ]
+        ),
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(
+        checks_json=checks,
+        logs_dir=logs_dir,
+    )
+
+    failed = intelligence["failed_checks"][0]
+    first = failed["first_failure"]
+    assert failed["log_collected"] is True
+    assert first["tool"] == "pytest"
+    assert first["kind"] == "test_failure"
+    assert "tests/test_widget.py::test_contract" in first["line"]
+    assert "Cache not found" not in first["line"]
+    assert "python -m pytest" not in first["line"]
+    assert failed["diagnosis"]["code"] == "PYTEST_ASSERTION_FAILURE"
+    assert failed["safe_to_auto_fix"] is False
+
+
+def test_check_intelligence_prefers_explicit_pytest_failed_node_over_summary_and_cache_warning(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Validate (macos-latest / py3.13)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                }
+            ]
+        },
+    )
+    logs_dir = tmp_path / "logs"
+    _write(
+        logs_dir / "09-validate-macos-latest-py3-13.log",
+        "\n".join(
+            [
+                "Validate (macos-latest / py3.13) WARNING: Cache entry deserialization failed, entry ignored",
+                "Validate (macos-latest / py3.13) python -m pytest -q",
+                "Validate (macos-latest / py3.13) =================================== FAILURES ===================================",
+                "Validate (macos-latest / py3.13) FAILED tests/test_widget.py::test_contract - AssertionError",
+                "Validate (macos-latest / py3.13) 1 failed, 20 passed in 1.00s",
+            ]
+        ),
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(
+        checks_json=checks,
+        logs_dir=logs_dir,
+    )
+
+    failed = intelligence["failed_checks"][0]
+    first = failed["first_failure"]
+    assert failed["log_collected"] is True
+    assert first["tool"] == "pytest"
+    assert first["kind"] == "test_failure"
+    assert "FAILED tests/test_widget.py::test_contract" in first["line"]
+    assert "Cache entry deserialization failed" not in first["line"]
+    assert "FAILURES" not in first["line"]
+    assert failed["diagnosis"]["code"] == "PYTEST_ASSERTION_FAILURE"
+    assert failed["safe_to_auto_fix"] is False
