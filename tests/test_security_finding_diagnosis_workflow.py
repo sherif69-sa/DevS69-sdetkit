@@ -37,3 +37,16 @@ def test_pr_quality_uploads_security_diagnosis_artifact_without_automation() -> 
     )[0]
     assert "dismiss" not in diagnosis_block.lower()
     assert "commit-safe-fixes" not in diagnosis_block
+
+
+def test_pr_quality_passes_security_diagnosis_artifact_to_operator_comment_renderer() -> None:
+    text = _workflow_text()
+
+    assert "python -m sdetkit.pr_quality_action_report" in text
+    assert (
+        "--security-finding-diagnosis build/pr-quality/security-diagnosis/security-finding-diagnosis.json"
+        in text
+    )
+    assert text.index("Diagnose security findings read-only") < text.index(
+        "python -m sdetkit.pr_quality_action_report"
+    )

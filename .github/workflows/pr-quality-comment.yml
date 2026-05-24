@@ -578,6 +578,7 @@ jobs:
             --evidence-narrative build/pr-quality/pr-evidence-narrative.json \
             --trajectory-jsonl build/pr-quality/trajectory/trajectory.jsonl \
             --runtime-proof-artifacts build/pr-quality/runtime-proof/summary/runtime-proof-artifacts.json \
+            --security-finding-diagnosis build/pr-quality/security-diagnosis/security-finding-diagnosis.json \
             --out build/pr-quality/pr-comment-body.md \
             > build/pr-quality/pr-comment-metadata.json
 

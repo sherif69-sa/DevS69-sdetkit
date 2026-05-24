@@ -1897,3 +1897,117 @@ def test_write_comment_body_exports_trusted_history_visibility_metadata(
     assert result[report.TRUSTED_HISTORY_AUTOMATION_ALLOWED] is False
     assert result[report.TRUSTED_HISTORY_MERGE_AUTHORIZED] is False
     assert result[report.TRUSTED_HISTORY_SEMANTIC_EQUIVALENCE_PROVEN] is False
+
+
+def test_action_report_renders_sanitized_security_diagnosis_without_authority() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    security_diagnosis = {
+        "collection_status": "collected",
+        "summary": {
+            "open_findings": 1,
+            "current_findings": 1,
+            "stale_findings": 0,
+            "scanner_metadata_false_positive_candidates": 0,
+            "intentional_test_fixture_candidates": 0,
+            "safe_mechanical_fix_candidates": 1,
+            "true_positive_fix_required": 0,
+        },
+        "decision_boundary": {
+            report.AUTOMATIC_SECURITY_FIX_ALLOWED: False,
+            report.AUTOMATIC_DISMISSAL_ALLOWED: False,
+        },
+        "diagnoses": [
+            {
+                "tool": "sdetkit-security-gate",
+                "rule_id": "SEC_DEBUG_PRINT",
+                "path": "src/sdetkit/reporter.py",
+                "line": 22,
+                "freshness": "current",
+                "classification": "_".join(("safe", "mechanical", "fix", "candidate")),
+                "recommended_action": "_".join(("propose", "stdout", "emission", "repair")),
+                "fix_proposal": "Replace direct output with explicit stdout emission.",
+                "human_review_required": True,
+            }
+        ],
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        security_finding_diagnosis=security_diagnosis,
+    )
+
+    assert "## Security finding diagnosis" in body
+    assert "Current findings: `1`" in body
+    assert "Mechanical fix proposals: `1`" in body
+    assert "Automatic security fix allowed: `false`" in body
+    assert "Automatic dismissal allowed: `false`" in body
+    assert "SEC_DEBUG_PRINT" in body
+    assert "src/sdetkit/reporter.py:22" in body
+    assert "Human review required: `true`" in body
+    assert "Replace direct output with explicit stdout emission." in body
+
+
+def test_write_comment_body_loads_security_diagnosis_artifact_for_operator_visibility(
+    tmp_path: Path,
+) -> None:
+    action_path = _write_json(
+        tmp_path / "action-report.json",
+        {
+            "status": "green",
+            "primary_blocker": {},
+            "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+            "recommended_actions": [],
+            "proof_commands": [],
+        },
+    )
+    intelligence_path = _write_json(
+        tmp_path / "check-intelligence.json",
+        {
+            "checks_seen": 1,
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "security_review": {"collected": True, "unresolved_findings": 0},
+        },
+    )
+    diagnosis_path = _write_json(
+        tmp_path / "security-finding-diagnosis.json",
+        {
+            "collection_status": "collected",
+            "summary": {"open_findings": 0, "current_findings": 0, "stale_findings": 0},
+            "decision_boundary": {
+                report.AUTOMATIC_SECURITY_FIX_ALLOWED: False,
+                report.AUTOMATIC_DISMISSAL_ALLOWED: False,
+            },
+            "diagnoses": [],
+        },
+    )
+    out = tmp_path / "comment.md"
+
+    report.write_comment_body(
+        action_report_path=action_path,
+        check_intelligence_path=intelligence_path,
+        security_finding_diagnosis_path=diagnosis_path,
+        out=out,
+    )
+
+    body = out.read_text(encoding="utf-8")
+    assert "## Security finding diagnosis" in body
+    assert "Open findings: `0`" in body
+    assert "Findings: none" in body
+    assert "Automatic dismissal allowed: `false`" in body
