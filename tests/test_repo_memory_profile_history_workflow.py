@@ -100,3 +100,36 @@ def test_repo_memory_history_never_uses_example_flake_history_as_trusted_evidenc
     assert "python -m sdetkit.trusted_flaky_test_registry_producer" in text
     assert "examples/kits/intelligence/flake-history.json" not in text
     assert "python -m sdetkit intelligence flake classify" not in text
+
+
+def test_repo_memory_history_collects_pr_scoped_reviewed_security_dispositions_read_only() -> None:
+    text = _workflow_text()
+
+    assert "pull-requests: read" in text
+    assert "security-events: read" in text
+    assert "Collect accepted-main reviewed security disposition inputs" in text
+    assert "commits/${GITHUB_SHA}/pulls?per_page=10" in text
+    assert "code-scanning/alerts?state=dismissed&pr=$pr_number&per_page=100" in text
+    assert "python -m sdetkit.security_reviewed_disposition_history" in text
+    assert (
+        "--associated-pr-json build/repo-memory-history/security-reviewed-dispositions/associated-merged-pr.json"
+        in text
+    )
+    assert (
+        "--dismissed-alerts-json build/repo-memory-history/security-reviewed-dispositions/dismissed-alerts.json"
+        in text
+    )
+    assert "--prior-history-jsonl" in text
+    assert "security-reviewed-disposition-history.jsonl" in text
+    assert "build/repo-memory-history/security-reviewed-dispositions/" in text
+
+
+def test_repo_memory_history_disposition_lane_never_writes_security_actions() -> None:
+    text = _workflow_text()
+
+    assert 'assert boundary["historical_disposition_authorizes_current_action"] is False' in text
+    assert 'assert boundary["automatic_security_fix_allowed"] is False' in text
+    assert 'assert boundary["automatic_dismissal_allowed"] is False' in text
+    assert "PATCH /repos/" not in text
+    assert "updateAlert" not in text
+    assert "dismissed_comment" not in text

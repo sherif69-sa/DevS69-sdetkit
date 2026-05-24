@@ -20,10 +20,13 @@ TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE = "_".join(
 )
 TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE = "_".join(("trusted", "test", "observation", "capture"))
 SECURITY_FINDING_DIAGNOSIS_MODULE = "_".join(("security", "finding", "diagnosis"))
+SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE = "_".join(
+    ("security", "reviewed", "disposition", "history")
+)
 NEXT_RECOMMENDED_PR = "/".join(
     (
         "feature",
-        "-".join(("security", "reviewed", "disposition", "history")),
+        "-".join(("security", "disposition", "diagnosis", "context")),
     )
 )
 
@@ -312,6 +315,23 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "PR Quality workflow",
             ),
             recommended_next_action="record human-reviewed fix and dismissal dispositions before considering any security automation",
+        ),
+        _component(
+            module=SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE,
+            role="record sanitized human-reviewed dismissed security findings from accepted-main merged PR evidence without authorizing reuse",
+            status="partially_aligned",
+            stages=("evidence", "history", "reporting"),
+            existing_artifacts=(
+                "security-reviewed-disposition-history.jsonl",
+                "security-reviewed-disposition-history-summary.json",
+                "security-reviewed-disposition-history-summary.md",
+            ),
+            integration_points=("RepoMemory Profile History workflow",),
+            gaps=(
+                "trusted reviewed disposition history is not yet consumed as advisory context by security finding diagnosis",
+                "historical dismissals must never authorize current finding actions",
+            ),
+            recommended_next_action="feed reviewed disposition history into diagnosis as read-only context while preserving manual authority",
         ),
         _component(
             module="adaptive_diagnosis",

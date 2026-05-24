@@ -7,6 +7,8 @@ on:
 permissions:
   contents: read
   actions: read
+  pull-requests: read
+  security-events: read
 
 concurrency:
   group: repo-memory-profile-history-main
@@ -212,7 +214,12 @@ jobs:
             exit 1
           fi
 
+          prior_security_disposition_jsonl="$(
+            find build/repo-memory-history/prior-download               -name security-reviewed-disposition-history.jsonl               -print               -quit
+          )"
+
           echo "prior_history_jsonl=$prior_history_jsonl" >> "$GITHUB_OUTPUT"
+          echo "prior_security_disposition_jsonl=$prior_security_disposition_jsonl" >> "$GITHUB_OUTPUT"
           echo "prior_run_id=$prior_run_id" >> "$GITHUB_OUTPUT"
           echo "prior_head_sha=$prior_head_sha" >> "$GITHUB_OUTPUT"
 
@@ -270,6 +277,126 @@ jobs:
           print("Trusted-main RepoMemory history snapshot passed.")
           PY
 
+      - name: Collect accepted-main reviewed security disposition inputs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          out_dir="build/repo-memory-history/security-reviewed-dispositions"
+          mkdir -p "$out_dir"
+
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            "repos/$REPOSITORY/commits/${GITHUB_SHA}/pulls?per_page=10" \
+            > "$out_dir/associated-merged-pr.json"
+
+          pr_number="$(
+            HEAD_SHA="$GITHUB_SHA" python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          candidates = json.loads(
+              Path("build/repo-memory-history/security-reviewed-dispositions/associated-merged-pr.json")
+              .read_text(encoding="utf-8")
+          )
+          matches = [
+              item
+              for item in candidates
+              if item.get("merged_at") and item.get("merge_commit_sha") == os.environ["HEAD_SHA"]
+          ]
+          if len(matches) > 1:
+              raise SystemExit("accepted-main commit maps to multiple merged PRs")
+          if matches:
+              print(matches[0]["number"])
+          PY
+          )"
+
+          collection_status="collected"
+          collection_reason=""
+          printf '[]\n' > "$out_dir/dismissed-alerts-raw.json"
+
+          if [ -n "$pr_number" ]; then
+            if ! gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/$REPOSITORY/code-scanning/alerts?state=dismissed&pr=$pr_number&per_page=100" \
+              > "$out_dir/dismissed-alerts-raw.json"; then
+              collection_status="unavailable"
+              collection_reason="GitHub code-scanning dismissed-alert evidence was unavailable or not permitted."
+              printf '[]\n' > "$out_dir/dismissed-alerts-raw.json"
+            fi
+          fi
+
+          COLLECTION_STATUS="$collection_status" COLLECTION_REASON="$collection_reason" python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          source = Path(
+              "build/repo-memory-history/security-reviewed-dispositions/dismissed-alerts-raw.json"
+          )
+          alerts = json.loads(source.read_text(encoding="utf-8"))
+          if not isinstance(alerts, list):
+              raise SystemExit("dismissed-alert API response must be a list")
+          payload = {
+              "collection_status": os.environ["COLLECTION_STATUS"],
+              "collection_reason": os.environ["COLLECTION_REASON"],
+              "alerts": alerts,
+          }
+          Path(
+              "build/repo-memory-history/security-reviewed-dispositions/dismissed-alerts.json"
+          ).write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
+      - name: Record trusted accepted-main reviewed security disposition history
+        shell: bash
+        env:
+          PRIOR_SECURITY_DISPOSITION_JSONL: ${{ steps.prior.outputs.prior_security_disposition_jsonl }}
+        run: |
+          set -euo pipefail
+
+          args=(
+            --associated-pr-json build/repo-memory-history/security-reviewed-dispositions/associated-merged-pr.json
+            --dismissed-alerts-json build/repo-memory-history/security-reviewed-dispositions/dismissed-alerts.json
+            --source-run-id "${GITHUB_RUN_ID}"
+            --source-head-sha "${GITHUB_SHA}"
+            --out-dir build/repo-memory-history/security-reviewed-dispositions/output
+            --format json
+          )
+
+          if [ -n "$PRIOR_SECURITY_DISPOSITION_JSONL" ]; then
+            args+=(--prior-history-jsonl "$PRIOR_SECURITY_DISPOSITION_JSONL")
+          fi
+
+          PYTHONPATH=src python -m sdetkit.security_reviewed_disposition_history \
+            "${args[@]}" \
+            > build/repo-memory-history/security-reviewed-dispositions/history-cli.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          summary = json.loads(
+              Path(
+                  "build/repo-memory-history/security-reviewed-dispositions/output/"
+                  "security-reviewed-disposition-history-summary.json"
+              ).read_text(encoding="utf-8")
+          )
+          assert summary["status"] == "reviewed_disposition_history_recorded"
+          assert summary["record_count"] >= 1
+          boundary = summary["decision_boundary"]
+          assert boundary["historical_disposition_authorizes_current_action"] is False
+          assert boundary["automatic_security_fix_allowed"] is False
+          assert boundary["automatic_dismissal_allowed"] is False
+          assert boundary["automation_allowed"] is False
+          assert boundary["merge_authorized"] is False
+          assert boundary["prior_history_is_read_only_input"] is True
+          print("Trusted accepted-main security disposition history passed.")
+          PY
+
       - name: Upload trusted main RepoMemory history artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
@@ -281,5 +408,6 @@ jobs:
             build/repo-memory-history/fixture-report/
             build/repo-memory-history/pattern-insights/
             build/repo-memory-history/flaky-test-registry/
+            build/repo-memory-history/security-reviewed-dispositions/
           if-no-files-found: error
           retention-days: 90
