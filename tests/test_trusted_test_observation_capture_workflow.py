@@ -12,12 +12,24 @@ def _full_ci_text() -> str:
 
 def test_full_ci_emits_junit_for_raw_observation_capture_without_extra_test_run() -> None:
     full_ci = _full_ci_text()
+    coverage_block = full_ci.split("- name: Coverage gate", 1)[1].split(
+        "- name: Normalize trusted-main test observations", 1
+    )[0]
 
-    assert "--junitxml=${{ runner.temp }}/sdetkit-trusted-test-input/junit.xml" in full_ci
+    assert 'PYTEST_ADDOPTS: "-n auto"' in full_ci
+    assert "--junitxml=${{ runner.temp }}/sdetkit-trusted-test-input/junit.xml" in coverage_block
     assert "- name: Coverage gate" in full_ci
     assert "id: coverage" in full_ci
     assert full_ci.count("bash quality.sh cov") == 1
     assert "python -m sdetkit.trusted_test_observation_capture" in full_ci
+
+
+def test_full_ci_does_not_use_runner_context_in_job_level_environment() -> None:
+    full_ci = _full_ci_text()
+    before_steps = full_ci.split("    steps:", 1)[0]
+
+    assert 'PYTEST_ADDOPTS: "-n auto"' in before_steps
+    assert "runner.temp" not in before_steps
 
 
 def test_full_ci_captures_observations_only_from_trusted_main_push() -> None:
