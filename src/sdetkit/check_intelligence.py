@@ -150,7 +150,7 @@ def _string(value: Any) -> str:
 
 
 def _slug(value: str) -> str:
-    slug = re.sub(r"[^A-Za-z0-9_.-]+", "-", value.strip().lower()).strip("-")
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", value.strip().lower()).strip("-")
     return slug or "check"
 
 
@@ -374,6 +374,14 @@ _SETUP_NOISE_CONTAINS = (
 def _is_setup_noise_line(line: str) -> bool:
     lowered = line.strip().lower()
     if not lowered:
+        return True
+    if "cache not found for input keys:" in lowered:
+        return True
+    if "cache entry deserialization failed" in lowered:
+        return True
+    if "python -m pytest" in lowered and not any(
+        token in lowered for token in ("failed", "failure", "error", "traceback", "assertion")
+    ):
         return True
     return lowered.startswith(_SETUP_NOISE_PREFIXES) or any(
         token in lowered for token in _SETUP_NOISE_CONTAINS
@@ -643,6 +651,21 @@ def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
 
     for index, line in enumerate(lines):
         stripped = line.strip()
+        pytest_node = re.search(
+            r"\bFAILED\s+((?:tests|src|tools|docs)/\S+::\S+)",
+            stripped,
+        )
+        if pytest_node:
+            return {
+                "line_number": index + 1,
+                "line": stripped,
+                "tool": "pytest",
+                "kind": "test_failure",
+                "context": _context_lines_around(lines, index + 1, context=context),
+            }
+
+    for index, line in enumerate(lines):
+        stripped = line.strip()
         lowered = stripped.lower()
         if not stripped or _is_setup_noise_line(stripped):
             continue
@@ -796,6 +819,11 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
     ]
 
     primary = diagnoses[0] if diagnoses else {}
+    if _string(first_failure.get("kind")).lower() == "test_failure":
+        for candidate in diagnoses:
+            if _string(candidate.get("code")).upper() == "PYTEST_ASSERTION_FAILURE":
+                primary = candidate
+                break
     runtime_traceback = _as_dict(first_failure.get("traceback"))
     if runtime_traceback and (
         not primary
