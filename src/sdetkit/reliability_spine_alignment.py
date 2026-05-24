@@ -14,10 +14,13 @@ REPLAYABLE_BENCHMARK_MODULE = "_".join(("replayable", "benchmark", "harness"))
 REPO_MEMORY_PROFILE_HISTORY_MODULE = "_".join(("repo", "memory", "profile", "history"))
 TRUSTED_HISTORY_EVIDENCE_MODULE = "_".join(("trusted", "history", "evidence"))
 FLAKY_TEST_REGISTRY_EVIDENCE_MODULE = "_".join(("flaky", "test", "registry", "evidence"))
+TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE = "_".join(
+    ("trusted", "flaky", "test", "registry", "producer")
+)
 NEXT_RECOMMENDED_PR = "/".join(
     (
         "feature",
-        "-".join(("trusted", "flaky", "test", "registry", "producer")),
+        "-".join(("trusted", "flaky", "test", "observation", "capture")),
     )
 )
 
@@ -446,6 +449,24 @@ def build_alignment_components() -> list[AlignmentComponent]:
             recommended_next_action="keep live benchmark evidence reporting-only until containment is proven",
         ),
         _component(
+            module=TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
+            role="emit an explicit trusted-main no-observation flaky-test registry artifact until real per-test history exists",
+            status="aligned",
+            stages=("evidence", "history", "reporting"),
+            existing_artifacts=(
+                "trusted-flaky-test-registry-producer.json",
+                "trusted-flaky-test-registry-producer.md",
+                "flaky-test-registry-evidence.json",
+                "flaky-test-registry-evidence.md",
+            ),
+            integration_points=(
+                "RepoMemory Profile History workflow",
+                FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
+                "repo_memory",
+            ),
+            recommended_next_action="add a provenance-checked per-test observation source before emitting populated registry entries",
+        ),
+        _component(
             module=FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
             role="normalize read-only flaky-test classification evidence for advisory RepoMemory ingestion",
             status="partially_aligned",
@@ -454,11 +475,15 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "flaky-test-registry-evidence.json",
                 "flaky-test-registry-evidence.md",
             ),
-            integration_points=("intelligence flake classify", "repo_memory"),
-            gaps=(
-                "trusted-main flaky-test evidence producer and PR Quality visibility are not yet connected",
+            integration_points=(
+                "intelligence flake classify",
+                TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
+                "repo_memory",
             ),
-            recommended_next_action="connect only provenance-checked trusted-main instability evidence",
+            gaps=(
+                "trusted per-test observation capture and PR Quality visibility are not yet connected",
+            ),
+            recommended_next_action="connect only provenance-checked observations before rendering populated instability history",
         ),
         _component(
             module="repo_memory",
@@ -477,10 +502,12 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "protected_verifier",
                 "pr_quality_runtime_proof_artifacts",
                 REPO_MEMORY_PROFILE_HISTORY_MODULE,
+                FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
+                TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
             ),
             gaps=(
                 "successful network-isolation proof is unavailable until a backend is verified",
-                "trusted-main flaky-test evidence producer and PR Quality visibility remain unconnected",
+                "trusted per-test observation capture and PR Quality visibility remain unconnected",
             ),
             recommended_next_action="surface only provenance-checked flaky-test instability context without expanding authority",
         ),
@@ -496,6 +523,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             integration_points=(
                 "repo_memory",
+                TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
                 TRUSTED_HISTORY_EVIDENCE_MODULE,
                 "RepoMemory Profile History workflow",
             ),

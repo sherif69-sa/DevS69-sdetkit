@@ -22,6 +22,10 @@ from sdetkit.repo_memory import (
     main,
     render_markdown,
 )
+from sdetkit.trusted_flaky_test_registry_producer import (
+    NO_TEST_OBSERVATIONS,
+    build_trusted_registry_evidence,
+)
 
 FIXTURES = Path("tests/fixtures/remediation_benchmark")
 SCENARIOS = [
@@ -562,3 +566,80 @@ def test_repo_memory_cli_accepts_advisory_flaky_registry_evidence(
     assert saved["flaky_test_registry"]["entry_count"] == 1
     assert saved["flaky_test_registry"]["decision_boundary"]["automation_allowed"] is False
     assert "Current failure suppression allowed: `false`" in markdown
+
+
+def test_repo_memory_ingests_trusted_main_no_observation_registry_without_claims() -> None:
+    profile = build_repo_memory_profile(
+        pattern_insights=_pattern_insights(),
+        benchmark_report=_benchmark_report(),
+        flaky_test_registry_evidence=build_trusted_registry_evidence(
+            source_run_id="run-1417",
+            source_head_sha="a5545fa1",
+        ),
+    )
+
+    flaky = profile["flaky_test_registry"]
+    assert flaky["collection_status"] == "collected"
+    assert flaky["entry_count"] == 0
+    assert flaky["entries"] == []
+    assert flaky["source"]["kind"] == "trusted_main_artifact"
+    assert flaky["source"]["observation_status"] == NO_TEST_OBSERVATIONS
+    assert flaky["source"]["observations_collected"] is False
+    assert flaky["decision_boundary"]["automation_allowed"] is False
+    assert flaky["decision_boundary"]["merge_authorized"] is False
+    assert "trusted per-test observation capture" in profile["recommended_next_action"]
+
+
+def test_repo_memory_rejects_unsupported_flaky_classification_schema() -> None:
+    evidence = _flaky_registry_evidence()
+    evidence["source"]["classification_schema"] = "unsupported.classification.v1"
+
+    try:
+        build_repo_memory_profile(
+            pattern_insights=_pattern_insights(),
+            benchmark_report=_benchmark_report(),
+            flaky_test_registry_evidence=evidence,
+        )
+    except ValueError as exc:
+        assert "classification schema is not supported" in str(exc)
+    else:
+        raise AssertionError("expected unsupported classification schema to be rejected")
+
+
+def test_repo_memory_rejects_entries_in_trusted_no_observation_registry() -> None:
+    evidence = build_trusted_registry_evidence(
+        source_run_id="run-1417",
+        source_head_sha="a5545fa1",
+    )
+    evidence["entries"] = [_flaky_registry_evidence()["entries"][0]]
+    evidence["summary"]["entry_count"] = 1
+    evidence["summary"]["flaky_test_count"] = 1
+
+    try:
+        build_repo_memory_profile(
+            pattern_insights=_pattern_insights(),
+            benchmark_report=_benchmark_report(),
+            flaky_test_registry_evidence=evidence,
+        )
+    except ValueError as exc:
+        assert "no-observation registry cannot contain entries" in str(exc)
+    else:
+        raise AssertionError("expected false trusted-main entry claim to be rejected")
+
+
+def test_repo_memory_markdown_renders_trusted_no_observation_status() -> None:
+    markdown = render_markdown(
+        build_repo_memory_profile(
+            pattern_insights=_pattern_insights(),
+            benchmark_report=_benchmark_report(),
+            flaky_test_registry_evidence=build_trusted_registry_evidence(
+                source_run_id="run-1417",
+                source_head_sha="a5545fa1",
+            ),
+        )
+    )
+
+    assert "Source kind: `trusted_main_artifact`" in markdown
+    assert "Observation status: `no_test_observations_available`" in markdown
+    assert "Entries: `0`" in markdown
+    assert "Automation allowed by flaky-test history: `false`" in markdown

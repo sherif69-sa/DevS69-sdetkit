@@ -349,10 +349,23 @@ def _flaky_test_registry(evidence: Mapping[str, Any]) -> JsonObject:
         raise ValueError("flaky-test registry evidence source kind is not supported")
     if not source_reference:
         raise ValueError("flaky-test registry evidence source reference is required")
+    if _string(source.get("classification_schema")) != "sdetkit.intelligence.flake.v1":
+        raise ValueError("flaky-test registry classification schema is not supported")
     if not _bool(source.get("input_read_only")):
         raise ValueError("flaky-test registry evidence input must be read-only")
     if _bool(source.get("commands_executed_by_reader")):
         raise ValueError("flaky-test registry evidence reader cannot execute commands")
+
+    observation_status = _string(source.get("observation_status"))
+    if source_kind == "trusted_main_artifact":
+        if _string(source.get("workflow")) != "RepoMemory Profile History":
+            raise ValueError("trusted-main flaky-test registry workflow is not supported")
+        if not _string(source.get("run_id")) or not _string(source.get("head_sha")):
+            raise ValueError("trusted-main flaky-test registry provenance is incomplete")
+        if observation_status != "no_test_observations_available":
+            raise ValueError("trusted-main flaky-test registry observation status is not supported")
+        if _bool(source.get("observations_collected")):
+            raise ValueError("trusted-main no-observation registry cannot claim observations")
 
     boundary = _as_dict(payload.get("decision_boundary"))
     expanded = [key for key in denied if _bool(boundary.get(key))]
@@ -411,20 +424,35 @@ def _flaky_test_registry(evidence: Mapping[str, Any]) -> JsonObject:
         raise ValueError("flaky-test registry evidence summary entry count is inconsistent")
     if _int(summary.get("flaky_test_count")) != len(entries):
         raise ValueError("flaky-test registry evidence summary flaky count is inconsistent")
+    if source_kind == "trusted_main_artifact" and entries:
+        raise ValueError("trusted-main no-observation registry cannot contain entries")
+
+    normalized_source: JsonObject = {
+        "kind": source_kind,
+        "reference": source_reference,
+        "classification_schema": _string(source.get("classification_schema")),
+        "input_read_only": True,
+        "commands_executed_by_reader": False,
+    }
+    if source_kind == "trusted_main_artifact":
+        normalized_source.update(
+            {
+                "workflow": _string(source.get("workflow")),
+                "run_id": _string(source.get("run_id")),
+                "head_sha": _string(source.get("head_sha")),
+                "observation_status": observation_status,
+                "observations_collected": False,
+            }
+        )
 
     return {
         "collection_status": "collected",
         "status": "advisory_registry_collected",
-        "source": {
-            "kind": source_kind,
-            "reference": source_reference,
-            "classification_schema": _string(source.get("classification_schema")),
-            "input_read_only": True,
-            "commands_executed_by_reader": False,
-        },
+        "source": normalized_source,
         "entries": entries,
         "entry_count": len(entries),
-        "note": (
+        "note": _string(payload.get("note"))
+        or (
             "Flaky-test evidence is advisory context only and cannot suppress "
             "a current failing contract."
         ),
@@ -582,7 +610,8 @@ def build_repo_memory_profile(
             ),
         },
         "recommended_next_action": (
-            "Surface runtime-proof and anti-cheat artifacts in PR Quality before any automation wiring."
+            "Establish trusted per-test observation capture before surfacing "
+            "populated flaky-test history in PR Quality."
         ),
     }
 
@@ -593,6 +622,7 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
     provenance = _as_dict(profile.get("proof_provenance"))
     failure_patterns = _as_dict(profile.get("failure_patterns"))
     flaky = _as_dict(profile.get("flaky_test_registry"))
+    flaky_source = _as_dict(flaky.get("source"))
     boundary = _as_dict(profile.get("decision_boundary"))
 
     lines = [
@@ -703,6 +733,11 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
             "",
             f"- Collection status: `{_string(flaky.get('collection_status'))}`",
             f"- Status: `{_string(flaky.get('status'))}`",
+            f"- Source kind: `{_string(flaky_source.get('kind')) or 'not_reported'}`",
+            (
+                "- Observation status: "
+                f"`{_string(flaky_source.get('observation_status')) or 'not_reported'}`"
+            ),
             f"- Entries: `{len(_as_list(flaky.get('entries')))}`",
             (
                 "- Automatic quarantine allowed: "

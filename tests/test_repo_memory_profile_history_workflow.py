@@ -28,10 +28,11 @@ def test_repo_memory_history_builds_fresh_live_profile_from_merged_code() -> Non
 
     workspace = text.index("python -m sdetkit.pr_quality_live_benchmark_workspace")
     live_report = text.index("python -m sdetkit.replayable_benchmark_harness")
+    producer = text.index("python -m sdetkit.trusted_flaky_test_registry_producer")
     profile = text.index("python -m sdetkit.repo_memory")
     history = text.index("python -m sdetkit.repo_memory_profile_history")
 
-    assert workspace < live_report < profile < history
+    assert workspace < live_report < producer < profile < history
     assert "${RUNNER_TEMP}/sdetkit-repo-memory-history-live-repositories" in text
     assert (
         "--live-benchmark-report build/repo-memory-history/live-report/benchmark-report.json"
@@ -41,6 +42,17 @@ def test_repo_memory_history_builds_fresh_live_profile_from_merged_code() -> Non
     assert 'assert boundary["automation_allowed"] is False' in text
     assert 'assert boundary["merge_authorized"] is False' in text
     assert 'assert boundary["semantic_equivalence_proven"] is False' in text
+    assert '--source-run-id "${GITHUB_RUN_ID}"' in text
+    assert '--source-head-sha "${GITHUB_SHA}"' in text
+    assert (
+        "--flaky-test-registry-evidence build/repo-memory-history/flaky-test-registry/flaky-test-registry-evidence.json"
+        in text
+    )
+    assert 'assert flaky["entry_count"] == 0' in text
+    assert (
+        'assert flaky["source"]["observation_status"] == "no_test_observations_available"' in text
+    )
+    assert 'assert flaky["source"]["observations_collected"] is False' in text
 
 
 def test_repo_memory_history_imports_only_successful_ancestor_main_history() -> None:
@@ -64,6 +76,7 @@ def test_repo_memory_history_uploads_snapshot_without_repository_mutation() -> N
     assert "Upload trusted main RepoMemory history artifact" in text
     assert "name: repo-memory-profile-history" in text
     assert "build/repo-memory-history/output/" in text
+    assert "build/repo-memory-history/flaky-test-registry/" in text
     assert "repo-memory-profile-history.jsonl" in text
     assert "git add " not in text
     assert "git commit " not in text
@@ -79,3 +92,11 @@ def test_repo_memory_history_verifies_no_authority_boundary() -> None:
     assert 'assert boundary["merge_authorized"] is False' in text
     assert 'assert boundary["semantic_equivalence_proven"] is False' in text
     assert 'assert boundary["prior_history_is_read_only_input"] is True' in text
+
+
+def test_repo_memory_history_never_uses_example_flake_history_as_trusted_evidence() -> None:
+    text = _workflow_text()
+
+    assert "python -m sdetkit.trusted_flaky_test_registry_producer" in text
+    assert "examples/kits/intelligence/flake-history.json" not in text
+    assert "python -m sdetkit intelligence flake classify" not in text
