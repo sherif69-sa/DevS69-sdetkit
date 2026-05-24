@@ -46,6 +46,7 @@ jobs:
             build/repo-memory-history/fixture-report \
             build/repo-memory-history/live-report \
             build/repo-memory-history/pattern-insights \
+            build/repo-memory-history/flaky-test-registry \
             build/repo-memory-history/profile
 
           live_root="${RUNNER_TEMP}/sdetkit-repo-memory-history-live-repositories"
@@ -106,10 +107,18 @@ jobs:
           )
           PY
 
+          PYTHONPATH=src python -m sdetkit.trusted_flaky_test_registry_producer \
+            --source-run-id "${GITHUB_RUN_ID}" \
+            --source-head-sha "${GITHUB_SHA}" \
+            --out-dir build/repo-memory-history/flaky-test-registry \
+            --format json \
+            > build/repo-memory-history/flaky-test-registry-cli.json
+
           PYTHONPATH=src python -m sdetkit.repo_memory \
             --pattern-insights build/repo-memory-history/pattern-insights/pattern-insights.json \
             --benchmark-report build/repo-memory-history/fixture-report/benchmark-report.json \
             --live-benchmark-report build/repo-memory-history/live-report/benchmark-report.json \
+            --flaky-test-registry-evidence build/repo-memory-history/flaky-test-registry/flaky-test-registry-evidence.json \
             --out-dir build/repo-memory-history/profile \
             --format json \
             > build/repo-memory-history/profile-cli.json
@@ -130,6 +139,16 @@ jobs:
           assert profile["proof_provenance"]["expected_failed_scenario_count"] == 5
           assert profile["proof_provenance"]["network_boundary_blocked_scenario_count"] == 1
           assert profile["proof_provenance"]["anti_cheat_rejection_scenario_count"] == 2
+
+          flaky = profile["flaky_test_registry"]
+          assert flaky["collection_status"] == "collected"
+          assert flaky["entry_count"] == 0
+          assert flaky["source"]["kind"] == "trusted_main_artifact"
+          assert flaky["source"]["workflow"] == "RepoMemory Profile History"
+          assert flaky["source"]["observation_status"] == "no_test_observations_available"
+          assert flaky["source"]["observations_collected"] is False
+          assert flaky["decision_boundary"]["automation_allowed"] is False
+          assert flaky["decision_boundary"]["merge_authorized"] is False
 
           boundary = profile["decision_boundary"]
           assert boundary["automation_allowed"] is False
@@ -261,5 +280,6 @@ jobs:
             build/repo-memory-history/live-report/
             build/repo-memory-history/fixture-report/
             build/repo-memory-history/pattern-insights/
+            build/repo-memory-history/flaky-test-registry/
           if-no-files-found: error
           retention-days: 90
