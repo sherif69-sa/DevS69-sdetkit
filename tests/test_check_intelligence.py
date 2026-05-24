@@ -771,3 +771,81 @@ def test_check_intelligence_prefers_explicit_pytest_failed_node_over_summary_and
     assert "FAILURES" not in first["line"]
     assert failed["diagnosis"]["code"] == "PYTEST_ASSERTION_FAILURE"
     assert failed["safe_to_auto_fix"] is False
+
+
+def test_check_intelligence_does_not_assign_single_unrelated_log_to_codeql(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {"name": "CodeQL", "status": "completed", "conclusion": "failure"},
+                {
+                    "name": "PR Quality local quality gate",
+                    "status": "completed",
+                    "conclusion": "failure",
+                },
+            ]
+        },
+    )
+    logs_dir = tmp_path / "logs"
+    _write(
+        logs_dir / "02-pr-quality-local-quality-gate.log",
+        "FAILED tests/test_local_quality.py::test_contract - AssertionError\n",
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(
+        checks_json=checks,
+        logs_dir=logs_dir,
+    )
+    failed_by_name = {item["name"]: item for item in intelligence["failed_checks"]}
+
+    codeql = failed_by_name["CodeQL"]
+    assert codeql["log_collected"] is False
+    assert not codeql["first_failure"]
+    assert codeql["safe_to_auto_fix"] is False
+
+    local_gate = failed_by_name["PR Quality local quality gate"]
+    assert local_gate["log_collected"] is True
+    assert local_gate["first_failure"]["tool"] == "pytest"
+    assert local_gate["first_failure"]["kind"] == "test_failure"
+
+
+def test_check_intelligence_does_not_assign_fast_ci_log_to_generic_ci_check(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {"name": "ci", "status": "completed", "conclusion": "failure"},
+                {
+                    "name": "Fast CI lane (py3.11)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                },
+            ]
+        },
+    )
+    logs_dir = tmp_path / "logs"
+    _write(
+        logs_dir / "01-fast-ci-lane-py3-11.log",
+        "FAILED tests/test_fast_lane.py::test_contract - AssertionError\n",
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(
+        checks_json=checks,
+        logs_dir=logs_dir,
+    )
+    failed_by_name = {item["name"]: item for item in intelligence["failed_checks"]}
+
+    generic = failed_by_name["ci"]
+    assert generic["log_collected"] is False
+    assert not generic["first_failure"]
+    assert generic["safe_to_auto_fix"] is False
+
+    fast = failed_by_name["Fast CI lane (py3.11)"]
+    assert fast["log_collected"] is True
+    assert fast["first_failure"]["tool"] == "pytest"
+    assert fast["first_failure"]["kind"] == "test_failure"

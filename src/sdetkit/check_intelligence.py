@@ -252,7 +252,6 @@ def _record_log_text(record: JsonObject, logs_dir: Path | None, name: str) -> st
         return ""
 
     slug = _slug(name)
-    compact_slug = slug.replace("-", "")
     exact_candidates = [
         logs_dir / f"{slug}.log",
         logs_dir / f"{slug}.txt",
@@ -263,7 +262,6 @@ def _record_log_text(record: JsonObject, logs_dir: Path | None, name: str) -> st
         if candidate.exists() and candidate.is_file():
             return candidate.read_text(encoding="utf-8", errors="ignore")
 
-    name_tokens = {token for token in slug.split("-") if token}
     readable_files = [
         candidate
         for candidate in sorted(logs_dir.rglob("*"))
@@ -271,22 +269,9 @@ def _record_log_text(record: JsonObject, logs_dir: Path | None, name: str) -> st
     ]
     for candidate in readable_files:
         candidate_slug = _slug(candidate.stem)
-        candidate_compact = candidate_slug.replace("-", "")
-        candidate_tokens = {token for token in candidate_slug.split("-") if token}
-
-        if (
-            slug == candidate_slug
-            or slug in candidate_slug
-            or candidate_slug in slug
-            or compact_slug == candidate_compact
-            or compact_slug in candidate_compact
-            or candidate_compact in compact_slug
-            or (name_tokens and name_tokens.issubset(candidate_tokens))
-        ):
+        collector_slug = re.sub(r"^[0-9]+-", "", candidate_slug)
+        if candidate_slug == slug or collector_slug == slug:
             return candidate.read_text(encoding="utf-8", errors="ignore")
-
-    if len(readable_files) == 1:
-        return readable_files[0].read_text(encoding="utf-8", errors="ignore")
 
     return ""
 
