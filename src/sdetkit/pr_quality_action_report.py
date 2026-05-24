@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +32,8 @@ TRUSTED_HISTORY_MERGE_AUTHORIZED = "_".join(("trusted", "history", "merge", "aut
 TRUSTED_HISTORY_SEMANTIC_EQUIVALENCE_PROVEN = "_".join(
     ("trusted", "history", "semantic", "equivalence", "proven")
 )
+AUTOMATIC_SECURITY_FIX_ALLOWED = "_".join(("automatic", "security", "fix", "allowed"))
+AUTOMATIC_DISMISSAL_ALLOWED = "_".join(("automatic", "dismissal", "allowed"))
 
 BANNED_EDUCATIONAL_PHRASES = (
     "Quality is green, so the review focus is not coverage.",
@@ -291,6 +294,72 @@ def _evidence_lines(check_intelligence: JsonObject, action_report: JsonObject) -
                 f"- Code scanning {freshness} finding: `{location}` "
                 f"(`{rule_id}`, severity=`{severity}`), action=`{action}`"
             )
+
+    return lines
+
+
+def _security_finding_diagnosis_lines(security_finding_diagnosis: JsonObject | None) -> list[str]:
+    report = _as_dict(security_finding_diagnosis)
+    if not report:
+        return []
+
+    summary = _as_dict(report.get("summary"))
+    boundary = _as_dict(report.get("decision_boundary"))
+    lines = [
+        f"- Collection status: `{_string(report.get('collection_status') or 'unknown')}`",
+        f"- Open findings: `{_int(summary.get('open_findings'))}`",
+        f"- Current findings: `{_int(summary.get('current_findings'))}`",
+        f"- Stale findings: `{_int(summary.get('stale_findings'))}`",
+        (
+            "- Metadata false-positive candidates: "
+            f"`{_int(summary.get('scanner_metadata_false_positive_candidates'))}`"
+        ),
+        (
+            "- Test-fixture candidates: "
+            f"`{_int(summary.get('intentional_test_fixture_candidates'))}`"
+        ),
+        (f"- Mechanical fix proposals: `{_int(summary.get('safe_mechanical_fix_candidates'))}`"),
+        f"- True-positive fixes required: `{_int(summary.get('true_positive_fix_required'))}`",
+        (
+            "- Automatic security fix allowed: "
+            f"`{str(bool(boundary.get(AUTOMATIC_SECURITY_FIX_ALLOWED, False))).lower()}`"
+        ),
+        (
+            "- Automatic dismissal allowed: "
+            f"`{str(bool(boundary.get(AUTOMATIC_DISMISSAL_ALLOWED, False))).lower()}`"
+        ),
+    ]
+
+    findings = [_as_dict(item) for item in _as_list(report.get("diagnoses")) if _as_dict(item)]
+    if not findings:
+        lines.append("- Findings: none")
+        return lines
+
+    lines.append("- Findings:")
+    for finding in findings[:5]:
+        path = _string(finding.get("path") or "unknown")
+        line = _string(finding.get("line"))
+        location = f"{path}:{line}" if line else path
+        rule_id = _string(finding.get("rule_id") or "unknown")
+        tool = _string(finding.get("tool") or "unknown")
+        freshness = _string(finding.get("freshness") or "unknown")
+        classification = _string(finding.get("classification") or "unknown")
+        action = _string(finding.get("recommended_action") or "review_current_finding")
+        lines.append(
+            f"  - `{rule_id}` at `{location}`: tool=`{tool}`, "
+            f"freshness=`{freshness}`, classification=`{classification}`, action=`{action}`"
+        )
+        proposal = _string(finding.get("fix_proposal"))
+        if proposal:
+            lines.append(f"    - Proposal: {proposal}")
+        lines.append(
+            "    - Human review required: "
+            f"`{str(bool(finding.get('human_review_required', True))).lower()}`"
+        )
+
+    remaining = len(findings) - 5
+    if remaining > 0:
+        lines.append(f"  - ... `{remaining}` more")
 
     return lines
 
@@ -922,6 +991,7 @@ def render_comment_body(
     safe_fix_outcome: JsonObject | None = None,
     trajectory_records: list[JsonObject] | None = None,
     runtime_proof_artifacts: JsonObject | None = None,
+    security_finding_diagnosis: JsonObject | None = None,
 ) -> str:
     evidence_narrative = evidence_narrative or {}
     safe_fix_outcome = safe_fix_outcome or _as_dict(check_intelligence.get("safe_fix_outcome"))
@@ -960,6 +1030,10 @@ def render_comment_body(
 
     if evidence_signal_lines:
         lines.extend(["## " + evidence_signal_heading, "", *evidence_signal_lines, ""])
+
+    security_diagnosis = _security_finding_diagnosis_lines(security_finding_diagnosis)
+    if security_diagnosis:
+        lines.extend(["## Security finding diagnosis", "", *security_diagnosis, ""])
 
     patch_plan = _patch_plan_lines(evidence_narrative)
     if patch_plan:
@@ -1045,6 +1119,7 @@ def write_comment_body(
     evidence_narrative_path: Path | None = None,
     trajectory_jsonl_path: Path | None = None,
     runtime_proof_artifacts_path: Path | None = None,
+    security_finding_diagnosis_path: Path | None = None,
     failure_bundle_out_dir: Path | None = None,
     pr_number: int = 0,
     head_sha: str = "",
@@ -1055,6 +1130,7 @@ def write_comment_body(
     evidence_narrative = _read_json(evidence_narrative_path)
     trajectory_records = _read_jsonl(trajectory_jsonl_path)
     runtime_proof_artifacts = _read_json(runtime_proof_artifacts_path)
+    security_finding_diagnosis = _read_json(security_finding_diagnosis_path)
 
     body = render_comment_body(
         action_report=action_report,
@@ -1062,6 +1138,7 @@ def write_comment_body(
         evidence_narrative=evidence_narrative,
         trajectory_records=trajectory_records,
         runtime_proof_artifacts=runtime_proof_artifacts,
+        security_finding_diagnosis=security_finding_diagnosis,
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(body, encoding="utf-8")
@@ -1241,6 +1318,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--evidence-narrative", type=Path)
     parser.add_argument("--trajectory-jsonl", type=Path)
     parser.add_argument("--runtime-proof-artifacts", type=Path)
+    parser.add_argument("--security-finding-diagnosis", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--failure-bundle-out-dir", type=Path)
     parser.add_argument("--pr-number", type=int, default=0)
@@ -1257,13 +1335,14 @@ def main(argv: list[str] | None = None) -> int:
         evidence_narrative_path=args.evidence_narrative,
         trajectory_jsonl_path=args.trajectory_jsonl,
         runtime_proof_artifacts_path=args.runtime_proof_artifacts,
+        security_finding_diagnosis_path=args.security_finding_diagnosis,
         out=args.out,
         failure_bundle_out_dir=args.failure_bundle_out_dir,
         pr_number=args.pr_number,
         head_sha=args.head_sha,
         base_sha=args.base_sha,
     )
-    print(json.dumps(result, indent=2, sort_keys=True))
+    sys.stdout.write(json.dumps(result, indent=2, sort_keys=True) + "\n")
     return 0
 
 

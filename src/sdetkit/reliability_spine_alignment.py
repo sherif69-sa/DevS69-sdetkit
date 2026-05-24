@@ -23,7 +23,7 @@ SECURITY_FINDING_DIAGNOSIS_MODULE = "_".join(("security", "finding", "diagnosis"
 NEXT_RECOMMENDED_PR = "/".join(
     (
         "feature",
-        "-".join(("security", "diagnosis", "pr", "quality", "visibility")),
+        "-".join(("security", "reviewed", "disposition", "history")),
     )
 )
 
@@ -299,7 +299,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
         _component(
             module=SECURITY_FINDING_DIAGNOSIS_MODULE,
             role="diagnose current and stale security findings into sanitized fix-or-review proposals without authorizing action",
-            status="partially_aligned",
+            status="aligned",
             stages=("evidence", "diagnosis", "decision", "reporting"),
             existing_artifacts=(
                 "security-finding-diagnosis.json",
@@ -308,13 +308,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
             integration_points=(
                 "security_review_evidence",
                 "check_intelligence",
+                "pr_quality_action_report",
                 "PR Quality workflow",
             ),
-            gaps=(
-                "diagnosis artifacts are uploaded but are not yet rendered in the PR Quality operator narrative",
-                "automatic security fixes and automatic dismissals remain intentionally disallowed",
-            ),
-            recommended_next_action="surface sanitized security diagnosis proposals in PR Quality while preserving human authority",
+            recommended_next_action="record human-reviewed fix and dismissal dispositions before considering any security automation",
         ),
         _component(
             module="adaptive_diagnosis",
