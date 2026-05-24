@@ -128,6 +128,17 @@ def classify_check_failure(
         "\n".join(value for value in (first_line, context_text, log_text) if value)
     )
 
+    if kind == "check_run_annotation":
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "safe_to_auto_fix": False,
+            "strategy": REVIEW_FIRST_STRATEGY,
+            "category": "review_first",
+            "affected_files": affected_files,
+            "reason": "Sanitized Check Run annotation evidence is review-first and cannot authorize mutation.",
+            "proof_commands": [],
+        }
+
     if _contains_any(combined, UNSAFE_REVIEW_MARKERS) and not _contains_any(
         combined,
         SAFE_FORMAT_MARKERS,
