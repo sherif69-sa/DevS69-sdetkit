@@ -133,3 +133,20 @@ def test_repo_memory_history_disposition_lane_never_writes_security_actions() ->
     assert "PATCH /repos/" not in text
     assert "updateAlert" not in text
     assert "dismissed_comment" not in text
+
+
+def test_repo_memory_history_filters_dismissed_security_evidence_to_merged_pr_changed_paths() -> (
+    None
+):
+    text = _workflow_text()
+    assert "pulls/$pr_number/files?per_page=100" in text
+    assert "changed-files.json" in text
+    assert (
+        "--changed-files-json build/repo-memory-history/security-reviewed-dispositions/changed-files.json"
+        in text
+    )
+    assert (
+        'assert summary["latest_record"]["pr_scope_verification"] == "changed_paths_proven"' in text
+    )
+    assert 'assert summary["latest_record"]["alerts_excluded_outside_changed_paths"] >= 0' in text
+    assert "gh api --paginate" in text

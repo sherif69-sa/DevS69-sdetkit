@@ -17,8 +17,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = ".".join(("sdetkit", "security", "reviewed", "disposition", "history", "v1"))
+SCHEMA_VERSION = ".".join(("sdetkit", "security", "reviewed", "disposition", "history", "v2"))
 RECORD_SCHEMA_VERSION = ".".join(
+    ("sdetkit", "security", "reviewed", "disposition", "history", "record", "v2")
+)
+UNVERIFIED_RECORD_SCHEMA_VERSION = ".".join(
     ("sdetkit", "security", "reviewed", "disposition", "history", "record", "v1")
 )
 DEFAULT_OUT_DIR = Path("build") / "repo-memory-history" / "security-reviewed-dispositions"
@@ -37,6 +40,17 @@ HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION = "_".join(
     ("historical", "disposition", "authorizes", "current", "action")
 )
 PRIOR_HISTORY_READ_ONLY_INPUT = "_".join(("prior", "history", "is", "read", "only", "input"))
+PR_SCOPE_VERIFICATION = "_".join(("pr", "scope", "verification"))
+CHANGED_PATHS_PROVEN = "_".join(("changed", "paths", "proven"))
+PATH_IN_MERGED_PR_CHANGED_FILES = "_".join(("path", "in", "merged", "pr", "changed", "files"))
+MERGED_PR_CHANGED_PATH_COUNT = "_".join(("merged", "pr", "changed", "path", "count"))
+ALERTS_RETURNED_BY_PR_FILTER = "_".join(("alerts", "returned", "by", "pr", "filter"))
+ALERTS_EXCLUDED_OUTSIDE_CHANGED_PATHS = "_".join(
+    ("alerts", "excluded", "outside", "changed", "paths")
+)
+IGNORED_UNVERIFIED_PRIOR_RECORD_COUNT = "_".join(
+    ("ignored", "unverified", "prior", "record", "count")
+)
 
 JsonObject = dict[str, Any]
 
@@ -137,6 +151,24 @@ def _select_merged_pr(payload: Any, *, source_head_sha: str) -> JsonObject:
     return matches[0] if matches else {}
 
 
+def _changed_paths(payload: Any) -> set[str]:
+    files = payload if isinstance(payload, list) else _as_list(_as_dict(payload).get("files"))
+    paths: set[str] = set()
+    for item in files:
+        data = _as_dict(item)
+        for key in ("filename", "previous_filename"):
+            item_path = _text(data.get(key))
+            if item_path:
+                paths.add(item_path)
+    return paths
+
+
+def _alert_path(alert: Mapping[str, Any]) -> str:
+    instance = _as_dict(alert.get("most_recent_instance"))
+    location = _as_dict(instance.get("location"))
+    return _text(location.get("path"))
+
+
 def _alert_payload(payload: Any) -> tuple[str, str, list[JsonObject]]:
     if isinstance(payload, list):
         return COLLECTED, "", [_as_dict(item) for item in payload if isinstance(item, dict)]
@@ -181,6 +213,7 @@ def _sanitize_dismissed_alert(alert: Mapping[str, Any], *, pull_number: int) -> 
         "dismissed_at": dismissed_at,
         "dismissed_reason": dismissed_reason,
         "dismissed_comment_present": bool(_text(alert.get("dismissed_comment"))),
+        PATH_IN_MERGED_PR_CHANGED_FILES: True,
     }
     return {
         "disposition_id": _stable_hash(stable),
@@ -195,17 +228,39 @@ def validate_record(record: Mapping[str, Any]) -> None:
         _as_dict(record.get("decision_boundary")),
         source="reviewed security disposition record",
     )
+    source = _as_dict(record.get("source"))
+    if (
+        _bool(source.get("merged_pr_present"))
+        and source.get(PR_SCOPE_VERIFICATION) != CHANGED_PATHS_PROVEN
+    ):
+        raise ValueError("reviewed disposition record lacks merged-PR changed-path provenance")
     for disposition in _as_list(record.get("reviewed_dispositions")):
         item = _as_dict(disposition)
         if _text(item.get("state")) != DISMISSED:
             raise ValueError("reviewed disposition record contains non-dismissed security state")
         if "dismissed_comment" in item:
             raise ValueError("reviewed disposition record must not persist dismissal comment text")
+        if item.get(PATH_IN_MERGED_PR_CHANGED_FILES) is not True:
+            raise ValueError("reviewed disposition is not proven to be in merged-PR changed files")
+
+
+def _import_verified_prior_records(records: list[JsonObject]) -> tuple[list[JsonObject], int]:
+    verified: list[JsonObject] = []
+    ignored_unverified = 0
+    for record in records:
+        schema = _text(record.get("schema_version"))
+        if schema == UNVERIFIED_RECORD_SCHEMA_VERSION:
+            ignored_unverified += 1
+            continue
+        validate_record(record)
+        verified.append(record)
+    return verified, ignored_unverified
 
 
 def build_history_record(
     *,
     associated_pr_payload: Any,
+    changed_files_payload: Any,
     dismissed_alerts_payload: Any,
     source_run_id: str,
     source_head_sha: str,
@@ -219,14 +274,20 @@ def build_history_record(
         raise ValueError("source_head_sha is required")
 
     merged_pr = _select_merged_pr(associated_pr_payload, source_head_sha=head_sha)
+    changed_paths = _changed_paths(changed_files_payload)
     collection_status, collection_reason, alerts = _alert_payload(dismissed_alerts_payload)
     if alerts and not merged_pr:
         raise ValueError("dismissed alerts cannot be recorded without an associated merged PR")
+    if merged_pr and not changed_paths:
+        raise ValueError("merged PR changed-file provenance is required for disposition history")
 
     pull_number = _int(merged_pr.get("number"))
+    scoped_alerts = [
+        alert for alert in alerts if _alert_path(alert) and _alert_path(alert) in changed_paths
+    ]
     dispositions = (
         sorted(
-            [_sanitize_dismissed_alert(alert, pull_number=pull_number) for alert in alerts],
+            [_sanitize_dismissed_alert(alert, pull_number=pull_number) for alert in scoped_alerts],
             key=lambda item: (
                 _text(item.get("path")),
                 _int(item.get("line")),
@@ -246,6 +307,10 @@ def build_history_record(
         "merged_pr_merged_at": _text(merged_pr.get("merged_at")),
         "collection_status": collection_status,
         "collection_reason": collection_reason,
+        PR_SCOPE_VERIFICATION: CHANGED_PATHS_PROVEN if merged_pr else "",
+        MERGED_PR_CHANGED_PATH_COUNT: len(changed_paths),
+        ALERTS_RETURNED_BY_PR_FILTER: len(alerts),
+        ALERTS_EXCLUDED_OUTSIDE_CHANGED_PATHS: len(alerts) - len(scoped_alerts),
     }
     stable = {
         "source": source,
@@ -296,6 +361,7 @@ def build_summary(
     history_path: Path,
     prior_history_collected: bool,
     prior_record_count: int,
+    ignored_unverified_prior_record_count: int,
 ) -> JsonObject:
     for record in records:
         validate_record(record)
@@ -314,6 +380,7 @@ def build_summary(
         "history_path": history_path.as_posix(),
         "prior_history_collected": prior_history_collected,
         "prior_record_count": prior_record_count,
+        IGNORED_UNVERIFIED_PRIOR_RECORD_COUNT: ignored_unverified_prior_record_count,
         "appended": appended,
         "record_count": len(records),
         "collection_status_counts": dict(sorted(status_counts.items())),
@@ -326,6 +393,11 @@ def build_summary(
             "merged_pr_present": _bool(latest_source.get("merged_pr_present")),
             "collection_status": _text(latest_source.get("collection_status")),
             "reviewed_disposition_count": len(latest_dispositions),
+            PR_SCOPE_VERIFICATION: _text(latest_source.get(PR_SCOPE_VERIFICATION)),
+            ALERTS_RETURNED_BY_PR_FILTER: _int(latest_source.get(ALERTS_RETURNED_BY_PR_FILTER)),
+            ALERTS_EXCLUDED_OUTSIDE_CHANGED_PATHS: _int(
+                latest_source.get(ALERTS_EXCLUDED_OUTSIDE_CHANGED_PATHS)
+            ),
         },
         "decision_boundary": _decision_boundary(),
     }
@@ -341,8 +413,17 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
             f"- Status: `{_text(summary.get('status'))}`",
             f"- Records: `{_int(summary.get('record_count'))}`",
             f"- Reviewed dispositions: `{_int(summary.get('reviewed_disposition_count'))}`",
+            (
+                "- Ignored unverified prior records: "
+                f"`{_int(summary.get(IGNORED_UNVERIFIED_PRIOR_RECORD_COUNT))}`"
+            ),
             f"- Latest accepted main head: `{_text(latest.get('source_head_sha'))}`",
             f"- Latest merged PR: `{_int(latest.get('merged_pr_number'))}`",
+            f"- Latest PR scope verification: `{_text(latest.get(PR_SCOPE_VERIFICATION))}`",
+            (
+                "- Latest excluded out-of-scope alerts: "
+                f"`{_int(latest.get(ALERTS_EXCLUDED_OUTSIDE_CHANGED_PATHS))}`"
+            ),
             (f"- Latest reviewed dispositions: `{_int(latest.get('reviewed_disposition_count'))}`"),
             "",
             "## Boundary",
@@ -388,6 +469,7 @@ def write_summary(summary: Mapping[str, Any], *, out_dir: Path) -> dict[str, str
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m sdetkit.security_reviewed_disposition_history")
     parser.add_argument("--associated-pr-json", type=Path, required=True)
+    parser.add_argument("--changed-files-json", type=Path, required=True)
     parser.add_argument("--dismissed-alerts-json", type=Path, required=True)
     parser.add_argument("--prior-history-jsonl", type=Path)
     parser.add_argument("--source-run-id", required=True)
@@ -405,9 +487,11 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError(
                 f"prior disposition history input does not exist: {args.prior_history_jsonl}"
             )
-        prior_records = _read_jsonl(args.prior_history_jsonl)
+        raw_prior_records = _read_jsonl(args.prior_history_jsonl)
+        prior_records, ignored_unverified = _import_verified_prior_records(raw_prior_records)
         record = build_history_record(
             associated_pr_payload=_read_json(args.associated_pr_json),
+            changed_files_payload=_read_json(args.changed_files_json),
             dismissed_alerts_payload=_read_json(args.dismissed_alerts_json),
             source_run_id=args.source_run_id,
             source_head_sha=args.source_head_sha,
@@ -420,7 +504,8 @@ def main(argv: list[str] | None = None) -> int:
             appended=appended,
             history_path=history_path,
             prior_history_collected=args.prior_history_jsonl is not None,
-            prior_record_count=len(prior_records),
+            prior_record_count=len(raw_prior_records),
+            ignored_unverified_prior_record_count=ignored_unverified,
         )
         artifacts = write_summary(summary, out_dir=args.out_dir)
         artifacts["history_jsonl"] = history_path.as_posix()
@@ -432,6 +517,7 @@ def main(argv: list[str] | None = None) -> int:
         "status": summary["status"],
         "record_count": summary["record_count"],
         "reviewed_disposition_count": summary["reviewed_disposition_count"],
+        IGNORED_UNVERIFIED_PRIOR_RECORD_COUNT: summary[IGNORED_UNVERIFIED_PRIOR_RECORD_COUNT],
         "appended": summary["appended"],
         "artifacts": artifacts,
     }
