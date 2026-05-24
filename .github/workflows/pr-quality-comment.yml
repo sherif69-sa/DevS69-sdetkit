@@ -346,6 +346,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           mkdir -p build/pr-quality
           {
@@ -562,6 +563,32 @@ jobs:
             > build/pr-quality/trusted-history/selected-run-id.txt
           printf '%s\n' "$trusted_history_head_sha" \
             > build/pr-quality/trusted-history/selected-head-sha.txt
+
+          reviewed_disposition_history="$(
+            find build/pr-quality/trusted-history/download \
+              -name security-reviewed-disposition-history.jsonl \
+              -print \
+              -quit
+          )"
+          security_diagnosis_args=(
+            --review-threads-json build/pr-quality/security-review/review-threads.json
+            --code-scanning-alerts-json build/pr-quality/code-scanning/alerts.json
+            --current-head-sha "$HEAD_SHA"
+            --root .
+            --out-dir build/pr-quality/security-diagnosis
+            --format json
+          )
+          if [ "$trusted_history_rc" -eq 0 ] \
+            && [ -n "$reviewed_disposition_history" ] \
+            && [ -f "$reviewed_disposition_history" ]; then
+            security_diagnosis_args+=(
+              --trusted-reviewed-disposition-history-jsonl "$reviewed_disposition_history"
+            )
+          fi
+
+          PYTHONPATH=src python -m sdetkit.security_finding_diagnosis \
+            "${security_diagnosis_args[@]}" \
+            > build/pr-quality/security-diagnosis/trusted-context-cli.json
 
           PYTHONPATH=src python -m sdetkit.pr_quality_runtime_proof_artifacts \
             --isolated-proof build/pr-quality/runtime-proof/isolated-proof/verification-evidence.json \

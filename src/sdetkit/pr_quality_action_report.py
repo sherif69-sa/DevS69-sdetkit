@@ -34,6 +34,12 @@ TRUSTED_HISTORY_SEMANTIC_EQUIVALENCE_PROVEN = "_".join(
 )
 AUTOMATIC_SECURITY_FIX_ALLOWED = "_".join(("automatic", "security", "fix", "allowed"))
 AUTOMATIC_DISMISSAL_ALLOWED = "_".join(("automatic", "dismissal", "allowed"))
+TRUSTED_REVIEWED_DISPOSITION_HISTORY = "_".join(("trusted", "reviewed", "disposition", "history"))
+TRUSTED_REVIEWED_DISPOSITION_CONTEXT = "_".join(("trusted", "reviewed", "disposition", "context"))
+MATCHING_REVIEWED_DISPOSITION_COUNT = "_".join(("matching", "reviewed", "disposition", "count"))
+HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION = "_".join(
+    ("historical", "disposition", "authorizes", "current", "action")
+)
 
 BANNED_EDUCATIONAL_PHRASES = (
     "Quality is green, so the review focus is not coverage.",
@@ -305,6 +311,7 @@ def _security_finding_diagnosis_lines(security_finding_diagnosis: JsonObject | N
 
     summary = _as_dict(report.get("summary"))
     boundary = _as_dict(report.get("decision_boundary"))
+    trusted_history = _as_dict(report.get(TRUSTED_REVIEWED_DISPOSITION_HISTORY))
     lines = [
         f"- Collection status: `{_string(report.get('collection_status') or 'unknown')}`",
         f"- Open findings: `{_int(summary.get('open_findings'))}`",
@@ -320,6 +327,18 @@ def _security_finding_diagnosis_lines(security_finding_diagnosis: JsonObject | N
         ),
         (f"- Mechanical fix proposals: `{_int(summary.get('safe_mechanical_fix_candidates'))}`"),
         f"- True-positive fixes required: `{_int(summary.get('true_positive_fix_required'))}`",
+        (
+            "- Trusted reviewed disposition context: "
+            f"`{_string(trusted_history.get('status') or 'not_collected')}`"
+        ),
+        (
+            "- Current findings with verified prior review context: "
+            f"`{_int(trusted_history.get('matched_current_findings'))}`"
+        ),
+        (
+            "- Historical disposition authorizes current action: "
+            f"`{str(bool(boundary.get(HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION, False))).lower()}`"
+        ),
         (
             "- Automatic security fix allowed: "
             f"`{str(bool(boundary.get(AUTOMATIC_SECURITY_FIX_ALLOWED, False))).lower()}`"
@@ -352,6 +371,15 @@ def _security_finding_diagnosis_lines(security_finding_diagnosis: JsonObject | N
         proposal = _string(finding.get("fix_proposal"))
         if proposal:
             lines.append(f"    - Proposal: {proposal}")
+        disposition_context = _as_dict(finding.get(TRUSTED_REVIEWED_DISPOSITION_CONTEXT))
+        matched_prior = _int(disposition_context.get(MATCHING_REVIEWED_DISPOSITION_COUNT))
+        if matched_prior:
+            lines.append(f"    - Verified prior reviewed dispositions: `{matched_prior}`")
+            reason = _string(disposition_context.get("latest_reviewed_reason") or "unknown")
+            lines.append(f"    - Latest prior reviewed reason: `{reason}`")
+            lines.append(
+                "    - Prior disposition is advisory evidence only; current action remains manual."
+            )
         lines.append(
             "    - Human review required: "
             f"`{str(bool(finding.get('human_review_required', True))).lower()}`"

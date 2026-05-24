@@ -21,6 +21,18 @@ SCHEMA_VERSION = "sdetkit.security-finding-diagnosis.v1"
 DEFAULT_OUT_DIR = Path("build") / "pr-quality" / "security-diagnosis"
 JSON_NAME = "security-finding-diagnosis.json"
 MARKDOWN_NAME = "security-finding-diagnosis.md"
+TRUSTED_DISPOSITION_RECORD_SCHEMA = ".".join(
+    ("sdetkit", "security", "reviewed", "disposition", "history", "record", "v2")
+)
+TRUSTED_REVIEWED_DISPOSITION_HISTORY = "_".join(("trusted", "reviewed", "disposition", "history"))
+TRUSTED_REVIEWED_DISPOSITION_CONTEXT = "_".join(("trusted", "reviewed", "disposition", "context"))
+MATCHING_REVIEWED_DISPOSITION_COUNT = "_".join(("matching", "reviewed", "disposition", "count"))
+HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION = "_".join(
+    ("historical", "disposition", "authorizes", "current", "action")
+)
+PR_SCOPE_VERIFICATION = "_".join(("pr", "scope", "verification"))
+CHANGED_PATHS_PROVEN = "_".join(("changed", "paths", "proven"))
+PATH_IN_MERGED_PR_CHANGED_FILES = "_".join(("path", "in", "merged", "pr", "changed", "files"))
 
 JsonObject = dict[str, Any]
 
@@ -53,6 +65,21 @@ def _read_json(path: Path | None) -> Any:
 def _write_json(path: Path, payload: JsonObject) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _read_jsonl(path: Path | None) -> list[JsonObject]:
+    if path is None or not path.exists():
+        return []
+
+    records: list[JsonObject] = []
+    for line_number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if not raw.strip():
+            continue
+        payload = json.loads(raw)
+        if not isinstance(payload, dict):
+            raise ValueError(f"expected JSON object on line {line_number} in {path}")
+        records.append(payload)
+    return records
 
 
 def _thread_nodes(payload: Any) -> list[JsonObject]:
@@ -130,6 +157,85 @@ def _location(alert: JsonObject) -> tuple[str, int, str]:
         _int_value(location.get("start_line")),
         _string(instance.get("commit_sha")),
     )
+
+
+def _trusted_reviewed_disposition_index(
+    history_path: Path | None,
+) -> tuple[JsonObject, dict[tuple[str, str, str], list[JsonObject]]]:
+    if history_path is None or not history_path.exists():
+        return {
+            "status": "not_collected",
+            "record_count": 0,
+            "reviewed_disposition_count": 0,
+            "advisory_only": True,
+            HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION: False,
+        }, {}
+
+    records = _read_jsonl(history_path)
+    index: dict[tuple[str, str, str], list[JsonObject]] = {}
+    count = 0
+    for record in records:
+        if _string(record.get("schema_version")) != TRUSTED_DISPOSITION_RECORD_SCHEMA:
+            raise ValueError("trusted reviewed disposition history is not verified v2")
+        source = _as_dict(record.get("source"))
+        if source.get(PR_SCOPE_VERIFICATION) != CHANGED_PATHS_PROVEN:
+            raise ValueError("trusted reviewed disposition record lacks changed-path provenance")
+        boundary = _as_dict(record.get("decision_boundary"))
+        if bool(boundary.get(HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION, False)):
+            raise ValueError(
+                "trusted reviewed disposition history expands current action authority"
+            )
+        if bool(boundary.get("automatic_security_fix_allowed", False)) or bool(
+            boundary.get("automatic_dismissal_allowed", False)
+        ):
+            raise ValueError(
+                "trusted reviewed disposition history expands security automation authority"
+            )
+        for raw_item in _as_list(record.get("reviewed_dispositions")):
+            item = _as_dict(raw_item)
+            if item.get(PATH_IN_MERGED_PR_CHANGED_FILES) is not True:
+                raise ValueError("trusted reviewed disposition lacks merged-PR changed-file proof")
+            key = (
+                _string(item.get("tool")),
+                _string(item.get("rule_id")),
+                _string(item.get("path")),
+            )
+            if not all(key):
+                raise ValueError("trusted reviewed disposition lacks exact-match identity")
+            index.setdefault(key, []).append(item)
+            count += 1
+
+    return {
+        "status": "verified_v2_read_only",
+        "record_count": len(records),
+        "reviewed_disposition_count": count,
+        "advisory_only": True,
+        HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION: False,
+    }, index
+
+
+def _trusted_reviewed_disposition_context(
+    *,
+    tool: str,
+    rule_id: str,
+    path: str,
+    freshness: str,
+    disposition_index: dict[tuple[str, str, str], list[JsonObject]],
+) -> JsonObject:
+    matches = disposition_index.get((tool, rule_id, path), []) if freshness == "current" else []
+    latest = (
+        sorted(matches, key=lambda item: _string(item.get("dismissed_at")), reverse=True)[0]
+        if matches
+        else {}
+    )
+    return {
+        "status": "verified_prior_review_match" if matches else "no_verified_prior_review_match",
+        MATCHING_REVIEWED_DISPOSITION_COUNT: len(matches),
+        "latest_reviewed_pull_number": _int_value(latest.get("pull_number")),
+        "latest_reviewed_reason": _string(latest.get("dismissed_reason")),
+        "advisory_only": True,
+        HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION: False,
+    }
 
 
 def _finding_id(tool: str, rule_id: str, path: str, line: int, number: Any) -> str:
@@ -320,6 +426,7 @@ def diagnose_alert(
     current_head_sha: str,
     root: Path,
     review_locations: set[tuple[str, int]],
+    reviewed_disposition_index: dict[tuple[str, str, str], list[JsonObject]] | None = None,
 ) -> JsonObject:
     tool = _tool_name(alert)
     rule_id = _rule_id(alert)
@@ -333,6 +440,13 @@ def diagnose_alert(
         source_line=source_line,
         freshness=freshness,
     )
+    disposition_context = _trusted_reviewed_disposition_context(
+        tool=tool,
+        rule_id=rule_id,
+        path=path,
+        freshness=freshness,
+        disposition_index=reviewed_disposition_index or {},
+    )
 
     return {
         "finding_id": _finding_id(tool, rule_id, path, line, alert.get("number")),
@@ -345,6 +459,7 @@ def diagnose_alert(
         "freshness": freshness,
         "review_thread_present": (path, line) in review_locations,
         **diagnosis,
+        TRUSTED_REVIEWED_DISPOSITION_CONTEXT: disposition_context,
         "source_context_examined": bool(source_line),
         "sensitive_source_text_emitted": False,
         "human_review_required": True,
@@ -360,9 +475,13 @@ def build_security_finding_diagnosis(
     review_threads: Path | None,
     current_head_sha: str,
     root: Path,
+    trusted_reviewed_disposition_history_jsonl: Path | None = None,
 ) -> JsonObject:
     collection_status, alerts = _alert_records(_read_json(code_scanning_alerts))
     review_locations = _current_review_locations(_read_json(review_threads))
+    trusted_history, reviewed_disposition_index = _trusted_reviewed_disposition_index(
+        trusted_reviewed_disposition_history_jsonl
+    )
 
     diagnoses: list[JsonObject] = []
     for alert in alerts:
@@ -374,6 +493,7 @@ def build_security_finding_diagnosis(
                 current_head_sha=current_head_sha,
                 root=root,
                 review_locations=review_locations,
+                reviewed_disposition_index=reviewed_disposition_index,
             )
         )
 
@@ -385,11 +505,23 @@ def build_security_finding_diagnosis(
         )
     )
     counts = Counter(_string(item.get("classification")) for item in diagnoses)
+    matched_current_findings = sum(
+        1
+        for item in diagnoses
+        if _int_value(
+            _as_dict(item.get(TRUSTED_REVIEWED_DISPOSITION_CONTEXT)).get(
+                MATCHING_REVIEWED_DISPOSITION_COUNT
+            )
+        )
+        > 0
+    )
+    trusted_history["matched_current_findings"] = matched_current_findings
 
     return {
         "schema_version": SCHEMA_VERSION,
         "collection_status": collection_status,
         "current_head_sha": current_head_sha,
+        TRUSTED_REVIEWED_DISPOSITION_HISTORY: trusted_history,
         "diagnoses": diagnoses,
         "summary": {
             "open_findings": len(diagnoses),
@@ -411,6 +543,7 @@ def build_security_finding_diagnosis(
             "automatic_dismissal_allowed": False,
             "automation_allowed": False,
             "merge_authorized": False,
+            HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION: False,
         },
     }
 
@@ -418,6 +551,7 @@ def build_security_finding_diagnosis(
 def render_markdown(report: JsonObject) -> str:
     summary = _as_dict(report.get("summary"))
     boundary = _as_dict(report.get("decision_boundary"))
+    trusted_history = _as_dict(report.get(TRUSTED_REVIEWED_DISPOSITION_HISTORY))
     lines = [
         "# Security Finding Diagnosis",
         "",
@@ -425,6 +559,14 @@ def render_markdown(report: JsonObject) -> str:
         f"- Open findings: `{summary.get('open_findings', 0)}`",
         f"- Current findings: `{summary.get('current_findings', 0)}`",
         f"- Stale findings: `{summary.get('stale_findings', 0)}`",
+        (
+            "- Trusted reviewed disposition context: "
+            f"`{_string(trusted_history.get('status') or 'not_collected')}`"
+        ),
+        (
+            "- Current findings with verified prior review context: "
+            f"`{_int_value(trusted_history.get('matched_current_findings'))}`"
+        ),
         (
             "- Scanner metadata false-positive candidates: "
             f"`{summary.get('scanner_metadata_false_positive_candidates', 0)}`"
@@ -445,6 +587,10 @@ def render_markdown(report: JsonObject) -> str:
             "- Automatic dismissal allowed: "
             f"`{str(bool(boundary.get('automatic_dismissal_allowed'))).lower()}`"
         ),
+        (
+            "- Historical disposition authorizes current action: "
+            f"`{str(bool(boundary.get(HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION))).lower()}`"
+        ),
         (f"- Safe mechanical fix candidates: `{summary.get('safe_mechanical_fix_candidates', 0)}`"),
         f"- True-positive fixes required: `{summary.get('true_positive_fix_required', 0)}`",
         "",
@@ -452,6 +598,7 @@ def render_markdown(report: JsonObject) -> str:
 
     for item in _as_list(report.get("diagnoses")):
         finding = _as_dict(item)
+        disposition_context = _as_dict(finding.get(TRUSTED_REVIEWED_DISPOSITION_CONTEXT))
         lines.extend(
             [
                 f"## `{_string(finding.get('rule_id'))}` — {_string(finding.get('path'))}",
@@ -461,6 +608,14 @@ def render_markdown(report: JsonObject) -> str:
                 f"- Classification: `{_string(finding.get('classification'))}`",
                 f"- Recommended action: `{_string(finding.get('recommended_action'))}`",
                 f"- Human review required: `{str(bool(finding.get('human_review_required'))).lower()}`",
+                (
+                    "- Verified prior reviewed dispositions: "
+                    f"`{_int_value(disposition_context.get(MATCHING_REVIEWED_DISPOSITION_COUNT))}`"
+                ),
+                (
+                    "- Historical disposition authorizes current action: "
+                    f"`{str(bool(disposition_context.get(HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION))).lower()}`"
+                ),
                 f"- Diagnosis: {_string(finding.get('diagnosis'))}",
                 "",
             ]
@@ -473,6 +628,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--code-scanning-alerts-json", type=Path)
     parser.add_argument("--review-threads-json", type=Path)
     parser.add_argument("--current-head-sha", required=True)
+    parser.add_argument("--trusted-reviewed-disposition-history-jsonl", type=Path)
     parser.add_argument("--root", type=Path, default=Path("."))
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--format", choices=["text", "json"], default="text")
@@ -486,6 +642,7 @@ def main(argv: list[str] | None = None) -> int:
         review_threads=args.review_threads_json,
         current_head_sha=args.current_head_sha,
         root=args.root,
+        trusted_reviewed_disposition_history_jsonl=args.trusted_reviewed_disposition_history_jsonl,
     )
     _write_json(args.out_dir / JSON_NAME, report)
     (args.out_dir / MARKDOWN_NAME).write_text(render_markdown(report), encoding="utf-8")
@@ -498,6 +655,10 @@ def main(argv: list[str] | None = None) -> int:
         "diagnosis_only": True,
         "automatic_security_fix_allowed": False,
         "automatic_dismissal_allowed": False,
+        "trusted_reviewed_disposition_history_status": _as_dict(
+            report.get(TRUSTED_REVIEWED_DISPOSITION_HISTORY)
+        ).get("status", "not_collected"),
+        HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION: False,
     }
     rendered = (
         json.dumps(output, indent=2, sort_keys=True)

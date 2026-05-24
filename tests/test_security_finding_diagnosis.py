@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from sdetkit import security_finding_diagnosis as diagnosis
 
 
@@ -349,3 +351,116 @@ def test_debug_print_proposes_mechanical_repair_without_authorizing_fix(
     assert finding["safe_to_auto_fix"] is False
     assert finding["automation_allowed"] is False
     assert report["summary"]["safe_mechanical_fix_candidates"] == 1
+
+
+def _verified_disposition_history(tmp_path: Path, *, path: str = "src/sdetkit/reporter.py") -> Path:
+    history_path = tmp_path / "trusted-reviewed-disposition-history.jsonl"
+    record = {
+        "schema_version": diagnosis.TRUSTED_DISPOSITION_RECORD_SCHEMA,
+        "source": {diagnosis.PR_SCOPE_VERIFICATION: diagnosis.CHANGED_PATHS_PROVEN},
+        "decision_boundary": {
+            diagnosis.HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION: False,
+            "automatic_security_fix_allowed": False,
+            "automatic_dismissal_allowed": False,
+        },
+        "reviewed_dispositions": [
+            {
+                "tool": "sdetkit-security-gate",
+                "rule_id": "SEC_DEBUG_PRINT",
+                "path": path,
+                "pull_number": 1401,
+                "dismissed_at": "2026-05-24T01:00:00Z",
+                "dismissed_reason": "false positive",
+                diagnosis.PATH_IN_MERGED_PR_CHANGED_FILES: True,
+            }
+        ],
+    }
+    history_path.write_text(json.dumps(record) + "\n", encoding="utf-8")
+    return history_path
+
+
+def test_verified_v2_history_adds_advisory_context_without_changing_current_action(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "repo"
+    source = root / "src" / "sdetkit" / "reporter.py"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text('print("operator output")\n', encoding="utf-8")
+    alerts = _write_json(
+        tmp_path / "alerts.json",
+        [_alert(number=93, rule_id="SEC_DEBUG_PRINT", path="src/sdetkit/reporter.py", line=1)],
+    )
+
+    report = diagnosis.build_security_finding_diagnosis(
+        code_scanning_alerts=alerts,
+        review_threads=None,
+        current_head_sha="pr-head",
+        root=root,
+        trusted_reviewed_disposition_history_jsonl=_verified_disposition_history(tmp_path),
+    )
+
+    finding = report["diagnoses"][0]
+    context = finding[diagnosis.TRUSTED_REVIEWED_DISPOSITION_CONTEXT]
+    assert finding["classification"] == "safe_mechanical_fix_candidate"
+    assert finding["recommended_action"] == "propose_stdout_emission_repair"
+    assert context[diagnosis.MATCHING_REVIEWED_DISPOSITION_COUNT] == 1
+    assert context["latest_reviewed_pull_number"] == 1401
+    assert context["advisory_only"] is True
+    assert context[diagnosis.HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION] is False
+    assert finding["safe_to_auto_fix"] is False
+    assert finding["auto_dismiss_allowed"] is False
+    history = report[diagnosis.TRUSTED_REVIEWED_DISPOSITION_HISTORY]
+    assert history["status"] == "verified_v2_read_only"
+    assert history["matched_current_findings"] == 1
+    assert (
+        report["decision_boundary"][diagnosis.HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION]
+        is False
+    )
+
+
+def test_stale_alert_never_consumes_prior_disposition_as_current_context(tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    alerts = _write_json(
+        tmp_path / "alerts.json",
+        [
+            _alert(
+                number=94,
+                rule_id="SEC_DEBUG_PRINT",
+                path="src/sdetkit/reporter.py",
+                line=1,
+                commit_sha="old-head",
+            )
+        ],
+    )
+
+    report = diagnosis.build_security_finding_diagnosis(
+        code_scanning_alerts=alerts,
+        review_threads=None,
+        current_head_sha="new-head",
+        root=root,
+        trusted_reviewed_disposition_history_jsonl=_verified_disposition_history(tmp_path),
+    )
+
+    context = report["diagnoses"][0][diagnosis.TRUSTED_REVIEWED_DISPOSITION_CONTEXT]
+    assert context[diagnosis.MATCHING_REVIEWED_DISPOSITION_COUNT] == 0
+    assert report[diagnosis.TRUSTED_REVIEWED_DISPOSITION_HISTORY]["matched_current_findings"] == 0
+
+
+def test_unverified_disposition_history_is_rejected_before_diagnosis_context(
+    tmp_path: Path,
+) -> None:
+    history_path = tmp_path / "unverified.jsonl"
+    history_path.write_text(
+        json.dumps({"schema_version": "sdetkit.security.reviewed.disposition.history.record.v1"})
+        + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="not verified v2"):
+        diagnosis.build_security_finding_diagnosis(
+            code_scanning_alerts=None,
+            review_threads=None,
+            current_head_sha="pr-head",
+            root=tmp_path,
+            trusted_reviewed_disposition_history_jsonl=history_path,
+        )
