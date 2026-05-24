@@ -17,10 +17,11 @@ FLAKY_TEST_REGISTRY_EVIDENCE_MODULE = "_".join(("flaky", "test", "registry", "ev
 TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE = "_".join(
     ("trusted", "flaky", "test", "registry", "producer")
 )
+TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE = "_".join(("trusted", "test", "observation", "capture"))
 NEXT_RECOMMENDED_PR = "/".join(
     (
         "feature",
-        "-".join(("trusted", "flaky", "test", "observation", "capture")),
+        "-".join(("trusted", "flaky", "test", "observation", "history")),
     )
 )
 
@@ -449,6 +450,21 @@ def build_alignment_components() -> list[AlignmentComponent]:
             recommended_next_action="keep live benchmark evidence reporting-only until containment is proven",
         ),
         _component(
+            module=TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE,
+            role="normalize raw per-test outcomes from real accepted-main Full CI execution without classifying flakiness",
+            status="aligned",
+            stages=("evidence", "reporting"),
+            existing_artifacts=(
+                "trusted-test-observations.json",
+                "trusted-test-observations.md",
+            ),
+            integration_points=(
+                "CI Full CI lane",
+                "quality.sh cov",
+            ),
+            recommended_next_action="aggregate accepted-main observations across trusted runs before any flaky-test classification",
+        ),
+        _component(
             module=TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
             role="emit an explicit trusted-main no-observation flaky-test registry artifact until real per-test history exists",
             status="aligned",
@@ -464,7 +480,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
                 "repo_memory",
             ),
-            recommended_next_action="add a provenance-checked per-test observation source before emitting populated registry entries",
+            recommended_next_action="consume only provenance-checked accepted-main observation history after cross-run aggregation is proven",
         ),
         _component(
             module=FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
@@ -481,9 +497,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "repo_memory",
             ),
             gaps=(
-                "trusted per-test observation capture and PR Quality visibility are not yet connected",
+                "accepted-main observation history aggregation, flaky-classification handoff, and PR Quality visibility are not yet connected",
             ),
-            recommended_next_action="connect only provenance-checked observations before rendering populated instability history",
+            recommended_next_action="connect only cross-run provenance-checked classifications before rendering populated instability history",
         ),
         _component(
             module="repo_memory",
@@ -504,10 +520,11 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 REPO_MEMORY_PROFILE_HISTORY_MODULE,
                 FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
                 TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
+                TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE,
             ),
             gaps=(
                 "successful network-isolation proof is unavailable until a backend is verified",
-                "trusted per-test observation capture and PR Quality visibility remain unconnected",
+                "accepted-main observation history aggregation, flaky-classification handoff, and PR Quality visibility remain unconnected",
             ),
             recommended_next_action="surface only provenance-checked flaky-test instability context without expanding authority",
         ),
