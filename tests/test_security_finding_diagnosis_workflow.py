@@ -50,3 +50,33 @@ def test_pr_quality_passes_security_diagnosis_artifact_to_operator_comment_rende
     assert text.index("Diagnose security findings read-only") < text.index(
         "python -m sdetkit.pr_quality_action_report"
     )
+
+
+def test_pr_quality_refreshes_diagnosis_with_verified_v2_disposition_history_before_comment() -> (
+    None
+):
+    text = _workflow_text()
+
+    assert "security-reviewed-disposition-history.jsonl" in text
+    assert "--trusted-reviewed-disposition-history-jsonl" in text
+    assert "build/pr-quality/security-diagnosis/trusted-context-cli.json" in text
+    assert "HEAD_SHA: ${{ github.event.pull_request.head.sha }}" in text
+    assert text.index("security-reviewed-disposition-history.jsonl") < text.index(
+        "--trusted-reviewed-disposition-history-jsonl"
+    )
+    assert text.index("--trusted-reviewed-disposition-history-jsonl") < text.index(
+        "python -m sdetkit.pr_quality_action_report"
+    )
+
+
+def test_pr_quality_disposition_context_refresh_does_not_add_security_mutation() -> None:
+    text = _workflow_text()
+    refresh = text.split('reviewed_disposition_history="$(', 1)[1].split(
+        "PYTHONPATH=src python -m sdetkit.pr_quality_runtime_proof_artifacts", 1
+    )[0]
+
+    assert "security_finding_diagnosis" in refresh
+    assert "--trusted-reviewed-disposition-history-jsonl" in refresh
+    assert "PATCH" not in refresh
+    assert "dismissed_comment" not in refresh
+    assert "commit-safe-fixes" not in refresh

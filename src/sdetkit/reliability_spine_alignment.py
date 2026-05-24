@@ -26,7 +26,7 @@ SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE = "_".join(
 NEXT_RECOMMENDED_PR = "/".join(
     (
         "feature",
-        "-".join(("security", "disposition", "diagnosis", "context")),
+        "-".join(("exact", "failure", "extraction", "safe", "remediation")),
     )
 )
 
@@ -318,20 +318,21 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module=SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE,
-            role="record sanitized human-reviewed dismissed security findings from accepted-main merged PR evidence without authorizing reuse",
-            status="partially_aligned",
-            stages=("evidence", "history", "reporting"),
+            role="record sanitized human-reviewed dismissed security findings from accepted-main merged PR evidence and expose verified advisory context without authorizing reuse",
+            status="aligned",
+            stages=("evidence", "diagnosis", "history", "reporting"),
             existing_artifacts=(
                 "security-reviewed-disposition-history.jsonl",
                 "security-reviewed-disposition-history-summary.json",
                 "security-reviewed-disposition-history-summary.md",
             ),
-            integration_points=("RepoMemory Profile History workflow",),
-            gaps=(
-                "trusted reviewed disposition history is not yet consumed as advisory context by security finding diagnosis",
-                "historical dismissals must never authorize current finding actions",
+            integration_points=(
+                "RepoMemory Profile History workflow",
+                "security_finding_diagnosis",
+                "pr_quality_action_report",
+                "PR Quality workflow",
             ),
-            recommended_next_action="feed reviewed disposition history into diagnosis as read-only context while preserving manual authority",
+            recommended_next_action="preserve manual security authority while advancing exact failure extraction and safe remediation",
         ),
         _component(
             module="adaptive_diagnosis",

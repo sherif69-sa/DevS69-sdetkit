@@ -2011,3 +2011,71 @@ def test_write_comment_body_loads_security_diagnosis_artifact_for_operator_visib
     assert "Open findings: `0`" in body
     assert "Findings: none" in body
     assert "Automatic dismissal allowed: `false`" in body
+
+
+def test_action_report_renders_verified_prior_disposition_as_advisory_only() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 1,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    security_diagnosis = {
+        "collection_status": "collected",
+        "summary": {
+            "open_findings": 1,
+            "current_findings": 1,
+            "stale_findings": 0,
+            "safe_mechanical_fix_candidates": 1,
+            "true_positive_fix_required": 0,
+        },
+        report.TRUSTED_REVIEWED_DISPOSITION_HISTORY: {
+            "status": "verified_v2_read_only",
+            "matched_current_findings": 1,
+        },
+        "decision_boundary": {
+            report.AUTOMATIC_SECURITY_FIX_ALLOWED: False,
+            report.AUTOMATIC_DISMISSAL_ALLOWED: False,
+            report.HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION: False,
+        },
+        "diagnoses": [
+            {
+                "tool": "sdetkit-security-gate",
+                "rule_id": "SEC_DEBUG_PRINT",
+                "path": "src/sdetkit/reporter.py",
+                "line": 22,
+                "freshness": "current",
+                "classification": "safe_mechanical_fix_candidate",
+                "recommended_action": "propose_stdout_emission_repair",
+                "human_review_required": True,
+                report.TRUSTED_REVIEWED_DISPOSITION_CONTEXT: {
+                    report.MATCHING_REVIEWED_DISPOSITION_COUNT: 1,
+                    "latest_reviewed_reason": "false positive",
+                    report.HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION: False,
+                },
+            }
+        ],
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        security_finding_diagnosis=security_diagnosis,
+    )
+
+    assert "Trusted reviewed disposition context: `verified_v2_read_only`" in body
+    assert "Current findings with verified prior review context: `1`" in body
+    assert "Historical disposition authorizes current action: `false`" in body
+    assert "Verified prior reviewed dispositions: `1`" in body
+    assert "Latest prior reviewed reason: `false positive`" in body
+    assert "Prior disposition is advisory evidence only; current action remains manual." in body
+    assert "Human review required: `true`" in body
