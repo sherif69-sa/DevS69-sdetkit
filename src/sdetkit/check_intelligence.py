@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -263,7 +264,11 @@ def _record_log_text(record: JsonObject, logs_dir: Path | None, name: str) -> st
             return candidate.read_text(encoding="utf-8", errors="ignore")
 
     name_tokens = {token for token in slug.split("-") if token}
-    readable_files = [candidate for candidate in sorted(logs_dir.rglob("*")) if candidate.is_file()]
+    readable_files = [
+        candidate
+        for candidate in sorted(logs_dir.rglob("*"))
+        if candidate.is_file() and candidate.suffix.lower() in {".log", ".txt"}
+    ]
     for candidate in readable_files:
         candidate_slug = _slug(candidate.stem)
         candidate_compact = candidate_slug.replace("-", "")
@@ -493,6 +498,8 @@ def _possible_changed_files_gate_fallout(record: JsonObject, log_text: str) -> b
 
 def _failure_tool_for_line(line: str) -> str:
     lowered = line.lower()
+    if "github check annotation" in lowered:
+        return "github_checks"
     if "known vulnerabilit" in lowered and "package" in lowered:
         return "pip-audit"
     if "ruff" in lowered:
@@ -512,6 +519,8 @@ def _failure_tool_for_line(line: str) -> str:
 
 def _failure_kind_for_line(line: str) -> str:
     lowered = line.lower()
+    if "github check annotation" in lowered:
+        return "check_run_annotation"
     if "known vulnerabilit" in lowered and "package" in lowered:
         return "dependency_vulnerability"
     if (
@@ -695,6 +704,27 @@ def _is_unknown_diagnosis(diagnosis: JsonObject) -> bool:
 def _fallback_check_diagnosis(name: str, first_failure: JsonObject) -> JsonObject:
     lowered = name.lower()
     first_line = _string(first_failure.get("line"))
+    first_kind = _string(first_failure.get("kind")).lower()
+
+    if "security" in lowered and first_kind == "check_run_annotation":
+        return {
+            "code": "SECURITY_FINDING_REVIEW_REQUIRED",
+            "title": "Security check annotation requires review",
+            "risk_surface": "security",
+            "diagnosis": (
+                "A failed custom security check produced sanitized GitHub Check Run "
+                f"annotation evidence. First collected annotation: {first_line}"
+            ),
+            "recommended_fix": [
+                "Review the current security check annotations for the PR.",
+                "Fix the flagged surface or dismiss a reviewed false positive with a reason.",
+                "Do not use annotation evidence as authority for automatic remediation.",
+            ],
+            "proof_commands": [
+                "python -m sdetkit security check --root . --format json",
+                "python -m pre_commit run -a",
+            ],
+        }
 
     if "codeql" in lowered:
         return {
@@ -815,7 +845,10 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
             ],
         }
     fallback = _fallback_check_diagnosis(name, first_failure)
-    if fallback and _is_unknown_diagnosis(primary):
+    if fallback and (
+        _string(first_failure.get("kind")).lower() == "check_run_annotation"
+        or _is_unknown_diagnosis(primary)
+    ):
         primary = fallback
 
     safe_remediation = safe_remediation_eligibility.classify_check_failure(
@@ -1611,7 +1644,7 @@ def main(argv: list[str] | None = None) -> int:
         action_report=action_report,
         out_dir=args.out_dir,
     )
-    print(json.dumps(artifacts, indent=2, sort_keys=True))
+    sys.stdout.write(json.dumps(artifacts, indent=2, sort_keys=True) + "\n")
     return 0
 
 
