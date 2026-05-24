@@ -317,13 +317,21 @@ jobs:
 
           collection_status="collected"
           collection_reason=""
+          printf '[]\n' > "$out_dir/changed-files.json"
           printf '[]\n' > "$out_dir/dismissed-alerts-raw.json"
 
           if [ -n "$pr_number" ]; then
-            if ! gh api \
+            gh api --paginate \
+              -H "Accept: application/vnd.github+json" \
+              "repos/$REPOSITORY/pulls/$pr_number/files?per_page=100" \
+              --jq '.[]' \
+              | jq -s '.' > "$out_dir/changed-files.json"
+
+            if ! gh api --paginate \
               -H "Accept: application/vnd.github+json" \
               "repos/$REPOSITORY/code-scanning/alerts?state=dismissed&pr=$pr_number&per_page=100" \
-              > "$out_dir/dismissed-alerts-raw.json"; then
+              --jq '.[]' \
+              | jq -s '.' > "$out_dir/dismissed-alerts-raw.json"; then
               collection_status="unavailable"
               collection_reason="GitHub code-scanning dismissed-alert evidence was unavailable or not permitted."
               printf '[]\n' > "$out_dir/dismissed-alerts-raw.json"
@@ -360,6 +368,7 @@ jobs:
 
           args=(
             --associated-pr-json build/repo-memory-history/security-reviewed-dispositions/associated-merged-pr.json
+            --changed-files-json build/repo-memory-history/security-reviewed-dispositions/changed-files.json
             --dismissed-alerts-json build/repo-memory-history/security-reviewed-dispositions/dismissed-alerts.json
             --source-run-id "${GITHUB_RUN_ID}"
             --source-head-sha "${GITHUB_SHA}"
@@ -387,6 +396,8 @@ jobs:
           )
           assert summary["status"] == "reviewed_disposition_history_recorded"
           assert summary["record_count"] >= 1
+          assert summary["latest_record"]["pr_scope_verification"] == "changed_paths_proven"
+          assert summary["latest_record"]["alerts_excluded_outside_changed_paths"] >= 0
           boundary = summary["decision_boundary"]
           assert boundary["historical_disposition_authorizes_current_action"] is False
           assert boundary["automatic_security_fix_allowed"] is False
