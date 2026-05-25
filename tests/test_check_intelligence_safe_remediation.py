@@ -28,6 +28,7 @@ def test_check_intelligence_marks_formatting_failure_safe_to_auto_fix(
                             "ruff format..............................Failed",
                             "- hook id: ruff-format",
                             "- files were modified by this hook",
+                            "Fixing tests/test_example.py",
                             "1 file reformatted",
                         ]
                     ),
@@ -64,3 +65,67 @@ def test_check_intelligence_keeps_type_failure_review_first(tmp_path: Path) -> N
 
     assert failed["safe_to_auto_fix"] is False
     assert failed["safe_remediation"]["strategy"] == "review_first"
+
+
+def test_check_intelligence_blocks_mixed_formatting_and_pytest_from_auto_fix(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "check-runs.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Full CI lane",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "output": "\n".join(
+                        [
+                            "ruff format..............................Failed",
+                            "- files were modified by this hook",
+                            "Fixing tests/test_behavior.py",
+                            "1 file reformatted",
+                            "FAILED tests/test_behavior.py::test_contract - AssertionError",
+                        ]
+                    ),
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    failed = intelligence["failed_checks"][0]
+
+    assert failed["safe_to_auto_fix"] is False
+    assert failed["safe_remediation"]["strategy"] == "review_first"
+    assert failed["safe_remediation"]["category"] == "review_first"
+
+
+def test_check_intelligence_blocks_formatting_without_affected_files(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "check-runs.json",
+        {
+            "check_runs": [
+                {
+                    "name": "autopilot",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "output": "\n".join(
+                        [
+                            "ruff format..............................Failed",
+                            "- files were modified by this hook",
+                            "1 file reformatted",
+                        ]
+                    ),
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    failed = intelligence["failed_checks"][0]
+
+    assert failed["safe_to_auto_fix"] is False
+    assert failed["safe_remediation"]["strategy"] == "review_first"
+    assert "no identified affected files" in failed["safe_remediation"]["reason"]

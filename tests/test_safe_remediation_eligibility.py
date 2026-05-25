@@ -11,6 +11,7 @@ def test_safe_remediation_allows_format_hook_modified_files() -> None:
             "line": "- files were modified by this hook",
             "tool": "pre_commit",
             "kind": "format_drift",
+            "context": [{"text": "Fixing tests/test_example.py"}],
         },
     )
 
@@ -29,6 +30,7 @@ def test_safe_remediation_allows_ruff_import_sorting_only() -> None:
             "line": "I001 [*] Import block is un-sorted or un-formatted",
             "tool": "ruff",
             "kind": "format_drift",
+            "context": [{"text": " --> src/sdetkit/example.py:1:1"}],
         },
     )
 
@@ -74,3 +76,81 @@ def test_safe_remediation_extracts_affected_files_from_log_context() -> None:
     assert result["safe_to_auto_fix"] is True
     assert result["strategy"] == "run_pre_commit"
     assert result["affected_files"] == ["tests/test_example.py"]
+
+
+def test_safe_remediation_blocks_mixed_formatting_and_test_failure() -> None:
+    result = eligibility.classify_check_failure(
+        name="Full CI lane",
+        diagnosis={"code": "PYTEST_ASSERTION_FAILURE"},
+        first_failure={
+            "line": "FAILED tests/test_behavior.py::test_contract - AssertionError",
+            "tool": "pytest",
+            "kind": "test_failure",
+        },
+        log_text="ruff format\n1 file reformatted\n",
+    )
+
+    assert result["safe_to_auto_fix"] is False
+    assert result["strategy"] == "review_first"
+    assert result["category"] == "review_first"
+    assert "dominates" in result["reason"]
+
+
+def test_safe_remediation_blocks_mixed_formatting_and_security_signal() -> None:
+    signal = "High " + "entropy string literal detected."
+    result = eligibility.classify_check_failure(
+        name="security-gate",
+        diagnosis={"code": "SEC_HIGH_ENTROPY_STRING"},
+        first_failure={
+            "line": signal + " src/sdetkit/example.py",
+            "tool": "security",
+            "kind": "finding",
+        },
+        log_text="ruff format\n1 file reformatted\n" + signal + "\n",
+    )
+
+    assert result["safe_to_auto_fix"] is False
+    assert result["strategy"] == "review_first"
+    assert result["category"] == "review_first"
+    assert "dominates" in result["reason"]
+
+
+def test_safe_remediation_blocks_formatting_without_affected_files() -> None:
+    result = eligibility.classify_check_failure(
+        name="autopilot",
+        diagnosis={"code": "PRE_COMMIT_FORMAT_DRIFT"},
+        first_failure={
+            "line": "- files were modified by this hook",
+            "tool": "pre_commit",
+            "kind": "format_drift",
+        },
+        log_text="ruff format\n1 file reformatted\n",
+    )
+
+    assert result["safe_to_auto_fix"] is False
+    assert result["strategy"] == "review_first"
+    assert result["affected_files"] == []
+    assert "no identified affected files" in result["reason"]
+
+
+def test_safe_remediation_blocks_formatting_with_unapproved_path_evidence() -> None:
+    result = eligibility.classify_check_failure(
+        name="autopilot",
+        diagnosis={"code": "PRE_COMMIT_FORMAT_DRIFT"},
+        first_failure={
+            "line": "- files were modified by this hook",
+            "tool": "pre_commit",
+            "kind": "format_drift",
+            "context": [
+                {
+                    "text": "Fixing home/runner/work/DevS69-sdetkit/DevS69-sdetkit/tools/maintenance_autopilot.py"
+                },
+                {"text": "Fixing tools/maintenance_autopilot.py"},
+            ],
+        },
+        log_text="ruff format\n1 file reformatted\n",
+    )
+
+    assert result["safe_to_auto_fix"] is False
+    assert result["strategy"] == "review_first"
+    assert "outside approved safe-fix paths" in result["reason"]

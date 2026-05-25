@@ -48,6 +48,20 @@ def _contains_any(text: str, needles: tuple[str, ...]) -> bool:
     return any(needle in lowered for needle in needles)
 
 
+SAFE_AUTO_FIX_PATH_PREFIXES = ("src/", "tests/", "tools/")
+
+
+def _is_safe_repo_owned_path(path: str) -> bool:
+    clean = path.strip().replace("\\", "/")
+    if not clean or clean.startswith(("/", "~")):
+        return False
+    if clean in {".", ".."} or "/../" in f"/{clean}/":
+        return False
+    if "<" in clean or ">" in clean:
+        return False
+    return clean.startswith(SAFE_AUTO_FIX_PATH_PREFIXES)
+
+
 SAFE_FORMAT_MARKERS = (
     "end-of-file-fixer",
     "fix end of files",
@@ -139,20 +153,44 @@ def classify_check_failure(
             "proof_commands": [],
         }
 
-    if _contains_any(combined, UNSAFE_REVIEW_MARKERS) and not _contains_any(
-        combined,
-        SAFE_FORMAT_MARKERS,
-    ):
+    unsafe_signal = _contains_any(combined, UNSAFE_REVIEW_MARKERS)
+    formatting_signal = kind == "format_drift" or _contains_any(combined, SAFE_FORMAT_MARKERS)
+
+    if unsafe_signal:
         return {
             "schema_version": SCHEMA_VERSION,
             "safe_to_auto_fix": False,
             "strategy": REVIEW_FIRST_STRATEGY,
             "category": "review_first",
-            "reason": "Failure matches review-first markers and is not formatting-only.",
+            "affected_files": affected_files,
+            "reason": "Review-first evidence dominates any formatting-only signal.",
             "proof_commands": [],
         }
 
-    if kind == "format_drift" or _contains_any(combined, SAFE_FORMAT_MARKERS):
+    if formatting_signal:
+        if not affected_files:
+            return {
+                "schema_version": SCHEMA_VERSION,
+                "safe_to_auto_fix": False,
+                "strategy": REVIEW_FIRST_STRATEGY,
+                "category": "review_first",
+                "affected_files": [],
+                "reason": "Formatting evidence has no identified affected files.",
+                "proof_commands": [],
+            }
+
+        unsafe_files = [value for value in affected_files if not _is_safe_repo_owned_path(value)]
+        if unsafe_files:
+            return {
+                "schema_version": SCHEMA_VERSION,
+                "safe_to_auto_fix": False,
+                "strategy": REVIEW_FIRST_STRATEGY,
+                "category": "review_first",
+                "affected_files": affected_files,
+                "reason": "Formatting evidence includes files outside approved safe-fix paths.",
+                "proof_commands": [],
+            }
+
         return {
             "schema_version": SCHEMA_VERSION,
             "safe_to_auto_fix": True,
