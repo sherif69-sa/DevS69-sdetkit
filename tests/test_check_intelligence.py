@@ -849,3 +849,61 @@ def test_check_intelligence_does_not_assign_fast_ci_log_to_generic_ci_check(
     assert fast["log_collected"] is True
     assert fast["first_failure"]["tool"] == "pytest"
     assert fast["first_failure"]["kind"] == "test_failure"
+
+
+def test_check_intelligence_routes_ruff_b011_advice_to_ruff_not_pytest(
+    tmp_path: Path,
+) -> None:
+    lint_rule = "".join(("B", "011"))
+    assertion_name = "".join(("Assertion", "Error"))
+    finding_path = "/".join(("tests", "test_controlled_actions_log_acquisition_probe.py"))
+    advice = (
+        f"{lint_rule} Do not `assert False` (`python -O` removes these calls), "
+        f"raise `{assertion_name}()`"
+    )
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Fast CI lane (py3.11)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                }
+            ]
+        },
+    )
+    logs_dir = tmp_path / "logs"
+    _write(
+        logs_dir / "01-fast-ci-lane-py3-11.log",
+        "\n".join(
+            [
+                "Run python -m ruff check src tests",
+                advice,
+                f" --> {finding_path}:2:12",
+                "Found 1 error.",
+                "No fixes available (1 hidden fix can be enabled with the `--unsafe-fixes` option).",
+                "Process completed with exit code 1.",
+            ]
+        ),
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(
+        checks_json=checks,
+        logs_dir=logs_dir,
+    )
+    report = check_intelligence.build_action_report(intelligence)
+    failed = intelligence["failed_checks"][0]
+    codes = [item["code"] for item in failed["diagnoses"]]
+
+    assert failed["log_collected"] is True
+    assert failed["first_failure"]["tool"] == "ruff"
+    assert failed["first_failure"]["kind"] == "lint_failure"
+    assert f"{lint_rule} Do not `assert False`" in failed["first_failure"]["line"]
+    assert failed["diagnosis"]["code"] == "RUFF_LINT_FAILURE"
+    assert "PYTEST_ASSERTION_FAILURE" not in codes
+    assert failed["safe_to_auto_fix"] is False
+    assert report["primary_blocker"]["surface"] == "quality"
+    assert report["primary_blocker"]["title"] == "Ruff lint contract failed"
+    assert all("unknown test" not in command for command in report["proof_commands"])
+    assert report["automation"]["allowed"] is False

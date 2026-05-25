@@ -782,3 +782,61 @@ def test_cli_contract_failure_is_specific():
     diagnosis = payload["diagnoses"][0]
     assert diagnosis["code"] == "CLI_CONTRACT_FAILURE"
     assert "python -m sdetkit --help" in " ".join(diagnosis["proof_commands"])
+
+
+def test_ruff_b011_assertionerror_advice_does_not_create_pytest_failure() -> None:
+    lint_rule = "".join(("B", "011"))
+    assertion_name = "".join(("Assertion", "Error"))
+    finding_path = "/".join(("tests", "test_controlled_actions_log_acquisition_probe.py"))
+    advice = (
+        f"{lint_rule} Do not `assert False` (`python -O` removes these calls), "
+        f"raise `{assertion_name}()`"
+    )
+    log_text = "\n".join(
+        [
+            "Run python -m ruff check src tests",
+            advice,
+            f" --> {finding_path}:2:12",
+            "Found 1 error.",
+            "No fixes available (1 hidden fix can be enabled with the `--unsafe-fixes` option).",
+            "Process completed with exit code 1.",
+        ]
+    )
+
+    payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+    codes = _codes(payload)
+
+    assert "RUFF_LINT_FAILURE" in codes
+    assert "PYTEST_ASSERTION_FAILURE" not in codes
+    ruff = next(item for item in payload["diagnoses"] if item["code"] == "RUFF_LINT_FAILURE")
+    assert ruff["operator_guidance"]["automation_boundary"] == "review_first_no_auto_mutation"
+
+
+def test_timestamp_prefixed_ruff_b011_advice_stays_ruff_not_pytest() -> None:
+    lint_rule = "".join(("B", "011"))
+    assertion_name = "".join(("Assertion", "Error"))
+    finding_path = "/".join(("tests", "test_controlled_actions_log_acquisition_probe.py"))
+    job_prefix = "Fast CI lane (py3.11) Ruff lint baseline "
+    timestamp = "".join(("2026-05", "-24T23", ":45:53", ".8020241Z"))
+    advice = (
+        f"{lint_rule} Do not `assert False` (`python -O` removes these calls), "
+        f"raise `{assertion_name}()`"
+    )
+    log_text = "\n".join(
+        [
+            f"{job_prefix}{timestamp} Run python -m ruff check src tests",
+            f"{job_prefix}{timestamp} {advice}",
+            f"{job_prefix}{timestamp}  --> {finding_path}:2:12",
+            f"{job_prefix}{timestamp} Found 1 error.",
+            f"{job_prefix}{timestamp} No fixes available (1 hidden fix can be enabled with the `--unsafe-fixes` option).",
+            f"Fast CI lane (py3.11) Complete job {timestamp} Process completed with exit code 1.",
+        ]
+    )
+
+    payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+    codes = _codes(payload)
+
+    assert "RUFF_LINT_FAILURE" in codes
+    assert "PYTEST_ASSERTION_FAILURE" not in codes
+    ruff = next(item for item in payload["diagnoses"] if item["code"] == "RUFF_LINT_FAILURE")
+    assert ruff["operator_guidance"]["automation_boundary"] == "review_first_no_auto_mutation"

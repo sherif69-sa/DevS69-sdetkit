@@ -1561,7 +1561,15 @@ def _append_log(
         )
     if "mypy" in lower and "error:" in lower:
         _append_static("MYPY_TYPE_CONTRACT_DRIFT", "Type contract drift detected", files, diagnoses)
-    if "ruff" in lower and not formatted and _has_failure_signal(text, "ruff-check-failure"):
+    ruff_rule_failure = bool(
+        "ruff" in lower and re.search(r"\b[A-Z]\d{3}\s+.+", text) and "-->" in text
+    )
+    ruff_lint_failure = (
+        "ruff" in lower
+        and not formatted
+        and (_has_failure_signal(text, "ruff-check-failure") or ruff_rule_failure)
+    )
+    if ruff_lint_failure:
         _append_ruff_lint(text, files, diagnoses)
     if "modulenotfounderror" in lower or "importerror while importing" in lower:
         _append_pytest(
@@ -1571,7 +1579,10 @@ def _append_log(
             files,
             diagnoses,
         )
-    elif not handled_local and ("assertionerror" in lower or re.search(r"FAILED\s+[^\s]+::", text)):
+    elif not handled_local and (
+        re.search(r"FAILED\s+[^\s]+::", text)
+        or ("assertionerror" in lower and not ruff_lint_failure)
+    ):
         _append_pytest(
             text,
             "PYTEST_ASSERTION_FAILURE",
@@ -2124,7 +2135,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             sys.stdout.write(rendered)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
-        print(f"error={exc}", file=sys.stderr)
+        sys.stderr.write(f"error={exc}\n")
         return 2
     return 0
 

@@ -651,6 +651,19 @@ def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
 
     for index, line in enumerate(lines):
         stripped = line.strip()
+        ruff_rule = re.search(r"\b([A-Z]\d{3})\s+.+", stripped)
+        nearby_context = "\n".join(lines[index + 1 : index + 3])
+        if ruff_rule and "-->" in nearby_context:
+            return {
+                "line_number": index + 1,
+                "line": stripped,
+                "tool": "ruff",
+                "kind": "lint_failure",
+                "context": _context_lines_around(lines, index + 1, context=context),
+            }
+
+    for index, line in enumerate(lines):
+        stripped = line.strip()
         lowered = stripped.lower()
         if not stripped or _is_setup_noise_line(stripped):
             continue
@@ -804,7 +817,18 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
     ]
 
     primary = diagnoses[0] if diagnoses else {}
-    if _string(first_failure.get("kind")).lower() == "test_failure":
+    if (
+        _string(first_failure.get("tool")).lower() == "ruff"
+        and _string(first_failure.get("kind")).lower() == "lint_failure"
+    ):
+        for candidate in diagnoses:
+            if _string(candidate.get("code")).upper() in {
+                "RUFF_FIXABLE_LINT",
+                "RUFF_LINT_FAILURE",
+            }:
+                primary = candidate
+                break
+    elif _string(first_failure.get("kind")).lower() == "test_failure":
         for candidate in diagnoses:
             if _string(candidate.get("code")).upper() == "PYTEST_ASSERTION_FAILURE":
                 primary = candidate
