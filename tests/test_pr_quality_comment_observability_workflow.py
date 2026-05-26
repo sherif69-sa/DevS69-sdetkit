@@ -20,11 +20,12 @@ def test_pr_quality_comment_workflow_has_queue_safe_concurrency_and_timeout() ->
     assert "timeout-minutes: 20" in text
 
 
-def test_pr_quality_comment_workflow_has_comment_permissions() -> None:
+def test_pr_quality_comment_workflow_has_comment_permissions_without_repository_write() -> None:
     text = _workflow_text()
     permissions = text.split("jobs:", 1)[0]
 
-    assert "contents: write" in permissions
+    assert "contents: read" in permissions
+    assert "contents: write" not in permissions
     assert "issues: write" in permissions
     assert "pull-requests: write" in permissions
     assert "checks: read" in permissions
@@ -205,40 +206,34 @@ def test_pr_quality_comment_workflow_passes_evidence_narrative_into_final_commen
     assert action_report_step < evidence_arg < comment_out
 
 
-def test_pr_quality_workflow_runs_safe_formatting_autopilot_bridge() -> None:
-    text = Path(".github/workflows/pr-quality-comment.yml").read_text(encoding="utf-8")
+def test_pr_quality_workflow_does_not_execute_unverified_safe_formatting() -> None:
+    text = _workflow_text()
 
-    check_intelligence = text.index("python -m sdetkit.check_intelligence")
-    bridge = text.index("Commit approved safe formatting fixes")
-    narrative = text.index("--out build/pr-quality/pr-evidence-narrative.md")
-
-    assert check_intelligence < bridge < narrative
-    assert "tools/maintenance_autopilot.py" in text
-    assert "--commit-safe-fixes" in text
-    assert (
-        "--check-intelligence-json build/pr-quality/check-intelligence/check-intelligence.json"
-        in text
-    )
-    assert "--pr-quality-safe-bridge-only" in text
-    assert "--out-dir build/pr-quality/safe-formatting-autopilot" in text
-    assert "build/pr-quality/safe-formatting-autopilot/" in text
+    assert "Commit approved safe formatting fixes" not in text
+    assert "--commit-safe-fixes" not in text
+    assert "--pr-quality-safe-bridge-only" not in text
+    assert "build/pr-quality/safe-formatting-autopilot/" not in text
+    assert "python -m sdetkit.check_intelligence" in text
+    assert "python -m sdetkit.pr_quality_action_report" in text
 
 
-def test_pr_quality_workflow_grants_contents_write_for_safe_branch_commit() -> None:
-    text = Path(".github/workflows/pr-quality-comment.yml").read_text(encoding="utf-8")
+def test_pr_quality_workflow_keeps_repository_contents_read_only() -> None:
+    text = _workflow_text()
     permissions = text.split("jobs:", 1)[0]
 
     assert "permissions:" in permissions
-    assert "contents: write" in permissions
+    assert "contents: read" in permissions
+    assert "contents: write" not in permissions
 
 
-def test_pr_quality_workflow_uploads_safe_fix_outcome_artifacts() -> None:
+def test_pr_quality_workflow_preserves_reporting_without_safe_fix_execution_artifacts() -> None:
     text = _workflow_text()
 
-    assert "build/pr-quality/safe-formatting-autopilot/" in text
-    assert "Commit approved safe formatting fixes" in text
+    assert "build/pr-quality/safe-formatting-autopilot/" not in text
+    assert "Commit approved safe formatting fixes" not in text
     assert "Build PR comment body" in text
-    assert text.index("Commit approved safe formatting fixes") < text.index("Build PR comment body")
+    assert "python -m sdetkit.check_intelligence" in text
+    assert "python -m sdetkit.pr_quality_action_report" in text
 
 
 def test_pr_quality_comment_workflow_builds_and_passes_trajectory_artifact() -> None:

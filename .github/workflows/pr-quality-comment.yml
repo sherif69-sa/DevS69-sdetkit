@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: write
+  contents: read
   issues: write
   pull-requests: write
   checks: read
@@ -329,18 +329,6 @@ jobs:
           )
           PY
 
-      - name: Commit approved safe formatting fixes
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PYTHONPATH=src python tools/maintenance_autopilot.py \
-            --owner "${{ github.repository_owner }}" \
-            --repo "${{ github.event.repository.name }}" \
-            --commit-safe-fixes \
-            --check-intelligence-json build/pr-quality/check-intelligence/check-intelligence.json \
-            --pr-quality-safe-bridge-only \
-            --out-dir build/pr-quality/safe-formatting-autopilot
-
       - name: Build PR comment body
         env:
           GH_TOKEN: ${{ github.token }}
@@ -663,7 +651,6 @@ jobs:
             build/pr-quality/security-review/
             build/pr-quality/code-scanning/
             build/pr-quality/security-diagnosis/
-            build/pr-quality/safe-formatting-autopilot/
             build/pr-quality/trajectory/
             build/pr-quality/trajectory-pattern-insights/
             build/pr-quality/live-benchmark/
