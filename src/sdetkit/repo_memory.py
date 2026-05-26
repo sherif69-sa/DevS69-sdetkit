@@ -142,8 +142,12 @@ def _controlled_candidate_validation(evidence: Mapping[str, Any]) -> JsonObject:
     for scenario in scenarios:
         if not _bool(scenario.get("passed")):
             raise ValueError("controlled candidate validation contains a failing scenario")
-        if _bool(scenario.get("automation_allowed")) or _bool(scenario.get("merge_authorized")):
-            raise ValueError("controlled candidate validation scenario expands authority")
+        scenario_expanded = [key for key in denied if _bool(scenario.get(key))]
+        if scenario_expanded:
+            raise ValueError(
+                "controlled candidate validation scenario expands authority: "
+                + ", ".join(scenario_expanded)
+            )
         observed_states.add(
             (
                 _string(scenario.get("observed_status")),

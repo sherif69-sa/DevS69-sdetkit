@@ -735,3 +735,19 @@ def test_repo_memory_cli_accepts_controlled_validation_without_promotion(
     assert (
         saved["controlled_candidate_validation"]["decision_boundary"]["automation_allowed"] is False
     )
+
+
+def test_repo_memory_rejects_controlled_scenario_semantic_equivalence_claim() -> None:
+    evidence = _candidate_validation_report()
+    evidence["scenarios"][0]["semantic_equivalence_proven"] = True
+
+    try:
+        build_repo_memory_profile(
+            pattern_insights=_pattern_insights(),
+            benchmark_report=_benchmark_report(),
+            controlled_candidate_validation_evidence=evidence,
+        )
+    except ValueError as exc:
+        assert "scenario expands authority" in str(exc)
+    else:
+        raise AssertionError("expected semantic-equivalence-claiming scenario to be rejected")
