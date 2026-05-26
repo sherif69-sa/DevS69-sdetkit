@@ -530,3 +530,42 @@ def test_pr_quality_comment_workflow_requires_trusted_history_visibility_after_p
     assert "if trusted_history_merge_authorized:" in verify_visibility
     assert "if trusted_history_semantic_equivalence_proven:" in verify_visibility
     assert "after diagnostic comment publication" in verify_visibility
+
+
+def test_pr_quality_workflow_publishes_read_only_candidate_verification_visibility() -> None:
+    text = _workflow_text()
+
+    candidate_step = text.index("python -m sdetkit.pr_quality_candidate_visibility")
+    report_step = text.index("python -m sdetkit.pr_quality_action_report")
+    append_step = text.index("cat build/pr-quality/candidate-visibility/candidate-visibility.md")
+
+    assert candidate_step < report_step < append_step
+    assert (
+        "--check-intelligence build/pr-quality/check-intelligence/check-intelligence.json" in text
+    )
+    assert "--evidence-graph build/sdetkit/evidence-graph/evidence-graph.json" in text
+    assert "--changed-files build/pr-quality/changed-files.txt" in text
+    assert (
+        "--pattern-insights build/pr-quality/trajectory-pattern-insights/pattern-insights.json"
+        in text
+    )
+    assert (
+        "--verification-evidence build/pr-quality/runtime-proof/isolated-proof/verification-evidence.json"
+        in text
+    )
+    assert "build/pr-quality/candidate-visibility/" in text
+    assert "--commit-safe-fixes" not in text
+    assert "--pr-quality-safe-bridge-only" not in text
+
+
+def test_pr_quality_workflow_captures_required_pre_commit_candidate_proof() -> None:
+    text = _workflow_text()
+
+    assert "--profile ruff_src_tests" in text
+    assert "--profile pre_commit_all" in text
+    assert (
+        "--verification-evidence build/pr-quality/runtime-proof/isolated-proof/verification-evidence.json"
+        in text
+    )
+    assert "--commit-safe-fixes" not in text
+    assert "--pr-quality-safe-bridge-only" not in text
