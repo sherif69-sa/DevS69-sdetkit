@@ -8,6 +8,10 @@ from sdetkit.pr_quality_candidate_visibility import (
     main,
     render_markdown,
 )
+from sdetkit.protected_verifier import (
+    CHANGED_FILE_INVENTORY_MISMATCH,
+    OUTSIDE_SCORED_SCOPE,
+)
 
 
 def _formatting_failure() -> dict:
@@ -120,8 +124,8 @@ def test_candidate_visibility_keeps_broader_pr_diff_review_first() -> None:
     assert payload["observed_pr_changed_files"] == observed
     assert payload["patch_score"]["decision"]["status"] == "candidate_for_protected_verification"
     assert verification["decision"]["status"] == "blocked_review_first"
-    assert "CHANGED_FILE_INVENTORY_MISMATCH" in codes
-    assert "OUTSIDE_SCORED_SCOPE" in codes
+    assert CHANGED_FILE_INVENTORY_MISMATCH in codes
+    assert OUTSIDE_SCORED_SCOPE in codes
     assert verification["decision"]["automation_allowed"] is False
     assert verification["decision"]["merge_authorized"] is False
 
