@@ -569,3 +569,32 @@ def test_pr_quality_workflow_captures_required_pre_commit_candidate_proof() -> N
     )
     assert "--commit-safe-fixes" not in text
     assert "--pr-quality-safe-bridge-only" not in text
+
+
+def test_pr_quality_workflow_appends_controlled_candidate_validation_only_after_decision_render() -> (
+    None
+):
+    text = _workflow_text()
+
+    action_report = text.index("python -m sdetkit.pr_quality_action_report")
+    validation = text.index("python -m sdetkit.pr_quality_candidate_validation")
+    validation_append = text.index(
+        "cat build/pr-quality/candidate-validation/candidate-validation.md"
+    )
+    action_report_command = text[
+        action_report : text.index("> build/pr-quality/pr-comment-metadata.json", action_report)
+    ]
+
+    assert action_report < validation < validation_append
+    assert "candidate-validation" not in action_report_command
+    assert (
+        "--scenario tests/fixtures/pr_quality_candidate_visibility/formatting_candidate_verified.json"
+        in text
+    )
+    assert (
+        "--scenario tests/fixtures/pr_quality_candidate_visibility/broader_diff_review_first.json"
+        in text
+    )
+    assert "build/pr-quality/candidate-validation/" in text
+    assert "--commit-safe-fixes" not in text
+    assert "--pr-quality-safe-bridge-only" not in text
