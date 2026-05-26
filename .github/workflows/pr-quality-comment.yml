@@ -359,6 +359,7 @@ jobs:
             --head-ref HEAD \
             "${claim_args[@]}" \
             --profile ruff_src_tests \
+            --profile pre_commit_all \
             --out-dir build/pr-quality/runtime-proof/isolated-proof \
             --format json \
             > build/pr-quality/runtime-proof/isolated-proof-cli.json \
@@ -463,6 +464,18 @@ jobs:
             --markdown-out build/pr-quality/trajectory-pattern-insights/pattern-insights.md \
             --format json \
             > build/pr-quality/trajectory-pattern-insights/pattern-insights-cli.json
+
+          mkdir -p build/pr-quality/candidate-visibility
+          PYTHONPATH=src python -m sdetkit.pr_quality_candidate_visibility \
+            --check-intelligence build/pr-quality/check-intelligence/check-intelligence.json \
+            --evidence-graph build/sdetkit/evidence-graph/evidence-graph.json \
+            --pr-quality-action-report build/pr-quality/check-intelligence/action-report.json \
+            --changed-files build/pr-quality/changed-files.txt \
+            --pattern-insights build/pr-quality/trajectory-pattern-insights/pattern-insights.json \
+            --verification-evidence build/pr-quality/runtime-proof/isolated-proof/verification-evidence.json \
+            --out-dir build/pr-quality/candidate-visibility \
+            --format json \
+            > build/pr-quality/candidate-visibility/candidate-visibility-cli.json
 
           repo_memory_rc=2
           if [ -s build/pr-quality/live-benchmark/fixture-report/benchmark-report.json ] \
@@ -597,6 +610,11 @@ jobs:
             --out build/pr-quality/pr-comment-body.md \
             > build/pr-quality/pr-comment-metadata.json
 
+          if [ -s build/pr-quality/candidate-visibility/candidate-visibility.md ]; then
+            printf '\n' >> build/pr-quality/pr-comment-body.md
+            cat build/pr-quality/candidate-visibility/candidate-visibility.md >> build/pr-quality/pr-comment-body.md
+          fi
+
       - name: Build verified operator evidence loop
         if: always()
         run: |
@@ -657,6 +675,7 @@ jobs:
             build/pr-quality/repo-memory/
             build/pr-quality/trusted-history/
             build/pr-quality/runtime-proof/
+            build/pr-quality/candidate-visibility/
             build/pr-quality/pr-evidence-narrative.md
             build/sdetkit/evidence-graph/
             build/sdetkit/operator-loop/

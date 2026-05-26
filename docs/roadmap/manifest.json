@@ -396,7 +396,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.expansion",
         "module_path": "src/sdetkit/expansion.py",
-        "tests_referencing_module": 25
+        "tests_referencing_module": 26
       },
       {
         "contract_script_paths": [
@@ -720,7 +720,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.proof",
         "module_path": "src/sdetkit/proof.py",
-        "tests_referencing_module": 116
+        "tests_referencing_module": 118
       },
       {
         "contract_script_paths": [
