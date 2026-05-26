@@ -49,6 +49,7 @@ jobs:
             build/repo-memory-history/live-report \
             build/repo-memory-history/pattern-insights \
             build/repo-memory-history/flaky-test-registry \
+            build/repo-memory-history/candidate-validation \
             build/repo-memory-history/profile
 
           live_root="${RUNNER_TEMP}/sdetkit-repo-memory-history-live-repositories"
@@ -109,6 +110,13 @@ jobs:
           )
           PY
 
+          PYTHONPATH=src python -m sdetkit.pr_quality_candidate_validation \
+            --scenario tests/fixtures/pr_quality_candidate_visibility/formatting_candidate_verified.json \
+            --scenario tests/fixtures/pr_quality_candidate_visibility/broader_diff_review_first.json \
+            --out-dir build/repo-memory-history/candidate-validation \
+            --format json \
+            > build/repo-memory-history/candidate-validation-cli.json
+
           PYTHONPATH=src python -m sdetkit.trusted_flaky_test_registry_producer \
             --source-run-id "${GITHUB_RUN_ID}" \
             --source-head-sha "${GITHUB_SHA}" \
@@ -121,6 +129,7 @@ jobs:
             --benchmark-report build/repo-memory-history/fixture-report/benchmark-report.json \
             --live-benchmark-report build/repo-memory-history/live-report/benchmark-report.json \
             --flaky-test-registry-evidence build/repo-memory-history/flaky-test-registry/flaky-test-registry-evidence.json \
+            --controlled-candidate-validation-evidence build/repo-memory-history/candidate-validation/candidate-validation.json \
             --out-dir build/repo-memory-history/profile \
             --format json \
             > build/repo-memory-history/profile-cli.json
@@ -141,6 +150,15 @@ jobs:
           assert profile["proof_provenance"]["expected_failed_scenario_count"] == 5
           assert profile["proof_provenance"]["network_boundary_blocked_scenario_count"] == 1
           assert profile["proof_provenance"]["anti_cheat_rejection_scenario_count"] == 2
+
+          controlled = profile["controlled_candidate_validation"]
+          assert controlled["collection_status"] == "collected"
+          assert controlled["status"] == "controlled_validation_passed"
+          assert controlled["scenario_count"] == 2
+          assert controlled["passed_count"] == 2
+          assert controlled["current_pr_decision_input"] is False
+          assert controlled["decision_boundary"]["automation_allowed"] is False
+          assert controlled["decision_boundary"]["merge_authorized"] is False
 
           flaky = profile["flaky_test_registry"]
           assert flaky["collection_status"] == "collected"
@@ -419,6 +437,7 @@ jobs:
             build/repo-memory-history/fixture-report/
             build/repo-memory-history/pattern-insights/
             build/repo-memory-history/flaky-test-registry/
+            build/repo-memory-history/candidate-validation/
             build/repo-memory-history/security-reviewed-dispositions/
           if-no-files-found: error
           retention-days: 90
