@@ -1,0 +1,85 @@
+{
+  "scenario_id": "broader_diff_remains_review_first",
+  "expected_status": "candidate_review_first_after_verification",
+  "expected_verifier_status": "blocked_review_first",
+  "check_intelligence": {
+    "failed_checks": [
+      {
+        "name": "PR Quality local quality gate",
+        "surface": "quality",
+        "diagnosis": {
+          "title": "Pre-commit formatting drift",
+          "code": "PRE_COMMIT_FORMAT_DRIFT"
+        },
+        "first_failure": {
+          "line": "ruff format..............................Failed",
+          "line_number": 30,
+          "tool": "ruff",
+          "kind": "format_drift"
+        },
+        "safe_to_auto_fix": true,
+        "safe_remediation": {
+          "safe_to_auto_fix": true,
+          "strategy": "run_pre_commit",
+          "category": "formatting_only",
+          "affected_files": [
+            "src/sdetkit/example.py"
+          ]
+        }
+      }
+    ]
+  },
+  "evidence_graph": {},
+  "pr_quality_action_report": {
+    "primary_blocker": {
+      "name": "PR Quality local quality gate",
+      "surface": "quality",
+      "diagnosis": {
+        "title": "Pre-commit formatting drift",
+        "code": "PRE_COMMIT_FORMAT_DRIFT"
+      },
+      "first_failure": {
+        "line": "ruff format..............................Failed",
+        "line_number": 30,
+        "tool": "ruff",
+        "kind": "format_drift"
+      },
+      "safe_to_auto_fix": true,
+      "safe_remediation": {
+        "safe_to_auto_fix": true,
+        "strategy": "run_pre_commit",
+        "category": "formatting_only",
+        "affected_files": [
+          "src/sdetkit/example.py"
+        ]
+      }
+    }
+  },
+  "changed_files": [
+    "src/sdetkit/example.py",
+    "src/sdetkit/feature.py"
+  ],
+  "pattern_insights": {
+    "recurring_review_first_surfaces": [],
+    "recurring_safe_fix_patterns": [
+      {
+        "failure_class": "formatting_only",
+        "action": "run_pre_commit",
+        "count": 2
+      }
+    ]
+  },
+  "verification_evidence": {
+    "changed_files": [
+      "src/sdetkit/example.py",
+      "src/sdetkit/feature.py"
+    ],
+    "proof_results": [
+      {
+        "command": "python -m pre_commit run -a",
+        "status": "passed",
+        "exit_code": 0
+      }
+    ]
+  }
+}

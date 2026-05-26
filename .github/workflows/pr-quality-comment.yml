@@ -610,10 +610,21 @@ jobs:
             --out build/pr-quality/pr-comment-body.md \
             > build/pr-quality/pr-comment-metadata.json
 
+          mkdir -p build/pr-quality/candidate-validation
+          PYTHONPATH=src python -m sdetkit.pr_quality_candidate_validation \
+            --scenario tests/fixtures/pr_quality_candidate_visibility/formatting_candidate_verified.json \
+            --scenario tests/fixtures/pr_quality_candidate_visibility/broader_diff_review_first.json \
+            --out-dir build/pr-quality/candidate-validation \
+            --format json \
+            > build/pr-quality/candidate-validation/candidate-validation-cli.json
+
           if [ -s build/pr-quality/candidate-visibility/candidate-visibility.md ]; then
             printf '\n' >> build/pr-quality/pr-comment-body.md
             cat build/pr-quality/candidate-visibility/candidate-visibility.md >> build/pr-quality/pr-comment-body.md
           fi
+
+          printf '\n' >> build/pr-quality/pr-comment-body.md
+          cat build/pr-quality/candidate-validation/candidate-validation.md >> build/pr-quality/pr-comment-body.md
 
       - name: Build verified operator evidence loop
         if: always()
@@ -676,6 +687,7 @@ jobs:
             build/pr-quality/trusted-history/
             build/pr-quality/runtime-proof/
             build/pr-quality/candidate-visibility/
+            build/pr-quality/candidate-validation/
             build/pr-quality/pr-evidence-narrative.md
             build/sdetkit/evidence-graph/
             build/sdetkit/operator-loop/
