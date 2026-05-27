@@ -150,3 +150,33 @@ def test_repo_memory_history_filters_dismissed_security_evidence_to_merged_pr_ch
     )
     assert 'assert summary["latest_record"]["alerts_excluded_outside_changed_paths"] >= 0' in text
     assert "gh api --paginate" in text
+
+
+def test_repo_memory_history_retains_controlled_candidate_validation_as_read_only_profile_evidence() -> (
+    None
+):
+    text = _workflow_text()
+
+    validation = text.index("python -m sdetkit.pr_quality_candidate_validation")
+    profile = text.index("python -m sdetkit.repo_memory")
+
+    assert validation < profile
+    assert (
+        "--scenario tests/fixtures/pr_quality_candidate_visibility/formatting_candidate_verified.json"
+        in text
+    )
+    assert (
+        "--scenario tests/fixtures/pr_quality_candidate_visibility/broader_diff_review_first.json"
+        in text
+    )
+    assert (
+        "--controlled-candidate-validation-evidence build/repo-memory-history/candidate-validation/candidate-validation.json"
+        in text
+    )
+    assert 'assert controlled["status"] == "controlled_validation_passed"' in text
+    assert 'assert controlled["current_pr_decision_input"] is False' in text
+    assert 'assert controlled["decision_boundary"]["automation_allowed"] is False' in text
+    assert 'assert controlled["decision_boundary"]["merge_authorized"] is False' in text
+    assert "build/repo-memory-history/candidate-validation/" in text
+    assert "contents: write" not in text.split("jobs:", 1)[0]
+    assert "git push " not in text

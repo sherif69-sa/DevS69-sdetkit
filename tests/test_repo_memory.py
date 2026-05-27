@@ -4,6 +4,7 @@ import copy
 import json
 from pathlib import Path
 
+from sdetkit.pr_quality_candidate_validation import build_validation_report
 from sdetkit.replayable_benchmark_harness import (
     EVIDENCE_SHADOW_FAIL,
     INVENTORY_CLAIM_MISMATCH_FAIL,
@@ -33,6 +34,15 @@ SCENARIOS = [
     FIXTURES / "oracle_formatting_patch.json",
     FIXTURES / "unsafe_protected_path_patch.json",
 ]
+CANDIDATE_FIXTURES = Path("tests/fixtures/pr_quality_candidate_visibility")
+CANDIDATE_SCENARIOS = [
+    CANDIDATE_FIXTURES / "formatting_candidate_verified.json",
+    CANDIDATE_FIXTURES / "broader_diff_review_first.json",
+]
+
+
+def _candidate_validation_report() -> dict:
+    return build_validation_report(CANDIDATE_SCENARIOS)
 
 
 def _benchmark_report() -> dict:
@@ -218,7 +228,7 @@ def test_repo_memory_records_benchmark_supported_candidate_without_automation() 
         benchmark_report=_benchmark_report(),
     )
 
-    assert profile["schema_version"] == "sdetkit.repo_memory.v5"
+    assert profile["schema_version"] == "sdetkit.repo_memory.v6"
     assert profile["profile_status"] == "benchmark_supported_memory"
     assert profile["memory_mode"] == "read_only_profile"
     assert profile["inputs"]["benchmark_contract_proven"] is True
@@ -643,3 +653,101 @@ def test_repo_memory_markdown_renders_trusted_no_observation_status() -> None:
     assert "Observation status: `no_test_observations_available`" in markdown
     assert "Entries: `0`" in markdown
     assert "Automation allowed by flaky-test history: `false`" in markdown
+
+
+def test_repo_memory_retains_controlled_candidate_validation_as_advisory_only() -> None:
+    profile = build_repo_memory_profile(
+        pattern_insights=_pattern_insights(),
+        benchmark_report=_benchmark_report(),
+        live_benchmark_report=_live_benchmark_report(),
+        controlled_candidate_validation_evidence=_candidate_validation_report(),
+    )
+
+    controlled = profile["controlled_candidate_validation"]
+    assert controlled["collection_status"] == "collected"
+    assert controlled["status"] == "controlled_validation_passed"
+    assert controlled["scenario_count"] == 2
+    assert controlled["passed_count"] == 2
+    assert controlled["structurally_verified_count"] == 1
+    assert controlled["review_first_count"] == 1
+    assert controlled["current_pr_decision_input"] is False
+    assert controlled["decision_boundary"]["automation_allowed"] is False
+    assert controlled["decision_boundary"]["merge_authorized"] is False
+    assert profile["live_safe_candidate_count"] == 1
+    assert profile["decision_boundary"]["automation_allowed"] is False
+
+    markdown = render_markdown(profile)
+    assert "Controlled candidate validation evidence" in markdown
+    assert "Status: `controlled_validation_passed`" in markdown
+    assert "Current PR decision input: `false`" in markdown
+    assert "Automation allowed by controlled validation: `false`" in markdown
+
+
+def test_repo_memory_rejects_controlled_validation_that_can_influence_current_pr() -> None:
+    evidence = _candidate_validation_report()
+    evidence["boundary"]["contributes_to_current_pr_decision"] = True
+
+    try:
+        build_repo_memory_profile(
+            pattern_insights=_pattern_insights(),
+            benchmark_report=_benchmark_report(),
+            controlled_candidate_validation_evidence=evidence,
+        )
+    except ValueError as exc:
+        assert "cannot contribute to a current PR decision" in str(exc)
+    else:
+        raise AssertionError("expected decision-influencing controlled validation to be rejected")
+
+
+def test_repo_memory_cli_accepts_controlled_validation_without_promotion(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    insights_path = tmp_path / "pattern-insights.json"
+    benchmark_path = tmp_path / "benchmark-report.json"
+    controlled_path = tmp_path / "candidate-validation.json"
+    out_dir = tmp_path / "repo-memory-controlled-validation"
+
+    insights_path.write_text(json.dumps(_pattern_insights()), encoding="utf-8")
+    benchmark_path.write_text(json.dumps(_benchmark_report()), encoding="utf-8")
+    controlled_path.write_text(json.dumps(_candidate_validation_report()), encoding="utf-8")
+
+    rc = main(
+        [
+            "--pattern-insights",
+            str(insights_path),
+            "--benchmark-report",
+            str(benchmark_path),
+            "--controlled-candidate-validation-evidence",
+            str(controlled_path),
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    printed = json.loads(capsys.readouterr().out)
+    saved = json.loads((out_dir / "repo-memory-profile.json").read_text(encoding="utf-8"))
+    assert printed["controlled_candidate_validation_status"] == "controlled_validation_passed"
+    assert saved["controlled_candidate_validation"]["current_pr_decision_input"] is False
+    assert (
+        saved["controlled_candidate_validation"]["decision_boundary"]["automation_allowed"] is False
+    )
+
+
+def test_repo_memory_rejects_controlled_scenario_semantic_equivalence_claim() -> None:
+    evidence = _candidate_validation_report()
+    evidence["scenarios"][0]["semantic_equivalence_proven"] = True
+
+    try:
+        build_repo_memory_profile(
+            pattern_insights=_pattern_insights(),
+            benchmark_report=_benchmark_report(),
+            controlled_candidate_validation_evidence=evidence,
+        )
+    except ValueError as exc:
+        assert "scenario expands authority" in str(exc)
+    else:
+        raise AssertionError("expected semantic-equivalence-claiming scenario to be rejected")

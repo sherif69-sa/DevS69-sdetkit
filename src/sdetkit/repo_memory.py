@@ -18,7 +18,7 @@ from sdetkit.replayable_benchmark_harness import (
     VERIFICATION_EVIDENCE_SOURCE,
 )
 
-SCHEMA_VERSION = "sdetkit.repo_memory.v5"
+SCHEMA_VERSION = "sdetkit.repo_memory.v6"
 DEFAULT_OUT_DIR = Path("build") / "repo-memory"
 PROFILE_JSON = "repo-memory-profile.json"
 PROFILE_MD = "repo-memory-profile.md"
@@ -28,6 +28,8 @@ LIVE_PROFILE_STATUS = "_".join(("live", "proof", "supported", "memory"))
 LIVE_PROOF_STATE = "_".join(("live", "proof", "supported", "candidate"))
 GIT_INVENTORY_VERIFIED = "_".join(("git", "inventory", "verified"))
 EXPECTED_FAILED_EVIDENCE_COUNT = "_".join(("expected", "failed", "evidence", "count"))
+CONTROLLED_VALIDATION_SCHEMA = "sdetkit.pr_quality.candidate_validation.v1"
+CONTROLLED_VALIDATION_STATUS = "_".join(("controlled", "validation", "passed"))
 
 JsonObject = dict[str, Any]
 
@@ -87,6 +89,95 @@ def _live_contract_proven(live_benchmark_report: Mapping[str, Any]) -> bool:
     return _string(
         live_benchmark_report.get("report_mode")
     ) == LIVE_EVIDENCE_SOURCE and _benchmark_contract_proven(live_benchmark_report)
+
+
+def _controlled_candidate_validation(evidence: Mapping[str, Any]) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+    payload = _as_dict(evidence)
+    if not payload:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "scenario_count": 0,
+            "passed_count": 0,
+            "structurally_verified_count": 0,
+            "review_first_count": 0,
+            "current_pr_decision_input": False,
+            "decision_boundary": denied,
+        }
+
+    if _string(payload.get("schema_version")) != CONTROLLED_VALIDATION_SCHEMA:
+        raise ValueError("controlled candidate validation schema is not supported")
+    if _string(payload.get("status")) != "passed":
+        raise ValueError("controlled candidate validation must have passed before ingestion")
+
+    boundary = _as_dict(payload.get("boundary"))
+    if not _bool(boundary.get("controlled_fixture_inputs_only")):
+        raise ValueError("controlled candidate validation must use fixture inputs only")
+    if _bool(boundary.get("contributes_to_current_pr_decision")):
+        raise ValueError(
+            "controlled candidate validation cannot contribute to a current PR decision"
+        )
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    if expanded:
+        raise ValueError(
+            "controlled candidate validation expands authority: " + ", ".join(expanded)
+        )
+
+    scenarios = [_as_dict(item) for item in _as_list(payload.get("scenarios")) if _as_dict(item)]
+    scenario_count = _int(payload.get("scenario_count"))
+    passed_count = _int(payload.get("passed_count"))
+    if scenario_count != len(scenarios) or passed_count != scenario_count or scenario_count < 2:
+        raise ValueError("controlled candidate validation scenario totals are inconsistent")
+
+    expected_states = {
+        ("candidate_structurally_verified", "structurally_verified_candidate"),
+        ("candidate_review_first_after_verification", "blocked_review_first"),
+    }
+    observed_states: set[tuple[str, str]] = set()
+    for scenario in scenarios:
+        if not _bool(scenario.get("passed")):
+            raise ValueError("controlled candidate validation contains a failing scenario")
+        scenario_expanded = [key for key in denied if _bool(scenario.get(key))]
+        if scenario_expanded:
+            raise ValueError(
+                "controlled candidate validation scenario expands authority: "
+                + ", ".join(scenario_expanded)
+            )
+        observed_states.add(
+            (
+                _string(scenario.get("observed_status")),
+                _string(scenario.get("observed_verifier_status")),
+            )
+        )
+    if not expected_states.issubset(observed_states):
+        raise ValueError("controlled candidate validation does not prove both boundary states")
+
+    return {
+        "collection_status": "collected",
+        "status": CONTROLLED_VALIDATION_STATUS,
+        "evidence_type": "deterministic_fixture_validation",
+        "scenario_count": scenario_count,
+        "passed_count": passed_count,
+        "structurally_verified_count": sum(
+            1
+            for state, verifier in observed_states
+            if state == "candidate_structurally_verified"
+            and verifier == "structurally_verified_candidate"
+        ),
+        "review_first_count": sum(
+            1
+            for state, verifier in observed_states
+            if state == "candidate_review_first_after_verification"
+            and verifier == "blocked_review_first"
+        ),
+        "current_pr_decision_input": False,
+        "decision_boundary": denied,
+    }
 
 
 def _proof_commands(benchmark_report: Mapping[str, Any]) -> list[str]:
@@ -501,9 +592,13 @@ def build_repo_memory_profile(
     benchmark_report: Mapping[str, Any],
     live_benchmark_report: Mapping[str, Any] | None = None,
     flaky_test_registry_evidence: Mapping[str, Any] | None = None,
+    controlled_candidate_validation_evidence: Mapping[str, Any] | None = None,
 ) -> JsonObject:
     live_report = dict(live_benchmark_report or {})
     flaky_registry = _flaky_test_registry(flaky_test_registry_evidence or {})
+    controlled_validation = _controlled_candidate_validation(
+        controlled_candidate_validation_evidence or {}
+    )
     benchmark_proven = _benchmark_contract_proven(benchmark_report)
     live_proven = _live_contract_proven(live_report)
     safe_fix_history = _safe_fix_history(
@@ -596,6 +691,7 @@ def build_repo_memory_profile(
         "safe_fix_history": safe_fix_history,
         "known_safe_candidate_count": len(supported_candidates),
         "live_safe_candidate_count": len(live_supported_candidates),
+        "controlled_candidate_validation": controlled_validation,
         "flaky_test_registry": flaky_registry,
         "escalation_rules": _escalation_rules(),
         "unproven_boundaries": unproven_boundaries,
@@ -621,6 +717,7 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
     commands = _as_dict(profile.get("command_profile"))
     provenance = _as_dict(profile.get("proof_provenance"))
     failure_patterns = _as_dict(profile.get("failure_patterns"))
+    controlled = _as_dict(profile.get("controlled_candidate_validation"))
     flaky = _as_dict(profile.get("flaky_test_registry"))
     flaky_source = _as_dict(flaky.get("source"))
     boundary = _as_dict(profile.get("decision_boundary"))
@@ -729,6 +826,34 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
     lines.extend(
         [
             "",
+            "## Controlled candidate validation evidence",
+            "",
+            f"- Collection status: `{_string(controlled.get('collection_status'))}`",
+            f"- Status: `{_string(controlled.get('status'))}`",
+            f"- Scenarios passed: `{_int(controlled.get('passed_count'))}/{_int(controlled.get('scenario_count'))}`",
+            (
+                "- Structurally verified scenarios: "
+                f"`{_int(controlled.get('structurally_verified_count'))}`"
+            ),
+            f"- Review-first scenarios: `{_int(controlled.get('review_first_count'))}`",
+            (
+                "- Current PR decision input: "
+                f"`{str(_bool(controlled.get('current_pr_decision_input'))).lower()}`"
+            ),
+            (
+                "- Automation allowed by controlled validation: "
+                f"`{str(_bool(_as_dict(controlled.get('decision_boundary')).get('automation_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by controlled validation: "
+                f"`{str(_bool(_as_dict(controlled.get('decision_boundary')).get('merge_authorized'))).lower()}`"
+            ),
+        ]
+    )
+
+    lines.extend(
+        [
+            "",
             "## Flaky test registry",
             "",
             f"- Collection status: `{_string(flaky.get('collection_status'))}`",
@@ -803,6 +928,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--benchmark-report", type=Path, required=True)
     parser.add_argument("--live-benchmark-report", type=Path)
     parser.add_argument("--flaky-test-registry-evidence", type=Path)
+    parser.add_argument("--controlled-candidate-validation-evidence", type=Path)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     return parser
@@ -823,6 +949,11 @@ def main(argv: list[str] | None = None) -> int:
                 if args.flaky_test_registry_evidence
                 else None
             ),
+            controlled_candidate_validation_evidence=(
+                _read_json(args.controlled_candidate_validation_evidence)
+                if args.controlled_candidate_validation_evidence
+                else None
+            ),
         )
         artifacts = write_profile(profile, out_dir=args.out_dir)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
@@ -837,6 +968,9 @@ def main(argv: list[str] | None = None) -> int:
                     "artifacts": artifacts,
                     "known_safe_candidate_count": profile["known_safe_candidate_count"],
                     "live_safe_candidate_count": profile["live_safe_candidate_count"],
+                    "controlled_candidate_validation_status": profile[
+                        "controlled_candidate_validation"
+                    ]["status"],
                 },
                 indent=2,
                 sort_keys=True,
