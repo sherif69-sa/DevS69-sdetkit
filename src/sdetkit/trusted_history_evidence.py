@@ -9,13 +9,19 @@ from typing import Any
 
 from sdetkit.repo_memory_profile_history import (
     AUTOMATION_ALLOWED,
+    CONTROLLED_REVIEW_FIRST_COUNT,
+    CONTROLLED_STRUCTURALLY_VERIFIED_COUNT,
+    CONTROLLED_VALIDATION_PASSED,
+    CONTROLLED_VALIDATION_RECORD_COUNT,
+    CONTROLLED_VALIDATION_SCENARIO_COUNT,
+    CONTROLLED_VALIDATION_STATUS,
     LIVE_CONTRACT_PROVEN,
     MERGE_AUTHORIZED,
     SEMANTIC_EQUIVALENCE_PROVEN,
     validate_record,
 )
 
-SCHEMA_VERSION = ".".join(("sdetkit", "trusted", "history", "evidence", "v1"))
+SCHEMA_VERSION = ".".join(("sdetkit", "trusted", "history", "evidence", "v2"))
 DEFAULT_OUT_DIR = Path("build") / "pr-quality" / "trusted-history"
 EVIDENCE_JSON = "trusted-history-evidence.json"
 EVIDENCE_MD = "trusted-history-evidence.md"
@@ -165,6 +171,37 @@ def build_trusted_history_evidence(
     if not _bool(latest.get(LIVE_CONTRACT_PROVEN)):
         raise ValueError("trusted history latest record lacks live-contract proof")
 
+    latest_controlled_status = _string(latest.get(CONTROLLED_VALIDATION_STATUS) or "not_collected")
+    record_controlled_status = _string(last.get(CONTROLLED_VALIDATION_STATUS) or "not_collected")
+    if latest_controlled_status != record_controlled_status:
+        raise ValueError(
+            "trusted history latest controlled validation status does not match JSONL record"
+        )
+
+    controlled_records = [
+        record
+        for record in records
+        if _string(record.get(CONTROLLED_VALIDATION_STATUS)) == CONTROLLED_VALIDATION_PASSED
+    ]
+    controlled_expectations = {
+        CONTROLLED_VALIDATION_RECORD_COUNT: len(controlled_records),
+        CONTROLLED_VALIDATION_SCENARIO_COUNT: sum(
+            _int(record.get(CONTROLLED_VALIDATION_SCENARIO_COUNT)) for record in controlled_records
+        ),
+        CONTROLLED_STRUCTURALLY_VERIFIED_COUNT: sum(
+            _int(record.get(CONTROLLED_STRUCTURALLY_VERIFIED_COUNT))
+            for record in controlled_records
+        ),
+        CONTROLLED_REVIEW_FIRST_COUNT: sum(
+            _int(record.get(CONTROLLED_REVIEW_FIRST_COUNT)) for record in controlled_records
+        ),
+    }
+    for key, expected in controlled_expectations.items():
+        if _int(payload.get(key)) != expected:
+            raise ValueError("trusted history controlled validation summary does not match records")
+    if controlled_records and not _bool(boundary.get("controlled_validation_is_advisory_only")):
+        raise ValueError("trusted history controlled validation is not marked advisory only")
+
     return {
         "schema_version": SCHEMA_VERSION,
         "collection_status": COLLECTED,
@@ -183,6 +220,18 @@ def build_trusted_history_evidence(
             "latest_accepted_main_head": selected_head,
             "latest_live_contract_proven": True,
             "prior_history_is_read_only_input": True,
+            CONTROLLED_VALIDATION_RECORD_COUNT: controlled_expectations[
+                CONTROLLED_VALIDATION_RECORD_COUNT
+            ],
+            CONTROLLED_VALIDATION_SCENARIO_COUNT: controlled_expectations[
+                CONTROLLED_VALIDATION_SCENARIO_COUNT
+            ],
+            CONTROLLED_STRUCTURALLY_VERIFIED_COUNT: controlled_expectations[
+                CONTROLLED_STRUCTURALLY_VERIFIED_COUNT
+            ],
+            CONTROLLED_REVIEW_FIRST_COUNT: controlled_expectations[CONTROLLED_REVIEW_FIRST_COUNT],
+            "latest_controlled_validation_status": record_controlled_status,
+            "controlled_validation_reporting_only": True,
         },
         "decision_boundary": {
             "reporting_only": True,
@@ -190,6 +239,7 @@ def build_trusted_history_evidence(
             AUTOMATION_ALLOWED: False,
             MERGE_AUTHORIZED: False,
             SEMANTIC_EQUIVALENCE_PROVEN: False,
+            "controlled_validation_authorizes_current_action": False,
         },
     }
 
@@ -220,6 +270,30 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
                 "- Prior history is read-only input: "
                 f"`{str(_bool(history.get('prior_history_is_read_only_input'))).lower()}`"
             ),
+            (
+                "- Controlled validation records: "
+                f"`{_int(history.get(CONTROLLED_VALIDATION_RECORD_COUNT))}`"
+            ),
+            (
+                "- Controlled validation scenario total: "
+                f"`{_int(history.get(CONTROLLED_VALIDATION_SCENARIO_COUNT))}`"
+            ),
+            (
+                "- Controlled structurally verified scenario total: "
+                f"`{_int(history.get(CONTROLLED_STRUCTURALLY_VERIFIED_COUNT))}`"
+            ),
+            (
+                "- Controlled review-first scenario total: "
+                f"`{_int(history.get(CONTROLLED_REVIEW_FIRST_COUNT))}`"
+            ),
+            (
+                "- Latest controlled validation status: "
+                f"`{_string(history.get('latest_controlled_validation_status') or 'not_collected')}`"
+            ),
+            (
+                "- Controlled validation reporting only: "
+                f"`{str(_bool(history.get('controlled_validation_reporting_only'))).lower()}`"
+            ),
             "",
             "## Boundary",
             "",
@@ -232,6 +306,10 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
             (
                 "- Semantic equivalence proven: "
                 f"`{str(_bool(boundary.get(SEMANTIC_EQUIVALENCE_PROVEN))).lower()}`"
+            ),
+            (
+                "- Controlled validation authorizes current action: "
+                f"`{str(_bool(boundary.get('controlled_validation_authorizes_current_action'))).lower()}`"
             ),
             "",
         ]

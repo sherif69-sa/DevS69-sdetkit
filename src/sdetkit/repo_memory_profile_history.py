@@ -9,9 +9,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = ".".join(("sdetkit", "repo", "memory", "profile", "history", "v1"))
-RECORD_SCHEMA_VERSION = ".".join(
+SCHEMA_VERSION = ".".join(("sdetkit", "repo", "memory", "profile", "history", "v2"))
+LEGACY_RECORD_SCHEMA_VERSION = ".".join(
     ("sdetkit", "repo", "memory", "profile", "history", "record", "v1")
+)
+RECORD_SCHEMA_VERSION = ".".join(
+    ("sdetkit", "repo", "memory", "profile", "history", "record", "v2")
 )
 DEFAULT_OUT_DIR = Path("build") / "repo-memory-history"
 SUMMARY_JSON = "repo-memory-history-summary.json"
@@ -30,6 +33,18 @@ NETWORK_BOUNDARY_BLOCKED_SCENARIO_COUNT = "_".join(
     ("network", "boundary", "blocked", "scenario", "count")
 )
 ANTI_CHEAT_REJECTION_SCENARIO_COUNT = "_".join(("anti", "cheat", "rejection", "scenario", "count"))
+CONTROLLED_VALIDATION_PASSED = "_".join(("controlled", "validation", "passed"))
+CONTROLLED_VALIDATION_STATUS = "_".join(("controlled", "validation", "status"))
+CONTROLLED_VALIDATION_RECORD_COUNT = "_".join(("controlled", "validation", "record", "count"))
+CONTROLLED_VALIDATION_SCENARIO_COUNT = "_".join(("controlled", "validation", "scenario", "count"))
+CONTROLLED_VALIDATION_PASSED_COUNT = "_".join(("controlled", "validation", "passed", "count"))
+CONTROLLED_STRUCTURALLY_VERIFIED_COUNT = "_".join(
+    ("controlled", "structurally", "verified", "count")
+)
+CONTROLLED_REVIEW_FIRST_COUNT = "_".join(("controlled", "review", "first", "count"))
+CONTROLLED_CURRENT_PR_DECISION_INPUT = "_".join(
+    ("controlled", "current", "pr", "decision", "input")
+)
 
 JsonObject = dict[str, Any]
 
@@ -106,6 +121,50 @@ def _assert_no_authority(boundary: Mapping[str, Any], *, source: str) -> None:
         )
 
 
+def _controlled_validation_observation(profile: Mapping[str, Any]) -> JsonObject:
+    controlled = _as_dict(profile.get("controlled_candidate_validation"))
+    status = _text(controlled.get("status") or "not_collected")
+    empty = {
+        CONTROLLED_VALIDATION_STATUS: "not_collected",
+        CONTROLLED_VALIDATION_SCENARIO_COUNT: 0,
+        CONTROLLED_VALIDATION_PASSED_COUNT: 0,
+        CONTROLLED_STRUCTURALLY_VERIFIED_COUNT: 0,
+        CONTROLLED_REVIEW_FIRST_COUNT: 0,
+        CONTROLLED_CURRENT_PR_DECISION_INPUT: False,
+    }
+    if not controlled or status == "not_collected":
+        return empty
+    if status != CONTROLLED_VALIDATION_PASSED:
+        raise ValueError("controlled validation profile status is not supported")
+    if _bool(controlled.get("current_pr_decision_input")):
+        raise ValueError("controlled validation profile cannot influence a current PR decision")
+    _assert_no_authority(
+        _as_dict(controlled.get("decision_boundary")),
+        source="controlled validation profile evidence",
+    )
+
+    scenario_count = _int(controlled.get("scenario_count"))
+    passed_count = _int(controlled.get("passed_count"))
+    structurally_verified = _int(controlled.get("structurally_verified_count"))
+    review_first = _int(controlled.get("review_first_count"))
+    if (
+        scenario_count < 2
+        or passed_count != scenario_count
+        or structurally_verified < 1
+        or review_first < 1
+    ):
+        raise ValueError("controlled validation profile totals are inconsistent")
+
+    return {
+        CONTROLLED_VALIDATION_STATUS: CONTROLLED_VALIDATION_PASSED,
+        CONTROLLED_VALIDATION_SCENARIO_COUNT: scenario_count,
+        CONTROLLED_VALIDATION_PASSED_COUNT: passed_count,
+        CONTROLLED_STRUCTURALLY_VERIFIED_COUNT: structurally_verified,
+        CONTROLLED_REVIEW_FIRST_COUNT: review_first,
+        CONTROLLED_CURRENT_PR_DECISION_INPUT: False,
+    }
+
+
 def validate_profile(profile: Mapping[str, Any]) -> None:
     if _text(profile.get("memory_mode")) != READ_ONLY_PROFILE_MODE:
         raise ValueError("RepoMemory profile must use read_only_profile memory mode")
@@ -113,15 +172,61 @@ def validate_profile(profile: Mapping[str, Any]) -> None:
         _as_dict(profile.get("decision_boundary")),
         source="RepoMemory profile",
     )
+    _controlled_validation_observation(profile)
 
 
 def validate_record(record: Mapping[str, Any]) -> None:
-    if _text(record.get("schema_version")) != RECORD_SCHEMA_VERSION:
+    schema = _text(record.get("schema_version"))
+    if schema not in {LEGACY_RECORD_SCHEMA_VERSION, RECORD_SCHEMA_VERSION}:
         raise ValueError("history record schema is not supported")
     _assert_no_authority(
         _as_dict(record.get("decision_boundary")),
         source="RepoMemory history record",
     )
+
+    controlled_keys = {
+        CONTROLLED_VALIDATION_STATUS,
+        CONTROLLED_VALIDATION_SCENARIO_COUNT,
+        CONTROLLED_VALIDATION_PASSED_COUNT,
+        CONTROLLED_STRUCTURALLY_VERIFIED_COUNT,
+        CONTROLLED_REVIEW_FIRST_COUNT,
+        CONTROLLED_CURRENT_PR_DECISION_INPUT,
+    }
+    if schema == LEGACY_RECORD_SCHEMA_VERSION:
+        if any(key in record for key in controlled_keys):
+            raise ValueError("legacy history record cannot carry controlled validation evidence")
+        return
+
+    status = _text(record.get(CONTROLLED_VALIDATION_STATUS) or "not_collected")
+    if status not in {"not_collected", CONTROLLED_VALIDATION_PASSED}:
+        raise ValueError("history record controlled validation status is not supported")
+    if _bool(record.get(CONTROLLED_CURRENT_PR_DECISION_INPUT)):
+        raise ValueError(
+            "history record controlled validation cannot influence a current PR decision"
+        )
+    if status == "not_collected":
+        if any(
+            _int(record.get(key))
+            for key in (
+                CONTROLLED_VALIDATION_SCENARIO_COUNT,
+                CONTROLLED_VALIDATION_PASSED_COUNT,
+                CONTROLLED_STRUCTURALLY_VERIFIED_COUNT,
+                CONTROLLED_REVIEW_FIRST_COUNT,
+            )
+        ):
+            raise ValueError(
+                "uncollected controlled validation record cannot carry scenario totals"
+            )
+        return
+
+    scenario_count = _int(record.get(CONTROLLED_VALIDATION_SCENARIO_COUNT))
+    if (
+        scenario_count < 2
+        or _int(record.get(CONTROLLED_VALIDATION_PASSED_COUNT)) != scenario_count
+        or _int(record.get(CONTROLLED_STRUCTURALLY_VERIFIED_COUNT)) < 1
+        or _int(record.get(CONTROLLED_REVIEW_FIRST_COUNT)) < 1
+    ):
+        raise ValueError("history record controlled validation totals are inconsistent")
 
 
 def build_history_record(
@@ -141,6 +246,7 @@ def build_history_record(
         raise ValueError("source_head_sha is required")
 
     provenance = _as_dict(profile.get("proof_provenance"))
+    controlled = _controlled_validation_observation(profile)
     boundary = {
         AUTOMATION_ALLOWED: False,
         MERGE_AUTHORIZED: False,
@@ -161,6 +267,18 @@ def build_history_record(
         ANTI_CHEAT_REJECTION_SCENARIO_COUNT: _int(
             provenance.get(ANTI_CHEAT_REJECTION_SCENARIO_COUNT)
         ),
+        CONTROLLED_VALIDATION_STATUS: _text(controlled.get(CONTROLLED_VALIDATION_STATUS)),
+        CONTROLLED_VALIDATION_SCENARIO_COUNT: _int(
+            controlled.get(CONTROLLED_VALIDATION_SCENARIO_COUNT)
+        ),
+        CONTROLLED_VALIDATION_PASSED_COUNT: _int(
+            controlled.get(CONTROLLED_VALIDATION_PASSED_COUNT)
+        ),
+        CONTROLLED_STRUCTURALLY_VERIFIED_COUNT: _int(
+            controlled.get(CONTROLLED_STRUCTURALLY_VERIFIED_COUNT)
+        ),
+        CONTROLLED_REVIEW_FIRST_COUNT: _int(controlled.get(CONTROLLED_REVIEW_FIRST_COUNT)),
+        CONTROLLED_CURRENT_PR_DECISION_INPUT: False,
         "decision_boundary": boundary,
     }
 
@@ -214,6 +332,11 @@ def build_history_summary(
     statuses = Counter(_text(item.get("profile_status")) for item in records)
     latest = dict(records[-1]) if records else {}
     live_records = [item for item in records if _bool(item.get(LIVE_CONTRACT_PROVEN))]
+    controlled_records = [
+        item
+        for item in records
+        if _text(item.get(CONTROLLED_VALIDATION_STATUS)) == CONTROLLED_VALIDATION_PASSED
+    ]
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -224,6 +347,16 @@ def build_history_summary(
         "appended": appended,
         "record_count": len(records),
         "live_contract_proven_record_count": len(live_records),
+        CONTROLLED_VALIDATION_RECORD_COUNT: len(controlled_records),
+        CONTROLLED_VALIDATION_SCENARIO_COUNT: sum(
+            _int(item.get(CONTROLLED_VALIDATION_SCENARIO_COUNT)) for item in controlled_records
+        ),
+        CONTROLLED_STRUCTURALLY_VERIFIED_COUNT: sum(
+            _int(item.get(CONTROLLED_STRUCTURALLY_VERIFIED_COUNT)) for item in controlled_records
+        ),
+        CONTROLLED_REVIEW_FIRST_COUNT: sum(
+            _int(item.get(CONTROLLED_REVIEW_FIRST_COUNT)) for item in controlled_records
+        ),
         "profile_status_counts": dict(sorted(statuses.items())),
         "known_safe_candidate_total": sum(
             _int(item.get("known_safe_candidate_count")) for item in records
@@ -240,12 +373,22 @@ def build_history_summary(
             "source_head_sha": _text(latest.get("source_head_sha")),
             "profile_status": _text(latest.get("profile_status")),
             LIVE_CONTRACT_PROVEN: _bool(latest.get(LIVE_CONTRACT_PROVEN)),
+            CONTROLLED_VALIDATION_STATUS: _text(
+                latest.get(CONTROLLED_VALIDATION_STATUS) or "not_collected"
+            ),
+            CONTROLLED_VALIDATION_SCENARIO_COUNT: _int(
+                latest.get(CONTROLLED_VALIDATION_SCENARIO_COUNT)
+            ),
+            CONTROLLED_CURRENT_PR_DECISION_INPUT: _bool(
+                latest.get(CONTROLLED_CURRENT_PR_DECISION_INPUT)
+            ),
         },
         "decision_boundary": {
             AUTOMATION_ALLOWED: False,
             MERGE_AUTHORIZED: False,
             SEMANTIC_EQUIVALENCE_PROVEN: False,
             "prior_history_is_read_only_input": True,
+            "controlled_validation_is_advisory_only": True,
             "reason": (
                 "RepoMemory profile history records proven read-only outcomes only; "
                 "it does not authorize remediation."
@@ -276,6 +419,22 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
             "- Anti-cheat rejection scenario total: "
             f"`{_int(summary.get(ANTI_CHEAT_REJECTION_SCENARIO_COUNT))}`"
         ),
+        (
+            "- Controlled validation records: "
+            f"`{_int(summary.get(CONTROLLED_VALIDATION_RECORD_COUNT))}`"
+        ),
+        (
+            "- Controlled validation scenario total: "
+            f"`{_int(summary.get(CONTROLLED_VALIDATION_SCENARIO_COUNT))}`"
+        ),
+        (
+            "- Controlled structurally verified scenario total: "
+            f"`{_int(summary.get(CONTROLLED_STRUCTURALLY_VERIFIED_COUNT))}`"
+        ),
+        (
+            "- Controlled review-first scenario total: "
+            f"`{_int(summary.get(CONTROLLED_REVIEW_FIRST_COUNT))}`"
+        ),
         "",
         "## Latest record",
         "",
@@ -284,6 +443,18 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
         f"- Source head sha: `{_text(latest.get('source_head_sha'))}`",
         f"- Profile status: `{_text(latest.get('profile_status'))}`",
         (f"- Live contract proven: `{str(_bool(latest.get(LIVE_CONTRACT_PROVEN))).lower()}`"),
+        (
+            "- Controlled validation status: "
+            f"`{_text(latest.get(CONTROLLED_VALIDATION_STATUS) or 'not_collected')}`"
+        ),
+        (
+            "- Controlled validation scenarios: "
+            f"`{_int(latest.get(CONTROLLED_VALIDATION_SCENARIO_COUNT))}`"
+        ),
+        (
+            "- Controlled validation current PR decision input: "
+            f"`{str(_bool(latest.get(CONTROLLED_CURRENT_PR_DECISION_INPUT))).lower()}`"
+        ),
         "",
         "## Boundary",
         "",
@@ -296,6 +467,10 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
         (
             "- Prior history is read-only input: "
             f"`{str(_bool(boundary.get('prior_history_is_read_only_input'))).lower()}`"
+        ),
+        (
+            "- Controlled validation is advisory only: "
+            f"`{str(_bool(boundary.get('controlled_validation_is_advisory_only'))).lower()}`"
         ),
         "- History executes proof commands: `false`",
         "",

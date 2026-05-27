@@ -20,6 +20,12 @@ PRIOR_HISTORY_READ_ONLY_INPUT = "_".join(("prior", "history", "is", "read", "onl
 PROOF_COMMANDS_EXECUTED_BY_READER = "_".join(("proof", "commands", "executed", "by", "reader"))
 TRUSTED_HISTORY_COLLECTION_STATUS = "_".join(("trusted", "history", "collection", "status"))
 TRUSTED_HISTORY_STATUS = "_".join(("trusted", "history", "status"))
+CONTROLLED_VALIDATION_RECORD_COUNT = "_".join(("controlled", "validation", "record", "count"))
+CONTROLLED_VALIDATION_SCENARIO_COUNT = "_".join(("controlled", "validation", "scenario", "count"))
+CONTROLLED_STRUCTURALLY_VERIFIED_COUNT = "_".join(
+    ("controlled", "structurally", "verified", "count")
+)
+CONTROLLED_REVIEW_FIRST_COUNT = "_".join(("controlled", "review", "first", "count"))
 TRUSTED_HISTORY_RECORD_COUNT = "_".join(("trusted", "history", "record", "count"))
 TRUSTED_HISTORY_BASE_ANCESTRY_VERIFIED = "_".join(
     ("trusted", "history", "base", "ancestry", "verified")
@@ -718,6 +724,34 @@ def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) ->
                 (
                     "- Trusted history prior input read-only: "
                     f"`{str(bool(trusted_history.get(PRIOR_HISTORY_READ_ONLY_INPUT, False))).lower()}`"
+                ),
+                (
+                    "- Trusted history controlled validation records: "
+                    f"`{_int(trusted_history.get(CONTROLLED_VALIDATION_RECORD_COUNT))}`"
+                ),
+                (
+                    "- Trusted history controlled validation scenarios: "
+                    f"`{_int(trusted_history.get(CONTROLLED_VALIDATION_SCENARIO_COUNT))}`"
+                ),
+                (
+                    "- Trusted history controlled structurally verified scenarios: "
+                    f"`{_int(trusted_history.get(CONTROLLED_STRUCTURALLY_VERIFIED_COUNT))}`"
+                ),
+                (
+                    "- Trusted history controlled review-first scenarios: "
+                    f"`{_int(trusted_history.get(CONTROLLED_REVIEW_FIRST_COUNT))}`"
+                ),
+                (
+                    "- Trusted history latest controlled validation status: "
+                    f"`{_string(trusted_history.get('latest_controlled_validation_status') or 'not_collected')}`"
+                ),
+                (
+                    "- Trusted history controlled validation reporting only: "
+                    f"`{str(bool(trusted_history.get('controlled_validation_reporting_only', False))).lower()}`"
+                ),
+                (
+                    "- Trusted history controlled validation authorizes current action: "
+                    f"`{str(bool(trusted_history.get('controlled_validation_authorizes_current_action', False))).lower()}`"
                 ),
                 (
                     "- Automation allowed by trusted history: "
