@@ -53,8 +53,10 @@ def _bool(value: Any) -> bool:
 
 
 def _read_json(path: Path | None) -> JsonObject:
-    if path is None or not path.exists():
+    if path is None:
         return {}
+    if not path.exists():
+        raise ValueError(f"declared diagnostic job evidence input is missing: {path}")
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"expected JSON object in {path}")

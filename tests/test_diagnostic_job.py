@@ -157,3 +157,29 @@ def test_diagnostic_job_cli_writes_job_result_vector_and_comment_artifacts(
     assert (out_dir / "vector" / "diagnostic-vector.json").exists()
     assert (out_dir / "vector" / "failure-vector.json").exists()
     assert "does not execute proof, apply a patch, or authorize a merge" in markdown
+
+
+def test_diagnostic_job_cli_rejects_declared_missing_evidence_input(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    missing = tmp_path / "missing-check-intelligence.json"
+    out_dir = tmp_path / "job"
+
+    rc = main(
+        [
+            "--check-intelligence",
+            str(missing),
+            "--head-sha",
+            "head123",
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 2
+    assert "declared diagnostic job evidence input is missing" in capsys.readouterr().out
+    assert not (out_dir / "diagnostic-worker-result.json").exists()
+    assert not (out_dir / "diagnostic-job.md").exists()
