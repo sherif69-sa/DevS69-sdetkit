@@ -598,3 +598,55 @@ def test_pr_quality_workflow_appends_controlled_candidate_validation_only_after_
     assert "build/pr-quality/candidate-validation/" in text
     assert "--commit-safe-fixes" not in text
     assert "--pr-quality-safe-bridge-only" not in text
+
+
+def test_pr_quality_workflow_runs_local_diagnostic_job_as_post_decision_read_only_evidence() -> (
+    None
+):
+    text = _workflow_text()
+
+    action_report = text.index("python -m sdetkit.pr_quality_action_report")
+    job = text.index("python -m sdetkit.diagnostic_job")
+    job_append = text.index("cat build/pr-quality/diagnostic-job/diagnostic-job.md")
+    action_report_command = text[
+        action_report : text.index("> build/pr-quality/pr-comment-metadata.json", action_report)
+    ]
+
+    assert action_report < job < job_append
+    assert "diagnostic-job" not in action_report_command
+    assert (
+        "--check-intelligence build/pr-quality/check-intelligence/check-intelligence.json" in text
+    )
+    assert "--evidence-graph build/sdetkit/evidence-graph/evidence-graph.json" in text
+    assert (
+        "--pr-quality-action-report build/pr-quality/check-intelligence/action-report.json" in text
+    )
+    assert (
+        "--security-review build/pr-quality/security-diagnosis/security-finding-diagnosis.json"
+        in text
+    )
+    assert '--base-sha "$PR_BASE_SHA"' in text
+    assert '--head-sha "$HEAD_SHA"' in text
+    assert "build/pr-quality/diagnostic-job/" in text
+    assert "--commit-safe-fixes" not in text
+    assert "--pr-quality-safe-bridge-only" not in text
+
+
+def test_pr_quality_workflow_keeps_failed_diagnostic_job_advisory_and_visible() -> None:
+    text = _workflow_text()
+    build_comment = text[
+        text.index("- name: Build PR comment body") : text.index(
+            "- name: Build verified operator evidence loop"
+        )
+    ]
+
+    assert "diagnostic_job_rc=0" in build_comment
+    assert "|| diagnostic_job_rc=$?" in build_comment
+    assert "diagnostic-job-exit-code.txt" in build_comment
+    assert 'if [ "$diagnostic_job_rc" -ne 0 ]' in build_comment
+    assert "Status: `collection_failed`" in build_comment
+    assert "Current PR decision input: `false`" in build_comment
+    assert "Patch application allowed: `false`" in build_comment
+    assert "Automation allowed: `false`" in build_comment
+    assert "Merge authorized: `false`" in build_comment
+    assert "base PR decision and report remain authoritative" in build_comment
