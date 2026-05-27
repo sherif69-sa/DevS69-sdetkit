@@ -610,6 +610,44 @@ jobs:
             --out build/pr-quality/pr-comment-body.md \
             > build/pr-quality/pr-comment-metadata.json
 
+          mkdir -p build/pr-quality/diagnostic-job
+          diagnostic_job_rc=0
+          PYTHONPATH=src python -m sdetkit.diagnostic_job \
+            --check-intelligence build/pr-quality/check-intelligence/check-intelligence.json \
+            --evidence-graph build/sdetkit/evidence-graph/evidence-graph.json \
+            --pr-quality-action-report build/pr-quality/check-intelligence/action-report.json \
+            --security-review build/pr-quality/security-diagnosis/security-finding-diagnosis.json \
+            --repo "$REPOSITORY" \
+            --base-sha "$PR_BASE_SHA" \
+            --head-sha "$HEAD_SHA" \
+            --event-name pull_request \
+            --pr-number "${{ github.event.pull_request.number }}" \
+            --out-dir build/pr-quality/diagnostic-job \
+            --format json \
+            > build/pr-quality/diagnostic-job/diagnostic-job-cli.json \
+            || diagnostic_job_rc=$?
+          printf '%s\n' "$diagnostic_job_rc" \
+            > build/pr-quality/diagnostic-job/diagnostic-job-exit-code.txt
+
+          if [ "$diagnostic_job_rc" -ne 0 ] \
+            && [ ! -s build/pr-quality/diagnostic-job/diagnostic-job.md ]; then
+            {
+              printf '%s\n' \
+                '## Local diagnostic job evidence' \
+                '' \
+                '- Evidence type: `current_pr_read_only_worker_result`' \
+                '- Status: `collection_failed`' \
+                '- Current PR decision input: `false`' \
+                '- Proof commands executed by worker: `false`' \
+                '- Patch application allowed: `false`' \
+                '- Automation allowed: `false`' \
+                '- Merge authorized: `false`' \
+                '- Semantic equivalence proven: `false`' \
+                '' \
+                '- Interpretation: diagnostic worker artifact collection failed; the base PR decision and report remain authoritative, and this failed advisory collection grants no authority.'
+            } > build/pr-quality/diagnostic-job/diagnostic-job.md
+          fi
+
           mkdir -p build/pr-quality/candidate-validation
           PYTHONPATH=src python -m sdetkit.pr_quality_candidate_validation \
             --scenario tests/fixtures/pr_quality_candidate_visibility/formatting_candidate_verified.json \
@@ -617,6 +655,11 @@ jobs:
             --out-dir build/pr-quality/candidate-validation \
             --format json \
             > build/pr-quality/candidate-validation/candidate-validation-cli.json
+
+          if [ -s build/pr-quality/diagnostic-job/diagnostic-job.md ]; then
+            printf '\n' >> build/pr-quality/pr-comment-body.md
+            cat build/pr-quality/diagnostic-job/diagnostic-job.md >> build/pr-quality/pr-comment-body.md
+          fi
 
           if [ -s build/pr-quality/candidate-visibility/candidate-visibility.md ]; then
             printf '\n' >> build/pr-quality/pr-comment-body.md
@@ -686,6 +729,7 @@ jobs:
             build/pr-quality/repo-memory/
             build/pr-quality/trusted-history/
             build/pr-quality/runtime-proof/
+            build/pr-quality/diagnostic-job/
             build/pr-quality/candidate-visibility/
             build/pr-quality/candidate-validation/
             build/pr-quality/pr-evidence-narrative.md
