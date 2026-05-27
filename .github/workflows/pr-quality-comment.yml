@@ -648,6 +648,49 @@ jobs:
             } > build/pr-quality/diagnostic-job/diagnostic-job.md
           fi
 
+          mkdir -p build/pr-quality/diagnostic-job/trajectory
+          diagnostic_worker_trajectory_rc=2
+          if [ "$diagnostic_job_rc" -eq 0 ] \
+            && [ -s build/pr-quality/diagnostic-job/diagnostic-job.json ] \
+            && [ -s build/pr-quality/diagnostic-job/diagnostic-worker-result.json ] \
+            && [ -s build/pr-quality/diagnostic-job/vector/diagnostic-vector.json ]; then
+            diagnostic_worker_trajectory_rc=0
+            PYTHONPATH=src python -m sdetkit.diagnostic_worker_trajectory \
+              --diagnostic-job build/pr-quality/diagnostic-job/diagnostic-job.json \
+              --diagnostic-worker-result build/pr-quality/diagnostic-job/diagnostic-worker-result.json \
+              --diagnostic-vector build/pr-quality/diagnostic-job/vector/diagnostic-vector.json \
+              --repo "$REPOSITORY" \
+              --branch "${{ github.event.pull_request.head.ref }}" \
+              --commit-sha "$HEAD_SHA" \
+              --pr-number "${{ github.event.pull_request.number }}" \
+              --out-dir build/pr-quality/diagnostic-job/trajectory \
+              --format json \
+              > build/pr-quality/diagnostic-job/trajectory/diagnostic-worker-trajectory-cli.json \
+              || diagnostic_worker_trajectory_rc=$?
+          fi
+          printf '%s\n' "$diagnostic_worker_trajectory_rc" \
+            > build/pr-quality/diagnostic-job/trajectory/diagnostic-worker-trajectory-exit-code.txt
+
+          if [ "$diagnostic_worker_trajectory_rc" -ne 0 ] \
+            && [ ! -s build/pr-quality/diagnostic-job/trajectory/diagnostic-worker-trajectory.md ]; then
+            {
+              printf '%s\n' \
+                '## Local diagnostic worker trajectory handoff' \
+                '' \
+                '- Evidence type: `post_decision_reporting_only_trajectory`' \
+                '- Status: `collection_failed`' \
+                '- Reporting only: `true`' \
+                '- Current PR decision input: `false`' \
+                '- Proof commands executed: `false`' \
+                '- Patch application allowed: `false`' \
+                '- Automation allowed: `false`' \
+                '- Merge authorized: `false`' \
+                '- Semantic equivalence proven: `false`' \
+                '' \
+                '- Interpretation: advisory trajectory handoff failed; current-run candidate decisions and RepoMemory remain unchanged.'
+            } > build/pr-quality/diagnostic-job/trajectory/diagnostic-worker-trajectory.md
+          fi
+
           mkdir -p build/pr-quality/candidate-validation
           PYTHONPATH=src python -m sdetkit.pr_quality_candidate_validation \
             --scenario tests/fixtures/pr_quality_candidate_visibility/formatting_candidate_verified.json \
@@ -659,6 +702,11 @@ jobs:
           if [ -s build/pr-quality/diagnostic-job/diagnostic-job.md ]; then
             printf '\n' >> build/pr-quality/pr-comment-body.md
             cat build/pr-quality/diagnostic-job/diagnostic-job.md >> build/pr-quality/pr-comment-body.md
+          fi
+
+          if [ -s build/pr-quality/diagnostic-job/trajectory/diagnostic-worker-trajectory.md ]; then
+            printf '\n' >> build/pr-quality/pr-comment-body.md
+            cat build/pr-quality/diagnostic-job/trajectory/diagnostic-worker-trajectory.md >> build/pr-quality/pr-comment-body.md
           fi
 
           if [ -s build/pr-quality/candidate-visibility/candidate-visibility.md ]; then

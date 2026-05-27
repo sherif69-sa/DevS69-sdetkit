@@ -650,3 +650,70 @@ def test_pr_quality_workflow_keeps_failed_diagnostic_job_advisory_and_visible() 
     assert "Automation allowed: `false`" in build_comment
     assert "Merge authorized: `false`" in build_comment
     assert "base PR decision and report remain authoritative" in build_comment
+
+
+def test_pr_quality_workflow_records_diagnostic_worker_trajectory_as_post_decision_advisory_only() -> (
+    None
+):
+    text = _workflow_text()
+
+    pattern_insights = text.index("python -m sdetkit.trajectory_pattern_insights")
+    repo_memory = text.index("python -m sdetkit.repo_memory")
+    action_report = text.index("python -m sdetkit.pr_quality_action_report")
+    diagnostic_job = text.index("python -m sdetkit.diagnostic_job")
+    trajectory = text.index("python -m sdetkit.diagnostic_worker_trajectory")
+    trajectory_append = text.index(
+        "cat build/pr-quality/diagnostic-job/trajectory/diagnostic-worker-trajectory.md"
+    )
+    action_report_command = text[
+        action_report : text.index("> build/pr-quality/pr-comment-metadata.json", action_report)
+    ]
+    repo_memory_command = text[
+        repo_memory : text.index("> build/pr-quality/repo-memory/repo-memory-cli.json", repo_memory)
+    ]
+
+    assert (
+        pattern_insights
+        < repo_memory
+        < action_report
+        < diagnostic_job
+        < trajectory
+        < trajectory_append
+    )
+    assert "diagnostic-worker-trajectory" not in action_report_command
+    assert "diagnostic-worker-trajectory" not in repo_memory_command
+    assert "--diagnostic-job build/pr-quality/diagnostic-job/diagnostic-job.json" in text
+    assert (
+        "--diagnostic-worker-result build/pr-quality/diagnostic-job/diagnostic-worker-result.json"
+        in text
+    )
+    assert (
+        "--diagnostic-vector build/pr-quality/diagnostic-job/vector/diagnostic-vector.json" in text
+    )
+    assert "build/pr-quality/diagnostic-job/trajectory/" in text
+    assert "--commit-safe-fixes" not in text
+    assert "--pr-quality-safe-bridge-only" not in text
+
+
+def test_pr_quality_workflow_keeps_failed_diagnostic_worker_trajectory_visible_and_non_authorizing() -> (
+    None
+):
+    text = _workflow_text()
+    build_comment = text[
+        text.index("- name: Build PR comment body") : text.index(
+            "- name: Build verified operator evidence loop"
+        )
+    ]
+
+    assert "diagnostic_worker_trajectory_rc=2" in build_comment
+    assert "|| diagnostic_worker_trajectory_rc=$?" in build_comment
+    assert "diagnostic-worker-trajectory-exit-code.txt" in build_comment
+    assert "Local diagnostic worker trajectory handoff" in build_comment
+    assert "post_decision_reporting_only_trajectory" in build_comment
+    assert "Status: `collection_failed`" in build_comment
+    assert "Reporting only: `true`" in build_comment
+    assert "Current PR decision input: `false`" in build_comment
+    assert "Patch application allowed: `false`" in build_comment
+    assert "Automation allowed: `false`" in build_comment
+    assert "Merge authorized: `false`" in build_comment
+    assert "current-run candidate decisions and RepoMemory remain unchanged" in build_comment

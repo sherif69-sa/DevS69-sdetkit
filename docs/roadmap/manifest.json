@@ -720,7 +720,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.proof",
         "module_path": "src/sdetkit/proof.py",
-        "tests_referencing_module": 119
+        "tests_referencing_module": 120
       },
       {
         "contract_script_paths": [
