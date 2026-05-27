@@ -285,12 +285,19 @@ jobs:
           assert summary["latest_record"]["source_head_sha"] == os.environ["GITHUB_SHA"]
           assert summary["latest_record"]["profile_status"] == "live_proof_supported_memory"
           assert summary["latest_record"]["live_contract_proven"] is True
+          assert summary["controlled_validation_record_count"] >= 1
+          assert summary["controlled_validation_scenario_count"] >= 2
+          assert summary["controlled_structurally_verified_count"] >= 1
+          assert summary["controlled_review_first_count"] >= 1
+          assert summary["latest_record"]["controlled_validation_status"] == "controlled_validation_passed"
+          assert summary["latest_record"]["controlled_current_pr_decision_input"] is False
 
           boundary = summary["decision_boundary"]
           assert boundary["automation_allowed"] is False
           assert boundary["merge_authorized"] is False
           assert boundary["semantic_equivalence_proven"] is False
           assert boundary["prior_history_is_read_only_input"] is True
+          assert boundary["controlled_validation_is_advisory_only"] is True
 
           print("Trusted-main RepoMemory history snapshot passed.")
           PY

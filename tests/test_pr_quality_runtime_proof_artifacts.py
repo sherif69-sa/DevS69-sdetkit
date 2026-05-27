@@ -6,6 +6,10 @@ from pathlib import Path
 from sdetkit.pr_quality_runtime_proof_artifacts import (
     BASE_ANCESTRY_VERIFIED,
     COLLECTED,
+    CONTROLLED_REVIEW_FIRST_COUNT,
+    CONTROLLED_STRUCTURALLY_VERIFIED_COUNT,
+    CONTROLLED_VALIDATION_RECORD_COUNT,
+    CONTROLLED_VALIDATION_SCENARIO_COUNT,
     LIVE_PROVEN_RECORD_COUNT,
     NOT_COLLECTED,
     PRIOR_HISTORY_READ_ONLY_INPUT,
@@ -226,12 +230,19 @@ def _trusted_history_evidence() -> dict:
             LIVE_PROVEN_RECORD_COUNT: 1,
             "latest_accepted_main_head": "accepted-main-head",
             PRIOR_HISTORY_READ_ONLY_INPUT: True,
+            CONTROLLED_VALIDATION_RECORD_COUNT: 1,
+            CONTROLLED_VALIDATION_SCENARIO_COUNT: 2,
+            CONTROLLED_STRUCTURALLY_VERIFIED_COUNT: 1,
+            CONTROLLED_REVIEW_FIRST_COUNT: 1,
+            "latest_controlled_validation_status": "controlled_validation_passed",
+            "controlled_validation_reporting_only": True,
         },
         "decision_boundary": {
             PROOF_COMMANDS_EXECUTED_BY_READER: False,
             "automation_allowed": False,
             "merge_authorized": False,
             "semantic_equivalence_proven": False,
+            "controlled_validation_authorizes_current_action": False,
         },
     }
 
@@ -250,6 +261,12 @@ def test_runtime_proof_summary_renders_validated_trusted_main_history() -> None:
     assert trusted["record_count"] == 1
     assert trusted[LIVE_PROVEN_RECORD_COUNT] == 1
     assert trusted[PRIOR_HISTORY_READ_ONLY_INPUT] is True
+    assert trusted[CONTROLLED_VALIDATION_RECORD_COUNT] == 1
+    assert trusted[CONTROLLED_VALIDATION_SCENARIO_COUNT] == 2
+    assert trusted[CONTROLLED_STRUCTURALLY_VERIFIED_COUNT] == 1
+    assert trusted[CONTROLLED_REVIEW_FIRST_COUNT] == 1
+    assert trusted["controlled_validation_reporting_only"] is True
+    assert trusted["controlled_validation_authorizes_current_action"] is False
     assert trusted[PROOF_COMMANDS_EXECUTED_BY_READER] is False
     assert trusted["automation_allowed"] is False
     assert trusted["merge_authorized"] is False
@@ -262,6 +279,9 @@ def test_runtime_proof_summary_renders_validated_trusted_main_history() -> None:
     assert "Records: `1`" in markdown
     assert "Live-contract-proven records: `1`" in markdown
     assert "Prior history is read-only input: `true`" in markdown
+    assert "Controlled validation records: `1`" in markdown
+    assert "Controlled validation reporting only: `true`" in markdown
+    assert "Controlled validation authorizes current action: `false`" in markdown
     assert "Automation allowed by trusted history: `false`" in markdown
     assert "Merge authorized by trusted history: `false`" in markdown
 

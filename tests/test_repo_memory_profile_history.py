@@ -8,7 +8,15 @@ import pytest
 from sdetkit.repo_memory_profile_history import (
     ANTI_CHEAT_REJECTION_SCENARIO_COUNT,
     AUTOMATION_ALLOWED,
+    CONTROLLED_CURRENT_PR_DECISION_INPUT,
+    CONTROLLED_REVIEW_FIRST_COUNT,
+    CONTROLLED_STRUCTURALLY_VERIFIED_COUNT,
+    CONTROLLED_VALIDATION_PASSED,
+    CONTROLLED_VALIDATION_RECORD_COUNT,
+    CONTROLLED_VALIDATION_SCENARIO_COUNT,
+    CONTROLLED_VALIDATION_STATUS,
     HISTORY_JSONL,
+    LEGACY_RECORD_SCHEMA_VERSION,
     LIVE_CONTRACT_PROVEN,
     LIVE_PROFILE_STATUS,
     MERGE_AUTHORIZED,
@@ -229,3 +237,102 @@ def test_history_cli_rejects_missing_declared_prior_input(
 
     assert rc == 2
     assert "prior history input does not exist" in capsys.readouterr().out
+
+
+def _controlled_profile() -> dict:
+    profile = _profile()
+    profile["controlled_candidate_validation"] = {
+        "collection_status": "collected",
+        "status": CONTROLLED_VALIDATION_PASSED,
+        "scenario_count": 2,
+        "passed_count": 2,
+        "structurally_verified_count": 1,
+        "review_first_count": 1,
+        "current_pr_decision_input": False,
+        "decision_boundary": {
+            AUTOMATION_ALLOWED: False,
+            MERGE_AUTHORIZED: False,
+            SEMANTIC_EQUIVALENCE_PROVEN: False,
+        },
+    }
+    return profile
+
+
+def test_history_promotes_controlled_validation_as_advisory_record_data(tmp_path: Path) -> None:
+    record = build_history_record(
+        _controlled_profile(),
+        source_run_id="run-controlled",
+        source_head_sha="controlled123",
+        recorded_at_utc="2026-05-27T00:00:00Z",
+    )
+    history_path = write_history_jsonl([record], out_dir=tmp_path)
+    summary = build_history_summary(
+        [record],
+        appended=True,
+        history_path=history_path,
+        prior_history_collected=False,
+        prior_record_count=0,
+    )
+
+    assert record[CONTROLLED_VALIDATION_STATUS] == CONTROLLED_VALIDATION_PASSED
+    assert record[CONTROLLED_VALIDATION_SCENARIO_COUNT] == 2
+    assert record[CONTROLLED_STRUCTURALLY_VERIFIED_COUNT] == 1
+    assert record[CONTROLLED_REVIEW_FIRST_COUNT] == 1
+    assert record[CONTROLLED_CURRENT_PR_DECISION_INPUT] is False
+    assert summary[CONTROLLED_VALIDATION_RECORD_COUNT] == 1
+    assert summary[CONTROLLED_VALIDATION_SCENARIO_COUNT] == 2
+    assert summary["latest_record"][CONTROLLED_VALIDATION_STATUS] == CONTROLLED_VALIDATION_PASSED
+    assert summary["decision_boundary"]["controlled_validation_is_advisory_only"] is True
+    assert summary["decision_boundary"][AUTOMATION_ALLOWED] is False
+
+    markdown = render_markdown(summary)
+    assert "Controlled validation records: `1`" in markdown
+    assert "Controlled validation status: `controlled_validation_passed`" in markdown
+    assert "Controlled validation is advisory only: `true`" in markdown
+
+
+def test_history_imports_legacy_record_as_zero_controlled_validation_evidence(
+    tmp_path: Path,
+) -> None:
+    legacy = _record("run-legacy", "legacy123")
+    legacy["schema_version"] = LEGACY_RECORD_SCHEMA_VERSION
+    for key in (
+        CONTROLLED_VALIDATION_STATUS,
+        CONTROLLED_VALIDATION_SCENARIO_COUNT,
+        "controlled_validation_passed_count",
+        CONTROLLED_STRUCTURALLY_VERIFIED_COUNT,
+        CONTROLLED_REVIEW_FIRST_COUNT,
+        CONTROLLED_CURRENT_PR_DECISION_INPUT,
+    ):
+        legacy.pop(key, None)
+
+    current = build_history_record(
+        _controlled_profile(),
+        source_run_id="run-current",
+        source_head_sha="current123",
+    )
+    records, appended = merge_history_records([legacy], current)
+    history_path = write_history_jsonl(records, out_dir=tmp_path)
+    summary = build_history_summary(
+        records,
+        appended=appended,
+        history_path=history_path,
+        prior_history_collected=True,
+        prior_record_count=1,
+    )
+
+    assert summary["record_count"] == 2
+    assert summary[CONTROLLED_VALIDATION_RECORD_COUNT] == 1
+    assert summary[CONTROLLED_VALIDATION_SCENARIO_COUNT] == 2
+
+
+def test_history_rejects_controlled_profile_that_claims_current_pr_influence() -> None:
+    profile = _controlled_profile()
+    profile["controlled_candidate_validation"]["current_pr_decision_input"] = True
+
+    with pytest.raises(ValueError, match="cannot influence a current PR decision"):
+        build_history_record(
+            profile,
+            source_run_id="run-bad",
+            source_head_sha="bad123",
+        )

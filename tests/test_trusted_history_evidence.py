@@ -8,6 +8,12 @@ import pytest
 
 from sdetkit.repo_memory_profile_history import (
     AUTOMATION_ALLOWED,
+    CONTROLLED_REVIEW_FIRST_COUNT,
+    CONTROLLED_STRUCTURALLY_VERIFIED_COUNT,
+    CONTROLLED_VALIDATION_PASSED,
+    CONTROLLED_VALIDATION_RECORD_COUNT,
+    CONTROLLED_VALIDATION_SCENARIO_COUNT,
+    CONTROLLED_VALIDATION_STATUS,
     LIVE_CONTRACT_PROVEN,
     LIVE_PROFILE_STATUS,
     MERGE_AUTHORIZED,
@@ -254,3 +260,151 @@ def test_trusted_history_markdown_preserves_advisory_boundary(tmp_path: Path) ->
     assert "Proof commands executed by reader: `false`" in markdown
     assert "Merge authorized: `false`" in markdown
     assert "Semantic equivalence proven: `false`" in markdown
+
+
+def _controlled_profile() -> dict:
+    profile = _profile()
+    profile["controlled_candidate_validation"] = {
+        "status": CONTROLLED_VALIDATION_PASSED,
+        "scenario_count": 2,
+        "passed_count": 2,
+        "structurally_verified_count": 1,
+        "review_first_count": 1,
+        "current_pr_decision_input": False,
+        "decision_boundary": {
+            AUTOMATION_ALLOWED: False,
+            MERGE_AUTHORIZED: False,
+            SEMANTIC_EQUIVALENCE_PROVEN: False,
+        },
+    }
+    return profile
+
+
+def test_trusted_history_reports_controlled_validation_as_advisory_only(tmp_path: Path) -> None:
+    _repo, accepted_head, base_head = _git_repo(tmp_path)
+    record = build_history_record(
+        _controlled_profile(),
+        source_run_id="trusted-controlled",
+        source_head_sha=accepted_head,
+    )
+    history_path = write_history_jsonl([record], out_dir=tmp_path)
+    summary = build_history_summary(
+        [record],
+        appended=True,
+        history_path=history_path,
+        prior_history_collected=False,
+        prior_record_count=0,
+    )
+
+    evidence = build_trusted_history_evidence(
+        summary=summary,
+        records=[record],
+        selected_run_id="trusted-controlled",
+        selected_head_sha=accepted_head,
+        base_sha=base_head,
+        base_ancestry_verified=True,
+    )
+
+    history = evidence["history"]
+    assert history[CONTROLLED_VALIDATION_RECORD_COUNT] == 1
+    assert history[CONTROLLED_VALIDATION_SCENARIO_COUNT] == 2
+    assert history[CONTROLLED_STRUCTURALLY_VERIFIED_COUNT] == 1
+    assert history[CONTROLLED_REVIEW_FIRST_COUNT] == 1
+    assert history["latest_controlled_validation_status"] == CONTROLLED_VALIDATION_PASSED
+    assert history["controlled_validation_reporting_only"] is True
+    assert evidence["decision_boundary"]["controlled_validation_authorizes_current_action"] is False
+
+    markdown = render_markdown(evidence)
+    assert "Controlled validation records: `1`" in markdown
+    assert "Controlled validation reporting only: `true`" in markdown
+    assert "Controlled validation authorizes current action: `false`" in markdown
+
+
+def test_trusted_history_rejects_forged_controlled_validation_summary(tmp_path: Path) -> None:
+    _repo, accepted_head, base_head = _git_repo(tmp_path)
+    record = build_history_record(
+        _controlled_profile(),
+        source_run_id="trusted-controlled",
+        source_head_sha=accepted_head,
+    )
+    history_path = write_history_jsonl([record], out_dir=tmp_path)
+    summary = build_history_summary(
+        [record],
+        appended=True,
+        history_path=history_path,
+        prior_history_collected=False,
+        prior_record_count=0,
+    )
+    summary[CONTROLLED_VALIDATION_RECORD_COUNT] = 99
+
+    with pytest.raises(ValueError, match="controlled validation summary does not match records"):
+        build_trusted_history_evidence(
+            summary=summary,
+            records=[record],
+            selected_run_id="trusted-controlled",
+            selected_head_sha=accepted_head,
+            base_sha=base_head,
+            base_ancestry_verified=True,
+        )
+
+
+def test_trusted_history_rejects_controlled_summary_not_marked_advisory_only(
+    tmp_path: Path,
+) -> None:
+    _repo, accepted_head, base_head = _git_repo(tmp_path)
+    record = build_history_record(
+        _controlled_profile(),
+        source_run_id="trusted-controlled",
+        source_head_sha=accepted_head,
+    )
+    history_path = write_history_jsonl([record], out_dir=tmp_path)
+    summary = build_history_summary(
+        [record],
+        appended=True,
+        history_path=history_path,
+        prior_history_collected=False,
+        prior_record_count=0,
+    )
+    summary["decision_boundary"]["controlled_validation_is_advisory_only"] = False
+
+    with pytest.raises(ValueError, match="not marked advisory only"):
+        build_trusted_history_evidence(
+            summary=summary,
+            records=[record],
+            selected_run_id="trusted-controlled",
+            selected_head_sha=accepted_head,
+            base_sha=base_head,
+            base_ancestry_verified=True,
+        )
+
+
+def test_trusted_history_rejects_forged_latest_controlled_validation_status(
+    tmp_path: Path,
+) -> None:
+    _repo, accepted_head, base_head = _git_repo(tmp_path)
+    record = build_history_record(
+        _controlled_profile(),
+        source_run_id="trusted-controlled",
+        source_head_sha=accepted_head,
+    )
+    history_path = write_history_jsonl([record], out_dir=tmp_path)
+    summary = build_history_summary(
+        [record],
+        appended=True,
+        history_path=history_path,
+        prior_history_collected=False,
+        prior_record_count=0,
+    )
+    summary["latest_record"][CONTROLLED_VALIDATION_STATUS] = "not_collected"
+
+    with pytest.raises(
+        ValueError, match="latest controlled validation status does not match JSONL record"
+    ):
+        build_trusted_history_evidence(
+            summary=summary,
+            records=[record],
+            selected_run_id="trusted-controlled",
+            selected_head_sha=accepted_head,
+            base_sha=base_head,
+            base_ancestry_verified=True,
+        )

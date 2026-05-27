@@ -19,6 +19,12 @@ LIVE_PROVEN_RECORD_COUNT = "_".join(("live", "contract", "proven", "record", "co
 PRIOR_HISTORY_READ_ONLY_INPUT = "_".join(("prior", "history", "is", "read", "only", "input"))
 PROOF_COMMANDS_EXECUTED_BY_READER = "_".join(("proof", "commands", "executed", "by", "reader"))
 TRUSTED_HISTORY_STATUS = "_".join(("trusted", "history", "status"))
+CONTROLLED_VALIDATION_RECORD_COUNT = "_".join(("controlled", "validation", "record", "count"))
+CONTROLLED_VALIDATION_SCENARIO_COUNT = "_".join(("controlled", "validation", "scenario", "count"))
+CONTROLLED_STRUCTURALLY_VERIFIED_COUNT = "_".join(
+    ("controlled", "structurally", "verified", "count")
+)
+CONTROLLED_REVIEW_FIRST_COUNT = "_".join(("controlled", "review", "first", "count"))
 
 JsonObject = dict[str, Any]
 
@@ -171,7 +177,24 @@ def _trusted_history_summary(evidence: Mapping[str, Any]) -> JsonObject:
         "record_count": _int(history.get("record_count")),
         LIVE_PROVEN_RECORD_COUNT: _int(history.get(LIVE_PROVEN_RECORD_COUNT)),
         PRIOR_HISTORY_READ_ONLY_INPUT: _bool(history.get(PRIOR_HISTORY_READ_ONLY_INPUT)),
+        CONTROLLED_VALIDATION_RECORD_COUNT: _int(history.get(CONTROLLED_VALIDATION_RECORD_COUNT)),
+        CONTROLLED_VALIDATION_SCENARIO_COUNT: _int(
+            history.get(CONTROLLED_VALIDATION_SCENARIO_COUNT)
+        ),
+        CONTROLLED_STRUCTURALLY_VERIFIED_COUNT: _int(
+            history.get(CONTROLLED_STRUCTURALLY_VERIFIED_COUNT)
+        ),
+        CONTROLLED_REVIEW_FIRST_COUNT: _int(history.get(CONTROLLED_REVIEW_FIRST_COUNT)),
+        "latest_controlled_validation_status": _string(
+            history.get("latest_controlled_validation_status") or "not_collected"
+        ),
+        "controlled_validation_reporting_only": _bool(
+            history.get("controlled_validation_reporting_only")
+        ),
         PROOF_COMMANDS_EXECUTED_BY_READER: _bool(boundary.get(PROOF_COMMANDS_EXECUTED_BY_READER)),
+        "controlled_validation_authorizes_current_action": _bool(
+            boundary.get("controlled_validation_authorizes_current_action")
+        ),
         "automation_allowed": _bool(boundary.get("automation_allowed")),
         "merge_authorized": _bool(boundary.get("merge_authorized")),
         "semantic_equivalence_proven": _bool(boundary.get("semantic_equivalence_proven")),
@@ -370,6 +393,34 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
                 (
                     "- Prior history is read-only input: "
                     f"`{str(_bool(trusted_history.get(PRIOR_HISTORY_READ_ONLY_INPUT))).lower()}`"
+                ),
+                (
+                    "- Controlled validation records: "
+                    f"`{_int(trusted_history.get(CONTROLLED_VALIDATION_RECORD_COUNT))}`"
+                ),
+                (
+                    "- Controlled validation scenario total: "
+                    f"`{_int(trusted_history.get(CONTROLLED_VALIDATION_SCENARIO_COUNT))}`"
+                ),
+                (
+                    "- Controlled structurally verified scenario total: "
+                    f"`{_int(trusted_history.get(CONTROLLED_STRUCTURALLY_VERIFIED_COUNT))}`"
+                ),
+                (
+                    "- Controlled review-first scenario total: "
+                    f"`{_int(trusted_history.get(CONTROLLED_REVIEW_FIRST_COUNT))}`"
+                ),
+                (
+                    "- Latest controlled validation status: "
+                    f"`{_string(trusted_history.get('latest_controlled_validation_status'))}`"
+                ),
+                (
+                    "- Controlled validation reporting only: "
+                    f"`{str(_bool(trusted_history.get('controlled_validation_reporting_only'))).lower()}`"
+                ),
+                (
+                    "- Controlled validation authorizes current action: "
+                    f"`{str(_bool(trusted_history.get('controlled_validation_authorizes_current_action'))).lower()}`"
                 ),
                 (
                     "- Proof commands executed by trusted-history reader: "

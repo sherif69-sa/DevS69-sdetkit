@@ -2079,3 +2079,44 @@ def test_action_report_renders_verified_prior_disposition_as_advisory_only() -> 
     assert "Latest prior reviewed reason: `false positive`" in body
     assert "Prior disposition is advisory evidence only; current action remains manual." in body
     assert "Human review required: `true`" in body
+
+
+def test_action_report_runtime_lines_render_controlled_history_as_advisory_only() -> None:
+    from sdetkit import pr_quality_action_report as report
+
+    lines = report._runtime_proof_artifact_lines(
+        {
+            "trusted_history": {
+                "collection_status": "collected",
+                "status": "trusted_history_verified",
+                "controlled_validation_record_count": 1,
+                "controlled_validation_scenario_count": 2,
+                "controlled_structurally_verified_count": 1,
+                "controlled_review_first_count": 1,
+                "latest_controlled_validation_status": "controlled_validation_passed",
+                "controlled_validation_reporting_only": True,
+                "controlled_validation_authorizes_current_action": False,
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+            "decision_boundary": {
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        }
+    )
+    body = "\n".join(lines)
+
+    assert "Trusted history controlled validation records: `1`" in body
+    assert "Trusted history controlled validation scenarios: `2`" in body
+    assert (
+        "Trusted history latest controlled validation status: `controlled_validation_passed`"
+        in body
+    )
+    assert "Trusted history controlled validation reporting only: `true`" in body
+    assert "Trusted history controlled validation authorizes current action: `false`" in body
+    assert "Automation allowed by trusted history: `false`" in body
+    assert "Merge authorized by trusted history: `false`" in body
+    assert "Semantic equivalence proven by trusted history: `false`" in body

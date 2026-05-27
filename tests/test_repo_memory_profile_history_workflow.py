@@ -180,3 +180,22 @@ def test_repo_memory_history_retains_controlled_candidate_validation_as_read_onl
     assert "build/repo-memory-history/candidate-validation/" in text
     assert "contents: write" not in text.split("jobs:", 1)[0]
     assert "git push " not in text
+
+
+def test_repo_memory_history_promotes_controlled_validation_as_advisory_counts_only() -> None:
+    text = _workflow_text()
+
+    assert 'assert summary["controlled_validation_record_count"] >= 1' in text
+    assert 'assert summary["controlled_validation_scenario_count"] >= 2' in text
+    assert 'assert summary["controlled_structurally_verified_count"] >= 1' in text
+    assert 'assert summary["controlled_review_first_count"] >= 1' in text
+    assert (
+        'assert summary["latest_record"]["controlled_validation_status"] == "controlled_validation_passed"'
+        in text
+    )
+    assert (
+        'assert summary["latest_record"]["controlled_current_pr_decision_input"] is False' in text
+    )
+    assert 'assert boundary["controlled_validation_is_advisory_only"] is True' in text
+    assert "contents: write" not in text.split("jobs:", 1)[0]
+    assert "git push " not in text
