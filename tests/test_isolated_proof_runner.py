@@ -499,3 +499,10 @@ def test_isolated_runner_markdown_reports_runtime_guard_detection_boundary(
     assert "Runtime guard violations: `1`" in markdown
     assert "runtime_guard=`unclaimed_write`" in markdown
     assert "Runtime guard passed: `false`" in markdown
+
+
+def test_pre_commit_doctor_ascii_hook_disables_workspace_recording_during_isolated_proof() -> None:
+    text = Path(".pre-commit-config.yaml").read_text(encoding="utf-8")
+
+    assert 'doctor.main(["--ascii", "--no-workspace"])' in text
+    assert 'doctor.main(["--ascii"])' not in text
