@@ -6,7 +6,9 @@ from pathlib import Path
 
 from sdetkit.replayable_benchmark_harness import (
     build_benchmark_report,
+    build_diagnostic_worker_benchmark_report,
     evaluate_scenario,
+    load_diagnostic_worker_scenarios,
     load_scenarios,
     main,
     render_markdown,
@@ -17,6 +19,11 @@ SCENARIO_PATHS = [
     FIXTURES / "nop_formatting_patch.json",
     FIXTURES / "oracle_formatting_patch.json",
     FIXTURES / "unsafe_protected_path_patch.json",
+]
+DIAGNOSTIC_WORKER_PATHS = [
+    FIXTURES / "runtime_guard_worker_oracle.json",
+    FIXTURES / "runtime_guard_worker_nop.json",
+    FIXTURES / "runtime_guard_worker_unsafe.json",
 ]
 
 
@@ -133,3 +140,61 @@ def test_replayable_benchmark_cli_writes_report_artifacts(
     assert printed["scenario_count"] == 3
     assert saved["required_contract"]["all_required_passed"] is True
     assert "Replayable Benchmark Harness report" in markdown
+
+
+def test_replayable_benchmark_runtime_guard_worker_mode_proves_oracle_nop_and_unsafe() -> None:
+    report = build_diagnostic_worker_benchmark_report(
+        load_diagnostic_worker_scenarios(DIAGNOSTIC_WORKER_PATHS)
+    )
+
+    assert report["status"] == "passed"
+    assert report["report_mode"] == "diagnostic_worker_runtime_guard_fixture"
+    assert report["scenario_count"] == 3
+    assert report["passed_count"] == 3
+    assert report["required_contract"]["all_required_passed"] is True
+    assert report["required_contract"]["oracle_pass_rate"] == 1.0
+    assert report["required_contract"]["nop_pass_rate"] == 1.0
+    assert report["required_contract"]["unsafe_authority_rejection_rate"] == 1.0
+    assert report["safety_boundary"]["contributes_to_current_pr_decision"] is False
+    assert report["safety_boundary"]["feeds_repo_memory"] is False
+    assert report["safety_boundary"]["protected_verifier_semantics_expanded"] is False
+    assert report["safety_boundary"]["automation_allowed_count"] == 0
+    assert report["safety_boundary"]["merge_authorized_count"] == 0
+
+
+def test_replayable_benchmark_runtime_guard_worker_markdown_is_non_authorizing() -> None:
+    report = build_diagnostic_worker_benchmark_report(
+        load_diagnostic_worker_scenarios(DIAGNOSTIC_WORKER_PATHS)
+    )
+    markdown = render_markdown(report)
+
+    assert "Required runtime-guard worker replay contract" in markdown
+    assert "Oracle pass rate: `1.0000`" in markdown
+    assert "NOP pass rate: `1.0000`" in markdown
+    assert "Unsafe authority rejection rate: `1.0000`" in markdown
+    assert "Current PR decision input: `false`" in markdown
+    assert "Feeds RepoMemory: `false`" in markdown
+    assert "ProtectedVerifier semantics expanded: `false`" in markdown
+    assert "does not expand ProtectedVerifier semantic claims" in markdown
+
+
+def test_replayable_benchmark_runtime_guard_worker_cli_writes_report(
+    tmp_path: Path, capsys
+) -> None:
+    out_dir = tmp_path / "worker-benchmark-report"
+    argv: list[str] = []
+    for path in DIAGNOSTIC_WORKER_PATHS:
+        argv.extend(["--diagnostic-worker-scenario", str(path)])
+    argv.extend(["--out-dir", str(out_dir), "--format", "json"])
+
+    rc = main(argv)
+
+    assert rc == 0
+    printed = json.loads(capsys.readouterr().out)
+    saved = json.loads((out_dir / "benchmark-report.json").read_text(encoding="utf-8"))
+    markdown = (out_dir / "benchmark-report.md").read_text(encoding="utf-8")
+    assert printed["status"] == "passed"
+    assert printed["scenario_count"] == 3
+    assert saved["report_mode"] == "diagnostic_worker_runtime_guard_fixture"
+    assert saved["safety_boundary"]["feeds_repo_memory"] is False
+    assert "Current PR decision input: `false`" in markdown
