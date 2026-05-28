@@ -217,3 +217,85 @@ def test_diagnostic_worker_surfaces_runtime_guard_violation_as_read_only_review_
     assert "Primary surface: `runtime`" in markdown
     assert "Primary action: `review_first_runtime_debug`" in markdown
     assert "Runtime guard violation observed" in markdown
+
+
+def test_diagnostic_worker_does_not_promote_stale_security_evidence_over_current_runtime_guard(
+    tmp_path: Path,
+) -> None:
+    result = run_diagnostic_worker(
+        _job(),
+        security_review={
+            "diagnoses": [
+                {
+                    "tool": "sdetkit-security-gate",
+                    "rule_id": "SEC_HIGH_ENTROPY_STRING",
+                    "path": "src/sdetkit/flaky_test_registry_evidence.py",
+                    "line": 218,
+                    "freshness": "stale",
+                    "classification": "stale_or_outdated_alert",
+                    "diagnosis": "The alert does not point at the current PR head.",
+                    "recommended_action": "wait_for_code_scanning_refresh",
+                    "safe_to_auto_fix": False,
+                    "automation_allowed": False,
+                }
+            ]
+        },
+        runtime_proof_artifacts={
+            "isolated_proof": {
+                "runtime_guard_checked": True,
+                "runtime_guard_passed": False,
+                "runtime_guard_violation_count": 1,
+            }
+        },
+        out_dir=tmp_path,
+    )
+
+    assert result["summary"]["diagnosis_count"] == 1
+    assert result["summary"]["primary_surface"] == "runtime"
+    assert result["summary"]["primary_action"] == "review_first_runtime_debug"
+    assert result["decision_boundary"]["automation_allowed"] is False
+    assert result["decision_boundary"]["merge_authorized"] is False
+
+
+def test_diagnostic_worker_promotes_current_security_evidence_as_non_authorizing_primary(
+    tmp_path: Path,
+) -> None:
+    result = run_diagnostic_worker(
+        _job(),
+        security_review={
+            "diagnoses": [
+                {
+                    "tool": "CodeQL",
+                    "rule_id": "py/credential-exposure",
+                    "path": "src/sdetkit/current_security.py",
+                    "line": 7,
+                    "freshness": "current",
+                    "classification": "codeql_security_review_required",
+                    "diagnosis": "A current CodeQL finding requires rule-specific human security review.",
+                    "recommended_action": "review_codeql_finding",
+                    "safe_to_auto_fix": False,
+                    "automation_allowed": False,
+                }
+            ]
+        },
+        runtime_proof_artifacts={
+            "isolated_proof": {
+                "runtime_guard_checked": True,
+                "runtime_guard_passed": False,
+                "runtime_guard_violation_count": 1,
+            }
+        },
+        out_dir=tmp_path,
+    )
+
+    assert result["summary"]["diagnosis_count"] == 2
+    assert result["summary"]["primary_surface"] == "security"
+    assert result["summary"]["primary_action"] == "review_first_security_review"
+    vector = json.loads(
+        (tmp_path / "vector" / "diagnostic-vector.json").read_text(encoding="utf-8")
+    )
+    assert vector["diagnoses"][0]["failure_vector"]["failure_class"] == "security"
+    assert result["primary_diagnosis"]["safe_fix_candidate"] is False
+    assert result["decision_boundary"]["current_pr_decision_input"] is False
+    assert result["decision_boundary"]["automation_allowed"] is False
+    assert result["decision_boundary"]["merge_authorized"] is False
