@@ -709,6 +709,15 @@ jobs:
             --format json \
             > build/pr-quality/runtime-guard-benchmark/runtime-guard-benchmark-cli.json
 
+          mkdir -p build/pr-quality/security-freshness-benchmark
+          PYTHONPATH=src python -m sdetkit.replayable_benchmark_harness \
+            --security-freshness-scenario tests/fixtures/remediation_benchmark/security_freshness_stale_runtime_oracle.json \
+            --security-freshness-scenario tests/fixtures/remediation_benchmark/security_freshness_current_primary_oracle.json \
+            --security-freshness-scenario tests/fixtures/remediation_benchmark/security_freshness_authority_unsafe.json \
+            --out-dir build/pr-quality/security-freshness-benchmark \
+            --format json \
+            > build/pr-quality/security-freshness-benchmark/security-freshness-benchmark-cli.json
+
           if [ -s build/pr-quality/diagnostic-job/diagnostic-job.md ]; then
             printf '\n' >> build/pr-quality/pr-comment-body.md
             cat build/pr-quality/diagnostic-job/diagnostic-job.md >> build/pr-quality/pr-comment-body.md
@@ -729,6 +738,9 @@ jobs:
 
           printf '\n' >> build/pr-quality/pr-comment-body.md
           cat build/pr-quality/runtime-guard-benchmark/benchmark-report.md >> build/pr-quality/pr-comment-body.md
+
+          printf '\n' >> build/pr-quality/pr-comment-body.md
+          cat build/pr-quality/security-freshness-benchmark/benchmark-report.md >> build/pr-quality/pr-comment-body.md
 
       - name: Build verified operator evidence loop
         if: always()
@@ -794,6 +806,7 @@ jobs:
             build/pr-quality/candidate-visibility/
             build/pr-quality/candidate-validation/
             build/pr-quality/runtime-guard-benchmark/
+            build/pr-quality/security-freshness-benchmark/
             build/pr-quality/pr-evidence-narrative.md
             build/sdetkit/evidence-graph/
             build/sdetkit/operator-loop/

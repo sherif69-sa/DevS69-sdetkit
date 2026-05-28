@@ -7,9 +7,11 @@ from pathlib import Path
 from sdetkit.replayable_benchmark_harness import (
     build_benchmark_report,
     build_diagnostic_worker_benchmark_report,
+    build_security_freshness_benchmark_report,
     evaluate_scenario,
     load_diagnostic_worker_scenarios,
     load_scenarios,
+    load_security_freshness_scenarios,
     main,
     render_markdown,
 )
@@ -24,6 +26,11 @@ DIAGNOSTIC_WORKER_PATHS = [
     FIXTURES / "runtime_guard_worker_oracle.json",
     FIXTURES / "runtime_guard_worker_nop.json",
     FIXTURES / "runtime_guard_worker_unsafe.json",
+]
+SECURITY_FRESHNESS_PATHS = [
+    FIXTURES / "security_freshness_stale_runtime_oracle.json",
+    FIXTURES / "security_freshness_current_primary_oracle.json",
+    FIXTURES / "security_freshness_authority_unsafe.json",
 ]
 
 
@@ -196,5 +203,64 @@ def test_replayable_benchmark_runtime_guard_worker_cli_writes_report(
     assert printed["status"] == "passed"
     assert printed["scenario_count"] == 3
     assert saved["report_mode"] == "diagnostic_worker_runtime_guard_fixture"
+    assert saved["safety_boundary"]["feeds_repo_memory"] is False
+    assert "Current PR decision input: `false`" in markdown
+
+
+def test_replayable_benchmark_security_freshness_worker_mode_proves_stale_current_and_unsafe() -> (
+    None
+):
+    report = build_security_freshness_benchmark_report(
+        load_security_freshness_scenarios(SECURITY_FRESHNESS_PATHS)
+    )
+
+    assert report["status"] == "passed"
+    assert report["report_mode"] == "diagnostic_worker_security_freshness_fixture"
+    assert report["scenario_count"] == 3
+    assert report["passed_count"] == 3
+    assert report["required_contract"]["all_required_passed"] is True
+    assert report["required_contract"]["stale_exclusion_pass_rate"] == 1.0
+    assert report["required_contract"]["current_primary_pass_rate"] == 1.0
+    assert report["required_contract"]["unsafe_authority_rejection_rate"] == 1.0
+    assert report["safety_boundary"]["contributes_to_current_pr_decision"] is False
+    assert report["safety_boundary"]["feeds_repo_memory"] is False
+    assert report["safety_boundary"]["executes_patch"] is False
+    assert report["safety_boundary"]["automation_allowed_count"] == 0
+    assert report["safety_boundary"]["merge_authorized_count"] == 0
+    assert report["safety_boundary"]["protected_verifier_semantics_expanded"] is False
+
+
+def test_replayable_benchmark_security_freshness_markdown_is_non_authorizing() -> None:
+    report = build_security_freshness_benchmark_report(
+        load_security_freshness_scenarios(SECURITY_FRESHNESS_PATHS)
+    )
+    markdown = render_markdown(report)
+
+    assert "Required security-freshness worker replay contract" in markdown
+    assert "Stale exclusion pass rate: `1.0000`" in markdown
+    assert "Current security primary pass rate: `1.0000`" in markdown
+    assert "Unsafe authority rejection rate: `1.0000`" in markdown
+    assert "Current PR decision input: `false`" in markdown
+    assert "Feeds RepoMemory: `false`" in markdown
+    assert "ProtectedVerifier semantics expanded: `false`" in markdown
+    assert "does not authorize security dismissal, remediation, or merge" in markdown
+
+
+def test_replayable_benchmark_security_freshness_cli_writes_report(tmp_path: Path, capsys) -> None:
+    out_dir = tmp_path / "security-freshness-benchmark-report"
+    argv: list[str] = []
+    for path in SECURITY_FRESHNESS_PATHS:
+        argv.extend(["--security-freshness-scenario", str(path)])
+    argv.extend(["--out-dir", str(out_dir), "--format", "json"])
+
+    rc = main(argv)
+
+    assert rc == 0
+    printed = json.loads(capsys.readouterr().out)
+    saved = json.loads((out_dir / "benchmark-report.json").read_text(encoding="utf-8"))
+    markdown = (out_dir / "benchmark-report.md").read_text(encoding="utf-8")
+    assert printed["status"] == "passed"
+    assert printed["scenario_count"] == 3
+    assert saved["report_mode"] == "diagnostic_worker_security_freshness_fixture"
     assert saved["safety_boundary"]["feeds_repo_memory"] is False
     assert "Current PR decision input: `false`" in markdown

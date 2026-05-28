@@ -49,6 +49,29 @@ DIAGNOSTIC_WORKER_REQUIRED_SCENARIO_TYPES = (
     RUNTIME_GUARD_WORKER_NOP_PASS,
     RUNTIME_GUARD_WORKER_AUTHORITY_FAIL,
 )
+SECURITY_FRESHNESS_REPORT_SCHEMA_VERSION = (
+    "sdetkit.replayable_benchmark_harness.security_freshness.v1"
+)
+SECURITY_FRESHNESS_REPORT_MODE = "_".join(
+    ("diagnostic", "worker", "security", "freshness", "fixture")
+)
+SECURITY_FRESHNESS_STALE_RUNTIME_PASS = "_".join(
+    ("security", "freshness", "stale", "runtime", "pass")
+)
+SECURITY_FRESHNESS_CURRENT_PRIMARY_PASS = "_".join(
+    ("security", "freshness", "current", "primary", "pass")
+)
+SECURITY_FRESHNESS_AUTHORITY_FAIL = "_".join(("security", "freshness", "authority", "fail"))
+SECURITY_FRESHNESS_SCENARIO_TYPES = {
+    SECURITY_FRESHNESS_STALE_RUNTIME_PASS,
+    SECURITY_FRESHNESS_CURRENT_PRIMARY_PASS,
+    SECURITY_FRESHNESS_AUTHORITY_FAIL,
+}
+SECURITY_FRESHNESS_REQUIRED_SCENARIO_TYPES = (
+    SECURITY_FRESHNESS_STALE_RUNTIME_PASS,
+    SECURITY_FRESHNESS_CURRENT_PRIMARY_PASS,
+    SECURITY_FRESHNESS_AUTHORITY_FAIL,
+)
 
 SCENARIO_TYPES = {
     "nop_fail",
@@ -155,6 +178,32 @@ def load_diagnostic_worker_scenarios(paths: list[Path]) -> list[JsonObject]:
             raise ValueError(
                 f"unsupported diagnostic worker scenario_type for {scenario_id}: {scenario_type}"
             )
+        if not _as_dict(scenario.get("runtime_proof_artifacts")):
+            raise ValueError(f"runtime_proof_artifacts is required in {path}")
+        identifiers.add(scenario_id)
+        scenarios.append(scenario)
+
+    return scenarios
+
+
+def load_security_freshness_scenarios(paths: list[Path]) -> list[JsonObject]:
+    scenarios: list[JsonObject] = []
+    identifiers: set[str] = set()
+
+    for path in paths:
+        scenario = _read_json_object(path)
+        scenario_id = _string(scenario.get("scenario_id"))
+        scenario_type = _string(scenario.get("scenario_type"))
+        if not scenario_id:
+            raise ValueError(f"scenario_id is required in {path}")
+        if scenario_id in identifiers:
+            raise ValueError(f"duplicate scenario_id: {scenario_id}")
+        if scenario_type not in SECURITY_FRESHNESS_SCENARIO_TYPES:
+            raise ValueError(
+                f"unsupported security freshness scenario_type for {scenario_id}: {scenario_type}"
+            )
+        if not _as_dict(scenario.get("security_review")):
+            raise ValueError(f"security_review is required in {path}")
         if not _as_dict(scenario.get("runtime_proof_artifacts")):
             raise ValueError(f"runtime_proof_artifacts is required in {path}")
         identifiers.add(scenario_id)
@@ -970,6 +1019,296 @@ def build_diagnostic_worker_benchmark_report(scenarios: list[Mapping[str, Any]])
     }
 
 
+def _run_security_freshness_worker_fixture(
+    scenario: Mapping[str, Any],
+) -> tuple[JsonObject, JsonObject, JsonObject]:
+    scenario_id = _string(scenario.get("scenario_id"))
+    job = build_diagnostic_job(
+        repo="controlled-fixture/replayable-benchmark",
+        base_sha="fixture-base",
+        head_sha=f"fixture-head-{scenario_id}",
+        event_name="replayable_benchmark",
+        pr_number=0,
+        input_artifacts={
+            "security_review": f"fixture:{scenario_id}",
+            "runtime_proof_artifacts": f"fixture:{scenario_id}",
+        },
+    )
+    with tempfile.TemporaryDirectory(prefix="sdetkit-security-freshness-benchmark-") as temp_dir:
+        worker_dir = Path(temp_dir) / "worker"
+        result = run_diagnostic_worker(
+            job,
+            security_review=_as_dict(scenario.get("security_review")),
+            runtime_proof_artifacts=_as_dict(scenario.get("runtime_proof_artifacts")),
+            out_dir=worker_dir,
+        )
+        vector = _read_json_object(worker_dir / "vector" / "diagnostic-vector.json")
+    return job, result, vector
+
+
+def evaluate_security_freshness_scenario(scenario: Mapping[str, Any]) -> JsonObject:
+    scenario_id = _string(scenario.get("scenario_id"))
+    scenario_type = _string(scenario.get("scenario_type"))
+    if scenario_type not in SECURITY_FRESHNESS_SCENARIO_TYPES:
+        raise ValueError(f"unsupported security freshness scenario_type: {scenario_type}")
+
+    job, worker_result, diagnostic_vector = _run_security_freshness_worker_fixture(scenario)
+    result_summary = _as_dict(worker_result.get("summary"))
+    primary = _as_dict(worker_result.get("primary_diagnosis"))
+    boundary = _as_dict(worker_result.get("decision_boundary"))
+    expected = _as_dict(scenario.get("expected"))
+    diagnoses = [_as_dict(item) for item in _as_list(diagnostic_vector.get("diagnoses"))]
+    primary_vector = _as_dict(diagnoses[0].get("failure_vector")) if diagnoses else {}
+    checks: list[JsonObject] = [
+        _check(
+            name="worker_automation_boundary",
+            passed=not _bool(boundary.get("automation_allowed")),
+            expected=False,
+            actual=_bool(boundary.get("automation_allowed")),
+        ),
+        _check(
+            name="worker_merge_boundary",
+            passed=not _bool(boundary.get("merge_authorized")),
+            expected=False,
+            actual=_bool(boundary.get("merge_authorized")),
+        ),
+        _check(
+            name="worker_semantic_boundary",
+            passed=not _bool(boundary.get("semantic_equivalence_proven")),
+            expected=False,
+            actual=_bool(boundary.get("semantic_equivalence_proven")),
+        ),
+    ]
+    trajectory_records: list[JsonObject] = []
+    observed_error = ""
+
+    if scenario_type == SECURITY_FRESHNESS_STALE_RUNTIME_PASS:
+        trajectory_records = build_worker_trajectory_records(
+            job=job,
+            worker_result=worker_result,
+            diagnostic_vector=diagnostic_vector,
+            repo="controlled-fixture/replayable-benchmark",
+            branch="fixture",
+            commit_sha="fixture-security-freshness-stale-runtime",
+        )
+        checks.extend(
+            [
+                _check(
+                    name="stale_security_is_not_worker_vector",
+                    passed=all(
+                        _string(row.get("failure_surface")) != "security" for row in diagnoses
+                    ),
+                    expected=True,
+                    actual=all(
+                        _string(row.get("failure_surface")) != "security" for row in diagnoses
+                    ),
+                ),
+                _check(
+                    name="runtime_remains_primary_when_security_is_stale",
+                    passed=_string(primary.get("failure_surface"))
+                    == _string(expected.get("primary_surface"))
+                    and _string(result_summary.get("primary_action"))
+                    == _string(expected.get("primary_action"))
+                    and _int(result_summary.get("diagnosis_count"))
+                    == _int(expected.get("diagnosis_count")),
+                    expected=True,
+                    actual=_string(primary.get("failure_surface"))
+                    == _string(expected.get("primary_surface"))
+                    and _string(result_summary.get("primary_action"))
+                    == _string(expected.get("primary_action"))
+                    and _int(result_summary.get("diagnosis_count"))
+                    == _int(expected.get("diagnosis_count")),
+                ),
+                _check(
+                    name="stale_security_runtime_trajectory_is_advisory",
+                    passed=len(trajectory_records) == 1
+                    and all(
+                        not _bool(_as_dict(row.get("decision")).get("auto_fix_allowed"))
+                        for row in trajectory_records
+                    ),
+                    expected=True,
+                    actual=len(trajectory_records) == 1
+                    and all(
+                        not _bool(_as_dict(row.get("decision")).get("auto_fix_allowed"))
+                        for row in trajectory_records
+                    ),
+                ),
+            ]
+        )
+    elif scenario_type == SECURITY_FRESHNESS_CURRENT_PRIMARY_PASS:
+        trajectory_records = build_worker_trajectory_records(
+            job=job,
+            worker_result=worker_result,
+            diagnostic_vector=diagnostic_vector,
+            repo="controlled-fixture/replayable-benchmark",
+            branch="fixture",
+            commit_sha="fixture-security-freshness-current-primary",
+        )
+        checks.extend(
+            [
+                _check(
+                    name="current_security_is_primary",
+                    passed=_string(primary.get("failure_surface"))
+                    == _string(expected.get("primary_surface"))
+                    and _string(result_summary.get("primary_action"))
+                    == _string(expected.get("primary_action"))
+                    and _int(result_summary.get("diagnosis_count"))
+                    == _int(expected.get("diagnosis_count")),
+                    expected=True,
+                    actual=_string(primary.get("failure_surface"))
+                    == _string(expected.get("primary_surface"))
+                    and _string(result_summary.get("primary_action"))
+                    == _string(expected.get("primary_action"))
+                    and _int(result_summary.get("diagnosis_count"))
+                    == _int(expected.get("diagnosis_count")),
+                ),
+                _check(
+                    name="current_security_vector_is_review_first",
+                    passed=_string(primary_vector.get("source")) == "security_review"
+                    and _string(primary_vector.get("failure_class")) == "security"
+                    and _string(diagnoses[0].get("stale_or_current_signal")) == "current"
+                    and _bool(diagnoses[0].get("review_first"))
+                    and not _bool(diagnoses[0].get("safe_fix_candidate")),
+                    expected=True,
+                    actual=_string(primary_vector.get("source")) == "security_review"
+                    and _string(primary_vector.get("failure_class")) == "security"
+                    and _string(diagnoses[0].get("stale_or_current_signal")) == "current"
+                    and _bool(diagnoses[0].get("review_first"))
+                    and not _bool(diagnoses[0].get("safe_fix_candidate")),
+                ),
+                _check(
+                    name="current_security_trajectory_has_no_fix_authority",
+                    passed=len(trajectory_records) == 2
+                    and all(
+                        not _bool(_as_dict(row.get("decision")).get("auto_fix_allowed"))
+                        for row in trajectory_records
+                    ),
+                    expected=True,
+                    actual=len(trajectory_records) == 2
+                    and all(
+                        not _bool(_as_dict(row.get("decision")).get("auto_fix_allowed"))
+                        for row in trajectory_records
+                    ),
+                ),
+            ]
+        )
+    else:
+        forged = json.loads(json.dumps(worker_result))
+        _as_dict(forged.get("decision_boundary")).update(
+            _as_dict(scenario.get("forged_worker_boundary"))
+        )
+        expected_error = _string(scenario.get("expected_error"))
+        rejected = False
+        try:
+            build_worker_trajectory_records(
+                job=job,
+                worker_result=forged,
+                diagnostic_vector=diagnostic_vector,
+                repo="controlled-fixture/replayable-benchmark",
+                branch="fixture",
+                commit_sha="fixture-security-freshness-authority-unsafe",
+            )
+        except ValueError as exc:
+            observed_error = str(exc)
+            rejected = expected_error in observed_error
+        checks.extend(
+            [
+                _check(
+                    name="current_security_before_forgery_is_review_first",
+                    passed=_string(primary.get("failure_surface")) == "security"
+                    and not _bool(primary.get("safe_fix_candidate")),
+                    expected=True,
+                    actual=_string(primary.get("failure_surface")) == "security"
+                    and not _bool(primary.get("safe_fix_candidate")),
+                ),
+                _check(
+                    name="forged_security_worker_authority_rejected",
+                    passed=rejected,
+                    expected=expected_error,
+                    actual=observed_error,
+                ),
+                _check(
+                    name="forged_security_worker_emits_no_trajectory",
+                    passed=trajectory_records == [],
+                    expected=[],
+                    actual=trajectory_records,
+                ),
+            ]
+        )
+
+    passed = all(_bool(item.get("passed")) for item in checks)
+    return {
+        "scenario_id": scenario_id,
+        "scenario_type": scenario_type,
+        "status": "passed" if passed else "failed",
+        "passed": passed,
+        "attempt_scored": False,
+        "attempt_score": 0,
+        "checks": checks,
+        "diagnosis_count": _int(result_summary.get("diagnosis_count")),
+        "trajectory_record_count": len(trajectory_records),
+        "observed_error": observed_error,
+    }
+
+
+def build_security_freshness_benchmark_report(scenarios: list[Mapping[str, Any]]) -> JsonObject:
+    results = [evaluate_security_freshness_scenario(scenario) for scenario in scenarios]
+    type_counts = Counter(_string(item.get("scenario_type")) for item in results)
+    required_present = all(
+        type_counts.get(item, 0) >= 1 for item in SECURITY_FRESHNESS_REQUIRED_SCENARIO_TYPES
+    )
+    required_passed = all(
+        any(
+            result.get("scenario_type") == scenario_type and result.get("passed") is True
+            for result in results
+        )
+        for scenario_type in SECURITY_FRESHNESS_REQUIRED_SCENARIO_TYPES
+    )
+    passed_count = sum(1 for item in results if item.get("passed") is True)
+    boundary = {
+        "execution_model": "_".join(
+            ("read", "only", "security", "freshness", "fixture", "evaluation")
+        ),
+        "automation_allowed_count": 0,
+        "merge_authorized_count": 0,
+        "semantic_equivalence_claimed_count": 0,
+        "preserved": True,
+        "contributes_to_current_pr_decision": False,
+        "feeds_repo_memory": False,
+        "executes_patch": False,
+        "protected_verifier_semantics_expanded": False,
+    }
+    passed = bool(results) and passed_count == len(results) and required_present and required_passed
+    return {
+        "schema_version": SECURITY_FRESHNESS_REPORT_SCHEMA_VERSION,
+        "report_mode": SECURITY_FRESHNESS_REPORT_MODE,
+        "status": "passed" if passed else "failed",
+        "scenario_count": len(results),
+        "passed_count": passed_count,
+        "failed_count": len(results) - passed_count,
+        "scenario_type_counts": dict(sorted(type_counts.items())),
+        "required_contract": {
+            "required_scenario_types": list(SECURITY_FRESHNESS_REQUIRED_SCENARIO_TYPES),
+            "all_required_present": required_present,
+            "all_required_passed": required_passed,
+            "stale_exclusion_pass_rate": _type_rate(results, SECURITY_FRESHNESS_STALE_RUNTIME_PASS),
+            "current_primary_pass_rate": _type_rate(
+                results, SECURITY_FRESHNESS_CURRENT_PRIMARY_PASS
+            ),
+            "unsafe_authority_rejection_rate": _type_rate(
+                results, SECURITY_FRESHNESS_AUTHORITY_FAIL
+            ),
+        },
+        "safety_boundary": boundary,
+        "attempt_scored_count": 0,
+        "scenarios": results,
+        "next_boundary": (
+            "Keep security-freshness worker evidence review-first and non-authorizing; "
+            "do not add security dismissal or remediation authority."
+        ),
+    }
+
+
 def render_markdown(report: Mapping[str, Any]) -> str:
     required = _as_dict(report.get("required_contract"))
     boundary = _as_dict(report.get("safety_boundary"))
@@ -978,6 +1317,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
     report_mode = _string(report.get("report_mode") or "fixture_declared")
     is_live = report_mode == LIVE_EVIDENCE_SOURCE
     is_diagnostic_worker = report_mode == DIAGNOSTIC_WORKER_REPORT_MODE
+    is_security_freshness = report_mode == SECURITY_FRESHNESS_REPORT_MODE
 
     lines = [
         "# Replayable Benchmark Harness report",
@@ -991,7 +1331,44 @@ def render_markdown(report: Mapping[str, Any]) -> str:
         "",
     ]
 
-    if is_diagnostic_worker:
+    if is_security_freshness:
+        lines.extend(
+            [
+                "## Required security-freshness worker replay contract",
+                "",
+                (
+                    "- All required scenarios present: "
+                    f"`{str(_bool(required.get('all_required_present'))).lower()}`"
+                ),
+                (
+                    "- All required scenarios passed: "
+                    f"`{str(_bool(required.get('all_required_passed'))).lower()}`"
+                ),
+                (
+                    "- Stale exclusion pass rate: "
+                    f"`{float(required.get('stale_exclusion_pass_rate', 0.0) or 0.0):.4f}`"
+                ),
+                (
+                    "- Current security primary pass rate: "
+                    f"`{float(required.get('current_primary_pass_rate', 0.0) or 0.0):.4f}`"
+                ),
+                (
+                    "- Unsafe authority rejection rate: "
+                    f"`{float(required.get('unsafe_authority_rejection_rate', 0.0) or 0.0):.4f}`"
+                ),
+                (
+                    "- Current PR decision input: "
+                    f"`{str(_bool(boundary.get('contributes_to_current_pr_decision'))).lower()}`"
+                ),
+                f"- Feeds RepoMemory: `{str(_bool(boundary.get('feeds_repo_memory'))).lower()}`",
+                (
+                    "- ProtectedVerifier semantics expanded: "
+                    f"`{str(_bool(boundary.get('protected_verifier_semantics_expanded'))).lower()}`"
+                ),
+                "",
+            ]
+        )
+    elif is_diagnostic_worker:
         lines.extend(
             [
                 "## Required runtime-guard worker replay contract",
@@ -1145,7 +1522,17 @@ def render_markdown(report: Mapping[str, Any]) -> str:
         )
 
     lines.extend(["", "## Boundary", ""])
-    if is_diagnostic_worker:
+    if is_security_freshness:
+        lines.extend(
+            [
+                "- This harness replays security-freshness DiagnosticWorker behavior through controlled fixture inputs.",
+                "- It proves stale security does not displace current runtime diagnosis.",
+                "- It proves current security remains review-first and rejects forged worker authority.",
+                "- It does not feed current PR decisions or RepoMemory.",
+                "- It does not authorize security dismissal, remediation, or merge.",
+            ]
+        )
+    elif is_diagnostic_worker:
         lines.extend(
             [
                 "- This harness replays runtime-guard DiagnosticWorker behavior through controlled fixture inputs.",
@@ -1198,6 +1585,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fixture-backed benchmark scenario JSON. May be supplied more than once.",
     )
     parser.add_argument(
+        "--security-freshness-scenario",
+        type=Path,
+        action="append",
+        default=[],
+        help="Controlled DiagnosticWorker security-freshness scenario JSON.",
+    )
+    parser.add_argument(
         "--diagnostic-worker-scenario",
         type=Path,
         action="append",
@@ -1227,7 +1621,20 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
     try:
-        if args.diagnostic_worker_scenario:
+        if args.security_freshness_scenario:
+            if (
+                args.diagnostic_worker_scenario
+                or args.scenario
+                or args.isolated_scenario
+                or args.isolated_repo_root
+            ):
+                raise ValueError(
+                    "security-freshness scenarios cannot be combined with other benchmark modes"
+                )
+            report = build_security_freshness_benchmark_report(
+                load_security_freshness_scenarios(args.security_freshness_scenario)
+            )
+        elif args.diagnostic_worker_scenario:
             if args.scenario or args.isolated_scenario or args.isolated_repo_root:
                 raise ValueError(
                     "diagnostic-worker scenarios cannot be combined with other benchmark modes"

@@ -798,3 +798,63 @@ def test_pr_quality_workflow_runs_runtime_guard_worker_benchmark_as_non_decision
     assert "build/pr-quality/runtime-guard-benchmark/" in build_comment
     assert "--commit-safe-fixes" not in text
     assert "--pr-quality-safe-bridge-only" not in text
+
+
+def test_pr_quality_workflow_runs_security_freshness_benchmark_as_non_decision_evidence() -> None:
+    text = _workflow_text()
+    marker = (
+        "--security-freshness-scenario tests/fixtures/remediation_benchmark/"
+        "security_freshness_stale_runtime_oracle.json"
+    )
+    marker_location = text.index(marker)
+    step_start = text.rfind("\n      - name:", 0, marker_location) + 1
+    step_end = text.find("\n      - name:", marker_location)
+    if step_end < 0:
+        step_end = len(text)
+    build_comment = text[step_start:step_end]
+
+    assert "- name: Build PR comment body" in build_comment
+    security_command = build_comment.rfind(
+        "python -m sdetkit.replayable_benchmark_harness",
+        0,
+        build_comment.index(marker),
+    )
+    runtime_command = build_comment.rfind(
+        "python -m sdetkit.replayable_benchmark_harness",
+        0,
+        security_command,
+    )
+    assert runtime_command >= 0
+    runtime_append = build_comment.index(
+        "cat build/pr-quality/runtime-guard-benchmark/benchmark-report.md"
+    )
+    security_append = build_comment.index(
+        "cat build/pr-quality/security-freshness-benchmark/benchmark-report.md"
+    )
+    repo_memory = build_comment.index("python -m sdetkit.repo_memory")
+    action_report = build_comment.index("python -m sdetkit.pr_quality_action_report")
+    repo_memory_command = build_comment[
+        repo_memory : build_comment.index(
+            "> build/pr-quality/repo-memory/repo-memory-cli.json", repo_memory
+        )
+    ]
+    action_report_command = build_comment[
+        action_report : build_comment.index(
+            "> build/pr-quality/pr-comment-metadata.json", action_report
+        )
+    ]
+
+    assert runtime_command < security_command < runtime_append < security_append
+    assert "security-freshness-benchmark" not in repo_memory_command
+    assert "security-freshness-benchmark" not in action_report_command
+    assert (
+        "--security-freshness-scenario tests/fixtures/remediation_benchmark/"
+        "security_freshness_current_primary_oracle.json" in build_comment
+    )
+    assert (
+        "--security-freshness-scenario tests/fixtures/remediation_benchmark/"
+        "security_freshness_authority_unsafe.json" in build_comment
+    )
+    assert "build/pr-quality/security-freshness-benchmark/" in build_comment
+    assert "--commit-safe-fixes" not in text
+    assert "--pr-quality-safe-bridge-only" not in text
