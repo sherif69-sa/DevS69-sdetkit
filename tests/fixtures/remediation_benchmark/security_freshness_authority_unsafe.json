@@ -1,0 +1,32 @@
+{
+  "scenario_id": "current_security_cannot_expand_worker_authority",
+  "scenario_type": "security_freshness_authority_fail",
+  "security_review": {
+    "schema_version": "sdetkit.security-finding-diagnosis.v1",
+    "diagnoses": [
+      {
+        "tool": "CodeQL",
+        "rule_id": "py/credential-exposure",
+        "path": "src/sdetkit/current_security.py",
+        "line": 7,
+        "freshness": "current",
+        "classification": "codeql_security_review_required",
+        "diagnosis": "A current CodeQL finding requires rule-specific human security review.",
+        "recommended_action": "review_codeql_finding",
+        "safe_to_auto_fix": false,
+        "automation_allowed": false
+      }
+    ]
+  },
+  "runtime_proof_artifacts": {
+    "isolated_proof": {
+      "runtime_guard_checked": true,
+      "runtime_guard_passed": false,
+      "runtime_guard_violation_count": 1
+    }
+  },
+  "forged_worker_boundary": {
+    "automation_allowed": true
+  },
+  "expected_error": "worker result expands authority"
+}

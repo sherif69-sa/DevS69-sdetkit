@@ -1,0 +1,50 @@
+{
+  "scenario_id": "stale_security_does_not_displace_current_runtime",
+  "scenario_type": "security_freshness_stale_runtime_pass",
+  "security_review": {
+    "schema_version": "sdetkit.security-finding-diagnosis.v1",
+    "summary": {
+      "open_findings": 3,
+      "current_findings": 0,
+      "stale_findings": 3
+    },
+    "diagnoses": [
+      {
+        "tool": "osv-scanner",
+        "rule_id": "CVE-2025-68146",
+        "path": "requirements-test.txt",
+        "line": 1,
+        "freshness": "stale",
+        "classification": "stale_or_outdated_alert",
+        "diagnosis": "The alert does not point at the current PR head.",
+        "recommended_action": "wait_for_code_scanning_refresh",
+        "safe_to_auto_fix": false,
+        "automation_allowed": false
+      },
+      {
+        "tool": "sdetkit-security-gate",
+        "rule_id": "SEC_HIGH_ENTROPY_STRING",
+        "path": "src/sdetkit/flaky_test_registry_evidence.py",
+        "line": 218,
+        "freshness": "stale",
+        "classification": "stale_or_outdated_alert",
+        "diagnosis": "The alert does not point at the current PR head.",
+        "recommended_action": "wait_for_code_scanning_refresh",
+        "safe_to_auto_fix": false,
+        "automation_allowed": false
+      }
+    ]
+  },
+  "runtime_proof_artifacts": {
+    "isolated_proof": {
+      "runtime_guard_checked": true,
+      "runtime_guard_passed": false,
+      "runtime_guard_violation_count": 1
+    }
+  },
+  "expected": {
+    "primary_surface": "runtime",
+    "primary_action": "review_first_runtime_debug",
+    "diagnosis_count": 1
+  }
+}
