@@ -13,6 +13,7 @@ from sdetkit.diagnostic_vector_engine import (
     RECOMMENDED_NEXT_ACTION,
     REVIEW_FIRST,
     SAFE_FIX_CANDIDATE,
+    STALE_OR_CURRENT_SIGNAL,
     build_diagnostic_vector,
     main,
 )
@@ -331,3 +332,108 @@ def test_diagnostic_vector_does_not_emit_runtime_guard_diagnosis_when_guard_pass
     assert payload["diagnoses"] == []
     assert payload["summary"]["diagnosis_count"] == 0
     assert payload["source_status"]["runtime_proof_artifacts"] is True
+
+
+def test_diagnostic_vector_does_not_promote_stale_security_diagnosis_over_current_runtime_guard() -> (
+    None
+):
+    payload = build_diagnostic_vector(
+        security_review={
+            "diagnoses": [
+                {
+                    "tool": "sdetkit-security-gate",
+                    "rule_id": "SEC_HIGH_ENTROPY_STRING",
+                    "path": "src/sdetkit/flaky_test_registry_evidence.py",
+                    "line": 218,
+                    "freshness": "stale",
+                    "classification": "stale_or_outdated_alert",
+                    "diagnosis": "The alert does not point at the current PR head.",
+                    "recommended_action": "wait_for_code_scanning_refresh",
+                    "safe_to_auto_fix": False,
+                    "automation_allowed": False,
+                }
+            ]
+        },
+        runtime_proof_artifacts={
+            "isolated_proof": {
+                "runtime_guard_checked": True,
+                "runtime_guard_passed": False,
+                "runtime_guard_violation_count": 1,
+            }
+        },
+    )
+
+    assert payload["source_status"]["security_review"] is True
+    assert payload["summary"]["diagnosis_count"] == 1
+    diagnosis = payload["diagnoses"][0]
+    assert diagnosis[FAILURE_SURFACE] == "runtime"
+    assert diagnosis[RECOMMENDED_NEXT_ACTION] == "review_first_runtime_debug"
+    assert diagnosis["failure_vector"]["failure_class"] == "runtime_guard"
+
+
+def test_diagnostic_vector_consumes_current_security_diagnosis_as_review_first_primary() -> None:
+    payload = build_diagnostic_vector(
+        security_review={
+            "diagnoses": [
+                {
+                    "tool": "CodeQL",
+                    "rule_id": "py/credential-exposure",
+                    "path": "src/sdetkit/current_security.py",
+                    "line": 7,
+                    "freshness": "current",
+                    "classification": "codeql_security_review_required",
+                    "diagnosis": "A current CodeQL finding requires rule-specific human security review.",
+                    "recommended_action": "review_codeql_finding",
+                    "safe_to_auto_fix": False,
+                    "automation_allowed": False,
+                }
+            ]
+        },
+        runtime_proof_artifacts={
+            "isolated_proof": {
+                "runtime_guard_checked": True,
+                "runtime_guard_passed": False,
+                "runtime_guard_violation_count": 1,
+            }
+        },
+    )
+
+    assert payload["summary"]["diagnosis_count"] == 2
+    diagnosis = payload["diagnoses"][0]
+    assert diagnosis[FAILURE_SURFACE] == "security"
+    assert diagnosis[STALE_OR_CURRENT_SIGNAL] == "current"
+    assert diagnosis[REVIEW_FIRST] is True
+    assert diagnosis[SAFE_FIX_CANDIDATE] is False
+    assert diagnosis[RECOMMENDED_NEXT_ACTION] == "review_first_security_review"
+    assert diagnosis[AFFECTED_FILES] == ["src/sdetkit/current_security.py"]
+    assert diagnosis["failure_vector"]["source"] == "security_review"
+    assert diagnosis["failure_vector"]["failure_class"] == "security"
+
+
+def test_diagnostic_vector_preserves_legacy_security_findings_key_as_review_first() -> None:
+    payload = build_diagnostic_vector(
+        security_review={
+            "findings": [
+                {
+                    "tool": "sdetkit-security-gate",
+                    "rule_id": "SEC_SECRET_PATTERN",
+                    "path": "src/sdetkit/legacy_security.py",
+                    "line": 4,
+                    "freshness": "current",
+                    "classification": "security",
+                    "diagnosis": "Legacy security evidence requires review.",
+                    "safe_to_auto_fix": False,
+                    "automation_allowed": False,
+                }
+            ]
+        }
+    )
+
+    assert payload["summary"]["diagnosis_count"] == 1
+    diagnosis = payload["diagnoses"][0]
+    assert diagnosis[FAILURE_SURFACE] == "security"
+    assert diagnosis[REVIEW_FIRST] is True
+    assert diagnosis[SAFE_FIX_CANDIDATE] is False
+    assert diagnosis[AFFECTED_FILES] == ["src/sdetkit/legacy_security.py"]
+    assert diagnosis["failure_vector"]["source"] == "security_review"
+    assert diagnosis["failure_vector"]["failure_class"] == "security"

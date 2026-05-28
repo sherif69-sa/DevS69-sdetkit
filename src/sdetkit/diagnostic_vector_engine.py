@@ -657,16 +657,38 @@ def _vectors_from_security_review(
     *,
     safe_fix_history: Mapping[str, Any] | None,
 ) -> list[dict[str, Any]]:
+    records = _as_list(payload.get("diagnoses"))
+    if not records:
+        records = _as_list(payload.get("findings"))
+
     vectors = []
-    for finding in _as_list(payload.get("findings")):
+    for finding in records:
         row = _as_dict(finding)
         if not row:
             continue
+        if _string(row.get("freshness")).lower() == "stale":
+            continue
+
         adapted = dict(row)
+        path = _string(row.get("path"))
         adapted["surface"] = "security"
         adapted["title"] = _first_text(
-            row.get("title"), row.get("summary"), "Security review finding"
+            row.get("title"),
+            row.get("summary"),
+            row.get("classification"),
+            row.get("rule_id"),
+            "Security review finding",
         )
+        adapted["first_failure_line"] = _first_text(
+            row.get("first_failure_line"),
+            row.get("diagnosis"),
+            row.get("summary"),
+            row.get("classification"),
+        )
+        adapted["affected_files"] = _string_list(row.get("affected_files")) or (
+            [path] if path else []
+        )
+        adapted["kind"] = _first_text(row.get("classification"), "security_finding")
         adapted["review_first"] = True
         adapted["safe_to_auto_fix"] = False
         vectors.append(
