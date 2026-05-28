@@ -746,3 +746,55 @@ def test_pr_quality_diagnostic_job_consumes_runtime_guard_summary_after_primary_
     )
     assert "--commit-safe-fixes" not in text
     assert "--pr-quality-safe-bridge-only" not in text
+
+
+def test_pr_quality_workflow_runs_runtime_guard_worker_benchmark_as_non_decision_evidence() -> None:
+    text = _workflow_text()
+    scenario_marker = (
+        "--diagnostic-worker-scenario tests/fixtures/remediation_benchmark/"
+        "runtime_guard_worker_oracle.json"
+    )
+    marker_location = text.index(scenario_marker)
+    step_start = text.rfind("\n      - name:", 0, marker_location) + 1
+    step_end = text.find("\n      - name:", marker_location)
+    if step_end < 0:
+        step_end = len(text)
+    build_comment = text[step_start:step_end]
+
+    assert "- name: Build PR comment body" in build_comment
+    assert build_comment.count(scenario_marker) == 1
+    benchmark_command_start = build_comment.rfind(
+        "python -m sdetkit.replayable_benchmark_harness", 0, build_comment.index(scenario_marker)
+    )
+    assert benchmark_command_start >= 0
+    candidate_validation = build_comment.index("python -m sdetkit.pr_quality_candidate_validation")
+    benchmark_append = build_comment.index(
+        "cat build/pr-quality/runtime-guard-benchmark/benchmark-report.md"
+    )
+    repo_memory = build_comment.index("python -m sdetkit.repo_memory")
+    action_report = build_comment.index("python -m sdetkit.pr_quality_action_report")
+    repo_memory_command = build_comment[
+        repo_memory : build_comment.index(
+            "> build/pr-quality/repo-memory/repo-memory-cli.json", repo_memory
+        )
+    ]
+    action_report_command = build_comment[
+        action_report : build_comment.index(
+            "> build/pr-quality/pr-comment-metadata.json", action_report
+        )
+    ]
+
+    assert candidate_validation < benchmark_command_start < benchmark_append
+    assert "runtime-guard-benchmark" not in repo_memory_command
+    assert "runtime-guard-benchmark" not in action_report_command
+    assert (
+        "--diagnostic-worker-scenario tests/fixtures/remediation_benchmark/"
+        "runtime_guard_worker_nop.json" in build_comment
+    )
+    assert (
+        "--diagnostic-worker-scenario tests/fixtures/remediation_benchmark/"
+        "runtime_guard_worker_unsafe.json" in build_comment
+    )
+    assert "build/pr-quality/runtime-guard-benchmark/" in build_comment
+    assert "--commit-safe-fixes" not in text
+    assert "--pr-quality-safe-bridge-only" not in text

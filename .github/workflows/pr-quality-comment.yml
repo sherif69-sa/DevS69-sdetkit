@@ -700,6 +700,15 @@ jobs:
             --format json \
             > build/pr-quality/candidate-validation/candidate-validation-cli.json
 
+          mkdir -p build/pr-quality/runtime-guard-benchmark
+          PYTHONPATH=src python -m sdetkit.replayable_benchmark_harness \
+            --diagnostic-worker-scenario tests/fixtures/remediation_benchmark/runtime_guard_worker_oracle.json \
+            --diagnostic-worker-scenario tests/fixtures/remediation_benchmark/runtime_guard_worker_nop.json \
+            --diagnostic-worker-scenario tests/fixtures/remediation_benchmark/runtime_guard_worker_unsafe.json \
+            --out-dir build/pr-quality/runtime-guard-benchmark \
+            --format json \
+            > build/pr-quality/runtime-guard-benchmark/runtime-guard-benchmark-cli.json
+
           if [ -s build/pr-quality/diagnostic-job/diagnostic-job.md ]; then
             printf '\n' >> build/pr-quality/pr-comment-body.md
             cat build/pr-quality/diagnostic-job/diagnostic-job.md >> build/pr-quality/pr-comment-body.md
@@ -717,6 +726,9 @@ jobs:
 
           printf '\n' >> build/pr-quality/pr-comment-body.md
           cat build/pr-quality/candidate-validation/candidate-validation.md >> build/pr-quality/pr-comment-body.md
+
+          printf '\n' >> build/pr-quality/pr-comment-body.md
+          cat build/pr-quality/runtime-guard-benchmark/benchmark-report.md >> build/pr-quality/pr-comment-body.md
 
       - name: Build verified operator evidence loop
         if: always()
@@ -781,6 +793,7 @@ jobs:
             build/pr-quality/diagnostic-job/
             build/pr-quality/candidate-visibility/
             build/pr-quality/candidate-validation/
+            build/pr-quality/runtime-guard-benchmark/
             build/pr-quality/pr-evidence-narrative.md
             build/sdetkit/evidence-graph/
             build/sdetkit/operator-loop/

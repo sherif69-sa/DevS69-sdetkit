@@ -1,0 +1,14 @@
+{
+  "scenario_id": "runtime_guard_worker_passing_nop",
+  "scenario_type": "runtime_guard_worker_nop_pass",
+  "runtime_proof_artifacts": {
+    "status": "collected",
+    "isolated_proof": {
+      "collection_status": "collected",
+      "status": "passed",
+      "runtime_guard_checked": true,
+      "runtime_guard_passed": true,
+      "runtime_guard_violation_count": 0
+    }
+  }
+}

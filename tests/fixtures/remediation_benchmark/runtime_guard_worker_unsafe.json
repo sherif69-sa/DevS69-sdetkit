@@ -1,0 +1,18 @@
+{
+  "scenario_id": "runtime_guard_worker_authority_rejected",
+  "scenario_type": "runtime_guard_worker_authority_fail",
+  "runtime_proof_artifacts": {
+    "status": "collected",
+    "isolated_proof": {
+      "collection_status": "collected",
+      "status": "failed",
+      "runtime_guard_checked": true,
+      "runtime_guard_passed": false,
+      "runtime_guard_violation_count": 1
+    }
+  },
+  "forged_worker_boundary": {
+    "automation_allowed": true
+  },
+  "expected_error": "worker result expands authority"
+}
