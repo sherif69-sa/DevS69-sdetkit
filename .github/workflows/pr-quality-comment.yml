@@ -42,20 +42,21 @@ jobs:
         env:
           COV_FAIL_UNDER: "95"
         run: |
+          mkdir -p build/pr-quality/failure-intelligence
           set -o pipefail
-          bash quality.sh cov 2>&1 | tee quality.log
+          bash quality.sh cov 2>&1 | tee build/pr-quality/failure-intelligence/quality.log
 
       - name: Build adaptive failure intelligence bundle
         if: always()
         run: |
           mkdir -p build/pr-quality/failure-intelligence
-          if [ -f quality.log ]; then
+          if [ -f build/pr-quality/failure-intelligence/quality.log ]; then
             proof_flag="--proof-failed"
             if [ "${{ steps.quality.outcome }}" = "success" ]; then
               proof_flag="--proof-passed"
             fi
             PYTHONPATH=src python -m sdetkit adaptive failure-bundle \
-              --log quality.log \
+              --log build/pr-quality/failure-intelligence/quality.log \
               --out-dir build/pr-quality/failure-intelligence \
               "${proof_flag}" \
               --format text
@@ -254,7 +255,7 @@ jobs:
                   "name": "PR Quality local quality gate",
                   "status": "completed",
                   "conclusion": local_conclusion,
-                  "log_path": "quality.log",
+                  "log_path": "build/pr-quality/failure-intelligence/quality.log",
                   "required": "PR Quality local quality gate" in required_contexts,
               }
           )
@@ -435,7 +436,7 @@ jobs:
             > build/pr-quality/live-benchmark/fixture-report/fixture-report-exit-code.txt
 
           PYTHONPATH=src python -m sdetkit.pr_quality_evidence_narrative \
-            --quality-log quality.log \
+            --quality-log build/pr-quality/failure-intelligence/quality.log \
             --quality-outcome "${{ steps.quality.outcome }}" \
             --sentinel-control-room build/sdetkit/sentinel/control-room-with-security-review.json \
             --evidence-graph build/sdetkit/evidence-graph/evidence-graph.json \
@@ -748,7 +749,7 @@ jobs:
           mkdir -p build/sdetkit/operator-loop
           PYTHONPATH=src python -m sdetkit operator-loop \
             --repo . \
-            --quality-log quality.log \
+            --quality-log build/pr-quality/failure-intelligence/quality.log \
             --quality-outcome "${{ steps.quality.outcome }}" \
             --sentinel-control-room build/sdetkit/sentinel/control-room-with-security-review.json \
             --evidence-graph build/sdetkit/evidence-graph/evidence-graph.json \
