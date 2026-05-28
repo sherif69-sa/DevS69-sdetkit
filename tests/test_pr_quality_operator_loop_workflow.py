@@ -9,7 +9,10 @@ def test_pr_quality_workflow_publishes_verified_operator_loop() -> None:
     assert "Build verified operator evidence loop" in workflow
     assert "python -m sdetkit operator-loop" in workflow
     assert "--verify" in workflow
-    assert "--quality-log quality.log" in workflow
+    quality_log = "/".join(("build", "pr-quality", "failure-intelligence", "quality.log"))
+
+    assert f"--quality-log {quality_log}" in workflow
+    assert "--quality-log quality.log" not in workflow
     assert '--quality-outcome "${{ steps.quality.outcome }}"' in workflow
     assert "--evidence-graph build/sdetkit/evidence-graph/evidence-graph.json" in workflow
     assert "--failure-bundle build/pr-quality/failure-intelligence/failure-bundle.json" in workflow

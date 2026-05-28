@@ -346,8 +346,11 @@ def test_pr_quality_comment_workflow_does_not_mask_quality_gate_failure_with_tee
         )
     ]
 
+    quality_log = "/".join(("build", "pr-quality", "failure-intelligence", "quality.log"))
+
     assert "set -o pipefail" in quality_step
-    assert "bash quality.sh cov 2>&1 | tee quality.log" in quality_step
+    assert f"bash quality.sh cov 2>&1 | tee {quality_log}" in quality_step
+    assert "tee quality.log" not in quality_step
 
 
 def test_pr_quality_comment_workflow_checks_out_history_for_runtime_proof_merge_base() -> None:

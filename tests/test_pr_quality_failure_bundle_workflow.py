@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 WORKFLOW = Path(".github/workflows/pr-quality-comment.yml")
+QUALITY_LOG = "/".join(("build", "pr-quality", "failure-intelligence", "quality.log"))
 
 
 def _workflow_text() -> str:
@@ -14,7 +15,9 @@ def test_pr_quality_workflow_uses_failure_bundle_handoff() -> None:
 
     assert "Build adaptive failure intelligence bundle" in text
     assert "python -m sdetkit adaptive failure-bundle" in text
-    assert "--log quality.log" in text
+    assert f"--log {QUALITY_LOG}" in text
+    assert f"tee {QUALITY_LOG}" in text
+    assert "tee quality.log" not in text
     assert "--out-dir build/pr-quality/failure-intelligence" in text
     assert "--proof-failed" in text
 
