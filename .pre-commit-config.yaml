@@ -19,7 +19,7 @@ repos:
     hooks:
       - id: doctor-ascii
         name: doctor --ascii
-        entry: python -c 'import sys; sys.path.insert(0, "src"); from sdetkit import doctor; raise SystemExit(doctor.main(["--ascii"]))'
+        entry: python -c 'import sys; sys.path.insert(0, "src"); from sdetkit import doctor; raise SystemExit(doctor.main(["--ascii", "--no-workspace"]))'
         language: python
         additional_dependencies: [tomli]
         pass_filenames: false
