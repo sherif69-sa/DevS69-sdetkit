@@ -364,6 +364,7 @@ def _failure_class(
         "lint",
         "type",
         "test",
+        "runtime_guard",
         "dependency",
         "merge_conflict",
         "flaky",
@@ -399,6 +400,8 @@ def _failure_class(
         return "formatter_only"
     if surface == "type_contract" or "mypy" in haystack:
         return "type"
+    if "runtime_guard" in haystack or "runtime guard" in haystack:
+        return "runtime_guard"
     if surface in {"test", "runtime"} or "pytest" in haystack or "assertion" in haystack:
         return "test"
     if surface == "quality" and "coverage" in haystack:
@@ -676,6 +679,52 @@ def _vectors_from_security_review(
     return vectors
 
 
+def _vectors_from_runtime_proof_artifacts(
+    payload: Mapping[str, Any],
+    *,
+    safe_fix_history: Mapping[str, Any] | None,
+) -> list[dict[str, Any]]:
+    isolated = _as_dict(payload.get("isolated_proof"))
+    if not isolated:
+        return []
+    if not _bool(isolated.get("runtime_guard_checked")):
+        return []
+    if _bool(isolated.get("runtime_guard_passed")):
+        return []
+
+    violation_count = int(isolated.get("runtime_guard_violation_count", 0) or 0)
+    first_line = f"runtime_guard_passed=false; runtime_guard_violation_count={violation_count}"
+    adapted = {
+        "name": "Isolated runtime proof guard",
+        "title": "Runtime guard violation observed",
+        "surface": "runtime",
+        "classification": "runtime_guard",
+        "actual_failure": first_line,
+        "first_failure_line": first_line,
+        "tool": "runtime_guard",
+        "kind": "runtime_guard_violation",
+        "review_first": True,
+        "safe_to_auto_fix": False,
+        "scope": "proof_boundary",
+        "environment": "github_actions",
+        "safe_remediation": {
+            "strategy": "review_first",
+            "reason": "runtime guard violations require human review and focused proof",
+        },
+        "proof_commands": [
+            "python -m pytest -q tests/test_protected_verifier.py tests/test_pr_quality_runtime_proof_artifacts.py -o addopts="
+        ],
+        "evidence_sources": ["runtime_proof_artifacts"],
+    }
+    return [
+        _vector_from_record(
+            adapted,
+            source="runtime_proof_artifacts",
+            safe_fix_history=safe_fix_history,
+        )
+    ]
+
+
 def _vectors_from_action_report(
     payload: Mapping[str, Any],
     *,
@@ -736,6 +785,7 @@ def build_diagnostic_vector(
     test_failure_bundle: Mapping[str, Any] | None = None,
     evidence_graph: Mapping[str, Any] | None = None,
     pr_quality_action_report: Mapping[str, Any] | None = None,
+    runtime_proof_artifacts: Mapping[str, Any] | None = None,
     operator_loop: Mapping[str, Any] | None = None,
     generated_at: str = DEFAULT_GENERATED_AT,
 ) -> dict[str, Any]:
@@ -768,6 +818,12 @@ def build_diagnostic_vector(
     vectors.extend(
         _vectors_from_action_report(
             _as_dict(pr_quality_action_report),
+            safe_fix_history=safe_fix_history,
+        )
+    )
+    vectors.extend(
+        _vectors_from_runtime_proof_artifacts(
+            _as_dict(runtime_proof_artifacts),
             safe_fix_history=safe_fix_history,
         )
     )
@@ -831,6 +887,7 @@ def build_diagnostic_vector(
             "test_failure_bundle": bool(test_failure_bundle),
             "evidence_graph": bool(evidence_graph),
             "pr_quality_action_report": bool(pr_quality_action_report),
+            "runtime_proof_artifacts": bool(runtime_proof_artifacts),
             "operator_loop": bool(operator_loop),
         },
     }
@@ -919,6 +976,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--test-failure-bundle", default="")
     parser.add_argument("--evidence-graph", default="")
     parser.add_argument("--pr-quality-action-report", default="")
+    parser.add_argument("--runtime-proof-artifacts", default="")
     parser.add_argument("--operator-loop", default="")
     parser.add_argument("--out-dir", default=DEFAULT_OUT_DIR)
     parser.add_argument("--generated-at", default=DEFAULT_GENERATED_AT)
@@ -946,6 +1004,7 @@ def main(argv: list[str] | None = None) -> int:
             test_failure_bundle=_read_json(_optional_path(args.test_failure_bundle)),
             evidence_graph=_read_json(_optional_path(args.evidence_graph)),
             pr_quality_action_report=_read_json(_optional_path(args.pr_quality_action_report)),
+            runtime_proof_artifacts=_read_json(_optional_path(args.runtime_proof_artifacts)),
             operator_loop=_read_json(_optional_path(args.operator_loop)),
             generated_at=args.generated_at,
         )

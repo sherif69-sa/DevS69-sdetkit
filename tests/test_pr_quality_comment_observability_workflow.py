@@ -717,3 +717,32 @@ def test_pr_quality_workflow_keeps_failed_diagnostic_worker_trajectory_visible_a
     assert "Automation allowed: `false`" in build_comment
     assert "Merge authorized: `false`" in build_comment
     assert "current-run candidate decisions and RepoMemory remain unchanged" in build_comment
+
+
+def test_pr_quality_diagnostic_job_consumes_runtime_guard_summary_after_primary_decision_render() -> (
+    None
+):
+    text = _workflow_text()
+
+    action_report = text.index("python -m sdetkit.pr_quality_action_report")
+    diagnostic_job = text.index("python -m sdetkit.diagnostic_job")
+    diagnostic_job_command = text[
+        diagnostic_job : text.index(
+            "> build/pr-quality/diagnostic-job/diagnostic-job-cli.json", diagnostic_job
+        )
+    ]
+    action_report_command = text[
+        action_report : text.index("> build/pr-quality/pr-comment-metadata.json", action_report)
+    ]
+
+    assert action_report < diagnostic_job
+    assert (
+        "--runtime-proof-artifacts build/pr-quality/runtime-proof/summary/runtime-proof-artifacts.json"
+        in diagnostic_job_command
+    )
+    assert (
+        "--runtime-proof-artifacts build/pr-quality/runtime-proof/summary/runtime-proof-artifacts.json"
+        in action_report_command
+    )
+    assert "--commit-safe-fixes" not in text
+    assert "--pr-quality-safe-bridge-only" not in text
