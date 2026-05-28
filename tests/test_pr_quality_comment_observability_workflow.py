@@ -861,3 +861,53 @@ def test_pr_quality_workflow_runs_security_freshness_benchmark_as_non_decision_e
     assert "build/pr-quality/security-freshness-benchmark/" in build_comment
     assert "--commit-safe-fixes" not in text
     assert "--pr-quality-safe-bridge-only" not in text
+
+
+def test_pr_quality_workflow_renders_diagnostic_signal_snapshot_after_worker_as_reporting_only() -> (
+    None
+):
+    text = _workflow_text()
+    build_comment = text[
+        text.index("- name: Build PR comment body") : text.index(
+            "- name: Build verified operator evidence loop"
+        )
+    ]
+
+    repo_memory = build_comment.index("python -m sdetkit.repo_memory")
+    action_report = build_comment.index("python -m sdetkit.pr_quality_action_report")
+    diagnostic_job = build_comment.index("python -m sdetkit.diagnostic_job")
+    trajectory = build_comment.index("python -m sdetkit.diagnostic_worker_trajectory")
+    snapshot = build_comment.index("python -m sdetkit.diagnostic_signal_snapshot")
+    candidate_validation = build_comment.index("python -m sdetkit.pr_quality_candidate_validation")
+    snapshot_append = build_comment.index(
+        "cat build/pr-quality/diagnostic-signal-snapshot/diagnostic-signal-snapshot.md"
+    )
+    repo_memory_command = build_comment[
+        repo_memory : build_comment.index(
+            "> build/pr-quality/repo-memory/repo-memory-cli.json", repo_memory
+        )
+    ]
+    action_report_command = build_comment[
+        action_report : build_comment.index(
+            "> build/pr-quality/pr-comment-metadata.json", action_report
+        )
+    ]
+
+    assert (
+        repo_memory < action_report < diagnostic_job < trajectory < snapshot < candidate_validation
+    )
+    assert snapshot < snapshot_append
+    assert "diagnostic-signal-snapshot" not in repo_memory_command
+    assert "diagnostic-signal-snapshot" not in action_report_command
+    assert (
+        "--diagnostic-worker-result build/pr-quality/diagnostic-job/diagnostic-worker-result.json"
+        in build_comment
+    )
+    assert "Diagnostic signal KPI snapshot" in build_comment
+    assert "current_pr_reporting_only_snapshot" in build_comment
+    assert "Current PR decision input: `false`" in build_comment
+    assert "Feeds RepoMemory: `false`" in build_comment
+    assert "Automation allowed: `false`" in build_comment
+    assert "Merge authorized: `false`" in build_comment
+    assert "--commit-safe-fixes" not in text
+    assert "--pr-quality-safe-bridge-only" not in text

@@ -693,6 +693,44 @@ jobs:
             } > build/pr-quality/diagnostic-job/trajectory/diagnostic-worker-trajectory.md
           fi
 
+          mkdir -p build/pr-quality/diagnostic-signal-snapshot
+          diagnostic_signal_snapshot_rc=2
+          if [ "$diagnostic_job_rc" -eq 0 ] \
+            && [ -s build/pr-quality/diagnostic-job/diagnostic-worker-result.json ]; then
+            diagnostic_signal_snapshot_rc=0
+            PYTHONPATH=src python -m sdetkit.diagnostic_signal_snapshot \
+              --evidence-narrative build/pr-quality/pr-evidence-narrative.json \
+              --evidence-graph build/sdetkit/evidence-graph/evidence-graph.json \
+              --diagnostic-worker-result build/pr-quality/diagnostic-job/diagnostic-worker-result.json \
+              --runtime-proof-artifacts build/pr-quality/runtime-proof/summary/runtime-proof-artifacts.json \
+              --security-finding-diagnosis build/pr-quality/security-diagnosis/security-finding-diagnosis.json \
+              --out-dir build/pr-quality/diagnostic-signal-snapshot \
+              --format json \
+              > build/pr-quality/diagnostic-signal-snapshot/diagnostic-signal-snapshot-cli.json \
+              || diagnostic_signal_snapshot_rc=$?
+          fi
+          printf '%s\n' "$diagnostic_signal_snapshot_rc" \
+            > build/pr-quality/diagnostic-signal-snapshot/diagnostic-signal-snapshot-exit-code.txt
+
+          if [ "$diagnostic_signal_snapshot_rc" -ne 0 ] \
+            && [ ! -s build/pr-quality/diagnostic-signal-snapshot/diagnostic-signal-snapshot.md ]; then
+            {
+              printf '%s\n' \
+                '## Diagnostic signal KPI snapshot' \
+                '' \
+                '- Evidence type: `current_pr_reporting_only_snapshot`' \
+                '- Status: `collection_failed`' \
+                '- Current PR decision input: `false`' \
+                '- Feeds RepoMemory: `false`' \
+                '- Patch application allowed: `false`' \
+                '- Automation allowed: `false`' \
+                '- Merge authorized: `false`' \
+                '- Semantic equivalence proven: `false`' \
+                '' \
+                '- Interpretation: signal snapshot collection failed; the existing PR decision, diagnostic worker evidence, and RepoMemory inputs remain unchanged.'
+            } > build/pr-quality/diagnostic-signal-snapshot/diagnostic-signal-snapshot.md
+          fi
+
           mkdir -p build/pr-quality/candidate-validation
           PYTHONPATH=src python -m sdetkit.pr_quality_candidate_validation \
             --scenario tests/fixtures/pr_quality_candidate_visibility/formatting_candidate_verified.json \
@@ -727,6 +765,11 @@ jobs:
           if [ -s build/pr-quality/diagnostic-job/trajectory/diagnostic-worker-trajectory.md ]; then
             printf '\n' >> build/pr-quality/pr-comment-body.md
             cat build/pr-quality/diagnostic-job/trajectory/diagnostic-worker-trajectory.md >> build/pr-quality/pr-comment-body.md
+          fi
+
+          if [ -s build/pr-quality/diagnostic-signal-snapshot/diagnostic-signal-snapshot.md ]; then
+            printf '\n' >> build/pr-quality/pr-comment-body.md
+            cat build/pr-quality/diagnostic-signal-snapshot/diagnostic-signal-snapshot.md >> build/pr-quality/pr-comment-body.md
           fi
 
           if [ -s build/pr-quality/candidate-visibility/candidate-visibility.md ]; then
@@ -804,6 +847,7 @@ jobs:
             build/pr-quality/trusted-history/
             build/pr-quality/runtime-proof/
             build/pr-quality/diagnostic-job/
+            build/pr-quality/diagnostic-signal-snapshot/
             build/pr-quality/candidate-visibility/
             build/pr-quality/candidate-validation/
             build/pr-quality/runtime-guard-benchmark/
