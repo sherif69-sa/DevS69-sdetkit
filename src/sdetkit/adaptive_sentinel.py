@@ -896,7 +896,7 @@ def _control_room_active_threats(payload: dict[str, Any]) -> list[dict[str, Any]
         finding = _as_dict(item)
         source = str(finding.get("source", "unknown"))
         state = str(finding.get("state", "healthy"))
-        if source == "sentinel" and state == "healthy":
+        if state == "healthy":
             continue
         rows.append(
             {

@@ -253,3 +253,63 @@ def test_failure_bundle_exposes_complete_diagnosis_set_for_graph_consumers(
     assert nodes["Dependency resolver failed"]["review_first"] is True
     assert nodes["Security finding requires review"]["risk_surface"] == "security"
     assert nodes["Security finding requires review"]["review_first"] is True
+
+
+def test_failure_bundle_successful_proof_does_not_promote_failure_shaped_fixture_text(
+    tmp_path: Path,
+) -> None:
+    log = _write(
+        tmp_path / "green-with-failure-shaped-fixture-text.log",
+        "\n".join(
+            [
+                "[quality] running coverage :: Coverage lane",
+                "tests/test_fixture_contract.py::test_rendered_message_contains coverage failure wording PASSED",
+                "Required test coverage of 95% reached. Total coverage: 96.69%",
+                "[quality] final verdict contract: sdetkit.final-verdict.v2",
+                "[quality] blocking failures: none",
+                "[quality] merge/release recommendation: ready-for-merge-review",
+            ]
+        ),
+    )
+
+    bundle = adaptive_failure_bundle.build_failure_bundle(
+        log_path=log,
+        out_dir=tmp_path / "passed-bundle",
+        proof_passed=True,
+    )
+
+    assert bundle["status"] == "clear"
+    assert bundle["diagnosis_count"] == 0
+    assert bundle["primary_diagnosis_code"] == ""
+    assert bundle["review_first"] is False
+    assert bundle["safe_to_auto_fix"] is False
+    assert bundle["proof_outcome"] == "passed"
+    assert bundle["raw_log_promoted"] is False
+    assert bundle["diagnosis"]["evidence"]["raw_log_promoted"] is False
+
+    manifest = json.loads(
+        Path(bundle["artifacts"]["artifact_manifest_json"]).read_text(encoding="utf-8")
+    )
+    assert manifest["proof_outcome"] == "passed"
+    assert manifest["raw_log_promoted"] is False
+
+
+def test_failure_bundle_failed_proof_still_promotes_failure_shaped_log_for_review(
+    tmp_path: Path,
+) -> None:
+    log = _write(
+        tmp_path / "failed-with-failure-shaped-text.log",
+        "custom check emitted coverage failure wording without a recognized repair route\n",
+    )
+
+    bundle = adaptive_failure_bundle.build_failure_bundle(
+        log_path=log,
+        out_dir=tmp_path / "failed-bundle",
+        proof_failed=True,
+    )
+
+    assert bundle["status"] == "needs_fix"
+    assert bundle["primary_diagnosis_code"] == "UNKNOWN_REVIEW_REQUIRED"
+    assert bundle["review_first"] is True
+    assert bundle["proof_outcome"] == "failed"
+    assert bundle["raw_log_promoted"] is True

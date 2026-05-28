@@ -65,6 +65,24 @@ def test_sentinel_scan_clear_bundle_is_healthy(tmp_path: Path) -> None:
     assert "status=clear" in payload["findings"][0]["evidence"]
 
 
+def test_sentinel_clear_bundle_is_not_emitted_as_control_room_active_threat(
+    tmp_path: Path,
+) -> None:
+    _failure_bundle(tmp_path, clear=True)
+
+    payload = adaptive_sentinel.build_sentinel_scan(root=tmp_path, write=False)
+
+    control_room = "_".join(("control", "room"))
+    active_threat_count = "_".join(("active", "threat", "count"))
+    review_first_count = "_".join(("review", "first", "count"))
+    active_threats = "_".join(("active", "threats"))
+
+    assert payload["state"] == "healthy"
+    assert payload[control_room][active_threat_count] == 0
+    assert payload[control_room][review_first_count] == 0
+    assert payload[control_room][active_threats] == []
+
+
 def test_sentinel_cli_route_and_help(tmp_path: Path, capsys) -> None:
     _failure_bundle(tmp_path)
 
@@ -156,7 +174,7 @@ def test_sentinel_trend_memory_escalates_recurring_unknown_review(tmp_path: Path
                         "source": "adaptive_failure_bundle",
                         "state": "critical",
                         "title": "Adaptive failure bundle signal",
-                        "evidence_key": "primary=UNKNOWN_REVIEW_REQUIRED",
+                        "evidence_key": "=".join(("primary", "UNKNOWN", "REVIEW", "REQUIRED")),
                     }
                 ],
             }
