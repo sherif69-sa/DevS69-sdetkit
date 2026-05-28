@@ -283,3 +283,51 @@ def test_diagnostic_vector_cli_writes_failure_vector_json(tmp_path: Path, capsys
     assert failure_vector_doc["summary"]["failure_vector_count"] == 1
     assert failure_vector_doc["failure_vectors"][0]["failure_class"] == "formatter_only"
     assert failure_vector_doc["failure_vectors"][0]["safe_fix_candidate"] is True
+
+
+def test_diagnostic_vector_emits_review_first_runtime_guard_violation_from_runtime_proof_artifacts() -> (
+    None
+):
+    payload = build_diagnostic_vector(
+        runtime_proof_artifacts={
+            "isolated_proof": {
+                "collection_status": "collected",
+                "runtime_guard_checked": True,
+                "runtime_guard_passed": False,
+                "runtime_guard_violation_count": 1,
+            }
+        }
+    )
+
+    diagnosis = payload["diagnoses"][0]
+    vector = diagnosis["failure_vector"]
+    assert payload["summary"]["diagnosis_count"] == 1
+    assert payload["summary"]["review_first_count"] == 1
+    assert payload["source_status"]["runtime_proof_artifacts"] is True
+    assert diagnosis[FAILURE_SURFACE] == "runtime"
+    assert (
+        diagnosis[ACTUAL_FAILURE] == "runtime_guard_passed=false; runtime_guard_violation_count=1"
+    )
+    assert diagnosis[REVIEW_FIRST] is True
+    assert diagnosis[SAFE_FIX_CANDIDATE] is False
+    assert diagnosis[RECOMMENDED_NEXT_ACTION] == "review_first_runtime_debug"
+    assert vector["source"] == "runtime_proof_artifacts"
+    assert vector["failure_class"] == "runtime_guard"
+    assert vector["scope"] == "proof_boundary"
+
+
+def test_diagnostic_vector_does_not_emit_runtime_guard_diagnosis_when_guard_passes() -> None:
+    payload = build_diagnostic_vector(
+        runtime_proof_artifacts={
+            "isolated_proof": {
+                "collection_status": "collected",
+                "runtime_guard_checked": True,
+                "runtime_guard_passed": True,
+                "runtime_guard_violation_count": 0,
+            }
+        }
+    )
+
+    assert payload["diagnoses"] == []
+    assert payload["summary"]["diagnosis_count"] == 0
+    assert payload["source_status"]["runtime_proof_artifacts"] is True

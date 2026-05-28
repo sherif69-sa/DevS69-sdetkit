@@ -200,6 +200,7 @@ def run_diagnostic_worker(
     evidence_graph: Mapping[str, Any] | None = None,
     pr_quality_action_report: Mapping[str, Any] | None = None,
     security_review: Mapping[str, Any] | None = None,
+    runtime_proof_artifacts: Mapping[str, Any] | None = None,
     out_dir: Path,
 ) -> JsonObject:
     validate_job(job)
@@ -208,6 +209,7 @@ def run_diagnostic_worker(
         evidence_graph=evidence_graph,
         pr_quality_action_report=pr_quality_action_report,
         security_review=security_review,
+        runtime_proof_artifacts=runtime_proof_artifacts,
         generated_at=_string(job.get("created_at")) or DEFAULT_GENERATED_AT,
     )
     vector_artifacts = write_diagnostic_vector(vector, out_dir / VECTOR_DIR)
@@ -319,6 +321,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--evidence-graph", type=Path)
     parser.add_argument("--pr-quality-action-report", type=Path)
     parser.add_argument("--security-review", type=Path)
+    parser.add_argument("--runtime-proof-artifacts", type=Path)
     parser.add_argument("--repo", default="")
     parser.add_argument("--base-sha", default="")
     parser.add_argument("--head-sha", required=True)
@@ -337,6 +340,7 @@ def main(argv: list[str] | None = None) -> int:
         "evidence_graph": str(args.evidence_graph or ""),
         "pr_quality_action_report": str(args.pr_quality_action_report or ""),
         "security_review": str(args.security_review or ""),
+        "runtime_proof_artifacts": str(args.runtime_proof_artifacts or ""),
     }
     try:
         job = build_diagnostic_job(
@@ -354,6 +358,7 @@ def main(argv: list[str] | None = None) -> int:
             evidence_graph=_read_json(args.evidence_graph),
             pr_quality_action_report=_read_json(args.pr_quality_action_report),
             security_review=_read_json(args.security_review),
+            runtime_proof_artifacts=_read_json(args.runtime_proof_artifacts),
             out_dir=args.out_dir,
         )
         artifacts = write_artifacts(job, result, out_dir=args.out_dir)

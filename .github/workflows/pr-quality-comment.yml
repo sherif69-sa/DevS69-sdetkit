@@ -617,6 +617,7 @@ jobs:
             --evidence-graph build/sdetkit/evidence-graph/evidence-graph.json \
             --pr-quality-action-report build/pr-quality/check-intelligence/action-report.json \
             --security-review build/pr-quality/security-diagnosis/security-finding-diagnosis.json \
+            --runtime-proof-artifacts build/pr-quality/runtime-proof/summary/runtime-proof-artifacts.json \
             --repo "$REPOSITORY" \
             --base-sha "$PR_BASE_SHA" \
             --head-sha "$HEAD_SHA" \

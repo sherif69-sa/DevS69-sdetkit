@@ -183,3 +183,37 @@ def test_diagnostic_job_cli_rejects_declared_missing_evidence_input(
     assert "declared diagnostic job evidence input is missing" in capsys.readouterr().out
     assert not (out_dir / "diagnostic-worker-result.json").exists()
     assert not (out_dir / "diagnostic-job.md").exists()
+
+
+def test_diagnostic_worker_surfaces_runtime_guard_violation_as_read_only_review_first_evidence(
+    tmp_path: Path,
+) -> None:
+    result = run_diagnostic_worker(
+        _job(),
+        runtime_proof_artifacts={
+            "isolated_proof": {
+                "collection_status": "collected",
+                "runtime_guard_checked": True,
+                "runtime_guard_passed": False,
+                "runtime_guard_violation_count": 1,
+            }
+        },
+        out_dir=tmp_path,
+    )
+
+    assert result["summary"]["diagnosis_count"] == 1
+    assert result["summary"]["primary_surface"] == "runtime"
+    assert result["summary"]["primary_action"] == "review_first_runtime_debug"
+    assert result["primary_diagnosis"]["actual_failure"] == (
+        "runtime_guard_passed=false; runtime_guard_violation_count=1"
+    )
+    assert result["primary_diagnosis"]["review_first"] is True
+    assert result["primary_diagnosis"]["safe_fix_candidate"] is False
+    assert result["decision_boundary"]["current_pr_decision_input"] is False
+    assert result["decision_boundary"]["automation_allowed"] is False
+    assert result["decision_boundary"]["merge_authorized"] is False
+
+    markdown = render_markdown(_job(), result)
+    assert "Primary surface: `runtime`" in markdown
+    assert "Primary action: `review_first_runtime_debug`" in markdown
+    assert "Runtime guard violation observed" in markdown
