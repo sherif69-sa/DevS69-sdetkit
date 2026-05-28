@@ -64,6 +64,33 @@ def _outcome_flags(
     return proof_result, fix_result
 
 
+def _proof_outcome_label(proof_result: bool | None) -> str:
+    if proof_result is True:
+        return "passed"
+    if proof_result is False:
+        return "failed"
+    return "not_provided"
+
+
+def _diagnosis_for_proof(*, log_text: str, proof_result: bool | None) -> dict[str, Any]:
+    if proof_result is not True:
+        return adaptive_diagnosis.analyze_evidence(log_text=log_text)
+
+    diagnosis = dict(adaptive_diagnosis.analyze_evidence(log_text=""))
+    evidence = _as_dict(diagnosis.get("evidence"))
+    evidence.update(
+        {
+            "proof_outcome": "passed",
+            "raw_log_promoted": False,
+            "interpretation": (
+                "Successful quality proof output is not promoted into current failure evidence."
+            ),
+        }
+    )
+    diagnosis["evidence"] = evidence
+    return diagnosis
+
+
 def build_failure_bundle(
     *,
     log_path: Path,
@@ -78,8 +105,15 @@ def build_failure_bundle(
 ) -> dict[str, Any]:
     log_text = log_path.read_text(encoding="utf-8", errors="replace")
     out_dir.mkdir(parents=True, exist_ok=True)
+    proof_result, fix_result = _outcome_flags(
+        proof_passed=proof_passed,
+        proof_failed=proof_failed,
+        fix_accepted=fix_accepted,
+        fix_rejected=fix_rejected,
+    )
+    proof_outcome = _proof_outcome_label(proof_result)
 
-    diagnosis = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+    diagnosis = _diagnosis_for_proof(log_text=log_text, proof_result=proof_result)
     diagnoses = [_as_dict(item) for item in _as_list(diagnosis.get("diagnoses"))]
     primary = diagnoses[0] if diagnoses else {}
     primary_code = str(primary.get("code", "") or "")
@@ -93,12 +127,6 @@ def build_failure_bundle(
     _write_text(comment_path, comment_text)
 
     db_path = memory_db or (out_dir / "adaptive-diagnosis-memory.jsonl")
-    proof_result, fix_result = _outcome_flags(
-        proof_passed=proof_passed,
-        proof_failed=proof_failed,
-        fix_accepted=fix_accepted,
-        fix_rejected=fix_rejected,
-    )
     records = adaptive_diagnosis_memory.build_learning_records(
         diagnosis,
         proof_passed=proof_result,
@@ -161,6 +189,8 @@ def build_failure_bundle(
         ],
         "review_first": review_first,
         "safe_to_auto_fix": bool(safe_fix_plan.get("safe_to_auto_fix", False)),
+        "proof_outcome": proof_outcome,
+        "raw_log_promoted": proof_result is not True,
     }
     manifest_path = out_dir / "artifact-manifest.json"
     _write_json(manifest_path, manifest)
@@ -179,6 +209,8 @@ def build_failure_bundle(
         "diagnoses": diagnoses,
         "review_first": review_first,
         "safe_to_auto_fix": bool(safe_fix_plan.get("safe_to_auto_fix", False)),
+        "proof_outcome": proof_outcome,
+        "raw_log_promoted": proof_result is not True,
         "artifacts": artifacts,
         "diagnosis": diagnosis,
         "learning_record_summary": learning_record_summary,
