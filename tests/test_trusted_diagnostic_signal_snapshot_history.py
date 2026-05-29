@@ -218,7 +218,8 @@ def test_trusted_history_cli_writes_reporting_only_evidence(
     )
 
     assert rc == 0
-    printed = json.loads(capsys.readouterr().out)
+    stdout = capsys.readouterr().out
+    printed = json.loads(stdout)
     saved = json.loads(
         (out_dir / "trusted-diagnostic-signal-snapshot-history.json").read_text(encoding="utf-8")
     )
@@ -226,7 +227,14 @@ def test_trusted_history_cli_writes_reporting_only_evidence(
         encoding="utf-8"
     )
 
-    assert printed["evidence"]["status"] == TRUSTED_HISTORY_VERIFIED
+    assert printed == {
+        "artifacts_written": True,
+        "collection_status": COLLECTED,
+        "status": TRUSTED_HISTORY_VERIFIED,
+    }
+    assert "evidence" not in printed
+    assert "retention-run-1" not in stdout
+    assert accepted_head not in stdout
     assert saved["decision_boundary"]["current_pr_decision_input"] is False
     assert saved["decision_boundary"]["feeds_repo_memory"] is False
     assert "Advisor false-positive rate status: `requires_reviewed_history`" in markdown
