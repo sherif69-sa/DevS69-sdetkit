@@ -341,22 +341,6 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error={exc}", file=sys.stderr)
         return 2
 
-    if args.format == "json":
-        print(
-            json.dumps(
-                {
-                    "artifacts_written": True,
-                    "collection_status": COLLECTED,
-                    "status": TRUSTED_HISTORY_VERIFIED,
-                },
-                indent=2,
-                sort_keys=True,
-            )
-        )
-    else:
-        print(f"status={TRUSTED_HISTORY_VERIFIED}")
-        print(f"collection_status={COLLECTED}")
-        print("artifacts_written=true")
     return 0
 
 
