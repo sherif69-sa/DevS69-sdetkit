@@ -352,7 +352,8 @@ jobs:
           print("Trusted-main RepoMemory history snapshot passed.")
           PY
 
-      - name: Collect accepted-main reviewed security disposition inputs
+      - name: Collect accepted-main observation recovery queue
+        id: accepted-main-sources
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -360,68 +361,211 @@ jobs:
         run: |
           set -euo pipefail
 
-          out_dir="build/repo-memory-history/security-reviewed-dispositions"
-          mkdir -p "$out_dir"
+          sources_root="build/repo-memory-history/accepted-main-sources"
+          mkdir -p "$sources_root"
+          : > "$sources_root/queue.tsv"
+          : > "$sources_root/recovery-events.tsv"
 
-          gh api \
-            -H "Accept: application/vnd.github+json" \
-            "repos/$REPOSITORY/commits/${GITHUB_SHA}/pulls?per_page=10" \
-            > "$out_dir/associated-merged-pr.json"
+          gh api --paginate \
+            "repos/${REPOSITORY}/actions/workflows/pr-quality-comment.yml/runs?event=pull_request&status=completed&per_page=100" \
+            --jq '.workflow_runs[] | select(.conclusion == "success") | [.id, .head_sha, (.pull_requests | map(.number | tostring) | join(","))] | @tsv' \
+            > "$sources_root/successful-pr-quality-runs.tsv"
 
-          pr_number="$(
-            HEAD_SHA="$GITHUB_SHA" python - <<'PY'
+          collect_source() {
+            local accepted_main_sha="$1"
+            local source_kind="$2"
+            local originating_retention_run_id="$3"
+            local source_dir="$sources_root/$accepted_main_sha"
+
+            mkdir -p "$source_dir/download" "$source_dir/security-reviewed-dispositions"
+
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/$REPOSITORY/commits/$accepted_main_sha/pulls?per_page=10" \
+              > "$source_dir/associated-merged-pr.json"
+
+            local source_match_count
+            source_match_count="$(
+              jq -er --arg sha "$accepted_main_sha" \
+                '[.[] | select(.merged_at and .merge_commit_sha == $sha)] | length' \
+                "$source_dir/associated-merged-pr.json"
+            )"
+
+            if [ "$source_match_count" -gt 1 ]; then
+              echo "Accepted-main commit maps to multiple merged PRs; refusing ambiguous snapshot provenance."
+              exit 1
+            fi
+            if [ "$source_match_count" -eq 0 ]; then
+              if [ "$source_kind" = "current_head" ]; then
+                echo "No merged PR maps to accepted-main head; no diagnostic snapshot observation will be appended."
+              else
+                echo "Skipping failed ancestor $accepted_main_sha because it is not a merged-PR accepted-main commit."
+              fi
+              return 0
+            fi
+
+            local source_pr_number source_head_sha
+            source_pr_number="$(
+              jq -er --arg sha "$accepted_main_sha" \
+                '[.[] | select(.merged_at and .merge_commit_sha == $sha)][0].number' \
+                "$source_dir/associated-merged-pr.json"
+            )"
+            source_head_sha="$(
+              jq -er --arg sha "$accepted_main_sha" \
+                '[.[] | select(.merged_at and .merge_commit_sha == $sha)][0].head.sha' \
+                "$source_dir/associated-merged-pr.json"
+            )"
+
+            validate_candidate_artifact() {
+              local candidate_run_id="$1"
+              local candidate_dir="$source_dir/candidates/$candidate_run_id"
+              local candidate_snapshot candidate_diagnostic_job
+
+              rm -rf "$candidate_dir"
+              mkdir -p "$candidate_dir"
+
+              if ! gh run download "$candidate_run_id" \
+                --repo "$REPOSITORY" \
+                --name pr-quality-comment \
+                --dir "$candidate_dir" >/dev/null 2>&1; then
+                return 1
+              fi
+
+              candidate_snapshot="$(
+                find "$candidate_dir" \
+                  -name diagnostic-signal-snapshot.json \
+                  -print \
+                  -quit
+              )"
+              candidate_diagnostic_job="$(
+                find "$candidate_dir" \
+                  -name diagnostic-job.json \
+                  -print \
+                  -quit
+              )"
+
+              if [ -z "$candidate_snapshot" ] || [ ! -f "$candidate_snapshot" ]; then
+                return 1
+              fi
+              if [ -z "$candidate_diagnostic_job" ] || [ ! -f "$candidate_diagnostic_job" ]; then
+                return 1
+              fi
+
+              CANDIDATE_DIAGNOSTIC_JOB="$candidate_diagnostic_job" \
+              SOURCE_PR_NUMBER="$source_pr_number" SOURCE_HEAD_SHA="$source_head_sha" \
+              REPOSITORY="$REPOSITORY" python - <<'PY'
           import json
           import os
           from pathlib import Path
 
-          candidates = json.loads(
-              Path("build/repo-memory-history/security-reviewed-dispositions/associated-merged-pr.json")
-              .read_text(encoding="utf-8")
-          )
-          matches = [
-              item
-              for item in candidates
-              if item.get("merged_at") and item.get("merge_commit_sha") == os.environ["HEAD_SHA"]
-          ]
-          if len(matches) > 1:
-              raise SystemExit("accepted-main commit maps to multiple merged PRs")
-          if matches:
-              print(matches[0]["number"])
+          payload = json.loads(Path(os.environ["CANDIDATE_DIAGNOSTIC_JOB"]).read_text(encoding="utf-8"))
+          event = payload.get("event") if isinstance(payload, dict) else {}
+          if not isinstance(event, dict):
+              raise SystemExit(1)
+          expected = {
+              "event_name": "pull_request",
+              "pr_number": int(os.environ["SOURCE_PR_NUMBER"]),
+              "head_sha": os.environ["SOURCE_HEAD_SHA"],
+              "repo": os.environ["REPOSITORY"],
+          }
+          observed = {
+              "event_name": event.get("event_name"),
+              "pr_number": int(event.get("pr_number") or 0),
+              "head_sha": str(event.get("head_sha") or ""),
+              "repo": str(event.get("repo") or ""),
+          }
+          if observed != expected:
+              raise SystemExit(1)
           PY
-          )"
 
-          collection_status="collected"
-          collection_reason=""
-          printf '[]\n' > "$out_dir/changed-files.json"
-          printf '[]\n' > "$out_dir/dismissed-alerts-raw.json"
+              cp "$candidate_snapshot" "$source_dir/diagnostic-signal-snapshot.json"
+              cp "$candidate_diagnostic_job" "$source_dir/source-diagnostic-job.json"
+              return 0
+            }
 
-          if [ -n "$pr_number" ]; then
+            local -a bound_source_run_ids=()
+            local -a fallback_source_run_ids=()
+            local contradictory_pr_metadata_seen=false
+
+            while IFS=$'\t' read -r candidate_run_id candidate_head_sha candidate_pr_numbers; do
+              if [ "$candidate_head_sha" != "$source_head_sha" ]; then
+                continue
+              fi
+              if [ -z "$candidate_pr_numbers" ]; then
+                fallback_source_run_ids+=("$candidate_run_id")
+                continue
+              fi
+              case ",${candidate_pr_numbers}," in
+                *,"${source_pr_number}",*)
+                  bound_source_run_ids+=("$candidate_run_id")
+                  ;;
+                *)
+                  contradictory_pr_metadata_seen=true
+                  ;;
+              esac
+            done < "$sources_root/successful-pr-quality-runs.tsv"
+
+            local source_run_id=""
+            local source_binding=""
+
+            for candidate_run_id in "${bound_source_run_ids[@]}"; do
+              if validate_candidate_artifact "$candidate_run_id"; then
+                source_run_id="$candidate_run_id"
+                source_binding="pr_number_metadata_and_artifact"
+                break
+              fi
+            done
+
+            if [ -z "$source_run_id" ]; then
+              for candidate_run_id in "${fallback_source_run_ids[@]}"; do
+                if validate_candidate_artifact "$candidate_run_id"; then
+                  source_run_id="$candidate_run_id"
+                  source_binding="verified_merged_pr_exact_head_artifact_fallback"
+                  break
+                fi
+              done
+            fi
+
+            if [ -z "$source_run_id" ]; then
+              if [ "$source_kind" = "current_head" ]; then
+                if [ "$contradictory_pr_metadata_seen" = true ]; then
+                  echo "No PR Quality artifact proved verified merged PR #$source_pr_number at $source_head_sha; contradictory run metadata was present."
+                else
+                  echo "No successful PR Quality artifact proved merged PR #$source_pr_number at $source_head_sha."
+                fi
+                exit 1
+              fi
+              echo "Failed ancestor $accepted_main_sha supplied no artifact-bound PR Quality source; skipping."
+              return 0
+            fi
+
             gh api --paginate \
               -H "Accept: application/vnd.github+json" \
-              "repos/$REPOSITORY/pulls/$pr_number/files?per_page=100" \
+              "repos/$REPOSITORY/pulls/$source_pr_number/files?per_page=100" \
               --jq '.[]' \
-              | jq -s '.' > "$out_dir/changed-files.json"
+              | jq -s '.' > "$source_dir/security-reviewed-dispositions/changed-files.json"
 
+            local collection_status="collected"
+            local collection_reason=""
             if ! gh api --paginate \
               -H "Accept: application/vnd.github+json" \
-              "repos/$REPOSITORY/code-scanning/alerts?state=dismissed&pr=$pr_number&per_page=100" \
+              "repos/$REPOSITORY/code-scanning/alerts?state=dismissed&pr=$source_pr_number&per_page=100" \
               --jq '.[]' \
-              | jq -s '.' > "$out_dir/dismissed-alerts-raw.json"; then
+              | jq -s '.' > "$source_dir/security-reviewed-dispositions/dismissed-alerts-raw.json"; then
               collection_status="unavailable"
               collection_reason="GitHub code-scanning dismissed-alert evidence was unavailable or not permitted."
-              printf '[]\n' > "$out_dir/dismissed-alerts-raw.json"
+              printf '[]\n' > "$source_dir/security-reviewed-dispositions/dismissed-alerts-raw.json"
             fi
-          fi
 
-          COLLECTION_STATUS="$collection_status" COLLECTION_REASON="$collection_reason" python - <<'PY'
+            COLLECTION_STATUS="$collection_status" COLLECTION_REASON="$collection_reason" \
+            SOURCE_DIR="$source_dir" python - <<'PY'
           import json
           import os
           from pathlib import Path
 
-          source = Path(
-              "build/repo-memory-history/security-reviewed-dispositions/dismissed-alerts-raw.json"
-          )
-          alerts = json.loads(source.read_text(encoding="utf-8"))
+          source_dir = Path(os.environ["SOURCE_DIR"])
+          raw_path = source_dir / "security-reviewed-dispositions" / "dismissed-alerts-raw.json"
+          alerts = json.loads(raw_path.read_text(encoding="utf-8"))
           if not isinstance(alerts, list):
               raise SystemExit("dismissed-alert API response must be a list")
           payload = {
@@ -429,142 +573,139 @@ jobs:
               "collection_reason": os.environ["COLLECTION_REASON"],
               "alerts": alerts,
           }
-          Path(
-              "build/repo-memory-history/security-reviewed-dispositions/dismissed-alerts.json"
-          ).write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          (source_dir / "security-reviewed-dispositions" / "dismissed-alerts.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
           PY
 
-      - name: Collect accepted-main diagnostic signal snapshot source
-        id: diagnostic-snapshot-source
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPOSITORY: ${{ github.repository }}
-        run: |
-          set -euo pipefail
+            printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+              "$accepted_main_sha" \
+              "$source_pr_number" \
+              "$source_head_sha" \
+              "$source_run_id" \
+              "$source_binding" \
+              "$source_kind" \
+              "$originating_retention_run_id" \
+              >> "$sources_root/queue.tsv"
 
-          out_dir="build/repo-memory-history/diagnostic-signal-snapshots/source"
-          associated_pr="build/repo-memory-history/security-reviewed-dispositions/associated-merged-pr.json"
-          mkdir -p "$out_dir/download"
+            printf '%s\t%s\t%s\t%s\t%s\n' \
+              "$accepted_main_sha" "$source_pr_number" "$source_head_sha" "$source_binding" "$source_kind" \
+              >> "$sources_root/recovery-events.tsv"
 
-          source_match_count="$(
-            jq -er --arg sha "${GITHUB_SHA}" \
-              '[.[] | select(.merged_at and .merge_commit_sha == $sha)] | length' \
-              "$associated_pr"
-          )"
-          if [ "$source_match_count" -gt 1 ]; then
-            echo "Accepted-main commit maps to multiple merged PRs; refusing ambiguous snapshot provenance."
-            exit 1
-          fi
-          if [ "$source_match_count" -eq 0 ]; then
-            echo "source_available=false" >> "$GITHUB_OUTPUT"
-            echo "No merged PR maps to accepted-main head; no diagnostic snapshot observation will be appended."
-            exit 0
-          fi
-
-          source_pr_number="$(
-            jq -er --arg sha "${GITHUB_SHA}" \
-              '[.[] | select(.merged_at and .merge_commit_sha == $sha)][0].number' \
-              "$associated_pr"
-          )"
-          source_head_sha="$(
-            jq -er --arg sha "${GITHUB_SHA}" \
-              '[.[] | select(.merged_at and .merge_commit_sha == $sha)][0].head.sha' \
-              "$associated_pr"
-          )"
+            echo "Collected accepted-main source: sha=$accepted_main_sha pr=$source_pr_number binding=$source_binding kind=$source_kind"
+          }
 
           gh api --paginate \
-            "repos/${REPOSITORY}/actions/workflows/pr-quality-comment.yml/runs?event=pull_request&status=completed&per_page=100" \
-            --jq '.workflow_runs[] | select(.conclusion == "success") | [.id, .head_sha, (.pull_requests | map(.number | tostring) | join(","))] | @tsv' \
-            > "$out_dir/successful-pr-quality-runs.tsv"
+            "repos/${REPOSITORY}/actions/workflows/repo-memory-history.yml/runs?branch=main&event=push&status=completed&per_page=100" \
+            --jq '.workflow_runs[] | select(.conclusion == "failure") | [.id, .head_sha] | @tsv' \
+            > "$sources_root/failed-main-runs-newest-first.tsv"
 
-          source_run_id=""
-          while IFS=$'\t' read -r candidate_run_id candidate_head_sha candidate_pr_numbers; do
-            if [ "$candidate_head_sha" != "$source_head_sha" ]; then
+          tac "$sources_root/failed-main-runs-newest-first.tsv" \
+            > "$sources_root/failed-main-runs-oldest-first.tsv"
+
+          while IFS=$'\t' read -r failed_run_id failed_head_sha; do
+            if [ -z "$failed_run_id" ] || [ "$failed_head_sha" = "${GITHUB_SHA}" ]; then
               continue
             fi
-            case ",${candidate_pr_numbers}," in
-              *,"${source_pr_number}",*)
-                source_run_id="$candidate_run_id"
-                break
-                ;;
-            esac
-          done < "$out_dir/successful-pr-quality-runs.tsv"
+            if git merge-base --is-ancestor "$failed_head_sha" "${GITHUB_SHA}"; then
+              collect_source "$failed_head_sha" "recovered_failed_ancestor" "$failed_run_id"
+            fi
+          done < "$sources_root/failed-main-runs-oldest-first.tsv"
 
-          if [ -z "$source_run_id" ]; then
-            echo "No successful PR Quality run was found for merged PR #$source_pr_number at $source_head_sha."
-            exit 1
+          collect_source "${GITHUB_SHA}" "current_head" "${GITHUB_RUN_ID}"
+
+          if [ -s "$sources_root/queue.tsv" ]; then
+            echo "source_available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "source_available=false" >> "$GITHUB_OUTPUT"
           fi
-
-          gh run download "$source_run_id" \
-            --repo "$REPOSITORY" \
-            --name pr-quality-comment \
-            --dir "$out_dir/download"
-
-          source_snapshot="$(
-            find "$out_dir/download" \
-              -name diagnostic-signal-snapshot.json \
-              -print \
-              -quit
-          )"
-          if [ -z "$source_snapshot" ] || [ ! -f "$source_snapshot" ]; then
-            echo "Successful PR Quality run supplied no DiagnosticSignalSnapshot artifact."
-            exit 1
-          fi
-
-          cp "$source_snapshot" "$out_dir/diagnostic-signal-snapshot.json"
-          echo "source_available=true" >> "$GITHUB_OUTPUT"
-          echo "source_run_id=$source_run_id" >> "$GITHUB_OUTPUT"
-          echo "source_head_sha=$source_head_sha" >> "$GITHUB_OUTPUT"
-          echo "source_pr_number=$source_pr_number" >> "$GITHUB_OUTPUT"
+          echo "sources_tsv=$sources_root/queue.tsv" >> "$GITHUB_OUTPUT"
 
       - name: Record trusted accepted-main diagnostic signal snapshot history
-        if: steps.diagnostic-snapshot-source.outputs.source_available == 'true'
+        if: steps.accepted-main-sources.outputs.source_available == 'true'
         shell: bash
         env:
           PRIOR_DIAGNOSTIC_SIGNAL_SNAPSHOT_JSONL: ${{ steps.prior.outputs.prior_diagnostic_signal_snapshot_jsonl }}
-          SOURCE_RUN_ID: ${{ steps.diagnostic-snapshot-source.outputs.source_run_id }}
-          SOURCE_HEAD_SHA: ${{ steps.diagnostic-snapshot-source.outputs.source_head_sha }}
         run: |
           set -euo pipefail
 
-          mkdir -p build/repo-memory-history/diagnostic-signal-snapshots/output
-          args=(
-            --diagnostic-signal-snapshot build/repo-memory-history/diagnostic-signal-snapshots/source/diagnostic-signal-snapshot.json
-            --associated-pr-json build/repo-memory-history/security-reviewed-dispositions/associated-merged-pr.json
-            --source-run-id "$SOURCE_RUN_ID"
-            --source-run-conclusion success
-            --source-head-sha "$SOURCE_HEAD_SHA"
-            --retention-run-id "${GITHUB_RUN_ID}"
-            --accepted-main-sha "${GITHUB_SHA}"
-            --out-dir build/repo-memory-history/diagnostic-signal-snapshots/output
-            --format json
-          )
-          if [ -n "$PRIOR_DIAGNOSTIC_SIGNAL_SNAPSHOT_JSONL" ]; then
-            args+=(--prior-history-jsonl "$PRIOR_DIAGNOSTIC_SIGNAL_SNAPSHOT_JSONL")
-          fi
+          sources_root="build/repo-memory-history/accepted-main-sources"
+          queue="$sources_root/queue.tsv"
+          iterations_root="build/repo-memory-history/diagnostic-signal-snapshots/iterations"
+          final_output="build/repo-memory-history/diagnostic-signal-snapshots/output"
+          mkdir -p "$iterations_root"
+          history_input="$PRIOR_DIAGNOSTIC_SIGNAL_SNAPSHOT_JSONL"
+          index=0
 
-          PYTHONPATH=src python -m sdetkit.diagnostic_signal_snapshot_history \
-            "${args[@]}" \
-            > build/repo-memory-history/diagnostic-signal-snapshots/history-cli.json
+          while IFS=$'\t' read -r accepted_main_sha source_pr_number source_head_sha source_run_id source_binding source_kind originating_retention_run_id; do
+            index=$((index + 1))
+            source_dir="$sources_root/$accepted_main_sha"
+            out_dir="$iterations_root/$index"
+            mkdir -p "$out_dir"
 
-          python - <<'PYCODE'
+            args=(
+              --diagnostic-signal-snapshot "$source_dir/diagnostic-signal-snapshot.json"
+              --associated-pr-json "$source_dir/associated-merged-pr.json"
+              --source-run-id "$source_run_id"
+              --source-run-conclusion success
+              --source-head-sha "$source_head_sha"
+              --retention-run-id "${GITHUB_RUN_ID}:$accepted_main_sha"
+              --accepted-main-sha "$accepted_main_sha"
+              --out-dir "$out_dir"
+              --format json
+            )
+            if [ -n "$history_input" ]; then
+              args+=(--prior-history-jsonl "$history_input")
+            fi
+
+            PYTHONPATH=src python -m sdetkit.diagnostic_signal_snapshot_history \
+              "${args[@]}" \
+              > "$out_dir/history-cli.json"
+
+            history_input="$out_dir/diagnostic-signal-snapshot-history.jsonl"
+            rm -rf "$final_output"
+            mkdir -p "$final_output"
+            cp -R "$out_dir/." "$final_output/"
+          done < "$queue"
+
+          QUEUE="$queue" GITHUB_SHA="${GITHUB_SHA}" python - <<'PYCODE'
           import json
           import os
           from pathlib import Path
 
+          queue_rows = [
+              line.split("\t")
+              for line in Path(os.environ["QUEUE"]).read_text(encoding="utf-8").splitlines()
+              if line.strip()
+          ]
           summary = json.loads(
               Path(
                   "build/repo-memory-history/diagnostic-signal-snapshots/output/"
                   "diagnostic-signal-snapshot-history-summary.json"
               ).read_text(encoding="utf-8")
           )
+          records = [
+              json.loads(line)
+              for line in Path(
+                  "build/repo-memory-history/diagnostic-signal-snapshots/output/"
+                  "diagnostic-signal-snapshot-history.jsonl"
+              ).read_text(encoding="utf-8").splitlines()
+              if line.strip()
+          ]
+          retained_shas = {record["source"]["accepted_main_sha"] for record in records}
+          expected_shas = {row[0] for row in queue_rows}
+
           assert summary["status"] == "diagnostic_signal_snapshot_history_recorded"
-          assert summary["record_count"] >= 1
+          assert expected_shas.issubset(retained_shas)
           assert summary["advisor_false_positive_rate_status"] == "requires_reviewed_history"
           assert summary["reviewed_false_positive_count"] is None
           assert summary["reviewed_observation_count"] is None
-          assert summary["latest_record"]["accepted_main_sha"] == os.environ["GITHUB_SHA"]
+
+          current_rows = [row for row in queue_rows if row[5] == "current_head"]
+          if current_rows:
+              assert summary["latest_record"]["accepted_main_sha"] == os.environ["GITHUB_SHA"]
+
           boundary = summary["decision_boundary"]
           assert boundary["current_pr_decision_input"] is False
           assert boundary["feeds_repo_memory"] is False
@@ -573,48 +714,89 @@ jobs:
           assert boundary["merge_authorized"] is False
           assert boundary["semantic_equivalence_proven"] is False
           assert boundary["historical_snapshot_authorizes_current_action"] is False
-          print("Trusted accepted-main diagnostic signal snapshot history passed.")
+          print("Trusted accepted-main diagnostic signal snapshot history recovery queue passed.")
           PYCODE
 
       - name: Record trusted accepted-main reviewed security disposition history
+        if: steps.accepted-main-sources.outputs.source_available == 'true'
         shell: bash
         env:
           PRIOR_SECURITY_DISPOSITION_JSONL: ${{ steps.prior.outputs.prior_security_disposition_jsonl }}
         run: |
           set -euo pipefail
 
-          args=(
-            --associated-pr-json build/repo-memory-history/security-reviewed-dispositions/associated-merged-pr.json
-            --changed-files-json build/repo-memory-history/security-reviewed-dispositions/changed-files.json
-            --dismissed-alerts-json build/repo-memory-history/security-reviewed-dispositions/dismissed-alerts.json
-            --source-run-id "${GITHUB_RUN_ID}"
-            --source-head-sha "${GITHUB_SHA}"
-            --out-dir build/repo-memory-history/security-reviewed-dispositions/output
-            --format json
-          )
+          sources_root="build/repo-memory-history/accepted-main-sources"
+          queue="$sources_root/queue.tsv"
+          iterations_root="build/repo-memory-history/security-reviewed-dispositions/iterations"
+          final_output="build/repo-memory-history/security-reviewed-dispositions/output"
+          mkdir -p "$iterations_root"
+          history_input="$PRIOR_SECURITY_DISPOSITION_JSONL"
+          index=0
 
-          if [ -n "$PRIOR_SECURITY_DISPOSITION_JSONL" ]; then
-            args+=(--prior-history-jsonl "$PRIOR_SECURITY_DISPOSITION_JSONL")
-          fi
+          while IFS=$'\t' read -r accepted_main_sha source_pr_number source_head_sha source_run_id source_binding source_kind originating_retention_run_id; do
+            index=$((index + 1))
+            source_dir="$sources_root/$accepted_main_sha"
+            out_dir="$iterations_root/$index"
+            mkdir -p "$out_dir"
 
-          PYTHONPATH=src python -m sdetkit.security_reviewed_disposition_history \
-            "${args[@]}" \
-            > build/repo-memory-history/security-reviewed-dispositions/history-cli.json
+            args=(
+              --associated-pr-json "$source_dir/associated-merged-pr.json"
+              --changed-files-json "$source_dir/security-reviewed-dispositions/changed-files.json"
+              --dismissed-alerts-json "$source_dir/security-reviewed-dispositions/dismissed-alerts.json"
+              --source-run-id "accepted-main:$accepted_main_sha"
+              --source-head-sha "$accepted_main_sha"
+              --out-dir "$out_dir"
+              --format json
+            )
+            if [ -n "$history_input" ]; then
+              args+=(--prior-history-jsonl "$history_input")
+            fi
 
-          python - <<'PY'
+            PYTHONPATH=src python -m sdetkit.security_reviewed_disposition_history \
+              "${args[@]}" \
+              > "$out_dir/history-cli.json"
+
+            history_input="$out_dir/security-reviewed-disposition-history.jsonl"
+            rm -rf "$final_output"
+            mkdir -p "$final_output"
+            cp -R "$out_dir/." "$final_output/"
+          done < "$queue"
+
+          QUEUE="$queue" GITHUB_SHA="${GITHUB_SHA}" python - <<'PY'
           import json
+          import os
           from pathlib import Path
 
+          queue_rows = [
+              line.split("\t")
+              for line in Path(os.environ["QUEUE"]).read_text(encoding="utf-8").splitlines()
+              if line.strip()
+          ]
           summary = json.loads(
               Path(
                   "build/repo-memory-history/security-reviewed-dispositions/output/"
                   "security-reviewed-disposition-history-summary.json"
               ).read_text(encoding="utf-8")
           )
+          records = [
+              json.loads(line)
+              for line in Path(
+                  "build/repo-memory-history/security-reviewed-dispositions/output/"
+                  "security-reviewed-disposition-history.jsonl"
+              ).read_text(encoding="utf-8").splitlines()
+              if line.strip()
+          ]
+          retained_shas = {record["source"]["source_head_sha"] for record in records}
+          expected_shas = {row[0] for row in queue_rows}
+
           assert summary["status"] == "reviewed_disposition_history_recorded"
-          assert summary["record_count"] >= 1
-          assert summary["latest_record"]["pr_scope_verification"] == "changed_paths_proven"
-          assert summary["latest_record"]["alerts_excluded_outside_changed_paths"] >= 0
+          assert expected_shas.issubset(retained_shas)
+
+          current_rows = [row for row in queue_rows if row[5] == "current_head"]
+          if current_rows:
+              assert summary["latest_record"]["source_head_sha"] == os.environ["GITHUB_SHA"]
+              assert summary["latest_record"]["pr_scope_verification"] == "changed_paths_proven"
+
           boundary = summary["decision_boundary"]
           assert boundary["historical_disposition_authorizes_current_action"] is False
           assert boundary["automatic_security_fix_allowed"] is False
@@ -622,7 +804,7 @@ jobs:
           assert boundary["automation_allowed"] is False
           assert boundary["merge_authorized"] is False
           assert boundary["prior_history_is_read_only_input"] is True
-          print("Trusted accepted-main security disposition history passed.")
+          print("Trusted accepted-main security disposition recovery queue passed.")
           PY
 
       - name: Upload trusted main RepoMemory history artifact
