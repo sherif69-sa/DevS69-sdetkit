@@ -786,6 +786,160 @@ jobs:
           printf '\n' >> build/pr-quality/pr-comment-body.md
           cat build/pr-quality/security-freshness-benchmark/benchmark-report.md >> build/pr-quality/pr-comment-body.md
 
+      - name: Build trusted diagnostic signal snapshot history visibility
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          mkdir -p build/pr-quality/trusted-diagnostic-signal-snapshot-history
+          trusted_diagnostic_signal_snapshot_history_rc=2
+          trusted_snapshot_history_summary=""
+          trusted_snapshot_history_jsonl=""
+          trusted_snapshot_history_run_id=""
+          trusted_snapshot_history_head_sha=""
+          trusted_snapshot_history_file_count=0
+          trusted_snapshot_download_root="${RUNNER_TEMP}/sdetkit-trusted-diagnostic-snapshot-history"
+          rm -rf "$trusted_snapshot_download_root"
+          mkdir -p "$trusted_snapshot_download_root"
+
+          while IFS=$'\t' read -r candidate_run_id candidate_head_sha; do
+            if [ -z "$candidate_run_id" ] || [ -z "$candidate_head_sha" ]; then
+              continue
+            fi
+            if ! git merge-base --is-ancestor "$candidate_head_sha" "$PR_BASE_SHA"; then
+              continue
+            fi
+
+            candidate_dir="$trusted_snapshot_download_root/$candidate_run_id"
+            mkdir -p "$candidate_dir"
+            candidate_download_rc=0
+            gh run download "$candidate_run_id" \
+              --repo "$REPOSITORY" \
+              --name repo-memory-profile-history \
+              --dir "$candidate_dir" >/dev/null 2>&1 \
+              || candidate_download_rc=$?
+            if [ "$candidate_download_rc" -ne 0 ]; then
+              continue
+            fi
+
+            candidate_summary="$(
+              find "$candidate_dir" \
+                -name diagnostic-signal-snapshot-history-summary.json \
+                -print \
+                -quit
+            )"
+            candidate_jsonl="$(
+              find "$candidate_dir" \
+                -name diagnostic-signal-snapshot-history.jsonl \
+                -print \
+                -quit
+            )"
+            candidate_file_count=0
+            if [ -n "$candidate_summary" ] && [ -f "$candidate_summary" ]; then
+              candidate_file_count=$((candidate_file_count + 1))
+            fi
+            if [ -n "$candidate_jsonl" ] && [ -f "$candidate_jsonl" ]; then
+              candidate_file_count=$((candidate_file_count + 1))
+            fi
+            if [ "$candidate_file_count" -eq 0 ]; then
+              continue
+            fi
+
+            trusted_snapshot_history_summary="$candidate_summary"
+            trusted_snapshot_history_jsonl="$candidate_jsonl"
+            trusted_snapshot_history_run_id="$candidate_run_id"
+            trusted_snapshot_history_head_sha="$candidate_head_sha"
+            trusted_snapshot_history_file_count="$candidate_file_count"
+            break
+          done < build/pr-quality/trusted-history/successful-main-runs.tsv
+
+          if [ "$trusted_snapshot_history_file_count" -eq 0 ]; then
+            trusted_diagnostic_signal_snapshot_history_rc=2
+          elif [ "$trusted_snapshot_history_file_count" -ne 2 ]; then
+            trusted_diagnostic_signal_snapshot_history_rc=3
+          else
+            trusted_diagnostic_signal_snapshot_history_rc=0
+            PYTHONPATH=src python -m sdetkit.trusted_diagnostic_signal_snapshot_history \
+              --history-summary "$trusted_snapshot_history_summary" \
+              --history-jsonl "$trusted_snapshot_history_jsonl" \
+              --repo-root . \
+              --selected-retention-run-id "$trusted_snapshot_history_run_id" \
+              --selected-head-sha "$trusted_snapshot_history_head_sha" \
+              --base-sha "$PR_BASE_SHA" \
+              --out-dir build/pr-quality/trusted-diagnostic-signal-snapshot-history \
+              --format json \
+              > build/pr-quality/trusted-diagnostic-signal-snapshot-history/evidence-cli.json \
+              || trusted_diagnostic_signal_snapshot_history_rc=3
+          fi
+          printf '%s\n' "$trusted_diagnostic_signal_snapshot_history_rc" \
+            > build/pr-quality/trusted-diagnostic-signal-snapshot-history/exit-code.txt
+
+          if [ "$trusted_diagnostic_signal_snapshot_history_rc" -eq 2 ] \
+            && [ ! -s build/pr-quality/trusted-diagnostic-signal-snapshot-history/trusted-diagnostic-signal-snapshot-history.md ]; then
+            {
+              printf '%s\n' \
+                '## Trusted diagnostic signal snapshot history' \
+                '' \
+                '- Evidence type: `accepted_main_reporting_only_snapshot_history`' \
+                '- Collection status: `not_collected`' \
+                '- Status: `not_collected`' \
+                '- Advisor false-positive rate status: `requires_reviewed_history`' \
+                '- Current PR decision input: `false`' \
+                '- Feeds RepoMemory: `false`' \
+                '- Patch application allowed: `false`' \
+                '- Automation allowed: `false`' \
+                '- Merge authorized: `false`' \
+                '- Semantic equivalence proven: `false`' \
+                '- Historical snapshot authorizes current action: `false`' \
+                '' \
+                '- Interpretation: accepted-main DiagnosticSignalSnapshot history is not yet available from a verified ancestor artifact; no authority is granted.'
+            } > build/pr-quality/trusted-diagnostic-signal-snapshot-history/trusted-diagnostic-signal-snapshot-history.md
+          elif [ "$trusted_diagnostic_signal_snapshot_history_rc" -ne 0 ] \
+            && [ ! -s build/pr-quality/trusted-diagnostic-signal-snapshot-history/trusted-diagnostic-signal-snapshot-history.md ]; then
+            {
+              printf '%s\n' \
+                '## Trusted diagnostic signal snapshot history' \
+                '' \
+                '- Evidence type: `accepted_main_reporting_only_snapshot_history`' \
+                '- Collection status: `collection_failed`' \
+                '- Status: `collection_failed`' \
+                '- Advisor false-positive rate status: `requires_reviewed_history`' \
+                '- Current PR decision input: `false`' \
+                '- Feeds RepoMemory: `false`' \
+                '- Patch application allowed: `false`' \
+                '- Automation allowed: `false`' \
+                '- Merge authorized: `false`' \
+                '- Semantic equivalence proven: `false`' \
+                '- Historical snapshot authorizes current action: `false`' \
+                '' \
+                '- Interpretation: present accepted-main DiagnosticSignalSnapshot history failed validation or is incomplete; no authority is granted and this run must fail after comment publication.'
+            } > build/pr-quality/trusted-diagnostic-signal-snapshot-history/trusted-diagnostic-signal-snapshot-history.md
+          fi
+
+          python - <<'PY'
+          from pathlib import Path
+
+          body_path = Path("build/pr-quality/pr-comment-body.md")
+          snapshot_path = Path(
+              "build/pr-quality/diagnostic-signal-snapshot/diagnostic-signal-snapshot.md"
+          )
+          history_path = Path(
+              "build/pr-quality/trusted-diagnostic-signal-snapshot-history/"
+              "trusted-diagnostic-signal-snapshot-history.md"
+          )
+
+          body = body_path.read_text(encoding="utf-8")
+          snapshot = snapshot_path.read_text(encoding="utf-8").rstrip("\n")
+          history = history_path.read_text(encoding="utf-8").rstrip("\n")
+          if not snapshot or not history:
+              raise SystemExit("diagnostic visibility markdown is missing")
+          if body.count(snapshot) != 1:
+              raise SystemExit("current diagnostic snapshot insertion anchor is ambiguous")
+          body = body.replace(snapshot, f"{snapshot}\n\n{history}", 1)
+          body_path.write_text(body.rstrip("\n") + "\n", encoding="utf-8")
+          PY
+
       - name: Build verified operator evidence loop
         if: always()
         run: |
@@ -848,6 +1002,7 @@ jobs:
             build/pr-quality/runtime-proof/
             build/pr-quality/diagnostic-job/
             build/pr-quality/diagnostic-signal-snapshot/
+            build/pr-quality/trusted-diagnostic-signal-snapshot-history/
             build/pr-quality/candidate-visibility/
             build/pr-quality/candidate-validation/
             build/pr-quality/runtime-guard-benchmark/
@@ -1233,5 +1388,24 @@ jobs:
           if trusted_history_semantic_equivalence_proven:
               raise SystemExit(
                   "PR Quality trusted history attempted to claim semantic equivalence"
+              )
+
+          trusted_snapshot_history_exit_path = Path(
+              "build/pr-quality/trusted-diagnostic-signal-snapshot-history/exit-code.txt"
+          )
+          trusted_snapshot_history_exit_code = (
+              trusted_snapshot_history_exit_path.read_text(encoding="utf-8").strip()
+              if trusted_snapshot_history_exit_path.exists()
+              else "missing"
+          )
+          print(
+              "trusted_diagnostic_signal_snapshot_history_exit_code="
+              f"{trusted_snapshot_history_exit_code}"
+          )
+          if trusted_snapshot_history_exit_code not in {"0", "2"}:
+              raise SystemExit(
+                  "PR Quality trusted diagnostic snapshot history validation failed after "
+                  "diagnostic comment publication: "
+                  f"exit_code={trusted_snapshot_history_exit_code}"
               )
           PY

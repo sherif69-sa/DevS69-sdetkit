@@ -199,3 +199,73 @@ def test_repo_memory_history_promotes_controlled_validation_as_advisory_counts_o
     assert 'assert boundary["controlled_validation_is_advisory_only"] is True' in text
     assert "contents: write" not in text.split("jobs:", 1)[0]
     assert "git push " not in text
+
+
+def test_repo_memory_history_retains_diagnostic_snapshot_as_parallel_advisory_history() -> None:
+    text = _workflow_text()
+
+    source = text.index("Collect accepted-main diagnostic signal snapshot source")
+    producer = text.index("python -m sdetkit.diagnostic_signal_snapshot_history")
+    security_history = text.index("python -m sdetkit.security_reviewed_disposition_history")
+    repo_memory = text.index("python -m sdetkit.repo_memory")
+    repo_memory_command = text[
+        repo_memory : text.index("> build/repo-memory-history/profile-cli.json", repo_memory)
+    ]
+
+    assert source < producer < security_history
+    assert (
+        "actions/workflows/pr-quality-comment.yml/runs?event=pull_request&status=completed" in text
+    )
+    assert 'select(.conclusion == "success")' in text
+    assert "--name pr-quality-comment" in text
+    assert "diagnostic-signal-snapshot.json" in text
+    assert "--prior-history-jsonl" in text
+    assert "prior_diagnostic_signal_snapshot_jsonl" in text
+    assert (
+        'assert summary["advisor_false_positive_rate_status"] == "requires_reviewed_history"'
+        in text
+    )
+    assert 'assert boundary["current_pr_decision_input"] is False' in text
+    assert 'assert boundary["feeds_repo_memory"] is False' in text
+    assert 'assert boundary["automation_allowed"] is False' in text
+    assert 'assert boundary["merge_authorized"] is False' in text
+    assert "build/repo-memory-history/diagnostic-signal-snapshots/" in text
+    assert "diagnostic-signal-snapshot" not in repo_memory_command
+
+
+def test_repo_memory_history_snapshot_retention_remains_read_only_and_non_mutating() -> None:
+    text = _workflow_text()
+
+    assert "python -m sdetkit.diagnostic_signal_snapshot_history" in text
+    assert "--source-run-conclusion success" in text
+    assert '--retention-run-id "${GITHUB_RUN_ID}"' in text
+    assert '--accepted-main-sha "${GITHUB_SHA}"' in text
+    assert 'assert boundary["patch_application_allowed"] is False' in text
+    assert 'assert boundary["semantic_equivalence_proven"] is False' in text
+    assert 'assert boundary["historical_snapshot_authorizes_current_action"] is False' in text
+    assert "contents: write" not in text.split("jobs:", 1)[0]
+    assert "git push " not in text
+
+
+def test_repo_memory_history_binds_snapshot_source_run_to_the_merged_pr_number() -> None:
+    text = _workflow_text()
+
+    assert '(.pull_requests | map(.number | tostring) | join(","))' in text
+    assert "candidate_pr_numbers" in text
+    assert 'case ",${candidate_pr_numbers}," in' in text
+    assert '*,"${source_pr_number}",*)' in text
+
+
+def test_repo_memory_history_snapshot_retention_does_not_fail_non_pr_main_push() -> None:
+    text = _workflow_text()
+
+    assert 'source_match_count="$(' in text
+    assert 'if [ "$source_match_count" -eq 0 ]; then' in text
+    assert 'echo "source_available=false" >> "$GITHUB_OUTPUT"' in text
+    assert (
+        "No merged PR maps to accepted-main head; no diagnostic snapshot observation will be appended."
+        in text
+    )
+    assert "if: steps.diagnostic-snapshot-source.outputs.source_available == 'true'" in text
+    assert "sdetkit-prior-diagnostic-snapshot-history" in text
+    assert "-name diagnostic-signal-snapshot-history.jsonl" in text
