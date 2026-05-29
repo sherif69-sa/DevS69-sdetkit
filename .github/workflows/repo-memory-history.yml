@@ -209,6 +209,7 @@ jobs:
 
           if [ -z "$prior_run_id" ]; then
             echo "prior_history_jsonl=" >> "$GITHUB_OUTPUT"
+            echo "prior_diagnostic_signal_snapshot_jsonl=" >> "$GITHUB_OUTPUT"
             echo "prior_run_id=" >> "$GITHUB_OUTPUT"
             echo "prior_head_sha=" >> "$GITHUB_OUTPUT"
             echo "No prior successful trusted-main history artifact found; starting initial history chain."
@@ -236,8 +237,57 @@ jobs:
             find build/repo-memory-history/prior-download               -name security-reviewed-disposition-history.jsonl               -print               -quit
           )"
 
+          prior_diagnostic_signal_snapshot_jsonl="$(
+            find build/repo-memory-history/prior-download \
+              -name diagnostic-signal-snapshot-history.jsonl \
+              -print \
+              -quit
+          )"
+
+          if [ -z "$prior_diagnostic_signal_snapshot_jsonl" ]; then
+            diagnostic_prior_root="${RUNNER_TEMP}/sdetkit-prior-diagnostic-snapshot-history"
+            rm -rf "$diagnostic_prior_root"
+            mkdir -p "$diagnostic_prior_root"
+
+            while IFS=$'\t' read -r candidate_run_id candidate_head_sha; do
+              if [ -z "$candidate_run_id" ] \
+                || [ "$candidate_run_id" = "${GITHUB_RUN_ID}" ] \
+                || [ "$candidate_run_id" = "$prior_run_id" ]; then
+                continue
+              fi
+              if ! git merge-base --is-ancestor "$candidate_head_sha" "$GITHUB_SHA"; then
+                continue
+              fi
+
+              candidate_dir="$diagnostic_prior_root/$candidate_run_id"
+              mkdir -p "$candidate_dir"
+              if ! gh run download "$candidate_run_id" \
+                --repo "$GITHUB_REPOSITORY" \
+                --name repo-memory-profile-history \
+                --dir "$candidate_dir" >/dev/null 2>&1; then
+                continue
+              fi
+
+              candidate_jsonl="$(
+                find "$candidate_dir" \
+                  -name diagnostic-signal-snapshot-history.jsonl \
+                  -print \
+                  -quit
+              )"
+              if [ -n "$candidate_jsonl" ] && [ -f "$candidate_jsonl" ]; then
+                prior_diagnostic_signal_snapshot_jsonl="$candidate_jsonl"
+                break
+              fi
+            done < <(
+              gh api --paginate \
+                "repos/${GITHUB_REPOSITORY}/actions/workflows/repo-memory-history.yml/runs?branch=main&event=push&status=completed&per_page=100" \
+                --jq '.workflow_runs[] | select(.conclusion == "success") | [.id, .head_sha] | @tsv'
+            )
+          fi
+
           echo "prior_history_jsonl=$prior_history_jsonl" >> "$GITHUB_OUTPUT"
           echo "prior_security_disposition_jsonl=$prior_security_disposition_jsonl" >> "$GITHUB_OUTPUT"
+          echo "prior_diagnostic_signal_snapshot_jsonl=$prior_diagnostic_signal_snapshot_jsonl" >> "$GITHUB_OUTPUT"
           echo "prior_run_id=$prior_run_id" >> "$GITHUB_OUTPUT"
           echo "prior_head_sha=$prior_head_sha" >> "$GITHUB_OUTPUT"
 
@@ -384,6 +434,148 @@ jobs:
           ).write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
           PY
 
+      - name: Collect accepted-main diagnostic signal snapshot source
+        id: diagnostic-snapshot-source
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          out_dir="build/repo-memory-history/diagnostic-signal-snapshots/source"
+          associated_pr="build/repo-memory-history/security-reviewed-dispositions/associated-merged-pr.json"
+          mkdir -p "$out_dir/download"
+
+          source_match_count="$(
+            jq -er --arg sha "${GITHUB_SHA}" \
+              '[.[] | select(.merged_at and .merge_commit_sha == $sha)] | length' \
+              "$associated_pr"
+          )"
+          if [ "$source_match_count" -gt 1 ]; then
+            echo "Accepted-main commit maps to multiple merged PRs; refusing ambiguous snapshot provenance."
+            exit 1
+          fi
+          if [ "$source_match_count" -eq 0 ]; then
+            echo "source_available=false" >> "$GITHUB_OUTPUT"
+            echo "No merged PR maps to accepted-main head; no diagnostic snapshot observation will be appended."
+            exit 0
+          fi
+
+          source_pr_number="$(
+            jq -er --arg sha "${GITHUB_SHA}" \
+              '[.[] | select(.merged_at and .merge_commit_sha == $sha)][0].number' \
+              "$associated_pr"
+          )"
+          source_head_sha="$(
+            jq -er --arg sha "${GITHUB_SHA}" \
+              '[.[] | select(.merged_at and .merge_commit_sha == $sha)][0].head.sha' \
+              "$associated_pr"
+          )"
+
+          gh api --paginate \
+            "repos/${REPOSITORY}/actions/workflows/pr-quality-comment.yml/runs?event=pull_request&status=completed&per_page=100" \
+            --jq '.workflow_runs[] | select(.conclusion == "success") | [.id, .head_sha, (.pull_requests | map(.number | tostring) | join(","))] | @tsv' \
+            > "$out_dir/successful-pr-quality-runs.tsv"
+
+          source_run_id=""
+          while IFS=$'\t' read -r candidate_run_id candidate_head_sha candidate_pr_numbers; do
+            if [ "$candidate_head_sha" != "$source_head_sha" ]; then
+              continue
+            fi
+            case ",${candidate_pr_numbers}," in
+              *,"${source_pr_number}",*)
+                source_run_id="$candidate_run_id"
+                break
+                ;;
+            esac
+          done < "$out_dir/successful-pr-quality-runs.tsv"
+
+          if [ -z "$source_run_id" ]; then
+            echo "No successful PR Quality run was found for merged PR #$source_pr_number at $source_head_sha."
+            exit 1
+          fi
+
+          gh run download "$source_run_id" \
+            --repo "$REPOSITORY" \
+            --name pr-quality-comment \
+            --dir "$out_dir/download"
+
+          source_snapshot="$(
+            find "$out_dir/download" \
+              -name diagnostic-signal-snapshot.json \
+              -print \
+              -quit
+          )"
+          if [ -z "$source_snapshot" ] || [ ! -f "$source_snapshot" ]; then
+            echo "Successful PR Quality run supplied no DiagnosticSignalSnapshot artifact."
+            exit 1
+          fi
+
+          cp "$source_snapshot" "$out_dir/diagnostic-signal-snapshot.json"
+          echo "source_available=true" >> "$GITHUB_OUTPUT"
+          echo "source_run_id=$source_run_id" >> "$GITHUB_OUTPUT"
+          echo "source_head_sha=$source_head_sha" >> "$GITHUB_OUTPUT"
+          echo "source_pr_number=$source_pr_number" >> "$GITHUB_OUTPUT"
+
+      - name: Record trusted accepted-main diagnostic signal snapshot history
+        if: steps.diagnostic-snapshot-source.outputs.source_available == 'true'
+        shell: bash
+        env:
+          PRIOR_DIAGNOSTIC_SIGNAL_SNAPSHOT_JSONL: ${{ steps.prior.outputs.prior_diagnostic_signal_snapshot_jsonl }}
+          SOURCE_RUN_ID: ${{ steps.diagnostic-snapshot-source.outputs.source_run_id }}
+          SOURCE_HEAD_SHA: ${{ steps.diagnostic-snapshot-source.outputs.source_head_sha }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p build/repo-memory-history/diagnostic-signal-snapshots/output
+          args=(
+            --diagnostic-signal-snapshot build/repo-memory-history/diagnostic-signal-snapshots/source/diagnostic-signal-snapshot.json
+            --associated-pr-json build/repo-memory-history/security-reviewed-dispositions/associated-merged-pr.json
+            --source-run-id "$SOURCE_RUN_ID"
+            --source-run-conclusion success
+            --source-head-sha "$SOURCE_HEAD_SHA"
+            --retention-run-id "${GITHUB_RUN_ID}"
+            --accepted-main-sha "${GITHUB_SHA}"
+            --out-dir build/repo-memory-history/diagnostic-signal-snapshots/output
+            --format json
+          )
+          if [ -n "$PRIOR_DIAGNOSTIC_SIGNAL_SNAPSHOT_JSONL" ]; then
+            args+=(--prior-history-jsonl "$PRIOR_DIAGNOSTIC_SIGNAL_SNAPSHOT_JSONL")
+          fi
+
+          PYTHONPATH=src python -m sdetkit.diagnostic_signal_snapshot_history \
+            "${args[@]}" \
+            > build/repo-memory-history/diagnostic-signal-snapshots/history-cli.json
+
+          python - <<'PYCODE'
+          import json
+          import os
+          from pathlib import Path
+
+          summary = json.loads(
+              Path(
+                  "build/repo-memory-history/diagnostic-signal-snapshots/output/"
+                  "diagnostic-signal-snapshot-history-summary.json"
+              ).read_text(encoding="utf-8")
+          )
+          assert summary["status"] == "diagnostic_signal_snapshot_history_recorded"
+          assert summary["record_count"] >= 1
+          assert summary["advisor_false_positive_rate_status"] == "requires_reviewed_history"
+          assert summary["reviewed_false_positive_count"] is None
+          assert summary["reviewed_observation_count"] is None
+          assert summary["latest_record"]["accepted_main_sha"] == os.environ["GITHUB_SHA"]
+          boundary = summary["decision_boundary"]
+          assert boundary["current_pr_decision_input"] is False
+          assert boundary["feeds_repo_memory"] is False
+          assert boundary["patch_application_allowed"] is False
+          assert boundary["automation_allowed"] is False
+          assert boundary["merge_authorized"] is False
+          assert boundary["semantic_equivalence_proven"] is False
+          assert boundary["historical_snapshot_authorizes_current_action"] is False
+          print("Trusted accepted-main diagnostic signal snapshot history passed.")
+          PYCODE
+
       - name: Record trusted accepted-main reviewed security disposition history
         shell: bash
         env:
@@ -445,6 +637,7 @@ jobs:
             build/repo-memory-history/pattern-insights/
             build/repo-memory-history/flaky-test-registry/
             build/repo-memory-history/candidate-validation/
+            build/repo-memory-history/diagnostic-signal-snapshots/
             build/repo-memory-history/security-reviewed-dispositions/
           if-no-files-found: error
           retention-days: 90
