@@ -911,3 +911,119 @@ def test_pr_quality_workflow_renders_diagnostic_signal_snapshot_after_worker_as_
     assert "Merge authorized: `false`" in build_comment
     assert "--commit-safe-fixes" not in text
     assert "--pr-quality-safe-bridge-only" not in text
+
+
+def test_pr_quality_workflow_appends_trusted_diagnostic_snapshot_history_post_decision_only() -> (
+    None
+):
+    text = _workflow_text()
+    comment_builder = text[
+        text.index("- name: Build PR comment body") : text.index(
+            "- name: Build trusted diagnostic signal snapshot history visibility"
+        )
+    ]
+    trusted_visibility = text[
+        text.index(
+            "- name: Build trusted diagnostic signal snapshot history visibility"
+        ) : text.index("- name: Build verified operator evidence loop")
+    ]
+
+    repo_memory = comment_builder.index("python -m sdetkit.repo_memory")
+    action_report = comment_builder.index("python -m sdetkit.pr_quality_action_report")
+    current_snapshot = comment_builder.index("python -m sdetkit.diagnostic_signal_snapshot")
+    candidate_validation = comment_builder.index(
+        "python -m sdetkit.pr_quality_candidate_validation"
+    )
+    repo_memory_command = comment_builder[
+        repo_memory : comment_builder.index(
+            "> build/pr-quality/repo-memory/repo-memory-cli.json", repo_memory
+        )
+    ]
+    action_report_command = comment_builder[
+        action_report : comment_builder.index(
+            "> build/pr-quality/pr-comment-metadata.json", action_report
+        )
+    ]
+
+    assert action_report < current_snapshot < candidate_validation
+    assert "python -m sdetkit.trusted_diagnostic_signal_snapshot_history" in trusted_visibility
+    assert "trusted-diagnostic-signal-snapshot-history" not in repo_memory_command
+    assert "trusted-diagnostic-signal-snapshot-history" not in action_report_command
+    assert '--selected-retention-run-id "$trusted_snapshot_history_run_id"' in trusted_visibility
+    assert '--selected-head-sha "$trusted_snapshot_history_head_sha"' in trusted_visibility
+    assert 'body = body.replace(snapshot, f"{snapshot}\\n\\n{history}", 1)' in trusted_visibility
+    assert "Advisor false-positive rate status: `requires_reviewed_history`" in trusted_visibility
+    assert "Current PR decision input: `false`" in trusted_visibility
+    assert "Feeds RepoMemory: `false`" in trusted_visibility
+    assert "Historical snapshot authorizes current action: `false`" in trusted_visibility
+
+
+def test_pr_quality_workflow_uploads_trusted_diagnostic_snapshot_history_artifact() -> None:
+    text = _workflow_text()
+
+    assert "build/pr-quality/trusted-diagnostic-signal-snapshot-history/" in text
+    assert "python -m sdetkit.trusted_diagnostic_signal_snapshot_history" in text
+    assert "--commit-safe-fixes" not in text
+    assert "--pr-quality-safe-bridge-only" not in text
+
+
+def test_pr_quality_snapshot_history_allows_bootstrap_absence_but_fails_invalid_present_history() -> (
+    None
+):
+    text = _workflow_text()
+    trusted_visibility = text[
+        text.index(
+            "- name: Build trusted diagnostic signal snapshot history visibility"
+        ) : text.index("- name: Build verified operator evidence loop")
+    ]
+    verify_visibility = text[text.index("- name: Verify PR Quality comment visibility") :]
+
+    assert "trusted_snapshot_history_file_count=0" in trusted_visibility
+    assert 'if [ "$trusted_snapshot_history_file_count" -eq 0 ]; then' in trusted_visibility
+    assert 'elif [ "$trusted_snapshot_history_file_count" -ne 2 ]' in trusted_visibility
+    assert "|| trusted_diagnostic_signal_snapshot_history_rc=3" in trusted_visibility
+    assert "Collection status: `not_collected`" in trusted_visibility
+    assert "Collection status: `collection_failed`" in trusted_visibility
+    assert "failed validation or is incomplete" in trusted_visibility
+    assert 'trusted_snapshot_history_exit_code not in {"0", "2"}' in verify_visibility
+    assert "validation failed after " in verify_visibility
+    assert "diagnostic comment publication" in verify_visibility
+
+
+def test_pr_quality_snapshot_history_falls_back_to_latest_ancestor_artifact_with_stream() -> None:
+    text = _workflow_text()
+    trusted_visibility = text[
+        text.index(
+            "- name: Build trusted diagnostic signal snapshot history visibility"
+        ) : text.index("- name: Build verified operator evidence loop")
+    ]
+
+    assert "sdetkit-trusted-diagnostic-snapshot-history" in trusted_visibility
+    assert "build/pr-quality/trusted-history/successful-main-runs.tsv" in trusted_visibility
+    assert 'if [ "$candidate_file_count" -eq 0 ]; then' in trusted_visibility
+    assert 'trusted_snapshot_history_run_id="$candidate_run_id"' in trusted_visibility
+    assert '--selected-retention-run-id "$trusted_snapshot_history_run_id"' in trusted_visibility
+    assert '--selected-head-sha "$trusted_snapshot_history_head_sha"' in trusted_visibility
+
+
+def test_pr_quality_builds_trusted_snapshot_history_in_bounded_follow_on_step() -> None:
+    text = _workflow_text()
+    comment_builder = text[
+        text.index("- name: Build PR comment body") : text.index(
+            "- name: Build trusted diagnostic signal snapshot history visibility"
+        )
+    ]
+    trusted_visibility = text[
+        text.index(
+            "- name: Build trusted diagnostic signal snapshot history visibility"
+        ) : text.index("- name: Build verified operator evidence loop")
+    ]
+
+    assert "python -m sdetkit.diagnostic_signal_snapshot" in comment_builder
+    assert "python -m sdetkit.pr_quality_candidate_validation" in comment_builder
+    assert "runtime_guard_worker_oracle.json" in comment_builder
+    assert "security_freshness_stale_runtime_oracle.json" in comment_builder
+    assert "python -m sdetkit.trusted_diagnostic_signal_snapshot_history" not in comment_builder
+    assert "python -m sdetkit.trusted_diagnostic_signal_snapshot_history" in trusted_visibility
+    assert "trusted-diagnostic-signal-snapshot-history.md" in trusted_visibility
+    assert 'body = body.replace(snapshot, f"{snapshot}\\n\\n{history}", 1)' in trusted_visibility
