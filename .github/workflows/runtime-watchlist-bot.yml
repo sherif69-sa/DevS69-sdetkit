@@ -47,6 +47,35 @@ jobs:
               except ValueError:
                   return raw
 
+          def markdown_excerpt(path: Path, *, max_lines: int = 36, max_chars: int = 4000) -> list[str]:
+              if not path.exists():
+                  return ["- Output not found in worker artifact directory."]
+              text = path.read_text(encoding="utf-8", errors="replace").strip()
+              if not text:
+                  return ["- Output was empty."]
+              lines = text.splitlines()
+              selected: list[str] = []
+              used = 0
+              for line in lines:
+                  if len(selected) >= max_lines:
+                      break
+                  next_used = used + len(line) + 1
+                  if next_used > max_chars:
+                      break
+                  selected.append(line)
+                  used = next_used
+              if len(selected) < len(lines):
+                  selected.append("...")
+              return selected
+
+          worker_dir = Path(".sdetkit/agent/template-runs/runtime-watchlist-worker")
+          runtime_watchlist_excerpt = markdown_excerpt(worker_dir / "runtime-watchlist.md")
+          runtime_route_map_excerpt = markdown_excerpt(
+              worker_dir / "route-map.json",
+              max_lines=60,
+              max_chars=6000,
+          )
+
           lines = [
               "# Runtime fast-follow watchlist",
               "",
@@ -66,6 +95,14 @@ jobs:
           ]
           lines.extend([f"- `{display_path(path)}`" for path in artifacts[:3]] or ["- None"])
           lines.extend([
+              "",
+              "## Runtime watchlist output",
+              *runtime_watchlist_excerpt,
+              "",
+              "## Runtime route-map output",
+              "```json",
+              *runtime_route_map_excerpt,
+              "```",
               "",
               "## Artifacts",
               "- `build/runtime-watchlist-worker-run.json`",
