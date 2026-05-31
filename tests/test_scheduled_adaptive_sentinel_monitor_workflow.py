@@ -42,7 +42,7 @@ def test_scheduled_adaptive_sentinel_monitor_uploads_artifacts_and_summary() -> 
     assert "build/sdetkit/sentinel/sentinel.json" in text
     assert "build/sdetkit/sentinel/sentinel.md" in text
     assert "Upload adaptive sentinel monitor artifacts" in text
-    assert "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02" in text
+    assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in text
     assert "name: adaptive-sentinel-monitor" in text
     assert "build/sdetkit/sentinel/" in text
     assert ".sdetkit/adaptive-sentinel/" in text
