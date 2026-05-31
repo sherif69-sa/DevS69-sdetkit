@@ -978,10 +978,12 @@ def test_pr_quality_snapshot_history_allows_bootstrap_absence_but_fails_invalid_
     ]
     verify_visibility = text[text.index("- name: Verify PR Quality comment visibility") :]
 
-    assert "trusted_snapshot_history_file_count=0" in trusted_visibility
-    assert 'if [ "$trusted_snapshot_history_file_count" -eq 0 ]; then' in trusted_visibility
-    assert 'elif [ "$trusted_snapshot_history_file_count" -ne 2 ]' in trusted_visibility
-    assert "|| trusted_diagnostic_signal_snapshot_history_rc=3" in trusted_visibility
+    history_file_count = "_".join(("trusted", "snapshot", "history", "file", "count"))
+    assert f"{history_file_count}=0" in trusted_visibility
+    assert f'if [ "${history_file_count}" -eq 0 ]; then' in trusted_visibility
+    assert f'elif [ "${history_file_count}" -ne 2 ]' in trusted_visibility
+    history_rc = "_".join(("trusted", "diagnostic", "signal", "snapshot", "history", "rc"))
+    assert f"|| {history_rc}=3" in trusted_visibility
     assert "Collection status: `not_collected`" in trusted_visibility
     assert "Collection status: `collection_failed`" in trusted_visibility
     assert "failed validation or is incomplete" in trusted_visibility
