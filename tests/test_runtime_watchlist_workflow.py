@@ -13,7 +13,9 @@ def test_runtime_watchlist_issue_embeds_worker_outputs() -> None:
     text = _workflow_text()
 
     assert 'worker_dir = Path(".sdetkit/agent/template-runs/runtime-watchlist-worker")' in text
-    assert 'runtime_watchlist_excerpt = markdown_excerpt(worker_dir / "runtime-watchlist.md")' in text
+    assert (
+        'runtime_watchlist_excerpt = markdown_excerpt(worker_dir / "runtime-watchlist.md")' in text
+    )
     assert 'worker_dir / "route-map.json",' in text
     assert '"## Runtime watchlist output",' in text
     assert "*runtime_watchlist_excerpt," in text
