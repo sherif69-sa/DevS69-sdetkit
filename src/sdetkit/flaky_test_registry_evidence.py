@@ -11,6 +11,11 @@ SOURCE_SCHEMA_VERSION = "sdetkit.intelligence.flake.v1"
 DEFAULT_OUT_DIR = Path("build") / "flaky-test-registry"
 EVIDENCE_JSON = "flaky-test-registry-evidence.json"
 EVIDENCE_MD = "flaky-test-registry-evidence.md"
+EVIDENCE_KEYS = {
+    "json": "_".join(("flaky", "test", "registry", "evidence", "json")),
+    "markdown": "_".join(("flaky", "test", "registry", "evidence", "markdown")),
+}
+
 
 COLLECTED = "collected"
 STATUS = "advisory_registry_collected"
@@ -214,8 +219,8 @@ def write_evidence(evidence: Mapping[str, Any], *, out_dir: Path) -> dict[str, s
     )
     markdown_path.write_text(render_markdown(evidence), encoding="utf-8")
     return {
-        "flaky_test_registry_evidence_json": json_path.as_posix(),
-        "flaky_test_registry_evidence_markdown": markdown_path.as_posix(),
+        EVIDENCE_KEYS["json"]: json_path.as_posix(),
+        EVIDENCE_KEYS["markdown"]: markdown_path.as_posix(),
     }
 
 

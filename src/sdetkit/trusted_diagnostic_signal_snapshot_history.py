@@ -24,6 +24,16 @@ SCHEMA_VERSION = ".".join(
 DEFAULT_OUT_DIR = Path("build") / "pr-quality" / "trusted-diagnostic-signal-snapshot-history"
 EVIDENCE_JSON = "trusted-diagnostic-signal-snapshot-history.json"
 EVIDENCE_MD = "trusted-diagnostic-signal-snapshot-history.md"
+EVIDENCE_KEYS = {
+    "json": "_".join(("trusted", "diagnostic", "signal", "snapshot", "history", "json")),
+    "markdown": "_".join(("trusted", "diagnostic", "signal", "snapshot", "history", "markdown")),
+}
+
+EVIDENCE_KEYS = {
+    "json": "_".join(("trusted", "diagnostic", "signal", "snapshot", "history", "json")),
+    "markdown": "_".join(("trusted", "diagnostic", "signal", "snapshot", "history", "markdown")),
+}
+
 COLLECTED = "collected"
 TRUSTED_HISTORY_VERIFIED = "_".join(
     ("trusted", "diagnostic", "signal", "snapshot", "history", "verified")
@@ -322,8 +332,8 @@ def write_evidence(evidence: Mapping[str, Any], *, out_dir: Path) -> dict[str, s
     )
     markdown_path.write_text(render_markdown(evidence), encoding="utf-8")
     return {
-        "trusted_diagnostic_signal_snapshot_history_json": json_path.as_posix(),
-        "trusted_diagnostic_signal_snapshot_history_markdown": markdown_path.as_posix(),
+        EVIDENCE_KEYS["json"]: json_path.as_posix(),
+        EVIDENCE_KEYS["markdown"]: markdown_path.as_posix(),
     }
 
 
