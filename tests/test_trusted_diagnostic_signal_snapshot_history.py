@@ -140,6 +140,32 @@ def test_trusted_history_accepts_verified_ancestor_snapshot_history(tmp_path: Pa
     assert evidence["decision_boundary"]["automation_allowed"] is False
 
 
+def test_trusted_history_accepts_composite_retention_run_id_from_retention_artifact(
+    tmp_path: Path,
+) -> None:
+    _repo, accepted_head, base_head = _git_repo(tmp_path)
+    _summary_path, _history_path, summary, record = _artifact(
+        tmp_path / "artifact",
+        accepted_head=accepted_head,
+    )
+    composite_retention_run_id = f"retention-run-1:{accepted_head}"
+    record["source"]["retention_run_id"] = composite_retention_run_id
+    summary["latest_record"]["retention_run_id"] = composite_retention_run_id
+
+    evidence = build_trusted_snapshot_history_evidence(
+        summary=summary,
+        records=[record],
+        selected_retention_run_id="retention-run-1",
+        selected_head_sha=accepted_head,
+        base_sha=base_head,
+        base_ancestry_verified=True,
+    )
+
+    assert evidence["status"] == TRUSTED_HISTORY_VERIFIED
+    assert evidence["source"]["run_id"] == "retention-run-1"
+    assert evidence["source"]["head_sha"] == accepted_head
+
+
 def test_trusted_history_git_verifier_rejects_nonancestor_head(tmp_path: Path) -> None:
     repo, first, second = _git_repo(tmp_path)
 
