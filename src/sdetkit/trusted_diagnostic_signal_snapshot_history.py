@@ -51,6 +51,20 @@ def _bool(value: Any) -> bool:
     return value is True
 
 
+def _retention_run_id_matches(
+    *,
+    recorded: Any,
+    selected_run: str,
+    selected_head: str,
+) -> bool:
+    recorded_text = _text(recorded)
+    if recorded_text == selected_run:
+        return True
+    if selected_run and selected_head:
+        return recorded_text == f"{selected_run}:{selected_head}"
+    return False
+
+
 def _read_json(path: Path) -> JsonObject:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -176,11 +190,19 @@ def build_trusted_snapshot_history_evidence(
     latest = _as_dict(records[-1])
     latest_source = _as_dict(latest.get("source"))
     summary_latest = _as_dict(summary.get("latest_record"))
-    if _text(latest_source.get("retention_run_id")) != selected_run:
+    if not _retention_run_id_matches(
+        recorded=latest_source.get("retention_run_id"),
+        selected_run=selected_run,
+        selected_head=selected_head,
+    ):
         raise ValueError("selected retention run does not match latest JSONL record")
     if _text(latest_source.get("accepted_main_sha")) != selected_head:
         raise ValueError("selected accepted-main head does not match latest JSONL record")
-    if _text(summary_latest.get("retention_run_id")) != selected_run:
+    if not _retention_run_id_matches(
+        recorded=summary_latest.get("retention_run_id"),
+        selected_run=selected_run,
+        selected_head=selected_head,
+    ):
         raise ValueError("selected retention run does not match latest summary record")
     if _text(summary_latest.get("accepted_main_sha")) != selected_head:
         raise ValueError("selected accepted-main head does not match latest summary record")
