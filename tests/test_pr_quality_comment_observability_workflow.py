@@ -985,10 +985,8 @@ def test_pr_quality_snapshot_history_allows_bootstrap_absence_but_fails_invalid_
     assert "Collection status: `not_collected`" in trusted_visibility
     assert "Collection status: `collection_failed`" in trusted_visibility
     assert "failed validation or is incomplete" in trusted_visibility
-    trusted_snapshot_history_exit_code_guard = "_".join(
-        ("trusted", "snapshot", "history", "exit", "code")
-    )
-    assert f'{trusted_snapshot_history_exit_code_guard} not in {{"0", "2"}}' in verify_visibility
+    guard_name = "_".join(("trusted", "snapshot", "history", "exit", "code"))
+    assert f'{guard_name} not in {{"0", "2"}}' in verify_visibility
     assert "validation failed after " in verify_visibility
     assert "diagnostic comment publication" in verify_visibility
 
