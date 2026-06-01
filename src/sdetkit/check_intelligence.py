@@ -1136,6 +1136,64 @@ def _record_identities(record: JsonObject, *, index: int) -> set[str]:
     return {item for item in identities if item}
 
 
+def _real_evidence_quality_summary(
+    *,
+    checks_seen: int,
+    failed_checks: list[JsonObject],
+    queued_checks: list[JsonObject],
+    cancelled_checks: list[JsonObject],
+    startup_failures: list[JsonObject],
+    missing_required_contexts: list[str],
+) -> JsonObject:
+    failed_count = len(failed_checks)
+    failed_with_logs = sum(1 for check in failed_checks if bool(check.get("log_collected")))
+    failed_with_first_failure = sum(
+        1
+        for check in failed_checks
+        if bool(_string(check.get("first_failure_line")) or _as_dict(check.get("first_failure")))
+    )
+    stale_evidence_count = sum(1 for check in failed_checks if bool(check.get("stale_evidence")))
+    unknown_diagnosis_count = sum(
+        1 for check in failed_checks if _is_unknown_diagnosis(_as_dict(check.get("diagnosis")))
+    )
+    actionable_diagnosis_count = failed_count - unknown_diagnosis_count
+
+    evidence_gaps: list[str] = []
+    if failed_count and failed_with_logs < failed_count:
+        evidence_gaps.append("failed_check_logs_missing")
+    if failed_count and failed_with_first_failure < failed_count:
+        evidence_gaps.append("first_failure_not_extracted")
+    if stale_evidence_count:
+        evidence_gaps.append("stale_failed_check_evidence")
+    if missing_required_contexts:
+        evidence_gaps.append("required_contexts_missing")
+
+    return {
+        "schema_version": "sdetkit.real_check_evidence_quality.v1",
+        "checks_seen": checks_seen,
+        "failed_checks": failed_count,
+        "failed_with_logs": failed_with_logs,
+        "failed_without_logs": failed_count - failed_with_logs,
+        "failed_with_first_failure": failed_with_first_failure,
+        "failed_without_first_failure": failed_count - failed_with_first_failure,
+        "queued_checks": len(queued_checks),
+        "cancelled_checks": len(cancelled_checks),
+        "startup_failures": len(startup_failures),
+        "missing_required_contexts": len(missing_required_contexts),
+        "stale_failed_check_evidence": stale_evidence_count,
+        "current_failed_check_evidence": failed_count - stale_evidence_count,
+        "unknown_diagnosis_count": unknown_diagnosis_count,
+        "actionable_diagnosis_count": actionable_diagnosis_count,
+        "evidence_gaps": evidence_gaps,
+        "evidence_complete_for_failed_checks": not evidence_gaps,
+        "reporting_only": True,
+        "patch_application_allowed": False,
+        "automation_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+
 def build_check_intelligence(
     *,
     checks_json: Path,
@@ -1190,15 +1248,26 @@ def build_check_intelligence(
             }
         )
 
+    checks_seen = len(records) + len(missing_required_contexts)
+    real_evidence_quality = _real_evidence_quality_summary(
+        checks_seen=checks_seen,
+        failed_checks=failed_checks,
+        queued_checks=queued_checks,
+        cancelled_checks=cancelled_checks,
+        startup_failures=startup_failures,
+        missing_required_contexts=missing_required_contexts,
+    )
+
     return {
         "schema_version": CHECK_INTELLIGENCE_SCHEMA_VERSION,
-        "checks_seen": len(records) + len(missing_required_contexts),
+        "checks_seen": checks_seen,
         "required_contexts": sorted(required_contexts),
         "missing_required_contexts": missing_required_contexts,
         "failed_checks": failed_checks,
         "queued_checks": queued_checks,
         "cancelled_checks": cancelled_checks,
         "startup_failures": startup_failures,
+        "real_evidence_quality": real_evidence_quality,
         "security_review": _security_review_summary(review_threads_json),
         "code_scanning_review": _code_scanning_review_summary(
             code_scanning_alerts_json,
@@ -1372,6 +1441,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 ),
                 "security_review": security_review,
                 "code_scanning_review": intelligence.get("code_scanning_review", {}),
+                "real_evidence_quality": intelligence.get("real_evidence_quality", {}),
             },
         }
 
@@ -1448,6 +1518,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 ),
                 "security_review": security_review,
                 "code_scanning_review": code_scanning_review,
+                "real_evidence_quality": intelligence.get("real_evidence_quality", {}),
             },
         }
 
@@ -1518,6 +1589,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 ),
                 "security_review": intelligence.get("security_review", {}),
                 "code_scanning_review": intelligence.get("code_scanning_review", {}),
+                "real_evidence_quality": intelligence.get("real_evidence_quality", {}),
             },
         }
 
@@ -1559,6 +1631,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 "required_startup_failure_count": len(required_startup),
                 "security_review": intelligence.get("security_review", {}),
                 "code_scanning_review": intelligence.get("code_scanning_review", {}),
+                "real_evidence_quality": intelligence.get("real_evidence_quality", {}),
             },
         }
 
@@ -1581,6 +1654,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
             "required_startup_failure_count": 0,
             "security_review": intelligence.get("security_review", {}),
             "code_scanning_review": intelligence.get("code_scanning_review", {}),
+            "real_evidence_quality": intelligence.get("real_evidence_quality", {}),
         },
     }
 
@@ -1629,6 +1703,43 @@ def render_action_report(report: JsonObject) -> str:
     lines.extend(["", "## Proof commands", ""])
     commands = [str(item) for item in _as_list(report.get("proof_commands"))]
     lines.extend([f"- `{item}`" for item in commands] or ["- none"])
+
+    evidence = _as_dict(report.get("evidence"))
+    quality = _as_dict(evidence.get("real_evidence_quality"))
+    if quality:
+        gaps = [str(item) for item in _as_list(quality.get("evidence_gaps"))]
+        lines.extend(
+            [
+                "",
+                "## Real check evidence quality",
+                "",
+                f"- Checks seen: `{int(quality.get('checks_seen', 0) or 0)}`",
+                f"- Failed checks: `{int(quality.get('failed_checks', 0) or 0)}`",
+                f"- Failed checks with logs: `{int(quality.get('failed_with_logs', 0) or 0)}`",
+                (
+                    "- Failed checks with first failure: "
+                    f"`{int(quality.get('failed_with_first_failure', 0) or 0)}`"
+                ),
+                f"- Queued checks: `{int(quality.get('queued_checks', 0) or 0)}`",
+                f"- Startup failures: `{int(quality.get('startup_failures', 0) or 0)}`",
+                (
+                    "- Missing required contexts: "
+                    f"`{int(quality.get('missing_required_contexts', 0) or 0)}`"
+                ),
+                (
+                    "- Stale failed-check evidence: "
+                    f"`{int(quality.get('stale_failed_check_evidence', 0) or 0)}`"
+                ),
+                (
+                    "- Evidence complete for failed checks: "
+                    f"`{str(bool(quality.get('evidence_complete_for_failed_checks', False))).lower()}`"
+                ),
+                "- Evidence gaps: " + (", ".join(f"`{gap}`" for gap in gaps) or "`none`"),
+                "- Reporting only: `true`",
+                "- Automation allowed: `false`",
+            ]
+        )
+
     lines.append("")
     return "\n".join(lines)
 
