@@ -9,6 +9,7 @@ JsonObject = dict[str, Any]
 
 SCHEMA_VERSION = "sdetkit.current_head_failure_bundle.v1"
 FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
+JOB_STEP_CONFIRMATION_KEY = "_".join(("job", "step", "confirmation"))
 
 
 def _as_dict(value: Any) -> JsonObject:
@@ -82,6 +83,7 @@ def build_current_head_failure_bundle(
                     "tool": _string(first_failure.get("tool") or "unknown"),
                     "kind": _string(first_failure.get("kind") or "unknown"),
                     FAILED_STEP_EVIDENCE_KEY: _as_dict(item.get(FAILED_STEP_EVIDENCE_KEY)),
+                    JOB_STEP_CONFIRMATION_KEY: _as_dict(item.get(JOB_STEP_CONFIRMATION_KEY)),
                 }
             )
 
@@ -174,6 +176,15 @@ def render_current_head_failure_bundle_markdown(bundle: JsonObject) -> str:
                     lines.append(f"  - Failed command: `{command}`")
                 lines.append("- Reporting only: `true`")
                 lines.append("- Automation allowed: `false`")
+            confirmation = _as_dict(item.get(JOB_STEP_CONFIRMATION_KEY))
+            if confirmation:
+                lines.append(
+                    f"  - Job step confirmation: `{_string(confirmation.get('status') or 'unknown')}`"
+                )
+                step_name = _string(confirmation.get("job_step_name"))
+                if step_name:
+                    lines.append(f"  - GitHub job step: `{step_name}`")
+                lines.append("- Job step automation allowed: `false`")
     else:
         lines.append("- none")
 

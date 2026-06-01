@@ -29,6 +29,10 @@ DEPENDENCY_AUDIT_OWNER_FILES = [
 ]
 
 FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
+JOB_STEP_CONFIRMATION_KEY = "_".join(("job", "step", "confirmation"))
+JOB_STEP_CONFIRMED_COUNT_KEY = "_".join(("job", "step", "confirmed", "count"))
+JOB_STEP_MISMATCH_COUNT_KEY = "_".join(("job", "step", "mismatch", "count"))
+JOB_STEP_UNAVAILABLE_COUNT_KEY = "_".join(("job", "step", "unavailable", "count"))
 FAILED_WITH_STEP_EVIDENCE_KEY = "_".join(("failed", "with", "step", "evidence"))
 FAILED_WITHOUT_STEP_EVIDENCE_KEY = "_".join(("failed", "without", "step", "evidence"))
 
@@ -831,6 +835,105 @@ def _failed_step_evidence(log_text: str, first_failure: JsonObject) -> JsonObjec
     }
 
 
+def _job_steps_from_record(record: JsonObject) -> list[JsonObject]:
+    for value in (
+        record.get("steps"),
+        record.get("job_steps"),
+        _as_dict(record.get("workflow_job")).get("steps"),
+        _as_dict(record.get("job")).get("steps"),
+    ):
+        steps = [_as_dict(item) for item in _as_list(value)]
+        if steps:
+            return steps
+    return []
+
+
+def _normal_step_text(value: str) -> str:
+    text = " ".join(value.strip().lower().split())
+    if text.startswith("run "):
+        text = text.removeprefix("run ").strip()
+    return text
+
+
+def _step_name(step: JsonObject) -> str:
+    return _string(step.get("name") or step.get("title") or step.get("command"))
+
+
+def _step_conclusion(step: JsonObject) -> str:
+    return _string(step.get("conclusion") or step.get("status")).lower()
+
+
+def _is_failed_job_step(step: JsonObject) -> bool:
+    return _step_conclusion(step) in {
+        "failure",
+        "failed",
+        "timed_out",
+        "cancelled",
+        "action_required",
+    }
+
+
+def _step_matches_log_command(step: JsonObject, command: str) -> bool:
+    needle = _normal_step_text(command)
+    haystack = _normal_step_text(_step_name(step))
+    return bool(needle and haystack and (needle == haystack or needle in haystack))
+
+
+def _job_step_confirmation(record: JsonObject, failed_step: JsonObject) -> JsonObject:
+    command = _string(failed_step.get("command"))
+    steps = _job_steps_from_record(record)
+    base = {
+        "log_command": command,
+        "reporting_only": True,
+        "automation_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+    if not command:
+        return {
+            **base,
+            "status": "missing",
+            "source": "absent",
+            "job_step_name": "",
+            "job_step_conclusion": "",
+            "job_step_count": len(steps),
+            "failed_job_step_count": len([step for step in steps if _is_failed_job_step(step)]),
+        }
+
+    if not steps:
+        return {
+            **base,
+            "status": "unavailable",
+            "source": "absent",
+            "job_step_name": "",
+            "job_step_conclusion": "",
+            "job_step_count": 0,
+            "failed_job_step_count": 0,
+        }
+
+    matched = next((step for step in steps if _step_matches_log_command(step, command)), {})
+    failed_steps = [step for step in steps if _is_failed_job_step(step)]
+    chosen = matched or (failed_steps[0] if failed_steps else {})
+
+    if matched:
+        status = "confirmed" if _is_failed_job_step(matched) else "mismatch"
+    elif failed_steps:
+        status = "mismatch"
+    else:
+        status = "missing"
+
+    return {
+        **base,
+        "status": status,
+        "source": "github_job_steps",
+        "job_step_name": _step_name(chosen),
+        "job_step_conclusion": _step_conclusion(chosen),
+        "job_step_count": len(steps),
+        "failed_job_step_count": len(failed_steps),
+    }
+
+
 def _dependency_audit_first_failure(log_text: str) -> JsonObject:
 
     for index, raw_line in enumerate(log_text.splitlines(), 1):
@@ -1027,6 +1130,7 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
         primary = fallback
 
     failed_step_evidence = _failed_step_evidence(log_text, first_failure)
+    job_step_confirmation = _job_step_confirmation(record, failed_step_evidence)
     safe_remediation = safe_remediation_eligibility.classify_check_failure(
         name=name,
         diagnosis=primary,
@@ -1048,6 +1152,7 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
         "first_failure": first_failure,
         "first_failure_line": _string(first_failure.get("line")),
         FAILED_STEP_EVIDENCE_KEY: failed_step_evidence,
+        JOB_STEP_CONFIRMATION_KEY: job_step_confirmation,
         "formatter_changed_files": _formatter_changed_files(log_text),
         "referenced_files": _referenced_failure_files(log_text),
         "outside_changed_files": _outside_changed_files(record, log_text),
@@ -1297,6 +1402,22 @@ def _real_evidence_quality_summary(
         for check in failed_checks
         if _string(_as_dict(check.get(FAILED_STEP_EVIDENCE_KEY)).get("status")) == "found"
     )
+    job_step_confirmed_count = sum(
+        1
+        for check in failed_checks
+        if _string(_as_dict(check.get(JOB_STEP_CONFIRMATION_KEY)).get("status")) == "confirmed"
+    )
+    job_step_mismatch_count = sum(
+        1
+        for check in failed_checks
+        if _string(_as_dict(check.get(JOB_STEP_CONFIRMATION_KEY)).get("status")) == "mismatch"
+    )
+    job_step_unavailable_count = sum(
+        1
+        for check in failed_checks
+        if _string(_as_dict(check.get(JOB_STEP_CONFIRMATION_KEY)).get("status"))
+        in {"unavailable", "missing"}
+    )
     stale_evidence_count = sum(1 for check in failed_checks if bool(check.get("stale_evidence")))
     unknown_diagnosis_count = sum(
         1 for check in failed_checks if _is_unknown_diagnosis(_as_dict(check.get("diagnosis")))
@@ -1323,6 +1444,9 @@ def _real_evidence_quality_summary(
         "failed_without_first_failure": failed_count - failed_with_first_failure,
         FAILED_WITH_STEP_EVIDENCE_KEY: failed_with_step_evidence,
         FAILED_WITHOUT_STEP_EVIDENCE_KEY: failed_count - failed_with_step_evidence,
+        JOB_STEP_CONFIRMED_COUNT_KEY: job_step_confirmed_count,
+        JOB_STEP_MISMATCH_COUNT_KEY: job_step_mismatch_count,
+        JOB_STEP_UNAVAILABLE_COUNT_KEY: job_step_unavailable_count,
         "queued_checks": len(queued_checks),
         "cancelled_checks": len(cancelled_checks),
         "startup_failures": len(startup_failures),
@@ -1694,6 +1818,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 "first_failure": check.get("first_failure", {}),
                 "first_failure_line": check.get("first_failure_line", ""),
                 FAILED_STEP_EVIDENCE_KEY: check.get(FAILED_STEP_EVIDENCE_KEY, {}),
+                JOB_STEP_CONFIRMATION_KEY: check.get(JOB_STEP_CONFIRMATION_KEY, {}),
                 "head_sha": check.get("head_sha", ""),
                 "current_pr_head_sha": check.get("current_pr_head_sha", ""),
                 "stale_evidence": check.get("stale_evidence", False),
