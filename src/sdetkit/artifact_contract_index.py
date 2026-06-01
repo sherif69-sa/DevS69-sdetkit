@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from . import adoption_surface, doctor, review
+from . import adoption_surface, check_intelligence, doctor, review
 from .checks import artifacts as check_artifacts
 
 INDEX_SCHEMA_VERSION = "sdetkit.artifact-contract-index.v1"
@@ -28,6 +28,39 @@ def build_index() -> dict[str, Any]:
                 "schema_version": None,
                 "required_fields": ["ok", "failed_steps", "profile"],
                 "stability": "public",
+            },
+            {
+                "id": "check-intelligence-json",
+                "path": "build/pr-quality/check-intelligence.json",
+                "produced_by": "python -m sdetkit.check_intelligence --checks-json <checks.json> --out-dir build/pr-quality",
+                "schema_version": check_intelligence.CHECK_INTELLIGENCE_SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "checks_seen",
+                    "failed_checks",
+                    "queued_checks",
+                    "startup_failures",
+                    "real_evidence_quality",
+                    "security_review",
+                    "code_scanning_review",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "check-intelligence-action-report-json",
+                "path": "build/pr-quality/action-report.json",
+                "produced_by": "python -m sdetkit.check_intelligence --checks-json <checks.json> --out-dir build/pr-quality",
+                "schema_version": check_intelligence.ACTION_REPORT_SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "status",
+                    "primary_blocker",
+                    "automation",
+                    "recommended_actions",
+                    "proof_commands",
+                    "evidence",
+                ],
+                "stability": "advanced",
             },
             {
                 "id": "adoption-surface-json",
