@@ -55,6 +55,15 @@ def test_controlled_validation_exercises_verified_and_review_first_states_withou
     assert family["merge_authorized"] is False
     assert family["semantic_equivalence_proven"] is False
     assert family["current_pr_decision_input"] is False
+    assert family["step_error_primary_categories"] == ["none"]
+
+    dimensions = family["patch_score_dimension_statuses"]
+    assert dimensions["diagnostic_precision"]["supported"] == 2
+    assert dimensions["patch_scope_safety"]["contained"] == 2
+    assert dimensions["proof_strength"]["supported"] == 2
+    assert dimensions["reviewability"]["reviewable"] == 2
+    assert dimensions["anti_cheat_integrity"]["preserved"] == 2
+    assert dimensions["regression_risk"]["low"] == 2
 
     boundary = report["boundary"]
     assert boundary["controlled_fixture_inputs_only"] is True
@@ -79,6 +88,10 @@ def test_controlled_validation_markdown_marks_evidence_as_non_decision_input() -
     assert "Structurally verified candidates: `1`" in markdown
     assert "Review-first blocked candidates: `1`" in markdown
     assert "Patch application allowed: `false`" in markdown
+    assert "PatchScorer dimension reporting" in markdown
+    assert "`diagnostic_precision`: supported=2" in markdown
+    assert "`anti_cheat_integrity`: preserved=2" in markdown
+    assert "Step error primary categories: `none`" in markdown
     assert "does not identify a remediation candidate in the current PR" in markdown
 
 
@@ -107,6 +120,13 @@ def test_controlled_validation_cli_writes_report_artifacts(tmp_path: Path, capsy
     assert printed["passed_count"] == 2
     assert printed["family_evaluation"]["family"] == "formatting_only"
     assert printed["family_evaluation"]["patch_application_allowed"] is False
+    assert printed["family_evaluation"]["step_error_primary_categories"] == ["none"]
+    assert (
+        printed["family_evaluation"]["patch_score_dimension_statuses"]["proof_strength"][
+            "supported"
+        ]
+        == 2
+    )
     assert printed["boundary"]["contributes_to_current_pr_decision"] is False
     assert report["family_evaluation"]["evaluation_mode"] == "read_only_without_writes"
     assert report["status"] == "passed"
