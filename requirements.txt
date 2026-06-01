@@ -14,13 +14,13 @@ pytest==9.0.3
 pygments==2.20.0
 pytest-cov==7.1.0
 pytest-asyncio==1.4.0
-hypothesis==6.155.0
+hypothesis==6.155.1
 mutmut==3.5.0
 build==1.5.0
 twine==6.2.0
 
 # Security/compliance tooling used in workflows
-pip==26.1.1
+pip==26.1.2
 pip-audit==2.10.0
 cyclonedx-bom==7.3.0
 
