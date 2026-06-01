@@ -85,3 +85,52 @@ def test_adoption_surface_detects_multi_language_evidence_without_running_comman
     assert "mvn test" in _commands(payload)
     assert "dotnet test" in _commands(payload)
     assert payload["artifact_surfaces"] == [{"name": "coverage", "paths": ["coverage.xml"]}]
+
+
+def test_adoption_surface_module_writes_deterministic_artifact(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    _write(tmp_path / "pyproject.toml", '[project]\ndependencies = ["pytest"]\n')
+    _write(tmp_path / "requirements-test.txt", "pytest==9.0.3\n")
+    out = tmp_path / "build" / "sdetkit" / "adoption-surface.json"
+
+    from sdetkit.adoption_surface import main
+
+    rc = main(["--root", str(tmp_path), "--out", str(out), "--format", "json"])
+
+    assert rc == 0
+    stdout = json.loads(capsys.readouterr().out)
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert stdout["adoption_surface_json"] == out.as_posix()
+    assert payload["schema_version"] == SCHEMA_VERSION
+    assert payload["automation_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+
+def test_adoption_surface_cli_dispatch_writes_artifact(tmp_path: Path) -> None:
+    _write(tmp_path / "pyproject.toml", '[project]\ndependencies = ["pytest"]\n')
+    _write(tmp_path / "requirements-test.txt", "pytest==9.0.3\n")
+    out = tmp_path / "adoption-surface.json"
+
+    from sdetkit.cli import main as cli_main
+
+    rc = cli_main(
+        [
+            "adoption-surface",
+            "--root",
+            str(tmp_path),
+            "--out",
+            str(out),
+            "--format",
+            "text",
+        ]
+    )
+
+    assert rc == 0
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == SCHEMA_VERSION
+    assert payload["automation_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False

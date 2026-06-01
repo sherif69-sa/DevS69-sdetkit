@@ -675,6 +675,14 @@ Then use stability-aware command discovery:
     adp.add_argument("--escalation-min-runs", type=int, default=None)
     adp.add_argument("--escalation-min-p0-rate", type=float, default=None)
 
+    adoption_surface = sub.add_parser(
+        "adoption-surface",
+        help="[Advanced but supported] Write read-only adoption surface discovery artifact",
+    )
+    adoption_surface.add_argument("--root", default=".")
+    adoption_surface.add_argument("--out", default="build/sdetkit/adoption-surface.json")
+    adoption_surface.add_argument("--format", choices=["json", "text"], default="json")
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -1231,6 +1239,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         if ns.escalation_min_p0_rate is not None:
             forwarded.extend(["--escalation-min-p0-rate", str(ns.escalation_min_p0_rate)])
         return _run_module_main("sdetkit.adoption", forwarded)
+
+    if ns.cmd == "adoption-surface":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        return _run_module_main("sdetkit.adoption_surface", forwarded)
 
     if ns.cmd == "boost":
         if getattr(ns, "boost_cmd", None) == "scan":

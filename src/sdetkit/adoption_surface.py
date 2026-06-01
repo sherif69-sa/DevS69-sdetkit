@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import argparse
 import json
+import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -285,3 +288,49 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         "merge_authorized": False,
         "semantic_equivalence_proven": False,
     }
+
+
+def write_adoption_surface_artifact(
+    *,
+    repo_root: str | Path = ".",
+    out: str | Path = "build/sdetkit/adoption-surface.json",
+) -> dict[str, Any]:
+    payload = discover_adoption_surface(repo_root)
+    out_path = Path(out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return {
+        "schema_version": payload["schema_version"],
+        "adoption_surface_json": out_path.as_posix(),
+        "automation_allowed": payload["automation_allowed"],
+        "merge_authorized": payload["merge_authorized"],
+        "semantic_equivalence_proven": payload["semantic_equivalence_proven"],
+    }
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit adoption-surface",
+        description="Write a read-only adoption surface discovery artifact.",
+    )
+    parser.add_argument("--root", default=".")
+    parser.add_argument("--out", default="build/sdetkit/adoption-surface.json")
+    parser.add_argument("--format", choices=["json", "text"], default="json")
+    ns = parser.parse_args(list(argv) if argv is not None else None)
+
+    summary = write_adoption_surface_artifact(repo_root=ns.root, out=ns.out)
+
+    if ns.format == "json":
+        sys.stdout.write(json.dumps(summary, indent=2, sort_keys=True) + "\n")
+    else:
+        sys.stdout.write(f"adoption_surface_json={summary['adoption_surface_json']}\n")
+        sys.stdout.write(f"automation_allowed={str(summary['automation_allowed']).lower()}\n")
+        sys.stdout.write(f"merge_authorized={str(summary['merge_authorized']).lower()}\n")
+        sys.stdout.write(
+            f"semantic_equivalence_proven={str(summary['semantic_equivalence_proven']).lower()}\n"
+        )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
