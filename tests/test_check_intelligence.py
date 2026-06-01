@@ -44,6 +44,8 @@ def test_check_intelligence_reports_green_when_all_checks_pass(tmp_path: Path) -
     assert intelligence["checks_seen"] == 2
     assert intelligence["failed_checks"] == []
     assert intelligence["queued_checks"] == []
+    assert intelligence["real_evidence_quality"]["evidence_complete_for_failed_checks"] is True
+    assert intelligence["real_evidence_quality"]["evidence_gaps"] == []
     assert report["schema_version"] == check_intelligence.ACTION_REPORT_SCHEMA_VERSION
     assert report["status"] == "green"
     assert report["primary_blocker"] == {}
@@ -165,6 +167,73 @@ def test_check_intelligence_treats_queued_checks_as_incomplete_not_green(
     assert "queued" in report["primary_blocker"]["impact"]
 
 
+def test_check_intelligence_summarizes_real_evidence_quality(tmp_path: Path) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "required_contexts": ["required-ci"],
+            "check_runs": [
+                {
+                    "name": "Runtime lane",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "headSha": "old-head",
+                    "currentHeadSha": "new-head",
+                    "log": "\n".join(
+                        [
+                            "Traceback (most recent call last):",
+                            '  File "/home/runner/work/repo/src/sdetkit/runtime.py", line 7, in main',
+                            "RuntimeError: boom",
+                        ]
+                    ),
+                },
+                {
+                    "name": "Mystery vendor check",
+                    "status": "completed",
+                    "conclusion": "failure",
+                },
+                {
+                    "name": "Optional slow lane",
+                    "status": "queued",
+                    "conclusion": "",
+                    "required": False,
+                },
+            ],
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    report = check_intelligence.build_action_report(intelligence)
+    markdown = check_intelligence.render_action_report(report)
+
+    quality = intelligence["real_evidence_quality"]
+    assert quality["schema_version"] == "sdetkit.real_check_evidence_quality.v1"
+    assert quality["checks_seen"] == 4
+    assert quality["failed_checks"] == 2
+    assert quality["failed_with_logs"] == 1
+    assert quality["failed_without_logs"] == 1
+    assert quality["failed_with_first_failure"] == 1
+    assert quality["failed_without_first_failure"] == 1
+    assert quality["queued_checks"] == 2
+    assert quality["missing_required_contexts"] == 1
+    assert quality["stale_failed_check_evidence"] == 1
+    assert quality["current_failed_check_evidence"] == 1
+    assert quality["evidence_complete_for_failed_checks"] is False
+    assert "failed_check_logs_missing" in quality["evidence_gaps"]
+    assert "first_failure_not_extracted" in quality["evidence_gaps"]
+    assert "stale_failed_check_evidence" in quality["evidence_gaps"]
+    assert "required_contexts_missing" in quality["evidence_gaps"]
+    assert quality["reporting_only"] is True
+    assert quality["automation_allowed"] is False
+    assert quality["merge_authorized"] is False
+
+    assert report["evidence"]["real_evidence_quality"] == quality
+    assert "Real check evidence quality" in markdown
+    assert "Failed checks with logs: `1`" in markdown
+    assert "Evidence gaps:" in markdown
+    assert "Automation allowed: `false`" in markdown
+
+
 def test_check_intelligence_cli_writes_json_and_markdown_artifacts(tmp_path: Path, capsys) -> None:
     checks = _write_json(
         tmp_path / "checks.json",
@@ -193,7 +262,9 @@ def test_check_intelligence_cli_writes_json_and_markdown_artifacts(tmp_path: Pat
 
     assert intelligence["checks_seen"] == 1
     assert report["status"] == "green"
+    assert "real_evidence_quality" in report["evidence"]
     assert "SDETKit Check Intelligence Action Report" in markdown
+    assert "Real check evidence quality" in markdown
 
 
 def test_check_intelligence_prioritizes_actionable_ruff_failure_over_ci_noise(
