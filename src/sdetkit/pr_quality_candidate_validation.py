@@ -86,6 +86,37 @@ def evaluate_scenario(payload: Mapping[str, Any], *, source_path: Path) -> JsonO
     }
 
 
+def build_family_evaluation(scenarios: Sequence[Mapping[str, Any]]) -> JsonObject:
+    structurally_verified = sum(
+        1
+        for scenario in scenarios
+        if _string(scenario.get("observed_status")) == "candidate_structurally_verified"
+        and _string(scenario.get("observed_verifier_status")) == "structurally_verified_candidate"
+        and scenario.get("passed") is True
+    )
+    review_first_blocked = sum(
+        1
+        for scenario in scenarios
+        if _string(scenario.get("observed_status")) == "candidate_review_first_after_verification"
+        and _string(scenario.get("observed_verifier_status")) == "blocked_review_first"
+        and scenario.get("passed") is True
+    )
+    return {
+        "schema_version": "sdetkit.formatting_candidate_family_evaluation.v1",
+        "family": "formatting_only",
+        "evaluation_mode": "read_only_without_writes",
+        "scenario_count": len(scenarios),
+        "passed_count": sum(1 for scenario in scenarios if scenario.get("passed") is True),
+        "structurally_verified_count": structurally_verified,
+        "review_first_blocked_count": review_first_blocked,
+        "patch_application_allowed": False,
+        "automation_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "current_pr_decision_input": False,
+    }
+
+
 def build_validation_report(scenario_paths: Sequence[Path]) -> JsonObject:
     scenarios = [
         evaluate_scenario(_read_scenario(path), source_path=path) for path in scenario_paths
@@ -97,6 +128,7 @@ def build_validation_report(scenario_paths: Sequence[Path]) -> JsonObject:
         "scenario_count": len(scenarios),
         "passed_count": passed_count,
         "scenarios": scenarios,
+        "family_evaluation": build_family_evaluation(scenarios),
         "boundary": {
             "controlled_fixture_inputs_only": True,
             "contributes_to_current_pr_decision": False,
@@ -109,6 +141,7 @@ def build_validation_report(scenario_paths: Sequence[Path]) -> JsonObject:
 
 def render_markdown(report: Mapping[str, Any]) -> str:
     boundary = _as_dict(report.get("boundary"))
+    family = _as_dict(report.get("family_evaluation"))
     lines = [
         "## Controlled read-only candidate evidence validation",
         "",
@@ -123,6 +156,19 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             f"`{str(bool(boundary.get('semantic_equivalence_proven', False))).lower()}`"
         ),
         "- Interpretation: this section validates the read-only evidence renderer; it does not identify a remediation candidate in the current PR.",
+        "",
+        "### Formatting-only family evaluation",
+        "",
+        f"- Family: `{_string(family.get('family') or 'unknown')}`",
+        f"- Evaluation mode: `{_string(family.get('evaluation_mode') or 'unknown')}`",
+        f"- Structurally verified candidates: `{int(family.get('structurally_verified_count', 0) or 0)}`",
+        f"- Review-first blocked candidates: `{int(family.get('review_first_blocked_count', 0) or 0)}`",
+        (
+            "- Patch application allowed: "
+            f"`{str(bool(family.get('patch_application_allowed', False))).lower()}`"
+        ),
+        f"- Automation allowed: `{str(bool(family.get('automation_allowed', False))).lower()}`",
+        f"- Merge authorized: `{str(bool(family.get('merge_authorized', False))).lower()}`",
         "",
         "### Controlled scenario outcomes",
         "",
@@ -177,6 +223,7 @@ def main(argv: list[str] | None = None) -> int:
                     "status": report["status"],
                     "scenario_count": report["scenario_count"],
                     "passed_count": report["passed_count"],
+                    "family_evaluation": report["family_evaluation"],
                     "boundary": report["boundary"],
                     "artifacts": artifacts,
                 },

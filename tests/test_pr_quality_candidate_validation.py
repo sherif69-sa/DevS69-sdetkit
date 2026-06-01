@@ -44,6 +44,18 @@ def test_controlled_validation_exercises_verified_and_review_first_states_withou
     assert all(row["automation_allowed"] is False for row in rows.values())
     assert all(row["merge_authorized"] is False for row in rows.values())
 
+    family = report["family_evaluation"]
+    assert family["schema_version"] == "sdetkit.formatting_candidate_family_evaluation.v1"
+    assert family["family"] == "formatting_only"
+    assert family["evaluation_mode"] == "read_only_without_writes"
+    assert family["structurally_verified_count"] == 1
+    assert family["review_first_blocked_count"] == 1
+    assert family["patch_application_allowed"] is False
+    assert family["automation_allowed"] is False
+    assert family["merge_authorized"] is False
+    assert family["semantic_equivalence_proven"] is False
+    assert family["current_pr_decision_input"] is False
+
     boundary = report["boundary"]
     assert boundary["controlled_fixture_inputs_only"] is True
     assert boundary["contributes_to_current_pr_decision"] is False
@@ -61,6 +73,12 @@ def test_controlled_validation_markdown_marks_evidence_as_non_decision_input() -
     assert "Scenarios passed: `2/2`" in markdown
     assert "Automation allowed: `false`" in markdown
     assert "Merge authorized: `false`" in markdown
+    assert "Formatting-only family evaluation" in markdown
+    assert "Family: `formatting_only`" in markdown
+    assert "Evaluation mode: `read_only_without_writes`" in markdown
+    assert "Structurally verified candidates: `1`" in markdown
+    assert "Review-first blocked candidates: `1`" in markdown
+    assert "Patch application allowed: `false`" in markdown
     assert "does not identify a remediation candidate in the current PR" in markdown
 
 
@@ -87,6 +105,9 @@ def test_controlled_validation_cli_writes_report_artifacts(tmp_path: Path, capsy
     assert printed["status"] == "passed"
     assert printed["scenario_count"] == 2
     assert printed["passed_count"] == 2
+    assert printed["family_evaluation"]["family"] == "formatting_only"
+    assert printed["family_evaluation"]["patch_application_allowed"] is False
     assert printed["boundary"]["contributes_to_current_pr_decision"] is False
+    assert report["family_evaluation"]["evaluation_mode"] == "read_only_without_writes"
     assert report["status"] == "passed"
     assert "Current PR decision input: `false`" in markdown
