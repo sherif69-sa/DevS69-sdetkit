@@ -140,6 +140,135 @@ def _decision_reason(*, blocked: bool, candidate: bool) -> str:
     return "The patch is not blocked, but its score is below the verification threshold."
 
 
+STEP_ERROR_TAXONOMY_SCHEMA_VERSION = "sdetkit.step_error_taxonomy.v1"
+STEP_ERROR_CATEGORIES = [
+    "none",
+    "scope_expansion",
+    "skipped_proof",
+    "unsafe_authority_request",
+    "false_success_claim",
+    "premature_completion",
+]
+
+
+def _authority_claimed(payload: Mapping[str, Any]) -> bool:
+    return any(
+        _bool(payload.get(key))
+        for key in (
+            "patch_application_allowed",
+            "automation_allowed",
+            "merge_authorized",
+            "semantic_equivalence_proven",
+        )
+    )
+
+
+def _flag_codes(flags: list[JsonObject]) -> set[str]:
+    return {_string(flag.get("code")) for flag in flags if _string(flag.get("code"))}
+
+
+def _step_error_taxonomy(flags: list[JsonObject]) -> JsonObject:
+    codes = _flag_codes(flags)
+    categories: list[str] = []
+    if codes.intersection({"OUTSIDE_EXACT_FIX_SCOPE", "PROTECTED_PATH_CHANGED"}):
+        categories.append("scope_expansion")
+    if "PROOF_COMMANDS_MISSING" in codes:
+        categories.append("skipped_proof")
+    if "UNSAFE_AUTHORITY_REQUEST" in codes:
+        categories.append("unsafe_authority_request")
+
+    return {
+        "schema_version": STEP_ERROR_TAXONOMY_SCHEMA_VERSION,
+        "supported_categories": STEP_ERROR_CATEGORIES,
+        "observed_categories": categories,
+        "primary_category": categories[0] if categories else "none",
+        "automation_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+
+def _dimension(status: str, score: int, reason: str) -> JsonObject:
+    return {
+        "status": status,
+        "score": score,
+        "reason": reason,
+    }
+
+
+def _outcome_dimensions(
+    flags: list[JsonObject],
+    *,
+    changed_files: list[str],
+    proof_commands: list[str],
+    safe_pattern_match: bool,
+) -> JsonObject:
+    codes = _flag_codes(flags)
+    blocked = any(_bool(flag.get("blocking")) for flag in flags)
+
+    diagnostic_blocked = bool(
+        codes.intersection({"PLAN_NOT_FOUND", "PLAN_REVIEW_FIRST", "NON_FORMATTING_SURFACE"})
+    )
+    scope_blocked = bool(
+        codes.intersection(
+            {"NO_CHANGED_FILES", "OUTSIDE_EXACT_FIX_SCOPE", "PROTECTED_PATH_CHANGED"}
+        )
+    )
+    proof_blocked = "PROOF_COMMANDS_MISSING" in codes
+    authority_blocked = "UNSAFE_AUTHORITY_REQUEST" in codes
+
+    return {
+        "diagnostic_precision": _dimension(
+            "blocked" if diagnostic_blocked else "supported",
+            0 if diagnostic_blocked else 100,
+            "diagnosis and remediation plan are formatter-compatible"
+            if not diagnostic_blocked
+            else "diagnosis or remediation plan requires review-first handling",
+        ),
+        "patch_scope_safety": _dimension(
+            "blocked" if scope_blocked else "contained",
+            0 if scope_blocked else 100,
+            "changed files stay inside the exact formatting scope"
+            if not scope_blocked
+            else "changed files are missing, protected, or outside the approved scope",
+        ),
+        "proof_strength": _dimension(
+            "blocked"
+            if proof_blocked
+            else ("supported" if safe_pattern_match else "needs_more_history"),
+            0 if proof_blocked else (100 if safe_pattern_match else 80),
+            "required proof commands and repeated safe-fix history are present"
+            if safe_pattern_match
+            else (
+                "required proof commands are missing"
+                if proof_blocked
+                else "proof commands exist, but repeated safe-fix history is not proven yet"
+            ),
+        ),
+        "reviewability": _dimension(
+            "reviewable" if changed_files and proof_commands else "thin_evidence",
+            100 if changed_files and proof_commands else 50,
+            "candidate exposes changed files and proof requirements for human review"
+            if changed_files and proof_commands
+            else "candidate evidence is missing changed files or proof requirements",
+        ),
+        "anti_cheat_integrity": _dimension(
+            "blocked" if authority_blocked else "preserved",
+            0 if authority_blocked else 100,
+            "candidate does not claim patch, automation, merge, or semantic authority"
+            if not authority_blocked
+            else "candidate attempted to claim authority outside PatchScorer",
+        ),
+        "regression_risk": _dimension(
+            "blocked" if blocked else ("low" if not codes else "watch"),
+            0 if blocked else (100 if not codes else 90),
+            "no blocking regression-risk signals were observed"
+            if not blocked
+            else "blocking safety signals require review-first handling",
+        ),
+    }
+
+
 def score_patch(
     *,
     remediation_plan: Mapping[str, Any],
@@ -156,7 +285,21 @@ def score_patch(
     plan = _select_plan(remediation_plan, diagnosis_id)
     patch_id = _string(proposed_patch.get("patch_id")) or "proposed-patch"
     changed_files = _string_list(proposed_patch.get("changed_files"))
+    proposed_authority_claimed = _authority_claimed(proposed_patch)
     flags: list[JsonObject] = []
+
+    if proposed_authority_claimed:
+        flags.append(
+            _risk_flag(
+                "UNSAFE_AUTHORITY_REQUEST",
+                (
+                    "PatchScorer input attempted to claim patch, automation, merge, "
+                    "or semantic authority."
+                ),
+                blocking=True,
+                penalty=100,
+            )
+        )
 
     if not plan:
         flags.append(
@@ -175,6 +318,13 @@ def score_patch(
             "score": 0,
             "minimum_score": minimum_score,
             "risk_flags": flags,
+            "dimensions": _outcome_dimensions(
+                flags,
+                changed_files=changed_files,
+                proof_commands=[],
+                safe_pattern_match=False,
+            ),
+            "step_error_taxonomy": _step_error_taxonomy(flags),
             "decision": {
                 "status": "blocked_review_first",
                 "candidate_for_protected_verification": False,
@@ -330,6 +480,13 @@ def score_patch(
         "score": score,
         "minimum_score": minimum_score,
         "risk_flags": flags,
+        "dimensions": _outcome_dimensions(
+            flags,
+            changed_files=changed_files,
+            proof_commands=proof_commands,
+            safe_pattern_match=safe_pattern_match,
+        ),
+        "step_error_taxonomy": _step_error_taxonomy(flags),
         "decision": {
             "status": status,
             "candidate_for_protected_verification": candidate,
@@ -347,6 +504,8 @@ def score_patch(
 def render_markdown(payload: Mapping[str, Any]) -> str:
     decision = _as_dict(payload.get("decision"))
     history = _as_dict(payload.get("history_evidence"))
+    taxonomy = _as_dict(payload.get("step_error_taxonomy"))
+    dimensions = _as_dict(payload.get("dimensions"))
     flags = [_as_dict(item) for item in _as_list(payload.get("risk_flags"))]
 
     lines = [
@@ -360,16 +519,38 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
         f"- Score: `{int(payload.get('score', 0) or 0)}`",
         f"- Minimum score: `{int(payload.get('minimum_score', 0) or 0)}`",
         f"- Decision: `{_string(decision.get('status'))}`",
+        f"- Step error primary category: `{_string(taxonomy.get('primary_category') or 'none')}`",
         "- Automation allowed: `false`",
         "",
-        "## History evidence",
-        "",
-        f"- Matching repeated safe-fix pattern: `{str(_bool(history.get('safe_fix_pattern_match'))).lower()}`",
-        f"- Matching recurring review-first surface: `{str(_bool(history.get('review_first_surface_match'))).lower()}`",
-        "",
-        "## Risk flags",
+        "## Outcome dimensions",
         "",
     ]
+    for name in (
+        "diagnostic_precision",
+        "patch_scope_safety",
+        "proof_strength",
+        "reviewability",
+        "anti_cheat_integrity",
+        "regression_risk",
+    ):
+        dimension = _as_dict(dimensions.get(name))
+        lines.append(
+            f"- `{name}`: status=`{_string(dimension.get('status'))}` "
+            f"score=`{int(dimension.get('score', 0) or 0)}`"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## History evidence",
+            "",
+            f"- Matching repeated safe-fix pattern: `{str(_bool(history.get('safe_fix_pattern_match'))).lower()}`",
+            f"- Matching recurring review-first surface: `{str(_bool(history.get('review_first_surface_match'))).lower()}`",
+            "",
+            "## Risk flags",
+            "",
+        ]
+    )
 
     if flags:
         for flag in flags:
@@ -454,7 +635,9 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "artifacts": artifacts,
                     "decision": payload["decision"],
+                    "dimensions": payload["dimensions"],
                     "score": payload["score"],
+                    "step_error_taxonomy": payload["step_error_taxonomy"],
                 },
                 indent=2,
                 sort_keys=True,
