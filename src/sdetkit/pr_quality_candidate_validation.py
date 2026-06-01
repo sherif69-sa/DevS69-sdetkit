@@ -33,6 +33,36 @@ def _string(value: Any) -> str:
     return str(value or "").strip()
 
 
+DIMENSION_NAMES = (
+    "diagnostic_precision",
+    "patch_scope_safety",
+    "proof_strength",
+    "reviewability",
+    "anti_cheat_integrity",
+    "regression_risk",
+)
+
+
+def _dimension_status_counts(scenarios: Sequence[Mapping[str, Any]]) -> JsonObject:
+    summary: JsonObject = {}
+    for name in DIMENSION_NAMES:
+        counts: JsonObject = {}
+        for scenario in scenarios:
+            dimensions = _as_dict(scenario.get("patch_score_dimensions"))
+            status = _string(_as_dict(dimensions.get(name)).get("status") or "unknown")
+            counts[status] = int(counts.get(status, 0) or 0) + 1
+        summary[name] = counts
+    return summary
+
+
+def _primary_categories(scenarios: Sequence[Mapping[str, Any]]) -> list[str]:
+    categories = {
+        _string(_as_dict(scenario.get("step_error_taxonomy")).get("primary_category") or "none")
+        for scenario in scenarios
+    }
+    return sorted(category for category in categories if category)
+
+
 def _read_scenario(path: Path) -> JsonObject:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -56,6 +86,9 @@ def evaluate_scenario(payload: Mapping[str, Any], *, source_path: Path) -> JsonO
         verification_evidence=_as_dict(payload.get("verification_evidence")),
     )
     decision = _as_dict(visibility.get("decision_boundary"))
+    score = _as_dict(visibility.get("patch_score"))
+    dimensions = _as_dict(score.get("dimensions"))
+    taxonomy = _as_dict(score.get("step_error_taxonomy"))
     verifier = _as_dict(_as_dict(visibility.get("protected_verifier")).get("decision"))
     rendered = render_candidate_markdown(visibility)
     expected_status = _string(payload.get("expected_status"))
@@ -79,6 +112,9 @@ def evaluate_scenario(payload: Mapping[str, Any], *, source_path: Path) -> JsonO
         "observed_verifier_status": _string(verifier.get("status")),
         "candidate_renderer_exercised": bool(rendered),
         "candidate_markdown": rendered,
+        "patch_score_dimensions": dimensions,
+        "step_error_taxonomy": taxonomy,
+        "step_error_primary_category": _string(taxonomy.get("primary_category") or "none"),
         "automation_allowed": bool(decision.get("automation_allowed", False)),
         "merge_authorized": bool(decision.get("merge_authorized", False)),
         "semantic_equivalence_proven": bool(decision.get("semantic_equivalence_proven", False)),
@@ -114,6 +150,8 @@ def build_family_evaluation(scenarios: Sequence[Mapping[str, Any]]) -> JsonObjec
         "merge_authorized": False,
         "semantic_equivalence_proven": False,
         "current_pr_decision_input": False,
+        "patch_score_dimension_statuses": _dimension_status_counts(scenarios),
+        "step_error_primary_categories": _primary_categories(scenarios),
     }
 
 
@@ -170,9 +208,28 @@ def render_markdown(report: Mapping[str, Any]) -> str:
         f"- Automation allowed: `{str(bool(family.get('automation_allowed', False))).lower()}`",
         f"- Merge authorized: `{str(bool(family.get('merge_authorized', False))).lower()}`",
         "",
-        "### Controlled scenario outcomes",
+        "### PatchScorer dimension reporting",
         "",
     ]
+    dimension_statuses = _as_dict(family.get("patch_score_dimension_statuses"))
+    for name in DIMENSION_NAMES:
+        counts = _as_dict(dimension_statuses.get(name))
+        if counts:
+            rendered_counts = ", ".join(
+                f"{key}={int(value or 0)}" for key, value in sorted(counts.items())
+            )
+            lines.append(f"- `{name}`: {rendered_counts}")
+
+    categories = [_string(item) for item in _as_list(family.get("step_error_primary_categories"))]
+    lines.extend(
+        [
+            "- Step error primary categories: "
+            + (", ".join(f"`{category}`" for category in categories) or "none"),
+            "",
+            "### Controlled scenario outcomes",
+            "",
+        ]
+    )
     for scenario in _as_list(report.get("scenarios")):
         row = _as_dict(scenario)
         lines.extend(
