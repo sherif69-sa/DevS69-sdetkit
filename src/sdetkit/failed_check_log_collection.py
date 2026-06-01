@@ -13,6 +13,11 @@ ANNOTATION_SCHEMA_VERSION = "sdetkit.pr_quality.failed_check_annotations.v1"
 
 JsonObject = dict[str, Any]
 
+WORKFLOW_JOB_EVIDENCE_QUALITY_KEY = "_".join(("workflow", "job", "evidence", "quality"))
+WORKFLOW_JOB_EVIDENCE_QUALITY_SCHEMA_VERSION = ".".join(
+    ("sdetkit", WORKFLOW_JOB_EVIDENCE_QUALITY_KEY, "v1")
+)
+
 _FAILURE_CONCLUSIONS = {
     "action_required",
     "cancelled",
@@ -263,7 +268,7 @@ def _workflow_job_evidence_quality(logs: list[JsonObject]) -> JsonObject:
         gaps.append("uncollectible_failed_checks")
 
     return {
-        "schema_version": "sdetkit.workflow_job_evidence_quality.v1",
+        "schema_version": WORKFLOW_JOB_EVIDENCE_QUALITY_SCHEMA_VERSION,
         "failed_checks": failed_checks,
         "existing_logs_collected": existing_logs_collected,
         "github_actions_log_download_supported": github_actions_supported,
@@ -346,7 +351,7 @@ def build_failed_check_log_manifest(
         "annotation_collected_count": len(
             [item for item in logs if bool(item.get("annotation_collected", False))]
         ),
-        "workflow_job_evidence_quality": _workflow_job_evidence_quality(logs),
+        WORKFLOW_JOB_EVIDENCE_QUALITY_KEY: _workflow_job_evidence_quality(logs),
         "logs": logs,
     }
 
@@ -399,7 +404,8 @@ def render_download_script(manifest: JsonObject) -> str:
                     ),
                     (
                         f'raw_annotations="${{RUNNER_TEMP:-/tmp}}/'
-                        f'sdetkit-check-run-{check_run_id}-annotations.json"'
+                        f"sdetkit-check-run-{check_run_id}-"
+                        'annotations.json"'
                     ),
                     (
                         f"echo collecting_failed_check_annotations="

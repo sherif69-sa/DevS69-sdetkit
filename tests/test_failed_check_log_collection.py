@@ -35,8 +35,8 @@ def test_failed_check_log_collection_plans_github_actions_job_download(tmp_path:
     assert manifest["schema_version"] == "sdetkit.pr_quality.failed_check_logs.v1"
     assert manifest["failed_check_count"] == 1
     assert manifest["collected_log_count"] == 0
-    assert manifest["workflow_job_evidence_quality"]["failed_checks"] == 1
-    assert manifest["workflow_job_evidence_quality"]["download_script_required"] is True
+    assert manifest[logs.WORKFLOW_JOB_EVIDENCE_QUALITY_KEY]["failed_checks"] == 1
+    assert manifest[logs.WORKFLOW_JOB_EVIDENCE_QUALITY_KEY]["download_script_required"] is True
 
     item = manifest["logs"][0]
     assert item["check_name"] == "Fast CI lane (py3.12)"
@@ -132,8 +132,8 @@ def test_failed_check_log_collection_summarizes_workflow_job_evidence_quality(
         out_dir=tmp_path / "check-logs",
     )
 
-    quality = manifest["workflow_job_evidence_quality"]
-    assert quality["schema_version"] == "sdetkit.workflow_job_evidence_quality.v1"
+    quality = manifest[logs.WORKFLOW_JOB_EVIDENCE_QUALITY_KEY]
+    assert quality["schema_version"] == logs.WORKFLOW_JOB_EVIDENCE_QUALITY_SCHEMA_VERSION
     assert quality["failed_checks"] == 4
     assert quality["existing_logs_collected"] == 1
     assert quality["github_actions_log_download_supported"] == 1
@@ -185,7 +185,9 @@ def test_failed_check_log_collection_cli_writes_manifest_and_script(
     assert rc == 0
     stdout = json.loads(capsys.readouterr().out)
     assert stdout["failed_check_count"] == 1
-    assert stdout["workflow_job_evidence_quality"]["github_actions_log_download_supported"] == 1
+    assert (
+        stdout[logs.WORKFLOW_JOB_EVIDENCE_QUALITY_KEY]["github_actions_log_download_supported"] == 1
+    )
     assert Path(stdout["manifest_path"]).exists()
     assert Path(stdout["download_script"]).exists()
 
@@ -202,7 +204,8 @@ def test_failed_check_log_collection_prefers_actions_url_over_check_run_api_url(
                     "status": "completed",
                     "conclusion": "failure",
                     "url": "https://api.github.com/repos/acme/project/check-runs/76639814418",
-                    "details_url": "https://github.com/acme/project/actions/runs/26063321385/job/76628412038",
+                    "details_url": "https://github.com/acme/project/actions/runs/"
+                    "26063321385/job/76628412038",
                 }
             ]
         },
