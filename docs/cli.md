@@ -89,6 +89,27 @@ Available utility lanes include:
 
 `triage-ci` reads a saved failed CI job log and emits an advisory report in text, JSON, or Markdown. Use it before patching when the final process-exit line is only wrapper noise.
 
+## Adoption surface artifact
+
+Use `adoption-surface` when an operator needs a read-only map of the repository before choosing proof commands or rollout depth.
+
+```bash
+python -m sdetkit adoption-surface --root . --out build/sdetkit/adoption-surface.json --format text
+```
+
+The command writes a deterministic JSON artifact at `build/sdetkit/adoption-surface.json` by default. It detects repository evidence such as languages, package managers, CI systems, security tools, artifact surfaces, and recommended proof commands.
+
+Safety boundary:
+
+- it does not run the recommended proof commands
+- it does not install dependencies
+- it does not apply patches
+- it does not authorize automation or merge
+- the emitted payload keeps `automation_allowed=false`, `merge_authorized=false`, and `semantic_equivalence_proven=false`
+
+Use this artifact as an operator handoff before expanding into CI rollout, investigation, or portfolio automation.
+
+
 - `triage-ci`, `kv`, `apiget`, `cassette-get`, `patch`, `maintenance`, `ops`, `notify`, `agent`
 
 ## Transition-era and legacy-oriented material
