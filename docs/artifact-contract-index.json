@@ -26,6 +26,39 @@
       "stability": "public"
     },
     {
+      "id": "check-intelligence-json",
+      "path": "build/pr-quality/check-intelligence.json",
+      "produced_by": "python -m sdetkit.check_intelligence --checks-json <checks.json> --out-dir build/pr-quality",
+      "schema_version": "sdetkit.pr_quality.check_intelligence.v1",
+      "required_fields": [
+        "schema_version",
+        "checks_seen",
+        "failed_checks",
+        "queued_checks",
+        "startup_failures",
+        "real_evidence_quality",
+        "security_review",
+        "code_scanning_review"
+      ],
+      "stability": "advanced"
+    },
+    {
+      "id": "check-intelligence-action-report-json",
+      "path": "build/pr-quality/action-report.json",
+      "produced_by": "python -m sdetkit.check_intelligence --checks-json <checks.json> --out-dir build/pr-quality",
+      "schema_version": "sdetkit.pr_quality.action_report.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "primary_blocker",
+        "automation",
+        "recommended_actions",
+        "proof_commands",
+        "evidence"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "adoption-surface-json",
       "path": "build/sdetkit/adoption-surface.json",
       "produced_by": "python -m sdetkit adoption-surface --root . --out build/sdetkit/adoption-surface.json --format text",
