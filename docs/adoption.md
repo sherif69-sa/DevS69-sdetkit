@@ -32,6 +32,19 @@ For maintainers validating the external-install contract itself (from this repos
 python -m pytest -q tests/test_external_first_run_contract.py
 ```
 
+
+## Optional preflight — capture the adoption surface
+
+Before choosing rollout depth, capture a read-only repository surface artifact:
+
+```bash
+python -m sdetkit adoption-surface --root . --out build/sdetkit/adoption-surface.json --format text
+```
+
+Use the generated `build/sdetkit/adoption-surface.json` to review detected languages, package managers, CI systems, security tooling, artifact surfaces, and recommended proof commands.
+
+This is an evidence-only handoff. It does not run proof commands, install dependencies, mutate the repository, authorize automation, or authorize merge.
+
 ## Stage 1 — local proof in the team repo
 
 ```bash
