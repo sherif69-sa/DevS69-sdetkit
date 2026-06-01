@@ -3,7 +3,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import adoption_surface, check_intelligence, doctor, review
+from sdetkit import (
+    adoption_surface,
+    check_intelligence,
+    doctor,
+    repo_memory,
+    review,
+    safe_fix_history_memory,
+    trajectory_store,
+)
 from sdetkit.artifact_contract_index import INDEX_SCHEMA_VERSION, build_index, write_index
 from sdetkit.checks import artifacts as check_artifacts
 
@@ -13,6 +21,25 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
     assert payload["schema_version"] == INDEX_SCHEMA_VERSION
 
     entries = {item["id"]: item for item in payload["artifacts"]}
+    assert entries["trajectory-jsonl"]["schema_version"] == trajectory_store.SCHEMA_VERSION
+    assert entries["repo-memory-profile-json"]["schema_version"] == repo_memory.SCHEMA_VERSION
+    assert (
+        entries["safe-fix-history-json"]["schema_version"] == safe_fix_history_memory.SCHEMA_VERSION
+    )
+    assert (
+        entries["safe-fix-trends-json"]["schema_version"]
+        == safe_fix_history_memory.TRENDS_SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "decision",
+        "final_result",
+    }.issubset(set(entries["trajectory-jsonl"]["required_fields"]))
+    assert {
+        "schema_version",
+        "profile_status",
+        "memory_mode",
+    }.issubset(set(entries["repo-memory-profile-json"]["required_fields"]))
     assert (
         entries["check-intelligence-json"]["schema_version"]
         == check_intelligence.CHECK_INTELLIGENCE_SCHEMA_VERSION
