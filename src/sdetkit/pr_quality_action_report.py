@@ -47,6 +47,9 @@ HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION = "_".join(
     ("historical", "disposition", "authorizes", "current", "action")
 )
 
+
+FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
+
 BANNED_EDUCATIONAL_PHRASES = (
     "Quality is green, so the review focus is not coverage.",
     "The comment must guide maintainers toward the changed risk surface.",
@@ -398,6 +401,29 @@ def _security_finding_diagnosis_lines(security_finding_diagnosis: JsonObject | N
     return lines
 
 
+def _failed_step_evidence_lines(payload: JsonObject, *, prefix: str = "  - ") -> list[str]:
+    step = _as_dict(payload.get(FAILED_STEP_EVIDENCE_KEY))
+    if not step:
+        return []
+
+    status = _string(step.get("status") or "unknown")
+    command = _string(step.get("command"))
+    source = _string(step.get("source") or "unknown")
+    line_number = _int(step.get("line_number"))
+    failure_line_number = _int(step.get("failure_line_number"))
+
+    lines = [f"{prefix}Failed step evidence: `{status}`"]
+    if command:
+        lines.append(f"{prefix}Failed command: `{command}`")
+    if line_number or failure_line_number:
+        location = f"command line {line_number or 'unknown'}, failure line {failure_line_number or 'unknown'}"
+        lines.append(f"{prefix}Failed step location: `{location}`")
+    lines.append(f"{prefix}Failed step source: `{source}`")
+    lines.append(f"{prefix}Failed step reporting only: `true`")
+    lines.append(f"{prefix}Failed step automation allowed: `false`")
+    return lines
+
+
 def _failed_check_lines(check_intelligence: JsonObject) -> list[str]:
     failed = [_as_dict(item) for item in _as_list(check_intelligence.get("failed_checks"))]
     if not failed:
@@ -421,6 +447,7 @@ def _failed_check_lines(check_intelligence: JsonObject) -> list[str]:
             lines.append(f"  - First failure: `{first_line}`")
             lines.append(f"  - Failure location: `{location}`")
             lines.append(f"  - Failure tool/kind: `{tool}` / `{kind}`")
+        lines.extend(_failed_step_evidence_lines(item))
         safe_remediation = _as_dict(item.get("safe_remediation"))
         if bool(safe_remediation.get("safe_to_auto_fix", False)):
             strategy = _string(safe_remediation.get("strategy") or "unknown")
@@ -482,6 +509,7 @@ def _primary_blocker_lines(primary: JsonObject) -> list[str]:
         lines.append(f"- First failure: `{first_line}`")
         lines.append(f"- Failure location: `{location}`")
         lines.append(f"- Failure tool/kind: `{tool}` / `{kind}`")
+    lines.extend(_failed_step_evidence_lines(primary, prefix="- "))
     safe_remediation = _as_dict(primary.get("safe_remediation"))
     if bool(safe_remediation.get("safe_to_auto_fix", False)):
         strategy = _string(safe_remediation.get("strategy") or "unknown")

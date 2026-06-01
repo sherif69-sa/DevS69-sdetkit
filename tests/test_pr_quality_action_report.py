@@ -825,6 +825,16 @@ def test_action_report_comment_renders_failed_check_first_failure() -> None:
                 "kind": "type_contract",
             },
             "first_failure_line": "src/sdetkit/example.py:10: error: Incompatible return value type",
+            check_intelligence.FAILED_STEP_EVIDENCE_KEY: {
+                "status": "found",
+                "command": "python -m mypy src",
+                "source": "github_actions_group",
+                "line_number": 4,
+                "failure_line_number": 12,
+                "reporting_only": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+            },
         },
         "automation": {"attempted": False, "allowed": False, "reason": "review-first"},
         "recommended_actions": ["Fix the first reported contract violation."],
@@ -847,6 +857,16 @@ def test_action_report_comment_renders_failed_check_first_failure() -> None:
                     "tool": "mypy",
                     "kind": "type_contract",
                 },
+                check_intelligence.FAILED_STEP_EVIDENCE_KEY: {
+                    "status": "found",
+                    "command": "python -m mypy src",
+                    "source": "github_actions_group",
+                    "line_number": 4,
+                    "failure_line_number": 12,
+                    "reporting_only": True,
+                    "automation_allowed": False,
+                    "merge_authorized": False,
+                },
             }
         ],
         "queued_checks": [],
@@ -862,6 +882,10 @@ def test_action_report_comment_renders_failed_check_first_failure() -> None:
     )
     assert "Failure location: `line 12`" in body
     assert "Failure tool/kind: `mypy` / `type_contract`" in body
+    assert "Failed step evidence: `found`" in body
+    assert "Failed command: `python -m mypy src`" in body
+    assert "Failed step reporting only: `true`" in body
+    assert "Failed step automation allowed: `false`" in body
 
 
 def test_action_report_comment_renders_safe_remediation_eligibility() -> None:

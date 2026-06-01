@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from sdetkit import check_intelligence
 from sdetkit.pr_quality_action_report import main, write_comment_body
 
 
@@ -49,6 +50,16 @@ def test_pr_quality_action_report_writes_optional_current_head_failure_bundle(tm
                         "line_number": 17,
                         "tool": "pytest",
                         "kind": "test_failure",
+                    },
+                    check_intelligence.FAILED_STEP_EVIDENCE_KEY: {
+                        "status": "found",
+                        "command": "python -m pytest -q tests/test_contract.py -o addopts=",
+                        "source": "github_actions_group",
+                        "line_number": 9,
+                        "failure_line_number": 17,
+                        "reporting_only": True,
+                        "automation_allowed": False,
+                        "merge_authorized": False,
                     },
                     "diagnosis": {
                         "code": "TEST_FAILURE",
@@ -105,6 +116,13 @@ def test_pr_quality_action_report_writes_optional_current_head_failure_bundle(tm
     assert manifest["review_first"] is True
     assert manifest["safe_fix_allowed"] is False
     assert bundle["first_failures"][0]["line"] == "FAILED tests/test_contract.py::test_contract"
+    step = bundle["first_failures"][0][check_intelligence.FAILED_STEP_EVIDENCE_KEY]
+    assert step["status"] == "found"
+    assert step["command"] == "python -m pytest -q tests/test_contract.py -o addopts="
+    assert step["reporting_only"] is True
+    assert step["automation_allowed"] is False
+    assert "Failed step evidence: `found`" in markdown
+    assert "Failed command: `python -m pytest -q tests/test_contract.py -o addopts=`" in markdown
     assert "src/sdetkit/check_intelligence.py" in bundle["owner_files"]
     assert "# Current-head failure evidence bundle" in markdown
     assert "Full CI lane" in markdown
