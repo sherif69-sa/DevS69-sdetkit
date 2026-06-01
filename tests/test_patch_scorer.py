@@ -81,6 +81,13 @@ def test_patch_scorer_marks_exact_formatting_patch_as_verification_candidate_onl
     assert payload["decision"]["automation_allowed"] is False
     assert payload["proof_requirements"] == ["python -m pre_commit run -a"]
     assert payload["history_evidence"]["safe_fix_pattern_match"] is True
+    assert payload["step_error_taxonomy"]["primary_category"] == "none"
+    assert payload["dimensions"]["diagnostic_precision"]["status"] == "supported"
+    assert payload["dimensions"]["patch_scope_safety"]["status"] == "contained"
+    assert payload["dimensions"]["proof_strength"]["status"] == "supported"
+    assert payload["dimensions"]["reviewability"]["status"] == "reviewable"
+    assert payload["dimensions"]["anti_cheat_integrity"]["status"] == "preserved"
+    assert payload["dimensions"]["regression_risk"]["status"] == "low"
 
 
 def test_patch_scorer_blocks_out_of_scope_and_protected_test_changes() -> None:
@@ -100,6 +107,9 @@ def test_patch_scorer_blocks_out_of_scope_and_protected_test_changes() -> None:
     assert payload["score"] == 0
     assert "OUTSIDE_EXACT_FIX_SCOPE" in codes
     assert "PROTECTED_PATH_CHANGED" in codes
+    assert payload["step_error_taxonomy"]["primary_category"] == "scope_expansion"
+    assert "scope_expansion" in payload["step_error_taxonomy"]["observed_categories"]
+    assert payload["dimensions"]["patch_scope_safety"]["status"] == "blocked"
     assert payload["decision"]["status"] == "blocked_review_first"
     assert payload["decision"]["candidate_for_protected_verification"] is False
     assert payload["decision"]["automation_allowed"] is False
@@ -136,6 +146,8 @@ def test_patch_scorer_keeps_unproven_safe_pattern_read_only() -> None:
     assert payload["score"] == 90
     assert payload["risk_flags"][0]["code"] == "SAFE_PATTERN_NOT_REPEATED"
     assert payload["risk_flags"][0]["blocking"] is False
+    assert payload["dimensions"]["proof_strength"]["status"] == "needs_more_history"
+    assert payload["dimensions"]["regression_risk"]["status"] == "watch"
     assert payload["decision"]["status"] == "candidate_for_protected_verification"
     assert payload["decision"]["automation_allowed"] is False
 
@@ -156,6 +168,26 @@ def test_patch_scorer_blocks_matching_review_first_surface_history() -> None:
     assert payload["score"] == 0
     assert payload["risk_flags"][0]["code"] == "RECURRING_REVIEW_FIRST_SURFACE"
     assert payload["decision"]["status"] == "blocked_review_first"
+
+
+def test_patch_scorer_blocks_unsafe_authority_claims() -> None:
+    payload = score_patch(
+        remediation_plan=_safe_plan(),
+        proposed_patch={
+            "patch_id": "authority-claim",
+            "changed_files": ["src/sdetkit/example.py"],
+            "automation_allowed": True,
+            "merge_authorized": True,
+        },
+        pattern_insights=_matching_safe_insights(),
+    )
+
+    codes = {flag["code"] for flag in payload["risk_flags"]}
+    assert "UNSAFE_AUTHORITY_REQUEST" in codes
+    assert payload["step_error_taxonomy"]["primary_category"] == "unsafe_authority_request"
+    assert payload["dimensions"]["anti_cheat_integrity"]["status"] == "blocked"
+    assert payload["decision"]["status"] == "blocked_review_first"
+    assert payload["decision"]["automation_allowed"] is False
 
 
 def test_patch_scorer_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
@@ -197,7 +229,11 @@ def test_patch_scorer_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> No
     markdown = (out_dir / "patch-score.md").read_text(encoding="utf-8")
 
     assert printed["score"] == 100
+    assert printed["step_error_taxonomy"]["primary_category"] == "none"
+    assert printed["dimensions"]["anti_cheat_integrity"]["status"] == "preserved"
     assert score["decision"]["status"] == "candidate_for_protected_verification"
     assert score["decision"]["automation_allowed"] is False
     assert "# Patch safety score" in markdown
+    assert "Outcome dimensions" in markdown
+    assert "Step error primary category: `none`" in markdown
     assert "ProtectedVerifier must exist and pass" in markdown
