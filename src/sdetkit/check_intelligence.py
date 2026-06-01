@@ -28,6 +28,10 @@ DEPENDENCY_AUDIT_OWNER_FILES = [
     ".github/scripts/check_pip_audit_baseline.py",
 ]
 
+FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
+FAILED_WITH_STEP_EVIDENCE_KEY = "_".join(("failed", "with", "step", "evidence"))
+FAILED_WITHOUT_STEP_EVIDENCE_KEY = "_".join(("failed", "without", "step", "evidence"))
+
 
 def _extract_dependency_audit_evidence(log_text: str) -> JsonObject:
 
@@ -693,6 +697,140 @@ def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
     return {}
 
 
+def _looks_like_command(line: str) -> bool:
+    lowered = line.strip().lower()
+    return lowered.startswith(
+        (
+            "python ",
+            "python3 ",
+            "python -m ",
+            "pytest ",
+            "ruff ",
+            "mypy ",
+            "pip-audit ",
+            "pre-commit ",
+            "make ",
+            "gh ",
+        )
+    )
+
+
+def _command_matches_failure_tool(line: str, first_failure: JsonObject) -> bool:
+    lowered = line.lower()
+    tool = _string(first_failure.get("tool")).lower()
+    kind = _string(first_failure.get("kind")).lower()
+    if tool == "pip-audit":
+        return "pip-audit" in lowered
+    if tool == "mypy":
+        return "mypy" in lowered
+    if tool == "ruff" or kind == "format_drift":
+        return "ruff" in lowered or "pre-commit" in lowered
+    if tool == "pytest" or kind == "test_failure":
+        return "pytest" in lowered
+    if tool == "python" or kind == "runtime_failure":
+        return lowered.startswith(("python ", "python3 ", "python -m "))
+    return _looks_like_command(line)
+
+
+def _github_actions_run_command(line: str) -> str:
+    stripped = line.strip()
+    if stripped.startswith("##[group]Run "):
+        return stripped.removeprefix("##[group]Run ").strip()
+    if stripped.startswith("Run "):
+        return stripped.removeprefix("Run ").strip()
+    return ""
+
+
+def _failed_step_evidence(log_text: str, first_failure: JsonObject) -> JsonObject:
+    if not log_text.strip():
+        return {
+            "status": "missing_log",
+            "command": "",
+            "source": "",
+            "line_number": 0,
+            "failure_line_number": int(first_failure.get("line_number", 0) or 0),
+            "reporting_only": True,
+            "automation_allowed": False,
+            "merge_authorized": False,
+        }
+
+    failure_line_number = int(first_failure.get("line_number", 0) or 0)
+    if failure_line_number <= 0:
+        return {
+            "status": "missing_first_failure",
+            "command": "",
+            "source": "",
+            "line_number": 0,
+            "failure_line_number": 0,
+            "reporting_only": True,
+            "automation_allowed": False,
+            "merge_authorized": False,
+        }
+
+    lines = log_text.splitlines()
+    start = min(failure_line_number - 1, len(lines) - 1)
+
+    for index in range(start, -1, -1):
+        command = _github_actions_run_command(lines[index])
+        if command and _command_matches_failure_tool(command, first_failure):
+            return {
+                "status": "found",
+                "command": command,
+                "source": "github_actions_group",
+                "line_number": index + 1,
+                "failure_line_number": failure_line_number,
+                "distance_to_failure": failure_line_number - (index + 1),
+                "reporting_only": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+            }
+
+    for index in range(start, -1, -1):
+        candidate = lines[index].strip()
+        if (
+            candidate
+            and _looks_like_command(candidate)
+            and _command_matches_failure_tool(candidate, first_failure)
+        ):
+            return {
+                "status": "found",
+                "command": candidate,
+                "source": "preceding_command",
+                "line_number": index + 1,
+                "failure_line_number": failure_line_number,
+                "distance_to_failure": failure_line_number - (index + 1),
+                "reporting_only": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+            }
+
+    for index in range(start, -1, -1):
+        command = _github_actions_run_command(lines[index])
+        if command:
+            return {
+                "status": "ambiguous",
+                "command": command,
+                "source": "nearest_github_actions_group",
+                "line_number": index + 1,
+                "failure_line_number": failure_line_number,
+                "distance_to_failure": failure_line_number - (index + 1),
+                "reporting_only": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+            }
+
+    return {
+        "status": "missing",
+        "command": "",
+        "source": "",
+        "line_number": 0,
+        "failure_line_number": failure_line_number,
+        "reporting_only": True,
+        "automation_allowed": False,
+        "merge_authorized": False,
+    }
+
+
 def _dependency_audit_first_failure(log_text: str) -> JsonObject:
 
     for index, raw_line in enumerate(log_text.splitlines(), 1):
@@ -888,6 +1026,7 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
     ):
         primary = fallback
 
+    failed_step_evidence = _failed_step_evidence(log_text, first_failure)
     safe_remediation = safe_remediation_eligibility.classify_check_failure(
         name=name,
         diagnosis=primary,
@@ -908,6 +1047,7 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
         "log_collected": bool(log_text.strip()),
         "first_failure": first_failure,
         "first_failure_line": _string(first_failure.get("line")),
+        FAILED_STEP_EVIDENCE_KEY: failed_step_evidence,
         "formatter_changed_files": _formatter_changed_files(log_text),
         "referenced_files": _referenced_failure_files(log_text),
         "outside_changed_files": _outside_changed_files(record, log_text),
@@ -1152,6 +1292,11 @@ def _real_evidence_quality_summary(
         for check in failed_checks
         if bool(_string(check.get("first_failure_line")) or _as_dict(check.get("first_failure")))
     )
+    failed_with_step_evidence = sum(
+        1
+        for check in failed_checks
+        if _string(_as_dict(check.get(FAILED_STEP_EVIDENCE_KEY)).get("status")) == "found"
+    )
     stale_evidence_count = sum(1 for check in failed_checks if bool(check.get("stale_evidence")))
     unknown_diagnosis_count = sum(
         1 for check in failed_checks if _is_unknown_diagnosis(_as_dict(check.get("diagnosis")))
@@ -1176,6 +1321,8 @@ def _real_evidence_quality_summary(
         "failed_without_logs": failed_count - failed_with_logs,
         "failed_with_first_failure": failed_with_first_failure,
         "failed_without_first_failure": failed_count - failed_with_first_failure,
+        FAILED_WITH_STEP_EVIDENCE_KEY: failed_with_step_evidence,
+        FAILED_WITHOUT_STEP_EVIDENCE_KEY: failed_count - failed_with_step_evidence,
         "queued_checks": len(queued_checks),
         "cancelled_checks": len(cancelled_checks),
         "startup_failures": len(startup_failures),

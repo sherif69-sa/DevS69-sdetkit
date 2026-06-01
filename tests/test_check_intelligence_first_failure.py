@@ -419,3 +419,41 @@ def test_check_intelligence_skips_pip_audit_install_noise_before_summary(tmp_pat
 
     assert first_failure["line"] == "Found 2 known vulnerabilities in 1 package"
     assert "Using cached" not in first_failure["line"]
+
+
+def test_check_intelligence_extracts_failed_step_command_evidence(tmp_path: Path) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Fast CI lane",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "log": "\n".join(
+                        [
+                            "##[group]Run python -m mypy src",
+                            "python -m mypy src",
+                            "src/sdetkit/example.py:12: error: Incompatible return value type",
+                            "##[error]Process completed with exit code 1.",
+                        ]
+                    ),
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    failed = intelligence["failed_checks"][0]
+    step = failed[check_intelligence.FAILED_STEP_EVIDENCE_KEY]
+    quality = intelligence["real_evidence_quality"]
+
+    assert failed["first_failure"]["tool"] == "mypy"
+    assert step["status"] == "found"
+    assert step["command"] == "python -m mypy src"
+    assert step["source"] == "github_actions_group"
+    assert step["reporting_only"] is True
+    assert step["automation_allowed"] is False
+    assert step["merge_authorized"] is False
+    assert quality[check_intelligence.FAILED_WITH_STEP_EVIDENCE_KEY] == 1
+    assert quality[check_intelligence.FAILED_WITHOUT_STEP_EVIDENCE_KEY] == 0
