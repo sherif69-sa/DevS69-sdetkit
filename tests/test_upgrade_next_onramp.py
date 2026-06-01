@@ -10,10 +10,13 @@ def test_makefile_upgrade_next_exposes_guided_five_step_path() -> None:
     assert "upgrade-next:" in makefile
     assert "operator-onramp: upgrade-next onboarding-next first-proof-dashboard" in makefile
     assert "operator-onramp-dry-run:" in makefile
-    assert (
-        "operator-onramp-verify: operator-onramp first-proof-schema-contract "
-        "first-proof-execution-contract first-proof-followup-ready" in makefile
-    )
+    assert "operator-onramp-verify:" in makefile
+    assert "first-proof-health-score" in makefile
+    assert "first-proof-ops-bundle-trend" in makefile
+    assert "first-proof-execution-report" in makefile
+    assert "first-proof-schema-contract" in makefile
+    assert "first-proof-execution-contract" in makefile
+    assert "first-proof-followup-ready" in makefile
     assert "make first-proof" in makefile
     assert "make first-proof-health-score" in makefile
     assert "make first-proof-verify" in makefile

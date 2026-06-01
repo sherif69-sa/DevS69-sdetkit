@@ -231,8 +231,8 @@ operator-onramp-dry-run:
 	@bash -lc 'echo "DRY RUN: make onboarding-next"'
 	@bash -lc 'echo "DRY RUN: make first-proof-dashboard"'
 
-operator-onramp-verify: operator-onramp first-proof-schema-contract first-proof-execution-contract first-proof-followup-ready
-	@bash -lc 'echo "operator-onramp-verify completed: contracts + followup-ready passed"'
+operator-onramp-verify: first-proof first-proof-health-score first-proof-verify first-proof-freshness doctor-remediate onboarding-next first-proof-dashboard first-proof-ops-bundle first-proof-ops-bundle-contract first-proof-ops-bundle-trend first-proof-execution-report first-proof-schema-contract first-proof-execution-contract first-proof-followup-ready
+	@bash -lc 'echo "operator-onramp-verify completed: artifacts + contracts + followup-ready passed"'
 
 business-execution-start: venv
 	@bash -lc '. .venv/bin/activate && python scripts/business_execution_start.py --single-operator "$(BUSINESS_EXECUTION_OPERATOR)"'
