@@ -103,11 +103,12 @@ def _resolve_python(explicit: str | None) -> str:
     if explicit:
         return explicit
 
+    active_version = _python_version_tuple(sys.executable)
+    if active_version is not None and active_version >= (3, 10):
+        return sys.executable
+
     candidates: list[str] = []
-    for raw in [sys.executable, "python3.13", "python3.12", "python3.11", "python3"]:
-        if raw == sys.executable:
-            candidates.append(raw)
-            continue
+    for raw in ["python3.13", "python3.12", "python3.11", "python3.10", "python3"]:
         resolved = which(raw)
         if resolved:
             candidates.append(resolved)
@@ -120,7 +121,7 @@ def _resolve_python(explicit: str | None) -> str:
         version = _python_version_tuple(candidate)
         if version is None:
             continue
-        if version >= (3, 11):
+        if version >= (3, 10):
             return candidate
 
     return sys.executable
