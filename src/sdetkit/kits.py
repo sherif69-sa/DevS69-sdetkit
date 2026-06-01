@@ -155,7 +155,22 @@ def optimize_payload(
         },
         "missing_domains": [],
         "operating_sequence": [{"stage": "doctor-first"}, {"stage": "intelligent-autofix"}],
-        "next_boosts": [{"id": "quality-boost"}],
+        "next_boosts": [
+            {
+                "id": "quality-boost",
+                "title": "Strengthen first-proof quality evidence",
+                "summary": (
+                    "Refresh the first-proof health, dashboard, and readiness threshold "
+                    "artifacts so the optimization loop points operators to concrete "
+                    "quality evidence rather than a bare boost identifier."
+                ),
+                "commands": [
+                    "make first-proof-health-score",
+                    "make first-proof-dashboard",
+                    "make first-proof-readiness-threshold",
+                ],
+            }
+        ],
         "alignment_score": {"score": 95, "status": "maximized"},
         "search_queries": [{"topic": "doctor-upgrade-lane"}],
         "blueprint": blueprint_payload(goal, selected_kits, limit),
