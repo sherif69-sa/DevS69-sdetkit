@@ -144,6 +144,8 @@ def _check_run_id(record: JsonObject, url: str) -> str:
         _string(record.get("html_url")),
         url,
     ):
+        if "/actions/runs/" in candidate:
+            continue
         match = _CHECK_RUN_URL_PATTERN.search(candidate)
         if match:
             return match.group("check_run_id") or ""
@@ -227,6 +229,60 @@ def sanitize_check_run_annotations(
     return report
 
 
+def _workflow_job_evidence_quality(logs: list[JsonObject]) -> JsonObject:
+    failed_checks = len(logs)
+    existing_logs_collected = sum(
+        1
+        for item in logs
+        if bool(item.get("collected")) and _string(item.get("evidence_source")) == "existing_log"
+    )
+    github_actions_supported = sum(1 for item in logs if bool(item.get("download_supported")))
+    annotation_supported = sum(
+        1 for item in logs if bool(item.get("annotation_collection_supported"))
+    )
+    uncollectible = sum(
+        1 for item in logs if _string(item.get("evidence_source")) == "uncollectible"
+    )
+    run_id_present = sum(1 for item in logs if bool(_string(item.get("run_id"))))
+    job_id_present = sum(1 for item in logs if bool(_string(item.get("job_id"))))
+    check_run_id_present = sum(1 for item in logs if bool(_string(item.get("check_run_id"))))
+    pending_downloads = sum(
+        1
+        for item in logs
+        if not bool(item.get("collected"))
+        and (
+            bool(item.get("download_supported"))
+            or bool(item.get("annotation_collection_supported"))
+        )
+    )
+
+    gaps: list[str] = []
+    if pending_downloads:
+        gaps.append("download_script_required")
+    if uncollectible:
+        gaps.append("uncollectible_failed_checks")
+
+    return {
+        "schema_version": "sdetkit.workflow_job_evidence_quality.v1",
+        "failed_checks": failed_checks,
+        "existing_logs_collected": existing_logs_collected,
+        "github_actions_log_download_supported": github_actions_supported,
+        "check_run_annotation_collection_supported": annotation_supported,
+        "uncollectible_failed_checks": uncollectible,
+        "run_id_present": run_id_present,
+        "job_id_present": job_id_present,
+        "check_run_id_present": check_run_id_present,
+        "pending_downloads": pending_downloads,
+        "download_script_required": bool(pending_downloads),
+        "evidence_gaps": gaps,
+        "reporting_only": True,
+        "patch_application_allowed": False,
+        "automation_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+
 def build_failed_check_log_manifest(
     *,
     checks_json: Path,
@@ -290,6 +346,7 @@ def build_failed_check_log_manifest(
         "annotation_collected_count": len(
             [item for item in logs if bool(item.get("annotation_collected", False))]
         ),
+        "workflow_job_evidence_quality": _workflow_job_evidence_quality(logs),
         "logs": logs,
     }
 
