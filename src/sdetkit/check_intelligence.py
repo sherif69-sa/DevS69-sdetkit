@@ -1693,6 +1693,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 "url": check.get("url", ""),
                 "first_failure": check.get("first_failure", {}),
                 "first_failure_line": check.get("first_failure_line", ""),
+                FAILED_STEP_EVIDENCE_KEY: check.get(FAILED_STEP_EVIDENCE_KEY, {}),
                 "head_sha": check.get("head_sha", ""),
                 "current_pr_head_sha": check.get("current_pr_head_sha", ""),
                 "stale_evidence": check.get("stale_evidence", False),
