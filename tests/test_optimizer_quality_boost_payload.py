@@ -25,9 +25,7 @@ def test_optimizer_quality_boost_is_operator_actionable() -> None:
     )
     payload = json.loads(result.stdout)
 
-    boost = next(
-        item for item in payload["next_boosts"] if item["id"] == "quality-boost"
-    )
+    boost = next(item for item in payload["next_boosts"] if item["id"] == "quality-boost")
 
     assert boost["title"] == "Strengthen first-proof quality evidence"
     assert "first-proof health" in boost["summary"]
