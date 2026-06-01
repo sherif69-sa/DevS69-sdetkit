@@ -29,6 +29,38 @@ FILE_PATH_RE = re.compile(
 )
 
 
+def _decision_boundary() -> JsonObject:
+    return {
+        "automation_allowed": False,
+        "auto_fix_allowed_now": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "requires_human_review": True,
+    }
+
+
+def _result(
+    *,
+    safe_to_auto_fix: bool,
+    strategy: str,
+    category: str,
+    reason: str,
+    affected_files: list[str] | None = None,
+    proof_commands: list[str] | None = None,
+) -> JsonObject:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "safe_to_auto_fix": safe_to_auto_fix,
+        "strategy": strategy,
+        "category": category,
+        "affected_files": list(affected_files or []),
+        "reason": reason,
+        "proof_commands": list(proof_commands or []),
+        **_decision_boundary(),
+    }
+
+
 def _extract_affected_files(text: str) -> list[str]:
     values: list[str] = []
     seen: set[str] = set()
@@ -143,73 +175,61 @@ def classify_check_failure(
     )
 
     if kind == "check_run_annotation":
-        return {
-            "schema_version": SCHEMA_VERSION,
-            "safe_to_auto_fix": False,
-            "strategy": REVIEW_FIRST_STRATEGY,
-            "category": "review_first",
-            "affected_files": affected_files,
-            "reason": "Sanitized Check Run annotation evidence is review-first and cannot authorize mutation.",
-            "proof_commands": [],
-        }
+        return _result(
+            safe_to_auto_fix=False,
+            strategy=REVIEW_FIRST_STRATEGY,
+            category="review_first",
+            affected_files=affected_files,
+            reason="Sanitized Check Run annotation evidence is review-first and cannot authorize mutation.",
+        )
 
     unsafe_signal = _contains_any(combined, UNSAFE_REVIEW_MARKERS)
     formatting_signal = kind == "format_drift" or _contains_any(combined, SAFE_FORMAT_MARKERS)
 
     if unsafe_signal:
-        return {
-            "schema_version": SCHEMA_VERSION,
-            "safe_to_auto_fix": False,
-            "strategy": REVIEW_FIRST_STRATEGY,
-            "category": "review_first",
-            "affected_files": affected_files,
-            "reason": "Review-first evidence dominates any formatting-only signal.",
-            "proof_commands": [],
-        }
+        return _result(
+            safe_to_auto_fix=False,
+            strategy=REVIEW_FIRST_STRATEGY,
+            category="review_first",
+            affected_files=affected_files,
+            reason="Review-first evidence dominates any formatting-only signal.",
+        )
 
     if formatting_signal:
         if not affected_files:
-            return {
-                "schema_version": SCHEMA_VERSION,
-                "safe_to_auto_fix": False,
-                "strategy": REVIEW_FIRST_STRATEGY,
-                "category": "review_first",
-                "affected_files": [],
-                "reason": "Formatting evidence has no identified affected files.",
-                "proof_commands": [],
-            }
+            return _result(
+                safe_to_auto_fix=False,
+                strategy=REVIEW_FIRST_STRATEGY,
+                category="review_first",
+                reason="Formatting evidence has no identified affected files.",
+            )
 
         unsafe_files = [value for value in affected_files if not _is_safe_repo_owned_path(value)]
         if unsafe_files:
-            return {
-                "schema_version": SCHEMA_VERSION,
-                "safe_to_auto_fix": False,
-                "strategy": REVIEW_FIRST_STRATEGY,
-                "category": "review_first",
-                "affected_files": affected_files,
-                "reason": "Formatting evidence includes files outside approved safe-fix paths.",
-                "proof_commands": [],
-            }
+            return _result(
+                safe_to_auto_fix=False,
+                strategy=REVIEW_FIRST_STRATEGY,
+                category="review_first",
+                affected_files=affected_files,
+                reason="Formatting evidence includes files outside approved safe-fix paths.",
+            )
 
-        return {
-            "schema_version": SCHEMA_VERSION,
-            "safe_to_auto_fix": True,
-            "strategy": FORMAT_SAFE_STRATEGY,
-            "category": "formatting_only",
-            "affected_files": affected_files,
-            "reason": "Failure is limited to deterministic formatting or whitespace hooks.",
-            "proof_commands": [
+        return _result(
+            safe_to_auto_fix=True,
+            strategy=FORMAT_SAFE_STRATEGY,
+            category="formatting_only",
+            affected_files=affected_files,
+            reason="Failure is limited to deterministic formatting or whitespace hooks.",
+            proof_commands=[
                 "python -m pre_commit run -a",
                 "python -m ruff check src tests",
                 "python -m mypy src",
             ],
-        }
+        )
 
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "safe_to_auto_fix": False,
-        "strategy": REVIEW_FIRST_STRATEGY,
-        "category": "unknown",
-        "reason": "Failure is not in the approved safe-remediation allowlist.",
-        "proof_commands": [],
-    }
+    return _result(
+        safe_to_auto_fix=False,
+        strategy=REVIEW_FIRST_STRATEGY,
+        category="unknown",
+        reason="Failure is not in the approved safe-remediation allowlist.",
+    )
