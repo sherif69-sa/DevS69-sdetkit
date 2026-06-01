@@ -101,9 +101,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     review_first_unknowns: list[str] = []
 
     python_evidence = [
-        path
-        for path in ["pyproject.toml", "setup.cfg", "setup.py"]
-        if _file(root, path)
+        path for path in ["pyproject.toml", "setup.cfg", "setup.py"] if _file(root, path)
     ]
     python_evidence.extend(requirements)
     if _dir(root, "src"):
@@ -218,7 +216,9 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         )
 
     java_files = [
-        path for path in ["pom.xml", "build.gradle", "build.gradle.kts", "gradlew"] if _file(root, path)
+        path
+        for path in ["pom.xml", "build.gradle", "build.gradle.kts", "gradlew"]
+        if _file(root, path)
     ]
     if java_files:
         _add_named(detected_languages, "java", confidence="high", evidence=java_files)
