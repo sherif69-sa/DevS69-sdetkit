@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import doctor, review
+from sdetkit import adoption_surface, doctor, review
 from sdetkit.artifact_contract_index import INDEX_SCHEMA_VERSION, build_index, write_index
 from sdetkit.checks import artifacts as check_artifacts
 
@@ -13,6 +13,13 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
     assert payload["schema_version"] == INDEX_SCHEMA_VERSION
 
     entries = {item["id"]: item for item in payload["artifacts"]}
+    assert entries["adoption-surface-json"]["schema_version"] == adoption_surface.SCHEMA_VERSION
+    assert {
+        "schema_version",
+        "automation_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven",
+    }.issubset(set(entries["adoption-surface-json"]["required_fields"]))
     assert entries["doctor-json"]["schema_version"] == doctor.SCHEMA_VERSION
     assert entries["doctor-evidence-json"]["schema_version"] == doctor.EVIDENCE_SCHEMA_VERSION
     assert (

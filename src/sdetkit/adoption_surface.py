@@ -9,6 +9,23 @@ from typing import Any
 
 SCHEMA_VERSION = "sdetkit.adoption_surface.v1"
 
+REQUIRED_LIST_FIELDS = (
+    "detected_languages",
+    "package_managers",
+    "test_runners",
+    "ci_systems",
+    "security_tools",
+    "artifact_surfaces",
+    "recommended_proof_commands",
+    "review_first_unknowns",
+)
+
+REQUIRED_FALSE_FIELDS = (
+    "automation_allowed",
+    "merge_authorized",
+    "semantic_equivalence_proven",
+)
+
 IGNORED_PARTS = {
     ".git",
     ".mypy_cache",
@@ -306,6 +323,36 @@ def write_adoption_surface_artifact(
         "merge_authorized": payload["merge_authorized"],
         "semantic_equivalence_proven": payload["semantic_equivalence_proven"],
     }
+
+
+def validate_adoption_surface_payload(payload: object) -> list[str]:
+    if not isinstance(payload, dict):
+        return ["payload must be a JSON object"]
+
+    errors: list[str] = []
+    if payload.get("schema_version") != SCHEMA_VERSION:
+        errors.append(f"schema_version must be {SCHEMA_VERSION}")
+
+    for field in REQUIRED_LIST_FIELDS:
+        if not isinstance(payload.get(field), list):
+            errors.append(f"{field} must be a list")
+
+    for field in REQUIRED_FALSE_FIELDS:
+        if payload.get(field) is not False:
+            errors.append(f"{field} must be false")
+
+    return errors
+
+
+def validate_adoption_surface_artifact(path: str | Path) -> list[str]:
+    artifact = Path(path)
+    try:
+        payload = json.loads(artifact.read_text(encoding="utf-8"))
+    except OSError as exc:
+        return [f"artifact could not be read: {exc}"]
+    except json.JSONDecodeError as exc:
+        return [f"artifact is not valid JSON: {exc}"]
+    return validate_adoption_surface_payload(payload)
 
 
 def main(argv: Sequence[str] | None = None) -> int:

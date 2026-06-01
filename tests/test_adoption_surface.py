@@ -134,3 +134,42 @@ def test_adoption_surface_cli_dispatch_writes_artifact(tmp_path: Path) -> None:
     assert payload["automation_allowed"] is False
     assert payload["merge_authorized"] is False
     assert payload["semantic_equivalence_proven"] is False
+
+
+def test_adoption_surface_payload_validator_accepts_generated_payload(tmp_path: Path) -> None:
+    _write(tmp_path / "pyproject.toml", '[project]\ndependencies = ["pytest"]\n')
+    _write(tmp_path / "requirements-test.txt", "pytest==9.0.3\n")
+
+    from sdetkit.adoption_surface import (
+        validate_adoption_surface_artifact,
+        validate_adoption_surface_payload,
+        write_adoption_surface_artifact,
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+    assert validate_adoption_surface_payload(payload) == []
+
+    out = tmp_path / "build" / "sdetkit" / "adoption-surface.json"
+    write_adoption_surface_artifact(repo_root=tmp_path, out=out)
+    assert validate_adoption_surface_artifact(out) == []
+
+
+def test_adoption_surface_payload_validator_rejects_authority_escalation() -> None:
+    from sdetkit.adoption_surface import validate_adoption_surface_payload
+
+    payload = {
+        "schema_version": SCHEMA_VERSION,
+        "detected_languages": [],
+        "package_managers": [],
+        "test_runners": [],
+        "ci_systems": [],
+        "security_tools": [],
+        "artifact_surfaces": [],
+        "recommended_proof_commands": [],
+        "review_first_unknowns": [],
+        "automation_allowed": True,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+    assert validate_adoption_surface_payload(payload) == ["automation_allowed must be false"]
