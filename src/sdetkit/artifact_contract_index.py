@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from . import doctor, review
+from . import adoption_surface, doctor, review
 from .checks import artifacts as check_artifacts
 
 INDEX_SCHEMA_VERSION = "sdetkit.artifact-contract-index.v1"
@@ -28,6 +28,27 @@ def build_index() -> dict[str, Any]:
                 "schema_version": None,
                 "required_fields": ["ok", "failed_steps", "profile"],
                 "stability": "public",
+            },
+            {
+                "id": "adoption-surface-json",
+                "path": "build/sdetkit/adoption-surface.json",
+                "produced_by": "python -m sdetkit adoption-surface --root . --out build/sdetkit/adoption-surface.json --format text",
+                "schema_version": adoption_surface.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "detected_languages",
+                    "package_managers",
+                    "test_runners",
+                    "ci_systems",
+                    "security_tools",
+                    "artifact_surfaces",
+                    "recommended_proof_commands",
+                    "review_first_unknowns",
+                    "automation_allowed",
+                    "merge_authorized",
+                    "semantic_equivalence_proven",
+                ],
+                "stability": "advanced",
             },
             {
                 "id": "doctor-json",

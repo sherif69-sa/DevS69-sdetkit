@@ -26,6 +26,27 @@
       "stability": "public"
     },
     {
+      "id": "adoption-surface-json",
+      "path": "build/sdetkit/adoption-surface.json",
+      "produced_by": "python -m sdetkit adoption-surface --root . --out build/sdetkit/adoption-surface.json --format text",
+      "schema_version": "sdetkit.adoption_surface.v1",
+      "required_fields": [
+        "schema_version",
+        "detected_languages",
+        "package_managers",
+        "test_runners",
+        "ci_systems",
+        "security_tools",
+        "artifact_surfaces",
+        "recommended_proof_commands",
+        "review_first_unknowns",
+        "automation_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "doctor-json",
       "path": "build/doctor.json",
       "produced_by": "python -m sdetkit doctor --format json --out build/doctor.json",
