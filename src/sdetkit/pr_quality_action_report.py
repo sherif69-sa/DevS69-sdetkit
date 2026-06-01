@@ -49,6 +49,7 @@ HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION = "_".join(
 
 
 FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
+JOB_STEP_CONFIRMATION_KEY = "_".join(("job", "step", "confirmation"))
 
 BANNED_EDUCATIONAL_PHRASES = (
     "Quality is green, so the review focus is not coverage.",
@@ -401,6 +402,25 @@ def _security_finding_diagnosis_lines(security_finding_diagnosis: JsonObject | N
     return lines
 
 
+def _job_step_confirmation_lines(payload: JsonObject, *, prefix: str = "  - ") -> list[str]:
+    confirmation = _as_dict(payload.get(JOB_STEP_CONFIRMATION_KEY))
+    if not confirmation:
+        return []
+
+    status = _string(confirmation.get("status") or "unknown")
+    source = _string(confirmation.get("source") or "unknown")
+    name = _string(confirmation.get("job_step_name"))
+    conclusion = _string(confirmation.get("job_step_conclusion") or "unknown")
+    lines = [f"{prefix}Job step confirmation: `{status}`"]
+    if name:
+        lines.append(f"{prefix}GitHub job step: `{name}`")
+    lines.append(f"{prefix}GitHub job step conclusion: `{conclusion}`")
+    lines.append(f"{prefix}Job step source: `{source}`")
+    lines.append(f"{prefix}Job step reporting only: `true`")
+    lines.append(f"{prefix}Job step automation allowed: `false`")
+    return lines
+
+
 def _failed_step_evidence_lines(payload: JsonObject, *, prefix: str = "  - ") -> list[str]:
     step = _as_dict(payload.get(FAILED_STEP_EVIDENCE_KEY))
     if not step:
@@ -421,6 +441,7 @@ def _failed_step_evidence_lines(payload: JsonObject, *, prefix: str = "  - ") ->
     lines.append(f"{prefix}Failed step source: `{source}`")
     lines.append(f"{prefix}Failed step reporting only: `true`")
     lines.append(f"{prefix}Failed step automation allowed: `false`")
+    lines.extend(_job_step_confirmation_lines(payload, prefix=prefix))
     return lines
 
 

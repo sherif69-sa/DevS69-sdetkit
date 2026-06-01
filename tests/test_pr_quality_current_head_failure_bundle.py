@@ -170,3 +170,51 @@ def test_pr_quality_action_report_cli_keeps_bundle_writing_optional(tmp_path):
 
     assert out.exists()
     assert not (tmp_path / "failure-bundle").exists()
+
+
+def test_current_head_failure_bundle_carries_job_step_confirmation() -> None:
+    from sdetkit import check_intelligence, current_head_failure_bundle
+
+    bundle = current_head_failure_bundle.build_current_head_failure_bundle(
+        pr_number=1484,
+        head_sha="head",
+        base_sha="base",
+        check_intelligence={
+            "checks_seen": 1,
+            "failed_checks": [
+                {
+                    "name": "Fast CI lane",
+                    "first_failure": {
+                        "line": "src/sdetkit/example.py:12: error: Incompatible return value type",
+                        "line_number": 3,
+                        "tool": "mypy",
+                        "kind": "type_contract",
+                    },
+                    check_intelligence.FAILED_STEP_EVIDENCE_KEY: {
+                        "status": "found",
+                        "command": "python -m mypy src",
+                        "reporting_only": True,
+                        "automation_allowed": False,
+                    },
+                    check_intelligence.JOB_STEP_CONFIRMATION_KEY: {
+                        "status": "confirmed",
+                        "source": "github_job_steps",
+                        "job_step_name": "Run python -m mypy src",
+                        "job_step_conclusion": "failure",
+                        "log_command": "python -m mypy src",
+                        "reporting_only": True,
+                        "automation_allowed": False,
+                        "merge_authorized": False,
+                    },
+                }
+            ],
+        },
+    )
+    markdown = current_head_failure_bundle.render_current_head_failure_bundle_markdown(bundle)
+    confirmation = bundle["first_failures"][0][check_intelligence.JOB_STEP_CONFIRMATION_KEY]
+
+    assert confirmation["status"] == "confirmed"
+    assert confirmation["job_step_name"] == "Run python -m mypy src"
+    assert "Job step confirmation: `confirmed`" in markdown
+    assert "GitHub job step: `Run python -m mypy src`" in markdown
+    assert "Job step automation allowed: `false`" in markdown

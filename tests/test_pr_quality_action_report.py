@@ -2144,3 +2144,46 @@ def test_action_report_runtime_lines_render_controlled_history_as_advisory_only(
     assert "Automation allowed by trusted history: `false`" in body
     assert "Merge authorized by trusted history: `false`" in body
     assert "Semantic equivalence proven by trusted history: `false`" in body
+
+
+def test_action_report_comment_renders_job_step_confirmation() -> None:
+    action = {
+        "status": "review_required",
+        "primary_blocker": {
+            "check": "Fast CI lane",
+            "title": "Type contract drift detected",
+            "surface": "quality",
+            "code": "MYPY_TYPE_CONTRACT_DRIFT",
+            check_intelligence.FAILED_STEP_EVIDENCE_KEY: {
+                "status": "found",
+                "command": "python -m mypy src",
+                "source": "github_actions_group",
+                "line_number": 1,
+                "failure_line_number": 3,
+                "reporting_only": True,
+                "automation_allowed": False,
+            },
+            check_intelligence.JOB_STEP_CONFIRMATION_KEY: {
+                "status": "confirmed",
+                "source": "github_job_steps",
+                "job_step_name": "Run python -m mypy src",
+                "job_step_conclusion": "failure",
+                "log_command": "python -m mypy src",
+                "reporting_only": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+            },
+        },
+        "automation": {"attempted": False, "allowed": False, "reason": "review-first"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    body = report.render_comment_body(action_report=action, check_intelligence={})
+
+    assert "Failed step evidence: `found`" in body
+    assert "Failed command: `python -m mypy src`" in body
+    assert "Job step confirmation: `confirmed`" in body
+    assert "GitHub job step: `Run python -m mypy src`" in body
+    assert "GitHub job step conclusion: `failure`" in body
+    assert "Job step automation allowed: `false`" in body

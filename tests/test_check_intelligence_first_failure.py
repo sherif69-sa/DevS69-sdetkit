@@ -457,3 +457,84 @@ def test_check_intelligence_extracts_failed_step_command_evidence(tmp_path: Path
     assert step["merge_authorized"] is False
     assert quality[check_intelligence.FAILED_WITH_STEP_EVIDENCE_KEY] == 1
     assert quality[check_intelligence.FAILED_WITHOUT_STEP_EVIDENCE_KEY] == 0
+
+
+def test_check_intelligence_confirms_failed_step_with_job_step_metadata(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Fast CI lane",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "log": "\n".join(
+                        [
+                            "##[group]Run python -m mypy src",
+                            "python -m mypy src",
+                            "src/sdetkit/example.py:12: error: Incompatible return value type",
+                        ]
+                    ),
+                    "steps": [
+                        {"name": "Set up Python", "conclusion": "success"},
+                        {"name": "Run python -m mypy src", "conclusion": "failure"},
+                    ],
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    failed = intelligence["failed_checks"][0]
+    confirmation = failed[check_intelligence.JOB_STEP_CONFIRMATION_KEY]
+    quality = intelligence["real_evidence_quality"]
+
+    assert confirmation["status"] == "confirmed"
+    assert confirmation["source"] == "github_job_steps"
+    assert confirmation["job_step_name"] == "Run python -m mypy src"
+    assert confirmation["job_step_conclusion"] == "failure"
+    assert confirmation["log_command"] == "python -m mypy src"
+    assert confirmation["reporting_only"] is True
+    assert confirmation["automation_allowed"] is False
+    assert confirmation["merge_authorized"] is False
+    assert confirmation["semantic_equivalence_proven"] is False
+    assert quality[check_intelligence.JOB_STEP_CONFIRMED_COUNT_KEY] == 1
+    assert quality[check_intelligence.JOB_STEP_MISMATCH_COUNT_KEY] == 0
+    assert quality[check_intelligence.JOB_STEP_UNAVAILABLE_COUNT_KEY] == 0
+
+
+def test_check_intelligence_reports_job_step_mismatch(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Fast CI lane",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "log": "\n".join(
+                        [
+                            "##[group]Run python -m mypy src",
+                            "python -m mypy src",
+                            "src/sdetkit/example.py:12: error: Incompatible return value type",
+                        ]
+                    ),
+                    "steps": [
+                        {"name": "Run python -m pytest -q", "conclusion": "failure"},
+                    ],
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    confirmation = intelligence["failed_checks"][0][check_intelligence.JOB_STEP_CONFIRMATION_KEY]
+
+    assert confirmation["status"] == "mismatch"
+    assert confirmation["job_step_name"] == "Run python -m pytest -q"
+    assert confirmation["job_step_conclusion"] == "failure"
+    assert confirmation["log_command"] == "python -m mypy src"
