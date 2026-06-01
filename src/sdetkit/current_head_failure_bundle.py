@@ -10,6 +10,7 @@ JsonObject = dict[str, Any]
 SCHEMA_VERSION = "sdetkit.current_head_failure_bundle.v1"
 FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
 JOB_STEP_CONFIRMATION_KEY = "_".join(("job", "step", "confirmation"))
+ARTIFACT_EVIDENCE_KEY = "_".join(("artifact", "evidence"))
 
 
 def _as_dict(value: Any) -> JsonObject:
@@ -84,6 +85,7 @@ def build_current_head_failure_bundle(
                     "kind": _string(first_failure.get("kind") or "unknown"),
                     FAILED_STEP_EVIDENCE_KEY: _as_dict(item.get(FAILED_STEP_EVIDENCE_KEY)),
                     JOB_STEP_CONFIRMATION_KEY: _as_dict(item.get(JOB_STEP_CONFIRMATION_KEY)),
+                    ARTIFACT_EVIDENCE_KEY: _as_dict(item.get(ARTIFACT_EVIDENCE_KEY)),
                 }
             )
 
@@ -176,6 +178,22 @@ def render_current_head_failure_bundle_markdown(bundle: JsonObject) -> str:
                     lines.append(f"  - Failed command: `{command}`")
                 lines.append("- Reporting only: `true`")
                 lines.append("- Automation allowed: `false`")
+            artifact_evidence = _as_dict(item.get(ARTIFACT_EVIDENCE_KEY))
+            if artifact_evidence:
+                lines.append(
+                    f"  - Artifact evidence: `{_string(artifact_evidence.get('status') or 'unknown')}`"
+                )
+                expected = [
+                    _string(value)
+                    for value in _as_list(artifact_evidence.get("expected_artifacts"))
+                    if _string(value)
+                ]
+                if expected:
+                    lines.append(
+                        "  - Expected artifacts: "
+                        + ", ".join(f"`{value}`" for value in expected[:5])
+                    )
+                lines.append("- Artifact automation allowed: `false`")
             confirmation = _as_dict(item.get(JOB_STEP_CONFIRMATION_KEY))
             if confirmation:
                 lines.append(

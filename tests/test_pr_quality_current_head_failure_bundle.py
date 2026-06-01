@@ -218,3 +218,45 @@ def test_current_head_failure_bundle_carries_job_step_confirmation() -> None:
     assert "Job step confirmation: `confirmed`" in markdown
     assert "GitHub job step: `Run python -m mypy src`" in markdown
     assert "Job step automation allowed: `false`" in markdown
+
+
+def test_current_head_failure_bundle_carries_artifact_evidence() -> None:
+    from sdetkit import check_intelligence, current_head_failure_bundle
+
+    bundle = current_head_failure_bundle.build_current_head_failure_bundle(
+        pr_number=1485,
+        head_sha="head",
+        base_sha="base",
+        check_intelligence={
+            "checks_seen": 1,
+            "failed_checks": [
+                {
+                    "name": "audit",
+                    "first_failure": {
+                        "line": "Found 1 known vulnerability in 1 package",
+                        "line_number": 2,
+                        "tool": "pip-audit",
+                        "kind": "dependency_vulnerability",
+                    },
+                    check_intelligence.ARTIFACT_EVIDENCE_KEY: {
+                        "status": "present",
+                        "expected_artifacts": ["pip-audit-report.json"],
+                        "present_artifacts": ["pip-audit-report.json"],
+                        "missing_artifacts": [],
+                        "source": "workflow_artifact_url",
+                        "reporting_only": True,
+                        "automation_allowed": False,
+                        "merge_authorized": False,
+                    },
+                }
+            ],
+        },
+    )
+    markdown = current_head_failure_bundle.render_current_head_failure_bundle_markdown(bundle)
+    evidence = bundle["first_failures"][0][check_intelligence.ARTIFACT_EVIDENCE_KEY]
+
+    assert evidence["status"] == "present"
+    assert evidence["expected_artifacts"] == ["pip-audit-report.json"]
+    assert "Artifact evidence: `present`" in markdown
+    assert "Expected artifacts: `pip-audit-report.json`" in markdown
+    assert "Artifact automation allowed: `false`" in markdown

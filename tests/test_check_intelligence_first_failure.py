@@ -538,3 +538,79 @@ def test_check_intelligence_reports_job_step_mismatch(
     assert confirmation["job_step_name"] == "Run python -m pytest -q"
     assert confirmation["job_step_conclusion"] == "failure"
     assert confirmation["log_command"] == "python -m mypy src"
+
+
+def test_check_intelligence_confirms_dependency_audit_artifact_evidence(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "audit",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "log": "\n".join(
+                        [
+                            "pip-audit --format json -o pip-audit-report.json -r requirements-test.txt",
+                            "Found 1 known vulnerability in 1 package",
+                            "name: pip-audit-report",
+                            "path: pip-audit-report.json",
+                            "Artifact download URL: "
+                            "https://github.com/example/actions/runs/"
+                            "1/artifacts/2",
+                        ]
+                    ),
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    failed = intelligence["failed_checks"][0]
+    evidence = failed[check_intelligence.ARTIFACT_EVIDENCE_KEY]
+    quality = intelligence["real_evidence_quality"]
+
+    assert evidence["status"] == "present"
+    assert evidence["expected_artifacts"] == ["pip-audit-report.json"]
+    assert evidence["present_artifacts"] == ["pip-audit-report.json"]
+    assert evidence["missing_artifacts"] == []
+    assert evidence["source"] == "workflow_artifact_url"
+    assert evidence["reporting_only"] is True
+    assert evidence["automation_allowed"] is False
+    assert evidence["merge_authorized"] is False
+    assert evidence["semantic_equivalence_proven"] is False
+    assert quality[check_intelligence.ARTIFACT_PRESENT_COUNT_KEY] == 1
+    assert quality[check_intelligence.ARTIFACT_MISSING_COUNT_KEY] == 0
+
+
+def test_check_intelligence_reports_missing_dependency_audit_artifact(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "audit",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "log": "\n".join(
+                        [
+                            "pip-audit --format json -o pip-audit-report.json -r requirements-test.txt",
+                            "Found 1 known vulnerability in 1 package",
+                        ]
+                    ),
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    evidence = intelligence["failed_checks"][0][check_intelligence.ARTIFACT_EVIDENCE_KEY]
+
+    assert evidence["status"] == "missing"
+    assert evidence["expected_artifacts"] == ["pip-audit-report.json"]
+    assert evidence["missing_artifacts"] == ["pip-audit-report.json"]
+    assert evidence["source"] == "absent"

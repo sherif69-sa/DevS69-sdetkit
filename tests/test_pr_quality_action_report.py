@@ -2187,3 +2187,37 @@ def test_action_report_comment_renders_job_step_confirmation() -> None:
     assert "GitHub job step: `Run python -m mypy src`" in body
     assert "GitHub job step conclusion: `failure`" in body
     assert "Job step automation allowed: `false`" in body
+
+
+def test_action_report_comment_renders_artifact_evidence() -> None:
+    action = {
+        "status": "review_required",
+        "primary_blocker": {
+            "check": "audit",
+            "title": "Dependency audit reported vulnerable packages",
+            "surface": "dependency",
+            "code": check_intelligence.DEPENDENCY_AUDIT_VULNERABILITY,
+            check_intelligence.ARTIFACT_EVIDENCE_KEY: {
+                "status": "present",
+                "expected_artifacts": ["pip-audit-report.json"],
+                "present_artifacts": ["pip-audit-report.json"],
+                "missing_artifacts": [],
+                "source": "workflow_artifact_url",
+                "reporting_only": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+            },
+        },
+        "automation": {"attempted": False, "allowed": False, "reason": "review-first"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+
+    body = report.render_comment_body(action_report=action, check_intelligence={})
+
+    assert "Artifact evidence: `present`" in body
+    assert "Expected artifacts: `pip-audit-report.json`" in body
+    assert "Present artifacts: `pip-audit-report.json`" in body
+    assert "Artifact evidence source: `workflow_artifact_url`" in body
+    assert "Artifact automation allowed: `false`" in body
