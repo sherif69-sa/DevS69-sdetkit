@@ -154,3 +154,44 @@ def test_safe_remediation_blocks_formatting_with_unapproved_path_evidence() -> N
     assert result["safe_to_auto_fix"] is False
     assert result["strategy"] == "review_first"
     assert "outside approved safe-fix paths" in result["reason"]
+
+
+def _assert_no_automation_boundary(result: dict) -> None:
+    assert result["automation_allowed"] is False
+    assert result["auto_fix_allowed_now"] is False
+    assert result["patch_application_allowed"] is False
+    assert result["merge_authorized"] is False
+    assert result["semantic_equivalence_proven"] is False
+    assert result["requires_human_review"] is True
+
+
+def test_safe_remediation_candidate_preserves_no_automation_boundary() -> None:
+    result = eligibility.classify_check_failure(
+        name="autopilot",
+        diagnosis={"code": "PRE_COMMIT_FORMAT_DRIFT"},
+        first_failure={
+            "line": "- files were modified by this hook",
+            "tool": "pre_commit",
+            "kind": "format_drift",
+            "context": [{"text": "Fixing tests/test_example.py"}],
+        },
+    )
+
+    assert result["safe_to_auto_fix"] is True
+    _assert_no_automation_boundary(result)
+
+
+def test_safe_remediation_review_first_preserves_no_automation_boundary() -> None:
+    result = eligibility.classify_check_failure(
+        name="Full CI lane",
+        diagnosis={"code": "PYTEST_ASSERTION_FAILURE"},
+        first_failure={
+            "line": "FAILED tests/test_behavior.py::test_contract - AssertionError",
+            "tool": "pytest",
+            "kind": "test_failure",
+        },
+    )
+
+    assert result["safe_to_auto_fix"] is False
+    assert result["strategy"] == "review_first"
+    _assert_no_automation_boundary(result)
