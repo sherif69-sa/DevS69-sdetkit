@@ -132,7 +132,25 @@ def optimize_payload(
             "focus": ["runtime", "integration"],
         },
         "innovation_opportunities": [
-            {"id": "dependency-radar"},
+            {
+                "id": "dependency-radar",
+                "title": "Review validation-linked dependency upgrade candidates",
+                "summary": (
+                    "Run the dependency radar dashboard and upgrade audit so operators "
+                    "can pick one dependency candidate with validation evidence instead "
+                    "of seeing only a bare innovation opportunity identifier."
+                ),
+                "commands": [
+                    "python -m sdetkit kits radar --repo-usage-tier hot-path --format json",
+                    "python -m sdetkit intelligence upgrade-audit --format json --used-in-repo-only --top 10",
+                    "python -m sdetkit agent templates run dependency-radar-worker",
+                ],
+                "acceptance_criteria": [
+                    "dependency radar payload is generated",
+                    "upgrade audit lists validation-linked candidates or confirms none are actionable",
+                    "selected upgrade candidate links back to the monthly enhancement intake",
+                ],
+            },
             {"id": "runtime-core-fast-follow"},
             {"id": "integration-topology-radar"},
         ],
