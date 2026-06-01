@@ -33,6 +33,10 @@ JOB_STEP_CONFIRMATION_KEY = "_".join(("job", "step", "confirmation"))
 JOB_STEP_CONFIRMED_COUNT_KEY = "_".join(("job", "step", "confirmed", "count"))
 JOB_STEP_MISMATCH_COUNT_KEY = "_".join(("job", "step", "mismatch", "count"))
 JOB_STEP_UNAVAILABLE_COUNT_KEY = "_".join(("job", "step", "unavailable", "count"))
+ARTIFACT_EVIDENCE_KEY = "_".join(("artifact", "evidence"))
+ARTIFACT_PRESENT_COUNT_KEY = "_".join(("artifact", "present", "count"))
+ARTIFACT_MISSING_COUNT_KEY = "_".join(("artifact", "missing", "count"))
+ARTIFACT_UNAVAILABLE_COUNT_KEY = "_".join(("artifact", "unavailable", "count"))
 FAILED_WITH_STEP_EVIDENCE_KEY = "_".join(("failed", "with", "step", "evidence"))
 FAILED_WITHOUT_STEP_EVIDENCE_KEY = "_".join(("failed", "without", "step", "evidence"))
 
@@ -160,6 +164,91 @@ def _string(value: Any) -> str:
 def _slug(value: str) -> str:
     slug = re.sub(r"[^A-Za-z0-9]+", "-", value.strip().lower()).strip("-")
     return slug or "check"
+
+
+def _artifact_name(value: Any) -> str:
+    if isinstance(value, dict):
+        return _string(value.get("path") or value.get("name") or value.get("filename"))
+    return _string(value)
+
+
+def _artifact_candidates(record: JsonObject) -> list[str]:
+    candidates: list[str] = []
+    for key in ("artifacts", "workflow_artifacts", "available_artifacts"):
+        for item in _as_list(record.get(key)):
+            name = _artifact_name(item)
+            if name and name not in candidates:
+                candidates.append(name)
+    return candidates
+
+
+def _expected_artifacts(record: JsonObject, dependency_audit: JsonObject) -> list[str]:
+    expected: list[str] = []
+    report_path = _string(dependency_audit.get("report_path"))
+    if report_path:
+        expected.append(report_path)
+
+    for key in ("expected_artifacts", "required_artifacts"):
+        for item in _as_list(record.get(key)):
+            name = _artifact_name(item)
+            if name and name not in expected:
+                expected.append(name)
+
+    return expected
+
+
+def _artifact_matches(expected: str, candidate: str) -> bool:
+    expected_text = expected.strip().lower()
+    candidate_text = candidate.strip().lower()
+    return bool(
+        expected_text
+        and candidate_text
+        and (
+            expected_text == candidate_text
+            or expected_text in candidate_text
+            or Path(expected_text).name == Path(candidate_text).name
+        )
+    )
+
+
+def _artifact_evidence(record: JsonObject, dependency_audit: JsonObject) -> JsonObject:
+    expected = _expected_artifacts(record, dependency_audit)
+    available = _artifact_candidates(record)
+    artifact_url = _string(dependency_audit.get("artifact_url") or record.get("artifact_url"))
+
+    present: list[str] = []
+    missing: list[str] = []
+
+    for expected_name in expected:
+        matched = any(_artifact_matches(expected_name, candidate) for candidate in available)
+        if matched or artifact_url:
+            present.append(expected_name)
+        else:
+            missing.append(expected_name)
+
+    if not expected:
+        status = "unavailable"
+        source = "absent"
+    elif missing:
+        status = "missing"
+        source = "absent" if not available and not artifact_url else "partial"
+    else:
+        status = "present"
+        source = "workflow_artifact_url" if artifact_url else "workflow_artifacts"
+
+    return {
+        "status": status,
+        "expected_artifacts": expected,
+        "present_artifacts": present,
+        "missing_artifacts": missing,
+        "available_artifacts": available,
+        "artifact_url": artifact_url,
+        "source": source,
+        "reporting_only": True,
+        "automation_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
 
 
 def _iter_check_records(payload: JsonObject) -> list[JsonObject]:
@@ -1131,6 +1220,7 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
 
     failed_step_evidence = _failed_step_evidence(log_text, first_failure)
     job_step_confirmation = _job_step_confirmation(record, failed_step_evidence)
+    artifact_evidence = _artifact_evidence(record, dependency_audit)
     safe_remediation = safe_remediation_eligibility.classify_check_failure(
         name=name,
         diagnosis=primary,
@@ -1153,6 +1243,7 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
         "first_failure_line": _string(first_failure.get("line")),
         FAILED_STEP_EVIDENCE_KEY: failed_step_evidence,
         JOB_STEP_CONFIRMATION_KEY: job_step_confirmation,
+        ARTIFACT_EVIDENCE_KEY: artifact_evidence,
         "formatter_changed_files": _formatter_changed_files(log_text),
         "referenced_files": _referenced_failure_files(log_text),
         "outside_changed_files": _outside_changed_files(record, log_text),
@@ -1418,6 +1509,21 @@ def _real_evidence_quality_summary(
         if _string(_as_dict(check.get(JOB_STEP_CONFIRMATION_KEY)).get("status"))
         in {"unavailable", "missing"}
     )
+    artifact_present_count = sum(
+        1
+        for check in failed_checks
+        if _string(_as_dict(check.get(ARTIFACT_EVIDENCE_KEY)).get("status")) == "present"
+    )
+    artifact_missing_count = sum(
+        1
+        for check in failed_checks
+        if _string(_as_dict(check.get(ARTIFACT_EVIDENCE_KEY)).get("status")) == "missing"
+    )
+    artifact_unavailable_count = sum(
+        1
+        for check in failed_checks
+        if _string(_as_dict(check.get(ARTIFACT_EVIDENCE_KEY)).get("status")) == "unavailable"
+    )
     stale_evidence_count = sum(1 for check in failed_checks if bool(check.get("stale_evidence")))
     unknown_diagnosis_count = sum(
         1 for check in failed_checks if _is_unknown_diagnosis(_as_dict(check.get("diagnosis")))
@@ -1447,6 +1553,9 @@ def _real_evidence_quality_summary(
         JOB_STEP_CONFIRMED_COUNT_KEY: job_step_confirmed_count,
         JOB_STEP_MISMATCH_COUNT_KEY: job_step_mismatch_count,
         JOB_STEP_UNAVAILABLE_COUNT_KEY: job_step_unavailable_count,
+        ARTIFACT_PRESENT_COUNT_KEY: artifact_present_count,
+        ARTIFACT_MISSING_COUNT_KEY: artifact_missing_count,
+        ARTIFACT_UNAVAILABLE_COUNT_KEY: artifact_unavailable_count,
         "queued_checks": len(queued_checks),
         "cancelled_checks": len(cancelled_checks),
         "startup_failures": len(startup_failures),
@@ -1819,6 +1928,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 "first_failure_line": check.get("first_failure_line", ""),
                 FAILED_STEP_EVIDENCE_KEY: check.get(FAILED_STEP_EVIDENCE_KEY, {}),
                 JOB_STEP_CONFIRMATION_KEY: check.get(JOB_STEP_CONFIRMATION_KEY, {}),
+                ARTIFACT_EVIDENCE_KEY: check.get(ARTIFACT_EVIDENCE_KEY, {}),
                 "head_sha": check.get("head_sha", ""),
                 "current_pr_head_sha": check.get("current_pr_head_sha", ""),
                 "stale_evidence": check.get("stale_evidence", False),

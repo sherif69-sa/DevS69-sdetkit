@@ -50,6 +50,7 @@ HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION = "_".join(
 
 FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
 JOB_STEP_CONFIRMATION_KEY = "_".join(("job", "step", "confirmation"))
+ARTIFACT_EVIDENCE_KEY = "_".join(("artifact", "evidence"))
 
 BANNED_EDUCATIONAL_PHRASES = (
     "Quality is green, so the review focus is not coverage.",
@@ -402,6 +403,42 @@ def _security_finding_diagnosis_lines(security_finding_diagnosis: JsonObject | N
     return lines
 
 
+def _artifact_evidence_lines(payload: JsonObject, *, prefix: str = "  - ") -> list[str]:
+    evidence = _as_dict(payload.get(ARTIFACT_EVIDENCE_KEY))
+    if not evidence:
+        return []
+
+    status = _string(evidence.get("status") or "unknown")
+    source = _string(evidence.get("source") or "unknown")
+    expected = [
+        _string(item) for item in _as_list(evidence.get("expected_artifacts")) if _string(item)
+    ]
+    present = [
+        _string(item) for item in _as_list(evidence.get("present_artifacts")) if _string(item)
+    ]
+    missing = [
+        _string(item) for item in _as_list(evidence.get("missing_artifacts")) if _string(item)
+    ]
+
+    lines = [f"{prefix}Artifact evidence: `{status}`"]
+    if expected:
+        lines.append(
+            f"{prefix}Expected artifacts: " + ", ".join(f"`{item}`" for item in expected[:5])
+        )
+    if present:
+        lines.append(
+            f"{prefix}Present artifacts: " + ", ".join(f"`{item}`" for item in present[:5])
+        )
+    if missing:
+        lines.append(
+            f"{prefix}Missing artifacts: " + ", ".join(f"`{item}`" for item in missing[:5])
+        )
+    lines.append(f"{prefix}Artifact evidence source: `{source}`")
+    lines.append(f"{prefix}Artifact evidence reporting only: `true`")
+    lines.append(f"{prefix}Artifact automation allowed: `false`")
+    return lines
+
+
 def _job_step_confirmation_lines(payload: JsonObject, *, prefix: str = "  - ") -> list[str]:
     confirmation = _as_dict(payload.get(JOB_STEP_CONFIRMATION_KEY))
     if not confirmation:
@@ -469,6 +506,7 @@ def _failed_check_lines(check_intelligence: JsonObject) -> list[str]:
             lines.append(f"  - Failure location: `{location}`")
             lines.append(f"  - Failure tool/kind: `{tool}` / `{kind}`")
         lines.extend(_failed_step_evidence_lines(item))
+        lines.extend(_artifact_evidence_lines(item))
         safe_remediation = _as_dict(item.get("safe_remediation"))
         if bool(safe_remediation.get("safe_to_auto_fix", False)):
             strategy = _string(safe_remediation.get("strategy") or "unknown")
@@ -531,6 +569,7 @@ def _primary_blocker_lines(primary: JsonObject) -> list[str]:
         lines.append(f"- Failure location: `{location}`")
         lines.append(f"- Failure tool/kind: `{tool}` / `{kind}`")
     lines.extend(_failed_step_evidence_lines(primary, prefix="- "))
+    lines.extend(_artifact_evidence_lines(primary, prefix="- "))
     safe_remediation = _as_dict(primary.get("safe_remediation"))
     if bool(safe_remediation.get("safe_to_auto_fix", False)):
         strategy = _string(safe_remediation.get("strategy") or "unknown")
