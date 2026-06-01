@@ -4,7 +4,6 @@ from pathlib import Path
 
 import yaml
 
-
 WORKFLOW = Path(".github/workflows/repo-optimization-bot.yml")
 
 
