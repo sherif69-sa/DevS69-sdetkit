@@ -35,11 +35,14 @@ def test_failed_check_log_collection_plans_github_actions_job_download(tmp_path:
     assert manifest["schema_version"] == "sdetkit.pr_quality.failed_check_logs.v1"
     assert manifest["failed_check_count"] == 1
     assert manifest["collected_log_count"] == 0
+    assert manifest[logs.WORKFLOW_JOB_EVIDENCE_QUALITY_KEY]["failed_checks"] == 1
+    assert manifest[logs.WORKFLOW_JOB_EVIDENCE_QUALITY_KEY]["download_script_required"] is True
 
     item = manifest["logs"][0]
     assert item["check_name"] == "Fast CI lane (py3.12)"
     assert item["run_id"] == "123456"
     assert item["job_id"] == "789"
+    assert item["check_run_id"] == ""
     assert item["download_supported"] is True
     assert item["collected"] is False
     assert item["log_path"].endswith("01-fast-ci-lane-py3-12.log")
@@ -87,6 +90,71 @@ def test_failed_check_log_collection_collects_inline_and_log_path_sources(
         assert Path(item["log_path"]).read_text(encoding="utf-8").strip()
 
 
+def test_failed_check_log_collection_summarizes_workflow_job_evidence_quality(
+    tmp_path: Path,
+) -> None:
+    existing = tmp_path / "existing.log"
+    existing.write_text("existing failure log\n", encoding="utf-8")
+
+    checks = _write_json(
+        tmp_path / "check-runs.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Existing log",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "log_path": existing.as_posix(),
+                },
+                {
+                    "name": "Actions job",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "html_url": "https://github.com/acme/project/actions/runs/123456/job/789",
+                },
+                {
+                    "name": "Check annotation",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "url": "https://api.github.com/repos/acme/project/check-runs/555",
+                },
+                {
+                    "name": "Unlinked vendor check",
+                    "status": "completed",
+                    "conclusion": "failure",
+                },
+            ]
+        },
+    )
+
+    manifest = logs.write_failed_check_log_artifacts(
+        checks_json=checks,
+        out_dir=tmp_path / "check-logs",
+    )
+
+    quality = manifest[logs.WORKFLOW_JOB_EVIDENCE_QUALITY_KEY]
+    assert quality["schema_version"] == logs.WORKFLOW_JOB_EVIDENCE_QUALITY_SCHEMA_VERSION
+    assert quality["failed_checks"] == 4
+    assert quality["existing_logs_collected"] == 1
+    assert quality["github_actions_log_download_supported"] == 1
+    assert quality["check_run_annotation_collection_supported"] == 1
+    assert quality["uncollectible_failed_checks"] == 1
+    assert quality["run_id_present"] == 1
+    assert quality["job_id_present"] == 1
+    assert quality["check_run_id_present"] == 1
+    assert quality["pending_downloads"] == 2
+    assert quality["download_script_required"] is True
+    assert quality["evidence_gaps"] == [
+        "download_script_required",
+        "uncollectible_failed_checks",
+    ]
+    assert quality["reporting_only"] is True
+    assert quality["patch_application_allowed"] is False
+    assert quality["automation_allowed"] is False
+    assert quality["merge_authorized"] is False
+    assert quality["semantic_equivalence_proven"] is False
+
+
 def test_failed_check_log_collection_cli_writes_manifest_and_script(
     tmp_path: Path,
     capsys,
@@ -117,6 +185,9 @@ def test_failed_check_log_collection_cli_writes_manifest_and_script(
     assert rc == 0
     stdout = json.loads(capsys.readouterr().out)
     assert stdout["failed_check_count"] == 1
+    assert (
+        stdout[logs.WORKFLOW_JOB_EVIDENCE_QUALITY_KEY]["github_actions_log_download_supported"] == 1
+    )
     assert Path(stdout["manifest_path"]).exists()
     assert Path(stdout["download_script"]).exists()
 
@@ -133,7 +204,8 @@ def test_failed_check_log_collection_prefers_actions_url_over_check_run_api_url(
                     "status": "completed",
                     "conclusion": "failure",
                     "url": "https://api.github.com/repos/acme/project/check-runs/76639814418",
-                    "details_url": "https://github.com/acme/project/actions/runs/26063321385/job/76628412038",
+                    "details_url": "https://github.com/acme/project/actions/runs/"
+                    "26063321385/job/76628412038",
                 }
             ]
         },
