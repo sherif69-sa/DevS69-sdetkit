@@ -34,3 +34,13 @@ def test_repo_optimization_bot_keeps_manual_recovery_trigger() -> None:
 
     assert "workflow_dispatch" in triggers
     assert "schedule" in triggers
+
+
+def test_repo_optimization_bot_declares_top_level_permissions() -> None:
+    payload = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+
+    assert payload["permissions"] == {
+        "contents": "read",
+        "issues": "write",
+    }
+    assert "permissions" not in payload["jobs"]["optimize"]
