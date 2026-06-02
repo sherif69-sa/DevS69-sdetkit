@@ -333,6 +333,33 @@
       "stability": "advanced"
     },
     {
+      "id": "security-review-packet-json",
+      "path": "build/sdetkit/security-review-packet.json",
+      "produced_by": "python -m sdetkit security-review-packet --inventory-json <security-findings-inventory.json> --matrix-json <security-finding-disposition-matrix.json> --out build/sdetkit/security-review-packet.json --format text",
+      "schema_version": "sdetkit.security.review.packet.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "inventory_schema",
+        "matrix_schema",
+        "summary",
+        "packet_sections",
+        "matrix_rows",
+        "review_questions",
+        "decision_options",
+        "decision_required",
+        "recommended_action",
+        "dismiss_allowed",
+        "suppress_allowed",
+        "fix_allowed",
+        "issue_mutation_allowed",
+        "automation_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "security-finding-disposition-matrix-json",
       "path": "build/sdetkit/security-finding-disposition-matrix.json",
       "produced_by": "python -m sdetkit security-finding-disposition-matrix --inventory-json <security-findings-inventory.json> --out build/sdetkit/security-finding-disposition-matrix.json --format text",
