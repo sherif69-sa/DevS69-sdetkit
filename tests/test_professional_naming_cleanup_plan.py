@@ -18,7 +18,13 @@ from sdetkit.professional_naming_cleanup_plan import (
 from sdetkit.professional_naming_inventory import SCHEMA_VERSION as INVENTORY_SCHEMA_VERSION
 
 
-def _item(path: str, term: str, classification: str, occurrences: int = 1) -> dict:
+def _item(
+    path: str,
+    term: str,
+    classification: str,
+    occurrences: int = 1,
+    actionability: str = "actionable_prose_cleanup",
+) -> dict:
     return {
         "path": path,
         "line": 1,
@@ -30,6 +36,8 @@ def _item(path: str, term: str, classification: str, occurrences: int = 1) -> di
         "classification": classification,
         "replacement_hint": "production name",
         "requires_compatibility_plan": classification == PUBLIC_ALIAS,
+        "actionability": actionability,
+        "actionability_reason": "test fixture",
         "automation_allowed": False,
         "merge_authorized": False,
         "semantic_equivalence_proven": False,
@@ -139,3 +147,25 @@ def test_professional_naming_cleanup_plan_cli_round_trip(tmp_path: Path) -> None
     assert "rename_allowed=false" in result.stdout
     assert "compatibility_migration_" + "allowed=false" in result.stdout
     assert out.is_file()
+
+
+def test_professional_naming_cleanup_plan_does_not_recommend_review_first_docs() -> None:
+    item = _item(
+        "docs/historical-report.md",
+        "phase3",
+        DOCS_ONLY,
+        actionability="review_first_context",
+    )
+    inventory = {
+        "schema_version": INVENTORY_SCHEMA_VERSION,
+        "status": "review required",
+        "finding_count": 1,
+        "items": [item],
+    }
+
+    payload = build_professional_naming_cleanup_plan(inventory)
+
+    assert payload["recommended_first_slice"] is None
+    assert payload["actionable_finding_count"] == 0
+    assert payload["review_first_finding_count"] == 1
+    assert payload["cleanup_slices"][0]["safe_to_plan_first"] is False

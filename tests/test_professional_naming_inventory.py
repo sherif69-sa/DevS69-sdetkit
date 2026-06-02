@@ -47,6 +47,8 @@ def test_professional_naming_inventory_classifies_docs_and_tests(tmp_path: Path)
     assert "safe_cleanup_internal" in classes
     assert payload["by_surface"]["docs"] >= 1
     assert payload["by_surface"]["test"] >= 1
+    assert payload["actionable_finding_count"] >= 1
+    assert payload["review_first_finding_count"] >= 1
 
 
 def test_professional_naming_inventory_preserves_non_authority_boundary(tmp_path: Path) -> None:
@@ -81,3 +83,37 @@ def test_professional_naming_inventory_writes_artifact(tmp_path: Path) -> None:
     written = json.loads(out.read_text(encoding="utf-8"))
     assert written == payload
     assert written["schema_version"] == SCHEMA_VERSION
+
+
+def test_professional_naming_inventory_separates_actionable_prose_from_headings(
+    tmp_path: Path,
+) -> None:
+    docs = tmp_path / "docs" / "report.md"
+    docs.parent.mkdir(parents=True)
+    docs.write_text("# phase3 closeout\n\nphase3 rollout prose\n", encoding="utf-8")
+
+    payload = build_professional_naming_inventory(root=tmp_path, terms=["phase3", "closeout"])
+
+    by_actionability = payload["by_actionability"]
+    assert by_actionability["actionable_prose_cleanup"] >= 1
+    assert by_actionability["review_first_context"] >= 1
+    assert payload["actionable_finding_count"] >= 1
+    assert payload["review_first_finding_count"] >= 1
+
+
+def test_professional_naming_inventory_marks_template_locked_docs_review_first(
+    tmp_path: Path,
+) -> None:
+    docs = tmp_path / "docs" / "integrations-release-prioritization-completion.md"
+    docs.parent.mkdir(parents=True)
+    docs.write_text(
+        "This closeout records release prioritization pack upgrades, storyline outcomes, and launch priorities.\n",
+        encoding="utf-8",
+    )
+
+    payload = build_professional_naming_inventory(root=tmp_path, terms=["closeout"])
+
+    assert payload["actionable_finding_count"] == 0
+    assert payload["review_first_finding_count"] == 1
+    assert payload["items"][0]["actionability"] == "review_first_context"
+    assert payload["items"][0]["actionability_reason"] == "template_locked_contract"

@@ -69,6 +69,13 @@ def _number(value: object) -> int:
         return 0
 
 
+def _is_actionable(item: dict[str, Any]) -> bool:
+    actionability = _text(item.get("actionability"), "")
+    if actionability:
+        return actionability == "actionable_prose_cleanup"
+    return _text(item.get("classification")) in SAFE_CLASSES
+
+
 def _top_counts(items: list[dict[str, Any]], field: str, *, limit: int = 8) -> list[dict[str, Any]]:
     counts = Counter(_text(item.get(field)) for item in items)
     return [
@@ -101,17 +108,21 @@ def _scope_for_classification(classification: str) -> str:
 
 def _slice(items: list[dict[str, Any]], classification: str) -> dict[str, Any]:
     requires_compatibility = classification in COMPATIBILITY_CLASSES
+    actionable_finding_count = sum(1 for item in items if _is_actionable(item))
+    review_first_finding_count = len(items) - actionable_finding_count
     return {
         "id": classification.replace("_", "-"),
         "classification": classification,
         "priority": PRIORITY_BY_CLASSIFICATION.get(classification, 80),
         "finding_count": len(items),
+        "actionable_finding_count": actionable_finding_count,
+        "review_first_finding_count": review_first_finding_count,
         "occurrence_count": sum(max(1, _number(item.get("occurrence_count"))) for item in items),
         "top_terms": _top_counts(items, "term"),
         "top_surfaces": _top_counts(items, "surface"),
         "top_paths": _path_counts(items),
         "recommended_scope": _scope_for_classification(classification),
-        "safe_to_plan_first": classification in SAFE_CLASSES,
+        "safe_to_plan_first": classification in SAFE_CLASSES and actionable_finding_count > 0,
         "requires_compatibility_plan": requires_compatibility,
         **ACTION_BOUNDARY,
         **AUTHORITY_BOUNDARY,
@@ -123,6 +134,8 @@ def build_professional_naming_cleanup_plan(inventory: dict[str, Any]) -> dict[st
     grouped: dict[str, list[dict[str, Any]]] = {}
     for item in items:
         grouped.setdefault(_text(item.get("classification")), []).append(item)
+
+    actionable_finding_count = sum(1 for item in items if _is_actionable(item))
 
     slices = [_slice(members, classification) for classification, members in grouped.items()]
     slices.sort(
@@ -141,6 +154,8 @@ def build_professional_naming_cleanup_plan(inventory: dict[str, Any]) -> dict[st
         "inventory_schema": str(inventory.get("schema_version", "")),
         "inventory_status": str(inventory.get("status", "")),
         "inventory_finding_count": _number(inventory.get("finding_count")),
+        "actionable_finding_count": actionable_finding_count,
+        "review_first_finding_count": len(items) - actionable_finding_count,
         "slice_count": len(slices),
         "safe_slice_count": sum(1 for item in slices if item["safe_to_plan_first"]),
         "compatibility_slice_count": sum(
@@ -149,9 +164,14 @@ def build_professional_naming_cleanup_plan(inventory: dict[str, Any]) -> dict[st
         "recommended_first_slice": first_safe["id"] if first_safe else None,
         "cleanup_slices": slices,
         "recommended_action": (
-            "start with docs-only or internal cleanup slices; defer public surfaces until alias plans exist"
-            if items
-            else "retain clean naming plan as evidence"
+            "start with actionable docs-only or internal cleanup slices; defer public surfaces until alias plans exist"
+            if actionable_finding_count
+            else (
+                "no actionable direct cleanup slice remains; preserve review-first historical, path, "
+                "template, workflow, and compatibility-bound findings until explicit migration plans exist"
+                if items
+                else "retain clean naming plan as evidence"
+            )
         ),
         **ACTION_BOUNDARY,
         **AUTHORITY_BOUNDARY,
@@ -191,6 +211,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         sys.stdout.write(f"cleanup_plan_json={ns.out}\n")
         sys.stdout.write(f"status={payload['status']}\n")
         sys.stdout.write(f"slice_count={payload['slice_count']}\n")
+        sys.stdout.write(f"actionable_finding_count={payload['actionable_finding_count']}\n")
+        sys.stdout.write(f"review_first_finding_count={payload['review_first_finding_count']}\n")
         sys.stdout.write(f"recommended_first_slice={payload['recommended_first_slice']}\n")
         sys.stdout.write(f"rename_allowed={str(payload['rename_allowed']).lower()}\n")
         sys.stdout.write(
