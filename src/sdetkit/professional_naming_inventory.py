@@ -63,6 +63,10 @@ REVIEW_FIRST_CONTEXT = "review_first_context"
 MIGRATION_OR_ALIAS_REQUIRED = "migration_or_alias_required"
 INTERNAL_REVIEW_FIRST = "internal_cleanup_review_first"
 
+TEMPLATE_LOCKED_DOC_PATHS = {
+    "docs/integrations-release-prioritization-completion.md",
+}
+
 
 def _docs_line_review_reason(line: str) -> str | None:
     stripped = line.strip()
@@ -129,6 +133,12 @@ def _actionability_fields(
         return {
             "actionability": MIGRATION_OR_ALIAS_REQUIRED,
             "actionability_reason": "compatibility plan required before changing this surface",
+        }
+
+    if path.as_posix() in TEMPLATE_LOCKED_DOC_PATHS:
+        return {
+            "actionability": REVIEW_FIRST_CONTEXT,
+            "actionability_reason": "template_locked_contract",
         }
 
     if match_type == "path":

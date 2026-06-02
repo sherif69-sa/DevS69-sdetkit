@@ -10,17 +10,17 @@ This lane closes with a major upgrade that converts evidence narrative outcomes 
 
 ## Required inputs (Release prioritization completion report lane)
 
-- `docs/artifacts/evidence-narrative-completion-pack/evidence-narrative-completion-summary.json`
-- `docs/artifacts/evidence-narrative-completion-pack/evidence-narrative-delivery-board.md`
+- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json`
+- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md`
 - `docs/roadmap/plans/release-prioritization-plan.json`
 
 ## Command lane
 
 ```bash
-python -m sdetkit release-prioritization-completion --format json --strict
-python -m sdetkit release-prioritization-completion --emit-pack-dir docs/artifacts/release-prioritization-completion-pack --format json --strict
-python -m sdetkit release-prioritization-completion --execute --evidence-dir docs/artifacts/release-prioritization-completion-pack/evidence --format json --strict
-python scripts/check_release_prioritization_completion_contract.py
+python -m sdetkit release-prioritization-closeout --format json --strict
+python -m sdetkit release-prioritization-closeout --emit-pack-dir docs/artifacts/release-prioritization-closeout-pack --format json --strict
+python -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/artifacts/release-prioritization-closeout-pack/evidence --format json --strict
+python scripts/check_release_prioritization_closeout_contract.py
 ```
 
 ## Release prioritization contract
@@ -28,7 +28,7 @@ python scripts/check_release_prioritization_completion_contract.py
 - Single owner + backup reviewer are assigned for this release prioritization execution and signoff.
 - This lane references evidence narrative outcomes, controls, and trust continuity signals.
 - Every section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- This completion records release prioritization pack upgrades, storyline outcomes, and launch priorities.
+- This closeout records release prioritization pack upgrades, storyline outcomes, and launch priorities.
 
 ## Release prioritization quality checklist
 

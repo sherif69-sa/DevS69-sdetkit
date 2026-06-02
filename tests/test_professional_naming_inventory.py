@@ -99,3 +99,21 @@ def test_professional_naming_inventory_separates_actionable_prose_from_headings(
     assert by_actionability["review_first_context"] >= 1
     assert payload["actionable_finding_count"] >= 1
     assert payload["review_first_finding_count"] >= 1
+
+
+def test_professional_naming_inventory_marks_template_locked_docs_review_first(
+    tmp_path: Path,
+) -> None:
+    docs = tmp_path / "docs" / "integrations-release-prioritization-completion.md"
+    docs.parent.mkdir(parents=True)
+    docs.write_text(
+        "This closeout records release prioritization pack upgrades, storyline outcomes, and launch priorities.\n",
+        encoding="utf-8",
+    )
+
+    payload = build_professional_naming_inventory(root=tmp_path, terms=["closeout"])
+
+    assert payload["actionable_finding_count"] == 0
+    assert payload["review_first_finding_count"] == 1
+    assert payload["items"][0]["actionability"] == "review_first_context"
+    assert payload["items"][0]["actionability_reason"] == "template_locked_contract"
