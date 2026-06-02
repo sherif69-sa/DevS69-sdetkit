@@ -745,6 +745,17 @@ Then use stability-aware command discovery:
     )
     security_review_packet.add_argument("--format", choices=["json", "text"], default="json")
 
+    professional_naming_inventory = sub.add_parser(
+        "professional-naming-inventory",
+        help="[Advanced but supported] Build read-only professional naming debt inventory",
+    )
+    professional_naming_inventory.add_argument("--root", default=".")
+    professional_naming_inventory.add_argument(
+        "--out", default="build/sdetkit/professional-naming-inventory.json"
+    )
+    professional_naming_inventory.add_argument("--term", action="append", dest="terms")
+    professional_naming_inventory.add_argument("--format", choices=["json", "text"], default="json")
+
     maintenance_queue_rollup = sub.add_parser(
         "maintenance-queue-rollup",
         help="[Advanced but supported] Build read-only maintenance queue rollup evidence",
@@ -1432,6 +1443,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.format),
         ]
         return _run_module_main("sdetkit.security_review_packet", forwarded)
+
+    if ns.cmd == "professional-naming-inventory":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        for term in ns.terms or []:
+            forwarded.extend(["--term", str(term)])
+        return _run_module_main("sdetkit.professional_naming_inventory", forwarded)
 
     if ns.cmd == "maintenance-queue-rollup":
         forwarded = [

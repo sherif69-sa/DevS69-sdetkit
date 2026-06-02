@@ -311,6 +311,29 @@
       "stability": "advanced"
     },
     {
+      "id": "professional-naming-inventory-json",
+      "path": "build/sdetkit/professional-naming-inventory.json",
+      "produced_by": "python -m sdetkit professional-naming-inventory --root . --out build/sdetkit/professional-naming-inventory.json --format text",
+      "schema_version": "sdetkit.professional.naming.inventory.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "terms",
+        "finding_count",
+        "by_term",
+        "by_classification",
+        "by_surface",
+        "items",
+        "recommended_action",
+        "rename_allowed",
+        "compatibility_required",
+        "automation_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "maintenance-queue-rollup-json",
       "path": "build/sdetkit/maintenance-queue-rollup.json",
       "produced_by": "python -m sdetkit maintenance-queue-rollup --issue-queue-json <issue-queue.json> --automation-health-json <automation-health.json> --security-followup-json <security-followup-disposition.json> --out build/sdetkit/maintenance-queue-rollup.json --format text",
