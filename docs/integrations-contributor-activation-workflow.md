@@ -6,7 +6,7 @@ Lane closes with a major contributor activation upgrade that turns Lane docs-loo
 
 - Converts Lane docs-loop wins into repeatable contributor activation motions.
 - Protects quality with ownership, command proof, and KPI guardrails.
-- Produces a deterministic handoff from Lane closeout into Lane planning.
+- Produces a deterministic handoff from Lane completion report into Lane planning.
 
 ## Required inputs (Lane)
 
@@ -27,7 +27,7 @@ python scripts/check_contributor_activation_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane contributor-activation execution and KPI follow-up.
 - This lane references Lane docs-loop wins and misses with deterministic contributor follow-up loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records contributor-activation learnings and Lane prioritization inputs.
+- Lane completion report records contributor-activation learnings and Lane prioritization inputs.
 
 ## Contributor activation quality checklist
 

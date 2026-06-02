@@ -6,7 +6,7 @@ This dashboard is the weekly control plane for the **DevS69 SDETKit top-tier ful
 - Leadership blueprint: `docs/cto-full-package-review.md`.
 - Execution workflow: `docs/cto-execution-workflow.md`.
 - Post-completion plan: `docs/cto-workflow-readiness-launch-plan.md`.
-- Reporting cadence: Monday planning, Wednesday risk review, Friday closeout
+- Reporting cadence: Monday planning, Wednesday risk review, Friday completion report
 
 ## Weekly status snapshot
 
@@ -56,7 +56,7 @@ Track weekly:
 |---|---|---|---|---|---|
 | B-001 | No portfolio aggregate schema versioning convention | Delayed WS2 reporting | Platform engineering | 2026-04-24 | Closed 2026-04-15 |
 
-## Weekly closeout template
+## Weekly completion report template
 
 ### Completed
 - [Portfolio aggregation schema](portfolio-aggregation-schema.md)

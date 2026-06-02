@@ -4,7 +4,7 @@ Lane ships a major Phase-3 kickoff upgrade that converts Lane wrap evidence into
 
 ## Why Phase3 Kickoff Closeout matters
 
-- Converts Lane closeout evidence into repeatable Phase-3 execution loops.
+- Converts Lane completion report evidence into repeatable Phase-3 execution loops.
 - Protects trust outcomes with ownership, command proof, and KPI rollback guardrails.
 - Produces a deterministic handoff from Lane kickoff into Lane community program setup.
 
@@ -27,7 +27,7 @@ python scripts/check_phase3_kickoff_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane Phase-3 kickoff execution and trust-signal triage.
 - This lane references Lane Phase-2 wrap outcomes, risks, and KPI continuity evidence.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records Phase-3 baseline activation, trust KPI owners, and Lane community program priorities.
+- Lane completion report records Phase-3 baseline activation, trust KPI owners, and Lane community program priorities.
 
 ## Phase-3 kickoff quality checklist
 

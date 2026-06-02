@@ -18,7 +18,7 @@ This is an inspection and planning artifact. It does **not** propose broad refac
   - core user journeys,
   - reference docs,
   - integration guides,
-  - a large archive of impact-based reports and closeout pages.
+  - a large archive of impact-based reports and completion report pages.
 - `scripts/` includes both core workflows (`ready_to_use.sh`, `check.sh`, `bootstrap.sh`) and many impact-specific contract checks.
 
 ## Package and command surface observations

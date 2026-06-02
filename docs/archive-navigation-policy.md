@@ -14,7 +14,7 @@ The documentation set contains both product documentation and operating history.
 
 Product documentation should help a user install, run, adopt, verify, integrate, and operate SDETKit. Those pages belong in the active navigation.
 
-Operating history captures the work that produced the toolkit. That includes upgrade reports, dated execution plans, closeout records, investor-readiness snapshots, roadmap artifacts, and one-off follow-up trackers. Those pages can remain valuable, but they should not crowd the active reader journey.
+Operating history captures the work that produced the toolkit. That includes upgrade reports, dated execution plans, completion report records, investor-readiness snapshots, roadmap artifacts, and one-off follow-up trackers. Those pages can remain valuable, but they should not crowd the active reader journey.
 
 The MkDocs inventory warning is therefore treated as a triage signal, not a blanket order to add every Markdown file to the nav.
 
@@ -65,7 +65,7 @@ Examples include:
 
 - dated upgrade reports
 - execution plans tied to a specific date
-- cycle closeout reports
+- cycle completion report reports
 - investor-readiness snapshots
 - historical audit records
 - one-off follow-up trackers
@@ -116,7 +116,7 @@ Poor slices include:
 - one generated artifact,
 - every remaining Markdown file,
 - a mix of unrelated old plans and current references,
-- dated closeout records added to the primary journey.
+- dated completion report records added to the primary journey.
 
 ## Archive rules
 
@@ -126,7 +126,7 @@ Common archive markers include:
 
 - a date in the file name or title,
 - a cycle number in the file name or title,
-- report or closeout language,
+- report or completion report language,
 - investor or audit snapshot language,
 - plan-execution follow-up language,
 - generated weekly-pack paths,
@@ -140,7 +140,7 @@ The preferred pattern is to create a curated index before adding many archive pa
 
 The following groups are examples of pages that should not be blindly promoted into primary navigation:
 
-### Continuous upgrade closeout reports
+### Continuous upgrade completion report reports
 
 Files like `continuous-upgrade-big-upgrade-report-1.md` through later cycle reports are historical closeout material. They may be useful for traceability, but they should live behind an archive or upgrade-history index.
 

@@ -27,7 +27,7 @@ python scripts/check_scale_workflow_contract.py
 - Single owner + backup reviewer are assigned for Lane scale lane execution and metric follow-up.
 - The Lane scale lane references Lane publication winners and explicit misses.
 - Every Lane scale lane section includes docs CTA, runnable command CTA, and one KPI target.
-- Lane closeout records scale learnings and Lane expansion priorities.
+- Lane completion report records scale learnings and Lane expansion priorities.
 
 ## Scale quality checklist
 

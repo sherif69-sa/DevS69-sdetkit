@@ -96,7 +96,7 @@ Upgrade checks into a stronger execution engine with better recommendations and 
 1. Extend adaptive planning signals (changed paths, reasons, risk areas).
 2. Enrich risk summary/fix plan payload contracts.
 3. Add trend deltas across successive baseline runs.
-4. Improve doctor handoff signals for deterministic next-pass actions.
+4. Improve doctor handoff signals for deterministic follow-up pass actions.
 5. Validate baseline summary schema with:
    - `make quality-contract-check`
    - `python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json`

@@ -4,7 +4,7 @@ Lane closes the weekly growth loop by consolidating Lane-27 outcomes into wins, 
 
 ## Who should run Lane
 
-- Maintainers preparing Phase-1 closeout and Lane hardening priorities.
+- Maintainers preparing Phase-1 completion report and Lane hardening priorities.
 - DevRel/community operators validating that activation efforts converted to contributions.
 - Engineering managers requiring an auditable weekly checkpoint before handoff.
 
@@ -29,7 +29,7 @@ Lane weighted score (0-100):
 
 - Docs contract + command lane completeness: 40 points.
 - Discoverability links in README/docs index: 20 points.
-- Roadmap alignment and closeout language quality: 15 points.
+- Roadmap alignment and completion report language quality: 15 points.
 - Input artifact availability from Cycles 25-27: 25 points.
 
 ## Evidence mode

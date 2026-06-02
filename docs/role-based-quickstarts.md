@@ -22,4 +22,4 @@ python -m sdetkit doctor --format json --out build/doctor.json
 
 - [ ] Assign one named owner per role.
 - [ ] Capture one successful evidence run per role.
-- [ ] Link each role run into the top-tier dashboard weekly closeout.
+- [ ] Link each role run into the top-tier dashboard weekly completion report.

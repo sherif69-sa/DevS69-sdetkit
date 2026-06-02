@@ -22,7 +22,7 @@ This command runs the execution lane, validates the flow contract, computes the 
 8. `python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json --require-logs`
 9. `python scripts/phase1_completion_gate.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json`
 
-Or run the full closeout path in one command:
+Or run the full completion report path in one command:
 
 - `make operations-complete`
 
@@ -53,7 +53,7 @@ The repository keeps the Phase 1 workflow and its execution artifacts as the sou
 2. Keep `make operations-status` and `make operations-next-action` as the operational source of truth.
 3. Treat non-blocking checks (`ruff`, `pytest`) as advisory remediation until stabilized.
 
-## Suggested evidence bundle for phase closeout
+## Suggested evidence bundle for phase completion report
 
 - `build/phase1-baseline/phase1-baseline-summary.json`
 - `build/phase1-baseline/phase1-baseline-summary.md`

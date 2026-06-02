@@ -22,12 +22,12 @@ python -m sdetkit expansion-closeout --execute --evidence-dir docs/artifacts/exp
 python scripts/check_expansion_closeout_contract.py
 ```
 
-## Expansion closeout contract
+## Expansion completion report contract
 
 - Single owner + backup reviewer are assigned for Lane expansion lane execution and KPI follow-up.
 - The Lane expansion lane references Lane scale winners and misses with deterministic growth loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records expansion learnings and Lane optimization priorities.
+- Lane completion report records expansion learnings and Lane optimization priorities.
 
 ## Expansion quality checklist
 

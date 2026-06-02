@@ -41,8 +41,8 @@ python scripts/check_release_cadence_contract.py
 
 - [ ] Lane cadence calendar committed
 - [ ] Lane changelog template committed
-- [ ] Lane demo asset #1 scope frozen
-- [ ] Lane demo asset #2 scope frozen
+- [ ] Lane example asset #1 scope frozen
+- [ ] Lane example asset #2 scope frozen
 - [ ] Lane weekly review KPI frame locked
 
 ## Scoring model

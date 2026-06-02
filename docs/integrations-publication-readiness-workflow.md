@@ -6,7 +6,7 @@ Lane closes with a major upgrade that converts Lane governance scale outcomes in
 
 - Converts Lane governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Lane closeout into the next-impact roadmap.
+- Creates a deterministic handoff from Lane completion report into the next-impact roadmap.
 
 ## Required inputs (Lane)
 
@@ -28,7 +28,7 @@ python scripts/check_phase3_wrap_publication_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane phase-3 wrap publication execution and signoff.
 - This lane references Lane outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.
+- Lane completion report records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.
 
 ## Phase-3 wrap publication quality checklist
 

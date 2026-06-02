@@ -22,12 +22,12 @@ python -m sdetkit acceleration-closeout --execute --evidence-dir docs/artifacts/
 python scripts/check_acceleration_closeout_contract.py
 ```
 
-## Acceleration closeout contract
+## Acceleration completion report contract
 
 - Single owner + backup reviewer are assigned for Lane acceleration lane execution and KPI follow-up.
 - The Lane acceleration lane references Lane optimization winners and misses with deterministic growth loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records acceleration learnings and Lane scale priorities.
+- Lane completion report records acceleration learnings and Lane scale priorities.
 
 ## Acceleration quality checklist
 

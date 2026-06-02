@@ -16,15 +16,15 @@ Prefer production workflow names:
 - ecosystem contract
 - metrics contract
 
-Avoid adding new workflow names that read like internal sequencing or education labels:
+Avoid adding new workflow names that read like internal sequencing or operator guidance labels:
 
-- phase1, phase2, phase3
+- baseline stage, release readiness stage, platform readiness stage
 - do-it
-- closeout
-- finish-signal
-- retire-plan
-- next-pass
-- gate-phase2
+- completion report
+- completion signal
+- deprecation plan
+- follow-up pass
+- release readiness gate
 
 ## Compatibility approach
 

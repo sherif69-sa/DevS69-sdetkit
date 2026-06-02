@@ -22,12 +22,12 @@ python -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/nar
 python scripts/check_narrative_closeout_contract.py
 ```
 
-## Narrative closeout contract
+## Narrative completion report contract
 
 - Single owner + backup reviewer are assigned for Lane narrative execution and KPI follow-up.
 - The Lane narrative lane references Lane case-snippet winners and misses with deterministic release-storytelling loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records narrative learnings and Lane expansion priorities.
+- Lane completion report records narrative learnings and Lane expansion priorities.
 
 ## Narrative quality checklist
 

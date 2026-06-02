@@ -22,12 +22,12 @@ python -m sdetkit optimization-closeout-foundation --execute --evidence-dir docs
 python scripts/check_optimization_closeout_contract.py
 ```
 
-## Optimization closeout contract
+## Optimization completion report contract
 
 - Single owner + backup reviewer are assigned for Optimization Closeout Foundation optimization lane execution and KPI follow-up.
 - The Optimization Closeout Foundation optimization lane references Lane expansion winners and misses with deterministic remediation loops.
 - Every Optimization Closeout Foundation section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Optimization Closeout Foundation closeout records optimization learnings and Lane acceleration priorities.
+- Optimization Closeout Foundation completion report records optimization learnings and Lane acceleration priorities.
 
 ## Optimization quality checklist
 

@@ -6,7 +6,7 @@ Lane closes with a major upgrade that converts Lane launch readiness outcomes in
 
 - Converts Lane launch readiness outcomes into reusable governance handoff decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Lane closeout into Lane governance priorities.
+- Creates a deterministic handoff from Lane completion report into Lane governance priorities.
 
 ## Required inputs (Lane)
 
@@ -28,7 +28,7 @@ python scripts/check_governance_handoff_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane governance handoff execution and signoff.
 - This lane references Lane outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records governance handoff pack upgrades, storyline outcomes, and Lane governance priorities.
+- Lane completion report records governance handoff pack upgrades, storyline outcomes, and Lane governance priorities.
 
 ## Governance handoff quality checklist
 

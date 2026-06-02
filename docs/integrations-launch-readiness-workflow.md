@@ -6,7 +6,7 @@ Lane closes with a major upgrade that converts Lane release prioritization outco
 
 - Converts Lane release prioritization outcomes into reusable launch readiness decisions across launch briefs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Lane closeout into Lane launch priorities.
+- Creates a deterministic handoff from Lane completion report into Lane launch priorities.
 
 ## Required inputs (Lane)
 
@@ -28,7 +28,7 @@ python scripts/check_launch_readiness_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane launch readiness execution and signoff.
 - This lane references Lane outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records launch readiness pack upgrades, storyline outcomes, and Lane launch priorities.
+- Lane completion report records launch readiness pack upgrades, storyline outcomes, and Lane launch priorities.
 
 ## Launch readiness quality checklist
 

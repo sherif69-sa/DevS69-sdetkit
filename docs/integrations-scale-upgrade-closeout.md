@@ -28,7 +28,7 @@ python scripts/check_scale_upgrade_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane scale upgrade execution and signoff.
 - This lane references Lane outcomes, controls, and KPI continuity signals.
 - Every Lane section includes enterprise CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records enterprise onboarding outcomes, confidence notes, and Lane partner outreach priorities.
+- Lane completion report records enterprise onboarding outcomes, confidence notes, and Lane partner outreach priorities.
 
 ## Scale upgrade quality checklist
 

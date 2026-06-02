@@ -68,7 +68,7 @@ auto_fix_enabled: false
 
 That is correct. The system can now recommend and plan, but it should not auto-fix until the proof, category, trend, candidate, probation, and policy proposal layers are mature.
 
-### Real workflow lesson from PR #1155
+### Real workflow guide from PR #1155
 
 A real product gap around async/client/helper envelope pagination parity showed what SDETKit should learn to do automatically:
 

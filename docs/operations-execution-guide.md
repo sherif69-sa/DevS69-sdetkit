@@ -59,7 +59,7 @@ Before promoting a phase from active to complete:
 
 ## Phase gate decision record template
 
-For each phase closeout, record:
+For each phase completion report, record:
 
 - Phase id and name
 - Date

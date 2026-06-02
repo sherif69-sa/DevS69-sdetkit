@@ -90,7 +90,7 @@ Expected outcome:
 
 ## Current-docs navigation slice
 
-This cleanup pass promotes current operator-facing documentation into the MkDocs navigation without trying to absorb the full historical inventory in one change. The intent is to make active docs discoverable while leaving report archives, one-off plans, and timebound closeout material for later curation.
+This cleanup pass promotes current operator-facing documentation into the MkDocs navigation without trying to absorb the full historical inventory in one change. The intent is to make active docs discoverable while leaving report archives, one-off plans, and timebound completion report material for later curation.
 
 ### Scope policy
 
@@ -181,6 +181,6 @@ The remaining MkDocs inventory still includes many useful pages, but it is mixed
 - support docs
 - productization notes
 - roadmap artifacts
-- archive-like generated closeout packs
+- archive-like generated completion report packs
 
 Those groups should be handled as separate PRs with their own navigation or archive policy. This pass deliberately avoids turning the whole inventory into primary navigation.

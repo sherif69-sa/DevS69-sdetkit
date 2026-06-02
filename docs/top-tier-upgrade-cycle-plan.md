@@ -8,7 +8,7 @@ Based on the current repository state and front-door documentation, the platform
 - A committed **live-adoption product proof** flow with explicit outcomes and known-finding accounting.
 - Multiple operational lanes (release gate, review, quality, CI-ready, reporting).
 - Strong artifact-first governance across docs/artifacts and plans/ for auditable execution history.
-- Extensive contract-check scripts that enforce consistency across releases, governance phases, and closeout packs.
+- Extensive contract-check scripts that enforce consistency across releases, governance phases, and completion report packs.
 
 In short: this repo is already beyond a simple test toolkit; it behaves like an operating system for release confidence.
 
@@ -65,7 +65,7 @@ Run the next cycle as ten parallel streams with one ownership board.
 6. **Risk scoring engine**: portfolio-level risk from per-repo gate evidence.
 7. **Auto-remediation lane**: safe fixers for common failures with rollback proofs.
 8. **Executive control tower**: organization-level dashboards + trend alerts.
-9. **Governance pack templates**: standard closeout packs for any language/repo type.
+9. **Governance pack templates**: standard completion report packs for any language/repo type.
 10. **Integration marketplace**: plug-ins for CI providers, SCMs, test frameworks, and package ecosystems.
 
 ## 4) Architecture target for "interact with all repos"

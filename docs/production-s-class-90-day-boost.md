@@ -22,7 +22,7 @@ Default outputs:
 1. **Every phase has owners** for each deliverable, plus a backup reviewer.
 2. **Every KPI has a baseline** and a weekly trend source of truth.
 3. **Every high-risk area has rollback criteria** documented before execution.
-4. **Every closeout produces evidence artifacts** that feed the next phase planning loop.
+4. **Every completion report produces evidence artifacts** that feed the next phase planning loop.
 
 ## Promotion criteria to "S-class production"
 

@@ -64,7 +64,7 @@ This blueprint defines how to package the **AgentOS + template engine + omnichan
 - Role-based operational runbooks published.
 
 ### Phase 3: Program rollout
-- Workspace bootstrap scripted with demo scenario for acceptance testing.
+- Workspace bootstrap scripted with example scenario for acceptance testing.
 - Dashboard and export artifacts integrated into quality gates.
 - Standardized policy exceptions and waiver process formalized.
 

@@ -22,12 +22,12 @@ python -m sdetkit case-snippet-closeout --execute --evidence-dir docs/artifacts/
 python scripts/check_case_snippet_closeout_contract_51.py
 ```
 
-## Case snippet closeout contract
+## Case snippet completion report contract
 
 - Single owner + backup reviewer are assigned for Lane case snippet execution and KPI follow-up.
 - The Lane case snippet lane references Lane execution-prioritization winners and misses with deterministic release-storytelling loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records case-snippet learnings and Lane narrative priorities.
+- Lane completion report records case-snippet learnings and Lane narrative priorities.
 
 ## Case snippet quality checklist
 

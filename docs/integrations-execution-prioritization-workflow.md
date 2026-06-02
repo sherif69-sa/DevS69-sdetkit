@@ -22,12 +22,12 @@ python -m sdetkit execution-prioritization-closeout --execute --evidence-dir doc
 python scripts/check_execution_prioritization_closeout_contract.py
 ```
 
-## Execution prioritization closeout contract
+## Execution prioritization completion report contract
 
 - Single owner + backup reviewer are assigned for Lane execution prioritization execution and KPI follow-up.
 - The Lane execution prioritization lane references Lane weekly-review winners and misses with deterministic execution-board loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records execution-board learnings and Lane release priorities.
+- Lane completion report records execution-board learnings and Lane release priorities.
 
 ## Execution prioritization quality checklist
 

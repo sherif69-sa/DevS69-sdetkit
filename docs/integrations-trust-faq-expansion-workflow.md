@@ -6,7 +6,7 @@ Lane closes with a major upgrade that folds Lane integration feedback outcomes i
 
 - Turns Lane integration feedback outcomes into deterministic trust FAQ expansion loops across docs, templates, and support operations.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Lane closeout into Lane evidence narrative priorities.
+- Creates a deterministic handoff from Lane completion report into Lane evidence narrative priorities.
 
 ## Required inputs (Lane)
 
@@ -28,7 +28,7 @@ python scripts/check_trust_faq_expansion_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane trust FAQ expansion execution and signoff.
 - This lane references Lane outcomes, controls, and campaign continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records trust FAQ content upgrades, escalation outcomes, and Lane evidence narrative priorities.
+- Lane completion report records trust FAQ content upgrades, escalation outcomes, and Lane evidence narrative priorities.
 
 ## Trust FAQ expansion quality checklist
 

@@ -22,12 +22,12 @@ python -m sdetkit optimization-closeout --execute --evidence-dir docs/artifacts/
 python scripts/check_optimization_closeout_contract.py
 ```
 
-## Optimization closeout contract
+## Optimization completion report contract
 
 - Single owner + backup reviewer are assigned for Lane optimization lane execution and KPI follow-up.
 - The Lane optimization lane references Lane expansion winners and misses with deterministic optimization loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records optimization learnings and Lane reliability priorities.
+- Lane completion report records optimization learnings and Lane reliability priorities.
 
 ## Optimization quality checklist
 

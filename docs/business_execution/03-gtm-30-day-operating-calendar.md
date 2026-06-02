@@ -92,7 +92,7 @@ Deliverables:
 - ICP scores
 
 ### Day 4
-- Run live first-proof demo script for shortlisted prospects.
+- Run live first-proof example script for shortlisted prospects.
 - Capture friction points in onboarding narrative.
 - Create objection-response notes.
 
@@ -451,7 +451,7 @@ Before each pilot:
 
 ---
 
-## Monthly closeout package
+## Monthly completion report package
 
 At the end of day 30 produce:
 1. Pipeline summary report.

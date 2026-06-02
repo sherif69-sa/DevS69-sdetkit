@@ -22,12 +22,12 @@ python -m sdetkit reliability-closeout --execute --evidence-dir docs/artifacts/c
 python scripts/check_reliability_closeout_contract.py
 ```
 
-## Reliability closeout contract
+## Reliability completion report contract
 
 - Single owner + backup reviewer are assigned for Lane reliability lane execution and KPI follow-up.
 - The Lane reliability lane references Lane optimization winners and misses with deterministic reliability loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records reliability learnings and Lane execution priorities.
+- Lane completion report records reliability learnings and Lane execution priorities.
 
 ## Reliability quality checklist
 

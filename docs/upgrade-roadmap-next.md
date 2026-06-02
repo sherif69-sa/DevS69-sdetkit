@@ -6,7 +6,7 @@ This roadmap is designed to help the team continue upgrades in a focused way, wi
 
 - Clear canonical workflow (`gate fast` -> `gate release` -> `doctor`) and a concrete first-proof entrypoint.
 - Strong artifact-driven model (`build/first-proof/*`) that supports auditable decisions.
-- Broad operational scripting footprint for governance, reporting, and closeout checks.
+- Broad operational scripting footprint for governance, reporting, and completion report checks.
 
 ## Where the next upgrades should go
 

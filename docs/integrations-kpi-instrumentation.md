@@ -4,7 +4,7 @@ Lane closes the week with a hardened KPI operating loop that ties growth narrati
 
 ## Why Lane matters
 
-- Converts production demo momentum into persistent weekly measurement.
+- Converts production example momentum into persistent weekly measurement.
 - Eliminates attribution blind spots with explicit source-command mapping per KPI.
 - Forces decisions by pairing every drift signal with a next-week action.
 

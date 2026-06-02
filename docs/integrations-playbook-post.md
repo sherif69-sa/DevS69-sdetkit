@@ -27,7 +27,7 @@ python scripts/check_playbook_post_contract.py
 - Single owner + backup reviewer are assigned for Lane playbook publication and metric follow-up.
 - The Lane playbook post references Lane distribution winners and explicit misses.
 - Every Lane playbook section includes docs CTA, runnable command CTA, and one KPI target.
-- Lane closeout records publication learnings and Lane scale priorities.
+- Lane completion report records publication learnings and Lane scale priorities.
 
 ## Playbook quality checklist
 
