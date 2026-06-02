@@ -6,7 +6,7 @@ Lane closes with a major upgrade that converts Lane governance scale outcomes in
 
 - Converts Lane governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Lane closeout into the continuous-upgrade backlog.
+- Creates a deterministic handoff from Lane completion report into the continuous-upgrade backlog.
 
 ## Required inputs (Lane)
 
@@ -28,7 +28,7 @@ python scripts/check_continuous_upgrade_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane continuous upgrade execution and signoff.
 - This lane references Lane outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records continuous upgrade outputs, report publication status, and backlog inputs.
+- Lane completion report records continuous upgrade outputs, report publication status, and backlog inputs.
 
 ## Continuous upgrade quality checklist
 

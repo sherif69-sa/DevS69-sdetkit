@@ -22,12 +22,12 @@ python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts
 python scripts/check_weekly_review_workflow_contract.py
 ```
 
-## Weekly review closeout contract
+## Weekly review completion report contract
 
 - Single owner + backup reviewer are assigned for Lane weekly review execution and KPI follow-up.
 - The Lane weekly review lane references Lane objection winners and misses with deterministic prioritization loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records weekly-review learnings and Lane execution priorities.
+- Lane completion report records weekly-review learnings and Lane execution priorities.
 
 ## Weekly review quality checklist
 

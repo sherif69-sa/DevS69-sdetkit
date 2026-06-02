@@ -27,7 +27,7 @@ python scripts/check_onboarding_activation_closeout_contract_63.py
 - Single owner + backup reviewer are assigned for Lane onboarding activation execution and roadmap-voting facilitation.
 - This lane references Lane community-program outcomes, moderation guardrails, and KPI continuity evidence.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records onboarding orientation flow, ownership handoff SOP, roadmap voting launch, and Lane pipeline priorities.
+- Lane completion report records onboarding orientation flow, ownership handoff SOP, roadmap voting launch, and Lane pipeline priorities.
 
 ## Onboarding quality checklist
 

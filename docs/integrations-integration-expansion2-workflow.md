@@ -28,7 +28,7 @@ python scripts/check_integration_expansion2_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane advanced GitLab CI rollout and signoff.
 - This lane references Lane weekly review outputs, governance decisions, and KPI continuity signals.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records GitLab pipeline stages, parallel matrix controls, cache strategy, and Lane integration priorities.
+- Lane completion report records GitLab pipeline stages, parallel matrix controls, cache strategy, and Lane integration priorities.
 
 ## Integration quality checklist
 

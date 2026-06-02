@@ -28,7 +28,7 @@ python scripts/check_integration_expansion3_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane advanced Jenkins rollout and signoff.
 - This lane references Lane integration expansion outputs, governance decisions, and KPI continuity signals.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records Jenkins pipeline stages, matrix controls, shared library strategy, and Lane integration priorities.
+- Lane completion report records Jenkins pipeline stages, matrix controls, shared library strategy, and Lane integration priorities.
 
 ## Integration quality checklist
 

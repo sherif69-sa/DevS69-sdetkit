@@ -35,7 +35,7 @@ After the canonical path succeeds, use the enterprise doctor profile for stricte
    - `python -m sdetkit doctor --enterprise-rerun-high --json`
    - optional scope cap: `--enterprise-rerun-top <N>`
 4. Repeat rerun/fix cycles until blockers are cleared and score stabilizes.
-5. Automation handoff (emit only suggested next-pass command):
+5. Automation handoff (emit only suggested follow-up pass command):
    - `python -m sdetkit doctor --enterprise-next-pass-only`
    - CI-friendly status mode: `python -m sdetkit doctor --enterprise-next-pass-only --enterprise-next-pass-exit-code`
      (returns exit code `2` when a follow-up pass is recommended, else `0`)
@@ -58,7 +58,7 @@ Expected enterprise outputs include:
 
 - profile markers (`profile=enterprise`, `profile_mode=full_scan|rerun_failed|rerun_high`)
 - rerun scope metadata (`rerun_top`) when `--enterprise-rerun-top` is used
-- enterprise execution insights (maturity tier, blockers, optimization queue, next-pass reason)
+- enterprise execution insights (maturity tier, blockers, optimization queue, follow-up pass reason)
 - next-pass command hint (`next_pass_command`) for the recommended focused rerun step
 - remediation bundle items for rapid operator follow-up
 

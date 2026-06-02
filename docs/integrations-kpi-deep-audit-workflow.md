@@ -6,7 +6,7 @@ Lane closes with a major KPI deep-audit upgrade that turns Lane stabilization ou
 
 - Converts Lane stabilization evidence into repeatable KPI anomaly triage loops.
 - Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Lane closeout into Lane execution planning.
+- Produces a deterministic handoff from Lane completion report into Lane execution planning.
 
 ## Required inputs (Lane)
 
@@ -27,7 +27,7 @@ python scripts/check_kpi_deep_audit_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane KPI deep-audit execution and signal triage.
 - This lane references Lane stabilization outcomes and unresolved risks.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records deep-audit outcomes and Lane execution priorities.
+- Lane completion report records deep-audit outcomes and Lane execution priorities.
 
 ## KPI deep audit quality checklist
 

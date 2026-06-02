@@ -6,9 +6,9 @@ This lane closes with a major upgrade that converts evidence narrative outcomes 
 
 - Converts evidence narrative outcomes into reusable release prioritization decisions across docs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from this closeout into launch priorities.
+- Creates a deterministic handoff from this completion report into launch priorities.
 
-## Required inputs (Release prioritization closeout lane)
+## Required inputs (Release prioritization completion report lane)
 
 - `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json`
 - `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md`

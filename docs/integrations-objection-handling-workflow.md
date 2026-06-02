@@ -22,12 +22,12 @@ python -m sdetkit objection-closeout --execute --evidence-dir docs/artifacts/obj
 python scripts/check_objection_handling_contract.py
 ```
 
-## Objection closeout contract
+## Objection completion report contract
 
 - Single owner + backup reviewer are assigned for Lane objection lane execution and KPI follow-up.
 - The Lane objection lane references Lane reliability winners and misses with deterministic objection-handling loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records objection-handling learnings and Lane weekly-review priorities.
+- Lane completion report records objection-handling learnings and Lane weekly-review priorities.
 
 ## Objection quality checklist
 

@@ -83,7 +83,7 @@ Every week must produce:
 Cadence:
 - Monday: prioritize and lock sprint slice
 - Wednesday: mid-week risk review
-- Friday: closeout report and next-sprint prep
+- Friday: completion report and next-sprint prep
 
 ## Step-by-step execution plan (first 90 days)
 

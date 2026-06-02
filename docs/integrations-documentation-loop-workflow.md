@@ -27,7 +27,7 @@ python scripts/check_docs_loop_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane docs-loop execution and KPI follow-up.
 - The Lane docs-loop lane references Lane narrative winners and misses with deterministic cross-link remediation loops.
 - Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Lane closeout records docs-loop learnings and Lane re-engagement priorities.
+- Lane completion report records docs-loop learnings and Lane re-engagement priorities.
 
 ## Docs loop quality checklist
 

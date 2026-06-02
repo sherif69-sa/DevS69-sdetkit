@@ -6,7 +6,7 @@ Lane closes with a major upgrade that converts Lane trust FAQ outcomes into a de
 
 - Converts Lane trust FAQ outcomes into reusable evidence narratives across docs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Lane closeout into Lane release priorities.
+- Creates a deterministic handoff from Lane completion report into Lane release priorities.
 
 ## Required inputs (Lane)
 
@@ -28,7 +28,7 @@ python scripts/check_evidence_narrative_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane evidence narrative execution and signoff.
 - This lane references Lane outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records evidence narrative pack upgrades, storyline outcomes, and Lane release priorities.
+- Lane completion report records evidence narrative pack upgrades, storyline outcomes, and Lane release priorities.
 
 ## Evidence narrative quality checklist
 

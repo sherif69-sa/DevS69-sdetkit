@@ -6,7 +6,7 @@ Lane closes with a major upgrade that folds Lane growth campaign outcomes into d
 
 - Turns Lane growth campaign outcomes into deterministic integration feedback loops across docs, templates, and community operations.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Lane closeout into Lane trust FAQ expansion priorities.
+- Creates a deterministic handoff from Lane completion report into Lane trust FAQ expansion priorities.
 
 ## Required inputs (Lane)
 
@@ -28,7 +28,7 @@ python scripts/check_integration_feedback_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane integration feedback execution and signoff.
 - This lane references Lane outcomes, controls, and campaign continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records docs-template upgrades, community touchpoint outcomes, and Lane trust FAQ priorities.
+- Lane completion report records docs-template upgrades, community touchpoint outcomes, and Lane trust FAQ priorities.
 
 ## Integration feedback quality checklist
 

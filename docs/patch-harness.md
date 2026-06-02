@@ -70,7 +70,7 @@ Dict form (also supported):
 
 - files are processed in sorted order.
 - unified diffs are emitted with stable headers.
-- writes are atomic (temp file + fsync + replace).
+- writes are atomic (temporary file + fsync + replace).
 - resource limits are configurable:
   - `--max-files`
   - `--max-bytes-per-file`

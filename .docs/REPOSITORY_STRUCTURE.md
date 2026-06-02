@@ -154,6 +154,6 @@ Key configuration files at repository root:
 
 - [ ] Group contract/check modules in `checks/` subdirectories
 - [ ] Consolidate upgrade-related modules
-- [ ] Organize closeout contract modules
+- [ ] Organize completion report contract modules
 - [ ] Create `integrations/` for external service modules
 - [ ] Consolidate obsolete/legacy numbered versions

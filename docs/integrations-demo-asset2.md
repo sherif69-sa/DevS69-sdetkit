@@ -1,6 +1,6 @@
 # Product proof audit workflow
 
-Lane closes the second distribution-ready demo asset by translating repository audit signals into clear, actionable proof.
+Lane closes the second distribution-ready example asset by translating repository audit signals into clear, actionable proof.
 
 ## Why Lane matters
 
@@ -26,7 +26,7 @@ python scripts/check_demo_asset2_contract.py
 
 - Demo owner: one accountable editor and one backup reviewer are assigned.
 - Target format: publish both MP4 clip and GIF teaser for social/docs embedding.
-- Runtime SLA: main demo duration stays between 60 and 120 seconds.
+- Runtime SLA: main example duration stays between 60 and 120 seconds.
 - Narrative shape: repo risk -> audit command -> findings -> remediation CTA must appear in order.
 
 ## Repo-audit quality checklist

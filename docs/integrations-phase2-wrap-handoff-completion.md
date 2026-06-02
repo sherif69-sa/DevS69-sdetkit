@@ -6,7 +6,7 @@ Lane closes with a major Phase-2 wrap + handoff upgrade that turns Lane pre-plan
 
 - Converts Lane pre-plan evidence into repeatable Phase-3 planning loops.
 - Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Lane closeout into Lane execution planning.
+- Produces a deterministic handoff from Lane completion report into Lane execution planning.
 
 ## Required inputs (Lane)
 
@@ -25,9 +25,9 @@ python scripts/check_phase2_wrap_handoff_closeout_contract.py
 ## Phase-2 wrap + handoff contract
 
 - Single owner + backup reviewer are assigned for Lane Phase-2 wrap + handoff execution and signal triage.
-- The closeout lane references Phase-3 pre-plan outcomes and unresolved risks.
+- The completion report lane references Phase-3 pre-plan outcomes and unresolved risks.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records Phase-2 wrap outcomes and Lane execution priorities.
+- Lane completion report records Phase-2 wrap outcomes and Lane execution priorities.
 
 ## Phase-2 wrap + handoff quality checklist
 

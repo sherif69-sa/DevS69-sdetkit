@@ -68,4 +68,4 @@ python scripts/check_top_tier_reporting_contract.py --portfolio-scorecard docs/a
 
 - KPI schema DRI: Platform engineering
 - KPI interpretation DRI: Product + DX
-- Weekly approval cadence: Friday closeout
+- Weekly approval cadence: Friday completion report

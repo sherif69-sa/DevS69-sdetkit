@@ -27,7 +27,7 @@ python scripts/check_distribution_batch_contract.py
 - Single owner + backup reviewer are assigned for Lane posting execution and outcome logging.
 - At least three coordinated channel posts are linked to Lane winners and mapped to audience segments.
 - Every Lane post includes docs CTA, command CTA, and one measurable KPI target.
-- Lane closeout records winners, misses, and Lane playbook-post priorities.
+- Lane completion report records winners, misses, and Lane playbook-post priorities.
 
 ## Distribution quality checklist
 

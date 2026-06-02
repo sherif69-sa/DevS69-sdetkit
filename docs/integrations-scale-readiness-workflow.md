@@ -1,6 +1,6 @@
 # Scale readiness workflow
 
-Scale closeout converts acceleration evidence into deterministic scale execution loops.
+Scale completion report converts acceleration evidence into deterministic scale execution loops.
 
 ## Why this lane matters
 
@@ -8,7 +8,7 @@ Scale closeout converts acceleration evidence into deterministic scale execution
 - Protects quality with owner accountability, command proof, and KPI guardrails.
 - Produces a deterministic handoff from scale outcomes into expansion priorities.
 
-## Required inputs (acceleration closeout)
+## Required inputs (acceleration completion report)
 
 - `docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json`
 - `docs/artifacts/acceleration-closeout-pack/delivery-board.md`
@@ -22,12 +22,12 @@ python -m sdetkit scale-closeout --execute --evidence-dir docs/artifacts/scale-c
 python scripts/check_scale_closeout_contract.py
 ```
 
-## Scale closeout contract
+## Scale completion report contract
 
 - Single owner + backup reviewer are assigned for the scale lane execution and KPI follow-up.
 - The scale lane references acceleration winners and misses with deterministic growth loops.
 - Every section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Scale closeout records learnings and expansion priorities.
+- Scale completion report records learnings and expansion priorities.
 
 ## Scale quality checklist
 

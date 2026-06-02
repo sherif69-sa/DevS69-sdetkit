@@ -1,6 +1,6 @@
 # Operational readiness hardening
 
-Lane closes Phase-1 by hardening top entry pages, removing stale guidance, and publishing a deterministic closeout lane.
+Lane closes Phase-1 by hardening top entry pages, removing stale guidance, and publishing a deterministic completion report lane.
 
 ## Why Lane exists
 

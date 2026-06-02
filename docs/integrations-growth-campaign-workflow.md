@@ -6,7 +6,7 @@ Lane closes with a major upgrade that converts Lane partner outreach outcomes in
 
 - Turns Lane partner outreach outcomes into growth campaign execution proof across docs, rollout, and demand loops.
 - Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Lane growth campaign closeout into Lane execution priorities.
+- Creates a deterministic handoff from Lane growth campaign completion report into Lane execution priorities.
 
 ## Required inputs (Lane)
 
@@ -28,7 +28,7 @@ python scripts/check_growth_campaign_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane growth campaign execution and signoff.
 - This lane references Lane outcomes, controls, and KPI continuity signals.
 - Every Lane section includes campaign CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records campaign outcomes, confidence notes, and Lane execution priorities.
+- Lane completion report records campaign outcomes, confidence notes, and Lane execution priorities.
 
 ## Growth campaign quality checklist
 

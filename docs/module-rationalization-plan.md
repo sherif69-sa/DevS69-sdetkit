@@ -5,7 +5,7 @@ Date: 2026-04-16
 
 ## Objective
 
-Reduce long-term maintenance overhead from closeout-era module sprawl while preserving CLI compatibility and historical evidence continuity.
+Reduce long-term maintenance overhead from completion report-era module sprawl while preserving CLI compatibility and historical evidence continuity.
 
 ## Current state snapshot
 
@@ -41,9 +41,9 @@ Reduce long-term maintenance overhead from closeout-era module sprawl while pres
 4. `phase2_*_closeout_*.py` + `phase3_*_closeout_*.py`
    - Decision: **Merge** into `phase_transition_closeout.py` with named step lanes.
 5. `optimization_closeout_42.py` + `optimization_closeout_46.py`
-   - Decision: **Merge** into one optimized closeout lane.
+   - Decision: **Merge** into one optimized completion report lane.
 6. `weekly_review_closeout_49.py` + `weekly_review_closeout_65.py`
-   - Decision: **Merge** to one weekly-review closeout implementation.
+   - Decision: **Merge** to one weekly-review completion report implementation.
 
 ### Archive candidates (legacy namespace)
 
@@ -73,7 +73,7 @@ Rationale: directly tied to release/governance/reliability decision contexts.
 
 ### Phase A — Inventory and telemetry baseline
 
-- [ ] Export command usage telemetry for all closeout lanes (90-day window).
+- [ ] Export command usage telemetry for all completion report lanes (90-day window).
 - [ ] Identify modules with zero/low usage and zero downstream contract dependencies.
 
 ### Phase B — Merge implementation with shims

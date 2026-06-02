@@ -6,7 +6,7 @@ Lane closes with a major Phase-2 hardening upgrade that turns Lane KPI deep-audi
 
 - Converts Lane KPI deep-audit evidence into repeatable hardening execution loops.
 - Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Lane closeout into Lane pre-plan execution planning.
+- Produces a deterministic handoff from Lane completion report into Lane pre-plan execution planning.
 
 ## Required inputs (Lane)
 
@@ -27,7 +27,7 @@ python scripts/check_phase2_hardening_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane Phase-2 hardening execution and signal triage.
 - The Lane references Lane KPI deep-audit outcomes and unresolved risks.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records hardening outcomes and Lane pre-plan priorities.
+- Lane completion report records hardening outcomes and Lane pre-plan priorities.
 
 ## Phase-2 hardening quality checklist
 

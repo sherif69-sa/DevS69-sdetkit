@@ -13,7 +13,7 @@ This plan starts immediately after completion of the 6-point CTO execution workf
 1. Convert completed documentation tracks into recurring operating routines.
 2. Add evidence freshness checks for weekly/monthly reporting cadence.
 3. Formalize cross-workstream KPI owners and handoff protocol.
-4. Execute one full mock leadership cycle (Monday planning → Wednesday risk review → Friday closeout).
+4. Execute one full mock leadership cycle (Monday planning → Wednesday risk review → Friday completion report).
 
 ## Point-by-point carry-forward tasks
 
@@ -21,7 +21,7 @@ This plan starts immediately after completion of the 6-point CTO execution workf
 
 - run `make top-tier-reporting` weekly with explicit date tags
 - run `make reporting-freshness-check DATE_TAG=<YYYY-MM-DD>` after weekly publish
-- publish weekly evidence links in dashboard closeout section
+- publish weekly evidence links in dashboard completion report section
 - enforce artifact-set and contract checks in every run
 
 ### B) Governance operations

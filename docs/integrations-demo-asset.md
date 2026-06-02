@@ -1,12 +1,12 @@
 # Product proof asset workflow
 
-Lane closes the first distribution-ready demo asset, turning Lane release readiness into externally consumable proof.
+Lane closes the first distribution-ready example asset, turning Lane release readiness into externally consumable proof.
 
 ## Why Lane matters
 
 - Demonstrates real value with a concise `doctor` workflow narrative.
 - Creates a repeatable media pipeline (script → cut → publish → evidence).
-- Links each demo claim to runnable CLI commands and docs for trust.
+- Links each example claim to runnable CLI commands and docs for trust.
 
 ## Required inputs (Lane)
 
@@ -26,7 +26,7 @@ python scripts/check_demo_asset_contract.py
 
 - Demo owner: one accountable editor and one backup reviewer are assigned.
 - Target format: publish both MP4 clip and GIF teaser for social/docs embedding.
-- Runtime SLA: main demo duration stays between 45 and 90 seconds.
+- Runtime SLA: main example duration stays between 45 and 90 seconds.
 - Narrative shape: pain -> command -> output -> value CTA must appear in order.
 
 ## Demo quality checklist
@@ -42,7 +42,7 @@ python scripts/check_demo_asset_contract.py
 - [ ] Lane script draft committed
 - [ ] Lane first cut rendered
 - [ ] Lane final cut + caption copy approved
-- [ ] Lane demo asset #2 backlog pre-scoped
+- [ ] Lane example asset #2 backlog pre-scoped
 - [ ] Lane KPI instrumentation plan updated
 
 ## Scoring model

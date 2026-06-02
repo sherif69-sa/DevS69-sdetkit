@@ -9,7 +9,7 @@ Each point is completed in its own change set:
 3. WS2 portfolio reporting execution
 4. WS3 governance/lifecycle execution
 5. WS5 reliability/release execution
-6. WS4 commercialization execution + closeout
+6. WS4 commercialization execution + completion report
 
 ---
 
@@ -68,7 +68,7 @@ Lock the active scope and evidence sources before making additional delivery cha
   - [Operations handbook](operations-handbook.md)
   - [Support and escalation model](support-and-escalation-model.md)
 
-## Point 6 — WS4 commercialization + program closeout
+## Point 6 — WS4 commercialization + program completion report
 
 - Status: ✅ Complete (2026-04-15)
 - Evidence:

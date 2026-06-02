@@ -4,7 +4,7 @@ Lane ships a major community-program upgrade that converts Lane kickoff evidence
 
 ## Why Community Program Closeout matters
 
-- Converts Lane closeout evidence into repeatable community operations loops.
+- Converts Lane completion report evidence into repeatable community operations loops.
 - Protects trust outcomes with ownership, command proof, and moderation rollback guardrails.
 - Produces a deterministic handoff from Lane community setup into Lane onboarding activation.
 
@@ -27,7 +27,7 @@ python scripts/check_community_program_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane community office-hours execution and moderation safety.
 - This lane references Lane Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records office-hours cadence, participation rules, moderation SOPs, and Lane onboarding priorities.
+- Lane completion report records office-hours cadence, participation rules, moderation SOPs, and Lane onboarding priorities.
 
 ## Community program quality checklist
 

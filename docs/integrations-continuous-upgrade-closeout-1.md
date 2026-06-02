@@ -6,7 +6,7 @@ Lane starts the next impact by converting phase-3 wrap publication outcomes into
 
 - Converts phase-3 wrap publication artifacts into a repeatable execution loop for ongoing repository upgrades.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Lane closeout into the continuous-upgrade backlog.
+- Creates a deterministic handoff from Lane completion report into the continuous-upgrade backlog.
 
 ## Required inputs (Phase-3 wrap publication)
 
@@ -28,7 +28,7 @@ python scripts/check_continuous_upgrade_foundation_contract.py
 - Single owner + backup reviewer are assigned for Lane continuous upgrade execution and signoff.
 - This lane references phase-3 wrap publication outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records continuous upgrade outputs, report publication status, and backlog inputs.
+- Lane completion report records continuous upgrade outputs, report publication status, and backlog inputs.
 
 ## Continuous upgrade quality checklist
 

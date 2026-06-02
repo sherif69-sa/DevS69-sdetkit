@@ -6,7 +6,7 @@ Lane closes with a major stabilization upgrade that turns Lane contributor-activ
 
 - Converts Lane contributor outcomes into repeatable stabilization loops.
 - Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Lane closeout into Lane deep audit planning.
+- Produces a deterministic handoff from Lane completion report into Lane deep audit planning.
 
 ## Required inputs (Lane)
 
@@ -27,7 +27,7 @@ python scripts/check_stabilization_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane stabilization execution and KPI recovery.
 - This lane references Lane contributor activation outcomes and unresolved risks.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records stabilization outcomes and Lane deep-audit priorities.
+- Lane completion report records stabilization outcomes and Lane deep-audit priorities.
 
 ## Stabilization quality checklist
 

@@ -28,7 +28,7 @@ python scripts/check_integration_expansion4_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane self-hosted enterprise rollout and signoff.
 - This lane references Lane integration expansion outputs, governance decisions, and KPI continuity signals.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records self-hosted pipeline stages, identity controls, runner policy strategy, and Lane case-study prep priorities.
+- Lane completion report records self-hosted pipeline stages, identity controls, runner policy strategy, and Lane case-study prep priorities.
 
 ## Integration quality checklist
 

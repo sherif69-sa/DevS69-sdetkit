@@ -28,7 +28,7 @@ python scripts/check_distribution_scaling_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane distribution scaling execution and signoff.
 - This lane references Lane publication outcomes, controls, and KPI continuity signals.
 - Every Lane section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records distribution outcomes, confidence notes, and Lane trust refresh priorities.
+- Lane completion report records distribution outcomes, confidence notes, and Lane trust refresh priorities.
 
 ## Distribution quality checklist
 

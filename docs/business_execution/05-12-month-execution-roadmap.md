@@ -626,7 +626,7 @@ Translate strategy into month-by-month execution with explicit owners, measurabl
 
 **Quarter context:** Q4 (scale efficiency + retention).
 
-**Primary focus:** Annual closeout.
+**Primary focus:** Annual completion report.
 
 **Core objective:** Complete annual review and lock next-year operating plan.
 

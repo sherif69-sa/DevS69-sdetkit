@@ -24,7 +24,7 @@ python scripts/check_phase2_kickoff_contract.py
 
 ## Baseline + weekly targets
 
-- Baseline source: Lane activation score and closeout rollup.
+- Baseline source: Lane activation score and completion report rollup.
 - Week-1 Phase-2 target: maintain activation score >= 95 and preserve strict pass.
 - Week-1 growth target: publish 3 external-facing assets and 1 KPI checkpoint.
 - Week-1 quality gate: every shipped action includes command evidence and a summary artifact.
@@ -34,8 +34,8 @@ python scripts/check_phase2_kickoff_contract.py
 
 - [ ] Lane baseline metrics snapshot emitted
 - [ ] Lane release cadence checklist drafted
-- [ ] Lane demo asset plan (doctor) assigned
-- [ ] Lane demo asset plan (repo audit) assigned
+- [ ] Lane example asset plan (doctor) assigned
+- [ ] Lane example asset plan (repo audit) assigned
 - [ ] Lane weekly review preparation checklist ready
 
 ## Scoring model

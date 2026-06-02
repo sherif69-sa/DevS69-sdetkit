@@ -36,9 +36,9 @@ Lane weighted score (0-100):
 
 - [ ] Lane baseline metrics + weekly targets
 - [ ] Lane release cadence + changelog checklist
-- [ ] Lane demo asset #1 (doctor)
-- [ ] Lane demo asset #2 (repo audit)
+- [ ] Lane example asset #1 (doctor)
+- [ ] Lane example asset #2 (repo audit)
 - [ ] Lane weekly review #5
-- [ ] Lane demo asset #3 (security gate)
-- [ ] Lane demo asset #4 (cassette replay)
+- [ ] Lane example asset #3 (security gate)
+- [ ] Lane example asset #4 (cassette replay)
 - [ ] Lane distribution batch #1

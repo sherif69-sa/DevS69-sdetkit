@@ -89,7 +89,7 @@ Interpretation: governance foundations exist, but wording- and evidence-contract
 ## 5) Key weaknesses / risk areas (what can cost money or slow teams)
 
 1. **Surface-area sprawl**
-   200+ modules and many similarly named “closeout” components suggest historical accretion. This raises cognitive load and long-term maintenance cost.
+   200+ modules and many similarly named “completion report” components suggest historical accretion. This raises cognitive load and long-term maintenance cost.
 
 2. **Workflow proliferation risk**
    40+ GitHub workflows can create redundant execution, noisy signal, and governance burden (permissions/pinning/ownership drift).
@@ -147,7 +147,7 @@ Interpretation: governance foundations exist, but wording- and evidence-contract
 
 ### P1 (next)
 
-5. **Module rationalization plan** (archive/merge closeout-era modules).
+5. **Module rationalization plan** (archive/merge completion report-era modules).
 6. **Cost telemetry** (minutes/job, artifact size, frequency by lane).
 7. **Reliability SLOs for the toolkit itself** (false-positive and flakiness targets).
 

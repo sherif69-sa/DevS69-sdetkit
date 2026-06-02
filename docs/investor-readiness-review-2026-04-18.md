@@ -46,7 +46,7 @@ The highest-value gap is not product vision; it is **operational signal clarity*
 
 ### Recommended next 7 days
 
-1. **Lock demo environment to Python 3.10+ in CI and local bootstrap docs**
+1. **Lock example environment to Python 3.10+ in CI and local bootstrap docs**
    Prevents wasted cycles debugging version mismatches during external evaluations.
 
 2. **Run `ruff check . --fix` in staged lanes, then stabilize remaining issues**
