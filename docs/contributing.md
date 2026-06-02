@@ -27,7 +27,7 @@ Use this page as a concise handoff, then follow the detailed path in [`CONTRIBUT
 ## Baseline contributor validation commands
 
 ```bash
-python -m pre_commit run -a
+make proof-after-format
 bash quality.sh cov
 NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q
 ```

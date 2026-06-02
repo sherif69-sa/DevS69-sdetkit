@@ -52,14 +52,14 @@ Purpose in order:
 Run minimum checks:
 
 ```bash
-python -m pre_commit run -a
+make proof-after-format
 bash quality.sh cov
 ```
 
 For docs-only changes:
 
 ```bash
-python -m pre_commit run -a
+make proof-after-format
 NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q
 ```
 
