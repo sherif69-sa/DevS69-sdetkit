@@ -228,7 +228,7 @@ def build_maintenance_queue_rollup(
         "input_artifacts": {
             "issue_queue_schema_version": str(issue_queue.get("schema_version", "")),
             "automation_health_schema_version": str(automation_health.get("schema_version", "")),
-            "security_followup_schema_version": str(security_followup.get("schema_version", "")),
+            "security_schema": str(security_followup.get("schema_version", "")),
         },
         **AUTHORITY_BOUNDARY,
     }
@@ -274,7 +274,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ns.format == "json":
         sys.stdout.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     else:
-        sys.stdout.write(f"maintenance_queue_rollup_json={ns.out}\n")
+        sys.stdout.write(f"rollup_json={ns.out}\n")
         sys.stdout.write(f"status={payload['status']}\n")
         sys.stdout.write(f"queue_items={payload['queue_item_count']}\n")
         sys.stdout.write(f"primary_issue={payload['primary_issue']}\n")
