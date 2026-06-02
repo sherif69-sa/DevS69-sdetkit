@@ -26,6 +26,45 @@
       "stability": "public"
     },
     {
+      "id": "diagnostic-signal-snapshot-json",
+      "path": "build/pr-quality/diagnostic-signal-snapshot/diagnostic-signal-snapshot.json",
+      "produced_by": "python -m sdetkit.diagnostic_signal_snapshot --evidence-narrative <evidence-narrative.json> --evidence-graph <evidence-graph.json> --diagnostic-worker-result <diagnostic-worker-result.json> --runtime-proof-artifacts <runtime-proof-artifacts.json> --security-finding-diagnosis <security-finding-diagnosis.json> --out-dir build/pr-quality/diagnostic-signal-snapshot --format json",
+      "schema_version": "sdetkit.diagnostic.signal.snapshot.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "snapshot_type",
+        "quiet_green_advisory_baseline",
+        "measurements",
+        "kpi_readiness",
+        "decision_boundary"
+      ],
+      "stability": "advanced"
+    },
+    {
+      "id": "diagnostic-signal-snapshot-history-summary-json",
+      "path": "build/repo-memory-history/diagnostic-signal-snapshots/diagnostic-signal-snapshot-history-summary.json",
+      "produced_by": "python -m sdetkit.diagnostic_signal_snapshot_history --diagnostic-signal-snapshot <diagnostic-signal-snapshot.json> --associated-pr-json <associated-pr.json> --source-run-id <run-id> --source-run-conclusion success --source-head-sha <head-sha> --retention-run-id <retention-run-id> --accepted-main-sha <main-sha> --out-dir build/repo-memory-history/diagnostic-signal-snapshots --format json",
+      "schema_version": "sdetkit.diagnostic.signal.snapshot.history.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "history_path",
+        "prior_history_collected",
+        "prior_record_count",
+        "appended",
+        "record_count",
+        "quiet_green_advisory_baseline_record_count",
+        "review_signal_record_count",
+        "integration_proof_signal_record_count",
+        "snapshot_status_counts",
+        "advisor_false_positive_rate_status",
+        "latest_record",
+        "decision_boundary"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "pr-quality-runtime-proof-artifacts-json",
       "path": "build/pr-quality/runtime-proof/summary/runtime-proof-artifacts.json",
       "produced_by": "python -m sdetkit.pr_quality_runtime_proof_artifacts --isolated-proof <isolated-proof.json> --live-benchmark-report <benchmark-report.json> --repo-memory-profile <repo-memory-profile.json> --trusted-history-evidence <trusted-history.json> --out-dir build/pr-quality/runtime-proof/summary --format json",
