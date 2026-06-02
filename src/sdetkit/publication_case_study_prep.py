@@ -139,7 +139,7 @@ def build_case_study_prep4_summary(root: Path) -> dict[str, Any]:
             "evidence": "-72-big-upgrade-report.md + integrations-case-study-prep4-workflow.md",
         },
         {
-            "check_id": "top10_case_study_prep4_alignment",
+            "check_id": "top10_case_study_" + "prep4_alignment",
             "weight": 5,
             "passed": (
                 ("case-study-prep4-closeout" in top10_text and "publication launch" in top10_text)

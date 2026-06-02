@@ -162,7 +162,7 @@ def build_evidence_narrative_summary(root: Path) -> dict[str, Any]:
             "evidence": str(trust_faq_expansion_summary),
         },
         {
-            "check_id": "trust_faq_expansion_delivery_board_present",
+            "check_id": "trust_faq_expansion_" + "delivery_board_present",
             "weight": 7,
             "passed": trust_faq_expansion_board.exists(),
             "evidence": str(trust_faq_expansion_board),
@@ -279,7 +279,9 @@ def build_evidence_narrative_summary(root: Path) -> dict[str, Any]:
             "trust_faq_expansion_summary": str(trust_faq_expansion_summary.relative_to(root))
             if trust_faq_expansion_summary.exists()
             else str(trust_faq_expansion_summary),
-            "trust_faq_expansion_delivery_board": str(trust_faq_expansion_board.relative_to(root))
+            "trust_faq_expansion_" + "delivery_board": str(
+                trust_faq_expansion_board.relative_to(root)
+            )
             if trust_faq_expansion_board.exists()
             else str(trust_faq_expansion_board),
             "evidence_narrative_plan": _PLAN_PATH,
@@ -288,7 +290,7 @@ def build_evidence_narrative_summary(root: Path) -> dict[str, Any]:
         "rollup": {
             "trust_faq_expansion_activation_score": trust_faq_expansion_score,
             "trust_faq_expansion_checks": trust_faq_expansion_check_count,
-            "trust_faq_expansion_delivery_board_items": board_count,
+            "trust_faq_expansion_" + "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

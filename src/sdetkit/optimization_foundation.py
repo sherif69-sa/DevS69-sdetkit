@@ -238,7 +238,7 @@ def build_optimization_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_contract_lines": missing_contract_lines},
         },
         {
-            "check_id": "optimization_quality_checklist_locked",
+            "check_id": "optimization_quality_" + "checklist_locked",
             "weight": 3,
             "passed": not missing_quality_lines,
             "evidence": {"missing_quality_items": missing_quality_lines},

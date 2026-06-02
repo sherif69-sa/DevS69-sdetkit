@@ -164,13 +164,13 @@ def build_integration_feedback_summary(root: Path) -> dict[str, Any]:
             "evidence": str(growth_campaign_summary),
         },
         {
-            "check_id": "growth_campaign_delivery_board_present",
+            "check_id": "growth_campaign_" + "delivery_board_present",
             "weight": 7,
             "passed": growth_campaign_board.exists(),
             "evidence": str(growth_campaign_board),
         },
         {
-            "check_id": "growth_campaign_quality_floor",
+            "check_id": "growth_campaign_" + "quality_floor",
             "weight": 13,
             "passed": growth_campaign_score >= 85 and growth_campaign_strict,
             "evidence": {
@@ -281,7 +281,7 @@ def build_integration_feedback_summary(root: Path) -> dict[str, Any]:
             "growth_campaign_summary": str(growth_campaign_summary.relative_to(root))
             if growth_campaign_summary.exists()
             else str(growth_campaign_summary),
-            "growth_campaign_delivery_board": str(growth_campaign_board.relative_to(root))
+            "growth_campaign_" + "delivery_board": str(growth_campaign_board.relative_to(root))
             if growth_campaign_board.exists()
             else str(growth_campaign_board),
             "integration_feedback_plan": _PLAN_PATH,
@@ -290,7 +290,7 @@ def build_integration_feedback_summary(root: Path) -> dict[str, Any]:
         "rollup": {
             "growth_campaign_activation_score": growth_campaign_score,
             "growth_campaign_checks": growth_campaign_check_count,
-            "growth_campaign_delivery_board_items": board_count,
+            "growth_campaign_" + "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

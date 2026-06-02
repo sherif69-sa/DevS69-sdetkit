@@ -67,7 +67,7 @@ def test_unknown_failure_like_log_stays_review_first():
     assert payload["status"] in {"needs_attention", "needs_fix"}
     assert payload["diagnoses"][0]["code"] == "UNKNOWN_REVIEW_REQUIRED"
     diagnosis = payload["diagnoses"][0]
-    assert "matched_failure_signals=ci-exit-code" in diagnosis["evidence"]
+    assert "matched_failure_signals=" + "ci-exit-code" in diagnosis["evidence"]
     assert "The CI step ended with a non-zero process exit code." in diagnosis["evidence"]
     assert any(
         item.startswith("candidate_scenarios=") and "CI_STEP_EXIT_NONZERO" in item
@@ -123,7 +123,7 @@ def test_coverage_failure_signal_routes_to_specific_coverage_gate_regression():
     codes = {diagnosis["code"] for diagnosis in payload["diagnoses"]}
     assert "COVERAGE_GATE_REGRESSION" in codes
     assert "UNKNOWN_REVIEW_REQUIRED" not in codes
-    assert "matched_failure_signals=coverage-failure" in payload["diagnoses"][0]["evidence"][0]
+    assert "matched_failure_signals=" + "coverage-failure" in payload["diagnoses"][0]["evidence"][0]
 
 
 def test_seeded_scenario_database_recommends_package_install_checks():
@@ -523,7 +523,7 @@ def test_learning_calibration_reranks_unknown_candidate_scenarios():
 
     assert diagnosis["code"] == "UNKNOWN_REVIEW_REQUIRED"
     assert any(
-        item.startswith("candidate_scenarios=RELEASE_VERSION_CONFLICT")
+        item.startswith("candidate_scenarios=" + "RELEASE_VERSION_CONFLICT")
         for item in diagnosis["evidence"]
     )
     assert any(

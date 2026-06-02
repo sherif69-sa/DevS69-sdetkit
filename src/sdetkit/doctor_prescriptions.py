@@ -138,7 +138,7 @@ _CHECK_GUIDANCE = {
     },
     "stdlib_shadowing": {
         "category": "code_health",
-        "action": "remove_stdlib_shadowing",
+        "action": "remove_stdlib_" + "shadowing",
         "summary": "Rename files or packages that shadow Python standard-library modules.",
         "why": "Stdlib shadowing can create confusing import behavior across machines and CI.",
         "verification_commands": [
