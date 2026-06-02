@@ -5,6 +5,7 @@ from pathlib import Path
 
 from sdetkit import (
     adoption_surface,
+    automation_health,
     check_intelligence,
     diagnostic_signal_snapshot,
     diagnostic_signal_snapshot_history,
@@ -109,6 +110,12 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         "automation",
         "evidence",
     }.issubset(set(entries["check-intelligence-action-report-json"]["required_fields"]))
+    assert entries["automation-health-json"]["schema_version"] == automation_health.SCHEMA_VERSION
+    assert {
+        "schema_version",
+        "automation_signals",
+        "automation_allowed",
+    }.issubset(set(entries["automation-health-json"]["required_fields"]))
     assert (
         entries["issue-queue-classifier-json"]["schema_version"]
         == issue_queue_classifier.SCHEMA_VERSION
