@@ -1,4 +1,4 @@
- governance scale closeout summary
+ governance scale completion summary
 - Activation score: 42
 - Passed checks: 6
 - Failed checks: 8

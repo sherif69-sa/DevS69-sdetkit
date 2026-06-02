@@ -1,6 +1,6 @@
 # Documentation governance workflow
 
-Lane closes with a major docs loop optimization upgrade that converts Lane narrative evidence into deterministic cross-link execution across demos, playbooks, and CLI docs.
+Lane closes with a major docs loop optimization upgrade that converts Lane narrative evidence into deterministic cross-link execution across examples, playbooks, and CLI docs.
 
 ## Why Lane matters
 

@@ -48,7 +48,7 @@ python scripts/check_growth_campaign_closeout_contract.py
 
 ## Scoring model
 
-Growth Campaign Closeout weighted score (0-100):
+Growth Campaign Completion weighted score (0-100):
 
 - Contract + command lane integrity (35)
 - Lane continuity baseline quality (35)

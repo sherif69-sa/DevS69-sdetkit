@@ -16,7 +16,7 @@
 ## Misses
 -  strict continuity signal is missing.
 -  delivery board integrity is incomplete (needs >=5 items and /34 anchors).
-- Demo contract, quality checklist, or delivery board entries are missing.
+- Example contract, quality checklist, or delivery board entries are missing.
 
 ## Handoff actions
 - [ ] Re-run  cadence command and restore strict pass baseline before demo lock.

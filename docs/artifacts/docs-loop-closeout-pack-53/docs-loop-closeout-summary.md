@@ -1,4 +1,4 @@
-Docs Loop Closeout summary (legacy: )
+Docs Loop Completion summary (legacy: )
 - Activation score: 41
 - Passed checks: 5
 - Failed checks: 9

@@ -1,4 +1,4 @@
- governance handoff closeout summary
+ governance handoff completion summary
 - Activation score: 42
 - Passed checks: 6
 - Failed checks: 8

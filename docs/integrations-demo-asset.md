@@ -24,7 +24,7 @@ python scripts/check_demo_asset_contract.py
 
 ## Demo production contract
 
-- Demo owner: one accountable editor and one backup reviewer are assigned.
+- Example owner: one accountable editor and one backup reviewer are assigned.
 - Target format: publish both MP4 clip and GIF teaser for social/docs embedding.
 - Runtime SLA: main example duration stays between 45 and 90 seconds.
 - Narrative shape: pain -> command -> output -> value CTA must appear in order.
@@ -52,4 +52,4 @@ Lane weighted score (0-100):
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
 - Lane continuity and strict baseline carryover: 35 points.
-- Demo contract lock + delivery board readiness: 15 points.
+- Example contract lock + delivery board readiness: 15 points.

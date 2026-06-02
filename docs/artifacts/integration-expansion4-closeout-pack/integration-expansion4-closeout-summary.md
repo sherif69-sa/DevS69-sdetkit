@@ -1,4 +1,4 @@
-Integration Expansion4 Closeout summary
+Integration Expansion4 Completion summary
 - Activation score: 42
 - Passed checks: 6
 - Failed checks: 8

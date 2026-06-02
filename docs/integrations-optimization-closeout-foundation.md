@@ -1,6 +1,6 @@
 # Optimization foundation workflow
 
-Optimization Closeout Foundation closes the lane with a major optimization upgrade that converts Lane expansion outcomes into deterministic remediation loops.
+Optimization Completion Foundation closes the lane with a major optimization upgrade that converts Lane expansion outcomes into deterministic remediation loops.
 
 ## Why Optimization Closeout Foundation matters
 
@@ -24,10 +24,10 @@ python scripts/check_optimization_closeout_contract.py
 
 ## Optimization completion report contract
 
-- Single owner + backup reviewer are assigned for Optimization Closeout Foundation optimization lane execution and KPI follow-up.
-- The Optimization Closeout Foundation optimization lane references Lane expansion winners and misses with deterministic remediation loops.
-- Every Optimization Closeout Foundation section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Optimization Closeout Foundation completion report records optimization learnings and Lane acceleration priorities.
+- Single owner + backup reviewer are assigned for Optimization Completion Foundation optimization lane execution and KPI follow-up.
+- The Optimization Completion Foundation optimization lane references Lane expansion winners and misses with deterministic remediation loops.
+- Every Optimization Completion Foundation section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Optimization Completion Foundation completion report records optimization learnings and Lane acceleration priorities.
 
 ## Optimization quality checklist
 
@@ -47,7 +47,7 @@ python scripts/check_optimization_closeout_contract.py
 
 ## Scoring model
 
-Optimization Closeout Foundation weighted score (0-100):
+Optimization Completion Foundation weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.

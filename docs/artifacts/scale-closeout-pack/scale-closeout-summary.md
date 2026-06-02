@@ -1,4 +1,4 @@
-Scale closeout summary
+Scale completion summary
 - Activation score: 51
 - Passed checks: 6
 - Failed checks: 8

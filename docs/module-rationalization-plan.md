@@ -94,7 +94,7 @@ Rationale: directly tied to release/governance/reliability decision contexts.
 
 ## Success criteria
 
-- Closeout-era module count reduced by >= 40% without Tier-A behavior changes.
+- Completion-era module count reduced by >= 40% without Tier-A behavior changes.
 - No CLI contract regressions on migrated commands.
 - Help/discovery surface simplified (fewer default/visible transition-era commands).
 
