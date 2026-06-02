@@ -17,7 +17,7 @@ Run these from repo root:
 
 ```bash
 python -m ruff format --check .
-python -m pre_commit run -a
+make proof-after-format
 bash quality.sh cov
 python -m build
 python -m twine check dist/*

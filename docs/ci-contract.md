@@ -18,6 +18,6 @@
 - Network tests must opt in with `@pytest.mark.network`.
 
 ## Local parity commands
-- `python -m pre_commit run -a`
+- `make proof-after-format`
 - `pytest -q`
 - `bash quality.sh cov`
