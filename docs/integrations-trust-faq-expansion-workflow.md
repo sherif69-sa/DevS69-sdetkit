@@ -48,7 +48,7 @@ python scripts/check_trust_faq_expansion_closeout_contract.py
 
 ## Scoring model
 
-Trust FAQ Expansion Closeout weighted score (0-100):
+Trust FAQ Expansion Completion weighted score (0-100):
 
 - Contract + command lane integrity (35)
 - Lane continuity baseline quality (35)

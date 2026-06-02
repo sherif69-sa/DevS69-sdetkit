@@ -1,4 +1,4 @@
-Integration Expansion3 Closeout summary
+Integration Expansion3 Completion summary
 - Activation score: 42
 - Passed checks: 6
 - Failed checks: 8

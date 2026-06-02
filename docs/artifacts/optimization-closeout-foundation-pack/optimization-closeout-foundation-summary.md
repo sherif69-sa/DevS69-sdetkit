@@ -1,4 +1,4 @@
-Optimization Closeout Foundation optimization closeout summary
+Optimization Completion Foundation optimization completion summary
 - Activation score: 51
 - Passed checks: 6
 - Failed checks: 8

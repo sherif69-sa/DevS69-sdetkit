@@ -1,4 +1,4 @@
-Trust Assets Refresh Closeout summary
+Trust Assets Refresh Completion summary
 - Activation score: 42
 - Passed checks: 6
 - Failed checks: 8

@@ -1,4 +1,4 @@
-Contributor Recognition Closeout summary
+Contributor Recognition Completion summary
 - Activation score: 42
 - Passed checks: 6
 - Failed checks: 8

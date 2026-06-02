@@ -4,8 +4,8 @@
 - External contribution stayed healthy (100.0).
 
 ## Misses
--  summary missing or below closeout target.
--  KPI summary missing or below closeout target.
+-  summary missing or below completion target.
+-  KPI summary missing or below completion target.
 
 ## Corrective actions
 - [ ] Re-run  pack generation and restore summary JSON for traceability.

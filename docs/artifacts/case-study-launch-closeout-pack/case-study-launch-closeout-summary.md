@@ -1,4 +1,4 @@
-Case Study Launch Closeout summary
+Case Study Launch Completion summary
 - Activation score: 42
 - Passed checks: 6
 - Failed checks: 8

@@ -97,7 +97,7 @@ Deliverables:
 - Create objection-response notes.
 
 Deliverables:
-- Demo script v1
+- Example script v1
 - Objection log v1
 
 ### Day 5

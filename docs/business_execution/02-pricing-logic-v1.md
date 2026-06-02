@@ -324,7 +324,7 @@ For every deal, log:
 - Discount details
 - Objections
 - Win/loss outcome
-- Lessons for model revision
+- Guides for model revision
 
 ---
 

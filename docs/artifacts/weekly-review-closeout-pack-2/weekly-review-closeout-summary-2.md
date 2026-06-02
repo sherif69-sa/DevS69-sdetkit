@@ -1,4 +1,4 @@
-Weekly Review Closeout summary
+Weekly Review Completion summary
 - Activation score: 55
 - Passed checks: 8
 - Failed checks: 6

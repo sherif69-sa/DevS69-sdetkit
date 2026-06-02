@@ -1,4 +1,4 @@
-Community Program Closeout summary
+Community Program Completion summary
 - Activation score: 36
 - Passed checks: 5
 - Failed checks: 8

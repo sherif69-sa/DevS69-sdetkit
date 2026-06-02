@@ -48,7 +48,7 @@ python scripts/check_integration_feedback_closeout_contract.py
 
 ## Scoring model
 
-Integration Feedback Closeout weighted score (0-100):
+Integration Feedback Completion weighted score (0-100):
 
 - Contract + command lane integrity (35)
 - Lane continuity baseline quality (35)

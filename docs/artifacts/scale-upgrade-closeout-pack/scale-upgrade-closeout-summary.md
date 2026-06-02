@@ -1,4 +1,4 @@
-Scale Upgrade Closeout summary
+Scale Upgrade Completion summary
 - Activation score: 61
 - Passed checks: 9
 - Failed checks: 5

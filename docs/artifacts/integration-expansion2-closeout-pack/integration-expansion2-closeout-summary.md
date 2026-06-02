@@ -1,4 +1,4 @@
-Integration Expansion 2 Closeout summary
+Integration Expansion 2 Completion summary
 - Activation score: 37
 - Passed checks: 5
 - Failed checks: 9

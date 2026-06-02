@@ -13,7 +13,7 @@
 - Average score: `100.0`
 
 ## Wins
-- Names 27-29 closeout artifacts loaded successfully (avg=100.0).
+- Names 27-29 completion artifacts loaded successfully (avg=100.0).
 - Phase-2 backlog locked with 8 actionable checklist items.
 - Name 30 wrap is release-ready and can hand off into Phase-2 kickoff.
 

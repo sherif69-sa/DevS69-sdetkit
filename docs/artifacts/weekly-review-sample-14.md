@@ -33,6 +33,6 @@
 
 ## Next-week focus
 
-- Name 15: refine multi-channel distribution loop for documentation and demos.
+- Name 15: refine multi-channel distribution loop for documentation and examples.
 - Name 16: publish adoption-ready workflow templates with copy/paste CI variants.
 - Name 17: capture week-over-week quality + contribution deltas in one evidence pack.

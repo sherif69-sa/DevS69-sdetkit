@@ -5,4 +5,4 @@
 - Gate status: **pass**
 
 ## Recommendations
-- Reliability posture is strong; keep current CI and closeout operating cadence.
+- Reliability posture is strong; keep current CI and completion operating cadence.

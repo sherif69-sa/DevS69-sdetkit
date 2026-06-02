@@ -36,7 +36,7 @@ The highest-value gap is not product vision; it is **operational signal clarity*
 
 - **Investor narrative strength: high** (clear problem/solution and packaging).
 - **Operational polish: medium** (lint/docs routing drift visible).
-- **Execution confidence for due diligence demos: medium-to-high** once quick hygiene fixes are applied.
+- **Execution confidence for due diligence examples: medium-to-high** once quick hygiene fixes are applied.
 
 ## Immediate actions (save time + money)
 

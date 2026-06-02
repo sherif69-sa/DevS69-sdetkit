@@ -12,11 +12,11 @@
 - Distribution closeout delivery board checklist items: `5`
 
 ## Wins
-- Distribution closeout delivery board integrity validated with 5 checklist items.
+- Distribution completion delivery board integrity validated with 5 checklist items.
 - Experiment contract + quality checklist is fully locked for execution.
 
 ## Misses
-- Distribution closeout strict continuity signal is missing.
+- Distribution completion strict continuity signal is missing.
 
 ## Handoff actions
 - [ ] Re-run distribution closeout command and restore strict pass baseline before experiment lane lock.

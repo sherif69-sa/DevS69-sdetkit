@@ -15,7 +15,7 @@
 - Name 34 continuity is strict-pass with activation score=100.0.
 - Name 34 delivery board integrity validated with 5 checklist items.
 - KPI instrumentation contract + quality checklist is fully locked for execution.
-- Name 35 KPI instrumentation closeout is fully complete and ready for Name 36 distribution execution.
+- Name 35 KPI instrumentation completion is fully complete and ready for Name 36 distribution execution.
 
 ## Misses
 - No misses recorded.
