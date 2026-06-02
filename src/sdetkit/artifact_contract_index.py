@@ -7,6 +7,8 @@ from . import (
     adoption_surface,
     check_intelligence,
     doctor,
+    protected_verifier,
+    replayable_benchmark_harness,
     repo_memory,
     review,
     safe_fix_history_memory,
@@ -36,6 +38,49 @@ def build_index() -> dict[str, Any]:
                 "schema_version": None,
                 "required_fields": ["ok", "failed_steps", "profile"],
                 "stability": "public",
+            },
+            {
+                "id": "protected-verifier-result-json",
+                "path": (
+                    protected_verifier.DEFAULT_OUT_DIR / protected_verifier.RESULT_JSON
+                ).as_posix(),
+                "produced_by": "python -m sdetkit.protected_verifier --patch-score <patch-score.json> --verification-evidence <verification-evidence.json> --out-dir build/protected-verifier --format json",
+                "schema_version": protected_verifier.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "patch_id",
+                    "diagnosis_id",
+                    "patch_score",
+                    "scored_files",
+                    "observed_changed_files",
+                    "allowed_files",
+                    "proof_requirements",
+                    "findings",
+                    "decision",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "replayable-benchmark-report-json",
+                "path": (
+                    replayable_benchmark_harness.DEFAULT_OUT_DIR
+                    / replayable_benchmark_harness.REPORT_JSON
+                ).as_posix(),
+                "produced_by": "python -m sdetkit.replayable_benchmark_harness --scenario <scenario.json> --out-dir build/replayable-benchmark-harness --format json",
+                "schema_version": replayable_benchmark_harness.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "status",
+                    "scenario_count",
+                    "passed_count",
+                    "failed_count",
+                    "required_contract",
+                    "safety_boundary",
+                    "attempt_scored_count",
+                    "scenarios",
+                    "next_boundary",
+                ],
+                "stability": "advanced",
             },
             {
                 "id": "trajectory-jsonl",
