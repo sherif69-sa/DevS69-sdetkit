@@ -752,6 +752,16 @@ Then use stability-aware command discovery:
     )
     candidate_evidence_checklist.add_argument("--format", choices=["json", "text"], default="json")
 
+    candidate_collision_checklist = sub.add_parser(
+        "candidate-collision-checklist",
+        help="[Advanced but supported] Build read-only candidate collision checklist",
+    )
+    candidate_collision_checklist.add_argument("--evidence-checklist-json", required=True)
+    candidate_collision_checklist.add_argument(
+        "--out", default="build/sdetkit/candidate-collision-checklist.json"
+    )
+    candidate_collision_checklist.add_argument("--format", choices=["json", "text"], default="json")
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -1402,6 +1412,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.format),
         ]
         return _run_module_main("sdetkit.candidate_evidence_checklist", forwarded)
+
+    if ns.cmd == "candidate-collision-checklist":
+        forwarded = [
+            "--evidence-checklist-json",
+            str(ns.evidence_checklist_json),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        return _run_module_main("sdetkit.candidate_collision_checklist", forwarded)
 
     if ns.cmd == "boost":
         if getattr(ns, "boost_cmd", None) == "scan":
