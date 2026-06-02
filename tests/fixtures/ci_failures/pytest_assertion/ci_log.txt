@@ -1,0 +1,4 @@
+Run python -m pytest -q tests/test_widget.py -o addopts=
+============================= test session starts =============================
+FAILED tests/test_widget.py::test_widget_contract - AssertionError: expected stable evidence
+Error: Process completed with exit code 1.
