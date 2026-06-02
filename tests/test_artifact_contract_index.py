@@ -16,6 +16,7 @@ from sdetkit import (
     issue_queue_classifier,
     maintenance_queue_rollup,
     pr_quality_runtime_proof_artifacts,
+    professional_naming_cleanup_plan,
     professional_naming_inventory,
     protected_verifier,
     replayable_benchmark_harness,
@@ -158,6 +159,18 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         "candidate_frozen",
         "automation_allowed",
     }.issubset(set(entries["repo-fit-screen-json"]["required_fields"]))
+    assert (
+        entries["professional-naming-cleanup-plan-json"]["schema_version"]
+        == professional_naming_cleanup_plan.SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "cleanup_slices",
+        "rename_allowed",
+        "compatibility_migration_allowed",
+        "public_surface_changes_allowed",
+        "automation_allowed",
+    }.issubset(set(entries["professional-naming-cleanup-plan-json"]["required_fields"]))
     assert (
         entries["professional-naming-inventory-json"]["schema_version"]
         == professional_naming_inventory.SCHEMA_VERSION
