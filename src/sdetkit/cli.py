@@ -693,6 +693,14 @@ Then use stability-aware command discovery:
     )
     issue_queue_classifier.add_argument("--format", choices=["json", "text"], default="json")
 
+    automation_health = sub.add_parser(
+        "automation-health",
+        help="[Advanced but supported] Build read-only automation health evidence",
+    )
+    automation_health.add_argument("--issues-json", required=True)
+    automation_health.add_argument("--out", default="build/sdetkit/automation-health.json")
+    automation_health.add_argument("--format", choices=["json", "text"], default="json")
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -1271,6 +1279,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.format),
         ]
         return _run_module_main("sdetkit.issue_queue_classifier", forwarded)
+
+    if ns.cmd == "automation-health":
+        forwarded = [
+            "--issues-json",
+            str(ns.issues_json),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        return _run_module_main("sdetkit.automation_health", forwarded)
 
     if ns.cmd == "boost":
         if getattr(ns, "boost_cmd", None) == "scan":
