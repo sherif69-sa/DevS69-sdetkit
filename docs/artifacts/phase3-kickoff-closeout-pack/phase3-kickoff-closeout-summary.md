@@ -1,4 +1,4 @@
-Phase3 Kickoff Closeout summary
+Phase3 Kickoff Completion summary
 - Activation score: 29
 - Passed checks: 4
 - Failed checks: 9

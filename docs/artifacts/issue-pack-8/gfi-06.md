@@ -8,4 +8,4 @@
 
 1. Contributing docs include explicit docs/artifacts/dayX-* naming guidance.
 2. Examples include at least one markdown artifact path.
-3. Language remains beginner-friendly and concise.
+3. Language remains introductory-friendly and concise.
