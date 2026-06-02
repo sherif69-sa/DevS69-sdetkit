@@ -1,0 +1,28 @@
+{
+  "counts": {
+    "error": 0,
+    "info": 282,
+    "warn": 29
+  },
+  "findings": [
+    {
+      "column": 25,
+      "line": 80,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/adaptive_remediation_policy.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn"
+    }
+  ],
+  "new_findings": [
+    {
+      "column": 25,
+      "line": 80,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/adaptive_remediation_policy.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn"
+    }
+  ],
+  "version": 1
+}

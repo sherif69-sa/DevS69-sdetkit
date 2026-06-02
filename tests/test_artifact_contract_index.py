@@ -17,6 +17,7 @@ from sdetkit import (
     repo_memory,
     review,
     safe_fix_history_memory,
+    security_followup_disposition,
     trajectory_store,
 )
 from sdetkit.artifact_contract_index import INDEX_SCHEMA_VERSION, build_index, write_index
@@ -110,6 +111,15 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         "automation",
         "evidence",
     }.issubset(set(entries["check-intelligence-action-report-json"]["required_fields"]))
+    assert (
+        entries["security-followup-disposition-json"]["schema_version"]
+        == security_followup_disposition.SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "dispositions",
+        "automation_allowed",
+    }.issubset(set(entries["security-followup-disposition-json"]["required_fields"]))
     assert entries["automation-health-json"]["schema_version"] == automation_health.SCHEMA_VERSION
     assert {
         "schema_version",

@@ -208,6 +208,29 @@
       "stability": "advanced"
     },
     {
+      "id": "security-followup-disposition-json",
+      "path": "build/sdetkit/security-followup-disposition.json",
+      "produced_by": "python -m sdetkit security-followup-disposition --issues-json <issues.json> --security-json <security-check.json> --out build/sdetkit/security-followup-disposition.json --format text",
+      "schema_version": "sdetkit.security.followup.disposition.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "source_issue_count",
+        "security_followup_count",
+        "security_counts",
+        "finding_severity_counts",
+        "current_finding_count",
+        "new_finding_count",
+        "dispositions",
+        "primary_issue",
+        "recommended_next_action",
+        "automation_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "automation-health-json",
       "path": "build/sdetkit/automation-health.json",
       "produced_by": "python -m sdetkit automation-health --issues-json <issues.json> --out build/sdetkit/automation-health.json --format text",

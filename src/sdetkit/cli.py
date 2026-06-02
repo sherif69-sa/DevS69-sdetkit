@@ -701,6 +701,17 @@ Then use stability-aware command discovery:
     automation_health.add_argument("--out", default="build/sdetkit/automation-health.json")
     automation_health.add_argument("--format", choices=["json", "text"], default="json")
 
+    security_followup_disposition = sub.add_parser(
+        "security-followup-disposition",
+        help="[Advanced but supported] Build read-only security follow-up disposition evidence",
+    )
+    security_followup_disposition.add_argument("--issues-json", required=True)
+    security_followup_disposition.add_argument("--security-json", required=True)
+    security_followup_disposition.add_argument(
+        "--out", default="build/sdetkit/security-followup-disposition.json"
+    )
+    security_followup_disposition.add_argument("--format", choices=["json", "text"], default="json")
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -1290,6 +1301,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.format),
         ]
         return _run_module_main("sdetkit.automation_health", forwarded)
+
+    if ns.cmd == "security-followup-disposition":
+        forwarded = [
+            "--issues-json",
+            str(ns.issues_json),
+            "--security-json",
+            str(ns.security_json),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        return _run_module_main("sdetkit.security_followup_disposition", forwarded)
 
     if ns.cmd == "boost":
         if getattr(ns, "boost_cmd", None) == "scan":
