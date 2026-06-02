@@ -734,6 +734,17 @@ Then use stability-aware command discovery:
         "--format", choices=["json", "text"], default="json"
     )
 
+    security_review_packet = sub.add_parser(
+        "security-review-packet",
+        help="[Advanced but supported] Build read-only human security review packet",
+    )
+    security_review_packet.add_argument("--inventory-json", required=True)
+    security_review_packet.add_argument("--matrix-json", required=True)
+    security_review_packet.add_argument(
+        "--out", default="build/sdetkit/security-review-packet.json"
+    )
+    security_review_packet.add_argument("--format", choices=["json", "text"], default="json")
+
     maintenance_queue_rollup = sub.add_parser(
         "maintenance-queue-rollup",
         help="[Advanced but supported] Build read-only maintenance queue rollup evidence",
@@ -1408,6 +1419,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.format),
         ]
         return _run_module_main("sdetkit.security_finding_disposition_matrix", forwarded)
+
+    if ns.cmd == "security-review-packet":
+        forwarded = [
+            "--inventory-json",
+            str(ns.inventory_json),
+            "--matrix-json",
+            str(ns.matrix_json),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        return _run_module_main("sdetkit.security_review_packet", forwarded)
 
     if ns.cmd == "maintenance-queue-rollup":
         forwarded = [

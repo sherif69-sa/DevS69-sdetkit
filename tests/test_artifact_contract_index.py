@@ -25,6 +25,7 @@ from sdetkit import (
     security_finding_disposition_matrix,
     security_findings_inventory,
     security_followup_disposition,
+    security_review_packet,
     trajectory_store,
 )
 from sdetkit.artifact_contract_index import INDEX_SCHEMA_VERSION, build_index, write_index
@@ -165,6 +166,19 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         "queue_items",
         "automation_allowed",
     }.issubset(set(entries["maintenance-queue-rollup-json"]["required_fields"]))
+    assert (
+        entries["security-review-packet-json"]["schema_version"]
+        == security_review_packet.SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "decision_required",
+        "dismiss_allowed",
+        "suppress_allowed",
+        "fix_allowed",
+        "issue_mutation_allowed",
+        "automation_allowed",
+    }.issubset(set(entries["security-review-packet-json"]["required_fields"]))
     assert (
         entries["security-finding-disposition-matrix-json"]["schema_version"]
         == security_finding_disposition_matrix.SCHEMA_VERSION
