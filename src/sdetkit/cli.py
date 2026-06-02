@@ -712,6 +712,18 @@ Then use stability-aware command discovery:
     )
     security_followup_disposition.add_argument("--format", choices=["json", "text"], default="json")
 
+    maintenance_queue_rollup = sub.add_parser(
+        "maintenance-queue-rollup",
+        help="[Advanced but supported] Build read-only maintenance queue rollup evidence",
+    )
+    maintenance_queue_rollup.add_argument("--issue-queue-json", required=True)
+    maintenance_queue_rollup.add_argument("--automation-health-json", required=True)
+    maintenance_queue_rollup.add_argument("--security-followup-json", required=True)
+    maintenance_queue_rollup.add_argument(
+        "--out", default="build/sdetkit/maintenance-queue-rollup.json"
+    )
+    maintenance_queue_rollup.add_argument("--format", choices=["json", "text"], default="json")
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -1314,6 +1326,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.format),
         ]
         return _run_module_main("sdetkit.security_followup_disposition", forwarded)
+
+    if ns.cmd == "maintenance-queue-rollup":
+        forwarded = [
+            "--issue-queue-json",
+            str(ns.issue_queue_json),
+            "--automation-health-json",
+            str(ns.automation_health_json),
+            "--security-followup-json",
+            str(ns.security_followup_json),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        return _run_module_main("sdetkit.maintenance_queue_rollup", forwarded)
 
     if ns.cmd == "boost":
         if getattr(ns, "boost_cmd", None) == "scan":
