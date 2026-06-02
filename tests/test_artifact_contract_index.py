@@ -7,6 +7,8 @@ from sdetkit import (
     adoption_surface,
     check_intelligence,
     doctor,
+    protected_verifier,
+    replayable_benchmark_harness,
     repo_memory,
     review,
     safe_fix_history_memory,
@@ -21,6 +23,24 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
     assert payload["schema_version"] == INDEX_SCHEMA_VERSION
 
     entries = {item["id"]: item for item in payload["artifacts"]}
+    assert (
+        entries["protected-verifier-result-json"]["schema_version"]
+        == protected_verifier.SCHEMA_VERSION
+    )
+    assert (
+        entries["replayable-benchmark-report-json"]["schema_version"]
+        == replayable_benchmark_harness.SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "decision",
+        "findings",
+    }.issubset(set(entries["protected-verifier-result-json"]["required_fields"]))
+    assert {
+        "schema_version",
+        "required_contract",
+        "safety_boundary",
+    }.issubset(set(entries["replayable-benchmark-report-json"]["required_fields"]))
     assert entries["trajectory-jsonl"]["schema_version"] == trajectory_store.SCHEMA_VERSION
     assert entries["repo-memory-profile-json"]["schema_version"] == repo_memory.SCHEMA_VERSION
     assert (
