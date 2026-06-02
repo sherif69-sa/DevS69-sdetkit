@@ -122,7 +122,7 @@ def _recommended_action(lane: str, health_state: str) -> str:
     if lane == "worker_alignment":
         return "convert_one_worker_alignment_gap_to_scoped_read_only_artifact_pr"
     if lane == "workflow_governance":
-        return "verify_workflow_governance_snapshot_before_remediation"
+        return "verify workflow governance snapshot before remediation"
     return "human_review_required"
 
 
