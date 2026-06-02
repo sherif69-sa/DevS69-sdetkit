@@ -15,6 +15,7 @@ from sdetkit import (
     pr_quality_runtime_proof_artifacts,
     protected_verifier,
     replayable_benchmark_harness,
+    repo_fit_screen,
     repo_memory,
     review,
     safe_fix_history_memory,
@@ -112,6 +113,12 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         "automation",
         "evidence",
     }.issubset(set(entries["check-intelligence-action-report-json"]["required_fields"]))
+    assert entries["repo-fit-screen-json"]["schema_version"] == repo_fit_screen.SCHEMA_VERSION
+    assert {
+        "schema_version",
+        "candidate_frozen",
+        "automation_allowed",
+    }.issubset(set(entries["repo-fit-screen-json"]["required_fields"]))
     assert (
         entries["maintenance-queue-rollup-json"]["schema_version"]
         == maintenance_queue_rollup.SCHEMA_VERSION
