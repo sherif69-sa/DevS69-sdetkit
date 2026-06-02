@@ -724,6 +724,14 @@ Then use stability-aware command discovery:
     )
     maintenance_queue_rollup.add_argument("--format", choices=["json", "text"], default="json")
 
+    repo_fit_screen = sub.add_parser(
+        "repo-fit-screen",
+        help="[Advanced but supported] Build read-only external repo fit screen evidence",
+    )
+    repo_fit_screen.add_argument("--screen-text", required=True)
+    repo_fit_screen.add_argument("--out", default="build/sdetkit/repo-fit-screen.json")
+    repo_fit_screen.add_argument("--format", choices=["json", "text"], default="json")
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -1341,6 +1349,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.format),
         ]
         return _run_module_main("sdetkit.maintenance_queue_rollup", forwarded)
+
+    if ns.cmd == "repo-fit-screen":
+        forwarded = [
+            "--screen-text",
+            str(ns.screen_text),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        return _run_module_main("sdetkit.repo_fit_screen", forwarded)
 
     if ns.cmd == "boost":
         if getattr(ns, "boost_cmd", None) == "scan":

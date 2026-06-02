@@ -1,0 +1,55 @@
+=== COMMIT ===
+28972a9932710c58f7c5b6f24d80f99aab134f00
+
+=== TOP LEVEL ===
+./LICENSE
+./README.md
+./pyproject.toml
+
+=== PYPROJECT BASIC SIGNALS ===
+[project]: True
+[project.optional-dependencies]: False
+[tool.pytest.ini_options]: False
+[tool.hatch: True
+[tool.ruff: True
+[tool.mypy: False
+
+=== PACKAGE AREAS ===
+src
+src/tox
+src/tox/config
+src/tox/execute
+src/tox/plugin
+src/tox/session
+src/tox/tox_env
+src/tox/util
+
+=== TEST AREAS ===
+tests
+tests/config
+tests/execute
+tests/plugin
+tests/session
+tests/tox_env
+tests/util
+
+=== LARGE PUBLIC SURFACE CANDIDATE FILES ===
+src/tox/__init__.py
+src/tox/__main__.py
+src/tox/config/main.py
+src/tox/provision.py
+src/tox/pytest.py
+src/tox/report.py
+src/tox/run.py
+src/tox/session/state.py
+
+=== TEST FILE COUNT BY AREA ===
+     34 tests/config
+     20 tests/tox_env
+     18 tests/session
+      6 tests/util
+      4 tests/execute
+      3 tests/plugin
+      2 tests/docs
+
+=== DONE: tox repo-fit screen only, no candidate frozen ===
