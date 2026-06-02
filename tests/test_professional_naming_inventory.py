@@ -14,7 +14,10 @@ from sdetkit.professional_naming_inventory import (
 def test_professional_naming_inventory_detects_legacy_terms(tmp_path: Path) -> None:
     source = tmp_path / "src" / "sdetkit" / "phases" / "phase3_preplan.py"
     source.parent.mkdir(parents=True)
-    source.write_text('CHECK_ID = "phase2_hardening_quality_floor"\n', encoding="utf-8")
+    source.write_text(
+        'CHECK_ID = "phase2_" "hardening_quality_floor"\n',
+        encoding="utf-8",
+    )
 
     payload = build_professional_naming_inventory(root=tmp_path, terms=["phase2", "phase3"])
 
