@@ -756,6 +756,18 @@ Then use stability-aware command discovery:
     professional_naming_inventory.add_argument("--term", action="append", dest="terms")
     professional_naming_inventory.add_argument("--format", choices=["json", "text"], default="json")
 
+    professional_naming_cleanup_plan = sub.add_parser(
+        "professional-naming-cleanup-plan",
+        help="[Advanced but supported] Build read-only professional naming cleanup plan",
+    )
+    professional_naming_cleanup_plan.add_argument("--inventory-json", required=True)
+    professional_naming_cleanup_plan.add_argument(
+        "--out", default="build/sdetkit/professional-naming-cleanup-plan.json"
+    )
+    professional_naming_cleanup_plan.add_argument(
+        "--format", choices=["json", "text"], default="json"
+    )
+
     maintenance_queue_rollup = sub.add_parser(
         "maintenance-queue-rollup",
         help="[Advanced but supported] Build read-only maintenance queue rollup evidence",
@@ -1456,6 +1468,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         for term in ns.terms or []:
             forwarded.extend(["--term", str(term)])
         return _run_module_main("sdetkit.professional_naming_inventory", forwarded)
+
+    if ns.cmd == "professional-naming-cleanup-plan":
+        forwarded = [
+            "--inventory-json",
+            str(ns.inventory_json),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        return _run_module_main("sdetkit.professional_naming_cleanup_plan", forwarded)
 
     if ns.cmd == "maintenance-queue-rollup":
         forwarded = [
