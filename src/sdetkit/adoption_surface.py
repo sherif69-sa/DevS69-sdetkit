@@ -87,6 +87,24 @@ def _add_named(items: list[dict[str, Any]], name: str, **fields: Any) -> None:
     items.append({"name": name, **fields})
 
 
+def _add_proof_command(
+    items: list[dict[str, Any]],
+    *,
+    surface: str,
+    command: str,
+    confidence: str,
+    purpose: str,
+) -> None:
+    items.append(
+        {
+            "surface": surface,
+            "command": command,
+            "confidence": confidence,
+            "purpose": purpose,
+        }
+    )
+
+
 def _workflow_files(root: Path) -> list[str]:
     return _glob_files(root, ".github/workflows/*.yml") + _glob_files(
         root, ".github/workflows/*.yaml"
@@ -170,32 +188,32 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             confidence="high",
             commands=["python -m pytest -q -o addopts="],
         )
-        recommended_proof_commands.append(
-            {
-                "surface": "python",
-                "command": "python -m pytest -q -o addopts=",
-                "confidence": "high",
-            }
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="python",
+            command="python -m pytest -q -o addopts=",
+            confidence="high",
+            purpose="test",
         )
     elif python_evidence:
         review_first_unknowns.append("Python project detected but test command is not proven")
 
     if _file(root, ".pre-commit-config.yaml"):
-        recommended_proof_commands.append(
-            {
-                "surface": "quality",
-                "command": _quality_proof_command(root),
-                "confidence": "high",
-            }
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="quality",
+            command=_quality_proof_command(root),
+            confidence="high",
+            purpose="quality",
         )
 
     if _file(root, "mkdocs.yml"):
-        recommended_proof_commands.append(
-            {
-                "surface": "docs",
-                "command": "NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict",
-                "confidence": "high",
-            }
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="docs",
+            command="NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict",
+            confidence="high",
+            purpose="docs",
         )
 
     js_evidence = [
@@ -229,8 +247,12 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             confidence="medium",
             commands=["npm test"],
         )
-        recommended_proof_commands.append(
-            {"surface": "javascript_typescript", "command": "npm test", "confidence": "medium"}
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="javascript_typescript",
+            command="npm test",
+            confidence="medium",
+            purpose="test",
         )
     elif _file(root, "package.json"):
         review_first_unknowns.append(
@@ -240,16 +262,24 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     if _file(root, "go.mod"):
         _add_named(detected_languages, "go", confidence="high", evidence=["go.mod"])
         _add_named(package_managers, "go_modules", files=["go.mod"])
-        recommended_proof_commands.append(
-            {"surface": "go", "command": "go test ./...", "confidence": "high"}
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="go",
+            command="go test ./...",
+            confidence="high",
+            purpose="test",
         )
 
     if _file(root, "Cargo.toml"):
         rust_files = [path for path in ["Cargo.toml", "Cargo.lock"] if _file(root, path)]
         _add_named(detected_languages, "rust", confidence="high", evidence=rust_files)
         _add_named(package_managers, "cargo", files=rust_files)
-        recommended_proof_commands.append(
-            {"surface": "rust", "command": "cargo test", "confidence": "high"}
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="rust",
+            command="cargo test",
+            confidence="high",
+            purpose="test",
         )
 
     java_files = [
@@ -261,21 +291,33 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         _add_named(detected_languages, "java", confidence="high", evidence=java_files)
         if _file(root, "pom.xml"):
             _add_named(package_managers, "maven", files=["pom.xml"])
-            recommended_proof_commands.append(
-                {"surface": "java", "command": "mvn test", "confidence": "high"}
+            _add_proof_command(
+                recommended_proof_commands,
+                surface="java",
+                command="mvn test",
+                confidence="high",
+                purpose="test",
             )
         if _file(root, "build.gradle") or _file(root, "build.gradle.kts"):
             _add_named(package_managers, "gradle", files=java_files)
-            recommended_proof_commands.append(
-                {"surface": "java", "command": "./gradlew test", "confidence": "medium"}
+            _add_proof_command(
+                recommended_proof_commands,
+                surface="java",
+                command="./gradlew test",
+                confidence="medium",
+                purpose="test",
             )
 
     dotnet_files = _recursive_files(root, "*.sln") + _recursive_files(root, "*.csproj")
     if dotnet_files:
         _add_named(detected_languages, "dotnet", confidence="high", evidence=dotnet_files)
         _add_named(package_managers, "nuget", files=dotnet_files)
-        recommended_proof_commands.append(
-            {"surface": "dotnet", "command": "dotnet test", "confidence": "high"}
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="dotnet",
+            command="dotnet test",
+            confidence="high",
+            purpose="test",
         )
 
     if workflows:
