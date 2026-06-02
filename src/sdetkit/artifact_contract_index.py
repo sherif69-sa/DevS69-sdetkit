@@ -6,6 +6,8 @@ from typing import Any
 from . import (
     adoption_surface,
     check_intelligence,
+    diagnostic_signal_snapshot,
+    diagnostic_signal_snapshot_history,
     doctor,
     pr_quality_runtime_proof_artifacts,
     protected_verifier,
@@ -39,6 +41,51 @@ def build_index() -> dict[str, Any]:
                 "schema_version": None,
                 "required_fields": ["ok", "failed_steps", "profile"],
                 "stability": "public",
+            },
+            {
+                "id": "diagnostic-signal-snapshot-json",
+                "path": (
+                    diagnostic_signal_snapshot.DEFAULT_OUT_DIR
+                    / diagnostic_signal_snapshot.SNAPSHOT_JSON
+                ).as_posix(),
+                "produced_by": "python -m sdetkit.diagnostic_signal_snapshot --evidence-narrative <evidence-narrative.json> --evidence-graph <evidence-graph.json> --diagnostic-worker-result <diagnostic-worker-result.json> --runtime-proof-artifacts <runtime-proof-artifacts.json> --security-finding-diagnosis <security-finding-diagnosis.json> --out-dir build/pr-quality/diagnostic-signal-snapshot --format json",
+                "schema_version": diagnostic_signal_snapshot.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "status",
+                    "snapshot_type",
+                    "quiet_green_advisory_baseline",
+                    "measurements",
+                    "kpi_readiness",
+                    "decision_boundary",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "diagnostic-signal-snapshot-history-summary-json",
+                "path": (
+                    diagnostic_signal_snapshot_history.DEFAULT_OUT_DIR
+                    / diagnostic_signal_snapshot_history.SUMMARY_JSON
+                ).as_posix(),
+                "produced_by": "python -m sdetkit.diagnostic_signal_snapshot_history --diagnostic-signal-snapshot <diagnostic-signal-snapshot.json> --associated-pr-json <associated-pr.json> --source-run-id <run-id> --source-run-conclusion success --source-head-sha <head-sha> --retention-run-id <retention-run-id> --accepted-main-sha <main-sha> --out-dir build/repo-memory-history/diagnostic-signal-snapshots --format json",
+                "schema_version": diagnostic_signal_snapshot_history.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "status",
+                    "history_path",
+                    "prior_history_collected",
+                    "prior_record_count",
+                    "appended",
+                    "record_count",
+                    "quiet_green_advisory_baseline_record_count",
+                    "review_signal_record_count",
+                    "integration_proof_signal_record_count",
+                    "snapshot_status_counts",
+                    "advisor_false_positive_rate_status",
+                    "latest_record",
+                    "decision_boundary",
+                ],
+                "stability": "advanced",
             },
             {
                 "id": "pr-quality-runtime-proof-artifacts-json",

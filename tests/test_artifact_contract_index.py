@@ -6,6 +6,8 @@ from pathlib import Path
 from sdetkit import (
     adoption_surface,
     check_intelligence,
+    diagnostic_signal_snapshot,
+    diagnostic_signal_snapshot_history,
     doctor,
     pr_quality_runtime_proof_artifacts,
     protected_verifier,
@@ -24,6 +26,24 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
     assert payload["schema_version"] == INDEX_SCHEMA_VERSION
 
     entries = {item["id"]: item for item in payload["artifacts"]}
+    assert (
+        entries["diagnostic-signal-snapshot-json"]["schema_version"]
+        == diagnostic_signal_snapshot.SCHEMA_VERSION
+    )
+    assert (
+        entries["diagnostic-signal-snapshot-history-summary-json"]["schema_version"]
+        == diagnostic_signal_snapshot_history.SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "measurements",
+        "decision_boundary",
+    }.issubset(set(entries["diagnostic-signal-snapshot-json"]["required_fields"]))
+    assert {
+        "schema_version",
+        "latest_record",
+        "decision_boundary",
+    }.issubset(set(entries["diagnostic-signal-snapshot-history-summary-json"]["required_fields"]))
     assert (
         entries["pr-quality-runtime-proof-artifacts-json"]["schema_version"]
         == pr_quality_runtime_proof_artifacts.SCHEMA_VERSION
