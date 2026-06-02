@@ -105,6 +105,23 @@ def _package_json_has_test(root: Path) -> bool:
     return bool(str(scripts.get("test", "")).strip())
 
 
+def _make_target_exists(root: Path, target: str) -> bool:
+    makefile = root / "Makefile"
+    if not makefile.is_file():
+        return False
+    prefix = f"{target}:"
+    for line in makefile.read_text(encoding="utf-8", errors="ignore").splitlines():
+        if line.startswith(prefix):
+            return True
+    return False
+
+
+def _quality_proof_command(root: Path) -> str:
+    if _make_target_exists(root, "proof-after-format"):
+        return "make proof-after-format"
+    return "python -m pre_commit run -a"
+
+
 def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     requirements = _glob_files(root, "requirements*.txt")
@@ -167,7 +184,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         recommended_proof_commands.append(
             {
                 "surface": "quality",
-                "command": "python -m pre_commit run -a",
+                "command": _quality_proof_command(root),
                 "confidence": "high",
             }
         )

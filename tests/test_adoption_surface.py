@@ -25,6 +25,10 @@ def test_adoption_surface_detects_python_github_security_and_proof_commands(
     _write(tmp_path / "pyproject.toml", '[project]\ndependencies = ["pytest"]\n')
     _write(tmp_path / "requirements-test.txt", "pytest==9.0.3\n")
     _write(tmp_path / ".pre-commit-config.yaml", "repos: []\n")
+    _write(
+        tmp_path / "Makefile",
+        ".PHONY: proof-after-format\nproof-after-format:\n\tpython -m pre_commit run -a\n",
+    )
     _write(tmp_path / "mkdocs.yml", "site_name: Example\n")
     _write(tmp_path / "src" / "sdetkit" / "__init__.py")
     _write(
@@ -44,7 +48,7 @@ def test_adoption_surface_detects_python_github_security_and_proof_commands(
     assert "github_actions" in _names(payload["ci_systems"])
     assert {"codeql", "dependency_review"} <= _names(payload["security_tools"])
     assert "python -m pytest -q -o addopts=" in _commands(payload)
-    assert "python -m pre_commit run -a" in _commands(payload)
+    assert "make proof-after-format" in _commands(payload)
     assert "NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict" in _commands(payload)
 
 
@@ -152,6 +156,17 @@ def test_adoption_surface_payload_validator_accepts_generated_payload(tmp_path: 
     out = tmp_path / "build" / "sdetkit" / "adoption-surface.json"
     write_adoption_surface_artifact(repo_root=tmp_path, out=out)
     assert validate_adoption_surface_artifact(out) == []
+
+
+def test_adoption_surface_falls_back_to_pre_commit_when_make_target_is_absent(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "pyproject.toml", "[project]\ndependencies = []\n")
+    _write(tmp_path / ".pre-commit-config.yaml", "repos: []\n")
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert "python -m pre_commit run -a" in _commands(payload)
 
 
 def test_adoption_surface_payload_validator_rejects_authority_escalation() -> None:
