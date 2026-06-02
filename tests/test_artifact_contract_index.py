@@ -6,6 +6,7 @@ from pathlib import Path
 from sdetkit import (
     adoption_surface,
     automation_health,
+    candidate_evidence_checklist,
     candidate_freeze_readiness,
     check_intelligence,
     diagnostic_signal_snapshot,
@@ -114,6 +115,17 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         "automation",
         "evidence",
     }.issubset(set(entries["check-intelligence-action-report-json"]["required_fields"]))
+    assert (
+        entries["candidate-evidence-checklist-json"]["schema_version"]
+        == candidate_evidence_checklist.SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "checklist_items",
+        "freeze_ready",
+        "candidate_frozen",
+        "automation_allowed",
+    }.issubset(set(entries["candidate-evidence-checklist-json"]["required_fields"]))
     assert (
         entries["candidate-freeze-readiness-json"]["schema_version"]
         == candidate_freeze_readiness.SCHEMA_VERSION

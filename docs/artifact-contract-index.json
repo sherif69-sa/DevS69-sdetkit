@@ -208,6 +208,32 @@
       "stability": "advanced"
     },
     {
+      "id": "candidate-evidence-checklist-json",
+      "path": "build/sdetkit/candidate-evidence-checklist.json",
+      "produced_by": "python -m sdetkit candidate-evidence-checklist --readiness-json <candidate-freeze-readiness.json> --out build/sdetkit/candidate-evidence-checklist.json --format text",
+      "schema_version": "sdetkit.candidate.evidence.checklist.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "repo",
+        "commit",
+        "readiness_schema",
+        "readiness_status",
+        "candidate_frozen",
+        "freeze_ready",
+        "required_item_count",
+        "missing_item_count",
+        "present_item_count",
+        "checklist_items",
+        "hard_blocks",
+        "recommended_action",
+        "automation_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "candidate-freeze-readiness-json",
       "path": "build/sdetkit/candidate-freeze-readiness.json",
       "produced_by": "python -m sdetkit candidate-freeze-readiness --repo-fit-json <repo-fit-screen.json> --out build/sdetkit/candidate-freeze-readiness.json --format text",
