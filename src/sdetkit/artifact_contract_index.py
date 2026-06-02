@@ -7,6 +7,7 @@ from . import (
     adoption_surface,
     check_intelligence,
     doctor,
+    pr_quality_runtime_proof_artifacts,
     protected_verifier,
     replayable_benchmark_harness,
     repo_memory,
@@ -38,6 +39,26 @@ def build_index() -> dict[str, Any]:
                 "schema_version": None,
                 "required_fields": ["ok", "failed_steps", "profile"],
                 "stability": "public",
+            },
+            {
+                "id": "pr-quality-runtime-proof-artifacts-json",
+                "path": (
+                    pr_quality_runtime_proof_artifacts.DEFAULT_OUT_DIR
+                    / pr_quality_runtime_proof_artifacts.SUMMARY_JSON
+                ).as_posix(),
+                "produced_by": "python -m sdetkit.pr_quality_runtime_proof_artifacts --isolated-proof <isolated-proof.json> --live-benchmark-report <benchmark-report.json> --repo-memory-profile <repo-memory-profile.json> --trusted-history-evidence <trusted-history.json> --out-dir build/pr-quality/runtime-proof/summary --format json",
+                "schema_version": pr_quality_runtime_proof_artifacts.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "status",
+                    "collected_components",
+                    "isolated_proof",
+                    "live_benchmark",
+                    "repo_memory",
+                    "trusted_history",
+                    "decision_boundary",
+                ],
+                "stability": "advanced",
             },
             {
                 "id": "protected-verifier-result-json",
