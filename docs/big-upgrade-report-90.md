@@ -4,7 +4,7 @@
 
 - Added `cycle90-phase3-wrap-publication-closeout` command to score Cycle 90 readiness from Cycle 89 governance scale artifacts.
 - Added deterministic pack emission and execution evidence generation for phase-3 wrap and publication proof.
-- Added strict contract validation script and tests that enforce Cycle 90 closeout quality gates and next-impact roadmap handoff integrity.
+- Added strict contract validation script and tests that enforce Cycle 90 completion report quality gates and next-impact roadmap handoff integrity.
 
 ## Command lane
 

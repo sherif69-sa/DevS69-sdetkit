@@ -1,6 +1,6 @@
 # Archive and history
 
-This section preserves **historical, transition-era, and closeout material** that is still useful for deep context.
+This section preserves **historical, transition-era, and completion report material** that is still useful for deep context.
 
 > This is not the recommended starting point for new users.
 

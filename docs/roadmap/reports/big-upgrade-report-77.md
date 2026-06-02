@@ -22,4 +22,4 @@ python scripts/check_community_touchpoint_closeout_contract.py
 
 ### Outcome
 
-Cycle 77 is now an evidence-backed community-touchpoint closeout lane with strict continuity to Cycle 76 and deterministic handoff into Cycle 78 ecosystem priorities.
+Cycle 77 is now an evidence-backed community-touchpoint completion report lane with strict continuity to Cycle 76 and deterministic handoff into Cycle 78 ecosystem priorities.

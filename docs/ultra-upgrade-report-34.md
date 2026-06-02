@@ -16,4 +16,4 @@ python -m sdetkit cycle34-demo-asset2 --format json --strict
 
 ## Cycle 35 handoff
 
-Cycle 34 is closed with a locked repo-audit demo-production contract and explicit handoff into Cycle 35 KPI instrumentation sequencing.
+Cycle 34 is closed with a locked repo-audit example-production contract and explicit handoff into Cycle 35 KPI instrumentation sequencing.

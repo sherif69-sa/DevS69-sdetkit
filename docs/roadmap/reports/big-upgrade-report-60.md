@@ -23,4 +23,4 @@ python scripts/check_phase2_wrap_handoff_closeout_contract_60.py
 
 ## Closeout
 
-Cycle 60 is now an evidence-backed closeout lane with strict continuity to Cycle 59 and deterministic handoff into Cycle 61 execution planning.
+Cycle 60 is now an evidence-backed completion report lane with strict continuity to Cycle 59 and deterministic handoff into Cycle 61 execution planning.

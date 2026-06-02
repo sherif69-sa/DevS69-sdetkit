@@ -3,8 +3,8 @@
 ## What shipped
 
 - Added `governance-scale-closeout` command to score Cycle 89 readiness from Cycle 88 governance handoff artifacts.
-- Added deterministic pack emission and execution evidence generation for governance scale closeout proof.
-- Added strict contract validation script and tests that enforce Cycle 89 closeout quality gates and handoff integrity.
+- Added deterministic pack emission and execution evidence generation for governance scale completion report proof.
+- Added strict contract validation script and tests that enforce Cycle 89 completion report quality gates and handoff integrity.
 
 ## Command lane
 

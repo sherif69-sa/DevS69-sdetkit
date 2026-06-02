@@ -6,7 +6,7 @@
 
 ## Problem statement
 
-Phase-1 work had six daily upgrades shipped, but no deterministic way to produce a weekly closeout summary from the repository itself.
+Phase-1 work had six daily upgrades shipped, but no deterministic way to produce a weekly completion report summary from the repository itself.
 
 This made weekly reporting manual and increased drift risk between what was delivered and what was communicated.
 
@@ -26,7 +26,7 @@ This made weekly reporting manual and increased drift risk between what was deli
 - `tests/test_cli_help_lists_subcommands.py`
   - Extended CLI help contract to include `weekly-review` in `sdetkit --help` output.
 - `README.md`
-  - Added Cycle 7 weekly review section with runnable command flow and closeout checks.
+  - Added Cycle 7 weekly review section with runnable command flow and completion report checks.
 - `docs/index.md`
   - Added Cycle 7 report link and execution bullets.
 - `docs/cli.md`
@@ -45,7 +45,7 @@ This made weekly reporting manual and increased drift risk between what was deli
 
 ## Artifact
 
-This document is the Cycle 7 artifact report for Weekly review #1 closeout and KPI checkpointing.
+This document is the Cycle 7 artifact report for Weekly review #1 completion report and KPI checkpointing.
 
 ## Rollback plan
 

@@ -1,4 +1,4 @@
-# Cycle 26 ultra upgrade report — external contribution push closeout
+# Cycle 26 ultra upgrade report — external contribution push completion report
 
 ## What shipped
 

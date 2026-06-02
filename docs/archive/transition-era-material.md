@@ -9,7 +9,7 @@ The full name-by-name report history is preserved as top-level docs files and ex
 - Pattern: `name-*-ultra-upgrade-report.md`
 - Pattern: `name-*-big-upgrade-report.md`
 
-## Transition and closeout documents
+## Transition and completion report documents
 
 Transition-era docs are preserved as top-level docs files and grouped by naming pattern:
 
@@ -18,7 +18,7 @@ Transition-era docs are preserved as top-level docs files and grouped by naming 
 - `integrations-*-handoff-*.md`
 - `integrations-*-kickoff*.md`
 
-These files primarily document sequencing, historical rollout decisions, and closeout snapshots.
+These files primarily document sequencing, historical rollout decisions, and completion report snapshots.
 
 ## Roadmap report archive
 

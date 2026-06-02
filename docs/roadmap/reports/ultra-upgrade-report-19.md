@@ -23,4 +23,4 @@ python scripts/check_release_readiness_contract.py
 
 ## Closeout
 
-Cycle 19 now provides one release score, one strict gate lane, and one evidence bundle that can be attached directly to weekly closeout and release-candidate reviews.
+Cycle 19 now provides one release score, one strict gate lane, and one evidence bundle that can be attached directly to weekly completion report and release-candidate reviews.

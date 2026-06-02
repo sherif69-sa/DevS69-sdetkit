@@ -1,4 +1,4 @@
-# Cycle 31 ultra upgrade report — Phase-2 kickoff baseline closeout
+# Cycle 31 ultra upgrade report — Phase-2 kickoff baseline completion report
 
 ## What shipped
 

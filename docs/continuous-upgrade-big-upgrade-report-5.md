@@ -6,7 +6,7 @@
 
 - Added `continuous-upgrade-closeout-5` command to score cycle 5 readiness from cycle 4 continuous-upgrade artifacts.
 - Added deterministic pack emission and execution evidence generation for impact-5 continuous-upgrade proof.
-- Added strict contract validation script and tests that enforce cycle 5 closeout quality gates.
+- Added strict contract validation script and tests that enforce cycle 5 completion report quality gates.
 
 ## Command lane
 

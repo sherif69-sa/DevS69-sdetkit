@@ -3,7 +3,7 @@
 ## What shipped
 
 - Added a new Cycle 33 command: `python -m sdetkit cycle33-demo-asset`.
-- Added strict scoring + contract checks for the first demo-production lane.
+- Added strict scoring + contract checks for the first example-production lane.
 - Added Cycle 33 artifact pack outputs for plan, script, board, and validation commands.
 
 ## Validation
@@ -16,4 +16,4 @@ python -m sdetkit cycle33-demo-asset --format json --strict
 
 ## Cycle 34 handoff
 
-Cycle 33 is closed with a locked demo-production contract and explicit handoff into Cycle 34 demo asset #2 pre-scope.
+Cycle 33 is closed with a locked example-production contract and explicit handoff into Cycle 34 example asset #2 pre-scope.

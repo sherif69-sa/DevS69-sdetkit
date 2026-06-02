@@ -3,8 +3,8 @@
 ## What shipped
 
 - Added `cycle87-governance-handoff-closeout` command to score Cycle 87 readiness from Cycle 86 launch readiness handoff artifacts.
-- Added deterministic pack emission and execution evidence generation for governance handoff closeout proof.
-- Added strict contract validation script and tests that enforce Cycle 87 closeout quality gates and handoff integrity.
+- Added deterministic pack emission and execution evidence generation for governance handoff completion report proof.
+- Added strict contract validation script and tests that enforce Cycle 87 completion report quality gates and handoff integrity.
 
 ## Command lane
 

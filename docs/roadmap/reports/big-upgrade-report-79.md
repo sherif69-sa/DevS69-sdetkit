@@ -1,6 +1,6 @@
 # Cycle 79 big upgrade report
 
-Cycle 79 delivers a closeout-grade scale upgrade lane that promotes Cycle 78 ecosystem outcomes into enterprise onboarding execution readiness with strict contract checks, deterministic command evidence, and Cycle 80 handoff coverage.
+Cycle 79 delivers a completion report-grade scale upgrade lane that promotes Cycle 78 ecosystem outcomes into enterprise onboarding execution readiness with strict contract checks, deterministic command evidence, and Cycle 80 handoff coverage.
 
 ## What shipped
 

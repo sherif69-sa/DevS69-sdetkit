@@ -5,5 +5,5 @@ Cycle 82 closes integration feedback execution by converting Cycle 81 growth-cam
 ## Delivered upgrades
 
 - Added a strict Cycle 82 integration feedback CLI lane with scoring, pack emission, and evidence execution hooks.
-- Added contract validation script and test coverage for strict closeout checks.
+- Added contract validation script and test coverage for strict completion report checks.
 - Added docs navigation and strategy continuity references for Cycle 82 execution.

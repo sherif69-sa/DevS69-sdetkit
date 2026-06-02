@@ -22,7 +22,7 @@ Cycle 15 now ships a **full GitHub Actions integration operating loop**:
   - failure recovery playbook.
 - Expanded emitted pack artifacts with strict/nightly workflows and distribution plan.
 - Strengthened tests for execute/evidence behavior and strict failure paths.
-- Hardened contract check script to enforce Cycle 15 closeout assets.
+- Hardened contract check script to enforce Cycle 15 completion report assets.
 
 ## Validation commands
 

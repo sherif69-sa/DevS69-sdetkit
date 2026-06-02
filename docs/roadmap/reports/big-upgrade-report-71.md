@@ -23,4 +23,4 @@ python scripts/check_case_study_prep3_closeout_contract.py
 
 ## Outcome
 
-Case-study prep #3 is now an evidence-backed closeout lane with strict continuity checks and a deterministic handoff into case-study prep #4.
+Case-study prep #3 is now an evidence-backed completion report lane with strict continuity checks and a deterministic handoff into case-study prep #4.

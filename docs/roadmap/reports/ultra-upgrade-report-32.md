@@ -13,4 +13,4 @@ Cycle 32 hardens Phase-2 execution by turning release behavior into a determinis
 
 ## Cycle 33 handoff
 
-Cycle 32 is now closed with a locked cadence contract and ready handoff into Cycle 33 demo asset production.
+Cycle 32 is now closed with a locked cadence contract and ready handoff into Cycle 33 example asset production.

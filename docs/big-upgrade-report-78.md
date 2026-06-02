@@ -22,4 +22,4 @@ python scripts/check_ecosystem_priorities_closeout_contract.py
 
 ### Outcome
 
-Cycle 78 is now an evidence-backed ecosystem-priorities closeout lane with strict continuity to Cycle 77 and deterministic handoff into Cycle 79 scale priorities.
+Cycle 78 is now an evidence-backed ecosystem-priorities completion report lane with strict continuity to Cycle 77 and deterministic handoff into Cycle 79 scale priorities.

@@ -22,4 +22,4 @@ python scripts/check_trust_assets_refresh_closeout_contract.py
 
 ### Outcome
 
-Cycle 75 is now an evidence-backed trust refresh closeout lane with strict continuity to Cycle 74 and deterministic handoff into Cycle 76 contributor recognition.
+Cycle 75 is now an evidence-backed trust refresh completion report lane with strict continuity to Cycle 74 and deterministic handoff into Cycle 76 contributor recognition.
