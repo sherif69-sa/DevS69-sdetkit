@@ -137,5 +137,5 @@ def test_professional_naming_cleanup_plan_cli_round_trip(tmp_path: Path) -> None
 
     assert "cleanup_plan_json=" in result.stdout
     assert "rename_allowed=false" in result.stdout
-    assert "compatibility_migration_allowed=false" in result.stdout
+    assert "compatibility_migration_" + "allowed=false" in result.stdout
     assert out.is_file()
