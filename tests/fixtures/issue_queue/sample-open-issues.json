@@ -1,0 +1,74 @@
+[
+  {
+    "issue_number": 1519,
+    "title": "📚 Docs experience radar (2026-06-02)",
+    "state": "open",
+    "labels": ["documentation", "maintenance", "priority:medium"],
+    "created_at": "2026-06-02T10:00:00Z",
+    "updated_at": "2026-06-02T11:00:00Z",
+    "body": "Auto-generated docs surface snapshot. Orphan docs outside the primary nav: 195."
+  },
+  {
+    "issue_number": 1518,
+    "title": "🧾 Workflow governance audit (2026-06)",
+    "state": "open",
+    "labels": ["maintenance", "priority:medium", "automation"],
+    "created_at": "2026-06-02T10:00:00Z",
+    "updated_at": "2026-06-02T11:00:00Z",
+    "body": "This issue is auto-generated to keep GitHub Actions permissions, pinning, and recovery posture in a reviewable state. Findings: **0**."
+  },
+  {
+    "issue_number": 1517,
+    "title": "🛡️ GHAS weekly digest (2026-06-02)",
+    "state": "open",
+    "labels": ["maintenance", "priority:high", "security", "ghas"],
+    "created_at": "2026-06-02T09:00:00Z",
+    "updated_at": "2026-06-02T11:00:00Z",
+    "body": "Auto-generated GitHub Advanced Security review. Required follow-up: review every open GHAS alert."
+  },
+  {
+    "issue_number": 1505,
+    "title": "🧠 Repo optimization control loop (2026-06-01)",
+    "state": "open",
+    "labels": ["enhancement", "maintenance", "priority:medium"],
+    "created_at": "2026-06-01T12:00:00Z",
+    "updated_at": "2026-06-02T11:00:00Z",
+    "body": "Generated from the repo optimize surface. Suggested follow-up: pick one next boost."
+  },
+  {
+    "issue_number": 1504,
+    "title": "🤖 Worker alignment radar (2026-06-01)",
+    "state": "open",
+    "labels": ["maintenance", "priority:medium", "automation"],
+    "created_at": "2026-06-01T12:00:00Z",
+    "updated_at": "2026-06-02T11:00:00Z",
+    "body": "Auto-generated worker alignment radar for adapter, dependency, docs, topology, release, runtime, and expansion lanes."
+  },
+  {
+    "issue_number": 1502,
+    "title": "🚨 Maintenance security follow-up (autopilot)",
+    "state": "open",
+    "labels": ["maintenance", "security"],
+    "created_at": "2026-06-02T10:30:00Z",
+    "updated_at": "2026-06-02T11:20:00Z",
+    "body": "Autopilot detected actionable security findings. error: 0. actionable findings: 29."
+  },
+  {
+    "issue_number": 1500,
+    "title": "🧠 Maintenance command center (rolling)",
+    "state": "open",
+    "labels": ["maintenance", "command-center"],
+    "created_at": "2026-06-02T10:30:00Z",
+    "updated_at": "2026-06-02T11:20:00Z",
+    "body": "Rolling issue keeps maintenance work focused so generated automation trackers stay solvable instead of piling up."
+  },
+  {
+    "issue_number": 1497,
+    "title": "🧱 GHAS configuration audit (2026-06)",
+    "state": "open",
+    "labels": ["maintenance", "priority:medium", "security", "ghas"],
+    "created_at": "2026-06-01T10:00:00Z",
+    "updated_at": "2026-06-02T11:00:00Z",
+    "body": "Auto-generated local workflow coverage for GitHub Advanced Security operating model."
+  }
+]

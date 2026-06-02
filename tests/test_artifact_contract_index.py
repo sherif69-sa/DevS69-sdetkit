@@ -9,6 +9,7 @@ from sdetkit import (
     diagnostic_signal_snapshot,
     diagnostic_signal_snapshot_history,
     doctor,
+    issue_queue_classifier,
     pr_quality_runtime_proof_artifacts,
     protected_verifier,
     replayable_benchmark_harness,
@@ -108,6 +109,16 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         "automation",
         "evidence",
     }.issubset(set(entries["check-intelligence-action-report-json"]["required_fields"]))
+    assert (
+        entries["issue-queue-classifier-json"]["schema_version"]
+        == issue_queue_classifier.SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "issues",
+        "classification_counts",
+        "automation_allowed",
+    }.issubset(set(entries["issue-queue-classifier-json"]["required_fields"]))
     assert entries["adoption-surface-json"]["schema_version"] == adoption_surface.SCHEMA_VERSION
     assert {
         "schema_version",
