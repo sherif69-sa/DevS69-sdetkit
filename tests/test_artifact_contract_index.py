@@ -22,6 +22,7 @@ from sdetkit import (
     repo_memory,
     review,
     safe_fix_history_memory,
+    security_findings_inventory,
     security_followup_disposition,
     trajectory_store,
 )
@@ -163,6 +164,17 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         "queue_items",
         "automation_allowed",
     }.issubset(set(entries["maintenance-queue-rollup-json"]["required_fields"]))
+    assert (
+        entries["security-findings-inventory-json"]["schema_version"]
+        == security_findings_inventory.SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "items",
+        "dismiss_allowed",
+        "fix_allowed",
+        "automation_allowed",
+    }.issubset(set(entries["security-findings-inventory-json"]["required_fields"]))
     assert (
         entries["security-followup-disposition-json"]["schema_version"]
         == security_followup_disposition.SCHEMA_VERSION
