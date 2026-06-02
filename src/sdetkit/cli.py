@@ -732,6 +732,16 @@ Then use stability-aware command discovery:
     repo_fit_screen.add_argument("--out", default="build/sdetkit/repo-fit-screen.json")
     repo_fit_screen.add_argument("--format", choices=["json", "text"], default="json")
 
+    candidate_freeze_readiness = sub.add_parser(
+        "candidate-freeze-readiness",
+        help="[Advanced but supported] Build read-only candidate freeze readiness evidence",
+    )
+    candidate_freeze_readiness.add_argument("--repo-fit-json", required=True)
+    candidate_freeze_readiness.add_argument(
+        "--out", default="build/sdetkit/candidate-freeze-readiness.json"
+    )
+    candidate_freeze_readiness.add_argument("--format", choices=["json", "text"], default="json")
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -1360,6 +1370,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.format),
         ]
         return _run_module_main("sdetkit.repo_fit_screen", forwarded)
+
+    if ns.cmd == "candidate-freeze-readiness":
+        forwarded = [
+            "--repo-fit-json",
+            str(ns.repo_fit_json),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        return _run_module_main("sdetkit.candidate_freeze_readiness", forwarded)
 
     if ns.cmd == "boost":
         if getattr(ns, "boost_cmd", None) == "scan":

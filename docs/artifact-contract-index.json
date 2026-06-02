@@ -208,6 +208,34 @@
       "stability": "advanced"
     },
     {
+      "id": "candidate-freeze-readiness-json",
+      "path": "build/sdetkit/candidate-freeze-readiness.json",
+      "produced_by": "python -m sdetkit candidate-freeze-readiness --repo-fit-json <repo-fit-screen.json> --out build/sdetkit/candidate-freeze-readiness.json --format text",
+      "schema_version": "sdetkit.candidate.freeze.readiness.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "repo",
+        "commit",
+        "repo_fit_schema",
+        "repo_fit",
+        "repo_fit_score",
+        "screen_valid",
+        "promising_screen",
+        "candidate_frozen",
+        "freeze_ready",
+        "readiness_score",
+        "required_evidence",
+        "missing_evidence",
+        "hard_blocks",
+        "recommended_action",
+        "automation_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "repo-fit-screen-json",
       "path": "build/sdetkit/repo-fit-screen.json",
       "produced_by": "python -m sdetkit repo-fit-screen --screen-text <screen.txt> --out build/sdetkit/repo-fit-screen.json --format text",
