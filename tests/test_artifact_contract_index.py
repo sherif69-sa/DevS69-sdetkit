@@ -7,6 +7,7 @@ from sdetkit import (
     adoption_surface,
     check_intelligence,
     doctor,
+    pr_quality_runtime_proof_artifacts,
     protected_verifier,
     replayable_benchmark_harness,
     repo_memory,
@@ -23,6 +24,15 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
     assert payload["schema_version"] == INDEX_SCHEMA_VERSION
 
     entries = {item["id"]: item for item in payload["artifacts"]}
+    assert (
+        entries["pr-quality-runtime-proof-artifacts-json"]["schema_version"]
+        == pr_quality_runtime_proof_artifacts.SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "collected_components",
+        "decision_boundary",
+    }.issubset(set(entries["pr-quality-runtime-proof-artifacts-json"]["required_fields"]))
     assert (
         entries["protected-verifier-result-json"]["schema_version"]
         == protected_verifier.SCHEMA_VERSION
