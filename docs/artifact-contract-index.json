@@ -333,6 +333,32 @@
       "stability": "advanced"
     },
     {
+      "id": "security-findings-inventory-json",
+      "path": "build/sdetkit/security-findings-inventory.json",
+      "produced_by": "python -m sdetkit security-findings-inventory --security-json <security-check.json> --out build/sdetkit/security-findings-inventory.json --format text",
+      "schema_version": "sdetkit.security.inventory.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "source_count",
+        "actual_count",
+        "new_count",
+        "review_count",
+        "by_rule",
+        "by_path",
+        "by_level",
+        "items",
+        "new_items",
+        "recommended_action",
+        "dismiss_allowed",
+        "fix_allowed",
+        "automation_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "security-followup-disposition-json",
       "path": "build/sdetkit/security-followup-disposition.json",
       "produced_by": "python -m sdetkit security-followup-disposition --issues-json <issues.json> --security-json <security-check.json> --out build/sdetkit/security-followup-disposition.json --format text",
