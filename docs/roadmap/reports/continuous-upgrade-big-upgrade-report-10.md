@@ -1,4 +1,4 @@
-# Cycle 10 — Continuous upgrade closeout lane report
+# Cycle 10 — Continuous upgrade completion report lane report
 
 ## Purpose
 Capture the active/public cycle 10 closeout surface with durable cycle-based wording.

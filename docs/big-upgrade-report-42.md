@@ -16,4 +16,4 @@ python -m sdetkit cycle42-optimization-closeout --format json --strict
 
 ## Cycle 43 handoff
 
-Cycle 42 is closed with a production-grade optimization closeout lane that converts Cycle 41 expansion evidence into Cycle 43 acceleration priorities.
+Cycle 42 is closed with a production-grade optimization completion report lane that converts Cycle 41 expansion evidence into Cycle 43 acceleration priorities.

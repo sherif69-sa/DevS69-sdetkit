@@ -2,14 +2,14 @@
 
 ## Objective
 
-Close Cycle 52 with a high-confidence narrative closeout lane that turns Cycle 51 case-snippet outcomes into deterministic Cycle 53 expansion priorities.
+Close Cycle 52 with a high-confidence narrative completion report lane that turns Cycle 51 case-snippet outcomes into deterministic Cycle 53 expansion priorities.
 
 ## Big upgrades delivered
 
 - Added a dedicated Cycle 52 CLI lane: `cycle52-narrative-closeout`.
 - Added strict docs contract checks and delivery board lock gates for narrative quality.
 - Added artifact-pack emission for narrative brief, proof map, KPI scorecard, and execution logs.
-- Added deterministic execution evidence capture for repeatable closeout verification.
+- Added deterministic execution evidence capture for repeatable completion report verification.
 
 ## Commands
 
@@ -22,4 +22,4 @@ python scripts/check_narrative_closeout_contract.py
 
 ## Outcome
 
-Cycle 52 is now a fully-scored, evidence-backed closeout lane with strict continuity to Cycle 51 and deterministic handoff into Cycle 53 expansion execution.
+Cycle 52 is now a fully-scored, evidence-backed completion report lane with strict continuity to Cycle 51 and deterministic handoff into Cycle 53 expansion execution.

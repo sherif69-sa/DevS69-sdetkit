@@ -1,4 +1,4 @@
-# Cycle 29 ultra upgrade report — phase-1 hardening closeout
+# Cycle 29 ultra upgrade report — phase-1 hardening completion report
 
 ## What shipped
 

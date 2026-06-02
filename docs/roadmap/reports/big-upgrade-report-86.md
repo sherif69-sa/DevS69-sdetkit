@@ -3,8 +3,8 @@
 ## What shipped
 
 - Added `cycle86-launch-readiness-closeout` command to score Cycle 86 readiness from Cycle 85 release prioritization handoff artifacts.
-- Added deterministic pack emission and execution evidence generation for launch readiness closeout proof.
-- Added strict contract validation script and tests that enforce Cycle 86 closeout quality gates and handoff integrity.
+- Added deterministic pack emission and execution evidence generation for launch readiness completion report proof.
+- Added strict contract validation script and tests that enforce Cycle 86 completion report quality gates and handoff integrity.
 
 ## Command lane
 

@@ -9,7 +9,7 @@ Close Cycle 56 with a high-confidence stabilization lane that converts Cycle 55 
 - Added a dedicated Cycle 56 CLI lane: `cycle56-stabilization-closeout`.
 - Added strict stabilization contract checks and discoverability checks.
 - Added artifact-pack emission for stabilization brief, risk ledger, KPI scorecard, and execution logs.
-- Added deterministic execution evidence capture for repeatable closeout verification.
+- Added deterministic execution evidence capture for repeatable completion report verification.
 
 ## Commands
 
@@ -22,4 +22,4 @@ python scripts/check_stabilization_closeout_contract.py
 
 ## Outcome
 
-Cycle 56 is now an evidence-backed closeout lane with strict continuity to Cycle 55 and deterministic handoff into Cycle 57 deep audit prioritization.
+Cycle 56 is now an evidence-backed completion report lane with strict continuity to Cycle 55 and deterministic handoff into Cycle 57 deep audit prioritization.

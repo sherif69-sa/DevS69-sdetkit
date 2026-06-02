@@ -9,7 +9,7 @@ Cycle 21 ships **weekly review #3** so teams can objectively track conversion im
 - Extended `sdetkit weekly-review` to support `--week 3` (Cycle 15-20 shipped window).
 - Added Cycle 21 growth-signal sample input for deterministic week-over-week deltas.
 - Added Cycle 20/21 documentation entries in README and docs index.
-- Added tests covering week-3 KPI behavior, growth-delta computation, and week-3 emitted closeout pack output.
+- Added tests covering week-3 KPI behavior, growth-delta computation, and week-3 emitted completion report pack output.
 
 ## Validation commands
 

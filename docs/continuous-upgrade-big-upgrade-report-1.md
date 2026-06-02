@@ -4,7 +4,7 @@
 
 - Added `continuous-upgrade-closeout-1` command to score Cycle 1 readiness from Cycle 90 publication artifacts.
 - Added deterministic pack emission and execution evidence generation for continuous upgrade proof.
-- Added strict contract validation script and tests that enforce Cycle 1 closeout quality gates.
+- Added strict contract validation script and tests that enforce Cycle 1 completion report quality gates.
 
 ## Command lane
 

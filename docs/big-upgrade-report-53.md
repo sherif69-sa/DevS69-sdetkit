@@ -9,7 +9,7 @@ Close Cycle 53 with a high-confidence docs-loop optimization lane that turns Cyc
 - Added a dedicated Cycle 53 CLI lane: `cycle53-docs-loop-closeout`.
 - Added strict docs-loop contract checks for cross-links between demos, playbooks, and CLI docs.
 - Added artifact-pack emission for docs-loop brief, cross-link map, KPI scorecard, and execution logs.
-- Added deterministic execution evidence capture for repeatable closeout verification.
+- Added deterministic execution evidence capture for repeatable completion report verification.
 
 ## Commands
 
@@ -22,4 +22,4 @@ python scripts/check_docs_loop_closeout_contract.py
 
 ## Outcome
 
-Cycle 53 is now a fully-scored, evidence-backed closeout lane with strict continuity to Cycle 52 and deterministic handoff into Cycle 54 re-engagement execution.
+Cycle 53 is now a fully-scored, evidence-backed completion report lane with strict continuity to Cycle 52 and deterministic handoff into Cycle 54 re-engagement execution.

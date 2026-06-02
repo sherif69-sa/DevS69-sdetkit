@@ -22,4 +22,4 @@ python scripts/check_contributor_recognition_closeout_contract.py
 
 ### Outcome
 
-Cycle 76 is now an evidence-backed contributor recognition closeout lane with strict continuity to Cycle 75 and deterministic handoff into Cycle 77 scale priorities.
+Cycle 76 is now an evidence-backed contributor recognition completion report lane with strict continuity to Cycle 75 and deterministic handoff into Cycle 77 scale priorities.

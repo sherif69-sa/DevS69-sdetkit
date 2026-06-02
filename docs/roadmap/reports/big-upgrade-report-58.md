@@ -23,4 +23,4 @@ python scripts/check_phase2_hardening_closeout_contract_58.py
 
 ## Closeout
 
-Cycle 58 is now an evidence-backed closeout lane with strict continuity to Cycle 57 and deterministic handoff into Cycle 59 pre-plan execution.
+Cycle 58 is now an evidence-backed completion report lane with strict continuity to Cycle 57 and deterministic handoff into Cycle 59 pre-plan execution.

@@ -23,4 +23,4 @@ python scripts/check_case_study_launch_closeout_contract.py
 
 ## Outcome
 
-Cycle 73 is now an evidence-backed case-study launch closeout lane with strict continuity to Cycle 72 and deterministic handoff into Cycle 74 distribution scaling.
+Cycle 73 is now an evidence-backed case-study launch completion report lane with strict continuity to Cycle 72 and deterministic handoff into Cycle 74 distribution scaling.

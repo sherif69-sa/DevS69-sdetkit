@@ -2,13 +2,13 @@
 
 ## Upgrade title
 
-**Cycle 14 big upgrade: week-two closeout engine with growth signals, week-over-week deltas, strict policy mode, and emitted blocker-remediation operating pack.**
+**Cycle 14 big upgrade: week-two completion report engine with growth signals, week-over-week deltas, strict policy mode, and emitted blocker-remediation operating pack.**
 
 ## Problem statement
 
 Week-two delivery (Cycles 8-13) was shippable, but maintainers still needed manual reporting for growth and blocker outcomes.
 
-The previous Cycle 14 implementation only mirrored week-one coverage and did not enforce growth-signal completeness or produce structured closeout artifacts for handoff.
+The previous Cycle 14 implementation only mirrored week-one coverage and did not enforce growth-signal completeness or produce structured completion report artifacts for handoff.
 
 ## Implementation scope
 
@@ -24,9 +24,9 @@ The previous Cycle 14 implementation only mirrored week-one coverage and did not
 - `docs/cli.md`
   - Updated `weekly-review` command examples and flags with Cycle 14 growth-signal and pack workflows.
 - `README.md`
-  - Upgraded Cycle 14 section with signal files, strict closeout run, and pack-generation command.
+  - Upgraded Cycle 14 section with signal files, strict completion report run, and pack-generation command.
 - `docs/index.md`
-  - Added Cycle 14 signal-driven command examples and links to closeout artifacts.
+  - Added Cycle 14 signal-driven command examples and links to completion report artifacts.
 - `scripts/check_weekly_review_artifact_contract.py`
   - Hardened Cycle 14 contract checks to include growth-signal and pack-file expectations.
 - `docs/artifacts/cycle14-growth-signals.json`
@@ -34,7 +34,7 @@ The previous Cycle 14 implementation only mirrored week-one coverage and did not
 - `docs/artifacts/cycle7-growth-signals.json`
   - Added baseline week-one growth signals for delta calculations.
 - `docs/artifacts/cycle14-weekly-pack/*`
-  - Added emitted Cycle 14 closeout operating pack files.
+  - Added emitted Cycle 14 completion report operating pack files.
 
 ## Validation checklist
 
@@ -46,7 +46,7 @@ The previous Cycle 14 implementation only mirrored week-one coverage and did not
 
 ## Artifact
 
-This document is the Cycle 14 closeout report for weekly review #2 with growth deltas and blocker-remediation pack outputs.
+This document is the Cycle 14 completion report for weekly review #2 with growth deltas and blocker-remediation pack outputs.
 
 ## Rollback plan
 

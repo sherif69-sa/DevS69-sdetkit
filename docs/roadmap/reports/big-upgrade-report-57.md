@@ -9,7 +9,7 @@ Close Cycle 57 with a high-confidence KPI deep-audit lane that converts Cycle 56
 - Added a dedicated Cycle 57 CLI lane: `cycle57-kpi-deep-audit-closeout`.
 - Added strict KPI deep-audit contract checks and discoverability checks.
 - Added artifact-pack emission for audit brief, risk ledger, KPI scorecard, and execution logs.
-- Added deterministic execution evidence capture for repeatable closeout verification.
+- Added deterministic execution evidence capture for repeatable completion report verification.
 
 ## Commands
 
@@ -22,4 +22,4 @@ python scripts/check_kpi_deep_audit_closeout_contract.py
 
 ## Outcome
 
-Cycle 57 is now an evidence-backed closeout lane with strict continuity to Cycle 56 and deterministic handoff into Cycle 58 execution planning.
+Cycle 57 is now an evidence-backed completion report lane with strict continuity to Cycle 56 and deterministic handoff into Cycle 58 execution planning.

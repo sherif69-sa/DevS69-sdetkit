@@ -8,7 +8,7 @@ Cycle 22 ships a deterministic **trust signal upgrade lane** so maintainers can 
 
 - Upgraded `sdetkit trust-assets` to a weighted trust matrix: badge visibility, policy-doc/link discoverability, and workflow/docs-index governance checks.
 - Added Cycle 22 integration doc + contract checks for required sections, commands, and generated artifacts.
-- Expanded Cycle 22 closeout pack outputs with trust action-plan guidance in addition to summary, scorecard, checklist, validation commands, and execution evidence.
+- Expanded Cycle 22 completion report pack outputs with trust action-plan guidance in addition to summary, scorecard, checklist, validation commands, and execution evidence.
 - Added README/docs index/CLI references and tests for command dispatch/help coverage.
 
 ## Validation commands

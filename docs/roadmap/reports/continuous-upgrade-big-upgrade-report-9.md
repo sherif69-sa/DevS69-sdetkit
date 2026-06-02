@@ -1,4 +1,4 @@
-# Cycle 9 — Continuous upgrade closeout lane report
+# Cycle 9 — Continuous upgrade completion report lane report
 
 ## Purpose
 Capture the active/public cycle 9 closeout surface with durable cycle-based wording.

@@ -22,4 +22,4 @@ python scripts/check_weekly_review_workflow_contract.py
 
 ## Outcome
 
-Cycle 65 is now an evidence-backed weekly review closeout lane with strict continuity to Cycle 64 and deterministic handoff into Cycle 66 integration expansion #2.
+Cycle 65 is now an evidence-backed weekly review completion report lane with strict continuity to Cycle 64 and deterministic handoff into Cycle 66 integration expansion #2.

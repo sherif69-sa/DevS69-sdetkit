@@ -3,8 +3,8 @@
 ## What shipped
 
 - Added `governance-priorities-closeout` command to score Cycle 88 readiness from Cycle 87 governance handoff artifacts.
-- Added deterministic pack emission and execution evidence generation for governance priorities closeout proof.
-- Added strict contract validation script and tests that enforce Cycle 88 closeout quality gates and handoff integrity.
+- Added deterministic pack emission and execution evidence generation for governance priorities completion report proof.
+- Added strict contract validation script and tests that enforce Cycle 88 completion report quality gates and handoff integrity.
 
 ## Command lane
 

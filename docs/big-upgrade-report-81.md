@@ -5,5 +5,5 @@ Cycle 81 closes growth campaign execution by converting Cycle 80 partner-outreac
 ## Delivered upgrades
 
 - Added a strict Cycle 81 growth campaign CLI lane with scoring, pack emission, and evidence execution hooks.
-- Added contract validation script and test coverage for strict closeout checks.
+- Added contract validation script and test coverage for strict completion report checks.
 - Added docs navigation and strategy continuity references for Cycle 81 execution.

@@ -1,4 +1,4 @@
-# Cycle 24 ultra upgrade report — onboarding time-to-first-success closeout
+# Cycle 24 ultra upgrade report — onboarding time-to-first-success completion report
 
 ## What shipped
 

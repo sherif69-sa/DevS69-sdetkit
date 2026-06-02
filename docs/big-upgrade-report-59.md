@@ -23,4 +23,4 @@ python scripts/check_phase3_preplan_closeout_contract_59.py
 
 ## Closeout
 
-Cycle 59 is now an evidence-backed closeout lane with strict continuity to Cycle 58 and deterministic handoff into Cycle 60 execution planning.
+Cycle 59 is now an evidence-backed completion report lane with strict continuity to Cycle 58 and deterministic handoff into Cycle 60 execution planning.

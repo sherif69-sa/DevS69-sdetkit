@@ -22,4 +22,4 @@ python scripts/check_distribution_scaling_closeout_contract.py
 
 ### Outcome
 
-Cycle 74 is now an evidence-backed distribution scaling closeout lane with strict continuity to Cycle 73 and deterministic handoff into Cycle 75 trust refresh.
+Cycle 74 is now an evidence-backed distribution scaling completion report lane with strict continuity to Cycle 73 and deterministic handoff into Cycle 75 trust refresh.

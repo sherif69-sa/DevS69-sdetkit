@@ -9,7 +9,7 @@ Close Cycle 55 with a high-confidence contributor activation lane that converts 
 - Added a dedicated Cycle 55 CLI lane: `cycle55-contributor-activation-closeout`.
 - Added strict contributor-activation contract checks and discoverability checks.
 - Added artifact-pack emission for contributor brief, contributor ladder, KPI scorecard, and execution logs.
-- Added deterministic execution evidence capture for repeatable closeout verification.
+- Added deterministic execution evidence capture for repeatable completion report verification.
 
 ## Commands
 
@@ -22,4 +22,4 @@ python scripts/check_contributor_activation_closeout_contract.py
 
 ## Outcome
 
-Cycle 55 is now an evidence-backed closeout lane with strict continuity to Cycle 53 and deterministic handoff into Cycle 56 prioritization.
+Cycle 55 is now an evidence-backed completion report lane with strict continuity to Cycle 53 and deterministic handoff into Cycle 56 prioritization.

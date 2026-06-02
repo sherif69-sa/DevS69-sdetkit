@@ -23,7 +23,7 @@ For Cycle 4, operators needed a single command that executes all built-in skills
 - `docs/cli.md`
   - Added `templates run-all` command reference.
 - `README.md`
-  - Added Cycle 4 ultra section for skills expansion and closeout checks.
+  - Added Cycle 4 ultra section for skills expansion and completion report checks.
 - `docs/index.md`
   - Added Cycle 4 ultra docs entry and quick-jump link.
 - `docs/artifacts/cycle4-skills-sample.md`
