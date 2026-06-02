@@ -3,7 +3,15 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from . import adoption_surface, check_intelligence, doctor, review
+from . import (
+    adoption_surface,
+    check_intelligence,
+    doctor,
+    repo_memory,
+    review,
+    safe_fix_history_memory,
+    trajectory_store,
+)
 from .checks import artifacts as check_artifacts
 
 INDEX_SCHEMA_VERSION = "sdetkit.artifact-contract-index.v1"
@@ -28,6 +36,61 @@ def build_index() -> dict[str, Any]:
                 "schema_version": None,
                 "required_fields": ["ok", "failed_steps", "profile"],
                 "stability": "public",
+            },
+            {
+                "id": "trajectory-jsonl",
+                "path": trajectory_store.DEFAULT_OUT,
+                "produced_by": "python -m sdetkit.trajectory_store --diagnostic-vector <diagnostic-vector.json> --remediation-plan <remediation-plan.json> --out build/sdetkit/trajectory.jsonl --format json",
+                "schema_version": trajectory_store.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "trajectory_id",
+                    "environment",
+                    "diagnosis",
+                    "decision",
+                    "response",
+                    "fix",
+                    "final_result",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "repo-memory-profile-json",
+                "path": (repo_memory.DEFAULT_OUT_DIR / repo_memory.PROFILE_JSON).as_posix(),
+                "produced_by": "python -m sdetkit.repo_memory --out-dir build/repo-memory --format json",
+                "schema_version": repo_memory.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "profile_status",
+                    "memory_mode",
+                    "inputs",
+                    "safe_fix_history",
+                    "known_safe_candidate_count",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "safe-fix-history-json",
+                "path": f"{safe_fix_history_memory.DEFAULT_OUT_DIR}/{safe_fix_history_memory.HISTORY_JSON}",
+                "produced_by": "python -m sdetkit.safe_fix_history_memory --out-dir build/operator-loop/safe-fix-history",
+                "schema_version": safe_fix_history_memory.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "attempts",
+                    "metrics",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "safe-fix-trends-json",
+                "path": f"{safe_fix_history_memory.DEFAULT_OUT_DIR}/{safe_fix_history_memory.TRENDS_JSON}",
+                "produced_by": "python -m sdetkit.safe_fix_history_memory --out-dir build/operator-loop/safe-fix-history",
+                "schema_version": safe_fix_history_memory.TRENDS_SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "metrics",
+                ],
+                "stability": "advanced",
             },
             {
                 "id": "check-intelligence-json",
