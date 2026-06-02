@@ -683,6 +683,16 @@ Then use stability-aware command discovery:
     adoption_surface.add_argument("--out", default="build/sdetkit/adoption-surface.json")
     adoption_surface.add_argument("--format", choices=["json", "text"], default="json")
 
+    issue_queue_classifier = sub.add_parser(
+        "issue-queue-classifier",
+        help="[Advanced but supported] Classify issue queue snapshots without mutation",
+    )
+    issue_queue_classifier.add_argument("--issues-json", required=True)
+    issue_queue_classifier.add_argument(
+        "--out", default="build/sdetkit/issue-queue-classifier.json"
+    )
+    issue_queue_classifier.add_argument("--format", choices=["json", "text"], default="json")
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -1250,6 +1260,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.format),
         ]
         return _run_module_main("sdetkit.adoption_surface", forwarded)
+
+    if ns.cmd == "issue-queue-classifier":
+        forwarded = [
+            "--issues-json",
+            str(ns.issues_json),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        return _run_module_main("sdetkit.issue_queue_classifier", forwarded)
 
     if ns.cmd == "boost":
         if getattr(ns, "boost_cmd", None) == "scan":
