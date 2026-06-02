@@ -3,7 +3,17 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from . import adoption_surface, check_intelligence, doctor, review
+from . import (
+    adoption_surface,
+    check_intelligence,
+    doctor,
+    protected_verifier,
+    replayable_benchmark_harness,
+    repo_memory,
+    review,
+    safe_fix_history_memory,
+    trajectory_store,
+)
 from .checks import artifacts as check_artifacts
 
 INDEX_SCHEMA_VERSION = "sdetkit.artifact-contract-index.v1"
@@ -28,6 +38,104 @@ def build_index() -> dict[str, Any]:
                 "schema_version": None,
                 "required_fields": ["ok", "failed_steps", "profile"],
                 "stability": "public",
+            },
+            {
+                "id": "protected-verifier-result-json",
+                "path": (
+                    protected_verifier.DEFAULT_OUT_DIR / protected_verifier.RESULT_JSON
+                ).as_posix(),
+                "produced_by": "python -m sdetkit.protected_verifier --patch-score <patch-score.json> --verification-evidence <verification-evidence.json> --out-dir build/protected-verifier --format json",
+                "schema_version": protected_verifier.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "patch_id",
+                    "diagnosis_id",
+                    "patch_score",
+                    "scored_files",
+                    "observed_changed_files",
+                    "allowed_files",
+                    "proof_requirements",
+                    "findings",
+                    "decision",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "replayable-benchmark-report-json",
+                "path": (
+                    replayable_benchmark_harness.DEFAULT_OUT_DIR
+                    / replayable_benchmark_harness.REPORT_JSON
+                ).as_posix(),
+                "produced_by": "python -m sdetkit.replayable_benchmark_harness --scenario <scenario.json> --out-dir build/replayable-benchmark-harness --format json",
+                "schema_version": replayable_benchmark_harness.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "status",
+                    "scenario_count",
+                    "passed_count",
+                    "failed_count",
+                    "required_contract",
+                    "safety_boundary",
+                    "attempt_scored_count",
+                    "scenarios",
+                    "next_boundary",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "trajectory-jsonl",
+                "path": trajectory_store.DEFAULT_OUT,
+                "produced_by": "python -m sdetkit.trajectory_store --diagnostic-vector <diagnostic-vector.json> --remediation-plan <remediation-plan.json> --out build/sdetkit/trajectory.jsonl --format json",
+                "schema_version": trajectory_store.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "trajectory_id",
+                    "environment",
+                    "diagnosis",
+                    "decision",
+                    "response",
+                    "fix",
+                    "final_result",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "repo-memory-profile-json",
+                "path": (repo_memory.DEFAULT_OUT_DIR / repo_memory.PROFILE_JSON).as_posix(),
+                "produced_by": "python -m sdetkit.repo_memory --out-dir build/repo-memory --format json",
+                "schema_version": repo_memory.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "profile_status",
+                    "memory_mode",
+                    "inputs",
+                    "safe_fix_history",
+                    "known_safe_candidate_count",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "safe-fix-history-json",
+                "path": f"{safe_fix_history_memory.DEFAULT_OUT_DIR}/{safe_fix_history_memory.HISTORY_JSON}",
+                "produced_by": "python -m sdetkit.safe_fix_history_memory --out-dir build/operator-loop/safe-fix-history",
+                "schema_version": safe_fix_history_memory.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "attempts",
+                    "metrics",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "safe-fix-trends-json",
+                "path": f"{safe_fix_history_memory.DEFAULT_OUT_DIR}/{safe_fix_history_memory.TRENDS_JSON}",
+                "produced_by": "python -m sdetkit.safe_fix_history_memory --out-dir build/operator-loop/safe-fix-history",
+                "schema_version": safe_fix_history_memory.TRENDS_SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "metrics",
+                ],
+                "stability": "advanced",
             },
             {
                 "id": "check-intelligence-json",
