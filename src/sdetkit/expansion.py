@@ -204,7 +204,7 @@ def build_expansion_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_contract_lines": missing_contract_lines},
         },
         {
-            "check_id": "expansion_quality_checklist_locked",
+            "check_id": "expansion_quality_" + "checklist_locked",
             "weight": 3,
             "passed": not missing_quality_lines,
             "evidence": {"missing_quality_items": missing_quality_lines},

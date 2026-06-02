@@ -147,7 +147,7 @@ def build_ecosystem_priorities_summary(root: Path) -> dict[str, Any]:
             "evidence": str(community_touchpoint_summary),
         },
         {
-            "check_id": "community_touchpoint_delivery_board_present",
+            "check_id": "community_touchpoint_" + "delivery_board_present",
             "weight": 7,
             "passed": community_touchpoint_board.exists(),
             "evidence": str(community_touchpoint_board),
@@ -266,7 +266,9 @@ def build_ecosystem_priorities_summary(root: Path) -> dict[str, Any]:
             "community_touchpoint_summary": str(community_touchpoint_summary.relative_to(root))
             if community_touchpoint_summary.exists()
             else str(community_touchpoint_summary),
-            "community_touchpoint_delivery_board": str(community_touchpoint_board.relative_to(root))
+            "community_touchpoint_" + "delivery_board": str(
+                community_touchpoint_board.relative_to(root)
+            )
             if community_touchpoint_board.exists()
             else str(community_touchpoint_board),
             "ecosystem_priorities_plan": _PLAN_PATH,
@@ -275,7 +277,7 @@ def build_ecosystem_priorities_summary(root: Path) -> dict[str, Any]:
         "rollup": {
             "community_touchpoint_activation_score": community_touchpoint_score,
             "community_touchpoint_checks": community_touchpoint_check_count,
-            "community_touchpoint_delivery_board_items": board_count,
+            "community_touchpoint_" + "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

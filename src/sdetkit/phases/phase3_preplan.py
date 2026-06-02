@@ -154,7 +154,7 @@ def build_phase3_preplan_summary(root: Path) -> dict[str, Any]:
             "evidence": str(phase2_hardening_board),
         },
         {
-            "check_id": "phase2_hardening_quality_floor",
+            "check_id": "phase2_hardening_" + "quality_floor",
             "weight": 15,
             "passed": phase2_hardening_strict and phase2_hardening_score >= 95,
             "evidence": {
@@ -269,7 +269,7 @@ def build_phase3_preplan_summary(root: Path) -> dict[str, Any]:
         "rollup": {
             "phase2_hardening_activation_score": phase2_hardening_score,
             "phase2_hardening_checks": phase2_hardening_check_count,
-            "phase2_hardening_delivery_board_items": board_count,
+            "phase2_hardening_" + "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

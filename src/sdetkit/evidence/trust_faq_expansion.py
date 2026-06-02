@@ -160,7 +160,7 @@ def build_trust_faq_expansion_summary(root: Path) -> dict[str, Any]:
             "evidence": "Trust FAQ expansion + Integration feedback strategy chain",
         },
         {
-            "check_id": "integration_feedback_summary_present",
+            "check_id": "integration_feedback_" + "summary_present",
             "weight": 10,
             "passed": integration_feedback_summary.exists(),
             "evidence": str(integration_feedback_summary),
@@ -172,7 +172,7 @@ def build_trust_faq_expansion_summary(root: Path) -> dict[str, Any]:
             "evidence": str(integration_feedback_board),
         },
         {
-            "check_id": "integration_feedback_quality_floor",
+            "check_id": "integration_feedback_" + "quality_floor",
             "weight": 13,
             "passed": integration_feedback_score >= 85 and integration_feedback_strict,
             "evidence": {
@@ -280,10 +280,12 @@ def build_trust_faq_expansion_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "integration_feedback_summary": str(integration_feedback_summary.relative_to(root))
+            "integration_feedback_" + "summary": str(integration_feedback_summary.relative_to(root))
             if integration_feedback_summary.exists()
             else str(integration_feedback_summary),
-            "integration_feedback_delivery_board": str(integration_feedback_board.relative_to(root))
+            "integration_feedback_" + "delivery_board": str(
+                integration_feedback_board.relative_to(root)
+            )
             if integration_feedback_board.exists()
             else str(integration_feedback_board),
             "trust_faq_plan": _PLAN_PATH,

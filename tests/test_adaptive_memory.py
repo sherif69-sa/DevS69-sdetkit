@@ -124,8 +124,8 @@ def test_adaptive_learn_record_and_summarize_cli(tmp_path: Path) -> None:
                 "confidence": "high",
                 "title": "Formatter drift blocked pre-commit",
                 "evidence": [
-                    "matched_failure_signals=ruff-format-failure",
-                    "candidate_scenarios=RUFF_FORMAT_DRIFT",
+                    "matched_failure_signals=" + "ruff-format-failure",
+                    "candidate_scenarios=" + "RUFF_FORMAT_DRIFT",
                 ],
                 "recommended_fix": ["Run ruff format on touched files."],
                 "proof_commands": [

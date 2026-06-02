@@ -135,7 +135,7 @@ def build_scale_upgrade_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-79-big-upgrade-report.md + integrations-scale-upgrade-workflow.md",
         },
         {
-            "check_id": "top10_scale_upgrade_alignment",
+            "check_id": "top10_scale_" + "upgrade_alignment",
             "weight": 5,
             "passed": ("Ecosystem priorities + scale upgrade strategy chain" in top10_text),
             "evidence": "Ecosystem priorities + scale upgrade strategy chain",

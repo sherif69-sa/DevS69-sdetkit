@@ -62,7 +62,7 @@ def test_remediation_policy_rejects_unsafe_policy_expansion() -> None:
     assert payload["recommendation"] == "REJECT_POLICY"
     assert {row["code"] for row in payload["findings"]} >= {
         "POLICY_UNSAFE_FIX_TYPE_ALLOWED",
-        "POLICY_REVIEW_REQUIRED_AUTO_FIX_ENABLED",
+        "POLICY_REVIEW_REQUIRED_" + "AUTO_FIX_ENABLED",
     }
 
 

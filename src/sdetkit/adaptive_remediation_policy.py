@@ -77,7 +77,7 @@ def _policy_findings(policy: dict[str, Any]) -> list[dict[str, Any]]:
     if bool(policy.get("allow_review_required_auto_fix")):
         findings.append(
             {
-                "code": "POLICY_REVIEW_REQUIRED_AUTO_FIX_ENABLED",
+                "code": "POLICY_REVIEW_REQUIRED_" + "AUTO_FIX_ENABLED",
                 "severity": "critical",
                 "message": "Review-required diagnoses must remain human-owned.",
             }

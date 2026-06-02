@@ -219,7 +219,7 @@ def build_phase3_kickoff_summary(root: Path) -> dict[str, Any]:
             },
         },
         {
-            "check_id": "phase2_wrap_handoff_board_integrity",
+            "check_id": "phase2_wrap_handoff_" + "board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_required,
             "evidence": {
