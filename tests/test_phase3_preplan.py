@@ -21,20 +21,20 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase3-preplan-workflow.md\nplatform-readiness-preplan-completion-report\n",
+        "docs/integrations-platform-readiness-preplan-workflow.md\nplatform-readiness-preplan-completion-report\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "impact-59-big-upgrade-report.md\nintegrations-phase3-preplan-workflow.md\n",
+        "impact-59-big-upgrade-report.md\nintegrations-platform-readiness-preplan-workflow.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- ** — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.\n"
-        "- ** — Phase-2 wrap + handoff:** publish full Phase-2 report and lock Phase-3 execution board.\n",
+        "- ** — platform readiness preplan:** convert Release readiness learnings into Platform readiness priorities.\n"
+        "- ** — release readiness wrap handoff:** publish full Release readiness report and lock Platform readiness execution board.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-phase3-preplan-workflow.md").write_text(
+    (root / "docs/integrations-platform-readiness-preplan-workflow.md").write_text(
         d59._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-59-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
@@ -56,13 +56,13 @@ def _seed_repo(root: Path) -> None:
     )
     board = (
         root
-        / "docs/artifacts/release-readiness-hardening-completion-report-pack/phase2-hardening-delivery-board.md"
+        / "docs/artifacts/release-readiness-hardening-completion-report-pack/release-readiness-hardening-delivery-board.md"
     )
     board.write_text(
         "\n".join(
             [
                 "#  delivery board",
-                "- [ ]  Phase-2 hardening brief committed",
+                "- [ ]  release readiness hardening brief committed",
                 "- [ ]  hardening plan reviewed with owner + backup",
                 "- [ ]  risk ledger exported",
                 "- [ ]  KPI scorecard snapshot exported",
@@ -112,31 +112,31 @@ def test_phase3_preplan_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-brief.md"
+        / "artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-brief.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-risk-ledger.csv"
+        / "artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-risk-ledger.csv"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-kpi-scorecard.json"
+        / "artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-kpi-scorecard.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-execution-log.md"
+        / "artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-execution-log.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-delivery-board.md"
+        / "artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-delivery-board.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-validation-commands.md"
+        / "artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-validation-commands.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-preplan-completion-report-pack/evidence/phase3-preplan-execution-summary.json"
+        / "artifacts/platform-readiness-preplan-completion-report-pack/evidence/platform-readiness-preplan-execution-summary.json"
     ).exists()
 
 

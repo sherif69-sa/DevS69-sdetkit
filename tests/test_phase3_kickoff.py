@@ -21,20 +21,20 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase3-kickoff-workflow.md\nplatform-readiness-kickoff-completion-report\n",
+        "docs/integrations-platform-readiness-kickoff-workflow.md\nplatform-readiness-kickoff-completion-report\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "impact-61-big-upgrade-report.md\nintegrations-phase3-kickoff-workflow.md\n",
+        "impact-61-big-upgrade-report.md\nintegrations-platform-readiness-kickoff-workflow.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- ** — Phase-3 kickoff:** set Phase-3 baseline and define ecosystem/trust KPIs.\n"
+        "- ** — platform readiness kickoff:** set Platform readiness baseline and define ecosystem/trust KPIs.\n"
         "- ** — Community program setup:** publish office-hours cadence and participation rules.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-phase3-kickoff-workflow.md").write_text(
+    (root / "docs/integrations-platform-readiness-kickoff-workflow.md").write_text(
         d61._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-61-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
@@ -56,13 +56,13 @@ def _seed_repo(root: Path) -> None:
     )
     board = (
         root
-        / "docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-delivery-board.md"
+        / "docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-delivery-board.md"
     )
     board.write_text(
         "\n".join(
             [
                 "#  delivery board",
-                "- [ ]  Phase-2 wrap + handoff brief committed",
+                "- [ ]  release readiness wrap handoff brief committed",
                 "- [ ]  wrap reviewed with owner + backup",
                 "- [ ]  risk ledger exported",
                 "- [ ]  KPI scorecard snapshot exported",
@@ -112,31 +112,31 @@ def test_phase3_kickoff_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-kickoff-completion-report-pack/phase3-kickoff-brief.md"
+        / "artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-brief.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-kickoff-completion-report-pack/phase3-kickoff-trust-ledger.csv"
+        / "artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-trust-ledger.csv"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-kickoff-completion-report-pack/phase3-kickoff-kpi-scorecard.json"
+        / "artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-kpi-scorecard.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-kickoff-completion-report-pack/phase3-kickoff-execution-log.md"
+        / "artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-execution-log.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-kickoff-completion-report-pack/phase3-kickoff-delivery-board.md"
+        / "artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-delivery-board.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-kickoff-completion-report-pack/phase3-kickoff-validation-commands.md"
+        / "artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-validation-commands.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/platform-readiness-kickoff-completion-report-pack/evidence/phase3-kickoff-execution-summary.json"
+        / "artifacts/platform-readiness-kickoff-completion-report-pack/evidence/platform-readiness-kickoff-execution-summary.json"
     ).exists()
 
 

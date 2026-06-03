@@ -10,17 +10,17 @@ from typing import Any
 
 from .bools import coerce_bool
 
-_PAGE_PATH = "docs/integrations-phase3-kickoff-workflow.md"
+_PAGE_PATH = "docs/integrations-platform-readiness-kickoff-workflow.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _PHASE2_WRAP_HANDOFF_CLOSEOUT_SUMMARY_PATH = "docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-completion-report-summary.json"
-_PHASE2_WRAP_HANDOFF_CLOSEOUT_BOARD_PATH = "docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-delivery-board.md"
-_SECTION_HEADER = "# \u2014 Phase-3 kickoff execution closeout lane"
+_PHASE2_WRAP_HANDOFF_CLOSEOUT_BOARD_PATH = "docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-delivery-board.md"
+_SECTION_HEADER = "# \u2014 platform readiness kickoff execution closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Phase3 Kickoff Closeout matters",
     "## Required inputs (handoff artifacts)",
     "## Phase3 Kickoff Closeout command lane",
-    "## Phase-3 kickoff execution contract",
-    "## Phase-3 kickoff quality checklist",
+    "## platform readiness kickoff execution contract",
+    "## platform readiness kickoff quality checklist",
     "## Phase3 Kickoff Closeout delivery board",
     "## Scoring model",
 ]
@@ -36,10 +36,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_phase3_kickoff_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Phase-3 kickoff execution and trust-signal triage.",
-    "The lane references Phase-2 wrap outcomes, risks, and KPI continuity evidence.",
+    "Single owner + backup reviewer are assigned for platform readiness kickoff execution and trust-signal triage.",
+    "The lane references Release readiness wrap outcomes, risks, and KPI continuity evidence.",
     "Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "closeout records Phase-3 baseline activation, trust KPI owners, and community program priorities.",
+    "closeout records Platform readiness baseline activation, trust KPI owners, and community program priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline snapshot, owner map, KPI guardrails, and rollback strategy",
@@ -49,27 +49,27 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes kickoff brief, trust ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Phase-3 kickoff brief committed",
+    "- [ ] platform readiness kickoff brief committed",
     "- [ ] kickoff reviewed with owner + backup",
     "- [ ] trust ledger exported",
     "- [ ] KPI scorecard snapshot exported",
     "- [ ] community program priorities drafted from learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# \u2014 Phase-3 kickoff execution closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# \u2014 platform readiness kickoff execution closeout lane
 
-ships a major Phase-3 kickoff upgrade that converts wrap evidence into a strict baseline for ecosystem + trust execution.
+ships a major platform readiness kickoff upgrade that converts wrap evidence into a strict baseline for ecosystem + trust execution.
 
 ## Why Phase3 Kickoff Closeout matters
 
-- Converts closeout evidence into repeatable Phase-3 execution loops.
+- Converts closeout evidence into repeatable Platform readiness execution loops.
 - Protects trust outcomes with ownership, command proof, and KPI rollback guardrails.
 - Produces a deterministic handoff from kickoff into community program setup.
 
 ## Required inputs (handoff artifacts)
 
 - `docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-completion-report-summary.json`
-- `docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-delivery-board.md`
+- `docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-delivery-board.md`
 
 ## Phase3 Kickoff Closeout command lane
 
@@ -80,14 +80,14 @@ python -m sdetkit platform-readiness-kickoff-completion-report --execute --evide
 python scripts/check_phase3_kickoff_contract.py
 ```
 
-## Phase-3 kickoff execution contract
+## platform readiness kickoff execution contract
 
-- Single owner + backup reviewer are assigned for Phase-3 kickoff execution and trust-signal triage.
-- The lane references Phase-2 wrap outcomes, risks, and KPI continuity evidence.
+- Single owner + backup reviewer are assigned for platform readiness kickoff execution and trust-signal triage.
+- The lane references Release readiness wrap outcomes, risks, and KPI continuity evidence.
 - Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- closeout records Phase-3 baseline activation, trust KPI owners, and community program priorities.
+- closeout records Platform readiness baseline activation, trust KPI owners, and community program priorities.
 
-## Phase-3 kickoff quality checklist
+## platform readiness kickoff quality checklist
 
 - [ ] Includes baseline snapshot, owner map, KPI guardrails, and rollback strategy
 - [ ] Every section has owner, review window, KPI threshold, and risk flag
@@ -97,7 +97,7 @@ python scripts/check_phase3_kickoff_contract.py
 
 ## Phase3 Kickoff Closeout delivery board
 
-- [ ] Phase-3 kickoff brief committed
+- [ ] platform readiness kickoff brief committed
 - [ ] kickoff reviewed with owner + backup
 - [ ] trust ledger exported
 - [ ] KPI scorecard snapshot exported
@@ -110,7 +110,7 @@ weighted score (0-100):
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
 - Phase2-wrap-handoff continuity and strict baseline carryover: 35 points.
-- Phase-3 kickoff contract lock + delivery board readiness: 15 points.
+- platform readiness kickoff contract lock + delivery board readiness: 15 points.
 """
 
 
@@ -179,18 +179,18 @@ def build_phase3_kickoff_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "impact-61-big-upgrade-report.md" in docs_index_text
-                and "integrations-phase3-kickoff-workflow.md" in docs_index_text
+                and "integrations-platform-readiness-kickoff-workflow.md" in docs_index_text
             ),
-            "evidence": "impact-61-big-upgrade-report.md + integrations-phase3-kickoff-workflow.md",
+            "evidence": "impact-61-big-upgrade-report.md + integrations-platform-readiness-kickoff-workflow.md",
         },
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": (
-                "Phase-3 Kickoff Closeout" in top10_text
-                and "Phase-3 Kickoff Closeout" in top10_text
+                "Platform Readiness Kickoff" in top10_text
+                and "Platform Readiness Kickoff" in top10_text
             ),
-            "evidence": "Phase-3 Kickoff Closeout strategy chain",
+            "evidence": "Platform Readiness Kickoff strategy chain",
         },
         {
             "check_id": "phase2_wrap_handoff_summary_present",
@@ -279,7 +279,7 @@ def build_phase3_kickoff_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run Phase-2 wrap + handoff closeout command and restore strict baseline before lock."
+            "Re-run release readiness wrap handoff closeout command and restore strict baseline before lock."
         )
 
     if board_count >= 5 and board_has_required:
@@ -289,10 +289,12 @@ def build_phase3_kickoff_summary(root: Path) -> dict[str, Any]:
         handoff_actions.append("Repair delivery board entries to include anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
-        wins.append("Phase-3 kickoff contract + quality checklist is fully locked for execution.")
+        wins.append(
+            "platform readiness kickoff contract + quality checklist is fully locked for execution."
+        )
     else:
         misses.append(
-            "Phase-3 kickoff contract, quality checklist, or delivery board entries are missing."
+            "platform readiness kickoff contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
             "Complete all contract lines, quality checklist entries, and delivery board tasks in docs."
@@ -300,7 +302,7 @@ def build_phase3_kickoff_summary(root: Path) -> dict[str, Any]:
 
     if not failed and not critical_failures:
         wins.append(
-            "Phase-3 kickoff closeout lane is fully complete and ready for community execution lane."
+            "platform readiness kickoff closeout lane is fully complete and ready for community execution lane."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -363,16 +365,19 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "platform-readiness-kickoff-completion-report-summary.md",
         _render_text(payload) + "\n",
     )
-    _write(target / "phase3-kickoff-brief.md", "# Phase-3 kickoff brief\n")
-    _write(target / "phase3-kickoff-trust-ledger.csv", "risk,owner,mitigation,status\n")
-    _write(target / "phase3-kickoff-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "phase3-kickoff-execution-log.md", "# execution log\n")
+    _write(target / "platform-readiness-kickoff-brief.md", "# platform readiness kickoff brief\n")
+    _write(target / "platform-readiness-kickoff-trust-ledger.csv", "risk,owner,mitigation,status\n")
     _write(
-        target / "phase3-kickoff-delivery-board.md",
+        target / "platform-readiness-kickoff-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
+    _write(target / "platform-readiness-kickoff-execution-log.md", "# execution log\n")
+    _write(
+        target / "platform-readiness-kickoff-delivery-board.md",
         "\n".join(["# delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "phase3-kickoff-validation-commands.md",
+        target / "platform-readiness-kickoff-validation-commands.md",
         "# validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -395,7 +400,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "phase3-kickoff-execution-summary.json",
+        out_dir / "platform-readiness-kickoff-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -406,7 +411,7 @@ def build_phase3_kickoff_summary_impl(root: Path) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Phase-3 kickoff closeout checks")
+    parser = argparse.ArgumentParser(description="platform readiness kickoff closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

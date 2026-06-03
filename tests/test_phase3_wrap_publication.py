@@ -21,20 +21,20 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase3-wrap-publication-workflow.md\nplatform-readiness-wrap-publication-completion-report\n",
+        "docs/integrations-platform-readiness-wrap-publication-workflow.md\nplatform-readiness-wrap-publication-completion-report\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "impact-90-big-upgrade-report.md\nintegrations-phase3-wrap-publication-workflow.md\n",
+        "impact-90-big-upgrade-report.md\nintegrations-platform-readiness-wrap-publication-workflow.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
         "- ** — Governance priorities closeout lane:** convert governance handoff outcomes into governance scale.\n"
-        "- ** — Phase-3 wrap publication closeout lane:** scale governance scale into deterministic execution lanes.\n",
+        "- ** — platform readiness wrap publication closeout lane:** scale governance scale into deterministic execution lanes.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-phase3-wrap-publication-workflow.md").write_text(
+    (root / "docs/integrations-platform-readiness-wrap-publication-workflow.md").write_text(
         d90._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-90-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
@@ -72,11 +72,11 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    plan = root / "docs/roadmap/plans/phase3-wrap-publication-plan.json"
+    plan = root / "docs/roadmap/plans/platform-readiness-wrap-publication-plan.json"
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "phase3-wrap-publication-001",
+                "plan_id": "platform-readiness-wrap-publication-001",
                 "contributors": ["maintainers", "release-ops"],
                 "narrative_channels": ["launch-brief", "release-report", "faq"],
                 "baseline": {"launch_confidence": 0.64, "narrative_reuse": 0.42},
@@ -107,10 +107,10 @@ def test_phase3_wrap_publication_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/phase3-wrap-publication-pack",
+            "artifacts/platform-readiness-wrap-publication-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/phase3-wrap-publication-pack/evidence",
+            "artifacts/platform-readiness-wrap-publication-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -119,45 +119,47 @@ def test_phase3_wrap_publication_emit_pack_and_execute(tmp_path: Path) -> None:
     assert rc == 0
     assert (
         tmp_path
-        / "artifacts/phase3-wrap-publication-pack/platform-readiness-wrap-publication-completion-report-summary.json"
+        / "artifacts/platform-readiness-wrap-publication-pack/platform-readiness-wrap-publication-completion-report-summary.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/phase3-wrap-publication-pack/platform-readiness-wrap-publication-completion-report-summary.md"
+        / "artifacts/platform-readiness-wrap-publication-pack/platform-readiness-wrap-publication-completion-report-summary.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-evidence-brief.md"
-    ).exists()
-    assert (
-        tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-plan.md"
+        / "artifacts/platform-readiness-wrap-publication-pack/platform-readiness-wrap-publication-evidence-brief.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-narrative-template-upgrade-ledger.json"
+        / "artifacts/platform-readiness-wrap-publication-pack/platform-readiness-wrap-publication-plan.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-storyline-outcomes-ledger.json"
+        / "artifacts/platform-readiness-wrap-publication-pack/platform-readiness-wrap-publication-narrative-template-upgrade-ledger.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-narrative-kpi-scorecard.json"
-    ).exists()
-    assert (
-        tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-execution-log.md"
+        / "artifacts/platform-readiness-wrap-publication-pack/platform-readiness-wrap-publication-storyline-outcomes-ledger.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-delivery-board.md"
+        / "artifacts/platform-readiness-wrap-publication-pack/platform-readiness-wrap-publication-narrative-kpi-scorecard.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-validation-commands.md"
+        / "artifacts/platform-readiness-wrap-publication-pack/platform-readiness-wrap-publication-execution-log.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/phase3-wrap-publication-pack/evidence/phase3-wrap-publication-execution-summary.json"
+        / "artifacts/platform-readiness-wrap-publication-pack/platform-readiness-wrap-publication-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/platform-readiness-wrap-publication-pack/platform-readiness-wrap-publication-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/platform-readiness-wrap-publication-pack/evidence/platform-readiness-wrap-publication-execution-summary.json"
     ).exists()
 
 
@@ -186,4 +188,4 @@ def test_phase3_wrap_publication_cli_dispatch(tmp_path: Path, capsys) -> None:
         ]
     )
     assert rc == 0
-    assert " phase-3 wrap publication closeout summary" in capsys.readouterr().out
+    assert " platform readiness wrap publication closeout summary" in capsys.readouterr().out
