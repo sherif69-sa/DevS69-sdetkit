@@ -10,15 +10,15 @@ Lane closes the second distribution-ready example asset by translating repositor
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/demo-asset-pack/demo-asset-summary.json`
-- `docs/artifacts/demo-asset-pack/demo-delivery-board.md`
+- `docs/artifacts/example-asset-pack/example-asset-summary.json`
+- `docs/artifacts/example-asset-pack/example-delivery-board.md`
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit demo-asset2 --format json --strict
-python -m sdetkit demo-asset2 --emit-pack-dir docs/artifacts/demo-asset2-pack --format json --strict
-python -m sdetkit demo-asset2 --execute --evidence-dir docs/artifacts/demo-asset2-pack/evidence --format json --strict
+python -m sdetkit example-asset2 --format json --strict
+python -m sdetkit example-asset2 --emit-pack-dir docs/artifacts/example-asset2-pack --format json --strict
+python -m sdetkit example-asset2 --execute --evidence-dir docs/artifacts/example-asset2-pack/evidence --format json --strict
 python scripts/check_demo_asset2_contract.py
 ```
 

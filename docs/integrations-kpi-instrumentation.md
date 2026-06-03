@@ -10,8 +10,8 @@ Lane closes the week with a hardened KPI operating loop that ties growth narrati
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/demo-asset2-pack/demo-asset2-summary.json`
-- `docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md`
+- `docs/artifacts/example-asset2-pack/example-asset2-summary.json`
+- `docs/artifacts/example-asset2-pack/example-asset2-delivery-board.md`
 
 ## Lane command lane
 

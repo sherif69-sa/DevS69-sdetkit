@@ -1,6 +1,6 @@
 # Workflow readiness baseline
 
-Lane starts Phase-2 with a measurable baseline carried over from Lane and a fixed weekly growth target set.
+Lane starts Release readiness with a measurable baseline carried over from Lane and a fixed weekly growth target set.
 
 ## Why Lane matters
 
@@ -10,22 +10,22 @@ Lane starts Phase-2 with a measurable baseline carried over from Lane and a fixe
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json` (primary)
-- `docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md` (primary)
+- `docs/artifacts/baseline-wrap-pack/baseline-wrap-summary.json` (primary)
+- `docs/artifacts/baseline-wrap-pack/baseline-wrap-release-readiness-backlog.md` (primary)
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit phase2-kickoff --format json --strict
-python -m sdetkit phase2-kickoff --emit-pack-dir docs/artifacts/phase2-kickoff-pack --format json --strict
-python -m sdetkit phase2-kickoff --execute --evidence-dir docs/artifacts/phase2-kickoff-pack/evidence --format json --strict
+python -m sdetkit release-readiness-kickoff --format json --strict
+python -m sdetkit release-readiness-kickoff --emit-pack-dir docs/artifacts/release-readiness-kickoff-pack --format json --strict
+python -m sdetkit release-readiness-kickoff --execute --evidence-dir docs/artifacts/release-readiness-kickoff-pack/evidence --format json --strict
 python scripts/check_phase2_kickoff_contract.py
 ```
 
 ## Baseline + weekly targets
 
 - Baseline source: Lane activation score and completion report rollup.
-- Week-1 Phase-2 target: maintain activation score >= 95 and preserve strict pass.
+- Week-1 Release readiness target: maintain activation score >= 95 and preserve strict pass.
 - Week-1 growth target: publish 3 external-facing assets and 1 KPI checkpoint.
 - Week-1 quality gate: every shipped action includes command evidence and a summary artifact.
 - Week-1 decision gate: if any target misses, publish corrective actions in the next weekly review.

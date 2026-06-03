@@ -1,6 +1,6 @@
 # Operational readiness hardening
 
-Lane closes Phase-1 by hardening top entry pages, removing stale guidance, and publishing a deterministic completion report lane.
+Lane closes Baseline by hardening top entry pages, removing stale guidance, and publishing a deterministic completion report lane.
 
 ## Why Lane exists
 
@@ -18,9 +18,9 @@ Lane closes Phase-1 by hardening top entry pages, removing stale guidance, and p
 ## Lane command lane
 
 ```bash
-python -m sdetkit phase1-hardening --format json --strict
-python -m sdetkit phase1-hardening --emit-pack-dir docs/artifacts/phase1-hardening-pack --format json --strict
-python -m sdetkit phase1-hardening --execute --evidence-dir docs/artifacts/phase1-hardening-pack/evidence --format json --strict
+python -m sdetkit baseline-hardening --format json --strict
+python -m sdetkit baseline-hardening --emit-pack-dir docs/artifacts/baseline-hardening-pack --format json --strict
+python -m sdetkit baseline-hardening --execute --evidence-dir docs/artifacts/baseline-hardening-pack/evidence --format json --strict
 python scripts/check_phase1_hardening_contract.py
 ```
 
@@ -31,7 +31,7 @@ Lane weighted score (0-100):
 - Docs contract and command-lane completeness: 35 points.
 - Entry-page discoverability + strategy alignment: 35 points.
 - Stale marker elimination in top pages: 20 points.
-- Artifact/report wiring for Phase-1 closeout: 10 points.
+- Artifact/report wiring for baseline closeout: 10 points.
 
 ## Entry page polish checklist
 

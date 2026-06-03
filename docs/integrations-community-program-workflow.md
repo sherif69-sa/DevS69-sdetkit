@@ -11,7 +11,7 @@ Lane ships a major community-program upgrade that converts Lane kickoff evidence
 ## Required inputs (Lane)
 
 - `docs/artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-completion-report-summary.json`
-- `docs/artifacts/platform-readiness-kickoff-completion-report-pack/phase3-kickoff-delivery-board.md`
+- `docs/artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-delivery-board.md`
 
 ## Community Program Closeout command lane (legacy)
 
@@ -25,7 +25,7 @@ python scripts/check_community_program_closeout_contract.py
 ## Community program execution contract
 
 - Single owner + backup reviewer are assigned for Lane community office-hours execution and moderation safety.
-- This lane references Lane Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.
+- This lane references Lane platform readiness kickoff outcomes, trust guardrails, and KPI continuity evidence.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane completion report records office-hours cadence, participation rules, moderation SOPs, and Lane onboarding priorities.
 

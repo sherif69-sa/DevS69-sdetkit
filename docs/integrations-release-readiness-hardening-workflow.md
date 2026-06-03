@@ -1,6 +1,6 @@
 # Workflow hardening workflow
 
-Lane closes with a major Phase-2 hardening upgrade that turns Lane KPI deep-audit outcomes into deterministic execution hardening governance.
+Lane closes with a major release readiness hardening upgrade that turns Lane KPI deep-audit outcomes into deterministic execution hardening governance.
 
 ## Why Lane matters
 
@@ -13,7 +13,7 @@ Lane closes with a major Phase-2 hardening upgrade that turns Lane KPI deep-audi
 - `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json`
 - `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md`
 
-## Phase 2 Hardening Closeout command lane
+## Release Readiness Hardening command lane
 
 ```bash
 python -m sdetkit release-readiness-hardening-completion-report --format json --strict
@@ -22,14 +22,14 @@ python -m sdetkit release-readiness-hardening-completion-report --execute --evid
 python scripts/check_phase2_hardening_closeout_contract.py
 ```
 
-## Phase-2 hardening contract
+## release readiness hardening contract
 
-- Single owner + backup reviewer are assigned for Lane Phase-2 hardening execution and signal triage.
+- Single owner + backup reviewer are assigned for Lane release readiness hardening execution and signal triage.
 - The Lane references Lane KPI deep-audit outcomes and unresolved risks.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane completion report records hardening outcomes and Lane pre-plan priorities.
 
-## Phase-2 hardening quality checklist
+## release readiness hardening quality checklist
 
 - [ ] Includes friction-map digest, page hardening actions, and rollback strategy
 - [ ] Every section has owner, review window, KPI threshold, and risk flag
@@ -39,7 +39,7 @@ python scripts/check_phase2_hardening_closeout_contract.py
 
 ## Lane delivery board
 
-- [ ] Lane Phase-2 hardening brief committed
+- [ ] Lane release readiness hardening brief committed
 - [ ] Lane hardening plan reviewed with owner + backup
 - [ ] Lane risk ledger exported
 - [ ] Lane KPI scorecard snapshot exported
@@ -52,4 +52,4 @@ Lane weighted score (0-100):
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
 - Lane continuity and strict baseline carryover: 35 points.
-- Phase-2 hardening contract lock + delivery board readiness: 15 points.
+- release readiness hardening contract lock + delivery board readiness: 15 points.

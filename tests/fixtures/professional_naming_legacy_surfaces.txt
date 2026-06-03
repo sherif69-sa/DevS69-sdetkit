@@ -15,11 +15,5 @@ docs/integrations-continuous-upgrade-closeout-6.md :: path :: closeout :: docs/i
 docs/integrations-continuous-upgrade-closeout-7.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-7.md
 docs/integrations-continuous-upgrade-closeout-8.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-8.md
 docs/integrations-continuous-upgrade-closeout-9.md :: path :: closeout :: docs/integrations-continuous-upgrade-closeout-9.md
-docs/integrations-demo-asset.md :: path :: demo :: docs/integrations-demo-asset.md
-docs/integrations-demo-asset2.md :: path :: demo :: docs/integrations-demo-asset2.md
 docs/integrations-optimization-closeout-foundation.md :: path :: closeout :: docs/integrations-optimization-closeout-foundation.md
-docs/integrations-phase1-hardening.md :: path :: phase1 :: docs/integrations-phase1-hardening.md
-docs/integrations-phase1-wrap.md :: path :: phase1 :: docs/integrations-phase1-wrap.md
-docs/integrations-phase2-kickoff.md :: path :: phase2 :: docs/integrations-phase2-kickoff.md
-docs/integrations-phase2-wrap-handoff-completion.md :: path :: phase2 :: docs/integrations-phase2-wrap-handoff-completion.md
 docs/integrations-scale-upgrade-closeout.md :: path :: closeout :: docs/integrations-scale-upgrade-closeout.md
