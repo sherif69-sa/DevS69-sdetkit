@@ -20,22 +20,22 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase1-hardening.md\nphase1-hardening\n",
+        "docs/integrations-baseline-hardening.md\nbaseline-hardening\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "impact-29-ultra-upgrade-report.md\nintegrations-phase1-hardening.md\n",
+        "impact-29-ultra-upgrade-report.md\nintegrations-baseline-hardening.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- ** — Phase-1 hardening:** close stale docs gaps and polish top entry pages.\n",
+        "- ** — Baseline hardening:** close stale docs gaps and polish top entry pages.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-weekly-review.md").write_text(
         "# Weekly review #4 ()\n", encoding="utf-8"
     )
-    (root / "docs/integrations-phase1-hardening.md").write_text(
+    (root / "docs/integrations-baseline-hardening.md").write_text(
         d29._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-29-ultra-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
@@ -46,7 +46,7 @@ def test_phase1_hardening_hardening_json(tmp_path: Path, capsys) -> None:
     rc = d29.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "phase1-hardening"
+    assert out["name"] == "baseline-hardening"
     assert out["summary"]["activation_score"] >= 90
 
 
@@ -57,32 +57,34 @@ def test_phase1_hardening_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/phase1-hardening-pack",
+            "artifacts/baseline-hardening-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/phase1-hardening-pack/evidence",
+            "artifacts/baseline-hardening-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-summary.json").exists()
-    assert (tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-summary.md").exists()
-    assert (tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-stale-gaps.json").exists()
+    assert (tmp_path / "artifacts/baseline-hardening-pack/baseline-hardening-summary.json").exists()
+    assert (tmp_path / "artifacts/baseline-hardening-pack/baseline-hardening-summary.md").exists()
     assert (
-        tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-validation-commands.md"
+        tmp_path / "artifacts/baseline-hardening-pack/baseline-hardening-stale-gaps.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/baseline-hardening-pack/baseline-hardening-validation-commands.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/phase1-hardening-pack/evidence/phase1-hardening-execution-summary.json"
+        / "artifacts/baseline-hardening-pack/evidence/baseline-hardening-execution-summary.json"
     ).exists()
 
 
 def test_phase1_hardening_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/integrations-phase1-hardening.md").write_text(
-        "#  — Phase-1 hardening\n", encoding="utf-8"
+    (tmp_path / "docs/integrations-baseline-hardening.md").write_text(
+        "#  — Baseline hardening\n", encoding="utf-8"
     )
     rc = d29.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

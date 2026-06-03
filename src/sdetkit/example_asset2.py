@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from ._legacy_workflow import run_lane
 
-_DEFAULT_PAGE_TEMPLATE = "# Demo asset #2 ()\n\n## Demo asset #2\n"
+_DEFAULT_PAGE_TEMPLATE = "# Example asset #2 ()\n\n## Example asset #2\n"
 _CFG = {
     "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "example-asset2",
     "page_path": "docs/integrations-example-asset2.md",
-    "required_inputs": ["docs/artifacts/demo-asset-pack/demo-asset-summary.json"],
-    "required_boards": ["docs/artifacts/demo-asset-pack/demo-delivery-board.md"],
+    "required_inputs": ["docs/artifacts/example-asset-pack/example-asset-summary.json"],
+    "required_boards": ["docs/artifacts/example-asset-pack/demo-delivery-board.md"],
     "summary_json": "example-asset2-summary.json",
     "summary_md": "example-asset2-summary.md",
     "pack_files": [

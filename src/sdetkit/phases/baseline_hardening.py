@@ -113,10 +113,10 @@ def build_phase1_hardening_summary_impl(
                 token in docs_index_text
                 for token in [
                     "impact-29-ultra-upgrade-report.md",
-                    "integrations-phase1-hardening.md",
+                    "integrations-baseline-hardening.md",
                 ]
             ),
-            "evidence": "impact-29-ultra-upgrade-report.md + integrations-phase1-hardening.md",
+            "evidence": "impact-29-ultra-upgrade-report.md + integrations-baseline-hardening.md",
         },
         {
             "check_id": "top10_phase1_hardening_alignment",
