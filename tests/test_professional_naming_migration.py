@@ -103,7 +103,7 @@ def test_professional_naming_migration_still_requires_alias_for_workflow_surface
         "items": [
             {
                 "term": "phase3",
-                "path": ".github/workflows/phase3-quality-contract.yml",
+                "path": ".github/workflows/platform-readiness-quality-contract.yml",
                 "match_type": "path",
                 "classification": "workflow_alias_migration",
                 "actionability": "migration_or_alias_required",

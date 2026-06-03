@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scripts import check_phase3_quality_contract as contract
+from scripts import check_platform_readiness_quality_contract as contract
 
 
 def _write_summary(path: Path, checks: list[dict[str, object]]) -> Path:
@@ -91,7 +91,7 @@ def test_phase3_quality_contract_missing_summary_text_includes_failure_header(
     rc = contract.main(["--summary", str(tmp_path / "missing.json"), "--format", "text"])
     out = capsys.readouterr().out
     assert rc == 1
-    assert "phase3-quality-contract: FAIL" in out
+    assert "platform-readiness-quality-contract: FAIL" in out
     assert "- decision: fail" in out
     assert "- doctor_handoff_alignment_reason: doctor_next_pass_unavailable" in out
 
@@ -236,7 +236,7 @@ def test_phase3_quality_contract_module_invocation_off_mode(tmp_path: Path) -> N
         [
             sys.executable,
             "-m",
-            "scripts.check_phase3_quality_contract",
+            "scripts.check_platform_readiness_quality_contract",
             "--summary",
             str(summary),
             "--doctor-summary",
@@ -362,7 +362,7 @@ def test_phase3_quality_contract_module_invocation_strict_mismatch_fails(tmp_pat
         [
             sys.executable,
             "-m",
-            "scripts.check_phase3_quality_contract",
+            "scripts.check_platform_readiness_quality_contract",
             "--summary",
             str(summary),
             "--doctor-summary",

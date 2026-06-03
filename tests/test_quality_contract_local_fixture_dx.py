@@ -49,7 +49,9 @@ def test_seed_phase1_baseline_summary_fixture_writes_contract_shape(tmp_path: Pa
 def test_phase3_quality_contract_depends_on_local_fixture() -> None:
     makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
     target_line = next(
-        line for line in makefile.splitlines() if line.startswith("phase3-quality-contract:")
+        line
+        for line in makefile.splitlines()
+        if line.startswith("platform-readiness-quality-contract:")
     )
 
     assert "quality-baseline-summary-fixture" in target_line

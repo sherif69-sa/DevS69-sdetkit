@@ -18,12 +18,14 @@ REQUIRED_KEYS = {
 EXPECTED_SCHEMA = "sdetkit.phase2_start_workflow.v1"
 REQUIRED_STEP_SUBSTRINGS = (
     "sdetkit phase2-kickoff",
-    "scripts/check_phase2_kickoff_contract.py",
+    "scripts/check_release_readiness_kickoff_contract.py",
 )
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Validate phase2-start summary contract.")
+    parser = argparse.ArgumentParser(
+        description="Validate release-readiness start summary contract."
+    )
     parser.add_argument("--summary", default="build/phase2-start/phase2-start-summary.json")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args(argv)

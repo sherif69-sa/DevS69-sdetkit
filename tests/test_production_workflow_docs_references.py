@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 LEGACY_COMMANDS = (
-    "make phase3-quality-contract",
+    "make platform-readiness-quality-contract",
     "make phase3-quality-report",
     "make phase3-do-it",
     "make phase1-closeout",
@@ -13,7 +13,7 @@ LEGACY_COMMANDS = (
     "make phase1-finish-signal",
     "make phase1-next-pass",
     "make phase1-do-it",
-    "make phase4-governance-contract",
+    "make operational-readiness-governance-contract",
     "make phase5-ecosystem-contract",
     "make phase6-metrics-contract",
 )

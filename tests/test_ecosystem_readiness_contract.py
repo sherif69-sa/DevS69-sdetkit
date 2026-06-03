@@ -8,11 +8,11 @@ from pathlib import Path
 
 import pytest
 
+from scripts import check_ecosystem_readiness_contract as contract
+from scripts import check_operational_readiness_governance_contract as phase4_contract
 from scripts import check_phase1_baseline_summary_contract as phase1_contract
-from scripts import check_phase2_start_summary_contract as phase2_contract
-from scripts import check_phase3_quality_contract as phase3_contract
-from scripts import check_phase4_governance_contract as phase4_contract
-from scripts import check_phase5_ecosystem_contract as contract
+from scripts import check_platform_readiness_quality_contract as phase3_contract
+from scripts import check_release_readiness_start_summary_contract as phase2_contract
 
 EXPECTED_GATE_CHECK_IDS = [
     "schema_completeness",
@@ -41,8 +41,8 @@ EXPECTED_RESULT_KEYS = [
 ]
 REPO_PHASE_FLOW_TARGETS = [
     "phase2-seed",
-    "phase3-quality-contract",
-    "phase4-governance-contract",
+    "platform-readiness-quality-contract",
+    "operational-readiness-governance-contract",
     "phase5-ecosystem-contract",
 ]
 
@@ -69,7 +69,9 @@ def test_phase5_contract_constants_are_non_empty_and_unique() -> None:
 
 
 def _run_phase5_subprocess(*, cwd: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
-    script = Path(__file__).resolve().parents[1] / "scripts" / "check_phase5_ecosystem_contract.py"
+    script = (
+        Path(__file__).resolve().parents[1] / "scripts" / "check_ecosystem_readiness_contract.py"
+    )
     return subprocess.run(
         [sys.executable, str(script), *args],
         cwd=cwd,
@@ -148,8 +150,8 @@ def test_phase5_missing_reason_or_rationale_code_fails() -> None:
 
 def test_phase5_regression_contracts_for_phase1_to_phase4_unchanged() -> None:
     makefile_text = Path("Makefile").read_text(encoding="utf-8")
-    assert "phase3-quality-contract" in makefile_text
-    assert "phase4-governance-contract" in makefile_text
+    assert "platform-readiness-quality-contract" in makefile_text
+    assert "operational-readiness-governance-contract" in makefile_text
     assert "phase5-ecosystem-contract" in makefile_text
 
     assert phase1_contract.REQUIRED_TOP_LEVEL["schema_version"] == "sdetkit.phase1_baseline.v1"

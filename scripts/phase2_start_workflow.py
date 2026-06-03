@@ -95,7 +95,7 @@ def main(argv: list[str] | None = None) -> int:
                 "--strict",
             ]
         ),
-        _run_step(["python", "scripts/check_phase2_kickoff_contract.py"]),
+        _run_step(["python", "scripts/check_release_readiness_kickoff_contract.py"]),
     ]
     summary = build_summary(steps)
 

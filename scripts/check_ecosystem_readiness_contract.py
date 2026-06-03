@@ -54,7 +54,7 @@ REQUIRED_PARTNER_ARTIFACTS = (
 )
 DEFAULT_SUPPORT_SURFACE = (
     "make phase5-ecosystem-contract",
-    "python scripts/check_phase5_ecosystem_contract.py --format json",
+    "python scripts/check_ecosystem_readiness_contract.py --format json",
 )
 DRIFT_THRESHOLD = 2
 
@@ -154,7 +154,7 @@ def _build_ecosystem_payload() -> dict[str, Any]:
             ),
             "compatibility_guards": _sorted_unique(
                 [
-                    "make phase4-governance-contract",
+                    "make operational-readiness-governance-contract",
                     "make phase5-ecosystem-contract",
                 ]
             ),

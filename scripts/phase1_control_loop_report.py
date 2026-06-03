@@ -103,7 +103,7 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "",
         f"- Generated at: {payload.get('generated_at', '')}",
         f"- Completion: {payload.get('completion_percent', 0)}%",
-        f"- Ready for closeout: {payload.get('ready_for_closeout', False)}",
+        f"- Ready for completion report: {payload.get('ready_for_closeout', False)}",
         "",
         "## Stage checks",
     ]

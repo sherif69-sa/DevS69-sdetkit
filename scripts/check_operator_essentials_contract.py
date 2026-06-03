@@ -24,8 +24,8 @@ REQUIRED_LINES = [
     "make phase2-complete",
     "make phase2-progress",
     "make phase2-surface-clarity",
-    "make phase3-quality-contract",
-    "make phase4-governance-contract",
+    "make platform-readiness-quality-contract",
+    "make operational-readiness-governance-contract",
     "make phase5-ecosystem-contract",
     "make phase6-metrics-contract",
 ]

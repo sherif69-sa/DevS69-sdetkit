@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from scripts import build_phase3_trend_delta as trend_script
-from scripts import phase3_quality_engine as q
+from scripts import build_platform_readiness_trend_delta as trend_script
+from scripts import platform_readiness_quality_engine as q
 
 
 def _summary(path: Path, checks: list[dict[str, object]]) -> Path:

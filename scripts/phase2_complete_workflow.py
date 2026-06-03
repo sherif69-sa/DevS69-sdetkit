@@ -56,7 +56,14 @@ def main(argv: list[str] | None = None) -> int:
     wrap_pack = workflow_root / "release-readiness-wrap-handoff-completion-report-pack"
     steps = [
         _run_step(["python", "scripts/phase2_start_workflow.py", "--format", "json"]),
-        _run_step(["python", "scripts/check_phase2_start_summary_contract.py", "--format", "json"]),
+        _run_step(
+            [
+                "python",
+                "scripts/check_release_readiness_start_summary_contract.py",
+                "--format",
+                "json",
+            ]
+        ),
         _run_step(
             [
                 "python",

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from scripts import check_phase4_governance_contract as contract
+from scripts import check_operational_readiness_governance_contract as contract
 
 
 def test_adherence_missing_review_timestamp_is_unknown_with_actions() -> None:

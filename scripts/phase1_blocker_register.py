@@ -52,7 +52,7 @@ def build_blocker_register(
                     "blocker": sid,
                     "category": "control_loop_stage",
                     "priority": RISK_PRIORITY.get(sid, 55),
-                    "recommended_action": f"Complete {sid} stage before closeout",
+                    "recommended_action": f"Complete {sid} stage before completion report",
                 }
             )
 
@@ -94,7 +94,7 @@ def main(argv: list[str] | None = None) -> int:
         payload = {
             "ok": False,
             "schema_version": "sdetkit.phase1_blocker_register.v1",
-            "reason": "missing next-pass and control-loop artifacts",
+            "reason": "missing follow-up pass and control-loop artifacts",
         }
         if args.format == "json":
             print(json.dumps(payload, indent=2, sort_keys=True))

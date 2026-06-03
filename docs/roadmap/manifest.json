@@ -616,7 +616,7 @@
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase1_wrap_contract.py"
+          "scripts/check_baseline_wrap_contract.py"
         ],
         "contract_scripts": 1,
         "id": 0,
@@ -628,7 +628,7 @@
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase2_hardening_contract.py"
+          "scripts/check_release_readiness_hardening_contract.py"
         ],
         "contract_scripts": 1,
         "id": 0,
@@ -640,7 +640,7 @@
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase2_kickoff_contract.py"
+          "scripts/check_release_readiness_kickoff_contract.py"
         ],
         "contract_scripts": 1,
         "id": 0,
@@ -652,7 +652,7 @@
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase2_wrap_handoff_contract.py"
+          "scripts/check_release_readiness_wrap_handoff_contract.py"
         ],
         "contract_scripts": 1,
         "id": 0,
@@ -664,7 +664,7 @@
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase3_kickoff_contract.py"
+          "scripts/check_platform_readiness_kickoff_contract.py"
         ],
         "contract_scripts": 1,
         "id": 0,
@@ -676,7 +676,7 @@
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase3_preplan_contract.py"
+          "scripts/check_platform_readiness_preplan_contract.py"
         ],
         "contract_scripts": 1,
         "id": 0,
@@ -688,7 +688,7 @@
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase3_wrap_publication_contract.py"
+          "scripts/check_platform_readiness_wrap_publication_contract.py"
         ],
         "contract_scripts": 1,
         "id": 0,

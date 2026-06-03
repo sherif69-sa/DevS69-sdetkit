@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts import check_phase6_metrics_contract as contract
+from scripts import check_metrics_readiness_contract as contract
 
 
 def test_kpi_snapshot_deterministic_sort_and_missing_kpis() -> None:

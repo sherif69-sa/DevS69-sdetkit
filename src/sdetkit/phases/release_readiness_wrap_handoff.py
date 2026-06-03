@@ -29,12 +29,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit release-readiness-wrap-handoff-completion-report --format json --strict",
     "python -m sdetkit release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict",
     "python -m sdetkit release-readiness-wrap-handoff-completion-report --execute --evidence-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence --format json --strict",
-    "python scripts/check_phase2_wrap_handoff_contract.py",
+    "python scripts/check_release_readiness_wrap_handoff_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit release-readiness-wrap-handoff-completion-report --format json --strict",
     "python -m sdetkit release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict",
-    "python scripts/check_phase2_wrap_handoff_contract.py --skip-evidence",
+    "python scripts/check_release_readiness_wrap_handoff_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for release readiness wrap handoff execution and signal triage.",
@@ -78,7 +78,7 @@ Release Readiness Wrap Handoff closes with a major release readiness wrap handof
 python -m sdetkit release-readiness-wrap-handoff-completion-report --format json --strict
 python -m sdetkit release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict
 python -m sdetkit release-readiness-wrap-handoff-completion-report --execute --evidence-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence --format json --strict
-python scripts/check_phase2_wrap_handoff_contract.py
+python scripts/check_release_readiness_wrap_handoff_contract.py
 ```
 
 ## release readiness wrap handoff contract

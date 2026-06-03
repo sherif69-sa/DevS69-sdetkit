@@ -13,7 +13,7 @@ _CANONICAL_EVIDENCE = "docs/artifacts/platform-readiness-wrap-publication-comple
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate phase-3 wrap publication closeout contract"
+        description="Validate platform readiness wrap publication completion-report contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")

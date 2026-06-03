@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts import check_phase4_governance_contract as contract
+from scripts import check_operational_readiness_governance_contract as contract
 
 
 def test_policy_compatibility_validation_rejects_missing_required_fields() -> None:
@@ -64,7 +64,7 @@ def test_policy_compatibility_validation_accepts_valid_payload() -> None:
         compatibility_contract={
             "supported_tiers": ["tier0"],
             "deprecation_boundaries": ["notice"],
-            "compatibility_guards": ["make phase4-governance-contract"],
+            "compatibility_guards": ["make operational-readiness-governance-contract"],
         },
         release_evidence_contract={
             "required_artifacts": ["docs/index.md"],
