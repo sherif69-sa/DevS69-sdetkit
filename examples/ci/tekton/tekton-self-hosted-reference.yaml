@@ -3,7 +3,7 @@ kind: Pipeline
 metadata:
   name: tekton-self-hosted-enterprise
 spec:
-  description: Self-hosted enterprise reference pipeline for integration closeout.
+  description: Self-hosted enterprise reference pipeline for integration completion report.
   workspaces:
     - name: shared-workspace
   params:
