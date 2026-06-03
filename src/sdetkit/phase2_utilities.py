@@ -1,21 +1,17 @@
+"""Compatibility wrapper for historical `sdetkit.phase2_utilities` imports."""
+
 from __future__ import annotations
 
-import datetime as dt
+from ._compat_alias import alias_dir as _alias_dir
+from ._compat_alias import alias_getattr as _alias_getattr
+from ._compat_alias import export_module as _export_module
+
+_TARGET = _export_module("sdetkit.release_readiness_utilities", globals())
 
 
-def parse_check_csv(value: str | None) -> list[str]:
-    if value is None:
-        return []
-    out: list[str] = []
-    for part in value.split(","):
-        item = part.strip()
-        if item:
-            out.append(item)
-    return out
+def __getattr__(name: str) -> object:
+    return _alias_getattr(_TARGET, name)
 
 
-def parse_iso_date(raw: str, *, field: str) -> dt.date:
-    try:
-        return dt.date.fromisoformat(raw)
-    except ValueError as exc:
-        raise ValueError(f"{field} must be ISO date YYYY-MM-DD") from exc
+def __dir__() -> list[str]:
+    return _alias_dir(globals(), _TARGET)

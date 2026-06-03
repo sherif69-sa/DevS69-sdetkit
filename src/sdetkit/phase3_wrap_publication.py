@@ -1,9 +1,17 @@
-"""Compatibility wrapper for historical `sdetkit.platform_readiness_wrap_publication` imports."""
+"""Compatibility wrapper for historical `sdetkit.phase3_wrap_publication` imports."""
 
 from __future__ import annotations
 
-from importlib import import_module as _import_module
+from ._compat_alias import alias_dir as _alias_dir
+from ._compat_alias import alias_getattr as _alias_getattr
+from ._compat_alias import export_module as _export_module
 
-_IMPL = _import_module("sdetkit.phases.platform_readiness_wrap_publication")
-__all__ = getattr(_IMPL, "__all__", [name for name in dir(_IMPL) if not name.startswith("__")])
-globals().update({name: getattr(_IMPL, name) for name in __all__})
+_TARGET = _export_module("sdetkit.platform_readiness_wrap_publication", globals())
+
+
+def __getattr__(name: str) -> object:
+    return _alias_getattr(_TARGET, name)
+
+
+def __dir__() -> list[str]:
+    return _alias_dir(globals(), _TARGET)
