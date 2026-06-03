@@ -34,3 +34,12 @@ LEGACY_FOUNDATION_COMMAND_MODULES: dict[str, str] = {
     "expansion-automation": "sdetkit.expansion_automation",
     "optimization-closeout-foundation": "sdetkit.optimization_foundation",
 }
+
+
+CANONICAL_FOUNDATION_COMMAND_MODULES: dict[str, str] = {
+    "baseline-hardening": "sdetkit.baseline_hardening",
+    "baseline-wrap": "sdetkit.baseline_wrap",
+    "release-readiness-kickoff": "sdetkit.release_readiness_kickoff",
+    "example-asset": "sdetkit.example_asset",
+    "example-asset2": "sdetkit.example_asset2",
+}

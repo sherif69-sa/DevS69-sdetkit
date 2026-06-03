@@ -5,19 +5,19 @@ from ._legacy_workflow import run_lane
 _DEFAULT_PAGE_TEMPLATE = "# Demo asset #2 ()\n\n## Demo asset #2\n"
 _CFG = {
     "page_template": _DEFAULT_PAGE_TEMPLATE,
-    "name": "demo-asset2",
-    "page_path": "docs/integrations-demo-asset2.md",
+    "name": "example-asset2",
+    "page_path": "docs/integrations-example-asset2.md",
     "required_inputs": ["docs/artifacts/demo-asset-pack/demo-asset-summary.json"],
     "required_boards": ["docs/artifacts/demo-asset-pack/demo-delivery-board.md"],
-    "summary_json": "demo-asset2-summary.json",
-    "summary_md": "demo-asset2-summary.md",
+    "summary_json": "example-asset2-summary.json",
+    "summary_md": "example-asset2-summary.md",
     "pack_files": [
-        "demo-asset2-plan.json",
-        "demo-asset2-script.md",
-        "demo-asset2-delivery-board.md",
-        "demo-asset2-validation-commands.md",
+        "example-asset2-plan.json",
+        "example-asset2-script.md",
+        "example-asset2-delivery-board.md",
+        "example-asset2-validation-commands.md",
     ],
-    "evidence_json": "demo-asset2-execution-summary.json",
+    "evidence_json": "example-asset2-execution-summary.json",
     "text_output": " demo asset #2 summary",
 }
 
