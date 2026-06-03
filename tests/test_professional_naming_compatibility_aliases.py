@@ -35,6 +35,21 @@ def test_professional_canonical_command_aliases_are_registered() -> None:
         assert LEGACY_COMMAND_MODULES[command] == module
 
 
+def test_professional_naming_aliases_preserve_private_workflow_templates() -> None:
+    modules = [
+        "sdetkit.phase2_kickoff",
+        "sdetkit.phase2_hardening",
+        "sdetkit.phase2_wrap_handoff",
+        "sdetkit.phase3_preplan",
+        "sdetkit.phase3_kickoff",
+        "sdetkit.phase3_wrap_publication",
+    ]
+
+    for module_name in modules:
+        module = importlib.import_module(module_name)
+        assert hasattr(module, "_DEFAULT_PAGE_TEMPLATE")
+
+
 def test_professional_naming_import_alias_modules_load() -> None:
     aliases = {
         "sdetkit.example": "sdetkit.demo",
