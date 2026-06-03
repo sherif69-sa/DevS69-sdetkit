@@ -20,11 +20,12 @@ MANUAL_REVIEW = "manual_review"
 MIGRATION_OR_ALIAS_REQUIRED = "migration_or_alias_required"
 ACTIONABLE_PROSE = "actionable_prose_cleanup"
 
-COMPATIBILITY_CLASSES = {
+PUBLIC_OR_WORKFLOW_ALIAS_CLASSES = {
     "public_surface_requires_alias",
     "workflow_alias_migration",
-    "internal_path_requires_migration",
 }
+
+INTERNAL_PATH_REQUIRES_MIGRATION = "internal_path_requires_migration"
 
 PRESERVE_REASON_MARKERS = {
     "heading_or_chronology_label",
@@ -77,7 +78,13 @@ def _migration_class(item: Mapping[str, Any]) -> str:
     if path in TEMPLATE_LOCKED_PATHS or "template_locked" in reason:
         return TEMPLATE_LOCKED
 
-    if classification in COMPATIBILITY_CLASSES or actionability == MIGRATION_OR_ALIAS_REQUIRED:
+    if classification in PUBLIC_OR_WORKFLOW_ALIAS_CLASSES:
+        return ALIAS_REQUIRED
+
+    if classification == INTERNAL_PATH_REQUIRES_MIGRATION:
+        return MANUAL_REVIEW
+
+    if actionability == MIGRATION_OR_ALIAS_REQUIRED:
         return ALIAS_REQUIRED
 
     if any(marker in reason for marker in PRESERVE_REASON_MARKERS):
