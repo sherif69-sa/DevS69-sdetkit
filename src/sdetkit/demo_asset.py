@@ -1,26 +1,21 @@
+"""Compatibility wrapper for historical `sdetkit.demo_asset` imports."""
+
 from __future__ import annotations
 
-from ._legacy_workflow import run_lane
+from ._compat_alias import alias_dir as _alias_dir
+from ._compat_alias import alias_getattr as _alias_getattr
+from ._compat_alias import export_module as _export_module
+from ._compat_alias import install_module_alias as _install_module_alias
 
-_DEFAULT_PAGE_TEMPLATE = "# Demo asset ()\n\n## Demo asset\n"
-_CFG = {
-    "page_template": _DEFAULT_PAGE_TEMPLATE,
-    "name": "demo-asset",
-    "page_path": "docs/integrations-demo-asset.md",
-    "required_inputs": ["docs/artifacts/release-cadence-pack/release-cadence-summary.json"],
-    "required_boards": ["docs/artifacts/release-cadence-pack/release-delivery-board.md"],
-    "summary_json": "demo-asset-summary.json",
-    "summary_md": "demo-asset-summary.md",
-    "pack_files": [
-        "demo-asset-plan.json",
-        "demo-script.md",
-        "demo-delivery-board.md",
-        "demo-validation-commands.md",
-    ],
-    "evidence_json": "demo-execution-summary.json",
-    "text_output": " demo asset summary",
-}
+_TARGET = _export_module("sdetkit.example_asset", globals())
 
 
-def main(argv: list[str] | None = None) -> int:
-    return run_lane(argv, _CFG)
+def __getattr__(name: str) -> object:
+    return _alias_getattr(_TARGET, name)
+
+
+def __dir__() -> list[str]:
+    return _alias_dir(globals(), _TARGET)
+
+
+_install_module_alias(__name__, _TARGET)

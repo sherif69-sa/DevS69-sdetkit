@@ -1,87 +1,21 @@
+"""Compatibility wrapper for historical `sdetkit.agent.demo` imports."""
+
 from __future__ import annotations
 
-from pathlib import Path
+from .._compat_alias import alias_dir as _alias_dir
+from .._compat_alias import alias_getattr as _alias_getattr
+from .._compat_alias import export_module as _export_module
+from .._compat_alias import install_module_alias as _install_module_alias
 
-from .core import init_agent, run_agent
-from .dashboard import build_dashboard
-from .templates import run_template, template_by_id
-
-_DEMO_SCENARIOS: dict[str, tuple[str, ...]] = {
-    "repo-enterprise-audit": (
-        "repo-health-audit",
-        "security-governance-summary",
-        "report-dashboard",
-    ),
-    "umbrella-upgrade-control-plane": (
-        "repo-health-audit",
-        "report-dashboard",
-    ),
-}
+_TARGET = _export_module("sdetkit.agent.example", globals())
 
 
-def run_demo(*, root: Path, scenario: str) -> dict[str, object]:
-    if scenario not in _DEMO_SCENARIOS:
-        raise ValueError(f"unknown scenario '{scenario}'")
+def __getattr__(name: str) -> object:
+    return _alias_getattr(_TARGET, name)
 
-    created = init_agent(root, root / ".sdetkit/agent/config.yaml")
-    template_outputs: list[dict[str, str]] = []
 
-    for template_id in _DEMO_SCENARIOS[scenario]:
-        template = template_by_id(root, template_id)
-        output_dir = root / ".sdetkit" / "agent" / "demo" / template_id
-        record = run_template(root, template=template, set_values={}, output_dir=output_dir)
-        template_outputs.append(
-            {
-                "template": template_id,
-                "status": str(record.get("status", "")),
-                "output_dir": output_dir.as_posix(),
-            }
-        )
-        run_agent(
-            root,
-            config_path=root / ".sdetkit/agent/config.yaml",
-            task=f"template:{template_id}",
-            auto_approve=True,
-        )
+def __dir__() -> list[str]:
+    return _alias_dir(globals(), _TARGET)
 
-    if scenario == "umbrella-upgrade-control-plane":
-        run_agent(
-            root,
-            config_path=root / ".sdetkit/agent/config.yaml",
-            task="umbrella architecture optimization blueprint",
-            auto_approve=True,
-        )
-        run_agent(
-            root,
-            config_path=root / ".sdetkit/agent/config.yaml",
-            task="optimize umbrella architecture and align doctor quality gate integration agentos",
-            auto_approve=True,
-        )
 
-    run_agent(
-        root,
-        config_path=root / ".sdetkit/agent/config.yaml",
-        task='action fs.read {"path":"missing-enterprise-control.md"}',
-        auto_approve=True,
-    )
-
-    dashboard_html = root / ".sdetkit" / "agent" / "demo" / "artifacts" / "agent-dashboard.html"
-    dashboard_md = root / ".sdetkit" / "agent" / "demo" / "artifacts" / "agent-summary.md"
-    dashboard_payload = build_dashboard(
-        history_dir=root / ".sdetkit" / "agent" / "history",
-        output=dashboard_html,
-        fmt="html",
-        summary_output=dashboard_md,
-    )
-
-    return {
-        "status": "ok",
-        "scenario": scenario,
-        "created": created,
-        "templates": template_outputs,
-        "artifacts": {
-            "dashboard_html": dashboard_payload["output"],
-            "dashboard_md": dashboard_payload["markdown_summary"],
-            "history_dir": (root / ".sdetkit" / "agent" / "history").as_posix(),
-        },
-    }
+_install_module_alias(__name__, _TARGET)

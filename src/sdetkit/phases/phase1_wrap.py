@@ -1,29 +1,21 @@
+"""Compatibility wrapper for historical `sdetkit.phases.phase1_wrap` imports."""
+
 from __future__ import annotations
 
-from ._legacy_workflow import run_lane
+from .._compat_alias import alias_dir as _alias_dir
+from .._compat_alias import alias_getattr as _alias_getattr
+from .._compat_alias import export_module as _export_module
+from .._compat_alias import install_module_alias as _install_module_alias
 
-_DEFAULT_PAGE_TEMPLATE = "# Phase-1 wrap ()\n\n## Phase-1 wrap\n"
-_CFG = {
-    "page_template": _DEFAULT_PAGE_TEMPLATE,
-    "name": "phase1-wrap",
-    "page_path": "docs/integrations-phase1-wrap.md",
-    "required_inputs": [
-        "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json",
-        "docs/artifacts/weekly-review-pack/weekly-review-summary.json",
-        "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
-    ],
-    "required_page_marker": "## Phase-1 wrap",
-    "summary_json": "phase1-wrap-summary.json",
-    "summary_md": "phase1-wrap-summary.md",
-    "pack_files": [
-        "phase1-wrap-phase2-backlog.md",
-        "phase1-wrap-handoff-actions.md",
-        "phase1-wrap-validation-commands.md",
-    ],
-    "evidence_json": "phase1-wrap-execution-summary.json",
-    "text_output": " phase-1 wrap summary",
-}
+_TARGET = _export_module("sdetkit.phases.baseline_wrap", globals())
 
 
-def main(argv: list[str] | None = None) -> int:
-    return run_lane(argv, _CFG)
+def __getattr__(name: str) -> object:
+    return _alias_getattr(_TARGET, name)
+
+
+def __dir__() -> list[str]:
+    return _alias_dir(globals(), _TARGET)
+
+
+_install_module_alias(__name__, _TARGET)

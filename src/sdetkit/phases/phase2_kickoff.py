@@ -1,28 +1,21 @@
+"""Compatibility wrapper for historical `sdetkit.phases.phase2_kickoff` imports."""
+
 from __future__ import annotations
 
-from ._legacy_workflow import run_lane
+from .._compat_alias import alias_dir as _alias_dir
+from .._compat_alias import alias_getattr as _alias_getattr
+from .._compat_alias import export_module as _export_module
+from .._compat_alias import install_module_alias as _install_module_alias
 
-_DEFAULT_PAGE_TEMPLATE = "# Phase-2 kickoff ()\n\n## Phase-2 kickoff\n"
-_CFG = {
-    "page_template": _DEFAULT_PAGE_TEMPLATE,
-    "name": "phase2-kickoff",
-    "page_path": "docs/integrations-phase2-kickoff.md",
-    "required_inputs": [
-        "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json",
-        "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md",
-    ],
-    "required_boards": ["docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md"],
-    "summary_json": "phase2-kickoff-summary.json",
-    "summary_md": "phase2-kickoff-summary.md",
-    "pack_files": [
-        "phase2-kickoff-baseline-snapshot.json",
-        "phase2-kickoff-delivery-board.md",
-        "phase2-kickoff-validation-commands.md",
-    ],
-    "evidence_json": "phase2-kickoff-execution-summary.json",
-    "text_output": " phase-2 kickoff summary",
-}
+_TARGET = _export_module("sdetkit.phases.release_readiness_kickoff", globals())
 
 
-def main(argv: list[str] | None = None) -> int:
-    return run_lane(argv, _CFG)
+def __getattr__(name: str) -> object:
+    return _alias_getattr(_TARGET, name)
+
+
+def __dir__() -> list[str]:
+    return _alias_dir(globals(), _TARGET)
+
+
+_install_module_alias(__name__, _TARGET)

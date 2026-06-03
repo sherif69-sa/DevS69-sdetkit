@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from importlib import import_module
 from types import ModuleType
 
@@ -29,3 +30,8 @@ def alias_dir(namespace: dict[str, object], module: ModuleType) -> list[str]:
     exported = namespace.get("__all__", [])
     export_names = [str(name) for name in exported] if isinstance(exported, list) else []
     return sorted(set(namespace) | set(export_names) | set(dir(module)))
+
+
+def install_module_alias(alias_name: str, module: ModuleType) -> ModuleType:
+    sys.modules[alias_name] = module
+    return module
