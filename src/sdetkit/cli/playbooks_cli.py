@@ -121,6 +121,12 @@ _PLAYBOOK_ALIAS_TO_CANONICAL: dict[str, str] = {
     "quality-contribution-delta": "contribution-quality-report",
 }
 
+_PROFESSIONAL_NAMING_PLAYBOOK_COMMANDS: dict[str, str] = {
+    "baseline-hardening": "phase1_hardening",
+    "baseline-wrap": "phase1_wrap",
+    "release-readiness-kickoff": "phase2_kickoff",
+}
+
 
 def _contains_day_token(name: str) -> bool:
     return "" in re.split(r"[^a-z0-9]+", name.lower())
@@ -226,6 +232,10 @@ def _build_registry(pkg_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
 
     for command, module_name in CONTINUOUS_UPGRADE_COMMAND_MODULES.items():
         cmd_to_mod.setdefault(command, module_name.removeprefix("sdetkit."))
+
+    for command, module_name in _PROFESSIONAL_NAMING_PLAYBOOK_COMMANDS.items():
+        if (pkg_dir / f"{module_name}.py").exists():
+            cmd_to_mod.setdefault(command, module_name)
 
     return cmd_to_mod, alias_to_canonical
 
