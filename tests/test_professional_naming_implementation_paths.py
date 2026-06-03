@@ -61,3 +61,10 @@ def test_legacy_implementation_paths_are_wrappers_not_deleted() -> None:
     for path in wrapper_paths:
         text = path.read_text(encoding="utf-8")
         assert "_compat_alias" in text
+
+
+def test_legacy_demo_import_is_canonical_module_object() -> None:
+    legacy_demo = importlib.import_module("sdetkit.demo")
+    canonical_example = importlib.import_module("sdetkit.example")
+
+    assert legacy_demo is canonical_example
