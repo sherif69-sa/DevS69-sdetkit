@@ -9,8 +9,8 @@ WORKFLOW_ROOT = ROOT / ".github" / "workflows"
 LEGACY_MAKE_COMMAND = re.compile(r"\bmake\s+phase\d[\w-]*\b")
 
 EXPECTED_WORKFLOW_ALIASES = {
-    "phase3-quality-contract.yml": "make quality-contract-run",
-    "phase4-governance-contract.yml": "make governance-contract-check",
+    "platform-readiness-quality-contract.yml": "make quality-contract-run",
+    "operational-readiness-governance-contract.yml": "make governance-contract-check",
     "phase5-ecosystem-contract.yml": "make ecosystem-contract-check",
     "phase6-metrics-contract.yml": "make metrics-contract-check",
 }
@@ -27,14 +27,14 @@ CONTRACT_SCRIPT_EXPECTATIONS = {
             "operations-next-action-pass",
         },
     },
-    "scripts/check_phase4_governance_contract.py": {
+    "scripts/check_operational_readiness_governance_contract.py": {
         "required": {
             '"make governance-contract-check"',
             '"make quality-contract-check"',
         },
         "forbidden": {
-            '"make phase4-governance-contract"',
-            '"make phase3-quality-contract"',
+            '"make operational-readiness-governance-contract"',
+            '"make platform-readiness-quality-contract"',
         },
     },
 }

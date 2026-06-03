@@ -54,7 +54,7 @@ def main(argv: list[str] | None = None) -> int:
         payload = {
             "ok": False,
             "schema_version": "sdetkit.phase1_gate_phase2.v1",
-            "reason": "missing finish-signal or artifact-set payload",
+            "reason": "missing readiness signal or artifact-set payload",
         }
         if args.format == "json":
             print(json.dumps(payload, indent=2, sort_keys=True))

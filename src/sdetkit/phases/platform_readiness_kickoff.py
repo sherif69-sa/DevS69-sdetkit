@@ -28,12 +28,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit platform-readiness-kickoff-completion-report --format json --strict",
     "python -m sdetkit platform-readiness-kickoff-completion-report --emit-pack-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack --format json --strict",
     "python -m sdetkit platform-readiness-kickoff-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack/evidence --format json --strict",
-    "python scripts/check_phase3_kickoff_contract.py",
+    "python scripts/check_platform_readiness_kickoff_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit platform-readiness-kickoff-completion-report --format json --strict",
     "python -m sdetkit platform-readiness-kickoff-completion-report --emit-pack-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack --format json --strict",
-    "python scripts/check_phase3_kickoff_contract.py --skip-evidence",
+    "python scripts/check_platform_readiness_kickoff_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for platform readiness kickoff execution and trust-signal triage.",
@@ -77,7 +77,7 @@ ships a major platform readiness kickoff upgrade that converts wrap evidence int
 python -m sdetkit platform-readiness-kickoff-completion-report --format json --strict
 python -m sdetkit platform-readiness-kickoff-completion-report --emit-pack-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack --format json --strict
 python -m sdetkit platform-readiness-kickoff-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack/evidence --format json --strict
-python scripts/check_phase3_kickoff_contract.py
+python scripts/check_platform_readiness_kickoff_contract.py
 ```
 
 ## platform readiness kickoff execution contract

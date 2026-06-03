@@ -88,7 +88,7 @@ Use the platform readiness preplan summary and delivery board before promoting t
 python -m sdetkit release-readiness-wrap-handoff-completion-report --format json --strict
 python -m sdetkit release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict
 python -m sdetkit release-readiness-wrap-handoff-completion-report --execute --evidence-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence --format json --strict
-python scripts/check_phase2_wrap_handoff_contract.py
+python scripts/check_release_readiness_wrap_handoff_contract.py
 
 ## release readiness wrap handoff contract
 

@@ -1,22 +1,22 @@
-name: phase4-governance-contract
+name: operational-readiness-governance-contract
 
 on:
   push:
     branches: [ main ]
     paths:
-      - 'scripts/check_phase4_governance_contract.py'
+      - 'scripts/check_operational_readiness_governance_contract.py'
       - 'config/phase4_drift_scoring.json'
       - 'docs/**'
       - 'Makefile'
-      - '.github/workflows/phase4-governance-contract.yml'
+      - '.github/workflows/operational-readiness-governance-contract.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'scripts/check_phase4_governance_contract.py'
+      - 'scripts/check_operational_readiness_governance_contract.py'
       - 'config/phase4_drift_scoring.json'
       - 'docs/**'
       - 'Makefile'
-      - '.github/workflows/phase4-governance-contract.yml'
+      - '.github/workflows/operational-readiness-governance-contract.yml'
 permissions:
   contents: read
 
@@ -42,7 +42,7 @@ jobs:
           python - <<'PYCODE'
           from pathlib import Path
           expected = {
-              "phase4-governance-contract.json",
+              "operational-readiness-governance-contract.json",
               "phase4-release-evidence.json",
               "phase4-release-evidence.md",
               "phase4-governance-adherence.json",
@@ -65,7 +65,7 @@ jobs:
         with:
           name: phase4-governance-artifacts
           path: |
-            build/phase4-governance/phase4-governance-contract.json
+            build/phase4-governance/operational-readiness-governance-contract.json
             build/phase4-governance/phase4-release-evidence.json
             build/phase4-governance/phase4-release-evidence.md
             build/phase4-governance/phase4-governance-adherence.json

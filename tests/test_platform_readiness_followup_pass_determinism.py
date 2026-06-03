@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts import phase3_quality_engine as q
+from scripts import platform_readiness_quality_engine as q
 
 
 def _summary() -> dict[str, object]:

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from scripts import phase3_persist_baseline_history as persist
+from scripts import platform_readiness_persist_baseline_history as persist
 
 
 def _write_summary(path: Path, generated_at: str) -> None:

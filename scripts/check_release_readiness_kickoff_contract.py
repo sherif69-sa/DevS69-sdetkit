@@ -18,7 +18,7 @@ def _evidence_path(root: Path) -> Path:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Validate phase2-kickoff contract.")
+    parser = argparse.ArgumentParser(description="Validate release-readiness kickoff contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     args = parser.parse_args(argv)

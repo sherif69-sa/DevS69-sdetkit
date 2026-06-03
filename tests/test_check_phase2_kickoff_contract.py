@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from scripts import check_phase2_kickoff_contract as contract
+from scripts import check_release_readiness_kickoff_contract as contract
 
 
 class _Proc:

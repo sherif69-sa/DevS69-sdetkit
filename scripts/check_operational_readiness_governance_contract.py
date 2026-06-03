@@ -676,7 +676,7 @@ def main(argv: list[str] | None = None) -> int:
         drift_threshold=max(0, int(ns.drift_threshold)),
     )
 
-    _write_json(out_dir / "phase4-governance-contract.json", governance_payload)
+    _write_json(out_dir / "operational-readiness-governance-contract.json", governance_payload)
     _write_json(out_dir / "phase4-release-evidence.json", release_payload)
     release_md_path = out_dir / "phase4-release-evidence.md"
     if not ns.no_md:
@@ -746,7 +746,7 @@ def main(argv: list[str] | None = None) -> int:
         "checks": checks,
         "failures": failures,
         "artifacts": {
-            "governance_contract": str(out_dir / "phase4-governance-contract.json"),
+            "governance_contract": str(out_dir / "operational-readiness-governance-contract.json"),
             "release_evidence": str(out_dir / "phase4-release-evidence.json"),
             "release_evidence_markdown": str(release_md_path) if not ns.no_md else "",
             "governance_adherence": str(out_dir / "phase4-governance-adherence.json"),
@@ -762,9 +762,9 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         print(
-            "phase4-governance-contract: OK"
+            "operational-readiness-governance-contract: OK"
             if payload["ok"]
-            else "phase4-governance-contract: FAIL"
+            else "operational-readiness-governance-contract: FAIL"
         )
         for check in checks:
             print(f"[{'OK' if check['ok'] else 'FAIL'}] {check['id']}")

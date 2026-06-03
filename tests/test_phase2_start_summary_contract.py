@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from scripts import check_phase2_start_summary_contract as contract
+from scripts import check_release_readiness_start_summary_contract as contract
 
 
 def test_contract_passes_valid_summary(tmp_path: Path) -> None:
@@ -18,7 +18,7 @@ def test_contract_passes_valid_summary(tmp_path: Path) -> None:
                 "next_actions": [],
                 "steps": [
                     {"command": "python -m sdetkit phase2-kickoff --strict"},
-                    {"command": "python scripts/check_phase2_kickoff_contract.py"},
+                    {"command": "python scripts/check_release_readiness_kickoff_contract.py"},
                 ],
             }
         ),
@@ -40,7 +40,7 @@ def test_contract_fails_missing_required_step(tmp_path: Path) -> None:
                 "next_actions": [],
                 "steps": [
                     {"command": "python -m sdetkit phase2-kickoff --strict"},
-                    {"command": "python scripts/check_phase2_kickoff_contract.py"},
+                    {"command": "python scripts/check_release_readiness_kickoff_contract.py"},
                 ],
             }
         ),

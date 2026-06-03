@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
-from scripts.phase3_quality_engine import build_trend_delta, load_json
+from scripts.platform_readiness_quality_engine import build_trend_delta, load_json
 
 
 def _resolve_previous_summary(explicit: str | None, current: Path) -> Path | None:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts import check_phase5_ecosystem_contract as contract
+from scripts import check_ecosystem_readiness_contract as contract
 
 
 def test_phase5_partner_packaging_incomplete_when_missing_artifacts() -> None:

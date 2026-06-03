@@ -11,7 +11,7 @@ from sdetkit import release_readiness_wrap_handoff as d60
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Phase-2 wrap + handoff closeout contract"
+        description="Validate release readiness wrap + handoff completion-report contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")

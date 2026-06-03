@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a concise next-pass card for Phase 1 remediation."""
+"""Generate a concise follow-up pass card for baseline remediation."""
 
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ def _to_markdown(payload: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build Phase 1 next-pass remediation card.")
+    parser = argparse.ArgumentParser(description="Build baseline follow-up pass remediation card.")
     parser.add_argument(
         "--finish-signal", default="build/phase1-baseline/phase1-finish-signal.json"
     )
@@ -103,7 +103,7 @@ def main(argv: list[str] | None = None) -> int:
         payload = {
             "ok": False,
             "schema_version": "sdetkit.phase1_next_pass_card.v1",
-            "reason": "missing finish-signal or control-loop artifact",
+            "reason": "missing readiness signal or control-loop artifact",
         }
         if args.format == "json":
             print(json.dumps(payload, indent=2, sort_keys=True))

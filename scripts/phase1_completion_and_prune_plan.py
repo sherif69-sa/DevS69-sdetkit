@@ -46,7 +46,7 @@ def complete_phase1_flow(status_path: Path, plan_path: Path, archive_dir: Path) 
         return {
             "ok": False,
             "schema_version": "sdetkit.phase1_completion.v1",
-            "reason": "phase1 status is incomplete; complete phase1 before closeout",
+            "reason": "baseline status is incomplete; complete baseline before completion report",
             "hard_blockers": status_payload.get("hard_blockers", []),
         }
 

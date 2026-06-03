@@ -45,7 +45,9 @@ def _phase1_baseline_seed() -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Seed minimal prerequisites for phase2 workflows.")
+    parser = argparse.ArgumentParser(
+        description="Seed minimal prerequisites for release readiness workflows."
+    )
     parser.add_argument("--root", default=".")
     args = parser.parse_args(argv)
     root = Path(args.root).resolve()

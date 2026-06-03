@@ -59,7 +59,7 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         f"- Generated at: {payload.get('generated_at', '')}",
         f"- Status: {payload.get('status', 'unknown')}",
         f"- Completion: {payload.get('completion_percent', 0)}%",
-        f"- Ready for Phase 2: {payload.get('ready_for_phase2', False)}",
+        f"- Ready for release readiness: {payload.get('ready_for_phase2', False)}",
         f"- Next step: {payload.get('gate_next_step', '')}",
         "",
         "## Telemetry",

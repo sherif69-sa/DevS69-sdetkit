@@ -19,7 +19,7 @@ Lane starts Release readiness with a measurable baseline carried over from Lane 
 python -m sdetkit release-readiness-kickoff --format json --strict
 python -m sdetkit release-readiness-kickoff --emit-pack-dir docs/artifacts/release-readiness-kickoff-pack --format json --strict
 python -m sdetkit release-readiness-kickoff --execute --evidence-dir docs/artifacts/release-readiness-kickoff-pack/evidence --format json --strict
-python scripts/check_phase2_kickoff_contract.py
+python scripts/check_release_readiness_kickoff_contract.py
 ```
 
 ## Baseline + weekly targets

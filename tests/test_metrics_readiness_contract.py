@@ -7,12 +7,12 @@ from pathlib import Path
 
 import pytest
 
+from scripts import check_ecosystem_readiness_contract as phase5_contract
+from scripts import check_metrics_readiness_contract as contract
+from scripts import check_operational_readiness_governance_contract as phase4_contract
 from scripts import check_phase1_baseline_summary_contract as phase1_contract
-from scripts import check_phase2_start_summary_contract as phase2_contract
-from scripts import check_phase3_quality_contract as phase3_contract
-from scripts import check_phase4_governance_contract as phase4_contract
-from scripts import check_phase5_ecosystem_contract as phase5_contract
-from scripts import check_phase6_metrics_contract as contract
+from scripts import check_platform_readiness_quality_contract as phase3_contract
+from scripts import check_release_readiness_start_summary_contract as phase2_contract
 
 EXPECTED_PHASE6_GATE_CHECK_IDS = [
     "schema_completeness",
@@ -47,7 +47,7 @@ def _write_phase6_prereqs(root: Path) -> None:
 
 
 def _run_phase6_subprocess(*, cwd: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
-    script = Path(__file__).resolve().parents[1] / "scripts" / "check_phase6_metrics_contract.py"
+    script = Path(__file__).resolve().parents[1] / "scripts" / "check_metrics_readiness_contract.py"
     return subprocess.run(
         [sys.executable, str(script), *args],
         cwd=cwd,
@@ -351,8 +351,8 @@ def test_phase6_regression_contracts_phase1_to_phase5_unchanged() -> None:
     makefile_text = Path("Makefile").read_text(encoding="utf-8")
     for target in (
         "phase2-seed",
-        "phase3-quality-contract",
-        "phase4-governance-contract",
+        "platform-readiness-quality-contract",
+        "operational-readiness-governance-contract",
         "phase5-ecosystem-contract",
         "phase6-start",
         "phase6-status",

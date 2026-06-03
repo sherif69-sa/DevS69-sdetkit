@@ -1123,7 +1123,7 @@ Then use stability-aware command discovery:
     obj = sub.add_parser("objection-handling", help="Objection handling playbook")
     obj.add_argument("args", nargs=argparse.REMAINDER)
 
-    dmo = sub.add_parser("demo", help="Demo playbook")
+    dmo = sub.add_parser("demo", help="Example playbook compatibility command")
     dmo.add_argument("args", nargs=argparse.REMAINDER)
 
     fct = sub.add_parser("first-contribution", help="First contribution playbook")

@@ -34,7 +34,7 @@ Do not break existing automation by removing old Make targets. Add production-na
 
 | Production alias | Compatibility target |
 |---|---|
-| `quality-contract-check` | `phase3-quality-contract` |
+| `quality-contract-check` | `platform-readiness-quality-contract` |
 | `quality-contract-report` | `phase3-quality-report` |
 | `quality-contract-run` | `phase3-do-it` |
 | `operations-baseline` | `phase1-baseline` |
@@ -61,6 +61,6 @@ Do not break existing automation by removing old Make targets. Add production-na
 | `operations-finalize` | `phase1-closeout` |
 | `operations-current` | `phase-current` |
 | `operations-current-json` | `phase-current-json` |
-| `governance-contract-check` | `phase4-governance-contract` |
+| `governance-contract-check` | `operational-readiness-governance-contract` |
 | `ecosystem-contract-check` | `phase5-ecosystem-contract` |
 | `metrics-contract-check` | `phase6-metrics-contract` |

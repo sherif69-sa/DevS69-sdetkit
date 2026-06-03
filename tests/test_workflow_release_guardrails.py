@@ -31,14 +31,14 @@ def test_impact_release_control_uses_least_privilege_permissions_and_constraints
 def test_artifact_publish_and_governance_workflows_declare_permissions() -> None:
     for workflow_name in [
         "first-proof-artifact-publish.yml",
-        "phase4-governance-contract.yml",
+        "operational-readiness-governance-contract.yml",
     ]:
         text = _workflow(workflow_name)
         assert "\npermissions:\n  contents: read\n" in text
 
 
 def test_phase4_governance_contract_install_uses_constraints() -> None:
-    text = _workflow("phase4-governance-contract.yml")
+    text = _workflow("operational-readiness-governance-contract.yml")
 
     assert "python -m pip install -c constraints-ci.txt -e ." in text
     assert "pip install -e ." not in text
@@ -75,7 +75,7 @@ def test_active_workflows_declare_top_level_or_job_level_permissions() -> None:
 def test_adaptive_and_quality_contract_workflows_use_read_only_permissions() -> None:
     for workflow_name in [
         "adaptive-ops-weekly.yml",
-        "phase3-quality-contract.yml",
+        "platform-readiness-quality-contract.yml",
     ]:
         text = _workflow(workflow_name)
         assert "\npermissions:\n  contents: read\n\njobs:\n" in text

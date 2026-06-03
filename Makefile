@@ -15,7 +15,7 @@ FIRST_PROOF_READINESS_PROFILE ?= lenient
 PHASE2_BASELINE_PRE_EXTRACTION ?= docs/artifacts/phase2-hotspot-baseline-pre-extraction-$(DATE_TAG).json
 BUSINESS_EXECUTION_OPERATOR ?= sherif69-sa
 
-.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt format-before-proof proof-after-format type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry upgrade-next operator-onramp operator-onramp-dry-run operator-onramp-verify onboarding-next doctor-remediate first-proof-freshness first-proof-ops-bundle-contract first-proof-ops-bundle-trend first-proof-ops-bundle-trend-report first-proof-execution-report first-proof-execution-contract first-proof-schema-contract upgrade-status-line first-proof-followup-ready followup-ready-metrics first-proof-dashboard first-proof-readiness-threshold followup-changelog plan-next-10 cleanup-first-proof-artifacts golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-fast ship-readiness-contract release-room release-room-fast portfolio-readiness premerge-release-room premerge-release-room-fast adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-local first-proof-contract first-proof-health-score first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-tests-local first-proof-verify first-proof-verify-local gate-decision-summary gate-decision-summary-contract fit-check adoption-followup adoption-followup-contract adoption-control-loop adoption-control-loop-contract adoption-posture adoption-validate adoption-control-loop-full ops-followup ops-followup-contract ops-now ops-now-lite ops-next ops-premerge-next ops-premerge-next-fast phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-execution-core phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-hotspot-baseline phase2-hotspot-delta phase2-complete phase2-progress phase2-surface-clarity phase3-dependency-radar quality-baseline-summary-fixture phase3-quality-contract phase3-quality-report phase3-do-it phase4-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility real-workflow-daily real-workflow-daily-fast real-workflow-weekly real-workflow-premerge real-workflow-premerge-fast real-workflow ops-daily ops-daily-fast ops-weekly ops-premerge ops-premerge-fast ops-workflow
+.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt format-before-proof proof-after-format type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry upgrade-next operator-onramp operator-onramp-dry-run operator-onramp-verify onboarding-next doctor-remediate first-proof-freshness first-proof-ops-bundle-contract first-proof-ops-bundle-trend first-proof-ops-bundle-trend-report first-proof-execution-report first-proof-execution-contract first-proof-schema-contract upgrade-status-line first-proof-followup-ready followup-ready-metrics first-proof-dashboard first-proof-readiness-threshold followup-changelog plan-next-10 cleanup-first-proof-artifacts golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-fast ship-readiness-contract release-room release-room-fast portfolio-readiness premerge-release-room premerge-release-room-fast adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-local first-proof-contract first-proof-health-score first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-tests-local first-proof-verify first-proof-verify-local gate-decision-summary gate-decision-summary-contract fit-check adoption-followup adoption-followup-contract adoption-control-loop adoption-control-loop-contract adoption-posture adoption-validate adoption-control-loop-full ops-followup ops-followup-contract ops-now ops-now-lite ops-next ops-premerge-next ops-premerge-next-fast phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-execution-core phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-hotspot-baseline phase2-hotspot-delta phase2-complete phase2-progress phase2-surface-clarity phase3-dependency-radar quality-baseline-summary-fixture platform-readiness-quality-contract phase3-quality-report phase3-do-it operational-readiness-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility real-workflow-daily real-workflow-daily-fast real-workflow-weekly real-workflow-premerge real-workflow-premerge-fast real-workflow ops-daily ops-daily-fast ops-weekly ops-premerge ops-premerge-fast ops-workflow
 .PHONY: business-execution-start business-execution-start-contract business-execution-go-gate business-execution-progress business-execution-progress-contract business-execution-next business-execution-next-contract business-execution-handoff business-execution-handoff-contract business-execution-escalation business-execution-escalation-contract business-execution-followup business-execution-followup-contract business-execution-continue business-execution-continue-contract business-execution-horizon business-execution-horizon-contract business-execution-inputs-contract business-execution-pipeline business-execution-week1-pipeline
 
 bootstrap: venv
@@ -524,7 +524,7 @@ phase1-execute: phase1-workflow
 phase2-execute: phase2-workflow
 	@bash -lc 'echo phase2-execute: canonical phase2 workflow complete'
 
-phase3-governance: phase3-quality-contract
+phase3-governance: platform-readiness-quality-contract
 	@bash -lc '. .venv/bin/activate && $(MAKE) phase3-dependency-radar'
 
 phase4-credibility: venv
@@ -535,7 +535,7 @@ phase2-start: phase2-workflow
 
 phase2-workflow: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase2_start_workflow.py --format json'
-	@bash -lc '. .venv/bin/activate && python scripts/check_phase2_start_summary_contract.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/check_release_readiness_start_summary_contract.py --format json'
 	@bash -lc '. .venv/bin/activate && python scripts/phase2_status_report.py --format json --out build/phase2-start/phase2-status.json'
 	@bash -lc '. .venv/bin/activate && $(MAKE) phase2-hotspot-baseline'
 
@@ -543,7 +543,7 @@ phase2-status: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase2_status_report.py --format json --out build/phase2-start/phase2-status.json'
 
 phase2-start-contract: venv
-	@bash -lc '. .venv/bin/activate && python scripts/check_phase2_start_summary_contract.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/check_release_readiness_start_summary_contract.py --format json'
 
 phase2-seed: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase2_seed_prerequisites.py'
@@ -571,23 +571,23 @@ phase3-dependency-radar: install
 quality-baseline-summary-fixture: venv
 	@bash -lc '. .venv/bin/activate && python scripts/seed_quality_baseline_summary_fixture.py --summary build/phase1-baseline/phase1-baseline-summary.json'
 
-phase3-quality-contract: venv quality-baseline-summary-fixture
-	@bash -lc '. .venv/bin/activate && python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.check_phase3_quality_contract --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.phase3_persist_baseline_history --summary build/phase1-baseline/phase1-baseline-summary.json --format json && $(MAKE) phase3-dependency-radar'
+platform-readiness-quality-contract: venv quality-baseline-summary-fixture
+	@bash -lc '. .venv/bin/activate && python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.check_platform_readiness_quality_contract --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.platform_readiness_persist_baseline_history --summary build/phase1-baseline/phase1-baseline-summary.json --format json && $(MAKE) phase3-dependency-radar'
 
-phase3-quality-report: phase3-quality-contract
-	@bash -lc '. .venv/bin/activate && python -m scripts.build_phase3_trend_delta --current build/phase1-baseline/phase1-baseline-summary.json --out-json build/phase3-quality/phase3-trend-delta.json --out-md build/phase3-quality/phase3-trend-delta.md --format json'
+phase3-quality-report: platform-readiness-quality-contract
+	@bash -lc '. .venv/bin/activate && python -m scripts.build_platform_readiness_trend_delta --current build/phase1-baseline/phase1-baseline-summary.json --out-json build/phase3-quality/phase3-trend-delta.json --out-md build/phase3-quality/phase3-trend-delta.md --format json'
 
-phase3-do-it: phase3-quality-contract
+phase3-do-it: platform-readiness-quality-contract
 	@bash -lc 'echo "phase3-do-it is deprecated; use phase3-quality-report"'
 
-phase4-governance-contract: venv
-	@bash -lc '. .venv/bin/activate && python scripts/check_phase4_governance_contract.py --format json'
+operational-readiness-governance-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_operational_readiness_governance_contract.py --format json'
 
 phase5-ecosystem-contract: venv
-	@bash -lc '. .venv/bin/activate && python scripts/check_phase5_ecosystem_contract.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/check_ecosystem_readiness_contract.py --format json'
 
 phase6-metrics-contract: venv
-	@bash -lc '. .venv/bin/activate && python scripts/check_phase6_metrics_contract.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/check_metrics_readiness_contract.py --format json'
 
 phase6-start: phase6-metrics-contract
 
@@ -698,7 +698,7 @@ powerfuel-merge-ready: powerfuel-contract
 .PHONY: operations-baseline operations-status operations-next-action operations-snapshot operations-dashboard operations-weekly-pack operations-control-loop operations-run-all operations-artifact-set operations-telemetry operations-readiness-signal operations-remediation-plan operations-blocker-register operations-run operations-core-run operations-workflow operations-flow-contract operations-quality-gate operations-executive-report operations-cleanup-plan operations-complete operations-finalize operations-current operations-current-json
 .PHONY: governance-contract-check ecosystem-contract-check metrics-contract-check
 
-quality-contract-check: phase3-quality-contract
+quality-contract-check: platform-readiness-quality-contract
 quality-contract-report: phase3-quality-report
 quality-contract-run: phase3-do-it
 
@@ -727,6 +727,6 @@ operations-finalize: phase1-closeout
 operations-current: phase-current
 operations-current-json: phase-current-json
 
-governance-contract-check: phase4-governance-contract
+governance-contract-check: operational-readiness-governance-contract
 ecosystem-contract-check: phase5-ecosystem-contract
 metrics-contract-check: phase6-metrics-contract

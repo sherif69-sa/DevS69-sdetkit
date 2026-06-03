@@ -41,7 +41,7 @@ def retire_phase1_plan(
         return {
             "ok": False,
             "schema_version": "sdetkit.phase1_retire_plan.v1",
-            "reason": completion.get("reason", "closeout failed"),
+            "reason": completion.get("reason", "completion report failed"),
             "completion": completion,
         }
 

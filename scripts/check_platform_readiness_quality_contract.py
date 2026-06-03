@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from scripts.phase3_quality_engine import (
+from scripts.platform_readiness_quality_engine import (
     build_adaptive_planning,
     build_next_pass_handoff,
     build_remediation_v2,
@@ -174,7 +174,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--doctor-summary",
         default="build/phase1-baseline/doctor.json",
-        help="Optional doctor summary for next-pass handoff alignment checks.",
+        help="Optional doctor summary for follow-up pass handoff alignment checks.",
     )
     parser.add_argument(
         "--doctor-alignment-mode",
@@ -214,7 +214,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.format == "json":
             print(json.dumps(payload, indent=2, sort_keys=True))
         else:
-            print("phase3-quality-contract: FAIL")
+            print("platform-readiness-quality-contract: FAIL")
             print("- decision: fail")
             print("- doctor_handoff_alignment: no-doctor")
             print("- doctor_handoff_alignment_reason: doctor_next_pass_unavailable")
@@ -282,7 +282,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
-        print("phase3-quality-contract: OK" if payload["ok"] else "phase3-quality-contract: FAIL")
+        print(
+            "platform-readiness-quality-contract: OK"
+            if payload["ok"]
+            else "platform-readiness-quality-contract: FAIL"
+        )
         print(f"- decision: {payload['decision']}")
         print(f"- doctor_handoff_alignment: {payload['doctor_handoff_alignment']}")
         print(f"- doctor_handoff_alignment_reason: {payload['doctor_handoff_alignment_reason']}")

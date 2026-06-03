@@ -6,17 +6,19 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import platform_readiness_kickoff as d61
+from sdetkit import release_readiness_hardening as d58
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Phase-3 kickoff closeout contract")
+    parser = argparse.ArgumentParser(
+        description="Validate release readiness hardening completion-report contract"
+    )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d61.build_phase3_kickoff_closeout_summary(root)
+    payload = d58.build_phase2_hardening_closeout_summary(root)
     errors: list[str] = []
 
     if payload["summary"]["activation_score"] < 95:
@@ -31,7 +33,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/platform-readiness-kickoff-completion-report-pack/evidence/phase3-kickoff-execution-summary.json"
+            / "docs/artifacts/release-readiness-hardening-completion-report-pack/evidence/phase2-hardening-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -45,13 +47,13 @@ def main() -> int:
 
     if errors:
         print(
-            "platform-readiness-kickoff-completion-report contract check failed:", file=sys.stderr
+            "release-readiness-hardening-completion-report contract check failed:", file=sys.stderr
         )
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("platform-readiness-kickoff-completion-report contract check passed")
+    print("release-readiness-hardening-completion-report contract check passed")
     return 0
 
 

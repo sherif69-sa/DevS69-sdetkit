@@ -20,7 +20,7 @@ Lane closes Baseline with a hard evidence wrap-up and locks the first Release re
 python -m sdetkit baseline-wrap --format json --strict
 python -m sdetkit baseline-wrap --emit-pack-dir docs/artifacts/baseline-wrap-pack --format json --strict
 python -m sdetkit baseline-wrap --execute --evidence-dir docs/artifacts/baseline-wrap-pack/evidence --format json --strict
-python scripts/check_phase1_wrap_contract.py
+python scripts/check_baseline_wrap_contract.py
 ```
 
 ## Scoring model

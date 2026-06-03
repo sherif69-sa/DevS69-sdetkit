@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from scripts import check_phase4_governance_contract as contract
+from scripts import check_operational_readiness_governance_contract as contract
 
 
 def _write_baseline_docs(root: Path) -> None:
@@ -45,7 +45,9 @@ def test_phase4_governance_contract_positive_path(tmp_path: Path, monkeypatch) -
     assert rc == 0
 
     payload = json.loads(
-        (tmp_path / "build/phase4-governance/phase4-governance-contract.json").read_text()
+        (
+            tmp_path / "build/phase4-governance/operational-readiness-governance-contract.json"
+        ).read_text()
     )
     assert payload["schema_version"] == "sdetkit.phase4_governance_contract.v2"
     assert payload["legacy_schema_version"] == "sdetkit.phase4_governance_contract.v1"
@@ -290,7 +292,7 @@ def test_phase4_corrupt_emitted_contract_reports_schema_errors(tmp_path: Path, m
 
     out_dir = tmp_path / "build/phase4-governance"
     governance = json.loads(
-        (out_dir / "phase4-governance-contract.json").read_text(encoding="utf-8")
+        (out_dir / "operational-readiness-governance-contract.json").read_text(encoding="utf-8")
     )
     release = json.loads((out_dir / "phase4-release-evidence.json").read_text(encoding="utf-8"))
     adherence = json.loads(
@@ -367,7 +369,7 @@ def test_phase4_end_to_end_artifacts_are_non_empty_json_objects(
 
     out_dir = tmp_path / "build/phase4-governance"
     artifact_names = [
-        "phase4-governance-contract.json",
+        "operational-readiness-governance-contract.json",
         "phase4-release-evidence.json",
         "phase4-governance-adherence.json",
         "phase4-compliance-overlay-pack.json",

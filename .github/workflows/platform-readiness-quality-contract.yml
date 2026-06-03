@@ -1,14 +1,14 @@
-name: phase3-quality-contract
+name: platform-readiness-quality-contract
 
 on:
   workflow_dispatch:
   push:
     paths:
       - 'Makefile'
-      - 'scripts/check_phase3_quality_contract.py'
-      - 'scripts/build_phase3_trend_delta.py'
-      - 'scripts/phase3_persist_baseline_history.py'
-      - 'scripts/phase3_quality_engine.py'
+      - 'scripts/check_platform_readiness_quality_contract.py'
+      - 'scripts/build_platform_readiness_trend_delta.py'
+      - 'scripts/platform_readiness_persist_baseline_history.py'
+      - 'scripts/platform_readiness_quality_engine.py'
       - 'tests/test_phase3_*.py'
 
 permissions:
@@ -38,11 +38,11 @@ jobs:
       - name: Run quality-contract tests
         run: |
           pytest -q \
-            tests/test_phase3_quality_contract.py \
-            tests/test_phase3_trend_delta.py \
-            tests/test_phase3_remediation_payload_v2.py \
-            tests/test_phase3_next_pass_determinism.py \
-            tests/test_phase3_baseline_history_persist.py
+            tests/test_platform_readiness_quality_contract.py \
+            tests/test_platform_readiness_trend_delta.py \
+            tests/test_platform_readiness_remediation_payload_v2.py \
+            tests/test_platform_readiness_followup_pass_determinism.py \
+            tests/test_platform_readiness_baseline_history_persist.py
 
       - name: Run quality-contract operational lane
         run: |

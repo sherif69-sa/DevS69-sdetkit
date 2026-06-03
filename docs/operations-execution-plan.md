@@ -130,7 +130,7 @@ Turn technical capability into enterprise-grade confidence with explicit governa
 4. Track governance adherence with recurring reviews.
 5. Enforce governance docs contract with:
    - `make governance-contract-check`
-   - `python scripts/check_phase4_governance_contract.py --format json`
+   - `python scripts/check_operational_readiness_governance_contract.py --format json`
 
 ### Done when
 - Enterprise checks are reproducible and policy-aligned.
@@ -161,7 +161,7 @@ Scale integrations and extension surfaces without destabilizing core release-con
 4. Build portfolio scorecards from shared evidence contracts.
 5. Enforce ecosystem contract with:
    - `make ecosystem-contract-check`
-   - `python scripts/check_phase5_ecosystem_contract.py --format json`
+   - `python scripts/check_ecosystem_readiness_contract.py --format json`
 
 ### Done when
 - Integrations remain optional, reliable, and version-aware.
@@ -191,7 +191,7 @@ Convert technical progress into repeatable business outcomes and reporting-ready
 3. Tie release-confidence outputs to adoption/operations metrics.
 4. Enforce metrics contract with:
    - `make metrics-contract-check`
-   - `python scripts/check_phase6_metrics_contract.py --format json`
+   - `python scripts/check_metrics_readiness_contract.py --format json`
 
 ### Done when
 - KPI artifacts are generated on schedule and contract-validated.
