@@ -10,19 +10,19 @@ from typing import Any
 
 from .bools import coerce_bool
 
-_PAGE_PATH = "docs/integrations-phase2-wrap-handoff.md"
+_PAGE_PATH = "docs/integrations-release-readiness-wrap-handoff.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY58_SUMMARY_PATH = "docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-completion-report-summary.json"
-_DAY58_BOARD_PATH = "docs/artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-delivery-board.md"
-_LANE_NAME = "Phase 2 Wrap Handoff Closeout"
-_SECTION_HEADER = "# Phase 2 Wrap Handoff Closeout - Phase-2 wrap + handoff closeout lane"
+_DAY58_BOARD_PATH = "docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-delivery-board.md"
+_LANE_NAME = "Release Readiness Wrap Handoff"
+_SECTION_HEADER = "# Release Readiness Wrap Handoff - release readiness wrap handoff closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Phase 2 Wrap Handoff Closeout matters",
-    "## Required inputs (Phase-3 pre-plan closeout)",
-    "## Phase 2 Wrap Handoff Closeout command lane",
-    "## Phase-2 wrap + handoff contract",
-    "## Phase-2 wrap + handoff quality checklist",
-    "## Phase 2 Wrap Handoff Closeout delivery board",
+    "## Why Release Readiness Wrap Handoff matters",
+    "## Required inputs (platform readiness preplan closeout)",
+    "## Release Readiness Wrap Handoff command lane",
+    "## release readiness wrap handoff contract",
+    "## release readiness wrap handoff quality checklist",
+    "## Release Readiness Wrap Handoff delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -37,10 +37,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_phase2_wrap_handoff_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Phase-2 wrap + handoff execution and signal triage.",
-    "The closeout lane references Phase-3 pre-plan outcomes and unresolved risks.",
+    "Single owner + backup reviewer are assigned for release readiness wrap handoff execution and signal triage.",
+    "The closeout lane references platform readiness preplan outcomes and unresolved risks.",
     "Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "This closeout records Phase-2 wrap outcomes and Phase-3 execution priorities.",
+    "This closeout records Release readiness wrap outcomes and Platform readiness execution priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes priority digest, lane-level plan actions, and rollback strategy",
@@ -50,29 +50,29 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes wrap brief, risk ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Phase-2 wrap + handoff brief committed",
+    "- [ ] release readiness wrap handoff brief committed",
     "- [ ] Wrap reviewed with owner + backup",
     "- [ ] Risk ledger exported",
     "- [ ] KPI scorecard snapshot exported",
-    "- [ ] Phase-3 execution priorities drafted from Phase-2 learnings",
+    "- [ ] Platform readiness execution priorities drafted from Release readiness learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Phase 2 Wrap Handoff Closeout - Phase-2 wrap + handoff closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Release Readiness Wrap Handoff - release readiness wrap handoff closeout lane
 
-Phase 2 Wrap Handoff Closeout closes with a major Phase-2 wrap + handoff upgrade that turns Phase-3 pre-plan outcomes into deterministic Phase-3 execution priorities.
+Release Readiness Wrap Handoff closes with a major release readiness wrap handoff upgrade that turns platform readiness preplan outcomes into deterministic Platform readiness execution priorities.
 
-## Why Phase 2 Wrap Handoff Closeout matters
+## Why Release Readiness Wrap Handoff matters
 
-- Converts Phase-3 pre-plan evidence into repeatable Phase-3 execution loops.
+- Converts platform readiness preplan evidence into repeatable Platform readiness execution loops.
 - Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from closeout into Phase-3 execution planning.
+- Produces a deterministic handoff from closeout into Platform readiness execution planning.
 
-## Required inputs (Phase-3 pre-plan closeout)
+## Required inputs (platform readiness preplan closeout)
 
 - `docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-completion-report-summary.json`
-- `docs/artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-delivery-board.md`
+- `docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-delivery-board.md`
 
-## Phase 2 Wrap Handoff Closeout command lane
+## Release Readiness Wrap Handoff command lane
 
 ```bash
 python -m sdetkit release-readiness-wrap-handoff-completion-report --format json --strict
@@ -81,14 +81,14 @@ python -m sdetkit release-readiness-wrap-handoff-completion-report --execute --e
 python scripts/check_phase2_wrap_handoff_contract.py
 ```
 
-## Phase-2 wrap + handoff contract
+## release readiness wrap handoff contract
 
-- Single owner + backup reviewer are assigned for Phase-2 wrap + handoff execution and signal triage.
-- The closeout lane references Phase-3 pre-plan outcomes and unresolved risks.
+- Single owner + backup reviewer are assigned for release readiness wrap handoff execution and signal triage.
+- The closeout lane references platform readiness preplan outcomes and unresolved risks.
 - Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- This closeout records Phase-2 wrap outcomes and Phase-3 execution priorities.
+- This closeout records Release readiness wrap outcomes and Platform readiness execution priorities.
 
-## Phase-2 wrap + handoff quality checklist
+## release readiness wrap handoff quality checklist
 
 - [ ] Includes priority digest, lane-level plan actions, and rollback strategy
 - [ ] Every section has owner, review window, KPI threshold, and risk flag
@@ -96,22 +96,22 @@ python scripts/check_phase2_wrap_handoff_contract.py
 - [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI
 - [ ] Artifact pack includes wrap brief, risk ledger, KPI scorecard, and execution log
 
-## Phase 2 Wrap Handoff Closeout delivery board
+## Release Readiness Wrap Handoff delivery board
 
-- [ ] Phase-2 wrap + handoff brief committed
+- [ ] release readiness wrap handoff brief committed
 - [ ] Wrap reviewed with owner + backup
 - [ ] Risk ledger exported
 - [ ] KPI scorecard snapshot exported
-- [ ] Phase-3 execution priorities drafted from Phase-2 learnings
+- [ ] Platform readiness execution priorities drafted from Release readiness learnings
 
 ## Scoring model
 
-Phase 2 Wrap Handoff Closeout weighted score (0-100):
+Release Readiness Wrap Handoff weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Phase-3 pre-plan continuity and strict baseline carryover: 35 points.
-- Phase-2 wrap + handoff contract lock + delivery board readiness: 15 points.
+- platform readiness preplan continuity and strict baseline carryover: 35 points.
+- release readiness wrap handoff contract lock + delivery board readiness: 15 points.
 """
 
 
@@ -161,7 +161,7 @@ def build_phase2_wrap_handoff_summary(root: Path) -> dict[str, Any]:
         phase3_preplan_summary
     )
     board_count, board_has_phase3_preplan = _count_board_items(
-        phase3_preplan_board, "Phase-3 pre-plan"
+        phase3_preplan_board, "platform readiness preplan"
     )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
@@ -182,15 +182,18 @@ def build_phase2_wrap_handoff_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "impact-60-big-upgrade-report.md" in docs_index_text
-                and "integrations-phase2-wrap-handoff-workflow.md" in docs_index_text
+                and "integrations-release-readiness-wrap-handoff-workflow.md" in docs_index_text
             ),
-            "evidence": "impact-60-big-upgrade-report.md + integrations-phase2-wrap-handoff-workflow.md",
+            "evidence": "impact-60-big-upgrade-report.md + integrations-release-readiness-wrap-handoff-workflow.md",
         },
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Phase-2 wrap + handoff" in top10_text and "Phase-3 kickoff" in top10_text),
-            "evidence": "Phase-2 wrap + handoff and Phase-3 kickoff strategy chain",
+            "passed": (
+                "release readiness wrap handoff" in top10_text
+                and "platform readiness kickoff" in top10_text
+            ),
+            "evidence": "release readiness wrap handoff and platform readiness kickoff strategy chain",
         },
         {
             "check_id": "phase3_preplan_summary_present",
@@ -274,31 +277,33 @@ def build_phase2_wrap_handoff_summary(root: Path) -> dict[str, Any]:
 
     if phase3_preplan_strict:
         wins.append(
-            f"Phase-3 pre-plan continuity is strict-pass with activation score={phase3_preplan_score}."
+            f"platform readiness preplan continuity is strict-pass with activation score={phase3_preplan_score}."
         )
     else:
-        misses.append("Phase-3 pre-plan strict continuity signal is missing.")
+        misses.append("platform readiness preplan strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run the Phase-3 pre-plan closeout command and restore strict baseline before lock."
+            "Re-run the platform readiness preplan closeout command and restore strict baseline before lock."
         )
 
     if board_count >= 5 and board_has_phase3_preplan:
         wins.append(
-            f"Phase-3 delivery board integrity validated with {board_count} checklist items."
+            f"Platform readiness delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Phase-3 delivery board integrity is incomplete (needs >=5 items and anchors)."
+            "Platform readiness delivery board integrity is incomplete (needs >=5 items and anchors)."
         )
-        handoff_actions.append("Repair Phase-3 delivery board entries to include pre-plan anchors.")
+        handoff_actions.append(
+            "Repair Platform readiness delivery board entries to include pre-plan anchors."
+        )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append(
-            "Phase-2 wrap + handoff contract + quality checklist is fully locked for execution."
+            "release readiness wrap handoff contract + quality checklist is fully locked for execution."
         )
     else:
         misses.append(
-            "Phase-2 wrap + handoff contract, quality checklist, or delivery board entries are missing."
+            "release readiness wrap handoff contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
             "Complete all contract lines, quality checklist entries, and delivery board tasks in docs."
@@ -306,7 +311,7 @@ def build_phase2_wrap_handoff_summary(root: Path) -> dict[str, Any]:
 
     if not failed and not critical_failures:
         wins.append(
-            "Phase-2 wrap + handoff closeout lane is fully complete and ready for Phase-3 execution."
+            "release readiness wrap handoff closeout lane is fully complete and ready for Platform readiness execution."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -369,19 +374,27 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "release-readiness-wrap-handoff-completion-report-summary.md",
         _render_text(payload) + "\n",
     )
-    _write(target / "phase2-wrap-handoff-brief.md", "# Phase-2 wrap + handoff brief\n")
-    _write(target / "phase2-wrap-handoff-risk-ledger.csv", "risk,owner,mitigation,status\n")
     _write(
-        target / "phase2-wrap-handoff-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+        target / "release-readiness-wrap-handoff-brief.md",
+        "# release readiness wrap handoff brief\n",
     )
-    _write(target / "phase2-wrap-handoff-execution-log.md", "# Execution log\n")
     _write(
-        target / "phase2-wrap-handoff-delivery-board.md",
-        "\n".join(["# Phase-2 wrap + handoff delivery board", *_REQUIRED_DELIVERY_BOARD_LINES])
+        target / "release-readiness-wrap-handoff-risk-ledger.csv", "risk,owner,mitigation,status\n"
+    )
+    _write(
+        target / "release-readiness-wrap-handoff-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
+    _write(target / "release-readiness-wrap-handoff-execution-log.md", "# Execution log\n")
+    _write(
+        target / "release-readiness-wrap-handoff-delivery-board.md",
+        "\n".join(
+            ["# release readiness wrap handoff delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]
+        )
         + "\n",
     )
     _write(
-        target / "phase2-wrap-handoff-validation-commands.md",
+        target / "release-readiness-wrap-handoff-validation-commands.md",
         "# Validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -404,7 +417,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "phase2-wrap-handoff-execution-summary.json",
+        out_dir / "release-readiness-wrap-handoff-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -415,7 +428,7 @@ def build_phase2_wrap_handoff_summary_impl(root: Path) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Phase 2 Wrap Handoff Closeout checks")
+    parser = argparse.ArgumentParser(description="Release Readiness Wrap Handoff checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

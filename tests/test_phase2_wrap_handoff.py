@@ -21,20 +21,20 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase2-wrap-handoff-completion.md\nrelease-readiness-wrap-handoff-completion-report\n",
+        "docs/integrations-release-readiness-wrap-handoff-completion.md\nrelease-readiness-wrap-handoff-completion-report\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "impact-60-big-upgrade-report.md\nintegrations-phase2-wrap-handoff-workflow.md\n",
+        "impact-60-big-upgrade-report.md\nintegrations-release-readiness-wrap-handoff-workflow.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- ** — Phase-2 wrap + handoff:** publish full Phase-2 report and lock Phase-3 execution board.\n"
-        "- ** — Phase-3 kickoff:** set Phase-3 baseline and define ecosystem/trust KPIs.\n",
+        "- ** — release readiness wrap handoff:** publish full Release readiness report and lock Platform readiness execution board.\n"
+        "- ** — platform readiness kickoff:** set Platform readiness baseline and define ecosystem/trust KPIs.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-phase2-wrap-handoff-completion.md").write_text(
+    (root / "docs/integrations-release-readiness-wrap-handoff-completion.md").write_text(
         d60._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-60-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
@@ -56,13 +56,13 @@ def _seed_repo(root: Path) -> None:
     )
     board = (
         root
-        / "docs/artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-delivery-board.md"
+        / "docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-delivery-board.md"
     )
     board.write_text(
         "\n".join(
             [
                 "#  delivery board",
-                "- [ ]  Phase-3 pre-plan brief committed",
+                "- [ ]  platform readiness preplan brief committed",
                 "- [ ]  pre-plan reviewed with owner + backup",
                 "- [ ]  risk ledger exported",
                 "- [ ]  KPI scorecard snapshot exported",
@@ -72,32 +72,32 @@ def _seed_repo(root: Path) -> None:
         + "\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-phase2-wrap-handoff.md").write_text(
-        """# Phase 2 Wrap Handoff Closeout - Phase-2 wrap + handoff closeout lane
+    (root / "docs/integrations-release-readiness-wrap-handoff.md").write_text(
+        """# Release Readiness Wrap Handoff - release readiness wrap handoff closeout lane
 
-## Why Phase 2 Wrap Handoff Closeout matters
+## Why Release Readiness Wrap Handoff matters
 
-The Phase-2 wrap + handoff workflow keeps Phase-2 outcomes connected to Phase-3 execution priorities.
+The release readiness wrap handoff workflow keeps Release readiness outcomes connected to Platform readiness execution priorities.
 
-## Required inputs (Phase-3 pre-plan closeout)
+## Required inputs (platform readiness preplan closeout)
 
-Use the Phase-3 pre-plan summary and delivery board before promoting the handoff.
+Use the platform readiness preplan summary and delivery board before promoting the handoff.
 
-## Phase 2 Wrap Handoff Closeout command lane
+## Release Readiness Wrap Handoff command lane
 
 python -m sdetkit release-readiness-wrap-handoff-completion-report --format json --strict
 python -m sdetkit release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict
 python -m sdetkit release-readiness-wrap-handoff-completion-report --execute --evidence-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence --format json --strict
 python scripts/check_phase2_wrap_handoff_contract.py
 
-## Phase-2 wrap + handoff contract
+## release readiness wrap handoff contract
 
-Single owner + backup reviewer are assigned for Phase-2 wrap + handoff execution and signal triage.
-The closeout lane references Phase-3 pre-plan outcomes and unresolved risks.
+Single owner + backup reviewer are assigned for release readiness wrap handoff execution and signal triage.
+The closeout lane references platform readiness preplan outcomes and unresolved risks.
 Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-This closeout records Phase-2 wrap outcomes and Phase-3 execution priorities.
+This closeout records Release readiness wrap outcomes and Platform readiness execution priorities.
 
-## Phase-2 wrap + handoff quality checklist
+## release readiness wrap handoff quality checklist
 
 - [ ] Includes priority digest, lane-level plan actions, and rollback strategy
 - [ ] Every section has owner, review window, KPI threshold, and risk flag
@@ -105,13 +105,13 @@ This closeout records Phase-2 wrap outcomes and Phase-3 execution priorities.
 - [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI
 - [ ] Artifact pack includes wrap brief, risk ledger, KPI scorecard, and execution log
 
-## Phase 2 Wrap Handoff Closeout delivery board
+## Release Readiness Wrap Handoff delivery board
 
-- [ ] Phase-2 wrap + handoff brief committed
+- [ ] release readiness wrap handoff brief committed
 - [ ] Wrap reviewed with owner + backup
 - [ ] Risk ledger exported
 - [ ] KPI scorecard snapshot exported
-- [ ] Phase-3 execution priorities drafted from Phase-2 learnings
+- [ ] Platform readiness execution priorities drafted from Release readiness learnings
 
 ## Scoring model
 
@@ -162,31 +162,31 @@ def test_phase2_wrap_handoff_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-brief.md"
+        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-brief.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-risk-ledger.csv"
+        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-risk-ledger.csv"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-kpi-scorecard.json"
+        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-kpi-scorecard.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-execution-log.md"
+        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-execution-log.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-delivery-board.md"
+        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-delivery-board.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-validation-commands.md"
+        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-validation-commands.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence/phase2-wrap-handoff-execution-summary.json"
+        / "artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence/release-readiness-wrap-handoff-execution-summary.json"
     ).exists()
 
 
@@ -213,12 +213,9 @@ def test_phase2_wrap_handoff_cli_dispatch(tmp_path: Path, capsys) -> None:
         ]
     )
     assert rc == 0
-    assert "Phase 2 Wrap Handoff Closeout summary" in capsys.readouterr().out
+    assert "Release Readiness Wrap Handoff summary" in capsys.readouterr().out
 
 
 def test_phase2_wrap_handoff_docs_page_has_no_lane_lane_typo() -> None:
-    docs_page = (
-        Path(__file__).resolve().parents[1] / "docs/integrations-phase2-wrap-handoff-completion.md"
-    )
-    page_text = docs_page.read_text(encoding="utf-8")
+    page_text = d60._DEFAULT_PAGE_TEMPLATE
     assert "Lane lane" not in page_text

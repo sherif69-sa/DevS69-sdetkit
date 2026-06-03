@@ -21,20 +21,20 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase2-hardening-workflow.md\nrelease-readiness-hardening-completion-report\n",
+        "docs/integrations-release-readiness-hardening-workflow.md\nrelease-readiness-hardening-completion-report\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "impact-58-big-upgrade-report.md\nintegrations-phase2-hardening-workflow.md\n",
+        "impact-58-big-upgrade-report.md\nintegrations-release-readiness-hardening-workflow.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- ** — Phase-2 hardening:** polish highest-traffic pages and remove top friction points.\n"
-        "- ** — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.\n",
+        "- ** — release readiness hardening:** polish highest-traffic pages and remove top friction points.\n"
+        "- ** — platform readiness preplan:** convert Release readiness learnings into Platform readiness priorities.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-phase2-hardening-workflow.md").write_text(
+    (root / "docs/integrations-release-readiness-hardening-workflow.md").write_text(
         d58._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-58-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
@@ -108,31 +108,31 @@ def test_phase2_hardening_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-hardening-completion-report-pack/phase2-hardening-brief.md"
+        / "artifacts/release-readiness-hardening-completion-report-pack/release-readiness-hardening-brief.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-hardening-completion-report-pack/phase2-hardening-risk-ledger.csv"
+        / "artifacts/release-readiness-hardening-completion-report-pack/release-readiness-hardening-risk-ledger.csv"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-hardening-completion-report-pack/phase2-hardening-scorecard.json"
+        / "artifacts/release-readiness-hardening-completion-report-pack/release-readiness-hardening-scorecard.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-hardening-completion-report-pack/phase2-hardening-execution-log.md"
+        / "artifacts/release-readiness-hardening-completion-report-pack/release-readiness-hardening-execution-log.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-hardening-completion-report-pack/phase2-hardening-delivery-board.md"
+        / "artifacts/release-readiness-hardening-completion-report-pack/release-readiness-hardening-delivery-board.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-hardening-completion-report-pack/phase2-hardening-validation-commands.md"
+        / "artifacts/release-readiness-hardening-completion-report-pack/release-readiness-hardening-validation-commands.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/release-readiness-hardening-completion-report-pack/evidence/phase2-hardening-execution-summary.json"
+        / "artifacts/release-readiness-hardening-completion-report-pack/evidence/release-readiness-hardening-execution-summary.json"
     ).exists()
 
 
