@@ -8,10 +8,10 @@ Lane starts the next impact by converting phase-3 wrap publication outcomes into
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
 - Creates a deterministic handoff from Lane completion report into the continuous-upgrade backlog.
 
-## Required inputs (Phase-3 wrap publication)
+## Required inputs (platform readiness wrap publication)
 
 - `docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/platform-readiness-wrap-publication-completion-report-summary.json`
-- `docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/phase3-wrap-publication-delivery-board.md`
+- `docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/platform-readiness-wrap-publication-delivery-board.md`
 - `docs/roadmap/plans/continuous-upgrade-plan-1.json`
 
 ## Command lane

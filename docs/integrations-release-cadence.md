@@ -10,8 +10,8 @@ Lane converts Lane baseline goals into a repeatable release operating cadence wi
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json` (primary)
-- `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md` (primary)
+- `docs/artifacts/release-readiness-kickoff-pack/release-readiness-kickoff-summary.json` (primary)
+- `docs/artifacts/release-readiness-kickoff-pack/release-readiness-kickoff-delivery-board.md` (primary)
 
 ## Lane command lane
 

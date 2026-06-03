@@ -12,7 +12,7 @@ Lane closes with a major upgrade that converts Lane governance scale outcomes in
 
 - `docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json`
 - `docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md`
-- `docs/roadmap/plans/phase3-wrap-publication-plan.json`
+- `docs/roadmap/plans/platform-readiness-wrap-publication-plan.json`
 
 ## Command lane
 
@@ -23,14 +23,14 @@ python -m sdetkit platform-readiness-wrap-publication-completion-report --execut
 python scripts/check_phase3_wrap_publication_closeout_contract.py
 ```
 
-## Phase-3 wrap publication contract
+## platform readiness wrap publication contract
 
 - Single owner + backup reviewer are assigned for Lane phase-3 wrap publication execution and signoff.
 - This lane references Lane outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Lane completion report records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.
 
-## Phase-3 wrap publication quality checklist
+## platform readiness wrap publication quality checklist
 
 - [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets
 - [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag

@@ -4,7 +4,7 @@ Lane closes the weekly growth loop by consolidating Lane-27 outcomes into wins, 
 
 ## Who should run Lane
 
-- Maintainers preparing Phase-1 completion report and Lane hardening priorities.
+- Maintainers preparing Baseline completion report and Lane hardening priorities.
 - DevRel/community operators validating that activation efforts converted to contributions.
 - Engineering managers requiring an auditable weekly checkpoint before handoff.
 
