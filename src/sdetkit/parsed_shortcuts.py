@@ -30,7 +30,7 @@ _PARSED_MODULE_SHORTCUTS: tuple[tuple[str, str], ...] = (
     ("kpi-audit", "sdetkit.kpi_audit"),
     ("kpi-report", "sdetkit.kpi_report"),
     ("objection-handling", "sdetkit.objection_handling"),
-    ("demo", "sdetkit.demo"),
+    ("demo", "sdetkit.example"),
     ("first-contribution", "sdetkit.first_contribution"),
     ("contributor-funnel", "sdetkit.contributor_funnel"),
     ("evidence-assets", "sdetkit.proof"),

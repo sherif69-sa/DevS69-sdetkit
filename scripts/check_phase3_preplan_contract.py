@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import phase3_preplan as d59
+from sdetkit import platform_readiness_preplan as d59
 
 
 def main() -> int:
@@ -31,7 +31,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/phase3-preplan-closeout-pack/evidence/phase3-preplan-execution-summary.json"
+            / "docs/artifacts/platform-readiness-preplan-completion-report-pack/evidence/phase3-preplan-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -44,12 +44,14 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("phase3-preplan-closeout contract check failed:", file=sys.stderr)
+        print(
+            "platform-readiness-preplan-completion-report contract check failed:", file=sys.stderr
+        )
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("phase3-preplan-closeout contract check passed")
+    print("platform-readiness-preplan-completion-report contract check passed")
     return 0
 
 

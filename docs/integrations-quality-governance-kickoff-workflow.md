@@ -10,15 +10,15 @@ Lane ships a major Phase-3 kickoff upgrade that converts Lane wrap evidence into
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json`
-- `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md`
+- `docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-completion-report-summary.json`
+- `docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-delivery-board.md`
 
 ## Phase3 Kickoff Closeout command lane (legacy)
 
 ```bash
-python -m sdetkit phase3-kickoff-closeout --format json --strict
-python -m sdetkit phase3-kickoff-closeout --emit-pack-dir docs/artifacts/phase3-kickoff-closeout-pack --format json --strict
-python -m sdetkit phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/phase3-kickoff-closeout-pack/evidence --format json --strict
+python -m sdetkit platform-readiness-kickoff-completion-report --format json --strict
+python -m sdetkit platform-readiness-kickoff-completion-report --emit-pack-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack --format json --strict
+python -m sdetkit platform-readiness-kickoff-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack/evidence --format json --strict
 python scripts/check_phase3_kickoff_closeout_contract.py
 ```
 

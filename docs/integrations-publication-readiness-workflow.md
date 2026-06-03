@@ -17,9 +17,9 @@ Lane closes with a major upgrade that converts Lane governance scale outcomes in
 ## Command lane
 
 ```bash
-python -m sdetkit phase3-wrap-publication-closeout --format json --strict
-python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict
-python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/phase3-wrap-publication-closeout-pack/evidence --format json --strict
+python -m sdetkit platform-readiness-wrap-publication-completion-report --format json --strict
+python -m sdetkit platform-readiness-wrap-publication-completion-report --emit-pack-dir docs/artifacts/platform-readiness-wrap-publication-completion-report-pack --format json --strict
+python -m sdetkit platform-readiness-wrap-publication-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/evidence --format json --strict
 python scripts/check_phase3_wrap_publication_closeout_contract.py
 ```
 

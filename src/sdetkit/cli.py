@@ -975,20 +975,20 @@ Then use stability-aware command discovery:
     d57.set_defaults(cmd="kpi-deep-audit-closeout")
     d57.add_argument("args", nargs=argparse.REMAINDER)
 
-    d58 = sub.add_parser("phase2-hardening-closeout")
-    d58.set_defaults(cmd="phase2-hardening-closeout")
+    d58 = sub.add_parser("release-readiness-hardening-completion-report")
+    d58.set_defaults(cmd="release-readiness-hardening-completion-report")
     d58.add_argument("args", nargs=argparse.REMAINDER)
 
-    d59 = sub.add_parser("phase3-preplan-closeout")
-    d59.set_defaults(cmd="phase3-preplan-closeout")
+    d59 = sub.add_parser("platform-readiness-preplan-completion-report")
+    d59.set_defaults(cmd="platform-readiness-preplan-completion-report")
     d59.add_argument("args", nargs=argparse.REMAINDER)
 
-    d60 = sub.add_parser("phase2-wrap-handoff-closeout")
-    d60.set_defaults(cmd="phase2-wrap-handoff-closeout")
+    d60 = sub.add_parser("release-readiness-wrap-handoff-completion-report")
+    d60.set_defaults(cmd="release-readiness-wrap-handoff-completion-report")
     d60.add_argument("args", nargs=argparse.REMAINDER)
 
-    d61 = sub.add_parser("phase3-kickoff-closeout")
-    d61.set_defaults(cmd="phase3-kickoff-closeout")
+    d61 = sub.add_parser("platform-readiness-kickoff-completion-report")
+    d61.set_defaults(cmd="platform-readiness-kickoff-completion-report")
     d61.add_argument("args", nargs=argparse.REMAINDER)
 
     d62 = sub.add_parser("community-program-closeout")
@@ -1079,8 +1079,8 @@ Then use stability-aware command discovery:
     d89 = sub.add_parser("governance-scale-closeout")
     d89.set_defaults(cmd="governance-scale-closeout")
     d89.add_argument("args", nargs=argparse.REMAINDER)
-    d90 = sub.add_parser("phase3-wrap-publication-closeout")
-    d90.set_defaults(cmd="phase3-wrap-publication-closeout")
+    d90 = sub.add_parser("platform-readiness-wrap-publication-completion-report")
+    d90.set_defaults(cmd="platform-readiness-wrap-publication-completion-report")
     d90.add_argument("args", nargs=argparse.REMAINDER)
     parser = sub.add_parser(
         "continuous-upgrade-closeout-1", aliases=["continuous-upgrade-closeout-1"]

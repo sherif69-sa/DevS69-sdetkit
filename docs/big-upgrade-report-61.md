@@ -6,7 +6,7 @@ Close Cycle 61 with a high-confidence Phase-3 kickoff execution lane that conver
 
 ## Big upgrades shipped
 
-- Added a dedicated Cycle 61 CLI lane: `cycle61-phase3-kickoff-closeout`.
+- Added a dedicated Cycle 61 CLI lane: `cycle61-platform-readiness-kickoff-completion-report`.
 - Added strict continuity gates against Cycle 60 handoff evidence and delivery board integrity.
 - Added deterministic artifact-pack emission and execution evidence capture.
 - Added contract checker script for CI-friendly enforcement.
@@ -15,9 +15,9 @@ Close Cycle 61 with a high-confidence Phase-3 kickoff execution lane that conver
 ## Validation commands
 
 ```bash
-python -m sdetkit cycle61-phase3-kickoff-closeout --format json --strict
-python -m sdetkit cycle61-phase3-kickoff-closeout --emit-pack-dir docs/artifacts/phase3-kickoff-closeout-pack --format json --strict
-python -m sdetkit cycle61-phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/phase3-kickoff-closeout-pack/evidence --format json --strict
+python -m sdetkit cycle61-platform-readiness-kickoff-completion-report --format json --strict
+python -m sdetkit cycle61-platform-readiness-kickoff-completion-report --emit-pack-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack --format json --strict
+python -m sdetkit cycle61-platform-readiness-kickoff-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack/evidence --format json --strict
 python scripts/check_phase3_kickoff_closeout_contract_61.py
 ```
 

@@ -1,4 +1,4 @@
-"""Compatibility wrapper for historical `sdetkit.phase1_hardening` imports."""
+"""Compatibility wrapper for historical `sdetkit.baseline_hardening` imports."""
 
 from __future__ import annotations
 

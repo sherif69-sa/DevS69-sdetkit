@@ -19,8 +19,8 @@ _GOVERNANCE_SCALE_BOARD_PATH = (
     "docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/phase3-wrap-publication-plan.json"
-_CANONICAL_PACK_DIR = "docs/artifacts/phase3-wrap-publication-closeout-pack"
-_CANONICAL_SUMMARY_NAME = "phase3-wrap-publication-closeout-summary.json"
+_CANONICAL_PACK_DIR = "docs/artifacts/platform-readiness-wrap-publication-completion-report-pack"
+_CANONICAL_SUMMARY_NAME = "platform-readiness-wrap-publication-completion-report-summary.json"
 _CANONICAL_BOARD_NAME = "phase3-wrap-publication-delivery-board.md"
 _CANONICAL_EVIDENCE_SUMMARY_NAME = "phase3-wrap-publication-execution-summary.json"
 _SECTION_HEADER = "# Phase-3 wrap publication closeout lane"
@@ -34,14 +34,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit phase3-wrap-publication-closeout --format json --strict",
-    "python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict",
-    "python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/phase3-wrap-publication-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit platform-readiness-wrap-publication-completion-report --format json --strict",
+    "python -m sdetkit platform-readiness-wrap-publication-completion-report --emit-pack-dir docs/artifacts/platform-readiness-wrap-publication-completion-report-pack --format json --strict",
+    "python -m sdetkit platform-readiness-wrap-publication-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/evidence --format json --strict",
     "python scripts/check_phase3_wrap_publication_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit phase3-wrap-publication-closeout --format json --strict",
-    "python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict",
+    "python -m sdetkit platform-readiness-wrap-publication-completion-report --format json --strict",
+    "python -m sdetkit platform-readiness-wrap-publication-completion-report --emit-pack-dir docs/artifacts/platform-readiness-wrap-publication-completion-report-pack --format json --strict",
     "python scripts/check_phase3_wrap_publication_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -73,7 +73,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = "# Phase-3 wrap publication closeout lane\n\n closes with a major upgrade that converts  governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.\n\n## Why Phase3 Wrap Publication Closeout matters\n\n- Converts  governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into the next-impact roadmap.\n\n## Required inputs (handoff artifacts)\n\n- `docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json`\n- `docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md`\n- `docs/roadmap/plans/phase3-wrap-publication-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit phase3-wrap-publication-closeout --format json --strict\npython -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict\npython -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/phase3-wrap-publication-closeout-pack/evidence --format json --strict\npython scripts/check_phase3_wrap_publication_contract.py\n```\n\n## Phase-3 wrap publication contract\n\n- Single owner + backup reviewer are assigned for  phase-3 wrap publication execution and signoff.\n- The  lane references  outcomes, controls, and trust continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.\n\n## Phase-3 wrap publication quality checklist\n\n- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to narrative docs/templates + runnable command evidence\n- [ ] Scorecard captures phase-3 wrap publication adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  evidence brief committed\n- [ ]  phase-3 wrap publication plan committed\n- [ ]  narrative template upgrade ledger exported\n- [ ]  storyline outcomes ledger exported\n- [ ] Next-impact roadmap draft captured from  outcomes\n\n## Scoring model\n\n weights continuity + execution contract + governance artifact readiness for a 100-point activation score.\n"
+_DEFAULT_PAGE_TEMPLATE = "# Phase-3 wrap publication closeout lane\n\n closes with a major upgrade that converts  governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.\n\n## Why Phase3 Wrap Publication Closeout matters\n\n- Converts  governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into the next-impact roadmap.\n\n## Required inputs (handoff artifacts)\n\n- `docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json`\n- `docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md`\n- `docs/roadmap/plans/phase3-wrap-publication-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit platform-readiness-wrap-publication-completion-report --format json --strict\npython -m sdetkit platform-readiness-wrap-publication-completion-report --emit-pack-dir docs/artifacts/platform-readiness-wrap-publication-completion-report-pack --format json --strict\npython -m sdetkit platform-readiness-wrap-publication-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/evidence --format json --strict\npython scripts/check_phase3_wrap_publication_contract.py\n```\n\n## Phase-3 wrap publication contract\n\n- Single owner + backup reviewer are assigned for  phase-3 wrap publication execution and signoff.\n- The  lane references  outcomes, controls, and trust continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.\n\n## Phase-3 wrap publication quality checklist\n\n- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to narrative docs/templates + runnable command evidence\n- [ ] Scorecard captures phase-3 wrap publication adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  evidence brief committed\n- [ ]  phase-3 wrap publication plan committed\n- [ ]  narrative template upgrade ledger exported\n- [ ]  storyline outcomes ledger exported\n- [ ] Next-impact roadmap draft captured from  outcomes\n\n## Scoring model\n\n weights continuity + execution contract + governance artifact readiness for a 100-point activation score.\n"
 
 
 def _read_text(path: Path) -> str:
@@ -136,8 +136,8 @@ def build_phase3_wrap_publication_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_command_lane",
             "weight": 7,
-            "passed": ("phase3-wrap-publication-closeout" in readme_text),
-            "evidence": "README phase3-wrap-publication-closeout command lane",
+            "passed": ("platform-readiness-wrap-publication-completion-report" in readme_text),
+            "evidence": "README platform-readiness-wrap-publication-completion-report command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -274,7 +274,7 @@ def build_phase3_wrap_publication_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "phase3-wrap-publication-closeout",
+        "name": "platform-readiness-wrap-publication-completion-report",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -329,7 +329,10 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / _CANONICAL_SUMMARY_NAME,
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "phase3-wrap-publication-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "platform-readiness-wrap-publication-completion-report-summary.md",
+        _render_text(payload) + "\n",
+    )
     _write(
         target / "phase3-wrap-publication-evidence-brief.md",
         "#  phase-3 wrap publication brief\n",
@@ -412,7 +415,9 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/phase3-wrap-publication-closeout-pack/evidence")
+            else Path(
+                "docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/evidence"
+            )
         )
         _execute_commands(root, evidence_dir)
 

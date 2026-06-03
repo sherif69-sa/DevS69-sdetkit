@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import phase2_hardening as d58
+from sdetkit import release_readiness_hardening as d58
 
 
 def main() -> int:
@@ -31,7 +31,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/phase2-hardening-closeout-pack/evidence/phase2-hardening-execution-summary.json"
+            / "docs/artifacts/release-readiness-hardening-completion-report-pack/evidence/phase2-hardening-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -44,12 +44,14 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("phase2-hardening-closeout contract check failed:", file=sys.stderr)
+        print(
+            "release-readiness-hardening-completion-report contract check failed:", file=sys.stderr
+        )
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("phase2-hardening-closeout contract check passed")
+    print("release-readiness-hardening-completion-report contract check passed")
     return 0
 
 

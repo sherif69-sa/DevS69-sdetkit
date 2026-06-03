@@ -27,7 +27,7 @@ _MODULE_SHORTCUTS: tuple[tuple[tuple[str, ...], str], ...] = (
     (("kpi-report",), "sdetkit.kpi_report"),
     (("objection-handling",), "sdetkit.objection_handling"),
     (("first-contribution",), "sdetkit.first_contribution"),
-    (("demo",), "sdetkit.demo"),
+    (("demo",), "sdetkit.example"),
     (("contributor-funnel",), "sdetkit.contributor_funnel"),
     (("evidence-assets", "proof"), "sdetkit.proof"),
     (("triage-templates",), "sdetkit.triage_templates"),

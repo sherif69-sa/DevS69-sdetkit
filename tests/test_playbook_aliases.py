@@ -17,7 +17,7 @@ def test_resolve_non_day_playbook_alias_resolves_known_alias(monkeypatch) -> Non
     fake = SimpleNamespace(
         _pkg_dir=lambda: "unused",
         _build_registry=lambda _pkg: (
-            {"phase1-wrap": "sdetkit.phase1_wrap"},
+            {"phase1-wrap": "sdetkit.baseline_wrap"},
             {"phase1-wrap": "phase2-kickoff"},
         ),
     )

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import demo_asset as d33
+from sdetkit import example_asset as d33
 
 
 def _seed_repo(root: Path) -> None:

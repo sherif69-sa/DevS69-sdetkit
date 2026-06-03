@@ -6,7 +6,7 @@ Close Cycle 58 with a high-confidence Phase-2 hardening lane that converts Cycle
 
 ## Big upgrades shipped
 
-- Added a dedicated Cycle 58 CLI lane: `cycle58-phase2-hardening-closeout`.
+- Added a dedicated Cycle 58 CLI lane: `cycle58-release-readiness-hardening-completion-report`.
 - Added strict continuity gates against Cycle 57 handoff evidence and delivery board integrity.
 - Added deterministic artifact-pack emission and execution evidence capture.
 - Added contract checker script for CI-friendly enforcement.
@@ -15,9 +15,9 @@ Close Cycle 58 with a high-confidence Phase-2 hardening lane that converts Cycle
 ## Validation commands
 
 ```bash
-python -m sdetkit cycle58-phase2-hardening-closeout --format json --strict
-python -m sdetkit cycle58-phase2-hardening-closeout --emit-pack-dir docs/artifacts/cycle58-phase2-hardening-closeout-pack --format json --strict
-python -m sdetkit cycle58-phase2-hardening-closeout --execute --evidence-dir docs/artifacts/cycle58-phase2-hardening-closeout-pack/evidence --format json --strict
+python -m sdetkit cycle58-release-readiness-hardening-completion-report --format json --strict
+python -m sdetkit cycle58-release-readiness-hardening-completion-report --emit-pack-dir docs/artifacts/cycle58-release-readiness-hardening-completion-report-pack --format json --strict
+python -m sdetkit cycle58-release-readiness-hardening-completion-report --execute --evidence-dir docs/artifacts/cycle58-release-readiness-hardening-completion-report-pack/evidence --format json --strict
 python scripts/check_phase2_hardening_closeout_contract_58.py
 ```
 

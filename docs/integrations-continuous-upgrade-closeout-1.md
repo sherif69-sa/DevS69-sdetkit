@@ -10,8 +10,8 @@ Lane starts the next impact by converting phase-3 wrap publication outcomes into
 
 ## Required inputs (Phase-3 wrap publication)
 
-- `docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json`
-- `docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md`
+- `docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/platform-readiness-wrap-publication-completion-report-summary.json`
+- `docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/phase3-wrap-publication-delivery-board.md`
 - `docs/roadmap/plans/continuous-upgrade-plan-1.json`
 
 ## Command lane

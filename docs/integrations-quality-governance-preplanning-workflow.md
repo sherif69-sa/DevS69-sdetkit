@@ -10,15 +10,15 @@ Lane closes with a major Phase-3 pre-plan upgrade that turns Lane hardening outc
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json`
-- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md`
+- `docs/artifacts/release-readiness-hardening-completion-report-pack/release-readiness-hardening-completion-report-summary.json`
+- `docs/artifacts/release-readiness-hardening-completion-report-pack/phase2-hardening-delivery-board.md`
 
 ## Phase3 Preplan Closeout command lane
 
 ```bash
-python -m sdetkit phase3-preplan-closeout --format json --strict
-python -m sdetkit phase3-preplan-closeout --emit-pack-dir docs/artifacts/phase3-preplan-closeout-pack --format json --strict
-python -m sdetkit phase3-preplan-closeout --execute --evidence-dir docs/artifacts/phase3-preplan-closeout-pack/evidence --format json --strict
+python -m sdetkit platform-readiness-preplan-completion-report --format json --strict
+python -m sdetkit platform-readiness-preplan-completion-report --emit-pack-dir docs/artifacts/platform-readiness-preplan-completion-report-pack --format json --strict
+python -m sdetkit platform-readiness-preplan-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-preplan-completion-report-pack/evidence --format json --strict
 python scripts/check_phase3_preplan_closeout_contract.py
 ```
 

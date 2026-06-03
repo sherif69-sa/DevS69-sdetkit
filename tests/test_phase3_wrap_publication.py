@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import phase3_wrap_publication as d90
+from sdetkit import platform_readiness_wrap_publication as d90
 from tests.workflow_fixture_seed import seed_contract_anchors
 
 
@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase3-wrap-publication-workflow.md\nphase3-wrap-publication-closeout\n",
+        "docs/integrations-phase3-wrap-publication-workflow.md\nplatform-readiness-wrap-publication-completion-report\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -95,7 +95,7 @@ def test_phase3_wrap_publication_json(tmp_path: Path, capsys) -> None:
     rc = d90.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "phase3-wrap-publication-closeout"
+    assert out["name"] == "platform-readiness-wrap-publication-completion-report"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -119,11 +119,11 @@ def test_phase3_wrap_publication_emit_pack_and_execute(tmp_path: Path) -> None:
     assert rc == 0
     assert (
         tmp_path
-        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-closeout-summary.json"
+        / "artifacts/phase3-wrap-publication-pack/platform-readiness-wrap-publication-completion-report-summary.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-closeout-summary.md"
+        / "artifacts/phase3-wrap-publication-pack/platform-readiness-wrap-publication-completion-report-summary.md"
     ).exists()
     assert (
         tmp_path
@@ -176,6 +176,14 @@ def test_phase3_wrap_publication_strict_fails_without_governance_scale(
 def test_phase3_wrap_publication_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
-    rc = cli.main(["phase3-wrap-publication-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(
+        [
+            "platform-readiness-wrap-publication-completion-report",
+            "--root",
+            str(tmp_path),
+            "--format",
+            "text",
+        ]
+    )
     assert rc == 0
     assert " phase-3 wrap publication closeout summary" in capsys.readouterr().out

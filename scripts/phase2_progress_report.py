@@ -24,8 +24,8 @@ def build_progress(
     milestones.append({"id": "phase2_complete_workflow_ok", "ok": complete_ok})
 
     for marker in (
-        "phase2-hardening-closeout",
-        "phase2-wrap-handoff-closeout",
+        "release-readiness-hardening-completion-report",
+        "release-readiness-wrap-handoff-completion-report",
     ):
         found = any(
             marker in str(step.get("command", "")) and bool(step.get("ok", False))

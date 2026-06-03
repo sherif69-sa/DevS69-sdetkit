@@ -18,7 +18,7 @@ def test_seed_prerequisites_writes_required_inputs(tmp_path: Path) -> None:
     ).exists()
     assert (
         tmp_path
-        / "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json"
+        / "docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-completion-report-summary.json"
     ).exists()
 
 

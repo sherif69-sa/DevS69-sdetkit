@@ -15,8 +15,14 @@ def test_build_progress_full_when_all_markers_pass() -> None:
         {
             "ok": True,
             "steps": [
-                {"command": "python -m sdetkit phase2-hardening-closeout", "ok": True},
-                {"command": "python -m sdetkit phase2-wrap-handoff-closeout", "ok": True},
+                {
+                    "command": "python -m sdetkit release-readiness-hardening-completion-report",
+                    "ok": True,
+                },
+                {
+                    "command": "python -m sdetkit release-readiness-wrap-handoff-completion-report",
+                    "ok": True,
+                },
             ],
         },
     )

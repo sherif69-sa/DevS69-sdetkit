@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import phase3_kickoff as d61
+from sdetkit import platform_readiness_kickoff as d61
 
 
 def main() -> int:
@@ -31,7 +31,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/phase3-kickoff-closeout-pack/evidence/phase3-kickoff-execution-summary.json"
+            / "docs/artifacts/platform-readiness-kickoff-completion-report-pack/evidence/phase3-kickoff-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -44,12 +44,14 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("phase3-kickoff-closeout contract check failed:", file=sys.stderr)
+        print(
+            "platform-readiness-kickoff-completion-report contract check failed:", file=sys.stderr
+        )
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("phase3-kickoff-closeout contract check passed")
+    print("platform-readiness-kickoff-completion-report contract check passed")
     return 0
 
 

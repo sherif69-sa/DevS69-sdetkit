@@ -52,8 +52,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     workflow_root = Path("build/phase2-workflow")
-    hardening_pack = workflow_root / "phase2-hardening-closeout-pack"
-    wrap_pack = workflow_root / "phase2-wrap-handoff-closeout-pack"
+    hardening_pack = workflow_root / "release-readiness-hardening-completion-report-pack"
+    wrap_pack = workflow_root / "release-readiness-wrap-handoff-completion-report-pack"
     steps = [
         _run_step(["python", "scripts/phase2_start_workflow.py", "--format", "json"]),
         _run_step(["python", "scripts/check_phase2_start_summary_contract.py", "--format", "json"]),
@@ -72,7 +72,7 @@ def main(argv: list[str] | None = None) -> int:
                 "python",
                 "-m",
                 "sdetkit",
-                "phase2-hardening-closeout",
+                "release-readiness-hardening-completion-report",
                 "--emit-pack-dir",
                 str(hardening_pack),
                 "--execute",
@@ -87,7 +87,7 @@ def main(argv: list[str] | None = None) -> int:
                 "python",
                 "-m",
                 "sdetkit",
-                "phase2-wrap-handoff-closeout",
+                "release-readiness-wrap-handoff-completion-report",
                 "--emit-pack-dir",
                 str(wrap_pack),
                 "--execute",

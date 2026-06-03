@@ -12,12 +12,8 @@ from .bools import coerce_bool
 
 _PAGE_PATH = "docs/integrations-phase3-preplan-workflow.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_PHASE2_HARDENING_CLOSEOUT_SUMMARY_PATH = (
-    "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json"
-)
-_PHASE2_HARDENING_CLOSEOUT_BOARD_PATH = (
-    "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
-)
+_PHASE2_HARDENING_CLOSEOUT_SUMMARY_PATH = "docs/artifacts/release-readiness-hardening-completion-report-pack/release-readiness-hardening-completion-report-summary.json"
+_PHASE2_HARDENING_CLOSEOUT_BOARD_PATH = "docs/artifacts/release-readiness-hardening-completion-report-pack/phase2-hardening-delivery-board.md"
 _SECTION_HEADER = "# Phase-3 pre-plan closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Phase-3 Pre-plan Closeout matters",
@@ -29,14 +25,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit phase3-preplan-closeout --format json --strict",
-    "python -m sdetkit phase3-preplan-closeout --emit-pack-dir docs/artifacts/phase3-preplan-closeout-pack --format json --strict",
-    "python -m sdetkit phase3-preplan-closeout --execute --evidence-dir docs/artifacts/phase3-preplan-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit platform-readiness-preplan-completion-report --format json --strict",
+    "python -m sdetkit platform-readiness-preplan-completion-report --emit-pack-dir docs/artifacts/platform-readiness-preplan-completion-report-pack --format json --strict",
+    "python -m sdetkit platform-readiness-preplan-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-preplan-completion-report-pack/evidence --format json --strict",
     "python scripts/check_phase3_preplan_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit phase3-preplan-closeout --format json --strict",
-    "python -m sdetkit phase3-preplan-closeout --emit-pack-dir docs/artifacts/phase3-preplan-closeout-pack --format json --strict",
+    "python -m sdetkit platform-readiness-preplan-completion-report --format json --strict",
+    "python -m sdetkit platform-readiness-preplan-completion-report --emit-pack-dir docs/artifacts/platform-readiness-preplan-completion-report-pack --format json --strict",
     "python scripts/check_phase3_preplan_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -60,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ]  execution priorities drafted from  learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = "# Phase-3 pre-plan closeout lane\n\n closes with a major Phase-3 pre-plan upgrade that turns  hardening outcomes into deterministic  execution priorities.\n\n## Why Phase-3 Pre-plan Closeout matters\n\n- Converts  hardening evidence into repeatable Phase-3 planning loops.\n- Protects quality with ownership, command proof, and KPI rollback guardrails.\n- Produces a deterministic handoff from  closeout into  execution planning.\n\n## Required inputs (handoff artifacts)\n\n- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json`\n- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md`\n\n## Phase-3 Pre-plan Closeout command lane\n\n```bash\npython -m sdetkit phase3-preplan-closeout --format json --strict\npython -m sdetkit phase3-preplan-closeout --emit-pack-dir docs/artifacts/phase3-preplan-closeout-pack --format json --strict\npython -m sdetkit phase3-preplan-closeout --execute --evidence-dir docs/artifacts/phase3-preplan-closeout-pack/evidence --format json --strict\npython scripts/check_phase3_preplan_contract.py\n```\n\n## Phase-3 pre-plan contract\n\n- Single owner + backup reviewer are assigned for  Phase-3 pre-plan execution and signal triage.\n- The  lane references  Phase-2 hardening outcomes and unresolved risks.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records pre-plan outcomes and  execution priorities.\n\n## Phase-3 pre-plan quality checklist\n\n- [ ] Includes priority digest, lane-level plan actions, and rollback strategy\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI\n- [ ] Artifact pack includes pre-plan brief, risk ledger, KPI scorecard, and execution log\n\n## Phase-3 Pre-plan Closeout delivery board\n\n- [ ]  Phase-3 pre-plan brief committed\n- [ ]  pre-plan reviewed with owner + backup\n- [ ]  risk ledger exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  execution priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Phase-3 pre-plan contract lock + delivery board readiness: 15 points.\n"
+_DEFAULT_PAGE_TEMPLATE = "# Phase-3 pre-plan closeout lane\n\n closes with a major Phase-3 pre-plan upgrade that turns  hardening outcomes into deterministic  execution priorities.\n\n## Why Phase-3 Pre-plan Closeout matters\n\n- Converts  hardening evidence into repeatable Phase-3 planning loops.\n- Protects quality with ownership, command proof, and KPI rollback guardrails.\n- Produces a deterministic handoff from  closeout into  execution planning.\n\n## Required inputs (handoff artifacts)\n\n- `docs/artifacts/release-readiness-hardening-completion-report-pack/release-readiness-hardening-completion-report-summary.json`\n- `docs/artifacts/release-readiness-hardening-completion-report-pack/phase2-hardening-delivery-board.md`\n\n## Phase-3 Pre-plan Closeout command lane\n\n```bash\npython -m sdetkit platform-readiness-preplan-completion-report --format json --strict\npython -m sdetkit platform-readiness-preplan-completion-report --emit-pack-dir docs/artifacts/platform-readiness-preplan-completion-report-pack --format json --strict\npython -m sdetkit platform-readiness-preplan-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-preplan-completion-report-pack/evidence --format json --strict\npython scripts/check_phase3_preplan_contract.py\n```\n\n## Phase-3 pre-plan contract\n\n- Single owner + backup reviewer are assigned for  Phase-3 pre-plan execution and signal triage.\n- The  lane references  Phase-2 hardening outcomes and unresolved risks.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records pre-plan outcomes and  execution priorities.\n\n## Phase-3 pre-plan quality checklist\n\n- [ ] Includes priority digest, lane-level plan actions, and rollback strategy\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI\n- [ ] Artifact pack includes pre-plan brief, risk ledger, KPI scorecard, and execution log\n\n## Phase-3 Pre-plan Closeout delivery board\n\n- [ ]  Phase-3 pre-plan brief committed\n- [ ]  pre-plan reviewed with owner + backup\n- [ ]  risk ledger exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  execution priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Phase-3 pre-plan contract lock + delivery board readiness: 15 points.\n"
 
 
 def _read(path: Path) -> str:
@@ -120,8 +116,8 @@ def build_phase3_preplan_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_command_lane",
             "weight": 7,
-            "passed": ("phase3-preplan-closeout" in readme_text),
-            "evidence": "README phase3-preplan-closeout command lane",
+            "passed": ("platform-readiness-preplan-completion-report" in readme_text),
+            "evidence": "README platform-readiness-preplan-completion-report command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -252,7 +248,7 @@ def build_phase3_preplan_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "phase3-preplan-closeout",
+        "name": "platform-readiness-preplan-completion-report",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -302,8 +298,14 @@ def _write(path: Path, text: str) -> None:
 
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
-    _write(target / "phase3-preplan-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "phase3-preplan-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "platform-readiness-preplan-completion-report-summary.json",
+        json.dumps(payload, indent=2) + "\n",
+    )
+    _write(
+        target / "platform-readiness-preplan-completion-report-summary.md",
+        _render_text(payload) + "\n",
+    )
     _write(target / "phase3-preplan-brief.md", "#  Phase-3 pre-plan brief\n")
     _write(target / "phase3-preplan-risk-ledger.csv", "risk,owner,mitigation,status\n")
     _write(target / "phase3-preplan-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
@@ -370,7 +372,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/phase3-preplan-closeout-pack/evidence")
+            else Path("docs/artifacts/platform-readiness-preplan-completion-report-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

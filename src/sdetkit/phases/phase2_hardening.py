@@ -29,14 +29,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit phase2-hardening-closeout --format json --strict",
-    "python -m sdetkit phase2-hardening-closeout --emit-pack-dir docs/artifacts/phase2-hardening-closeout-pack --format json --strict",
-    "python -m sdetkit phase2-hardening-closeout --execute --evidence-dir docs/artifacts/phase2-hardening-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit release-readiness-hardening-completion-report --format json --strict",
+    "python -m sdetkit release-readiness-hardening-completion-report --emit-pack-dir docs/artifacts/release-readiness-hardening-completion-report-pack --format json --strict",
+    "python -m sdetkit release-readiness-hardening-completion-report --execute --evidence-dir docs/artifacts/release-readiness-hardening-completion-report-pack/evidence --format json --strict",
     "python scripts/check_phase2_hardening_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit phase2-hardening-closeout --format json --strict",
-    "python -m sdetkit phase2-hardening-closeout --emit-pack-dir docs/artifacts/phase2-hardening-closeout-pack --format json --strict",
+    "python -m sdetkit release-readiness-hardening-completion-report --format json --strict",
+    "python -m sdetkit release-readiness-hardening-completion-report --emit-pack-dir docs/artifacts/release-readiness-hardening-completion-report-pack --format json --strict",
     "python scripts/check_phase2_hardening_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -60,7 +60,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ]  pre-plan priorities drafted from  learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = "# Phase-2 hardening closeout lane\n\n closes with a major Phase-2 hardening upgrade that turns  KPI deep-audit outcomes into deterministic execution hardening governance.\n\n## Why Phase-2 Hardening Closeout matters\n\n- Converts  KPI deep-audit evidence into repeatable hardening execution loops.\n- Protects quality with ownership, command proof, and KPI rollback guardrails.\n- Produces a deterministic handoff from  closeout into  pre-plan execution planning.\n\n## Required inputs (handoff artifacts)\n\n- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json`\n- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md`\n\n## Phase-2 Hardening Closeout command lane\n\n```bash\npython -m sdetkit phase2-hardening-closeout --format json --strict\npython -m sdetkit phase2-hardening-closeout --emit-pack-dir docs/artifacts/phase2-hardening-closeout-pack --format json --strict\npython -m sdetkit phase2-hardening-closeout --execute --evidence-dir docs/artifacts/phase2-hardening-closeout-pack/evidence --format json --strict\npython scripts/check_phase2_hardening_contract.py\n```\n\n## Phase-2 hardening contract\n\n- Single owner + backup reviewer are assigned for  Phase-2 hardening execution and signal triage.\n- The  lane references  KPI deep-audit outcomes and unresolved risks.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records hardening outcomes and  pre-plan priorities.\n\n## Phase-2 hardening quality checklist\n\n- [ ] Includes friction-map digest, page hardening actions, and rollback strategy\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI\n- [ ] Artifact pack includes hardening brief, risk ledger, KPI scorecard, and execution log\n\n## Phase-2 Hardening Closeout delivery board\n\n- [ ]  Phase-2 hardening brief committed\n- [ ]  hardening plan reviewed with owner + backup\n- [ ]  risk ledger exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  pre-plan priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Phase-2 hardening contract lock + delivery board readiness: 15 points.\n"
+_DEFAULT_PAGE_TEMPLATE = "# Phase-2 hardening closeout lane\n\n closes with a major Phase-2 hardening upgrade that turns  KPI deep-audit outcomes into deterministic execution hardening governance.\n\n## Why Phase-2 Hardening Closeout matters\n\n- Converts  KPI deep-audit evidence into repeatable hardening execution loops.\n- Protects quality with ownership, command proof, and KPI rollback guardrails.\n- Produces a deterministic handoff from  closeout into  pre-plan execution planning.\n\n## Required inputs (handoff artifacts)\n\n- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json`\n- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md`\n\n## Phase-2 Hardening Closeout command lane\n\n```bash\npython -m sdetkit release-readiness-hardening-completion-report --format json --strict\npython -m sdetkit release-readiness-hardening-completion-report --emit-pack-dir docs/artifacts/release-readiness-hardening-completion-report-pack --format json --strict\npython -m sdetkit release-readiness-hardening-completion-report --execute --evidence-dir docs/artifacts/release-readiness-hardening-completion-report-pack/evidence --format json --strict\npython scripts/check_phase2_hardening_contract.py\n```\n\n## Phase-2 hardening contract\n\n- Single owner + backup reviewer are assigned for  Phase-2 hardening execution and signal triage.\n- The  lane references  KPI deep-audit outcomes and unresolved risks.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records hardening outcomes and  pre-plan priorities.\n\n## Phase-2 hardening quality checklist\n\n- [ ] Includes friction-map digest, page hardening actions, and rollback strategy\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI\n- [ ] Artifact pack includes hardening brief, risk ledger, KPI scorecard, and execution log\n\n## Phase-2 Hardening Closeout delivery board\n\n- [ ]  Phase-2 hardening brief committed\n- [ ]  hardening plan reviewed with owner + backup\n- [ ]  risk ledger exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  pre-plan priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Phase-2 hardening contract lock + delivery board readiness: 15 points.\n"
 
 
 def _read(path: Path) -> str:
@@ -129,8 +129,8 @@ def build_phase2_hardening_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_command_lane",
             "weight": 4,
-            "passed": "phase2-hardening-closeout" in readme_text,
-            "evidence": "README phase2-hardening-closeout command lane",
+            "passed": "release-readiness-hardening-completion-report" in readme_text,
+            "evidence": "README release-readiness-hardening-completion-report command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -261,7 +261,7 @@ def build_phase2_hardening_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if bool(c["passed"]))))
     return {
-        "name": "phase2-hardening-closeout",
+        "name": "release-readiness-hardening-completion-report",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -312,10 +312,13 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "phase2-hardening-closeout-summary.json",
+        target / "release-readiness-hardening-completion-report-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "phase2-hardening-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "release-readiness-hardening-completion-report-summary.md",
+        _render_text(payload) + "\n",
+    )
     _write(target / "phase2-hardening-brief.md", "#  Phase-2 hardening brief\n")
     _write(target / "phase2-hardening-risk-ledger.csv", "risk,owner,mitigation,status\n")
     _write(target / "phase2-hardening-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
@@ -382,7 +385,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/phase2-hardening-closeout-pack/evidence")
+            else Path("docs/artifacts/release-readiness-hardening-completion-report-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

@@ -58,7 +58,7 @@ def test_legacy_dispatch_uses_central_mapping(monkeypatch) -> None:
     monkeypatch.setattr(cli, "_run_module_main", _fake_run)
 
     assert cli.main(["phase1-hardening", "--format", "json"]) == 0
-    assert captured == [("sdetkit.phase1_hardening", ["--format", "json"])]
+    assert captured == [("sdetkit.baseline_hardening", ["--format", "json"])]
 
 
 def test_legacy_dispatch_emits_migration_hint(monkeypatch, capsys) -> None:

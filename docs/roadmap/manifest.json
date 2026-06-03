@@ -238,7 +238,7 @@
         "id": 0,
         "lane": "demo_asset2",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.demo_asset2",
+        "module": "sdetkit.example_asset2",
         "module_path": "src/sdetkit/demo_asset2.py",
         "tests_referencing_module": 1
       },
@@ -250,7 +250,7 @@
         "id": 0,
         "lane": "demo_asset",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.demo_asset",
+        "module": "sdetkit.example_asset",
         "module_path": "src/sdetkit/demo_asset.py",
         "tests_referencing_module": 2
       },
@@ -610,7 +610,7 @@
         "id": 0,
         "lane": "phase1_hardening",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase1_hardening",
+        "module": "sdetkit.baseline_hardening",
         "module_path": "src/sdetkit/phase1_hardening.py",
         "tests_referencing_module": 3
       },
@@ -622,7 +622,7 @@
         "id": 0,
         "lane": "phase1_wrap",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase1_wrap",
+        "module": "sdetkit.baseline_wrap",
         "module_path": "src/sdetkit/phase1_wrap.py",
         "tests_referencing_module": 2
       },
@@ -634,7 +634,7 @@
         "id": 0,
         "lane": "phase2_hardening",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase2_hardening",
+        "module": "sdetkit.release_readiness_hardening",
         "module_path": "src/sdetkit/phase2_hardening.py",
         "tests_referencing_module": 2
       },
@@ -646,7 +646,7 @@
         "id": 0,
         "lane": "phase2_kickoff",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase2_kickoff",
+        "module": "sdetkit.release_readiness_kickoff",
         "module_path": "src/sdetkit/phase2_kickoff.py",
         "tests_referencing_module": 3
       },
@@ -658,7 +658,7 @@
         "id": 0,
         "lane": "phase2_wrap_handoff",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase2_wrap_handoff",
+        "module": "sdetkit.release_readiness_wrap_handoff",
         "module_path": "src/sdetkit/phase2_wrap_handoff.py",
         "tests_referencing_module": 1
       },
@@ -670,7 +670,7 @@
         "id": 0,
         "lane": "phase3_kickoff",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase3_kickoff",
+        "module": "sdetkit.platform_readiness_kickoff",
         "module_path": "src/sdetkit/phase3_kickoff.py",
         "tests_referencing_module": 1
       },
@@ -682,7 +682,7 @@
         "id": 0,
         "lane": "phase3_preplan",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase3_preplan",
+        "module": "sdetkit.platform_readiness_preplan",
         "module_path": "src/sdetkit/phase3_preplan.py",
         "tests_referencing_module": 2
       },
@@ -694,7 +694,7 @@
         "id": 0,
         "lane": "phase3_wrap_publication",
         "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.phase3_wrap_publication",
+        "module": "sdetkit.platform_readiness_wrap_publication",
         "module_path": "src/sdetkit/phase3_wrap_publication.py",
         "tests_referencing_module": 1
       },

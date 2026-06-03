@@ -47,7 +47,10 @@ def test_legacy_burndown_emits_contract_and_markdown(tmp_path: Path) -> None:
                     {"path": "docs/guide.md", "command": "phase1-hardening"},
                     {"path": "scripts/ci.sh", "command": "weekly-review-lane"},
                     {"path": "src/sdetkit/legacy.py", "command": "phase2-kickoff"},
-                    {"path": "tests/test_legacy.py", "command": "phase3-preplan-closeout"},
+                    {
+                        "path": "tests/test_legacy.py",
+                        "command": "platform-readiness-preplan-completion-report",
+                    },
                 ],
             }
         ),
