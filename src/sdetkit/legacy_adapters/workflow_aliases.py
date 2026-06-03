@@ -49,3 +49,26 @@ LEGACY_CLOSEOUT_COMMAND_MODULES: dict[str, str] = {
     "governance-scale-closeout": "sdetkit.governance_scale",
     "phase3-wrap-publication-closeout": "sdetkit.phase3_wrap_publication",
 }
+
+
+_PHASE_COMMAND_REPLACEMENTS: tuple[tuple[str, str], ...] = (
+    ("phase1", "baseline"),
+    ("phase2", "release-readiness"),
+    ("phase3", "platform-readiness"),
+    ("phase4", "operational-readiness"),
+    ("phase5", "adoption-readiness"),
+    ("phase6", "scale-readiness"),
+)
+
+
+def professional_canonical_command_for(command: str) -> str:
+    canonical = command.replace("closeout", "completion-report")
+    for legacy, replacement in _PHASE_COMMAND_REPLACEMENTS:
+        canonical = canonical.replace(legacy, replacement)
+    return canonical
+
+
+CANONICAL_CLOSEOUT_COMMAND_MODULES: dict[str, str] = {
+    professional_canonical_command_for(command): module
+    for command, module in LEGACY_CLOSEOUT_COMMAND_MODULES.items()
+}
