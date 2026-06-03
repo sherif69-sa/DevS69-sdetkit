@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import phase2_kickoff as d31
+from sdetkit import release_readiness_kickoff as d31
 
 
 def _seed_repo(root: Path) -> None:

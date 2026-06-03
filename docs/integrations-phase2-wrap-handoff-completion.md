@@ -10,15 +10,15 @@ Lane closes with a major Phase-2 wrap + handoff upgrade that turns Lane pre-plan
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json`
-- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md`
+- `docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-completion-report-summary.json`
+- `docs/artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-delivery-board.md`
 
 ## Phase 2 Wrap Handoff Closeout command lane
 
 ```bash
-python -m sdetkit phase2-wrap-handoff-closeout --format json --strict
-python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict
-python -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence --format json --strict
+python -m sdetkit release-readiness-wrap-handoff-completion-report --format json --strict
+python -m sdetkit release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict
+python -m sdetkit release-readiness-wrap-handoff-completion-report --execute --evidence-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence --format json --strict
 python scripts/check_phase2_wrap_handoff_closeout_contract.py
 ```
 

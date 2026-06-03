@@ -76,7 +76,7 @@ def main(argv: list[str] | None = None) -> int:
 
     result = {
         "ok": not errors,
-        "schema_version": "sdetkit.phase2_kickoff_contract.v2",
+        "schema_version": "sdetkit.release_readiness_kickoff_contract.v2",
         "score": int(summary.get("activation_score", 0)) if isinstance(summary, dict) else 0,
         "errors": errors,
     }

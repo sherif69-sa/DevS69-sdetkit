@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from sdetkit import baseline_hardening as d29
 from sdetkit import cli
-from sdetkit import phase1_hardening as d29
 
 
 def _seed_repo(root: Path) -> None:

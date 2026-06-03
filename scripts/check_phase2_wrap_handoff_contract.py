@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import phase2_wrap_handoff as d60
+from sdetkit import release_readiness_wrap_handoff as d60
 
 
 def main() -> int:
@@ -33,7 +33,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence/phase2-wrap-handoff-execution-summary.json"
+            / "docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence/phase2-wrap-handoff-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -46,12 +46,15 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("phase2-wrap-handoff-closeout contract check failed:", file=sys.stderr)
+        print(
+            "release-readiness-wrap-handoff-completion-report contract check failed:",
+            file=sys.stderr,
+        )
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("phase2-wrap-handoff-closeout contract check passed")
+    print("release-readiness-wrap-handoff-completion-report contract check passed")
     return 0
 
 

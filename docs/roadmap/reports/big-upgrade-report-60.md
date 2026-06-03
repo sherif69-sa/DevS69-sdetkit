@@ -6,7 +6,7 @@ Close Cycle 60 with a high-confidence Phase-2 wrap + handoff lane that converts 
 
 ## Big upgrades shipped
 
-- Added a dedicated Cycle 60 CLI lane: `cycle60-phase2-wrap-handoff-closeout`.
+- Added a dedicated Cycle 60 CLI lane: `cycle60-release-readiness-wrap-handoff-completion-report`.
 - Added strict continuity gates against Cycle 59 handoff evidence and delivery board integrity.
 - Added deterministic artifact-pack emission and execution evidence capture.
 - Added contract checker script for CI-friendly enforcement.
@@ -15,9 +15,9 @@ Close Cycle 60 with a high-confidence Phase-2 wrap + handoff lane that converts 
 ## Validation commands
 
 ```bash
-python -m sdetkit cycle60-phase2-wrap-handoff-closeout --format json --strict
-python -m sdetkit cycle60-phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict
-python -m sdetkit cycle60-phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence --format json --strict
+python -m sdetkit cycle60-release-readiness-wrap-handoff-completion-report --format json --strict
+python -m sdetkit cycle60-release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict
+python -m sdetkit cycle60-release-readiness-wrap-handoff-completion-report --execute --evidence-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence --format json --strict
 python scripts/check_phase2_wrap_handoff_closeout_contract_60.py
 ```
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 
 from sdetkit import doctor, repo
-from sdetkit.phase2_utilities import parse_check_csv, parse_iso_date
+from sdetkit.release_readiness_utilities import parse_check_csv, parse_iso_date
 
 
 def test_parse_check_csv_handles_empty_and_whitespace() -> None:

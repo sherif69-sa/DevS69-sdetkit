@@ -12,12 +12,8 @@ from .bools import coerce_bool
 
 _PAGE_PATH = "docs/integrations-phase3-kickoff-workflow.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_PHASE2_WRAP_HANDOFF_CLOSEOUT_SUMMARY_PATH = (
-    "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json"
-)
-_PHASE2_WRAP_HANDOFF_CLOSEOUT_BOARD_PATH = (
-    "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md"
-)
+_PHASE2_WRAP_HANDOFF_CLOSEOUT_SUMMARY_PATH = "docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-completion-report-summary.json"
+_PHASE2_WRAP_HANDOFF_CLOSEOUT_BOARD_PATH = "docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-delivery-board.md"
 _SECTION_HEADER = "# \u2014 Phase-3 kickoff execution closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Phase3 Kickoff Closeout matters",
@@ -29,14 +25,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit phase3-kickoff-closeout --format json --strict",
-    "python -m sdetkit phase3-kickoff-closeout --emit-pack-dir docs/artifacts/phase3-kickoff-closeout-pack --format json --strict",
-    "python -m sdetkit phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/phase3-kickoff-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit platform-readiness-kickoff-completion-report --format json --strict",
+    "python -m sdetkit platform-readiness-kickoff-completion-report --emit-pack-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack --format json --strict",
+    "python -m sdetkit platform-readiness-kickoff-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack/evidence --format json --strict",
     "python scripts/check_phase3_kickoff_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit phase3-kickoff-closeout --format json --strict",
-    "python -m sdetkit phase3-kickoff-closeout --emit-pack-dir docs/artifacts/phase3-kickoff-closeout-pack --format json --strict",
+    "python -m sdetkit platform-readiness-kickoff-completion-report --format json --strict",
+    "python -m sdetkit platform-readiness-kickoff-completion-report --emit-pack-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack --format json --strict",
     "python scripts/check_phase3_kickoff_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -72,15 +68,15 @@ ships a major Phase-3 kickoff upgrade that converts wrap evidence into a strict 
 
 ## Required inputs (handoff artifacts)
 
-- `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json`
-- `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md`
+- `docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/release-readiness-wrap-handoff-completion-report-summary.json`
+- `docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/phase2-wrap-handoff-delivery-board.md`
 
 ## Phase3 Kickoff Closeout command lane
 
 ```bash
-python -m sdetkit phase3-kickoff-closeout --format json --strict
-python -m sdetkit phase3-kickoff-closeout --emit-pack-dir docs/artifacts/phase3-kickoff-closeout-pack --format json --strict
-python -m sdetkit phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/phase3-kickoff-closeout-pack/evidence --format json --strict
+python -m sdetkit platform-readiness-kickoff-completion-report --format json --strict
+python -m sdetkit platform-readiness-kickoff-completion-report --emit-pack-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack --format json --strict
+python -m sdetkit platform-readiness-kickoff-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack/evidence --format json --strict
 python scripts/check_phase3_kickoff_contract.py
 ```
 
@@ -175,8 +171,8 @@ def build_phase3_kickoff_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_command_lane",
             "weight": 7,
-            "passed": ("phase3-kickoff-closeout" in readme_text),
-            "evidence": "README phase3-kickoff-closeout command lane",
+            "passed": ("platform-readiness-kickoff-completion-report" in readme_text),
+            "evidence": "README platform-readiness-kickoff-completion-report command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -309,7 +305,7 @@ def build_phase3_kickoff_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "phase3-kickoff-closeout",
+        "name": "platform-readiness-kickoff-completion-report",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -360,10 +356,13 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "phase3-kickoff-closeout-summary.json",
+        target / "platform-readiness-kickoff-completion-report-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "phase3-kickoff-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "platform-readiness-kickoff-completion-report-summary.md",
+        _render_text(payload) + "\n",
+    )
     _write(target / "phase3-kickoff-brief.md", "# Phase-3 kickoff brief\n")
     _write(target / "phase3-kickoff-trust-ledger.csv", "risk,owner,mitigation,status\n")
     _write(target / "phase3-kickoff-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
@@ -429,7 +428,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/phase3-kickoff-closeout-pack/evidence")
+            else Path("docs/artifacts/platform-readiness-kickoff-completion-report-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

@@ -40,7 +40,8 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/impact-62-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
-        root / "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json"
+        root
+        / "docs/artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-completion-report-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -53,7 +54,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/platform-readiness-kickoff-completion-report-pack/phase3-kickoff-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -145,7 +149,7 @@ def test_community_program_strict_fails_without_prereq_baseline(tmp_path: Path) 
     seed_contract_anchors(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json"
+        / "docs/artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-completion-report-summary.json"
     ).unlink()
     assert d62.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

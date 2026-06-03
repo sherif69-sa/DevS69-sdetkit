@@ -61,14 +61,14 @@ def test_cmd_run_success_and_validate_json(monkeypatch, capsys) -> None:
     monkeypatch.setattr(
         pc,
         "_build_registry",
-        lambda pkg: ({"alias": "demo_mod", "broken": "broken_mod"}, {"alias": "demo"}),
+        lambda pkg: ({"alias": "example_mod", "broken": "broken_mod"}, {"alias": "example"}),
     )
 
     good_mod = types.SimpleNamespace(main=lambda argv: 7)
     broken_mod = types.SimpleNamespace(main="not-callable")
 
     def _fake_import(name: str):
-        if name == "sdetkit.demo_mod":
+        if name == "sdetkit.example_mod":
             return good_mod
         if name == "sdetkit.broken_mod":
             return broken_mod
@@ -90,4 +90,4 @@ def test_cmd_run_success_and_validate_json(monkeypatch, capsys) -> None:
     assert pc._cmd_validate(json_ns) == 2
     out = capsys.readouterr().out
     assert '"failed": [' in out
-    assert '"canonical": "demo"' in out
+    assert '"canonical": "example"' in out

@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from sdetkit import baseline_wrap as d30
 from sdetkit import cli
-from sdetkit import phase1_wrap as d30
 
 
 def _seed_repo(root: Path) -> None:

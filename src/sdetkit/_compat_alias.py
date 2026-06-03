@@ -8,7 +8,7 @@ def export_module(target_module: str, namespace: dict[str, object]) -> ModuleTyp
     module = import_module(target_module)
     raw_all = getattr(module, "__all__", None)
     if raw_all is None:
-        exports = [name for name in dir(module) if not name.startswith("_")]
+        exports = [name for name in dir(module) if not name.startswith("__")]
     else:
         exports = [str(name) for name in raw_all]
 

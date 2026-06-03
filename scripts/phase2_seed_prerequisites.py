@@ -71,11 +71,13 @@ def main(argv: list[str] | None = None) -> int:
 
     # phase2 wrap prerequisites
     _write_json(
-        root / "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json",
+        root
+        / "docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-completion-report-summary.json",
         {"summary": {"activation_score": 99, "strict_pass": True}, "checks": [{"id": "seed"}]},
     )
     _write_board(
-        root / "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md",
+        root
+        / "docs/artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-delivery-board.md",
         "Phase3 preplan board",
     )
 

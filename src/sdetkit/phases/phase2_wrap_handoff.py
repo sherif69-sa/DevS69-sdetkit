@@ -12,10 +12,8 @@ from .bools import coerce_bool
 
 _PAGE_PATH = "docs/integrations-phase2-wrap-handoff.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY58_SUMMARY_PATH = (
-    "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json"
-)
-_DAY58_BOARD_PATH = "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md"
+_DAY58_SUMMARY_PATH = "docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-completion-report-summary.json"
+_DAY58_BOARD_PATH = "docs/artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-delivery-board.md"
 _LANE_NAME = "Phase 2 Wrap Handoff Closeout"
 _SECTION_HEADER = "# Phase 2 Wrap Handoff Closeout - Phase-2 wrap + handoff closeout lane"
 _REQUIRED_SECTIONS = [
@@ -28,14 +26,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit phase2-wrap-handoff-closeout --format json --strict",
-    "python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict",
-    "python -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit release-readiness-wrap-handoff-completion-report --format json --strict",
+    "python -m sdetkit release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict",
+    "python -m sdetkit release-readiness-wrap-handoff-completion-report --execute --evidence-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence --format json --strict",
     "python scripts/check_phase2_wrap_handoff_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit phase2-wrap-handoff-closeout --format json --strict",
-    "python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict",
+    "python -m sdetkit release-readiness-wrap-handoff-completion-report --format json --strict",
+    "python -m sdetkit release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict",
     "python scripts/check_phase2_wrap_handoff_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -71,15 +69,15 @@ Phase 2 Wrap Handoff Closeout closes with a major Phase-2 wrap + handoff upgrade
 
 ## Required inputs (Phase-3 pre-plan closeout)
 
-- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json`
-- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md`
+- `docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-completion-report-summary.json`
+- `docs/artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-delivery-board.md`
 
 ## Phase 2 Wrap Handoff Closeout command lane
 
 ```bash
-python -m sdetkit phase2-wrap-handoff-closeout --format json --strict
-python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict
-python -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence --format json --strict
+python -m sdetkit release-readiness-wrap-handoff-completion-report --format json --strict
+python -m sdetkit release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict
+python -m sdetkit release-readiness-wrap-handoff-completion-report --execute --evidence-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence --format json --strict
 python scripts/check_phase2_wrap_handoff_contract.py
 ```
 
@@ -176,8 +174,8 @@ def build_phase2_wrap_handoff_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_command_lane",
             "weight": 7,
-            "passed": ("phase2-wrap-handoff-closeout" in readme_text),
-            "evidence": "README phase2-wrap-handoff-closeout command lane",
+            "passed": ("release-readiness-wrap-handoff-completion-report" in readme_text),
+            "evidence": "README release-readiness-wrap-handoff-completion-report command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -313,7 +311,7 @@ def build_phase2_wrap_handoff_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "phase2-wrap-handoff-closeout",
+        "name": "release-readiness-wrap-handoff-completion-report",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -364,10 +362,13 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "phase2-wrap-handoff-closeout-summary.json",
+        target / "release-readiness-wrap-handoff-completion-report-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "phase2-wrap-handoff-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "release-readiness-wrap-handoff-completion-report-summary.md",
+        _render_text(payload) + "\n",
+    )
     _write(target / "phase2-wrap-handoff-brief.md", "# Phase-2 wrap + handoff brief\n")
     _write(target / "phase2-wrap-handoff-risk-ledger.csv", "risk,owner,mitigation,status\n")
     _write(
@@ -436,7 +437,9 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence")
+            else Path(
+                "docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence"
+            )
         )
         _execute_commands(root, evidence_dir)
 

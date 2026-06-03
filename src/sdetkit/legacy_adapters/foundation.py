@@ -19,12 +19,12 @@ LEGACY_NAMESPACE_COMMANDS: tuple[str, ...] = (
 
 LEGACY_FOUNDATION_COMMAND_MODULES: dict[str, str] = {
     "weekly-review-lane": "sdetkit.weekly_review_foundation",
-    "phase1-hardening": "sdetkit.phase1_hardening",
-    "phase1-wrap": "sdetkit.phase1_wrap",
-    "phase2-kickoff": "sdetkit.phase2_kickoff",
+    "phase1-hardening": "sdetkit.baseline_hardening",
+    "phase1-wrap": "sdetkit.baseline_wrap",
+    "phase2-kickoff": "sdetkit.release_readiness_kickoff",
     "release-cadence": "sdetkit.release_cadence",
-    "demo-asset": "sdetkit.demo_asset",
-    "demo-asset2": "sdetkit.demo_asset2",
+    "demo-asset": "sdetkit.example_asset",
+    "demo-asset2": "sdetkit.example_asset2",
     "kpi-instrumentation": "sdetkit.kpi_instrumentation",
     "distribution-closeout": "sdetkit.distribution",
     "experiment-lane": "sdetkit.experiment_workflow",

@@ -10,8 +10,8 @@ Lane ships a major community-program upgrade that converts Lane kickoff evidence
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json`
-- `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md`
+- `docs/artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-completion-report-summary.json`
+- `docs/artifacts/platform-readiness-kickoff-completion-report-pack/phase3-kickoff-delivery-board.md`
 
 ## Community Program Closeout command lane (legacy)
 

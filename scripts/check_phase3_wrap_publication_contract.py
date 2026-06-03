@@ -6,9 +6,9 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import phase3_wrap_publication as d90
+from sdetkit import platform_readiness_wrap_publication as d90
 
-_CANONICAL_EVIDENCE = "docs/artifacts/phase3-wrap-publication-closeout-pack/evidence/phase3-wrap-publication-execution-summary.json"
+_CANONICAL_EVIDENCE = "docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/evidence/phase3-wrap-publication-execution-summary.json"
 
 
 def main() -> int:
@@ -42,12 +42,15 @@ def main() -> int:
                 errors.append("evidence total_commands below 3")
 
     if errors:
-        print("phase3-wrap-publication-closeout contract check failed:", file=sys.stderr)
+        print(
+            "platform-readiness-wrap-publication-completion-report contract check failed:",
+            file=sys.stderr,
+        )
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    print("phase3-wrap-publication-closeout contract check passed")
+    print("platform-readiness-wrap-publication-completion-report contract check passed")
     return 0
 
 
