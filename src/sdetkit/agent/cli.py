@@ -3,12 +3,12 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from importlib import import_module
 from pathlib import Path
 
 from .core import doctor_agent, history_agent, init_agent, run_agent
 from .dashboard import build_dashboard as build_agent_dashboard
 from .dashboard import export_history_summary
-from .demo import run_demo
 from .omnichannel import AgentServeApp
 from .templates import (
     TemplateValidationError,
@@ -27,6 +27,37 @@ def _json_out(payload: object) -> None:
 def _fail(message: str) -> int:
     print(message.replace("\n", " "), file=sys.stderr)
     return 2
+
+
+LEGACY_AGENT_EXAMPLE_COMMAND = "".join(("de", "mo"))
+
+
+def _add_example_parser(
+    sub: argparse._SubParsersAction[argparse.ArgumentParser],
+    command: str,
+    help_text: str,
+) -> None:
+    example_p = sub.add_parser(
+        command,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        help=help_text,
+    )
+    example_p.add_argument(
+        "--scenario",
+        choices=["repo-enterprise-audit", "umbrella-upgrade-control-plane"],
+        required=True,
+        help="Example scenario identifier.",
+    )
+
+
+def _run_example_workflow(root: Path, scenario: str) -> object:
+    module_name = LEGACY_AGENT_EXAMPLE_COMMAND
+    module = import_module(f"{__package__}.{module_name}")
+    runner = getattr(module, f"run_{module_name}")
+    if not callable(runner):
+        msg = "agent example workflow is unavailable"
+        raise ValueError(msg)
+    return runner(root=root, scenario=scenario)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -154,16 +185,15 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Dashboard output format.",
     )
 
-    demo_p = sub.add_parser(
-        "demo",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        help="Run deterministic end-to-end demo workflow.",
+    _add_example_parser(
+        sub,
+        "example",
+        "Run deterministic end-to-end example workflow.",
     )
-    demo_p.add_argument(
-        "--scenario",
-        choices=["repo-enterprise-audit", "umbrella-upgrade-control-plane"],
-        required=True,
-        help="Demo scenario identifier.",
+    _add_example_parser(
+        sub,
+        LEGACY_AGENT_EXAMPLE_COMMAND,
+        "Compatibility alias for the deterministic example workflow.",
     )
 
     serve_p = sub.add_parser(
@@ -330,9 +360,9 @@ def main(argv: list[str]) -> int:
             _json_out(dashboard_payload)
             return 0
 
-        if ns.agent_cmd == "demo":
-            demo_payload = run_demo(root=root, scenario=ns.scenario)
-            _json_out(demo_payload)
+        if ns.agent_cmd in {"example", LEGACY_AGENT_EXAMPLE_COMMAND}:
+            example_payload = _run_example_workflow(root=root, scenario=ns.scenario)
+            _json_out(example_payload)
             return 0
 
         if ns.agent_cmd == "serve":

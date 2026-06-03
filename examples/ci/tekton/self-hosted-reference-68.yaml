@@ -3,7 +3,7 @@ kind: Pipeline
 metadata:
   name: -self-hosted-enterprise
 spec:
-  description:  self-hosted enterprise reference pipeline for integration expansion closeout.
+  description:  self-hosted enterprise reference pipeline for integration expansion completion report.
   workspaces:
     - name: shared-workspace
   params:

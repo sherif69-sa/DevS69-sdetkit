@@ -13,8 +13,8 @@ body:
     id: radar_artifact
     attributes:
       label: Radar artifact path
-      description: Path to latest phase3 dependency radar JSON.
-      placeholder: docs/artifacts/phase3-dependency-radar-YYYY-MM-DD.json
+      description: Path to latest platform-readiness dependency radar JSON.
+      placeholder: docs/artifacts/platform-readiness-dependency-radar-YYYY-MM-DD.json
     validations:
       required: true
   - type: textarea
