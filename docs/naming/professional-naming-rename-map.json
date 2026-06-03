@@ -1,0 +1,23 @@
+{
+  "schema_version": "sdetkit.professional_naming_rename_map.v1",
+  "rename_map": {
+    "phase1": "baseline",
+    "phase2": "release_readiness",
+    "phase3": "platform_readiness",
+    "phase4": "operational_readiness",
+    "phase5": "adoption_readiness",
+    "phase6": "scale_readiness",
+    "gate-phase2": "release_readiness_gate",
+    "closeout": "completion_report",
+    "demo": "example",
+    "toy": "sample",
+    "scratch": "workspace",
+    "temp": "temporary_workspace",
+    "tutorial": "guide",
+    "lesson": "guide",
+    "education": "operator_guidance",
+    "finish-signal": "completion_signal",
+    "retire-plan": "deprecation_plan",
+    "next-pass": "followup_pass"
+  }
+}
