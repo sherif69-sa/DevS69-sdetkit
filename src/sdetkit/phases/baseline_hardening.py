@@ -8,18 +8,18 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-phase1-hardening.md"
+_PAGE_PATH = "docs/integrations-baseline-hardening.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_CANONICAL_LANE_NAME = "phase1-hardening"
+_CANONICAL_LANE_NAME = "baseline-hardening"
 _LEGACY_LANE_NAME = "legacy-phase1-hardening"
-_CANONICAL_PACK_DIR = "docs/artifacts/phase1-hardening-pack"
+_CANONICAL_PACK_DIR = "docs/artifacts/baseline-hardening-pack"
 _LEGACY_PACK_DIR = "docs/artifacts/legacy-phase1-hardening-pack"
-_CANONICAL_SUMMARY_JSON = "phase1-hardening-summary.json"
-_CANONICAL_SUMMARY_MD = "phase1-hardening-summary.md"
-_CANONICAL_STALE_GAPS = "phase1-hardening-stale-gaps.json"
-_CANONICAL_VALIDATION_COMMANDS = "phase1-hardening-validation-commands.md"
-_CANONICAL_EXECUTION_SUMMARY = "phase1-hardening-execution-summary.json"
-_SECTION_HEADER = "#  - Phase-1 hardening"
+_CANONICAL_SUMMARY_JSON = "baseline-hardening-summary.json"
+_CANONICAL_SUMMARY_MD = "baseline-hardening-summary.md"
+_CANONICAL_STALE_GAPS = "baseline-hardening-stale-gaps.json"
+_CANONICAL_VALIDATION_COMMANDS = "baseline-hardening-validation-commands.md"
+_CANONICAL_EXECUTION_SUMMARY = "baseline-hardening-execution-summary.json"
+_SECTION_HEADER = "#  - Baseline hardening"
 _REQUIRED_SECTIONS = [
     "## Why  exists",
     "## Hardening scope",
@@ -28,18 +28,18 @@ _REQUIRED_SECTIONS = [
     "## Entry page polish checklist",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit phase1-hardening --format json --strict",
-    "python -m sdetkit phase1-hardening --emit-pack-dir docs/artifacts/phase1-hardening-pack --format json --strict",
-    "python -m sdetkit phase1-hardening --execute --evidence-dir docs/artifacts/phase1-hardening-pack/evidence --format json --strict",
+    "python -m sdetkit baseline-hardening --format json --strict",
+    "python -m sdetkit baseline-hardening --emit-pack-dir docs/artifacts/baseline-hardening-pack --format json --strict",
+    "python -m sdetkit baseline-hardening --execute --evidence-dir docs/artifacts/baseline-hardening-pack/evidence --format json --strict",
     "python scripts/check_phase1_hardening_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit phase1-hardening --format json --strict",
+    "python -m sdetkit baseline-hardening --format json --strict",
     "python scripts/check_phase1_hardening_contract.py --skip-evidence",
 ]
 _STALE_MARKERS = ["TODO", "TBD", "lorem ipsum", "coming soon"]
 
-_DEFAULT_PAGE_TEMPLATE = "#  - Phase-1 hardening\n\n closes Phase-1 by hardening top entry pages, removing stale guidance, and publishing a deterministic closeout lane.\n\n## Why  exists\n\n- Preserve trust by ensuring README + docs index + strategy pages are mutually consistent.\n- Close stale docs gaps before  phase wrap and handoff.\n- Produce a reviewable hardening artifact pack for maintainers.\n\n## Hardening scope\n\n- README entry-page checks and command-lane verification.\n- Docs index discoverability checks for  integration/report pages.\n- Strategy alignment checks against `docs/top-10-github-strategy.md`  objective.\n- Stale marker scans across top entry pages and recent integration docs.\n\n##  command lane\n\n```bash\npython -m sdetkit phase1-hardening --format json --strict\npython -m sdetkit phase1-hardening --emit-pack-dir docs/artifacts/phase1-hardening-pack --format json --strict\npython -m sdetkit phase1-hardening --execute --evidence-dir docs/artifacts/phase1-hardening-pack/evidence --format json --strict\npython scripts/check_phase1_hardening_contract.py\n```\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract and command-lane completeness: 35 points.\n- Entry-page discoverability + strategy alignment: 35 points.\n- Stale marker elimination in top pages: 20 points.\n- Artifact/report wiring for Phase-1 closeout: 10 points.\n\n## Entry page polish checklist\n\n- README includes  section and command lane.\n- Docs index links both integration guide and  report.\n- Top-10 strategy includes  hardening objective.\n- No stale placeholder markers in top entry pages.\n"
+_DEFAULT_PAGE_TEMPLATE = "#  - Baseline hardening\n\n closes Baseline by hardening top entry pages, removing stale guidance, and publishing a deterministic closeout lane.\n\n## Why  exists\n\n- Preserve trust by ensuring README + docs index + strategy pages are mutually consistent.\n- Close stale docs gaps before  baseline wrap and handoff.\n- Produce a reviewable hardening artifact pack for maintainers.\n\n## Hardening scope\n\n- README entry-page checks and command-lane verification.\n- Docs index discoverability checks for  integration/report pages.\n- Strategy alignment checks against `docs/top-10-github-strategy.md`  objective.\n- Stale marker scans across top entry pages and recent integration docs.\n\n##  command lane\n\n```bash\npython -m sdetkit baseline-hardening --format json --strict\npython -m sdetkit baseline-hardening --emit-pack-dir docs/artifacts/baseline-hardening-pack --format json --strict\npython -m sdetkit baseline-hardening --execute --evidence-dir docs/artifacts/baseline-hardening-pack/evidence --format json --strict\npython scripts/check_phase1_hardening_contract.py\n```\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract and command-lane completeness: 35 points.\n- Entry-page discoverability + strategy alignment: 35 points.\n- Stale marker elimination in top pages: 20 points.\n- Artifact/report wiring for baseline completion: 10 points.\n\n## Entry page polish checklist\n\n- README includes  section and command lane.\n- Docs index links both integration guide and  report.\n- Top-10 strategy includes  hardening objective.\n- No stale placeholder markers in top entry pages.\n"
 
 
 def _read(path: Path) -> str:
@@ -72,7 +72,7 @@ def build_phase1_hardening_summary_impl(
         "README.md": readme_text,
         "docs/index.md": docs_index_text,
         "docs/top-10-github-strategy.md": top10_text,
-        "docs/integrations-phase1-hardening.md": page_text,
+        "docs/integrations-baseline-hardening.md": page_text,
         "docs/integrations-weekly-review.md": _read(root / "docs/integrations-weekly-review.md"),
     }
     stale_hits: dict[str, list[str]] = {}
@@ -103,8 +103,8 @@ def build_phase1_hardening_summary_impl(
         {
             "check_id": "readme_phase1_hardening_link",
             "weight": 12,
-            "passed": "docs/integrations-phase1-hardening.md" in readme_text,
-            "evidence": "docs/integrations-phase1-hardening.md",
+            "passed": "docs/integrations-baseline-hardening.md" in readme_text,
+            "evidence": "docs/integrations-baseline-hardening.md",
         },
         {
             "check_id": "docs_index_phase1_hardening_links",
@@ -113,10 +113,10 @@ def build_phase1_hardening_summary_impl(
                 token in docs_index_text
                 for token in [
                     "impact-29-ultra-upgrade-report.md",
-                    "integrations-phase1-hardening.md",
+                    "integrations-baseline-hardening.md",
                 ]
             ),
-            "evidence": "impact-29-ultra-upgrade-report.md + integrations-phase1-hardening.md",
+            "evidence": "impact-29-ultra-upgrade-report.md + integrations-baseline-hardening.md",
         },
         {
             "check_id": "top10_phase1_hardening_alignment",
@@ -124,11 +124,11 @@ def build_phase1_hardening_summary_impl(
             "passed": any(
                 marker in top10_text
                 for marker in (
-                    " - Phase-1 hardening",
-                    " " + chr(0x2014) + " Phase-1 hardening",
+                    " - Baseline hardening",
+                    " " + chr(0x2014) + " Baseline hardening",
                 )
             ),
-            "evidence": " - Phase-1 hardening",
+            "evidence": " - Baseline hardening",
         },
         {
             "check_id": "report_exists",
@@ -255,7 +255,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "phase1-hardening-execution",
+        "name": "baseline-hardening-execution",
         "legacy_name": "legacy-phase1-hardening-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
@@ -303,7 +303,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/phase1-hardening-pack/evidence")
+            else Path("docs/artifacts/baseline-hardening-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

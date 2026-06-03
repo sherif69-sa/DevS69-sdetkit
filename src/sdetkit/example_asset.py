@@ -2,17 +2,17 @@ from __future__ import annotations
 
 from ._legacy_workflow import run_lane
 
-_DEFAULT_PAGE_TEMPLATE = "# Demo asset ()\n\n## Demo asset\n"
+_DEFAULT_PAGE_TEMPLATE = "# Example asset ()\n\n## Example asset\n"
 _CFG = {
     "page_template": _DEFAULT_PAGE_TEMPLATE,
-    "name": "demo-asset",
-    "page_path": "docs/integrations-demo-asset.md",
+    "name": "example-asset",
+    "page_path": "docs/integrations-example-asset.md",
     "required_inputs": ["docs/artifacts/release-cadence-pack/release-cadence-summary.json"],
     "required_boards": ["docs/artifacts/release-cadence-pack/release-delivery-board.md"],
-    "summary_json": "demo-asset-summary.json",
-    "summary_md": "demo-asset-summary.md",
+    "summary_json": "example-asset-summary.json",
+    "summary_md": "example-asset-summary.md",
     "pack_files": [
-        "demo-asset-plan.json",
+        "example-asset-plan.json",
         "demo-script.md",
         "demo-delivery-board.md",
         "demo-validation-commands.md",

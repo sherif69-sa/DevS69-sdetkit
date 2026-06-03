@@ -20,25 +20,25 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-demo-asset2.md\ndemo-asset2\n",
+        "docs/integrations-example-asset2.md\nexample-asset2\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "impact-34-ultra-upgrade-report.md\nintegrations-demo-asset2.md\n",
+        "impact-34-ultra-upgrade-report.md\nintegrations-example-asset2.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- ** — Demo asset #2:** produce/publish `repo audit` workflow short video or GIF.\n"
+        "- ** — Example asset #2:** produce/publish `repo audit` workflow short video or GIF.\n"
         "- ** — KPI instrumentation:** tighten signal loops and close attribution gaps.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-demo-asset2.md").write_text(
+    (root / "docs/integrations-example-asset2.md").write_text(
         d34._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-34-ultra-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/demo-asset-pack/demo-asset-summary.json"
+    summary = root / "docs/artifacts/example-asset-pack/example-asset-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -50,7 +50,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/demo-asset-pack/demo-delivery-board.md"
+    board = root / "docs/artifacts/example-asset-pack/demo-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -72,7 +72,7 @@ def test_demo_asset2_json(tmp_path: Path, capsys) -> None:
     rc = d34.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "demo-asset2"
+    assert out["name"] == "example-asset2"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -83,37 +83,39 @@ def test_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/demo-asset2-pack",
+            "artifacts/example-asset2-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/demo-asset2-pack/evidence",
+            "artifacts/example-asset2-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-summary.json").exists()
-    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-summary.md").exists()
-    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-plan.json").exists()
-    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-script.md").exists()
-    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/example-asset2-pack/example-asset2-summary.json").exists()
+    assert (tmp_path / "artifacts/example-asset2-pack/example-asset2-summary.md").exists()
+    assert (tmp_path / "artifacts/example-asset2-pack/example-asset2-plan.json").exists()
+    assert (tmp_path / "artifacts/example-asset2-pack/example-asset2-script.md").exists()
+    assert (tmp_path / "artifacts/example-asset2-pack/example-asset2-delivery-board.md").exists()
     assert (
-        tmp_path / "artifacts/demo-asset2-pack/evidence/demo-asset2-execution-summary.json"
+        tmp_path / "artifacts/example-asset2-pack/example-asset2-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/example-asset2-pack/evidence/example-asset2-execution-summary.json"
     ).exists()
 
 
 def test_strict_fails_when_workflow_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/demo-asset-pack/demo-asset-summary.json").unlink()
+    (tmp_path / "docs/artifacts/example-asset-pack/example-asset-summary.json").unlink()
     rc = d34.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
 def test_strict_fails_when_workflow_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/demo-asset-pack/demo-delivery-board.md").write_text(
+    (tmp_path / "docs/artifacts/example-asset-pack/demo-delivery-board.md").write_text(
         "- [ ]  demo asset #2 backlog pre-scoped\n", encoding="utf-8"
     )
     rc = d34.main(["--root", str(tmp_path), "--strict", "--format", "json"])
