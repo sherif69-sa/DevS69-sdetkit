@@ -61,7 +61,7 @@ def test_cmd_run_success_and_validate_json(monkeypatch, capsys) -> None:
     monkeypatch.setattr(
         pc,
         "_build_registry",
-        lambda pkg: ({"alias": "demo_mod", "broken": "broken_mod"}, {"alias": "demo"}),
+        lambda pkg: ({"alias": "example_mod", "broken": "broken_mod"}, {"alias": "example"}),
     )
 
     good_mod = types.SimpleNamespace(main=lambda argv: 7)
@@ -90,4 +90,4 @@ def test_cmd_run_success_and_validate_json(monkeypatch, capsys) -> None:
     assert pc._cmd_validate(json_ns) == 2
     out = capsys.readouterr().out
     assert '"failed": [' in out
-    assert '"canonical": "demo"' in out
+    assert '"canonical": "example"' in out
