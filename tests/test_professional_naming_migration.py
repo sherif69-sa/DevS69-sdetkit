@@ -5,6 +5,7 @@ from pathlib import Path
 
 from sdetkit.professional_naming_migration import (
     ALIAS_REQUIRED,
+    MANUAL_REVIEW,
     PRESERVE_HISTORY,
     SAFE_CONTENT_REWRITE,
     TEMPLATE_LOCKED,
@@ -69,6 +70,53 @@ def test_professional_naming_migration_requires_alias_for_public_surface() -> No
     item = payload["items"][0]
     assert item["migration_class"] == ALIAS_REQUIRED
     assert item["allowed_to_apply"] is False
+
+
+def test_professional_naming_migration_keeps_internal_wrapper_paths_review_first() -> None:
+    inventory = {
+        "items": [
+            {
+                "term": "phase3",
+                "path": "src/sdetkit/phase3_kickoff.py",
+                "match_type": "path",
+                "classification": "internal_path_requires_migration",
+                "actionability": "migration_or_alias_required",
+                "actionability_reason": "compatibility plan required before changing this surface",
+            }
+        ]
+    }
+
+    payload = build_professional_naming_migration_plan(inventory, _rename_map())
+
+    assert payload["alias_required_count"] == 0
+    assert payload["manual_review_count"] == 1
+    expected_next_action = "_".join(("review", "preserved", "history", "and", "manual", "contexts"))
+    assert payload["recommended_next_action"] == expected_next_action
+    item = payload["items"][0]
+    assert item["migration_class"] == MANUAL_REVIEW
+    assert item["allowed_to_apply"] is False
+    assert item["required_guard"] == "human review before rename"
+
+
+def test_professional_naming_migration_still_requires_alias_for_workflow_surface() -> None:
+    inventory = {
+        "items": [
+            {
+                "term": "phase3",
+                "path": ".github/workflows/phase3-quality-contract.yml",
+                "match_type": "path",
+                "classification": "workflow_alias_migration",
+                "actionability": "migration_or_alias_required",
+                "actionability_reason": "compatibility plan required before changing this surface",
+            }
+        ]
+    }
+
+    payload = build_professional_naming_migration_plan(inventory, _rename_map())
+
+    assert payload["alias_required_count"] == 1
+    assert payload["items"][0]["migration_class"] == ALIAS_REQUIRED
+    assert payload["items"][0]["allowed_to_apply"] is False
 
 
 def test_professional_naming_migration_preserves_history_headings() -> None:
