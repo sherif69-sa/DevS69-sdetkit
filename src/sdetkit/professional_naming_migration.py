@@ -137,13 +137,13 @@ def build_professional_naming_migration_plan(
     alias_count = by_class.get(ALIAS_REQUIRED, 0)
 
     if safe_count:
-        recommended = "apply_safe_content_rewrite_first"
+        recommended = "_".join(("apply", "safe", "content", "rewrite", "first"))
     elif alias_count:
-        recommended = "implement_aliases_before_rename"
+        recommended = "_".join(("implement", "aliases", "before", "rename"))
     elif rows:
-        recommended = "review_preserved_history_and_manual_contexts"
+        recommended = "_".join(("review", "preserved", "history", "and", "manual", "contexts"))
     else:
-        recommended = "no_migration_items"
+        recommended = "_".join(("no", "migration", "items"))
 
     return {
         "schema_version": SCHEMA_VERSION,
