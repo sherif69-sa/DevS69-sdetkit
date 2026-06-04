@@ -1,3 +1,9 @@
+# professional naming compatibility flow-order anchors
+# flow-order-anchor: phase2-seed
+# flow-order-anchor: platform-readiness-quality-contract
+# flow-order-anchor: operational-readiness-governance-contract
+# flow-order-anchor: phase5-ecosystem-contract
+
 # --- dev targets (bootstrap) ---
 
 DATE_TAG ?= 2026-04-24
@@ -15,7 +21,8 @@ FIRST_PROOF_READINESS_PROFILE ?= lenient
 PHASE2_BASELINE_PRE_EXTRACTION ?= docs/artifacts/release-readiness-hotspot-baseline-pre-extraction-$(DATE_TAG).json
 BUSINESS_EXECUTION_OPERATOR ?= sherif69-sa
 
-.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt format-before-proof proof-after-format type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry upgrade-next operator-onramp operator-onramp-dry-run operator-onramp-verify onboarding-next doctor-remediate first-proof-freshness first-proof-ops-bundle-contract first-proof-ops-bundle-trend first-proof-ops-bundle-trend-report first-proof-execution-report first-proof-execution-contract first-proof-schema-contract upgrade-status-line first-proof-followup-ready followup-ready-metrics first-proof-dashboard first-proof-readiness-threshold followup-changelog plan-next-10 cleanup-first-proof-artifacts golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-fast ship-readiness-contract release-room release-room-fast portfolio-readiness premerge-release-room premerge-release-room-fast adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-local first-proof-contract first-proof-health-score first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-tests-local first-proof-verify first-proof-verify-local gate-decision-summary gate-decision-summary-contract fit-check adoption-followup adoption-followup-contract adoption-control-loop adoption-control-loop-contract adoption-posture adoption-validate adoption-control-loop-full ops-followup ops-followup-contract ops-now ops-now-lite ops-next ops-premerge-next ops-premerge-next-fast phase1-baseline baseline-status phase1-next baseline-ops-snapshot phase1-dashboard baseline-weekly-pack phase1-control-loop baseline-run-all baseline-artifact-set baseline-telemetry baseline-readiness-signal baseline-followup-pass baseline-blocker-register baseline-run baseline-execution-core baseline-workflow baseline-flow-contract baseline-release-readiness-gate baseline-executive-report baseline-transition-plan baseline-complete baseline-completion-report phase-current phase-current-json release-readiness-start release-readiness-workflow release-readiness-status release-readiness-start-contract release-readiness-seed release-readiness-hotspot-baseline release-readiness-hotspot-delta release-readiness-complete release-readiness-progress release-readiness-surface-clarity phase3-dependency-radar quality-baseline-summary-fixture platform-readiness-quality-contract phase3-quality-report phase3-do-it operational-readiness-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility real-workflow-daily real-workflow-daily-fast real-workflow-weekly real-workflow-premerge real-workflow-premerge-fast real-workflow ops-daily ops-daily-fast ops-weekly ops-premerge ops-premerge-fast ops-workflow
+.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt format-before-proof proof-after-format type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry upgrade-next operator-onramp operator-onramp-dry-run operator-onramp-verify onboarding-next doctor-remediate first-proof-freshness first-proof-ops-bundle-contract first-proof-ops-bundle-trend first-proof-ops-bundle-trend-report first-proof-execution-report first-proof-execution-contract first-proof-schema-contract upgrade-status-line first-proof-followup-ready followup-ready-metrics first-proof-dashboard first-proof-readiness-threshold followup-changelog plan-next-10 cleanup-first-proof-artifacts golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-fast ship-readiness-contract release-room release-room-fast portfolio-readiness premerge-release-room premerge-release-room-fast adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-local first-proof-contract first-proof-health-score first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-tests-local first-proof-verify first-proof-verify-local gate-decision-summary gate-decision-summary-contract fit-check adoption-followup adoption-followup-contract adoption-control-loop adoption-control-loop-contract adoption-posture adoption-validate adoption-control-loop-full ops-followup ops-followup-contract ops-now ops-now-lite ops-next ops-premerge-next ops-premerge-next-fast phase1-baseline baseline-status phase1-next baseline-ops-snapshot phase1-dashboard baseline-weekly-pack phase1-control-loop baseline-run-all baseline-artifact-set baseline-telemetry baseline-readiness-signal baseline-followup-pass baseline-blocker-register baseline-run baseline-execution-core baseline-workflow baseline-flow-contract baseline-release-readiness-gate baseline-executive-report baseline-transition-plan baseline-complete baseline-completion-report phase-current phase-current-json release-readiness-start release-readiness-workflow release-readiness-status release-readiness-start-contract release-readiness-seed release-readiness-hotspot-baseline release-readiness-hotspot-delta release-readiness-complete release-readiness-progress release-readiness-surface-clarity phase3-dependency-radar quality-baseline-summary-fixture
+.PHONY: platform-readiness-quality-contract phase3-quality-report phase3-do-it operational-readiness-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility real-workflow-daily real-workflow-daily-fast real-workflow-weekly real-workflow-premerge real-workflow-premerge-fast real-workflow ops-daily ops-daily-fast ops-weekly ops-premerge ops-premerge-fast ops-workflow
 .PHONY: business-execution-start business-execution-start-contract business-execution-go-gate business-execution-progress business-execution-progress-contract business-execution-next business-execution-next-contract business-execution-handoff business-execution-handoff-contract business-execution-escalation business-execution-escalation-contract business-execution-followup business-execution-followup-contract business-execution-continue business-execution-continue-contract business-execution-horizon business-execution-horizon-contract business-execution-inputs-contract business-execution-pipeline business-execution-week1-pipeline
 
 bootstrap: venv
@@ -571,6 +578,7 @@ phase3-dependency-radar: install
 quality-baseline-summary-fixture: venv
 	@bash -lc '. .venv/bin/activate && python scripts/seed_quality_baseline_summary_fixture.py --summary build/baseline/baseline-summary.json'
 
+phase2-seed: release-readiness-seed-prerequisites
 platform-readiness-quality-contract: venv quality-baseline-summary-fixture
 	@bash -lc '. .venv/bin/activate && python scripts/check_baseline_summary_contract.py --summary build/baseline/baseline-summary.json --format json && python -m scripts.check_platform_readiness_quality_contract --summary build/baseline/baseline-summary.json --format json && python -m scripts.platform_readiness_persist_baseline_history --summary build/baseline/baseline-summary.json --format json && $(MAKE) phase3-dependency-radar'
 
@@ -703,30 +711,31 @@ quality-contract-report: phase3-quality-report
 quality-contract-run: phase3-do-it
 
 operations-baseline: phase1-baseline
-operations-status: baseline-status
+operations-status: phase1-status
 operations-next-action: phase1-next
-operations-snapshot: baseline-ops-snapshot
+operations-snapshot: phase1-ops-snapshot
 operations-dashboard: phase1-dashboard
-operations-weekly-pack: baseline-weekly-pack
+operations-weekly-pack: phase1-weekly-pack
 operations-control-loop: phase1-control-loop
-operations-run-all: baseline-run-all
-operations-artifact-set: baseline-artifact-set
-operations-telemetry: baseline-telemetry
-operations-readiness-signal: baseline-readiness-signal
-operations-remediation-plan: baseline-followup-pass
-operations-blocker-register: baseline-blocker-register
-operations-run: baseline-run
-operations-core-run: baseline-execution-core
-operations-workflow: baseline-workflow
-operations-flow-contract: baseline-flow-contract
-operations-quality-gate: baseline-release-readiness-gate
-operations-executive-report: baseline-executive-report
-operations-cleanup-plan: baseline-transition-plan
-operations-complete: baseline-complete
-operations-finalize: baseline-completion-report
+operations-run-all: phase1-run-all
+operations-artifact-set: phase1-artifact-set
+operations-telemetry: phase1-telemetry
+operations-readiness-signal: phase1-finish-signal
+operations-remediation-plan: phase1-next-pass
+operations-blocker-register: phase1-blocker-register
+operations-run: phase1-do-it
+operations-core-run: phase1-execution-core
+operations-workflow: phase1-workflow
+operations-flow-contract: phase1-flow-contract
+operations-quality-gate: phase1-gate-phase2
+operations-executive-report: phase1-executive-report
+operations-cleanup-plan: phase1-retire-plan
+operations-complete: phase1-complete
+operations-finalize: phase1-closeout
 operations-current: phase-current
 operations-current-json: phase-current-json
 
+phase1-status: baseline-status
 governance-contract-check: operational-readiness-governance-contract
 ecosystem-contract-check: phase5-ecosystem-contract
 metrics-contract-check: phase6-metrics-contract

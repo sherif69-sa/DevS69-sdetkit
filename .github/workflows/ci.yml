@@ -294,7 +294,7 @@ jobs:
         id: coverage
         env:
           COV_FAIL_UNDER: "95"
-          PYTEST_ADDOPTS: "-n auto --junitxml=${{ runner.temporary-workspace }}/sdetkit-trusted-test-input/junit.xml"
+          PYTEST_ADDOPTS: "-n auto --junitxml=${{ runner.temp }}/sdetkit-trusted-test-input/junit.xml"
         run: bash quality.sh cov
 
       - name: Normalize trusted-main test observations

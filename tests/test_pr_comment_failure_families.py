@@ -70,3 +70,12 @@ def test_comment_renders_multiple_failure_families() -> None:
     assert "artifact_set_mismatch" in report
     assert "schema_version_mismatch" in report
     assert "make_target_contract_failed" in report
+
+
+def test_comment_diagnoses_validate_exact_artifact_set_step() -> None:
+    log = """
+    operational-readiness-governance Validate exact artifact set
+    ##[error]Process completed with exit code 1.
+    """
+
+    assert "artifact_set_mismatch" in _families(log)

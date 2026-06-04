@@ -37,7 +37,10 @@ def test_release_evidence_complete_and_sorted(tmp_path: Path, monkeypatch) -> No
     assert contract.main(["--format", "json", "--last-review-at", "2026-04-01"]) == 0
 
     payload = json.loads(
-        (tmp_path / "build/phase4-governance/phase4-release-evidence.json").read_text()
+        (
+            tmp_path
+            / "build/operational-readiness-governance/operational-readiness-release-evidence.json"
+        ).read_text()
     )
     assert payload["required_artifacts"] == sorted(payload["required_artifacts"])
     assert payload["discovered_artifacts"] == sorted(payload["discovered_artifacts"])
@@ -52,7 +55,10 @@ def test_release_evidence_incomplete_when_required_missing(tmp_path: Path, monke
     contract.main(["--format", "json", "--last-review-at", "2026-04-01"])
 
     payload = json.loads(
-        (tmp_path / "build/phase4-governance/phase4-release-evidence.json").read_text()
+        (
+            tmp_path
+            / "build/operational-readiness-governance/operational-readiness-release-evidence.json"
+        ).read_text()
     )
     assert payload["evidence_status"] == "incomplete"
     assert "docs/versioning-and-support.md" in payload["missing_artifacts"]
@@ -63,7 +69,10 @@ def test_release_evidence_markdown_emitted(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     assert contract.main(["--format", "json", "--last-review-at", "2026-04-01"]) == 0
 
-    md_path = tmp_path / "build/phase4-governance/phase4-release-evidence.md"
+    md_path = (
+        tmp_path
+        / "build/operational-readiness-governance/operational-readiness-release-evidence.md"
+    )
     assert md_path.exists()
     text = md_path.read_text(encoding="utf-8")
     assert "# Phase 4 release evidence" in text
@@ -75,7 +84,10 @@ def test_release_evidence_markdown_ordering_snapshot(tmp_path: Path, monkeypatch
     monkeypatch.chdir(tmp_path)
     assert contract.main(["--format", "json", "--last-review-at", "2026-04-01"]) == 0
 
-    md_path = tmp_path / "build/phase4-governance/phase4-release-evidence.md"
+    md_path = (
+        tmp_path
+        / "build/operational-readiness-governance/operational-readiness-release-evidence.md"
+    )
     text = md_path.read_text(encoding="utf-8")
     expected_sequence = [
         "# Phase 4 release evidence",
@@ -101,5 +113,8 @@ def test_release_evidence_markdown_can_be_skipped(tmp_path: Path, monkeypatch) -
     monkeypatch.chdir(tmp_path)
     assert contract.main(["--format", "json", "--no-md", "--last-review-at", "2026-04-01"]) == 0
 
-    md_path = tmp_path / "build/phase4-governance/phase4-release-evidence.md"
+    md_path = (
+        tmp_path
+        / "build/operational-readiness-governance/operational-readiness-release-evidence.md"
+    )
     assert not md_path.exists()

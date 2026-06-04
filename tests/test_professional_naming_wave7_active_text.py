@@ -15,8 +15,20 @@ def _legacy_closeout() -> str:
     return "".join(("close", "out"))
 
 
+SCRIPT_ALIASES = {
+    "phase1_gate_phase2.py": "baseline_release_readiness_gate.py",
+    "phase1_control_loop_report.py": "baseline_control_loop_report.py",
+    "phase1_completion_and_prune_plan.py": "baseline_completion_and_prune_plan.py",
+    "phase1_blocker_register.py": "baseline_blocker_register.py",
+    "phase1_next_pass_card.py": "baseline_followup_pass_card.py",
+    "phase1_retire_plan_into_flow.py": "baseline_transition_plan_into_flow.py",
+    "phase2_seed_prerequisites.py": "release_readiness_seed_prerequisites.py",
+}
+
+
 def _script(*parts: str) -> Path:
-    return Path("scripts") / "_".join(parts)
+    requested = "_".join(parts)
+    return Path("scripts") / SCRIPT_ALIASES.get(requested, requested)
 
 
 def test_wave7_scripts_use_professional_followup_and_readiness_wording() -> None:

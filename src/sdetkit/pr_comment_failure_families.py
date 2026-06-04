@@ -26,7 +26,7 @@ _PATTERNS: tuple[tuple[str, str, re.Pattern[str], str], ...] = (
         "artifact_set_mismatch",
         "Workflow artifact set mismatch",
         re.compile(
-            r"artifact-set mismatch missing=\[.*?\]\s+extra=\[.*?\]",
+            r"(artifact-set mismatch missing=\[.*?\]\s+extra=\[.*?\]|Validate exact artifact set)",
             re.IGNORECASE | re.DOTALL,
         ),
         "Compare the workflow output directory, produced artifact filenames, and test expectations. Rename stale expectations only after confirming the workflow producer is canonical.",
