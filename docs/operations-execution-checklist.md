@@ -1,6 +1,6 @@
 # Operational workflow runbook
 
-Use this runbook to execute the live Phase 1 workflow and produce operational artifacts.
+Use this runbook to execute the live baseline workflow and produce operational artifacts.
 
 ## One-command execution
 
@@ -13,20 +13,20 @@ This command runs the execution lane, validates the flow contract, computes the 
 ## Run order
 
 1. `make operations-baseline`
-2. `python scripts/phase1_status_report.py --format json --out build/phase1-baseline/phase1-status.json`
+2. `python scripts/baseline_status_report.py --format json --out build/baseline/baseline-status.json`
 3. `make operations-next-action`
 4. `make operations-snapshot`
 5. `make operations-dashboard`
 6. `make operations-weekly-pack`
 7. `make operations-control-loop`
-8. `python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json --require-logs`
-9. `python scripts/phase1_completion_gate.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json`
+8. `python scripts/check_baseline_summary_contract.py --summary build/baseline/baseline-summary.json --format json --require-logs`
+9. `python scripts/baseline_completion_gate.py --summary build/baseline/baseline-summary.json --format json`
 
 Or run the full completion report path in one command:
 
 - `make operations-complete`
 
-## Phase 1 definition of done (DoD)
+## baseline definition of done (DoD)
 
 Required checks must be green in the baseline summary:
 
@@ -40,14 +40,14 @@ Allowlisted non-blocking checks (can fail temporarily during hardening):
 - `pytest`
 
 The completion gate enforces this policy by default.
-Optional checks (`ruff`, `pytest`) are tracked and reported, but are non-blocking for Phase 1 closeout by default.
+Optional checks (`ruff`, `pytest`) are tracked and reported, but are non-blocking for baseline completion report by default.
 
 `make operations-status` prints what is accomplished and what is not yet complete.
-`make operations-next-action` emits required actions when blockers exist, and advisory actions when closeout is complete.
+`make operations-next-action` emits required actions when blockers exist, and advisory actions when completion report is complete.
 
 ## Workflow retention policy
 
-The repository keeps the Phase 1 workflow and its execution artifacts as the source of truth.
+The repository keeps the baseline workflow and its execution artifacts as the source of truth.
 
 1. Keep baseline artifacts for audit history; do not delete run evidence.
 2. Keep `make operations-status` and `make operations-next-action` as the operational source of truth.
@@ -55,7 +55,7 @@ The repository keeps the Phase 1 workflow and its execution artifacts as the sou
 
 ## Suggested evidence bundle for phase completion report
 
-- `build/phase1-baseline/phase1-baseline-summary.json`
-- `build/phase1-baseline/phase1-baseline-summary.md`
+- `build/baseline/baseline-summary.json`
+- `build/baseline/baseline-summary.md`
 - completion-gate JSON output
 - key remediation notes (if any)

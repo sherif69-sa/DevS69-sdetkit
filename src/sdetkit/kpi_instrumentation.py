@@ -7,8 +7,8 @@ _CFG = {
     "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "kpi-instrumentation",
     "page_path": "docs/integrations-kpi-instrumentation.md",
-    "required_inputs": ["docs/artifacts/demo-asset2-pack/demo-asset2-summary.json"],
-    "required_boards": ["docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md"],
+    "required_inputs": ["docs/artifacts/example-asset2-pack/example-asset2-summary.json"],
+    "required_boards": ["docs/artifacts/example-asset2-pack/example-asset2-delivery-board.md"],
     "summary_json": "kpi-instrumentation-summary.json",
     "summary_md": "kpi-instrumentation-summary.md",
     "pack_files": [

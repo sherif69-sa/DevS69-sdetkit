@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Phase 2 startup workflow summary contract."""
+"""Validate release readiness startup workflow summary contract."""
 
 from __future__ import annotations
 
@@ -15,9 +15,9 @@ REQUIRED_KEYS = {
     "next_actions",
     "steps",
 }
-EXPECTED_SCHEMA = "sdetkit.phase2_start_workflow.v1"
+EXPECTED_SCHEMA = "sdetkit.release_readiness_start_workflow.v1"
 REQUIRED_STEP_SUBSTRINGS = (
-    "sdetkit phase2-kickoff",
+    "sdetkit release readiness-kickoff",
     "scripts/check_release_readiness_kickoff_contract.py",
 )
 
@@ -26,7 +26,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Validate release-readiness start summary contract."
     )
-    parser.add_argument("--summary", default="build/phase2-start/phase2-start-summary.json")
+    parser.add_argument(
+        "--summary", default="build/release-readiness-start/release-readiness-start-summary.json"
+    )
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args(argv)
 
@@ -56,7 +58,7 @@ def main(argv: list[str] | None = None) -> int:
 
     result = {
         "ok": not errors,
-        "schema_version": "sdetkit.phase2_start_summary_contract.v1",
+        "schema_version": "sdetkit.release readiness_start_summary_contract.v1",
         "summary": str(summary_path),
         "errors": errors,
     }
@@ -64,9 +66,9 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(result, indent=2, sort_keys=True))
     else:
         print(
-            "phase2-start-summary-contract: OK"
+            "release-readiness-start-summary-contract: OK"
             if result["ok"]
-            else "phase2-start-summary-contract: FAIL"
+            else "release-readiness-start-summary-contract: FAIL"
         )
         for item in errors:
             print(f"- {item}")

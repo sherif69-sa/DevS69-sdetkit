@@ -46,7 +46,8 @@ def test_phase4_governance_contract_positive_path(tmp_path: Path, monkeypatch) -
 
     payload = json.loads(
         (
-            tmp_path / "build/phase4-governance/operational-readiness-governance-contract.json"
+            tmp_path
+            / "build/operational-readiness-governance/operational-readiness-governance-contract.json"
         ).read_text()
     )
     assert payload["schema_version"] == "sdetkit.phase4_governance_contract.v2"
@@ -290,13 +291,15 @@ def test_phase4_corrupt_emitted_contract_reports_schema_errors(tmp_path: Path, m
     monkeypatch.chdir(tmp_path)
     assert contract.main(["--format", "json", "--last-review-at", "2026-04-01"]) == 0
 
-    out_dir = tmp_path / "build/phase4-governance"
+    out_dir = tmp_path / "build/operational-readiness-governance"
     governance = json.loads(
         (out_dir / "operational-readiness-governance-contract.json").read_text(encoding="utf-8")
     )
-    release = json.loads((out_dir / "phase4-release-evidence.json").read_text(encoding="utf-8"))
+    release = json.loads(
+        (out_dir / "operational-readiness-release-evidence.json").read_text(encoding="utf-8")
+    )
     adherence = json.loads(
-        (out_dir / "phase4-governance-adherence.json").read_text(encoding="utf-8")
+        (out_dir / "operational-readiness-governance-adherence.json").read_text(encoding="utf-8")
     )
 
     governance.pop("generated_at", None)
@@ -316,15 +319,15 @@ def test_phase4_governance_emits_overlay_template_and_drift_artifacts(
     rc = contract.main(["--format", "json", "--last-review-at", "2026-04-01"])
     assert rc == 0
 
-    out_dir = tmp_path / "build/phase4-governance"
+    out_dir = tmp_path / "build/operational-readiness-governance"
     overlay = json.loads(
-        (out_dir / "phase4-compliance-overlay-pack.json").read_text(encoding="utf-8")
+        (out_dir / "operational-readiness-compliance-overlay-pack.json").read_text(encoding="utf-8")
     )
     template = json.loads(
-        (out_dir / "phase4-policy-as-code-template.json").read_text(encoding="utf-8")
+        (out_dir / "operational-readiness-policy-as-code-template.json").read_text(encoding="utf-8")
     )
     drift = json.loads(
-        (out_dir / "phase4-governance-drift-alerts.json").read_text(encoding="utf-8")
+        (out_dir / "operational-readiness-governance-drift-alerts.json").read_text(encoding="utf-8")
     )
 
     assert overlay["schema_version"] == "sdetkit.phase4_compliance_overlay_pack.v1"
@@ -367,17 +370,17 @@ def test_phase4_end_to_end_artifacts_are_non_empty_json_objects(
     monkeypatch.chdir(tmp_path)
     assert contract.main(["--format", "json", "--last-review-at", "2026-04-01"]) == 0
 
-    out_dir = tmp_path / "build/phase4-governance"
+    out_dir = tmp_path / "build/operational-readiness-governance"
     artifact_names = [
         "operational-readiness-governance-contract.json",
-        "phase4-release-evidence.json",
-        "phase4-governance-adherence.json",
-        "phase4-compliance-overlay-pack.json",
-        "phase4-policy-as-code-template.json",
-        "phase4-governance-drift-alerts.json",
-        "phase4-compliance-overlay-privacy.json",
-        "phase4-compliance-overlay-regulated.json",
-        "phase4-compliance-overlay-security.json",
+        "operational-readiness-release-evidence.json",
+        "operational-readiness-governance-adherence.json",
+        "operational-readiness-compliance-overlay-pack.json",
+        "operational-readiness-policy-as-code-template.json",
+        "operational-readiness-governance-drift-alerts.json",
+        "operational-readiness-compliance-overlay-privacy.json",
+        "operational-readiness-compliance-overlay-regulated.json",
+        "operational-readiness-compliance-overlay-security.json",
     ]
     for name in artifact_names:
         payload = json.loads((out_dir / name).read_text(encoding="utf-8"))
@@ -390,7 +393,10 @@ def test_phase4_drift_alerts_markdown_emitted(tmp_path: Path, monkeypatch) -> No
     monkeypatch.chdir(tmp_path)
     assert contract.main(["--format", "json", "--last-review-at", "2026-04-01"]) == 0
 
-    md_path = tmp_path / "build/phase4-governance/phase4-governance-drift-alerts.md"
+    md_path = (
+        tmp_path
+        / "build/operational-readiness-governance/operational-readiness-governance-drift-alerts.md"
+    )
     assert md_path.exists()
     text = md_path.read_text(encoding="utf-8")
     assert "# Phase 4 governance drift alerts" in text
@@ -412,11 +418,11 @@ def test_phase4_drift_markdown_parity_with_json(tmp_path: Path, monkeypatch) -> 
     monkeypatch.chdir(tmp_path)
     assert contract.main(["--format", "json", "--last-review-at", "2026-04-01"]) == 0
 
-    out_dir = tmp_path / "build/phase4-governance"
+    out_dir = tmp_path / "build/operational-readiness-governance"
     drift = json.loads(
-        (out_dir / "phase4-governance-drift-alerts.json").read_text(encoding="utf-8")
+        (out_dir / "operational-readiness-governance-drift-alerts.json").read_text(encoding="utf-8")
     )
-    md = (out_dir / "phase4-governance-drift-alerts.md").read_text(encoding="utf-8")
+    md = (out_dir / "operational-readiness-governance-drift-alerts.md").read_text(encoding="utf-8")
 
     assert f"`{drift['drift_status']}`" in md
     assert f"`{drift['drift_score']}`" in md
@@ -448,9 +454,10 @@ def test_phase4_drift_threshold_cli_override(tmp_path: Path, monkeypatch) -> Non
     assert rc == 0
 
     drift = json.loads(
-        (tmp_path / "build/phase4-governance/phase4-governance-drift-alerts.json").read_text(
-            encoding="utf-8"
-        )
+        (
+            tmp_path
+            / "build/operational-readiness-governance/operational-readiness-governance-drift-alerts.json"
+        ).read_text(encoding="utf-8")
     )
     assert drift["drift_threshold"] == 1
 
@@ -466,9 +473,10 @@ def test_phase4_negative_drift_threshold_is_clamped_to_zero(tmp_path: Path, monk
     )
 
     drift = json.loads(
-        (tmp_path / "build/phase4-governance/phase4-governance-drift-alerts.json").read_text(
-            encoding="utf-8"
-        )
+        (
+            tmp_path
+            / "build/operational-readiness-governance/operational-readiness-governance-drift-alerts.json"
+        ).read_text(encoding="utf-8")
     )
     assert drift["drift_threshold"] == 0
 

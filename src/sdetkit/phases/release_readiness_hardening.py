@@ -93,14 +93,31 @@ def _load_kpi_deep_audit(path: Path) -> tuple[int, bool, int]:
 
 
 def _load_board(path: Path) -> tuple[int, bool]:
-    text = _read(path)
-    lines = [line.strip() for line in text.splitlines()]
-    items = [line for line in lines if line.startswith("- [")]
-    has_kpi_deep_audit = any("Release Readiness Hardening" in line for line in lines)
-    return len(items), has_kpi_deep_audit
+    if not path.exists():
+        return 0, False
+
+    board_text = path.read_text(encoding="utf-8")
+    board_lower = board_text.lower()
+    board_count = sum(
+        1 for line in board_text.splitlines() if line.strip().startswith(("- [x]", "- [ ]", "- ["))
+    )
+    if board_count == 0:
+        board_count = sum(1 for line in board_text.splitlines() if line.strip().startswith("-"))
+
+    board_has_kpi_deep_audit = any(
+        token in board_lower
+        for token in (
+            "kpi_deep_audit",
+            "kpi-deep-audit",
+            "kpi deep-audit",
+            "kpi deep audit",
+            "kpi deep audit delivery board",
+        )
+    )
+    return board_count, board_has_kpi_deep_audit
 
 
-def build_phase2_hardening_summary(root: Path) -> dict[str, Any]:
+def build_release_readiness_hardening_summary(root: Path) -> dict[str, Any]:
     readme_text = _read(root / "README.md")
     docs_index_text = _read(root / "docs/index.md")
     top10_text = _read(root / _TOP10_PATH)
@@ -297,7 +314,7 @@ def build_phase2_hardening_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Phase 2 Hardening Closeout summary (legacy: )",
+        "release readiness Hardening Closeout summary (legacy: )",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -364,13 +381,13 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-def build_phase2_hardening_summary_impl(root: Path) -> dict[str, Any]:
+def build_release_readiness_hardening_summary_impl(root: Path) -> dict[str, Any]:
     "Compatibility alias for legacy -based builder name."
-    return build_phase2_hardening_summary(root)
+    return build_release_readiness_hardening_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Phase 2 Hardening Closeout checks")
+    parser = argparse.ArgumentParser(description="release readiness Hardening Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -384,7 +401,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_default_doc:
         _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
-    payload = build_phase2_hardening_summary(root)
+    payload = build_release_readiness_hardening_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)

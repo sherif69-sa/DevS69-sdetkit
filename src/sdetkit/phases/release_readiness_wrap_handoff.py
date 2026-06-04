@@ -15,10 +15,12 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY58_SUMMARY_PATH = "docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-completion-report-summary.json"
 _DAY58_BOARD_PATH = "docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-delivery-board.md"
 _LANE_NAME = "Release Readiness Wrap Handoff"
-_SECTION_HEADER = "# Release Readiness Wrap Handoff - release readiness wrap handoff closeout lane"
+_SECTION_HEADER = (
+    "# Release Readiness Wrap Handoff - release readiness wrap handoff completion report lane"
+)
 _REQUIRED_SECTIONS = [
     "## Why Release Readiness Wrap Handoff matters",
-    "## Required inputs (platform readiness preplan closeout)",
+    "## Required inputs (platform readiness preplan completion report)",
     "## Release Readiness Wrap Handoff command lane",
     "## release readiness wrap handoff contract",
     "## release readiness wrap handoff quality checklist",
@@ -38,9 +40,9 @@ _EXECUTION_COMMANDS = [
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for release readiness wrap handoff execution and signal triage.",
-    "The closeout lane references platform readiness preplan outcomes and unresolved risks.",
+    "The completion report lane references platform readiness preplan outcomes and unresolved risks.",
     "Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "This closeout records Release readiness wrap outcomes and Platform readiness execution priorities.",
+    "This completion report records Release readiness wrap outcomes and Platform readiness execution priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes priority digest, lane-level plan actions, and rollback strategy",
@@ -57,7 +59,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Platform readiness execution priorities drafted from Release readiness learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Release Readiness Wrap Handoff - release readiness wrap handoff closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Release Readiness Wrap Handoff - release readiness wrap handoff completion report lane
 
 Release Readiness Wrap Handoff closes with a major release readiness wrap handoff upgrade that turns platform readiness preplan outcomes into deterministic Platform readiness execution priorities.
 
@@ -67,7 +69,7 @@ Release Readiness Wrap Handoff closes with a major release readiness wrap handof
 - Protects quality with ownership, command proof, and KPI rollback guardrails.
 - Produces a deterministic handoff from closeout into Platform readiness execution planning.
 
-## Required inputs (platform readiness preplan closeout)
+## Required inputs (platform readiness preplan completion report)
 
 - `docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-completion-report-summary.json`
 - `docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-delivery-board.md`
@@ -84,9 +86,9 @@ python scripts/check_release_readiness_wrap_handoff_contract.py
 ## release readiness wrap handoff contract
 
 - Single owner + backup reviewer are assigned for release readiness wrap handoff execution and signal triage.
-- The closeout lane references platform readiness preplan outcomes and unresolved risks.
+- The completion report lane references platform readiness preplan outcomes and unresolved risks.
 - Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- This closeout records Release readiness wrap outcomes and Platform readiness execution priorities.
+- This completion report records Release readiness wrap outcomes and Platform readiness execution priorities.
 
 ## release readiness wrap handoff quality checklist
 
@@ -149,7 +151,7 @@ def _count_board_items(path: Path, needle: str) -> tuple[int, bool]:
     return len(checks), (needle in text)
 
 
-def build_phase2_wrap_handoff_summary(root: Path) -> dict[str, Any]:
+def build_release_readiness_wrap_handoff_summary(root: Path) -> dict[str, Any]:
     readme_text = _read(root / "README.md")
     docs_index_text = _read(root / "docs/index.md")
     page_text = _read(root / _PAGE_PATH)
@@ -282,7 +284,7 @@ def build_phase2_wrap_handoff_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("platform readiness preplan strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run the platform readiness preplan closeout command and restore strict baseline before lock."
+            "Re-run the platform readiness preplan completion report command and restore strict baseline before lock."
         )
 
     if board_count >= 5 and board_has_phase3_preplan:
@@ -311,7 +313,7 @@ def build_phase2_wrap_handoff_summary(root: Path) -> dict[str, Any]:
 
     if not failed and not critical_failures:
         wins.append(
-            "release readiness wrap handoff closeout lane is fully complete and ready for Platform readiness execution."
+            "release readiness wrap handoff completion report lane is fully complete and ready for Platform readiness execution."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -422,9 +424,9 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-def build_phase2_wrap_handoff_summary_impl(root: Path) -> dict[str, Any]:
+def build_release_readiness_wrap_handoff_summary_impl(root: Path) -> dict[str, Any]:
     "Compatibility alias for legacy -based builder name."
-    return build_phase2_wrap_handoff_summary(root)
+    return build_release_readiness_wrap_handoff_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -442,7 +444,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_default_doc:
         _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
-    payload = build_phase2_wrap_handoff_summary(root)
+    payload = build_release_readiness_wrap_handoff_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)

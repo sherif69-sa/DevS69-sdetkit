@@ -232,26 +232,26 @@
       },
       {
         "contract_script_paths": [
-          "scripts/check_demo_asset2_contract.py"
+          "scripts/check_example_asset2_contract.py"
         ],
         "contract_scripts": 1,
         "id": 0,
-        "lane": "demo_asset2",
+        "lane": "example_asset2",
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.example_asset2",
-        "module_path": "src/sdetkit/demo_asset2.py",
+        "module_path": "src/sdetkit/example_asset2.py",
         "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
-          "scripts/check_demo_asset_contract.py"
+          "scripts/check_example_asset_contract.py"
         ],
         "contract_scripts": 1,
         "id": 0,
-        "lane": "demo_asset",
+        "lane": "example_asset",
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.example_asset",
-        "module_path": "src/sdetkit/demo_asset.py",
+        "module_path": "src/sdetkit/example_asset.py",
         "tests_referencing_module": 2
       },
       {
@@ -604,14 +604,14 @@
       },
       {
         "contract_script_paths": [
-          "scripts/check_phase1_hardening_contract.py"
+          "scripts/check_baseline_hardening_contract.py"
         ],
         "contract_scripts": 1,
         "id": 0,
-        "lane": "phase1_hardening",
+        "lane": "baseline_hardening",
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.baseline_hardening",
-        "module_path": "src/sdetkit/phase1_hardening.py",
+        "module_path": "src/sdetkit/baseline_hardening.py",
         "tests_referencing_module": 3
       },
       {
@@ -620,10 +620,10 @@
         ],
         "contract_scripts": 1,
         "id": 0,
-        "lane": "phase1_wrap",
+        "lane": "baseline_wrap",
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.baseline_wrap",
-        "module_path": "src/sdetkit/phase1_wrap.py",
+        "module_path": "src/sdetkit/baseline_wrap.py",
         "tests_referencing_module": 2
       },
       {
@@ -632,10 +632,10 @@
         ],
         "contract_scripts": 1,
         "id": 0,
-        "lane": "phase2_hardening",
+        "lane": "release readiness_hardening",
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.release_readiness_hardening",
-        "module_path": "src/sdetkit/phase2_hardening.py",
+        "module_path": "src/sdetkit/release readiness_hardening.py",
         "tests_referencing_module": 2
       },
       {
@@ -644,10 +644,10 @@
         ],
         "contract_scripts": 1,
         "id": 0,
-        "lane": "phase2_kickoff",
+        "lane": "release readiness_kickoff",
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.release_readiness_kickoff",
-        "module_path": "src/sdetkit/phase2_kickoff.py",
+        "module_path": "src/sdetkit/release readiness_kickoff.py",
         "tests_referencing_module": 3
       },
       {
@@ -656,10 +656,10 @@
         ],
         "contract_scripts": 1,
         "id": 0,
-        "lane": "phase2_wrap_handoff",
+        "lane": "release readiness_wrap_handoff",
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.release_readiness_wrap_handoff",
-        "module_path": "src/sdetkit/phase2_wrap_handoff.py",
+        "module_path": "src/sdetkit/release readiness_wrap_handoff.py",
         "tests_referencing_module": 1
       },
       {

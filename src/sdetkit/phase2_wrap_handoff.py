@@ -1,4 +1,4 @@
-"""Compatibility wrapper for historical `sdetkit.phase2_wrap_handoff` imports."""
+"""Compatibility wrapper for historical `sdetkit.release_readiness_wrap_handoff` imports."""
 
 from __future__ import annotations
 
