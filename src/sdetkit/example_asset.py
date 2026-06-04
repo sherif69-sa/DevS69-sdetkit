@@ -13,12 +13,12 @@ _CFG = {
     "summary_md": "example-asset-summary.md",
     "pack_files": [
         "example-asset-plan.json",
-        "demo-script.md",
-        "demo-delivery-board.md",
-        "demo-validation-commands.md",
+        "example-script.md",
+        "example-delivery-board.md",
+        "example-validation-commands.md",
     ],
-    "evidence_json": "demo-execution-summary.json",
-    "text_output": " demo asset summary",
+    "evidence_json": "example-execution-summary.json",
+    "text_output": " example asset summary",
 }
 
 

@@ -151,8 +151,8 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
-  ci-demo-60s:
-    name: 60-second CI demo artifact
+  ci-example-60s:
+    name: 60-second CI example artifact
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -168,16 +168,16 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -c constraints-ci.txt -e .
 
-      - name: Run deterministic demo
+      - name: Run deterministic example
         run: |
           mkdir -p build
-          python -m sdetkit demo --format json > build/ci-demo.json
+          python -m sdetkit example --format json > build/ci-example.json
 
-      - name: Upload demo artifact
+      - name: Upload example artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: ci-demo-json
-          path: build/ci-demo.json
+          name: ci-example-json
+          path: build/ci-example.json
 
   package-validate:
     name: Build + twine check
@@ -294,7 +294,7 @@ jobs:
         id: coverage
         env:
           COV_FAIL_UNDER: "95"
-          PYTEST_ADDOPTS: "-n auto --junitxml=${{ runner.temp }}/sdetkit-trusted-test-input/junit.xml"
+          PYTEST_ADDOPTS: "-n auto --junitxml=${{ runner.temporary-workspace }}/sdetkit-trusted-test-input/junit.xml"
         run: bash quality.sh cov
 
       - name: Normalize trusted-main test observations

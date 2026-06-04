@@ -884,10 +884,14 @@ Then use stability-aware command discovery:
     d32.set_defaults(cmd="release-cadence")
     d32.add_argument("args", nargs=argparse.REMAINDER)
 
+    ex33 = sub.add_parser("example-asset")
+    ex33.set_defaults(cmd="example-asset")
     d33 = sub.add_parser("demo-asset")
     d33.set_defaults(cmd="demo-asset")
     d33.add_argument("args", nargs=argparse.REMAINDER)
 
+    ex34 = sub.add_parser("example-asset2")
+    ex34.set_defaults(cmd="example-asset2")
     d34 = sub.add_parser("demo-asset2")
     d34.set_defaults(cmd="demo-asset2")
     d34.add_argument("args", nargs=argparse.REMAINDER)

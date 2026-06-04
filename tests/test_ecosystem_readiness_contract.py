@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
+from scripts import check_baseline_summary_contract as phase1_contract
 from scripts import check_ecosystem_readiness_contract as contract
 from scripts import check_operational_readiness_governance_contract as phase4_contract
-from scripts import check_phase1_baseline_summary_contract as phase1_contract
 from scripts import check_platform_readiness_quality_contract as phase3_contract
 from scripts import check_release_readiness_start_summary_contract as phase2_contract
 
@@ -155,7 +155,7 @@ def test_phase5_regression_contracts_for_phase1_to_phase4_unchanged() -> None:
     assert "phase5-ecosystem-contract" in makefile_text
 
     assert phase1_contract.REQUIRED_TOP_LEVEL["schema_version"] == "sdetkit.phase1_baseline.v1"
-    assert phase2_contract.EXPECTED_SCHEMA == "sdetkit.phase2_start_workflow.v1"
+    assert phase2_contract.EXPECTED_SCHEMA == "sdetkit.release_readiness_start_workflow.v1"
     assert callable(phase3_contract.main)
     assert phase4_contract.SCHEMA_VERSION == "sdetkit.phase4_governance_contract.v2"
 

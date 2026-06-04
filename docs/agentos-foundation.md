@@ -71,9 +71,9 @@ This improves deterministic behavior and repeatability for local-provider runs.
   - Produces an umbrella architecture plan that composes kits with AgentOS as the control plane
 - `sdetkit agent run "umbrella architecture optimization blueprint" --approve`
   - Uses AgentOS to render a deterministic umbrella blueprint artifact at `.sdetkit/agent/workdir/umbrella-blueprint.json`
-- `sdetkit agent demo --scenario repo-enterprise-audit`
+- `sdetkit agent example --scenario repo-enterprise-audit`
   - Runs an offline deterministic end-to-end enterprise audit scenario
-- `sdetkit agent demo --scenario umbrella-upgrade-control-plane`
+- `sdetkit agent example --scenario umbrella-upgrade-control-plane`
   - Demonstrates AgentOS generating an umbrella-upgrade control-plane artifact plus dashboard outputs
 
 ## Config (`.sdetkit/agent/config.yaml`)

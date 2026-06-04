@@ -7,9 +7,9 @@ If you already completed planning for all 6 phases, execute only one phase at a 
 3. Freeze phase status.
 4. Start next phase kickoff.
 
-## Current focus: Phase 1
+## Current focus: baseline
 
-Use this exact sequence for Phase 1 operations:
+Use this exact sequence for baseline operations:
 
 ```bash
 make operations-current
@@ -71,9 +71,9 @@ For each phase completion report, record:
 Keeping this format constant makes trend reporting and investor review easier.
 
 
-## After Phase 1 is completed
+## After baseline is completed
 
-Run `make operations-finalize` to archive the previous strategic plan snapshot and remove Phase 1 from the active phase queue, then advance `current_phase` to Phase 2.
+Run `make operations-finalize` to archive the previous strategic plan snapshot and remove baseline from the active phase queue, then advance `current_phase` to release readiness.
 
 Use `make operations-snapshot` each week to publish:
 
@@ -83,16 +83,16 @@ Use `make operations-snapshot` each week to publish:
 - recommended next actions.
 
 
-For one-command orchestration, run `make operations-run-all` (or `python scripts/phase1_run_all.py --include-closeout`).
+For one-command orchestration, run `make operations-run-all` (or `python scripts/baseline_run_all.py --include-completion report`).
 
 
-Use `make operations-telemetry` after `phase1-run-all` to track run timing drift, pass-rate, and blocker categories over time.
+Use `make operations-telemetry` after `baseline-run-all` to track run timing drift, pass-rate, and blocker categories over time.
 
 
-Use `make operations-artifact-set` to enforce that all Phase 1 JSON/Markdown artifacts exist before closeout.
+Use `make operations-artifact-set` to enforce that all baseline JSON/Markdown artifacts exist before completion report.
 
 
-Use `make operations-readiness-signal` to answer if Phase 1 is early / in_progress / near_finish / complete.
+Use `make operations-readiness-signal` to answer if baseline is early / in_progress / near_finish / complete.
 
 
 If you want to run the full evidence pipeline now, use `make operations-run`.
@@ -104,10 +104,10 @@ Use `make operations-remediation-plan` to generate a concise remediation card fo
 Use `make operations-blocker-register` to produce a prioritized JSON/CSV blocker list for assignment tracking.
 
 
-After Phase 1 is truly complete, run `make operations-cleanup-plan` to archive Phase 1 planning state and keep flow-first operations as the repo default.
+After baseline is truly complete, run `make operations-cleanup-plan` to archive baseline planning state and keep flow-first operations as the repo default.
 
 
-Use `make operations-quality-gate` to decide if Phase 2 can start, based on finish signal + artifact contract.
+Use `make operations-quality-gate` to decide if release readiness can start, based on finish signal + artifact contract.
 
 
 Use `make operations-executive-report` to produce a one-page status for leadership handoff and phase decision meetings.

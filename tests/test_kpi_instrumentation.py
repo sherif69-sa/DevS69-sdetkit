@@ -38,7 +38,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/impact-35-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/demo-asset2-pack/demo-asset2-summary.json"
+    summary = root / "docs/artifacts/example-asset2-pack/example-asset2-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -50,7 +50,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md"
+    board = root / "docs/artifacts/example-asset2-pack/example-asset2-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -111,14 +111,14 @@ def test_kpi_instrumentation_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_kpi_instrumentation_strict_fails_when_workflow_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/demo-asset2-pack/demo-asset2-summary.json").unlink()
+    (tmp_path / "docs/artifacts/example-asset2-pack/example-asset2-summary.json").unlink()
     rc = d35.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
 def test_kpi_instrumentation_strict_fails_when_workflow_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md").write_text(
+    (tmp_path / "docs/artifacts/example-asset2-pack/example-asset2-delivery-board.md").write_text(
         "- [ ]  KPI instrumentation backlog pre-scoped\n", encoding="utf-8"
     )
     rc = d35.main(["--root", str(tmp_path), "--strict", "--format", "json"])

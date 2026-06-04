@@ -40,7 +40,8 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/impact-58-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
-        root / "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json"
+        root
+        / "docs/artifacts/kpi-deep-audit-completion report-pack/kpi-deep-audit-completion report-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -53,7 +54,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/kpi-deep-audit-completion report-pack/kpi-deep-audit-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -70,7 +74,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_phase2_hardening_json(tmp_path: Path, capsys) -> None:
+def test_release_readiness_hardening_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
     rc = d58.main(["--root", str(tmp_path), "--format", "json", "--strict"])
@@ -80,7 +84,7 @@ def test_phase2_hardening_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_phase2_hardening_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_release_readiness_hardening_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
     rc = d58.main(
@@ -136,17 +140,17 @@ def test_phase2_hardening_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_phase2_hardening_strict_fails_without_kpi_deep_audit(tmp_path: Path) -> None:
+def test_release_readiness_hardening_strict_fails_without_kpi_deep_audit(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json"
+        / "docs/artifacts/kpi-deep-audit-completion report-pack/kpi-deep-audit-completion report-summary.json"
     ).unlink()
     assert d58.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_phase2_hardening_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_release_readiness_hardening_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
     rc = cli.main(
@@ -159,4 +163,4 @@ def test_phase2_hardening_cli_dispatch(tmp_path: Path, capsys) -> None:
         ]
     )
     assert rc == 0
-    assert "Phase 2 Hardening Closeout summary" in capsys.readouterr().out
+    assert "release readiness Hardening Closeout summary" in capsys.readouterr().out

@@ -12,10 +12,10 @@ FIRST_PROOF_BRANCH ?= local
 FIRST_PROOF_STRICT ?= false
 FIRST_PROOF_RELEASE_DRY_RUN ?= true
 FIRST_PROOF_READINESS_PROFILE ?= lenient
-PHASE2_BASELINE_PRE_EXTRACTION ?= docs/artifacts/phase2-hotspot-baseline-pre-extraction-$(DATE_TAG).json
+PHASE2_BASELINE_PRE_EXTRACTION ?= docs/artifacts/release-readiness-hotspot-baseline-pre-extraction-$(DATE_TAG).json
 BUSINESS_EXECUTION_OPERATOR ?= sherif69-sa
 
-.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt format-before-proof proof-after-format type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry upgrade-next operator-onramp operator-onramp-dry-run operator-onramp-verify onboarding-next doctor-remediate first-proof-freshness first-proof-ops-bundle-contract first-proof-ops-bundle-trend first-proof-ops-bundle-trend-report first-proof-execution-report first-proof-execution-contract first-proof-schema-contract upgrade-status-line first-proof-followup-ready followup-ready-metrics first-proof-dashboard first-proof-readiness-threshold followup-changelog plan-next-10 cleanup-first-proof-artifacts golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-fast ship-readiness-contract release-room release-room-fast portfolio-readiness premerge-release-room premerge-release-room-fast adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-local first-proof-contract first-proof-health-score first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-tests-local first-proof-verify first-proof-verify-local gate-decision-summary gate-decision-summary-contract fit-check adoption-followup adoption-followup-contract adoption-control-loop adoption-control-loop-contract adoption-posture adoption-validate adoption-control-loop-full ops-followup ops-followup-contract ops-now ops-now-lite ops-next ops-premerge-next ops-premerge-next-fast phase1-baseline phase1-status phase1-next phase1-ops-snapshot phase1-dashboard phase1-weekly-pack phase1-control-loop phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal phase1-next-pass phase1-blocker-register phase1-do-it phase1-execution-core phase1-workflow phase1-flow-contract phase1-gate-phase2 phase1-executive-report phase1-retire-plan phase1-complete phase1-closeout phase-current phase-current-json phase2-start phase2-workflow phase2-status phase2-start-contract phase2-seed phase2-hotspot-baseline phase2-hotspot-delta phase2-complete phase2-progress phase2-surface-clarity phase3-dependency-radar quality-baseline-summary-fixture platform-readiness-quality-contract phase3-quality-report phase3-do-it operational-readiness-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility real-workflow-daily real-workflow-daily-fast real-workflow-weekly real-workflow-premerge real-workflow-premerge-fast real-workflow ops-daily ops-daily-fast ops-weekly ops-premerge ops-premerge-fast ops-workflow
+.PHONY: bootstrap max brutal venv runtime-install first-proof-install install ci-deps-sync test cov lint fmt format-before-proof proof-after-format type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry upgrade-next operator-onramp operator-onramp-dry-run operator-onramp-verify onboarding-next doctor-remediate first-proof-freshness first-proof-ops-bundle-contract first-proof-ops-bundle-trend first-proof-ops-bundle-trend-report first-proof-execution-report first-proof-execution-contract first-proof-schema-contract upgrade-status-line first-proof-followup-ready followup-ready-metrics first-proof-dashboard first-proof-readiness-threshold followup-changelog plan-next-10 cleanup-first-proof-artifacts golden-path-health canonical-path-drift legacy-command-analyzer legacy-burndown adoption-scorecard adoption-scorecard-contract observability-contract operator-onboarding-wizard primary-docs-map top-tier-reporting enterprise-contracts-check enterprise-assessment enterprise-assessment-contract ship-readiness ship-readiness-fast ship-readiness-contract release-room release-room-fast portfolio-readiness premerge-release-room premerge-release-room-fast adaptive-scenario-db adaptive-postcheck owner-escalation-payload adaptive-premerge adaptive-ops-bundle repo-alignment-check test-bootstrap test-bootstrap-contract merge-ready premerge-finalize first-proof first-proof-local first-proof-contract first-proof-health-score first-proof-learn first-proof-control-tower first-proof-weekly-trend first-proof-trend-threshold first-proof-tests first-proof-tests-local first-proof-verify first-proof-verify-local gate-decision-summary gate-decision-summary-contract fit-check adoption-followup adoption-followup-contract adoption-control-loop adoption-control-loop-contract adoption-posture adoption-validate adoption-control-loop-full ops-followup ops-followup-contract ops-now ops-now-lite ops-next ops-premerge-next ops-premerge-next-fast phase1-baseline baseline-status phase1-next baseline-ops-snapshot phase1-dashboard baseline-weekly-pack phase1-control-loop baseline-run-all baseline-artifact-set baseline-telemetry baseline-readiness-signal baseline-followup-pass baseline-blocker-register baseline-run baseline-execution-core baseline-workflow baseline-flow-contract baseline-release-readiness-gate baseline-executive-report baseline-transition-plan baseline-complete baseline-completion-report phase-current phase-current-json release-readiness-start release-readiness-workflow release-readiness-status release-readiness-start-contract release-readiness-seed release-readiness-hotspot-baseline release-readiness-hotspot-delta release-readiness-complete release-readiness-progress release-readiness-surface-clarity phase3-dependency-radar quality-baseline-summary-fixture platform-readiness-quality-contract phase3-quality-report phase3-do-it operational-readiness-governance-contract phase5-ecosystem-contract phase6-start phase6-status phase6-progress phase6-complete phase6-metrics-contract plan-status phase1-execute phase2-execute phase3-governance phase4-credibility real-workflow-daily real-workflow-daily-fast real-workflow-weekly real-workflow-premerge real-workflow-premerge-fast real-workflow ops-daily ops-daily-fast ops-weekly ops-premerge ops-premerge-fast ops-workflow
 .PHONY: business-execution-start business-execution-start-contract business-execution-go-gate business-execution-progress business-execution-progress-contract business-execution-next business-execution-next-contract business-execution-handoff business-execution-handoff-contract business-execution-escalation business-execution-escalation-contract business-execution-followup business-execution-followup-contract business-execution-continue business-execution-continue-contract business-execution-horizon business-execution-horizon-contract business-execution-inputs-contract business-execution-pipeline business-execution-week1-pipeline
 
 bootstrap: venv
@@ -58,9 +58,9 @@ merge-ready: test-bootstrap
 	@bash -lc '. .venv/bin/activate && bash quality.sh verify'
 
 premerge-finalize: install
-	@bash -lc '. .venv/bin/activate && python -m pytest -q tests/test_first_proof_script.py tests/test_first_proof_contract.py tests/test_first_proof_learning_db.py tests/test_first_proof_weekly_trend.py tests/test_first_proof_control_tower.py tests/test_first_proof_trend_threshold.py tests/test_build_owner_escalation_payload.py tests/test_phase2_hotspot_baseline.py tests/test_phase2_hotspot_delta.py tests/test_phase2_utilities_extraction.py tests/test_phase3_dependency_radar.py'
+	@bash -lc '. .venv/bin/activate && python -m pytest -q tests/test_first_proof_script.py tests/test_first_proof_contract.py tests/test_first_proof_learning_db.py tests/test_first_proof_weekly_trend.py tests/test_first_proof_control_tower.py tests/test_first_proof_trend_threshold.py tests/test_build_owner_escalation_payload.py tests/test_release_readiness_hotspot_baseline.py tests/test_release_readiness_hotspot_delta.py tests/test_release_readiness_utilities_extraction.py tests/test_platform_readiness_dependency_radar.py'
 	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_summary_contract.py --summary build/first-proof/first-proof-summary.json --allow-missing --format json'
-	@bash -lc '. .venv/bin/activate && python scripts/phase3_dependency_radar.py --policy-json config/dependency_slo_policy.json --out docs/artifacts/phase3-dependency-radar-$(DATE_TAG).json'
+	@bash -lc '. .venv/bin/activate && python scripts/platform_readiness_dependency_radar.py --policy-json config/dependency_slo_policy.json --out docs/artifacts/phase3-dependency-radar-$(DATE_TAG).json'
 	@bash -lc '. .venv/bin/activate && $(MAKE) plan-status'
 
 first-proof: first-proof-install
@@ -444,70 +444,70 @@ repo-alignment-check: venv
 	@bash -lc '. .venv/bin/activate && pytest -q'
 
 phase1-baseline: install
-	@bash -lc '. .venv/bin/activate && bash scripts/phase1_baseline_lane.sh'
+	@bash -lc '. .venv/bin/activate && bash scripts/baseline_lane.sh'
 
-phase1-status: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_status_report.py --format json --out build/phase1-baseline/phase1-status.json'
+baseline-status: venv
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_status_report.py --format json --out build/baseline/baseline-status.json'
 
 phase1-next: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_next_actions.py --status-json build/phase1-baseline/phase1-status.json --format json --out build/phase1-baseline/phase1-next-actions.json'
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_next_actions.py --status-json build/baseline/baseline-status.json --format json --out build/baseline/baseline-next-actions.json'
 
-phase1-ops-snapshot: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_build_ops_snapshot.py --format json'
+baseline-ops-snapshot: venv
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_build_ops_snapshot.py --format json'
 
 phase1-dashboard: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_completion_dashboard.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_completion_dashboard.py --format json'
 
-phase1-weekly-pack: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_weekly_report_pack.py --format json'
+baseline-weekly-pack: venv
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_weekly_report_pack.py --format json'
 
 phase1-control-loop: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_control_loop_report.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_control_loop_report.py --format json'
 
-phase1-run-all: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_run_all.py --format json'
+baseline-run-all: venv
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_run_all.py --format json'
 
-phase1-artifact-set: venv
-	@bash -lc '. .venv/bin/activate && python scripts/check_phase1_artifact_set.py --format json'
+baseline-artifact-set: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_baseline_artifact_set.py --format json'
 
-phase1-telemetry: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_telemetry_history.py --format json'
+baseline-telemetry: venv
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_telemetry_history.py --format json'
 
-phase1-finish-signal: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_finish_signal.py --format json > build/phase1-baseline/phase1-finish-signal.json'
+baseline-readiness-signal: venv
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_readiness_signal.py --format json > build/baseline/baseline-readiness-signal.json'
 
-phase1-next-pass: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_next_pass_card.py --format json'
+baseline-followup-pass: venv
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_followup_pass_card.py --format json'
 
-phase1-blocker-register: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_blocker_register.py --format json'
+baseline-blocker-register: venv
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_blocker_register.py --format json'
 
-phase1-execution-core: phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal
-	@bash -lc 'echo phase1-execution-core: pipeline completed'
+baseline-execution-core: baseline-run-all baseline-artifact-set baseline-telemetry baseline-readiness-signal
+	@bash -lc 'echo baseline-execution-core: pipeline completed'
 
-phase1-do-it: phase1-run-all phase1-artifact-set phase1-telemetry phase1-finish-signal
-	@bash -lc 'echo phase1-do-it is deprecated; use phase1-execution-core'
+baseline-run: baseline-run-all baseline-artifact-set baseline-telemetry baseline-readiness-signal
+	@bash -lc 'echo baseline-run is deprecated; use baseline-execution-core'
 
-phase1-workflow: phase1-execution-core phase1-flow-contract phase1-gate-phase2 phase1-executive-report
-	@bash -lc 'echo phase1-workflow: operational workflow completed'
+baseline-workflow: baseline-execution-core baseline-flow-contract baseline-release-readiness-gate baseline-executive-report
+	@bash -lc 'echo baseline-workflow: operational workflow completed'
 
-phase1-flow-contract: venv
-	@bash -lc '. .venv/bin/activate && python scripts/check_phase1_flow_contract.py --format json'
+baseline-flow-contract: venv
+	@bash -lc '. .venv/bin/activate && python scripts/check_baseline_flow_contract.py --format json'
 
-phase1-gate-phase2: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_gate_phase2.py --format json > build/phase1-baseline/phase1-gate-phase2.json'
+baseline-release-readiness-gate: venv
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_release_readiness_gate.py --format json > build/baseline/baseline-release-readiness-gate.json'
 
-phase1-executive-report: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_executive_report.py --format json'
+baseline-executive-report: venv
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_executive_report.py --format json'
 
-phase1-retire-plan: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase1_retire_plan_into_flow.py --format json'
+baseline-transition-plan: venv
+	@bash -lc '. .venv/bin/activate && python scripts/baseline_transition_plan_into_flow.py --format json'
 
-phase1-closeout: venv
+baseline-completion-report: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase1_closeout_and_prune_plan.py --format json'
 
-phase1-complete: install
-	@bash -lc '. .venv/bin/activate && bash scripts/phase1_baseline_lane.sh && python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json --require-logs && python scripts/phase1_completion_gate.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json'
+baseline-complete: install
+	@bash -lc '. .venv/bin/activate && bash scripts/baseline_lane.sh && python scripts/check_baseline_summary_contract.py --summary build/baseline/baseline-summary.json --format json --require-logs && python scripts/baseline_completion_gate.py --summary build/baseline/baseline-summary.json --format json'
 
 phase-current: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase_sequential_executor.py --format text'
@@ -518,10 +518,10 @@ phase-current-json: venv
 plan-status: phase-current-json
 	@bash -lc 'echo plan-status: use phase-current-json output as canonical status payload'
 
-phase1-execute: phase1-workflow
+phase1-execute: baseline-workflow
 	@bash -lc 'echo phase1-execute: canonical phase1 workflow complete'
 
-phase2-execute: phase2-workflow
+phase2-execute: release-readiness-workflow
 	@bash -lc 'echo phase2-execute: canonical phase2 workflow complete'
 
 phase3-governance: platform-readiness-quality-contract
@@ -530,52 +530,52 @@ phase3-governance: platform-readiness-quality-contract
 phase4-credibility: venv
 	@bash -lc 'echo phase4-credibility: reference packs and adoption walkthroughs are published under docs/'
 
-phase2-start: phase2-workflow
-	@bash -lc 'echo phase2-start: implementation lane initialized'
+release-readiness-start: release-readiness-workflow
+	@bash -lc 'echo release-readiness-start: implementation lane initialized'
 
-phase2-workflow: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase2_start_workflow.py --format json'
+release-readiness-workflow: venv
+	@bash -lc '. .venv/bin/activate && python scripts/release_readiness_start_workflow.py --format json'
 	@bash -lc '. .venv/bin/activate && python scripts/check_release_readiness_start_summary_contract.py --format json'
-	@bash -lc '. .venv/bin/activate && python scripts/phase2_status_report.py --format json --out build/phase2-start/phase2-status.json'
-	@bash -lc '. .venv/bin/activate && $(MAKE) phase2-hotspot-baseline'
+	@bash -lc '. .venv/bin/activate && python scripts/release_readiness_status_report.py --format json --out build/release-readiness-start/release-readiness-status.json'
+	@bash -lc '. .venv/bin/activate && $(MAKE) release-readiness-hotspot-baseline'
 
-phase2-status: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase2_status_report.py --format json --out build/phase2-start/phase2-status.json'
+release-readiness-status: venv
+	@bash -lc '. .venv/bin/activate && python scripts/release_readiness_status_report.py --format json --out build/release-readiness-start/release-readiness-status.json'
 
-phase2-start-contract: venv
+release-readiness-start-contract: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_release_readiness_start_summary_contract.py --format json'
 
-phase2-seed: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase2_seed_prerequisites.py'
+release-readiness-seed: venv
+	@bash -lc '. .venv/bin/activate && python scripts/release_readiness_seed_prerequisites.py'
 
-phase2-hotspot-baseline: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase2_hotspot_baseline.py --paths src/sdetkit/repo.py src/sdetkit/doctor.py --out docs/artifacts/phase2-hotspot-baseline-$(DATE_TAG).json'
+release-readiness-hotspot-baseline: venv
+	@bash -lc '. .venv/bin/activate && python scripts/release_readiness_hotspot_baseline.py --paths src/sdetkit/repo.py src/sdetkit/doctor.py --out docs/artifacts/release-readiness-hotspot-baseline-$(DATE_TAG).json'
 
-phase2-hotspot-delta: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase2_hotspot_delta.py --baseline $(PHASE2_BASELINE_PRE_EXTRACTION) --current docs/artifacts/phase2-hotspot-baseline-$(DATE_TAG).json --out-json docs/artifacts/phase2-hotspot-delta-$(DATE_TAG).json --out-md docs/artifacts/phase2-hotspot-delta-$(DATE_TAG).md'
+release-readiness-hotspot-delta: venv
+	@bash -lc '. .venv/bin/activate && python scripts/release_readiness_hotspot_delta.py --baseline $(PHASE2_BASELINE_PRE_EXTRACTION) --current docs/artifacts/release-readiness-hotspot-baseline-$(DATE_TAG).json --out-json docs/artifacts/release-readiness-hotspot-delta-$(DATE_TAG).json --out-md docs/artifacts/release-readiness-hotspot-delta-$(DATE_TAG).md'
 
-phase2-complete: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase2_complete_workflow.py --format json'
-	@bash -lc '. .venv/bin/activate && python scripts/phase2_progress_report.py --format json --out build/phase2-complete/phase2-progress.json'
+release-readiness-complete: venv
+	@bash -lc '. .venv/bin/activate && python scripts/release_readiness_complete_workflow.py --format json'
+	@bash -lc '. .venv/bin/activate && python scripts/release_readiness_progress_report.py --format json --out build/release-readiness-complete/release-readiness-progress.json'
 
-phase2-progress: venv
-	@bash -lc '. .venv/bin/activate && python scripts/phase2_progress_report.py --format json --out build/phase2-complete/phase2-progress.json'
+release-readiness-progress: venv
+	@bash -lc '. .venv/bin/activate && python scripts/release_readiness_progress_report.py --format json --out build/release-readiness-complete/release-readiness-progress.json'
 
-phase2-surface-clarity: venv
+release-readiness-surface-clarity: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_operator_essentials_contract.py --format json'
 
 phase3-dependency-radar: install
-	@bash -lc '. .venv/bin/activate && python scripts/phase3_dependency_radar.py --policy-json config/dependency_slo_policy.json --out docs/artifacts/phase3-dependency-radar-$(DATE_TAG).json'
+	@bash -lc '. .venv/bin/activate && python scripts/platform_readiness_dependency_radar.py --policy-json config/dependency_slo_policy.json --out docs/artifacts/phase3-dependency-radar-$(DATE_TAG).json'
 
 
 quality-baseline-summary-fixture: venv
-	@bash -lc '. .venv/bin/activate && python scripts/seed_quality_baseline_summary_fixture.py --summary build/phase1-baseline/phase1-baseline-summary.json'
+	@bash -lc '. .venv/bin/activate && python scripts/seed_quality_baseline_summary_fixture.py --summary build/baseline/baseline-summary.json'
 
 platform-readiness-quality-contract: venv quality-baseline-summary-fixture
-	@bash -lc '. .venv/bin/activate && python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.check_platform_readiness_quality_contract --summary build/phase1-baseline/phase1-baseline-summary.json --format json && python -m scripts.platform_readiness_persist_baseline_history --summary build/phase1-baseline/phase1-baseline-summary.json --format json && $(MAKE) phase3-dependency-radar'
+	@bash -lc '. .venv/bin/activate && python scripts/check_baseline_summary_contract.py --summary build/baseline/baseline-summary.json --format json && python -m scripts.check_platform_readiness_quality_contract --summary build/baseline/baseline-summary.json --format json && python -m scripts.platform_readiness_persist_baseline_history --summary build/baseline/baseline-summary.json --format json && $(MAKE) phase3-dependency-radar'
 
 phase3-quality-report: platform-readiness-quality-contract
-	@bash -lc '. .venv/bin/activate && python -m scripts.build_platform_readiness_trend_delta --current build/phase1-baseline/phase1-baseline-summary.json --out-json build/phase3-quality/phase3-trend-delta.json --out-md build/phase3-quality/phase3-trend-delta.md --format json'
+	@bash -lc '. .venv/bin/activate && python -m scripts.build_platform_readiness_trend_delta --current build/baseline/baseline-summary.json --out-json build/phase3-quality/phase3-trend-delta.json --out-md build/phase3-quality/phase3-trend-delta.md --format json'
 
 phase3-do-it: platform-readiness-quality-contract
 	@bash -lc 'echo "phase3-do-it is deprecated; use phase3-quality-report"'
@@ -703,27 +703,27 @@ quality-contract-report: phase3-quality-report
 quality-contract-run: phase3-do-it
 
 operations-baseline: phase1-baseline
-operations-status: phase1-status
+operations-status: baseline-status
 operations-next-action: phase1-next
-operations-snapshot: phase1-ops-snapshot
+operations-snapshot: baseline-ops-snapshot
 operations-dashboard: phase1-dashboard
-operations-weekly-pack: phase1-weekly-pack
+operations-weekly-pack: baseline-weekly-pack
 operations-control-loop: phase1-control-loop
-operations-run-all: phase1-run-all
-operations-artifact-set: phase1-artifact-set
-operations-telemetry: phase1-telemetry
-operations-readiness-signal: phase1-finish-signal
-operations-remediation-plan: phase1-next-pass
-operations-blocker-register: phase1-blocker-register
-operations-run: phase1-do-it
-operations-core-run: phase1-execution-core
-operations-workflow: phase1-workflow
-operations-flow-contract: phase1-flow-contract
-operations-quality-gate: phase1-gate-phase2
-operations-executive-report: phase1-executive-report
-operations-cleanup-plan: phase1-retire-plan
-operations-complete: phase1-complete
-operations-finalize: phase1-closeout
+operations-run-all: baseline-run-all
+operations-artifact-set: baseline-artifact-set
+operations-telemetry: baseline-telemetry
+operations-readiness-signal: baseline-readiness-signal
+operations-remediation-plan: baseline-followup-pass
+operations-blocker-register: baseline-blocker-register
+operations-run: baseline-run
+operations-core-run: baseline-execution-core
+operations-workflow: baseline-workflow
+operations-flow-contract: baseline-flow-contract
+operations-quality-gate: baseline-release-readiness-gate
+operations-executive-report: baseline-executive-report
+operations-cleanup-plan: baseline-transition-plan
+operations-complete: baseline-complete
+operations-finalize: baseline-completion-report
 operations-current: phase-current
 operations-current-json: phase-current-json
 

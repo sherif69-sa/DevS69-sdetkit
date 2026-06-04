@@ -11,9 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-baseline-hardening.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _CANONICAL_LANE_NAME = "baseline-hardening"
-_LEGACY_LANE_NAME = "legacy-phase1-hardening"
+_LEGACY_LANE_NAME = "legacy-baseline-hardening"
 _CANONICAL_PACK_DIR = "docs/artifacts/baseline-hardening-pack"
-_LEGACY_PACK_DIR = "docs/artifacts/legacy-phase1-hardening-pack"
+_LEGACY_PACK_DIR = "docs/artifacts/legacy-baseline-hardening-pack"
 _CANONICAL_SUMMARY_JSON = "baseline-hardening-summary.json"
 _CANONICAL_SUMMARY_MD = "baseline-hardening-summary.md"
 _CANONICAL_STALE_GAPS = "baseline-hardening-stale-gaps.json"
@@ -31,22 +31,22 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit baseline-hardening --format json --strict",
     "python -m sdetkit baseline-hardening --emit-pack-dir docs/artifacts/baseline-hardening-pack --format json --strict",
     "python -m sdetkit baseline-hardening --execute --evidence-dir docs/artifacts/baseline-hardening-pack/evidence --format json --strict",
-    "python scripts/check_phase1_hardening_contract.py",
+    "python scripts/check_baseline_hardening_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit baseline-hardening --format json --strict",
-    "python scripts/check_phase1_hardening_contract.py --skip-evidence",
+    "python scripts/check_baseline_hardening_contract.py --skip-evidence",
 ]
 _STALE_MARKERS = ["TODO", "TBD", "lorem ipsum", "coming soon"]
 
-_DEFAULT_PAGE_TEMPLATE = "#  - Baseline hardening\n\n closes Baseline by hardening top entry pages, removing stale guidance, and publishing a deterministic closeout lane.\n\n## Why  exists\n\n- Preserve trust by ensuring README + docs index + strategy pages are mutually consistent.\n- Close stale docs gaps before  baseline wrap and handoff.\n- Produce a reviewable hardening artifact pack for maintainers.\n\n## Hardening scope\n\n- README entry-page checks and command-lane verification.\n- Docs index discoverability checks for  integration/report pages.\n- Strategy alignment checks against `docs/top-10-github-strategy.md`  objective.\n- Stale marker scans across top entry pages and recent integration docs.\n\n##  command lane\n\n```bash\npython -m sdetkit baseline-hardening --format json --strict\npython -m sdetkit baseline-hardening --emit-pack-dir docs/artifacts/baseline-hardening-pack --format json --strict\npython -m sdetkit baseline-hardening --execute --evidence-dir docs/artifacts/baseline-hardening-pack/evidence --format json --strict\npython scripts/check_phase1_hardening_contract.py\n```\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract and command-lane completeness: 35 points.\n- Entry-page discoverability + strategy alignment: 35 points.\n- Stale marker elimination in top pages: 20 points.\n- Artifact/report wiring for baseline completion: 10 points.\n\n## Entry page polish checklist\n\n- README includes  section and command lane.\n- Docs index links both integration guide and  report.\n- Top-10 strategy includes  hardening objective.\n- No stale placeholder markers in top entry pages.\n"
+_DEFAULT_PAGE_TEMPLATE = "#  - Baseline hardening\n\n closes Baseline by hardening top entry pages, removing stale guidance, and publishing a deterministic completion report lane.\n\n## Why  exists\n\n- Preserve trust by ensuring README + docs index + strategy pages are mutually consistent.\n- Close stale docs gaps before  baseline wrap and handoff.\n- Produce a reviewable hardening artifact pack for maintainers.\n\n## Hardening scope\n\n- README entry-page checks and command-lane verification.\n- Docs index discoverability checks for  integration/report pages.\n- Strategy alignment checks against `docs/top-10-github-strategy.md`  objective.\n- Stale marker scans across top entry pages and recent integration docs.\n\n##  command lane\n\n```bash\npython -m sdetkit baseline-hardening --format json --strict\npython -m sdetkit baseline-hardening --emit-pack-dir docs/artifacts/baseline-hardening-pack --format json --strict\npython -m sdetkit baseline-hardening --execute --evidence-dir docs/artifacts/baseline-hardening-pack/evidence --format json --strict\npython scripts/check_baseline_hardening_contract.py\n```\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract and command-lane completeness: 35 points.\n- Entry-page discoverability + strategy alignment: 35 points.\n- Stale marker elimination in top pages: 20 points.\n- Artifact/report wiring for baseline completion: 10 points.\n\n## Entry page polish checklist\n\n- README includes  section and command lane.\n- Docs index links both integration guide and  report.\n- Top-10 strategy includes  hardening objective.\n- No stale placeholder markers in top entry pages.\n"
 
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def build_phase1_hardening_summary_impl(
+def build_baseline_hardening_summary_impl(
     root: Path,
     *,
     readme_path: str = "README.md",
@@ -101,13 +101,13 @@ def build_phase1_hardening_summary_impl(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_phase1_hardening_link",
+            "check_id": "readme_baseline_hardening_link",
             "weight": 12,
             "passed": "docs/integrations-baseline-hardening.md" in readme_text,
             "evidence": "docs/integrations-baseline-hardening.md",
         },
         {
-            "check_id": "docs_index_phase1_hardening_links",
+            "check_id": "docs_index_baseline_hardening_links",
             "weight": 12,
             "passed": all(
                 token in docs_index_text
@@ -119,7 +119,7 @@ def build_phase1_hardening_summary_impl(
             "evidence": "impact-29-ultra-upgrade-report.md + integrations-baseline-hardening.md",
         },
         {
-            "check_id": "top10_phase1_hardening_alignment",
+            "check_id": "top10_baseline_hardening_alignment",
             "weight": 11,
             "passed": any(
                 marker in top10_text
@@ -187,7 +187,7 @@ def build_phase1_hardening_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        " phase-1 hardening summary\n"
+        " baseline hardening summary\n"
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -198,7 +198,7 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "#  phase-1 hardening summary",
+        "#  baseline hardening summary",
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
@@ -256,7 +256,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
         )
     summary = {
         "name": "baseline-hardening-execution",
-        "legacy_name": "legacy-phase1-hardening-execution",
+        "legacy_name": "legacy-baseline-hardening-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
@@ -267,7 +267,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description=" phase-1 hardening scorer.", epilog=" phase-1 hardening scorer"
+        description=" baseline hardening scorer.", epilog=" baseline hardening scorer"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
@@ -286,7 +286,7 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     if argv and "--help" in argv:
-        print(" phase-1 hardening scorer")
+        print(" baseline hardening scorer")
     ns = parser.parse_args(argv)
     root = Path(ns.root).resolve()
 
@@ -295,7 +295,7 @@ def main(argv: list[str] | None = None) -> int:
         if not page.exists():
             _write(page, _DEFAULT_PAGE_TEMPLATE)
 
-    payload = build_phase1_hardening_summary_impl(root)
+    payload = build_baseline_hardening_summary_impl(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
@@ -329,7 +329,7 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-def build_phase1_hardening_summary(
+def build_baseline_hardening_summary(
     root: Path,
     *,
     readme_path: str = "README.md",
@@ -338,7 +338,7 @@ def build_phase1_hardening_summary(
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
     "Canonical summary builder (-based name retained as compatibility alias)."
-    return build_phase1_hardening_summary_impl(
+    return build_baseline_hardening_summary_impl(
         root,
         readme_path=readme_path,
         docs_index_path=docs_index_path,

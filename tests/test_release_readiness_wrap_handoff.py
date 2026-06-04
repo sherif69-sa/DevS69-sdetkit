@@ -73,13 +73,13 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-release-readiness-wrap-handoff.md").write_text(
-        """# Release Readiness Wrap Handoff - release readiness wrap handoff closeout lane
+        """# Release Readiness Wrap Handoff - release readiness wrap handoff completion report lane
 
 ## Why Release Readiness Wrap Handoff matters
 
 The release readiness wrap handoff workflow keeps Release readiness outcomes connected to Platform readiness execution priorities.
 
-## Required inputs (platform readiness preplan closeout)
+## Required inputs (platform readiness preplan completion report)
 
 Use the platform readiness preplan summary and delivery board before promoting the handoff.
 
@@ -93,9 +93,9 @@ python scripts/check_release_readiness_wrap_handoff_contract.py
 ## release readiness wrap handoff contract
 
 Single owner + backup reviewer are assigned for release readiness wrap handoff execution and signal triage.
-The closeout lane references platform readiness preplan outcomes and unresolved risks.
+The completion report lane references platform readiness preplan outcomes and unresolved risks.
 Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-This closeout records Release readiness wrap outcomes and Platform readiness execution priorities.
+This completion report records Release readiness wrap outcomes and Platform readiness execution priorities.
 
 ## release readiness wrap handoff quality checklist
 
@@ -121,7 +121,7 @@ Activation score must stay above the strict promotion floor.
     )
 
 
-def test_phase2_wrap_handoff_json(tmp_path: Path, capsys) -> None:
+def test_release_readiness_wrap_handoff_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
     rc = d60.main(["--root", str(tmp_path), "--format", "json", "--strict"])
@@ -134,7 +134,7 @@ def test_phase2_wrap_handoff_json(tmp_path: Path, capsys) -> None:
     assert "## Why  matters" not in d60._DEFAULT_PAGE_TEMPLATE
 
 
-def test_phase2_wrap_handoff_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_release_readiness_wrap_handoff_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
     rc = d60.main(
@@ -190,7 +190,7 @@ def test_phase2_wrap_handoff_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_phase2_wrap_handoff_strict_fails_without_phase3_preplan(tmp_path: Path) -> None:
+def test_release_readiness_wrap_handoff_strict_fails_without_phase3_preplan(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
     (
@@ -200,7 +200,7 @@ def test_phase2_wrap_handoff_strict_fails_without_phase3_preplan(tmp_path: Path)
     assert d60.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_phase2_wrap_handoff_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_release_readiness_wrap_handoff_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
     rc = cli.main(
@@ -216,6 +216,6 @@ def test_phase2_wrap_handoff_cli_dispatch(tmp_path: Path, capsys) -> None:
     assert "Release Readiness Wrap Handoff summary" in capsys.readouterr().out
 
 
-def test_phase2_wrap_handoff_docs_page_has_no_lane_lane_typo() -> None:
+def test_release_readiness_wrap_handoff_docs_page_has_no_lane_lane_typo() -> None:
     page_text = d60._DEFAULT_PAGE_TEMPLATE
     assert "Lane lane" not in page_text

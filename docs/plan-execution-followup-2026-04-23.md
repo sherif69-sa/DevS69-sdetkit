@@ -129,7 +129,7 @@ Phase 3 artifacts now present:
 
 - `docs/dependency-slo-policy.md`
 - `config/dependency_slo_policy.json`
-- `scripts/phase3_dependency_radar.py`
+- `scripts/platform_readiness_dependency_radar.py`
 - `docs/artifacts/phase3-dependency-radar-2026-04-24.json`
 - `.github/ISSUE_TEMPLATE/dependency-drift-weekly.yml`
 

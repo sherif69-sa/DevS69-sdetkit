@@ -21,7 +21,7 @@ Lane closes Baseline by hardening top entry pages, removing stale guidance, and 
 python -m sdetkit baseline-hardening --format json --strict
 python -m sdetkit baseline-hardening --emit-pack-dir docs/artifacts/baseline-hardening-pack --format json --strict
 python -m sdetkit baseline-hardening --execute --evidence-dir docs/artifacts/baseline-hardening-pack/evidence --format json --strict
-python scripts/check_phase1_hardening_contract.py
+python scripts/check_baseline_hardening_contract.py
 ```
 
 ## Scoring model
@@ -31,7 +31,7 @@ Lane weighted score (0-100):
 - Docs contract and command-lane completeness: 35 points.
 - Entry-page discoverability + strategy alignment: 35 points.
 - Stale marker elimination in top pages: 20 points.
-- Artifact/report wiring for baseline closeout: 10 points.
+- Artifact/report wiring for baseline completion report: 10 points.
 
 ## Entry page polish checklist
 
