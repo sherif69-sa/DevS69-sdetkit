@@ -5,7 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'scripts/check_operational_readiness_governance_contract.py'
-      - 'config/phase4_drift_scoring.json'
+      - 'config/operational-readiness_drift_scoring.json'
       - 'docs/**'
       - 'Makefile'
       - '.github/workflows/operational-readiness-governance-contract.yml'
@@ -13,7 +13,7 @@ on:
     branches: [ main ]
     paths:
       - 'scripts/check_operational_readiness_governance_contract.py'
-      - 'config/phase4_drift_scoring.json'
+      - 'config/operational-readiness_drift_scoring.json'
       - 'docs/**'
       - 'Makefile'
       - '.github/workflows/operational-readiness-governance-contract.yml'
@@ -21,7 +21,7 @@ permissions:
   contents: read
 
 jobs:
-  phase4-governance:
+  operational-readiness-governance:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.3
@@ -33,7 +33,7 @@ jobs:
           python -m venv .venv
           . .venv/bin/activate
           python -m pip install -c constraints-ci.txt -e .
-      - name: Run phase4 contract
+      - name: Run operational-readiness contract
         run: |
           . .venv/bin/activate
           make governance-contract-check
@@ -43,36 +43,36 @@ jobs:
           from pathlib import Path
           expected = {
               "operational-readiness-governance-contract.json",
-              "phase4-release-evidence.json",
-              "phase4-release-evidence.md",
-              "phase4-governance-adherence.json",
-              "phase4-compliance-overlay-pack.json",
-              "phase4-policy-as-code-template.json",
-              "phase4-governance-drift-alerts.json",
-              "phase4-governance-drift-alerts.md",
-              "phase4-compliance-overlay-security.json",
-              "phase4-compliance-overlay-privacy.json",
-              "phase4-compliance-overlay-regulated.json",
+              "operational-readiness-release-evidence.json",
+              "operational-readiness-release-evidence.md",
+              "operational-readiness-governance-adherence.json",
+              "operational-readiness-compliance-overlay-pack.json",
+              "operational-readiness-policy-as-code-template.json",
+              "operational-readiness-governance-drift-alerts.json",
+              "operational-readiness-governance-drift-alerts.md",
+              "operational-readiness-compliance-overlay-security.json",
+              "operational-readiness-compliance-overlay-privacy.json",
+              "operational-readiness-compliance-overlay-regulated.json",
           }
-          actual = {p.name for p in Path("build/phase4-governance").glob("*") if p.is_file()}
+          actual = {p.name for p in Path("build/operational-readiness-governance").glob("*") if p.is_file()}
           missing = sorted(expected - actual)
           extra = sorted(actual - expected)
           if missing or extra:
               raise SystemExit(f"artifact-set mismatch missing={missing} extra={extra}")
           PYCODE
-      - name: Upload phase4 artifacts
+      - name: Upload operational-readiness artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: phase4-governance-artifacts
+          name: operational-readiness-governance-artifacts
           path: |
-            build/phase4-governance/operational-readiness-governance-contract.json
-            build/phase4-governance/phase4-release-evidence.json
-            build/phase4-governance/phase4-release-evidence.md
-            build/phase4-governance/phase4-governance-adherence.json
-            build/phase4-governance/phase4-compliance-overlay-pack.json
-            build/phase4-governance/phase4-policy-as-code-template.json
-            build/phase4-governance/phase4-governance-drift-alerts.json
-            build/phase4-governance/phase4-governance-drift-alerts.md
-            build/phase4-governance/phase4-compliance-overlay-security.json
-            build/phase4-governance/phase4-compliance-overlay-privacy.json
-            build/phase4-governance/phase4-compliance-overlay-regulated.json
+            build/operational-readiness-governance/operational-readiness-governance-contract.json
+            build/operational-readiness-governance/operational-readiness-release-evidence.json
+            build/operational-readiness-governance/operational-readiness-release-evidence.md
+            build/operational-readiness-governance/operational-readiness-governance-adherence.json
+            build/operational-readiness-governance/operational-readiness-compliance-overlay-pack.json
+            build/operational-readiness-governance/operational-readiness-policy-as-code-template.json
+            build/operational-readiness-governance/operational-readiness-governance-drift-alerts.json
+            build/operational-readiness-governance/operational-readiness-governance-drift-alerts.md
+            build/operational-readiness-governance/operational-readiness-compliance-overlay-security.json
+            build/operational-readiness-governance/operational-readiness-compliance-overlay-privacy.json
+            build/operational-readiness-governance/operational-readiness-compliance-overlay-regulated.json

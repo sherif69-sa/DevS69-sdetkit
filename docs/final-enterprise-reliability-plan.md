@@ -78,7 +78,7 @@ Implement a repeatable two-pass enterprise workflow:
 - Check runtime optimization report
 - Dependency governance matrix
 - CI blueprint examples
-- `templates/automations/enterprise-next-pass-handoff.yaml` for contract-driven follow-up branching
+- `templates/automations/enterprise-followup-pass-handoff.yaml` for contract-driven follow-up branching
 
 ---
 

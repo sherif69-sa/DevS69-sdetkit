@@ -8,7 +8,7 @@ from sdetkit import baseline_wrap as d30
 
 
 def _evidence_path(root: Path) -> Path:
-    return root / "docs/artifacts/phase1-wrap-pack/evidence/phase1-wrap-execution-summary.json"
+    return root / "docs/artifacts/baseline-wrap-pack/evidence/baseline-wrap-execution-summary.json"
 
 
 def main() -> int:
@@ -18,7 +18,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d30.build_phase1_wrap_summary(root)
+    payload = d30.build_baseline_wrap_summary(root)
 
     strict_failures: list[str] = []
     page = root / d30._PAGE_PATH

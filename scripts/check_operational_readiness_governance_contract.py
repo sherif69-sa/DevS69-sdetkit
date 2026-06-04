@@ -528,7 +528,7 @@ def _emit_domain_overlay_files(out_dir: Path, compliance_overlay: dict[str, Any]
         domain = str(row.get("domain", "")).strip()
         if not domain:
             continue
-        path = out_dir / f"phase4-compliance-overlay-{domain}.json"
+        path = out_dir / f"operational-readiness-compliance-overlay-{domain}.json"
         _write_json(
             path,
             {
@@ -652,11 +652,15 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--docs-index", default="docs/index.md")
     ap.add_argument("--operator-essentials", default="docs/operator-essentials.md")
-    ap.add_argument("--out-dir", default="build/phase4-governance")
+    ap.add_argument("--out-dir", default="build/operational-readiness-governance")
     ap.add_argument("--review-cadence-days", type=int, default=30)
     ap.add_argument("--last-review-at", default="")
     ap.add_argument("--format", choices=["text", "json"], default="text")
-    ap.add_argument("--no-md", action="store_true", help="Skip phase4-release-evidence.md emission")
+    ap.add_argument(
+        "--no-md",
+        action="store_true",
+        help="Skip operational-readiness-release-evidence.md emission",
+    )
     ap.add_argument("--drift-scoring-config", default="config/phase4_drift_scoring.json")
     ap.add_argument("--drift-threshold", type=int, default=DRIFT_THRESHOLD)
     ns = ap.parse_args(argv)
@@ -677,18 +681,18 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     _write_json(out_dir / "operational-readiness-governance-contract.json", governance_payload)
-    _write_json(out_dir / "phase4-release-evidence.json", release_payload)
-    release_md_path = out_dir / "phase4-release-evidence.md"
+    _write_json(out_dir / "operational-readiness-release-evidence.json", release_payload)
+    release_md_path = out_dir / "operational-readiness-release-evidence.md"
     if not ns.no_md:
         release_md_path.write_text(
             _render_release_evidence_markdown(release_payload), encoding="utf-8"
         )
-    _write_json(out_dir / "phase4-governance-adherence.json", adherence_payload)
-    _write_json(out_dir / "phase4-compliance-overlay-pack.json", compliance_overlay)
+    _write_json(out_dir / "operational-readiness-governance-adherence.json", adherence_payload)
+    _write_json(out_dir / "operational-readiness-compliance-overlay-pack.json", compliance_overlay)
     domain_overlay_paths = _emit_domain_overlay_files(out_dir, compliance_overlay)
-    _write_json(out_dir / "phase4-policy-as-code-template.json", policy_template)
-    _write_json(out_dir / "phase4-governance-drift-alerts.json", drift_alerts)
-    (out_dir / "phase4-governance-drift-alerts.md").write_text(
+    _write_json(out_dir / "operational-readiness-policy-as-code-template.json", policy_template)
+    _write_json(out_dir / "operational-readiness-governance-drift-alerts.json", drift_alerts)
+    (out_dir / "operational-readiness-governance-drift-alerts.md").write_text(
         _render_drift_alerts_markdown(drift_alerts), encoding="utf-8"
     )
 
@@ -747,13 +751,23 @@ def main(argv: list[str] | None = None) -> int:
         "failures": failures,
         "artifacts": {
             "governance_contract": str(out_dir / "operational-readiness-governance-contract.json"),
-            "release_evidence": str(out_dir / "phase4-release-evidence.json"),
+            "release_evidence": str(out_dir / "operational-readiness-release-evidence.json"),
             "release_evidence_markdown": str(release_md_path) if not ns.no_md else "",
-            "governance_adherence": str(out_dir / "phase4-governance-adherence.json"),
-            "compliance_overlay_pack": str(out_dir / "phase4-compliance-overlay-pack.json"),
-            "policy_as_code_template": str(out_dir / "phase4-policy-as-code-template.json"),
-            "governance_drift_alerts": str(out_dir / "phase4-governance-drift-alerts.json"),
-            "governance_drift_alerts_markdown": str(out_dir / "phase4-governance-drift-alerts.md"),
+            "governance_adherence": str(
+                out_dir / "operational-readiness-governance-adherence.json"
+            ),
+            "compliance_overlay_pack": str(
+                out_dir / "operational-readiness-compliance-overlay-pack.json"
+            ),
+            "policy_as_code_template": str(
+                out_dir / "operational-readiness-policy-as-code-template.json"
+            ),
+            "governance_drift_alerts": str(
+                out_dir / "operational-readiness-governance-drift-alerts.json"
+            ),
+            "governance_drift_alerts_markdown": str(
+                out_dir / "operational-readiness-governance-drift-alerts.md"
+            ),
             "compliance_overlay_domain_artifacts": domain_overlay_paths,
         },
     }

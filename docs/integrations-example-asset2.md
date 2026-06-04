@@ -19,7 +19,7 @@ Lane closes the second distribution-ready example asset by translating repositor
 python -m sdetkit example-asset2 --format json --strict
 python -m sdetkit example-asset2 --emit-pack-dir docs/artifacts/example-asset2-pack --format json --strict
 python -m sdetkit example-asset2 --execute --evidence-dir docs/artifacts/example-asset2-pack/evidence --format json --strict
-python scripts/check_demo_asset2_contract.py
+python scripts/check_example_asset2_contract.py
 ```
 
 ## Repo-audit production contract

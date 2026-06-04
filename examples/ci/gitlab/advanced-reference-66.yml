@@ -23,7 +23,7 @@ lint:
     - . .venv/bin/activate
     - bash quality.sh lint
     - bash quality.sh type
-    - python -m pytest -q tests/test_integration_expansion2_closeout.py
+    - python -m pytest -q tests/test_integration_expansion2_completion-report.py
 
 integration-matrix:
   stage: test
@@ -34,18 +34,18 @@ integration-matrix:
   script:
     - bash scripts/bootstrap.sh
     - . .venv/bin/activate
-    - python -m sdetkit integration-expansion2-closeout --format json --strict
+    - python -m sdetkit integration-expansion2-completion-report --format json --strict
 
 package-evidence:
   stage: package
   script:
     - bash scripts/bootstrap.sh
     - . .venv/bin/activate
-    - python -m sdetkit integration-expansion2-closeout --emit-pack-dir docs/artifacts/-integration-expansion2-closeout-pack --format json --strict
-    - python scripts/check_integration_expansion2_closeout_contract_66.py --skip-evidence
+    - python -m sdetkit integration-expansion2-completion-report --emit-pack-dir docs/artifacts/-integration-expansion2-completion-report-pack --format json --strict
+    - python scripts/check_integration_expansion2_completion-report_contract_66.py --skip-evidence
     - bash security.sh
   artifacts:
     when: always
     paths:
-      - docs/artifacts/-integration-expansion2-closeout-pack/
+      - docs/artifacts/-integration-expansion2-completion-report-pack/
       - build/security.sarif

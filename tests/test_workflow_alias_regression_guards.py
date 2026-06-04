@@ -16,7 +16,7 @@ EXPECTED_WORKFLOW_ALIASES = {
 }
 
 CONTRACT_SCRIPT_EXPECTATIONS = {
-    "scripts/check_phase1_flow_contract.py": {
+    "scripts/check_baseline_flow_contract.py": {
         "required": {
             "docs/operations-execution-guide.md",
         },

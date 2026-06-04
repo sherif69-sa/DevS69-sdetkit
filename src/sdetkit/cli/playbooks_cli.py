@@ -25,6 +25,7 @@ RECOMMENDED_PLAYBOOKS: list[str] = [
     "onboarding-optimization",
     "weekly-review",
     "evidence-assets",
+    "example",
     "demo",
     "first-contribution",
     "contributor-funnel",
@@ -102,6 +103,7 @@ _PRODUCT_CANONICAL_BY_LEGACY_MODULE: dict[str, str] = {
 }
 
 _PLAYBOOK_MODULE_BY_CANONICAL: dict[str, str] = {
+    "example": "demo",
     "evidence-assets": "proof",
     "onboarding-optimization": "onboarding_optimization",
     "external-contribution": "external_contribution",

@@ -8,7 +8,7 @@ _CFG = {
     "name": "example-asset2",
     "page_path": "docs/integrations-example-asset2.md",
     "required_inputs": ["docs/artifacts/example-asset-pack/example-asset-summary.json"],
-    "required_boards": ["docs/artifacts/example-asset-pack/demo-delivery-board.md"],
+    "required_boards": ["docs/artifacts/example-asset-pack/example-delivery-board.md"],
     "summary_json": "example-asset2-summary.json",
     "summary_md": "example-asset2-summary.md",
     "pack_files": [
@@ -18,7 +18,7 @@ _CFG = {
         "example-asset2-validation-commands.md",
     ],
     "evidence_json": "example-asset2-execution-summary.json",
-    "text_output": " demo asset #2 summary",
+    "text_output": " example asset #2 summary",
 }
 
 
