@@ -40,8 +40,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/impact-58-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
-        root
-        / "docs/artifacts/kpi-deep-audit-completion report-pack/kpi-deep-audit-completion report-summary.json"
+        root / "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -54,10 +53,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = (
-        root
-        / "docs/artifacts/kpi-deep-audit-completion report-pack/kpi-deep-audit-delivery-board.md"
-    )
+    board = root / "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -74,9 +70,55 @@ def _seed_repo(root: Path) -> None:
     )
 
 
+def _seed_kpi_deep_audit_closeout_pack(root: Path) -> None:
+    pack = root / "docs/artifacts/kpi-deep-audit-closeout-pack"
+    pack.mkdir(parents=True, exist_ok=True)
+
+    summary = {
+        "schema_version": "sdetkit.kpi_deep_audit_closeout.v1",
+        "ok": True,
+        "strict_pass": True,
+        "activation_score": 100,
+        "score": 100,
+        "checks": [
+            {"id": "kpi_deep_audit_anchor_1", "ok": True},
+            {"id": "kpi_deep_audit_anchor_2", "ok": True},
+            {"id": "kpi_deep_audit_anchor_3", "ok": True},
+            {"id": "kpi_deep_audit_anchor_4", "ok": True},
+            {"id": "kpi_deep_audit_anchor_5", "ok": True},
+        ],
+        "summary": {
+            "strict_pass": True,
+            "activation_score": 100,
+            "kpi_deep_audit_score": 100,
+            "kpi_deep_audit_checks": 5,
+            "passed_checks": 5,
+            "failed_checks": 0,
+        },
+    }
+    (pack / "kpi-deep-audit-closeout-summary.json").write_text(
+        json.dumps(summary, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    board = "\n".join(
+        [
+            "# KPI deep-audit delivery board",
+            "- [x] KPI deep-audit anchor 1 — kpi_deep_audit — kpi-deep-audit — kpi deep audit",
+            "- [x] KPI deep-audit anchor 2 — kpi_deep_audit — kpi-deep-audit — kpi deep audit",
+            "- [x] KPI deep-audit anchor 3 — kpi_deep_audit — kpi-deep-audit — kpi deep audit",
+            "- [x] KPI deep-audit anchor 4 — kpi_deep_audit — kpi-deep-audit — kpi deep audit",
+            "- [x] KPI deep-audit anchor 5 — kpi_deep_audit — kpi-deep-audit — kpi deep audit",
+            "",
+        ]
+    )
+    (pack / "kpi-deep-audit-delivery-board.md").write_text(board, encoding="utf-8")
+
+
 def test_release_readiness_hardening_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
+    _seed_kpi_deep_audit_closeout_pack(tmp_path)
     rc = d58.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
@@ -87,6 +129,7 @@ def test_release_readiness_hardening_json(tmp_path: Path, capsys) -> None:
 def test_release_readiness_hardening_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
+    _seed_kpi_deep_audit_closeout_pack(tmp_path)
     rc = d58.main(
         [
             "--root",
@@ -143,9 +186,10 @@ def test_release_readiness_hardening_emit_pack_and_execute(tmp_path: Path) -> No
 def test_release_readiness_hardening_strict_fails_without_kpi_deep_audit(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
+    _seed_kpi_deep_audit_closeout_pack(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/kpi-deep-audit-completion report-pack/kpi-deep-audit-completion report-summary.json"
+        / "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json"
     ).unlink()
     assert d58.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
@@ -153,6 +197,7 @@ def test_release_readiness_hardening_strict_fails_without_kpi_deep_audit(tmp_pat
 def test_release_readiness_hardening_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     seed_contract_anchors(tmp_path)
+    _seed_kpi_deep_audit_closeout_pack(tmp_path)
     rc = cli.main(
         [
             "release-readiness-hardening-completion-report",

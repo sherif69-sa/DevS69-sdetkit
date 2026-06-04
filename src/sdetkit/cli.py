@@ -1127,6 +1127,13 @@ Then use stability-aware command discovery:
     obj = sub.add_parser("objection-handling", help="Objection handling playbook")
     obj.add_argument("args", nargs=argparse.REMAINDER)
 
+    ex = sub.add_parser("example", help="Example playbook")
+    ex.set_defaults(cmd="example")
+    ex.add_argument("--format", choices=["json", "text"], default="text")
+    ex.add_argument("--strict", action="store_true")
+    ex.add_argument("--root", default=".")
+    ex.add_argument("args", nargs=argparse.REMAINDER)
+
     dmo = sub.add_parser("demo", help="Example playbook compatibility command")
     dmo.add_argument("args", nargs=argparse.REMAINDER)
 

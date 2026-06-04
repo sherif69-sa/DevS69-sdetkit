@@ -15,6 +15,13 @@ from ..versioning import tool_version
 __all__ = ["import_module", "tool_version", "_run_module_main", "main"]
 
 
+def _normalize_professional_command_aliases(argv: list[str]) -> list[str]:
+    normalized = list(argv)
+    if normalized and normalized[0] == "example":
+        normalized[0] = "demo"
+    return normalized
+
+
 def _load_legacy_cli_module() -> ModuleType:
     cached = getattr(_load_legacy_cli_module, "_cached_module", None)
     if isinstance(cached, ModuleType):
@@ -50,6 +57,13 @@ def __getattr__(name: str):
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    if argv is None:
+        import sys as _sys
+
+        argv = list(_sys.argv[1:])
+    else:
+        argv = list(argv)
+    argv = _normalize_professional_command_aliases(argv)
     module = _load_legacy_cli_module()
     _sync_compat_bindings(module)
     module._run_module_main = globals().get("_run_module_main", _run_module_main)

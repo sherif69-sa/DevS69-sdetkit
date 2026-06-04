@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 REQUIRED_TOP_LEVEL = {
-    "schema_version": "sdetkit.baseline_baseline.v1",
+    "schema_version": "sdetkit.phase1_baseline.v1",
     "generated_at_utc": str,
     "out_dir": str,
     "checks": list,
@@ -46,7 +46,7 @@ def main() -> int:
         failures.append(f"missing summary file: {summary_path}")
         payload = {
             "ok": False,
-            "schema_version": "sdetkit.baseline_baseline_summary_contract.v1",
+            "schema_version": "sdetkit.baseline_summary_contract.v1",
             "summary": str(summary_path),
             "checks": checks,
             "failures": failures,
@@ -108,7 +108,7 @@ def main() -> int:
 
     payload = {
         "ok": not failures,
-        "schema_version": "sdetkit.baseline_baseline_summary_contract.v1",
+        "schema_version": "sdetkit.baseline_summary_contract.v1",
         "summary": str(summary_path),
         "checks": checks,
         "failures": failures,

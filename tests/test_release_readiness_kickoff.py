@@ -138,6 +138,6 @@ def test_strict_fails_when_backlog_is_not_release_readiness_ready(tmp_path: Path
 
 def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["release readiness-kickoff", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["release-readiness-kickoff", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert " release readiness kickoff summary" in capsys.readouterr().out

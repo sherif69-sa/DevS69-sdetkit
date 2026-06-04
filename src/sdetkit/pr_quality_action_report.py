@@ -10,6 +10,7 @@ from sdetkit.current_head_failure_bundle import (
     build_current_head_failure_bundle,
     write_current_head_failure_bundle,
 )
+from sdetkit.pr_comment_failure_families import render_comment_failure_families
 
 JsonObject = dict[str, Any]
 
@@ -59,6 +60,13 @@ BANNED_EDUCATIONAL_PHRASES = (
     "Confirm the graph findings match the changed files and artifacts.",
     "PR Quality evidence affects the comment maintainers use",
 )
+
+
+def _render_failure_family_coverage_from_report_text(report_text: str) -> list[str]:
+    rendered = render_comment_failure_families(report_text)
+    if rendered == "Additional failure families: none detected":
+        return ["## Failure family coverage", "", "- none detected", ""]
+    return ["## Failure family coverage", "", *rendered.splitlines(), ""]
 
 
 def _as_dict(value: Any) -> JsonObject:
