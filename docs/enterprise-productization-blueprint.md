@@ -11,7 +11,7 @@ This blueprint defines how to package the **AgentOS + template engine + omnichan
 - Data path: `.sdetkit/` stays in-repo or on local workstation storage.
 - Best fit: regulated teams with strict source-code locality requirements.
 - Operational deliverables:
-  - standardized `sdetkit agent demo --scenario repo-enterprise-audit` smoke check
+  - standardized `sdetkit agent example --scenario repo-enterprise-audit` smoke check
   - local runbooks for template and dashboard generation
   - workstation onboarding and deterministic cache policies
 

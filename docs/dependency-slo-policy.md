@@ -21,7 +21,7 @@ Current defaults:
 ## Artifact + check flow
 
 1. Generate upgrade audit payload (`upgrade_audit` JSON).
-2. Build radar artifact with threshold evaluation via `scripts/phase3_dependency_radar.py`.
+2. Build radar artifact with threshold evaluation via `scripts/platform_readiness_dependency_radar.py`.
 3. Fail only when `breach == true` and lane is configured with `--fail-on-breach`.
 
 ## Weekly operations

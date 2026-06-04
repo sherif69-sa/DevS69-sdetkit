@@ -58,7 +58,7 @@ python scripts/build_kpi_weekly_snapshot.py \
 
 ```bash
 python scripts/check_repo_layout.py
-python -m pytest -q tests/test_phase1_hardening.py
+python -m pytest -q tests/test_baseline_hardening.py
 python -m pytest -q tests/test_build_kpi_weekly_snapshot.py
 python scripts/check_kpi_weekly_contract.py --schema docs/kpi-schema.v1.json --payload docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json --out docs/artifacts/kpi-weekly-contract-check-2026-04-17.json
 python scripts/check_top_tier_reporting_contract.py --portfolio-scorecard docs/artifacts/portfolio-scorecard-sample-2026-04-17.json --kpi-weekly docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json --out docs/artifacts/top-tier-contract-check-2026-04-17.json

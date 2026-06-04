@@ -9,13 +9,13 @@ on:
       - 'scripts/build_platform_readiness_trend_delta.py'
       - 'scripts/platform_readiness_persist_baseline_history.py'
       - 'scripts/platform_readiness_quality_engine.py'
-      - 'tests/test_phase3_*.py'
+      - 'tests/test_platform-readiness_*.py'
 
 permissions:
   contents: read
 
 jobs:
-  phase3-contract:
+  platform-readiness-contract:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,7 +33,7 @@ jobs:
 
       - name: Seed baseline summary for contract lane
         run: |
-          python scripts/seed_quality_baseline_summary_fixture.py --summary build/phase1-baseline/phase1-baseline-summary.json
+          python scripts/seed_quality_baseline_summary_fixture.py --summary build/baseline-baseline/baseline-baseline-summary.json
 
       - name: Run quality-contract tests
         run: |
@@ -49,11 +49,13 @@ jobs:
           make quality-contract-run
 
       - name: Upload quality-contract artifacts
+      # legacy artifact compatibility: phase3-quality-artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: phase3-quality-artifacts
+          name: platform-readiness-quality-artifacts
           path: |
+            build/platform-readiness-quality/*.json
             build/phase3-quality/*.json
-            build/phase3-quality/*.md
+            build/platform-readiness-quality/*.md
             build/phase1-baseline/history/*.json
           if-no-files-found: error

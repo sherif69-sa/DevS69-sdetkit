@@ -884,10 +884,14 @@ Then use stability-aware command discovery:
     d32.set_defaults(cmd="release-cadence")
     d32.add_argument("args", nargs=argparse.REMAINDER)
 
+    ex33 = sub.add_parser("example-asset")
+    ex33.set_defaults(cmd="example-asset")
     d33 = sub.add_parser("demo-asset")
     d33.set_defaults(cmd="demo-asset")
     d33.add_argument("args", nargs=argparse.REMAINDER)
 
+    ex34 = sub.add_parser("example-asset2")
+    ex34.set_defaults(cmd="example-asset2")
     d34 = sub.add_parser("demo-asset2")
     d34.set_defaults(cmd="demo-asset2")
     d34.add_argument("args", nargs=argparse.REMAINDER)
@@ -1122,6 +1126,13 @@ Then use stability-aware command discovery:
 
     obj = sub.add_parser("objection-handling", help="Objection handling playbook")
     obj.add_argument("args", nargs=argparse.REMAINDER)
+
+    ex = sub.add_parser("example", help="Example playbook")
+    ex.set_defaults(cmd="example")
+    ex.add_argument("--format", choices=["json", "text"], default="text")
+    ex.add_argument("--strict", action="store_true")
+    ex.add_argument("--root", default=".")
+    ex.add_argument("args", nargs=argparse.REMAINDER)
 
     dmo = sub.add_parser("demo", help="Example playbook compatibility command")
     dmo.add_argument("args", nargs=argparse.REMAINDER)

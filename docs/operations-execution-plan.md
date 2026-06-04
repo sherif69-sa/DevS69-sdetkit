@@ -10,7 +10,7 @@ Run this plan in sequence and ship concrete outputs in every phase.
 
 ---
 
-## Phase 1 — Build the baseline execution lane
+## baseline — Build the baseline execution lane
 
 ### Mission
 Stand up a baseline lane that always produces machine-readable evidence and immediately flags environment/tooling drift.
@@ -27,8 +27,8 @@ Stand up a baseline lane that always produces machine-readable evidence and imme
    - `make operations-status`
    - `make operations-next-action`
    - `make operations-complete`
-   - or `bash scripts/phase1_baseline_lane.sh`
-2. Capture outputs under `build/phase1-baseline/`:
+   - or `bash scripts/baseline_lane.sh`
+2. Capture outputs under `build/baseline/`:
    - `gate-fast.json`
    - `release-preflight.json`
    - `doctor.json`
@@ -48,13 +48,13 @@ Stand up a baseline lane that always produces machine-readable evidence and imme
 - Cross-repo baseline federation for portfolio reporting.
 
 ### Close out
-- Freeze Phase 1 as complete in weekly reporting.
+- Freeze baseline as complete in weekly reporting.
 - Keep baseline artifacts as immutable audit evidence.
-- Remove stale Phase 1 open tasks from active execution boards.
+- Remove stale baseline open tasks from active execution boards.
 
 ---
 
-## Phase 2 — Simplify surfaces and commands
+## release readiness — Simplify surfaces and commands
 
 ### Mission
 Cut onboarding confusion while preserving advanced operational power.
@@ -99,7 +99,7 @@ Upgrade checks into a stronger execution engine with better recommendations and 
 4. Improve doctor handoff signals for deterministic follow-up pass actions.
 5. Validate baseline summary schema with:
    - `make quality-contract-check`
-   - `python scripts/check_phase1_baseline_summary_contract.py --summary build/phase1-baseline/phase1-baseline-summary.json --format json`
+   - `python scripts/check_baseline_summary_contract.py --summary build/baseline/baseline-summary.json --format json`
 
 ### Done when
 - Mean-time-to-triage drops through machine-readable outputs.
