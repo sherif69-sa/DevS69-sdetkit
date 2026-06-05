@@ -69,3 +69,29 @@ def test_command_center_body_includes_live_repository_scan() -> None:
     assert "Code scanning open alerts: **0**" in body
     assert "Dependabot open alerts: **unavailable**" in body
     assert "Secret scanning open alerts: **0**" in body
+
+
+def test_alert_scan_falls_back_when_endpoint_rejects_page_parameter() -> None:
+    module = _load_module()
+
+    class Client:
+        requested_path = ""
+        requested_params = {}
+
+        def paginate(self, path, params=None):
+            raise RuntimeError(
+                "GitHub API error 400 GET /dependabot/alerts: "
+                '{"message":"Pagination using the `page` parameter is not supported."}'
+            )
+
+        def list_without_page(self, path, params=None):
+            self.requested_path = path
+            self.requested_params = dict(params or {})
+            return [{"number": 1}, {"number": 2}]
+
+    client = Client()
+    scan = module._alert_scan(client, "/repos/example/repo/dependabot/alerts")
+
+    assert scan == {"available": True, "count": 2, "error": ""}
+    assert client.requested_path == "/repos/example/repo/dependabot/alerts"
+    assert client.requested_params == {"state": "open"}

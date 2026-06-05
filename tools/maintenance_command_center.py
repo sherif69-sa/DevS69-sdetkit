@@ -78,6 +78,16 @@ class GitHubClient:
             page += 1
         return out
 
+    def list_without_page(
+        self, path: str, params: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
+        query = {"per_page": 100}
+        if params:
+            query.update(params)
+        qs = urllib.parse.urlencode(query)
+        chunk = self._request("GET", f"{path}?{qs}")
+        return chunk if isinstance(chunk, list) else []
+
     def list_open_issues(self) -> list[dict[str, Any]]:
         issues = self.paginate(f"/repos/{self.owner}/{self.repo}/issues", {"state": "open"})
         return [item for item in issues if "pull_request" not in item]
@@ -284,11 +294,20 @@ def _alert_scan(client: GitHubClient, path: str) -> dict[str, Any]:
     try:
         alerts = client.paginate(path, {"state": "open"})
     except RuntimeError as exc:
-        return {
-            "available": False,
-            "count": None,
-            "error": _compact_api_error(exc),
-        }
+        if "Pagination using the `page` parameter is not supported" not in str(exc):
+            return {
+                "available": False,
+                "count": None,
+                "error": _compact_api_error(exc),
+            }
+        try:
+            alerts = client.list_without_page(path, {"state": "open"})
+        except RuntimeError as fallback_exc:
+            return {
+                "available": False,
+                "count": None,
+                "error": _compact_api_error(fallback_exc),
+            }
     return {
         "available": True,
         "count": len(alerts),
