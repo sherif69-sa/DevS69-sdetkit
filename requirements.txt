@@ -4,10 +4,10 @@
 
 # Runtime dependency
 httpx==0.28.1
-filelock==3.29.0
+filelock==3.29.1
 
 # Dev + QA tooling
-ruff==0.15.15
+ruff==0.15.16
 mypy==2.1.0
 pre-commit==4.6.0
 pytest==9.0.3
@@ -34,5 +34,5 @@ pymdown-extensions==10.21.3
 tomli==2.4.1; python_version < "3.11"
 
 # Security scanner transitive dependency floors
-idna==3.17
+idna==3.18
 lxml==6.1.1
