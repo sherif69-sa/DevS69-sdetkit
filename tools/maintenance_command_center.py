@@ -82,6 +82,20 @@ class GitHubClient:
         issues = self.paginate(f"/repos/{self.owner}/{self.repo}/issues", {"state": "open"})
         return [item for item in issues if "pull_request" not in item]
 
+    def list_open_pull_requests(self) -> list[dict[str, Any]]:
+        return self.paginate(f"/repos/{self.owner}/{self.repo}/pulls", {"state": "open"})
+
+    def list_recent_workflow_runs(self, *, limit: int = 20) -> list[dict[str, Any]]:
+        per_page = max(min(limit, 100), 1)
+        payload = self._request(
+            "GET",
+            f"/repos/{self.owner}/{self.repo}/actions/runs?per_page={per_page}",
+        )
+        if not isinstance(payload, dict):
+            return []
+        runs = payload.get("workflow_runs", [])
+        return runs if isinstance(runs, list) else []
+
     def ensure_label(self, *, name: str, color: str, description: str) -> None:
         try:
             self._request(
@@ -236,6 +250,220 @@ def _make_rollup(records: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _compact_api_error(exc: object) -> str:
+    message = str(exc).replace("\n", " ").strip()
+    if len(message) > 220:
+        return message[:217] + "..."
+    return message or "unknown error"
+
+
+def _label_names(item: dict[str, Any]) -> list[str]:
+    labels = item.get("labels", [])
+    if not isinstance(labels, list):
+        return []
+    return [str(label.get("name", "")) for label in labels if label.get("name")]
+
+
+def _summary_items(items: list[dict[str, Any]], *, limit: int = 5) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for item in items[:limit]:
+        out.append(
+            {
+                "number": item.get("number"),
+                "title": str(item.get("title", "")),
+                "labels": _label_names(item),
+                "created_at": item.get("created_at", ""),
+                "updated_at": item.get("updated_at", ""),
+                "html_url": item.get("html_url", ""),
+            }
+        )
+    return out
+
+
+def _alert_scan(client: GitHubClient, path: str) -> dict[str, Any]:
+    try:
+        alerts = client.paginate(path, {"state": "open"})
+    except RuntimeError as exc:
+        return {
+            "available": False,
+            "count": None,
+            "error": _compact_api_error(exc),
+        }
+    return {
+        "available": True,
+        "count": len(alerts),
+        "error": "",
+    }
+
+
+def _workflow_run_summary(runs: list[dict[str, Any]]) -> dict[str, Any]:
+    counts = {"success": 0, "failure": 0, "pending": 0, "other": 0}
+    failures: list[dict[str, Any]] = []
+
+    for run in runs:
+        status = str(run.get("status", "") or "")
+        conclusion = str(run.get("conclusion", "") or "")
+        if status != "completed":
+            counts["pending"] += 1
+            continue
+        if conclusion == "success":
+            counts["success"] += 1
+        elif conclusion in {"failure", "timed_out", "action_required", "startup_failure"}:
+            counts["failure"] += 1
+            failures.append(
+                {
+                    "name": run.get("name") or run.get("display_title") or "workflow",
+                    "conclusion": conclusion,
+                    "branch": run.get("head_branch", ""),
+                    "event": run.get("event", ""),
+                    "created_at": run.get("created_at", ""),
+                    "html_url": run.get("html_url", ""),
+                }
+            )
+        else:
+            counts["other"] += 1
+
+    return {
+        "available": True,
+        "total": len(runs),
+        "counts": counts,
+        "latest_failures": failures[:5],
+        "error": "",
+    }
+
+
+def _collect_live_scan(
+    client: GitHubClient,
+    *,
+    open_issues: list[dict[str, Any]],
+    command_center_title: str,
+    now_iso: str,
+) -> dict[str, Any]:
+    non_command_issues = [
+        issue for issue in open_issues if issue.get("title") != command_center_title
+    ]
+
+    try:
+        open_prs = client.list_open_pull_requests()
+        pr_scan = {
+            "available": True,
+            "count": len(open_prs),
+            "items": _summary_items(open_prs),
+            "error": "",
+        }
+    except RuntimeError as exc:
+        pr_scan = {
+            "available": False,
+            "count": None,
+            "items": [],
+            "error": _compact_api_error(exc),
+        }
+
+    try:
+        workflow_runs = client.list_recent_workflow_runs(limit=20)
+        workflow_scan = _workflow_run_summary(workflow_runs)
+    except RuntimeError as exc:
+        workflow_scan = {
+            "available": False,
+            "total": None,
+            "counts": {},
+            "latest_failures": [],
+            "error": _compact_api_error(exc),
+        }
+
+    return {
+        "generated_at": now_iso,
+        "source": "GitHub API live scan at command runtime",
+        "open_pull_requests": pr_scan,
+        "open_issues_excluding_command_center": {
+            "available": True,
+            "count": len(non_command_issues),
+            "items": _summary_items(non_command_issues),
+            "error": "",
+        },
+        "recent_workflow_runs": workflow_scan,
+        "security_alerts": {
+            "code_scanning": _alert_scan(
+                client, f"/repos/{client.owner}/{client.repo}/code-scanning/alerts"
+            ),
+            "dependabot": _alert_scan(
+                client, f"/repos/{client.owner}/{client.repo}/dependabot/alerts"
+            ),
+            "secret_scanning": _alert_scan(
+                client, f"/repos/{client.owner}/{client.repo}/secret-scanning/alerts"
+            ),
+        },
+    }
+
+
+def _scan_count_line(label: str, scan: dict[str, Any]) -> str:
+    if scan.get("available") is False:
+        return f"- {label}: **unavailable** — {scan.get('error', 'unknown error')}"
+    return f"- {label}: **{scan.get('count', 0)}**"
+
+
+def _live_scan_lines(live_scan: dict[str, Any]) -> list[str]:
+    prs = live_scan.get("open_pull_requests", {})
+    issues = live_scan.get("open_issues_excluding_command_center", {})
+    workflows = live_scan.get("recent_workflow_runs", {})
+    alerts = live_scan.get("security_alerts", {})
+
+    lines = [
+        "## Live repository scan",
+        f"- Generated at: **{live_scan.get('generated_at', 'unknown')}**",
+        f"- Source: **{live_scan.get('source', 'GitHub API live scan')}**",
+        _scan_count_line("Open pull requests", prs),
+        _scan_count_line("Open issues excluding command center", issues),
+    ]
+
+    if prs.get("items"):
+        lines.append("  - Open PR sample:")
+        for item in prs["items"]:
+            lines.append(f"    - #{item.get('number')} — {item.get('title', '')}")
+    else:
+        lines.append("  - Open PR sample: none")
+
+    if issues.get("items"):
+        lines.append("  - Open issue sample:")
+        for item in issues["items"]:
+            labels = ", ".join(f"`{label}`" for label in item.get("labels", [])) or "-"
+            lines.append(f"    - #{item.get('number')} — {item.get('title', '')} ({labels})")
+    else:
+        lines.append("  - Open issue sample: none")
+
+    if workflows.get("available") is False:
+        lines.append(f"- Recent workflow runs: **unavailable** — {workflows.get('error')}")
+    else:
+        counts = workflows.get("counts", {})
+        lines.append(
+            "- Recent workflow runs: "
+            f"**{workflows.get('total', 0)}** scanned; "
+            f"success **{counts.get('success', 0)}**, "
+            f"failure **{counts.get('failure', 0)}**, "
+            f"pending **{counts.get('pending', 0)}**, "
+            f"other **{counts.get('other', 0)}**"
+        )
+        failures = workflows.get("latest_failures", [])
+        if failures:
+            lines.append("  - Latest failed workflow runs:")
+            for run in failures:
+                lines.append(
+                    f"    - {run.get('name')} on {run.get('branch') or 'unknown'} "
+                    f"({run.get('conclusion')})"
+                )
+        else:
+            lines.append("  - Latest failed workflow runs: none")
+
+    lines.extend(
+        [
+            _scan_count_line("Code scanning open alerts", alerts.get("code_scanning", {})),
+            _scan_count_line("Dependabot open alerts", alerts.get("dependabot", {})),
+            _scan_count_line("Secret scanning open alerts", alerts.get("secret_scanning", {})),
+        ]
+    )
+    return lines
+
+
 def _build_body(
     *,
     now_iso: str,
@@ -245,6 +473,7 @@ def _build_body(
     review_payload: dict[str, Any],
     doctor_payload: dict[str, Any],
     rollup_payload: dict[str, Any],
+    live_scan: dict[str, Any],
     max_open_trackers: int,
 ) -> str:
     top_rows = [
@@ -310,6 +539,8 @@ def _build_body(
             "This rolling issue keeps maintenance work focused so newly generated automation trackers stay solvable instead of piling up.",
             "",
             f"Generated: {now_iso}",
+            "",
+            *_live_scan_lines(live_scan),
             "",
             "## Active queue (kept open)",
             *top_rows,
@@ -397,6 +628,12 @@ def main(argv: list[str] | None = None) -> int:
     now_iso = _iso_now()
 
     issues = client.list_open_issues()
+    live_scan = _collect_live_scan(
+        client,
+        open_issues=issues,
+        command_center_title=ns.command_center_title,
+        now_iso=now_iso,
+    )
     maintenance_issues = [
         issue
         for issue in issues
@@ -431,6 +668,7 @@ def main(argv: list[str] | None = None) -> int:
         "deferred_tracker_count": len(deferred),
         "high_priority_pressure": sum(row["score"] for row in keep_open),
         "active_titles": [row["issue"].get("title", "") for row in keep_open],
+        "live_scan": live_scan,
         "doctor": {
             "score": doctor_payload.get("score", 0),
             "status": doctor_payload.get("status") or doctor_payload.get("summary", "unknown"),
@@ -465,6 +703,7 @@ def main(argv: list[str] | None = None) -> int:
         review_payload=review_payload,
         doctor_payload=doctor_payload,
         rollup_payload=rollup,
+        live_scan=live_scan,
         max_open_trackers=max_open,
     )
 
