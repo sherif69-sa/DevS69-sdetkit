@@ -789,24 +789,71 @@ def run_review(
         if inspect_rc == 0:
             healthy_controls.append("inspect evidence diagnostics are stable")
         else:
-            findings.append(
-                {
-                    "id": "review:inspect",
-                    "kind": "inspect",
-                    "severity": "high",
-                    "priority": 65,
-                    "why_it_matters": "inspect surfaced suspicious evidence or rule failures",
-                    "next_action": "Investigate inspect anomalies and resolve suspicious signals.",
-                    "message": "inspect reported findings",
-                }
+            inspect_judgment = inspect_payload.get("judgment", {})
+            if not isinstance(inspect_judgment, dict):
+                inspect_judgment = {}
+
+            inspect_severity = str(inspect_judgment.get("severity") or "high").lower()
+            inspect_status = str(inspect_judgment.get("status") or "fail").lower()
+            inspect_priority = int(inspect_judgment.get("priority_score") or 65)
+            inspect_recommendations = [
+                item
+                for item in inspect_judgment.get("recommendations", [])
+                if isinstance(item, dict)
+            ]
+            inspect_diagnostics = inspect_payload.get("summary", {}).get("diagnostics", {})
+            if not isinstance(inspect_diagnostics, dict):
+                inspect_diagnostics = {}
+            monitor_only_diagnostic_keys = {
+                "missing_value_columns",
+                "inconsistent_type_columns",
+            }
+            blocking_inspect_diagnostics = {
+                str(key): int(value)
+                for key, value in inspect_diagnostics.items()
+                if str(key) not in monitor_only_diagnostic_keys
+                and isinstance(value, int)
+                and value > 0
+            }
+            inspect_is_monitor_only = (
+                inspect_status in {"pass", "watch"}
+                and inspect_severity == "low"
+                and inspect_priority < selected_profile.fail_threshold
+                and not blocking_inspect_diagnostics
             )
-            prioritized_actions.append(
-                {
-                    "tier": "now",
-                    "priority": 65,
-                    "action": "Resolve inspect evidence anomalies and rerun review.",
-                }
-            )
+
+            if inspect_is_monitor_only:
+                healthy_controls.append("inspect evidence diagnostics are monitor-only")
+                for item in inspect_recommendations[:3]:
+                    prioritized_actions.append(
+                        {
+                            "tier": str(item.get("tier") or "monitor"),
+                            "priority": int(item.get("priority") or inspect_priority),
+                            "action": str(
+                                item.get("action")
+                                or "Monitor low-severity inspect evidence diagnostics."
+                            ),
+                        }
+                    )
+            else:
+                findings.append(
+                    {
+                        "id": "review:inspect",
+                        "kind": "inspect",
+                        "severity": inspect_severity,
+                        "priority": max(inspect_priority, 65),
+                        "why_it_matters": "inspect surfaced suspicious evidence or rule failures",
+                        "next_action": "Investigate inspect anomalies and resolve suspicious signals.",
+                        "message": "inspect reported findings",
+                    }
+                )
+                prioritized_actions.append(
+                    {
+                        "tier": "now",
+                        "priority": max(inspect_priority, 65),
+                        "action": "Resolve inspect evidence anomalies and rerun review.",
+                    }
+                )
 
     if "inspect-project" in baseline_checks:
         project_out = out_dir / "inspect-project"
@@ -847,8 +894,15 @@ def run_review(
                 }
             )
 
-    # contradictions as first-class product output (baseline signal set)
-    contradiction_graph = build_contradiction_clusters(findings=findings, detection=detection)
+    # contradictions as first-class product output (baseline signal set).
+    # Clean repo+data coexistence is useful during forensics/deep review, but
+    # normal release review should not fail solely because repo artifacts and
+    # low-severity evidence files coexist.
+    contradiction_graph = build_contradiction_clusters(
+        findings=findings,
+        detection=detection,
+        flag_repo_data_coexistence=selected_profile.name == "forensics" or adaptive_deep,
+    )
     conflicting.extend(contradiction_graph.get("flat_contradictions", []))
 
     baseline_confidence = investigation_confidence(

@@ -921,3 +921,62 @@ def test_cli_review_rejects_code_scanning_path_traversal(tmp_path: Path) -> None
 
     assert run.returncode != 0
     assert "code scanning file must be a single relative file name" in (run.stderr + run.stdout)
+
+
+def test_review_treats_low_severity_inspect_watch_as_monitor_signal(tmp_path: Path) -> None:
+    data = tmp_path / "events.csv"
+    data.write_text("id,type\nE1,\n", encoding="utf-8")
+
+    rc, payload, _, _ = review.run_review(
+        target=data,
+        out_dir=tmp_path / "out",
+        workspace_root=tmp_path / "workspace",
+        profile="release",
+        no_workspace=True,
+    )
+
+    assert rc == 0
+    assert payload["status"] == "pass"
+    assert "inspect evidence diagnostics are monitor-only" in payload["healthy_controls"]
+    assert not any(item.get("id") == "review:inspect" for item in payload["top_matters"])
+    assert not any(
+        item.get("action") == "Resolve inspect evidence anomalies and rerun review."
+        for item in payload["prioritized_actions"]
+    )
+
+
+def test_review_contradiction_graph_can_suppress_clean_repo_data_coexistence() -> None:
+    graph = review.build_contradiction_clusters(
+        findings=[],
+        detection={"repo_like": True, "data_like": True},
+        flag_repo_data_coexistence=False,
+    )
+
+    assert graph["flat_contradictions"] == []
+
+
+def test_forensics_review_keeps_repo_data_coexistence_verification_signal(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "pyproject.toml").write_text(
+        "[project]\nname='demo'\nversion='0.1.0'\n",
+        encoding="utf-8",
+    )
+    (repo / "dataset.json").write_text(
+        json.dumps([{"id": "A1", "value": "ok"}]),
+        encoding="utf-8",
+    )
+
+    rc, payload, _, _ = review.run_review(
+        target=repo,
+        out_dir=tmp_path / "out",
+        workspace_root=tmp_path / "workspace",
+        profile="forensics",
+        no_workspace=True,
+    )
+
+    assert rc == 2
+    assert any(
+        item.get("id") == "review:conflict:repo-and-data-coexist"
+        for item in payload["conflicting_evidence"]
+    )
