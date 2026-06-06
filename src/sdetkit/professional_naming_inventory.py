@@ -39,7 +39,7 @@ DEFAULT_TERMS = [
     "next-pass",
 ]
 
-TEXT_SUFFIXES = {".py", ".md", ".yml", ".yaml", ".toml", ".txt", ".sh", ".ini", ".cfg"}
+TEXT_SUFFIXES = {".py", ".md", ".json", ".yml", ".yaml", ".toml", ".txt", ".sh", ".ini", ".cfg"}
 SKIP_PARTS = {
     ".git",
     ".venv",
@@ -63,8 +63,13 @@ REVIEW_FIRST_CONTEXT = "review_first_context"
 MIGRATION_OR_ALIAS_REQUIRED = "migration_or_alias_required"
 INTERNAL_REVIEW_FIRST = "internal_cleanup_review_first"
 
-TEMPLATE_LOCKED_DOC_PATHS = {
+REVIEW_LOCKED_DOC_PATHS = {
     "docs/integrations-release-prioritization-completion.md",
+    "docs/naming/professional-naming-compatibility-migration.md",
+    "docs/naming/professional-naming-rename-map.json",
+    "docs/naming/professional-public-command-surface.md",
+    "docs/professional-naming-debt-register.md",
+    "docs/contracts/workflow-consolidation-plan.v1.json",
 }
 
 
@@ -135,10 +140,10 @@ def _actionability_fields(
             "actionability_reason": "compatibility plan required before changing this surface",
         }
 
-    if path.as_posix() in TEMPLATE_LOCKED_DOC_PATHS:
+    if path.as_posix() in REVIEW_LOCKED_DOC_PATHS:
         return {
             "actionability": REVIEW_FIRST_CONTEXT,
-            "actionability_reason": "template_locked_contract",
+            "actionability_reason": "review_locked_naming_governance_reference",
         }
 
     if match_type == "path":
