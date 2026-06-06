@@ -15,11 +15,23 @@ def _target_dependencies(target: str) -> list[str]:
 
 def test_operations_aliases_route_through_baseline_names() -> None:
     expected = {
+        "operations-status": ["baseline-status"],
+        "operations-snapshot": ["baseline-ops-snapshot"],
+        "operations-weekly-pack": ["baseline-weekly-pack"],
+        "operations-run-all": ["baseline-run-all"],
+        "operations-artifact-set": ["baseline-artifact-set"],
+        "operations-telemetry": ["baseline-telemetry"],
         "operations-readiness-signal": ["baseline-readiness-signal"],
         "operations-remediation-plan": ["baseline-followup-pass"],
+        "operations-blocker-register": ["baseline-blocker-register"],
         "operations-run": ["baseline-run"],
+        "operations-core-run": ["baseline-execution-core"],
+        "operations-workflow": ["baseline-workflow"],
+        "operations-flow-contract": ["baseline-flow-contract"],
         "operations-quality-gate": ["baseline-release-readiness-gate"],
+        "operations-executive-report": ["baseline-executive-report"],
         "operations-cleanup-plan": ["baseline-transition-plan"],
+        "operations-complete": ["baseline-complete"],
         "operations-finalize": ["baseline-completion-report"],
     }
 
@@ -29,17 +41,39 @@ def test_operations_aliases_route_through_baseline_names() -> None:
 
 def test_baseline_targets_are_first_class_professional_targets() -> None:
     expected = {
+        "baseline-status": ["venv"],
+        "baseline-ops-snapshot": ["venv"],
+        "baseline-weekly-pack": ["venv"],
+        "baseline-run-all": ["venv"],
+        "baseline-artifact-set": ["venv"],
+        "baseline-telemetry": ["venv"],
         "baseline-readiness-signal": ["venv"],
         "baseline-followup-pass": ["venv"],
+        "baseline-blocker-register": ["venv"],
+        "baseline-execution-core": [
+            "baseline-run-all",
+            "baseline-artifact-set",
+            "baseline-telemetry",
+            "baseline-readiness-signal",
+        ],
         "baseline-run": [
             "baseline-run-all",
             "baseline-artifact-set",
             "baseline-telemetry",
             "baseline-readiness-signal",
         ],
-        "baseline-transition-plan": ["venv"],
+        "baseline-workflow": [
+            "baseline-execution-core",
+            "baseline-flow-contract",
+            "baseline-release-readiness-gate",
+            "baseline-executive-report",
+        ],
+        "baseline-flow-contract": ["venv"],
         "baseline-release-readiness-gate": ["venv"],
+        "baseline-executive-report": ["venv"],
+        "baseline-transition-plan": ["venv"],
         "baseline-completion-report": ["venv"],
+        "baseline-complete": ["install"],
     }
 
     banned_fragments = ("phase", "do-it", "closeout", "finish-signal", "next-pass", "retire-plan")
