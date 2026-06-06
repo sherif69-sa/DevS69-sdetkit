@@ -1,11 +1,11 @@
 # Sequential execution operator guide
 
-If you already completed planning for all 6 phases, execute only one phase at a time with this rule:
+If you already completed planning for all readiness stages, execute only one stage at a time with this rule:
 
-1. Finish current phase exit criteria.
+1. Finish current readiness-stage exit criteria.
 2. Publish evidence artifacts.
-3. Freeze phase status.
-4. Start next phase kickoff.
+3. Freeze readiness-stage status.
+4. Start next readiness-stage kickoff.
 
 ## Current focus: baseline
 
@@ -41,39 +41,39 @@ If you want machine-readable output for automation:
 make operations-current-json
 ```
 
-## Phase completion contract
+## Readiness-stage completion contract
 
-Before promoting a phase from active to complete:
+Before promoting a readiness stage from active to complete:
 
 - Canonical truth lane artifacts exist and are readable.
 - Exit criteria are all explicitly marked pass.
 - Remaining work is moved to either:
-  - the next phase backlog, or
+  - the next readiness-stage backlog, or
   - an expansion options backlog.
 
 ## Weekly operating cadence (recommended)
 
 - **Monday:** Plan (scope, KPI, risks)
 - **Wednesday:** Build + validate checkpoint
-- **Friday:** Operationalize + expand backlog + phase status update
+- **Friday:** Operationalize + expand backlog + readiness-stage status update
 
-## Phase gate decision record template
+## Readiness-stage decision record template
 
-For each phase completion report, record:
+For each readiness-stage completion report, record:
 
-- Phase id and name
+- Stage id and name
 - Date
 - Exit criteria pass/fail status
 - Blocking risks
 - Canonical artifacts produced
-- Go/No-go decision for next phase
+- Go/No-go decision for the next readiness stage
 
 Keeping this format constant makes trend reporting and investor review easier.
 
 
 ## After baseline is completed
 
-Run `make operations-finalize` to archive the previous strategic plan snapshot and remove baseline from the active phase queue, then advance `current_phase` to release readiness.
+Run `make operations-finalize` to archive the previous strategic plan snapshot and remove baseline from the active readiness queue, then advance the `current_phase` state field to release readiness.
 
 Use `make operations-snapshot` each week to publish:
 
@@ -110,7 +110,7 @@ After baseline is truly complete, run `make operations-cleanup-plan` to archive 
 Use `make operations-quality-gate` to decide if release readiness can start, based on finish signal + artifact contract.
 
 
-Use `make operations-executive-report` to produce a one-page status for leadership handoff and phase decision meetings.
+Use `make operations-executive-report` to produce a one-page status for leadership handoff and readiness decision meetings.
 
 
 Use `make operations-flow-contract` to ensure the documented command path and Makefile targets stay in sync.

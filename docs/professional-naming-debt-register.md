@@ -96,3 +96,11 @@ Current sweep policy:
 - do not rewrite generated evidence for line count
 - do not change schema identifiers without a migration contract
 - do not rename historical closeout reports as part of public command sweeps
+
+## Execution docs terminology progress
+
+The active execution-plan and execution-guide documentation now prefers readiness-stage,
+quality-governance, operational-governance, ecosystem-readiness, and metrics-readiness
+language in visible headings and navigation labels.
+
+Compatibility command names, generated artifact paths, and state-field names remain stable.
