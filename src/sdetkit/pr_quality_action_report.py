@@ -47,6 +47,12 @@ MATCHING_REVIEWED_DISPOSITION_COUNT = "_".join(("matching", "reviewed", "disposi
 HISTORICAL_DISPOSITION_AUTHORIZES_CURRENT_ACTION = "_".join(
     ("historical", "disposition", "authorizes", "current", "action")
 )
+CURRENT_FINDINGS = "_".join(("current", "findings"))
+STALE_FINDINGS = "_".join(("stale", "findings"))
+TRUE_POSITIVE_FIX_REQUIRED = "_".join(("true", "positive", "fix", "required"))
+CURRENT_ALERTS = "_".join(("current", "alerts"))
+STALE_ALERTS = "_".join(("stale", "alerts"))
+UNRESOLVED_FINDINGS = "_".join(("unresolved", "findings"))
 
 
 FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
@@ -997,6 +1003,137 @@ def _cleared_security_review_lines(
     ]
 
 
+def _security_review_real_diagnosis_lines(
+    *,
+    check_intelligence: JsonObject,
+    action_report: JsonObject,
+    evidence_narrative: JsonObject,
+    security_finding_diagnosis: JsonObject | None,
+    review_required: bool,
+) -> list[str]:
+    if not review_required:
+        return []
+
+    primary = _as_dict(evidence_narrative.get("primary_signal"))
+    graph = _as_dict(evidence_narrative.get("graph"))
+    top_blocker = _as_dict(graph.get("top_blocker"))
+    surface = _string(primary.get("surface") or top_blocker.get("surface") or "")
+    if surface != "security":
+        return []
+
+    report = _as_dict(security_finding_diagnosis)
+    summary = _as_dict(report.get("summary"))
+    code_scanning = _as_dict(
+        check_intelligence.get("code_scanning_review")
+        or _as_dict(action_report.get("evidence")).get("code_scanning_review")
+    )
+    security = _as_dict(
+        check_intelligence.get("security_review")
+        or _as_dict(action_report.get("evidence")).get("security_review")
+    )
+
+    current_count = _int(summary.get(CURRENT_FINDINGS))
+    stale_count = _int(summary.get(STALE_FINDINGS))
+    true_positive_count = _int(summary.get(TRUE_POSITIVE_FIX_REQUIRED))
+    if not report:
+        current_count = _int(code_scanning.get(CURRENT_ALERTS))
+        stale_count = _int(code_scanning.get(STALE_ALERTS))
+    if current_count == 0 and stale_count == 0:
+        current_count = _int(security.get(UNRESOLVED_FINDINGS))
+
+    if current_count == 0 and stale_count == 0:
+        return []
+
+    action = _string(top_blocker.get("action") or "")
+    proof_commands = [
+        str(item)
+        for item in _as_list(evidence_narrative.get("next_proof"))
+        if isinstance(item, str) and item.strip()
+    ]
+
+    lines = [
+        "- Review signal: `present`",
+        "- Surface: `security`",
+        "- Checks status: `no failed required check reported by this diagnosis`",
+        f"- Current findings: `{current_count}`",
+        f"- Stale findings: `{stale_count}`",
+        f"- True-positive fixes required: `{true_positive_count}`",
+    ]
+    if action:
+        lines.append(f"- Operator action: `{action}`")
+
+    boundary = _as_dict(report.get("decision_boundary"))
+    lines.extend(
+        _evidence_review_clarity_lines(
+            quality_ok=_as_dict(evidence_narrative.get("quality")).get("ok") is True,
+            surface="security",
+        )
+    )
+
+    if current_count:
+        lines.extend(
+            [
+                "- Diagnosis: current PR-owned security findings still need human disposition.",
+                "- Merge impact: blocked until the current findings are fixed or reviewed as false positives.",
+                "- Security review action: fix the current PR-owned finding or record a reviewed false-positive disposition.",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "- Diagnosis: stale security review comments remain, but no current findings were reported.",
+                "- Merge impact: blocked only while stale review comments remain unresolved.",
+                "- Security review action: refresh code scanning or resolve stale review comments with a reviewed disposition.",
+            ]
+        )
+
+    lines.extend(
+        [
+            "- Automation boundary: no auto-remediation, auto-dismissal, or merge authorization claimed.",
+            (
+                "- Automatic dismissal allowed: "
+                f"`{str(bool(boundary.get(AUTOMATIC_DISMISSAL_ALLOWED, False))).lower()}`"
+            ),
+            (
+                "- Automatic security fix allowed: "
+                f"`{str(bool(boundary.get(AUTOMATIC_SECURITY_FIX_ALLOWED, False))).lower()}`"
+            ),
+        ]
+    )
+
+    if proof_commands:
+        lines.append("- Next proof:")
+        lines.extend(f"  - `{command}`" for command in proof_commands[:5])
+
+    findings = [_as_dict(item) for item in _as_list(report.get("diagnoses")) if _as_dict(item)]
+    if not findings:
+        findings = [
+            _as_dict(item)
+            for item in _as_list(code_scanning.get("findings"))
+            if isinstance(item, dict)
+        ]
+    if findings:
+        lines.append("- Finding sample:")
+        for finding in findings[:4]:
+            path = _string(finding.get("path") or "unknown")
+            line = _string(finding.get("line"))
+            location = f"{path}:{line}" if line else path
+            freshness = _string(finding.get("freshness") or "unknown")
+            classification = _string(finding.get("classification") or "unknown")
+            action = _string(
+                finding.get("recommended_action")
+                or finding.get("action")
+                or "manual_security_review"
+            )
+            rule_id = _string(finding.get("rule_id") or "unknown")
+            lines.append(
+                f"  - `{rule_id}` at `{location}`: freshness=`{freshness}`, "
+                f"classification=`{classification}`, action=`{action}`"
+            )
+
+    return lines
+
+
 def _reconciled_evidence_signal(
     *,
     check_intelligence: JsonObject,
@@ -1005,7 +1142,18 @@ def _reconciled_evidence_signal(
     heading: str,
     lines: list[str],
     review_required: bool,
+    security_finding_diagnosis: JsonObject | None = None,
 ) -> tuple[str, list[str], bool]:
+    security_diagnosis = _security_review_real_diagnosis_lines(
+        check_intelligence=check_intelligence,
+        action_report=action_report,
+        evidence_narrative=evidence_narrative,
+        security_finding_diagnosis=security_finding_diagnosis,
+        review_required=review_required,
+    )
+    if security_diagnosis:
+        return "Evidence review signal", security_diagnosis, True
+
     cleared_security = _cleared_security_review_lines(
         check_intelligence=check_intelligence,
         action_report=action_report,
@@ -1167,6 +1315,7 @@ def render_comment_body(
             heading=evidence_signal_heading,
             lines=evidence_signal_lines,
             review_required=evidence_review_required,
+            security_finding_diagnosis=security_finding_diagnosis,
         )
     )
 
@@ -1345,6 +1494,7 @@ def write_comment_body(
         heading=_heading,
         lines=evidence_signal_lines,
         review_required=evidence_review_required,
+        security_finding_diagnosis=security_finding_diagnosis,
     )
     if evidence_review_required:
         evidence_signal_kind = "review"

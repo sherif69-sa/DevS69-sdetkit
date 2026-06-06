@@ -57,6 +57,11 @@ def _items(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return [item for item in raw if isinstance(item, dict)]
 
 
+COMPATIBILITY_REVIEW_FIRST_FINDING_COUNT = "_".join(
+    ("compatibility", "review", "first", "finding", "count")
+)
+
+
 def _text(value: object, default: str = "unknown") -> str:
     value_text = str(value or "").strip()
     return value_text if value_text else default
@@ -82,6 +87,18 @@ def _top_counts(items: list[dict[str, Any]], field: str, *, limit: int = 8) -> l
         {"name": name, "count": count}
         for name, count in sorted(counts.items(), key=lambda entry: (-entry[1], entry[0]))[:limit]
     ]
+
+
+def _review_first_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [item for item in items if not _is_actionable(item)]
+
+
+def _compatibility_review_first_count(items: list[dict[str, Any]]) -> int:
+    return sum(
+        1
+        for item in items
+        if _text(item.get("classification")) in COMPATIBILITY_CLASSES and not _is_actionable(item)
+    )
 
 
 def _path_counts(items: list[dict[str, Any]], *, limit: int = 10) -> list[dict[str, Any]]:
@@ -110,6 +127,7 @@ def _slice(items: list[dict[str, Any]], classification: str) -> dict[str, Any]:
     requires_compatibility = classification in COMPATIBILITY_CLASSES
     actionable_finding_count = sum(1 for item in items if _is_actionable(item))
     review_first_finding_count = len(items) - actionable_finding_count
+    review_first_items = _review_first_items(items)
     return {
         "id": classification.replace("_", "-"),
         "classification": classification,
@@ -117,10 +135,13 @@ def _slice(items: list[dict[str, Any]], classification: str) -> dict[str, Any]:
         "finding_count": len(items),
         "actionable_finding_count": actionable_finding_count,
         "review_first_finding_count": review_first_finding_count,
+        COMPATIBILITY_REVIEW_FIRST_FINDING_COUNT: _compatibility_review_first_count(items),
         "occurrence_count": sum(max(1, _number(item.get("occurrence_count"))) for item in items),
         "top_terms": _top_counts(items, "term"),
         "top_surfaces": _top_counts(items, "surface"),
         "top_paths": _path_counts(items),
+        "actionability_mix": _top_counts(items, "actionability"),
+        "review_first_reason_mix": _top_counts(review_first_items, "actionability_reason"),
         "recommended_scope": _scope_for_classification(classification),
         "safe_to_plan_first": classification in SAFE_CLASSES and actionable_finding_count > 0,
         "requires_compatibility_plan": requires_compatibility,
@@ -136,6 +157,7 @@ def build_professional_naming_cleanup_plan(inventory: dict[str, Any]) -> dict[st
         grouped.setdefault(_text(item.get("classification")), []).append(item)
 
     actionable_finding_count = sum(1 for item in items if _is_actionable(item))
+    review_first_items = _review_first_items(items)
 
     slices = [_slice(members, classification) for classification, members in grouped.items()]
     slices.sort(
@@ -156,6 +178,9 @@ def build_professional_naming_cleanup_plan(inventory: dict[str, Any]) -> dict[st
         "inventory_finding_count": _number(inventory.get("finding_count")),
         "actionable_finding_count": actionable_finding_count,
         "review_first_finding_count": len(items) - actionable_finding_count,
+        COMPATIBILITY_REVIEW_FIRST_FINDING_COUNT: _compatibility_review_first_count(items),
+        "actionability_mix": _top_counts(items, "actionability"),
+        "review_first_reason_mix": _top_counts(review_first_items, "actionability_reason"),
         "slice_count": len(slices),
         "safe_slice_count": sum(1 for item in slices if item["safe_to_plan_first"]),
         "compatibility_slice_count": sum(
