@@ -717,13 +717,6 @@ quality-contract-check: platform-readiness-quality-contract
 quality-contract-report: platform-readiness-quality-report
 quality-contract-run: platform-readiness-quality-run
 
-baseline-readiness-signal: phase1-finish-signal
-baseline-followup-pass: phase1-next-pass
-baseline-run: phase1-do-it
-baseline-transition-plan: phase1-retire-plan
-baseline-release-readiness-gate: phase1-gate-phase2
-baseline-completion-report: phase1-closeout
-
 operations-baseline: phase1-baseline
 operations-status: phase1-status
 operations-next-action: phase1-next

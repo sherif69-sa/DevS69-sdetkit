@@ -28,19 +28,24 @@ def test_operations_aliases_route_through_baseline_names() -> None:
 
 
 def test_baseline_targets_are_first_class_professional_targets() -> None:
-    targets = (
-        "baseline-readiness-signal",
-        "baseline-followup-pass",
-        "baseline-run",
-        "baseline-transition-plan",
-        "baseline-release-readiness-gate",
-        "baseline-completion-report",
-    )
+    expected = {
+        "baseline-readiness-signal": ["venv"],
+        "baseline-followup-pass": ["venv"],
+        "baseline-run": [
+            "baseline-run-all",
+            "baseline-artifact-set",
+            "baseline-telemetry",
+            "baseline-readiness-signal",
+        ],
+        "baseline-transition-plan": ["venv"],
+        "baseline-release-readiness-gate": ["venv"],
+        "baseline-completion-report": ["venv"],
+    }
 
     banned_fragments = ("phase", "do-it", "closeout", "finish-signal", "next-pass", "retire-plan")
 
-    for target in targets:
-        deps = _target_dependencies(target)
-        assert deps, f"{target} should have an implementation dependency"
+    for target, deps in expected.items():
+        assert _target_dependencies(target) == deps
         for fragment in banned_fragments:
             assert fragment not in target
+            assert all(fragment not in dep for dep in deps)
