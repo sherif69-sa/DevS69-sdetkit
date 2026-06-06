@@ -7,8 +7,8 @@ MAKEFILE = ROOT / "Makefile"
 
 ALIASES = {
     "quality-contract-check": "platform-readiness-quality-contract",
-    "quality-contract-report": "phase3-quality-report",
-    "quality-contract-run": "phase3-do-it",
+    "quality-contract-report": "platform-readiness-quality-report",
+    "quality-contract-run": "platform-readiness-quality-run",
     "operations-baseline": "phase1-baseline",
     "operations-status": "phase1-status",
     "operations-next-action": "phase1-next",
@@ -39,7 +39,7 @@ ALIASES = {
 }
 
 
-def test_production_workflow_aliases_point_to_legacy_targets() -> None:
+def test_production_workflow_aliases_point_to_supported_targets() -> None:
     makefile = MAKEFILE.read_text(encoding="utf-8")
 
     for alias, target in ALIASES.items():
