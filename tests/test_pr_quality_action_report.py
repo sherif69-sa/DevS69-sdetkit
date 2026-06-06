@@ -2221,3 +2221,167 @@ def test_action_report_comment_renders_artifact_evidence() -> None:
     assert "Present artifacts: `pip-audit-report.json`" in body
     assert "Artifact evidence source: `workflow_artifact_url`" in body
     assert "Artifact automation allowed: `false`" in body
+
+
+def test_action_report_security_review_signal_diagnoses_current_findings() -> None:
+    high_entropy_rule = "SEC_" + "HIGH_" + "ENTROPY_" + "STRING"
+    action = {
+        "status": "review_required",
+        "primary_blocker": {
+            "check": "GitHub security review",
+            "title": "Security review requires action",
+            "surface": "security",
+            "code": "SECURITY_REVIEW_FINDING",
+        },
+        "automation": {
+            "attempted": False,
+            "allowed": False,
+            "reason": "security review findings are review-first",
+        },
+        "recommended_actions": ["Review unresolved security comments."],
+        "proof_commands": ["python -m sdetkit security check --root . --format json"],
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 2},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "security",
+            "title": "Security review requires action",
+        },
+        "graph": {
+            "node_count": 6,
+            "review_first_count": 5,
+            "critical_count": 1,
+            "top_blocker": {
+                "title": "Security review requires action",
+                "surface": "security",
+                "action": "review",
+                "review_first": True,
+            },
+        },
+    }
+    security_diagnosis = {
+        "summary": {
+            report.CURRENT_FINDINGS: 2,
+            report.STALE_FINDINGS: 1,
+            report.TRUE_POSITIVE_FIX_REQUIRED: 0,
+        },
+        "decision_boundary": {
+            report.AUTOMATIC_DISMISSAL_ALLOWED: False,
+            report.AUTOMATIC_SECURITY_FIX_ALLOWED: False,
+        },
+        "diagnoses": [
+            {
+                "path": "src/sdetkit/example.py",
+                "line": 10,
+                "rule_id": high_entropy_rule,
+                "freshness": "current",
+                "classification": "review_first_security_signal",
+                "recommended_action": "manual_security_review",
+            }
+        ],
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=evidence_narrative,
+        security_finding_diagnosis=security_diagnosis,
+    )
+
+    assert "SDETKit Review Result: Action required" in body
+    assert "Current findings: `2`" in body
+    assert "Stale findings: `1`" in body
+    assert "current PR-owned security findings still need human disposition" in body
+    assert "blocked until the current findings are fixed or reviewed as false positives" in body
+    assert "Automatic dismissal allowed: `false`" in body
+    assert "src/sdetkit/example.py:10" in body
+    assert high_entropy_rule in body
+
+
+def test_action_report_security_review_signal_diagnoses_stale_only_findings() -> None:
+    stale_classification = "_".join(("stale", "or", "outdated", "alert"))
+    action = {
+        "status": "review_required",
+        "primary_blocker": {
+            "check": "GitHub security review",
+            "title": "Security review requires action",
+            "surface": "security",
+            "code": "SECURITY_REVIEW_FINDING",
+        },
+        "automation": {
+            "attempted": False,
+            "allowed": False,
+            "reason": "security review findings are review-first",
+        },
+        "recommended_actions": ["Review unresolved security comments."],
+        "proof_commands": ["python -m sdetkit security check --root . --format json"],
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 4},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "security",
+            "title": "Security review requires action",
+        },
+        "graph": {
+            "node_count": 6,
+            "review_first_count": 5,
+            "critical_count": 1,
+            "top_blocker": {
+                "title": "Security review requires action",
+                "surface": "security",
+                "action": "review",
+                "review_first": True,
+            },
+        },
+    }
+    security_diagnosis = {
+        "summary": {
+            report.CURRENT_FINDINGS: 0,
+            report.STALE_FINDINGS: 4,
+            report.TRUE_POSITIVE_FIX_REQUIRED: 0,
+        },
+        "decision_boundary": {
+            report.AUTOMATIC_DISMISSAL_ALLOWED: False,
+            report.AUTOMATIC_SECURITY_FIX_ALLOWED: False,
+        },
+        "diagnoses": [
+            {
+                "path": "src/sdetkit/example.py",
+                "line": 10,
+                "rule_id": "SECURITY_REVIEW_FINDING",
+                "freshness": "stale",
+                "classification": stale_classification,
+                "recommended_action": "wait_for_code_scanning_refresh",
+            }
+        ],
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=evidence_narrative,
+        security_finding_diagnosis=security_diagnosis,
+    )
+
+    assert "Current findings: `0`" in body
+    assert "Stale findings: `4`" in body
+    assert "stale security review comments remain, but no current findings were reported" in body
+    assert "blocked only while stale review comments remain unresolved" in body
+    assert "refresh code scanning or resolve stale review comments" in body
+    assert "wait_for_code_scanning_refresh" in body
