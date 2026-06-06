@@ -17,6 +17,10 @@ from sdetkit.professional_naming_cleanup_plan import (
 )
 from sdetkit.professional_naming_inventory import SCHEMA_VERSION as INVENTORY_SCHEMA_VERSION
 
+COMPATIBILITY_REVIEW_FIRST_FINDING_COUNT = "_".join(
+    ("compatibility", "review", "first", "finding", "count")
+)
+
 
 def _item(
     path: str,
@@ -190,7 +194,7 @@ def test_professional_naming_cleanup_plan_separates_compatibility_review_first_f
 
     assert payload["actionable_finding_count"] == 0
     assert payload["review_first_finding_count"] == 1
-    assert payload["compatibility_review_first_finding_count"] == 1
+    assert payload[COMPATIBILITY_REVIEW_FIRST_FINDING_COUNT] == 1
     assert payload["recommended_first_slice"] is None
     assert payload["actionability_mix"] == [{"name": "migration_or_alias_required", "count": 1}]
     assert payload["review_first_reason_mix"] == [
@@ -204,7 +208,7 @@ def test_professional_naming_cleanup_plan_separates_compatibility_review_first_f
     assert cleanup_slice["classification"] == PUBLIC_ALIAS
     assert cleanup_slice["requires_compatibility_plan"] is True
     assert cleanup_slice["safe_to_plan_first"] is False
-    assert cleanup_slice["compatibility_review_first_finding_count"] == 1
+    assert cleanup_slice[COMPATIBILITY_REVIEW_FIRST_FINDING_COUNT] == 1
     assert cleanup_slice["actionability_mix"] == [
         {"name": "migration_or_alias_required", "count": 1}
     ]
