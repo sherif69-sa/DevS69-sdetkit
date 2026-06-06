@@ -450,26 +450,34 @@ repo-alignment-check: venv
 	@bash -lc '. .venv/bin/activate && python scripts/validate_enterprise_contracts.py'
 	@bash -lc '. .venv/bin/activate && pytest -q'
 
-phase1-baseline: install
+baseline-foundation: install
 	@bash -lc '. .venv/bin/activate && bash scripts/baseline_lane.sh'
+
+phase1-baseline: baseline-foundation
 
 baseline-status: venv
 	@bash -lc '. .venv/bin/activate && python scripts/baseline_status_report.py --format json --out build/baseline/baseline-status.json'
 
-phase1-next: venv
+baseline-next-action: venv
 	@bash -lc '. .venv/bin/activate && python scripts/baseline_next_actions.py --status-json build/baseline/baseline-status.json --format json --out build/baseline/baseline-next-actions.json'
+
+phase1-next: baseline-next-action
 
 baseline-ops-snapshot: venv
 	@bash -lc '. .venv/bin/activate && python scripts/baseline_build_ops_snapshot.py --format json'
 
-phase1-dashboard: venv
+baseline-dashboard: venv
 	@bash -lc '. .venv/bin/activate && python scripts/baseline_completion_dashboard.py --format json'
+
+phase1-dashboard: baseline-dashboard
 
 baseline-weekly-pack: venv
 	@bash -lc '. .venv/bin/activate && python scripts/baseline_weekly_report_pack.py --format json'
 
-phase1-control-loop: venv
+baseline-control-loop: venv
 	@bash -lc '. .venv/bin/activate && python scripts/baseline_control_loop_report.py --format json'
+
+phase1-control-loop: baseline-control-loop
 
 baseline-run-all: venv
 	@bash -lc '. .venv/bin/activate && python scripts/baseline_run_all.py --format json'
@@ -721,13 +729,13 @@ quality-contract-check: platform-readiness-quality-contract
 quality-contract-report: platform-readiness-quality-report
 quality-contract-run: platform-readiness-quality-run
 
-operations-baseline: phase1-baseline
+operations-baseline: baseline-foundation
 operations-status: baseline-status
-operations-next-action: phase1-next
+operations-next-action: baseline-next-action
 operations-snapshot: baseline-ops-snapshot
-operations-dashboard: phase1-dashboard
+operations-dashboard: baseline-dashboard
 operations-weekly-pack: baseline-weekly-pack
-operations-control-loop: phase1-control-loop
+operations-control-loop: baseline-control-loop
 operations-run-all: baseline-run-all
 operations-artifact-set: baseline-artifact-set
 operations-telemetry: baseline-telemetry

@@ -15,9 +15,13 @@ def _target_dependencies(target: str) -> list[str]:
 
 def test_operations_aliases_route_through_baseline_names() -> None:
     expected = {
+        "operations-baseline": ["baseline-foundation"],
         "operations-status": ["baseline-status"],
+        "operations-next-action": ["baseline-next-action"],
         "operations-snapshot": ["baseline-ops-snapshot"],
+        "operations-dashboard": ["baseline-dashboard"],
         "operations-weekly-pack": ["baseline-weekly-pack"],
+        "operations-control-loop": ["baseline-control-loop"],
         "operations-run-all": ["baseline-run-all"],
         "operations-artifact-set": ["baseline-artifact-set"],
         "operations-telemetry": ["baseline-telemetry"],
@@ -41,9 +45,13 @@ def test_operations_aliases_route_through_baseline_names() -> None:
 
 def test_baseline_targets_are_first_class_professional_targets() -> None:
     expected = {
+        "baseline-foundation": ["install"],
         "baseline-status": ["venv"],
+        "baseline-next-action": ["venv"],
         "baseline-ops-snapshot": ["venv"],
+        "baseline-dashboard": ["venv"],
         "baseline-weekly-pack": ["venv"],
+        "baseline-control-loop": ["venv"],
         "baseline-run-all": ["venv"],
         "baseline-artifact-set": ["venv"],
         "baseline-telemetry": ["venv"],
