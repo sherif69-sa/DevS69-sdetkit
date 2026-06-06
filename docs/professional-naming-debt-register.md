@@ -79,3 +79,20 @@ These are safer because they can improve visible professionalism without breakin
 - No generated artifact path moves.
 - No bulk file renames.
 - No historical report rewrite.
+
+## Public command surface progress
+
+The public Makefile surface now prefers professional names for baseline, operations,
+release-readiness, platform-readiness, adoption-readiness, and scale-readiness lanes.
+
+Compatibility aliases remain available for transition-era `phase1`, `phase2`, `phase3`,
+`phase5`, `phase6`, `phase-current`, `do-it`, `finish-signal`, `next-pass`, and
+`retire-plan` names where removal would break existing users or historical automation.
+
+Current sweep policy:
+
+- update active docs and operator contracts first
+- keep compatibility aliases tested
+- do not rewrite generated evidence for line count
+- do not change schema identifiers without a migration contract
+- do not rename historical closeout reports as part of public command sweeps

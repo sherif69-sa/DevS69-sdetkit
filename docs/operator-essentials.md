@@ -103,21 +103,21 @@ These commands are kept here for rollout contract visibility, not as the first-t
 - `make operations-status`
 - `make operations-next-action`
 - `make operations-complete`
-- `make phase2-start`
-- `make phase2-workflow`
-- `make phase2-status`
-- `make phase2-start-contract`
-- `make phase2-seed`
-- `make phase2-complete`
-- `make phase2-progress`
-- `make phase2-surface-clarity`
+- `make release-readiness-start`
+- `make release-readiness-workflow`
+- `make release-readiness-status`
+- `make release-readiness-start-contract`
+- `make release-readiness-seed`
+- `make release-readiness-complete`
+- `make release-readiness-progress`
+- `make release-readiness-surface-clarity`
 - `make quality-contract-check`
 - `make governance-contract-check`
 - `make ecosystem-contract-check`
-- `make phase6-start`
-- `make phase6-status`
-- `make phase6-progress`
-- `make phase6-complete`
+- `make scale-readiness-start`
+- `make scale-readiness-status`
+- `make scale-readiness-progress`
+- `make scale-readiness-complete`
 - `make metrics-contract-check`
 
 ## Expansion trigger rules

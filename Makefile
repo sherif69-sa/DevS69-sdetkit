@@ -583,11 +583,9 @@ release-readiness-progress: venv
 release-readiness-surface-clarity: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_operator_essentials_contract.py --format json'
 
-platform-readiness-dependency-radar: phase3-dependency-radar
-
-platform-readiness-quality-report: phase3-quality-report
-
 platform-readiness-quality-run: platform-readiness-quality-report
+
+platform-readiness-dependency-radar: phase3-dependency-radar
 
 phase3-dependency-radar: install
 	@bash -lc '. .venv/bin/activate && python scripts/platform_readiness_dependency_radar.py --policy-json config/dependency_slo_policy.json --out docs/artifacts/phase3-dependency-radar-$(DATE_TAG).json'
@@ -599,6 +597,8 @@ quality-baseline-summary-fixture: venv
 phase2-seed: release-readiness-seed-prerequisites
 platform-readiness-quality-contract: venv quality-baseline-summary-fixture
 	@bash -lc '. .venv/bin/activate && python scripts/check_baseline_summary_contract.py --summary build/baseline/baseline-summary.json --format json && python -m scripts.check_platform_readiness_quality_contract --summary build/baseline/baseline-summary.json --format json && python -m scripts.platform_readiness_persist_baseline_history --summary build/baseline/baseline-summary.json --format json && $(MAKE) phase3-dependency-radar'
+
+platform-readiness-quality-report: phase3-quality-report
 
 phase3-quality-report: platform-readiness-quality-contract
 	@bash -lc '. .venv/bin/activate && python -m scripts.build_platform_readiness_trend_delta --current build/baseline/baseline-summary.json --out-json build/phase3-quality/phase3-trend-delta.json --out-md build/phase3-quality/phase3-trend-delta.md --format json'
