@@ -101,7 +101,7 @@ def test_professional_naming_inventory_separates_actionable_prose_from_headings(
     assert payload["review_first_finding_count"] >= 1
 
 
-def test_professional_naming_inventory_marks_template_locked_docs_review_first(
+def test_professional_naming_inventory_marks_review_locked_docs_review_first(
     tmp_path: Path,
 ) -> None:
     docs = tmp_path / "docs" / "integrations-release-prioritization-completion.md"
@@ -116,4 +116,6 @@ def test_professional_naming_inventory_marks_template_locked_docs_review_first(
     assert payload["actionable_finding_count"] == 0
     assert payload["review_first_finding_count"] == 1
     assert payload["items"][0]["actionability"] == "review_first_context"
-    assert payload["items"][0]["actionability_reason"] == "template_locked_contract"
+    assert (
+        payload["items"][0]["actionability_reason"] == "review_locked_naming_governance_reference"
+    )

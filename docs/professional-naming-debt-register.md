@@ -104,3 +104,10 @@ quality-governance, operational-governance, ecosystem-readiness, and metrics-rea
 language in visible headings and navigation labels.
 
 Compatibility command names, generated artifact paths, and state-field names remain stable.
+
+## Inventory policy progress
+
+The professional naming inventory now treats naming-governance records,
+compatibility migration maps, and workflow consolidation contracts as review-locked
+references rather than plain prose cleanup. This keeps real operator-facing wording
+actionable while avoiding churn in compatibility evidence.
