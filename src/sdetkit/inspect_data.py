@@ -18,6 +18,22 @@ EXIT_OK = 0
 EXIT_FINDINGS = 2
 SUPPORTED_EXTENSIONS = {".csv", ".json"}
 SUPPORTED_CROSS_FILE_MODES = {"left_subset", "exact_match"}
+DEFAULT_EXCLUDED_DIRECTORY_PARTS = {
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".sdetkit",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "htmlcov",
+    "node_modules",
+}
 RULES_TEMPLATE: dict[str, Any] = {
     "files": {
         "orders.csv": {
@@ -435,6 +451,14 @@ def _recommendations(diagnostics: dict[str, int], has_record_ids: bool) -> list[
     return recs
 
 
+def _is_excluded_directory_scan_candidate(candidate: Path, *, root: Path) -> bool:
+    try:
+        parts = candidate.relative_to(root).parts
+    except ValueError:
+        parts = candidate.parts
+    return bool(DEFAULT_EXCLUDED_DIRECTORY_PARTS.intersection(parts))
+
+
 def _discover_supported_files(target: Path) -> tuple[list[Path], list[Path]]:
     if target.is_file():
         if target.suffix.lower() in SUPPORTED_EXTENSIONS:
@@ -443,8 +467,12 @@ def _discover_supported_files(target: Path) -> tuple[list[Path], list[Path]]:
 
     supported: list[Path] = []
     skipped: list[Path] = []
+    root = target.resolve()
     for candidate in sorted(target.rglob("*")):
         if not candidate.is_file():
+            continue
+        if _is_excluded_directory_scan_candidate(candidate.resolve(), root=root):
+            skipped.append(candidate)
             continue
         if candidate.suffix.lower() in SUPPORTED_EXTENSIONS:
             supported.append(candidate)

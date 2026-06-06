@@ -304,3 +304,34 @@ def test_inspect_requires_path_in_normal_mode() -> None:
     assert run.returncode == 2
     assert run.stdout == ""
     assert run.stderr == "inspect: missing input path (or use --rules-template)\n"
+
+
+def test_inspect_directory_scan_excludes_local_tool_caches(tmp_path: Path) -> None:
+    data = tmp_path / "dataset.json"
+    data.write_text(json.dumps([{"id": "A1", "value": "kept"}]), encoding="utf-8")
+
+    mypy_cache = tmp_path / ".mypy_cache" / "3.10"
+    mypy_cache.mkdir(parents=True)
+    (mypy_cache / "module.meta.json").write_text(
+        json.dumps({"id": "CACHE_ONLY", "value": "generated"}),
+        encoding="utf-8",
+    )
+
+    pycache = tmp_path / "__pycache__"
+    pycache.mkdir()
+    (pycache / "generated.json").write_text(
+        json.dumps({"id": "PYCACHE_ONLY", "value": "generated"}),
+        encoding="utf-8",
+    )
+
+    rc = inspect_data.main([str(tmp_path), "--format", "json", "--out-dir", str(tmp_path / "out")])
+
+    assert rc == 0
+    payload = json.loads((tmp_path / "out" / "inspect.json").read_text(encoding="utf-8"))
+    assert payload["summary"]["files_analyzed"] == 1
+    assert payload["summary"]["skipped_file_count"] >= 2
+    assert payload["summary"]["diagnostics"]["cross_file_mismatches"] == 0
+    analyzed_paths = [report["path"] for report in payload["file_reports"]]
+    assert analyzed_paths == [str(data)]
+    assert all(".mypy_cache" not in path for path in analyzed_paths)
+    assert all("__pycache__" not in path for path in analyzed_paths)

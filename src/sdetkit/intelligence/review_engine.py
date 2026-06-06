@@ -326,13 +326,20 @@ def build_contradiction_graph(
     detection: dict[str, bool] | None = None,
     doctor_kind: str = "doctor",
     inspect_kind: str = "inspect",
+    flag_repo_data_coexistence: bool = True,
 ) -> list[dict[str, Any]]:
     graph: list[dict[str, Any]] = []
     has_doctor_failure = any(str(f.get("kind", "")) == doctor_kind for f in findings)
     has_inspect_failure = any(str(f.get("kind", "")) == inspect_kind for f in findings)
     repo_like = bool((detection or {}).get("repo_like", False))
     data_like = bool((detection or {}).get("data_like", False))
-    if repo_like and data_like and not has_doctor_failure and not has_inspect_failure:
+    if (
+        flag_repo_data_coexistence
+        and repo_like
+        and data_like
+        and not has_doctor_failure
+        and not has_inspect_failure
+    ):
         graph.append(
             {
                 "id": "review:conflict:repo-and-data-coexist",
@@ -370,8 +377,13 @@ def build_contradiction_clusters(
     *,
     findings: list[dict[str, Any]],
     detection: dict[str, bool] | None = None,
+    flag_repo_data_coexistence: bool = True,
 ) -> dict[str, Any]:
-    flat = build_contradiction_graph(findings=findings, detection=detection)
+    flat = build_contradiction_graph(
+        findings=findings,
+        detection=detection,
+        flag_repo_data_coexistence=flag_repo_data_coexistence,
+    )
     findings_by_kind: dict[str, list[dict[str, Any]]] = {}
     for item in findings:
         kind = str(item.get("kind", "unknown"))
