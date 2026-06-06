@@ -516,14 +516,18 @@ baseline-completion-report: venv
 baseline-complete: install
 	@bash -lc '. .venv/bin/activate && bash scripts/baseline_lane.sh && python scripts/check_baseline_summary_contract.py --summary build/baseline/baseline-summary.json --format json --require-logs && python scripts/baseline_completion_gate.py --summary build/baseline/baseline-summary.json --format json'
 
-phase-current: venv
+operations-current-status: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase_sequential_executor.py --format text'
 
-phase-current-json: venv
+operations-current-status-json: venv
 	@bash -lc '. .venv/bin/activate && python scripts/phase_sequential_executor.py --format json'
 
-plan-status: phase-current-json
-	@bash -lc 'echo plan-status: use phase-current-json output as canonical status payload'
+phase-current: operations-current-status
+
+phase-current-json: operations-current-status-json
+
+plan-status: operations-current-status-json
+	@bash -lc 'echo plan-status: use operations-current-status-json output as canonical status payload'
 
 phase1-execute: baseline-workflow
 	@bash -lc 'echo phase1-execute: canonical phase1 workflow complete'
@@ -710,7 +714,7 @@ powerfuel-merge-ready: powerfuel-contract
 # Production workflow aliases. Keep legacy targets available for compatibility.
 .PHONY: quality-contract-check quality-contract-report quality-contract-run
 .PHONY: baseline-readiness-signal baseline-followup-pass baseline-run baseline-transition-plan baseline-release-readiness-gate baseline-completion-report
-.PHONY: operations-baseline operations-status operations-next-action operations-snapshot operations-dashboard operations-weekly-pack operations-control-loop operations-run-all operations-artifact-set operations-telemetry operations-readiness-signal operations-remediation-plan operations-blocker-register operations-run operations-core-run operations-workflow operations-flow-contract operations-quality-gate operations-executive-report operations-cleanup-plan operations-complete operations-finalize operations-current operations-current-json
+.PHONY: operations-baseline operations-status operations-next-action operations-snapshot operations-dashboard operations-weekly-pack operations-control-loop operations-run-all operations-artifact-set operations-telemetry operations-readiness-signal operations-remediation-plan operations-blocker-register operations-run operations-core-run operations-workflow operations-flow-contract operations-quality-gate operations-executive-report operations-cleanup-plan operations-complete operations-finalize operations-current operations-current-json operations-current-status operations-current-status-json
 .PHONY: governance-contract-check ecosystem-contract-check metrics-contract-check
 
 quality-contract-check: platform-readiness-quality-contract
@@ -739,8 +743,8 @@ operations-executive-report: baseline-executive-report
 operations-cleanup-plan: baseline-transition-plan
 operations-complete: baseline-complete
 operations-finalize: baseline-completion-report
-operations-current: phase-current
-operations-current-json: phase-current-json
+operations-current: operations-current-status
+operations-current-json: operations-current-status-json
 
 phase1-status: baseline-status
 governance-contract-check: operational-readiness-governance-contract
