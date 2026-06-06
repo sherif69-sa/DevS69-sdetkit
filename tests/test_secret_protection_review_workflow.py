@@ -47,7 +47,11 @@ def test_secret_protection_review_suppresses_empty_standalone_trackers() -> None
         "const shouldOpenStandaloneIssue = hasOpenSecretAlerts || hasBypassedSecretAlerts;" in text
     )
     assert "if (!shouldOpenStandaloneIssue)" in text
-    assert "No standalone secret protection review issue created" in text
+    assert (
+        "No standalone issue created: live secret scanning found no open alerts or bypassed alerts."
+        in text
+    )
+    assert "console.log(" not in text
 
     guard = text.index("if (!shouldOpenStandaloneIssue)")
     create_issue = text.index("await github.rest.issues.create({")
