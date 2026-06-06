@@ -191,8 +191,8 @@ nav:
       - License: license.md
   - Advanced:
       - Execution programs:
-          - Phase-by-phase execution plan: operations-execution-plan.md
-          - Phase execution one-by-one: operations-execution-guide.md
+          - Upgrade execution plan: operations-execution-plan.md
+          - Sequential execution guide: operations-execution-guide.md
           - Repo health dashboard: repo-health-dashboard.md
           - Business execution hub: business_execution/index.md
           - Business execution — program master plan: business_execution/00-program-master-plan.md

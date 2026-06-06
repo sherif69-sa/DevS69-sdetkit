@@ -1,6 +1,6 @@
 # Execution plan for major upgrades
 
-Run this plan in sequence and ship concrete outputs in every phase.
+Run this plan in sequence and ship concrete outputs in every readiness stage.
 
 ## Program guardrails
 
@@ -10,10 +10,10 @@ Run this plan in sequence and ship concrete outputs in every phase.
 
 ---
 
-## baseline — Build the baseline execution lane
+## Baseline readiness — Build the baseline evidence lane
 
 ### Mission
-Stand up a baseline lane that always produces machine-readable evidence and immediately flags environment/tooling drift.
+Stand up a baseline evidence lane that always produces machine-readable evidence and immediately flags environment/tooling drift.
 
 ### Do this
 - Lock environment contracts (Python/toolchain expectations).
@@ -22,7 +22,7 @@ Stand up a baseline lane that always produces machine-readable evidence and imme
 - Publish a weekly baseline report.
 
 ### Execute now
-1. Run the baseline lane:
+1. Run the baseline evidence lane:
    - `make operations-baseline`
    - `make operations-status`
    - `make operations-next-action`
@@ -82,7 +82,7 @@ Cut onboarding confusion while preserving advanced operational power.
 
 ---
 
-## Phase 3 — Expand the quality engine
+## Quality governance — Expand the quality engine
 
 ### Mission
 Upgrade checks into a stronger execution engine with better recommendations and richer evidence payloads.
@@ -113,7 +113,7 @@ Upgrade checks into a stronger execution engine with better recommendations and 
 
 ---
 
-## Phase 4 — Enforce enterprise governance
+## Operational governance — Enforce enterprise governance
 
 ### Mission
 Turn technical capability into enterprise-grade confidence with explicit governance and audit evidence.
@@ -144,7 +144,7 @@ Turn technical capability into enterprise-grade confidence with explicit governa
 
 ---
 
-## Phase 5 — Scale ecosystem integrations
+## Ecosystem readiness — Scale integrations
 
 ### Mission
 Scale integrations and extension surfaces without destabilizing core release-confidence guarantees.
@@ -175,7 +175,7 @@ Scale integrations and extension surfaces without destabilizing core release-con
 
 ---
 
-## Phase 6 — Operationalize metrics and commercialization
+## Metrics readiness — Operationalize metrics and commercialization
 
 ### Mission
 Convert technical progress into repeatable business outcomes and reporting-ready metrics for operators, buyers, and investors.
@@ -205,9 +205,9 @@ Convert technical progress into repeatable business outcomes and reporting-ready
 
 ---
 
-## Phase control loop (run every phase)
+## Readiness control loop (run every stage)
 
-Run the same control loop in every phase:
+Run the same control loop in every readiness stage:
 
 1. Plan: set targets, risks, and metrics.
 2. Execute: ship lane automation and deliverables.
