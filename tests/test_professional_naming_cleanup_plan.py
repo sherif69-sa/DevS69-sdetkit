@@ -169,3 +169,48 @@ def test_professional_naming_cleanup_plan_does_not_recommend_review_first_docs()
     assert payload["actionable_finding_count"] == 0
     assert payload["review_first_finding_count"] == 1
     assert payload["cleanup_slices"][0]["safe_to_plan_first"] is False
+
+
+def test_professional_naming_cleanup_plan_separates_compatibility_review_first_findings() -> None:
+    item = _item(
+        "src/sdetkit/cli.py",
+        "phase3",
+        PUBLIC_ALIAS,
+        actionability="migration_or_alias_required",
+    )
+    item["actionability_reason"] = "compatibility plan required before changing this surface"
+    inventory = {
+        "schema_version": INVENTORY_SCHEMA_VERSION,
+        "status": "review required",
+        "finding_count": 1,
+        "items": [item],
+    }
+
+    payload = build_professional_naming_cleanup_plan(inventory)
+
+    assert payload["actionable_finding_count"] == 0
+    assert payload["review_first_finding_count"] == 1
+    assert payload["compatibility_review_first_finding_count"] == 1
+    assert payload["recommended_first_slice"] is None
+    assert payload["actionability_mix"] == [{"name": "migration_or_alias_required", "count": 1}]
+    assert payload["review_first_reason_mix"] == [
+        {
+            "name": "compatibility plan required before changing this surface",
+            "count": 1,
+        }
+    ]
+
+    cleanup_slice = payload["cleanup_slices"][0]
+    assert cleanup_slice["classification"] == PUBLIC_ALIAS
+    assert cleanup_slice["requires_compatibility_plan"] is True
+    assert cleanup_slice["safe_to_plan_first"] is False
+    assert cleanup_slice["compatibility_review_first_finding_count"] == 1
+    assert cleanup_slice["actionability_mix"] == [
+        {"name": "migration_or_alias_required", "count": 1}
+    ]
+    assert cleanup_slice["review_first_reason_mix"] == [
+        {
+            "name": "compatibility plan required before changing this surface",
+            "count": 1,
+        }
+    ]
