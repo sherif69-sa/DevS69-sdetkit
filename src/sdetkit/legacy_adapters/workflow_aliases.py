@@ -68,7 +68,21 @@ def professional_canonical_command_for(command: str) -> str:
     return canonical
 
 
+_PHASE_MODULE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
+    ("sdetkit.phase1_", "sdetkit.baseline_"),
+    ("sdetkit.phase2_", "sdetkit.release_readiness_"),
+    ("sdetkit.phase3_", "sdetkit.platform_readiness_"),
+)
+
+
+def professional_canonical_module_for(module: str) -> str:
+    for legacy_prefix, replacement_prefix in _PHASE_MODULE_REPLACEMENTS:
+        if module.startswith(legacy_prefix):
+            return replacement_prefix + module.removeprefix(legacy_prefix)
+    return module
+
+
 CANONICAL_CLOSEOUT_COMMAND_MODULES: dict[str, str] = {
-    professional_canonical_command_for(command): module
+    professional_canonical_command_for(command): professional_canonical_module_for(module)
     for command, module in LEGACY_CLOSEOUT_COMMAND_MODULES.items()
 }

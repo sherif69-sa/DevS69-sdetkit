@@ -7,6 +7,7 @@ from sdetkit.legacy_adapters.workflow_aliases import (
     CANONICAL_CLOSEOUT_COMMAND_MODULES,
     LEGACY_CLOSEOUT_COMMAND_MODULES,
     professional_canonical_command_for,
+    professional_canonical_module_for,
 )
 
 
@@ -15,9 +16,13 @@ def test_professional_canonical_closeout_commands_preserve_modules() -> None:
     canonical = "release-readiness-hardening-completion-report"
 
     assert professional_canonical_command_for(legacy) == canonical
+    assert professional_canonical_module_for("sdetkit.phase2_hardening") == (
+        "sdetkit.release_readiness_hardening"
+    )
     assert LEGACY_CLOSEOUT_COMMAND_MODULES[legacy] == "sdetkit.phase2_hardening"
-    assert CANONICAL_CLOSEOUT_COMMAND_MODULES[canonical] == "sdetkit.phase2_hardening"
-    assert LEGACY_COMMAND_MODULES[legacy] == LEGACY_COMMAND_MODULES[canonical]
+    assert CANONICAL_CLOSEOUT_COMMAND_MODULES[canonical] == ("sdetkit.release_readiness_hardening")
+    assert LEGACY_COMMAND_MODULES[legacy] == "sdetkit.phase2_hardening"
+    assert LEGACY_COMMAND_MODULES[canonical] == "sdetkit.release_readiness_hardening"
 
 
 def test_professional_canonical_command_aliases_are_registered() -> None:
@@ -25,8 +30,14 @@ def test_professional_canonical_command_aliases_are_registered() -> None:
         "acceleration-completion-report": "sdetkit.acceleration",
         "scale-completion-report": "sdetkit.scale",
         "release-prioritization-completion-report": "sdetkit.release_prioritization",
+        "release-readiness-hardening-completion-report": ("sdetkit.release_readiness_hardening"),
+        "release-readiness-wrap-handoff-completion-report": (
+            "sdetkit.release_readiness_wrap_handoff"
+        ),
+        "platform-readiness-preplan-completion-report": ("sdetkit.platform_readiness_preplan"),
+        "platform-readiness-kickoff-completion-report": ("sdetkit.platform_readiness_kickoff"),
         "platform-readiness-wrap-publication-completion-report": (
-            "sdetkit.phase3_wrap_publication"
+            "sdetkit.platform_readiness_wrap_publication"
         ),
     }
 
