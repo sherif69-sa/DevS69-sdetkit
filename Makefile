@@ -709,12 +709,20 @@ powerfuel-merge-ready: powerfuel-contract
 
 # Production workflow aliases. Keep legacy targets available for compatibility.
 .PHONY: quality-contract-check quality-contract-report quality-contract-run
+.PHONY: baseline-readiness-signal baseline-followup-pass baseline-run baseline-transition-plan baseline-release-readiness-gate baseline-completion-report
 .PHONY: operations-baseline operations-status operations-next-action operations-snapshot operations-dashboard operations-weekly-pack operations-control-loop operations-run-all operations-artifact-set operations-telemetry operations-readiness-signal operations-remediation-plan operations-blocker-register operations-run operations-core-run operations-workflow operations-flow-contract operations-quality-gate operations-executive-report operations-cleanup-plan operations-complete operations-finalize operations-current operations-current-json
 .PHONY: governance-contract-check ecosystem-contract-check metrics-contract-check
 
 quality-contract-check: platform-readiness-quality-contract
 quality-contract-report: platform-readiness-quality-report
 quality-contract-run: platform-readiness-quality-run
+
+baseline-readiness-signal: phase1-finish-signal
+baseline-followup-pass: phase1-next-pass
+baseline-run: phase1-do-it
+baseline-transition-plan: phase1-retire-plan
+baseline-release-readiness-gate: phase1-gate-phase2
+baseline-completion-report: phase1-closeout
 
 operations-baseline: phase1-baseline
 operations-status: phase1-status
@@ -726,18 +734,18 @@ operations-control-loop: phase1-control-loop
 operations-run-all: phase1-run-all
 operations-artifact-set: phase1-artifact-set
 operations-telemetry: phase1-telemetry
-operations-readiness-signal: phase1-finish-signal
-operations-remediation-plan: phase1-next-pass
+operations-readiness-signal: baseline-readiness-signal
+operations-remediation-plan: baseline-followup-pass
 operations-blocker-register: phase1-blocker-register
-operations-run: phase1-do-it
+operations-run: baseline-run
 operations-core-run: phase1-execution-core
 operations-workflow: phase1-workflow
 operations-flow-contract: phase1-flow-contract
-operations-quality-gate: phase1-gate-phase2
+operations-quality-gate: baseline-release-readiness-gate
 operations-executive-report: phase1-executive-report
-operations-cleanup-plan: phase1-retire-plan
+operations-cleanup-plan: baseline-transition-plan
 operations-complete: phase1-complete
-operations-finalize: phase1-closeout
+operations-finalize: baseline-completion-report
 operations-current: phase-current
 operations-current-json: phase-current-json
 
