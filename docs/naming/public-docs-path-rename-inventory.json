@@ -1,0 +1,122 @@
+{
+  "records": [
+    {
+      "classification": "needs_review",
+      "first_heading": "# Continuous upgrade delivery workflow",
+      "path": "docs/integrations-continuous-upgrade-closeout-1.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Continuous upgrade delivery workflow",
+      "path": "docs/integrations-continuous-upgrade-closeout-10.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Continuous upgrade delivery workflow",
+      "path": "docs/integrations-continuous-upgrade-closeout-11.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Continuous upgrade delivery workflow",
+      "path": "docs/integrations-continuous-upgrade-closeout-2.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Continuous upgrade delivery workflow",
+      "path": "docs/integrations-continuous-upgrade-closeout-3.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Continuous upgrade delivery workflow",
+      "path": "docs/integrations-continuous-upgrade-closeout-4.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Continuous upgrade delivery workflow",
+      "path": "docs/integrations-continuous-upgrade-closeout-5.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Continuous upgrade delivery workflow",
+      "path": "docs/integrations-continuous-upgrade-closeout-6.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Continuous upgrade delivery workflow",
+      "path": "docs/integrations-continuous-upgrade-closeout-7.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Continuous upgrade delivery workflow",
+      "path": "docs/integrations-continuous-upgrade-closeout-8.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Continuous upgrade delivery workflow",
+      "path": "docs/integrations-continuous-upgrade-closeout-9.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Optimization foundation workflow",
+      "path": "docs/integrations-optimization-closeout-foundation.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    },
+    {
+      "classification": "needs_review",
+      "first_heading": "# Scale upgrade workflow",
+      "path": "docs/integrations-scale-upgrade-closeout.md",
+      "recommended_action": "rename_with_redirect_or_preserve_as_legacy_reference",
+      "tokens": [
+        "closeout"
+      ]
+    }
+  ],
+  "schema_version": "sdetkit.public-docs-path-rename-inventory.v1"
+}
