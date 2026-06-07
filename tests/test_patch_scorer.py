@@ -306,3 +306,96 @@ def test_patch_scorer_blocks_authority_expanding_safetygate_evidence() -> None:
         item["code"] == "SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION" and item["blocking"] is True
         for item in payload["risk_flags"]
     )
+
+
+def test_patch_scorer_classifies_operator_missteps_without_authority() -> None:
+    payload = score_patch(
+        remediation_plan=_safe_plan(),
+        proposed_patch={
+            "patch_id": "format-patch",
+            "changed_files": ["src/sdetkit/example.py"],
+            "operator_missteps": [
+                {
+                    "code": "wrong_helper_name",
+                    "message": "Used a helper name that does not exist in the current test file.",
+                },
+                {
+                    "code": "unsupported_helper_signature",
+                    "message": "Called a local helper with an unsupported keyword argument.",
+                },
+            ],
+        },
+        pattern_insights=_matching_safe_insights(),
+    )
+
+    assert payload["decision"]["status"] == "candidate_for_protected_verification"
+    assert payload["decision"]["automation_allowed"] is False
+    assert payload["score"] == 100
+    assert payload["step_error_taxonomy"]["primary_category"] == "wrong_helper_name"
+    assert payload["step_error_taxonomy"]["observed_categories"] == [
+        "wrong_helper_name",
+        "unsupported_helper_signature",
+    ]
+    assert {
+        flag["step_error_category"]
+        for flag in payload["risk_flags"]
+        if flag.get("source") == "operator_misstep"
+    } == {"wrong_helper_name", "unsupported_helper_signature"}
+    assert all(
+        flag["blocking"] is False
+        for flag in payload["risk_flags"]
+        if flag.get("source") == "operator_misstep"
+    )
+
+
+def test_patch_scorer_blocks_declared_public_cli_drift_misstep() -> None:
+    payload = score_patch(
+        remediation_plan=_safe_plan(),
+        proposed_patch={
+            "patch_id": "format-patch",
+            "changed_files": ["src/sdetkit/example.py"],
+            "operator_missteps": [
+                {
+                    "code": "accidental_public_cli_drift",
+                    "message": "A broad replacement changed a public CLI default.",
+                    "blocking": True,
+                    "penalty": 100,
+                    "files": ["src/sdetkit/pr_quality_action_report.py"],
+                }
+            ],
+        },
+        pattern_insights=_matching_safe_insights(),
+    )
+
+    assert payload["score"] == 0
+    assert payload["decision"]["status"] == "blocked_review_first"
+    assert payload["decision"]["automation_allowed"] is False
+    assert payload["step_error_taxonomy"]["primary_category"] == "accidental_public_cli_drift"
+    assert payload["step_error_taxonomy"]["observed_categories"] == ["accidental_public_cli_drift"]
+    assert any(
+        flag["code"] == "ACCIDENTAL_PUBLIC_CLI_DRIFT"
+        and flag["blocking"] is True
+        and flag["files"] == ["src/sdetkit/pr_quality_action_report.py"]
+        for flag in payload["risk_flags"]
+    )
+
+
+def test_patch_scorer_maps_safetygate_authority_violation_to_step_error_taxonomy() -> None:
+    insights = _safetygate_safe_insights()
+    insights["safety_gate_evidence"]["decision_boundary"]["merge_authorized"] = True
+
+    payload = score_patch(
+        remediation_plan=_safe_plan(),
+        proposed_patch={
+            "patch_id": "format-patch",
+            "changed_files": ["src/sdetkit/example.py"],
+        },
+        pattern_insights=insights,
+    )
+
+    assert payload["decision"]["status"] == "blocked_review_first"
+    assert "authority_expansion_attempt" in payload["step_error_taxonomy"]["observed_categories"]
+    assert any(
+        flag["code"] == "SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION" and flag["blocking"] is True
+        for flag in payload["risk_flags"]
+    )
