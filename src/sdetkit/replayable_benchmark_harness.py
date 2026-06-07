@@ -137,6 +137,95 @@ def _read_json_object(path: Path) -> JsonObject:
     return payload
 
 
+def _scenario_safety_gate_evidence(pattern_insights: Mapping[str, Any]) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+    payload = _as_dict(pattern_insights.get("safety_gate_evidence"))
+    if not payload:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "trajectory.safety_gate",
+            "record_count": 0,
+            "review_first_count": 0,
+            "safe_fix_allowed_count": 0,
+            "reporting_only_count": 0,
+            "report_paths": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = _as_dict(payload.get("decision_boundary"))
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    if expanded:
+        raise ValueError("SafetyGate benchmark evidence expands authority: " + ", ".join(expanded))
+
+    return {
+        "collection_status": _string(payload.get("collection_status")) or "collected",
+        "status": _string(payload.get("status")) or "safety_gate_evidence_observed",
+        "source": _string(payload.get("source")) or "trajectory.safety_gate",
+        "record_count": _int(payload.get("record_count")),
+        "review_first_count": _int(payload.get("review_first_count")),
+        "safe_fix_allowed_count": _int(payload.get("safe_fix_allowed_count")),
+        "reporting_only_count": _int(payload.get("reporting_only_count")),
+        "report_paths": [
+            _string(item) for item in _as_list(payload.get("report_paths")) if _string(item)
+        ],
+        "decision_boundary": denied,
+    }
+
+
+def _aggregate_safety_gate_evidence(results: list[JsonObject]) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+    rows = [
+        _as_dict(result.get("safety_gate_evidence"))
+        for result in results
+        if _string(_as_dict(result.get("safety_gate_evidence")).get("collection_status"))
+        == "collected"
+    ]
+    if not rows:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "trajectory.safety_gate",
+            "scenario_count": 0,
+            "record_count": 0,
+            "review_first_count": 0,
+            "safe_fix_allowed_count": 0,
+            "reporting_only_count": 0,
+            "report_paths": [],
+            "decision_boundary": denied,
+        }
+
+    return {
+        "collection_status": "collected",
+        "status": "safety_gate_evidence_replayed",
+        "source": "trajectory.safety_gate",
+        "scenario_count": len(rows),
+        "record_count": sum(_int(row.get("record_count")) for row in rows),
+        "review_first_count": sum(_int(row.get("review_first_count")) for row in rows),
+        "safe_fix_allowed_count": sum(_int(row.get("safe_fix_allowed_count")) for row in rows),
+        "reporting_only_count": sum(_int(row.get("reporting_only_count")) for row in rows),
+        "report_paths": sorted(
+            {
+                _string(path)
+                for row in rows
+                for path in _as_list(row.get("report_paths"))
+                if _string(path)
+            }
+        ),
+        "decision_boundary": denied,
+    }
+
+
 def load_scenarios(paths: list[Path]) -> list[JsonObject]:
     scenarios: list[JsonObject] = []
     identifiers: set[str] = set()
@@ -247,6 +336,7 @@ def evaluate_scenario(
     remediation_plan = _as_dict(scenario.get("remediation_plan"))
     proposed_patch = _as_dict(scenario.get("proposed_patch"))
     pattern_insights = _as_dict(scenario.get("pattern_insights"))
+    safety_gate_evidence = _scenario_safety_gate_evidence(pattern_insights)
     declared_verification_evidence = _as_dict(scenario.get("verification_evidence"))
     verification_evidence = (
         dict(verification_evidence_override)
@@ -393,6 +483,7 @@ def evaluate_scenario(
         "checks": checks,
         "patch_score": patch_score,
         "protected_verifier_result": verifier_result,
+        "safety_gate_evidence": safety_gate_evidence,
     }
 
 
@@ -544,6 +635,7 @@ def _type_rate(results: list[JsonObject], scenario_type: str) -> float:
 
 def build_benchmark_report(scenarios: list[Mapping[str, Any]]) -> JsonObject:
     results = [evaluate_scenario(scenario) for scenario in scenarios]
+    safety_gate_evidence = _aggregate_safety_gate_evidence(results)
     type_counts = Counter(_string(item.get("scenario_type")) for item in results)
     required_present = all(type_counts.get(item, 0) >= 1 for item in REQUIRED_SCENARIO_TYPES)
     required_passed = all(
@@ -606,6 +698,7 @@ def build_benchmark_report(scenarios: list[Mapping[str, Any]]) -> JsonObject:
         "passed_count": passed_count,
         "failed_count": len(results) - passed_count,
         "scenario_type_counts": dict(sorted(type_counts.items())),
+        "safety_gate_evidence": safety_gate_evidence,
         "required_contract": {
             "required_scenario_types": list(REQUIRED_SCENARIO_TYPES),
             "all_required_present": required_present,
@@ -1313,6 +1406,8 @@ def render_markdown(report: Mapping[str, Any]) -> str:
     required = _as_dict(report.get("required_contract"))
     boundary = _as_dict(report.get("safety_boundary"))
     live_evidence = _as_dict(report.get("live_evidence"))
+    safety_gate = _as_dict(report.get("safety_gate_evidence"))
+    safety_boundary = _as_dict(safety_gate.get("decision_boundary"))
     scenarios = [_as_dict(item) for item in _as_list(report.get("scenarios"))]
     report_mode = _string(report.get("report_mode") or "fixture_declared")
     is_live = report_mode == LIVE_EVIDENCE_SOURCE
@@ -1494,6 +1589,32 @@ def render_markdown(report: Mapping[str, Any]) -> str:
 
     lines.extend(
         [
+            "## SafetyGate evidence replay",
+            "",
+            f"- Collection status: `{_string(safety_gate.get('collection_status'))}`",
+            f"- Status: `{_string(safety_gate.get('status'))}`",
+            f"- Scenarios with evidence: `{_int(safety_gate.get('scenario_count'))}`",
+            f"- Records: `{_int(safety_gate.get('record_count'))}`",
+            f"- Safe-fix allowed records: `{_int(safety_gate.get('safe_fix_allowed_count'))}`",
+            f"- Review-first records: `{_int(safety_gate.get('review_first_count'))}`",
+            f"- Reporting-only records: `{_int(safety_gate.get('reporting_only_count'))}`",
+            (
+                "- Automation allowed by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('automation_allowed'))).lower()}`"
+            ),
+            (
+                "- Patch application allowed by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence proven by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('semantic_equivalence_proven'))).lower()}`"
+            ),
+            "",
             "## Safety boundary",
             "",
             f"- Execution model: `{_string(boundary.get('execution_model'))}`",
