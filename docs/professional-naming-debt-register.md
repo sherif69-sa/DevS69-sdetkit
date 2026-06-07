@@ -111,3 +111,9 @@ The professional naming inventory now treats naming-governance records,
 compatibility migration maps, and workflow consolidation contracts as review-locked
 references rather than plain prose cleanup. This keeps real operator-facing wording
 actionable while avoiding churn in compatibility evidence.
+
+## Cleanup plan review-lock progress
+
+The professional naming cleanup plan now reports review-locked naming governance
+references separately from generic review-first findings. This keeps governance
+evidence visible without recommending it as a direct cleanup slice.

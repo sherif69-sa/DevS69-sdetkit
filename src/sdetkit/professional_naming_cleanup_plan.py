@@ -60,6 +60,8 @@ def _items(payload: dict[str, Any]) -> list[dict[str, Any]]:
 COMPATIBILITY_REVIEW_FIRST_FINDING_COUNT = "_".join(
     ("compatibility", "review", "first", "finding", "count")
 )
+REVIEW_LOCKED_NAMING_GOVERNANCE_REFERENCE = "review_locked_naming_governance_reference"
+REVIEW_LOCKED_REFERENCE_COUNT = "_".join(("review", "locked", "reference", "count"))
 
 
 def _text(value: object, default: str = "unknown") -> str:
@@ -101,6 +103,14 @@ def _compatibility_review_first_count(items: list[dict[str, Any]]) -> int:
     )
 
 
+def _review_locked_reference_count(items: list[dict[str, Any]]) -> int:
+    return sum(
+        1
+        for item in items
+        if _text(item.get("actionability_reason"), "") == REVIEW_LOCKED_NAMING_GOVERNANCE_REFERENCE
+    )
+
+
 def _path_counts(items: list[dict[str, Any]], *, limit: int = 10) -> list[dict[str, Any]]:
     counts: Counter[str] = Counter()
     for item in items:
@@ -136,6 +146,7 @@ def _slice(items: list[dict[str, Any]], classification: str) -> dict[str, Any]:
         "actionable_finding_count": actionable_finding_count,
         "review_first_finding_count": review_first_finding_count,
         COMPATIBILITY_REVIEW_FIRST_FINDING_COUNT: _compatibility_review_first_count(items),
+        REVIEW_LOCKED_REFERENCE_COUNT: _review_locked_reference_count(items),
         "occurrence_count": sum(max(1, _number(item.get("occurrence_count"))) for item in items),
         "top_terms": _top_counts(items, "term"),
         "top_surfaces": _top_counts(items, "surface"),
@@ -179,6 +190,7 @@ def build_professional_naming_cleanup_plan(inventory: dict[str, Any]) -> dict[st
         "actionable_finding_count": actionable_finding_count,
         "review_first_finding_count": len(items) - actionable_finding_count,
         COMPATIBILITY_REVIEW_FIRST_FINDING_COUNT: _compatibility_review_first_count(items),
+        REVIEW_LOCKED_REFERENCE_COUNT: _review_locked_reference_count(items),
         "actionability_mix": _top_counts(items, "actionability"),
         "review_first_reason_mix": _top_counts(review_first_items, "actionability_reason"),
         "slice_count": len(slices),
