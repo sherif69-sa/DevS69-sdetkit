@@ -1,9 +1,29 @@
-"""Compatibility wrapper for historical `sdetkit.phase_boost` imports."""
+"""Compatibility wrapper for legacy module name.
+
+Use ``sdetkit.readiness_boost`` instead of ``sdetkit.phase_boost``.
+"""
 
 from __future__ import annotations
 
 from importlib import import_module as _import_module
+from typing import Any as _Any
 
-_IMPL = _import_module("sdetkit.phases.phase_boost")
-__all__ = getattr(_IMPL, "__all__", [name for name in dir(_IMPL) if not name.startswith("__")])
-globals().update({name: getattr(_IMPL, name) for name in __all__})
+_COMPAT_MODULE_NAME = "sdetkit.readiness_boost"
+_compat_module = _import_module(_COMPAT_MODULE_NAME)
+
+
+def __getattr__(name: str) -> _Any:
+    return getattr(_compat_module, name)
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(dir(_compat_module)))
+
+
+for _name in dir(_compat_module):
+    if not (_name.startswith("__") and _name.endswith("__")):
+        globals().setdefault(_name, getattr(_compat_module, _name))
+
+__all__ = [
+    _name for _name in dir(_compat_module) if not (_name.startswith("__") and _name.endswith("__"))
+]

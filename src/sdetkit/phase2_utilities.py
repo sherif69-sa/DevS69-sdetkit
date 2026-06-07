@@ -1,21 +1,29 @@
-"""Compatibility wrapper for historical `sdetkit.phase2_utilities` imports."""
+"""Compatibility wrapper for legacy module name.
+
+Use ``sdetkit.release_readiness_utilities`` instead of ``sdetkit.phase2_utilities``.
+"""
 
 from __future__ import annotations
 
-from ._compat_alias import alias_dir as _alias_dir
-from ._compat_alias import alias_getattr as _alias_getattr
-from ._compat_alias import export_module as _export_module
-from ._compat_alias import install_module_alias as _install_module_alias
+from importlib import import_module as _import_module
+from typing import Any as _Any
 
-_TARGET = _export_module("sdetkit.release_readiness_utilities", globals())
+_COMPAT_MODULE_NAME = "sdetkit.release_readiness_utilities"
+_compat_module = _import_module(_COMPAT_MODULE_NAME)
 
 
-def __getattr__(name: str) -> object:
-    return _alias_getattr(_TARGET, name)
+def __getattr__(name: str) -> _Any:
+    return getattr(_compat_module, name)
 
 
 def __dir__() -> list[str]:
-    return _alias_dir(globals(), _TARGET)
+    return sorted(set(globals()) | set(dir(_compat_module)))
 
 
-_install_module_alias(__name__, _TARGET)
+for _name in dir(_compat_module):
+    if not (_name.startswith("__") and _name.endswith("__")):
+        globals().setdefault(_name, getattr(_compat_module, _name))
+
+__all__ = [
+    _name for _name in dir(_compat_module) if not (_name.startswith("__") and _name.endswith("__"))
+]

@@ -1,64 +1,29 @@
+"""Compatibility wrapper for legacy module name.
+
+Use ``sdetkit.phases.readiness_boost`` instead of ``sdetkit.phases.phase_boost``.
+"""
+
 from __future__ import annotations
 
-import argparse
-import json
-import sys
-from datetime import date
-from pathlib import Path
+from importlib import import_module as _import_module
+from typing import Any as _Any
+
+_COMPAT_MODULE_NAME = "sdetkit.phases.readiness_boost"
+_compat_module = _import_module(_COMPAT_MODULE_NAME)
 
 
-def build_phase_boost_payload(repository: str, start_date: str) -> dict:
-    return {
-        "repository": repository,
-        "start_date": start_date,
-        "duration_window": 90,
-        "goal": "S-class production readiness",
-        "phases": [
-            {"phase": "Phase 1 - Baseline hardening", "days": 30},
-            {"phase": "Phase 2 - Scale and automation", "days": 30},
-            {"phase": "Phase 3 - Release excellence", "days": 30},
-        ],
-    }
+def __getattr__(name: str) -> _Any:
+    return getattr(_compat_module, name)
 
 
-def _render_markdown(payload: dict) -> str:
-    lines = [f"# Phase boost plan for {payload['repository']}", "", payload["goal"], ""]
-    for p in payload["phases"]:
-        lines.append(f"- {p['phase']} ({p['days']} days)")
-    return "\n".join(lines) + "\n"
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(dir(_compat_module)))
 
 
-def _parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="sdetkit phase-boost")
-    p.add_argument("--repo-name", default="repo")
-    p.add_argument("--start-date", default=date.today().isoformat())
-    p.add_argument("--output", default=None)
-    p.add_argument("--json-output", default=None)
-    return p
+for _name in dir(_compat_module):
+    if not (_name.startswith("__") and _name.endswith("__")):
+        globals().setdefault(_name, getattr(_compat_module, _name))
 
-
-def _is_valid_iso_date(value: str) -> bool:
-    try:
-        parsed = date.fromisoformat(value)
-    except ValueError:
-        return False
-    return parsed.isoformat() == value
-
-
-def main(argv: list[str] | None = None) -> int:
-    ns = _parser().parse_args(argv)
-    if not _is_valid_iso_date(ns.start_date):
-        print(
-            "error: --start-date must be a valid ISO date in YYYY-MM-DD format.",
-            file=sys.stderr,
-        )
-        return 2
-
-    payload = build_phase_boost_payload(ns.repo_name, ns.start_date)
-    md = _render_markdown(payload)
-    print(md, end="")
-    if ns.output:
-        Path(ns.output).write_text(md, encoding="utf-8")
-    if ns.json_output:
-        Path(ns.json_output).write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    return 0
+__all__ = [
+    _name for _name in dir(_compat_module) if not (_name.startswith("__") and _name.endswith("__"))
+]
