@@ -429,6 +429,95 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     }
 
 
+def _format_named_items(items: object) -> list[str]:
+    if not isinstance(items, list) or not items:
+        return ["- none detected"]
+
+    lines: list[str] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name", "unknown"))
+        confidence = item.get("confidence")
+        suffix = f" ({confidence})" if confidence else ""
+        lines.append(f"- {name}{suffix}")
+    return lines or ["- none detected"]
+
+
+def _format_proof_commands(items: object) -> list[str]:
+    if not isinstance(items, list) or not items:
+        return ["- none recommended"]
+
+    lines: list[str] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        command = str(item.get("command", "")).strip()
+        if not command:
+            continue
+        surface = str(item.get("surface", "unknown"))
+        purpose = str(item.get("purpose", "unknown"))
+        auto_run = str(item.get("auto_run_allowed", False)).lower()
+        lines.append(
+            f"- `{command}` — surface={surface}; purpose={purpose}; auto_run_allowed={auto_run}"
+        )
+    return lines or ["- none recommended"]
+
+
+def render_adoption_surface_report(payload: dict[str, Any]) -> str:
+    identity = payload.get("repo_identity")
+    repo_identity = identity if isinstance(identity, dict) else {}
+    operator_summary = payload.get("operator_summary")
+    summary = operator_summary if isinstance(operator_summary, dict) else {}
+
+    lines = [
+        "# SDETKit adoption readiness report",
+        "",
+        "## Repository",
+        f"- name: {repo_identity.get('name', 'unknown')}",
+        f"- git_detected: {str(repo_identity.get('git_detected', False)).lower()}",
+        f"- is_current_sdetkit_repo: {str(repo_identity.get('is_current_sdetkit_repo', False)).lower()}",
+        f"- remote_url: {repo_identity.get('remote_url', '')}",
+        "",
+        "## Detected languages",
+        *_format_named_items(payload.get("detected_languages")),
+        "",
+        "## Package managers",
+        *_format_named_items(payload.get("package_managers")),
+        "",
+        "## Test runners",
+        *_format_named_items(payload.get("test_runners")),
+        "",
+        "## CI systems",
+        *_format_named_items(payload.get("ci_systems")),
+        "",
+        "## Security tools",
+        *_format_named_items(payload.get("security_tools")),
+        "",
+        "## Recommended proof commands",
+        *_format_proof_commands(payload.get("recommended_proof_commands")),
+        "",
+        "## Review-first unknowns",
+        *(
+            [f"- {item}" for item in payload.get("review_first_unknowns", [])]
+            if payload.get("review_first_unknowns")
+            else ["- none"]
+        ),
+        "",
+        "## Operator summary",
+        f"- status: {summary.get('status', 'unknown')}",
+        f"- next_action: {summary.get('next_action', '')}",
+        "",
+        "## Authority boundary",
+        f"- automation_allowed: {str(payload.get('automation_allowed', True)).lower()}",
+        f"- patch_application_allowed: {str(payload.get('patch_application_allowed', True)).lower()}",
+        f"- merge_authorized: {str(payload.get('merge_authorized', True)).lower()}",
+        f"- semantic_equivalence_proven: {str(payload.get('semantic_equivalence_proven', True)).lower()}",
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def write_adoption_surface_artifact(
     *,
     repo_root: str | Path = ".",
@@ -489,13 +578,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--out", default="build/sdetkit/adoption-surface.json")
-    parser.add_argument("--format", choices=["json", "text"], default="json")
+    parser.add_argument("--format", choices=["json", "text", "report"], default="json")
     ns = parser.parse_args(list(argv) if argv is not None else None)
 
     summary = write_adoption_surface_artifact(repo_root=ns.root, out=ns.out)
 
     if ns.format == "json":
         sys.stdout.write(json.dumps(summary, indent=2, sort_keys=True) + "\n")
+    elif ns.format == "report":
+        payload = json.loads(Path(summary["adoption_surface_json"]).read_text(encoding="utf-8"))
+        sys.stdout.write(render_adoption_surface_report(payload) + "\n")
     else:
         sys.stdout.write(f"adoption_surface_json={summary['adoption_surface_json']}\n")
         sys.stdout.write(f"automation_allowed={str(summary['automation_allowed']).lower()}\n")
