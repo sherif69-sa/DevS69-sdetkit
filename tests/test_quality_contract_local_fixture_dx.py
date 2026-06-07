@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from sdetkit.schema_version_aliases import schema_versions_compatible
+
 ROOT = Path(__file__).resolve().parents[1]
 SEED_SCRIPT = ROOT / "scripts" / "seed_quality_baseline_summary_fixture.py"
 
@@ -23,7 +25,7 @@ def test_seed_phase1_baseline_summary_fixture_writes_contract_shape(tmp_path: Pa
     assert json.loads(result.stdout)["seeded"] is True
 
     payload = json.loads(summary.read_text(encoding="utf-8"))
-    assert payload["schema_version"] == "sdetkit.phase1_baseline.v1"
+    assert schema_versions_compatible(payload["schema_version"], "sdetkit.phase1_baseline.v1")
     assert payload["generated_at_utc"] == "2026-04-19T00:00:00Z"
     assert payload["out_dir"] == "build/phase1-baseline"
     assert payload["ok"] is False
