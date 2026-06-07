@@ -1,13 +1,13 @@
-# Big-Brain Toolkit progress tracker
+# Adaptive Intelligence Toolkit progress tracker
 
-This tracker keeps the Big-Brain Toolkit roadmap measurable after every follow-up PR. It is the quick answer for: **how much did we achieve, what changed in the latest pass, what should the next PR do, and what follow-ups must stay on track?**
+This tracker keeps the Adaptive Intelligence Toolkit roadmap measurable after every follow-up PR. It is the quick answer for: **how much did we achieve, what changed in the latest pass, what should the next PR do, and what follow-ups must stay on track?**
 
 ## Current progress snapshot
 
 | Scope | Completed | Total | Progress | Status |
 | --- | ---: | ---: | ---: | --- |
 | Immediate backlog | 8 | 8 | 100% | Immediate backlog complete; continue into Operational readiness/5 follow-ups. |
-| Baseline readiness — Externalize the big-brain database | 4 | 4 | 100% | Built-in scenarios are data-backed and schema validated. |
+| Baseline readiness — Externalize the adaptive intelligence database | 4 | 4 | 100% | Built-in scenarios are data-backed and schema validated. |
 | Release readiness — Close the learning loop | 3 | 3 | 100% | Learning records, summaries, promotion/exampletion, and calibration are active. |
 | Platform readiness — Trust-grade operator experience | 3 | 3 | 100% | Operator brief, PR comment mode, and example gallery are complete. |
 | Operational readiness — Safe remediation expansion | 4 | 4 | 100% | Safe-fix, assisted patch-plan, fix-audit records, and proof enforcement are in place. |
@@ -71,7 +71,7 @@ The latest pass finalized the adaptive next wave by adding anonymized learning i
 
 ## Operating rule for future updates
 
-Every Big-Brain follow-up PR should update this file with:
+Every Adaptive Intelligence follow-up PR should update this file with:
 
 1. progress percentage after the PR,
 2. what was completed in that pass,

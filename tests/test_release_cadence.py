@@ -30,7 +30,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/top-10-github-strategy.md").write_text(
         "- ** — Release cadence setup:** lock weekly release rhythm and changelog publication checklist.\n"
-        "- ** — Demo asset #1:** produce/publish `doctor` workflow short video or GIF.\n",
+        "- ** — Example asset #1:** produce/publish `doctor` workflow short video or GIF.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-release-cadence.md").write_text(
@@ -57,8 +57,8 @@ def _seed_repo(root: Path) -> None:
                 "#  delivery board",
                 "- [ ]  baseline metrics snapshot emitted",
                 "- [ ]  release cadence checklist drafted",
-                "- [ ]  demo asset plan (doctor) assigned",
-                "- [ ]  demo asset plan (repo audit) assigned",
+                "- [ ]  example asset plan (doctor) assigned",
+                "- [ ]  example asset plan (repo audit) assigned",
                 "- [ ]  weekly review preparation checklist ready",
             ]
         )

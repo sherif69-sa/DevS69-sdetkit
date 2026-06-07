@@ -30,7 +30,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/top-10-github-strategy.md").write_text(
         "- ** — Experiment lane activation:** seed controlled experiments from  distribution misses and KPI deltas.\n"
-        "- ** — Distribution batch #1:** publish coordinated posts linking demo assets to docs.\n",
+        "- ** — Distribution batch #1:** publish coordinated posts linking example assets to docs.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-experiment-lane.md").write_text(

@@ -42,7 +42,7 @@ def test_wave7_scripts_use_professional_followup_and_readiness_wording() -> None
     assert "missing follow-up pass and control-loop artifacts" in blocker_text
     assert "missing readiness signal or artifact-set payload" in gate_text
 
-    assert "next-pass card for Phase 1 remediation" not in next_pass_text
+    assert "next-pass card for Baseline readiness remediation" not in next_pass_text
     assert "missing next-pass and control-loop artifacts" not in blocker_text
     assert f"missing {_legacy_finish_signal()} or artifact-set payload" not in gate_text
 

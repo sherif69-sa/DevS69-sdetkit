@@ -30,10 +30,10 @@ def test_execution_plan_uses_professional_stage_headings() -> None:
     ]
 
     banned = [
-        "## Phase 3 — Expand the quality engine",
-        "## Phase 4 — Enforce enterprise governance",
-        "## Phase 5 — Scale ecosystem integrations",
-        "## Phase 6 — Operationalize metrics and commercialization",
+        "## Platform readiness — Expand the quality engine",
+        "## Operational readiness — Enforce enterprise governance",
+        "## Adoption readiness — Scale ecosystem integrations",
+        "## Scale readiness — Operationalize metrics and commercialization",
         "## Phase control loop (run every phase)",
     ]
 

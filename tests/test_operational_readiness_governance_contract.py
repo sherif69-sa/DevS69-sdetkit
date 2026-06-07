@@ -399,7 +399,7 @@ def test_phase4_drift_alerts_markdown_emitted(tmp_path: Path, monkeypatch) -> No
     )
     assert md_path.exists()
     text = md_path.read_text(encoding="utf-8")
-    assert "# Phase 4 governance drift alerts" in text
+    assert "# Operational readiness governance drift alerts" in text
     assert "drift_threshold" in text
 
 

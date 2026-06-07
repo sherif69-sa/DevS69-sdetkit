@@ -14,9 +14,9 @@ def build_phase_boost_payload(repository: str, start_date: str) -> dict:
         "duration_window": 90,
         "goal": "S-class production readiness",
         "phases": [
-            {"phase": "Phase 1 - Baseline hardening", "days": 30},
-            {"phase": "Phase 2 - Scale and automation", "days": 30},
-            {"phase": "Phase 3 - Release excellence", "days": 30},
+            {"phase": "Baseline readiness - Baseline hardening", "days": 30},
+            {"phase": "Release readiness - Scale and automation", "days": 30},
+            {"phase": "Platform readiness - Release excellence", "days": 30},
         ],
     }
 

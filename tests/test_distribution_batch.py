@@ -29,7 +29,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- ** — Distribution batch #1:** publish coordinated posts linking demo assets to docs.\n"
+        "- ** — Distribution batch #1:** publish coordinated posts linking example assets to docs.\n"
         "- ** — Playbook post #1:** publish Repo Reliability Playbook article #1.\n",
         encoding="utf-8",
     )

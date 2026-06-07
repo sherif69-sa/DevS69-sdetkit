@@ -1,6 +1,6 @@
 # Adaptive product proof gallery
 
-Use this gallery when you want a quick, reviewer-friendly picture of what the Big-Brain adaptive lane should show in pull requests and release reviews.
+Use this gallery when you want a quick, reviewer-friendly picture of what the Adaptive Intelligence adaptive lane should show in pull requests and release reviews.
 
 The examples are intentionally compact. They examplenstrate the expected operator behavior for the top scenario families: stay quiet on green evidence, give precise proof commands for known failures, and keep unknown or risky failures review-first.
 

@@ -11,7 +11,7 @@ def test_build_phase_boost_payload_has_three_phases():
     assert payload["repository"] == "repo-x"
     assert payload["duration_window"] == 90
     assert len(payload["phases"]) == 3
-    assert payload["phases"][0]["phase"].startswith("Phase 1")
+    assert payload["phases"][0]["phase"].startswith("Baseline readiness")
 
 
 def test_phase_boost_cli_writes_markdown_and_json(tmp_path: Path):
@@ -63,7 +63,7 @@ def test_phase_boost_main_valid_start_date_emits_markdown(capsys) -> None:
     captured = capsys.readouterr()
     assert rc == 0
     assert "# Phase boost plan for repo-prod" in captured.out
-    assert "- Phase 1 - Baseline hardening (30 days)" in captured.out
+    assert "- Baseline readiness - Baseline hardening (30 days)" in captured.out
 
 
 def test_phase_boost_main_json_output_contract(tmp_path: Path) -> None:

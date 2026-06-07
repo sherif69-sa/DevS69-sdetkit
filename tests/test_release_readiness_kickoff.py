@@ -57,11 +57,11 @@ def _seed_repo(root: Path) -> None:
                 "# Locked release readiness backlog",
                 "- [ ]  baseline metrics + weekly targets",
                 "- [ ]  release cadence + changelog checklist",
-                "- [ ]  demo asset #1 (doctor)",
-                "- [ ]  demo asset #2 (repo audit)",
+                "- [ ]  example asset #1 (doctor)",
+                "- [ ]  example asset #2 (repo audit)",
                 "- [ ]  weekly review #5",
-                "- [ ]  demo asset #3 (security gate)",
-                "- [ ]  demo asset #4 (cassette replay)",
+                "- [ ]  example asset #3 (security gate)",
+                "- [ ]  example asset #4 (cassette replay)",
                 "- [ ]  distribution batch #1",
             ]
         )
