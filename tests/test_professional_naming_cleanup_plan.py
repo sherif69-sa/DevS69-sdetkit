@@ -10,6 +10,8 @@ from sdetkit.professional_naming_cleanup_plan import (
     AUTHORITY_BOUNDARY,
     DOCS_ONLY,
     PUBLIC_ALIAS,
+    REVIEW_LOCKED_NAMING_GOVERNANCE_REFERENCE,
+    REVIEW_LOCKED_REFERENCE_COUNT,
     SAFE_INTERNAL,
     SCHEMA_VERSION,
     build_professional_naming_cleanup_plan,
@@ -217,4 +219,38 @@ def test_professional_naming_cleanup_plan_separates_compatibility_review_first_f
             "name": "compatibility plan required before changing this surface",
             "count": 1,
         }
+    ]
+
+
+def test_professional_naming_cleanup_plan_counts_review_locked_references() -> None:
+    item = _item(
+        "docs/professional-naming-debt-register.md",
+        "closeout",
+        DOCS_ONLY,
+        actionability="review_first_context",
+    )
+    item["actionability_reason"] = REVIEW_LOCKED_NAMING_GOVERNANCE_REFERENCE
+    inventory = {
+        "schema_version": INVENTORY_SCHEMA_VERSION,
+        "status": "review required",
+        "finding_count": 1,
+        "items": [item],
+    }
+
+    payload = build_professional_naming_cleanup_plan(inventory)
+
+    assert payload["actionable_finding_count"] == 0
+    assert payload["review_first_finding_count"] == 1
+    assert payload[REVIEW_LOCKED_REFERENCE_COUNT] == 1
+    assert payload["recommended_first_slice"] is None
+    assert payload["review_first_reason_mix"] == [
+        {"name": REVIEW_LOCKED_NAMING_GOVERNANCE_REFERENCE, "count": 1}
+    ]
+
+    cleanup_slice = payload["cleanup_slices"][0]
+    assert cleanup_slice["classification"] == DOCS_ONLY
+    assert cleanup_slice["safe_to_plan_first"] is False
+    assert cleanup_slice[REVIEW_LOCKED_REFERENCE_COUNT] == 1
+    assert cleanup_slice["review_first_reason_mix"] == [
+        {"name": REVIEW_LOCKED_NAMING_GOVERNANCE_REFERENCE, "count": 1}
     ]
