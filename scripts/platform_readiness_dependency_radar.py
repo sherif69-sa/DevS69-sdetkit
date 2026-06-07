@@ -95,7 +95,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--out",
         type=Path,
-        default=Path("docs/artifacts/phase3-dependency-radar-2026-04-24.json"),
+        default=Path("docs/artifacts/platform-readiness-dependency-radar-2026-04-24.json"),
     )
     parser.add_argument("--fail-on-breach", action="store_true")
     args = parser.parse_args(argv)

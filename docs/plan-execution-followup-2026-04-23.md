@@ -98,9 +98,9 @@ Release readiness kickoff artifacts now present:
 
 - `docs/contracts/phase2-repo-behavior-contract.v1.json`
 - `docs/contracts/phase2-doctor-behavior-contract.v1.json`
-- `docs/artifacts/phase2-hotspot-baseline-2026-04-24.json` (baseline for upcoming delta tracking)
-- `docs/artifacts/phase2-hotspot-baseline-pre-extraction-2026-04-24.json`
-- `docs/artifacts/phase2-hotspot-delta-2026-04-24.json`
+- `docs/artifacts/release-readiness-hotspot-baseline-2026-04-24.json` (baseline for upcoming delta tracking)
+- `docs/artifacts/release-readiness-hotspot-baseline-pre-extraction-2026-04-24.json`
+- `docs/artifacts/release-readiness-hotspot-delta-2026-04-24.json`
 - `docs/artifacts/phase2-hotspot-delta-2026-04-24.md`
 
 Suggestions:
@@ -130,7 +130,7 @@ Platform readiness artifacts now present:
 - `docs/dependency-slo-policy.md`
 - `config/dependency_slo_policy.json`
 - `scripts/platform_readiness_dependency_radar.py`
-- `docs/artifacts/phase3-dependency-radar-2026-04-24.json`
+- `docs/artifacts/platform-readiness-dependency-radar-2026-04-24.json`
 - `.github/ISSUE_TEMPLATE/dependency-drift-weekly.yml`
 
 ## Operational readiness (Weeks 7-8): market credibility assets

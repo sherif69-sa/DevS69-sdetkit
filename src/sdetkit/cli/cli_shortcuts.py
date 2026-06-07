@@ -19,7 +19,7 @@ _MODULE_SHORTCUTS: tuple[tuple[tuple[str, ...], str], ...] = (
     (("evidence",), "sdetkit.evidence"),
     (("onboarding",), "sdetkit.onboarding"),
     (("onboarding-optimization",), "sdetkit.onboarding_optimization"),
-    (("phase-boost",), "sdetkit.phase_boost"),
+    (("phase-boost",), "sdetkit.readiness_boost"),
     (("production-readiness",), "sdetkit.production_readiness"),
     (("community-activation",), "sdetkit.community_activation"),
     (("external-contribution",), "sdetkit.external_contribution"),

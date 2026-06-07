@@ -102,20 +102,20 @@ def test_changed_file_targeting_marks_targeted_tests_for_non_strict_profiles(
 ) -> None:
     (tmp_path / "src" / "sdetkit").mkdir(parents=True)
     (tmp_path / "tests").mkdir()
-    (tmp_path / "src" / "sdetkit" / "demo.py").write_text("print('x')\n", encoding="utf-8")
-    (tmp_path / "tests" / "test_demo.py").write_text(
-        "def test_demo():\n    assert True\n", encoding="utf-8"
+    (tmp_path / "src" / "sdetkit" / "example.py").write_text("print('x')\n", encoding="utf-8")
+    (tmp_path / "tests" / "test_example.py").write_text(
+        "def test_example():\n    assert True\n", encoding="utf-8"
     )
 
     plan = CheckPlanner(default_registry().snapshot()).plan(
         "quick",
         repo_root=tmp_path,
-        hint=PlannerHint(profile="quick", changed_paths=("src/sdetkit/demo.py",)),
+        hint=PlannerHint(profile="quick", changed_paths=("src/sdetkit/example.py",)),
     )
     tests_check = next(item for item in plan.selected_checks if item.id == "tests_smoke")
 
     assert tests_check.target_mode == "targeted"
-    assert tests_check.selected_targets == ("tests/test_demo.py",)
+    assert tests_check.selected_targets == ("tests/test_example.py",)
     assert "targeted pytest scope" in tests_check.targeting_reason
 
 
@@ -124,7 +124,7 @@ def test_strict_mode_preserves_full_truth_even_when_changed_files_exist(tmp_path
     plan = CheckPlanner(default_registry().snapshot()).plan(
         "strict",
         repo_root=tmp_path,
-        hint=PlannerHint(profile="strict", changed_paths=("src/sdetkit/demo.py",)),
+        hint=PlannerHint(profile="strict", changed_paths=("src/sdetkit/example.py",)),
     )
     tests_check = next(item for item in plan.selected_checks if item.id == "tests_full")
 

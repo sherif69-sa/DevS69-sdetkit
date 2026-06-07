@@ -77974,8 +77974,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/agent/demo.py",
-      "source": "src/sdetkit/agent/demo.py",
+      "scenario_id": "module::src/sdetkit/agent/example.py",
+      "source": "src/sdetkit/agent/example.py",
       "status": "active"
     },
     {
@@ -78520,22 +78520,22 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/demo.py",
-      "source": "src/sdetkit/demo.py",
+      "scenario_id": "module::src/sdetkit/example.py",
+      "source": "src/sdetkit/example.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/demo_asset2.py",
-      "source": "src/sdetkit/demo_asset2.py",
+      "scenario_id": "module::src/sdetkit/example_asset2.py",
+      "source": "src/sdetkit/example_asset2.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/demo_asset.py",
-      "source": "src/sdetkit/demo_asset.py",
+      "scenario_id": "module::src/sdetkit/example_asset.py",
+      "source": "src/sdetkit/example_asset.py",
       "status": "active"
     },
     {
@@ -79332,15 +79332,15 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/phase1_hardening.py",
-      "source": "src/sdetkit/phase1_hardening.py",
+      "scenario_id": "module::src/sdetkit/baseline_hardening.py",
+      "source": "src/sdetkit/baseline_hardening.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/phase1_wrap.py",
-      "source": "src/sdetkit/phase1_wrap.py",
+      "scenario_id": "module::src/sdetkit/baseline_wrap.py",
+      "source": "src/sdetkit/baseline_wrap.py",
       "status": "active"
     },
     {
@@ -79353,8 +79353,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/phase2_kickoff.py",
-      "source": "src/sdetkit/phase2_kickoff.py",
+      "scenario_id": "module::src/sdetkit/release_readiness_kickoff.py",
+      "source": "src/sdetkit/release_readiness_kickoff.py",
       "status": "active"
     },
     {
@@ -79388,8 +79388,8 @@
     {
       "domain": "quality",
       "kind": "module_surface",
-      "scenario_id": "module::src/sdetkit/phase_boost.py",
-      "source": "src/sdetkit/phase_boost.py",
+      "scenario_id": "module::src/sdetkit/readiness_boost.py",
+      "source": "src/sdetkit/readiness_boost.py",
       "status": "active"
     },
     {
@@ -81703,8 +81703,8 @@
     {
       "domain": "quality",
       "kind": "automation_script",
-      "scenario_id": "script::scripts/phase_sequential_executor.py",
-      "source": "scripts/phase_sequential_executor.py",
+      "scenario_id": "script::scripts/readiness_sequential_executor.py",
+      "source": "scripts/readiness_sequential_executor.py",
       "status": "active"
     },
     {
@@ -92854,29 +92854,29 @@
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_phase_sequential_executor.py::test_build_payload_uses_current_phase",
-      "source": "tests/test_phase_sequential_executor.py",
+      "scenario_id": "tests/test_readiness_sequential_executor.py::test_build_payload_uses_current_phase",
+      "source": "tests/test_readiness_sequential_executor.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_phase_sequential_executor.py::test_main_json_output",
-      "source": "tests/test_phase_sequential_executor.py",
+      "scenario_id": "tests/test_readiness_sequential_executor.py::test_main_json_output",
+      "source": "tests/test_readiness_sequential_executor.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_phase_sequential_executor.py::test_missing_plan_returns_error",
-      "source": "tests/test_phase_sequential_executor.py",
+      "scenario_id": "tests/test_readiness_sequential_executor.py::test_missing_plan_returns_error",
+      "source": "tests/test_readiness_sequential_executor.py",
       "status": "active"
     },
     {
       "domain": "quality",
       "kind": "test_function",
-      "scenario_id": "tests/test_phase_sequential_executor.py::test_progress_from_status_file",
-      "source": "tests/test_phase_sequential_executor.py",
+      "scenario_id": "tests/test_readiness_sequential_executor.py::test_progress_from_status_file",
+      "source": "tests/test_readiness_sequential_executor.py",
       "status": "active"
     },
     {
