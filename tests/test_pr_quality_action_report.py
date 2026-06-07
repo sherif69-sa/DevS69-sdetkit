@@ -2465,3 +2465,155 @@ def test_write_comment_body_surfaces_failure_bundle_safety_summary(tmp_path: Pat
     assert "# Current-head failure evidence bundle" in markdown
     assert "- Safe fix allowed: `true`" in markdown
     assert "- Review first: `false`" in markdown
+
+
+def test_action_report_renders_operator_safetygate_summary_without_authority() -> None:
+    action = {
+        "status": "safe_fix_available",
+        "primary_blocker": {},
+        "automation": {"allowed": False, "reason": "reporting only"},
+        "recommended_actions": ["Review the summary and run required proof."],
+        "proof_commands": ["python -m pytest -q tests/test_patch_scorer.py -o addopts="],
+        "failure_bundle": {
+            "safety_summary": {
+                "review_first": False,
+                "safe_fix_allowed": True,
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            }
+        },
+        "patch_score": {
+            "score": 100,
+            "decision": {
+                "status": "candidate_for_protected_verification",
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+            "safety_gate_evidence": {
+                "record_count": 1,
+                "safe_fix_allowed_count": 1,
+                "review_first_count": 0,
+                "decision_boundary": {
+                    "automation_allowed": False,
+                    "patch_application_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_proven": False,
+                },
+            },
+        },
+        "protected_verifier_result": {
+            "decision": {
+                "status": "structurally_verified_candidate",
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+            "safety_gate_evidence": {
+                "record_count": 1,
+                "decision_boundary": {
+                    "automation_allowed": False,
+                    "patch_application_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_proven": False,
+                },
+            },
+        },
+        "benchmark_report": {
+            "safety_gate_evidence": {
+                "scenario_count": 1,
+                "record_count": 1,
+                "decision_boundary": {
+                    "automation_allowed": False,
+                    "patch_application_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_proven": False,
+                },
+            }
+        },
+        "repo_memory": {
+            "safety_gate_evidence": {
+                "record_count": 1,
+                "decision_boundary": {
+                    "automation_allowed": False,
+                    "patch_application_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_proven": False,
+                },
+            }
+        },
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence={"checks_seen": 1, "failed_checks": []},
+        trajectory_records=[
+            {
+                "safety_gate": {
+                    "review_first": False,
+                    "safe_fix_allowed": True,
+                    "automation_allowed": False,
+                    "patch_application_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_proven": False,
+                }
+            }
+        ],
+    )
+
+    assert "## Operator SafetyGate summary" in body
+    assert "- Failure bundle safe-fix allowed: `true`" in body
+    assert "- Trajectory SafetyGate records: `1`" in body
+    assert "- RepoMemory SafetyGate records: `1`" in body
+    assert "- Replay benchmark SafetyGate scenarios: `1`" in body
+    assert "- PatchScorer status: `candidate_for_protected_verification`" in body
+    assert "- PatchScorer score: `100`" in body
+    assert "- ProtectedVerifier status: `structurally_verified_candidate`" in body
+    assert (
+        "- Operator next action: `Human review may use this evidence, but no automation or merge authority is granted.`"
+        in body
+    )
+    assert "- Operator summary automation allowed: `false`" in body
+    assert "- Operator summary patch application allowed: `false`" in body
+    assert "- Operator summary merge authorized: `false`" in body
+    assert "- Operator summary semantic equivalence proven: `false`" in body
+
+
+def test_action_report_operator_safetygate_summary_surfaces_authority_expansion() -> None:
+    action = {
+        "status": "review_first",
+        "primary_blocker": {},
+        "automation": {"allowed": False, "reason": "reporting only"},
+        "recommended_actions": ["Keep review-first."],
+        "proof_commands": [],
+        "patch_score": {
+            "score": 0,
+            "decision": {
+                "status": "blocked_review_first",
+                "automation_allowed": False,
+            },
+            "safety_gate_evidence": {
+                "decision_boundary": {
+                    "automation_allowed": True,
+                    "patch_application_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_proven": False,
+                }
+            },
+        },
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence={"checks_seen": 1, "failed_checks": []},
+    )
+
+    assert "## Operator SafetyGate summary" in body
+    assert (
+        "- Operator next action: `Review-first: a SafetyGate boundary attempted to expand authority.`"
+        in body
+    )
+    assert "- Operator summary automation allowed: `true`" in body
+    assert "- Operator summary merge authorized: `false`" in body
