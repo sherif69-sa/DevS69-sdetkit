@@ -8,7 +8,7 @@ This plan starts immediately after completion of the 6-point CTO execution workf
 - Baseline date: 2026-04-15.
 - Primary control plane: [Top-tier program dashboard](top-tier-program-dashboard.md).
 
-## Phase 2 launch objectives (next 30 days)
+## Release readiness launch objectives (next 30 days)
 
 1. Convert completed documentation tracks into recurring operating routines.
 2. Add evidence freshness checks for weekly/monthly reporting cadence.
@@ -42,7 +42,7 @@ This plan starts immediately after completion of the 6-point CTO execution workf
 - maintain role quickstarts with owner review dates
 - update executive weekly/monthly templates based on reviewer feedback
 
-## Exit criteria for Phase 2 launch readiness
+## Exit criteria for Release readiness launch readiness
 
 - [ ] 4 consecutive weekly reporting cycles completed with evidence links.
 - [ ] 1 monthly governance review completed with decisions logged.

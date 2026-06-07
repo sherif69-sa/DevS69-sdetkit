@@ -53,17 +53,17 @@ This blueprint defines how to package the **AgentOS + template engine + omnichan
 
 ## Enterprise adoption path
 
-### Phase 1: Pilot (1-2 squads)
+### Baseline readiness: Pilot (1-2 squads)
 - Baseline templates activated.
 - Provider pinned to `none`.
 - Dashboard cadence: per pull request and nightly.
 
-### Phase 2: Platform alignment
+### Release readiness: Platform alignment
 - Shared template catalog governance owners assigned.
 - Omnichannel ingress and rate-limits enabled in controlled channels.
 - Role-based operational runbooks published.
 
-### Phase 3: Program rollout
+### Platform readiness: Program rollout
 - Workspace bootstrap scripted with example scenario for acceptance testing.
 - Dashboard and export artifacts integrated into quality gates.
 - Standardized policy exceptions and waiver process formalized.

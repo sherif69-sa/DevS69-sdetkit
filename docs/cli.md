@@ -36,11 +36,11 @@ After the canonical path succeeds, use the enterprise doctor profile for stricte
    - optional scope cap: `--enterprise-rerun-top <N>`
 4. Repeat rerun/fix cycles until blockers are cleared and score stabilizes.
 5. Automation handoff (emit only suggested follow-up pass command):
-   - `python -m sdetkit doctor --enterprise-next-pass-only`
-   - CI-friendly status mode: `python -m sdetkit doctor --enterprise-next-pass-only --enterprise-next-pass-exit-code`
+   - `python -m sdetkit doctor --enterprise-follow-up-only`
+   - CI-friendly status mode: `python -m sdetkit doctor --enterprise-follow-up-only --enterprise-follow-up-exit-code`
      (returns exit code `2` when a follow-up pass is recommended, else `0`)
    - plain output emits three lines: command/no-op, `reason: ...`, `alternates: ...`
-   - markdown-friendly output: `python -m sdetkit doctor --enterprise-next-pass-only --format md`
+   - markdown-friendly output: `python -m sdetkit doctor --enterprise-follow-up-only --format md`
    - when no follow-up is needed in markdown mode, output is `_no follow-up pass required_`
    - markdown mode also emits a second line reason hint: `` `reason: <reason>` ``
    - markdown mode also emits a third line alternates hint: `` `alternates: <cmds|none>` ``
@@ -50,7 +50,7 @@ After the canonical path succeeds, use the enterprise doctor profile for stricte
    - JSON handoff payload includes `alternate_commands` for fallback lane selection
    - JSON handoff payload includes `exit_code_hint` (`0` no follow-up, `2` follow-up recommended)
    - note: this handoff mode is standalone and cannot be combined with rerun flags.
-   - note: `--enterprise-next-pass-exit-code` only works with `--enterprise-next-pass-only`.
+   - note: `--enterprise-follow-up-exit-code` only works with `--enterprise-follow-up-only`.
 
 If historical workspace payloads do not include per-check severity metadata, `--enterprise-rerun-high` falls back to rerunning recorded failed checks.
 
@@ -59,7 +59,7 @@ Expected enterprise outputs include:
 - profile markers (`profile=enterprise`, `profile_mode=full_scan|rerun_failed|rerun_high`)
 - rerun scope metadata (`rerun_top`) when `--enterprise-rerun-top` is used
 - enterprise execution insights (maturity tier, blockers, optimization queue, follow-up pass reason)
-- next-pass command hint (`next_pass_command`) for the recommended focused rerun step
+- follow-up command hint (`next_pass_command`) for the recommended focused rerun step
 - remediation bundle items for rapid operator follow-up
 
 ## Stability-aware command discovery

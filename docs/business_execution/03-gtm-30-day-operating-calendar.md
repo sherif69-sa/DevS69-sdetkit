@@ -379,7 +379,7 @@ Use this period to maximize conversion and lock repeatable process.
 ## Content engine plan (support GTM)
 
 Publish weekly:
-1. One educational post (category narrative).
+1. One operator-guidance post (category narrative).
 2. One proof-oriented artifact (example outcomes).
 3. One operator how-to (practical implementation).
 

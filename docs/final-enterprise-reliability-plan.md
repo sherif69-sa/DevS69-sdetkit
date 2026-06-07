@@ -13,7 +13,7 @@ Execution tracker: `plans/enterprise-reliability-execution-tracker.json`.
 
 ---
 
-## Phase 1 — Baseline Lockdown (Week 1)
+## Baseline readiness — Baseline Lockdown (Week 1)
 ### 1.1 Establish hard baseline
 - Freeze current quality baseline (`doctor`, `gate`, `security`, `repo` outputs).
 - Capture golden snapshots for enterprise-mode JSON and markdown outputs.
@@ -34,7 +34,7 @@ Execution tracker: `plans/enterprise-reliability-execution-tracker.json`.
 
 ---
 
-## Phase 2 — Reliability Deepening (Weeks 2–3)
+## Release readiness — Reliability Deepening (Weeks 2–3)
 ### 2.1 Double-analysis workflow
 Implement a repeatable two-pass enterprise workflow:
 1. **Pass A (Broad scan)**: full checks with upgrade intelligence.
@@ -58,7 +58,7 @@ Implement a repeatable two-pass enterprise workflow:
 
 ---
 
-## Phase 3 — Toolchain Optimization (Weeks 3–4)
+## Platform readiness — Toolchain Optimization (Weeks 3–4)
 ### 3.1 Performance and determinism
 - Profile slow checks and add caching where safe.
 - Bound network-sensitive checks with timeout/retry policy.
@@ -82,7 +82,7 @@ Implement a repeatable two-pass enterprise workflow:
 
 ---
 
-## Phase 4 — Enterprise Operations Readiness (Weeks 5–6)
+## Operational readiness — Enterprise Operations Readiness (Weeks 5–6)
 ### 4.1 Incident and rollback readiness
 - Add incident response runbook for failed enterprise gates.
 - Add rollback criteria and safe bypass protocol with audit trail.
@@ -106,7 +106,7 @@ Track:
 
 ---
 
-## Phase 5 — Production Rollout and Continuous Improvement (Ongoing)
+## Adoption readiness — Production Rollout and Continuous Improvement (Ongoing)
 ### 5.1 Rollout model
 - Pilot in 1–2 internal repos.
 - Expand to tier-1 production repos.

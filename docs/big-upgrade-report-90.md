@@ -3,7 +3,7 @@
 ## What shipped
 
 - Added `cycle90-platform-readiness-wrap-publication-completion-report` command to score Cycle 90 readiness from Cycle 89 governance scale artifacts.
-- Added deterministic pack emission and execution evidence generation for phase-3 wrap and publication proof.
+- Added deterministic pack emission and execution evidence generation for platform-readiness wrap and publication proof.
 - Added strict contract validation script and tests that enforce Cycle 90 completion report quality gates and next-impact roadmap handoff integrity.
 
 ## Command lane

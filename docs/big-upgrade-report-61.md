@@ -2,7 +2,7 @@
 
 ## Objective
 
-Close Cycle 61 with a high-confidence Phase-3 kickoff execution lane that converts Cycle 60 wrap evidence into deterministic Cycle 62 community-program priorities.
+Close Cycle 61 with a high-confidence Platform readiness kickoff execution lane that converts Cycle 60 wrap evidence into deterministic Cycle 62 community-program priorities.
 
 ## Big upgrades shipped
 

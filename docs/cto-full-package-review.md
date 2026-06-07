@@ -87,7 +87,7 @@ Cadence:
 
 ## Step-by-step execution plan (first 90 days)
 
-## Phase 1 (Days 0-30): baseline + packaging MVP
+## Baseline readiness (Days 0-30): baseline + packaging MVP
 
 ### Tasks
 
@@ -106,7 +106,7 @@ Cadence:
 - KPI schema exists in JSON + markdown narrative.
 - At least one worked example per lane in repo artifacts.
 
-## Phase 2 (Days 31-60): governance + operationalization
+## Release readiness (Days 31-60): governance + operationalization
 
 ### Tasks
 
@@ -124,7 +124,7 @@ Cadence:
 - each policy has an owner and review cadence.
 - one simulated incident walkthrough completed using the runbook.
 
-## Phase 3 (Days 61-90): portfolio + commercialization readiness
+## Platform readiness (Days 61-90): portfolio + commercialization readiness
 
 ### Tasks
 

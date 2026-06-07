@@ -11,8 +11,8 @@ def test_big_brain_toolkit_roadmap_captures_strengths_gaps_and_upgrades() -> Non
     assert "## Current strengths after the latest kit run" in text
     assert "## What still needs to become stronger" in text
     assert "## Next upgrade roadmap" in text
-    assert "Phase 1 — Externalize the big-brain database" in text
-    assert "Phase 5 — Make it enterprise-scale" in text
+    assert "Baseline readiness — Externalize the big-brain database" in text
+    assert "Adoption readiness — Make it enterprise-scale" in text
     assert "Unknown is review-first" in text
 
 

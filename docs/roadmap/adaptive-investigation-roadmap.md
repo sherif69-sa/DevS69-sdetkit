@@ -125,7 +125,7 @@ Keep responsibilities separate and composable.
 
 ## Phase-by-phase roadmap
 
-## Phase 1 — Upgrade the shared diagnosis brain
+## Baseline readiness — Upgrade the shared diagnosis brain
 
 ### Goal
 
@@ -218,7 +218,7 @@ Acceptance criteria:
 
 ---
 
-## Phase 2 — Align maintenance action categories with diagnosis classes
+## Release readiness — Align maintenance action categories with diagnosis classes
 
 ### Goal
 
@@ -313,7 +313,7 @@ Acceptance criteria:
 
 ---
 
-## Phase 3 — Add proof checklist
+## Platform readiness — Add proof checklist
 
 ### Goal
 
@@ -403,7 +403,7 @@ Acceptance criteria:
 
 ---
 
-## Phase 4 — Add signal trends
+## Operational readiness — Add signal trends
 
 ### Goal
 
@@ -471,7 +471,7 @@ Acceptance criteria:
 
 ---
 
-## Phase 5 — Add human-friendly investigation front door
+## Adoption readiness — Add human-friendly investigation front door
 
 ### Goal
 
@@ -553,7 +553,7 @@ Acceptance criteria:
 
 ---
 
-## Phase 6 — Add repository investigation summary
+## Scale readiness — Add repository investigation summary
 
 ### Goal
 
@@ -795,7 +795,7 @@ PYTHONPATH=src python -m pytest -q tests/test_investigate_evidence.py
 
 ---
 
-## Phase 10 — Route investigation diagnoses through safe-fix policy
+## Baseline readiness0 — Route investigation diagnoses through safe-fix policy
 
 ### Goal
 
@@ -846,7 +846,7 @@ Acceptance criteria:
 
 ---
 
-## Phase 11 — Publish investigation summaries in PR comments
+## Baseline readiness1 — Publish investigation summaries in PR comments
 
 ### Goal
 
@@ -887,7 +887,7 @@ PYTHONPATH=src python -m pytest -q tests/test_pr_investigation_summary_workflow.
 
 ---
 
-## Phase 12 — Remember investigation outcomes
+## Baseline readiness2 — Remember investigation outcomes
 
 ### Goal
 
@@ -937,7 +937,7 @@ PYTHONPATH=src python -m pytest -q tests/test_investigation_outcome_memory.py
 
 ---
 
-## Phase 13 — Safe-fix candidate registry
+## Baseline readiness3 — Safe-fix candidate registry
 
 ### Goal
 
@@ -981,7 +981,7 @@ JSON contract:
 
 ---
 
-## Phase 14 — Auto-fix probation report
+## Baseline readiness4 — Auto-fix probation report
 
 ### Goal
 
@@ -1012,7 +1012,7 @@ BLOCKED
 
 ---
 
-## Phase 15 — Policy proposal generator
+## Baseline readiness5 — Policy proposal generator
 
 ### Goal
 
@@ -1065,7 +1065,7 @@ Required.
 
 ---
 
-## Phase 16 — Auto-fix dry-run planner
+## Baseline readiness6 — Auto-fix dry-run planner
 
 ### Goal
 
@@ -1096,7 +1096,7 @@ no allowlist expansion
 
 ---
 
-## Phase 17 — Guarded PR-only auto-fix
+## Baseline readiness7 — Guarded PR-only auto-fix
 
 ### Goal
 
@@ -1132,7 +1132,7 @@ must record outcome
 
 ---
 
-## Phase 18 — Auto-fix outcome memory
+## Baseline readiness8 — Auto-fix outcome memory
 
 ### Goal
 
@@ -1478,7 +1478,7 @@ SDETKit Adaptive Investigation Roadmap
 | Field | Values |
 |---|---|
 | Status | Backlog, Ready, In Progress, In Review, Merged, Blocked, Later |
-| Phase | Phase 1 through Phase 18 |
+| Phase | Baseline readiness through Baseline readiness8 |
 | Safety Route | Diagnostic Only, Review First, Safe Mechanical Candidate, Probation, Policy Proposal, Guarded PR Auto-Fix |
 | Priority | P0, P1, P2 |
 | Artifact Type | JSON, Markdown, CLI, Workflow, Memory, Policy, Tests |
@@ -1491,31 +1491,31 @@ SDETKit Adaptive Investigation Roadmap
 
 | Order | Issue title | Phase | Safety Route |
 |---:|---|---|---|
-| 1 | Expand adaptive diagnosis for local investigation failures | Phase 1 | Diagnostic Only |
-| 2 | Classify maintenance actions with adaptive diagnosis classes | Phase 2 | Diagnostic Only |
-| 3 | Publish maintenance proof checklist | Phase 3 | Diagnostic Only |
-| 4 | Publish maintenance signal trend summary | Phase 4 | Diagnostic Only |
-| 5 | Add failure investigation command | Phase 5 | Diagnostic Only |
-| 6 | Add repository investigation summary | Phase 6 | Diagnostic Only |
+| 1 | Expand adaptive diagnosis for local investigation failures | Baseline readiness | Diagnostic Only |
+| 2 | Classify maintenance actions with adaptive diagnosis classes | Release readiness | Diagnostic Only |
+| 3 | Publish maintenance proof checklist | Platform readiness | Diagnostic Only |
+| 4 | Publish maintenance signal trend summary | Operational readiness | Diagnostic Only |
+| 5 | Add failure investigation command | Adoption readiness | Diagnostic Only |
+| 6 | Add repository investigation summary | Scale readiness | Diagnostic Only |
 | 7 | Add focused surface investigation | Phase 7 | Diagnostic Only |
 | 8 | Detect public API parity gaps | Phase 8 | Review First |
 | 9 | Write investigation candidate evidence | Phase 9 | Diagnostic Only |
-| 10 | Route investigation diagnoses through safe-fix policy | Phase 10 | Review First |
-| 11 | Publish investigation summaries for PR failures | Phase 11 | Diagnostic Only |
-| 12 | Record investigation outcome memory | Phase 12 | Diagnostic Only |
-| 13 | Publish safe-fix candidate registry | Phase 13 | Safe Mechanical Candidate |
-| 14 | Publish auto-fix probation report | Phase 14 | Probation |
-| 15 | Publish maintenance policy proposals | Phase 15 | Policy Proposal |
-| 16 | Publish auto-fix dry-run plan | Phase 16 | Policy Proposal |
-| 17 | Enable guarded PR-only auto-fix | Phase 17 | Guarded PR Auto-Fix |
-| 18 | Record auto-fix outcome memory | Phase 18 | Guarded PR Auto-Fix |
+| 10 | Route investigation diagnoses through safe-fix policy | Baseline readiness0 | Review First |
+| 11 | Publish investigation summaries for PR failures | Baseline readiness1 | Diagnostic Only |
+| 12 | Record investigation outcome memory | Baseline readiness2 | Diagnostic Only |
+| 13 | Publish safe-fix candidate registry | Baseline readiness3 | Safe Mechanical Candidate |
+| 14 | Publish auto-fix probation report | Baseline readiness4 | Probation |
+| 15 | Publish maintenance policy proposals | Baseline readiness5 | Policy Proposal |
+| 16 | Publish auto-fix dry-run plan | Baseline readiness6 | Policy Proposal |
+| 17 | Enable guarded PR-only auto-fix | Baseline readiness7 | Guarded PR Auto-Fix |
+| 18 | Record auto-fix outcome memory | Baseline readiness8 | Guarded PR Auto-Fix |
 
 ### Board execution rules
 
 - Keep only one or two P0 items in progress at a time.
 - Do not move an item to `Ready` unless its dependency issue or PR is merged.
 - Do not move any auto-fix item past `Probation` unless proof, trend, candidate registry, and policy proposal artifacts exist.
-- Keep Phase 17 as a major milestone, not a near-term task. It should stay blocked until Phases 1-16 are stable.
+- Keep Baseline readiness7 as a major milestone, not a near-term task. It should stay blocked until Phases 1-16 are stable.
 - Every issue should include the safety route and whether behavior is diagnostic-only, review-first, or an approved mechanical candidate.
 
 ---
@@ -1585,9 +1585,9 @@ Every PR in this roadmap should meet this checklist before merge.
 
 ## Major milestone gate for guarded auto-fix
 
-Phase 17, guarded PR-only auto-fix, is a major milestone and must not start until the earlier investigation, proof, trend, candidate, probation, policy proposal, and dry-run layers are stable.
+Baseline readiness7, guarded PR-only auto-fix, is a major milestone and must not start until the earlier investigation, proof, trend, candidate, probation, policy proposal, and dry-run layers are stable.
 
-Before Phase 17 starts, the project should have:
+Before Baseline readiness7 starts, the project should have:
 
 ```text
 - Stable diagnosis classes for local investigation failures.

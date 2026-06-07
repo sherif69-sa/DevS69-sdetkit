@@ -84,7 +84,7 @@ You can keep history:
 - in-repo (`.sdetkit/audit-history`) for local trend review, or
 - as CI artifacts (for lighter repos and cleaner history ownership)
 
-Phase 3 GitHub Action JSON artifacts are compatible with `sdetkit report ingest` because legacy audit JSON is normalized to v1 on ingest.
+Platform readiness GitHub Action JSON artifacts are compatible with `sdetkit report ingest` because legacy audit JSON is normalized to v1 on ingest.
 
 ## Legacy burn-down KPI
 

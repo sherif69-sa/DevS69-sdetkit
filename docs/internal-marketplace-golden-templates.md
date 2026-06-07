@@ -53,17 +53,17 @@ Each marketplace package should include:
 
 ## Rollout model
 
-### Phase 1 — Bootstrap
+### Baseline readiness — Bootstrap
 
 - Publish catalog with 4 initial templates.
 - Run in 2-3 pilot repos per template.
 
-### Phase 2 — Governance
+### Release readiness — Governance
 
 - Promote only templates that meet reliability/cost thresholds.
 - Add template health score (adoption count, failure rate, maintenance freshness).
 
-### Phase 3 — Scale
+### Platform readiness — Scale
 
 - Make approved templates self-service via internal documentation index.
 - Enforce owner assignment and quarterly template review cadence.

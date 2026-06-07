@@ -16,7 +16,7 @@ python -m sdetkit kpi-audit --execute --evidence-dir docs/artifacts/kpi-audit-pa
 python scripts/check_kpi_audit_contract.py
 ```
 
-## Closeout criteria
+## Completion criteria
 
 - Cycle 27 score >= 90 with no critical failures.
 - Baseline/current KPI snapshots valid and published.

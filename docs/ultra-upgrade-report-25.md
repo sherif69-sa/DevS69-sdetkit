@@ -16,7 +16,7 @@ python -m sdetkit community-activation --execute --evidence-dir docs/artifacts/c
 python scripts/check_community_activation_contract.py
 ```
 
-## Closeout criteria
+## Completion criteria
 
 - Cycle 25 score >= 90 with no critical failures.
 - Integration page includes all required sections + command contract.

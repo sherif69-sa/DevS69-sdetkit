@@ -14,7 +14,7 @@ Lane closes the weekly growth loop by consolidating Lane-27 outcomes into wins, 
 - External contribution: `docs/artifacts/external-contribution-pack/external-contribution-summary.json`
 - Lane: `docs/artifacts/kpi-audit-pack/kpi-audit-summary.json`
 
-## Closeout checklist
+## Completion checklist
 
 ```bash
 python -m sdetkit weekly-review --format json --strict

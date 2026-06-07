@@ -1,6 +1,6 @@
 # Publication readiness workflow
 
-Lane closes with a major upgrade that converts Lane governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
+Lane closes with a major upgrade that converts Lane governance scale outcomes into a deterministic platform-readiness wrap and publication operating lane.
 
 ## Why Phase3 Wrap Publication Closeout matters
 
@@ -25,23 +25,23 @@ python scripts/check_phase3_wrap_publication_closeout_contract.py
 
 ## platform readiness wrap publication contract
 
-- Single owner + backup reviewer are assigned for Lane phase-3 wrap publication execution and signoff.
+- Single owner + backup reviewer are assigned for Lane platform-readiness wrap publication execution and signoff.
 - This lane references Lane outcomes, controls, and trust continuity signals.
 - Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane completion report records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.
+- Lane completion report records platform-readiness wrap publication outputs, final report publication status, and next-impact roadmap inputs.
 
 ## platform readiness wrap publication quality checklist
 
 - [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets
 - [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag
 - [ ] CTA links point to narrative docs/templates + runnable command evidence
-- [ ] Scorecard captures phase-3 wrap publication adoption delta, objection deflection delta, confidence, and rollback owner
+- [ ] Scorecard captures platform-readiness wrap publication adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
 ## Delivery board
 
 - [ ] Lane evidence brief committed
-- [ ] Lane phase-3 wrap publication plan committed
+- [ ] Lane platform-readiness wrap publication plan committed
 - [ ] Lane narrative template upgrade ledger exported
 - [ ] Lane storyline outcomes ledger exported
 - [ ] Next-impact roadmap draft captured from Lane outcomes

@@ -16,7 +16,7 @@ python -m sdetkit external-contribution --execute --evidence-dir docs/artifacts/
 python scripts/check_external_contribution_contract.py
 ```
 
-## Closeout criteria
+## Completion criteria
 
 - External-contribution score >= 90 with no critical failures.
 - Integration page includes all required sections + command contract.
