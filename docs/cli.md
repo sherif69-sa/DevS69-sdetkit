@@ -211,3 +211,13 @@ python -m sdetkit boost scan . --index-out build/sdetkit-index --evidence-dir bu
 - [Versioning and support posture](versioning-and-support.md)
 - [Command taxonomy](command-taxonomy.md)
 - [Umbrella architecture](architecture/umbrella-kits.md)
+
+### `sdetkit adoption-surface --format report`
+
+Render a Markdown-style operator readiness report while also writing the deterministic adoption-surface JSON artifact:
+
+```bash
+python -m sdetkit adoption-surface --root . --out build/sdetkit/adoption-surface.json --format report
+```
+
+Use this report for review-first adoption planning. It does not authorize automation, patch application, merging, or semantic-equivalence claims.
