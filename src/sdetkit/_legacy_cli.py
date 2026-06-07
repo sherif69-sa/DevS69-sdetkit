@@ -683,6 +683,16 @@ Then use stability-aware command discovery:
     adoption_surface.add_argument("--out", default="build/sdetkit/adoption-surface.json")
     adoption_surface.add_argument("--format", choices=["json", "text", "report"], default="json")
 
+    adoption_learning = sub.add_parser(
+        "adoption-learning",
+        help="[Advanced but supported] Record read-only adoption learning evidence",
+    )
+    adoption_learning.add_argument("--root", default=".")
+    adoption_learning.add_argument("--surface-json", default="")
+    adoption_learning.add_argument("--out", default="build/sdetkit/adoption-learning.json")
+    adoption_learning.add_argument("--trial-name", default="self_adoption_baseline")
+    adoption_learning.add_argument("--format", choices=["json", "text"], default="json")
+
     issue_queue_classifier = sub.add_parser(
         "issue-queue-classifier",
         help="[Advanced but supported] Classify issue queue snapshots without mutation",
@@ -1396,6 +1406,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.format),
         ]
         return _run_module_main("sdetkit.adoption_surface", forwarded)
+
+    if ns.cmd == "adoption-learning":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out",
+            str(ns.out),
+            "--trial-name",
+            str(ns.trial_name),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.surface_json):
+            forwarded.extend(["--surface-json", str(ns.surface_json)])
+        return _run_module_main("sdetkit.adoption_learning", forwarded)
 
     if ns.cmd == "issue-queue-classifier":
         forwarded = [
