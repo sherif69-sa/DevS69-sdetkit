@@ -141,7 +141,7 @@ The Adaptive Intelligence execution plan is now complete across the immediate ba
 
 ## Progress tracking
 
-Current measurable progress, latest movement, next-PR recommendation, and follow-up queue are tracked in [`adaptive intelligence-progress-tracker.md`](adaptive intelligence-progress-tracker.md).
+Current measurable progress, latest movement, next-PR recommendation, and follow-up queue are tracked in [`big-brain-progress-tracker.md`](big-brain-progress-tracker.md).
 
 ## Definition of “real big win”
 
