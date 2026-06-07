@@ -25,6 +25,9 @@ PROOF_REQUIREMENTS_MISSING = "_".join(("PROOF", "REQUIREMENTS", "MISSING"))
 REQUIRED_PROOF_NOT_CAPTURED = "_".join(("REQUIRED", "PROOF", "NOT", "CAPTURED"))
 REQUIRED_PROOF_FAILED = "_".join(("REQUIRED", "PROOF", "FAILED"))
 SEMANTIC_EQUIVALENCE_NOT_PROVEN = "_".join(("SEMANTIC", "EQUIVALENCE", "NOT", "PROVEN"))
+SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION = "_".join(
+    ("SAFETYGATE", "EVIDENCE", "AUTHORITY", "VIOLATION")
+)
 
 
 def _as_dict(value: Any) -> JsonObject:
@@ -103,6 +106,46 @@ def _proof_passed(result: Mapping[str, Any]) -> bool:
     )
 
 
+def _safety_gate_evidence(evidence: Mapping[str, Any]) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+    payload = _as_dict(evidence.get("safety_gate_evidence"))
+    if not payload:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "verification_evidence.safety_gate_evidence",
+            "record_count": 0,
+            "review_first_count": 0,
+            "safe_fix_allowed_count": 0,
+            "reporting_only_count": 0,
+            "report_paths": [],
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = _as_dict(payload.get("decision_boundary"))
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    return {
+        "collection_status": _string(payload.get("collection_status")) or "collected",
+        "status": _string(payload.get("status")) or "safety_gate_evidence_observed",
+        "source": _string(payload.get("source")) or "verification_evidence.safety_gate_evidence",
+        "record_count": _int(payload.get("record_count"), default=0),
+        "review_first_count": _int(payload.get("review_first_count"), default=0),
+        "safe_fix_allowed_count": _int(payload.get("safe_fix_allowed_count"), default=0),
+        "reporting_only_count": _int(payload.get("reporting_only_count"), default=0),
+        "report_paths": [
+            _string(item) for item in _as_list(payload.get("report_paths")) if _string(item)
+        ],
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
 def verify_candidate(
     *,
     patch_score: Mapping[str, Any],
@@ -116,6 +159,7 @@ def verify_candidate(
     evidence_files = _string_list(verification_evidence.get("changed_files"))
     proof_requirements = _string_list(patch_score.get("proof_requirements"))
     proof_results = _proof_results_by_command(verification_evidence)
+    safety_gate_evidence = _safety_gate_evidence(verification_evidence)
     findings: list[JsonObject] = []
 
     if _string(decision.get("status")) != "candidate_for_protected_verification" or not _bool(
@@ -135,6 +179,17 @@ def verify_candidate(
                 AUTOMATION_BOUNDARY_VIOLATION,
                 "PatchScorer output unexpectedly attempts to authorize automation.",
                 blocking=True,
+            )
+        )
+
+    expanded_safetygate_fields = _string_list(safety_gate_evidence.get("expanded_authority_fields"))
+    if expanded_safetygate_fields:
+        findings.append(
+            _finding(
+                SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION,
+                "SafetyGate evidence attempted to expand verifier authority.",
+                blocking=True,
+                files=expanded_safetygate_fields,
             )
         )
 
@@ -238,6 +293,7 @@ def verify_candidate(
         "observed_changed_files": evidence_files,
         "allowed_files": allowed_files,
         "proof_requirements": proof_requirements,
+        "safety_gate_evidence": safety_gate_evidence,
         "findings": findings,
         "decision": {
             "status": status,
@@ -257,6 +313,8 @@ def verify_candidate(
 
 def render_markdown(payload: Mapping[str, Any]) -> str:
     decision = _as_dict(payload.get("decision"))
+    safety_gate = _as_dict(payload.get("safety_gate_evidence"))
+    safety_boundary = _as_dict(safety_gate.get("decision_boundary"))
     findings = [_as_dict(item) for item in _as_list(payload.get("findings"))]
 
     lines = [
@@ -291,6 +349,36 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
             f"blocking=`{str(_bool(finding.get('blocking'))).lower()}` "
             f"{_string(finding.get('message'))}{suffix}"
         )
+
+    lines.extend(
+        [
+            "",
+            "## SafetyGate evidence",
+            "",
+            f"- Collection status: `{_string(safety_gate.get('collection_status'))}`",
+            f"- Status: `{_string(safety_gate.get('status'))}`",
+            f"- Records: `{_int(safety_gate.get('record_count'), default=0)}`",
+            f"- Safe-fix allowed records: `{_int(safety_gate.get('safe_fix_allowed_count'), default=0)}`",
+            f"- Review-first records: `{_int(safety_gate.get('review_first_count'), default=0)}`",
+            f"- Reporting-only records: `{_int(safety_gate.get('reporting_only_count'), default=0)}`",
+            (
+                "- Automation allowed by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('automation_allowed'))).lower()}`"
+            ),
+            (
+                "- Patch application allowed by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence proven by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('semantic_equivalence_proven'))).lower()}`"
+            ),
+        ]
+    )
 
     lines.extend(["", "## Required proof evaluated", ""])
     proof_requirements = _string_list(payload.get("proof_requirements"))
