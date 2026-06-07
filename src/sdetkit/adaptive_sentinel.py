@@ -196,7 +196,7 @@ def _protected_surface_rule(path: str) -> dict[str, str] | None:
             "proof_command": "python -m pytest -q tests/test_adaptive_sentinel.py -o addopts=",
         }
 
-    if rel == "src/sdetkit/cli.py" or rel.startswith("src/sdetkit/core/"):
+    if rel == "src/sdetkit/_legacy_cli.py" or rel.startswith("src/sdetkit/core/"):
         return {
             "surface": "cli_routing",
             "risk_band": "warning",

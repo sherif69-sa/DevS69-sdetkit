@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Helpers for serializing Rich styles and metadata back to markup.
@@ -13,19 +14,19 @@ string-only style definition. That lets ``Text.markup`` reconstruct richer
 state without inventing ad-hoc escaping rules in multiple modules.
 """
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any
 
-
-MarkupTags = Tuple[List[str], List[str]]
+MarkupTags = tuple[list[str], list[str]]
 
 
 @dataclass(frozen=True)
 class MarkupTagPlan:
     """A structured opening / closing tag plan."""
 
-    opening: List[str]
-    closing: List[str]
+    opening: list[str]
+    closing: list[str]
 
     def to_pair(self) -> MarkupTags:
         return self.opening, self.closing
@@ -69,7 +70,7 @@ def render_handler_value(value: Any) -> str:
 
 
 
-def split_meta(meta: Dict[str, Any]) -> tuple[list[tuple[str, Any]], dict[str, Any]]:
+def split_meta(meta: dict[str, Any]) -> tuple[list[tuple[str, Any]], dict[str, Any]]:
     """Split meta in to handler items and generic metadata.
 
     Handler keys start with ``@`` and have a dedicated markup shorthand. Other
@@ -87,7 +88,7 @@ def split_meta(meta: Dict[str, Any]) -> tuple[list[tuple[str, Any]], dict[str, A
 
 
 
-def has_generic_meta(meta: Dict[str, Any]) -> bool:
+def has_generic_meta(meta: dict[str, Any]) -> bool:
     """Check if a meta mapping contains non-handler values."""
     return any(not key.startswith("@") or key == "@meta" for key in meta)
 
@@ -101,9 +102,9 @@ def visual_style_definition(style: Any) -> str:
 
 
 
-def style_markup_open_tags(style: Any) -> List[str]:
+def style_markup_open_tags(style: Any) -> list[str]:
     """Build markup opening tags for a Rich ``Style`` instance."""
-    tags: List[str] = []
+    tags: list[str] = []
     visual_definition = visual_style_definition(style)
     if visual_definition:
         tags.append(render_open_tag(visual_definition))
@@ -118,9 +119,9 @@ def style_markup_open_tags(style: Any) -> List[str]:
 
 
 
-def style_markup_close_tags(style: Any) -> List[str]:
+def style_markup_close_tags(style: Any) -> list[str]:
     """Build markup closing tags for a Rich ``Style`` instance."""
-    closes: List[str] = []
+    closes: list[str] = []
     meta = style.meta
     if has_generic_meta(meta):
         closes.append(render_close_tag("@meta"))
@@ -156,6 +157,6 @@ def plain_style_markup_pairs(style_definition: str) -> MarkupTags:
 
 
 
-def extend_tokens(destination: List[str], tokens: Iterable[str]) -> None:
+def extend_tokens(destination: list[str], tokens: Iterable[str]) -> None:
     """Extend a destination list with pre-rendered token strings."""
     destination.extend(tokens)

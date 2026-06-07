@@ -1,10 +1,11 @@
 import re
 from ast import literal_eval
+from collections.abc import Callable, Iterable
 from operator import attrgetter
-from typing import Callable, Iterable, List, Match, NamedTuple, Optional, Tuple, Union
+from re import Match
+from typing import NamedTuple
 
 from ._emoji_replace import _emoji_replace
-from .markup_tags import render_close_tag, render_open_tag
 from .emoji import EmojiVariant
 from .errors import MarkupError
 from .style import Style
@@ -23,7 +24,7 @@ class Tag(NamedTuple):
 
     name: str
     """The tag name. e.g. 'bold'."""
-    parameters: Optional[str]
+    parameters: str | None
     """Any additional parameters after the name."""
 
     def __str__(self) -> str:
@@ -71,7 +72,7 @@ def escape(
     return markup
 
 
-def _parse(markup: str) -> Iterable[Tuple[int, Optional[str], Optional[Tag]]]:
+def _parse(markup: str) -> Iterable[tuple[int, str | None, Tag | None]]:
     """Parse markup in to an iterable of tuples of (position, text, tag).
 
     Args:
@@ -106,9 +107,9 @@ def _parse(markup: str) -> Iterable[Tuple[int, Optional[str], Optional[Tag]]]:
 
 def render(
     markup: str,
-    style: Union[str, Style] = "",
+    style: str | Style = "",
     emoji: bool = True,
-    emoji_variant: Optional[EmojiVariant] = None,
+    emoji_variant: EmojiVariant | None = None,
 ) -> Text:
     """Render console markup in to a Text instance.
 
@@ -135,16 +136,16 @@ def render(
     append = text.append
     normalize = Style.normalize
 
-    style_stack: List[Tuple[int, Tag]] = []
+    style_stack: list[tuple[int, Tag]] = []
     pop = style_stack.pop
 
-    spans: List[Span] = []
+    spans: list[Span] = []
     append_span = spans.append
 
     _Span = Span
     _Tag = Tag
 
-    def pop_style(style_name: str) -> Tuple[int, Tag]:
+    def pop_style(style_name: str) -> tuple[int, Tag]:
         """Pop tag matching given style name."""
         for index, (_, tag) in enumerate(reversed(style_stack), 1):
             if tag.name == style_name:
@@ -192,7 +193,7 @@ def render(
                         except SyntaxError as error:
                             raise MarkupError(
                                 f"error parsing {parameters!r} in {open_tag.parameters!r}; {error.msg}"
-                            )
+                            ) from error
                         except Exception as error:
                             raise MarkupError(
                                 f"error parsing {open_tag.parameters!r}; {error}"

@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Structured helpers for serializing :class:`rich.text.Text` back to markup.
@@ -20,14 +21,13 @@ Keeping those steps explicit also makes metadata-bearing close ordering changes
 easier to review when the round-trip contract expands in future problems.
 """
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence, Tuple
 
 from .markup_tags import plain_style_markup_pairs, style_markup_pairs
 from .style import Style, StyleType
 
-
-MarkupPair = Tuple[List[str], List[str]]
+MarkupPair = tuple[list[str], list[str]]
 
 
 @dataclass(frozen=True)
@@ -37,10 +37,10 @@ class MarkupEvent:
     offset: int
     closing: bool
     sort_key: int
-    tokens: Tuple[str, ...]
+    tokens: tuple[str, ...]
 
     @property
-    def ordering(self) -> Tuple[int, int, int]:
+    def ordering(self) -> tuple[int, int, int]:
         """Sort key used to stabilize serialization order."""
         return (self.offset, 1 if self.closing else 0, self.sort_key)
 
@@ -76,7 +76,7 @@ class MarkupEventStream:
     """Collect positioned serialization events for a ``Text`` object."""
 
     def init_(self) -> None:
-        self._events: List[MarkupEvent] = []
+        self._events: list[MarkupEvent] = []
 
     def add(self, offset: int, closing: bool, sort_key: int, style: StyleType) -> None:
         opening, closing_tokens = StyleMarkupResolver.resolve(style)
@@ -94,7 +94,7 @@ class MarkupEventStream:
     def extend(self, events: Iterable[MarkupEvent]) -> None:
         self._events.extend(events)
 
-    def sorted(self) -> List[MarkupEvent]:
+    def sorted(self) -> list[MarkupEvent]:
         return sorted(self._events, key=lambda event: event.ordering)
 
 
@@ -102,7 +102,7 @@ class MarkupTokenBuffer:
     """Mutable buffer used while rendering the final markup string."""
 
     def init_(self) -> None:
-        self._tokens: List[str] = []
+        self._tokens: list[str] = []
         self._position = 0
 
     @property
@@ -141,7 +141,7 @@ class TextMarkupSerializer:
     without reintroducing inline string assembly bugs.
     """
 
-    def init_(self, text: "Text") -> None:
+    def init_(self, text: Text) -> None:
         self.text = text
         self.plain = text.plain
         self.stream = MarkupEventStream()
@@ -157,7 +157,7 @@ class TextMarkupSerializer:
             self.stream.add(span.start, False, index, span.style)
             self.stream.add(span.end, True, span_count - index, span.style)
 
-    def build_events(self) -> List[MarkupEvent]:
+    def build_events(self) -> list[MarkupEvent]:
         """Build and sort all markup events for the text instance."""
         self.build_base_style_events()
         self.build_span_events()
@@ -177,7 +177,7 @@ class TextMarkupSerializer:
         return self.emit(self.build_events())
 
 
-def serialize_text_markup(text: "Text") -> str:
+def serialize_text_markup(text: Text) -> str:
     """Serialize a ``Text`` instance to Rich markup."""
     return TextMarkupSerializer(text).render()
 

@@ -26,7 +26,7 @@ def _load_legacy_cli_module() -> ModuleType:
     cached = getattr(_load_legacy_cli_module, "_cached_module", None)
     if isinstance(cached, ModuleType):
         return cached
-    module_path = Path(__file__).resolve().parent.parent / "cli.py"
+    module_path = Path(__file__).resolve().parent.parent / "_legacy_cli.py"
     spec = importlib.util.spec_from_file_location("sdetkit._legacy_cli_module", module_path)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Unable to load CLI module from {module_path}")

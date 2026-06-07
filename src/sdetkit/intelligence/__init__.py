@@ -10,7 +10,7 @@ from types import ModuleType
 
 
 def _load_legacy_intelligence_module() -> ModuleType:
-    module_path = Path(__file__).resolve().parent.parent / "intelligence.py"
+    module_path = Path(__file__).resolve().parent.parent / "_legacy_intelligence.py"
     spec = importlib.util.spec_from_file_location(
         "sdetkit._legacy_intelligence_module", module_path
     )

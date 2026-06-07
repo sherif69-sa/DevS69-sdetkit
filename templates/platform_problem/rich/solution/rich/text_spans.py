@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Helpers for redistributing ``Text`` spans across fragment ranges.
@@ -15,14 +16,15 @@ coordinates without dropping zero-width guards or upsetting the original style
 association.
 """
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
     from .text import Span
 
 
-LineRange = Tuple[int, int]
+LineRange = tuple[int, int]
 
 
 @dataclass(frozen=True)
@@ -90,11 +92,11 @@ class SpanDistributor:
         self.line_ranges = list(line_ranges)
         self.index = LineRangeIndex(self.line_ranges)
 
-    def slice_span(self, span: "Span") -> List[SpanSlice]:
+    def slice_span(self, span: Span) -> list[SpanSlice]:
         span_start, span_end, style = span
         start_line_no = self.index.locate_start(span_start)
         end_line_no = self.index.locate_end(span_end, start_line_no=start_line_no)
-        slices: List[SpanSlice] = []
+        slices: list[SpanSlice] = []
         for line_no in range(start_line_no, end_line_no + 1):
             line_start, line_end = self.line_ranges[line_no]
             new_start = max(0, span_start - line_start)
@@ -103,8 +105,8 @@ class SpanDistributor:
                 slices.append(SpanSlice(line_no=line_no, start=new_start, end=new_end, style=style))
         return slices
 
-    def distribute(self, spans: Iterable["Span"]) -> List[List[SpanSlice]]:
-        grouped: List[List[SpanSlice]] = [[] for _ in self.line_ranges]
+    def distribute(self, spans: Iterable[Span]) -> list[list[SpanSlice]]:
+        grouped: list[list[SpanSlice]] = [[] for _ in self.line_ranges]
         for span in spans:
             for span_slice in self.slice_span(span):
                 grouped[span_slice.line_no].append(span_slice)

@@ -18,7 +18,7 @@ def main() -> int:
         print(f"Missing Cycle 3 proof contract files: {', '.join(missing)}", file=sys.stderr)
         return 1
 
-    cli = (ROOT / "src/sdetkit/cli.py").read_text(encoding="utf-8")
+    cli = (ROOT / "src/sdetkit/_legacy_cli.py").read_text(encoding="utf-8")
     if '"proof",' not in cli and '{"evidence-assets", "proof"}' not in cli:
         print("CLI must expose proof command", file=sys.stderr)
         return 1
