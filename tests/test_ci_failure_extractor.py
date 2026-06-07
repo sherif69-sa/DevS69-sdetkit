@@ -3,7 +3,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit.ci_failure_extractor import build_failed_check_logs, main
+from sdetkit.ci_failure_extractor import (
+    build_failed_check_logs,
+    main,
+    write_failure_vector_artifacts,
+)
 from sdetkit.diagnostic_vector_engine import build_diagnostic_vector
 
 
@@ -86,3 +90,74 @@ def test_ci_failure_extractor_cli_writes_failed_check_logs(tmp_path: Path, capsy
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["summary"]["unknown_count"] == 1
     assert payload["failed_checks"][0]["review_first"] is True
+
+
+def test_ci_failure_extractor_writes_failure_vector_artifacts(tmp_path: Path) -> None:
+    log_path = tmp_path / "pytest" / "ci.log"
+    vectors_out = tmp_path / "failure-vectors.json"
+    vectors_md = tmp_path / "failure-vectors.md"
+    log_path.parent.mkdir()
+    log_path.write_text(
+        "Run python -m pytest -q\n"
+        "FAILED tests/test_widget.py::test_widget_contract - AssertionError\n"
+        "Error: Process completed with exit code 1.\n",
+        encoding="utf-8",
+    )
+
+    payload = write_failure_vector_artifacts(
+        [log_path],
+        json_out=vectors_out,
+        markdown_out=vectors_md,
+        environment="github_actions",
+    )
+
+    assert payload["schema_version"] == "sdetkit.failure_vector.bundle.v1"
+    assert payload["failure_vector_count"] == 1
+    assert vectors_out.exists()
+    assert vectors_md.exists()
+    assert "# Failure Vector Bundle" in vectors_md.read_text(encoding="utf-8")
+
+
+def test_ci_failure_extractor_cli_can_emit_failure_vector_bundle(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    log_path = tmp_path / "mypy" / "ci.log"
+    failed_logs = tmp_path / "failed-check-logs.json"
+    vectors_out = tmp_path / "failure-vectors.json"
+    vectors_md = tmp_path / "failure-vectors.md"
+    log_path.parent.mkdir()
+    log_path.write_text(
+        "Run python -m mypy src\n"
+        "src/sdetkit/example.py:10: error: Incompatible return value type\n"
+        "Error: Process completed with exit code 1.\n",
+        encoding="utf-8",
+    )
+
+    rc = main(
+        [
+            "--log",
+            str(log_path),
+            "--out",
+            str(failed_logs),
+            "--failure-vectors-out",
+            str(vectors_out),
+            "--failure-vectors-md",
+            str(vectors_md),
+            "--environment",
+            "github_actions",
+            "--format",
+            "text",
+        ]
+    )
+
+    assert rc == 0
+    stdout = capsys.readouterr().out
+    assert f"failure_vectors_json={vectors_out}" in stdout
+    assert f"failure_vectors_md={vectors_md}" in stdout
+    assert "failure_vector_count=1" in stdout
+
+    vector_payload = json.loads(vectors_out.read_text(encoding="utf-8"))
+    assert vector_payload["environment"] == "github_actions"
+    assert vector_payload["failure_vectors"][0]["command"] == "python -m mypy src"
+    assert vector_payload["failure_vectors"][0]["failure_class"] == "type"
