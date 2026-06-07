@@ -7,6 +7,7 @@ from sdetkit.professional_naming_migration import (
     ALIAS_REQUIRED,
     MANUAL_REVIEW,
     PRESERVE_HISTORY,
+    REVIEW_LOCKED_REFERENCE,
     SAFE_CONTENT_REWRITE,
     TEMPLATE_LOCKED,
     build_professional_naming_migration_plan,
@@ -204,3 +205,29 @@ def test_professional_naming_migration_cli_writes_plan(tmp_path: Path, capsys) -
     payload = json.loads(out_path.read_text(encoding="utf-8"))
     assert payload["safe_content_rewrite_count"] == 1
     assert payload["blind_rename_allowed"] is False
+
+
+def test_professional_naming_migration_preserves_review_locked_references() -> None:
+    inventory = {
+        "items": [
+            {
+                "term": "closeout",
+                "path": "docs/professional-naming-debt-register.md",
+                "match_type": "content",
+                "classification": "docs_only_cleanup",
+                "actionability": "review_first_context",
+                "actionability_reason": "review_locked_naming_governance_reference",
+            }
+        ]
+    }
+
+    payload = build_professional_naming_migration_plan(inventory, _rename_map())
+
+    assert payload["review_locked_reference_count"] == 1
+    assert payload["review_locked_reference_rewrite"] is False
+    assert payload["items"][0]["migration_class"] == REVIEW_LOCKED_REFERENCE
+    assert payload["items"][0]["allowed_to_apply"] is False
+    assert (
+        payload["items"][0]["required_guard"]
+        == "preserve naming governance reference unless explicit migration plan exists"
+    )

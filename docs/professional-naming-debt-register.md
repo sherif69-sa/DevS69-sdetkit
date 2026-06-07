@@ -117,3 +117,9 @@ actionable while avoiding churn in compatibility evidence.
 The professional naming cleanup plan now reports review-locked naming governance
 references separately from generic review-first findings. This keeps governance
 evidence visible without recommending it as a direct cleanup slice.
+
+## Migration plan review-lock progress
+
+The professional naming migration plan now separates review-locked naming
+governance references from generic manual-review findings. This preserves naming
+governance evidence unless a dedicated migration plan explicitly owns the change.
