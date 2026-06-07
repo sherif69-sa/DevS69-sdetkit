@@ -1,7 +1,7 @@
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-ROADMAP = REPO_ROOT / "docs" / "roadmap" / "adaptive intelligence-toolkit-roadmap.md"
+ROADMAP = REPO_ROOT / "docs" / "roadmap" / "big-brain-toolkit-roadmap.md"
 MKDOCS = REPO_ROOT / "mkdocs.yml"
 
 
@@ -19,4 +19,4 @@ def test_big_brain_toolkit_roadmap_captures_strengths_gaps_and_upgrades() -> Non
 def test_big_brain_toolkit_roadmap_is_discoverable_in_mkdocs_nav() -> None:
     text = MKDOCS.read_text(encoding="utf-8")
 
-    assert "Big-brain toolkit roadmap: roadmap/adaptive intelligence-toolkit-roadmap.md" in text
+    assert "Big-brain toolkit roadmap: roadmap/big-brain-toolkit-roadmap.md" in text

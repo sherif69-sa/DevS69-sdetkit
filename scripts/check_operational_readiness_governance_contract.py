@@ -252,7 +252,7 @@ def _build_governance_payload(ns: argparse.Namespace) -> dict[str, Any]:
 
 def _render_release_evidence_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# Phase 4 release evidence",
+        "# Operational readiness release evidence",
         "",
         f"- schema_version: `{payload.get('schema_version', '')}`",
         f"- evidence_status: `{payload.get('evidence_status', '')}`",
@@ -604,7 +604,7 @@ def _build_governance_drift_alerts(
 
 def _render_drift_alerts_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# Phase 4 governance drift alerts",
+        "# Operational readiness governance drift alerts",
         "",
         f"- drift_status: `{payload.get('drift_status', '')}`",
         f"- drift_score: `{payload.get('drift_score', '')}`",
