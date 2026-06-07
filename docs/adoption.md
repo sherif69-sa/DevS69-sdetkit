@@ -95,3 +95,27 @@ Use these in order:
 - [Real repo adoption proof](real-repo-adoption.md)
 - [Adoption examples](adoption-examples.md)
 - [Choose your path](choose-your-path.md)
+
+## Operator readiness report
+
+Use the adoption-surface report when you want a human-readable, review-first summary before running commands in an adopted repository:
+
+```bash
+python -m sdetkit adoption-surface \
+  --root . \
+  --out build/sdetkit/adoption-surface.json \
+  --format report
+```
+
+The report summarizes repository identity, detected languages, package managers, test runners, CI systems, security tools, recommended proof commands, review-first unknowns, and the authority boundary.
+
+The command is intentionally read-only. Recommended proof commands are listed for the operator to review and run manually; they are not auto-run by SDETKit.
+
+Authority boundary:
+
+```text
+automation_allowed=false
+patch_application_allowed=false
+merge_authorized=false
+semantic_equivalence_proven=false
+```
