@@ -1,5 +1,3 @@
-Community Program Completion summary
-- Activation score: 36
-- Passed checks: 5
-- Failed checks: 8
-- Critical failures: ['strict_baseline']
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`community-program-completion-summary.md`](../../artifacts/community-program-completion-pack/community-program-completion-summary.md).

@@ -1,0 +1,13 @@
+Optimization Completion Foundation optimization completion summary
+- Activation score: 51
+- Passed checks: 6
+- Failed checks: 8
+- Critical failures: []
+- Expansion automation activation score: `100.0`
+- Expansion automation checks evaluated: `14`
+- Expansion automation delivery board checklist items: `5`
+- Wins:
+  -  continuity is strict-pass with activation score=100.0.
+- Misses:
+  -  delivery board integrity is incomplete (needs >=5 items and /42 anchors).
+  - Optimization contract, quality checklist, or delivery board entries are missing.

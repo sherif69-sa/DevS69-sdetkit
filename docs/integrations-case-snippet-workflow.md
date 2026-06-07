@@ -10,16 +10,16 @@ Lane closes with a major case-snippet upgrade that converts Lane execution-prior
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json`
-- `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md`
+- `docs/artifacts/execution-prioritization-completion-pack/execution-prioritization-completion-summary.json`
+- `docs/artifacts/execution-prioritization-completion-pack/execution-prioritization-delivery-board.md`
 
-## Case Snippet Closeout command lane
+## Case Snippet Completion command lane
 
 ```bash
-python -m sdetkit case-snippet-closeout --format json --strict
-python -m sdetkit case-snippet-closeout --emit-pack-dir docs/artifacts/case-snippet-closeout-pack --format json --strict
-python -m sdetkit case-snippet-closeout --execute --evidence-dir docs/artifacts/case-snippet-closeout-pack/evidence --format json --strict
-python scripts/check_case_snippet_closeout_contract_51.py
+python -m sdetkit case-snippet-completion --format json --strict
+python -m sdetkit case-snippet-completion --emit-pack-dir docs/artifacts/case-snippet-completion-pack --format json --strict
+python -m sdetkit case-snippet-completion --execute --evidence-dir docs/artifacts/case-snippet-completion-pack/evidence --format json --strict
+python scripts/check_case_snippet_completion_contract_51.py
 ```
 
 ## Case snippet completion report contract

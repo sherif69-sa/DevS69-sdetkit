@@ -6,7 +6,7 @@ Close Cycle 78 with a high-signal ecosystem-priorities lane that upgrades Cycle 
 
 ### What shipped
 
-- New `ecosystem-priorities-closeout` CLI lane with strict scoring and Cycle 77 continuity validation.
+- New `ecosystem-priorities-completion` CLI lane with strict scoring and Cycle 77 continuity validation.
 - New Cycle 78 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Cycle 78 contract checker script for CI and local execution gating.
 - New `docs/roadmap/plans/cycle78-ecosystem-priorities-plan.json` baseline dataset scaffold for ecosystem execution planning.
@@ -14,10 +14,10 @@ Close Cycle 78 with a high-signal ecosystem-priorities lane that upgrades Cycle 
 ### Command lane
 
 ```bash
-python -m sdetkit ecosystem-priorities-closeout --format json --strict
-python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/cycle78-ecosystem-priorities-closeout-pack --format json --strict
-python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/cycle78-ecosystem-priorities-closeout-pack/evidence --format json --strict
-python scripts/check_ecosystem_priorities_closeout_contract.py
+python -m sdetkit ecosystem-priorities-completion --format json --strict
+python -m sdetkit ecosystem-priorities-completion --emit-pack-dir docs/artifacts/cycle78-ecosystem-priorities-completion-pack --format json --strict
+python -m sdetkit ecosystem-priorities-completion --execute --evidence-dir docs/artifacts/cycle78-ecosystem-priorities-completion-pack/evidence --format json --strict
+python scripts/check_ecosystem_priorities_completion_contract.py
 ```
 
 ### Outcome

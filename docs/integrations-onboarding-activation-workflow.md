@@ -2,7 +2,7 @@
 
 Lane closes with a major onboarding activation upgrade that turns Lane community operations evidence into deterministic contributor activation, ownership handoffs, and roadmap voting execution.
 
-## Why Onboarding Activation Closeout matters
+## Why Onboarding Activation Completion matters
 
 - Converts Lane community momentum into repeatable onboarding and mentor ownership loops.
 - Protects onboarding outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -10,16 +10,16 @@ Lane closes with a major onboarding activation upgrade that turns Lane community
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json`
-- `docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md`
+- `docs/artifacts/community-program-completion-pack/community-program-completion-summary.json`
+- `docs/artifacts/community-program-completion-pack/community-program-delivery-board.md`
 
-## Onboarding Activation Closeout command lane (legacy)
+## Onboarding Activation Completion command lane (legacy)
 
 ```bash
-python -m sdetkit onboarding-activation-closeout --format json --strict
-python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/onboarding-activation-closeout-pack --format json --strict
-python -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/onboarding-activation-closeout-pack/evidence --format json --strict
-python scripts/check_onboarding_activation_closeout_contract_63.py
+python -m sdetkit onboarding-activation-completion --format json --strict
+python -m sdetkit onboarding-activation-completion --emit-pack-dir docs/artifacts/onboarding-activation-completion-pack --format json --strict
+python -m sdetkit onboarding-activation-completion --execute --evidence-dir docs/artifacts/onboarding-activation-completion-pack/evidence --format json --strict
+python scripts/check_onboarding_activation_completion_contract_63.py
 ```
 
 ## Onboarding activation contract
@@ -37,7 +37,7 @@ python scripts/check_onboarding_activation_closeout_contract_63.py
 - [ ] Scorecard captures activation conversion, mentor SLA, roadmap-vote participation, confidence, and recovery owner
 - [ ] Artifact pack includes onboarding brief, orientation script, ownership matrix, roadmap-vote brief, and execution log
 
-## Onboarding Activation Closeout delivery board (legacy)
+## Onboarding Activation Completion delivery board (legacy)
 
 - [ ] Lane onboarding launch brief committed
 - [ ] Lane orientation script + ownership matrix published

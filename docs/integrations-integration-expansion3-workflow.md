@@ -2,7 +2,7 @@
 
 Lane closes with a major integration upgrade that converts Lane integration outputs into an advanced Jenkins reference pipeline.
 
-## Why Integration Expansion3 Closeout matters
+## Why Integration Expansion3 Completion matters
 
 - Converts Lane governance outputs into reusable Jenkins implementation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -10,17 +10,17 @@ Lane closes with a major integration upgrade that converts Lane integration outp
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json`
-- `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md`
+- `docs/artifacts/integration-expansion2-completion-pack/integration-expansion2-completion-summary.json`
+- `docs/artifacts/integration-expansion2-completion-pack/integration-expansion2-delivery-board.md`
 - `templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile`
 
-## Integration Expansion3 Closeout command lane (legacy)
+## Integration Expansion3 Completion command lane (legacy)
 
 ```bash
-python -m sdetkit integration-expansion3-closeout --format json --strict
-python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/integration-expansion3-closeout-pack --format json --strict
-python -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/integration-expansion3-closeout-pack/evidence --format json --strict
-python scripts/check_integration_expansion3_closeout_contract.py
+python -m sdetkit integration-expansion3-completion --format json --strict
+python -m sdetkit integration-expansion3-completion --emit-pack-dir docs/artifacts/integration-expansion3-completion-pack --format json --strict
+python -m sdetkit integration-expansion3-completion --execute --evidence-dir docs/artifacts/integration-expansion3-completion-pack/evidence --format json --strict
+python scripts/check_integration_expansion3_completion_contract.py
 ```
 
 ## Integration expansion contract
@@ -38,7 +38,7 @@ python scripts/check_integration_expansion3_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, Jenkins blueprint, matrix plan, KPI scorecard, and execution log
 
-## Integration Expansion3 Closeout delivery board (legacy)
+## Integration Expansion3 Completion delivery board (legacy)
 
 - [ ] Lane integration brief committed
 - [ ] Lane advanced Jenkins pipeline blueprint published

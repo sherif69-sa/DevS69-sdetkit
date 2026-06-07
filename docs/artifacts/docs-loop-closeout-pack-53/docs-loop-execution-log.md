@@ -1,3 +1,3 @@
-#  Execution Log
+# Moved: professional documentation
 
-- [ ] 2026-03-20: Record misses, wins, and  re-engagement priorities.
+This compatibility page preserves the legacy public path. The professional page is now [`docs-loop-execution-log.md`](../../artifacts/docs-loop-completion-pack-53/docs-loop-execution-log.md).

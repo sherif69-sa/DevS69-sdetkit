@@ -6,7 +6,7 @@ Close Cycle 66 with a high-signal integration lane that converts Cycle 65 weekly
 
 ## What shipped
 
-- New `cycle66-integration-expansion2-closeout` CLI lane with strict scoring and Cycle 65 continuity validation.
+- New `cycle66-integration-expansion2-completion` CLI lane with strict scoring and Cycle 65 continuity validation.
 - New Cycle 66 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Cycle 66 contract checker script for CI and local execution gating.
 - New integration artifact pack outputs for pipeline blueprinting, matrix planning, KPI scoring, and execution logging.
@@ -15,10 +15,10 @@ Close Cycle 66 with a high-signal integration lane that converts Cycle 65 weekly
 ## Validation flow
 
 ```bash
-python -m sdetkit cycle66-integration-expansion2-closeout --format json --strict
-python -m sdetkit cycle66-integration-expansion2-closeout --emit-pack-dir docs/artifacts/integration-expansion2-closeout-pack --format json --strict
-python -m sdetkit cycle66-integration-expansion2-closeout --execute --evidence-dir docs/artifacts/integration-expansion2-closeout-pack/evidence --format json --strict
-python scripts/check_integration_expansion2_closeout_contract.py
+python -m sdetkit cycle66-integration-expansion2-completion --format json --strict
+python -m sdetkit cycle66-integration-expansion2-completion --emit-pack-dir docs/artifacts/integration-expansion2-completion-pack --format json --strict
+python -m sdetkit cycle66-integration-expansion2-completion --execute --evidence-dir docs/artifacts/integration-expansion2-completion-pack/evidence --format json --strict
+python scripts/check_integration_expansion2_completion_contract.py
 ```
 
 ## Outcome

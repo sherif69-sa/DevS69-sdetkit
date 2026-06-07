@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added Cycle 39 closeout command: `python -m sdetkit playbook-post`.
+- Added Cycle 39 completion command: `python -m sdetkit playbook-post`.
 - Added strict continuity checks that require Cycle 38 strict-pass and board integrity.
 - Added Cycle 39 artifact outputs for playbook draft, rollout plan, KPI scorecard, execution log, and validation commands.
 

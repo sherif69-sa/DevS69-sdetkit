@@ -1,7 +1,3 @@
-#  validation commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit phase2-hardening-closeout --format json --strict
-python -m sdetkit phase2-hardening-closeout --emit-pack-dir docs/artifacts/phase2-hardening-closeout-pack --format json --strict
-python scripts/check_phase2_hardening_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`release-readiness-hardening-validation-commands.md`](../../artifacts/release-readiness-hardening-completion-pack/release-readiness-hardening-validation-commands.md).

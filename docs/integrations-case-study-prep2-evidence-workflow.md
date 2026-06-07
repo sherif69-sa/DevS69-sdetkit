@@ -2,7 +2,7 @@
 
 Lane closes with a major upgrade that turns Lane integration outputs into a measurable triage-speed case-study prep pack.
 
-## Why Case Study Prep 2 Closeout matters
+## Why Case Study Prep 2 Completion matters
 
 - Converts Lane implementation signals into before/after triage-speed evidence.
 - Protects case-study quality with strict contract coverage, runnable commands, and rollback safety.
@@ -10,17 +10,17 @@ Lane closes with a major upgrade that turns Lane integration outputs into a meas
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-closeout-summary.json`
-- `docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md`
+- `docs/artifacts/case-study-prep1-completion-pack/case-study-prep1-completion-summary.json`
+- `docs/artifacts/case-study-prep1-completion-pack/case-study-prep1-delivery-board.md`
 - `docs/roadmap/plans/triage-speed-case-study.json`
 
-## Case Study Prep 2 Closeout command lane (Legacy Lane)
+## Case Study Prep 2 Completion command lane (Legacy Lane)
 
 ```bash
-python -m sdetkit case-study-prep2-closeout --format json --strict
-python -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/case-study-prep2-closeout-pack --format json --strict
-python -m sdetkit case-study-prep2-closeout --execute --evidence-dir docs/artifacts/case-study-prep2-closeout-pack/evidence --format json --strict
-python scripts/check_case_study_prep2_closeout_contract.py
+python -m sdetkit case-study-prep2-completion --format json --strict
+python -m sdetkit case-study-prep2-completion --emit-pack-dir docs/artifacts/case-study-prep2-completion-pack --format json --strict
+python -m sdetkit case-study-prep2-completion --execute --evidence-dir docs/artifacts/case-study-prep2-completion-pack/evidence --format json --strict
+python scripts/check_case_study_prep2_completion_contract.py
 ```
 
 ## Case-study prep contract
@@ -28,7 +28,7 @@ python scripts/check_case_study_prep2_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane triage-speed case-study prep and signoff.
 - This lane references Lane case-study prep outputs, governance decisions, and KPI continuity signals.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records before/after triage-speed deltas, evidence confidence notes, and Lane prep priorities.
+- Lane completion records before/after triage-speed deltas, evidence confidence notes, and Lane prep priorities.
 
 ## Case-study quality checklist
 
@@ -38,7 +38,7 @@ python scripts/check_case_study_prep2_closeout_contract.py
 - [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log
 
-## Case Study Prep 2 Closeout delivery board (Legacy Lane)
+## Case Study Prep 2 Completion delivery board (Legacy Lane)
 
 - [ ] Lane integration brief committed
 - [ ] Lane triage-speed case-study narrative published

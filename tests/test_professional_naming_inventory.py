@@ -104,10 +104,10 @@ def test_professional_naming_inventory_separates_actionable_prose_from_headings(
 def test_professional_naming_inventory_marks_review_locked_docs_review_first(
     tmp_path: Path,
 ) -> None:
-    docs = tmp_path / "docs" / "integrations-release-prioritization-completion.md"
+    docs = tmp_path / "docs" / "integrations-release-prioritization-closeout.md"
     docs.parent.mkdir(parents=True)
     docs.write_text(
-        "This closeout records release prioritization pack upgrades, storyline outcomes, and launch priorities.\n",
+        "This completion records release prioritization pack upgrades, storyline outcomes, and launch priorities.\n",
         encoding="utf-8",
     )
 

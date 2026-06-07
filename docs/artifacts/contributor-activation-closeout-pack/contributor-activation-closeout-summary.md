@@ -1,5 +1,3 @@
-Contributor Activation Completion summary (legacy: )
-- Activation score: 48
-- Passed checks: 6
-- Failed checks: 8
-- Critical failures: ['docs_loop_closeout_strict_baseline']
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`contributor-activation-completion-summary.md`](../../artifacts/contributor-activation-completion-pack/contributor-activation-completion-summary.md).

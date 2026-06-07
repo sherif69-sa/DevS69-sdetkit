@@ -22,4 +22,4 @@
 ## Corrective actions
 - [ ] Re-run  pack generation and restore summary JSON for traceability.
 - [ ] Refresh KPI baseline/current snapshots and regenerate  artifacts.
-- [ ] Address  documentation and discoverability gaps before phase closeout.
+- [ ] Address  documentation and discoverability gaps before phase completion.

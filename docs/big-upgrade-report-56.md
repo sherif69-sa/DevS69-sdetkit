@@ -6,7 +6,7 @@ Close Cycle 56 with a high-confidence stabilization lane that converts Cycle 55 
 
 ## Big upgrades delivered
 
-- Added a dedicated Cycle 56 CLI lane: `cycle56-stabilization-closeout`.
+- Added a dedicated Cycle 56 CLI lane: `cycle56-stabilization-completion`.
 - Added strict stabilization contract checks and discoverability checks.
 - Added artifact-pack emission for stabilization brief, risk ledger, KPI scorecard, and execution logs.
 - Added deterministic execution evidence capture for repeatable completion report verification.
@@ -14,10 +14,10 @@ Close Cycle 56 with a high-confidence stabilization lane that converts Cycle 55 
 ## Commands
 
 ```bash
-python -m sdetkit cycle56-stabilization-closeout --format json --strict
-python -m sdetkit cycle56-stabilization-closeout --emit-pack-dir docs/artifacts/cycle56-stabilization-closeout-pack --format json --strict
-python -m sdetkit cycle56-stabilization-closeout --execute --evidence-dir docs/artifacts/cycle56-stabilization-closeout-pack/evidence --format json --strict
-python scripts/check_stabilization_closeout_contract.py
+python -m sdetkit cycle56-stabilization-completion --format json --strict
+python -m sdetkit cycle56-stabilization-completion --emit-pack-dir docs/artifacts/cycle56-stabilization-completion-pack --format json --strict
+python -m sdetkit cycle56-stabilization-completion --execute --evidence-dir docs/artifacts/cycle56-stabilization-completion-pack/evidence --format json --strict
+python scripts/check_stabilization_completion_contract.py
 ```
 
 ## Outcome

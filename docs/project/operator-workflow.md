@@ -78,7 +78,7 @@ Use only when needed:
 
 Do **not** explore these unless the task explicitly needs them:
 
-- hidden/legacy closeout lanes (`*-closeout`, transition-era commands)
+- hidden/legacy completion lanes (`*-completion`, transition-era commands)
 - broad advanced families (`ops`, `agent`, deep playbook families)
 - archive/history-heavy docs
 

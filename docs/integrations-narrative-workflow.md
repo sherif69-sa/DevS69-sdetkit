@@ -10,16 +10,16 @@ Lane closes with a major narrative upgrade that converts Lane case-snippet evide
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json`
-- `docs/artifacts/case-snippet-closeout-pack/delivery-board.md`
+- `docs/artifacts/case-snippet-completion-pack/case-snippet-completion-summary.json`
+- `docs/artifacts/case-snippet-completion-pack/delivery-board.md`
 
-## Narrative Closeout command lane
+## Narrative Completion command lane
 
 ```bash
-python -m sdetkit narrative-closeout --format json --strict
-python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/narrative-closeout-pack --format json --strict
-python -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/narrative-closeout-pack/evidence --format json --strict
-python scripts/check_narrative_closeout_contract.py
+python -m sdetkit narrative-completion --format json --strict
+python -m sdetkit narrative-completion --emit-pack-dir docs/artifacts/narrative-completion-pack --format json --strict
+python -m sdetkit narrative-completion --execute --evidence-dir docs/artifacts/narrative-completion-pack/evidence --format json --strict
+python scripts/check_narrative_completion_contract.py
 ```
 
 ## Narrative completion report contract

@@ -6,7 +6,7 @@ Close Cycle 64 with an advanced GitHub Actions integration lane that converts Cy
 
 ## What shipped
 
-- New `cycle64-integration-expansion-closeout` CLI lane with strict scoring and Cycle 63 continuity validation.
+- New `cycle64-integration-expansion-completion` CLI lane with strict scoring and Cycle 63 continuity validation.
 - New Cycle 64 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Cycle 64 contract checker script for CI and local execution gating.
 - New advanced GitHub Actions reference workflow with reusable trigger support, matrix coverage, caching, and concurrency controls.
@@ -14,10 +14,10 @@ Close Cycle 64 with an advanced GitHub Actions integration lane that converts Cy
 ## Validation flow
 
 ```bash
-python -m sdetkit cycle64-integration-expansion-closeout --format json --strict
-python -m sdetkit cycle64-integration-expansion-closeout --emit-pack-dir docs/artifacts/integration-expansion-closeout-pack --format json --strict
-python -m sdetkit cycle64-integration-expansion-closeout --execute --evidence-dir docs/artifacts/integration-expansion-closeout-pack/evidence --format json --strict
-python scripts/check_integration_expansion_closeout_contract.py
+python -m sdetkit cycle64-integration-expansion-completion --format json --strict
+python -m sdetkit cycle64-integration-expansion-completion --emit-pack-dir docs/artifacts/integration-expansion-completion-pack --format json --strict
+python -m sdetkit cycle64-integration-expansion-completion --execute --evidence-dir docs/artifacts/integration-expansion-completion-pack/evidence --format json --strict
+python scripts/check_integration_expansion_completion_contract.py
 ```
 
 ## Outcome

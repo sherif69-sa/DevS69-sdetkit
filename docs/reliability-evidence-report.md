@@ -23,6 +23,6 @@ python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifa
 python scripts/check_reliability_evidence_pack_contract.py
 ```
 
-## Closeout
+## Completion
 
 Reliability evidence now provides one deterministic reliability score, one strict gate lane, and one artifact/evidence bundle ready for weekly review and release-readiness reviews.

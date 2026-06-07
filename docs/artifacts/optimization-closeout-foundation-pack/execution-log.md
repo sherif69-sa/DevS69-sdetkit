@@ -1,3 +1,3 @@
-# Optimization Closeout Foundation Execution Log
+# Moved: professional documentation
 
-- [ ] 2026-03-12: Record misses, wins, and  acceleration priorities.
+This compatibility page preserves the legacy public path. The professional page is now [`execution-log.md`](../../artifacts/optimization-completion-foundation-pack/execution-log.md).

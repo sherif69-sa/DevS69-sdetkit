@@ -17,7 +17,7 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 
 | Area | Primary docs | Notes |
 | --- | --- | --- |
-| Getting started | [Install](install.md), [Quickstart](quickstart-copy-paste.md), [Blank repo to value](blank-repo-to-value-60-seconds.md), [Ready to use](ready-to-use.md) | Keep these copy-pasteable and beginner-oriented. |
+| Getting started | [Install](install.md), [Quickstart](quickstart-copy-paste.md), [Blank repo to value](blank-repo-to-value-60-seconds.md), [Ready to use](ready-to-use.md) | Keep these copy-pasteable and starter-oriented. |
 | Operator guide | [Operator essentials](operator-essentials.md), [Operator onboarding](operator-onboarding-7-day.md), [Recommended CI flow](recommended-ci-flow.md) | Daily operator work belongs here, not in the README. |
 | Investigation / diagnosis | [Investigation operator guide](investigation-operator-guide.md), [Adaptive Diagnosis Intelligence](adaptive-diagnosis.md), [First failure triage](first-failure-triage.md) | Diagnostic/report-only unless a guarded lane explicitly authorizes mutation. |
 | Maintenance / autopilot | [Artifact reference](artifact-reference.md#maintenance-autopilot-upload-set), [Operations handbook](operations-handbook.md), [Automation bots](automation-bots.md) | Treat plans, candidates, and safe-fix outputs as evidence until reviewed policy approves the next step. |
@@ -32,7 +32,7 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 | Directory | Contents | Tidy rule |
 | --- | --- | --- |
 | `docs/` | Primary human docs and reference pages. | New primary guides must be linked from [Start here homepage](index.md) or this map. |
-| `docs/artifacts/` | Committed generated/sample artifacts, proof packs, and historical closeout material. | Label as generated/sample; do not treat as current runtime evidence. |
+| `docs/artifacts/` | Committed generated/sample artifacts, proof packs, and historical completion material. | Label as generated/sample; do not treat as current runtime evidence. |
 | `docs/archive/` | Historical and transition-era docs. | Keep non-primary material here when it is no longer part of the operator path. |
 | `docs/business_execution/` | Business execution and GTM planning docs. | Keep business/program material out of first-run operator docs. |
 | `docs/contracts/` | Formal contracts and schema-oriented references. | Link from the relevant feature doc instead of duplicating contract text. |

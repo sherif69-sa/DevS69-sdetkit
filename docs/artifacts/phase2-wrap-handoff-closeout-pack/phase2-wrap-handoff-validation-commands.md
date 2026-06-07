@@ -1,7 +1,3 @@
-#  validation commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit phase2-wrap-handoff-closeout --format json --strict
-python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict
-python scripts/check_phase2_wrap_handoff_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`release-readiness-wrap-handoff-validation-commands.md`](../../artifacts/release-readiness-wrap-handoff-completion-pack/release-readiness-wrap-handoff-validation-commands.md).

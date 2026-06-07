@@ -21,7 +21,7 @@ Use this page as a concise handoff, then follow the detailed path in [`CONTRIBUT
 
 - Do not add new product surfaces, kits, bots, workers, or integrations.
 - Do not change CLI behavior or command semantics.
-- Do not remove deep docs; demote/reorder/reframe instead.
+- Do not remove deep docs; examplete/reorder/reframe instead.
 - For your first PR, avoid broad cross-cutting refactors; start with safe starter surfaces first.
 
 ## Baseline contributor validation commands

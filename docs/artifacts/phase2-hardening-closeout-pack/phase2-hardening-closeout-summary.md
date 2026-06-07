@@ -1,5 +1,3 @@
-Phase 2 Hardening Closeout summary (legacy: )
-- Activation score: 100
-- Passed checks: 14
-- Failed checks: 0
-- Critical failures: []
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`release-readiness-hardening-completion-summary.md`](../../artifacts/release-readiness-hardening-completion-pack/release-readiness-hardening-completion-summary.md).

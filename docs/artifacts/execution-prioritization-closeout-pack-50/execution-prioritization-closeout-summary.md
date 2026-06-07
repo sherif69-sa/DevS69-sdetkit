@@ -1,13 +1,3 @@
- execution prioritization completion summary
-- Activation score: 51
-- Passed checks: 6
-- Failed checks: 8
-- Critical failures: []
--  activation score: `100.0`
--  checks evaluated: `14`
--  delivery board checklist items: `5`
-- Wins:
-  -  continuity is strict-pass with activation score=100.0.
-- Misses:
-  -  delivery board integrity is incomplete (needs >=5 items and /50 anchors).
-  - Execution prioritization contract, quality checklist, or delivery board entries are missing.
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`execution-prioritization-completion-summary.md`](../../artifacts/execution-prioritization-completion-pack-50/execution-prioritization-completion-summary.md).

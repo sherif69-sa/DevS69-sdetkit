@@ -67,7 +67,7 @@ External repositories should use direct `python -m sdetkit ...` commands.
 - Trust breaks only when artifacts are missing or malformed.
 - Inspect `build/release-preflight.json` and `build/gate-fast.json` before raw logs.
 
-## Beginner troubleshooting for the canonical first path
+## Starter troubleshooting for the canonical first path
 
 The first run often fails for practical setup reasons. That is normal.
 

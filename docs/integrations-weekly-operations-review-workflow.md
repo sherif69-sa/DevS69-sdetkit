@@ -10,15 +10,15 @@ Lane closes with a major weekly-review upgrade that converts Lane objection evid
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/objection-closeout-pack/objection-closeout-summary.json`
-- `docs/artifacts/objection-closeout-pack/objection-delivery-board.md`
+- `docs/artifacts/objection-completion-pack/objection-completion-summary.json`
+- `docs/artifacts/objection-completion-pack/objection-delivery-board.md`
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit weekly-review-closeout --format json --strict
-python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-pack --format json --strict
-python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-pack/evidence --format json --strict
+python -m sdetkit weekly-review-completion --format json --strict
+python -m sdetkit weekly-review-completion --emit-pack-dir docs/artifacts/weekly-review-completion-pack --format json --strict
+python -m sdetkit weekly-review-completion --execute --evidence-dir docs/artifacts/weekly-review-completion-pack/evidence --format json --strict
 python scripts/check_weekly_review_workflow_contract.py
 ```
 

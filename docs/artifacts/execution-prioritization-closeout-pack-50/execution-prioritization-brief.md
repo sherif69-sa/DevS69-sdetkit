@@ -1,3 +1,3 @@
-#  Execution Prioritization Brief
+# Moved: professional documentation
 
-- Objective: close  with measurable execution-board discipline and prioritized release storytelling gains.
+This compatibility page preserves the legacy public path. The professional page is now [`execution-prioritization-brief.md`](../../artifacts/execution-prioritization-completion-pack-50/execution-prioritization-brief.md).

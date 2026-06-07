@@ -2,7 +2,7 @@
 
 Lane closes with a major upgrade that converts Lane trust FAQ outcomes into a deterministic evidence narrative operating lane.
 
-## Why Evidence Narrative Closeout matters
+## Why Evidence Narrative Completion matters
 
 - Converts Lane trust FAQ outcomes into reusable evidence narratives across docs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -10,17 +10,17 @@ Lane closes with a major upgrade that converts Lane trust FAQ outcomes into a de
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-closeout-summary.json`
-- `docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-delivery-board.md`
+- `docs/artifacts/trust-faq-expansion-completion-pack/trust-faq-expansion-completion-summary.json`
+- `docs/artifacts/trust-faq-expansion-completion-pack/trust-faq-expansion-delivery-board.md`
 - `docs/roadmap/plans/evidence-narrative-plan.json`
 
 ## Command lane
 
 ```bash
-python -m sdetkit evidence-narrative-closeout --format json --strict
-python -m sdetkit evidence-narrative-closeout --emit-pack-dir docs/artifacts/evidence-narrative-closeout-pack --format json --strict
-python -m sdetkit evidence-narrative-closeout --execute --evidence-dir docs/artifacts/evidence-narrative-closeout-pack/evidence --format json --strict
-python scripts/check_evidence_narrative_closeout_contract.py
+python -m sdetkit evidence-narrative-completion --format json --strict
+python -m sdetkit evidence-narrative-completion --emit-pack-dir docs/artifacts/evidence-narrative-completion-pack --format json --strict
+python -m sdetkit evidence-narrative-completion --execute --evidence-dir docs/artifacts/evidence-narrative-completion-pack/evidence --format json --strict
+python scripts/check_evidence_narrative_completion_contract.py
 ```
 
 ## Evidence narrative contract

@@ -246,7 +246,7 @@ Expected cycle:
 ### Tier C (50-64) — monitor and educate
 
 Actions:
-1. Lightweight educational sequence.
+1. Lightweight operator guidanceal sequence.
 2. Invite to workshop/webinar/office hours.
 3. Trigger re-qualification on incident or governance event.
 

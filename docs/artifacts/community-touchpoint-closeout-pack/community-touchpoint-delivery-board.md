@@ -1,6 +1,3 @@
-# Community touchpoint delivery board
-- [ ]  integration brief committed
-- [ ]  community touchpoint plan committed
-- [ ]  touchpoint session ledger exported
-- [ ]  touchpoint KPI scorecard snapshot exported
-- [ ]  ecosystem priorities drafted from  learnings
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`community-touchpoint-delivery-board.md`](../../artifacts/community-touchpoint-completion-pack/community-touchpoint-delivery-board.md).

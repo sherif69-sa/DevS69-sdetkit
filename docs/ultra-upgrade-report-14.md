@@ -18,7 +18,7 @@ The previous Cycle 14 implementation only mirrored week-one coverage and did not
   - Expanded Cycle 14 mode to accept growth signals (`traffic`, `stars`, `discussions`, `blocker_fixes`).
   - Added optional previous-week signal loading and automatic week-over-week delta computation.
   - Added strict mode gate (`--strict`) to fail when shipped scope is incomplete or week-two signals are missing.
-  - Added emitted closeout pack support (`--emit-pack-dir`) for checklist, KPI scorecard JSON, and blocker action plan.
+  - Added emitted completion pack support (`--emit-pack-dir`) for checklist, KPI scorecard JSON, and blocker action plan.
 - `tests/test_weekly_review.py`
   - Added growth signal + delta contract coverage for week-two report generation.
 - `docs/cli.md`

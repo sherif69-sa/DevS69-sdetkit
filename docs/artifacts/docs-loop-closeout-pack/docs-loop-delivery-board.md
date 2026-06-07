@@ -1,7 +1,3 @@
-#  Delivery Board
+# Moved: professional documentation
 
-- [ ]  docs-loop brief committed
-- [ ]  docs-loop plan reviewed with owner + backup
-- [ ]  cross-link map exported
-- [ ]  KPI scorecard snapshot exported
-- [ ]  re-engagement priorities drafted from  learnings
+This compatibility page preserves the legacy public path. The professional page is now [`docs-loop-delivery-board.md`](../../artifacts/docs-loop-completion-pack/docs-loop-delivery-board.md).

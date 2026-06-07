@@ -4,9 +4,9 @@ Cycle 79 delivers a completion report-grade scale upgrade lane that promotes Cyc
 
 ## What shipped
 
-- New command: `python -m sdetkit scale-upgrade-closeout`.
-- New integration guide: `docs/integrations-cycle79-scale-upgrade-closeout.md`.
-- New contract checker: `python scripts/check_scale_upgrade_closeout_contract_79.py`.
+- New command: `python -m sdetkit scale-upgrade-completion`.
+- New integration guide: `docs/integrations-cycle79-scale-upgrade-completion.md`.
+- New contract checker: `python scripts/check_scale_upgrade_completion_contract_79.py`.
 - New artifact schema emitted via `--emit-pack-dir` and deterministic evidence via `--execute`.
 
 ## Why this is a big upgrade

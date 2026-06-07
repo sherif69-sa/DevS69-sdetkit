@@ -10,15 +10,15 @@ Lane closes with a major objection-handling upgrade that converts Lane reliabili
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/cycle47-reliability-closeout-pack/cycle47-reliability-closeout-summary.json`
-- `docs/artifacts/cycle47-reliability-closeout-pack/cycle47-delivery-board.md`
+- `docs/artifacts/cycle47-reliability-completion-pack/cycle47-reliability-completion-summary.json`
+- `docs/artifacts/cycle47-reliability-completion-pack/cycle47-delivery-board.md`
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit objection-closeout --format json --strict
-python -m sdetkit objection-closeout --emit-pack-dir docs/artifacts/objection-closeout-pack --format json --strict
-python -m sdetkit objection-closeout --execute --evidence-dir docs/artifacts/objection-closeout-pack/evidence --format json --strict
+python -m sdetkit objection-completion --format json --strict
+python -m sdetkit objection-completion --emit-pack-dir docs/artifacts/objection-completion-pack --format json --strict
+python -m sdetkit objection-completion --execute --evidence-dir docs/artifacts/objection-completion-pack/evidence --format json --strict
 python scripts/check_objection_handling_contract.py
 ```
 

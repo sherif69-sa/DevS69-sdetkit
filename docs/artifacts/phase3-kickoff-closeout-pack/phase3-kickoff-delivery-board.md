@@ -1,6 +1,3 @@
-#  delivery board
-- [ ]  Phase-3 kickoff brief committed
-- [ ]  kickoff reviewed with owner + backup
-- [ ]  trust ledger exported
-- [ ]  KPI scorecard snapshot exported
-- [ ]  community program priorities drafted from  learnings
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`platform-readiness-kickoff-delivery-board.md`](../../artifacts/platform-readiness-kickoff-completion-pack/platform-readiness-kickoff-delivery-board.md).

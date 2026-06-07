@@ -9,9 +9,9 @@ Reduce long-term maintenance overhead from completion report-era module sprawl w
 
 ## Current state snapshot
 
-- Detected closeout-era Python modules in `src/sdetkit`: **56** files.
-- Largest duplicate family: `continuous_upgrade_closeout_*` (**11** files).
-- Additional repeat families: `optimization_closeout_*` and `weekly_review_closeout_*` (2 each).
+- Detected completion-era Python modules in `src/sdetkit`: **56** files.
+- Largest duplicate family: `continuous_upgrade_completion_*` (**11** files).
+- Additional repeat families: `optimization_completion_*` and `weekly_review_completion_*` (2 each).
 
 ## Rationalization policy
 
@@ -32,29 +32,29 @@ Reduce long-term maintenance overhead from completion report-era module sprawl w
 
 ### Merge families (high ROI)
 
-1. `continuous_upgrade_closeout_1..11.py`
-   - Decision: **Merge** to a single orchestrator module (`continuous_upgrade_closeout.py`) with numeric mode selectors.
-2. `case_study_prep1..4_closeout_*.py`
-   - Decision: **Merge** into a unified `case_study_prep_closeout.py` with phase selector.
-3. `integration_expansion2/3/4_closeout_*.py`
-   - Decision: **Merge** into `integration_expansion_closeout.py` with stage profile.
-4. `phase2_*_closeout_*.py` + `phase3_*_closeout_*.py`
-   - Decision: **Merge** into `phase_transition_closeout.py` with named step lanes.
-5. `optimization_closeout_42.py` + `optimization_closeout_46.py`
+1. `continuous_upgrade_completion_1..11.py`
+   - Decision: **Merge** to a single orchestrator module (`continuous_upgrade_completion.py`) with numeric mode selectors.
+2. `case_study_prep1..4_completion_*.py`
+   - Decision: **Merge** into a unified `case_study_prep_completion.py` with phase selector.
+3. `integration_expansion2/3/4_completion_*.py`
+   - Decision: **Merge** into `integration_expansion_completion.py` with stage profile.
+4. `phase2_*_completion_*.py` + `phase3_*_completion_*.py`
+   - Decision: **Merge** into `readiness_transition_completion.py` with named step lanes.
+5. `optimization_completion_42.py` + `optimization_completion_46.py`
    - Decision: **Merge** into one optimized completion report lane.
-6. `weekly_review_closeout_49.py` + `weekly_review_closeout_65.py`
+6. `weekly_review_completion_49.py` + `weekly_review_completion_65.py`
    - Decision: **Merge** to one weekly-review completion report implementation.
 
 ### Archive candidates (legacy namespace)
 
 Archive from default help/discovery (keep runnable via legacy routing):
 
-- `objection_closeout_48.py`
-- `partner_outreach_closeout_80.py`
-- `community_touchpoint_closeout_77.py`
-- `growth_campaign_closeout_81.py`
-- `trust_assets_refresh_closeout_75.py`
-- `trust_faq_expansion_closeout_83.py`
+- `objection_completion_48.py`
+- `partner_outreach_completion_80.py`
+- `community_touchpoint_completion_77.py`
+- `growth_campaign_completion_81.py`
+- `trust_assets_refresh_completion_75.py`
+- `trust_faq_expansion_completion_83.py`
 
 Rationale: narrow campaign-specific surfaces with likely overlap in playbook-style flows.
 
@@ -62,10 +62,10 @@ Rationale: narrow campaign-specific surfaces with likely overlap in playbook-sty
 
 Keep as standalone until usage telemetry indicates safe consolidation:
 
-- `launch_readiness_closeout_86.py`
-- `release_prioritization_closeout_85.py`
-- `reliability_closeout_47.py`
-- `governance_scale_closeout_89.py`
+- `launch_readiness_completion_86.py`
+- `release_prioritization_completion_85.py`
+- `reliability_completion_47.py`
+- `governance_scale_completion_89.py`
 
 Rationale: directly tied to release/governance/reliability decision contexts.
 

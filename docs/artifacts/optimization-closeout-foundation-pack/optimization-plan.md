@@ -1,3 +1,3 @@
-# Optimization Closeout Foundation Optimization Plan
+# Moved: professional documentation
 
-- Objective: close Optimization Completion Foundation with measurable quality and throughput gains.
+This compatibility page preserves the legacy public path. The professional page is now [`optimization-plan.md`](../../artifacts/optimization-completion-foundation-pack/optimization-plan.md).

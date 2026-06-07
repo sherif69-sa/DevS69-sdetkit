@@ -16,9 +16,9 @@ Use this page when you inherit existing automation that still uses transition-er
 
 | If you currently run | Preferred target lane | Why |
 |---|---|---|
-| `sdetkit weekly-review-lane` / historical weekly closeout variants | `sdetkit weekly-review` (or `sdetkit playbooks`) | Keeps workflow intent while moving to maintained surfaces. |
-| `sdetkit phase1-*` / `phase2-*` / `phase3-*` closeout commands | `sdetkit playbooks` + stable command families (`gate`, `doctor`, `report`, `evidence`) | Reduces dependency on transition-era naming. |
-| `sdetkit *-closeout` command families | `sdetkit playbooks` or umbrella kits (`release`, `intelligence`, `integration`, `forensics`) | Preserves outcomes while using clearer capability groupings. |
+| `sdetkit weekly-review-lane` / historical weekly completion variants | `sdetkit weekly-review` (or `sdetkit playbooks`) | Keeps workflow intent while moving to maintained surfaces. |
+| `sdetkit phase1-*` / `phase2-*` / `phase3-*` completion commands | `sdetkit playbooks` + stable command families (`gate`, `doctor`, `report`, `evidence`) | Reduces dependency on transition-era naming. |
+| `sdetkit *-completion` command families | `sdetkit playbooks` or umbrella kits (`release`, `intelligence`, `integration`, `forensics`) | Preserves outcomes while using clearer capability groupings. |
 | Legacy quality-only invocations without explicit release decision flow | `gate fast` -> `gate release` -> `doctor` | Aligns with canonical ship/no-ship contract. |
 | Hidden inventory-driven discovery in day-to-day use | `sdetkit kits list` and public help surfaces | Lowers cognitive load for new operators. |
 

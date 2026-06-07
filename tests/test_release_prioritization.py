@@ -111,7 +111,7 @@ python scripts/check_release_prioritization_contract.py
 Single owner + backup reviewer are assigned for this release prioritization execution and signoff.
 This lane references evidence narrative outcomes, controls, and trust continuity signals.
 Every section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-This closeout records release prioritization pack upgrades, storyline outcomes, and launch priorities.
+This completion records release prioritization pack upgrades, storyline outcomes, and launch priorities.
 
 ## Release prioritization quality checklist
 

@@ -84,7 +84,7 @@ Docs/workflow/report volume is strong for advanced users, but first-time users n
 
 - Ship a **starter profile** with exactly 3 required commands and 3 artifacts.
 - Add a strict first-week navigation path in docs index.
-- Hide advanced/legacy workflows by default in beginner pathway outputs.
+- Hide advanced/legacy workflows by default in starter pathway outputs.
 
 ## B3) Module concentration is now an execution bottleneck
 

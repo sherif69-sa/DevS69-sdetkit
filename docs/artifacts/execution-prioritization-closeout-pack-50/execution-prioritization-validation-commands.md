@@ -1,7 +1,3 @@
-#  Validation Commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit execution-prioritization-closeout --format json --strict
-python -m sdetkit execution-prioritization-closeout --emit-pack-dir docs/artifacts/execution-prioritization-closeout-pack --format json --strict
-python scripts/check_execution_prioritization_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`execution-prioritization-validation-commands.md`](../../artifacts/execution-prioritization-completion-pack-50/execution-prioritization-validation-commands.md).

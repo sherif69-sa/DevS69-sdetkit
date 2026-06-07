@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added Cycle 41 closeout command: `python -m sdetkit cycle41-expansion-automation`.
+- Added Cycle 41 completion command: `python -m sdetkit cycle41-expansion-automation`.
 - Added strict continuity checks that require Cycle 40 strict-pass and delivery board integrity.
 - Added Cycle 41 artifact outputs for expansion summary, expansion plan, automation matrix, KPI scorecard, execution log, and validation commands.
 

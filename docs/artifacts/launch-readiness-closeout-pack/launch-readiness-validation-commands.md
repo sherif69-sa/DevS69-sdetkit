@@ -1,7 +1,3 @@
-#  validation commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit launch-readiness-closeout --format json --strict
-python -m sdetkit launch-readiness-closeout --emit-pack-dir docs/artifacts/launch-readiness-closeout-pack --format json --strict
-python scripts/check_launch_readiness_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`launch-readiness-validation-commands.md`](../../artifacts/launch-readiness-completion-pack/launch-readiness-validation-commands.md).

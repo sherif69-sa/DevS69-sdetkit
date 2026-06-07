@@ -1,5 +1,3 @@
- phase-3 wrap publication completion summary
-- Activation score: 42
-- Passed checks: 6
-- Failed checks: 8
-- Critical failures: []
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`platform-readiness-wrap-publication-completion-summary.md`](../../artifacts/platform-readiness-wrap-publication-completion-pack/platform-readiness-wrap-publication-completion-summary.md).

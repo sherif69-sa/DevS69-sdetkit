@@ -6,7 +6,7 @@ Close Cycle 76 with a high-signal contributor-recognition lane that upgrades Cyc
 
 ### What shipped
 
-- New `contributor-recognition-closeout` CLI lane with strict scoring and Cycle 75 continuity validation.
+- New `contributor-recognition-completion` CLI lane with strict scoring and Cycle 75 continuity validation.
 - New Cycle 76 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Cycle 76 contract checker script for CI and local execution gating.
 - New `docs/roadmap/plans/cycle76-contributor-recognition-plan.json` baseline dataset scaffold for recognition execution planning.
@@ -14,10 +14,10 @@ Close Cycle 76 with a high-signal contributor-recognition lane that upgrades Cyc
 ### Command lane
 
 ```bash
-python -m sdetkit contributor-recognition-closeout --format json --strict
-python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/contributor-recognition-closeout-pack --format json --strict
-python -m sdetkit contributor-recognition-closeout --execute --evidence-dir docs/artifacts/contributor-recognition-closeout-pack/evidence --format json --strict
-python scripts/check_contributor_recognition_closeout_contract.py
+python -m sdetkit contributor-recognition-completion --format json --strict
+python -m sdetkit contributor-recognition-completion --emit-pack-dir docs/artifacts/contributor-recognition-completion-pack --format json --strict
+python -m sdetkit contributor-recognition-completion --execute --evidence-dir docs/artifacts/contributor-recognition-completion-pack/evidence --format json --strict
+python scripts/check_contributor_recognition_completion_contract.py
 ```
 
 ### Outcome

@@ -1,5 +1,3 @@
-Ecosystem Priorities Completion summary
-- Activation score: 69
-- Passed checks: 10
-- Failed checks: 4
-- Critical failures: []
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`ecosystem-priorities-completion-summary.md`](../../artifacts/ecosystem-priorities-completion-pack/ecosystem-priorities-completion-summary.md).

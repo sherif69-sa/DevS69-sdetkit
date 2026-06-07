@@ -13,7 +13,7 @@ This dashboard is the weekly control plane for the **DevS69 SDETKit top-tier ful
 | Field | Value |
 |---|---|
 | Week ending | 2026-04-17 |
-| Program status | Baseline readiness closeout complete |
+| Program status | Baseline readiness completion complete |
 | Delivery confidence | Green |
 | Top blocker count | 0 |
 | KPI movement | Seed baseline published |

@@ -1,3 +1,3 @@
-# Scale plan
+# Moved: professional documentation
 
-- Objective: close  with measurable quality and throughput gains.
+This compatibility page preserves the legacy public path. The professional page is now [`scale-plan.md`](../../artifacts/scale-completion-pack/scale-plan.md).

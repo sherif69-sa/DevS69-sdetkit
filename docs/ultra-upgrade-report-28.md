@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added `cycle28-weekly-review` command to consolidate Cycle 25-27 outputs into a strict weekly closeout score.
+- Added `cycle28-weekly-review` command to consolidate Cycle 25-27 outputs into a strict weekly completion score.
 - Added Cycle 28 docs contract validation and deterministic execution evidence lane.
 - Added Cycle 28 pack generation with wins/misses/corrective-actions and KPI rollup artifacts.
 - Added dedicated Cycle 28 contract-check script and automated tests.

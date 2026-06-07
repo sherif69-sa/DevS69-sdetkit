@@ -65,6 +65,7 @@ INTERNAL_REVIEW_FIRST = "internal_cleanup_review_first"
 
 REVIEW_LOCKED_DOC_PATHS = {
     "docs/integrations-release-prioritization-completion.md",
+    "docs/integrations-release-prioritization-closeout.md",
     "docs/naming/professional-naming-compatibility-migration.md",
     "docs/naming/professional-naming-rename-map.json",
     "docs/naming/professional-public-command-surface.md",

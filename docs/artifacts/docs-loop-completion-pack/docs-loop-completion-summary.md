@@ -1,0 +1,12 @@
+Docs Loop Completion summary (legacy: )
+- Activation score: 41
+- Passed checks: 5
+- Failed checks: 9
+- Critical failures: ['narrative_completion_strict_baseline']
+-  activation score: `55.0`
+-  checks evaluated: `14`
+-  delivery board checklist items: `5`
+- Misses:
+  -  strict continuity signal is missing.
+  -  delivery board integrity is incomplete (needs >=5 items and /53 anchors).
+  - Docs-loop contract, quality checklist, or delivery board entries are missing.

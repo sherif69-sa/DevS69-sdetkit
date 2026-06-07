@@ -2,7 +2,7 @@
 
 Lane closes with a major upgrade that converts Lane release prioritization outcomes into a deterministic launch readiness operating lane.
 
-## Why Launch Readiness Closeout matters
+## Why Launch Readiness Completion matters
 
 - Converts Lane release prioritization outcomes into reusable launch readiness decisions across launch briefs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -10,17 +10,17 @@ Lane closes with a major upgrade that converts Lane release prioritization outco
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-closeout-summary.json`
-- `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-delivery-board.md`
+- `docs/artifacts/release-prioritization-completion-pack/release-prioritization-completion-summary.json`
+- `docs/artifacts/release-prioritization-completion-pack/release-prioritization-delivery-board.md`
 - `docs/roadmap/plans/launch-readiness-plan.json`
 
 ## Command lane
 
 ```bash
-python -m sdetkit launch-readiness-closeout --format json --strict
-python -m sdetkit launch-readiness-closeout --emit-pack-dir docs/artifacts/launch-readiness-closeout-pack --format json --strict
-python -m sdetkit launch-readiness-closeout --execute --evidence-dir docs/artifacts/launch-readiness-closeout-pack/evidence --format json --strict
-python scripts/check_launch_readiness_closeout_contract.py
+python -m sdetkit launch-readiness-completion --format json --strict
+python -m sdetkit launch-readiness-completion --emit-pack-dir docs/artifacts/launch-readiness-completion-pack --format json --strict
+python -m sdetkit launch-readiness-completion --execute --evidence-dir docs/artifacts/launch-readiness-completion-pack/evidence --format json --strict
+python scripts/check_launch_readiness_completion_contract.py
 ```
 
 ## Launch readiness contract

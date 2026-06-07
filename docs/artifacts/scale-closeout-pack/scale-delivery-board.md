@@ -1,7 +1,3 @@
-# Scale delivery board
+# Moved: professional documentation
 
-- [ ]  scale plan draft committed
-- [ ]  review notes captured with owner + backup
-- [ ]  growth matrix exported
-- [ ]  KPI scorecard snapshot exported
-- [ ]  expansion priorities drafted from  learnings
+This compatibility page preserves the legacy public path. The professional page is now [`scale-delivery-board.md`](../../artifacts/scale-completion-pack/scale-delivery-board.md).

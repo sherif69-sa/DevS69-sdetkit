@@ -1,0 +1,13 @@
+Acceleration completion summary
+- Activation score: 51
+- Passed checks: 6
+- Failed checks: 8
+- Critical failures: []
+-  activation score: `100.0`
+-  checks evaluated: `14`
+-  delivery board checklist items: `5`
+- Wins:
+  -  continuity is strict-pass with activation score=100.0.
+- Misses:
+  -  delivery board integrity is incomplete (needs >=5 items and /43 anchors).
+  - Acceleration contract, quality checklist, or delivery board entries are missing.

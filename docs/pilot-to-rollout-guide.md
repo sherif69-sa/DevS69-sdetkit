@@ -36,7 +36,7 @@ Validate repeatability across multiple teams/repos.
 |---|---|---|
 | Pilot coverage | At least 3 repos onboarded (or approved pilot size) | Portfolio scorecard JSON |
 | Weekly operating rhythm | 2 consecutive weekly cycles completed | Weekly executive reports |
-| Escalation readiness | 1 incident/escalation workflow exercised | Incident log + support model reference |
+| Escalation readiness | 1 incident/escalation workflow practiced | Incident log + support model reference |
 | Portfolio contract adoption | Scorecard payload emitted with `schema_version` and required totals | `docs/artifacts/portfolio-scorecard-*.json` |
 
 ## Stage 3: Production rollout

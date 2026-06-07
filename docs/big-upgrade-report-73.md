@@ -6,7 +6,7 @@ Close Cycle 73 with a high-signal case-study launch lane that upgrades Cycle 72 
 
 ## What shipped
 
-- New `case-study-launch-closeout` CLI lane with strict scoring and Cycle 72 continuity validation.
+- New `case-study-launch-completion` CLI lane with strict scoring and Cycle 72 continuity validation.
 - New Cycle 73 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Cycle 73 contract checker script for CI and local execution gating.
 - New published-case-study artifact pack outputs for narrative, controls logging, KPI scoring, and execution evidence.
@@ -15,10 +15,10 @@ Close Cycle 73 with a high-signal case-study launch lane that upgrades Cycle 72 
 ## Validation flow
 
 ```bash
-python -m sdetkit case-study-launch-closeout --format json --strict
-python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/case-study-launch-closeout-pack --format json --strict
-python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/case-study-launch-closeout-pack/evidence --format json --strict
-python scripts/check_case_study_launch_closeout_contract.py
+python -m sdetkit case-study-launch-completion --format json --strict
+python -m sdetkit case-study-launch-completion --emit-pack-dir docs/artifacts/case-study-launch-completion-pack --format json --strict
+python -m sdetkit case-study-launch-completion --execute --evidence-dir docs/artifacts/case-study-launch-completion-pack/evidence --format json --strict
+python scripts/check_case_study_launch_completion_contract.py
 ```
 
 ## Outcome

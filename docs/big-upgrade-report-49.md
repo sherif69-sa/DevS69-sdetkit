@@ -6,7 +6,7 @@ Close Cycle 49 with a high-confidence weekly-review completion report lane that 
 
 ## Big upgrades delivered
 
-- Added a dedicated Cycle 49 CLI lane: `cycle49-weekly-review-closeout`.
+- Added a dedicated Cycle 49 CLI lane: `cycle49-weekly-review-completion`.
 - Added strict docs contract checks and delivery board lock gates.
 - Added artifact-pack emission for weekly review brief, risk register, KPI scorecard, and execution logs.
 - Added deterministic execution evidence capture for repeatable completion report verification.
@@ -14,9 +14,9 @@ Close Cycle 49 with a high-confidence weekly-review completion report lane that 
 ## Commands
 
 ```bash
-python -m sdetkit cycle49-weekly-review-closeout --format json --strict
-python -m sdetkit cycle49-weekly-review-closeout --emit-pack-dir docs/artifacts/cycle49-weekly-review-closeout-pack --format json --strict
-python -m sdetkit cycle49-weekly-review-closeout --execute --evidence-dir docs/artifacts/cycle49-weekly-review-closeout-pack/evidence --format json --strict
+python -m sdetkit cycle49-weekly-review-completion --format json --strict
+python -m sdetkit cycle49-weekly-review-completion --emit-pack-dir docs/artifacts/cycle49-weekly-review-completion-pack --format json --strict
+python -m sdetkit cycle49-weekly-review-completion --execute --evidence-dir docs/artifacts/cycle49-weekly-review-completion-pack/evidence --format json --strict
 python scripts/check_weekly_review_workflow_contract.py
 ```
 

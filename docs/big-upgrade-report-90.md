@@ -12,5 +12,5 @@
 python -m sdetkit cycle90-platform-readiness-wrap-publication-completion-report --format json --strict
 python -m sdetkit cycle90-platform-readiness-wrap-publication-completion-report --emit-pack-dir docs/artifacts/cycle90-platform-readiness-wrap-publication-completion-report-pack --format json --strict
 python -m sdetkit cycle90-platform-readiness-wrap-publication-completion-report --execute --evidence-dir docs/artifacts/cycle90-platform-readiness-wrap-publication-completion-report-pack/evidence --format json --strict
-python scripts/check_phase3_wrap_publication_closeout_contract_90.py
+python scripts/check_phase3_wrap_publication_completion_contract_90.py
 ```

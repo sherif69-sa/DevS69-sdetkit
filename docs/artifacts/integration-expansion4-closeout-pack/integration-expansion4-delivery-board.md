@@ -1,6 +1,3 @@
-#  delivery board
-- [ ]  integration brief committed
-- [ ]  self-hosted enterprise pipeline blueprint published
-- [ ]  identity and runner policy strategy exported
-- [ ]  KPI scorecard snapshot exported
-- [ ]  case-study prep priorities drafted from  learnings
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`integration-expansion4-delivery-board.md`](../../artifacts/integration-expansion4-completion-pack/integration-expansion4-delivery-board.md).

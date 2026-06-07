@@ -74,7 +74,7 @@ This improves deterministic behavior and repeatability for local-provider runs.
 - `sdetkit agent example --scenario repo-enterprise-audit`
   - Runs an offline deterministic end-to-end enterprise audit scenario
 - `sdetkit agent example --scenario umbrella-upgrade-control-plane`
-  - Demonstrates AgentOS generating an umbrella-upgrade control-plane artifact plus dashboard outputs
+  - Examplenstrates AgentOS generating an umbrella-upgrade control-plane artifact plus dashboard outputs
 
 ## Config (`.sdetkit/agent/config.yaml`)
 

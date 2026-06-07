@@ -1,5 +1,3 @@
-Case Study Prep 2 Completion summary
-- Activation score: 42
-- Passed checks: 6
-- Failed checks: 8
-- Critical failures: ['prior_closeout_strict_baseline']
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`case-study-prep2-completion-summary.md`](../../artifacts/case-study-prep2-completion-pack/case-study-prep2-completion-summary.md).

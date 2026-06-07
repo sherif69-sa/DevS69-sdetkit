@@ -2,7 +2,7 @@
 
 Use this gallery when you want a quick, reviewer-friendly picture of what the Big-Brain adaptive lane should show in pull requests and release reviews.
 
-The examples are intentionally compact. They demonstrate the expected operator behavior for the top scenario families: stay quiet on green evidence, give precise proof commands for known failures, and keep unknown or risky failures review-first.
+The examples are intentionally compact. They examplenstrate the expected operator behavior for the top scenario families: stay quiet on green evidence, give precise proof commands for known failures, and keep unknown or risky failures review-first.
 
 ## How to generate matching artifacts
 
@@ -88,7 +88,7 @@ Use this when logs contain failure-like signals but no known safe remediation pa
 - Compare the current release artifact with prior accepted diagnosis events before changing release metadata.
 ```
 
-Use this when learning summary data has promoted or demoted candidates based on prior proof/fix outcomes.
+Use this when learning summary data has promoted or exampleted candidates based on prior proof/fix outcomes.
 
 ## Top scenario review checklist
 

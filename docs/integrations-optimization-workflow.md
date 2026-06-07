@@ -10,16 +10,16 @@ Lane closes with a major optimization upgrade that converts Lane expansion evide
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json`
-- `docs/artifacts/expansion-closeout-pack/expansion-delivery-board.md`
+- `docs/artifacts/expansion-completion-pack/expansion-completion-summary.json`
+- `docs/artifacts/expansion-completion-pack/expansion-delivery-board.md`
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit optimization-closeout --format json --strict
-python -m sdetkit optimization-closeout --emit-pack-dir docs/artifacts/optimization-closeout-pack --format json --strict
-python -m sdetkit optimization-closeout --execute --evidence-dir docs/artifacts/optimization-closeout-pack/evidence --format json --strict
-python scripts/check_optimization_closeout_contract.py
+python -m sdetkit optimization-completion --format json --strict
+python -m sdetkit optimization-completion --emit-pack-dir docs/artifacts/optimization-completion-pack --format json --strict
+python -m sdetkit optimization-completion --execute --evidence-dir docs/artifacts/optimization-completion-pack/evidence --format json --strict
+python scripts/check_optimization_completion_contract.py
 ```
 
 ## Optimization completion report contract

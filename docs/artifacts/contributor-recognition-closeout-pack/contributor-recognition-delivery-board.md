@@ -1,6 +1,3 @@
-#  delivery board
-- [ ]  integration brief committed
-- [ ]  contributor recognition plan committed
-- [ ]  recognition credits ledger exported
-- [ ]  recognition KPI scorecard snapshot exported
-- [ ]  scale priorities drafted from  learnings
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`contributor-recognition-delivery-board.md`](../../artifacts/contributor-recognition-completion-pack/contributor-recognition-delivery-board.md).

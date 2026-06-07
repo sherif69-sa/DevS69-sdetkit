@@ -19,7 +19,7 @@ Lane ships a major platform readiness kickoff upgrade that converts Lane wrap ev
 python -m sdetkit platform-readiness-kickoff-completion-report --format json --strict
 python -m sdetkit platform-readiness-kickoff-completion-report --emit-pack-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack --format json --strict
 python -m sdetkit platform-readiness-kickoff-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack/evidence --format json --strict
-python scripts/check_phase3_kickoff_closeout_contract.py
+python scripts/check_phase3_kickoff_completion_contract.py
 ```
 
 ## platform readiness kickoff execution contract

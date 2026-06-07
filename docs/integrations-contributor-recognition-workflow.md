@@ -10,17 +10,17 @@ Lane closes with a major upgrade that converts Lane trust refresh outcomes into 
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json`
-- `docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md`
+- `docs/artifacts/trust-assets-refresh-completion-pack/trust-assets-refresh-completion-summary.json`
+- `docs/artifacts/trust-assets-refresh-completion-pack/trust-assets-refresh-delivery-board.md`
 - `docs/roadmap/plans/contributor-recognition-plan.json`
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit contributor-recognition-closeout --format json --strict
-python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/contributor-recognition-closeout-pack --format json --strict
-python -m sdetkit contributor-recognition-closeout --execute --evidence-dir docs/artifacts/contributor-recognition-closeout-pack/evidence --format json --strict
-python scripts/check_contributor_recognition_closeout_contract.py
+python -m sdetkit contributor-recognition-completion --format json --strict
+python -m sdetkit contributor-recognition-completion --emit-pack-dir docs/artifacts/contributor-recognition-completion-pack --format json --strict
+python -m sdetkit contributor-recognition-completion --execute --evidence-dir docs/artifacts/contributor-recognition-completion-pack/evidence --format json --strict
+python scripts/check_contributor_recognition_completion_contract.py
 ```
 
 ## Contributor recognition contract

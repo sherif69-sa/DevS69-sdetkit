@@ -10,17 +10,17 @@ Lane closes with a major upgrade that turns Lane publication-quality prep into a
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json`
-- `docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md`
+- `docs/artifacts/case-study-prep4-completion-pack/case-study-prep4-completion-summary.json`
+- `docs/artifacts/case-study-prep4-completion-pack/case-study-prep4-delivery-board.md`
 - `docs/roadmap/plans/published-case-study.json`
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit case-study-launch-closeout --format json --strict
-python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/case-study-launch-closeout-pack --format json --strict
-python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/case-study-launch-closeout-pack/evidence --format json --strict
-python scripts/check_case_study_launch_closeout_contract.py
+python -m sdetkit case-study-launch-completion --format json --strict
+python -m sdetkit case-study-launch-completion --emit-pack-dir docs/artifacts/case-study-launch-completion-pack --format json --strict
+python -m sdetkit case-study-launch-completion --execute --evidence-dir docs/artifacts/case-study-launch-completion-pack/evidence --format json --strict
+python scripts/check_case_study_launch_completion_contract.py
 ```
 
 ## Case-study launch contract

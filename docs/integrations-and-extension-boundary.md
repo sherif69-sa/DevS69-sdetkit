@@ -47,7 +47,7 @@ Guided adoption lanes may iterate faster than core command docs as long as they 
 Keep material in **Experimental** (or explicitly transition-era) when it is:
 
 - New and not yet proven across multiple adoption contexts.
-- Historical impact/impact/closeout content preserved for auditability.
+- Historical impact/impact/completion content preserved for auditability.
 - Advanced or niche lanes that are useful for some users but not core onboarding.
 
 Do not remove this content by default; keep it available but clearly secondary in high-traffic docs.

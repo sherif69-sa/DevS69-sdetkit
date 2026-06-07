@@ -1,6 +1,6 @@
 # Generated and sample artifacts
 
-This directory is a committed evidence gallery. It contains generated/sample artifacts, product proof packs, adoption examples, and historical closeout material.
+This directory is a committed evidence gallery. It contains generated/sample artifacts, product proof packs, adoption examples, and historical completion material.
 
 ## How to read this directory
 

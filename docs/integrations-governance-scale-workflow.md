@@ -2,7 +2,7 @@
 
 Lane closes with a major upgrade that converts Lane governance handoff outcomes into a deterministic governance scale operating lane.
 
-## Why Governance Scale Closeout matters
+## Why Governance Scale Completion matters
 
 - Converts Lane governance handoff outcomes into reusable governance scale decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -10,17 +10,17 @@ Lane closes with a major upgrade that converts Lane governance handoff outcomes 
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json`
-- `docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md`
+- `docs/artifacts/governance-priorities-completion-pack/governance-priorities-completion-summary.json`
+- `docs/artifacts/governance-priorities-completion-pack/governance-priorities-delivery-board.md`
 - `docs/roadmap/plans/governance-scale-plan.json`
 
 ## Command lane
 
 ```bash
-python -m sdetkit governance-scale-closeout --format json --strict
-python -m sdetkit governance-scale-closeout --emit-pack-dir docs/artifacts/governance-scale-closeout-pack --format json --strict
-python -m sdetkit governance-scale-closeout --execute --evidence-dir docs/artifacts/governance-scale-closeout-pack/evidence --format json --strict
-python scripts/check_governance_scale_closeout_contract.py
+python -m sdetkit governance-scale-completion --format json --strict
+python -m sdetkit governance-scale-completion --emit-pack-dir docs/artifacts/governance-scale-completion-pack --format json --strict
+python -m sdetkit governance-scale-completion --execute --evidence-dir docs/artifacts/governance-scale-completion-pack/evidence --format json --strict
+python scripts/check_governance_scale_completion_contract.py
 ```
 
 ## Governance scale contract

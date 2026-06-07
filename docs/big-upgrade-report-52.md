@@ -6,7 +6,7 @@ Close Cycle 52 with a high-confidence narrative completion report lane that turn
 
 ## Big upgrades delivered
 
-- Added a dedicated Cycle 52 CLI lane: `cycle52-narrative-closeout`.
+- Added a dedicated Cycle 52 CLI lane: `cycle52-narrative-completion`.
 - Added strict docs contract checks and delivery board lock gates for narrative quality.
 - Added artifact-pack emission for narrative brief, proof map, KPI scorecard, and execution logs.
 - Added deterministic execution evidence capture for repeatable completion report verification.
@@ -14,10 +14,10 @@ Close Cycle 52 with a high-confidence narrative completion report lane that turn
 ## Commands
 
 ```bash
-python -m sdetkit cycle52-narrative-closeout --format json --strict
-python -m sdetkit cycle52-narrative-closeout --emit-pack-dir docs/artifacts/narrative-closeout-pack --format json --strict
-python -m sdetkit cycle52-narrative-closeout --execute --evidence-dir docs/artifacts/narrative-closeout-pack/evidence --format json --strict
-python scripts/check_narrative_closeout_contract.py
+python -m sdetkit cycle52-narrative-completion --format json --strict
+python -m sdetkit cycle52-narrative-completion --emit-pack-dir docs/artifacts/narrative-completion-pack --format json --strict
+python -m sdetkit cycle52-narrative-completion --execute --evidence-dir docs/artifacts/narrative-completion-pack/evidence --format json --strict
+python scripts/check_narrative_completion_contract.py
 ```
 
 ## Outcome

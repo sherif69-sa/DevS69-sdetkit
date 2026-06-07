@@ -2,7 +2,7 @@
 
 Lane ships a major community-program upgrade that converts Lane kickoff evidence into a strict baseline for office-hours, participation, and moderation execution.
 
-## Why Community Program Closeout matters
+## Why Community Program Completion matters
 
 - Converts Lane completion report evidence into repeatable community operations loops.
 - Protects trust outcomes with ownership, command proof, and moderation rollback guardrails.
@@ -13,13 +13,13 @@ Lane ships a major community-program upgrade that converts Lane kickoff evidence
 - `docs/artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-completion-report-summary.json`
 - `docs/artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-delivery-board.md`
 
-## Community Program Closeout command lane (legacy)
+## Community Program Completion command lane (legacy)
 
 ```bash
-python -m sdetkit community-program-closeout --format json --strict
-python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/community-program-closeout-pack --format json --strict
-python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/community-program-closeout-pack/evidence --format json --strict
-python scripts/check_community_program_closeout_contract.py
+python -m sdetkit community-program-completion --format json --strict
+python -m sdetkit community-program-completion --emit-pack-dir docs/artifacts/community-program-completion-pack --format json --strict
+python -m sdetkit community-program-completion --execute --evidence-dir docs/artifacts/community-program-completion-pack/evidence --format json --strict
+python scripts/check_community_program_completion_contract.py
 ```
 
 ## Community program execution contract
@@ -37,7 +37,7 @@ python scripts/check_community_program_closeout_contract.py
 - [ ] Scorecard captures attendance target, response SLA, trust incidents, confidence, and recovery owner
 - [ ] Artifact pack includes launch brief, participation policy, moderation runbook, and execution log
 
-## Community Program Closeout delivery board (legacy)
+## Community Program Completion delivery board (legacy)
 
 - [ ] Lane community launch brief committed
 - [ ] Lane office-hours cadence published

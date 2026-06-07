@@ -1,0 +1,1 @@
+# Scale upgrade integration brief

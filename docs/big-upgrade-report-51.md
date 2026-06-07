@@ -6,7 +6,7 @@ Close Cycle 51 with a high-confidence case-snippet completion report lane that t
 
 ## Big upgrades delivered
 
-- Added a dedicated Cycle 51 CLI lane: `cycle51-case-snippet-closeout`.
+- Added a dedicated Cycle 51 CLI lane: `cycle51-case-snippet-completion`.
 - Added strict docs contract checks and delivery board lock gates for mini-case storytelling quality.
 - Added artifact-pack emission for case brief, proof map, KPI scorecard, and execution logs.
 - Added deterministic execution evidence capture for repeatable completion report verification.
@@ -14,10 +14,10 @@ Close Cycle 51 with a high-confidence case-snippet completion report lane that t
 ## Commands
 
 ```bash
-python -m sdetkit cycle51-case-snippet-closeout --format json --strict
-python -m sdetkit cycle51-case-snippet-closeout --emit-pack-dir docs/artifacts/cycle51-case-snippet-closeout-pack --format json --strict
-python -m sdetkit cycle51-case-snippet-closeout --execute --evidence-dir docs/artifacts/cycle51-case-snippet-closeout-pack/evidence --format json --strict
-python scripts/check_case_snippet_closeout_contract_51.py
+python -m sdetkit cycle51-case-snippet-completion --format json --strict
+python -m sdetkit cycle51-case-snippet-completion --emit-pack-dir docs/artifacts/cycle51-case-snippet-completion-pack --format json --strict
+python -m sdetkit cycle51-case-snippet-completion --execute --evidence-dir docs/artifacts/cycle51-case-snippet-completion-pack/evidence --format json --strict
+python scripts/check_case_snippet_completion_contract_51.py
 ```
 
 ## Outcome

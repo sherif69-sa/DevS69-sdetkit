@@ -18,9 +18,9 @@ Close Cycle 59 with a high-confidence Platform readiness pre-plan lane that conv
 python -m sdetkit cycle59-platform-readiness-preplan-completion-report --format json --strict
 python -m sdetkit cycle59-platform-readiness-preplan-completion-report --emit-pack-dir docs/artifacts/platform-readiness-preplan-completion-report-pack --format json --strict
 python -m sdetkit cycle59-platform-readiness-preplan-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-preplan-completion-report-pack/evidence --format json --strict
-python scripts/check_phase3_preplan_closeout_contract_59.py
+python scripts/check_phase3_preplan_completion_contract_59.py
 ```
 
-## Closeout
+## Completion
 
 Cycle 59 is now an evidence-backed completion report lane with strict continuity to Cycle 58 and deterministic handoff into Cycle 60 execution planning.

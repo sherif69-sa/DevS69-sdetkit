@@ -1,7 +1,3 @@
-#  validation commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit contributor-recognition-closeout --format json --strict
-python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/contributor-recognition-closeout-pack --format json --strict
-python scripts/check_contributor_recognition_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`contributor-recognition-validation-commands.md`](../../artifacts/contributor-recognition-completion-pack/contributor-recognition-validation-commands.md).

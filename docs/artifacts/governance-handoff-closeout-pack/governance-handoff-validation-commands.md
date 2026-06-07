@@ -1,7 +1,3 @@
-#  validation commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit governance-handoff-closeout --format json --strict
-python -m sdetkit governance-handoff-closeout --emit-pack-dir docs/artifacts/governance-handoff-closeout-pack --format json --strict
-python scripts/check_governance_handoff_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`governance-handoff-validation-commands.md`](../../artifacts/governance-handoff-completion-pack/governance-handoff-validation-commands.md).

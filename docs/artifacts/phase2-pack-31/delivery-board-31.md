@@ -1,7 +1,3 @@
-# Name 31 delivery board
+# Moved: professional documentation
 
-- [ ] Name 31 baseline metrics snapshot emitted
-- [ ] Name 32 release cadence checklist drafted
-- [ ] Name 33 demo asset plan (doctor) assigned
-- [ ] Name 34 demo asset plan (repo audit) assigned
-- [ ] Name 35 weekly review preparation checklist ready
+This compatibility page preserves the legacy public path. The professional page is now [`delivery-board-31.md`](../../artifacts/release-readiness-pack-31/delivery-board-31.md).

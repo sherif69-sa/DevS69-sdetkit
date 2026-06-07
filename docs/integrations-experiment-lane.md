@@ -10,8 +10,8 @@ Lane turns Lane distribution misses into controlled experiments with strict scor
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json`
-- `docs/artifacts/distribution-closeout-pack/delivery-board.md`
+- `docs/artifacts/distribution-completion-pack/distribution-completion-summary.json`
+- `docs/artifacts/distribution-completion-pack/delivery-board.md`
 
 ## Lane command lane
 

@@ -2,7 +2,7 @@
 
 Lane closes with a major upgrade that converts Lane partner outreach outcomes into a growth-campaign execution pack.
 
-## Why Growth Campaign Closeout matters
+## Why Growth Campaign Completion matters
 
 - Turns Lane partner outreach outcomes into growth campaign execution proof across docs, rollout, and demand loops.
 - Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
@@ -10,17 +10,17 @@ Lane closes with a major upgrade that converts Lane partner outreach outcomes in
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-closeout-summary.json`
-- `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md`
+- `docs/artifacts/partner-outreach-completion-pack/partner-outreach-completion-summary.json`
+- `docs/artifacts/partner-outreach-completion-pack/partner-outreach-delivery-board.md`
 - `docs/roadmap/plans/growth-campaign-plan.json`
 
 ## Command lane
 
 ```bash
-python -m sdetkit growth-campaign-closeout --format json --strict
-python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/growth-campaign-closeout-pack --format json --strict
-python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/growth-campaign-closeout-pack/evidence --format json --strict
-python scripts/check_growth_campaign_closeout_contract.py
+python -m sdetkit growth-campaign-completion --format json --strict
+python -m sdetkit growth-campaign-completion --emit-pack-dir docs/artifacts/growth-campaign-completion-pack --format json --strict
+python -m sdetkit growth-campaign-completion --execute --evidence-dir docs/artifacts/growth-campaign-completion-pack/evidence --format json --strict
+python scripts/check_growth_campaign_completion_contract.py
 ```
 
 ## Growth campaign contract

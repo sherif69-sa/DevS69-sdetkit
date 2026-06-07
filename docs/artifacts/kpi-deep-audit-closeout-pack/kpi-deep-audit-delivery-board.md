@@ -1,6 +1,3 @@
-# KPI deep audit board
-- [ ] item-1
-- [ ] item-2
-- [ ] item-3
-- [ ] item-4
-- [ ] item-5
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`kpi-deep-audit-delivery-board.md`](../../artifacts/kpi-deep-audit-completion-pack/kpi-deep-audit-delivery-board.md).

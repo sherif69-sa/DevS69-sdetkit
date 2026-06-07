@@ -10,17 +10,17 @@ Lane closes with a major upgrade that turns Lane escalation-quality outputs into
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/case-study-prep3-closeout-pack/case-study-prep3-closeout-summary.json`
-- `docs/artifacts/case-study-prep3-closeout-pack/case-study-prep3-delivery-board.md`
+- `docs/artifacts/case-study-prep3-completion-pack/case-study-prep3-completion-summary.json`
+- `docs/artifacts/case-study-prep3-completion-pack/case-study-prep3-delivery-board.md`
 - `docs/roadmap/plans/publication-quality-case-study.json`
 
 ## Lane command
 
 ```bash
-python -m sdetkit case-study-prep4-closeout --format json --strict
-python -m sdetkit case-study-prep4-closeout --emit-pack-dir docs/artifacts/case-study-prep4-closeout-pack --format json --strict
-python -m sdetkit case-study-prep4-closeout --execute --evidence-dir docs/artifacts/case-study-prep4-closeout-pack/evidence --format json --strict
-python scripts/check_case_study_prep4_closeout_contract.py
+python -m sdetkit case-study-prep4-completion --format json --strict
+python -m sdetkit case-study-prep4-completion --emit-pack-dir docs/artifacts/case-study-prep4-completion-pack --format json --strict
+python -m sdetkit case-study-prep4-completion --execute --evidence-dir docs/artifacts/case-study-prep4-completion-pack/evidence --format json --strict
+python scripts/check_case_study_prep4_completion_contract.py
 ```
 
 ## Case-study prep contract
@@ -28,7 +28,7 @@ python scripts/check_case_study_prep4_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane publication-quality case-study prep and signoff.
 - The lane references case-study prep outputs, governance decisions, and KPI continuity signals.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records before/after publication-quality deltas, evidence confidence notes, and Lane prep priorities.
+- Lane completion records before/after publication-quality deltas, evidence confidence notes, and Lane prep priorities.
 
 ## Case-study quality checklist
 

@@ -18,9 +18,9 @@ Close Cycle 58 with a high-confidence Release readiness hardening lane that conv
 python -m sdetkit cycle58-release-readiness-hardening-completion-report --format json --strict
 python -m sdetkit cycle58-release-readiness-hardening-completion-report --emit-pack-dir docs/artifacts/cycle58-release-readiness-hardening-completion-report-pack --format json --strict
 python -m sdetkit cycle58-release-readiness-hardening-completion-report --execute --evidence-dir docs/artifacts/cycle58-release-readiness-hardening-completion-report-pack/evidence --format json --strict
-python scripts/check_phase2_hardening_closeout_contract_58.py
+python scripts/check_phase2_hardening_completion_contract_58.py
 ```
 
-## Closeout
+## Completion
 
 Cycle 58 is now an evidence-backed completion report lane with strict continuity to Cycle 57 and deterministic handoff into Cycle 59 pre-plan execution.

@@ -10,16 +10,16 @@ Lane closes with a major docs loop optimization upgrade that converts Lane narra
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json`
-- `docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md`
+- `docs/artifacts/narrative-completion-pack/narrative-completion-summary.json`
+- `docs/artifacts/narrative-completion-pack/narrative-delivery-board.md`
 
-## Docs Loop Closeout command lane
+## Docs Loop Completion command lane
 
 ```bash
-python -m sdetkit docs-loop-closeout --format json --strict
-python -m sdetkit docs-loop-closeout --emit-pack-dir docs/artifacts/docs-loop-closeout-pack --format json --strict
-python -m sdetkit docs-loop-closeout --execute --evidence-dir docs/artifacts/docs-loop-closeout-pack/evidence --format json --strict
-python scripts/check_docs_loop_closeout_contract.py
+python -m sdetkit docs-loop-completion --format json --strict
+python -m sdetkit docs-loop-completion --emit-pack-dir docs/artifacts/docs-loop-completion-pack --format json --strict
+python -m sdetkit docs-loop-completion --execute --evidence-dir docs/artifacts/docs-loop-completion-pack/evidence --format json --strict
+python scripts/check_docs_loop_completion_contract.py
 ```
 
 ## Docs loop optimization contract

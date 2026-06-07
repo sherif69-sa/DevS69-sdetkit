@@ -10,17 +10,17 @@ Lane closes with a major upgrade that converts Lane scale outcomes into a partne
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-closeout-summary.json`
-- `docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-delivery-board.md`
+- `docs/artifacts/scale-upgrade-completion-pack/scale-upgrade-completion-summary.json`
+- `docs/artifacts/scale-upgrade-completion-pack/scale-upgrade-delivery-board.md`
 - `docs/roadmap/plans/partner-outreach-plan.json`
 
 ## Partner outreach command lane
 
 ```bash
-python -m sdetkit partner-outreach-closeout --format json --strict
-python -m sdetkit partner-outreach-closeout --emit-pack-dir docs/artifacts/partner-outreach-closeout-pack --format json --strict
-python -m sdetkit partner-outreach-closeout --execute --evidence-dir docs/artifacts/partner-outreach-closeout-pack/evidence --format json --strict
-python scripts/check_partner_outreach_closeout_contract.py
+python -m sdetkit partner-outreach-completion --format json --strict
+python -m sdetkit partner-outreach-completion --emit-pack-dir docs/artifacts/partner-outreach-completion-pack --format json --strict
+python -m sdetkit partner-outreach-completion --execute --evidence-dir docs/artifacts/partner-outreach-completion-pack/evidence --format json --strict
+python scripts/check_partner_outreach_completion_contract.py
 ```
 
 ## Partner outreach contract

@@ -1,1 +1,3 @@
-#  self-hosted blueprint
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`integration-expansion4-self-hosted-blueprint.md`](../../artifacts/integration-expansion4-completion-pack/integration-expansion4-self-hosted-blueprint.md).

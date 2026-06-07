@@ -1,6 +1,3 @@
-#  delivery board
-- [ ]  Phase-2 wrap + handoff brief committed
-- [ ]  wrap reviewed with owner + backup
-- [ ]  risk ledger exported
-- [ ]  KPI scorecard snapshot exported
-- [ ]  execution priorities drafted from  learnings
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`release-readiness-wrap-handoff-delivery-board.md`](../../artifacts/release-readiness-wrap-handoff-completion-pack/release-readiness-wrap-handoff-delivery-board.md).

@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added `kpi-audit` command to compare baseline vs current KPI snapshots and enforce strict closeout gates.
+- Added `kpi-audit` command to compare baseline vs current KPI snapshots and enforce strict completion gates.
 - Added Cycle 27 docs contract validation for KPI audit guidance and command lane completeness.
 - Added deterministic Cycle 27 artifact pack generation (scorecard, delta table, corrective action plan, snapshots).
 - Added dedicated Cycle 27 contract-check script and automated tests.

@@ -8,8 +8,8 @@ This tracker keeps the Big-Brain Toolkit roadmap measurable after every follow-u
 | --- | ---: | ---: | ---: | --- |
 | Immediate backlog | 8 | 8 | 100% | Immediate backlog complete; continue into Operational readiness/5 follow-ups. |
 | Baseline readiness — Externalize the big-brain database | 4 | 4 | 100% | Built-in scenarios are data-backed and schema validated. |
-| Release readiness — Close the learning loop | 3 | 3 | 100% | Learning records, summaries, promotion/demotion, and calibration are active. |
-| Platform readiness — Trust-grade operator experience | 3 | 3 | 100% | Operator brief, PR comment mode, and demo gallery are complete. |
+| Release readiness — Close the learning loop | 3 | 3 | 100% | Learning records, summaries, promotion/exampletion, and calibration are active. |
+| Platform readiness — Trust-grade operator experience | 3 | 3 | 100% | Operator brief, PR comment mode, and example gallery are complete. |
 | Operational readiness — Safe remediation expansion | 4 | 4 | 100% | Safe-fix, assisted patch-plan, fix-audit records, and proof enforcement are in place. |
 | Adoption readiness — Enterprise scale | 3 | 3 | 100% | Portfolio rollup, enterprise governance controls, and adapter hardening are complete. |
 
@@ -21,7 +21,7 @@ This tracker keeps the Big-Brain Toolkit roadmap measurable after every follow-u
 | P0 | Add learning event records for adaptive diagnosis. | `sdetkit adaptive learn record` JSONL events. |
 | P0 | Add operator brief artifact. | `sdetkit adaptive brief` with Markdown, JSON, and PR comment outputs. |
 | P1 | Add candidate confidence calibration. | `candidate_calibration=...` evidence in adaptive diagnosis output. |
-| P1 | Add docs demo gallery. | `docs/adaptive-product-proof-gallery.md` with green, safe-fix, unknown-review, recurring-learning, and portfolio examples. |
+| P1 | Add docs example gallery. | `docs/adaptive-product-proof-gallery.md` with green, safe-fix, unknown-review, recurring-learning, and portfolio examples. |
 | P1 | Add fixture corpus for top scenarios. | `tests/fixtures/adaptive_logs/` plus parametrized coverage for 20 realistic adaptive failure logs. |
 | P2 | Add portfolio rollup. | `sdetkit adaptive portfolio-rollup` with top-risk scenarios, recurrence by repo, and next owner action. |
 | P2 | Harden org-level pack overlay. | Layer metadata, override approval validation, and governance docs for org/private scenario packs. |

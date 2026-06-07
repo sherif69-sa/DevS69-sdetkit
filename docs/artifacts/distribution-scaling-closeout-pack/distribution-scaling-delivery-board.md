@@ -1,6 +1,3 @@
-#  delivery board
-- [ ]  integration brief committed
-- [ ]  distribution scaling plan committed
-- [ ]  channel controls and assumptions log exported
-- [ ]  KPI scorecard snapshot exported
-- [ ]  trust refresh priorities drafted from  learnings
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`distribution-scaling-delivery-board.md`](../../artifacts/distribution-scaling-completion-pack/distribution-scaling-delivery-board.md).

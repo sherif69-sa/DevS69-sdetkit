@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added Cycle 38 closeout command: `python -m sdetkit cycle38-distribution-batch`.
+- Added Cycle 38 completion command: `python -m sdetkit cycle38-distribution-batch`.
 - Added strict continuity checks that require Cycle 37 strict-pass and board integrity.
 - Added Cycle 38 artifact outputs for channel plan, post copy pack, KPI scorecard, execution log, and validation commands.
 

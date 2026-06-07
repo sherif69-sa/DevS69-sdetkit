@@ -2,7 +2,7 @@
 
 This policy explains how SDETKit handles documentation that is built by MkDocs but intentionally not promoted into the primary navigation.
 
-The goal is to keep the public documentation useful for active operators while still preserving older reports, closeout notes, implementation plans, and supporting material. A page being outside `nav` is not automatically a defect. It means the page needs one of three clear outcomes:
+The goal is to keep the public documentation useful for active operators while still preserving older reports, completion notes, implementation plans, and supporting material. A page being outside `nav` is not automatically a defect. It means the page needs one of three clear outcomes:
 
 1. promote it into primary navigation,
 2. group it under an archive or supporting-reference section,
@@ -142,7 +142,7 @@ The following groups are examples of pages that should not be blindly promoted i
 
 ### Continuous upgrade completion report reports
 
-Files like `continuous-upgrade-big-upgrade-report-1.md` through later cycle reports are historical closeout material. They may be useful for traceability, but they should live behind an archive or upgrade-history index.
+Files like `continuous-upgrade-big-upgrade-report-1.md` through later cycle reports are historical completion material. They may be useful for traceability, but they should live behind an archive or upgrade-history index.
 
 ### Dated execution plans
 

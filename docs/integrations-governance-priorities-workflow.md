@@ -2,7 +2,7 @@
 
 Lane closes with a major upgrade that converts Lane governance handoff outcomes into a deterministic governance priorities operating lane.
 
-## Why Governance Priorities Closeout matters
+## Why Governance Priorities Completion matters
 
 - Converts Lane governance handoff outcomes into reusable governance priorities decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -10,17 +10,17 @@ Lane closes with a major upgrade that converts Lane governance handoff outcomes 
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json`
-- `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md`
+- `docs/artifacts/governance-handoff-completion-pack/governance-handoff-completion-summary.json`
+- `docs/artifacts/governance-handoff-completion-pack/governance-handoff-delivery-board.md`
 - `docs/roadmap/plans/governance-priorities-plan.json`
 
 ## Command lane
 
 ```bash
-python -m sdetkit governance-priorities-closeout --format json --strict
-python -m sdetkit governance-priorities-closeout --emit-pack-dir docs/artifacts/governance-priorities-closeout-pack --format json --strict
-python -m sdetkit governance-priorities-closeout --execute --evidence-dir docs/artifacts/governance-priorities-closeout-pack/evidence --format json --strict
-python scripts/check_governance_priorities_closeout_contract.py
+python -m sdetkit governance-priorities-completion --format json --strict
+python -m sdetkit governance-priorities-completion --emit-pack-dir docs/artifacts/governance-priorities-completion-pack --format json --strict
+python -m sdetkit governance-priorities-completion --execute --evidence-dir docs/artifacts/governance-priorities-completion-pack/evidence --format json --strict
+python scripts/check_governance_priorities_completion_contract.py
 ```
 
 ## Governance priorities contract
