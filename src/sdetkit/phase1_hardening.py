@@ -1,29 +1,12 @@
-"""Compatibility wrapper for legacy module name.
+"""Compatibility alias for a legacy module name.
 
 Use ``sdetkit.baseline_hardening`` instead of ``sdetkit.phase1_hardening``.
 """
 
 from __future__ import annotations
 
+import sys as _sys
 from importlib import import_module as _import_module
-from typing import Any as _Any
 
-_COMPAT_MODULE_NAME = "sdetkit.baseline_hardening"
-_compat_module = _import_module(_COMPAT_MODULE_NAME)
-
-
-def __getattr__(name: str) -> _Any:
-    return getattr(_compat_module, name)
-
-
-def __dir__() -> list[str]:
-    return sorted(set(globals()) | set(dir(_compat_module)))
-
-
-for _name in dir(_compat_module):
-    if not (_name.startswith("__") and _name.endswith("__")):
-        globals().setdefault(_name, getattr(_compat_module, _name))
-
-__all__ = [
-    _name for _name in dir(_compat_module) if not (_name.startswith("__") and _name.endswith("__"))
-]
+_compat_alias = _import_module("sdetkit.baseline_hardening")
+_sys.modules[__name__] = _compat_alias
