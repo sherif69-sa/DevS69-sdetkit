@@ -8,8 +8,15 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+from sdetkit.failure_vector import (
+    render_failure_vector_bundle_report,
+    write_failure_vector_bundle,
+)
+
 SCHEMA_VERSION = "sdetkit.ci_failure_extractor.v1"
 DEFAULT_OUT = "build/sdetkit/failed-check-logs.json"
+DEFAULT_FAILURE_VECTORS_OUT = "build/sdetkit/failure-vectors.json"
+DEFAULT_FAILURE_VECTORS_MD = "build/sdetkit/failure-vectors.md"
 
 PATH_RE = re.compile(
     r"(?P<path>(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+\.(?:py|md|yml|yaml|toml|ini|cfg|txt|sh))"
@@ -222,10 +229,45 @@ def write_failed_check_logs(log_paths: Sequence[str | Path], out: str | Path) ->
     return payload
 
 
+def write_failure_vector_artifacts(
+    log_paths: Sequence[str | Path],
+    *,
+    json_out: str | Path = DEFAULT_FAILURE_VECTORS_OUT,
+    markdown_out: str | Path | None = None,
+    environment: str = "unknown",
+) -> dict[str, Any]:
+    payload = write_failure_vector_bundle(
+        log_paths,
+        Path(json_out),
+        environment=environment,
+    )
+
+    if markdown_out:
+        md_path = Path(markdown_out)
+        md_path.parent.mkdir(parents=True, exist_ok=True)
+        md_path.write_text(render_failure_vector_bundle_report(payload) + "\n", encoding="utf-8")
+
+    return payload
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m sdetkit.ci_failure_extractor")
     parser.add_argument("--log", action="append", required=True, help="Raw CI log file to extract")
     parser.add_argument("--out", default=DEFAULT_OUT)
+    parser.add_argument(
+        "--failure-vectors-out",
+        default="",
+        help=(
+            "Optional JSON output path for deterministic failure-vector bundle "
+            f"(defaults to {DEFAULT_FAILURE_VECTORS_OUT} when markdown output is requested)"
+        ),
+    )
+    parser.add_argument(
+        "--failure-vectors-md",
+        default="",
+        help="Optional Markdown output path for deterministic failure-vector bundle summary",
+    )
+    parser.add_argument("--environment", default="unknown")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     return parser
 
@@ -234,18 +276,37 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(list(argv) if argv is not None else None)
     try:
         payload = write_failed_check_logs(args.log, args.out)
+        vector_payload = None
+        vectors_out = args.failure_vectors_out
+        if args.failure_vectors_md and not vectors_out:
+            vectors_out = DEFAULT_FAILURE_VECTORS_OUT
+        if vectors_out:
+            vector_payload = write_failure_vector_artifacts(
+                args.log,
+                json_out=vectors_out,
+                markdown_out=args.failure_vectors_md or None,
+                environment=args.environment,
+            )
     except OSError as exc:
         print(f"error={exc}", file=sys.stderr)
         return 2
 
     if args.format == "json":
-        print(json.dumps(payload, indent=2, sort_keys=True))
+        output: dict[str, Any] = {"failed_check_logs": payload}
+        if vector_payload is not None:
+            output["failure_vector_bundle"] = vector_payload
+        print(json.dumps(output, indent=2, sort_keys=True))
     else:
         print(f"failed_check_logs_json={args.out}")
         print(f"failed_check_count={payload['failed_check_count']}")
         print(f"safe_to_auto_fix_count={payload['summary']['safe_to_auto_fix_count']}")
         print(f"review_first_count={payload['summary']['review_first_count']}")
         print(f"unknown_count={payload['summary']['unknown_count']}")
+        if vector_payload is not None:
+            print(f"failure_vectors_json={vectors_out}")
+            if args.failure_vectors_md:
+                print(f"failure_vectors_md={args.failure_vectors_md}")
+            print(f"failure_vector_count={vector_payload['failure_vector_count']}")
     return 0
 
 
