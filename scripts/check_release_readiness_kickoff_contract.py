@@ -13,7 +13,7 @@ from pathlib import Path
 def _evidence_path(root: Path) -> Path:
     return (
         root
-        / "build/phase2-workflow/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
+        / "build/phase2-workflow/phase2-kickoff-pack/evidence/release-readiness-kickoff-execution-summary.json"
     )
 
 

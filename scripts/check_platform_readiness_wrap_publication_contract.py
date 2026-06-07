@@ -8,7 +8,7 @@ from pathlib import Path
 
 from sdetkit import platform_readiness_wrap_publication as d90
 
-_CANONICAL_EVIDENCE = "docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/evidence/phase3-wrap-publication-execution-summary.json"
+_CANONICAL_EVIDENCE = "docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/evidence/platform-readiness-wrap-publication-execution-summary.json"
 
 
 def main() -> int:

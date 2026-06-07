@@ -1,0 +1,22 @@
+{
+  "name": "phase2-kickoff",
+  "summary": {
+    "activation_score": 100,
+    "strict_pass": true
+  },
+  "checks": [
+    {
+      "check_id": "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json",
+      "passed": true
+    },
+    {
+      "check_id": "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md",
+      "passed": true
+    },
+    {
+      "check_id": "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md",
+      "passed": true,
+      "count": 5
+    }
+  ]
+}
