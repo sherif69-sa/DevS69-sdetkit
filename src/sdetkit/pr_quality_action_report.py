@@ -1480,9 +1480,20 @@ def write_comment_body(
             bundle,
             failure_bundle_out_dir,
         )
+        manifest = _as_dict(bundle.get("manifest"))
         failure_bundle_result = {
             "out_dir": failure_bundle_out_dir.as_posix(),
             "files": [item.as_posix() for item in written_bundle_paths],
+            "report_path": (failure_bundle_out_dir / "failure-bundle.md").as_posix(),
+            "safety_summary": {
+                "review_first": bool(manifest.get("review_first", False)),
+                "safe_fix_allowed": bool(manifest.get("safe_fix_allowed", False)),
+                "reporting_only": True,
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
         }
 
     status = _string(action_report.get("status") or "unknown")
