@@ -13,8 +13,10 @@
   "recommendations": [
     "Release posture is strong; proceed with release candidate tagging and notes preparation."
   ],
-  "score": 100.0,
-  "strict_failures": [],
+  "score": 0.0,
+  "strict_failures": [
+    "## Closeout checklist"
+  ],
   "summary": {
     "gate_status": "pass",
     "release_score": 96.56,

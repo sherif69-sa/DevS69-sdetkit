@@ -9,7 +9,7 @@ Turn SDETKit from "good" to a top-tier, operator-first release confidence platfo
 
 ## 90-day structure
 
-### Phase 1 (Days 1-21): Workflow hardening and CI efficiency
+### Baseline readiness (Days 1-21): Workflow hardening and CI efficiency
 
 Goals:
 - Reduce duplicate automation paths and workflow overhead.
@@ -25,7 +25,7 @@ Exit criteria:
 - No reduction in quality/security/release gate coverage.
 - CI minute spend per merged PR reduced against baseline.
 
-### Phase 2 (Days 22-45): First-run dominance
+### Release readiness (Days 22-45): First-run dominance
 
 Goals:
 - Improve adoption conversion for new operators.
@@ -40,7 +40,7 @@ Exit criteria:
 - Reduced onboarding friction in smoke runs.
 - Faster median first-proof completion from baseline.
 
-### Phase 3 (Days 46-70): Enterprise confidence lane
+### Platform readiness (Days 46-70): Enterprise confidence lane
 
 Goals:
 - Strengthen policy-backed decision artifacts.
@@ -55,7 +55,7 @@ Exit criteria:
 - Policy decisions are reproducible and contract-validated.
 - Portfolio orchestration outputs are stable and reviewable.
 
-### Phase 4 (Days 71-90): Market credibility engine
+### Operational readiness (Days 71-90): Market credibility engine
 
 Goals:
 - Productize proof assets for adoption growth.

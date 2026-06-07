@@ -27,10 +27,10 @@ This program is organized into 7 connected workstreams:
 | Phase | Time window | Primary outcome | Exit gate |
 |---|---|---|---|
 | Phase 0 | Week 1 | Foundation and alignment | Messaging, ICP, KPI baseline approved |
-| Phase 1 | Weeks 2-4 | Design partner activation | 2 pilots active with scorecards |
-| Phase 2 | Months 2-3 | Repeatable GTM loop | Predictable pipeline conversion |
-| Phase 3 | Months 4-6 | Standardized expansion | Multi-repo expansion pattern validated |
-| Phase 4 | Months 7-12 | Enterprise scale | Portfolio/governance motion operational |
+| Baseline readiness | Weeks 2-4 | Design partner activation | 2 pilots active with scorecards |
+| Release readiness | Months 2-3 | Repeatable GTM loop | Predictable pipeline conversion |
+| Platform readiness | Months 4-6 | Standardized expansion | Multi-repo expansion pattern validated |
+| Operational readiness | Months 7-12 | Enterprise scale | Portfolio/governance motion operational |
 
 ---
 

@@ -1,6 +1,6 @@
 # Plugins, rule packs, and `fix-audit`
 
-Phase 5 turns `sdetkit repo audit` into a plugin-driven platform.
+Adoption readiness turns `sdetkit repo audit` into a plugin-driven platform.
 
 ## Plugin API
 

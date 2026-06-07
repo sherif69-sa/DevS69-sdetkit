@@ -1,6 +1,6 @@
 # Continuous upgrade delivery workflow
 
-Lane closes with a major upgrade that converts Lane governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
+Lane closes with a major upgrade that converts Lane governance scale outcomes into a deterministic platform-readiness wrap and publication operating lane.
 
 ## Why Lane matters
 

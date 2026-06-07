@@ -2,7 +2,7 @@
 
 ## Mission closed
 
-Cycle 32 hardens Phase-2 execution by turning release behavior into a deterministic weekly system with explicit quality and rollback gates.
+Cycle 32 hardens Release readiness execution by turning release behavior into a deterministic weekly system with explicit quality and rollback gates.
 
 ## Upgrades shipped
 

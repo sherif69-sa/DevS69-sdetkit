@@ -34,7 +34,7 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
 
 ## Next upgrade roadmap
 
-### Phase 1 — Externalize the big-brain database
+### Baseline readiness — Externalize the big-brain database
 
 **Outcome:** the seeded brain becomes a maintainable data product.
 
@@ -48,7 +48,7 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
   - private enterprise pack.
 - Add tests that reject malformed packs and prove deterministic ordering.
 
-### Phase 2 — Close the learning loop
+### Release readiness — Close the learning loop
 
 **Outcome:** the kit learns from actual run outcomes, not only from seed data.
 
@@ -65,7 +65,7 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
 - Add promotion/demotion rules: **Done:** summaries now promote scenarios when proof/fix feedback succeeds, demote false positives, increase risk for recurring failures, and lower confidence for thin evidence.
 - Add `sdetkit adaptive learn summarize` to show top recurring scenarios and weakest lanes. **Done:** the CLI now rolls JSONL diagnosis events into `top_recurring_scenarios` and `weakest_lanes`.
 
-### Phase 3 — Build the trust-grade operator experience
+### Platform readiness — Build the trust-grade operator experience
 
 **Outcome:** anyone trying the repo can see why SDETKit is valuable in one run.
 
@@ -82,7 +82,7 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
   - unknown failure: review-first candidate scenarios and checks.
 - Add screenshots or sample PR comments in docs for the top 10 scenarios. **Done:** `docs/adaptive-product-proof-gallery.md` now shows green, safe-fix, unknown-review, recurring-learning, top-scenario, and portfolio rollup examples.
 
-### Phase 4 — Expand safe remediation without weakening safety
+### Operational readiness — Expand safe remediation without weakening safety
 
 **Outcome:** more fixes are assisted, but unknown failures remain human-reviewed.
 
@@ -95,7 +95,7 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
   - post-fix proof command. **Done:** fix-audit summaries now flag missing proof, block failed proof, and emit release recommendations.
 - Add fix-audit records for every automated change. **Done:** `sdetkit adaptive fix-audit record` stores safe-fix and assisted patch-plan decisions with guardrails, proof commands, changed-file scope, rollback notes, and outcomes.
 
-### Phase 5 — Make it enterprise-scale
+### Adoption readiness — Make it enterprise-scale
 
 **Outcome:** SDETKit becomes a cross-repo quality intelligence layer.
 
@@ -115,7 +115,7 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
 
 ## Completion checkpoint
 
-The Big-Brain execution plan is now complete across the immediate backlog, Phase 4 safe-remediation expansion, and Phase 5 enterprise-scale lanes. CLI discoverability for every adaptive lane is covered by regression tests so the next work can move into a fresh roadmap wave without losing these command surfaces. The next wave is tracked in [`adaptive-next-wave-roadmap.md`](adaptive-next-wave-roadmap.md).
+The Big-Brain execution plan is now complete across the immediate backlog, Operational readiness safe-remediation expansion, and Adoption readiness enterprise-scale lanes. CLI discoverability for every adaptive lane is covered by regression tests so the next work can move into a fresh roadmap wave without losing these command surfaces. The next wave is tracked in [`adaptive-next-wave-roadmap.md`](adaptive-next-wave-roadmap.md).
 
 ## Big-win differentiators to protect
 

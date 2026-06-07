@@ -16,7 +16,7 @@ python -m sdetkit cycle29-phase1-hardening --execute --evidence-dir docs/artifac
 python scripts/check_phase1_hardening_contract.py
 ```
 
-## Closeout criteria
+## Completion criteria
 
 - Cycle 29 score >= 90 with no critical failures.
 - Top entry pages link Cycle 29 integration + report docs.

@@ -2,7 +2,7 @@
 
 ## Objective
 
-Close Cycle 58 with a high-confidence Phase-2 hardening lane that converts Cycle 57 KPI deep-audit outcomes into deterministic Cycle 59 pre-plan priorities.
+Close Cycle 58 with a high-confidence Release readiness hardening lane that converts Cycle 57 KPI deep-audit outcomes into deterministic Cycle 59 pre-plan priorities.
 
 ## Big upgrades shipped
 

@@ -16,7 +16,7 @@ python -m sdetkit cycle28-weekly-review --execute --evidence-dir docs/artifacts/
 python scripts/check_weekly_review_contract.py
 ```
 
-## Closeout criteria
+## Completion criteria
 
 - Cycle 28 score >= 90 with no critical failures.
 - Cycle 25/26/27 summary artifacts available and parseable.

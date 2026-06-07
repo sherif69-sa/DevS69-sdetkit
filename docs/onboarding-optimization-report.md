@@ -16,7 +16,7 @@ python -m sdetkit onboarding-optimization --execute --evidence-dir docs/artifact
 python scripts/check_onboarding_optimization_contract.py
 ```
 
-## Closeout criteria
+## Completion criteria
 
 - Onboarding-optimization score >= 90 with no critical failures.
 - Integration page includes all required sections + command contract.

@@ -6,7 +6,7 @@ Use this lightweight playbook to turn product updates into repeatable community 
 
 - **1x/week:** one concrete workflow improvement (`before` -> `after`)
 - **1x/week:** one artifact-driven use case from real usage
-- **1x/month:** one roadmap + lessons learned update
+- **1x/month:** one roadmap + learning notes update
 
 ## Post template: workflow win
 

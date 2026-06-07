@@ -32,7 +32,7 @@ python scripts/check_reliability_evidence_pack_contract.py
 
 `--execute` runs the reliability-evidence command chain and writes deterministic logs for each command into `--evidence-dir`.
 
-## Closeout checklist
+## Completion checklist
 
 - [ ] GitHub Actions onboarding execution summary is green.
 - [ ] GitLab CI onboarding execution summary is green.

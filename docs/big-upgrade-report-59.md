@@ -2,7 +2,7 @@
 
 ## Objective
 
-Close Cycle 59 with a high-confidence Phase-3 pre-plan lane that converts Cycle 58 hardening outcomes into deterministic Cycle 60 execution priorities.
+Close Cycle 59 with a high-confidence Platform readiness pre-plan lane that converts Cycle 58 hardening outcomes into deterministic Cycle 60 execution priorities.
 
 ## Big upgrades shipped
 

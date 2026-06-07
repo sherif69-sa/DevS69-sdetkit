@@ -105,7 +105,7 @@ For a compact tree-level map, use [Docs map and organization](docs-map.md).
 - [Artifact reference and generated sample map](artifact-reference.md)
 - [Docs map and organization](docs-map.md)
 - [Operator onboarding (7-day)](operator-onboarding-7-day.md)
-- [Phase 1 execution checklist](operations-execution-checklist.md)
+- [Baseline readiness execution checklist](operations-execution-checklist.md)
 - [Next 10 follow-ups](next-10-followups.md)
 - [Recommended CI flow](recommended-ci-flow.md)
 - [CI artifact walkthrough](ci-artifact-walkthrough.md)

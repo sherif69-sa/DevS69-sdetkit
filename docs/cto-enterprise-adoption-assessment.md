@@ -114,7 +114,7 @@ Interpretation: governance foundations exist, but wording- and evidence-contract
   - Security approver (AppSec)
   - Runtime owner (Developer Experience)
 
-### Phase 1 (2-6 weeks): Controlled pilot in 3-5 repos
+### Baseline readiness (2-6 weeks): Controlled pilot in 3-5 repos
 
 - Roll out to repos with different risk classes (service, library, internal tooling).
 - Track metrics:
@@ -124,13 +124,13 @@ Interpretation: governance foundations exist, but wording- and evidence-contract
   - flaky-check ratio,
   - compute minutes per merged PR.
 
-### Phase 2 (6-10 weeks): Hardening for enterprise standard
+### Release readiness (6-10 weeks): Hardening for enterprise standard
 
 - Consolidate workflows into tiered bundles (core/security/release).
 - Deprecate low-value or overlapping commands.
 - Introduce compatibility policy (LTS command contract, deprecation windows).
 
-### Phase 3 (10-16 weeks): Organization rollout
+### Platform readiness (10-16 weeks): Organization rollout
 
 - Provide role-specific enablement kits (developer, release manager, compliance).
 - Establish monthly release governance review and quarterly architecture review.

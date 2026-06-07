@@ -2,7 +2,7 @@
 
 ## Objective
 
-Close Cycle 60 with a high-confidence Phase-2 wrap + handoff lane that converts Cycle 59 pre-plan outcomes into deterministic Cycle 61 execution priorities.
+Close Cycle 60 with a high-confidence Release readiness wrap + handoff lane that converts Cycle 59 pre-plan outcomes into deterministic Cycle 61 execution priorities.
 
 ## Big upgrades shipped
 

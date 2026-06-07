@@ -16,14 +16,14 @@ This tracker is the "do not move forward until done" execution board for the CTO
 - Total checklist items across Phases 1-4: **18**
 - Completed checklist items: **18**
 - Overall completion: **100%**
-- Current active phase: **Phase set complete (Phase 1-4 delivered)**
+- Current active phase: **Phase set complete (Baseline readiness-4 delivered)**
 
 ### Phase completion by checklist
 
-- Phase 1: **9/9 complete (100%)**
-- Phase 2: **3/3 complete (100%)**
-- Phase 3: **3/3 complete (100%)**
-- Phase 4: **3/3 complete (100%)**
+- Baseline readiness: **9/9 complete (100%)**
+- Release readiness: **3/3 complete (100%)**
+- Platform readiness: **3/3 complete (100%)**
+- Operational readiness: **3/3 complete (100%)**
 
 ## Workflow naming alignment (professional entrypoints)
 
@@ -41,7 +41,7 @@ use these canonical targets:
 Legacy phase aliases remain for compatibility with existing CI/docs history and will be retired
 only after consumers migrate.
 
-## Phase 1 (Weeks 1-2): first-proof conversion
+## Baseline readiness (Weeks 1-2): first-proof conversion
 
 Status: **Completed**
 
@@ -74,17 +74,17 @@ Follow-up checklist:
 - [x] Add one-line `FIRST_PROOF_DECISION=SHIP|NO-SHIP` output for executive readability.
 - [x] Run first-proof script/test suite inside `make first-proof-verify` for CI parity evidence.
 
-Suggestions before Phase 2:
+Suggestions before Release readiness:
 
 1. Publish one short screencast/gif for first-proof path.
 
-Immediate next actions (Phase 2 kickoff):
+Immediate next actions (Release readiness kickoff):
 
 1. Freeze behavior contracts for `repo.py` and `doctor.py` and check them into `docs/contracts/`.
 2. Extract one read-only/reporting bounded module from each file with compatibility wrappers.
-3. Record LOC/complexity delta in a single phase-2 baseline artifact before/after extraction.
+3. Record LOC/complexity delta in a single release-readiness baseline artifact before/after extraction.
 
-## Phase 2 (Weeks 3-4): hotspot decomposition
+## Release readiness (Weeks 3-4): hotspot decomposition
 
 Status: **Completed**
 
@@ -94,7 +94,7 @@ Follow-up checklist:
 - [x] Extract one bounded module from each file without public CLI drift.
 - [x] Track LOC reduction and complexity delta.
 
-Phase 2 kickoff artifacts now present:
+Release readiness kickoff artifacts now present:
 
 - `docs/contracts/phase2-repo-behavior-contract.v1.json`
 - `docs/contracts/phase2-doctor-behavior-contract.v1.json`
@@ -109,7 +109,7 @@ Suggestions:
 2. Keep compatibility wrappers to avoid breaking imports.
 3. Merge only with contract-test parity.
 
-## Phase 3 (Weeks 5-6): dependency governance automation
+## Platform readiness (Weeks 5-6): dependency governance automation
 
 Status: **Completed**
 
@@ -125,7 +125,7 @@ Suggestions:
 2. Fail CI only on policy-critical lag to avoid noise.
 3. Keep weekly trend chart in one artifact for leadership.
 
-Phase 3 artifacts now present:
+Platform readiness artifacts now present:
 
 - `docs/dependency-slo-policy.md`
 - `config/dependency_slo_policy.json`
@@ -133,7 +133,7 @@ Phase 3 artifacts now present:
 - `docs/artifacts/phase3-dependency-radar-2026-04-24.json`
 - `.github/ISSUE_TEMPLATE/dependency-drift-weekly.yml`
 
-## Phase 4 (Weeks 7-8): market credibility assets
+## Operational readiness (Weeks 7-8): market credibility assets
 
 Status: **Completed**
 
@@ -149,7 +149,7 @@ Suggestions:
 2. Include "time to first proof" metric in every case study.
 3. Add rollback/remediation examples to improve trust.
 
-Phase 4 artifacts now present:
+Operational readiness artifacts now present:
 
 - `docs/integrations/github-actions-reference-pack.md`
 - `docs/integrations/gitlab-reference-pack.md`

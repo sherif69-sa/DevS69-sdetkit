@@ -34,7 +34,7 @@ Onboarding-optimization computes a weighted readiness score (0-100):
 
 `--execute` runs the onboarding-optimization validation chain and stores deterministic logs in `--evidence-dir`.
 
-## Closeout checklist
+## Completion checklist
 
 - [ ] `onboarding` command supports role and platform targeting.
 - [ ] README links to onboarding-optimization integration and command examples.

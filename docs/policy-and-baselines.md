@@ -1,6 +1,6 @@
 # Policy and baselines (`sdetkit repo audit`)
 
-Phase 4 adds company-grade policy and baseline controls to keep `repo audit` signal high while staying deterministic and offline.
+Operational readiness adds company-grade policy and baseline controls to keep `repo audit` signal high while staying deterministic and offline.
 
 ## Configuration location
 
@@ -80,4 +80,4 @@ SARIF output includes actionable findings only.
 
 ## CI + GitHub Action guidance
 
-Use baseline-aware `repo audit` in CI for stable gates while keeping trend visibility through baseline check output and optional JSON artifacts/step summary from the Phase 3 GitHub Action workflow.
+Use baseline-aware `repo audit` in CI for stable gates while keeping trend visibility through baseline check output and optional JSON artifacts/step summary from the Platform readiness GitHub Action workflow.

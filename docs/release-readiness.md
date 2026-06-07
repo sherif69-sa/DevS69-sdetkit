@@ -26,7 +26,7 @@ python scripts/check_release_readiness_contract.py
 
 `--execute` runs the release-readiness command chain and writes deterministic logs into `--evidence-dir`.
 
-## Closeout checklist
+## Completion checklist
 
 - [ ] Reliability-evidence gate status is `pass`.
 - [ ] Weekly-review score meets threshold.

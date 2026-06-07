@@ -19,7 +19,7 @@ Prefer production workflow names:
 Avoid adding new workflow names that read like internal sequencing or operator guidance labels:
 
 - baseline stage, release readiness stage, platform readiness stage
-- do-it
+- execute
 - completion report
 - completion signal
 - deprecation plan

@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added `cycle30-phase1-wrap` command to score Phase-1 closeout and lock a deterministic Phase-2 backlog.
+- Added `cycle30-phase1-wrap` command to score Baseline readiness closeout and lock a deterministic Release readiness backlog.
 - Added Cycle 30 docs contract validation and evidence lane execution mode.
 - Added Cycle 30 handoff pack generation: summary, backlog snapshot, handoff actions, and validation commands.
 - Added dedicated Cycle 30 contract-check script and automated tests.
@@ -16,9 +16,9 @@ python -m sdetkit cycle30-phase1-wrap --execute --evidence-dir docs/artifacts/cy
 python scripts/check_phase1_wrap_contract.py
 ```
 
-## Closeout criteria
+## Completion criteria
 
 - Cycle 30 score >= 90 with no critical failures.
 - README + docs index + strategy pages all advertise Cycle 30 wrap lane.
 - Cycles 27-29 summary artifacts are available and parsed.
-- Phase-2 backlog list is locked with >=8 actionable checkpoints.
+- Release readiness backlog list is locked with >=8 actionable checkpoints.

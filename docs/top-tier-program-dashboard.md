@@ -13,7 +13,7 @@ This dashboard is the weekly control plane for the **DevS69 SDETKit top-tier ful
 | Field | Value |
 |---|---|
 | Week ending | 2026-04-17 |
-| Program status | Phase 1 closeout complete |
+| Program status | Baseline readiness closeout complete |
 | Delivery confidence | Green |
 | Top blocker count | 0 |
 | KPI movement | Seed baseline published |
@@ -22,11 +22,11 @@ This dashboard is the weekly control plane for the **DevS69 SDETKit top-tier ful
 
 | Workstream | Owner role | Current phase | Status | This-week deliverable | Evidence |
 |---|---|---|---|---|---|
-| WS1 Product packaging | Product + DX | Phase 1 | In progress | Publish packaging lanes | [Packaging lanes](packaging-lanes.md) |
-| WS2 Portfolio reporting | Platform engineering | Phase 1 | In progress | Publish portfolio reporting recipe | [Portfolio reporting recipe](portfolio-reporting-recipe.md) |
-| WS3 Governance and lifecycle | Architecture + QA governance | Phase 1 | In progress | Publish compatibility matrix | [Policy compatibility matrix](policy-compatibility-matrix.md) |
-| WS4 Commercialization enablement | PMM + Solutions | Phase 1 | In progress | Build role-based quickstart skeleton | [Role-based quickstarts](role-based-quickstarts.md) |
-| WS5 Reliability and release excellence | Release engineering | Phase 1 | In progress | Publish support/escalation model | [Support and escalation model](support-and-escalation-model.md) |
+| WS1 Product packaging | Product + DX | Baseline readiness | In progress | Publish packaging lanes | [Packaging lanes](packaging-lanes.md) |
+| WS2 Portfolio reporting | Platform engineering | Baseline readiness | In progress | Publish portfolio reporting recipe | [Portfolio reporting recipe](portfolio-reporting-recipe.md) |
+| WS3 Governance and lifecycle | Architecture + QA governance | Baseline readiness | In progress | Publish compatibility matrix | [Policy compatibility matrix](policy-compatibility-matrix.md) |
+| WS4 Commercialization enablement | PMM + Solutions | Baseline readiness | In progress | Build role-based quickstart skeleton | [Role-based quickstarts](role-based-quickstarts.md) |
+| WS5 Reliability and release excellence | Release engineering | Baseline readiness | In progress | Publish support/escalation model | [Support and escalation model](support-and-escalation-model.md) |
 
 ## KPI board (contract baseline)
 

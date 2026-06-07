@@ -6,12 +6,12 @@ This tracker keeps the Big-Brain Toolkit roadmap measurable after every follow-u
 
 | Scope | Completed | Total | Progress | Status |
 | --- | ---: | ---: | ---: | --- |
-| Immediate backlog | 8 | 8 | 100% | Immediate backlog complete; continue into Phase 4/5 follow-ups. |
-| Phase 1 — Externalize the big-brain database | 4 | 4 | 100% | Built-in scenarios are data-backed and schema validated. |
-| Phase 2 — Close the learning loop | 3 | 3 | 100% | Learning records, summaries, promotion/demotion, and calibration are active. |
-| Phase 3 — Trust-grade operator experience | 3 | 3 | 100% | Operator brief, PR comment mode, and demo gallery are complete. |
-| Phase 4 — Safe remediation expansion | 4 | 4 | 100% | Safe-fix, assisted patch-plan, fix-audit records, and proof enforcement are in place. |
-| Phase 5 — Enterprise scale | 3 | 3 | 100% | Portfolio rollup, enterprise governance controls, and adapter hardening are complete. |
+| Immediate backlog | 8 | 8 | 100% | Immediate backlog complete; continue into Operational readiness/5 follow-ups. |
+| Baseline readiness — Externalize the big-brain database | 4 | 4 | 100% | Built-in scenarios are data-backed and schema validated. |
+| Release readiness — Close the learning loop | 3 | 3 | 100% | Learning records, summaries, promotion/demotion, and calibration are active. |
+| Platform readiness — Trust-grade operator experience | 3 | 3 | 100% | Operator brief, PR comment mode, and demo gallery are complete. |
+| Operational readiness — Safe remediation expansion | 4 | 4 | 100% | Safe-fix, assisted patch-plan, fix-audit records, and proof enforcement are in place. |
+| Adoption readiness — Enterprise scale | 3 | 3 | 100% | Portfolio rollup, enterprise governance controls, and adapter hardening are complete. |
 
 ## Completed immediate-backlog items
 
@@ -28,7 +28,7 @@ This tracker keeps the Big-Brain Toolkit roadmap measurable after every follow-u
 
 ## Remaining immediate-backlog items
 
-All immediate backlog items are complete. Continue with the Phase 4/5 follow-up queue below.
+All immediate backlog items are complete. Continue with the Operational readiness/5 follow-up queue below.
 
 ## Latest progress made
 
