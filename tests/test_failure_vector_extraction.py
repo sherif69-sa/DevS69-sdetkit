@@ -167,3 +167,41 @@ def test_failure_vector_bundle_can_write_deterministic_json(tmp_path: Path) -> N
     text = out.read_text(encoding="utf-8")
     assert '"schema_version": "sdetkit.failure_vector.bundle.v1"' in text
     assert '"failure_class": "test"' in text
+
+
+def test_failure_vector_bundle_report_surfaces_safety_gate_summary(tmp_path: Path) -> None:
+    formatter_dir = tmp_path / "ruff-format"
+    formatter_dir.mkdir()
+    formatter_log = formatter_dir / "log.txt"
+    formatter_log.write_text(
+        """
+        ruff format..............................................................Failed
+        tests/test_widget.py
+        1 file would be reformatted
+        """,
+        encoding="utf-8",
+    )
+
+    unknown_dir = tmp_path / "custom-wrapper"
+    unknown_dir.mkdir()
+    unknown_log = unknown_dir / "log.txt"
+    unknown_log.write_text(
+        """
+        custom wrapper failed with unknown output
+        Process completed with exit code 42
+        """,
+        encoding="utf-8",
+    )
+
+    payload = build_failure_vector_bundle([formatter_log, unknown_log], environment="local")
+    report = render_failure_vector_bundle_report(payload)
+
+    assert "## SafetyGate summary" in report
+    assert "- safe_fix_allowed_count: `1`" in report
+    assert "- safety_review_first_count: `1`" in report
+    assert "- safety_allowed_files: `tests/test_widget.py`" in report
+    assert "python -m ruff format --check tests/test_widget.py" in report
+    assert "make proof-after-format" in report
+    assert "- automation_allowed: `false`" in report
+    assert "- patch_application_allowed: `false`" in report
+    assert "- merge_authorized: `false`" in report
