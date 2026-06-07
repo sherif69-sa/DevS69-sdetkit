@@ -681,7 +681,7 @@ Then use stability-aware command discovery:
     )
     adoption_surface.add_argument("--root", default=".")
     adoption_surface.add_argument("--out", default="build/sdetkit/adoption-surface.json")
-    adoption_surface.add_argument("--format", choices=["json", "text"], default="json")
+    adoption_surface.add_argument("--format", choices=["json", "text", "report"], default="json")
 
     issue_queue_classifier = sub.add_parser(
         "issue-queue-classifier",

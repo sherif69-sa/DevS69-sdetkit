@@ -283,3 +283,68 @@ def test_adoption_surface_payload_validator_rejects_authority_escalation() -> No
     }
 
     assert validate_adoption_surface_payload(payload) == ["automation_allowed must be false"]
+
+
+def test_adoption_surface_report_renders_operator_readiness_summary(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    _write(tmp_path / "pyproject.toml", '[project]\ndependencies = ["pytest"]\n')
+    _write(tmp_path / "requirements-test.txt", "pytest==9.0.3\n")
+    _write(tmp_path / ".pre-commit-config.yaml", "repos: []\n")
+    _write(tmp_path / "package.json", json.dumps({"name": "demo", "scripts": {"build": "tsc"}}))
+    out = tmp_path / "adoption-surface.json"
+
+    from sdetkit.adoption_surface import main
+
+    rc = main(["--root", str(tmp_path), "--out", str(out), "--format", "report"])
+
+    assert rc == 0
+    report = capsys.readouterr().out
+    assert "# SDETKit adoption readiness report" in report
+    assert "## Detected languages" in report
+    assert "- python (high)" in report
+    assert "- javascript_typescript (medium)" in report
+    assert "## Recommended proof commands" in report
+    assert "`python -m pytest -q -o addopts=`" in report
+    assert "auto_run_allowed=false" in report
+    assert "## Review-first unknowns" in report
+    assert (
+        "JavaScript/TypeScript package manifest detected but test command is not proven" in report
+    )
+    assert "## Authority boundary" in report
+    assert "- automation_allowed: false" in report
+    assert "- patch_application_allowed: false" in report
+    assert "- merge_authorized: false" in report
+    assert "- semantic_equivalence_proven: false" in report
+
+
+def test_adoption_surface_cli_dispatch_renders_operator_report(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    _write(tmp_path / "pyproject.toml", '[project]\ndependencies = ["pytest"]\n')
+    _write(tmp_path / "requirements-test.txt", "pytest==9.0.3\n")
+    _write(tmp_path / "package.json", json.dumps({"name": "demo", "scripts": {"build": "tsc"}}))
+    out = tmp_path / "adoption-surface.json"
+
+    from sdetkit.cli import main as cli_main
+
+    rc = cli_main(
+        [
+            "adoption-surface",
+            "--root",
+            str(tmp_path),
+            "--out",
+            str(out),
+            "--format",
+            "report",
+        ]
+    )
+
+    assert rc == 0
+    report = capsys.readouterr().out
+    assert "# SDETKit adoption readiness report" in report
+    assert "## Recommended proof commands" in report
+    assert "auto_run_allowed=false" in report
+    assert "- patch_application_allowed: false" in report
