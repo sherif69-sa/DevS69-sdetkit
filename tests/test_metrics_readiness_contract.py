@@ -25,11 +25,11 @@ EXPECTED_PHASE6_GATE_CHECK_IDS = [
 ]
 EXPECTED_PHASE6_WORKFLOW_TARGETS = [
     "adoption-readiness-ecosystem-contract",
-    "scale-readiness-start",
-    "scale-readiness-status",
-    "scale-readiness-progress",
-    "scale-readiness-complete",
-    "scale-readiness-metrics-contract",
+    "phase6-start",
+    "phase6-status",
+    "phase6-progress",
+    "phase6-complete",
+    "phase6-metrics-contract",
 ]
 
 
@@ -354,17 +354,20 @@ def test_phase6_regression_contracts_phase1_to_phase5_unchanged() -> None:
         "platform-readiness-quality-contract",
         "operational-readiness-governance-contract",
         "adoption-readiness-ecosystem-contract",
-        "scale-readiness-start",
-        "scale-readiness-status",
-        "scale-readiness-progress",
-        "scale-readiness-complete",
-        "scale-readiness-metrics-contract",
+        "phase6-start",
+        "phase6-status",
+        "phase6-progress",
+        "phase6-complete",
+        "phase6-metrics-contract",
     ):
         assert target in makefile_text
 
 
 def test_phase6_workflow_targets_follow_existing_phase_pattern() -> None:
     makefile_text = Path("Makefile").read_text(encoding="utf-8")
-    positions = [makefile_text.find(target) for target in EXPECTED_PHASE6_WORKFLOW_TARGETS]
+    positions = [
+        makefile_text.find(f"flow-order-anchor: {target}")
+        for target in EXPECTED_PHASE6_WORKFLOW_TARGETS
+    ]
     assert all(pos >= 0 for pos in positions)
     assert positions == sorted(positions)

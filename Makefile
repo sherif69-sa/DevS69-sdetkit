@@ -1,4 +1,11 @@
 # professional naming compatibility flow-order anchors
+# phase6 workflow order anchors
+# flow-order-anchor: adoption-readiness-ecosystem-contract
+# flow-order-anchor: phase6-start
+# flow-order-anchor: phase6-status
+# flow-order-anchor: phase6-progress
+# flow-order-anchor: phase6-complete
+# flow-order-anchor: phase6-metrics-contract
 # flow-order-anchor: phase2-seed
 # flow-order-anchor: platform-readiness-quality-contract
 # flow-order-anchor: operational-readiness-governance-contract
@@ -799,3 +806,10 @@ scale-readiness-start: phase6-start
 
 .PHONY: scale-readiness-status
 scale-readiness-status: phase6-status
+
+# Professional public command aliases.
+.PHONY: ecosystem-contract-check
+ecosystem-contract-check: adoption-readiness-ecosystem-contract
+
+.PHONY: metrics-contract-check
+metrics-contract-check: scale-readiness-metrics-contract
