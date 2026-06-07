@@ -16,7 +16,7 @@ CHECKS = (
     ("docs_index", Path("docs/index.md")),
     ("docs_cli", Path("docs/cli.md")),
     ("docs_taxonomy", Path("docs/command-taxonomy.md")),
-    ("cli_help_source", Path("src/sdetkit/cli.py")),
+    ("cli_help_source", Path("src/sdetkit/_legacy_cli.py")),
 )
 
 

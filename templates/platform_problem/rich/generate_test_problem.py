@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from rich.console import Console
 from rich.style import Style
 from rich.text import Text
 

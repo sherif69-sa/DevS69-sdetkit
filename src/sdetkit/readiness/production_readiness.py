@@ -157,7 +157,8 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
         ReadinessCheck(
             check_id="src_package_present",
             weight=10,
-            passed=(root / "src/sdetkit").exists() and (root / "src/sdetkit/cli.py").exists(),
+            passed=(root / "src/sdetkit").exists()
+            and (root / "src/sdetkit/_legacy_cli.py").exists(),
             evidence="src/sdetkit and CLI entry",
             remediation="Keep package layout deterministic with stable command entrypoints.",
         ),

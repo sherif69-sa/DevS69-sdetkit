@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 from __future__ import annotations
 
 """Helpers for preserving ``Text`` metadata when fragmenting content.
@@ -14,8 +15,9 @@ which ``Text`` attributes are safe to preserve, which ones should be forwarded
 unchanged, and where the fragment ordering contract begins and ends.
 """
 
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
-from typing import Iterable, Iterator, List, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
     from .text import Text
@@ -49,7 +51,7 @@ class FragmentMetadata:
 class FragmentMetadataBuilder:
     """Collect metadata from a source ``Text`` object."""
 
-    def init_(self, source: "Text") -> None:
+    def init_(self, source: Text) -> None:
         self.source = source
 
     def build(self) -> FragmentMetadata:
@@ -67,7 +69,7 @@ class FragmentSequence:
     """A structured view of fragment ranges derived from divide offsets."""
 
     def init_(self, ranges: Iterable[FragmentRange]) -> None:
-        self._ranges: List[FragmentRange] = list(ranges)
+        self._ranges: list[FragmentRange] = list(ranges)
 
     def __iter__(self) -> Iterator[FragmentRange]:
         return iter(self._ranges)
@@ -79,13 +81,13 @@ class FragmentSequence:
         return self._ranges[index]
 
     @property
-    def line_ranges(self) -> List[tuple[int, int]]:
+    def line_ranges(self) -> list[tuple[int, int]]:
         return [(fragment.start, fragment.end) for fragment in self._ranges]
 
     @classmethod
-    def from_offsets(cls, offsets: Iterable[int], *, text_length: int) -> "FragmentSequence":
+    def from_offsets(cls, offsets: Iterable[int], *, text_length: int) -> FragmentSequence:
         divide_offsets = [0, *offsets, text_length]
-        line_ranges = list(zip(divide_offsets, divide_offsets[1:]))
+        line_ranges = list(zip(divide_offsets, divide_offsets[1:], strict=False))
         last_index = len(line_ranges) - 1
         return cls(
             FragmentRange(start=start, end=end, is_last=index == last_index)
@@ -96,11 +98,11 @@ class FragmentSequence:
 class FragmentFactory:
     """Create ``Text`` fragments with copied render metadata."""
 
-    def init_(self, source: "Text") -> None:
+    def init_(self, source: Text) -> None:
         self.source = source
         self.metadata = FragmentMetadataBuilder(source).build()
 
-    def make(self, plain: str, *, is_last: bool) -> "Text":
+    def make(self, plain: str, *, is_last: bool) -> Text:
         from .text import Text
 
         return Text(
@@ -119,6 +121,6 @@ def fragment_ranges(offsets: Iterable[int], *, text_length: int) -> Iterator[Fra
     yield from FragmentSequence.from_offsets(offsets, text_length=text_length)
 
 
-def make_fragment(source: "Text", plain: str, *, is_last: bool) -> "Text":
+def make_fragment(source: Text, plain: str, *, is_last: bool) -> Text:
     """Create a text fragment with copied structural metadata."""
     return FragmentFactory(source).make(plain, is_last=is_last)

@@ -11,7 +11,7 @@ _ALLOWED_CONTENT_CLOSEOUT_PATH_PARTS = (
     "src/sdetkit/legacy_adapters/",
     "src/sdetkit/legacy_commands.py",
     "src/sdetkit/legacy_namespace.py",
-    "src/sdetkit/cli.py",
+    "src/sdetkit/_legacy_cli.py",
     "src/sdetkit/cli/playbooks_cli.py",
     "scripts/business_execution_",
     "scripts/phase1_",
