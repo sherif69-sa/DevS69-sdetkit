@@ -12,6 +12,7 @@ from sdetkit.protected_verifier import (
     REQUIRED_PROOF_NOT_CAPTURED,
     SEMANTIC_EQUIVALENCE_NOT_PROVEN,
     main,
+    render_markdown,
     verify_candidate,
 )
 
@@ -71,7 +72,7 @@ def test_verifier_structurally_verifies_candidate_but_does_not_authorize() -> No
     ]
 
 
-def test_verifier_blocks_non_candidate_patch_score() -> None:
+def test_verifier_blocks_non_candidate_score() -> None:
     score = _candidate_score()
     score["decision"] = {
         "status": "blocked_review_first",
@@ -177,3 +178,79 @@ def test_verifier_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     assert saved["decision"]["automation_allowed"] is False
     assert "# Protected verifier result" in markdown
     assert "does not prove semantic equivalence" in markdown
+
+
+def test_protected_verifier_surfaces_safetygate_evidence_without_authority() -> None:
+    evidence = _passing_evidence()
+    evidence["safety_gate_evidence"] = {
+        "collection_status": "collected",
+        "status": "safety_gate_evidence_observed",
+        "source": "trajectory.safety_gate",
+        "record_count": 1,
+        "safe_fix_allowed_count": 1,
+        "review_first_count": 0,
+        "reporting_only_count": 1,
+        "report_paths": ["build/pr-quality/failure-bundle/failure-bundle.md"],
+        "decision_boundary": {
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    payload = verify_candidate(
+        patch_score=_candidate_score(),
+        verification_evidence=evidence,
+    )
+
+    assert payload["decision"]["status"] == "structurally_verified_candidate"
+    assert payload["decision"]["automation_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    safety_gate = payload["safety_gate_evidence"]
+    assert safety_gate["collection_status"] == "collected"
+    assert safety_gate["safe_fix_allowed_count"] == 1
+    assert safety_gate["expanded_authority_fields"] == []
+    assert safety_gate["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+    markdown = render_markdown(payload)
+    assert "## SafetyGate evidence" in markdown
+    assert "Safe-fix allowed records: `1`" in markdown
+    assert "Automation allowed by SafetyGate evidence: `false`" in markdown
+    assert "Merge authorized by SafetyGate evidence: `false`" in markdown
+
+
+def test_protected_verifier_blocks_authority_expanding_safetygate_evidence() -> None:
+    evidence = _passing_evidence()
+    evidence["safety_gate_evidence"] = {
+        "collection_status": "collected",
+        "status": "safety_gate_evidence_observed",
+        "source": "trajectory.safety_gate",
+        "record_count": 1,
+        "safe_fix_allowed_count": 1,
+        "review_first_count": 0,
+        "reporting_only_count": 1,
+        "decision_boundary": {
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": True,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    payload = verify_candidate(
+        patch_score=_candidate_score(),
+        verification_evidence=evidence,
+    )
+
+    assert payload["decision"]["status"] == "blocked_review_first"
+    assert payload["safety_gate_evidence"]["expanded_authority_fields"] == ["merge_authorized"]
+    assert any(
+        item["code"] == "SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION" and item["blocking"] is True
+        for item in payload["findings"]
+    )

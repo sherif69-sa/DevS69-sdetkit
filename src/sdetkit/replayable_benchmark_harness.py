@@ -341,8 +341,13 @@ def evaluate_scenario(
     verification_evidence = (
         dict(verification_evidence_override)
         if verification_evidence_override is not None
-        else declared_verification_evidence
+        else dict(declared_verification_evidence)
     )
+    if (
+        _string(safety_gate_evidence.get("collection_status")) == "collected"
+        and "safety_gate_evidence" not in verification_evidence
+    ):
+        verification_evidence["safety_gate_evidence"] = safety_gate_evidence
     evidence_source = (
         LIVE_EVIDENCE_SOURCE if verification_evidence_override is not None else "fixture_declared"
     )

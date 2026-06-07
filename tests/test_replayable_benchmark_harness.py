@@ -317,3 +317,17 @@ def test_replayable_benchmark_rejects_authority_expanding_safetygate_evidence() 
         assert "SafetyGate benchmark evidence expands authority: merge_authorized" in str(exc)
     else:
         raise AssertionError("expected authority-expanding SafetyGate evidence to fail")
+
+
+def test_replayable_benchmark_passes_safetygate_evidence_into_protected_verifier() -> None:
+    scenario = load_scenarios([SAFETYGATE_EVIDENCE_PATH])[0]
+
+    result = evaluate_scenario(scenario)
+
+    verifier_safety_gate = result["protected_verifier_result"]["safety_gate_evidence"]
+    assert verifier_safety_gate["collection_status"] == "collected"
+    assert verifier_safety_gate["source"] == "trajectory.safety_gate"
+    assert verifier_safety_gate["safe_fix_allowed_count"] == 1
+    assert verifier_safety_gate["expanded_authority_fields"] == []
+    assert result["protected_verifier_result"]["decision"]["automation_allowed"] is False
+    assert result["protected_verifier_result"]["decision"]["merge_authorized"] is False
