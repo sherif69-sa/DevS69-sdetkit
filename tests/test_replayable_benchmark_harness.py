@@ -264,3 +264,56 @@ def test_replayable_benchmark_security_freshness_cli_writes_report(tmp_path: Pat
     assert saved["report_mode"] == "diagnostic_worker_security_freshness_fixture"
     assert saved["safety_boundary"]["feeds_repo_memory"] is False
     assert "Current PR decision input: `false`" in markdown
+
+
+SAFETYGATE_EVIDENCE_PATH = FIXTURES / "oracle_safetygate_repo_memory_evidence.json"
+
+
+def test_replayable_benchmark_replays_safetygate_repo_memory_evidence() -> None:
+    report = build_benchmark_report(load_scenarios(SCENARIO_PATHS + [SAFETYGATE_EVIDENCE_PATH]))
+
+    safety_gate = report["safety_gate_evidence"]
+    assert report["status"] == "passed"
+    assert safety_gate["collection_status"] == "collected"
+    assert safety_gate["status"] == "safety_gate_evidence_replayed"
+    assert safety_gate["scenario_count"] == 1
+    assert safety_gate["record_count"] == 1
+    assert safety_gate["safe_fix_allowed_count"] == 1
+    assert safety_gate["review_first_count"] == 0
+    assert safety_gate["reporting_only_count"] == 1
+    assert safety_gate["report_paths"] == ["build/pr-quality/failure-bundle/failure-bundle.md"]
+    assert safety_gate["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+    scenario = next(
+        item
+        for item in report["scenarios"]
+        if item["scenario_id"] == "oracle-safetygate-repo-memory-evidence"
+    )
+    assert scenario["passed"] is True
+    assert scenario["safety_gate_evidence"]["source"] == "trajectory.safety_gate"
+    assert scenario["safety_gate_evidence"]["safe_fix_allowed_count"] == 1
+
+    markdown = render_markdown(report)
+    assert "## SafetyGate evidence replay" in markdown
+    assert "Safe-fix allowed records: `1`" in markdown
+    assert "Automation allowed by SafetyGate evidence: `false`" in markdown
+    assert "Merge authorized by SafetyGate evidence: `false`" in markdown
+
+
+def test_replayable_benchmark_rejects_authority_expanding_safetygate_evidence() -> None:
+    scenario = load_scenarios([SAFETYGATE_EVIDENCE_PATH])[0]
+    scenario["pattern_insights"]["safety_gate_evidence"]["decision_boundary"][
+        "merge_authorized"
+    ] = True
+
+    try:
+        evaluate_scenario(scenario)
+    except ValueError as exc:
+        assert "SafetyGate benchmark evidence expands authority: merge_authorized" in str(exc)
+    else:
+        raise AssertionError("expected authority-expanding SafetyGate evidence to fail")

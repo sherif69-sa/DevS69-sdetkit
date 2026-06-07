@@ -1,0 +1,81 @@
+{
+  "description": "A formatting-only oracle patch carries read-only SafetyGate evidence through benchmark replay without expanding authority.",
+  "expected": {
+    "patch_score_status": "candidate_for_protected_verification",
+    "verifier_status": "structurally_verified_candidate"
+  },
+  "pattern_insights": {
+    "recurring_review_first_surfaces": [],
+    "recurring_safe_fix_patterns": [
+      {
+        "action": "run_pre_commit",
+        "count": 2,
+        "failure_class": "formatting_only"
+      }
+    ],
+    "safety_gate_evidence": {
+      "collection_status": "collected",
+      "decision_boundary": {
+        "automation_allowed": false,
+        "merge_authorized": false,
+        "patch_application_allowed": false,
+        "semantic_equivalence_proven": false
+      },
+      "record_count": 1,
+      "report_paths": [
+        "build/pr-quality/failure-bundle/failure-bundle.md"
+      ],
+      "reporting_only_count": 1,
+      "review_first_count": 0,
+      "safe_fix_allowed_count": 1,
+      "source": "trajectory.safety_gate",
+      "status": "safety_gate_evidence_observed"
+    }
+  },
+  "proposed_patch": {
+    "changed_files": [
+      "src/sdetkit/example.py"
+    ],
+    "patch_id": "oracle-safetygate-repo-memory-evidence"
+  },
+  "remediation_plan": {
+    "plans": [
+      {
+        "affected_files": [
+          "src/sdetkit/example.py"
+        ],
+        "allowed_strategy": "run_pre_commit",
+        "blocked_reason": "",
+        "classification": "formatting_only",
+        "diagnosis_id": "safetygate-memory-oracle",
+        "exact_fix_scope": {
+          "allowed_files": [
+            "src/sdetkit/example.py"
+          ],
+          "allowed_strategy": "run_pre_commit",
+          "scope": "deterministic formatting or whitespace only"
+        },
+        "failure_surface": "formatting",
+        "proof_commands": [
+          "python -m pre_commit run -a"
+        ],
+        "risk_level": "low",
+        "safe_to_auto_fix": true
+      }
+    ]
+  },
+  "scenario_id": "oracle-safetygate-repo-memory-evidence",
+  "scenario_type": "oracle_pass",
+  "verification_evidence": {
+    "changed_files": [
+      "src/sdetkit/example.py"
+    ],
+    "proof_results": [
+      {
+        "command": "python -m pre_commit run -a",
+        "exit_code": 0,
+        "status": "passed"
+      }
+    ]
+  }
+}
