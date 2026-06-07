@@ -318,9 +318,9 @@ None.
 | `docs/cli.md` | 30 | `docs-command-needs-fixture-or-policy-review` | `- `python -m sdetkit doctor --enterprise --format md` |
 | `docs/cli.md` | 32 | `docs-command-needs-fixture-or-policy-review` | `- `python -m sdetkit doctor --enterprise-rerun-failed --json` |
 | `docs/cli.md` | 35 | `docs-command-needs-fixture-or-policy-review` | `- `python -m sdetkit doctor --enterprise-rerun-high --json` |
-| `docs/cli.md` | 39 | `docs-command-needs-fixture-or-policy-review` | `- `python -m sdetkit doctor --enterprise-next-pass-only` |
-| `docs/cli.md` | 40 | `docs-command-needs-fixture-or-policy-review` | `- CI-friendly status mode: `python -m sdetkit doctor --enterprise-next-pass-only --enterprise-next-pass-exit-code` |
-| `docs/cli.md` | 43 | `docs-command-needs-fixture-or-policy-review` | `- markdown-friendly output: `python -m sdetkit doctor --enterprise-next-pass-only --format md` |
+| `docs/cli.md` | 39 | `docs-command-needs-fixture-or-policy-review` | `- `python -m sdetkit doctor --enterprise-follow-up-only` |
+| `docs/cli.md` | 40 | `docs-command-needs-fixture-or-policy-review` | `- CI-friendly status mode: `python -m sdetkit doctor --enterprise-follow-up-only --enterprise-follow-up-exit-code` |
+| `docs/cli.md` | 43 | `docs-command-needs-fixture-or-policy-review` | `- markdown-friendly output: `python -m sdetkit doctor --enterprise-follow-up-only --format md` |
 | `docs/cli.md` | 115 | `docs-command-needs-fixture-or-policy-review` | `python -m sdetkit --no-legacy-hint phase1-hardening` |
 | `docs/cli.md` | 118 | `docs-command-needs-fixture-or-policy-review` | `SDETKIT_LEGACY_HINTS=0 python -m sdetkit phase1-hardening` |
 | `docs/cli.md` | 126 | `docs-command-needs-fixture-or-policy-review` | `python -m sdetkit legacy migrate-hint phase1-hardening` |
@@ -599,7 +599,7 @@ None.
 | `docs/omnichannel-mcp-bridge.md` | 24 | `docs-command-needs-fixture-or-policy-review` | `sdetkit agent serve \` |
 | `docs/operator-essentials.md` | 10 | `docs-command-needs-fixture-or-policy-review` | `2. `python -m sdetkit gate release --format json --out build/release-preflight.json` |
 | `docs/operator-essentials.md` | 22 | `docs-command-needs-fixture-or-policy-review` | `- `python -m sdetkit review . --no-workspace --format operator-json` |
-| `docs/operator-essentials.md` | 24 | `docs-command-needs-fixture-or-policy-review` | `- `python -m sdetkit doctor --enterprise-next-pass-only --enterprise-next-pass-exit-code` |
+| `docs/operator-essentials.md` | 24 | `docs-command-needs-fixture-or-policy-review` | `- `python -m sdetkit doctor --enterprise-follow-up-only --enterprise-follow-up-exit-code` |
 | `docs/ops.md` | 3 | `docs-command-needs-fixture-or-policy-review` | `sdetkit ops init` bootstraps `.sdetkit/` with config, policies, playbooks, cache, and out folders.` |
 | `docs/patch-harness.md` | 11 | `docs-command-needs-fixture-or-policy-review` | `sdetkit patch spec.json` |
 | `docs/patch-harness.md` | 12 | `safe-dry-run-candidate-not-in-allowlist` | `sdetkit patch spec.json --dry-run` |

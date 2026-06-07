@@ -9,11 +9,11 @@ New public surfaces should use durable production names.
 Avoid new names containing:
 
 - `phase1`, `phase2`, `phase3`, `phase4`, `phase5`, `phase6`
-- `do-it`
+- `execute`
 - `closeout`
-- `finish-signal`
-- `retire-plan`
-- `next-pass`
+- `completion-signal`
+- `deprecation-plan`
+- `follow-up`
 - `gate-phase2`
 - `lesson`
 - `tutorial`
@@ -35,9 +35,9 @@ Existing legacy names may remain when they are public compatibility surfaces, ge
 | phase 6 / phase6 | metrics contract |
 | closeout | completion, evidence pack, delivery summary, release evidence |
 | demo | product proof, example workflow, sample output |
-| next-pass | follow-up, handoff, remediation plan |
-| finish-signal | readiness signal |
-| retire-plan | migration plan |
+| follow-up | follow-up, handoff, remediation plan |
+| completion-signal | readiness signal |
+| deprecation-plan | migration plan |
 | gate-phase2 | readiness gate |
 | big upgrade report | upgrade assessment report |
 | ultra upgrade report | implementation report |
@@ -86,8 +86,8 @@ The public Makefile surface now prefers professional names for baseline, operati
 release-readiness, platform-readiness, adoption-readiness, and scale-readiness lanes.
 
 Compatibility aliases remain available for transition-era `phase1`, `phase2`, `phase3`,
-`phase5`, `phase6`, `phase-current`, `do-it`, `finish-signal`, `next-pass`, and
-`retire-plan` names where removal would break existing users or historical automation.
+`phase5`, `phase6`, `phase-current`, `execute`, `completion-signal`, `follow-up`, and
+`deprecation-plan` names where removal would break existing users or historical automation.
 
 Current sweep policy:
 
