@@ -22,8 +22,14 @@ REQUIRED_LIST_FIELDS = (
 
 REQUIRED_FALSE_FIELDS = (
     "automation_allowed",
+    "patch_application_allowed",
     "merge_authorized",
     "semantic_equivalence_proven",
+)
+
+REQUIRED_OBJECT_FIELDS = (
+    "repo_identity",
+    "operator_summary",
 )
 
 IGNORED_PARTS = {
@@ -101,6 +107,8 @@ def _add_proof_command(
             "command": command,
             "confidence": confidence,
             "purpose": purpose,
+            "executes_untrusted_code": True,
+            "auto_run_allowed": False,
         }
     )
 
@@ -138,6 +146,58 @@ def _quality_proof_command(root: Path) -> str:
     if _make_target_exists(root, "proof-after-format"):
         return "make proof-after-format"
     return "python -m pre_commit run -a"
+
+
+def _sanitize_remote_url(url: str) -> str:
+    if "://" not in url or "@" not in url:
+        return url
+    scheme, rest = url.split("://", 1)
+    return f"{scheme}://{rest.rsplit('@', 1)[-1]}"
+
+
+def _git_detected(root: Path) -> bool:
+    return (root / ".git").exists()
+
+
+def _git_remote_url(root: Path) -> str:
+    config = root / ".git" / "config"
+    if not config.is_file():
+        return ""
+
+    in_origin = False
+    for raw_line in config.read_text(encoding="utf-8", errors="ignore").splitlines():
+        line = raw_line.strip()
+        if line.startswith("[remote "):
+            in_origin = '"origin"' in line or "'origin'" in line
+            continue
+        if in_origin and line.startswith("url ="):
+            return _sanitize_remote_url(line.split("=", 1)[1].strip())
+    return ""
+
+
+def _is_current_sdetkit_repo(root: Path) -> bool:
+    try:
+        return root.resolve() == Path.cwd().resolve()
+    except OSError:
+        return False
+
+
+def _repo_identity(root: Path) -> dict[str, Any]:
+    return {
+        "name": root.resolve().name if root.exists() else root.name,
+        "is_current_sdetkit_repo": _is_current_sdetkit_repo(root),
+        "git_detected": _git_detected(root),
+        "remote_url": _git_remote_url(root),
+    }
+
+
+def _operator_summary() -> dict[str, str]:
+    return {
+        "status": "read_only_profile_generated",
+        "next_action": (
+            "Review detected surfaces and manually run trusted proof commands in the target repo."
+        ),
+    }
 
 
 def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
@@ -348,7 +408,8 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
 
     return {
         "schema_version": SCHEMA_VERSION,
-        "repo_root": ".",
+        "repo_root": root.as_posix(),
+        "repo_identity": _repo_identity(root),
         "detected_languages": sorted(detected_languages, key=lambda item: item["name"]),
         "package_managers": sorted(package_managers, key=lambda item: item["name"]),
         "test_runners": sorted(test_runners, key=lambda item: item["name"]),
@@ -360,7 +421,9 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             key=lambda item: (item["surface"], item["command"]),
         ),
         "review_first_unknowns": sorted(set(review_first_unknowns)),
+        "operator_summary": _operator_summary(),
         "automation_allowed": False,
+        "patch_application_allowed": False,
         "merge_authorized": False,
         "semantic_equivalence_proven": False,
     }
@@ -379,6 +442,7 @@ def write_adoption_surface_artifact(
         "schema_version": payload["schema_version"],
         "adoption_surface_json": out_path.as_posix(),
         "automation_allowed": payload["automation_allowed"],
+        "patch_application_allowed": payload["patch_application_allowed"],
         "merge_authorized": payload["merge_authorized"],
         "semantic_equivalence_proven": payload["semantic_equivalence_proven"],
     }
@@ -395,6 +459,10 @@ def validate_adoption_surface_payload(payload: object) -> list[str]:
     for field in REQUIRED_LIST_FIELDS:
         if not isinstance(payload.get(field), list):
             errors.append(f"{field} must be a list")
+
+    for field in REQUIRED_OBJECT_FIELDS:
+        if not isinstance(payload.get(field), dict):
+            errors.append(f"{field} must be an object")
 
     for field in REQUIRED_FALSE_FIELDS:
         if payload.get(field) is not False:
@@ -431,6 +499,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     else:
         sys.stdout.write(f"adoption_surface_json={summary['adoption_surface_json']}\n")
         sys.stdout.write(f"automation_allowed={str(summary['automation_allowed']).lower()}\n")
+        sys.stdout.write(
+            f"patch_application_allowed={str(summary['patch_application_allowed']).lower()}\n"
+        )
         sys.stdout.write(f"merge_authorized={str(summary['merge_authorized']).lower()}\n")
         sys.stdout.write(
             f"semantic_equivalence_proven={str(summary['semantic_equivalence_proven']).lower()}\n"
