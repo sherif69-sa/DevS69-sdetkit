@@ -45,6 +45,7 @@ def test_adoption_surface_detects_python_github_security_and_proof_commands(
 
     assert payload["schema_version"] == SCHEMA_VERSION
     assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
     assert payload["merge_authorized"] is False
     assert payload["semantic_equivalence_proven"] is False
     assert "python" in _names(payload["detected_languages"])
@@ -143,6 +144,44 @@ def test_adoption_surface_detects_multi_language_evidence_without_running_comman
     assert payload["artifact_surfaces"] == [{"name": "coverage", "paths": ["coverage.xml"]}]
 
 
+def test_adoption_surface_profiles_external_repo_readiness_without_authority(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "pyproject.toml", '[project]\ndependencies = ["pytest"]\n')
+    _write(tmp_path / "requirements-test.txt", "pytest==9.0.3\n")
+    _write(
+        tmp_path / ".git" / "config",
+        '[remote "origin"]\n    url = https://token@example.com/org/repo.git\n',
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert payload["repo_root"] == tmp_path.as_posix()
+    assert payload["repo_identity"] == {
+        "name": tmp_path.name,
+        "is_current_sdetkit_repo": False,
+        "git_detected": True,
+        "remote_url": "https://example.com/org/repo.git",
+    }
+    assert payload["operator_summary"] == {
+        "status": "read_only_profile_generated",
+        "next_action": (
+            "Review detected surfaces and manually run trusted proof commands in the target repo."
+        ),
+    }
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+    assert all(
+        command["auto_run_allowed"] is False for command in payload["recommended_proof_commands"]
+    )
+    assert all(
+        command["executes_untrusted_code"] is True
+        for command in payload["recommended_proof_commands"]
+    )
+
+
 def test_adoption_surface_module_writes_deterministic_artifact(
     tmp_path: Path,
     capsys,
@@ -161,6 +200,7 @@ def test_adoption_surface_module_writes_deterministic_artifact(
     assert stdout["adoption_surface_json"] == out.as_posix()
     assert payload["schema_version"] == SCHEMA_VERSION
     assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
     assert payload["merge_authorized"] is False
     assert payload["semantic_equivalence_proven"] is False
 
@@ -234,7 +274,10 @@ def test_adoption_surface_payload_validator_rejects_authority_escalation() -> No
         "artifact_surfaces": [],
         "recommended_proof_commands": [],
         "review_first_unknowns": [],
+        "repo_identity": {},
+        "operator_summary": {},
         "automation_allowed": True,
+        "patch_application_allowed": False,
         "merge_authorized": False,
         "semantic_equivalence_proven": False,
     }
