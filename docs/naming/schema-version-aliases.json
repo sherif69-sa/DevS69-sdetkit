@@ -1,0 +1,273 @@
+{
+  "alias_count": 30,
+  "aliases": [
+    {
+      "legacy": "sdetkit.phase1_baseline.v1",
+      "professional": "sdetkit.baseline_baseline.v1",
+      "sample_sources": [
+        "scripts/baseline_lane.sh",
+        "scripts/check_baseline_summary_contract.py",
+        "scripts/seed_quality_baseline_summary_fixture.py",
+        "tests/test_ecosystem_readiness_contract.py",
+        "tests/test_metrics_readiness_contract.py",
+        "tests/test_platform_readiness_baseline_history_persist.py",
+        "tests/test_platform_readiness_followup_pass_determinism.py",
+        "tests/test_platform_readiness_quality_contract.py",
+        "tests/test_platform_readiness_remediation_payload_v2.py",
+        "tests/test_platform_readiness_trend_delta.py"
+      ],
+      "source_count": 11
+    },
+    {
+      "legacy": "sdetkit.phase2-hotspot-baseline.v1",
+      "professional": "sdetkit.release-readiness-hotspot-baseline.v1",
+      "sample_sources": [
+        "docs/artifacts/phase2-hotspot-baseline-2026-04-24.json",
+        "docs/artifacts/phase2-hotspot-baseline-pre-extraction-2026-04-24.json",
+        "docs/artifacts/release-readiness-hotspot-baseline-2026-04-24.json",
+        "docs/artifacts/release-readiness-hotspot-baseline-pre-extraction-2026-04-24.json"
+      ],
+      "source_count": 4
+    },
+    {
+      "legacy": "sdetkit.phase2-hotspot-delta.v1",
+      "professional": "sdetkit.release-readiness-hotspot-delta.v1",
+      "sample_sources": [
+        "docs/artifacts/phase2-hotspot-delta-2026-04-24.json",
+        "docs/artifacts/release-readiness-hotspot-delta-2026-04-24.json"
+      ],
+      "source_count": 2
+    },
+    {
+      "legacy": "sdetkit.phase2.doctor-behavior.v1",
+      "professional": "sdetkit.release_readiness.doctor-behavior.v1",
+      "sample_sources": [
+        "docs/contracts/phase2-doctor-behavior-contract.v1.json"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase2.repo-behavior.v1",
+      "professional": "sdetkit.release_readiness.repo-behavior.v1",
+      "sample_sources": [
+        "docs/contracts/phase2-repo-behavior-contract.v1.json"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase3-dependency-radar.v1",
+      "professional": "sdetkit.platform-readiness-dependency-radar.v1",
+      "sample_sources": [
+        "docs/artifacts/phase3-dependency-radar-2026-04-24.json",
+        "docs/artifacts/platform-readiness-dependency-radar-2026-04-24.json",
+        "scripts/platform_readiness_dependency_radar.py"
+      ],
+      "source_count": 3
+    },
+    {
+      "legacy": "sdetkit.phase3_adaptive_planning.v1",
+      "professional": "sdetkit.platform_readiness_adaptive_planning.v1",
+      "sample_sources": [
+        "scripts/platform_readiness_quality_engine.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase3_baseline_history.v1",
+      "professional": "sdetkit.platform_readiness_baseline_history.v1",
+      "sample_sources": [
+        "scripts/platform_readiness_persist_baseline_history.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase3_next_pass.v1",
+      "professional": "sdetkit.platform_readiness_next_pass.v1",
+      "sample_sources": [
+        "scripts/platform_readiness_quality_engine.py",
+        "tests/test_platform_readiness_quality_contract.py"
+      ],
+      "source_count": 2
+    },
+    {
+      "legacy": "sdetkit.phase3_quality_contract.v1",
+      "professional": "sdetkit.platform_readiness_quality_contract.v1",
+      "sample_sources": [
+        "scripts/check_platform_readiness_quality_contract.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase3_remediation.v2",
+      "professional": "sdetkit.platform_readiness_remediation.v2",
+      "sample_sources": [
+        "scripts/platform_readiness_quality_engine.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase3_trend_delta.v1",
+      "professional": "sdetkit.platform_readiness_trend_delta.v1",
+      "sample_sources": [
+        "scripts/platform_readiness_quality_engine.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase4_compliance_overlay.v1",
+      "professional": "sdetkit.operational_readiness_compliance_overlay.v1",
+      "sample_sources": [
+        "scripts/check_operational_readiness_governance_contract.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase4_compliance_overlay_pack.v1",
+      "professional": "sdetkit.operational_readiness_compliance_overlay_pack.v1",
+      "sample_sources": [
+        "scripts/check_operational_readiness_governance_contract.py",
+        "tests/test_operational_readiness_governance_contract.py"
+      ],
+      "source_count": 2
+    },
+    {
+      "legacy": "sdetkit.phase4_governance_adherence.v1",
+      "professional": "sdetkit.operational_readiness_governance_adherence.v1",
+      "sample_sources": [
+        "scripts/check_operational_readiness_governance_contract.py",
+        "tests/test_operational_readiness_governance_contract.py"
+      ],
+      "source_count": 2
+    },
+    {
+      "legacy": "sdetkit.phase4_governance_contract.v1",
+      "professional": "sdetkit.operational_readiness_governance_contract.v1",
+      "sample_sources": [
+        "scripts/check_operational_readiness_governance_contract.py",
+        "tests/test_operational_readiness_governance_contract.py"
+      ],
+      "source_count": 2
+    },
+    {
+      "legacy": "sdetkit.phase4_governance_contract.v2",
+      "professional": "sdetkit.operational_readiness_governance_contract.v2",
+      "sample_sources": [
+        "scripts/check_operational_readiness_governance_contract.py",
+        "tests/test_ecosystem_readiness_contract.py",
+        "tests/test_metrics_readiness_contract.py",
+        "tests/test_operational_readiness_governance_contract.py"
+      ],
+      "source_count": 4
+    },
+    {
+      "legacy": "sdetkit.phase4_governance_drift_alerts.v1",
+      "professional": "sdetkit.operational_readiness_governance_drift_alerts.v1",
+      "sample_sources": [
+        "scripts/check_operational_readiness_governance_contract.py",
+        "tests/test_operational_readiness_governance_contract.py"
+      ],
+      "source_count": 2
+    },
+    {
+      "legacy": "sdetkit.phase4_policy_as_code_template.v1",
+      "professional": "sdetkit.operational_readiness_policy_as_code_template.v1",
+      "sample_sources": [
+        "scripts/check_operational_readiness_governance_contract.py",
+        "tests/test_operational_readiness_governance_contract.py"
+      ],
+      "source_count": 2
+    },
+    {
+      "legacy": "sdetkit.phase4_release_evidence.v1",
+      "professional": "sdetkit.operational_readiness_release_evidence.v1",
+      "sample_sources": [
+        "scripts/check_operational_readiness_governance_contract.py",
+        "tests/test_operational_readiness_governance_contract.py"
+      ],
+      "source_count": 2
+    },
+    {
+      "legacy": "sdetkit.phase5_ecosystem_contract.v1",
+      "professional": "sdetkit.adoption_readiness_ecosystem_contract.v1",
+      "sample_sources": [
+        "scripts/check_ecosystem_readiness_contract.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase5_ecosystem_contract.v2",
+      "professional": "sdetkit.adoption_readiness_ecosystem_contract.v2",
+      "sample_sources": [
+        "scripts/check_ecosystem_readiness_contract.py",
+        "tests/test_metrics_readiness_contract.py"
+      ],
+      "source_count": 2
+    },
+    {
+      "legacy": "sdetkit.phase5_ecosystem_drift_alerts.v1",
+      "professional": "sdetkit.adoption_readiness_ecosystem_drift_alerts.v1",
+      "sample_sources": [
+        "scripts/check_ecosystem_readiness_contract.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase5_ecosystem_reliability.v1",
+      "professional": "sdetkit.adoption_readiness_ecosystem_reliability.v1",
+      "sample_sources": [
+        "scripts/check_ecosystem_readiness_contract.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase5_partner_packaging.v1",
+      "professional": "sdetkit.adoption_readiness_partner_packaging.v1",
+      "sample_sources": [
+        "scripts/check_ecosystem_readiness_contract.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase6_commercial_scorecard.v1",
+      "professional": "sdetkit.scale_readiness_commercial_scorecard.v1",
+      "sample_sources": [
+        "scripts/check_metrics_readiness_contract.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase6_kpi_snapshot.v1",
+      "professional": "sdetkit.scale_readiness_kpi_snapshot.v1",
+      "sample_sources": [
+        "scripts/check_metrics_readiness_contract.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase6_metrics_contract.v1",
+      "professional": "sdetkit.scale_readiness_metrics_contract.v1",
+      "sample_sources": [
+        "scripts/check_metrics_readiness_contract.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase6_metrics_contract.v2",
+      "professional": "sdetkit.scale_readiness_metrics_contract.v2",
+      "sample_sources": [
+        "scripts/check_metrics_readiness_contract.py"
+      ],
+      "source_count": 1
+    },
+    {
+      "legacy": "sdetkit.phase6_metrics_drift_alerts.v1",
+      "professional": "sdetkit.scale_readiness_metrics_drift_alerts.v1",
+      "sample_sources": [
+        "scripts/check_metrics_readiness_contract.py"
+      ],
+      "source_count": 1
+    }
+  ],
+  "policy": "Legacy schema_version values remain accepted. Professional schema_version values are aliases and must canonicalize back to legacy values for compatibility.",
+  "schema_version": "sdetkit.naming.schema-version-aliases.v1"
+}

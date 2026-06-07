@@ -13,6 +13,7 @@ from scripts import check_metrics_readiness_contract as contract
 from scripts import check_operational_readiness_governance_contract as phase4_contract
 from scripts import check_platform_readiness_quality_contract as phase3_contract
 from scripts import check_release_readiness_start_summary_contract as phase2_contract
+from sdetkit.schema_version_aliases import schema_versions_compatible
 
 EXPECTED_PHASE6_GATE_CHECK_IDS = [
     "schema_completeness",
@@ -342,7 +343,9 @@ def test_phase6_legacy_cli_args_subprocess_smoke(tmp_path: Path) -> None:
 
 
 def test_phase6_regression_contracts_phase1_to_phase5_unchanged() -> None:
-    assert phase1_contract.REQUIRED_TOP_LEVEL["schema_version"] == "sdetkit.phase1_baseline.v1"
+    assert schema_versions_compatible(
+        phase1_contract.REQUIRED_TOP_LEVEL["schema_version"], "sdetkit.phase1_baseline.v1"
+    )
     assert phase2_contract.EXPECTED_SCHEMA == "sdetkit.release_readiness_start_workflow.v1"
     assert callable(phase3_contract.main)
     assert phase4_contract.SCHEMA_VERSION == "sdetkit.phase4_governance_contract.v2"
