@@ -40,10 +40,10 @@ EXPECTED_RESULT_KEYS = [
     "schema_version",
 ]
 REPO_PHASE_FLOW_TARGETS = [
-    "phase2-seed",
+    "release-readiness-seed",
     "platform-readiness-quality-contract",
     "operational-readiness-governance-contract",
-    "phase5-ecosystem-contract",
+    "adoption-readiness-ecosystem-contract",
 ]
 
 
@@ -53,7 +53,7 @@ def _write_phase5_prereqs(root: Path) -> None:
 
     (root / "docs/integrations-and-extension-boundary.md").write_text("ok\n", encoding="utf-8")
     (root / "docs/operator-essentials.md").write_text(
-        "make phase5-ecosystem-contract\n", encoding="utf-8"
+        "make adoption-readiness-ecosystem-contract\n", encoding="utf-8"
     )
     (root / "src/sdetkit/plugin_system.py").write_text("# plugin system\n", encoding="utf-8")
     (root / "pyproject.toml").write_text("[project]\nname='x'\n", encoding="utf-8")
@@ -135,11 +135,11 @@ def test_phase5_missing_reason_or_rationale_code_fails() -> None:
             "plugin_reliability_contract": {
                 "supported_extension_modes": ["entry_points"],
                 "failure_isolation_guards": ["guard"],
-                "compatibility_guards": ["make phase5-ecosystem-contract"],
+                "compatibility_guards": ["make adoption-readiness-ecosystem-contract"],
             },
             "partner_packaging_contract": {
                 "required_artifacts": ["pyproject.toml"],
-                "support_surface": ["make phase5-ecosystem-contract"],
+                "support_surface": ["make adoption-readiness-ecosystem-contract"],
                 "auditability_status": "pass",
             },
         }
@@ -152,7 +152,7 @@ def test_phase5_regression_contracts_for_phase1_to_phase4_unchanged() -> None:
     makefile_text = Path("Makefile").read_text(encoding="utf-8")
     assert "platform-readiness-quality-contract" in makefile_text
     assert "operational-readiness-governance-contract" in makefile_text
-    assert "phase5-ecosystem-contract" in makefile_text
+    assert "adoption-readiness-ecosystem-contract" in makefile_text
 
     assert phase1_contract.REQUIRED_TOP_LEVEL["schema_version"] == "sdetkit.phase1_baseline.v1"
     assert phase2_contract.EXPECTED_SCHEMA == "sdetkit.release_readiness_start_workflow.v1"

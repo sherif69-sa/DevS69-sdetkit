@@ -31,10 +31,10 @@ To keep repository workflows neutral and professional while preserving backward 
 use these canonical targets:
 
 - `make plan-status`
-- `make phase1-execute`
-- `make phase2-execute`
-- `make phase3-governance`
-- `make phase4-credibility`
+- `make baseline-execute`
+- `make release-readiness-execute`
+- `make platform-readiness-governance`
+- `make operational-readiness-credibility`
 - `make operations-core-run`
 - `make quality-contract-report`
 

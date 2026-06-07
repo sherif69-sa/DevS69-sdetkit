@@ -1,0 +1,135 @@
+{
+  "aliases_added": [
+    {
+      "legacy": "phase1-baseline",
+      "professional": "baseline-baseline"
+    },
+    {
+      "legacy": "phase1-execute",
+      "professional": "baseline-execute"
+    },
+    {
+      "legacy": "phase1-next",
+      "professional": "baseline-next"
+    },
+    {
+      "legacy": "phase2-execute",
+      "professional": "release-readiness-execute"
+    },
+    {
+      "legacy": "phase3-do-it",
+      "professional": "platform-readiness-do-it"
+    },
+    {
+      "legacy": "phase3-governance",
+      "professional": "platform-readiness-governance"
+    },
+    {
+      "legacy": "phase4-credibility",
+      "professional": "operational-readiness-credibility"
+    },
+    {
+      "legacy": "phase5-ecosystem-contract",
+      "professional": "adoption-readiness-ecosystem-contract"
+    },
+    {
+      "legacy": "phase6-complete",
+      "professional": "scale-readiness-complete"
+    },
+    {
+      "legacy": "phase6-metrics-contract",
+      "professional": "scale-readiness-metrics-contract"
+    },
+    {
+      "legacy": "phase6-progress",
+      "professional": "scale-readiness-progress"
+    },
+    {
+      "legacy": "phase6-start",
+      "professional": "scale-readiness-start"
+    },
+    {
+      "legacy": "phase6-status",
+      "professional": "scale-readiness-status"
+    }
+  ],
+  "legacy_targets_found": [
+    {
+      "legacy": "phase1-baseline",
+      "professional": "baseline-baseline"
+    },
+    {
+      "legacy": "phase1-control-loop",
+      "professional": "baseline-control-loop"
+    },
+    {
+      "legacy": "phase1-dashboard",
+      "professional": "baseline-dashboard"
+    },
+    {
+      "legacy": "phase1-execute",
+      "professional": "baseline-execute"
+    },
+    {
+      "legacy": "phase1-next",
+      "professional": "baseline-next"
+    },
+    {
+      "legacy": "phase1-status",
+      "professional": "baseline-status"
+    },
+    {
+      "legacy": "phase2-execute",
+      "professional": "release-readiness-execute"
+    },
+    {
+      "legacy": "phase2-seed",
+      "professional": "release-readiness-seed"
+    },
+    {
+      "legacy": "phase3-dependency-radar",
+      "professional": "platform-readiness-dependency-radar"
+    },
+    {
+      "legacy": "phase3-do-it",
+      "professional": "platform-readiness-do-it"
+    },
+    {
+      "legacy": "phase3-governance",
+      "professional": "platform-readiness-governance"
+    },
+    {
+      "legacy": "phase3-quality-report",
+      "professional": "platform-readiness-quality-report"
+    },
+    {
+      "legacy": "phase4-credibility",
+      "professional": "operational-readiness-credibility"
+    },
+    {
+      "legacy": "phase5-ecosystem-contract",
+      "professional": "adoption-readiness-ecosystem-contract"
+    },
+    {
+      "legacy": "phase6-complete",
+      "professional": "scale-readiness-complete"
+    },
+    {
+      "legacy": "phase6-metrics-contract",
+      "professional": "scale-readiness-metrics-contract"
+    },
+    {
+      "legacy": "phase6-progress",
+      "professional": "scale-readiness-progress"
+    },
+    {
+      "legacy": "phase6-start",
+      "professional": "scale-readiness-start"
+    },
+    {
+      "legacy": "phase6-status",
+      "professional": "scale-readiness-status"
+    }
+  ],
+  "schema_version": "sdetkit.naming.professional-command-aliases.v1"
+}

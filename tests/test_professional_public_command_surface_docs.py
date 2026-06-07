@@ -42,15 +42,15 @@ def test_operator_essentials_prefers_professional_rollout_commands() -> None:
         "make phase2-workflow",
         "make phase2-status",
         "make phase2-start-contract",
-        "make phase2-seed",
+        "make release-readiness-seed",
         "make phase2-complete",
         "make phase2-progress",
         "make phase2-surface-clarity",
-        "make phase6-start",
-        "make phase6-status",
-        "make phase6-progress",
-        "make phase6-complete",
-        "make phase6-metrics-contract",
+        "make scale-readiness-start",
+        "make scale-readiness-status",
+        "make scale-readiness-progress",
+        "make scale-readiness-complete",
+        "make scale-readiness-metrics-contract",
     ]
 
     for command in required:

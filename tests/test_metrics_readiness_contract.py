@@ -24,12 +24,12 @@ EXPECTED_PHASE6_GATE_CHECK_IDS = [
     "reason_rationale_vocabulary_enforced",
 ]
 EXPECTED_PHASE6_WORKFLOW_TARGETS = [
-    "phase5-ecosystem-contract",
-    "phase6-start",
-    "phase6-status",
-    "phase6-progress",
-    "phase6-complete",
-    "phase6-metrics-contract",
+    "adoption-readiness-ecosystem-contract",
+    "scale-readiness-start",
+    "scale-readiness-status",
+    "scale-readiness-progress",
+    "scale-readiness-complete",
+    "scale-readiness-metrics-contract",
 ]
 
 
@@ -350,15 +350,15 @@ def test_phase6_regression_contracts_phase1_to_phase5_unchanged() -> None:
 
     makefile_text = Path("Makefile").read_text(encoding="utf-8")
     for target in (
-        "phase2-seed",
+        "release-readiness-seed",
         "platform-readiness-quality-contract",
         "operational-readiness-governance-contract",
-        "phase5-ecosystem-contract",
-        "phase6-start",
-        "phase6-status",
-        "phase6-progress",
-        "phase6-complete",
-        "phase6-metrics-contract",
+        "adoption-readiness-ecosystem-contract",
+        "scale-readiness-start",
+        "scale-readiness-status",
+        "scale-readiness-progress",
+        "scale-readiness-complete",
+        "scale-readiness-metrics-contract",
     ):
         assert target in makefile_text
 

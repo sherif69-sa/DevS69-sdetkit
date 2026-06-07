@@ -32,7 +32,7 @@ def test_ecosystem_readiness_partner_packaging_missing_required_keys_fails() -> 
             },
             "partner_packaging_contract": {
                 "required_artifacts": ["pyproject.toml"],
-                "support_surface": ["make phase5-ecosystem-contract"],
+                "support_surface": ["make adoption-readiness-ecosystem-contract"],
                 "auditability_status": "pass",
             },
             "generated_at": "2026-04-20T00:00:00Z",

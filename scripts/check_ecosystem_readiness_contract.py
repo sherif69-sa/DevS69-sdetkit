@@ -53,7 +53,7 @@ REQUIRED_PARTNER_ARTIFACTS = (
     "pyproject.toml",
 )
 DEFAULT_SUPPORT_SURFACE = (
-    "make phase5-ecosystem-contract",
+    "make adoption-readiness-ecosystem-contract",
     "python scripts/check_ecosystem_readiness_contract.py --format json",
 )
 DRIFT_THRESHOLD = 2
@@ -155,7 +155,7 @@ def _build_ecosystem_payload() -> dict[str, Any]:
             "compatibility_guards": _sorted_unique(
                 [
                     "make operational-readiness-governance-contract",
-                    "make phase5-ecosystem-contract",
+                    "make adoption-readiness-ecosystem-contract",
                 ]
             ),
         },

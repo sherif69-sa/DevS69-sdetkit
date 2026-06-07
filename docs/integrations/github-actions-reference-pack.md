@@ -15,4 +15,4 @@ Provide a canonical GitHub Actions flow for first-proof adoption.
 ## Suggested follow-up lanes
 
 - `make owner-escalation-payload`
-- `make phase3-dependency-radar`
+- `make platform-readiness-dependency-radar`

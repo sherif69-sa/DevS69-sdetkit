@@ -237,7 +237,7 @@ def build_next_pass_handoff(
                     "priority_tier": lane,
                     "priority": int(action.get("priority", 0)),
                     "reason_code": str(action.get("reason_code", "")),
-                    "command_hint": f"make phase1-baseline # validate {action.get('acceptance_check', '')}",
+                    "command_hint": f"make baseline-baseline # validate {action.get('acceptance_check', '')}",
                     # Stable fields above are consumed by equality-sensitive operators.
                     # Volatile fields below are diagnostics-only and excluded from stable_payload.
                     "volatile_diagnostics": {
