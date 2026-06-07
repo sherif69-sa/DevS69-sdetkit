@@ -751,3 +751,76 @@ def test_repo_memory_rejects_controlled_scenario_semantic_equivalence_claim() ->
         assert "scenario expands authority" in str(exc)
     else:
         raise AssertionError("expected semantic-equivalence-claiming scenario to be rejected")
+
+
+def test_repo_memory_surfaces_safety_gate_evidence_without_authority() -> None:
+    insights = _pattern_insights()
+    insights["safety_gate_evidence"] = {
+        "collection_status": "collected",
+        "status": "safety_gate_evidence_observed",
+        "source": "trajectory.safety_gate",
+        "record_count": 1,
+        "safe_fix_allowed_count": 1,
+        "review_first_count": 0,
+        "reporting_only_count": 1,
+        "report_paths": ["build/pr-quality/failure-bundle/failure-bundle.md"],
+        "decision_boundary": {
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    profile = build_repo_memory_profile(
+        pattern_insights=insights,
+        benchmark_report=_benchmark_report(),
+        live_benchmark_report=_live_benchmark_report(),
+    )
+
+    safety_gate = profile["safety_gate_evidence"]
+    assert profile["inputs"]["safety_gate_evidence_record_count"] == 1
+    assert safety_gate["collection_status"] == "collected"
+    assert safety_gate["safe_fix_allowed_count"] == 1
+    assert safety_gate["review_first_count"] == 0
+    assert safety_gate["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+    markdown = render_markdown(profile)
+    assert "## SafetyGate trajectory evidence" in markdown
+    assert "Safe-fix allowed records: `1`" in markdown
+    assert "Automation allowed by SafetyGate evidence: `false`" in markdown
+    assert "Merge authorized by SafetyGate evidence: `false`" in markdown
+
+
+def test_repo_memory_rejects_authority_expanding_safety_gate_evidence() -> None:
+    insights = _pattern_insights()
+    insights["safety_gate_evidence"] = {
+        "collection_status": "collected",
+        "status": "safety_gate_evidence_observed",
+        "source": "trajectory.safety_gate",
+        "record_count": 1,
+        "safe_fix_allowed_count": 1,
+        "review_first_count": 0,
+        "reporting_only_count": 1,
+        "decision_boundary": {
+            "automation_allowed": True,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    try:
+        build_repo_memory_profile(
+            pattern_insights=insights,
+            benchmark_report=_benchmark_report(),
+        )
+    except ValueError as exc:
+        assert "SafetyGate evidence expands authority: automation_allowed" in str(exc)
+    else:
+        raise AssertionError("expected authority-expanding SafetyGate evidence to fail")
