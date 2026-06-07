@@ -3,24 +3,24 @@
   "automation_allowed": false,
   "by_actionability": {
     "actionable_prose_cleanup": 52,
-    "internal_cleanup_review_first": 332,
-    "migration_or_alias_required": 51,
-    "review_first_context": 362
+    "internal_cleanup_review_first": 334,
+    "migration_or_alias_required": 53,
+    "review_first_context": 360
   },
   "by_classification": {
     "defer_until_related_pr": 183,
-    "docs_only_cleanup": 230,
+    "docs_only_cleanup": 228,
     "internal_path_requires_migration": 42,
     "public_surface_requires_alias": 8,
-    "safe_cleanup_internal": 333,
-    "workflow_alias_migration": 1
+    "safe_cleanup_internal": 335,
+    "workflow_alias_migration": 3
   },
   "by_surface": {
-    "docs": 230,
+    "docs": 228,
     "other": 183,
     "source": 176,
-    "test": 207,
-    "workflow": 1
+    "test": 209,
+    "workflow": 3
   },
   "by_term": {
     "Big-Brain": 2,
@@ -37,9 +37,9 @@
     "education": 5,
     "final-final": 1,
     "lesson": 5,
-    "phase1": 87,
+    "phase1": 88,
     "phase2": 86,
-    "phase3": 98,
+    "phase3": 99,
     "phase4": 26,
     "phase5": 20,
     "phase6": 19,
@@ -48,8 +48,8 @@
     "tutorial": 5
   },
   "compatibility_required": true,
-  "final_gate_policy": "Remaining legacy naming is allowed only when it is review-first, compatibility/migration evidence, historical/governance evidence, schema/contract evidence, tooling evidence, naming inventory evidence, or a required platform token such as GitHub Actions runner.temp.",
-  "finding_count": 797,
+  "final_gate_policy": "Remaining legacy naming is allowed only when it is review-first, compatibility/migration evidence, historical/governance evidence, schema/contract evidence, tooling evidence, naming inventory evidence, or a required platform/workflow compatibility token.",
+  "finding_count": 799,
   "items": [
     {
       "actionability": "review_first_context",
@@ -11224,45 +11224,7 @@
       "actionability_reason": "command_path_link_schema_or_audit_context",
       "automation_allowed": false,
       "classification": "docs_only_cleanup",
-      "line": 21,
-      "match_type": "content",
-      "merge_authorized": false,
-      "occurrence_count": 1,
-      "path": "docs/naming/final-professional-naming-inventory.md",
-      "replacement_hint": "baseline",
-      "requires_compatibility_plan": false,
-      "sample_lines": [
-        21
-      ],
-      "semantic_equivalence_proven": false,
-      "surface": "docs",
-      "term": "phase1"
-    },
-    {
-      "actionability": "review_first_context",
-      "actionability_reason": "command_path_link_schema_or_audit_context",
-      "automation_allowed": false,
-      "classification": "docs_only_cleanup",
-      "line": 22,
-      "match_type": "content",
-      "merge_authorized": false,
-      "occurrence_count": 1,
-      "path": "docs/naming/final-professional-naming-inventory.md",
-      "replacement_hint": "platform_readiness",
-      "requires_compatibility_plan": false,
-      "sample_lines": [
-        22
-      ],
-      "semantic_equivalence_proven": false,
-      "surface": "docs",
-      "term": "phase3"
-    },
-    {
-      "actionability": "review_first_context",
-      "actionability_reason": "command_path_link_schema_or_audit_context",
-      "automation_allowed": false,
-      "classification": "docs_only_cleanup",
-      "line": 20,
+      "line": 8,
       "match_type": "content",
       "merge_authorized": false,
       "occurrence_count": 1,
@@ -11270,7 +11232,7 @@
       "replacement_hint": "temporary_workspace",
       "requires_compatibility_plan": false,
       "sample_lines": [
-        20
+        8
       ],
       "semantic_equivalence_proven": false,
       "surface": "docs",
@@ -11787,7 +11749,7 @@
         4160,
         5274,
         10824,
-        11737
+        11794
       ],
       "semantic_equivalence_proven": false,
       "surface": "docs",
@@ -11833,7 +11795,7 @@
         4198,
         6075,
         10862,
-        11783
+        11840
       ],
       "semantic_equivalence_proven": false,
       "surface": "docs",
@@ -11879,7 +11841,7 @@
         1858,
         6381,
         10904,
-        11829
+        11886
       ],
       "semantic_equivalence_proven": false,
       "surface": "docs",
@@ -11923,8 +11885,8 @@
       "sample_lines": [
         26,
         10949,
-        11874,
-        16624
+        11931,
+        16661
       ],
       "semantic_equivalence_proven": false,
       "surface": "docs",
@@ -11947,7 +11909,7 @@
         531,
         10669,
         11125,
-        11897
+        11954
       ],
       "semantic_equivalence_proven": false,
       "surface": "docs",
@@ -11970,7 +11932,7 @@
         551,
         10688,
         11144,
-        11920
+        11977
       ],
       "semantic_equivalence_proven": false,
       "surface": "docs",
@@ -11993,7 +11955,7 @@
         571,
         10707,
         11163,
-        11943
+        12000
       ],
       "semantic_equivalence_proven": false,
       "surface": "docs",
@@ -12039,7 +12001,7 @@
         612,
         10745,
         11201,
-        11989
+        12046
       ],
       "semantic_equivalence_proven": false,
       "surface": "docs",
@@ -12053,16 +12015,16 @@
       "line": 47,
       "match_type": "content",
       "merge_authorized": false,
-      "occurrence_count": 18,
+      "occurrence_count": 21,
       "path": "docs/naming/final-professional-naming-inventory.json",
       "replacement_hint": "temporary_workspace",
       "requires_compatibility_plan": false,
       "sample_lines": [
         47,
+        51,
         632,
         1708,
-        2262,
-        3871
+        2262
       ],
       "semantic_equivalence_proven": false,
       "surface": "docs",
@@ -12082,8 +12044,8 @@
       "requires_compatibility_plan": false,
       "sample_lines": [
         38,
-        12033,
-        16631
+        12090,
+        16668
       ],
       "semantic_equivalence_proven": false,
       "surface": "docs",
@@ -13564,7 +13526,45 @@
       "actionability_reason": "internal cleanup remains review-first",
       "automation_allowed": false,
       "classification": "safe_cleanup_internal",
-      "line": 45,
+      "line": 79,
+      "match_type": "content",
+      "merge_authorized": false,
+      "occurrence_count": 1,
+      "path": "tests/test_final_professional_naming_inventory_gate.py",
+      "replacement_hint": "baseline",
+      "requires_compatibility_plan": false,
+      "sample_lines": [
+        79
+      ],
+      "semantic_equivalence_proven": false,
+      "surface": "test",
+      "term": "phase1"
+    },
+    {
+      "actionability": "internal_cleanup_review_first",
+      "actionability_reason": "internal cleanup remains review-first",
+      "automation_allowed": false,
+      "classification": "safe_cleanup_internal",
+      "line": 79,
+      "match_type": "content",
+      "merge_authorized": false,
+      "occurrence_count": 1,
+      "path": "tests/test_final_professional_naming_inventory_gate.py",
+      "replacement_hint": "platform_readiness",
+      "requires_compatibility_plan": false,
+      "sample_lines": [
+        79
+      ],
+      "semantic_equivalence_proven": false,
+      "surface": "test",
+      "term": "phase3"
+    },
+    {
+      "actionability": "internal_cleanup_review_first",
+      "actionability_reason": "internal cleanup remains review-first",
+      "automation_allowed": false,
+      "classification": "safe_cleanup_internal",
+      "line": 44,
       "match_type": "content",
       "merge_authorized": false,
       "occurrence_count": 2,
@@ -13572,8 +13572,8 @@
       "replacement_hint": "example",
       "requires_compatibility_plan": false,
       "sample_lines": [
-        45,
-        46
+        44,
+        45
       ],
       "semantic_equivalence_proven": false,
       "surface": "test",
@@ -13584,7 +13584,7 @@
       "actionability_reason": "internal cleanup remains review-first",
       "automation_allowed": false,
       "classification": "safe_cleanup_internal",
-      "line": 69,
+      "line": 72,
       "match_type": "content",
       "merge_authorized": false,
       "occurrence_count": 1,
@@ -13592,7 +13592,7 @@
       "replacement_hint": "temporary_workspace",
       "requires_compatibility_plan": false,
       "sample_lines": [
-        69
+        72
       ],
       "semantic_equivalence_proven": false,
       "surface": "test",
@@ -15095,13 +15095,12 @@
       "line": 4,
       "match_type": "content",
       "merge_authorized": false,
-      "occurrence_count": 2,
+      "occurrence_count": 1,
       "path": "tests/test_big_brain_toolkit_roadmap.py",
       "replacement_hint": "production_name_required",
       "requires_compatibility_plan": false,
       "sample_lines": [
-        4,
-        22
+        4
       ],
       "semantic_equivalence_proven": false,
       "surface": "test",
@@ -16633,12 +16632,51 @@
       "semantic_equivalence_proven": false,
       "surface": "workflow",
       "term": "temp"
+    },
+    {
+      "actionability": "migration_or_alias_required",
+      "actionability_reason": "compatibility plan required before changing this surface",
+      "automation_allowed": false,
+      "classification": "workflow_alias_migration",
+      "line": 60,
+      "match_type": "content",
+      "merge_authorized": false,
+      "occurrence_count": 1,
+      "path": ".github/workflows/platform-readiness-quality-contract.yml",
+      "replacement_hint": "baseline",
+      "requires_compatibility_plan": true,
+      "sample_lines": [
+        60
+      ],
+      "semantic_equivalence_proven": false,
+      "surface": "workflow",
+      "term": "phase1"
+    },
+    {
+      "actionability": "migration_or_alias_required",
+      "actionability_reason": "compatibility plan required before changing this surface",
+      "automation_allowed": false,
+      "classification": "workflow_alias_migration",
+      "line": 52,
+      "match_type": "content",
+      "merge_authorized": false,
+      "occurrence_count": 2,
+      "path": ".github/workflows/platform-readiness-quality-contract.yml",
+      "replacement_hint": "platform_readiness",
+      "requires_compatibility_plan": true,
+      "sample_lines": [
+        52,
+        58
+      ],
+      "semantic_equivalence_proven": false,
+      "surface": "workflow",
+      "term": "phase3"
     }
   ],
   "merge_authorized": false,
   "recommended_action": "review naming debt inventory before any rename or compatibility migration",
   "rename_allowed": false,
-  "review_first_finding_count": 745,
+  "review_first_finding_count": 747,
   "schema_version": "sdetkit.professional.naming.inventory.v1",
   "semantic_equivalence_proven": false,
   "status": "review required",

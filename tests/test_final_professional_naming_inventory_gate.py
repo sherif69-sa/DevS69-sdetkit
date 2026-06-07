@@ -63,10 +63,21 @@ def _is_compatibility_path(path: str) -> bool:
 
 
 def _is_required_workflow_context(item: dict[str, object]) -> bool:
+    path = item.get("path")
+    term = item.get("term")
+    classification = item.get("classification")
+
+    if (
+        path == ".github/workflows/ci.yml"
+        and term == "temp"
+        and classification == "workflow_alias_migration"
+    ):
+        return True
+
     return (
-        item.get("path") == ".github/workflows/ci.yml"
-        and item.get("term") == "temp"
-        and item.get("classification") == "workflow_alias_migration"
+        path == ".github/workflows/platform-readiness-quality-contract.yml"
+        and term in {"phase1", "phase3"}
+        and classification == "workflow_alias_migration"
     )
 
 

@@ -19,4 +19,7 @@ def test_big_brain_toolkit_roadmap_captures_strengths_gaps_and_upgrades() -> Non
 def test_big_brain_toolkit_roadmap_is_discoverable_in_mkdocs_nav() -> None:
     text = MKDOCS.read_text(encoding="utf-8")
 
-    assert "Big-brain toolkit roadmap: roadmap/big-brain-toolkit-roadmap.md" in text
+    assert (
+        "Adaptive Intelligence toolkit roadmap: roadmap/adaptive-intelligence-toolkit-roadmap.md"
+        in text
+    )

@@ -49,13 +49,13 @@ jobs:
           make quality-contract-run
 
       - name: Upload quality-contract artifacts
-      # legacy artifact compatibility: platform-readiness-quality-artifacts
+      # legacy artifact compatibility: phase3-quality-artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: platform-readiness-quality-artifacts
           path: |
             build/platform-readiness-quality/*.json
-            build/platform-readiness-quality/*.json
+            build/phase3-quality/*.json
             build/platform-readiness-quality/*.md
-            build/baseline-readiness-baseline/history/*.json
+            build/phase1-baseline/history/*.json
           if-no-files-found: error
