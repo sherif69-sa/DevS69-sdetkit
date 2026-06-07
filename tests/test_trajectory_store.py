@@ -479,3 +479,135 @@ def test_pr_quality_comment_can_show_green_evidence_review_trajectory_summary() 
     assert "Review-first decisions: `1`" in body
     assert "`evidence_review_required`=1" in body
     assert "`pr-quality-evidence-signal-evidence-review-signal`: action=`review`" in body
+
+
+def test_pr_quality_trajectory_records_carry_failure_bundle_safety_evidence() -> None:
+    from sdetkit.trajectory_store import build_pr_quality_trajectory_records
+
+    records = build_pr_quality_trajectory_records(
+        action_report={
+            "status": "safe_fix_available",
+            "automation": {
+                "allowed": True,
+                "reason": "safe fix planning is allowed, but not applied",
+            },
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "checks_seen": 1,
+            "failed_checks": [
+                {
+                    "name": "ruff",
+                    "safe_to_auto_fix": True,
+                    "review_first": False,
+                    "diagnosis": {
+                        "code": "RUFF_FIXABLE_LINT",
+                        "title": "Ruff fixable lint can be mechanically remediated",
+                    },
+                }
+            ],
+        },
+        failure_bundle={
+            "out_dir": "build/pr-quality/failure-bundle",
+            "report_path": "build/pr-quality/failure-bundle/failure-bundle.md",
+            "safety_summary": {
+                "review_first": False,
+                "safe_fix_allowed": True,
+                "reporting_only": True,
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        },
+        repo="sherif69-sa/DevS69-sdetkit",
+        branch="feat/trajectory-safetygate-summary-evidence",
+        commit_sha="abc123",
+        pr_number=1607,
+    )
+
+    assert len(records) == 1
+    safety_gate = records[0]["safety_gate"]
+    assert safety_gate == {
+        "source": "failure_bundle.safety_summary",
+        "review_first": False,
+        "safe_fix_allowed": True,
+        "reporting_only": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "report_path": "build/pr-quality/failure-bundle/failure-bundle.md",
+    }
+
+
+def test_pr_quality_trajectory_cli_accepts_failure_bundle_artifact(tmp_path: Path, capsys) -> None:
+    action_report = tmp_path / "action-report.json"
+    action_report.write_text(
+        json.dumps(
+            {
+                "status": "safe_fix_available",
+                "automation": {
+                    "allowed": True,
+                    "reason": "safe fix planning is allowed, but not applied",
+                },
+                "proof_commands": ["python -m pre_commit run -a"],
+            }
+        ),
+        encoding="utf-8",
+    )
+    check_intelligence = tmp_path / "check-intelligence.json"
+    check_intelligence.write_text(
+        json.dumps(
+            {
+                "checks_seen": 1,
+                "failed_checks": [
+                    {
+                        "name": "ruff",
+                        "safe_to_auto_fix": True,
+                        "review_first": False,
+                        "diagnosis": {"code": "RUFF_FIXABLE_LINT"},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    failure_bundle = tmp_path / "failure-bundle.json"
+    failure_bundle.write_text(
+        json.dumps(
+            {
+                "manifest": {
+                    "review_first": False,
+                    "safe_fix_allowed": True,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    out = tmp_path / "trajectory.jsonl"
+
+    rc = main(
+        [
+            "--pr-quality-action-report",
+            str(action_report),
+            "--check-intelligence",
+            str(check_intelligence),
+            "--failure-bundle",
+            str(failure_bundle),
+            "--out",
+            str(out),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["summary"]["record_count"] == 1
+    record = json.loads(out.read_text(encoding="utf-8").splitlines()[0])
+    assert record["safety_gate"]["source"] == "failure_bundle.safety_summary"
+    assert record["safety_gate"]["safe_fix_allowed"] is True
+    assert record["safety_gate"]["review_first"] is False
+    assert record["safety_gate"]["automation_allowed"] is False
+    assert record["safety_gate"]["merge_authorized"] is False

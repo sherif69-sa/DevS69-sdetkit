@@ -43,6 +43,45 @@ def _string_list(value: Any) -> list[str]:
     return sorted({_string(item) for item in _as_list(value) if _string(item)})
 
 
+def _failure_bundle_safety_evidence(value: Mapping[str, Any] | None) -> JsonObject:
+    payload = _as_dict(value)
+    if not payload:
+        return {}
+
+    failure_bundle = _as_dict(payload.get("failure_bundle"))
+    if failure_bundle:
+        payload = failure_bundle
+
+    summary = _as_dict(payload.get("safety_summary"))
+    if not summary:
+        manifest = _as_dict(payload.get("manifest"))
+        if manifest:
+            summary = {
+                "review_first": manifest.get("review_first", False),
+                "safe_fix_allowed": manifest.get("safe_fix_allowed", False),
+                "reporting_only": True,
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            }
+
+    if not summary:
+        return {}
+
+    return {
+        "source": "failure_bundle.safety_summary",
+        "review_first": _bool(summary.get("review_first")),
+        "safe_fix_allowed": _bool(summary.get("safe_fix_allowed")),
+        "reporting_only": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "report_path": _string(payload.get("report_path")),
+    }
+
+
 def _slug(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.lower()).strip("-")
     return slug or "unknown"
@@ -268,6 +307,7 @@ def build_pr_quality_trajectory_records(
     check_intelligence: Mapping[str, Any],
     evidence_narrative: Mapping[str, Any] | None = None,
     safe_fix_outcome: Mapping[str, Any] | None = None,
+    failure_bundle: Mapping[str, Any] | None = None,
     repo: str = "",
     branch: str = "",
     commit_sha: str = "",
@@ -275,6 +315,7 @@ def build_pr_quality_trajectory_records(
     generated_at: str = DEFAULT_GENERATED_AT,
 ) -> list[JsonObject]:
     outcome = _as_dict(safe_fix_outcome)
+    failure_bundle_safety = _failure_bundle_safety_evidence(failure_bundle)
     automation = _as_dict(action_report.get("automation"))
     default_proof_commands = _string_list(action_report.get("proof_commands"))
     records: list[JsonObject] = []
@@ -373,6 +414,7 @@ def build_pr_quality_trajectory_records(
                         or check.get("title")
                     ),
                 },
+                "safety_gate": failure_bundle_safety,
                 "fix": {
                     "allowed_strategy": action,
                     "patch_files": patch_files,
@@ -534,6 +576,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--check-intelligence", default="")
     parser.add_argument("--evidence-narrative", default="")
     parser.add_argument("--safe-fix-outcome", default="")
+    parser.add_argument("--failure-bundle", default="")
     parser.add_argument("--out", default=DEFAULT_OUT)
     parser.add_argument("--repo", default="")
     parser.add_argument("--branch", default="")
@@ -558,6 +601,7 @@ def main(argv: list[str] | None = None) -> int:
                 check_intelligence=_read_json(_optional_path(args.check_intelligence)),
                 evidence_narrative=_read_json(_optional_path(args.evidence_narrative)),
                 safe_fix_outcome=_read_json(_optional_path(args.safe_fix_outcome)),
+                failure_bundle=_read_json(_optional_path(args.failure_bundle)),
                 repo=args.repo,
                 branch=args.branch,
                 commit_sha=args.commit_sha,
