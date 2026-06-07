@@ -10,7 +10,7 @@ SEED_SCRIPT = ROOT / "scripts" / "seed_quality_baseline_summary_fixture.py"
 
 
 def test_seed_phase1_baseline_summary_fixture_writes_contract_shape(tmp_path: Path) -> None:
-    summary = tmp_path / "build" / "phase1-baseline" / "phase1-baseline-summary.json"
+    summary = tmp_path / "build" / "baseline-baseline" / "phase1-baseline-summary.json"
 
     result = subprocess.run(
         [sys.executable, str(SEED_SCRIPT), "--summary", str(summary)],

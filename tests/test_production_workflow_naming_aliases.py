@@ -34,8 +34,8 @@ ALIASES = {
     "operations-current": "operations-current-status",
     "operations-current-json": "operations-current-status-json",
     "governance-contract-check": "operational-readiness-governance-contract",
-    "ecosystem-contract-check": "phase5-ecosystem-contract",
-    "metrics-contract-check": "phase6-metrics-contract",
+    "ecosystem-contract-check": "adoption-readiness-ecosystem-contract",
+    "metrics-contract-check": "scale-readiness-metrics-contract",
 }
 
 

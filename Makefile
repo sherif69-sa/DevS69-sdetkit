@@ -1,4 +1,11 @@
 # professional naming compatibility flow-order anchors
+# phase6 workflow order anchors
+# flow-order-anchor: adoption-readiness-ecosystem-contract
+# flow-order-anchor: phase6-start
+# flow-order-anchor: phase6-status
+# flow-order-anchor: phase6-progress
+# flow-order-anchor: phase6-complete
+# flow-order-anchor: phase6-metrics-contract
 # flow-order-anchor: phase2-seed
 # flow-order-anchor: platform-readiness-quality-contract
 # flow-order-anchor: operational-readiness-governance-contract
@@ -758,3 +765,51 @@ phase1-status: baseline-status
 governance-contract-check: operational-readiness-governance-contract
 ecosystem-contract-check: phase5-ecosystem-contract
 metrics-contract-check: phase6-metrics-contract
+
+# Professional readiness command aliases.
+# Legacy phase-* targets remain available for compatibility.
+.PHONY: baseline-baseline
+baseline-baseline: phase1-baseline
+
+.PHONY: baseline-execute
+baseline-execute: phase1-execute
+
+.PHONY: baseline-next
+baseline-next: phase1-next
+
+.PHONY: release-readiness-execute
+release-readiness-execute: phase2-execute
+
+.PHONY: platform-readiness-do-it
+platform-readiness-do-it: phase3-do-it
+
+.PHONY: platform-readiness-governance
+platform-readiness-governance: phase3-governance
+
+.PHONY: operational-readiness-credibility
+operational-readiness-credibility: phase4-credibility
+
+.PHONY: adoption-readiness-ecosystem-contract
+adoption-readiness-ecosystem-contract: phase5-ecosystem-contract
+
+.PHONY: scale-readiness-complete
+scale-readiness-complete: phase6-complete
+
+.PHONY: scale-readiness-metrics-contract
+scale-readiness-metrics-contract: phase6-metrics-contract
+
+.PHONY: scale-readiness-progress
+scale-readiness-progress: phase6-progress
+
+.PHONY: scale-readiness-start
+scale-readiness-start: phase6-start
+
+.PHONY: scale-readiness-status
+scale-readiness-status: phase6-status
+
+# Professional public command aliases.
+.PHONY: ecosystem-contract-check
+ecosystem-contract-check: adoption-readiness-ecosystem-contract
+
+.PHONY: metrics-contract-check
+metrics-contract-check: scale-readiness-metrics-contract
