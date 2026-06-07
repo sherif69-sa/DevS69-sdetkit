@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit.patch_scorer import main, score_patch
+from sdetkit.patch_scorer import main, render_markdown, score_patch
 
 
 def _safe_plan() -> dict:
@@ -237,3 +237,72 @@ def test_patch_scorer_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> No
     assert "Outcome dimensions" in markdown
     assert "Step error primary category: `none`" in markdown
     assert "ProtectedVerifier must exist and pass" in markdown
+
+
+def _safetygate_safe_insights() -> dict:
+    insights = _matching_safe_insights()
+    insights["safety_gate_evidence"] = {
+        "collection_status": "collected",
+        "status": "safety_gate_evidence_observed",
+        "source": "trajectory.safety_gate",
+        "record_count": 1,
+        "safe_fix_allowed_count": 1,
+        "review_first_count": 0,
+        "reporting_only_count": 1,
+        "report_paths": ["build/pr-quality/failure-bundle/failure-bundle.md"],
+        "decision_boundary": {
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+    return insights
+
+
+def test_patch_scorer_surfaces_safetygate_evidence_without_authority() -> None:
+    payload = score_patch(
+        remediation_plan=_safe_plan(),
+        proposed_patch={"patch_id": "format-patch", "changed_files": ["src/sdetkit/example.py"]},
+        pattern_insights=_safetygate_safe_insights(),
+    )
+
+    assert payload["decision"]["status"] == "candidate_for_protected_verification"
+    assert payload["decision"]["automation_allowed"] is False
+    assert payload["safety_gate_evidence"]["collection_status"] == "collected"
+    assert payload["safety_gate_evidence"]["safe_fix_allowed_count"] == 1
+    assert payload["safety_gate_evidence"]["expanded_authority_fields"] == []
+    assert payload["safety_gate_evidence"]["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+    assert payload["history_evidence"]["safety_gate_collection_status"] == "collected"
+    assert payload["history_evidence"]["safety_gate_safe_fix_allowed_count"] == 1
+    assert payload["history_evidence"]["safety_gate_review_first_count"] == 0
+
+    markdown = render_markdown(payload)
+    assert "## SafetyGate evidence" in markdown
+    assert "Safe-fix allowed records: `1`" in markdown
+    assert "Automation allowed by SafetyGate evidence: `false`" in markdown
+    assert "Merge authorized by SafetyGate evidence: `false`" in markdown
+
+
+def test_patch_scorer_blocks_authority_expanding_safetygate_evidence() -> None:
+    insights = _safetygate_safe_insights()
+    insights["safety_gate_evidence"]["decision_boundary"]["automation_allowed"] = True
+
+    payload = score_patch(
+        remediation_plan=_safe_plan(),
+        proposed_patch={"patch_id": "format-patch", "changed_files": ["src/sdetkit/example.py"]},
+        pattern_insights=insights,
+    )
+
+    assert payload["decision"]["status"] == "blocked_review_first"
+    assert payload["decision"]["automation_allowed"] is False
+    assert payload["safety_gate_evidence"]["expanded_authority_fields"] == ["automation_allowed"]
+    assert any(
+        item["code"] == "SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION" and item["blocking"] is True
+        for item in payload["risk_flags"]
+    )
