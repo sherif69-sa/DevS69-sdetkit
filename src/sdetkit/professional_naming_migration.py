@@ -15,6 +15,7 @@ SAFE_CONTENT_REWRITE = "safe_content_rewrite"
 ALIAS_REQUIRED = "alias_required"
 PRESERVE_HISTORY = "preserve_history"
 TEMPLATE_LOCKED = "template_locked"
+REVIEW_LOCKED_REFERENCE = "review_locked_reference"
 MANUAL_REVIEW = "manual_review"
 
 MIGRATION_OR_ALIAS_REQUIRED = "migration_or_alias_required"
@@ -31,6 +32,9 @@ PRESERVE_REASON_MARKERS = {
     "heading_or_chronology_label",
     "command_path_link_schema_or_audit_context",
     "table_or_generated_matrix",
+}
+REVIEW_LOCKED_REASON_MARKERS = {
+    "review_locked_naming_governance_reference",
 }
 
 TEMPLATE_LOCKED_PATHS = {
@@ -78,6 +82,9 @@ def _migration_class(item: Mapping[str, Any]) -> str:
     if path in TEMPLATE_LOCKED_PATHS or "template_locked" in reason:
         return TEMPLATE_LOCKED
 
+    if reason in REVIEW_LOCKED_REASON_MARKERS:
+        return REVIEW_LOCKED_REFERENCE
+
     if classification in PUBLIC_OR_WORKFLOW_ALIAS_CLASSES:
         return ALIAS_REQUIRED
 
@@ -105,6 +112,7 @@ def _required_guard(migration_class: str) -> str:
         ALIAS_REQUIRED: "alias or compatibility shim plus tests",
         PRESERVE_HISTORY: "preserve historical evidence unless explicit migration plan exists",
         TEMPLATE_LOCKED: "template contract test must remain green",
+        REVIEW_LOCKED_REFERENCE: "preserve naming governance reference unless explicit migration plan exists",
         MANUAL_REVIEW: "human review before rename",
     }.get(migration_class, "human review before rename")
 
@@ -142,6 +150,7 @@ def build_professional_naming_migration_plan(
     by_class = Counter(row["migration_class"] for row in rows)
     safe_count = by_class.get(SAFE_CONTENT_REWRITE, 0)
     alias_count = by_class.get(ALIAS_REQUIRED, 0)
+    review_locked_count = by_class.get(REVIEW_LOCKED_REFERENCE, 0)
 
     if safe_count:
         recommended = "_".join(("apply", "safe", "content", "rewrite", "first"))
@@ -160,6 +169,7 @@ def build_professional_naming_migration_plan(
         "alias_required_count": alias_count,
         "preserve_history_count": by_class.get(PRESERVE_HISTORY, 0),
         "template_locked_count": by_class.get(TEMPLATE_LOCKED, 0),
+        "review_locked_reference_count": review_locked_count,
         "manual_review_count": by_class.get(MANUAL_REVIEW, 0),
         "by_migration_class": dict(sorted(by_class.items())),
         "recommended_next_action": recommended,
@@ -169,6 +179,7 @@ def build_professional_naming_migration_plan(
         "json_key_rename_without_alias": False,
         "artifact_slug_rename_without_redirect": False,
         "template_locked_rewrite": False,
+        "review_locked_reference_rewrite": False,
         "items": rows,
     }
 
@@ -204,6 +215,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"alias_required_count={payload['alias_required_count']}")
         print(f"preserve_history_count={payload['preserve_history_count']}")
         print(f"template_locked_count={payload['template_locked_count']}")
+        print(f"review_locked_reference_count={payload['review_locked_reference_count']}")
         print(f"manual_review_count={payload['manual_review_count']}")
         print(f"recommended_next_action={payload['recommended_next_action']}")
         print(f"blind_rename_allowed={str(payload['blind_rename_allowed']).lower()}")
