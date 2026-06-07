@@ -38,7 +38,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/impact-32-ultra-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json"
+    summary = root / "docs/artifacts/phase2-kickoff-pack/release-readiness-kickoff-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -50,7 +50,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md"
+    board = root / "docs/artifacts/phase2-kickoff-pack/release-readiness-kickoff-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -106,16 +106,18 @@ def test_release_cadence_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_release_cadence_strict_fails_when_workflow_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json").unlink()
+    (
+        tmp_path / "docs/artifacts/phase2-kickoff-pack/release-readiness-kickoff-summary.json"
+    ).unlink()
     rc = d32.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
 def test_release_cadence_strict_fails_when_workflow_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md").write_text(
-        "- [ ]  release cadence checklist drafted\n", encoding="utf-8"
-    )
+    (
+        tmp_path / "docs/artifacts/phase2-kickoff-pack/release-readiness-kickoff-delivery-board.md"
+    ).write_text("- [ ]  release cadence checklist drafted\n", encoding="utf-8")
     rc = d32.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

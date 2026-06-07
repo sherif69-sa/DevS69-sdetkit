@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
     )
     board = (
         root
-        / "docs/artifacts/platform-readiness-kickoff-completion-report-pack/phase3-kickoff-delivery-board.md"
+        / "docs/artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-delivery-board.md"
     )
     board.write_text(
         "\n".join(

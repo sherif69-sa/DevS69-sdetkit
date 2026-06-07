@@ -82,7 +82,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     _write_board(
         root
-        / "docs/artifacts/platform-readiness-preplan-completion-report-pack/phase3-preplan-delivery-board.md",
+        / "docs/artifacts/platform-readiness-preplan-completion-report-pack/platform-readiness-preplan-delivery-board.md",
         "Phase3 preplan board",
     )
 

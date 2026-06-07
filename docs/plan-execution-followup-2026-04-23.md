@@ -101,7 +101,7 @@ Release readiness kickoff artifacts now present:
 - `docs/artifacts/release-readiness-hotspot-baseline-2026-04-24.json` (baseline for upcoming delta tracking)
 - `docs/artifacts/release-readiness-hotspot-baseline-pre-extraction-2026-04-24.json`
 - `docs/artifacts/release-readiness-hotspot-delta-2026-04-24.json`
-- `docs/artifacts/phase2-hotspot-delta-2026-04-24.md`
+- `docs/artifacts/release-readiness-hotspot-delta-2026-04-24.md`
 
 Suggestions:
 

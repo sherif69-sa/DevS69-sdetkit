@@ -11,7 +11,7 @@ _CFG = {
         "docs/artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-completion-report-summary.json"
     ],
     "required_boards": [
-        "docs/artifacts/platform-readiness-kickoff-completion-report-pack/phase3-kickoff-delivery-board.md"
+        "docs/artifacts/platform-readiness-kickoff-completion-report-pack/platform-readiness-kickoff-delivery-board.md"
     ],
     "summary_json": "community-program-closeout-summary.json",
     "summary_md": "community-program-closeout-summary.md",

@@ -1,0 +1,11 @@
+{
+  "summary": {
+    "activation_score": 99,
+    "strict_pass": true
+  },
+  "checks": [
+    {
+      "id": "seed"
+    }
+  ]
+}

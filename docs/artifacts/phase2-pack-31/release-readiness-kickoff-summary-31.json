@@ -1,0 +1,127 @@
+{
+  "name": "name31-phase2-kickoff",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-name31-phase2-kickoff.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "name30_summary": "docs/artifacts/name30-wrap-pack/name30-phase1-wrap-summary.json",
+    "name30_backlog": "docs/artifacts/name30-wrap-pack/name30-phase2-backlog.md"
+  },
+  "checks": [
+    {
+      "check_id": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-name31-phase2-kickoff.md"
+    },
+    {
+      "check_id": "required_sections_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "check_id": "required_commands_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "check_id": "readme_name31_link",
+      "weight": 8,
+      "passed": true,
+      "evidence": "docs/integrations-name31-phase2-kickoff.md"
+    },
+    {
+      "check_id": "readme_name31_command",
+      "weight": 4,
+      "passed": true,
+      "evidence": "name31-phase2-kickoff"
+    },
+    {
+      "check_id": "docs_index_name31_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "name-31-ultra-upgrade-report.md + integrations-name31-phase2-kickoff.md"
+    },
+    {
+      "check_id": "top10_name31_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Name 31 + Name 32 strategy chain"
+    },
+    {
+      "check_id": "name30_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/name30-wrap-pack/name30-phase1-wrap-summary.json"
+    },
+    {
+      "check_id": "name30_backlog_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/name30-wrap-pack/name30-phase2-backlog.md"
+    },
+    {
+      "check_id": "name30_quality_floor",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "name30_score": 99.0,
+        "name30_average": 100.0,
+        "strict_pass": true
+      }
+    },
+    {
+      "check_id": "phase2_backlog_integrity",
+      "weight": 7,
+      "passed": true,
+      "evidence": {
+        "backlog_items": 8,
+        "contains_name31": true,
+        "contains_name32": true
+      }
+    },
+    {
+      "check_id": "weekly_target_contract",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_target_lines": []
+      }
+    },
+    {
+      "check_id": "delivery_board_locked",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_board_items": []
+      }
+    }
+  ],
+  "rollup": {
+    "name30_activation_score": 99.0,
+    "name30_average_activation_score": 100.0,
+    "name30_backlog_items": 8
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 13,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Name 30 continuity is strict-pass with score=99.0 and avg=100.0.",
+    "Phase-2 backlog integrity validated with 8 checklist items.",
+    "Week-1 targets and Name 31 delivery board are fully locked.",
+    "Name 31 kickoff is fully closed and ready for Name 32 release-cadence execution."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

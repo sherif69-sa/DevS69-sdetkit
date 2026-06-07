@@ -1,0 +1,136 @@
+{
+  "name": "phase3-kickoff-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-phase3-kickoff-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "phase2_wrap_handoff_summary": "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json",
+    "phase2_wrap_handoff_delivery_board": "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md"
+  },
+  "checks": [
+    {
+      "check_id": "readme_command_lane",
+      "weight": 7,
+      "passed": false,
+      "evidence": "README phase3-kickoff-closeout command lane"
+    },
+    {
+      "check_id": "docs_index_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-61-big-upgrade-report.md + integrations-phase3-kickoff-closeout.md"
+    },
+    {
+      "check_id": "top10_strategy_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": "+ strategy chain"
+    },
+    {
+      "check_id": "phase2_wrap_handoff_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json"
+    },
+    {
+      "check_id": "phase2_wrap_handoff_delivery_board_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md"
+    },
+    {
+      "check_id": "phase2_wrap_handoff_quality_floor",
+      "weight": 15,
+      "passed": false,
+      "evidence": {
+        "phase2_wrap_handoff_score": 43,
+        "strict_pass": false,
+        "phase2_wrap_handoff_checks": 13
+      }
+    },
+    {
+      "check_id": "phase2_wrap_handoff_board_integrity",
+      "weight": 7,
+      "passed": false,
+      "evidence": {
+        "board_items": 5,
+        "contains_required": false
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": false,
+      "evidence": "# \u2014 Phase-3 kickoff execution closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 10,
+      "passed": false,
+      "evidence": [
+        "## Required inputs ()"
+      ]
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Phase-3 kickoff execution and trust-signal triage.",
+        "The lane references Phase-2 wrap outcomes, risks, and KPI continuity evidence.",
+        "Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "closeout records Phase-3 baseline activation, trust KPI owners, and community program priorities."
+      ]
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 3,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 2,
+      "passed": false,
+      "evidence": [
+        "- [ ] Phase-3 kickoff brief committed",
+        "- [ ] kickoff reviewed with owner + backup",
+        "- [ ] trust ledger exported",
+        "- [ ] KPI scorecard snapshot exported",
+        "- [ ] community program priorities drafted from learnings"
+      ]
+    }
+  ],
+  "rollup": {
+    "phase2_wrap_handoff_activation_score": 43,
+    "phase2_wrap_handoff_checks": 13,
+    "phase2_wrap_handoff_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 29,
+    "passed_checks": 4,
+    "failed_checks": 9,
+    "critical_failures": [
+      "phase2_wrap_handoff_strict_baseline"
+    ],
+    "strict_pass": false
+  },
+  "wins": [],
+  "misses": [
+    "strict continuity signal is missing.",
+    "delivery board integrity is incomplete (needs >=5 items and anchors).",
+    "Phase-3 kickoff contract, quality checklist, or delivery board entries are missing."
+  ],
+  "handoff_actions": [
+    "Re-run Phase-2 wrap + handoff closeout command and restore strict baseline before lock.",
+    "Repair delivery board entries to include anchors.",
+    "Complete all contract lines, quality checklist entries, and delivery board tasks in docs."
+  ]
+}

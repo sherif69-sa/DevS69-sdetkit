@@ -1,0 +1,140 @@
+{
+  "name": "phase3-wrap-publication-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-phase3-wrap-publication-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "governance_scale_summary": "docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json",
+    "governance_scale_delivery_board": "docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md",
+    "phase3_wrap_publication_plan": "docs/roadmap/plans/phase3-wrap-publication-plan.json"
+  },
+  "checks": [
+    {
+      "check_id": "readme_command_lane",
+      "weight": 7,
+      "passed": false,
+      "evidence": "README phase3-wrap-publication-closeout command lane"
+    },
+    {
+      "check_id": "docs_index_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-90-big-upgrade-report.md + integrations-phase3-wrap-publication-closeout.md"
+    },
+    {
+      "check_id": "top10_strategy_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": " +  strategy chain"
+    },
+    {
+      "check_id": "governance_scale_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json"
+    },
+    {
+      "check_id": "governance_scale_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md"
+    },
+    {
+      "check_id": "governance_scale_quality_floor",
+      "weight": 13,
+      "passed": false,
+      "evidence": {
+        "governance_scale_score": 42,
+        "strict_pass": false,
+        "governance_scale_checks": 14
+      }
+    },
+    {
+      "check_id": "governance_scale_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_governance_scale": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": false,
+      "evidence": "#  \u2014 Phase-3 wrap publication closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": false,
+      "evidence": [
+        "## Required inputs ()"
+      ]
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for  phase-3 wrap publication execution and signoff.",
+        "The  lane references  outcomes, controls, and trust continuity signals.",
+        "Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs."
+      ]
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": false,
+      "evidence": [
+        "- [ ]  evidence brief committed",
+        "- [ ]  phase-3 wrap publication plan committed",
+        "- [ ]  narrative template upgrade ledger exported",
+        "- [ ]  storyline outcomes ledger exported",
+        "- [ ] Next-impact roadmap draft captured from  outcomes"
+      ]
+    },
+    {
+      "check_id": "evidence_plan_data_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "docs/roadmap/plans/phase3-wrap-publication-plan.json"
+    }
+  ],
+  "rollup": {
+    "governance_scale_activation_score": 42,
+    "governance_scale_checks": 14,
+    "governance_scale_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 42,
+    "passed_checks": 6,
+    "failed_checks": 8,
+    "critical_failures": [],
+    "strict_pass": false
+  },
+  "wins": [
+    "Governance scale delivery board integrity validated with 5 checklist items.",
+    " phase-3 wrap publication dataset is available for governance execution."
+  ],
+  "misses": [
+    " continuity baseline is below the floor (<85) or not strict-pass."
+  ],
+  "handoff_actions": [
+    "Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock."
+  ]
+}

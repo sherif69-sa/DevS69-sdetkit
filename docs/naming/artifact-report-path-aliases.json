@@ -1,0 +1,327 @@
+{
+  "alias_count": 64,
+  "aliases": [
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/hardening-pack-29/phase1-hardening-summary-29.json",
+      "professional_path": "docs/artifacts/hardening-pack-29/baseline-hardening-summary-29.json"
+    },
+    {
+      "action": "already_exists",
+      "legacy_path": "docs/artifacts/hardening-pack-29/phase1-hardening-summary-29.md",
+      "professional_path": "docs/artifacts/hardening-pack-29/baseline-hardening-summary-29.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase1-hardening-pack/phase1-hardening-stale-gaps.json",
+      "professional_path": "docs/artifacts/phase1-hardening-pack/baseline-hardening-stale-gaps.json"
+    },
+    {
+      "action": "already_exists",
+      "legacy_path": "docs/artifacts/phase1-hardening-sample-29.md",
+      "professional_path": "docs/artifacts/baseline-hardening-sample-29.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md",
+      "professional_path": "docs/artifacts/phase1-wrap-pack/baseline-wrap-release-readiness-backlog.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json",
+      "professional_path": "docs/artifacts/phase1-wrap-pack/baseline-wrap-summary.json"
+    },
+    {
+      "action": "already_exists",
+      "legacy_path": "docs/artifacts/phase1-wrap-sample-30.md",
+      "professional_path": "docs/artifacts/baseline-wrap-sample-30.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-hardening-closeout-pack/evidence/phase2-hardening-execution-summary.json",
+      "professional_path": "docs/artifacts/phase2-hardening-closeout-pack/evidence/release-readiness-hardening-execution-summary.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-brief.md",
+      "professional_path": "docs/artifacts/phase2-hardening-closeout-pack/release-readiness-hardening-brief.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json",
+      "professional_path": "docs/artifacts/phase2-hardening-closeout-pack/release-readiness-hardening-closeout-summary.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.md",
+      "professional_path": "docs/artifacts/phase2-hardening-closeout-pack/release-readiness-hardening-closeout-summary.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md",
+      "professional_path": "docs/artifacts/phase2-hardening-closeout-pack/release-readiness-hardening-delivery-board.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-execution-log.md",
+      "professional_path": "docs/artifacts/phase2-hardening-closeout-pack/release-readiness-hardening-execution-log.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-risk-ledger.csv",
+      "professional_path": "docs/artifacts/phase2-hardening-closeout-pack/release-readiness-hardening-risk-ledger.csv"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-scorecard.json",
+      "professional_path": "docs/artifacts/phase2-hardening-closeout-pack/release-readiness-hardening-scorecard.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-validation-commands.md",
+      "professional_path": "docs/artifacts/phase2-hardening-closeout-pack/release-readiness-hardening-validation-commands.md"
+    },
+    {
+      "action": "already_exists",
+      "legacy_path": "docs/artifacts/phase2-hotspot-baseline-2026-04-24.json",
+      "professional_path": "docs/artifacts/release-readiness-hotspot-baseline-2026-04-24.json"
+    },
+    {
+      "action": "already_exists",
+      "legacy_path": "docs/artifacts/phase2-hotspot-baseline-pre-extraction-2026-04-24.json",
+      "professional_path": "docs/artifacts/release-readiness-hotspot-baseline-pre-extraction-2026-04-24.json"
+    },
+    {
+      "action": "already_exists",
+      "legacy_path": "docs/artifacts/phase2-hotspot-delta-2026-04-24.json",
+      "professional_path": "docs/artifacts/release-readiness-hotspot-delta-2026-04-24.json"
+    },
+    {
+      "action": "already_exists",
+      "legacy_path": "docs/artifacts/phase2-hotspot-delta-2026-04-24.md",
+      "professional_path": "docs/artifacts/release-readiness-hotspot-delta-2026-04-24.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json",
+      "professional_path": "docs/artifacts/phase2-kickoff-pack/evidence/release-readiness-kickoff-execution-summary.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-baseline-snapshot.json",
+      "professional_path": "docs/artifacts/phase2-kickoff-pack/release-readiness-kickoff-baseline-snapshot.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md",
+      "professional_path": "docs/artifacts/phase2-kickoff-pack/release-readiness-kickoff-delivery-board.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
+      "professional_path": "docs/artifacts/phase2-kickoff-pack/release-readiness-kickoff-summary.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.md",
+      "professional_path": "docs/artifacts/phase2-kickoff-pack/release-readiness-kickoff-summary.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-validation-commands.md",
+      "professional_path": "docs/artifacts/phase2-kickoff-pack/release-readiness-kickoff-validation-commands.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-pack-31/phase2-kickoff-summary-31.json",
+      "professional_path": "docs/artifacts/phase2-pack-31/release-readiness-kickoff-summary-31.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-pack-31/phase2-kickoff-summary-31.md",
+      "professional_path": "docs/artifacts/phase2-pack-31/release-readiness-kickoff-summary-31.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence/phase2-wrap-handoff-execution-summary.json",
+      "professional_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence/release-readiness-wrap-handoff-execution-summary.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-brief.md",
+      "professional_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/release-readiness-wrap-handoff-brief.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json",
+      "professional_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/release-readiness-wrap-handoff-closeout-summary.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.md",
+      "professional_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/release-readiness-wrap-handoff-closeout-summary.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md",
+      "professional_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/release-readiness-wrap-handoff-delivery-board.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-execution-log.md",
+      "professional_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/release-readiness-wrap-handoff-execution-log.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-kpi-scorecard.json",
+      "professional_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/release-readiness-wrap-handoff-kpi-scorecard.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-risk-ledger.csv",
+      "professional_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/release-readiness-wrap-handoff-risk-ledger.csv"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-validation-commands.md",
+      "professional_path": "docs/artifacts/phase2-wrap-handoff-closeout-pack/release-readiness-wrap-handoff-validation-commands.md"
+    },
+    {
+      "action": "already_exists",
+      "legacy_path": "docs/artifacts/phase3-dependency-radar-2026-04-24.json",
+      "professional_path": "docs/artifacts/platform-readiness-dependency-radar-2026-04-24.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-brief.md",
+      "professional_path": "docs/artifacts/phase3-kickoff-closeout-pack/platform-readiness-kickoff-brief.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json",
+      "professional_path": "docs/artifacts/phase3-kickoff-closeout-pack/platform-readiness-kickoff-closeout-summary.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.md",
+      "professional_path": "docs/artifacts/phase3-kickoff-closeout-pack/platform-readiness-kickoff-closeout-summary.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md",
+      "professional_path": "docs/artifacts/phase3-kickoff-closeout-pack/platform-readiness-kickoff-delivery-board.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-execution-log.md",
+      "professional_path": "docs/artifacts/phase3-kickoff-closeout-pack/platform-readiness-kickoff-execution-log.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-kpi-scorecard.json",
+      "professional_path": "docs/artifacts/phase3-kickoff-closeout-pack/platform-readiness-kickoff-kpi-scorecard.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-trust-ledger.csv",
+      "professional_path": "docs/artifacts/phase3-kickoff-closeout-pack/platform-readiness-kickoff-trust-ledger.csv"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-validation-commands.md",
+      "professional_path": "docs/artifacts/phase3-kickoff-closeout-pack/platform-readiness-kickoff-validation-commands.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json",
+      "professional_path": "docs/artifacts/phase3-preplan-closeout-pack/platform-readiness-preplan-closeout-summary.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md",
+      "professional_path": "docs/artifacts/phase3-preplan-closeout-pack/platform-readiness-preplan-delivery-board.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-kpi-scorecard.json",
+      "professional_path": "docs/artifacts/phase3-preplan-closeout-pack/platform-readiness-preplan-kpi-scorecard.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-risk-ledger.csv",
+      "professional_path": "docs/artifacts/phase3-preplan-closeout-pack/platform-readiness-preplan-risk-ledger.csv"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/evidence/phase3-wrap-publication-execution-summary.json",
+      "professional_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/evidence/platform-readiness-wrap-publication-execution-summary.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json",
+      "professional_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/platform-readiness-wrap-publication-closeout-summary.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.md",
+      "professional_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/platform-readiness-wrap-publication-closeout-summary.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md",
+      "professional_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/platform-readiness-wrap-publication-delivery-board.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-evidence-brief.md",
+      "professional_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/platform-readiness-wrap-publication-evidence-brief.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-execution-log.md",
+      "professional_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/platform-readiness-wrap-publication-execution-log.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-narrative-kpi-scorecard.json",
+      "professional_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/platform-readiness-wrap-publication-narrative-kpi-scorecard.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-narrative-template-upgrade-ledger.json",
+      "professional_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/platform-readiness-wrap-publication-narrative-template-upgrade-ledger.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-plan.md",
+      "professional_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/platform-readiness-wrap-publication-plan.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-storyline-outcomes-ledger.json",
+      "professional_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/platform-readiness-wrap-publication-storyline-outcomes-ledger.json"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-validation-commands.md",
+      "professional_path": "docs/artifacts/phase3-wrap-publication-closeout-pack/platform-readiness-wrap-publication-validation-commands.md"
+    },
+    {
+      "action": "copied",
+      "legacy_path": "docs/artifacts/wrap-pack-30/phase1-wrap-summary-30.json",
+      "professional_path": "docs/artifacts/wrap-pack-30/baseline-wrap-summary-30.json"
+    },
+    {
+      "action": "already_exists",
+      "legacy_path": "docs/artifacts/wrap-pack-30/phase1-wrap-summary-30.md",
+      "professional_path": "docs/artifacts/wrap-pack-30/baseline-wrap-summary-30.md"
+    },
+    {
+      "action": "already_exists",
+      "legacy_path": "docs/artifacts/wrap-pack-30/phase2-backlog-30.md",
+      "professional_path": "docs/artifacts/wrap-pack-30/release-readiness-backlog-30.md"
+    }
+  ],
+  "policy": "Professional artifact/report paths are added while legacy paths remain available for historical evidence and compatibility.",
+  "schema_version": "sdetkit.naming.artifact-report-path-aliases.v1"
+}

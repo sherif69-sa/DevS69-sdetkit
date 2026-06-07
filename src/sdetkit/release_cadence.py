@@ -7,8 +7,12 @@ _CFG = {
     "page_template": _DEFAULT_PAGE_TEMPLATE,
     "name": "release-cadence",
     "page_path": "docs/integrations-release-cadence.md",
-    "required_inputs": ["docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json"],
-    "required_boards": ["docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md"],
+    "required_inputs": [
+        "docs/artifacts/phase2-kickoff-pack/release-readiness-kickoff-summary.json"
+    ],
+    "required_boards": [
+        "docs/artifacts/phase2-kickoff-pack/release-readiness-kickoff-delivery-board.md"
+    ],
     "summary_json": "release-cadence-summary.json",
     "summary_md": "release-cadence-summary.md",
     "pack_files": [
