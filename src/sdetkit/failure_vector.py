@@ -2,13 +2,17 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
 SCHEMA_VERSION = "sdetkit.failure_vector.v1"
+BUNDLE_SCHEMA_VERSION = "sdetkit.failure_vector.bundle.v1"
 
 PYTEST_NODE_RE = re.compile(r"FAILED\s+(?P<node>[^\s]+::[^\s]+)")
 PY_FILE_RE = re.compile(r"(?P<path>(?:src|tests)/[A-Za-z0-9_./-]+\.py)")
+MYPY_ERROR_RE = re.compile(r"(?P<path>(?:src|tests)/[A-Za-z0-9_./-]+\.py):\d+:\s+error:")
 RUFF_RULE_RE = re.compile(r"\b(?P<rule>[A-Z]\d{3})\b")
 EXIT_CODE_RE = re.compile(r"Process completed with exit code (?P<code>\d+)")
 
@@ -44,13 +48,14 @@ def extract_failure_vector(
     environment: str = "unknown",
 ) -> FailureVector:
     lines = [line.rstrip() for line in log_text.splitlines()]
-    first_line = _first_failing_line(lines)
+    failure_index = _first_failing_line_index(lines)
+    first_line = _line_at(lines, failure_index)
     failure_class = _classify_failure(log_text, first_line)
     affected_files = _affected_files(log_text, first_line)
 
     return FailureVector(
         check=check,
-        command="unknown",
+        command=_extract_command(lines, failure_index),
         exit_code=_extract_exit_code(log_text),
         failure_class=failure_class,
         risk=_risk_for_class(failure_class),
@@ -65,24 +70,78 @@ def extract_failure_vector(
     )
 
 
+def build_failure_vector_bundle(
+    log_paths: Sequence[str | Path],
+    *,
+    environment: str = "unknown",
+) -> dict[str, object]:
+    vectors = []
+    for raw_path in log_paths:
+        path = Path(raw_path)
+        vector = extract_failure_vector(
+            path.read_text(encoding="utf-8", errors="ignore"),
+            check=path.parent.name if path.parent.name else path.stem,
+            log_url=path.as_posix(),
+            environment=environment,
+        )
+        vectors.append(vector.to_dict())
+
+    by_class = Counter(str(vector["failure_class"]) for vector in vectors)
+    by_risk = Counter(str(vector["risk"]) for vector in vectors)
+
+    return {
+        "schema_version": BUNDLE_SCHEMA_VERSION,
+        "vector_schema_version": SCHEMA_VERSION,
+        "environment": environment,
+        "failure_vector_count": len(vectors),
+        "summary": {
+            "by_failure_class": dict(sorted(by_class.items())),
+            "by_risk": dict(sorted(by_risk.items())),
+            "safe_fix_candidate_count": sum(
+                1 for vector in vectors if bool(vector["safe_fix_candidate"])
+            ),
+            "review_first_count": sum(
+                1 for vector in vectors if not bool(vector["safe_fix_candidate"])
+            ),
+        },
+        "failure_vectors": vectors,
+    }
+
+
 def write_failure_vector(vector: FailureVector, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(vector.to_dict(), indent=2, sort_keys=True)
     path.write_text(payload + "\n", encoding="utf-8")
 
 
+def write_failure_vector_bundle(
+    log_paths: Sequence[str | Path],
+    path: Path,
+    *,
+    environment: str = "unknown",
+) -> dict[str, object]:
+    payload = build_failure_vector_bundle(log_paths, environment=environment)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return payload
+
+
 def render_failure_vector_report(vector: FailureVector) -> str:
     safe = "yes" if vector.safe_fix_candidate else "no"
     local_repro = vector.local_repro_command or "none"
     first_line = vector.first_failing_line or "unknown"
+    affected = ", ".join(vector.affected_files) if vector.affected_files else "none"
     return "\n".join(
         [
             "# Failure Vector",
             "",
             f"- check: `{vector.check}`",
+            f"- command: `{vector.command}`",
             f"- class: `{vector.failure_class}`",
             f"- risk: `{vector.risk}`",
+            f"- scope: `{vector.scope}`",
             f"- safe_fix_candidate: `{safe}`",
+            f"- affected_files: `{affected}`",
             f"- first_failing_line: `{first_line}`",
             f"- local_repro_command: `{local_repro}`",
             "",
@@ -90,30 +149,98 @@ def render_failure_vector_report(vector: FailureVector) -> str:
     )
 
 
+def render_failure_vector_bundle_report(payload: dict[str, object]) -> str:
+    summary = payload.get("summary", {})
+    summary = summary if isinstance(summary, dict) else {}
+    by_class = summary.get("by_failure_class", {})
+    by_class = by_class if isinstance(by_class, dict) else {}
+
+    lines = [
+        "# Failure Vector Bundle",
+        "",
+        f"- schema_version: `{payload.get('schema_version', 'unknown')}`",
+        f"- failure_vector_count: `{payload.get('failure_vector_count', 0)}`",
+        f"- safe_fix_candidate_count: `{summary.get('safe_fix_candidate_count', 0)}`",
+        f"- review_first_count: `{summary.get('review_first_count', 0)}`",
+        "",
+        "## By failure class",
+        "",
+    ]
+
+    if by_class:
+        lines.extend(f"- `{name}`: `{count}`" for name, count in sorted(by_class.items()))
+    else:
+        lines.append("- none")
+
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _line_at(lines: Sequence[str], index: int) -> str:
+    if index < 0 or index >= len(lines):
+        return ""
+    return lines[index].strip()
+
+
 def _first_failing_line(lines: list[str]) -> str:
-    needles = (
-        "FAILED ",
-        "ERROR ",
-        "AssertionError",
-        "Traceback",
-        "ruff format",
-        "ruff check",
-        "mypy",
-        "Merge conflict",
-        "CONFLICT ",
-        "npm ERR!",
-        "Process completed with exit code",
-    )
-    for line in lines:
+    return _line_at(lines, _first_failing_line_index(lines))
+
+
+def _first_failing_line_index(lines: Sequence[str]) -> int:
+    generic_index = -1
+
+    for index, line in enumerate(lines):
         stripped = line.strip()
-        if stripped and any(needle in stripped for needle in needles):
+        lowered = stripped.lower()
+
+        if not stripped:
+            continue
+
+        if stripped.startswith("FAILED "):
+            return index
+        if MYPY_ERROR_RE.search(stripped):
+            return index
+        if "would be reformatted" in lowered:
+            return index
+        if "ruff format" in lowered and "failed" in lowered:
+            return index
+        if RUFF_RULE_RE.search(stripped) and "-->" in "\n".join(lines[index : index + 4]):
+            return index
+        if stripped.startswith(("ERROR ", "ERROR:")):
+            return index
+        if stripped.startswith("Traceback"):
+            return index
+        if "merge conflict" in lowered or stripped.startswith("CONFLICT "):
+            return index
+        if "npm err!" in lowered:
+            return index
+        if "process completed with exit code" in lowered:
+            generic_index = index
+
+    return generic_index
+
+
+def _extract_command(lines: Sequence[str], failure_index: int) -> str:
+    upper_bound = failure_index if failure_index >= 0 else len(lines)
+
+    for line in reversed(lines[:upper_bound]):
+        stripped = line.strip()
+
+        if stripped.startswith("Run "):
+            return stripped.removeprefix("Run ").strip()
+        if "##[group]Run " in stripped:
+            return stripped.split("Run ", 1)[1].strip()
+        if stripped.startswith("$ "):
+            return stripped[2:].strip()
+        if "python -m " in stripped or "pytest" in stripped or "mypy" in stripped:
             return stripped
-    return ""
+
+    return "unknown"
 
 
 def _classify_failure(log_text: str, first_line: str) -> str:
     lowered = f"{first_line}\n{log_text}".lower()
-    if "ruff format" in lowered or "would reformat" in lowered:
+    if "ruff format" in lowered or "would reformat" in lowered or "would be reformatted" in lowered:
         return "formatter_only"
     if "ruff check" in lowered or RUFF_RULE_RE.search(first_line):
         return "lint"
