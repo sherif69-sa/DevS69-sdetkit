@@ -3,10 +3,19 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-
-from sdetkit.failure_vector import FailureVector
+from typing import Protocol
 
 SCHEMA_VERSION = "sdetkit.safety_gate.v1"
+
+
+class FailureVectorLike(Protocol):
+    failure_class: str
+    risk: str
+    scope: str
+    safe_fix_candidate: bool
+    affected_files: tuple[str, ...]
+    local_repro_command: str | None
+
 
 SAFE_FIX_CLASSES = frozenset({"formatter_only", "lint"})
 
@@ -39,7 +48,7 @@ class SafetyGateDecision:
         return payload
 
 
-def evaluate_failure_vector(vector: FailureVector) -> SafetyGateDecision:
+def evaluate_failure_vector(vector: FailureVectorLike) -> SafetyGateDecision:
     safe_fix_allowed = _safe_fix_allowed(vector)
 
     return SafetyGateDecision(
@@ -87,7 +96,7 @@ def render_safety_gate_decision_report(decision: SafetyGateDecision) -> str:
     )
 
 
-def _safe_fix_allowed(vector: FailureVector) -> bool:
+def _safe_fix_allowed(vector: FailureVectorLike) -> bool:
     return (
         vector.safe_fix_candidate
         and vector.failure_class in SAFE_FIX_CLASSES
@@ -97,7 +106,7 @@ def _safe_fix_allowed(vector: FailureVector) -> bool:
     )
 
 
-def _decision_reason(vector: FailureVector, safe_fix_allowed: bool) -> str:
+def _decision_reason(vector: FailureVectorLike, safe_fix_allowed: bool) -> str:
     if safe_fix_allowed:
         return "failure vector is low-risk, PR-owned, and mechanically eligible"
     if not vector.safe_fix_candidate:
@@ -113,7 +122,7 @@ def _decision_reason(vector: FailureVector, safe_fix_allowed: bool) -> str:
     return "failure vector does not satisfy SafetyGate eligibility"
 
 
-def _proof_commands(vector: FailureVector) -> tuple[str, ...]:
+def _proof_commands(vector: FailureVectorLike) -> tuple[str, ...]:
     commands: list[str] = []
     if vector.local_repro_command:
         commands.append(vector.local_repro_command)

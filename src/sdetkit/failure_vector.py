@@ -127,10 +127,17 @@ def write_failure_vector_bundle(
 
 
 def render_failure_vector_report(vector: FailureVector) -> str:
+    from sdetkit.safety_gate import evaluate_failure_vector
+
+    decision = evaluate_failure_vector(vector)
     safe = "yes" if vector.safe_fix_candidate else "no"
+    allowed = "yes" if decision.safe_fix_allowed else "no"
+    review_first = "yes" if decision.review_first else "no"
     local_repro = vector.local_repro_command or "none"
     first_line = vector.first_failing_line or "unknown"
     affected = ", ".join(vector.affected_files) if vector.affected_files else "none"
+    allowed_files = ", ".join(decision.allowed_files) if decision.allowed_files else "none"
+    proof_commands = ", ".join(decision.proof_commands) if decision.proof_commands else "none"
     return "\n".join(
         [
             "# Failure Vector",
@@ -144,6 +151,17 @@ def render_failure_vector_report(vector: FailureVector) -> str:
             f"- affected_files: `{affected}`",
             f"- first_failing_line: `{first_line}`",
             f"- local_repro_command: `{local_repro}`",
+            "",
+            "## SafetyGate Decision",
+            "",
+            f"- safe_fix_allowed: `{allowed}`",
+            f"- review_first: `{review_first}`",
+            f"- reason: `{decision.reason}`",
+            f"- allowed_files: `{allowed_files}`",
+            f"- proof_commands: `{proof_commands}`",
+            "- automation_allowed: `false`",
+            "- patch_application_allowed: `false`",
+            "- merge_authorized: `false`",
             "",
         ]
     )
