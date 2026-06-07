@@ -2385,3 +2385,83 @@ def test_action_report_security_review_signal_diagnoses_stale_only_findings() ->
     assert "blocked only while stale review comments remain unresolved" in body
     assert "refresh code scanning or resolve stale review comments" in body
     assert "wait_for_code_scanning_refresh" in body
+
+
+def test_write_comment_body_surfaces_failure_bundle_safety_summary(tmp_path: Path) -> None:
+    action_path = _write_json(
+        tmp_path / "action-report.json",
+        {
+            "status": "safe_fix_available",
+            "primary_blocker": {},
+            "automation": {
+                "attempted": False,
+                "allowed": True,
+                "reason": "safe fix planning is allowed, but not applied by this report",
+            },
+            "recommended_actions": ["Run the listed proof before any merge decision."],
+            "proof_commands": ["python -m pre_commit run -a"],
+            "safe_fix_available": True,
+        },
+    )
+    intelligence_path = _write_json(
+        tmp_path / "check-intelligence.json",
+        {
+            "checks_seen": 3,
+            "failed_checks": [
+                {
+                    "name": "ruff",
+                    "safe_to_auto_fix": True,
+                    "review_first": False,
+                    "first_failure": {
+                        "line": "I001 Import block is un-sorted or un-formatted",
+                        "line_number": 12,
+                        "tool": "ruff",
+                        "kind": "lint",
+                    },
+                    "diagnosis": {
+                        "owner_files": ["tests/test_widget.py"],
+                    },
+                }
+            ],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+    )
+    out = tmp_path / "comment.md"
+    bundle_out = tmp_path / "failure-bundle"
+
+    result = report.write_comment_body(
+        action_report_path=action_path,
+        check_intelligence_path=intelligence_path,
+        out=out,
+        failure_bundle_out_dir=bundle_out,
+        pr_number=1606,
+        head_sha="head-sha",
+        base_sha="base-sha",
+    )
+
+    failure_bundle = result["failure_bundle"]
+    safety_summary = failure_bundle["safety_summary"]
+
+    assert failure_bundle["out_dir"] == bundle_out.as_posix()
+    assert failure_bundle["report_path"] == (bundle_out / "failure-bundle.md").as_posix()
+    assert failure_bundle["files"] == [
+        (bundle_out / "manifest.json").as_posix(),
+        (bundle_out / "failure-bundle.json").as_posix(),
+        (bundle_out / "failure-bundle.md").as_posix(),
+    ]
+    assert safety_summary == {
+        "review_first": False,
+        "safe_fix_allowed": True,
+        "reporting_only": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+    markdown = (bundle_out / "failure-bundle.md").read_text(encoding="utf-8")
+    assert "# Current-head failure evidence bundle" in markdown
+    assert "- Safe fix allowed: `true`" in markdown
+    assert "- Review first: `false`" in markdown
