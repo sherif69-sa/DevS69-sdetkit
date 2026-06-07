@@ -1,1 +1,3 @@
-# Ecosystem priorities execution log
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`ecosystem-priorities-execution-log.md`](../../artifacts/ecosystem-priorities-completion-pack/ecosystem-priorities-execution-log.md).

@@ -2,7 +2,7 @@
 
 Lane closes with a major upgrade that folds Lane growth campaign outcomes into docs/template upgrades and community touchpoint execution.
 
-## Why Integration Feedback Closeout matters
+## Why Integration Feedback Completion matters
 
 - Turns Lane growth campaign outcomes into deterministic integration feedback loops across docs, templates, and community operations.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -10,17 +10,17 @@ Lane closes with a major upgrade that folds Lane growth campaign outcomes into d
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/growth-campaign-closeout-pack/growth-campaign-closeout-summary.json`
-- `docs/artifacts/growth-campaign-closeout-pack/growth-campaign-delivery-board.md`
+- `docs/artifacts/growth-campaign-completion-pack/growth-campaign-completion-summary.json`
+- `docs/artifacts/growth-campaign-completion-pack/growth-campaign-delivery-board.md`
 - `docs/roadmap/plans/integration-feedback-plan.json`
 
 ## Command lane
 
 ```bash
-python -m sdetkit integration-feedback-closeout --format json --strict
-python -m sdetkit integration-feedback-closeout --emit-pack-dir docs/artifacts/integration-feedback-closeout-pack --format json --strict
-python -m sdetkit integration-feedback-closeout --execute --evidence-dir docs/artifacts/integration-feedback-closeout-pack/evidence --format json --strict
-python scripts/check_integration_feedback_closeout_contract.py
+python -m sdetkit integration-feedback-completion --format json --strict
+python -m sdetkit integration-feedback-completion --emit-pack-dir docs/artifacts/integration-feedback-completion-pack --format json --strict
+python -m sdetkit integration-feedback-completion --execute --evidence-dir docs/artifacts/integration-feedback-completion-pack/evidence --format json --strict
+python scripts/check_integration_feedback_completion_contract.py
 ```
 
 ## Integration feedback contract

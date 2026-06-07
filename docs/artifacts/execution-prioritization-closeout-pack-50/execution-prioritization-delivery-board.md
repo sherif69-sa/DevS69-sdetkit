@@ -1,7 +1,3 @@
-#  Delivery Board
+# Moved: professional documentation
 
-- [ ]  execution prioritization brief committed
-- [ ]  priorities reviewed with owner + backup
-- [ ]  risk register exported
-- [ ]  KPI scorecard snapshot exported
-- [ ]  release priorities drafted from  learnings
+This compatibility page preserves the legacy public path. The professional page is now [`execution-prioritization-delivery-board.md`](../../artifacts/execution-prioritization-completion-pack-50/execution-prioritization-delivery-board.md).

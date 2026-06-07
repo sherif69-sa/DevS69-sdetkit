@@ -2,16 +2,16 @@
 
 ## What shipped
 
-- Added Cycle 36 closeout command: `python -m sdetkit distribution-closeout`.
+- Added Cycle 36 completion command: `python -m sdetkit distribution-completion`.
 - Added strict continuity checks that require Cycle 35 strict-pass and board integrity.
 - Added Cycle 36 artifact outputs for distribution message kit, launch plan, experiment backlog, and validation commands.
 
 ## Validation
 
 ```bash
-python -m pytest -q tests/test_distribution_closeout.py tests/test_cli_help_lists_subcommands.py
-python scripts/check_distribution_closeout_contract.py --skip-evidence
-python -m sdetkit distribution-closeout --format json --strict
+python -m pytest -q tests/test_distribution_completion.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_distribution_completion_contract.py --skip-evidence
+python -m sdetkit distribution-completion --format json --strict
 ```
 
 ## Cycle 37 handoff

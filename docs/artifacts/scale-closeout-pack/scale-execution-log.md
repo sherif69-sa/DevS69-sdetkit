@@ -1,3 +1,3 @@
-# Scale execution log
+# Moved: professional documentation
 
-- [ ] 2026-03-12: Record misses, wins, and  expansion priorities.
+This compatibility page preserves the legacy public path. The professional page is now [`scale-execution-log.md`](../../artifacts/scale-completion-pack/scale-execution-log.md).

@@ -1,1 +1,3 @@
-#  Phase-2 hardening brief
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`release-readiness-hardening-brief.md`](../../artifacts/release-readiness-hardening-completion-pack/release-readiness-hardening-brief.md).

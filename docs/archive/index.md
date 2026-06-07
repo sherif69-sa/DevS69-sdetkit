@@ -14,7 +14,7 @@ If you're new to SDETKit, start with:
 ## What lives in this archive
 
 - Name-by-name upgrade reports (`name-*-*-report.md`)
-- Transition-era integration and closeout docs (`integrations-*-closeout.md`, phase handoff docs, and similar)
+- Transition-era integration and completion docs (`integrations-*-completion.md`, phase handoff docs, and similar)
 - Chronological roadmap reports under [`roadmap/reports/`](../roadmap.md)
 
 ## Archive map

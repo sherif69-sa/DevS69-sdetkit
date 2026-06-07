@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added `cycle30-phase1-wrap` command to score Baseline readiness closeout and lock a deterministic Release readiness backlog.
+- Added `cycle30-phase1-wrap` command to score Baseline readiness completion and lock a deterministic Release readiness backlog.
 - Added Cycle 30 docs contract validation and evidence lane execution mode.
 - Added Cycle 30 handoff pack generation: summary, backlog snapshot, handoff actions, and validation commands.
 - Added dedicated Cycle 30 contract-check script and automated tests.

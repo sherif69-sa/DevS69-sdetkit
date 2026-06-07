@@ -2,7 +2,7 @@
 
 This is the **live operating workflow** for running SDETKit on a real repository.
 
-No educational naming, no planning theater: this page is for execution.
+No operator guidanceal naming, no planning theater: this page is for execution.
 
 ## Mission
 

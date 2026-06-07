@@ -218,7 +218,7 @@ python -m sdetkit adaptive learn record build/adaptive-diagnosis.json \
   --fix-accepted
 ```
 
-Use `--proof-failed`, `--fix-rejected`, or `--false-positive` when the recommendation did not hold. The learning summary applies deterministic promotion/demotion rules: confirmed proof promotes confidence, false positives demote confidence, repeated recurrence increases risk, and thin evidence lowers confidence until better signals are available.
+Use `--proof-failed`, `--fix-rejected`, or `--false-positive` when the recommendation did not hold. The learning summary applies deterministic promotion/exampletion rules: confirmed proof promotes confidence, false positives examplete confidence, repeated recurrence increases risk, and thin evidence lowers confidence until better signals are available.
 
 ### Calibration-aware candidate ranking
 
@@ -232,7 +232,7 @@ PYTHONPATH=src python -m sdetkit.adaptive_diagnosis \
   --out build/adaptive-diagnosis.json
 ```
 
-When the summary contains `top_recurring_scenarios[].calibration`, promoted scenarios receive a ranking boost, false positives are demoted, recurrence can raise risk priority, and thin-evidence scenarios are kept lower until better signals exist. Unknown-review evidence includes a `candidate_calibration=` line whenever calibration affected a visible candidate.
+When the summary contains `top_recurring_scenarios[].calibration`, promoted scenarios receive a ranking boost, false positives are exampleted, recurrence can raise risk priority, and thin-evidence scenarios are kept lower until better signals exist. Unknown-review evidence includes a `candidate_calibration=` line whenever calibration affected a visible candidate.
 
 ## Unified failure intelligence bundle
 

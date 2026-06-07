@@ -1,13 +1,3 @@
-# Name 30 sample output (illustrative)
+# Moved: professional documentation
 
-- Activation score: **100**
-- Passed checks: **11**
-- Failed checks: **0**
-- Critical failures: **none**
-
-## Closeout rollup
-
-- Name 27 score: `95`
-- Name 28 score: `93`
-- Name 29 score: `97`
-- Average score: `95.0`
+This compatibility page preserves the legacy public path. The professional page is now [`baseline-wrap-sample-30.md`](../artifacts/baseline-wrap-sample-30.md).

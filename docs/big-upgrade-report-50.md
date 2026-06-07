@@ -6,7 +6,7 @@ Close Cycle 50 with a high-confidence execution-prioritization completion report
 
 ## Big upgrades delivered
 
-- Added a dedicated Cycle 50 CLI lane: `cycle50-execution-prioritization-closeout`.
+- Added a dedicated Cycle 50 CLI lane: `cycle50-execution-prioritization-completion`.
 - Added strict docs contract checks and delivery board lock gates.
 - Added artifact-pack emission for execution brief, risk register, KPI scorecard, and execution logs.
 - Added deterministic execution evidence capture for repeatable completion report verification.
@@ -14,10 +14,10 @@ Close Cycle 50 with a high-confidence execution-prioritization completion report
 ## Commands
 
 ```bash
-python -m sdetkit cycle50-execution-prioritization-closeout --format json --strict
-python -m sdetkit cycle50-execution-prioritization-closeout --emit-pack-dir docs/artifacts/cycle50-execution-prioritization-closeout-pack --format json --strict
-python -m sdetkit cycle50-execution-prioritization-closeout --execute --evidence-dir docs/artifacts/cycle50-execution-prioritization-closeout-pack/evidence --format json --strict
-python scripts/check_execution_prioritization_closeout_contract_50.py
+python -m sdetkit cycle50-execution-prioritization-completion --format json --strict
+python -m sdetkit cycle50-execution-prioritization-completion --emit-pack-dir docs/artifacts/cycle50-execution-prioritization-completion-pack --format json --strict
+python -m sdetkit cycle50-execution-prioritization-completion --execute --evidence-dir docs/artifacts/cycle50-execution-prioritization-completion-pack/evidence --format json --strict
+python scripts/check_execution_prioritization_completion_contract_50.py
 ```
 
 ## Outcome

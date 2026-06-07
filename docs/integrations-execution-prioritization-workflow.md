@@ -10,16 +10,16 @@ Lane closes with a major execution-prioritization upgrade that converts Lane wee
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/cycle49-weekly-review-closeout-pack/cycle49-weekly-review-closeout-summary.json`
-- `docs/artifacts/cycle49-weekly-review-closeout-pack/weekly-review-delivery-board.md`
+- `docs/artifacts/cycle49-weekly-review-completion-pack/cycle49-weekly-review-completion-summary.json`
+- `docs/artifacts/cycle49-weekly-review-completion-pack/weekly-review-delivery-board.md`
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit execution-prioritization-closeout --format json --strict
-python -m sdetkit execution-prioritization-closeout --emit-pack-dir docs/artifacts/execution-prioritization-closeout-pack --format json --strict
-python -m sdetkit execution-prioritization-closeout --execute --evidence-dir docs/artifacts/execution-prioritization-closeout-pack/evidence --format json --strict
-python scripts/check_execution_prioritization_closeout_contract.py
+python -m sdetkit execution-prioritization-completion --format json --strict
+python -m sdetkit execution-prioritization-completion --emit-pack-dir docs/artifacts/execution-prioritization-completion-pack --format json --strict
+python -m sdetkit execution-prioritization-completion --execute --evidence-dir docs/artifacts/execution-prioritization-completion-pack/evidence --format json --strict
+python scripts/check_execution_prioritization_completion_contract.py
 ```
 
 ## Execution prioritization completion report contract

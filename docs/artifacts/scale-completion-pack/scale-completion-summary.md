@@ -1,0 +1,13 @@
+Scale completion summary
+- Activation score: 51
+- Passed checks: 6
+- Failed checks: 8
+- Critical failures: []
+-  activation score: `98.0`
+-  checks evaluated: `1`
+-  delivery board checklist items: `5`
+- Wins:
+  -  continuity is strict-pass with activation score=98.0.
+- Misses:
+  -  delivery board integrity is incomplete (needs >=5 items and /44 anchors).
+  - Scale contract, quality checklist, or delivery board entries are missing.

@@ -2,7 +2,7 @@
 
 Lane closes with a major upgrade that converts Lane governance scale outcomes into a deterministic platform-readiness wrap and publication operating lane.
 
-## Why Phase3 Wrap Publication Closeout matters
+## Why Phase3 Wrap Publication Completion matters
 
 - Converts Lane governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -10,8 +10,8 @@ Lane closes with a major upgrade that converts Lane governance scale outcomes in
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json`
-- `docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md`
+- `docs/artifacts/governance-scale-completion-pack/governance-scale-completion-summary.json`
+- `docs/artifacts/governance-scale-completion-pack/governance-scale-delivery-board.md`
 - `docs/roadmap/plans/platform-readiness-wrap-publication-plan.json`
 
 ## Command lane
@@ -20,7 +20,7 @@ Lane closes with a major upgrade that converts Lane governance scale outcomes in
 python -m sdetkit platform-readiness-wrap-publication-completion-report --format json --strict
 python -m sdetkit platform-readiness-wrap-publication-completion-report --emit-pack-dir docs/artifacts/platform-readiness-wrap-publication-completion-report-pack --format json --strict
 python -m sdetkit platform-readiness-wrap-publication-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-wrap-publication-completion-report-pack/evidence --format json --strict
-python scripts/check_phase3_wrap_publication_closeout_contract.py
+python scripts/check_phase3_wrap_publication_completion_contract.py
 ```
 
 ## platform readiness wrap publication contract

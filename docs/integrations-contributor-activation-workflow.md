@@ -10,16 +10,16 @@ Lane closes with a major contributor activation upgrade that turns Lane docs-loo
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json`
-- `docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md`
+- `docs/artifacts/docs-loop-completion-pack/docs-loop-completion-summary.json`
+- `docs/artifacts/docs-loop-completion-pack/docs-loop-delivery-board.md`
 
-## Contributor Activation Closeout command lane
+## Contributor Activation Completion command lane
 
 ```bash
-python -m sdetkit contributor-activation-closeout --format json --strict
-python -m sdetkit contributor-activation-closeout --emit-pack-dir docs/artifacts/contributor-activation-closeout-pack --format json --strict
-python -m sdetkit contributor-activation-closeout --execute --evidence-dir docs/artifacts/contributor-activation-closeout-pack/evidence --format json --strict
-python scripts/check_contributor_activation_closeout_contract.py
+python -m sdetkit contributor-activation-completion --format json --strict
+python -m sdetkit contributor-activation-completion --emit-pack-dir docs/artifacts/contributor-activation-completion-pack --format json --strict
+python -m sdetkit contributor-activation-completion --execute --evidence-dir docs/artifacts/contributor-activation-completion-pack/evidence --format json --strict
+python scripts/check_contributor_activation_completion_contract.py
 ```
 
 ## Contributor activation contract

@@ -101,7 +101,7 @@ The current slice is intentionally limited to documents that serve an active rea
 - operator evidence material that explains diagnostic surfaces and proof artifacts
 - current reference material that defines supported contracts, compatibility, CI status, and integration packs
 
-The slice is not historical reports, dated investor/audit material, old upgrade closeouts, one-off execution plans, or broad archive cleanup. Those documents may still be useful, but they need a separate archive strategy rather than being mixed into the primary nav.
+The slice is not historical reports, dated investor/audit material, old upgrade completions, one-off execution plans, or broad archive cleanup. Those documents may still be useful, but they need a separate archive strategy rather than being mixed into the primary nav.
 
 ### Added first-proof discoverability
 

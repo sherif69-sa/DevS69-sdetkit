@@ -81,4 +81,4 @@ python -m sdetkit adaptive learn record build/adaptive-diagnosis.json \
   --fix-accepted
 ```
 
-Use `--false-positive` to demote a scenario when an operator confirms the diagnosis was wrong. The summarize command exposes calibration actions (`promote`, `demote`, `increase_risk`, `lower_confidence`) per scenario and as a `calibration_summary` rollup.
+Use `--false-positive` to examplete a scenario when an operator confirms the diagnosis was wrong. The summarize command exposes calibration actions (`promote`, `examplete`, `increase_risk`, `lower_confidence`) per scenario and as a `calibration_summary` rollup.

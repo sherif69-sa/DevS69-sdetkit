@@ -19,7 +19,7 @@ Lane closes with a major platform readiness preplan upgrade that turns Lane hard
 python -m sdetkit platform-readiness-preplan-completion-report --format json --strict
 python -m sdetkit platform-readiness-preplan-completion-report --emit-pack-dir docs/artifacts/platform-readiness-preplan-completion-report-pack --format json --strict
 python -m sdetkit platform-readiness-preplan-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-preplan-completion-report-pack/evidence --format json --strict
-python scripts/check_phase3_preplan_closeout_contract.py
+python scripts/check_phase3_preplan_completion_contract.py
 ```
 
 ## platform readiness preplan contract

@@ -10,15 +10,15 @@ Avoid new names containing:
 
 - `phase1`, `phase2`, `phase3`, `phase4`, `phase5`, `phase6`
 - `execute`
-- `closeout`
+- `completion`
 - `completion-signal`
 - `deprecation-plan`
 - `follow-up`
-- `gate-phase2`
-- `lesson`
-- `tutorial`
-- `education`
-- `demo`
+- `release-readiness-gate`
+- `learning note`
+- `guide`
+- `operator guidance`
+- `example`
 - numbered “big upgrade” / “ultra upgrade” labels for active surfaces
 
 Existing legacy names may remain when they are public compatibility surfaces, generated artifact names, historical reports, or references required by existing contracts.
@@ -27,18 +27,18 @@ Existing legacy names may remain when they are public compatibility surfaces, ge
 
 | Legacy wording | Preferred wording |
 | --- | --- |
-| phase 1 / phase1 | operational readiness |
-| phase 2 / phase2 | workflow readiness |
-| phase 3 / phase3 | quality governance |
-| phase 4 / phase4 | governance contract |
-| phase 5 / phase5 | ecosystem contract |
-| phase 6 / phase6 | metrics contract |
-| closeout | completion, evidence pack, delivery summary, release evidence |
-| demo | product proof, example workflow, sample output |
+| baseline readiness / phase1 | operational readiness |
+| release readiness / phase2 | workflow readiness |
+| platform readiness / phase3 | quality governance |
+| operational readiness / phase4 | governance contract |
+| adoption readiness / phase5 | ecosystem contract |
+| scale readiness / phase6 | metrics contract |
+| completion | completion, evidence pack, delivery summary, release evidence |
+| example | product proof, example workflow, sample output |
 | follow-up | follow-up, handoff, remediation plan |
 | completion-signal | readiness signal |
 | deprecation-plan | migration plan |
-| gate-phase2 | readiness gate |
+| release-readiness-gate | readiness gate |
 | big upgrade report | upgrade assessment report |
 | ultra upgrade report | implementation report |
 
@@ -68,8 +68,8 @@ These are safer because they can improve visible professionalism without breakin
 
 - docs H1 headings that say `Lane — ...`
 - docs H1 headings that say `Phase-1`, `Phase-2`, or similar
-- docs H1 headings that say `Demo asset`
-- front-door references to `closeout` where `completion`, `evidence`, or `delivery summary` is clearer
+- docs H1 headings that say `Example asset`
+- front-door references to `completion` where `completion`, `evidence`, or `delivery summary` is clearer
 - docs-map labels that expose legacy terms
 
 ## Non-goals for the first PR
@@ -86,7 +86,7 @@ The public Makefile surface now prefers professional names for baseline, operati
 release-readiness, platform-readiness, adoption-readiness, and scale-readiness lanes.
 
 Compatibility aliases remain available for transition-era `phase1`, `phase2`, `phase3`,
-`phase5`, `phase6`, `phase-current`, `execute`, `completion-signal`, `follow-up`, and
+`phase5`, `phase6`, `readiness-current`, `execute`, `completion-signal`, `follow-up`, and
 `deprecation-plan` names where removal would break existing users or historical automation.
 
 Current sweep policy:
@@ -95,7 +95,7 @@ Current sweep policy:
 - keep compatibility aliases tested
 - do not rewrite generated evidence for line count
 - do not change schema identifiers without a migration contract
-- do not rename historical closeout reports as part of public command sweeps
+- do not rename historical completion reports as part of public command sweeps
 
 ## Execution docs terminology progress
 

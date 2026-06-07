@@ -10,16 +10,16 @@ Lane closes with a major upgrade that turns Lane distribution outcomes into a go
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json`
-- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md`
+- `docs/artifacts/distribution-scaling-completion-pack/distribution-scaling-completion-summary.json`
+- `docs/artifacts/distribution-scaling-completion-pack/distribution-scaling-delivery-board.md`
 - `docs/roadmap/plans/trust-assets-refresh-plan.json`
 
 ## Command lane
 
 ```bash
-python -m sdetkit trust-assets-refresh-closeout --format json --strict
-python -m sdetkit trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/trust-assets-refresh-closeout-pack --format json --strict
-python scripts/check_trust_assets_refresh_closeout_contract.py --skip-evidence
+python -m sdetkit trust-assets-refresh-completion --format json --strict
+python -m sdetkit trust-assets-refresh-completion --emit-pack-dir docs/artifacts/trust-assets-refresh-completion-pack --format json --strict
+python scripts/check_trust_assets_refresh_completion_contract.py --skip-evidence
 ```
 
 ## Trust assets refresh contract

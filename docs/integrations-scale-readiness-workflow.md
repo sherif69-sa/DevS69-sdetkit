@@ -10,16 +10,16 @@ Scale completion report converts acceleration evidence into deterministic scale 
 
 ## Required inputs (acceleration completion report)
 
-- `docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json`
-- `docs/artifacts/acceleration-closeout-pack/delivery-board.md`
+- `docs/artifacts/acceleration-completion-pack/acceleration-completion-summary.json`
+- `docs/artifacts/acceleration-completion-pack/delivery-board.md`
 
 ## Command lane
 
 ```bash
-python -m sdetkit scale-closeout --format json --strict
-python -m sdetkit scale-closeout --emit-pack-dir docs/artifacts/scale-closeout-pack --format json --strict
-python -m sdetkit scale-closeout --execute --evidence-dir docs/artifacts/scale-closeout-pack/evidence --format json --strict
-python scripts/check_scale_closeout_contract.py
+python -m sdetkit scale-completion --format json --strict
+python -m sdetkit scale-completion --emit-pack-dir docs/artifacts/scale-completion-pack --format json --strict
+python -m sdetkit scale-completion --execute --evidence-dir docs/artifacts/scale-completion-pack/evidence --format json --strict
+python scripts/check_scale_completion_contract.py
 ```
 
 ## Scale completion report contract

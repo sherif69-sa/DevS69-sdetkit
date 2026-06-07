@@ -1,5 +1,3 @@
-Contributor Recognition Completion summary
-- Activation score: 42
-- Passed checks: 6
-- Failed checks: 8
-- Critical failures: ['trust_assets_refresh_strict_baseline']
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`contributor-recognition-completion-summary.md`](../../artifacts/contributor-recognition-completion-pack/contributor-recognition-completion-summary.md).

@@ -1,5 +1,3 @@
-Community Touchpoint Completion summary
-- Activation score: 69
-- Passed checks: 10
-- Failed checks: 4
-- Critical failures: ['contributor_recognition_strict_baseline']
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`community-touchpoint-completion-summary.md`](../../artifacts/community-touchpoint-completion-pack/community-touchpoint-completion-summary.md).

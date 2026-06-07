@@ -18,9 +18,9 @@ Close Cycle 60 with a high-confidence Release readiness wrap + handoff lane that
 python -m sdetkit cycle60-release-readiness-wrap-handoff-completion-report --format json --strict
 python -m sdetkit cycle60-release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict
 python -m sdetkit cycle60-release-readiness-wrap-handoff-completion-report --execute --evidence-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence --format json --strict
-python scripts/check_phase2_wrap_handoff_closeout_contract_60.py
+python scripts/check_phase2_wrap_handoff_completion_contract_60.py
 ```
 
-## Closeout
+## Completion
 
 Cycle 60 is now an evidence-backed completion report lane with strict continuity to Cycle 59 and deterministic handoff into Cycle 61 execution planning.

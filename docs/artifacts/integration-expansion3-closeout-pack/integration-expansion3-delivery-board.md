@@ -1,6 +1,3 @@
-#  delivery board
-- [ ]  integration brief committed
-- [ ]  advanced Jenkins pipeline blueprint published
-- [ ]  matrix and cache strategy exported
-- [ ]  KPI scorecard snapshot exported
-- [ ]  integration expansion priorities drafted from  learnings
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`integration-expansion3-delivery-board.md`](../../artifacts/integration-expansion3-completion-pack/integration-expansion3-delivery-board.md).

@@ -1,7 +1,3 @@
-#  validation commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit community-program-closeout --format json --strict
-python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/community-program-closeout-pack --format json --strict
-python scripts/check_community_program_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`community-program-validation-commands.md`](../../artifacts/community-program-completion-pack/community-program-validation-commands.md).

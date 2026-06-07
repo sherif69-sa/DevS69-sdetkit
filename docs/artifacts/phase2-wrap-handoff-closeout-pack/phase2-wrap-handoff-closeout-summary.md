@@ -1,5 +1,3 @@
-Phase 2 Wrap Handoff Closeout summary (legacy: )
-- Activation score: 95
-- Passed checks: 13
-- Failed checks: 0
-- Critical failures: []
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`release-readiness-wrap-handoff-completion-summary.md`](../../artifacts/release-readiness-wrap-handoff-completion-pack/release-readiness-wrap-handoff-completion-summary.md).

@@ -2,7 +2,7 @@
 
 Lane closes with a major integration upgrade that converts Lane outputs into a self-hosted enterprise Tekton reference.
 
-## Why Integration Expansion4 Closeout matters
+## Why Integration Expansion4 Completion matters
 
 - Converts Lane governance outputs into reusable self-hosted implementation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -10,17 +10,17 @@ Lane closes with a major integration upgrade that converts Lane outputs into a s
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-closeout-summary.json`
-- `docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md`
+- `docs/artifacts/integration-expansion3-completion-pack/integration-expansion3-completion-summary.json`
+- `docs/artifacts/integration-expansion3-completion-pack/integration-expansion3-delivery-board.md`
 - `templates/ci/tekton/tekton-self-hosted-reference.yaml`
 
-## Integration Expansion4 Closeout command lane (legacy)
+## Integration Expansion4 Completion command lane (legacy)
 
 ```bash
-python -m sdetkit integration-expansion4-closeout --format json --strict
-python -m sdetkit integration-expansion4-closeout --emit-pack-dir docs/artifacts/integration-expansion4-closeout-pack --format json --strict
-python -m sdetkit integration-expansion4-closeout --execute --evidence-dir docs/artifacts/integration-expansion4-closeout-pack/evidence --format json --strict
-python scripts/check_integration_expansion4_closeout_contract.py
+python -m sdetkit integration-expansion4-completion --format json --strict
+python -m sdetkit integration-expansion4-completion --emit-pack-dir docs/artifacts/integration-expansion4-completion-pack --format json --strict
+python -m sdetkit integration-expansion4-completion --execute --evidence-dir docs/artifacts/integration-expansion4-completion-pack/evidence --format json --strict
+python scripts/check_integration_expansion4_completion_contract.py
 ```
 
 ## Integration expansion contract
@@ -38,7 +38,7 @@ python scripts/check_integration_expansion4_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, queue saturation, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, self-hosted blueprint, policy plan, KPI scorecard, and execution log
 
-## Integration Expansion4 Closeout delivery board (legacy)
+## Integration Expansion4 Completion delivery board (legacy)
 
 - [ ] Lane integration brief committed
 - [ ] Lane self-hosted enterprise pipeline blueprint published

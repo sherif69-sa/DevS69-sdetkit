@@ -10,16 +10,16 @@ Lane closes with a major expansion upgrade that converts Lane scale evidence int
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/scale-closeout-pack/scale-closeout-summary.json`
-- `docs/artifacts/scale-closeout-pack/scale-delivery-board.md`
+- `docs/artifacts/scale-completion-pack/scale-completion-summary.json`
+- `docs/artifacts/scale-completion-pack/scale-delivery-board.md`
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit expansion-closeout --format json --strict
-python -m sdetkit expansion-closeout --emit-pack-dir docs/artifacts/expansion-closeout-pack --format json --strict
-python -m sdetkit expansion-closeout --execute --evidence-dir docs/artifacts/expansion-closeout-pack/evidence --format json --strict
-python scripts/check_expansion_closeout_contract.py
+python -m sdetkit expansion-completion --format json --strict
+python -m sdetkit expansion-completion --emit-pack-dir docs/artifacts/expansion-completion-pack --format json --strict
+python -m sdetkit expansion-completion --execute --evidence-dir docs/artifacts/expansion-completion-pack/evidence --format json --strict
+python scripts/check_expansion_completion_contract.py
 ```
 
 ## Expansion completion report contract

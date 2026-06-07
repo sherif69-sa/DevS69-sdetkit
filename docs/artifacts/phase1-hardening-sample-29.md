@@ -1,12 +1,3 @@
-# Name 29 phase-1 hardening sample output
+# Moved: professional documentation
 
-- Activation score: `100`
-- Strict pass: `true`
-- Stale marker hits: `none`
-
-## Key checks passed
-
-- `required_sections_present`
-- `readme_name29_link`
-- `docs_index_name29_links`
-- `top10_name29_alignment`
+This compatibility page preserves the legacy public path. The professional page is now [`baseline-hardening-sample-29.md`](../artifacts/baseline-hardening-sample-29.md).

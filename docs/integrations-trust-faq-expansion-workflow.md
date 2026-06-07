@@ -2,7 +2,7 @@
 
 Lane closes with a major upgrade that folds Lane integration feedback outcomes into trust FAQ coverage upgrades and escalation-readiness execution.
 
-## Why Trust FAQ Expansion Closeout matters
+## Why Trust FAQ Expansion Completion matters
 
 - Turns Lane integration feedback outcomes into deterministic trust FAQ expansion loops across docs, templates, and support operations.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -10,17 +10,17 @@ Lane closes with a major upgrade that folds Lane integration feedback outcomes i
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-closeout-summary.json`
-- `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md`
+- `docs/artifacts/integration-feedback-completion-pack/integration-feedback-completion-summary.json`
+- `docs/artifacts/integration-feedback-completion-pack/integration-feedback-delivery-board.md`
 - `docs/roadmap/plans/trust-faq-expansion-plan.json`
 
 ## Command lane
 
 ```bash
-python -m sdetkit trust-faq-expansion-closeout --format json --strict
-python -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/trust-faq-expansion-closeout-pack --format json --strict
-python -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/trust-faq-expansion-closeout-pack/evidence --format json --strict
-python scripts/check_trust_faq_expansion_closeout_contract.py
+python -m sdetkit trust-faq-expansion-completion --format json --strict
+python -m sdetkit trust-faq-expansion-completion --emit-pack-dir docs/artifacts/trust-faq-expansion-completion-pack --format json --strict
+python -m sdetkit trust-faq-expansion-completion --execute --evidence-dir docs/artifacts/trust-faq-expansion-completion-pack/evidence --format json --strict
+python scripts/check_trust_faq_expansion_completion_contract.py
 ```
 
 ## Trust FAQ expansion contract

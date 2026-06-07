@@ -19,6 +19,6 @@ python -m sdetkit contribution-quality-report --current-signals-file docs/artifa
 python scripts/check_quality_contribution_delta_contract.py
 ```
 
-## Closeout
+## Completion
 
 Contribution-quality reporting now provides one deterministic evidence path for week-over-week quality and contribution deltas.

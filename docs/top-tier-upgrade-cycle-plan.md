@@ -2,7 +2,7 @@
 
 ## 1) What is already proven strongly in this repository
 
-Based on the current repository state and front-door documentation, the platform already demonstrates strong proof in the following areas:
+Based on the current repository state and front-door documentation, the platform already examplenstrates strong proof in the following areas:
 
 - Deterministic **SHIP / NO-SHIP** release gates with machine-readable artifacts.
 - A committed **live-adoption product proof** flow with explicit outcomes and known-finding accounting.

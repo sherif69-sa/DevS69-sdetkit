@@ -26,11 +26,11 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
 | --- | --- | --- |
 | Scenario data is still embedded in Python | The catalog grows harder to review, version, extend, and ship as packs. | Move scenario definitions to versioned JSON/YAML rule packs with schema validation. |
 | Candidate scoring is heuristic-only | Similar signals can rank confusingly when logs are noisy. | Add weighted scoring using historical outcomes, repo-local memory, and confidence calibration. |
-| Learning memory is not yet fully closed-loop with scenario outcomes | The kit can suggest candidates, but it does not yet continuously promote/demote scenarios based on whether fixes worked. | Record accepted diagnosis, applied fix, proof command result, recurrence, and false-positive feedback. |
+| Learning memory is not yet fully closed-loop with scenario outcomes | The kit can suggest candidates, but it does not yet continuously promote/examplete scenarios based on whether fixes worked. | Record accepted diagnosis, applied fix, proof command result, recurrence, and false-positive feedback. |
 | Remediation remains narrow | This is safe, but users will want more assisted fixes after trust builds. | Add staged remediation lanes: explain-only, patch-plan, dry-run patch, guarded same-repo PR, and post-fix proof. |
 | Evidence UI can still be easier to consume | Large JSON is powerful but not always persuasive for new users. | Add compact dashboards, markdown summaries, and PR comment sections that show evidence progression. |
 | Multi-repo and enterprise pack behavior needs stronger contracts | Teams need repeatable policy and learning across many repositories. | Add organization-level scenario packs, policy overlays, shared learning exports, and privacy-preserving aggregation. |
-| Benchmarking and demos need more real failure fixtures | A powerful product needs believable proof, not only unit tests. | Add fixture suites for common CI failures and publish before/after case studies. |
+| Benchmarking and examples need more real failure fixtures | A powerful product needs believable proof, not only unit tests. | Add fixture suites for common CI failures and publish before/after case studies. |
 
 ## Next upgrade roadmap
 
@@ -62,7 +62,7 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
   - whether fix was accepted,
   - recurrence count,
   - false-positive marker.
-- Add promotion/demotion rules: **Done:** summaries now promote scenarios when proof/fix feedback succeeds, demote false positives, increase risk for recurring failures, and lower confidence for thin evidence.
+- Add promotion/exampletion rules: **Done:** summaries now promote scenarios when proof/fix feedback succeeds, examplete false positives, increase risk for recurring failures, and lower confidence for thin evidence.
 - Add `sdetkit adaptive learn summarize` to show top recurring scenarios and weakest lanes. **Done:** the CLI now rolls JSONL diagnosis events into `top_recurring_scenarios` and `weakest_lanes`.
 
 ### Platform readiness — Build the trust-grade operator experience
@@ -134,8 +134,8 @@ The Big-Brain execution plan is now complete across the immediate backlog, Opera
 | P0 | Add learning event records for adaptive diagnosis | Done: `sdetkit adaptive learn record` writes JSONL events with matched signals, candidates, selected primary diagnosis, checks, proof commands, recurrence count, and outcome placeholders. |
 | P0 | Add operator brief artifact | Done: `python -m sdetkit adaptive brief` generates `build/sdetkit/operator-brief.md` from gate, diagnosis, learning, and safe-fix artifacts. |
 | P1 | Add fixture corpus for top scenarios | Done: `tests/fixtures/adaptive_logs/` covers 20 realistic log fixtures with expected primary diagnosis, first proof command, candidate scenario, and safe-fix posture assertions. |
-| P1 | Add candidate confidence calibration | Done: adaptive diagnosis can consume learning-summary calibration to boost/demote candidate scenario ranking and emit `candidate_calibration` evidence. |
-| P1 | Add docs demo gallery | Done: `docs/adaptive-product-proof-gallery.md` shows green, safe-fix, unknown-review, recurring-learning, top-10 scenario, and portfolio rollup examples. |
+| P1 | Add candidate confidence calibration | Done: adaptive diagnosis can consume learning-summary calibration to boost/examplete candidate scenario ranking and emit `candidate_calibration` evidence. |
+| P1 | Add docs example gallery | Done: `docs/adaptive-product-proof-gallery.md` shows green, safe-fix, unknown-review, recurring-learning, top-10 scenario, and portfolio rollup examples. |
 | P2 | Add org-level pack overlay | Done: layered packs emit source metadata, governance validation rejects unapproved duplicate-code overrides, and `docs/governance-and-org-packs.md` documents approval expectations. |
 | P2 | Add portfolio rollup | Done: `sdetkit adaptive portfolio-rollup` rolls multiple adaptive diagnosis outputs into a top-risk scenario report with recurrence by repo, candidate mentions, release recommendation, and next owner action. |
 

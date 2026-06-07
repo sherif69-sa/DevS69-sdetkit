@@ -1,6 +1,3 @@
-#  delivery board
-- [ ]  integration brief committed
-- [ ]  publication-quality case-study narrative published
-- [ ]  controls and assumptions log exported
-- [ ]  KPI scorecard snapshot exported
-- [ ]  publication launch priorities drafted from  learnings
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`case-study-prep4-delivery-board.md`](../../artifacts/case-study-prep4-completion-pack/case-study-prep4-delivery-board.md).

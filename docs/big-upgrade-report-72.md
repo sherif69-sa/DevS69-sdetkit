@@ -6,7 +6,7 @@ Close Cycle 72 with a high-signal case-study prep #4 lane that upgrades Cycle 71
 
 ## What shipped
 
-- New `case-study-prep4-closeout` CLI lane with strict scoring and Cycle 71 continuity validation.
+- New `case-study-prep4-completion` CLI lane with strict scoring and Cycle 71 continuity validation.
 - New Cycle 72 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Cycle 72 contract checker script for CI and local execution gating.
 - New publication-quality artifact pack outputs for narrative, controls logging, KPI scoring, and execution evidence.
@@ -15,10 +15,10 @@ Close Cycle 72 with a high-signal case-study prep #4 lane that upgrades Cycle 71
 ## Validation flow
 
 ```bash
-python -m sdetkit case-study-prep4-closeout --format json --strict
-python -m sdetkit case-study-prep4-closeout --emit-pack-dir docs/artifacts/case-study-prep4-closeout-pack --format json --strict
-python -m sdetkit case-study-prep4-closeout --execute --evidence-dir docs/artifacts/case-study-prep4-closeout-pack/evidence --format json --strict
-python scripts/check_case_study_prep4_closeout_contract.py
+python -m sdetkit case-study-prep4-completion --format json --strict
+python -m sdetkit case-study-prep4-completion --emit-pack-dir docs/artifacts/case-study-prep4-completion-pack --format json --strict
+python -m sdetkit case-study-prep4-completion --execute --evidence-dir docs/artifacts/case-study-prep4-completion-pack/evidence --format json --strict
+python scripts/check_case_study_prep4_completion_contract.py
 ```
 
 ## Outcome

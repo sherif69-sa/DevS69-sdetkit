@@ -18,9 +18,9 @@ Close Cycle 61 with a high-confidence Platform readiness kickoff execution lane 
 python -m sdetkit cycle61-platform-readiness-kickoff-completion-report --format json --strict
 python -m sdetkit cycle61-platform-readiness-kickoff-completion-report --emit-pack-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack --format json --strict
 python -m sdetkit cycle61-platform-readiness-kickoff-completion-report --execute --evidence-dir docs/artifacts/platform-readiness-kickoff-completion-report-pack/evidence --format json --strict
-python scripts/check_phase3_kickoff_closeout_contract_61.py
+python scripts/check_phase3_kickoff_completion_contract_61.py
 ```
 
-## Closeout
+## Completion
 
 Cycle 61 is now an evidence-backed kickoff lane with strict continuity to Cycle 60 and deterministic handoff into Cycle 62 community program execution.

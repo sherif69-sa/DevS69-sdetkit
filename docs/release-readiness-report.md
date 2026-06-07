@@ -21,6 +21,6 @@ python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/rele
 python scripts/check_release_readiness_contract.py
 ```
 
-## Closeout
+## Completion
 
 Release readiness now provides one release score, one strict gate lane, and one evidence bundle that can be attached directly to weekly review and release-candidate reviews.

@@ -2,7 +2,7 @@
 
 Lane closes with a major integration upgrade that converts Lane weekly review outcomes into an advanced GitLab CI reference pipeline.
 
-## Why Integration Expansion 2 Closeout matters
+## Why Integration Expansion 2 Completion matters
 
 - Converts Lane governance outputs into reusable GitLab CI implementation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -10,17 +10,17 @@ Lane closes with a major integration upgrade that converts Lane weekly review ou
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json`
-- `docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md`
+- `docs/artifacts/weekly-review-completion-pack-2/weekly-review-completion-summary-2.json`
+- `docs/artifacts/weekly-review-completion-pack-2/weekly-review-completion-delivery-board-2.md`
 - `templates/ci/gitlab/gitlab-advanced-reference.yml`
 
-## Integration Expansion 2 Closeout command lane (legacy)
+## Integration Expansion 2 Completion command lane (legacy)
 
 ```bash
-python -m sdetkit integration-expansion2-closeout --format json --strict
-python -m sdetkit integration-expansion2-closeout --emit-pack-dir docs/artifacts/integration-expansion2-closeout-pack --format json --strict
-python -m sdetkit integration-expansion2-closeout --execute --evidence-dir docs/artifacts/integration-expansion2-closeout-pack/evidence --format json --strict
-python scripts/check_integration_expansion2_closeout_contract.py
+python -m sdetkit integration-expansion2-completion --format json --strict
+python -m sdetkit integration-expansion2-completion --emit-pack-dir docs/artifacts/integration-expansion2-completion-pack --format json --strict
+python -m sdetkit integration-expansion2-completion --execute --evidence-dir docs/artifacts/integration-expansion2-completion-pack/evidence --format json --strict
+python scripts/check_integration_expansion2_completion_contract.py
 ```
 
 ## Integration expansion contract
@@ -38,7 +38,7 @@ python scripts/check_integration_expansion2_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, pipeline blueprint, matrix plan, KPI scorecard, and execution log
 
-## Integration Expansion 2 Closeout delivery board (legacy)
+## Integration Expansion 2 Completion delivery board (legacy)
 
 - [ ] Lane integration brief committed
 - [ ] Lane advanced GitLab pipeline blueprint published

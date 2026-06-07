@@ -2,7 +2,7 @@
 
 Lane closes with a major integration upgrade that turns Lane onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
 
-## Why Integration Expansion Closeout matters
+## Why Integration Expansion Completion matters
 
 - Converts Lane contributor activation into reusable CI automation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -10,16 +10,16 @@ Lane closes with a major integration upgrade that turns Lane onboarding momentum
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json`
-- `docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md`
+- `docs/artifacts/onboarding-activation-completion-pack/onboarding-activation-completion-summary.json`
+- `docs/artifacts/onboarding-activation-completion-pack/delivery-board.md`
 
-## Integration Expansion Closeout command lane (legacy)
+## Integration Expansion Completion command lane (legacy)
 
 ```bash
-python -m sdetkit integration-expansion-closeout --format json --strict
-python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/integration-expansion-closeout-pack --format json --strict
-python -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/integration-expansion-closeout-pack/evidence --format json --strict
-python scripts/check_integration_expansion_closeout_contract.py
+python -m sdetkit integration-expansion-completion --format json --strict
+python -m sdetkit integration-expansion-completion --emit-pack-dir docs/artifacts/integration-expansion-completion-pack --format json --strict
+python -m sdetkit integration-expansion-completion --execute --evidence-dir docs/artifacts/integration-expansion-completion-pack/evidence --format json --strict
+python scripts/check_integration_expansion_completion_contract.py
 ```
 
 ## Integration expansion contract
@@ -27,7 +27,7 @@ python scripts/check_integration_expansion_closeout_contract.py
 - Single owner + backup reviewer are assigned for Lane advanced GitHub Actions workflow execution and rollout signoff.
 - This lane references Lane onboarding outcomes, ownership handoff evidence, and KPI continuity signals.
 - Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Lane closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Lane review priorities.
+- Lane completion records reusable workflow design, matrix strategy, caching/concurrency controls, and Lane review priorities.
 
 ## Integration quality checklist
 
@@ -37,7 +37,7 @@ python scripts/check_integration_expansion_closeout_contract.py
 - [ ] Scorecard captures workflow pass-rate, median runtime, cache hit-rate, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, workflow blueprint, matrix plan, KPI scorecard, and execution log
 
-## Integration Expansion Closeout delivery board (legacy)
+## Integration Expansion Completion delivery board (legacy)
 
 - [ ] Lane integration brief committed
 - [ ] Lane advanced workflow blueprint published

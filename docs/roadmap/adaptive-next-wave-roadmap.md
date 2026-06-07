@@ -8,7 +8,7 @@ The Big-Brain execution plan is complete. This next wave turns the completed ada
 | --- | --- |
 | Scenario packs and layered governance | `adaptive_diagnosis.load_layered_scenarios()`, `layered_scenario_pack_report()`, `validate_layered_scenario_packs()` |
 | Learning loop and calibration | `sdetkit adaptive learn record`, `sdetkit adaptive learn summarize`, `candidate_calibration=...` evidence |
-| Operator experience | `sdetkit adaptive brief`, PR comment output, demo gallery, fixture corpus |
+| Operator experience | `sdetkit adaptive brief`, PR comment output, example gallery, fixture corpus |
 | Safe remediation expansion | safe-fix plans, assisted patch plans, fix-audit records, post-fix proof enforcement |
 | Enterprise scale | portfolio rollup, enterprise governance report, anonymized export, integration-adapter contract validation |
 

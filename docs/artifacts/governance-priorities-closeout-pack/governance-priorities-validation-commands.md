@@ -1,7 +1,3 @@
-#  validation commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit governance-priorities-closeout --format json --strict
-python -m sdetkit governance-priorities-closeout --emit-pack-dir docs/artifacts/governance-priorities-closeout-pack --format json --strict
-python scripts/check_governance_priorities_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`governance-priorities-validation-commands.md`](../../artifacts/governance-priorities-completion-pack/governance-priorities-validation-commands.md).

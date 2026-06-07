@@ -1,6 +1,3 @@
-#  delivery board
-- [ ]  evidence brief committed
-- [ ]  governance scale plan committed
-- [ ]  narrative template upgrade ledger exported
-- [ ]  storyline outcomes ledger exported
-- [ ]  governance planning drafted from  outcomes
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`governance-scale-delivery-board.md`](../../artifacts/governance-scale-completion-pack/governance-scale-delivery-board.md).

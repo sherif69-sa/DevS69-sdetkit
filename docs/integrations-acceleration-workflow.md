@@ -10,16 +10,16 @@ Lane closes with a major acceleration upgrade that converts Lane optimization ev
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json`
-- `docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md`
+- `docs/artifacts/optimization-completion-foundation-pack/optimization-completion-foundation-summary.json`
+- `docs/artifacts/optimization-completion-foundation-pack/delivery-board.md`
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit acceleration-closeout --format json --strict
-python -m sdetkit acceleration-closeout --emit-pack-dir docs/artifacts/acceleration-closeout-pack --format json --strict
-python -m sdetkit acceleration-closeout --execute --evidence-dir docs/artifacts/acceleration-closeout-pack/evidence --format json --strict
-python scripts/check_acceleration_closeout_contract.py
+python -m sdetkit acceleration-completion --format json --strict
+python -m sdetkit acceleration-completion --emit-pack-dir docs/artifacts/acceleration-completion-pack --format json --strict
+python -m sdetkit acceleration-completion --execute --evidence-dir docs/artifacts/acceleration-completion-pack/evidence --format json --strict
+python scripts/check_acceleration_completion_contract.py
 ```
 
 ## Acceleration completion report contract

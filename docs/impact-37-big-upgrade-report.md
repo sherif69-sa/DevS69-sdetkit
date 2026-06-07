@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added Cycle 37 closeout command: `python -m sdetkit experiment-lane`.
+- Added Cycle 37 completion command: `python -m sdetkit experiment-lane`.
 - Added strict continuity checks that require Cycle 36 strict-pass and board integrity.
 - Added Cycle 37 artifact outputs for experiment matrix, hypothesis brief, scorecard, decision log, and validation commands.
 

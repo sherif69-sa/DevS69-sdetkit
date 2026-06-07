@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added Cycle 40 closeout command: `python -m sdetkit scale-lane`.
+- Added Cycle 40 completion command: `python -m sdetkit scale-lane`.
 - Added strict continuity checks that require Cycle 39 strict-pass and board integrity.
 - Added Cycle 40 artifact outputs for scale summary, scale plan, channel matrix, KPI scorecard, execution log, and validation commands.
 

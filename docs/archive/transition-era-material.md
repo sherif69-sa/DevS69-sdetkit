@@ -13,7 +13,7 @@ The full name-by-name report history is preserved as top-level docs files and ex
 
 Transition-era docs are preserved as top-level docs files and grouped by naming pattern:
 
-- `integrations-*-closeout.md`
+- `integrations-*-completion.md`
 - `integrations-phase*.md`
 - `integrations-*-handoff-*.md`
 - `integrations-*-kickoff*.md`

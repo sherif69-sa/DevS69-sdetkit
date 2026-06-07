@@ -1,7 +1,3 @@
-#  validation commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit integration-expansion3-closeout --format json --strict
-python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/integration-expansion3-closeout-pack --format json --strict
-python scripts/check_integration_expansion3_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`integration-expansion3-validation-commands.md`](../../artifacts/integration-expansion3-completion-pack/integration-expansion3-validation-commands.md).

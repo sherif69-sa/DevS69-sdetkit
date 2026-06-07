@@ -43,4 +43,4 @@ Lane computes weighted readiness score (0-100):
 
 ## Execution evidence mode
 
-`--execute` runs deterministic Lane checks and writes logs to `--evidence-dir` for final closeout review.
+`--execute` runs deterministic Lane checks and writes logs to `--evidence-dir` for final completion review.

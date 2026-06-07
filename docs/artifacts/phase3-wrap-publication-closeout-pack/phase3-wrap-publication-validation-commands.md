@@ -1,7 +1,3 @@
-#  validation commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit phase3-wrap-publication-closeout --format json --strict
-python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict
-python scripts/check_phase3_wrap_publication_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`platform-readiness-wrap-publication-validation-commands.md`](../../artifacts/platform-readiness-wrap-publication-completion-pack/platform-readiness-wrap-publication-validation-commands.md).

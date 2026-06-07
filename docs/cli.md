@@ -10,7 +10,7 @@ It intentionally prioritizes:
 
 1. the canonical public/stable first-time path,
 2. stability-aware expansion into advanced surfaces,
-3. clear demotion of transition-era or legacy-oriented material.
+3. clear exampletion of transition-era or legacy-oriented material.
 
 ## Canonical first-time path (public / stable)
 

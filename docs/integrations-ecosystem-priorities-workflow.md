@@ -10,17 +10,17 @@ Lane closes with a major upgrade that converts Lane community-touchpoint outcome
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json`
-- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md`
+- `docs/artifacts/community-touchpoint-completion-pack/community-touchpoint-completion-summary.json`
+- `docs/artifacts/community-touchpoint-completion-pack/community-touchpoint-delivery-board.md`
 - `docs/roadmap/plans/ecosystem-priorities-plan.json`
 
 ## Ecosystem priorities command lane
 
 ```bash
-python -m sdetkit ecosystem-priorities-closeout --format json --strict
-python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict
-python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/ecosystem-priorities-closeout-pack/evidence --format json --strict
-python scripts/check_ecosystem_priorities_closeout_contract.py
+python -m sdetkit ecosystem-priorities-completion --format json --strict
+python -m sdetkit ecosystem-priorities-completion --emit-pack-dir docs/artifacts/ecosystem-priorities-completion-pack --format json --strict
+python -m sdetkit ecosystem-priorities-completion --execute --evidence-dir docs/artifacts/ecosystem-priorities-completion-pack/evidence --format json --strict
+python scripts/check_ecosystem_priorities_completion_contract.py
 ```
 
 ## Ecosystem priorities contract

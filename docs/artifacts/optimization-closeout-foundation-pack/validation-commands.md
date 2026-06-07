@@ -1,7 +1,3 @@
-# Optimization Closeout Foundation Validation Commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit optimization-closeout-foundation --format json --strict
-python -m sdetkit optimization-closeout-foundation --emit-pack-dir docs/artifacts/optimization-closeout-foundation-pack --format json --strict
-python scripts/check_optimization_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`validation-commands.md`](../../artifacts/optimization-completion-foundation-pack/validation-commands.md).

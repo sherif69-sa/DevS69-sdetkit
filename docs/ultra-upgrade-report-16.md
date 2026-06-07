@@ -22,6 +22,6 @@ python -m sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/c
 python scripts/check_gitlab_ci_onboarding_contract.py
 ```
 
-## Closeout
+## Completion
 
 Cycle 16 now provides adoption-ready, copy/paste GitLab CI templates and deterministic checks aligned with the integration roadmap.

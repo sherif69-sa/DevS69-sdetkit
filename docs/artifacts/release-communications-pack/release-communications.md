@@ -11,7 +11,7 @@
 ## Highlights
 
 - add GHAS alert SLA + metrics export bots, wire them into maintenance coverage checks, and refresh GHAS automation docs.
-- add Name 86 launch readiness closeout lane command, docs, checks, and tests (`name86-launch-readiness-closeout`).
+- add Name 86 launch readiness completion lane command, docs, checks, and tests (`name86-launch-readiness-completion`).
 - upgrade audit: parse modern `pyproject.toml` `[dependency-groups]` declarations, including `{include-group = "..."}` expansions.
 - Packaging: modernize license metadata.
 - CI gate: run `sdetkit doctor --all` and `sdetkit repo check --profile enterprise` on every PR.

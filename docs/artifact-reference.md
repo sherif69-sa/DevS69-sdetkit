@@ -22,7 +22,7 @@ A file that says a fix is possible is not approval to mutate the repository. Mut
 | Repository investigation | `build/investigation/repo.json` | `python -m sdetkit investigate repo --root . --format json --out build/investigation/repo.json` | Diagnostic-only surface narrowing. |
 | Adaptive diagnosis | `build/adaptive-diagnosis.json` | `PYTHONPATH=src python -m sdetkit.adaptive_diagnosis --log build/quality.log --format json --out build/adaptive-diagnosis.json` | Evidence-fitted diagnosis and proof commands. |
 | Adaptive diagnosis learning | `.sdetkit/adaptive-diagnosis-memory.jsonl` | `python -m sdetkit adaptive learn record build/adaptive-diagnosis.json --db .sdetkit/adaptive-diagnosis-memory.jsonl` | JSONL learning events for matched signals, candidates, proof commands, recurrence, and operator outcome feedback. |
-| Adaptive learning summary | operator-chosen JSON/stdout | `python -m sdetkit adaptive learn summarize --db .sdetkit/adaptive-diagnosis-memory.jsonl --format json` | Rollup of top recurring scenarios, weakest lanes, and promotion/demotion calibration actions. |
+| Adaptive learning summary | operator-chosen JSON/stdout | `python -m sdetkit adaptive learn summarize --db .sdetkit/adaptive-diagnosis-memory.jsonl --format json` | Rollup of top recurring scenarios, weakest lanes, and promotion/exampletion calibration actions. |
 | Operator brief | `build/sdetkit/operator-brief.md` | `python -m sdetkit adaptive brief --gate build/gate-fast.json --diagnosis build/adaptive-diagnosis.json --out build/sdetkit/operator-brief.md` | One-page handoff with gate result, diagnosis, candidates, first proof command, safe-fix decision, and owner action. |
 | Operator PR comment | `build/sdetkit/operator-comment.md` | `python -m sdetkit adaptive brief --gate build/gate-fast.json --diagnosis build/adaptive-diagnosis.json --format comment --out build/sdetkit/operator-comment.md` | Compact PR-safe summary for green, safe mechanical, and review-first unknown flows. |
 
@@ -45,7 +45,7 @@ The workflow keeps pull-request runs diagnostic by avoiding live remediation fla
 
 ## Committed generated and sample artifacts
 
-`docs/artifacts/` is a committed evidence gallery. It contains generated/sample artifacts used for product proof, adoption examples, closeout packs, and historical demonstrations.
+`docs/artifacts/` is a committed evidence gallery. It contains generated/sample artifacts used for product proof, adoption examples, completion packs, and historical examplenstrations.
 
 Labels to use when reading that tree:
 

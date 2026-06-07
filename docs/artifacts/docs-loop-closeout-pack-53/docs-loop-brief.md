@@ -1,3 +1,3 @@
-#  Docs-loop Brief
+# Moved: professional documentation
 
-- Objective: close  with measurable docs-loop optimization gains and proof-backed cross-link quality.
+This compatibility page preserves the legacy public path. The professional page is now [`docs-loop-brief.md`](../../artifacts/docs-loop-completion-pack-53/docs-loop-brief.md).

@@ -1,7 +1,3 @@
-#  validation commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit distribution-scaling-closeout --format json --strict
-python -m sdetkit distribution-scaling-closeout --emit-pack-dir docs/artifacts/distribution-scaling-closeout-pack --format json --strict
-python scripts/check_distribution_scaling_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`distribution-scaling-validation-commands.md`](../../artifacts/distribution-scaling-completion-pack/distribution-scaling-validation-commands.md).

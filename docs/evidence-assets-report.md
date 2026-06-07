@@ -6,7 +6,7 @@
 
 ## Problem statement
 
-Cycle 1 and Cycle 2 improved conversion and demos, but teams still needed a consistent Cycle 3 mechanism to produce reusable proof artifacts for governance, security, and release stakeholders.
+Cycle 1 and Cycle 2 improved conversion and examples, but teams still needed a consistent Cycle 3 mechanism to produce reusable proof artifacts for governance, security, and release stakeholders.
 
 Without a dedicated Cycle 3 command, proof gathering was manual and inconsistent.
 

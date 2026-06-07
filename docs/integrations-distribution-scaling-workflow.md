@@ -10,17 +10,17 @@ Lane closes with a major upgrade that turns Lane published case-study outcomes i
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json`
-- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md`
+- `docs/artifacts/case-study-launch-completion-pack/case-study-launch-completion-summary.json`
+- `docs/artifacts/case-study-launch-completion-pack/case-study-launch-delivery-board.md`
 - `docs/roadmap/plans/distribution-scaling-plan.json`
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit distribution-scaling-closeout --format json --strict
-python -m sdetkit distribution-scaling-closeout --emit-pack-dir docs/artifacts/distribution-scaling-closeout-pack --format json --strict
-python -m sdetkit distribution-scaling-closeout --execute --evidence-dir docs/artifacts/distribution-scaling-closeout-pack/evidence --format json --strict
-python scripts/check_distribution_scaling_closeout_contract.py
+python -m sdetkit distribution-scaling-completion --format json --strict
+python -m sdetkit distribution-scaling-completion --emit-pack-dir docs/artifacts/distribution-scaling-completion-pack --format json --strict
+python -m sdetkit distribution-scaling-completion --execute --evidence-dir docs/artifacts/distribution-scaling-completion-pack/evidence --format json --strict
+python scripts/check_distribution_scaling_completion_contract.py
 ```
 
 ## Distribution scaling contract

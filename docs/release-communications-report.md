@@ -22,6 +22,6 @@ python -m sdetkit release-communications --format markdown --output docs/artifac
 python scripts/check_release_communications_contract.py
 ```
 
-## Closeout
+## Completion
 
 Release communications now provides one strict and auditable narrative lane: release story, channel-ready blurbs, validation commands, and execution evidence that can be reused across release notes, social distribution, and internal status updates.

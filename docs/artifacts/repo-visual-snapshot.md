@@ -32,7 +32,7 @@ This artifact summarizes README live signals, docs palette settings, and proof m
 
 | Stream | Owner | KPI target | Risk | Status |
 |---|---|---|---|---|
-| Case Snippet Closeout | qa-lead | failed-checks:0 | narrative-drift | active |
+| Case Snippet Completion | qa-lead | failed-checks:0 | narrative-drift | active |
 | Case Snippet Proof Log | qa-lead | release-ok:true | evidence-lag | active |
 
 ## Signal targets

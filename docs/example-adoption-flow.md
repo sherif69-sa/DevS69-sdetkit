@@ -145,4 +145,4 @@ Promote to strict release gating once fast gate is consistently green and remedi
 
 This page is intentionally **representative**.
 
-It demonstrates a realistic operator workflow and command sequence, but does not claim a published third-party customer case.
+It examplenstrates a realistic operator workflow and command sequence, but does not claim a published third-party customer case.

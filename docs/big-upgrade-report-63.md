@@ -6,7 +6,7 @@ Close Cycle 63 with a high-confidence contributor-onboarding activation lane tha
 
 ## What shipped
 
-- New `cycle63-onboarding-activation-closeout` CLI lane with strict scoring and handoff validation.
+- New `cycle63-onboarding-activation-completion` CLI lane with strict scoring and handoff validation.
 - New Cycle 63 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New contract checker script for CI and local execution gating.
 - New Cycle 63 artifact pack outputs for onboarding brief, orientation script, ownership matrix, roadmap-voting brief, KPI scorecard, and execution logs.
@@ -14,10 +14,10 @@ Close Cycle 63 with a high-confidence contributor-onboarding activation lane tha
 ## Validation flow
 
 ```bash
-python -m sdetkit cycle63-onboarding-activation-closeout --format json --strict
-python -m sdetkit cycle63-onboarding-activation-closeout --emit-pack-dir docs/artifacts/cycle63-onboarding-activation-closeout-pack --format json --strict
-python -m sdetkit cycle63-onboarding-activation-closeout --execute --evidence-dir docs/artifacts/cycle63-onboarding-activation-closeout-pack/evidence --format json --strict
-python scripts/check_onboarding_activation_closeout_contract_63.py
+python -m sdetkit cycle63-onboarding-activation-completion --format json --strict
+python -m sdetkit cycle63-onboarding-activation-completion --emit-pack-dir docs/artifacts/cycle63-onboarding-activation-completion-pack --format json --strict
+python -m sdetkit cycle63-onboarding-activation-completion --execute --evidence-dir docs/artifacts/cycle63-onboarding-activation-completion-pack/evidence --format json --strict
+python scripts/check_onboarding_activation_completion_contract_63.py
 ```
 
 ## Outcome

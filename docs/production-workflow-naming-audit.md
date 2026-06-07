@@ -1,6 +1,6 @@
 # Production workflow naming audit
 
-This repo still carries some internal phase-style workflow names. Those names remain available for compatibility, but new commands, docs, PR titles, branches, and tests should use production workflow language.
+This repo still carries some internal readiness-style workflow names. Those names remain available for compatibility, but new commands, docs, PR titles, branches, and tests should use production workflow language.
 
 ## Naming direction
 

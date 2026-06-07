@@ -43,5 +43,5 @@ Backward compatibility specifics:
 
 ## Experimental summary
 
-Transition-era `dayNN-*` / `*-closeout` lanes remain available but are intentionally non-flagship.
+Transition-era `dayNN-*` / `*-completion` lanes remain available but are intentionally non-flagship.
 Forensics remains production-usable with deterministic contracts while some sub-lanes may continue to evolve.

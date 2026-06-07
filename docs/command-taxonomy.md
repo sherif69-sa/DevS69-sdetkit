@@ -62,7 +62,7 @@ These remain fully supported for daily operations and automation after the canon
 ## Layer 5: Playbooks and transition-era lanes
 
 - Guided lanes: `sdetkit playbooks`
-- Transition-era compatibility lanes: `dayNN-*`, `*-closeout`, `continuous-upgrade-cycleX-closeout`
+- Transition-era compatibility lanes: `dayNN-*`, `*-completion`, `continuous-upgrade-cycleX-completion`
 
 Use these intentionally; they are not the default first-run product surface.
 

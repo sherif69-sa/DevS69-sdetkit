@@ -24,7 +24,7 @@ We will execute **one concrete deliverable at a time**, and each cycle will incl
 
 ### P1 — next
 
-- [x] P1.1 Rationalize/merge closeout-era modules
+- [x] P1.1 Rationalize/merge completion-era modules
 - [x] P1.2 Add CI cost telemetry (minutes/artifact size/frequency by lane)
 - [x] P1.3 Define toolkit reliability SLOs (false positives/flakiness)
 

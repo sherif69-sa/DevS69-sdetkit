@@ -22,6 +22,6 @@ python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/trust-ass
 python scripts/check_trust_assets_contract.py
 ```
 
-## Closeout
+## Completion
 
 Trust assets now provides a trust visibility control point that can be run before releases to keep reliability and governance posture obvious to new adopters.

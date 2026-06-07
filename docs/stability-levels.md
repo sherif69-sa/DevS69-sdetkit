@@ -49,7 +49,7 @@ Opt-in surfaces for incubator and transition-era workflows. Useful for advanced 
 
 ### Experimental / incubator
 
-- Impact/closeout and other transition-era command lanes
+- Impact/completion and other transition-era command lanes
 - Hidden/legacy long-tail command families intended for explicit opt-in use
 - Archive/history-heavy material that remains available for context and continuity
 

@@ -6,7 +6,7 @@ Close Cycle 68 with a high-signal self-hosted integration lane that converts Cyc
 
 ## What shipped
 
-- New `cycle68-integration-expansion4-closeout` CLI lane with strict scoring and Cycle 67 continuity validation.
+- New `cycle68-integration-expansion4-completion` CLI lane with strict scoring and Cycle 67 continuity validation.
 - New Cycle 68 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Cycle 68 contract checker script for CI and local execution gating.
 - New integration artifact pack outputs for self-hosted blueprinting, policy planning, KPI scoring, and execution logging.
@@ -15,10 +15,10 @@ Close Cycle 68 with a high-signal self-hosted integration lane that converts Cyc
 ## Validation flow
 
 ```bash
-python -m sdetkit cycle68-integration-expansion4-closeout --format json --strict
-python -m sdetkit cycle68-integration-expansion4-closeout --emit-pack-dir docs/artifacts/integration-expansion4-closeout-pack --format json --strict
-python -m sdetkit cycle68-integration-expansion4-closeout --execute --evidence-dir docs/artifacts/integration-expansion4-closeout-pack/evidence --format json --strict
-python scripts/check_integration_expansion4_closeout_contract.py
+python -m sdetkit cycle68-integration-expansion4-completion --format json --strict
+python -m sdetkit cycle68-integration-expansion4-completion --emit-pack-dir docs/artifacts/integration-expansion4-completion-pack --format json --strict
+python -m sdetkit cycle68-integration-expansion4-completion --execute --evidence-dir docs/artifacts/integration-expansion4-completion-pack/evidence --format json --strict
+python scripts/check_integration_expansion4_completion_contract.py
 ```
 
 ## Outcome

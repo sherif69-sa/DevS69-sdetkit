@@ -1,6 +1,3 @@
-#  delivery board
-- [ ]  evidence brief committed
-- [ ]  governance priorities plan committed
-- [ ]  narrative template upgrade ledger exported
-- [ ]  storyline outcomes ledger exported
-- [ ]  governance priorities drafted from  outcomes
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`governance-priorities-delivery-board.md`](../../artifacts/governance-priorities-completion-pack/governance-priorities-delivery-board.md).

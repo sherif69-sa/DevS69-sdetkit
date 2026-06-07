@@ -140,7 +140,7 @@ Cadence:
 
 ### Definition of done
 
-- portfolio board template demonstrated with sample data.
+- portfolio board template examplenstrated with sample data.
 - leadership template used in one internal review cycle.
 - rollout guide includes gates for eval/pilot/production adoption.
 

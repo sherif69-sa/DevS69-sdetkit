@@ -26,7 +26,7 @@ Accepted imports are grouped by scenario code and produce hints such as:
 
 - `promote` when proof passed or a fix was accepted;
 - `review_guardrail` when imported proof failed;
-- `demote` when records are marked false-positive;
+- `examplete` when records are marked false-positive;
 - `observe` when evidence is not strong enough to move confidence.
 
 Hints are local-only; they do not mutate built-in scenario packs or enable automatic remediation. Operator feedback hardening now rejects private URLs, hostnames, and email addresses as well as raw paths/files.

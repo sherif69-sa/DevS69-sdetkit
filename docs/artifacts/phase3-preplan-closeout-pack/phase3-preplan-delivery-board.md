@@ -1,6 +1,3 @@
-# Phase3 preplan board
-- [ ] item-1
-- [ ] item-2
-- [ ] item-3
-- [ ] item-4
-- [ ] item-5
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`platform-readiness-preplan-delivery-board.md`](../../artifacts/platform-readiness-preplan-completion-pack/platform-readiness-preplan-delivery-board.md).

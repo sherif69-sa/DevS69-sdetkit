@@ -1,7 +1,3 @@
-# Optimization Closeout Foundation Delivery Board
+# Moved: professional documentation
 
-- [ ] Optimization Closeout Foundation optimization plan draft committed
-- [ ] Optimization Closeout Foundation review notes captured with owner + backup
-- [ ] Optimization Closeout Foundation remediation matrix exported
-- [ ] Optimization Closeout Foundation KPI scorecard snapshot exported
-- [ ]  acceleration priorities drafted from Optimization Closeout Foundation learnings
+This compatibility page preserves the legacy public path. The professional page is now [`delivery-board.md`](../../artifacts/optimization-completion-foundation-pack/delivery-board.md).

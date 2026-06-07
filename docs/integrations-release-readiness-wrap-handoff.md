@@ -19,7 +19,7 @@ Lane closes with a major release readiness wrap handoff upgrade that turns Lane 
 python -m sdetkit release-readiness-wrap-handoff-completion-report --format json --strict
 python -m sdetkit release-readiness-wrap-handoff-completion-report --emit-pack-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack --format json --strict
 python -m sdetkit release-readiness-wrap-handoff-completion-report --execute --evidence-dir docs/artifacts/release-readiness-wrap-handoff-completion-report-pack/evidence --format json --strict
-python scripts/check_phase2_wrap_handoff_closeout_contract.py
+python scripts/check_phase2_wrap_handoff_completion_contract.py
 ```
 
 ## release readiness wrap handoff contract

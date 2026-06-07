@@ -10,17 +10,17 @@ Lane closes with a major upgrade that converts Lane contributor-recognition outc
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json`
-- `docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md`
+- `docs/artifacts/contributor-recognition-completion-pack/contributor-recognition-completion-summary.json`
+- `docs/artifacts/contributor-recognition-completion-pack/contributor-recognition-delivery-board.md`
 - `docs/roadmap/plans/community-touchpoint-plan.json`
 
 ## Community touchpoint command lane
 
 ```bash
-python -m sdetkit community-touchpoint-closeout --format json --strict
-python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/community-touchpoint-closeout-pack --format json --strict
-python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/community-touchpoint-closeout-pack/evidence --format json --strict
-python scripts/check_community_touchpoint_closeout_contract.py
+python -m sdetkit community-touchpoint-completion --format json --strict
+python -m sdetkit community-touchpoint-completion --emit-pack-dir docs/artifacts/community-touchpoint-completion-pack --format json --strict
+python -m sdetkit community-touchpoint-completion --execute --evidence-dir docs/artifacts/community-touchpoint-completion-pack/evidence --format json --strict
+python scripts/check_community_touchpoint_completion_contract.py
 ```
 
 ## Community touchpoint contract

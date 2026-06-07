@@ -1,7 +1,3 @@
-#  validation commands
+# Moved: professional documentation
 
-```bash
-python -m sdetkit case-study-prep1-closeout --format json --strict
-python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/case-study-prep1-closeout-pack --format json --strict
-python scripts/check_case_study_prep1_closeout_contract.py --skip-evidence
-```
+This compatibility page preserves the legacy public path. The professional page is now [`case-study-prep1-validation-commands.md`](../../artifacts/case-study-prep1-completion-pack/case-study-prep1-validation-commands.md).

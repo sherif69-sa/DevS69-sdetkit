@@ -1,1 +1,3 @@
-#  integration brief
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`trust-assets-refresh-integration-brief.md`](../../artifacts/trust-assets-refresh-completion-pack/trust-assets-refresh-integration-brief.md).

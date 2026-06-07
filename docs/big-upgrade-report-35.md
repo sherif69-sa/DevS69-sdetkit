@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added Cycle 35 closeout command: `python -m sdetkit cycle35-kpi-instrumentation`.
+- Added Cycle 35 completion command: `python -m sdetkit cycle35-kpi-instrumentation`.
 - Added strict scoring and continuity checks that require Cycle 34 strict-pass and board integrity.
 - Added Cycle 35 artifact outputs for KPI dictionary, alert policy, delivery board, and validation commands.
 

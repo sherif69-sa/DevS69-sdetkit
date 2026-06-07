@@ -10,16 +10,16 @@ Lane closes with a major reliability upgrade that converts Lane optimization evi
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json`
-- `docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md`
+- `docs/artifacts/optimization-completion-pack/optimization-completion-summary.json`
+- `docs/artifacts/optimization-completion-pack/optimization-delivery-board.md`
 
 ## Lane command lane
 
 ```bash
-python -m sdetkit reliability-closeout --format json --strict
-python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/cycle47-reliability-closeout-pack --format json --strict
-python -m sdetkit reliability-closeout --execute --evidence-dir docs/artifacts/cycle47-reliability-closeout-pack/evidence --format json --strict
-python scripts/check_reliability_closeout_contract.py
+python -m sdetkit reliability-completion --format json --strict
+python -m sdetkit reliability-completion --emit-pack-dir docs/artifacts/cycle47-reliability-completion-pack --format json --strict
+python -m sdetkit reliability-completion --execute --evidence-dir docs/artifacts/cycle47-reliability-completion-pack/evidence --format json --strict
+python scripts/check_reliability_completion_contract.py
 ```
 
 ## Reliability completion report contract

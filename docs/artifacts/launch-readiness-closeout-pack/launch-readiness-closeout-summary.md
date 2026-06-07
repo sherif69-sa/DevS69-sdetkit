@@ -1,5 +1,3 @@
- launch readiness completion summary
-- Activation score: 50
-- Passed checks: 6
-- Failed checks: 8
-- Critical failures: []
+# Moved: professional documentation
+
+This compatibility page preserves the legacy public path. The professional page is now [`launch-readiness-completion-summary.md`](../../artifacts/launch-readiness-completion-pack/launch-readiness-completion-summary.md).

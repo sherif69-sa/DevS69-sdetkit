@@ -10,8 +10,8 @@ Lane closes with a major release readiness hardening upgrade that turns Lane KPI
 
 ## Required inputs (Lane)
 
-- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json`
-- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md`
+- `docs/artifacts/kpi-deep-audit-completion-pack/kpi-deep-audit-completion-summary.json`
+- `docs/artifacts/kpi-deep-audit-completion-pack/kpi-deep-audit-delivery-board.md`
 
 ## Release Readiness Hardening command lane
 
@@ -19,7 +19,7 @@ Lane closes with a major release readiness hardening upgrade that turns Lane KPI
 python -m sdetkit release-readiness-hardening-completion-report --format json --strict
 python -m sdetkit release-readiness-hardening-completion-report --emit-pack-dir docs/artifacts/release-readiness-hardening-completion-report-pack --format json --strict
 python -m sdetkit release-readiness-hardening-completion-report --execute --evidence-dir docs/artifacts/release-readiness-hardening-completion-report-pack/evidence --format json --strict
-python scripts/check_phase2_hardening_closeout_contract.py
+python scripts/check_phase2_hardening_completion_contract.py
 ```
 
 ## release readiness hardening contract

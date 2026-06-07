@@ -1,7 +1,3 @@
-# Acceleration delivery board
+# Moved: professional documentation
 
-- [ ]  acceleration plan draft committed
-- [ ]  review notes captured with owner + backup
-- [ ]  growth matrix exported
-- [ ]  KPI scorecard snapshot exported
-- [ ]  scale priorities drafted from  learnings
+This compatibility page preserves the legacy public path. The professional page is now [`delivery-board.md`](../../artifacts/acceleration-completion-pack/delivery-board.md).
