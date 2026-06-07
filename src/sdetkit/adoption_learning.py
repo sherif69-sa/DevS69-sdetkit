@@ -18,6 +18,21 @@ AUTHORITY_FIELDS = (
     "semantic_equivalence_proven",
 )
 
+EXPECTED_FIXTURE_REPOS = frozenset(
+    {
+        "python_pytest_github",
+        "node_no_test_script",
+        "node_with_test_script",
+        "mixed_python_node",
+        "go_module",
+        "rust_cargo",
+        "java_maven",
+        "dotnet_solution",
+        "gitlab_python",
+        "jenkins_java",
+    }
+)
+
 
 def _names(items: object) -> list[str]:
     if not isinstance(items, list):
@@ -41,6 +56,15 @@ def _commands(items: object) -> list[str]:
 
 def _authority_boundary(surface: dict[str, Any]) -> dict[str, bool]:
     return {field: bool(surface.get(field)) for field in AUTHORITY_FIELDS}
+
+
+def _fixture_repo_matrix_present(repo_root: Path) -> bool:
+    fixture_root = repo_root / "tests" / "fixtures" / "adoption_repos"
+    if not fixture_root.is_dir():
+        return False
+
+    present = {path.name for path in fixture_root.iterdir() if path.is_dir()}
+    return EXPECTED_FIXTURE_REPOS <= present
 
 
 def _detected_strengths(surface: dict[str, Any]) -> list[str]:
@@ -71,21 +95,32 @@ def _detected_strengths(surface: dict[str, Any]) -> list[str]:
     return strengths
 
 
-def _learning_gaps(surface: dict[str, Any]) -> list[str]:
+def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
     languages = set(_names(surface.get("detected_languages")))
     ci_systems = set(_names(surface.get("ci_systems")))
     review_unknowns = surface.get("review_first_unknowns")
+    fixture_matrix_present = _fixture_repo_matrix_present(repo_root)
 
     gaps: list[str] = []
-    if languages <= {"python"}:
+    if languages <= {"python"} and not fixture_matrix_present:
         gaps.append("add fixture repo matrix for non-Python repo shapes")
-    if ci_systems <= {"github_actions"}:
+    if ci_systems <= {"github_actions"} and not fixture_matrix_present:
         gaps.append("add fixture coverage for non-GitHub CI providers")
-    if not review_unknowns:
+    if not review_unknowns and not fixture_matrix_present:
         gaps.append("add fixtures that prove review-first unknown handling")
     gaps.append("add local external-root smoke before public repo trials")
     gaps.append("add public repo eligibility screen before using third-party repos")
     return gaps
+
+
+def _recommended_next_upgrade(gaps: list[str]) -> str:
+    if any("fixture repo matrix" in gap for gap in gaps):
+        return "fixture repo matrix"
+    if any("local external-root smoke" in gap for gap in gaps):
+        return "local external root smoke"
+    if any("public repo eligibility screen" in gap for gap in gaps):
+        return "public repo eligibility screen"
+    return "review learning gaps"
 
 
 def _upgrade_candidates() -> list[str]:
@@ -116,6 +151,9 @@ def build_adoption_learning_payload(
     identity = repo_identity if isinstance(repo_identity, dict) else {}
     is_current_repo = bool(identity.get("is_current_sdetkit_repo"))
 
+    root_path = Path(repo_root)
+    learning_gaps = _learning_gaps(surface, root_path)
+
     return {
         "schema_version": SCHEMA_VERSION,
         "trial_name": trial_name,
@@ -134,9 +172,9 @@ def build_adoption_learning_payload(
                 str(item) for item in surface.get("review_first_unknowns", [])
             ),
         },
-        "learning_gaps": _learning_gaps(surface),
+        "learning_gaps": learning_gaps,
         "upgrade_candidates": _upgrade_candidates(),
-        "recommended_next_upgrade": "fixture repo matrix",
+        "recommended_next_upgrade": _recommended_next_upgrade(learning_gaps),
         "authority_boundary": _authority_boundary(surface),
         "automation_allowed": False,
         "patch_application_allowed": False,

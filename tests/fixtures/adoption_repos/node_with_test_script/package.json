@@ -1,0 +1,6 @@
+{
+  "name": "node-with-test",
+  "scripts": {
+    "test": "node test.js"
+  }
+}
