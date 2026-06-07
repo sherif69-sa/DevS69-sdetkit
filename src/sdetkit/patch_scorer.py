@@ -112,6 +112,46 @@ def _history_review_surface_match(
     return False
 
 
+def _safety_gate_evidence(pattern_insights: Mapping[str, Any]) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+    payload = _as_dict(pattern_insights.get("safety_gate_evidence"))
+    if not payload:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "pattern_insights.safety_gate_evidence",
+            "record_count": 0,
+            "review_first_count": 0,
+            "safe_fix_allowed_count": 0,
+            "reporting_only_count": 0,
+            "report_paths": [],
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = _as_dict(payload.get("decision_boundary"))
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    return {
+        "collection_status": _string(payload.get("collection_status")) or "collected",
+        "status": _string(payload.get("status")) or "safety_gate_evidence_observed",
+        "source": _string(payload.get("source")) or "pattern_insights.safety_gate_evidence",
+        "record_count": int(payload.get("record_count", 0) or 0),
+        "review_first_count": int(payload.get("review_first_count", 0) or 0),
+        "safe_fix_allowed_count": int(payload.get("safe_fix_allowed_count", 0) or 0),
+        "reporting_only_count": int(payload.get("reporting_only_count", 0) or 0),
+        "report_paths": [
+            _string(item) for item in _as_list(payload.get("report_paths")) if _string(item)
+        ],
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
 def _risk_flag(
     code: str,
     message: str,
@@ -282,6 +322,7 @@ def score_patch(
         raise ValueError(msg)
 
     insights = _as_dict(pattern_insights)
+    safety_gate_evidence = _safety_gate_evidence(insights)
     plan = _select_plan(remediation_plan, diagnosis_id)
     patch_id = _string(proposed_patch.get("patch_id")) or "proposed-patch"
     changed_files = _string_list(proposed_patch.get("changed_files"))
@@ -298,6 +339,18 @@ def score_patch(
                 ),
                 blocking=True,
                 penalty=100,
+            )
+        )
+
+    expanded_safetygate_fields = _string_list(safety_gate_evidence.get("expanded_authority_fields"))
+    if expanded_safetygate_fields:
+        flags.append(
+            _risk_flag(
+                "SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION",
+                "SafetyGate evidence attempted to expand PatchScorer authority.",
+                blocking=True,
+                penalty=100,
+                files=expanded_safetygate_fields,
             )
         )
 
@@ -325,6 +378,7 @@ def score_patch(
                 safe_pattern_match=False,
             ),
             "step_error_taxonomy": _step_error_taxonomy(flags),
+            "safety_gate_evidence": safety_gate_evidence,
             "decision": {
                 "status": "blocked_review_first",
                 "candidate_for_protected_verification": False,
@@ -335,6 +389,15 @@ def score_patch(
             "history_evidence": {
                 "safe_fix_pattern_match": False,
                 "review_first_surface_match": False,
+                "safety_gate_collection_status": _string(
+                    safety_gate_evidence.get("collection_status")
+                ),
+                "safety_gate_safe_fix_allowed_count": int(
+                    safety_gate_evidence.get("safe_fix_allowed_count", 0) or 0
+                ),
+                "safety_gate_review_first_count": int(
+                    safety_gate_evidence.get("review_first_count", 0) or 0
+                ),
             },
         }
 
@@ -487,6 +550,7 @@ def score_patch(
             safe_pattern_match=safe_pattern_match,
         ),
         "step_error_taxonomy": _step_error_taxonomy(flags),
+        "safety_gate_evidence": safety_gate_evidence,
         "decision": {
             "status": status,
             "candidate_for_protected_verification": candidate,
@@ -497,6 +561,13 @@ def score_patch(
         "history_evidence": {
             "safe_fix_pattern_match": safe_pattern_match,
             "review_first_surface_match": review_surface_match,
+            "safety_gate_collection_status": _string(safety_gate_evidence.get("collection_status")),
+            "safety_gate_safe_fix_allowed_count": int(
+                safety_gate_evidence.get("safe_fix_allowed_count", 0) or 0
+            ),
+            "safety_gate_review_first_count": int(
+                safety_gate_evidence.get("review_first_count", 0) or 0
+            ),
         },
     }
 
@@ -504,6 +575,8 @@ def score_patch(
 def render_markdown(payload: Mapping[str, Any]) -> str:
     decision = _as_dict(payload.get("decision"))
     history = _as_dict(payload.get("history_evidence"))
+    safety_gate = _as_dict(payload.get("safety_gate_evidence"))
+    safety_boundary = _as_dict(safety_gate.get("decision_boundary"))
     taxonomy = _as_dict(payload.get("step_error_taxonomy"))
     dimensions = _as_dict(payload.get("dimensions"))
     flags = [_as_dict(item) for item in _as_list(payload.get("risk_flags"))]
@@ -546,6 +619,43 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
             "",
             f"- Matching repeated safe-fix pattern: `{str(_bool(history.get('safe_fix_pattern_match'))).lower()}`",
             f"- Matching recurring review-first surface: `{str(_bool(history.get('review_first_surface_match'))).lower()}`",
+            (
+                "- SafetyGate evidence collection: "
+                f"`{_string(history.get('safety_gate_collection_status'))}`"
+            ),
+            (
+                "- SafetyGate safe-fix allowed records: "
+                f"`{int(history.get('safety_gate_safe_fix_allowed_count', 0) or 0)}`"
+            ),
+            (
+                "- SafetyGate review-first records: "
+                f"`{int(history.get('safety_gate_review_first_count', 0) or 0)}`"
+            ),
+            "",
+            "## SafetyGate evidence",
+            "",
+            f"- Collection status: `{_string(safety_gate.get('collection_status'))}`",
+            f"- Status: `{_string(safety_gate.get('status'))}`",
+            f"- Records: `{int(safety_gate.get('record_count', 0) or 0)}`",
+            f"- Safe-fix allowed records: `{int(safety_gate.get('safe_fix_allowed_count', 0) or 0)}`",
+            f"- Review-first records: `{int(safety_gate.get('review_first_count', 0) or 0)}`",
+            f"- Reporting-only records: `{int(safety_gate.get('reporting_only_count', 0) or 0)}`",
+            (
+                "- Automation allowed by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('automation_allowed'))).lower()}`"
+            ),
+            (
+                "- Patch application allowed by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence proven by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('semantic_equivalence_proven'))).lower()}`"
+            ),
             "",
             "## Risk flags",
             "",
