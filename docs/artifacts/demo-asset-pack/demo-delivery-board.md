@@ -1,7 +1,3 @@
-#  delivery board
+# Moved: example documentation
 
-- [ ]  script draft committed
-- [ ]  first cut rendered
-- [ ]  final cut + caption copy approved
-- [ ]  demo asset #2 backlog pre-scoped
-- [ ]  KPI instrumentation plan updated
+This compatibility page preserves the legacy public path. The professional page is now [`example-delivery-board.md`](../../artifacts/example-asset-pack/example-delivery-board.md).
