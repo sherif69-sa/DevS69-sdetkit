@@ -180,6 +180,47 @@ def _controlled_candidate_validation(evidence: Mapping[str, Any]) -> JsonObject:
     }
 
 
+def _safety_gate_evidence(pattern_insights: Mapping[str, Any]) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+    payload = _as_dict(pattern_insights.get("safety_gate_evidence"))
+    if not payload:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "trajectory.safety_gate",
+            "record_count": 0,
+            "review_first_count": 0,
+            "safe_fix_allowed_count": 0,
+            "reporting_only_count": 0,
+            "report_paths": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = _as_dict(payload.get("decision_boundary"))
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    if expanded:
+        raise ValueError("SafetyGate evidence expands authority: " + ", ".join(expanded))
+
+    return {
+        "collection_status": _string(payload.get("collection_status")) or "collected",
+        "status": _string(payload.get("status")) or "safety_gate_evidence_observed",
+        "source": _string(payload.get("source")) or "trajectory.safety_gate",
+        "record_count": _int(payload.get("record_count")),
+        "review_first_count": _int(payload.get("review_first_count")),
+        "safe_fix_allowed_count": _int(payload.get("safe_fix_allowed_count")),
+        "reporting_only_count": _int(payload.get("reporting_only_count")),
+        "report_paths": [
+            _string(item) for item in _as_list(payload.get("report_paths")) if _string(item)
+        ],
+        "decision_boundary": denied,
+    }
+
+
 def _proof_commands(benchmark_report: Mapping[str, Any]) -> list[str]:
     commands: set[str] = set()
     for scenario in _as_list(benchmark_report.get("scenarios")):
@@ -599,6 +640,7 @@ def build_repo_memory_profile(
     controlled_validation = _controlled_candidate_validation(
         controlled_candidate_validation_evidence or {}
     )
+    safety_gate_evidence = _safety_gate_evidence(pattern_insights)
     benchmark_proven = _benchmark_contract_proven(benchmark_report)
     live_proven = _live_contract_proven(live_report)
     safe_fix_history = _safe_fix_history(
@@ -654,6 +696,7 @@ def build_repo_memory_profile(
             "live_benchmark_status": _string(live_report.get("status")),
             "live_report_mode": _string(live_report.get("report_mode")),
             "live_contract_proven": live_proven,
+            "safety_gate_evidence_record_count": _int(safety_gate_evidence.get("record_count")),
         },
         "command_profile": {
             "source": "replayable_benchmark_harness",
@@ -692,6 +735,7 @@ def build_repo_memory_profile(
         "known_safe_candidate_count": len(supported_candidates),
         "live_safe_candidate_count": len(live_supported_candidates),
         "controlled_candidate_validation": controlled_validation,
+        "safety_gate_evidence": safety_gate_evidence,
         "flaky_test_registry": flaky_registry,
         "escalation_rules": _escalation_rules(),
         "unproven_boundaries": unproven_boundaries,
@@ -718,6 +762,8 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
     provenance = _as_dict(profile.get("proof_provenance"))
     failure_patterns = _as_dict(profile.get("failure_patterns"))
     controlled = _as_dict(profile.get("controlled_candidate_validation"))
+    safety_gate = _as_dict(profile.get("safety_gate_evidence"))
+    safety_boundary = _as_dict(safety_gate.get("decision_boundary"))
     flaky = _as_dict(profile.get("flaky_test_registry"))
     flaky_source = _as_dict(flaky.get("source"))
     boundary = _as_dict(profile.get("decision_boundary"))
@@ -854,6 +900,36 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
     lines.extend(
         [
             "",
+            "## SafetyGate trajectory evidence",
+            "",
+            f"- Collection status: `{_string(safety_gate.get('collection_status'))}`",
+            f"- Status: `{_string(safety_gate.get('status'))}`",
+            f"- Records: `{_int(safety_gate.get('record_count'))}`",
+            f"- Safe-fix allowed records: `{_int(safety_gate.get('safe_fix_allowed_count'))}`",
+            f"- Review-first records: `{_int(safety_gate.get('review_first_count'))}`",
+            f"- Reporting-only records: `{_int(safety_gate.get('reporting_only_count'))}`",
+            (
+                "- Automation allowed by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('automation_allowed'))).lower()}`"
+            ),
+            (
+                "- Patch application allowed by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence proven by SafetyGate evidence: "
+                f"`{str(_bool(safety_boundary.get('semantic_equivalence_proven'))).lower()}`"
+            ),
+        ]
+    )
+
+    lines.extend(
+        [
+            "",
             "## Flaky test registry",
             "",
             f"- Collection status: `{_string(flaky.get('collection_status'))}`",
@@ -971,6 +1047,9 @@ def main(argv: list[str] | None = None) -> int:
                     "controlled_candidate_validation_status": profile[
                         "controlled_candidate_validation"
                     ]["status"],
+                    "safety_gate_evidence_record_count": profile["safety_gate_evidence"][
+                        "record_count"
+                    ],
                 },
                 indent=2,
                 sort_keys=True,

@@ -184,3 +184,40 @@ def test_pattern_insights_cli_accepts_multiple_trajectory_files(
     printed = json.loads(capsys.readouterr().out)
     assert printed["insights"]["record_count"] == 5
     assert printed["insights"]["recurring_review_first_surfaces"][0]["value"] == "pr_quality"
+
+
+def test_pattern_insights_summarizes_safety_gate_evidence() -> None:
+    rows = _records()[:1]
+    rows[0]["safety_gate"] = {
+        "source": "failure_bundle.safety_summary",
+        "review_first": False,
+        "safe_fix_allowed": True,
+        "reporting_only": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "report_path": "build/pr-quality/failure-bundle/failure-bundle.md",
+    }
+
+    insights = build_pattern_insights(rows, minimum_repeat=1)
+    safety_gate = insights["safety_gate_evidence"]
+
+    assert safety_gate["collection_status"] == "collected"
+    assert safety_gate["status"] == "safety_gate_evidence_observed"
+    assert safety_gate["record_count"] == 1
+    assert safety_gate["safe_fix_allowed_count"] == 1
+    assert safety_gate["review_first_count"] == 0
+    assert safety_gate["reporting_only_count"] == 1
+    assert safety_gate["report_paths"] == ["build/pr-quality/failure-bundle/failure-bundle.md"]
+    assert safety_gate["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+    markdown = render_pattern_markdown(insights)
+    assert "## SafetyGate evidence" in markdown
+    assert "Safe-fix allowed records: `1`" in markdown
+    assert "Automation allowed by SafetyGate evidence: `false`" in markdown

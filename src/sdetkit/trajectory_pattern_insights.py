@@ -98,6 +98,58 @@ def _safe_fix_patterns(
     ]
 
 
+def _safety_gate_evidence(rows: list[JsonObject]) -> JsonObject:
+    safety_rows = [
+        _as_dict(row.get("safety_gate")) for row in rows if _as_dict(row.get("safety_gate"))
+    ]
+    if not safety_rows:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "trajectory.safety_gate",
+            "record_count": 0,
+            "review_first_count": 0,
+            "safe_fix_allowed_count": 0,
+            "reporting_only_count": 0,
+            "report_paths": [],
+            "decision_boundary": {
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        }
+
+    return {
+        "collection_status": "collected",
+        "status": "safety_gate_evidence_observed",
+        "source": "trajectory.safety_gate",
+        "record_count": len(safety_rows),
+        "review_first_count": sum(1 for row in safety_rows if _bool(row.get("review_first"))),
+        "safe_fix_allowed_count": sum(
+            1 for row in safety_rows if _bool(row.get("safe_fix_allowed"))
+        ),
+        "reporting_only_count": sum(1 for row in safety_rows if _bool(row.get("reporting_only"))),
+        "report_paths": sorted(
+            {
+                _string(row.get("report_path"))
+                for row in safety_rows
+                if _string(row.get("report_path"))
+            }
+        ),
+        "decision_boundary": {
+            "automation_allowed": any(_bool(row.get("automation_allowed")) for row in safety_rows),
+            "patch_application_allowed": any(
+                _bool(row.get("patch_application_allowed")) for row in safety_rows
+            ),
+            "merge_authorized": any(_bool(row.get("merge_authorized")) for row in safety_rows),
+            "semantic_equivalence_proven": any(
+                _bool(row.get("semantic_equivalence_proven")) for row in safety_rows
+            ),
+        },
+    }
+
+
 def _operator_focus(
     *,
     record_count: int,
@@ -198,6 +250,7 @@ def build_pattern_insights(
         "dominant_action": _dominant(actions, total=len(rows)),
         "recurring_review_first_surfaces": recurring_review_surfaces,
         "recurring_safe_fix_patterns": recurring_safe_fixes,
+        "safety_gate_evidence": _safety_gate_evidence(rows),
         "operator_focus": _operator_focus(
             record_count=len(rows),
             recurring_review_surfaces=recurring_review_surfaces,
@@ -211,6 +264,8 @@ def build_pattern_insights(
 def render_pattern_markdown(insights: Mapping[str, Any]) -> str:
     history = _as_dict(insights.get("history_summary"))
     focus = _as_dict(insights.get("operator_focus"))
+    safety_gate = _as_dict(insights.get("safety_gate_evidence"))
+    boundary = _as_dict(safety_gate.get("decision_boundary"))
 
     lines = [
         "# Trajectory pattern insights",
@@ -258,6 +313,28 @@ def render_pattern_markdown(insights: Mapping[str, Any]) -> str:
             )
     else:
         lines.append("- none")
+
+    lines.extend(
+        [
+            "",
+            "## SafetyGate evidence",
+            "",
+            f"- Collection status: `{_string(safety_gate.get('collection_status'))}`",
+            f"- Status: `{_string(safety_gate.get('status'))}`",
+            f"- Records: `{int(safety_gate.get('record_count', 0) or 0)}`",
+            f"- Safe-fix allowed records: `{int(safety_gate.get('safe_fix_allowed_count', 0) or 0)}`",
+            f"- Review-first records: `{int(safety_gate.get('review_first_count', 0) or 0)}`",
+            f"- Reporting-only records: `{int(safety_gate.get('reporting_only_count', 0) or 0)}`",
+            (
+                "- Automation allowed by SafetyGate evidence: "
+                f"`{str(_bool(boundary.get('automation_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by SafetyGate evidence: "
+                f"`{str(_bool(boundary.get('merge_authorized'))).lower()}`"
+            ),
+        ]
+    )
 
     lines.extend(
         [
