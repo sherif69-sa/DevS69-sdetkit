@@ -1,0 +1,103 @@
+{
+  "changed_file_count": 15,
+  "changed_files": [
+    {
+      "path": "docs/adaptive-product-proof-gallery.md",
+      "replacements": [
+        "Big-Brain->Adaptive Intelligence"
+      ]
+    },
+    {
+      "path": "docs/roadmap/adaptive-next-wave-roadmap.md",
+      "replacements": [
+        "Big-Brain->Adaptive Intelligence"
+      ]
+    },
+    {
+      "path": "docs/roadmap/big-brain-progress-tracker.md",
+      "replacements": [
+        "big-brain->adaptive intelligence",
+        "Big-Brain->Adaptive Intelligence"
+      ]
+    },
+    {
+      "path": "docs/roadmap/big-brain-toolkit-roadmap.md",
+      "replacements": [
+        "big-brain->adaptive intelligence",
+        "Big-Brain->Adaptive Intelligence"
+      ]
+    },
+    {
+      "path": "tests/test_big_brain_toolkit_roadmap.py",
+      "replacements": [
+        "big-brain->adaptive intelligence"
+      ]
+    },
+    {
+      "path": "tests/test_distribution_batch.py",
+      "replacements": [
+        "demo asset->example asset"
+      ]
+    },
+    {
+      "path": "tests/test_experiment_workflow.py",
+      "replacements": [
+        "demo asset->example asset"
+      ]
+    },
+    {
+      "path": "tests/test_kpi_instrumentation.py",
+      "replacements": [
+        "Demo asset->Example asset"
+      ]
+    },
+    {
+      "path": "tests/test_operational_readiness_governance_contract.py",
+      "replacements": [
+        "Phase 4->Operational readiness"
+      ]
+    },
+    {
+      "path": "tests/test_operational_readiness_release_evidence.py",
+      "replacements": [
+        "Phase 4->Operational readiness"
+      ]
+    },
+    {
+      "path": "tests/test_professional_execution_docs_language.py",
+      "replacements": [
+        "Phase 3->Platform readiness",
+        "Phase 4->Operational readiness",
+        "Phase 5->Adoption readiness",
+        "Phase 6->Scale readiness"
+      ]
+    },
+    {
+      "path": "tests/test_professional_naming_wave7_active_text.py",
+      "replacements": [
+        "Phase 1->Baseline readiness"
+      ]
+    },
+    {
+      "path": "tests/test_readiness_boost.py",
+      "replacements": [
+        "Phase 1->Baseline readiness"
+      ]
+    },
+    {
+      "path": "tests/test_release_cadence.py",
+      "replacements": [
+        "demo asset->example asset",
+        "Demo asset->Example asset"
+      ]
+    },
+    {
+      "path": "tests/test_release_readiness_kickoff.py",
+      "replacements": [
+        "demo asset->example asset"
+      ]
+    }
+  ],
+  "policy": "Active docs/tests prefer professional readiness/example/adaptive-intelligence wording. Compatibility, historical, artifact, schema, and naming-governance files are intentionally excluded.",
+  "schema_version": "sdetkit.naming.active-wording-sweep.v1"
+}

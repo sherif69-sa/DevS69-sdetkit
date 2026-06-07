@@ -30,7 +30,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/top-10-github-strategy.md").write_text(
         "- ** — KPI instrumentation:** close attribution gaps and lock weekly review metrics.\n"
-        "- ** — Demo asset #3:** produce/publish `security gate` workflow short video or GIF.\n",
+        "- ** — Example asset #3:** produce/publish `security gate` workflow short video or GIF.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-kpi-instrumentation.md").write_text(

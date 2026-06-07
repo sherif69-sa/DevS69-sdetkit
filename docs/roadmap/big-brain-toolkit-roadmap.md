@@ -1,4 +1,4 @@
-# Big-Brain Toolkit Roadmap
+# Adaptive Intelligence Toolkit Roadmap
 
 This roadmap converts the recent adaptive-diagnosis work into a product plan for making SDETKit feel like a serious, evidence-first engineering copilot instead of a static CI helper.
 
@@ -34,7 +34,7 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
 
 ## Next upgrade roadmap
 
-### Baseline readiness — Externalize the big-brain database
+### Baseline readiness — Externalize the adaptive intelligence database
 
 **Outcome:** the seeded brain becomes a maintainable data product.
 
@@ -115,7 +115,7 @@ The goal is not to hard-code millions of brittle rules. The goal is to combine a
 
 ## Completion checkpoint
 
-The Big-Brain execution plan is now complete across the immediate backlog, Operational readiness safe-remediation expansion, and Adoption readiness enterprise-scale lanes. CLI discoverability for every adaptive lane is covered by regression tests so the next work can move into a fresh roadmap wave without losing these command surfaces. The next wave is tracked in [`adaptive-next-wave-roadmap.md`](adaptive-next-wave-roadmap.md).
+The Adaptive Intelligence execution plan is now complete across the immediate backlog, Operational readiness safe-remediation expansion, and Adoption readiness enterprise-scale lanes. CLI discoverability for every adaptive lane is covered by regression tests so the next work can move into a fresh roadmap wave without losing these command surfaces. The next wave is tracked in [`adaptive-next-wave-roadmap.md`](adaptive-next-wave-roadmap.md).
 
 ## Big-win differentiators to protect
 
@@ -141,7 +141,7 @@ The Big-Brain execution plan is now complete across the immediate backlog, Opera
 
 ## Progress tracking
 
-Current measurable progress, latest movement, next-PR recommendation, and follow-up queue are tracked in [`big-brain-progress-tracker.md`](big-brain-progress-tracker.md).
+Current measurable progress, latest movement, next-PR recommendation, and follow-up queue are tracked in [`adaptive intelligence-progress-tracker.md`](adaptive intelligence-progress-tracker.md).
 
 ## Definition of “real big win”
 

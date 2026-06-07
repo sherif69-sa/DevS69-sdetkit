@@ -1,10 +1,10 @@
 # Adaptive next-wave roadmap
 
-The Big-Brain execution plan is complete. This next wave turns the completed adaptive foundation into deeper enterprise analytics, stronger remediation governance, and optional operator-facing product surfaces without weakening the review-first safety model.
+The Adaptive Intelligence execution plan is complete. This next wave turns the completed adaptive foundation into deeper enterprise analytics, stronger remediation governance, and optional operator-facing product surfaces without weakening the review-first safety model.
 
 ## Completion baseline carried forward
 
-| Completed Big-Brain lane | Proof surface to protect |
+| Completed Adaptive Intelligence lane | Proof surface to protect |
 | --- | --- |
 | Scenario packs and layered governance | `adaptive_diagnosis.load_layered_scenarios()`, `layered_scenario_pack_report()`, `validate_layered_scenario_packs()` |
 | Learning loop and calibration | `sdetkit adaptive learn record`, `sdetkit adaptive learn summarize`, `candidate_calibration=...` evidence |

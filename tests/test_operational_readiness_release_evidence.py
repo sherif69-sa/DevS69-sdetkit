@@ -75,7 +75,7 @@ def test_release_evidence_markdown_emitted(tmp_path: Path, monkeypatch) -> None:
     )
     assert md_path.exists()
     text = md_path.read_text(encoding="utf-8")
-    assert "# Phase 4 release evidence" in text
+    assert "# Operational readiness release evidence" in text
     assert "evidence_status" in text
 
 
@@ -90,7 +90,7 @@ def test_release_evidence_markdown_ordering_snapshot(tmp_path: Path, monkeypatch
     )
     text = md_path.read_text(encoding="utf-8")
     expected_sequence = [
-        "# Phase 4 release evidence",
+        "# Operational readiness release evidence",
         "## Required artifacts",
         "`docs/index.md`",
         "`docs/integrations-and-extension-boundary.md`",
