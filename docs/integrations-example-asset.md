@@ -4,7 +4,7 @@ Lane closes the first distribution-ready example asset, turning Lane release rea
 
 ## Why Lane matters
 
-- Demonstrates real value with a concise `doctor` workflow narrative.
+- Examplenstrates real value with a concise `doctor` workflow narrative.
 - Creates a repeatable media pipeline (script → cut → publish → evidence).
 - Links each example claim to runnable CLI commands and docs for trust.
 
@@ -22,14 +22,14 @@ python -m sdetkit example-asset --execute --evidence-dir docs/artifacts/example-
 python scripts/check_example_asset_contract.py
 ```
 
-## Demo production contract
+## Example production contract
 
 - Example owner: one accountable editor and one backup reviewer are assigned.
 - Target format: publish both MP4 clip and GIF teaser for social/docs embedding.
 - Runtime SLA: main example duration stays between 45 and 90 seconds.
 - Narrative shape: pain -> command -> output -> value CTA must appear in order.
 
-## Demo quality checklist
+## Example quality checklist
 
 - [ ] Shows `python -m sdetkit doctor --json` execution with readable terminal output
 - [ ] Includes before/after or problem/solution framing in first 10 seconds
