@@ -1,0 +1,6 @@
+{
+  "name": "node-no-test",
+  "scripts": {
+    "build": "tsc"
+  }
+}

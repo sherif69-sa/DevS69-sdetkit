@@ -1,0 +1,6 @@
+{
+  "name": "mixed",
+  "scripts": {
+    "build": "vite build"
+  }
+}

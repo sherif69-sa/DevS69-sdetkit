@@ -1,0 +1,5 @@
+name: ci
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
