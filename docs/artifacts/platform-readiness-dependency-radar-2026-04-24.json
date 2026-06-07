@@ -1,0 +1,51 @@
+{
+  "policy": {
+    "schema_version": "sdetkit.dependency-slo-policy.v1",
+    "thresholds": {
+      "actionable_packages_max": 12,
+      "critical_upgrade_signals_max": 0,
+      "high_priority_upgrade_signals_max": 2
+    }
+  },
+  "schema_version": "sdetkit.phase3-dependency-radar.v1",
+  "summary": {
+    "actionable_packages": 2,
+    "active_usage_packages": 1,
+    "aging_release_packages": 6,
+    "cached_metadata_packages": 0,
+    "compatible_constraint_packages": 0,
+    "critical_upgrade_signals": 0,
+    "current_release_packages": 11,
+    "declared_only_packages": 21,
+    "edge_usage_packages": 1,
+    "floor_lock_packages": 7,
+    "fresh_release_packages": 6,
+    "high_priority_upgrade_signals": 0,
+    "hot_path_packages": 2,
+    "integration_adapter_packages": 2,
+    "investigate_upgrade_signals": 0,
+    "manifest_drift_packages": 0,
+    "max_risk_score": 60,
+    "medium_priority_upgrade_signals": 1,
+    "packages_audited": 25,
+    "policy_blocked_packages": 1,
+    "policy_covered_packages": 24,
+    "python_compatible_fallback_packages": 0,
+    "python_compatible_latest_packages": 25,
+    "python_incompatible_latest_packages": 0,
+    "quality_tooling_packages": 8,
+    "runtime_core_packages": 2,
+    "stale_metadata_packages": 0,
+    "stale_release_packages": 2,
+    "unknown_release_age_packages": 0
+  },
+  "threshold_check": {
+    "breach": false,
+    "reasons": [],
+    "thresholds": {
+      "actionable_packages_max": 12,
+      "critical_upgrade_signals_max": 0,
+      "high_priority_upgrade_signals_max": 2
+    }
+  }
+}

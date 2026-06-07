@@ -461,7 +461,7 @@ def _build_follow_up_enhancements(
                 "area": "workflow",
                 "priority": "high",
                 "feature": "Add phase handoff gates with explicit entry/exit contracts for all 6 phases.",
-                "next_command": "python scripts/phase_sequential_executor.py --help",
+                "next_command": "python scripts/readiness_sequential_executor.py --help",
             }
         )
     if not bool(by_name.get("intelligence_matrix_present", {}).get("passed", False)):

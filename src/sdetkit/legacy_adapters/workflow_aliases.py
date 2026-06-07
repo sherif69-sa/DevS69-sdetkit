@@ -15,10 +15,10 @@ LEGACY_CLOSEOUT_COMMAND_MODULES: dict[str, str] = {
     "contributor-activation-closeout": "sdetkit.contributor_activation",
     "stabilization-closeout": "sdetkit.stabilization",
     "kpi-deep-audit-closeout": "sdetkit.kpi_deep_audit",
-    "phase2-hardening-closeout": "sdetkit.phase2_hardening",
-    "phase3-preplan-closeout": "sdetkit.phase3_preplan",
-    "phase2-wrap-handoff-closeout": "sdetkit.phase2_wrap_handoff",
-    "phase3-kickoff-closeout": "sdetkit.phase3_kickoff",
+    "phase2-hardening-closeout": "sdetkit.release_readiness_hardening",
+    "phase3-preplan-closeout": "sdetkit.platform_readiness_preplan",
+    "phase2-wrap-handoff-closeout": "sdetkit.release_readiness_wrap_handoff",
+    "phase3-kickoff-closeout": "sdetkit.platform_readiness_kickoff",
     "community-program-closeout": "sdetkit.community_program",
     "onboarding-activation-closeout": "sdetkit.onboarding_activation_63",
     "integration-expansion-closeout": "sdetkit.integration_expansion_64",
@@ -47,7 +47,7 @@ LEGACY_CLOSEOUT_COMMAND_MODULES: dict[str, str] = {
     "governance-handoff-closeout": "sdetkit.governance_handoff",
     "governance-priorities-closeout": "sdetkit.governance_priorities",
     "governance-scale-closeout": "sdetkit.governance_scale",
-    "phase3-wrap-publication-closeout": "sdetkit.phase3_wrap_publication",
+    "phase3-wrap-publication-closeout": "sdetkit.platform_readiness_wrap_publication",
 }
 
 

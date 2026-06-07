@@ -16,12 +16,12 @@ def test_professional_canonical_closeout_commands_preserve_modules() -> None:
     canonical = "release-readiness-hardening-completion-report"
 
     assert professional_canonical_command_for(legacy) == canonical
-    assert professional_canonical_module_for("sdetkit.phase2_hardening") == (
+    assert professional_canonical_module_for("sdetkit.release_readiness_hardening") == (
         "sdetkit.release_readiness_hardening"
     )
-    assert LEGACY_CLOSEOUT_COMMAND_MODULES[legacy] == "sdetkit.phase2_hardening"
+    assert LEGACY_CLOSEOUT_COMMAND_MODULES[legacy] == "sdetkit.release_readiness_hardening"
     assert CANONICAL_CLOSEOUT_COMMAND_MODULES[canonical] == ("sdetkit.release_readiness_hardening")
-    assert LEGACY_COMMAND_MODULES[legacy] == "sdetkit.phase2_hardening"
+    assert LEGACY_COMMAND_MODULES[legacy] == "sdetkit.release_readiness_hardening"
     assert LEGACY_COMMAND_MODULES[canonical] == "sdetkit.release_readiness_hardening"
 
 
@@ -48,12 +48,12 @@ def test_professional_canonical_command_aliases_are_registered() -> None:
 
 def test_professional_naming_aliases_preserve_private_workflow_templates() -> None:
     modules = [
-        "sdetkit.phase2_kickoff",
-        "sdetkit.phase2_hardening",
-        "sdetkit.phase2_wrap_handoff",
-        "sdetkit.phase3_preplan",
-        "sdetkit.phase3_kickoff",
-        "sdetkit.phase3_wrap_publication",
+        "sdetkit.release_readiness_kickoff",
+        "sdetkit.release_readiness_hardening",
+        "sdetkit.release_readiness_wrap_handoff",
+        "sdetkit.platform_readiness_preplan",
+        "sdetkit.platform_readiness_kickoff",
+        "sdetkit.platform_readiness_wrap_publication",
     ]
 
     for module_name in modules:
@@ -63,25 +63,27 @@ def test_professional_naming_aliases_preserve_private_workflow_templates() -> No
 
 def test_professional_naming_import_alias_modules_load() -> None:
     aliases = {
-        "sdetkit.example": "sdetkit.demo",
-        "sdetkit.example_asset": "sdetkit.demo_asset",
-        "sdetkit.example_asset2": "sdetkit.demo_asset2",
-        "sdetkit.baseline_hardening": "sdetkit.phase1_hardening",
-        "sdetkit.baseline_wrap": "sdetkit.phase1_wrap",
-        "sdetkit.release_readiness_kickoff": "sdetkit.phase2_kickoff",
-        "sdetkit.release_readiness_hardening": "sdetkit.phase2_hardening",
-        "sdetkit.release_readiness_wrap_handoff": "sdetkit.phase2_wrap_handoff",
-        "sdetkit.release_readiness_utilities": "sdetkit.phase2_utilities",
-        "sdetkit.platform_readiness_preplan": "sdetkit.phase3_preplan",
-        "sdetkit.platform_readiness_kickoff": "sdetkit.phase3_kickoff",
-        "sdetkit.platform_readiness_wrap_publication": "sdetkit.phase3_wrap_publication",
-        "sdetkit.phases.release_readiness_kickoff": "sdetkit.phases.phase2_kickoff",
-        "sdetkit.phases.release_readiness_hardening": "sdetkit.phases.phase2_hardening",
-        "sdetkit.phases.release_readiness_wrap_handoff": ("sdetkit.phases.phase2_wrap_handoff"),
-        "sdetkit.phases.platform_readiness_preplan": "sdetkit.phases.phase3_preplan",
-        "sdetkit.phases.platform_readiness_kickoff": "sdetkit.phases.phase3_kickoff",
+        "sdetkit.example": "sdetkit.example",
+        "sdetkit.example_asset": "sdetkit.example_asset",
+        "sdetkit.example_asset2": "sdetkit.example_asset2",
+        "sdetkit.baseline_hardening": "sdetkit.baseline_hardening",
+        "sdetkit.baseline_wrap": "sdetkit.baseline_wrap",
+        "sdetkit.release_readiness_kickoff": "sdetkit.release_readiness_kickoff",
+        "sdetkit.release_readiness_hardening": "sdetkit.release_readiness_hardening",
+        "sdetkit.release_readiness_wrap_handoff": "sdetkit.release_readiness_wrap_handoff",
+        "sdetkit.release_readiness_utilities": "sdetkit.release_readiness_utilities",
+        "sdetkit.platform_readiness_preplan": "sdetkit.platform_readiness_preplan",
+        "sdetkit.platform_readiness_kickoff": "sdetkit.platform_readiness_kickoff",
+        "sdetkit.platform_readiness_wrap_publication": "sdetkit.platform_readiness_wrap_publication",
+        "sdetkit.phases.release_readiness_kickoff": "sdetkit.phases.release_readiness_kickoff",
+        "sdetkit.phases.release_readiness_hardening": "sdetkit.phases.release_readiness_hardening",
+        "sdetkit.phases.release_readiness_wrap_handoff": (
+            "sdetkit.phases.release_readiness_wrap_handoff"
+        ),
+        "sdetkit.phases.platform_readiness_preplan": "sdetkit.phases.platform_readiness_preplan",
+        "sdetkit.phases.platform_readiness_kickoff": "sdetkit.phases.platform_readiness_kickoff",
         "sdetkit.phases.platform_readiness_wrap_publication": (
-            "sdetkit.phases.phase3_wrap_publication"
+            "sdetkit.phases.platform_readiness_wrap_publication"
         ),
     }
 
