@@ -1289,6 +1289,151 @@ def _patch_plan_lines(evidence_narrative: JsonObject) -> list[str]:
     return lines
 
 
+def _operator_bool(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value).lower() in {"1", "true", "yes"}
+
+
+def _operator_safetygate_summary_lines(
+    *,
+    action_report: JsonObject,
+    trajectory_records: list[JsonObject],
+    runtime_proof_artifacts: JsonObject,
+) -> list[str]:
+    failure_bundle = _as_dict(action_report.get("failure_bundle"))
+    failure_safety = _as_dict(failure_bundle.get("safety_summary"))
+
+    patch_score = _as_dict(action_report.get("patch_score"))
+    patch_decision = _as_dict(patch_score.get("decision"))
+    patch_safety = _as_dict(patch_score.get("safety_gate_evidence"))
+    patch_boundary = _as_dict(patch_safety.get("decision_boundary"))
+
+    protected_verifier = _as_dict(action_report.get("protected_verifier_result"))
+    verifier_decision = _as_dict(protected_verifier.get("decision"))
+    verifier_safety = _as_dict(protected_verifier.get("safety_gate_evidence"))
+    verifier_boundary = _as_dict(verifier_safety.get("decision_boundary"))
+
+    benchmark = _as_dict(action_report.get("benchmark_report"))
+    benchmark_safety = _as_dict(benchmark.get("safety_gate_evidence"))
+    benchmark_boundary = _as_dict(benchmark_safety.get("decision_boundary"))
+
+    repo_memory = _as_dict(action_report.get("repo_memory"))
+    memory_safety = _as_dict(repo_memory.get("safety_gate_evidence"))
+    memory_boundary = _as_dict(memory_safety.get("decision_boundary"))
+
+    runtime_boundary = _as_dict(runtime_proof_artifacts.get("decision_boundary"))
+
+    trajectory_safety_records = [
+        _as_dict(row.get("safety_gate"))
+        for row in trajectory_records
+        if _as_dict(row.get("safety_gate"))
+    ]
+
+    observed = any(
+        [
+            failure_safety,
+            patch_score,
+            protected_verifier,
+            benchmark_safety,
+            memory_safety,
+            trajectory_safety_records,
+        ]
+    )
+    if not observed:
+        return []
+
+    automation_allowed = any(
+        [
+            _operator_bool(failure_safety.get("automation_allowed")),
+            _operator_bool(patch_decision.get("automation_allowed")),
+            _operator_bool(patch_boundary.get("automation_allowed")),
+            _operator_bool(verifier_decision.get("automation_allowed")),
+            _operator_bool(verifier_boundary.get("automation_allowed")),
+            _operator_bool(benchmark_boundary.get("automation_allowed")),
+            _operator_bool(memory_boundary.get("automation_allowed")),
+            _operator_bool(runtime_boundary.get("automation_allowed")),
+            any(_operator_bool(row.get("automation_allowed")) for row in trajectory_safety_records),
+        ]
+    )
+    patch_application_allowed = any(
+        [
+            _operator_bool(failure_safety.get("patch_application_allowed")),
+            _operator_bool(patch_boundary.get("patch_application_allowed")),
+            _operator_bool(verifier_boundary.get("patch_application_allowed")),
+            _operator_bool(benchmark_boundary.get("patch_application_allowed")),
+            _operator_bool(memory_boundary.get("patch_application_allowed")),
+            any(
+                _operator_bool(row.get("patch_application_allowed"))
+                for row in trajectory_safety_records
+            ),
+        ]
+    )
+    merge_authorized = any(
+        [
+            _operator_bool(failure_safety.get("merge_authorized")),
+            _operator_bool(patch_decision.get("merge_authorized")),
+            _operator_bool(patch_boundary.get("merge_authorized")),
+            _operator_bool(verifier_decision.get("merge_authorized")),
+            _operator_bool(verifier_boundary.get("merge_authorized")),
+            _operator_bool(benchmark_boundary.get("merge_authorized")),
+            _operator_bool(memory_boundary.get("merge_authorized")),
+            _operator_bool(runtime_boundary.get("merge_authorized")),
+            any(_operator_bool(row.get("merge_authorized")) for row in trajectory_safety_records),
+        ]
+    )
+    semantic_equivalence_proven = any(
+        [
+            _operator_bool(failure_safety.get("semantic_equivalence_proven")),
+            _operator_bool(patch_decision.get("semantic_equivalence_proven")),
+            _operator_bool(patch_boundary.get("semantic_equivalence_proven")),
+            _operator_bool(verifier_decision.get("semantic_equivalence_proven")),
+            _operator_bool(verifier_boundary.get("semantic_equivalence_proven")),
+            _operator_bool(benchmark_boundary.get("semantic_equivalence_proven")),
+            _operator_bool(memory_boundary.get("semantic_equivalence_proven")),
+            _operator_bool(runtime_boundary.get("semantic_equivalence_proven")),
+            any(
+                _operator_bool(row.get("semantic_equivalence_proven"))
+                for row in trajectory_safety_records
+            ),
+        ]
+    )
+
+    next_action = (
+        "Review-first: a SafetyGate boundary attempted to expand authority."
+        if any(
+            [
+                automation_allowed,
+                patch_application_allowed,
+                merge_authorized,
+                semantic_equivalence_proven,
+            ]
+        )
+        else "Human review may use this evidence, but no automation or merge authority is granted."
+    )
+
+    return [
+        "- Failure bundle review-first: "
+        f"`{str(_operator_bool(failure_safety.get('review_first'))).lower()}`",
+        "- Failure bundle safe-fix allowed: "
+        f"`{str(_operator_bool(failure_safety.get('safe_fix_allowed'))).lower()}`",
+        f"- Trajectory SafetyGate records: `{len(trajectory_safety_records)}`",
+        f"- RepoMemory SafetyGate records: `{_int(memory_safety.get('record_count'))}`",
+        "- Replay benchmark SafetyGate scenarios: "
+        f"`{_int(benchmark_safety.get('scenario_count'))}`",
+        f"- PatchScorer status: `{_string(patch_decision.get('status')) or 'not_collected'}`",
+        f"- PatchScorer score: `{_int(patch_score.get('score'))}`",
+        "- ProtectedVerifier status: "
+        f"`{_string(verifier_decision.get('status')) or 'not_collected'}`",
+        f"- Operator next action: `{next_action}`",
+        f"- Operator summary automation allowed: `{str(automation_allowed).lower()}`",
+        f"- Operator summary patch application allowed: `{str(patch_application_allowed).lower()}`",
+        f"- Operator summary merge authorized: `{str(merge_authorized).lower()}`",
+        "- Operator summary semantic equivalence proven: "
+        f"`{str(semantic_equivalence_proven).lower()}`",
+    ]
+
+
 def render_comment_body(
     *,
     action_report: JsonObject,
@@ -1353,6 +1498,14 @@ def render_comment_body(
     runtime_proof = _runtime_proof_artifact_lines(runtime_proof_artifacts)
     if runtime_proof:
         lines.extend(["## Runtime proof artifacts", "", *runtime_proof, ""])
+
+    operator_summary = _operator_safetygate_summary_lines(
+        action_report=action_report,
+        trajectory_records=trajectory_records,
+        runtime_proof_artifacts=runtime_proof_artifacts or {},
+    )
+    if operator_summary:
+        lines.extend(["## Operator SafetyGate summary", "", *operator_summary, ""])
 
     lines.extend(
         [
