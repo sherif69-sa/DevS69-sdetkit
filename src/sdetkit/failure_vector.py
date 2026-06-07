@@ -168,10 +168,68 @@ def render_failure_vector_report(vector: FailureVector) -> str:
 
 
 def render_failure_vector_bundle_report(payload: dict[str, object]) -> str:
+    from sdetkit.safety_gate import evaluate_failure_vector
+
+    def _optional_int(value: object) -> int | None:
+        if value is None:
+            return None
+        try:
+            return int(str(value))
+        except ValueError:
+            return None
+
+    def _optional_string(value: object) -> str | None:
+        if value is None:
+            return None
+        text = str(value).strip()
+        return text or None
+
+    def _affected_files(value: object) -> tuple[str, ...]:
+        if not isinstance(value, (list, tuple)):
+            return ()
+        return tuple(str(item) for item in value if str(item).strip())
+
+    def _vector_from_payload(value: dict[object, object]) -> FailureVector:
+        return FailureVector(
+            check=str(value.get("check") or "unknown"),
+            command=str(value.get("command") or "unknown"),
+            exit_code=_optional_int(value.get("exit_code")),
+            failure_class=str(value.get("failure_class") or "unknown"),
+            risk=str(value.get("risk") or "unknown"),
+            scope=str(value.get("scope") or "unknown"),
+            reproducible_locally=str(value.get("reproducible_locally") or "not_run"),
+            safe_fix_candidate=bool(value.get("safe_fix_candidate", False)),
+            first_failing_line=str(value.get("first_failing_line") or ""),
+            affected_files=_affected_files(value.get("affected_files")),
+            log_url=_optional_string(value.get("log_url")),
+            local_repro_command=_optional_string(value.get("local_repro_command")),
+            environment=str(value.get("environment") or "unknown"),
+            schema_version=str(value.get("schema_version") or SCHEMA_VERSION),
+        )
+
     summary = payload.get("summary", {})
     summary = summary if isinstance(summary, dict) else {}
     by_class = summary.get("by_failure_class", {})
     by_class = by_class if isinstance(by_class, dict) else {}
+
+    raw_vectors = payload.get("failure_vectors", [])
+    vector_payloads = (
+        [item for item in raw_vectors if isinstance(item, dict)]
+        if isinstance(raw_vectors, list)
+        else []
+    )
+    safety_decisions = [
+        evaluate_failure_vector(_vector_from_payload(vector_payload))
+        for vector_payload in vector_payloads
+    ]
+    safe_fix_allowed_count = sum(1 for decision in safety_decisions if decision.safe_fix_allowed)
+    safety_review_first_count = sum(1 for decision in safety_decisions if decision.review_first)
+    safety_allowed_files = sorted(
+        {path for decision in safety_decisions for path in decision.allowed_files}
+    )
+    safety_proof_commands = sorted(
+        {command for decision in safety_decisions for command in decision.proof_commands}
+    )
 
     lines = [
         "# Failure Vector Bundle",
@@ -180,6 +238,26 @@ def render_failure_vector_bundle_report(payload: dict[str, object]) -> str:
         f"- failure_vector_count: `{payload.get('failure_vector_count', 0)}`",
         f"- safe_fix_candidate_count: `{summary.get('safe_fix_candidate_count', 0)}`",
         f"- review_first_count: `{summary.get('review_first_count', 0)}`",
+        "",
+        "## SafetyGate summary",
+        "",
+        f"- safe_fix_allowed_count: `{safe_fix_allowed_count}`",
+        f"- safety_review_first_count: `{safety_review_first_count}`",
+        "- safety_allowed_files: "
+        + (
+            ", ".join(f"`{path}`" for path in safety_allowed_files)
+            if safety_allowed_files
+            else "`none`"
+        ),
+        "- safety_proof_commands: "
+        + (
+            ", ".join(f"`{command}`" for command in safety_proof_commands)
+            if safety_proof_commands
+            else "`none`"
+        ),
+        "- automation_allowed: `false`",
+        "- patch_application_allowed: `false`",
+        "- merge_authorized: `false`",
         "",
         "## By failure class",
         "",
