@@ -188,7 +188,54 @@ STEP_ERROR_CATEGORIES = [
     "unsafe_authority_request",
     "false_success_claim",
     "premature_completion",
+    "wrong_helper_name",
+    "wrong_marker_patch",
+    "unsupported_helper_signature",
+    "accidental_public_cli_drift",
+    "authority_expansion_attempt",
+    "skipped_post_format_proof",
 ]
+
+OPERATOR_MISSTEP_CODE_TO_CATEGORY = {
+    "wrong_helper_name": "wrong_helper_name",
+    "wrong_marker_patch": "wrong_marker_patch",
+    "unsupported_helper_signature": "unsupported_helper_signature",
+    "accidental_public_cli_drift": "accidental_public_cli_drift",
+    "authority_expansion_attempt": "authority_expansion_attempt",
+    "skipped_post_format_proof": "skipped_post_format_proof",
+}
+
+
+def _int_from(value: Any, *, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _operator_misstep_flags(proposed_patch: Mapping[str, Any]) -> list[JsonObject]:
+    flags: list[JsonObject] = []
+    for item in _as_list(proposed_patch.get("operator_missteps")):
+        raw = _as_dict(item)
+        code = _string(raw.get("code")).lower().strip()
+        category = OPERATOR_MISSTEP_CODE_TO_CATEGORY.get(code)
+        if not category and code in STEP_ERROR_CATEGORIES:
+            category = code
+        if not category:
+            continue
+
+        blocking = _bool(raw.get("blocking"))
+        flag = _risk_flag(
+            category.upper(),
+            _string(raw.get("message")) or f"Operator misstep recorded: {category}.",
+            blocking=blocking,
+            penalty=_int_from(raw.get("penalty"), default=100 if blocking else 0),
+            files=_string_list(raw.get("files")),
+        )
+        flag["step_error_category"] = category
+        flag["source"] = "operator_misstep"
+        flags.append(flag)
+    return flags
 
 
 def _authority_claimed(payload: Mapping[str, Any]) -> bool:
@@ -216,6 +263,13 @@ def _step_error_taxonomy(flags: list[JsonObject]) -> JsonObject:
         categories.append("skipped_proof")
     if "UNSAFE_AUTHORITY_REQUEST" in codes:
         categories.append("unsafe_authority_request")
+    if "SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION" in codes:
+        categories.append("authority_expansion_attempt")
+
+    for flag in flags:
+        category = _string(flag.get("step_error_category"))
+        if category in STEP_ERROR_CATEGORIES and category not in categories:
+            categories.append(category)
 
     return {
         "schema_version": STEP_ERROR_TAXONOMY_SCHEMA_VERSION,
@@ -328,6 +382,7 @@ def score_patch(
     changed_files = _string_list(proposed_patch.get("changed_files"))
     proposed_authority_claimed = _authority_claimed(proposed_patch)
     flags: list[JsonObject] = []
+    flags.extend(_operator_misstep_flags(proposed_patch))
 
     if proposed_authority_claimed:
         flags.append(
