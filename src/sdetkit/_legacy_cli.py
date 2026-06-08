@@ -789,6 +789,21 @@ Then use stability-aware command discovery:
     adoption_learning_report.add_argument("--markdown-out", default="")
     adoption_learning_report.add_argument("--format", choices=["json", "text"], default="json")
 
+    release_anti_hijack_threat_model = sub.add_parser(
+        "release-anti-hijack-threat-model",
+        help=argparse.SUPPRESS,
+    )
+    release_anti_hijack_threat_model.add_argument(
+        "--workflow", default=".github/workflows/release.yml"
+    )
+    release_anti_hijack_threat_model.add_argument(
+        "--out", default="build/sdetkit/release-anti-hijack-threat-model.json"
+    )
+    release_anti_hijack_threat_model.add_argument("--markdown-out", default="")
+    release_anti_hijack_threat_model.add_argument(
+        "--format", choices=["json", "text"], default="json"
+    )
+
     issue_queue_classifier = sub.add_parser(
         "issue-queue-classifier",
         help="[Advanced but supported] Classify issue queue snapshots without mutation",
@@ -1658,6 +1673,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.markdown_out):
             forwarded.extend(["--markdown-out", str(ns.markdown_out)])
         return _run_module_main("sdetkit.adoption_learning_report", forwarded)
+
+    if ns.cmd == "release-anti-hijack-threat-model":
+        forwarded = [
+            "--workflow",
+            str(ns.workflow),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.markdown_out):
+            forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        return _run_module_main("sdetkit.release_anti_hijack_threat_model", forwarded)
 
     if ns.cmd == "issue-queue-classifier":
         forwarded = [
