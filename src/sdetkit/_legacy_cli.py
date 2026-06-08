@@ -715,7 +715,7 @@ Then use stability-aware command discovery:
 
     adoption_proof_recommendations = sub.add_parser(
         "adoption-proof-recommendations",
-        help="[Advanced but supported] Classify adoption proof commands for operators",
+        help=argparse.SUPPRESS,
     )
     adoption_proof_recommendations.add_argument("--root", default=".")
     adoption_proof_recommendations.add_argument("--surface-json", default="")
