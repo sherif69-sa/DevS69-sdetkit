@@ -271,6 +271,8 @@ def test_adoption_surface_payload_validator_rejects_authority_escalation() -> No
         "test_runners": [],
         "ci_systems": [],
         "security_tools": [],
+        "docs_tools": [],
+        "release_surfaces": [],
         "artifact_surfaces": [],
         "recommended_proof_commands": [],
         "review_first_unknowns": [],
@@ -348,3 +350,53 @@ def test_adoption_surface_cli_dispatch_renders_operator_report(
     assert "## Recommended proof commands" in report
     assert "auto_run_allowed=false" in report
     assert "- patch_application_allowed: false" in report
+
+
+def test_adoption_surface_detects_docs_and_release_surfaces_without_running_commands(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "mkdocs.yml", "site_name: Example\n")
+    _write(tmp_path / "docs" / "index.md", "# Example\n")
+    _write(tmp_path / "CHANGELOG.md", "# Changelog\n")
+    _write(
+        tmp_path / ".github" / "workflows" / "release.yml",
+        "name: release\non: workflow_dispatch\njobs:\n  publish:\n    runs-on: ubuntu-latest\n    steps: []\n",
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert payload["docs_tools"] == [
+        {
+            "name": "mkdocs",
+            "confidence": "high",
+            "evidence": ["mkdocs.yml", "docs/"],
+        }
+    ]
+    assert _names(payload["release_surfaces"]) == {"changelog", "release_workflow"}
+    assert "NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict" in _commands(payload)
+
+
+def test_adoption_surface_payload_validator_accepts_docs_and_release_surface_lists() -> None:
+    from sdetkit.adoption_surface import validate_adoption_surface_payload
+
+    payload = {
+        "schema_version": SCHEMA_VERSION,
+        "detected_languages": [],
+        "package_managers": [],
+        "test_runners": [],
+        "ci_systems": [],
+        "security_tools": [],
+        "docs_tools": [],
+        "release_surfaces": [],
+        "artifact_surfaces": [],
+        "recommended_proof_commands": [],
+        "review_first_unknowns": [],
+        "repo_identity": {},
+        "operator_summary": {},
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+    assert validate_adoption_surface_payload(payload) == []

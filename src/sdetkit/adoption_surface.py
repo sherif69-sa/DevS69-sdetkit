@@ -15,6 +15,8 @@ REQUIRED_LIST_FIELDS = (
     "test_runners",
     "ci_systems",
     "security_tools",
+    "docs_tools",
+    "release_surfaces",
     "artifact_surfaces",
     "recommended_proof_commands",
     "review_first_unknowns",
@@ -211,6 +213,8 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     test_runners: list[dict[str, Any]] = []
     ci_systems: list[dict[str, Any]] = []
     security_tools: list[dict[str, Any]] = []
+    docs_tools: list[dict[str, Any]] = []
+    release_surfaces: list[dict[str, Any]] = []
     artifact_surfaces: list[dict[str, Any]] = []
     recommended_proof_commands: list[dict[str, Any]] = []
     review_first_unknowns: list[str] = []
@@ -268,12 +272,25 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         )
 
     if _file(root, "mkdocs.yml"):
+        _add_named(
+            docs_tools,
+            "mkdocs",
+            confidence="high",
+            evidence=["mkdocs.yml", *(["docs/"] if _dir(root, "docs") else [])],
+        )
         _add_proof_command(
             recommended_proof_commands,
             surface="docs",
             command="NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict",
             confidence="high",
             purpose="docs",
+        )
+    elif _dir(root, "docs"):
+        _add_named(
+            docs_tools,
+            "docs_directory",
+            confidence="medium",
+            evidence=["docs/"],
         )
 
     js_evidence = [
@@ -399,6 +416,29 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     if "pip-audit" in workflow_text or "pip-audit" in python_tool_text:
         _add_named(security_tools, "pip_audit", confidence="detected", evidence=workflows)
 
+    release_workflows = [
+        path
+        for path in workflows
+        if "release" in Path(path).name.lower()
+        or "publish" in Path(path).name.lower()
+        or "release" in _read_text(root, path).lower()
+        or "publish" in _read_text(root, path).lower()
+    ]
+    if release_workflows:
+        _add_named(
+            release_surfaces,
+            "release_workflow",
+            confidence="detected",
+            evidence=release_workflows,
+        )
+    if _file(root, "CHANGELOG.md"):
+        _add_named(
+            release_surfaces,
+            "changelog",
+            confidence="detected",
+            evidence=["CHANGELOG.md"],
+        )
+
     if _file(root, "coverage.xml"):
         _add_named(artifact_surfaces, "coverage", paths=["coverage.xml"])
     if _dir(root, "dist"):
@@ -415,6 +455,8 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         "test_runners": sorted(test_runners, key=lambda item: item["name"]),
         "ci_systems": sorted(ci_systems, key=lambda item: item["name"]),
         "security_tools": sorted(security_tools, key=lambda item: item["name"]),
+        "docs_tools": sorted(docs_tools, key=lambda item: item["name"]),
+        "release_surfaces": sorted(release_surfaces, key=lambda item: item["name"]),
         "artifact_surfaces": sorted(artifact_surfaces, key=lambda item: item["name"]),
         "recommended_proof_commands": sorted(
             recommended_proof_commands,
@@ -493,6 +535,12 @@ def render_adoption_surface_report(payload: dict[str, Any]) -> str:
         "",
         "## Security tools",
         *_format_named_items(payload.get("security_tools")),
+        "",
+        "## Docs tools",
+        *_format_named_items(payload.get("docs_tools")),
+        "",
+        "## Release surfaces",
+        *_format_named_items(payload.get("release_surfaces")),
         "",
         "## Recommended proof commands",
         *_format_proof_commands(payload.get("recommended_proof_commands")),
