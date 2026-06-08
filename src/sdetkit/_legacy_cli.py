@@ -777,6 +777,17 @@ Then use stability-aware command discovery:
         "--format", choices=["json", "text"], default="json"
     )
 
+    adoption_learning_report = sub.add_parser(
+        "adoption-learning-report",
+        help=argparse.SUPPRESS,
+    )
+    adoption_learning_report.add_argument("--matrix-json", required=True)
+    adoption_learning_report.add_argument(
+        "--out", default="build/sdetkit/adoption-learning-report.json"
+    )
+    adoption_learning_report.add_argument("--markdown-out", default="")
+    adoption_learning_report.add_argument("--format", choices=["json", "text"], default="json")
+
     issue_queue_classifier = sub.add_parser(
         "issue-queue-classifier",
         help="[Advanced but supported] Classify issue queue snapshots without mutation",
@@ -1609,6 +1620,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.markdown_out):
             forwarded.extend(["--markdown-out", str(ns.markdown_out)])
         return _run_module_main("sdetkit.adoption_real_world_learning_matrix", forwarded)
+
+    if ns.cmd == "adoption-learning-report":
+        forwarded = [
+            "--matrix-json",
+            str(ns.matrix_json),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.markdown_out):
+            forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        return _run_module_main("sdetkit.adoption_learning_report", forwarded)
 
     if ns.cmd == "issue-queue-classifier":
         forwarded = [
