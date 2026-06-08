@@ -31,6 +31,10 @@ This page is the product homepage/router for first-time adoption.
 
 ### Top journeys
 
+
+- Run a read-only external-repo adoption check and inspect evidence before prescribing work
+- Convert repeated real-world repo gaps into detector, report, memory, or roadmap upgrades
+- Use the product maturity radar as a roadmap control panel without replacing review-first governance
 - Run first command in under 60 seconds
 - Validate docs links and anchors before publishing
 - Ship a first contribution with deterministic quality gates
@@ -97,6 +101,18 @@ Use this index as the primary human navigation map. The docs are organized aroun
 For a compact tree-level map, use [Docs map and organization](docs-map.md).
 
 ## Team rollout / CI
+
+## Real-world learning and governance
+
+SDETKit can now run read-only adoption and learning lanes against cloned external repositories while keeping artifacts outside the target repo. These lanes are designed for product learning and operator evidence, not automatic target patching.
+
+- Start with [Adopt in your repository](adoption.md) for external-repo readiness and adoption-surface evidence.
+- Use [Artifact reference and generated sample map](artifact-reference.md) to understand machine-readable outputs and evidence bundles.
+- Use [Investigation operator guide](investigation-operator-guide.md) when a CI log, repo shape, or proof command needs review-first diagnosis.
+- Use this docs homepage and [Docs map and organization](docs-map.md) to keep radar, report, and governance tools connected to the broader roadmap.
+
+Safety boundary: adoption and learning outputs are advisory unless an explicit guarded policy says otherwise.
+
 
 - [Adopt in your repository](adoption.md)
 - [Team adoption checklist](team-adoption-checklist.md)
