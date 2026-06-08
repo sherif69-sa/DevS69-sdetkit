@@ -761,6 +761,22 @@ Then use stability-aware command discovery:
     adoption_external_integration.add_argument("--out", default="")
     adoption_external_integration.add_argument("--format", choices=["json", "text"], default="json")
 
+    adoption_real_world_learning_matrix = sub.add_parser(
+        "adoption-real-world-learning-matrix",
+        help=argparse.SUPPRESS,
+    )
+    adoption_real_world_learning_matrix.add_argument("--matrix-json", required=True)
+    adoption_real_world_learning_matrix.add_argument(
+        "--artifact-root",
+        default="build/sdetkit/adoption-real-world-learning",
+    )
+    adoption_real_world_learning_matrix.add_argument("--out", default="")
+    adoption_real_world_learning_matrix.add_argument("--markdown-out", default="")
+    adoption_real_world_learning_matrix.add_argument("--minimum-repos", type=int, default=10)
+    adoption_real_world_learning_matrix.add_argument(
+        "--format", choices=["json", "text"], default="json"
+    )
+
     issue_queue_classifier = sub.add_parser(
         "issue-queue-classifier",
         help="[Advanced but supported] Classify issue queue snapshots without mutation",
@@ -1576,6 +1592,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.out):
             forwarded.extend(["--out", str(ns.out)])
         return _run_module_main("sdetkit.adoption_external_integration", forwarded)
+
+    if ns.cmd == "adoption-real-world-learning-matrix":
+        forwarded = [
+            "--matrix-json",
+            str(ns.matrix_json),
+            "--artifact-root",
+            str(ns.artifact_root),
+            "--minimum-repos",
+            str(ns.minimum_repos),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.out):
+            forwarded.extend(["--out", str(ns.out)])
+        if str(ns.markdown_out):
+            forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        return _run_module_main("sdetkit.adoption_real_world_learning_matrix", forwarded)
 
     if ns.cmd == "issue-queue-classifier":
         forwarded = [
