@@ -43,10 +43,11 @@ def test_first_public_readonly_trial_fixture_contains_no_source_tree() -> None:
 def test_self_learning_advances_after_first_public_readonly_trial() -> None:
     payload = build_adoption_learning_payload(Path("."))
 
-    assert payload["recommended_next_upgrade"] == "adoption evidence bundle"
+    assert payload["recommended_next_upgrade"] == "public repo trial matrix"
     assert "run first permissive public repo read-only trial" not in payload["learning_gaps"]
     assert "add proof command recommendation levels" not in payload["learning_gaps"]
     assert "add repo topology summary" not in payload["learning_gaps"]
-    assert "add adoption evidence bundle" in payload["learning_gaps"]
+    assert "add adoption evidence bundle" not in payload["learning_gaps"]
+    assert "add public repo trial matrix" in payload["learning_gaps"]
     assert payload["authority_boundary"]["automation_allowed"] is False
     assert payload["authority_boundary"]["patch_application_allowed"] is False

@@ -93,6 +93,10 @@ def _repo_topology_summary_present(repo_root: Path) -> bool:
     return (repo_root / "tests" / "test_adoption_repo_topology.py").is_file()
 
 
+def _adoption_evidence_bundle_present(repo_root: Path) -> bool:
+    return (repo_root / "tests" / "test_adoption_evidence_bundle.py").is_file()
+
+
 def _detected_strengths(surface: dict[str, Any]) -> list[str]:
     languages = set(_names(surface.get("detected_languages")))
     package_managers = set(_names(surface.get("package_managers")))
@@ -132,6 +136,7 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
     first_public_repo_trial_present = _first_public_repo_trial_present(repo_root)
     proof_recommendations_present = _proof_command_recommendation_levels_present(repo_root)
     repo_topology_summary_present = _repo_topology_summary_present(repo_root)
+    adoption_evidence_bundle_present = _adoption_evidence_bundle_present(repo_root)
 
     gaps: list[str] = []
     if languages <= {"python"} and not fixture_matrix_present:
@@ -150,8 +155,10 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
         gaps.append("add proof command recommendation levels")
     elif not repo_topology_summary_present:
         gaps.append("add repo topology summary")
-    else:
+    elif not adoption_evidence_bundle_present:
         gaps.append("add adoption evidence bundle")
+    else:
+        gaps.append("add public repo trial matrix")
     return gaps
 
 
@@ -170,6 +177,8 @@ def _recommended_next_upgrade(gaps: list[str]) -> str:
         return "repo topology summary"
     if any("adoption evidence bundle" in gap for gap in gaps):
         return "adoption evidence bundle"
+    if any("public repo trial matrix" in gap for gap in gaps):
+        return "public repo trial matrix"
     return "review learning gaps"
 
 
