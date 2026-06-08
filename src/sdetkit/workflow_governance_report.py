@@ -142,12 +142,22 @@ def analyze_workflow(repo_root: str | Path, workflow_path: str | Path) -> dict[s
     upload_artifact_used = "actions/upload-artifact" in lower
     artifact_retention = None if not upload_artifact_used else "retention-days:" in lower
 
-    cache_used = "actions/cache" in lower or "setup-python" in lower and "cache:" in lower
-    cache_key_appropriate = (
-        None
-        if not cache_used
-        else "key:" in lower and ("hashfiles(" in lower or "github.sha" in lower)
+    actions_cache_used = "actions/cache" in lower
+    setup_python_cache_used = "setup-python" in lower and "cache:" in lower
+    setup_python_cache_has_dependency_path = (
+        setup_python_cache_used and "cache-dependency-path:" in lower
     )
+    explicit_cache_key_appropriate = "key:" in lower and (
+        "hashfiles(" in lower or "github.sha" in lower
+    )
+    if not actions_cache_used and not setup_python_cache_used:
+        cache_key_appropriate = None
+    elif actions_cache_used and not explicit_cache_key_appropriate:
+        cache_key_appropriate = False
+    elif setup_python_cache_used and not setup_python_cache_has_dependency_path:
+        cache_key_appropriate = False
+    else:
+        cache_key_appropriate = True
 
     mkdocs_used = "mkdocs build" in lower
     docs_build_strict = None if not mkdocs_used else "--strict" in lower

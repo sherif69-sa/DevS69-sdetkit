@@ -163,3 +163,65 @@ jobs:
     assert "workflow_mutation: false" in stdout
     assert out.is_file()
     assert out.with_suffix(".md").is_file()
+
+
+def test_workflow_governance_accepts_setup_python_cache_dependency_path(tmp_path: Path) -> None:
+    workflow = _write(
+        tmp_path / ".github" / "workflows" / "setup-python-cache.yml",
+        """
+name: setup-python-cache
+on: [push]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@0123456789abcdef0123456789abcdef01234567
+      - uses: actions/setup-python@abcdef0123456789abcdef0123456789abcdef01
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements-test.txt
+            constraints-ci.txt
+      - run: python -m pip install -c constraints-ci.txt -e '.[test]'
+      - run: python -m pytest -q tests/test_workflow_governance_report.py -o addopts=
+""",
+    )
+
+    payload = analyze_workflow(tmp_path, workflow)
+
+    assert payload["checklist"]["cache_key_appropriate"] == "yes"
+    assert "cache_key_appropriate" not in payload["findings"]
+
+
+def test_workflow_governance_flags_setup_python_cache_without_dependency_path(
+    tmp_path: Path,
+) -> None:
+    workflow = _write(
+        tmp_path / ".github" / "workflows" / "setup-python-cache.yml",
+        """
+name: setup-python-cache
+on: [push]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@0123456789abcdef0123456789abcdef01234567
+      - uses: actions/setup-python@abcdef0123456789abcdef0123456789abcdef01
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - run: python -m pip install -c constraints-ci.txt -e '.[test]'
+      - run: python -m pytest -q tests/test_workflow_governance_report.py -o addopts=
+""",
+    )
+
+    payload = analyze_workflow(tmp_path, workflow)
+
+    assert payload["checklist"]["cache_key_appropriate"] == "no"
+    assert "cache_key_appropriate" in payload["findings"]
