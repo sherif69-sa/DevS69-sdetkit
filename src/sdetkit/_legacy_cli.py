@@ -934,6 +934,17 @@ Then use stability-aware command discovery:
     workflow_governance_report.add_argument("--markdown-out", default="")
     workflow_governance_report.add_argument("--format", choices=["json", "text"], default="json")
 
+    product_maturity_radar = sub.add_parser(
+        "product-maturity-radar",
+        help=argparse.SUPPRESS,
+    )
+    product_maturity_radar.add_argument("--root", default=".")
+    product_maturity_radar.add_argument(
+        "--out", default="build/sdetkit/product-maturity-radar.json"
+    )
+    product_maturity_radar.add_argument("--markdown-out", default="")
+    product_maturity_radar.add_argument("--format", choices=["json", "text"], default="json")
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -2079,6 +2090,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.markdown_out):
             forwarded.extend(["--markdown-out", str(ns.markdown_out)])
         return _run_module_main("sdetkit.workflow_governance_report", forwarded)
+
+    if ns.cmd == "product-maturity-radar":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.markdown_out):
+            forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        return _run_module_main("sdetkit.product_maturity_radar", forwarded)
 
     if ns.cmd == "fit":
         forwarded = [
