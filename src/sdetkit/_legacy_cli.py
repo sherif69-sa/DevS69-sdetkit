@@ -923,6 +923,17 @@ Then use stability-aware command discovery:
     )
     candidate_collision_checklist.add_argument("--format", choices=["json", "text"], default="json")
 
+    workflow_governance_report = sub.add_parser(
+        "workflow-governance-report",
+        help=argparse.SUPPRESS,
+    )
+    workflow_governance_report.add_argument("--root", default=".")
+    workflow_governance_report.add_argument(
+        "--out", default="build/sdetkit/workflow-governance-report.json"
+    )
+    workflow_governance_report.add_argument("--markdown-out", default="")
+    workflow_governance_report.add_argument("--format", choices=["json", "text"], default="json")
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -2055,6 +2066,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.out):
             forwarded.extend(["--out", str(ns.out)])
         return _run_module_main("sdetkit.repo_adoption_scan", forwarded)
+
+    if ns.cmd == "workflow-governance-report":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.markdown_out):
+            forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        return _run_module_main("sdetkit.workflow_governance_report", forwarded)
 
     if ns.cmd == "fit":
         forwarded = [
