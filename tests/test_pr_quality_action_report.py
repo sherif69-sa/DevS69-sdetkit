@@ -2617,3 +2617,79 @@ def test_action_report_operator_safetygate_summary_surfaces_authority_expansion(
     )
     assert "- Operator summary automation allowed: `true`" in body
     assert "- Operator summary merge authorized: `false`" in body
+
+
+def test_action_report_green_comment_collapses_operator_sections_by_default() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 12,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative={"quality": {"ok": True}},
+    )
+
+    assert "<summary>Primary blocker</summary>" in body
+    assert "<summary>Failed check diagnoses</summary>" in body
+    assert "<details open>" not in body
+    assert "No action required from SDETKit." in body
+
+
+def test_action_report_failure_comment_expands_operator_action_sections() -> None:
+    action = {
+        "status": "review_required",
+        "primary_blocker": {
+            "check": "ruff",
+            "title": "Ruff lint contract failed",
+            "surface": "quality",
+            "code": "RUFF_LINT_FAILURE",
+            "impact": "CI is blocked by a lint finding.",
+            "path": "src/sdetkit/check_intelligence.py",
+        },
+        "automation": {
+            "attempted": False,
+            "allowed": False,
+            "reason": "diagnosis is review-first",
+        },
+        "recommended_actions": ["Fix the lint finding."],
+        "proof_commands": ["python -m ruff check src tests"],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 1,
+        "failed_checks": [
+            {
+                "name": "ruff",
+                "safe_to_auto_fix": False,
+                "diagnosis": {
+                    "code": "RUFF_LINT_FAILURE",
+                    "title": "Ruff lint contract failed",
+                },
+            }
+        ],
+        "queued_checks": [],
+        "startup_failures": [],
+    }
+
+    body = report.render_comment_body(action_report=action, check_intelligence=intelligence)
+
+    assert "<details open>" in body
+    assert "<summary>Primary blocker</summary>" in body
+    assert "<summary>Failed check diagnoses</summary>" in body
+    assert "<summary>Recommended actions</summary>" in body
+    assert "Ruff lint contract failed" in body
+    assert "Fix the lint finding." in body
+    assert "python -m ruff check src tests" in body
