@@ -192,6 +192,118 @@ def analyze_workflow(repo_root: str | Path, workflow_path: str | Path) -> dict[s
     }
 
 
+FINDING_GUIDANCE: dict[str, dict[str, str]] = {
+    "permissions_least_privilege": {
+        "priority": "P1",
+        "product_reason": "Permission-scope findings affect workflow trust boundaries and operator confidence.",
+        "recommended_change_type": "workflow_permission_review",
+    },
+    "artifacts_have_retention": {
+        "priority": "P1",
+        "product_reason": "Artifact retention controls whether operator evidence remains inspectable after CI completes.",
+        "recommended_change_type": "artifact_retention_followup",
+    },
+    "install_uses_constraints": {
+        "priority": "P2",
+        "product_reason": "Constrained installs improve reproducibility of workflow proof lanes.",
+        "recommended_change_type": "dependency_install_reproducibility",
+    },
+    "local_equivalent_command_documented": {
+        "priority": "P2",
+        "product_reason": "Local equivalents let operators reproduce workflow evidence without depending on GitHub Actions.",
+        "recommended_change_type": "operator_reproducibility_docs",
+    },
+    "cache_key_appropriate": {
+        "priority": "P2",
+        "product_reason": "Cache-key quality protects CI determinism and avoids stale proof artifacts.",
+        "recommended_change_type": "cache_review",
+    },
+    "docs_build_strict": {
+        "priority": "P2",
+        "product_reason": "Strict docs builds protect operator-facing documentation quality.",
+        "recommended_change_type": "docs_quality_followup",
+    },
+    "actions_pinned_to_sha": {
+        "priority": "P1",
+        "product_reason": "Pinned actions protect supply-chain integrity for workflow execution.",
+        "recommended_change_type": "action_pin_followup",
+    },
+}
+
+
+def _priority_rank(priority: str) -> int:
+    order = {"P0": 0, "P1": 1, "P2": 2, "P3": 3}
+    return order.get(priority, 9)
+
+
+def _workflow_paths_for_finding(workflows: list[dict[str, Any]], finding: str) -> list[str]:
+    paths: list[str] = []
+    for workflow in workflows:
+        findings = workflow.get("findings")
+        if isinstance(findings, list) and finding in findings:
+            paths.append(str(workflow.get("path", "unknown")))
+    return sorted(paths)
+
+
+def _ranked_followups(
+    *,
+    finding_counts: dict[str, int],
+    workflows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    followups: list[dict[str, Any]] = []
+    for finding, count in finding_counts.items():
+        guidance = FINDING_GUIDANCE.get(
+            finding,
+            {
+                "priority": "P3",
+                "product_reason": "Workflow governance finding requires operator review.",
+                "recommended_change_type": "workflow_governance_followup",
+            },
+        )
+        affected_workflows = _workflow_paths_for_finding(workflows, finding)
+        followups.append(
+            {
+                "finding": finding,
+                "priority": guidance["priority"],
+                "affected_workflow_count": count,
+                "sample_workflows": affected_workflows[:8],
+                "product_reason": guidance["product_reason"],
+                "recommended_change_type": guidance["recommended_change_type"],
+                "review_first": True,
+                "safe_to_patch": False,
+            }
+        )
+
+    return sorted(
+        followups,
+        key=lambda item: (
+            _priority_rank(str(item["priority"])),
+            -int(item["affected_workflow_count"]),
+            str(item["finding"]),
+        ),
+    )
+
+
+def _actionability_summary(
+    *,
+    workflow_count: int,
+    review_required_count: int,
+    finding_count: int,
+    ranked_followups: list[dict[str, Any]],
+) -> dict[str, Any]:
+    top_followup = ranked_followups[0] if ranked_followups else {}
+    return {
+        "workflow_count": workflow_count,
+        "review_required_count": review_required_count,
+        "finding_count": finding_count,
+        "ranked_followup_count": len(ranked_followups),
+        "top_followup": top_followup.get("finding", ""),
+        "top_followup_priority": top_followup.get("priority", ""),
+        "review_first": True,
+        "safe_to_patch": False,
+    }
+
+
 def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root).resolve()
     workflows = [analyze_workflow(root, path) for path in _workflow_files(root)]
@@ -209,21 +321,41 @@ def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, A
         for finding in workflow["findings"]:
             finding_counts[finding] = finding_counts.get(finding, 0) + 1
 
+    sorted_finding_counts = dict(sorted(finding_counts.items()))
+    finding_count = sum(sorted_finding_counts.values())
+    ranked_followups = _ranked_followups(
+        finding_counts=sorted_finding_counts,
+        workflows=workflows,
+    )
+    actionability_summary = _actionability_summary(
+        workflow_count=len(workflows),
+        review_required_count=len(review_required),
+        finding_count=finding_count,
+        ranked_followups=ranked_followups,
+    )
+
     return {
         "schema_version": SCHEMA_VERSION,
         "report_status": report_status,
         "repo_root": root.as_posix(),
         "workflow_count": len(workflows),
         "review_required_count": len(review_required),
-        "finding_counts": dict(sorted(finding_counts.items())),
+        "finding_count": finding_count,
+        "finding_counts": sorted_finding_counts,
+        "ranked_followups": ranked_followups,
+        "actionability_summary": actionability_summary,
         "workflows": workflows,
         "operator_summary": {
             "status": "workflow_governance_report_generated",
             "next_action": (
-                "Review workflow governance findings before making narrow CI hardening PRs."
+                "Review ranked workflow governance followups before making narrow CI hardening PRs."
                 if review_required
                 else "No workflow governance findings detected."
             ),
+            "top_followup": actionability_summary["top_followup"],
+            "ranked_followup_count": actionability_summary["ranked_followup_count"],
+            "review_first": True,
+            "safe_to_patch": False,
         },
         "rules": {
             "advisory_only": True,
@@ -234,6 +366,10 @@ def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, A
             "secrets_read": False,
             "review_first": True,
         },
+        "advisory_only": True,
+        "repo_mutation": False,
+        "review_first": True,
+        "safe_to_patch": False,
         "automation_allowed": False,
         "patch_application_allowed": False,
         "merge_authorized": False,
@@ -249,6 +385,7 @@ def render_workflow_governance_markdown(payload: dict[str, Any]) -> str:
         f"- report_status: {payload['report_status']}",
         f"- workflow_count: {payload['workflow_count']}",
         f"- review_required_count: {payload['review_required_count']}",
+        f"- finding_count: {payload.get('finding_count', 0)}",
         "- advisory_only: true",
         "- workflow_mutation: false",
         "- review_first: true",
@@ -261,6 +398,29 @@ def render_workflow_governance_markdown(payload: dict[str, Any]) -> str:
     if isinstance(finding_counts, dict) and finding_counts:
         for name, count in sorted(finding_counts.items()):
             lines.append(f"- {name}: {count}")
+    else:
+        lines.append("- none")
+
+    lines.extend(["", "## Ranked follow-up candidates", ""])
+    ranked_followups = payload.get("ranked_followups")
+    if isinstance(ranked_followups, list) and ranked_followups:
+        for index, followup in enumerate(ranked_followups, start=1):
+            if not isinstance(followup, dict):
+                continue
+            lines.append(f"{index}. `{followup.get('finding', 'unknown')}`")
+            lines.append(f"   - priority: `{followup.get('priority', 'P3')}`")
+            lines.append(
+                f"   - affected_workflow_count: {followup.get('affected_workflow_count', 0)}"
+            )
+            lines.append(
+                f"   - recommended_change_type: `{followup.get('recommended_change_type', 'workflow_governance_followup')}`"
+            )
+            lines.append(
+                f"   - review_first: {str(bool(followup.get('review_first', True))).lower()}"
+            )
+            lines.append(
+                f"   - safe_to_patch: {str(bool(followup.get('safe_to_patch', False))).lower()}"
+            )
     else:
         lines.append("- none")
 
