@@ -135,3 +135,97 @@ def test_adoption_learning_report_cli_dispatch(tmp_path: Path, capsys) -> None:
     assert "safe_to_patch: false" in stdout
     assert out.is_file()
     assert out.with_suffix(".md").is_file()
+
+
+def test_adoption_learning_report_attaches_non_authorizing_repo_memory_profile(
+    tmp_path: Path,
+) -> None:
+    matrix_json = _matrix(tmp_path / "matrix.json")
+    repo_memory_profile = tmp_path / "repo-memory-profile.json"
+    repo_memory_profile.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.repo_memory.v6",
+                "profile_status": "live_proof_supported_memory",
+                "memory_mode": "trusted_main_profile",
+                "decision_boundary": {
+                    "automation_allowed": True,
+                    "patch_application_allowed": True,
+                    "merge_authorized": True,
+                    "semantic_equivalence_proven": True,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload = build_adoption_learning_report(
+        matrix_json,
+        repo_memory_profile=repo_memory_profile,
+    )
+
+    assert payload["rules"]["source_matrix_only"] is False
+    assert payload["rules"]["repo_memory_profile_read"] is True
+    assert payload["rules"]["repo_memory_profile_authoritative"] is False
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+    memory = payload["repo_memory_profile"]
+    assert memory["connected"] is True
+    assert memory["schema_version"] == "sdetkit.repo_memory.v6"
+    assert memory["profile_status"] == "live_proof_supported_memory"
+    assert memory["memory_mode"] == "trusted_main_profile"
+    assert memory["authoritative_for_adoption_report"] is False
+    assert memory["authority_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+
+def test_adoption_learning_report_cli_accepts_repo_memory_profile_context(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    matrix_json = _matrix(tmp_path / "matrix.json")
+    repo_memory_profile = tmp_path / "repo-memory-profile.json"
+    repo_memory_profile.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.repo_memory.v6",
+                "profile_status": "live_proof_supported_memory",
+                "memory_mode": "trusted_main_profile",
+            }
+        ),
+        encoding="utf-8",
+    )
+    out = tmp_path / "reports" / "adoption-learning-report.json"
+
+    from sdetkit.cli import main as cli_main
+
+    rc = cli_main(
+        [
+            "adoption-learning-report",
+            "--matrix-json",
+            str(matrix_json),
+            "--repo-memory-profile",
+            str(repo_memory_profile),
+            "--out",
+            str(out),
+            "--format",
+            "text",
+        ]
+    )
+
+    assert rc == 0
+    stdout = capsys.readouterr().out
+    assert "## RepoMemory profile" in stdout
+    assert "connected: true" in stdout
+    assert "authoritative_for_adoption_report: false" in stdout
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["repo_memory_profile"]["connected"] is True
+    assert payload["rules"]["repo_memory_profile_authoritative"] is False

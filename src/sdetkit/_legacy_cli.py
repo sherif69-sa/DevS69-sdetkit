@@ -782,6 +782,7 @@ Then use stability-aware command discovery:
         help=argparse.SUPPRESS,
     )
     adoption_learning_report.add_argument("--matrix-json", required=True)
+    adoption_learning_report.add_argument("--repo-memory-profile", default="")
     adoption_learning_report.add_argument(
         "--out", default="build/sdetkit/adoption-learning-report.json"
     )
@@ -1652,6 +1653,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "--format",
             str(ns.format),
         ]
+        if str(ns.repo_memory_profile):
+            forwarded.extend(["--repo-memory-profile", str(ns.repo_memory_profile)])
         if str(ns.markdown_out):
             forwarded.extend(["--markdown-out", str(ns.markdown_out)])
         return _run_module_main("sdetkit.adoption_learning_report", forwarded)
