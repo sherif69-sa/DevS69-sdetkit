@@ -20,6 +20,7 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 | Getting started | [Install](install.md), [Quickstart](quickstart-copy-paste.md), [Blank repo to value](blank-repo-to-value-60-seconds.md), [Ready to use](ready-to-use.md) | Keep these copy-pasteable and starter-oriented. |
 | Operator guide | [Operator essentials](operator-essentials.md), [Operator onboarding](operator-onboarding-7-day.md), [Recommended CI flow](recommended-ci-flow.md) | Daily operator work belongs here, not in the README. |
 | Investigation / diagnosis | [Investigation operator guide](investigation-operator-guide.md), [Adaptive Diagnosis Intelligence](adaptive-diagnosis.md), [First failure triage](first-failure-triage.md) | Diagnostic/report-only unless a guarded lane explicitly authorizes mutation. |
+| Real-world adoption and learning | [Adopt in your repository](adoption.md), [Artifact reference](artifact-reference.md), [Investigation operator guide](investigation-operator-guide.md) | Read-only external-repo evidence, learning observations, detector upgrades, and roadmap/radar control panels. |
 | Maintenance / autopilot | [Artifact reference](artifact-reference.md#maintenance-autopilot-upload-set), [Operations handbook](operations-handbook.md), [Automation bots](automation-bots.md) | Treat plans, candidates, and safe-fix outputs as evidence until reviewed policy approves the next step. |
 | Quality gates | [Premium quality gate](premium-quality-gate.md), [Security gate](security-gate.md), [Determinism checklist](determinism-checklist.md), [Determinism contract](determinism-contract.md) | Gate docs explain proof and policy, not broad default auto-fix. |
 | Artifact reference | [Artifact reference](artifact-reference.md), [CI artifact walkthrough](ci-artifact-walkthrough.md), [Evidence showcase](evidence-showcase.md) | Runtime artifacts live under `build/` and `.sdetkit/`; committed examples live under `docs/artifacts/`. |
@@ -42,6 +43,19 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 | `docs/roadmap/` | Roadmap artifacts and reports. | Keep roadmap/reporting secondary to current operator guidance. |
 
 ## Navigation rules for future cleanup
+
+## Real-world learning lanes
+
+Use these pages when SDETKit is being evaluated as a repository doctor rather than only a local release gate:
+
+| Lane | Primary pages | Operator rule |
+| --- | --- | --- |
+| Adoption surface | [Adopt in your repository](adoption.md), [Artifact reference](artifact-reference.md) | Detect repo shape and proof surfaces before recommending commands. |
+| Evidence and learning loop | [Investigation operator guide](investigation-operator-guide.md), [Adaptive Diagnosis Intelligence](adaptive-diagnosis.md) | Convert repeated gaps into detector/report/memory upgrades. |
+| Roadmap control panels | [Docs map and organization](docs-map.md), [Artifact reference](artifact-reference.md) | Use radar/report outputs to choose focused PRs; do not replace the roadmap. |
+
+External repositories remain learning targets, not patch targets. Default posture is no install, no target tests, no mutation, no target PRs/issues, and no endorsement claim.
+
 
 1. Keep the README as a concise front door; move command matrices to focused docs.
 2. Keep [Operator essentials](operator-essentials.md) as the day-to-day runbook.

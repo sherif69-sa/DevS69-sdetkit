@@ -55,6 +55,22 @@ Secondary lanes cover review, investigation, quality, maintenance, and CI automa
 
 ## Core operator lanes
 
+## Real-world learning and governance lanes
+
+SDETKit now includes read-only adoption and learning lanes for understanding real repositories before recommending proof or remediation. These lanes are advisory by default: they collect evidence, classify repo shape, surface review-first unknowns, and produce upgrade candidates for SDETKit itself without installing target dependencies, running target tests, mutating target repositories, or opening target PRs/issues.
+
+Use these lanes when you need to evaluate repository readiness beyond the local release gate:
+
+| Lane | Start here | What it proves |
+| --- | --- | --- |
+| External repo adoption | [`docs/adoption.md`](docs/adoption.md) | Detects language, package, CI, docs, release, security, artifact, and proof-command surfaces. |
+| Evidence bundles | [`docs/artifact-reference.md`](docs/artifact-reference.md) | Keeps operator evidence reviewable and machine-readable. |
+| Learning loop | [`docs/investigation-operator-guide.md`](docs/investigation-operator-guide.md) | Turns repeated gaps into detector, report, memory, or roadmap upgrades. |
+| Product maturity radar | [`docs/docs-map.md`](docs/docs-map.md) | Treats radar/report tools as control panels, not replacements for the roadmap. |
+
+Authority boundary remains unchanged: `automation_allowed=false`, `patch_application_allowed=false`, `merge_authorized=false`, and `semantic_equivalence_proven=false`.
+
+
 | Lane | Command | Start here when... |
 | --- | --- | --- |
 | Release gate | `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor` | You need a ship/no-ship decision. |
@@ -68,7 +84,6 @@ For a guided command router, run:
 ```bash
 make upgrade-next
 ```
-
 ## Product proof
 
 <!-- product-proof-start -->
