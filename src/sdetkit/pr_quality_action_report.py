@@ -682,6 +682,37 @@ def _command_lines(values: list[Any]) -> list[str]:
     return [f"- `{item}`" for item in items] or ["- none"]
 
 
+def _has_operator_content(lines: list[str]) -> bool:
+    return any(line.strip() and line.strip() != "- none" for line in lines)
+
+
+def _details_block(title: str, lines: list[str], *, open_by_default: bool = False) -> list[str]:
+    marker = " open" if open_by_default else ""
+    return [
+        f"## {title}",
+        "",
+        f"<details{marker}>",
+        f"<summary>{title}</summary>",
+        "",
+        *lines,
+        "",
+        "</details>",
+    ]
+
+
+def _operator_section(
+    title: str,
+    lines: list[str],
+    *,
+    open_when: bool = False,
+) -> list[str]:
+    return _details_block(
+        title,
+        lines,
+        open_by_default=open_when and _has_operator_content(lines),
+    )
+
+
 def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) -> list[str]:
     summary = _as_dict(runtime_proof_artifacts)
     if not summary:
@@ -1507,37 +1538,68 @@ def render_comment_body(
     if operator_summary:
         lines.extend(["## Operator SafetyGate summary", "", *operator_summary, ""])
 
+    primary_blocker_lines = _primary_blocker_lines(_as_dict(action_report.get("primary_blocker")))
+    automation_decision_lines = _automation_lines(action_report)
+    safe_fix_lines = [
+        *_safe_fix_outcome_lines(_as_dict(safe_fix_outcome)),
+        "",
+        "Remediation refresh",
+        *_remediation_refresh_lines(_as_dict(remediation_refresh)),
+    ]
+    evidence_collected_lines = _evidence_lines(check_intelligence, action_report)
+    failed_check_lines = _failed_check_lines(check_intelligence)
+    recommended_action_lines = _bullet_lines(_as_list(action_report.get("recommended_actions")))
+    required_proof_lines = _command_lines(_as_list(action_report.get("proof_commands")))
+
+    has_primary_blocker = _as_dict(action_report.get("primary_blocker")) != {}
+    has_failed_checks = bool(_as_list(check_intelligence.get("failed_checks")))
+    has_recommended_actions = _has_operator_content(recommended_action_lines)
+    has_required_proof = _has_operator_content(required_proof_lines)
+    status_needs_operator = status != "green"
+
     lines.extend(
         [
-            "## Primary blocker",
+            *_operator_section(
+                "Primary blocker",
+                primary_blocker_lines,
+                open_when=status_needs_operator or has_primary_blocker,
+            ),
             "",
-            *_primary_blocker_lines(_as_dict(action_report.get("primary_blocker"))),
+            *_operator_section(
+                "Automation decision",
+                automation_decision_lines,
+                open_when=status_needs_operator,
+            ),
             "",
-            "## Automation decision",
+            *_operator_section(
+                "Safe fix outcome",
+                safe_fix_lines,
+                open_when=status in {"safe_fix_available", "review_required"},
+            ),
             "",
-            *_automation_lines(action_report),
+            *_operator_section(
+                "Evidence collected",
+                evidence_collected_lines,
+                open_when=status_needs_operator,
+            ),
             "",
-            "## Safe fix outcome",
+            *_operator_section(
+                "Failed check diagnoses",
+                failed_check_lines,
+                open_when=has_failed_checks,
+            ),
             "",
-            *_safe_fix_outcome_lines(_as_dict(safe_fix_outcome)),
-            "Remediation refresh",
-            *_remediation_refresh_lines(_as_dict(remediation_refresh)),
+            *_operator_section(
+                "Recommended actions",
+                recommended_action_lines,
+                open_when=status_needs_operator or has_recommended_actions,
+            ),
             "",
-            "## Evidence collected",
-            "",
-            *_evidence_lines(check_intelligence, action_report),
-            "",
-            "## Failed check diagnoses",
-            "",
-            *_failed_check_lines(check_intelligence),
-            "",
-            "## Recommended actions",
-            "",
-            *_bullet_lines(_as_list(action_report.get("recommended_actions"))),
-            "",
-            "## Required proof",
-            "",
-            *_command_lines(_as_list(action_report.get("proof_commands"))),
+            *_operator_section(
+                "Required proof",
+                required_proof_lines,
+                open_when=status_needs_operator or has_required_proof,
+            ),
             "",
         ]
     )
