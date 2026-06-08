@@ -37,6 +37,7 @@ jobs:
       - name: Upload first-proof execution report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
+          retention-days: 14
           name: first-proof-execution-report
           path: |
             build/first-proof/execution-report.json
@@ -47,6 +48,7 @@ jobs:
       - name: Upload first-proof ops pack
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
+          retention-days: 14
           name: first-proof-ops-pack
           path: |
             build/first-proof/health-score.json
