@@ -738,6 +738,20 @@ Then use stability-aware command discovery:
     )
     adoption_repo_topology.add_argument("--format", choices=["json", "text"], default="json")
 
+    adoption_evidence_bundle = sub.add_parser(
+        "adoption-evidence-bundle",
+        help=argparse.SUPPRESS,
+    )
+    adoption_evidence_bundle.add_argument("--root", default=".")
+    adoption_evidence_bundle.add_argument("--surface-json", default="")
+    adoption_evidence_bundle.add_argument("--proof-json", default="")
+    adoption_evidence_bundle.add_argument("--topology-json", default="")
+    adoption_evidence_bundle.add_argument("--learning-json", default="")
+    adoption_evidence_bundle.add_argument(
+        "--out", default="build/sdetkit/adoption-evidence-bundle.json"
+    )
+    adoption_evidence_bundle.add_argument("--format", choices=["json", "text"], default="json")
+
     issue_queue_classifier = sub.add_parser(
         "issue-queue-classifier",
         help="[Advanced but supported] Classify issue queue snapshots without mutation",
@@ -1521,6 +1535,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.proof_json):
             forwarded.extend(["--proof-json", str(ns.proof_json)])
         return _run_module_main("sdetkit.adoption_repo_topology", forwarded)
+
+    if ns.cmd == "adoption-evidence-bundle":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.surface_json):
+            forwarded.extend(["--surface-json", str(ns.surface_json)])
+        if str(ns.proof_json):
+            forwarded.extend(["--proof-json", str(ns.proof_json)])
+        if str(ns.topology_json):
+            forwarded.extend(["--topology-json", str(ns.topology_json)])
+        if str(ns.learning_json):
+            forwarded.extend(["--learning-json", str(ns.learning_json)])
+        return _run_module_main("sdetkit.adoption_evidence_bundle", forwarded)
 
     if ns.cmd == "issue-queue-classifier":
         forwarded = [
