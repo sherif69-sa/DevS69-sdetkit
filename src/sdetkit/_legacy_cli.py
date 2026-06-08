@@ -713,6 +713,19 @@ Then use stability-aware command discovery:
     public_repo_eligibility.add_argument("--has-malware-or-exploit-content", action="store_true")
     public_repo_eligibility.add_argument("--format", choices=["json", "text"], default="json")
 
+    adoption_proof_recommendations = sub.add_parser(
+        "adoption-proof-recommendations",
+        help=argparse.SUPPRESS,
+    )
+    adoption_proof_recommendations.add_argument("--root", default=".")
+    adoption_proof_recommendations.add_argument("--surface-json", default="")
+    adoption_proof_recommendations.add_argument(
+        "--out", default="build/sdetkit/adoption-proof-recommendations.json"
+    )
+    adoption_proof_recommendations.add_argument(
+        "--format", choices=["json", "text"], default="json"
+    )
+
     issue_queue_classifier = sub.add_parser(
         "issue-queue-classifier",
         help="[Advanced but supported] Classify issue queue snapshots without mutation",
@@ -1468,6 +1481,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if ns.has_malware_or_exploit_content:
             forwarded.append("--has-malware-or-exploit-content")
         return _run_module_main("sdetkit.adoption_public_repo_eligibility", forwarded)
+
+    if ns.cmd == "adoption-proof-recommendations":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.surface_json):
+            forwarded.extend(["--surface-json", str(ns.surface_json)])
+        return _run_module_main("sdetkit.adoption_proof_recommendations", forwarded)
 
     if ns.cmd == "issue-queue-classifier":
         forwarded = [
