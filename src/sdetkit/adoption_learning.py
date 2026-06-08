@@ -67,6 +67,10 @@ def _fixture_repo_matrix_present(repo_root: Path) -> bool:
     return EXPECTED_FIXTURE_REPOS <= present
 
 
+def _local_external_root_smoke_present(repo_root: Path) -> bool:
+    return (repo_root / "tests" / "test_adoption_local_external_root.py").is_file()
+
+
 def _detected_strengths(surface: dict[str, Any]) -> list[str]:
     languages = set(_names(surface.get("detected_languages")))
     package_managers = set(_names(surface.get("package_managers")))
@@ -100,6 +104,7 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
     ci_systems = set(_names(surface.get("ci_systems")))
     review_unknowns = surface.get("review_first_unknowns")
     fixture_matrix_present = _fixture_repo_matrix_present(repo_root)
+    local_external_root_smoke_present = _local_external_root_smoke_present(repo_root)
 
     gaps: list[str] = []
     if languages <= {"python"} and not fixture_matrix_present:
@@ -108,7 +113,8 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
         gaps.append("add fixture coverage for non-GitHub CI providers")
     if not review_unknowns and not fixture_matrix_present:
         gaps.append("add fixtures that prove review-first unknown handling")
-    gaps.append("add local external-root smoke before public repo trials")
+    if not local_external_root_smoke_present:
+        gaps.append("add local external-root smoke before public repo trials")
     gaps.append("add public repo eligibility screen before using third-party repos")
     return gaps
 
