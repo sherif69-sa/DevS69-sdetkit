@@ -85,6 +85,10 @@ def _first_public_repo_trial_present(repo_root: Path) -> bool:
     ).is_file()
 
 
+def _proof_command_recommendation_levels_present(repo_root: Path) -> bool:
+    return (repo_root / "tests" / "test_adoption_proof_recommendations.py").is_file()
+
+
 def _detected_strengths(surface: dict[str, Any]) -> list[str]:
     languages = set(_names(surface.get("detected_languages")))
     package_managers = set(_names(surface.get("package_managers")))
@@ -123,6 +127,8 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
 
     first_public_repo_trial_present = _first_public_repo_trial_present(repo_root)
 
+    proof_recommendations_present = _proof_command_recommendation_levels_present(repo_root)
+
     gaps: list[str] = []
     if languages <= {"python"} and not fixture_matrix_present:
         gaps.append("add fixture repo matrix for non-Python repo shapes")
@@ -136,8 +142,10 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
         gaps.append("add public repo eligibility screen before using third-party repos")
     elif not first_public_repo_trial_present:
         gaps.append("run first permissive public repo read-only trial")
-    else:
+    elif not proof_recommendations_present:
         gaps.append("add proof command recommendation levels")
+    else:
+        gaps.append("add repo topology summary")
     return gaps
 
 
@@ -152,6 +160,8 @@ def _recommended_next_upgrade(gaps: list[str]) -> str:
         return "first permissive public repo read-only trial"
     if any("proof command recommendation levels" in gap for gap in gaps):
         return "proof command recommendation levels"
+    if any("repo topology summary" in gap for gap in gaps):
+        return "repo topology summary"
     return "review learning gaps"
 
 
