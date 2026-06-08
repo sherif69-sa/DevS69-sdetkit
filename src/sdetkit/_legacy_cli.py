@@ -950,6 +950,17 @@ Then use stability-aware command discovery:
     workflow_governance_report.add_argument("--markdown-out", default="")
     workflow_governance_report.add_argument("--format", choices=["json", "text"], default="json")
 
+    public_command_surface_report = sub.add_parser(
+        "public-command-surface-report",
+        help=argparse.SUPPRESS,
+    )
+    public_command_surface_report.add_argument("--root", default=".")
+    public_command_surface_report.add_argument(
+        "--out", default="build/sdetkit/public-command-surface-report.json"
+    )
+    public_command_surface_report.add_argument("--markdown-out", default="")
+    public_command_surface_report.add_argument("--format", choices=["json", "text"], default="json")
+
     product_maturity_radar = sub.add_parser(
         "product-maturity-radar",
         help=argparse.SUPPRESS,
@@ -2121,6 +2132,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.markdown_out):
             forwarded.extend(["--markdown-out", str(ns.markdown_out)])
         return _run_module_main("sdetkit.workflow_governance_report", forwarded)
+
+    if ns.cmd == "public-command-surface-report":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.markdown_out):
+            forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        return _run_module_main("sdetkit.public_command_surface_report", forwarded)
 
     if ns.cmd == "product-maturity-radar":
         forwarded = [
