@@ -64,7 +64,7 @@ def test_adoption_learning_records_current_repo_self_baseline() -> None:
     assert "make proof-after-format" in payload["observed_surfaces"]["recommended_proof_commands"]
     assert "fixture repo matrix" in payload["upgrade_candidates"]
     assert "add fixture repo matrix for non-Python repo shapes" not in payload["learning_gaps"]
-    assert payload["recommended_next_upgrade"] == "first permissive public repo read-only trial"
+    assert payload["recommended_next_upgrade"] == "proof command recommendation levels"
     assert payload["authority_boundary"]["automation_allowed"] is False
     assert payload["authority_boundary"]["patch_application_allowed"] is False
 
@@ -127,6 +127,6 @@ def test_adoption_learning_text_renderer_keeps_next_upgrade_visible() -> None:
 
     text = render_adoption_learning_text(payload)
 
-    assert "recommended_next_upgrade=first permissive public repo read-only trial" in text
+    assert "recommended_next_upgrade=proof command recommendation levels" in text
     assert "learning_gaps:" in text
     assert "- semantic_equivalence_proven=false" in text
