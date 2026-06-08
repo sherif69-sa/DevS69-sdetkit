@@ -75,6 +75,16 @@ def _public_repo_eligibility_screen_present(repo_root: Path) -> bool:
     return (repo_root / "tests" / "test_adoption_public_repo_eligibility.py").is_file()
 
 
+def _first_public_repo_trial_present(repo_root: Path) -> bool:
+    return (
+        repo_root
+        / "tests"
+        / "fixtures"
+        / "adoption_public_trials"
+        / "pallets_markupsafe_readonly_trial.json"
+    ).is_file()
+
+
 def _detected_strengths(surface: dict[str, Any]) -> list[str]:
     languages = set(_names(surface.get("detected_languages")))
     package_managers = set(_names(surface.get("package_managers")))
@@ -111,6 +121,8 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
     local_external_root_smoke_present = _local_external_root_smoke_present(repo_root)
     public_repo_eligibility_screen_present = _public_repo_eligibility_screen_present(repo_root)
 
+    first_public_repo_trial_present = _first_public_repo_trial_present(repo_root)
+
     gaps: list[str] = []
     if languages <= {"python"} and not fixture_matrix_present:
         gaps.append("add fixture repo matrix for non-Python repo shapes")
@@ -122,8 +134,10 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
         gaps.append("add local external-root smoke before public repo trials")
     if not public_repo_eligibility_screen_present:
         gaps.append("add public repo eligibility screen before using third-party repos")
-    else:
+    elif not first_public_repo_trial_present:
         gaps.append("run first permissive public repo read-only trial")
+    else:
+        gaps.append("add proof command recommendation levels")
     return gaps
 
 
@@ -136,6 +150,8 @@ def _recommended_next_upgrade(gaps: list[str]) -> str:
         return "public repo eligibility screen"
     if any("first permissive public repo read-only trial" in gap for gap in gaps):
         return "first permissive public repo read-only trial"
+    if any("proof command recommendation levels" in gap for gap in gaps):
+        return "proof command recommendation levels"
     return "review learning gaps"
 
 

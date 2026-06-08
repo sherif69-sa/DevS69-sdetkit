@@ -119,12 +119,13 @@ def test_local_external_root_cli_dispatch_writes_artifact_outside_target(
 def test_self_learning_advances_to_public_repo_eligibility_after_local_smoke() -> None:
     payload = build_adoption_learning_payload(Path("."))
 
-    assert payload["recommended_next_upgrade"] == "first permissive public repo read-only trial"
+    assert payload["recommended_next_upgrade"] == "proof command recommendation levels"
     assert "add local external-root smoke before public repo trials" not in payload["learning_gaps"]
     assert (
         "add public repo eligibility screen before using third-party repos"
         not in payload["learning_gaps"]
     )
-    assert "run first permissive public repo read-only trial" in payload["learning_gaps"]
+    assert "run first permissive public repo read-only trial" not in payload["learning_gaps"]
+    assert "add proof command recommendation levels" in payload["learning_gaps"]
     assert payload["authority_boundary"]["automation_allowed"] is False
     assert payload["authority_boundary"]["patch_application_allowed"] is False

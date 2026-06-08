@@ -194,10 +194,10 @@ def test_adoption_surface_fixture_reports_remain_operator_readable(fixture: str)
 def test_adoption_learning_uses_fixture_matrix_as_next_upgrade_source() -> None:
     payload = build_adoption_learning_payload(Path("."))
 
-    assert payload["recommended_next_upgrade"] == "first permissive public repo read-only trial"
+    assert payload["recommended_next_upgrade"] == "proof command recommendation levels"
     assert "fixture repo matrix" in payload["upgrade_candidates"]
     assert "add fixture repo matrix for non-Python repo shapes" not in payload["learning_gaps"]
-    assert payload["recommended_next_upgrade"] == "first permissive public repo read-only trial"
+    assert payload["recommended_next_upgrade"] == "proof command recommendation levels"
     assert "add fixture coverage for non-GitHub CI providers" not in payload["learning_gaps"]
     assert "add fixtures that prove review-first unknown handling" not in payload["learning_gaps"]
     assert "add local external-root smoke before public repo trials" not in payload["learning_gaps"]
@@ -205,7 +205,8 @@ def test_adoption_learning_uses_fixture_matrix_as_next_upgrade_source() -> None:
         "add public repo eligibility screen before using third-party repos"
         not in payload["learning_gaps"]
     )
-    assert "run first permissive public repo read-only trial" in payload["learning_gaps"]
+    assert "run first permissive public repo read-only trial" not in payload["learning_gaps"]
+    assert "add proof command recommendation levels" in payload["learning_gaps"]
 
 
 def test_fixture_matrix_proves_review_first_unknown_handling() -> None:

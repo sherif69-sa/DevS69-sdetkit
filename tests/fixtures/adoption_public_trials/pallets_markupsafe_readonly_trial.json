@@ -1,0 +1,27 @@
+{
+  "schema_version": "sdetkit.public_repo_readonly_trial.v1",
+  "trial_name": "pallets_markupsafe_readonly_trial",
+  "repo_url": "https://github.com/pallets/markupsafe",
+  "repo_full_name": "pallets/markupsafe",
+  "license_id": "BSD-3-Clause",
+  "eligibility_allowed_for_read_only_trial": true,
+  "trial_mode": "manual_read_only_public_repo",
+  "source_code_vendored": false,
+  "dependency_install_performed": false,
+  "target_tests_executed": false,
+  "target_repo_mutated": false,
+  "target_pr_or_issue_opened": false,
+  "endorsement_claimed": false,
+  "expected_observations": {
+    "is_current_sdetkit_repo": false,
+    "git_detected": true,
+    "detected_language": "python"
+  },
+  "authority_boundary": {
+    "automation_allowed": false,
+    "patch_application_allowed": false,
+    "merge_authorized": false,
+    "semantic_equivalence_proven": false
+  },
+  "recommended_next_upgrade_after_trial": "proof command recommendation levels"
+}
