@@ -693,6 +693,26 @@ Then use stability-aware command discovery:
     adoption_learning.add_argument("--trial-name", default="self_adoption_baseline")
     adoption_learning.add_argument("--format", choices=["json", "text"], default="json")
 
+    public_repo_eligibility = sub.add_parser(
+        "public-repo-eligibility",
+        help="[Advanced but supported] Screen public repo eligibility for read-only trials",
+    )
+    public_repo_eligibility.add_argument("--repo-url", required=True)
+    public_repo_eligibility.add_argument("--license", dest="license_id", required=True)
+    public_repo_eligibility.add_argument(
+        "--out", default="build/sdetkit/public-repo-eligibility.json"
+    )
+    public_repo_eligibility.add_argument(
+        "--repo-size", choices=["small", "medium", "large", "huge"], default="small"
+    )
+    public_repo_eligibility.add_argument("--private", action="store_true")
+    public_repo_eligibility.add_argument("--owned-by-us", action="store_true")
+    public_repo_eligibility.add_argument("--has-no-ai-notice", action="store_true")
+    public_repo_eligibility.add_argument("--has-no-benchmark-notice", action="store_true")
+    public_repo_eligibility.add_argument("--has-security-sensitive-content", action="store_true")
+    public_repo_eligibility.add_argument("--has-malware-or-exploit-content", action="store_true")
+    public_repo_eligibility.add_argument("--format", choices=["json", "text"], default="json")
+
     issue_queue_classifier = sub.add_parser(
         "issue-queue-classifier",
         help="[Advanced but supported] Classify issue queue snapshots without mutation",
@@ -1421,6 +1441,33 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.surface_json):
             forwarded.extend(["--surface-json", str(ns.surface_json)])
         return _run_module_main("sdetkit.adoption_learning", forwarded)
+
+    if ns.cmd == "public-repo-eligibility":
+        forwarded = [
+            "--repo-url",
+            str(ns.repo_url),
+            "--license",
+            str(ns.license_id),
+            "--out",
+            str(ns.out),
+            "--repo-size",
+            str(ns.repo_size),
+            "--format",
+            str(ns.format),
+        ]
+        if ns.private:
+            forwarded.append("--private")
+        if ns.owned_by_us:
+            forwarded.append("--owned-by-us")
+        if ns.has_no_ai_notice:
+            forwarded.append("--has-no-ai-notice")
+        if ns.has_no_benchmark_notice:
+            forwarded.append("--has-no-benchmark-notice")
+        if ns.has_security_sensitive_content:
+            forwarded.append("--has-security-sensitive-content")
+        if ns.has_malware_or_exploit_content:
+            forwarded.append("--has-malware-or-exploit-content")
+        return _run_module_main("sdetkit.adoption_public_repo_eligibility", forwarded)
 
     if ns.cmd == "issue-queue-classifier":
         forwarded = [

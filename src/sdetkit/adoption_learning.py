@@ -71,6 +71,10 @@ def _local_external_root_smoke_present(repo_root: Path) -> bool:
     return (repo_root / "tests" / "test_adoption_local_external_root.py").is_file()
 
 
+def _public_repo_eligibility_screen_present(repo_root: Path) -> bool:
+    return (repo_root / "tests" / "test_adoption_public_repo_eligibility.py").is_file()
+
+
 def _detected_strengths(surface: dict[str, Any]) -> list[str]:
     languages = set(_names(surface.get("detected_languages")))
     package_managers = set(_names(surface.get("package_managers")))
@@ -105,6 +109,7 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
     review_unknowns = surface.get("review_first_unknowns")
     fixture_matrix_present = _fixture_repo_matrix_present(repo_root)
     local_external_root_smoke_present = _local_external_root_smoke_present(repo_root)
+    public_repo_eligibility_screen_present = _public_repo_eligibility_screen_present(repo_root)
 
     gaps: list[str] = []
     if languages <= {"python"} and not fixture_matrix_present:
@@ -115,7 +120,10 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
         gaps.append("add fixtures that prove review-first unknown handling")
     if not local_external_root_smoke_present:
         gaps.append("add local external-root smoke before public repo trials")
-    gaps.append("add public repo eligibility screen before using third-party repos")
+    if not public_repo_eligibility_screen_present:
+        gaps.append("add public repo eligibility screen before using third-party repos")
+    else:
+        gaps.append("run first permissive public repo read-only trial")
     return gaps
 
 
@@ -126,6 +134,8 @@ def _recommended_next_upgrade(gaps: list[str]) -> str:
         return "local external root smoke"
     if any("public repo eligibility screen" in gap for gap in gaps):
         return "public repo eligibility screen"
+    if any("first permissive public repo read-only trial" in gap for gap in gaps):
+        return "first permissive public repo read-only trial"
     return "review learning gaps"
 
 
