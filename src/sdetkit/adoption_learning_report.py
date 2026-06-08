@@ -61,6 +61,34 @@ def _int_value(value: object, *, default: int = 0) -> int:
         return default
 
 
+def _repo_memory_profile_summary(profile_path: str | Path | None) -> dict[str, Any]:
+    if not profile_path:
+        return {
+            "connected": False,
+            "path": "",
+            "schema_version": "",
+            "profile_status": "not_provided",
+            "memory_mode": "",
+            "review_first": True,
+            "authoritative_for_adoption_report": False,
+            "authority_boundary": _authority_boundary(),
+        }
+
+    resolved = Path(profile_path).resolve()
+    profile = _load_json_object(resolved)
+
+    return {
+        "connected": True,
+        "path": resolved.as_posix(),
+        "schema_version": str(profile.get("schema_version", "")).strip(),
+        "profile_status": str(profile.get("profile_status", "unknown")).strip(),
+        "memory_mode": str(profile.get("memory_mode", "")).strip(),
+        "review_first": True,
+        "authoritative_for_adoption_report": False,
+        "authority_boundary": _authority_boundary(),
+    }
+
+
 def _candidate_score(candidate: dict[str, Any]) -> int:
     classification = str(candidate.get("classification", "")).strip()
     frequency = _int_value(candidate.get("frequency_across_matrix"))
@@ -111,9 +139,14 @@ def _candidate_summary(candidate: dict[str, Any], *, rank: int) -> dict[str, Any
     }
 
 
-def build_adoption_learning_report(matrix_json: str | Path) -> dict[str, Any]:
+def build_adoption_learning_report(
+    matrix_json: str | Path,
+    *,
+    repo_memory_profile: str | Path | None = None,
+) -> dict[str, Any]:
     matrix_path = Path(matrix_json).resolve()
     matrix = _load_json_object(matrix_path)
+    repo_memory_summary = _repo_memory_profile_summary(repo_memory_profile)
 
     raw_candidates = matrix.get("upgrade_candidates")
     if not isinstance(raw_candidates, list):
@@ -142,6 +175,7 @@ def build_adoption_learning_report(matrix_json: str | Path) -> dict[str, Any]:
         "candidate_count": len(prioritized),
         "top_candidate": top_candidate,
         "prioritized_upgrade_candidates": prioritized,
+        "repo_memory_profile": repo_memory_summary,
         "operator_summary": {
             "status": "review_first_learning_report_generated",
             "next_action": (
@@ -151,7 +185,9 @@ def build_adoption_learning_report(matrix_json: str | Path) -> dict[str, Any]:
             ),
         },
         "rules": {
-            "source_matrix_only": True,
+            "source_matrix_only": not repo_memory_summary["connected"],
+            "repo_memory_profile_read": repo_memory_summary["connected"],
+            "repo_memory_profile_authoritative": False,
             "target_repos_read": False,
             "install_dependencies": False,
             "target_tests_executed": False,
@@ -200,6 +236,20 @@ def render_adoption_learning_report_markdown(payload: dict[str, Any]) -> str:
             lines.append("   - review_first: true")
             lines.append("   - safe_to_patch: false")
 
+    repo_memory = payload.get("repo_memory_profile")
+    if not isinstance(repo_memory, dict):
+        repo_memory = {}
+    lines.extend(
+        [
+            "",
+            "## RepoMemory profile",
+            "",
+            f"- connected: {str(repo_memory.get('connected', False)).lower()}",
+            f"- profile_status: {repo_memory.get('profile_status', 'unknown')}",
+            "- authoritative_for_adoption_report: false",
+        ]
+    )
+
     lines.extend(
         [
             "",
@@ -220,8 +270,12 @@ def write_adoption_learning_report_artifacts(
     matrix_json: str | Path,
     out: str | Path,
     markdown_out: str | Path | None = None,
+    repo_memory_profile: str | Path | None = None,
 ) -> dict[str, Any]:
-    payload = build_adoption_learning_report(matrix_json)
+    payload = build_adoption_learning_report(
+        matrix_json,
+        repo_memory_profile=repo_memory_profile,
+    )
     out_path = Path(out)
     markdown_path = Path(markdown_out) if markdown_out else out_path.with_suffix(".md")
 
@@ -242,6 +296,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         description="Prioritize review-first upgrade candidates from an adoption matrix artifact.",
     )
     parser.add_argument("--matrix-json", required=True)
+    parser.add_argument("--repo-memory-profile", default="")
     parser.add_argument("--out", default="build/sdetkit/adoption-learning-report.json")
     parser.add_argument("--markdown-out", default="")
     parser.add_argument("--format", choices=["json", "text"], default="json")
@@ -251,6 +306,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         matrix_json=ns.matrix_json,
         out=ns.out,
         markdown_out=ns.markdown_out or None,
+        repo_memory_profile=ns.repo_memory_profile or None,
     )
 
     if ns.format == "json":
