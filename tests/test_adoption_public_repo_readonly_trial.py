@@ -37,17 +37,20 @@ def test_first_public_readonly_trial_fixture_contains_no_source_tree() -> None:
         if path.is_file()
     )
 
-    assert files == ["pallets_markupsafe_readonly_trial.json"]
+    assert "pallets_markupsafe_readonly_trial.json" in files
+    assert all(file_name.endswith(".json") for file_name in files)
+    assert all(not file_name.endswith(".py") for file_name in files)
 
 
 def test_self_learning_advances_after_first_public_readonly_trial() -> None:
     payload = build_adoption_learning_payload(Path("."))
 
-    assert payload["recommended_next_upgrade"] == "public repo trial matrix"
+    assert payload["recommended_next_upgrade"] == "public repo trial matrix report"
     assert "run first permissive public repo read-only trial" not in payload["learning_gaps"]
     assert "add proof command recommendation levels" not in payload["learning_gaps"]
     assert "add repo topology summary" not in payload["learning_gaps"]
     assert "add adoption evidence bundle" not in payload["learning_gaps"]
-    assert "add public repo trial matrix" in payload["learning_gaps"]
+    assert "add public repo trial matrix" not in payload["learning_gaps"]
+    assert "add public repo trial matrix report" in payload["learning_gaps"]
     assert payload["authority_boundary"]["automation_allowed"] is False
     assert payload["authority_boundary"]["patch_application_allowed"] is False

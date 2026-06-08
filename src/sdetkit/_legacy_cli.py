@@ -752,6 +752,15 @@ Then use stability-aware command discovery:
     )
     adoption_evidence_bundle.add_argument("--format", choices=["json", "text"], default="json")
 
+    adoption_external_integration = sub.add_parser(
+        "adoption-external-integration",
+        help=argparse.SUPPRESS,
+    )
+    adoption_external_integration.add_argument("--target-root", required=True)
+    adoption_external_integration.add_argument("--artifact-dir", required=True)
+    adoption_external_integration.add_argument("--out", default="")
+    adoption_external_integration.add_argument("--format", choices=["json", "text"], default="json")
+
     issue_queue_classifier = sub.add_parser(
         "issue-queue-classifier",
         help="[Advanced but supported] Classify issue queue snapshots without mutation",
@@ -1554,6 +1563,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.learning_json):
             forwarded.extend(["--learning-json", str(ns.learning_json)])
         return _run_module_main("sdetkit.adoption_evidence_bundle", forwarded)
+
+    if ns.cmd == "adoption-external-integration":
+        forwarded = [
+            "--target-root",
+            str(ns.target_root),
+            "--artifact-dir",
+            str(ns.artifact_dir),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.out):
+            forwarded.extend(["--out", str(ns.out)])
+        return _run_module_main("sdetkit.adoption_external_integration", forwarded)
 
     if ns.cmd == "issue-queue-classifier":
         forwarded = [
