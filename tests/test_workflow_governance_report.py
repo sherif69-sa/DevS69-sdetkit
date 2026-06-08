@@ -225,3 +225,115 @@ jobs:
 
     assert payload["checklist"]["cache_key_appropriate"] == "no"
     assert "cache_key_appropriate" in payload["findings"]
+
+
+def test_workflow_governance_report_exposes_top_level_actionability_contract(
+    tmp_path: Path,
+) -> None:
+    _write(
+        tmp_path / ".github" / "workflows" / "ci.yml",
+        """
+name: ci
+on: [pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install -e '.[dev,test]'
+""",
+    )
+
+    payload = build_workflow_governance_report(tmp_path)
+
+    assert payload["finding_count"] == sum(payload["finding_counts"].values())
+    assert payload["advisory_only"] is True
+    assert payload["repo_mutation"] is False
+    assert payload["review_first"] is True
+    assert payload["safe_to_patch"] is False
+    assert payload["operator_summary"]["review_first"] is True
+    assert payload["operator_summary"]["safe_to_patch"] is False
+
+    summary = payload["actionability_summary"]
+    assert summary["workflow_count"] == 1
+    assert summary["review_required_count"] == 1
+    assert summary["finding_count"] == payload["finding_count"]
+    assert summary["ranked_followup_count"] == len(payload["ranked_followups"])
+    assert summary["review_first"] is True
+    assert summary["safe_to_patch"] is False
+
+
+def test_workflow_governance_report_ranks_product_followups_without_authority(
+    tmp_path: Path,
+) -> None:
+    _write(
+        tmp_path / ".github" / "workflows" / "bot.yml",
+        """
+name: bot
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@0123456789abcdef0123456789abcdef01234567
+      - uses: actions/upload-artifact@1111111111111111111111111111111111111111
+        with:
+          name: evidence
+          path: build/evidence
+""",
+    )
+
+    payload = build_workflow_governance_report(tmp_path)
+
+    ranked = payload["ranked_followups"]
+    assert ranked
+
+    by_finding = {item["finding"]: item for item in ranked}
+    assert "permissions_least_privilege" in by_finding
+    assert "artifacts_have_retention" in by_finding
+
+    permissions = by_finding["permissions_least_privilege"]
+    assert permissions["priority"] == "P1"
+    assert permissions["recommended_change_type"] == "workflow_permission_review"
+    assert permissions["review_first"] is True
+    assert permissions["safe_to_patch"] is False
+    assert permissions["sample_workflows"] == [".github/workflows/bot.yml"]
+
+    retention = by_finding["artifacts_have_retention"]
+    assert retention["priority"] == "P1"
+    assert retention["recommended_change_type"] == "artifact_retention_followup"
+    assert retention["review_first"] is True
+    assert retention["safe_to_patch"] is False
+
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+
+def test_workflow_governance_markdown_includes_ranked_followups(tmp_path: Path) -> None:
+    _write(
+        tmp_path / ".github" / "workflows" / "ci.yml",
+        """
+name: ci
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+""",
+    )
+    out = tmp_path / "build" / "workflow-governance-report.json"
+
+    write_workflow_governance_report(repo_root=tmp_path, out=out)
+
+    markdown = out.with_suffix(".md").read_text(encoding="utf-8")
+    assert "finding_count:" in markdown
+    assert "## Ranked follow-up candidates" in markdown
+    assert "recommended_change_type" in markdown
+    assert "review_first: true" in markdown
+    assert "safe_to_patch: false" in markdown
