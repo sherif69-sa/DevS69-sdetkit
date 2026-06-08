@@ -112,8 +112,9 @@ def test_proof_recommendations_writer_records_json(tmp_path: Path) -> None:
 def test_self_learning_advances_after_proof_recommendations_exist() -> None:
     payload = build_adoption_learning_payload(Path("."))
 
-    assert payload["recommended_next_upgrade"] == "repo topology summary"
+    assert payload["recommended_next_upgrade"] == "adoption evidence bundle"
     assert "add proof command recommendation levels" not in payload["learning_gaps"]
-    assert "add repo topology summary" in payload["learning_gaps"]
+    assert "add repo topology summary" not in payload["learning_gaps"]
+    assert "add adoption evidence bundle" in payload["learning_gaps"]
     assert payload["authority_boundary"]["automation_allowed"] is False
     assert payload["authority_boundary"]["patch_application_allowed"] is False

@@ -726,6 +726,18 @@ Then use stability-aware command discovery:
         "--format", choices=["json", "text"], default="json"
     )
 
+    adoption_repo_topology = sub.add_parser(
+        "adoption-repo-topology",
+        help=argparse.SUPPRESS,
+    )
+    adoption_repo_topology.add_argument("--root", default=".")
+    adoption_repo_topology.add_argument("--surface-json", default="")
+    adoption_repo_topology.add_argument("--proof-json", default="")
+    adoption_repo_topology.add_argument(
+        "--out", default="build/sdetkit/adoption-repo-topology.json"
+    )
+    adoption_repo_topology.add_argument("--format", choices=["json", "text"], default="json")
+
     issue_queue_classifier = sub.add_parser(
         "issue-queue-classifier",
         help="[Advanced but supported] Classify issue queue snapshots without mutation",
@@ -1494,6 +1506,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         if str(ns.surface_json):
             forwarded.extend(["--surface-json", str(ns.surface_json)])
         return _run_module_main("sdetkit.adoption_proof_recommendations", forwarded)
+
+    if ns.cmd == "adoption-repo-topology":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.surface_json):
+            forwarded.extend(["--surface-json", str(ns.surface_json)])
+        if str(ns.proof_json):
+            forwarded.extend(["--proof-json", str(ns.proof_json)])
+        return _run_module_main("sdetkit.adoption_repo_topology", forwarded)
 
     if ns.cmd == "issue-queue-classifier":
         forwarded = [

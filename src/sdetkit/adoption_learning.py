@@ -89,6 +89,10 @@ def _proof_command_recommendation_levels_present(repo_root: Path) -> bool:
     return (repo_root / "tests" / "test_adoption_proof_recommendations.py").is_file()
 
 
+def _repo_topology_summary_present(repo_root: Path) -> bool:
+    return (repo_root / "tests" / "test_adoption_repo_topology.py").is_file()
+
+
 def _detected_strengths(surface: dict[str, Any]) -> list[str]:
     languages = set(_names(surface.get("detected_languages")))
     package_managers = set(_names(surface.get("package_managers")))
@@ -121,13 +125,13 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
     languages = set(_names(surface.get("detected_languages")))
     ci_systems = set(_names(surface.get("ci_systems")))
     review_unknowns = surface.get("review_first_unknowns")
+
     fixture_matrix_present = _fixture_repo_matrix_present(repo_root)
     local_external_root_smoke_present = _local_external_root_smoke_present(repo_root)
     public_repo_eligibility_screen_present = _public_repo_eligibility_screen_present(repo_root)
-
     first_public_repo_trial_present = _first_public_repo_trial_present(repo_root)
-
     proof_recommendations_present = _proof_command_recommendation_levels_present(repo_root)
+    repo_topology_summary_present = _repo_topology_summary_present(repo_root)
 
     gaps: list[str] = []
     if languages <= {"python"} and not fixture_matrix_present:
@@ -144,8 +148,10 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
         gaps.append("run first permissive public repo read-only trial")
     elif not proof_recommendations_present:
         gaps.append("add proof command recommendation levels")
-    else:
+    elif not repo_topology_summary_present:
         gaps.append("add repo topology summary")
+    else:
+        gaps.append("add adoption evidence bundle")
     return gaps
 
 
@@ -162,6 +168,8 @@ def _recommended_next_upgrade(gaps: list[str]) -> str:
         return "proof command recommendation levels"
     if any("repo topology summary" in gap for gap in gaps):
         return "repo topology summary"
+    if any("adoption evidence bundle" in gap for gap in gaps):
+        return "adoption evidence bundle"
     return "review learning gaps"
 
 
