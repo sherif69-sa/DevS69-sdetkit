@@ -1,0 +1,44 @@
+{
+  "schema_version": "sdetkit.public_repo_trial_matrix.v1",
+  "matrix_name": "pallets_public_readonly_trial_matrix",
+  "trial_mode": "manual_read_only_public_repo_matrix",
+  "source_code_vendored": false,
+  "dependency_install_performed": false,
+  "target_tests_executed": false,
+  "target_repo_mutated": false,
+  "target_pr_or_issue_opened": false,
+  "endorsement_claimed": false,
+  "trials": [
+    {
+      "repo_full_name": "pallets/markupsafe",
+      "repo_url": "https://github.com/pallets/markupsafe",
+      "license_id": "BSD-3-Clause",
+      "expected_primary_language": "python",
+      "eligibility_allowed_for_read_only_trial": true,
+      "prior_single_repo_trial": true
+    },
+    {
+      "repo_full_name": "pallets/click",
+      "repo_url": "https://github.com/pallets/click",
+      "license_id": "BSD-3-Clause",
+      "expected_primary_language": "python",
+      "eligibility_allowed_for_read_only_trial": true,
+      "prior_single_repo_trial": false
+    },
+    {
+      "repo_full_name": "pallets/itsdangerous",
+      "repo_url": "https://github.com/pallets/itsdangerous",
+      "license_id": "BSD-3-Clause",
+      "expected_primary_language": "python",
+      "eligibility_allowed_for_read_only_trial": true,
+      "prior_single_repo_trial": false
+    }
+  ],
+  "authority_boundary": {
+    "automation_allowed": false,
+    "patch_application_allowed": false,
+    "merge_authorized": false,
+    "semantic_equivalence_proven": false
+  },
+  "recommended_next_upgrade_after_matrix": "public repo trial matrix report"
+}
