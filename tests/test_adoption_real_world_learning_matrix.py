@@ -186,3 +186,31 @@ def test_real_world_learning_matrix_cli_dispatch(tmp_path: Path, capsys) -> None
     assert "install_dependencies: false" in stdout
     assert (artifact_root / "adoption-real-world-matrix.json").is_file()
     assert (artifact_root / "adoption-real-world-matrix.md").is_file()
+
+
+def test_real_world_learning_matrix_uses_docs_and_release_detector_fields(
+    tmp_path: Path,
+) -> None:
+    matrix_json, _snapshots = _matrix(tmp_path)
+    artifact_root = tmp_path / "artifacts"
+
+    payload = run_real_world_learning_matrix(
+        matrix_json=matrix_json,
+        artifact_root=artifact_root,
+    )
+
+    docs_repo = next(repo for repo in payload["repos"] if repo["shape"] == "minimal_docs_project")
+    assert docs_repo["docs_tools"] == ["mkdocs"]
+    assert "unsupported_language" not in docs_repo["learning_observations"]
+
+    package_repos = [
+        repo
+        for repo in payload["repos"]
+        if repo["package_managers"] and not repo["release_surfaces"]
+    ]
+    assert package_repos
+    assert "missed_release_surface" in payload["observation_counts"]
+    assert any(
+        candidate["classification"] == "missed_release_surface"
+        for candidate in payload["upgrade_candidates"]
+    )

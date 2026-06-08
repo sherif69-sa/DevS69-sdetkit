@@ -89,15 +89,24 @@ def _classification_for_surface(
     test_runners = _names(surface.get("test_runners"))
     ci_systems = _names(surface.get("ci_systems"))
     security_tools = _names(surface.get("security_tools"))
+    docs_tools = _names(surface.get("docs_tools"))
+    release_surfaces = _names(surface.get("release_surfaces"))
     artifact_surfaces = _names(surface.get("artifact_surfaces"))
     proof_commands = surface.get("recommended_proof_commands")
     review_first_unknowns = _list_strings(surface.get("review_first_unknowns"))
 
     if integration.get("integration_status") != "passed":
         observations.add("integration_runner_bug")
-    if languages or package_managers or ci_systems or proof_commands:
+    if (
+        languages
+        or package_managers
+        or ci_systems
+        or docs_tools
+        or release_surfaces
+        or proof_commands
+    ):
         observations.add("supported_surface")
-    if not languages:
+    if not languages and not docs_tools:
         observations.add("unsupported_language")
     if languages and not package_managers:
         observations.add("unsupported_package_manager")
@@ -111,6 +120,8 @@ def _classification_for_surface(
         observations.add("review_first_unknown")
     if ci_systems and not security_tools:
         observations.add("missed_security_surface")
+    if package_managers and not release_surfaces:
+        observations.add("missed_release_surface")
     if not artifact_surfaces:
         observations.add("artifact_path_gap")
     if len(languages) > 1 or len(package_managers) > 1:
@@ -306,6 +317,8 @@ def run_real_world_learning_matrix(
                 "test_runners": _names(surface.get("test_runners")),
                 "ci_systems": _names(surface.get("ci_systems")),
                 "security_tools": _names(surface.get("security_tools")),
+                "docs_tools": _names(surface.get("docs_tools")),
+                "release_surfaces": _names(surface.get("release_surfaces")),
                 "review_first_unknowns": _list_strings(surface.get("review_first_unknowns")),
                 "learning_observations": learning_observations,
                 "artifact_paths": {
