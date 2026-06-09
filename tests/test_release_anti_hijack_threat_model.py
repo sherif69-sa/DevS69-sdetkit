@@ -95,7 +95,21 @@ def test_release_anti_hijack_threat_model_writes_json_and_markdown(
     markdown = out.with_suffix(".md")
     assert out.is_file()
     assert markdown.is_file()
-    assert json.loads(out.read_text(encoding="utf-8"))["schema_version"] == SCHEMA_VERSION
+    document = json.loads(out.read_text(encoding="utf-8"))
+    assert document["schema_version"] == SCHEMA_VERSION
+    assert document["finding_count"] == payload["finding_count"]
+
+    finding_ids = {finding["id"] for finding in document["findings"]}
+    assert "pypi_publish_credential_surface" in finding_ids
+    assert "release_contents_write_scope" in finding_ids
+    assert "manual_release_dispatch_review_surface" in finding_ids
+    assert document["unverified_settings"]
+    assert document["rules"]["release_workflow_mutated"] is False
+    assert document["automation_allowed"] is False
+    assert document["patch_application_allowed"] is False
+    assert document["merge_authorized"] is False
+    assert document["semantic_equivalence_proven"] is False
+
     assert "# SDETKit release anti-hijack threat model" in markdown.read_text(encoding="utf-8")
     assert payload["finding_count"] >= 1
 
