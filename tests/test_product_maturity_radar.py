@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from sdetkit import product_maturity_radar as radar_module
 from sdetkit.product_maturity_radar import (
     SCHEMA_VERSION,
     build_product_maturity_radar,
@@ -206,3 +207,25 @@ def test_product_maturity_radar_marks_accepted_candidates_from_git_history(
     assert accepted[0]["ranking_status"] == "accepted_on_main"
     assert accepted[0]["ranking_score"] < before["ranked_upgrade_candidates"][0]["ranking_score"]
     assert all(candidate["safe_to_patch"] is False for candidate in accepted)
+
+
+def test_product_maturity_radar_matches_accepted_candidate_title_drift() -> None:
+    assert radar_module._candidate_accepted_on_main(
+        "docs(product): refresh README and docs map for real-world learning lanes",
+        {"docs(product): refresh real-world learning lanes"},
+    )
+
+    assert radar_module._candidate_accepted_on_main(
+        "security: refresh anti-hijack and release threat model",
+        {"security: add release anti-hijack threat model"},
+    )
+
+    assert radar_module._candidate_accepted_on_main(
+        "feat(packaging): publish stable versus hidden command surface report",
+        {"feat(packaging): add public command surface report"},
+    )
+
+    assert not radar_module._candidate_accepted_on_main(
+        "ci: continue workflow hardening from governance report findings",
+        {"ci: explain workflow permission findings"},
+    )
