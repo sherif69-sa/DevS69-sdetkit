@@ -1,0 +1,36 @@
+{
+  "authority_boundary": {
+    "automation_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "semantic_equivalence_proven": false
+  },
+  "automatic_permission_reduction_allowed": false,
+  "automation_allowed": false,
+  "evidence_type": "permission_group_evidence",
+  "granted_write_scopes": [
+    "id-token: write",
+    "pages: write"
+  ],
+  "merge_authorized": false,
+  "next_allowed_action": "collect_human_review_evidence",
+  "patch_application_allowed": false,
+  "permission_group": "deployment_or_oidc",
+  "report_status": "review_required",
+  "requires_human_review": true,
+  "review_first": true,
+  "review_notes": [
+    "This evidence is scoped only to deployment and OIDC workflow permissions.",
+    "Release/provenance, repository mutation, security upload, and PR/issue interaction workflows stay in separate groups.",
+    "Use this as human-review evidence before any future permission reduction.",
+    "Do not mutate workflow YAML automatically from this evidence."
+  ],
+  "safe_to_patch": false,
+  "schema_version": 1,
+  "semantic_equivalence_proven": false,
+  "workflow_count": 1,
+  "workflow_mutation": false,
+  "workflows": [
+    ".github/workflows/pages.yml"
+  ]
+}
