@@ -177,9 +177,13 @@ def build_public_command_surface_report(root: str | Path = ".") -> dict[str, Any
         "stable_command_count": len(stable_commands),
         "hidden_command_count": len(hidden_commands),
         "tier_counts": dict(sorted(counts.items())),
+        "stable_public_commands": stable_commands,
+        "hidden_internal_commands": hidden_commands,
         "stable_commands": stable_commands,
         "hidden_commands": hidden_commands,
         "commands": commands,
+        "review_first": True,
+        "safe_to_patch": False,
         "operator_summary": {
             "stable_surface_visible": bool(stable_commands),
             "hidden_surface_visible_with_show_hidden": bool(hidden_commands),
