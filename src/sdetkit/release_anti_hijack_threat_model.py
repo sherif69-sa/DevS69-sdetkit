@@ -374,13 +374,18 @@ def _public_report_payload(payload: dict[str, Any]) -> dict[str, Any]:
 def _public_output_summary(payload: dict[str, Any]) -> dict[str, Any]:
     controls = _public_release_controls(payload.get("release_controls"))
     rules = _public_rules(payload.get("rules"))
+    findings = _public_findings(payload.get("findings"))
     return {
         "schema_version": SCHEMA_VERSION,
         "status": "review_required",
         "workflow_path": DEFAULT_WORKFLOW,
         "workflow_present": bool(controls.get("uses_action_count", 0)),
-        "finding_count": _public_int(payload.get("finding_count")),
+        "positive_controls": _public_string_list(payload.get("positive_controls")),
+        "findings": findings,
+        "finding_count": len(findings),
+        "unverified_settings": _public_string_list(payload.get("unverified_settings")),
         "release_controls": controls,
+        "recommended_next_actions": _public_string_list(payload.get("recommended_next_actions")),
         "rules": rules,
         "automation_allowed": False,
         "patch_application_allowed": False,
@@ -393,13 +398,18 @@ def _public_output_summary(payload: dict[str, Any]) -> dict[str, Any]:
 def _render_public_json_document(summary: dict[str, Any]) -> str:
     controls = _public_release_controls(summary.get("release_controls"))
     rules = _public_rules(summary.get("rules"))
+    findings = _public_findings(summary.get("findings"))
     document = {
         "schema_version": SCHEMA_VERSION,
         "status": "review_required",
         "workflow_path": DEFAULT_WORKFLOW,
         "workflow_present": bool(summary.get("workflow_present")),
-        "finding_count": _public_int(summary.get("finding_count")),
+        "positive_controls": _public_string_list(summary.get("positive_controls")),
+        "findings": findings,
+        "finding_count": len(findings),
+        "unverified_settings": _public_string_list(summary.get("unverified_settings")),
         "release_controls": controls,
+        "recommended_next_actions": _public_string_list(summary.get("recommended_next_actions")),
         "rules": rules,
         "automation_allowed": False,
         "patch_application_allowed": False,
