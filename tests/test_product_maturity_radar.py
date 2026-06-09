@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 from sdetkit.product_maturity_radar import (
@@ -85,6 +87,19 @@ sdetkit = ["data/*.json"]
         _write(root / "tests" / filename, "def test_demo():\n    assert True\n")
 
 
+def _ranked_radar_candidates(payload: dict) -> list[dict]:
+    for key in (
+        "ranked_upgrade_candidates",
+        "ranked_candidates",
+        "upgrade_candidates",
+        "candidates",
+    ):
+        value = payload.get(key)
+        if isinstance(value, list):
+            return value
+    raise AssertionError(f"No ranked candidate list found in payload keys: {sorted(payload)}")
+
+
 def test_product_maturity_radar_builds_repo_wide_surface_report(tmp_path: Path) -> None:
     _fixture_repo(tmp_path)
 
@@ -161,3 +176,39 @@ def test_product_maturity_radar_cli_dispatch(tmp_path: Path, capsys) -> None:
     assert "repo_mutation: false" in stdout
     assert out.is_file()
     assert out.with_suffix(".md").is_file()
+
+
+def test_product_maturity_radar_marks_accepted_candidates_from_git_history(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[1]
+    out = tmp_path / "radar.json"
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "sdetkit",
+            "product-maturity-radar",
+            "--root",
+            str(root),
+            "--out",
+            str(out),
+            "--format",
+            "text",
+        ],
+        check=True,
+        cwd=root,
+        text=True,
+        stdout=subprocess.PIPE,
+    )
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    accepted = [
+        candidate
+        for candidate in _ranked_radar_candidates(payload)
+        if candidate.get("accepted_on_main") is True
+    ]
+
+    assert accepted
+    assert "accepted_on_main: true" in completed.stdout
+    assert all(candidate["ranking_status"] == "accepted_on_main" for candidate in accepted)
+    assert all(candidate["safe_to_patch"] is False for candidate in accepted)
