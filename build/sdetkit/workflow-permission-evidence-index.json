@@ -1,0 +1,85 @@
+{
+  "authority_boundary": {
+    "automation_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "semantic_equivalence_proven": false
+  },
+  "automatic_permission_reduction_allowed": false,
+  "evidence_type": "workflow_permission_evidence_index",
+  "group_count": 5,
+  "groups": [
+    {
+      "permission_group": "repository_mutation",
+      "requires_human_review": true,
+      "safe_to_patch": false,
+      "source_path": "build/sdetkit/workflow-permission-repository-mutation-evidence.json",
+      "workflow_count": 5,
+      "workflow_mutation": false,
+      "workflows": [
+        ".github/workflows/dependency-auto-merge.yml",
+        ".github/workflows/maintenance-issue-command-center.yml",
+        ".github/workflows/maintenance-on-demand.yml",
+        ".github/workflows/pre-commit-autoupdate.yml",
+        ".github/workflows/weekly-maintenance.yml"
+      ]
+    },
+    {
+      "permission_group": "security_upload",
+      "requires_human_review": true,
+      "safe_to_patch": false,
+      "source_path": "build/sdetkit/workflow-permission-security-upload-evidence.json",
+      "workflow_count": 5,
+      "workflow_mutation": false,
+      "workflows": [
+        ".github/workflows/osv-scanner.yml",
+        ".github/workflows/premium-gate.yml",
+        ".github/workflows/repo-audit.yml",
+        ".github/workflows/security-maintenance-bot.yml",
+        ".github/workflows/security.yml"
+      ]
+    },
+    {
+      "permission_group": "pr_issue_interaction",
+      "requires_human_review": true,
+      "safe_to_patch": false,
+      "source_path": "build/sdetkit/workflow-permission-pr-issue-interaction-evidence.json",
+      "workflow_count": 4,
+      "workflow_mutation": false,
+      "workflows": [
+        ".github/workflows/contributor-onboarding-bot.yml",
+        ".github/workflows/maintenance-autopilot.yml",
+        ".github/workflows/pr-helper-bot.yml",
+        ".github/workflows/pr-quality-comment.yml"
+      ]
+    },
+    {
+      "permission_group": "deployment_or_oidc",
+      "requires_human_review": true,
+      "safe_to_patch": false,
+      "source_path": "build/sdetkit/workflow-permission-deployment-oidc-evidence.json",
+      "workflow_count": 1,
+      "workflow_mutation": false,
+      "workflows": [
+        ".github/workflows/pages.yml"
+      ]
+    },
+    {
+      "permission_group": "release_or_provenance",
+      "requires_human_review": true,
+      "safe_to_patch": false,
+      "source_path": "build/sdetkit/workflow-permission-release-provenance-evidence.json",
+      "workflow_count": 1,
+      "workflow_mutation": false,
+      "workflows": [
+        ".github/workflows/release.yml"
+      ]
+    }
+  ],
+  "next_allowed_action": "human_review_permission_evidence",
+  "report_status": "review_required",
+  "review_first": true,
+  "schema_version": 1,
+  "workflow_count": 16,
+  "workflow_mutation": false
+}
