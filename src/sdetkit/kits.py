@@ -170,6 +170,29 @@ def optimize_payload(
         "doctor_quality_contract": {
             "entrypoint": "sdetkit doctor --dev --ci --repo --upgrade-audit",
             "auto_fix_commands": ["bash quality.sh type"],
+            "auto_fix_requires": "verified_safe_fix_contract",
+        },
+        "doctor_upgrade_lane": {
+            "status": "materialized",
+            "classification": "diagnostic_intelligence",
+            "entrypoint": "sdetkit doctor --dev --ci --repo --upgrade-audit",
+            "proof_commands": [
+                "python -m sdetkit doctor --dev --ci --repo --upgrade-audit --format json",
+                "python -m pytest -q tests/test_doctor_upgrade_audit.py tests/test_doctor_contract_upgrade.py -o addopts=",
+            ],
+            "acceptance_criteria": [
+                "doctor output is valid JSON",
+                "upgrade-audit findings are review-first",
+                "no remediation is applied automatically",
+                "operator receives exact proof commands",
+            ],
+            "authority_boundary": {
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+            "next_allowed_action": "run_doctor_upgrade_audit",
         },
         "missing_domains": [],
         "operating_sequence": [{"stage": "doctor-first"}, {"stage": "intelligent-autofix"}],
@@ -190,7 +213,14 @@ def optimize_payload(
             }
         ],
         "alignment_score": {"score": 95, "status": "maximized"},
-        "search_queries": [{"topic": "doctor-upgrade-lane"}],
+        "search_queries": [
+            {
+                "topic": "doctor-upgrade-lane",
+                "status": "materialized",
+                "owner_lane": "doctor_upgrade_lane",
+                "next_allowed_action": "run_doctor_upgrade_audit",
+            }
+        ],
         "blueprint": blueprint_payload(goal, selected_kits, limit),
     }
 
