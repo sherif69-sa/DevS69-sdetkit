@@ -2,12 +2,69 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from collections import Counter
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
+
+
+def _accepted_candidate_history(root: Path) -> set[str]:
+    """Return normalized commit subjects already accepted on the local history."""
+
+    try:
+        completed = subprocess.run(
+            ["git", "log", "--format=%s", "--max-count=300"],
+            cwd=root,
+            check=False,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+    except OSError:
+        return set()
+
+    if completed.returncode != 0:
+        return set()
+
+    subjects: set[str] = set()
+    for line in completed.stdout.splitlines():
+        subject = line.strip()
+        if not subject:
+            continue
+        if " (#" in subject and subject.endswith(")"):
+            subject = subject.rsplit(" (#", 1)[0].strip()
+        subjects.add(subject.lower())
+
+    return subjects
+
+
+def _normalized_history_subject(value: str) -> str:
+    return " ".join(value.strip().lower().replace("-", " ").split())
+
+
+def _candidate_accepted_on_main(candidate_title: str, accepted_subjects: set[str]) -> bool:
+    normalized_candidate = _normalized_history_subject(candidate_title)
+    if not normalized_candidate:
+        return False
+
+    if normalized_candidate in accepted_subjects:
+        return True
+
+    for subject in accepted_subjects:
+        normalized_subject = _normalized_history_subject(subject)
+        if not normalized_subject:
+            continue
+        if normalized_candidate == normalized_subject:
+            return True
+        if SequenceMatcher(None, normalized_candidate, normalized_subject).ratio() >= 0.82:
+            return True
+
+    return False
+
 
 SCHEMA_VERSION = "sdetkit.product_maturity_radar.v1"
 
@@ -569,8 +626,9 @@ def _remediation_surface(root: Path, text_index: dict[str, str]) -> dict[str, An
     )
 
 
-def _rank_candidates(surfaces: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+def _rank_candidates(surfaces: Sequence[dict[str, Any]], root: Path) -> list[dict[str, Any]]:
     priority_weight = {"P0": 400, "P1": 300, "P2": 200, "P3": 100}
+    accepted_subjects = _accepted_candidate_history(root)
     ranked: list[dict[str, Any]] = []
     for surface in surfaces:
         surface_score = int(surface["score"])
@@ -578,12 +636,26 @@ def _rank_candidates(surfaces: Sequence[dict[str, Any]]) -> list[dict[str, Any]]
         maturity_gap = surface_max - surface_score
         for candidate in surface["upgrade_candidates"]:
             priority = str(candidate.get("priority", "P3"))
+            candidate_title = str(
+                candidate.get("upgrade_candidate_title") or candidate.get("title") or ""
+            )
+            accepted_on_main = _candidate_accepted_on_main(
+                candidate_title,
+                accepted_subjects,
+            )
+            ranking_status = "accepted_on_main" if accepted_on_main else "fresh_candidate"
+            accepted_penalty = 1000 if accepted_on_main else 0
+
             ranked.append(
                 {
                     **candidate,
                     "surface_score": surface_score,
                     "surface_max_score": surface_max,
-                    "ranking_score": priority_weight.get(priority, 0) + maturity_gap * 10,
+                    "ranking_score": priority_weight.get(priority, 0)
+                    + maturity_gap * 10
+                    - accepted_penalty,
+                    "accepted_on_main": accepted_on_main,
+                    "ranking_status": ranking_status,
                 }
             )
 
@@ -612,7 +684,7 @@ def build_product_maturity_radar(repo_root: str | Path = ".") -> dict[str, Any]:
         _learning_surface(root),
         _remediation_surface(root, text_index),
     ]
-    ranked = _rank_candidates(surfaces)
+    ranked = _rank_candidates(surfaces, root)
     status_counts = Counter(str(surface["status"]) for surface in surfaces)
     total_score = sum(int(surface["score"]) for surface in surfaces)
     total_max_score = sum(int(surface["max_score"]) for surface in surfaces)
@@ -689,6 +761,11 @@ def render_product_maturity_radar_markdown(payload: dict[str, Any]) -> str:
             lines.append(f"   - classification: `{candidate['classification']}`")
             lines.append(f"   - priority: `{candidate['priority']}`")
             lines.append(f"   - ranking_score: `{candidate['ranking_score']}`")
+            if candidate.get("accepted_on_main"):
+                lines.append("   - accepted_on_main: true")
+                lines.append(
+                    f"   - ranking_status: `{candidate.get('ranking_status', 'accepted_on_main')}`"
+                )
             lines.append("   - review_first: true")
             lines.append("   - safe_to_patch: false")
 

@@ -85,6 +85,19 @@ sdetkit = ["data/*.json"]
         _write(root / "tests" / filename, "def test_demo():\n    assert True\n")
 
 
+def _ranked_radar_candidates(payload: dict) -> list[dict]:
+    for key in (
+        "ranked_upgrade_candidates",
+        "ranked_candidates",
+        "upgrade_candidates",
+        "candidates",
+    ):
+        value = payload.get(key)
+        if isinstance(value, list):
+            return value
+    raise AssertionError(f"No ranked candidate list found in payload keys: {sorted(payload)}")
+
+
 def test_product_maturity_radar_builds_repo_wide_surface_report(tmp_path: Path) -> None:
     _fixture_repo(tmp_path)
 
@@ -161,3 +174,35 @@ def test_product_maturity_radar_cli_dispatch(tmp_path: Path, capsys) -> None:
     assert "repo_mutation: false" in stdout
     assert out.is_file()
     assert out.with_suffix(".md").is_file()
+
+
+def test_product_maturity_radar_marks_accepted_candidates_from_git_history(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _fixture_repo(tmp_path)
+
+    before = build_product_maturity_radar(tmp_path)
+    candidate_title = before["ranked_upgrade_candidates"][0]["upgrade_candidate_title"]
+
+    def fake_accepted_candidate_history(root: Path) -> set[str]:
+        assert root == tmp_path.resolve()
+        return {candidate_title.lower()}
+
+    monkeypatch.setattr(
+        "sdetkit.product_maturity_radar._accepted_candidate_history",
+        fake_accepted_candidate_history,
+    )
+
+    payload = build_product_maturity_radar(tmp_path)
+    accepted = [
+        candidate
+        for candidate in _ranked_radar_candidates(payload)
+        if candidate.get("accepted_on_main") is True
+    ]
+
+    assert accepted
+    assert accepted[0]["upgrade_candidate_title"] == candidate_title
+    assert accepted[0]["ranking_status"] == "accepted_on_main"
+    assert accepted[0]["ranking_score"] < before["ranked_upgrade_candidates"][0]["ranking_score"]
+    assert all(candidate["safe_to_patch"] is False for candidate in accepted)
