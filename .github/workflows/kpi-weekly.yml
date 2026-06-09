@@ -1,3 +1,6 @@
+# Local equivalent command:
+#   python -m sdetkit workflow-governance-report --root . --format text
+#   See docs/ci/workflow-local-equivalents.md#kpi-weekly for workflow-specific operator notes.
 name: Weekly Release Confidence KPI Pack
 
 on:

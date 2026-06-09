@@ -1,3 +1,6 @@
+# Local equivalent command:
+#   python -m sdetkit workflow-governance-report --root . --format text
+#   See docs/ci/workflow-local-equivalents.md#pr-quality-comment for workflow-specific operator notes.
 name: PR Quality Comment
 
 on:
