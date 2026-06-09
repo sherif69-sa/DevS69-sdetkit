@@ -1,0 +1,2931 @@
+{
+  "actionability_summary": {
+    "finding_count": 16,
+    "ranked_followup_count": 1,
+    "review_first": true,
+    "review_required_count": 16,
+    "safe_to_patch": false,
+    "top_followup": "permissions_least_privilege",
+    "top_followup_priority": "P1",
+    "workflow_count": 55
+  },
+  "advisory_only": true,
+  "authority_boundary": {
+    "automation_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "semantic_equivalence_proven": false
+  },
+  "automation_allowed": false,
+  "finding_count": 16,
+  "finding_counts": {
+    "permissions_least_privilege": 16
+  },
+  "merge_authorized": false,
+  "operator_summary": {
+    "next_action": "Review ranked workflow governance followups before making narrow CI hardening PRs.",
+    "ranked_followup_count": 1,
+    "review_first": true,
+    "safe_to_patch": false,
+    "status": "workflow_governance_report_generated",
+    "top_followup": "permissions_least_privilege"
+  },
+  "patch_application_allowed": false,
+  "permission_review_count": 16,
+  "permission_review_matrix": [
+    {
+      "granted_write_scope_count": 2,
+      "granted_write_scopes": [
+        "issues: write",
+        "pull-requests: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "GitHub API or gh-based PR/issue interaction detected.",
+        "Issue create/update API usage detected.",
+        "PR or issue comment/review API usage detected."
+      ],
+      "path": ".github/workflows/contributor-onboarding-bot.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 2,
+      "granted_write_scopes": [
+        "contents: write",
+        "pull-requests: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "Repository write/release/PR branch mutation surface detected."
+      ],
+      "path": ".github/workflows/dependency-auto-merge.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 2,
+      "granted_write_scopes": [
+        "issues: write",
+        "pull-requests: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "GitHub API or gh-based PR/issue interaction detected.",
+        "Issue create/update API usage detected."
+      ],
+      "path": ".github/workflows/maintenance-autopilot.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 2,
+      "granted_write_scopes": [
+        "contents: write",
+        "issues: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "Repository write/release/PR branch mutation surface detected."
+      ],
+      "path": ".github/workflows/maintenance-issue-command-center.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 3,
+      "granted_write_scopes": [
+        "contents: write",
+        "issues: write",
+        "pull-requests: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "GitHub API or gh-based PR/issue interaction detected.",
+        "Issue create/update API usage detected.",
+        "PR or issue comment/review API usage detected.",
+        "Repository write/release/PR branch mutation surface detected."
+      ],
+      "path": ".github/workflows/maintenance-on-demand.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 1,
+      "granted_write_scopes": [
+        "security-events: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "SARIF/code-scanning upload surface detected."
+      ],
+      "path": ".github/workflows/osv-scanner.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 2,
+      "granted_write_scopes": [
+        "id-token: write",
+        "pages: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "GitHub Pages deployment surface detected.",
+        "OIDC token permission detected; requires environment/provider review."
+      ],
+      "path": ".github/workflows/pages.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 2,
+      "granted_write_scopes": [
+        "issues: write",
+        "pull-requests: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "GitHub API or gh-based PR/issue interaction detected.",
+        "Issue create/update API usage detected.",
+        "PR or issue comment/review API usage detected."
+      ],
+      "path": ".github/workflows/pr-helper-bot.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 2,
+      "granted_write_scopes": [
+        "issues: write",
+        "pull-requests: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [],
+      "path": ".github/workflows/pr-quality-comment.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 2,
+      "granted_write_scopes": [
+        "contents: write",
+        "pull-requests: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "Repository write/release/PR branch mutation surface detected."
+      ],
+      "path": ".github/workflows/pre-commit-autoupdate.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 1,
+      "granted_write_scopes": [
+        "security-events: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "SARIF/code-scanning upload surface detected."
+      ],
+      "path": ".github/workflows/premium-gate.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 3,
+      "granted_write_scopes": [
+        "attestations: write",
+        "contents: write",
+        "id-token: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "OIDC token permission detected; requires environment/provider review.",
+        "Release attestation/provenance surface detected.",
+        "Repository write/release/PR branch mutation surface detected."
+      ],
+      "path": ".github/workflows/release.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 1,
+      "granted_write_scopes": [
+        "security-events: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "SARIF/code-scanning upload surface detected."
+      ],
+      "path": ".github/workflows/repo-audit.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 2,
+      "granted_write_scopes": [
+        "issues: write",
+        "security-events: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "GitHub API or gh-based PR/issue interaction detected.",
+        "Issue create/update API usage detected.",
+        "SARIF/code-scanning upload surface detected."
+      ],
+      "path": ".github/workflows/security-maintenance-bot.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 1,
+      "granted_write_scopes": [
+        "security-events: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "SARIF/code-scanning upload surface detected."
+      ],
+      "path": ".github/workflows/security.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    },
+    {
+      "granted_write_scope_count": 3,
+      "granted_write_scopes": [
+        "contents: write",
+        "issues: write",
+        "pull-requests: write"
+      ],
+      "has_permission_finding": true,
+      "inferred_permission_reasons": [
+        "GitHub API or gh-based PR/issue interaction detected.",
+        "Issue create/update API usage detected.",
+        "PR or issue comment/review API usage detected.",
+        "Repository write/release/PR branch mutation surface detected."
+      ],
+      "path": ".github/workflows/weekly-maintenance.yml",
+      "recommended_change_type": "permission_reason_review",
+      "requires_human_review": true,
+      "safe_to_patch": false
+    }
+  ],
+  "permission_review_next_actions": [
+    "Use the workflow permission review playbook before any permission reduction.",
+    "Keep permission changes human-reviewed and one narrow workflow slice at a time.",
+    "Do not patch permissions automatically when safe_to_patch is false."
+  ],
+  "permission_review_playbook": "docs/ci/workflow-permission-review-playbook.md",
+  "permission_review_summary": {
+    "automatic_permission_reduction_allowed": false,
+    "blocked_actions": [
+      "automatic_permission_reduction",
+      "broad_workflow_permission_sweep",
+      "security_alert_dismissal",
+      "merge_authorization"
+    ],
+    "group_count": 5,
+    "groups": [
+      {
+        "granted_write_scopes": [
+          "contents: write",
+          "issues: write",
+          "pull-requests: write"
+        ],
+        "kind": "repository_mutation",
+        "requires_human_review": true,
+        "safe_to_patch": false,
+        "workflow_count": 5,
+        "workflows": [
+          ".github/workflows/dependency-auto-merge.yml",
+          ".github/workflows/maintenance-issue-command-center.yml",
+          ".github/workflows/maintenance-on-demand.yml",
+          ".github/workflows/pre-commit-autoupdate.yml",
+          ".github/workflows/weekly-maintenance.yml"
+        ]
+      },
+      {
+        "granted_write_scopes": [
+          "issues: write",
+          "security-events: write"
+        ],
+        "kind": "security_upload",
+        "requires_human_review": true,
+        "safe_to_patch": false,
+        "workflow_count": 5,
+        "workflows": [
+          ".github/workflows/osv-scanner.yml",
+          ".github/workflows/premium-gate.yml",
+          ".github/workflows/repo-audit.yml",
+          ".github/workflows/security-maintenance-bot.yml",
+          ".github/workflows/security.yml"
+        ]
+      },
+      {
+        "granted_write_scopes": [
+          "issues: write",
+          "pull-requests: write"
+        ],
+        "kind": "pr_issue_interaction",
+        "requires_human_review": true,
+        "safe_to_patch": false,
+        "workflow_count": 4,
+        "workflows": [
+          ".github/workflows/contributor-onboarding-bot.yml",
+          ".github/workflows/maintenance-autopilot.yml",
+          ".github/workflows/pr-helper-bot.yml",
+          ".github/workflows/pr-quality-comment.yml"
+        ]
+      },
+      {
+        "granted_write_scopes": [
+          "id-token: write",
+          "pages: write"
+        ],
+        "kind": "deployment_or_oidc",
+        "requires_human_review": true,
+        "safe_to_patch": false,
+        "workflow_count": 1,
+        "workflows": [
+          ".github/workflows/pages.yml"
+        ]
+      },
+      {
+        "granted_write_scopes": [
+          "attestations: write",
+          "contents: write",
+          "id-token: write"
+        ],
+        "kind": "release_or_provenance",
+        "requires_human_review": true,
+        "safe_to_patch": false,
+        "workflow_count": 1,
+        "workflows": [
+          ".github/workflows/release.yml"
+        ]
+      }
+    ],
+    "next_allowed_action": "collect_human_review_evidence",
+    "permission_review_count": 16,
+    "review_first": true,
+    "safe_to_patch": false,
+    "status": "human_review_required"
+  },
+  "ranked_followups": [
+    {
+      "affected_workflow_count": 16,
+      "finding": "permissions_least_privilege",
+      "priority": "P1",
+      "product_reason": "Permission-scope findings affect workflow trust boundaries and operator confidence.",
+      "recommended_change_type": "workflow_permission_review",
+      "review_first": true,
+      "safe_to_patch": false,
+      "sample_workflows": [
+        ".github/workflows/contributor-onboarding-bot.yml",
+        ".github/workflows/dependency-auto-merge.yml",
+        ".github/workflows/maintenance-autopilot.yml",
+        ".github/workflows/maintenance-issue-command-center.yml",
+        ".github/workflows/maintenance-on-demand.yml",
+        ".github/workflows/osv-scanner.yml",
+        ".github/workflows/pages.yml",
+        ".github/workflows/pr-helper-bot.yml"
+      ]
+    }
+  ],
+  "repo_mutation": false,
+  "repo_root": "/home/noname/devs69_sdetkit_audit_repo",
+  "report_status": "review_required",
+  "review_first": true,
+  "review_required_count": 16,
+  "rules": {
+    "advisory_only": true,
+    "checks_skipped": false,
+    "permissions_weakened": false,
+    "required_checks_bypassed": false,
+    "review_first": true,
+    "secrets_read": false,
+    "workflow_mutation": false
+  },
+  "safe_to_patch": false,
+  "schema_version": "sdetkit.workflow_governance_report.v1",
+  "semantic_equivalence_proven": false,
+  "workflow_count": 55,
+  "workflows": [
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 82,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 92,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/adapter-smoke-bot.yml",
+      "pip_install_lines": [
+        "run: python -m pip install -c constraints-ci.txt -e .[test]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 26,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 29,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 47,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/adaptive-ops-weekly.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -e .[dev,test,docs]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 18,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 20,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 71,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/adaptive-sentinel-monitor.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 27,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 28,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 64,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/adoption-real-repo-canonical.yml",
+      "pip_install_lines": [
+        "run: python -m pip install -c constraints-ci.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 33,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 36,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/cache",
+          "line": 41,
+          "pinned_to_full_sha": true,
+          "ref": "27d5ce7f107fe9357f9df03efb73ab90386fccae"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/advanced-github-actions-reference-64.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt --upgrade pip",
+        "if [ -f requirements.txt ]; then python -m pip install -c constraints-ci.txt -r requirements.txt; fi",
+        "if [ -f requirements-dev.txt ]; then python -m pip install -c constraints-ci.txt -r requirements-dev.txt; fi"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 28,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/checkout",
+          "line": 34,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 38,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 54,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/checkout",
+          "line": 69,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 71,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 135,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/checkout",
+          "line": 158,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 160,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 177,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/checkout",
+          "line": 186,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 188,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 224,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/checkout",
+          "line": 240,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 242,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/download-artifact",
+          "line": 247,
+          "pinned_to_full_sha": true,
+          "ref": "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"
+        },
+        {
+          "action": "actions/checkout",
+          "line": 274,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 276,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 326,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "yes",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": true,
+      "path": ".github/workflows/ci.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt --upgrade pip",
+        "python -m pip install -c constraints-ci.txt -e .",
+        "python -m pip install -c constraints-ci.txt --upgrade pip",
+        "python -m pip install -c constraints-ci.txt -e .[dev,test]",
+        "python -m pip install -c constraints-ci.txt --upgrade pip",
+        "python -m pip install -c constraints-ci.txt -e .",
+        "python -m pip install -c constraints-ci.txt --upgrade pip",
+        "python -m pip install -c constraints-ci.txt -e .[dev,packaging]",
+        "python -m pip install -c constraints-ci.txt \"$WHEEL_PATH\"",
+        "python -m pip install -c constraints-ci.txt --upgrade pip",
+        "python -m pip install -c constraints-ci.txt -e .[dev,test,docs]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/github-script",
+          "line": 20,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "yes",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": true,
+      "path": ".github/workflows/contributor-onboarding-bot.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 23,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 44,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/dependency-audit.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt pip-audit==2.10.0",
+        "python -m pip install -c constraints-ci.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "dependabot/fetch-metadata",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "25dd0e34f4fe68f24cc83900b1fe3fe149efef98"
+        },
+        {
+          "action": "peter-evans/enable-pull-request-automerge",
+          "line": 32,
+          "pinned_to_full_sha": true,
+          "ref": "a660677d5469627102a1c1e11409dd063606628d"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/dependency-auto-merge.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 95,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 105,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/dependency-radar-bot.yml",
+      "pip_install_lines": [
+        "run: python -m pip install -c constraints-ci.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 17,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/dependency-review-action",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "a1d282b36b6f3519aa1f3fc636f609c47dddb294"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/dependency-review.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 164,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 173,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/docs-experience-bot.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 32,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "lycheeverse/lychee-action",
+          "line": 35,
+          "pinned_to_full_sha": true,
+          "ref": "8646ba30535128ac92d33dfc9133794bfdd9b411"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/docs-link-check.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 23,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 26,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/enforce-branch-protection.yml",
+      "pip_install_lines": [
+        "run: python -m pip install -c constraints-ci.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 18,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/checkout",
+          "line": 24,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 29,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 69,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/enterprise-gate.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -U pip",
+        "python -m pip install -c constraints-ci.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 25,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 28,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 41,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 52,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/first-proof-artifact-publish.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt --upgrade pip",
+        "python -m pip install -c constraints-ci.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 31,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 33,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 70,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/first-proof.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt --upgrade pip",
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/github-script",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/ghas-alert-sla-bot.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/github-script",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/ghas-campaign-bot.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 20,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 24,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 182,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 191,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/ghas-codeql-hotspots-bot.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 25,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 236,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 245,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/ghas-metrics-export-bot.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/github-script",
+          "line": 22,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/ghas-review-bot.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 18,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 106,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/impact-release-control.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -e .",
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 82,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 92,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/integration-topology-radar-bot.yml",
+      "pip_install_lines": [
+        "run: python -m pip install -c constraints-ci.txt -e .[test]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 118,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/kpi-weekly.yml",
+      "pip_install_lines": [
+        "run: python -m pip install -c constraints-ci.txt -e .[dev,test]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/github-script",
+          "line": 23,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 58,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/legacy-required-status-bridge.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 22,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 27,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 59,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 97,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/maintenance-autopilot.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -e .[dev,test]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 24,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 27,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/maintenance-issue-command-center.yml",
+      "pip_install_lines": [
+        "run: python -m pip install -c constraints-ci.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 42,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 46,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 246,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "peter-evans/create-pull-request",
+          "line": 319,
+          "pinned_to_full_sha": true,
+          "ref": "5f6978faf089d4d20b00c7766989d076bb2fc7f1"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 328,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/maintenance-on-demand.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -e .[dev,test]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 31,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 33,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 104,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/mutation-tests.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt",
+        "python -m pip install -c constraints-ci.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 30,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 31,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 67,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/operational-readiness-governance-contract.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml",
+          "line": 22,
+          "pinned_to_full_sha": true,
+          "ref": "9a498708959aeaef5ef730655706c5a1df1edbc2"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/osv-scanner.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 24,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 26,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/configure-pages",
+          "line": 38,
+          "pinned_to_full_sha": true,
+          "ref": "45bfe0192ca1faeb007ade9deae92b16b8254a0d"
+        },
+        {
+          "action": "actions/upload-pages-artifact",
+          "line": 48,
+          "pinned_to_full_sha": true,
+          "ref": "fc324d3547104276b827a68afc52ff2a11cc49c9"
+        },
+        {
+          "action": "actions/deploy-pages",
+          "line": 60,
+          "pinned_to_full_sha": true,
+          "ref": "cd2ce8fcbc39b97be8ca5fce6e763baed58fa128"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "yes",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": true,
+      "path": ".github/workflows/pages.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -r requirements-docs.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 25,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 28,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 56,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/platform-readiness-quality-contract.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt --upgrade pip",
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/github-script",
+          "line": 29,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        },
+        {
+          "action": "actions/checkout",
+          "line": 42,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 47,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 83,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "yes",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": true,
+      "path": ".github/workflows/pr-helper-bot.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt",
+        "python -m pip install -c constraints-ci.txt -e .",
+        "python -m pip install -c constraints-ci.txt pre-commit",
+        "body += '- Suggested local fix: `python -m pip install -c constraints-ci.txt -r requirements-test.txt -e . && bash quality.sh cov`\\n';"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 26,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 29,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 967,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 976,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 987,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/pr-quality-comment.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 23,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "peter-evans/create-pull-request",
+          "line": 35,
+          "pinned_to_full_sha": true,
+          "ref": "5f6978faf089d4d20b00c7766989d076bb2fc7f1"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/pre-commit-autoupdate.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt pre-commit"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 20,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 23,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "github/codeql-action/upload-sarif",
+          "line": 41,
+          "pinned_to_full_sha": true,
+          "ref": "8aad20d150bbac5944a9f9d289da16a4b0d87c1e"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 47,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/premium-gate.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt --upgrade pip",
+        "python -m pip install -c constraints-ci.txt -e '.[dev,test,docs]'"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 22,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 24,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/quality.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -e .[dev,test,docs]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 197,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 208,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/release-readiness-radar-bot.yml",
+      "pip_install_lines": [
+        "run: python -m pip install -c constraints-ci.txt -e .[test]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 30,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 53,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/attest-build-provenance",
+          "line": 113,
+          "pinned_to_full_sha": true,
+          "ref": "a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32"
+        },
+        {
+          "action": "softprops/action-gh-release",
+          "line": 118,
+          "pinned_to_full_sha": true,
+          "ref": "b4309332981a82ec1c5618f44dd2e27cc8bfbfda"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 129,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/release.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .[packaging]",
+        "python -m pip install -c constraints-ci.txt --force-reinstall dist/*.whl"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 24,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/repo-audit.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 28,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 33,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 814,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/repo-memory-history.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 104,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 113,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/repo-optimization-bot.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt --upgrade pip",
+        "python -m pip install -c constraints-ci.txt -e ."
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 119,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 129,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/runtime-watchlist-bot.yml",
+      "pip_install_lines": [
+        "run: python -m pip install -c constraints-ci.txt -e .[test]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 18,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 20,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 34,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/sbom.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .",
+        "python -m pip install -c constraints-ci.txt cyclonedx-bom==7.3.0"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/github-script",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/secret-protection-review-bot.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 20,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 23,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/security-configuration-audit-bot.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 26,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "github/codeql-action/upload-sarif",
+          "line": 72,
+          "pinned_to_full_sha": true,
+          "ref": "8aad20d150bbac5944a9f9d289da16a4b0d87c1e"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 81,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/security-maintenance-bot.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 25,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "github/codeql-action/init",
+          "line": 26,
+          "pinned_to_full_sha": true,
+          "ref": "8aad20d150bbac5944a9f9d289da16a4b0d87c1e"
+        },
+        {
+          "action": "github/codeql-action/autobuild",
+          "line": 30,
+          "pinned_to_full_sha": true,
+          "ref": "8aad20d150bbac5944a9f9d289da16a4b0d87c1e"
+        },
+        {
+          "action": "github/codeql-action/analyze",
+          "line": 31,
+          "pinned_to_full_sha": true,
+          "ref": "8aad20d150bbac5944a9f9d289da16a4b0d87c1e"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/security.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 15,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 17,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 38,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/top-tier-reporting-sample.yml",
+      "pip_install_lines": [
+        "run: python -m pip install -c constraints-ci.txt -e .[dev,test]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 18,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "not_applicable",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/versioning.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": false
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 20,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 24,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 38,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 67,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "peter-evans/create-pull-request",
+          "line": 106,
+          "pinned_to_full_sha": true,
+          "ref": "5f6978faf089d4d20b00c7766989d076bb2fc7f1"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 115,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/weekly-maintenance.yml",
+      "pip_install_lines": [
+        "python -m pip install -c constraints-ci.txt -e .[dev,test]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "review_required",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 21,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 111,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 133,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "yes",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "yes",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/worker-alignment-bot.yml",
+      "pip_install_lines": [
+        "run: python -m pip install -c constraints-ci.txt -e .[dev,test,docs]"
+      ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/checkout",
+          "line": 19,
+          "pinned_to_full_sha": true,
+          "ref": "df4cb1c069e1874edd31b4311f1884172cec0e10"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 129,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/github-script",
+          "line": 138,
+          "pinned_to_full_sha": true,
+          "ref": "3a2844b7e9c422d3c10d287c895573f7108da1b3"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "yes",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "yes"
+      },
+      "findings": [],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/workflow-governance-bot.yml",
+      "pip_install_lines": [],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    }
+  ]
+}
