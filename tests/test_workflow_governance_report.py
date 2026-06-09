@@ -415,3 +415,116 @@ jobs:
     assert "`pull-requests: write`" in markdown
     assert "requires_human_review: true" in markdown
     assert "safe_to_patch: false" in markdown
+
+
+def test_workflow_governance_report_exposes_permission_review_playbook(tmp_path: Path) -> None:
+    root = tmp_path
+    workflow_dir = root / ".github" / "workflows"
+    workflow_dir.mkdir(parents=True)
+    (workflow_dir / "bot.yml").write_text(
+        """
+name: bot
+on:
+  workflow_dispatch:
+permissions:
+  issues: write
+  pull-requests: write
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh issue comment 1 --body hi
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    from sdetkit.workflow_governance_report import build_workflow_governance_report
+
+    payload = build_workflow_governance_report(root)
+
+    assert payload["permission_review_playbook"] == "docs/ci/workflow-permission-review-playbook.md"
+    assert payload["permission_review_next_actions"]
+    assert payload["permission_review_matrix"]
+    assert payload["safe_to_patch"] is False
+    assert payload["review_first"] is True
+
+
+def test_workflow_governance_report_groups_permission_review_intelligence(tmp_path: Path) -> None:
+    root = tmp_path
+    workflow_dir = root / ".github" / "workflows"
+    workflow_dir.mkdir(parents=True)
+
+    (workflow_dir / "issue-bot.yml").write_text(
+        """
+name: issue bot
+on:
+  workflow_dispatch:
+permissions:
+  issues: write
+  pull-requests: write
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh issue comment 1 --body hi
+""".lstrip(),
+        encoding="utf-8",
+    )
+    (workflow_dir / "security-upload.yml").write_text(
+        """
+name: security upload
+on:
+  workflow_dispatch:
+permissions:
+  security-events: write
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo upload sarif
+""".lstrip(),
+        encoding="utf-8",
+    )
+    (workflow_dir / "release.yml").write_text(
+        """
+name: release
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  attestations: write
+  id-token: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo release
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    from sdetkit.workflow_governance_report import (
+        build_workflow_governance_report,
+        render_workflow_governance_markdown,
+    )
+
+    payload = build_workflow_governance_report(root)
+    summary = payload["permission_review_summary"]
+    markdown = render_workflow_governance_markdown(payload)
+
+    assert summary["status"] == "human_review_required"
+    assert summary["permission_review_count"] == payload["permission_review_count"]
+    assert summary["automatic_permission_reduction_allowed"] is False
+    assert summary["safe_to_patch"] is False
+    assert summary["review_first"] is True
+    assert summary["next_allowed_action"] == "collect_human_review_evidence"
+    assert "automatic_permission_reduction" in summary["blocked_actions"]
+
+    groups = {group["kind"]: group for group in summary["groups"]}
+    assert "pr_issue_interaction" in groups
+    assert "security_upload" in groups
+    assert "release_or_provenance" in groups or "repository_mutation" in groups
+
+    assert "## Permission review summary" in markdown
+    assert "automatic_permission_reduction_allowed: false" in markdown
+    assert "collect_human_review_evidence" in markdown

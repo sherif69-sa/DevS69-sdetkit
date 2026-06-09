@@ -380,6 +380,76 @@ def _permission_review_entry(repo_root: Path, workflow: dict[str, Any]) -> dict[
     }
 
 
+def _permission_review_kind(entry: dict[str, Any]) -> str:
+    scopes = set(entry.get("granted_write_scopes", []))
+    reasons = " ".join(str(reason) for reason in entry.get("inferred_permission_reasons", []))
+
+    if (
+        "attestations: write" in scopes
+        or "id-token: write" in scopes
+        and "release" in reasons.lower()
+    ):
+        return "release_or_provenance"
+    if "pages: write" in scopes or "id-token: write" in scopes:
+        return "deployment_or_oidc"
+    if "security-events: write" in scopes:
+        return "security_upload"
+    if "contents: write" in scopes:
+        return "repository_mutation"
+    if {"issues: write", "pull-requests: write"} & scopes:
+        return "pr_issue_interaction"
+    return "other_write_scope"
+
+
+def _permission_review_summary(
+    permission_review_matrix: list[dict[str, Any]],
+) -> dict[str, Any]:
+    groups: dict[str, dict[str, Any]] = {}
+
+    for entry in permission_review_matrix:
+        kind = _permission_review_kind(entry)
+        group = groups.setdefault(
+            kind,
+            {
+                "kind": kind,
+                "workflow_count": 0,
+                "workflows": [],
+                "granted_write_scopes": [],
+                "requires_human_review": True,
+                "safe_to_patch": False,
+            },
+        )
+        group["workflow_count"] += 1
+        group["workflows"].append(
+            entry.get("path") or entry.get("workflow_path") or entry.get("file")
+        )
+        group["granted_write_scopes"] = sorted(
+            set(group["granted_write_scopes"]) | set(entry.get("granted_write_scopes", []))
+        )
+
+    grouped = sorted(
+        groups.values(),
+        key=lambda item: (-int(item["workflow_count"]), str(item["kind"])),
+    )
+
+    return {
+        "status": "human_review_required",
+        "permission_review_count": len(permission_review_matrix),
+        "group_count": len(grouped),
+        "groups": grouped,
+        "automatic_permission_reduction_allowed": False,
+        "safe_to_patch": False,
+        "review_first": True,
+        "next_allowed_action": "collect_human_review_evidence",
+        "blocked_actions": [
+            "automatic_permission_reduction",
+            "broad_workflow_permission_sweep",
+            "security_alert_dismissal",
+            "merge_authorization",
+        ],
+    }
+
+
 def _permission_review_matrix(
     *,
     repo_root: Path,
@@ -420,6 +490,8 @@ def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, A
         repo_root=root,
         workflows=workflows,
     )
+    permission_review_summary = _permission_review_summary(permission_review_matrix)
+
     actionability_summary = _actionability_summary(
         workflow_count=len(workflows),
         review_required_count=len(review_required),
@@ -436,8 +508,15 @@ def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, A
         "finding_count": finding_count,
         "finding_counts": sorted_finding_counts,
         "ranked_followups": ranked_followups,
+        "permission_review_playbook": "docs/ci/workflow-permission-review-playbook.md",
+        "permission_review_next_actions": [
+            "Use the workflow permission review playbook before any permission reduction.",
+            "Keep permission changes human-reviewed and one narrow workflow slice at a time.",
+            "Do not patch permissions automatically when safe_to_patch is false.",
+        ],
         "permission_review_matrix": permission_review_matrix,
         "permission_review_count": len(permission_review_matrix),
+        "permission_review_summary": permission_review_summary,
         "actionability_summary": actionability_summary,
         "workflows": workflows,
         "operator_summary": {
@@ -519,6 +598,34 @@ def render_workflow_governance_markdown(payload: dict[str, Any]) -> str:
     else:
         lines.append("- none")
 
+    lines.extend(["", "## Permission review summary", ""])
+    permission_summary = payload.get("permission_review_summary", {})
+    if isinstance(permission_summary, dict) and permission_summary:
+        lines.append(f"- status: `{permission_summary.get('status', 'unknown')}`")
+        lines.append(
+            "- automatic_permission_reduction_allowed: "
+            f"{str(bool(permission_summary.get('automatic_permission_reduction_allowed', False))).lower()}"
+        )
+        lines.append(
+            f"- next_allowed_action: `{permission_summary.get('next_allowed_action', 'human_review')}`"
+        )
+        groups = permission_summary.get("groups", [])
+        if isinstance(groups, list) and groups:
+            lines.append("- groups:")
+            for group in groups:
+                lines.append(
+                    f"  - `{group.get('kind')}`: {group.get('workflow_count', 0)} workflows"
+                )
+
+    lines.extend(["", "## Permission review playbook", ""])
+    playbook = payload.get("permission_review_playbook")
+    if playbook:
+        lines.append(f"- playbook: `{playbook}`")
+    next_actions = payload.get("permission_review_next_actions", [])
+    if next_actions:
+        lines.append("- next_actions:")
+        for action in next_actions:
+            lines.append(f"  - {action}")
     lines.extend(["", "## Permission review matrix", ""])
     permission_review = payload.get("permission_review_matrix")
     if isinstance(permission_review, list) and permission_review:
