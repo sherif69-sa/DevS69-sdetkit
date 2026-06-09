@@ -337,3 +337,81 @@ jobs:
     assert "recommended_change_type" in markdown
     assert "review_first: true" in markdown
     assert "safe_to_patch: false" in markdown
+
+
+def test_workflow_governance_report_explains_permission_findings_without_authority(
+    tmp_path: Path,
+) -> None:
+    _write(
+        tmp_path / ".github" / "workflows" / "security.yml",
+        """
+name: security
+on: [push]
+permissions:
+  contents: read
+  security-events: write
+jobs:
+  codeql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@0123456789abcdef0123456789abcdef01234567
+      - uses: github/codeql-action/upload-sarif@0123456789abcdef0123456789abcdef01234567
+        with:
+          sarif_file: build/security.sarif
+""",
+    )
+
+    payload = build_workflow_governance_report(tmp_path)
+
+    assert payload["permission_review_count"] == 1
+    entry = payload["permission_review_matrix"][0]
+    assert entry["path"] == ".github/workflows/security.yml"
+    assert entry["has_permission_finding"] is True
+    assert entry["granted_write_scopes"] == ["security-events: write"]
+    assert entry["granted_write_scope_count"] == 1
+    assert entry["requires_human_review"] is True
+    assert entry["safe_to_patch"] is False
+    assert entry["recommended_change_type"] == "permission_reason_review"
+    assert any("SARIF/code-scanning" in reason for reason in entry["inferred_permission_reasons"])
+
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+
+def test_workflow_governance_markdown_includes_permission_review_matrix(
+    tmp_path: Path,
+) -> None:
+    _write(
+        tmp_path / ".github" / "workflows" / "bot.yml",
+        """
+name: bot
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@0123456789abcdef0123456789abcdef01234567
+        with:
+          script: |
+            await github.rest.issues.createComment({})
+""",
+    )
+    out = tmp_path / "build" / "workflow-governance-report.json"
+
+    write_workflow_governance_report(repo_root=tmp_path, out=out)
+
+    markdown = out.with_suffix(".md").read_text(encoding="utf-8")
+    assert "## Permission review matrix" in markdown
+    assert ".github/workflows/bot.yml" in markdown
+    assert "`issues: write`" in markdown
+    assert "`pull-requests: write`" in markdown
+    assert "requires_human_review: true" in markdown
+    assert "safe_to_patch: false" in markdown

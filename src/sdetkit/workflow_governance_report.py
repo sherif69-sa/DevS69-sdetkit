@@ -304,6 +304,95 @@ def _actionability_summary(
     }
 
 
+PERMISSION_SCOPE_REASONS: dict[str, str] = {
+    "contents: write": "May be required for commits, tags, releases, generated branches, or auto-update PR branches.",
+    "pull-requests: write": "May be required for PR comments, reviews, labels, auto-merge, or PR creation/update flows.",
+    "issues: write": "May be required for issue comments, tracker creation, maintenance reports, or issue updates.",
+    "security-events: write": "May be required to upload SARIF or code-scanning/security findings.",
+    "pages: write": "May be required by GitHub Pages deployment workflows.",
+    "id-token: write": "May be required for OIDC, trusted publishing, attestations, or Pages deployment.",
+    "attestations: write": "May be required for release provenance or build attestations.",
+    "actions: write": "May be required only for workflow-dispatch/rerun/cancel operations and needs strict review.",
+}
+
+
+def _workflow_text_for_permission_review(repo_root: Path, workflow: dict[str, Any]) -> str:
+    workflow_path = workflow.get("path")
+    if not isinstance(workflow_path, str):
+        return ""
+    path = repo_root / workflow_path
+    if not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8", errors="ignore")
+
+
+def _granted_write_scopes(workflow_text: str) -> list[str]:
+    scopes: list[str] = []
+    for scope in PERMISSION_SCOPE_REASONS:
+        if scope in workflow_text:
+            scopes.append(scope)
+    return sorted(scopes)
+
+
+def _inferred_permission_reasons(workflow_text: str) -> list[str]:
+    reasons: list[str] = []
+
+    if "actions/github-script" in workflow_text or "gh pr comment" in workflow_text:
+        reasons.append("GitHub API or gh-based PR/issue interaction detected.")
+    if "issues.create" in workflow_text or "issues.update" in workflow_text:
+        reasons.append("Issue create/update API usage detected.")
+    if "issues.createComment" in workflow_text or "pulls.createReview" in workflow_text:
+        reasons.append("PR or issue comment/review API usage detected.")
+    if "upload-sarif" in workflow_text or "security-events: write" in workflow_text:
+        reasons.append("SARIF/code-scanning upload surface detected.")
+    if "github-pages" in workflow_text or "pages: write" in workflow_text:
+        reasons.append("GitHub Pages deployment surface detected.")
+    if "attest" in workflow_text.lower() or "attestations: write" in workflow_text:
+        reasons.append("Release attestation/provenance surface detected.")
+    if "id-token: write" in workflow_text:
+        reasons.append("OIDC token permission detected; requires environment/provider review.")
+    if "contents: write" in workflow_text and (
+        "peter-evans/create-pull-request" in workflow_text
+        or "gh pr create" in workflow_text
+        or "git push" in workflow_text
+        or "auto-merge" in workflow_text
+        or "release" in workflow_text.lower()
+    ):
+        reasons.append("Repository write/release/PR branch mutation surface detected.")
+
+    return sorted(set(reasons))
+
+
+def _permission_review_entry(repo_root: Path, workflow: dict[str, Any]) -> dict[str, Any]:
+    workflow_text = _workflow_text_for_permission_review(repo_root, workflow)
+    granted = _granted_write_scopes(workflow_text)
+    reasons = _inferred_permission_reasons(workflow_text)
+
+    return {
+        "path": workflow.get("path", "unknown"),
+        "has_permission_finding": "permissions_least_privilege" in workflow.get("findings", []),
+        "granted_write_scopes": granted,
+        "granted_write_scope_count": len(granted),
+        "inferred_permission_reasons": reasons,
+        "requires_human_review": True,
+        "safe_to_patch": False,
+        "recommended_change_type": "permission_reason_review",
+    }
+
+
+def _permission_review_matrix(
+    *,
+    repo_root: Path,
+    workflows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    entries = [
+        _permission_review_entry(repo_root, workflow)
+        for workflow in workflows
+        if "permissions_least_privilege" in workflow.get("findings", [])
+    ]
+    return sorted(entries, key=lambda item: str(item["path"]))
+
+
 def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root).resolve()
     workflows = [analyze_workflow(root, path) for path in _workflow_files(root)]
@@ -327,6 +416,10 @@ def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, A
         finding_counts=sorted_finding_counts,
         workflows=workflows,
     )
+    permission_review_matrix = _permission_review_matrix(
+        repo_root=root,
+        workflows=workflows,
+    )
     actionability_summary = _actionability_summary(
         workflow_count=len(workflows),
         review_required_count=len(review_required),
@@ -343,6 +436,8 @@ def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, A
         "finding_count": finding_count,
         "finding_counts": sorted_finding_counts,
         "ranked_followups": ranked_followups,
+        "permission_review_matrix": permission_review_matrix,
+        "permission_review_count": len(permission_review_matrix),
         "actionability_summary": actionability_summary,
         "workflows": workflows,
         "operator_summary": {
@@ -421,6 +516,33 @@ def render_workflow_governance_markdown(payload: dict[str, Any]) -> str:
             lines.append(
                 f"   - safe_to_patch: {str(bool(followup.get('safe_to_patch', False))).lower()}"
             )
+    else:
+        lines.append("- none")
+
+    lines.extend(["", "## Permission review matrix", ""])
+    permission_review = payload.get("permission_review_matrix")
+    if isinstance(permission_review, list) and permission_review:
+        for entry in permission_review:
+            if not isinstance(entry, dict):
+                continue
+            lines.append(f"### {entry.get('path', 'unknown')}")
+            lines.append("")
+            lines.append(
+                f"- granted_write_scope_count: {entry.get('granted_write_scope_count', 0)}"
+            )
+            lines.append("- requires_human_review: true")
+            lines.append("- safe_to_patch: false")
+            scopes = entry.get("granted_write_scopes")
+            if isinstance(scopes, list) and scopes:
+                lines.append("- granted_write_scopes:")
+                for scope in scopes:
+                    lines.append(f"  - `{scope}`")
+            reasons = entry.get("inferred_permission_reasons")
+            if isinstance(reasons, list) and reasons:
+                lines.append("- inferred_permission_reasons:")
+                for reason in reasons:
+                    lines.append(f"  - {reason}")
+            lines.append("")
     else:
         lines.append("- none")
 
