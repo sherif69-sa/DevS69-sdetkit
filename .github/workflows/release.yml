@@ -90,7 +90,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m pip install --force-reinstall dist/*.whl
+          python -m pip install -c constraints-ci.txt --force-reinstall dist/*.whl
           sdetkit --help
 
       - name: Publish to PyPI when token is configured

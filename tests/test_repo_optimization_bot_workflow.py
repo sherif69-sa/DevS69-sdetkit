@@ -24,7 +24,7 @@ def test_repo_optimization_bot_installs_sdetkit_before_module_execution() -> Non
     install_step = next(step for step in steps if step.get("name") == "Install SDETKit")
     run = str(install_step.get("run", ""))
 
-    assert "python -m pip install --upgrade pip" in run
+    assert "python -m pip install -c constraints-ci.txt --upgrade pip" in run
     assert "python -m pip install -c constraints-ci.txt -e ." in run
 
 

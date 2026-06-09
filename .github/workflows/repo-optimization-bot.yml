@@ -22,7 +22,7 @@ jobs:
       - name: Install SDETKit
         run: |
           set -euo pipefail
-          python -m pip install --upgrade pip
+          python -m pip install -c constraints-ci.txt --upgrade pip
           python -m pip install -c constraints-ci.txt -e .
 
       - name: Run optimize lane snapshot
