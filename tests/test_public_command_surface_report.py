@@ -18,6 +18,10 @@ def test_public_command_surface_report_classifies_stable_advanced_and_hidden_com
     assert payload["command_count"] > 50
     assert payload["stable_command_count"] >= 1
     assert payload["hidden_command_count"] >= 1
+    assert payload["stable_public_commands"] == payload["stable_commands"]
+    assert payload["hidden_internal_commands"] == payload["hidden_commands"]
+    assert payload["review_first"] is True
+    assert payload["safe_to_patch"] is False
 
     commands = {item["command"]: item for item in payload["commands"]}
 
@@ -90,6 +94,14 @@ def test_public_command_surface_report_public_cli_dispatch(tmp_path: Path, capsy
     assert "automation_allowed: false" in stdout
     assert out.is_file()
     assert out.with_suffix(".md").is_file()
+
+    document = json.loads(out.read_text(encoding="utf-8"))
+    assert document["stable_public_commands"] == document["stable_commands"]
+    assert document["hidden_internal_commands"] == document["hidden_commands"]
+    assert document["review_first"] is True
+    assert document["safe_to_patch"] is False
+    assert document["rules"]["public_behavior_changed"] is False
+    assert document["rules"]["hidden_commands_exposed"] is False
 
 
 def test_public_command_surface_report_stays_hidden_from_default_help() -> None:
