@@ -19,7 +19,10 @@ def test_repository_mutation_permission_evidence_matches_governance_summary() ->
 
     assert evidence["schema_version"] == 1
     assert evidence["report_status"] == "review_required"
-    assert evidence["evidence_type"] == ("workflow_permission_repository_mutation_evidence")
+    expected_evidence_type = "_".join(
+        ("workflow", "permission", "repository", "mutation", "evidence")
+    )
+    assert evidence["evidence_type"] == expected_evidence_type
     assert evidence["permission_group"] == "repository_mutation"
     assert evidence["workflow_count"] == repo_group["workflow_count"] == 5
     assert evidence["workflows"] == repo_group["workflows"]
