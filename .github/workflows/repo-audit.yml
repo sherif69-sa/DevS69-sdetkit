@@ -1,3 +1,6 @@
+# Local equivalent command:
+#   python -m sdetkit workflow-governance-report --root . --format text
+#   See docs/ci/workflow-local-equivalents.md#repo-audit for workflow-specific operator notes.
 name: Repo Audit
 
 on:
