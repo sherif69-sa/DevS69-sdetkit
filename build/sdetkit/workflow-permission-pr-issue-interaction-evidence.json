@@ -1,0 +1,39 @@
+{
+  "authority_boundary": {
+    "automation_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "semantic_equivalence_proven": false
+  },
+  "automatic_permission_reduction_allowed": false,
+  "automation_allowed": false,
+  "evidence_type": "permission_group_evidence",
+  "granted_write_scopes": [
+    "issues: write",
+    "pull-requests: write"
+  ],
+  "merge_authorized": false,
+  "next_allowed_action": "collect_human_review_evidence",
+  "patch_application_allowed": false,
+  "permission_group": "pr_issue_interaction",
+  "report_status": "review_required",
+  "requires_human_review": true,
+  "review_first": true,
+  "review_notes": [
+    "This evidence is scoped only to PR and issue interaction workflows.",
+    "Repository mutation, security upload, deployment, and release workflows stay in separate groups.",
+    "Use this as human-review evidence before any future permission reduction.",
+    "Do not mutate workflow YAML automatically from this evidence."
+  ],
+  "safe_to_patch": false,
+  "schema_version": 1,
+  "semantic_equivalence_proven": false,
+  "workflow_count": 4,
+  "workflow_mutation": false,
+  "workflows": [
+    ".github/workflows/contributor-onboarding-bot.yml",
+    ".github/workflows/maintenance-autopilot.yml",
+    ".github/workflows/pr-helper-bot.yml",
+    ".github/workflows/pr-quality-comment.yml"
+  ]
+}
