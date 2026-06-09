@@ -415,6 +415,67 @@ def _collect_live_scan(
     }
 
 
+def _queue_snapshot_summary(live_scan: dict[str, Any]) -> dict[str, Any]:
+    prs = live_scan.get("open_pull_requests") or live_scan.get("pull_requests", {})
+    issues = live_scan.get("open_issues_excluding_command_center") or live_scan.get("issues", {})
+
+    if prs.get("error") or issues.get("error"):
+        return {
+            "status": "unknown",
+            "open_pr_count": prs.get("count"),
+            "open_issue_count": issues.get("count"),
+            "stale_open_pr_sample_count": 0,
+            "next_allowed_action": "retry_live_queue_scan",
+        }
+
+    open_pr_count = int(prs.get("count", 0) or 0)
+    open_issue_count = int(issues.get("count", 0) or 0)
+    samples = prs.get("items", [])
+    if not isinstance(samples, list):
+        samples = []
+
+    stale_samples = [
+        sample for sample in samples if str(sample.get("state", "open")).lower() != "open"
+    ]
+
+    if stale_samples:
+        status = "stale"
+        next_action = "refresh_command_center_snapshot"
+    elif open_pr_count == 0:
+        status = "fresh_no_open_prs"
+        next_action = "continue_roadmap_selection"
+    else:
+        status = "fresh_open_prs"
+        next_action = "review_open_pr_queue"
+
+    return {
+        "status": status,
+        "open_pr_count": open_pr_count,
+        "open_issue_count": open_issue_count,
+        "stale_open_pr_sample_count": len(stale_samples),
+        "next_allowed_action": next_action,
+    }
+
+
+def _queue_snapshot_lines(live_scan: dict[str, Any]) -> list[str]:
+    summary = _queue_snapshot_summary(live_scan)
+
+    lines = [
+        "- Queue snapshot status: "
+        f"**{summary['status']}**; "
+        f"open PRs **{summary.get('open_pr_count')}**, "
+        f"open issues **{summary.get('open_issue_count')}**",
+        f"  - Next allowed action: `{summary['next_allowed_action']}`",
+    ]
+
+    if int(summary.get("stale_open_pr_sample_count", 0) or 0):
+        lines.append(
+            f"  - Stale open PR samples detected: **{summary['stale_open_pr_sample_count']}**"
+        )
+
+    return lines
+
+
 def _scan_count_line(label: str, scan: dict[str, Any]) -> str:
     if scan.get("available") is False:
         return f"- {label}: **unavailable** — {scan.get('error', 'unknown error')}"
@@ -431,9 +492,14 @@ def _live_scan_lines(live_scan: dict[str, Any]) -> list[str]:
         "## Live repository scan",
         f"- Generated at: **{live_scan.get('generated_at', 'unknown')}**",
         f"- Source: **{live_scan.get('source', 'GitHub API live scan')}**",
-        _scan_count_line("Open pull requests", prs),
-        _scan_count_line("Open issues excluding command center", issues),
     ]
+    lines.extend(_queue_snapshot_lines(live_scan))
+    lines.extend(
+        [
+            _scan_count_line("Open pull requests", prs),
+            _scan_count_line("Open issues excluding command center", issues),
+        ]
+    )
 
     if prs.get("items"):
         lines.append("  - Open PR sample:")
