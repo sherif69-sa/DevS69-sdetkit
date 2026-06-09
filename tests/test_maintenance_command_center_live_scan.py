@@ -95,3 +95,65 @@ def test_alert_scan_falls_back_when_endpoint_rejects_page_parameter() -> None:
     assert scan == {"available": True, "count": 2, "error": ""}
     assert client.requested_path == "/repos/example/repo/dependabot/alerts"
     assert client.requested_params == {"state": "open"}
+
+
+def test_command_center_live_scan_lines_include_queue_snapshot_status() -> None:
+    module = _load_module()
+
+    live_scan = {
+        "generated_at": "2026-06-09T00:00:00Z",
+        "source": "GitHub API live scan",
+        "open_pull_requests": {"available": True, "count": 0, "items": []},
+        "open_issues_excluding_command_center": {"available": True, "count": 2, "items": []},
+        "recent_workflow_runs": {
+            "available": True,
+            "total": 0,
+            "counts": {"success": 0, "failure": 0, "pending": 0, "other": 0},
+            "latest_failures": [],
+        },
+        "security_alerts": {
+            "dependabot": {"available": True, "count": 0},
+            "code_scanning": {"available": True, "count": 0},
+            "secret_scanning": {"available": True, "count": 0},
+        },
+    }
+
+    rendered = "\n".join(module._live_scan_lines(live_scan))
+
+    assert "## Live repository scan" in rendered
+    assert "Queue snapshot status: **fresh_no_open_prs**" in rendered
+    assert "open PRs **0**, open issues **2**" in rendered
+    assert "Next allowed action: `continue_roadmap_selection`" in rendered
+
+
+def test_command_center_queue_snapshot_detects_stale_pr_samples() -> None:
+    module = _load_module()
+
+    live_scan = {
+        "open_pull_requests": {
+            "available": True,
+            "count": 1,
+            "items": [
+                {
+                    "number": 1657,
+                    "title": "ci: add workflow permission review intelligence",
+                    "state": "closed",
+                }
+            ],
+        },
+        "open_issues_excluding_command_center": {
+            "available": True,
+            "count": 6,
+            "items": [],
+        },
+    }
+
+    summary = module._queue_snapshot_summary(live_scan)
+
+    assert summary["status"] == "stale"
+    assert summary["stale_open_pr_sample_count"] == 1
+    assert summary["next_allowed_action"] == "refresh_command_center_snapshot"
+
+    rendered = "\n".join(module._queue_snapshot_lines(live_scan))
+    assert "Queue snapshot status: **stale**" in rendered
+    assert "Stale open PR samples detected: **1**" in rendered
