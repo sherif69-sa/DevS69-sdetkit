@@ -125,7 +125,7 @@ jobs:
                 `- Run: \`python -m pre_commit run -a\`\n` +
                 `- Run: \`bash quality.sh cov\`\n` +
                 `- Run: \`python -m build && python -m twine check dist/*\`\n` +
-                `- Run docs gate for docs changes: \`mkdocs build\`\n` +
+                `- Run docs gate for docs changes: \`mkdocs build --strict\`\n` +
                 `- Ensure PR summary includes: What, Why, Risks, Tests.\n` +
                 `- Bot shortcuts: \`/doctor\`, \`/check\`, \`/quality\`, \`/hint\`\n` +
                 `- Reference guide: \`docs/premium-quality-gate.md\`\n\n` +
