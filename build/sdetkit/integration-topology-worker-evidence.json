@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "report_status": "review_required",
+  "evidence_type": "integration_topology_worker_evidence",
+  "review_first": true,
+  "safe_to_patch": false,
+  "repo_mutation": false,
+  "workflow_mutation": false,
+  "automation_allowed": false,
+  "patch_application_allowed": false,
+  "merge_authorized": false,
+  "semantic_equivalence_proven": false,
+  "authority_boundary": {
+    "automation_allowed": false,
+    "patch_application_allowed": false,
+    "merge_authorized": false,
+    "semantic_equivalence_proven": false
+  },
+  "workers": [
+    {
+      "id": "integration-topology-worker",
+      "template_path": "templates/automations/integration-topology-worker.yaml",
+      "purpose": "Validate heterogeneous topology proof, capture optimize guidance, and bundle architecture-ready artifacts.",
+      "expected_step_ids": [
+        "topology-check",
+        "topology-optimize",
+        "topology-summary",
+        "bundle"
+      ],
+      "expected_outputs": [
+        "topology-check.json",
+        "optimize.json",
+        "summary.md",
+        "bundle.tar"
+      ],
+      "command_surfaces": [
+        "python -m sdetkit integration topology-check --profile examples/kits/integration/heterogeneous-topology.json",
+        "python -m sdetkit kits optimize --goal \"integration topology premium gate alignment\" --format json"
+      ],
+      "review_notes": [
+        "Use topology-check.json before topology/platform refactors.",
+        "Use optimize.json as guidance only.",
+        "Do not infer automation, patch application, merge authorization, or semantic equivalence from this evidence."
+      ]
+    },
+    {
+      "id": "worker-alignment-radar",
+      "template_path": "templates/automations/worker-alignment-radar.yaml",
+      "purpose": "Keep worker templates aligned with the repo's expansion plan, automation coverage, and template inventory.",
+      "expected_step_ids": [
+        "expand",
+        "automation-check",
+        "templates-list",
+        "summary",
+        "bundle"
+      ],
+      "expected_outputs": [
+        "expand.json",
+        "automation-check.json",
+        "templates.json",
+        "summary.md",
+        "bundle.tar"
+      ],
+      "command_surfaces": [
+        "python -m sdetkit kits expand --goal \"${{inputs.goal}}\" --format json",
+        "python -m sdetkit maintenance --include-check github_automation_check --format json",
+        "python -m sdetkit agent templates list"
+      ],
+      "review_notes": [
+        "Use expand.json to compare expansion guidance against the worker inventory.",
+        "Use automation-check.json to keep automation health visible.",
+        "Use templates.json to detect worker inventory drift."
+      ]
+    }
+  ],
+  "recommended_next_actions": [
+    "Keep this contract as evidence only.",
+    "Run the worker templates before topology/platform/premium-gate refactors.",
+    "Review generated artifacts before any human-authored patch.",
+    "Do not auto-apply workflow, platform, or topology changes from this report."
+  ]
+}
