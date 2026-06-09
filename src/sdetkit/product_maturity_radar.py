@@ -46,6 +46,29 @@ def _normalized_history_subject(value: str) -> str:
     return " ".join(value.strip().lower().replace("-", " ").split())
 
 
+def _history_title_tokens(value: str) -> set[str]:
+    cleaned = value.lower().replace("-", " ")
+    for char in "()[]{}:,_/.":
+        cleaned = cleaned.replace(char, " ")
+
+    return {token for token in cleaned.split() if len(token) >= 3}
+
+
+def _accepted_title_drift_match(candidate_title: str, accepted_subject: str) -> bool:
+    candidate_tokens = _history_title_tokens(candidate_title)
+    subject_tokens = _history_title_tokens(accepted_subject)
+
+    if not candidate_tokens or not subject_tokens:
+        return False
+
+    overlap = candidate_tokens & subject_tokens
+
+    # Conservative title-drift rule:
+    # - catches wording drift like "refresh README and docs map" vs "refresh docs lanes"
+    # - avoids overmatching broad workflow/ci subjects where only 1-3 generic tokens overlap
+    return len(overlap) >= 4
+
+
 def _candidate_accepted_on_main(candidate_title: str, accepted_subjects: set[str]) -> bool:
     normalized_candidate = _normalized_history_subject(candidate_title)
     if not normalized_candidate:
@@ -61,6 +84,8 @@ def _candidate_accepted_on_main(candidate_title: str, accepted_subjects: set[str
         if normalized_candidate == normalized_subject:
             return True
         if SequenceMatcher(None, normalized_candidate, normalized_subject).ratio() >= 0.82:
+            return True
+        if _accepted_title_drift_match(candidate_title, subject):
             return True
 
     return False
