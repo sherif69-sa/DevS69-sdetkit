@@ -1009,7 +1009,7 @@ def test_pr_quality_snapshot_history_falls_back_to_latest_ancestor_artifact_with
     assert '--selected-head-sha "$trusted_snapshot_history_head_sha"' in trusted_visibility
 
 
-def test_pr_quality_builds_trusted_snapshot_history_in_bounded_follow_on_step() -> None:
+def test_pr_quality_builds_trusted_snapshot_history_for_runtime_and_visibility() -> None:
     text = _workflow_text()
     comment_builder = text[
         text.index("- name: Build PR comment body") : text.index(
@@ -1026,7 +1026,23 @@ def test_pr_quality_builds_trusted_snapshot_history_in_bounded_follow_on_step() 
     assert "python -m sdetkit.pr_quality_candidate_validation" in comment_builder
     assert "runtime_guard_worker_oracle.json" in comment_builder
     assert "security_freshness_stale_runtime_oracle.json" in comment_builder
-    assert "python -m sdetkit.trusted_diagnostic_signal_snapshot_history" not in comment_builder
+
+    runtime_summary = comment_builder.index("python -m sdetkit.pr_quality_runtime_proof_artifacts")
+    early_trusted_history = comment_builder.index(
+        "python -m sdetkit.trusted_diagnostic_signal_snapshot_history"
+    )
+    runtime_command = comment_builder[
+        runtime_summary : comment_builder.index(
+            "> build/pr-quality/runtime-proof/summary-metadata.json", runtime_summary
+        )
+    ]
+
+    assert early_trusted_history < runtime_summary
+    assert "--trusted-diagnostic-signal-snapshot-history" in runtime_command
+    assert (
+        "build/pr-quality/trusted-diagnostic-signal-snapshot-history/"
+        "trusted-diagnostic-signal-snapshot-history.json"
+    ) in runtime_command
     assert "python -m sdetkit.trusted_diagnostic_signal_snapshot_history" in trusted_visibility
     assert "trusted-diagnostic-signal-snapshot-history.md" in trusted_visibility
     assert 'body = body.replace(snapshot, f"{snapshot}\\n\\n{history}", 1)' in trusted_visibility
