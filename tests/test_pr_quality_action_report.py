@@ -1762,6 +1762,105 @@ def test_action_report_cli_reports_runtime_proof_metadata(tmp_path: Path, capsys
     assert "## Runtime proof artifacts" in out.read_text(encoding="utf-8")
 
 
+def test_action_report_cli_keeps_trusted_diagnostic_history_out_of_stdout_metadata(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    action_path = _write_json(
+        tmp_path / "action-report.json",
+        {
+            "status": "green",
+            "primary_blocker": {},
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": "no remediation needed",
+            },
+            "recommended_actions": [],
+            "proof_commands": [],
+        },
+    )
+    intelligence_path = _write_json(
+        tmp_path / "check-intelligence.json",
+        {
+            "checks_seen": 1,
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+        },
+    )
+    runtime_path = _write_json(
+        tmp_path / "runtime-proof-artifacts.json",
+        {
+            "status": "collected",
+            "isolated_proof": {
+                "status": "passed",
+                "runtime_guard_violation_count": 0,
+            },
+            "trusted_diagnostic_signal_snapshot_history": {
+                "collection_status": "collected",
+                "status": "trusted_diagnostic_signal_snapshot_history_verified",
+                "source_workflow": "internal-history-source",
+                "latest_accepted_main_head": "abc123",
+                "base_ancestry_verified": True,
+                "record_count": 4,
+                "quiet_green_advisory_baseline_record_count": 2,
+                "review_signal_record_count": 1,
+                "integration_proof_signal_record_count": 1,
+                "latest_snapshot_status": "diagnostic_signal_observed",
+                "latest_primary_signal_kind": "review_signal",
+                "advisor_false_positive_rate_status": "requires_reviewed_history",
+                "prior_history_is_read_only_input": True,
+                "reporting_only": True,
+                "current_pr_decision_input": False,
+                "feeds_repo_memory": False,
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+                "historical_snapshot_authorizes_current_action": False,
+            },
+            "decision_boundary": {
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        },
+    )
+    out = tmp_path / "comment.md"
+
+    rc = report.main(
+        [
+            "--action-report",
+            str(action_path),
+            "--check-intelligence",
+            str(intelligence_path),
+            "--runtime-proof-artifacts",
+            str(runtime_path),
+            "--out",
+            str(out),
+        ]
+    )
+
+    assert rc == 0
+    stdout_text = capsys.readouterr().out
+    printed = json.loads(stdout_text)
+
+    assert printed["runtime_proof_artifacts_present"] is True
+    assert printed["runtime_proof_collection_status"] == "collected"
+    assert "trusted_diagnostic_signal_snapshot_history" not in stdout_text
+    assert "internal-history-source" not in stdout_text
+    assert "requires_reviewed_history" not in stdout_text
+
+    body = out.read_text(encoding="utf-8")
+    assert "Trusted diagnostic signal snapshot history collection status: `collected`" in body
+    assert "Trusted diagnostic signal snapshot history records: `4`" in body
+    assert (
+        "Trusted diagnostic signal snapshot history advisor false-positive rate status: "
+        "`requires_reviewed_history`"
+    ) in body
+    assert "Historical snapshot authorizes current action: `false`" in body
+
+
 def test_action_report_renders_collected_live_benchmark_and_repo_memory() -> None:
     action = {
         "status": "green",
