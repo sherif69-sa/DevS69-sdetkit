@@ -1,0 +1,2 @@
+custom quality wrapper returned an unexpected integrity result
+Process completed with exit code 42

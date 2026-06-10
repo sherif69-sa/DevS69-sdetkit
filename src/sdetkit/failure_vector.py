@@ -262,9 +262,37 @@ def render_failure_vector_bundle_report(payload: dict[str, object]) -> str:
         "- patch_application_allowed: `false`",
         "- merge_authorized: `false`",
         "",
-        "## By failure class",
+        "## Failure vectors",
         "",
     ]
+
+    if vector_payloads:
+        for vector_payload in sorted(
+            vector_payloads,
+            key=lambda item: str(item.get("check") or "unknown"),
+        ):
+            affected_files = _affected_files(vector_payload.get("affected_files"))
+            affected = ", ".join(f"`{path}`" for path in affected_files) or "`none`"
+            safe = "yes" if bool(vector_payload.get("safe_fix_candidate", False)) else "no"
+            local_repro = _optional_string(vector_payload.get("local_repro_command")) or "none"
+            lines.extend(
+                [
+                    f"### {str(vector_payload.get('check') or 'unknown')}",
+                    "",
+                    f"- class: `{str(vector_payload.get('failure_class') or 'unknown')}`",
+                    f"- risk: `{str(vector_payload.get('risk') or 'unknown')}`",
+                    f"- safe_fix_candidate: `{safe}`",
+                    f"- first_failing_line: `{str(vector_payload.get('first_failing_line') or 'unknown')}`",
+                    f"- affected_files: {affected}",
+                    f"- local_repro_command: `{local_repro}`",
+                    "",
+                ]
+            )
+    else:
+        lines.append("- none")
+        lines.append("")
+
+    lines.extend(["## By failure class", ""])
 
     if by_class:
         lines.extend(f"- `{name}`: `{count}`" for name, count in sorted(by_class.items()))
