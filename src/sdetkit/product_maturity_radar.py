@@ -418,6 +418,30 @@ def _workflow_surface(root: Path) -> dict[str, Any]:
             priority="P2",
         )
     ]
+    candidates[0].update(
+        {
+            "blocked_by": "human_review_evidence_required",
+            "blocker_source_report": "sdetkit.workflow_governance_report",
+            "blocker_playbook": "docs/ci/workflow-permission-review-playbook.md",
+            "next_allowed_action": "collect_human_review_evidence",
+            "required_evidence": [
+                "workflow path",
+                "current granted write scopes",
+                "inferred permission reasons from the report",
+                "exact scope proposed for removal, if any",
+                "exact proof command",
+                "rollback plan",
+                "reviewer decision",
+            ],
+            "blocked_actions": [
+                "automatic_permission_reduction",
+                "broad_workflow_permission_sweep",
+                "security_alert_dismissal",
+                "merge_authorization",
+                "semantic_equivalence_claim",
+            ],
+        }
+    )
 
     return _surface_payload(
         name="workflow",
@@ -797,7 +821,17 @@ def render_product_maturity_radar_markdown(payload: dict[str, Any]) -> str:
                 f"   - ranking_status: `{candidate.get('ranking_status', 'fresh_candidate')}`"
             )
             if candidate.get("ranking_status") == "blocked_review_first_candidate":
-                lines.append("   - blocked_by: `human_review_evidence_required`")
+                lines.append(
+                    f"   - blocked_by: `{candidate.get('blocked_by', 'human_review_evidence_required')}`"
+                )
+                if candidate.get("next_allowed_action"):
+                    lines.append(f"   - next_allowed_action: `{candidate['next_allowed_action']}`")
+                if candidate.get("blocker_source_report"):
+                    lines.append(
+                        f"   - blocker_source_report: `{candidate['blocker_source_report']}`"
+                    )
+                if candidate.get("blocker_playbook"):
+                    lines.append(f"   - blocker_playbook: `{candidate['blocker_playbook']}`")
             lines.append("   - review_first: true")
             lines.append("   - safe_to_patch: false")
 
