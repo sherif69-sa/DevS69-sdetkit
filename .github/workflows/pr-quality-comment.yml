@@ -573,16 +573,32 @@ jobs:
           trusted_diagnostic_signal_snapshot_history_for_runtime_rc=2
           runtime_trusted_snapshot_history_summary="$(
             find build/pr-quality/trusted-history/download \
-              -name diagnostic-signal-snapshot-history-summary.json \
+              -path '*/diagnostic-signal-snapshots/output/diagnostic-signal-snapshot-history-summary.json' \
               -print \
               -quit
           )"
+          if [ -z "$runtime_trusted_snapshot_history_summary" ]; then
+            runtime_trusted_snapshot_history_summary="$(
+              find build/pr-quality/trusted-history/download \
+                -name diagnostic-signal-snapshot-history-summary.json \
+                -print \
+                -quit
+            )"
+          fi
           runtime_trusted_snapshot_history_jsonl="$(
             find build/pr-quality/trusted-history/download \
-              -name diagnostic-signal-snapshot-history.jsonl \
+              -path '*/diagnostic-signal-snapshots/output/diagnostic-signal-snapshot-history.jsonl' \
               -print \
               -quit
           )"
+          if [ -z "$runtime_trusted_snapshot_history_jsonl" ]; then
+            runtime_trusted_snapshot_history_jsonl="$(
+              find build/pr-quality/trusted-history/download \
+                -name diagnostic-signal-snapshot-history.jsonl \
+                -print \
+                -quit
+            )"
+          fi
           if [ "$trusted_history_rc" -eq 0 ] \
             && [ -n "$runtime_trusted_snapshot_history_summary" ] \
             && [ -n "$runtime_trusted_snapshot_history_jsonl" ] \
@@ -871,16 +887,32 @@ jobs:
 
             candidate_summary="$(
               find "$candidate_dir" \
-                -name diagnostic-signal-snapshot-history-summary.json \
+                -path '*/diagnostic-signal-snapshots/output/diagnostic-signal-snapshot-history-summary.json' \
                 -print \
                 -quit
             )"
+            if [ -z "$candidate_summary" ]; then
+              candidate_summary="$(
+                find "$candidate_dir" \
+                  -name diagnostic-signal-snapshot-history-summary.json \
+                  -print \
+                  -quit
+              )"
+            fi
             candidate_jsonl="$(
               find "$candidate_dir" \
-                -name diagnostic-signal-snapshot-history.jsonl \
+                -path '*/diagnostic-signal-snapshots/output/diagnostic-signal-snapshot-history.jsonl' \
                 -print \
                 -quit
             )"
+            if [ -z "$candidate_jsonl" ]; then
+              candidate_jsonl="$(
+                find "$candidate_dir" \
+                  -name diagnostic-signal-snapshot-history.jsonl \
+                  -print \
+                  -quit
+              )"
+            fi
             candidate_file_count=0
             if [ -n "$candidate_summary" ] && [ -f "$candidate_summary" ]; then
               candidate_file_count=$((candidate_file_count + 1))

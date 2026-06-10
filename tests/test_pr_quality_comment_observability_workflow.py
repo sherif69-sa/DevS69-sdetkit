@@ -1073,3 +1073,18 @@ def test_pr_quality_comment_workflow_run_blocks_stay_below_registration_limit() 
         "PR Quality Comment run blocks must stay small enough for GitHub "
         f"workflow registration: {oversized}"
     )
+
+
+def test_pr_quality_prefers_final_trusted_diagnostic_snapshot_history_output_files() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+
+    assert (
+        "-path '*/diagnostic-signal-snapshots/output/"
+        "diagnostic-signal-snapshot-history-summary.json'"
+    ) in text
+    assert (
+        "-path '*/diagnostic-signal-snapshots/output/diagnostic-signal-snapshot-history.jsonl'"
+    ) in text
+    assert text.count("diagnostic-signal-snapshots/output/") >= 4
+    assert text.count("-name diagnostic-signal-snapshot-history-summary.json") >= 2
+    assert text.count("-name diagnostic-signal-snapshot-history.jsonl") >= 2
