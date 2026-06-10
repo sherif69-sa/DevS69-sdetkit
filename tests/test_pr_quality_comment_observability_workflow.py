@@ -1046,3 +1046,31 @@ def test_pr_quality_builds_trusted_snapshot_history_for_runtime_and_visibility()
     assert "python -m sdetkit.trusted_diagnostic_signal_snapshot_history" in trusted_visibility
     assert "trusted-diagnostic-signal-snapshot-history.md" in trusted_visibility
     assert 'body = body.replace(snapshot, f"{snapshot}\\n\\n{history}", 1)' in trusted_visibility
+
+
+def test_pr_quality_comment_avoids_untrusted_head_ref_expression_in_run_blocks() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    direct_expression = "${{ github.event.pull_request.head.ref }}"
+    offending_run_lines: list[int] = []
+
+    for index, line in enumerate(lines):
+        if line.strip() != "run: |":
+            continue
+
+        run_indent = len(line) - len(line.lstrip())
+        block: list[str] = []
+        for block_line in lines[index + 1 :]:
+            stripped = block_line.strip()
+            block_indent = len(block_line) - len(block_line.lstrip())
+            if stripped and block_indent <= run_indent:
+                break
+            block.append(block_line)
+
+        if direct_expression in "\n".join(block):
+            offending_run_lines.append(index + 1)
+
+    assert not offending_run_lines, (
+        "PR Quality Comment must pass untrusted pull_request.head.ref through "
+        f"an environment variable before inline scripts: {offending_run_lines}"
+    )
