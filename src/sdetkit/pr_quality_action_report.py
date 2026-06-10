@@ -15,6 +15,9 @@ from sdetkit.pr_comment_failure_families import render_comment_failure_families
 JsonObject = dict[str, Any]
 
 TRUSTED_HISTORY = "_".join(("trusted", "history"))
+TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY = "_".join(
+    ("trusted", "diagnostic", "signal", "snapshot", "history")
+)
 BASE_ANCESTRY_VERIFIED = "_".join(("base", "ancestry", "verified"))
 LIVE_PROVEN_RECORD_COUNT = "_".join(("live", "contract", "proven", "record", "count"))
 PRIOR_HISTORY_READ_ONLY_INPUT = "_".join(("prior", "history", "is", "read", "only", "input"))
@@ -722,6 +725,7 @@ def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) ->
     benchmark = _as_dict(summary.get("live_benchmark"))
     memory = _as_dict(summary.get("repo_memory"))
     trusted_history = _as_dict(summary.get(TRUSTED_HISTORY))
+    trusted_signal_history = _as_dict(summary.get(TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY))
     boundary = _as_dict(summary.get("decision_boundary"))
 
     lines = [
@@ -897,6 +901,97 @@ def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) ->
                 (
                     "- Semantic equivalence proven by trusted history: "
                     f"`{str(bool(trusted_history.get('semantic_equivalence_proven', False))).lower()}`"
+                ),
+            ]
+        )
+
+    lines.extend(
+        [
+            (
+                "- Trusted diagnostic signal snapshot history collection status: "
+                f"`{_string(trusted_signal_history.get('collection_status') or 'not_collected')}`"
+            ),
+            (
+                "- Trusted diagnostic signal snapshot history status: "
+                f"`{_string(trusted_signal_history.get('status') or 'not_collected')}`"
+            ),
+        ]
+    )
+
+    if trusted_signal_history.get("collection_status") == "collected":
+        lines.extend(
+            [
+                (
+                    "- Trusted diagnostic signal snapshot history source workflow: "
+                    f"`{_string(trusted_signal_history.get('source_workflow'))}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history latest accepted main head: "
+                    f"`{_string(trusted_signal_history.get('latest_accepted_main_head'))}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history base ancestry verified: "
+                    f"`{str(bool(trusted_signal_history.get(BASE_ANCESTRY_VERIFIED, False))).lower()}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history records: "
+                    f"`{_int(trusted_signal_history.get('record_count'))}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history quiet-green records: "
+                    f"`{_int(trusted_signal_history.get('quiet_green_advisory_baseline_record_count'))}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history review-signal records: "
+                    f"`{_int(trusted_signal_history.get('review_signal_record_count'))}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history integration-proof records: "
+                    f"`{_int(trusted_signal_history.get('integration_proof_signal_record_count'))}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history latest snapshot status: "
+                    f"`{_string(trusted_signal_history.get('latest_snapshot_status') or 'not_collected')}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history latest primary signal kind: "
+                    f"`{_string(trusted_signal_history.get('latest_primary_signal_kind') or 'unknown')}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history advisor false-positive rate status: "
+                    f"`{_string(trusted_signal_history.get('advisor_false_positive_rate_status') or 'unknown')}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history prior input read-only: "
+                    f"`{str(bool(trusted_signal_history.get(PRIOR_HISTORY_READ_ONLY_INPUT, False))).lower()}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history reporting only: "
+                    f"`{str(bool(trusted_signal_history.get('reporting_only', False))).lower()}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history current PR decision input: "
+                    f"`{str(bool(trusted_signal_history.get('current_pr_decision_input', False))).lower()}`"
+                ),
+                (
+                    "- Trusted diagnostic signal snapshot history feeds RepoMemory: "
+                    f"`{str(bool(trusted_signal_history.get('feeds_repo_memory', False))).lower()}`"
+                ),
+                (
+                    "- Automation allowed by trusted diagnostic signal snapshot history: "
+                    f"`{str(bool(trusted_signal_history.get('automation_allowed', False))).lower()}`"
+                ),
+                (
+                    "- Merge authorized by trusted diagnostic signal snapshot history: "
+                    f"`{str(bool(trusted_signal_history.get('merge_authorized', False))).lower()}`"
+                ),
+                (
+                    "- Semantic equivalence proven by trusted diagnostic signal snapshot history: "
+                    f"`{str(bool(trusted_signal_history.get('semantic_equivalence_proven', False))).lower()}`"
+                ),
+                (
+                    "- Historical snapshot authorizes current action: "
+                    f"`{str(bool(trusted_signal_history.get('historical_snapshot_authorizes_current_action', False))).lower()}`"
                 ),
             ]
         )

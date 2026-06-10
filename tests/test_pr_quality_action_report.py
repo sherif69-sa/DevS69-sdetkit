@@ -1633,6 +1633,28 @@ def test_action_report_renders_runtime_proof_artifacts_without_authority() -> No
         },
         "live_benchmark": {"collection_status": "not_collected"},
         "repo_memory": {"collection_status": "not_collected"},
+        "trusted_diagnostic_signal_snapshot_history": {
+            "collection_status": "collected",
+            "status": "trusted_diagnostic_signal_snapshot_history_verified",
+            "source_workflow": "repo-memory-history.yml",
+            "latest_accepted_main_head": "abc123",
+            "base_ancestry_verified": True,
+            "record_count": 3,
+            "quiet_green_advisory_baseline_record_count": 1,
+            "review_signal_record_count": 2,
+            "integration_proof_signal_record_count": 1,
+            "latest_snapshot_status": "diagnostic_signal_observed",
+            "latest_primary_signal_kind": "review_signal",
+            "advisor_false_positive_rate_status": "requires_reviewed_history",
+            "prior_history_is_read_only_input": True,
+            "reporting_only": True,
+            "current_pr_decision_input": False,
+            "feeds_repo_memory": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+            "historical_snapshot_authorizes_current_action": False,
+        },
         "decision_boundary": {
             "proof_commands_executed_by_renderer": False,
             "automation_allowed": False,
@@ -1658,6 +1680,14 @@ def test_action_report_renders_runtime_proof_artifacts_without_authority() -> No
     assert "Proof commands executed by renderer: `false`" in body
     assert "Automation allowed by runtime artifacts: `false`" in body
     assert "Merge authorized by runtime artifacts: `false`" in body
+    assert "Trusted diagnostic signal snapshot history collection status: `collected`" in body
+    assert "Trusted diagnostic signal snapshot history records: `3`" in body
+    assert (
+        "Trusted diagnostic signal snapshot history advisor false-positive rate status: "
+        "`requires_reviewed_history`"
+    ) in body
+    assert "Historical snapshot authorizes current action: `false`" in body
+    assert "Automation allowed by trusted diagnostic signal snapshot history: `false`" in body
 
 
 def test_action_report_cli_reports_runtime_proof_metadata(tmp_path: Path, capsys) -> None:
@@ -1719,6 +1749,16 @@ def test_action_report_cli_reports_runtime_proof_metadata(tmp_path: Path, capsys
     assert printed["runtime_proof_artifacts_present"] is True
     assert printed["runtime_proof_collection_status"] == "collected"
     assert printed["runtime_guard_violation_count"] == 0
+    assert "trusted_diagnostic_signal_snapshot_history_collection_status" not in printed
+    assert "trusted_diagnostic_signal_snapshot_history_record_count" not in printed
+    assert (
+        "trusted_diagnostic_signal_snapshot_history_advisor_false_positive_rate_status"
+        not in printed
+    )
+    assert (
+        "trusted_diagnostic_signal_snapshot_history_historical_snapshot_authorizes_current_action"
+        not in printed
+    )
     assert "## Runtime proof artifacts" in out.read_text(encoding="utf-8")
 
 
