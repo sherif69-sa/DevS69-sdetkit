@@ -455,7 +455,7 @@ jobs:
             --evidence-narrative build/pr-quality/pr-evidence-narrative.json \
             --out build/pr-quality/trajectory/trajectory.jsonl \
             --repo "${{ github.repository }}" \
-            --branch "${{ github.event.pull_request.head.ref }}" \
+            --branch "$GITHUB_HEAD_REF" \
             --commit-sha "${{ github.event.pull_request.head.sha }}" \
             --pr-number "${{ github.event.pull_request.number }}" \
             --format json \
@@ -701,7 +701,7 @@ jobs:
               --diagnostic-worker-result build/pr-quality/diagnostic-job/diagnostic-worker-result.json \
               --diagnostic-vector build/pr-quality/diagnostic-job/vector/diagnostic-vector.json \
               --repo "$REPOSITORY" \
-              --branch "${{ github.event.pull_request.head.ref }}" \
+              --branch "$GITHUB_HEAD_REF" \
               --commit-sha "$HEAD_SHA" \
               --pr-number "${{ github.event.pull_request.number }}" \
               --out-dir build/pr-quality/diagnostic-job/trajectory \
