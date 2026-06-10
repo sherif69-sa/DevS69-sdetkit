@@ -1,0 +1,100 @@
+{
+  "blocked_until_future_wave": [
+    {
+      "item": "SafetyGate policy expansion",
+      "reason": "Wave B starts only after FailureVector support matrix is committed and green."
+    },
+    {
+      "item": "TrajectoryStore / RepoMemory expansion",
+      "reason": "Wave C starts only after SafetyGate policy contracts are stable."
+    },
+    {
+      "item": "cloud, service, dashboard, or worker orchestration",
+      "reason": "Not allowed until local contracts prove value."
+    }
+  ],
+  "next_lane_after_completion": "Wave B / SafetyGate policy expansion",
+  "purpose": "Documents the currently supported FailureVector failure classes so future roadmap work does not repeat completed extraction contracts.",
+  "roadmap_lane": "Wave A / FailureVectorEngine",
+  "schema_version": "sdetkit.failure_vector.support_matrix.v1",
+  "supported_failure_classes": [
+    {
+      "artifact_coverage": [
+        "failure-vector-json",
+        "failure-vector-markdown",
+        "diagnostic-vector"
+      ],
+      "default_risk": "medium",
+      "failure_class": "test",
+      "first_signal_contract": "pytest FAILED node id or assertion failure line",
+      "review_policy": "review_or_focused_proof",
+      "safe_fix_candidate": false
+    },
+    {
+      "artifact_coverage": [
+        "failure-vector-json",
+        "failure-vector-markdown",
+        "safety-gate"
+      ],
+      "default_risk": "low",
+      "failure_class": "formatter_only",
+      "first_signal_contract": "ruff format failed or would be reformatted",
+      "review_policy": "mechanical_safe_fix_allowed_when_pr_owned",
+      "safe_fix_candidate": true
+    },
+    {
+      "artifact_coverage": [
+        "failure-vector-json",
+        "safety-gate"
+      ],
+      "default_risk": "medium",
+      "failure_class": "lint",
+      "first_signal_contract": "ruff rule line or ruff check signal",
+      "review_policy": "safe_fix_only_for_low_risk_mechanical_lint",
+      "safe_fix_candidate": "only mechanically fixable lint such as I001 import sorting"
+    },
+    {
+      "artifact_coverage": [
+        "failure-vector-json",
+        "diagnostic-vector"
+      ],
+      "default_risk": "medium",
+      "failure_class": "type",
+      "first_signal_contract": "mypy file:line error",
+      "review_policy": "review_first",
+      "safe_fix_candidate": false
+    },
+    {
+      "artifact_coverage": [
+        "failure-vector-json",
+        "failure-vector-markdown"
+      ],
+      "default_risk": "high",
+      "failure_class": "dependency",
+      "first_signal_contract": "pip resolver failure such as ResolutionImpossible",
+      "review_policy": "review_first",
+      "safe_fix_candidate": false
+    },
+    {
+      "artifact_coverage": [
+        "failure-vector-json"
+      ],
+      "default_risk": "high",
+      "failure_class": "merge_conflict",
+      "first_signal_contract": "CONFLICT line or merge conflict signal",
+      "review_policy": "review_first",
+      "safe_fix_candidate": false
+    },
+    {
+      "artifact_coverage": [
+        "failure-vector-json",
+        "failure-vector-markdown"
+      ],
+      "default_risk": "high",
+      "failure_class": "unknown",
+      "first_signal_contract": "first meaningful wrapper line, not generic exit-code fallback",
+      "review_policy": "review_first",
+      "safe_fix_candidate": false
+    }
+  ]
+}
