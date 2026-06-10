@@ -2478,6 +2478,8 @@ def test_action_report_renders_operator_safetygate_summary_without_authority() -
             "safety_summary": {
                 "review_first": False,
                 "safe_fix_allowed": True,
+                "allowed_files": ["tests/test_patch_scorer.py"],
+                "proof_commands": ["python -m pytest -q tests/test_patch_scorer.py -o addopts="],
                 "automation_allowed": False,
                 "patch_application_allowed": False,
                 "merge_authorized": False,
@@ -2565,6 +2567,11 @@ def test_action_report_renders_operator_safetygate_summary_without_authority() -
 
     assert "## Operator SafetyGate summary" in body
     assert "- Failure bundle safe-fix allowed: `true`" in body
+    assert "- Operator summary allowed files: `tests/test_patch_scorer.py`" in body
+    assert (
+        "- Operator summary proof commands: "
+        "`python -m pytest -q tests/test_patch_scorer.py -o addopts=`" in body
+    )
     assert "- Trajectory SafetyGate records: `1`" in body
     assert "- RepoMemory SafetyGate records: `1`" in body
     assert "- Replay benchmark SafetyGate scenarios: `1`" in body
