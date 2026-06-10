@@ -1,0 +1,105 @@
+{
+  "blocked_until_future_wave": [
+    {
+      "item": "automatic patch application",
+      "reason": "SafetyGate can declare eligibility, but patch application remains outside this policy matrix."
+    },
+    {
+      "item": "merge authorization",
+      "reason": "SafetyGate decisions never authorize merging."
+    },
+    {
+      "item": "TrajectoryStore / RepoMemory expansion",
+      "reason": "Wave C starts only after SafetyGate policy contracts are stable."
+    },
+    {
+      "item": "cloud, service, dashboard, or worker orchestration",
+      "reason": "Not allowed until local contracts prove value."
+    }
+  ],
+  "depends_on": "docs/contracts/failure-vector-support-matrix.v1.json",
+  "global_blocked_actions": [
+    "delete or weaken tests",
+    "skip CI or verifier checks",
+    "edit workflow gates to hide the failure",
+    "modify files outside allowed_files"
+  ],
+  "policy_by_failure_class": [
+    {
+      "allowed_files_policy": "affected_files_only",
+      "default_decision": "safe_fix_allowed_if_all_global_conditions_pass",
+      "failure_class": "formatter_only",
+      "review_first_when": [
+        "affected_files is empty",
+        "scope is not pr_owned_only",
+        "risk is not low",
+        "safe_fix_candidate is false"
+      ]
+    },
+    {
+      "allowed_files_policy": "affected_files_only",
+      "default_decision": "safe_fix_allowed_if_all_global_conditions_pass",
+      "failure_class": "lint",
+      "review_first_when": [
+        "lint is not mechanically fixable",
+        "affected_files is empty",
+        "scope is not pr_owned_only",
+        "risk is not low",
+        "safe_fix_candidate is false"
+      ]
+    },
+    {
+      "allowed_files_policy": "none",
+      "default_decision": "review_first",
+      "failure_class": "test",
+      "review_first_when": [
+        "always in current policy"
+      ]
+    },
+    {
+      "allowed_files_policy": "none",
+      "default_decision": "review_first",
+      "failure_class": "type",
+      "review_first_when": [
+        "always in current policy"
+      ]
+    },
+    {
+      "allowed_files_policy": "none",
+      "default_decision": "review_first",
+      "failure_class": "dependency",
+      "review_first_when": [
+        "always in current policy"
+      ]
+    },
+    {
+      "allowed_files_policy": "none",
+      "default_decision": "review_first",
+      "failure_class": "merge_conflict",
+      "review_first_when": [
+        "always in current policy"
+      ]
+    },
+    {
+      "allowed_files_policy": "none",
+      "default_decision": "review_first",
+      "failure_class": "unknown",
+      "review_first_when": [
+        "always in current policy"
+      ]
+    }
+  ],
+  "purpose": "Documents the SafetyGate policy that maps FailureVector classes to safe-fix or review-first outcomes.",
+  "roadmap_lane": "Wave B / SafetyGate policy expansion",
+  "safe_fix_allowed_only_when": {
+    "affected_files": "non_empty",
+    "failure_class_in": [
+      "formatter_only",
+      "lint"
+    ],
+    "risk": "low",
+    "safe_fix_candidate": true,
+    "scope": "pr_owned_only"
+  },
+  "schema_version": "sdetkit.safety_gate.policy_matrix.v1"
+}
