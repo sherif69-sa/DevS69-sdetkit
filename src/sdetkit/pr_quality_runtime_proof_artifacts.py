@@ -13,6 +13,15 @@ SUMMARY_MD = "runtime-proof-artifacts.md"
 
 COLLECTED = "collected"
 NOT_COLLECTED = "_".join(("not", "collected"))
+REPLAY_MANIFEST = "_".join(("replay", "manifest"))
+REPLAY_MANIFEST_PRESENT = "_".join(("replay", "manifest", "present"))
+REPLAY_MANIFEST_SCENARIO_COUNT = "_".join(("replay", "manifest", "scenario", "count"))
+REPLAY_MANIFEST_REPORTING_ONLY = "_".join(("replay", "manifest", "reporting", "only"))
+REPLAY_MANIFEST_AUTOMATION_ALLOWED = "_".join(("replay", "manifest", "automation", "allowed"))
+REPLAY_MANIFEST_MERGE_AUTHORIZED = "_".join(("replay", "manifest", "merge", "authorized"))
+REPLAY_MANIFEST_SEMANTIC_EQUIVALENCE_PROVEN = "_".join(
+    ("replay", "manifest", "semantic", "equivalence", "proven")
+)
 TRUSTED_HISTORY = "_".join(("trusted", "history"))
 TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY = "_".join(
     ("trusted", "diagnostic", "signal", "snapshot", "history")
@@ -108,7 +117,7 @@ def _live_benchmark_summary(report: Mapping[str, Any]) -> JsonObject:
 
     live = _as_dict(payload.get("live_evidence"))
     boundary = _as_dict(payload.get("safety_boundary"))
-    replay = _as_dict(payload.get("replay_manifest"))
+    replay = _as_dict(payload.get(REPLAY_MANIFEST))
     return {
         "collection_status": COLLECTED,
         "status": _string(payload.get("status") or "unknown"),
@@ -127,12 +136,12 @@ def _live_benchmark_summary(report: Mapping[str, Any]) -> JsonObject:
             boundary.get("semantic_equivalence_claimed_count")
         ),
         "boundary_preserved": _bool(boundary.get("preserved")),
-        "replay_manifest_present": bool(replay),
-        "replay_manifest_scenario_count": _int(replay.get("scenario_count")),
-        "replay_manifest_reporting_only": _bool(replay.get("reporting_only")),
-        "replay_manifest_automation_allowed": _bool(replay.get("automation_allowed")),
-        "replay_manifest_merge_authorized": _bool(replay.get("merge_authorized")),
-        "replay_manifest_semantic_equivalence_proven": _bool(
+        REPLAY_MANIFEST_PRESENT: bool(replay),
+        REPLAY_MANIFEST_SCENARIO_COUNT: _int(replay.get("scenario_count")),
+        REPLAY_MANIFEST_REPORTING_ONLY: _bool(replay.get("reporting_only")),
+        REPLAY_MANIFEST_AUTOMATION_ALLOWED: _bool(replay.get("automation_allowed")),
+        REPLAY_MANIFEST_MERGE_AUTHORIZED: _bool(replay.get("merge_authorized")),
+        REPLAY_MANIFEST_SEMANTIC_EQUIVALENCE_PROVEN: _bool(
             replay.get("semantic_equivalence_proven")
         ),
     }
@@ -414,27 +423,27 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
                 ),
                 (
                     "- Replay manifest present: "
-                    f"`{str(_bool(benchmark.get('replay_manifest_present'))).lower()}`"
+                    f"`{str(_bool(benchmark.get(REPLAY_MANIFEST_PRESENT))).lower()}`"
                 ),
                 (
                     "- Replay manifest scenarios: "
-                    f"`{_int(benchmark.get('replay_manifest_scenario_count'))}`"
+                    f"`{_int(benchmark.get(REPLAY_MANIFEST_SCENARIO_COUNT))}`"
                 ),
                 (
                     "- Replay manifest reporting only: "
-                    f"`{str(_bool(benchmark.get('replay_manifest_reporting_only'))).lower()}`"
+                    f"`{str(_bool(benchmark.get(REPLAY_MANIFEST_REPORTING_ONLY))).lower()}`"
                 ),
                 (
                     "- Replay manifest automation allowed: "
-                    f"`{str(_bool(benchmark.get('replay_manifest_automation_allowed'))).lower()}`"
+                    f"`{str(_bool(benchmark.get(REPLAY_MANIFEST_AUTOMATION_ALLOWED))).lower()}`"
                 ),
                 (
                     "- Replay manifest merge authorized: "
-                    f"`{str(_bool(benchmark.get('replay_manifest_merge_authorized'))).lower()}`"
+                    f"`{str(_bool(benchmark.get(REPLAY_MANIFEST_MERGE_AUTHORIZED))).lower()}`"
                 ),
                 (
                     "- Replay manifest semantic equivalence proven: "
-                    f"`{str(_bool(benchmark.get('replay_manifest_semantic_equivalence_proven'))).lower()}`"
+                    f"`{str(_bool(benchmark.get(REPLAY_MANIFEST_SEMANTIC_EQUIVALENCE_PROVEN))).lower()}`"
                 ),
             ]
         )

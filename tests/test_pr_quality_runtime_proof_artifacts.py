@@ -14,6 +14,13 @@ from sdetkit.pr_quality_runtime_proof_artifacts import (
     NOT_COLLECTED,
     PRIOR_HISTORY_READ_ONLY_INPUT,
     PROOF_COMMANDS_EXECUTED_BY_READER,
+    REPLAY_MANIFEST,
+    REPLAY_MANIFEST_AUTOMATION_ALLOWED,
+    REPLAY_MANIFEST_MERGE_AUTHORIZED,
+    REPLAY_MANIFEST_PRESENT,
+    REPLAY_MANIFEST_REPORTING_ONLY,
+    REPLAY_MANIFEST_SCENARIO_COUNT,
+    REPLAY_MANIFEST_SEMANTIC_EQUIVALENCE_PROVEN,
     TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY,
     TRUSTED_HISTORY,
     build_runtime_proof_artifacts,
@@ -98,7 +105,7 @@ def test_runtime_proof_summary_accepts_future_live_inputs_without_authority() ->
                 "anti_cheat_rejection_count": 2,
                 "network_isolation_enforced_count": 0,
             },
-            "replay_manifest": {
+            REPLAY_MANIFEST: {
                 "scenario_count": 6,
                 "reporting_only": True,
                 "automation_allowed": False,
@@ -124,12 +131,12 @@ def test_runtime_proof_summary_accepts_future_live_inputs_without_authority() ->
     ]
     benchmark = summary["live_benchmark"]
     assert benchmark["anti_cheat_rejection_count"] == 2
-    assert benchmark["replay_manifest_present"] is True
-    assert benchmark["replay_manifest_scenario_count"] == 6
-    assert benchmark["replay_manifest_reporting_only"] is True
-    assert benchmark["replay_manifest_automation_allowed"] is False
-    assert benchmark["replay_manifest_merge_authorized"] is False
-    assert benchmark["replay_manifest_semantic_equivalence_proven"] is False
+    assert benchmark[REPLAY_MANIFEST_PRESENT] is True
+    assert benchmark[REPLAY_MANIFEST_SCENARIO_COUNT] == 6
+    assert benchmark[REPLAY_MANIFEST_REPORTING_ONLY] is True
+    assert benchmark[REPLAY_MANIFEST_AUTOMATION_ALLOWED] is False
+    assert benchmark[REPLAY_MANIFEST_MERGE_AUTHORIZED] is False
+    assert benchmark[REPLAY_MANIFEST_SEMANTIC_EQUIVALENCE_PROVEN] is False
     assert summary["repo_memory"]["live_safe_candidate_count"] == 1
     assert summary["decision_boundary"]["automation_allowed"] is False
 
@@ -200,7 +207,7 @@ def test_runtime_proof_markdown_renders_collected_live_benchmark_and_memory() ->
                 "semantic_equivalence_claimed_count": 0,
                 "preserved": True,
             },
-            "replay_manifest": {
+            REPLAY_MANIFEST: {
                 "scenario_count": 6,
                 "reporting_only": True,
                 "automation_allowed": False,
