@@ -33,7 +33,8 @@
         "affected_files is empty",
         "scope is not pr_owned_only",
         "risk is not low",
-        "safe_fix_candidate is false"
+        "safe_fix_candidate is false",
+        "local_repro_command is empty"
       ]
     },
     {
@@ -45,7 +46,8 @@
         "affected_files is empty",
         "scope is not pr_owned_only",
         "risk is not low",
-        "safe_fix_candidate is false"
+        "safe_fix_candidate is false",
+        "local_repro_command is empty"
       ]
     },
     {
@@ -97,6 +99,7 @@
       "formatter_only",
       "lint"
     ],
+    "local_repro_command": "non_empty",
     "risk": "low",
     "safe_fix_candidate": true,
     "scope": "pr_owned_only"

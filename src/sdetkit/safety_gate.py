@@ -103,18 +103,21 @@ def _safe_fix_allowed(vector: FailureVectorLike) -> bool:
         and vector.risk == "low"
         and vector.scope == "pr_owned_only"
         and bool(vector.affected_files)
+        and bool(vector.local_repro_command)
     )
 
 
 def _decision_reason(vector: FailureVectorLike, safe_fix_allowed: bool) -> str:
     if safe_fix_allowed:
-        return "failure vector is low-risk, PR-owned, and mechanically eligible"
+        return "failure vector is low-risk, PR-owned, mechanically eligible, and has required proof"
     if not vector.safe_fix_candidate:
         return (
             f"failure_class {vector.failure_class!r} is review-first or not mechanically eligible"
         )
     if not vector.affected_files:
         return "safe candidate lacks affected files, so patch scope cannot be verified"
+    if not vector.local_repro_command:
+        return "safe candidate lacks local repro command, so required proof cannot be selected"
     if vector.scope != "pr_owned_only":
         return f"scope {vector.scope!r} is not eligible for mechanical remediation"
     if vector.risk != "low":

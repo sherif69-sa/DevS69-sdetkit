@@ -22,7 +22,7 @@ class MinimalFailureVector:
     scope: str = "pr_owned_only"
     safe_fix_candidate: bool = True
     affected_files: tuple[str, ...] = ("tests/test_widget.py",)
-    local_repro_command: str | None = None
+    local_repro_command: str | None = "python -m ruff format --check tests/test_widget.py"
 
 
 def _load_policy() -> dict[str, object]:
@@ -48,6 +48,7 @@ def test_safety_gate_policy_matrix_matches_current_safe_fix_classes() -> None:
 
     safe_fix_classes = set(policy["safe_fix_allowed_only_when"]["failure_class_in"])
     assert safe_fix_classes == set(SAFE_FIX_CLASSES)
+    assert policy["safe_fix_allowed_only_when"]["local_repro_command"] == "non_empty"
 
     allowed_rows = {
         row["failure_class"]
@@ -102,6 +103,7 @@ def test_safety_gate_policy_matrix_markdown_matches_contract() -> None:
     assert "SafetyGate policy matrix" in markdown
     assert "docs/contracts/safety-gate-policy-matrix.v1.json" in markdown
     assert "automatic patch application" in markdown
+    assert "local repro command" in markdown
     assert "merge authorization" in markdown
 
     for row in policy["policy_by_failure_class"]:

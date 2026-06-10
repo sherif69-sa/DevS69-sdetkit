@@ -17,13 +17,14 @@ SafetyGate may allow a safe fix only when all of these are true:
 - risk is `low`
 - scope is `pr_owned_only`
 - affected files are non-empty
+- local repro command is present
 
 ## Policy by failure class
 
 | Failure class | Default decision | Allowed files policy | Review-first when |
 | --- | --- | --- | --- |
-| `formatter_only` | `safe_fix_allowed_if_all_global_conditions_pass` | `affected_files_only` | affected_files is empty, scope is not pr_owned_only, risk is not low, safe_fix_candidate is false |
-| `lint` | `safe_fix_allowed_if_all_global_conditions_pass` | `affected_files_only` | lint is not mechanically fixable, affected_files is empty, scope is not pr_owned_only, risk is not low, safe_fix_candidate is false |
+| `formatter_only` | `safe_fix_allowed_if_all_global_conditions_pass` | `affected_files_only` | affected_files is empty, scope is not pr_owned_only, risk is not low, safe_fix_candidate is false, local_repro_command is empty |
+| `lint` | `safe_fix_allowed_if_all_global_conditions_pass` | `affected_files_only` | lint is not mechanically fixable, affected_files is empty, scope is not pr_owned_only, risk is not low, safe_fix_candidate is false, local_repro_command is empty |
 | `test` | `review_first` | `none` | always in current policy |
 | `type` | `review_first` | `none` | always in current policy |
 | `dependency` | `review_first` | `none` | always in current policy |
