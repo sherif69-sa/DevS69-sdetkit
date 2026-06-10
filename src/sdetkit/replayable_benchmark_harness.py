@@ -638,6 +638,23 @@ def _type_rate(results: list[JsonObject], scenario_type: str) -> float:
     return round(passing / len(matching), 4)
 
 
+def _replay_manifest(results: list[JsonObject]) -> JsonObject:
+    scenario_types = [_string(item.get("scenario_type")) for item in results]
+    return {
+        "scenario_count": len(results),
+        "scenario_ids": [_string(item.get("scenario_id")) for item in results],
+        "scenario_types": scenario_types,
+        "scenario_type_counts": dict(sorted(Counter(scenario_types).items())),
+        "input_order_preserved": True,
+        "duplicate_scenario_ids_rejected": True,
+        "unsupported_scenario_types_rejected": True,
+        "reporting_only": True,
+        "automation_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+
 def build_benchmark_report(scenarios: list[Mapping[str, Any]]) -> JsonObject:
     results = [evaluate_scenario(scenario) for scenario in scenarios]
     safety_gate_evidence = _aggregate_safety_gate_evidence(results)
@@ -703,6 +720,7 @@ def build_benchmark_report(scenarios: list[Mapping[str, Any]]) -> JsonObject:
         "passed_count": passed_count,
         "failed_count": len(results) - passed_count,
         "scenario_type_counts": dict(sorted(type_counts.items())),
+        "replay_manifest": _replay_manifest(results),
         "safety_gate_evidence": safety_gate_evidence,
         "required_contract": {
             "required_scenario_types": list(REQUIRED_SCENARIO_TYPES),
@@ -793,6 +811,7 @@ def build_isolated_evidence_report(
         "passed_count": passed_count,
         "failed_count": len(results) - passed_count,
         "scenario_type_counts": dict(sorted(type_counts.items())),
+        "replay_manifest": _replay_manifest(results),
         "required_contract": {
             "required_scenario_types": list(ISOLATED_EVIDENCE_REQUIRED_TYPES),
             "all_required_present": required_present,
@@ -1097,6 +1116,7 @@ def build_diagnostic_worker_benchmark_report(scenarios: list[Mapping[str, Any]])
         "passed_count": passed_count,
         "failed_count": len(results) - passed_count,
         "scenario_type_counts": dict(sorted(type_counts.items())),
+        "replay_manifest": _replay_manifest(results),
         "required_contract": {
             "required_scenario_types": list(DIAGNOSTIC_WORKER_REQUIRED_SCENARIO_TYPES),
             "all_required_present": required_present,
@@ -1385,6 +1405,7 @@ def build_security_freshness_benchmark_report(scenarios: list[Mapping[str, Any]]
         "passed_count": passed_count,
         "failed_count": len(results) - passed_count,
         "scenario_type_counts": dict(sorted(type_counts.items())),
+        "replay_manifest": _replay_manifest(results),
         "required_contract": {
             "required_scenario_types": list(SECURITY_FRESHNESS_REQUIRED_SCENARIO_TYPES),
             "all_required_present": required_present,
@@ -1411,6 +1432,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
     required = _as_dict(report.get("required_contract"))
     boundary = _as_dict(report.get("safety_boundary"))
     live_evidence = _as_dict(report.get("live_evidence"))
+    replay_manifest = _as_dict(report.get("replay_manifest"))
     safety_gate = _as_dict(report.get("safety_gate_evidence"))
     safety_boundary = _as_dict(safety_gate.get("decision_boundary"))
     scenarios = [_as_dict(item) for item in _as_list(report.get("scenarios"))]
@@ -1430,6 +1452,49 @@ def render_markdown(report: Mapping[str, Any]) -> str:
         f"- Attempts scored: `{_int(report.get('attempt_scored_count'))}`",
         "",
     ]
+
+    if replay_manifest:
+        scenario_ids = ", ".join(
+            _string(item) for item in _as_list(replay_manifest.get("scenario_ids"))
+        )
+        scenario_types = ", ".join(
+            _string(item) for item in _as_list(replay_manifest.get("scenario_types"))
+        )
+        lines.extend(
+            [
+                "## Replay manifest",
+                "",
+                f"- Scenario count: `{_int(replay_manifest.get('scenario_count'))}`",
+                f"- Scenario ids: `{scenario_ids or 'none'}`",
+                f"- Scenario types: `{scenario_types or 'none'}`",
+                (
+                    "- Input order preserved: "
+                    f"`{str(_bool(replay_manifest.get('input_order_preserved'))).lower()}`"
+                ),
+                (
+                    "- Duplicate scenario IDs rejected: "
+                    f"`{str(_bool(replay_manifest.get('duplicate_scenario_ids_rejected'))).lower()}`"
+                ),
+                (
+                    "- Unsupported scenario types rejected: "
+                    f"`{str(_bool(replay_manifest.get('unsupported_scenario_types_rejected'))).lower()}`"
+                ),
+                f"- Reporting only: `{str(_bool(replay_manifest.get('reporting_only'))).lower()}`",
+                (
+                    "- Automation allowed by replay manifest: "
+                    f"`{str(_bool(replay_manifest.get('automation_allowed'))).lower()}`"
+                ),
+                (
+                    "- Merge authorized by replay manifest: "
+                    f"`{str(_bool(replay_manifest.get('merge_authorized'))).lower()}`"
+                ),
+                (
+                    "- Semantic equivalence proven by replay manifest: "
+                    f"`{str(_bool(replay_manifest.get('semantic_equivalence_proven'))).lower()}`"
+                ),
+                "",
+            ]
+        )
 
     if is_security_freshness:
         lines.extend(
