@@ -762,45 +762,30 @@ def test_pr_quality_workflow_runs_runtime_guard_worker_benchmark_as_non_decision
     step_end = text.find("\n      - name:", marker_location)
     if step_end < 0:
         step_end = len(text)
-    build_comment = text[step_start:step_end]
+    benchmark_step = text[step_start:step_end]
 
-    assert "- name: Build PR comment body" in build_comment
-    assert build_comment.count(scenario_marker) == 1
-    benchmark_command_start = build_comment.rfind(
-        "python -m sdetkit.replayable_benchmark_harness", 0, build_comment.index(scenario_marker)
+    assert "- name: Build PR comment body diagnostic appendices" in benchmark_step
+    assert benchmark_step.count(scenario_marker) == 1
+    assert "runtime_guard_worker_nop.json" in benchmark_step
+    assert "runtime_guard_worker_unsafe.json" in benchmark_step
+
+    benchmark_command_start = benchmark_step.rfind(
+        "python -m sdetkit.replayable_benchmark_harness",
+        0,
+        benchmark_step.index(scenario_marker),
     )
     assert benchmark_command_start >= 0
-    candidate_validation = build_comment.index("python -m sdetkit.pr_quality_candidate_validation")
-    benchmark_append = build_comment.index(
+
+    repo_memory = text.index("python -m sdetkit.repo_memory")
+    candidate_validation = step_start + benchmark_step.index(
+        "python -m sdetkit.pr_quality_candidate_validation"
+    )
+    benchmark_command_start += step_start
+    benchmark_append = step_start + benchmark_step.index(
         "cat build/pr-quality/runtime-guard-benchmark/benchmark-report.md"
     )
-    repo_memory = build_comment.index("python -m sdetkit.repo_memory")
-    action_report = build_comment.index("python -m sdetkit.pr_quality_action_report")
-    repo_memory_command = build_comment[
-        repo_memory : build_comment.index(
-            "> build/pr-quality/repo-memory/repo-memory-cli.json", repo_memory
-        )
-    ]
-    action_report_command = build_comment[
-        action_report : build_comment.index(
-            "> build/pr-quality/pr-comment-metadata.json", action_report
-        )
-    ]
 
-    assert candidate_validation < benchmark_command_start < benchmark_append
-    assert "runtime-guard-benchmark" not in repo_memory_command
-    assert "runtime-guard-benchmark" not in action_report_command
-    assert (
-        "--diagnostic-worker-scenario tests/fixtures/remediation_benchmark/"
-        "runtime_guard_worker_nop.json" in build_comment
-    )
-    assert (
-        "--diagnostic-worker-scenario tests/fixtures/remediation_benchmark/"
-        "runtime_guard_worker_unsafe.json" in build_comment
-    )
-    assert "build/pr-quality/runtime-guard-benchmark/" in build_comment
-    assert "--commit-safe-fixes" not in text
-    assert "--pr-quality-safe-bridge-only" not in text
+    assert repo_memory < candidate_validation < benchmark_command_start < benchmark_append
 
 
 def test_pr_quality_workflow_runs_security_freshness_benchmark_as_non_decision_evidence() -> None:
@@ -814,51 +799,36 @@ def test_pr_quality_workflow_runs_security_freshness_benchmark_as_non_decision_e
     step_end = text.find("\n      - name:", marker_location)
     if step_end < 0:
         step_end = len(text)
-    build_comment = text[step_start:step_end]
+    benchmark_step = text[step_start:step_end]
 
-    assert "- name: Build PR comment body" in build_comment
-    security_command = build_comment.rfind(
+    assert "- name: Build PR comment body diagnostic appendices" in benchmark_step
+    assert "security_freshness_current_primary_oracle.json" in benchmark_step
+    assert "security_freshness_authority_unsafe.json" in benchmark_step
+
+    marker_in_step = benchmark_step.index(marker)
+    security_command = benchmark_step.rfind(
         "python -m sdetkit.replayable_benchmark_harness",
         0,
-        build_comment.index(marker),
+        marker_in_step,
     )
-    runtime_command = build_comment.rfind(
+    runtime_command = benchmark_step.rfind(
         "python -m sdetkit.replayable_benchmark_harness",
         0,
         security_command,
     )
     assert runtime_command >= 0
-    runtime_append = build_comment.index(
+    assert security_command >= 0
+
+    runtime_append = benchmark_step.index(
         "cat build/pr-quality/runtime-guard-benchmark/benchmark-report.md"
     )
-    security_append = build_comment.index(
+    security_append = benchmark_step.index(
         "cat build/pr-quality/security-freshness-benchmark/benchmark-report.md"
     )
-    repo_memory = build_comment.index("python -m sdetkit.repo_memory")
-    action_report = build_comment.index("python -m sdetkit.pr_quality_action_report")
-    repo_memory_command = build_comment[
-        repo_memory : build_comment.index(
-            "> build/pr-quality/repo-memory/repo-memory-cli.json", repo_memory
-        )
-    ]
-    action_report_command = build_comment[
-        action_report : build_comment.index(
-            "> build/pr-quality/pr-comment-metadata.json", action_report
-        )
-    ]
 
     assert runtime_command < security_command < runtime_append < security_append
-    assert "security-freshness-benchmark" not in repo_memory_command
-    assert "security-freshness-benchmark" not in action_report_command
-    assert (
-        "--security-freshness-scenario tests/fixtures/remediation_benchmark/"
-        "security_freshness_current_primary_oracle.json" in build_comment
-    )
-    assert (
-        "--security-freshness-scenario tests/fixtures/remediation_benchmark/"
-        "security_freshness_authority_unsafe.json" in build_comment
-    )
-    assert "build/pr-quality/security-freshness-benchmark/" in build_comment
+    assert "python -m sdetkit.repo_memory" not in benchmark_step
+    assert "python -m sdetkit.pr_quality_action_report" not in benchmark_step
     assert "--commit-safe-fixes" not in text
     assert "--pr-quality-safe-bridge-only" not in text
 
@@ -1073,4 +1043,33 @@ def test_pr_quality_comment_avoids_untrusted_head_ref_expression_in_run_blocks()
     assert not offending_run_lines, (
         "PR Quality Comment must pass untrusted pull_request.head.ref through "
         f"an environment variable before inline scripts: {offending_run_lines}"
+    )
+
+
+def test_pr_quality_comment_workflow_run_blocks_stay_below_registration_limit() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    max_chars = 24_000
+    oversized: list[tuple[int, int]] = []
+
+    for index, line in enumerate(lines):
+        if line.strip() != "run: |":
+            continue
+
+        run_indent = len(line) - len(line.lstrip())
+        block: list[str] = []
+        for block_line in lines[index + 1 :]:
+            stripped = block_line.strip()
+            block_indent = len(block_line) - len(block_line.lstrip())
+            if stripped and block_indent <= run_indent:
+                break
+            block.append(block_line)
+
+        size = len("\n".join(block))
+        if size > max_chars:
+            oversized.append((index + 1, size))
+
+    assert not oversized, (
+        "PR Quality Comment run blocks must stay small enough for GitHub "
+        f"workflow registration: {oversized}"
     )
