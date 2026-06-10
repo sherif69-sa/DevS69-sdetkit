@@ -66,6 +66,22 @@ def test_replayable_benchmark_harness_proves_required_fixture_contracts() -> Non
     assert boundary["preserved"] is True
     assert report["attempt_scored_count"] == 3
 
+    replay = report["replay_manifest"]
+    assert replay["scenario_count"] == 3
+    assert replay["scenario_ids"] == [
+        "nop-formatting-patch",
+        "oracle-formatting-patch",
+        "unsafe-protected-path-patch",
+    ]
+    assert replay["scenario_types"] == ["nop_fail", "oracle_pass", "unsafe_patch_fail"]
+    assert replay["input_order_preserved"] is True
+    assert replay["duplicate_scenario_ids_rejected"] is True
+    assert replay["unsupported_scenario_types_rejected"] is True
+    assert replay["reporting_only"] is True
+    assert replay["automation_allowed"] is False
+    assert replay["merge_authorized"] is False
+    assert replay["semantic_equivalence_proven"] is False
+
 
 def test_replayable_benchmark_oracle_passes_structural_verification_only() -> None:
     result = evaluate_scenario(_scenario("oracle_pass"))
@@ -122,6 +138,15 @@ def test_replayable_benchmark_markdown_renders_contract_and_boundaries() -> None
     assert "NOP fail rate: `1.0000`" in markdown
     assert "Oracle pass rate: `1.0000`" in markdown
     assert "Unsafe patch rejection rate: `1.0000`" in markdown
+    assert "## Replay manifest" in markdown
+    assert (
+        "Scenario ids: `nop-formatting-patch, oracle-formatting-patch, unsafe-protected-path-patch`"
+        in markdown
+    )
+    assert "Input order preserved: `true`" in markdown
+    assert "Automation allowed by replay manifest: `false`" in markdown
+    assert "Merge authorized by replay manifest: `false`" in markdown
+    assert "Semantic equivalence proven by replay manifest: `false`" in markdown
     assert "Automation allowed count: `0`" in markdown
     assert "It does not apply patches or execute proof commands." in markdown
 
@@ -146,6 +171,12 @@ def test_replayable_benchmark_cli_writes_report_artifacts(
     assert printed["status"] == "passed"
     assert printed["scenario_count"] == 3
     assert saved["required_contract"]["all_required_passed"] is True
+    assert saved["replay_manifest"]["scenario_ids"] == [
+        "nop-formatting-patch",
+        "oracle-formatting-patch",
+        "unsafe-protected-path-patch",
+    ]
+    assert saved["replay_manifest"]["automation_allowed"] is False
     assert "Replayable Benchmark Harness report" in markdown
 
 
