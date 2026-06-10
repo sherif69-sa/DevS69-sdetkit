@@ -1,4 +1,5 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 from sdetkit.failure_vector import extract_failure_vector
 from sdetkit.safety_gate import (
@@ -47,6 +48,24 @@ def test_safety_gate_allows_import_sort_lint_only_when_vector_is_safe_candidate(
     assert vector.safe_fix_candidate is True
     assert decision.safe_fix_allowed is True
     assert decision.allowed_files == ("tests/test_widget.py",)
+
+
+def test_safety_gate_blocks_safe_candidate_without_required_proof_command() -> None:
+    vector = SimpleNamespace(
+        failure_class="formatter_only",
+        risk="low",
+        scope="pr_owned_only",
+        safe_fix_candidate=True,
+        affected_files=("tests/test_widget.py",),
+        local_repro_command=None,
+    )
+
+    decision = evaluate_failure_vector(vector)
+
+    assert decision.safe_fix_allowed is False
+    assert decision.review_first is True
+    assert decision.allowed_files == ()
+    assert "local repro command" in decision.reason
 
 
 def test_safety_gate_blocks_unknown_failure_review_first() -> None:
