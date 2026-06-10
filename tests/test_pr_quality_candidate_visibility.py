@@ -130,7 +130,7 @@ def test_candidate_visibility_keeps_broader_pr_diff_review_first() -> None:
     assert verification["decision"]["merge_authorized"] is False
 
 
-def test_candidate_visibility_stays_quiet_without_candidate() -> None:
+def test_candidate_visibility_renders_no_candidate_boundary() -> None:
     payload = build_candidate_visibility(
         check_intelligence={"failed_checks": []},
         evidence_graph={},
@@ -144,7 +144,19 @@ def test_candidate_visibility_stays_quiet_without_candidate() -> None:
     assert payload["candidate_count"] == 0
     assert payload["patch_score"] == {}
     assert payload["protected_verifier"] == {}
-    assert render_markdown(payload) == ""
+
+    markdown = render_markdown(payload)
+    assert "Read-only remediation candidate verification" in markdown
+    assert "Status: `no_candidate`" in markdown
+    assert "Candidates observed: `0`" in markdown
+    assert "Review-first plans observed: `0`" in markdown
+    assert "Candidate scope: none" in markdown
+    assert "Observed PR changed files: none" in markdown
+    assert "Automation allowed: `false`" in markdown
+    assert "Merge authorized: `false`" in markdown
+    assert "Semantic equivalence proven: `false`" in markdown
+    assert "PatchScorer decision" not in markdown
+    assert "ProtectedVerifier decision" not in markdown
 
 
 def test_candidate_visibility_cli_writes_read_only_artifacts(tmp_path: Path, capsys) -> None:

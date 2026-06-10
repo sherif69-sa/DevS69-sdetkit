@@ -187,9 +187,6 @@ def build_candidate_visibility(
 
 def render_markdown(payload: Mapping[str, Any]) -> str:
     candidate_count = int(payload.get("candidate_count", 0) or 0)
-    if candidate_count == 0:
-        return ""
-
     boundary = _as_dict(payload.get("decision_boundary"))
     score = _as_dict(payload.get("patch_score"))
     score_decision = _as_dict(score.get("decision"))
