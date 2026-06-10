@@ -193,10 +193,20 @@ def test_product_maturity_radar_marks_review_first_unsafe_candidates_as_blocked(
     assert workflow["review_first"] is True
     assert workflow["safe_to_patch"] is False
     assert workflow["ranking_status"] == "blocked_review_first_candidate"
+    assert workflow["blocked_by"] == "human_review_evidence_required"
+    assert workflow["blocker_source_report"] == "sdetkit.workflow_governance_report"
+    assert workflow["blocker_playbook"] == "docs/ci/workflow-permission-review-playbook.md"
+    assert workflow["next_allowed_action"] == "collect_human_review_evidence"
+    assert "reviewer decision" in workflow["required_evidence"]
+    assert "automatic_permission_reduction" in workflow["blocked_actions"]
+    assert "semantic_equivalence_claim" in workflow["blocked_actions"]
 
     markdown = radar_module.render_product_maturity_radar_markdown(payload)
     assert "ranking_status: `blocked_review_first_candidate`" in markdown
     assert "blocked_by: `human_review_evidence_required`" in markdown
+    assert "next_allowed_action: `collect_human_review_evidence`" in markdown
+    assert "blocker_source_report: `sdetkit.workflow_governance_report`" in markdown
+    assert "blocker_playbook: `docs/ci/workflow-permission-review-playbook.md`" in markdown
 
 
 def test_product_maturity_radar_marks_accepted_candidates_from_git_history(
