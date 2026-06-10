@@ -96,12 +96,17 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
     assert {
         "schema_version",
         "decision",
+        "proof",
         "final_result",
+        "learned_pattern",
     }.issubset(set(entries["trajectory-jsonl"]["required_fields"]))
     assert {
         "schema_version",
         "profile_status",
         "memory_mode",
+        "proof_provenance",
+        "safety_gate_evidence",
+        "decision_boundary",
     }.issubset(set(entries["repo-memory-profile-json"]["required_fields"]))
     assert (
         entries["check-intelligence-json"]["schema_version"]
