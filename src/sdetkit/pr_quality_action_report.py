@@ -1430,6 +1430,44 @@ def _operator_safetygate_summary_lines(
         ]
     )
 
+    def _operator_unique_strings(*values: object) -> list[str]:
+        seen: set[str] = set()
+        result: list[str] = []
+        for value in values:
+            for item in _as_list(value):
+                text = _string(item)
+                if text and text not in seen:
+                    seen.add(text)
+                    result.append(text)
+        return result
+
+    allowed_files = _operator_unique_strings(
+        failure_safety.get("allowed_files"),
+        patch_score.get("allowed_files"),
+        patch_safety.get("allowed_files"),
+        verifier_safety.get("allowed_files"),
+        benchmark_safety.get("allowed_files"),
+        memory_safety.get("allowed_files"),
+        action_report.get("allowed_files"),
+        [path for row in trajectory_safety_records for path in _as_list(row.get("allowed_files"))],
+    )
+    proof_commands = _operator_unique_strings(
+        failure_safety.get("proof_commands"),
+        patch_score.get("proof_requirements"),
+        patch_safety.get("proof_commands"),
+        verifier_safety.get("proof_commands"),
+        benchmark_safety.get("proof_commands"),
+        memory_safety.get("proof_commands"),
+        runtime_proof_artifacts.get("proof_commands"),
+        runtime_boundary.get("proof_commands"),
+        action_report.get("proof_commands"),
+        [
+            command
+            for row in trajectory_safety_records
+            for command in _as_list(row.get("proof_commands"))
+        ],
+    )
+
     next_action = (
         "Review-first: a SafetyGate boundary attempted to expand authority."
         if any(
@@ -1448,6 +1486,10 @@ def _operator_safetygate_summary_lines(
         f"`{str(_operator_bool(failure_safety.get('review_first'))).lower()}`",
         "- Failure bundle safe-fix allowed: "
         f"`{str(_operator_bool(failure_safety.get('safe_fix_allowed'))).lower()}`",
+        "- Operator summary allowed files: "
+        f"`{', '.join(allowed_files) if allowed_files else 'none'}`",
+        "- Operator summary proof commands: "
+        f"`{', '.join(proof_commands) if proof_commands else 'none'}`",
         f"- Trajectory SafetyGate records: `{len(trajectory_safety_records)}`",
         f"- RepoMemory SafetyGate records: `{_int(memory_safety.get('record_count'))}`",
         "- Replay benchmark SafetyGate scenarios: "
