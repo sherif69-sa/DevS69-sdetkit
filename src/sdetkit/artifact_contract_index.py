@@ -106,7 +106,7 @@ def build_index() -> dict[str, Any]:
                     pr_quality_runtime_proof_artifacts.DEFAULT_OUT_DIR
                     / pr_quality_runtime_proof_artifacts.SUMMARY_JSON
                 ).as_posix(),
-                "produced_by": "python -m sdetkit.pr_quality_runtime_proof_artifacts --isolated-proof <isolated-proof.json> --live-benchmark-report <benchmark-report.json> --repo-memory-profile <repo-memory-profile.json> --trusted-history-evidence <trusted-history.json> --out-dir build/pr-quality/runtime-proof/summary --format json",
+                "produced_by": "python -m sdetkit.pr_quality_runtime_proof_artifacts --isolated-proof <isolated-proof.json> --live-benchmark-report <benchmark-report.json> --repo-memory-profile <repo-memory-profile.json> --trusted-history-evidence <trusted-history.json> --trusted-diagnostic-signal-snapshot-history <trusted-diagnostic-signal-snapshot-history.json> --out-dir build/pr-quality/runtime-proof/summary --format json",
                 "schema_version": pr_quality_runtime_proof_artifacts.SCHEMA_VERSION,
                 "required_fields": [
                     "schema_version",
@@ -116,6 +116,7 @@ def build_index() -> dict[str, Any]:
                     "live_benchmark",
                     "repo_memory",
                     "trusted_history",
+                    "trusted_diagnostic_signal_snapshot_history",
                     "decision_boundary",
                 ],
                 "stability": "advanced",
