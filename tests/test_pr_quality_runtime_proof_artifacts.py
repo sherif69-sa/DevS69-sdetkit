@@ -196,6 +196,17 @@ def test_runtime_proof_markdown_renders_collected_live_benchmark_and_memory() ->
                 "network_boundary_blocked_scenario_count": 1,
                 "anti_cheat_rejection_scenario_count": 2,
             },
+            "safety_gate_evidence": {
+                "status": "safety_gate_evidence_observed",
+                "record_count": 3,
+                "safe_fix_allowed_count": 1,
+                "review_first_count": 2,
+                "decision_boundary": {
+                    "automation_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_proven": False,
+                },
+            },
             "decision_boundary": {
                 "automation_allowed": False,
                 "merge_authorized": False,
@@ -212,6 +223,17 @@ def test_runtime_proof_markdown_renders_collected_live_benchmark_and_memory() ->
     assert "Boundary preserved: `true`" in markdown
     assert "Status: `live_proof_supported_memory`" in markdown
     assert "Live contract proven: `true`" in markdown
+    assert summary["repo_memory"]["safety_gate_record_count"] == 3
+    assert summary["repo_memory"]["safety_gate_safe_fix_allowed_count"] == 1
+    assert summary["repo_memory"]["safety_gate_review_first_count"] == 2
+    assert summary["repo_memory"]["safety_gate_automation_allowed"] is False
+    assert "RepoMemory SafetyGate status: `safety_gate_evidence_observed`" in markdown
+    assert "RepoMemory SafetyGate records: `3`" in markdown
+    assert "RepoMemory SafetyGate safe-fix allowed records: `1`" in markdown
+    assert "RepoMemory SafetyGate review-first records: `2`" in markdown
+    assert "RepoMemory SafetyGate automation allowed: `false`" in markdown
+    assert "RepoMemory SafetyGate merge authorized: `false`" in markdown
+    assert "RepoMemory SafetyGate semantic equivalence proven: `false`" in markdown
 
 
 def _trusted_history_evidence() -> dict:

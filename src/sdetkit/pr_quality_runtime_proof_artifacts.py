@@ -135,6 +135,8 @@ def _repo_memory_summary(profile: Mapping[str, Any]) -> JsonObject:
         }
 
     provenance = _as_dict(payload.get("proof_provenance"))
+    safety_gate = _as_dict(payload.get("safety_gate_evidence"))
+    safety_boundary = _as_dict(safety_gate.get("decision_boundary"))
     boundary = _as_dict(payload.get("decision_boundary"))
     return {
         "collection_status": COLLECTED,
@@ -149,6 +151,15 @@ def _repo_memory_summary(profile: Mapping[str, Any]) -> JsonObject:
         ),
         "anti_cheat_rejection_scenario_count": _int(
             provenance.get("anti_cheat_rejection_scenario_count")
+        ),
+        "safety_gate_status": _string(safety_gate.get("status") or NOT_COLLECTED),
+        "safety_gate_record_count": _int(safety_gate.get("record_count")),
+        "safety_gate_safe_fix_allowed_count": _int(safety_gate.get("safe_fix_allowed_count")),
+        "safety_gate_review_first_count": _int(safety_gate.get("review_first_count")),
+        "safety_gate_automation_allowed": _bool(safety_boundary.get("automation_allowed")),
+        "safety_gate_merge_authorized": _bool(safety_boundary.get("merge_authorized")),
+        "safety_gate_semantic_equivalence_proven": _bool(
+            safety_boundary.get("semantic_equivalence_proven")
         ),
         "automation_allowed": _bool(boundary.get("automation_allowed")),
         "merge_authorized": _bool(boundary.get("merge_authorized")),
@@ -359,6 +370,31 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
                 (
                     "- Anti-cheat rejection scenarios: "
                     f"`{_int(memory.get('anti_cheat_rejection_scenario_count'))}`"
+                ),
+                (f"- RepoMemory SafetyGate status: `{_string(memory.get('safety_gate_status'))}`"),
+                (
+                    "- RepoMemory SafetyGate records: "
+                    f"`{_int(memory.get('safety_gate_record_count'))}`"
+                ),
+                (
+                    "- RepoMemory SafetyGate safe-fix allowed records: "
+                    f"`{_int(memory.get('safety_gate_safe_fix_allowed_count'))}`"
+                ),
+                (
+                    "- RepoMemory SafetyGate review-first records: "
+                    f"`{_int(memory.get('safety_gate_review_first_count'))}`"
+                ),
+                (
+                    "- RepoMemory SafetyGate automation allowed: "
+                    f"`{str(_bool(memory.get('safety_gate_automation_allowed'))).lower()}`"
+                ),
+                (
+                    "- RepoMemory SafetyGate merge authorized: "
+                    f"`{str(_bool(memory.get('safety_gate_merge_authorized'))).lower()}`"
+                ),
+                (
+                    "- RepoMemory SafetyGate semantic equivalence proven: "
+                    f"`{str(_bool(memory.get('safety_gate_semantic_equivalence_proven'))).lower()}`"
                 ),
             ]
         )
