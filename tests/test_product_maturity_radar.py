@@ -177,6 +177,28 @@ def test_product_maturity_radar_cli_dispatch(tmp_path: Path, capsys) -> None:
     assert out.with_suffix(".md").is_file()
 
 
+def test_product_maturity_radar_marks_review_first_unsafe_candidates_as_blocked(
+    tmp_path: Path,
+) -> None:
+    _fixture_repo(tmp_path)
+
+    payload = build_product_maturity_radar(tmp_path)
+    workflow = next(
+        candidate
+        for candidate in _ranked_radar_candidates(payload)
+        if candidate["classification"] == "workflow_governance_followup"
+    )
+
+    assert workflow["accepted_on_main"] is False
+    assert workflow["review_first"] is True
+    assert workflow["safe_to_patch"] is False
+    assert workflow["ranking_status"] == "blocked_review_first_candidate"
+
+    markdown = radar_module.render_product_maturity_radar_markdown(payload)
+    assert "ranking_status: `blocked_review_first_candidate`" in markdown
+    assert "blocked_by: `human_review_evidence_required`" in markdown
+
+
 def test_product_maturity_radar_marks_accepted_candidates_from_git_history(
     tmp_path: Path,
     monkeypatch,

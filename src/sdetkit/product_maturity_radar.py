@@ -668,7 +668,12 @@ def _rank_candidates(surfaces: Sequence[dict[str, Any]], root: Path) -> list[dic
                 candidate_title,
                 accepted_subjects,
             )
-            ranking_status = "accepted_on_main" if accepted_on_main else "fresh_candidate"
+            if accepted_on_main:
+                ranking_status = "accepted_on_main"
+            elif candidate.get("review_first") is True and candidate.get("safe_to_patch") is False:
+                ranking_status = "blocked_review_first_candidate"
+            else:
+                ranking_status = "fresh_candidate"
             accepted_penalty = 1000 if accepted_on_main else 0
 
             ranked.append(
@@ -788,9 +793,11 @@ def render_product_maturity_radar_markdown(payload: dict[str, Any]) -> str:
             lines.append(f"   - ranking_score: `{candidate['ranking_score']}`")
             if candidate.get("accepted_on_main"):
                 lines.append("   - accepted_on_main: true")
-                lines.append(
-                    f"   - ranking_status: `{candidate.get('ranking_status', 'accepted_on_main')}`"
-                )
+            lines.append(
+                f"   - ranking_status: `{candidate.get('ranking_status', 'fresh_candidate')}`"
+            )
+            if candidate.get("ranking_status") == "blocked_review_first_candidate":
+                lines.append("   - blocked_by: `human_review_evidence_required`")
             lines.append("   - review_first: true")
             lines.append("   - safe_to_patch: false")
 
