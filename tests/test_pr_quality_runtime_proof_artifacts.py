@@ -14,6 +14,7 @@ from sdetkit.pr_quality_runtime_proof_artifacts import (
     NOT_COLLECTED,
     PRIOR_HISTORY_READ_ONLY_INPUT,
     PROOF_COMMANDS_EXECUTED_BY_READER,
+    TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY,
     TRUSTED_HISTORY,
     build_runtime_proof_artifacts,
     main,
@@ -73,6 +74,7 @@ def test_runtime_proof_summary_records_actual_isolated_proof_only() -> None:
     assert summary["live_benchmark"]["collection_status"] == NOT_COLLECTED
     assert summary["repo_memory"]["collection_status"] == NOT_COLLECTED
     assert summary[TRUSTED_HISTORY]["collection_status"] == NOT_COLLECTED
+    assert summary[TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY]["collection_status"] == NOT_COLLECTED
 
     boundary = summary["decision_boundary"]
     assert boundary["proof_commands_executed_by_renderer"] is False
@@ -126,7 +128,7 @@ def test_runtime_proof_markdown_reports_unwired_artifacts_honestly() -> None:
     assert "Runtime guard passed: `true`" in markdown
     assert "Runtime guard violations: `0`" in markdown
     assert "Network isolation enforced: `false`" in markdown
-    assert markdown.count("Collection status: `not_collected`") == 3
+    assert markdown.count("Collection status: `not_collected`") == 4
     assert "Proof commands executed by renderer: `false`" in markdown
     assert "Automation allowed: `false`" in markdown
     assert "Merge authorized: `false`" in markdown
@@ -236,6 +238,90 @@ def test_runtime_proof_markdown_renders_collected_live_benchmark_and_memory() ->
     assert "RepoMemory SafetyGate semantic equivalence proven: `false`" in markdown
 
 
+def _trusted_diagnostic_signal_snapshot_history() -> dict:
+    return {
+        "collection_status": COLLECTED,
+        "status": "trusted_diagnostic_signal_snapshot_history_verified",
+        "source": {
+            "workflow": "RepoMemory Profile History",
+            "run_id": "snapshot-run-1",
+            "head_sha": "accepted-main-head",
+            "base_sha": "pr-base-head",
+            BASE_ANCESTRY_VERIFIED: True,
+        },
+        "history": {
+            "record_count": 3,
+            "quiet_green_advisory_baseline_record_count": 1,
+            "review_signal_record_count": 3,
+            "integration_proof_signal_record_count": 2,
+            "latest_snapshot_status": "diagnostic_signal_observed",
+            "latest_primary_signal_kind": "review_signal",
+            "advisor_false_positive_rate_status": "requires_reviewed_history",
+            "reviewed_false_positive_count": None,
+            "reviewed_observation_count": None,
+            PRIOR_HISTORY_READ_ONLY_INPUT: True,
+        },
+        "decision_boundary": {
+            "reporting_only": True,
+            "current_pr_decision_input": False,
+            "feeds_repo_memory": False,
+            "proof_commands_executed": False,
+            "patch_application_allowed": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+            "historical_snapshot_authorizes_current_action": False,
+        },
+    }
+
+
+def test_runtime_proof_summary_renders_trusted_diagnostic_signal_snapshot_history() -> None:
+    summary = build_runtime_proof_artifacts(
+        isolated_proof=_isolated_proof(),
+        trusted_diagnostic_signal_snapshot_history=(_trusted_diagnostic_signal_snapshot_history()),
+    )
+
+    trusted = summary[TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY]
+    assert summary["collected_components"] == [
+        "isolated_proof",
+        TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY,
+    ]
+    assert trusted["collection_status"] == COLLECTED
+    assert trusted["status"] == "trusted_diagnostic_signal_snapshot_history_verified"
+    assert trusted[BASE_ANCESTRY_VERIFIED] is True
+    assert trusted["record_count"] == 3
+    assert trusted["quiet_green_advisory_baseline_record_count"] == 1
+    assert trusted["review_signal_record_count"] == 3
+    assert trusted["integration_proof_signal_record_count"] == 2
+    assert trusted["latest_snapshot_status"] == "diagnostic_signal_observed"
+    assert trusted["advisor_false_positive_rate_status"] == "requires_reviewed_history"
+    assert trusted["reviewed_false_positive_count"] is None
+    assert trusted["reviewed_observation_count"] is None
+    assert trusted[PRIOR_HISTORY_READ_ONLY_INPUT] is True
+    assert trusted["current_pr_decision_input"] is False
+    assert trusted["feeds_repo_memory"] is False
+    assert trusted["proof_commands_executed"] is False
+    assert trusted["patch_application_allowed"] is False
+    assert trusted["automation_allowed"] is False
+    assert trusted["merge_authorized"] is False
+    assert trusted["semantic_equivalence_proven"] is False
+    assert trusted["historical_snapshot_authorizes_current_action"] is False
+
+    markdown = render_markdown(summary)
+    assert "Trusted diagnostic signal snapshot history" in markdown
+    assert "Review-signal records: `3`" in markdown
+    assert "Integration-proof-signal records: `2`" in markdown
+    assert "Latest retained snapshot status: `diagnostic_signal_observed`" in markdown
+    assert "Advisor false-positive rate status: `requires_reviewed_history`" in markdown
+    assert "Prior history is read-only input: `true`" in markdown
+    assert "Current PR decision input: `false`" in markdown
+    assert "Feeds RepoMemory: `false`" in markdown
+    assert "Patch application allowed: `false`" in markdown
+    assert "Automation allowed by trusted diagnostic signal history: `false`" in markdown
+    assert "Merge authorized by trusted diagnostic signal history: `false`" in markdown
+    assert "Historical snapshot authorizes current action: `false`" in markdown
+
+
 def _trusted_history_evidence() -> dict:
     return {
         "collection_status": COLLECTED,
@@ -336,3 +422,38 @@ def test_runtime_proof_cli_accepts_validated_trusted_history_input(
     assert saved[TRUSTED_HISTORY]["status"] == "trusted_history_verified"
     assert saved[TRUSTED_HISTORY]["record_count"] == 1
     assert saved[TRUSTED_HISTORY][BASE_ANCESTRY_VERIFIED] is True
+
+
+def test_runtime_proof_cli_accepts_trusted_diagnostic_signal_snapshot_history(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    trusted_path = tmp_path / "trusted-diagnostic-signal-snapshot-history.json"
+    trusted_path.write_text(
+        json.dumps(_trusted_diagnostic_signal_snapshot_history()),
+        encoding="utf-8",
+    )
+    out_dir = tmp_path / "runtime-proof"
+
+    rc = main(
+        [
+            "--trusted-diagnostic-signal-snapshot-history",
+            str(trusted_path),
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    captured = capsys.readouterr()
+    saved = json.loads((out_dir / "runtime-proof-artifacts.json").read_text(encoding="utf-8"))
+
+    assert captured.out == ""
+    assert captured.err == ""
+    trusted = saved[TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY]
+    assert trusted["status"] == "trusted_diagnostic_signal_snapshot_history_verified"
+    assert trusted["record_count"] == 3
+    assert trusted["automation_allowed"] is False
+    assert trusted["merge_authorized"] is False

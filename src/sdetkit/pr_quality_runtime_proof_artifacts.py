@@ -14,6 +14,9 @@ SUMMARY_MD = "runtime-proof-artifacts.md"
 COLLECTED = "collected"
 NOT_COLLECTED = "_".join(("not", "collected"))
 TRUSTED_HISTORY = "_".join(("trusted", "history"))
+TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY = "_".join(
+    ("trusted", "diagnostic", "signal", "snapshot", "history")
+)
 BASE_ANCESTRY_VERIFIED = "_".join(("base", "ancestry", "verified"))
 LIVE_PROVEN_RECORD_COUNT = "_".join(("live", "contract", "proven", "record", "count"))
 PRIOR_HISTORY_READ_ONLY_INPUT = "_".join(("prior", "history", "is", "read", "only", "input"))
@@ -167,6 +170,57 @@ def _repo_memory_summary(profile: Mapping[str, Any]) -> JsonObject:
     }
 
 
+def _trusted_diagnostic_signal_snapshot_history_summary(
+    evidence: Mapping[str, Any],
+) -> JsonObject:
+    payload = _as_dict(evidence)
+    if not payload:
+        return {
+            "collection_status": NOT_COLLECTED,
+            "status": NOT_COLLECTED,
+        }
+
+    source = _as_dict(payload.get("source"))
+    history = _as_dict(payload.get("history"))
+    boundary = _as_dict(payload.get("decision_boundary"))
+    return {
+        "collection_status": COLLECTED,
+        "status": _string(payload.get("status") or "unknown"),
+        "source_workflow": _string(source.get("workflow") or "unknown"),
+        "latest_accepted_main_head": _string(source.get("head_sha") or "unknown"),
+        BASE_ANCESTRY_VERIFIED: _bool(source.get(BASE_ANCESTRY_VERIFIED)),
+        "record_count": _int(history.get("record_count")),
+        "quiet_green_advisory_baseline_record_count": _int(
+            history.get("quiet_green_advisory_baseline_record_count")
+        ),
+        "review_signal_record_count": _int(history.get("review_signal_record_count")),
+        "integration_proof_signal_record_count": _int(
+            history.get("integration_proof_signal_record_count")
+        ),
+        "latest_snapshot_status": _string(history.get("latest_snapshot_status") or "not_collected"),
+        "latest_primary_signal_kind": _string(
+            history.get("latest_primary_signal_kind") or "unknown"
+        ),
+        "advisor_false_positive_rate_status": _string(
+            history.get("advisor_false_positive_rate_status") or "unknown"
+        ),
+        "reviewed_false_positive_count": history.get("reviewed_false_positive_count"),
+        "reviewed_observation_count": history.get("reviewed_observation_count"),
+        PRIOR_HISTORY_READ_ONLY_INPUT: _bool(history.get(PRIOR_HISTORY_READ_ONLY_INPUT)),
+        "reporting_only": _bool(boundary.get("reporting_only")),
+        "current_pr_decision_input": _bool(boundary.get("current_pr_decision_input")),
+        "feeds_repo_memory": _bool(boundary.get("feeds_repo_memory")),
+        "proof_commands_executed": _bool(boundary.get("proof_commands_executed")),
+        "patch_application_allowed": _bool(boundary.get("patch_application_allowed")),
+        "automation_allowed": _bool(boundary.get("automation_allowed")),
+        "merge_authorized": _bool(boundary.get("merge_authorized")),
+        "semantic_equivalence_proven": _bool(boundary.get("semantic_equivalence_proven")),
+        "historical_snapshot_authorizes_current_action": _bool(
+            boundary.get("historical_snapshot_authorizes_current_action")
+        ),
+    }
+
+
 def _trusted_history_summary(evidence: Mapping[str, Any]) -> JsonObject:
     payload = _as_dict(evidence)
     if not payload:
@@ -218,11 +272,15 @@ def build_runtime_proof_artifacts(
     live_benchmark_report: Mapping[str, Any] | None = None,
     repo_memory_profile: Mapping[str, Any] | None = None,
     trusted_history_evidence: Mapping[str, Any] | None = None,
+    trusted_diagnostic_signal_snapshot_history: Mapping[str, Any] | None = None,
 ) -> JsonObject:
     isolated = _isolated_proof_summary(isolated_proof or {})
     live_benchmark = _live_benchmark_summary(live_benchmark_report or {})
     repo_memory = _repo_memory_summary(repo_memory_profile or {})
     trusted_history = _trusted_history_summary(trusted_history_evidence or {})
+    trusted_signal_history = _trusted_diagnostic_signal_snapshot_history_summary(
+        trusted_diagnostic_signal_snapshot_history or {}
+    )
 
     collected_components = [
         name
@@ -231,6 +289,7 @@ def build_runtime_proof_artifacts(
             ("live_benchmark", live_benchmark),
             ("repo_memory", repo_memory),
             (TRUSTED_HISTORY, trusted_history),
+            (TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY, trusted_signal_history),
         )
         if component["collection_status"] == COLLECTED
     ]
@@ -243,6 +302,7 @@ def build_runtime_proof_artifacts(
         "live_benchmark": live_benchmark,
         "repo_memory": repo_memory,
         TRUSTED_HISTORY: trusted_history,
+        TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY: trusted_signal_history,
         "decision_boundary": {
             "reporting_only": True,
             "proof_commands_executed_by_renderer": False,
@@ -258,6 +318,7 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
     benchmark = _as_dict(summary.get("live_benchmark"))
     memory = _as_dict(summary.get("repo_memory"))
     trusted_history = _as_dict(summary.get(TRUSTED_HISTORY))
+    trusted_signal_history = _as_dict(summary.get(TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY))
     boundary = _as_dict(summary.get("decision_boundary"))
 
     lines = [
@@ -480,6 +541,87 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
     lines.extend(
         [
             "",
+            "## Trusted diagnostic signal snapshot history",
+            "",
+            (f"- Collection status: `{_string(trusted_signal_history.get('collection_status'))}`"),
+            f"- Status: `{_string(trusted_signal_history.get('status'))}`",
+        ]
+    )
+    if trusted_signal_history.get("collection_status") == COLLECTED:
+        lines.extend(
+            [
+                (f"- Source workflow: `{_string(trusted_signal_history.get('source_workflow'))}`"),
+                (
+                    "- Latest accepted main head: "
+                    f"`{_string(trusted_signal_history.get('latest_accepted_main_head'))}`"
+                ),
+                (
+                    "- Base ancestry verified: "
+                    f"`{str(_bool(trusted_signal_history.get(BASE_ANCESTRY_VERIFIED))).lower()}`"
+                ),
+                f"- Records: `{_int(trusted_signal_history.get('record_count'))}`",
+                (
+                    "- Quiet-green advisory baseline records: "
+                    f"`{_int(trusted_signal_history.get('quiet_green_advisory_baseline_record_count'))}`"
+                ),
+                (
+                    "- Review-signal records: "
+                    f"`{_int(trusted_signal_history.get('review_signal_record_count'))}`"
+                ),
+                (
+                    "- Integration-proof-signal records: "
+                    f"`{_int(trusted_signal_history.get('integration_proof_signal_record_count'))}`"
+                ),
+                (
+                    "- Latest retained snapshot status: "
+                    f"`{_string(trusted_signal_history.get('latest_snapshot_status'))}`"
+                ),
+                (
+                    "- Advisor false-positive rate status: "
+                    f"`{_string(trusted_signal_history.get('advisor_false_positive_rate_status'))}`"
+                ),
+                (
+                    "- Prior history is read-only input: "
+                    f"`{str(_bool(trusted_signal_history.get(PRIOR_HISTORY_READ_ONLY_INPUT))).lower()}`"
+                ),
+                (
+                    "- Current PR decision input: "
+                    f"`{str(_bool(trusted_signal_history.get('current_pr_decision_input'))).lower()}`"
+                ),
+                (
+                    "- Feeds RepoMemory: "
+                    f"`{str(_bool(trusted_signal_history.get('feeds_repo_memory'))).lower()}`"
+                ),
+                (
+                    "- Proof commands executed: "
+                    f"`{str(_bool(trusted_signal_history.get('proof_commands_executed'))).lower()}`"
+                ),
+                (
+                    "- Patch application allowed: "
+                    f"`{str(_bool(trusted_signal_history.get('patch_application_allowed'))).lower()}`"
+                ),
+                (
+                    "- Automation allowed by trusted diagnostic signal history: "
+                    f"`{str(_bool(trusted_signal_history.get('automation_allowed'))).lower()}`"
+                ),
+                (
+                    "- Merge authorized by trusted diagnostic signal history: "
+                    f"`{str(_bool(trusted_signal_history.get('merge_authorized'))).lower()}`"
+                ),
+                (
+                    "- Semantic equivalence proven by trusted diagnostic signal history: "
+                    f"`{str(_bool(trusted_signal_history.get('semantic_equivalence_proven'))).lower()}`"
+                ),
+                (
+                    "- Historical snapshot authorizes current action: "
+                    f"`{str(_bool(trusted_signal_history.get('historical_snapshot_authorizes_current_action'))).lower()}`"
+                ),
+            ]
+        )
+
+    lines.extend(
+        [
+            "",
             "## Boundary",
             "",
             (
@@ -519,6 +661,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--live-benchmark-report", type=Path)
     parser.add_argument("--repo-memory-profile", type=Path)
     parser.add_argument("--trusted-history-evidence", type=Path)
+    parser.add_argument("--trusted-diagnostic-signal-snapshot-history", type=Path)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     return parser
@@ -531,6 +674,9 @@ def main(argv: list[str] | None = None) -> int:
         live_benchmark_report=_read_json(args.live_benchmark_report),
         repo_memory_profile=_read_json(args.repo_memory_profile),
         trusted_history_evidence=_read_json(args.trusted_history_evidence),
+        trusted_diagnostic_signal_snapshot_history=_read_json(
+            args.trusted_diagnostic_signal_snapshot_history
+        ),
     )
     write_summary(summary, out_dir=args.out_dir)
     return 0
