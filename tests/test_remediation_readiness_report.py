@@ -22,6 +22,18 @@ def test_remediation_readiness_report_is_verifier_backed_and_non_authorizing() -
     assert checks["policy_accepts_narrow_safe_fix_candidate"] is True
     assert checks["protected_verifier_structural_check_passed"] is True
     assert checks["protected_verifier_keeps_semantic_equivalence_false"] is True
+    assert checks["safety_gate_requires_local_repro_command"] is True
+
+    safety_gate_policy = payload["safety_gate_policy"]
+    assert safety_gate_policy["present"] is True
+    assert safety_gate_policy["local_repro_command"] == "non_empty"
+    assert safety_gate_policy["requires_local_repro_command"] is True
+
+    contract_paths = {item["path"] for item in payload["contract_files"]}
+    assert "src/sdetkit/safety_gate.py" in contract_paths
+    assert "src/sdetkit/failure_vector.py" in contract_paths
+    assert "docs/contracts/safety-gate-policy-matrix.v1.json" in contract_paths
+    assert "docs/safety-gate-policy-matrix.md" in contract_paths
 
     verifier = payload["protected_verifier_result"]
     assert verifier["decision_status"] == "structurally_verified_candidate"
@@ -88,6 +100,8 @@ def test_remediation_readiness_report_writes_json_and_markdown(tmp_path: Path) -
     assert "# SDETKit remediation readiness report" in rendered
     assert "verifier_backed: true" in rendered
     assert "dry_run_only: true" in rendered
+    assert "SafetyGate proof contract" in rendered
+    assert "local_repro_command: non_empty" in rendered
     assert "semantic_equivalence_proven: false" in rendered
     assert "automation_allowed: false" in rendered
 

@@ -13,6 +13,7 @@ from sdetkit.protected_verifier import verify_candidate
 SCHEMA_VERSION = "sdetkit.remediation_readiness_report.v1"
 DEFAULT_OUT = "build/sdetkit/remediation-readiness-report.json"
 DEFAULT_POLICY_PATH = "config/adaptive_remediation_policy.default.json"
+SAFETYGATE_POLICY_PATH = "docs/contracts/safety-gate-policy-matrix.v1.json"
 
 AUTHORITY_FIELDS = (
     "automation_allowed",
@@ -123,9 +124,29 @@ def _verification_evidence() -> dict[str, Any]:
     }
 
 
-def _contract_status(path: Path) -> dict[str, Any]:
+def _safety_gate_policy_summary(root: Path) -> dict[str, Any]:
+    policy_path = root / SAFETYGATE_POLICY_PATH
+    payload: dict[str, Any] = {}
+    if policy_path.exists():
+        loaded = json.loads(policy_path.read_text(encoding="utf-8"))
+        if isinstance(loaded, dict):
+            payload = loaded
+
+    requirements = _as_dict(payload.get("safe_fix_allowed_only_when"))
+    local_repro_requirement = _safe_text(requirements.get("local_repro_command"), 80)
+
     return {
-        "path": path.as_posix(),
+        "path": SAFETYGATE_POLICY_PATH,
+        "present": policy_path.exists(),
+        "schema_version": _safe_text(payload.get("schema_version"), 120),
+        "local_repro_command": local_repro_requirement,
+        "requires_local_repro_command": local_repro_requirement == "non_empty",
+    }
+
+
+def _contract_status(path: Path, *, display_path: str | None = None) -> dict[str, Any]:
+    return {
+        "path": display_path or path.as_posix(),
         "present": path.exists(),
     }
 
@@ -153,6 +174,7 @@ def build_remediation_readiness_report(
     repo_root = Path(root).resolve()
     policy_file = repo_root / (str(policy_path) if policy_path else DEFAULT_POLICY_PATH)
     policy = _load_policy(policy_file)
+    safety_gate_policy = _safety_gate_policy_summary(repo_root)
 
     dry_run_plan = _review_only_patch_plan()
     safe_fix_plan = _safe_fix_plan()
@@ -173,6 +195,9 @@ def build_remediation_readiness_report(
         "policy_accepts_narrow_safe_fix_candidate": bool(safe_fix_policy_result.get("ok")),
         "protected_verifier_structural_check_passed": structural_verification_passed,
         "protected_verifier_keeps_semantic_equivalence_false": not semantic_equivalence_proven,
+        "safety_gate_requires_local_repro_command": bool(
+            safety_gate_policy.get("requires_local_repro_command")
+        ),
         "dry_run_plan_mutation_blocked": all(
             not bool(step.get("mutation_allowed"))
             for step in _as_list(dry_run_plan.get("patch_steps"))
@@ -184,6 +209,10 @@ def build_remediation_readiness_report(
     blocking_gaps = [name for name, passed in readiness_checks.items() if not passed]
 
     contract_files = [
+        "src/sdetkit/safety_gate.py",
+        "src/sdetkit/failure_vector.py",
+        SAFETYGATE_POLICY_PATH,
+        "docs/safety-gate-policy-matrix.md",
         "src/sdetkit/adaptive_remediation_policy.py",
         "src/sdetkit/adaptive_patch_plan.py",
         "src/sdetkit/adaptive_fix_audit.py",
@@ -200,7 +229,10 @@ def build_remediation_readiness_report(
         if policy_file.is_relative_to(repo_root)
         else policy_file.as_posix(),
         "policy": _policy_summary(policy),
-        "contract_files": [_contract_status(repo_root / path) for path in contract_files],
+        "safety_gate_policy": safety_gate_policy,
+        "contract_files": [
+            _contract_status(repo_root / path, display_path=path) for path in contract_files
+        ],
         "readiness_checks": readiness_checks,
         "blocking_gap_count": len(blocking_gaps),
         "blocking_gaps": blocking_gaps,
@@ -269,6 +301,20 @@ def render_markdown(payload: dict[str, Any]) -> str:
     checks = _as_dict(payload.get("readiness_checks"))
     for name, passed in sorted(checks.items()):
         lines.append(f"- {name}: {str(bool(passed)).lower()}")
+
+    safety_gate_policy = _as_dict(payload.get("safety_gate_policy"))
+    lines.extend(
+        [
+            "",
+            "## SafetyGate proof contract",
+            "",
+            f"- policy_path: `{safety_gate_policy.get('path', SAFETYGATE_POLICY_PATH)}`",
+            f"- present: {str(bool(safety_gate_policy.get('present'))).lower()}",
+            f"- local_repro_command: {safety_gate_policy.get('local_repro_command', '')}",
+            "- requires_local_repro_command: "
+            f"{str(bool(safety_gate_policy.get('requires_local_repro_command'))).lower()}",
+        ]
+    )
 
     lines.extend(["", "## Protected verifier", ""])
     verifier = _as_dict(payload.get("protected_verifier_result"))
