@@ -158,6 +158,7 @@ def build_index() -> dict[str, Any]:
                     "failed_count",
                     "required_contract",
                     "safety_boundary",
+                    "replay_manifest",
                     "attempt_scored_count",
                     "scenarios",
                     "next_boundary",

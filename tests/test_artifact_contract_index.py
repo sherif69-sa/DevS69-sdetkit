@@ -83,6 +83,7 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         "schema_version",
         "required_contract",
         "safety_boundary",
+        "replay_manifest",
     }.issubset(set(entries["replayable-benchmark-report-json"]["required_fields"]))
     assert entries["trajectory-jsonl"]["schema_version"] == trajectory_store.SCHEMA_VERSION
     assert entries["repo-memory-profile-json"]["schema_version"] == repo_memory.SCHEMA_VERSION
