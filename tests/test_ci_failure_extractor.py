@@ -161,3 +161,67 @@ def test_ci_failure_extractor_cli_can_emit_failure_vector_bundle(
     assert vector_payload["environment"] == "github_actions"
     assert vector_payload["failure_vectors"][0]["command"] == "python -m mypy src"
     assert vector_payload["failure_vectors"][0]["failure_class"] == "type"
+
+
+def test_ci_failure_extractor_cli_artifacts_cover_dependency_and_unknown_wrapper(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    dependency_log = Path("tests/fixtures/ci_failures/dependency_resolver/ci_log.txt")
+    unknown_log = Path("tests/fixtures/ci_failures/unknown_wrapper/ci_log.txt")
+    failed_logs = tmp_path / "failed-check-logs.json"
+    vectors_out = tmp_path / "failure-vectors.json"
+    vectors_md = tmp_path / "failure-vectors.md"
+
+    rc = main(
+        [
+            "--log",
+            str(dependency_log),
+            "--log",
+            str(unknown_log),
+            "--out",
+            str(failed_logs),
+            "--failure-vectors-out",
+            str(vectors_out),
+            "--failure-vectors-md",
+            str(vectors_md),
+            "--environment",
+            "github_actions",
+            "--format",
+            "text",
+        ]
+    )
+
+    assert rc == 0
+    stdout = capsys.readouterr().out
+    assert f"failure_vectors_json={vectors_out}" in stdout
+    assert f"failure_vectors_md={vectors_md}" in stdout
+    assert "failure_vector_count=2" in stdout
+
+    payload = json.loads(vectors_out.read_text(encoding="utf-8"))
+    vectors = {item["check"]: item for item in payload["failure_vectors"]}
+
+    dependency = vectors["dependency_resolver"]
+    assert dependency["failure_class"] == "dependency"
+    assert dependency["risk"] == "high"
+    assert dependency["safe_fix_candidate"] is False
+    assert dependency["first_failing_line"] == (
+        "ERROR: ResolutionImpossible: for help visit https://pip.pypa.io"
+    )
+    assert dependency["local_repro_command"] is None
+
+    unknown = vectors["unknown_wrapper"]
+    assert unknown["failure_class"] == "unknown"
+    assert unknown["risk"] == "high"
+    assert unknown["safe_fix_candidate"] is False
+    assert unknown["exit_code"] == 42
+    assert unknown["first_failing_line"] == (
+        "custom quality wrapper returned an unexpected integrity result"
+    )
+    assert unknown["local_repro_command"] is None
+
+    markdown = vectors_md.read_text(encoding="utf-8")
+    assert "# Failure Vector Bundle" in markdown
+    assert "- `dependency`: `1`" in markdown
+    assert "- `unknown`: `1`" in markdown
+    assert "custom quality wrapper returned an unexpected integrity result" in markdown
