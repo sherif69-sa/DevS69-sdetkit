@@ -650,6 +650,13 @@ jobs:
             --out build/pr-quality/pr-comment-body.md \
             > build/pr-quality/pr-comment-metadata.json
 
+      - name: Build PR comment body diagnostic appendices
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
           mkdir -p build/pr-quality/diagnostic-job
           diagnostic_job_rc=0
           PYTHONPATH=src python -m sdetkit.diagnostic_job \
