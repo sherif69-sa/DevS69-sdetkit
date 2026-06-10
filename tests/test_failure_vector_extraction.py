@@ -205,3 +205,63 @@ def test_failure_vector_bundle_report_surfaces_safety_gate_summary(tmp_path: Pat
     assert "- automation_allowed: `false`" in report
     assert "- patch_application_allowed: `false`" in report
     assert "- merge_authorized: `false`" in report
+
+
+def test_failure_vector_classifies_dependency_resolver_conflict_review_first() -> None:
+    log_text = """
+    Run python -m pip install -c constraints-ci.txt -e .[dev,test]
+    ERROR: ResolutionImpossible: for help visit https://pip.pypa.io
+    Process completed with exit code 1
+    """
+
+    vector = extract_failure_vector(
+        log_text,
+        check="dependency install",
+        environment="github_actions",
+    )
+
+    assert vector.failure_class == "dependency"
+    assert vector.risk == "high"
+    assert vector.scope == "unknown"
+    assert vector.safe_fix_candidate is False
+    assert vector.first_failing_line == (
+        "ERROR: ResolutionImpossible: for help visit https://pip.pypa.io"
+    )
+    assert vector.local_repro_command is None
+
+
+def test_failure_vector_unknown_wrapper_keeps_first_meaningful_line() -> None:
+    log_text = """
+    custom quality wrapper returned an unexpected integrity result
+    Process completed with exit code 42
+    """
+
+    vector = extract_failure_vector(log_text, check="quality wrapper")
+
+    assert vector.failure_class == "unknown"
+    assert vector.risk == "high"
+    assert vector.scope == "unknown"
+    assert vector.safe_fix_candidate is False
+    assert vector.exit_code == 42
+    assert vector.first_failing_line == (
+        "custom quality wrapper returned an unexpected integrity result"
+    )
+    assert vector.local_repro_command is None
+
+
+def test_failure_vector_classifies_fixable_ruff_import_sort_lint() -> None:
+    log_text = """
+    Run python -m ruff check tests/test_widget.py
+    I001 [*] Import block is un-sorted or un-formatted
+     --> tests/test_widget.py:1:1
+    Process completed with exit code 1
+    """
+
+    vector = extract_failure_vector(log_text, check="ruff")
+
+    assert vector.failure_class == "lint"
+    assert vector.risk == "low"
+    assert vector.scope == "pr_owned_only"
+    assert vector.safe_fix_candidate is True
+    assert vector.first_failing_line == "I001 [*] Import block is un-sorted or un-formatted"
+    assert vector.affected_files == ("tests/test_widget.py",)

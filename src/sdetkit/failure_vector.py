@@ -58,7 +58,10 @@ def extract_failure_vector(
         command=_extract_command(lines, failure_index),
         exit_code=_extract_exit_code(log_text),
         failure_class=failure_class,
-        risk=_risk_for_class(failure_class),
+        risk=_risk_for_class(
+            failure_class,
+            safe_fix_candidate=_safe_fix_candidate(failure_class, first_line),
+        ),
         scope=_scope_for_files(affected_files),
         reproducible_locally="not_run",
         safe_fix_candidate=_safe_fix_candidate(failure_class, first_line),
@@ -283,37 +286,54 @@ def _first_failing_line(lines: list[str]) -> str:
 
 
 def _first_failing_line_index(lines: Sequence[str]) -> int:
-    generic_index = -1
+    fallback_index = -1
+    generic_exit_index = -1
 
     for index, line in enumerate(lines):
         stripped = line.strip()
-        lowered = stripped.lower()
+        lower = stripped.lower()
 
         if not stripped:
+            continue
+
+        if "process completed with exit code" in lower:
+            if generic_exit_index < 0:
+                generic_exit_index = index
+            continue
+
+        if stripped.startswith("Run ") or stripped.startswith("$ "):
             continue
 
         if stripped.startswith("FAILED "):
             return index
         if MYPY_ERROR_RE.search(stripped):
             return index
-        if "would be reformatted" in lowered:
+        if "ruff format" in lower and "failed" in lower:
             return index
-        if "ruff format" in lowered and "failed" in lowered:
+        if "would be reformatted" in lower:
             return index
-        if RUFF_RULE_RE.search(stripped) and "-->" in "\n".join(lines[index : index + 4]):
+        if (
+            "resolutionimpossible" in lower
+            or "no matching distribution found" in lower
+            or "could not find a version that satisfies" in lower
+            or "pip's dependency resolver" in lower
+        ):
             return index
-        if stripped.startswith(("ERROR ", "ERROR:")):
+        if "merge conflict" in lower or stripped.startswith("CONFLICT "):
             return index
-        if stripped.startswith("Traceback"):
-            return index
-        if "merge conflict" in lowered or stripped.startswith("CONFLICT "):
-            return index
-        if "npm err!" in lowered:
-            return index
-        if "process completed with exit code" in lowered:
-            generic_index = index
+        if stripped.startswith("ERROR ") or stripped.startswith("ERROR:"):
+            if fallback_index < 0:
+                fallback_index = index
+            continue
 
-    return generic_index
+        if fallback_index < 0:
+            fallback_index = index
+
+    if fallback_index >= 0:
+        return fallback_index
+    if generic_exit_index >= 0:
+        return generic_exit_index
+    return 0
 
 
 def _extract_command(lines: Sequence[str], failure_index: int) -> str:
@@ -335,25 +355,40 @@ def _extract_command(lines: Sequence[str], failure_index: int) -> str:
 
 
 def _classify_failure(log_text: str, first_line: str) -> str:
-    lowered = f"{first_line}\n{log_text}".lower()
-    if "ruff format" in lowered or "would reformat" in lowered or "would be reformatted" in lowered:
-        return "formatter_only"
-    if "ruff check" in lowered or RUFF_RULE_RE.search(first_line):
-        return "lint"
-    if "mypy" in lowered and "error:" in lowered:
-        return "type"
-    if first_line.startswith("FAILED ") or "assertionerror" in lowered or "pytest" in lowered:
-        return "test"
-    if "npm err!" in lowered or "dependency conflict" in lowered:
-        return "dependency"
-    if "conflict " in lowered or "merge conflict" in lowered:
+    haystack = f"{first_line}\n{log_text}".lower()
+
+    if "merge conflict" in haystack or "<<<<<<<" in haystack or "conflict " in haystack:
         return "merge_conflict"
-    if "timed out" in lowered or "connection reset" in lowered:
-        return "infra"
-    if "twine" in lowered or "wheel" in lowered or "release" in lowered:
-        return "release"
-    if "secret" in lowered or "codeql" in lowered or "vulnerability" in lowered:
-        return "security"
+
+    if (
+        "resolutionimpossible" in haystack
+        or "no matching distribution found" in haystack
+        or "could not find a version that satisfies" in haystack
+        or "pip's dependency resolver" in haystack
+    ):
+        return "dependency"
+
+    if "ruff format" in haystack or "would be reformatted" in haystack:
+        return "formatter_only"
+
+    if RUFF_RULE_RE.search(first_line) or (
+        "ruff check" in haystack and ("-->" in haystack or RUFF_RULE_RE.search(log_text))
+    ):
+        return "lint"
+
+    if "ruff" in haystack and ("failed" in haystack or "error" in haystack):
+        return "lint"
+
+    if "mypy" in haystack or MYPY_ERROR_RE.search(first_line):
+        return "type"
+
+    if (
+        first_line.strip().startswith("FAILED ")
+        or "pytest" in haystack
+        or "assertionerror" in haystack
+    ):
+        return "test"
+
     return "unknown"
 
 
@@ -372,12 +407,21 @@ def _extract_exit_code(log_text: str) -> int | None:
     return int(match.group("code")) if match else None
 
 
-def _risk_for_class(failure_class: str) -> str:
-    if failure_class in {"security", "release", "dependency", "merge_conflict", "unknown"}:
-        return "high"
-    if failure_class in {"test", "type", "infra"}:
-        return "medium"
-    return "low"
+def _risk_for_class(failure_class: str, *, safe_fix_candidate: bool = False) -> str:
+    if safe_fix_candidate and failure_class in {"formatter_only", "lint"}:
+        return "low"
+
+    return {
+        "formatter_only": "low",
+        "lint": "medium",
+        "test": "medium",
+        "type": "medium",
+        "dependency": "high",
+        "merge_conflict": "high",
+        "release": "high",
+        "security": "high",
+        "unknown": "high",
+    }.get(failure_class, "high")
 
 
 def _scope_for_files(files: tuple[str, ...]) -> str:
@@ -391,9 +435,11 @@ def _scope_for_files(files: tuple[str, ...]) -> str:
 def _safe_fix_candidate(failure_class: str, first_line: str) -> bool:
     if failure_class == "formatter_only":
         return True
-    if failure_class == "lint":
-        rule_match = RUFF_RULE_RE.search(first_line)
-        return bool(rule_match and rule_match.group("rule") == "I001")
+
+    stripped = first_line.strip()
+    if failure_class == "lint" and stripped.startswith("I001") and "[*]" in stripped:
+        return True
+
     return False
 
 
