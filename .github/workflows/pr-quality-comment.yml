@@ -569,6 +569,41 @@ jobs:
           printf '%s\n' "$trusted_history_head_sha" \
             > build/pr-quality/trusted-history/selected-head-sha.txt
 
+          mkdir -p build/pr-quality/trusted-diagnostic-signal-snapshot-history
+          trusted_diagnostic_signal_snapshot_history_for_runtime_rc=2
+          runtime_trusted_snapshot_history_summary="$(
+            find build/pr-quality/trusted-history/download \
+              -name diagnostic-signal-snapshot-history-summary.json \
+              -print \
+              -quit
+          )"
+          runtime_trusted_snapshot_history_jsonl="$(
+            find build/pr-quality/trusted-history/download \
+              -name diagnostic-signal-snapshot-history.jsonl \
+              -print \
+              -quit
+          )"
+          if [ "$trusted_history_rc" -eq 0 ] \
+            && [ -n "$runtime_trusted_snapshot_history_summary" ] \
+            && [ -n "$runtime_trusted_snapshot_history_jsonl" ] \
+            && [ -f "$runtime_trusted_snapshot_history_summary" ] \
+            && [ -f "$runtime_trusted_snapshot_history_jsonl" ]; then
+            trusted_diagnostic_signal_snapshot_history_for_runtime_rc=0
+            PYTHONPATH=src python -m sdetkit.trusted_diagnostic_signal_snapshot_history \
+              --history-summary "$runtime_trusted_snapshot_history_summary" \
+              --history-jsonl "$runtime_trusted_snapshot_history_jsonl" \
+              --repo-root . \
+              --selected-retention-run-id "$trusted_history_run_id" \
+              --selected-head-sha "$trusted_history_head_sha" \
+              --base-sha "$PR_BASE_SHA" \
+              --out-dir build/pr-quality/trusted-diagnostic-signal-snapshot-history \
+              --format json \
+              > build/pr-quality/trusted-diagnostic-signal-snapshot-history/runtime-evidence-cli.json \
+              || trusted_diagnostic_signal_snapshot_history_for_runtime_rc=3
+          fi
+          printf '%s\n' "$trusted_diagnostic_signal_snapshot_history_for_runtime_rc" \
+            > build/pr-quality/trusted-diagnostic-signal-snapshot-history/runtime-exit-code.txt
+
           reviewed_disposition_history="$(
             find build/pr-quality/trusted-history/download \
               -name security-reviewed-disposition-history.jsonl \
@@ -600,6 +635,7 @@ jobs:
             --live-benchmark-report build/pr-quality/live-benchmark/live-report/benchmark-report.json \
             --repo-memory-profile build/pr-quality/repo-memory/repo-memory-profile.json \
             --trusted-history-evidence build/pr-quality/trusted-history/evidence/trusted-history-evidence.json \
+            --trusted-diagnostic-signal-snapshot-history build/pr-quality/trusted-diagnostic-signal-snapshot-history/trusted-diagnostic-signal-snapshot-history.json \
             --out-dir build/pr-quality/runtime-proof/summary \
             --format json \
             > build/pr-quality/runtime-proof/summary-metadata.json
