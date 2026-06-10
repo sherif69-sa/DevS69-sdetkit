@@ -108,6 +108,7 @@ def _live_benchmark_summary(report: Mapping[str, Any]) -> JsonObject:
 
     live = _as_dict(payload.get("live_evidence"))
     boundary = _as_dict(payload.get("safety_boundary"))
+    replay = _as_dict(payload.get("replay_manifest"))
     return {
         "collection_status": COLLECTED,
         "status": _string(payload.get("status") or "unknown"),
@@ -126,6 +127,14 @@ def _live_benchmark_summary(report: Mapping[str, Any]) -> JsonObject:
             boundary.get("semantic_equivalence_claimed_count")
         ),
         "boundary_preserved": _bool(boundary.get("preserved")),
+        "replay_manifest_present": bool(replay),
+        "replay_manifest_scenario_count": _int(replay.get("scenario_count")),
+        "replay_manifest_reporting_only": _bool(replay.get("reporting_only")),
+        "replay_manifest_automation_allowed": _bool(replay.get("automation_allowed")),
+        "replay_manifest_merge_authorized": _bool(replay.get("merge_authorized")),
+        "replay_manifest_semantic_equivalence_proven": _bool(
+            replay.get("semantic_equivalence_proven")
+        ),
     }
 
 
@@ -402,6 +411,30 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
                 (
                     "- Boundary preserved: "
                     f"`{str(_bool(benchmark.get('boundary_preserved'))).lower()}`"
+                ),
+                (
+                    "- Replay manifest present: "
+                    f"`{str(_bool(benchmark.get('replay_manifest_present'))).lower()}`"
+                ),
+                (
+                    "- Replay manifest scenarios: "
+                    f"`{_int(benchmark.get('replay_manifest_scenario_count'))}`"
+                ),
+                (
+                    "- Replay manifest reporting only: "
+                    f"`{str(_bool(benchmark.get('replay_manifest_reporting_only'))).lower()}`"
+                ),
+                (
+                    "- Replay manifest automation allowed: "
+                    f"`{str(_bool(benchmark.get('replay_manifest_automation_allowed'))).lower()}`"
+                ),
+                (
+                    "- Replay manifest merge authorized: "
+                    f"`{str(_bool(benchmark.get('replay_manifest_merge_authorized'))).lower()}`"
+                ),
+                (
+                    "- Replay manifest semantic equivalence proven: "
+                    f"`{str(_bool(benchmark.get('replay_manifest_semantic_equivalence_proven'))).lower()}`"
                 ),
             ]
         )

@@ -98,6 +98,13 @@ def test_runtime_proof_summary_accepts_future_live_inputs_without_authority() ->
                 "anti_cheat_rejection_count": 2,
                 "network_isolation_enforced_count": 0,
             },
+            "replay_manifest": {
+                "scenario_count": 6,
+                "reporting_only": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
         },
         repo_memory_profile={
             "profile_status": "live_proof_supported_memory",
@@ -115,7 +122,14 @@ def test_runtime_proof_summary_accepts_future_live_inputs_without_authority() ->
         "live_benchmark",
         "repo_memory",
     ]
-    assert summary["live_benchmark"]["anti_cheat_rejection_count"] == 2
+    benchmark = summary["live_benchmark"]
+    assert benchmark["anti_cheat_rejection_count"] == 2
+    assert benchmark["replay_manifest_present"] is True
+    assert benchmark["replay_manifest_scenario_count"] == 6
+    assert benchmark["replay_manifest_reporting_only"] is True
+    assert benchmark["replay_manifest_automation_allowed"] is False
+    assert benchmark["replay_manifest_merge_authorized"] is False
+    assert benchmark["replay_manifest_semantic_equivalence_proven"] is False
     assert summary["repo_memory"]["live_safe_candidate_count"] == 1
     assert summary["decision_boundary"]["automation_allowed"] is False
 
@@ -186,6 +200,13 @@ def test_runtime_proof_markdown_renders_collected_live_benchmark_and_memory() ->
                 "semantic_equivalence_claimed_count": 0,
                 "preserved": True,
             },
+            "replay_manifest": {
+                "scenario_count": 6,
+                "reporting_only": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
         },
         repo_memory_profile={
             "profile_status": "live_proof_supported_memory",
@@ -223,6 +244,12 @@ def test_runtime_proof_markdown_renders_collected_live_benchmark_and_memory() ->
     assert "Passed: `6`" in markdown
     assert "Anti-cheat rejection scenarios: `2`" in markdown
     assert "Boundary preserved: `true`" in markdown
+    assert "Replay manifest present: `true`" in markdown
+    assert "Replay manifest scenarios: `6`" in markdown
+    assert "Replay manifest reporting only: `true`" in markdown
+    assert "Replay manifest automation allowed: `false`" in markdown
+    assert "Replay manifest merge authorized: `false`" in markdown
+    assert "Replay manifest semantic equivalence proven: `false`" in markdown
     assert "Status: `live_proof_supported_memory`" in markdown
     assert "Live contract proven: `true`" in markdown
     assert summary["repo_memory"]["safety_gate_record_count"] == 3
