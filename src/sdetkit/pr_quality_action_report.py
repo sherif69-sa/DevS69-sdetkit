@@ -1840,26 +1840,108 @@ def _reviewer_dashboard_lines(
 def render_pr_quality_review_summary(model: JsonObject) -> str:
     decision = _as_dict(model.get("decision"))
     authority = _as_dict(model.get("authority_boundary"))
+    primary_blocker = _as_dict(model.get("primary_blocker"))
     proof_commands = [
         str(command)
         for command in _as_list(model.get("proof_to_rerun"))
         if isinstance(command, str) and command.strip()
     ]
+    recommended_actions = [
+        str(item)
+        for item in _as_list(model.get("recommended_actions"))
+        if isinstance(item, str) and item.strip()
+    ]
+    failed_check_names = [
+        str(item)
+        for item in _as_list(model.get("failed_check_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    queued_check_names = [
+        str(item)
+        for item in _as_list(model.get("required_queued_check_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    startup_failure_names = [
+        str(item)
+        for item in _as_list(model.get("required_startup_failure_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    missing_context_names = [
+        str(item)
+        for item in _as_list(model.get("missing_required_context_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+
+    def _count(value: object) -> int:
+        try:
+            return int(value or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    def _joined(items: list[str]) -> str:
+        return ", ".join(items) if items else "none"
+
+    status = _review_model_scalar(decision.get("status") or "unknown")
+    failed_total = _count(decision.get("failed_checks"))
+    queued_total = _count(decision.get("required_queued_checks"))
+    startup_total = _count(decision.get("required_startup_failures"))
+    missing_total = _count(decision.get("missing_required_contexts"))
+    review_first = bool(decision.get("review_first_evidence"))
+    first_blocker = _review_model_scalar(
+        primary_blocker.get("title") or decision.get("signal_title") or "none"
+    )
+    first_action = _review_model_scalar(
+        primary_blocker.get("action") or decision.get("next_action") or "none"
+    )
+    first_recommended_action = recommended_actions[0] if recommended_actions else first_action
+
+    needs_attention = (
+        status != "green"
+        or failed_total > 0
+        or queued_total > 0
+        or startup_total > 0
+        or missing_total > 0
+        or review_first
+    )
+    is_blocked = status != "green" or failed_total > 0 or startup_total > 0 or missing_total > 0
+    if is_blocked:
+        review_state = "needs_attention"
+    elif needs_attention:
+        review_state = "review_required"
+    else:
+        review_state = "green"
 
     lines = [
         "# PR Quality Review Summary",
+        "",
+        "## Mini triage",
+        "",
+        "| Item | Value |",
+        "|---|---|",
+        f"| Review state | `{review_state}` |",
+        f"| Status | `{_review_model_scalar(decision.get('status'))}` |",
+        f"| First blocker | `{_markdown_table_value(first_blocker)}` |",
+        f"| Recommended action | `{_markdown_table_value(first_recommended_action)}` |",
+        f"| Failed checks | `{failed_total}` |",
+        f"| Failed check names | `{_markdown_table_value(_joined(failed_check_names))}` |",
+        f"| Queued required checks | `{queued_total}` |",
+        f"| Queued check names | `{_markdown_table_value(_joined(queued_check_names))}` |",
+        f"| Startup failures | `{startup_total}` |",
+        f"| Startup failure names | `{_markdown_table_value(_joined(startup_failure_names))}` |",
+        f"| Missing required contexts | `{missing_total}` |",
+        f"| Missing context names | `{_markdown_table_value(_joined(missing_context_names))}` |",
         "",
         "## Decision",
         "",
         "| Item | Value |",
         "|---|---|",
-        f"| Status | `{_review_model_scalar(decision.get('status'))}` |",
         f"| Merge assessment | `{_review_model_scalar(decision.get('merge_assessment'))}` |",
         f"| Next action | `{_review_model_scalar(decision.get('next_action'))}` |",
         f"| Risk surface | `{_markdown_table_value(decision.get('risk_surface'))}` |",
+        f"| Signal title | `{_markdown_table_value(decision.get('signal_title'))}` |",
         f"| Signal | `{_markdown_table_value(decision.get('comment_signal'))}` |",
         f"| Review-first evidence | `{_review_model_scalar(decision.get('review_first_evidence'))}` |",
-        f"| Failed checks | `{_review_model_scalar(decision.get('failed_checks'))}` |",
+        f"| Cleared security signal | `{_review_model_scalar(decision.get('cleared_security_signal'))}` |",
         "",
         "## Proof to rerun",
         "",
@@ -1871,6 +1953,10 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         lines.append("```")
     else:
         lines.append("`none`")
+
+    if recommended_actions:
+        lines.extend(["", "## Recommended actions", ""])
+        lines.extend(f"- {action}" for action in recommended_actions)
 
     lines.extend(
         [

@@ -3384,7 +3384,7 @@ def test_review_html_dashboard_visualizes_error_state() -> None:
         check_intelligence={
             "failed_checks": [{"name": "quality"}],
             "queued_checks": [{"name": "gate", "required": True}],
-            "startup_failures": [{"name": "first-proof"}],
+            "startup_failures": [{"name": "first-proof", "required": True}],
             "missing_required_contexts": ["ci"],
         },
         evidence_narrative={
@@ -3434,3 +3434,67 @@ def test_review_html_dashboard_visualizes_error_state() -> None:
     assert "python -m pytest -q tests/test_example.py -o addopts=" in html
     assert "Merge authorization" in html
     assert "false" in html
+
+
+def test_review_summary_includes_error_state_mini_triage() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=True,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {
+                "title": "Ruff check failed",
+                "surface": "workflow",
+                "action": "fix_lint",
+                "code": "ruff",
+                "path": "src/example.py",
+                "details": "unused import",
+            },
+            "recommended_actions": ["Fix the lint finding.", "Run pre-commit."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [{"name": "quality"}],
+            "queued_checks": [{"name": "gate", "required": True}],
+            "startup_failures": [{"name": "first-proof", "required": True}],
+            "missing_required_contexts": ["ci"],
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "workflow",
+                "title": "Workflow review evidence changed",
+            },
+            "graph": {
+                "top_blocker": {
+                    "title": "Ruff check failed",
+                    "surface": "workflow",
+                    "action": "fix_lint",
+                    "review_first": True,
+                }
+            },
+            "next_proof": ["python -m pytest -q tests/test_example.py -o addopts="],
+        },
+    )
+
+    summary = report.render_pr_quality_review_summary(model)
+
+    assert "## Mini triage" in summary
+    assert "| Review state | `needs_attention` |" in summary
+    assert "| First blocker | `Ruff check failed` |" in summary
+    assert "| Recommended action | `Fix the lint finding.` |" in summary
+    assert "| Failed checks | `1` |" in summary
+    assert "| Failed check names | `quality` |" in summary
+    assert "| Queued required checks | `1` |" in summary
+    assert "| Queued check names | `gate` |" in summary
+    assert "| Startup failures | `1` |" in summary
+    assert "| Startup failure names | `first-proof` |" in summary
+    assert "| Missing required contexts | `1` |" in summary
+    assert "| Missing context names | `ci` |" in summary
+    assert "## Recommended actions" in summary
+    assert "- Fix the lint finding." in summary
+    assert "- Run pre-commit." in summary
+    assert "python -m pytest -q tests/test_example.py -o addopts=" in summary
+    assert "| Merge authorization | `false` |" in summary
