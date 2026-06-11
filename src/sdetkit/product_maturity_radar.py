@@ -723,6 +723,52 @@ def _rank_candidates(surfaces: Sequence[dict[str, Any]], root: Path) -> list[dic
     )
 
 
+def _actionability_summary(ranked: Sequence[dict[str, Any]]) -> dict[str, Any]:
+    status_counts = Counter(str(item.get("ranking_status") or "unknown") for item in ranked)
+    patch_ready = [
+        item
+        for item in ranked
+        if item.get("accepted_on_main") is not True
+        and item.get("safe_to_patch") is True
+        and item.get("ranking_status") != "blocked_review_first_candidate"
+    ]
+    blocked = [
+        item for item in ranked if item.get("ranking_status") == "blocked_review_first_candidate"
+    ]
+
+    if patch_ready:
+        next_allowed_action = "review_patch_ready_candidate"
+        status = "patch_ready_candidate_available"
+    elif blocked:
+        next_allowed_action = str(
+            blocked[0].get("next_allowed_action") or "collect_human_review_evidence"
+        )
+        status = "blocked_review_first_candidate"
+    elif ranked:
+        next_allowed_action = "review_accepted_candidate_history"
+        status = "no_unaccepted_patch_ready_candidates"
+    else:
+        next_allowed_action = "none"
+        status = "no_candidates"
+
+    return {
+        "status": status,
+        "candidate_count": len(ranked),
+        "patch_ready_candidate_count": len(patch_ready),
+        "blocked_review_first_candidate_count": len(blocked),
+        "accepted_on_main_candidate_count": status_counts.get("accepted_on_main", 0),
+        "ranking_status_counts": dict(sorted(status_counts.items())),
+        "has_patch_ready_candidate": bool(patch_ready),
+        "next_allowed_action": next_allowed_action,
+        "review_first": True,
+        "safe_to_patch": False,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+
 def _operator_summary(ranked: Sequence[dict[str, Any]]) -> dict[str, Any]:
     if not ranked:
         return {
@@ -786,6 +832,7 @@ def build_product_maturity_radar(repo_root: str | Path = ".") -> dict[str, Any]:
         "status_counts": dict(sorted(status_counts.items())),
         "surfaces": surfaces,
         "ranked_upgrade_candidates": ranked,
+        "actionability_summary": _actionability_summary(ranked),
         "operator_summary": _operator_summary(ranked),
         "rules": {
             "advisory_only": True,
@@ -813,6 +860,15 @@ def render_product_maturity_radar_markdown(payload: dict[str, Any]) -> str:
         "- advisory_only: true",
         "- repo_mutation: false",
         "- review_first: true",
+        "",
+        "## Actionability summary",
+        "",
+        f"- status: `{payload['actionability_summary']['status']}`",
+        f"- patch_ready_candidate_count: `{payload['actionability_summary']['patch_ready_candidate_count']}`",
+        f"- blocked_review_first_candidate_count: `{payload['actionability_summary']['blocked_review_first_candidate_count']}`",
+        f"- accepted_on_main_candidate_count: `{payload['actionability_summary']['accepted_on_main_candidate_count']}`",
+        f"- next_allowed_action: `{payload['actionability_summary']['next_allowed_action']}`",
+        "- safe_to_patch: false",
         "",
         "## Surfaces",
         "",

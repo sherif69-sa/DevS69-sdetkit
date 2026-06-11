@@ -210,7 +210,35 @@ def test_product_maturity_radar_marks_review_first_unsafe_candidates_as_blocked(
     assert "automatic_permission_reduction" in workflow["blocked_actions"]
     assert "semantic_equivalence_claim" in workflow["blocked_actions"]
 
-    markdown = radar_module.render_product_maturity_radar_markdown(payload)
+    payload_actionability = payload["actionability_summary"]
+    assert payload_actionability["patch_ready_candidate_count"] == 0
+    assert payload_actionability["blocked_review_first_candidate_count"] >= 1
+    assert payload_actionability["has_patch_ready_candidate"] is False
+
+    actionability = radar_module._actionability_summary([workflow])
+    assert actionability["status"] == "blocked_review_first_candidate"
+    assert actionability["patch_ready_candidate_count"] == 0
+    assert actionability["blocked_review_first_candidate_count"] == 1
+    assert actionability["accepted_on_main_candidate_count"] == 0
+    assert actionability["has_patch_ready_candidate"] is False
+    assert actionability["next_allowed_action"] == "collect_human_review_evidence"
+    assert actionability["automation_allowed"] is False
+    assert actionability["patch_application_allowed"] is False
+    assert actionability["merge_authorized"] is False
+    assert actionability["semantic_equivalence_proven"] is False
+
+    single_candidate_payload = {
+        **payload,
+        "ranked_upgrade_candidates": [workflow],
+        "candidate_count": 1,
+        "actionability_summary": actionability,
+        "operator_summary": radar_module._operator_summary([workflow]),
+    }
+    markdown = radar_module.render_product_maturity_radar_markdown(single_candidate_payload)
+    assert "## Actionability summary" in markdown
+    assert "patch_ready_candidate_count: `0`" in markdown
+    assert "blocked_review_first_candidate_count: `1`" in markdown
+    assert "next_allowed_action: `collect_human_review_evidence`" in markdown
     assert "ranking_status: `blocked_review_first_candidate`" in markdown
     assert "blocked_by: `human_review_evidence_required`" in markdown
     assert "next_allowed_action: `collect_human_review_evidence`" in markdown
