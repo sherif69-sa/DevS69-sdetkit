@@ -1694,8 +1694,51 @@ def build_pr_quality_review_model(
     required_startup = _required_count(_as_list(check_intelligence.get("startup_failures")))
     missing_required = len(_as_list(check_intelligence.get("missing_required_contexts")))
 
+    def _check_labels(items: object) -> list[str]:
+        labels: list[str] = []
+        for item in _as_list(items):
+            check = _as_dict(item)
+            label = _string(
+                check.get("name")
+                or check.get("context")
+                or check.get("check")
+                or check.get("workflow")
+                or check.get("title")
+                or item
+            )
+            if label:
+                labels.append(label)
+        return labels[:10]
+
+    recommended_actions = [
+        str(item)
+        for item in _as_list(action_report.get("recommended_actions"))
+        if isinstance(item, str) and item.strip()
+    ]
+
     return {
         "schema_version": "sdetkit.pr_quality.review_model.v1",
+        "primary_blocker": {
+            "title": _string(primary_blocker.get("title") or title),
+            "surface": _string(primary_blocker.get("surface") or surface),
+            "action": _string(primary_blocker.get("action") or action or next_action),
+            "code": _string(primary_blocker.get("code")),
+            "path": _string(primary_blocker.get("path")),
+            "details": _string(
+                primary_blocker.get("details")
+                or primary_blocker.get("message")
+                or primary_blocker.get("reason")
+            ),
+        },
+        "recommended_actions": recommended_actions[:10],
+        "failed_check_names": _check_labels(check_intelligence.get("failed_checks")),
+        "required_queued_check_names": _check_labels(check_intelligence.get("queued_checks")),
+        "required_startup_failure_names": _check_labels(check_intelligence.get("startup_failures")),
+        "missing_required_context_names": [
+            _string(item)
+            for item in _as_list(check_intelligence.get("missing_required_contexts"))
+            if _string(item)
+        ][:10],
         "decision": {
             "status": status,
             "merge_assessment": merge_assessment,
@@ -1862,17 +1905,78 @@ def _html_escape(value: object) -> str:
 def render_pr_quality_review_html(model: JsonObject) -> str:
     decision = _as_dict(model.get("decision"))
     authority = _as_dict(model.get("authority_boundary"))
+    primary_blocker = _as_dict(model.get("primary_blocker"))
     proof_commands = [
         str(command)
         for command in _as_list(model.get("proof_to_rerun"))
         if isinstance(command, str) and command.strip()
     ]
+    recommended_actions = [
+        str(item)
+        for item in _as_list(model.get("recommended_actions"))
+        if isinstance(item, str) and item.strip()
+    ]
+    failed_check_names = [
+        str(item)
+        for item in _as_list(model.get("failed_check_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    queued_check_names = [
+        str(item)
+        for item in _as_list(model.get("required_queued_check_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    startup_failure_names = [
+        str(item)
+        for item in _as_list(model.get("required_startup_failure_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    missing_context_names = [
+        str(item)
+        for item in _as_list(model.get("missing_required_context_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+
+    def _count(value: object) -> int:
+        try:
+            return int(value or 0)
+        except (TypeError, ValueError):
+            return 0
 
     status = _review_model_scalar(decision.get("status") or "unknown")
     next_action = _review_model_scalar(decision.get("next_action") or "unknown")
     merge_assessment = _review_model_scalar(decision.get("merge_assessment") or "unknown")
     risk_surface = _review_model_scalar(decision.get("risk_surface") or "unknown")
     signal = _review_model_scalar(decision.get("comment_signal") or "none")
+    first_blocker = _review_model_scalar(
+        primary_blocker.get("title") or decision.get("signal_title") or "none"
+    )
+    first_action = _review_model_scalar(primary_blocker.get("action") or next_action or "none")
+
+    failed_total = _count(decision.get("failed_checks"))
+    queued_total = _count(decision.get("required_queued_checks"))
+    startup_total = _count(decision.get("required_startup_failures"))
+    missing_total = _count(decision.get("missing_required_contexts"))
+    review_first = bool(decision.get("review_first_evidence"))
+    needs_attention = (
+        status != "green"
+        or failed_total > 0
+        or queued_total > 0
+        or startup_total > 0
+        or missing_total > 0
+        or review_first
+    )
+    is_blocked = status != "green" or failed_total > 0 or startup_total > 0 or missing_total > 0
+
+    if is_blocked:
+        status_class = "status-failed"
+        hero_label = "needs attention"
+    elif needs_attention:
+        status_class = "status-review"
+        hero_label = "review required"
+    else:
+        status_class = "status-green"
+        hero_label = "green"
 
     decision_rows = [
         ("Status", decision.get("status")),
@@ -1881,12 +1985,22 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         ("Risk surface", decision.get("risk_surface")),
         ("Signal title", decision.get("signal_title")),
         ("Signal", decision.get("comment_signal")),
+        ("First blocker", first_blocker),
+        ("First blocker action", first_action),
         ("Review-first evidence", decision.get("review_first_evidence")),
         ("Failed checks", decision.get("failed_checks")),
         ("Required queued checks", decision.get("required_queued_checks")),
         ("Required startup failures", decision.get("required_startup_failures")),
         ("Missing required contexts", decision.get("missing_required_contexts")),
         ("Cleared security signal", decision.get("cleared_security_signal")),
+    ]
+    blocker_rows = [
+        ("Title", primary_blocker.get("title") or first_blocker),
+        ("Surface", primary_blocker.get("surface") or risk_surface),
+        ("Action", primary_blocker.get("action") or first_action),
+        ("Code", primary_blocker.get("code")),
+        ("Path", primary_blocker.get("path")),
+        ("Details", primary_blocker.get("details")),
     ]
     authority_rows = [
         ("Boundary mode", authority.get("boundary_mode")),
@@ -1896,11 +2010,11 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         ("Semantic equivalence claim", authority.get("semantic_equivalence_claim")),
     ]
     metric_rows = [
-        ("Failed checks", decision.get("failed_checks")),
-        ("Queued required checks", decision.get("required_queued_checks")),
-        ("Startup failures", decision.get("required_startup_failures")),
-        ("Missing contexts", decision.get("missing_required_contexts")),
-        ("Review-first", decision.get("review_first_evidence")),
+        ("Failed checks", failed_total),
+        ("Queued required checks", queued_total),
+        ("Startup failures", startup_total),
+        ("Missing contexts", missing_total),
+        ("Review-first", review_first),
     ]
     artifact_rows = [
         ("pr-review-summary.md", "Concise human review panel"),
@@ -1935,6 +2049,19 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
             for name, description in rows
         )
 
+    def list_panel(title: str, items: list[str]) -> str:
+        if not items:
+            return (
+                '<article class="signal-card">'
+                f"<h3>{_html_escape(title)}</h3>"
+                "<p><code>none</code></p>"
+                "</article>"
+            )
+        body = "".join(f"<li>{_html_escape(item)}</li>" for item in items)
+        return (
+            f'<article class="signal-card"><h3>{_html_escape(title)}</h3><ul>{body}</ul></article>'
+        )
+
     if proof_commands:
         proof_html = (
             "<pre><code>"
@@ -1944,7 +2071,20 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
     else:
         proof_html = "<p><code>none</code></p>"
 
-    status_class = "status-green" if status == "green" else "status-review"
+    first_recommended_action = recommended_actions[0] if recommended_actions else first_action
+    triage_html = ""
+    if needs_attention:
+        triage_html = (
+            '<section class="alert-card">'
+            f"<h2>{_html_escape(hero_label.title())}</h2>"
+            '<div class="triage-grid">'
+            f"<article><span>First blocker</span><strong>{_html_escape(first_blocker)}</strong></article>"
+            f"<article><span>Recommended action</span><strong>{_html_escape(first_recommended_action)}</strong></article>"
+            f"<article><span>Failed checks</span><strong>{_html_escape(failed_total)}</strong></article>"
+            f"<article><span>Missing contexts</span><strong>{_html_escape(missing_total)}</strong></article>"
+            "</div>"
+            "</section>"
+        )
 
     return (
         "<!doctype html>\n"
@@ -1954,7 +2094,7 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         '  <meta name="viewport" content="width=device-width, initial-scale=1">\n'
         "  <title>PR Quality Review Dashboard</title>\n"
         "  <style>\n"
-        "    :root { color-scheme: light dark; --bg: #0d1117; --panel: #161b22; --panel-2: #0f1720; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #2f81f7; --green: #3fb950; --code: #0b1220; }\n"
+        "    :root { color-scheme: light dark; --bg: #0d1117; --panel: #161b22; --panel-2: #0f1720; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #2f81f7; --green: #3fb950; --orange: #f0b72f; --red: #f85149; --code: #0b1220; }\n"
         "    * { box-sizing: border-box; }\n"
         "    body { margin: 0; background: radial-gradient(circle at top left, #132238, var(--bg) 42rem); color: var(--text); font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.45; }\n"
         "    main { max-width: 1120px; margin: 0 auto; padding: 2rem; }\n"
@@ -1962,12 +2102,17 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         "    .eyebrow { color: var(--muted); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }\n"
         "    h1 { margin: 0.35rem 0 0.75rem; font-size: clamp(1.8rem, 4vw, 3rem); }\n"
         "    h2 { margin: 0 0 1rem; }\n"
-        "    .hero-grid, .metrics, .artifact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.8rem; margin-top: 1rem; }\n"
-        "    .hero-card, .metric-card, .artifact-card, .card { border: 1px solid var(--border); border-radius: 14px; background: rgba(22,27,34,0.88); padding: 1rem; }\n"
-        "    .hero-card span, .metric-label, .artifact-card span { display: block; color: var(--muted); font-size: 0.82rem; margin-bottom: 0.25rem; }\n"
+        "    h3 { margin: 0 0 0.5rem; }\n"
+        "    .hero-grid, .metrics, .artifact-grid, .signal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.8rem; margin-top: 1rem; }\n"
+        "    .hero-card, .metric-card, .artifact-card, .signal-card, .card, .alert-card { border: 1px solid var(--border); border-radius: 14px; background: rgba(22,27,34,0.88); padding: 1rem; }\n"
+        "    .hero-card span, .metric-label, .artifact-card span, .alert-card span { display: block; color: var(--muted); font-size: 0.82rem; margin-bottom: 0.25rem; }\n"
         "    .status-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 0.22rem 0.6rem; font-weight: 800; border: 1px solid var(--border); }\n"
         "    .status-green { color: var(--green); background: rgba(63,185,80,0.12); }\n"
-        "    .status-review { color: #f0b72f; background: rgba(240,183,47,0.12); }\n"
+        "    .status-review { color: var(--orange); background: rgba(240,183,47,0.12); }\n"
+        "    .status-failed { color: var(--red); background: rgba(248,81,73,0.14); }\n"
+        "    .alert-card { border-color: rgba(248,81,73,0.55); background: linear-gradient(135deg, rgba(248,81,73,0.16), rgba(240,183,47,0.08)), var(--panel); margin-top: 1rem; }\n"
+        "    .triage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; }\n"
+        "    .triage-grid article { border: 1px solid var(--border); border-radius: 12px; padding: 0.8rem; background: rgba(13,17,23,0.55); }\n"
         "    .layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr); gap: 1rem; margin-top: 1rem; }\n"
         "    @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } main { padding: 1rem; } }\n"
         "    table { border-collapse: collapse; width: 100%; overflow: hidden; border-radius: 10px; }\n"
@@ -1985,7 +2130,7 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         '    <section class="hero">\n'
         '      <div class="eyebrow">SDET Quality Gate</div>\n'
         "      <h1>PR Quality Review Dashboard</h1>\n"
-        f'      <span class="status-badge {status_class}">{_html_escape(status)}</span>\n'
+        f'      <span class="status-badge {status_class}">{_html_escape(hero_label)}</span>\n'
         '      <div class="hero-grid">\n'
         f'        <article class="hero-card"><span>Merge assessment</span><strong>{_html_escape(merge_assessment)}</strong></article>\n'
         f'        <article class="hero-card"><span>Next reviewer action</span><strong>{_html_escape(next_action)}</strong></article>\n'
@@ -1993,6 +2138,7 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         f'        <article class="hero-card"><span>Signal</span><strong>{_html_escape(signal)}</strong></article>\n'
         "      </div>\n"
         "    </section>\n"
+        f"    {triage_html}\n"
         '    <section class="metrics">\n'
         f"      {metric_cards(metric_rows)}\n"
         "    </section>\n"
@@ -2002,14 +2148,30 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         f"        {table(decision_rows)}\n"
         "      </article>\n"
         '      <article class="card">\n'
+        "        <h2>First blocker</h2>\n"
+        f"        {table(blocker_rows)}\n"
+        "      </article>\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        "      <h2>Failure signals</h2>\n"
+        '      <div class="signal-grid">\n'
+        f"        {list_panel('Failed checks', failed_check_names)}\n"
+        f"        {list_panel('Queued required checks', queued_check_names)}\n"
+        f"        {list_panel('Startup failures', startup_failure_names)}\n"
+        f"        {list_panel('Missing required contexts', missing_context_names)}\n"
+        f"        {list_panel('Recommended actions', recommended_actions)}\n"
+        "      </div>\n"
+        "    </section>\n"
+        '    <section class="layout">\n'
+        '      <article class="card">\n'
+        "        <h2>Proof to rerun</h2>\n"
+        f"        {proof_html}\n"
+        "      </article>\n"
+        '      <article class="card">\n'
         "        <h2>Authority boundary</h2>\n"
         f"        {table(authority_rows)}\n"
         '        <p class="boundary">Reporting-only. This dashboard does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.</p>\n'
         "      </article>\n"
-        "    </section>\n"
-        '    <section class="card">\n'
-        "      <h2>Proof to rerun</h2>\n"
-        f"      {proof_html}\n"
         "    </section>\n"
         '    <section class="card">\n'
         "      <h2>Product artifacts</h2>\n"

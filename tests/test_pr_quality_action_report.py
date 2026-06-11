@@ -3360,3 +3360,77 @@ def test_write_comment_body_writes_review_html_dashboard_artifact(tmp_path: Path
     assert "python -m pre_commit run -a" in html
     assert "Reporting-only" in html
     assert "does not authorize merge" in html
+
+
+def test_review_html_dashboard_visualizes_error_state() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=True,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {
+                "title": "Ruff check failed",
+                "surface": "workflow",
+                "action": "fix_lint",
+                "code": "ruff",
+                "path": "src/example.py",
+                "details": "unused import",
+            },
+            "recommended_actions": ["Fix the lint finding.", "Run pre-commit."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [{"name": "quality"}],
+            "queued_checks": [{"name": "gate", "required": True}],
+            "startup_failures": [{"name": "first-proof"}],
+            "missing_required_contexts": ["ci"],
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "workflow",
+                "title": "Workflow review evidence changed",
+            },
+            "graph": {
+                "top_blocker": {
+                    "title": "Ruff check failed",
+                    "surface": "workflow",
+                    "action": "fix_lint",
+                    "review_first": True,
+                }
+            },
+            "next_proof": ["python -m pytest -q tests/test_example.py -o addopts="],
+        },
+    )
+
+    assert model["primary_blocker"]["title"] == "Ruff check failed"
+    assert model["recommended_actions"] == ["Fix the lint finding.", "Run pre-commit."]
+    assert model["failed_check_names"] == ["quality"]
+    assert model["required_queued_check_names"] == ["gate"]
+    assert model["required_startup_failure_names"] == ["first-proof"]
+    assert model["missing_required_context_names"] == ["ci"]
+
+    html = report.render_pr_quality_review_html(model)
+
+    assert "needs attention" in html
+    assert "status-failed" in html
+    assert "Needs Attention" in html
+    assert "First blocker" in html
+    assert "Ruff check failed" in html
+    assert "fix_lint" in html
+    assert "Failure signals" in html
+    assert "Failed checks" in html
+    assert "quality" in html
+    assert "Queued required checks" in html
+    assert "gate" in html
+    assert "Startup failures" in html
+    assert "first-proof" in html
+    assert "Missing required contexts" in html
+    assert "ci" in html
+    assert "Recommended actions" in html
+    assert "Fix the lint finding." in html
+    assert "python -m pytest -q tests/test_example.py -o addopts=" in html
+    assert "Merge authorization" in html
+    assert "false" in html
