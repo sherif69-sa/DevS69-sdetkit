@@ -4,7 +4,7 @@
 
 # Runtime dependency
 httpx==0.28.1
-filelock==3.29.1
+filelock==3.29.3
 
 # Dev + QA tooling
 ruff==0.15.16
@@ -21,7 +21,7 @@ twine==6.2.0
 
 # Security/compliance tooling used in workflows
 pip==26.1.2
-pip-audit==2.10.0
+pip-audit==2.10.1
 cyclonedx-bom==7.3.0
 
 # Docs
