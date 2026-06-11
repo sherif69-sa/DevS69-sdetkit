@@ -1117,8 +1117,30 @@ jobs:
 
           mkdir -p "$publish_dir"
 
-          printf '### SDET Quality Gate\n' > "$body_path"
-          cat build/pr-quality/pr-comment-body.md >> "$body_path"
+          printf '### SDET Quality Gate\n\n' > "$body_path"
+
+          if [ -s build/pr-quality/pr-review-summary.md ]; then
+            cat build/pr-quality/pr-review-summary.md >> "$body_path"
+          else
+            cat build/pr-quality/pr-comment-body.md >> "$body_path"
+          fi
+
+          cat >> "$body_path" <<'MARKDOWN'
+
+          ---
+
+          <details>
+          <summary><strong>PR Quality product artifacts</strong></summary>
+
+          - `pr-review-summary.md`: concise human review panel.
+          - `pr-review-model.json`: machine-readable review model.
+          - `pr-review-dashboard.html`: browser-ready review dashboard.
+          - `pr-comment-body.md`: full raw evidence body retained in the artifact bundle.
+          - `pr-quality-comment`: uploaded artifact bundle for full diagnostic evidence.
+
+          </details>
+
+          MARKDOWN
 
           BODY_PATH="$body_path" REQUEST_PATH="$request_path" python - <<'PYCODE'
           import json

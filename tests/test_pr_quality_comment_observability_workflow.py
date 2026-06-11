@@ -1095,3 +1095,25 @@ def test_pr_quality_prefers_final_trusted_diagnostic_snapshot_history_output_fil
     assert text.count("diagnostic-signal-snapshots/output/") >= 4
     assert text.count("-name diagnostic-signal-snapshot-history-summary.json") >= 2
     assert text.count("-name diagnostic-signal-snapshot-history.jsonl") >= 2
+
+
+def test_pr_quality_published_comment_prefers_compact_review_summary() -> None:
+    text = _workflow_text()
+    start = text.index('publish_dir="build/pr-quality/comment-publish"')
+    end = text.index('BODY_PATH="$body_path" REQUEST_PATH="$request_path"', start)
+    publisher = text[start:end]
+
+    assert 'cat build/pr-quality/pr-review-summary.md >> "$body_path"' in publisher
+    assert 'cat build/pr-quality/pr-comment-body.md >> "$body_path"' in publisher
+    assert publisher.index("cat build/pr-quality/pr-review-summary.md") < publisher.index(
+        "cat build/pr-quality/pr-comment-body.md"
+    )
+    assert "PR Quality product artifacts" in publisher
+    assert "`pr-review-model.json`: machine-readable review model." in publisher
+    assert "`pr-review-dashboard.html`: browser-ready review dashboard." in publisher
+    assert (
+        "`pr-comment-body.md`: full raw evidence body retained in the artifact bundle." in publisher
+    )
+    assert (
+        "`pr-quality-comment`: uploaded artifact bundle for full diagnostic evidence." in publisher
+    )
