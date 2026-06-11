@@ -197,6 +197,15 @@ def test_product_maturity_radar_marks_review_first_unsafe_candidates_as_blocked(
     assert workflow["blocker_source_report"] == "sdetkit.workflow_governance_report"
     assert workflow["blocker_playbook"] == "docs/ci/workflow-permission-review-playbook.md"
     assert workflow["next_allowed_action"] == "collect_human_review_evidence"
+
+    summary = radar_module._operator_summary([workflow])
+    assert summary["next_action"] == "collect_human_review_evidence"
+    assert summary["top_candidate"] == workflow["upgrade_candidate_title"]
+    assert summary["top_candidate_classification"] == "workflow_governance_followup"
+    assert summary["top_candidate_ranking_status"] == "blocked_review_first_candidate"
+    assert summary["blocked_by"] == "human_review_evidence_required"
+    assert summary["blocker_source_report"] == "sdetkit.workflow_governance_report"
+    assert summary["blocker_playbook"] == "docs/ci/workflow-permission-review-playbook.md"
     assert "reviewer decision" in workflow["required_evidence"]
     assert "automatic_permission_reduction" in workflow["blocked_actions"]
     assert "semantic_equivalence_claim" in workflow["blocked_actions"]

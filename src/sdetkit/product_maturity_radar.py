@@ -723,6 +723,38 @@ def _rank_candidates(surfaces: Sequence[dict[str, Any]], root: Path) -> list[dic
     )
 
 
+def _operator_summary(ranked: Sequence[dict[str, Any]]) -> dict[str, Any]:
+    if not ranked:
+        return {
+            "status": "product_maturity_radar_generated",
+            "next_action": "No product maturity candidates found.",
+        }
+
+    top = ranked[0]
+    summary = {
+        "status": "product_maturity_radar_generated",
+        "top_candidate": str(top.get("upgrade_candidate_title") or ""),
+        "top_candidate_classification": str(top.get("classification") or ""),
+        "top_candidate_ranking_status": str(top.get("ranking_status") or "fresh_candidate"),
+    }
+
+    if top.get("ranking_status") == "blocked_review_first_candidate":
+        summary["next_action"] = str(
+            top.get("next_allowed_action") or "collect_human_review_evidence"
+        )
+        summary["blocked_by"] = str(top.get("blocked_by") or "human_review_evidence_required")
+        if top.get("blocker_source_report"):
+            summary["blocker_source_report"] = str(top["blocker_source_report"])
+        if top.get("blocker_playbook"):
+            summary["blocker_playbook"] = str(top["blocker_playbook"])
+        return summary
+
+    summary["next_action"] = str(
+        top.get("upgrade_candidate_title") or "Review ranked product maturity candidates."
+    )
+    return summary
+
+
 def build_product_maturity_radar(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root).resolve()
     text_index = _repo_text_index(root)
@@ -754,12 +786,7 @@ def build_product_maturity_radar(repo_root: str | Path = ".") -> dict[str, Any]:
         "status_counts": dict(sorted(status_counts.items())),
         "surfaces": surfaces,
         "ranked_upgrade_candidates": ranked,
-        "operator_summary": {
-            "status": "product_maturity_radar_generated",
-            "next_action": ranked[0]["upgrade_candidate_title"]
-            if ranked
-            else "No product maturity candidates found.",
-        },
+        "operator_summary": _operator_summary(ranked),
         "rules": {
             "advisory_only": True,
             "repo_mutation": False,
