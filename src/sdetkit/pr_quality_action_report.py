@@ -1849,6 +1849,104 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _html_escape(value: object) -> str:
+    return (
+        _review_model_scalar(value)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
+
+
+def render_pr_quality_review_html(model: JsonObject) -> str:
+    decision = _as_dict(model.get("decision"))
+    authority = _as_dict(model.get("authority_boundary"))
+    proof_commands = [
+        str(command)
+        for command in _as_list(model.get("proof_to_rerun"))
+        if isinstance(command, str) and command.strip()
+    ]
+
+    decision_rows = [
+        ("Status", decision.get("status")),
+        ("Merge assessment", decision.get("merge_assessment")),
+        ("Next action", decision.get("next_action")),
+        ("Risk surface", decision.get("risk_surface")),
+        ("Signal title", decision.get("signal_title")),
+        ("Signal", decision.get("comment_signal")),
+        ("Review-first evidence", decision.get("review_first_evidence")),
+        ("Failed checks", decision.get("failed_checks")),
+        ("Required queued checks", decision.get("required_queued_checks")),
+        ("Required startup failures", decision.get("required_startup_failures")),
+        ("Missing required contexts", decision.get("missing_required_contexts")),
+    ]
+    authority_rows = [
+        ("Boundary mode", authority.get("boundary_mode")),
+        ("Patch automation", authority.get("patch_automation")),
+        ("Security dismissal", authority.get("security_dismissal")),
+        ("Merge authorization", authority.get("merge_authorization")),
+        ("Semantic equivalence claim", authority.get("semantic_equivalence_claim")),
+    ]
+
+    def table(rows: list[tuple[str, object]]) -> str:
+        body = "\n".join(
+            f"<tr><th>{_html_escape(label)}</th><td><code>{_html_escape(value)}</code></td></tr>"
+            for label, value in rows
+        )
+        return f"<table>{body}</table>"
+
+    if proof_commands:
+        proof_html = (
+            "<pre><code>"
+            + "\n".join(_html_escape(command) for command in proof_commands)
+            + "</code></pre>"
+        )
+    else:
+        proof_html = "<p><code>none</code></p>"
+
+    return (
+        "<!doctype html>\n"
+        '<html lang="en">\n'
+        "<head>\n"
+        '  <meta charset="utf-8">\n'
+        '  <meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        "  <title>PR Quality Review Dashboard</title>\n"
+        "  <style>\n"
+        "    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 2rem; line-height: 1.45; }\n"
+        "    main { max-width: 980px; margin: 0 auto; }\n"
+        "    .card { border: 1px solid #d0d7de; border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0; }\n"
+        "    table { border-collapse: collapse; width: 100%; }\n"
+        "    th, td { border-bottom: 1px solid #d8dee4; padding: 0.55rem; text-align: left; vertical-align: top; }\n"
+        "    th { width: 34%; }\n"
+        "    code, pre { background: #f6f8fa; border-radius: 6px; }\n"
+        "    code { padding: 0.1rem 0.25rem; }\n"
+        "    pre { padding: 1rem; overflow-x: auto; }\n"
+        "    .boundary { font-weight: 600; }\n"
+        "  </style>\n"
+        "</head>\n"
+        "<body>\n"
+        "  <main>\n"
+        "    <h1>PR Quality Review Dashboard</h1>\n"
+        '    <section class="card">\n'
+        "      <h2>Decision</h2>\n"
+        f"      {table(decision_rows)}\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        "      <h2>Proof to rerun</h2>\n"
+        f"      {proof_html}\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        "      <h2>Authority boundary</h2>\n"
+        f"      {table(authority_rows)}\n"
+        '      <p class="boundary">Reporting-only. This dashboard does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.</p>\n'
+        "    </section>\n"
+        "  </main>\n"
+        "</body>\n"
+        "</html>\n"
+    )
+
+
 def render_comment_body(
     *,
     action_report: JsonObject,
@@ -2079,6 +2177,7 @@ def write_comment_body(
     out: Path,
     review_model_out: Path | None = None,
     review_summary_out: Path | None = None,
+    review_html_out: Path | None = None,
     evidence_narrative_path: Path | None = None,
     trajectory_jsonl_path: Path | None = None,
     runtime_proof_artifacts_path: Path | None = None,
@@ -2197,6 +2296,15 @@ def write_comment_body(
         )
         review_summary_written = True
 
+    review_html_written = False
+    if review_html_out is not None:
+        review_html_out.parent.mkdir(parents=True, exist_ok=True)
+        review_html_out.write_text(
+            render_pr_quality_review_html(review_model),
+            encoding="utf-8",
+        )
+        review_html_written = True
+
     trajectory_summary = _trajectory_summary(trajectory_records)
     result: JsonObject = {
         "out": out.as_posix(),
@@ -2207,6 +2315,8 @@ def write_comment_body(
         if review_summary_out is not None
         else "",
         "review_summary_written": review_summary_written,
+        "review_html_out": review_html_out.as_posix() if review_html_out is not None else "",
+        "review_html_written": review_html_written,
         "status": status,
         "result_title": _result_title(
             status,
@@ -2331,6 +2441,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--review-model-out", type=Path)
     parser.add_argument("--review-summary-out", type=Path)
+    parser.add_argument("--review-html-out", type=Path)
     parser.add_argument("--failure-bundle-out-dir", type=Path)
     parser.add_argument("--pr-number", type=int, default=0)
     parser.add_argument("--head-sha", default="")
@@ -2350,6 +2461,7 @@ def main(argv: list[str] | None = None) -> int:
         out=args.out,
         review_model_out=args.review_model_out,
         review_summary_out=args.review_summary_out,
+        review_html_out=args.review_html_out,
         failure_bundle_out_dir=args.failure_bundle_out_dir,
         pr_number=args.pr_number,
         head_sha=args.head_sha,
