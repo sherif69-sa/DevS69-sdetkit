@@ -142,6 +142,7 @@ def test_pr_quality_comment_workflow_renders_comment_from_action_report() -> Non
     assert "--out build/pr-quality/pr-comment-body.md" in text
     assert "--review-model-out build/pr-quality/pr-review-model.json" in text
     assert "--review-summary-out build/pr-quality/pr-review-summary.md" in text
+    assert "--review-html-out build/pr-quality/pr-review-dashboard.html" in text
     assert "> build/pr-quality/pr-comment-metadata.json" in text
     assert 'cat build/pr-quality/pr-review-summary.md >> "$GITHUB_STEP_SUMMARY"' in text
 
@@ -153,6 +154,7 @@ def test_pr_quality_comment_workflow_uploads_check_intelligence_artifacts() -> N
     assert "build/pr-quality/check-intelligence/" in text
     assert "build/pr-quality/pr-review-model.json" in text
     assert "build/pr-quality/pr-review-summary.md" in text
+    assert "build/pr-quality/pr-review-dashboard.html" in text
     assert "build/pr-quality/pr-evidence-narrative.md" in text
 
 
