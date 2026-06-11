@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CARD = REPO_ROOT / "docs/ci/workflow-permission-review-cards/deployment-oidc-pages.md"
 
@@ -15,7 +14,7 @@ def test_deployment_oidc_pages_review_card_is_evidence_only() -> None:
     assert "review_group=deployment_or_oidc" in text
     assert "proposed_change=none" in text
     assert "human_reviewer=pending" in text
-    assert "decision=defer_until_human_reviewer_confirms_scope_usage" in text
+    assert "decision=defer_pending_human_review" in text
 
     assert "It is evidence-only." in text
     assert "does not approve a permission reduction" in text

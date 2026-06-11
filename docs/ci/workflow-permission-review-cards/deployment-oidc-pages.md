@@ -20,7 +20,7 @@ proposed_change=none
 human_reviewer=pending
 proof=python -m pytest -q tests/test_workflow_governance_report.py tests/test_product_maturity_radar.py tests/test_workflow_permission_review_cards.py -o addopts= && python -m pre_commit run -a
 rollback=single review-card revert
-decision=defer_until_human_reviewer_confirms_scope_usage
+decision=defer_pending_human_review
 ```
 
 ## Evidence observed
