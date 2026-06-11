@@ -3346,7 +3346,7 @@ def test_write_comment_body_writes_review_html_dashboard_artifact(tmp_path: Path
     assert "<!doctype html>" in html
     assert "<title>PR Quality Review Dashboard</title>" in html
     assert "<h1>PR Quality Review Dashboard</h1>" in html
-    assert 'class="hero"' in html
+    assert 'class="hero status-green"' in html
     assert "Decision details" in html
     assert "Product artifacts" in html
     assert "pr-review-model.json" in html
@@ -3416,6 +3416,11 @@ def test_review_html_dashboard_visualizes_error_state() -> None:
 
     assert "needs attention" in html
     assert "status-failed" in html
+    assert 'class="hero status-failed"' in html
+    assert 'class="hero-top"' in html
+    assert 'class="state-caption"' in html
+    assert "Failure signals are present." in html
+    assert "section-kicker" in html
     assert "Needs Attention" in html
     assert "First blocker" in html
     assert "Ruff check failed" in html
