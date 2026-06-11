@@ -15,6 +15,8 @@ PY_FILE_RE = re.compile(r"(?P<path>(?:src|tests)/[A-Za-z0-9_./-]+\.py)")
 MYPY_ERROR_RE = re.compile(r"(?P<path>(?:src|tests)/[A-Za-z0-9_./-]+\.py):\d+:\s+error:")
 RUFF_RULE_RE = re.compile(r"\b(?P<rule>[A-Z]\d{3})\b")
 EXIT_CODE_RE = re.compile(r"Process completed with exit code (?P<code>\d+)")
+PYTEST_NODE_ANY_RE = re.compile(r"(?P<node>(?:src|tests)/[A-Za-z0-9_./-]+\.py::[^\s]+)")
+PRECOMMIT_HOOK_RE = re.compile(r"^(?P<hook>.+?)\.+Failed$")
 
 
 @dataclass(frozen=True)
@@ -32,6 +34,13 @@ class FailureVector:
     log_url: str | None
     local_repro_command: str | None
     environment: str
+    headline_signal: str = ""
+    actual_failure: str = ""
+    failure_type: str = ""
+    failing_command: str = ""
+    failing_test_or_check: str = ""
+    owner_hint: str = ""
+    safe_fix_allowed: bool = False
     schema_version: str = SCHEMA_VERSION
 
     def to_dict(self) -> dict[str, object]:
@@ -50,26 +59,40 @@ def extract_failure_vector(
     lines = [line.rstrip() for line in log_text.splitlines()]
     failure_index = _first_failing_line_index(lines)
     first_line = _line_at(lines, failure_index)
+    actual_failure = _actual_failure_line(lines, failure_index, first_line)
     failure_class = _classify_failure(log_text, first_line)
-    affected_files = _affected_files(log_text, first_line)
+    affected_files = _affected_files(log_text, actual_failure or first_line)
+    command = _extract_command(lines, failure_index)
+    safe_candidate = _safe_fix_candidate(failure_class, actual_failure or first_line)
 
     return FailureVector(
         check=check,
-        command=_extract_command(lines, failure_index),
+        command=command,
         exit_code=_extract_exit_code(log_text),
         failure_class=failure_class,
         risk=_risk_for_class(
             failure_class,
-            safe_fix_candidate=_safe_fix_candidate(failure_class, first_line),
+            safe_fix_candidate=safe_candidate,
         ),
         scope=_scope_for_files(affected_files),
         reproducible_locally="not_run",
-        safe_fix_candidate=_safe_fix_candidate(failure_class, first_line),
+        safe_fix_candidate=safe_candidate,
         first_failing_line=first_line,
         affected_files=affected_files,
         log_url=log_url,
-        local_repro_command=_local_repro_command(failure_class, affected_files, first_line),
+        local_repro_command=_local_repro_command(
+            failure_class,
+            affected_files,
+            actual_failure or first_line,
+        ),
         environment=environment,
+        headline_signal=_headline_signal(check, failure_class, first_line),
+        actual_failure=actual_failure or first_line,
+        failure_type=failure_class,
+        failing_command=command,
+        failing_test_or_check=_failing_test_or_check(check, first_line, actual_failure),
+        owner_hint=_owner_hint(affected_files, check),
+        safe_fix_allowed=False,
     )
 
 
@@ -138,6 +161,12 @@ def render_failure_vector_report(vector: FailureVector) -> str:
     review_first = "yes" if decision.review_first else "no"
     local_repro = vector.local_repro_command or "none"
     first_line = vector.first_failing_line or "unknown"
+    actual_failure = vector.actual_failure or first_line
+    headline_signal = vector.headline_signal or "unknown"
+    failing_command = vector.failing_command or vector.command or "unknown"
+    failing_test_or_check = vector.failing_test_or_check or vector.check or "unknown"
+    owner_hint = vector.owner_hint or "unknown"
+    explicit_safe_fix_allowed = "yes" if vector.safe_fix_allowed else "no"
     affected = ", ".join(vector.affected_files) if vector.affected_files else "none"
     allowed_files = ", ".join(decision.allowed_files) if decision.allowed_files else "none"
     proof_commands = ", ".join(decision.proof_commands) if decision.proof_commands else "none"
@@ -147,10 +176,17 @@ def render_failure_vector_report(vector: FailureVector) -> str:
             "",
             f"- check: `{vector.check}`",
             f"- command: `{vector.command}`",
+            f"- headline_signal: `{headline_signal}`",
+            f"- actual_failure: `{actual_failure}`",
+            f"- failure_type: `{vector.failure_type or vector.failure_class}`",
+            f"- failing_command: `{failing_command}`",
+            f"- failing_test_or_check: `{failing_test_or_check}`",
+            f"- owner_hint: `{owner_hint}`",
             f"- class: `{vector.failure_class}`",
             f"- risk: `{vector.risk}`",
             f"- scope: `{vector.scope}`",
             f"- safe_fix_candidate: `{safe}`",
+            f"- safe_fix_allowed: `{explicit_safe_fix_allowed}`",
             f"- affected_files: `{affected}`",
             f"- first_failing_line: `{first_line}`",
             f"- local_repro_command: `{local_repro}`",
@@ -207,6 +243,13 @@ def render_failure_vector_bundle_report(payload: dict[str, object]) -> str:
             log_url=_optional_string(value.get("log_url")),
             local_repro_command=_optional_string(value.get("local_repro_command")),
             environment=str(value.get("environment") or "unknown"),
+            headline_signal=str(value.get("headline_signal") or ""),
+            actual_failure=str(value.get("actual_failure") or ""),
+            failure_type=str(value.get("failure_type") or ""),
+            failing_command=str(value.get("failing_command") or ""),
+            failing_test_or_check=str(value.get("failing_test_or_check") or ""),
+            owner_hint=str(value.get("owner_hint") or ""),
+            safe_fix_allowed=bool(value.get("safe_fix_allowed", False)),
             schema_version=str(value.get("schema_version") or SCHEMA_VERSION),
         )
 
@@ -279,9 +322,16 @@ def render_failure_vector_bundle_report(payload: dict[str, object]) -> str:
                 [
                     f"### {str(vector_payload.get('check') or 'unknown')}",
                     "",
+                    f"- headline_signal: `{str(vector_payload.get('headline_signal') or 'unknown')}`",
+                    f"- actual_failure: `{str(vector_payload.get('actual_failure') or vector_payload.get('first_failing_line') or 'unknown')}`",
+                    f"- failure_type: `{str(vector_payload.get('failure_type') or vector_payload.get('failure_class') or 'unknown')}`",
+                    f"- failing_command: `{str(vector_payload.get('failing_command') or vector_payload.get('command') or 'unknown')}`",
+                    f"- failing_test_or_check: `{str(vector_payload.get('failing_test_or_check') or vector_payload.get('check') or 'unknown')}`",
+                    f"- owner_hint: `{str(vector_payload.get('owner_hint') or 'unknown')}`",
                     f"- class: `{str(vector_payload.get('failure_class') or 'unknown')}`",
                     f"- risk: `{str(vector_payload.get('risk') or 'unknown')}`",
                     f"- safe_fix_candidate: `{safe}`",
+                    f"- safe_fix_allowed: `{'yes' if bool(vector_payload.get('safe_fix_allowed', False)) else 'no'}`",
                     f"- first_failing_line: `{str(vector_payload.get('first_failing_line') or 'unknown')}`",
                     f"- affected_files: {affected}",
                     f"- local_repro_command: `{local_repro}`",
@@ -433,6 +483,86 @@ def _affected_files(log_text: str, first_line: str) -> tuple[str, ...]:
 def _extract_exit_code(log_text: str) -> int | None:
     match = EXIT_CODE_RE.search(log_text)
     return int(match.group("code")) if match else None
+
+
+def _actual_failure_line(lines: Sequence[str], failure_index: int, first_line: str) -> str:
+    start = failure_index if failure_index >= 0 else 0
+    search_window = list(lines[start : start + 40])
+
+    for raw_line in search_window:
+        stripped = raw_line.strip()
+        lower = stripped.lower()
+
+        if not stripped or _failure_line_is_noise(stripped):
+            continue
+        if (
+            stripped.startswith("FAILED ")
+            or MYPY_ERROR_RE.search(stripped)
+            or RUFF_RULE_RE.search(stripped)
+            or "assertionerror" in lower
+            or "modulenotfounderror" in lower
+            or "importerror" in lower
+            or "resolutionimpossible" in lower
+            or "no matching distribution found" in lower
+            or "could not find a version that satisfies" in lower
+            or "would be reformatted" in lower
+            or stripped.startswith("ERROR ")
+            or stripped.startswith("ERROR:")
+        ):
+            return stripped
+
+    if first_line and not _failure_line_is_noise(first_line):
+        return first_line
+
+    for raw_line in search_window:
+        stripped = raw_line.strip()
+        if stripped and not _failure_line_is_noise(stripped):
+            return stripped
+
+    return first_line
+
+
+def _failure_line_is_noise(line: str) -> bool:
+    lower = line.lower()
+
+    if "process completed with exit code" in lower:
+        return True
+    if line.startswith("Run ") or line.startswith("$ ") or "##[group]Run " in line:
+        return True
+    if PRECOMMIT_HOOK_RE.match(line) and not RUFF_RULE_RE.search(line):
+        return True
+
+    return False
+
+
+def _headline_signal(check: str, failure_class: str, first_line: str) -> str:
+    check_text = check.strip() or "unknown"
+    if first_line:
+        return f"{check_text}: {failure_class}"
+    return f"{check_text}: no failure signal"
+
+
+def _failing_test_or_check(check: str, first_line: str, actual_failure: str) -> str:
+    for source in (first_line, actual_failure):
+        pytest_match = PYTEST_NODE_RE.search(source) or PYTEST_NODE_ANY_RE.search(source)
+        if pytest_match:
+            return pytest_match.group("node")
+
+        mypy_match = MYPY_ERROR_RE.search(source)
+        if mypy_match:
+            return mypy_match.group("path")
+
+        rule_match = RUFF_RULE_RE.search(source)
+        if rule_match:
+            return rule_match.group("rule")
+
+    return check.strip() or "unknown"
+
+
+def _owner_hint(affected_files: tuple[str, ...], check: str) -> str:
+    if affected_files:
+        return affected_files[0]
+    return check.strip() or "unknown"
 
 
 def _risk_for_class(failure_class: str, *, safe_fix_candidate: bool = False) -> str:
