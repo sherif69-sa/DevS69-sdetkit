@@ -1600,6 +1600,114 @@ def _operator_safetygate_summary_lines(
     ]
 
 
+def _reviewer_dashboard_lines(
+    *,
+    status: str,
+    evidence_signal_heading: str,
+    evidence_signal_lines: list[str],
+    evidence_review_required: bool,
+    action_report: JsonObject,
+    check_intelligence: JsonObject,
+    evidence_narrative: JsonObject,
+) -> list[str]:
+    primary_signal = _as_dict(evidence_narrative.get("primary_signal"))
+    graph = _as_dict(evidence_narrative.get("graph"))
+    top_blocker = _as_dict(graph.get("top_blocker"))
+    primary_blocker = _as_dict(action_report.get("primary_blocker"))
+
+    surface = _string(
+        primary_signal.get("surface")
+        or top_blocker.get("surface")
+        or primary_blocker.get("surface")
+        or "unknown"
+    )
+    title = _string(
+        primary_signal.get("title")
+        or top_blocker.get("title")
+        or primary_blocker.get("title")
+        or "none"
+    )
+    action = _string(
+        top_blocker.get("action")
+        or primary_blocker.get("action")
+        or primary_blocker.get("code")
+        or ""
+    )
+
+    if status != "green":
+        merge_assessment = "do_not_merge_until_blocker_resolved"
+        next_action = action or "review_primary_blocker"
+    elif evidence_review_required:
+        merge_assessment = "human_review_required_before_merge"
+        next_action = action or "review_listed_evidence"
+    elif evidence_signal_lines:
+        merge_assessment = "verify_listed_proof_before_routine_merge"
+        next_action = action or "rerun_listed_proof"
+    else:
+        merge_assessment = "no_sdetkit_action_required"
+        next_action = "none"
+
+    cleared_security_signal = any(
+        "Security review cleared for changed code" in line
+        or "no fix or dismissal required for PR-owned security findings" in line
+        for line in evidence_signal_lines
+    )
+
+    proof_commands: list[str] = []
+    for index, line in enumerate(evidence_signal_lines):
+        if line.strip() != "- Next proof:":
+            continue
+        for candidate in evidence_signal_lines[index + 1 :]:
+            stripped = candidate.strip()
+            if not stripped.startswith("- `"):
+                break
+            proof_commands.append(stripped.removeprefix("- `").removesuffix("`"))
+        break
+
+    if not proof_commands and not cleared_security_signal:
+        proof_commands = [
+            str(command)
+            for command in _as_list(evidence_narrative.get("next_proof"))
+            if isinstance(command, str) and command.strip()
+        ]
+    if not proof_commands and not cleared_security_signal:
+        proof_commands = [
+            str(command)
+            for command in _as_list(action_report.get("proof_commands"))
+            if isinstance(command, str) and command.strip()
+        ]
+
+    failed_count = len(_as_list(check_intelligence.get("failed_checks")))
+    required_queued = _required_count(_as_list(check_intelligence.get("queued_checks")))
+    required_startup = _required_count(_as_list(check_intelligence.get("startup_failures")))
+    missing_required = len(_as_list(check_intelligence.get("missing_required_contexts")))
+
+    lines = [
+        f"- Merge assessment: `{merge_assessment}`",
+        f"- Next action: `{next_action}`",
+        f"- Risk surface: `{surface}`",
+        f"- Signal title: {title}",
+        f"- Comment signal: `{_string(evidence_signal_heading or 'none')}`",
+        f"- Review-first evidence: `{str(evidence_review_required).lower()}`",
+        f"- Failed checks: `{failed_count}`",
+        f"- Required queued checks: `{required_queued}`",
+        f"- Required startup failures: `{required_startup}`",
+        f"- Missing required contexts: `{missing_required}`",
+        "- Authority boundary: `reporting_only`",
+        "- Patch automation authority: `false`",
+        "- Security dismissal authority: `false`",
+        "- Merge authorization claimed: `false`",
+    ]
+
+    if proof_commands:
+        lines.append("- Proof commands:")
+        lines.extend(f"  - `{command}`" for command in proof_commands[:5])
+    else:
+        lines.append("- Proof commands: `none`")
+
+    return lines
+
+
 def render_comment_body(
     *,
     action_report: JsonObject,
@@ -1642,6 +1750,17 @@ def render_comment_body(
         f"Status: `{status}`",
         "",
     ]
+
+    reviewer_dashboard = _reviewer_dashboard_lines(
+        status=status,
+        evidence_signal_heading=evidence_signal_heading,
+        evidence_signal_lines=evidence_signal_lines,
+        evidence_review_required=evidence_review_required,
+        action_report=action_report,
+        check_intelligence=check_intelligence,
+        evidence_narrative=evidence_narrative,
+    )
+    lines.extend(["## Reviewer dashboard", "", *reviewer_dashboard, ""])
 
     quality = _quality_lines(evidence_narrative)
     if quality:

@@ -806,6 +806,7 @@ def test_action_report_reconciles_cleared_security_review_signal() -> None:
     assert "Evidence review signal present; quality gate passed" not in body
     assert "human review required before merge" not in body
     assert "Fix the flagged surface or dismiss the false positive" not in body
+    assert "- Proof commands: `none`" in body
 
 
 def test_action_report_comment_renders_failed_check_first_failure() -> None:
@@ -2943,3 +2944,61 @@ def test_pr_quality_comment_v2_collapses_noisy_product_sections() -> None:
     assert "## Runtime proof artifacts" not in body
     assert "## Primary blocker" not in body
     assert "## Automation decision" not in body
+
+
+def test_pr_quality_comment_v3_renders_reviewer_dashboard_top_card() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "workflow",
+            "title": "Workflow evidence changed",
+        },
+        "graph": {
+            "node_count": 1,
+            "review_first_count": 0,
+            "critical_count": 0,
+            "top_blocker": {
+                "title": "Workflow evidence changed",
+                "surface": "workflow",
+                "action": "rerun_proof",
+                "review_first": False,
+            },
+        },
+        "next_proof": ["python -m pre_commit run -a"],
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=evidence_narrative,
+    )
+
+    assert "## Reviewer dashboard" in body
+    assert "## Reviewer dashboard" in body.split("## Quality summary", maxsplit=1)[0]
+    assert "- Merge assessment: `verify_listed_proof_before_routine_merge`" in body
+    assert "- Next action: `rerun_proof`" in body
+    assert "- Risk surface: `workflow`" in body
+    assert "- Signal title: Workflow evidence changed" in body
+    assert "- Review-first evidence: `false`" in body
+    assert "- Authority boundary: `reporting_only`" in body
+    assert "- Patch automation authority: `false`" in body
+    assert "- Security dismissal authority: `false`" in body
+    assert "- Merge authorization claimed: `false`" in body
+    assert "- Proof commands:" in body
+    assert "  - `python -m pre_commit run -a`" in body
