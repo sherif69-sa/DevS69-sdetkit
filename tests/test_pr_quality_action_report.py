@@ -3065,7 +3065,7 @@ def test_pr_quality_review_model_is_structured_product_surface() -> None:
         evidence_narrative=evidence_narrative,
     )
 
-    assert model["schema_version"] == "sdetkit.pr_quality.review_model.v1"
+    assert model["schema_version"] == "sdetkit.pr_quality.review_model.v2"
     assert model["decision"] == {
         "status": "green",
         "merge_assessment": "verify_listed_proof_before_routine_merge",
@@ -3162,10 +3162,10 @@ def test_write_comment_body_writes_review_model_artifact(tmp_path: Path) -> None
 
     assert result["review_model_written"] is True
     assert result["review_model_out"] == review_model_out.as_posix()
-    assert result["review_model_schema_version"] == "sdetkit.pr_quality.review_model.v1"
+    assert result["review_model_schema_version"] == "sdetkit.pr_quality.review_model.v2"
 
     model = json.loads(review_model_out.read_text(encoding="utf-8"))
-    assert model["schema_version"] == "sdetkit.pr_quality.review_model.v1"
+    assert model["schema_version"] == "sdetkit.pr_quality.review_model.v2"
     assert model["decision"]["merge_assessment"] == "verify_listed_proof_before_routine_merge"
     assert model["decision"]["next_action"] == "rerun_proof"
     assert model["decision"]["risk_surface"] == "diagnostic_engine"
@@ -3589,3 +3589,65 @@ def test_write_comment_body_writes_artifact_landing_page(tmp_path: Path) -> None
     assert 'href="pr-comment-body.md"' in index_html
     assert "Reporting-only" in index_html
     assert "does not authorize merge" in index_html
+
+
+def test_review_model_schema_v2_includes_artifact_index_metadata() -> None:
+    model = report.build_pr_quality_review_model(
+        status="green",
+        evidence_signal_heading="Evidence proof signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "green",
+            "primary_blocker": {},
+            "recommended_actions": [],
+            "proof_commands": ["python -m pytest -q"],
+        },
+        check_intelligence={
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {"kind": "none", "surface": "none", "title": "none"},
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pytest -q"],
+        },
+    )
+
+    assert model["schema_version"] == "sdetkit.pr_quality.review_model.v2"
+    assert model["schema"] == {
+        "name": "sdetkit.pr_quality.review_model",
+        "version": 2,
+        "previous_version": "sdetkit.pr_quality.review_model.v1",
+        "compatibility": "additive",
+        "decision_logic": "unchanged",
+        "authority_boundary": "reporting_only",
+    }
+    assert model["generated_by"] == "sdetkit.pr_quality_action_report"
+
+    artifact_index = model["artifact_index"]
+    paths = [artifact["path"] for artifact in artifact_index]
+
+    assert paths == [
+        "index.html",
+        "pr-review-dashboard.html",
+        "pr-review-summary.md",
+        "pr-review-model.json",
+        "pr-comment-body.md",
+        "pr-quality-comment",
+    ]
+    assert artifact_index[0]["primary"] is True
+    assert artifact_index[0]["surface"] == "artifact_center"
+    assert artifact_index[3]["kind"] == "json"
+    assert artifact_index[5]["format"] == "github_artifact"
+
+    index_html = report.render_pr_quality_artifact_index_html(model)
+    dashboard_html = report.render_pr_quality_review_html(model)
+
+    assert 'href="index.html"' in index_html
+    assert 'href="pr-review-dashboard.html"' in index_html
+    assert "Browser-ready entry point for the PR Quality artifact bundle." in index_html
+    assert "index.html" in dashboard_html
+    assert "artifact_center" not in dashboard_html

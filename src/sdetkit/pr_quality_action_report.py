@@ -1612,6 +1612,65 @@ def _markdown_table_value(value: object) -> str:
     return _review_model_scalar(value).replace("|", "\\|")
 
 
+def _review_model_artifact_index() -> list[JsonObject]:
+    return [
+        {
+            "path": "index.html",
+            "kind": "html",
+            "surface": "artifact_center",
+            "title": "Artifact landing page",
+            "description": "Browser-ready entry point for the PR Quality artifact bundle.",
+            "primary": True,
+            "format": "html",
+        },
+        {
+            "path": "pr-review-dashboard.html",
+            "kind": "html",
+            "surface": "review_dashboard",
+            "title": "Visual dashboard",
+            "description": "Browser-ready visual dashboard with state, blocker, proof, and artifact cards.",
+            "primary": False,
+            "format": "html",
+        },
+        {
+            "path": "pr-review-summary.md",
+            "kind": "markdown",
+            "surface": "review_summary",
+            "title": "Compact summary",
+            "description": "Concise human review panel used by the PR comment and step summary.",
+            "primary": False,
+            "format": "markdown",
+        },
+        {
+            "path": "pr-review-model.json",
+            "kind": "json",
+            "surface": "review_model",
+            "title": "Review model",
+            "description": "Machine-readable source-of-truth model for all rendered review surfaces.",
+            "primary": False,
+            "format": "json",
+        },
+        {
+            "path": "pr-comment-body.md",
+            "kind": "markdown",
+            "surface": "raw_evidence",
+            "title": "Raw evidence body",
+            "description": "Full diagnostic evidence retained for audit and debugging.",
+            "primary": False,
+            "format": "markdown",
+        },
+        {
+            "path": "pr-quality-comment",
+            "kind": "github_artifact",
+            "surface": "artifact_bundle",
+            "title": "Uploaded artifact bundle",
+            "description": "GitHub Actions artifact bundle containing full diagnostic evidence.",
+            "primary": False,
+            "format": "github_artifact",
+        },
+    ]
+
+
 def build_pr_quality_review_model(
     *,
     status: str,
@@ -1717,7 +1776,17 @@ def build_pr_quality_review_model(
     ]
 
     return {
-        "schema_version": "sdetkit.pr_quality.review_model.v1",
+        "schema_version": "sdetkit.pr_quality.review_model.v2",
+        "schema": {
+            "name": "sdetkit.pr_quality.review_model",
+            "version": 2,
+            "previous_version": "sdetkit.pr_quality.review_model.v1",
+            "compatibility": "additive",
+            "decision_logic": "unchanged",
+            "authority_boundary": "reporting_only",
+        },
+        "generated_by": "sdetkit.pr_quality_action_report",
+        "artifact_index": _review_model_artifact_index(),
         "primary_blocker": {
             "title": _string(primary_blocker.get("title") or title),
             "surface": _string(primary_blocker.get("surface") or surface),
@@ -2004,27 +2073,22 @@ def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
     else:
         status_class = "status-failed"
 
+    artifact_index = [
+        item
+        for item in (_as_dict(candidate) for candidate in _as_list(model.get("artifact_index")))
+        if _string(item.get("path"))
+    ]
+    if not artifact_index:
+        artifact_index = _review_model_artifact_index()
+
     artifact_rows = [
         (
-            "pr-review-dashboard.html",
-            "Open visual dashboard",
-            "Browser-ready visual dashboard with state, blocker, proof, and artifact cards.",
-        ),
-        (
-            "pr-review-summary.md",
-            "Open compact summary",
-            "Concise Markdown review summary used by the PR comment and step summary.",
-        ),
-        (
-            "pr-review-model.json",
-            "Open review model",
-            "Machine-readable source-of-truth model for all rendered review surfaces.",
-        ),
-        (
-            "pr-comment-body.md",
-            "Open raw evidence",
-            "Full diagnostic evidence retained for audit and debugging.",
-        ),
+            _string(item.get("path")),
+            "Open " + _string(item.get("title") or item.get("path")),
+            _string(item.get("description") or item.get("surface") or "PR Quality artifact."),
+        )
+        for item in artifact_index
+        if _string(item.get("path")) != "pr-quality-comment"
     ]
 
     def artifact_cards(rows: list[tuple[str, str, str]]) -> str:
@@ -2243,13 +2307,21 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         ("Review-first", review_first),
     ]
     artifact_rows = [
-        ("index.html", "Artifact landing page for the full PR Quality product bundle"),
-        ("pr-review-summary.md", "Concise human review panel"),
-        ("pr-review-model.json", "Machine-readable review model"),
-        ("pr-review-dashboard.html", "Browser-ready review dashboard"),
-        ("pr-comment-body.md", "Full raw evidence body retained in the artifact bundle"),
-        ("pr-quality-comment", "Uploaded artifact bundle for full diagnostic evidence"),
+        (
+            _string(item.get("path")),
+            _string(item.get("description") or item.get("title") or "PR Quality artifact"),
+        )
+        for item in (_as_dict(candidate) for candidate in _as_list(model.get("artifact_index")))
+        if _string(item.get("path"))
     ]
+    if not artifact_rows:
+        artifact_rows = [
+            (
+                _string(item.get("path")),
+                _string(item.get("description") or item.get("title") or "PR Quality artifact"),
+            )
+            for item in _review_model_artifact_index()
+        ]
 
     def table(rows: list[tuple[str, object]]) -> str:
         body = "\n".join(
