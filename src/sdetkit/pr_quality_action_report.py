@@ -1906,6 +1906,44 @@ def _reviewer_dashboard_lines(
     return lines
 
 
+def _review_model_state(model: JsonObject) -> str:
+    decision = _as_dict(model.get("decision"))
+    status = _review_model_scalar(decision.get("status") or "unknown")
+    failed_total = _int(decision.get("failed_checks"))
+    queued_total = _int(decision.get("required_queued_checks"))
+    startup_total = _int(decision.get("required_startup_failures"))
+    missing_total = _int(decision.get("missing_required_contexts"))
+    review_first = bool(decision.get("review_first_evidence"))
+
+    needs_attention = (
+        status != "green"
+        or failed_total > 0
+        or queued_total > 0
+        or startup_total > 0
+        or missing_total > 0
+        or review_first
+    )
+    is_blocked = status != "green" or failed_total > 0 or startup_total > 0 or missing_total > 0
+
+    if is_blocked:
+        return "needs_attention"
+    if needs_attention:
+        return "review_required"
+    return "green"
+
+
+def _review_model_state_class(review_state: str) -> str:
+    if review_state == "green":
+        return "status-green"
+    if review_state == "review_required":
+        return "status-review"
+    return "status-failed"
+
+
+def _review_model_state_label(review_state: str) -> str:
+    return review_state.replace("_", " ")
+
+
 def render_pr_quality_review_summary(model: JsonObject) -> str:
     decision = _as_dict(model.get("decision"))
     authority = _as_dict(model.get("authority_boundary"))
@@ -2061,17 +2099,12 @@ def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
     decision = _as_dict(model.get("decision"))
     authority = _as_dict(model.get("authority_boundary"))
 
-    status = _review_model_scalar(decision.get("status") or "unknown")
+    review_state = _review_model_state(model)
+    status_label = _review_model_state_label(review_state)
+    status_class = _review_model_state_class(review_state)
     merge_assessment = _review_model_scalar(decision.get("merge_assessment") or "unknown")
     next_action = _review_model_scalar(decision.get("next_action") or "unknown")
     risk_surface = _review_model_scalar(decision.get("risk_surface") or "unknown")
-
-    if status == "green":
-        status_class = "status-green"
-    elif status in {"review", "review_required"}:
-        status_class = "status-review"
-    else:
-        status_class = "status-failed"
 
     artifact_index = [
         item
@@ -2154,7 +2187,7 @@ def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
         '    <section class="hero">\n'
         '      <div class="eyebrow">SDET Quality Gate</div>\n'
         "      <h1>PR Quality Artifact Center</h1>\n"
-        f'      <span class="status-badge {status_class}">{_html_escape(status)}</span>\n'
+        f'      <span class="status-badge {status_class}">{_html_escape(status_label)}</span>\n'
         '      <div class="summary-grid">\n'
         f'        <article class="summary-card"><span>Merge assessment</span><strong>{_html_escape(merge_assessment)}</strong></article>\n'
         f'        <article class="summary-card"><span>Next action</span><strong>{_html_escape(next_action)}</strong></article>\n'

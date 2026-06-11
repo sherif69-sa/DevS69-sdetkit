@@ -3651,3 +3651,112 @@ def test_review_model_schema_v2_includes_artifact_index_metadata() -> None:
     assert "Browser-ready entry point for the PR Quality artifact bundle." in index_html
     assert "index.html" in dashboard_html
     assert "artifact_center" not in dashboard_html
+
+
+def _build_review_state_matrix_model(
+    *,
+    status: str,
+    evidence_review_required: bool,
+    failed_check: bool = False,
+) -> dict[str, object]:
+    primary_blocker = (
+        {
+            "title": "Ruff check failed",
+            "surface": "workflow",
+            "action": "fix_lint",
+            "code": "ruff",
+            "path": "src/example.py",
+            "details": "unused import",
+        }
+        if status != "green" or failed_check
+        else {}
+    )
+
+    return report.build_pr_quality_review_model(
+        status=status,
+        evidence_signal_heading="Evidence review signal"
+        if evidence_review_required
+        else "Evidence proof signal",
+        evidence_signal_lines=[],
+        evidence_review_required=evidence_review_required,
+        action_report={
+            "status": status,
+            "primary_blocker": primary_blocker,
+            "recommended_actions": ["Fix the lint finding."] if primary_blocker else [],
+            "proof_commands": [
+                "python -m pytest -q tests/test_pr_quality_action_report.py -o addopts="
+            ],
+        },
+        check_intelligence={
+            "failed_checks": [{"name": "quality"}] if failed_check else [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "review_signal" if evidence_review_required else "none",
+                "surface": "workflow" if evidence_review_required else "none",
+                "title": "Workflow review evidence changed" if evidence_review_required else "none",
+            },
+            "graph": {"top_blocker": primary_blocker},
+            "next_proof": [
+                "python -m pytest -q tests/test_pr_quality_action_report.py -o addopts="
+            ],
+        },
+    )
+
+
+def test_review_surfaces_cover_green_review_required_and_needs_attention_states() -> None:
+    cases = [
+        {
+            "name": "green",
+            "model": _build_review_state_matrix_model(
+                status="green",
+                evidence_review_required=False,
+            ),
+            "review_state": "green",
+            "class_name": "status-green",
+            "label": "green",
+            "caption": "No PR Quality blocker is currently reported.",
+        },
+        {
+            "name": "review_required",
+            "model": _build_review_state_matrix_model(
+                status="green",
+                evidence_review_required=True,
+            ),
+            "review_state": "review_required",
+            "class_name": "status-review",
+            "label": "review required",
+            "caption": "Review-first evidence is present.",
+        },
+        {
+            "name": "needs_attention",
+            "model": _build_review_state_matrix_model(
+                status="failed",
+                evidence_review_required=False,
+                failed_check=True,
+            ),
+            "review_state": "needs_attention",
+            "class_name": "status-failed",
+            "label": "needs attention",
+            "caption": "Failure signals are present.",
+        },
+    ]
+
+    for case in cases:
+        model = case["model"]
+        summary = report.render_pr_quality_review_summary(model)
+        dashboard_html = report.render_pr_quality_review_html(model)
+        artifact_index_html = report.render_pr_quality_artifact_index_html(model)
+
+        assert f"| Review state | `{case['review_state']}` |" in summary, case["name"]
+        assert f'class="hero {case["class_name"]}"' in dashboard_html, case["name"]
+        assert f'class="status-badge {case["class_name"]}"' in dashboard_html, case["name"]
+        assert f'class="status-badge {case["class_name"]}"' in artifact_index_html, case["name"]
+        assert case["label"] in dashboard_html, case["name"]
+        assert case["label"] in artifact_index_html, case["name"]
+        assert case["caption"] in dashboard_html, case["name"]
+        assert "Reporting-only" in artifact_index_html, case["name"]
+        assert "does not authorize merge" in artifact_index_html, case["name"]
