@@ -3900,3 +3900,107 @@ def test_write_comment_body_writes_review_artifacts_manifest(tmp_path: Path) -> 
     assert manifest["primary_entrypoint"] == "index.html"
     assert "pr-review-artifacts-manifest.json" in manifest["expected_artifact_paths"]
     assert manifest["authority_boundary"]["merge_authorization"] is False
+
+
+def test_review_model_includes_failure_vector_signal_from_failed_check() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {},
+            "recommended_actions": ["Fix the ruff finding."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [
+                {
+                    "name": "pre-commit / ruff",
+                    "command": "python -m pre_commit run -a",
+                    "actual_failure": "F821 Undefined name `JsonObject`",
+                    "failure_type": "lint",
+                    "failing_test_or_check": "F821",
+                    "owner_hint": "tests/test_pr_quality_action_report.py",
+                    "affected_files": ["tests/test_pr_quality_action_report.py"],
+                    "safe_fix_candidate": False,
+                    "safe_fix_allowed": False,
+                    "first_failure": {
+                        "line": "F821 Undefined name `JsonObject`",
+                        "kind": "lint",
+                        "tool": "ruff",
+                        "line_number": 3661,
+                    },
+                }
+            ],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {"kind": "actual_failure", "surface": "diagnostic_engine"},
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+    signal = model["failure_vector_signal"]
+
+    assert signal["source"] == "failed_check"
+    assert signal["actual_failure"] == "F821 Undefined name `JsonObject`"
+    assert signal["failure_type"] == "lint"
+    assert signal["failing_command"] == "python -m pre_commit run -a"
+    assert signal["failing_test_or_check"] == "F821"
+    assert signal["owner_hint"] == "tests/test_pr_quality_action_report.py"
+    assert signal["affected_files"] == ["tests/test_pr_quality_action_report.py"]
+    assert signal["safe_fix_allowed"] is False
+    assert signal["reporting_only"] is True
+
+
+def test_review_summary_renders_failure_vector_signal() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {},
+            "recommended_actions": ["Fix the ruff finding."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [
+                {
+                    "name": "pre-commit / ruff",
+                    "command": "python -m pre_commit run -a",
+                    "actual_failure": "F821 Undefined name `JsonObject`",
+                    "failure_type": "lint",
+                    "failing_test_or_check": "F821",
+                    "owner_hint": "tests/test_pr_quality_action_report.py",
+                    "affected_files": ["tests/test_pr_quality_action_report.py"],
+                    "safe_fix_allowed": False,
+                }
+            ],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {"kind": "actual_failure", "surface": "diagnostic_engine"},
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+    summary = report.render_pr_quality_review_summary(model)
+
+    assert "| Failure vector source | `failed_check` |" in summary
+    assert "| Actual failure | `F821 Undefined name `JsonObject`` |" in summary
+    assert "| Failure type | `lint` |" in summary
+    assert "| Failing command | `python -m pre_commit run -a` |" in summary
+    assert "| Failing test/check | `F821` |" in summary
+    assert "| Owner hint | `tests/test_pr_quality_action_report.py` |" in summary
+    assert "| Failure-vector safe-fix allowed | `false` |" in summary
+    assert "does not authorize merge" in summary
