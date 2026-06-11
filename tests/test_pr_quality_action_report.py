@@ -2999,6 +2999,10 @@ def test_pr_quality_comment_v3_renders_reviewer_dashboard_top_card() -> None:
     assert "| Changed risk surface | `workflow` |" in body
     assert "| Signal title | Workflow evidence changed |" in body
     assert "| Review-first evidence | `false` |" in body
+    assert "| Failed checks | `0` |" in body
+    assert "| Required queued checks | `0` |" in body
+    assert "| Required startup failures | `0` |" in body
+    assert "| Missing required contexts | `0` |" in body
     assert "### Proof to rerun" in body
     assert "```bash" in body
     assert "python -m pre_commit run -a" in body
@@ -3008,3 +3012,82 @@ def test_pr_quality_comment_v3_renders_reviewer_dashboard_top_card() -> None:
     assert "| Security dismissal | `false` |" in body
     assert "| Merge authorization | `false` |" in body
     assert "| Semantic equivalence claim | `false` |" in body
+
+
+def test_pr_quality_review_model_is_structured_product_surface() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "diagnostic_engine",
+            "title": "Diagnostic intelligence evidence changed",
+        },
+        "graph": {
+            "node_count": 1,
+            "review_first_count": 0,
+            "critical_count": 0,
+            "top_blocker": {
+                "title": "Diagnostic intelligence evidence changed",
+                "surface": "diagnostic_engine",
+                "action": "rerun_proof",
+                "review_first": False,
+            },
+        },
+        "next_proof": [
+            "python -m pytest -q tests/test_adaptive_quality_gate_advisory_alignment.py tests/test_adaptive_failure_bundle.py -o addopts=",
+            "python -m pre_commit run -a",
+        ],
+    }
+    heading, signal_lines, review_required = report._evidence_signal(evidence_narrative)
+
+    model = report.build_pr_quality_review_model(
+        status="green",
+        evidence_signal_heading=heading,
+        evidence_signal_lines=signal_lines,
+        evidence_review_required=review_required,
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=evidence_narrative,
+    )
+
+    assert model["schema_version"] == "sdetkit.pr_quality.review_model.v1"
+    assert model["decision"] == {
+        "status": "green",
+        "merge_assessment": "verify_listed_proof_before_routine_merge",
+        "next_action": "rerun_proof",
+        "risk_surface": "diagnostic_engine",
+        "signal_title": "Diagnostic intelligence evidence changed",
+        "comment_signal": "Evidence proof signal",
+        "review_first_evidence": False,
+        "failed_checks": 0,
+        "required_queued_checks": 0,
+        "required_startup_failures": 0,
+        "missing_required_contexts": 0,
+        "cleared_security_signal": False,
+    }
+    assert model["proof_to_rerun"] == [
+        "python -m pytest -q tests/test_adaptive_quality_gate_advisory_alignment.py tests/test_adaptive_failure_bundle.py -o addopts=",
+        "python -m pre_commit run -a",
+    ]
+    assert model["authority_boundary"] == {
+        "boundary_mode": "reporting_only",
+        "patch_automation": False,
+        "security_dismissal": False,
+        "merge_authorization": False,
+        "semantic_equivalence_claim": False,
+    }
