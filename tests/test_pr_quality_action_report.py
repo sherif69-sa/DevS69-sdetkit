@@ -4004,3 +4004,55 @@ def test_review_summary_renders_failure_vector_signal() -> None:
     assert "| Owner hint | `tests/test_pr_quality_action_report.py` |" in summary
     assert "| Failure-vector safe-fix allowed | `false` |" in summary
     assert "does not authorize merge" in summary
+
+
+def test_review_html_renders_failure_vector_signal() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {},
+            "recommended_actions": ["Fix the ruff finding."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [
+                {
+                    "name": "pre-commit / ruff",
+                    "command": "python -m pre_commit run -a",
+                    "headline_signal": "pre-commit / ruff: lint",
+                    "actual_failure": "F821 Undefined name `JsonObject`",
+                    "failure_type": "lint",
+                    "failing_test_or_check": "F821",
+                    "owner_hint": "tests/test_pr_quality_action_report.py",
+                    "affected_files": ["tests/test_pr_quality_action_report.py"],
+                    "safe_fix_candidate": False,
+                    "safe_fix_allowed": False,
+                    "reporting_only": True,
+                }
+            ],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {"kind": "actual_failure", "surface": "diagnostic_engine"},
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+    html = report.render_pr_quality_review_html(model)
+
+    assert "Failure vector signal" in html
+    assert "pre-commit / ruff: lint" in html
+    assert "F821 Undefined name `JsonObject`" in html
+    assert "python -m pre_commit run -a" in html
+    assert "tests/test_pr_quality_action_report.py" in html
+    assert "Safe-fix allowed" in html
+    assert "Reporting-only FailureVector projection" in html
+    assert "does not authorize safe-fix execution" in html
+    assert "does not authorize merge" in html

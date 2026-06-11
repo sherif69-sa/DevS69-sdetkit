@@ -2439,6 +2439,7 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
     decision = _as_dict(model.get("decision"))
     authority = _as_dict(model.get("authority_boundary"))
     primary_blocker = _as_dict(model.get("primary_blocker"))
+    failure_vector_signal = _as_dict(model.get("failure_vector_signal"))
     proof_commands = [
         str(command)
         for command in _as_list(model.get("proof_to_rerun"))
@@ -2549,6 +2550,19 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         ("Path", primary_blocker.get("path")),
         ("Details", primary_blocker.get("details")),
     ]
+    failure_vector_rows = [
+        ("Source", failure_vector_signal.get("source") or "none"),
+        ("Headline signal", failure_vector_signal.get("headline_signal") or "none"),
+        ("Actual failure", failure_vector_signal.get("actual_failure") or "none"),
+        ("Failure type", failure_vector_signal.get("failure_type") or "none"),
+        ("Failing command", failure_vector_signal.get("failing_command") or "none"),
+        ("Failing test/check", failure_vector_signal.get("failing_test_or_check") or "none"),
+        ("Exit code", failure_vector_signal.get("exit_code")),
+        ("Owner hint", failure_vector_signal.get("owner_hint") or "none"),
+        ("Safe-fix candidate", failure_vector_signal.get("safe_fix_candidate")),
+        ("Safe-fix allowed", failure_vector_signal.get("safe_fix_allowed")),
+        ("Reporting only", failure_vector_signal.get("reporting_only")),
+    ]
     authority_rows = [
         ("Boundary mode", authority.get("boundary_mode")),
         ("Patch automation", authority.get("patch_automation")),
@@ -2638,6 +2652,8 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
             f"<article><span>Recommended action</span><strong>{_html_escape(first_recommended_action)}</strong></article>"
             f"<article><span>Failed checks</span><strong>{_html_escape(failed_total)}</strong></article>"
             f"<article><span>Missing contexts</span><strong>{_html_escape(missing_total)}</strong></article>"
+            f"<article><span>Actual failure</span><strong>{_html_escape(failure_vector_signal.get('actual_failure') or 'none')}</strong></article>"
+            f"<article><span>Owner hint</span><strong>{_html_escape(failure_vector_signal.get('owner_hint') or 'none')}</strong></article>"
             "</div>"
             "</section>"
         )
@@ -2723,6 +2739,12 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         '        <span class="section-kicker">Triage</span>\n'
         "        <h2>First blocker</h2>\n"
         f"        {table(blocker_rows)}\n"
+        "      </article>\n"
+        '      <article class="card">\n'
+        '        <span class="section-kicker">FailureVector</span>\n'
+        "        <h2>Failure vector signal</h2>\n"
+        f"        {table(failure_vector_rows)}\n"
+        '        <p class="boundary">Reporting-only FailureVector projection. This signal does not authorize safe-fix execution, patch automation, or merge.</p>\n'
         "      </article>\n"
         "    </section>\n"
         '    <section class="card">\n'
