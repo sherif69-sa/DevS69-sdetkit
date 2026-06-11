@@ -1868,6 +1868,12 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         if isinstance(command, str) and command.strip()
     ]
 
+    status = _review_model_scalar(decision.get("status") or "unknown")
+    next_action = _review_model_scalar(decision.get("next_action") or "unknown")
+    merge_assessment = _review_model_scalar(decision.get("merge_assessment") or "unknown")
+    risk_surface = _review_model_scalar(decision.get("risk_surface") or "unknown")
+    signal = _review_model_scalar(decision.get("comment_signal") or "none")
+
     decision_rows = [
         ("Status", decision.get("status")),
         ("Merge assessment", decision.get("merge_assessment")),
@@ -1880,6 +1886,7 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         ("Required queued checks", decision.get("required_queued_checks")),
         ("Required startup failures", decision.get("required_startup_failures")),
         ("Missing required contexts", decision.get("missing_required_contexts")),
+        ("Cleared security signal", decision.get("cleared_security_signal")),
     ]
     authority_rows = [
         ("Boundary mode", authority.get("boundary_mode")),
@@ -1888,6 +1895,20 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         ("Merge authorization", authority.get("merge_authorization")),
         ("Semantic equivalence claim", authority.get("semantic_equivalence_claim")),
     ]
+    metric_rows = [
+        ("Failed checks", decision.get("failed_checks")),
+        ("Queued required checks", decision.get("required_queued_checks")),
+        ("Startup failures", decision.get("required_startup_failures")),
+        ("Missing contexts", decision.get("missing_required_contexts")),
+        ("Review-first", decision.get("review_first_evidence")),
+    ]
+    artifact_rows = [
+        ("pr-review-summary.md", "Concise human review panel"),
+        ("pr-review-model.json", "Machine-readable review model"),
+        ("pr-review-dashboard.html", "Browser-ready review dashboard"),
+        ("pr-comment-body.md", "Full raw evidence body retained in the artifact bundle"),
+        ("pr-quality-comment", "Uploaded artifact bundle for full diagnostic evidence"),
+    ]
 
     def table(rows: list[tuple[str, object]]) -> str:
         body = "\n".join(
@@ -1895,6 +1916,24 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
             for label, value in rows
         )
         return f"<table>{body}</table>"
+
+    def metric_cards(rows: list[tuple[str, object]]) -> str:
+        return "\n".join(
+            '<article class="metric-card">'
+            f'<span class="metric-label">{_html_escape(label)}</span>'
+            f"<strong>{_html_escape(value)}</strong>"
+            "</article>"
+            for label, value in rows
+        )
+
+    def artifact_cards(rows: list[tuple[str, object]]) -> str:
+        return "\n".join(
+            '<article class="artifact-card">'
+            f"<strong><code>{_html_escape(name)}</code></strong>"
+            f"<span>{_html_escape(description)}</span>"
+            "</article>"
+            for name, description in rows
+        )
 
     if proof_commands:
         proof_html = (
@@ -1905,6 +1944,8 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
     else:
         proof_html = "<p><code>none</code></p>"
 
+    status_class = "status-green" if status == "green" else "status-review"
+
     return (
         "<!doctype html>\n"
         '<html lang="en">\n'
@@ -1913,33 +1954,68 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         '  <meta name="viewport" content="width=device-width, initial-scale=1">\n'
         "  <title>PR Quality Review Dashboard</title>\n"
         "  <style>\n"
-        "    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 2rem; line-height: 1.45; }\n"
-        "    main { max-width: 980px; margin: 0 auto; }\n"
-        "    .card { border: 1px solid #d0d7de; border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0; }\n"
-        "    table { border-collapse: collapse; width: 100%; }\n"
-        "    th, td { border-bottom: 1px solid #d8dee4; padding: 0.55rem; text-align: left; vertical-align: top; }\n"
-        "    th { width: 34%; }\n"
-        "    code, pre { background: #f6f8fa; border-radius: 6px; }\n"
-        "    code { padding: 0.1rem 0.25rem; }\n"
-        "    pre { padding: 1rem; overflow-x: auto; }\n"
-        "    .boundary { font-weight: 600; }\n"
+        "    :root { color-scheme: light dark; --bg: #0d1117; --panel: #161b22; --panel-2: #0f1720; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #2f81f7; --green: #3fb950; --code: #0b1220; }\n"
+        "    * { box-sizing: border-box; }\n"
+        "    body { margin: 0; background: radial-gradient(circle at top left, #132238, var(--bg) 42rem); color: var(--text); font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.45; }\n"
+        "    main { max-width: 1120px; margin: 0 auto; padding: 2rem; }\n"
+        "    .hero { border: 1px solid var(--border); border-radius: 18px; padding: 1.5rem; background: linear-gradient(135deg, rgba(47,129,247,0.16), rgba(63,185,80,0.08)), var(--panel); box-shadow: 0 18px 42px rgba(0,0,0,0.25); }\n"
+        "    .eyebrow { color: var(--muted); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }\n"
+        "    h1 { margin: 0.35rem 0 0.75rem; font-size: clamp(1.8rem, 4vw, 3rem); }\n"
+        "    h2 { margin: 0 0 1rem; }\n"
+        "    .hero-grid, .metrics, .artifact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.8rem; margin-top: 1rem; }\n"
+        "    .hero-card, .metric-card, .artifact-card, .card { border: 1px solid var(--border); border-radius: 14px; background: rgba(22,27,34,0.88); padding: 1rem; }\n"
+        "    .hero-card span, .metric-label, .artifact-card span { display: block; color: var(--muted); font-size: 0.82rem; margin-bottom: 0.25rem; }\n"
+        "    .status-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 0.22rem 0.6rem; font-weight: 800; border: 1px solid var(--border); }\n"
+        "    .status-green { color: var(--green); background: rgba(63,185,80,0.12); }\n"
+        "    .status-review { color: #f0b72f; background: rgba(240,183,47,0.12); }\n"
+        "    .layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr); gap: 1rem; margin-top: 1rem; }\n"
+        "    @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } main { padding: 1rem; } }\n"
+        "    table { border-collapse: collapse; width: 100%; overflow: hidden; border-radius: 10px; }\n"
+        "    th, td { border-bottom: 1px solid var(--border); padding: 0.68rem; text-align: left; vertical-align: top; }\n"
+        "    th { width: 34%; color: var(--muted); font-weight: 700; }\n"
+        "    code, pre { background: var(--code); border: 1px solid var(--border); border-radius: 8px; }\n"
+        "    code { padding: 0.12rem 0.32rem; }\n"
+        "    pre { padding: 1rem; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }\n"
+        "    .boundary { color: var(--muted); border-left: 4px solid var(--accent); padding-left: 0.8rem; }\n"
+        "    .card { margin-top: 1rem; }\n"
         "  </style>\n"
         "</head>\n"
         "<body>\n"
         "  <main>\n"
-        "    <h1>PR Quality Review Dashboard</h1>\n"
-        '    <section class="card">\n'
-        "      <h2>Decision</h2>\n"
-        f"      {table(decision_rows)}\n"
+        '    <section class="hero">\n'
+        '      <div class="eyebrow">SDET Quality Gate</div>\n'
+        "      <h1>PR Quality Review Dashboard</h1>\n"
+        f'      <span class="status-badge {status_class}">{_html_escape(status)}</span>\n'
+        '      <div class="hero-grid">\n'
+        f'        <article class="hero-card"><span>Merge assessment</span><strong>{_html_escape(merge_assessment)}</strong></article>\n'
+        f'        <article class="hero-card"><span>Next reviewer action</span><strong>{_html_escape(next_action)}</strong></article>\n'
+        f'        <article class="hero-card"><span>Risk surface</span><strong>{_html_escape(risk_surface)}</strong></article>\n'
+        f'        <article class="hero-card"><span>Signal</span><strong>{_html_escape(signal)}</strong></article>\n'
+        "      </div>\n"
+        "    </section>\n"
+        '    <section class="metrics">\n'
+        f"      {metric_cards(metric_rows)}\n"
+        "    </section>\n"
+        '    <section class="layout">\n'
+        '      <article class="card">\n'
+        "        <h2>Decision details</h2>\n"
+        f"        {table(decision_rows)}\n"
+        "      </article>\n"
+        '      <article class="card">\n'
+        "        <h2>Authority boundary</h2>\n"
+        f"        {table(authority_rows)}\n"
+        '        <p class="boundary">Reporting-only. This dashboard does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.</p>\n'
+        "      </article>\n"
         "    </section>\n"
         '    <section class="card">\n'
         "      <h2>Proof to rerun</h2>\n"
         f"      {proof_html}\n"
         "    </section>\n"
         '    <section class="card">\n'
-        "      <h2>Authority boundary</h2>\n"
-        f"      {table(authority_rows)}\n"
-        '      <p class="boundary">Reporting-only. This dashboard does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.</p>\n'
+        "      <h2>Product artifacts</h2>\n"
+        '      <div class="artifact-grid">\n'
+        f"        {artifact_cards(artifact_rows)}\n"
+        "      </div>\n"
         "    </section>\n"
         "  </main>\n"
         "</body>\n"
