@@ -667,6 +667,7 @@ jobs:
             --review-model-out build/pr-quality/pr-review-model.json \
             --review-summary-out build/pr-quality/pr-review-summary.md \
             --review-html-out build/pr-quality/pr-review-dashboard.html \
+            --review-index-out build/pr-quality/index.html \
             > build/pr-quality/pr-comment-metadata.json
 
           if [ -n "${GITHUB_STEP_SUMMARY:-}" ] && [ -s build/pr-quality/pr-review-summary.md ]; then
@@ -1071,6 +1072,7 @@ jobs:
           retention-days: 14
           name: pr-quality-comment
           path: |
+            build/pr-quality/index.html
             build/pr-quality/pr-comment-body.md
             build/pr-quality/pr-comment-metadata.json
             build/pr-quality/pr-review-model.json
@@ -1132,6 +1134,7 @@ jobs:
           <details>
           <summary><strong>PR Quality product artifacts</strong></summary>
 
+          - `index.html`: artifact landing page.
           - `pr-review-summary.md`: concise human review panel.
           - `pr-review-model.json`: machine-readable review model.
           - `pr-review-dashboard.html`: browser-ready review dashboard.

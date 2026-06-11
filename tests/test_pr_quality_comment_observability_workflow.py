@@ -1117,3 +1117,12 @@ def test_pr_quality_published_comment_prefers_compact_review_summary() -> None:
     assert (
         "`pr-quality-comment`: uploaded artifact bundle for full diagnostic evidence." in publisher
     )
+
+
+def test_pr_quality_comment_workflow_builds_artifact_landing_page() -> None:
+    text = _workflow_text()
+
+    assert "--review-index-out build/pr-quality/index.html" in text
+    assert "build/pr-quality/index.html" in text
+    assert "`index.html`: artifact landing page." in text
+    assert "Upload PR quality comment artifacts" in text
