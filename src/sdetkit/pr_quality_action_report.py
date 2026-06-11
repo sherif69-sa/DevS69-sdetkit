@@ -692,10 +692,8 @@ def _has_operator_content(lines: list[str]) -> bool:
 def _details_block(title: str, lines: list[str], *, open_by_default: bool = False) -> list[str]:
     marker = " open" if open_by_default else ""
     return [
-        f"## {title}",
-        "",
         f"<details{marker}>",
-        f"<summary>{title}</summary>",
+        f"<summary><strong>{title}</strong></summary>",
         "",
         *lines,
         "",
@@ -1617,6 +1615,7 @@ def render_comment_body(
     trajectory_records = trajectory_records or []
     remediation_refresh = _as_dict(check_intelligence.get("remediation_refresh"))
     status = _string(action_report.get("status") or "unknown")
+    status_needs_operator = status != "green"
     evidence_signal_heading, evidence_signal_lines, evidence_review_required = _evidence_signal(
         evidence_narrative
     )
@@ -1653,19 +1652,55 @@ def render_comment_body(
 
     security_diagnosis = _security_finding_diagnosis_lines(security_finding_diagnosis)
     if security_diagnosis:
-        lines.extend(["## Security finding diagnosis", "", *security_diagnosis, ""])
+        lines.extend(
+            [
+                *_operator_section(
+                    "Security finding diagnosis",
+                    security_diagnosis,
+                    open_when=status_needs_operator or evidence_review_required,
+                ),
+                "",
+            ]
+        )
 
     patch_plan = _patch_plan_lines(evidence_narrative)
     if patch_plan:
-        lines.extend(["## Review-first patch plan", "", *patch_plan, ""])
+        lines.extend(
+            [
+                *_operator_section(
+                    "Review-first patch plan",
+                    patch_plan,
+                    open_when=status in {"review_required", "safe_fix_available"},
+                ),
+                "",
+            ]
+        )
 
     trajectory = _trajectory_lines(trajectory_records)
     if trajectory:
-        lines.extend(["## Trajectory summary", "", *trajectory, ""])
+        lines.extend(
+            [
+                *_operator_section(
+                    "Trajectory summary",
+                    trajectory,
+                    open_when=status_needs_operator,
+                ),
+                "",
+            ]
+        )
 
     runtime_proof = _runtime_proof_artifact_lines(runtime_proof_artifacts)
     if runtime_proof:
-        lines.extend(["## Runtime proof artifacts", "", *runtime_proof, ""])
+        lines.extend(
+            [
+                *_operator_section(
+                    "Runtime proof artifacts",
+                    runtime_proof,
+                    open_when=status_needs_operator,
+                ),
+                "",
+            ]
+        )
 
     operator_summary = _operator_safetygate_summary_lines(
         action_report=action_report,
@@ -1673,7 +1708,16 @@ def render_comment_body(
         runtime_proof_artifacts=runtime_proof_artifacts or {},
     )
     if operator_summary:
-        lines.extend(["## Operator SafetyGate summary", "", *operator_summary, ""])
+        lines.extend(
+            [
+                *_operator_section(
+                    "Operator SafetyGate summary",
+                    operator_summary,
+                    open_when=status_needs_operator,
+                ),
+                "",
+            ]
+        )
 
     primary_blocker_lines = _primary_blocker_lines(_as_dict(action_report.get("primary_blocker")))
     automation_decision_lines = _automation_lines(action_report)
@@ -1692,8 +1736,6 @@ def render_comment_body(
     has_failed_checks = bool(_as_list(check_intelligence.get("failed_checks")))
     has_recommended_actions = _has_operator_content(recommended_action_lines)
     has_required_proof = _has_operator_content(required_proof_lines)
-    status_needs_operator = status != "green"
-
     lines.extend(
         [
             *_operator_section(

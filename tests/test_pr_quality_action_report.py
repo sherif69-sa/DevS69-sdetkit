@@ -737,7 +737,7 @@ def test_action_report_surfaces_review_first_patch_plan_handoff() -> None:
     )
 
     assert "SDETKit Review Result: Green with proof signal" in body
-    assert "## Review-first patch plan" in body
+    assert "<summary><strong>Review-first patch plan</strong></summary>" in body
     assert "Status: `review_required`" in body
     assert "Source kind: `evidence_graph`" in body
     assert "Source code: `security-review`" in body
@@ -987,7 +987,7 @@ def test_action_report_comment_renders_safe_fix_outcome() -> None:
 
     body = report.render_comment_body(action_report=action, check_intelligence=intelligence)
 
-    assert "## Safe fix outcome" in body
+    assert "<summary><strong>Safe fix outcome</strong></summary>" in body
     assert "- Status: `pushed`" in body
     assert "- Attempted: `true`" in body
     assert "- Committed: `true`" in body
@@ -1286,7 +1286,7 @@ def test_action_report_comment_surfaces_trajectory_summary() -> None:
         trajectory_records=_trajectory_records(),
     )
 
-    assert "## Trajectory summary" in body
+    assert "<summary><strong>Trajectory summary</strong></summary>" in body
     assert "Records: `2`" in body
     assert "Review-first decisions: `1`" in body
     assert "Auto-fix allowed decisions: `1`" in body
@@ -1345,7 +1345,7 @@ def test_write_comment_body_reads_trajectory_jsonl_and_reports_metadata(
     assert result["trajectory_record_count"] == 2
     assert result["trajectory_review_first_count"] == 1
     assert result["trajectory_auto_fix_allowed_count"] == 1
-    assert "## Trajectory summary" in body
+    assert "<summary><strong>Trajectory summary</strong></summary>" in body
     assert "Records: `2`" in body
 
 
@@ -1401,7 +1401,9 @@ def test_action_report_cli_accepts_trajectory_jsonl(tmp_path: Path, capsys) -> N
     assert printed["trajectory_record_count"] == 2
     assert printed["trajectory_review_first_count"] == 1
     assert printed["trajectory_auto_fix_allowed_count"] == 1
-    assert "## Trajectory summary" in out.read_text(encoding="utf-8")
+    assert "<summary><strong>Trajectory summary</strong></summary>" in out.read_text(
+        encoding="utf-8"
+    )
 
 
 def test_comment_does_not_clear_unresolved_security_review_evidence() -> None:
@@ -1669,7 +1671,7 @@ def test_action_report_renders_runtime_proof_artifacts_without_authority() -> No
         runtime_proof_artifacts=runtime,
     )
 
-    assert "## Runtime proof artifacts" in body
+    assert "<summary><strong>Runtime proof artifacts</strong></summary>" in body
     assert "Isolated proof status: `passed`" in body
     assert "Git inventory verified: `true`" in body
     assert "Runtime guard passed: `true`" in body
@@ -1759,7 +1761,9 @@ def test_action_report_cli_reports_runtime_proof_metadata(tmp_path: Path, capsys
         "trusted_diagnostic_signal_snapshot_history_historical_snapshot_authorizes_current_action"
         not in printed
     )
-    assert "## Runtime proof artifacts" in out.read_text(encoding="utf-8")
+    assert "<summary><strong>Runtime proof artifacts</strong></summary>" in out.read_text(
+        encoding="utf-8"
+    )
 
 
 def test_action_report_cli_keeps_trusted_diagnostic_history_out_of_stdout_metadata(
@@ -2114,7 +2118,7 @@ def test_action_report_renders_sanitized_security_diagnosis_without_authority() 
         security_finding_diagnosis=security_diagnosis,
     )
 
-    assert "## Security finding diagnosis" in body
+    assert "<summary><strong>Security finding diagnosis</strong></summary>" in body
     assert "Current findings: `1`" in body
     assert "Mechanical fix proposals: `1`" in body
     assert "Automatic security fix allowed: `false`" in body
@@ -2170,7 +2174,7 @@ def test_write_comment_body_loads_security_diagnosis_artifact_for_operator_visib
     )
 
     body = out.read_text(encoding="utf-8")
-    assert "## Security finding diagnosis" in body
+    assert "<summary><strong>Security finding diagnosis</strong></summary>" in body
     assert "Open findings: `0`" in body
     assert "Findings: none" in body
     assert "Automatic dismissal allowed: `false`" in body
@@ -2704,7 +2708,7 @@ def test_action_report_renders_operator_safetygate_summary_without_authority() -
         ],
     )
 
-    assert "## Operator SafetyGate summary" in body
+    assert "<summary><strong>Operator SafetyGate summary</strong></summary>" in body
     assert "- Failure bundle safe-fix allowed: `true`" in body
     assert "- Operator summary allowed files: `tests/test_patch_scorer.py`" in body
     assert (
@@ -2756,7 +2760,7 @@ def test_action_report_operator_safetygate_summary_surfaces_authority_expansion(
         check_intelligence={"checks_seen": 1, "failed_checks": []},
     )
 
-    assert "## Operator SafetyGate summary" in body
+    assert "<summary><strong>Operator SafetyGate summary</strong></summary>" in body
     assert (
         "- Operator next action: `Review-first: a SafetyGate boundary attempted to expand authority.`"
         in body
@@ -2788,8 +2792,8 @@ def test_action_report_green_comment_collapses_operator_sections_by_default() ->
         evidence_narrative={"quality": {"ok": True}},
     )
 
-    assert "<summary>Primary blocker</summary>" in body
-    assert "<summary>Failed check diagnoses</summary>" in body
+    assert "<summary><strong>Primary blocker</strong></summary>" in body
+    assert "<summary><strong>Failed check diagnoses</strong></summary>" in body
     assert "<details open>" not in body
     assert "No action required from SDETKit." in body
 
@@ -2833,9 +2837,109 @@ def test_action_report_failure_comment_expands_operator_action_sections() -> Non
     body = report.render_comment_body(action_report=action, check_intelligence=intelligence)
 
     assert "<details open>" in body
-    assert "<summary>Primary blocker</summary>" in body
-    assert "<summary>Failed check diagnoses</summary>" in body
-    assert "<summary>Recommended actions</summary>" in body
+    assert "<summary><strong>Primary blocker</strong></summary>" in body
+    assert "<summary><strong>Failed check diagnoses</strong></summary>" in body
+    assert "<summary><strong>Recommended actions</strong></summary>" in body
     assert "Ruff lint contract failed" in body
     assert "Fix the lint finding." in body
     assert "python -m ruff check src tests" in body
+
+
+def test_pr_quality_comment_v2_collapses_noisy_product_sections() -> None:
+    action = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "workflow",
+            "title": "Workflow evidence changed",
+        },
+        "graph": {
+            "node_count": 1,
+            "review_first_count": 0,
+            "critical_count": 0,
+            "top_blocker": {
+                "title": "Workflow evidence changed",
+                "surface": "workflow",
+                "action": "rerun_proof",
+                "review_first": False,
+            },
+        },
+        "next_proof": ["python -m pre_commit run -a"],
+    }
+    security_diagnosis = {
+        "collection_status": "collected",
+        "summary": {
+            "open_findings": 52,
+            "current_findings": 0,
+            "stale_findings": 52,
+        },
+        "diagnoses": [
+            {
+                "rule_id": "CVE-EXAMPLE",
+                "path": "tests/fixtures/example.txt",
+                "line": 1,
+                "tool": "osv-scanner",
+                "freshness": "stale",
+                "classification": "stale_or_outdated_alert",
+                "recommended_action": "wait_for_code_scanning_refresh",
+                "human_review_required": True,
+            }
+        ],
+        "decision_boundary": {
+            "automatic_security_fix_allowed": False,
+            "automatic_dismissal_allowed": False,
+        },
+    }
+    runtime_proof = {
+        "status": "collected",
+        "isolated_proof": {
+            "status": "passed",
+            "git_inventory_verified": True,
+            "runtime_guard_checked": True,
+            "runtime_guard_passed": True,
+        },
+        "decision_boundary": {
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=evidence_narrative,
+        security_finding_diagnosis=security_diagnosis,
+        runtime_proof_artifacts=runtime_proof,
+    )
+
+    assert "## Quality summary" in body
+    assert "## Evidence proof signal" in body
+    assert "## Merge assessment" in body
+
+    assert "<summary><strong>Security finding diagnosis</strong></summary>" in body
+    assert "<summary><strong>Runtime proof artifacts</strong></summary>" in body
+    assert "<summary><strong>Primary blocker</strong></summary>" in body
+    assert "<summary><strong>Automation decision</strong></summary>" in body
+    assert "<summary><strong>Evidence collected</strong></summary>" in body
+    assert "<summary><strong>Required proof</strong></summary>" in body
+
+    assert "## Security finding diagnosis" not in body
+    assert "## Runtime proof artifacts" not in body
+    assert "## Primary blocker" not in body
+    assert "## Automation decision" not in body
