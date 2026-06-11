@@ -1624,6 +1624,15 @@ def _review_model_artifact_index() -> list[JsonObject]:
             "format": "html",
         },
         {
+            "path": "pr-review-artifacts-manifest.json",
+            "kind": "json",
+            "surface": "artifact_manifest",
+            "title": "Artifact manifest",
+            "description": "Machine-readable manifest for expected PR Quality artifact bundle entries.",
+            "primary": False,
+            "format": "json",
+        },
+        {
             "path": "pr-review-dashboard.html",
             "kind": "html",
             "surface": "review_dashboard",
@@ -2093,6 +2102,53 @@ def _html_escape(value: object) -> str:
         .replace(">", "&gt;")
         .replace('"', "&quot;")
     )
+
+
+def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
+    artifacts = [
+        item
+        for item in (_as_dict(candidate) for candidate in _as_list(model.get("artifact_index")))
+        if _string(item.get("path"))
+    ]
+    if not artifacts:
+        artifacts = _review_model_artifact_index()
+
+    expected_paths = [_string(item.get("path")) for item in artifacts if _string(item.get("path"))]
+    primary_entrypoint = next(
+        (
+            _string(item.get("path"))
+            for item in artifacts
+            if bool(item.get("primary")) and _string(item.get("path"))
+        ),
+        expected_paths[0] if expected_paths else "index.html",
+    )
+
+    decision = _as_dict(model.get("decision"))
+    authority = _as_dict(model.get("authority_boundary"))
+
+    return {
+        "schema_version": "sdetkit.pr_quality.artifacts_manifest.v1",
+        "review_model_schema_version": _string(model.get("schema_version")),
+        "review_model_schema": _as_dict(model.get("schema")),
+        "generated_by": "sdetkit.pr_quality_action_report",
+        "primary_entrypoint": primary_entrypoint,
+        "expected_artifact_paths": expected_paths,
+        "artifacts": artifacts,
+        "reporting_only": True,
+        "authority_boundary": {
+            "boundary_mode": _string(authority.get("boundary_mode") or "reporting_only"),
+            "patch_automation": bool(authority.get("patch_automation", False)),
+            "security_dismissal": bool(authority.get("security_dismissal", False)),
+            "merge_authorization": bool(authority.get("merge_authorization", False)),
+            "semantic_equivalence_claim": bool(authority.get("semantic_equivalence_claim", False)),
+        },
+        "decision": {
+            "status": _review_model_scalar(decision.get("status") or "unknown"),
+            "review_state": _review_model_state(model),
+            "merge_assessment": _review_model_scalar(decision.get("merge_assessment") or "unknown"),
+            "next_action": _review_model_scalar(decision.get("next_action") or "unknown"),
+        },
+    }
 
 
 def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
@@ -2770,6 +2826,7 @@ def write_comment_body(
     review_summary_out: Path | None = None,
     review_html_out: Path | None = None,
     review_index_out: Path | None = None,
+    review_artifacts_manifest_out: Path | None = None,
     evidence_narrative_path: Path | None = None,
     trajectory_jsonl_path: Path | None = None,
     runtime_proof_artifacts_path: Path | None = None,
@@ -2906,6 +2963,20 @@ def write_comment_body(
         )
         review_index_written = True
 
+    review_artifacts_manifest_written = False
+    if review_artifacts_manifest_out is not None:
+        review_artifacts_manifest_out.parent.mkdir(parents=True, exist_ok=True)
+        review_artifacts_manifest_out.write_text(
+            json.dumps(
+                build_pr_quality_artifacts_manifest(review_model),
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        review_artifacts_manifest_written = True
+
     trajectory_summary = _trajectory_summary(trajectory_records)
     result: JsonObject = {
         "out": out.as_posix(),
@@ -2920,6 +2991,10 @@ def write_comment_body(
         "review_html_written": review_html_written,
         "review_index_out": review_index_out.as_posix() if review_index_out is not None else "",
         "review_index_written": review_index_written,
+        "review_artifacts_manifest_out": review_artifacts_manifest_out.as_posix()
+        if review_artifacts_manifest_out is not None
+        else "",
+        "review_artifacts_manifest_written": review_artifacts_manifest_written,
         "status": status,
         "result_title": _result_title(
             status,
@@ -3046,6 +3121,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--review-summary-out", type=Path)
     parser.add_argument("--review-html-out", type=Path)
     parser.add_argument("--review-index-out", type=Path)
+    parser.add_argument("--review-artifacts-manifest-out", type=Path)
     parser.add_argument("--failure-bundle-out-dir", type=Path)
     parser.add_argument("--pr-number", type=int, default=0)
     parser.add_argument("--head-sha", default="")
@@ -3067,6 +3143,7 @@ def main(argv: list[str] | None = None) -> int:
         review_summary_out=args.review_summary_out,
         review_html_out=args.review_html_out,
         review_index_out=args.review_index_out,
+        review_artifacts_manifest_out=args.review_artifacts_manifest_out,
         failure_bundle_out_dir=args.failure_bundle_out_dir,
         pr_number=args.pr_number,
         head_sha=args.head_sha,

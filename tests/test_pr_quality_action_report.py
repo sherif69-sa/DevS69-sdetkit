@@ -3632,6 +3632,7 @@ def test_review_model_schema_v2_includes_artifact_index_metadata() -> None:
 
     assert paths == [
         "index.html",
+        "pr-review-artifacts-manifest.json",
         "pr-review-dashboard.html",
         "pr-review-summary.md",
         "pr-review-model.json",
@@ -3640,13 +3641,16 @@ def test_review_model_schema_v2_includes_artifact_index_metadata() -> None:
     ]
     assert artifact_index[0]["primary"] is True
     assert artifact_index[0]["surface"] == "artifact_center"
-    assert artifact_index[3]["kind"] == "json"
-    assert artifact_index[5]["format"] == "github_artifact"
+    assert artifact_index[1]["surface"] == "artifact_manifest"
+    assert artifact_index[1]["kind"] == "json"
+    assert artifact_index[4]["kind"] == "json"
+    assert artifact_index[6]["format"] == "github_artifact"
 
     index_html = report.render_pr_quality_artifact_index_html(model)
     dashboard_html = report.render_pr_quality_review_html(model)
 
     assert 'href="index.html"' in index_html
+    assert 'href="pr-review-artifacts-manifest.json"' in index_html
     assert 'href="pr-review-dashboard.html"' in index_html
     assert "Browser-ready entry point for the PR Quality artifact bundle." in index_html
     assert "index.html" in dashboard_html
@@ -3760,3 +3764,139 @@ def test_review_surfaces_cover_green_review_required_and_needs_attention_states(
         assert case["caption"] in dashboard_html, case["name"]
         assert "Reporting-only" in artifact_index_html, case["name"]
         assert "does not authorize merge" in artifact_index_html, case["name"]
+
+
+def test_review_artifacts_manifest_describes_bundle_contract() -> None:
+    model = report.build_pr_quality_review_model(
+        status="green",
+        evidence_signal_heading="Evidence proof signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "green",
+            "primary_blocker": {},
+            "recommended_actions": [],
+            "proof_commands": ["python -m pytest -q"],
+        },
+        check_intelligence={
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {"kind": "none", "surface": "none", "title": "none"},
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pytest -q"],
+        },
+    )
+
+    manifest = report.build_pr_quality_artifacts_manifest(model)
+
+    assert manifest["schema_version"] == "sdetkit.pr_quality.artifacts_manifest.v1"
+    assert manifest["review_model_schema_version"] == "sdetkit.pr_quality.review_model.v2"
+    assert manifest["primary_entrypoint"] == "index.html"
+    assert manifest["reporting_only"] is True
+    assert manifest["authority_boundary"] == {
+        "boundary_mode": "reporting_only",
+        "patch_automation": False,
+        "security_dismissal": False,
+        "merge_authorization": False,
+        "semantic_equivalence_claim": False,
+    }
+    assert manifest["decision"]["review_state"] == "green"
+    assert manifest["decision"]["merge_assessment"] == "no_sdetkit_action_required"
+
+    paths = manifest["expected_artifact_paths"]
+    assert paths[0] == "index.html"
+    assert "pr-review-artifacts-manifest.json" in paths
+    assert "pr-review-dashboard.html" in paths
+    assert "pr-review-summary.md" in paths
+    assert "pr-review-model.json" in paths
+    assert "pr-comment-body.md" in paths
+    assert "pr-quality-comment" in paths
+
+    artifact_by_path = {artifact["path"]: artifact for artifact in manifest["artifacts"]}
+    assert artifact_by_path["pr-review-artifacts-manifest.json"]["surface"] == "artifact_manifest"
+    assert artifact_by_path["pr-review-artifacts-manifest.json"]["format"] == "json"
+
+
+def test_write_comment_body_writes_review_artifacts_manifest(tmp_path: Path) -> None:
+    action_report_path = tmp_path / "action-report.json"
+    check_intelligence_path = tmp_path / "check-intelligence.json"
+    evidence_narrative_path = tmp_path / "evidence-narrative.json"
+    out = tmp_path / "pr-comment-body.md"
+    review_model_out = tmp_path / "pr-review-model.json"
+    review_summary_out = tmp_path / "pr-review-summary.md"
+    review_html_out = tmp_path / "pr-review-dashboard.html"
+    review_index_out = tmp_path / "index.html"
+    review_artifacts_manifest_out = tmp_path / "pr-review-artifacts-manifest.json"
+
+    action_report_path.write_text(
+        json.dumps(
+            {
+                "automation": {
+                    "allowed": False,
+                    "attempted": False,
+                    "reason": "reporting only",
+                },
+                "evidence": {},
+                "primary_blocker": {},
+                "proof_commands": ["python -m pytest -q"],
+                "recommended_actions": [],
+                "status": "green",
+            }
+        ),
+        encoding="utf-8",
+    )
+    check_intelligence_path.write_text(
+        json.dumps(
+            {
+                "checks_seen": 44,
+                "failed_checks": [],
+                "missing_required_contexts": [],
+                "queued_checks": [],
+                "security_review": {"collected": True, "unresolved_findings": 0},
+                "startup_failures": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    evidence_narrative_path.write_text(
+        json.dumps(
+            {
+                "graph": {
+                    "critical_count": 0,
+                    "node_count": 1,
+                    "review_first_count": 0,
+                    "top_blocker": {},
+                },
+                "next_proof": ["python -m pytest -q"],
+                "primary_signal": {"kind": "none", "surface": "none", "title": "none"},
+                "quality": {"coverage_percent": "96.69%", "ok": True},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = report.write_comment_body(
+        action_report_path=action_report_path,
+        check_intelligence_path=check_intelligence_path,
+        evidence_narrative_path=evidence_narrative_path,
+        out=out,
+        review_model_out=review_model_out,
+        review_summary_out=review_summary_out,
+        review_html_out=review_html_out,
+        review_index_out=review_index_out,
+        review_artifacts_manifest_out=review_artifacts_manifest_out,
+    )
+
+    assert result["review_artifacts_manifest_out"] == review_artifacts_manifest_out.as_posix()
+    assert result["review_artifacts_manifest_written"] is True
+
+    manifest = json.loads(review_artifacts_manifest_out.read_text(encoding="utf-8"))
+    assert manifest["schema_version"] == "sdetkit.pr_quality.artifacts_manifest.v1"
+    assert manifest["review_model_schema_version"] == "sdetkit.pr_quality.review_model.v2"
+    assert manifest["primary_entrypoint"] == "index.html"
+    assert "pr-review-artifacts-manifest.json" in manifest["expected_artifact_paths"]
+    assert manifest["authority_boundary"]["merge_authorization"] is False

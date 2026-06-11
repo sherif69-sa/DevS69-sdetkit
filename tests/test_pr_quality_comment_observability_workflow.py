@@ -1126,3 +1126,19 @@ def test_pr_quality_comment_workflow_builds_artifact_landing_page() -> None:
     assert "build/pr-quality/index.html" in text
     assert "`index.html`: artifact landing page." in text
     assert "Upload PR quality comment artifacts" in text
+
+
+def test_pr_quality_comment_workflow_builds_artifact_manifest() -> None:
+    text = _workflow_text()
+
+    assert (
+        "--review-artifacts-manifest-out build/pr-quality/pr-review-artifacts-manifest.json" in text
+    )
+    assert "build/pr-quality/pr-review-artifacts-manifest.json" in text
+    assert "`pr-review-artifacts-manifest.json`: machine-readable artifact bundle manifest." in text
+    assert text.index("--review-index-out build/pr-quality/index.html") < text.index(
+        "--review-artifacts-manifest-out build/pr-quality/pr-review-artifacts-manifest.json"
+    )
+    assert text.index("build/pr-quality/index.html") < text.index(
+        "build/pr-quality/pr-review-artifacts-manifest.json"
+    )
