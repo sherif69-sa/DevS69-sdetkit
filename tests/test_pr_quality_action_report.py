@@ -3503,3 +3503,89 @@ def test_review_summary_includes_error_state_mini_triage() -> None:
     assert "- Run pre-commit." in summary
     assert "python -m pytest -q tests/test_example.py -o addopts=" in summary
     assert "| Merge authorization | `false` |" in summary
+
+
+def test_write_comment_body_writes_artifact_landing_page(tmp_path: Path) -> None:
+    action_report_path = tmp_path / "action-report.json"
+    check_intelligence_path = tmp_path / "check-intelligence.json"
+    evidence_narrative_path = tmp_path / "evidence-narrative.json"
+    out = tmp_path / "pr-comment-body.md"
+    review_model_out = tmp_path / "pr-review-model.json"
+    review_summary_out = tmp_path / "pr-review-summary.md"
+    review_html_out = tmp_path / "pr-review-dashboard.html"
+    review_index_out = tmp_path / "index.html"
+
+    action_report_path.write_text(
+        json.dumps(
+            {
+                "automation": {
+                    "allowed": False,
+                    "attempted": False,
+                    "reason": "reporting only",
+                },
+                "evidence": {},
+                "primary_blocker": {},
+                "proof_commands": [
+                    "python -m pytest -q tests/test_pr_quality_action_report.py -o addopts="
+                ],
+                "recommended_actions": [],
+                "status": "green",
+            }
+        ),
+        encoding="utf-8",
+    )
+    check_intelligence_path.write_text(
+        json.dumps(
+            {
+                "checks_seen": 44,
+                "failed_checks": [],
+                "missing_required_contexts": [],
+                "queued_checks": [],
+                "security_review": {"collected": True, "unresolved_findings": 0},
+                "startup_failures": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    evidence_narrative_path.write_text(
+        json.dumps(
+            {
+                "graph": {
+                    "critical_count": 0,
+                    "node_count": 1,
+                    "review_first_count": 0,
+                    "top_blocker": {},
+                },
+                "next_proof": [
+                    "python -m pytest -q tests/test_pr_quality_action_report.py -o addopts="
+                ],
+                "primary_signal": {"kind": "none", "surface": "none", "title": "none"},
+                "quality": {"coverage_percent": "96.69%", "ok": True},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = report.write_comment_body(
+        action_report_path=action_report_path,
+        check_intelligence_path=check_intelligence_path,
+        evidence_narrative_path=evidence_narrative_path,
+        out=out,
+        review_model_out=review_model_out,
+        review_summary_out=review_summary_out,
+        review_html_out=review_html_out,
+        review_index_out=review_index_out,
+    )
+
+    assert result["review_index_out"] == review_index_out.as_posix()
+    assert result["review_index_written"] is True
+
+    index_html = review_index_out.read_text(encoding="utf-8")
+    assert "<title>PR Quality Artifact Center</title>" in index_html
+    assert "<h1>PR Quality Artifact Center</h1>" in index_html
+    assert 'href="pr-review-dashboard.html"' in index_html
+    assert 'href="pr-review-summary.md"' in index_html
+    assert 'href="pr-review-model.json"' in index_html
+    assert 'href="pr-comment-body.md"' in index_html
+    assert "Reporting-only" in index_html
+    assert "does not authorize merge" in index_html

@@ -1988,6 +1988,132 @@ def _html_escape(value: object) -> str:
     )
 
 
+def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
+    decision = _as_dict(model.get("decision"))
+    authority = _as_dict(model.get("authority_boundary"))
+
+    status = _review_model_scalar(decision.get("status") or "unknown")
+    merge_assessment = _review_model_scalar(decision.get("merge_assessment") or "unknown")
+    next_action = _review_model_scalar(decision.get("next_action") or "unknown")
+    risk_surface = _review_model_scalar(decision.get("risk_surface") or "unknown")
+
+    if status == "green":
+        status_class = "status-green"
+    elif status in {"review", "review_required"}:
+        status_class = "status-review"
+    else:
+        status_class = "status-failed"
+
+    artifact_rows = [
+        (
+            "pr-review-dashboard.html",
+            "Open visual dashboard",
+            "Browser-ready visual dashboard with state, blocker, proof, and artifact cards.",
+        ),
+        (
+            "pr-review-summary.md",
+            "Open compact summary",
+            "Concise Markdown review summary used by the PR comment and step summary.",
+        ),
+        (
+            "pr-review-model.json",
+            "Open review model",
+            "Machine-readable source-of-truth model for all rendered review surfaces.",
+        ),
+        (
+            "pr-comment-body.md",
+            "Open raw evidence",
+            "Full diagnostic evidence retained for audit and debugging.",
+        ),
+    ]
+
+    def artifact_cards(rows: list[tuple[str, str, str]]) -> str:
+        return "\n".join(
+            '<article class="artifact-card">'
+            f'<a href="{_html_escape(href)}">{_html_escape(title)}</a>'
+            f"<span><code>{_html_escape(href)}</code></span>"
+            f"<p>{_html_escape(description)}</p>"
+            "</article>"
+            for href, title, description in rows
+        )
+
+    authority_rows = [
+        ("Boundary mode", authority.get("boundary_mode")),
+        ("Patch automation", authority.get("patch_automation")),
+        ("Security dismissal", authority.get("security_dismissal")),
+        ("Merge authorization", authority.get("merge_authorization")),
+        ("Semantic equivalence claim", authority.get("semantic_equivalence_claim")),
+    ]
+
+    authority_table = "\n".join(
+        f"<tr><th>{_html_escape(label)}</th><td><code>{_html_escape(value)}</code></td></tr>"
+        for label, value in authority_rows
+    )
+
+    return (
+        "<!doctype html>\n"
+        '<html lang="en">\n'
+        "<head>\n"
+        '  <meta charset="utf-8">\n'
+        '  <meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        "  <title>PR Quality Artifact Center</title>\n"
+        "  <style>\n"
+        "    :root { color-scheme: light dark; --bg: #0d1117; --panel: #161b22; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #2f81f7; --green: #3fb950; --orange: #f0b72f; --red: #f85149; --code: #0b1220; }\n"
+        "    * { box-sizing: border-box; }\n"
+        "    body { margin: 0; background: radial-gradient(circle at top left, #132238, var(--bg) 42rem); color: var(--text); font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.45; }\n"
+        "    main { max-width: 980px; margin: 0 auto; padding: 2rem; }\n"
+        "    .hero, .card, .artifact-card { border: 1px solid var(--border); border-radius: 18px; background: rgba(22,27,34,0.92); padding: 1rem; box-shadow: 0 18px 42px rgba(0,0,0,0.22); }\n"
+        "    .hero { padding: 1.5rem; background: linear-gradient(135deg, rgba(47,129,247,0.16), rgba(63,185,80,0.08)), var(--panel); }\n"
+        "    .eyebrow { color: var(--muted); font-size: 0.82rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }\n"
+        "    h1 { margin: 0.35rem 0 0.75rem; font-size: clamp(1.8rem, 4vw, 3rem); }\n"
+        "    h2 { margin: 0 0 1rem; }\n"
+        "    .status-badge { display: inline-flex; border-radius: 999px; padding: 0.35rem 0.78rem; font-weight: 900; border: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; }\n"
+        "    .status-green { color: var(--green); background: rgba(63,185,80,0.12); }\n"
+        "    .status-review { color: var(--orange); background: rgba(240,183,47,0.12); }\n"
+        "    .status-failed { color: var(--red); background: rgba(248,81,73,0.14); }\n"
+        "    .summary-grid, .artifact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.8rem; margin-top: 1rem; }\n"
+        "    .summary-card span, .artifact-card span { display: block; color: var(--muted); font-size: 0.82rem; margin-top: 0.25rem; }\n"
+        "    .summary-card { border: 1px solid var(--border); border-radius: 14px; background: rgba(13,17,23,0.48); padding: 1rem; }\n"
+        "    .artifact-card a { color: var(--text); font-size: 1.05rem; font-weight: 800; text-decoration: none; }\n"
+        "    .artifact-card a:hover { color: var(--accent); text-decoration: underline; }\n"
+        "    .artifact-card p { color: var(--muted); margin-bottom: 0; }\n"
+        "    table { width: 100%; border-collapse: collapse; }\n"
+        "    th, td { border-bottom: 1px solid var(--border); padding: 0.65rem; text-align: left; vertical-align: top; }\n"
+        "    th { width: 38%; color: var(--muted); }\n"
+        "    code { background: var(--code); border: 1px solid var(--border); border-radius: 8px; padding: 0.12rem 0.32rem; }\n"
+        "    .card { margin-top: 1rem; }\n"
+        "    .boundary { color: var(--muted); border-left: 4px solid var(--accent); padding-left: 0.8rem; }\n"
+        "  </style>\n"
+        "</head>\n"
+        "<body>\n"
+        "  <main>\n"
+        '    <section class="hero">\n'
+        '      <div class="eyebrow">SDET Quality Gate</div>\n'
+        "      <h1>PR Quality Artifact Center</h1>\n"
+        f'      <span class="status-badge {status_class}">{_html_escape(status)}</span>\n'
+        '      <div class="summary-grid">\n'
+        f'        <article class="summary-card"><span>Merge assessment</span><strong>{_html_escape(merge_assessment)}</strong></article>\n'
+        f'        <article class="summary-card"><span>Next action</span><strong>{_html_escape(next_action)}</strong></article>\n'
+        f'        <article class="summary-card"><span>Risk surface</span><strong>{_html_escape(risk_surface)}</strong></article>\n'
+        "      </div>\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        "      <h2>Artifact entry points</h2>\n"
+        '      <div class="artifact-grid">\n'
+        f"        {artifact_cards(artifact_rows)}\n"
+        "      </div>\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        "      <h2>Authority boundary</h2>\n"
+        f"      <table>{authority_table}</table>\n"
+        '      <p class="boundary">Reporting-only. This artifact center does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.</p>\n'
+        "    </section>\n"
+        "  </main>\n"
+        "</body>\n"
+        "</html>\n"
+    )
+
+
 def render_pr_quality_review_html(model: JsonObject) -> str:
     decision = _as_dict(model.get("decision"))
     authority = _as_dict(model.get("authority_boundary"))
@@ -2117,6 +2243,7 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         ("Review-first", review_first),
     ]
     artifact_rows = [
+        ("index.html", "Artifact landing page for the full PR Quality product bundle"),
         ("pr-review-summary.md", "Concise human review panel"),
         ("pr-review-model.json", "Machine-readable review model"),
         ("pr-review-dashboard.html", "Browser-ready review dashboard"),
@@ -2537,6 +2664,7 @@ def write_comment_body(
     review_model_out: Path | None = None,
     review_summary_out: Path | None = None,
     review_html_out: Path | None = None,
+    review_index_out: Path | None = None,
     evidence_narrative_path: Path | None = None,
     trajectory_jsonl_path: Path | None = None,
     runtime_proof_artifacts_path: Path | None = None,
@@ -2664,6 +2792,15 @@ def write_comment_body(
         )
         review_html_written = True
 
+    review_index_written = False
+    if review_index_out is not None:
+        review_index_out.parent.mkdir(parents=True, exist_ok=True)
+        review_index_out.write_text(
+            render_pr_quality_artifact_index_html(review_model),
+            encoding="utf-8",
+        )
+        review_index_written = True
+
     trajectory_summary = _trajectory_summary(trajectory_records)
     result: JsonObject = {
         "out": out.as_posix(),
@@ -2676,6 +2813,8 @@ def write_comment_body(
         "review_summary_written": review_summary_written,
         "review_html_out": review_html_out.as_posix() if review_html_out is not None else "",
         "review_html_written": review_html_written,
+        "review_index_out": review_index_out.as_posix() if review_index_out is not None else "",
+        "review_index_written": review_index_written,
         "status": status,
         "result_title": _result_title(
             status,
@@ -2801,6 +2940,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--review-model-out", type=Path)
     parser.add_argument("--review-summary-out", type=Path)
     parser.add_argument("--review-html-out", type=Path)
+    parser.add_argument("--review-index-out", type=Path)
     parser.add_argument("--failure-bundle-out-dir", type=Path)
     parser.add_argument("--pr-number", type=int, default=0)
     parser.add_argument("--head-sha", default="")
@@ -2821,6 +2961,7 @@ def main(argv: list[str] | None = None) -> int:
         review_model_out=args.review_model_out,
         review_summary_out=args.review_summary_out,
         review_html_out=args.review_html_out,
+        review_index_out=args.review_index_out,
         failure_bundle_out_dir=args.failure_bundle_out_dir,
         pr_number=args.pr_number,
         head_sha=args.head_sha,
