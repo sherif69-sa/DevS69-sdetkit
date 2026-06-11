@@ -2057,12 +2057,26 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
     if is_blocked:
         status_class = "status-failed"
         hero_label = "needs attention"
+        state_caption = (
+            "Failure signals are present. Review the mini triage, first blocker, "
+            "recommended action, and proof to rerun before any merge decision."
+        )
     elif needs_attention:
         status_class = "status-review"
         hero_label = "review required"
+        state_caption = (
+            "Review-first evidence is present. Confirm the listed evidence and proof "
+            "before any merge decision."
+        )
     else:
         status_class = "status-green"
         hero_label = "green"
+        state_caption = (
+            "No PR Quality blocker is currently reported. Keep the listed proof and "
+            "authority boundary visible before any merge decision."
+        )
+
+    hero_class = f"hero {status_class}"
 
     decision_rows = [
         ("Status", decision.get("status")),
@@ -2184,15 +2198,22 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         "    * { box-sizing: border-box; }\n"
         "    body { margin: 0; background: radial-gradient(circle at top left, #132238, var(--bg) 42rem); color: var(--text); font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.45; }\n"
         "    main { max-width: 1120px; margin: 0 auto; padding: 2rem; }\n"
-        "    .hero { border: 1px solid var(--border); border-radius: 18px; padding: 1.5rem; background: linear-gradient(135deg, rgba(47,129,247,0.16), rgba(63,185,80,0.08)), var(--panel); box-shadow: 0 18px 42px rgba(0,0,0,0.25); }\n"
-        "    .eyebrow { color: var(--muted); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }\n"
+        "    .hero { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 22px; padding: 1.6rem; background: linear-gradient(135deg, rgba(47,129,247,0.18), rgba(63,185,80,0.08)), var(--panel); box-shadow: 0 22px 56px rgba(0,0,0,0.34); }\n"
+        "    .hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 18rem); }\n"
+        "    .hero > * { position: relative; z-index: 1; }\n"
+        "    .hero.status-failed { border-color: rgba(248,81,73,0.55); background: linear-gradient(135deg, rgba(248,81,73,0.16), rgba(240,183,47,0.08)), var(--panel); }\n"
+        "    .hero.status-review { border-color: rgba(240,183,47,0.50); background: linear-gradient(135deg, rgba(240,183,47,0.16), rgba(47,129,247,0.08)), var(--panel); }\n"
+        "    .hero.status-green { border-color: rgba(63,185,80,0.45); background: linear-gradient(135deg, rgba(63,185,80,0.14), rgba(47,129,247,0.08)), var(--panel); }\n"
+        "    .eyebrow { color: var(--muted); font-size: 0.82rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }\n"
         "    h1 { margin: 0.35rem 0 0.75rem; font-size: clamp(1.8rem, 4vw, 3rem); }\n"
         "    h2 { margin: 0 0 1rem; }\n"
         "    h3 { margin: 0 0 0.5rem; }\n"
+        "    .hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }\n"
+        "    .state-caption { max-width: 780px; margin: 0.2rem 0 0; color: var(--muted); font-size: 1rem; }\n"
         "    .hero-grid, .metrics, .artifact-grid, .signal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.8rem; margin-top: 1rem; }\n"
-        "    .hero-card, .metric-card, .artifact-card, .signal-card, .card, .alert-card { border: 1px solid var(--border); border-radius: 14px; background: rgba(22,27,34,0.88); padding: 1rem; }\n"
+        "    .hero-card, .metric-card, .artifact-card, .signal-card, .card, .alert-card { border: 1px solid var(--border); border-radius: 16px; background: rgba(22,27,34,0.90); padding: 1rem; box-shadow: 0 10px 28px rgba(0,0,0,0.18); }\n"
         "    .hero-card span, .metric-label, .artifact-card span, .alert-card span { display: block; color: var(--muted); font-size: 0.82rem; margin-bottom: 0.25rem; }\n"
-        "    .status-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 0.22rem 0.6rem; font-weight: 800; border: 1px solid var(--border); }\n"
+        "    .status-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 0.38rem 0.78rem; font-weight: 900; border: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }\n"
         "    .status-green { color: var(--green); background: rgba(63,185,80,0.12); }\n"
         "    .status-review { color: var(--orange); background: rgba(240,183,47,0.12); }\n"
         "    .status-failed { color: var(--red); background: rgba(248,81,73,0.14); }\n"
@@ -2209,14 +2230,22 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         "    pre { padding: 1rem; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }\n"
         "    .boundary { color: var(--muted); border-left: 4px solid var(--accent); padding-left: 0.8rem; }\n"
         "    .card { margin-top: 1rem; }\n"
+        "    .section-kicker { color: var(--muted); display: block; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; margin-bottom: 0.25rem; }\n"
+        "    .artifact-card strong, .signal-card h3 { overflow-wrap: anywhere; }\n"
+        "    .signal-card ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }\n"
         "  </style>\n"
         "</head>\n"
         "<body>\n"
         "  <main>\n"
-        '    <section class="hero">\n'
-        '      <div class="eyebrow">SDET Quality Gate</div>\n'
-        "      <h1>PR Quality Review Dashboard</h1>\n"
-        f'      <span class="status-badge {status_class}">{_html_escape(hero_label)}</span>\n'
+        f'    <section class="{hero_class}">\n'
+        '      <div class="hero-top">\n'
+        "        <div>\n"
+        '          <div class="eyebrow">SDET Quality Gate</div>\n'
+        "          <h1>PR Quality Review Dashboard</h1>\n"
+        f'          <p class="state-caption">{_html_escape(state_caption)}</p>\n'
+        "        </div>\n"
+        f'        <span class="status-badge {status_class}">{_html_escape(hero_label)}</span>\n'
+        "      </div>\n"
         '      <div class="hero-grid">\n'
         f'        <article class="hero-card"><span>Merge assessment</span><strong>{_html_escape(merge_assessment)}</strong></article>\n'
         f'        <article class="hero-card"><span>Next reviewer action</span><strong>{_html_escape(next_action)}</strong></article>\n'
@@ -2230,15 +2259,18 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         "    </section>\n"
         '    <section class="layout">\n'
         '      <article class="card">\n'
+        '        <span class="section-kicker">Review model</span>\n'
         "        <h2>Decision details</h2>\n"
         f"        {table(decision_rows)}\n"
         "      </article>\n"
         '      <article class="card">\n'
+        '        <span class="section-kicker">Triage</span>\n'
         "        <h2>First blocker</h2>\n"
         f"        {table(blocker_rows)}\n"
         "      </article>\n"
         "    </section>\n"
         '    <section class="card">\n'
+        '      <span class="section-kicker">Live inputs</span>\n'
         "      <h2>Failure signals</h2>\n"
         '      <div class="signal-grid">\n'
         f"        {list_panel('Failed checks', failed_check_names)}\n"
@@ -2250,16 +2282,19 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         "    </section>\n"
         '    <section class="layout">\n'
         '      <article class="card">\n'
+        '        <span class="section-kicker">Operator proof</span>\n'
         "        <h2>Proof to rerun</h2>\n"
         f"        {proof_html}\n"
         "      </article>\n"
         '      <article class="card">\n'
+        '        <span class="section-kicker">Safety boundary</span>\n'
         "        <h2>Authority boundary</h2>\n"
         f"        {table(authority_rows)}\n"
         '        <p class="boundary">Reporting-only. This dashboard does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.</p>\n'
         "      </article>\n"
         "    </section>\n"
         '    <section class="card">\n'
+        '      <span class="section-kicker">Artifact bundle</span>\n'
         "      <h2>Product artifacts</h2>\n"
         '      <div class="artifact-grid">\n'
         f"        {artifact_cards(artifact_rows)}\n"
