@@ -474,7 +474,7 @@ def test_pr_quality_comment_can_show_green_evidence_review_trajectory_summary() 
 
     assert "SDETKit Review Result: Green with evidence review" in body
     assert "## Evidence review signal" in body
-    assert "## Trajectory summary" in body
+    assert "<summary><strong>Trajectory summary</strong></summary>" in body
     assert "Records: `1`" in body
     assert "Review-first decisions: `1`" in body
     assert "`evidence_review_required`=1" in body

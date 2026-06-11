@@ -679,7 +679,7 @@ def test_patch_plan_handoff_flows_through_full_evidence_spine(tmp_path: Path) ->
     )
 
     assert "SDETKit Review Result: Green with evidence review" in body
-    assert "## Review-first patch plan" in body
+    assert "<summary><strong>Review-first patch plan</strong></summary>" in body
     assert "Source kind: `evidence_graph`" in body
     assert f"Source code: `{mission_patch_plan['source_code']}`" in body
     assert "Safe to auto-fix: `false`" in body

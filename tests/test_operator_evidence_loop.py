@@ -109,7 +109,7 @@ def test_operator_evidence_loop_builds_review_first_handoff(tmp_path: Path) -> N
         encoding="utf-8"
     )
     assert "SDETKit Review Result: Green with evidence review" in comment
-    assert "## Review-first patch plan" in comment
+    assert "<summary><strong>Review-first patch plan</strong></summary>" in comment
     assert "Source kind: `evidence_graph`" in comment
     assert "Safe to auto-fix: `false`" in comment
     assert "Dry run only: `true`" in comment
