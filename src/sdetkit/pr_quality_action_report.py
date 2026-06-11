@@ -1600,7 +1600,19 @@ def _operator_safetygate_summary_lines(
     ]
 
 
-def _reviewer_dashboard_lines(
+def _review_model_scalar(value: object) -> str:
+    if isinstance(value, bool):
+        return str(value).lower()
+    if value is None:
+        return ""
+    return str(value)
+
+
+def _markdown_table_value(value: object) -> str:
+    return _review_model_scalar(value).replace("|", "\\|")
+
+
+def build_pr_quality_review_model(
     *,
     status: str,
     evidence_signal_heading: str,
@@ -1609,7 +1621,7 @@ def _reviewer_dashboard_lines(
     action_report: JsonObject,
     check_intelligence: JsonObject,
     evidence_narrative: JsonObject,
-) -> list[str]:
+) -> JsonObject:
     primary_signal = _as_dict(evidence_narrative.get("primary_signal"))
     graph = _as_dict(evidence_narrative.get("graph"))
     top_blocker = _as_dict(graph.get("top_blocker"))
@@ -1682,26 +1694,76 @@ def _reviewer_dashboard_lines(
     required_startup = _required_count(_as_list(check_intelligence.get("startup_failures")))
     missing_required = len(_as_list(check_intelligence.get("missing_required_contexts")))
 
-    safe_surface = surface.replace("|", "\\|")
-    safe_title = title.replace("|", "\\|")
-    safe_signal = _string(evidence_signal_heading or "none").replace("|", "\\|")
+    return {
+        "schema_version": "sdetkit.pr_quality.review_model.v1",
+        "decision": {
+            "status": status,
+            "merge_assessment": merge_assessment,
+            "next_action": next_action,
+            "risk_surface": surface,
+            "signal_title": title,
+            "comment_signal": _string(evidence_signal_heading or "none"),
+            "review_first_evidence": evidence_review_required,
+            "failed_checks": failed_count,
+            "required_queued_checks": required_queued,
+            "required_startup_failures": required_startup,
+            "missing_required_contexts": missing_required,
+            "cleared_security_signal": cleared_security_signal,
+        },
+        "proof_to_rerun": proof_commands[:5],
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+    }
+
+
+def _reviewer_dashboard_lines(
+    *,
+    status: str,
+    evidence_signal_heading: str,
+    evidence_signal_lines: list[str],
+    evidence_review_required: bool,
+    action_report: JsonObject,
+    check_intelligence: JsonObject,
+    evidence_narrative: JsonObject,
+) -> list[str]:
+    model = build_pr_quality_review_model(
+        status=status,
+        evidence_signal_heading=evidence_signal_heading,
+        evidence_signal_lines=evidence_signal_lines,
+        evidence_review_required=evidence_review_required,
+        action_report=action_report,
+        check_intelligence=check_intelligence,
+        evidence_narrative=evidence_narrative,
+    )
+    decision = _as_dict(model.get("decision"))
+    authority = _as_dict(model.get("authority_boundary"))
+    proof_commands = [
+        str(command)
+        for command in _as_list(model.get("proof_to_rerun"))
+        if isinstance(command, str) and command.strip()
+    ]
 
     lines = [
         "### Decision",
         "",
         "| Item | Value |",
         "|---|---|",
-        f"| SDETKit status | `{status}` |",
-        f"| Merge assessment | `{merge_assessment}` |",
-        f"| Next reviewer action | `{next_action}` |",
-        f"| Changed risk surface | `{safe_surface}` |",
-        f"| Signal title | {safe_title} |",
-        f"| Comment signal | `{safe_signal}` |",
-        f"| Review-first evidence | `{str(evidence_review_required).lower()}` |",
-        f"| Failed checks | `{failed_count}` |",
-        f"| Required queued checks | `{required_queued}` |",
-        f"| Required startup failures | `{required_startup}` |",
-        f"| Missing required contexts | `{missing_required}` |",
+        f"| SDETKit status | `{_review_model_scalar(decision.get('status'))}` |",
+        f"| Merge assessment | `{_review_model_scalar(decision.get('merge_assessment'))}` |",
+        f"| Next reviewer action | `{_review_model_scalar(decision.get('next_action'))}` |",
+        f"| Changed risk surface | `{_markdown_table_value(decision.get('risk_surface'))}` |",
+        f"| Signal title | {_markdown_table_value(decision.get('signal_title'))} |",
+        f"| Comment signal | `{_markdown_table_value(decision.get('comment_signal'))}` |",
+        f"| Review-first evidence | `{str(bool(decision.get('review_first_evidence'))).lower()}` |",
+        f"| Failed checks | `{_review_model_scalar(decision.get('failed_checks'))}` |",
+        f"| Required queued checks | `{_review_model_scalar(decision.get('required_queued_checks'))}` |",
+        f"| Required startup failures | `{_review_model_scalar(decision.get('required_startup_failures'))}` |",
+        f"| Missing required contexts | `{_review_model_scalar(decision.get('missing_required_contexts'))}` |",
         "",
         "### Proof to rerun",
         "",
@@ -1709,7 +1771,7 @@ def _reviewer_dashboard_lines(
 
     if proof_commands:
         lines.append("```bash")
-        lines.extend(proof_commands[:5])
+        lines.extend(proof_commands)
         lines.append("```")
     else:
         lines.append("`none`")
@@ -1721,11 +1783,11 @@ def _reviewer_dashboard_lines(
             "",
             "| Authority | Value |",
             "|---|---|",
-            "| Boundary mode | `reporting_only` |",
-            "| Patch automation | `false` |",
-            "| Security dismissal | `false` |",
-            "| Merge authorization | `false` |",
-            "| Semantic equivalence claim | `false` |",
+            f"| Boundary mode | `{_string(authority.get('boundary_mode'))}` |",
+            f"| Patch automation | `{str(bool(authority.get('patch_automation'))).lower()}` |",
+            f"| Security dismissal | `{str(bool(authority.get('security_dismissal'))).lower()}` |",
+            f"| Merge authorization | `{str(bool(authority.get('merge_authorization'))).lower()}` |",
+            f"| Semantic equivalence claim | `{str(bool(authority.get('semantic_equivalence_claim'))).lower()}` |",
         ]
     )
 
