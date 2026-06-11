@@ -1794,6 +1794,61 @@ def _reviewer_dashboard_lines(
     return lines
 
 
+def render_pr_quality_review_summary(model: JsonObject) -> str:
+    decision = _as_dict(model.get("decision"))
+    authority = _as_dict(model.get("authority_boundary"))
+    proof_commands = [
+        str(command)
+        for command in _as_list(model.get("proof_to_rerun"))
+        if isinstance(command, str) and command.strip()
+    ]
+
+    lines = [
+        "# PR Quality Review Summary",
+        "",
+        "## Decision",
+        "",
+        "| Item | Value |",
+        "|---|---|",
+        f"| Status | `{_review_model_scalar(decision.get('status'))}` |",
+        f"| Merge assessment | `{_review_model_scalar(decision.get('merge_assessment'))}` |",
+        f"| Next action | `{_review_model_scalar(decision.get('next_action'))}` |",
+        f"| Risk surface | `{_markdown_table_value(decision.get('risk_surface'))}` |",
+        f"| Signal | `{_markdown_table_value(decision.get('comment_signal'))}` |",
+        f"| Review-first evidence | `{_review_model_scalar(decision.get('review_first_evidence'))}` |",
+        f"| Failed checks | `{_review_model_scalar(decision.get('failed_checks'))}` |",
+        "",
+        "## Proof to rerun",
+        "",
+    ]
+
+    if proof_commands:
+        lines.append("```bash")
+        lines.extend(proof_commands)
+        lines.append("```")
+    else:
+        lines.append("`none`")
+
+    lines.extend(
+        [
+            "",
+            "## Authority boundary",
+            "",
+            "| Authority | Value |",
+            "|---|---|",
+            f"| Boundary mode | `{_review_model_scalar(authority.get('boundary_mode'))}` |",
+            f"| Patch automation | `{_review_model_scalar(authority.get('patch_automation'))}` |",
+            f"| Security dismissal | `{_review_model_scalar(authority.get('security_dismissal'))}` |",
+            f"| Merge authorization | `{_review_model_scalar(authority.get('merge_authorization'))}` |",
+            f"| Semantic equivalence claim | `{_review_model_scalar(authority.get('semantic_equivalence_claim'))}` |",
+            "",
+            "> This summary is generated from the structured PR Quality review model. It is reporting-only and does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.",
+        ]
+    )
+
+    return "\n".join(lines) + "\n"
+
+
 def render_comment_body(
     *,
     action_report: JsonObject,
@@ -2023,6 +2078,7 @@ def write_comment_body(
     check_intelligence_path: Path,
     out: Path,
     review_model_out: Path | None = None,
+    review_summary_out: Path | None = None,
     evidence_narrative_path: Path | None = None,
     trajectory_jsonl_path: Path | None = None,
     runtime_proof_artifacts_path: Path | None = None,
@@ -2132,12 +2188,25 @@ def write_comment_body(
         )
         review_model_written = True
 
+    review_summary_written = False
+    if review_summary_out is not None:
+        review_summary_out.parent.mkdir(parents=True, exist_ok=True)
+        review_summary_out.write_text(
+            render_pr_quality_review_summary(review_model),
+            encoding="utf-8",
+        )
+        review_summary_written = True
+
     trajectory_summary = _trajectory_summary(trajectory_records)
     result: JsonObject = {
         "out": out.as_posix(),
         "review_model_out": review_model_out.as_posix() if review_model_out is not None else "",
         "review_model_written": review_model_written,
         "review_model_schema_version": _string(review_model.get("schema_version")),
+        "review_summary_out": review_summary_out.as_posix()
+        if review_summary_out is not None
+        else "",
+        "review_summary_written": review_summary_written,
         "status": status,
         "result_title": _result_title(
             status,
@@ -2261,6 +2330,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--security-finding-diagnosis", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--review-model-out", type=Path)
+    parser.add_argument("--review-summary-out", type=Path)
     parser.add_argument("--failure-bundle-out-dir", type=Path)
     parser.add_argument("--pr-number", type=int, default=0)
     parser.add_argument("--head-sha", default="")
@@ -2279,6 +2349,7 @@ def main(argv: list[str] | None = None) -> int:
         security_finding_diagnosis_path=args.security_finding_diagnosis,
         out=args.out,
         review_model_out=args.review_model_out,
+        review_summary_out=args.review_summary_out,
         failure_bundle_out_dir=args.failure_bundle_out_dir,
         pr_number=args.pr_number,
         head_sha=args.head_sha,

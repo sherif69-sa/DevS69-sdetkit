@@ -3184,3 +3184,88 @@ def test_write_comment_body_writes_review_model_artifact(tmp_path: Path) -> None
     body = comment_out.read_text(encoding="utf-8")
     assert "## Reviewer dashboard" in body
     assert "### Proof to rerun" in body
+
+
+def test_write_comment_body_writes_review_summary_artifact(tmp_path: Path) -> None:
+    action_report_path = tmp_path / "action-report.json"
+    check_intelligence_path = tmp_path / "check-intelligence.json"
+    evidence_narrative_path = tmp_path / "evidence-narrative.json"
+    comment_out = tmp_path / "comment.md"
+    review_model_out = tmp_path / "review-model.json"
+    review_summary_out = tmp_path / "review-summary.md"
+
+    action_report = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    check_intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "diagnostic_engine",
+            "title": "Diagnostic intelligence evidence changed",
+        },
+        "graph": {
+            "node_count": 1,
+            "review_first_count": 0,
+            "critical_count": 0,
+            "top_blocker": {
+                "title": "Diagnostic intelligence evidence changed",
+                "surface": "diagnostic_engine",
+                "action": "rerun_proof",
+                "review_first": False,
+            },
+        },
+        "next_proof": [
+            "python -m pytest -q tests/test_adaptive_quality_gate_advisory_alignment.py tests/test_adaptive_failure_bundle.py -o addopts=",
+            "python -m pre_commit run -a",
+        ],
+    }
+
+    action_report_path.write_text(
+        json.dumps(action_report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    check_intelligence_path.write_text(
+        json.dumps(check_intelligence, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    evidence_narrative_path.write_text(
+        json.dumps(evidence_narrative, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    result = report.write_comment_body(
+        action_report_path=action_report_path,
+        check_intelligence_path=check_intelligence_path,
+        evidence_narrative_path=evidence_narrative_path,
+        out=comment_out,
+        review_model_out=review_model_out,
+        review_summary_out=review_summary_out,
+    )
+
+    assert result["review_model_written"] is True
+    assert result["review_summary_written"] is True
+    assert result["review_summary_out"] == review_summary_out.as_posix()
+
+    summary = review_summary_out.read_text(encoding="utf-8")
+    assert "# PR Quality Review Summary" in summary
+    assert "| Merge assessment | `verify_listed_proof_before_routine_merge` |" in summary
+    assert "| Next action | `rerun_proof` |" in summary
+    assert "| Risk surface | `diagnostic_engine` |" in summary
+    assert "```bash" in summary
+    assert "python -m pre_commit run -a" in summary
+    assert "| Boundary mode | `reporting_only` |" in summary
+    assert "| Merge authorization | `false` |" in summary
+    assert "does not authorize merge" in summary
