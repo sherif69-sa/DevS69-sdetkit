@@ -2022,6 +2022,7 @@ def write_comment_body(
     action_report_path: Path,
     check_intelligence_path: Path,
     out: Path,
+    review_model_out: Path | None = None,
     evidence_narrative_path: Path | None = None,
     trajectory_jsonl_path: Path | None = None,
     runtime_proof_artifacts_path: Path | None = None,
@@ -2113,9 +2114,30 @@ def write_comment_body(
     else:
         evidence_signal_kind = "none"
 
+    review_model = build_pr_quality_review_model(
+        status=status,
+        evidence_signal_heading=_heading,
+        evidence_signal_lines=evidence_signal_lines,
+        evidence_review_required=evidence_review_required,
+        action_report=action_report,
+        check_intelligence=check_intelligence,
+        evidence_narrative=evidence_narrative,
+    )
+    review_model_written = False
+    if review_model_out is not None:
+        review_model_out.parent.mkdir(parents=True, exist_ok=True)
+        review_model_out.write_text(
+            json.dumps(review_model, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        review_model_written = True
+
     trajectory_summary = _trajectory_summary(trajectory_records)
     result: JsonObject = {
         "out": out.as_posix(),
+        "review_model_out": review_model_out.as_posix() if review_model_out is not None else "",
+        "review_model_written": review_model_written,
+        "review_model_schema_version": _string(review_model.get("schema_version")),
         "status": status,
         "result_title": _result_title(
             status,
@@ -2238,6 +2260,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--runtime-proof-artifacts", type=Path)
     parser.add_argument("--security-finding-diagnosis", type=Path)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--review-model-out", type=Path)
     parser.add_argument("--failure-bundle-out-dir", type=Path)
     parser.add_argument("--pr-number", type=int, default=0)
     parser.add_argument("--head-sha", default="")
@@ -2255,6 +2278,7 @@ def main(argv: list[str] | None = None) -> int:
         runtime_proof_artifacts_path=args.runtime_proof_artifacts,
         security_finding_diagnosis_path=args.security_finding_diagnosis,
         out=args.out,
+        review_model_out=args.review_model_out,
         failure_bundle_out_dir=args.failure_bundle_out_dir,
         pr_number=args.pr_number,
         head_sha=args.head_sha,
