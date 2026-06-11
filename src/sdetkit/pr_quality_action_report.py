@@ -1680,6 +1680,160 @@ def _review_model_artifact_index() -> list[JsonObject]:
     ]
 
 
+def _review_model_failure_vector_signal(
+    *,
+    action_report: JsonObject,
+    check_intelligence: JsonObject,
+    evidence_narrative: JsonObject,
+) -> JsonObject:
+    graph = _as_dict(evidence_narrative.get("graph"))
+    top_blocker = _as_dict(graph.get("top_blocker"))
+    primary_blocker = _as_dict(action_report.get("primary_blocker"))
+
+    diagnostic_vectors = _as_dict(
+        check_intelligence.get("diagnostic_vectors") or action_report.get("diagnostic_vectors")
+    )
+    diagnostic_candidates = [
+        _as_dict(item)
+        for item in _as_list(diagnostic_vectors.get("failure_vectors"))
+        if _as_dict(item)
+    ]
+    single_failure_vector = _as_dict(diagnostic_vectors.get("failure_vector"))
+    if single_failure_vector:
+        diagnostic_candidates.insert(0, single_failure_vector)
+
+    candidates: list[tuple[str, JsonObject]] = []
+    candidates.extend(("diagnostic_vector", item) for item in diagnostic_candidates)
+    if top_blocker:
+        candidates.append(("evidence_top_blocker", top_blocker))
+    if primary_blocker:
+        candidates.append(("primary_blocker", primary_blocker))
+    candidates.extend(
+        ("failed_check", _as_dict(item))
+        for item in _as_list(check_intelligence.get("failed_checks"))
+        if _as_dict(item)
+    )
+
+    for source, candidate in candidates:
+        first_failure = _as_dict(candidate.get("first_failure"))
+        failed_step = _as_dict(candidate.get(FAILED_STEP_EVIDENCE_KEY))
+        safe_remediation = _as_dict(candidate.get("safe_remediation"))
+
+        affected_files = [
+            _string(item)
+            for key in (
+                "affected_files",
+                "owner_files",
+                "likely_owner_files",
+                "formatter_changed_files",
+            )
+            for item in _as_list(candidate.get(key))
+            if _string(item)
+        ]
+        explicit_path = _string(
+            candidate.get("owner_hint")
+            or candidate.get("failing_file")
+            or candidate.get("path")
+            or first_failure.get("path")
+        )
+        if explicit_path and explicit_path not in affected_files:
+            affected_files.insert(0, explicit_path)
+
+        headline_signal = _string(
+            candidate.get("headline_signal")
+            or candidate.get("headline_failure")
+            or candidate.get("title")
+            or candidate.get("name")
+            or candidate.get("check")
+            or candidate.get("context")
+            or "unknown"
+        )
+        actual_failure = _string(
+            candidate.get("actual_failure")
+            or candidate.get("first_failure_line")
+            or first_failure.get("line")
+            or candidate.get("details")
+            or candidate.get("message")
+            or candidate.get("reason")
+            or headline_signal
+        )
+        failure_type = _string(
+            candidate.get("failure_type")
+            or candidate.get("failure_class")
+            or first_failure.get("kind")
+            or candidate.get("code")
+            or "unknown"
+        )
+        failing_command = _string(
+            candidate.get("failing_command")
+            or candidate.get("command")
+            or failed_step.get("command")
+            or "unknown"
+        )
+        failing_test_or_check = _string(
+            candidate.get("failing_test_or_check")
+            or candidate.get("failing_test")
+            or candidate.get("check")
+            or candidate.get("name")
+            or first_failure.get("tool")
+            or "unknown"
+        )
+        owner_hint = _string(
+            candidate.get("owner_hint") or (affected_files[0] if affected_files else "")
+        )
+
+        if not any(
+            value and value != "unknown"
+            for value in (
+                headline_signal,
+                actual_failure,
+                failure_type,
+                failing_command,
+                failing_test_or_check,
+                owner_hint,
+            )
+        ):
+            continue
+
+        return {
+            "source": source,
+            "headline_signal": headline_signal,
+            "actual_failure": actual_failure,
+            "failure_type": failure_type,
+            "failing_command": failing_command,
+            "failing_test_or_check": failing_test_or_check,
+            "exit_code": _int(
+                candidate.get("exit_code")
+                or candidate.get("status_code")
+                or failed_step.get("exit_code")
+            ),
+            "owner_hint": owner_hint or "unknown",
+            "affected_files": affected_files[:10],
+            "safe_fix_candidate": bool(
+                candidate.get("safe_fix_candidate")
+                or candidate.get("safe_to_auto_fix")
+                or safe_remediation.get("safe_to_auto_fix")
+            ),
+            "safe_fix_allowed": False,
+            "reporting_only": True,
+        }
+
+    return {
+        "source": "none",
+        "headline_signal": "none",
+        "actual_failure": "none",
+        "failure_type": "none",
+        "failing_command": "none",
+        "failing_test_or_check": "none",
+        "exit_code": 0,
+        "owner_hint": "none",
+        "affected_files": [],
+        "safe_fix_candidate": False,
+        "safe_fix_allowed": False,
+        "reporting_only": True,
+    }
+
+
 def build_pr_quality_review_model(
     *,
     status: str,
@@ -1694,6 +1848,11 @@ def build_pr_quality_review_model(
     graph = _as_dict(evidence_narrative.get("graph"))
     top_blocker = _as_dict(graph.get("top_blocker"))
     primary_blocker = _as_dict(action_report.get("primary_blocker"))
+    failure_vector_signal = _review_model_failure_vector_signal(
+        action_report=action_report,
+        check_intelligence=check_intelligence,
+        evidence_narrative=evidence_narrative,
+    )
 
     surface = _string(
         primary_signal.get("surface")
@@ -1809,6 +1968,7 @@ def build_pr_quality_review_model(
             ),
         },
         "recommended_actions": recommended_actions[:10],
+        "failure_vector_signal": failure_vector_signal,
         "failed_check_names": _check_labels(check_intelligence.get("failed_checks")),
         "required_queued_check_names": _check_labels(check_intelligence.get("queued_checks")),
         "required_startup_failure_names": _check_labels(check_intelligence.get("startup_failures")),
@@ -1957,6 +2117,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     decision = _as_dict(model.get("decision"))
     authority = _as_dict(model.get("authority_boundary"))
     primary_blocker = _as_dict(model.get("primary_blocker"))
+    failure_vector_signal = _as_dict(model.get("failure_vector_signal"))
     proof_commands = [
         str(command)
         for command in _as_list(model.get("proof_to_rerun"))
@@ -2046,6 +2207,13 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         f"| Startup failure names | `{_markdown_table_value(_joined(startup_failure_names))}` |",
         f"| Missing required contexts | `{missing_total}` |",
         f"| Missing context names | `{_markdown_table_value(_joined(missing_context_names))}` |",
+        f"| Failure vector source | `{_markdown_table_value(failure_vector_signal.get('source') or 'none')}` |",
+        f"| Actual failure | `{_markdown_table_value(failure_vector_signal.get('actual_failure') or 'none')}` |",
+        f"| Failure type | `{_markdown_table_value(failure_vector_signal.get('failure_type') or 'none')}` |",
+        f"| Failing command | `{_markdown_table_value(failure_vector_signal.get('failing_command') or 'none')}` |",
+        f"| Failing test/check | `{_markdown_table_value(failure_vector_signal.get('failing_test_or_check') or 'none')}` |",
+        f"| Owner hint | `{_markdown_table_value(failure_vector_signal.get('owner_hint') or 'none')}` |",
+        f"| Failure-vector safe-fix allowed | `{_review_model_scalar(failure_vector_signal.get('safe_fix_allowed'))}` |",
         "",
         "## Decision",
         "",
