@@ -806,7 +806,8 @@ def test_action_report_reconciles_cleared_security_review_signal() -> None:
     assert "Evidence review signal present; quality gate passed" not in body
     assert "human review required before merge" not in body
     assert "Fix the flagged surface or dismiss the false positive" not in body
-    assert "- Proof commands: `none`" in body
+    assert "### Proof to rerun" in body
+    assert "`none`" in body
 
 
 def test_action_report_comment_renders_failed_check_first_failure() -> None:
@@ -2991,14 +2992,19 @@ def test_pr_quality_comment_v3_renders_reviewer_dashboard_top_card() -> None:
 
     assert "## Reviewer dashboard" in body
     assert "## Reviewer dashboard" in body.split("## Quality summary", maxsplit=1)[0]
-    assert "- Merge assessment: `verify_listed_proof_before_routine_merge`" in body
-    assert "- Next action: `rerun_proof`" in body
-    assert "- Risk surface: `workflow`" in body
-    assert "- Signal title: Workflow evidence changed" in body
-    assert "- Review-first evidence: `false`" in body
-    assert "- Authority boundary: `reporting_only`" in body
-    assert "- Patch automation authority: `false`" in body
-    assert "- Security dismissal authority: `false`" in body
-    assert "- Merge authorization claimed: `false`" in body
-    assert "- Proof commands:" in body
-    assert "  - `python -m pre_commit run -a`" in body
+    assert "### Decision" in body
+    assert "| SDETKit status | `green` |" in body
+    assert "| Merge assessment | `verify_listed_proof_before_routine_merge` |" in body
+    assert "| Next reviewer action | `rerun_proof` |" in body
+    assert "| Changed risk surface | `workflow` |" in body
+    assert "| Signal title | Workflow evidence changed |" in body
+    assert "| Review-first evidence | `false` |" in body
+    assert "### Proof to rerun" in body
+    assert "```bash" in body
+    assert "python -m pre_commit run -a" in body
+    assert "### Authority boundary" in body
+    assert "| Boundary mode | `reporting_only` |" in body
+    assert "| Patch automation | `false` |" in body
+    assert "| Security dismissal | `false` |" in body
+    assert "| Merge authorization | `false` |" in body
+    assert "| Semantic equivalence claim | `false` |" in body

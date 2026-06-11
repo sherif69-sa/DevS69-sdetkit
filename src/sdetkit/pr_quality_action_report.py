@@ -1682,28 +1682,52 @@ def _reviewer_dashboard_lines(
     required_startup = _required_count(_as_list(check_intelligence.get("startup_failures")))
     missing_required = len(_as_list(check_intelligence.get("missing_required_contexts")))
 
+    safe_surface = surface.replace("|", "\\|")
+    safe_title = title.replace("|", "\\|")
+    safe_signal = _string(evidence_signal_heading or "none").replace("|", "\\|")
+
     lines = [
-        f"- Merge assessment: `{merge_assessment}`",
-        f"- Next action: `{next_action}`",
-        f"- Risk surface: `{surface}`",
-        f"- Signal title: {title}",
-        f"- Comment signal: `{_string(evidence_signal_heading or 'none')}`",
-        f"- Review-first evidence: `{str(evidence_review_required).lower()}`",
-        f"- Failed checks: `{failed_count}`",
-        f"- Required queued checks: `{required_queued}`",
-        f"- Required startup failures: `{required_startup}`",
-        f"- Missing required contexts: `{missing_required}`",
-        "- Authority boundary: `reporting_only`",
-        "- Patch automation authority: `false`",
-        "- Security dismissal authority: `false`",
-        "- Merge authorization claimed: `false`",
+        "### Decision",
+        "",
+        "| Item | Value |",
+        "|---|---|",
+        f"| SDETKit status | `{status}` |",
+        f"| Merge assessment | `{merge_assessment}` |",
+        f"| Next reviewer action | `{next_action}` |",
+        f"| Changed risk surface | `{safe_surface}` |",
+        f"| Signal title | {safe_title} |",
+        f"| Comment signal | `{safe_signal}` |",
+        f"| Review-first evidence | `{str(evidence_review_required).lower()}` |",
+        f"| Failed checks | `{failed_count}` |",
+        f"| Required queued checks | `{required_queued}` |",
+        f"| Required startup failures | `{required_startup}` |",
+        f"| Missing required contexts | `{missing_required}` |",
+        "",
+        "### Proof to rerun",
+        "",
     ]
 
     if proof_commands:
-        lines.append("- Proof commands:")
-        lines.extend(f"  - `{command}`" for command in proof_commands[:5])
+        lines.append("```bash")
+        lines.extend(proof_commands[:5])
+        lines.append("```")
     else:
-        lines.append("- Proof commands: `none`")
+        lines.append("`none`")
+
+    lines.extend(
+        [
+            "",
+            "### Authority boundary",
+            "",
+            "| Authority | Value |",
+            "|---|---|",
+            "| Boundary mode | `reporting_only` |",
+            "| Patch automation | `false` |",
+            "| Security dismissal | `false` |",
+            "| Merge authorization | `false` |",
+            "| Semantic equivalence claim | `false` |",
+        ]
+    )
 
     return lines
 
