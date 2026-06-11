@@ -664,7 +664,13 @@ jobs:
             --runtime-proof-artifacts build/pr-quality/runtime-proof/summary/runtime-proof-artifacts.json \
             --security-finding-diagnosis build/pr-quality/security-diagnosis/security-finding-diagnosis.json \
             --out build/pr-quality/pr-comment-body.md \
+            --review-model-out build/pr-quality/pr-review-model.json \
+            --review-summary-out build/pr-quality/pr-review-summary.md \
             > build/pr-quality/pr-comment-metadata.json
+
+          if [ -n "${GITHUB_STEP_SUMMARY:-}" ] && [ -s build/pr-quality/pr-review-summary.md ]; then
+            cat build/pr-quality/pr-review-summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Build PR comment body diagnostic appendices
         env:
@@ -1066,6 +1072,8 @@ jobs:
           path: |
             build/pr-quality/pr-comment-body.md
             build/pr-quality/pr-comment-metadata.json
+            build/pr-quality/pr-review-model.json
+            build/pr-quality/pr-review-summary.md
             build/pr-quality/pr-evidence-narrative.json
             build/pr-quality/changed-files.txt
             build/pr-quality/comment-status.json
