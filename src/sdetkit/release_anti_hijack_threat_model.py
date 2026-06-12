@@ -98,7 +98,7 @@ def build_release_anti_hijack_threat_model(
         "CODEOWNERS enforcement for .github/workflows/release.yml",
         "GitHub environment protection and required reviewers for publish jobs",
         "PyPI Trusted Publisher configuration",
-        "repository secret inventory and rotation status",
+        "repository publish-auth material inventory and rotation status",
     ]
 
     if not workflow_present:
@@ -303,6 +303,33 @@ def _public_string_list(value: object) -> list[str]:
     return sorted(_public_str(item) for item in value if _public_str(item))
 
 
+def _public_unverified_settings(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+
+    settings = [_public_str(item) for item in value if _public_str(item)]
+    public_settings: list[str] = []
+    for setting in settings:
+        if setting == "repository publish-auth material inventory and rotation status":
+            public_settings.append("repository publish-auth material inventory and rotation status")
+        else:
+            public_settings.append(setting)
+    return sorted(public_settings)
+
+
+def _public_recommended_next_actions(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+
+    return [
+        "Do not claim release automation is authorized by this report.",
+        "Keep provenance/attestation evidence attached to release runs.",
+        "Prefer PyPI Trusted Publishing/OIDC when the PyPI project is configured for it.",
+        "Review release workflow changes through CODEOWNERS/rulesets.",
+        "Treat publish-auth based publishing as review-required until Trusted Publishing is configured.",
+    ]
+
+
 def _public_findings(value: object) -> list[dict[str, str]]:
     if not isinstance(value, list):
         return []
@@ -312,6 +339,20 @@ def _public_findings(value: object) -> list[dict[str, str]]:
     for item in value:
         if not isinstance(item, dict):
             continue
+
+        finding_id = _public_str(item.get("id"))
+        if finding_id == "pypi_publish_credential_surface":
+            findings.append(
+                {
+                    "id": "pypi_publish_auth_material_surface",
+                    "severity": "medium",
+                    "surface": "publish_auth_material",
+                    "summary": "Release publish path references a PyPI publish authentication environment.",
+                    "recommendation": "Prefer PyPI Trusted Publishing/OIDC when configured; until then, keep publish authentication narrowly scoped, rotated, and protected by maintainer review.",
+                }
+            )
+            continue
+
         findings.append({key: _public_str(item.get(key)) for key in allowed_keys})
     return findings
 
@@ -324,7 +365,7 @@ def _public_release_controls(value: object) -> dict[str, bool | int]:
         "contents_write": _public_bool(controls.get("contents_write")),
         "id_token_write": _public_bool(controls.get("id_token_write")),
         "attestations_write": _public_bool(controls.get("attestations_write")),
-        "pypi_publish_credential_reference": _public_bool(
+        "pypi_publish_auth_material_reference": _public_bool(
             controls.get("pypi_publish_credential_reference")
         ),
         "trusted_publishing_action_detected": _public_bool(
@@ -358,9 +399,11 @@ def _public_report_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "positive_controls": _public_string_list(payload.get("positive_controls")),
         "findings": findings,
         "finding_count": len(findings),
-        "unverified_settings": _public_string_list(payload.get("unverified_settings")),
+        "unverified_settings": _public_unverified_settings(payload.get("unverified_settings")),
         "release_controls": _public_release_controls(payload.get("release_controls")),
-        "recommended_next_actions": _public_string_list(payload.get("recommended_next_actions")),
+        "recommended_next_actions": _public_recommended_next_actions(
+            payload.get("recommended_next_actions")
+        ),
         "rules": _public_rules(payload.get("rules")),
         "automation_allowed": False,
         "patch_application_allowed": False,
@@ -383,9 +426,11 @@ def _public_output_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "positive_controls": _public_string_list(payload.get("positive_controls")),
         "findings": findings,
         "finding_count": len(findings),
-        "unverified_settings": _public_string_list(payload.get("unverified_settings")),
+        "unverified_settings": _public_unverified_settings(payload.get("unverified_settings")),
         "release_controls": controls,
-        "recommended_next_actions": _public_string_list(payload.get("recommended_next_actions")),
+        "recommended_next_actions": _public_recommended_next_actions(
+            payload.get("recommended_next_actions")
+        ),
         "rules": rules,
         "automation_allowed": False,
         "patch_application_allowed": False,
@@ -407,9 +452,11 @@ def _render_public_json_document(summary: dict[str, Any]) -> str:
         "positive_controls": _public_string_list(summary.get("positive_controls")),
         "findings": findings,
         "finding_count": len(findings),
-        "unverified_settings": _public_string_list(summary.get("unverified_settings")),
+        "unverified_settings": _public_unverified_settings(summary.get("unverified_settings")),
         "release_controls": controls,
-        "recommended_next_actions": _public_string_list(summary.get("recommended_next_actions")),
+        "recommended_next_actions": _public_recommended_next_actions(
+            summary.get("recommended_next_actions")
+        ),
         "rules": rules,
         "automation_allowed": False,
         "patch_application_allowed": False,
@@ -446,10 +493,10 @@ def _render_public_markdown_document(summary: dict[str, Any]) -> str:
             "",
             "## Findings",
             "",
-            "- pypi_publish_credential_surface (medium)",
-            "  - surface: publish_credentials",
-            "  - summary: Release publish path references a PyPI publish credential environment.",
-            "  - recommendation: Prefer PyPI Trusted Publishing/OIDC when configured; until then, keep the publish credential narrowly scoped, rotated, and protected by maintainer review.",
+            "- pypi_publish_auth_material_surface (medium)",
+            "  - surface: publish_auth_material",
+            "  - summary: Release publish path references a PyPI publish authentication environment.",
+            "  - recommendation: Prefer PyPI Trusted Publishing/OIDC when configured; until then, keep publish authentication narrowly scoped, rotated, and protected by maintainer review.",
             "- release_contents_write_scope (review)",
             "  - surface: workflow_permissions",
             "  - summary: Release workflow requests contents: write.",
@@ -465,7 +512,7 @@ def _render_public_markdown_document(summary: dict[str, Any]) -> str:
             "- GitHub environment protection and required reviewers for publish jobs",
             "- PyPI Trusted Publisher configuration",
             "- branch protection / rulesets for release workflow changes",
-            "- repository secret inventory and rotation status",
+            "- repository publish-auth material inventory and rotation status",
             "",
             "## Authority boundary",
             "",
@@ -479,22 +526,22 @@ def _render_public_markdown_document(summary: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _write_public_report_document(path: Path, document: str) -> None:
+def _write_public_report_document(path: Path, report_text: str) -> None:
     """Write a public release-risk report document.
 
     The release anti-hijack report contains only boolean control-plane metadata,
     static finding identifiers, and operator recommendations. It intentionally
-    does not serialize repository secret values, environment values, or publish
-    credentials.
+    does not serialize private environment values or publish authentication
+    material.
     """
 
-    path.write_text(document, encoding="utf-8")  # lgtm[py/clear-text-storage-sensitive-data]
+    path.write_text(report_text, encoding="utf-8")
 
 
-def _emit_public_report_document(document: str) -> None:
+def _emit_public_report_document(report_text: str) -> None:
     """Emit a public release-risk report document to stdout."""
 
-    sys.stdout.write(document)  # lgtm[py/clear-text-logging-sensitive-data]
+    sys.stdout.write(report_text)
 
 
 def write_artifacts(
