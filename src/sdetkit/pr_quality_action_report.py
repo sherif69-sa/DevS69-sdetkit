@@ -2824,6 +2824,29 @@ def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
         if _string(item.get("path")) != "pr-quality-comment"
     ]
 
+    authority_evidence_sources = [
+        item
+        for item in (
+            _as_dict(candidate) for candidate in _as_list(model.get("authority_evidence_sources"))
+        )
+        if _string(item.get("path"))
+    ]
+    if not authority_evidence_sources:
+        authority_evidence_sources = _authority_evidence_source_index()
+
+    authority_source_rows = [
+        (
+            _string(item.get("path")),
+            "Open " + _string(item.get("title") or item.get("path")),
+            _string(
+                item.get("description")
+                or item.get("surface")
+                or "PR Quality authority evidence source."
+            ),
+        )
+        for item in authority_evidence_sources
+    ]
+
     def artifact_cards(rows: list[tuple[str, str, str]]) -> str:
         return "\n".join(
             '<article class="artifact-card">'
@@ -2898,6 +2921,13 @@ def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
         "      <h2>Artifact entry points</h2>\n"
         '      <div class="artifact-grid">\n'
         f"        {artifact_cards(artifact_rows)}\n"
+        "      </div>\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        "      <h2>Authority evidence sources</h2>\n"
+        '      <p class="boundary">Reporting-only source map. This source map explains authority evidence and does not authorize patch automation, security dismissal, merge, or semantic-equivalence claims.</p>\n'
+        '      <div class="artifact-grid">\n'
+        f"        {artifact_cards(authority_source_rows)}\n"
         "      </div>\n"
         "    </section>\n"
         '    <section class="card">\n'
