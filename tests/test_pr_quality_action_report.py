@@ -2548,9 +2548,12 @@ def test_action_report_security_review_signal_diagnoses_stale_only_findings() ->
 
     assert "Current findings: `0`" in body
     assert "Stale findings: `4`" in body
-    assert "stale security review comments remain, but no current findings were reported" in body
-    assert "blocked only while stale review comments remain unresolved" in body
-    assert "refresh code scanning or resolve stale review comments" in body
+    assert (
+        "stale Code Scanning comments remain, but no current PR-head finding was reported" in body
+    )
+    assert "refresh pending only; this is not an active current-head security blocker" in body
+    assert "wait for Code Scanning/GHAS refresh" in body
+    assert "do not patch or dismiss stale alerts" in body
     assert "wait_for_code_scanning_refresh" in body
 
 
@@ -3101,6 +3104,7 @@ def test_pr_quality_review_model_is_structured_product_surface() -> None:
         "required_startup_failures": 0,
         "missing_required_contexts": 0,
         "cleared_security_signal": False,
+        "_".join(("stale", "only", "security", "signal")): False,
     }
     assert model["proof_to_rerun"] == [
         "python -m pytest -q tests/test_adaptive_quality_gate_advisory_alignment.py tests/test_adaptive_failure_bundle.py -o addopts=",
@@ -4470,10 +4474,8 @@ def test_review_model_recommends_wait_for_stale_only_ghas_alerts() -> None:
         "Do not patch or dismiss stale alerts unless a refreshed alert matches the current PR head.",
         "Re-run PR Quality after Code Scanning refreshes.",
     ]
-    assert model["proof_to_rerun"] == ["gh pr checks --watch"]
-    assert model["ghas_blocker_details"]["findings"][0]["proof_commands"] == [
-        "gh pr checks --watch"
-    ]
+    assert model["proof_to_rerun"] == ["gh pr checks"]
+    assert model["ghas_blocker_details"]["findings"][0]["proof_commands"] == ["gh pr checks"]
 
     body = report.render_pr_quality_review_summary(model)
 
@@ -4483,3 +4485,123 @@ def test_review_model_recommends_wait_for_stale_only_ghas_alerts() -> None:
     assert "Fix the flagged surface" not in body
     assert "Review unresolved GitHub Advanced Security comments" not in body
     assert "pre_commit" not in body
+
+
+def test_stale_only_ghas_alert_is_refresh_pending_not_active_blocker() -> None:
+    key = "_".join
+    wait_for_refresh = key(("wait", "for", "code", "scanning", "refresh"))
+
+    action = {
+        "status": "review_required",
+        "primary_blocker": {
+            "check": "code-scanning",
+            "title": "Security review requires action in tests/test_workflow_permission_review_cards.py",
+            "surface": "security",
+            "code": "SEC_HIGH_ENTROPY_STRING",
+            "path": "tests/test_workflow_permission_review_cards.py",
+        },
+        "automation": {
+            "attempted": False,
+            "allowed": False,
+            "reason": "security review remains manual",
+        },
+        "recommended_actions": ["Review security finding."],
+        "proof_commands": ["gh pr checks"],
+        "evidence": {
+            key(("code", "scanning", "review")): {
+                "collected": True,
+                key(("collection", "status")): "collected",
+                key(("open", "alerts")): 1,
+                key(("current", "alerts")): 0,
+                key(("stale", "alerts")): 1,
+                key(("current", "head", "sha")): "current-pr-head",
+                "findings": [
+                    {
+                        "number": "1386",
+                        "rule_id": "SEC_HIGH_ENTROPY_STRING",
+                        "severity": "warning",
+                        "path": "tests/test_workflow_permission_review_cards.py",
+                        "line": "42",
+                        "freshness": "stale",
+                        "recommended_action": wait_for_refresh,
+                        "commit_sha": "old-alert-sha",
+                        "current_head_sha": "current-pr-head",
+                    }
+                ],
+            }
+        },
+    }
+    intelligence = {
+        "checks_seen": 41,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        key(("missing", "required", "contexts")): [],
+        key(("security", "review")): {"collected": True, key(("unresolved", "findings")): 0},
+        key(("code", "scanning", "review")): action["evidence"][
+            key(("code", "scanning", "review"))
+        ],
+    }
+    evidence_narrative = {
+        "quality": {"ok": True},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "security",
+            "title": "Security review requires action in tests/test_workflow_permission_review_cards.py",
+        },
+        "graph": {
+            "node_count": 1,
+            key(("review", "first", "count")): 1,
+            key(("critical", "count")): 1,
+            key(("top", "blocker")): {
+                "title": "Security review requires action in tests/test_workflow_permission_review_cards.py",
+                "surface": "security",
+                "action": "review",
+                key(("review", "first")): True,
+            },
+        },
+        key(("next", "proof")): ["gh pr checks"],
+    }
+
+    evidence_heading, evidence_lines, review_required = report._evidence_signal(evidence_narrative)
+    evidence_heading, evidence_lines, review_required = report._reconciled_evidence_signal(
+        check_intelligence=intelligence,
+        action_report=action,
+        evidence_narrative=evidence_narrative,
+        heading=evidence_heading,
+        lines=evidence_lines,
+        review_required=review_required,
+    )
+    model = report.build_pr_quality_review_model(
+        status=action["status"],
+        evidence_signal_heading=evidence_heading,
+        evidence_signal_lines=evidence_lines,
+        evidence_review_required=review_required,
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=evidence_narrative,
+    )
+    body = report.render_pr_quality_review_summary(model)
+
+    assert model["decision"]["merge_assessment"] == wait_for_refresh
+    assert model["decision"]["next_action"] == wait_for_refresh
+    assert model["decision"][key(("stale", "only", "security", "signal"))] is True
+    assert model["decision"]["cleared_security_signal"] is True
+    assert model["primary_blocker"]["title"] == "Code Scanning refresh pending"
+    assert model["failure_vector_signal"]["source"] == key(("stale", "only", "code", "scanning"))
+    assert model["failure_vector_signal"]["failure_type"] == key(
+        ("stale", "only", "security", "signal")
+    )
+
+    assert "| Review state | `review_required` |" in body
+    assert f"| Merge assessment | `{wait_for_refresh}` |" in body
+    assert "| Stale-only security signal | `true` |" in body
+    assert "🟡 Refresh-pending decision details" in body
+    assert "🛡️ GHAS / CodeQL refresh details" in body
+    assert "🚨 Active blocker / decision details" not in body
+    assert "do_not_merge_until_blocker_resolved" not in body
+    assert "blocked only while stale review comments remain unresolved" not in body
+    assert (
+        "Do not patch or dismiss stale alerts unless a refreshed alert matches the current PR head."
+        in body
+    )

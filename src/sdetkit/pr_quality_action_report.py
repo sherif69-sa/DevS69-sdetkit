@@ -56,6 +56,9 @@ TRUE_POSITIVE_FIX_REQUIRED = "_".join(("true", "positive", "fix", "required"))
 CURRENT_ALERTS = "_".join(("current", "alerts"))
 STALE_ALERTS = "_".join(("stale", "alerts"))
 UNRESOLVED_FINDINGS = "_".join(("unresolved", "findings"))
+STALE_ONLY_CODE_SCANNING = "_".join(("stale", "only", "code", "scanning"))
+STALE_ONLY_SECURITY_SIGNAL = "_".join(("stale", "only", "security", "signal"))
+WAIT_FOR_CODE_SCANNING_REFRESH = "_".join(("wait", "for", "code", "scanning", "refresh"))
 
 
 FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
@@ -1205,9 +1208,9 @@ def _security_review_real_diagnosis_lines(
     else:
         lines.extend(
             [
-                "- Diagnosis: stale security review comments remain, but no current findings were reported.",
-                "- Merge impact: blocked only while stale review comments remain unresolved.",
-                "- Security review action: refresh code scanning or resolve stale review comments with a reviewed disposition.",
+                "- Diagnosis: stale Code Scanning comments remain, but no current PR-head finding was reported.",
+                "- Merge impact: refresh pending only; this is not an active current-head security blocker.",
+                "- Security review action: wait for Code Scanning/GHAS refresh and rerun PR Quality; do not patch or dismiss stale alerts.",
             ]
         )
 
@@ -1863,11 +1866,11 @@ def _review_model_ghas_blocker_details(
                 "make proof-after-format",
             ]
         elif freshness == "stale":
-            proof_commands = ["gh pr checks --watch"]
+            proof_commands = ["gh pr checks"]
         else:
             proof_commands = [
                 "Review alert freshness against the current PR head SHA.",
-                "gh pr checks --watch",
+                "gh pr checks",
             ]
 
         findings.append(
@@ -1935,6 +1938,11 @@ def build_pr_quality_review_model(
         action_report=action_report,
         check_intelligence=check_intelligence,
     )
+    stale_only_security_signal = (
+        _int(ghas_blocker_details.get("open_alerts")) > 0
+        and _int(ghas_blocker_details.get("current_alerts")) == 0
+        and _int(ghas_blocker_details.get("stale_alerts")) > 0
+    )
 
     surface = _string(
         primary_signal.get("surface")
@@ -1955,7 +1963,10 @@ def build_pr_quality_review_model(
         or ""
     )
 
-    if status != "green":
+    if stale_only_security_signal:
+        merge_assessment = WAIT_FOR_CODE_SCANNING_REFRESH
+        next_action = WAIT_FOR_CODE_SCANNING_REFRESH
+    elif status != "green":
         merge_assessment = "do_not_merge_until_blocker_resolved"
         next_action = action or "review_primary_blocker"
     elif evidence_review_required:
@@ -2025,18 +2036,47 @@ def build_pr_quality_review_model(
         if isinstance(item, str) and item.strip()
     ]
 
-    if (
-        _int(ghas_blocker_details.get("open_alerts")) > 0
-        and _int(ghas_blocker_details.get("current_alerts")) == 0
-        and _int(ghas_blocker_details.get("stale_alerts")) > 0
-    ):
+    primary_title = _string(primary_blocker.get("title") or title)
+    primary_surface = _string(primary_blocker.get("surface") or surface)
+    primary_action = _string(primary_blocker.get("action") or action or next_action)
+    primary_code = _string(primary_blocker.get("code"))
+    primary_details = _string(
+        primary_blocker.get("details")
+        or primary_blocker.get("message")
+        or primary_blocker.get("reason")
+    )
+
+    if stale_only_security_signal:
         stale_only_actions = [
             "Wait for Code Scanning/GHAS refresh; no current code-scanning alert matches the PR head SHA.",
             "Do not patch or dismiss stale alerts unless a refreshed alert matches the current PR head.",
             "Re-run PR Quality after Code Scanning refreshes.",
         ]
         recommended_actions = stale_only_actions
-        proof_commands = ["gh pr checks --watch"]
+        proof_commands = ["gh pr checks"]
+        cleared_security_signal = True
+        primary_title = "Code Scanning refresh pending"
+        primary_surface = "security"
+        primary_action = WAIT_FOR_CODE_SCANNING_REFRESH
+        primary_code = STALE_ONLY_CODE_SCANNING
+        primary_details = (
+            "No current Code Scanning alert matches the PR head SHA; "
+            "stale alerts are refresh-pending evidence only."
+        )
+        failure_vector_signal = {
+            "source": STALE_ONLY_CODE_SCANNING,
+            "headline_signal": primary_title,
+            "actual_failure": "No current Code Scanning alert matches the PR head SHA.",
+            "failure_type": STALE_ONLY_SECURITY_SIGNAL,
+            "failing_command": "none",
+            "failing_test_or_check": "none",
+            "exit_code": 0,
+            "owner_hint": "none",
+            "affected_files": [],
+            "safe_fix_candidate": False,
+            "safe_fix_allowed": False,
+            "reporting_only": True,
+        }
 
     return {
         "schema_version": "sdetkit.pr_quality.review_model.v2",
@@ -2051,16 +2091,12 @@ def build_pr_quality_review_model(
         "generated_by": "sdetkit.pr_quality_action_report",
         "artifact_index": _review_model_artifact_index(),
         "primary_blocker": {
-            "title": _string(primary_blocker.get("title") or title),
-            "surface": _string(primary_blocker.get("surface") or surface),
-            "action": _string(primary_blocker.get("action") or action or next_action),
-            "code": _string(primary_blocker.get("code")),
+            "title": primary_title,
+            "surface": primary_surface,
+            "action": primary_action,
+            "code": primary_code,
             "path": _string(primary_blocker.get("path")),
-            "details": _string(
-                primary_blocker.get("details")
-                or primary_blocker.get("message")
-                or primary_blocker.get("reason")
-            ),
+            "details": primary_details,
         },
         "recommended_actions": recommended_actions[:10],
         "failure_vector_signal": failure_vector_signal,
@@ -2086,6 +2122,7 @@ def build_pr_quality_review_model(
             "required_startup_failures": required_startup,
             "missing_required_contexts": missing_required,
             "cleared_security_signal": cleared_security_signal,
+            STALE_ONLY_SECURITY_SIGNAL: stale_only_security_signal,
         },
         "proof_to_rerun": proof_commands[:5],
         "authority_boundary": {
@@ -2179,16 +2216,23 @@ def _review_model_state(model: JsonObject) -> str:
     startup_total = _int(decision.get("required_startup_failures"))
     missing_total = _int(decision.get("missing_required_contexts"))
     review_first = bool(decision.get("review_first_evidence"))
+    stale_only_security_signal = bool(decision.get(STALE_ONLY_SECURITY_SIGNAL))
 
     needs_attention = (
-        status != "green"
+        (status != "green" and not stale_only_security_signal)
         or failed_total > 0
         or queued_total > 0
         or startup_total > 0
         or missing_total > 0
-        or review_first
+        or (review_first and not stale_only_security_signal)
+        or stale_only_security_signal
     )
-    is_blocked = status != "green" or failed_total > 0 or startup_total > 0 or missing_total > 0
+    is_blocked = (
+        (status != "green" and not stale_only_security_signal)
+        or failed_total > 0
+        or startup_total > 0
+        or missing_total > 0
+    )
 
     if is_blocked:
         return "needs_attention"
@@ -2278,6 +2322,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     startup_total = _count(decision.get("required_startup_failures"))
     missing_total = _count(decision.get("missing_required_contexts"))
     review_first = bool(decision.get("review_first_evidence"))
+    stale_only_security_signal = bool(decision.get(STALE_ONLY_SECURITY_SIGNAL))
     first_blocker = _review_model_scalar(
         primary_blocker.get("title") or decision.get("signal_title") or "none"
     )
@@ -2287,14 +2332,20 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     first_recommended_action = recommended_actions[0] if recommended_actions else first_action
 
     needs_attention = (
-        status != "green"
+        (status != "green" and not stale_only_security_signal)
         or failed_total > 0
         or queued_total > 0
         or startup_total > 0
         or missing_total > 0
-        or review_first
+        or (review_first and not stale_only_security_signal)
+        or stale_only_security_signal
     )
-    is_blocked = status != "green" or failed_total > 0 or startup_total > 0 or missing_total > 0
+    is_blocked = (
+        (status != "green" and not stale_only_security_signal)
+        or failed_total > 0
+        or startup_total > 0
+        or missing_total > 0
+    )
     if is_blocked:
         review_state = "needs_attention"
     elif needs_attention:
@@ -2332,13 +2383,13 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             "- `pr-comment-body.md` — raw rendered comment body",
         ]
 
-    active_blocker_open = is_blocked or review_first
+    active_blocker_open = is_blocked or (review_first and not stale_only_security_signal)
     failure_vector_open = active_blocker_open and failure_actual not in {"", "none"}
     proof_open = active_blocker_open and bool(proof_commands)
     ghas_findings = [
         _as_dict(item) for item in _as_list(ghas_blocker_details.get("findings")) if _as_dict(item)
     ]
-    ghas_open = active_blocker_open and bool(ghas_findings)
+    ghas_open = bool(ghas_findings) and (active_blocker_open or stale_only_security_signal)
 
     lines = [
         "# PR Quality Review Summary",
@@ -2391,6 +2442,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         f"| Signal | `{_markdown_table_value(decision.get('comment_signal'))}` |",
         f"| Review-first evidence | `{_review_model_scalar(decision.get('review_first_evidence'))}` |",
         f"| Cleared security signal | `{_review_model_scalar(decision.get('cleared_security_signal'))}` |",
+        f"| Stale-only security signal | `{str(stale_only_security_signal).lower()}` |",
         "",
     ]
     if recommended_actions:
@@ -2401,9 +2453,13 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
 
     lines.extend(
         _details(
-            "🚨 Active blocker / decision details"
-            if active_blocker_open
-            else "✅ Decision details",
+            "🟡 Refresh-pending decision details"
+            if stale_only_security_signal
+            else (
+                "🚨 Active blocker / decision details"
+                if active_blocker_open
+                else "✅ Decision details"
+            ),
             blocker_body,
             open_by_default=active_blocker_open,
         )
@@ -2495,7 +2551,11 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
 
     lines.extend(
         _details(
-            "🛡️ GHAS / CodeQL blocker details",
+            (
+                "🛡️ GHAS / CodeQL refresh details"
+                if stale_only_security_signal
+                else "🛡️ GHAS / CodeQL blocker details"
+            ),
             ghas_body,
             open_by_default=ghas_open,
         )
@@ -2791,15 +2851,22 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
     startup_total = _count(decision.get("required_startup_failures"))
     missing_total = _count(decision.get("missing_required_contexts"))
     review_first = bool(decision.get("review_first_evidence"))
+    stale_only_security_signal = bool(decision.get(STALE_ONLY_SECURITY_SIGNAL))
     needs_attention = (
-        status != "green"
+        (status != "green" and not stale_only_security_signal)
         or failed_total > 0
         or queued_total > 0
         or startup_total > 0
         or missing_total > 0
-        or review_first
+        or (review_first and not stale_only_security_signal)
+        or stale_only_security_signal
     )
-    is_blocked = status != "green" or failed_total > 0 or startup_total > 0 or missing_total > 0
+    is_blocked = (
+        (status != "green" and not stale_only_security_signal)
+        or failed_total > 0
+        or startup_total > 0
+        or missing_total > 0
+    )
 
     if is_blocked:
         status_class = "status-failed"
