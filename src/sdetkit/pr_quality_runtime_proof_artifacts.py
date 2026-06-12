@@ -158,6 +158,8 @@ def _repo_memory_summary(profile: Mapping[str, Any]) -> JsonObject:
     provenance = _as_dict(payload.get("proof_provenance"))
     safety_gate = _as_dict(payload.get("safety_gate_evidence"))
     safety_boundary = _as_dict(safety_gate.get("decision_boundary"))
+    trajectory_authority = _as_dict(payload.get("trajectory_authority_evidence"))
+    trajectory_authority_boundary = _as_dict(trajectory_authority.get("decision_boundary"))
     boundary = _as_dict(payload.get("decision_boundary"))
     return {
         "collection_status": COLLECTED,
@@ -181,6 +183,32 @@ def _repo_memory_summary(profile: Mapping[str, Any]) -> JsonObject:
         "safety_gate_merge_authorized": _bool(safety_boundary.get("merge_authorized")),
         "safety_gate_semantic_equivalence_proven": _bool(
             safety_boundary.get("semantic_equivalence_proven")
+        ),
+        "trajectory_authority_status": _string(trajectory_authority.get("status") or NOT_COLLECTED),
+        "trajectory_authority_record_count": _int(trajectory_authority.get("record_count")),
+        "trajectory_authority_review_first_count": _int(
+            trajectory_authority.get("review_first_count")
+        ),
+        "trajectory_authority_auto_fix_allowed_count": _int(
+            trajectory_authority.get("auto_fix_allowed_count")
+        ),
+        "trajectory_authority_reporting_only_count": _int(
+            trajectory_authority.get("reporting_only_count")
+        ),
+        "trajectory_authority_automation_allowed": _bool(
+            trajectory_authority_boundary.get("automation_allowed")
+        ),
+        "trajectory_authority_patch_application_allowed": _bool(
+            trajectory_authority_boundary.get("patch_application_allowed")
+        ),
+        "trajectory_authority_security_dismissal_allowed": _bool(
+            trajectory_authority_boundary.get("automatic_dismissal_allowed")
+        ),
+        "trajectory_authority_merge_authorized": _bool(
+            trajectory_authority_boundary.get("merge_authorized")
+        ),
+        "trajectory_authority_semantic_equivalence_proven": _bool(
+            trajectory_authority_boundary.get("semantic_equivalence_proven")
         ),
         "automation_allowed": _bool(boundary.get("automation_allowed")),
         "merge_authorized": _bool(boundary.get("merge_authorized")),
@@ -498,6 +526,42 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
                 (
                     "- RepoMemory SafetyGate semantic equivalence proven: "
                     f"`{str(_bool(memory.get('safety_gate_semantic_equivalence_proven'))).lower()}`"
+                ),
+                (
+                    "- RepoMemory trajectory authority status: "
+                    f"`{_string(memory.get('trajectory_authority_status'))}`"
+                ),
+                (
+                    "- RepoMemory trajectory authority records: "
+                    f"`{_int(memory.get('trajectory_authority_record_count'))}`"
+                ),
+                (
+                    "- RepoMemory trajectory authority review-first records: "
+                    f"`{_int(memory.get('trajectory_authority_review_first_count'))}`"
+                ),
+                (
+                    "- RepoMemory trajectory authority auto-fix evidence records: "
+                    f"`{_int(memory.get('trajectory_authority_auto_fix_allowed_count'))}`"
+                ),
+                (
+                    "- RepoMemory trajectory authority reporting-only records: "
+                    f"`{_int(memory.get('trajectory_authority_reporting_only_count'))}`"
+                ),
+                (
+                    "- RepoMemory trajectory authority patch application allowed: "
+                    f"`{str(_bool(memory.get('trajectory_authority_patch_application_allowed'))).lower()}`"
+                ),
+                (
+                    "- RepoMemory trajectory authority security dismissal allowed: "
+                    f"`{str(_bool(memory.get('trajectory_authority_security_dismissal_allowed'))).lower()}`"
+                ),
+                (
+                    "- RepoMemory trajectory authority merge authorized: "
+                    f"`{str(_bool(memory.get('trajectory_authority_merge_authorized'))).lower()}`"
+                ),
+                (
+                    "- RepoMemory trajectory authority semantic equivalence proven: "
+                    f"`{str(_bool(memory.get('trajectory_authority_semantic_equivalence_proven'))).lower()}`"
                 ),
             ]
         )
