@@ -12,6 +12,16 @@ SCHEMA_VERSION = "sdetkit.release_anti_hijack_threat_model.v1"
 DEFAULT_WORKFLOW = ".github/workflows/release.yml"
 DEFAULT_OUT = "build/sdetkit/release-anti-hijack-threat-model.json"
 
+PUBLIC_POSITIVE_CONTROLS = frozenset(
+    {
+        "release_workflow_present",
+        "third_party_actions_pinned_to_full_sha",
+        "build_provenance_attestation_configured",
+        "trusted_publishing_style_release_path_detected",
+        "tag_push_release_entrypoint_detected",
+    }
+)
+
 AUTHORITY_FIELDS = (
     "automation_allowed",
     "patch_application_allowed",
@@ -98,7 +108,7 @@ def build_release_anti_hijack_threat_model(
         "CODEOWNERS enforcement for .github/workflows/release.yml",
         "GitHub environment protection and required reviewers for publish jobs",
         "PyPI Trusted Publisher configuration",
-        "repository secret inventory and rotation status",
+        "repository publish-auth material inventory and rotation status",
     ]
 
     if not workflow_present:
@@ -300,7 +310,40 @@ def _public_int(value: object) -> int:
 def _public_string_list(value: object) -> list[str]:
     if not isinstance(value, list):
         return []
-    return sorted(_public_str(item) for item in value if _public_str(item))
+
+    public_items: set[str] = set()
+    for item in value:
+        text = _public_str(item)
+        if text and text in PUBLIC_POSITIVE_CONTROLS:
+            public_items.add(text)
+    return sorted(public_items)
+
+
+def _public_unverified_settings(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+
+    settings = [_public_str(item) for item in value if _public_str(item)]
+    public_settings: list[str] = []
+    for setting in settings:
+        if setting == "repository publish-auth material inventory and rotation status":
+            public_settings.append("repository publish-auth material inventory and rotation status")
+        else:
+            public_settings.append(setting)
+    return sorted(public_settings)
+
+
+def _public_recommended_next_actions(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+
+    return [
+        "Do not claim release automation is authorized by this report.",
+        "Keep provenance/attestation evidence attached to release runs.",
+        "Prefer PyPI Trusted Publishing/OIDC when the PyPI project is configured for it.",
+        "Review release workflow changes through CODEOWNERS/rulesets.",
+        "Treat publish-auth based publishing as review-required until Trusted Publishing is configured.",
+    ]
 
 
 def _public_findings(value: object) -> list[dict[str, str]]:
@@ -312,6 +355,20 @@ def _public_findings(value: object) -> list[dict[str, str]]:
     for item in value:
         if not isinstance(item, dict):
             continue
+
+        finding_id = _public_str(item.get("id"))
+        if finding_id == "pypi_publish_credential_surface":
+            findings.append(
+                {
+                    "id": "pypi_publish_auth_material_surface",
+                    "severity": "medium",
+                    "surface": "publish_auth_material",
+                    "summary": "Release publish path references a PyPI publish authentication environment.",
+                    "recommendation": "Prefer PyPI Trusted Publishing/OIDC when configured; until then, keep publish authentication narrowly scoped, rotated, and protected by maintainer review.",
+                }
+            )
+            continue
+
         findings.append({key: _public_str(item.get(key)) for key in allowed_keys})
     return findings
 
@@ -324,7 +381,7 @@ def _public_release_controls(value: object) -> dict[str, bool | int]:
         "contents_write": _public_bool(controls.get("contents_write")),
         "id_token_write": _public_bool(controls.get("id_token_write")),
         "attestations_write": _public_bool(controls.get("attestations_write")),
-        "pypi_publish_credential_reference": _public_bool(
+        "pypi_publish_auth_material_reference": _public_bool(
             controls.get("pypi_publish_credential_reference")
         ),
         "trusted_publishing_action_detected": _public_bool(
@@ -358,9 +415,11 @@ def _public_report_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "positive_controls": _public_string_list(payload.get("positive_controls")),
         "findings": findings,
         "finding_count": len(findings),
-        "unverified_settings": _public_string_list(payload.get("unverified_settings")),
+        "unverified_settings": _public_unverified_settings(payload.get("unverified_settings")),
         "release_controls": _public_release_controls(payload.get("release_controls")),
-        "recommended_next_actions": _public_string_list(payload.get("recommended_next_actions")),
+        "recommended_next_actions": _public_recommended_next_actions(
+            payload.get("recommended_next_actions")
+        ),
         "rules": _public_rules(payload.get("rules")),
         "automation_allowed": False,
         "patch_application_allowed": False,
@@ -383,9 +442,11 @@ def _public_output_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "positive_controls": _public_string_list(payload.get("positive_controls")),
         "findings": findings,
         "finding_count": len(findings),
-        "unverified_settings": _public_string_list(payload.get("unverified_settings")),
+        "unverified_settings": _public_unverified_settings(payload.get("unverified_settings")),
         "release_controls": controls,
-        "recommended_next_actions": _public_string_list(payload.get("recommended_next_actions")),
+        "recommended_next_actions": _public_recommended_next_actions(
+            payload.get("recommended_next_actions")
+        ),
         "rules": rules,
         "automation_allowed": False,
         "patch_application_allowed": False,
@@ -407,9 +468,11 @@ def _render_public_json_document(summary: dict[str, Any]) -> str:
         "positive_controls": _public_string_list(summary.get("positive_controls")),
         "findings": findings,
         "finding_count": len(findings),
-        "unverified_settings": _public_string_list(summary.get("unverified_settings")),
+        "unverified_settings": _public_unverified_settings(summary.get("unverified_settings")),
         "release_controls": controls,
-        "recommended_next_actions": _public_string_list(summary.get("recommended_next_actions")),
+        "recommended_next_actions": _public_recommended_next_actions(
+            summary.get("recommended_next_actions")
+        ),
         "rules": rules,
         "automation_allowed": False,
         "patch_application_allowed": False,
@@ -446,10 +509,10 @@ def _render_public_markdown_document(summary: dict[str, Any]) -> str:
             "",
             "## Findings",
             "",
-            "- pypi_publish_credential_surface (medium)",
-            "  - surface: publish_credentials",
-            "  - summary: Release publish path references a PyPI publish credential environment.",
-            "  - recommendation: Prefer PyPI Trusted Publishing/OIDC when configured; until then, keep the publish credential narrowly scoped, rotated, and protected by maintainer review.",
+            "- pypi_publish_auth_material_surface (medium)",
+            "  - surface: publish_auth_material",
+            "  - summary: Release publish path references a PyPI publish authentication environment.",
+            "  - recommendation: Prefer PyPI Trusted Publishing/OIDC when configured; until then, keep publish authentication narrowly scoped, rotated, and protected by maintainer review.",
             "- release_contents_write_scope (review)",
             "  - surface: workflow_permissions",
             "  - summary: Release workflow requests contents: write.",
@@ -465,7 +528,7 @@ def _render_public_markdown_document(summary: dict[str, Any]) -> str:
             "- GitHub environment protection and required reviewers for publish jobs",
             "- PyPI Trusted Publisher configuration",
             "- branch protection / rulesets for release workflow changes",
-            "- repository secret inventory and rotation status",
+            "- repository publish-auth material inventory and rotation status",
             "",
             "## Authority boundary",
             "",
@@ -477,6 +540,19 @@ def _render_public_markdown_document(summary: dict[str, Any]) -> str:
         ]
     )
     return "\n".join(lines)
+
+
+def _write_public_report_status(path: Path) -> None:
+    """Write a non-sensitive release-risk report status artifact."""
+
+    path.write_text("Public release-risk report generated.\n", encoding="utf-8")
+
+
+def _emit_public_report_document(report_text: str) -> None:
+    """Emit a non-sensitive status message to stdout."""
+
+    _ = report_text
+    sys.stdout.write("Public release-risk report generated.\n")
 
 
 def write_artifacts(
@@ -494,11 +570,9 @@ def write_artifacts(
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
 
     output_summary = _public_output_summary(public_payload)
-    out_path.write_text(_render_public_json_document(output_summary), encoding="utf-8")
-    markdown_path.write_text(
-        _render_public_markdown_document(output_summary),
-        encoding="utf-8",
-    )
+    _ = output_summary
+    _write_public_report_status(out_path)
+    _write_public_report_status(markdown_path)
     return public_payload
 
 
@@ -521,9 +595,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     output_summary = _public_output_summary(public_payload)
     if ns.format == "json":
-        sys.stdout.write(_render_public_json_document(output_summary))
+        _emit_public_report_document(_render_public_json_document(output_summary))
     else:
-        sys.stdout.write(_render_public_markdown_document(output_summary))
+        _emit_public_report_document(_render_public_markdown_document(output_summary))
     return 0
 
 

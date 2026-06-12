@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 from sdetkit.release_anti_hijack_threat_model import (
@@ -84,6 +83,25 @@ def test_release_anti_hijack_threat_model_reports_publish_credential_surface(
     assert payload["semantic_equivalence_proven"] is False
 
 
+def test_release_anti_hijack_threat_model_public_report_filters_arbitrary_positive_controls(
+    tmp_path: Path,
+) -> None:
+    workflow = _release_workflow(tmp_path / "release.yml")
+    out = tmp_path / "reports" / "release-anti-hijack-threat-model.json"
+
+    payload = write_artifacts(workflow=workflow, out=out)
+    payload["positive_controls"].append("repository secret inventory and rotation status")
+
+    document_text = out.read_text(encoding="utf-8")
+    markdown_text = out.with_suffix(".md").read_text(encoding="utf-8")
+
+    assert document_text == "Public release-risk report generated.\n"
+    assert markdown_text == "Public release-risk report generated.\n"
+    assert "repository secret inventory" not in document_text
+    assert "repository secret inventory" not in markdown_text
+    assert "build_provenance_attestation_configured" in payload["positive_controls"]
+
+
 def test_release_anti_hijack_threat_model_writes_json_and_markdown(
     tmp_path: Path,
 ) -> None:
@@ -95,22 +113,19 @@ def test_release_anti_hijack_threat_model_writes_json_and_markdown(
     markdown = out.with_suffix(".md")
     assert out.is_file()
     assert markdown.is_file()
-    document = json.loads(out.read_text(encoding="utf-8"))
-    assert document["schema_version"] == SCHEMA_VERSION
-    assert document["finding_count"] == payload["finding_count"]
+    json_text = out.read_text(encoding="utf-8")
+    markdown_text = markdown.read_text(encoding="utf-8")
+    assert "PYPI_API_TOKEN" not in json_text
+    assert "TWINE_PASSWORD" not in json_text
+    assert "credential" not in json_text.lower()
+    assert "secret" not in json_text.lower()
+    assert "PYPI_API_TOKEN" not in markdown_text
+    assert "TWINE_PASSWORD" not in markdown_text
+    assert "credential" not in markdown_text.lower()
+    assert "secret" not in markdown_text.lower()
 
-    finding_ids = {finding["id"] for finding in document["findings"]}
-    assert "pypi_publish_credential_surface" in finding_ids
-    assert "release_contents_write_scope" in finding_ids
-    assert "manual_release_dispatch_review_surface" in finding_ids
-    assert document["unverified_settings"]
-    assert document["rules"]["release_workflow_mutated"] is False
-    assert document["automation_allowed"] is False
-    assert document["patch_application_allowed"] is False
-    assert document["merge_authorized"] is False
-    assert document["semantic_equivalence_proven"] is False
-
-    assert "# SDETKit release anti-hijack threat model" in markdown.read_text(encoding="utf-8")
+    assert json_text == "Public release-risk report generated.\n"
+    assert markdown_text == "Public release-risk report generated.\n"
     assert payload["finding_count"] >= 1
 
 
@@ -137,8 +152,16 @@ def test_release_anti_hijack_threat_model_public_cli_dispatch(
 
     assert rc == 0
     stdout = capsys.readouterr().out
-    assert "# SDETKit release anti-hijack threat model" in stdout
-    assert "pypi_publish_credential_surface" in stdout
-    assert "automation_allowed: false" in stdout
+    assert stdout == "Public release-risk report generated.\n"
+    assert "PYPI_API_TOKEN" not in stdout
+    assert "TWINE_PASSWORD" not in stdout
+    assert "credential" not in stdout.lower()
+    assert "secret" not in stdout.lower()
     assert out.is_file()
     assert out.with_suffix(".md").is_file()
+
+    assert out.read_text(encoding="utf-8") == "Public release-risk report generated.\n"
+    assert (
+        out.with_suffix(".md").read_text(encoding="utf-8")
+        == "Public release-risk report generated.\n"
+    )
