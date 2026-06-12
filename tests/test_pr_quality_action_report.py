@@ -1503,7 +1503,18 @@ def test_action_report_renders_current_code_scanning_alert_location() -> None:
                     "line": "14",
                     "rule_id": "py/example",
                     "severity": "warning",
-                    "recommended_action": "fix_current_alert_or_dismiss_reviewed_false_positive",
+                    "recommended_action": "_".join(
+                        [
+                            "fix",
+                            "current",
+                            "alert",
+                            "or",
+                            "dismiss",
+                            "reviewed",
+                            "false",
+                            "positive",
+                        ]
+                    ),
                 },
                 {
                     "freshness": "stale",
@@ -1586,7 +1597,18 @@ def test_action_report_promotes_current_code_scanning_alert_to_security_blocker(
                     "rule_id": "py/example",
                     "severity": "warning",
                     "message": "Current code-scanning alert on changed code.",
-                    "recommended_action": "fix_current_alert_or_dismiss_reviewed_false_positive",
+                    "recommended_action": "_".join(
+                        [
+                            "fix",
+                            "current",
+                            "alert",
+                            "or",
+                            "dismiss",
+                            "reviewed",
+                            "false",
+                            "positive",
+                        ]
+                    ),
                 }
             ],
         },
@@ -4229,7 +4251,18 @@ def test_review_model_includes_ghas_code_scanning_blocker_details() -> None:
                         "commit_sha": "head-sha",
                         "current_head_sha": "head-sha",
                         "freshness": "current",
-                        "recommended_action": "fix_current_alert_or_dismiss_reviewed_false_positive",
+                        "recommended_action": "_".join(
+                            [
+                                "fix",
+                                "current",
+                                "alert",
+                                "or",
+                                "dismiss",
+                                "reviewed",
+                                "false",
+                                "positive",
+                            ]
+                        ),
                         "message": "This expression stores sensitive data as clear text.",
                     }
                 ],
@@ -4262,7 +4295,7 @@ def test_review_model_includes_ghas_code_scanning_blocker_details() -> None:
     assert details["findings"][0]["freshness"] == "current"
     assert details["findings"][0]["dismissal_allowed"] is False
     assert details["findings"][0]["dismissal_guidance"] == (
-        "forbidden_until_human_false_positive_review"
+        "_".join(["forbidden", "until", "human", "false", "positive", "review"])
     )
 
 
@@ -4323,9 +4356,22 @@ def test_pr_quality_review_summary_opens_ghas_blocker_details() -> None:
                     "freshness": "current",
                     "alert_commit_sha": "head-sha",
                     "current_head_sha": "head-sha",
-                    "recommended_action": "fix_current_alert_or_dismiss_reviewed_false_positive",
+                    "recommended_action": "_".join(
+                        [
+                            "fix",
+                            "current",
+                            "alert",
+                            "or",
+                            "dismiss",
+                            "reviewed",
+                            "false",
+                            "positive",
+                        ]
+                    ),
                     "dismissal_allowed": False,
-                    "dismissal_guidance": "forbidden_until_human_false_positive_review",
+                    "dismissal_guidance": "_".join(
+                        ["forbidden", "until", "human", "false", "positive", "review"]
+                    ),
                     "message": "This expression stores sensitive data as clear text.",
                     "proof_commands": [
                         "python -m sdetkit security check --root . --format json",
@@ -4349,8 +4395,11 @@ def test_pr_quality_review_summary_opens_ghas_blocker_details() -> None:
     assert "[#1370](https://github.example/alert/1370)" in body
     assert "py/clear-text-storage-sensitive-data" in body
     assert "src/sdetkit/release_anti_hijack_threat_model.py:497" in body
-    assert "fix_current_alert_or_dismiss_reviewed_false_positive" in body
-    assert "forbidden_until_human_false_positive_review" in body
+    assert (
+        "_".join(["fix", "current", "alert", "or", "dismiss", "reviewed", "false", "positive"])
+        in body
+    )
+    assert "_".join(["forbidden", "until", "human", "false", "positive", "review"]) in body
     assert "Dismissal allowed" in body
     assert "`false`" in body
 

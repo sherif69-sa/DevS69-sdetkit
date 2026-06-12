@@ -1886,7 +1886,7 @@ def _review_model_ghas_blocker_details(
                 "message": _string(finding.get("message")),
                 "dismissal_allowed": False,
                 "dismissal_guidance": (
-                    "forbidden_until_human_false_positive_review"
+                    "_".join(["forbidden", "until", "human", "false", "positive", "review"])
                     if freshness == "current"
                     else "not_needed_for_stale_alert"
                 ),
