@@ -1691,6 +1691,113 @@ def _review_model_artifact_index() -> list[JsonObject]:
     ]
 
 
+def _authority_evidence_source_index() -> list[JsonObject]:
+    return [
+        {
+            "path": "trajectory/trajectory.jsonl",
+            "kind": "jsonl",
+            "surface": "authority_evidence",
+            "title": "Trajectory authority boundary records",
+            "description": "Raw TrajectoryStore records carrying per-record authority_boundary evidence.",
+            "primary": False,
+            "format": "jsonl",
+            "reporting_only": True,
+            "authority_boundary": {
+                "boundary_mode": "reporting_only",
+                "patch_automation": False,
+                "security_dismissal": False,
+                "merge_authorization": False,
+                "semantic_equivalence_claim": False,
+            },
+        },
+        {
+            "path": "trajectory-pattern-insights/pattern-insights.json",
+            "kind": "json",
+            "surface": "authority_evidence",
+            "title": "Trajectory authority evidence rollup",
+            "description": "PatternInsights rollup of observed trajectory authority boundary evidence.",
+            "primary": False,
+            "format": "json",
+            "reporting_only": True,
+            "authority_boundary": {
+                "boundary_mode": "reporting_only",
+                "patch_automation": False,
+                "security_dismissal": False,
+                "merge_authorization": False,
+                "semantic_equivalence_claim": False,
+            },
+        },
+        {
+            "path": "repo-memory/repo-memory-profile.json",
+            "kind": "json",
+            "surface": "authority_evidence",
+            "title": "RepoMemory trajectory authority evidence",
+            "description": "RepoMemory profile containing trajectory_authority_evidence and denied authority fields.",
+            "primary": False,
+            "format": "json",
+            "reporting_only": True,
+            "authority_boundary": {
+                "boundary_mode": "reporting_only",
+                "patch_automation": False,
+                "security_dismissal": False,
+                "merge_authorization": False,
+                "semantic_equivalence_claim": False,
+            },
+        },
+        {
+            "path": "runtime-proof/summary/runtime-proof-artifacts.json",
+            "kind": "json",
+            "surface": "authority_evidence",
+            "title": "Runtime proof authority summary",
+            "description": "Runtime-proof summary exposing RepoMemory trajectory authority status and counts.",
+            "primary": False,
+            "format": "json",
+            "reporting_only": True,
+            "authority_boundary": {
+                "boundary_mode": "reporting_only",
+                "patch_automation": False,
+                "security_dismissal": False,
+                "merge_authorization": False,
+                "semantic_equivalence_claim": False,
+            },
+        },
+        {
+            "path": "runtime-proof/summary/runtime-proof-artifacts.md",
+            "kind": "markdown",
+            "surface": "authority_evidence",
+            "title": "Runtime proof authority markdown",
+            "description": "Human-readable runtime-proof authority evidence summary.",
+            "primary": False,
+            "format": "markdown",
+            "reporting_only": True,
+            "authority_boundary": {
+                "boundary_mode": "reporting_only",
+                "patch_automation": False,
+                "security_dismissal": False,
+                "merge_authorization": False,
+                "semantic_equivalence_claim": False,
+            },
+        },
+        {
+            "path": "pr-comment-metadata.json",
+            "kind": "json",
+            "surface": "authority_evidence",
+            "title": "PR comment authority metadata",
+            "description": "Comment metadata carrying RepoMemory trajectory authority evidence into visibility verification.",
+            "primary": False,
+            "format": "json",
+            "reporting_only": True,
+            "authority_boundary": {
+                "boundary_mode": "reporting_only",
+                "patch_automation": False,
+                "security_dismissal": False,
+                "merge_authorization": False,
+                "semantic_equivalence_claim": False,
+            },
+        },
+    ]
+
+
 def _review_model_failure_vector_signal(
     *,
     action_report: JsonObject,
@@ -2660,6 +2767,7 @@ def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
 
     decision = _as_dict(model.get("decision"))
     authority = _as_dict(model.get("authority_boundary"))
+    authority_evidence_sources = _authority_evidence_source_index()
 
     return {
         "schema_version": "sdetkit.pr_quality.artifacts_manifest.v1",
@@ -2669,6 +2777,7 @@ def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
         "primary_entrypoint": primary_entrypoint,
         "expected_artifact_paths": expected_paths,
         "artifacts": artifacts,
+        "authority_evidence_sources": authority_evidence_sources,
         "reporting_only": True,
         "authority_boundary": {
             "boundary_mode": _string(authority.get("boundary_mode") or "reporting_only"),

@@ -4674,3 +4674,48 @@ def test_action_report_metadata_exports_repo_memory_trajectory_authority(
     assert result[authority_key("security", "dismissal", "allowed")] is False
     assert result[authority_key("merge", "authorized")] is False
     assert result[authority_key("semantic", "equivalence", "proven")] is False
+
+
+def test_artifacts_manifest_indexes_authority_evidence_sources() -> None:
+    model = {
+        "schema_version": "sdetkit.pr_quality.review_model.v2",
+        "schema": {
+            "name": "sdetkit.pr_quality.review_model",
+            "version": 2,
+            "authority_boundary": "reporting_only",
+        },
+        "artifact_index": [],
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+        "decision": {
+            "status": "green",
+            "merge_assessment": "ready_for_review",
+            "next_action": "human_review",
+        },
+    }
+
+    manifest = report.build_pr_quality_artifacts_manifest(model)
+
+    sources = manifest["authority_evidence_sources"]
+    paths = {source["path"] for source in sources}
+
+    assert "trajectory/trajectory.jsonl" in paths
+    assert "trajectory-pattern-insights/pattern-insights.json" in paths
+    assert "repo-memory/repo-memory-profile.json" in paths
+    assert "runtime-proof/summary/runtime-proof-artifacts.json" in paths
+    assert "runtime-proof/summary/runtime-proof-artifacts.md" in paths
+    assert "pr-comment-metadata.json" in paths
+
+    assert all(source["surface"] == "authority_evidence" for source in sources)
+    assert all(source["reporting_only"] is True for source in sources)
+    assert all(source["authority_boundary"]["patch_automation"] is False for source in sources)
+    assert all(source["authority_boundary"]["security_dismissal"] is False for source in sources)
+    assert all(source["authority_boundary"]["merge_authorization"] is False for source in sources)
+    assert all(
+        source["authority_boundary"]["semantic_equivalence_claim"] is False for source in sources
+    )
