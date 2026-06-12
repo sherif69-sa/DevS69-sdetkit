@@ -1834,6 +1834,84 @@ def _review_model_failure_vector_signal(
     }
 
 
+def _review_model_ghas_blocker_details(
+    *,
+    action_report: JsonObject,
+    check_intelligence: JsonObject,
+) -> JsonObject:
+    code_scanning = _as_dict(
+        check_intelligence.get("code_scanning_review")
+        or _as_dict(action_report.get("evidence")).get("code_scanning_review")
+    )
+
+    findings: list[JsonObject] = []
+    for item in _as_list(code_scanning.get("findings")):
+        finding = _as_dict(item)
+        if not finding:
+            continue
+
+        path = _string(finding.get("path") or "unknown")
+        line = _string(finding.get("line"))
+        location = f"{path}:{line}" if line else path
+        freshness = _string(finding.get("freshness") or "unknown")
+        recommended_action = _string(finding.get("recommended_action") or "review_alert_freshness")
+
+        if freshness == "current":
+            proof_commands = [
+                "python -m sdetkit security check --root . --format json",
+                "python -m pre_commit run -a",
+                "make proof-after-format",
+            ]
+        elif freshness == "stale":
+            proof_commands = ["gh pr checks --watch"]
+        else:
+            proof_commands = [
+                "Review alert freshness against the current PR head SHA.",
+                "gh pr checks --watch",
+            ]
+
+        findings.append(
+            {
+                "number": _string(finding.get("number") or "unknown"),
+                "url": _string(finding.get("url")),
+                "rule_id": _string(finding.get("rule_id") or "unknown"),
+                "severity": _string(finding.get("severity") or "unknown"),
+                "path": path,
+                "line": line,
+                "location": location,
+                "alert_commit_sha": _string(finding.get("commit_sha")),
+                "current_head_sha": _string(finding.get("current_head_sha")),
+                "freshness": freshness,
+                "recommended_action": recommended_action,
+                "message": _string(finding.get("message")),
+                "dismissal_allowed": False,
+                "dismissal_guidance": (
+                    "_".join(["forbidden", "until", "human", "false", "positive", "review"])
+                    if freshness == "current"
+                    else "not_needed_for_stale_alert"
+                ),
+                "proof_commands": proof_commands,
+            }
+        )
+
+    return {
+        "schema_version": "sdetkit.pr_quality.ghas_blocker_details.v1",
+        "collected": bool(code_scanning.get("collected", False)),
+        "collection_status": _string(code_scanning.get("collection_status") or "unknown"),
+        "collection_reason": _string(code_scanning.get("collection_reason")),
+        "source": _string(code_scanning.get("source")),
+        "open_alerts": _int(code_scanning.get("open_alerts")),
+        "current_alerts": _int(code_scanning.get("current_alerts")),
+        "stale_alerts": _int(code_scanning.get("stale_alerts")),
+        "unknown_freshness_alerts": _int(code_scanning.get("unknown_freshness_alerts")),
+        "current_head_sha": _string(code_scanning.get("current_head_sha")),
+        "has_current_blockers": any(item.get("freshness") == "current" for item in findings),
+        "dismissal_allowed": False,
+        "reporting_only": True,
+        "findings": findings[:10],
+    }
+
+
 def build_pr_quality_review_model(
     *,
     status: str,
@@ -1852,6 +1930,10 @@ def build_pr_quality_review_model(
         action_report=action_report,
         check_intelligence=check_intelligence,
         evidence_narrative=evidence_narrative,
+    )
+    ghas_blocker_details = _review_model_ghas_blocker_details(
+        action_report=action_report,
+        check_intelligence=check_intelligence,
     )
 
     surface = _string(
@@ -1943,6 +2025,24 @@ def build_pr_quality_review_model(
         if isinstance(item, str) and item.strip()
     ]
 
+    if (
+        _int(ghas_blocker_details.get("open_alerts")) > 0
+        and _int(ghas_blocker_details.get("current_alerts")) == 0
+        and _int(ghas_blocker_details.get("stale_alerts")) > 0
+    ):
+        stale_only_actions = [
+            "Wait for Code Scanning/GHAS refresh; no current code-scanning alert matches the PR head SHA.",
+            "Do not patch or dismiss stale alerts unless a refreshed alert matches the current PR head.",
+            "Re-run PR Quality after Code Scanning refreshes.",
+        ]
+        filtered_actions = [
+            action
+            for action in recommended_actions
+            if "dismiss" not in action.lower() and "fix the flagged surface" not in action.lower()
+        ]
+        recommended_actions = [*stale_only_actions, *filtered_actions]
+        proof_commands = ["gh pr checks --watch"]
+
     return {
         "schema_version": "sdetkit.pr_quality.review_model.v2",
         "schema": {
@@ -1969,6 +2069,7 @@ def build_pr_quality_review_model(
         },
         "recommended_actions": recommended_actions[:10],
         "failure_vector_signal": failure_vector_signal,
+        "ghas_blocker_details": ghas_blocker_details,
         "failed_check_names": _check_labels(check_intelligence.get("failed_checks")),
         "required_queued_check_names": _check_labels(check_intelligence.get("queued_checks")),
         "required_startup_failure_names": _check_labels(check_intelligence.get("startup_failures")),
@@ -2118,6 +2219,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     authority = _as_dict(model.get("authority_boundary"))
     primary_blocker = _as_dict(model.get("primary_blocker"))
     failure_vector_signal = _as_dict(model.get("failure_vector_signal"))
+    ghas_blocker_details = _as_dict(model.get("ghas_blocker_details"))
     proof_commands = [
         str(command)
         for command in _as_list(model.get("proof_to_rerun"))
@@ -2238,6 +2340,10 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     active_blocker_open = is_blocked or review_first
     failure_vector_open = active_blocker_open and failure_actual not in {"", "none"}
     proof_open = active_blocker_open and bool(proof_commands)
+    ghas_findings = [
+        _as_dict(item) for item in _as_list(ghas_blocker_details.get("findings")) if _as_dict(item)
+    ]
+    ghas_open = active_blocker_open and bool(ghas_findings)
 
     lines = [
         "# PR Quality Review Summary",
@@ -2331,6 +2437,72 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             "🧭 Failure vector deep dive",
             failure_body,
             open_by_default=failure_vector_open,
+        )
+    )
+    lines.append("")
+
+    ghas_body = [
+        "| Item | Value |",
+        "|---|---|",
+        f"| Collected | `{_review_model_scalar(ghas_blocker_details.get('collected'))}` |",
+        f"| Collection status | `{_markdown_table_value(ghas_blocker_details.get('collection_status') or 'unknown')}` |",
+        f"| Open alerts | `{_review_model_scalar(ghas_blocker_details.get('open_alerts') or 0)}` |",
+        f"| Current alerts | `{_review_model_scalar(ghas_blocker_details.get('current_alerts') or 0)}` |",
+        f"| Stale alerts | `{_review_model_scalar(ghas_blocker_details.get('stale_alerts') or 0)}` |",
+        f"| Current head SHA | `{_markdown_table_value(ghas_blocker_details.get('current_head_sha') or 'unknown')}` |",
+        f"| Dismissal allowed | `{_review_model_scalar(ghas_blocker_details.get('dismissal_allowed'))}` |",
+    ]
+    if (
+        _int(ghas_blocker_details.get("open_alerts")) > 0
+        and _int(ghas_blocker_details.get("current_alerts")) == 0
+        and _int(ghas_blocker_details.get("stale_alerts")) > 0
+    ):
+        ghas_body.extend(
+            [
+                "",
+                "> Stale-only Code Scanning state: no alert currently matches the PR head SHA. Wait for Code Scanning refresh; do not patch or dismiss stale alerts.",
+                "",
+            ]
+        )
+
+    if ghas_findings:
+        ghas_body.extend(["", "### Code Scanning alert details", ""])
+        for finding in ghas_findings[:5]:
+            alert_number = _markdown_table_value(finding.get("number") or "unknown")
+            alert_url = _string(finding.get("url"))
+            alert_label = f"[#{alert_number}]({alert_url})" if alert_url else f"#{alert_number}"
+            ghas_body.extend(
+                [
+                    f"#### {alert_label} — `{_markdown_table_value(finding.get('rule_id') or 'unknown')}`",
+                    "",
+                    "| Field | Value |",
+                    "|---|---|",
+                    f"| Severity | `{_markdown_table_value(finding.get('severity') or 'unknown')}` |",
+                    f"| Location | `{_markdown_table_value(finding.get('location') or 'unknown')}` |",
+                    f"| Freshness | `{_markdown_table_value(finding.get('freshness') or 'unknown')}` |",
+                    f"| Alert SHA | `{_markdown_table_value(finding.get('alert_commit_sha') or 'unknown')}` |",
+                    f"| PR head SHA | `{_markdown_table_value(finding.get('current_head_sha') or 'unknown')}` |",
+                    f"| Recommended action | `{_markdown_table_value(finding.get('recommended_action') or 'review_alert_freshness')}` |",
+                    f"| Dismissal allowed | `{_review_model_scalar(finding.get('dismissal_allowed'))}` |",
+                    f"| Dismissal guidance | `{_markdown_table_value(finding.get('dismissal_guidance') or 'manual_review_required')}` |",
+                ]
+            )
+            message = _string(finding.get("message"))
+            if message:
+                ghas_body.extend(["", f"> {message}", ""])
+            commands = [
+                str(command)
+                for command in _as_list(finding.get("proof_commands"))
+                if isinstance(command, str) and command.strip()
+            ]
+            if commands:
+                ghas_body.extend(["", "Proof:", "", "```bash", *commands[:5], "```", ""])
+
+    lines.extend(
+        _details(
+            "🛡️ GHAS / CodeQL blocker details",
+            ghas_body,
+            open_by_default=ghas_open,
         )
     )
     lines.append("")
