@@ -1863,10 +1863,7 @@ def _review_model_ghas_blocker_details(
                 "make proof-after-format",
             ]
         elif freshness == "stale":
-            proof_commands = [
-                "gh pr checks --watch",
-                "Re-run PR Quality after Code Scanning refreshes on the current PR head.",
-            ]
+            proof_commands = ["gh pr checks --watch"]
         else:
             proof_commands = [
                 "Review alert freshness against the current PR head SHA.",
@@ -2044,6 +2041,7 @@ def build_pr_quality_review_model(
             if "dismiss" not in action.lower() and "fix the flagged surface" not in action.lower()
         ]
         recommended_actions = [*stale_only_actions, *filtered_actions]
+        proof_commands = ["gh pr checks --watch"]
 
     return {
         "schema_version": "sdetkit.pr_quality.review_model.v2",

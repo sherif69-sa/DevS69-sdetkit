@@ -4418,8 +4418,7 @@ def test_review_model_recommends_wait_for_stale_only_ghas_alerts() -> None:
     assert model["recommended_actions"][0].startswith("Wait for Code Scanning/GHAS refresh")
     assert "Fix the flagged surface" not in "\\n".join(model["recommended_actions"])
     assert model["ghas_blocker_details"]["findings"][0]["proof_commands"] == [
-        "gh pr checks --watch",
-        "Re-run PR Quality after Code Scanning refreshes on the current PR head.",
+        "gh pr checks --watch"
     ]
 
     body = report.render_pr_quality_review_summary(model)
