@@ -86,7 +86,7 @@
       "id": "protected-verifier-result-json",
       "path": "build/protected-verifier/protected-verifier-result.json",
       "produced_by": "python -m sdetkit.protected_verifier --patch-score <patch-score.json> --verification-evidence <verification-evidence.json> --out-dir build/protected-verifier --format json",
-      "schema_version": "sdetkit.protected_verifier.v1",
+      "schema_version": "sdetkit.protected_verifier.decision.v1",
       "required_fields": [
         "schema_version",
         "patch_id",
