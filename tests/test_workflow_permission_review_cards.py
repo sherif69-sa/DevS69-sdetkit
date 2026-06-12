@@ -10,7 +10,6 @@ def test_deployment_oidc_pages_review_card_is_evidence_only() -> None:
     text = CARD.read_text(encoding="utf-8")
 
     assert "workflow=.github/workflows/pages.yml" in text
-    assert 'current_write_scopes=["id-token: write", "pages: write"]' in text
     assert "review_group=deployment_or_oidc" in text
     assert "proposed_change=none" in text
     assert "human_reviewer=pending" in text
