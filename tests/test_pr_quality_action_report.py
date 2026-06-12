@@ -4405,6 +4405,7 @@ def test_pr_quality_review_summary_opens_ghas_blocker_details() -> None:
 
 
 def test_review_model_recommends_wait_for_stale_only_ghas_alerts() -> None:
+    stale_action = "wait_for_code_scanning_refresh"
     model = report.build_pr_quality_review_model(
         status="review_required",
         evidence_signal_heading="Evidence review signal",
@@ -4447,7 +4448,7 @@ def test_review_model_recommends_wait_for_stale_only_ghas_alerts() -> None:
                         "commit_sha": "old-head",
                         "current_head_sha": "new-head",
                         "freshness": "stale",
-                        "recommended_action": "wait_for_code_scanning_refresh",
+                        "recommended_action": stale_action,
                         "message": "High-entropy string literal detected.",
                     }
                 ],
@@ -4464,8 +4465,12 @@ def test_review_model_recommends_wait_for_stale_only_ghas_alerts() -> None:
         },
     )
 
-    assert model["recommended_actions"][0].startswith("Wait for Code Scanning/GHAS refresh")
-    assert "Fix the flagged surface" not in "\\n".join(model["recommended_actions"])
+    assert model["recommended_actions"] == [
+        "Wait for Code Scanning/GHAS refresh; no current code-scanning alert matches the PR head SHA.",
+        "Do not patch or dismiss stale alerts unless a refreshed alert matches the current PR head.",
+        "Re-run PR Quality after Code Scanning refreshes.",
+    ]
+    assert model["proof_to_rerun"] == ["gh pr checks --watch"]
     assert model["ghas_blocker_details"]["findings"][0]["proof_commands"] == [
         "gh pr checks --watch"
     ]
@@ -4474,4 +4479,7 @@ def test_review_model_recommends_wait_for_stale_only_ghas_alerts() -> None:
 
     assert "Stale-only Code Scanning state" in body
     assert "do not patch or dismiss stale alerts" in body
-    assert "wait_for_code_scanning_refresh" in body
+    assert stale_action in body
+    assert "Fix the flagged surface" not in body
+    assert "Review unresolved GitHub Advanced Security comments" not in body
+    assert "pre_commit" not in body
