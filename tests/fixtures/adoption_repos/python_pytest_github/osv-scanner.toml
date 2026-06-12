@@ -1,0 +1,12 @@
+# Fixture-local OSV policy.
+#
+# This directory is an adoption-surface detector fixture, not a shipped or
+# executable project dependency. The repo-level OSV workflow scans recursively
+# from the repository root, so this fixture-local config prevents demo Python
+# fixture metadata from flooding GHAS Code Scanning.
+#
+# Scope: applies only to lock/manifests in this directory.
+
+[[PackageOverrides]]
+vulnerability.ignore = true
+reason = "Fixture-only Python adoption repo used by tests; not a production or release dependency."
