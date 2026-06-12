@@ -2035,12 +2035,7 @@ def build_pr_quality_review_model(
             "Do not patch or dismiss stale alerts unless a refreshed alert matches the current PR head.",
             "Re-run PR Quality after Code Scanning refreshes.",
         ]
-        filtered_actions = [
-            action
-            for action in recommended_actions
-            if "dismiss" not in action.lower() and "fix the flagged surface" not in action.lower()
-        ]
-        recommended_actions = [*stale_only_actions, *filtered_actions]
+        recommended_actions = stale_only_actions
         proof_commands = ["gh pr checks --watch"]
 
     return {
