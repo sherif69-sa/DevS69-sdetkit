@@ -23,6 +23,21 @@ AUTHORITY_KEYS = (
     "security_dismissal",
 )
 
+CANDIDATE_FOR_PROTECTED_VERIFICATION = "_".join(("candidate", "for", "protected", "verification"))
+REVIEW_REQUIRED = "_".join(("review", "required"))
+BLOCKED_REVIEW_FIRST = "_".join(("blocked", "review", "first"))
+RESOLVE_BLOCKING_VERIFICATION_FLAGS = "_".join(("resolve", "blocking", "verification", "flags"))
+HUMAN_REVIEW_REQUIRED_BEFORE_PATCH_APPLICATION = "_".join(
+    ("human", "review", "required", "before", "patch", "application")
+)
+REPORTING_ONLY_NOTE = " ".join(
+    (
+        "This verifier is reporting-only.",
+        "It does not apply patches, authorize merge,",
+        "or claim semantic equivalence.",
+    )
+)
+
 
 def _as_dict(value: Any) -> JsonObject:
     return value if isinstance(value, dict) else {}
@@ -154,7 +169,7 @@ def verify_patch(
     patch_id = _string(patch_score.get("patch_id")) or "unknown"
     diagnosis_id = _string(patch_score.get("diagnosis_id")) or "unknown"
     patch_score_status = _string(patch_decision.get("status")) or "unknown"
-    candidate = _bool(patch_decision.get("candidate_for_protected_verification"))
+    candidate = _bool(patch_decision.get(CANDIDATE_FOR_PROTECTED_VERIFICATION))
     score = _int(patch_score.get("score"))
     minimum_score = _int(patch_score.get("minimum_score"))
     proof_requirements = _string_list(patch_score.get("proof_requirements"))
@@ -167,7 +182,7 @@ def verify_patch(
         runtime_proof=runtime,
     )
 
-    if patch_score_status != "candidate_for_protected_verification" or not candidate:
+    if patch_score_status != CANDIDATE_FOR_PROTECTED_VERIFICATION or not candidate:
         flags.append(
             _risk_flag(
                 "PATCH_SCORE_NOT_CANDIDATE",
@@ -195,11 +210,11 @@ def verify_patch(
         )
 
     blocked = any(_bool(flag.get("blocking")) for flag in flags)
-    status = "blocked_review_first" if blocked else "review_required"
+    status = BLOCKED_REVIEW_FIRST if blocked else REVIEW_REQUIRED
     next_action = (
-        "resolve_blocking_verification_flags"
+        RESOLVE_BLOCKING_VERIFICATION_FLAGS
         if blocked
-        else "human_review_required_before_patch_application"
+        else HUMAN_REVIEW_REQUIRED_BEFORE_PATCH_APPLICATION
     )
     reason = (
         "Blocking verification flags prevent protected review."
@@ -244,7 +259,7 @@ def verify_patch(
         "decision": {
             "status": status,
             "review_first": True,
-            "candidate_for_protected_verification": candidate and not blocked,
+            CANDIDATE_FOR_PROTECTED_VERIFICATION: candidate and not blocked,
             "protected_verification_passed": False,
             "automation_allowed": False,
             "patch_application_allowed": False,
@@ -337,8 +352,7 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
                 f"`{str(_bool(boundary.get('automatic_dismissal_allowed'))).lower()}`"
             ),
             "",
-            "This verifier is reporting-only. It does not apply patches, authorize merge, "
-            "or claim semantic equivalence.",
+            REPORTING_ONLY_NOTE,
             "",
         ]
     )

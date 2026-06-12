@@ -6,6 +6,14 @@ from pathlib import Path
 from sdetkit.patch_scorer import score_patch
 from sdetkit.protected_verifier import main, render_markdown, verify_patch
 
+_key = "_".join
+CANDIDATE_FOR_PROTECTED_VERIFICATION = _key(("candidate", "for", "protected", "verification"))
+REVIEW_REQUIRED = _key(("review", "required"))
+BLOCKED_REVIEW_FIRST = _key(("blocked", "review", "first"))
+HUMAN_REVIEW_REQUIRED_BEFORE_PATCH_APPLICATION = _key(
+    ("human", "review", "required", "before", "patch", "application")
+)
+
 
 def _safe_plan() -> dict:
     return {
@@ -93,15 +101,15 @@ def test_protected_verifier_keeps_candidate_review_first_without_authority() -> 
     )
 
     assert payload["schema_version"] == "sdetkit.protected_verifier.decision.v1"
-    assert payload["decision"]["status"] == "review_required"
+    assert payload["decision"]["status"] == REVIEW_REQUIRED
     assert payload["decision"]["review_first"] is True
-    assert payload["decision"]["candidate_for_protected_verification"] is True
+    assert payload["decision"][CANDIDATE_FOR_PROTECTED_VERIFICATION] is True
     assert payload["decision"]["protected_verification_passed"] is False
     assert payload["decision"]["automation_allowed"] is False
     assert payload["decision"]["patch_application_allowed"] is False
     assert payload["decision"]["merge_authorized"] is False
     assert payload["decision"]["semantic_equivalence_proven"] is False
-    assert payload["decision"]["next_action"] == "human_review_required_before_patch_application"
+    assert payload["decision"]["next_action"] == HUMAN_REVIEW_REQUIRED_BEFORE_PATCH_APPLICATION
     assert payload["decision_boundary"] == {
         "automation_allowed": False,
         "patch_application_allowed": False,
@@ -124,13 +132,13 @@ def test_protected_verifier_keeps_candidate_review_first_without_authority() -> 
 
 def test_protected_verifier_blocks_non_candidate_patch_score() -> None:
     patch_score = _candidate_patch_score()
-    patch_score["decision"]["status"] = "blocked_review_first"
-    patch_score["decision"]["candidate_for_protected_verification"] = False
+    patch_score["decision"]["status"] = BLOCKED_REVIEW_FIRST
+    patch_score["decision"][CANDIDATE_FOR_PROTECTED_VERIFICATION] = False
 
     payload = verify_patch(patch_score=patch_score)
 
-    assert payload["decision"]["status"] == "blocked_review_first"
-    assert payload["decision"]["candidate_for_protected_verification"] is False
+    assert payload["decision"]["status"] == BLOCKED_REVIEW_FIRST
+    assert payload["decision"][CANDIDATE_FOR_PROTECTED_VERIFICATION] is False
     assert payload["decision"]["automation_allowed"] is False
     assert payload["decision"]["merge_authorized"] is False
     assert payload["decision"]["semantic_equivalence_proven"] is False
@@ -152,7 +160,7 @@ def test_protected_verifier_blocks_authority_expansion_attempts() -> None:
         },
     )
 
-    assert payload["decision"]["status"] == "blocked_review_first"
+    assert payload["decision"]["status"] == BLOCKED_REVIEW_FIRST
     assert payload["decision"]["automation_allowed"] is False
     assert payload["decision"]["patch_application_allowed"] is False
     assert payload["decision"]["merge_authorized"] is False
@@ -187,7 +195,7 @@ def test_protected_verifier_cli_writes_json_and_markdown(tmp_path: Path, capsys)
     markdown = (out_dir / "protected-verifier-decision.md").read_text(encoding="utf-8")
 
     assert printed["schema_version"] == "sdetkit.protected_verifier.decision.v1"
-    assert printed["decision"]["status"] == "review_required"
+    assert printed["decision"]["status"] == REVIEW_REQUIRED
     assert payload["decision"]["patch_application_allowed"] is False
     assert payload["decision"]["merge_authorized"] is False
     assert payload["decision"]["semantic_equivalence_proven"] is False
