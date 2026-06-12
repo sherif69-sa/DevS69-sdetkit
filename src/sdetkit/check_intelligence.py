@@ -1332,6 +1332,7 @@ def _empty_code_scanning_review(
     source: str,
     collection_reason: str,
     current_head_sha: str,
+    merge_candidate_sha: str = "",
 ) -> JsonObject:
     return {
         "collected": collected,
@@ -1343,6 +1344,7 @@ def _empty_code_scanning_review(
         "stale_alerts": 0,
         "unknown_freshness_alerts": 0,
         "current_head_sha": current_head_sha,
+        "merge_candidate_sha": merge_candidate_sha,
         "rule_counts": {},
         "findings": [],
     }
@@ -1352,6 +1354,7 @@ def _code_scanning_review_summary(
     alerts_json: Path | None,
     *,
     current_head_sha: str = "",
+    merge_candidate_sha: str = "",
 ) -> JsonObject:
     if alerts_json is None:
         return _empty_code_scanning_review(
@@ -1360,6 +1363,7 @@ def _code_scanning_review_summary(
             collection_reason="No code-scanning alert collection artifact was provided.",
             source="",
             current_head_sha=current_head_sha,
+            merge_candidate_sha=merge_candidate_sha,
         )
 
     if not alerts_json.exists():
@@ -1369,6 +1373,7 @@ def _code_scanning_review_summary(
             collection_reason="The code-scanning alert collection artifact was not found.",
             source=alerts_json.as_posix(),
             current_head_sha=current_head_sha,
+            merge_candidate_sha=merge_candidate_sha,
         )
 
     payload = json.loads(alerts_json.read_text(encoding="utf-8"))
@@ -1385,6 +1390,7 @@ def _code_scanning_review_summary(
             ),
             source=alerts_json.as_posix(),
             current_head_sha=current_head_sha,
+            merge_candidate_sha=merge_candidate_sha,
         )
 
     findings: list[JsonObject] = []
@@ -1397,12 +1403,18 @@ def _code_scanning_review_summary(
         message = _as_dict(instance.get("message"))
         commit_sha = _string(instance.get("commit_sha"))
 
-        if not commit_sha or not current_head_sha:
+        if not commit_sha or not (current_head_sha or merge_candidate_sha):
             freshness = "unknown"
-        elif commit_sha == current_head_sha:
+            freshness_basis = "unknown"
+        elif current_head_sha and commit_sha == current_head_sha:
             freshness = "current"
+            freshness_basis = "pr_head"
+        elif merge_candidate_sha and commit_sha == merge_candidate_sha:
+            freshness = "current"
+            freshness_basis = "merge_candidate"
         else:
             freshness = "stale"
+            freshness_basis = "none"
 
         if freshness == "current":
             action = "fix_current_alert_or_dismiss_reviewed_false_positive"
@@ -1426,7 +1438,9 @@ def _code_scanning_review_summary(
                 "line": _string(location.get("start_line")),
                 "commit_sha": commit_sha,
                 "current_head_sha": current_head_sha,
+                "merge_candidate_sha": merge_candidate_sha,
                 "freshness": freshness,
+                "freshness_basis": freshness_basis,
                 "recommended_action": action,
                 "message": _string(message.get("text")),
             }
@@ -1444,6 +1458,7 @@ def _code_scanning_review_summary(
             [item for item in findings if item["freshness"] == "unknown"]
         ),
         "current_head_sha": current_head_sha,
+        "merge_candidate_sha": merge_candidate_sha,
         "rule_counts": dict(sorted(rule_counts.items())),
         "findings": findings,
     }
@@ -1581,6 +1596,7 @@ def build_check_intelligence(
     review_threads_json: Path | None = None,
     code_scanning_alerts_json: Path | None = None,
     current_head_sha: str = "",
+    merge_candidate_sha: str = "",
 ) -> JsonObject:
     payload = _read_json(checks_json)
     records = _iter_check_records(payload)
@@ -1652,8 +1668,10 @@ def build_check_intelligence(
         "code_scanning_review": _code_scanning_review_summary(
             code_scanning_alerts_json,
             current_head_sha=current_head_sha,
+            merge_candidate_sha=merge_candidate_sha,
         ),
         "current_head_sha": current_head_sha,
+        "merge_candidate_sha": merge_candidate_sha,
     }
 
 
@@ -2156,6 +2174,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--review-threads-json", type=Path)
     parser.add_argument("--code-scanning-alerts-json", type=Path)
     parser.add_argument("--current-head-sha", default="")
+    parser.add_argument("--merge-candidate-sha", default="")
     parser.add_argument("--out-dir", type=Path, default=Path("build/pr-quality"))
     return parser
 
@@ -2168,6 +2187,7 @@ def main(argv: list[str] | None = None) -> int:
         review_threads_json=args.review_threads_json,
         code_scanning_alerts_json=args.code_scanning_alerts_json,
         current_head_sha=args.current_head_sha,
+        merge_candidate_sha=args.merge_candidate_sha,
     )
     action_report = build_action_report(intelligence)
     artifacts = write_artifacts(
