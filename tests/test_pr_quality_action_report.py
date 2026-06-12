@@ -4797,3 +4797,42 @@ def test_artifacts_manifest_expected_paths_include_authority_evidence_sources() 
     assert "runtime-proof/summary/runtime-proof-artifacts.md" in expected_paths
     assert "pr-comment-metadata.json" in expected_paths
     assert len(expected_paths) == len(set(expected_paths))
+
+
+def test_artifact_center_renders_expected_artifact_inventory() -> None:
+    model = {
+        "schema_version": "sdetkit.pr_quality.review_model.v2",
+        "schema": {
+            "name": "sdetkit.pr_quality.review_model",
+            "version": 2,
+            "authority_boundary": "reporting_only",
+        },
+        "artifact_index": [],
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+        "decision": {
+            "status": "green",
+            "merge_assessment": "ready_for_review",
+            "next_action": "human_review",
+            "risk_surface": "authority",
+        },
+    }
+
+    html = report.render_pr_quality_artifact_index_html(model)
+
+    assert "Expected artifact inventory" in html
+    assert "Reporting-only expected-path inventory" in html
+    assert "does not authorize merge" in html
+    assert "index.html" in html
+    assert "pr-review-artifacts-manifest.json" in html
+    assert "trajectory/trajectory.jsonl" in html
+    assert "trajectory-pattern-insights/pattern-insights.json" in html
+    assert "repo-memory/repo-memory-profile.json" in html
+    assert "runtime-proof/summary/runtime-proof-artifacts.json" in html
+    assert "runtime-proof/summary/runtime-proof-artifacts.md" in html
+    assert "pr-comment-metadata.json" in html

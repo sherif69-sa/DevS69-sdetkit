@@ -2851,6 +2851,17 @@ def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
         for item in authority_evidence_sources
     ]
 
+    expected_artifact_paths: list[str] = []
+    for item in [*artifact_index, *authority_evidence_sources]:
+        artifact_path = _string(item.get("path"))
+        if artifact_path and artifact_path not in expected_artifact_paths:
+            expected_artifact_paths.append(artifact_path)
+
+    expected_artifact_items = "\n".join(
+        f"<li><code>{_html_escape(artifact_path)}</code></li>"
+        for artifact_path in expected_artifact_paths
+    )
+
     def artifact_cards(rows: list[tuple[str, str, str]]) -> str:
         return "\n".join(
             '<article class="artifact-card">'
@@ -2900,7 +2911,7 @@ def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
         "    .summary-card { border: 1px solid var(--border); border-radius: 14px; background: rgba(13,17,23,0.48); padding: 1rem; }\n"
         "    .artifact-card a { color: var(--text); font-size: 1.05rem; font-weight: 800; text-decoration: none; }\n"
         "    .artifact-card a:hover { color: var(--accent); text-decoration: underline; }\n"
-        "    .artifact-card p { color: var(--muted); margin-bottom: 0; }\n"
+        "    .artifact-card p { color: var(--muted); margin-bottom: 0; }\n    .path-list { margin: 0; padding-left: 1.2rem; color: var(--muted); }\n    .path-list li { margin: 0.35rem 0; }\n"
         "    table { width: 100%; border-collapse: collapse; }\n"
         "    th, td { border-bottom: 1px solid var(--border); padding: 0.65rem; text-align: left; vertical-align: top; }\n"
         "    th { width: 38%; color: var(--muted); }\n"
@@ -2926,6 +2937,13 @@ def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
         '      <div class="artifact-grid">\n'
         f"        {artifact_cards(artifact_rows)}\n"
         "      </div>\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        "      <h2>Expected artifact inventory</h2>\n"
+        '      <p class="boundary">Reporting-only expected-path inventory. This inventory describes review artifacts and does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.</p>\n'
+        '      <ul class="path-list">\n'
+        f"        {expected_artifact_items}\n"
+        "      </ul>\n"
         "    </section>\n"
         '    <section class="card">\n'
         "      <h2>Authority evidence sources</h2>\n"
