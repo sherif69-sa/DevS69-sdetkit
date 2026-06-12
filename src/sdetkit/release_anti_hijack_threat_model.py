@@ -12,6 +12,16 @@ SCHEMA_VERSION = "sdetkit.release_anti_hijack_threat_model.v1"
 DEFAULT_WORKFLOW = ".github/workflows/release.yml"
 DEFAULT_OUT = "build/sdetkit/release-anti-hijack-threat-model.json"
 
+PUBLIC_POSITIVE_CONTROLS = frozenset(
+    {
+        "release_workflow_present",
+        "third_party_actions_pinned_to_full_sha",
+        "build_provenance_attestation_configured",
+        "trusted_publishing_style_release_path_detected",
+        "tag_push_release_entrypoint_detected",
+    }
+)
+
 AUTHORITY_FIELDS = (
     "automation_allowed",
     "patch_application_allowed",
@@ -300,7 +310,13 @@ def _public_int(value: object) -> int:
 def _public_string_list(value: object) -> list[str]:
     if not isinstance(value, list):
         return []
-    return sorted(_public_str(item) for item in value if _public_str(item))
+
+    public_items: set[str] = set()
+    for item in value:
+        text = _public_str(item)
+        if text and text in PUBLIC_POSITIVE_CONTROLS:
+            public_items.add(text)
+    return sorted(public_items)
 
 
 def _public_unverified_settings(value: object) -> list[str]:

@@ -84,6 +84,23 @@ def test_release_anti_hijack_threat_model_reports_publish_credential_surface(
     assert payload["semantic_equivalence_proven"] is False
 
 
+def test_release_anti_hijack_threat_model_public_report_filters_arbitrary_positive_controls(
+    tmp_path: Path,
+) -> None:
+    workflow = _release_workflow(tmp_path / "release.yml")
+    out = tmp_path / "reports" / "release-anti-hijack-threat-model.json"
+
+    payload = write_artifacts(workflow=workflow, out=out)
+    payload["positive_controls"].append("repository secret inventory and rotation status")
+
+    document_text = out.read_text(encoding="utf-8")
+    markdown_text = out.with_suffix(".md").read_text(encoding="utf-8")
+
+    assert "repository secret inventory" not in document_text
+    assert "repository secret inventory" not in markdown_text
+    assert "build_provenance_attestation_configured" in document_text
+
+
 def test_release_anti_hijack_threat_model_writes_json_and_markdown(
     tmp_path: Path,
 ) -> None:
