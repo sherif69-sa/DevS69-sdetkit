@@ -7,7 +7,7 @@ httpx==0.28.1
 filelock==3.29.3
 
 # Dev + QA tooling
-ruff==0.15.16
+ruff==0.15.17
 mypy==2.1.0
 pre-commit==4.6.0
 pytest==9.0.3
