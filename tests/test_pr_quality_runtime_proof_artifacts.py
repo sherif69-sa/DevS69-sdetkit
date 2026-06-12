@@ -237,6 +237,21 @@ def test_runtime_proof_markdown_renders_collected_live_benchmark_and_memory() ->
                     "semantic_equivalence_proven": False,
                 },
             },
+            "trajectory_authority_evidence": {
+                "status": "authority_boundary_evidence_observed",
+                "record_count": 2,
+                "review_first_count": 1,
+                "auto_fix_allowed_count": 1,
+                "reporting_only_count": 2,
+                "decision_boundary": {
+                    "automation_allowed": False,
+                    "patch_application_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_proven": False,
+                    "automatic_security_fix_allowed": False,
+                    "automatic_dismissal_allowed": False,
+                },
+            },
             "decision_boundary": {
                 "automation_allowed": False,
                 "merge_authorized": False,
@@ -263,6 +278,18 @@ def test_runtime_proof_markdown_renders_collected_live_benchmark_and_memory() ->
     assert summary["repo_memory"]["safety_gate_safe_fix_allowed_count"] == 1
     assert summary["repo_memory"]["safety_gate_review_first_count"] == 2
     assert summary["repo_memory"]["safety_gate_automation_allowed"] is False
+    assert (
+        summary["repo_memory"]["trajectory_authority_status"]
+        == "authority_boundary_evidence_observed"
+    )
+    assert summary["repo_memory"]["trajectory_authority_record_count"] == 2
+    assert summary["repo_memory"]["trajectory_authority_review_first_count"] == 1
+    assert summary["repo_memory"]["trajectory_authority_auto_fix_allowed_count"] == 1
+    assert summary["repo_memory"]["trajectory_authority_reporting_only_count"] == 2
+    assert summary["repo_memory"]["trajectory_authority_patch_application_allowed"] is False
+    assert summary["repo_memory"]["trajectory_authority_security_dismissal_allowed"] is False
+    assert summary["repo_memory"]["trajectory_authority_merge_authorized"] is False
+    assert summary["repo_memory"]["trajectory_authority_semantic_equivalence_proven"] is False
     assert "RepoMemory SafetyGate status: `safety_gate_evidence_observed`" in markdown
     assert "RepoMemory SafetyGate records: `3`" in markdown
     assert "RepoMemory SafetyGate safe-fix allowed records: `1`" in markdown
@@ -270,6 +297,14 @@ def test_runtime_proof_markdown_renders_collected_live_benchmark_and_memory() ->
     assert "RepoMemory SafetyGate automation allowed: `false`" in markdown
     assert "RepoMemory SafetyGate merge authorized: `false`" in markdown
     assert "RepoMemory SafetyGate semantic equivalence proven: `false`" in markdown
+    assert (
+        "RepoMemory trajectory authority status: `authority_boundary_evidence_observed`"
+    ) in markdown
+    assert "RepoMemory trajectory authority records: `2`" in markdown
+    assert ("RepoMemory trajectory authority patch application allowed: `false`") in markdown
+    assert ("RepoMemory trajectory authority security dismissal allowed: `false`") in markdown
+    assert "RepoMemory trajectory authority merge authorized: `false`" in markdown
+    assert ("RepoMemory trajectory authority semantic equivalence proven: `false`") in markdown
 
 
 def _trusted_diagnostic_signal_snapshot_history() -> dict:
