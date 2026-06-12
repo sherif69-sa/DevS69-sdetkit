@@ -2755,7 +2755,12 @@ def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
     if not artifacts:
         artifacts = _review_model_artifact_index()
 
-    expected_paths = [_string(item.get("path")) for item in artifacts if _string(item.get("path"))]
+    authority_evidence_sources = _authority_evidence_source_index()
+    expected_paths: list[str] = []
+    for item in [*artifacts, *authority_evidence_sources]:
+        artifact_path = _string(item.get("path"))
+        if artifact_path and artifact_path not in expected_paths:
+            expected_paths.append(artifact_path)
     primary_entrypoint = next(
         (
             _string(item.get("path"))
@@ -2767,7 +2772,6 @@ def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
 
     decision = _as_dict(model.get("decision"))
     authority = _as_dict(model.get("authority_boundary"))
-    authority_evidence_sources = _authority_evidence_source_index()
 
     return {
         "schema_version": "sdetkit.pr_quality.artifacts_manifest.v1",

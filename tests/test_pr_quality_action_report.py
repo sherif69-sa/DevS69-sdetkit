@@ -4760,3 +4760,40 @@ def test_artifact_center_renders_authority_evidence_sources() -> None:
     assert "runtime-proof/summary/runtime-proof-artifacts.json" in html
     assert "PR comment authority metadata" in html
     assert "pr-comment-metadata.json" in html
+
+
+def test_artifacts_manifest_expected_paths_include_authority_evidence_sources() -> None:
+    model = {
+        "schema_version": "sdetkit.pr_quality.review_model.v2",
+        "schema": {
+            "name": "sdetkit.pr_quality.review_model",
+            "version": 2,
+            "authority_boundary": "reporting_only",
+        },
+        "artifact_index": [],
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+        "decision": {
+            "status": "green",
+            "merge_assessment": "ready_for_review",
+            "next_action": "human_review",
+        },
+    }
+
+    manifest = report.build_pr_quality_artifacts_manifest(model)
+    expected_paths = manifest["expected_artifact_paths"]
+
+    assert "index.html" in expected_paths
+    assert "pr-review-artifacts-manifest.json" in expected_paths
+    assert "trajectory/trajectory.jsonl" in expected_paths
+    assert "trajectory-pattern-insights/pattern-insights.json" in expected_paths
+    assert "repo-memory/repo-memory-profile.json" in expected_paths
+    assert "runtime-proof/summary/runtime-proof-artifacts.json" in expected_paths
+    assert "runtime-proof/summary/runtime-proof-artifacts.md" in expected_paths
+    assert "pr-comment-metadata.json" in expected_paths
+    assert len(expected_paths) == len(set(expected_paths))
