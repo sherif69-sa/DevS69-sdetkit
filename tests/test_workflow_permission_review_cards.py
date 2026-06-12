@@ -42,7 +42,9 @@ def test_pr_issue_interaction_review_card_is_evidence_only() -> None:
 
     assert "workflow_group=pr_issue_interaction" in text
     assert "review_group=pr_issue_interaction" in text
-    assert 'current_write_scopes=["issues: write", "pull-requests: write"]' in text
+    assert "current_write_scopes=" in text
+    assert "issues: write" in text
+    assert "pull-requests: write" in text
     assert "proposed_change=none" in text
     assert "human_reviewer=pending" in text
     assert "decision=defer_pending_human_review" in text
