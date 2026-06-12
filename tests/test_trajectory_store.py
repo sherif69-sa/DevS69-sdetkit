@@ -100,6 +100,19 @@ def test_trajectory_records_capture_safe_candidate_and_review_first_decisions() 
     assert formatting["diagnosis"]["failure_class"] == "formatter_only"
     assert formatting["fix"]["patch_files"] == ["src/sdetkit/example.py"]
     assert formatting["final_result"] == "safe_fix_candidate"
+    assert formatting["authority_boundary"] == {
+        "source": "trajectory_store",
+        "reporting_only": True,
+        "review_first": False,
+        "auto_fix_allowed": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+        "reason": "safe mechanical remediation candidate",
+    }
     assert unknown["decision"]["auto_fix_allowed"] is False
     assert unknown["decision"]["review_first"] is True
     assert unknown["response"]["response_type"] == "unknown_review_required"
@@ -243,6 +256,19 @@ def test_pr_quality_trajectory_records_capture_safe_formatter_decision() -> None
     assert record["fix"]["patch_files"] == ["tools/maintenance_autopilot.py"]
     assert record["proof"]["commands"] == ["python -m pre_commit run -a"]
     assert record["final_result"] == "safe_fix_candidate"
+    assert record["authority_boundary"] == {
+        "source": "pr_quality",
+        "reporting_only": True,
+        "review_first": False,
+        "auto_fix_allowed": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+        "reason": "Failure is limited to deterministic formatting or whitespace hooks.",
+    }
 
 
 def test_pr_quality_trajectory_cli_writes_artifact(tmp_path: Path, capsys) -> None:
