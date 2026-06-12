@@ -8,12 +8,48 @@ from typing import Any
 
 from sdetkit.patch_scorer import PROTECTED_EXACT_PATHS, PROTECTED_PREFIXES
 
-SCHEMA_VERSION = "sdetkit.protected_verifier.v1"
+SCHEMA_VERSION = "sdetkit.protected_verifier.decision.v1"
 DEFAULT_OUT_DIR = Path("build") / "protected-verifier"
+PROTECTED_VERIFIER_JSON = "protected-verifier-decision.json"
+PROTECTED_VERIFIER_MD = "protected-verifier-decision.md"
 RESULT_JSON = "protected-verifier-result.json"
 RESULT_MD = "protected-verifier-result.md"
 
 JsonObject = dict[str, Any]
+
+AUTHORITY_KEYS = (
+    "automation_allowed",
+    "patch_application_allowed",
+    "merge_authorized",
+    "semantic_equivalence_proven",
+    "automatic_security_fix_allowed",
+    "automatic_dismissal_allowed",
+    "security_dismissal",
+)
+
+CANDIDATE_FOR_PROTECTED_VERIFICATION = "_".join(("candidate", "for", "protected", "verification"))
+REVIEW_REQUIRED = "_".join(("review", "required"))
+BLOCKED_REVIEW_FIRST = "_".join(("blocked", "review", "first"))
+RESOLVE_BLOCKING_VERIFICATION_FLAGS = "_".join(("resolve", "blocking", "verification", "flags"))
+HUMAN_REVIEW_REQUIRED_BEFORE_PATCH_APPLICATION = "_".join(
+    ("human", "review", "required", "before", "patch", "application")
+)
+REPORTING_ONLY_NOTE = " ".join(
+    (
+        "This verifier is reporting-only.",
+        "It does not apply patches, authorize merge,",
+        "or claim semantic equivalence.",
+    )
+)
+
+
+RESULT_REPORTING_ONLY_NOTE = " ".join(
+    (
+        "This result is reporting-only.",
+        "It does not apply patches, authorize merge,",
+        "or prove semantic equivalence.",
+    )
+)
 
 PATCH_SCORE_NOT_CANDIDATE = "_".join(("PATCH", "SCORE", "NOT", "CANDIDATE"))
 AUTOMATION_BOUNDARY_VIOLATION = "_".join(("AUTOMATION", "BOUNDARY", "VIOLATION"))
@@ -28,6 +64,7 @@ SEMANTIC_EQUIVALENCE_NOT_PROVEN = "_".join(("SEMANTIC", "EQUIVALENCE", "NOT", "P
 SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION = "_".join(
     ("SAFETYGATE", "EVIDENCE", "AUTHORITY", "VIOLATION")
 )
+STRUCTURALLY_VERIFIED_CANDIDATE = "_".join(("structurally", "verified", "candidate"))
 
 
 def _as_dict(value: Any) -> JsonObject:
@@ -48,23 +85,219 @@ def _bool(value: Any) -> bool:
     return str(value).lower() in {"1", "true", "yes"}
 
 
-def _int(value: Any, *, default: int = -1) -> int:
+def _int(value: Any) -> int:
     try:
-        return int(value)
+        return int(value or 0)
     except (TypeError, ValueError):
-        return default
+        return 0
 
 
 def _string_list(value: Any) -> list[str]:
-    return sorted({_string(item) for item in _as_list(value) if _string(item)})
+    seen: set[str] = set()
+    rendered: list[str] = []
+    for item in _as_list(value):
+        text = _string(item)
+        if text and text not in seen:
+            seen.add(text)
+            rendered.append(text)
+    return rendered
 
 
-def _read_json(path: Path) -> JsonObject:
+def _read_json(path: Path | None) -> JsonObject:
+    if path is None or not path.exists():
+        return {}
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         msg = f"expected JSON object in {path}"
         raise ValueError(msg)
     return payload
+
+
+def _boundary_payloads(
+    *,
+    patch_score: Mapping[str, Any],
+    failure_bundle: Mapping[str, Any],
+    runtime_proof: Mapping[str, Any],
+) -> list[tuple[str, JsonObject]]:
+    patch_safety_gate = _as_dict(patch_score.get("safety_gate_evidence"))
+    failure_safety_gate = _as_dict(failure_bundle.get("safety_gate"))
+    runtime_safety_gate = _as_dict(runtime_proof.get("safety_gate"))
+
+    return [
+        ("patch_score", _as_dict(patch_score)),
+        ("patch_score.decision", _as_dict(patch_score.get("decision"))),
+        ("patch_score.decision_boundary", _as_dict(patch_score.get("decision_boundary"))),
+        ("patch_score.authority_boundary", _as_dict(patch_score.get("authority_boundary"))),
+        (
+            "patch_score.safety_gate_evidence.decision_boundary",
+            _as_dict(patch_safety_gate.get("decision_boundary")),
+        ),
+        ("failure_bundle.decision_boundary", _as_dict(failure_bundle.get("decision_boundary"))),
+        ("failure_bundle.authority_boundary", _as_dict(failure_bundle.get("authority_boundary"))),
+        ("failure_bundle.safety_gate", failure_safety_gate),
+        (
+            "failure_bundle.safety_gate.decision_boundary",
+            _as_dict(failure_safety_gate.get("decision_boundary")),
+        ),
+        ("runtime_proof.decision_boundary", _as_dict(runtime_proof.get("decision_boundary"))),
+        ("runtime_proof.authority_boundary", _as_dict(runtime_proof.get("authority_boundary"))),
+        ("runtime_proof.safety_gate", runtime_safety_gate),
+        (
+            "runtime_proof.safety_gate.decision_boundary",
+            _as_dict(runtime_safety_gate.get("decision_boundary")),
+        ),
+    ]
+
+
+def _authority_expansion_flags(
+    *,
+    patch_score: Mapping[str, Any],
+    failure_bundle: Mapping[str, Any],
+    runtime_proof: Mapping[str, Any],
+) -> list[JsonObject]:
+    flags: list[JsonObject] = []
+    for source, payload in _boundary_payloads(
+        patch_score=patch_score,
+        failure_bundle=failure_bundle,
+        runtime_proof=runtime_proof,
+    ):
+        expanded = [key for key in AUTHORITY_KEYS if _bool(payload.get(key))]
+        if not expanded:
+            continue
+        flags.append(
+            {
+                "code": "AUTHORITY_EXPANSION_ATTEMPT",
+                "message": f"{source} attempted to expand ProtectedVerifier authority.",
+                "blocking": True,
+                "source": source,
+                "fields": expanded,
+            }
+        )
+    return flags
+
+
+def _risk_flag(code: str, message: str, *, blocking: bool) -> JsonObject:
+    return {
+        "code": code,
+        "message": message,
+        "blocking": blocking,
+    }
+
+
+def verify_patch(
+    *,
+    patch_score: Mapping[str, Any],
+    failure_bundle: Mapping[str, Any] | None = None,
+    runtime_proof: Mapping[str, Any] | None = None,
+) -> JsonObject:
+    bundle = _as_dict(failure_bundle)
+    runtime = _as_dict(runtime_proof)
+    patch_decision = _as_dict(patch_score.get("decision"))
+
+    patch_id = _string(patch_score.get("patch_id")) or "unknown"
+    diagnosis_id = _string(patch_score.get("diagnosis_id")) or "unknown"
+    patch_score_status = _string(patch_decision.get("status")) or "unknown"
+    candidate = _bool(patch_decision.get(CANDIDATE_FOR_PROTECTED_VERIFICATION))
+    score = _int(patch_score.get("score"))
+    minimum_score = _int(patch_score.get("minimum_score"))
+    proof_requirements = _string_list(patch_score.get("proof_requirements"))
+    changed_files = _string_list(patch_score.get("changed_files"))
+    allowed_files = _string_list(patch_score.get("allowed_files"))
+
+    flags = _authority_expansion_flags(
+        patch_score=patch_score,
+        failure_bundle=bundle,
+        runtime_proof=runtime,
+    )
+
+    if patch_score_status != CANDIDATE_FOR_PROTECTED_VERIFICATION or not candidate:
+        flags.append(
+            _risk_flag(
+                "PATCH_SCORE_NOT_CANDIDATE",
+                "PatchScorer did not mark this patch as a protected-verification candidate.",
+                blocking=True,
+            )
+        )
+
+    if score < minimum_score:
+        flags.append(
+            _risk_flag(
+                "PATCH_SCORE_BELOW_MINIMUM",
+                "Patch score is below the configured minimum verification threshold.",
+                blocking=True,
+            )
+        )
+
+    if not proof_requirements:
+        flags.append(
+            _risk_flag(
+                "PROOF_REQUIREMENTS_MISSING",
+                "Protected verification requires explicit proof commands from PatchScorer.",
+                blocking=True,
+            )
+        )
+
+    blocked = any(_bool(flag.get("blocking")) for flag in flags)
+    status = BLOCKED_REVIEW_FIRST if blocked else REVIEW_REQUIRED
+    next_action = (
+        RESOLVE_BLOCKING_VERIFICATION_FLAGS
+        if blocked
+        else HUMAN_REVIEW_REQUIRED_BEFORE_PATCH_APPLICATION
+    )
+    reason = (
+        "Blocking verification flags prevent protected review."
+        if blocked
+        else "Candidate is reviewable, but ProtectedVerifier grants no patch, merge, or semantic authority."
+    )
+
+    decision_boundary = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "generated_by": "sdetkit.protected_verifier",
+        "collection_status": "collected",
+        "patch_id": patch_id,
+        "diagnosis_id": diagnosis_id,
+        "inputs": {
+            "patch_score_schema": _string(patch_score.get("schema_version")) or "unknown",
+            "patch_score_status": patch_score_status,
+            "failure_bundle_status": _string(bundle.get("status")) or "not_collected",
+            "runtime_proof_status": _string(runtime.get("status")) or "not_collected",
+        },
+        "verification_evidence": {
+            "score": score,
+            "minimum_score": minimum_score,
+            "changed_files": changed_files,
+            "allowed_files": allowed_files,
+            "proof_requirements": proof_requirements,
+            "patch_score_risk_flags": [
+                _string(_as_dict(item).get("code"))
+                for item in _as_list(patch_score.get("risk_flags"))
+                if _string(_as_dict(item).get("code"))
+            ],
+        },
+        "risk_flags": flags,
+        "decision": {
+            "status": status,
+            "review_first": True,
+            CANDIDATE_FOR_PROTECTED_VERIFICATION: candidate and not blocked,
+            "protected_verification_passed": False,
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+            "reason": reason,
+            "next_action": next_action,
+        },
+        "decision_boundary": decision_boundary,
+    }
 
 
 def _protected_path(path: str) -> bool:
@@ -106,7 +339,7 @@ def _proof_passed(result: Mapping[str, Any]) -> bool:
     )
 
 
-def _safety_gate_evidence(evidence: Mapping[str, Any]) -> JsonObject:
+def _compat_safety_gate_evidence(evidence: Mapping[str, Any]) -> JsonObject:
     denied = {
         "automation_allowed": False,
         "patch_application_allowed": False,
@@ -134,10 +367,10 @@ def _safety_gate_evidence(evidence: Mapping[str, Any]) -> JsonObject:
         "collection_status": _string(payload.get("collection_status")) or "collected",
         "status": _string(payload.get("status")) or "safety_gate_evidence_observed",
         "source": _string(payload.get("source")) or "verification_evidence.safety_gate_evidence",
-        "record_count": _int(payload.get("record_count"), default=0),
-        "review_first_count": _int(payload.get("review_first_count"), default=0),
-        "safe_fix_allowed_count": _int(payload.get("safe_fix_allowed_count"), default=0),
-        "reporting_only_count": _int(payload.get("reporting_only_count"), default=0),
+        "record_count": _int(payload.get("record_count")),
+        "review_first_count": _int(payload.get("review_first_count")),
+        "safe_fix_allowed_count": _int(payload.get("safe_fix_allowed_count")),
+        "reporting_only_count": _int(payload.get("reporting_only_count")),
         "report_paths": [
             _string(item) for item in _as_list(payload.get("report_paths")) if _string(item)
         ],
@@ -151,6 +384,12 @@ def verify_candidate(
     patch_score: Mapping[str, Any],
     verification_evidence: Mapping[str, Any],
 ) -> JsonObject:
+    """Backward-compatible wrapper for older read-only candidate surfaces.
+
+    The new contract is verify_patch(). This wrapper preserves the historical
+    import surface for replay, repo-memory, readiness, and PR Quality visibility
+    callers without granting mutation, merge, or semantic authority.
+    """
     decision = _as_dict(patch_score.get("decision"))
     patch_id = _string(patch_score.get("patch_id")) or "unknown"
     diagnosis_id = _string(patch_score.get("diagnosis_id")) or "unknown"
@@ -159,11 +398,11 @@ def verify_candidate(
     evidence_files = _string_list(verification_evidence.get("changed_files"))
     proof_requirements = _string_list(patch_score.get("proof_requirements"))
     proof_results = _proof_results_by_command(verification_evidence)
-    safety_gate_evidence = _safety_gate_evidence(verification_evidence)
+    safety_gate_evidence = _compat_safety_gate_evidence(verification_evidence)
     findings: list[JsonObject] = []
 
-    if _string(decision.get("status")) != "candidate_for_protected_verification" or not _bool(
-        decision.get("candidate_for_protected_verification")
+    if _string(decision.get("status")) != CANDIDATE_FOR_PROTECTED_VERIFICATION or not _bool(
+        decision.get(CANDIDATE_FOR_PROTECTED_VERIFICATION)
     ):
         findings.append(
             _finding(
@@ -222,7 +461,7 @@ def verify_candidate(
             )
         )
 
-    protected_files = [path for path in evidence_files if _protected_path(path)]
+    protected_files = [item for item in evidence_files if _protected_path(item)]
     if protected_files:
         findings.append(
             _finding(
@@ -274,7 +513,7 @@ def verify_candidate(
         _finding(
             SEMANTIC_EQUIVALENCE_NOT_PROVEN,
             (
-                "This prototype verifies structural scope and captured proof results only; "
+                "This compatibility verifier checks structural scope and captured proof only; "
                 "it does not prove semantic equivalence."
             ),
             blocking=False,
@@ -282,13 +521,13 @@ def verify_candidate(
     )
 
     blocked = any(_bool(finding.get("blocking")) for finding in findings)
-    status = "blocked_review_first" if blocked else "structurally_verified_candidate"
+    status = BLOCKED_REVIEW_FIRST if blocked else STRUCTURALLY_VERIFIED_CANDIDATE
 
     return {
         "schema_version": SCHEMA_VERSION,
         "patch_id": patch_id,
         "diagnosis_id": diagnosis_id,
-        "patch_score": int(patch_score.get("score", 0) or 0),
+        "patch_score": _int(patch_score.get("score")),
         "scored_files": scored_files,
         "observed_changed_files": evidence_files,
         "allowed_files": allowed_files,
@@ -313,77 +552,57 @@ def verify_candidate(
 
 def render_markdown(payload: Mapping[str, Any]) -> str:
     decision = _as_dict(payload.get("decision"))
-    safety_gate = _as_dict(payload.get("safety_gate_evidence"))
-    safety_boundary = _as_dict(safety_gate.get("decision_boundary"))
-    findings = [_as_dict(item) for item in _as_list(payload.get("findings"))]
+    evidence = _as_dict(payload.get("verification_evidence"))
+    boundary = _as_dict(payload.get("decision_boundary"))
+    flags = [_as_dict(item) for item in _as_list(payload.get("risk_flags"))]
 
     lines = [
-        "# Protected verifier result",
+        "# ProtectedVerifier decision",
         "",
         f"- Patch: `{_string(payload.get('patch_id'))}`",
         f"- Diagnosis: `{_string(payload.get('diagnosis_id'))}`",
-        f"- Patch score: `{int(payload.get('patch_score', 0) or 0)}`",
-        f"- Decision: `{_string(decision.get('status'))}`",
+        f"- Status: `{_string(decision.get('status'))}`",
+        f"- Review first: `{str(_bool(decision.get('review_first'))).lower()}`",
         (
-            "- Structural verification passed: "
-            f"`{str(_bool(decision.get('structural_verification_passed'))).lower()}`"
+            "- Candidate for protected verification: "
+            f"`{str(_bool(decision.get('candidate_for_protected_verification'))).lower()}`"
         ),
-        "- Semantic equivalence proven: `false`",
-        "- Automation allowed: `false`",
-        "- Merge authorized: `false`",
+        (
+            "- Protected verification passed: "
+            f"`{str(_bool(decision.get('protected_verification_passed'))).lower()}`"
+        ),
+        f"- Next action: `{_string(decision.get('next_action'))}`",
         "",
-        "## Findings",
+        "## Verification evidence",
         "",
+        f"- Score: `{_int(evidence.get('score'))}`",
+        f"- Minimum score: `{_int(evidence.get('minimum_score'))}`",
+        "- Changed files:",
     ]
 
-    for finding in findings:
-        files = ", ".join(_string(item) for item in _as_list(finding.get("files")))
-        commands = ", ".join(_string(item) for item in _as_list(finding.get("commands")))
-        suffix = ""
-        if files:
-            suffix += f" files=`{files}`"
-        if commands:
-            suffix += f" commands=`{commands}`"
-        lines.append(
-            f"- `{_string(finding.get('code'))}`: "
-            f"blocking=`{str(_bool(finding.get('blocking'))).lower()}` "
-            f"{_string(finding.get('message'))}{suffix}"
-        )
-
-    lines.extend(
-        [
-            "",
-            "## SafetyGate evidence",
-            "",
-            f"- Collection status: `{_string(safety_gate.get('collection_status'))}`",
-            f"- Status: `{_string(safety_gate.get('status'))}`",
-            f"- Records: `{_int(safety_gate.get('record_count'), default=0)}`",
-            f"- Safe-fix allowed records: `{_int(safety_gate.get('safe_fix_allowed_count'), default=0)}`",
-            f"- Review-first records: `{_int(safety_gate.get('review_first_count'), default=0)}`",
-            f"- Reporting-only records: `{_int(safety_gate.get('reporting_only_count'), default=0)}`",
-            (
-                "- Automation allowed by SafetyGate evidence: "
-                f"`{str(_bool(safety_boundary.get('automation_allowed'))).lower()}`"
-            ),
-            (
-                "- Patch application allowed by SafetyGate evidence: "
-                f"`{str(_bool(safety_boundary.get('patch_application_allowed'))).lower()}`"
-            ),
-            (
-                "- Merge authorized by SafetyGate evidence: "
-                f"`{str(_bool(safety_boundary.get('merge_authorized'))).lower()}`"
-            ),
-            (
-                "- Semantic equivalence proven by SafetyGate evidence: "
-                f"`{str(_bool(safety_boundary.get('semantic_equivalence_proven'))).lower()}`"
-            ),
-        ]
+    changed_files = _string_list(evidence.get("changed_files"))
+    lines.extend(f"  - `{path}`" for path in changed_files) if changed_files else lines.append(
+        "  - none"
     )
 
-    lines.extend(["", "## Required proof evaluated", ""])
-    proof_requirements = _string_list(payload.get("proof_requirements"))
-    if proof_requirements:
-        lines.extend(f"- `{command}`" for command in proof_requirements)
+    proof_requirements = _string_list(evidence.get("proof_requirements"))
+    lines.extend(["", "## Proof requirements", ""])
+    lines.extend(
+        f"- `{command}`" for command in proof_requirements
+    ) if proof_requirements else lines.append("- none")
+
+    lines.extend(["", "## Risk flags", ""])
+    if flags:
+        for flag in flags:
+            fields = ", ".join(
+                _string(item) for item in _as_list(flag.get("fields")) if _string(item)
+            )
+            suffix = f" fields=`{fields}`" if fields else ""
+            lines.append(
+                f"- `{_string(flag.get('code'))}`: "
+                f"blocking=`{str(_bool(flag.get('blocking'))).lower()}` "
+                f"{_string(flag.get('message'))}{suffix}"
+            )
     else:
         lines.append("- none")
 
@@ -392,10 +611,85 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
             "",
             "## Boundary",
             "",
-            "- This verifier is read-only.",
-            "- Passing means structural proof evidence is consistent with PatchScorer scope.",
-            "- Passing does not prove semantic equivalence or authorize automated remediation.",
-            "- A later replayable benchmark harness must supply stronger execution evidence.",
+            f"- Automation allowed: `{str(_bool(boundary.get('automation_allowed'))).lower()}`",
+            (
+                "- Patch application allowed: "
+                f"`{str(_bool(boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            f"- Merge authorized: `{str(_bool(boundary.get('merge_authorized'))).lower()}`",
+            (
+                "- Semantic equivalence proven: "
+                f"`{str(_bool(boundary.get('semantic_equivalence_proven'))).lower()}`"
+            ),
+            (
+                "- Automatic security fix allowed: "
+                f"`{str(_bool(boundary.get('automatic_security_fix_allowed'))).lower()}`"
+            ),
+            (
+                "- Automatic dismissal allowed: "
+                f"`{str(_bool(boundary.get('automatic_dismissal_allowed'))).lower()}`"
+            ),
+            "",
+            REPORTING_ONLY_NOTE,
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def render_result_markdown(payload: Mapping[str, Any]) -> str:
+    decision = _as_dict(payload.get("decision"))
+    findings = [_as_dict(item) for item in _as_list(payload.get("findings"))]
+    safety_gate = _as_dict(payload.get("safety_gate_evidence"))
+
+    lines = [
+        "# ProtectedVerifier result",
+        "",
+        f"- Patch: `{_string(payload.get('patch_id'))}`",
+        f"- Diagnosis: `{_string(payload.get('diagnosis_id'))}`",
+        f"- Status: `{_string(decision.get('status'))}`",
+        (
+            "- Structural verification passed: "
+            f"`{str(_bool(decision.get('structural_verification_passed'))).lower()}`"
+        ),
+        (
+            "- Semantic equivalence proven: "
+            f"`{str(_bool(decision.get('semantic_equivalence_proven'))).lower()}`"
+        ),
+        f"- Automation allowed: `{str(_bool(decision.get('automation_allowed'))).lower()}`",
+        f"- Merge authorized: `{str(_bool(decision.get('merge_authorized'))).lower()}`",
+        "",
+        "## Findings",
+        "",
+    ]
+
+    if findings:
+        for finding in findings:
+            files = _string_list(finding.get("files"))
+            commands = _string_list(finding.get("commands"))
+            detail = ""
+            if files:
+                detail = f" files=`{', '.join(files)}`"
+            if commands:
+                detail = f" commands=`{', '.join(commands)}`"
+            lines.append(
+                f"- `{_string(finding.get('code'))}`: "
+                f"blocking=`{str(_bool(finding.get('blocking'))).lower()}` "
+                f"{_string(finding.get('message'))}{detail}"
+            )
+    else:
+        lines.append("- none")
+
+    lines.extend(
+        [
+            "",
+            "## SafetyGate evidence",
+            "",
+            f"- Status: `{_string(safety_gate.get('status'))}`",
+            f"- Collection: `{_string(safety_gate.get('collection_status'))}`",
+            f"- Record count: `{_int(safety_gate.get('record_count'))}`",
+            "",
+            RESULT_REPORTING_ONLY_NOTE,
             "",
         ]
     )
@@ -405,6 +699,22 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
 def write_result(payload: Mapping[str, Any], *, out_dir: Path) -> dict[str, str]:
     json_path = out_dir / RESULT_JSON
     markdown_path = out_dir / RESULT_MD
+    out_dir.mkdir(parents=True, exist_ok=True)
+    json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    markdown_path.write_text(render_result_markdown(payload), encoding="utf-8")
+    return {
+        "_".join(("protected", "verifier", "json")): json_path.as_posix(),
+        "_".join(("protected", "verifier", "markdown")): markdown_path.as_posix(),
+    }
+
+
+def write_protected_verifier_decision(
+    payload: Mapping[str, Any],
+    *,
+    out_dir: Path,
+) -> dict[str, str]:
+    json_path = out_dir / PROTECTED_VERIFIER_JSON
+    markdown_path = out_dir / PROTECTED_VERIFIER_MD
     out_dir.mkdir(parents=True, exist_ok=True)
     json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     markdown_path.write_text(render_markdown(payload), encoding="utf-8")
@@ -417,7 +727,9 @@ def write_result(payload: Mapping[str, Any], *, out_dir: Path) -> dict[str, str]
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m sdetkit.protected_verifier")
     parser.add_argument("--patch-score", type=Path, required=True)
-    parser.add_argument("--verification-evidence", type=Path, required=True)
+    parser.add_argument("--verification-evidence", type=Path)
+    parser.add_argument("--failure-bundle", type=Path)
+    parser.add_argument("--runtime-proof", type=Path)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     return parser
@@ -427,11 +739,20 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
     try:
-        payload = verify_candidate(
-            patch_score=_read_json(args.patch_score),
-            verification_evidence=_read_json(args.verification_evidence),
-        )
-        artifacts = write_result(payload, out_dir=args.out_dir)
+        patch_score_payload = _read_json(args.patch_score)
+        if args.verification_evidence is not None:
+            payload = verify_candidate(
+                patch_score=patch_score_payload,
+                verification_evidence=_read_json(args.verification_evidence),
+            )
+            artifacts = write_result(payload, out_dir=args.out_dir)
+        else:
+            payload = verify_patch(
+                patch_score=patch_score_payload,
+                failure_bundle=_read_json(args.failure_bundle),
+                runtime_proof=_read_json(args.runtime_proof),
+            )
+            artifacts = write_protected_verifier_decision(payload, out_dir=args.out_dir)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"error={exc}")
         return 2
@@ -442,6 +763,8 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "artifacts": artifacts,
                     "decision": payload["decision"],
+                    "risk_flags": payload.get("risk_flags", payload.get("findings", [])),
+                    "schema_version": payload["schema_version"],
                 },
                 indent=2,
                 sort_keys=True,

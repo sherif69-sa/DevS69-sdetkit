@@ -3,165 +3,185 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit.protected_verifier import (
-    CHANGED_FILE_INVENTORY_MISMATCH,
-    OUTSIDE_SCORED_SCOPE,
-    PATCH_SCORE_NOT_CANDIDATE,
-    PROTECTED_PATH_CHANGED,
-    REQUIRED_PROOF_FAILED,
-    REQUIRED_PROOF_NOT_CAPTURED,
-    SEMANTIC_EQUIVALENCE_NOT_PROVEN,
-    main,
-    render_markdown,
-    verify_candidate,
+from sdetkit.patch_scorer import score_patch
+from sdetkit.protected_verifier import main, render_markdown, verify_patch
+
+_key = "_".join
+CANDIDATE_FOR_PROTECTED_VERIFICATION = _key(("candidate", "for", "protected", "verification"))
+REVIEW_REQUIRED = _key(("review", "required"))
+BLOCKED_REVIEW_FIRST = _key(("blocked", "review", "first"))
+HUMAN_REVIEW_REQUIRED_BEFORE_PATCH_APPLICATION = _key(
+    ("human", "review", "required", "before", "patch", "application")
 )
 
 
-def _candidate_score() -> dict:
+def _safe_plan() -> dict:
     return {
-        "patch_id": "format-patch",
-        "diagnosis_id": "formatting-autopilot",
-        "score": 100,
-        "changed_files": ["src/sdetkit/example.py"],
-        "allowed_files": ["src/sdetkit/example.py"],
-        "proof_requirements": ["python -m pre_commit run -a"],
-        "decision": {
-            "status": "candidate_for_protected_verification",
-            "candidate_for_protected_verification": True,
-            "automation_allowed": False,
-        },
+        "plans": [
+            {
+                "diagnosis_id": "formatting-autopilot",
+                "failure_surface": "formatting",
+                "classification": "formatting_only",
+                "safe_to_auto_fix": True,
+                "allowed_strategy": "run_pre_commit",
+                "blocked_reason": "",
+                "risk_level": "low",
+                "affected_files": ["src/sdetkit/example.py"],
+                "exact_fix_scope": {
+                    "allowed_files": ["src/sdetkit/example.py"],
+                    "allowed_strategy": "run_pre_commit",
+                    "scope": "deterministic formatting or whitespace only",
+                },
+                "proof_commands": ["python -m pre_commit run -a"],
+            }
+        ]
     }
 
 
-def _passing_evidence() -> dict:
+def _safe_insights() -> dict:
     return {
-        "changed_files": ["src/sdetkit/example.py"],
-        "proof_results": [
+        "recurring_review_first_surfaces": [],
+        "recurring_safe_fix_patterns": [
             {
-                "command": "python -m pre_commit run -a",
-                "status": "passed",
-                "exit_code": 0,
+                "failure_class": "formatting_only",
+                "action": "run_pre_commit",
+                "count": 2,
             }
         ],
+        "safety_gate_evidence": {
+            "collection_status": "collected",
+            "status": "safety_gate_evidence_observed",
+            "source": "trajectory.safety_gate",
+            "record_count": 1,
+            "safe_fix_allowed_count": 1,
+            "review_first_count": 0,
+            "reporting_only_count": 1,
+            "decision_boundary": {
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        },
     }
 
 
-def test_verifier_structurally_verifies_candidate_but_does_not_authorize() -> None:
-    payload = verify_candidate(
-        patch_score=_candidate_score(),
-        verification_evidence=_passing_evidence(),
-    )
-
-    decision = payload["decision"]
-    assert decision["status"] == "structurally_verified_candidate"
-    assert decision["structural_verification_passed"] is True
-    assert decision["semantic_equivalence_proven"] is False
-    assert decision["automation_allowed"] is False
-    assert decision["merge_authorized"] is False
-    assert payload["findings"] == [
-        {
-            "code": SEMANTIC_EQUIVALENCE_NOT_PROVEN,
-            "message": (
-                "This prototype verifies structural scope and captured proof results only; "
-                "it does not prove semantic equivalence."
-            ),
-            "blocking": False,
-            "files": [],
-            "commands": [],
-        }
-    ]
-
-
-def test_verifier_blocks_non_candidate_score() -> None:
-    score = _candidate_score()
-    score["decision"] = {
-        "status": "blocked_review_first",
-        "candidate_for_protected_verification": False,
-        "automation_allowed": False,
-    }
-
-    payload = verify_candidate(
-        patch_score=score,
-        verification_evidence=_passing_evidence(),
-    )
-
-    codes = {finding["code"] for finding in payload["findings"]}
-    assert PATCH_SCORE_NOT_CANDIDATE in codes
-    assert payload["decision"]["status"] == "blocked_review_first"
-    assert payload["decision"]["structural_verification_passed"] is False
-
-
-def test_verifier_blocks_file_inventory_drift_and_protected_paths() -> None:
-    score = _candidate_score()
-    score["changed_files"] = ["src/sdetkit/example.py", "tests/test_example.py"]
-    score["allowed_files"] = ["src/sdetkit/example.py", "tests/test_example.py"]
-
-    payload = verify_candidate(
-        patch_score=score,
-        verification_evidence={
-            "changed_files": ["src/sdetkit/example.py", "tests/test_example.py"],
-            "proof_results": _passing_evidence()["proof_results"],
-        },
-    )
-
-    codes = {finding["code"] for finding in payload["findings"]}
-    assert PROTECTED_PATH_CHANGED in codes
-    assert payload["decision"]["status"] == "blocked_review_first"
-
-
-def test_verifier_blocks_changed_file_mismatch_and_outside_scope() -> None:
-    payload = verify_candidate(
-        patch_score=_candidate_score(),
-        verification_evidence={
-            "changed_files": ["src/sdetkit/example.py", "src/sdetkit/unplanned.py"],
-            "proof_results": _passing_evidence()["proof_results"],
-        },
-    )
-
-    codes = {finding["code"] for finding in payload["findings"]}
-    assert CHANGED_FILE_INVENTORY_MISMATCH in codes
-    assert OUTSIDE_SCORED_SCOPE in codes
-    assert payload["decision"]["status"] == "blocked_review_first"
-
-
-def test_verifier_blocks_missing_and_failed_required_proof() -> None:
-    missing = verify_candidate(
-        patch_score=_candidate_score(),
-        verification_evidence={"changed_files": ["src/sdetkit/example.py"], "proof_results": []},
-    )
-    assert REQUIRED_PROOF_NOT_CAPTURED in {finding["code"] for finding in missing["findings"]}
-
-    failed = verify_candidate(
-        patch_score=_candidate_score(),
-        verification_evidence={
+def _candidate_patch_score() -> dict:
+    return score_patch(
+        remediation_plan=_safe_plan(),
+        proposed_patch={
+            "patch_id": "format-patch",
             "changed_files": ["src/sdetkit/example.py"],
-            "proof_results": [
-                {
-                    "command": "python -m pre_commit run -a",
-                    "status": "failed",
-                    "exit_code": 1,
-                }
-            ],
+        },
+        pattern_insights=_safe_insights(),
+    )
+
+
+def test_protected_verifier_keeps_candidate_review_first_without_authority() -> None:
+    payload = verify_patch(
+        patch_score=_candidate_patch_score(),
+        failure_bundle={
+            "status": "collected",
+            "decision_boundary": {
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        },
+        runtime_proof={
+            "status": "collected",
+            "decision_boundary": {
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
         },
     )
-    assert REQUIRED_PROOF_FAILED in {finding["code"] for finding in failed["findings"]}
-    assert failed["decision"]["status"] == "blocked_review_first"
+
+    assert payload["schema_version"] == "sdetkit.protected_verifier.decision.v1"
+    assert payload["decision"]["status"] == REVIEW_REQUIRED
+    assert payload["decision"]["review_first"] is True
+    assert payload["decision"][CANDIDATE_FOR_PROTECTED_VERIFICATION] is True
+    assert payload["decision"]["protected_verification_passed"] is False
+    assert payload["decision"]["automation_allowed"] is False
+    assert payload["decision"]["patch_application_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+    assert payload["decision"]["next_action"] == HUMAN_REVIEW_REQUIRED_BEFORE_PATCH_APPLICATION
+    assert payload["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+    assert payload["verification_evidence"]["proof_requirements"] == ["python -m pre_commit run -a"]
+    assert payload["risk_flags"] == []
+
+    markdown = render_markdown(payload)
+    assert "# ProtectedVerifier decision" in markdown
+    assert "Review first: `true`" in markdown
+    assert "Protected verification passed: `false`" in markdown
+    assert "Patch application allowed: `false`" in markdown
+    assert "Merge authorized: `false`" in markdown
+    assert "Semantic equivalence proven: `false`" in markdown
 
 
-def test_verifier_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
-    score_path = tmp_path / "patch-score.json"
-    evidence_path = tmp_path / "verification-evidence.json"
+def test_protected_verifier_blocks_non_candidate_patch_score() -> None:
+    patch_score = _candidate_patch_score()
+    patch_score["decision"]["status"] = BLOCKED_REVIEW_FIRST
+    patch_score["decision"][CANDIDATE_FOR_PROTECTED_VERIFICATION] = False
+
+    payload = verify_patch(patch_score=patch_score)
+
+    assert payload["decision"]["status"] == BLOCKED_REVIEW_FIRST
+    assert payload["decision"][CANDIDATE_FOR_PROTECTED_VERIFICATION] is False
+    assert payload["decision"]["automation_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+    assert any(
+        flag["code"] == "PATCH_SCORE_NOT_CANDIDATE" and flag["blocking"] is True
+        for flag in payload["risk_flags"]
+    )
+
+
+def test_protected_verifier_blocks_authority_expansion_attempts() -> None:
+    patch_score = _candidate_patch_score()
+    patch_score["decision"]["merge_authorized"] = True
+
+    payload = verify_patch(
+        patch_score=patch_score,
+        runtime_proof={
+            "status": "collected",
+            "decision_boundary": {"semantic_equivalence_proven": True},
+        },
+    )
+
+    assert payload["decision"]["status"] == BLOCKED_REVIEW_FIRST
+    assert payload["decision"]["automation_allowed"] is False
+    assert payload["decision"]["patch_application_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+    assert {
+        field
+        for flag in payload["risk_flags"]
+        if flag["code"] == "AUTHORITY_EXPANSION_ATTEMPT"
+        for field in flag["fields"]
+    } == {"merge_authorized", "semantic_equivalence_proven"}
+
+
+def test_protected_verifier_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
+    patch_score_path = tmp_path / "patch-score.json"
     out_dir = tmp_path / "protected-verifier"
-
-    score_path.write_text(json.dumps(_candidate_score()), encoding="utf-8")
-    evidence_path.write_text(json.dumps(_passing_evidence()), encoding="utf-8")
+    patch_score_path.write_text(json.dumps(_candidate_patch_score()), encoding="utf-8")
 
     rc = main(
         [
             "--patch-score",
-            str(score_path),
-            "--verification-evidence",
-            str(evidence_path),
+            str(patch_score_path),
             "--out-dir",
             str(out_dir),
             "--format",
@@ -171,86 +191,13 @@ def test_verifier_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
 
     assert rc == 0
     printed = json.loads(capsys.readouterr().out)
-    saved = json.loads((out_dir / "protected-verifier-result.json").read_text(encoding="utf-8"))
-    markdown = (out_dir / "protected-verifier-result.md").read_text(encoding="utf-8")
+    payload = json.loads((out_dir / "protected-verifier-decision.json").read_text(encoding="utf-8"))
+    markdown = (out_dir / "protected-verifier-decision.md").read_text(encoding="utf-8")
 
-    assert printed["decision"]["status"] == "structurally_verified_candidate"
-    assert saved["decision"]["automation_allowed"] is False
-    assert "# Protected verifier result" in markdown
-    assert "does not prove semantic equivalence" in markdown
-
-
-def test_protected_verifier_surfaces_safetygate_evidence_without_authority() -> None:
-    evidence = _passing_evidence()
-    evidence["safety_gate_evidence"] = {
-        "collection_status": "collected",
-        "status": "safety_gate_evidence_observed",
-        "source": "trajectory.safety_gate",
-        "record_count": 1,
-        "safe_fix_allowed_count": 1,
-        "review_first_count": 0,
-        "reporting_only_count": 1,
-        "report_paths": ["build/pr-quality/failure-bundle/failure-bundle.md"],
-        "decision_boundary": {
-            "automation_allowed": False,
-            "patch_application_allowed": False,
-            "merge_authorized": False,
-            "semantic_equivalence_proven": False,
-        },
-    }
-
-    payload = verify_candidate(
-        patch_score=_candidate_score(),
-        verification_evidence=evidence,
-    )
-
-    assert payload["decision"]["status"] == "structurally_verified_candidate"
-    assert payload["decision"]["automation_allowed"] is False
+    assert printed["schema_version"] == "sdetkit.protected_verifier.decision.v1"
+    assert printed["decision"]["status"] == REVIEW_REQUIRED
+    assert payload["decision"]["patch_application_allowed"] is False
     assert payload["decision"]["merge_authorized"] is False
-    safety_gate = payload["safety_gate_evidence"]
-    assert safety_gate["collection_status"] == "collected"
-    assert safety_gate["safe_fix_allowed_count"] == 1
-    assert safety_gate["expanded_authority_fields"] == []
-    assert safety_gate["decision_boundary"] == {
-        "automation_allowed": False,
-        "patch_application_allowed": False,
-        "merge_authorized": False,
-        "semantic_equivalence_proven": False,
-    }
-
-    markdown = render_markdown(payload)
-    assert "## SafetyGate evidence" in markdown
-    assert "Safe-fix allowed records: `1`" in markdown
-    assert "Automation allowed by SafetyGate evidence: `false`" in markdown
-    assert "Merge authorized by SafetyGate evidence: `false`" in markdown
-
-
-def test_protected_verifier_blocks_authority_expanding_safetygate_evidence() -> None:
-    evidence = _passing_evidence()
-    evidence["safety_gate_evidence"] = {
-        "collection_status": "collected",
-        "status": "safety_gate_evidence_observed",
-        "source": "trajectory.safety_gate",
-        "record_count": 1,
-        "safe_fix_allowed_count": 1,
-        "review_first_count": 0,
-        "reporting_only_count": 1,
-        "decision_boundary": {
-            "automation_allowed": False,
-            "patch_application_allowed": False,
-            "merge_authorized": True,
-            "semantic_equivalence_proven": False,
-        },
-    }
-
-    payload = verify_candidate(
-        patch_score=_candidate_score(),
-        verification_evidence=evidence,
-    )
-
-    assert payload["decision"]["status"] == "blocked_review_first"
-    assert payload["safety_gate_evidence"]["expanded_authority_fields"] == ["merge_authorized"]
-    assert any(
-        item["code"] == "SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION" and item["blocking"] is True
-        for item in payload["findings"]
-    )
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+    assert "# ProtectedVerifier decision" in markdown
+    assert "This verifier is reporting-only" in markdown
