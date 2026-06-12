@@ -82,6 +82,28 @@ def _failure_bundle_safety_evidence(value: Mapping[str, Any] | None) -> JsonObje
     }
 
 
+def _authority_boundary(
+    *,
+    source: str,
+    review_first: bool,
+    auto_fix_allowed: bool,
+    reason: str = "",
+) -> JsonObject:
+    return {
+        "source": source,
+        "reporting_only": True,
+        "review_first": review_first,
+        "auto_fix_allowed": auto_fix_allowed,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+        "reason": _string(reason),
+    }
+
+
 def _slug(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.lower()).strip("-")
     return slug or "unknown"
@@ -414,6 +436,16 @@ def build_pr_quality_trajectory_records(
                         or check.get("title")
                     ),
                 },
+                "authority_boundary": _authority_boundary(
+                    source="pr_quality",
+                    review_first=review_first,
+                    auto_fix_allowed=auto_fix_allowed,
+                    reason=(
+                        _string(safe_remediation.get("reason"))
+                        or _string(automation.get("reason"))
+                        or _string(check.get("title"))
+                    ),
+                ),
                 "safety_gate": failure_bundle_safety,
                 "fix": {
                     "allowed_strategy": action,
@@ -525,6 +557,15 @@ def build_trajectory_records(
                     "reason": _string(plan.get("blocked_reason"))
                     or "safe mechanical remediation candidate",
                 },
+                "authority_boundary": _authority_boundary(
+                    source="trajectory_store",
+                    review_first=not auto_fix_allowed,
+                    auto_fix_allowed=auto_fix_allowed,
+                    reason=(
+                        _string(plan.get("blocked_reason"))
+                        or "safe mechanical remediation candidate"
+                    ),
+                ),
                 "fix": {
                     "allowed_strategy": action,
                     "patch_files": _string_list(plan.get("affected_files"))
