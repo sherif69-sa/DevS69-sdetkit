@@ -98,6 +98,55 @@ def _safe_fix_patterns(
     ]
 
 
+def _authority_boundary_evidence(rows: list[JsonObject]) -> JsonObject:
+    authority_rows = [
+        _as_dict(row.get("authority_boundary"))
+        for row in rows
+        if _as_dict(row.get("authority_boundary"))
+    ]
+    denied_keys = (
+        "automation_allowed",
+        "patch_application_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven",
+        "automatic_security_fix_allowed",
+        "automatic_dismissal_allowed",
+    )
+    denied = {key: False for key in denied_keys}
+    if not authority_rows:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "trajectory.authority_boundary",
+            "record_count": 0,
+            "review_first_count": 0,
+            "auto_fix_allowed_count": 0,
+            "reporting_only_count": 0,
+            "sources": [],
+            "decision_boundary": denied,
+        }
+
+    return {
+        "collection_status": "collected",
+        "status": "authority_boundary_evidence_observed",
+        "source": "trajectory.authority_boundary",
+        "record_count": len(authority_rows),
+        "review_first_count": sum(1 for row in authority_rows if _bool(row.get("review_first"))),
+        "auto_fix_allowed_count": sum(
+            1 for row in authority_rows if _bool(row.get("auto_fix_allowed"))
+        ),
+        "reporting_only_count": sum(
+            1 for row in authority_rows if _bool(row.get("reporting_only"))
+        ),
+        "sources": sorted(
+            {_string(row.get("source")) for row in authority_rows if _string(row.get("source"))}
+        ),
+        "decision_boundary": {
+            key: any(_bool(row.get(key)) for row in authority_rows) for key in denied_keys
+        },
+    }
+
+
 def _safety_gate_evidence(rows: list[JsonObject]) -> JsonObject:
     safety_rows = [
         _as_dict(row.get("safety_gate")) for row in rows if _as_dict(row.get("safety_gate"))
@@ -251,6 +300,7 @@ def build_pattern_insights(
         "recurring_review_first_surfaces": recurring_review_surfaces,
         "recurring_safe_fix_patterns": recurring_safe_fixes,
         "safety_gate_evidence": _safety_gate_evidence(rows),
+        "authority_boundary_evidence": _authority_boundary_evidence(rows),
         "operator_focus": _operator_focus(
             record_count=len(rows),
             recurring_review_surfaces=recurring_review_surfaces,
@@ -266,6 +316,8 @@ def render_pattern_markdown(insights: Mapping[str, Any]) -> str:
     focus = _as_dict(insights.get("operator_focus"))
     safety_gate = _as_dict(insights.get("safety_gate_evidence"))
     boundary = _as_dict(safety_gate.get("decision_boundary"))
+    authority = _as_dict(insights.get("authority_boundary_evidence"))
+    authority_boundary = _as_dict(authority.get("decision_boundary"))
 
     lines = [
         "# Trajectory pattern insights",
@@ -338,6 +390,27 @@ def render_pattern_markdown(insights: Mapping[str, Any]) -> str:
 
     lines.extend(
         [
+            "",
+            "## Trajectory authority boundary evidence",
+            "",
+            f"- Collection status: `{_string(authority.get('collection_status'))}`",
+            f"- Status: `{_string(authority.get('status'))}`",
+            f"- Records: `{int(authority.get('record_count', 0) or 0)}`",
+            f"- Review-first records: `{int(authority.get('review_first_count', 0) or 0)}`",
+            f"- Auto-fix evidence records: `{int(authority.get('auto_fix_allowed_count', 0) or 0)}`",
+            f"- Reporting-only records: `{int(authority.get('reporting_only_count', 0) or 0)}`",
+            (
+                "- Patch automation allowed by trajectory authority evidence: "
+                f"`{str(_bool(authority_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by trajectory authority evidence: "
+                f"`{str(_bool(authority_boundary.get('automatic_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by trajectory authority evidence: "
+                f"`{str(_bool(authority_boundary.get('merge_authorized'))).lower()}`"
+            ),
             "",
             "## Operator focus",
             "",

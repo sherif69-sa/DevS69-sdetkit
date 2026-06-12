@@ -180,6 +180,47 @@ def _controlled_candidate_validation(evidence: Mapping[str, Any]) -> JsonObject:
     }
 
 
+def _trajectory_authority_evidence(pattern_insights: Mapping[str, Any]) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+    payload = _as_dict(pattern_insights.get("authority_boundary_evidence"))
+    if not payload:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "trajectory.authority_boundary",
+            "record_count": 0,
+            "review_first_count": 0,
+            "auto_fix_allowed_count": 0,
+            "reporting_only_count": 0,
+            "sources": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = _as_dict(payload.get("decision_boundary"))
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    if expanded:
+        raise ValueError("trajectory authority evidence expands authority: " + ", ".join(expanded))
+
+    return {
+        "collection_status": _string(payload.get("collection_status")) or "collected",
+        "status": _string(payload.get("status")) or "authority_boundary_evidence_observed",
+        "source": _string(payload.get("source")) or "trajectory.authority_boundary",
+        "record_count": _int(payload.get("record_count")),
+        "review_first_count": _int(payload.get("review_first_count")),
+        "auto_fix_allowed_count": _int(payload.get("auto_fix_allowed_count")),
+        "reporting_only_count": _int(payload.get("reporting_only_count")),
+        "sources": [_string(item) for item in _as_list(payload.get("sources")) if _string(item)],
+        "decision_boundary": denied,
+    }
+
+
 def _safety_gate_evidence(pattern_insights: Mapping[str, Any]) -> JsonObject:
     denied = {
         "automation_allowed": False,
@@ -641,6 +682,7 @@ def build_repo_memory_profile(
         controlled_candidate_validation_evidence or {}
     )
     safety_gate_evidence = _safety_gate_evidence(pattern_insights)
+    trajectory_authority_evidence = _trajectory_authority_evidence(pattern_insights)
     benchmark_proven = _benchmark_contract_proven(benchmark_report)
     live_proven = _live_contract_proven(live_report)
     safe_fix_history = _safe_fix_history(
@@ -697,6 +739,9 @@ def build_repo_memory_profile(
             "live_report_mode": _string(live_report.get("report_mode")),
             "live_contract_proven": live_proven,
             "safety_gate_evidence_record_count": _int(safety_gate_evidence.get("record_count")),
+            "trajectory_authority_record_count": _int(
+                trajectory_authority_evidence.get("record_count")
+            ),
         },
         "command_profile": {
             "source": "replayable_benchmark_harness",
@@ -736,6 +781,7 @@ def build_repo_memory_profile(
         "live_safe_candidate_count": len(live_supported_candidates),
         "controlled_candidate_validation": controlled_validation,
         "safety_gate_evidence": safety_gate_evidence,
+        "trajectory_authority_evidence": trajectory_authority_evidence,
         "flaky_test_registry": flaky_registry,
         "escalation_rules": _escalation_rules(),
         "unproven_boundaries": unproven_boundaries,
@@ -764,6 +810,8 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
     controlled = _as_dict(profile.get("controlled_candidate_validation"))
     safety_gate = _as_dict(profile.get("safety_gate_evidence"))
     safety_boundary = _as_dict(safety_gate.get("decision_boundary"))
+    trajectory_authority = _as_dict(profile.get("trajectory_authority_evidence"))
+    trajectory_authority_boundary = _as_dict(trajectory_authority.get("decision_boundary"))
     flaky = _as_dict(profile.get("flaky_test_registry"))
     flaky_source = _as_dict(flaky.get("source"))
     boundary = _as_dict(profile.get("decision_boundary"))
@@ -929,6 +977,33 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
 
     lines.extend(
         [
+            "",
+            "## Trajectory authority boundary evidence",
+            "",
+            f"- Collection status: `{_string(trajectory_authority.get('collection_status'))}`",
+            f"- Status: `{_string(trajectory_authority.get('status'))}`",
+            f"- Records: `{_int(trajectory_authority.get('record_count'))}`",
+            f"- Review-first records: `{_int(trajectory_authority.get('review_first_count'))}`",
+            (
+                "- Auto-fix evidence records: "
+                f"`{_int(trajectory_authority.get('auto_fix_allowed_count'))}`"
+            ),
+            (
+                "- Reporting-only records: "
+                f"`{_int(trajectory_authority.get('reporting_only_count'))}`"
+            ),
+            (
+                "- Patch automation allowed by trajectory authority: "
+                f"`{str(_bool(trajectory_authority_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by trajectory authority: "
+                f"`{str(_bool(trajectory_authority_boundary.get('automatic_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by trajectory authority: "
+                f"`{str(_bool(trajectory_authority_boundary.get('merge_authorized'))).lower()}`"
+            ),
             "",
             "## Flaky test registry",
             "",

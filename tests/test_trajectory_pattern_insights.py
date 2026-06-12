@@ -221,3 +221,55 @@ def test_pattern_insights_summarizes_safety_gate_evidence() -> None:
     assert "## SafetyGate evidence" in markdown
     assert "Safe-fix allowed records: `1`" in markdown
     assert "Automation allowed by SafetyGate evidence: `false`" in markdown
+
+
+def test_pattern_insights_summarizes_trajectory_authority_boundary_evidence() -> None:
+    rows = _records()[:2]
+    rows[0]["authority_boundary"] = {
+        "source": "pr_quality",
+        "reporting_only": True,
+        "review_first": True,
+        "auto_fix_allowed": False,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+    rows[1]["authority_boundary"] = {
+        "source": "trajectory_store",
+        "reporting_only": True,
+        "review_first": False,
+        "auto_fix_allowed": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+
+    insights = build_pattern_insights(rows, minimum_repeat=1)
+    authority = insights["authority_boundary_evidence"]
+
+    assert authority["collection_status"] == "collected"
+    assert authority["status"] == "authority_boundary_evidence_observed"
+    assert authority["record_count"] == 2
+    assert authority["review_first_count"] == 1
+    assert authority["auto_fix_allowed_count"] == 1
+    assert authority["reporting_only_count"] == 2
+    assert authority["sources"] == ["pr_quality", "trajectory_store"]
+    assert authority["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+
+    markdown = render_pattern_markdown(insights)
+    assert "## Trajectory authority boundary evidence" in markdown
+    assert "Auto-fix evidence records: `1`" in markdown
+    assert "Security dismissal allowed by trajectory authority evidence: `false`" in markdown
