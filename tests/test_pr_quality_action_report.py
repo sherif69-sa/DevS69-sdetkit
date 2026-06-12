@@ -4353,3 +4353,77 @@ def test_pr_quality_review_summary_opens_ghas_blocker_details() -> None:
     assert "forbidden_until_human_false_positive_review" in body
     assert "Dismissal allowed" in body
     assert "`false`" in body
+
+
+def test_review_model_recommends_wait_for_stale_only_ghas_alerts() -> None:
+    model = report.build_pr_quality_review_model(
+        status="review_required",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=True,
+        action_report={
+            "status": "review_required",
+            "primary_blocker": {
+                "title": "Security review requires action",
+                "surface": "security",
+                "action": "review_security",
+            },
+            "recommended_actions": [
+                "Review unresolved GitHub Advanced Security comments on the PR.",
+                "Fix the flagged surface or dismiss the false positive with a review reason.",
+            ],
+            "proof_commands": ["make proof-after-format"],
+        },
+        check_intelligence={
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+            "code_scanning_review": {
+                "collected": True,
+                "collection_status": "collected",
+                "open_alerts": 1,
+                "current_alerts": 0,
+                "stale_alerts": 1,
+                "unknown_freshness_alerts": 0,
+                "current_head_sha": "new-head",
+                "findings": [
+                    {
+                        "number": 1385,
+                        "url": "https://github.example/alert/1385",
+                        "rule_id": "SEC_HIGH_ENTROPY_STRING",
+                        "severity": "warning",
+                        "path": "tests/test_pr_quality_action_report.py",
+                        "line": "4353",
+                        "commit_sha": "old-head",
+                        "current_head_sha": "new-head",
+                        "freshness": "stale",
+                        "recommended_action": "wait_for_code_scanning_refresh",
+                        "message": "High-entropy string literal detected.",
+                    }
+                ],
+            },
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "security",
+                "title": "Security review requires action",
+            },
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+    assert model["recommended_actions"][0].startswith("Wait for Code Scanning/GHAS refresh")
+    assert "Fix the flagged surface" not in "\\n".join(model["recommended_actions"])
+    assert model["ghas_blocker_details"]["findings"][0]["proof_commands"] == [
+        "gh pr checks --watch",
+        "Re-run PR Quality after Code Scanning refreshes on the current PR head.",
+    ]
+
+    body = report.render_pr_quality_review_summary(model)
+
+    assert "Stale-only Code Scanning state" in body
+    assert "do not patch or dismiss stale alerts" in body
+    assert "wait_for_code_scanning_refresh" in body

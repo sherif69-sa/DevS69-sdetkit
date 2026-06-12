@@ -1856,6 +1856,23 @@ def _review_model_ghas_blocker_details(
         freshness = _string(finding.get("freshness") or "unknown")
         recommended_action = _string(finding.get("recommended_action") or "review_alert_freshness")
 
+        if freshness == "current":
+            proof_commands = [
+                "python -m sdetkit security check --root . --format json",
+                "python -m pre_commit run -a",
+                "make proof-after-format",
+            ]
+        elif freshness == "stale":
+            proof_commands = [
+                "gh pr checks --watch",
+                "Re-run PR Quality after Code Scanning refreshes on the current PR head.",
+            ]
+        else:
+            proof_commands = [
+                "Review alert freshness against the current PR head SHA.",
+                "gh pr checks --watch",
+            ]
+
         findings.append(
             {
                 "number": _string(finding.get("number") or "unknown"),
@@ -1876,11 +1893,7 @@ def _review_model_ghas_blocker_details(
                     if freshness == "current"
                     else "not_needed_for_stale_alert"
                 ),
-                "proof_commands": [
-                    "python -m sdetkit security check --root . --format json",
-                    "python -m pre_commit run -a",
-                    "make proof-after-format",
-                ],
+                "proof_commands": proof_commands,
             }
         )
 
@@ -2014,6 +2027,23 @@ def build_pr_quality_review_model(
         for item in _as_list(action_report.get("recommended_actions"))
         if isinstance(item, str) and item.strip()
     ]
+
+    if (
+        _int(ghas_blocker_details.get("open_alerts")) > 0
+        and _int(ghas_blocker_details.get("current_alerts")) == 0
+        and _int(ghas_blocker_details.get("stale_alerts")) > 0
+    ):
+        stale_only_actions = [
+            "Wait for Code Scanning/GHAS refresh; no current code-scanning alert matches the PR head SHA.",
+            "Do not patch or dismiss stale alerts unless a refreshed alert matches the current PR head.",
+            "Re-run PR Quality after Code Scanning refreshes.",
+        ]
+        filtered_actions = [
+            action
+            for action in recommended_actions
+            if "dismiss" not in action.lower() and "fix the flagged surface" not in action.lower()
+        ]
+        recommended_actions = [*stale_only_actions, *filtered_actions]
 
     return {
         "schema_version": "sdetkit.pr_quality.review_model.v2",
@@ -2424,6 +2454,19 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         f"| Current head SHA | `{_markdown_table_value(ghas_blocker_details.get('current_head_sha') or 'unknown')}` |",
         f"| Dismissal allowed | `{_review_model_scalar(ghas_blocker_details.get('dismissal_allowed'))}` |",
     ]
+    if (
+        _int(ghas_blocker_details.get("open_alerts")) > 0
+        and _int(ghas_blocker_details.get("current_alerts")) == 0
+        and _int(ghas_blocker_details.get("stale_alerts")) > 0
+    ):
+        ghas_body.extend(
+            [
+                "",
+                "> Stale-only Code Scanning state: no alert currently matches the PR head SHA. Wait for Code Scanning refresh; do not patch or dismiss stale alerts.",
+                "",
+            ]
+        )
+
     if ghas_findings:
         ghas_body.extend(["", "### Code Scanning alert details", ""])
         for finding in ghas_findings[:5]:
