@@ -142,6 +142,7 @@ def test_pr_quality_comment_workflow_renders_comment_from_action_report() -> Non
     assert "--out build/pr-quality/pr-comment-body.md" in text
     assert "--review-model-out build/pr-quality/pr-review-model.json" in text
     assert "--review-summary-out build/pr-quality/pr-review-summary.md" in text
+    assert "--review-html-out build/pr-quality/pr-review-dashboard.html" in text
     assert "> build/pr-quality/pr-comment-metadata.json" in text
     assert 'cat build/pr-quality/pr-review-summary.md >> "$GITHUB_STEP_SUMMARY"' in text
 
@@ -153,6 +154,7 @@ def test_pr_quality_comment_workflow_uploads_check_intelligence_artifacts() -> N
     assert "build/pr-quality/check-intelligence/" in text
     assert "build/pr-quality/pr-review-model.json" in text
     assert "build/pr-quality/pr-review-summary.md" in text
+    assert "build/pr-quality/pr-review-dashboard.html" in text
     assert "build/pr-quality/pr-evidence-narrative.md" in text
 
 
@@ -1093,3 +1095,50 @@ def test_pr_quality_prefers_final_trusted_diagnostic_snapshot_history_output_fil
     assert text.count("diagnostic-signal-snapshots/output/") >= 4
     assert text.count("-name diagnostic-signal-snapshot-history-summary.json") >= 2
     assert text.count("-name diagnostic-signal-snapshot-history.jsonl") >= 2
+
+
+def test_pr_quality_published_comment_prefers_compact_review_summary() -> None:
+    text = _workflow_text()
+    start = text.index('publish_dir="build/pr-quality/comment-publish"')
+    end = text.index('BODY_PATH="$body_path" REQUEST_PATH="$request_path"', start)
+    publisher = text[start:end]
+
+    assert 'cat build/pr-quality/pr-review-summary.md >> "$body_path"' in publisher
+    assert 'cat build/pr-quality/pr-comment-body.md >> "$body_path"' in publisher
+    assert publisher.index("cat build/pr-quality/pr-review-summary.md") < publisher.index(
+        "cat build/pr-quality/pr-comment-body.md"
+    )
+    assert "PR Quality product artifacts" in publisher
+    assert "`pr-review-model.json`: machine-readable review model." in publisher
+    assert "`pr-review-dashboard.html`: browser-ready review dashboard." in publisher
+    assert (
+        "`pr-comment-body.md`: full raw evidence body retained in the artifact bundle." in publisher
+    )
+    assert (
+        "`pr-quality-comment`: uploaded artifact bundle for full diagnostic evidence." in publisher
+    )
+
+
+def test_pr_quality_comment_workflow_builds_artifact_landing_page() -> None:
+    text = _workflow_text()
+
+    assert "--review-index-out build/pr-quality/index.html" in text
+    assert "build/pr-quality/index.html" in text
+    assert "`index.html`: artifact landing page." in text
+    assert "Upload PR quality comment artifacts" in text
+
+
+def test_pr_quality_comment_workflow_builds_artifact_manifest() -> None:
+    text = _workflow_text()
+
+    assert (
+        "--review-artifacts-manifest-out build/pr-quality/pr-review-artifacts-manifest.json" in text
+    )
+    assert "build/pr-quality/pr-review-artifacts-manifest.json" in text
+    assert "`pr-review-artifacts-manifest.json`: machine-readable artifact bundle manifest." in text
+    assert text.index("--review-index-out build/pr-quality/index.html") < text.index(
+        "--review-artifacts-manifest-out build/pr-quality/pr-review-artifacts-manifest.json"
+    )
+    assert text.index("build/pr-quality/index.html") < text.index(
+        "build/pr-quality/pr-review-artifacts-manifest.json"
+    )

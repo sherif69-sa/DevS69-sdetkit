@@ -3065,7 +3065,7 @@ def test_pr_quality_review_model_is_structured_product_surface() -> None:
         evidence_narrative=evidence_narrative,
     )
 
-    assert model["schema_version"] == "sdetkit.pr_quality.review_model.v1"
+    assert model["schema_version"] == "sdetkit.pr_quality.review_model.v2"
     assert model["decision"] == {
         "status": "green",
         "merge_assessment": "verify_listed_proof_before_routine_merge",
@@ -3162,10 +3162,10 @@ def test_write_comment_body_writes_review_model_artifact(tmp_path: Path) -> None
 
     assert result["review_model_written"] is True
     assert result["review_model_out"] == review_model_out.as_posix()
-    assert result["review_model_schema_version"] == "sdetkit.pr_quality.review_model.v1"
+    assert result["review_model_schema_version"] == "sdetkit.pr_quality.review_model.v2"
 
     model = json.loads(review_model_out.read_text(encoding="utf-8"))
-    assert model["schema_version"] == "sdetkit.pr_quality.review_model.v1"
+    assert model["schema_version"] == "sdetkit.pr_quality.review_model.v2"
     assert model["decision"]["merge_assessment"] == "verify_listed_proof_before_routine_merge"
     assert model["decision"]["next_action"] == "rerun_proof"
     assert model["decision"]["risk_surface"] == "diagnostic_engine"
@@ -3269,3 +3269,790 @@ def test_write_comment_body_writes_review_summary_artifact(tmp_path: Path) -> No
     assert "| Boundary mode | `reporting_only` |" in summary
     assert "| Merge authorization | `false` |" in summary
     assert "does not authorize merge" in summary
+
+
+def test_write_comment_body_writes_review_html_dashboard_artifact(tmp_path: Path) -> None:
+    action_report_path = tmp_path / "action-report.json"
+    check_intelligence_path = tmp_path / "check-intelligence.json"
+    evidence_narrative_path = tmp_path / "evidence-narrative.json"
+    comment_out = tmp_path / "comment.md"
+    review_model_out = tmp_path / "review-model.json"
+    review_summary_out = tmp_path / "review-summary.md"
+    review_html_out = tmp_path / "review-dashboard.html"
+
+    action_report = {
+        "status": "green",
+        "primary_blocker": {},
+        "automation": {"attempted": False, "allowed": False, "reason": "no remediation needed"},
+        "recommended_actions": [],
+        "proof_commands": [],
+        "evidence": {},
+    }
+    check_intelligence = {
+        "checks_seen": 44,
+        "failed_checks": [],
+        "queued_checks": [],
+        "startup_failures": [],
+        "security_review": {"collected": True, "unresolved_findings": 0},
+    }
+    evidence_narrative = {
+        "quality": {"ok": True, "coverage_percent": "96.69%"},
+        "primary_signal": {
+            "kind": "review_signal",
+            "surface": "diagnostic_engine",
+            "title": "Diagnostic intelligence evidence changed",
+        },
+        "graph": {
+            "node_count": 1,
+            "review_first_count": 0,
+            "critical_count": 0,
+            "top_blocker": {
+                "title": "Diagnostic intelligence evidence changed",
+                "surface": "diagnostic_engine",
+                "action": "rerun_proof",
+                "review_first": False,
+            },
+        },
+        "next_proof": ["python -m pre_commit run -a"],
+    }
+
+    action_report_path.write_text(
+        json.dumps(action_report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    check_intelligence_path.write_text(
+        json.dumps(check_intelligence, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    evidence_narrative_path.write_text(
+        json.dumps(evidence_narrative, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    result = report.write_comment_body(
+        action_report_path=action_report_path,
+        check_intelligence_path=check_intelligence_path,
+        evidence_narrative_path=evidence_narrative_path,
+        out=comment_out,
+        review_model_out=review_model_out,
+        review_summary_out=review_summary_out,
+        review_html_out=review_html_out,
+    )
+
+    assert result["review_html_written"] is True
+    assert result["review_html_out"] == review_html_out.as_posix()
+
+    html = review_html_out.read_text(encoding="utf-8")
+    assert "<!doctype html>" in html
+    assert "<title>PR Quality Review Dashboard</title>" in html
+    assert "<h1>PR Quality Review Dashboard</h1>" in html
+    assert 'class="hero status-green"' in html
+    assert "Decision details" in html
+    assert "Product artifacts" in html
+    assert "pr-review-model.json" in html
+    assert "pr-review-summary.md" in html
+    assert "pr-review-dashboard.html" in html
+    assert "Required queued checks" in html
+    assert "Missing required contexts" in html
+    assert "white-space: pre-wrap" in html
+    assert "verify_listed_proof_before_routine_merge" in html
+    assert "rerun_proof" in html
+    assert "python -m pre_commit run -a" in html
+    assert "Reporting-only" in html
+    assert "does not authorize merge" in html
+
+
+def test_review_html_dashboard_visualizes_error_state() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=True,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {
+                "title": "Ruff check failed",
+                "surface": "workflow",
+                "action": "fix_lint",
+                "code": "ruff",
+                "path": "src/example.py",
+                "details": "unused import",
+            },
+            "recommended_actions": ["Fix the lint finding.", "Run pre-commit."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [{"name": "quality"}],
+            "queued_checks": [{"name": "gate", "required": True}],
+            "startup_failures": [{"name": "first-proof", "required": True}],
+            "missing_required_contexts": ["ci"],
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "workflow",
+                "title": "Workflow review evidence changed",
+            },
+            "graph": {
+                "top_blocker": {
+                    "title": "Ruff check failed",
+                    "surface": "workflow",
+                    "action": "fix_lint",
+                    "review_first": True,
+                }
+            },
+            "next_proof": ["python -m pytest -q tests/test_example.py -o addopts="],
+        },
+    )
+
+    assert model["primary_blocker"]["title"] == "Ruff check failed"
+    assert model["recommended_actions"] == ["Fix the lint finding.", "Run pre-commit."]
+    assert model["failed_check_names"] == ["quality"]
+    assert model["required_queued_check_names"] == ["gate"]
+    assert model["required_startup_failure_names"] == ["first-proof"]
+    assert model["missing_required_context_names"] == ["ci"]
+
+    html = report.render_pr_quality_review_html(model)
+
+    assert "needs attention" in html
+    assert "status-failed" in html
+    assert 'class="hero status-failed"' in html
+    assert 'class="hero-top"' in html
+    assert 'class="state-caption"' in html
+    assert "Failure signals are present." in html
+    assert "section-kicker" in html
+    assert "Needs Attention" in html
+    assert "First blocker" in html
+    assert "Ruff check failed" in html
+    assert "fix_lint" in html
+    assert "Failure signals" in html
+    assert "Failed checks" in html
+    assert "quality" in html
+    assert "Queued required checks" in html
+    assert "gate" in html
+    assert "Startup failures" in html
+    assert "first-proof" in html
+    assert "Missing required contexts" in html
+    assert "ci" in html
+    assert "Recommended actions" in html
+    assert "Fix the lint finding." in html
+    assert "python -m pytest -q tests/test_example.py -o addopts=" in html
+    assert "Merge authorization" in html
+    assert "false" in html
+
+
+def test_review_summary_includes_error_state_mini_triage() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=True,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {
+                "title": "Ruff check failed",
+                "surface": "workflow",
+                "action": "fix_lint",
+                "code": "ruff",
+                "path": "src/example.py",
+                "details": "unused import",
+            },
+            "recommended_actions": ["Fix the lint finding.", "Run pre-commit."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [{"name": "quality"}],
+            "queued_checks": [{"name": "gate", "required": True}],
+            "startup_failures": [{"name": "first-proof", "required": True}],
+            "missing_required_contexts": ["ci"],
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "workflow",
+                "title": "Workflow review evidence changed",
+            },
+            "graph": {
+                "top_blocker": {
+                    "title": "Ruff check failed",
+                    "surface": "workflow",
+                    "action": "fix_lint",
+                    "review_first": True,
+                }
+            },
+            "next_proof": ["python -m pytest -q tests/test_example.py -o addopts="],
+        },
+    )
+
+    summary = report.render_pr_quality_review_summary(model)
+
+    assert "## Mini triage" in summary
+    assert "| Review state | `needs_attention` |" in summary
+    assert "| First blocker | `Ruff check failed` |" in summary
+    assert "| Recommended action | `Fix the lint finding.` |" in summary
+    assert "| Failed checks | `1` |" in summary
+    assert "| Failed check names | `quality` |" in summary
+    assert "| Queued required checks | `1` |" in summary
+    assert "| Queued check names | `gate` |" in summary
+    assert "| Startup failures | `1` |" in summary
+    assert "| Startup failure names | `first-proof` |" in summary
+    assert "| Missing required contexts | `1` |" in summary
+    assert "| Missing context names | `ci` |" in summary
+    assert "## Recommended actions" in summary
+    assert "- Fix the lint finding." in summary
+    assert "- Run pre-commit." in summary
+    assert "python -m pytest -q tests/test_example.py -o addopts=" in summary
+    assert "| Merge authorization | `false` |" in summary
+
+
+def test_write_comment_body_writes_artifact_landing_page(tmp_path: Path) -> None:
+    action_report_path = tmp_path / "action-report.json"
+    check_intelligence_path = tmp_path / "check-intelligence.json"
+    evidence_narrative_path = tmp_path / "evidence-narrative.json"
+    out = tmp_path / "pr-comment-body.md"
+    review_model_out = tmp_path / "pr-review-model.json"
+    review_summary_out = tmp_path / "pr-review-summary.md"
+    review_html_out = tmp_path / "pr-review-dashboard.html"
+    review_index_out = tmp_path / "index.html"
+
+    action_report_path.write_text(
+        json.dumps(
+            {
+                "automation": {
+                    "allowed": False,
+                    "attempted": False,
+                    "reason": "reporting only",
+                },
+                "evidence": {},
+                "primary_blocker": {},
+                "proof_commands": [
+                    "python -m pytest -q tests/test_pr_quality_action_report.py -o addopts="
+                ],
+                "recommended_actions": [],
+                "status": "green",
+            }
+        ),
+        encoding="utf-8",
+    )
+    check_intelligence_path.write_text(
+        json.dumps(
+            {
+                "checks_seen": 44,
+                "failed_checks": [],
+                "missing_required_contexts": [],
+                "queued_checks": [],
+                "security_review": {"collected": True, "unresolved_findings": 0},
+                "startup_failures": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    evidence_narrative_path.write_text(
+        json.dumps(
+            {
+                "graph": {
+                    "critical_count": 0,
+                    "node_count": 1,
+                    "review_first_count": 0,
+                    "top_blocker": {},
+                },
+                "next_proof": [
+                    "python -m pytest -q tests/test_pr_quality_action_report.py -o addopts="
+                ],
+                "primary_signal": {"kind": "none", "surface": "none", "title": "none"},
+                "quality": {"coverage_percent": "96.69%", "ok": True},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = report.write_comment_body(
+        action_report_path=action_report_path,
+        check_intelligence_path=check_intelligence_path,
+        evidence_narrative_path=evidence_narrative_path,
+        out=out,
+        review_model_out=review_model_out,
+        review_summary_out=review_summary_out,
+        review_html_out=review_html_out,
+        review_index_out=review_index_out,
+    )
+
+    assert result["review_index_out"] == review_index_out.as_posix()
+    assert result["review_index_written"] is True
+
+    index_html = review_index_out.read_text(encoding="utf-8")
+    assert "<title>PR Quality Artifact Center</title>" in index_html
+    assert "<h1>PR Quality Artifact Center</h1>" in index_html
+    assert 'href="pr-review-dashboard.html"' in index_html
+    assert 'href="pr-review-summary.md"' in index_html
+    assert 'href="pr-review-model.json"' in index_html
+    assert 'href="pr-comment-body.md"' in index_html
+    assert "Reporting-only" in index_html
+    assert "does not authorize merge" in index_html
+
+
+def test_review_model_schema_v2_includes_artifact_index_metadata() -> None:
+    model = report.build_pr_quality_review_model(
+        status="green",
+        evidence_signal_heading="Evidence proof signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "green",
+            "primary_blocker": {},
+            "recommended_actions": [],
+            "proof_commands": ["python -m pytest -q"],
+        },
+        check_intelligence={
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {"kind": "none", "surface": "none", "title": "none"},
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pytest -q"],
+        },
+    )
+
+    assert model["schema_version"] == "sdetkit.pr_quality.review_model.v2"
+    assert model["schema"] == {
+        "name": "sdetkit.pr_quality.review_model",
+        "version": 2,
+        "previous_version": "sdetkit.pr_quality.review_model.v1",
+        "compatibility": "additive",
+        "decision_logic": "unchanged",
+        "authority_boundary": "reporting_only",
+    }
+    assert model["generated_by"] == "sdetkit.pr_quality_action_report"
+
+    artifact_index = model["artifact_index"]
+    paths = [artifact["path"] for artifact in artifact_index]
+
+    assert paths == [
+        "index.html",
+        "pr-review-artifacts-manifest.json",
+        "pr-review-dashboard.html",
+        "pr-review-summary.md",
+        "pr-review-model.json",
+        "pr-comment-body.md",
+        "pr-quality-comment",
+    ]
+    assert artifact_index[0]["primary"] is True
+    assert artifact_index[0]["surface"] == "artifact_center"
+    assert artifact_index[1]["surface"] == "artifact_manifest"
+    assert artifact_index[1]["kind"] == "json"
+    assert artifact_index[4]["kind"] == "json"
+    assert artifact_index[6]["format"] == "github_artifact"
+
+    index_html = report.render_pr_quality_artifact_index_html(model)
+    dashboard_html = report.render_pr_quality_review_html(model)
+
+    assert 'href="index.html"' in index_html
+    assert 'href="pr-review-artifacts-manifest.json"' in index_html
+    assert 'href="pr-review-dashboard.html"' in index_html
+    assert "Browser-ready entry point for the PR Quality artifact bundle." in index_html
+    assert "index.html" in dashboard_html
+    assert "artifact_center" not in dashboard_html
+
+
+def _build_review_state_matrix_model(
+    *,
+    status: str,
+    evidence_review_required: bool,
+    failed_check: bool = False,
+) -> dict[str, object]:
+    primary_blocker = (
+        {
+            "title": "Ruff check failed",
+            "surface": "workflow",
+            "action": "fix_lint",
+            "code": "ruff",
+            "path": "src/example.py",
+            "details": "unused import",
+        }
+        if status != "green" or failed_check
+        else {}
+    )
+
+    return report.build_pr_quality_review_model(
+        status=status,
+        evidence_signal_heading="Evidence review signal"
+        if evidence_review_required
+        else "Evidence proof signal",
+        evidence_signal_lines=[],
+        evidence_review_required=evidence_review_required,
+        action_report={
+            "status": status,
+            "primary_blocker": primary_blocker,
+            "recommended_actions": ["Fix the lint finding."] if primary_blocker else [],
+            "proof_commands": [
+                "python -m pytest -q tests/test_pr_quality_action_report.py -o addopts="
+            ],
+        },
+        check_intelligence={
+            "failed_checks": [{"name": "quality"}] if failed_check else [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "review_signal" if evidence_review_required else "none",
+                "surface": "workflow" if evidence_review_required else "none",
+                "title": "Workflow review evidence changed" if evidence_review_required else "none",
+            },
+            "graph": {"top_blocker": primary_blocker},
+            "next_proof": [
+                "python -m pytest -q tests/test_pr_quality_action_report.py -o addopts="
+            ],
+        },
+    )
+
+
+def test_review_surfaces_cover_green_review_required_and_needs_attention_states() -> None:
+    cases = [
+        {
+            "name": "green",
+            "model": _build_review_state_matrix_model(
+                status="green",
+                evidence_review_required=False,
+            ),
+            "review_state": "green",
+            "class_name": "status-green",
+            "label": "green",
+            "caption": "No PR Quality blocker is currently reported.",
+        },
+        {
+            "name": "review_required",
+            "model": _build_review_state_matrix_model(
+                status="green",
+                evidence_review_required=True,
+            ),
+            "review_state": "review_required",
+            "class_name": "status-review",
+            "label": "review required",
+            "caption": "Review-first evidence is present.",
+        },
+        {
+            "name": "needs_attention",
+            "model": _build_review_state_matrix_model(
+                status="failed",
+                evidence_review_required=False,
+                failed_check=True,
+            ),
+            "review_state": "needs_attention",
+            "class_name": "status-failed",
+            "label": "needs attention",
+            "caption": "Failure signals are present.",
+        },
+    ]
+
+    for case in cases:
+        model = case["model"]
+        summary = report.render_pr_quality_review_summary(model)
+        dashboard_html = report.render_pr_quality_review_html(model)
+        artifact_index_html = report.render_pr_quality_artifact_index_html(model)
+
+        assert f"| Review state | `{case['review_state']}` |" in summary, case["name"]
+        assert f'class="hero {case["class_name"]}"' in dashboard_html, case["name"]
+        assert f'class="status-badge {case["class_name"]}"' in dashboard_html, case["name"]
+        assert f'class="status-badge {case["class_name"]}"' in artifact_index_html, case["name"]
+        assert case["label"] in dashboard_html, case["name"]
+        assert case["label"] in artifact_index_html, case["name"]
+        assert case["caption"] in dashboard_html, case["name"]
+        assert "Reporting-only" in artifact_index_html, case["name"]
+        assert "does not authorize merge" in artifact_index_html, case["name"]
+
+
+def test_review_artifacts_manifest_describes_bundle_contract() -> None:
+    model = report.build_pr_quality_review_model(
+        status="green",
+        evidence_signal_heading="Evidence proof signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "green",
+            "primary_blocker": {},
+            "recommended_actions": [],
+            "proof_commands": ["python -m pytest -q"],
+        },
+        check_intelligence={
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {"kind": "none", "surface": "none", "title": "none"},
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pytest -q"],
+        },
+    )
+
+    manifest = report.build_pr_quality_artifacts_manifest(model)
+
+    assert manifest["schema_version"] == "sdetkit.pr_quality.artifacts_manifest.v1"
+    assert manifest["review_model_schema_version"] == "sdetkit.pr_quality.review_model.v2"
+    assert manifest["primary_entrypoint"] == "index.html"
+    assert manifest["reporting_only"] is True
+    assert manifest["authority_boundary"] == {
+        "boundary_mode": "reporting_only",
+        "patch_automation": False,
+        "security_dismissal": False,
+        "merge_authorization": False,
+        "semantic_equivalence_claim": False,
+    }
+    assert manifest["decision"]["review_state"] == "green"
+    assert manifest["decision"]["merge_assessment"] == "no_sdetkit_action_required"
+
+    paths = manifest["expected_artifact_paths"]
+    assert paths[0] == "index.html"
+    assert "pr-review-artifacts-manifest.json" in paths
+    assert "pr-review-dashboard.html" in paths
+    assert "pr-review-summary.md" in paths
+    assert "pr-review-model.json" in paths
+    assert "pr-comment-body.md" in paths
+    assert "pr-quality-comment" in paths
+
+    artifact_by_path = {artifact["path"]: artifact for artifact in manifest["artifacts"]}
+    assert artifact_by_path["pr-review-artifacts-manifest.json"]["surface"] == "artifact_manifest"
+    assert artifact_by_path["pr-review-artifacts-manifest.json"]["format"] == "json"
+
+
+def test_write_comment_body_writes_review_artifacts_manifest(tmp_path: Path) -> None:
+    action_report_path = tmp_path / "action-report.json"
+    check_intelligence_path = tmp_path / "check-intelligence.json"
+    evidence_narrative_path = tmp_path / "evidence-narrative.json"
+    out = tmp_path / "pr-comment-body.md"
+    review_model_out = tmp_path / "pr-review-model.json"
+    review_summary_out = tmp_path / "pr-review-summary.md"
+    review_html_out = tmp_path / "pr-review-dashboard.html"
+    review_index_out = tmp_path / "index.html"
+    review_artifacts_manifest_out = tmp_path / "pr-review-artifacts-manifest.json"
+
+    action_report_path.write_text(
+        json.dumps(
+            {
+                "automation": {
+                    "allowed": False,
+                    "attempted": False,
+                    "reason": "reporting only",
+                },
+                "evidence": {},
+                "primary_blocker": {},
+                "proof_commands": ["python -m pytest -q"],
+                "recommended_actions": [],
+                "status": "green",
+            }
+        ),
+        encoding="utf-8",
+    )
+    check_intelligence_path.write_text(
+        json.dumps(
+            {
+                "checks_seen": 44,
+                "failed_checks": [],
+                "missing_required_contexts": [],
+                "queued_checks": [],
+                "security_review": {"collected": True, "unresolved_findings": 0},
+                "startup_failures": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    evidence_narrative_path.write_text(
+        json.dumps(
+            {
+                "graph": {
+                    "critical_count": 0,
+                    "node_count": 1,
+                    "review_first_count": 0,
+                    "top_blocker": {},
+                },
+                "next_proof": ["python -m pytest -q"],
+                "primary_signal": {"kind": "none", "surface": "none", "title": "none"},
+                "quality": {"coverage_percent": "96.69%", "ok": True},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = report.write_comment_body(
+        action_report_path=action_report_path,
+        check_intelligence_path=check_intelligence_path,
+        evidence_narrative_path=evidence_narrative_path,
+        out=out,
+        review_model_out=review_model_out,
+        review_summary_out=review_summary_out,
+        review_html_out=review_html_out,
+        review_index_out=review_index_out,
+        review_artifacts_manifest_out=review_artifacts_manifest_out,
+    )
+
+    assert result["review_artifacts_manifest_out"] == review_artifacts_manifest_out.as_posix()
+    assert result["review_artifacts_manifest_written"] is True
+
+    manifest = json.loads(review_artifacts_manifest_out.read_text(encoding="utf-8"))
+    assert manifest["schema_version"] == "sdetkit.pr_quality.artifacts_manifest.v1"
+    assert manifest["review_model_schema_version"] == "sdetkit.pr_quality.review_model.v2"
+    assert manifest["primary_entrypoint"] == "index.html"
+    assert "pr-review-artifacts-manifest.json" in manifest["expected_artifact_paths"]
+    assert manifest["authority_boundary"]["merge_authorization"] is False
+
+
+def test_review_model_includes_failure_vector_signal_from_failed_check() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {},
+            "recommended_actions": ["Fix the ruff finding."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [
+                {
+                    "name": "pre-commit / ruff",
+                    "command": "python -m pre_commit run -a",
+                    "actual_failure": "F821 Undefined name `JsonObject`",
+                    "failure_type": "lint",
+                    "failing_test_or_check": "F821",
+                    "owner_hint": "tests/test_pr_quality_action_report.py",
+                    "affected_files": ["tests/test_pr_quality_action_report.py"],
+                    "safe_fix_candidate": False,
+                    "safe_fix_allowed": False,
+                    "first_failure": {
+                        "line": "F821 Undefined name `JsonObject`",
+                        "kind": "lint",
+                        "tool": "ruff",
+                        "line_number": 3661,
+                    },
+                }
+            ],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {"kind": "actual_failure", "surface": "diagnostic_engine"},
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+    signal = model["failure_vector_signal"]
+
+    assert signal["source"] == "failed_check"
+    assert signal["actual_failure"] == "F821 Undefined name `JsonObject`"
+    assert signal["failure_type"] == "lint"
+    assert signal["failing_command"] == "python -m pre_commit run -a"
+    assert signal["failing_test_or_check"] == "F821"
+    assert signal["owner_hint"] == "tests/test_pr_quality_action_report.py"
+    assert signal["affected_files"] == ["tests/test_pr_quality_action_report.py"]
+    assert signal["safe_fix_allowed"] is False
+    assert signal["reporting_only"] is True
+
+
+def test_review_summary_renders_failure_vector_signal() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {},
+            "recommended_actions": ["Fix the ruff finding."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [
+                {
+                    "name": "pre-commit / ruff",
+                    "command": "python -m pre_commit run -a",
+                    "actual_failure": "F821 Undefined name `JsonObject`",
+                    "failure_type": "lint",
+                    "failing_test_or_check": "F821",
+                    "owner_hint": "tests/test_pr_quality_action_report.py",
+                    "affected_files": ["tests/test_pr_quality_action_report.py"],
+                    "safe_fix_allowed": False,
+                }
+            ],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {"kind": "actual_failure", "surface": "diagnostic_engine"},
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+    summary = report.render_pr_quality_review_summary(model)
+
+    assert "| Failure vector source | `failed_check` |" in summary
+    assert "| Actual failure | `F821 Undefined name `JsonObject`` |" in summary
+    assert "| Failure type | `lint` |" in summary
+    assert "| Failing command | `python -m pre_commit run -a` |" in summary
+    assert "| Failing test/check | `F821` |" in summary
+    assert "| Owner hint | `tests/test_pr_quality_action_report.py` |" in summary
+    assert "| Failure-vector safe-fix allowed | `false` |" in summary
+    assert "does not authorize merge" in summary
+
+
+def test_review_html_renders_failure_vector_signal() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {},
+            "recommended_actions": ["Fix the ruff finding."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [
+                {
+                    "name": "pre-commit / ruff",
+                    "command": "python -m pre_commit run -a",
+                    "headline_signal": "pre-commit / ruff: lint",
+                    "actual_failure": "F821 Undefined name `JsonObject`",
+                    "failure_type": "lint",
+                    "failing_test_or_check": "F821",
+                    "owner_hint": "tests/test_pr_quality_action_report.py",
+                    "affected_files": ["tests/test_pr_quality_action_report.py"],
+                    "safe_fix_candidate": False,
+                    "safe_fix_allowed": False,
+                    "reporting_only": True,
+                }
+            ],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {"kind": "actual_failure", "surface": "diagnostic_engine"},
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+    html = report.render_pr_quality_review_html(model)
+
+    assert "Failure vector signal" in html
+    assert "pre-commit / ruff: lint" in html
+    assert "F821 Undefined name `JsonObject`" in html
+    assert "python -m pre_commit run -a" in html
+    assert "tests/test_pr_quality_action_report.py" in html
+    assert "Safe-fix allowed" in html
+    assert "Reporting-only FailureVector projection" in html
+    assert "does not authorize safe-fix execution" in html
+    assert "does not authorize merge" in html

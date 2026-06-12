@@ -1612,6 +1612,228 @@ def _markdown_table_value(value: object) -> str:
     return _review_model_scalar(value).replace("|", "\\|")
 
 
+def _review_model_artifact_index() -> list[JsonObject]:
+    return [
+        {
+            "path": "index.html",
+            "kind": "html",
+            "surface": "artifact_center",
+            "title": "Artifact landing page",
+            "description": "Browser-ready entry point for the PR Quality artifact bundle.",
+            "primary": True,
+            "format": "html",
+        },
+        {
+            "path": "pr-review-artifacts-manifest.json",
+            "kind": "json",
+            "surface": "artifact_manifest",
+            "title": "Artifact manifest",
+            "description": "Machine-readable manifest for expected PR Quality artifact bundle entries.",
+            "primary": False,
+            "format": "json",
+        },
+        {
+            "path": "pr-review-dashboard.html",
+            "kind": "html",
+            "surface": "review_dashboard",
+            "title": "Visual dashboard",
+            "description": "Browser-ready visual dashboard with state, blocker, proof, and artifact cards.",
+            "primary": False,
+            "format": "html",
+        },
+        {
+            "path": "pr-review-summary.md",
+            "kind": "markdown",
+            "surface": "review_summary",
+            "title": "Compact summary",
+            "description": "Concise human review panel used by the PR comment and step summary.",
+            "primary": False,
+            "format": "markdown",
+        },
+        {
+            "path": "pr-review-model.json",
+            "kind": "json",
+            "surface": "review_model",
+            "title": "Review model",
+            "description": "Machine-readable source-of-truth model for all rendered review surfaces.",
+            "primary": False,
+            "format": "json",
+        },
+        {
+            "path": "pr-comment-body.md",
+            "kind": "markdown",
+            "surface": "raw_evidence",
+            "title": "Raw evidence body",
+            "description": "Full diagnostic evidence retained for audit and debugging.",
+            "primary": False,
+            "format": "markdown",
+        },
+        {
+            "path": "pr-quality-comment",
+            "kind": "github_artifact",
+            "surface": "artifact_bundle",
+            "title": "Uploaded artifact bundle",
+            "description": "GitHub Actions artifact bundle containing full diagnostic evidence.",
+            "primary": False,
+            "format": "github_artifact",
+        },
+    ]
+
+
+def _review_model_failure_vector_signal(
+    *,
+    action_report: JsonObject,
+    check_intelligence: JsonObject,
+    evidence_narrative: JsonObject,
+) -> JsonObject:
+    graph = _as_dict(evidence_narrative.get("graph"))
+    top_blocker = _as_dict(graph.get("top_blocker"))
+    primary_blocker = _as_dict(action_report.get("primary_blocker"))
+
+    diagnostic_vectors = _as_dict(
+        check_intelligence.get("diagnostic_vectors") or action_report.get("diagnostic_vectors")
+    )
+    diagnostic_candidates = [
+        _as_dict(item)
+        for item in _as_list(diagnostic_vectors.get("failure_vectors"))
+        if _as_dict(item)
+    ]
+    single_failure_vector = _as_dict(diagnostic_vectors.get("failure_vector"))
+    if single_failure_vector:
+        diagnostic_candidates.insert(0, single_failure_vector)
+
+    candidates: list[tuple[str, JsonObject]] = []
+    candidates.extend(("diagnostic_vector", item) for item in diagnostic_candidates)
+    if top_blocker:
+        candidates.append(("evidence_top_blocker", top_blocker))
+    if primary_blocker:
+        candidates.append(("primary_blocker", primary_blocker))
+    candidates.extend(
+        ("failed_check", _as_dict(item))
+        for item in _as_list(check_intelligence.get("failed_checks"))
+        if _as_dict(item)
+    )
+
+    for source, candidate in candidates:
+        first_failure = _as_dict(candidate.get("first_failure"))
+        failed_step = _as_dict(candidate.get(FAILED_STEP_EVIDENCE_KEY))
+        safe_remediation = _as_dict(candidate.get("safe_remediation"))
+
+        affected_files = [
+            _string(item)
+            for key in (
+                "affected_files",
+                "owner_files",
+                "likely_owner_files",
+                "formatter_changed_files",
+            )
+            for item in _as_list(candidate.get(key))
+            if _string(item)
+        ]
+        explicit_path = _string(
+            candidate.get("owner_hint")
+            or candidate.get("failing_file")
+            or candidate.get("path")
+            or first_failure.get("path")
+        )
+        if explicit_path and explicit_path not in affected_files:
+            affected_files.insert(0, explicit_path)
+
+        headline_signal = _string(
+            candidate.get("headline_signal")
+            or candidate.get("headline_failure")
+            or candidate.get("title")
+            or candidate.get("name")
+            or candidate.get("check")
+            or candidate.get("context")
+            or "unknown"
+        )
+        actual_failure = _string(
+            candidate.get("actual_failure")
+            or candidate.get("first_failure_line")
+            or first_failure.get("line")
+            or candidate.get("details")
+            or candidate.get("message")
+            or candidate.get("reason")
+            or headline_signal
+        )
+        failure_type = _string(
+            candidate.get("failure_type")
+            or candidate.get("failure_class")
+            or first_failure.get("kind")
+            or candidate.get("code")
+            or "unknown"
+        )
+        failing_command = _string(
+            candidate.get("failing_command")
+            or candidate.get("command")
+            or failed_step.get("command")
+            or "unknown"
+        )
+        failing_test_or_check = _string(
+            candidate.get("failing_test_or_check")
+            or candidate.get("failing_test")
+            or candidate.get("check")
+            or candidate.get("name")
+            or first_failure.get("tool")
+            or "unknown"
+        )
+        owner_hint = _string(
+            candidate.get("owner_hint") or (affected_files[0] if affected_files else "")
+        )
+
+        if not any(
+            value and value != "unknown"
+            for value in (
+                headline_signal,
+                actual_failure,
+                failure_type,
+                failing_command,
+                failing_test_or_check,
+                owner_hint,
+            )
+        ):
+            continue
+
+        return {
+            "source": source,
+            "headline_signal": headline_signal,
+            "actual_failure": actual_failure,
+            "failure_type": failure_type,
+            "failing_command": failing_command,
+            "failing_test_or_check": failing_test_or_check,
+            "exit_code": _int(
+                candidate.get("exit_code")
+                or candidate.get("status_code")
+                or failed_step.get("exit_code")
+            ),
+            "owner_hint": owner_hint or "unknown",
+            "affected_files": affected_files[:10],
+            "safe_fix_candidate": bool(
+                candidate.get("safe_fix_candidate")
+                or candidate.get("safe_to_auto_fix")
+                or safe_remediation.get("safe_to_auto_fix")
+            ),
+            "safe_fix_allowed": False,
+            "reporting_only": True,
+        }
+
+    return {
+        "source": "none",
+        "headline_signal": "none",
+        "actual_failure": "none",
+        "failure_type": "none",
+        "failing_command": "none",
+        "failing_test_or_check": "none",
+        "exit_code": 0,
+        "owner_hint": "none",
+        "affected_files": [],
+        "safe_fix_candidate": False,
+        "safe_fix_allowed": False,
+        "reporting_only": True,
+    }
+
+
 def build_pr_quality_review_model(
     *,
     status: str,
@@ -1626,6 +1848,11 @@ def build_pr_quality_review_model(
     graph = _as_dict(evidence_narrative.get("graph"))
     top_blocker = _as_dict(graph.get("top_blocker"))
     primary_blocker = _as_dict(action_report.get("primary_blocker"))
+    failure_vector_signal = _review_model_failure_vector_signal(
+        action_report=action_report,
+        check_intelligence=check_intelligence,
+        evidence_narrative=evidence_narrative,
+    )
 
     surface = _string(
         primary_signal.get("surface")
@@ -1694,8 +1921,62 @@ def build_pr_quality_review_model(
     required_startup = _required_count(_as_list(check_intelligence.get("startup_failures")))
     missing_required = len(_as_list(check_intelligence.get("missing_required_contexts")))
 
+    def _check_labels(items: object) -> list[str]:
+        labels: list[str] = []
+        for item in _as_list(items):
+            check = _as_dict(item)
+            label = _string(
+                check.get("name")
+                or check.get("context")
+                or check.get("check")
+                or check.get("workflow")
+                or check.get("title")
+                or item
+            )
+            if label:
+                labels.append(label)
+        return labels[:10]
+
+    recommended_actions = [
+        str(item)
+        for item in _as_list(action_report.get("recommended_actions"))
+        if isinstance(item, str) and item.strip()
+    ]
+
     return {
-        "schema_version": "sdetkit.pr_quality.review_model.v1",
+        "schema_version": "sdetkit.pr_quality.review_model.v2",
+        "schema": {
+            "name": "sdetkit.pr_quality.review_model",
+            "version": 2,
+            "previous_version": "sdetkit.pr_quality.review_model.v1",
+            "compatibility": "additive",
+            "decision_logic": "unchanged",
+            "authority_boundary": "reporting_only",
+        },
+        "generated_by": "sdetkit.pr_quality_action_report",
+        "artifact_index": _review_model_artifact_index(),
+        "primary_blocker": {
+            "title": _string(primary_blocker.get("title") or title),
+            "surface": _string(primary_blocker.get("surface") or surface),
+            "action": _string(primary_blocker.get("action") or action or next_action),
+            "code": _string(primary_blocker.get("code")),
+            "path": _string(primary_blocker.get("path")),
+            "details": _string(
+                primary_blocker.get("details")
+                or primary_blocker.get("message")
+                or primary_blocker.get("reason")
+            ),
+        },
+        "recommended_actions": recommended_actions[:10],
+        "failure_vector_signal": failure_vector_signal,
+        "failed_check_names": _check_labels(check_intelligence.get("failed_checks")),
+        "required_queued_check_names": _check_labels(check_intelligence.get("queued_checks")),
+        "required_startup_failure_names": _check_labels(check_intelligence.get("startup_failures")),
+        "missing_required_context_names": [
+            _string(item)
+            for item in _as_list(check_intelligence.get("missing_required_contexts"))
+            if _string(item)
+        ][:10],
         "decision": {
             "status": status,
             "merge_assessment": merge_assessment,
@@ -1794,29 +2075,157 @@ def _reviewer_dashboard_lines(
     return lines
 
 
+def _review_model_state(model: JsonObject) -> str:
+    decision = _as_dict(model.get("decision"))
+    status = _review_model_scalar(decision.get("status") or "unknown")
+    failed_total = _int(decision.get("failed_checks"))
+    queued_total = _int(decision.get("required_queued_checks"))
+    startup_total = _int(decision.get("required_startup_failures"))
+    missing_total = _int(decision.get("missing_required_contexts"))
+    review_first = bool(decision.get("review_first_evidence"))
+
+    needs_attention = (
+        status != "green"
+        or failed_total > 0
+        or queued_total > 0
+        or startup_total > 0
+        or missing_total > 0
+        or review_first
+    )
+    is_blocked = status != "green" or failed_total > 0 or startup_total > 0 or missing_total > 0
+
+    if is_blocked:
+        return "needs_attention"
+    if needs_attention:
+        return "review_required"
+    return "green"
+
+
+def _review_model_state_class(review_state: str) -> str:
+    if review_state == "green":
+        return "status-green"
+    if review_state == "review_required":
+        return "status-review"
+    return "status-failed"
+
+
+def _review_model_state_label(review_state: str) -> str:
+    return review_state.replace("_", " ")
+
+
 def render_pr_quality_review_summary(model: JsonObject) -> str:
     decision = _as_dict(model.get("decision"))
     authority = _as_dict(model.get("authority_boundary"))
+    primary_blocker = _as_dict(model.get("primary_blocker"))
+    failure_vector_signal = _as_dict(model.get("failure_vector_signal"))
     proof_commands = [
         str(command)
         for command in _as_list(model.get("proof_to_rerun"))
         if isinstance(command, str) and command.strip()
     ]
+    recommended_actions = [
+        str(item)
+        for item in _as_list(model.get("recommended_actions"))
+        if isinstance(item, str) and item.strip()
+    ]
+    failed_check_names = [
+        str(item)
+        for item in _as_list(model.get("failed_check_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    queued_check_names = [
+        str(item)
+        for item in _as_list(model.get("required_queued_check_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    startup_failure_names = [
+        str(item)
+        for item in _as_list(model.get("required_startup_failure_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    missing_context_names = [
+        str(item)
+        for item in _as_list(model.get("missing_required_context_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+
+    def _count(value: object) -> int:
+        try:
+            return int(value or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    def _joined(items: list[str]) -> str:
+        return ", ".join(items) if items else "none"
+
+    status = _review_model_scalar(decision.get("status") or "unknown")
+    failed_total = _count(decision.get("failed_checks"))
+    queued_total = _count(decision.get("required_queued_checks"))
+    startup_total = _count(decision.get("required_startup_failures"))
+    missing_total = _count(decision.get("missing_required_contexts"))
+    review_first = bool(decision.get("review_first_evidence"))
+    first_blocker = _review_model_scalar(
+        primary_blocker.get("title") or decision.get("signal_title") or "none"
+    )
+    first_action = _review_model_scalar(
+        primary_blocker.get("action") or decision.get("next_action") or "none"
+    )
+    first_recommended_action = recommended_actions[0] if recommended_actions else first_action
+
+    needs_attention = (
+        status != "green"
+        or failed_total > 0
+        or queued_total > 0
+        or startup_total > 0
+        or missing_total > 0
+        or review_first
+    )
+    is_blocked = status != "green" or failed_total > 0 or startup_total > 0 or missing_total > 0
+    if is_blocked:
+        review_state = "needs_attention"
+    elif needs_attention:
+        review_state = "review_required"
+    else:
+        review_state = "green"
 
     lines = [
         "# PR Quality Review Summary",
+        "",
+        "## Mini triage",
+        "",
+        "| Item | Value |",
+        "|---|---|",
+        f"| Review state | `{review_state}` |",
+        f"| Status | `{_review_model_scalar(decision.get('status'))}` |",
+        f"| First blocker | `{_markdown_table_value(first_blocker)}` |",
+        f"| Recommended action | `{_markdown_table_value(first_recommended_action)}` |",
+        f"| Failed checks | `{failed_total}` |",
+        f"| Failed check names | `{_markdown_table_value(_joined(failed_check_names))}` |",
+        f"| Queued required checks | `{queued_total}` |",
+        f"| Queued check names | `{_markdown_table_value(_joined(queued_check_names))}` |",
+        f"| Startup failures | `{startup_total}` |",
+        f"| Startup failure names | `{_markdown_table_value(_joined(startup_failure_names))}` |",
+        f"| Missing required contexts | `{missing_total}` |",
+        f"| Missing context names | `{_markdown_table_value(_joined(missing_context_names))}` |",
+        f"| Failure vector source | `{_markdown_table_value(failure_vector_signal.get('source') or 'none')}` |",
+        f"| Actual failure | `{_markdown_table_value(failure_vector_signal.get('actual_failure') or 'none')}` |",
+        f"| Failure type | `{_markdown_table_value(failure_vector_signal.get('failure_type') or 'none')}` |",
+        f"| Failing command | `{_markdown_table_value(failure_vector_signal.get('failing_command') or 'none')}` |",
+        f"| Failing test/check | `{_markdown_table_value(failure_vector_signal.get('failing_test_or_check') or 'none')}` |",
+        f"| Owner hint | `{_markdown_table_value(failure_vector_signal.get('owner_hint') or 'none')}` |",
+        f"| Failure-vector safe-fix allowed | `{_review_model_scalar(failure_vector_signal.get('safe_fix_allowed'))}` |",
         "",
         "## Decision",
         "",
         "| Item | Value |",
         "|---|---|",
-        f"| Status | `{_review_model_scalar(decision.get('status'))}` |",
         f"| Merge assessment | `{_review_model_scalar(decision.get('merge_assessment'))}` |",
         f"| Next action | `{_review_model_scalar(decision.get('next_action'))}` |",
         f"| Risk surface | `{_markdown_table_value(decision.get('risk_surface'))}` |",
+        f"| Signal title | `{_markdown_table_value(decision.get('signal_title'))}` |",
         f"| Signal | `{_markdown_table_value(decision.get('comment_signal'))}` |",
         f"| Review-first evidence | `{_review_model_scalar(decision.get('review_first_evidence'))}` |",
-        f"| Failed checks | `{_review_model_scalar(decision.get('failed_checks'))}` |",
+        f"| Cleared security signal | `{_review_model_scalar(decision.get('cleared_security_signal'))}` |",
         "",
         "## Proof to rerun",
         "",
@@ -1828,6 +2237,10 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         lines.append("```")
     else:
         lines.append("`none`")
+
+    if recommended_actions:
+        lines.extend(["", "## Recommended actions", ""])
+        lines.extend(f"- {action}" for action in recommended_actions)
 
     lines.extend(
         [
@@ -1847,6 +2260,528 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     )
 
     return "\n".join(lines) + "\n"
+
+
+def _html_escape(value: object) -> str:
+    return (
+        _review_model_scalar(value)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
+
+
+def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
+    artifacts = [
+        item
+        for item in (_as_dict(candidate) for candidate in _as_list(model.get("artifact_index")))
+        if _string(item.get("path"))
+    ]
+    if not artifacts:
+        artifacts = _review_model_artifact_index()
+
+    expected_paths = [_string(item.get("path")) for item in artifacts if _string(item.get("path"))]
+    primary_entrypoint = next(
+        (
+            _string(item.get("path"))
+            for item in artifacts
+            if bool(item.get("primary")) and _string(item.get("path"))
+        ),
+        expected_paths[0] if expected_paths else "index.html",
+    )
+
+    decision = _as_dict(model.get("decision"))
+    authority = _as_dict(model.get("authority_boundary"))
+
+    return {
+        "schema_version": "sdetkit.pr_quality.artifacts_manifest.v1",
+        "review_model_schema_version": _string(model.get("schema_version")),
+        "review_model_schema": _as_dict(model.get("schema")),
+        "generated_by": "sdetkit.pr_quality_action_report",
+        "primary_entrypoint": primary_entrypoint,
+        "expected_artifact_paths": expected_paths,
+        "artifacts": artifacts,
+        "reporting_only": True,
+        "authority_boundary": {
+            "boundary_mode": _string(authority.get("boundary_mode") or "reporting_only"),
+            "patch_automation": bool(authority.get("patch_automation", False)),
+            "security_dismissal": bool(authority.get("security_dismissal", False)),
+            "merge_authorization": bool(authority.get("merge_authorization", False)),
+            "semantic_equivalence_claim": bool(authority.get("semantic_equivalence_claim", False)),
+        },
+        "decision": {
+            "status": _review_model_scalar(decision.get("status") or "unknown"),
+            "review_state": _review_model_state(model),
+            "merge_assessment": _review_model_scalar(decision.get("merge_assessment") or "unknown"),
+            "next_action": _review_model_scalar(decision.get("next_action") or "unknown"),
+        },
+    }
+
+
+def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
+    decision = _as_dict(model.get("decision"))
+    authority = _as_dict(model.get("authority_boundary"))
+
+    review_state = _review_model_state(model)
+    status_label = _review_model_state_label(review_state)
+    status_class = _review_model_state_class(review_state)
+    merge_assessment = _review_model_scalar(decision.get("merge_assessment") or "unknown")
+    next_action = _review_model_scalar(decision.get("next_action") or "unknown")
+    risk_surface = _review_model_scalar(decision.get("risk_surface") or "unknown")
+
+    artifact_index = [
+        item
+        for item in (_as_dict(candidate) for candidate in _as_list(model.get("artifact_index")))
+        if _string(item.get("path"))
+    ]
+    if not artifact_index:
+        artifact_index = _review_model_artifact_index()
+
+    artifact_rows = [
+        (
+            _string(item.get("path")),
+            "Open " + _string(item.get("title") or item.get("path")),
+            _string(item.get("description") or item.get("surface") or "PR Quality artifact."),
+        )
+        for item in artifact_index
+        if _string(item.get("path")) != "pr-quality-comment"
+    ]
+
+    def artifact_cards(rows: list[tuple[str, str, str]]) -> str:
+        return "\n".join(
+            '<article class="artifact-card">'
+            f'<a href="{_html_escape(href)}">{_html_escape(title)}</a>'
+            f"<span><code>{_html_escape(href)}</code></span>"
+            f"<p>{_html_escape(description)}</p>"
+            "</article>"
+            for href, title, description in rows
+        )
+
+    authority_rows = [
+        ("Boundary mode", authority.get("boundary_mode")),
+        ("Patch automation", authority.get("patch_automation")),
+        ("Security dismissal", authority.get("security_dismissal")),
+        ("Merge authorization", authority.get("merge_authorization")),
+        ("Semantic equivalence claim", authority.get("semantic_equivalence_claim")),
+    ]
+
+    authority_table = "\n".join(
+        f"<tr><th>{_html_escape(label)}</th><td><code>{_html_escape(value)}</code></td></tr>"
+        for label, value in authority_rows
+    )
+
+    return (
+        "<!doctype html>\n"
+        '<html lang="en">\n'
+        "<head>\n"
+        '  <meta charset="utf-8">\n'
+        '  <meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        "  <title>PR Quality Artifact Center</title>\n"
+        "  <style>\n"
+        "    :root { color-scheme: light dark; --bg: #0d1117; --panel: #161b22; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #2f81f7; --green: #3fb950; --orange: #f0b72f; --red: #f85149; --code: #0b1220; }\n"
+        "    * { box-sizing: border-box; }\n"
+        "    body { margin: 0; background: radial-gradient(circle at top left, #132238, var(--bg) 42rem); color: var(--text); font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.45; }\n"
+        "    main { max-width: 980px; margin: 0 auto; padding: 2rem; }\n"
+        "    .hero, .card, .artifact-card { border: 1px solid var(--border); border-radius: 18px; background: rgba(22,27,34,0.92); padding: 1rem; box-shadow: 0 18px 42px rgba(0,0,0,0.22); }\n"
+        "    .hero { padding: 1.5rem; background: linear-gradient(135deg, rgba(47,129,247,0.16), rgba(63,185,80,0.08)), var(--panel); }\n"
+        "    .eyebrow { color: var(--muted); font-size: 0.82rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }\n"
+        "    h1 { margin: 0.35rem 0 0.75rem; font-size: clamp(1.8rem, 4vw, 3rem); }\n"
+        "    h2 { margin: 0 0 1rem; }\n"
+        "    .status-badge { display: inline-flex; border-radius: 999px; padding: 0.35rem 0.78rem; font-weight: 900; border: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; }\n"
+        "    .status-green { color: var(--green); background: rgba(63,185,80,0.12); }\n"
+        "    .status-review { color: var(--orange); background: rgba(240,183,47,0.12); }\n"
+        "    .status-failed { color: var(--red); background: rgba(248,81,73,0.14); }\n"
+        "    .summary-grid, .artifact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.8rem; margin-top: 1rem; }\n"
+        "    .summary-card span, .artifact-card span { display: block; color: var(--muted); font-size: 0.82rem; margin-top: 0.25rem; }\n"
+        "    .summary-card { border: 1px solid var(--border); border-radius: 14px; background: rgba(13,17,23,0.48); padding: 1rem; }\n"
+        "    .artifact-card a { color: var(--text); font-size: 1.05rem; font-weight: 800; text-decoration: none; }\n"
+        "    .artifact-card a:hover { color: var(--accent); text-decoration: underline; }\n"
+        "    .artifact-card p { color: var(--muted); margin-bottom: 0; }\n"
+        "    table { width: 100%; border-collapse: collapse; }\n"
+        "    th, td { border-bottom: 1px solid var(--border); padding: 0.65rem; text-align: left; vertical-align: top; }\n"
+        "    th { width: 38%; color: var(--muted); }\n"
+        "    code { background: var(--code); border: 1px solid var(--border); border-radius: 8px; padding: 0.12rem 0.32rem; }\n"
+        "    .card { margin-top: 1rem; }\n"
+        "    .boundary { color: var(--muted); border-left: 4px solid var(--accent); padding-left: 0.8rem; }\n"
+        "  </style>\n"
+        "</head>\n"
+        "<body>\n"
+        "  <main>\n"
+        '    <section class="hero">\n'
+        '      <div class="eyebrow">SDET Quality Gate</div>\n'
+        "      <h1>PR Quality Artifact Center</h1>\n"
+        f'      <span class="status-badge {status_class}">{_html_escape(status_label)}</span>\n'
+        '      <div class="summary-grid">\n'
+        f'        <article class="summary-card"><span>Merge assessment</span><strong>{_html_escape(merge_assessment)}</strong></article>\n'
+        f'        <article class="summary-card"><span>Next action</span><strong>{_html_escape(next_action)}</strong></article>\n'
+        f'        <article class="summary-card"><span>Risk surface</span><strong>{_html_escape(risk_surface)}</strong></article>\n'
+        "      </div>\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        "      <h2>Artifact entry points</h2>\n"
+        '      <div class="artifact-grid">\n'
+        f"        {artifact_cards(artifact_rows)}\n"
+        "      </div>\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        "      <h2>Authority boundary</h2>\n"
+        f"      <table>{authority_table}</table>\n"
+        '      <p class="boundary">Reporting-only. This artifact center does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.</p>\n'
+        "    </section>\n"
+        "  </main>\n"
+        "</body>\n"
+        "</html>\n"
+    )
+
+
+def render_pr_quality_review_html(model: JsonObject) -> str:
+    decision = _as_dict(model.get("decision"))
+    authority = _as_dict(model.get("authority_boundary"))
+    primary_blocker = _as_dict(model.get("primary_blocker"))
+    failure_vector_signal = _as_dict(model.get("failure_vector_signal"))
+    proof_commands = [
+        str(command)
+        for command in _as_list(model.get("proof_to_rerun"))
+        if isinstance(command, str) and command.strip()
+    ]
+    recommended_actions = [
+        str(item)
+        for item in _as_list(model.get("recommended_actions"))
+        if isinstance(item, str) and item.strip()
+    ]
+    failed_check_names = [
+        str(item)
+        for item in _as_list(model.get("failed_check_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    queued_check_names = [
+        str(item)
+        for item in _as_list(model.get("required_queued_check_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    startup_failure_names = [
+        str(item)
+        for item in _as_list(model.get("required_startup_failure_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+    missing_context_names = [
+        str(item)
+        for item in _as_list(model.get("missing_required_context_names"))
+        if isinstance(item, str) and item.strip()
+    ]
+
+    def _count(value: object) -> int:
+        try:
+            return int(value or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    status = _review_model_scalar(decision.get("status") or "unknown")
+    next_action = _review_model_scalar(decision.get("next_action") or "unknown")
+    merge_assessment = _review_model_scalar(decision.get("merge_assessment") or "unknown")
+    risk_surface = _review_model_scalar(decision.get("risk_surface") or "unknown")
+    signal = _review_model_scalar(decision.get("comment_signal") or "none")
+    first_blocker = _review_model_scalar(
+        primary_blocker.get("title") or decision.get("signal_title") or "none"
+    )
+    first_action = _review_model_scalar(primary_blocker.get("action") or next_action or "none")
+
+    failed_total = _count(decision.get("failed_checks"))
+    queued_total = _count(decision.get("required_queued_checks"))
+    startup_total = _count(decision.get("required_startup_failures"))
+    missing_total = _count(decision.get("missing_required_contexts"))
+    review_first = bool(decision.get("review_first_evidence"))
+    needs_attention = (
+        status != "green"
+        or failed_total > 0
+        or queued_total > 0
+        or startup_total > 0
+        or missing_total > 0
+        or review_first
+    )
+    is_blocked = status != "green" or failed_total > 0 or startup_total > 0 or missing_total > 0
+
+    if is_blocked:
+        status_class = "status-failed"
+        hero_label = "needs attention"
+        state_caption = (
+            "Failure signals are present. Review the mini triage, first blocker, "
+            "recommended action, and proof to rerun before any merge decision."
+        )
+    elif needs_attention:
+        status_class = "status-review"
+        hero_label = "review required"
+        state_caption = (
+            "Review-first evidence is present. Confirm the listed evidence and proof "
+            "before any merge decision."
+        )
+    else:
+        status_class = "status-green"
+        hero_label = "green"
+        state_caption = (
+            "No PR Quality blocker is currently reported. Keep the listed proof and "
+            "authority boundary visible before any merge decision."
+        )
+
+    hero_class = f"hero {status_class}"
+
+    decision_rows = [
+        ("Status", decision.get("status")),
+        ("Merge assessment", decision.get("merge_assessment")),
+        ("Next action", decision.get("next_action")),
+        ("Risk surface", decision.get("risk_surface")),
+        ("Signal title", decision.get("signal_title")),
+        ("Signal", decision.get("comment_signal")),
+        ("First blocker", first_blocker),
+        ("First blocker action", first_action),
+        ("Review-first evidence", decision.get("review_first_evidence")),
+        ("Failed checks", decision.get("failed_checks")),
+        ("Required queued checks", decision.get("required_queued_checks")),
+        ("Required startup failures", decision.get("required_startup_failures")),
+        ("Missing required contexts", decision.get("missing_required_contexts")),
+        ("Cleared security signal", decision.get("cleared_security_signal")),
+    ]
+    blocker_rows = [
+        ("Title", primary_blocker.get("title") or first_blocker),
+        ("Surface", primary_blocker.get("surface") or risk_surface),
+        ("Action", primary_blocker.get("action") or first_action),
+        ("Code", primary_blocker.get("code")),
+        ("Path", primary_blocker.get("path")),
+        ("Details", primary_blocker.get("details")),
+    ]
+    failure_vector_rows = [
+        ("Source", failure_vector_signal.get("source") or "none"),
+        ("Headline signal", failure_vector_signal.get("headline_signal") or "none"),
+        ("Actual failure", failure_vector_signal.get("actual_failure") or "none"),
+        ("Failure type", failure_vector_signal.get("failure_type") or "none"),
+        ("Failing command", failure_vector_signal.get("failing_command") or "none"),
+        ("Failing test/check", failure_vector_signal.get("failing_test_or_check") or "none"),
+        ("Exit code", failure_vector_signal.get("exit_code")),
+        ("Owner hint", failure_vector_signal.get("owner_hint") or "none"),
+        ("Safe-fix candidate", failure_vector_signal.get("safe_fix_candidate")),
+        ("Safe-fix allowed", failure_vector_signal.get("safe_fix_allowed")),
+        ("Reporting only", failure_vector_signal.get("reporting_only")),
+    ]
+    authority_rows = [
+        ("Boundary mode", authority.get("boundary_mode")),
+        ("Patch automation", authority.get("patch_automation")),
+        ("Security dismissal", authority.get("security_dismissal")),
+        ("Merge authorization", authority.get("merge_authorization")),
+        ("Semantic equivalence claim", authority.get("semantic_equivalence_claim")),
+    ]
+    metric_rows = [
+        ("Failed checks", failed_total),
+        ("Queued required checks", queued_total),
+        ("Startup failures", startup_total),
+        ("Missing contexts", missing_total),
+        ("Review-first", review_first),
+    ]
+    artifact_rows = [
+        (
+            _string(item.get("path")),
+            _string(item.get("description") or item.get("title") or "PR Quality artifact"),
+        )
+        for item in (_as_dict(candidate) for candidate in _as_list(model.get("artifact_index")))
+        if _string(item.get("path"))
+    ]
+    if not artifact_rows:
+        artifact_rows = [
+            (
+                _string(item.get("path")),
+                _string(item.get("description") or item.get("title") or "PR Quality artifact"),
+            )
+            for item in _review_model_artifact_index()
+        ]
+
+    def table(rows: list[tuple[str, object]]) -> str:
+        body = "\n".join(
+            f"<tr><th>{_html_escape(label)}</th><td><code>{_html_escape(value)}</code></td></tr>"
+            for label, value in rows
+        )
+        return f"<table>{body}</table>"
+
+    def metric_cards(rows: list[tuple[str, object]]) -> str:
+        return "\n".join(
+            '<article class="metric-card">'
+            f'<span class="metric-label">{_html_escape(label)}</span>'
+            f"<strong>{_html_escape(value)}</strong>"
+            "</article>"
+            for label, value in rows
+        )
+
+    def artifact_cards(rows: list[tuple[str, object]]) -> str:
+        return "\n".join(
+            '<article class="artifact-card">'
+            f"<strong><code>{_html_escape(name)}</code></strong>"
+            f"<span>{_html_escape(description)}</span>"
+            "</article>"
+            for name, description in rows
+        )
+
+    def list_panel(title: str, items: list[str]) -> str:
+        if not items:
+            return (
+                '<article class="signal-card">'
+                f"<h3>{_html_escape(title)}</h3>"
+                "<p><code>none</code></p>"
+                "</article>"
+            )
+        body = "".join(f"<li>{_html_escape(item)}</li>" for item in items)
+        return (
+            f'<article class="signal-card"><h3>{_html_escape(title)}</h3><ul>{body}</ul></article>'
+        )
+
+    if proof_commands:
+        proof_html = (
+            "<pre><code>"
+            + "\n".join(_html_escape(command) for command in proof_commands)
+            + "</code></pre>"
+        )
+    else:
+        proof_html = "<p><code>none</code></p>"
+
+    first_recommended_action = recommended_actions[0] if recommended_actions else first_action
+    triage_html = ""
+    if needs_attention:
+        triage_html = (
+            '<section class="alert-card">'
+            f"<h2>{_html_escape(hero_label.title())}</h2>"
+            '<div class="triage-grid">'
+            f"<article><span>First blocker</span><strong>{_html_escape(first_blocker)}</strong></article>"
+            f"<article><span>Recommended action</span><strong>{_html_escape(first_recommended_action)}</strong></article>"
+            f"<article><span>Failed checks</span><strong>{_html_escape(failed_total)}</strong></article>"
+            f"<article><span>Missing contexts</span><strong>{_html_escape(missing_total)}</strong></article>"
+            f"<article><span>Actual failure</span><strong>{_html_escape(failure_vector_signal.get('actual_failure') or 'none')}</strong></article>"
+            f"<article><span>Owner hint</span><strong>{_html_escape(failure_vector_signal.get('owner_hint') or 'none')}</strong></article>"
+            "</div>"
+            "</section>"
+        )
+
+    return (
+        "<!doctype html>\n"
+        '<html lang="en">\n'
+        "<head>\n"
+        '  <meta charset="utf-8">\n'
+        '  <meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        "  <title>PR Quality Review Dashboard</title>\n"
+        "  <style>\n"
+        "    :root { color-scheme: light dark; --bg: #0d1117; --panel: #161b22; --panel-2: #0f1720; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #2f81f7; --green: #3fb950; --orange: #f0b72f; --red: #f85149; --code: #0b1220; }\n"
+        "    * { box-sizing: border-box; }\n"
+        "    body { margin: 0; background: radial-gradient(circle at top left, #132238, var(--bg) 42rem); color: var(--text); font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.45; }\n"
+        "    main { max-width: 1120px; margin: 0 auto; padding: 2rem; }\n"
+        "    .hero { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 22px; padding: 1.6rem; background: linear-gradient(135deg, rgba(47,129,247,0.18), rgba(63,185,80,0.08)), var(--panel); box-shadow: 0 22px 56px rgba(0,0,0,0.34); }\n"
+        "    .hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 18rem); }\n"
+        "    .hero > * { position: relative; z-index: 1; }\n"
+        "    .hero.status-failed { border-color: rgba(248,81,73,0.55); background: linear-gradient(135deg, rgba(248,81,73,0.16), rgba(240,183,47,0.08)), var(--panel); }\n"
+        "    .hero.status-review { border-color: rgba(240,183,47,0.50); background: linear-gradient(135deg, rgba(240,183,47,0.16), rgba(47,129,247,0.08)), var(--panel); }\n"
+        "    .hero.status-green { border-color: rgba(63,185,80,0.45); background: linear-gradient(135deg, rgba(63,185,80,0.14), rgba(47,129,247,0.08)), var(--panel); }\n"
+        "    .eyebrow { color: var(--muted); font-size: 0.82rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }\n"
+        "    h1 { margin: 0.35rem 0 0.75rem; font-size: clamp(1.8rem, 4vw, 3rem); }\n"
+        "    h2 { margin: 0 0 1rem; }\n"
+        "    h3 { margin: 0 0 0.5rem; }\n"
+        "    .hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }\n"
+        "    .state-caption { max-width: 780px; margin: 0.2rem 0 0; color: var(--muted); font-size: 1rem; }\n"
+        "    .hero-grid, .metrics, .artifact-grid, .signal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.8rem; margin-top: 1rem; }\n"
+        "    .hero-card, .metric-card, .artifact-card, .signal-card, .card, .alert-card { border: 1px solid var(--border); border-radius: 16px; background: rgba(22,27,34,0.90); padding: 1rem; box-shadow: 0 10px 28px rgba(0,0,0,0.18); }\n"
+        "    .hero-card span, .metric-label, .artifact-card span, .alert-card span { display: block; color: var(--muted); font-size: 0.82rem; margin-bottom: 0.25rem; }\n"
+        "    .status-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 0.38rem 0.78rem; font-weight: 900; border: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }\n"
+        "    .status-green { color: var(--green); background: rgba(63,185,80,0.12); }\n"
+        "    .status-review { color: var(--orange); background: rgba(240,183,47,0.12); }\n"
+        "    .status-failed { color: var(--red); background: rgba(248,81,73,0.14); }\n"
+        "    .alert-card { border-color: rgba(248,81,73,0.55); background: linear-gradient(135deg, rgba(248,81,73,0.16), rgba(240,183,47,0.08)), var(--panel); margin-top: 1rem; }\n"
+        "    .triage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; }\n"
+        "    .triage-grid article { border: 1px solid var(--border); border-radius: 12px; padding: 0.8rem; background: rgba(13,17,23,0.55); }\n"
+        "    .layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr); gap: 1rem; margin-top: 1rem; }\n"
+        "    @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } main { padding: 1rem; } }\n"
+        "    table { border-collapse: collapse; width: 100%; overflow: hidden; border-radius: 10px; }\n"
+        "    th, td { border-bottom: 1px solid var(--border); padding: 0.68rem; text-align: left; vertical-align: top; }\n"
+        "    th { width: 34%; color: var(--muted); font-weight: 700; }\n"
+        "    code, pre { background: var(--code); border: 1px solid var(--border); border-radius: 8px; }\n"
+        "    code { padding: 0.12rem 0.32rem; }\n"
+        "    pre { padding: 1rem; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }\n"
+        "    .boundary { color: var(--muted); border-left: 4px solid var(--accent); padding-left: 0.8rem; }\n"
+        "    .card { margin-top: 1rem; }\n"
+        "    .section-kicker { color: var(--muted); display: block; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; margin-bottom: 0.25rem; }\n"
+        "    .artifact-card strong, .signal-card h3 { overflow-wrap: anywhere; }\n"
+        "    .signal-card ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }\n"
+        "  </style>\n"
+        "</head>\n"
+        "<body>\n"
+        "  <main>\n"
+        f'    <section class="{hero_class}">\n'
+        '      <div class="hero-top">\n'
+        "        <div>\n"
+        '          <div class="eyebrow">SDET Quality Gate</div>\n'
+        "          <h1>PR Quality Review Dashboard</h1>\n"
+        f'          <p class="state-caption">{_html_escape(state_caption)}</p>\n'
+        "        </div>\n"
+        f'        <span class="status-badge {status_class}">{_html_escape(hero_label)}</span>\n'
+        "      </div>\n"
+        '      <div class="hero-grid">\n'
+        f'        <article class="hero-card"><span>Merge assessment</span><strong>{_html_escape(merge_assessment)}</strong></article>\n'
+        f'        <article class="hero-card"><span>Next reviewer action</span><strong>{_html_escape(next_action)}</strong></article>\n'
+        f'        <article class="hero-card"><span>Risk surface</span><strong>{_html_escape(risk_surface)}</strong></article>\n'
+        f'        <article class="hero-card"><span>Signal</span><strong>{_html_escape(signal)}</strong></article>\n'
+        "      </div>\n"
+        "    </section>\n"
+        f"    {triage_html}\n"
+        '    <section class="metrics">\n'
+        f"      {metric_cards(metric_rows)}\n"
+        "    </section>\n"
+        '    <section class="layout">\n'
+        '      <article class="card">\n'
+        '        <span class="section-kicker">Review model</span>\n'
+        "        <h2>Decision details</h2>\n"
+        f"        {table(decision_rows)}\n"
+        "      </article>\n"
+        '      <article class="card">\n'
+        '        <span class="section-kicker">Triage</span>\n'
+        "        <h2>First blocker</h2>\n"
+        f"        {table(blocker_rows)}\n"
+        "      </article>\n"
+        '      <article class="card">\n'
+        '        <span class="section-kicker">FailureVector</span>\n'
+        "        <h2>Failure vector signal</h2>\n"
+        f"        {table(failure_vector_rows)}\n"
+        '        <p class="boundary">Reporting-only FailureVector projection. This signal does not authorize safe-fix execution, patch automation, or merge.</p>\n'
+        "      </article>\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        '      <span class="section-kicker">Live inputs</span>\n'
+        "      <h2>Failure signals</h2>\n"
+        '      <div class="signal-grid">\n'
+        f"        {list_panel('Failed checks', failed_check_names)}\n"
+        f"        {list_panel('Queued required checks', queued_check_names)}\n"
+        f"        {list_panel('Startup failures', startup_failure_names)}\n"
+        f"        {list_panel('Missing required contexts', missing_context_names)}\n"
+        f"        {list_panel('Recommended actions', recommended_actions)}\n"
+        "      </div>\n"
+        "    </section>\n"
+        '    <section class="layout">\n'
+        '      <article class="card">\n'
+        '        <span class="section-kicker">Operator proof</span>\n'
+        "        <h2>Proof to rerun</h2>\n"
+        f"        {proof_html}\n"
+        "      </article>\n"
+        '      <article class="card">\n'
+        '        <span class="section-kicker">Safety boundary</span>\n'
+        "        <h2>Authority boundary</h2>\n"
+        f"        {table(authority_rows)}\n"
+        '        <p class="boundary">Reporting-only. This dashboard does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.</p>\n'
+        "      </article>\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        '      <span class="section-kicker">Artifact bundle</span>\n'
+        "      <h2>Product artifacts</h2>\n"
+        '      <div class="artifact-grid">\n'
+        f"        {artifact_cards(artifact_rows)}\n"
+        "      </div>\n"
+        "    </section>\n"
+        "  </main>\n"
+        "</body>\n"
+        "</html>\n"
+    )
 
 
 def render_comment_body(
@@ -2079,6 +3014,9 @@ def write_comment_body(
     out: Path,
     review_model_out: Path | None = None,
     review_summary_out: Path | None = None,
+    review_html_out: Path | None = None,
+    review_index_out: Path | None = None,
+    review_artifacts_manifest_out: Path | None = None,
     evidence_narrative_path: Path | None = None,
     trajectory_jsonl_path: Path | None = None,
     runtime_proof_artifacts_path: Path | None = None,
@@ -2197,6 +3135,38 @@ def write_comment_body(
         )
         review_summary_written = True
 
+    review_html_written = False
+    if review_html_out is not None:
+        review_html_out.parent.mkdir(parents=True, exist_ok=True)
+        review_html_out.write_text(
+            render_pr_quality_review_html(review_model),
+            encoding="utf-8",
+        )
+        review_html_written = True
+
+    review_index_written = False
+    if review_index_out is not None:
+        review_index_out.parent.mkdir(parents=True, exist_ok=True)
+        review_index_out.write_text(
+            render_pr_quality_artifact_index_html(review_model),
+            encoding="utf-8",
+        )
+        review_index_written = True
+
+    review_artifacts_manifest_written = False
+    if review_artifacts_manifest_out is not None:
+        review_artifacts_manifest_out.parent.mkdir(parents=True, exist_ok=True)
+        review_artifacts_manifest_out.write_text(
+            json.dumps(
+                build_pr_quality_artifacts_manifest(review_model),
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        review_artifacts_manifest_written = True
+
     trajectory_summary = _trajectory_summary(trajectory_records)
     result: JsonObject = {
         "out": out.as_posix(),
@@ -2207,6 +3177,14 @@ def write_comment_body(
         if review_summary_out is not None
         else "",
         "review_summary_written": review_summary_written,
+        "review_html_out": review_html_out.as_posix() if review_html_out is not None else "",
+        "review_html_written": review_html_written,
+        "review_index_out": review_index_out.as_posix() if review_index_out is not None else "",
+        "review_index_written": review_index_written,
+        "review_artifacts_manifest_out": review_artifacts_manifest_out.as_posix()
+        if review_artifacts_manifest_out is not None
+        else "",
+        "review_artifacts_manifest_written": review_artifacts_manifest_written,
         "status": status,
         "result_title": _result_title(
             status,
@@ -2331,6 +3309,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--review-model-out", type=Path)
     parser.add_argument("--review-summary-out", type=Path)
+    parser.add_argument("--review-html-out", type=Path)
+    parser.add_argument("--review-index-out", type=Path)
+    parser.add_argument("--review-artifacts-manifest-out", type=Path)
     parser.add_argument("--failure-bundle-out-dir", type=Path)
     parser.add_argument("--pr-number", type=int, default=0)
     parser.add_argument("--head-sha", default="")
@@ -2350,6 +3331,9 @@ def main(argv: list[str] | None = None) -> int:
         out=args.out,
         review_model_out=args.review_model_out,
         review_summary_out=args.review_summary_out,
+        review_html_out=args.review_html_out,
+        review_index_out=args.review_index_out,
+        review_artifacts_manifest_out=args.review_artifacts_manifest_out,
         failure_bundle_out_dir=args.failure_bundle_out_dir,
         pr_number=args.pr_number,
         head_sha=args.head_sha,

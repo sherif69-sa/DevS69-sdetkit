@@ -265,3 +265,94 @@ def test_failure_vector_classifies_fixable_ruff_import_sort_lint() -> None:
     assert vector.safe_fix_candidate is True
     assert vector.first_failing_line == "I001 [*] Import block is un-sorted or un-formatted"
     assert vector.affected_files == ("tests/test_widget.py",)
+
+
+def test_failure_vector_exposes_starter_fields_for_ruff_lint_failure() -> None:
+    log_text = """
+    Run python -m pre_commit run -a
+    ruff (legacy alias)......................................................Failed
+    - hook id: ruff
+    - exit code: 1
+
+    F821 Undefined name `JsonObject`
+        --> tests/test_pr_quality_action_report.py:3661:6
+
+    Found 1 error.
+    Process completed with exit code 1
+    """
+
+    vector = extract_failure_vector(
+        log_text,
+        check="pre-commit / ruff",
+        environment="github_actions",
+    )
+
+    assert vector.schema_version == "sdetkit.failure_vector.v1"
+    assert vector.command == "python -m pre_commit run -a"
+    assert vector.failing_command == "python -m pre_commit run -a"
+    assert vector.exit_code == 1
+    assert vector.failure_class == "lint"
+    assert vector.failure_type == "lint"
+    assert vector.headline_signal == "pre-commit / ruff: lint"
+    assert vector.first_failing_line == (
+        "ruff (legacy alias)......................................................Failed"
+    )
+    assert vector.actual_failure == "F821 Undefined name `JsonObject`"
+    assert vector.failing_test_or_check == "F821"
+    assert vector.owner_hint == "tests/test_pr_quality_action_report.py"
+    assert vector.affected_files == ("tests/test_pr_quality_action_report.py",)
+    assert vector.safe_fix_candidate is False
+    assert vector.safe_fix_allowed is False
+
+
+def test_failure_vector_report_renders_starter_fields() -> None:
+    vector = extract_failure_vector(
+        "Run python -m pre_commit run -a\n"
+        "ruff (legacy alias)......................................................Failed\n"
+        "F821 Undefined name `JsonObject`\n"
+        "    --> tests/test_pr_quality_action_report.py:3661:6\n"
+        "Process completed with exit code 1\n",
+        check="pre-commit / ruff",
+    )
+
+    report = render_failure_vector_report(vector)
+
+    assert "- headline_signal: `pre-commit / ruff: lint`" in report
+    assert "- actual_failure: `F821 Undefined name `JsonObject``" in report
+    assert "- failure_type: `lint`" in report
+    assert "- failing_command: `python -m pre_commit run -a`" in report
+    assert "- failing_test_or_check: `F821`" in report
+    assert "- owner_hint: `tests/test_pr_quality_action_report.py`" in report
+    assert "- safe_fix_allowed: `no`" in report
+    assert "- automation_allowed: `false`" in report
+    assert "- patch_application_allowed: `false`" in report
+    assert "- merge_authorized: `false`" in report
+
+
+def test_failure_vector_bundle_preserves_starter_fields(tmp_path: Path) -> None:
+    log = tmp_path / "pre-commit" / "ruff.log"
+    log.parent.mkdir()
+    log.write_text(
+        "Run python -m pre_commit run -a\n"
+        "ruff (legacy alias)......................................................Failed\n"
+        "F821 Undefined name `JsonObject`\n"
+        "    --> tests/test_pr_quality_action_report.py:3661:6\n"
+        "Process completed with exit code 1\n",
+        encoding="utf-8",
+    )
+
+    payload = build_failure_vector_bundle([log], environment="github_actions")
+
+    vector = payload["failure_vectors"][0]
+    assert vector["headline_signal"] == "pre-commit: lint"
+    assert vector["actual_failure"] == "F821 Undefined name `JsonObject`"
+    assert vector["failure_type"] == "lint"
+    assert vector["failing_command"] == "python -m pre_commit run -a"
+    assert vector["failing_test_or_check"] == "F821"
+    assert vector["owner_hint"] == "tests/test_pr_quality_action_report.py"
+    assert vector["safe_fix_allowed"] is False
+
+    report = render_failure_vector_bundle_report(payload)
+    assert "- headline_signal: `pre-commit: lint`" in report
+    assert "- actual_failure: `F821 Undefined name `JsonObject``" in report
+    assert "- safe_fix_allowed: `no`" in report
