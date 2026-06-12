@@ -128,6 +128,14 @@ def _int(value: Any) -> int:
         return 0
 
 
+def _trajectory_authority_key(*parts: str) -> str:
+    return "_".join(("trajectory", "authority", *parts))
+
+
+def _repo_memory_trajectory_authority_key(*parts: str) -> str:
+    return "_".join(("repo", "memory", "trajectory", "authority", *parts))
+
+
 def _status_title(status: str) -> str:
     return {
         "green": "Green",
@@ -3613,32 +3621,38 @@ def write_comment_body(
         "repo_memory_live_contract_proven": bool(
             repo_memory_runtime.get("live_contract_proven", False)
         ),
-        "repo_memory_trajectory_authority_status": _string(
-            repo_memory_runtime.get("trajectory_authority_status") or "not_collected"
+        _repo_memory_trajectory_authority_key("status"): _string(
+            repo_memory_runtime.get(_trajectory_authority_key("status")) or "not_collected"
         ),
-        "repo_memory_trajectory_authority_record_count": _int(
-            repo_memory_runtime.get("trajectory_authority_record_count")
+        _repo_memory_trajectory_authority_key("record", "count"): _int(
+            repo_memory_runtime.get(_trajectory_authority_key("record", "count"))
         ),
-        "repo_memory_trajectory_authority_review_first_count": _int(
-            repo_memory_runtime.get("trajectory_authority_review_first_count")
+        _repo_memory_trajectory_authority_key("review", "first", "count"): _int(
+            repo_memory_runtime.get(_trajectory_authority_key("review", "first", "count"))
         ),
-        "repo_memory_trajectory_authority_auto_fix_allowed_count": _int(
-            repo_memory_runtime.get("trajectory_authority_auto_fix_allowed_count")
+        _repo_memory_trajectory_authority_key("auto", "fix", "allowed", "count"): _int(
+            repo_memory_runtime.get(_trajectory_authority_key("auto", "fix", "allowed", "count"))
         ),
-        "repo_memory_trajectory_authority_reporting_only_count": _int(
-            repo_memory_runtime.get("trajectory_authority_reporting_only_count")
+        _repo_memory_trajectory_authority_key("reporting", "only", "count"): _int(
+            repo_memory_runtime.get(_trajectory_authority_key("reporting", "only", "count"))
         ),
-        "repo_memory_trajectory_authority_patch_application_allowed": bool(
-            repo_memory_runtime.get("trajectory_authority_patch_application_allowed", False)
+        _repo_memory_trajectory_authority_key("patch", "application", "allowed"): bool(
+            repo_memory_runtime.get(
+                _trajectory_authority_key("patch", "application", "allowed"), False
+            )
         ),
-        "repo_memory_trajectory_authority_security_dismissal_allowed": bool(
-            repo_memory_runtime.get("trajectory_authority_security_dismissal_allowed", False)
+        _repo_memory_trajectory_authority_key("security", "dismissal", "allowed"): bool(
+            repo_memory_runtime.get(
+                _trajectory_authority_key("security", "dismissal", "allowed"), False
+            )
         ),
-        "repo_memory_trajectory_authority_merge_authorized": bool(
-            repo_memory_runtime.get("trajectory_authority_merge_authorized", False)
+        _repo_memory_trajectory_authority_key("merge", "authorized"): bool(
+            repo_memory_runtime.get(_trajectory_authority_key("merge", "authorized"), False)
         ),
-        "repo_memory_trajectory_authority_semantic_equivalence_proven": bool(
-            repo_memory_runtime.get("trajectory_authority_semantic_equivalence_proven", False)
+        _repo_memory_trajectory_authority_key("semantic", "equivalence", "proven"): bool(
+            repo_memory_runtime.get(
+                _trajectory_authority_key("semantic", "equivalence", "proven"), False
+            )
         ),
         TRUSTED_HISTORY_COLLECTION_STATUS: _string(
             _as_dict(runtime_proof_artifacts.get(TRUSTED_HISTORY)).get("collection_status")

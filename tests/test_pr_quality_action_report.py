@@ -4662,14 +4662,15 @@ def test_action_report_metadata_exports_repo_memory_trajectory_authority(
         out=tmp_path / "comment.md",
     )
 
-    assert (
-        result["repo_memory_trajectory_authority_status"] == "authority_boundary_evidence_observed"
-    )
-    assert result["repo_memory_trajectory_authority_record_count"] == 2
-    assert result["repo_memory_trajectory_authority_review_first_count"] == 1
-    assert result["repo_memory_trajectory_authority_auto_fix_allowed_count"] == 1
-    assert result["repo_memory_trajectory_authority_reporting_only_count"] == 2
-    assert result["repo_memory_trajectory_authority_patch_application_allowed"] is False
-    assert result["repo_memory_trajectory_authority_security_dismissal_allowed"] is False
-    assert result["repo_memory_trajectory_authority_merge_authorized"] is False
-    assert result["repo_memory_trajectory_authority_semantic_equivalence_proven"] is False
+    def authority_key(*parts: str) -> str:
+        return "_".join(("repo", "memory", "trajectory", "authority", *parts))
+
+    assert result[authority_key("status")] == "authority_boundary_evidence_observed"
+    assert result[authority_key("record", "count")] == 2
+    assert result[authority_key("review", "first", "count")] == 1
+    assert result[authority_key("auto", "fix", "allowed", "count")] == 1
+    assert result[authority_key("reporting", "only", "count")] == 2
+    assert result[authority_key("patch", "application", "allowed")] is False
+    assert result[authority_key("security", "dismissal", "allowed")] is False
+    assert result[authority_key("merge", "authorized")] is False
+    assert result[authority_key("semantic", "equivalence", "proven")] is False
