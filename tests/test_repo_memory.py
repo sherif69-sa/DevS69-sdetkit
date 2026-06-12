@@ -824,3 +824,85 @@ def test_repo_memory_rejects_authority_expanding_safety_gate_evidence() -> None:
         assert "SafetyGate evidence expands authority: automation_allowed" in str(exc)
     else:
         raise AssertionError("expected authority-expanding SafetyGate evidence to fail")
+
+
+def test_repo_memory_surfaces_trajectory_authority_evidence_without_authority() -> None:
+    insights = _pattern_insights()
+    insights["authority_boundary_evidence"] = {
+        "collection_status": "collected",
+        "status": "authority_boundary_evidence_observed",
+        "source": "trajectory.authority_boundary",
+        "record_count": 2,
+        "review_first_count": 1,
+        "auto_fix_allowed_count": 1,
+        "reporting_only_count": 2,
+        "sources": ["pr_quality", "trajectory_store"],
+        "decision_boundary": {
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+            "automatic_security_fix_allowed": False,
+            "automatic_dismissal_allowed": False,
+        },
+    }
+
+    profile = build_repo_memory_profile(
+        pattern_insights=insights,
+        benchmark_report=_benchmark_report(),
+    )
+
+    authority = profile["trajectory_authority_evidence"]
+    assert profile["inputs"]["trajectory_authority_record_count"] == 2
+    assert authority["collection_status"] == "collected"
+    assert authority["status"] == "authority_boundary_evidence_observed"
+    assert authority["record_count"] == 2
+    assert authority["review_first_count"] == 1
+    assert authority["auto_fix_allowed_count"] == 1
+    assert authority["reporting_only_count"] == 2
+    assert authority["sources"] == ["pr_quality", "trajectory_store"]
+    assert authority["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+
+    markdown = render_markdown(profile)
+    assert "## Trajectory authority boundary evidence" in markdown
+    assert "Patch automation allowed by trajectory authority: `false`" in markdown
+    assert "Security dismissal allowed by trajectory authority: `false`" in markdown
+
+
+def test_repo_memory_rejects_authority_expanding_trajectory_authority_evidence() -> None:
+    insights = _pattern_insights()
+    insights["authority_boundary_evidence"] = {
+        "collection_status": "collected",
+        "status": "authority_boundary_evidence_observed",
+        "source": "trajectory.authority_boundary",
+        "record_count": 1,
+        "review_first_count": 0,
+        "auto_fix_allowed_count": 1,
+        "reporting_only_count": 1,
+        "sources": ["pr_quality"],
+        "decision_boundary": {
+            "automation_allowed": False,
+            "patch_application_allowed": True,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+            "automatic_security_fix_allowed": False,
+            "automatic_dismissal_allowed": False,
+        },
+    }
+
+    try:
+        build_repo_memory_profile(
+            pattern_insights=insights,
+            benchmark_report=_benchmark_report(),
+        )
+    except ValueError as exc:
+        assert "trajectory authority evidence expands authority" in str(exc)
+    else:
+        raise AssertionError("expected authority expansion to be rejected")
