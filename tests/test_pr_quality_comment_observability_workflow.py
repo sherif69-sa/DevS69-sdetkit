@@ -444,6 +444,13 @@ def test_pr_quality_comment_workflow_requires_live_memory_visibility_after_posti
     assert 'if repo_memory_collection_status != "collected":' in verify_visibility
     assert 'if repo_memory_status != "live_proof_supported_memory":' in verify_visibility
     assert "if not repo_memory_live_contract_proven:" in verify_visibility
+    assert "repo_memory_trajectory_authority_key" in verify_visibility
+    assert 'if authority_status != "authority_boundary_evidence_observed":' in verify_visibility
+    assert "if authority_record_count < 1:" in verify_visibility
+    assert "if authority_patch_application_allowed:" in verify_visibility
+    assert "if authority_security_dismissal_allowed:" in verify_visibility
+    assert "if authority_merge_authorized:" in verify_visibility
+    assert "if authority_semantic_equivalence_proven:" in verify_visibility
 
 
 def test_pr_quality_comment_workflow_exports_live_memory_metadata() -> None:
@@ -466,6 +473,25 @@ def test_pr_quality_comment_workflow_exports_live_memory_metadata() -> None:
     assert (
         "repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven)"
         in text
+    )
+    assert "const repoMemoryAuthorityKey = (...parts)" in text
+    assert "repoMemoryAuthorityStatusKey = repoMemoryAuthorityKey('status')" in text
+    assert "repoMemoryAuthorityRecordCountKey = repoMemoryAuthorityKey('record', 'count')" in text
+    assert (
+        "repoMemoryAuthorityPatchApplicationAllowedKey = "
+        "repoMemoryAuthorityKey('patch', 'application', 'allowed')" in text
+    )
+    assert (
+        "repoMemoryAuthoritySecurityDismissalAllowedKey = "
+        "repoMemoryAuthorityKey('security', 'dismissal', 'allowed')" in text
+    )
+    assert (
+        "repoMemoryAuthorityMergeAuthorizedKey = "
+        "repoMemoryAuthorityKey('merge', 'authorized')" in text
+    )
+    assert (
+        "repoMemoryAuthoritySemanticEquivalenceProvenKey = "
+        "repoMemoryAuthorityKey('semantic', 'equivalence', 'proven')" in text
     )
 
 

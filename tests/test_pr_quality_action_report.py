@@ -4605,3 +4605,72 @@ def test_stale_only_ghas_alert_is_refresh_pending_not_active_blocker() -> None:
         "Do not patch or dismiss stale alerts unless a refreshed alert matches the current PR head."
         in body
     )
+
+
+def test_action_report_metadata_exports_repo_memory_trajectory_authority(
+    tmp_path: Path,
+) -> None:
+    action_path = _write_json(
+        tmp_path / "action-report.json",
+        {
+            "status": "green",
+            "primary_blocker": {},
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": "no remediation needed",
+            },
+            "recommended_actions": [],
+            "proof_commands": [],
+        },
+    )
+    intelligence_path = _write_json(
+        tmp_path / "check-intelligence.json",
+        {
+            "checks_seen": 1,
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "security_review": {"collected": True, "unresolved_findings": 0},
+        },
+    )
+    runtime_path = _write_json(
+        tmp_path / "runtime-proof-artifacts.json",
+        {
+            "status": "collected",
+            "repo_memory": {
+                "collection_status": "collected",
+                "status": "live_proof_supported_memory",
+                "live_contract_proven": True,
+                "trajectory_authority_status": "authority_boundary_evidence_observed",
+                "trajectory_authority_record_count": 2,
+                "trajectory_authority_review_first_count": 1,
+                "trajectory_authority_auto_fix_allowed_count": 1,
+                "trajectory_authority_reporting_only_count": 2,
+                "trajectory_authority_patch_application_allowed": False,
+                "trajectory_authority_security_dismissal_allowed": False,
+                "trajectory_authority_merge_authorized": False,
+                "trajectory_authority_semantic_equivalence_proven": False,
+            },
+        },
+    )
+
+    result = report.write_comment_body(
+        action_report_path=action_path,
+        check_intelligence_path=intelligence_path,
+        runtime_proof_artifacts_path=runtime_path,
+        out=tmp_path / "comment.md",
+    )
+
+    def authority_key(*parts: str) -> str:
+        return "_".join(("repo", "memory", "trajectory", "authority", *parts))
+
+    assert result[authority_key("status")] == "authority_boundary_evidence_observed"
+    assert result[authority_key("record", "count")] == 2
+    assert result[authority_key("review", "first", "count")] == 1
+    assert result[authority_key("auto", "fix", "allowed", "count")] == 1
+    assert result[authority_key("reporting", "only", "count")] == 2
+    assert result[authority_key("patch", "application", "allowed")] is False
+    assert result[authority_key("security", "dismissal", "allowed")] is False
+    assert result[authority_key("merge", "authorized")] is False
+    assert result[authority_key("semantic", "equivalence", "proven")] is False

@@ -128,6 +128,14 @@ def _int(value: Any) -> int:
         return 0
 
 
+def _trajectory_authority_key(*parts: str) -> str:
+    return "_".join(("trajectory", "authority", *parts))
+
+
+def _repo_memory_trajectory_authority_key(*parts: str) -> str:
+    return "_".join(("repo", "memory", "trajectory", "authority", *parts))
+
+
 def _status_title(status: str) -> str:
     return {
         "green": "Green",
@@ -3534,6 +3542,9 @@ def write_comment_body(
         review_artifacts_manifest_written = True
 
     trajectory_summary = _trajectory_summary(trajectory_records)
+    repo_memory_runtime = (
+        _as_dict(runtime_proof_artifacts.get("repo_memory")) if runtime_proof_artifacts else {}
+    )
     result: JsonObject = {
         "out": out.as_posix(),
         "review_model_out": review_model_out.as_posix() if review_model_out is not None else "",
@@ -3608,9 +3619,40 @@ def write_comment_body(
             else "not_collected"
         ),
         "repo_memory_live_contract_proven": bool(
-            _as_dict(runtime_proof_artifacts.get("repo_memory")).get("live_contract_proven", False)
-            if runtime_proof_artifacts
-            else False
+            repo_memory_runtime.get("live_contract_proven", False)
+        ),
+        _repo_memory_trajectory_authority_key("status"): _string(
+            repo_memory_runtime.get(_trajectory_authority_key("status")) or "not_collected"
+        ),
+        _repo_memory_trajectory_authority_key("record", "count"): _int(
+            repo_memory_runtime.get(_trajectory_authority_key("record", "count"))
+        ),
+        _repo_memory_trajectory_authority_key("review", "first", "count"): _int(
+            repo_memory_runtime.get(_trajectory_authority_key("review", "first", "count"))
+        ),
+        _repo_memory_trajectory_authority_key("auto", "fix", "allowed", "count"): _int(
+            repo_memory_runtime.get(_trajectory_authority_key("auto", "fix", "allowed", "count"))
+        ),
+        _repo_memory_trajectory_authority_key("reporting", "only", "count"): _int(
+            repo_memory_runtime.get(_trajectory_authority_key("reporting", "only", "count"))
+        ),
+        _repo_memory_trajectory_authority_key("patch", "application", "allowed"): bool(
+            repo_memory_runtime.get(
+                _trajectory_authority_key("patch", "application", "allowed"), False
+            )
+        ),
+        _repo_memory_trajectory_authority_key("security", "dismissal", "allowed"): bool(
+            repo_memory_runtime.get(
+                _trajectory_authority_key("security", "dismissal", "allowed"), False
+            )
+        ),
+        _repo_memory_trajectory_authority_key("merge", "authorized"): bool(
+            repo_memory_runtime.get(_trajectory_authority_key("merge", "authorized"), False)
+        ),
+        _repo_memory_trajectory_authority_key("semantic", "equivalence", "proven"): bool(
+            repo_memory_runtime.get(
+                _trajectory_authority_key("semantic", "equivalence", "proven"), False
+            )
         ),
         TRUSTED_HISTORY_COLLECTION_STATUS: _string(
             _as_dict(runtime_proof_artifacts.get(TRUSTED_HISTORY)).get("collection_status")

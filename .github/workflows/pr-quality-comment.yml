@@ -1219,6 +1219,9 @@ jobs:
           const fs = require('fs');
           const path = require('path');
 
+          const repoMemoryAuthorityKey = (...parts) =>
+            ['repo', 'memory', 'trajectory', 'authority', ...parts].join('_');
+
           const statusPath = 'build/pr-quality/comment-status.json';
           const readCommentMetadata = () => {
             const metadataPath = 'build/pr-quality/pr-comment-metadata.json';
@@ -1239,6 +1242,15 @@ jobs:
 
           const writeStatus = (payload) => {
             const metadata = readCommentMetadata();
+            const repoMemoryAuthorityStatusKey = repoMemoryAuthorityKey('status');
+            const repoMemoryAuthorityRecordCountKey = repoMemoryAuthorityKey('record', 'count');
+            const repoMemoryAuthorityReviewFirstCountKey = repoMemoryAuthorityKey('review', 'first', 'count');
+            const repoMemoryAuthorityAutoFixAllowedCountKey = repoMemoryAuthorityKey('auto', 'fix', 'allowed', 'count');
+            const repoMemoryAuthorityReportingOnlyCountKey = repoMemoryAuthorityKey('reporting', 'only', 'count');
+            const repoMemoryAuthorityPatchApplicationAllowedKey = repoMemoryAuthorityKey('patch', 'application', 'allowed');
+            const repoMemoryAuthoritySecurityDismissalAllowedKey = repoMemoryAuthorityKey('security', 'dismissal', 'allowed');
+            const repoMemoryAuthorityMergeAuthorizedKey = repoMemoryAuthorityKey('merge', 'authorized');
+            const repoMemoryAuthoritySemanticEquivalenceProvenKey = repoMemoryAuthorityKey('semantic', 'equivalence', 'proven');
             const enrichedPayload = {
               ...payload,
               action_report_status: metadata.status || 'unknown',
@@ -1260,6 +1272,15 @@ jobs:
               repo_memory_collection_status: metadata.repo_memory_collection_status || 'not_collected',
               repo_memory_status: metadata.repo_memory_status || 'not_collected',
               repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven),
+              [repoMemoryAuthorityStatusKey]: metadata[repoMemoryAuthorityStatusKey] || 'not_collected',
+              [repoMemoryAuthorityRecordCountKey]: Number(metadata[repoMemoryAuthorityRecordCountKey] || 0),
+              [repoMemoryAuthorityReviewFirstCountKey]: Number(metadata[repoMemoryAuthorityReviewFirstCountKey] || 0),
+              [repoMemoryAuthorityAutoFixAllowedCountKey]: Number(metadata[repoMemoryAuthorityAutoFixAllowedCountKey] || 0),
+              [repoMemoryAuthorityReportingOnlyCountKey]: Number(metadata[repoMemoryAuthorityReportingOnlyCountKey] || 0),
+              [repoMemoryAuthorityPatchApplicationAllowedKey]: Boolean(metadata[repoMemoryAuthorityPatchApplicationAllowedKey]),
+              [repoMemoryAuthoritySecurityDismissalAllowedKey]: Boolean(metadata[repoMemoryAuthoritySecurityDismissalAllowedKey]),
+              [repoMemoryAuthorityMergeAuthorizedKey]: Boolean(metadata[repoMemoryAuthorityMergeAuthorizedKey]),
+              [repoMemoryAuthoritySemanticEquivalenceProvenKey]: Boolean(metadata[repoMemoryAuthoritySemanticEquivalenceProvenKey]),
               trusted_history_collection_status: metadata.trusted_history_collection_status || 'not_collected',
               trusted_history_status: metadata.trusted_history_status || 'not_collected',
               trusted_history_record_count: Number(metadata.trusted_history_record_count || 0),
@@ -1318,6 +1339,34 @@ jobs:
               raise SystemExit("comment_status=missing: build/pr-quality/comment-status.json was not written")
 
           payload = json.loads(path.read_text(encoding="utf-8"))
+
+          def repo_memory_trajectory_authority_key(*parts: str) -> str:
+              return "_".join(("repo", "memory", "trajectory", "authority", *parts))
+
+          authority_status_key = repo_memory_trajectory_authority_key("status")
+          authority_record_count_key = repo_memory_trajectory_authority_key("record", "count")
+          authority_review_first_count_key = repo_memory_trajectory_authority_key(
+              "review", "first", "count"
+          )
+          authority_auto_fix_allowed_count_key = repo_memory_trajectory_authority_key(
+              "auto", "fix", "allowed", "count"
+          )
+          authority_reporting_only_count_key = repo_memory_trajectory_authority_key(
+              "reporting", "only", "count"
+          )
+          authority_patch_application_allowed_key = repo_memory_trajectory_authority_key(
+              "patch", "application", "allowed"
+          )
+          authority_security_dismissal_allowed_key = repo_memory_trajectory_authority_key(
+              "security", "dismissal", "allowed"
+          )
+          authority_merge_authorized_key = repo_memory_trajectory_authority_key(
+              "merge", "authorized"
+          )
+          authority_semantic_equivalence_proven_key = repo_memory_trajectory_authority_key(
+              "semantic", "equivalence", "proven"
+          )
+
           status = str(payload.get("status", "missing"))
           reason = str(payload.get("reason", ""))
           action_report_status = str(payload.get("action_report_status", "unknown"))
@@ -1359,6 +1408,29 @@ jobs:
           )
           repo_memory_live_contract_proven = bool(
               payload.get("repo_memory_live_contract_proven", False)
+          )
+          authority_status = str(payload.get(authority_status_key, "not_collected"))
+          authority_record_count = int(payload.get(authority_record_count_key, 0) or 0)
+          authority_review_first_count = int(
+              payload.get(authority_review_first_count_key, 0) or 0
+          )
+          authority_auto_fix_allowed_count = int(
+              payload.get(authority_auto_fix_allowed_count_key, 0) or 0
+          )
+          authority_reporting_only_count = int(
+              payload.get(authority_reporting_only_count_key, 0) or 0
+          )
+          authority_patch_application_allowed = bool(
+              payload.get(authority_patch_application_allowed_key, False)
+          )
+          authority_security_dismissal_allowed = bool(
+              payload.get(authority_security_dismissal_allowed_key, False)
+          )
+          authority_merge_authorized = bool(
+              payload.get(authority_merge_authorized_key, False)
+          )
+          authority_semantic_equivalence_proven = bool(
+              payload.get(authority_semantic_equivalence_proven_key, False)
           )
           history_semantic_key = "_".join(
               ("trusted", "history", "semantic", "equivalence", "proven")
@@ -1409,6 +1481,29 @@ jobs:
           print(f"repo_memory_status={repo_memory_status}")
           print(
               f"repo_memory_live_contract_proven={str(repo_memory_live_contract_proven).lower()}"
+          )
+          print(f"{authority_status_key}={authority_status}")
+          print(f"{authority_record_count_key}={authority_record_count}")
+          print(f"{authority_review_first_count_key}={authority_review_first_count}")
+          print(
+              f"{authority_auto_fix_allowed_count_key}={authority_auto_fix_allowed_count}"
+          )
+          print(f"{authority_reporting_only_count_key}={authority_reporting_only_count}")
+          print(
+              f"{authority_patch_application_allowed_key}="
+              f"{str(authority_patch_application_allowed).lower()}"
+          )
+          print(
+              f"{authority_security_dismissal_allowed_key}="
+              f"{str(authority_security_dismissal_allowed).lower()}"
+          )
+          print(
+              f"{authority_merge_authorized_key}="
+              f"{str(authority_merge_authorized).lower()}"
+          )
+          print(
+              f"{authority_semantic_equivalence_proven_key}="
+              f"{str(authority_semantic_equivalence_proven).lower()}"
           )
           print(f"trusted_history_collection_status={trusted_history_collection_status}")
           print(f"trusted_history_status={trusted_history_status}")
@@ -1484,6 +1579,31 @@ jobs:
               )
           if not repo_memory_live_contract_proven:
               raise SystemExit("PR Quality RepoMemory live contract was not proven")
+          if authority_status != "authority_boundary_evidence_observed":
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority evidence missing: "
+                  f"status={authority_status}"
+              )
+          if authority_record_count < 1:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority evidence has no records"
+              )
+          if authority_patch_application_allowed:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to allow patch application"
+              )
+          if authority_security_dismissal_allowed:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to allow security dismissal"
+              )
+          if authority_merge_authorized:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to authorize merge"
+              )
+          if authority_semantic_equivalence_proven:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to claim semantic equivalence"
+              )
           if trusted_history_collection_status != "collected":
               raise SystemExit(
                   "PR Quality trusted accepted-main history collection failed after "
