@@ -42,6 +42,15 @@ REPORTING_ONLY_NOTE = " ".join(
     )
 )
 
+
+RESULT_REPORTING_ONLY_NOTE = " ".join(
+    (
+        "This result is reporting-only.",
+        "It does not apply patches, authorize merge,",
+        "or prove semantic equivalence.",
+    )
+)
+
 PATCH_SCORE_NOT_CANDIDATE = "_".join(("PATCH", "SCORE", "NOT", "CANDIDATE"))
 AUTOMATION_BOUNDARY_VIOLATION = "_".join(("AUTOMATION", "BOUNDARY", "VIOLATION"))
 VERIFICATION_FILE_INVENTORY_MISSING = "_".join(("VERIFICATION", "FILE", "INVENTORY", "MISSING"))
@@ -680,8 +689,7 @@ def render_result_markdown(payload: Mapping[str, Any]) -> str:
             f"- Collection: `{_string(safety_gate.get('collection_status'))}`",
             f"- Record count: `{_int(safety_gate.get('record_count'))}`",
             "",
-            "This result is reporting-only. It does not apply patches, authorize merge, "
-            "or prove semantic equivalence.",
+            RESULT_REPORTING_ONLY_NOTE,
             "",
         ]
     )
