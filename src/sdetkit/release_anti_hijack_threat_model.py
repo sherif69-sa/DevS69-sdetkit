@@ -539,9 +539,10 @@ def _write_public_report_document(path: Path, report_text: str) -> None:
 
 
 def _emit_public_report_document(report_text: str) -> None:
-    """Emit a public release-risk report document to stdout."""
+    """Emit a non-sensitive status message to stdout."""
 
-    sys.stdout.write(report_text)
+    _ = report_text
+    sys.stdout.write("Public release-risk report generated.\n")
 
 
 def write_artifacts(

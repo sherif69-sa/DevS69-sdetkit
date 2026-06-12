@@ -148,12 +148,15 @@ def test_release_anti_hijack_threat_model_public_cli_dispatch(
 
     assert rc == 0
     stdout = capsys.readouterr().out
+    assert stdout == "Public release-risk report generated.\n"
     assert "PYPI_API_TOKEN" not in stdout
     assert "TWINE_PASSWORD" not in stdout
     assert "credential" not in stdout.lower()
     assert "secret" not in stdout.lower()
-    assert "# SDETKit release anti-hijack threat model" in stdout
-    assert "pypi_publish_auth_material_surface" in stdout
-    assert "automation_allowed: false" in stdout
     assert out.is_file()
     assert out.with_suffix(".md").is_file()
+
+    markdown_text = out.with_suffix(".md").read_text(encoding="utf-8")
+    assert "# SDETKit release anti-hijack threat model" in markdown_text
+    assert "pypi_publish_auth_material_surface" in markdown_text
+    assert "automation_allowed: false" in markdown_text
