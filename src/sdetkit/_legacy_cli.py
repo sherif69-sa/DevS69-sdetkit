@@ -39,6 +39,12 @@ _resolve_non_day_playbook_alias = resolve_non_day_playbook_alias
 LEGACY_COMMAND_MODULES = _LEGACY_COMMAND_MODULES
 LEGACY_NAMESPACE_COMMANDS = _LEGACY_NAMESPACE_COMMANDS
 
+__all__ = [
+    "_resolve_non_day_playbook_alias",
+    "LEGACY_COMMAND_MODULES",
+    "LEGACY_NAMESPACE_COMMANDS",
+]
+
 _COMPAT_MODULE_ATTRS: dict[str, str] = {
     "expansion_automation": "sdetkit.expansion_automation",
     "optimization_foundation": "sdetkit.optimization_foundation",

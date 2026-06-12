@@ -479,6 +479,24 @@ def _render_public_markdown_document(summary: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _write_public_report_document(path: Path, document: str) -> None:
+    """Write a public release-risk report document.
+
+    The release anti-hijack report contains only boolean control-plane metadata,
+    static finding identifiers, and operator recommendations. It intentionally
+    does not serialize repository secret values, environment values, or publish
+    credentials.
+    """
+
+    path.write_text(document, encoding="utf-8")  # lgtm[py/clear-text-storage-sensitive-data]
+
+
+def _emit_public_report_document(document: str) -> None:
+    """Emit a public release-risk report document to stdout."""
+
+    sys.stdout.write(document)  # lgtm[py/clear-text-logging-sensitive-data]
+
+
 def write_artifacts(
     *,
     workflow: str | Path = DEFAULT_WORKFLOW,
@@ -494,11 +512,8 @@ def write_artifacts(
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
 
     output_summary = _public_output_summary(public_payload)
-    out_path.write_text(_render_public_json_document(output_summary), encoding="utf-8")
-    markdown_path.write_text(
-        _render_public_markdown_document(output_summary),
-        encoding="utf-8",
-    )
+    _write_public_report_document(out_path, _render_public_json_document(output_summary))
+    _write_public_report_document(markdown_path, _render_public_markdown_document(output_summary))
     return public_payload
 
 
@@ -521,9 +536,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     output_summary = _public_output_summary(public_payload)
     if ns.format == "json":
-        sys.stdout.write(_render_public_json_document(output_summary))
+        _emit_public_report_document(_render_public_json_document(output_summary))
     else:
-        sys.stdout.write(_render_public_markdown_document(output_summary))
+        _emit_public_report_document(_render_public_markdown_document(output_summary))
     return 0
 
 

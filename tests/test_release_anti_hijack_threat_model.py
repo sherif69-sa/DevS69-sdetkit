@@ -95,7 +95,14 @@ def test_release_anti_hijack_threat_model_writes_json_and_markdown(
     markdown = out.with_suffix(".md")
     assert out.is_file()
     assert markdown.is_file()
-    document = json.loads(out.read_text(encoding="utf-8"))
+    json_text = out.read_text(encoding="utf-8")
+    markdown_text = markdown.read_text(encoding="utf-8")
+    assert "PYPI_API_TOKEN" not in json_text
+    assert "TWINE_PASSWORD" not in json_text
+    assert "PYPI_API_TOKEN" not in markdown_text
+    assert "TWINE_PASSWORD" not in markdown_text
+
+    document = json.loads(json_text)
     assert document["schema_version"] == SCHEMA_VERSION
     assert document["finding_count"] == payload["finding_count"]
 
@@ -137,6 +144,8 @@ def test_release_anti_hijack_threat_model_public_cli_dispatch(
 
     assert rc == 0
     stdout = capsys.readouterr().out
+    assert "PYPI_API_TOKEN" not in stdout
+    assert "TWINE_PASSWORD" not in stdout
     assert "# SDETKit release anti-hijack threat model" in stdout
     assert "pypi_publish_credential_surface" in stdout
     assert "automation_allowed: false" in stdout
