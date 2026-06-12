@@ -573,6 +573,60 @@ def test_check_intelligence_reports_code_scanning_freshness_counts(
     assert action["evidence"]["code_scanning_review"]["current_alerts"] == 1
 
 
+def test_check_intelligence_treats_merge_candidate_code_scanning_alert_as_current(
+    tmp_path: Path,
+) -> None:
+    pr_head_sha = "pr-head-sha"
+    merge_candidate_sha = "merge-candidate-sha"
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {"check_runs": [{"name": "CI", "status": "completed", "conclusion": "success"}]},
+    )
+    alerts = _write_json(
+        tmp_path / "alerts.json",
+        {
+            "collection_status": "collected",
+            "alerts": [
+                {
+                    "number": 1390,
+                    "state": "open",
+                    "html_url": "https://example.test/code-scanning/1390",
+                    "rule": {"id": "py/implicit-string-concatenation-in-list"},
+                    "most_recent_instance": {
+                        "commit_sha": merge_candidate_sha,
+                        "message": {"text": "Implicit string concatenation."},
+                        "location": {
+                            "path": "src/sdetkit/protected_verifier.py",
+                            "start_line": 683,
+                        },
+                    },
+                }
+            ],
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(
+        checks_json=checks,
+        code_scanning_alerts_json=alerts,
+        current_head_sha=pr_head_sha,
+        merge_candidate_sha=merge_candidate_sha,
+    )
+    review = intelligence["code_scanning_review"]
+    finding = review["findings"][0]
+
+    assert review["current_alerts"] == 1
+    assert review["stale_alerts"] == 0
+    assert review["merge_candidate_sha"] == merge_candidate_sha
+    assert finding["freshness"] == "current"
+    assert finding["freshness_basis"] == "merge_candidate"
+    assert finding["merge_candidate_sha"] == merge_candidate_sha
+
+    action = check_intelligence.build_action_report(intelligence)
+    assert action["status"] == "review_required"
+    assert action["primary_blocker"]["surface"] == "security"
+    assert action["primary_blocker"]["code"] == check_intelligence.CODE_SCANNING_CURRENT_ALERT
+
+
 def test_check_intelligence_preserves_unresolved_security_review_findings(
     tmp_path: Path,
 ) -> None:

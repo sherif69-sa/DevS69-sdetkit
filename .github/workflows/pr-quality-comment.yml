@@ -288,12 +288,18 @@ jobs:
             --checks-json build/pr-quality/checks/check-runs.json \
             --out-dir build/pr-quality/check-logs
 
+          MERGE_CANDIDATE_SHA="$(
+            gh api "repos/$REPOSITORY_OWNER/$REPOSITORY_NAME/pulls/$PR_NUMBER" \
+              --jq '.merge_commit_sha // ""' 2>/dev/null || true
+          )"
+
           PYTHONPATH=src python -m sdetkit.check_intelligence \
             --checks-json build/pr-quality/checks/check-runs.json \
             --logs-dir build/pr-quality/check-logs/failed-check-logs \
             --review-threads-json build/pr-quality/security-review/review-threads.json \
             --code-scanning-alerts-json build/pr-quality/code-scanning/alerts.json \
             --current-head-sha "$HEAD_SHA" \
+            --merge-candidate-sha "$MERGE_CANDIDATE_SHA" \
             --out-dir build/pr-quality/check-intelligence
 
 
