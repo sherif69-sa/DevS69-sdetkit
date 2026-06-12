@@ -3534,6 +3534,9 @@ def write_comment_body(
         review_artifacts_manifest_written = True
 
     trajectory_summary = _trajectory_summary(trajectory_records)
+    repo_memory_runtime = (
+        _as_dict(runtime_proof_artifacts.get("repo_memory")) if runtime_proof_artifacts else {}
+    )
     result: JsonObject = {
         "out": out.as_posix(),
         "review_model_out": review_model_out.as_posix() if review_model_out is not None else "",
@@ -3608,9 +3611,34 @@ def write_comment_body(
             else "not_collected"
         ),
         "repo_memory_live_contract_proven": bool(
-            _as_dict(runtime_proof_artifacts.get("repo_memory")).get("live_contract_proven", False)
-            if runtime_proof_artifacts
-            else False
+            repo_memory_runtime.get("live_contract_proven", False)
+        ),
+        "repo_memory_trajectory_authority_status": _string(
+            repo_memory_runtime.get("trajectory_authority_status") or "not_collected"
+        ),
+        "repo_memory_trajectory_authority_record_count": _int(
+            repo_memory_runtime.get("trajectory_authority_record_count")
+        ),
+        "repo_memory_trajectory_authority_review_first_count": _int(
+            repo_memory_runtime.get("trajectory_authority_review_first_count")
+        ),
+        "repo_memory_trajectory_authority_auto_fix_allowed_count": _int(
+            repo_memory_runtime.get("trajectory_authority_auto_fix_allowed_count")
+        ),
+        "repo_memory_trajectory_authority_reporting_only_count": _int(
+            repo_memory_runtime.get("trajectory_authority_reporting_only_count")
+        ),
+        "repo_memory_trajectory_authority_patch_application_allowed": bool(
+            repo_memory_runtime.get("trajectory_authority_patch_application_allowed", False)
+        ),
+        "repo_memory_trajectory_authority_security_dismissal_allowed": bool(
+            repo_memory_runtime.get("trajectory_authority_security_dismissal_allowed", False)
+        ),
+        "repo_memory_trajectory_authority_merge_authorized": bool(
+            repo_memory_runtime.get("trajectory_authority_merge_authorized", False)
+        ),
+        "repo_memory_trajectory_authority_semantic_equivalence_proven": bool(
+            repo_memory_runtime.get("trajectory_authority_semantic_equivalence_proven", False)
         ),
         TRUSTED_HISTORY_COLLECTION_STATUS: _string(
             _as_dict(runtime_proof_artifacts.get(TRUSTED_HISTORY)).get("collection_status")

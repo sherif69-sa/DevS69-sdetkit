@@ -1260,6 +1260,15 @@ jobs:
               repo_memory_collection_status: metadata.repo_memory_collection_status || 'not_collected',
               repo_memory_status: metadata.repo_memory_status || 'not_collected',
               repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven),
+              repo_memory_trajectory_authority_status: metadata.repo_memory_trajectory_authority_status || 'not_collected',
+              repo_memory_trajectory_authority_record_count: Number(metadata.repo_memory_trajectory_authority_record_count || 0),
+              repo_memory_trajectory_authority_review_first_count: Number(metadata.repo_memory_trajectory_authority_review_first_count || 0),
+              repo_memory_trajectory_authority_auto_fix_allowed_count: Number(metadata.repo_memory_trajectory_authority_auto_fix_allowed_count || 0),
+              repo_memory_trajectory_authority_reporting_only_count: Number(metadata.repo_memory_trajectory_authority_reporting_only_count || 0),
+              repo_memory_trajectory_authority_patch_application_allowed: Boolean(metadata.repo_memory_trajectory_authority_patch_application_allowed),
+              repo_memory_trajectory_authority_security_dismissal_allowed: Boolean(metadata.repo_memory_trajectory_authority_security_dismissal_allowed),
+              repo_memory_trajectory_authority_merge_authorized: Boolean(metadata.repo_memory_trajectory_authority_merge_authorized),
+              repo_memory_trajectory_authority_semantic_equivalence_proven: Boolean(metadata.repo_memory_trajectory_authority_semantic_equivalence_proven),
               trusted_history_collection_status: metadata.trusted_history_collection_status || 'not_collected',
               trusted_history_status: metadata.trusted_history_status || 'not_collected',
               trusted_history_record_count: Number(metadata.trusted_history_record_count || 0),
@@ -1360,6 +1369,33 @@ jobs:
           repo_memory_live_contract_proven = bool(
               payload.get("repo_memory_live_contract_proven", False)
           )
+          repo_memory_trajectory_authority_status = str(
+              payload.get("repo_memory_trajectory_authority_status", "not_collected")
+          )
+          repo_memory_trajectory_authority_record_count = int(
+              payload.get("repo_memory_trajectory_authority_record_count", 0) or 0
+          )
+          repo_memory_trajectory_authority_review_first_count = int(
+              payload.get("repo_memory_trajectory_authority_review_first_count", 0) or 0
+          )
+          repo_memory_trajectory_authority_auto_fix_allowed_count = int(
+              payload.get("repo_memory_trajectory_authority_auto_fix_allowed_count", 0) or 0
+          )
+          repo_memory_trajectory_authority_reporting_only_count = int(
+              payload.get("repo_memory_trajectory_authority_reporting_only_count", 0) or 0
+          )
+          repo_memory_trajectory_authority_patch_application_allowed = bool(
+              payload.get("repo_memory_trajectory_authority_patch_application_allowed", False)
+          )
+          repo_memory_trajectory_authority_security_dismissal_allowed = bool(
+              payload.get("repo_memory_trajectory_authority_security_dismissal_allowed", False)
+          )
+          repo_memory_trajectory_authority_merge_authorized = bool(
+              payload.get("repo_memory_trajectory_authority_merge_authorized", False)
+          )
+          repo_memory_trajectory_authority_semantic_equivalence_proven = bool(
+              payload.get("repo_memory_trajectory_authority_semantic_equivalence_proven", False)
+          )
           history_semantic_key = "_".join(
               ("trusted", "history", "semantic", "equivalence", "proven")
           )
@@ -1409,6 +1445,42 @@ jobs:
           print(f"repo_memory_status={repo_memory_status}")
           print(
               f"repo_memory_live_contract_proven={str(repo_memory_live_contract_proven).lower()}"
+          )
+          print(
+              "repo_memory_trajectory_authority_status="
+              f"{repo_memory_trajectory_authority_status}"
+          )
+          print(
+              "repo_memory_trajectory_authority_record_count="
+              f"{repo_memory_trajectory_authority_record_count}"
+          )
+          print(
+              "repo_memory_trajectory_authority_review_first_count="
+              f"{repo_memory_trajectory_authority_review_first_count}"
+          )
+          print(
+              "repo_memory_trajectory_authority_auto_fix_allowed_count="
+              f"{repo_memory_trajectory_authority_auto_fix_allowed_count}"
+          )
+          print(
+              "repo_memory_trajectory_authority_reporting_only_count="
+              f"{repo_memory_trajectory_authority_reporting_only_count}"
+          )
+          print(
+              "repo_memory_trajectory_authority_patch_application_allowed="
+              f"{str(repo_memory_trajectory_authority_patch_application_allowed).lower()}"
+          )
+          print(
+              "repo_memory_trajectory_authority_security_dismissal_allowed="
+              f"{str(repo_memory_trajectory_authority_security_dismissal_allowed).lower()}"
+          )
+          print(
+              "repo_memory_trajectory_authority_merge_authorized="
+              f"{str(repo_memory_trajectory_authority_merge_authorized).lower()}"
+          )
+          print(
+              "repo_memory_trajectory_authority_semantic_equivalence_proven="
+              f"{str(repo_memory_trajectory_authority_semantic_equivalence_proven).lower()}"
           )
           print(f"trusted_history_collection_status={trusted_history_collection_status}")
           print(f"trusted_history_status={trusted_history_status}")
@@ -1484,6 +1556,31 @@ jobs:
               )
           if not repo_memory_live_contract_proven:
               raise SystemExit("PR Quality RepoMemory live contract was not proven")
+          if repo_memory_trajectory_authority_status != "authority_boundary_evidence_observed":
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority evidence missing: "
+                  f"status={repo_memory_trajectory_authority_status}"
+              )
+          if repo_memory_trajectory_authority_record_count < 1:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority evidence has no records"
+              )
+          if repo_memory_trajectory_authority_patch_application_allowed:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to allow patch application"
+              )
+          if repo_memory_trajectory_authority_security_dismissal_allowed:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to allow security dismissal"
+              )
+          if repo_memory_trajectory_authority_merge_authorized:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to authorize merge"
+              )
+          if repo_memory_trajectory_authority_semantic_equivalence_proven:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to claim semantic equivalence"
+              )
           if trusted_history_collection_status != "collected":
               raise SystemExit(
                   "PR Quality trusted accepted-main history collection failed after "
