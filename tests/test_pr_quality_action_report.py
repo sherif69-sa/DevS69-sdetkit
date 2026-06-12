@@ -4836,3 +4836,44 @@ def test_artifact_center_renders_expected_artifact_inventory() -> None:
     assert "runtime-proof/summary/runtime-proof-artifacts.json" in html
     assert "runtime-proof/summary/runtime-proof-artifacts.md" in html
     assert "pr-comment-metadata.json" in html
+
+
+def test_artifacts_manifest_verifies_expected_inventory_is_authority_aware() -> None:
+    model = {
+        "schema_version": "sdetkit.pr_quality.review_model.v2",
+        "schema": {
+            "name": "sdetkit.pr_quality.review_model",
+            "version": 2,
+            "authority_boundary": "reporting_only",
+        },
+        "artifact_index": [],
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+        "decision": {
+            "status": "green",
+            "merge_assessment": "ready_for_review",
+            "next_action": "human_review",
+        },
+    }
+
+    manifest = report.build_pr_quality_artifacts_manifest(model)
+    verification = manifest["expected_artifact_inventory_verification"]
+
+    assert verification["status"] == "passed"
+    assert verification["non_empty"] is True
+    assert verification["authority_aware"] is True
+    assert verification["expected_artifact_count"] == len(manifest["expected_artifact_paths"])
+    assert verification["authority_evidence_source_count"] == len(
+        manifest["authority_evidence_sources"]
+    )
+    assert verification["missing_authority_evidence_paths"] == []
+    assert verification["reporting_only"] is True
+    assert verification["authority_boundary"]["patch_automation"] is False
+    assert verification["authority_boundary"]["security_dismissal"] is False
+    assert verification["authority_boundary"]["merge_authorization"] is False
+    assert verification["authority_boundary"]["semantic_equivalence_claim"] is False

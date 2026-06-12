@@ -2761,6 +2761,34 @@ def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
         artifact_path = _string(item.get("path"))
         if artifact_path and artifact_path not in expected_paths:
             expected_paths.append(artifact_path)
+    authority_evidence_source_paths = [
+        _string(item.get("path"))
+        for item in authority_evidence_sources
+        if _string(item.get("path"))
+    ]
+    missing_authority_evidence_paths = [
+        artifact_path
+        for artifact_path in authority_evidence_source_paths
+        if artifact_path not in expected_paths
+    ]
+    expected_artifact_inventory_verification = {
+        "status": (
+            "passed" if expected_paths and not missing_authority_evidence_paths else "failed"
+        ),
+        "non_empty": bool(expected_paths),
+        "authority_aware": not missing_authority_evidence_paths,
+        "expected_artifact_count": len(expected_paths),
+        "authority_evidence_source_count": len(authority_evidence_source_paths),
+        "missing_authority_evidence_paths": missing_authority_evidence_paths,
+        "reporting_only": True,
+        "authority_boundary": {
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+    }
+
     primary_entrypoint = next(
         (
             _string(item.get("path"))
@@ -2780,6 +2808,7 @@ def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
         "generated_by": "sdetkit.pr_quality_action_report",
         "primary_entrypoint": primary_entrypoint,
         "expected_artifact_paths": expected_paths,
+        "expected_artifact_inventory_verification": expected_artifact_inventory_verification,
         "artifacts": artifacts,
         "authority_evidence_sources": authority_evidence_sources,
         "reporting_only": True,
