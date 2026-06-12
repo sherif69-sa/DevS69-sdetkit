@@ -2158,6 +2158,23 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     def _joined(items: list[str]) -> str:
         return ", ".join(items) if items else "none"
 
+    def _markdown_table(rows: list[tuple[str, object]]) -> list[str]:
+        rendered = ["| Item | Value |", "|---|---|"]
+        for label, value in rows:
+            rendered.append(f"| {label} | `{_markdown_table_value(value)}` |")
+        return rendered
+
+    def _details(summary: str, body: list[str], *, open_by_default: bool = False) -> list[str]:
+        attr = " open" if open_by_default else ""
+        return [
+            f"<details{attr}>",
+            f"<summary>{summary}</summary>",
+            "",
+            *body,
+            "",
+            "</details>",
+        ]
+
     status = _review_model_scalar(decision.get("status") or "unknown")
     failed_total = _count(decision.get("failed_checks"))
     queued_total = _count(decision.get("required_queued_checks"))
@@ -2188,35 +2205,82 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     else:
         review_state = "green"
 
+    failure_actual = _review_model_scalar(failure_vector_signal.get("actual_failure") or "none")
+    failure_source = _review_model_scalar(failure_vector_signal.get("source") or "none")
+    failure_owner = _review_model_scalar(failure_vector_signal.get("owner_hint") or "none")
+    failure_type = _review_model_scalar(failure_vector_signal.get("failure_type") or "none")
+    failing_command = _review_model_scalar(failure_vector_signal.get("failing_command") or "none")
+    failing_test = _review_model_scalar(
+        failure_vector_signal.get("failing_test_or_check") or "none"
+    )
+    affected_files = [
+        str(item)
+        for item in _as_list(failure_vector_signal.get("affected_files"))
+        if isinstance(item, str) and item.strip()
+    ]
+
+    artifact_entries = [
+        _as_dict(item)
+        for item in _as_list(model.get("artifact_index"))
+        if _string(_as_dict(item).get("path"))
+    ]
+    artifact_lines = [
+        f"- `{_string(item.get('path'))}` — {_string(item.get('description') or item.get('title') or item.get('surface'))}"
+        for item in artifact_entries
+    ]
+    if not artifact_lines:
+        artifact_lines = [
+            "- `index.html` — artifact landing page",
+            "- `pr-review-model.json` — machine-readable review model",
+            "- `pr-comment-body.md` — raw rendered comment body",
+        ]
+
+    active_blocker_open = is_blocked or review_first
+    failure_vector_open = active_blocker_open and failure_actual not in {"", "none"}
+    proof_open = active_blocker_open and bool(proof_commands)
+
     lines = [
         "# PR Quality Review Summary",
         "",
         "## Mini triage",
         "",
-        "| Item | Value |",
-        "|---|---|",
-        f"| Review state | `{review_state}` |",
-        f"| Status | `{_review_model_scalar(decision.get('status'))}` |",
-        f"| First blocker | `{_markdown_table_value(first_blocker)}` |",
-        f"| Recommended action | `{_markdown_table_value(first_recommended_action)}` |",
-        f"| Failed checks | `{failed_total}` |",
-        f"| Failed check names | `{_markdown_table_value(_joined(failed_check_names))}` |",
-        f"| Queued required checks | `{queued_total}` |",
-        f"| Queued check names | `{_markdown_table_value(_joined(queued_check_names))}` |",
-        f"| Startup failures | `{startup_total}` |",
-        f"| Startup failure names | `{_markdown_table_value(_joined(startup_failure_names))}` |",
-        f"| Missing required contexts | `{missing_total}` |",
-        f"| Missing context names | `{_markdown_table_value(_joined(missing_context_names))}` |",
-        f"| Failure vector source | `{_markdown_table_value(failure_vector_signal.get('source') or 'none')}` |",
-        f"| Actual failure | `{_markdown_table_value(failure_vector_signal.get('actual_failure') or 'none')}` |",
-        f"| Failure type | `{_markdown_table_value(failure_vector_signal.get('failure_type') or 'none')}` |",
-        f"| Failing command | `{_markdown_table_value(failure_vector_signal.get('failing_command') or 'none')}` |",
-        f"| Failing test/check | `{_markdown_table_value(failure_vector_signal.get('failing_test_or_check') or 'none')}` |",
-        f"| Owner hint | `{_markdown_table_value(failure_vector_signal.get('owner_hint') or 'none')}` |",
-        f"| Failure-vector safe-fix allowed | `{_review_model_scalar(failure_vector_signal.get('safe_fix_allowed'))}` |",
+        *_markdown_table(
+            [
+                ("Review state", review_state),
+                ("Status", decision.get("status")),
+                ("First blocker", first_blocker),
+                ("Recommended action", first_recommended_action),
+                ("Failed checks", failed_total),
+                ("Failed check names", _joined(failed_check_names)),
+                ("Queued required checks", queued_total),
+                ("Queued check names", _joined(queued_check_names)),
+                ("Startup failures", startup_total),
+                ("Startup failure names", _joined(startup_failure_names)),
+                ("Missing required contexts", missing_total),
+                ("Missing context names", _joined(missing_context_names)),
+                ("Failure vector source", failure_source),
+                ("Actual failure", failure_actual),
+                ("Failure type", failure_type),
+                ("Failing command", failing_command),
+                ("Failing test/check", failing_test),
+                ("Owner hint", failure_owner),
+                (
+                    "Failure-vector safe-fix allowed",
+                    _review_model_scalar(failure_vector_signal.get("safe_fix_allowed")),
+                ),
+            ]
+        ),
         "",
-        "## Decision",
-        "",
+    ]
+
+    if recommended_actions:
+        lines.extend(["## Recommended actions", ""])
+        lines.extend(f"- {action}" for action in recommended_actions[:10])
+        lines.append("")
+
+    lines.extend(["## Adaptive review details", ""])
+
+    blocker_body = [
         "| Item | Value |",
         "|---|---|",
         f"| Merge assessment | `{_review_model_scalar(decision.get('merge_assessment'))}` |",
@@ -2227,24 +2291,92 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         f"| Review-first evidence | `{_review_model_scalar(decision.get('review_first_evidence'))}` |",
         f"| Cleared security signal | `{_review_model_scalar(decision.get('cleared_security_signal'))}` |",
         "",
-        "## Proof to rerun",
-        "",
     ]
-
-    if proof_commands:
-        lines.append("```bash")
-        lines.extend(proof_commands)
-        lines.append("```")
-    else:
-        lines.append("`none`")
-
     if recommended_actions:
-        lines.extend(["", "## Recommended actions", ""])
-        lines.extend(f"- {action}" for action in recommended_actions)
+        blocker_body.extend(["### Recommended next action", ""])
+        blocker_body.extend(f"- {action}" for action in recommended_actions[:10])
+    else:
+        blocker_body.extend(["### Recommended next action", "", "- none"])
+
+    lines.extend(
+        _details(
+            "🚨 Active blocker / decision details"
+            if active_blocker_open
+            else "✅ Decision details",
+            blocker_body,
+            open_by_default=active_blocker_open,
+        )
+    )
+    lines.append("")
+
+    failure_body = [
+        "| Failure field | Value |",
+        "|---|---|",
+        f"| Source | `{_markdown_table_value(failure_source)}` |",
+        f"| Actual failure | `{_markdown_table_value(failure_actual)}` |",
+        f"| Failure type | `{_markdown_table_value(failure_type)}` |",
+        f"| Failing command | `{_markdown_table_value(failing_command)}` |",
+        f"| Failing test/check | `{_markdown_table_value(failing_test)}` |",
+        f"| Owner hint | `{_markdown_table_value(failure_owner)}` |",
+        f"| Safe-fix candidate | `{_review_model_scalar(failure_vector_signal.get('safe_fix_candidate'))}` |",
+        f"| Safe-fix allowed | `{_review_model_scalar(failure_vector_signal.get('safe_fix_allowed'))}` |",
+        f"| Reporting only | `{_review_model_scalar(failure_vector_signal.get('reporting_only'))}` |",
+    ]
+    if affected_files:
+        failure_body.extend(["", "### Affected files", ""])
+        failure_body.extend(f"- `{item}`" for item in affected_files[:10])
+
+    lines.extend(
+        _details(
+            "🧭 Failure vector deep dive",
+            failure_body,
+            open_by_default=failure_vector_open,
+        )
+    )
+    lines.append("")
+
+    proof_body: list[str] = []
+    if proof_commands:
+        proof_body.extend(["```bash", *proof_commands, "```"])
+    else:
+        proof_body.append("`none`")
+    lines.extend(
+        _details(
+            "🧪 Proof to rerun",
+            proof_body,
+            open_by_default=proof_open,
+        )
+    )
+    lines.append("")
+
+    check_body = [
+        "| Check group | Count / names |",
+        "|---|---|",
+        f"| Failed checks | `{failed_total}` / `{_markdown_table_value(_joined(failed_check_names))}` |",
+        f"| Queued required checks | `{queued_total}` / `{_markdown_table_value(_joined(queued_check_names))}` |",
+        f"| Startup failures | `{startup_total}` / `{_markdown_table_value(_joined(startup_failure_names))}` |",
+        f"| Missing required contexts | `{missing_total}` / `{_markdown_table_value(_joined(missing_context_names))}` |",
+    ]
+    lines.extend(
+        _details(
+            "✅ Passing / queued / missing check evidence",
+            check_body,
+            open_by_default=False,
+        )
+    )
+    lines.append("")
+
+    lines.extend(
+        _details(
+            "📦 PR Quality product artifacts",
+            artifact_lines,
+            open_by_default=False,
+        )
+    )
+    lines.append("")
 
     lines.extend(
         [
-            "",
             "## Authority boundary",
             "",
             "| Authority | Value |",

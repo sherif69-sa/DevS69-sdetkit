@@ -4056,3 +4056,134 @@ def test_review_html_renders_failure_vector_signal() -> None:
     assert "Reporting-only FailureVector projection" in html
     assert "does not authorize safe-fix execution" in html
     assert "does not authorize merge" in html
+
+
+def test_pr_quality_review_summary_opens_blocker_sections_and_collapses_noise() -> None:
+    model = {
+        "decision": {
+            "status": "review_required",
+            "merge_assessment": "do_not_merge_until_blocker_resolved",
+            "next_action": "review",
+            "risk_surface": "security",
+            "signal_title": "CodeQL security analysis requires review",
+            "comment_signal": "Evidence review signal",
+            "review_first_evidence": True,
+            "cleared_security_signal": False,
+            "failed_checks": 1,
+            "required_queued_checks": 0,
+            "required_startup_failures": 0,
+            "missing_required_contexts": 0,
+        },
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+        "primary_blocker": {
+            "title": "CodeQL security analysis requires review",
+            "action": "Review unresolved GitHub Advanced Security comments on the PR.",
+        },
+        "failure_vector_signal": {
+            "source": "evidence_top_blocker",
+            "actual_failure": "CodeQL security analysis requires review",
+            "failure_type": "security_review",
+            "failing_command": "unknown",
+            "failing_test_or_check": "CodeQL",
+            "owner_hint": "src/sdetkit/release_anti_hijack_threat_model.py",
+            "affected_files": ["src/sdetkit/release_anti_hijack_threat_model.py"],
+            "safe_fix_candidate": False,
+            "safe_fix_allowed": False,
+            "reporting_only": True,
+        },
+        "recommended_actions": [
+            "Review unresolved GitHub Advanced Security comments on the PR.",
+            "Compare the alert commit SHA with the current PR head.",
+        ],
+        "proof_to_rerun": [
+            "python -m sdetkit security check --root . --format json",
+            "python -m pre_commit run -a",
+        ],
+        "failed_check_names": ["CodeQL"],
+        "required_queued_check_names": [],
+        "required_startup_failure_names": [],
+        "missing_required_context_names": [],
+        "artifact_index": [
+            {
+                "path": "index.html",
+                "title": "Artifact landing page",
+                "description": "Browser-ready entry point for the PR Quality artifact bundle.",
+            },
+            {
+                "path": "pr-review-model.json",
+                "title": "Review model",
+                "description": "Machine-readable review model.",
+            },
+        ],
+    }
+
+    body = report.render_pr_quality_review_summary(model)
+
+    assert "## Adaptive review details" in body
+    assert "<details open>\n<summary>🚨 Active blocker / decision details</summary>" in body
+    assert "<details open>\n<summary>🧭 Failure vector deep dive</summary>" in body
+    assert "<details open>\n<summary>🧪 Proof to rerun</summary>" in body
+    assert "<details>\n<summary>✅ Passing / queued / missing check evidence</summary>" in body
+    assert "<details>\n<summary>📦 PR Quality product artifacts</summary>" in body
+    assert "Compare the alert commit SHA with the current PR head." in body
+    assert "`src/sdetkit/release_anti_hijack_threat_model.py`" in body
+    assert "does not authorize merge" in body
+
+
+def test_pr_quality_review_summary_keeps_green_details_collapsed() -> None:
+    model = {
+        "decision": {
+            "status": "green",
+            "merge_assessment": "verify_listed_proof_before_routine_merge",
+            "next_action": "rerun_proof",
+            "risk_surface": "none",
+            "signal_title": "Green",
+            "comment_signal": "No blocker",
+            "review_first_evidence": False,
+            "cleared_security_signal": True,
+            "failed_checks": 0,
+            "required_queued_checks": 0,
+            "required_startup_failures": 0,
+            "missing_required_contexts": 0,
+        },
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+        "primary_blocker": {},
+        "failure_vector_signal": {
+            "source": "none",
+            "actual_failure": "none",
+            "failure_type": "none",
+            "failing_command": "none",
+            "failing_test_or_check": "none",
+            "owner_hint": "none",
+            "affected_files": [],
+            "safe_fix_candidate": False,
+            "safe_fix_allowed": False,
+            "reporting_only": True,
+        },
+        "recommended_actions": [],
+        "proof_to_rerun": ["make proof-after-format"],
+        "failed_check_names": [],
+        "required_queued_check_names": [],
+        "required_startup_failure_names": [],
+        "missing_required_context_names": [],
+        "artifact_index": [],
+    }
+
+    body = report.render_pr_quality_review_summary(model)
+
+    assert "<details>\n<summary>✅ Decision details</summary>" in body
+    assert "<details>\n<summary>🧭 Failure vector deep dive</summary>" in body
+    assert "<details>\n<summary>🧪 Proof to rerun</summary>" in body
+    assert "<details open>" not in body
