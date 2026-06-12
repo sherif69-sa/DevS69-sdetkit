@@ -4187,3 +4187,169 @@ def test_pr_quality_review_summary_keeps_green_details_collapsed() -> None:
     assert "<details>\n<summary>🧭 Failure vector deep dive</summary>" in body
     assert "<details>\n<summary>🧪 Proof to rerun</summary>" in body
     assert "<details open>" not in body
+
+
+def test_review_model_includes_ghas_code_scanning_blocker_details() -> None:
+    model = report.build_pr_quality_review_model(
+        status="review_required",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=True,
+        action_report={
+            "status": "review_required",
+            "primary_blocker": {
+                "title": "CodeQL security analysis requires review",
+                "surface": "security",
+                "action": "review_security",
+            },
+            "recommended_actions": ["Review CodeQL alert #1370."],
+            "proof_commands": ["make proof-after-format"],
+        },
+        check_intelligence={
+            "failed_checks": [{"name": "CodeQL"}],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+            "code_scanning_review": {
+                "collected": True,
+                "collection_status": "collected",
+                "open_alerts": 1,
+                "current_alerts": 1,
+                "stale_alerts": 0,
+                "unknown_freshness_alerts": 0,
+                "current_head_sha": "head-sha",
+                "findings": [
+                    {
+                        "number": 1370,
+                        "url": "https://github.example/alert/1370",
+                        "rule_id": "py/clear-text-storage-sensitive-data",
+                        "severity": "high",
+                        "path": "src/sdetkit/release_anti_hijack_threat_model.py",
+                        "line": "497",
+                        "commit_sha": "head-sha",
+                        "current_head_sha": "head-sha",
+                        "freshness": "current",
+                        "recommended_action": "fix_current_alert_or_dismiss_reviewed_false_positive",
+                        "message": "This expression stores sensitive data as clear text.",
+                    }
+                ],
+            },
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "security",
+                "title": "CodeQL security analysis requires review",
+            },
+            "graph": {"top_blocker": {}},
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+    details = model["ghas_blocker_details"]
+
+    assert details["schema_version"] == "sdetkit.pr_quality.ghas_blocker_details.v1"
+    assert details["collected"] is True
+    assert details["open_alerts"] == 1
+    assert details["current_alerts"] == 1
+    assert details["stale_alerts"] == 0
+    assert details["has_current_blockers"] is True
+    assert details["dismissal_allowed"] is False
+    assert details["findings"][0]["number"] == "1370"
+    assert details["findings"][0]["location"] == (
+        "src/sdetkit/release_anti_hijack_threat_model.py:497"
+    )
+    assert details["findings"][0]["freshness"] == "current"
+    assert details["findings"][0]["dismissal_allowed"] is False
+    assert details["findings"][0]["dismissal_guidance"] == (
+        "forbidden_until_human_false_positive_review"
+    )
+
+
+def test_pr_quality_review_summary_opens_ghas_blocker_details() -> None:
+    model = {
+        "decision": {
+            "status": "review_required",
+            "merge_assessment": "do_not_merge_until_blocker_resolved",
+            "next_action": "review",
+            "risk_surface": "security",
+            "signal_title": "CodeQL security analysis requires review",
+            "comment_signal": "Evidence review signal",
+            "review_first_evidence": True,
+            "cleared_security_signal": False,
+            "failed_checks": 1,
+            "required_queued_checks": 0,
+            "required_startup_failures": 0,
+            "missing_required_contexts": 0,
+        },
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+        "primary_blocker": {
+            "title": "CodeQL security analysis requires review",
+            "action": "Review unresolved GitHub Advanced Security comments on the PR.",
+        },
+        "failure_vector_signal": {
+            "source": "evidence_top_blocker",
+            "actual_failure": "CodeQL security analysis requires review",
+            "failure_type": "security_review",
+            "failing_command": "unknown",
+            "failing_test_or_check": "CodeQL",
+            "owner_hint": "src/sdetkit/release_anti_hijack_threat_model.py",
+            "affected_files": ["src/sdetkit/release_anti_hijack_threat_model.py"],
+            "safe_fix_candidate": False,
+            "safe_fix_allowed": False,
+            "reporting_only": True,
+        },
+        "ghas_blocker_details": {
+            "collected": True,
+            "collection_status": "collected",
+            "open_alerts": 1,
+            "current_alerts": 1,
+            "stale_alerts": 0,
+            "current_head_sha": "head-sha",
+            "dismissal_allowed": False,
+            "findings": [
+                {
+                    "number": "1370",
+                    "url": "https://github.example/alert/1370",
+                    "rule_id": "py/clear-text-storage-sensitive-data",
+                    "severity": "high",
+                    "location": "src/sdetkit/release_anti_hijack_threat_model.py:497",
+                    "freshness": "current",
+                    "alert_commit_sha": "head-sha",
+                    "current_head_sha": "head-sha",
+                    "recommended_action": "fix_current_alert_or_dismiss_reviewed_false_positive",
+                    "dismissal_allowed": False,
+                    "dismissal_guidance": "forbidden_until_human_false_positive_review",
+                    "message": "This expression stores sensitive data as clear text.",
+                    "proof_commands": [
+                        "python -m sdetkit security check --root . --format json",
+                        "python -m pre_commit run -a",
+                    ],
+                }
+            ],
+        },
+        "recommended_actions": ["Review CodeQL alert #1370."],
+        "proof_to_rerun": ["python -m pre_commit run -a"],
+        "failed_check_names": ["CodeQL"],
+        "required_queued_check_names": [],
+        "required_startup_failure_names": [],
+        "missing_required_context_names": [],
+        "artifact_index": [],
+    }
+
+    body = report.render_pr_quality_review_summary(model)
+
+    assert "<details open>\n<summary>🛡️ GHAS / CodeQL blocker details</summary>" in body
+    assert "[#1370](https://github.example/alert/1370)" in body
+    assert "py/clear-text-storage-sensitive-data" in body
+    assert "src/sdetkit/release_anti_hijack_threat_model.py:497" in body
+    assert "fix_current_alert_or_dismiss_reviewed_false_positive" in body
+    assert "forbidden_until_human_false_positive_review" in body
+    assert "Dismissal allowed" in body
+    assert "`false`" in body
