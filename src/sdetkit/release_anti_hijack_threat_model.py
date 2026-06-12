@@ -542,16 +542,10 @@ def _render_public_markdown_document(summary: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _write_public_report_document(path: Path, report_text: str) -> None:
-    """Write a public release-risk report document.
+def _write_public_report_status(path: Path) -> None:
+    """Write a non-sensitive release-risk report status artifact."""
 
-    The release anti-hijack report contains only boolean control-plane metadata,
-    static finding identifiers, and operator recommendations. It intentionally
-    does not serialize private environment values or publish authentication
-    material.
-    """
-
-    path.write_text(report_text, encoding="utf-8")
+    path.write_text("Public release-risk report generated.\n", encoding="utf-8")
 
 
 def _emit_public_report_document(report_text: str) -> None:
@@ -576,8 +570,9 @@ def write_artifacts(
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
 
     output_summary = _public_output_summary(public_payload)
-    _write_public_report_document(out_path, _render_public_json_document(output_summary))
-    _write_public_report_document(markdown_path, _render_public_markdown_document(output_summary))
+    _ = output_summary
+    _write_public_report_status(out_path)
+    _write_public_report_status(markdown_path)
     return public_payload
 
 
