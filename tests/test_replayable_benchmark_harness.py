@@ -362,3 +362,99 @@ def test_replayable_benchmark_passes_safetygate_evidence_into_protected_verifier
     assert verifier_safety_gate["expanded_authority_fields"] == []
     assert result["protected_verifier_result"]["decision"]["automation_allowed"] is False
     assert result["protected_verifier_result"]["decision"]["merge_authorized"] is False
+
+
+def _runtime_contract_artifacts(*, merge_authorized: bool = False) -> dict:
+    return {
+        "schema_version": "sdetkit.pr_quality_runtime_proof_artifacts.v1",
+        "status": "collected",
+        "protected_verifier": {
+            "collection_status": "collected",
+            "status": "review_required",
+            "review_first": True,
+            "contract_status": "failure_vector_contract_evidence_observed",
+            "contract_record_count": 1,
+            "contract_security_relevance_count": 0,
+            "contract_authority_boundary_preserved_count": 1 if not merge_authorized else 0,
+            "contract_patch_application_allowed": False,
+            "contract_security_dismissal_allowed": False,
+            "contract_merge_authorized": merge_authorized,
+            "contract_semantic_equivalence_claim": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+        "decision_boundary": {
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+
+def test_replayable_benchmark_replays_runtime_proof_protected_verifier_contract_evidence() -> None:
+    scenarios = _scenarios()
+    oracle = copy.deepcopy(_scenario("oracle_pass"))
+    oracle["runtime_proof_artifacts"] = _runtime_contract_artifacts()
+    scenarios = [oracle if item["scenario_type"] == "oracle_pass" else item for item in scenarios]
+
+    report = build_benchmark_report(scenarios)
+
+    evidence = report["runtime_proof_protected_verifier_contract_evidence"]
+    assert report["status"] == "passed"
+    assert evidence["collection_status"] == "collected"
+    assert evidence["status"] == "runtime_proof_protected_verifier_contract_evidence_replayed"
+    assert evidence["scenario_count"] == 1
+    assert evidence["record_count"] == 1
+    assert evidence["security_relevance_count"] == 0
+    assert evidence["authority_boundary_preserved_count"] == 1
+    assert evidence["expanded_authority_fields"] == []
+    assert evidence["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    assert report["safety_boundary"]["runtime_proof_contract_authority_expansion_count"] == 0
+    assert report["safety_boundary"]["preserved"] is True
+
+    markdown = render_markdown(report)
+    assert "## Runtime proof ProtectedVerifier contract replay" in markdown
+    assert "Scenarios with evidence: `1`" in markdown
+    assert "Records: `1`" in markdown
+    assert "Authority boundary preserved records: `1`" in markdown
+    assert "Expanded authority fields: `none`" in markdown
+    assert "Merge authorized by runtime proof contract evidence: `false`" in markdown
+    assert "Semantic equivalence claimed by runtime proof contract evidence: `false`" in markdown
+
+
+def test_replayable_benchmark_fails_authority_expanding_runtime_proof_contract_evidence() -> None:
+    scenarios = _scenarios()
+    oracle = copy.deepcopy(_scenario("oracle_pass"))
+    oracle["runtime_proof_artifacts"] = _runtime_contract_artifacts(merge_authorized=True)
+    scenarios = [oracle if item["scenario_type"] == "oracle_pass" else item for item in scenarios]
+
+    report = build_benchmark_report(scenarios)
+
+    evidence = report["runtime_proof_protected_verifier_contract_evidence"]
+    assert report["status"] == "failed"
+    assert evidence["expanded_authority_fields"] == ["merge_authorized"]
+    assert report["safety_boundary"]["runtime_proof_contract_authority_expansion_count"] == 1
+    assert report["safety_boundary"]["preserved"] is False
+
+    oracle_result = next(
+        item for item in report["scenarios"] if item["scenario_type"] == "oracle_pass"
+    )
+    assert oracle_result["passed"] is False
+    assert any(
+        check["name"] == "runtime_proof_contract_authority_boundary"
+        and check["passed"] is False
+        and check["actual"] == ["merge_authorized"]
+        for check in oracle_result["checks"]
+    )
+
+    markdown = render_markdown(report)
+    assert "Expanded authority fields: `merge_authorized`" in markdown
+    assert "Runtime proof contract authority expansion count: `1`" in markdown
+    assert "Boundary preserved: `false`" in markdown
