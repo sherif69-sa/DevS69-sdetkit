@@ -1221,6 +1221,8 @@ jobs:
 
           const repoMemoryAuthorityKey = (...parts) =>
             ['repo', 'memory', 'trajectory', 'authority', ...parts].join('_');
+          const expectedInventoryKey = (...parts) =>
+            ['expected', 'artifact', 'inventory', ...parts].join('_');
 
           const statusPath = 'build/pr-quality/comment-status.json';
           const readCommentMetadata = () => {
@@ -1242,6 +1244,17 @@ jobs:
 
           const writeStatus = (payload) => {
             const metadata = readCommentMetadata();
+            const expectedInventoryStatusKey = expectedInventoryKey('status');
+            const expectedInventoryNonEmptyKey = expectedInventoryKey('non', 'empty');
+            const expectedInventoryAuthorityAwareKey = expectedInventoryKey('authority', 'aware');
+            const expectedInventoryExpectedArtifactCountKey = expectedInventoryKey('expected', 'artifact', 'count');
+            const expectedInventoryAuthorityEvidenceSourceCountKey = expectedInventoryKey('authority', 'evidence', 'source', 'count');
+            const expectedInventoryMissingAuthorityEvidencePathCountKey = expectedInventoryKey('missing', 'authority', 'evidence', 'path', 'count');
+            const expectedInventoryReportingOnlyKey = expectedInventoryKey('reporting', 'only');
+            const expectedInventoryPatchAutomationKey = expectedInventoryKey('patch', 'automation');
+            const expectedInventorySecurityDismissalKey = expectedInventoryKey('security', 'dismissal');
+            const expectedInventoryMergeAuthorizationKey = expectedInventoryKey('merge', 'authorization');
+            const expectedInventorySemanticEquivalenceClaimKey = expectedInventoryKey('semantic', 'equivalence', 'claim');
             const repoMemoryAuthorityStatusKey = repoMemoryAuthorityKey('status');
             const repoMemoryAuthorityRecordCountKey = repoMemoryAuthorityKey('record', 'count');
             const repoMemoryAuthorityReviewFirstCountKey = repoMemoryAuthorityKey('review', 'first', 'count');
@@ -1272,6 +1285,17 @@ jobs:
               repo_memory_collection_status: metadata.repo_memory_collection_status || 'not_collected',
               repo_memory_status: metadata.repo_memory_status || 'not_collected',
               repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven),
+              [expectedInventoryStatusKey]: metadata[expectedInventoryStatusKey] || 'not_collected',
+              [expectedInventoryNonEmptyKey]: Boolean(metadata[expectedInventoryNonEmptyKey]),
+              [expectedInventoryAuthorityAwareKey]: Boolean(metadata[expectedInventoryAuthorityAwareKey]),
+              [expectedInventoryExpectedArtifactCountKey]: Number(metadata[expectedInventoryExpectedArtifactCountKey] || 0),
+              [expectedInventoryAuthorityEvidenceSourceCountKey]: Number(metadata[expectedInventoryAuthorityEvidenceSourceCountKey] || 0),
+              [expectedInventoryMissingAuthorityEvidencePathCountKey]: Number(metadata[expectedInventoryMissingAuthorityEvidencePathCountKey] || 0),
+              [expectedInventoryReportingOnlyKey]: Boolean(metadata[expectedInventoryReportingOnlyKey]),
+              [expectedInventoryPatchAutomationKey]: Boolean(metadata[expectedInventoryPatchAutomationKey]),
+              [expectedInventorySecurityDismissalKey]: Boolean(metadata[expectedInventorySecurityDismissalKey]),
+              [expectedInventoryMergeAuthorizationKey]: Boolean(metadata[expectedInventoryMergeAuthorizationKey]),
+              [expectedInventorySemanticEquivalenceClaimKey]: Boolean(metadata[expectedInventorySemanticEquivalenceClaimKey]),
               [repoMemoryAuthorityStatusKey]: metadata[repoMemoryAuthorityStatusKey] || 'not_collected',
               [repoMemoryAuthorityRecordCountKey]: Number(metadata[repoMemoryAuthorityRecordCountKey] || 0),
               [repoMemoryAuthorityReviewFirstCountKey]: Number(metadata[repoMemoryAuthorityReviewFirstCountKey] || 0),
@@ -1343,6 +1367,33 @@ jobs:
           def repo_memory_trajectory_authority_key(*parts: str) -> str:
               return "_".join(("repo", "memory", "trajectory", "authority", *parts))
 
+          def expected_inventory_key(*parts: str) -> str:
+              return "_".join(("expected", "artifact", "inventory", *parts))
+
+          expected_inventory_status_key = expected_inventory_key("status")
+          expected_inventory_non_empty_key = expected_inventory_key("non", "empty")
+          expected_inventory_authority_aware_key = expected_inventory_key("authority", "aware")
+          expected_inventory_expected_artifact_count_key = expected_inventory_key(
+              "expected", "artifact", "count"
+          )
+          expected_inventory_authority_evidence_source_count_key = expected_inventory_key(
+              "authority", "evidence", "source", "count"
+          )
+          expected_inventory_missing_authority_evidence_path_count_key = expected_inventory_key(
+              "missing", "authority", "evidence", "path", "count"
+          )
+          expected_inventory_reporting_only_key = expected_inventory_key("reporting", "only")
+          expected_inventory_patch_automation_key = expected_inventory_key("patch", "automation")
+          expected_inventory_security_dismissal_key = expected_inventory_key(
+              "security", "dismissal"
+          )
+          expected_inventory_merge_authorization_key = expected_inventory_key(
+              "merge", "authorization"
+          )
+          expected_inventory_semantic_equivalence_claim_key = expected_inventory_key(
+              "semantic", "equivalence", "claim"
+          )
+
           authority_status_key = repo_memory_trajectory_authority_key("status")
           authority_record_count_key = repo_memory_trajectory_authority_key("record", "count")
           authority_review_first_count_key = repo_memory_trajectory_authority_key(
@@ -1408,6 +1459,40 @@ jobs:
           )
           repo_memory_live_contract_proven = bool(
               payload.get("repo_memory_live_contract_proven", False)
+          )
+          expected_artifact_inventory_status = str(
+              payload.get(expected_inventory_status_key, "not_collected")
+          )
+          expected_artifact_inventory_non_empty = bool(
+              payload.get(expected_inventory_non_empty_key, False)
+          )
+          expected_artifact_inventory_authority_aware = bool(
+              payload.get(expected_inventory_authority_aware_key, False)
+          )
+          expected_artifact_inventory_expected_artifact_count = int(
+              payload.get(expected_inventory_expected_artifact_count_key, 0) or 0
+          )
+          expected_artifact_inventory_authority_evidence_source_count = int(
+              payload.get(expected_inventory_authority_evidence_source_count_key, 0) or 0
+          )
+          expected_artifact_inventory_missing_authority_evidence_path_count = int(
+              payload.get(expected_inventory_missing_authority_evidence_path_count_key, 0)
+              or 0
+          )
+          expected_artifact_inventory_reporting_only = bool(
+              payload.get(expected_inventory_reporting_only_key, False)
+          )
+          expected_artifact_inventory_patch_automation = bool(
+              payload.get(expected_inventory_patch_automation_key, False)
+          )
+          expected_artifact_inventory_security_dismissal = bool(
+              payload.get(expected_inventory_security_dismissal_key, False)
+          )
+          expected_artifact_inventory_merge_authorization = bool(
+              payload.get(expected_inventory_merge_authorization_key, False)
+          )
+          expected_artifact_inventory_semantic_equivalence_claim = bool(
+              payload.get(expected_inventory_semantic_equivalence_claim_key, False)
           )
           authority_status = str(payload.get(authority_status_key, "not_collected"))
           authority_record_count = int(payload.get(authority_record_count_key, 0) or 0)
@@ -1481,6 +1566,47 @@ jobs:
           print(f"repo_memory_status={repo_memory_status}")
           print(
               f"repo_memory_live_contract_proven={str(repo_memory_live_contract_proven).lower()}"
+          )
+          print(f"expected_artifact_inventory_status={expected_artifact_inventory_status}")
+          print(
+              "expected_artifact_inventory_non_empty="
+              f"{str(expected_artifact_inventory_non_empty).lower()}"
+          )
+          print(
+              "expected_artifact_inventory_authority_aware="
+              f"{str(expected_artifact_inventory_authority_aware).lower()}"
+          )
+          print(
+              expected_inventory_expected_artifact_count_key + '='
+              f"{expected_artifact_inventory_expected_artifact_count}"
+          )
+          print(
+              expected_inventory_authority_evidence_source_count_key + '='
+              f"{expected_artifact_inventory_authority_evidence_source_count}"
+          )
+          print(
+              expected_inventory_missing_authority_evidence_path_count_key + '='
+              f"{expected_artifact_inventory_missing_authority_evidence_path_count}"
+          )
+          print(
+              f"{expected_inventory_reporting_only_key}="
+              f"{str(expected_artifact_inventory_reporting_only).lower()}"
+          )
+          print(
+              f"{expected_inventory_patch_automation_key}="
+              f"{str(expected_artifact_inventory_patch_automation).lower()}"
+          )
+          print(
+              f"{expected_inventory_security_dismissal_key}="
+              f"{str(expected_artifact_inventory_security_dismissal).lower()}"
+          )
+          print(
+              f"{expected_inventory_merge_authorization_key}="
+              f"{str(expected_artifact_inventory_merge_authorization).lower()}"
+          )
+          print(
+              f"{expected_inventory_semantic_equivalence_claim_key}="
+              f"{str(expected_artifact_inventory_semantic_equivalence_claim).lower()}"
           )
           print(f"{authority_status_key}={authority_status}")
           print(f"{authority_record_count_key}={authority_record_count}")
@@ -1579,6 +1705,46 @@ jobs:
               )
           if not repo_memory_live_contract_proven:
               raise SystemExit("PR Quality RepoMemory live contract was not proven")
+          if expected_artifact_inventory_status != "passed":
+              raise SystemExit(
+                  "PR Quality expected artifact inventory verification failed: "
+                  f"status={expected_artifact_inventory_status}"
+              )
+          if not expected_artifact_inventory_non_empty:
+              raise SystemExit("PR Quality expected artifact inventory was empty")
+          if not expected_artifact_inventory_authority_aware:
+              raise SystemExit("PR Quality expected artifact inventory was not authority-aware")
+          if expected_artifact_inventory_expected_artifact_count < 1:
+              raise SystemExit("PR Quality expected artifact inventory had no artifacts")
+          if expected_artifact_inventory_authority_evidence_source_count < 1:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory had no authority evidence sources"
+              )
+          if expected_artifact_inventory_missing_authority_evidence_path_count:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory is missing authority evidence paths: "
+                  f"count={expected_artifact_inventory_missing_authority_evidence_path_count}"
+              )
+          if not expected_artifact_inventory_reporting_only:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory verification was not reporting-only"
+              )
+          if expected_artifact_inventory_patch_automation:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory attempted to allow patch automation"
+              )
+          if expected_artifact_inventory_security_dismissal:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory attempted to allow security dismissal"
+              )
+          if expected_artifact_inventory_merge_authorization:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory attempted to authorize merge"
+              )
+          if expected_artifact_inventory_semantic_equivalence_claim:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory attempted to claim semantic equivalence"
+              )
           if authority_status != "authority_boundary_evidence_observed":
               raise SystemExit(
                   "PR Quality RepoMemory trajectory authority evidence missing: "

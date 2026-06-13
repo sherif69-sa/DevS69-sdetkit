@@ -3759,12 +3759,13 @@ def write_comment_body(
         )
         review_index_written = True
 
+    review_artifacts_manifest = build_pr_quality_artifacts_manifest(review_model)
     review_artifacts_manifest_written = False
     if review_artifacts_manifest_out is not None:
         review_artifacts_manifest_out.parent.mkdir(parents=True, exist_ok=True)
         review_artifacts_manifest_out.write_text(
             json.dumps(
-                build_pr_quality_artifacts_manifest(review_model),
+                review_artifacts_manifest,
                 indent=2,
                 sort_keys=True,
             )
@@ -3777,6 +3778,16 @@ def write_comment_body(
     repo_memory_runtime = (
         _as_dict(runtime_proof_artifacts.get("repo_memory")) if runtime_proof_artifacts else {}
     )
+    expected_inventory_verification = _as_dict(
+        review_artifacts_manifest.get("expected_artifact_inventory_verification")
+    )
+    expected_inventory_authority = _as_dict(
+        expected_inventory_verification.get("authority_boundary")
+    )
+
+    def expected_inventory_key(*parts: str) -> str:
+        return "_".join(("expected", "artifact", "inventory", *parts))
+
     result: JsonObject = {
         "out": out.as_posix(),
         "review_model_out": review_model_out.as_posix() if review_model_out is not None else "",
@@ -3794,6 +3805,39 @@ def write_comment_body(
         if review_artifacts_manifest_out is not None
         else "",
         "review_artifacts_manifest_written": review_artifacts_manifest_written,
+        expected_inventory_key("status"): _string(
+            expected_inventory_verification.get("status") or "not_collected"
+        ),
+        expected_inventory_key("non", "empty"): bool(
+            expected_inventory_verification.get("non_empty", False)
+        ),
+        expected_inventory_key("authority", "aware"): bool(
+            expected_inventory_verification.get("authority_aware", False)
+        ),
+        expected_inventory_key("expected", "artifact", "count"): _int(
+            expected_inventory_verification.get("expected_artifact_count")
+        ),
+        expected_inventory_key("authority", "evidence", "source", "count"): _int(
+            expected_inventory_verification.get("authority_evidence_source_count")
+        ),
+        expected_inventory_key("missing", "authority", "evidence", "path", "count"): len(
+            _as_list(expected_inventory_verification.get("missing_authority_evidence_paths"))
+        ),
+        expected_inventory_key("reporting", "only"): bool(
+            expected_inventory_verification.get("reporting_only", False)
+        ),
+        expected_inventory_key("patch", "automation"): bool(
+            expected_inventory_authority.get("patch_automation", False)
+        ),
+        expected_inventory_key("security", "dismissal"): bool(
+            expected_inventory_authority.get("security_dismissal", False)
+        ),
+        expected_inventory_key("merge", "authorization"): bool(
+            expected_inventory_authority.get("merge_authorization", False)
+        ),
+        expected_inventory_key("semantic", "equivalence", "claim"): bool(
+            expected_inventory_authority.get("semantic_equivalence_claim", False)
+        ),
         "status": status,
         "result_title": _result_title(
             status,
