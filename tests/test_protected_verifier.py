@@ -286,3 +286,99 @@ def test_protected_verifier_blocks_authority_expanding_repo_memory_contract_evid
         and flag["fields"] == ["merge_authorized"]
         for flag in payload["risk_flags"]
     )
+
+
+def _runtime_proof_with_protected_verifier_contract() -> dict:
+    return {
+        "schema_version": "sdetkit.pr_quality_runtime_proof_artifacts.v1",
+        "status": "collected",
+        "protected_verifier": {
+            "collection_status": "collected",
+            "status": "review_required",
+            "review_first": True,
+            "contract_status": "failure_vector_contract_evidence_observed",
+            "contract_record_count": 1,
+            "contract_security_relevance_count": 0,
+            "contract_authority_boundary_preserved_count": 1,
+            "contract_patch_application_allowed": False,
+            "contract_security_dismissal_allowed": False,
+            "contract_merge_authorized": False,
+            "contract_semantic_equivalence_claim": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+        "decision_boundary": {
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+
+def test_protected_verifier_consumes_runtime_proof_protected_verifier_contract_evidence() -> None:
+    payload = verify_patch(
+        patch_score=_candidate_patch_score(),
+        runtime_proof=_runtime_proof_with_protected_verifier_contract(),
+    )
+
+    evidence = payload["runtime_proof_evidence"]["protected_verifier_contract_evidence"]
+    assert evidence["collection_status"] == "collected"
+    assert evidence["status"] == "failure_vector_contract_evidence_observed"
+    assert evidence["source"] == "runtime_proof.protected_verifier.failure_vector_contract_evidence"
+    assert evidence["record_count"] == 1
+    assert evidence["security_relevance_count"] == 0
+    assert evidence["authority_boundary_preserved_count"] == 1
+    assert evidence["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    assert payload["decision"]["status"] == REVIEW_REQUIRED
+    assert payload["decision"]["patch_application_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+    assert payload["risk_flags"] == []
+
+    markdown = render_markdown(payload)
+    assert "## Runtime proof ProtectedVerifier contract evidence" in markdown
+    assert "Authority boundary preserved records: `1`" in markdown
+    assert (
+        "Patch application allowed by runtime proof ProtectedVerifier contract evidence: `false`"
+        in markdown
+    )
+    assert (
+        "Security dismissal allowed by runtime proof ProtectedVerifier contract evidence: `false`"
+        in markdown
+    )
+    assert (
+        "Merge authorized by runtime proof ProtectedVerifier contract evidence: `false`" in markdown
+    )
+    assert (
+        "Semantic equivalence claimed by runtime proof ProtectedVerifier contract evidence: `false`"
+        in markdown
+    )
+
+
+def test_protected_verifier_blocks_authority_expanding_runtime_proof_contract_evidence() -> None:
+    runtime = _runtime_proof_with_protected_verifier_contract()
+    runtime["protected_verifier"]["contract_patch_application_allowed"] = True
+    runtime["protected_verifier"]["contract_semantic_equivalence_claim"] = True
+
+    payload = verify_patch(
+        patch_score=_candidate_patch_score(),
+        runtime_proof=runtime,
+    )
+
+    assert payload["decision"]["status"] == BLOCKED_REVIEW_FIRST
+    assert payload["decision"]["patch_application_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+    assert any(
+        flag["code"] == "RUNTIME_PROOF_PROTECTED_VERIFIER_CONTRACT_AUTHORITY_VIOLATION"
+        and flag["blocking"] is True
+        and flag["fields"] == ["patch_application_allowed", "semantic_equivalence_claim"]
+        for flag in payload["risk_flags"]
+    )
