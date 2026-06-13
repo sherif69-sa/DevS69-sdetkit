@@ -906,3 +906,82 @@ def test_repo_memory_rejects_authority_expanding_trajectory_authority_evidence()
         assert "trajectory authority evidence expands authority" in str(exc)
     else:
         raise AssertionError("expected authority expansion to be rejected")
+
+
+def test_repo_memory_surfaces_failure_vector_contract_evidence_without_authority() -> None:
+    insights = _pattern_insights()
+    insights["failure_vector_contract_evidence"] = {
+        "collection_status": "collected",
+        "status": "failure_vector_contract_evidence_observed",
+        "source": "trajectory.failure_vector_contract",
+        "record_count": 1,
+        "security_relevance_count": 0,
+        "authority_boundary_preserved_count": 1,
+        "failure_kinds": [{"value": "test", "count": 1}],
+        "affected_surfaces": [{"value": "tests", "count": 1}],
+        "decision_boundary": {
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "security_dismissal_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_claim": False,
+        },
+    }
+
+    profile = build_repo_memory_profile(
+        pattern_insights=insights,
+        benchmark_report=_benchmark_report(),
+    )
+
+    evidence = profile["failure_vector_contract_evidence"]
+    assert profile["inputs"]["failure_vector_contract_evidence_record_count"] == 1
+    assert evidence["status"] == "failure_vector_contract_evidence_observed"
+    assert evidence["record_count"] == 1
+    assert evidence["security_relevance_count"] == 0
+    assert evidence["authority_boundary_preserved_count"] == 1
+    assert evidence["failure_kinds"] == [{"value": "test", "count": 1}]
+    assert evidence["affected_surfaces"] == [{"value": "tests", "count": 1}]
+    assert evidence["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+
+    markdown = render_markdown(profile)
+    assert "## FailureVector contract trajectory evidence" in markdown
+    assert "Authority boundary preserved records: `1`" in markdown
+    assert "Security dismissal allowed by FailureVector contract evidence: `false`" in markdown
+    assert "Semantic equivalence claimed by FailureVector contract evidence: `false`" in markdown
+
+
+def test_repo_memory_rejects_authority_expanding_failure_vector_contract_evidence() -> None:
+    insights = _pattern_insights()
+    insights["failure_vector_contract_evidence"] = {
+        "collection_status": "collected",
+        "status": "failure_vector_contract_evidence_observed",
+        "source": "trajectory.failure_vector_contract",
+        "record_count": 1,
+        "security_relevance_count": 0,
+        "authority_boundary_preserved_count": 0,
+        "failure_kinds": [{"value": "test", "count": 1}],
+        "affected_surfaces": [{"value": "tests", "count": 1}],
+        "decision_boundary": {
+            "automation_allowed": True,
+            "patch_application_allowed": False,
+            "security_dismissal_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_claim": False,
+        },
+    }
+
+    try:
+        build_repo_memory_profile(
+            pattern_insights=insights,
+            benchmark_report=_benchmark_report(),
+        )
+    except ValueError as exc:
+        assert "FailureVector contract evidence expands authority: automation_allowed" in str(exc)
+    else:
+        raise AssertionError("expected authority-expanding FailureVector evidence to fail")

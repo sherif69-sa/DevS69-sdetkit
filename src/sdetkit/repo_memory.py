@@ -262,6 +262,66 @@ def _safety_gate_evidence(pattern_insights: Mapping[str, Any]) -> JsonObject:
     }
 
 
+def _failure_vector_contract_evidence(
+    pattern_insights: Mapping[str, Any],
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    payload = _as_dict(pattern_insights.get("failure_vector_contract_evidence"))
+    if not payload:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "trajectory.failure_vector_contract",
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "failure_kinds": [],
+            "affected_surfaces": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = _as_dict(payload.get("decision_boundary"))
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    if expanded:
+        raise ValueError(
+            "FailureVector contract evidence expands authority: " + ", ".join(expanded)
+        )
+
+    return {
+        "collection_status": _string(payload.get("collection_status")) or "collected",
+        "status": _string(payload.get("status")) or "failure_vector_contract_evidence_observed",
+        "source": _string(payload.get("source")) or "trajectory.failure_vector_contract",
+        "record_count": _int(payload.get("record_count")),
+        "security_relevance_count": _int(payload.get("security_relevance_count")),
+        "authority_boundary_preserved_count": _int(
+            payload.get("authority_boundary_preserved_count")
+        ),
+        "failure_kinds": [
+            {
+                "value": _string(item.get("value")),
+                "count": _int(item.get("count")),
+            }
+            for item in (_as_dict(row) for row in _as_list(payload.get("failure_kinds")))
+            if _string(item.get("value"))
+        ],
+        "affected_surfaces": [
+            {
+                "value": _string(item.get("value")),
+                "count": _int(item.get("count")),
+            }
+            for item in (_as_dict(row) for row in _as_list(payload.get("affected_surfaces")))
+            if _string(item.get("value"))
+        ],
+        "decision_boundary": denied,
+    }
+
+
 def _proof_commands(benchmark_report: Mapping[str, Any]) -> list[str]:
     commands: set[str] = set()
     for scenario in _as_list(benchmark_report.get("scenarios")):
@@ -683,6 +743,7 @@ def build_repo_memory_profile(
     )
     safety_gate_evidence = _safety_gate_evidence(pattern_insights)
     trajectory_authority_evidence = _trajectory_authority_evidence(pattern_insights)
+    failure_vector_contract_evidence = _failure_vector_contract_evidence(pattern_insights)
     benchmark_proven = _benchmark_contract_proven(benchmark_report)
     live_proven = _live_contract_proven(live_report)
     safe_fix_history = _safe_fix_history(
@@ -742,6 +803,9 @@ def build_repo_memory_profile(
             "trajectory_authority_record_count": _int(
                 trajectory_authority_evidence.get("record_count")
             ),
+            "failure_vector_contract_evidence_record_count": _int(
+                failure_vector_contract_evidence.get("record_count")
+            ),
         },
         "command_profile": {
             "source": "replayable_benchmark_harness",
@@ -782,6 +846,7 @@ def build_repo_memory_profile(
         "controlled_candidate_validation": controlled_validation,
         "safety_gate_evidence": safety_gate_evidence,
         "trajectory_authority_evidence": trajectory_authority_evidence,
+        "failure_vector_contract_evidence": failure_vector_contract_evidence,
         "flaky_test_registry": flaky_registry,
         "escalation_rules": _escalation_rules(),
         "unproven_boundaries": unproven_boundaries,
@@ -812,6 +877,8 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
     safety_boundary = _as_dict(safety_gate.get("decision_boundary"))
     trajectory_authority = _as_dict(profile.get("trajectory_authority_evidence"))
     trajectory_authority_boundary = _as_dict(trajectory_authority.get("decision_boundary"))
+    vector_contract = _as_dict(profile.get("failure_vector_contract_evidence"))
+    vector_contract_boundary = _as_dict(vector_contract.get("decision_boundary"))
     flaky = _as_dict(profile.get("flaky_test_registry"))
     flaky_source = _as_dict(flaky.get("source"))
     boundary = _as_dict(profile.get("decision_boundary"))
@@ -977,6 +1044,36 @@ def render_markdown(profile: Mapping[str, Any]) -> str:
 
     lines.extend(
         [
+            "",
+            "## FailureVector contract trajectory evidence",
+            "",
+            f"- Collection status: `{_string(vector_contract.get('collection_status'))}`",
+            f"- Status: `{_string(vector_contract.get('status'))}`",
+            f"- Records: `{_int(vector_contract.get('record_count'))}`",
+            (
+                "- Security-relevant records: "
+                f"`{_int(vector_contract.get('security_relevance_count'))}`"
+            ),
+            (
+                "- Authority boundary preserved records: "
+                f"`{_int(vector_contract.get('authority_boundary_preserved_count'))}`"
+            ),
+            (
+                "- Patch application allowed by FailureVector contract evidence: "
+                f"`{str(_bool(vector_contract_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by FailureVector contract evidence: "
+                f"`{str(_bool(vector_contract_boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by FailureVector contract evidence: "
+                f"`{str(_bool(vector_contract_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence claimed by FailureVector contract evidence: "
+                f"`{str(_bool(vector_contract_boundary.get('semantic_equivalence_claim'))).lower()}`"
+            ),
             "",
             "## Trajectory authority boundary evidence",
             "",
