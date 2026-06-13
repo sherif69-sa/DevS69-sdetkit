@@ -5010,3 +5010,122 @@ def test_action_report_operator_summary_surfaces_protected_verifier_contract_aut
     assert "- ProtectedVerifier RepoMemory contract patch application allowed: `true`" in body
     assert "- Operator summary patch application allowed: `true`" in body
     assert "- Operator summary merge authorized: `false`" in body
+
+
+PV_RUNTIME_PROOF_EVIDENCE = "_".join(("runtime", "proof", "evidence"))
+PV_BENCHMARK_CONTRACT_REPLAY_EVIDENCE = "_".join(("benchmark", "contract", "replay", "evidence"))
+
+
+def _protected_verifier_benchmark_contract_replay_evidence(
+    *,
+    expanded: list[str] | None = None,
+    merge_authorized: bool = False,
+) -> dict:
+    return {
+        "collection_status": "collected",
+        "status": "_".join(("runtime", "proof", "benchmark", "contract", "replay", "observed")),
+        "scenario_count": 1,
+        "record_count": 1,
+        "security_relevance_count": 0,
+        "authority_boundary_preserved_count": 0 if expanded else 1,
+        "expanded_authority_fields": expanded or [],
+        "decision_boundary": {
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "security_dismissal_allowed": False,
+            "merge_authorized": merge_authorized,
+            "semantic_equivalence_claim": False,
+        },
+    }
+
+
+def test_action_report_operator_summary_surfaces_protected_verifier_benchmark_contract_replay_evidence() -> (
+    None
+):
+    action = {
+        "status": "safe_fix_available",
+        "primary_blocker": {},
+        "automation": {"allowed": False, "reason": "reporting only"},
+        "recommended_actions": ["Review the summary and run required proof."],
+        "protected_verifier_result": {
+            "decision": {
+                "status": "structurally_verified_candidate",
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+            PV_RUNTIME_PROOF_EVIDENCE: {
+                PV_BENCHMARK_CONTRACT_REPLAY_EVIDENCE: (
+                    _protected_verifier_benchmark_contract_replay_evidence()
+                )
+            },
+        },
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence={"checks_seen": 1, "failed_checks": []},
+    )
+
+    assert "<summary><strong>Operator SafetyGate summary</strong></summary>" in body
+    assert "- ProtectedVerifier benchmark replay contract scenarios: `1`" in body
+    assert "- ProtectedVerifier benchmark replay contract records: `1`" in body
+    assert "- ProtectedVerifier benchmark replay contract security-relevant records: `0`" in body
+    assert "- ProtectedVerifier benchmark replay contract authority preserved records: `1`" in body
+    assert "- ProtectedVerifier benchmark replay contract expanded authority fields: `none`" in body
+    assert (
+        "- ProtectedVerifier benchmark replay contract patch application allowed: `false`" in body
+    )
+    assert (
+        "- ProtectedVerifier benchmark replay contract security dismissal allowed: `false`" in body
+    )
+    assert "- ProtectedVerifier benchmark replay contract merge authorized: `false`" in body
+    assert (
+        "- ProtectedVerifier benchmark replay contract semantic equivalence claim: `false`" in body
+    )
+    assert "- Operator summary patch application allowed: `false`" in body
+    assert "- Operator summary merge authorized: `false`" in body
+
+
+def test_action_report_operator_summary_surfaces_protected_verifier_benchmark_contract_replay_authority_expansion() -> (
+    None
+):
+    action = {
+        "status": "review_first",
+        "primary_blocker": {},
+        "automation": {"allowed": False, "reason": "reporting only"},
+        "recommended_actions": ["Keep review-first."],
+        "protected_verifier_result": {
+            "decision": {
+                "status": "blocked_review_first",
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+            PV_RUNTIME_PROOF_EVIDENCE: {
+                PV_BENCHMARK_CONTRACT_REPLAY_EVIDENCE: (
+                    _protected_verifier_benchmark_contract_replay_evidence(
+                        expanded=["merge_authorized"],
+                        merge_authorized=True,
+                    )
+                )
+            },
+        },
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence={"checks_seen": 1, "failed_checks": []},
+    )
+
+    assert "<summary><strong>Operator SafetyGate summary</strong></summary>" in body
+    assert (
+        "- Operator next action: `Review-first: ProtectedVerifier benchmark replay contract evidence attempted to expand authority.`"
+        in body
+    )
+    assert (
+        "- ProtectedVerifier benchmark replay contract expanded authority fields: `merge_authorized`"
+        in body
+    )
+    assert "- ProtectedVerifier benchmark replay contract merge authorized: `true`" in body
+    assert "- Operator summary merge authorized: `true`" in body
