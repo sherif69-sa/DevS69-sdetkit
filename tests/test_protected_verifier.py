@@ -77,6 +77,30 @@ def _candidate_patch_score() -> dict:
     )
 
 
+def _repo_memory_profile() -> dict:
+    return {
+        "schema_version": "sdetkit.repo_memory.v6",
+        "profile_status": "observation_only",
+        "failure_vector_contract_evidence": {
+            "collection_status": "collected",
+            "status": "failure_vector_contract_evidence_observed",
+            "source": "trajectory.failure_vector_contract",
+            "record_count": 1,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 1,
+            "failure_kinds": [{"value": "formatter_only", "count": 1}],
+            "affected_surfaces": [{"value": "source", "count": 1}],
+            "decision_boundary": {
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "security_dismissal_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_claim": False,
+            },
+        },
+    }
+
+
 def test_protected_verifier_keeps_candidate_review_first_without_authority() -> None:
     payload = verify_patch(
         patch_score=_candidate_patch_score(),
@@ -201,3 +225,64 @@ def test_protected_verifier_cli_writes_json_and_markdown(tmp_path: Path, capsys)
     assert payload["decision"]["semantic_equivalence_proven"] is False
     assert "# ProtectedVerifier decision" in markdown
     assert "This verifier is reporting-only" in markdown
+
+
+def test_protected_verifier_consumes_repo_memory_failure_vector_contract_evidence() -> None:
+    payload = verify_patch(
+        patch_score=_candidate_patch_score(),
+        repo_memory_profile=_repo_memory_profile(),
+    )
+
+    evidence = payload["repo_memory_evidence"]["failure_vector_contract_evidence"]
+    assert evidence["collection_status"] == "collected"
+    assert evidence["status"] == "failure_vector_contract_evidence_observed"
+    assert evidence["record_count"] == 1
+    assert evidence["security_relevance_count"] == 0
+    assert evidence["authority_boundary_preserved_count"] == 1
+    assert evidence["failure_kinds"] == [{"value": "formatter_only", "count": 1}]
+    assert evidence["affected_surfaces"] == [{"value": "source", "count": 1}]
+    assert evidence["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    assert payload["decision"]["status"] == REVIEW_REQUIRED
+    assert payload["decision"]["patch_application_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+    assert payload["risk_flags"] == []
+
+    markdown = render_markdown(payload)
+    assert "## RepoMemory FailureVector contract evidence" in markdown
+    assert "Authority boundary preserved records: `1`" in markdown
+    assert (
+        "Security dismissal allowed by RepoMemory FailureVector contract evidence: `false`"
+        in markdown
+    )
+    assert (
+        "Semantic equivalence claimed by RepoMemory FailureVector contract evidence: `false`"
+        in markdown
+    )
+
+
+def test_protected_verifier_blocks_authority_expanding_repo_memory_contract_evidence() -> None:
+    profile = _repo_memory_profile()
+    profile["failure_vector_contract_evidence"]["decision_boundary"]["merge_authorized"] = True
+
+    payload = verify_patch(
+        patch_score=_candidate_patch_score(),
+        repo_memory_profile=profile,
+    )
+
+    assert payload["decision"]["status"] == BLOCKED_REVIEW_FIRST
+    assert payload["decision"]["patch_application_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+    assert any(
+        flag["code"] == "FAILURE_VECTOR_CONTRACT_EVIDENCE_AUTHORITY_VIOLATION"
+        and flag["blocking"] is True
+        and flag["fields"] == ["merge_authorized"]
+        for flag in payload["risk_flags"]
+    )
