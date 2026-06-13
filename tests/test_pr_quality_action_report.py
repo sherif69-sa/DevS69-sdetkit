@@ -2683,6 +2683,20 @@ def test_action_report_renders_operator_safetygate_summary_without_authority() -
                 "merge_authorized": False,
                 "semantic_equivalence_proven": False,
             },
+            "repo_memory_evidence": {
+                "failure_vector_contract_evidence": {
+                    "record_count": 1,
+                    "security_relevance_count": 0,
+                    "authority_boundary_preserved_count": 1,
+                    "decision_boundary": {
+                        "automation_allowed": False,
+                        "patch_application_allowed": False,
+                        "security_dismissal_allowed": False,
+                        "merge_authorized": False,
+                        "semantic_equivalence_claim": False,
+                    },
+                }
+            },
             "safety_gate_evidence": {
                 "record_count": 1,
                 "decision_boundary": {
@@ -2748,6 +2762,13 @@ def test_action_report_renders_operator_safetygate_summary_without_authority() -
     assert "- PatchScorer status: `candidate_for_protected_verification`" in body
     assert "- PatchScorer score: `100`" in body
     assert "- ProtectedVerifier status: `structurally_verified_candidate`" in body
+    assert "- ProtectedVerifier RepoMemory FailureVector contract records: `1`" in body
+    assert "- ProtectedVerifier RepoMemory contract security-relevant records: `0`" in body
+    assert "- ProtectedVerifier RepoMemory contract authority preserved records: `1`" in body
+    assert "- ProtectedVerifier RepoMemory contract patch application allowed: `false`" in body
+    assert "- ProtectedVerifier RepoMemory contract security dismissal allowed: `false`" in body
+    assert "- ProtectedVerifier RepoMemory contract merge authorized: `false`" in body
+    assert "- ProtectedVerifier RepoMemory contract semantic equivalence claim: `false`" in body
     assert (
         "- Operator next action: `Human review may use this evidence, but no automation or merge authority is granted.`"
         in body
@@ -4940,3 +4961,52 @@ def test_artifact_center_renders_expected_inventory_verification() -> None:
     assert "Merge authorization" in html
     assert "Semantic equivalence claim" in html
     assert "does not authorize merge" in html
+
+
+def test_action_report_operator_summary_surfaces_protected_verifier_contract_authority_expansion() -> (
+    None
+):
+    action = {
+        "status": "review_first",
+        "primary_blocker": {},
+        "automation": {"allowed": False, "reason": "reporting only"},
+        "recommended_actions": ["Keep review-first."],
+        "proof_commands": [],
+        "protected_verifier_result": {
+            "decision": {
+                "status": "blocked_review_first",
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+            "repo_memory_evidence": {
+                "failure_vector_contract_evidence": {
+                    "record_count": 1,
+                    "security_relevance_count": 0,
+                    "authority_boundary_preserved_count": 0,
+                    "decision_boundary": {
+                        "automation_allowed": False,
+                        "patch_application_allowed": True,
+                        "security_dismissal_allowed": False,
+                        "merge_authorized": False,
+                        "semantic_equivalence_claim": False,
+                    },
+                }
+            },
+        },
+    }
+
+    body = report.render_comment_body(
+        action_report=action,
+        check_intelligence={"checks_seen": 1, "failed_checks": []},
+    )
+
+    assert "<summary><strong>Operator SafetyGate summary</strong></summary>" in body
+    assert (
+        "- Operator next action: `Review-first: ProtectedVerifier RepoMemory contract evidence attempted to expand authority.`"
+        in body
+    )
+    assert "- ProtectedVerifier RepoMemory FailureVector contract records: `1`" in body
+    assert "- ProtectedVerifier RepoMemory contract patch application allowed: `true`" in body
+    assert "- Operator summary patch application allowed: `true`" in body
+    assert "- Operator summary merge authorized: `false`" in body

@@ -1448,6 +1448,11 @@ def _operator_safetygate_summary_lines(
     verifier_decision = _as_dict(protected_verifier.get("decision"))
     verifier_safety = _as_dict(protected_verifier.get("safety_gate_evidence"))
     verifier_boundary = _as_dict(verifier_safety.get("decision_boundary"))
+    verifier_repo_memory = _as_dict(protected_verifier.get("repo_memory_evidence"))
+    verifier_contract = _as_dict(
+        verifier_repo_memory.get("_".join(("failure", "vector", "contract", "evidence")))
+    )
+    verifier_contract_boundary = _as_dict(verifier_contract.get("decision_boundary"))
 
     benchmark = _as_dict(action_report.get("benchmark_report"))
     benchmark_safety = _as_dict(benchmark.get("safety_gate_evidence"))
@@ -1465,11 +1470,28 @@ def _operator_safetygate_summary_lines(
         if _as_dict(row.get("safety_gate"))
     ]
 
+    verifier_contract_automation_allowed = _operator_bool(
+        verifier_contract_boundary.get("automation_allowed")
+    )
+    verifier_contract_patch_application_allowed = _operator_bool(
+        verifier_contract_boundary.get("patch_application_allowed")
+    )
+    verifier_contract_security_dismissal_allowed = _operator_bool(
+        verifier_contract_boundary.get("security_dismissal_allowed")
+    )
+    verifier_contract_merge_authorized = _operator_bool(
+        verifier_contract_boundary.get("merge_authorized")
+    )
+    verifier_contract_semantic_equivalence_claim = _operator_bool(
+        verifier_contract_boundary.get("semantic_equivalence_claim")
+    )
+
     observed = any(
         [
             failure_safety,
             patch_score,
             protected_verifier,
+            verifier_contract,
             benchmark_safety,
             memory_safety,
             trajectory_safety_records,
@@ -1485,6 +1507,7 @@ def _operator_safetygate_summary_lines(
             _operator_bool(patch_boundary.get("automation_allowed")),
             _operator_bool(verifier_decision.get("automation_allowed")),
             _operator_bool(verifier_boundary.get("automation_allowed")),
+            verifier_contract_automation_allowed,
             _operator_bool(benchmark_boundary.get("automation_allowed")),
             _operator_bool(memory_boundary.get("automation_allowed")),
             _operator_bool(runtime_boundary.get("automation_allowed")),
@@ -1496,6 +1519,7 @@ def _operator_safetygate_summary_lines(
             _operator_bool(failure_safety.get("patch_application_allowed")),
             _operator_bool(patch_boundary.get("patch_application_allowed")),
             _operator_bool(verifier_boundary.get("patch_application_allowed")),
+            verifier_contract_patch_application_allowed,
             _operator_bool(benchmark_boundary.get("patch_application_allowed")),
             _operator_bool(memory_boundary.get("patch_application_allowed")),
             any(
@@ -1511,6 +1535,7 @@ def _operator_safetygate_summary_lines(
             _operator_bool(patch_boundary.get("merge_authorized")),
             _operator_bool(verifier_decision.get("merge_authorized")),
             _operator_bool(verifier_boundary.get("merge_authorized")),
+            verifier_contract_merge_authorized,
             _operator_bool(benchmark_boundary.get("merge_authorized")),
             _operator_bool(memory_boundary.get("merge_authorized")),
             _operator_bool(runtime_boundary.get("merge_authorized")),
@@ -1572,18 +1597,41 @@ def _operator_safetygate_summary_lines(
         ],
     )
 
-    next_action = (
-        "Review-first: a SafetyGate boundary attempted to expand authority."
-        if any(
-            [
-                automation_allowed,
-                patch_application_allowed,
-                merge_authorized,
-                semantic_equivalence_proven,
-            ]
-        )
-        else "Human review may use this evidence, but no automation or merge authority is granted."
+    safetygate_authority_expanded = any(
+        [
+            failure_safety,
+            patch_score,
+            protected_verifier,
+            benchmark_safety,
+            memory_safety,
+            trajectory_safety_records,
+        ]
+    ) and any(
+        [
+            automation_allowed and not verifier_contract_automation_allowed,
+            patch_application_allowed and not verifier_contract_patch_application_allowed,
+            merge_authorized and not verifier_contract_merge_authorized,
+            semantic_equivalence_proven,
+        ]
     )
+    contract_authority_expanded = any(
+        [
+            verifier_contract_automation_allowed,
+            verifier_contract_patch_application_allowed,
+            verifier_contract_security_dismissal_allowed,
+            verifier_contract_merge_authorized,
+            verifier_contract_semantic_equivalence_claim,
+        ]
+    )
+
+    if contract_authority_expanded:
+        next_action = "Review-first: ProtectedVerifier RepoMemory contract evidence attempted to expand authority."
+    elif safetygate_authority_expanded:
+        next_action = "Review-first: a SafetyGate boundary attempted to expand authority."
+    else:
+        next_action = (
+            "Human review may use this evidence, but no automation or merge authority is granted."
+        )
 
     return [
         "- Failure bundle review-first: "
@@ -1602,6 +1650,20 @@ def _operator_safetygate_summary_lines(
         f"- PatchScorer score: `{_int(patch_score.get('score'))}`",
         "- ProtectedVerifier status: "
         f"`{_string(verifier_decision.get('status')) or 'not_collected'}`",
+        "- ProtectedVerifier RepoMemory FailureVector contract records: "
+        f"`{_int(verifier_contract.get('record_count'))}`",
+        "- ProtectedVerifier RepoMemory contract security-relevant records: "
+        f"`{_int(verifier_contract.get('security_relevance_count'))}`",
+        "- ProtectedVerifier RepoMemory contract authority preserved records: "
+        f"`{_int(verifier_contract.get('authority_boundary_preserved_count'))}`",
+        "- ProtectedVerifier RepoMemory contract patch application allowed: "
+        f"`{str(verifier_contract_patch_application_allowed).lower()}`",
+        "- ProtectedVerifier RepoMemory contract security dismissal allowed: "
+        f"`{str(verifier_contract_security_dismissal_allowed).lower()}`",
+        "- ProtectedVerifier RepoMemory contract merge authorized: "
+        f"`{str(verifier_contract_merge_authorized).lower()}`",
+        "- ProtectedVerifier RepoMemory contract semantic equivalence claim: "
+        f"`{str(verifier_contract_semantic_equivalence_claim).lower()}`",
         f"- Operator next action: `{next_action}`",
         f"- Operator summary automation allowed: `{str(automation_allowed).lower()}`",
         f"- Operator summary patch application allowed: `{str(patch_application_allowed).lower()}`",
