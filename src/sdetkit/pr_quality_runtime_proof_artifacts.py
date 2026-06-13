@@ -22,6 +22,47 @@ REPLAY_MANIFEST_MERGE_AUTHORIZED = "_".join(("replay", "manifest", "merge", "aut
 REPLAY_MANIFEST_SEMANTIC_EQUIVALENCE_PROVEN = "_".join(
     ("replay", "manifest", "semantic", "equivalence", "proven")
 )
+BENCHMARK_RUNTIME_PROOF_CONTRACT_EVIDENCE = "_".join(
+    ("runtime", "proof", "protected", "verifier", "contract", "evidence")
+)
+BENCHMARK_RUNTIME_PROOF_CONTRACT_REPLAYED = "_".join(
+    (
+        "runtime",
+        "proof",
+        "protected",
+        "verifier",
+        "contract",
+        "evidence",
+        "replayed",
+    )
+)
+BENCHMARK_RUNTIME_CONTRACT_COLLECTION_STATUS = "_".join(
+    ("runtime", "contract", "collection", "status")
+)
+BENCHMARK_RUNTIME_CONTRACT_STATUS = "_".join(("runtime", "contract", "status"))
+BENCHMARK_RUNTIME_CONTRACT_SCENARIO_COUNT = "_".join(("runtime", "contract", "scenario", "count"))
+BENCHMARK_RUNTIME_CONTRACT_RECORD_COUNT = "_".join(("runtime", "contract", "record", "count"))
+BENCHMARK_RUNTIME_CONTRACT_SECURITY_RELEVANCE_COUNT = "_".join(
+    ("runtime", "contract", "security", "relevance", "count")
+)
+BENCHMARK_RUNTIME_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT = "_".join(
+    ("runtime", "contract", "authority", "boundary", "preserved", "count")
+)
+BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS = "_".join(
+    ("runtime", "contract", "expanded", "authority", "fields")
+)
+BENCHMARK_RUNTIME_CONTRACT_PATCH_APPLICATION_ALLOWED = "_".join(
+    ("runtime", "contract", "patch", "application", "allowed")
+)
+BENCHMARK_RUNTIME_CONTRACT_SECURITY_DISMISSAL_ALLOWED = "_".join(
+    ("runtime", "contract", "security", "dismissal", "allowed")
+)
+BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED = "_".join(
+    ("runtime", "contract", "merge", "authorized")
+)
+BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM = "_".join(
+    ("runtime", "contract", "semantic", "equivalence", "claim")
+)
 TRUSTED_HISTORY = "_".join(("trusted", "history"))
 TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY = "_".join(
     ("trusted", "diagnostic", "signal", "snapshot", "history")
@@ -110,6 +151,10 @@ def _isolated_proof_summary(evidence: Mapping[str, Any]) -> JsonObject:
     }
 
 
+def _string_list(value: object) -> list[str]:
+    return [_string(item) for item in _as_list(value) if _string(item)]
+
+
 def _live_benchmark_summary(report: Mapping[str, Any]) -> JsonObject:
     payload = _as_dict(report)
     if not payload:
@@ -121,6 +166,8 @@ def _live_benchmark_summary(report: Mapping[str, Any]) -> JsonObject:
     live = _as_dict(payload.get("live_evidence"))
     boundary = _as_dict(payload.get("safety_boundary"))
     replay = _as_dict(payload.get(REPLAY_MANIFEST))
+    runtime_contract = _as_dict(payload.get(BENCHMARK_RUNTIME_PROOF_CONTRACT_EVIDENCE))
+    runtime_contract_boundary = _as_dict(runtime_contract.get("decision_boundary"))
     return {
         "collection_status": COLLECTED,
         "status": _string(payload.get("status") or "unknown"),
@@ -139,6 +186,34 @@ def _live_benchmark_summary(report: Mapping[str, Any]) -> JsonObject:
             boundary.get("semantic_equivalence_claimed_count")
         ),
         "boundary_preserved": _bool(boundary.get("preserved")),
+        BENCHMARK_RUNTIME_CONTRACT_COLLECTION_STATUS: _string(
+            runtime_contract.get("collection_status")
+        )
+        or NOT_COLLECTED,
+        BENCHMARK_RUNTIME_CONTRACT_STATUS: _string(runtime_contract.get("status")) or NOT_COLLECTED,
+        BENCHMARK_RUNTIME_CONTRACT_SCENARIO_COUNT: _int(runtime_contract.get("scenario_count")),
+        BENCHMARK_RUNTIME_CONTRACT_RECORD_COUNT: _int(runtime_contract.get("record_count")),
+        BENCHMARK_RUNTIME_CONTRACT_SECURITY_RELEVANCE_COUNT: _int(
+            runtime_contract.get("security_relevance_count")
+        ),
+        BENCHMARK_RUNTIME_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT: _int(
+            runtime_contract.get("authority_boundary_preserved_count")
+        ),
+        BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS: _string_list(
+            runtime_contract.get("expanded_authority_fields")
+        ),
+        BENCHMARK_RUNTIME_CONTRACT_PATCH_APPLICATION_ALLOWED: _bool(
+            runtime_contract_boundary.get("patch_application_allowed")
+        ),
+        BENCHMARK_RUNTIME_CONTRACT_SECURITY_DISMISSAL_ALLOWED: _bool(
+            runtime_contract_boundary.get("security_dismissal_allowed")
+        ),
+        BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED: _bool(
+            runtime_contract_boundary.get("merge_authorized")
+        ),
+        BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM: _bool(
+            runtime_contract_boundary.get("semantic_equivalence_claim")
+        ),
         REPLAY_MANIFEST_PRESENT: bool(replay),
         REPLAY_MANIFEST_SCENARIO_COUNT: _int(replay.get("scenario_count")),
         REPLAY_MANIFEST_REPORTING_ONLY: _bool(replay.get("reporting_only")),
@@ -499,6 +574,44 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
                 (
                     "- Boundary preserved: "
                     f"`{str(_bool(benchmark.get('boundary_preserved'))).lower()}`"
+                ),
+                f"- Runtime proof contract collection: `{_string(benchmark.get(BENCHMARK_RUNTIME_CONTRACT_COLLECTION_STATUS))}`",
+                f"- Runtime proof contract status: `{_string(benchmark.get(BENCHMARK_RUNTIME_CONTRACT_STATUS))}`",
+                (
+                    "- Runtime proof contract scenarios: "
+                    f"`{_int(benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SCENARIO_COUNT))}`"
+                ),
+                (
+                    "- Runtime proof contract records: "
+                    f"`{_int(benchmark.get(BENCHMARK_RUNTIME_CONTRACT_RECORD_COUNT))}`"
+                ),
+                (
+                    "- Runtime proof contract security-relevant records: "
+                    f"`{_int(benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SECURITY_RELEVANCE_COUNT))}`"
+                ),
+                (
+                    "- Runtime proof contract authority-preserved records: "
+                    f"`{_int(benchmark.get(BENCHMARK_RUNTIME_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT))}`"
+                ),
+                (
+                    "- Runtime proof contract expanded authority fields: "
+                    f"`{', '.join(_string_list(benchmark.get(BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS))) or 'none'}`"
+                ),
+                (
+                    "- Runtime proof contract patch application allowed: "
+                    f"`{str(_bool(benchmark.get(BENCHMARK_RUNTIME_CONTRACT_PATCH_APPLICATION_ALLOWED))).lower()}`"
+                ),
+                (
+                    "- Runtime proof contract security dismissal allowed: "
+                    f"`{str(_bool(benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SECURITY_DISMISSAL_ALLOWED))).lower()}`"
+                ),
+                (
+                    "- Runtime proof contract merge authorized: "
+                    f"`{str(_bool(benchmark.get(BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED))).lower()}`"
+                ),
+                (
+                    "- Runtime proof contract semantic equivalence claim: "
+                    f"`{str(_bool(benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM))).lower()}`"
                 ),
                 (
                     "- Replay manifest present: "
