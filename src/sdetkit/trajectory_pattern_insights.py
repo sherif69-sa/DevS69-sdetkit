@@ -199,6 +199,56 @@ def _safety_gate_evidence(rows: list[JsonObject]) -> JsonObject:
     }
 
 
+def _failure_vector_contract_evidence(rows: list[JsonObject]) -> JsonObject:
+    contract_rows = [
+        _as_dict(row.get("failure_vector_contract"))
+        for row in rows
+        if _as_dict(row.get("failure_vector_contract"))
+    ]
+    denied_keys = (
+        "automation_allowed",
+        "patch_application_allowed",
+        "security_dismissal_allowed",
+        "merge_authorized",
+        "semantic_equivalence_claim",
+    )
+    denied = {key: False for key in denied_keys}
+    if not contract_rows:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "trajectory.failure_vector_contract",
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "failure_kinds": [],
+            "affected_surfaces": [],
+            "decision_boundary": denied,
+        }
+
+    return {
+        "collection_status": "collected",
+        "status": "failure_vector_contract_evidence_observed",
+        "source": "trajectory.failure_vector_contract",
+        "record_count": len(contract_rows),
+        "security_relevance_count": sum(
+            1 for row in contract_rows if _bool(row.get("security_relevance"))
+        ),
+        "authority_boundary_preserved_count": sum(
+            1 for row in contract_rows if _bool(row.get("authority_boundary_preserved"))
+        ),
+        "failure_kinds": _counter_rows(
+            Counter(_string(row.get("failure_kind")) for row in contract_rows)
+        ),
+        "affected_surfaces": _counter_rows(
+            Counter(_string(row.get("affected_surface")) for row in contract_rows)
+        ),
+        "decision_boundary": {
+            key: any(_bool(row.get(key)) for row in contract_rows) for key in denied_keys
+        },
+    }
+
+
 def _operator_focus(
     *,
     record_count: int,
@@ -301,6 +351,7 @@ def build_pattern_insights(
         "recurring_safe_fix_patterns": recurring_safe_fixes,
         "safety_gate_evidence": _safety_gate_evidence(rows),
         "authority_boundary_evidence": _authority_boundary_evidence(rows),
+        "failure_vector_contract_evidence": _failure_vector_contract_evidence(rows),
         "operator_focus": _operator_focus(
             record_count=len(rows),
             recurring_review_surfaces=recurring_review_surfaces,
@@ -318,6 +369,8 @@ def render_pattern_markdown(insights: Mapping[str, Any]) -> str:
     boundary = _as_dict(safety_gate.get("decision_boundary"))
     authority = _as_dict(insights.get("authority_boundary_evidence"))
     authority_boundary = _as_dict(authority.get("decision_boundary"))
+    vector_contract = _as_dict(insights.get("failure_vector_contract_evidence"))
+    vector_boundary = _as_dict(vector_contract.get("decision_boundary"))
 
     lines = [
         "# Trajectory pattern insights",
@@ -390,6 +443,32 @@ def render_pattern_markdown(insights: Mapping[str, Any]) -> str:
 
     lines.extend(
         [
+            "",
+            "## FailureVector contract evidence",
+            "",
+            f"- Collection status: `{_string(vector_contract.get('collection_status'))}`",
+            f"- Status: `{_string(vector_contract.get('status'))}`",
+            f"- Records: `{int(vector_contract.get('record_count', 0) or 0)}`",
+            (
+                "- Authority boundary preserved records: "
+                f"`{int(vector_contract.get('authority_boundary_preserved_count', 0) or 0)}`"
+            ),
+            (
+                "- Security-relevant records: "
+                f"`{int(vector_contract.get('security_relevance_count', 0) or 0)}`"
+            ),
+            (
+                "- Patch application allowed by FailureVector contract evidence: "
+                f"`{str(_bool(vector_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by FailureVector contract evidence: "
+                f"`{str(_bool(vector_boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by FailureVector contract evidence: "
+                f"`{str(_bool(vector_boundary.get('merge_authorized'))).lower()}`"
+            ),
             "",
             "## Trajectory authority boundary evidence",
             "",
