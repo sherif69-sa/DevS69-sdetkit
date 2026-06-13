@@ -168,3 +168,7 @@ Historical and transition-era references remain intentionally secondary to first
 - Python 3.10+
 - Prefer isolated environments
 - `NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q`
+
+## Architecture checkpoints
+
+- [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md): documents the completed FailureVectorEngine → SafetyGate → TrajectoryStore → RepoMemory → ProtectedVerifier → PR Quality → Runtime Proof → benchmark replay circuit and the reporting-only stop condition.
