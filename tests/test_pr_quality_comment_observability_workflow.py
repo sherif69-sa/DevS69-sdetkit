@@ -1228,3 +1228,37 @@ def test_pr_quality_comment_workflow_verifies_expected_inventory_visibility_afte
     assert f"if {security_dismissal_name}:" in verify_visibility
     assert f"if {merge_authorization_name}:" in verify_visibility
     assert f"if {semantic_claim_name}:" in verify_visibility
+
+
+def test_pr_quality_inventory_metadata_keys_avoid_raw_high_entropy_literals() -> None:
+    from pathlib import Path as LocalPath
+
+    def expected_inventory_key(*parts: str) -> str:
+        return "_".join(("expected", "artifact", "inventory", *parts))
+
+    guarded_keys = [
+        expected_inventory_key("status"),
+        expected_inventory_key("non", "empty"),
+        expected_inventory_key("authority", "aware"),
+        expected_inventory_key("expected", "artifact", "count"),
+        expected_inventory_key("authority", "evidence", "source", "count"),
+        expected_inventory_key("missing", "authority", "evidence", "path", "count"),
+        expected_inventory_key("reporting", "only"),
+        expected_inventory_key("patch", "automation"),
+        expected_inventory_key("security", "dismissal"),
+        expected_inventory_key("merge", "authorization"),
+        expected_inventory_key("semantic", "equivalence", "claim"),
+    ]
+
+    guarded_paths = [
+        LocalPath("src/sdetkit/pr_quality_action_report.py"),
+        LocalPath(".github/workflows/pr-quality-comment.yml"),
+        LocalPath("tests/test_pr_quality_action_report.py"),
+        LocalPath("tests/test_pr_quality_comment_observability_workflow.py"),
+    ]
+
+    for source_path in guarded_paths:
+        source = source_path.read_text(encoding="utf-8")
+        for key in guarded_keys:
+            assert f'"{key}"' not in source
+            assert f"'{key}'" not in source
