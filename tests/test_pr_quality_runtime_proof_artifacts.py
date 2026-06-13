@@ -5,6 +5,19 @@ from pathlib import Path
 
 from sdetkit.pr_quality_runtime_proof_artifacts import (
     BASE_ANCESTRY_VERIFIED,
+    BENCHMARK_RUNTIME_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT,
+    BENCHMARK_RUNTIME_CONTRACT_COLLECTION_STATUS,
+    BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS,
+    BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED,
+    BENCHMARK_RUNTIME_CONTRACT_PATCH_APPLICATION_ALLOWED,
+    BENCHMARK_RUNTIME_CONTRACT_RECORD_COUNT,
+    BENCHMARK_RUNTIME_CONTRACT_SCENARIO_COUNT,
+    BENCHMARK_RUNTIME_CONTRACT_SECURITY_DISMISSAL_ALLOWED,
+    BENCHMARK_RUNTIME_CONTRACT_SECURITY_RELEVANCE_COUNT,
+    BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM,
+    BENCHMARK_RUNTIME_CONTRACT_STATUS,
+    BENCHMARK_RUNTIME_PROOF_CONTRACT_EVIDENCE,
+    BENCHMARK_RUNTIME_PROOF_CONTRACT_REPLAYED,
     COLLECTED,
     CONTROLLED_REVIEW_FIRST_COUNT,
     CONTROLLED_STRUCTURALLY_VERIFIED_COUNT,
@@ -628,3 +641,118 @@ def test_runtime_proof_summary_surfaces_protected_verifier_contract_authority_ex
     assert "Contract patch application allowed: `true`" in markdown
     assert "Contract merge authorized: `false`" in markdown
     assert "Contract semantic equivalence claim: `false`" in markdown
+
+
+def test_runtime_proof_summary_consumes_benchmark_runtime_contract_replay_evidence() -> None:
+    summary = build_runtime_proof_artifacts(
+        live_benchmark_report={
+            "status": "passed",
+            "report_mode": "git_grounded_isolated_proof",
+            "scenario_count": 3,
+            "passed_count": 3,
+            "failed_count": 0,
+            "live_evidence": {
+                "git_inventory_verified_count": 3,
+                "expected_failed_evidence_count": 0,
+                "network_boundary_blocked_count": 0,
+                "anti_cheat_rejection_count": 0,
+                "network_isolation_enforced_count": 0,
+            },
+            "safety_boundary": {
+                "automation_allowed_count": 0,
+                "merge_authorized_count": 0,
+                "semantic_equivalence_claimed_count": 0,
+                "preserved": True,
+            },
+            BENCHMARK_RUNTIME_PROOF_CONTRACT_EVIDENCE: {
+                "collection_status": "collected",
+                "status": BENCHMARK_RUNTIME_PROOF_CONTRACT_REPLAYED,
+                "scenario_count": 1,
+                "record_count": 1,
+                "security_relevance_count": 0,
+                "authority_boundary_preserved_count": 1,
+                "expanded_authority_fields": [],
+                "decision_boundary": {
+                    "automation_allowed": False,
+                    "patch_application_allowed": False,
+                    "security_dismissal_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_claim": False,
+                },
+            },
+            REPLAY_MANIFEST: {
+                "scenario_count": 3,
+                "reporting_only": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        },
+    )
+
+    benchmark = summary["live_benchmark"]
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_COLLECTION_STATUS] == "collected"
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_STATUS] == BENCHMARK_RUNTIME_PROOF_CONTRACT_REPLAYED
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_SCENARIO_COUNT] == 1
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_RECORD_COUNT] == 1
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_SECURITY_RELEVANCE_COUNT] == 0
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT] == 1
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS] == []
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_PATCH_APPLICATION_ALLOWED] is False
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_SECURITY_DISMISSAL_ALLOWED] is False
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED] is False
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM] is False
+
+    markdown = render_markdown(summary)
+    assert "Runtime proof contract collection: `collected`" in markdown
+    assert (
+        f"Runtime proof contract status: `{BENCHMARK_RUNTIME_PROOF_CONTRACT_REPLAYED}`" in markdown
+    )
+    assert "Runtime proof contract records: `1`" in markdown
+    assert "Runtime proof contract authority-preserved records: `1`" in markdown
+    assert "Runtime proof contract expanded authority fields: `none`" in markdown
+    assert "Runtime proof contract merge authorized: `false`" in markdown
+    assert "Runtime proof contract semantic equivalence claim: `false`" in markdown
+
+
+def test_runtime_proof_summary_surfaces_benchmark_runtime_contract_authority_expansion() -> None:
+    summary = build_runtime_proof_artifacts(
+        live_benchmark_report={
+            "status": "failed",
+            "report_mode": "git_grounded_isolated_proof",
+            "scenario_count": 3,
+            "passed_count": 2,
+            "failed_count": 1,
+            "safety_boundary": {
+                "automation_allowed_count": 0,
+                "merge_authorized_count": 0,
+                "semantic_equivalence_claimed_count": 0,
+                "preserved": False,
+            },
+            BENCHMARK_RUNTIME_PROOF_CONTRACT_EVIDENCE: {
+                "collection_status": "collected",
+                "status": BENCHMARK_RUNTIME_PROOF_CONTRACT_REPLAYED,
+                "scenario_count": 1,
+                "record_count": 1,
+                "security_relevance_count": 0,
+                "authority_boundary_preserved_count": 0,
+                "expanded_authority_fields": ["merge_authorized"],
+                "decision_boundary": {
+                    "automation_allowed": False,
+                    "patch_application_allowed": False,
+                    "security_dismissal_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_claim": False,
+                },
+            },
+        },
+    )
+
+    benchmark = summary["live_benchmark"]
+    assert benchmark["boundary_preserved"] is False
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS] == ["merge_authorized"]
+    assert benchmark[BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED] is False
+
+    markdown = render_markdown(summary)
+    assert "Runtime proof contract expanded authority fields: `merge_authorized`" in markdown
+    assert "Boundary preserved: `false`" in markdown
