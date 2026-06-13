@@ -70,6 +70,46 @@ FAILURE_VECTOR_CONTRACT_EVIDENCE_AUTHORITY_VIOLATION = "_".join(
 RUNTIME_PROOF_PROTECTED_VERIFIER_CONTRACT_AUTHORITY_VIOLATION = "_".join(
     ("RUNTIME", "PROOF", "PROTECTED", "VERIFIER", "CONTRACT", "AUTHORITY", "VIOLATION")
 )
+RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_AUTHORITY_VIOLATION = "_".join(
+    ("RUNTIME", "PROOF", "BENCHMARK", "CONTRACT", "REPLAY", "AUTHORITY", "VIOLATION")
+)
+RUNTIME_PROOF_LIVE_BENCHMARK = "_".join(("live", "benchmark"))
+RUNTIME_PROOF_BENCHMARK_CONTRACT_EVIDENCE = "_".join(
+    ("runtime", "proof", "protected", "verifier", "contract", "evidence")
+)
+RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_SOURCE = ".".join(
+    ("runtime_proof", RUNTIME_PROOF_LIVE_BENCHMARK, RUNTIME_PROOF_BENCHMARK_CONTRACT_EVIDENCE)
+)
+BENCHMARK_RUNTIME_CONTRACT_COLLECTION_STATUS = "_".join(
+    ("runtime", "contract", "collection", "status")
+)
+BENCHMARK_RUNTIME_CONTRACT_STATUS = "_".join(("runtime", "contract", "status"))
+BENCHMARK_RUNTIME_CONTRACT_SCENARIO_COUNT = "_".join(("runtime", "contract", "scenario", "count"))
+BENCHMARK_RUNTIME_CONTRACT_RECORD_COUNT = "_".join(("runtime", "contract", "record", "count"))
+BENCHMARK_RUNTIME_CONTRACT_SECURITY_RELEVANCE_COUNT = "_".join(
+    ("runtime", "contract", "security", "relevance", "count")
+)
+BENCHMARK_RUNTIME_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT = "_".join(
+    ("runtime", "contract", "authority", "boundary", "preserved", "count")
+)
+BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS = "_".join(
+    ("runtime", "contract", "expanded", "authority", "fields")
+)
+BENCHMARK_RUNTIME_CONTRACT_PATCH_APPLICATION_ALLOWED = "_".join(
+    ("runtime", "contract", "patch", "application", "allowed")
+)
+BENCHMARK_RUNTIME_CONTRACT_SECURITY_DISMISSAL_ALLOWED = "_".join(
+    ("runtime", "contract", "security", "dismissal", "allowed")
+)
+BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED = "_".join(
+    ("runtime", "contract", "merge", "authorized")
+)
+BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM = "_".join(
+    ("runtime", "contract", "semantic", "equivalence", "claim")
+)
+RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_OBSERVED = "_".join(
+    ("runtime", "proof", "benchmark", "contract", "replay", "observed")
+)
 STRUCTURALLY_VERIFIED_CANDIDATE = "_".join(("structurally", "verified", "candidate"))
 
 
@@ -237,6 +277,70 @@ def _runtime_proof_protected_verifier_contract_evidence(
     }
 
 
+def _runtime_proof_benchmark_contract_replay_evidence(
+    runtime_proof: Mapping[str, Any],
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    live_benchmark = _as_dict(runtime_proof.get(RUNTIME_PROOF_LIVE_BENCHMARK))
+    collection_status = _string(live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_COLLECTION_STATUS))
+
+    if not live_benchmark or collection_status == "not_collected":
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+            "scenario_count": 0,
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = {
+        "automation_allowed": False,
+        "patch_application_allowed": _bool(
+            live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_PATCH_APPLICATION_ALLOWED)
+        ),
+        "security_dismissal_allowed": _bool(
+            live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SECURITY_DISMISSAL_ALLOWED)
+        ),
+        "merge_authorized": _bool(live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED)),
+        "semantic_equivalence_claim": _bool(
+            live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM)
+        ),
+    }
+    expanded = _string_list(
+        live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS)
+    )
+    for key in denied:
+        if _bool(boundary.get(key)) and key not in expanded:
+            expanded.append(key)
+
+    return {
+        "collection_status": collection_status or "collected",
+        "status": _string(live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_STATUS))
+        or RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_OBSERVED,
+        "source": RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+        "scenario_count": _int(live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SCENARIO_COUNT)),
+        "record_count": _int(live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_RECORD_COUNT)),
+        "security_relevance_count": _int(
+            live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SECURITY_RELEVANCE_COUNT)
+        ),
+        "authority_boundary_preserved_count": _int(
+            live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT)
+        ),
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
 def _repo_memory_failure_vector_contract_evidence(
     repo_memory_profile: Mapping[str, Any],
 ) -> JsonObject:
@@ -313,6 +417,7 @@ def verify_patch(
     runtime = _as_dict(runtime_proof)
     repo_memory = _as_dict(repo_memory_profile)
     runtime_proof_contract_evidence = _runtime_proof_protected_verifier_contract_evidence(runtime)
+    benchmark_contract_replay_evidence = _runtime_proof_benchmark_contract_replay_evidence(runtime)
     failure_vector_contract_evidence = _repo_memory_failure_vector_contract_evidence(repo_memory)
     patch_decision = _as_dict(patch_score.get("decision"))
 
@@ -343,6 +448,20 @@ def verify_patch(
                 "blocking": True,
                 "source": "runtime_proof.protected_verifier.failure_vector_contract_evidence",
                 "fields": expanded_runtime_contract_fields,
+            }
+        )
+
+    expanded_benchmark_contract_fields = _string_list(
+        benchmark_contract_replay_evidence.get("expanded_authority_fields")
+    )
+    if expanded_benchmark_contract_fields:
+        flags.append(
+            {
+                "code": RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_AUTHORITY_VIOLATION,
+                "message": "Runtime proof benchmark contract replay evidence attempted to expand verifier authority.",
+                "blocking": True,
+                "source": RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+                "fields": expanded_benchmark_contract_fields,
             }
         )
 
@@ -425,6 +544,7 @@ def verify_patch(
         },
         "runtime_proof_evidence": {
             "protected_verifier_contract_evidence": runtime_proof_contract_evidence,
+            "benchmark_contract_replay_evidence": benchmark_contract_replay_evidence,
         },
         "repo_memory_evidence": {
             "failure_vector_contract_evidence": failure_vector_contract_evidence,
@@ -715,6 +835,8 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
     runtime_proof = _as_dict(payload.get("runtime_proof_evidence"))
     runtime_contract = _as_dict(runtime_proof.get("protected_verifier_contract_evidence"))
     runtime_boundary = _as_dict(runtime_contract.get("decision_boundary"))
+    benchmark_contract = _as_dict(runtime_proof.get("benchmark_contract_replay_evidence"))
+    benchmark_boundary = _as_dict(benchmark_contract.get("decision_boundary"))
     repo_memory = _as_dict(payload.get("repo_memory_evidence"))
     vector_contract = _as_dict(repo_memory.get("failure_vector_contract_evidence"))
     vector_boundary = _as_dict(vector_contract.get("decision_boundary"))
@@ -786,6 +908,41 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
             (
                 "- Semantic equivalence claimed by runtime proof ProtectedVerifier contract evidence: "
                 f"`{str(_bool(runtime_boundary.get('semantic_equivalence_claim'))).lower()}`"
+            ),
+            "",
+            "## Runtime proof benchmark contract replay evidence",
+            "",
+            f"- Collection status: `{_string(benchmark_contract.get('collection_status'))}`",
+            f"- Status: `{_string(benchmark_contract.get('status'))}`",
+            f"- Scenarios with evidence: `{_int(benchmark_contract.get('scenario_count'))}`",
+            f"- Records: `{_int(benchmark_contract.get('record_count'))}`",
+            (
+                "- Security-relevant records: "
+                f"`{_int(benchmark_contract.get('security_relevance_count'))}`"
+            ),
+            (
+                "- Authority boundary preserved records: "
+                f"`{_int(benchmark_contract.get('authority_boundary_preserved_count'))}`"
+            ),
+            (
+                "- Expanded authority fields: "
+                f"`{', '.join(_string_list(benchmark_contract.get('expanded_authority_fields'))) or 'none'}`"
+            ),
+            (
+                "- Patch application allowed by runtime proof benchmark contract replay evidence: "
+                f"`{str(_bool(benchmark_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by runtime proof benchmark contract replay evidence: "
+                f"`{str(_bool(benchmark_boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by runtime proof benchmark contract replay evidence: "
+                f"`{str(_bool(benchmark_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence claimed by runtime proof benchmark contract replay evidence: "
+                f"`{str(_bool(benchmark_boundary.get('semantic_equivalence_claim'))).lower()}`"
             ),
             "",
             "## RepoMemory FailureVector contract evidence",

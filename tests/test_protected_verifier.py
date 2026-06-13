@@ -382,3 +382,115 @@ def test_protected_verifier_blocks_authority_expanding_runtime_proof_contract_ev
         and flag["fields"] == ["patch_application_allowed", "semantic_equivalence_claim"]
         for flag in payload["risk_flags"]
     )
+
+
+RUNTIME_PROOF_LIVE_BENCHMARK = _key(("live", "benchmark"))
+BENCHMARK_RUNTIME_CONTRACT_COLLECTION_STATUS = _key(("runtime", "contract", "collection", "status"))
+BENCHMARK_RUNTIME_CONTRACT_STATUS = _key(("runtime", "contract", "status"))
+BENCHMARK_RUNTIME_CONTRACT_SCENARIO_COUNT = _key(("runtime", "contract", "scenario", "count"))
+BENCHMARK_RUNTIME_CONTRACT_RECORD_COUNT = _key(("runtime", "contract", "record", "count"))
+BENCHMARK_RUNTIME_CONTRACT_SECURITY_RELEVANCE_COUNT = _key(
+    ("runtime", "contract", "security", "relevance", "count")
+)
+BENCHMARK_RUNTIME_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT = _key(
+    ("runtime", "contract", "authority", "boundary", "preserved", "count")
+)
+BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS = _key(
+    ("runtime", "contract", "expanded", "authority", "fields")
+)
+BENCHMARK_RUNTIME_CONTRACT_PATCH_APPLICATION_ALLOWED = _key(
+    ("runtime", "contract", "patch", "application", "allowed")
+)
+BENCHMARK_RUNTIME_CONTRACT_SECURITY_DISMISSAL_ALLOWED = _key(
+    ("runtime", "contract", "security", "dismissal", "allowed")
+)
+BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED = _key(("runtime", "contract", "merge", "authorized"))
+BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM = _key(
+    ("runtime", "contract", "semantic", "equivalence", "claim")
+)
+
+
+def _runtime_proof_with_benchmark_contract_replay() -> dict:
+    runtime = _runtime_proof_with_protected_verifier_contract()
+    runtime[RUNTIME_PROOF_LIVE_BENCHMARK] = {
+        BENCHMARK_RUNTIME_CONTRACT_COLLECTION_STATUS: "collected",
+        BENCHMARK_RUNTIME_CONTRACT_STATUS: _key(
+            ("runtime", "proof", "protected", "verifier", "contract", "evidence", "replayed")
+        ),
+        BENCHMARK_RUNTIME_CONTRACT_SCENARIO_COUNT: 1,
+        BENCHMARK_RUNTIME_CONTRACT_RECORD_COUNT: 1,
+        BENCHMARK_RUNTIME_CONTRACT_SECURITY_RELEVANCE_COUNT: 0,
+        BENCHMARK_RUNTIME_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT: 1,
+        BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS: [],
+        BENCHMARK_RUNTIME_CONTRACT_PATCH_APPLICATION_ALLOWED: False,
+        BENCHMARK_RUNTIME_CONTRACT_SECURITY_DISMISSAL_ALLOWED: False,
+        BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED: False,
+        BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM: False,
+    }
+    return runtime
+
+
+def test_protected_verifier_consumes_runtime_proof_benchmark_contract_replay_evidence() -> None:
+    payload = verify_patch(
+        patch_score=_candidate_patch_score(),
+        runtime_proof=_runtime_proof_with_benchmark_contract_replay(),
+    )
+
+    evidence = payload["runtime_proof_evidence"]["benchmark_contract_replay_evidence"]
+    assert evidence["collection_status"] == "collected"
+    assert evidence["scenario_count"] == 1
+    assert evidence["record_count"] == 1
+    assert evidence["security_relevance_count"] == 0
+    assert evidence["authority_boundary_preserved_count"] == 1
+    assert evidence["expanded_authority_fields"] == []
+    assert evidence["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    assert payload["decision"]["patch_application_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+
+    markdown = render_markdown(payload)
+    assert "Runtime proof benchmark contract replay evidence" in markdown
+    assert "Scenarios with evidence: `1`" in markdown
+    assert "Expanded authority fields: `none`" in markdown
+    assert (
+        "Merge authorized by runtime proof benchmark contract replay evidence: `false`" in markdown
+    )
+
+
+def test_protected_verifier_blocks_authority_expanding_runtime_proof_benchmark_contract_replay_evidence() -> (
+    None
+):
+    runtime = _runtime_proof_with_benchmark_contract_replay()
+    runtime[RUNTIME_PROOF_LIVE_BENCHMARK][BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS] = [
+        "merge_authorized"
+    ]
+    runtime[RUNTIME_PROOF_LIVE_BENCHMARK][BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED] = True
+
+    payload = verify_patch(
+        patch_score=_candidate_patch_score(),
+        runtime_proof=runtime,
+    )
+
+    evidence = payload["runtime_proof_evidence"]["benchmark_contract_replay_evidence"]
+    assert evidence["expanded_authority_fields"] == ["merge_authorized"]
+    assert evidence["decision_boundary"]["merge_authorized"] is False
+    assert payload["decision"]["patch_application_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+    assert any(
+        flag["source"].startswith("runtime_proof.live_benchmark")
+        and flag["fields"] == ["merge_authorized"]
+        for flag in payload["risk_flags"]
+    )
+
+    markdown = render_markdown(payload)
+    assert "Expanded authority fields: `merge_authorized`" in markdown
+    assert (
+        "Merge authorized by runtime proof benchmark contract replay evidence: `false`" in markdown
+    )
