@@ -37,6 +37,9 @@ CONTROLLED_STRUCTURALLY_VERIFIED_COUNT = "_".join(
     ("controlled", "structurally", "verified", "count")
 )
 CONTROLLED_REVIEW_FIRST_COUNT = "_".join(("controlled", "review", "first", "count"))
+FAILURE_VECTOR_CONTRACT_EVIDENCE = "_".join(("failure", "vector", "contract", "evidence"))
+SECURITY_DISMISSAL_ALLOWED = "_".join(("security", "dismissal", "allowed"))
+SEMANTIC_EQUIVALENCE_CLAIM = "_".join(("semantic", "equivalence", "claim"))
 
 JsonObject = dict[str, Any]
 
@@ -216,6 +219,49 @@ def _repo_memory_summary(profile: Mapping[str, Any]) -> JsonObject:
     }
 
 
+def _protected_verifier_summary(result: Mapping[str, Any]) -> JsonObject:
+    payload = _as_dict(result)
+    if not payload:
+        return {
+            "collection_status": NOT_COLLECTED,
+            "status": NOT_COLLECTED,
+        }
+
+    decision = _as_dict(payload.get("decision"))
+    decision_boundary = _as_dict(payload.get("decision_boundary"))
+    repo_memory = _as_dict(payload.get("repo_memory_evidence"))
+    contract = _as_dict(repo_memory.get(FAILURE_VECTOR_CONTRACT_EVIDENCE))
+    contract_boundary = _as_dict(contract.get("decision_boundary"))
+
+    return {
+        "collection_status": COLLECTED,
+        "status": _string(decision.get("status") or payload.get("status") or "unknown"),
+        "review_first": _bool(decision.get("review_first")),
+        "contract_status": _string(contract.get("status") or NOT_COLLECTED),
+        "contract_record_count": _int(contract.get("record_count")),
+        "contract_security_relevance_count": _int(contract.get("security_relevance_count")),
+        "contract_authority_boundary_preserved_count": _int(
+            contract.get("authority_boundary_preserved_count")
+        ),
+        "contract_patch_application_allowed": _bool(
+            contract_boundary.get("patch_application_allowed")
+        ),
+        "contract_security_dismissal_allowed": _bool(
+            contract_boundary.get(SECURITY_DISMISSAL_ALLOWED)
+        ),
+        "contract_merge_authorized": _bool(contract_boundary.get("merge_authorized")),
+        "contract_semantic_equivalence_claim": _bool(
+            contract_boundary.get(SEMANTIC_EQUIVALENCE_CLAIM)
+        ),
+        "automation_allowed": _bool(decision.get("automation_allowed"))
+        or _bool(decision_boundary.get("automation_allowed")),
+        "merge_authorized": _bool(decision.get("merge_authorized"))
+        or _bool(decision_boundary.get("merge_authorized")),
+        "semantic_equivalence_proven": _bool(decision.get("semantic_equivalence_proven"))
+        or _bool(decision_boundary.get("semantic_equivalence_proven")),
+    }
+
+
 def _trusted_diagnostic_signal_snapshot_history_summary(
     evidence: Mapping[str, Any],
 ) -> JsonObject:
@@ -317,12 +363,14 @@ def build_runtime_proof_artifacts(
     isolated_proof: Mapping[str, Any] | None = None,
     live_benchmark_report: Mapping[str, Any] | None = None,
     repo_memory_profile: Mapping[str, Any] | None = None,
+    protected_verifier_result: Mapping[str, Any] | None = None,
     trusted_history_evidence: Mapping[str, Any] | None = None,
     trusted_diagnostic_signal_snapshot_history: Mapping[str, Any] | None = None,
 ) -> JsonObject:
     isolated = _isolated_proof_summary(isolated_proof or {})
     live_benchmark = _live_benchmark_summary(live_benchmark_report or {})
     repo_memory = _repo_memory_summary(repo_memory_profile or {})
+    protected_verifier = _protected_verifier_summary(protected_verifier_result or {})
     trusted_history = _trusted_history_summary(trusted_history_evidence or {})
     trusted_signal_history = _trusted_diagnostic_signal_snapshot_history_summary(
         trusted_diagnostic_signal_snapshot_history or {}
@@ -334,6 +382,7 @@ def build_runtime_proof_artifacts(
             ("isolated_proof", isolated),
             ("live_benchmark", live_benchmark),
             ("repo_memory", repo_memory),
+            ("protected_verifier", protected_verifier),
             (TRUSTED_HISTORY, trusted_history),
             (TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY, trusted_signal_history),
         )
@@ -347,6 +396,7 @@ def build_runtime_proof_artifacts(
         "isolated_proof": isolated,
         "live_benchmark": live_benchmark,
         "repo_memory": repo_memory,
+        "protected_verifier": protected_verifier,
         TRUSTED_HISTORY: trusted_history,
         TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY: trusted_signal_history,
         "decision_boundary": {
@@ -363,6 +413,7 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
     isolated = _as_dict(summary.get("isolated_proof"))
     benchmark = _as_dict(summary.get("live_benchmark"))
     memory = _as_dict(summary.get("repo_memory"))
+    protected_verifier = _as_dict(summary.get("protected_verifier"))
     trusted_history = _as_dict(summary.get(TRUSTED_HISTORY))
     trusted_signal_history = _as_dict(summary.get(TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY))
     boundary = _as_dict(summary.get("decision_boundary"))
@@ -569,6 +620,42 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
     lines.extend(
         [
             "",
+            "## ProtectedVerifier RepoMemory contract evidence",
+            "",
+            f"- Collection status: `{_string(protected_verifier.get('collection_status'))}`",
+            f"- Status: `{_string(protected_verifier.get('status'))}`",
+        ]
+    )
+    if protected_verifier.get("collection_status") == COLLECTED:
+        lines.extend(
+            [
+                f"- Review first: `{str(_bool(protected_verifier.get('review_first'))).lower()}`",
+                f"- Contract status: `{_string(protected_verifier.get('contract_status'))}`",
+                f"- Contract records: `{_int(protected_verifier.get('contract_record_count'))}`",
+                "- Contract security-relevant records: "
+                f"`{_int(protected_verifier.get('contract_security_relevance_count'))}`",
+                "- Contract authority boundary preserved records: "
+                f"`{_int(protected_verifier.get('contract_authority_boundary_preserved_count'))}`",
+                "- Contract patch application allowed: "
+                f"`{str(_bool(protected_verifier.get('contract_patch_application_allowed'))).lower()}`",
+                "- Contract security dismissal allowed: "
+                f"`{str(_bool(protected_verifier.get('contract_security_dismissal_allowed'))).lower()}`",
+                "- Contract merge authorized: "
+                f"`{str(_bool(protected_verifier.get('contract_merge_authorized'))).lower()}`",
+                "- Contract semantic equivalence claim: "
+                f"`{str(_bool(protected_verifier.get('contract_semantic_equivalence_claim'))).lower()}`",
+                "- ProtectedVerifier automation allowed: "
+                f"`{str(_bool(protected_verifier.get('automation_allowed'))).lower()}`",
+                "- ProtectedVerifier merge authorized: "
+                f"`{str(_bool(protected_verifier.get('merge_authorized'))).lower()}`",
+                "- ProtectedVerifier semantic equivalence proven: "
+                f"`{str(_bool(protected_verifier.get('semantic_equivalence_proven'))).lower()}`",
+            ]
+        )
+
+    lines.extend(
+        [
+            "",
             "## Trusted accepted-main RepoMemory history",
             "",
             (f"- Collection status: `{_string(trusted_history.get('collection_status'))}`"),
@@ -766,6 +853,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--isolated-proof", type=Path)
     parser.add_argument("--live-benchmark-report", type=Path)
     parser.add_argument("--repo-memory-profile", type=Path)
+    parser.add_argument("--protected-verifier-result", type=Path)
     parser.add_argument("--trusted-history-evidence", type=Path)
     parser.add_argument("--trusted-diagnostic-signal-snapshot-history", type=Path)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
@@ -779,6 +867,7 @@ def main(argv: list[str] | None = None) -> int:
         isolated_proof=_read_json(args.isolated_proof),
         live_benchmark_report=_read_json(args.live_benchmark_report),
         repo_memory_profile=_read_json(args.repo_memory_profile),
+        protected_verifier_result=_read_json(args.protected_verifier_result),
         trusted_history_evidence=_read_json(args.trusted_history_evidence),
         trusted_diagnostic_signal_snapshot_history=_read_json(
             args.trusted_diagnostic_signal_snapshot_history

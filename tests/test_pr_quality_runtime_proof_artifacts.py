@@ -149,7 +149,7 @@ def test_runtime_proof_markdown_reports_unwired_artifacts_honestly() -> None:
     assert "Runtime guard passed: `true`" in markdown
     assert "Runtime guard violations: `0`" in markdown
     assert "Network isolation enforced: `false`" in markdown
-    assert markdown.count("Collection status: `not_collected`") == 4
+    assert markdown.count("Collection status: `not_collected`") == 5
     assert "Proof commands executed by renderer: `false`" in markdown
     assert "Automation allowed: `false`" in markdown
     assert "Merge authorized: `false`" in markdown
@@ -526,3 +526,105 @@ def test_runtime_proof_cli_accepts_trusted_diagnostic_signal_snapshot_history(
     assert trusted["record_count"] == 3
     assert trusted["automation_allowed"] is False
     assert trusted["merge_authorized"] is False
+
+
+def test_runtime_proof_summary_consumes_protected_verifier_repo_memory_contract_evidence() -> None:
+    summary = build_runtime_proof_artifacts(
+        protected_verifier_result={
+            "decision": {
+                "status": "review_required",
+                "review_first": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+            "decision_boundary": {
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+            "repo_memory_evidence": {
+                "failure_vector_contract_evidence": {
+                    "status": "failure_vector_contract_evidence_observed",
+                    "record_count": 1,
+                    "security_relevance_count": 0,
+                    "authority_boundary_preserved_count": 1,
+                    "decision_boundary": {
+                        "automation_allowed": False,
+                        "patch_application_allowed": False,
+                        "security_dismissal_allowed": False,
+                        "merge_authorized": False,
+                        "semantic_equivalence_claim": False,
+                    },
+                }
+            },
+        }
+    )
+
+    protected = summary["protected_verifier"]
+    assert summary["status"] == COLLECTED
+    assert summary["collected_components"] == ["protected_verifier"]
+    assert protected["status"] == "review_required"
+    assert protected["review_first"] is True
+    assert protected["contract_status"] == "failure_vector_contract_evidence_observed"
+    assert protected["contract_record_count"] == 1
+    assert protected["contract_security_relevance_count"] == 0
+    assert protected["contract_authority_boundary_preserved_count"] == 1
+    assert protected["contract_patch_application_allowed"] is False
+    assert protected["contract_security_dismissal_allowed"] is False
+    assert protected["contract_merge_authorized"] is False
+    assert protected["contract_semantic_equivalence_claim"] is False
+    assert protected["automation_allowed"] is False
+    assert protected["merge_authorized"] is False
+    assert protected["semantic_equivalence_proven"] is False
+
+    markdown = render_markdown(summary)
+    assert "## ProtectedVerifier RepoMemory contract evidence" in markdown
+    assert "Contract records: `1`" in markdown
+    assert "Contract security-relevant records: `0`" in markdown
+    assert "Contract authority boundary preserved records: `1`" in markdown
+    assert "Contract patch application allowed: `false`" in markdown
+    assert "Contract security dismissal allowed: `false`" in markdown
+    assert "Contract merge authorized: `false`" in markdown
+    assert "Contract semantic equivalence claim: `false`" in markdown
+    assert "ProtectedVerifier merge authorized: `false`" in markdown
+    assert "ProtectedVerifier semantic equivalence proven: `false`" in markdown
+
+
+def test_runtime_proof_summary_surfaces_protected_verifier_contract_authority_expansion() -> None:
+    summary = build_runtime_proof_artifacts(
+        protected_verifier_result={
+            "decision": {
+                "status": "blocked_review_first",
+                "review_first": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+            "repo_memory_evidence": {
+                "failure_vector_contract_evidence": {
+                    "status": "failure_vector_contract_evidence_observed",
+                    "record_count": 1,
+                    "security_relevance_count": 0,
+                    "authority_boundary_preserved_count": 0,
+                    "decision_boundary": {
+                        "automation_allowed": False,
+                        "patch_application_allowed": True,
+                        "security_dismissal_allowed": False,
+                        "merge_authorized": False,
+                        "semantic_equivalence_claim": False,
+                    },
+                }
+            },
+        }
+    )
+
+    protected = summary["protected_verifier"]
+    assert protected["contract_patch_application_allowed"] is True
+    assert protected["contract_merge_authorized"] is False
+    assert protected["contract_semantic_equivalence_claim"] is False
+
+    markdown = render_markdown(summary)
+    assert "Contract patch application allowed: `true`" in markdown
+    assert "Contract merge authorized: `false`" in markdown
+    assert "Contract semantic equivalence claim: `false`" in markdown
