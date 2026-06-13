@@ -273,3 +273,47 @@ def test_pattern_insights_summarizes_trajectory_authority_boundary_evidence() ->
     assert "## Trajectory authority boundary evidence" in markdown
     assert "Auto-fix evidence records: `1`" in markdown
     assert "Security dismissal allowed by trajectory authority evidence: `false`" in markdown
+
+
+def test_pattern_insights_summarizes_failure_vector_contract_evidence() -> None:
+    rows = _records()[:1]
+    rows[0]["failure_vector_contract"] = {
+        "source": "failure_vector.contract",
+        "schema_version": "sdetkit.failure_vector.contract.v1",
+        "failure_kind": "test",
+        "affected_surface": "tests",
+        "ownership_area": "tests/test_widget.py",
+        "retryability": "not_retryable_without_change",
+        "security_relevance": False,
+        "recommended_next_human_action": "inspect failing test and affected file",
+        "reporting_only": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+        "authority_boundary_preserved": True,
+    }
+
+    insights = build_pattern_insights(rows, minimum_repeat=1)
+    evidence = insights["failure_vector_contract_evidence"]
+
+    assert evidence["collection_status"] == "collected"
+    assert evidence["status"] == "failure_vector_contract_evidence_observed"
+    assert evidence["record_count"] == 1
+    assert evidence["security_relevance_count"] == 0
+    assert evidence["authority_boundary_preserved_count"] == 1
+    assert evidence["failure_kinds"] == [{"value": "test", "count": 1}]
+    assert evidence["affected_surfaces"] == [{"value": "tests", "count": 1}]
+    assert evidence["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+
+    markdown = render_pattern_markdown(insights)
+    assert "## FailureVector contract evidence" in markdown
+    assert "Authority boundary preserved records: `1`" in markdown
+    assert "Security dismissal allowed by FailureVector contract evidence: `false`" in markdown

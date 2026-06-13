@@ -104,6 +104,35 @@ def _authority_boundary(
     }
 
 
+def _failure_vector_contract_evidence(failure_vector: Mapping[str, Any]) -> JsonObject:
+    contract = _as_dict(failure_vector.get("contract"))
+    if not contract:
+        return {}
+
+    false_authority = {
+        "automation_allowed": _bool(contract.get("automation_allowed")),
+        "patch_application_allowed": _bool(contract.get("patch_application_allowed")),
+        "security_dismissal_allowed": _bool(contract.get("security_dismissal_allowed")),
+        "merge_authorized": _bool(contract.get("merge_authorized")),
+        "semantic_equivalence_claim": _bool(contract.get("semantic_equivalence_claim")),
+    }
+
+    return {
+        "source": "failure_vector.contract",
+        "schema_version": _string(contract.get("schema_version")),
+        "failure_kind": _string(contract.get("failure_kind")) or "unknown",
+        "affected_surface": _string(contract.get("affected_surface")) or "unknown",
+        "ownership_area": _string(contract.get("ownership_area")) or "unknown",
+        "retryability": _string(contract.get("retryability")) or "unknown",
+        "security_relevance": _bool(contract.get("security_relevance")),
+        "recommended_next_human_action": _string(contract.get("recommended_next_human_action")),
+        "reporting_only": _bool(contract.get("reporting_only")),
+        **false_authority,
+        "authority_boundary_preserved": _bool(contract.get("reporting_only"))
+        and not any(false_authority.values()),
+    }
+
+
 def _slug(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.lower()).strip("-")
     return slug or "unknown"
@@ -499,6 +528,7 @@ def build_trajectory_records(
         diagnosis_id = _string(plan.get("diagnosis_id")) or "unknown"
         diagnosis = diagnoses.get(diagnosis_id, {})
         failure_vector = _as_dict(diagnosis.get("failure_vector"))
+        failure_vector_contract = _failure_vector_contract_evidence(failure_vector)
         action = _string(plan.get("allowed_strategy")) or "collect_logs_and_classify"
         auto_fix_allowed = _bool(plan.get("safe_to_auto_fix"))
         proof_commands = _string_list(plan.get("proof_commands"))
@@ -566,6 +596,7 @@ def build_trajectory_records(
                         or "safe mechanical remediation candidate"
                     ),
                 ),
+                "failure_vector_contract": failure_vector_contract,
                 "fix": {
                     "allowed_strategy": action,
                     "patch_files": _string_list(plan.get("affected_files"))
@@ -598,6 +629,21 @@ def summarize_trajectory_records(records: list[Mapping[str, Any]]) -> JsonObject
             1
             for record in records
             if _as_dict(record.get("decision")).get("auto_fix_allowed") is True
+        ),
+        "failure_vector_contract_count": sum(
+            1 for record in records if _as_dict(record.get("failure_vector_contract"))
+        ),
+        "failure_vector_contract_boundary_preserved_count": sum(
+            1
+            for record in records
+            if _bool(
+                _as_dict(record.get("failure_vector_contract")).get("authority_boundary_preserved")
+            )
+        ),
+        "security_relevant_failure_vector_contract_count": sum(
+            1
+            for record in records
+            if _bool(_as_dict(record.get("failure_vector_contract")).get("security_relevance"))
         ),
     }
 

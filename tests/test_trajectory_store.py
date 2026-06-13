@@ -3,7 +3,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit.trajectory_store import build_trajectory_records, main, write_trajectory_records
+from sdetkit.trajectory_store import (
+    build_trajectory_records,
+    main,
+    summarize_trajectory_records,
+    write_trajectory_records,
+)
 
 
 def _diagnostic_vector() -> dict:
@@ -28,6 +33,21 @@ def _diagnostic_vector() -> dict:
                     "environment": "github_actions",
                     "exit_code": 1,
                     "first_failing_line": "ruff format..............................Failed",
+                    "contract": {
+                        "schema_version": "sdetkit.failure_vector.contract.v1",
+                        "failure_kind": "formatter_only",
+                        "affected_surface": "source",
+                        "ownership_area": "src/sdetkit/example.py",
+                        "retryability": "not_retryable_without_change",
+                        "security_relevance": False,
+                        "recommended_next_human_action": "review generated fix",
+                        "reporting_only": True,
+                        "automation_allowed": False,
+                        "patch_application_allowed": False,
+                        "security_dismissal_allowed": False,
+                        "merge_authorized": False,
+                        "semantic_equivalence_claim": False,
+                    },
                 },
             },
             {
@@ -100,6 +120,25 @@ def test_trajectory_records_capture_safe_candidate_and_review_first_decisions() 
     assert formatting["diagnosis"]["failure_class"] == "formatter_only"
     assert formatting["fix"]["patch_files"] == ["src/sdetkit/example.py"]
     assert formatting["final_result"] == "safe_fix_candidate"
+    contract = formatting["failure_vector_contract"]
+    assert contract["source"] == "failure_vector.contract"
+    assert contract["schema_version"] == "sdetkit.failure_vector.contract.v1"
+    assert contract["failure_kind"] == "formatter_only"
+    assert contract["affected_surface"] == "source"
+    assert contract["ownership_area"] == "src/sdetkit/example.py"
+    assert contract["retryability"] == "not_retryable_without_change"
+    assert contract["security_relevance"] is False
+    assert contract["reporting_only"] is True
+    assert contract["automation_allowed"] is False
+    assert contract["patch_application_allowed"] is False
+    assert contract["security_dismissal_allowed"] is False
+    assert contract["merge_authorized"] is False
+    assert contract["semantic_equivalence_claim"] is False
+    assert contract["authority_boundary_preserved"] is True
+    summary = summarize_trajectory_records(records)
+    assert summary["failure_vector_contract_count"] == 1
+    assert summary["failure_vector_contract_boundary_preserved_count"] == 1
+    assert summary["security_relevant_failure_vector_contract_count"] == 0
     assert formatting["authority_boundary"] == {
         "source": "trajectory_store",
         "reporting_only": True,
