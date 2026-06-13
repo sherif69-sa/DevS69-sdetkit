@@ -64,6 +64,9 @@ SEMANTIC_EQUIVALENCE_NOT_PROVEN = "_".join(("SEMANTIC", "EQUIVALENCE", "NOT", "P
 SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION = "_".join(
     ("SAFETYGATE", "EVIDENCE", "AUTHORITY", "VIOLATION")
 )
+FAILURE_VECTOR_CONTRACT_EVIDENCE_AUTHORITY_VIOLATION = "_".join(
+    ("FAILURE", "VECTOR", "CONTRACT", "EVIDENCE", "AUTHORITY", "VIOLATION")
+)
 STRUCTURALLY_VERIFIED_CANDIDATE = "_".join(("structurally", "verified", "candidate"))
 
 
@@ -176,6 +179,63 @@ def _authority_expansion_flags(
     return flags
 
 
+def _repo_memory_failure_vector_contract_evidence(
+    repo_memory_profile: Mapping[str, Any],
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    payload = _as_dict(repo_memory_profile.get("failure_vector_contract_evidence"))
+    if not payload:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "repo_memory.failure_vector_contract_evidence",
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "failure_kinds": [],
+            "affected_surfaces": [],
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = _as_dict(payload.get("decision_boundary"))
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    return {
+        "collection_status": _string(payload.get("collection_status")) or "collected",
+        "status": _string(payload.get("status")) or "failure_vector_contract_evidence_observed",
+        "source": _string(payload.get("source")) or "repo_memory.failure_vector_contract_evidence",
+        "record_count": _int(payload.get("record_count")),
+        "security_relevance_count": _int(payload.get("security_relevance_count")),
+        "authority_boundary_preserved_count": _int(
+            payload.get("authority_boundary_preserved_count")
+        ),
+        "failure_kinds": [
+            {
+                "value": _string(item.get("value")),
+                "count": _int(item.get("count")),
+            }
+            for item in (_as_dict(row) for row in _as_list(payload.get("failure_kinds")))
+            if _string(item.get("value"))
+        ],
+        "affected_surfaces": [
+            {
+                "value": _string(item.get("value")),
+                "count": _int(item.get("count")),
+            }
+            for item in (_as_dict(row) for row in _as_list(payload.get("affected_surfaces")))
+            if _string(item.get("value"))
+        ],
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
 def _risk_flag(code: str, message: str, *, blocking: bool) -> JsonObject:
     return {
         "code": code,
@@ -189,9 +249,12 @@ def verify_patch(
     patch_score: Mapping[str, Any],
     failure_bundle: Mapping[str, Any] | None = None,
     runtime_proof: Mapping[str, Any] | None = None,
+    repo_memory_profile: Mapping[str, Any] | None = None,
 ) -> JsonObject:
     bundle = _as_dict(failure_bundle)
     runtime = _as_dict(runtime_proof)
+    repo_memory = _as_dict(repo_memory_profile)
+    failure_vector_contract_evidence = _repo_memory_failure_vector_contract_evidence(repo_memory)
     patch_decision = _as_dict(patch_score.get("decision"))
 
     patch_id = _string(patch_score.get("patch_id")) or "unknown"
@@ -209,6 +272,20 @@ def verify_patch(
         failure_bundle=bundle,
         runtime_proof=runtime,
     )
+
+    expanded_contract_fields = _string_list(
+        failure_vector_contract_evidence.get("expanded_authority_fields")
+    )
+    if expanded_contract_fields:
+        flags.append(
+            {
+                "code": FAILURE_VECTOR_CONTRACT_EVIDENCE_AUTHORITY_VIOLATION,
+                "message": "RepoMemory FailureVector contract evidence attempted to expand verifier authority.",
+                "blocking": True,
+                "source": "repo_memory.failure_vector_contract_evidence",
+                "fields": expanded_contract_fields,
+            }
+        )
 
     if patch_score_status != CANDIDATE_FOR_PROTECTED_VERIFICATION or not candidate:
         flags.append(
@@ -270,6 +347,11 @@ def verify_patch(
             "patch_score_status": patch_score_status,
             "failure_bundle_status": _string(bundle.get("status")) or "not_collected",
             "runtime_proof_status": _string(runtime.get("status")) or "not_collected",
+            "repo_memory_profile_status": _string(repo_memory.get("profile_status"))
+            or "not_collected",
+        },
+        "repo_memory_evidence": {
+            "failure_vector_contract_evidence": failure_vector_contract_evidence,
         },
         "verification_evidence": {
             "score": score,
@@ -554,6 +636,9 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
     decision = _as_dict(payload.get("decision"))
     evidence = _as_dict(payload.get("verification_evidence"))
     boundary = _as_dict(payload.get("decision_boundary"))
+    repo_memory = _as_dict(payload.get("repo_memory_evidence"))
+    vector_contract = _as_dict(repo_memory.get("failure_vector_contract_evidence"))
+    vector_boundary = _as_dict(vector_contract.get("decision_boundary"))
     flags = [_as_dict(item) for item in _as_list(payload.get("risk_flags"))]
 
     lines = [
@@ -590,6 +675,41 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
     lines.extend(
         f"- `{command}`" for command in proof_requirements
     ) if proof_requirements else lines.append("- none")
+
+    lines.extend(
+        [
+            "",
+            "## RepoMemory FailureVector contract evidence",
+            "",
+            f"- Collection status: `{_string(vector_contract.get('collection_status'))}`",
+            f"- Status: `{_string(vector_contract.get('status'))}`",
+            f"- Records: `{_int(vector_contract.get('record_count'))}`",
+            (
+                "- Security-relevant records: "
+                f"`{_int(vector_contract.get('security_relevance_count'))}`"
+            ),
+            (
+                "- Authority boundary preserved records: "
+                f"`{_int(vector_contract.get('authority_boundary_preserved_count'))}`"
+            ),
+            (
+                "- Patch application allowed by RepoMemory FailureVector contract evidence: "
+                f"`{str(_bool(vector_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by RepoMemory FailureVector contract evidence: "
+                f"`{str(_bool(vector_boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by RepoMemory FailureVector contract evidence: "
+                f"`{str(_bool(vector_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence claimed by RepoMemory FailureVector contract evidence: "
+                f"`{str(_bool(vector_boundary.get('semantic_equivalence_claim'))).lower()}`"
+            ),
+        ]
+    )
 
     lines.extend(["", "## Risk flags", ""])
     if flags:
@@ -730,6 +850,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--verification-evidence", type=Path)
     parser.add_argument("--failure-bundle", type=Path)
     parser.add_argument("--runtime-proof", type=Path)
+    parser.add_argument("--repo-memory-profile", type=Path)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     return parser
@@ -751,6 +872,7 @@ def main(argv: list[str] | None = None) -> int:
                 patch_score=patch_score_payload,
                 failure_bundle=_read_json(args.failure_bundle),
                 runtime_proof=_read_json(args.runtime_proof),
+                repo_memory_profile=_read_json(args.repo_memory_profile),
             )
             artifacts = write_protected_verifier_decision(payload, out_dir=args.out_dir)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
