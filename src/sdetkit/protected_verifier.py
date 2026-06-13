@@ -67,6 +67,9 @@ SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION = "_".join(
 FAILURE_VECTOR_CONTRACT_EVIDENCE_AUTHORITY_VIOLATION = "_".join(
     ("FAILURE", "VECTOR", "CONTRACT", "EVIDENCE", "AUTHORITY", "VIOLATION")
 )
+RUNTIME_PROOF_PROTECTED_VERIFIER_CONTRACT_AUTHORITY_VIOLATION = "_".join(
+    ("RUNTIME", "PROOF", "PROTECTED", "VERIFIER", "CONTRACT", "AUTHORITY", "VIOLATION")
+)
 STRUCTURALLY_VERIFIED_CANDIDATE = "_".join(("structurally", "verified", "candidate"))
 
 
@@ -179,6 +182,61 @@ def _authority_expansion_flags(
     return flags
 
 
+def _runtime_proof_protected_verifier_contract_evidence(
+    runtime_proof: Mapping[str, Any],
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    protected_verifier = _as_dict(runtime_proof.get("protected_verifier"))
+    if not protected_verifier:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "runtime_proof.protected_verifier.failure_vector_contract_evidence",
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = {
+        "automation_allowed": _bool(protected_verifier.get("automation_allowed")),
+        "patch_application_allowed": _bool(
+            protected_verifier.get("contract_patch_application_allowed")
+        ),
+        "security_dismissal_allowed": _bool(
+            protected_verifier.get("contract_security_dismissal_allowed")
+        ),
+        "merge_authorized": _bool(protected_verifier.get("contract_merge_authorized")),
+        "semantic_equivalence_claim": _bool(
+            protected_verifier.get("contract_semantic_equivalence_claim")
+        ),
+    }
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    return {
+        "collection_status": _string(protected_verifier.get("collection_status")) or "collected",
+        "status": _string(protected_verifier.get("contract_status"))
+        or _string(protected_verifier.get("status"))
+        or "failure_vector_contract_evidence_observed",
+        "source": "runtime_proof.protected_verifier.failure_vector_contract_evidence",
+        "record_count": _int(protected_verifier.get("contract_record_count")),
+        "security_relevance_count": _int(
+            protected_verifier.get("contract_security_relevance_count")
+        ),
+        "authority_boundary_preserved_count": _int(
+            protected_verifier.get("contract_authority_boundary_preserved_count")
+        ),
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
 def _repo_memory_failure_vector_contract_evidence(
     repo_memory_profile: Mapping[str, Any],
 ) -> JsonObject:
@@ -254,6 +312,7 @@ def verify_patch(
     bundle = _as_dict(failure_bundle)
     runtime = _as_dict(runtime_proof)
     repo_memory = _as_dict(repo_memory_profile)
+    runtime_proof_contract_evidence = _runtime_proof_protected_verifier_contract_evidence(runtime)
     failure_vector_contract_evidence = _repo_memory_failure_vector_contract_evidence(repo_memory)
     patch_decision = _as_dict(patch_score.get("decision"))
 
@@ -272,6 +331,20 @@ def verify_patch(
         failure_bundle=bundle,
         runtime_proof=runtime,
     )
+
+    expanded_runtime_contract_fields = _string_list(
+        runtime_proof_contract_evidence.get("expanded_authority_fields")
+    )
+    if expanded_runtime_contract_fields:
+        flags.append(
+            {
+                "code": RUNTIME_PROOF_PROTECTED_VERIFIER_CONTRACT_AUTHORITY_VIOLATION,
+                "message": "Runtime proof ProtectedVerifier contract evidence attempted to expand verifier authority.",
+                "blocking": True,
+                "source": "runtime_proof.protected_verifier.failure_vector_contract_evidence",
+                "fields": expanded_runtime_contract_fields,
+            }
+        )
 
     expanded_contract_fields = _string_list(
         failure_vector_contract_evidence.get("expanded_authority_fields")
@@ -349,6 +422,9 @@ def verify_patch(
             "runtime_proof_status": _string(runtime.get("status")) or "not_collected",
             "repo_memory_profile_status": _string(repo_memory.get("profile_status"))
             or "not_collected",
+        },
+        "runtime_proof_evidence": {
+            "protected_verifier_contract_evidence": runtime_proof_contract_evidence,
         },
         "repo_memory_evidence": {
             "failure_vector_contract_evidence": failure_vector_contract_evidence,
@@ -636,6 +712,9 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
     decision = _as_dict(payload.get("decision"))
     evidence = _as_dict(payload.get("verification_evidence"))
     boundary = _as_dict(payload.get("decision_boundary"))
+    runtime_proof = _as_dict(payload.get("runtime_proof_evidence"))
+    runtime_contract = _as_dict(runtime_proof.get("protected_verifier_contract_evidence"))
+    runtime_boundary = _as_dict(runtime_contract.get("decision_boundary"))
     repo_memory = _as_dict(payload.get("repo_memory_evidence"))
     vector_contract = _as_dict(repo_memory.get("failure_vector_contract_evidence"))
     vector_boundary = _as_dict(vector_contract.get("decision_boundary"))
@@ -678,6 +757,36 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
 
     lines.extend(
         [
+            "",
+            "## Runtime proof ProtectedVerifier contract evidence",
+            "",
+            f"- Collection status: `{_string(runtime_contract.get('collection_status'))}`",
+            f"- Status: `{_string(runtime_contract.get('status'))}`",
+            f"- Records: `{_int(runtime_contract.get('record_count'))}`",
+            (
+                "- Security-relevant records: "
+                f"`{_int(runtime_contract.get('security_relevance_count'))}`"
+            ),
+            (
+                "- Authority boundary preserved records: "
+                f"`{_int(runtime_contract.get('authority_boundary_preserved_count'))}`"
+            ),
+            (
+                "- Patch application allowed by runtime proof ProtectedVerifier contract evidence: "
+                f"`{str(_bool(runtime_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by runtime proof ProtectedVerifier contract evidence: "
+                f"`{str(_bool(runtime_boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by runtime proof ProtectedVerifier contract evidence: "
+                f"`{str(_bool(runtime_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence claimed by runtime proof ProtectedVerifier contract evidence: "
+                f"`{str(_bool(runtime_boundary.get('semantic_equivalence_claim'))).lower()}`"
+            ),
             "",
             "## RepoMemory FailureVector contract evidence",
             "",
