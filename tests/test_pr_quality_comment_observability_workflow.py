@@ -1168,3 +1168,63 @@ def test_pr_quality_comment_workflow_builds_artifact_manifest() -> None:
     assert text.index("build/pr-quality/index.html") < text.index(
         "build/pr-quality/pr-review-artifacts-manifest.json"
     )
+
+
+def test_pr_quality_comment_workflow_exports_expected_inventory_verification_metadata() -> None:
+    text = _workflow_text()
+
+    assert "[expectedInventoryStatusKey]: metadata[expectedInventoryStatusKey]" in text
+    assert "[expectedInventoryNonEmptyKey]: Boolean(metadata[expectedInventoryNonEmptyKey])" in text
+    assert (
+        "[expectedInventoryAuthorityAwareKey]: "
+        "Boolean(metadata[expectedInventoryAuthorityAwareKey])" in text
+    )
+    assert (
+        "[expectedInventoryExpectedArtifactCountKey]: "
+        "Number(metadata[expectedInventoryExpectedArtifactCountKey] || 0)" in text
+    )
+    assert (
+        "[expectedInventoryAuthorityEvidenceSourceCountKey]: "
+        "Number(metadata[expectedInventoryAuthorityEvidenceSourceCountKey] || 0)" in text
+    )
+    assert (
+        "[expectedInventoryMissingAuthorityEvidencePathCountKey]: "
+        "Number(metadata[expectedInventoryMissingAuthorityEvidencePathCountKey] || 0)" in text
+    )
+
+
+def test_pr_quality_comment_workflow_verifies_expected_inventory_visibility_after_posting() -> None:
+    text = _workflow_text()
+    verify_visibility = text[text.index("- name: Verify PR Quality comment visibility") :]
+
+    def expected_inventory_key(*parts: str) -> str:
+        return "_".join(("expected", "artifact", "inventory", *parts))
+
+    status_name = expected_inventory_key("status")
+    non_empty_name = expected_inventory_key("non", "empty")
+    authority_aware_name = expected_inventory_key("authority", "aware")
+    expected_artifact_count_name = expected_inventory_key("expected", "artifact", "count")
+    reporting_only_name = expected_inventory_key("reporting", "only")
+    patch_automation_name = expected_inventory_key("patch", "automation")
+    security_dismissal_name = expected_inventory_key("security", "dismissal")
+    merge_authorization_name = expected_inventory_key("merge", "authorization")
+    semantic_claim_name = expected_inventory_key("semantic", "equivalence", "claim")
+
+    assert "expected_inventory_status_key" in verify_visibility
+    assert f'if {status_name} != "passed":' in verify_visibility
+    assert f"if not {non_empty_name}:" in verify_visibility
+    assert f"if not {authority_aware_name}:" in verify_visibility
+    assert f"{expected_artifact_count_name} < 1" in verify_visibility
+    authority_source_key_name = "expected_inventory_" + "_".join(
+        ("authority", "evidence", "source", "count", "key")
+    )
+    missing_authority_key_name = "expected_inventory_" + "_".join(
+        ("missing", "authority", "evidence", "path", "count", "key")
+    )
+    assert authority_source_key_name in verify_visibility
+    assert missing_authority_key_name in verify_visibility
+    assert f"if not {reporting_only_name}:" in verify_visibility
+    assert f"if {patch_automation_name}:" in verify_visibility
+    assert f"if {security_dismissal_name}:" in verify_visibility
+    assert f"if {merge_authorization_name}:" in verify_visibility
+    assert f"if {semantic_claim_name}:" in verify_visibility

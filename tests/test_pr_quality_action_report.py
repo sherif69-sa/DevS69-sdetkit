@@ -3927,6 +3927,25 @@ def test_write_comment_body_writes_review_artifacts_manifest(tmp_path: Path) -> 
     assert "pr-review-artifacts-manifest.json" in manifest["expected_artifact_paths"]
     assert manifest["authority_boundary"]["merge_authorization"] is False
 
+    def expected_inventory_key(*parts: str) -> str:
+        return "_".join(("expected", "artifact", "inventory", *parts))
+
+    assert result[expected_inventory_key("status")] == "passed"
+    assert result[expected_inventory_key("non", "empty")] is True
+    assert result[expected_inventory_key("authority", "aware")] is True
+    assert result[expected_inventory_key("expected", "artifact", "count")] == len(
+        manifest["expected_artifact_paths"]
+    )
+    assert result[expected_inventory_key("authority", "evidence", "source", "count")] == len(
+        manifest["authority_evidence_sources"]
+    )
+    assert result[expected_inventory_key("missing", "authority", "evidence", "path", "count")] == 0
+    assert result[expected_inventory_key("reporting", "only")] is True
+    assert result[expected_inventory_key("patch", "automation")] is False
+    assert result[expected_inventory_key("security", "dismissal")] is False
+    assert result[expected_inventory_key("merge", "authorization")] is False
+    assert result[expected_inventory_key("semantic", "equivalence", "claim")] is False
+
 
 def test_review_model_includes_failure_vector_signal_from_failed_check() -> None:
     model = report.build_pr_quality_review_model(
