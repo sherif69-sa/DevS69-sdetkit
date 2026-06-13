@@ -226,6 +226,114 @@ def _aggregate_safety_gate_evidence(results: list[JsonObject]) -> JsonObject:
     }
 
 
+def _runtime_proof_protected_verifier_contract_evidence(
+    runtime_proof_artifacts: Mapping[str, Any],
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    protected_verifier = _as_dict(_as_dict(runtime_proof_artifacts).get("protected_verifier"))
+    if not protected_verifier:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "runtime_proof.protected_verifier.failure_vector_contract_evidence",
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = {
+        "automation_allowed": _bool(protected_verifier.get("automation_allowed")),
+        "patch_application_allowed": _bool(
+            protected_verifier.get("contract_patch_application_allowed")
+        ),
+        "security_dismissal_allowed": _bool(
+            protected_verifier.get("contract_security_dismissal_allowed")
+        ),
+        "merge_authorized": _bool(protected_verifier.get("contract_merge_authorized")),
+        "semantic_equivalence_claim": _bool(
+            protected_verifier.get("contract_semantic_equivalence_claim")
+        ),
+    }
+    expanded = sorted(key for key in denied if _bool(boundary.get(key)))
+    return {
+        "collection_status": _string(protected_verifier.get("collection_status")) or "collected",
+        "status": _string(protected_verifier.get("contract_status"))
+        or _string(protected_verifier.get("status"))
+        or "failure_vector_contract_evidence_observed",
+        "source": "runtime_proof.protected_verifier.failure_vector_contract_evidence",
+        "record_count": _int(protected_verifier.get("contract_record_count")),
+        "security_relevance_count": _int(
+            protected_verifier.get("contract_security_relevance_count")
+        ),
+        "authority_boundary_preserved_count": _int(
+            protected_verifier.get("contract_authority_boundary_preserved_count")
+        ),
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
+def _aggregate_runtime_proof_protected_verifier_contract_evidence(
+    results: list[JsonObject],
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    rows = [
+        _as_dict(result.get("runtime_proof_protected_verifier_contract_evidence"))
+        for result in results
+    ]
+    collected = [row for row in rows if row.get("collection_status") == "collected"]
+    if not collected:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "runtime_proof.protected_verifier.failure_vector_contract_evidence",
+            "scenario_count": 0,
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    expanded = sorted(
+        {
+            _string(field)
+            for row in collected
+            for field in _as_list(row.get("expanded_authority_fields"))
+            if _string(field)
+        }
+    )
+    return {
+        "collection_status": "collected",
+        "status": "runtime_proof_protected_verifier_contract_evidence_replayed",
+        "source": "runtime_proof.protected_verifier.failure_vector_contract_evidence",
+        "scenario_count": len(collected),
+        "record_count": sum(_int(row.get("record_count")) for row in collected),
+        "security_relevance_count": sum(
+            _int(row.get("security_relevance_count")) for row in collected
+        ),
+        "authority_boundary_preserved_count": sum(
+            _int(row.get("authority_boundary_preserved_count")) for row in collected
+        ),
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
 def load_scenarios(paths: list[Path]) -> list[JsonObject]:
     scenarios: list[JsonObject] = []
     identifiers: set[str] = set()
@@ -337,6 +445,9 @@ def evaluate_scenario(
     proposed_patch = _as_dict(scenario.get("proposed_patch"))
     pattern_insights = _as_dict(scenario.get("pattern_insights"))
     safety_gate_evidence = _scenario_safety_gate_evidence(pattern_insights)
+    runtime_proof_contract_evidence = _runtime_proof_protected_verifier_contract_evidence(
+        _as_dict(scenario.get("runtime_proof_artifacts"))
+    )
     declared_verification_evidence = _as_dict(scenario.get("verification_evidence"))
     verification_evidence = (
         dict(verification_evidence_override)
@@ -420,6 +531,14 @@ def evaluate_scenario(
             expected=False,
             actual=_bool(verifier_decision.get("semantic_equivalence_proven")),
         ),
+        _check(
+            name="runtime_proof_contract_authority_boundary",
+            passed=not _string_list(
+                runtime_proof_contract_evidence.get("expanded_authority_fields")
+            ),
+            expected=[],
+            actual=_string_list(runtime_proof_contract_evidence.get("expanded_authority_fields")),
+        ),
     ]
 
     if scenario_type == "oracle_pass":
@@ -488,6 +607,7 @@ def evaluate_scenario(
         "checks": checks,
         "patch_score": patch_score,
         "protected_verifier_result": verifier_result,
+        "runtime_proof_protected_verifier_contract_evidence": runtime_proof_contract_evidence,
         "safety_gate_evidence": safety_gate_evidence,
     }
 
@@ -658,6 +778,9 @@ def _replay_manifest(results: list[JsonObject]) -> JsonObject:
 def build_benchmark_report(scenarios: list[Mapping[str, Any]]) -> JsonObject:
     results = [evaluate_scenario(scenario) for scenario in scenarios]
     safety_gate_evidence = _aggregate_safety_gate_evidence(results)
+    runtime_proof_contract_evidence = _aggregate_runtime_proof_protected_verifier_contract_evidence(
+        results
+    )
     type_counts = Counter(_string(item.get("scenario_type")) for item in results)
     required_present = all(type_counts.get(item, 0) >= 1 for item in REQUIRED_SCENARIO_TYPES)
     required_passed = all(
@@ -698,12 +821,16 @@ def build_benchmark_report(scenarios: list[Mapping[str, Any]]) -> JsonObject:
             )
         )
     )
+    runtime_contract_authority_expansion_count = len(
+        _string_list(runtime_proof_contract_evidence.get("expanded_authority_fields"))
+    )
 
     passed_count = sum(1 for item in results if item.get("passed") is True)
     boundary_preserved = (
         automation_allowed_count == 0
         and merge_authorized_count == 0
         and semantic_equivalence_claimed_count == 0
+        and runtime_contract_authority_expansion_count == 0
     )
     passed = (
         bool(results)
@@ -721,6 +848,7 @@ def build_benchmark_report(scenarios: list[Mapping[str, Any]]) -> JsonObject:
         "failed_count": len(results) - passed_count,
         "scenario_type_counts": dict(sorted(type_counts.items())),
         "replay_manifest": _replay_manifest(results),
+        "runtime_proof_protected_verifier_contract_evidence": runtime_proof_contract_evidence,
         "safety_gate_evidence": safety_gate_evidence,
         "required_contract": {
             "required_scenario_types": list(REQUIRED_SCENARIO_TYPES),
@@ -735,6 +863,7 @@ def build_benchmark_report(scenarios: list[Mapping[str, Any]]) -> JsonObject:
             "automation_allowed_count": automation_allowed_count,
             "merge_authorized_count": merge_authorized_count,
             "semantic_equivalence_claimed_count": semantic_equivalence_claimed_count,
+            "runtime_proof_contract_authority_expansion_count": runtime_contract_authority_expansion_count,
             "preserved": boundary_preserved,
         },
         "attempt_scored_count": sum(1 for item in results if item.get("attempt_scored") is True),
@@ -1433,6 +1562,8 @@ def render_markdown(report: Mapping[str, Any]) -> str:
     boundary = _as_dict(report.get("safety_boundary"))
     live_evidence = _as_dict(report.get("live_evidence"))
     replay_manifest = _as_dict(report.get("replay_manifest"))
+    runtime_contract = _as_dict(report.get("runtime_proof_protected_verifier_contract_evidence"))
+    runtime_contract_boundary = _as_dict(runtime_contract.get("decision_boundary"))
     safety_gate = _as_dict(report.get("safety_gate_evidence"))
     safety_boundary = _as_dict(safety_gate.get("decision_boundary"))
     scenarios = [_as_dict(item) for item in _as_list(report.get("scenarios"))]
@@ -1657,8 +1788,45 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             ]
         )
 
+    expanded_runtime_contract_fields = ", ".join(
+        _string(item)
+        for item in _as_list(runtime_contract.get("expanded_authority_fields"))
+        if _string(item)
+    )
     lines.extend(
         [
+            "## Runtime proof ProtectedVerifier contract replay",
+            "",
+            f"- Collection status: `{_string(runtime_contract.get('collection_status'))}`",
+            f"- Status: `{_string(runtime_contract.get('status'))}`",
+            f"- Scenarios with evidence: `{_int(runtime_contract.get('scenario_count'))}`",
+            f"- Records: `{_int(runtime_contract.get('record_count'))}`",
+            (
+                "- Security-relevant records: "
+                f"`{_int(runtime_contract.get('security_relevance_count'))}`"
+            ),
+            (
+                "- Authority boundary preserved records: "
+                f"`{_int(runtime_contract.get('authority_boundary_preserved_count'))}`"
+            ),
+            f"- Expanded authority fields: `{expanded_runtime_contract_fields or 'none'}`",
+            (
+                "- Patch application allowed by runtime proof contract evidence: "
+                f"`{str(_bool(runtime_contract_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by runtime proof contract evidence: "
+                f"`{str(_bool(runtime_contract_boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by runtime proof contract evidence: "
+                f"`{str(_bool(runtime_contract_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence claimed by runtime proof contract evidence: "
+                f"`{str(_bool(runtime_contract_boundary.get('semantic_equivalence_claim'))).lower()}`"
+            ),
+            "",
             "## SafetyGate evidence replay",
             "",
             f"- Collection status: `{_string(safety_gate.get('collection_status'))}`",
@@ -1693,6 +1861,10 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             (
                 "- Semantic equivalence claimed count: "
                 f"`{_int(boundary.get('semantic_equivalence_claimed_count'))}`"
+            ),
+            (
+                "- Runtime proof contract authority expansion count: "
+                f"`{_int(boundary.get('runtime_proof_contract_authority_expansion_count'))}`"
             ),
             f"- Boundary preserved: `{str(_bool(boundary.get('preserved'))).lower()}`",
             "",
