@@ -8,6 +8,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 SCHEMA_VERSION = "sdetkit.failure_vector.v1"
+CONTRACT_SCHEMA_VERSION = "sdetkit.failure_vector.contract.v1"
 BUNDLE_SCHEMA_VERSION = "sdetkit.failure_vector.bundle.v1"
 
 PYTEST_NODE_RE = re.compile(r"FAILED\s+(?P<node>[^\s]+::[^\s]+)")
@@ -46,7 +47,67 @@ class FailureVector:
     def to_dict(self) -> dict[str, object]:
         payload = asdict(self)
         payload["affected_files"] = list(self.affected_files)
+        payload["contract"] = failure_vector_contract(self)
         return payload
+
+
+def failure_vector_contract(vector: FailureVector) -> dict[str, object]:
+    failure_kind = vector.failure_type or vector.failure_class or "unknown"
+    return {
+        "schema_version": CONTRACT_SCHEMA_VERSION,
+        "failure_kind": failure_kind,
+        "affected_surface": _contract_affected_surface(vector.affected_files),
+        "ownership_area": _contract_ownership_area(vector),
+        "retryability": _contract_retryability(failure_kind),
+        "security_relevance": failure_kind == "security",
+        "recommended_next_human_action": _contract_next_action(vector, failure_kind),
+        "reporting_only": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+
+
+def _contract_affected_surface(affected_files: tuple[str, ...]) -> str:
+    if not affected_files:
+        return "unknown"
+    if all(path.startswith("tests/") for path in affected_files):
+        return "tests"
+    if all(path.startswith("src/") for path in affected_files):
+        return "source"
+    if all(path.startswith(("src/", "tests/")) for path in affected_files):
+        return "code"
+    return "repo_wide"
+
+
+def _contract_ownership_area(vector: FailureVector) -> str:
+    if vector.owner_hint and vector.owner_hint != "unknown":
+        return vector.owner_hint
+    if vector.affected_files:
+        return vector.affected_files[0]
+    return vector.check or "unknown"
+
+
+def _contract_retryability(failure_kind: str) -> str:
+    if failure_kind in {"dependency", "merge_conflict", "release", "security", "unknown"}:
+        return "human_review_required"
+    return "not_retryable_without_change"
+
+
+def _contract_next_action(vector: FailureVector, failure_kind: str) -> str:
+    if failure_kind == "security":
+        return "perform security review; do not dismiss automatically"
+    if failure_kind == "merge_conflict":
+        return "resolve conflicts manually and rerun full proof"
+    if failure_kind == "dependency":
+        return "review dependency constraints and resolver output before changing locks"
+    if failure_kind == "test":
+        return "inspect failing test and affected file before patching"
+    if vector.safe_fix_candidate:
+        return "review generated fix and run proof commands"
+    return "triage failure and rerun focused proof"
 
 
 def extract_failure_vector(
@@ -156,6 +217,7 @@ def render_failure_vector_report(vector: FailureVector) -> str:
     from sdetkit.safety_gate import evaluate_failure_vector
 
     decision = evaluate_failure_vector(vector)
+    contract = failure_vector_contract(vector)
     safe = "yes" if vector.safe_fix_candidate else "no"
     allowed = "yes" if decision.safe_fix_allowed else "no"
     review_first = "yes" if decision.review_first else "no"
@@ -190,6 +252,24 @@ def render_failure_vector_report(vector: FailureVector) -> str:
             f"- affected_files: `{affected}`",
             f"- first_failing_line: `{first_line}`",
             f"- local_repro_command: `{local_repro}`",
+            "",
+            "## Normalized Failure Vector Contract",
+            "",
+            f"- contract_schema_version: `{contract['schema_version']}`",
+            f"- failure_kind: `{contract['failure_kind']}`",
+            f"- affected_surface: `{contract['affected_surface']}`",
+            f"- ownership_area: `{contract['ownership_area']}`",
+            f"- retryability: `{contract['retryability']}`",
+            f"- security_relevance: `{str(contract['security_relevance']).lower()}`",
+            f"- recommended_next_human_action: `{contract['recommended_next_human_action']}`",
+            f"- reporting_only: `{str(contract['reporting_only']).lower()}`",
+            f"- automation_allowed: `{str(contract['automation_allowed']).lower()}`",
+            f"- patch_application_allowed: `{str(contract['patch_application_allowed']).lower()}`",
+            "- security_dismissal_allowed: "
+            f"`{str(contract['security_dismissal_allowed']).lower()}`",
+            f"- merge_authorized: `{str(contract['merge_authorized']).lower()}`",
+            "- semantic_equivalence_claim: "
+            f"`{str(contract['semantic_equivalence_claim']).lower()}`",
             "",
             "## SafetyGate Decision",
             "",

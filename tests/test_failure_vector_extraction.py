@@ -1,8 +1,10 @@
 from pathlib import Path
 
 from sdetkit.failure_vector import (
+    CONTRACT_SCHEMA_VERSION,
     build_failure_vector_bundle,
     extract_failure_vector,
+    failure_vector_contract,
     render_failure_vector_bundle_report,
     render_failure_vector_report,
     write_failure_vector,
@@ -356,3 +358,56 @@ def test_failure_vector_bundle_preserves_starter_fields(tmp_path: Path) -> None:
     assert "- headline_signal: `pre-commit: lint`" in report
     assert "- actual_failure: `F821 Undefined name `JsonObject``" in report
     assert "- safe_fix_allowed: `no`" in report
+
+
+def test_failure_vector_exposes_normalized_contract() -> None:
+    vector = extract_failure_vector(
+        "Run PYTHONPATH=src python -m pytest -q\n"
+        "FAILED tests/test_widget.py::test_widget_contract - AssertionError\n"
+        "Process completed with exit code 1\n",
+        check="CI / test",
+        environment="github_actions",
+    )
+
+    contract = failure_vector_contract(vector)
+
+    assert contract["schema_version"] == CONTRACT_SCHEMA_VERSION
+    assert contract["failure_kind"] == "test"
+    assert contract["affected_surface"] == "tests"
+    assert contract["ownership_area"] == "tests/test_widget.py"
+    assert contract["retryability"] == "not_retryable_without_change"
+    assert contract["security_relevance"] is False
+    assert (
+        contract["recommended_next_human_action"]
+        == "inspect failing test and affected file before patching"
+    )
+    assert contract["reporting_only"] is True
+    assert contract["automation_allowed"] is False
+    assert contract["patch_application_allowed"] is False
+    assert contract["security_dismissal_allowed"] is False
+    assert contract["merge_authorized"] is False
+    assert contract["semantic_equivalence_claim"] is False
+    assert vector.to_dict()["contract"] == contract
+
+
+def test_failure_vector_report_renders_normalized_contract() -> None:
+    vector = extract_failure_vector(
+        "Run PYTHONPATH=src python -m pytest -q\n"
+        "FAILED tests/test_widget.py::test_widget_contract - AssertionError\n",
+        check="CI / test",
+    )
+
+    report = render_failure_vector_report(vector)
+
+    assert "## Normalized Failure Vector Contract" in report
+    assert "- contract_schema_version: `sdetkit.failure_vector.contract.v1`" in report
+    assert "- failure_kind: `test`" in report
+    assert "- affected_surface: `tests`" in report
+    assert "- ownership_area: `tests/test_widget.py`" in report
+    assert "- retryability: `not_retryable_without_change`" in report
+    assert "- reporting_only: `true`" in report
+    assert "- automation_allowed: `false`" in report
+    assert "- patch_application_allowed: `false`" in report
+    assert "- security_dismissal_allowed: `false`" in report
+    assert "- merge_authorized: `false`" in report
+    assert "- semantic_equivalence_claim: `false`" in report
