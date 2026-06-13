@@ -2891,6 +2891,43 @@ def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
         for artifact_path in expected_artifact_paths
     )
 
+    authority_evidence_source_paths = [
+        _string(item.get("path"))
+        for item in authority_evidence_sources
+        if _string(item.get("path"))
+    ]
+    missing_authority_evidence_paths = [
+        artifact_path
+        for artifact_path in authority_evidence_source_paths
+        if artifact_path not in expected_artifact_paths
+    ]
+    expected_inventory_status = (
+        "passed" if expected_artifact_paths and not missing_authority_evidence_paths else "failed"
+    )
+    expected_inventory_rows = [
+        ("Status", expected_inventory_status),
+        ("Non-empty", bool(expected_artifact_paths)),
+        ("Authority-aware", not missing_authority_evidence_paths),
+        ("Expected artifact count", len(expected_artifact_paths)),
+        ("Authority evidence source count", len(authority_evidence_source_paths)),
+        (
+            "Missing authority evidence paths",
+            ", ".join(missing_authority_evidence_paths)
+            if missing_authority_evidence_paths
+            else "none",
+        ),
+        ("Reporting only", True),
+        ("Patch automation", False),
+        ("Security dismissal", False),
+        ("Merge authorization", False),
+        ("Semantic equivalence claim", False),
+    ]
+
+    expected_inventory_table = "\n".join(
+        f"<tr><th>{_html_escape(label)}</th><td><code>{_html_escape(value)}</code></td></tr>"
+        for label, value in expected_inventory_rows
+    )
+
     def artifact_cards(rows: list[tuple[str, str, str]]) -> str:
         return "\n".join(
             '<article class="artifact-card">'
@@ -2966,6 +3003,11 @@ def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
         '      <div class="artifact-grid">\n'
         f"        {artifact_cards(artifact_rows)}\n"
         "      </div>\n"
+        "    </section>\n"
+        '    <section class="card">\n'
+        "      <h2>Expected artifact inventory verification</h2>\n"
+        '      <p class="boundary">Reporting-only verification. This verification explains expected artifact completeness and does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.</p>\n'
+        f"      <table>{expected_inventory_table}</table>\n"
         "    </section>\n"
         '    <section class="card">\n'
         "      <h2>Expected artifact inventory</h2>\n"
