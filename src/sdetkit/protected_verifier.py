@@ -73,6 +73,9 @@ RUNTIME_PROOF_PROTECTED_VERIFIER_CONTRACT_AUTHORITY_VIOLATION = "_".join(
 RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_AUTHORITY_VIOLATION = "_".join(
     ("RUNTIME", "PROOF", "BENCHMARK", "CONTRACT", "REPLAY", "AUTHORITY", "VIOLATION")
 )
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_AUTHORITY_VIOLATION = "_".join(
+    ("RUNTIME", "PROOF", "PR", "QUALITY", "BENCHMARK", "REPLAY", "AUTHORITY", "VIOLATION")
+)
 RUNTIME_PROOF_LIVE_BENCHMARK = "_".join(("live", "benchmark"))
 RUNTIME_PROOF_BENCHMARK_CONTRACT_EVIDENCE = "_".join(
     ("runtime", "proof", "protected", "verifier", "contract", "evidence")
@@ -109,6 +112,85 @@ BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM = "_".join(
 )
 RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_OBSERVED = "_".join(
     ("runtime", "proof", "benchmark", "contract", "replay", "observed")
+)
+RUNTIME_PROOF_PROTECTED_VERIFIER = "_".join(("protected", "verifier"))
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_EVIDENCE = "_".join(
+    ("benchmark", "contract", "replay", "evidence")
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_SOURCE = ".".join(
+    (
+        "runtime_proof",
+        RUNTIME_PROOF_PROTECTED_VERIFIER,
+        RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_EVIDENCE,
+    )
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OBSERVED = "_".join(
+    ("runtime", "proof", "pr", "quality", "benchmark", "replay", "observed")
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OUTPUT_KEY = "_".join(
+    ("pr", "quality", "benchmark", "contract", "replay", "evidence")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_COLLECTION_STATUS = "_".join(
+    ("benchmark", "contract", "collection", "status")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_STATUS = "_".join(("benchmark", "contract", "status"))
+PR_QUALITY_BENCHMARK_CONTRACT_SCENARIO_COUNT = "_".join(
+    ("benchmark", "contract", "scenario", "count")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_RECORD_COUNT = "_".join(("benchmark", "contract", "record", "count"))
+PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_RELEVANCE_COUNT = "_".join(
+    ("benchmark", "contract", "security", "relevance", "count")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT = "_".join(
+    ("benchmark", "contract", "authority", "boundary", "preserved", "count")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS = "_".join(
+    ("benchmark", "contract", "expanded", "authority", "fields")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_PATCH_APPLICATION_ALLOWED = "_".join(
+    ("benchmark", "contract", "patch", "application", "allowed")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_DISMISSAL_ALLOWED = "_".join(
+    ("benchmark", "contract", "security", "dismissal", "allowed")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_MERGE_AUTHORIZED = "_".join(
+    ("benchmark", "contract", "merge", "authorized")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM = "_".join(
+    ("benchmark", "contract", "semantic", "equivalence", "claim")
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_HEADING = " ".join(
+    ("Runtime", "proof", "PR", "Quality", "benchmark", "replay", "evidence")
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_AUTHORITY_MESSAGE = " ".join(
+    (
+        "Runtime",
+        "proof",
+        "PR",
+        "Quality",
+        "benchmark",
+        "replay",
+        "evidence",
+        "attempted",
+        "to",
+        "expand",
+        "verifier",
+        "authority.",
+    )
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_MERGE_AUTHORIZED_LABEL = " ".join(
+    (
+        "Merge",
+        "authorized",
+        "by",
+        "runtime",
+        "proof",
+        "PR",
+        "Quality",
+        "benchmark",
+        "replay",
+        "evidence:",
+    )
 )
 STRUCTURALLY_VERIFIED_CANDIDATE = "_".join(("structurally", "verified", "candidate"))
 
@@ -341,6 +423,76 @@ def _runtime_proof_benchmark_contract_replay_evidence(
     }
 
 
+def _runtime_proof_pr_quality_benchmark_contract_replay_evidence(
+    runtime_proof: Mapping[str, Any],
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    protected_verifier = _as_dict(runtime_proof.get(RUNTIME_PROOF_PROTECTED_VERIFIER))
+    collection_status = _string(
+        protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_COLLECTION_STATUS)
+    )
+
+    if not protected_verifier or collection_status == "not_collected":
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+            "scenario_count": 0,
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = {
+        "automation_allowed": False,
+        "patch_application_allowed": _bool(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_PATCH_APPLICATION_ALLOWED)
+        ),
+        "security_dismissal_allowed": _bool(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_DISMISSAL_ALLOWED)
+        ),
+        "merge_authorized": _bool(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_MERGE_AUTHORIZED)
+        ),
+        "semantic_equivalence_claim": _bool(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM)
+        ),
+    }
+    expanded = _string_list(
+        protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS)
+    )
+    for key in denied:
+        if _bool(boundary.get(key)) and key not in expanded:
+            expanded.append(key)
+
+    return {
+        "collection_status": collection_status or "collected",
+        "status": _string(protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_STATUS))
+        or RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OBSERVED,
+        "source": RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+        "scenario_count": _int(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_SCENARIO_COUNT)
+        ),
+        "record_count": _int(protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_RECORD_COUNT)),
+        "security_relevance_count": _int(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_RELEVANCE_COUNT)
+        ),
+        "authority_boundary_preserved_count": _int(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT)
+        ),
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
 def _repo_memory_failure_vector_contract_evidence(
     repo_memory_profile: Mapping[str, Any],
 ) -> JsonObject:
@@ -418,6 +570,9 @@ def verify_patch(
     repo_memory = _as_dict(repo_memory_profile)
     runtime_proof_contract_evidence = _runtime_proof_protected_verifier_contract_evidence(runtime)
     benchmark_contract_replay_evidence = _runtime_proof_benchmark_contract_replay_evidence(runtime)
+    pr_quality_benchmark_contract_replay_evidence = (
+        _runtime_proof_pr_quality_benchmark_contract_replay_evidence(runtime)
+    )
     failure_vector_contract_evidence = _repo_memory_failure_vector_contract_evidence(repo_memory)
     patch_decision = _as_dict(patch_score.get("decision"))
 
@@ -462,6 +617,20 @@ def verify_patch(
                 "blocking": True,
                 "source": RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_SOURCE,
                 "fields": expanded_benchmark_contract_fields,
+            }
+        )
+
+    expanded_pr_quality_benchmark_contract_fields = _string_list(
+        pr_quality_benchmark_contract_replay_evidence.get("expanded_authority_fields")
+    )
+    if expanded_pr_quality_benchmark_contract_fields:
+        flags.append(
+            {
+                "code": RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_AUTHORITY_VIOLATION,
+                "message": RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_AUTHORITY_MESSAGE,
+                "blocking": True,
+                "source": RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+                "fields": expanded_pr_quality_benchmark_contract_fields,
             }
         )
 
@@ -545,6 +714,9 @@ def verify_patch(
         "runtime_proof_evidence": {
             "protected_verifier_contract_evidence": runtime_proof_contract_evidence,
             "benchmark_contract_replay_evidence": benchmark_contract_replay_evidence,
+            RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OUTPUT_KEY: (
+                pr_quality_benchmark_contract_replay_evidence
+            ),
         },
         "repo_memory_evidence": {
             "failure_vector_contract_evidence": failure_vector_contract_evidence,
@@ -837,6 +1009,10 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
     runtime_boundary = _as_dict(runtime_contract.get("decision_boundary"))
     benchmark_contract = _as_dict(runtime_proof.get("benchmark_contract_replay_evidence"))
     benchmark_boundary = _as_dict(benchmark_contract.get("decision_boundary"))
+    pr_quality_benchmark_contract = _as_dict(
+        runtime_proof.get(RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OUTPUT_KEY)
+    )
+    pr_quality_benchmark_boundary = _as_dict(pr_quality_benchmark_contract.get("decision_boundary"))
     repo_memory = _as_dict(payload.get("repo_memory_evidence"))
     vector_contract = _as_dict(repo_memory.get("failure_vector_contract_evidence"))
     vector_boundary = _as_dict(vector_contract.get("decision_boundary"))
@@ -943,6 +1119,41 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
             (
                 "- Semantic equivalence claimed by runtime proof benchmark contract replay evidence: "
                 f"`{str(_bool(benchmark_boundary.get('semantic_equivalence_claim'))).lower()}`"
+            ),
+            "",
+            f"## {RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_HEADING}",
+            "",
+            f"- Collection status: `{_string(pr_quality_benchmark_contract.get('collection_status'))}`",
+            f"- Status: `{_string(pr_quality_benchmark_contract.get('status'))}`",
+            f"- Scenarios with evidence: `{_int(pr_quality_benchmark_contract.get('scenario_count'))}`",
+            f"- Records: `{_int(pr_quality_benchmark_contract.get('record_count'))}`",
+            (
+                "- Security-relevant records: "
+                f"`{_int(pr_quality_benchmark_contract.get('security_relevance_count'))}`"
+            ),
+            (
+                "- Authority boundary preserved records: "
+                f"`{_int(pr_quality_benchmark_contract.get('authority_boundary_preserved_count'))}`"
+            ),
+            (
+                "- Expanded authority fields: "
+                f"`{', '.join(_string_list(pr_quality_benchmark_contract.get('expanded_authority_fields'))) or 'none'}`"
+            ),
+            (
+                "- Patch application allowed by runtime proof PR Quality benchmark replay evidence: "
+                f"`{str(_bool(pr_quality_benchmark_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by runtime proof PR Quality benchmark replay evidence: "
+                f"`{str(_bool(pr_quality_benchmark_boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                f"- {RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_MERGE_AUTHORIZED_LABEL} "
+                f"`{str(_bool(pr_quality_benchmark_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence claimed by runtime proof PR Quality benchmark replay evidence: "
+                f"`{str(_bool(pr_quality_benchmark_boundary.get('semantic_equivalence_claim'))).lower()}`"
             ),
             "",
             "## RepoMemory FailureVector contract evidence",

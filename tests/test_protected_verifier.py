@@ -494,3 +494,137 @@ def test_protected_verifier_blocks_authority_expanding_runtime_proof_benchmark_c
     assert (
         "Merge authorized by runtime proof benchmark contract replay evidence: `false`" in markdown
     )
+
+
+PR_QUALITY_BENCHMARK_CONTRACT_COLLECTION_STATUS = _key(
+    ("benchmark", "contract", "collection", "status")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_STATUS = _key(("benchmark", "contract", "status"))
+PR_QUALITY_BENCHMARK_CONTRACT_SCENARIO_COUNT = _key(("benchmark", "contract", "scenario", "count"))
+PR_QUALITY_BENCHMARK_CONTRACT_RECORD_COUNT = _key(("benchmark", "contract", "record", "count"))
+PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_RELEVANCE_COUNT = _key(
+    ("benchmark", "contract", "security", "relevance", "count")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT = _key(
+    ("benchmark", "contract", "authority", "boundary", "preserved", "count")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS = _key(
+    ("benchmark", "contract", "expanded", "authority", "fields")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_PATCH_APPLICATION_ALLOWED = _key(
+    ("benchmark", "contract", "patch", "application", "allowed")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_DISMISSAL_ALLOWED = _key(
+    ("benchmark", "contract", "security", "dismissal", "allowed")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_MERGE_AUTHORIZED = _key(
+    ("benchmark", "contract", "merge", "authorized")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM = _key(
+    ("benchmark", "contract", "semantic", "equivalence", "claim")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OUTPUT_KEY = _key(
+    ("pr", "quality", "benchmark", "contract", "replay", "evidence")
+)
+PR_QUALITY_BENCHMARK_REPLAY_HEADING = " ".join(
+    ("Runtime", "proof", "PR", "Quality", "benchmark", "replay", "evidence")
+)
+PR_QUALITY_BENCHMARK_REPLAY_MERGE_FALSE_LINE = " ".join(
+    (
+        "Merge",
+        "authorized",
+        "by",
+        "runtime",
+        "proof",
+        "PR",
+        "Quality",
+        "benchmark",
+        "replay",
+        "evidence:",
+        "`false`",
+    )
+)
+
+
+def _runtime_proof_with_pr_quality_benchmark_contract_replay() -> dict:
+    runtime = _runtime_proof_with_protected_verifier_contract()
+    runtime["protected_verifier"].update(
+        {
+            PR_QUALITY_BENCHMARK_CONTRACT_COLLECTION_STATUS: "collected",
+            PR_QUALITY_BENCHMARK_CONTRACT_STATUS: _key(
+                ("runtime", "proof", "pr", "quality", "benchmark", "replay", "observed")
+            ),
+            PR_QUALITY_BENCHMARK_CONTRACT_SCENARIO_COUNT: 1,
+            PR_QUALITY_BENCHMARK_CONTRACT_RECORD_COUNT: 1,
+            PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_RELEVANCE_COUNT: 0,
+            PR_QUALITY_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT: 1,
+            PR_QUALITY_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS: [],
+            PR_QUALITY_BENCHMARK_CONTRACT_PATCH_APPLICATION_ALLOWED: False,
+            PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_DISMISSAL_ALLOWED: False,
+            PR_QUALITY_BENCHMARK_CONTRACT_MERGE_AUTHORIZED: False,
+            PR_QUALITY_BENCHMARK_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM: False,
+        }
+    )
+    return runtime
+
+
+def test_protected_verifier_consumes_runtime_proof_pr_quality_benchmark_replay_evidence() -> None:
+    payload = verify_patch(
+        patch_score=_candidate_patch_score(),
+        runtime_proof=_runtime_proof_with_pr_quality_benchmark_contract_replay(),
+    )
+
+    evidence = payload["runtime_proof_evidence"][PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OUTPUT_KEY]
+    assert evidence["collection_status"] == "collected"
+    assert evidence["scenario_count"] == 1
+    assert evidence["record_count"] == 1
+    assert evidence["security_relevance_count"] == 0
+    assert evidence["authority_boundary_preserved_count"] == 1
+    assert evidence["expanded_authority_fields"] == []
+    assert evidence["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    assert payload["decision"]["patch_application_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+
+    markdown = render_markdown(payload)
+    assert PR_QUALITY_BENCHMARK_REPLAY_HEADING in markdown
+    assert "Scenarios with evidence: `1`" in markdown
+    assert "Expanded authority fields: `none`" in markdown
+    assert PR_QUALITY_BENCHMARK_REPLAY_MERGE_FALSE_LINE in markdown
+
+
+def test_protected_verifier_blocks_authority_expanding_runtime_proof_pr_quality_benchmark_replay_evidence() -> (
+    None
+):
+    runtime = _runtime_proof_with_pr_quality_benchmark_contract_replay()
+    runtime["protected_verifier"][PR_QUALITY_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS] = [
+        "merge_authorized"
+    ]
+    runtime["protected_verifier"][PR_QUALITY_BENCHMARK_CONTRACT_MERGE_AUTHORIZED] = True
+
+    payload = verify_patch(
+        patch_score=_candidate_patch_score(),
+        runtime_proof=runtime,
+    )
+
+    evidence = payload["runtime_proof_evidence"][PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OUTPUT_KEY]
+    assert evidence["expanded_authority_fields"] == ["merge_authorized"]
+    assert evidence["decision_boundary"]["merge_authorized"] is False
+    assert payload["decision"]["patch_application_allowed"] is False
+    assert payload["decision"]["merge_authorized"] is False
+    assert payload["decision"]["semantic_equivalence_proven"] is False
+    assert any(
+        flag["source"].startswith("runtime_proof.protected_verifier")
+        and flag["fields"] == ["merge_authorized"]
+        for flag in payload["risk_flags"]
+    )
+
+    markdown = render_markdown(payload)
+    assert "Expanded authority fields: `merge_authorized`" in markdown
+    assert PR_QUALITY_BENCHMARK_REPLAY_MERGE_FALSE_LINE in markdown
