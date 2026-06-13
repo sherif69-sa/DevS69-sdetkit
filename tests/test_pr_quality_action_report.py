@@ -4877,3 +4877,47 @@ def test_artifacts_manifest_verifies_expected_inventory_is_authority_aware() -> 
     assert verification["authority_boundary"]["security_dismissal"] is False
     assert verification["authority_boundary"]["merge_authorization"] is False
     assert verification["authority_boundary"]["semantic_equivalence_claim"] is False
+
+
+def test_artifact_center_renders_expected_inventory_verification() -> None:
+    model = {
+        "schema_version": "sdetkit.pr_quality.review_model.v2",
+        "schema": {
+            "name": "sdetkit.pr_quality.review_model",
+            "version": 2,
+            "authority_boundary": "reporting_only",
+        },
+        "artifact_index": [],
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+        "decision": {
+            "status": "green",
+            "merge_assessment": "ready_for_review",
+            "next_action": "human_review",
+            "risk_surface": "authority",
+        },
+    }
+
+    html = report.render_pr_quality_artifact_index_html(model)
+
+    assert "Expected artifact inventory verification" in html
+    assert "Reporting-only verification" in html
+    assert "Status" in html
+    assert "passed" in html
+    assert "Non-empty" in html
+    assert "Authority-aware" in html
+    assert "Expected artifact count" in html
+    assert "Authority evidence source count" in html
+    assert "Missing authority evidence paths" in html
+    assert "none" in html
+    assert "Reporting only" in html
+    assert "Patch automation" in html
+    assert "Security dismissal" in html
+    assert "Merge authorization" in html
+    assert "Semantic equivalence claim" in html
+    assert "does not authorize merge" in html
