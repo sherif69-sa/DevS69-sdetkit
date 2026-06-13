@@ -81,6 +81,41 @@ CONTROLLED_REVIEW_FIRST_COUNT = "_".join(("controlled", "review", "first", "coun
 FAILURE_VECTOR_CONTRACT_EVIDENCE = "_".join(("failure", "vector", "contract", "evidence"))
 SECURITY_DISMISSAL_ALLOWED = "_".join(("security", "dismissal", "allowed"))
 SEMANTIC_EQUIVALENCE_CLAIM = "_".join(("semantic", "equivalence", "claim"))
+PROTECTED_VERIFIER_RUNTIME_PROOF_EVIDENCE = "_".join(("runtime", "proof", "evidence"))
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_REPLAY_EVIDENCE = "_".join(
+    ("benchmark", "contract", "replay", "evidence")
+)
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_COLLECTION_STATUS = "_".join(
+    ("benchmark", "contract", "collection", "status")
+)
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_STATUS = "_".join(("benchmark", "contract", "status"))
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SCENARIO_COUNT = "_".join(
+    ("benchmark", "contract", "scenario", "count")
+)
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_RECORD_COUNT = "_".join(
+    ("benchmark", "contract", "record", "count")
+)
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SECURITY_RELEVANCE_COUNT = "_".join(
+    ("benchmark", "contract", "security", "relevance", "count")
+)
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT = "_".join(
+    ("benchmark", "contract", "authority", "boundary", "preserved", "count")
+)
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS = "_".join(
+    ("benchmark", "contract", "expanded", "authority", "fields")
+)
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_PATCH_APPLICATION_ALLOWED = "_".join(
+    ("benchmark", "contract", "patch", "application", "allowed")
+)
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SECURITY_DISMISSAL_ALLOWED = "_".join(
+    ("benchmark", "contract", "security", "dismissal", "allowed")
+)
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_MERGE_AUTHORIZED = "_".join(
+    ("benchmark", "contract", "merge", "authorized")
+)
+PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM = "_".join(
+    ("benchmark", "contract", "semantic", "equivalence", "claim")
+)
 
 JsonObject = dict[str, Any]
 
@@ -307,6 +342,11 @@ def _protected_verifier_summary(result: Mapping[str, Any]) -> JsonObject:
     repo_memory = _as_dict(payload.get("repo_memory_evidence"))
     contract = _as_dict(repo_memory.get(FAILURE_VECTOR_CONTRACT_EVIDENCE))
     contract_boundary = _as_dict(contract.get("decision_boundary"))
+    runtime_proof = _as_dict(payload.get(PROTECTED_VERIFIER_RUNTIME_PROOF_EVIDENCE))
+    benchmark_contract = _as_dict(
+        runtime_proof.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_REPLAY_EVIDENCE)
+    )
+    benchmark_contract_boundary = _as_dict(benchmark_contract.get("decision_boundary"))
 
     return {
         "collection_status": COLLECTED,
@@ -327,6 +367,39 @@ def _protected_verifier_summary(result: Mapping[str, Any]) -> JsonObject:
         "contract_merge_authorized": _bool(contract_boundary.get("merge_authorized")),
         "contract_semantic_equivalence_claim": _bool(
             contract_boundary.get(SEMANTIC_EQUIVALENCE_CLAIM)
+        ),
+        PROTECTED_VERIFIER_BENCHMARK_CONTRACT_COLLECTION_STATUS: _string(
+            benchmark_contract.get("collection_status")
+        )
+        or NOT_COLLECTED,
+        PROTECTED_VERIFIER_BENCHMARK_CONTRACT_STATUS: _string(benchmark_contract.get("status"))
+        or NOT_COLLECTED,
+        PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SCENARIO_COUNT: _int(
+            benchmark_contract.get("scenario_count")
+        ),
+        PROTECTED_VERIFIER_BENCHMARK_CONTRACT_RECORD_COUNT: _int(
+            benchmark_contract.get("record_count")
+        ),
+        PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SECURITY_RELEVANCE_COUNT: _int(
+            benchmark_contract.get("security_relevance_count")
+        ),
+        PROTECTED_VERIFIER_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT: _int(
+            benchmark_contract.get("authority_boundary_preserved_count")
+        ),
+        PROTECTED_VERIFIER_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS: _string_list(
+            benchmark_contract.get("expanded_authority_fields")
+        ),
+        PROTECTED_VERIFIER_BENCHMARK_CONTRACT_PATCH_APPLICATION_ALLOWED: _bool(
+            benchmark_contract_boundary.get("patch_application_allowed")
+        ),
+        PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SECURITY_DISMISSAL_ALLOWED: _bool(
+            benchmark_contract_boundary.get(SECURITY_DISMISSAL_ALLOWED)
+        ),
+        PROTECTED_VERIFIER_BENCHMARK_CONTRACT_MERGE_AUTHORIZED: _bool(
+            benchmark_contract_boundary.get("merge_authorized")
+        ),
+        PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM: _bool(
+            benchmark_contract_boundary.get(SEMANTIC_EQUIVALENCE_CLAIM)
         ),
         "automation_allowed": _bool(decision.get("automation_allowed"))
         or _bool(decision_boundary.get("automation_allowed")),
@@ -757,6 +830,28 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
                 f"`{str(_bool(protected_verifier.get('contract_merge_authorized'))).lower()}`",
                 "- Contract semantic equivalence claim: "
                 f"`{str(_bool(protected_verifier.get('contract_semantic_equivalence_claim'))).lower()}`",
+                "- Benchmark replay contract collection: "
+                f"`{_string(protected_verifier.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_COLLECTION_STATUS))}`",
+                "- Benchmark replay contract status: "
+                f"`{_string(protected_verifier.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_STATUS))}`",
+                "- Benchmark replay contract scenarios: "
+                f"`{_int(protected_verifier.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SCENARIO_COUNT))}`",
+                "- Benchmark replay contract records: "
+                f"`{_int(protected_verifier.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_RECORD_COUNT))}`",
+                "- Benchmark replay contract security-relevant records: "
+                f"`{_int(protected_verifier.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SECURITY_RELEVANCE_COUNT))}`",
+                "- Benchmark replay contract authority-preserved records: "
+                f"`{_int(protected_verifier.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT))}`",
+                "- Benchmark replay contract expanded authority fields: "
+                f"`{', '.join(_string_list(protected_verifier.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS))) or 'none'}`",
+                "- Benchmark replay contract patch application allowed: "
+                f"`{str(_bool(protected_verifier.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_PATCH_APPLICATION_ALLOWED))).lower()}`",
+                "- Benchmark replay contract security dismissal allowed: "
+                f"`{str(_bool(protected_verifier.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SECURITY_DISMISSAL_ALLOWED))).lower()}`",
+                "- Benchmark replay contract merge authorized: "
+                f"`{str(_bool(protected_verifier.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_MERGE_AUTHORIZED))).lower()}`",
+                "- Benchmark replay contract semantic equivalence claim: "
+                f"`{str(_bool(protected_verifier.get(PROTECTED_VERIFIER_BENCHMARK_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM))).lower()}`",
                 "- ProtectedVerifier automation allowed: "
                 f"`{str(_bool(protected_verifier.get('automation_allowed'))).lower()}`",
                 "- ProtectedVerifier merge authorized: "

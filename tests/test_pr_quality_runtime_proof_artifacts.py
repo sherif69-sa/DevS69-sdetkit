@@ -756,3 +756,125 @@ def test_runtime_proof_summary_surfaces_benchmark_runtime_contract_authority_exp
     markdown = render_markdown(summary)
     assert "Runtime proof contract expanded authority fields: `merge_authorized`" in markdown
     assert "Boundary preserved: `false`" in markdown
+
+
+PV_RUNTIME_PROOF_EVIDENCE = "_".join(("runtime", "proof", "evidence"))
+PV_BENCHMARK_CONTRACT_REPLAY_EVIDENCE = "_".join(("benchmark", "contract", "replay", "evidence"))
+PV_BENCHMARK_CONTRACT_COLLECTION_STATUS = "_".join(
+    ("benchmark", "contract", "collection", "status")
+)
+PV_BENCHMARK_CONTRACT_STATUS = "_".join(("benchmark", "contract", "status"))
+PV_BENCHMARK_CONTRACT_SCENARIO_COUNT = "_".join(("benchmark", "contract", "scenario", "count"))
+PV_BENCHMARK_CONTRACT_RECORD_COUNT = "_".join(("benchmark", "contract", "record", "count"))
+PV_BENCHMARK_CONTRACT_SECURITY_RELEVANCE_COUNT = "_".join(
+    ("benchmark", "contract", "security", "relevance", "count")
+)
+PV_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT = "_".join(
+    ("benchmark", "contract", "authority", "boundary", "preserved", "count")
+)
+PV_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS = "_".join(
+    ("benchmark", "contract", "expanded", "authority", "fields")
+)
+PV_BENCHMARK_CONTRACT_PATCH_APPLICATION_ALLOWED = "_".join(
+    ("benchmark", "contract", "patch", "application", "allowed")
+)
+PV_BENCHMARK_CONTRACT_SECURITY_DISMISSAL_ALLOWED = "_".join(
+    ("benchmark", "contract", "security", "dismissal", "allowed")
+)
+PV_BENCHMARK_CONTRACT_MERGE_AUTHORIZED = "_".join(("benchmark", "contract", "merge", "authorized"))
+PV_BENCHMARK_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM = "_".join(
+    ("benchmark", "contract", "semantic", "equivalence", "claim")
+)
+
+
+def _protected_verifier_result_with_benchmark_replay_contract(
+    *,
+    expanded: list[str] | None = None,
+    merge_authorized: bool = False,
+) -> dict:
+    return {
+        "decision": {
+            "status": "structurally_verified_candidate",
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+        "decision_boundary": {
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+        PV_RUNTIME_PROOF_EVIDENCE: {
+            PV_BENCHMARK_CONTRACT_REPLAY_EVIDENCE: {
+                "collection_status": "collected",
+                "status": "_".join(
+                    ("runtime", "proof", "benchmark", "contract", "replay", "observed")
+                ),
+                "scenario_count": 1,
+                "record_count": 1,
+                "security_relevance_count": 0,
+                "authority_boundary_preserved_count": 0 if expanded else 1,
+                "expanded_authority_fields": expanded or [],
+                "decision_boundary": {
+                    "automation_allowed": False,
+                    "patch_application_allowed": False,
+                    "security_dismissal_allowed": False,
+                    "merge_authorized": merge_authorized,
+                    "semantic_equivalence_claim": False,
+                },
+            }
+        },
+    }
+
+
+def test_runtime_proof_summary_consumes_protected_verifier_benchmark_replay_contract_evidence() -> (
+    None
+):
+    summary = build_runtime_proof_artifacts(
+        protected_verifier_result=_protected_verifier_result_with_benchmark_replay_contract()
+    )
+
+    protected = summary["protected_verifier"]
+    assert protected[PV_BENCHMARK_CONTRACT_COLLECTION_STATUS] == "collected"
+    assert protected[PV_BENCHMARK_CONTRACT_SCENARIO_COUNT] == 1
+    assert protected[PV_BENCHMARK_CONTRACT_RECORD_COUNT] == 1
+    assert protected[PV_BENCHMARK_CONTRACT_SECURITY_RELEVANCE_COUNT] == 0
+    assert protected[PV_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT] == 1
+    assert protected[PV_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS] == []
+    assert protected[PV_BENCHMARK_CONTRACT_PATCH_APPLICATION_ALLOWED] is False
+    assert protected[PV_BENCHMARK_CONTRACT_SECURITY_DISMISSAL_ALLOWED] is False
+    assert protected[PV_BENCHMARK_CONTRACT_MERGE_AUTHORIZED] is False
+    assert protected[PV_BENCHMARK_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM] is False
+    assert summary["decision_boundary"]["automation_allowed"] is False
+    assert summary["decision_boundary"]["merge_authorized"] is False
+    assert summary["decision_boundary"]["semantic_equivalence_proven"] is False
+
+    markdown = render_markdown(summary)
+    assert "Benchmark replay contract collection: `collected`" in markdown
+    assert "Benchmark replay contract scenarios: `1`" in markdown
+    assert "Benchmark replay contract expanded authority fields: `none`" in markdown
+    assert "Benchmark replay contract merge authorized: `false`" in markdown
+
+
+def test_runtime_proof_summary_surfaces_protected_verifier_benchmark_replay_contract_authority_expansion() -> (
+    None
+):
+    summary = build_runtime_proof_artifacts(
+        protected_verifier_result=_protected_verifier_result_with_benchmark_replay_contract(
+            expanded=["merge_authorized"],
+            merge_authorized=True,
+        )
+    )
+
+    protected = summary["protected_verifier"]
+    assert protected[PV_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT] == 0
+    assert protected[PV_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS] == ["merge_authorized"]
+    assert protected[PV_BENCHMARK_CONTRACT_MERGE_AUTHORIZED] is True
+    assert summary["decision_boundary"]["automation_allowed"] is False
+    assert summary["decision_boundary"]["merge_authorized"] is False
+    assert summary["decision_boundary"]["semantic_equivalence_proven"] is False
+
+    markdown = render_markdown(summary)
+    assert "Benchmark replay contract expanded authority fields: `merge_authorized`" in markdown
+    assert "Benchmark replay contract merge authorized: `true`" in markdown
+    assert "- Merge authorized: `false`" in markdown
