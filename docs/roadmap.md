@@ -72,3 +72,4 @@ This creates a repeatable maintenance loop: **detect weak spots → summarize GH
 The evidence propagation chain from #1748 through #1761 is documented in [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md). Future work should treat that chain as complete and move toward architecture, operator review, dashboard, or release-readiness slices rather than adding another recursive consumer.
 The operator review flow for this completed circuit is documented in [Operator evidence review guide](operator-evidence-review-guide.md).
 The reviewer-facing source map for this completed circuit is documented in [Evidence graph summary](evidence-graph-summary.md).
+The artifact navigation layer for this circuit is documented in [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map).

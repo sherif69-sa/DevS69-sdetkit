@@ -76,3 +76,35 @@ Quick rules:
 3. For recurring maintenance failures, open the `maintenance-autopilot` upload and read the report, adaptive diagnosis, safe-fix plan, and learning memory together.
 4. For human remediation steps, use [`remediation-cookbook.md`](remediation-cookbook.md) after the investigation or artifact summary points to a specific failure class.
 5. For CI upload interpretation, use [`ci-artifact-walkthrough.md`](ci-artifact-walkthrough.md).
+
+## Evidence circuit artifact source map
+
+Use this source map when a PR or workflow run references the completed #1748
+through #1761 evidence circuit. It connects the human docs to the artifact
+surfaces that reviewers should inspect first.
+
+| Review question | Open first | Then inspect | Authority posture |
+| --- | --- | --- | --- |
+| What is the completed evidence path? | [`evidence-graph-summary.md`](evidence-graph-summary.md) | [`evidence-circuit-architecture-checkpoint.md`](evidence-circuit-architecture-checkpoint.md) | Reporting-only source map |
+| How should a reviewer read the evidence? | [`operator-evidence-review-guide.md`](operator-evidence-review-guide.md) | PR Quality, Runtime Proof, and ProtectedVerifier artifacts | Human review only |
+| Which artifact explains PR-facing evidence? | PR Quality action report or review dashboard | Runtime Proof summary and ProtectedVerifier decision | Does not authorize merge |
+| Which artifact explains runtime evidence? | `runtime-proof/summary/runtime-proof-artifacts.json` | `runtime-proof/summary/runtime-proof-artifacts.md` | Does not authorize patching or dismissal |
+| Which artifact explains authority evidence? | PR Quality artifact manifest | authority evidence source map in the artifact center | Denied authority remains denied |
+| Which artifact explains replay evidence? | benchmark replay report or Runtime Proof benchmark section | ProtectedVerifier benchmark replay evidence | Replay supports review, not approval |
+
+### Evidence circuit reading order
+
+1. Start with [Evidence graph summary](evidence-graph-summary.md) for the
+   reviewer-facing source map.
+2. Use [Operator evidence review guide](operator-evidence-review-guide.md) to
+   decide which evidence source needs inspection.
+3. Open PR Quality artifacts for the maintainer-facing summary.
+4. Open Runtime Proof artifacts when runtime evidence or benchmark replay is
+   referenced.
+5. Open ProtectedVerifier output when authority boundaries are disputed.
+6. Return to the PR only after confirming patch application, security
+   dismissal, merge authorization, and semantic-equivalence claims remain
+   denied.
+
+This table is a navigation aid. It does not replace the proof command, PR
+review, or release-readiness checklist.
