@@ -18,7 +18,7 @@ Use this map when the `docs/` tree feels large. It separates the primary operato
 | Area | Primary docs | Notes |
 | --- | --- | --- |
 | Getting started | [Install](install.md), [Quickstart](quickstart-copy-paste.md), [Blank repo to value](blank-repo-to-value-60-seconds.md), [Ready to use](ready-to-use.md) | Keep these copy-pasteable and starter-oriented. |
-| Operator guide | [Operator essentials](operator-essentials.md), [Operator onboarding](operator-onboarding-7-day.md), [Recommended CI flow](recommended-ci-flow.md) | Daily operator work belongs here, not in the README. |
+| Operator guide | [Operator essentials](operator-essentials.md), [Local diagnostic queue operator guide](local-diagnostic-queue-operator-guide.md), [Operator onboarding](operator-onboarding-7-day.md), [Recommended CI flow](recommended-ci-flow.md) | Daily operator work belongs here, not in the README. |
 | Investigation / diagnosis | [Investigation operator guide](investigation-operator-guide.md), [Adaptive Diagnosis Intelligence](adaptive-diagnosis.md), [First failure triage](first-failure-triage.md) | Diagnostic/report-only unless a guarded lane explicitly authorizes mutation. |
 | Real-world adoption and learning | [Adopt in your repository](adoption.md), [Artifact reference](artifact-reference.md), [Investigation operator guide](investigation-operator-guide.md) | Read-only external-repo evidence, learning observations, detector upgrades, and roadmap/radar control panels. |
 | Maintenance / autopilot | [Artifact reference](artifact-reference.md#maintenance-autopilot-upload-set), [Operations handbook](operations-handbook.md), [Automation bots](automation-bots.md) | Treat plans, candidates, and safe-fix outputs as evidence until reviewed policy approves the next step. |

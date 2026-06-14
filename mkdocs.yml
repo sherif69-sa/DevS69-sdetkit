@@ -137,6 +137,7 @@ nav:
   - Operator and evidence (primary):
       - Docs map and organization: docs-map.md
       - Operator essentials: operator-essentials.md
+      - Local diagnostic queue operator guide: local-diagnostic-queue-operator-guide.md
       - Doctor Cortex CLI: doctor-cortex.md
       - Doctor diagnosis contract: doctor-diagnosis.md
       - Doctor prescriptions: doctor-prescriptions.md
