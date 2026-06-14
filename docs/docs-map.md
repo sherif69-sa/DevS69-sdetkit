@@ -66,3 +66,15 @@ External repositories remain learning targets, not patch targets. Default postur
 ## Diagnostic intelligence
 
 - [Cross-System Evidence Graph](evidence-graph.md)
+
+## Evidence circuit review bundle
+
+The completed evidence circuit documentation bundle consists of:
+
+- [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md)
+- [Evidence graph summary](evidence-graph-summary.md)
+- [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map)
+- [Operator evidence review guide](operator-evidence-review-guide.md)
+- [Dashboard and reporting polish](dashboard-reporting-polish.md)
+- [Evidence circuit review pack](evidence-circuit-review-pack.md)
+- [Release-readiness evidence handoff](release-readiness-evidence-handoff.md)

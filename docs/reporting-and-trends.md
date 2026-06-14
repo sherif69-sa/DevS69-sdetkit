@@ -97,3 +97,11 @@ python scripts/legacy_burndown.py --format json
 The report includes grouped findings (`category`, `path`, `domain`), baseline delta math, and target tracking via `--target-reduction-pct`.
 
 `ci.sh` now runs this maturity sequence (`legacy analyzer -> burn-down -> scorecard -> scorecard contract`) in both quick and all modes for continuous governance feedback.
+
+## Evidence circuit reporting handoff
+
+For the completed evidence circuit, use
+[Dashboard and reporting polish](dashboard-reporting-polish.md) and
+[Evidence circuit review pack](evidence-circuit-review-pack.md) as the canonical
+reviewer-facing reporting path. These docs keep trend, dashboard, and artifact
+language reporting-only.

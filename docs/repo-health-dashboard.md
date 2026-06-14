@@ -61,3 +61,11 @@ Notes:
 - **Week 4:** consolidate docs and remove stale repo artifacts
 
 Consistency beats one-time cleanup. Track trends, not just snapshots.
+
+## Evidence circuit dashboard handoff
+
+When repo-health review intersects with PR Quality, Runtime Proof, or
+ProtectedVerifier evidence, use
+[Dashboard and reporting polish](dashboard-reporting-polish.md) and
+[Evidence circuit review pack](evidence-circuit-review-pack.md) before making
+a maintenance or release-readiness decision.
