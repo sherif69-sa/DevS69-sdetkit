@@ -145,6 +145,7 @@ kvcli = "sdetkit._entrypoints:kvcli"
 apigetcli = "sdetkit._entrypoints:apigetcli"
 sdetkit-test-bootstrap-contract = "sdetkit.test_bootstrap_contract:main"
 sdetkit-test-bootstrap-validate = "sdetkit.test_bootstrap_validate:main"
+sdetkit-diagnostic-queue-runner = "sdetkit.diagnostic_queue_runner_cli:main"
 
 [project.entry-points."sdetkit.notify_adapters"]
 stdout = "sdetkit.notify_plugins:stdout_adapter"
