@@ -5129,3 +5129,130 @@ def test_action_report_operator_summary_surfaces_protected_verifier_benchmark_co
     )
     assert "- ProtectedVerifier benchmark replay contract merge authorized: `true`" in body
     assert "- Operator summary merge authorized: `true`" in body
+
+
+def _workflow_permission_review_packet_for_pr_quality() -> dict:
+    return {
+        "schema_version": "sdetkit.workflow_permission_review_evidence.v1",
+        "status": "human_review_required",
+        "permission_review_count": 1,
+        "automatic_permission_reduction_allowed": False,
+        "review_first": True,
+        "safe_to_patch": False,
+        "next_allowed_action": "collect_human_review_evidence",
+        "blocked_actions": [
+            "automatic_permission_reduction",
+            "broad_workflow_permission_sweep",
+        ],
+        "required_human_evidence": [
+            "workflow intent",
+            "current granted write scopes",
+            "inferred permission reasons from the report",
+            "smallest reviewed permission-only change",
+            "exact proof command",
+            "reviewer decision",
+        ],
+        "review_tasks": [
+            {
+                "workflow": ".github/workflows/bot.yml",
+                "permission_group": "pr_issue_interaction",
+                "granted_write_scopes": ["issues: write", "pull-requests: write"],
+                "inferred_permission_reasons": [
+                    "GitHub API or gh-based PR/issue interaction detected.",
+                    "Issue create/update API usage detected.",
+                ],
+                "reviewer_decision_required": True,
+                "requires_human_review": True,
+                "safe_to_patch": False,
+                "recommended_change_type": "workflow_permission_review_evidence",
+            }
+        ],
+    }
+
+
+def test_pr_quality_comment_surfaces_workflow_permission_review_packet() -> None:
+    packet = _workflow_permission_review_packet_for_pr_quality()
+
+    body = report.render_comment_body(
+        action_report={
+            "workflow_governance_report": {
+                "permission_review_evidence_packet": packet,
+            },
+            "proof_commands": ["make proof-after-format"],
+        },
+        check_intelligence={},
+    )
+
+    assert "## Workflow permission review evidence" in body
+    assert "sdetkit.workflow_permission_review_evidence.v1" in body
+    assert "collect_human_review_evidence" in body
+    assert "automatic_permission_reduction" in body
+    assert ".github/workflows/bot.yml" in body
+    assert "issues: write" in body
+    assert "does not authorize workflow permission mutation" in body
+
+
+def test_pr_quality_summary_and_dashboard_surface_workflow_permission_review_packet() -> None:
+    packet = _workflow_permission_review_packet_for_pr_quality()
+    model = {
+        "decision": {
+            "status": "review_first",
+            "merge_assessment": "review_required",
+            "next_action": "collect_human_review_evidence",
+            "risk_surface": "workflow",
+            "signal_title": "Workflow permission review required",
+            "comment_signal": "workflow_permission_review",
+            "review_first_evidence": True,
+            "failed_checks": 0,
+            "required_queued_checks": 0,
+            "required_startup_failures": 0,
+            "missing_required_contexts": 0,
+            "cleared_security_signal": False,
+        },
+        "primary_blocker": {
+            "title": "Workflow permission review required",
+            "recommended_action": "collect_human_review_evidence",
+        },
+        "failure_vector_signal": {
+            "actual_failure": "workflow permission review evidence required",
+            "source": "workflow_governance_report",
+            "failure_type": "permission_review",
+            "safe_fix_candidate": False,
+            "safe_fix_allowed": False,
+            "reporting_only": True,
+        },
+        "proof_to_rerun": ["python -m sdetkit workflow-governance-report --root . --format text"],
+        "artifact_index": [],
+        "workflow_permission_review_evidence_packet": packet,
+    }
+
+    summary = report.render_pr_quality_review_summary(model)
+    html = report.render_pr_quality_review_html(model)
+
+    assert "## Workflow permission review evidence" in summary
+    assert "collect_human_review_evidence" in summary
+    assert "reviewer decision" in summary
+    assert ".github/workflows/bot.yml" in summary
+
+    assert "Workflow permission review evidence" in html
+    assert "collect_human_review_evidence" in html
+    assert ".github/workflows/bot.yml" in html
+    assert "No automatic permission reduction" in html
+
+
+def test_artifact_center_indexes_workflow_permission_review_evidence_source() -> None:
+    model = {
+        "decision": {
+            "status": "passed",
+            "merge_assessment": "verify_listed_proof_before_routine_merge",
+            "next_action": "rerun_proof",
+            "risk_surface": "workflow",
+        },
+        "artifact_index": [],
+    }
+
+    html = report.render_pr_quality_artifact_index_html(model)
+
+    assert "Workflow permission review evidence packet" in html
+    assert "workflow-governance/workflow-governance-report.json" in html
+    assert "Reporting-only workflow governance packet" in html
