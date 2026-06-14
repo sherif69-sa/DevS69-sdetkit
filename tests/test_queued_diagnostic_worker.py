@@ -121,8 +121,35 @@ def test_queued_worker_claims_runs_and_completes_job(
     result_path = tmp_path / "worker" / job["job_id"] / "diagnostic-worker-result.json"
     vector_path = tmp_path / "worker" / job["job_id"] / "vector" / "diagnostic-vector.json"
 
+    trajectory_jsonl = (
+        tmp_path / "worker" / job["job_id"] / "trajectory" / "diagnostic-worker-trajectory.jsonl"
+    )
+    trajectory_summary = (
+        tmp_path
+        / "worker"
+        / job["job_id"]
+        / "trajectory"
+        / "diagnostic-worker-trajectory-summary.json"
+    )
+    trajectory_markdown = (
+        tmp_path / "worker" / job["job_id"] / "trajectory" / "diagnostic-worker-trajectory.md"
+    )
+
     assert result_path.exists()
     assert vector_path.exists()
+    assert trajectory_jsonl.exists()
+    assert trajectory_summary.exists()
+    assert trajectory_markdown.exists()
+
+    assert result["trajectory"]["summary"]["status"] == "recorded"
+    assert result["trajectory"]["summary"]["reporting_only"] is True
+    assert result["trajectory"]["summary"]["current_pr_decision_input"] is False
+    assert result["trajectory"]["summary"]["automation_allowed"] is False
+    assert result["trajectory"]["summary"]["merge_authorized"] is False
+
+    assert "diagnostic_worker_trajectory_jsonl" in record["result_artifacts"]
+    assert "diagnostic_worker_trajectory_summary_json" in record["result_artifacts"]
+    assert "diagnostic_worker_trajectory_markdown" in record["result_artifacts"]
 
 
 def test_queued_worker_uses_queue_order_when_job_id_is_omitted(
@@ -346,3 +373,54 @@ def test_worker_exception_marks_job_failed_and_is_reraised(
 
     assert record["state"] == FAILED
     assert record["failure_reason"] == "RuntimeError: bounded worker failure"
+
+
+def test_trajectory_recording_failure_marks_job_failed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    queue_path = tmp_path / "queue.json"
+    input_path = tmp_path / "check-intelligence.json"
+
+    input_path.write_text(
+        json.dumps(_formatting_intelligence()),
+        encoding="utf-8",
+    )
+
+    job = _job(
+        head_sha="trajectory-error",
+        created_at="2026-06-14T00:00:00Z",
+        input_artifacts={
+            "check_intelligence": str(input_path),
+        },
+    )
+
+    enqueue_job(queue_path, job)
+
+    def fail_trajectory_writer(
+        *args: object,
+        **kwargs: object,
+    ) -> dict:
+        raise RuntimeError("bounded trajectory recording failure")
+
+    monkeypatch.setattr(
+        queued_worker,
+        "write_worker_trajectory_artifacts",
+        fail_trajectory_writer,
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="bounded trajectory recording failure",
+    ):
+        run_queued_diagnostic_job(
+            queue_path,
+            claimed_at="2026-06-14T01:00:00Z",
+            finished_at="2026-06-14T02:00:00Z",
+            out_root=tmp_path / "worker",
+        )
+
+    record = load_queue(queue_path)["jobs"][0]
+
+    assert record["state"] == FAILED
+    assert record["failure_reason"] == ("RuntimeError: bounded trajectory recording failure")

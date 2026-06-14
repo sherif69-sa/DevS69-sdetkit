@@ -9,9 +9,16 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit.diagnostic_job import RESULT_JSON, run_diagnostic_worker
+from sdetkit.diagnostic_worker_trajectory import (
+    build_worker_trajectory_records,
+)
+from sdetkit.diagnostic_worker_trajectory import (
+    write_artifacts as write_worker_trajectory_artifacts,
+)
 from sdetkit.job_queue import claim_job, complete_job, fail_job
 
 SCHEMA_VERSION = "sdetkit.queued_diagnostic_worker.v1"
+TRAJECTORY_DIR = "trajectory"
 SUPPORTED_INPUTS = frozenset(
     {
         "check_intelligence",
@@ -111,10 +118,55 @@ def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
         raise
 
 
+def _diagnostic_vector_path(
+    worker_result: Mapping[str, Any],
+) -> Path:
+    candidates = sorted(
+        {
+            normalized
+            for raw_path in _as_dict(worker_result.get("output_artifacts")).values()
+            if (normalized := _string(raw_path))
+            and Path(normalized).name == "diagnostic-vector.json"
+        }
+    )
+
+    if len(candidates) != 1:
+        raise ValueError("queued diagnostic worker requires exactly one diagnostic vector artifact")
+
+    return Path(candidates[0])
+
+
+def _record_worker_trajectory(
+    *,
+    job: Mapping[str, Any],
+    worker_result: Mapping[str, Any],
+    out_dir: Path,
+) -> JsonObject:
+    diagnostic_vector = _read_json_object(_diagnostic_vector_path(worker_result))
+
+    records = build_worker_trajectory_records(
+        job=job,
+        worker_result=worker_result,
+        diagnostic_vector=diagnostic_vector,
+        repo=(_string(job.get("repo")) or _string(job.get("repository"))),
+        branch=_string(job.get("branch")),
+        commit_sha=(_string(job.get("head_sha")) or _string(job.get("commit_sha"))),
+        pr_number=int(job.get("pr_number") or 0),
+        generated_at=_string(job.get("created_at")),
+    )
+
+    return write_worker_trajectory_artifacts(
+        records,
+        worker_result=worker_result,
+        out_dir=out_dir / TRAJECTORY_DIR,
+    )
+
+
 def _result_artifacts(
     worker_result: Mapping[str, Any],
     *,
     result_path: Path,
+    trajectory_payload: Mapping[str, Any],
 ) -> dict[str, str]:
     artifacts = {
         "worker_result": str(result_path),
@@ -126,6 +178,13 @@ def _result_artifacts(
 
         if normalized_name and normalized_path:
             artifacts[f"worker_{normalized_name}"] = normalized_path
+
+    for name, raw_path in sorted(_as_dict(trajectory_payload.get("artifacts")).items()):
+        normalized_name = _string(name)
+        normalized_path = _string(raw_path)
+
+        if normalized_name and normalized_path:
+            artifacts[normalized_name] = normalized_path
 
     return artifacts
 
@@ -178,12 +237,19 @@ def run_queued_diagnostic_job(
             worker_result,
         )
 
+        trajectory_payload = _record_worker_trajectory(
+            job=job,
+            worker_result=worker_result,
+            out_dir=out_dir,
+        )
+
         completed = complete_job(
             queue_path,
             claimed_job_id,
             result_artifacts=_result_artifacts(
                 worker_result,
                 result_path=result_path,
+                trajectory_payload=trajectory_payload,
             ),
             completed_at=finished_at,
         )
@@ -209,6 +275,7 @@ def run_queued_diagnostic_job(
         "job_id": claimed_job_id,
         "queue_record": copy.deepcopy(completed),
         "worker_result": copy.deepcopy(worker_result),
+        "trajectory": copy.deepcopy(trajectory_payload),
         "decision_boundary": _boundary(),
         "execution": {
             "automatic_retry": False,
