@@ -149,3 +149,7 @@ Before accepting a PR that uses this evidence circuit, verify:
 - no evidence source grants merge authorization;
 - no evidence source claims semantic equivalence;
 - the final decision remains human-reviewed.
+
+## Related source map
+
+Use [Evidence graph summary](evidence-graph-summary.md) when you need a compact source map of the completed evidence circuit before reading individual PR Quality, Runtime Proof, or ProtectedVerifier artifacts.
