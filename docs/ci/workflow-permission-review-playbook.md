@@ -72,3 +72,21 @@ proof=<command>
 rollback=<single workflow revert>
 decision=<keep|reduce|split|defer>
 ```
+
+## Permission review evidence packet
+
+`sdetkit workflow-governance-report` also emits a
+`permission_review_evidence_packet` object. This packet is the product-facing
+handoff between the advisory report and a later human-reviewed permission PR.
+
+The packet records:
+
+- the workflow requiring review;
+- the granted write scopes;
+- inferred permission reasons from the workflow body;
+- required human evidence;
+- blocked actions;
+- the next allowed action.
+
+The packet remains advisory-only. It does not make a permission change safe,
+and it does not authorize automatic permission reduction.

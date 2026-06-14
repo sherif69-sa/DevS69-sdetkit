@@ -528,3 +528,58 @@ jobs:
     assert "## Permission review summary" in markdown
     assert "automatic_permission_reduction_allowed: false" in markdown
     assert "collect_human_review_evidence" in markdown
+
+
+def test_workflow_governance_report_emits_permission_review_evidence_packet(
+    tmp_path: Path,
+) -> None:
+    workflow = tmp_path / ".github" / "workflows" / "bot.yml"
+    workflow.parent.mkdir(parents=True)
+    workflow.write_text(
+        """name: bot
+on: workflow_dispatch
+permissions:
+  issues: write
+  pull-requests: write
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh issue comment 1 --body hi
+""",
+        encoding="utf-8",
+    )
+
+    from sdetkit.workflow_governance_report import (
+        build_workflow_governance_report,
+        render_workflow_governance_markdown,
+    )
+
+    payload = build_workflow_governance_report(tmp_path)
+    packet = payload["permission_review_evidence_packet"]
+
+    assert packet["schema_version"] == "sdetkit.workflow_permission_review_evidence.v1"
+    assert packet["status"] == "human_review_required"
+    assert packet["permission_review_count"] == 1
+    assert packet["automatic_permission_reduction_allowed"] is False
+    assert packet["review_first"] is True
+    assert packet["safe_to_patch"] is False
+    assert packet["next_allowed_action"] == "collect_human_review_evidence"
+    assert "automatic_permission_reduction" in packet["blocked_actions"]
+    assert "reviewer decision" in packet["required_human_evidence"]
+
+    task = packet["review_tasks"][0]
+    assert task["workflow"] == ".github/workflows/bot.yml"
+    assert task["reviewer_decision_required"] is True
+    assert task["requires_human_review"] is True
+    assert task["safe_to_patch"] is False
+    assert "issues: write" in task["granted_write_scopes"]
+    assert "pull-requests: write" in task["granted_write_scopes"]
+    assert task["recommended_change_type"] == "workflow_permission_review_evidence"
+
+    markdown = render_workflow_governance_markdown(payload)
+    assert "## Permission review evidence packet" in markdown
+    assert "### Required human evidence" in markdown
+    assert "`reviewer decision`" in markdown
+    assert "### Permission review tasks" in markdown
+    assert ".github/workflows/bot.yml" in markdown

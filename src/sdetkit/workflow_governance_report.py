@@ -9,6 +9,9 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "sdetkit.workflow_governance_report.v1"
+WORKFLOW_PERMISSION_REVIEW_EVIDENCE_SCHEMA_VERSION = (
+    "sdetkit.workflow_permission_review_evidence.v1"
+)
 
 AUTHORITY_FIELDS = (
     "automation_allowed",
@@ -463,6 +466,71 @@ def _permission_review_matrix(
     return sorted(entries, key=lambda item: str(item["path"]))
 
 
+def _permission_review_packet_strings(value: Any) -> list[str]:
+    if isinstance(value, (list, tuple, set)):
+        return [str(item) for item in value if str(item)]
+    if value:
+        return [str(value)]
+    return []
+
+
+def _permission_review_evidence_packet(
+    permission_review_matrix: list[dict[str, Any]],
+    permission_review_summary: dict[str, Any],
+) -> dict[str, Any]:
+    required_evidence = [
+        "workflow intent",
+        "current granted write scopes",
+        "inferred permission reasons from the report",
+        "smallest reviewed permission-only change",
+        "exact proof command",
+        "reviewer decision",
+    ]
+    blocked_actions = [
+        "automatic_permission_reduction",
+        "broad_workflow_permission_sweep",
+    ]
+
+    review_tasks: list[dict[str, Any]] = []
+    for entry in permission_review_matrix:
+        workflow_path = str(
+            entry.get("path") or entry.get("workflow_path") or entry.get("workflow") or "unknown"
+        )
+        granted_scopes = _permission_review_packet_strings(entry.get("granted_write_scopes"))
+        inferred_reasons = _permission_review_packet_strings(
+            entry.get("inferred_permission_reasons")
+        )
+
+        review_tasks.append(
+            {
+                "workflow": workflow_path,
+                "permission_group": _permission_review_kind(entry),
+                "granted_write_scopes": granted_scopes,
+                "inferred_permission_reasons": inferred_reasons,
+                "required_evidence": required_evidence,
+                "reviewer_decision_required": True,
+                "requires_human_review": True,
+                "safe_to_patch": False,
+                "recommended_change_type": "workflow_permission_review_evidence",
+            }
+        )
+
+    status = "human_review_required" if review_tasks else "not_required"
+    return {
+        "schema_version": WORKFLOW_PERMISSION_REVIEW_EVIDENCE_SCHEMA_VERSION,
+        "status": status,
+        "permission_review_count": len(review_tasks),
+        "automatic_permission_reduction_allowed": False,
+        "review_first": True,
+        "safe_to_patch": False,
+        "next_allowed_action": "collect_human_review_evidence" if review_tasks else "none",
+        "blocked_actions": blocked_actions if review_tasks else [],
+        "required_human_evidence": required_evidence if review_tasks else [],
+        "groups": permission_review_summary.get("groups", []),
+        "review_tasks": review_tasks,
+    }
+
+
 def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root).resolve()
     workflows = [analyze_workflow(root, path) for path in _workflow_files(root)]
@@ -491,6 +559,10 @@ def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, A
         workflows=workflows,
     )
     permission_review_summary = _permission_review_summary(permission_review_matrix)
+    permission_review_evidence_packet = _permission_review_evidence_packet(
+        permission_review_matrix,
+        permission_review_summary,
+    )
 
     actionability_summary = _actionability_summary(
         workflow_count=len(workflows),
@@ -517,6 +589,7 @@ def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, A
         "permission_review_matrix": permission_review_matrix,
         "permission_review_count": len(permission_review_matrix),
         "permission_review_summary": permission_review_summary,
+        "permission_review_evidence_packet": permission_review_evidence_packet,
         "actionability_summary": actionability_summary,
         "workflows": workflows,
         "operator_summary": {
@@ -616,6 +689,53 @@ def render_workflow_governance_markdown(payload: dict[str, Any]) -> str:
                 lines.append(
                     f"  - `{group.get('kind')}`: {group.get('workflow_count', 0)} workflows"
                 )
+
+    packet = payload.get("permission_review_evidence_packet", {})
+    if isinstance(packet, dict) and packet:
+        lines.extend(["", "## Permission review evidence packet", ""])
+        lines.append(f"- schema_version: `{packet.get('schema_version', 'unknown')}`")
+        lines.append(f"- status: `{packet.get('status', 'unknown')}`")
+        lines.append(
+            "- automatic_permission_reduction_allowed: "
+            f"{str(bool(packet.get('automatic_permission_reduction_allowed', False))).lower()}"
+        )
+        lines.append(f"- next_allowed_action: `{packet.get('next_allowed_action', 'none')}`")
+        lines.append("- review_first: true")
+        lines.append("- safe_to_patch: false")
+
+        required = packet.get("required_human_evidence", [])
+        if isinstance(required, list) and required:
+            lines.extend(["", "### Required human evidence", ""])
+            for item in required:
+                lines.append(f"- `{item}`")
+
+        blocked = packet.get("blocked_actions", [])
+        if isinstance(blocked, list) and blocked:
+            lines.extend(["", "### Blocked actions", ""])
+            for item in blocked:
+                lines.append(f"- `{item}`")
+
+        review_tasks = packet.get("review_tasks", [])
+        if isinstance(review_tasks, list) and review_tasks:
+            lines.extend(["", "### Permission review tasks", ""])
+            for task in review_tasks:
+                if not isinstance(task, dict):
+                    continue
+                lines.append(f"#### {task.get('workflow', 'unknown')}")
+                lines.append(f"- permission_group: `{task.get('permission_group', 'unknown')}`")
+                lines.append("- reviewer_decision_required: true")
+                lines.append("- requires_human_review: true")
+                lines.append("- safe_to_patch: false")
+                scopes = task.get("granted_write_scopes", [])
+                if isinstance(scopes, list) and scopes:
+                    lines.append("- granted_write_scopes:")
+                    for scope in scopes:
+                        lines.append(f"  - `{scope}`")
+                reasons = task.get("inferred_permission_reasons", [])
+                if isinstance(reasons, list) and reasons:
+                    lines.append("- inferred_permission_reasons:")
+                    for reason in reasons:
+                        lines.append(f"  - {reason}")
 
     lines.extend(["", "## Permission review playbook", ""])
     playbook = payload.get("permission_review_playbook")
