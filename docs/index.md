@@ -172,3 +172,4 @@ Historical and transition-era references remain intentionally secondary to first
 ## Architecture checkpoints
 
 - [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md): documents the completed FailureVectorEngine → SafetyGate → TrajectoryStore → RepoMemory → ProtectedVerifier → PR Quality → Runtime Proof → benchmark replay circuit and the reporting-only stop condition.
+- [Operator evidence review guide](operator-evidence-review-guide.md): explains how reviewers should inspect the completed evidence circuit without granting patch, dismissal, merge, or semantic authority.
