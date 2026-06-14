@@ -153,3 +153,13 @@ Before accepting a PR that uses this evidence circuit, verify:
 ## Related source map
 
 Use [Evidence graph summary](evidence-graph-summary.md) when you need a compact source map of the completed evidence circuit before reading individual PR Quality, Runtime Proof, or ProtectedVerifier artifacts.
+
+## Documentation bundle handoff
+
+For complete reviewer navigation, pair this guide with:
+
+- [Evidence circuit review pack](evidence-circuit-review-pack.md)
+- [Dashboard and reporting polish](dashboard-reporting-polish.md)
+- [Release-readiness evidence handoff](release-readiness-evidence-handoff.md)
+
+The handoff remains review-first and reporting-only.

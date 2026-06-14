@@ -87,7 +87,7 @@ surfaces that reviewers should inspect first.
 | --- | --- | --- | --- |
 | What is the completed evidence path? | [`evidence-graph-summary.md`](evidence-graph-summary.md) | [`evidence-circuit-architecture-checkpoint.md`](evidence-circuit-architecture-checkpoint.md) | Reporting-only source map |
 | How should a reviewer read the evidence? | [`operator-evidence-review-guide.md`](operator-evidence-review-guide.md) | PR Quality, Runtime Proof, and ProtectedVerifier artifacts | Human review only |
-| Which artifact explains PR-facing evidence? | PR Quality action report or review dashboard | Runtime Proof summary and ProtectedVerifier decision | Does not authorize merge |
+| Which artifact explains PR-facing evidence? | PR Quality action report or review dashboard | [Dashboard and reporting polish](dashboard-reporting-polish.md), Runtime Proof summary, and ProtectedVerifier decision | Does not authorize merge |
 | Which artifact explains runtime evidence? | `runtime-proof/summary/runtime-proof-artifacts.json` | `runtime-proof/summary/runtime-proof-artifacts.md` | Does not authorize patching or dismissal |
 | Which artifact explains authority evidence? | PR Quality artifact manifest | authority evidence source map in the artifact center | Denied authority remains denied |
 | Which artifact explains replay evidence? | benchmark replay report or Runtime Proof benchmark section | ProtectedVerifier benchmark replay evidence | Replay supports review, not approval |
@@ -108,3 +108,17 @@ surfaces that reviewers should inspect first.
 
 This table is a navigation aid. It does not replace the proof command, PR
 review, or release-readiness checklist.
+
+## Evidence circuit review pack links
+
+After using the evidence circuit artifact source map, continue with:
+
+1. [Dashboard and reporting polish](dashboard-reporting-polish.md) for dashboard
+   reading order.
+2. [Evidence circuit review pack](evidence-circuit-review-pack.md) for the
+   complete reviewer path.
+3. [Release-readiness evidence handoff](release-readiness-evidence-handoff.md)
+   when evidence must be summarized for release review.
+
+These links are navigation aids only. They do not authorize patch automation,
+security dismissal, merge, or semantic-equivalence claims.

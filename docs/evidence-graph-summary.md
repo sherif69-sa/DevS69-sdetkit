@@ -118,4 +118,13 @@ without a distinct product surface.
 - [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md)
 - [Operator evidence review guide](operator-evidence-review-guide.md)
 - [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map)
+- [Dashboard and reporting polish](dashboard-reporting-polish.md)
 - [Investigation operator guide](investigation-operator-guide.md)
+
+## Review pack handoff
+
+When the evidence graph summary is not enough by itself, use the
+[Evidence circuit review pack](evidence-circuit-review-pack.md) to move from
+the source map to dashboard, artifact, operator, and release-readiness review.
+Use [Release-readiness evidence handoff](release-readiness-evidence-handoff.md)
+when the same evidence must be summarized for a release decision.

@@ -52,3 +52,12 @@ Decision: <trust lane healthy / drift investigation required>
 ```
 
 For deeper troubleshooting, continue to [adoption-troubleshooting.md](adoption-troubleshooting.md).
+
+## Evidence circuit dashboard handoff
+
+When CI artifacts include PR Quality, Runtime Proof, ProtectedVerifier, or
+benchmark replay evidence, use the
+[Evidence circuit review pack](evidence-circuit-review-pack.md) after the raw
+artifact inspection. The pack maps the dashboard, artifact center, evidence
+graph, operator guide, and release-readiness handoff without granting merge,
+patch, dismissal, or semantic authority.

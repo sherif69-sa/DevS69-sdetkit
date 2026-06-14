@@ -73,3 +73,21 @@ The evidence propagation chain from #1748 through #1761 is documented in [Eviden
 The operator review flow for this completed circuit is documented in [Operator evidence review guide](operator-evidence-review-guide.md).
 The reviewer-facing source map for this completed circuit is documented in [Evidence graph summary](evidence-graph-summary.md).
 The artifact navigation layer for this circuit is documented in [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map).
+The dashboard/reporting review layer for this circuit is documented in [Dashboard and reporting polish](dashboard-reporting-polish.md).
+
+## Evidence circuit documentation bundle
+
+The completed #1748 through #1761 evidence circuit now has a bundled
+reviewer path:
+
+- [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md)
+- [Operator evidence review guide](operator-evidence-review-guide.md)
+- [Evidence graph summary](evidence-graph-summary.md)
+- [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map)
+- [Dashboard and reporting polish](dashboard-reporting-polish.md)
+- [Evidence circuit review pack](evidence-circuit-review-pack.md)
+- [Release-readiness evidence handoff](release-readiness-evidence-handoff.md)
+
+The next roadmap slice should move from documentation completion to a concrete
+product surface, artifact generation improvement, dashboard UI improvement, or
+release-readiness packaging task.
