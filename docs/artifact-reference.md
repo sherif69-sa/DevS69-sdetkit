@@ -14,6 +14,7 @@ A file that says a fix is possible is not approval to mutate the repository. Mut
 
 | Purpose | Path | Produced by | Notes |
 | --- | --- | --- | --- |
+| Release-readiness evidence package | `build/sdetkit/release-readiness-evidence/package.json`, `build/sdetkit/release-readiness-evidence/package.md` | `python -m sdetkit.release_readiness_evidence_package --root . --out-json build/sdetkit/release-readiness-evidence/package.json --out-md build/sdetkit/release-readiness-evidence/package.md --format text` | Reporting-only release evidence bundle; does not authorize publish or merge. |
 | Fast release-confidence gate | `build/gate-fast.json` | `python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json` | First artifact to inspect. |
 | Release preflight gate | `build/release-preflight.json` | `python -m sdetkit gate release --format json --out build/release-preflight.json` | Pairs with `gate-fast.json` for ship/no-ship decisions. |
 | Doctor checks | `build/doctor.json` | `python -m sdetkit doctor --format json --out build/doctor.json` | Optional JSON form for machine-readable doctor output. |

@@ -73,3 +73,21 @@ A release-readiness handoff is blocked when:
 - [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map)
 - [Evidence graph summary](evidence-graph-summary.md)
 - [Operator evidence review guide](operator-evidence-review-guide.md)
+
+## Release-readiness evidence package
+
+Use the local package when release evidence needs one reviewer-facing bundle:
+
+```bash
+python -m sdetkit.release_readiness_evidence_package \
+  --root . \
+  --out-json build/sdetkit/release-readiness-evidence/package.json \
+  --out-md build/sdetkit/release-readiness-evidence/package.md \
+  --format text
+```
+
+The package summarizes package build, twine metadata check, wheel contents
+check, smoke install, release preflight, provenance attestation, diagnostics
+upload, and post-publish or rollback verification evidence. It is reporting-only
+and does not authorize release, publish, merge, patch automation, security
+dismissal, or semantic-equivalence claims.
