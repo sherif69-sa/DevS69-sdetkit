@@ -117,5 +117,5 @@ without a distinct product surface.
 
 - [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md)
 - [Operator evidence review guide](operator-evidence-review-guide.md)
-- [Artifact reference and generated sample map](artifact-reference.md)
+- [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map)
 - [Investigation operator guide](investigation-operator-guide.md)

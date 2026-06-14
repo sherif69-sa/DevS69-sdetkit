@@ -108,6 +108,7 @@ SDETKit can now run read-only adoption and learning lanes against cloned externa
 
 - Start with [Adopt in your repository](adoption.md) for external-repo readiness and adoption-surface evidence.
 - Use [Artifact reference and generated sample map](artifact-reference.md) to understand machine-readable outputs and evidence bundles.
+- Use [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map) to map evidence-circuit docs to PR Quality, Runtime Proof, and ProtectedVerifier artifacts.
 - Use [Investigation operator guide](investigation-operator-guide.md) when a CI log, repo shape, or proof command needs review-first diagnosis.
 - Use this docs homepage and [Docs map and organization](docs-map.md) to keep radar, report, and governance tools connected to the broader roadmap.
 
