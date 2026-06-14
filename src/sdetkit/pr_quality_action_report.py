@@ -1941,6 +1941,151 @@ def _authority_evidence_source_index() -> list[JsonObject]:
     ]
 
 
+def _workflow_permission_review_packet_from_sources(
+    action_report: JsonObject,
+    check_intelligence: JsonObject,
+) -> JsonObject:
+    candidate_sources = [
+        _as_dict(action_report.get("workflow_governance_report")),
+        _as_dict(check_intelligence.get("workflow_governance_report")),
+        _as_dict(action_report.get("workflow_governance")),
+        _as_dict(check_intelligence.get("workflow_governance")),
+        _as_dict(action_report),
+        _as_dict(check_intelligence),
+    ]
+    for source in candidate_sources:
+        packet = _as_dict(source.get("permission_review_evidence_packet"))
+        if packet:
+            return packet
+    return {}
+
+
+def _workflow_permission_review_packet_markdown_lines(packet: JsonObject) -> list[str]:
+    if not packet:
+        return []
+
+    lines = [
+        "## Workflow permission review evidence",
+        "",
+        f"- Schema version: `{_string(packet.get('schema_version') or 'unknown')}`",
+        f"- Status: `{_string(packet.get('status') or 'unknown')}`",
+        f"- Permission review count: `{_int(packet.get('permission_review_count'))}`",
+        f"- Next allowed action: `{_string(packet.get('next_allowed_action') or 'none')}`",
+        f"- Review first: `{str(bool(packet.get('review_first', True))).lower()}`",
+        f"- Safe to patch: `{str(bool(packet.get('safe_to_patch', False))).lower()}`",
+        "- Automatic permission reduction allowed: "
+        f"`{str(bool(packet.get('automatic_permission_reduction_allowed', False))).lower()}`",
+    ]
+
+    required = [
+        _string(item) for item in _as_list(packet.get("required_human_evidence")) if _string(item)
+    ]
+    if required:
+        lines.extend(["", "### Required human evidence", ""])
+        lines.extend(f"- `{item}`" for item in required)
+
+    blocked = [_string(item) for item in _as_list(packet.get("blocked_actions")) if _string(item)]
+    if blocked:
+        lines.extend(["", "### Blocked permission actions", ""])
+        lines.extend(f"- `{item}`" for item in blocked)
+
+    tasks = [_as_dict(item) for item in _as_list(packet.get("review_tasks"))]
+    if tasks:
+        lines.extend(["", "### Permission review task sample", ""])
+        for task in tasks[:5]:
+            lines.append(f"#### {_string(task.get('workflow') or 'unknown')}")
+            lines.append(
+                f"- Permission group: `{_string(task.get('permission_group') or 'unknown')}`"
+            )
+            lines.append("- Reviewer decision required: `true`")
+            lines.append("- Requires human review: `true`")
+            lines.append("- Safe to patch: `false`")
+            scopes = [
+                _string(item)
+                for item in _as_list(task.get("granted_write_scopes"))
+                if _string(item)
+            ]
+            if scopes:
+                lines.append("- Granted write scopes:")
+                lines.extend(f"  - `{scope}`" for scope in scopes)
+            reasons = [
+                _string(item)
+                for item in _as_list(task.get("inferred_permission_reasons"))
+                if _string(item)
+            ]
+            if reasons:
+                lines.append("- Inferred permission reasons:")
+                lines.extend(f"  - {reason}" for reason in reasons)
+        if len(tasks) > 5:
+            lines.append(f"- Additional permission review tasks: `{len(tasks) - 5}`")
+
+    lines.extend(
+        [
+            "",
+            "_Reporting-only. This PR Quality surface does not authorize workflow permission mutation, automatic permission reduction, patch automation, security dismissal, merge, or semantic-equivalence claims._",
+        ]
+    )
+    return lines
+
+
+def _workflow_permission_review_packet_html(packet: JsonObject) -> str:
+    if not packet:
+        return ""
+
+    tasks = [_as_dict(item) for item in _as_list(packet.get("review_tasks"))]
+    task_items = []
+    for task in tasks[:6]:
+        workflow = _html_escape(_string(task.get("workflow") or "unknown"))
+        group = _html_escape(_string(task.get("permission_group") or "unknown"))
+        scopes = ", ".join(
+            _html_escape(_string(scope))
+            for scope in _as_list(task.get("granted_write_scopes"))
+            if _string(scope)
+        )
+        task_items.append(
+            "<li>"
+            f"<strong><code>{workflow}</code></strong>"
+            f"<span>Group: <code>{group}</code></span>"
+            f"<span>Scopes: <code>{scopes or 'none'}</code></span>"
+            "</li>"
+        )
+
+    task_list = (
+        "".join(task_items)
+        if task_items
+        else "<li><span>No permission review tasks reported.</span></li>"
+    )
+
+    rows = [
+        ("Schema", packet.get("schema_version") or "unknown"),
+        ("Status", packet.get("status") or "unknown"),
+        ("Permission reviews", _int(packet.get("permission_review_count"))),
+        ("Next allowed action", packet.get("next_allowed_action") or "none"),
+        ("Review first", bool(packet.get("review_first", True))),
+        ("Safe to patch", bool(packet.get("safe_to_patch", False))),
+        (
+            "Automatic permission reduction",
+            bool(packet.get("automatic_permission_reduction_allowed", False)),
+        ),
+    ]
+    table_html = "\n".join(
+        f"<tr><th>{_html_escape(label)}</th><td><code>{_html_escape(value)}</code></td></tr>"
+        for label, value in rows
+    )
+
+    return (
+        '<section class="panel workflow-permission-evidence">'
+        '<span class="section-kicker">Workflow governance</span>'
+        "<h2>Workflow permission review evidence</h2>"
+        "<p>Human-review packet for workflow permission findings. Reporting-only; does not authorize permission mutation.</p>"
+        f"<table>{table_html}</table>"
+        "<h3>Permission review tasks</h3>"
+        f"<ul>{task_list}</ul>"
+        '<p class="boundary">Reporting-only. No automatic permission reduction, patch automation, security dismissal, merge authorization, or semantic-equivalence claim.</p>'
+        "</section>"
+    )
+
+
 def _review_model_failure_vector_signal(
     *,
     action_report: JsonObject,
@@ -2348,6 +2493,10 @@ def build_pr_quality_review_model(
         },
         "generated_by": "sdetkit.pr_quality_action_report",
         "artifact_index": _review_model_artifact_index(),
+        "workflow_permission_review_evidence_packet": _workflow_permission_review_packet_from_sources(
+            action_report,
+            check_intelligence,
+        ),
         "primary_blocker": {
             "title": primary_title,
             "surface": primary_surface,
@@ -4168,6 +4317,90 @@ def main(argv: list[str] | None = None) -> int:
     )
     sys.stdout.write(json.dumps(result, indent=2, sort_keys=True) + "\n")
     return 0
+
+
+_BASE_AUTHORITY_EVIDENCE_SOURCE_INDEX = _authority_evidence_source_index
+
+
+def _authority_evidence_source_index() -> list[JsonObject]:  # type: ignore[no-redef]  # noqa: F811
+    sources = list(_BASE_AUTHORITY_EVIDENCE_SOURCE_INDEX())
+    workflow_source = {
+        "path": "workflow-governance/workflow-governance-report.json",
+        "kind": "json",
+        "surface": "authority_evidence",
+        "title": "Workflow permission review evidence packet",
+        "description": "Reporting-only workflow governance packet with required human evidence, blocked actions, permission groups, granted write scopes, and inferred permission reasons.",
+        "format": "json",
+        "reporting_only": True,
+        "patch_automation": False,
+        "security_dismissal": False,
+        "merge_authorization": False,
+        "semantic_equivalence_claim": False,
+        "authority_boundary": {
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+    }
+    if not any(_string(item.get("path")) == workflow_source["path"] for item in sources):
+        sources.append(workflow_source)
+    return sources
+
+
+_BASE_RENDER_PR_QUALITY_REVIEW_SUMMARY = render_pr_quality_review_summary
+
+
+def render_pr_quality_review_summary(model: JsonObject) -> str:  # type: ignore[no-redef]  # noqa: F811
+    body = _BASE_RENDER_PR_QUALITY_REVIEW_SUMMARY(model)
+    packet = _as_dict(model.get("workflow_permission_review_evidence_packet"))
+    section = _workflow_permission_review_packet_markdown_lines(packet)
+    if not section or "## Workflow permission review evidence" in body:
+        return body
+
+    rendered_section = "\n".join(section)
+    if "\n## Product artifacts" in body:
+        return body.replace(
+            "\n## Product artifacts", f"\n{rendered_section}\n\n## Product artifacts", 1
+        )
+    return body.rstrip() + "\n\n" + rendered_section + "\n"
+
+
+_BASE_RENDER_PR_QUALITY_REVIEW_HTML = render_pr_quality_review_html
+
+
+def render_pr_quality_review_html(model: JsonObject) -> str:  # type: ignore[no-redef]  # noqa: F811
+    html = _BASE_RENDER_PR_QUALITY_REVIEW_HTML(model)
+    panel = _workflow_permission_review_packet_html(
+        _as_dict(model.get("workflow_permission_review_evidence_packet"))
+    )
+    if not panel or "Workflow permission review evidence" in html:
+        return html
+    if "</main>" in html:
+        return html.replace("</main>", f"{panel}\n</main>", 1)
+    return html
+
+
+_BASE_RENDER_COMMENT_BODY = render_comment_body
+
+
+def render_comment_body(*args: object, **kwargs: object) -> str:  # type: ignore[no-redef]  # noqa: F811
+    body = _BASE_RENDER_COMMENT_BODY(*args, **kwargs)
+    action_report = _as_dict(kwargs.get("action_report") or (args[0] if args else {}))
+    check_intelligence = _as_dict(
+        kwargs.get("check_intelligence") or (args[1] if len(args) > 1 else {})
+    )
+    packet = _workflow_permission_review_packet_from_sources(action_report, check_intelligence)
+    section = _workflow_permission_review_packet_markdown_lines(packet)
+    if not section or "## Workflow permission review evidence" in body:
+        return body
+
+    rendered_section = "\n".join(section)
+    if "\n## Quality summary" in body:
+        return body.replace(
+            "\n## Quality summary", f"\n{rendered_section}\n\n## Quality summary", 1
+        )
+    return body.rstrip() + "\n\n" + rendered_section + "\n"
 
 
 if __name__ == "__main__":
