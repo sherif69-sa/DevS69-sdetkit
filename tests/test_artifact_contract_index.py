@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import (
+    adoption_learning_report,
     adoption_surface,
     automation_health,
     candidate_collision_checklist,
@@ -416,6 +417,47 @@ def test_artifact_contract_index_includes_local_diagnostic_queue_dashboard_json(
     assert "--queue-path build/local-diagnostic-queue/queue.json" in (entry["produced_by"])
     assert "--format json" in entry["produced_by"]
     assert "--out build/local-diagnostic-queue/dashboard.json" in (entry["produced_by"])
+
+
+def test_artifact_contract_index_includes_adoption_learning_report_json() -> None:
+    payload = build_index()
+    entries = {item["id"]: item for item in payload["artifacts"]}
+
+    artifact_id = "adoption-learning-report-json"
+    assert artifact_id in entries
+
+    entry = entries[artifact_id]
+    assert entry["schema_version"] == adoption_learning_report.SCHEMA_VERSION
+    assert entry["path"] == ("build/sdetkit/adoption-learning-report.json")
+    assert entry["stability"] == "advanced"
+
+    assert {
+        "schema_version",
+        "source_matrix",
+        "source_matrix_schema_version",
+        "source_matrix_status",
+        "source_repo_count",
+        "candidate_count",
+        "top_candidate",
+        "prioritized_upgrade_candidates",
+        "repo_memory_profile",
+        "operator_summary",
+        "rules",
+        "automation_allowed",
+        "patch_application_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven",
+        "authority_boundary",
+    }.issubset(set(entry["required_fields"]))
+
+    assert entry["produced_by"].startswith("python -m sdetkit adoption-learning-report ")
+    assert (
+        "--matrix-json "
+        "build/sdetkit/adoption-real-world-learning/"
+        "adoption-real-world-matrix.json" in entry["produced_by"]
+    )
+    assert "--out build/sdetkit/adoption-learning-report.json" in entry["produced_by"]
+    assert "--format json" in entry["produced_by"]
 
 
 def test_artifact_contract_index_docs_json_matches_generator_payload() -> None:
