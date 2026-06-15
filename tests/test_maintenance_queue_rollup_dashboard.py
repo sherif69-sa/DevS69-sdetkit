@@ -431,3 +431,14 @@ def test_dashboard_rejects_authority_expansion(
     assert rc == 2
     assert not out.exists()
     assert "maintenance queue item authority boundary" in capsys.readouterr().err
+
+
+def test_project_registers_maintenance_queue_rollup_dashboard_script() -> None:
+    pyproject = Path("pyproject.toml").read_text(encoding="utf-8")
+
+    registration = (
+        "sdetkit-maintenance-queue-rollup-dashboard = "
+        '"sdetkit.maintenance_queue_rollup_dashboard:main"'
+    )
+
+    assert pyproject.count(registration) == 1
