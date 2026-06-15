@@ -119,3 +119,59 @@ patch_application_allowed=false
 merge_authorized=false
 semantic_equivalence_proven=false
 ```
+
+## Review real-world adoption learning
+
+Maintainers can aggregate read-only observations from a verified matrix of external repository roots, then convert the resulting matrix artifact into a review-first learning report.
+
+First, generate the real-world learning matrix from repository roots whose licenses and local paths have already been verified:
+
+```bash
+python -m sdetkit adoption-real-world-learning-matrix \
+  --matrix-json <verified-repo-matrix.json> \
+  --artifact-root build/sdetkit/adoption-real-world-learning \
+  --out build/sdetkit/adoption-real-world-learning/adoption-real-world-matrix.json \
+  --markdown-out build/sdetkit/adoption-real-world-learning/adoption-real-world-matrix.md \
+  --minimum-repos 10 \
+  --format json
+```
+
+The matrix lane inspects repository surfaces without installing dependencies, running target tests, changing target repositories, or opening target issues or pull requests. A fully passed matrix returns exit code `0`; a matrix that requires human review returns exit code `2` while still writing its evidence artifacts.
+
+Then generate the prioritized adoption learning report:
+
+```bash
+python -m sdetkit adoption-learning-report \
+  --matrix-json build/sdetkit/adoption-real-world-learning/adoption-real-world-matrix.json \
+  --out build/sdetkit/adoption-learning-report.json \
+  --markdown-out build/sdetkit/adoption-learning-report.md \
+  --format json
+```
+
+The report command reads the matrix artifact and, when explicitly provided, an optional RepoMemory profile. It does not revisit the target repositories, execute proof commands, apply patches, or make a current-PR decision.
+
+Read these JSON fields first:
+
+- `source_matrix_schema_version`
+- `source_matrix_status`
+- `source_repo_count`
+- `candidate_count`
+- `top_candidate`
+- `prioritized_upgrade_candidates`
+- `repo_memory_profile`
+- `operator_summary`
+- `rules`
+- `authority_boundary`
+
+Each candidate remains review-first. `safe_to_patch=false` means the report is evidence for a human-scoped follow-up, not approval to edit another repository.
+
+The report preserves these boundaries:
+
+```text
+automation_allowed=false
+patch_application_allowed=false
+merge_authorized=false
+semantic_equivalence_proven=false
+```
+
+The generated JSON artifact is registered as `adoption-learning-report-json` at `build/sdetkit/adoption-learning-report.json`. The Markdown file is an operator-readable companion, not a separate machine schema.
