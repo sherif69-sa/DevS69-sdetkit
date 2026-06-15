@@ -213,3 +213,12 @@ def test_missing_queue_renders_valid_empty_dashboard(tmp_path: Path) -> None:
     assert "No queued jobs" in text
     assert "status: empty" in text
     assert "read only: true" in text
+
+
+def test_project_registers_local_diagnostic_queue_dashboard_script() -> None:
+    pyproject = Path("pyproject.toml").read_text(encoding="utf-8")
+
+    assert (
+        "sdetkit-local-diagnostic-queue-dashboard = "
+        '"sdetkit.local_diagnostic_queue_dashboard:main"' in pyproject
+    )
