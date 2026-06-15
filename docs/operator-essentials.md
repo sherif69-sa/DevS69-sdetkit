@@ -67,6 +67,8 @@ python -m sdetkit investigate surface --root . --surface <surface> --format mark
 
 See [Investigation operator guide](investigation-operator-guide.md) for the complete diagnostic-only flow.
 
+For bounded local processing of already-created diagnostic jobs, use the [Local diagnostic queue operator guide](local-diagnostic-queue-operator-guide.md). This path is local, reporting-only, explicitly bounded by `--max-jobs`, and stops after the first failed job without retrying it.
+
 ## Day 2 — Maintenance/autopilot artifact review
 
 For maintenance-autopilot runs, start with the uploaded artifact bundle rather than individual logs:
