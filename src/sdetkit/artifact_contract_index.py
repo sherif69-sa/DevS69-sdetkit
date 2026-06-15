@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from . import (
+    adoption_learning_report,
     adoption_surface,
     automation_health,
     candidate_collision_checklist,
@@ -726,6 +727,38 @@ def build_index() -> dict[str, Any]:
                     "automation_allowed",
                     "merge_authorized",
                     "semantic_equivalence_proven",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "adoption-learning-report-json",
+                "path": "build/sdetkit/adoption-learning-report.json",
+                "produced_by": (
+                    "python -m sdetkit adoption-learning-report "
+                    "--matrix-json "
+                    "build/sdetkit/adoption-real-world-learning/"
+                    "adoption-real-world-matrix.json "
+                    "--out build/sdetkit/adoption-learning-report.json "
+                    "--format json"
+                ),
+                "schema_version": adoption_learning_report.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "source_matrix",
+                    "source_matrix_schema_version",
+                    "source_matrix_status",
+                    "source_repo_count",
+                    "candidate_count",
+                    "top_candidate",
+                    "prioritized_upgrade_candidates",
+                    "repo_memory_profile",
+                    "operator_summary",
+                    "rules",
+                    "automation_allowed",
+                    "patch_application_allowed",
+                    "merge_authorized",
+                    "semantic_equivalence_proven",
+                    "authority_boundary",
                 ],
                 "stability": "advanced",
             },
