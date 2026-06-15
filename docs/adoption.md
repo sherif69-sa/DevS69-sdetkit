@@ -175,3 +175,66 @@ semantic_equivalence_proven=false
 ```
 
 The generated JSON artifact is registered as `adoption-learning-report-json` at `build/sdetkit/adoption-learning-report.json`. The Markdown file is an operator-readable companion, not a separate machine schema.
+
+## Render the adoption learning dashboard
+
+After generating `build/sdetkit/adoption-learning-report.json`, render a static local dashboard for human review:
+
+```bash
+sdetkit-adoption-learning-report-dashboard \
+  --report-path build/sdetkit/adoption-learning-report.json \
+  --format html \
+  --out build/sdetkit/adoption-learning-report-dashboard.html
+```
+
+The equivalent Python module command remains available:
+
+```bash
+python -m sdetkit.adoption_learning_report_dashboard \
+  --report-path build/sdetkit/adoption-learning-report.json \
+  --format html \
+  --out build/sdetkit/adoption-learning-report-dashboard.html
+```
+
+For deterministic machine-readable output, select JSON explicitly:
+
+```bash
+sdetkit-adoption-learning-report-dashboard \
+  --report-path build/sdetkit/adoption-learning-report.json \
+  --format json \
+  --out build/sdetkit/adoption-learning-report-dashboard.json
+```
+
+The dashboard validates the accepted source schema `sdetkit.adoption_learning_report.v1` and checks that `candidate_count` matches `prioritized_upgrade_candidates`. A successful render returns exit code `0`. Missing, malformed, unsupported-schema, or inconsistent input returns exit code `2` without creating the requested dashboard output.
+
+Read these dashboard JSON fields first:
+
+- `schema_version`
+- `status`
+- `source_report_schema_version`
+- `source_matrix_schema_version`
+- `source_matrix_status`
+- `source_repo_count`
+- `candidate_count`
+- `top_candidate`
+- `prioritized_upgrade_candidates`
+- `repo_memory_profile`
+- `operator_summary`
+- `local_only`
+- `read_only`
+- `decision_boundary`
+
+The HTML output is static and escapes report-provided text. It contains no JavaScript, performs no network access, and does not mutate the source adoption learning report. The JSON output is a deterministic read-only projection of the same accepted Python source of truth.
+
+The dashboard preserves these non-authorizing boundaries:
+
+```text
+current_pr_decision_input=false
+automation_allowed=false
+proof_commands_executed=false
+patch_application_allowed=false
+merge_authorized=false
+semantic_equivalence_proven=false
+```
+
+The default HTML output path is `build/sdetkit/adoption-learning-report-dashboard.html`. The optional JSON dashboard is not yet a separately registered artifact contract; artifact-index registration remains a distinct follow-up.
