@@ -119,3 +119,122 @@ patch_application_allowed=false
 merge_authorized=false
 semantic_equivalence_proven=false
 ```
+
+## Review real-world adoption learning
+
+Maintainers can aggregate read-only observations from a verified matrix of external repository roots, then convert the resulting matrix artifact into a review-first learning report.
+
+First, generate the real-world learning matrix from repository roots whose licenses and local paths have already been verified:
+
+```bash
+python -m sdetkit adoption-real-world-learning-matrix \
+  --matrix-json <verified-repo-matrix.json> \
+  --artifact-root build/sdetkit/adoption-real-world-learning \
+  --out build/sdetkit/adoption-real-world-learning/adoption-real-world-matrix.json \
+  --markdown-out build/sdetkit/adoption-real-world-learning/adoption-real-world-matrix.md \
+  --minimum-repos 10 \
+  --format json
+```
+
+The matrix lane inspects repository surfaces without installing dependencies, running target tests, changing target repositories, or opening target issues or pull requests. A fully passed matrix returns exit code `0`; a matrix that requires human review returns exit code `2` while still writing its evidence artifacts.
+
+Then generate the prioritized adoption learning report:
+
+```bash
+python -m sdetkit adoption-learning-report \
+  --matrix-json build/sdetkit/adoption-real-world-learning/adoption-real-world-matrix.json \
+  --out build/sdetkit/adoption-learning-report.json \
+  --markdown-out build/sdetkit/adoption-learning-report.md \
+  --format json
+```
+
+The report command reads the matrix artifact and, when explicitly provided, an optional RepoMemory profile. It does not revisit the target repositories, execute proof commands, apply patches, or make a current-PR decision.
+
+Read these JSON fields first:
+
+- `source_matrix_schema_version`
+- `source_matrix_status`
+- `source_repo_count`
+- `candidate_count`
+- `top_candidate`
+- `prioritized_upgrade_candidates`
+- `repo_memory_profile`
+- `operator_summary`
+- `rules`
+- `authority_boundary`
+
+Each candidate remains review-first. `safe_to_patch=false` means the report is evidence for a human-scoped follow-up, not approval to edit another repository.
+
+The report preserves these boundaries:
+
+```text
+automation_allowed=false
+patch_application_allowed=false
+merge_authorized=false
+semantic_equivalence_proven=false
+```
+
+The generated JSON artifact is registered as `adoption-learning-report-json` at `build/sdetkit/adoption-learning-report.json`. The Markdown file is an operator-readable companion, not a separate machine schema.
+
+## Render the adoption learning dashboard
+
+After generating `build/sdetkit/adoption-learning-report.json`, render a static local dashboard for human review:
+
+```bash
+sdetkit-adoption-learning-report-dashboard \
+  --report-path build/sdetkit/adoption-learning-report.json \
+  --format html \
+  --out build/sdetkit/adoption-learning-report-dashboard.html
+```
+
+The equivalent Python module command remains available:
+
+```bash
+python -m sdetkit.adoption_learning_report_dashboard \
+  --report-path build/sdetkit/adoption-learning-report.json \
+  --format html \
+  --out build/sdetkit/adoption-learning-report-dashboard.html
+```
+
+For deterministic machine-readable output, select JSON explicitly:
+
+```bash
+sdetkit-adoption-learning-report-dashboard \
+  --report-path build/sdetkit/adoption-learning-report.json \
+  --format json \
+  --out build/sdetkit/adoption-learning-report-dashboard.json
+```
+
+The dashboard validates the accepted source schema `sdetkit.adoption_learning_report.v1` and checks that `candidate_count` matches `prioritized_upgrade_candidates`. A successful render returns exit code `0`. Missing, malformed, unsupported-schema, or inconsistent input returns exit code `2` without creating the requested dashboard output.
+
+Read these dashboard JSON fields first:
+
+- `schema_version`
+- `status`
+- `source_report_schema_version`
+- `source_matrix_schema_version`
+- `source_matrix_status`
+- `source_repo_count`
+- `candidate_count`
+- `top_candidate`
+- `prioritized_upgrade_candidates`
+- `repo_memory_profile`
+- `operator_summary`
+- `local_only`
+- `read_only`
+- `decision_boundary`
+
+The HTML output is static and escapes report-provided text. It contains no JavaScript, performs no network access, and does not mutate the source adoption learning report. The JSON output is a deterministic read-only projection of the same accepted Python source of truth.
+
+The dashboard preserves these non-authorizing boundaries:
+
+```text
+current_pr_decision_input=false
+automation_allowed=false
+proof_commands_executed=false
+patch_application_allowed=false
+merge_authorized=false
+semantic_equivalence_proven=false
+```
+
+The default HTML output path is `build/sdetkit/adoption-learning-report-dashboard.html`. The optional JSON dashboard is not yet a separately registered artifact contract; artifact-index registration remains a distinct follow-up.

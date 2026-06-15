@@ -182,3 +182,69 @@ onboarding-next action plan, onboarding wizard, operator brief, operator
 evidence loop, and onramp verification. It is reporting-only and does not
 authorize remediation, patch application, merge, security dismissal, or
 semantic-equivalence claims.
+
+## Review the maintenance queue rollup
+
+Use the maintenance queue rollup when a maintainer needs one review-first ordering of the issue queue, automation-health evidence, and security-followup dispositions.
+
+Generate the rollup from the three accepted source artifacts:
+
+```bash
+python -m sdetkit maintenance-queue-rollup \
+  --issue-queue-json build/sdetkit/issue-queue-classifier.json \
+  --automation-health-json build/sdetkit/automation-health.json \
+  --security-followup-json build/sdetkit/security-followup-disposition.json \
+  --out build/sdetkit/maintenance-queue-rollup.json \
+  --format text
+```
+
+The command always writes the JSON artifact. `--format text` prints a compact operator summary; `--format json` prints the same artifact payload to standard output.
+
+Read these top-level fields first:
+
+- `schema_version`
+- `status`
+- `source_issue_count`
+- `queue_item_count`
+- `review_required_count`
+- `close_candidate_count`
+- `primary_issue`
+- `recommended_next_action`
+- `queue_items`
+- `input_artifacts`
+- `automation_allowed`
+- `merge_authorized`
+- `semantic_equivalence_proven`
+
+The status values mean:
+
+- `review required`: one or more queue items require human review;
+- `ready with proof`: queue items exist, but none currently require review;
+- `empty`: no valid queue items were produced.
+
+Queue items requiring review are ordered before other items. Within that boundary, higher `rank_score` values are ordered first, followed by the lower issue number when scores are equal.
+
+For each queue item, inspect:
+
+- `issue_number`
+- `title`
+- `lane`
+- `classification`
+- `rank_score`
+- `review_required`
+- `close_candidate`
+- `security_disposition`
+- `automation_health_state`
+- `recommended_action`
+
+`primary_issue` identifies the first item in the review ordering. It is a prioritization signal, not authorization to edit, close, dismiss, or merge anything. Likewise, `close_candidate=true` is context for human review and never performs issue mutation.
+
+The rollup preserves these boundaries at the top level and on every queue item:
+
+```text
+automation_allowed=false
+merge_authorized=false
+semantic_equivalence_proven=false
+```
+
+The artifact is registered as `maintenance-queue-rollup-json` at `build/sdetkit/maintenance-queue-rollup.json` with schema `sdetkit.maintenance.queue.rollup.v1`. It is a local reporting artifact and does not apply patches, mutate issues, dismiss security findings, or make a merge decision.

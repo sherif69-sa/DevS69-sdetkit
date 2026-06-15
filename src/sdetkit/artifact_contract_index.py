@@ -5,6 +5,7 @@ from typing import Any
 
 from . import (
     adoption_learning_report,
+    adoption_learning_report_dashboard,
     adoption_surface,
     automation_health,
     candidate_collision_checklist,
@@ -56,6 +57,13 @@ def build_index() -> dict[str, Any]:
         "--queue-path build/local-diagnostic-queue/queue.json "
         "--format json "
         "--out build/local-diagnostic-queue/dashboard.json"
+    )
+
+    adoption_learning_report_dashboard_command = (
+        "sdetkit-adoption-learning-report-dashboard "
+        "--report-path build/sdetkit/adoption-learning-report.json "
+        "--format json "
+        "--out build/sdetkit/adoption-learning-report-dashboard.json"
     )
 
     return {
@@ -759,6 +767,34 @@ def build_index() -> dict[str, Any]:
                     "merge_authorized",
                     "semantic_equivalence_proven",
                     "authority_boundary",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "adoption-learning-report-dashboard-json",
+                "path": adoption_learning_report_dashboard.DEFAULT_OUT.with_suffix(
+                    ".json"
+                ).as_posix(),
+                "produced_by": adoption_learning_report_dashboard_command,
+                "schema_version": adoption_learning_report_dashboard.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "status",
+                    "report_path",
+                    "report_exists",
+                    "source_report_schema_version",
+                    "source_matrix",
+                    "source_matrix_schema_version",
+                    "source_matrix_status",
+                    "source_repo_count",
+                    "candidate_count",
+                    "top_candidate",
+                    "prioritized_upgrade_candidates",
+                    "repo_memory_profile",
+                    "operator_summary",
+                    "local_only",
+                    "read_only",
+                    "decision_boundary",
                 ],
                 "stability": "advanced",
             },
