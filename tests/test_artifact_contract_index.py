@@ -10,10 +10,13 @@ from sdetkit import (
     candidate_evidence_checklist,
     candidate_freeze_readiness,
     check_intelligence,
+    diagnostic_job,
     diagnostic_signal_snapshot,
     diagnostic_signal_snapshot_history,
+    diagnostic_worker_trajectory,
     doctor,
     issue_queue_classifier,
+    job_queue,
     maintenance_queue_rollup,
     pr_quality_runtime_proof_artifacts,
     professional_naming_cleanup_plan,
@@ -295,6 +298,85 @@ def test_artifact_contract_index_includes_canonical_gate_artifacts() -> None:
         assert artifact_id in entries
         required = set(entries[artifact_id]["required_fields"])
         assert {"ok", "failed_steps", "profile"}.issubset(required)
+
+
+def test_artifact_contract_index_includes_local_diagnostic_queue_artifacts() -> None:
+    payload = build_index()
+    entries = {item["id"]: item for item in payload["artifacts"]}
+
+    artifact_ids = {
+        "local-diagnostic-queue-json",
+        "diagnostic-worker-result-json",
+        "diagnostic-worker-trajectory-jsonl",
+        "diagnostic-worker-trajectory-summary-json",
+    }
+
+    assert artifact_ids.issubset(entries)
+
+    queue_entry = entries["local-diagnostic-queue-json"]
+    worker_entry = entries["diagnostic-worker-result-json"]
+    trajectory_entry = entries["diagnostic-worker-trajectory-jsonl"]
+    summary_entry = entries["diagnostic-worker-trajectory-summary-json"]
+
+    assert queue_entry["schema_version"] == job_queue.SCHEMA_VERSION
+    assert worker_entry["schema_version"] == diagnostic_job.WORKER_RESULT_SCHEMA_VERSION
+    assert trajectory_entry["schema_version"] == trajectory_store.SCHEMA_VERSION
+    assert summary_entry["schema_version"] == diagnostic_worker_trajectory.SCHEMA_VERSION
+
+    assert queue_entry["path"] == ("build/local-diagnostic-queue/queue.json")
+    assert worker_entry["path"] == (
+        "build/local-diagnostic-queue/worker/<job-id>/diagnostic-worker-result.json"
+    )
+    assert trajectory_entry["path"] == (
+        "build/local-diagnostic-queue/worker/<job-id>/trajectory/diagnostic-worker-trajectory.jsonl"
+    )
+    assert summary_entry["path"] == (
+        "build/local-diagnostic-queue/worker/"
+        "<job-id>/trajectory/"
+        "diagnostic-worker-trajectory-summary.json"
+    )
+
+    assert {
+        "schema_version",
+        "execution_mode",
+        "jobs",
+        "decision_boundary",
+    }.issubset(queue_entry["required_fields"])
+
+    assert {
+        "schema_version",
+        "job_id",
+        "status",
+        "output_artifacts",
+        "decision_boundary",
+        "execution",
+    }.issubset(worker_entry["required_fields"])
+
+    assert {
+        "schema_version",
+        "trajectory_id",
+        "decision",
+        "proof",
+        "worker_evidence",
+    }.issubset(trajectory_entry["required_fields"])
+
+    assert {
+        "schema_version",
+        "trajectory_schema_version",
+        "reporting_only",
+        "current_pr_decision_input",
+        "automation_allowed",
+        "merge_authorized",
+    }.issubset(summary_entry["required_fields"])
+
+    for artifact_id in artifact_ids:
+        entry = entries[artifact_id]
+
+        assert entry["stability"] == "advanced"
+        assert entry["produced_by"].startswith("sdetkit-diagnostic-queue-runner ")
+        assert "--max-jobs <count>" in entry["produced_by"]
+        assert "--claimed-at <timestamp>" in entry["produced_by"]
+        assert "--finished-at <timestamp>" in entry["produced_by"]
 
 
 def test_artifact_contract_index_docs_json_matches_generator_payload() -> None:

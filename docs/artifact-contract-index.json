@@ -26,6 +26,83 @@
       "stability": "public"
     },
     {
+      "id": "local-diagnostic-queue-json",
+      "path": "build/local-diagnostic-queue/queue.json",
+      "produced_by": "sdetkit-diagnostic-queue-runner --queue-path build/local-diagnostic-queue/queue.json --out-root build/local-diagnostic-queue/worker --input-root build/local-diagnostic-queue/inputs --max-jobs <count> --claimed-at <timestamp> --finished-at <timestamp>",
+      "schema_version": "sdetkit.local_diagnostic_job_queue.v1",
+      "required_fields": [
+        "schema_version",
+        "execution_mode",
+        "jobs",
+        "decision_boundary"
+      ],
+      "stability": "advanced"
+    },
+    {
+      "id": "diagnostic-worker-result-json",
+      "path": "build/local-diagnostic-queue/worker/<job-id>/diagnostic-worker-result.json",
+      "produced_by": "sdetkit-diagnostic-queue-runner --queue-path build/local-diagnostic-queue/queue.json --out-root build/local-diagnostic-queue/worker --input-root build/local-diagnostic-queue/inputs --max-jobs <count> --claimed-at <timestamp> --finished-at <timestamp>",
+      "schema_version": "sdetkit.diagnostic_worker_result.v1",
+      "required_fields": [
+        "schema_version",
+        "job_id",
+        "job_type",
+        "worker",
+        "status",
+        "execution_mode",
+        "summary",
+        "primary_diagnosis",
+        "output_artifacts",
+        "decision_boundary",
+        "execution"
+      ],
+      "stability": "advanced"
+    },
+    {
+      "id": "diagnostic-worker-trajectory-jsonl",
+      "path": "build/local-diagnostic-queue/worker/<job-id>/trajectory/diagnostic-worker-trajectory.jsonl",
+      "produced_by": "sdetkit-diagnostic-queue-runner --queue-path build/local-diagnostic-queue/queue.json --out-root build/local-diagnostic-queue/worker --input-root build/local-diagnostic-queue/inputs --max-jobs <count> --claimed-at <timestamp> --finished-at <timestamp>",
+      "schema_version": "sdetkit.trajectory.v1",
+      "required_fields": [
+        "schema_version",
+        "trajectory_id",
+        "environment",
+        "diagnosis",
+        "decision",
+        "response",
+        "fix",
+        "proof",
+        "final_result",
+        "learned_pattern",
+        "worker_evidence"
+      ],
+      "stability": "advanced"
+    },
+    {
+      "id": "diagnostic-worker-trajectory-summary-json",
+      "path": "build/local-diagnostic-queue/worker/<job-id>/trajectory/diagnostic-worker-trajectory-summary.json",
+      "produced_by": "sdetkit-diagnostic-queue-runner --queue-path build/local-diagnostic-queue/queue.json --out-root build/local-diagnostic-queue/worker --input-root build/local-diagnostic-queue/inputs --max-jobs <count> --claimed-at <timestamp> --finished-at <timestamp>",
+      "schema_version": "sdetkit.diagnostic_worker_trajectory.v1",
+      "required_fields": [
+        "schema_version",
+        "trajectory_schema_version",
+        "status",
+        "record_count",
+        "review_first_count",
+        "observed_safe_fix_candidate_count",
+        "worker_result_status",
+        "trajectory_jsonl",
+        "reporting_only",
+        "current_pr_decision_input",
+        "proof_commands_executed",
+        "patch_application_allowed",
+        "automation_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "diagnostic-signal-snapshot-json",
       "path": "build/pr-quality/diagnostic-signal-snapshot/diagnostic-signal-snapshot.json",
       "produced_by": "python -m sdetkit.diagnostic_signal_snapshot --evidence-narrative <evidence-narrative.json> --evidence-graph <evidence-graph.json> --diagnostic-worker-result <diagnostic-worker-result.json> --runtime-proof-artifacts <runtime-proof-artifacts.json> --security-finding-diagnosis <security-finding-diagnosis.json> --out-dir build/pr-quality/diagnostic-signal-snapshot --format json",
