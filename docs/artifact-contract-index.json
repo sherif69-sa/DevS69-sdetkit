@@ -39,6 +39,30 @@
       "stability": "advanced"
     },
     {
+      "id": "local-diagnostic-queue-dashboard-json",
+      "path": "build/local-diagnostic-queue/dashboard.json",
+      "produced_by": "sdetkit-local-diagnostic-queue-dashboard --queue-path build/local-diagnostic-queue/queue.json --format json --out build/local-diagnostic-queue/dashboard.json",
+      "schema_version": "sdetkit.local_diagnostic_queue_dashboard.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "queue_path",
+        "queue_exists",
+        "source_queue_schema_version",
+        "execution_mode",
+        "local_only",
+        "read_only",
+        "job_count",
+        "state_counts",
+        "artifact_count",
+        "present_artifact_count",
+        "missing_artifact_count",
+        "jobs",
+        "decision_boundary"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "diagnostic-worker-result-json",
       "path": "build/local-diagnostic-queue/worker/<job-id>/diagnostic-worker-result.json",
       "produced_by": "sdetkit-diagnostic-queue-runner --queue-path build/local-diagnostic-queue/queue.json --out-root build/local-diagnostic-queue/worker --input-root build/local-diagnostic-queue/inputs --max-jobs <count> --claimed-at <timestamp> --finished-at <timestamp>",

@@ -17,6 +17,7 @@ from . import (
     doctor,
     issue_queue_classifier,
     job_queue,
+    local_diagnostic_queue_dashboard,
     maintenance_queue_rollup,
     pr_quality_runtime_proof_artifacts,
     professional_naming_cleanup_plan,
@@ -49,6 +50,13 @@ def build_index() -> dict[str, Any]:
         "--finished-at <timestamp>"
     )
 
+    local_diagnostic_queue_dashboard_command = (
+        "sdetkit-local-diagnostic-queue-dashboard "
+        "--queue-path build/local-diagnostic-queue/queue.json "
+        "--format json "
+        "--out build/local-diagnostic-queue/dashboard.json"
+    )
+
     return {
         "schema_version": INDEX_SCHEMA_VERSION,
         "artifacts": [
@@ -76,6 +84,32 @@ def build_index() -> dict[str, Any]:
                 "required_fields": [
                     "schema_version",
                     "execution_mode",
+                    "jobs",
+                    "decision_boundary",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "local-diagnostic-queue-dashboard-json",
+                "path": local_diagnostic_queue_dashboard.DEFAULT_OUT.with_suffix(
+                    ".json"
+                ).as_posix(),
+                "produced_by": local_diagnostic_queue_dashboard_command,
+                "schema_version": local_diagnostic_queue_dashboard.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "status",
+                    "queue_path",
+                    "queue_exists",
+                    "source_queue_schema_version",
+                    "execution_mode",
+                    "local_only",
+                    "read_only",
+                    "job_count",
+                    "state_counts",
+                    "artifact_count",
+                    "present_artifact_count",
+                    "missing_artifact_count",
                     "jobs",
                     "decision_boundary",
                 ],

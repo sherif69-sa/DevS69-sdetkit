@@ -17,6 +17,7 @@ from sdetkit import (
     doctor,
     issue_queue_classifier,
     job_queue,
+    local_diagnostic_queue_dashboard,
     maintenance_queue_rollup,
     pr_quality_runtime_proof_artifacts,
     professional_naming_cleanup_plan,
@@ -377,6 +378,44 @@ def test_artifact_contract_index_includes_local_diagnostic_queue_artifacts() -> 
         assert "--max-jobs <count>" in entry["produced_by"]
         assert "--claimed-at <timestamp>" in entry["produced_by"]
         assert "--finished-at <timestamp>" in entry["produced_by"]
+
+
+def test_artifact_contract_index_includes_local_diagnostic_queue_dashboard_json() -> None:
+    payload = build_index()
+    entries = {item["id"]: item for item in payload["artifacts"]}
+
+    artifact_id = "local-diagnostic-queue-dashboard-json"
+    assert artifact_id in entries
+
+    entry = entries[artifact_id]
+    assert entry["schema_version"] == local_diagnostic_queue_dashboard.SCHEMA_VERSION
+    assert entry["path"] == (
+        local_diagnostic_queue_dashboard.DEFAULT_OUT.with_suffix(".json").as_posix()
+    )
+    assert entry["stability"] == "advanced"
+
+    assert {
+        "schema_version",
+        "status",
+        "queue_path",
+        "queue_exists",
+        "source_queue_schema_version",
+        "execution_mode",
+        "local_only",
+        "read_only",
+        "job_count",
+        "state_counts",
+        "artifact_count",
+        "present_artifact_count",
+        "missing_artifact_count",
+        "jobs",
+        "decision_boundary",
+    }.issubset(set(entry["required_fields"]))
+
+    assert entry["produced_by"].startswith("sdetkit-local-diagnostic-queue-dashboard ")
+    assert "--queue-path build/local-diagnostic-queue/queue.json" in (entry["produced_by"])
+    assert "--format json" in entry["produced_by"]
+    assert "--out build/local-diagnostic-queue/dashboard.json" in (entry["produced_by"])
 
 
 def test_artifact_contract_index_docs_json_matches_generator_payload() -> None:
