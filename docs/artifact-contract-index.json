@@ -678,6 +678,32 @@
       "stability": "advanced"
     },
     {
+      "id": "adoption-learning-report-dashboard-json",
+      "path": "build/sdetkit/adoption-learning-report-dashboard.json",
+      "produced_by": "sdetkit-adoption-learning-report-dashboard --report-path build/sdetkit/adoption-learning-report.json --format json --out build/sdetkit/adoption-learning-report-dashboard.json",
+      "schema_version": "sdetkit.adoption_learning_report_dashboard.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "report_path",
+        "report_exists",
+        "source_report_schema_version",
+        "source_matrix",
+        "source_matrix_schema_version",
+        "source_matrix_status",
+        "source_repo_count",
+        "candidate_count",
+        "top_candidate",
+        "prioritized_upgrade_candidates",
+        "repo_memory_profile",
+        "operator_summary",
+        "local_only",
+        "read_only",
+        "decision_boundary"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "doctor-json",
       "path": "build/doctor.json",
       "produced_by": "python -m sdetkit doctor --format json --out build/doctor.json",

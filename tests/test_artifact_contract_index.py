@@ -5,6 +5,7 @@ from pathlib import Path
 
 from sdetkit import (
     adoption_learning_report,
+    adoption_learning_report_dashboard,
     adoption_surface,
     automation_health,
     candidate_collision_checklist,
@@ -458,6 +459,46 @@ def test_artifact_contract_index_includes_adoption_learning_report_json() -> Non
     )
     assert "--out build/sdetkit/adoption-learning-report.json" in entry["produced_by"]
     assert "--format json" in entry["produced_by"]
+
+
+def test_artifact_contract_index_includes_adoption_learning_report_dashboard_json() -> None:
+    payload = build_index()
+    entries = {item["id"]: item for item in payload["artifacts"]}
+
+    artifact_id = "adoption-learning-report-dashboard-json"
+    assert artifact_id in entries
+
+    entry = entries[artifact_id]
+    assert entry["schema_version"] == adoption_learning_report_dashboard.SCHEMA_VERSION
+    assert entry["path"] == (
+        adoption_learning_report_dashboard.DEFAULT_OUT.with_suffix(".json").as_posix()
+    )
+    assert entry["stability"] == "advanced"
+
+    assert {
+        "schema_version",
+        "status",
+        "report_path",
+        "report_exists",
+        "source_report_schema_version",
+        "source_matrix",
+        "source_matrix_schema_version",
+        "source_matrix_status",
+        "source_repo_count",
+        "candidate_count",
+        "top_candidate",
+        "prioritized_upgrade_candidates",
+        "repo_memory_profile",
+        "operator_summary",
+        "local_only",
+        "read_only",
+        "decision_boundary",
+    }.issubset(set(entry["required_fields"]))
+
+    assert entry["produced_by"].startswith("sdetkit-adoption-learning-report-dashboard ")
+    assert "--report-path build/sdetkit/adoption-learning-report.json" in entry["produced_by"]
+    assert "--format json" in entry["produced_by"]
+    assert "--out build/sdetkit/adoption-learning-report-dashboard.json" in entry["produced_by"]
 
 
 def test_artifact_contract_index_docs_json_matches_generator_payload() -> None:
