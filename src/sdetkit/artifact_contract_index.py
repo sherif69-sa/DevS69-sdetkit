@@ -10,10 +10,13 @@ from . import (
     candidate_evidence_checklist,
     candidate_freeze_readiness,
     check_intelligence,
+    diagnostic_job,
     diagnostic_signal_snapshot,
     diagnostic_signal_snapshot_history,
+    diagnostic_worker_trajectory,
     doctor,
     issue_queue_classifier,
+    job_queue,
     maintenance_queue_rollup,
     pr_quality_runtime_proof_artifacts,
     professional_naming_cleanup_plan,
@@ -36,6 +39,16 @@ INDEX_SCHEMA_VERSION = "sdetkit.artifact-contract-index.v1"
 
 
 def build_index() -> dict[str, Any]:
+    local_diagnostic_queue_command = (
+        "sdetkit-diagnostic-queue-runner "
+        "--queue-path build/local-diagnostic-queue/queue.json "
+        "--out-root build/local-diagnostic-queue/worker "
+        "--input-root build/local-diagnostic-queue/inputs "
+        "--max-jobs <count> "
+        "--claimed-at <timestamp> "
+        "--finished-at <timestamp>"
+    )
+
     return {
         "schema_version": INDEX_SCHEMA_VERSION,
         "artifacts": [
@@ -54,6 +67,93 @@ def build_index() -> dict[str, Any]:
                 "schema_version": None,
                 "required_fields": ["ok", "failed_steps", "profile"],
                 "stability": "public",
+            },
+            {
+                "id": "local-diagnostic-queue-json",
+                "path": "build/local-diagnostic-queue/queue.json",
+                "produced_by": local_diagnostic_queue_command,
+                "schema_version": job_queue.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "execution_mode",
+                    "jobs",
+                    "decision_boundary",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "diagnostic-worker-result-json",
+                "path": (
+                    "build/local-diagnostic-queue/worker/<job-id>/diagnostic-worker-result.json"
+                ),
+                "produced_by": local_diagnostic_queue_command,
+                "schema_version": diagnostic_job.WORKER_RESULT_SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "job_id",
+                    "job_type",
+                    "worker",
+                    "status",
+                    "execution_mode",
+                    "summary",
+                    "primary_diagnosis",
+                    "output_artifacts",
+                    "decision_boundary",
+                    "execution",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "diagnostic-worker-trajectory-jsonl",
+                "path": (
+                    "build/local-diagnostic-queue/worker/"
+                    "<job-id>/trajectory/"
+                    "diagnostic-worker-trajectory.jsonl"
+                ),
+                "produced_by": local_diagnostic_queue_command,
+                "schema_version": trajectory_store.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "trajectory_id",
+                    "environment",
+                    "diagnosis",
+                    "decision",
+                    "response",
+                    "fix",
+                    "proof",
+                    "final_result",
+                    "learned_pattern",
+                    "worker_evidence",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "diagnostic-worker-trajectory-summary-json",
+                "path": (
+                    "build/local-diagnostic-queue/worker/"
+                    "<job-id>/trajectory/"
+                    "diagnostic-worker-trajectory-summary.json"
+                ),
+                "produced_by": local_diagnostic_queue_command,
+                "schema_version": diagnostic_worker_trajectory.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "trajectory_schema_version",
+                    "status",
+                    "record_count",
+                    "review_first_count",
+                    "observed_safe_fix_candidate_count",
+                    "worker_result_status",
+                    "trajectory_jsonl",
+                    "reporting_only",
+                    "current_pr_decision_input",
+                    "proof_commands_executed",
+                    "patch_application_allowed",
+                    "automation_allowed",
+                    "merge_authorized",
+                    "semantic_equivalence_proven",
+                ],
+                "stability": "advanced",
             },
             {
                 "id": "diagnostic-signal-snapshot-json",
