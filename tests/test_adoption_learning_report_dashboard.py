@@ -338,3 +338,12 @@ def test_dashboard_rejects_unknown_schema_or_inconsistent_count(
     assert rc == 2
     assert not out.exists()
     assert "candidate_count does not match" in capsys.readouterr().err
+
+
+def test_project_registers_adoption_learning_report_dashboard_script() -> None:
+    pyproject = Path("pyproject.toml").read_text(encoding="utf-8")
+
+    assert (
+        "sdetkit-adoption-learning-report-dashboard = "
+        '"sdetkit.adoption_learning_report_dashboard:main"' in pyproject
+    )
