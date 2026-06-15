@@ -160,6 +160,89 @@ semantic_equivalence_proven=false
 
 Do not present trajectory observations as focused proof, CI proof, patch approval, or merge approval.
 
+## Render the local queue dashboard
+
+The dashboard is a static, local-only, read-only view of the validated queue JSON. It does not run the queue, execute a worker, retry a job, or change queue state.
+
+Use the installed command to create an HTML dashboard:
+
+```bash
+sdetkit-local-diagnostic-queue-dashboard \
+  --queue-path build/local-diagnostic-queue/queue.json \
+  --format html \
+  --out build/local-diagnostic-queue/dashboard.html
+```
+
+The equivalent Python module command is:
+
+```bash
+python -m sdetkit.local_diagnostic_queue_dashboard \
+  --queue-path build/local-diagnostic-queue/queue.json \
+  --format html \
+  --out build/local-diagnostic-queue/dashboard.html
+```
+
+The default format is HTML. When `--out` is omitted, the default path is:
+
+```text
+build/local-diagnostic-queue/dashboard.html
+```
+
+Open the generated HTML file directly in a browser. No web server, hosted service, JavaScript application, or network connection is required.
+
+The dashboard shows:
+
+- total jobs and counts for `pending`, `claimed`, `completed`, and `failed`;
+- repository, PR number, head SHA, and queue timestamps for each job;
+- sanitized failure reasons for failed jobs;
+- result-artifact links for completed jobs;
+- whether each referenced artifact is currently present or missing.
+
+Artifact links are calculated relative to the dashboard output location when possible. The dashboard does not copy, alter, or regenerate the referenced artifacts.
+
+To produce a deterministic JSON representation instead:
+
+```bash
+sdetkit-local-diagnostic-queue-dashboard \
+  --queue-path build/local-diagnostic-queue/queue.json \
+  --format json \
+  --out build/local-diagnostic-queue/dashboard.json
+```
+
+Read these JSON fields first:
+
+- `status`
+- `queue_exists`
+- `source_queue_schema_version`
+- `execution_mode`
+- `job_count`
+- `state_counts`
+- `artifact_count`
+- `present_artifact_count`
+- `missing_artifact_count`
+- `jobs`
+- `decision_boundary`
+
+A queue with no jobs produces `status=empty`. A missing queue path is also rendered as a valid empty view and is not created or mutated by the dashboard.
+
+For successful rendering, the command exits with code `0`. A malformed queue, unreadable input, or output-write failure returns code `2`.
+
+The dashboard preserves these boundaries:
+
+```text
+local_only=true
+read_only=true
+current_pr_decision_input=false
+automation_allowed=false
+automatic_retry=false
+proof_commands_executed=false
+patch_application_allowed=false
+merge_authorized=false
+semantic_equivalence_proven=false
+```
+
+The dashboard is an operator presentation surface only. Its output is not CI proof, patch approval, a current-PR decision, or merge authorization.
+
 ## Read the JSON summary
 
 Read these fields first:
