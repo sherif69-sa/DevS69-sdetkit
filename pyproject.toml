@@ -148,6 +148,7 @@ sdetkit-test-bootstrap-validate = "sdetkit.test_bootstrap_validate:main"
 sdetkit-diagnostic-queue-runner = "sdetkit.diagnostic_queue_runner_cli:main"
 sdetkit-local-diagnostic-queue-dashboard = "sdetkit.local_diagnostic_queue_dashboard:main"
 sdetkit-adoption-learning-report-dashboard = "sdetkit.adoption_learning_report_dashboard:main"
+sdetkit-maintenance-queue-rollup-dashboard = "sdetkit.maintenance_queue_rollup_dashboard:main"
 
 [project.entry-points."sdetkit.notify_adapters"]
 stdout = "sdetkit.notify_plugins:stdout_adapter"
