@@ -21,6 +21,7 @@ from . import (
     job_queue,
     local_diagnostic_queue_dashboard,
     maintenance_queue_rollup,
+    maintenance_queue_rollup_dashboard,
     pr_quality_runtime_proof_artifacts,
     professional_naming_cleanup_plan,
     professional_naming_inventory,
@@ -64,6 +65,13 @@ def build_index() -> dict[str, Any]:
         "--report-path build/sdetkit/adoption-learning-report.json "
         "--format json "
         "--out build/sdetkit/adoption-learning-report-dashboard.json"
+    )
+
+    maintenance_queue_rollup_dashboard_command = (
+        "sdetkit-maintenance-queue-rollup-dashboard "
+        "--rollup-path build/sdetkit/maintenance-queue-rollup.json "
+        "--format json "
+        "--out build/sdetkit/maintenance-queue-rollup-dashboard.json"
     )
 
     return {
@@ -574,6 +582,35 @@ def build_index() -> dict[str, Any]:
                     "automation_allowed",
                     "merge_authorized",
                     "semantic_equivalence_proven",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "maintenance-queue-rollup-dashboard-json",
+                "path": maintenance_queue_rollup_dashboard.DEFAULT_OUT.with_suffix(
+                    ".json"
+                ).as_posix(),
+                "produced_by": maintenance_queue_rollup_dashboard_command,
+                "schema_version": maintenance_queue_rollup_dashboard.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "status",
+                    "rollup_path",
+                    "rollup_exists",
+                    "source_rollup_schema_version",
+                    "source_rollup_status",
+                    "source_issue_count",
+                    "queue_item_count",
+                    "review_required_count",
+                    "close_candidate_count",
+                    "primary_issue",
+                    "recommended_next_action",
+                    "lane_counts",
+                    "input_artifacts",
+                    "queue_items",
+                    "local_only",
+                    "read_only",
+                    "decision_boundary",
                 ],
                 "stability": "advanced",
             },
