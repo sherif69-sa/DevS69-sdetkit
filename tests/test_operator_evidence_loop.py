@@ -188,6 +188,7 @@ def test_operator_evidence_loop_verification_marks_complete_bundle(tmp_path: Pat
     assert verification["missing_artifacts"] == []
     assert verification["checks"] == {
         "advisory_boundary": True,
+        "reporting_projection_boundary": True,
         "comment": True,
         "mission": True,
         "patch_plan": True,
@@ -302,3 +303,337 @@ def test_operator_evidence_loop_surfaces_safe_fix_outcome_rollup(tmp_path: Path)
     assert "## Safe-fix outcome rollup" in markdown
     assert "Recommendation: `rerun_proof`" in markdown
     assert "`tests/test_example.py`" in markdown
+
+
+def _projection_inputs(
+    tmp_path: Path,
+) -> tuple[Path, Path, Path]:
+    trajectory_path = _write_json(
+        tmp_path / "trajectory-history.json",
+        {
+            "schema_version": ("sdetkit.trajectory_history_report.v1"),
+            "record_count": 3,
+            "review_first_count": 2,
+            "auto_fix_allowed_count": 1,
+            "by_final_result": {
+                "passed": 2,
+                "review_required": 1,
+            },
+            "by_risk_surface": {
+                "formatting": 1,
+                "security": 2,
+            },
+            "by_failure_class": {
+                "formatting_only": 1,
+                "security_review": 2,
+            },
+            "by_action": {
+                "review": 2,
+                "verify": 1,
+            },
+            "recent_decisions": [
+                {
+                    "diagnostic_id": "diag-3",
+                    "action": "review",
+                    "failure_class": ("security_review"),
+                    "risk_surface": "security",
+                    "review_first": True,
+                    "auto_fix_allowed": False,
+                    "final_result": ("review_required"),
+                }
+            ],
+        },
+    )
+    patch_score_path = _write_json(
+        tmp_path / "patch-score.json",
+        {
+            "schema_version": "sdetkit.patch_score.v1",
+            "patch_id": "patch-1",
+            "diagnosis_id": "diag-3",
+            "failure_surface": "formatting",
+            "classification": "formatting_only",
+            "risk_level": "low",
+            "strategy": "run_pre_commit",
+            "score": 90,
+            "minimum_score": 80,
+            "changed_files": ["src/example.py"],
+            "risk_flags": [
+                {
+                    "code": ("SAFE_PATTERN_NOT_REPEATED"),
+                    "blocking": False,
+                }
+            ],
+            "decision": {
+                "status": ("candidate_for_protected_verification"),
+                "candidate_for_protected_verification": (True),
+                "automation_allowed": False,
+            },
+        },
+    )
+    verifier_path = _write_json(
+        tmp_path / "protected-verifier.json",
+        {
+            "schema_version": ("sdetkit.protected_verifier.decision.v1"),
+            "patch_id": "patch-1",
+            "diagnosis_id": "diag-3",
+            "patch_score": 90,
+            "findings": [
+                {
+                    "code": ("SEMANTIC_EQUIVALENCE_NOT_PROVEN"),
+                    "blocking": False,
+                }
+            ],
+            "risk_flags": [],
+            "decision": {
+                "status": ("structurally_verified_candidate"),
+                "structural_verification_passed": (True),
+                "semantic_equivalence_proven": False,
+                "automation_allowed": False,
+                "merge_authorized": False,
+            },
+        },
+    )
+    return (
+        trajectory_path,
+        patch_score_path,
+        verifier_path,
+    )
+
+
+def test_operator_loop_projects_existing_reports_without_changing_decision(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    graph_path = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [],
+            "source_summary": [],
+        },
+    )
+    (
+        trajectory_path,
+        patch_score_path,
+        verifier_path,
+    ) = _projection_inputs(tmp_path)
+
+    original_inputs = {
+        path: path.read_text(encoding="utf-8")
+        for path in (
+            trajectory_path,
+            patch_score_path,
+            verifier_path,
+        )
+    }
+
+    baseline = loop.build_operator_evidence_loop(
+        repo=repo,
+        out_dir=tmp_path / "baseline",
+        evidence_graph_path=graph_path,
+        quality_outcome="success",
+    )
+    projected = loop.build_operator_evidence_loop(
+        repo=repo,
+        out_dir=tmp_path / "projected",
+        evidence_graph_path=graph_path,
+        quality_outcome="success",
+        trajectory_history=trajectory_path,
+        patch_score=patch_score_path,
+        protected_verifier_decision=verifier_path,
+    )
+
+    reporting_key = _artifact_key(
+        "reporting",
+        "projections",
+    )
+    trajectory_key = _artifact_key(
+        "trajectory",
+        "history",
+        "projection",
+    )
+    patch_key = _artifact_key(
+        "patch",
+        "score",
+        "projection",
+    )
+    verifier_key = _artifact_key(
+        "protected",
+        "verifier",
+        "projection",
+    )
+    current_input_key = _artifact_key(
+        "current",
+        "pr",
+        "decision",
+        "input",
+    )
+    producer_changed_key = _artifact_key(
+        "producer",
+        "execution",
+        "changed",
+    )
+
+    reporting = projected[reporting_key]
+
+    assert reporting["schema_version"] == ".".join(
+        (
+            "sdetkit",
+            "operator",
+            "evidence",
+            "loop",
+            "reporting",
+            "projections",
+            "v1",
+        )
+    )
+    assert reporting["reporting_only"] is True
+    assert reporting[current_input_key] is False
+    assert reporting[producer_changed_key] is False
+    assert reporting["decision_boundary"] == {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+
+    trajectory = reporting[trajectory_key]
+    assert trajectory["collection_status"] == "collected"
+    assert trajectory["record_count"] == 3
+    assert trajectory["review_first_count"] == 2
+    assert len(trajectory["recent_decisions"]) == 1
+
+    patch_score = reporting[patch_key]
+    assert patch_score["collection_status"] == "collected"
+    assert patch_score["score"] == 90
+    assert patch_score["source_candidate_for_protected_verification"] is True
+    assert patch_score["source_automation_allowed"] is False
+
+    verifier = reporting[verifier_key]
+    assert verifier["collection_status"] == "collected"
+    assert verifier["source_structural_verification_passed"] is True
+    assert verifier["source_semantic_equivalence_proven"] is False
+
+    assert projected["classification"] == baseline["classification"]
+    projected_patch_plan = {
+        key: value
+        for key, value in projected["patch_plan"].items()
+        if key not in {"path", "artifacts"}
+    }
+    baseline_patch_plan = {
+        key: value
+        for key, value in baseline["patch_plan"].items()
+        if key not in {"path", "artifacts"}
+    }
+    assert projected_patch_plan == baseline_patch_plan
+    assert projected["automation_boundary"] == baseline["automation_boundary"]
+    assert projected["verification"]["ok"] is True
+
+    artifacts = projected["artifacts"]
+    assert (
+        artifacts[
+            _artifact_key(
+                "trajectory",
+                "history",
+                "json",
+            )
+        ]
+        == trajectory_path.as_posix()
+    )
+    assert artifacts[_artifact_key("patch", "score", "json")] == patch_score_path.as_posix()
+    assert (
+        artifacts[
+            _artifact_key(
+                "protected",
+                "verifier",
+                "json",
+            )
+        ]
+        == verifier_path.as_posix()
+    )
+
+    markdown = (tmp_path / "projected" / "operator-loop.md").read_text(encoding="utf-8")
+    assert "## Read-only reporting projections" in markdown
+    assert "Current PR decision input: `false`" in markdown
+    assert "Producer execution changed: `false`" in markdown
+    assert "### Trajectory history" in markdown
+    assert "### PatchScorer" in markdown
+    assert "### ProtectedVerifier" in markdown
+
+    for path, original in original_inputs.items():
+        assert path.read_text(encoding="utf-8") == original
+
+
+def test_operator_loop_cli_accepts_optional_projection_artifacts(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    graph_path = _write_json(
+        tmp_path / "evidence-graph.json",
+        {
+            "schema_version": "sdetkit.evidence-graph.v1",
+            "nodes": [],
+            "source_summary": [],
+        },
+    )
+    (
+        trajectory_path,
+        patch_score_path,
+        verifier_path,
+    ) = _projection_inputs(tmp_path)
+    out_dir = tmp_path / "operator-loop"
+
+    rc = loop.main(
+        [
+            "--repo",
+            str(repo),
+            "--out-dir",
+            str(out_dir),
+            "--evidence-graph",
+            str(graph_path),
+            "--quality-outcome",
+            "success",
+            "--trajectory-history",
+            str(trajectory_path),
+            "--patch-score",
+            str(patch_score_path),
+            "--protected-verifier",
+            str(verifier_path),
+            "--format",
+            "json",
+            "--verify",
+        ]
+    )
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    reporting = payload[_artifact_key("reporting", "projections")]
+
+    assert reporting["reporting_only"] is True
+    assert (
+        reporting[
+            _artifact_key(
+                "current",
+                "pr",
+                "decision",
+                "input",
+            )
+        ]
+        is False
+    )
+    assert (
+        reporting[
+            _artifact_key(
+                "producer",
+                "execution",
+                "changed",
+            )
+        ]
+        is False
+    )
+    assert payload["verification"]["ok"] is True

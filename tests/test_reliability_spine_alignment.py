@@ -57,7 +57,7 @@ def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
     status_counts = report["status_counts"]
 
     assert status_counts["aligned"] >= 12
-    assert status_counts["partially_aligned"] >= 12
+    assert status_counts["partially_aligned"] >= 11
     assert status_counts.get("planned", 0) == 0
     assert report["next_recommended_pr"] == NEXT_RECOMMENDED_PR
 
@@ -87,6 +87,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert "pr_quality_runtime_proof_artifacts" not in gaps_by_module
     assert "current_head_failure_bundle" not in gaps_by_module
     assert "remediation_plan_engine" not in gaps_by_module
+    assert "operator_evidence_loop" not in gaps_by_module
     assert PR_QUALITY_LIVE_WORKSPACE_MODULE not in gaps_by_module
     assert REPO_MEMORY_PROFILE_HISTORY_MODULE not in gaps_by_module
     assert TRUSTED_HISTORY_EVIDENCE_MODULE not in gaps_by_module
@@ -128,6 +129,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert "`trajectory_pattern_insights`: `aligned`" in markdown
     assert "`current_head_failure_bundle`: `aligned`" in markdown
     assert "`remediation_plan_engine`: `aligned`" in markdown
+    assert "`operator_evidence_loop`: `aligned`" in markdown
     assert "`patch_scorer`: `partially_aligned`" in markdown
     assert "`protected_verifier`: `partially_aligned`" in markdown
     assert "`replayable_benchmark_harness`: `partially_aligned`" in markdown
@@ -264,4 +266,24 @@ def test_remediation_plan_engine_alignment_is_closed() -> None:
     assert (
         component.recommended_next_action == "keep remediation-plan context reporting-only "
         "until structural and semantic proof mature"
+    )
+
+
+def test_operator_evidence_loop_alignment_is_closed() -> None:
+    components = {item.module: item for item in build_alignment_components()}
+
+    component = components["operator_evidence_loop"]
+
+    assert component.status == "aligned"
+    assert component.gaps == ()
+    assert "history" in component.stages
+    assert "proof" in component.stages
+    assert "trajectory_history_report" in component.integration_points
+    assert "patch_scorer" in component.integration_points
+    assert "protected_verifier" in component.integration_points
+    assert "read-only reporting projections" in component.existing_artifacts
+    assert (
+        component.recommended_next_action == "keep producer artifacts optional, "
+        "reporting-only, and excluded from "
+        "operator classification"
     )
