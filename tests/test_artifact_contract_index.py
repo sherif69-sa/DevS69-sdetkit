@@ -12,6 +12,7 @@ from sdetkit import (
     candidate_evidence_checklist,
     candidate_freeze_readiness,
     check_intelligence,
+    ci_failure_extractor,
     diagnostic_job,
     diagnostic_signal_snapshot,
     diagnostic_signal_snapshot_history,
@@ -541,6 +542,31 @@ def test_artifact_contract_index_includes_maintenance_queue_rollup_dashboard_jso
     assert "--rollup-path build/sdetkit/maintenance-queue-rollup.json" in entry["produced_by"]
     assert "--format json" in entry["produced_by"]
     assert "--out build/sdetkit/maintenance-queue-rollup-dashboard.json" in entry["produced_by"]
+
+
+def test_artifact_contract_index_includes_ci_failure_extractor_json() -> None:
+    payload = build_index()
+    entries = {item["id"]: item for item in payload["artifacts"]}
+
+    artifact_id = "ci-failure-extractor-json"
+    assert artifact_id in entries
+
+    entry = entries[artifact_id]
+    assert entry["schema_version"] == ci_failure_extractor.SCHEMA_VERSION
+    assert entry["path"] == ci_failure_extractor.DEFAULT_OUT
+    assert entry["stability"] == "advanced"
+
+    assert {
+        "schema_version",
+        "failed_check_count",
+        "failed_checks",
+        "summary",
+    }.issubset(set(entry["required_fields"]))
+
+    assert entry["produced_by"].startswith("python -m sdetkit.ci_failure_extractor ")
+    assert "--log <raw-ci.log>" in entry["produced_by"]
+    assert "--out build/sdetkit/failed-check-logs.json" in entry["produced_by"]
+    assert "--format text" in entry["produced_by"]
 
 
 def test_artifact_contract_index_docs_json_matches_generator_payload() -> None:
