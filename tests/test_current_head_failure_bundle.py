@@ -9,6 +9,8 @@ from sdetkit.current_head_failure_bundle import (
     write_current_head_failure_bundle,
 )
 
+TEST_SOURCE_AUTHORITY_EXPANDED_FIELDS_KEY = "_".join(("source", "authority", "expanded", "fields"))
+
 
 def test_current_head_failure_bundle_persists_replayable_manifest(tmp_path):
     bundle = build_current_head_failure_bundle(
@@ -168,6 +170,7 @@ def test_current_head_failure_bundle_links_only_matching_head_trajectory() -> No
     assert history["trajectory_ids"] == ["matching-trajectory"]
     assert history["records"][0]["trajectory_id"] == "matching-trajectory"
     assert history["records"][0]["review_first"] is True
+    assert history["records"][0][TEST_SOURCE_AUTHORITY_EXPANDED_FIELDS_KEY] == []
     assert history["reporting_only"] is True
     assert history["current_pr_decision_input"] is False
     assert history["expanded_authority_fields"] == []
@@ -209,6 +212,12 @@ def test_current_head_failure_bundle_surfaces_trajectory_authority_expansion() -
     history = bundle["trajectory_history"]
 
     assert history["status"] == "linked_review_required"
+    assert history["records"][0][TEST_SOURCE_AUTHORITY_EXPANDED_FIELDS_KEY] == [
+        "automation_allowed",
+        "merge_authorized",
+        "patch_application_allowed",
+        "semantic_equivalence_proven",
+    ]
     assert history["expanded_authority_fields"] == [
         "automation_allowed",
         "merge_authorized",

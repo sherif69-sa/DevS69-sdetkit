@@ -12,6 +12,7 @@ TRAJECTORY_LINK_SCHEMA_VERSION = "sdetkit.current_head_trajectory_link.v1"
 FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
 JOB_STEP_CONFIRMATION_KEY = "_".join(("job", "step", "confirmation"))
 ARTIFACT_EVIDENCE_KEY = "_".join(("artifact", "evidence"))
+SOURCE_AUTHORITY_EXPANDED_FIELDS_KEY = "_".join(("source", "authority", "expanded", "fields"))
 
 
 def _as_dict(value: Any) -> JsonObject:
@@ -84,7 +85,7 @@ def _trajectory_link_summary(
                 "review_first": _bool(decision.get("review_first")),
                 "auto_fix_allowed": _bool(decision.get("auto_fix_allowed")),
                 "source_reporting_only": _bool(boundary.get("reporting_only")),
-                "source_authority_expanded_fields": expanded,
+                SOURCE_AUTHORITY_EXPANDED_FIELDS_KEY: sorted(expanded),
             }
         )
 
