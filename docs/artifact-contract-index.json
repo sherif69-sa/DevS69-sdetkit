@@ -492,6 +492,33 @@
       "stability": "advanced"
     },
     {
+      "id": "maintenance-queue-rollup-dashboard-json",
+      "path": "build/sdetkit/maintenance-queue-rollup-dashboard.json",
+      "produced_by": "sdetkit-maintenance-queue-rollup-dashboard --rollup-path build/sdetkit/maintenance-queue-rollup.json --format json --out build/sdetkit/maintenance-queue-rollup-dashboard.json",
+      "schema_version": "sdetkit.maintenance_queue_rollup_dashboard.v1",
+      "required_fields": [
+        "schema_version",
+        "status",
+        "rollup_path",
+        "rollup_exists",
+        "source_rollup_schema_version",
+        "source_rollup_status",
+        "source_issue_count",
+        "queue_item_count",
+        "review_required_count",
+        "close_candidate_count",
+        "primary_issue",
+        "recommended_next_action",
+        "lane_counts",
+        "input_artifacts",
+        "queue_items",
+        "local_only",
+        "read_only",
+        "decision_boundary"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "security-review-packet-json",
       "path": "build/sdetkit/security-review-packet.json",
       "produced_by": "python -m sdetkit security-review-packet --inventory-json <security-findings-inventory.json> --matrix-json <security-finding-disposition-matrix.json> --out build/sdetkit/security-review-packet.json --format text",

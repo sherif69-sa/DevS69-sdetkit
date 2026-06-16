@@ -21,6 +21,7 @@ from sdetkit import (
     job_queue,
     local_diagnostic_queue_dashboard,
     maintenance_queue_rollup,
+    maintenance_queue_rollup_dashboard,
     pr_quality_runtime_proof_artifacts,
     professional_naming_cleanup_plan,
     professional_naming_inventory,
@@ -499,6 +500,47 @@ def test_artifact_contract_index_includes_adoption_learning_report_dashboard_jso
     assert "--report-path build/sdetkit/adoption-learning-report.json" in entry["produced_by"]
     assert "--format json" in entry["produced_by"]
     assert "--out build/sdetkit/adoption-learning-report-dashboard.json" in entry["produced_by"]
+
+
+def test_artifact_contract_index_includes_maintenance_queue_rollup_dashboard_json() -> None:
+    payload = build_index()
+    entries = {item["id"]: item for item in payload["artifacts"]}
+
+    artifact_id = "maintenance-queue-rollup-dashboard-json"
+    assert artifact_id in entries
+
+    entry = entries[artifact_id]
+    assert entry["schema_version"] == maintenance_queue_rollup_dashboard.SCHEMA_VERSION
+    assert entry["path"] == (
+        maintenance_queue_rollup_dashboard.DEFAULT_OUT.with_suffix(".json").as_posix()
+    )
+    assert entry["stability"] == "advanced"
+
+    assert {
+        "schema_version",
+        "status",
+        "rollup_path",
+        "rollup_exists",
+        "source_rollup_schema_version",
+        "source_rollup_status",
+        "source_issue_count",
+        "queue_item_count",
+        "review_required_count",
+        "close_candidate_count",
+        "primary_issue",
+        "recommended_next_action",
+        "lane_counts",
+        "input_artifacts",
+        "queue_items",
+        "local_only",
+        "read_only",
+        "decision_boundary",
+    }.issubset(set(entry["required_fields"]))
+
+    assert entry["produced_by"].startswith("sdetkit-maintenance-queue-rollup-dashboard ")
+    assert "--rollup-path build/sdetkit/maintenance-queue-rollup.json" in entry["produced_by"]
+    assert "--format json" in entry["produced_by"]
+    assert "--out build/sdetkit/maintenance-queue-rollup-dashboard.json" in entry["produced_by"]
 
 
 def test_artifact_contract_index_docs_json_matches_generator_payload() -> None:
