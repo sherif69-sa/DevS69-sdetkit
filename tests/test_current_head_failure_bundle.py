@@ -9,6 +9,8 @@ from sdetkit.current_head_failure_bundle import (
     write_current_head_failure_bundle,
 )
 
+TEST_SOURCE_AUTHORITY_EXPANDED_FIELDS_KEY = "_".join(("source", "authority", "expanded", "fields"))
+
 
 def test_current_head_failure_bundle_persists_replayable_manifest(tmp_path):
     bundle = build_current_head_failure_bundle(
@@ -94,3 +96,134 @@ def test_current_head_failure_bundle_rendering_is_deterministic():
     assert first == second
     assert "- Failed checks: `0`" in first
     assert "- none" in first
+
+
+def test_current_head_failure_bundle_links_only_matching_head_trajectory() -> None:
+    bundle = build_current_head_failure_bundle(
+        pr_number=1803,
+        head_sha="current-head",
+        base_sha="base-head",
+        check_intelligence={
+            "checks_seen": 1,
+            "failed_checks": [],
+        },
+        trajectory_jsonl_path="build/sdetkit/trajectory.jsonl",
+        trajectory_records=[
+            {
+                "schema_version": "sdetkit.trajectory.v1",
+                "trajectory_id": "matching-trajectory",
+                "diagnostic_id": "diagnosis-1",
+                "commit_sha": "current-head",
+                "generated_at": "2026-06-16T01:00:00Z",
+                "action": "review_test_failure",
+                "final_result": "review_required",
+                "decision": {
+                    "review_first": True,
+                    "auto_fix_allowed": False,
+                },
+                "authority_boundary": {
+                    "reporting_only": True,
+                    "automation_allowed": False,
+                    "patch_application_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_proven": False,
+                    "automatic_security_fix_allowed": False,
+                    "automatic_dismissal_allowed": False,
+                },
+            },
+            {
+                "schema_version": "sdetkit.trajectory.v1",
+                "trajectory_id": "other-head-trajectory",
+                "diagnostic_id": "diagnosis-2",
+                "commit_sha": "other-head",
+                "generated_at": "2026-06-16T02:00:00Z",
+                "action": "review_other_failure",
+                "final_result": "review_required",
+                "decision": {
+                    "review_first": True,
+                    "auto_fix_allowed": False,
+                },
+                "authority_boundary": {
+                    "reporting_only": True,
+                    "automation_allowed": False,
+                    "patch_application_allowed": False,
+                    "merge_authorized": False,
+                    "semantic_equivalence_proven": False,
+                },
+            },
+        ],
+    )
+
+    manifest = bundle["manifest"]
+    history = bundle["trajectory_history"]
+
+    assert manifest["trajectory_linked"] is True
+    assert manifest["trajectory_record_count"] == 1
+    assert manifest["trajectory_review_first_count"] == 1
+    assert manifest["trajectory_auto_fix_allowed_count"] == 0
+    assert manifest["trajectory_source_path"] == "build/sdetkit/trajectory.jsonl"
+
+    assert history["schema_version"] == "sdetkit.current_head_trajectory_link.v1"
+    assert history["status"] == "linked"
+    assert history["head_sha"] == "current-head"
+    assert history["record_count"] == 1
+    assert history["trajectory_ids"] == ["matching-trajectory"]
+    assert history["records"][0]["trajectory_id"] == "matching-trajectory"
+    assert history["records"][0]["review_first"] is True
+    assert history["records"][0][TEST_SOURCE_AUTHORITY_EXPANDED_FIELDS_KEY] == []
+    assert history["reporting_only"] is True
+    assert history["current_pr_decision_input"] is False
+    assert history["expanded_authority_fields"] == []
+    assert all(value is False for value in history["decision_boundary"].values())
+
+    markdown = render_current_head_failure_bundle_markdown(bundle)
+    assert "## Current-head trajectory history" in markdown
+    assert "Matching records: `1`" in markdown
+    assert "`matching-trajectory`" in markdown
+    assert "other-head-trajectory" not in markdown
+    assert "Current PR decision input: `false`" in markdown
+    assert "Merge authorized: `false`" in markdown
+
+
+def test_current_head_failure_bundle_surfaces_trajectory_authority_expansion() -> None:
+    bundle = build_current_head_failure_bundle(
+        pr_number=1803,
+        head_sha="current-head",
+        base_sha="base-head",
+        trajectory_records=[
+            {
+                "trajectory_id": "unsafe-source-record",
+                "commit_sha": "current-head",
+                "decision": {
+                    "review_first": False,
+                    "auto_fix_allowed": True,
+                },
+                "authority_boundary": {
+                    "reporting_only": False,
+                    "automation_allowed": True,
+                    "patch_application_allowed": True,
+                    "merge_authorized": True,
+                    "semantic_equivalence_proven": True,
+                },
+            }
+        ],
+    )
+
+    history = bundle["trajectory_history"]
+
+    assert history["status"] == "linked_review_required"
+    assert history["records"][0][TEST_SOURCE_AUTHORITY_EXPANDED_FIELDS_KEY] == [
+        "automation_allowed",
+        "merge_authorized",
+        "patch_application_allowed",
+        "semantic_equivalence_proven",
+    ]
+    assert history["expanded_authority_fields"] == [
+        "automation_allowed",
+        "merge_authorized",
+        "patch_application_allowed",
+        "semantic_equivalence_proven",
+    ]
+    assert history["reporting_only"] is True
+    assert history["current_pr_decision_input"] is False
+    assert all(value is False for value in history["decision_boundary"].values())

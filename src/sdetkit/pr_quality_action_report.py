@@ -3967,6 +3967,10 @@ def write_comment_body(
                 check_intelligence.get("remediation_refresh")
                 or action_report.get("remediation_refresh")
             ),
+            trajectory_records=trajectory_records,
+            trajectory_jsonl_path=(
+                trajectory_jsonl_path.as_posix() if trajectory_jsonl_path is not None else ""
+            ),
         )
         written_bundle_paths = write_current_head_failure_bundle(
             bundle,
