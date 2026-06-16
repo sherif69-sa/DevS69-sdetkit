@@ -7,8 +7,33 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit.patch_scorer import PROTECTED_EXACT_PATHS, PROTECTED_PREFIXES
+from sdetkit.remediation_plan_engine import (
+    ALLOWED_STRATEGY,
+    BLOCKED_REASON,
+    CLASSIFICATION,
+    EXACT_FIX_SCOPE,
+    HUMAN_REVIEW_ACTION,
+    REQUIRES_FRESH_LOGS,
+    REQUIRES_RELEASE_VALIDATION,
+    REQUIRES_SECURITY_REVIEW,
+    RISK_LEVEL,
+    SAFE_TO_AUTO_FIX,
+)
 
 SCHEMA_VERSION = "sdetkit.protected_verifier.decision.v1"
+REMEDIATION_PLAN_CONTEXT_SCHEMA_VERSION = ".".join(
+    ("sdetkit", "protected", "verifier", "remediation", "plan", "context", "v1")
+)
+REMEDIATION_PLAN_CONTEXT = "_".join(("remediation", "plan", "context"))
+REMEDIATION_PLAN_SOURCE = "_".join(("remediation", "plan"))
+REMEDIATION_PLAN_SCHEMA_INPUT = "_".join(("remediation", "plan", "schema"))
+REMEDIATION_PLAN_CONTEXT_STATUS_INPUT = "_".join(("remediation", "plan", "context", "status"))
+CURRENT_PR_DECISION_INPUT = "_".join(("current", "pr", "decision", "input"))
+PROTECTED_VERIFIER_EXECUTION_CHANGED = "_".join(("protected", "verifier", "execution", "changed"))
+SELECTED_PLAN_PRESENT = "_".join(("selected", "plan", "present"))
+SELECTED_PLAN = "_".join(("selected", "plan"))
+PLAN_SELECTED = "_".join(("plan", "selected"))
+PLAN_NOT_FOUND = "_".join(("plan", "not", "found"))
 DEFAULT_OUT_DIR = Path("build") / "protected-verifier"
 PROTECTED_VERIFIER_JSON = "protected-verifier-decision.json"
 PROTECTED_VERIFIER_MD = "protected-verifier-decision.md"
@@ -239,6 +264,89 @@ def _read_json(path: Path | None) -> JsonObject:
         msg = f"expected JSON object in {path}"
         raise ValueError(msg)
     return payload
+
+
+def _remediation_plan_context(
+    remediation_plan: Mapping[str, Any],
+    *,
+    diagnosis_id: str,
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+    payload = _as_dict(remediation_plan)
+    plans = [_as_dict(item) for item in _as_list(payload.get("plans")) if _as_dict(item)]
+
+    if not payload:
+        return {
+            "schema_version": REMEDIATION_PLAN_CONTEXT_SCHEMA_VERSION,
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": REMEDIATION_PLAN_SOURCE,
+            "source_schema": "not_collected",
+            "diagnosis_id": diagnosis_id,
+            "plan_count": 0,
+            SELECTED_PLAN_PRESENT: False,
+            SELECTED_PLAN: {},
+            "reporting_only": True,
+            CURRENT_PR_DECISION_INPUT: False,
+            PROTECTED_VERIFIER_EXECUTION_CHANGED: False,
+            "decision_boundary": denied,
+        }
+
+    selected: JsonObject = {}
+    if diagnosis_id:
+        selected = next(
+            (plan for plan in plans if _string(plan.get("diagnosis_id")) == diagnosis_id),
+            {},
+        )
+    elif plans:
+        selected = plans[0]
+
+    exact_scope = _as_dict(selected.get(EXACT_FIX_SCOPE))
+    selected_projection: JsonObject = {}
+    if selected:
+        selected_projection = {
+            "diagnosis_id": _string(selected.get("diagnosis_id")),
+            "failure_surface": _string(selected.get("failure_surface")),
+            CLASSIFICATION: _string(selected.get(CLASSIFICATION)),
+            SAFE_TO_AUTO_FIX: _bool(selected.get(SAFE_TO_AUTO_FIX)),
+            ALLOWED_STRATEGY: _string(selected.get(ALLOWED_STRATEGY)),
+            BLOCKED_REASON: _string(selected.get(BLOCKED_REASON)),
+            RISK_LEVEL: _string(selected.get(RISK_LEVEL)),
+            "affected_files": _string_list(selected.get("affected_files")),
+            EXACT_FIX_SCOPE: {
+                "allowed_files": _string_list(exact_scope.get("allowed_files")),
+                ALLOWED_STRATEGY: _string(exact_scope.get(ALLOWED_STRATEGY)),
+                "scope": _string(exact_scope.get("scope")),
+            },
+            "proof_commands": _string_list(selected.get("proof_commands")),
+            HUMAN_REVIEW_ACTION: _string(selected.get(HUMAN_REVIEW_ACTION)),
+            REQUIRES_FRESH_LOGS: _bool(selected.get(REQUIRES_FRESH_LOGS)),
+            REQUIRES_SECURITY_REVIEW: _bool(selected.get(REQUIRES_SECURITY_REVIEW)),
+            REQUIRES_RELEASE_VALIDATION: _bool(selected.get(REQUIRES_RELEASE_VALIDATION)),
+        }
+
+    return {
+        "schema_version": REMEDIATION_PLAN_CONTEXT_SCHEMA_VERSION,
+        "collection_status": "collected",
+        "status": (PLAN_SELECTED if selected_projection else PLAN_NOT_FOUND),
+        "source": REMEDIATION_PLAN_SOURCE,
+        "source_schema": (_string(payload.get("schema_version")) or "unknown"),
+        "diagnosis_id": diagnosis_id,
+        "plan_count": len(plans),
+        SELECTED_PLAN_PRESENT: bool(selected_projection),
+        SELECTED_PLAN: selected_projection,
+        "reporting_only": True,
+        CURRENT_PR_DECISION_INPUT: False,
+        PROTECTED_VERIFIER_EXECUTION_CHANGED: False,
+        "decision_boundary": denied,
+    }
 
 
 def _boundary_payloads(
@@ -561,10 +669,12 @@ def _risk_flag(code: str, message: str, *, blocking: bool) -> JsonObject:
 def verify_patch(
     *,
     patch_score: Mapping[str, Any],
+    remediation_plan: Mapping[str, Any] | None = None,
     failure_bundle: Mapping[str, Any] | None = None,
     runtime_proof: Mapping[str, Any] | None = None,
     repo_memory_profile: Mapping[str, Any] | None = None,
 ) -> JsonObject:
+    remediation = _as_dict(remediation_plan)
     bundle = _as_dict(failure_bundle)
     runtime = _as_dict(runtime_proof)
     repo_memory = _as_dict(repo_memory_profile)
@@ -578,6 +688,10 @@ def verify_patch(
 
     patch_id = _string(patch_score.get("patch_id")) or "unknown"
     diagnosis_id = _string(patch_score.get("diagnosis_id")) or "unknown"
+    remediation_plan_context = _remediation_plan_context(
+        remediation,
+        diagnosis_id=diagnosis_id,
+    )
     patch_score_status = _string(patch_decision.get("status")) or "unknown"
     candidate = _bool(patch_decision.get(CANDIDATE_FOR_PROTECTED_VERIFICATION))
     score = _int(patch_score.get("score"))
@@ -706,11 +820,16 @@ def verify_patch(
         "inputs": {
             "patch_score_schema": _string(patch_score.get("schema_version")) or "unknown",
             "patch_score_status": patch_score_status,
+            REMEDIATION_PLAN_SCHEMA_INPUT: (
+                _string(remediation.get("schema_version")) or "not_collected"
+            ),
+            REMEDIATION_PLAN_CONTEXT_STATUS_INPUT: _string(remediation_plan_context.get("status")),
             "failure_bundle_status": _string(bundle.get("status")) or "not_collected",
             "runtime_proof_status": _string(runtime.get("status")) or "not_collected",
             "repo_memory_profile_status": _string(repo_memory.get("profile_status"))
             or "not_collected",
         },
+        REMEDIATION_PLAN_CONTEXT: remediation_plan_context,
         "runtime_proof_evidence": {
             "protected_verifier_contract_evidence": runtime_proof_contract_evidence,
             "benchmark_contract_replay_evidence": benchmark_contract_replay_evidence,
@@ -1004,6 +1123,9 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
     decision = _as_dict(payload.get("decision"))
     evidence = _as_dict(payload.get("verification_evidence"))
     boundary = _as_dict(payload.get("decision_boundary"))
+    remediation_context = _as_dict(payload.get(REMEDIATION_PLAN_CONTEXT))
+    remediation_selected = _as_dict(remediation_context.get(SELECTED_PLAN))
+    remediation_boundary = _as_dict(remediation_context.get("decision_boundary"))
     runtime_proof = _as_dict(payload.get("runtime_proof_evidence"))
     runtime_contract = _as_dict(runtime_proof.get("protected_verifier_contract_evidence"))
     runtime_boundary = _as_dict(runtime_contract.get("decision_boundary"))
@@ -1052,6 +1174,63 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
     lines.extend(
         f"- `{command}`" for command in proof_requirements
     ) if proof_requirements else lines.append("- none")
+
+    lines.extend(
+        [
+            "",
+            "## Remediation plan context",
+            "",
+            (f"- Collection status: `{_string(remediation_context.get('collection_status'))}`"),
+            (f"- Status: `{_string(remediation_context.get('status'))}`"),
+            (f"- Source schema: `{_string(remediation_context.get('source_schema'))}`"),
+            (f"- Plan count: `{_int(remediation_context.get('plan_count'))}`"),
+            (
+                "- Selected plan present: "
+                f"`{str(_bool(remediation_context.get(SELECTED_PLAN_PRESENT))).lower()}`"
+            ),
+            (
+                "- Failure surface: "
+                f"`{_string(remediation_selected.get('failure_surface')) or 'none'}`"
+            ),
+            (f"- Classification: `{_string(remediation_selected.get(CLASSIFICATION)) or 'none'}`"),
+            (
+                "- Allowed strategy: "
+                f"`{_string(remediation_selected.get(ALLOWED_STRATEGY)) or 'none'}`"
+            ),
+            (
+                "- Source safe-to-auto-fix claim: "
+                f"`{str(_bool(remediation_selected.get(SAFE_TO_AUTO_FIX))).lower()}`"
+            ),
+            (
+                "- Reporting only: "
+                f"`{str(_bool(remediation_context.get('reporting_only'))).lower()}`"
+            ),
+            (
+                "- Current PR decision input: "
+                f"`{str(_bool(remediation_context.get(CURRENT_PR_DECISION_INPUT))).lower()}`"
+            ),
+            (
+                "- ProtectedVerifier execution changed: "
+                f"`{str(_bool(remediation_context.get(PROTECTED_VERIFIER_EXECUTION_CHANGED))).lower()}`"
+            ),
+            (
+                "- Patch application allowed by remediation-plan context: "
+                f"`{str(_bool(remediation_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Automation allowed by remediation-plan context: "
+                f"`{str(_bool(remediation_boundary.get('automation_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by remediation-plan context: "
+                f"`{str(_bool(remediation_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence proven by remediation-plan context: "
+                f"`{str(_bool(remediation_boundary.get('semantic_equivalence_proven'))).lower()}`"
+            ),
+        ]
+    )
 
     lines.extend(
         [
@@ -1324,6 +1503,7 @@ def write_protected_verifier_decision(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m sdetkit.protected_verifier")
     parser.add_argument("--patch-score", type=Path, required=True)
+    parser.add_argument("--remediation-plan", type=Path)
     parser.add_argument("--verification-evidence", type=Path)
     parser.add_argument("--failure-bundle", type=Path)
     parser.add_argument("--runtime-proof", type=Path)
@@ -1347,6 +1527,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             payload = verify_patch(
                 patch_score=patch_score_payload,
+                remediation_plan=_read_json(args.remediation_plan),
                 failure_bundle=_read_json(args.failure_bundle),
                 runtime_proof=_read_json(args.runtime_proof),
                 repo_memory_profile=_read_json(args.repo_memory_profile),
