@@ -478,13 +478,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "json":
         print(
             json.dumps(
-                {"status": report["status"], "artifacts": artifacts},
+                {"status": STATUS, "artifacts": artifacts},
                 indent=2,
                 sort_keys=True,
             )
         )
     else:
-        print(f"status={report['status']}")
+        print(f"status={STATUS}")
         for key, value in artifacts.items():
             print(f"{key}={value}")
     return 0
