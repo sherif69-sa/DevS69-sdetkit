@@ -132,15 +132,20 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="remediation_plan_engine",
-            role="plan review-first and safe-fix remediation routes",
-            status="partially_aligned",
-            stages=("decision", "remediation_eligibility", "proof"),
-            existing_artifacts=("remediation plans",),
-            integration_points=("diagnostic_vector_engine", "trajectory_store", "patch_scorer"),
-            gaps=(
-                "needs structural verifier results and later semantic proof before broader mutation use",
+            role="plan review-first and safe-fix remediation routes with PatchScorer and ProtectedVerifier reporting",
+            status="aligned",
+            stages=("decision", "remediation_eligibility", "proof", "reporting"),
+            existing_artifacts=(
+                "remediation plans",
+                "ProtectedVerifier remediation-plan context",
             ),
-            recommended_next_action="feed plans through PatchScorer and protected_verifier reporting",
+            integration_points=(
+                "diagnostic_vector_engine",
+                "trajectory_store",
+                "patch_scorer",
+                "protected_verifier",
+            ),
+            recommended_next_action="keep remediation-plan context reporting-only until structural and semantic proof mature",
         ),
         _component(
             module="safe_remediation_eligibility",

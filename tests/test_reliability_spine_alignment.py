@@ -86,6 +86,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert "proof_runtime_guard" in gaps_by_module
     assert "pr_quality_runtime_proof_artifacts" not in gaps_by_module
     assert "current_head_failure_bundle" not in gaps_by_module
+    assert "remediation_plan_engine" not in gaps_by_module
     assert PR_QUALITY_LIVE_WORKSPACE_MODULE not in gaps_by_module
     assert REPO_MEMORY_PROFILE_HISTORY_MODULE not in gaps_by_module
     assert TRUSTED_HISTORY_EVIDENCE_MODULE not in gaps_by_module
@@ -126,6 +127,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert "`maintenance_autopilot`: `partially_aligned`" in markdown
     assert "`trajectory_pattern_insights`: `aligned`" in markdown
     assert "`current_head_failure_bundle`: `aligned`" in markdown
+    assert "`remediation_plan_engine`: `aligned`" in markdown
     assert "`patch_scorer`: `partially_aligned`" in markdown
     assert "`protected_verifier`: `partially_aligned`" in markdown
     assert "`replayable_benchmark_harness`: `partially_aligned`" in markdown
@@ -245,4 +247,21 @@ def test_current_head_failure_bundle_alignment_is_closed() -> None:
     assert (
         component.recommended_next_action
         == "keep same-head trajectory links reporting-only and authority-denied"
+    )
+
+
+def test_remediation_plan_engine_alignment_is_closed() -> None:
+    components = {item.module: item for item in build_alignment_components()}
+
+    component = components["remediation_plan_engine"]
+
+    assert component.status == "aligned"
+    assert component.gaps == ()
+    assert "reporting" in component.stages
+    assert "patch_scorer" in component.integration_points
+    assert "protected_verifier" in component.integration_points
+    assert "ProtectedVerifier remediation-plan context" in component.existing_artifacts
+    assert (
+        component.recommended_next_action == "keep remediation-plan context reporting-only "
+        "until structural and semantic proof mature"
     )
