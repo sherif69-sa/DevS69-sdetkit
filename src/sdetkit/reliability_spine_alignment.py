@@ -271,13 +271,16 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="current_head_failure_bundle",
-            role="capture current-head failure evidence for operator inspection",
-            status="partially_aligned",
-            stages=("evidence", "reporting"),
-            existing_artifacts=("current-head failure bundle",),
-            integration_points=("pr_quality_action_report",),
-            gaps=("should include or link trajectory records for the same head SHA",),
-            recommended_next_action="connect bundle summaries to trajectory/history reports",
+            role="capture current-head failure evidence with same-head trajectory links for operator inspection",
+            status="aligned",
+            stages=("evidence", "trajectory", "reporting", "history"),
+            existing_artifacts=("current-head failure bundle", "same-head trajectory summary"),
+            integration_points=(
+                "pr_quality_action_report",
+                "trajectory_store",
+                "trajectory_history_report",
+            ),
+            recommended_next_action="keep same-head trajectory links reporting-only and authority-denied",
         ),
         _component(
             module="operator_evidence_loop",

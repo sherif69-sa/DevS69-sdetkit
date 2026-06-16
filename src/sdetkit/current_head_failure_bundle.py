@@ -8,6 +8,7 @@ JsonObject = dict[str, Any]
 
 
 SCHEMA_VERSION = "sdetkit.current_head_failure_bundle.v1"
+TRAJECTORY_LINK_SCHEMA_VERSION = "sdetkit.current_head_trajectory_link.v1"
 FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
 JOB_STEP_CONFIRMATION_KEY = "_".join(("job", "step", "confirmation"))
 ARTIFACT_EVIDENCE_KEY = "_".join(("artifact", "evidence"))
@@ -40,6 +41,95 @@ def _stable_json(payload: JsonObject) -> str:
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
 
+def _trajectory_link_summary(
+    trajectory_records: list[JsonObject] | None,
+    *,
+    head_sha: str,
+    trajectory_jsonl_path: str,
+) -> JsonObject:
+    normalized_head = _string(head_sha)
+    linked: list[JsonObject] = []
+    expanded_authority_fields: set[str] = set()
+
+    denied = (
+        "automation_allowed",
+        "patch_application_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven",
+        "automatic_security_fix_allowed",
+        "automatic_dismissal_allowed",
+    )
+
+    for raw in _as_list(trajectory_records):
+        record = _as_dict(raw)
+        if not record:
+            continue
+        if not normalized_head:
+            continue
+        if _string(record.get("commit_sha")) != normalized_head:
+            continue
+
+        boundary = _as_dict(record.get("authority_boundary"))
+        expanded = [key for key in denied if _bool(boundary.get(key))]
+        expanded_authority_fields.update(expanded)
+
+        decision = _as_dict(record.get("decision"))
+        linked.append(
+            {
+                "trajectory_id": _string(record.get("trajectory_id")),
+                "diagnostic_id": _string(record.get("diagnostic_id")),
+                "generated_at": _string(record.get("generated_at")),
+                "action": _string(record.get("action")),
+                "final_result": _string(record.get("final_result")),
+                "review_first": _bool(decision.get("review_first")),
+                "auto_fix_allowed": _bool(decision.get("auto_fix_allowed")),
+                "source_reporting_only": _bool(boundary.get("reporting_only")),
+                "source_authority_expanded_fields": expanded,
+            }
+        )
+
+    linked.sort(
+        key=lambda item: (
+            _string(item.get("generated_at")),
+            _string(item.get("trajectory_id")),
+        )
+    )
+
+    if expanded_authority_fields:
+        status = "linked_review_required"
+    elif linked:
+        status = "linked"
+    else:
+        status = "not_found"
+
+    return {
+        "schema_version": TRAJECTORY_LINK_SCHEMA_VERSION,
+        "status": status,
+        "head_sha": normalized_head,
+        "source_path": _string(trajectory_jsonl_path),
+        "record_count": len(linked),
+        "review_first_count": sum(_bool(item.get("review_first")) for item in linked),
+        "auto_fix_allowed_count": sum(_bool(item.get("auto_fix_allowed")) for item in linked),
+        "reporting_only_count": sum(_bool(item.get("source_reporting_only")) for item in linked),
+        "expanded_authority_fields": sorted(expanded_authority_fields),
+        "trajectory_ids": [
+            _string(item.get("trajectory_id"))
+            for item in linked
+            if _string(item.get("trajectory_id"))
+        ],
+        "records": linked,
+        "reporting_only": True,
+        "current_pr_decision_input": False,
+        "decision_boundary": {
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+            "proof_commands_executed": False,
+        },
+    }
+
+
 def build_current_head_failure_bundle(
     *,
     pr_number: int,
@@ -51,6 +141,8 @@ def build_current_head_failure_bundle(
     remediation_plans: JsonObject | None = None,
     safe_fix_outcome: JsonObject | None = None,
     refresh_summary: JsonObject | None = None,
+    trajectory_records: list[JsonObject] | None = None,
+    trajectory_jsonl_path: str = "",
     created_at: str = "",
 ) -> JsonObject:
     check_payload = _as_dict(check_intelligence)
@@ -59,6 +151,11 @@ def build_current_head_failure_bundle(
     plans_payload = _as_dict(remediation_plans)
     safe_fix_payload = _as_dict(safe_fix_outcome)
     refresh_payload = _as_dict(refresh_summary)
+    trajectory_history = _trajectory_link_summary(
+        trajectory_records,
+        head_sha=head_sha,
+        trajectory_jsonl_path=trajectory_jsonl_path,
+    )
 
     failed_checks = [_as_dict(item) for item in _as_list(check_payload.get("failed_checks"))]
     queued_checks = [_as_dict(item) for item in _as_list(check_payload.get("queued_checks"))]
@@ -115,6 +212,11 @@ def build_current_head_failure_bundle(
         "missing_required_contexts": len(missing_required),
         "review_first": review_first,
         "safe_fix_allowed": safe_fix_allowed,
+        "trajectory_linked": _int(trajectory_history.get("record_count")) > 0,
+        "trajectory_record_count": _int(trajectory_history.get("record_count")),
+        "trajectory_review_first_count": _int(trajectory_history.get("review_first_count")),
+        "trajectory_auto_fix_allowed_count": _int(trajectory_history.get("auto_fix_allowed_count")),
+        "trajectory_source_path": _string(trajectory_history.get("source_path")),
         "bundle_files": [
             "manifest.json",
             "failure-bundle.json",
@@ -131,6 +233,7 @@ def build_current_head_failure_bundle(
         "remediation_plans": plans_payload,
         "safe_fix_outcome": safe_fix_payload,
         "refresh_summary": refresh_payload,
+        "trajectory_history": trajectory_history,
         "owner_files": owner_files,
     }
 
@@ -139,6 +242,10 @@ def render_current_head_failure_bundle_markdown(bundle: JsonObject) -> str:
     manifest = _as_dict(bundle.get("manifest"))
     first_failures = [_as_dict(item) for item in _as_list(bundle.get("first_failures"))]
     owner_files = [_string(item) for item in _as_list(bundle.get("owner_files")) if _string(item)]
+    trajectory_history = _as_dict(bundle.get("trajectory_history"))
+    trajectory_records = [
+        _as_dict(item) for item in _as_list(trajectory_history.get("records")) if _as_dict(item)
+    ]
 
     lines = [
         "# Current-head failure evidence bundle",
@@ -211,6 +318,36 @@ def render_current_head_failure_bundle_markdown(bundle: JsonObject) -> str:
         lines.extend(f"- `{path}`" for path in owner_files)
     else:
         lines.append("- none")
+
+    lines.extend(
+        [
+            "",
+            "## Current-head trajectory history",
+            f"- Status: `{_string(trajectory_history.get('status') or 'not_found')}`",
+            f"- Source: `{_string(trajectory_history.get('source_path') or 'none')}`",
+            f"- Matching records: `{_int(trajectory_history.get('record_count'))}`",
+            f"- Review-first records: `{_int(trajectory_history.get('review_first_count'))}`",
+            (
+                "- Auto-fix candidates observed: "
+                f"`{_int(trajectory_history.get('auto_fix_allowed_count'))}`"
+            ),
+            "- Reporting only: `true`",
+            "- Current PR decision input: `false`",
+            "- Patch application allowed: `false`",
+            "- Automation allowed: `false`",
+            "- Merge authorized: `false`",
+        ]
+    )
+    if trajectory_records:
+        lines.extend(["", "### Linked trajectory records"])
+        for item in trajectory_records:
+            lines.append(
+                f"- `{_string(item.get('trajectory_id') or 'unknown')}`: "
+                f"`{_string(item.get('action') or 'none')}` / "
+                f"`{_string(item.get('final_result') or 'unknown')}`"
+            )
+    else:
+        lines.extend(["", "- none"])
 
     lines.append("")
     return "\n".join(lines)

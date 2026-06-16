@@ -260,3 +260,124 @@ def test_current_head_failure_bundle_carries_artifact_evidence() -> None:
     assert "Artifact evidence: `present`" in markdown
     assert "Expected artifacts: `pip-audit-report.json`" in markdown
     assert "Artifact automation allowed: `false`" in markdown
+
+
+def test_pr_quality_failure_bundle_links_same_head_trajectory_records(
+    tmp_path: Path,
+) -> None:
+    action_report_path = _write_json(
+        tmp_path / "action-report.json",
+        {
+            "status": "review_required",
+            "review_first": True,
+            "safe_fix_available": False,
+            "automation": {
+                "attempted": False,
+                "allowed": False,
+                "reason": "review-first failure",
+            },
+            "recommended_actions": ["Review the current failure."],
+            "proof_commands": ["make proof-after-format"],
+        },
+    )
+    check_intelligence_path = _write_json(
+        tmp_path / "check-intelligence.json",
+        {
+            "checks_seen": 1,
+            "head_sha": "current-head",
+            "base_sha": "base-head",
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+    )
+    trajectory_path = tmp_path / "trajectory.jsonl"
+    trajectory_path.write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "schema_version": "sdetkit.trajectory.v1",
+                        "trajectory_id": "current-head-record",
+                        "diagnostic_id": "diagnosis-current",
+                        "commit_sha": "current-head",
+                        "generated_at": "2026-06-16T00:00:00Z",
+                        "action": "review_current_failure",
+                        "final_result": "review_required",
+                        "decision": {
+                            "review_first": True,
+                            "auto_fix_allowed": False,
+                        },
+                        "authority_boundary": {
+                            "reporting_only": True,
+                            "automation_allowed": False,
+                            "patch_application_allowed": False,
+                            "merge_authorized": False,
+                            "semantic_equivalence_proven": False,
+                        },
+                    },
+                    sort_keys=True,
+                ),
+                json.dumps(
+                    {
+                        "schema_version": "sdetkit.trajectory.v1",
+                        "trajectory_id": "stale-head-record",
+                        "diagnostic_id": "diagnosis-stale",
+                        "commit_sha": "stale-head",
+                        "generated_at": "2026-06-15T00:00:00Z",
+                        "action": "review_stale_failure",
+                        "final_result": "review_required",
+                        "decision": {
+                            "review_first": True,
+                            "auto_fix_allowed": False,
+                        },
+                        "authority_boundary": {
+                            "reporting_only": True,
+                            "automation_allowed": False,
+                            "patch_application_allowed": False,
+                            "merge_authorized": False,
+                            "semantic_equivalence_proven": False,
+                        },
+                    },
+                    sort_keys=True,
+                ),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    out = tmp_path / "comment.md"
+    bundle_dir = tmp_path / "failure-bundle"
+
+    result = write_comment_body(
+        action_report_path=action_report_path,
+        check_intelligence_path=check_intelligence_path,
+        trajectory_jsonl_path=trajectory_path,
+        out=out,
+        failure_bundle_out_dir=bundle_dir,
+        pr_number=1803,
+        head_sha="current-head",
+        base_sha="base-head",
+    )
+
+    assert result["failure_bundle"]["out_dir"] == bundle_dir.as_posix()
+
+    bundle = json.loads((bundle_dir / "failure-bundle.json").read_text(encoding="utf-8"))
+    manifest = json.loads((bundle_dir / "manifest.json").read_text(encoding="utf-8"))
+    markdown = (bundle_dir / "failure-bundle.md").read_text(encoding="utf-8")
+
+    assert manifest["trajectory_linked"] is True
+    assert manifest["trajectory_record_count"] == 1
+    assert manifest["trajectory_source_path"] == trajectory_path.as_posix()
+
+    history = bundle["trajectory_history"]
+    assert history["status"] == "linked"
+    assert history["record_count"] == 1
+    assert history["trajectory_ids"] == ["current-head-record"]
+    assert history["source_path"] == trajectory_path.as_posix()
+    assert history["reporting_only"] is True
+    assert history["current_pr_decision_input"] is False
+    assert "current-head-record" in markdown
+    assert "stale-head-record" not in markdown
