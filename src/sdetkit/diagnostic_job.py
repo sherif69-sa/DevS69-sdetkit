@@ -22,6 +22,7 @@ from sdetkit.diagnostic_vector_engine import (
 
 SCHEMA_VERSION = "sdetkit.diagnostic_job.v1"
 WORKER_RESULT_SCHEMA_VERSION = "sdetkit.diagnostic_worker_result.v1"
+REVIEW_HANDOFF_SCHEMA_VERSION = "sdetkit.queue_review_handoff.v1"
 JOB_TYPE = "diagnostic_vector"
 WORKER_NAME = "diagnostic_worker"
 EXECUTION_MODE = "local_read_only"

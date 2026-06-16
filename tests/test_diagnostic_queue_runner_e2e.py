@@ -311,3 +311,114 @@ def test_module_cli_stops_after_real_failed_job_without_retry(
     assert states[later["job_id"]] == PENDING
 
     assert not (out_root / later["job_id"]).exists()
+
+
+def test_module_cli_carries_review_evidence_through_bounded_queue(
+    tmp_path: Path,
+) -> None:
+    queue_path = tmp_path / "queue.json"
+    input_root = tmp_path / "inputs"
+    out_root = tmp_path / "worker"
+    input_root.mkdir()
+
+    check_path = input_root / "check-intelligence.json"
+    safety_path = input_root / "safety-gate.json"
+    patch_path = input_root / "patch-score.json"
+
+    check_path.write_text(
+        json.dumps(_formatting_intelligence(), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    safety_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.safety_gate.v1",
+                "failure_class": "formatter_only",
+                "risk": "low",
+                "scope": "pr_owned_only",
+                "failure_kind": "formatter_only",
+                "affected_surface": "source",
+                "ownership_area": "src/sdetkit/example.py",
+                "retryability": "not_retryable_without_change",
+                "security_relevance": False,
+                "recommended_next_human_action": "review candidate",
+                "reporting_only": True,
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "security_dismissal_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_claim": False,
+                "safe_fix_allowed": True,
+                "review_first": False,
+                "reason": "protected verification required",
+                "allowed_files": ["src/sdetkit/example.py"],
+                "blocked_actions": [],
+                "proof_commands": ["make proof-after-format"],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    patch_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.patch_score.v1",
+                "patch_id": "patch-e2e",
+                "diagnosis_id": "diagnosis-e2e",
+                "score": 90,
+                "minimum_score": 80,
+                "risk_flags": [],
+                "decision": {
+                    "status": "candidate_for_protected_verification",
+                    "candidate_for_protected_verification": True,
+                    "automation_allowed": False,
+                    "reason": "protected verification required",
+                },
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    job = _job(
+        head_sha="e2e-review-handoff",
+        created_at="2026-06-16T00:00:00Z",
+        input_artifacts={
+            "check_intelligence": check_path.name,
+            "safety_gate_decision": safety_path.name,
+            "patch_score": patch_path.name,
+        },
+    )
+    enqueue_job(queue_path, job)
+
+    completed = _run_cli(
+        queue_path=queue_path,
+        out_root=out_root,
+        input_root=input_root,
+        max_jobs=1,
+    )
+
+    assert completed.returncode == 0
+    payload = _json_stdout(completed)
+    result = payload["successful_results"][0]
+    handoff = result["worker_result"]["review_handoff"]
+
+    assert handoff["status"] == "observed"
+    assert handoff["reporting_only"] is True
+    assert handoff["current_pr_decision_input"] is False
+    assert handoff["patch_score"]["score"] == 90
+    assert handoff["safety_gate_decision"]["safe_fix_allowed"] is True
+
+    trajectory = result["trajectory"]["summary"]
+    assert trajectory["review_handoff_count"] == 1
+    assert trajectory["safety_gate_decision_observed_count"] == 1
+    assert trajectory["patch_score_observed_count"] == 1
+    assert trajectory["automation_allowed"] is False
+    assert trajectory["merge_authorized"] is False
+
+    queue = load_queue(queue_path)
+    assert queue["jobs"][0]["state"] == COMPLETED

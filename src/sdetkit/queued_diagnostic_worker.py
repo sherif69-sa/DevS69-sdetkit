@@ -8,7 +8,11 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from sdetkit.diagnostic_job import RESULT_JSON, run_diagnostic_worker
+from sdetkit.diagnostic_job import (
+    RESULT_JSON,
+    REVIEW_HANDOFF_SCHEMA_VERSION,
+    run_diagnostic_worker,
+)
 from sdetkit.diagnostic_worker_trajectory import (
     build_worker_trajectory_records,
 )
@@ -16,6 +20,8 @@ from sdetkit.diagnostic_worker_trajectory import (
     write_artifacts as write_worker_trajectory_artifacts,
 )
 from sdetkit.job_queue import claim_job, complete_job, fail_job
+from sdetkit.patch_scorer import SCHEMA_VERSION as PATCH_SCORE_SCHEMA_VERSION
+from sdetkit.safety_gate import SCHEMA_VERSION as SAFETY_GATE_SCHEMA_VERSION
 
 SCHEMA_VERSION = "sdetkit.queued_diagnostic_worker.v1"
 TRAJECTORY_DIR = "trajectory"
@@ -26,6 +32,8 @@ SUPPORTED_INPUTS = frozenset(
         "pr_quality_action_report",
         "security_review",
         "runtime_proof_artifacts",
+        "patch_score",
+        "safety_gate_decision",
     }
 )
 
@@ -38,6 +46,12 @@ def _as_dict(value: Any) -> JsonObject:
 
 def _string(value: Any) -> str:
     return str(value or "").replace("\r", " ").replace("\n", " ").strip()
+
+
+def _bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value).lower() in {"1", "true", "yes"}
 
 
 def _boundary() -> JsonObject:
@@ -91,6 +105,102 @@ def _load_worker_inputs(
             )
         )
         for name, raw_path in sorted(declared.items())
+    }
+
+
+def _assert_review_authority_boundary(
+    payload: Mapping[str, Any],
+    *,
+    source: str,
+) -> None:
+    denied = (
+        "automation_allowed",
+        "patch_application_allowed",
+        "security_dismissal_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven",
+        "semantic_equivalence_claim",
+    )
+    expanded = [key for key in denied if _bool(payload.get(key))]
+    if expanded:
+        raise ValueError(f"{source} expands authority: " + ", ".join(expanded))
+
+
+def _build_review_handoff(
+    worker_inputs: Mapping[str, Mapping[str, Any]],
+) -> JsonObject:
+    safety = _as_dict(worker_inputs.get("safety_gate_decision"))
+    patch = _as_dict(worker_inputs.get("patch_score"))
+
+    safety_projection: JsonObject = {}
+    patch_projection: JsonObject = {}
+
+    if safety:
+        if _string(safety.get("schema_version")) != SAFETY_GATE_SCHEMA_VERSION:
+            raise ValueError("queued safety-gate decision schema is not supported")
+        if not _bool(safety.get("reporting_only")):
+            raise ValueError("queued safety-gate decision must be reporting-only")
+        _assert_review_authority_boundary(
+            safety,
+            source="queued safety-gate decision",
+        )
+        safety_projection = {
+            "schema_version": SAFETY_GATE_SCHEMA_VERSION,
+            "failure_class": _string(safety.get("failure_class")) or "unknown",
+            "risk": _string(safety.get("risk")) or "unknown",
+            "review_first": _bool(safety.get("review_first")),
+            "safe_fix_allowed": _bool(safety.get("safe_fix_allowed")),
+            "reason": _string(safety.get("reason")),
+            "reporting_only": True,
+            "authority_boundary_preserved": True,
+        }
+
+    if patch:
+        if _string(patch.get("schema_version")) != PATCH_SCORE_SCHEMA_VERSION:
+            raise ValueError("queued patch-score schema is not supported")
+        _assert_review_authority_boundary(
+            patch,
+            source="queued patch-score",
+        )
+        decision = _as_dict(patch.get("decision"))
+        _assert_review_authority_boundary(
+            decision,
+            source="queued patch-score decision",
+        )
+        patch_projection = {
+            "schema_version": PATCH_SCORE_SCHEMA_VERSION,
+            "patch_id": _string(patch.get("patch_id")) or "unknown",
+            "diagnosis_id": _string(patch.get("diagnosis_id")) or "unknown",
+            "score": int(patch.get("score", 0) or 0),
+            "minimum_score": int(patch.get("minimum_score", 0) or 0),
+            "decision_status": _string(decision.get("status")) or "unknown",
+            "candidate_for_protected_verification": _bool(
+                decision.get("candidate_for_protected_verification")
+            ),
+            "risk_flag_count": len(patch.get("risk_flags") or []),
+            "automation_allowed": False,
+            "reporting_only": True,
+            "authority_boundary_preserved": True,
+        }
+
+    observed = bool(safety_projection or patch_projection)
+
+    return {
+        "schema_version": REVIEW_HANDOFF_SCHEMA_VERSION,
+        "status": "observed" if observed else "not_provided",
+        "sources": {
+            "pr_quality_action_report": bool(
+                _as_dict(worker_inputs.get("pr_quality_action_report"))
+            ),
+            "runtime_proof_artifacts": bool(_as_dict(worker_inputs.get("runtime_proof_artifacts"))),
+            "safety_gate_decision": bool(safety_projection),
+            "patch_score": bool(patch_projection),
+        },
+        "safety_gate_decision": safety_projection,
+        "patch_score": patch_projection,
+        "reporting_only": True,
+        "current_pr_decision_input": False,
+        "decision_boundary": _boundary(),
     }
 
 
@@ -219,6 +329,7 @@ def run_queued_diagnostic_job(
             job,
             input_root=input_root,
         )
+        review_handoff = _build_review_handoff(worker_inputs)
 
         worker_result = run_diagnostic_worker(
             job,
@@ -229,6 +340,7 @@ def run_queued_diagnostic_job(
             runtime_proof_artifacts=worker_inputs.get("runtime_proof_artifacts"),
             out_dir=out_dir,
         )
+        worker_result["review_handoff"] = review_handoff
 
         result_path = out_dir / RESULT_JSON
 
