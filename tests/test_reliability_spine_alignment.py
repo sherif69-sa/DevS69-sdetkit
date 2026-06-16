@@ -14,6 +14,7 @@ from sdetkit.reliability_spine_alignment import (
     TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
     TRUSTED_HISTORY_EVIDENCE_MODULE,
     TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE,
+    TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE,
     TRUSTED_TEST_OBSERVATION_HISTORY_MODULE,
     build_alignment_components,
     build_alignment_report,
@@ -50,6 +51,7 @@ def test_alignment_components_cover_current_reliability_spine() -> None:
     assert TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE in modules
     assert TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE in modules
     assert TRUSTED_TEST_OBSERVATION_HISTORY_MODULE in modules
+    assert TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE in modules
     assert SECURITY_FINDING_DIAGNOSIS_MODULE in modules
     assert SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE in modules
 
@@ -96,6 +98,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE not in gaps_by_module
     assert TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE not in gaps_by_module
     assert TRUSTED_TEST_OBSERVATION_HISTORY_MODULE not in gaps_by_module
+    assert TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE not in gaps_by_module
     assert FLAKY_TEST_REGISTRY_EVIDENCE_MODULE in gaps_by_module
     assert SECURITY_FINDING_DIAGNOSIS_MODULE not in gaps_by_module
     assert SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE not in gaps_by_module
@@ -110,10 +113,12 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert any("containment" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert not any("PR Quality" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert any("network-isolation" in gap for gap in gaps_by_module["repo_memory"])
-    assert any("flaky-classification handoff" in gap for gap in gaps_by_module["repo_memory"])
+    assert any(
+        "trusted classification producer handoff" in gap for gap in gaps_by_module["repo_memory"]
+    )
     assert any("PR Quality visibility" in gap for gap in gaps_by_module["repo_memory"])
     assert any(
-        "flaky-classification handoff" in gap
+        "trusted classification producer handoff" in gap
         for gap in gaps_by_module[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
     )
     assert any(
@@ -319,10 +324,11 @@ def test_trusted_test_observation_history_alignment_is_closed() -> None:
     assert TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE in component.integration_points
     assert "CI Full CI lane" in component.integration_points
     assert "RepoMemory Profile History workflow" in component.integration_points
+    assert TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE in component.integration_points
     assert (
         component.recommended_next_action
-        == "audit a separate provenance-checked classification handoff "
-        "before any registry or PR Quality visibility"
+        == "keep immutable history as the only input to the dedicated "
+        "fingerprint classification contract"
     )
 
 
@@ -341,16 +347,44 @@ def test_flaky_registry_alignment_starts_after_persisted_observation_history() -
         "flaky-test classification"
     )
     assert "RepoMemory Profile History workflow" in history.integration_points
+    classification = components[TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE]
+    assert classification.status == "aligned"
+    assert classification.gaps == ()
     assert (
-        producer.recommended_next_action == "consume only persisted provenance-checked "
-        "observation history after a separate advisory "
-        "classification handoff is proven"
+        producer.recommended_next_action
+        == "audit consumption of the dedicated advisory classification "
+        "artifact before changing the no-observation fail-closed state"
     )
     assert registry.gaps == (
-        "flaky-classification handoff and PR Quality visibility are not yet connected",
+        "trusted classification producer handoff and PR Quality visibility are not yet connected",
     )
     assert TRUSTED_TEST_OBSERVATION_HISTORY_MODULE in repo_memory.integration_points
     assert (
-        "flaky-classification handoff and PR Quality visibility "
-        "remain unconnected" in repo_memory.gaps
+        "trusted classification producer handoff and PR Quality "
+        "visibility remain unconnected" in repo_memory.gaps
+    )
+
+
+def test_trusted_observation_classification_alignment_is_closed() -> None:
+    components = {item.module: item for item in build_alignment_components()}
+
+    component = components[TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE]
+
+    assert component.status == "aligned"
+    assert component.gaps == ()
+    assert component.stages == (
+        "evidence",
+        "diagnosis",
+        "history",
+        "reporting",
+    )
+    assert component.existing_artifacts == (
+        "trusted-test-observation-classification.json",
+        "trusted-test-observation-classification.md",
+    )
+    assert TRUSTED_TEST_OBSERVATION_HISTORY_MODULE in component.integration_points
+    assert (
+        component.recommended_next_action == "audit trusted producer consumption of the dedicated "
+        "advisory classification artifact before registry, workflow, "
+        "RepoMemory, or PR Quality integration"
     )
