@@ -10,6 +10,7 @@ from typing import Any
 from sdetkit.diagnostic_job import (
     EXECUTION_MODE,
     JOB_TYPE,
+    REVIEW_HANDOFF_SCHEMA_VERSION,
     WORKER_NAME,
     WORKER_RESULT_SCHEMA_VERSION,
     validate_job,
@@ -98,6 +99,51 @@ def _summary_projection(payload: Mapping[str, Any]) -> JsonObject:
     }
 
 
+def _review_handoff_projection(
+    worker_result: Mapping[str, Any],
+) -> JsonObject:
+    handoff = _as_dict(worker_result.get("review_handoff"))
+    if not handoff:
+        return {}
+
+    if _string(handoff.get("schema_version")) != REVIEW_HANDOFF_SCHEMA_VERSION:
+        raise ValueError("diagnostic worker review handoff schema is not supported")
+    if not _bool(handoff.get("reporting_only")):
+        raise ValueError("diagnostic worker review handoff must be reporting-only")
+    if _bool(handoff.get("current_pr_decision_input")):
+        raise ValueError("diagnostic worker review handoff cannot decide the current PR")
+
+    _assert_false_fields(
+        _as_dict(handoff.get("decision_boundary")),
+        source="diagnostic worker review handoff",
+    )
+
+    safety = _as_dict(handoff.get("safety_gate_decision"))
+    patch = _as_dict(handoff.get("patch_score"))
+
+    for source, payload in (
+        ("diagnostic worker safety-gate projection", safety),
+        ("diagnostic worker patch-score projection", patch),
+    ):
+        if payload and (
+            _bool(payload.get("automation_allowed"))
+            or not _bool(payload.get("reporting_only"))
+            or not _bool(payload.get("authority_boundary_preserved"))
+        ):
+            raise ValueError(f"{source} does not preserve the authority boundary")
+
+    return {
+        "schema_version": REVIEW_HANDOFF_SCHEMA_VERSION,
+        "status": _string(handoff.get("status")) or "unknown",
+        "sources": copy.deepcopy(_as_dict(handoff.get("sources"))),
+        "safety_gate_decision": copy.deepcopy(safety),
+        "patch_score": copy.deepcopy(patch),
+        "reporting_only": True,
+        "current_pr_decision_input": False,
+        "decision_boundary": copy.deepcopy(_as_dict(handoff.get("decision_boundary"))),
+    }
+
+
 def validate_worker_handoff(
     *,
     job: Mapping[str, Any],
@@ -131,6 +177,8 @@ def validate_worker_handoff(
         raise ValueError(
             "diagnostic worker execution expands authority: " + ", ".join(execution_expanded)
         )
+
+    _review_handoff_projection(worker_result)
 
     result_summary = _summary_projection(_as_dict(worker_result.get("summary")))
     vector_summary = _summary_projection(_as_dict(diagnostic_vector.get("summary")))
@@ -175,6 +223,7 @@ def build_worker_trajectory_records(
         generated_at=generated_at,
     )
 
+    review_handoff = _review_handoff_projection(worker_result)
     records: list[JsonObject] = []
     for base_record in base_records:
         record = copy.deepcopy(base_record)
@@ -221,6 +270,7 @@ def build_worker_trajectory_records(
             "automation_allowed": False,
             "merge_authorized": False,
             "semantic_equivalence_proven": False,
+            "review_handoff": copy.deepcopy(review_handoff),
         }
         records.append(record)
     return records
@@ -246,6 +296,29 @@ def build_summary(
             if _as_dict(row.get("worker_evidence")).get("observed_safe_fix_candidate") is True
         ),
         "worker_result_status": _string(worker_result.get("status")),
+        "review_handoff_count": sum(
+            1
+            for row in records
+            if _as_dict(_as_dict(row.get("worker_evidence")).get("review_handoff"))
+        ),
+        "safety_gate_decision_observed_count": sum(
+            1
+            for row in records
+            if _as_dict(
+                _as_dict(_as_dict(row.get("worker_evidence")).get("review_handoff")).get(
+                    "safety_gate_decision"
+                )
+            )
+        ),
+        "patch_score_observed_count": sum(
+            1
+            for row in records
+            if _as_dict(
+                _as_dict(_as_dict(row.get("worker_evidence")).get("review_handoff")).get(
+                    "patch_score"
+                )
+            )
+        ),
         "trajectory_jsonl": trajectory_jsonl,
         "reporting_only": True,
         "current_pr_decision_input": False,
@@ -269,6 +342,12 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
             "- Observed safe-fix candidates retained as advisory only: "
             f"`{_int(summary.get('observed_safe_fix_candidate_count'))}`"
         ),
+        f"- Review handoffs retained: `{_int(summary.get('review_handoff_count'))}`",
+        (
+            "- SafetyGate decisions retained: "
+            f"`{_int(summary.get('safety_gate_decision_observed_count'))}`"
+        ),
+        f"- Patch scores retained: `{_int(summary.get('patch_score_observed_count'))}`",
         f"- Reporting only: `{str(_bool(summary.get('reporting_only'))).lower()}`",
         (
             "- Current PR decision input: "
