@@ -312,3 +312,81 @@ def test_repo_memory_history_recovers_reviewed_security_history_with_determinist
     assert 'assert boundary["automatic_dismissal_allowed"] is False' in text
     assert 'assert boundary["automation_allowed"] is False' in text
     assert 'assert boundary["merge_authorized"] is False' in text
+
+
+def test_repo_memory_history_selects_exact_head_full_ci_observation_artifact() -> None:
+    text = _workflow_text()
+
+    selection = text.index("Select trusted-main test observation artifact")
+    prior = text.index("Select prior trusted main history artifact")
+
+    assert selection < prior
+    assert "actions/workflows/ci.yml/runs?branch=main&event=push&status=completed" in text
+    assert 'select(.conclusion == "success")' in text
+    assert '[ "$candidate_head_sha" != "${GITHUB_SHA}" ]' in text
+    assert '.name == "trusted-test-observations"' in text
+    assert ".expired == false" in text
+    assert 'if [ "$candidate_artifact_count" -gt 1 ]; then' in text
+    assert "refusing ambiguous provenance" in text
+    assert 'gh run download "$selected_run_id"' in text
+    assert "--name trusted-test-observations" in text
+    assert "-name trusted-test-observations.json" in text
+    assert 'source["workflow"] == "CI"' in text
+    assert 'source["job"] == "Full CI lane"' in text
+    assert 'source["head_sha"] == os.environ["GITHUB_SHA"]' in text
+    assert 'source["event_name"] == "push"' in text
+    assert 'source["ref_name"] == "refs/heads/main"' in text
+    assert 'source["trusted_main"] is True' in text
+    assert 'source["input_read_only"] is True' in text
+    assert 'source["commands_executed_by_reader"] is False' in text
+    assert "for attempt in $(seq 1 20)" in text
+    assert "sleep 15" in text
+
+
+def test_repo_memory_history_recovers_optional_prior_test_observation_history() -> None:
+    text = _workflow_text()
+
+    assert 'echo "prior_test_observation_history_jsonl="' in text
+    assert "-name trusted-test-observation-history.jsonl" in text
+    assert (
+        'echo "prior_test_observation_history_jsonl=$prior_test_observation_history_jsonl"' in text
+    )
+    assert "Prior trusted-main run was selected but supplied no history JSONL artifact." in text
+
+
+def test_repo_memory_history_records_and_uploads_raw_observation_history() -> None:
+    text = _workflow_text()
+
+    selection = text.index("Select trusted-main test observation artifact")
+    prior = text.index("Select prior trusted main history artifact")
+    record = text.index("Record trusted main test observation history")
+    upload = text.index("Upload trusted main RepoMemory history artifact")
+
+    assert selection < prior < record < upload
+    assert "OBSERVATION_REPORT: ${{ steps.test-observations.outputs.observation_report }}" in text
+    assert "OBSERVATION_SOURCE_RUN_ID: ${{ steps.test-observations.outputs.source_run_id }}" in text
+    assert (
+        "PRIOR_TEST_OBSERVATION_HISTORY_JSONL: "
+        "${{ steps.prior.outputs.prior_test_observation_history_jsonl }}" in text
+    )
+    assert "python -m sdetkit.trusted_test_observation_history" in text
+    assert '--observation-report "$OBSERVATION_REPORT"' in text
+    assert '--source-run-id "$OBSERVATION_SOURCE_RUN_ID"' in text
+    assert '--source-head-sha "$OBSERVATION_SOURCE_HEAD_SHA"' in text
+    assert '--prior-history-jsonl "$PRIOR_TEST_OBSERVATION_HISTORY_JSONL"' in text
+    assert "build/repo-memory-history/test-observation-history/" in text
+    assert 'summary["flaky_classification_performed"] is False' in text
+    assert 'summary["current_pr_decision_input"] is False' in text
+    assert 'boundary["automatic_quarantine_allowed"] is False' in text
+    assert 'boundary["automatic_rerun_allowed"] is False' in text
+    assert 'boundary["current_failure_suppression_allowed"] is False' in text
+    assert 'boundary["automation_allowed"] is False' in text
+    assert 'boundary["patch_application_allowed"] is False' in text
+    assert 'boundary["merge_authorized"] is False' in text
+    assert 'boundary["semantic_equivalence_proven"] is False' in text
+    assert "python -m sdetkit intelligence flake classify" not in text
+    assert "gh run rerun" not in text
+    assert "rerun-failed-jobs" not in text
+    assert "--quarantine" not in text.lower()
+    assert "quarantine-test" not in text.lower()
+    assert "pytest.mark.quarantine" not in text.lower()
