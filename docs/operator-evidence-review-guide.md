@@ -248,3 +248,78 @@ semantic_equivalence_proven=false
 ```
 
 The artifact is registered as `maintenance-queue-rollup-json` at `build/sdetkit/maintenance-queue-rollup.json` with schema `sdetkit.maintenance.queue.rollup.v1`. It is a local reporting artifact and does not apply patches, mutate issues, dismiss security findings, or make a merge decision.
+
+## Review the maintenance queue rollup dashboard
+
+Use the dashboard after generating a valid `maintenance-queue-rollup.json` artifact. It provides a static local view of queue ordering, review-required items, close-candidate context, lane counts, and denied authority fields.
+
+Generate the HTML dashboard with the installed console command:
+
+```bash
+sdetkit-maintenance-queue-rollup-dashboard \
+  --rollup-path build/sdetkit/maintenance-queue-rollup.json \
+  --format html \
+  --out build/sdetkit/maintenance-queue-rollup-dashboard.html
+```
+
+The equivalent module fallback is:
+
+```bash
+python -m sdetkit.maintenance_queue_rollup_dashboard \
+  --rollup-path build/sdetkit/maintenance-queue-rollup.json \
+  --format html \
+  --out build/sdetkit/maintenance-queue-rollup-dashboard.html
+```
+
+Generate the deterministic JSON projection with:
+
+```bash
+sdetkit-maintenance-queue-rollup-dashboard \
+  --rollup-path build/sdetkit/maintenance-queue-rollup.json \
+  --format json \
+  --out build/sdetkit/maintenance-queue-rollup-dashboard.json
+```
+
+The dashboard accepts only source artifacts using schema `sdetkit.maintenance.queue.rollup.v1`. It validates `queue_item_count`, `review_required_count`, `close_candidate_count`, and `primary_issue` against the ordered `queue_items` before writing output. Missing, malformed, unsupported, inconsistent, or authority-expanding input returns exit code `2`; successful rendering returns `0`.
+
+Read these dashboard fields first:
+
+- `schema_version`
+- `status`
+- `rollup_path`
+- `rollup_exists`
+- `source_rollup_schema_version`
+- `source_rollup_status`
+- `source_issue_count`
+- `queue_item_count`
+- `review_required_count`
+- `close_candidate_count`
+- `primary_issue`
+- `recommended_next_action`
+- `lane_counts`
+- `input_artifacts`
+- `queue_items`
+- `local_only`
+- `read_only`
+- `decision_boundary`
+
+The dashboard status is `ready` when queue items are present and `empty` when the source rollup is valid but contains no items. The source rollup status remains separately visible in `source_rollup_status`.
+
+The HTML output is static and escapes source-provided text. It contains no JavaScript, performs no network access, and does not modify the source rollup. The JSON output is deterministic for the same source artifact and command arguments.
+
+Every dashboard decision-boundary field must remain false:
+
+```text
+current_pr_decision_input=false
+automation_allowed=false
+issue_mutation_allowed=false
+security_dismissal_allowed=false
+proof_commands_executed=false
+patch_application_allowed=false
+merge_authorized=false
+semantic_equivalence_proven=false
+```
+
+The dashboard schema is `sdetkit.maintenance_queue_rollup_dashboard.v1`. The default HTML path is `build/sdetkit/maintenance-queue-rollup-dashboard.html`; the recommended JSON path is `build/sdetkit/maintenance-queue-rollup-dashboard.json`.
+
+This dashboard is a read-only review surface. `primary_issue`, `review_required`, and `close_candidate` are prioritization context only and never authorize issue mutation, security dismissal, patch application, proof execution, or merge. Dashboard JSON artifact-contract registration remains a separate follow-up.
