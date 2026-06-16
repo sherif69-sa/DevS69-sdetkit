@@ -14,6 +14,7 @@ from sdetkit.reliability_spine_alignment import (
     TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
     TRUSTED_HISTORY_EVIDENCE_MODULE,
     TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE,
+    TRUSTED_TEST_OBSERVATION_HISTORY_MODULE,
     build_alignment_components,
     build_alignment_report,
     main,
@@ -48,6 +49,7 @@ def test_alignment_components_cover_current_reliability_spine() -> None:
     assert FLAKY_TEST_REGISTRY_EVIDENCE_MODULE in modules
     assert TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE in modules
     assert TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE in modules
+    assert TRUSTED_TEST_OBSERVATION_HISTORY_MODULE in modules
     assert SECURITY_FINDING_DIAGNOSIS_MODULE in modules
     assert SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE in modules
 
@@ -93,6 +95,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert TRUSTED_HISTORY_EVIDENCE_MODULE not in gaps_by_module
     assert TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE not in gaps_by_module
     assert TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE not in gaps_by_module
+    assert TRUSTED_TEST_OBSERVATION_HISTORY_MODULE not in gaps_by_module
     assert FLAKY_TEST_REGISTRY_EVIDENCE_MODULE in gaps_by_module
     assert SECURITY_FINDING_DIAGNOSIS_MODULE not in gaps_by_module
     assert SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE not in gaps_by_module
@@ -145,6 +148,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert f"`{FLAKY_TEST_REGISTRY_EVIDENCE_MODULE}`: `partially_aligned`" in markdown
     assert f"`{TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE}`: `aligned`" in markdown
     assert f"`{TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE}`: `aligned`" in markdown
+    assert f"`{TRUSTED_TEST_OBSERVATION_HISTORY_MODULE}`: `aligned`" in markdown
     assert f"`{SECURITY_FINDING_DIAGNOSIS_MODULE}`: `aligned`" in markdown
     assert f"`{SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE}`: `aligned`" in markdown
 
@@ -227,6 +231,7 @@ def test_alignment_has_no_behavior_mutation_surfaces() -> None:
         FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
         TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
         TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE,
+        TRUSTED_TEST_OBSERVATION_HISTORY_MODULE,
         SECURITY_FINDING_DIAGNOSIS_MODULE,
         SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE,
     }
@@ -286,4 +291,30 @@ def test_operator_evidence_loop_alignment_is_closed() -> None:
         component.recommended_next_action == "keep producer artifacts optional, "
         "reporting-only, and excluded from "
         "operator classification"
+    )
+
+
+def test_trusted_test_observation_history_alignment_is_closed() -> None:
+    components = {item.module: item for item in build_alignment_components()}
+
+    component = components[TRUSTED_TEST_OBSERVATION_HISTORY_MODULE]
+
+    assert component.status == "aligned"
+    assert component.gaps == ()
+    assert component.stages == (
+        "evidence",
+        "history",
+        "reporting",
+    )
+    assert component.existing_artifacts == (
+        "trusted-test-observation-history.jsonl",
+        "trusted-test-observation-history-summary.json",
+        "trusted-test-observation-history-summary.md",
+    )
+    assert TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE in component.integration_points
+    assert "CI Full CI lane" in component.integration_points
+    assert (
+        component.recommended_next_action == "wire the immutable raw history artifact "
+        "into trusted-main history collection before "
+        "any separate classification handoff"
     )
