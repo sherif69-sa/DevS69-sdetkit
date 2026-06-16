@@ -110,9 +110,14 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert any("containment" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert not any("PR Quality" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert any("network-isolation" in gap for gap in gaps_by_module["repo_memory"])
-    assert any("observation history aggregation" in gap for gap in gaps_by_module["repo_memory"])
+    assert any("flaky-classification handoff" in gap for gap in gaps_by_module["repo_memory"])
+    assert any("PR Quality visibility" in gap for gap in gaps_by_module["repo_memory"])
     assert any(
-        "observation history aggregation" in gap
+        "flaky-classification handoff" in gap
+        for gap in gaps_by_module[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
+    )
+    assert any(
+        "PR Quality visibility" in gap
         for gap in gaps_by_module[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
     )
     assert not any("persistent profile" in gap for gap in gaps_by_module["repo_memory"])
@@ -313,8 +318,39 @@ def test_trusted_test_observation_history_alignment_is_closed() -> None:
     )
     assert TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE in component.integration_points
     assert "CI Full CI lane" in component.integration_points
+    assert "RepoMemory Profile History workflow" in component.integration_points
     assert (
-        component.recommended_next_action == "wire the immutable raw history artifact "
-        "into trusted-main history collection before "
-        "any separate classification handoff"
+        component.recommended_next_action
+        == "audit a separate provenance-checked classification handoff "
+        "before any registry or PR Quality visibility"
+    )
+
+
+def test_flaky_registry_alignment_starts_after_persisted_observation_history() -> None:
+    components = {item.module: item for item in build_alignment_components()}
+
+    capture = components[TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE]
+    history = components[TRUSTED_TEST_OBSERVATION_HISTORY_MODULE]
+    producer = components[TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE]
+    registry = components[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
+    repo_memory = components["repo_memory"]
+
+    assert (
+        capture.recommended_next_action == "preserve capture as raw input and route it only "
+        "through trusted observation history before any "
+        "flaky-test classification"
+    )
+    assert "RepoMemory Profile History workflow" in history.integration_points
+    assert (
+        producer.recommended_next_action == "consume only persisted provenance-checked "
+        "observation history after a separate advisory "
+        "classification handoff is proven"
+    )
+    assert registry.gaps == (
+        "flaky-classification handoff and PR Quality visibility are not yet connected",
+    )
+    assert TRUSTED_TEST_OBSERVATION_HISTORY_MODULE in repo_memory.integration_points
+    assert (
+        "flaky-classification handoff and PR Quality visibility "
+        "remain unconnected" in repo_memory.gaps
     )

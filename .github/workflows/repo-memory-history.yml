@@ -181,6 +181,183 @@ jobs:
           print("Trusted-main RepoMemory live profile passed.")
           PY
 
+      - name: Select trusted-main test observation artifact
+        id: test-observations
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          source_root="build/repo-memory-history/test-observation-source"
+          rm -rf "$source_root"
+          mkdir -p "$source_root/download"
+
+          selected_run_id=""
+          selected_head_sha=""
+          selected_artifact_id=""
+          selected_artifact_expires_at=""
+
+          for attempt in $(seq 1 20); do
+            while IFS=$'\t' read -r candidate_run_id candidate_head_sha; do
+              if [ -z "$candidate_run_id" ] || [ "$candidate_head_sha" != "${GITHUB_SHA}" ]; then
+                continue
+              fi
+
+              artifact_json="$source_root/artifacts-$candidate_run_id.json"
+              gh api \
+                "repos/${GITHUB_REPOSITORY}/actions/runs/$candidate_run_id/artifacts?per_page=100" \
+                > "$artifact_json"
+
+              candidate_artifact_count="$(
+                jq '[
+                  .artifacts[]
+                  | select(
+                      .name == "trusted-test-observations"
+                      and .expired == false
+                    )
+                ] | length' "$artifact_json"
+              )"
+
+              if [ "$candidate_artifact_count" -gt 1 ]; then
+                echo "Exact-head CI run supplied multiple trusted-test-observations artifacts; refusing ambiguous provenance."
+                exit 1
+              fi
+
+              if [ "$candidate_artifact_count" -eq 1 ]; then
+                selected_run_id="$candidate_run_id"
+                selected_head_sha="$candidate_head_sha"
+                selected_artifact_id="$(
+                  jq -r '[
+                    .artifacts[]
+                    | select(
+                        .name == "trusted-test-observations"
+                        and .expired == false
+                      )
+                  ][0].id' "$artifact_json"
+                )"
+                selected_artifact_expires_at="$(
+                  jq -r '[
+                    .artifacts[]
+                    | select(
+                        .name == "trusted-test-observations"
+                        and .expired == false
+                      )
+                  ][0].expires_at' "$artifact_json"
+                )"
+                break
+              fi
+            done < <(
+              gh api --paginate \
+                "repos/${GITHUB_REPOSITORY}/actions/workflows/ci.yml/runs?branch=main&event=push&status=completed&per_page=100" \
+                --jq '.workflow_runs[] | select(.conclusion == "success") | [.id, .head_sha] | @tsv'
+            )
+
+            if [ -n "$selected_run_id" ]; then
+              break
+            fi
+
+            if [ "$attempt" -lt 20 ]; then
+              echo "Waiting for successful exact-head Full CI observation artifact: attempt $attempt/20"
+              sleep 15
+            fi
+          done
+
+          if [ -z "$selected_run_id" ] || [ -z "$selected_artifact_id" ]; then
+            echo "No successful exact-head CI run supplied a non-expired trusted-test-observations artifact."
+            exit 1
+          fi
+
+          gh run download "$selected_run_id" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name trusted-test-observations \
+            --dir "$source_root/download"
+
+          mapfile -t observation_reports < <(
+            find "$source_root/download" \
+              -type f \
+              -name trusted-test-observations.json \
+              -print
+          )
+
+          if [ "${#observation_reports[@]}" -ne 1 ]; then
+            echo "Expected exactly one trusted-test-observations.json payload."
+            exit 1
+          fi
+
+          observation_report="${observation_reports[0]}"
+
+          OBSERVATION_REPORT="$observation_report" \
+          SELECTED_CI_RUN_ID="$selected_run_id" \
+          SELECTED_CI_HEAD_SHA="$selected_head_sha" \
+          SELECTED_CI_ARTIFACT_ID="$selected_artifact_id" \
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          payload = json.loads(
+              Path(os.environ["OBSERVATION_REPORT"]).read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          assert (
+              payload["schema_version"]
+              == "sdetkit.trusted_test_observation_capture.v1"
+          )
+          assert payload["status"] == "trusted_main_observations_captured"
+
+          source = payload["source"]
+          assert source["workflow"] == "CI"
+          assert source["job"] == "Full CI lane"
+          assert str(source["run_id"]) == os.environ["SELECTED_CI_RUN_ID"]
+          assert source["head_sha"] == os.environ["GITHUB_SHA"]
+          assert source["head_sha"] == os.environ["SELECTED_CI_HEAD_SHA"]
+          assert source["event_name"] == "push"
+          assert source["ref_name"] == "refs/heads/main"
+          assert source["trusted_main"] is True
+          assert source["input_read_only"] is True
+          assert source["commands_executed_by_reader"] is False
+
+          summary = payload["summary"]
+          assert summary["observation_count"] >= 1
+          assert summary["raw_test_identity_emitted"] is False
+          assert summary["flaky_classification_performed"] is False
+
+          observations = payload["observations"]
+          assert len(observations) == summary["observation_count"]
+          assert all(
+              set(item) == {"test_fingerprint", "outcome"}
+              for item in observations
+          )
+          assert all(
+              len(item["test_fingerprint"]) == 64
+              for item in observations
+          )
+
+          boundary = payload["decision_boundary"]
+          assert boundary["raw_observation_only"] is True
+          for key in (
+              "flaky_classification_performed",
+              "automatic_quarantine_allowed",
+              "automatic_rerun_allowed",
+              "current_failure_suppression_allowed",
+              "automation_allowed",
+              "merge_authorized",
+              "semantic_equivalence_proven",
+          ):
+              assert boundary[key] is False
+
+          print("Trusted exact-head Full CI observation artifact passed.")
+          PY
+
+          echo "observation_report=$observation_report" >> "$GITHUB_OUTPUT"
+          echo "source_run_id=$selected_run_id" >> "$GITHUB_OUTPUT"
+          echo "source_head_sha=$selected_head_sha" >> "$GITHUB_OUTPUT"
+          echo "artifact_id=$selected_artifact_id" >> "$GITHUB_OUTPUT"
+          echo "artifact_expires_at=$selected_artifact_expires_at" >> "$GITHUB_OUTPUT"
+
       - name: Select prior trusted main history artifact
         id: prior
         shell: bash
@@ -212,6 +389,7 @@ jobs:
 
           if [ -z "$prior_run_id" ]; then
             echo "prior_history_jsonl=" >> "$GITHUB_OUTPUT"
+            echo "prior_test_observation_history_jsonl=" >> "$GITHUB_OUTPUT"
             echo "prior_diagnostic_signal_snapshot_jsonl=" >> "$GITHUB_OUTPUT"
             echo "prior_run_id=" >> "$GITHUB_OUTPUT"
             echo "prior_head_sha=" >> "$GITHUB_OUTPUT"
@@ -235,6 +413,10 @@ jobs:
             echo "Prior trusted-main run was selected but supplied no history JSONL artifact."
             exit 1
           fi
+
+          prior_test_observation_history_jsonl="$(
+            find build/repo-memory-history/prior-download               -name trusted-test-observation-history.jsonl               -print               -quit
+          )"
 
           prior_security_disposition_jsonl="$(
             find build/repo-memory-history/prior-download               -name security-reviewed-disposition-history.jsonl               -print               -quit
@@ -289,6 +471,7 @@ jobs:
           fi
 
           echo "prior_history_jsonl=$prior_history_jsonl" >> "$GITHUB_OUTPUT"
+          echo "prior_test_observation_history_jsonl=$prior_test_observation_history_jsonl" >> "$GITHUB_OUTPUT"
           echo "prior_security_disposition_jsonl=$prior_security_disposition_jsonl" >> "$GITHUB_OUTPUT"
           echo "prior_diagnostic_signal_snapshot_jsonl=$prior_diagnostic_signal_snapshot_jsonl" >> "$GITHUB_OUTPUT"
           echo "prior_run_id=$prior_run_id" >> "$GITHUB_OUTPUT"
@@ -353,6 +536,110 @@ jobs:
           assert boundary["controlled_validation_is_advisory_only"] is True
 
           print("Trusted-main RepoMemory history snapshot passed.")
+          PY
+
+      - name: Record trusted main test observation history
+        shell: bash
+        env:
+          OBSERVATION_REPORT: ${{ steps.test-observations.outputs.observation_report }}
+          OBSERVATION_SOURCE_RUN_ID: ${{ steps.test-observations.outputs.source_run_id }}
+          OBSERVATION_SOURCE_HEAD_SHA: ${{ steps.test-observations.outputs.source_head_sha }}
+          PRIOR_TEST_OBSERVATION_HISTORY_JSONL: ${{ steps.prior.outputs.prior_test_observation_history_jsonl }}
+        run: |
+          set -euo pipefail
+
+          args=(
+            --observation-report "$OBSERVATION_REPORT"
+            --source-run-id "$OBSERVATION_SOURCE_RUN_ID"
+            --source-head-sha "$OBSERVATION_SOURCE_HEAD_SHA"
+            --out-dir build/repo-memory-history/test-observation-history
+            --format json
+          )
+
+          if [ -n "$PRIOR_TEST_OBSERVATION_HISTORY_JSONL" ]; then
+            args+=(--prior-history-jsonl "$PRIOR_TEST_OBSERVATION_HISTORY_JSONL")
+          fi
+
+          PYTHONPATH=src python -m sdetkit.trusted_test_observation_history \
+            "${args[@]}" \
+            > build/repo-memory-history/test-observation-history-cli.json
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path("build/repo-memory-history/test-observation-history")
+          summary = json.loads(
+              (root / "trusted-test-observation-history-summary.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+          records = [
+              json.loads(line)
+              for line in (
+                  root / "trusted-test-observation-history.jsonl"
+              ).read_text(encoding="utf-8").splitlines()
+              if line.strip()
+          ]
+
+          assert (
+              summary["schema_version"]
+              == "sdetkit.trusted_test_observation_history.v1"
+          )
+          assert summary["status"] == "history_recorded"
+          assert summary["record_count"] == len(records)
+          assert summary["record_count"] >= 1
+          assert summary["source_run_ids"][-1] == os.environ[
+              "OBSERVATION_SOURCE_RUN_ID"
+          ]
+          assert summary["source_head_shas"][-1] == os.environ["GITHUB_SHA"]
+          assert summary["source_head_shas"][-1] == os.environ[
+              "OBSERVATION_SOURCE_HEAD_SHA"
+          ]
+          assert summary["raw_test_identity_emitted"] is False
+          assert summary["flaky_classification_performed"] is False
+          assert summary["current_pr_decision_input"] is False
+          assert summary["prior_history_collected"] is bool(
+              os.environ["PRIOR_TEST_OBSERVATION_HISTORY_JSONL"]
+          )
+
+          latest = records[-1]
+          assert (
+              latest["schema_version"]
+              == "sdetkit.trusted_test_observation_history.record.v1"
+          )
+          assert latest["source_run_id"] == os.environ[
+              "OBSERVATION_SOURCE_RUN_ID"
+          ]
+          assert latest["source_head_sha"] == os.environ["GITHUB_SHA"]
+          assert latest["source_workflow"] == "CI"
+          assert latest["source_job"] == "Full CI lane"
+          assert latest["event_name"] == "push"
+          assert latest["ref_name"] == "refs/heads/main"
+
+          boundary = summary["decision_boundary"]
+          assert boundary["raw_observation_only"] is True
+          assert boundary["flaky_classification_performed"] is False
+          assert boundary["current_pr_decision_input"] is False
+          assert boundary["automatic_quarantine_allowed"] is False
+          assert boundary["automatic_rerun_allowed"] is False
+          assert boundary["current_failure_suppression_allowed"] is False
+          assert boundary["automation_allowed"] is False
+          assert boundary["patch_application_allowed"] is False
+          assert boundary["merge_authorized"] is False
+          assert boundary["semantic_equivalence_proven"] is False
+
+          serialized = json.dumps(
+              {"summary": summary, "records": records},
+              sort_keys=True,
+          )
+          assert '"test_id"' not in serialized
+          assert '"classname"' not in serialized
+          assert '"nodeid"' not in serialized
+          assert '"classification"' not in serialized
+
+          print("Trusted-main test observation history handoff passed.")
           PY
 
       - name: Collect accepted-main observation recovery queue
@@ -822,6 +1109,7 @@ jobs:
             build/repo-memory-history/pattern-insights/
             build/repo-memory-history/flaky-test-registry/
             build/repo-memory-history/candidate-validation/
+            build/repo-memory-history/test-observation-history/
             build/repo-memory-history/diagnostic-signal-snapshots/
             build/repo-memory-history/security-reviewed-dispositions/
           if-no-files-found: error
