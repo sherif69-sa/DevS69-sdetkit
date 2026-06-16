@@ -19,6 +19,7 @@ TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE = "_".join(
     ("trusted", "flaky", "test", "registry", "producer")
 )
 TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE = "_".join(("trusted", "test", "observation", "capture"))
+TRUSTED_TEST_OBSERVATION_HISTORY_MODULE = "_".join(("trusted", "test", "observation", "history"))
 SECURITY_FINDING_DIAGNOSIS_MODULE = "_".join(("security", "finding", "diagnosis"))
 SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE = "_".join(
     ("security", "reviewed", "disposition", "history")
@@ -525,6 +526,22 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "quality.sh cov",
             ),
             recommended_next_action="aggregate accepted-main observations across trusted runs before any flaky-test classification",
+        ),
+        _component(
+            module=TRUSTED_TEST_OBSERVATION_HISTORY_MODULE,
+            role="aggregate provenance-checked accepted-main fingerprinted test outcomes into immutable read-only cross-run history without classifying flakiness",
+            status="aligned",
+            stages=("evidence", "history", "reporting"),
+            existing_artifacts=(
+                "trusted-test-observation-history.jsonl",
+                "trusted-test-observation-history-summary.json",
+                "trusted-test-observation-history-summary.md",
+            ),
+            integration_points=(
+                TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE,
+                "CI Full CI lane",
+            ),
+            recommended_next_action="wire the immutable raw history artifact into trusted-main history collection before any separate classification handoff",
         ),
         _component(
             module=TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
