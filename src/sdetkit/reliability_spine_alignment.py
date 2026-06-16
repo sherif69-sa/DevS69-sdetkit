@@ -289,15 +289,29 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="operator_evidence_loop",
-            role="assemble verified operator evidence loop outputs",
-            status="partially_aligned",
-            stages=("evidence", "diagnosis", "decision", "reporting"),
-            integration_points=("evidence_graph", "pr_quality_action_report"),
-            gaps=(
-                "should consume trajectory history",
-                "should later include PatchScorer and ProtectedVerifier results",
+            role="assemble verified operator evidence loop outputs with optional read-only trajectory, PatchScorer, and ProtectedVerifier projections",
+            status="aligned",
+            stages=(
+                "evidence",
+                "diagnosis",
+                "decision",
+                "history",
+                "proof",
+                "reporting",
             ),
-            recommended_next_action="make it the local orchestration report after PatchScorer exists",
+            existing_artifacts=(
+                "operator-loop.json",
+                "operator-loop.md",
+                "read-only reporting projections",
+            ),
+            integration_points=(
+                "evidence_graph",
+                "pr_quality_action_report",
+                "trajectory_history_report",
+                "patch_scorer",
+                "protected_verifier",
+            ),
+            recommended_next_action="keep producer artifacts optional, reporting-only, and excluded from operator classification",
         ),
         _component(
             module="security_review_evidence",

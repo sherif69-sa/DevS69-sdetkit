@@ -16,6 +16,15 @@ from sdetkit import (
 )
 
 SCHEMA_VERSION = "sdetkit.operator.evidence_loop.v1"
+REPORTING_PROJECTIONS_SCHEMA_VERSION = ".".join(
+    ("sdetkit", "operator", "evidence", "loop", "reporting", "projections", "v1")
+)
+REPORTING_PROJECTIONS = "_".join(("reporting", "projections"))
+TRAJECTORY_HISTORY_PROJECTION = "_".join(("trajectory", "history", "projection"))
+PATCH_SCORE_PROJECTION = "_".join(("patch", "score", "projection"))
+PROTECTED_VERIFIER_PROJECTION = "_".join(("protected", "verifier", "projection"))
+CURRENT_PR_DECISION_INPUT = "_".join(("current", "pr", "decision", "input"))
+PRODUCER_EXECUTION_CHANGED = "_".join(("producer", "execution", "changed"))
 DEFAULT_OUTPUT_DIR = Path("build/sdetkit/operator-loop")
 
 JsonObject = dict[str, Any]
@@ -55,6 +64,17 @@ def _int(value: Any, default: int = 0) -> int:
         return int(value)
     except (TypeError, ValueError):
         return default
+
+
+def _bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value).lower() in {"1", "true", "yes"}
+
+
+def _string_list(value: Any, *, limit: int = 20) -> list[str]:
+    values = [_string(item) for item in _as_list(value) if _string(item)]
+    return values[: max(limit, 0)]
 
 
 def _artifact_key(*parts: str) -> str:
@@ -173,6 +193,163 @@ def _write_safe_fix_outcome_rollup(
     }
 
 
+def _projection_boundary() -> JsonObject:
+    return {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+
+
+def _not_collected_projection(source: str) -> JsonObject:
+    return {
+        "collection_status": "not_collected",
+        "source": source,
+        "source_schema": "not_collected",
+        "reporting_only": True,
+        CURRENT_PR_DECISION_INPUT: False,
+        PRODUCER_EXECUTION_CHANGED: False,
+        "decision_boundary": _projection_boundary(),
+    }
+
+
+def _trajectory_history_projection(
+    payload: JsonObject,
+) -> JsonObject:
+    if not payload:
+        return _not_collected_projection("trajectory_history_report")
+
+    recent = [
+        {
+            "diagnostic_id": _string(_as_dict(item).get("diagnostic_id")),
+            "action": _string(_as_dict(item).get("action")),
+            "failure_class": _string(_as_dict(item).get("failure_class")),
+            "risk_surface": _string(_as_dict(item).get("risk_surface")),
+            "review_first": _bool(_as_dict(item).get("review_first")),
+            "auto_fix_allowed": _bool(_as_dict(item).get("auto_fix_allowed")),
+            "final_result": _string(_as_dict(item).get("final_result")),
+        }
+        for item in _as_list(payload.get("recent_decisions"))[:5]
+        if _as_dict(item)
+    ]
+
+    return {
+        "collection_status": "collected",
+        "source": "trajectory_history_report",
+        "source_schema": (_string(payload.get("schema_version")) or "unknown"),
+        "record_count": _int(payload.get("record_count")),
+        "review_first_count": _int(payload.get("review_first_count")),
+        "auto_fix_allowed_count": _int(payload.get("auto_fix_allowed_count")),
+        "by_final_result": _as_dict(payload.get("by_final_result")),
+        "by_risk_surface": _as_dict(payload.get("by_risk_surface")),
+        "by_failure_class": _as_dict(payload.get("by_failure_class")),
+        "by_action": _as_dict(payload.get("by_action")),
+        "recent_decisions": recent,
+        "reporting_only": True,
+        CURRENT_PR_DECISION_INPUT: False,
+        PRODUCER_EXECUTION_CHANGED: False,
+        "decision_boundary": _projection_boundary(),
+    }
+
+
+def _patch_score_projection(
+    payload: JsonObject,
+) -> JsonObject:
+    if not payload:
+        return _not_collected_projection("patch_scorer")
+
+    decision = _as_dict(payload.get("decision"))
+    flags = [_as_dict(item) for item in _as_list(payload.get("risk_flags")) if _as_dict(item)]
+
+    return {
+        "collection_status": "collected",
+        "source": "patch_scorer",
+        "source_schema": (_string(payload.get("schema_version")) or "unknown"),
+        "patch_id": _string(payload.get("patch_id")),
+        "diagnosis_id": _string(payload.get("diagnosis_id")),
+        "failure_surface": _string(payload.get("failure_surface")),
+        "classification": _string(payload.get("classification")),
+        "risk_level": _string(payload.get("risk_level")),
+        "strategy": _string(payload.get("strategy")),
+        "score": _int(payload.get("score")),
+        "minimum_score": _int(payload.get("minimum_score")),
+        "changed_files": _string_list(payload.get("changed_files")),
+        "risk_flag_count": len(flags),
+        "blocking_risk_flag_count": sum(1 for flag in flags if _bool(flag.get("blocking"))),
+        "risk_flag_codes": sorted(
+            {_string(flag.get("code")) for flag in flags if _string(flag.get("code"))}
+        ),
+        "source_decision_status": _string(decision.get("status")),
+        "source_candidate_for_protected_verification": (
+            _bool(decision.get("candidate_for_protected_verification"))
+        ),
+        "source_automation_allowed": _bool(decision.get("automation_allowed")),
+        "reporting_only": True,
+        CURRENT_PR_DECISION_INPUT: False,
+        PRODUCER_EXECUTION_CHANGED: False,
+        "decision_boundary": _projection_boundary(),
+    }
+
+
+def _protected_verifier_projection(
+    payload: JsonObject,
+) -> JsonObject:
+    if not payload:
+        return _not_collected_projection("protected_verifier")
+
+    decision = _as_dict(payload.get("decision"))
+    findings = [_as_dict(item) for item in _as_list(payload.get("findings")) if _as_dict(item)]
+    risk_flags = [_as_dict(item) for item in _as_list(payload.get("risk_flags")) if _as_dict(item)]
+
+    return {
+        "collection_status": "collected",
+        "source": "protected_verifier",
+        "source_schema": (_string(payload.get("schema_version")) or "unknown"),
+        "patch_id": _string(payload.get("patch_id")),
+        "diagnosis_id": _string(payload.get("diagnosis_id")),
+        "patch_score": _int(payload.get("patch_score")),
+        "source_decision_status": _string(decision.get("status")),
+        "source_review_first": _bool(decision.get("review_first")),
+        "source_structural_verification_passed": (
+            _bool(decision.get("structural_verification_passed"))
+            or _bool(decision.get("protected_verification_passed"))
+        ),
+        "source_semantic_equivalence_proven": (_bool(decision.get("semantic_equivalence_proven"))),
+        "source_automation_allowed": _bool(decision.get("automation_allowed")),
+        "source_merge_authorized": _bool(decision.get("merge_authorized")),
+        "finding_count": len(findings),
+        "risk_flag_count": len(risk_flags),
+        "blocking_finding_count": sum(1 for finding in findings if _bool(finding.get("blocking"))),
+        "reporting_only": True,
+        CURRENT_PR_DECISION_INPUT: False,
+        PRODUCER_EXECUTION_CHANGED: False,
+        "decision_boundary": _projection_boundary(),
+    }
+
+
+def _reporting_projections(
+    *,
+    trajectory_history: JsonObject,
+    patch_score: JsonObject,
+    protected_verifier_decision: JsonObject,
+) -> JsonObject:
+    return {
+        "schema_version": (REPORTING_PROJECTIONS_SCHEMA_VERSION),
+        TRAJECTORY_HISTORY_PROJECTION: (_trajectory_history_projection(trajectory_history)),
+        PATCH_SCORE_PROJECTION: (_patch_score_projection(patch_score)),
+        PROTECTED_VERIFIER_PROJECTION: (
+            _protected_verifier_projection(protected_verifier_decision)
+        ),
+        "reporting_only": True,
+        CURRENT_PR_DECISION_INPUT: False,
+        PRODUCER_EXECUTION_CHANGED: False,
+        "decision_boundary": _projection_boundary(),
+    }
+
+
 def _classification(
     *,
     evidence_narrative: JsonObject,
@@ -231,6 +408,26 @@ def _verify_operator_loop_payload(payload: JsonObject) -> JsonObject:
         ]
     )
 
+    reporting = _as_dict(payload.get(REPORTING_PROJECTIONS))
+    reporting_boundary = _as_dict(reporting.get("decision_boundary"))
+    reporting_projection_ok = (
+        reporting.get("schema_version") == REPORTING_PROJECTIONS_SCHEMA_VERSION
+        and reporting.get("reporting_only") is True
+        and reporting.get(CURRENT_PR_DECISION_INPUT) is False
+        and reporting.get(PRODUCER_EXECUTION_CHANGED) is False
+        and all(
+            reporting_boundary.get(key) is False
+            for key in [
+                "automation_allowed",
+                "patch_application_allowed",
+                "merge_authorized",
+                "semantic_equivalence_proven",
+                "automatic_security_fix_allowed",
+                "automatic_dismissal_allowed",
+            ]
+        )
+    )
+
     comment_key = _artifact_key("pr", "quality", "comment", "markdown")
     comment_path = Path(str(artifacts.get(comment_key, "")))
     comment_ok = comment_path.exists() and "SDETKit Review Result" in comment_path.read_text(
@@ -247,6 +444,7 @@ def _verify_operator_loop_payload(payload: JsonObject) -> JsonObject:
     checks = {
         "required_artifacts": not missing,
         "advisory_boundary": advisory_ok,
+        "reporting_projection_boundary": (reporting_projection_ok),
         "comment": comment_ok,
         "mission": mission_ok,
         "patch_plan": patch_plan_ok,
@@ -297,6 +495,12 @@ def _render_markdown(payload: JsonObject) -> str:
     mission_control_summary = _as_dict(payload.get("mission_control"))
     patch_plan = _as_dict(payload.get("patch_plan"))
     safe_fix_rollup = _as_dict(payload.get("safe_fix_outcome_rollup"))
+
+    reporting = _as_dict(payload.get(REPORTING_PROJECTIONS))
+    reporting_boundary = _as_dict(reporting.get("decision_boundary"))
+    trajectory_projection = _as_dict(reporting.get(TRAJECTORY_HISTORY_PROJECTION))
+    patch_score_projection = _as_dict(reporting.get(PATCH_SCORE_PROJECTION))
+    verifier_projection = _as_dict(reporting.get(PROTECTED_VERIFIER_PROJECTION))
 
     lines = [
         "# Operator evidence loop",
@@ -349,6 +553,88 @@ def _render_markdown(payload: JsonObject) -> str:
         ]
     )
 
+    lines.extend(
+        [
+            "",
+            "## Read-only reporting projections",
+            "",
+            (f"- Schema: `{_string(reporting.get('schema_version'), 'unknown')}`"),
+            (f"- Reporting only: `{str(_bool(reporting.get('reporting_only'))).lower()}`"),
+            (
+                "- Current PR decision input: "
+                f"`{str(_bool(reporting.get(CURRENT_PR_DECISION_INPUT))).lower()}`"
+            ),
+            (
+                "- Producer execution changed: "
+                f"`{str(_bool(reporting.get(PRODUCER_EXECUTION_CHANGED))).lower()}`"
+            ),
+            (
+                "- Patch application allowed: "
+                f"`{str(_bool(reporting_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Automation allowed: "
+                f"`{str(_bool(reporting_boundary.get('automation_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized: "
+                f"`{str(_bool(reporting_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence proven: "
+                f"`{str(_bool(reporting_boundary.get('semantic_equivalence_proven'))).lower()}`"
+            ),
+            "",
+            "### Trajectory history",
+            "",
+            (
+                "- Collection status: "
+                f"`{_string(trajectory_projection.get('collection_status'), 'unknown')}`"
+            ),
+            (f"- Records: `{_int(trajectory_projection.get('record_count'))}`"),
+            (
+                "- Review-first decisions: "
+                f"`{_int(trajectory_projection.get('review_first_count'))}`"
+            ),
+            (
+                "- Auto-fix-allowed decisions: "
+                f"`{_int(trajectory_projection.get('auto_fix_allowed_count'))}`"
+            ),
+            "",
+            "### PatchScorer",
+            "",
+            (
+                "- Collection status: "
+                f"`{_string(patch_score_projection.get('collection_status'), 'unknown')}`"
+            ),
+            (
+                "- Decision status: "
+                f"`{_string(patch_score_projection.get('source_decision_status'), 'unknown')}`"
+            ),
+            (f"- Score: `{_int(patch_score_projection.get('score'))}`"),
+            (
+                "- Blocking risk flags: "
+                f"`{_int(patch_score_projection.get('blocking_risk_flag_count'))}`"
+            ),
+            "",
+            "### ProtectedVerifier",
+            "",
+            (
+                "- Collection status: "
+                f"`{_string(verifier_projection.get('collection_status'), 'unknown')}`"
+            ),
+            (
+                "- Decision status: "
+                f"`{_string(verifier_projection.get('source_decision_status'), 'unknown')}`"
+            ),
+            (
+                "- Structural verification passed: "
+                f"`{str(_bool(verifier_projection.get('source_structural_verification_passed'))).lower()}`"
+            ),
+            (f"- Blocking findings: `{_int(verifier_projection.get('blocking_finding_count'))}`"),
+        ]
+    )
+
     lines.extend(["", "## Artifacts", ""])
     for key in sorted(artifacts):
         lines.append(f"- {key}: `{artifacts[key]}`")
@@ -368,6 +654,9 @@ def build_operator_evidence_loop(
     changed_files: Path | None = None,
     action_report: Path | None = None,
     check_intelligence: Path | None = None,
+    trajectory_history: Path | None = None,
+    patch_score: Path | None = None,
+    protected_verifier_decision: Path | None = None,
 ) -> JsonObject:
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -404,6 +693,14 @@ def build_operator_evidence_loop(
 
     action_payload = _read_json(action_report) or _default_action_report(evidence_narrative)
     check_payload = _read_json(check_intelligence) or _default_check_intelligence()
+    trajectory_payload = _read_optional_json(trajectory_history)
+    patch_score_payload = _read_optional_json(patch_score)
+    protected_verifier_payload = _read_optional_json(protected_verifier_decision)
+    reporting_projections = _reporting_projections(
+        trajectory_history=trajectory_payload,
+        patch_score=patch_score_payload,
+        protected_verifier_decision=(protected_verifier_payload),
+    )
     comment_body = pr_quality_action_report.render_comment_body(
         action_report=action_payload,
         check_intelligence=check_payload,
@@ -419,6 +716,23 @@ def build_operator_evidence_loop(
         _artifact_key("pr", "quality", "narrative", "markdown"): narrative_markdown.as_posix(),
         _artifact_key("pr", "quality", "comment", "markdown"): comment_path.as_posix(),
     }
+
+    for source_path, artifact_parts in (
+        (
+            trajectory_history,
+            ("trajectory", "history", "json"),
+        ),
+        (
+            patch_score,
+            ("patch", "score", "json"),
+        ),
+        (
+            protected_verifier_decision,
+            ("protected", "verifier", "json"),
+        ),
+    ):
+        if source_path is not None and source_path.exists():
+            artifacts[_artifact_key(*artifact_parts)] = source_path.as_posix()
 
     evidence_graph_markdown = graph_path.parent / "evidence-graph.md"
     if evidence_graph_markdown.exists():
@@ -450,6 +764,7 @@ def build_operator_evidence_loop(
             "evidence_graph": mission_bundle.get("evidence_graph", {}),
         },
         "patch_plan": mission_bundle.get("patch_plan", {}),
+        REPORTING_PROJECTIONS: reporting_projections,
         "pr_quality": {
             "primary_signal": evidence_narrative.get("primary_signal", {}),
             "quality": evidence_narrative.get("quality", {}),
@@ -495,6 +810,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--changed-files", type=Path, default=None)
     parser.add_argument("--action-report", type=Path, default=None)
     parser.add_argument("--check-intelligence", type=Path, default=None)
+    parser.add_argument("--trajectory-history", type=Path, default=None)
+    parser.add_argument("--patch-score", type=Path, default=None)
+    parser.add_argument("--protected-verifier", type=Path, default=None)
     parser.add_argument("--format", choices=["json", "markdown"], default="json")
     parser.add_argument(
         "--verify",
@@ -517,6 +835,9 @@ def main(argv: list[str] | None = None) -> int:
         changed_files=args.changed_files,
         action_report=args.action_report,
         check_intelligence=args.check_intelligence,
+        trajectory_history=args.trajectory_history,
+        patch_score=args.patch_score,
+        protected_verifier_decision=(args.protected_verifier),
     )
 
     if args.format == "markdown":
