@@ -20,6 +20,9 @@ TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE = "_".join(
 )
 TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE = "_".join(("trusted", "test", "observation", "capture"))
 TRUSTED_TEST_OBSERVATION_HISTORY_MODULE = "_".join(("trusted", "test", "observation", "history"))
+TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE = "_".join(
+    ("trusted", "test", "observation", "classification")
+)
 SECURITY_FINDING_DIAGNOSIS_MODULE = "_".join(("security", "finding", "diagnosis"))
 SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE = "_".join(
     ("security", "reviewed", "disposition", "history")
@@ -539,10 +542,23 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             integration_points=(
                 TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE,
+                TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE,
                 "CI Full CI lane",
                 "RepoMemory Profile History workflow",
             ),
-            recommended_next_action="audit a separate provenance-checked classification handoff before any registry or PR Quality visibility",
+            recommended_next_action="keep immutable history as the only input to the dedicated fingerprint classification contract",
+        ),
+        _component(
+            module=TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE,
+            role="classify provenance-bound fingerprint outcome histories into deterministic advisory states without recovering raw test identity",
+            status="aligned",
+            stages=("evidence", "diagnosis", "history", "reporting"),
+            existing_artifacts=(
+                "trusted-test-observation-classification.json",
+                "trusted-test-observation-classification.md",
+            ),
+            integration_points=(TRUSTED_TEST_OBSERVATION_HISTORY_MODULE,),
+            recommended_next_action="audit trusted producer consumption of the dedicated advisory classification artifact before registry, workflow, RepoMemory, or PR Quality integration",
         ),
         _component(
             module=TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
@@ -560,7 +576,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
                 "repo_memory",
             ),
-            recommended_next_action="consume only persisted provenance-checked observation history after a separate advisory classification handoff is proven",
+            recommended_next_action="audit consumption of the dedicated advisory classification artifact before changing the no-observation fail-closed state",
         ),
         _component(
             module=FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
@@ -576,8 +592,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
                 "repo_memory",
             ),
-            gaps=("flaky-classification handoff and PR Quality visibility are not yet connected",),
-            recommended_next_action="connect only cross-run provenance-checked classifications before rendering populated instability history",
+            gaps=(
+                "trusted classification producer handoff and PR Quality visibility are not yet connected",
+            ),
+            recommended_next_action="connect only producer-vetted dedicated fingerprint classifications before rendering populated instability history",
         ),
         _component(
             module="repo_memory",
@@ -603,7 +621,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             gaps=(
                 "successful network-isolation proof is unavailable until a backend is verified",
-                "flaky-classification handoff and PR Quality visibility remain unconnected",
+                "trusted classification producer handoff and PR Quality visibility remain unconnected",
             ),
             recommended_next_action="surface only provenance-checked flaky-test instability context without expanding authority",
         ),
