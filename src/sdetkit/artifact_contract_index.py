@@ -12,6 +12,7 @@ from . import (
     candidate_evidence_checklist,
     candidate_freeze_readiness,
     check_intelligence,
+    ci_failure_extractor,
     diagnostic_job,
     diagnostic_signal_snapshot,
     diagnostic_signal_snapshot_history,
@@ -560,6 +561,24 @@ def build_index() -> dict[str, Any]:
                     "automation_allowed",
                     "merge_authorized",
                     "semantic_equivalence_proven",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "ci-failure-extractor-json",
+                "path": ci_failure_extractor.DEFAULT_OUT,
+                "produced_by": (
+                    "python -m sdetkit.ci_failure_extractor "
+                    "--log <raw-ci.log> "
+                    "--out build/sdetkit/failed-check-logs.json "
+                    "--format text"
+                ),
+                "schema_version": ci_failure_extractor.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "failed_check_count",
+                    "failed_checks",
+                    "summary",
                 ],
                 "stability": "advanced",
             },
