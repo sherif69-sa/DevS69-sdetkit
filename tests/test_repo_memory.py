@@ -1279,3 +1279,104 @@ def test_repo_memory_rejects_authority_expanding_failure_vector_contract_evidenc
         assert "FailureVector contract evidence expands authority: automation_allowed" in str(exc)
     else:
         raise AssertionError("expected authority-expanding FailureVector evidence to fail")
+
+
+def test_repo_memory_cli_redacts_validation_exception_details(
+    tmp_path: Path,
+    capsys,
+    monkeypatch,
+) -> None:
+    insights_path = tmp_path / "pattern-insights.json"
+    benchmark_path = tmp_path / "benchmark-report.json"
+    out_dir = tmp_path / "repo-memory"
+    sensitive_value = "repo-memory-sensitive-validation-value"
+
+    insights_path.write_text(json.dumps(_pattern_insights()), encoding="utf-8")
+    benchmark_path.write_text(json.dumps(_benchmark_report()), encoding="utf-8")
+
+    def raise_sensitive_validation_error(**_: object) -> dict:
+        raise ValueError(f"rejected secret={sensitive_value}")
+
+    monkeypatch.setattr(
+        "sdetkit.repo_memory.build_repo_memory_profile",
+        raise_sensitive_validation_error,
+    )
+
+    rc = main(
+        [
+            "--pattern-insights",
+            str(insights_path),
+            "--benchmark-report",
+            str(benchmark_path),
+            "--out-dir",
+            str(out_dir),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 2
+    assert captured.out == "error=input_validation_failed\n"
+    assert sensitive_value not in captured.out
+    assert sensitive_value not in captured.err
+
+
+def test_repo_memory_cli_redacts_invalid_json_contents(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    sensitive_value = "repo-memory-sensitive-json-value"
+    insights_path = tmp_path / "pattern-insights.json"
+    benchmark_path = tmp_path / "benchmark-report.json"
+    out_dir = tmp_path / "repo-memory"
+
+    insights_path.write_text(
+        '{"secret": "' + sensitive_value + '", "broken": ',
+        encoding="utf-8",
+    )
+    benchmark_path.write_text(json.dumps(_benchmark_report()), encoding="utf-8")
+
+    rc = main(
+        [
+            "--pattern-insights",
+            str(insights_path),
+            "--benchmark-report",
+            str(benchmark_path),
+            "--out-dir",
+            str(out_dir),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 2
+    assert captured.out == "error=invalid_json\n"
+    assert sensitive_value not in captured.out
+    assert sensitive_value not in captured.err
+
+
+def test_repo_memory_cli_redacts_input_io_failure_path(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    sensitive_value = "repo-memory-sensitive-path-value"
+    missing_insights = tmp_path / sensitive_value / "pattern-insights.json"
+    benchmark_path = tmp_path / "benchmark-report.json"
+    out_dir = tmp_path / "repo-memory"
+
+    benchmark_path.write_text(json.dumps(_benchmark_report()), encoding="utf-8")
+
+    rc = main(
+        [
+            "--pattern-insights",
+            str(missing_insights),
+            "--benchmark-report",
+            str(benchmark_path),
+            "--out-dir",
+            str(out_dir),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 2
+    assert captured.out == "error=input_io_failure\n"
+    assert sensitive_value not in captured.out
+    assert sensitive_value not in captured.err

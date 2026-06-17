@@ -1465,8 +1465,14 @@ def main(argv: list[str] | None = None) -> int:
             ),
         )
         artifacts = write_profile(profile, out_dir=args.out_dir)
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
-        print(f"error={exc}")
+    except json.JSONDecodeError:
+        print("error=invalid_json")
+        return 2
+    except OSError:
+        print("error=input_io_failure")
+        return 2
+    except ValueError:
+        print("error=input_validation_failed")
         return 2
 
     if args.format == "json":
