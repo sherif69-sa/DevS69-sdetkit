@@ -1464,7 +1464,7 @@ def main(argv: list[str] | None = None) -> int:
                 else None
             ),
         )
-        artifacts = write_profile(profile, out_dir=args.out_dir)
+        write_profile(profile, out_dir=args.out_dir)
     except json.JSONDecodeError:
         print("error=invalid_json")
         return 2
@@ -1480,7 +1480,10 @@ def main(argv: list[str] | None = None) -> int:
             json.dumps(
                 {
                     "profile_status": profile["profile_status"],
-                    "artifacts": artifacts,
+                    "artifacts": {
+                        "repo_memory_profile_json": PROFILE_JSON,
+                        "repo_memory_profile_markdown": PROFILE_MD,
+                    },
                     "known_safe_candidate_count": profile["known_safe_candidate_count"],
                     "live_safe_candidate_count": profile["live_safe_candidate_count"],
                     "controlled_candidate_validation_status": profile[
@@ -1495,8 +1498,8 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
     else:
-        for key, value in artifacts.items():
-            print(f"{key}: {value}")
+        print(f"repo_memory_profile_json: {PROFILE_JSON}")
+        print(f"repo_memory_profile_markdown: {PROFILE_MD}")
 
     return 0
 

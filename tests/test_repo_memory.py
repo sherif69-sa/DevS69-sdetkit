@@ -1380,3 +1380,77 @@ def test_repo_memory_cli_redacts_input_io_failure_path(
     assert captured.out == "error=input_io_failure\n"
     assert sensitive_value not in captured.out
     assert sensitive_value not in captured.err
+
+
+def test_repo_memory_cli_redacts_success_artifact_paths_in_text_output(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    sensitive_value = "repo-memory-sensitive-success-path"
+    insights_path = tmp_path / "pattern-insights.json"
+    benchmark_path = tmp_path / "benchmark-report.json"
+    out_dir = tmp_path / sensitive_value / "repo-memory"
+
+    insights_path.write_text(json.dumps(_pattern_insights()), encoding="utf-8")
+    benchmark_path.write_text(json.dumps(_benchmark_report()), encoding="utf-8")
+
+    rc = main(
+        [
+            "--pattern-insights",
+            str(insights_path),
+            "--benchmark-report",
+            str(benchmark_path),
+            "--out-dir",
+            str(out_dir),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert captured.out == (
+        "repo_memory_profile_json: repo-memory-profile.json\n"
+        "repo_memory_profile_markdown: repo-memory-profile.md\n"
+    )
+    assert sensitive_value not in captured.out
+    assert sensitive_value not in captured.err
+    assert (out_dir / "repo-memory-profile.json").is_file()
+    assert (out_dir / "repo-memory-profile.md").is_file()
+
+
+def test_repo_memory_cli_redacts_success_artifact_paths_in_json_output(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    sensitive_value = "repo-memory-sensitive-success-json-path"
+    insights_path = tmp_path / "pattern-insights.json"
+    benchmark_path = tmp_path / "benchmark-report.json"
+    out_dir = tmp_path / sensitive_value / "repo-memory"
+
+    insights_path.write_text(json.dumps(_pattern_insights()), encoding="utf-8")
+    benchmark_path.write_text(json.dumps(_benchmark_report()), encoding="utf-8")
+
+    rc = main(
+        [
+            "--pattern-insights",
+            str(insights_path),
+            "--benchmark-report",
+            str(benchmark_path),
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert sensitive_value not in captured.out
+    assert sensitive_value not in captured.err
+
+    payload = json.loads(captured.out)
+    assert payload["artifacts"] == {
+        "repo_memory_profile_json": "repo-memory-profile.json",
+        "repo_memory_profile_markdown": "repo-memory-profile.md",
+    }
+    assert (out_dir / "repo-memory-profile.json").is_file()
+    assert (out_dir / "repo-memory-profile.md").is_file()
