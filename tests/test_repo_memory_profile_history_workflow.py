@@ -26,13 +26,27 @@ def test_repo_memory_history_runs_only_from_trusted_main_pushes() -> None:
 def test_repo_memory_history_builds_fresh_live_profile_from_merged_code() -> None:
     text = _workflow_text()
 
+    observations = text.index("Select trusted-main test observation artifact")
+    prior = text.index("Select prior trusted main history artifact")
+    observation_history = text.index("python -m sdetkit.trusted_test_observation_history")
+    classification = text.index("python -m sdetkit.trusted_test_observation_classification")
     workspace = text.index("python -m sdetkit.pr_quality_live_benchmark_workspace")
     live_report = text.index("python -m sdetkit.replayable_benchmark_harness")
     producer = text.index("python -m sdetkit.trusted_flaky_test_registry_producer")
-    profile = text.index("python -m sdetkit.repo_memory")
+    profile = text.index("PYTHONPATH=src python -m sdetkit.repo_memory")
     history = text.index("python -m sdetkit.repo_memory_profile_history")
 
-    assert workspace < live_report < producer < profile < history
+    assert (
+        observations
+        < prior
+        < observation_history
+        < classification
+        < workspace
+        < live_report
+        < producer
+        < profile
+        < history
+    )
     assert "${RUNNER_TEMP}/sdetkit-repo-memory-history-live-repositories" in text
     assert (
         "--live-benchmark-report build/repo-memory-history/live-report/benchmark-report.json"
@@ -48,11 +62,23 @@ def test_repo_memory_history_builds_fresh_live_profile_from_merged_code() -> Non
         "--flaky-test-registry-evidence build/repo-memory-history/flaky-test-registry/flaky-test-registry-evidence.json"
         in text
     )
-    assert 'assert flaky["entry_count"] == 0' in text
     assert (
-        'assert flaky["source"]["observation_status"] == "no_test_observations_available"' in text
+        "--history-jsonl build/repo-memory-history/test-observation-history/"
+        "trusted-test-observation-history.jsonl" in text
     )
-    assert 'assert flaky["source"]["observations_collected"] is False' in text
+    assert (
+        "--classification-report build/repo-memory-history/"
+        "test-observation-classification/"
+        "trusted-test-observation-classification.json" in text
+    )
+    assert 'assert flaky["entry_count"] == classification_summary["flaky"]' in text
+    assert 'assert handoff["latest_source_head_sha"] == os.environ["GITHUB_SHA"]' in text
+    assert 'if classification_summary["flaky"]:' in text
+    assert 'producer_status = "_".join(' in text
+    assert '("producer", "vetted", "flaky", "observations", "available")' in text
+    assert "== producer_status" in text
+    assert '"no_test_observations_available"' in text
+    assert 'assert all("test_id" not in item for item in flaky["entries"])' in text
 
 
 def test_repo_memory_history_imports_only_successful_ancestor_main_history() -> None:
@@ -77,6 +103,7 @@ def test_repo_memory_history_uploads_snapshot_without_repository_mutation() -> N
     assert "name: repo-memory-profile-history" in text
     assert "build/repo-memory-history/output/" in text
     assert "build/repo-memory-history/flaky-test-registry/" in text
+    assert "build/repo-memory-history/test-observation-classification/" in text
     assert "repo-memory-profile-history.jsonl" in text
     assert "git add " not in text
     assert "git commit " not in text
@@ -390,3 +417,30 @@ def test_repo_memory_history_records_and_uploads_raw_observation_history() -> No
     assert "--quarantine" not in text.lower()
     assert "quarantine-test" not in text.lower()
     assert "pytest.mark.quarantine" not in text.lower()
+
+
+def test_repo_memory_history_classifies_cumulative_history_before_registry_population() -> None:
+    text = _workflow_text()
+
+    observation_history = text.index("python -m sdetkit.trusted_test_observation_history")
+    classification = text.index("python -m sdetkit.trusted_test_observation_classification")
+    producer = text.index("python -m sdetkit.trusted_flaky_test_registry_producer")
+    profile = text.index("PYTHONPATH=src python -m sdetkit.repo_memory")
+
+    assert observation_history < classification < producer < profile
+    assert 'source["source_head_shas"][-1] == os.environ["GITHUB_SHA"]' in text
+    assert 'summary["current_pr_decision_input"] is False' in text
+    assert 'boundary["automatic_quarantine_allowed"] is False' in text
+    assert 'boundary["automatic_rerun_allowed"] is False' in text
+    assert 'boundary["current_failure_suppression_allowed"] is False' in text
+    assert 'boundary["patch_application_allowed"] is False' in text
+
+
+def test_repo_memory_history_allows_zero_flaky_population_without_fabrication() -> None:
+    text = _workflow_text()
+
+    assert 'if classification_summary["flaky"]:' in text
+    assert 'flaky["source"]["observations_collected"] is True' in text
+    assert 'flaky["source"]["observations_collected"] is False' in text
+    assert 'assert handoff["flaky"] == classification_summary["flaky"]' in text
+    assert 'assert flaky["entry_count"] == 0' not in text

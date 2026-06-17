@@ -60,8 +60,8 @@ def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
     report = build_alignment_report()
     status_counts = report["status_counts"]
 
-    assert status_counts["aligned"] >= 12
-    assert status_counts["partially_aligned"] >= 11
+    assert status_counts["aligned"] >= 13
+    assert status_counts["partially_aligned"] >= 10
     assert status_counts.get("planned", 0) == 0
     assert report["next_recommended_pr"] == NEXT_RECOMMENDED_PR
 
@@ -99,7 +99,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE not in gaps_by_module
     assert TRUSTED_TEST_OBSERVATION_HISTORY_MODULE not in gaps_by_module
     assert TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE not in gaps_by_module
-    assert FLAKY_TEST_REGISTRY_EVIDENCE_MODULE in gaps_by_module
+    assert FLAKY_TEST_REGISTRY_EVIDENCE_MODULE not in gaps_by_module
     assert SECURITY_FINDING_DIAGNOSIS_MODULE not in gaps_by_module
     assert SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE not in gaps_by_module
     assert any("protected_verifier" in gap for gap in gaps_by_module["maintenance_autopilot"])
@@ -117,42 +117,33 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
         "producer-vetted fingerprint registry population" in gap
         for gap in gaps_by_module["repo_memory"]
     )
-    assert any("trusted-main workflow population" in gap for gap in gaps_by_module["repo_memory"])
+    assert not any(
+        "trusted-main workflow population" in gap for gap in gaps_by_module["repo_memory"]
+    )
     assert any("PR Quality visibility" in gap for gap in gaps_by_module["repo_memory"])
-    assert not any(
-        "classification adapter" in gap
-        for gap in gaps_by_module[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
-    )
-    assert not any(
-        "RepoMemory population" in gap
-        for gap in gaps_by_module[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
-    )
-    assert any(
-        "trusted-main workflow population" in gap
-        for gap in gaps_by_module[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
-    )
-    assert any(
-        "PR Quality visibility" in gap
-        for gap in gaps_by_module[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
-    )
     assert not any("persistent profile" in gap for gap in gaps_by_module["repo_memory"])
     assert any("verified" in gap for gap in gaps_by_module["network_boundary"])
     assert any("external filesystem" in gap for gap in gaps_by_module["proof_runtime_guard"])
 
 
-def test_alignment_closes_repomemory_ingestion_before_workflow_wiring() -> None:
+def test_alignment_closes_workflow_population_before_pr_quality_visibility() -> None:
     components = {item.module: item for item in build_alignment_components()}
     registry = components[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
+    producer = components[TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE]
     memory = components["repo_memory"]
 
-    assert "producer-vetted fingerprint classifications" in registry.role
-    assert "advisory fingerprint-only registry evidence" in memory.role
-    assert not any("RepoMemory population" in gap for gap in registry.gaps)
-    assert not any("producer-vetted fingerprint registry population" in gap for gap in memory.gaps)
-    assert any("trusted-main workflow population" in gap for gap in registry.gaps)
-    assert any("trusted-main workflow population" in gap for gap in memory.gaps)
-    assert any("PR Quality visibility" in gap for gap in registry.gaps)
+    assert registry.status == "aligned"
+    assert registry.gaps == ()
+    assert "RepoMemory Profile History workflow" in registry.integration_points
+    assert "trusted-main workflow population" in registry.recommended_next_action
+    assert "PR Quality" in registry.recommended_next_action
+
+    assert "trusted-main workflow population" in producer.recommended_next_action
+    assert "PR Quality visibility" in producer.recommended_next_action
+
+    assert not any("trusted-main workflow population" in gap for gap in memory.gaps)
     assert any("PR Quality visibility" in gap for gap in memory.gaps)
+    assert "trusted-main registry population" in memory.recommended_next_action
 
 
 def test_alignment_markdown_renders_operator_audit() -> None:
@@ -180,7 +171,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert f"`{PR_QUALITY_LIVE_WORKSPACE_MODULE}`: `aligned`" in markdown
     assert f"`{REPO_MEMORY_PROFILE_HISTORY_MODULE}`: `aligned`" in markdown
     assert f"`{TRUSTED_HISTORY_EVIDENCE_MODULE}`: `aligned`" in markdown
-    assert f"`{FLAKY_TEST_REGISTRY_EVIDENCE_MODULE}`: `partially_aligned`" in markdown
+    assert f"`{FLAKY_TEST_REGISTRY_EVIDENCE_MODULE}`: `aligned`" in markdown
     assert f"`{TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE}`: `aligned`" in markdown
     assert f"`{TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE}`: `aligned`" in markdown
     assert f"`{TRUSTED_TEST_OBSERVATION_HISTORY_MODULE}`: `aligned`" in markdown
@@ -362,6 +353,7 @@ def test_flaky_registry_alignment_starts_after_persisted_observation_history() -
 
     capture = components[TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE]
     history = components[TRUSTED_TEST_OBSERVATION_HISTORY_MODULE]
+    classification = components[TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE]
     producer = components[TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE]
     registry = components[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
     repo_memory = components["repo_memory"]
@@ -372,24 +364,28 @@ def test_flaky_registry_alignment_starts_after_persisted_observation_history() -
         "observation history before any flaky-test classification"
     )
     assert "RepoMemory Profile History workflow" in history.integration_points
-
-    classification = components[TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE]
     assert classification.status == "aligned"
     assert classification.gaps == ()
 
+    assert producer.status == "aligned"
+    assert producer.gaps == ()
     assert (
         producer.recommended_next_action
-        == "keep producer-vetted fingerprint registry evidence advisory-only "
-        "and defer trusted-main workflow population and PR Quality integration"
+        == "keep trusted-main workflow population advisory-only and defer "
+        "PR Quality visibility to a separate slice"
     )
-    assert registry.gaps == (
-        "trusted-main workflow population and PR Quality visibility are not yet connected",
-    )
+
+    assert registry.status == "aligned"
+    assert registry.gaps == ()
+    assert "RepoMemory Profile History workflow" in registry.integration_points
+    assert TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE in registry.integration_points
+    assert "repo_memory" in registry.integration_points
+
     assert TRUSTED_TEST_OBSERVATION_HISTORY_MODULE in repo_memory.integration_points
     assert not any(
         "producer-vetted fingerprint registry population" in gap for gap in repo_memory.gaps
     )
-    assert any("trusted-main workflow population" in gap for gap in repo_memory.gaps)
+    assert not any("trusted-main workflow population" in gap for gap in repo_memory.gaps)
     assert any("PR Quality visibility" in gap for gap in repo_memory.gaps)
 
 
@@ -431,17 +427,20 @@ def test_trusted_producer_validation_handoff_alignment_is_closed() -> None:
     assert "classification_handoff summary" in producer.existing_artifacts
     assert (
         producer.recommended_next_action
-        == "keep producer-vetted fingerprint registry evidence advisory-only "
-        "and defer trusted-main workflow population and PR Quality integration"
+        == "keep trusted-main workflow population advisory-only and defer "
+        "PR Quality visibility to a separate slice"
     )
 
-    assert not any("classification adapter" in gap for gap in registry.gaps)
-    assert not any("RepoMemory population" in gap for gap in registry.gaps)
-    assert any("trusted-main workflow population" in gap for gap in registry.gaps)
-    assert any("PR Quality visibility" in gap for gap in registry.gaps)
+    assert registry.status == "aligned"
+    assert registry.gaps == ()
+    assert TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE in registry.integration_points
+    assert "repo_memory" in registry.integration_points
+    assert "RepoMemory Profile History workflow" in registry.integration_points
+    assert "trusted-main workflow population" in registry.recommended_next_action
+    assert "PR Quality" in registry.recommended_next_action
 
     assert not any(
         "producer-vetted fingerprint registry population" in gap for gap in repo_memory.gaps
     )
-    assert any("trusted-main workflow population" in gap for gap in repo_memory.gaps)
+    assert not any("trusted-main workflow population" in gap for gap in repo_memory.gaps)
     assert any("PR Quality visibility" in gap for gap in repo_memory.gaps)

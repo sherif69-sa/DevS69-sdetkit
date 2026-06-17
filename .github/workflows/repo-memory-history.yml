@@ -42,145 +42,6 @@ jobs:
         run: |
           python -m pip install -c constraints-ci.txt -r requirements-test.txt -e .
 
-      - name: Build trusted-main live RepoMemory profile
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          mkdir -p \
-            build/repo-memory-history/fixture-report \
-            build/repo-memory-history/live-report \
-            build/repo-memory-history/pattern-insights \
-            build/repo-memory-history/flaky-test-registry \
-            build/repo-memory-history/candidate-validation \
-            build/repo-memory-history/profile
-
-          live_root="${RUNNER_TEMP}/sdetkit-repo-memory-history-live-repositories"
-          rm -rf "$live_root"
-
-          PYTHONPATH=src python -m sdetkit.pr_quality_live_benchmark_workspace \
-            --out-dir "$live_root" \
-            --format json \
-            > build/repo-memory-history/live-workspace-cli.json
-
-          PYTHONPATH=src python -m sdetkit.replayable_benchmark_harness \
-            --scenario tests/fixtures/remediation_benchmark/nop_formatting_patch.json \
-            --scenario tests/fixtures/remediation_benchmark/oracle_formatting_patch.json \
-            --scenario tests/fixtures/remediation_benchmark/unsafe_protected_path_patch.json \
-            --out-dir build/repo-memory-history/fixture-report \
-            --format json \
-            > build/repo-memory-history/fixture-report-cli.json
-
-          mapfile -t live_args < <(
-            LIVE_ROOT="$live_root" python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          manifest = json.loads(
-              (Path(os.environ["LIVE_ROOT"]) / "workspace-manifest.json").read_text(
-                  encoding="utf-8"
-              )
-          )
-          for item in manifest["scenarios"]:
-              print("--isolated-scenario")
-              print(item["fixture_path"])
-              print("--isolated-repo-root")
-              print(item["repo_root"])
-          PY
-          )
-
-          PYTHONPATH=src python -m sdetkit.replayable_benchmark_harness \
-            "${live_args[@]}" \
-            --out-dir build/repo-memory-history/live-report \
-            --format json \
-            > build/repo-memory-history/live-report-cli.json
-
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          payload = {
-              "schema_version": "sdetkit.trajectory_pattern_insights.v1",
-              "record_count": 0,
-              "recurring_safe_fix_patterns": [],
-              "recurring_review_first_surfaces": [],
-              "source": "trusted_main_snapshot",
-          }
-          Path("build/repo-memory-history/pattern-insights/pattern-insights.json").write_text(
-              json.dumps(payload, indent=2, sort_keys=True) + "\n",
-              encoding="utf-8",
-          )
-          PY
-
-          PYTHONPATH=src python -m sdetkit.pr_quality_candidate_validation \
-            --scenario tests/fixtures/pr_quality_candidate_visibility/formatting_candidate_verified.json \
-            --scenario tests/fixtures/pr_quality_candidate_visibility/broader_diff_review_first.json \
-            --out-dir build/repo-memory-history/candidate-validation \
-            --format json \
-            > build/repo-memory-history/candidate-validation-cli.json
-
-          PYTHONPATH=src python -m sdetkit.trusted_flaky_test_registry_producer \
-            --source-run-id "${GITHUB_RUN_ID}" \
-            --source-head-sha "${GITHUB_SHA}" \
-            --out-dir build/repo-memory-history/flaky-test-registry \
-            --format json \
-            > build/repo-memory-history/flaky-test-registry-cli.json
-
-          PYTHONPATH=src python -m sdetkit.repo_memory \
-            --pattern-insights build/repo-memory-history/pattern-insights/pattern-insights.json \
-            --benchmark-report build/repo-memory-history/fixture-report/benchmark-report.json \
-            --live-benchmark-report build/repo-memory-history/live-report/benchmark-report.json \
-            --flaky-test-registry-evidence build/repo-memory-history/flaky-test-registry/flaky-test-registry-evidence.json \
-            --controlled-candidate-validation-evidence build/repo-memory-history/candidate-validation/candidate-validation.json \
-            --out-dir build/repo-memory-history/profile \
-            --format json \
-            > build/repo-memory-history/profile-cli.json
-
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          profile = json.loads(
-              Path("build/repo-memory-history/profile/repo-memory-profile.json").read_text(
-                  encoding="utf-8"
-              )
-          )
-
-          assert profile["profile_status"] == "live_proof_supported_memory"
-          assert profile["inputs"]["live_contract_proven"] is True
-          assert profile["proof_provenance"]["git_verified_scenario_count"] == 5
-          assert profile["proof_provenance"]["expected_failed_scenario_count"] == 5
-          assert profile["proof_provenance"]["network_boundary_blocked_scenario_count"] == 1
-          assert profile["proof_provenance"]["anti_cheat_rejection_scenario_count"] == 2
-
-          controlled = profile["controlled_candidate_validation"]
-          assert controlled["collection_status"] == "collected"
-          assert controlled["status"] == "controlled_validation_passed"
-          assert controlled["scenario_count"] == 2
-          assert controlled["passed_count"] == 2
-          assert controlled["current_pr_decision_input"] is False
-          assert controlled["decision_boundary"]["automation_allowed"] is False
-          assert controlled["decision_boundary"]["merge_authorized"] is False
-
-          flaky = profile["flaky_test_registry"]
-          assert flaky["collection_status"] == "collected"
-          assert flaky["entry_count"] == 0
-          assert flaky["source"]["kind"] == "trusted_main_artifact"
-          assert flaky["source"]["workflow"] == "RepoMemory Profile History"
-          assert flaky["source"]["observation_status"] == "no_test_observations_available"
-          assert flaky["source"]["observations_collected"] is False
-          assert flaky["decision_boundary"]["automation_allowed"] is False
-          assert flaky["decision_boundary"]["merge_authorized"] is False
-
-          boundary = profile["decision_boundary"]
-          assert boundary["automation_allowed"] is False
-          assert boundary["merge_authorized"] is False
-          assert boundary["semantic_equivalence_proven"] is False
-
-          print("Trusted-main RepoMemory live profile passed.")
-          PY
-
       - name: Select trusted-main test observation artifact
         id: test-observations
         shell: bash
@@ -480,64 +341,6 @@ jobs:
           echo "Selected prior trusted-main history run: $prior_run_id"
           echo "Selected prior trusted-main history head: $prior_head_sha"
 
-      - name: Record trusted main RepoMemory profile history
-        shell: bash
-        env:
-          PRIOR_HISTORY_JSONL: ${{ steps.prior.outputs.prior_history_jsonl }}
-        run: |
-          set -euo pipefail
-
-          args=(
-            --profile-json build/repo-memory-history/profile/repo-memory-profile.json
-            --source-run-id "${GITHUB_RUN_ID}"
-            --source-head-sha "${GITHUB_SHA}"
-            --out-dir build/repo-memory-history/output
-            --format json
-          )
-
-          if [ -n "$PRIOR_HISTORY_JSONL" ]; then
-            args+=(--prior-history-jsonl "$PRIOR_HISTORY_JSONL")
-          fi
-
-          PYTHONPATH=src python -m sdetkit.repo_memory_profile_history \
-            "${args[@]}" \
-            > build/repo-memory-history/history-cli.json
-
-          python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          summary = json.loads(
-              Path(
-                  "build/repo-memory-history/output/repo-memory-history-summary.json"
-              ).read_text(encoding="utf-8")
-          )
-
-          assert summary["status"] == "history_recorded"
-          assert summary["record_count"] >= 1
-          assert summary["live_contract_proven_record_count"] >= 1
-          assert summary["latest_record"]["source_run_id"] == os.environ["GITHUB_RUN_ID"]
-          assert summary["latest_record"]["source_head_sha"] == os.environ["GITHUB_SHA"]
-          assert summary["latest_record"]["profile_status"] == "live_proof_supported_memory"
-          assert summary["latest_record"]["live_contract_proven"] is True
-          assert summary["controlled_validation_record_count"] >= 1
-          assert summary["controlled_validation_scenario_count"] >= 2
-          assert summary["controlled_structurally_verified_count"] >= 1
-          assert summary["controlled_review_first_count"] >= 1
-          assert summary["latest_record"]["controlled_validation_status"] == "controlled_validation_passed"
-          assert summary["latest_record"]["controlled_current_pr_decision_input"] is False
-
-          boundary = summary["decision_boundary"]
-          assert boundary["automation_allowed"] is False
-          assert boundary["merge_authorized"] is False
-          assert boundary["semantic_equivalence_proven"] is False
-          assert boundary["prior_history_is_read_only_input"] is True
-          assert boundary["controlled_validation_is_advisory_only"] is True
-
-          print("Trusted-main RepoMemory history snapshot passed.")
-          PY
-
       - name: Record trusted main test observation history
         shell: bash
         env:
@@ -640,6 +443,339 @@ jobs:
           assert '"classification"' not in serialized
 
           print("Trusted-main test observation history handoff passed.")
+          PY
+
+      - name: Classify trusted main test observation history
+        shell: bash
+        env:
+          OBSERVATION_SOURCE_RUN_ID: ${{ steps.test-observations.outputs.source_run_id }}
+          OBSERVATION_SOURCE_HEAD_SHA: ${{ steps.test-observations.outputs.source_head_sha }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p build/repo-memory-history/test-observation-classification
+
+          PYTHONPATH=src python -m sdetkit.trusted_test_observation_classification \
+            --history-jsonl build/repo-memory-history/test-observation-history/trusted-test-observation-history.jsonl \
+            --out-dir build/repo-memory-history/test-observation-classification \
+            --format json \
+            > build/repo-memory-history/test-observation-classification-cli.json
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path("build/repo-memory-history/test-observation-classification")
+          report = json.loads(
+              (root / "trusted-test-observation-classification.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          assert (
+              report["schema_version"]
+              == "sdetkit.trusted_test_observation_classification.v1"
+          )
+          assert report["status"] == "advisory_classification_recorded"
+
+          source = report["source"]
+          assert source["record_count"] >= 1
+          assert source["source_run_ids"][-1] == os.environ[
+              "OBSERVATION_SOURCE_RUN_ID"
+          ]
+          assert source["source_head_shas"][-1] == os.environ["GITHUB_SHA"]
+          assert source["source_head_shas"][-1] == os.environ[
+              "OBSERVATION_SOURCE_HEAD_SHA"
+          ]
+          assert source["input_read_only"] is True
+          assert source["commands_executed_by_reader"] is False
+          assert source["per_observation_provenance_bound"] is True
+
+          summary = report["summary"]
+          assert summary["fingerprint_count"] >= 1
+          assert summary["fingerprint_count"] == sum(
+              summary[key]
+              for key in (
+                  "flaky",
+                  "stable_failing",
+                  "stable_passing",
+                  "insufficient_history",
+              )
+          )
+          assert summary["classification_performed"] is True
+          assert summary["raw_test_identity_emitted"] is False
+          assert summary["current_pr_decision_input"] is False
+
+          boundary = report["decision_boundary"]
+          assert boundary["advisory_only"] is True
+          assert boundary["raw_test_identity_emitted"] is False
+          assert boundary["current_pr_decision_input"] is False
+          assert boundary["automatic_quarantine_allowed"] is False
+          assert boundary["automatic_rerun_allowed"] is False
+          assert boundary["current_failure_suppression_allowed"] is False
+          assert boundary["automation_allowed"] is False
+          assert boundary["patch_application_allowed"] is False
+          assert boundary["merge_authorized"] is False
+          assert boundary["semantic_equivalence_proven"] is False
+
+          serialized = json.dumps(report, sort_keys=True)
+          assert '"test_id"' not in serialized
+          assert '"classname"' not in serialized
+          assert '"nodeid"' not in serialized
+
+          print("Trusted-main cumulative observation classification passed.")
+          PY
+
+      - name: Build trusted-main live RepoMemory profile
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p \
+            build/repo-memory-history/fixture-report \
+            build/repo-memory-history/live-report \
+            build/repo-memory-history/pattern-insights \
+            build/repo-memory-history/flaky-test-registry \
+            build/repo-memory-history/test-observation-classification \
+            build/repo-memory-history/candidate-validation \
+            build/repo-memory-history/profile
+
+          live_root="${RUNNER_TEMP}/sdetkit-repo-memory-history-live-repositories"
+          rm -rf "$live_root"
+
+          PYTHONPATH=src python -m sdetkit.pr_quality_live_benchmark_workspace \
+            --out-dir "$live_root" \
+            --format json \
+            > build/repo-memory-history/live-workspace-cli.json
+
+          PYTHONPATH=src python -m sdetkit.replayable_benchmark_harness \
+            --scenario tests/fixtures/remediation_benchmark/nop_formatting_patch.json \
+            --scenario tests/fixtures/remediation_benchmark/oracle_formatting_patch.json \
+            --scenario tests/fixtures/remediation_benchmark/unsafe_protected_path_patch.json \
+            --out-dir build/repo-memory-history/fixture-report \
+            --format json \
+            > build/repo-memory-history/fixture-report-cli.json
+
+          mapfile -t live_args < <(
+            LIVE_ROOT="$live_root" python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          manifest = json.loads(
+              (Path(os.environ["LIVE_ROOT"]) / "workspace-manifest.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+          for item in manifest["scenarios"]:
+              print("--isolated-scenario")
+              print(item["fixture_path"])
+              print("--isolated-repo-root")
+              print(item["repo_root"])
+          PY
+          )
+
+          PYTHONPATH=src python -m sdetkit.replayable_benchmark_harness \
+            "${live_args[@]}" \
+            --out-dir build/repo-memory-history/live-report \
+            --format json \
+            > build/repo-memory-history/live-report-cli.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = {
+              "schema_version": "sdetkit.trajectory_pattern_insights.v1",
+              "record_count": 0,
+              "recurring_safe_fix_patterns": [],
+              "recurring_review_first_surfaces": [],
+              "source": "trusted_main_snapshot",
+          }
+          Path("build/repo-memory-history/pattern-insights/pattern-insights.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          PYTHONPATH=src python -m sdetkit.pr_quality_candidate_validation \
+            --scenario tests/fixtures/pr_quality_candidate_visibility/formatting_candidate_verified.json \
+            --scenario tests/fixtures/pr_quality_candidate_visibility/broader_diff_review_first.json \
+            --out-dir build/repo-memory-history/candidate-validation \
+            --format json \
+            > build/repo-memory-history/candidate-validation-cli.json
+
+          PYTHONPATH=src python -m sdetkit.trusted_flaky_test_registry_producer \
+            --source-run-id "${GITHUB_RUN_ID}" \
+            --source-head-sha "${GITHUB_SHA}" \
+            --classification-report build/repo-memory-history/test-observation-classification/trusted-test-observation-classification.json \
+            --out-dir build/repo-memory-history/flaky-test-registry \
+            --format json \
+            > build/repo-memory-history/flaky-test-registry-cli.json
+
+          PYTHONPATH=src python -m sdetkit.repo_memory \
+            --pattern-insights build/repo-memory-history/pattern-insights/pattern-insights.json \
+            --benchmark-report build/repo-memory-history/fixture-report/benchmark-report.json \
+            --live-benchmark-report build/repo-memory-history/live-report/benchmark-report.json \
+            --flaky-test-registry-evidence build/repo-memory-history/flaky-test-registry/flaky-test-registry-evidence.json \
+            --controlled-candidate-validation-evidence build/repo-memory-history/candidate-validation/candidate-validation.json \
+            --out-dir build/repo-memory-history/profile \
+            --format json \
+            > build/repo-memory-history/profile-cli.json
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          profile = json.loads(
+              Path("build/repo-memory-history/profile/repo-memory-profile.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+          classification = json.loads(
+              Path(
+                  "build/repo-memory-history/test-observation-classification/"
+                  "trusted-test-observation-classification.json"
+              ).read_text(encoding="utf-8")
+          )
+          producer = json.loads(
+              Path(
+                  "build/repo-memory-history/flaky-test-registry/"
+                  "trusted-flaky-test-registry-producer.json"
+              ).read_text(encoding="utf-8")
+          )
+
+          assert profile["profile_status"] == "live_proof_supported_memory"
+          assert profile["inputs"]["live_contract_proven"] is True
+          assert profile["proof_provenance"]["git_verified_scenario_count"] == 5
+          assert profile["proof_provenance"]["expected_failed_scenario_count"] == 5
+          assert profile["proof_provenance"]["network_boundary_blocked_scenario_count"] == 1
+          assert profile["proof_provenance"]["anti_cheat_rejection_scenario_count"] == 2
+
+          controlled = profile["controlled_candidate_validation"]
+          assert controlled["collection_status"] == "collected"
+          assert controlled["status"] == "controlled_validation_passed"
+          assert controlled["scenario_count"] == 2
+          assert controlled["passed_count"] == 2
+          assert controlled["current_pr_decision_input"] is False
+          assert controlled["decision_boundary"]["automation_allowed"] is False
+          assert controlled["decision_boundary"]["merge_authorized"] is False
+
+          classification_source = classification["source"]
+          classification_summary = classification["summary"]
+          handoff = producer["classification_handoff"]
+
+          assert classification["status"] == "advisory_classification_recorded"
+          assert classification_source["record_count"] >= 1
+          assert classification_source["source_head_shas"][-1] == os.environ["GITHUB_SHA"]
+          assert classification_source["input_read_only"] is True
+          assert classification_source["commands_executed_by_reader"] is False
+          assert classification_source["per_observation_provenance_bound"] is True
+          assert classification_summary["classification_performed"] is True
+          assert classification_summary["raw_test_identity_emitted"] is False
+          assert classification_summary["current_pr_decision_input"] is False
+
+          flaky = profile["flaky_test_registry"]
+          assert flaky["collection_status"] == "collected"
+          assert flaky["entry_count"] == classification_summary["flaky"]
+          assert flaky["source"]["kind"] == "trusted_main_artifact"
+          assert flaky["source"]["workflow"] == "RepoMemory Profile History"
+          assert flaky["source"]["identity_kind"] == "fingerprint_only"
+          assert handoff["forwarded_to_registry"] is True
+          assert handoff["latest_source_head_sha"] == os.environ["GITHUB_SHA"]
+          assert handoff["flaky"] == classification_summary["flaky"]
+
+          producer_status = "_".join(
+              ("producer", "vetted", "flaky", "observations", "available")
+          )
+          if classification_summary["flaky"]:
+              assert (
+                  flaky["source"]["observation_status"]
+                  == producer_status
+              )
+              assert flaky["source"]["observations_collected"] is True
+          else:
+              assert (
+                  flaky["source"]["observation_status"]
+                  == "no_test_observations_available"
+              )
+              assert flaky["source"]["observations_collected"] is False
+
+          assert all("test_id" not in item for item in flaky["entries"])
+          assert all("classname" not in item for item in flaky["entries"])
+          assert all("nodeid" not in item for item in flaky["entries"])
+          assert flaky["decision_boundary"]["automatic_quarantine_allowed"] is False
+          assert flaky["decision_boundary"]["automatic_rerun_allowed"] is False
+          assert flaky["decision_boundary"]["current_failure_suppression_allowed"] is False
+          assert flaky["decision_boundary"]["automation_allowed"] is False
+          assert flaky["decision_boundary"]["merge_authorized"] is False
+
+          boundary = profile["decision_boundary"]
+          assert boundary["automation_allowed"] is False
+          assert boundary["merge_authorized"] is False
+          assert boundary["semantic_equivalence_proven"] is False
+
+          print("Trusted-main RepoMemory live profile passed.")
+          PY
+
+      - name: Record trusted main RepoMemory profile history
+        shell: bash
+        env:
+          PRIOR_HISTORY_JSONL: ${{ steps.prior.outputs.prior_history_jsonl }}
+        run: |
+          set -euo pipefail
+
+          args=(
+            --profile-json build/repo-memory-history/profile/repo-memory-profile.json
+            --source-run-id "${GITHUB_RUN_ID}"
+            --source-head-sha "${GITHUB_SHA}"
+            --out-dir build/repo-memory-history/output
+            --format json
+          )
+
+          if [ -n "$PRIOR_HISTORY_JSONL" ]; then
+            args+=(--prior-history-jsonl "$PRIOR_HISTORY_JSONL")
+          fi
+
+          PYTHONPATH=src python -m sdetkit.repo_memory_profile_history \
+            "${args[@]}" \
+            > build/repo-memory-history/history-cli.json
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          summary = json.loads(
+              Path(
+                  "build/repo-memory-history/output/repo-memory-history-summary.json"
+              ).read_text(encoding="utf-8")
+          )
+
+          assert summary["status"] == "history_recorded"
+          assert summary["record_count"] >= 1
+          assert summary["live_contract_proven_record_count"] >= 1
+          assert summary["latest_record"]["source_run_id"] == os.environ["GITHUB_RUN_ID"]
+          assert summary["latest_record"]["source_head_sha"] == os.environ["GITHUB_SHA"]
+          assert summary["latest_record"]["profile_status"] == "live_proof_supported_memory"
+          assert summary["latest_record"]["live_contract_proven"] is True
+          assert summary["controlled_validation_record_count"] >= 1
+          assert summary["controlled_validation_scenario_count"] >= 2
+          assert summary["controlled_structurally_verified_count"] >= 1
+          assert summary["controlled_review_first_count"] >= 1
+          assert summary["latest_record"]["controlled_validation_status"] == "controlled_validation_passed"
+          assert summary["latest_record"]["controlled_current_pr_decision_input"] is False
+
+          boundary = summary["decision_boundary"]
+          assert boundary["automation_allowed"] is False
+          assert boundary["merge_authorized"] is False
+          assert boundary["semantic_equivalence_proven"] is False
+          assert boundary["prior_history_is_read_only_input"] is True
+          assert boundary["controlled_validation_is_advisory_only"] is True
+
+          print("Trusted-main RepoMemory history snapshot passed.")
           PY
 
       - name: Collect accepted-main observation recovery queue
@@ -1110,6 +1246,7 @@ jobs:
             build/repo-memory-history/flaky-test-registry/
             build/repo-memory-history/candidate-validation/
             build/repo-memory-history/test-observation-history/
+            build/repo-memory-history/test-observation-classification/
             build/repo-memory-history/diagnostic-signal-snapshots/
             build/repo-memory-history/security-reviewed-dispositions/
           if-no-files-found: error
