@@ -19,13 +19,24 @@ from sdetkit.replayable_benchmark_harness import (
 from sdetkit.repo_memory import (
     LIVE_PROFILE_STATUS,
     LIVE_PROOF_STATE,
+    _flaky_test_registry,
     build_repo_memory_profile,
     main,
     render_markdown,
 )
 from sdetkit.trusted_flaky_test_registry_producer import (
     NO_TEST_OBSERVATIONS,
+    PRODUCER_VETTED_OBSERVATIONS,
     build_trusted_registry_evidence,
+)
+from sdetkit.trusted_test_observation_classification import (
+    SCHEMA_VERSION as TRUSTED_CLASSIFICATION_SCHEMA,
+)
+from sdetkit.trusted_test_observation_classification import (
+    build_trusted_observation_classification,
+)
+from sdetkit.trusted_test_observation_history import (
+    build_observation_history_record,
 )
 
 FIXTURES = Path("tests/fixtures/remediation_benchmark")
@@ -200,6 +211,100 @@ def _flaky_registry_evidence() -> dict:
             "semantic_equivalence_proven": False,
         },
     }
+
+
+TRUSTED_FINGERPRINT = "f" * 64
+TRUSTED_SECOND_FINGERPRINT = "e" * 64
+TRUSTED_PRIOR_HEAD = "a" * 40
+TRUSTED_CURRENT_HEAD = "b" * 40
+
+
+def _trusted_observation_report(
+    *,
+    run_id: str,
+    head_sha: str,
+    outcome: str,
+    fingerprints: tuple[str, ...] = (TRUSTED_FINGERPRINT,),
+) -> dict:
+    return {
+        "schema_version": "sdetkit.trusted_test_observation_capture.v1",
+        "status": "trusted_main_observations_captured",
+        "source": {
+            "workflow": "CI",
+            "job": "Full CI lane",
+            "run_id": run_id,
+            "head_sha": head_sha,
+            "event_name": "push",
+            "ref_name": "refs/heads/main",
+            "trusted_main": True,
+            "input_read_only": True,
+            "commands_executed_by_reader": False,
+        },
+        "summary": {
+            "observation_count": len(fingerprints),
+            "passed": len(fingerprints) if outcome == "passed" else 0,
+            "failed": len(fingerprints) if outcome == "failed" else 0,
+            "error": len(fingerprints) if outcome == "error" else 0,
+            "skipped": len(fingerprints) if outcome == "skipped" else 0,
+            "raw_test_identity_emitted": False,
+            "flaky_classification_performed": False,
+        },
+        "observations": [
+            {
+                "test_fingerprint": fingerprint,
+                "outcome": outcome,
+            }
+            for fingerprint in fingerprints
+        ],
+        "decision_boundary": {
+            "raw_observation_only": True,
+            "flaky_classification_performed": False,
+            "current_pr_decision_input": False,
+            "automatic_quarantine_allowed": False,
+            "automatic_rerun_allowed": False,
+            "current_failure_suppression_allowed": False,
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+
+def _producer_vetted_registry_evidence(
+    *,
+    fingerprints: tuple[str, ...] = (TRUSTED_FINGERPRINT,),
+) -> dict:
+    records = [
+        build_observation_history_record(
+            _trusted_observation_report(
+                run_id="full-ci-prior",
+                head_sha=TRUSTED_PRIOR_HEAD,
+                outcome="passed",
+                fingerprints=fingerprints,
+            ),
+            source_run_id="full-ci-prior",
+            source_head_sha=TRUSTED_PRIOR_HEAD,
+            recorded_at_utc="2026-06-16T00:00:00Z",
+        ),
+        build_observation_history_record(
+            _trusted_observation_report(
+                run_id="full-ci-current",
+                head_sha=TRUSTED_CURRENT_HEAD,
+                outcome="failed",
+                fingerprints=fingerprints,
+            ),
+            source_run_id="full-ci-current",
+            source_head_sha=TRUSTED_CURRENT_HEAD,
+            recorded_at_utc="2026-06-17T00:00:00Z",
+        ),
+    ]
+    classification = build_trusted_observation_classification(records)
+    return build_trusted_registry_evidence(
+        source_run_id="repo-memory-current",
+        source_head_sha=TRUSTED_CURRENT_HEAD,
+        classification_report=classification,
+    )
 
 
 def _pattern_insights() -> dict:
@@ -476,6 +581,195 @@ def test_repo_memory_ingests_flaky_test_registry_as_advisory_context_only() -> N
     assert boundary["automation_allowed"] is False
     assert boundary["merge_authorized"] is False
     assert boundary["semantic_equivalence_proven"] is False
+
+
+def test_repo_memory_ingests_producer_vetted_fingerprint_registry_without_identity() -> None:
+    profile = build_repo_memory_profile(
+        pattern_insights=_pattern_insights(),
+        benchmark_report=_benchmark_report(),
+        flaky_test_registry_evidence=_producer_vetted_registry_evidence(),
+    )
+
+    flaky = profile["flaky_test_registry"]
+    source = flaky["source"]
+    entry = flaky["entries"][0]
+
+    assert flaky["collection_status"] == "collected"
+    assert flaky["status"] == "advisory_registry_collected"
+    assert flaky["entry_count"] == 1
+    assert source["classification_schema"] == TRUSTED_CLASSIFICATION_SCHEMA
+    assert source["identity_kind"] == "fingerprint_only"
+    assert source["producer_vetted"] is True
+    assert source["raw_test_identity_emitted"] is False
+    assert source["observation_status"] == PRODUCER_VETTED_OBSERVATIONS
+    assert source["observations_collected"] is True
+    assert entry["test_fingerprint"] == TRUSTED_FINGERPRINT
+    assert entry["observed_runs"] == 2
+    assert entry["decisive_observation_count"] == 2
+    assert entry["observed_passes"] == 1
+    assert entry["observed_failures"] == 1
+    assert entry["observed_errors"] == 0
+    assert entry["observed_skipped"] == 0
+    assert entry["review_first"] is True
+    assert entry["patch_application_allowed"] is False
+    assert flaky["decision_boundary"]["current_pr_decision_input"] is False
+    assert flaky["decision_boundary"]["patch_application_allowed"] is False
+
+    serialized = json.dumps(flaky, sort_keys=True)
+    assert '"test_id"' not in serialized
+    assert '"classname"' not in serialized
+    assert '"nodeid"' not in serialized
+
+
+def test_repo_memory_cli_accepts_producer_vetted_fingerprint_registry(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    insights_path = tmp_path / "pattern-insights.json"
+    benchmark_path = tmp_path / "benchmark-report.json"
+    flaky_path = tmp_path / "producer-vetted-flaky-registry.json"
+    out_dir = tmp_path / "repo-memory-with-producer-vetted-flaky-context"
+
+    insights_path.write_text(json.dumps(_pattern_insights()), encoding="utf-8")
+    benchmark_path.write_text(json.dumps(_benchmark_report()), encoding="utf-8")
+    flaky_path.write_text(
+        json.dumps(_producer_vetted_registry_evidence()),
+        encoding="utf-8",
+    )
+
+    rc = main(
+        [
+            "--pattern-insights",
+            str(insights_path),
+            "--benchmark-report",
+            str(benchmark_path),
+            "--flaky-test-registry-evidence",
+            str(flaky_path),
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    capsys.readouterr()
+    saved = json.loads((out_dir / "repo-memory-profile.json").read_text(encoding="utf-8"))
+    markdown = (out_dir / "repo-memory-profile.md").read_text(encoding="utf-8")
+
+    flaky = saved["flaky_test_registry"]
+    assert flaky["entry_count"] == 1
+    assert flaky["entries"][0]["test_fingerprint"] == TRUSTED_FINGERPRINT
+    assert flaky["decision_boundary"]["automation_allowed"] is False
+    assert "Observation status: `producer_vetted_flaky_observations_available`" in markdown
+
+
+def test_repo_memory_sorts_producer_vetted_fingerprints_deterministically() -> None:
+    evidence = _producer_vetted_registry_evidence(
+        fingerprints=(TRUSTED_FINGERPRINT, TRUSTED_SECOND_FINGERPRINT)
+    )
+    evidence["entries"].reverse()
+
+    first = _flaky_test_registry(copy.deepcopy(evidence))
+    second = _flaky_test_registry(copy.deepcopy(evidence))
+
+    assert json.dumps(first, sort_keys=True) == json.dumps(second, sort_keys=True)
+    assert [item["test_fingerprint"] for item in first["entries"]] == sorted(
+        (TRUSTED_FINGERPRINT, TRUSTED_SECOND_FINGERPRINT)
+    )
+
+
+def test_repo_memory_rejects_duplicate_producer_vetted_fingerprints() -> None:
+    evidence = _producer_vetted_registry_evidence()
+    evidence["entries"].append(copy.deepcopy(evidence["entries"][0]))
+    evidence["summary"]["entry_count"] = 2
+    evidence["summary"]["flaky_test_count"] = 2
+
+    try:
+        _flaky_test_registry(evidence)
+    except ValueError as exc:
+        assert "duplicate fingerprints" in str(exc)
+    else:
+        raise AssertionError("expected duplicate trusted fingerprints to be rejected")
+
+
+def test_repo_memory_rejects_duplicate_producer_vetted_provenance() -> None:
+    evidence = _producer_vetted_registry_evidence()
+    entry = evidence["entries"][0]
+    entry["observation_provenance"].append(copy.deepcopy(entry["observation_provenance"][0]))
+
+    try:
+        _flaky_test_registry(evidence)
+    except ValueError as exc:
+        assert "duplicate provenance tuples" in str(exc)
+    else:
+        raise AssertionError("expected duplicate trusted provenance to be rejected")
+
+
+def test_repo_memory_rejects_producer_vetted_count_mismatch_and_raw_identity() -> None:
+    mismatched = _producer_vetted_registry_evidence()
+    mismatched["entries"][0]["observed_runs"] = 3
+
+    try:
+        _flaky_test_registry(mismatched)
+    except ValueError as exc:
+        assert "counts are inconsistent" in str(exc)
+    else:
+        raise AssertionError("expected trusted count mismatch to be rejected")
+
+    raw_identity = _producer_vetted_registry_evidence()
+    raw_identity["entries"][0]["test_id"] = "tests/test_service.py::test_retry_path"
+
+    try:
+        _flaky_test_registry(raw_identity)
+    except ValueError as exc:
+        assert "raw test identity" in str(exc)
+    else:
+        raise AssertionError("expected raw identity in trusted registry to be rejected")
+
+
+def test_repo_memory_rejects_invalid_producer_vetted_source_contract() -> None:
+    bad_head = _producer_vetted_registry_evidence()
+    bad_head["source"]["head_sha"] = "abc123"
+
+    try:
+        _flaky_test_registry(bad_head)
+    except ValueError as exc:
+        assert "40-character lower-case hexadecimal" in str(exc)
+    else:
+        raise AssertionError("expected invalid trusted source head to be rejected")
+
+    unvetted = _producer_vetted_registry_evidence()
+    unvetted["source"]["producer_vetted"] = False
+
+    try:
+        _flaky_test_registry(unvetted)
+    except ValueError as exc:
+        assert "must be producer-vetted" in str(exc)
+    else:
+        raise AssertionError("expected unvetted trusted registry to be rejected")
+
+    false_collection = _producer_vetted_registry_evidence()
+    false_collection["source"]["observations_collected"] = False
+
+    try:
+        _flaky_test_registry(false_collection)
+    except ValueError as exc:
+        assert "must claim observations" in str(exc)
+    else:
+        raise AssertionError("expected populated registry without collection claim to fail")
+
+
+def test_repo_memory_rejects_producer_vetted_authority_expansion() -> None:
+    evidence = _producer_vetted_registry_evidence()
+    evidence["entries"][0]["patch_application_allowed"] = True
+
+    try:
+        _flaky_test_registry(evidence)
+    except ValueError as exc:
+        assert "entry expands authority" in str(exc)
+    else:
+        raise AssertionError("expected trusted authority expansion to be rejected")
 
 
 def test_repo_memory_rejects_authority_expanding_flaky_test_registry() -> None:
