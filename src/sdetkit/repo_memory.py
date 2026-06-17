@@ -1479,19 +1479,11 @@ def main(argv: list[str] | None = None) -> int:
         print(
             json.dumps(
                 {
-                    "profile_status": profile["profile_status"],
                     "artifacts": {
                         "repo_memory_profile_json": PROFILE_JSON,
                         "repo_memory_profile_markdown": PROFILE_MD,
                     },
-                    "known_safe_candidate_count": profile["known_safe_candidate_count"],
-                    "live_safe_candidate_count": profile["live_safe_candidate_count"],
-                    "controlled_candidate_validation_status": profile[
-                        "controlled_candidate_validation"
-                    ]["status"],
-                    "safety_gate_evidence_record_count": profile["safety_gate_evidence"][
-                        "record_count"
-                    ],
+                    "status": "repo_memory_profile_written",
                 },
                 indent=2,
                 sort_keys=True,

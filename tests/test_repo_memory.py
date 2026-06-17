@@ -453,8 +453,13 @@ def test_repo_memory_cli_writes_profile_artifacts(tmp_path: Path, capsys) -> Non
     saved = json.loads((out_dir / "repo-memory-profile.json").read_text(encoding="utf-8"))
     markdown = (out_dir / "repo-memory-profile.md").read_text(encoding="utf-8")
 
-    assert printed["profile_status"] == "benchmark_supported_memory"
-    assert printed["known_safe_candidate_count"] == 1
+    assert printed == {
+        "artifacts": {
+            "repo_memory_profile_json": "repo-memory-profile.json",
+            "repo_memory_profile_markdown": "repo-memory-profile.md",
+        },
+        "status": "repo_memory_profile_written",
+    }
     assert saved["decision_boundary"]["automation_allowed"] is False
     assert "# RepoMemory profile" in markdown
 
@@ -552,8 +557,13 @@ def test_repo_memory_cli_accepts_live_benchmark_report(tmp_path: Path, capsys) -
     saved = json.loads((out_dir / "repo-memory-profile.json").read_text(encoding="utf-8"))
     markdown = (out_dir / "repo-memory-profile.md").read_text(encoding="utf-8")
 
-    assert printed["profile_status"] == LIVE_PROFILE_STATUS
-    assert printed["live_safe_candidate_count"] == 1
+    assert printed == {
+        "artifacts": {
+            "repo_memory_profile_json": "repo-memory-profile.json",
+            "repo_memory_profile_markdown": "repo-memory-profile.md",
+        },
+        "status": "repo_memory_profile_written",
+    }
     assert saved["proof_provenance"]["live_contract_proven"] is True
     assert "Live Git-grounded contract proven: `true`" in markdown
     assert "Live safe candidates: `1`" in markdown
@@ -1024,7 +1034,13 @@ def test_repo_memory_cli_accepts_controlled_validation_without_promotion(
     assert rc == 0
     printed = json.loads(capsys.readouterr().out)
     saved = json.loads((out_dir / "repo-memory-profile.json").read_text(encoding="utf-8"))
-    assert printed["controlled_candidate_validation_status"] == "controlled_validation_passed"
+    assert printed == {
+        "artifacts": {
+            "repo_memory_profile_json": "repo-memory-profile.json",
+            "repo_memory_profile_markdown": "repo-memory-profile.md",
+        },
+        "status": "repo_memory_profile_written",
+    }
     assert saved["controlled_candidate_validation"]["current_pr_decision_input"] is False
     assert (
         saved["controlled_candidate_validation"]["decision_boundary"]["automation_allowed"] is False
@@ -1448,9 +1464,80 @@ def test_repo_memory_cli_redacts_success_artifact_paths_in_json_output(
     assert sensitive_value not in captured.err
 
     payload = json.loads(captured.out)
-    assert payload["artifacts"] == {
-        "repo_memory_profile_json": "repo-memory-profile.json",
-        "repo_memory_profile_markdown": "repo-memory-profile.md",
+    assert payload == {
+        "artifacts": {
+            "repo_memory_profile_json": "repo-memory-profile.json",
+            "repo_memory_profile_markdown": "repo-memory-profile.md",
+        },
+        "status": "repo_memory_profile_written",
     }
     assert (out_dir / "repo-memory-profile.json").is_file()
     assert (out_dir / "repo-memory-profile.md").is_file()
+
+
+def test_repo_memory_cli_redacts_profile_derived_values_from_json_stdout(
+    tmp_path: Path,
+    capsys,
+    monkeypatch,
+) -> None:
+    sensitive_value = "repo-memory-sensitive-profile-derived-value"
+    insights_path = tmp_path / "pattern-insights.json"
+    benchmark_path = tmp_path / "benchmark-report.json"
+    out_dir = tmp_path / "repo-memory"
+
+    insights_path.write_text(json.dumps(_pattern_insights()), encoding="utf-8")
+    benchmark_path.write_text(json.dumps(_benchmark_report()), encoding="utf-8")
+
+    def build_sensitive_profile(**_: object) -> dict[str, object]:
+        return {
+            "profile_status": sensitive_value,
+            "known_safe_candidate_count": sensitive_value,
+            "live_safe_candidate_count": sensitive_value,
+            "controlled_candidate_validation": {"status": sensitive_value},
+            "safety_gate_evidence": {"record_count": sensitive_value},
+        }
+
+    def write_sensitive_profile(
+        profile: dict[str, object],
+        *,
+        out_dir: Path,
+    ) -> dict[str, Path]:
+        assert sensitive_value in repr(profile)
+        return {
+            "repo_memory_profile_json": out_dir / "repo-memory-profile.json",
+            "repo_memory_profile_markdown": out_dir / "repo-memory-profile.md",
+        }
+
+    monkeypatch.setattr(
+        "sdetkit.repo_memory.build_repo_memory_profile",
+        build_sensitive_profile,
+    )
+    monkeypatch.setattr(
+        "sdetkit.repo_memory.write_profile",
+        write_sensitive_profile,
+    )
+
+    rc = main(
+        [
+            "--pattern-insights",
+            str(insights_path),
+            "--benchmark-report",
+            str(benchmark_path),
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert sensitive_value not in captured.out
+    assert sensitive_value not in captured.err
+    assert json.loads(captured.out) == {
+        "artifacts": {
+            "repo_memory_profile_json": "repo-memory-profile.json",
+            "repo_memory_profile_markdown": "repo-memory-profile.md",
+        },
+        "status": "repo_memory_profile_written",
+    }
