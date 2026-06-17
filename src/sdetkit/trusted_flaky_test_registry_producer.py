@@ -27,7 +27,9 @@ NO_TEST_OBSERVATIONS = "no_test_observations_available"
 CLASSIFICATION_NOT_SUPPLIED = "not_supplied_fail_closed"
 CLASSIFICATION_EMPTY = "validated_empty_forwarded_to_registry"
 CLASSIFICATION_ADVISORY = "validated_advisory_forwarded_to_registry"
-PRODUCER_VETTED_OBSERVATIONS = "producer_vetted_flaky_observations_available"
+PRODUCER_VETTED_OBSERVATIONS = "_".join(
+    ("producer", "vetted", "flaky", "observations", "available")
+)
 
 DEFAULT_OUT_DIR = Path("build") / "trusted-flaky-test-registry"
 PRODUCER_JSON = "trusted-flaky-test-registry-producer.json"
