@@ -578,7 +578,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
                 "repo_memory",
             ),
-            recommended_next_action="keep producer-vetted fingerprint registry evidence advisory-only and defer workflow, RepoMemory population, and PR Quality integration",
+            recommended_next_action="keep producer-vetted fingerprint registry evidence advisory-only and defer trusted-main workflow population and PR Quality integration",
         ),
         _component(
             module=FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
@@ -594,12 +594,14 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
                 "repo_memory",
             ),
-            gaps=("RepoMemory population and PR Quality visibility are not yet connected",),
-            recommended_next_action="connect only producer-vetted dedicated fingerprint classifications before rendering populated instability history",
+            gaps=(
+                "trusted-main workflow population and PR Quality visibility are not yet connected",
+            ),
+            recommended_next_action="wire producer-vetted fingerprint registry evidence through the trusted-main workflow before PR Quality visibility",
         ),
         _component(
             module="repo_memory",
-            role="produce local repo-specific memory profiles from trajectory and benchmark evidence",
+            role="produce local repo-specific memory profiles from trajectory, benchmark, and advisory fingerprint-only registry evidence",
             status="partially_aligned",
             stages=("history", "decision", "reporting"),
             existing_artifacts=(
@@ -621,9 +623,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             gaps=(
                 "successful network-isolation proof is unavailable until a backend is verified",
-                "producer-vetted fingerprint registry population and PR Quality visibility remain unconnected",
+                "trusted-main workflow population and PR Quality visibility remain unconnected",
             ),
-            recommended_next_action="surface only provenance-checked flaky-test instability context without expanding authority",
+            recommended_next_action="keep provenance-checked flaky-test instability context advisory-only while deferring workflow and PR Quality integration",
         ),
         _component(
             module=REPO_MEMORY_PROFILE_HISTORY_MODULE,

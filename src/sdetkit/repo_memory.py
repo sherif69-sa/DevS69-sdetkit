@@ -17,6 +17,10 @@ from sdetkit.replayable_benchmark_harness import (
     UNCLAIMED_WRITE_FAIL,
     VERIFICATION_EVIDENCE_SOURCE,
 )
+from sdetkit.trusted_test_observation_classification import (
+    SCHEMA_VERSION as TRUSTED_TEST_OBSERVATION_CLASSIFICATION_SCHEMA,
+)
+from sdetkit.trusted_test_observation_history import ALLOWED_OUTCOMES
 
 SCHEMA_VERSION = "sdetkit.repo_memory.v6"
 DEFAULT_OUT_DIR = Path("build") / "repo-memory"
@@ -30,6 +34,12 @@ GIT_INVENTORY_VERIFIED = "_".join(("git", "inventory", "verified"))
 EXPECTED_FAILED_EVIDENCE_COUNT = "_".join(("expected", "failed", "evidence", "count"))
 CONTROLLED_VALIDATION_SCHEMA = "sdetkit.pr_quality.candidate_validation.v1"
 CONTROLLED_VALIDATION_STATUS = "_".join(("controlled", "validation", "passed"))
+LEGACY_FLAKY_CLASSIFICATION_SCHEMA = "sdetkit.intelligence.flake.v1"
+TRUSTED_FLAKY_IDENTITY_KIND = "fingerprint_only"
+NO_TEST_OBSERVATIONS = "_".join(("no", "test", "observations", "available"))
+PRODUCER_VETTED_OBSERVATIONS = "_".join(
+    ("producer", "vetted", "flaky", "observations", "available")
+)
 
 JsonObject = dict[str, Any]
 
@@ -548,8 +558,8 @@ def _live_benchmark_rejections(
     return records
 
 
-def _flaky_test_registry(evidence: Mapping[str, Any]) -> JsonObject:
-    denied = {
+def _registry_denied(*, trusted_fingerprint: bool = False) -> JsonObject:
+    denied: JsonObject = {
         "automatic_quarantine_allowed": False,
         "automatic_rerun_allowed": False,
         "current_failure_suppression_allowed": False,
@@ -557,8 +567,210 @@ def _flaky_test_registry(evidence: Mapping[str, Any]) -> JsonObject:
         "merge_authorized": False,
         "semantic_equivalence_proven": False,
     }
+    if trusted_fingerprint:
+        denied.update(
+            {
+                "current_pr_decision_input": False,
+                "patch_application_allowed": False,
+            }
+        )
+    return denied
+
+
+def _assert_registry_authority(
+    value: Mapping[str, Any],
+    *,
+    denied: Mapping[str, Any],
+    source: str,
+    explicit: bool,
+) -> None:
+    expanded = [key for key in denied if _bool(value.get(key))]
+    if expanded:
+        raise ValueError(f"{source} expands authority: " + ", ".join(expanded))
+    if explicit:
+        omitted = [key for key in denied if value.get(key) is not False]
+        if omitted:
+            raise ValueError(f"{source} must explicitly deny authority: " + ", ".join(omitted))
+
+
+def _lower_hex(value: Any, *, length: int, source: str) -> str:
+    rendered = _string(value)
+    if (
+        len(rendered) != length
+        or rendered != rendered.lower()
+        or any(char not in "0123456789abcdef" for char in rendered)
+    ):
+        raise ValueError(f"{source} must be {length}-character lower-case hexadecimal")
+    return rendered
+
+
+def _trusted_registry_provenance(value: Any) -> list[JsonObject]:
+    if not isinstance(value, list):
+        raise ValueError(
+            "producer-vetted flaky-test registry entry requires observation provenance"
+        )
+
+    normalized: list[JsonObject] = []
+    seen: set[tuple[str, str, str]] = set()
+    for raw_item in value:
+        if not isinstance(raw_item, dict):
+            raise ValueError("producer-vetted flaky-test registry provenance contains a non-object")
+        if set(raw_item) != {"source_run_id", "source_head_sha", "outcome"}:
+            raise ValueError(
+                "producer-vetted flaky-test registry provenance fields are not supported"
+            )
+
+        source_run_id = _string(raw_item.get("source_run_id"))
+        source_head_sha = _string(raw_item.get("source_head_sha"))
+        outcome = _string(raw_item.get("outcome"))
+        if not source_run_id or not source_head_sha:
+            raise ValueError("producer-vetted flaky-test registry provenance is incomplete")
+        if outcome not in ALLOWED_OUTCOMES:
+            raise ValueError(
+                "producer-vetted flaky-test registry provenance outcome is not supported"
+            )
+
+        provenance_tuple = (source_run_id, source_head_sha, outcome)
+        if provenance_tuple in seen:
+            raise ValueError(
+                "producer-vetted flaky-test registry contains duplicate provenance tuples"
+            )
+        seen.add(provenance_tuple)
+        normalized.append(
+            {
+                "source_run_id": source_run_id,
+                "source_head_sha": source_head_sha,
+                "outcome": outcome,
+            }
+        )
+
+    if not normalized:
+        raise ValueError(
+            "producer-vetted flaky-test registry entry requires observation provenance"
+        )
+    return normalized
+
+
+def _legacy_registry_entry(
+    raw_item: Mapping[str, Any],
+    *,
+    denied: Mapping[str, Any],
+) -> JsonObject:
+    _assert_registry_authority(
+        raw_item,
+        denied=denied,
+        source="flaky-test registry entry",
+        explicit=False,
+    )
+
+    test_id = _string(raw_item.get("test_id"))
+    fingerprint = _string(raw_item.get("fingerprint"))
+    runs = _int(raw_item.get("observed_runs"))
+    failures = _int(raw_item.get("observed_failures"))
+    passes = _int(raw_item.get("observed_passes"))
+
+    if _string(raw_item.get("classification")) != "flaky":
+        raise ValueError("flaky-test registry entry must classify a flaky test")
+    if not test_id or not fingerprint:
+        raise ValueError("flaky-test registry entry requires test_id and fingerprint")
+    if runs < 2 or failures < 1 or passes < 1:
+        raise ValueError("flaky-test registry entry lacks mixed pass/fail observations")
+    if _string(raw_item.get("decision")) != "instability_context_only":
+        raise ValueError("flaky-test registry entry decision is not supported")
+    if not _bool(raw_item.get("review_first")):
+        raise ValueError("flaky-test registry entry must remain review-first")
+
+    return {
+        "test_id": test_id,
+        "fingerprint": fingerprint,
+        "classification": "flaky",
+        "observed_runs": runs,
+        "observed_failures": failures,
+        "observed_passes": passes,
+        "decision": "instability_context_only",
+        "review_first": True,
+        **denied,
+    }
+
+
+def _trusted_registry_entry(
+    raw_item: Mapping[str, Any],
+    *,
+    denied: Mapping[str, Any],
+    seen_fingerprints: set[str],
+) -> JsonObject:
+    _assert_registry_authority(
+        raw_item,
+        denied=denied,
+        source="producer-vetted flaky-test registry entry",
+        explicit=True,
+    )
+
+    forbidden_identity_fields = {
+        "test_id",
+        "classname",
+        "name",
+        "nodeid",
+        "fingerprint",
+    }
+    present_forbidden = sorted(forbidden_identity_fields.intersection(raw_item))
+    if present_forbidden:
+        raise ValueError(
+            "raw test identity cannot enter producer-vetted RepoMemory registry: "
+            + ", ".join(present_forbidden)
+        )
+
+    fingerprint = _lower_hex(
+        raw_item.get("test_fingerprint"),
+        length=64,
+        source="producer-vetted test fingerprint",
+    )
+    if fingerprint in seen_fingerprints:
+        raise ValueError("producer-vetted flaky-test registry contains duplicate fingerprints")
+    seen_fingerprints.add(fingerprint)
+
+    if _string(raw_item.get("classification")) != "flaky":
+        raise ValueError("producer-vetted flaky-test registry entry must classify a flaky test")
+    if _string(raw_item.get("decision")) != "instability_context_only":
+        raise ValueError("producer-vetted flaky-test registry entry decision is not supported")
+    if raw_item.get("review_first") is not True:
+        raise ValueError("producer-vetted flaky-test registry entry must remain review-first")
+
+    provenance = _trusted_registry_provenance(raw_item.get("observation_provenance"))
+    outcomes = [_string(item.get("outcome")) for item in provenance]
+    expected = {
+        "observed_runs": len(provenance),
+        "decisive_observation_count": (
+            outcomes.count("passed") + outcomes.count("failed") + outcomes.count("error")
+        ),
+        "observed_passes": outcomes.count("passed"),
+        "observed_failures": outcomes.count("failed") + outcomes.count("error"),
+        "observed_errors": outcomes.count("error"),
+        "observed_skipped": outcomes.count("skipped"),
+    }
+    declared = {key: _int(raw_item.get(key)) for key in expected}
+    if declared != expected:
+        raise ValueError("producer-vetted flaky-test registry entry counts are inconsistent")
+    if expected["observed_passes"] < 1 or expected["observed_failures"] < 1:
+        raise ValueError(
+            "producer-vetted flaky-test registry entry lacks mixed pass/fail observations"
+        )
+
+    return {
+        "test_fingerprint": fingerprint,
+        "classification": "flaky",
+        **declared,
+        "observation_provenance": provenance,
+        "decision": "instability_context_only",
+        "review_first": True,
+        **denied,
+    }
+
+
+def _flaky_test_registry(evidence: Mapping[str, Any]) -> JsonObject:
     payload = _as_dict(evidence)
     if not payload:
+        denied = _registry_denied()
         return {
             "collection_status": "not_collected",
             "status": "not_collected",
@@ -578,92 +790,132 @@ def _flaky_test_registry(evidence: Mapping[str, Any]) -> JsonObject:
     source = _as_dict(payload.get("source"))
     source_kind = _string(source.get("kind"))
     source_reference = _string(source.get("reference"))
+    classification_schema = _string(source.get("classification_schema"))
     if source_kind not in {"operator_review_input", "trusted_main_artifact"}:
         raise ValueError("flaky-test registry evidence source kind is not supported")
     if not source_reference:
         raise ValueError("flaky-test registry evidence source reference is required")
-    if _string(source.get("classification_schema")) != "sdetkit.intelligence.flake.v1":
+
+    trusted_fingerprint = (
+        source_kind == "trusted_main_artifact"
+        and classification_schema == TRUSTED_TEST_OBSERVATION_CLASSIFICATION_SCHEMA
+    )
+    legacy_classification = classification_schema == LEGACY_FLAKY_CLASSIFICATION_SCHEMA
+    if not trusted_fingerprint and not legacy_classification:
         raise ValueError("flaky-test registry classification schema is not supported")
-    if not _bool(source.get("input_read_only")):
-        raise ValueError("flaky-test registry evidence input must be read-only")
-    if _bool(source.get("commands_executed_by_reader")):
-        raise ValueError("flaky-test registry evidence reader cannot execute commands")
+    if source_kind == "operator_review_input" and not legacy_classification:
+        raise ValueError("producer-vetted flaky-test registry requires trusted-main provenance")
 
-    observation_status = _string(source.get("observation_status"))
-    if source_kind == "trusted_main_artifact":
-        if _string(source.get("workflow")) != "RepoMemory Profile History":
-            raise ValueError("trusted-main flaky-test registry workflow is not supported")
-        if not _string(source.get("run_id")) or not _string(source.get("head_sha")):
-            raise ValueError("trusted-main flaky-test registry provenance is incomplete")
-        if observation_status != "no_test_observations_available":
-            raise ValueError("trusted-main flaky-test registry observation status is not supported")
-        if _bool(source.get("observations_collected")):
-            raise ValueError("trusted-main no-observation registry cannot claim observations")
-
-    boundary = _as_dict(payload.get("decision_boundary"))
-    expanded = [key for key in denied if _bool(boundary.get(key))]
-    if expanded:
-        raise ValueError("flaky-test registry evidence expands authority: " + ", ".join(expanded))
+    if trusted_fingerprint:
+        if source.get("input_read_only") is not True:
+            raise ValueError("flaky-test registry evidence input must be read-only")
+        if source.get("commands_executed_by_reader") is not False:
+            raise ValueError("flaky-test registry evidence reader cannot execute commands")
+    else:
+        if not _bool(source.get("input_read_only")):
+            raise ValueError("flaky-test registry evidence input must be read-only")
+        if _bool(source.get("commands_executed_by_reader")):
+            raise ValueError("flaky-test registry evidence reader cannot execute commands")
 
     raw_entries = payload.get("entries")
     if not isinstance(raw_entries, list):
         raise ValueError("flaky-test registry evidence must contain an entries array")
 
+    observation_status = _string(source.get("observation_status"))
+    if source_kind == "trusted_main_artifact":
+        if _string(source.get("workflow")) != "RepoMemory Profile History":
+            raise ValueError("trusted-main flaky-test registry workflow is not supported")
+        run_id = _string(source.get("run_id"))
+        head_sha = _string(source.get("head_sha"))
+        if not run_id or not head_sha:
+            raise ValueError("trusted-main flaky-test registry provenance is incomplete")
+
+        if trusted_fingerprint:
+            _lower_hex(
+                head_sha,
+                length=40,
+                source="producer-vetted registry source head SHA",
+            )
+            if _string(source.get("identity_kind")) != TRUSTED_FLAKY_IDENTITY_KIND:
+                raise ValueError(
+                    "producer-vetted flaky-test registry identity kind is not supported"
+                )
+            if source.get("producer_vetted") is not True:
+                raise ValueError("producer-vetted flaky-test registry must be producer-vetted")
+            if source.get("raw_test_identity_emitted") is not False:
+                raise ValueError(
+                    "producer-vetted flaky-test registry cannot emit raw test identity"
+                )
+            if observation_status not in {
+                NO_TEST_OBSERVATIONS,
+                PRODUCER_VETTED_OBSERVATIONS,
+            }:
+                raise ValueError(
+                    "producer-vetted flaky-test registry observation status is not supported"
+                )
+            observations_collected = source.get("observations_collected")
+            if observation_status == NO_TEST_OBSERVATIONS:
+                if raw_entries or observations_collected is not False:
+                    raise ValueError(
+                        "producer-vetted no-observation registry cannot contain entries"
+                    )
+            elif not raw_entries or observations_collected is not True:
+                raise ValueError("producer-vetted populated registry must claim observations")
+        else:
+            if observation_status != NO_TEST_OBSERVATIONS:
+                raise ValueError(
+                    "trusted-main flaky-test registry observation status is not supported"
+                )
+            if _bool(source.get("observations_collected")):
+                raise ValueError("trusted-main no-observation registry cannot claim observations")
+
+    denied = _registry_denied(trusted_fingerprint=trusted_fingerprint)
+    boundary = _as_dict(payload.get("decision_boundary"))
+    _assert_registry_authority(
+        boundary,
+        denied=denied,
+        source="flaky-test registry evidence",
+        explicit=trusted_fingerprint,
+    )
+
     entries: list[JsonObject] = []
+    seen_fingerprints: set[str] = set()
     for raw_item in raw_entries:
         if not isinstance(raw_item, dict):
             raise ValueError("flaky-test registry evidence contains a non-object entry")
-
-        item_expanded = [key for key in denied if _bool(raw_item.get(key))]
-        if item_expanded:
-            raise ValueError(
-                "flaky-test registry entry expands authority: " + ", ".join(item_expanded)
+        if trusted_fingerprint:
+            entries.append(
+                _trusted_registry_entry(
+                    raw_item,
+                    denied=denied,
+                    seen_fingerprints=seen_fingerprints,
+                )
+            )
+        else:
+            entries.append(
+                _legacy_registry_entry(
+                    raw_item,
+                    denied=denied,
+                )
             )
 
-        test_id = _string(raw_item.get("test_id"))
-        fingerprint = _string(raw_item.get("fingerprint"))
-        runs = _int(raw_item.get("observed_runs"))
-        failures = _int(raw_item.get("observed_failures"))
-        passes = _int(raw_item.get("observed_passes"))
+    if trusted_fingerprint:
+        entries.sort(key=lambda item: str(item["test_fingerprint"]))
+    else:
+        entries.sort(key=lambda item: (item["test_id"], item["fingerprint"]))
 
-        if _string(raw_item.get("classification")) != "flaky":
-            raise ValueError("flaky-test registry entry must classify a flaky test")
-        if not test_id or not fingerprint:
-            raise ValueError("flaky-test registry entry requires test_id and fingerprint")
-        if runs < 2 or failures < 1 or passes < 1:
-            raise ValueError("flaky-test registry entry lacks mixed pass/fail observations")
-        if _string(raw_item.get("decision")) != "instability_context_only":
-            raise ValueError("flaky-test registry entry decision is not supported")
-        if not _bool(raw_item.get("review_first")):
-            raise ValueError("flaky-test registry entry must remain review-first")
-
-        entries.append(
-            {
-                "test_id": test_id,
-                "fingerprint": fingerprint,
-                "classification": "flaky",
-                "observed_runs": runs,
-                "observed_failures": failures,
-                "observed_passes": passes,
-                "decision": "instability_context_only",
-                "review_first": True,
-                **denied,
-            }
-        )
-
-    entries.sort(key=lambda item: (item["test_id"], item["fingerprint"]))
     summary = _as_dict(payload.get("summary"))
     if _int(summary.get("entry_count")) != len(entries):
         raise ValueError("flaky-test registry evidence summary entry count is inconsistent")
     if _int(summary.get("flaky_test_count")) != len(entries):
         raise ValueError("flaky-test registry evidence summary flaky count is inconsistent")
-    if source_kind == "trusted_main_artifact" and entries:
+    if source_kind == "trusted_main_artifact" and not trusted_fingerprint and entries:
         raise ValueError("trusted-main no-observation registry cannot contain entries")
 
     normalized_source: JsonObject = {
         "kind": source_kind,
         "reference": source_reference,
-        "classification_schema": _string(source.get("classification_schema")),
+        "classification_schema": classification_schema,
         "input_read_only": True,
         "commands_executed_by_reader": False,
     }
@@ -674,7 +926,15 @@ def _flaky_test_registry(evidence: Mapping[str, Any]) -> JsonObject:
                 "run_id": _string(source.get("run_id")),
                 "head_sha": _string(source.get("head_sha")),
                 "observation_status": observation_status,
-                "observations_collected": False,
+                "observations_collected": bool(source.get("observations_collected")),
+            }
+        )
+    if trusted_fingerprint:
+        normalized_source.update(
+            {
+                "identity_kind": TRUSTED_FLAKY_IDENTITY_KIND,
+                "producer_vetted": True,
+                "raw_test_identity_emitted": False,
             }
         )
 
@@ -861,8 +1121,9 @@ def build_repo_memory_profile(
             ),
         },
         "recommended_next_action": (
-            "Establish trusted accepted-main observation history and classification "
-            "handoff before surfacing populated flaky-test history in PR Quality."
+            "Keep trusted accepted-main observation history advisory-only and wire "
+            "producer-vetted fingerprint registry population through the trusted-main "
+            "workflow before PR Quality visibility."
         ),
     }
 
@@ -1203,33 +1464,34 @@ def main(argv: list[str] | None = None) -> int:
                 else None
             ),
         )
-        artifacts = write_profile(profile, out_dir=args.out_dir)
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
-        print(f"error={exc}")
+        write_profile(profile, out_dir=args.out_dir)
+    except json.JSONDecodeError:
+        print("error=invalid_json")
+        return 2
+    except OSError:
+        print("error=input_io_failure")
+        return 2
+    except ValueError:
+        print("error=input_validation_failed")
         return 2
 
     if args.format == "json":
         print(
             json.dumps(
                 {
-                    "profile_status": profile["profile_status"],
-                    "artifacts": artifacts,
-                    "known_safe_candidate_count": profile["known_safe_candidate_count"],
-                    "live_safe_candidate_count": profile["live_safe_candidate_count"],
-                    "controlled_candidate_validation_status": profile[
-                        "controlled_candidate_validation"
-                    ]["status"],
-                    "safety_gate_evidence_record_count": profile["safety_gate_evidence"][
-                        "record_count"
-                    ],
+                    "artifacts": {
+                        "repo_memory_profile_json": PROFILE_JSON,
+                        "repo_memory_profile_markdown": PROFILE_MD,
+                    },
+                    "status": "repo_memory_profile_written",
                 },
                 indent=2,
                 sort_keys=True,
             )
         )
     else:
-        for key, value in artifacts.items():
-            print(f"{key}: {value}")
+        print(f"repo_memory_profile_json: {PROFILE_JSON}")
+        print(f"repo_memory_profile_markdown: {PROFILE_MD}")
 
     return 0
 
