@@ -9,6 +9,7 @@ from typing import Any
 from sdetkit.flaky_test_registry_evidence import (
     SOURCE_SCHEMA_VERSION,
     build_flaky_test_registry_evidence,
+    build_producer_vetted_fingerprint_registry_evidence,
     write_evidence,
 )
 from sdetkit.trusted_test_observation_classification import (
@@ -24,8 +25,11 @@ SOURCE_CONNECTED = "trusted_main_source_connected"
 NO_TEST_OBSERVATIONS = "no_test_observations_available"
 
 CLASSIFICATION_NOT_SUPPLIED = "not_supplied_fail_closed"
-CLASSIFICATION_EMPTY = "validated_empty_not_forwarded"
-CLASSIFICATION_ADVISORY = "validated_advisory_not_forwarded"
+CLASSIFICATION_EMPTY = "validated_empty_forwarded_to_registry"
+CLASSIFICATION_ADVISORY = "validated_advisory_forwarded_to_registry"
+PRODUCER_VETTED_OBSERVATIONS = "_".join(
+    ("producer", "vetted", "flaky", "observations", "available")
+)
 
 DEFAULT_OUT_DIR = Path("build") / "trusted-flaky-test-registry"
 PRODUCER_JSON = "trusted-flaky-test-registry-producer.json"
@@ -128,7 +132,7 @@ def _classification_handoff(
         "latest_source_head_sha": latest_source_head_sha,
         "input_read_only": True,
         "raw_test_identity_emitted": False,
-        "forwarded_to_registry": False,
+        "forwarded_to_registry": True,
         "current_pr_decision_input": False,
     }
 
@@ -151,11 +155,22 @@ def build_trusted_registry_evidence(
         producer_source_head_sha=head_sha,
     )
 
-    evidence = build_flaky_test_registry_evidence(
-        classification_report=_empty_classification_report(),
-        source_kind="trusted_main_artifact",
-        source_reference=(f"{SOURCE_WORKFLOW}:run={run_id}:head={head_sha}"),
-    )
+    source_reference = f"{SOURCE_WORKFLOW}:run={run_id}:head={head_sha}"
+    if classification_report is None:
+        evidence = build_flaky_test_registry_evidence(
+            classification_report=_empty_classification_report(),
+            source_kind="trusted_main_artifact",
+            source_reference=source_reference,
+        )
+    else:
+        evidence = build_producer_vetted_fingerprint_registry_evidence(
+            classification_report=classification_report,
+            source_reference=source_reference,
+        )
+
+    entries = [_as_dict(item) for item in _as_list(evidence.get("entries"))]
+    observation_count = sum(_int(item.get("observed_runs")) for item in entries)
+    observation_status = PRODUCER_VETTED_OBSERVATIONS if entries else NO_TEST_OBSERVATIONS
 
     source = _as_dict(evidence.get("source"))
     source.update(
@@ -163,8 +178,8 @@ def build_trusted_registry_evidence(
             "workflow": SOURCE_WORKFLOW,
             "run_id": run_id,
             "head_sha": head_sha,
-            "observation_status": NO_TEST_OBSERVATIONS,
-            "observations_collected": False,
+            "observation_status": observation_status,
+            "observations_collected": bool(entries),
         }
     )
     evidence["source"] = source
@@ -172,16 +187,22 @@ def build_trusted_registry_evidence(
     summary = _as_dict(evidence.get("summary"))
     summary.update(
         {
-            "observation_status": NO_TEST_OBSERVATIONS,
-            "observation_count": 0,
+            "observation_status": observation_status,
+            "observation_count": observation_count,
         }
     )
     evidence["summary"] = summary
-    evidence["note"] = (
-        "Trusted-main producer remains fail-closed; dedicated "
-        f"classification handoff status is {handoff['status']}; "
-        "no classification is forwarded to registry entries."
-    )
+    if classification_report is None:
+        evidence["note"] = (
+            "Trusted-main producer remains fail-closed because no dedicated "
+            "classification artifact was supplied; registry entries remain empty."
+        )
+    else:
+        evidence["note"] = (
+            "Dedicated classification handoff status is "
+            f"{handoff['status']}; producer-vetted flaky fingerprints are "
+            "forwarded as advisory registry evidence without authority expansion."
+        )
     return evidence
 
 
@@ -207,6 +228,7 @@ def build_producer_report(
             "collection_status": _string(evidence.get("collection_status")),
             "status": _string(evidence.get("status")),
             "entry_count": _int(summary.get("entry_count")),
+            "identity_kind": _string(source.get("identity_kind")),
             "observation_status": _string(summary.get("observation_status")),
             "observation_count": _int(summary.get("observation_count")),
         },
@@ -261,8 +283,8 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             "## Boundary",
             "",
             (
-                "- No flaky-test observations are claimed without "
-                "a separately reviewed registry adapter."
+                "- Only producer-vetted fingerprint classifications are represented; "
+                "registry evidence remains advisory and non-authoritative."
             ),
             (
                 "- Automatic quarantine allowed: "

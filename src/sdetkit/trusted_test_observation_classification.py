@@ -296,6 +296,7 @@ def validate_classification_report(report: Mapping[str, Any]) -> None:
             raise ValueError("trusted observation classification requires observation provenance")
 
         outcomes: list[str] = []
+        seen_provenance_tuples: set[tuple[str, str, str]] = set()
         for entry in provenance:
             if set(entry) != {"source_run_id", "source_head_sha", "outcome"}:
                 raise ValueError(
@@ -314,6 +315,12 @@ def validate_classification_report(report: Mapping[str, Any]) -> None:
                 raise ValueError(
                     "trusted observation classification provenance contains an unsupported outcome"
                 )
+            provenance_tuple = (pair[0], pair[1], outcome)
+            if provenance_tuple in seen_provenance_tuples:
+                raise ValueError(
+                    "trusted observation classification contains duplicate provenance tuples"
+                )
+            seen_provenance_tuples.add(provenance_tuple)
             outcomes.append(outcome)
 
         passed = outcomes.count("passed")
