@@ -578,12 +578,12 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
                 "repo_memory",
             ),
-            recommended_next_action="keep producer-vetted fingerprint registry evidence advisory-only and defer trusted-main workflow population and PR Quality integration",
+            recommended_next_action="keep trusted-main workflow population advisory-only and defer PR Quality visibility to a separate slice",
         ),
         _component(
             module=FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
             role="normalize legacy operator review and producer-vetted fingerprint classifications as advisory registry evidence",
-            status="partially_aligned",
+            status="aligned",
             stages=("evidence", "history", "reporting"),
             existing_artifacts=(
                 "flaky-test-registry-evidence.json",
@@ -593,11 +593,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "intelligence flake classify",
                 TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
                 "repo_memory",
+                "RepoMemory Profile History workflow",
             ),
-            gaps=(
-                "trusted-main workflow population and PR Quality visibility are not yet connected",
-            ),
-            recommended_next_action="wire producer-vetted fingerprint registry evidence through the trusted-main workflow before PR Quality visibility",
+            recommended_next_action="keep trusted-main workflow population advisory-only and expose it to PR Quality only through a separate audited slice",
         ),
         _component(
             module="repo_memory",
@@ -623,9 +621,9 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             gaps=(
                 "successful network-isolation proof is unavailable until a backend is verified",
-                "trusted-main workflow population and PR Quality visibility remain unconnected",
+                "PR Quality visibility remains unconnected",
             ),
-            recommended_next_action="keep provenance-checked flaky-test instability context advisory-only while deferring workflow and PR Quality integration",
+            recommended_next_action="keep trusted-main registry population advisory-only while deferring PR Quality visibility",
         ),
         _component(
             module=REPO_MEMORY_PROFILE_HISTORY_MODULE,
