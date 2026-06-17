@@ -558,25 +558,27 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "trusted-test-observation-classification.md",
             ),
             integration_points=(TRUSTED_TEST_OBSERVATION_HISTORY_MODULE,),
-            recommended_next_action="audit trusted producer consumption of the dedicated advisory classification artifact before registry, workflow, RepoMemory, or PR Quality integration",
+            recommended_next_action="keep the dedicated artifact advisory-only and route it only through the trusted producer validation handoff before registry or workflow integration",
         ),
         _component(
             module=TRUSTED_FLAKY_TEST_REGISTRY_PRODUCER_MODULE,
-            role="emit an explicit trusted-main no-observation flaky-test registry artifact until real per-test history exists",
+            role="validate an optional dedicated advisory fingerprint classification artifact while preserving fail-closed empty registry evidence",
             status="aligned",
             stages=("evidence", "history", "reporting"),
             existing_artifacts=(
                 "trusted-flaky-test-registry-producer.json",
                 "trusted-flaky-test-registry-producer.md",
+                "classification_handoff summary",
                 "flaky-test-registry-evidence.json",
                 "flaky-test-registry-evidence.md",
             ),
             integration_points=(
+                TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE,
                 "RepoMemory Profile History workflow",
                 FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
                 "repo_memory",
             ),
-            recommended_next_action="audit consumption of the dedicated advisory classification artifact before changing the no-observation fail-closed state",
+            recommended_next_action="audit a producer-vetted fingerprint classification adapter before registry, workflow, RepoMemory, or PR Quality integration",
         ),
         _component(
             module=FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
@@ -593,7 +595,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "repo_memory",
             ),
             gaps=(
-                "trusted classification producer handoff and PR Quality visibility are not yet connected",
+                "producer-vetted fingerprint classification adapter and PR Quality visibility are not yet connected",
             ),
             recommended_next_action="connect only producer-vetted dedicated fingerprint classifications before rendering populated instability history",
         ),
@@ -621,7 +623,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
             ),
             gaps=(
                 "successful network-isolation proof is unavailable until a backend is verified",
-                "trusted classification producer handoff and PR Quality visibility remain unconnected",
+                "producer-vetted fingerprint classification adapter and PR Quality visibility remain unconnected",
             ),
             recommended_next_action="surface only provenance-checked flaky-test instability context without expanding authority",
         ),
