@@ -13,6 +13,7 @@ from sdetkit.trusted_flaky_test_registry_producer import (
     CLASSIFICATION_NOT_SUPPLIED,
     NO_TEST_OBSERVATIONS,
     PRODUCER_JSON,
+    PRODUCER_VETTED_OBSERVATIONS,
     SOURCE_CONNECTED,
     build_producer_report,
     build_trusted_registry_evidence,
@@ -150,7 +151,7 @@ def test_trusted_producer_emits_explicit_no_observation_registry_without_authori
     assert boundary["merge_authorized"] is False
 
 
-def test_valid_empty_dedicated_report_is_validated_but_not_forwarded() -> None:
+def test_valid_empty_dedicated_report_is_validated_and_forwarded() -> None:
     classification = build_trusted_observation_classification([])
 
     evidence = build_trusted_registry_evidence(
@@ -171,10 +172,10 @@ def test_valid_empty_dedicated_report_is_validated_but_not_forwarded() -> None:
     assert handoff["status"] == CLASSIFICATION_EMPTY
     assert handoff["record_count"] == 0
     assert handoff["fingerprint_count"] == 0
-    assert handoff["forwarded_to_registry"] is False
+    assert handoff["forwarded_to_registry"] is True
 
 
-def test_valid_mixed_report_records_summary_without_registry_forwarding() -> None:
+def test_valid_mixed_report_forwards_only_flaky_fingerprint_registry_entry() -> None:
     classification = _mixed_classification_report()
 
     evidence = build_trusted_registry_evidence(
@@ -188,9 +189,22 @@ def test_valid_mixed_report_records_summary_without_registry_forwarding() -> Non
         producer_source_head_sha=HEAD_B,
     )
 
-    assert evidence["entries"] == []
-    assert evidence["summary"]["entry_count"] == 0
+    assert evidence["summary"]["entry_count"] == 1
+    assert evidence["summary"]["observation_count"] == 2
+    assert evidence["summary"]["observation_status"] == PRODUCER_VETTED_OBSERVATIONS
     assert evidence["source"]["run_id"] == "repo-memory-run"
+    assert evidence["source"]["identity_kind"] == "fingerprint_only"
+    assert evidence["source"]["observations_collected"] is True
+    entry = evidence["entries"][0]
+    assert entry["test_fingerprint"] == FINGERPRINT
+    assert "test_id" not in entry
+    assert entry["observed_runs"] == 2
+    assert entry["observed_passes"] == 1
+    assert entry["observed_failures"] == 1
+    assert (
+        entry["observation_provenance"]
+        == classification["classifications"][0]["observation_provenance"]
+    )
 
     handoff = report["classification_handoff"]
     assert handoff["status"] == CLASSIFICATION_ADVISORY
@@ -203,7 +217,7 @@ def test_valid_mixed_report_records_summary_without_registry_forwarding() -> Non
     assert handoff["latest_source_run_id"] == "full-ci-run-b"
     assert handoff["latest_source_head_sha"] == HEAD_B
     assert handoff["raw_test_identity_emitted"] is False
-    assert handoff["forwarded_to_registry"] is False
+    assert handoff["forwarded_to_registry"] is True
     assert handoff["current_pr_decision_input"] is False
 
 
@@ -263,6 +277,14 @@ def _duplicate_fingerprint(report: dict) -> None:
     report["summary"]["fingerprint_count"] += 1
 
 
+def _duplicate_provenance_tuple(report: dict) -> None:
+    item = report["classifications"][0]
+    item["observation_provenance"].append(deepcopy(item["observation_provenance"][0]))
+    item["runs_observed"] += 1
+    item["decisive_observation_count"] += 1
+    item["failed"] += 1
+
+
 @pytest.mark.parametrize(
     "mutator",
     [
@@ -270,6 +292,7 @@ def _duplicate_fingerprint(report: dict) -> None:
         _expand_authority,
         _unbind_provenance,
         _duplicate_fingerprint,
+        _duplicate_provenance_tuple,
     ],
 )
 def test_invalid_dedicated_reports_fail_closed(
@@ -301,12 +324,13 @@ def test_trusted_producer_report_explains_validation_only_boundary() -> None:
     markdown = render_markdown(report)
 
     assert report["status"] == SOURCE_CONNECTED
-    assert report["registry"]["observation_count"] == 0
-    assert report["registry"]["entry_count"] == 0
+    assert report["registry"]["observation_count"] == 2
+    assert report["registry"]["entry_count"] == 1
+    assert report["registry"]["identity_kind"] == "fingerprint_only"
     assert "# Trusted-main flaky-test registry producer" in markdown
     assert "Dedicated classification handoff" in markdown
-    assert "Status: `validated_advisory_not_forwarded`" in markdown
-    assert "Forwarded to registry: `false`" in markdown
+    assert "Status: `validated_advisory_forwarded_to_registry`" in markdown
+    assert "Forwarded to registry: `true`" in markdown
     assert "Current PR decision input: `false`" in markdown
     assert "Automation allowed: `false`" in markdown
 
@@ -343,7 +367,7 @@ def test_producer_report_is_deterministic() -> None:
     )
 
 
-def test_trusted_producer_cli_reads_dedicated_report_without_forwarding(
+def test_trusted_producer_cli_reads_and_forwards_dedicated_report(
     tmp_path: Path,
     capsys,
 ) -> None:
@@ -377,10 +401,11 @@ def test_trusted_producer_cli_reads_dedicated_report_without_forwarding(
     report = json.loads((out_dir / PRODUCER_JSON).read_text(encoding="utf-8"))
 
     assert printed["status"] == SOURCE_CONNECTED
-    assert registry["entries"] == []
-    assert registry["summary"]["entry_count"] == 0
+    assert registry["summary"]["entry_count"] == 1
+    assert registry["entries"][0]["test_fingerprint"] == FINGERPRINT
+    assert "test_id" not in registry["entries"][0]
     assert report["classification_handoff"]["status"] == CLASSIFICATION_ADVISORY
-    assert report["classification_handoff"]["forwarded_to_registry"] is False
+    assert report["classification_handoff"]["forwarded_to_registry"] is True
 
 
 def test_trusted_producer_cli_rejects_invalid_json_without_artifacts(

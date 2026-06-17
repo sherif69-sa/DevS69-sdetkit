@@ -6,6 +6,13 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from sdetkit.trusted_test_observation_classification import (
+    SCHEMA_VERSION as TRUSTED_CLASSIFICATION_SCHEMA_VERSION,
+)
+from sdetkit.trusted_test_observation_classification import (
+    validate_classification_report,
+)
+
 SCHEMA_VERSION = "sdetkit.flaky_test_registry_evidence.v1"
 SOURCE_SCHEMA_VERSION = "sdetkit.intelligence.flake.v1"
 DEFAULT_OUT_DIR = Path("build") / "flaky-test-registry"
@@ -19,6 +26,7 @@ EVIDENCE_KEYS = {
 
 COLLECTED = "collected"
 STATUS = "advisory_registry_collected"
+TRUSTED_SOURCE_IDENTITY_KIND = "fingerprint_only"
 VALID_SOURCE_KINDS = {
     "operator_review_input",
     "trusted_main_artifact",
@@ -149,6 +157,92 @@ def build_flaky_test_registry_evidence(
     }
 
 
+def build_producer_vetted_fingerprint_registry_evidence(
+    *,
+    classification_report: Mapping[str, Any],
+    source_reference: str,
+) -> JsonObject:
+    source_reference_value = _string(source_reference)
+    if not source_reference_value:
+        raise ValueError("flaky-test evidence source reference is required")
+
+    validate_classification_report(classification_report)
+
+    entries: list[JsonObject] = []
+    for raw_item in _as_list(classification_report.get("classifications")):
+        item = _as_dict(raw_item)
+        if _string(item.get("classification")) != "flaky":
+            continue
+
+        provenance = [
+            dict(_as_dict(entry)) for entry in _as_list(item.get("observation_provenance"))
+        ]
+        entries.append(
+            {
+                "test_fingerprint": _string(item.get("test_fingerprint")),
+                "classification": "flaky",
+                "observed_runs": _int(item.get("runs_observed")),
+                "decisive_observation_count": _int(item.get("decisive_observation_count")),
+                "observed_passes": _int(item.get("passed")),
+                "observed_failures": _int(item.get("failed")) + _int(item.get("error")),
+                "observed_errors": _int(item.get("error")),
+                "observed_skipped": _int(item.get("skipped")),
+                "observation_provenance": provenance,
+                "decision": "instability_context_only",
+                "review_first": True,
+                "current_pr_decision_input": False,
+                "automatic_quarantine_allowed": False,
+                "automatic_rerun_allowed": False,
+                "current_failure_suppression_allowed": False,
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            }
+        )
+
+    entries.sort(key=lambda item: str(item["test_fingerprint"]))
+    summary = _as_dict(classification_report.get("summary"))
+
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "collection_status": COLLECTED,
+        "status": STATUS,
+        "source": {
+            "kind": "trusted_main_artifact",
+            "reference": source_reference_value,
+            "classification_schema": TRUSTED_CLASSIFICATION_SCHEMA_VERSION,
+            "identity_kind": TRUSTED_SOURCE_IDENTITY_KIND,
+            "input_read_only": True,
+            "commands_executed_by_reader": False,
+            "producer_vetted": True,
+            "raw_test_identity_emitted": False,
+        },
+        "summary": {
+            "entry_count": len(entries),
+            "flaky_test_count": len(entries),
+            "classification_fingerprint_count": _int(summary.get("fingerprint_count")),
+        },
+        "entries": entries,
+        "decision_boundary": {
+            "advisory_only": True,
+            "raw_test_identity_emitted": False,
+            "current_pr_decision_input": False,
+            "automatic_quarantine_allowed": False,
+            "automatic_rerun_allowed": False,
+            "current_failure_suppression_allowed": False,
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+            "reason": (
+                "Producer-vetted flaky fingerprints are advisory context only; "
+                "current failures remain active until independently diagnosed and proven."
+            ),
+        },
+    }
+
+
 def render_markdown(evidence: Mapping[str, Any]) -> str:
     source = _as_dict(evidence.get("source"))
     summary = _as_dict(evidence.get("summary"))
@@ -170,8 +264,11 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
 
     if entries:
         for entry in entries:
+            test_id = _string(entry.get("test_id"))
+            identity_label = "test" if test_id else "fingerprint"
+            identity = test_id or _string(entry.get("test_fingerprint"))
             lines.append(
-                f"- test=`{_string(entry.get('test_id'))}`, "
+                f"- {identity_label}=`{identity}`, "
                 f"runs=`{_int(entry.get('observed_runs'))}`, "
                 f"failures=`{_int(entry.get('observed_failures'))}`, "
                 f"passes=`{_int(entry.get('observed_passes'))}`, "

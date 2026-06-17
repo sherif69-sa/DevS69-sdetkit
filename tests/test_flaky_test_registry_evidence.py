@@ -7,9 +7,20 @@ import pytest
 
 from sdetkit.flaky_test_registry_evidence import (
     STATUS,
+    TRUSTED_SOURCE_IDENTITY_KIND,
     build_flaky_test_registry_evidence,
+    build_producer_vetted_fingerprint_registry_evidence,
     main,
     render_markdown,
+)
+from sdetkit.trusted_test_observation_classification import (
+    SCHEMA_VERSION as TRUSTED_CLASSIFICATION_SCHEMA_VERSION,
+)
+from sdetkit.trusted_test_observation_classification import (
+    build_trusted_observation_classification,
+)
+from sdetkit.trusted_test_observation_history import (
+    build_observation_history_record,
 )
 
 
@@ -44,6 +55,106 @@ def _classification_report() -> dict:
     }
 
 
+TRUSTED_FLAKY_FINGERPRINT = "f" * 64
+TRUSTED_STABLE_FINGERPRINT = "e" * 64
+TRUSTED_HEAD_A = "1" * 40
+TRUSTED_HEAD_B = "2" * 40
+
+
+def _trusted_capture(
+    *,
+    run_id: str,
+    head_sha: str,
+    flaky_outcome: str,
+) -> dict:
+    observations = [
+        {
+            "test_fingerprint": TRUSTED_FLAKY_FINGERPRINT,
+            "outcome": flaky_outcome,
+        },
+        {
+            "test_fingerprint": TRUSTED_STABLE_FINGERPRINT,
+            "outcome": "passed",
+        },
+    ]
+    counts = {
+        "passed": sum(item["outcome"] == "passed" for item in observations),
+        "failed": sum(item["outcome"] == "failed" for item in observations),
+        "error": 0,
+        "skipped": 0,
+    }
+    return {
+        "schema_version": "sdetkit.trusted_test_observation_capture.v1",
+        "status": "trusted_main_observations_captured",
+        "source": {
+            "workflow": "CI",
+            "job": "Full CI lane",
+            "run_id": run_id,
+            "head_sha": head_sha,
+            "event_name": "push",
+            "ref_name": "refs/heads/main",
+            "trusted_main": True,
+            "input_read_only": True,
+            "commands_executed_by_reader": False,
+        },
+        "summary": {
+            "observation_count": len(observations),
+            **counts,
+            "flaky_classification_performed": False,
+            "raw_test_identity_emitted": False,
+        },
+        "observations": observations,
+        "decision_boundary": {
+            "raw_observation_only": True,
+            "flaky_classification_performed": False,
+            "automatic_quarantine_allowed": False,
+            "automatic_rerun_allowed": False,
+            "current_failure_suppression_allowed": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+
+def _trusted_record(
+    *,
+    run_id: str,
+    head_sha: str,
+    recorded_at: str,
+    flaky_outcome: str,
+) -> dict:
+    return build_observation_history_record(
+        _trusted_capture(
+            run_id=run_id,
+            head_sha=head_sha,
+            flaky_outcome=flaky_outcome,
+        ),
+        source_run_id=run_id,
+        source_head_sha=head_sha,
+        recorded_at_utc=recorded_at,
+    )
+
+
+def _trusted_classification_report() -> dict:
+    return build_trusted_observation_classification(
+        [
+            _trusted_record(
+                run_id="full-ci-a",
+                head_sha=TRUSTED_HEAD_A,
+                recorded_at="2026-06-16T00:00:00Z",
+                flaky_outcome="failed",
+            ),
+            _trusted_record(
+                run_id="full-ci-b",
+                head_sha=TRUSTED_HEAD_B,
+                recorded_at="2026-06-16T01:00:00Z",
+                flaky_outcome="passed",
+            ),
+        ]
+    )
+
+
 def test_flaky_test_registry_normalizes_flake_evidence_without_authority() -> None:
     evidence = build_flaky_test_registry_evidence(
         classification_report=_classification_report(),
@@ -64,6 +175,69 @@ def test_flaky_test_registry_normalizes_flake_evidence_without_authority() -> No
     assert boundary["automation_allowed"] is False
     assert boundary["merge_authorized"] is False
     assert boundary["semantic_equivalence_proven"] is False
+
+
+def test_producer_vetted_registry_maps_only_flaky_fingerprints() -> None:
+    classification = _trusted_classification_report()
+    evidence = build_producer_vetted_fingerprint_registry_evidence(
+        classification_report=classification,
+        source_reference="trusted-producer",
+    )
+
+    assert evidence["status"] == STATUS
+    assert evidence["source"]["kind"] == "trusted_main_artifact"
+    assert evidence["source"]["identity_kind"] == TRUSTED_SOURCE_IDENTITY_KIND
+    assert evidence["source"]["classification_schema"] == TRUSTED_CLASSIFICATION_SCHEMA_VERSION
+    assert evidence["source"]["producer_vetted"] is True
+    assert evidence["source"]["raw_test_identity_emitted"] is False
+    assert evidence["summary"]["classification_fingerprint_count"] == 2
+    assert evidence["summary"]["entry_count"] == 1
+
+    entry = evidence["entries"][0]
+    assert entry["test_fingerprint"] == TRUSTED_FLAKY_FINGERPRINT
+    assert entry["classification"] == "flaky"
+    assert entry["observed_runs"] == 2
+    assert entry["decisive_observation_count"] == 2
+    assert entry["observed_passes"] == 1
+    assert entry["observed_failures"] == 1
+    assert entry["observed_errors"] == 0
+    assert entry["observed_skipped"] == 0
+    assert (
+        entry["observation_provenance"]
+        == classification["classifications"][1]["observation_provenance"]
+    )
+    assert "test_id" not in entry
+    assert "fingerprint" not in entry
+    assert entry["current_pr_decision_input"] is False
+    assert entry["automatic_quarantine_allowed"] is False
+    assert entry["automatic_rerun_allowed"] is False
+    assert entry["current_failure_suppression_allowed"] is False
+    assert entry["automation_allowed"] is False
+    assert entry["patch_application_allowed"] is False
+    assert entry["merge_authorized"] is False
+    assert entry["semantic_equivalence_proven"] is False
+
+
+def test_producer_vetted_registry_is_deterministic_and_separate_from_legacy() -> None:
+    classification = _trusted_classification_report()
+    first = build_producer_vetted_fingerprint_registry_evidence(
+        classification_report=classification,
+        source_reference="trusted-producer",
+    )
+    second = build_producer_vetted_fingerprint_registry_evidence(
+        classification_report=json.loads(json.dumps(classification)),
+        source_reference="trusted-producer",
+    )
+
+    assert first == second
+    assert json.dumps(first, sort_keys=True) == json.dumps(second, sort_keys=True)
+
+    with pytest.raises(ValueError, match="unsupported flaky-test classification report schema"):
+        build_flaky_test_registry_evidence(
+            classification_report=classification,
+            source_kind="trusted_main_artifact",
+            source_reference="trusted-producer",
+        )
 
 
 def test_flaky_test_registry_rejects_unproven_flaky_entry() -> None:

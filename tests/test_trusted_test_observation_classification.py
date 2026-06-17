@@ -227,6 +227,19 @@ def test_rejects_unbound_or_malformed_provenance() -> None:
         validate_classification_report(malformed)
 
 
+def test_rejects_duplicate_provenance_tuple_even_with_consistent_counts() -> None:
+    report = build_trusted_observation_classification(_records())
+    duplicated = deepcopy(report)
+    item = duplicated["classifications"][0]
+    item["observation_provenance"].append(deepcopy(item["observation_provenance"][0]))
+    item["runs_observed"] += 1
+    item["decisive_observation_count"] += 1
+    item["failed"] += 1
+
+    with pytest.raises(ValueError, match="duplicate provenance tuples"):
+        validate_classification_report(duplicated)
+
+
 def test_jsonl_reader_and_cli_write_review_first_artifacts(tmp_path: Path, capsys) -> None:
     history_path = tmp_path / "history.jsonl"
     history_path.write_text(

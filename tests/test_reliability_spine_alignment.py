@@ -114,12 +114,16 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert not any("PR Quality" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert any("network-isolation" in gap for gap in gaps_by_module["repo_memory"])
     assert any(
-        "producer-vetted fingerprint classification adapter" in gap
+        "producer-vetted fingerprint registry population" in gap
         for gap in gaps_by_module["repo_memory"]
     )
     assert any("PR Quality visibility" in gap for gap in gaps_by_module["repo_memory"])
+    assert not any(
+        "classification adapter" in gap
+        for gap in gaps_by_module[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
+    )
     assert any(
-        "producer-vetted fingerprint classification adapter" in gap
+        "RepoMemory population" in gap
         for gap in gaps_by_module[FLAKY_TEST_REGISTRY_EVIDENCE_MODULE]
     )
     assert any(
@@ -353,15 +357,15 @@ def test_flaky_registry_alignment_starts_after_persisted_observation_history() -
     assert classification.gaps == ()
     assert (
         producer.recommended_next_action
-        == "audit a producer-vetted fingerprint classification adapter "
-        "before registry, workflow, RepoMemory, or PR Quality integration"
+        == "keep producer-vetted fingerprint registry evidence advisory-only "
+        "and defer workflow, RepoMemory population, and PR Quality integration"
     )
     assert registry.gaps == (
-        "producer-vetted fingerprint classification adapter and PR Quality visibility are not yet connected",
+        "RepoMemory population and PR Quality visibility are not yet connected",
     )
     assert TRUSTED_TEST_OBSERVATION_HISTORY_MODULE in repo_memory.integration_points
     assert (
-        "producer-vetted fingerprint classification adapter and "
+        "producer-vetted fingerprint registry population and "
         "PR Quality visibility remain unconnected" in repo_memory.gaps
     )
 
@@ -387,8 +391,7 @@ def test_trusted_observation_classification_alignment_is_closed() -> None:
     assert (
         component.recommended_next_action
         == "keep the dedicated artifact advisory-only and route it only "
-        "through the trusted producer validation handoff before registry "
-        "or workflow integration"
+        "through the trusted producer fingerprint adapter before workflow integration"
     )
 
 
@@ -404,11 +407,10 @@ def test_trusted_producer_validation_handoff_alignment_is_closed() -> None:
     assert TRUSTED_TEST_OBSERVATION_CLASSIFICATION_MODULE in producer.integration_points
     assert "classification_handoff summary" in producer.existing_artifacts
     assert (
-        producer.recommended_next_action == "audit a producer-vetted fingerprint classification "
-        "adapter before registry, workflow, RepoMemory, or "
-        "PR Quality integration"
+        producer.recommended_next_action
+        == "keep producer-vetted fingerprint registry evidence advisory-only "
+        "and defer workflow, RepoMemory population, and PR Quality integration"
     )
-    assert any("producer-vetted fingerprint classification adapter" in gap for gap in registry.gaps)
-    assert any(
-        "producer-vetted fingerprint classification adapter" in gap for gap in repo_memory.gaps
-    )
+    assert not any("classification adapter" in gap for gap in registry.gaps)
+    assert any("RepoMemory population" in gap for gap in registry.gaps)
+    assert any("producer-vetted fingerprint registry population" in gap for gap in repo_memory.gaps)
