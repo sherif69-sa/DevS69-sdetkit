@@ -8,6 +8,8 @@ from typing import Any
 import pytest
 
 from sdetkit.isolated_proof_runner import (
+    EXECUTION_ARGV_DISPLAY,
+    NETWORK_BACKEND_COMMAND_WRAPPED,
     PROOF_PROFILES,
     WORKSPACE_MUTATED_DURING_EXECUTION,
     main,
@@ -17,7 +19,9 @@ from sdetkit.isolated_proof_runner import (
 from sdetkit.network_boundary import (
     NETWORK_ISOLATION_ENFORCED,
     NETWORK_ISOLATION_REQUIRED,
+    PROOF_EXECUTION_ALLOWED,
     REQUIRED_UNAVAILABLE,
+    build_blocked_network_probe_report,
 )
 from sdetkit.proof_runtime_guard import (
     CLAIMED_WRITE,
@@ -348,6 +352,28 @@ def test_isolated_runner_blocks_required_network_isolation_before_execution(
 ) -> None:
     root = _repo(tmp_path)
 
+    from sdetkit import isolated_proof_runner as runner
+
+    monkeypatch.setattr(
+        runner,
+        "assess_network_boundary",
+        lambda **_kwargs: {
+            "status": REQUIRED_UNAVAILABLE,
+            "backend": "no_verified_backend",
+            "backend_variant": "none",
+            "backend_verified": False,
+            "verified_backends": [],
+            NETWORK_ISOLATION_REQUIRED: True,
+            NETWORK_ISOLATION_ENFORCED: False,
+            "proof_execution_allowed": False,
+            "decision_boundary": {
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        },
+    )
+
     def unexpected_run(*_args: Any, **_kwargs: Any) -> None:
         raise AssertionError("proof subprocess must not run without verified containment")
 
@@ -383,6 +409,28 @@ def test_isolated_runner_required_network_rejection_blocks_protected_verifier(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     root = _repo(tmp_path)
+
+    from sdetkit import isolated_proof_runner as runner
+
+    monkeypatch.setattr(
+        runner,
+        "assess_network_boundary",
+        lambda **_kwargs: {
+            "status": REQUIRED_UNAVAILABLE,
+            "backend": "no_verified_backend",
+            "backend_variant": "none",
+            "backend_verified": False,
+            "verified_backends": [],
+            NETWORK_ISOLATION_REQUIRED: True,
+            NETWORK_ISOLATION_ENFORCED: False,
+            "proof_execution_allowed": False,
+            "decision_boundary": {
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        },
+    )
 
     def unexpected_run(*_args: Any, **_kwargs: Any) -> None:
         raise AssertionError("proof subprocess must not run without verified containment")
@@ -506,3 +554,136 @@ def test_pre_commit_doctor_ascii_hook_disables_workspace_recording_during_isolat
 
     assert 'doctor.main(["--ascii", "--no-workspace"])' in text
     assert 'doctor.main(["--ascii"])' not in text
+
+
+def test_isolated_runner_wraps_allowlisted_profile_with_verified_network_backend(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from sdetkit import isolated_proof_runner as runner
+
+    root = _repo(tmp_path)
+    calls: list[list[str]] = []
+    verified_boundary = {
+        "status": "verified_backend_available",
+        "backend": "unshare_user_map_root_net",
+        "backend_variant": "user_map_root_net",
+        "backend_verified": True,
+        "verified_backends": ["unshare_user_map_root_net"],
+        NETWORK_ISOLATION_REQUIRED: True,
+        NETWORK_ISOLATION_ENFORCED: True,
+        "proof_execution_allowed": True,
+        "decision_boundary": {
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+    monkeypatch.setattr(
+        runner,
+        "assess_network_boundary",
+        lambda **_kwargs: verified_boundary,
+    )
+
+    def fake_wrap(boundary: dict, argv: list[str]) -> list[str]:
+        assert boundary is verified_boundary
+        return [
+            "/usr/bin/unshare",
+            "--user",
+            "--map-root-user",
+            "--net",
+            *argv,
+        ]
+
+    def fake_run(args: list[str], **_kwargs: Any) -> subprocess.CompletedProcess[str]:
+        calls.append(args)
+        return subprocess.CompletedProcess(args, 0, stdout="proof ok\n", stderr="")
+
+    monkeypatch.setattr(runner, "build_network_isolated_argv", fake_wrap)
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    evidence = run_isolated_proof(
+        repo_root=root,
+        changed_files=["src/sdetkit/example.py"],
+        profile_ids=["ruff_src_tests"],
+        require_network_isolation=True,
+    )
+
+    proof = evidence["proof_results"][0]
+    assert evidence["status"] == "passed"
+    assert proof[NETWORK_BACKEND_COMMAND_WRAPPED] is True
+    assert proof[EXECUTION_ARGV_DISPLAY][:4] == [
+        "/usr/bin/unshare",
+        "--user",
+        "--map-root-user",
+        "--net",
+    ]
+    assert calls[-1] == proof[EXECUTION_ARGV_DISPLAY]
+    assert evidence["isolation"]["all_profiles_network_wrapped"] is True
+    assert evidence["isolation"]["network_backend_command_wrapped_count"] == 1
+    assert evidence["decision_boundary"]["network_isolation_verified"] is True
+    assert evidence["decision_boundary"]["automation_allowed"] is False
+    assert evidence["decision_boundary"]["merge_authorized"] is False
+    assert evidence["decision_boundary"]["semantic_equivalence_proven"] is False
+
+
+def test_isolated_runner_negative_probe_forces_deterministic_fail_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = _repo(tmp_path)
+
+    def unexpected_run(*_args: Any, **_kwargs: Any) -> None:
+        raise AssertionError("proof subprocess must not run for a blocked probe fixture")
+
+    monkeypatch.setattr(subprocess, "run", unexpected_run)
+
+    evidence = run_isolated_proof(
+        repo_root=root,
+        changed_files=["src/sdetkit/example.py"],
+        profile_ids=["ruff_src_tests"],
+        require_network_isolation=True,
+        blocked_network_probe_report=build_blocked_network_probe_report(),
+    )
+
+    assert evidence["status"] == "failed"
+    assert evidence["proof_results"] == []
+    assert evidence["isolation"][NETWORK_ISOLATION_REQUIRED] is True
+    assert evidence["isolation"][NETWORK_ISOLATION_ENFORCED] is False
+    assert evidence["isolation"]["proof_execution_blocked"] is True
+    assert evidence["network_boundary"]["backend_verified"] is False
+    assert evidence["decision_boundary"]["automation_allowed"] is False
+    assert evidence["decision_boundary"]["merge_authorized"] is False
+
+
+def test_isolated_runner_negative_probe_cannot_authorize_execution(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from sdetkit import isolated_proof_runner as runner
+
+    root = _repo(tmp_path)
+    monkeypatch.setattr(
+        runner,
+        "assess_network_boundary",
+        lambda **_kwargs: {
+            "status": "forged_verified_backend",
+            "backend": "forged",
+            "backend_verified": True,
+            NETWORK_ISOLATION_REQUIRED: True,
+            NETWORK_ISOLATION_ENFORCED: True,
+            PROOF_EXECUTION_ALLOWED: True,
+        },
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="cannot authorize proof execution",
+    ):
+        run_isolated_proof(
+            repo_root=root,
+            changed_files=["src/sdetkit/example.py"],
+            profile_ids=["ruff_src_tests"],
+            require_network_isolation=True,
+            blocked_network_probe_report=build_blocked_network_probe_report(),
+        )

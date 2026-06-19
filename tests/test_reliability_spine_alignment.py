@@ -61,7 +61,7 @@ def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
     status_counts = report["status_counts"]
 
     assert status_counts["aligned"] >= 13
-    assert status_counts["partially_aligned"] >= 10
+    assert status_counts["partially_aligned"] >= 8
     assert status_counts.get("planned", 0) == 0
     assert report["next_recommended_pr"] == NEXT_RECOMMENDED_PR
 
@@ -83,10 +83,10 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert "patch_scorer" in gaps_by_module
     assert "protected_verifier" in gaps_by_module
     assert "replayable_benchmark_harness" in gaps_by_module
-    assert "repo_memory" in gaps_by_module
+    assert "repo_memory" not in gaps_by_module
     assert "isolated_proof_runner" in gaps_by_module
     assert "git_inventory_collector" in gaps_by_module
-    assert "network_boundary" in gaps_by_module
+    assert "network_boundary" not in gaps_by_module
     assert "proof_runtime_guard" in gaps_by_module
     assert "pr_quality_runtime_proof_artifacts" not in gaps_by_module
     assert "current_head_failure_bundle" not in gaps_by_module
@@ -105,24 +105,16 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert any("protected_verifier" in gap for gap in gaps_by_module["maintenance_autopilot"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["patch_scorer"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["protected_verifier"])
-    assert any("network-isolated" in gap for gap in gaps_by_module["isolated_proof_runner"])
+    assert not any("network-isolated" in gap for gap in gaps_by_module["isolated_proof_runner"])
+    assert any("external filesystem" in gap for gap in gaps_by_module["isolated_proof_runner"])
     assert any(
         "narrow allowlisted Ruff proof profile" in gap
         for gap in gaps_by_module["git_inventory_collector"]
     )
     assert any("containment" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert not any("PR Quality" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
-    assert any("network-isolation" in gap for gap in gaps_by_module["repo_memory"])
-    assert not any(
-        "producer-vetted fingerprint registry population" in gap
-        for gap in gaps_by_module["repo_memory"]
-    )
-    assert not any(
-        "trusted-main workflow population" in gap for gap in gaps_by_module["repo_memory"]
-    )
-    assert not any("PR Quality visibility" in gap for gap in gaps_by_module["repo_memory"])
-    assert not any("persistent profile" in gap for gap in gaps_by_module["repo_memory"])
-    assert any("verified" in gap for gap in gaps_by_module["network_boundary"])
+    assert "repo_memory" not in gaps_by_module
+    assert "network_boundary" not in gaps_by_module
     assert any("external filesystem" in gap for gap in gaps_by_module["proof_runtime_guard"])
 
 
@@ -146,8 +138,8 @@ def test_alignment_closes_pr_quality_registry_visibility_without_authority() -> 
 
     assert not any("trusted-main workflow population" in gap for gap in memory.gaps)
     assert not any("PR Quality visibility" in gap for gap in memory.gaps)
-    assert any("network-isolation" in gap for gap in memory.gaps)
-    assert "aggregate registry visibility" in memory.recommended_next_action
+    assert memory.gaps == ()
+    assert "runtime-verified network-boundary evidence" in memory.recommended_next_action
 
     assert "aggregate producer-vetted registry context" in history.role
     assert "aggregate-only" in history.recommended_next_action
@@ -175,10 +167,10 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert "`patch_scorer`: `partially_aligned`" in markdown
     assert "`protected_verifier`: `partially_aligned`" in markdown
     assert "`replayable_benchmark_harness`: `partially_aligned`" in markdown
-    assert "`repo_memory`: `partially_aligned`" in markdown
+    assert "`repo_memory`: `aligned`" in markdown
     assert "`isolated_proof_runner`: `partially_aligned`" in markdown
     assert "`git_inventory_collector`: `partially_aligned`" in markdown
-    assert "`network_boundary`: `partially_aligned`" in markdown
+    assert "`network_boundary`: `aligned`" in markdown
     assert "`proof_runtime_guard`: `partially_aligned`" in markdown
     assert "`pr_quality_runtime_proof_artifacts`: `aligned`" in markdown
     assert f"`{PR_QUALITY_LIVE_WORKSPACE_MODULE}`: `aligned`" in markdown
@@ -458,3 +450,31 @@ def test_trusted_producer_validation_handoff_alignment_is_closed() -> None:
     )
     assert not any("trusted-main workflow population" in gap for gap in repo_memory.gaps)
     assert not any("PR Quality visibility" in gap for gap in repo_memory.gaps)
+
+
+def test_alignment_closes_verified_network_backend_contract_without_overclaim() -> None:
+    components = {item.module: item for item in build_alignment_components()}
+    network = components["network_boundary"]
+    runner = components["isolated_proof_runner"]
+    benchmark = components["replayable_benchmark_harness"]
+    memory = components["repo_memory"]
+
+    assert network.status == "aligned"
+    assert network.gaps == ()
+    assert "runtime-probe" in network.role
+    assert "controlled loopback backend probe" in network.existing_artifacts
+    assert "filesystem or process containment" in network.recommended_next_action
+
+    assert runner.status == "partially_aligned"
+    assert not any("network-isolated" in gap for gap in runner.gaps)
+    assert any("external filesystem" in gap for gap in runner.gaps)
+    assert "runtime-reprobed network isolation" in runner.recommended_next_action
+
+    assert benchmark.status == "partially_aligned"
+    assert any("external filesystem" in gap for gap in benchmark.gaps)
+    assert "verified network-backend contract" in benchmark.recommended_next_action
+    assert "authority" in benchmark.recommended_next_action
+
+    assert memory.status == "aligned"
+    assert memory.gaps == ()
+    assert "runtime-verified network-boundary evidence" in memory.recommended_next_action

@@ -7,6 +7,7 @@ from pathlib import Path
 from sdetkit.replayable_benchmark_harness import (
     build_benchmark_report,
     build_diagnostic_worker_benchmark_report,
+    build_network_backend_contract_report,
     build_security_freshness_benchmark_report,
     evaluate_scenario,
     load_diagnostic_worker_scenarios,
@@ -14,6 +15,7 @@ from sdetkit.replayable_benchmark_harness import (
     load_security_freshness_scenarios,
     main,
     render_markdown,
+    render_network_backend_contract_markdown,
 )
 
 FIXTURES = Path("tests/fixtures/remediation_benchmark")
@@ -458,3 +460,96 @@ def test_replayable_benchmark_fails_authority_expanding_runtime_proof_contract_e
     assert "Expanded authority fields: `merge_authorized`" in markdown
     assert "Runtime proof contract authority expansion count: `1`" in markdown
     assert "Boundary preserved: `false`" in markdown
+
+
+def _verified_network_evidence(*, merge_authorized: bool = False) -> dict:
+    return {
+        "status": "passed",
+        "network_boundary": {
+            "status": "verified_backend_available",
+            "backend": "unshare_user_map_root_net",
+            "backend_variant": "user_map_root_net",
+            "backend_verified": True,
+        },
+        "runtime_guard": {
+            "external_filesystem_containment_enforced": False,
+            "process_escape_prevention_enforced": False,
+        },
+        "proof_summary": {"executed_count": 1},
+        "isolation": {
+            "network_isolation_required": True,
+            "network_isolation_enforced": True,
+            "all_profiles_network_wrapped": True,
+            "network_backend_command_wrapped_count": 1,
+        },
+        "decision_boundary": {
+            "network_isolation_verified": True,
+            "automation_allowed": False,
+            "merge_authorized": merge_authorized,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+
+def test_network_backend_contract_report_accepts_verified_narrow_scope() -> None:
+    report = build_network_backend_contract_report(_verified_network_evidence())
+    assert report["status"] == "passed"
+    assert report["backend"] == "unshare_user_map_root_net"
+    assert report["backend_verified"] is True
+    assert report["network_isolation_enforced"] is True
+    assert report["all_profiles_network_wrapped"] is True
+    assert report["network_isolation_scope_only"] is True
+    assert report["external_filesystem_containment_enforced"] is False
+    assert report["process_escape_prevention_enforced"] is False
+    assert report["expanded_authority_fields"] == []
+    assert report["decision_boundary"]["automation_allowed"] is False
+    assert report["decision_boundary"]["merge_authorized"] is False
+
+
+def test_network_backend_contract_report_rejects_unwrapped_or_authorizing_evidence() -> None:
+    unwrapped = _verified_network_evidence()
+    unwrapped["isolation"]["all_profiles_network_wrapped"] = False
+    assert build_network_backend_contract_report(unwrapped)["status"] == "failed"
+
+    authorizing = _verified_network_evidence(merge_authorized=True)
+    report = build_network_backend_contract_report(authorizing)
+    assert report["status"] == "failed"
+    assert report["expanded_authority_fields"] == ["merge_authorized"]
+
+
+def test_network_backend_contract_markdown_preserves_narrow_boundary() -> None:
+    markdown = render_network_backend_contract_markdown(
+        build_network_backend_contract_report(_verified_network_evidence())
+    )
+    assert "# Network backend contract replay" in markdown
+    assert "Backend verified: `true`" in markdown
+    assert "Network isolation enforced: `true`" in markdown
+    assert "All profiles network wrapped: `true`" in markdown
+    assert "External filesystem containment enforced: `false`" in markdown
+    assert "Process escape prevention enforced: `false`" in markdown
+    assert "Automation allowed: `false`" in markdown
+    assert "Merge authorized: `false`" in markdown
+    assert "Semantic equivalence proven: `false`" in markdown
+
+
+def test_blocked_network_probe_fixture_is_negative_only() -> None:
+    from sdetkit.network_boundary import (
+        NETWORK_ISOLATION_ENFORCED,
+        NETWORK_ISOLATION_REQUIRED,
+        PROOF_EXECUTION_ALLOWED,
+        assess_network_boundary,
+        build_blocked_network_probe_report,
+    )
+
+    boundary = assess_network_boundary(
+        require_network_isolation=True,
+        probe_report=build_blocked_network_probe_report(),
+    )
+
+    assert boundary["status"] == "required_unavailable"
+    assert boundary["backend_verified"] is False
+    assert boundary[NETWORK_ISOLATION_REQUIRED] is True
+    assert boundary[NETWORK_ISOLATION_ENFORCED] is False
+    assert boundary[PROOF_EXECUTION_ALLOWED] is False
+    assert boundary["decision_boundary"]["automation_allowed"] is False
+    assert boundary["decision_boundary"]["merge_authorized"] is False
