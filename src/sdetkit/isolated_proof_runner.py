@@ -23,6 +23,7 @@ from sdetkit.network_boundary import (
     NETWORK_ISOLATION_REQUIRED,
     PROOF_EXECUTION_ALLOWED,
     assess_network_boundary,
+    build_network_isolated_argv,
 )
 from sdetkit.proof_runtime_guard import (
     CLEAN,
@@ -43,6 +44,8 @@ JsonObject = dict[str, Any]
 WORKSPACE_MUTATED_DURING_EXECUTION = "_".join(("workspace", "mutated", "during", "execution"))
 CLAIMED_CHANGED_FILES = "_".join(("claimed", "changed", "files"))
 INVENTORY_CLAIM_MATCH = "_".join(("inventory", "claim", "match"))
+EXECUTION_ARGV_DISPLAY = "_".join(("execution", "argv", "display"))
+NETWORK_BACKEND_COMMAND_WRAPPED = "_".join(("network", "backend", "command", "wrapped"))
 
 IGNORED_NAMES = {
     ".git",
@@ -250,10 +253,18 @@ def _profile_result(
     workspace: Path,
     timeout_seconds: int,
     expected_changed_files: list[str],
+    network_boundary: Mapping[str, Any],
 ) -> JsonObject:
     before = _snapshot_workspace(workspace)
     reserved_before = _snapshot_reserved_evidence(workspace)
-    argv = [sys.executable, *profile.argv_suffix]
+    profile_argv = [sys.executable, *profile.argv_suffix]
+    network_required = network_boundary.get(NETWORK_ISOLATION_REQUIRED) is True
+    argv = (
+        build_network_isolated_argv(network_boundary, profile_argv)
+        if network_required
+        else profile_argv
+    )
+    network_backend_command_wrapped = network_required
 
     try:
         completed = subprocess.run(
@@ -299,6 +310,10 @@ def _profile_result(
         "profile_id": profile.profile_id,
         "command": profile.canonical_command,
         "argv_display": ["python", *profile.argv_suffix],
+        EXECUTION_ARGV_DISPLAY: argv,
+        NETWORK_BACKEND_COMMAND_WRAPPED: network_backend_command_wrapped,
+        "network_backend": _string(network_boundary.get("backend")),
+        "network_backend_variant": _string(network_boundary.get("backend_variant")),
         "status": status,
         "exit_code": exit_code,
         "timed_out": timed_out,
@@ -321,6 +336,7 @@ def run_isolated_proof(
     base_ref: str = "",
     head_ref: str = "HEAD",
     require_network_isolation: bool = False,
+    blocked_network_probe_report: Mapping[str, Any] | None = None,
 ) -> JsonObject:
     if timeout_seconds < 1:
         raise ValueError("timeout_seconds must be at least 1")
@@ -344,9 +360,23 @@ def run_isolated_proof(
     changed_files_source = "caller_supplied_inventory_unverified"
     inventory_claim_match: bool | None = None
     git_inventory_verified = False
-    network_boundary = assess_network_boundary(
-        require_network_isolation=require_network_isolation,
-    )
+    if blocked_network_probe_report is not None:
+        if not require_network_isolation:
+            raise ValueError("blocked network probe report requires network isolation")
+        network_boundary = assess_network_boundary(
+            require_network_isolation=True,
+            probe_report=blocked_network_probe_report,
+        )
+        if _bool(network_boundary.get(PROOF_EXECUTION_ALLOWED)):
+            raise ValueError("blocked network probe report cannot authorize proof execution")
+        if _bool(network_boundary.get(NETWORK_ISOLATION_ENFORCED)):
+            raise ValueError("blocked network probe report cannot claim enforcement")
+        if _bool(network_boundary.get("backend_verified")):
+            raise ValueError("blocked network probe report cannot verify a backend")
+    else:
+        network_boundary = assess_network_boundary(
+            require_network_isolation=require_network_isolation,
+        )
     proof_execution_allowed = _bool(network_boundary.get(PROOF_EXECUTION_ALLOWED))
 
     if inventory_mode:
@@ -380,6 +410,7 @@ def run_isolated_proof(
                         workspace=workspace,
                         timeout_seconds=timeout_seconds,
                         expected_changed_files=effective_changed_files,
+                        network_boundary=network_boundary,
                     )
                 )
 
@@ -393,6 +424,16 @@ def run_isolated_proof(
             runtime_guard_violation_count += 1
 
     runtime_guard_checked = bool(results)
+    network_required = network_boundary.get(NETWORK_ISOLATION_REQUIRED) is True
+    network_wrapped_count = sum(
+        1 for result in results if result.get(NETWORK_BACKEND_COMMAND_WRAPPED) is True
+    )
+    all_profiles_network_wrapped = (
+        network_required and bool(results) and network_wrapped_count == len(results)
+    )
+    network_isolation_verified = (
+        network_boundary.get(NETWORK_ISOLATION_ENFORCED) is True and all_profiles_network_wrapped
+    )
     passed_count = sum(1 for result in results if result["status"] == "passed")
     failed_count = len(results) - passed_count
     blocked_count = 0 if proof_execution_allowed else len(requested_profiles)
@@ -407,6 +448,12 @@ def run_isolated_proof(
         boundary_reason = (
             "Network-isolated proof was required, but no verified runtime "
             "containment backend is available; proof execution was blocked."
+        )
+    elif network_required:
+        boundary_reason = (
+            "The runner executed every allowlisted proof profile through a "
+            "runtime-reprobed registered network namespace backend; automation "
+            "and merge authority remain disabled."
         )
     elif runtime_guard_violation_count:
         boundary_reason = (
@@ -465,11 +512,14 @@ def run_isolated_proof(
             NETWORK_ISOLATION_ENFORCED: _bool(network_boundary.get(NETWORK_ISOLATION_ENFORCED)),
             "network_boundary_status": _string(network_boundary.get("status")),
             "network_boundary_backend": _string(network_boundary.get("backend")),
+            "network_boundary_backend_variant": _string(network_boundary.get("backend_variant")),
+            "network_backend_command_wrapped_count": network_wrapped_count,
+            "all_profiles_network_wrapped": all_profiles_network_wrapped,
             "proof_execution_blocked": not proof_execution_allowed,
         },
         "decision_boundary": {
             "git_inventory_verified": git_inventory_verified,
-            "network_isolation_verified": _bool(network_boundary.get(NETWORK_ISOLATION_ENFORCED)),
+            "network_isolation_verified": network_isolation_verified,
             "runtime_guard_passed": runtime_guard_checked and runtime_guard_violation_count == 0,
             "automation_allowed": False,
             "merge_authorized": False,
@@ -527,6 +577,11 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
             f"`{str(_bool(isolation.get(NETWORK_ISOLATION_ENFORCED))).lower()}`"
         ),
         f"- Network boundary status: `{_string(network_boundary.get('status'))}`",
+        f"- Network boundary backend: `{_string(network_boundary.get('backend'))}`",
+        (
+            "- All profiles network wrapped: "
+            f"`{str(_bool(isolation.get('all_profiles_network_wrapped'))).lower()}`"
+        ),
         (
             "- Proof execution blocked: "
             f"`{str(_bool(isolation.get('proof_execution_blocked'))).lower()}`"

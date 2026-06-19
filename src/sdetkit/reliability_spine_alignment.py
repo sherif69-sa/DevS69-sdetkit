@@ -433,23 +433,20 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="network_boundary",
-            role="block proof execution when required network isolation lacks a verified runtime backend",
-            status="partially_aligned",
+            role="runtime-probe registered network namespace backends and fail closed unless the exact executable and controlled loopback contract are verified",
+            status="aligned",
             stages=("proof", "verifier", "reporting"),
             existing_artifacts=(
                 "network-boundary.json",
                 "network-boundary.md",
+                "controlled loopback backend probe",
             ),
             integration_points=(
                 "isolated_proof_runner",
                 "replayable_benchmark_harness",
                 "repo_memory",
             ),
-            gaps=(
-                "no runtime containment backend has a verified network-isolation contract",
-                "the observed unshare probe is not sufficient to claim enforcement",
-            ),
-            recommended_next_action="register a backend only after successful containment proof",
+            recommended_next_action="keep verified network isolation narrow, runtime-reprobed, and independent of filesystem or process containment claims",
         ),
         _component(
             module="proof_runtime_guard",
@@ -486,11 +483,8 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "replayable_benchmark_harness",
                 "repo_memory",
             ),
-            gaps=(
-                "successful network-isolated proof execution remains unavailable",
-                "external filesystem and process escape prevention remain unavailable",
-            ),
-            recommended_next_action="expand visibility only through read-only artifact collection",
+            gaps=("external filesystem and process escape prevention remain unavailable",),
+            recommended_next_action="keep runtime-reprobed network isolation separate from unavailable filesystem and process containment",
         ),
         _component(
             module="replayable_benchmark_harness",
@@ -512,8 +506,8 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "protected_verifier",
                 "repo_memory",
             ),
-            gaps=("successful containment remains unavailable",),
-            recommended_next_action="keep live benchmark evidence reporting-only until containment is proven",
+            gaps=("external filesystem and process containment remain unavailable",),
+            recommended_next_action="replay the verified network-backend contract without expanding proof or merge authority",
         ),
         _component(
             module=TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE,
@@ -600,7 +594,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
         _component(
             module="repo_memory",
             role="produce local repo-specific memory profiles from trajectory, benchmark, and advisory fingerprint-only registry evidence",
-            status="partially_aligned",
+            status="aligned",
             stages=("history", "decision", "reporting"),
             existing_artifacts=(
                 "repo-memory-profile.json",
@@ -619,8 +613,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE,
                 TRUSTED_TEST_OBSERVATION_HISTORY_MODULE,
             ),
-            gaps=("successful network-isolation proof is unavailable until a backend is verified",),
-            recommended_next_action="keep accepted-main aggregate registry visibility reporting-only while network-isolation proof remains unavailable",
+            recommended_next_action="consume only runtime-verified network-boundary evidence while keeping accepted-main aggregate registry visibility reporting-only",
         ),
         _component(
             module=REPO_MEMORY_PROFILE_HISTORY_MODULE,
