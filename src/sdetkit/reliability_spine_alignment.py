@@ -195,7 +195,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="pr_quality_action_report",
-            role="render operator-facing PR Quality status, evidence, trajectory, runtime-proof, and trusted-history summaries",
+            role="render operator-facing PR Quality status, evidence, trajectory, runtime-proof, trusted-history, and aggregate producer-vetted registry summaries",
             status="aligned",
             stages=("reporting", "trajectory", "proof", "history"),
             existing_artifacts=("pr-comment-body.md", "pr-comment-metadata.json"),
@@ -204,11 +204,11 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "trajectory_store",
                 "pr_quality_runtime_proof_artifacts",
             ),
-            recommended_next_action="keep accepted-main history advisory-only and no-authority boundaries explicit",
+            recommended_next_action="keep accepted-main registry context aggregate-only, advisory-only, and no-authority",
         ),
         _component(
             module="pr_quality_runtime_proof_artifacts",
-            role="summarize isolated proof, live benchmark, RepoMemory, and trusted accepted-main history evidence for PR Quality visibility",
+            role="summarize isolated proof, live benchmark, RepoMemory, trusted accepted-main history, and aggregate producer-vetted registry evidence for PR Quality visibility",
             status="aligned",
             stages=("proof", "benchmark", "history", "reporting"),
             existing_artifacts=(
@@ -226,7 +226,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 TRUSTED_HISTORY_EVIDENCE_MODULE,
                 "pr_quality_action_report",
             ),
-            recommended_next_action="keep runtime, benchmark, memory, and accepted-main history visibility reporting-only",
+            recommended_next_action="keep runtime, benchmark, memory, accepted-main history, and registry aggregate visibility reporting-only",
         ),
         _component(
             module=PR_QUALITY_LIVE_WORKSPACE_MODULE,
@@ -578,7 +578,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
                 "repo_memory",
             ),
-            recommended_next_action="keep trusted-main workflow population advisory-only and defer PR Quality visibility to a separate slice",
+            recommended_next_action="keep producer-vetted registry output advisory-only while exposing aggregate accepted-main context to PR Quality",
         ),
         _component(
             module=FLAKY_TEST_REGISTRY_EVIDENCE_MODULE,
@@ -595,7 +595,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "repo_memory",
                 "RepoMemory Profile History workflow",
             ),
-            recommended_next_action="keep trusted-main workflow population advisory-only and expose it to PR Quality only through a separate audited slice",
+            recommended_next_action="keep producer-vetted registry evidence aggregate-only and advisory-only in PR Quality",
         ),
         _component(
             module="repo_memory",
@@ -619,15 +619,12 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 TRUSTED_TEST_OBSERVATION_CAPTURE_MODULE,
                 TRUSTED_TEST_OBSERVATION_HISTORY_MODULE,
             ),
-            gaps=(
-                "successful network-isolation proof is unavailable until a backend is verified",
-                "PR Quality visibility remains unconnected",
-            ),
-            recommended_next_action="keep trusted-main registry population advisory-only while deferring PR Quality visibility",
+            gaps=("successful network-isolation proof is unavailable until a backend is verified",),
+            recommended_next_action="keep accepted-main aggregate registry visibility reporting-only while network-isolation proof remains unavailable",
         ),
         _component(
             module=REPO_MEMORY_PROFILE_HISTORY_MODULE,
-            role="record trusted-main RepoMemory profile snapshots through an immutable artifact history chain",
+            role="record trusted-main RepoMemory profile snapshots and aggregate producer-vetted registry context through an immutable artifact history chain",
             status="aligned",
             stages=("history", "reporting"),
             existing_artifacts=(
@@ -641,11 +638,11 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 TRUSTED_HISTORY_EVIDENCE_MODULE,
                 "RepoMemory Profile History workflow",
             ),
-            recommended_next_action="keep trusted-main history immutable and advisory-only",
+            recommended_next_action="keep trusted-main history immutable, aggregate-only, and advisory-only",
         ),
         _component(
             module=TRUSTED_HISTORY_EVIDENCE_MODULE,
-            role="validate successful accepted-main RepoMemory history artifacts for advisory PR Quality visibility",
+            role="validate successful accepted-main RepoMemory history artifacts and aggregate producer-vetted registry context for advisory PR Quality visibility",
             status="aligned",
             stages=("evidence", "history", "reporting"),
             existing_artifacts=(
@@ -658,7 +655,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "pr_quality_action_report",
                 "PR Quality workflow",
             ),
-            recommended_next_action="keep accepted-main history reporting-only and independent of merge authority",
+            recommended_next_action="keep accepted-main history and registry aggregate reporting-only and independent of merge authority",
         ),
     ]
 

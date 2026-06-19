@@ -15,6 +15,24 @@ from sdetkit.pr_comment_failure_families import render_comment_failure_families
 JsonObject = dict[str, Any]
 
 TRUSTED_HISTORY = "_".join(("trusted", "history"))
+FLAKY_TEST_REGISTRY_COLLECTION_STATUS = "_".join(
+    ("flaky", "test", "registry", "collection", "status")
+)
+FLAKY_TEST_REGISTRY_STATUS = "_".join(("flaky", "test", "registry", "status"))
+FLAKY_TEST_REGISTRY_ENTRY_COUNT = "_".join(("flaky", "test", "registry", "entry", "count"))
+FLAKY_TEST_REGISTRY_OBSERVATION_STATUS = "_".join(
+    ("flaky", "test", "registry", "observation", "status")
+)
+FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED = "_".join(
+    ("flaky", "test", "registry", "observations", "collected")
+)
+FLAKY_TEST_REGISTRY_PRODUCER_VETTED = "_".join(("flaky", "test", "registry", "producer", "vetted"))
+FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED = "_".join(
+    ("flaky", "test", "registry", "raw", "test", "identity", "emitted")
+)
+FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT = "_".join(
+    ("flaky", "test", "registry", "current", "pr", "decision", "input")
+)
 TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY = "_".join(
     ("trusted", "diagnostic", "signal", "snapshot", "history")
 )
@@ -910,6 +928,38 @@ def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) ->
                 (
                     "- Trusted history controlled validation authorizes current action: "
                     f"`{str(bool(trusted_history.get('controlled_validation_authorizes_current_action', False))).lower()}`"
+                ),
+                (
+                    "- Trusted history producer-vetted registry collection status: "
+                    f"`{_string(trusted_history.get(FLAKY_TEST_REGISTRY_COLLECTION_STATUS) or 'not_collected')}`"
+                ),
+                (
+                    "- Trusted history producer-vetted registry status: "
+                    f"`{_string(trusted_history.get(FLAKY_TEST_REGISTRY_STATUS) or 'not_collected')}`"
+                ),
+                (
+                    "- Trusted history producer-vetted registry aggregate entries: "
+                    f"`{_int(trusted_history.get(FLAKY_TEST_REGISTRY_ENTRY_COUNT))}`"
+                ),
+                (
+                    "- Trusted history producer-vetted registry observation status: "
+                    f"`{_string(trusted_history.get(FLAKY_TEST_REGISTRY_OBSERVATION_STATUS) or 'not_collected')}`"
+                ),
+                (
+                    "- Trusted history producer-vetted observations collected: "
+                    f"`{str(bool(trusted_history.get(FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED, False))).lower()}`"
+                ),
+                (
+                    "- Trusted history producer-vetted registry producer vetted: "
+                    f"`{str(bool(trusted_history.get(FLAKY_TEST_REGISTRY_PRODUCER_VETTED, False))).lower()}`"
+                ),
+                (
+                    "- Trusted history producer-vetted registry raw test identity emitted: "
+                    f"`{str(bool(trusted_history.get(FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED, False))).lower()}`"
+                ),
+                (
+                    "- Trusted history producer-vetted registry current PR decision input: "
+                    f"`{str(bool(trusted_history.get(FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT, False))).lower()}`"
                 ),
                 (
                     "- Automation allowed by trusted history: "

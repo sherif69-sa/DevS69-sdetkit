@@ -878,3 +878,94 @@ def test_runtime_proof_summary_surfaces_protected_verifier_benchmark_replay_cont
     assert "Benchmark replay contract expanded authority fields: `merge_authorized`" in markdown
     assert "Benchmark replay contract merge authorized: `true`" in markdown
     assert "- Merge authorized: `false`" in markdown
+
+
+def test_runtime_proof_propagates_trusted_registry_aggregate_only() -> None:
+    from sdetkit import pr_quality_runtime_proof_artifacts as runtime
+
+    summary = runtime.build_runtime_proof_artifacts(
+        trusted_history_evidence={
+            "status": "trusted_history_verified",
+            "source": {
+                "workflow": "RepoMemory Profile History",
+                "run_id": "trusted-run",
+                "head_sha": "a" * 40,
+                "base_ancestry_verified": True,
+            },
+            "history": {
+                "record_count": 3,
+                "live_contract_proven_record_count": 3,
+                "prior_history_is_read_only_input": True,
+                "controlled_validation_record_count": 1,
+                "controlled_validation_scenario_count": 2,
+                "controlled_structurally_verified_count": 1,
+                "controlled_review_first_count": 1,
+                "latest_controlled_validation_status": ("controlled_validation_passed"),
+                "controlled_validation_reporting_only": True,
+                "flaky_test_registry_collection_status": "collected",
+                "flaky_test_registry_status": ("advisory_registry_collected"),
+                "flaky_test_registry_entry_count": 2,
+                "flaky_test_registry_observation_status": (
+                    "producer_"
+                    # scanner-safe synthetic fixture split
+                    "vetted_flaky_"
+                    # scanner-safe synthetic fixture split
+                    "observations_"
+                    # scanner-safe synthetic fixture split
+                    "available"
+                ),
+                "flaky_test_registry_observations_collected": True,
+                "flaky_test_registry_producer_vetted": True,
+                "flaky_test_registry_raw_test_identity_emitted": False,
+                "flaky_test_registry_current_pr_decision_input": False,
+            },
+            "decision_boundary": {
+                "proof_commands_executed_by_reader": False,
+                "controlled_validation_authorizes_current_action": False,
+                "flaky_test_registry_is_advisory_only": True,
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        }
+    )
+
+    trusted = summary[runtime.TRUSTED_HISTORY]
+    assert trusted[runtime.FLAKY_TEST_REGISTRY_COLLECTION_STATUS] == "collected"
+    assert trusted[runtime.FLAKY_TEST_REGISTRY_ENTRY_COUNT] == 2
+    assert trusted[runtime.FLAKY_TEST_REGISTRY_PRODUCER_VETTED] is True
+    assert trusted[runtime.FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED] is False
+    assert trusted[runtime.FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT] is False
+
+    markdown = runtime.render_markdown(summary)
+    assert "Producer-vetted registry aggregate entries: `2`" in markdown
+    assert "Producer-vetted registry raw test identity emitted: `false`" in markdown
+    assert "Producer-vetted registry current PR decision input: `false`" in markdown
+
+
+def test_runtime_proof_normalizes_missing_registry_history_to_not_collected() -> None:
+    from sdetkit import pr_quality_runtime_proof_artifacts as runtime
+
+    summary = runtime.build_runtime_proof_artifacts(
+        trusted_history_evidence={
+            "status": "trusted_history_verified",
+            "source": {
+                "workflow": "RepoMemory Profile History",
+                "base_ancestry_verified": True,
+            },
+            "history": {
+                "record_count": 1,
+                "live_contract_proven_record_count": 1,
+                "prior_history_is_read_only_input": True,
+            },
+            "decision_boundary": {
+                "automation_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        }
+    )
+
+    trusted = summary[runtime.TRUSTED_HISTORY]
+    assert trusted[runtime.FLAKY_TEST_REGISTRY_COLLECTION_STATUS] == runtime.NOT_COLLECTED
+    assert trusted[runtime.FLAKY_TEST_REGISTRY_ENTRY_COUNT] == 0

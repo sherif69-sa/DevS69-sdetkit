@@ -7,6 +7,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from sdetkit import repo_memory_profile_history as history_model
 from sdetkit.repo_memory_profile_history import (
     AUTOMATION_ALLOWED,
     CONTROLLED_REVIEW_FIRST_COUNT,
@@ -33,6 +34,20 @@ PRIOR_HISTORY_READ_ONLY = "_".join(("prior", "history", "is", "read", "only", "i
 LIVE_PROVEN_RECORD_COUNT = "_".join(("live", "contract", "proven", "record", "count"))
 ANTI_CHEAT_REJECTION_COUNT = "_".join(("anti", "cheat", "rejection", "scenario", "count"))
 SOURCE_WORKFLOW = "RepoMemory Profile History"
+FLAKY_TEST_REGISTRY_COLLECTION_STATUS = history_model.FLAKY_TEST_REGISTRY_COLLECTION_STATUS
+FLAKY_TEST_REGISTRY_STATUS = history_model.FLAKY_TEST_REGISTRY_STATUS
+FLAKY_TEST_REGISTRY_ENTRY_COUNT = history_model.FLAKY_TEST_REGISTRY_ENTRY_COUNT
+FLAKY_TEST_REGISTRY_OBSERVATION_STATUS = history_model.FLAKY_TEST_REGISTRY_OBSERVATION_STATUS
+FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED = (
+    history_model.FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED
+)
+FLAKY_TEST_REGISTRY_PRODUCER_VETTED = history_model.FLAKY_TEST_REGISTRY_PRODUCER_VETTED
+FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED = (
+    history_model.FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED
+)
+FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT = (
+    history_model.FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT
+)
 
 JsonObject = dict[str, Any]
 
@@ -202,6 +217,23 @@ def build_trusted_history_evidence(
     if controlled_records and not _bool(boundary.get("controlled_validation_is_advisory_only")):
         raise ValueError("trusted history controlled validation is not marked advisory only")
 
+    registry = history_model.flaky_test_registry_record_summary(last)
+    for key in history_model.FLAKY_TEST_REGISTRY_FIELDS:
+        if payload.get(key) != registry[key]:
+            raise ValueError(
+                "trusted history flaky-test registry summary does not match latest JSONL record"
+            )
+        if latest.get(key) != registry[key]:
+            raise ValueError(
+                "trusted history latest flaky-test registry summary does not match JSONL record"
+            )
+    if not _bool(boundary.get("flaky_test_registry_is_advisory_only")):
+        raise ValueError("trusted history flaky-test registry is not marked advisory only")
+    if _bool(boundary.get(FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT)):
+        raise ValueError(
+            "trusted history flaky-test registry cannot influence a current PR decision"
+        )
+
     return {
         "schema_version": SCHEMA_VERSION,
         "collection_status": COLLECTED,
@@ -230,8 +262,9 @@ def build_trusted_history_evidence(
                 CONTROLLED_STRUCTURALLY_VERIFIED_COUNT
             ],
             CONTROLLED_REVIEW_FIRST_COUNT: controlled_expectations[CONTROLLED_REVIEW_FIRST_COUNT],
-            "latest_controlled_validation_status": record_controlled_status,
+            "latest_controlled_validation_status": (record_controlled_status),
             "controlled_validation_reporting_only": True,
+            **registry,
         },
         "decision_boundary": {
             "reporting_only": True,
@@ -240,6 +273,8 @@ def build_trusted_history_evidence(
             MERGE_AUTHORIZED: False,
             SEMANTIC_EQUIVALENCE_PROVEN: False,
             "controlled_validation_authorizes_current_action": False,
+            "flaky_test_registry_is_advisory_only": True,
+            FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT: False,
         },
     }
 
@@ -256,7 +291,7 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
             f"- Status: `{_string(evidence.get('status'))}`",
             f"- Source workflow: `{_string(source.get('workflow'))}`",
             f"- Source run id: `{_string(source.get('run_id'))}`",
-            f"- Latest accepted main head: `{_string(history.get('latest_accepted_main_head'))}`",
+            (f"- Latest accepted main head: `{_string(history.get('latest_accepted_main_head'))}`"),
             (
                 "- Base ancestry verified: "
                 f"`{str(_bool(source.get('base_ancestry_verified'))).lower()}`"
@@ -295,6 +330,35 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
                 f"`{str(_bool(history.get('controlled_validation_reporting_only'))).lower()}`"
             ),
             "",
+            "## Producer-vetted flaky-test registry",
+            "",
+            (
+                "- Collection status: "
+                f"`{_string(history.get(FLAKY_TEST_REGISTRY_COLLECTION_STATUS))}`"
+            ),
+            (f"- Status: `{_string(history.get(FLAKY_TEST_REGISTRY_STATUS))}`"),
+            (f"- Aggregate entry count: `{_int(history.get(FLAKY_TEST_REGISTRY_ENTRY_COUNT))}`"),
+            (
+                "- Observation status: "
+                f"`{_string(history.get(FLAKY_TEST_REGISTRY_OBSERVATION_STATUS))}`"
+            ),
+            (
+                "- Observations collected: "
+                f"`{str(_bool(history.get(FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED))).lower()}`"
+            ),
+            (
+                "- Producer vetted: "
+                f"`{str(_bool(history.get(FLAKY_TEST_REGISTRY_PRODUCER_VETTED))).lower()}`"
+            ),
+            (
+                "- Raw test identity emitted: "
+                f"`{str(_bool(history.get(FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED))).lower()}`"
+            ),
+            (
+                "- Current PR decision input: "
+                f"`{str(_bool(history.get(FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT))).lower()}`"
+            ),
+            "",
             "## Boundary",
             "",
             (
@@ -310,6 +374,10 @@ def render_markdown(evidence: Mapping[str, Any]) -> str:
             (
                 "- Controlled validation authorizes current action: "
                 f"`{str(_bool(boundary.get('controlled_validation_authorizes_current_action'))).lower()}`"
+            ),
+            (
+                "- Flaky-test registry is advisory only: "
+                f"`{str(_bool(boundary.get('flaky_test_registry_is_advisory_only'))).lower()}`"
             ),
             "",
         ]

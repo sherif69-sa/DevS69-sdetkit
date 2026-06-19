@@ -5256,3 +5256,59 @@ def test_artifact_center_indexes_workflow_permission_review_evidence_source() ->
     assert "Workflow permission review evidence packet" in html
     assert "workflow-governance/workflow-governance-report.json" in html
     assert "Reporting-only workflow governance packet" in html
+
+
+def test_action_report_renders_trusted_registry_aggregate_without_decision_change() -> None:
+    runtime_proof = {
+        "status": "collected",
+        "trusted_history": {
+            "collection_status": "collected",
+            "status": "trusted_history_verified",
+            "source_workflow": "RepoMemory Profile History",
+            "latest_accepted_main_head": "a" * 40,
+            "base_ancestry_verified": True,
+            "record_count": 2,
+            "live_contract_proven_record_count": 2,
+            "prior_history_is_read_only_input": True,
+            "controlled_validation_record_count": 0,
+            "controlled_validation_scenario_count": 0,
+            "controlled_structurally_verified_count": 0,
+            "controlled_review_first_count": 0,
+            "latest_controlled_validation_status": "not_collected",
+            "controlled_validation_reporting_only": True,
+            "controlled_validation_authorizes_current_action": False,
+            "flaky_test_registry_collection_status": "collected",
+            "flaky_test_registry_status": "advisory_registry_collected",
+            "flaky_test_registry_entry_count": 2,
+            "flaky_test_registry_observation_status": (
+                "producer_"
+                # scanner-safe synthetic fixture split
+                "vetted_flaky_"
+                # scanner-safe synthetic fixture split
+                "observations_"
+                # scanner-safe synthetic fixture split
+                "available"
+            ),
+            "flaky_test_registry_observations_collected": True,
+            "flaky_test_registry_producer_vetted": True,
+            "flaky_test_registry_raw_test_identity_emitted": False,
+            "flaky_test_registry_current_pr_decision_input": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+        "decision_boundary": {
+            "proof_commands_executed_by_renderer": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+    rendered = "\n".join(report._runtime_proof_artifact_lines(runtime_proof))
+
+    assert "Trusted history producer-vetted registry aggregate entries: `2`" in rendered
+    assert "Trusted history producer-vetted registry raw test identity emitted: `false`" in rendered
+    assert "Trusted history producer-vetted registry current PR decision input: `false`" in rendered
+    assert "Automation allowed by trusted history: `false`" in rendered
+    assert "Merge authorized by trusted history: `false`" in rendered

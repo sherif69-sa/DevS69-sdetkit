@@ -13,8 +13,11 @@ SCHEMA_VERSION = ".".join(("sdetkit", "repo", "memory", "profile", "history", "v
 LEGACY_RECORD_SCHEMA_VERSION = ".".join(
     ("sdetkit", "repo", "memory", "profile", "history", "record", "v1")
 )
-RECORD_SCHEMA_VERSION = ".".join(
+CONTROLLED_RECORD_SCHEMA_VERSION = ".".join(
     ("sdetkit", "repo", "memory", "profile", "history", "record", "v2")
+)
+RECORD_SCHEMA_VERSION = ".".join(
+    ("sdetkit", "repo", "memory", "profile", "history", "record", "v3")
 )
 DEFAULT_OUT_DIR = Path("build") / "repo-memory-history"
 SUMMARY_JSON = "repo-memory-history-summary.json"
@@ -45,6 +48,48 @@ CONTROLLED_REVIEW_FIRST_COUNT = "_".join(("controlled", "review", "first", "coun
 CONTROLLED_CURRENT_PR_DECISION_INPUT = "_".join(
     ("controlled", "current", "pr", "decision", "input")
 )
+NOT_COLLECTED = "_".join(("not", "collected"))
+NO_TEST_OBSERVATIONS = "_".join(("no", "test", "observations", "available"))
+PRODUCER_VETTED_OBSERVATIONS = "_".join(
+    ("producer", "vetted", "flaky", "observations", "available")
+)
+ADVISORY_REGISTRY_COLLECTED = "_".join(("advisory", "registry", "collected"))
+FLAKY_TEST_REGISTRY_COLLECTION_STATUS = "_".join(
+    ("flaky", "test", "registry", "collection", "status")
+)
+FLAKY_TEST_REGISTRY_STATUS = "_".join(("flaky", "test", "registry", "status"))
+FLAKY_TEST_REGISTRY_ENTRY_COUNT = "_".join(("flaky", "test", "registry", "entry", "count"))
+FLAKY_TEST_REGISTRY_OBSERVATION_STATUS = "_".join(
+    ("flaky", "test", "registry", "observation", "status")
+)
+FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED = "_".join(
+    ("flaky", "test", "registry", "observations", "collected")
+)
+FLAKY_TEST_REGISTRY_PRODUCER_VETTED = "_".join(("flaky", "test", "registry", "producer", "vetted"))
+FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED = "_".join(
+    ("flaky", "test", "registry", "raw", "test", "identity", "emitted")
+)
+FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT = "_".join(
+    ("flaky", "test", "registry", "current", "pr", "decision", "input")
+)
+FLAKY_TEST_REGISTRY_FIELDS = (
+    FLAKY_TEST_REGISTRY_COLLECTION_STATUS,
+    FLAKY_TEST_REGISTRY_STATUS,
+    FLAKY_TEST_REGISTRY_ENTRY_COUNT,
+    FLAKY_TEST_REGISTRY_OBSERVATION_STATUS,
+    FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED,
+    FLAKY_TEST_REGISTRY_PRODUCER_VETTED,
+    FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED,
+    FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT,
+)
+FORBIDDEN_FLAKY_TEST_REGISTRY_HISTORY_KEYS = {
+    "entries",
+    "test_id",
+    "classname",
+    "nodeid",
+    "test_fingerprint",
+    "observation_provenance",
+}
 
 JsonObject = dict[str, Any]
 
@@ -165,6 +210,169 @@ def _controlled_validation_observation(profile: Mapping[str, Any]) -> JsonObject
     }
 
 
+def _assert_no_raw_registry_identity(value: Any, *, source: str) -> None:
+    if isinstance(value, Mapping):
+        present = sorted(FORBIDDEN_FLAKY_TEST_REGISTRY_HISTORY_KEYS.intersection(value))
+        if present:
+            raise ValueError(
+                f"{source} cannot persist raw flaky-test identity: " + ", ".join(present)
+            )
+        for child in value.values():
+            _assert_no_raw_registry_identity(child, source=source)
+    elif isinstance(value, list):
+        for child in value:
+            _assert_no_raw_registry_identity(child, source=source)
+
+
+def _empty_flaky_test_registry_observation() -> JsonObject:
+    return {
+        FLAKY_TEST_REGISTRY_COLLECTION_STATUS: NOT_COLLECTED,
+        FLAKY_TEST_REGISTRY_STATUS: NOT_COLLECTED,
+        FLAKY_TEST_REGISTRY_ENTRY_COUNT: 0,
+        FLAKY_TEST_REGISTRY_OBSERVATION_STATUS: NOT_COLLECTED,
+        FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED: False,
+        FLAKY_TEST_REGISTRY_PRODUCER_VETTED: False,
+        FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED: False,
+        FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT: False,
+    }
+
+
+def _validate_flaky_test_registry_observation(
+    observation: Mapping[str, Any],
+    *,
+    source: str,
+) -> JsonObject:
+    normalized = {
+        FLAKY_TEST_REGISTRY_COLLECTION_STATUS: _text(
+            observation.get(FLAKY_TEST_REGISTRY_COLLECTION_STATUS)
+        ),
+        FLAKY_TEST_REGISTRY_STATUS: _text(observation.get(FLAKY_TEST_REGISTRY_STATUS)),
+        FLAKY_TEST_REGISTRY_ENTRY_COUNT: _int(observation.get(FLAKY_TEST_REGISTRY_ENTRY_COUNT)),
+        FLAKY_TEST_REGISTRY_OBSERVATION_STATUS: _text(
+            observation.get(FLAKY_TEST_REGISTRY_OBSERVATION_STATUS)
+        ),
+        FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED: _bool(
+            observation.get(FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED)
+        ),
+        FLAKY_TEST_REGISTRY_PRODUCER_VETTED: _bool(
+            observation.get(FLAKY_TEST_REGISTRY_PRODUCER_VETTED)
+        ),
+        FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED: _bool(
+            observation.get(FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED)
+        ),
+        FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT: _bool(
+            observation.get(FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT)
+        ),
+    }
+
+    if normalized[FLAKY_TEST_REGISTRY_ENTRY_COUNT] < 0:
+        raise ValueError(f"{source} entry count cannot be negative")
+    if normalized[FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED]:
+        raise ValueError(f"{source} cannot emit raw test identity")
+    if normalized[FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT]:
+        raise ValueError(f"{source} cannot influence a current PR decision")
+
+    collection_status = normalized[FLAKY_TEST_REGISTRY_COLLECTION_STATUS]
+    status = normalized[FLAKY_TEST_REGISTRY_STATUS]
+    observation_status = normalized[FLAKY_TEST_REGISTRY_OBSERVATION_STATUS]
+    entry_count = normalized[FLAKY_TEST_REGISTRY_ENTRY_COUNT]
+    observations_collected = normalized[FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED]
+    producer_vetted = normalized[FLAKY_TEST_REGISTRY_PRODUCER_VETTED]
+
+    if collection_status == NOT_COLLECTED:
+        expected = _empty_flaky_test_registry_observation()
+        if normalized != expected:
+            raise ValueError(f"{source} not-collected registry fields are inconsistent")
+        return expected
+
+    if collection_status != "collected":
+        raise ValueError(f"{source} collection status is not supported")
+    if status != ADVISORY_REGISTRY_COLLECTED:
+        raise ValueError(f"{source} status is not advisory_registry_collected")
+    if not producer_vetted:
+        raise ValueError(f"{source} must be producer-vetted")
+
+    if observation_status == NO_TEST_OBSERVATIONS:
+        if entry_count != 0 or observations_collected:
+            raise ValueError(f"{source} no-observation state cannot contain registry entries")
+    elif observation_status == PRODUCER_VETTED_OBSERVATIONS:
+        if entry_count < 1 or not observations_collected:
+            raise ValueError(f"{source} populated state requires producer-vetted observations")
+    else:
+        raise ValueError(f"{source} observation status is not supported")
+
+    return normalized
+
+
+def _flaky_test_registry_observation(profile: Mapping[str, Any]) -> JsonObject:
+    registry = _as_dict(profile.get("flaky_test_registry"))
+    if not registry:
+        return _empty_flaky_test_registry_observation()
+
+    collection_status = _text(registry.get("collection_status") or NOT_COLLECTED)
+    if collection_status == NOT_COLLECTED:
+        return _empty_flaky_test_registry_observation()
+
+    source = _as_dict(registry.get("source"))
+    boundary = _as_dict(registry.get("decision_boundary"))
+    _assert_no_authority(boundary, source="RepoMemory flaky-test registry")
+
+    if _text(source.get("kind")) != "trusted_main_artifact":
+        raise ValueError(
+            "RepoMemory history accepts only trusted-main flaky-test registry evidence"
+        )
+    if _text(source.get("identity_kind")) != "fingerprint_only":
+        raise ValueError("RepoMemory history requires fingerprint-only flaky-test identity")
+    if source.get("input_read_only") is not True:
+        raise ValueError("RepoMemory flaky-test registry input must be read-only")
+    if source.get("commands_executed_by_reader") is not False:
+        raise ValueError("RepoMemory flaky-test registry reader cannot execute commands")
+    if source.get("producer_vetted") is not True:
+        raise ValueError("RepoMemory flaky-test registry must be producer-vetted")
+    if source.get("raw_test_identity_emitted") is not False:
+        raise ValueError("RepoMemory flaky-test registry cannot emit raw test identity")
+    if boundary.get("current_pr_decision_input") is not False:
+        raise ValueError("RepoMemory flaky-test registry cannot influence a current PR decision")
+
+    return _validate_flaky_test_registry_observation(
+        {
+            FLAKY_TEST_REGISTRY_COLLECTION_STATUS: collection_status,
+            FLAKY_TEST_REGISTRY_STATUS: registry.get("status"),
+            FLAKY_TEST_REGISTRY_ENTRY_COUNT: registry.get("entry_count"),
+            FLAKY_TEST_REGISTRY_OBSERVATION_STATUS: source.get("observation_status"),
+            FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED: source.get("observations_collected"),
+            FLAKY_TEST_REGISTRY_PRODUCER_VETTED: source.get("producer_vetted"),
+            FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED: source.get("raw_test_identity_emitted"),
+            FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT: boundary.get(
+                "current_pr_decision_input"
+            ),
+        },
+        source="RepoMemory flaky-test registry",
+    )
+
+
+def flaky_test_registry_record_summary(
+    record: Mapping[str, Any],
+) -> JsonObject:
+    schema = _text(record.get("schema_version"))
+    if schema != RECORD_SCHEMA_VERSION:
+        return _empty_flaky_test_registry_observation()
+
+    missing = [key for key in FLAKY_TEST_REGISTRY_FIELDS if key not in record]
+    if missing:
+        raise ValueError(
+            "history v3 record is missing flaky-test registry fields: " + ", ".join(missing)
+        )
+    _assert_no_raw_registry_identity(
+        record,
+        source="RepoMemory history record",
+    )
+    return _validate_flaky_test_registry_observation(
+        {key: record.get(key) for key in FLAKY_TEST_REGISTRY_FIELDS},
+        source="RepoMemory history record",
+    )
+
+
 def validate_profile(profile: Mapping[str, Any]) -> None:
     if _text(profile.get("memory_mode")) != READ_ONLY_PROFILE_MODE:
         raise ValueError("RepoMemory profile must use read_only_profile memory mode")
@@ -173,12 +381,23 @@ def validate_profile(profile: Mapping[str, Any]) -> None:
         source="RepoMemory profile",
     )
     _controlled_validation_observation(profile)
+    _flaky_test_registry_observation(profile)
 
 
 def validate_record(record: Mapping[str, Any]) -> None:
     schema = _text(record.get("schema_version"))
-    if schema not in {LEGACY_RECORD_SCHEMA_VERSION, RECORD_SCHEMA_VERSION}:
+    supported = {
+        LEGACY_RECORD_SCHEMA_VERSION,
+        CONTROLLED_RECORD_SCHEMA_VERSION,
+        RECORD_SCHEMA_VERSION,
+    }
+    if schema not in supported:
         raise ValueError("history record schema is not supported")
+
+    _assert_no_raw_registry_identity(
+        record,
+        source="RepoMemory history record",
+    )
     _assert_no_authority(
         _as_dict(record.get("decision_boundary")),
         source="RepoMemory history record",
@@ -192,19 +411,27 @@ def validate_record(record: Mapping[str, Any]) -> None:
         CONTROLLED_REVIEW_FIRST_COUNT,
         CONTROLLED_CURRENT_PR_DECISION_INPUT,
     }
+    registry_keys = set(FLAKY_TEST_REGISTRY_FIELDS)
+
     if schema == LEGACY_RECORD_SCHEMA_VERSION:
-        if any(key in record for key in controlled_keys):
-            raise ValueError("legacy history record cannot carry controlled validation evidence")
+        if any(key in record for key in controlled_keys | registry_keys):
+            raise ValueError(
+                "legacy history record cannot carry controlled validation "
+                "or flaky-test registry evidence"
+            )
         return
 
-    status = _text(record.get(CONTROLLED_VALIDATION_STATUS) or "not_collected")
-    if status not in {"not_collected", CONTROLLED_VALIDATION_PASSED}:
+    if schema == CONTROLLED_RECORD_SCHEMA_VERSION and any(key in record for key in registry_keys):
+        raise ValueError("history v2 record cannot carry flaky-test registry evidence")
+
+    status = _text(record.get(CONTROLLED_VALIDATION_STATUS) or NOT_COLLECTED)
+    if status not in {NOT_COLLECTED, CONTROLLED_VALIDATION_PASSED}:
         raise ValueError("history record controlled validation status is not supported")
     if _bool(record.get(CONTROLLED_CURRENT_PR_DECISION_INPUT)):
         raise ValueError(
             "history record controlled validation cannot influence a current PR decision"
         )
-    if status == "not_collected":
+    if status == NOT_COLLECTED:
         if any(
             _int(record.get(key))
             for key in (
@@ -217,16 +444,18 @@ def validate_record(record: Mapping[str, Any]) -> None:
             raise ValueError(
                 "uncollected controlled validation record cannot carry scenario totals"
             )
-        return
+    else:
+        scenario_count = _int(record.get(CONTROLLED_VALIDATION_SCENARIO_COUNT))
+        if (
+            scenario_count < 2
+            or _int(record.get(CONTROLLED_VALIDATION_PASSED_COUNT)) != scenario_count
+            or _int(record.get(CONTROLLED_STRUCTURALLY_VERIFIED_COUNT)) < 1
+            or _int(record.get(CONTROLLED_REVIEW_FIRST_COUNT)) < 1
+        ):
+            raise ValueError("history record controlled validation totals are inconsistent")
 
-    scenario_count = _int(record.get(CONTROLLED_VALIDATION_SCENARIO_COUNT))
-    if (
-        scenario_count < 2
-        or _int(record.get(CONTROLLED_VALIDATION_PASSED_COUNT)) != scenario_count
-        or _int(record.get(CONTROLLED_STRUCTURALLY_VERIFIED_COUNT)) < 1
-        or _int(record.get(CONTROLLED_REVIEW_FIRST_COUNT)) < 1
-    ):
-        raise ValueError("history record controlled validation totals are inconsistent")
+    if schema == RECORD_SCHEMA_VERSION:
+        flaky_test_registry_record_summary(record)
 
 
 def build_history_record(
@@ -247,6 +476,7 @@ def build_history_record(
 
     provenance = _as_dict(profile.get("proof_provenance"))
     controlled = _controlled_validation_observation(profile)
+    flaky_registry = _flaky_test_registry_observation(profile)
     boundary = {
         AUTOMATION_ALLOWED: False,
         MERGE_AUTHORIZED: False,
@@ -279,6 +509,7 @@ def build_history_record(
         ),
         CONTROLLED_REVIEW_FIRST_COUNT: _int(controlled.get(CONTROLLED_REVIEW_FIRST_COUNT)),
         CONTROLLED_CURRENT_PR_DECISION_INPUT: False,
+        **flaky_registry,
         "decision_boundary": boundary,
     }
 
@@ -331,6 +562,11 @@ def build_history_summary(
 
     statuses = Counter(_text(item.get("profile_status")) for item in records)
     latest = dict(records[-1]) if records else {}
+    latest_registry = (
+        flaky_test_registry_record_summary(latest)
+        if latest
+        else _empty_flaky_test_registry_observation()
+    )
     live_records = [item for item in records if _bool(item.get(LIVE_CONTRACT_PROVEN))]
     controlled_records = [
         item
@@ -357,6 +593,7 @@ def build_history_summary(
         CONTROLLED_REVIEW_FIRST_COUNT: sum(
             _int(item.get(CONTROLLED_REVIEW_FIRST_COUNT)) for item in controlled_records
         ),
+        **latest_registry,
         "profile_status_counts": dict(sorted(statuses.items())),
         "known_safe_candidate_total": sum(
             _int(item.get("known_safe_candidate_count")) for item in records
@@ -374,7 +611,7 @@ def build_history_summary(
             "profile_status": _text(latest.get("profile_status")),
             LIVE_CONTRACT_PROVEN: _bool(latest.get(LIVE_CONTRACT_PROVEN)),
             CONTROLLED_VALIDATION_STATUS: _text(
-                latest.get(CONTROLLED_VALIDATION_STATUS) or "not_collected"
+                latest.get(CONTROLLED_VALIDATION_STATUS) or NOT_COLLECTED
             ),
             CONTROLLED_VALIDATION_SCENARIO_COUNT: _int(
                 latest.get(CONTROLLED_VALIDATION_SCENARIO_COUNT)
@@ -382,6 +619,7 @@ def build_history_summary(
             CONTROLLED_CURRENT_PR_DECISION_INPUT: _bool(
                 latest.get(CONTROLLED_CURRENT_PR_DECISION_INPUT)
             ),
+            **latest_registry,
         },
         "decision_boundary": {
             AUTOMATION_ALLOWED: False,
@@ -389,8 +627,11 @@ def build_history_summary(
             SEMANTIC_EQUIVALENCE_PROVEN: False,
             "prior_history_is_read_only_input": True,
             "controlled_validation_is_advisory_only": True,
+            "flaky_test_registry_is_advisory_only": True,
+            FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT: False,
             "reason": (
-                "RepoMemory profile history records proven read-only outcomes only; "
+                "RepoMemory profile history records proven read-only outcomes "
+                "and aggregate producer-vetted registry context only; "
                 "it does not authorize remediation."
             ),
         },
@@ -435,6 +676,23 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
             "- Controlled review-first scenario total: "
             f"`{_int(summary.get(CONTROLLED_REVIEW_FIRST_COUNT))}`"
         ),
+        (
+            "- Latest flaky registry collection status: "
+            f"`{_text(summary.get(FLAKY_TEST_REGISTRY_COLLECTION_STATUS))}`"
+        ),
+        (f"- Latest flaky registry status: `{_text(summary.get(FLAKY_TEST_REGISTRY_STATUS))}`"),
+        (
+            "- Latest flaky registry entries: "
+            f"`{_int(summary.get(FLAKY_TEST_REGISTRY_ENTRY_COUNT))}`"
+        ),
+        (
+            "- Latest flaky registry observation status: "
+            f"`{_text(summary.get(FLAKY_TEST_REGISTRY_OBSERVATION_STATUS))}`"
+        ),
+        (
+            "- Latest flaky observations collected: "
+            f"`{str(_bool(summary.get(FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED))).lower()}`"
+        ),
         "",
         "## Latest record",
         "",
@@ -445,7 +703,7 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
         (f"- Live contract proven: `{str(_bool(latest.get(LIVE_CONTRACT_PROVEN))).lower()}`"),
         (
             "- Controlled validation status: "
-            f"`{_text(latest.get(CONTROLLED_VALIDATION_STATUS) or 'not_collected')}`"
+            f"`{_text(latest.get(CONTROLLED_VALIDATION_STATUS) or NOT_COLLECTED)}`"
         ),
         (
             "- Controlled validation scenarios: "
@@ -454,6 +712,18 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
         (
             "- Controlled validation current PR decision input: "
             f"`{str(_bool(latest.get(CONTROLLED_CURRENT_PR_DECISION_INPUT))).lower()}`"
+        ),
+        (
+            "- Flaky registry producer vetted: "
+            f"`{str(_bool(latest.get(FLAKY_TEST_REGISTRY_PRODUCER_VETTED))).lower()}`"
+        ),
+        (
+            "- Flaky registry raw test identity emitted: "
+            f"`{str(_bool(latest.get(FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED))).lower()}`"
+        ),
+        (
+            "- Flaky registry current PR decision input: "
+            f"`{str(_bool(latest.get(FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT))).lower()}`"
         ),
         "",
         "## Boundary",
@@ -471,6 +741,10 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
         (
             "- Controlled validation is advisory only: "
             f"`{str(_bool(boundary.get('controlled_validation_is_advisory_only'))).lower()}`"
+        ),
+        (
+            "- Flaky-test registry is advisory only: "
+            f"`{str(_bool(boundary.get('flaky_test_registry_is_advisory_only'))).lower()}`"
         ),
         "- History executes proof commands: `false`",
         "",
