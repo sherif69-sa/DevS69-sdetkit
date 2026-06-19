@@ -218,16 +218,38 @@ def build_trusted_history_evidence(
         raise ValueError("trusted history controlled validation is not marked advisory only")
 
     registry = history_model.flaky_test_registry_record_summary(last)
+    record_schema = _string(last.get("schema_version"))
+    legacy_registry_contract = record_schema != history_model.RECORD_SCHEMA_VERSION
     for key in history_model.FLAKY_TEST_REGISTRY_FIELDS:
-        if payload.get(key) != registry[key]:
+        if legacy_registry_contract:
+            summary_value = payload.get(key, registry[key])
+            latest_value = latest.get(key, registry[key])
+        else:
+            if key not in payload:
+                raise ValueError(
+                    "trusted history flaky-test registry summary does not match latest JSONL record"
+                )
+            if key not in latest:
+                raise ValueError(
+                    "trusted history latest flaky-test registry summary does not match JSONL record"
+                )
+            summary_value = payload.get(key)
+            latest_value = latest.get(key)
+
+        if summary_value != registry[key]:
             raise ValueError(
                 "trusted history flaky-test registry summary does not match latest JSONL record"
             )
-        if latest.get(key) != registry[key]:
+        if latest_value != registry[key]:
             raise ValueError(
                 "trusted history latest flaky-test registry summary does not match JSONL record"
             )
-    if not _bool(boundary.get("flaky_test_registry_is_advisory_only")):
+
+    registry_advisory_only = boundary.get("flaky_test_registry_is_advisory_only")
+    if legacy_registry_contract:
+        if registry_advisory_only is not None and registry_advisory_only is not True:
+            raise ValueError("trusted history flaky-test registry is not marked advisory only")
+    elif registry_advisory_only is not True:
         raise ValueError("trusted history flaky-test registry is not marked advisory only")
     if _bool(boundary.get(FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT)):
         raise ValueError(

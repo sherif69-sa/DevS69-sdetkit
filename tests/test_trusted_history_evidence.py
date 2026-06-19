@@ -541,3 +541,183 @@ def test_trusted_history_rejects_forged_registry_summary(
             base_sha=base_head,
             base_ancestry_verified=True,
         )
+
+
+def _legacy_v2_history_artifact(
+    tmp_path: Path,
+    *,
+    run_id: str,
+    head_sha: str,
+) -> tuple[dict, dict]:
+    from sdetkit import repo_memory_profile_history as history_model
+
+    record = build_history_record(
+        _controlled_profile(),
+        source_run_id=run_id,
+        source_head_sha=head_sha,
+    )
+    record["schema_version"] = history_model.CONTROLLED_RECORD_SCHEMA_VERSION
+    for key in history_model.FLAKY_TEST_REGISTRY_FIELDS:
+        record.pop(key, None)
+
+    history_path = write_history_jsonl([record], out_dir=tmp_path)
+    summary = build_history_summary(
+        [record],
+        appended=True,
+        history_path=history_path,
+        prior_history_collected=False,
+        prior_record_count=0,
+    )
+    for key in history_model.FLAKY_TEST_REGISTRY_FIELDS:
+        summary.pop(key, None)
+        summary["latest_record"].pop(key, None)
+    summary["decision_boundary"].pop(
+        "flaky_test_registry_is_advisory_only",
+        None,
+    )
+    return summary, record
+
+
+def test_trusted_history_accepts_legacy_v2_summary_without_registry_fields(
+    tmp_path: Path,
+) -> None:
+    from sdetkit import repo_memory_profile_history as history_model
+
+    _repo, accepted_head, base_head = _git_repo(tmp_path)
+    summary, record = _legacy_v2_history_artifact(
+        tmp_path,
+        run_id="trusted-v2",
+        head_sha=accepted_head,
+    )
+
+    evidence = build_trusted_history_evidence(
+        summary=summary,
+        records=[record],
+        selected_run_id="trusted-v2",
+        selected_head_sha=accepted_head,
+        base_sha=base_head,
+        base_ancestry_verified=True,
+    )
+
+    history = evidence["history"]
+    expected_empty = {
+        history_model.FLAKY_TEST_REGISTRY_COLLECTION_STATUS: "not_collected",
+        history_model.FLAKY_TEST_REGISTRY_STATUS: "not_collected",
+        history_model.FLAKY_TEST_REGISTRY_ENTRY_COUNT: 0,
+        history_model.FLAKY_TEST_REGISTRY_OBSERVATION_STATUS: "not_collected",
+        history_model.FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED: False,
+        history_model.FLAKY_TEST_REGISTRY_PRODUCER_VETTED: False,
+        history_model.FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED: False,
+        history_model.FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT: False,
+    }
+    for key, expected in expected_empty.items():
+        assert history[key] == expected
+
+    assert evidence["decision_boundary"]["flaky_test_registry_is_advisory_only"] is True
+    assert (
+        evidence["decision_boundary"][history_model.FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT]
+        is False
+    )
+
+    serialized = json.dumps(evidence, sort_keys=True)
+    for forbidden_key in (
+        '"entries"',
+        '"test_id"',
+        '"classname"',
+        '"nodeid"',
+        '"test_fingerprint"',
+        '"observation_provenance"',
+    ):
+        assert forbidden_key not in serialized
+
+
+def test_trusted_history_rejects_legacy_v2_false_registry_advisory_marker(
+    tmp_path: Path,
+) -> None:
+    _repo, accepted_head, base_head = _git_repo(tmp_path)
+    summary, record = _legacy_v2_history_artifact(
+        tmp_path,
+        run_id="trusted-v2",
+        head_sha=accepted_head,
+    )
+    summary["decision_boundary"]["flaky_test_registry_is_advisory_only"] = False
+
+    with pytest.raises(ValueError, match="not marked advisory only"):
+        build_trusted_history_evidence(
+            summary=summary,
+            records=[record],
+            selected_run_id="trusted-v2",
+            selected_head_sha=accepted_head,
+            base_sha=base_head,
+            base_ancestry_verified=True,
+        )
+
+
+def test_trusted_history_rejects_v3_missing_registry_summary_key(
+    tmp_path: Path,
+) -> None:
+    from sdetkit import repo_memory_profile_history as history_model
+
+    _repo, accepted_head, base_head = _git_repo(tmp_path)
+    record = build_history_record(
+        _producer_vetted_history_profile(),
+        source_run_id="trusted-registry-run",
+        source_head_sha=accepted_head,
+    )
+    history_path = write_history_jsonl([record], out_dir=tmp_path)
+    summary = build_history_summary(
+        [record],
+        appended=True,
+        history_path=history_path,
+        prior_history_collected=False,
+        prior_record_count=0,
+    )
+    summary.pop(history_model.FLAKY_TEST_REGISTRY_ENTRY_COUNT)
+
+    with pytest.raises(
+        ValueError,
+        match="flaky-test registry summary does not match",
+    ):
+        build_trusted_history_evidence(
+            summary=summary,
+            records=[record],
+            selected_run_id="trusted-registry-run",
+            selected_head_sha=accepted_head,
+            base_sha=base_head,
+            base_ancestry_verified=True,
+        )
+
+
+def test_trusted_history_rejects_v3_missing_latest_registry_key(
+    tmp_path: Path,
+) -> None:
+    from sdetkit import repo_memory_profile_history as history_model
+
+    _repo, accepted_head, base_head = _git_repo(tmp_path)
+    record = build_history_record(
+        _producer_vetted_history_profile(),
+        source_run_id="trusted-registry-run",
+        source_head_sha=accepted_head,
+    )
+    history_path = write_history_jsonl([record], out_dir=tmp_path)
+    summary = build_history_summary(
+        [record],
+        appended=True,
+        history_path=history_path,
+        prior_history_collected=False,
+        prior_record_count=0,
+    )
+    summary["latest_record"].pop(history_model.FLAKY_TEST_REGISTRY_ENTRY_COUNT)
+
+    with pytest.raises(
+        ValueError,
+        match="latest flaky-test registry summary does not match",
+    ):
+        build_trusted_history_evidence(
+            summary=summary,
+            records=[record],
+            selected_run_id="trusted-registry-run",
+            selected_head_sha=accepted_head,
+            base_sha=base_head,
+            base_ancestry_verified=True,
+        )
