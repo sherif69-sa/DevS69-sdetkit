@@ -12,7 +12,11 @@ from sdetkit.diagnostic_job import build_diagnostic_job, run_diagnostic_worker
 from sdetkit.diagnostic_worker_trajectory import build_worker_trajectory_records
 from sdetkit.git_inventory_collector import STAGED_WORKTREE
 from sdetkit.isolated_proof_runner import INVENTORY_CLAIM_MATCH, run_isolated_proof
-from sdetkit.network_boundary import NETWORK_ISOLATION_ENFORCED, NETWORK_ISOLATION_REQUIRED
+from sdetkit.network_boundary import (
+    NETWORK_ISOLATION_ENFORCED,
+    NETWORK_ISOLATION_REQUIRED,
+    build_blocked_network_probe_report,
+)
 from sdetkit.patch_scorer import score_patch
 from sdetkit.protected_verifier import verify_candidate
 
@@ -26,6 +30,9 @@ INVENTORY_CLAIM_MISMATCH_FAIL = "_".join(("inventory", "claim", "mismatch", "fai
 PROOF_MUTATION_FAIL = "_".join(("proof", "mutation", "fail"))
 NETWORK_BOUNDARY_REQUIRED_FAIL = "_".join(("network", "boundary", "required", "fail"))
 NETWORK_BOUNDARY_BLOCKED_COUNT = "_".join(("network", "boundary", "blocked", "count"))
+NETWORK_BACKEND_CONTRACT_SCHEMA_VERSION = (
+    "sdetkit.replayable_benchmark_harness.network_backend_contract.v1"
+)
 UNCLAIMED_WRITE_FAIL = "_".join(("unclaimed", "write", "fail"))
 EVIDENCE_SHADOW_FAIL = "_".join(("evidence", "shadow", "fail"))
 ANTI_CHEAT_REJECTION_COUNT = "_".join(("anti", "cheat", "rejection", "count"))
@@ -334,6 +341,109 @@ def _aggregate_runtime_proof_protected_verifier_contract_evidence(
     }
 
 
+def build_network_backend_contract_report(
+    verification_evidence: Mapping[str, Any],
+) -> JsonObject:
+    evidence = _as_dict(verification_evidence)
+    isolation = _as_dict(evidence.get("isolation"))
+    boundary = _as_dict(evidence.get("decision_boundary"))
+    network = _as_dict(evidence.get("network_boundary"))
+    summary = _as_dict(evidence.get("proof_summary"))
+
+    authority_expansion = sorted(
+        key
+        for key in (
+            "automation_allowed",
+            "merge_authorized",
+            "semantic_equivalence_proven",
+        )
+        if _bool(boundary.get(key))
+    )
+    required = _bool(isolation.get(NETWORK_ISOLATION_REQUIRED))
+    enforced = _bool(isolation.get(NETWORK_ISOLATION_ENFORCED))
+    verified = _bool(boundary.get("network_isolation_verified"))
+    all_wrapped = _bool(isolation.get("all_profiles_network_wrapped"))
+    executed_count = _int(summary.get("executed_count"))
+    wrapped_count = _int(isolation.get("network_backend_command_wrapped_count"))
+    narrow_scope = not _bool(
+        _as_dict(evidence.get("runtime_guard")).get("external_filesystem_containment_enforced")
+    ) and not _bool(
+        _as_dict(evidence.get("runtime_guard")).get("process_escape_prevention_enforced")
+    )
+    passed = (
+        _string(evidence.get("status")) == "passed"
+        and required
+        and enforced
+        and verified
+        and all_wrapped
+        and executed_count >= 1
+        and wrapped_count == executed_count
+        and _bool(network.get("backend_verified"))
+        and not authority_expansion
+        and narrow_scope
+    )
+    return {
+        "schema_version": NETWORK_BACKEND_CONTRACT_SCHEMA_VERSION,
+        "status": "passed" if passed else "failed",
+        "source": "isolated_proof_runner.network_boundary",
+        "backend": _string(network.get("backend")),
+        "backend_variant": _string(network.get("backend_variant")),
+        "backend_verified": _bool(network.get("backend_verified")),
+        NETWORK_ISOLATION_REQUIRED: required,
+        NETWORK_ISOLATION_ENFORCED: enforced,
+        "network_isolation_verified": verified,
+        "all_profiles_network_wrapped": all_wrapped,
+        "executed_count": executed_count,
+        "wrapped_count": wrapped_count,
+        "network_isolation_scope_only": narrow_scope,
+        "external_filesystem_containment_enforced": False,
+        "process_escape_prevention_enforced": False,
+        "expanded_authority_fields": authority_expansion,
+        "reporting_only": True,
+        "decision_boundary": {
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+
+def render_network_backend_contract_markdown(
+    report: Mapping[str, Any],
+) -> str:
+    boundary = _as_dict(report.get("decision_boundary"))
+    expanded = _string_list(report.get("expanded_authority_fields"))
+    return "\n".join(
+        [
+            "# Network backend contract replay",
+            "",
+            f"- Status: `{_string(report.get('status'))}`",
+            f"- Backend: `{_string(report.get('backend'))}`",
+            f"- Backend variant: `{_string(report.get('backend_variant'))}`",
+            (f"- Backend verified: `{str(_bool(report.get('backend_verified'))).lower()}`"),
+            (
+                "- Network isolation enforced: "
+                f"`{str(_bool(report.get(NETWORK_ISOLATION_ENFORCED))).lower()}`"
+            ),
+            (
+                "- All profiles network wrapped: "
+                f"`{str(_bool(report.get('all_profiles_network_wrapped'))).lower()}`"
+            ),
+            "- External filesystem containment enforced: `false`",
+            "- Process escape prevention enforced: `false`",
+            (f"- Expanded authority fields: `{', '.join(expanded) if expanded else 'none'}`"),
+            (f"- Automation allowed: `{str(_bool(boundary.get('automation_allowed'))).lower()}`"),
+            (f"- Merge authorized: `{str(_bool(boundary.get('merge_authorized'))).lower()}`"),
+            (
+                "- Semantic equivalence proven: "
+                f"`{str(_bool(boundary.get('semantic_equivalence_proven'))).lower()}`"
+            ),
+            "",
+        ]
+    )
+
+
 def load_scenarios(paths: list[Path]) -> list[JsonObject]:
     scenarios: list[JsonObject] = []
     identifiers: set[str] = set()
@@ -640,6 +750,11 @@ def evaluate_isolated_evidence_scenario(
             "git_inventory_verified, and inventory_claim_match"
         )
 
+    blocked_network_probe_report = (
+        build_blocked_network_probe_report()
+        if scenario_type == NETWORK_BOUNDARY_REQUIRED_FAIL
+        else None
+    )
     evidence = run_isolated_proof(
         repo_root=repo_root,
         changed_files=claimed_files,
@@ -649,6 +764,7 @@ def evaluate_isolated_evidence_scenario(
         base_ref=_string(runtime.get("base_ref")),
         head_ref=_string(runtime.get("head_ref") or "HEAD"),
         require_network_isolation=_bool(runtime.get("require_network_isolation")),
+        blocked_network_probe_report=blocked_network_probe_report,
     )
     result = evaluate_scenario(
         scenario,
