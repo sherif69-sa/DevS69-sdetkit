@@ -15,6 +15,7 @@ from sdetkit.repo_memory_profile_history import (
     CONTROLLED_VALIDATION_RECORD_COUNT,
     CONTROLLED_VALIDATION_SCENARIO_COUNT,
     CONTROLLED_VALIDATION_STATUS,
+    FLAKY_TEST_REGISTRY_FIELDS,
     HISTORY_JSONL,
     LEGACY_RECORD_SCHEMA_VERSION,
     LIVE_CONTRACT_PROVEN,
@@ -303,6 +304,7 @@ def test_history_imports_legacy_record_as_zero_controlled_validation_evidence(
         CONTROLLED_STRUCTURALLY_VERIFIED_COUNT,
         CONTROLLED_REVIEW_FIRST_COUNT,
         CONTROLLED_CURRENT_PR_DECISION_INPUT,
+        *FLAKY_TEST_REGISTRY_FIELDS,
     ):
         legacy.pop(key, None)
 
@@ -335,4 +337,172 @@ def test_history_rejects_controlled_profile_that_claims_current_pr_influence() -
             profile,
             source_run_id="run-bad",
             source_head_sha="bad123",
+        )
+
+
+def _producer_vetted_registry_profile() -> dict:
+    profile = _profile()
+    profile["flaky_test_registry"] = {
+        "collection_status": "collected",
+        "status": "advisory_registry_collected",
+        "source": {
+            "kind": "trusted_main_artifact",
+            "reference": "producer-output.json",
+            "classification_schema": ("sdetkit.trusted_test_observation_classification.v1"),
+            "input_read_only": True,
+            "commands_executed_by_reader": False,
+            "workflow": "RepoMemory Profile History",
+            "run_id": "trusted-run-7",
+            "head_sha": "a" * 40,
+            "observation_status": (
+                "producer_"
+                # scanner-safe synthetic fixture split
+                "vetted_flaky_"
+                # scanner-safe synthetic fixture split
+                "observations_"
+                # scanner-safe synthetic fixture split
+                "available"
+            ),
+            "observations_collected": True,
+            "identity_kind": "fingerprint_only",
+            "producer_vetted": True,
+            "raw_test_identity_emitted": False,
+        },
+        "entries": [
+            {
+                "test_fingerprint": "b" * 64,
+                "observation_provenance": [
+                    {
+                        "source_run_id": "run-1",
+                        "source_head_sha": "c" * 40,
+                        "outcome": "passed",
+                    },
+                    {
+                        "source_run_id": "run-2",
+                        "source_head_sha": "d" * 40,
+                        "outcome": "failed",
+                    },
+                ],
+            }
+        ],
+        "entry_count": 1,
+        "decision_boundary": {
+            "automatic_quarantine_allowed": False,
+            "automatic_rerun_allowed": False,
+            "current_failure_suppression_allowed": False,
+            "current_pr_decision_input": False,
+            "patch_application_allowed": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+    return profile
+
+
+def test_history_v3_persists_producer_vetted_registry_aggregate_only(
+    tmp_path: Path,
+) -> None:
+    from sdetkit import repo_memory_profile_history as history
+
+    record = history.build_history_record(
+        _producer_vetted_registry_profile(),
+        source_run_id="trusted-run-7",
+        source_head_sha="a" * 40,
+        recorded_at_utc="2026-06-19T00:00:00Z",
+    )
+    history_path = history.write_history_jsonl([record], out_dir=tmp_path)
+    summary = history.build_history_summary(
+        [record],
+        appended=True,
+        history_path=history_path,
+        prior_history_collected=False,
+        prior_record_count=0,
+    )
+
+    assert record["schema_version"] == history.RECORD_SCHEMA_VERSION
+    assert record[history.FLAKY_TEST_REGISTRY_COLLECTION_STATUS] == "collected"
+    assert record[history.FLAKY_TEST_REGISTRY_ENTRY_COUNT] == 1
+    assert record[history.FLAKY_TEST_REGISTRY_OBSERVATION_STATUS] == (
+        "producer_"
+        # scanner-safe synthetic fixture split
+        "vetted_flaky_"
+        # scanner-safe synthetic fixture split
+        "observations_"
+        # scanner-safe synthetic fixture split
+        "available"
+    )
+    assert record[history.FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED] is True
+    assert record[history.FLAKY_TEST_REGISTRY_PRODUCER_VETTED] is True
+    assert record[history.FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED] is False
+    assert record[history.FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT] is False
+
+    serialized = json.dumps(record, sort_keys=True)
+    for forbidden_key in (
+        '"entries"',
+        '"test_id"',
+        '"classname"',
+        '"nodeid"',
+        '"test_fingerprint"',
+        '"observation_provenance"',
+    ):
+        assert forbidden_key not in serialized
+
+    assert summary[history.FLAKY_TEST_REGISTRY_ENTRY_COUNT] == 1
+    assert summary["latest_record"][history.FLAKY_TEST_REGISTRY_PRODUCER_VETTED] is True
+    assert summary["decision_boundary"]["flaky_test_registry_is_advisory_only"] is True
+
+    markdown = history.render_markdown(summary)
+    assert "Latest flaky registry entries: `1`" in markdown
+    assert "Flaky registry producer vetted: `true`" in markdown
+    assert "Flaky registry raw test identity emitted: `false`" in markdown
+    assert "Flaky registry current PR decision input: `false`" in markdown
+
+
+def test_history_v1_v2_records_normalize_registry_to_not_collected() -> None:
+    from sdetkit import repo_memory_profile_history as history
+
+    v1 = _record("legacy-v1", "legacy-v1-head")
+    v1["schema_version"] = history.LEGACY_RECORD_SCHEMA_VERSION
+    for key in (
+        history.CONTROLLED_VALIDATION_STATUS,
+        history.CONTROLLED_VALIDATION_SCENARIO_COUNT,
+        history.CONTROLLED_VALIDATION_PASSED_COUNT,
+        history.CONTROLLED_STRUCTURALLY_VERIFIED_COUNT,
+        history.CONTROLLED_REVIEW_FIRST_COUNT,
+        history.CONTROLLED_CURRENT_PR_DECISION_INPUT,
+        *history.FLAKY_TEST_REGISTRY_FIELDS,
+    ):
+        v1.pop(key, None)
+
+    v2 = _record("legacy-v2", "legacy-v2-head")
+    v2["schema_version"] = history.CONTROLLED_RECORD_SCHEMA_VERSION
+    for key in history.FLAKY_TEST_REGISTRY_FIELDS:
+        v2.pop(key, None)
+
+    history.validate_record(v1)
+    history.validate_record(v2)
+
+    assert (
+        history.flaky_test_registry_record_summary(v1)[
+            history.FLAKY_TEST_REGISTRY_COLLECTION_STATUS
+        ]
+        == history.NOT_COLLECTED
+    )
+    assert (
+        history.flaky_test_registry_record_summary(v2)[history.FLAKY_TEST_REGISTRY_ENTRY_COUNT] == 0
+    )
+
+
+def test_history_rejects_registry_that_claims_current_pr_influence() -> None:
+    from sdetkit import repo_memory_profile_history as history
+
+    profile = _producer_vetted_registry_profile()
+    profile["flaky_test_registry"]["decision_boundary"]["current_pr_decision_input"] = True
+
+    with pytest.raises(ValueError, match="current PR decision"):
+        history.build_history_record(
+            profile,
+            source_run_id="bad-run",
+            source_head_sha="e" * 40,
         )

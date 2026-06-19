@@ -64,6 +64,24 @@ BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM = "_".join(
     ("runtime", "contract", "semantic", "equivalence", "claim")
 )
 TRUSTED_HISTORY = "_".join(("trusted", "history"))
+FLAKY_TEST_REGISTRY_COLLECTION_STATUS = "_".join(
+    ("flaky", "test", "registry", "collection", "status")
+)
+FLAKY_TEST_REGISTRY_STATUS = "_".join(("flaky", "test", "registry", "status"))
+FLAKY_TEST_REGISTRY_ENTRY_COUNT = "_".join(("flaky", "test", "registry", "entry", "count"))
+FLAKY_TEST_REGISTRY_OBSERVATION_STATUS = "_".join(
+    ("flaky", "test", "registry", "observation", "status")
+)
+FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED = "_".join(
+    ("flaky", "test", "registry", "observations", "collected")
+)
+FLAKY_TEST_REGISTRY_PRODUCER_VETTED = "_".join(("flaky", "test", "registry", "producer", "vetted"))
+FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED = "_".join(
+    ("flaky", "test", "registry", "raw", "test", "identity", "emitted")
+)
+FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT = "_".join(
+    ("flaky", "test", "registry", "current", "pr", "decision", "input")
+)
 TRUSTED_DIAGNOSTIC_SIGNAL_SNAPSHOT_HISTORY = "_".join(
     ("trusted", "diagnostic", "signal", "snapshot", "history")
 )
@@ -467,6 +485,14 @@ def _trusted_history_summary(evidence: Mapping[str, Any]) -> JsonObject:
         return {
             "collection_status": NOT_COLLECTED,
             "status": NOT_COLLECTED,
+            FLAKY_TEST_REGISTRY_COLLECTION_STATUS: NOT_COLLECTED,
+            FLAKY_TEST_REGISTRY_STATUS: NOT_COLLECTED,
+            FLAKY_TEST_REGISTRY_ENTRY_COUNT: 0,
+            FLAKY_TEST_REGISTRY_OBSERVATION_STATUS: NOT_COLLECTED,
+            FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED: False,
+            FLAKY_TEST_REGISTRY_PRODUCER_VETTED: False,
+            FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED: False,
+            FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT: False,
         }
 
     source = _as_dict(payload.get("source"))
@@ -491,14 +517,39 @@ def _trusted_history_summary(evidence: Mapping[str, Any]) -> JsonObject:
         ),
         CONTROLLED_REVIEW_FIRST_COUNT: _int(history.get(CONTROLLED_REVIEW_FIRST_COUNT)),
         "latest_controlled_validation_status": _string(
-            history.get("latest_controlled_validation_status") or "not_collected"
+            history.get("latest_controlled_validation_status") or NOT_COLLECTED
         ),
         "controlled_validation_reporting_only": _bool(
             history.get("controlled_validation_reporting_only")
         ),
+        FLAKY_TEST_REGISTRY_COLLECTION_STATUS: _string(
+            history.get(FLAKY_TEST_REGISTRY_COLLECTION_STATUS) or NOT_COLLECTED
+        ),
+        FLAKY_TEST_REGISTRY_STATUS: _string(
+            history.get(FLAKY_TEST_REGISTRY_STATUS) or NOT_COLLECTED
+        ),
+        FLAKY_TEST_REGISTRY_ENTRY_COUNT: _int(history.get(FLAKY_TEST_REGISTRY_ENTRY_COUNT)),
+        FLAKY_TEST_REGISTRY_OBSERVATION_STATUS: _string(
+            history.get(FLAKY_TEST_REGISTRY_OBSERVATION_STATUS) or NOT_COLLECTED
+        ),
+        FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED: _bool(
+            history.get(FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED)
+        ),
+        FLAKY_TEST_REGISTRY_PRODUCER_VETTED: _bool(
+            history.get(FLAKY_TEST_REGISTRY_PRODUCER_VETTED)
+        ),
+        FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED: _bool(
+            history.get(FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED)
+        ),
+        FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT: _bool(
+            history.get(FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT)
+        ),
         PROOF_COMMANDS_EXECUTED_BY_READER: _bool(boundary.get(PROOF_COMMANDS_EXECUTED_BY_READER)),
         "controlled_validation_authorizes_current_action": _bool(
             boundary.get("controlled_validation_authorizes_current_action")
+        ),
+        "flaky_test_registry_is_advisory_only": _bool(
+            boundary.get("flaky_test_registry_is_advisory_only")
         ),
         "automation_allowed": _bool(boundary.get("automation_allowed")),
         "merge_authorized": _bool(boundary.get("merge_authorized")),
@@ -919,6 +970,38 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
                 (
                     "- Controlled validation authorizes current action: "
                     f"`{str(_bool(trusted_history.get('controlled_validation_authorizes_current_action'))).lower()}`"
+                ),
+                (
+                    "- Producer-vetted registry collection status: "
+                    f"`{_string(trusted_history.get(FLAKY_TEST_REGISTRY_COLLECTION_STATUS))}`"
+                ),
+                (
+                    "- Producer-vetted registry status: "
+                    f"`{_string(trusted_history.get(FLAKY_TEST_REGISTRY_STATUS))}`"
+                ),
+                (
+                    "- Producer-vetted registry aggregate entries: "
+                    f"`{_int(trusted_history.get(FLAKY_TEST_REGISTRY_ENTRY_COUNT))}`"
+                ),
+                (
+                    "- Producer-vetted registry observation status: "
+                    f"`{_string(trusted_history.get(FLAKY_TEST_REGISTRY_OBSERVATION_STATUS))}`"
+                ),
+                (
+                    "- Producer-vetted registry observations collected: "
+                    f"`{str(_bool(trusted_history.get(FLAKY_TEST_REGISTRY_OBSERVATIONS_COLLECTED))).lower()}`"
+                ),
+                (
+                    "- Producer-vetted registry producer vetted: "
+                    f"`{str(_bool(trusted_history.get(FLAKY_TEST_REGISTRY_PRODUCER_VETTED))).lower()}`"
+                ),
+                (
+                    "- Producer-vetted registry raw test identity emitted: "
+                    f"`{str(_bool(trusted_history.get(FLAKY_TEST_REGISTRY_RAW_TEST_IDENTITY_EMITTED))).lower()}`"
+                ),
+                (
+                    "- Producer-vetted registry current PR decision input: "
+                    f"`{str(_bool(trusted_history.get(FLAKY_TEST_REGISTRY_CURRENT_PR_DECISION_INPUT))).lower()}`"
                 ),
                 (
                     "- Proof commands executed by trusted-history reader: "
