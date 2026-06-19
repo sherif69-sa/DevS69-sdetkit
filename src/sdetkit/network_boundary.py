@@ -215,7 +215,7 @@ def probe_registered_backends(
                 try:
                     connection.sendall(b"ok")
                 except OSError:
-                    pass
+                    continue
 
     thread = threading.Thread(target=accept_loop, daemon=True)
     thread.start()
