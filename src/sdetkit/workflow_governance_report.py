@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -8,7 +9,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = "sdetkit.workflow_governance_report.v1"
+SCHEMA_VERSION = "sdetkit.workflow_governance_report.v2"
 WORKFLOW_PERMISSION_REVIEW_EVIDENCE_SCHEMA_VERSION = (
     "sdetkit.workflow_permission_review_evidence.v1"
 )
@@ -22,6 +23,152 @@ AUTHORITY_FIELDS = (
 
 FULL_SHA_RE = re.compile(r"^[a-fA-F0-9]{40}$")
 USES_RE = re.compile(r"uses:\s*([^@\s#]+)@([^\s#]+)")
+INPUT_DIGEST_ALGORITHM = "sha256"
+GENERATOR_SOURCE_LABEL = "src/sdetkit/workflow_governance_report.py"
+
+
+def _update_input_digest(hasher: Any, label: str, content: bytes) -> None:
+    label_bytes = label.encode("utf-8")
+    hasher.update(len(label_bytes).to_bytes(8, "big"))
+    hasher.update(label_bytes)
+    hasher.update(len(content).to_bytes(8, "big"))
+    hasher.update(content)
+
+
+def workflow_governance_input_provenance(
+    repo_root: str | Path = ".",
+    *,
+    generator_path: str | Path | None = None,
+) -> dict[str, Any]:
+    root = Path(repo_root).resolve()
+    generator = (
+        Path(generator_path).resolve() if generator_path is not None else Path(__file__).resolve()
+    )
+    workflows = _workflow_files(root)
+
+    inputs: list[tuple[str, bytes]] = [
+        ("schema_version", SCHEMA_VERSION.encode("utf-8")),
+        (GENERATOR_SOURCE_LABEL, generator.read_bytes()),
+    ]
+    inputs.extend((_rel(root, path), path.read_bytes()) for path in workflows)
+
+    hasher = hashlib.sha256()
+    for label, content in sorted(inputs, key=lambda item: item[0]):
+        _update_input_digest(hasher, label, content)
+
+    return {
+        "digest_algorithm": INPUT_DIGEST_ALGORITHM,
+        "input_digest": hasher.hexdigest(),
+        "input_count": len(inputs),
+        "workflow_file_count": len(workflows),
+        "generator_schema_version": SCHEMA_VERSION,
+        "generator_source": GENERATOR_SOURCE_LABEL,
+    }
+
+
+def validate_workflow_governance_report_freshness(
+    repo_root: str | Path,
+    payload: dict[str, Any],
+    *,
+    generator_path: str | Path | None = None,
+) -> dict[str, Any]:
+    current = workflow_governance_input_provenance(
+        repo_root,
+        generator_path=generator_path,
+    )
+    recorded = payload.get("input_provenance")
+    reasons: list[str] = []
+
+    if not isinstance(recorded, dict):
+        recorded = {}
+        reasons.append("missing_input_provenance")
+
+    for field in (
+        "digest_algorithm",
+        "input_digest",
+        "input_count",
+        "workflow_file_count",
+        "generator_schema_version",
+        "generator_source",
+    ):
+        if recorded.get(field) != current.get(field):
+            reasons.append(f"{field}_mismatch")
+
+    reasons = sorted(set(reasons))
+    fresh = not reasons
+    return {
+        "status": "fresh" if fresh else "stale",
+        "fresh": fresh,
+        "reasons": reasons,
+        "recorded_input_digest": recorded.get("input_digest", ""),
+        "current_input_digest": current["input_digest"],
+        "reporting_only": True,
+        "repo_mutation": False,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+
+def check_workflow_governance_report_freshness(
+    *,
+    repo_root: str | Path,
+    report_path: str | Path,
+    generator_path: str | Path | None = None,
+) -> dict[str, Any]:
+    path = Path(report_path)
+    if not path.is_file():
+        result = validate_workflow_governance_report_freshness(
+            repo_root,
+            {},
+            generator_path=generator_path,
+        )
+        result["reasons"] = sorted(set([*result["reasons"], "report_missing"]))
+        result["status"] = "stale"
+        result["fresh"] = False
+        return result
+
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        result = validate_workflow_governance_report_freshness(
+            repo_root,
+            {},
+            generator_path=generator_path,
+        )
+        result["reasons"] = sorted(set([*result["reasons"], "report_invalid_json"]))
+        result["status"] = "stale"
+        result["fresh"] = False
+        return result
+
+    if not isinstance(payload, dict):
+        payload = {}
+    return validate_workflow_governance_report_freshness(
+        repo_root,
+        payload,
+        generator_path=generator_path,
+    )
+
+
+def render_workflow_governance_freshness_text(payload: dict[str, Any]) -> str:
+    reasons = payload.get("reasons", [])
+    reason_text = ",".join(str(reason) for reason in reasons) if reasons else "none"
+    return "\n".join(
+        [
+            f"freshness_status={payload.get('status', 'stale')}",
+            f"fresh={str(bool(payload.get('fresh', False))).lower()}",
+            f"freshness_reasons={reason_text}",
+            f"recorded_input_digest={payload.get('recorded_input_digest', '')}",
+            f"current_input_digest={payload.get('current_input_digest', '')}",
+            "reporting_only=true",
+            "repo_mutation=false",
+            "automation_allowed=false",
+            "patch_application_allowed=false",
+            "merge_authorized=false",
+            "semantic_equivalence_proven=false",
+        ]
+    )
 
 
 def _authority_boundary() -> dict[str, bool]:
@@ -545,6 +692,7 @@ def _permission_review_evidence_packet(
 
 def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root).resolve()
+    input_provenance = workflow_governance_input_provenance(root)
     workflows = [analyze_workflow(root, path) for path in _workflow_files(root)]
     review_required = [item for item in workflows if item["status"] == "review_required"]
 
@@ -585,6 +733,17 @@ def build_workflow_governance_report(repo_root: str | Path = ".") -> dict[str, A
 
     return {
         "schema_version": SCHEMA_VERSION,
+        "input_provenance": input_provenance,
+        "freshness": {
+            "status": "fresh",
+            "input_digest_matches": True,
+            "reporting_only": True,
+            "repo_mutation": False,
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
         "report_status": report_status,
         "repo_root": root.as_posix(),
         "workflow_count": len(workflows),
@@ -645,6 +804,10 @@ def render_workflow_governance_markdown(payload: dict[str, Any]) -> str:
         f"- workflow_count: {payload['workflow_count']}",
         f"- review_required_count: {payload['review_required_count']}",
         f"- finding_count: {payload.get('finding_count', 0)}",
+        f"- input_digest: `{payload.get('input_provenance', {}).get('input_digest', '')}`",
+        f"- digest_algorithm: `{payload.get('input_provenance', {}).get('digest_algorithm', '')}`",
+        f"- workflow_file_count: {payload.get('input_provenance', {}).get('workflow_file_count', 0)}",
+        f"- freshness_status: `{payload.get('freshness', {}).get('status', 'stale')}`",
         "- advisory_only: true",
         "- workflow_mutation: false",
         "- review_first: true",
@@ -852,7 +1015,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--out", default="build/sdetkit/workflow-governance-report.json")
     parser.add_argument("--markdown-out", default="")
     parser.add_argument("--format", choices=["json", "text"], default="json")
+    parser.add_argument(
+        "--check-freshness",
+        action="store_true",
+        help="Check the existing report against current deterministic inputs without rewriting it.",
+    )
     ns = parser.parse_args(list(argv) if argv is not None else None)
+
+    if ns.check_freshness:
+        freshness = check_workflow_governance_report_freshness(
+            repo_root=ns.root,
+            report_path=ns.out,
+        )
+        if ns.format == "json":
+            sys.stdout.write(json.dumps(freshness, indent=2, sort_keys=True) + "\n")
+        else:
+            sys.stdout.write(render_workflow_governance_freshness_text(freshness) + "\n")
+        return 0 if freshness["fresh"] else 1
 
     payload = write_workflow_governance_report(
         repo_root=ns.root,

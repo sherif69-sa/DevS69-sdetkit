@@ -7,6 +7,9 @@ from sdetkit.workflow_governance_report import (
     SCHEMA_VERSION,
     analyze_workflow,
     build_workflow_governance_report,
+    check_workflow_governance_report_freshness,
+    validate_workflow_governance_report_freshness,
+    workflow_governance_input_provenance,
     write_workflow_governance_report,
 )
 
@@ -630,3 +633,168 @@ jobs:
     workflow_text = workflow.read_text(encoding="utf-8")
     assert "gh api --method POST" in workflow_text
     assert "gh api --method PATCH" in workflow_text
+
+
+def test_workflow_governance_input_digest_is_deterministic_and_root_independent(
+    tmp_path: Path,
+) -> None:
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    first_generator = _write(first / "generator.py", "generator-v1\n")
+    second_generator = _write(second / "generator.py", "generator-v1\n")
+    _write(first / ".github" / "workflows" / "b.yml", "name: b\n")
+    _write(first / ".github" / "workflows" / "a.yml", "name: a\n")
+    _write(second / ".github" / "workflows" / "a.yml", "name: a\n")
+    _write(second / ".github" / "workflows" / "b.yml", "name: b\n")
+
+    first_payload = workflow_governance_input_provenance(first, generator_path=first_generator)
+    second_payload = workflow_governance_input_provenance(second, generator_path=second_generator)
+
+    assert first_payload == second_payload
+    assert first_payload["digest_algorithm"] == "sha256"
+    assert len(first_payload["input_digest"]) == 64
+    assert first_payload["workflow_file_count"] == 2
+    assert first_payload["input_count"] == 4
+    assert first_payload["generator_schema_version"] == SCHEMA_VERSION
+
+
+def test_workflow_governance_input_digest_changes_with_workflow_or_generator(
+    tmp_path: Path,
+) -> None:
+    generator = _write(tmp_path / "generator.py", "generator-v1\n")
+    workflow = _write(
+        tmp_path / ".github" / "workflows" / "ci.yml",
+        "name: ci\n",
+    )
+    baseline = workflow_governance_input_provenance(tmp_path, generator_path=generator)
+
+    workflow.write_text("name: ci-updated\n", encoding="utf-8")
+    workflow_changed = workflow_governance_input_provenance(tmp_path, generator_path=generator)
+    assert workflow_changed["input_digest"] != baseline["input_digest"]
+
+    workflow.write_text("name: ci\n", encoding="utf-8")
+    generator.write_text("generator-v2\n", encoding="utf-8")
+    generator_changed = workflow_governance_input_provenance(tmp_path, generator_path=generator)
+    assert generator_changed["input_digest"] != baseline["input_digest"]
+
+
+def test_workflow_governance_freshness_detects_matching_and_stale_reports(
+    tmp_path: Path,
+) -> None:
+    workflow = _write(
+        tmp_path / ".github" / "workflows" / "ci.yml",
+        """
+name: ci
+on: [push]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@0123456789abcdef0123456789abcdef01234567
+""",
+    )
+    out = tmp_path / "build" / "workflow-governance-report.json"
+    write_workflow_governance_report(repo_root=tmp_path, out=out)
+
+    fresh = check_workflow_governance_report_freshness(repo_root=tmp_path, report_path=out)
+    assert fresh["status"] == "fresh"
+    assert fresh["fresh"] is True
+    assert fresh["reasons"] == []
+    assert fresh["repo_mutation"] is False
+    assert fresh["automation_allowed"] is False
+    assert fresh["patch_application_allowed"] is False
+    assert fresh["merge_authorized"] is False
+    assert fresh["semantic_equivalence_proven"] is False
+
+    workflow.write_text(
+        workflow.read_text(encoding="utf-8") + "\n# changed\n",
+        encoding="utf-8",
+    )
+    stale = check_workflow_governance_report_freshness(repo_root=tmp_path, report_path=out)
+    assert stale["status"] == "stale"
+    assert stale["fresh"] is False
+    assert "input_digest_mismatch" in stale["reasons"]
+
+
+def test_workflow_governance_freshness_rejects_missing_or_invalid_provenance(
+    tmp_path: Path,
+) -> None:
+    missing = validate_workflow_governance_report_freshness(
+        tmp_path, {"schema_version": SCHEMA_VERSION}
+    )
+    assert missing["status"] == "stale"
+    assert missing["fresh"] is False
+    assert "missing_input_provenance" in missing["reasons"]
+
+    report = tmp_path / "build" / "workflow-governance-report.json"
+    report.parent.mkdir(parents=True)
+    report.write_text("{invalid", encoding="utf-8")
+    invalid = check_workflow_governance_report_freshness(repo_root=tmp_path, report_path=report)
+    assert invalid["status"] == "stale"
+    assert invalid["fresh"] is False
+    assert "report_invalid_json" in invalid["reasons"]
+
+
+def test_workflow_governance_cli_checks_freshness_without_rewriting(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    workflow = _write(
+        tmp_path / ".github" / "workflows" / "ci.yml",
+        """
+name: ci
+on: [push]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@0123456789abcdef0123456789abcdef01234567
+""",
+    )
+    out = tmp_path / "build" / "workflow-governance-report.json"
+    write_workflow_governance_report(repo_root=tmp_path, out=out)
+    original = out.read_text(encoding="utf-8")
+
+    from sdetkit.cli import main as cli_main
+
+    rc = cli_main(
+        [
+            "workflow-governance-report",
+            "--root",
+            str(tmp_path),
+            "--out",
+            str(out),
+            "--check-freshness",
+            "--format",
+            "text",
+        ]
+    )
+    assert rc == 0
+    assert "freshness_status=fresh" in capsys.readouterr().out
+    assert out.read_text(encoding="utf-8") == original
+
+    workflow.write_text(
+        workflow.read_text(encoding="utf-8") + "\n# stale\n",
+        encoding="utf-8",
+    )
+    rc = cli_main(
+        [
+            "workflow-governance-report",
+            "--root",
+            str(tmp_path),
+            "--out",
+            str(out),
+            "--check-freshness",
+            "--format",
+            "json",
+        ]
+    )
+    assert rc == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "stale"
+    assert payload["fresh"] is False
+    assert out.read_text(encoding="utf-8") == original
