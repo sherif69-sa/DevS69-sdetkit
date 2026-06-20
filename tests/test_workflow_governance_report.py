@@ -583,3 +583,50 @@ jobs:
     assert "`reviewer decision`" in markdown
     assert "### Permission review tasks" in markdown
     assert ".github/workflows/bot.yml" in markdown
+
+
+def test_workflow_governance_infers_gh_api_pr_comment_permissions(
+    tmp_path: Path,
+) -> None:
+    workflow = _write(
+        tmp_path / ".github" / "workflows" / "pr-comment.yml",
+        """
+name: PR comment
+on: [pull_request]
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          gh api --method POST \
+            "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments"
+          gh api --method PATCH \
+            "repos/${REPOSITORY}/issues/comments/${COMMENT_ID}"
+""",
+    )
+
+    payload = build_workflow_governance_report(tmp_path)
+    entry = next(
+        item
+        for item in payload["permission_review_matrix"]
+        if item["path"] == ".github/workflows/pr-comment.yml"
+    )
+
+    assert entry["granted_write_scopes"] == [
+        "issues: write",
+        "pull-requests: write",
+    ]
+    assert entry["inferred_permission_reasons"] == [
+        "GitHub API or gh-based PR/issue interaction detected.",
+        "PR or issue comment/review API usage detected.",
+    ]
+    assert entry["requires_human_review"] is True
+    assert entry["safe_to_patch"] is False
+
+    workflow_text = workflow.read_text(encoding="utf-8")
+    assert "gh api --method POST" in workflow_text
+    assert "gh api --method PATCH" in workflow_text

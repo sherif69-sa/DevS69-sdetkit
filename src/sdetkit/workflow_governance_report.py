@@ -339,12 +339,24 @@ def _granted_write_scopes(workflow_text: str) -> list[str]:
 
 def _inferred_permission_reasons(workflow_text: str) -> list[str]:
     reasons: list[str] = []
+    lower = workflow_text.lower()
+    gh_api_issue_comment = "gh api" in lower and (
+        "/issues/comments/" in lower or ("/issues/" in lower and "/comments" in lower)
+    )
 
-    if "actions/github-script" in workflow_text or "gh pr comment" in workflow_text:
+    if (
+        "actions/github-script" in workflow_text
+        or "gh pr comment" in workflow_text
+        or gh_api_issue_comment
+    ):
         reasons.append("GitHub API or gh-based PR/issue interaction detected.")
     if "issues.create" in workflow_text or "issues.update" in workflow_text:
         reasons.append("Issue create/update API usage detected.")
-    if "issues.createComment" in workflow_text or "pulls.createReview" in workflow_text:
+    if (
+        "issues.createComment" in workflow_text
+        or "pulls.createReview" in workflow_text
+        or gh_api_issue_comment
+    ):
         reasons.append("PR or issue comment/review API usage detected.")
     if "upload-sarif" in workflow_text or "security-events: write" in workflow_text:
         reasons.append("SARIF/code-scanning upload surface detected.")
