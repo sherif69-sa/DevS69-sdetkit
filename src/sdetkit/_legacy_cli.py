@@ -955,6 +955,7 @@ Then use stability-aware command discovery:
     )
     workflow_governance_report.add_argument("--markdown-out", default="")
     workflow_governance_report.add_argument("--format", choices=["json", "text"], default="json")
+    workflow_governance_report.add_argument("--check-freshness", action="store_true")
 
     remediation_readiness_report = sub.add_parser(
         "remediation-readiness-report",
@@ -2149,6 +2150,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         ]
         if str(ns.markdown_out):
             forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
         return _run_module_main("sdetkit.workflow_governance_report", forwarded)
 
     if ns.cmd == "remediation-readiness-report":
