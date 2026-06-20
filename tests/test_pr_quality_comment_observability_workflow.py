@@ -27,7 +27,7 @@ def test_pr_quality_comment_workflow_has_comment_permissions_without_repository_
     assert "contents: read" in permissions
     assert "contents: write" not in permissions
     assert "issues: write" in permissions
-    assert "pull-requests: read" in permissions
+    assert "pull-requests: write" in permissions
     assert "checks: read" in permissions
     assert "actions: read" in permissions
     assert "security-events: read" in permissions
