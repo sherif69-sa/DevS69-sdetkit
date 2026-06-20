@@ -6,6 +6,21 @@ from pathlib import Path
 from sdetkit import repo_adoption_scan
 from sdetkit.cli import main as top_level_main
 
+AUTHORITY_FIELDS = (
+    "automation_allowed",
+    "patch_application_allowed",
+    "merge_authorized",
+    "semantic_equivalence_proven",
+    "automatic_security_fix_allowed",
+    "automatic_dismissal_allowed",
+)
+
+
+def _assert_no_authority(payload: dict[str, object]) -> None:
+    for field in AUTHORITY_FIELDS:
+        assert payload[field] is False
+    assert payload["authority_boundary"] == {field: False for field in AUTHORITY_FIELDS}
+
 
 def test_repo_adoption_scan_detects_stack_and_gaps(tmp_path: Path) -> None:
     (tmp_path / "pyproject.toml").write_text("[project]\nname='demo'\n", encoding="utf-8")
@@ -22,6 +37,7 @@ def test_repo_adoption_scan_detects_stack_and_gaps(tmp_path: Path) -> None:
     assert "TEST_SURFACE_MISSING" in codes
     assert "CI_CONTRACT_MISSING" in codes
     assert any("sdetkit review" in command for command in payload["recommended_commands"])
+    _assert_no_authority(payload)
 
 
 def test_repo_adoption_scan_ready_repo_has_canonical_commands(tmp_path: Path) -> None:
@@ -42,6 +58,7 @@ def test_repo_adoption_scan_ready_repo_has_canonical_commands(tmp_path: Path) ->
     assert payload["ok"] is True
     assert payload["risk_score"] == 0
     assert payload["next_owner_action"] == "Adopt the canonical gate/review path in CI now."
+    _assert_no_authority(payload)
 
 
 def test_top_level_cli_adopt_scan_passthrough(tmp_path: Path) -> None:
@@ -56,3 +73,13 @@ def test_top_level_cli_adopt_scan_passthrough(tmp_path: Path) -> None:
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["stack"]["javascript"] is True
     assert payload["adoption_gaps"]
+    _assert_no_authority(payload)
+
+
+def test_repo_adoption_scan_text_renders_no_authority(tmp_path: Path) -> None:
+    payload = repo_adoption_scan.build_repo_adoption_scan(tmp_path)
+
+    rendered = repo_adoption_scan.render_text(payload)
+
+    for field in AUTHORITY_FIELDS:
+        assert f"{field}=false" in rendered
