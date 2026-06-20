@@ -7,6 +7,16 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "sdetkit.repo_adoption_scan.v1"
+
+AUTHORITY_FIELDS = (
+    "automation_allowed",
+    "patch_application_allowed",
+    "merge_authorized",
+    "semantic_equivalence_proven",
+    "automatic_security_fix_allowed",
+    "automatic_dismissal_allowed",
+)
+
 SKIP_DIRS = {
     ".git",
     ".venv",
@@ -18,6 +28,10 @@ SKIP_DIRS = {
     ".ruff_cache",
     "__pycache__",
 }
+
+
+def _authority_boundary() -> dict[str, bool]:
+    return {field: False for field in AUTHORITY_FIELDS}
 
 
 def _rel(path: Path, root: Path) -> str:
@@ -182,6 +196,8 @@ def build_repo_adoption_scan(root: Path, *, max_files: int = 4000) -> dict[str, 
         "next_owner_action": gaps[0]["fix"]
         if gaps
         else "Adopt the canonical gate/review path in CI now.",
+        **_authority_boundary(),
+        "authority_boundary": _authority_boundary(),
     }
 
 
@@ -200,6 +216,8 @@ def render_text(payload: dict[str, Any]) -> str:
     lines.append("recommended_commands:")
     lines.extend(f"- {command}" for command in payload["recommended_commands"])
     lines.append(f"next_owner_action={payload['next_owner_action']}")
+    for field in AUTHORITY_FIELDS:
+        lines.append(f"{field}={str(bool(payload.get(field, True))).lower()}")
     return "\n".join(lines) + "\n"
 
 
