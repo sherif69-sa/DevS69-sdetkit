@@ -118,7 +118,34 @@ automation_allowed=false
 patch_application_allowed=false
 merge_authorized=false
 semantic_equivalence_proven=false
+automatic_security_fix_allowed=false
+automatic_dismissal_allowed=false
 ```
+
+## Adoption follow-up authority boundary
+
+The public `adoption` command builds prioritized follow-up recommendations from fit and gate
+decision artifacts:
+
+```bash
+python -m sdetkit adoption   --fit build/sdetkit-fit-recommendation.json   --summary build/gate-decision-summary.json   --format json   --out build/adoption-followup.json
+```
+
+Its recommendations are advisory and review-first. JSON, Markdown, history JSONL, and history
+rollup outputs explicitly preserve:
+
+```text
+automation_allowed=false
+patch_application_allowed=false
+merge_authorized=false
+semantic_equivalence_proven=false
+automatic_security_fix_allowed=false
+automatic_dismissal_allowed=false
+```
+
+A recommendation or escalation signal does not authorize command execution, patch application,
+security remediation, alert dismissal, branch creation, or merge. Those actions remain separate
+human decisions.
 
 ## Review real-world adoption learning
 

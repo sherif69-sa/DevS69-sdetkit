@@ -8,6 +8,19 @@ from typing import Any
 
 from sdetkit._datetime import UTC
 
+AUTHORITY_FIELDS = (
+    "automation_allowed",
+    "patch_application_allowed",
+    "merge_authorized",
+    "semantic_equivalence_proven",
+    "automatic_security_fix_allowed",
+    "automatic_dismissal_allowed",
+)
+
+
+def _authority_boundary() -> dict[str, bool]:
+    return {field: False for field in AUTHORITY_FIELDS}
+
 
 def _load_optional(path: Path) -> dict[str, Any] | None:
     if not path.exists():
@@ -147,6 +160,8 @@ def build_followup(
         "decision": decision,
         "next_command": top["action"],
         "recommendations": normalized,
+        **_authority_boundary(),
+        "authority_boundary": _authority_boundary(),
     }
 
 
@@ -175,6 +190,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         rationale = str(rec.get("rationale", "")).strip()
         if rationale:
             lines.append(f"   - Rationale: {rationale}")
+    lines.extend(["", "## Authority boundary"])
+    for field in AUTHORITY_FIELDS:
+        lines.append(f"- {field}: `{str(bool(payload.get(field, True))).lower()}`")
     lines.append("")
     return "\n".join(lines)
 
@@ -254,6 +272,8 @@ def _build_history_rollup(
         },
         "latest_next_command": latest.get("next_command", ""),
         "latest_generated_at": latest.get("generated_at", ""),
+        **_authority_boundary(),
+        "authority_boundary": _authority_boundary(),
     }
 
 

@@ -5,6 +5,21 @@ from pathlib import Path
 
 from sdetkit import adoption
 
+AUTHORITY_FIELDS = (
+    "automation_allowed",
+    "patch_application_allowed",
+    "merge_authorized",
+    "semantic_equivalence_proven",
+    "automatic_security_fix_allowed",
+    "automatic_dismissal_allowed",
+)
+
+
+def _assert_no_authority(payload: dict[str, object]) -> None:
+    for field in AUTHORITY_FIELDS:
+        assert payload[field] is False
+    assert payload["authority_boundary"] == {field: False for field in AUTHORITY_FIELDS}
+
 
 def test_adoption_cli_json_output_with_missing_inputs(tmp_path: Path, capsys) -> None:
     rc = adoption.main(
@@ -24,6 +39,7 @@ def test_adoption_cli_json_output_with_missing_inputs(tmp_path: Path, capsys) ->
     assert payload["decision_context"]["policy_profile"] == "balanced"
     assert payload["decision_context"]["fit_artifact_present"] is False
     assert payload["decision_context"]["summary_artifact_present"] is False
+    _assert_no_authority(payload)
 
 
 def test_adoption_cli_writes_markdown(tmp_path: Path, capsys) -> None:
@@ -48,6 +64,9 @@ def test_adoption_cli_writes_markdown(tmp_path: Path, capsys) -> None:
     assert "Why now:" in rendered
     assert "Rationale:" in rendered
     assert "Policy profile:" in rendered
+    assert "## Authority boundary" in rendered
+    for field in AUTHORITY_FIELDS:
+        assert f"- {field}: `false`" in rendered
 
 
 def test_adoption_cli_history_and_rollup(tmp_path: Path, capsys) -> None:
@@ -78,6 +97,10 @@ def test_adoption_cli_history_and_rollup(tmp_path: Path, capsys) -> None:
     assert "escalation_recommended" in rollup_payload
     assert rollup_payload["escalation_reason"] in {"none", "consecutive_no_ship", "high_p0_rate"}
     assert rollup_payload["thresholds"]["escalation_consecutive_no_ship"] == 2
+    _assert_no_authority(payload)
+    _assert_no_authority(rollup_payload)
+    latest_history = json.loads(history.read_text(encoding="utf-8").strip().splitlines()[-1])
+    _assert_no_authority(latest_history)
 
 
 def test_adoption_cli_rollup_escalation_on_consecutive_no_ship(tmp_path: Path, capsys) -> None:
