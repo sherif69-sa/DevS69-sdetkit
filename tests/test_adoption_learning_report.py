@@ -4,8 +4,13 @@ import json
 from pathlib import Path
 
 from sdetkit.adoption_learning_report import (
+    ACCEPTED_MATRIX_SCHEMA,
+    ACCEPTED_REPO_MEMORY_SCHEMAS,
     SCHEMA_VERSION,
+    adoption_learning_input_provenance,
     build_adoption_learning_report,
+    check_adoption_learning_report_freshness,
+    validate_adoption_learning_report_freshness,
     write_adoption_learning_report_artifacts,
 )
 
@@ -74,6 +79,15 @@ def test_adoption_learning_report_prioritizes_matrix_candidates(tmp_path: Path) 
     assert payload["source_matrix_status"] == "passed"
     assert payload["source_repo_count"] == 10
     assert payload["candidate_count"] == 3
+    provenance = payload["input_provenance"]
+    assert provenance["digest_algorithm"] == "sha256"
+    assert len(provenance["input_digest"]) == 64
+    assert provenance["matrix_schema_version"] == ACCEPTED_MATRIX_SCHEMA
+    assert provenance["current_head_available"] is True
+    relationships = payload["source_relationships"]
+    assert relationships["matrix_schema_accepted"] is True
+    assert relationships["repo_memory_profile_schema_accepted"] is True
+    assert relationships["current_head_bound"] is True
     assert payload["automation_allowed"] is False
     assert payload["patch_application_allowed"] is False
     assert payload["merge_authorized"] is False
@@ -107,7 +121,11 @@ def test_adoption_learning_report_writes_json_and_markdown(tmp_path: Path) -> No
     assert out.is_file()
     assert markdown.is_file()
     assert json.loads(out.read_text(encoding="utf-8"))["schema_version"] == SCHEMA_VERSION
-    assert "# SDETKit adoption learning report" in markdown.read_text(encoding="utf-8")
+    rendered = markdown.read_text(encoding="utf-8")
+    assert "# SDETKit adoption learning report" in rendered
+    assert "input_digest:" in rendered
+    assert "matrix_schema_accepted: true" in rendered
+    assert "repo_memory_profile_schema_accepted: true" in rendered
     assert payload["candidate_count"] == 3
 
 
@@ -178,6 +196,7 @@ def test_adoption_learning_report_attaches_non_authorizing_repo_memory_profile(
     assert memory["profile_status"] == "live_proof_supported_memory"
     assert memory["memory_mode"] == "trusted_main_profile"
     assert memory["authoritative_for_adoption_report"] is False
+    assert payload["source_relationships"]["repo_memory_profile_schema_accepted"] is True
     assert memory["authority_boundary"] == {
         "automation_allowed": False,
         "patch_application_allowed": False,
@@ -229,3 +248,226 @@ def test_adoption_learning_report_cli_accepts_repo_memory_profile_context(
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["repo_memory_profile"]["connected"] is True
     assert payload["rules"]["repo_memory_profile_authoritative"] is False
+
+
+def test_adoption_learning_provenance_binds_matrix_profile_generator_and_head(
+    tmp_path: Path,
+) -> None:
+    matrix = _matrix(tmp_path / "matrix.json")
+    profile = tmp_path / "profile.json"
+    profile.write_text(
+        json.dumps({"schema_version": ACCEPTED_REPO_MEMORY_SCHEMAS[0]}),
+        encoding="utf-8",
+    )
+    generator = tmp_path / "generator.py"
+    generator.write_text("generator-v1\n", encoding="utf-8")
+
+    first = adoption_learning_input_provenance(
+        matrix,
+        root=tmp_path,
+        repo_memory_profile=profile,
+        generator_path=generator,
+        current_head_sha="head-a",
+    )
+    second = adoption_learning_input_provenance(
+        matrix,
+        root=tmp_path,
+        repo_memory_profile=profile,
+        generator_path=generator,
+        current_head_sha="head-a",
+    )
+    assert first == second
+    assert first["matrix_schema_version"] == ACCEPTED_MATRIX_SCHEMA
+    assert first["repo_memory_profile_schema_version"] == ACCEPTED_REPO_MEMORY_SCHEMAS[0]
+
+    matrix_payload = json.loads(matrix.read_text(encoding="utf-8"))
+    matrix_payload["repo_count"] = 11
+    matrix.write_text(json.dumps(matrix_payload), encoding="utf-8")
+    matrix_changed = adoption_learning_input_provenance(
+        matrix,
+        root=tmp_path,
+        repo_memory_profile=profile,
+        generator_path=generator,
+        current_head_sha="head-a",
+    )
+    assert matrix_changed["input_digest"] != first["input_digest"]
+
+    head_changed = adoption_learning_input_provenance(
+        matrix,
+        root=tmp_path,
+        repo_memory_profile=profile,
+        generator_path=generator,
+        current_head_sha="head-b",
+    )
+    assert head_changed["input_digest"] != matrix_changed["input_digest"]
+
+
+def test_adoption_learning_report_records_unaccepted_source_schema_relationships(
+    tmp_path: Path,
+) -> None:
+    matrix = _matrix(tmp_path / "matrix.json")
+    matrix_payload = json.loads(matrix.read_text(encoding="utf-8"))
+    matrix_payload["schema_version"] = "sdetkit.adoption_real_world_learning_matrix.v0"
+    matrix.write_text(json.dumps(matrix_payload), encoding="utf-8")
+    profile = tmp_path / "profile.json"
+    profile.write_text(
+        json.dumps({"schema_version": "sdetkit.repo_memory.v5"}),
+        encoding="utf-8",
+    )
+
+    payload = build_adoption_learning_report(
+        matrix,
+        repo_memory_profile=profile,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+    relationships = payload["source_relationships"]
+    assert relationships["matrix_schema_accepted"] is False
+    assert relationships["repo_memory_profile_schema_accepted"] is False
+
+
+def test_adoption_learning_freshness_detects_source_and_head_drift(
+    tmp_path: Path,
+) -> None:
+    matrix = _matrix(tmp_path / "matrix.json")
+    report = tmp_path / "report.json"
+    write_adoption_learning_report_artifacts(
+        matrix_json=matrix,
+        out=report,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+
+    fresh = check_adoption_learning_report_freshness(
+        report_path=report,
+        matrix_json=matrix,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+    assert fresh["fresh"] is True
+    assert fresh["source_schema_valid"] is True
+    assert fresh["current_head_valid"] is True
+    assert fresh["authority_valid"] is True
+
+    head_stale = check_adoption_learning_report_freshness(
+        report_path=report,
+        matrix_json=matrix,
+        root=tmp_path,
+        current_head_sha="head-b",
+    )
+    assert head_stale["fresh"] is False
+    assert head_stale["current_head_valid"] is False
+    assert "current_head_sha_mismatch" in head_stale["reasons"]
+
+    matrix_payload = json.loads(matrix.read_text(encoding="utf-8"))
+    matrix_payload["repo_count"] = 12
+    matrix.write_text(json.dumps(matrix_payload), encoding="utf-8")
+    source_stale = check_adoption_learning_report_freshness(
+        report_path=report,
+        matrix_json=matrix,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+    assert source_stale["fresh"] is False
+    assert "matrix_sha256_mismatch" in source_stale["reasons"]
+
+
+def test_adoption_learning_freshness_fails_closed_for_bad_reports(tmp_path: Path) -> None:
+    matrix = _matrix(tmp_path / "matrix.json")
+    missing = check_adoption_learning_report_freshness(
+        report_path=tmp_path / "missing.json",
+        matrix_json=matrix,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+    assert missing["fresh"] is False
+    assert "report_missing" in missing["reasons"]
+
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text("{", encoding="utf-8")
+    invalid_result = check_adoption_learning_report_freshness(
+        report_path=invalid,
+        matrix_json=matrix,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+    assert invalid_result["fresh"] is False
+    assert "report_invalid_json" in invalid_result["reasons"]
+
+    non_object = tmp_path / "non-object.json"
+    non_object.write_text("[]", encoding="utf-8")
+    non_object_result = check_adoption_learning_report_freshness(
+        report_path=non_object,
+        matrix_json=matrix,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+    assert non_object_result["fresh"] is False
+    assert "report_not_object" in non_object_result["reasons"]
+
+
+def test_adoption_learning_freshness_detects_authority_drift(tmp_path: Path) -> None:
+    matrix = _matrix(tmp_path / "matrix.json")
+    payload = build_adoption_learning_report(
+        matrix,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+    payload["automation_allowed"] = True
+
+    result = validate_adoption_learning_report_freshness(
+        payload,
+        matrix_json=matrix,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+    assert result["fresh"] is False
+    assert result["authority_valid"] is False
+    assert "automation_allowed_mismatch" in result["reasons"]
+
+
+def test_adoption_learning_cli_checks_freshness_without_rewriting(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    from sdetkit.cli import main as cli_main
+
+    matrix = _matrix(tmp_path / "matrix.json")
+    report = tmp_path / "report.json"
+    rc = cli_main(
+        [
+            "adoption-learning-report",
+            "--root",
+            ".",
+            "--matrix-json",
+            str(matrix),
+            "--out",
+            str(report),
+            "--format",
+            "text",
+        ]
+    )
+    assert rc == 0
+    capsys.readouterr()
+    before = report.read_bytes()
+
+    rc = cli_main(
+        [
+            "adoption-learning-report",
+            "--root",
+            ".",
+            "--matrix-json",
+            str(matrix),
+            "--out",
+            str(report),
+            "--check-freshness",
+            "--format",
+            "text",
+        ]
+    )
+    assert rc == 0
+    stdout = capsys.readouterr().out
+    assert "freshness_status=fresh" in stdout
+    assert "source_schema_valid=true" in stdout
+    assert "current_head_valid=true" in stdout
+    assert report.read_bytes() == before
