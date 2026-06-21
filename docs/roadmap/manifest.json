@@ -12,7 +12,31 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.acceleration",
         "module_path": "src/sdetkit/acceleration.py",
+        "tests_referencing_module": 7
+      },
+      {
+        "contract_script_paths": [
+          "scripts/check_baseline_hardening_contract.py"
+        ],
+        "contract_scripts": 1,
+        "id": 0,
+        "lane": "baseline_hardening",
+        "legacy_anchor_refs_in_module": 0,
+        "module": "sdetkit.baseline_hardening",
+        "module_path": "src/sdetkit/baseline_hardening.py",
         "tests_referencing_module": 6
+      },
+      {
+        "contract_script_paths": [
+          "scripts/check_baseline_wrap_contract.py"
+        ],
+        "contract_scripts": 1,
+        "id": 0,
+        "lane": "baseline_wrap",
+        "legacy_anchor_refs_in_module": 0,
+        "module": "sdetkit.baseline_wrap",
+        "module_path": "src/sdetkit/baseline_wrap.py",
+        "tests_referencing_module": 5
       },
       {
         "contract_script_paths": [
@@ -232,30 +256,6 @@
       },
       {
         "contract_script_paths": [
-          "scripts/check_example_asset2_contract.py"
-        ],
-        "contract_scripts": 1,
-        "id": 0,
-        "lane": "example_asset2",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.example_asset2",
-        "module_path": "src/sdetkit/example_asset2.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_example_asset_contract.py"
-        ],
-        "contract_scripts": 1,
-        "id": 0,
-        "lane": "example_asset",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.example_asset",
-        "module_path": "src/sdetkit/example_asset.py",
-        "tests_referencing_module": 2
-      },
-      {
-        "contract_script_paths": [
           "scripts/check_distribution_batch_contract.py"
         ],
         "contract_scripts": 1,
@@ -364,6 +364,30 @@
       },
       {
         "contract_script_paths": [
+          "scripts/check_example_asset2_contract.py"
+        ],
+        "contract_scripts": 1,
+        "id": 0,
+        "lane": "example_asset2",
+        "legacy_anchor_refs_in_module": 0,
+        "module": "sdetkit.example_asset2",
+        "module_path": "src/sdetkit/example_asset2.py",
+        "tests_referencing_module": 3
+      },
+      {
+        "contract_script_paths": [
+          "scripts/check_example_asset_contract.py"
+        ],
+        "contract_scripts": 1,
+        "id": 0,
+        "lane": "example_asset",
+        "legacy_anchor_refs_in_module": 0,
+        "module": "sdetkit.example_asset",
+        "module_path": "src/sdetkit/example_asset.py",
+        "tests_referencing_module": 4
+      },
+      {
+        "contract_script_paths": [
           "scripts/check_execution_prioritization_contract.py"
         ],
         "contract_scripts": 1,
@@ -396,7 +420,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.expansion",
         "module_path": "src/sdetkit/expansion.py",
-        "tests_referencing_module": 28
+        "tests_referencing_module": 40
       },
       {
         "contract_script_paths": [
@@ -564,7 +588,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.onboarding",
         "module_path": "src/sdetkit/onboarding.py",
-        "tests_referencing_module": 29
+        "tests_referencing_module": 32
       },
       {
         "contract_script_paths": [
@@ -588,7 +612,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.optimization",
         "module_path": "src/sdetkit/optimization.py",
-        "tests_referencing_module": 18
+        "tests_referencing_module": 21
       },
       {
         "contract_script_paths": [
@@ -604,75 +628,15 @@
       },
       {
         "contract_script_paths": [
-          "scripts/check_baseline_hardening_contract.py"
-        ],
-        "contract_scripts": 1,
-        "id": 0,
-        "lane": "baseline_hardening",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.baseline_hardening",
-        "module_path": "src/sdetkit/baseline_hardening.py",
-        "tests_referencing_module": 3
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_baseline_wrap_contract.py"
-        ],
-        "contract_scripts": 1,
-        "id": 0,
-        "lane": "baseline_wrap",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.baseline_wrap",
-        "module_path": "src/sdetkit/baseline_wrap.py",
-        "tests_referencing_module": 2
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_release_readiness_hardening_contract.py"
-        ],
-        "contract_scripts": 1,
-        "id": 0,
-        "lane": "release readiness_hardening",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.release_readiness_hardening",
-        "module_path": "src/sdetkit/release readiness_hardening.py",
-        "tests_referencing_module": 2
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_release_readiness_kickoff_contract.py"
-        ],
-        "contract_scripts": 1,
-        "id": 0,
-        "lane": "release readiness_kickoff",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.release_readiness_kickoff",
-        "module_path": "src/sdetkit/release readiness_kickoff.py",
-        "tests_referencing_module": 3
-      },
-      {
-        "contract_script_paths": [
-          "scripts/check_release_readiness_wrap_handoff_contract.py"
-        ],
-        "contract_scripts": 1,
-        "id": 0,
-        "lane": "release readiness_wrap_handoff",
-        "legacy_anchor_refs_in_module": 0,
-        "module": "sdetkit.release_readiness_wrap_handoff",
-        "module_path": "src/sdetkit/release readiness_wrap_handoff.py",
-        "tests_referencing_module": 1
-      },
-      {
-        "contract_script_paths": [
           "scripts/check_platform_readiness_kickoff_contract.py"
         ],
         "contract_scripts": 1,
         "id": 0,
-        "lane": "phase3_kickoff",
+        "lane": "platform_readiness_kickoff",
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.platform_readiness_kickoff",
         "module_path": "src/sdetkit/platform_readiness_kickoff.py",
-        "tests_referencing_module": 1
+        "tests_referencing_module": 4
       },
       {
         "contract_script_paths": [
@@ -680,11 +644,11 @@
         ],
         "contract_scripts": 1,
         "id": 0,
-        "lane": "phase3_preplan",
+        "lane": "platform_readiness_preplan",
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.platform_readiness_preplan",
         "module_path": "src/sdetkit/platform_readiness_preplan.py",
-        "tests_referencing_module": 2
+        "tests_referencing_module": 4
       },
       {
         "contract_script_paths": [
@@ -692,11 +656,11 @@
         ],
         "contract_scripts": 1,
         "id": 0,
-        "lane": "phase3_wrap_publication",
+        "lane": "platform_readiness_wrap_publication",
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.platform_readiness_wrap_publication",
         "module_path": "src/sdetkit/platform_readiness_wrap_publication.py",
-        "tests_referencing_module": 1
+        "tests_referencing_module": 4
       },
       {
         "contract_script_paths": [
@@ -720,7 +684,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.proof",
         "module_path": "src/sdetkit/proof.py",
-        "tests_referencing_module": 123
+        "tests_referencing_module": 159
       },
       {
         "contract_script_paths": [
@@ -768,7 +732,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.release_prioritization",
         "module_path": "src/sdetkit/release_prioritization.py",
-        "tests_referencing_module": 1
+        "tests_referencing_module": 2
       },
       {
         "contract_script_paths": [
@@ -780,7 +744,43 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.release_readiness",
         "module_path": "src/sdetkit/release_readiness.py",
-        "tests_referencing_module": 9
+        "tests_referencing_module": 33
+      },
+      {
+        "contract_script_paths": [
+          "scripts/check_release_readiness_hardening_contract.py"
+        ],
+        "contract_scripts": 1,
+        "id": 0,
+        "lane": "release_readiness_hardening",
+        "legacy_anchor_refs_in_module": 0,
+        "module": "sdetkit.release_readiness_hardening",
+        "module_path": "src/sdetkit/release_readiness_hardening.py",
+        "tests_referencing_module": 4
+      },
+      {
+        "contract_script_paths": [
+          "scripts/check_release_readiness_kickoff_contract.py"
+        ],
+        "contract_scripts": 1,
+        "id": 0,
+        "lane": "release_readiness_kickoff",
+        "legacy_anchor_refs_in_module": 0,
+        "module": "sdetkit.release_readiness_kickoff",
+        "module_path": "src/sdetkit/release_readiness_kickoff.py",
+        "tests_referencing_module": 6
+      },
+      {
+        "contract_script_paths": [
+          "scripts/check_release_readiness_wrap_handoff_contract.py"
+        ],
+        "contract_scripts": 1,
+        "id": 0,
+        "lane": "release_readiness_wrap_handoff",
+        "legacy_anchor_refs_in_module": 0,
+        "module": "sdetkit.release_readiness_wrap_handoff",
+        "module_path": "src/sdetkit/release_readiness_wrap_handoff.py",
+        "tests_referencing_module": 4
       },
       {
         "contract_script_paths": [
@@ -792,7 +792,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.reliability",
         "module_path": "src/sdetkit/reliability.py",
-        "tests_referencing_module": 29
+        "tests_referencing_module": 30
       },
       {
         "contract_script_paths": [
@@ -816,7 +816,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.scale",
         "module_path": "src/sdetkit/scale.py",
-        "tests_referencing_module": 22
+        "tests_referencing_module": 26
       },
       {
         "contract_script_paths": [
@@ -840,7 +840,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.scale",
         "module_path": "src/sdetkit/scale.py",
-        "tests_referencing_module": 22
+        "tests_referencing_module": 26
       },
       {
         "contract_script_paths": [
