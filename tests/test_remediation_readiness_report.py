@@ -6,6 +6,9 @@ from pathlib import Path
 from sdetkit.remediation_readiness_report import (
     SCHEMA_VERSION,
     build_remediation_readiness_report,
+    check_remediation_readiness_report_freshness,
+    remediation_readiness_input_provenance,
+    validate_remediation_readiness_report_freshness,
     write_artifacts,
 )
 
@@ -16,6 +19,13 @@ def test_remediation_readiness_report_is_verifier_backed_and_non_authorizing() -
     assert payload["schema_version"] == SCHEMA_VERSION
     assert payload["report_status"] == "review_required"
     assert payload["blocking_gap_count"] == 0
+    provenance = payload["input_provenance"]
+    assert provenance["digest_algorithm"] == "sha256"
+    assert len(provenance["input_digest"]) == 64
+    assert provenance["generator_schema_version"] == SCHEMA_VERSION
+    assert provenance["generator_source"] == "src/sdetkit/remediation_readiness_report.py"
+    assert provenance["policy_path"] == "config/adaptive_remediation_policy.default.json"
+    assert provenance["missing_input_count"] == 0
 
     checks = payload["readiness_checks"]
     assert checks["policy_accepts_review_only_dry_run_plan"] is True
@@ -98,6 +108,8 @@ def test_remediation_readiness_report_writes_json_and_markdown(tmp_path: Path) -
 
     rendered = markdown.read_text(encoding="utf-8")
     assert "# SDETKit remediation readiness report" in rendered
+    assert "input_digest:" in rendered
+    assert "digest_algorithm: `sha256`" in rendered
     assert "verifier_backed: true" in rendered
     assert "dry_run_only: true" in rendered
     assert "SafetyGate proof contract" in rendered
@@ -141,3 +153,191 @@ def test_remediation_readiness_report_stays_hidden_from_default_help() -> None:
 
     assert "remediation-readiness-report" not in default_help
     assert "remediation-readiness-report" in hidden_help
+
+
+def test_remediation_readiness_input_digest_is_deterministic_and_root_independent(
+    tmp_path: Path,
+) -> None:
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    first.mkdir()
+    second.mkdir()
+    first_generator = first / "generator.py"
+    second_generator = second / "generator.py"
+    first_generator.write_text("generator-v1\n", encoding="utf-8")
+    second_generator.write_text("generator-v1\n", encoding="utf-8")
+
+    first_payload = remediation_readiness_input_provenance(
+        first,
+        generator_path=first_generator,
+    )
+    second_payload = remediation_readiness_input_provenance(
+        second,
+        generator_path=second_generator,
+    )
+
+    assert first_payload == second_payload
+    assert first_payload["digest_algorithm"] == "sha256"
+    assert len(first_payload["input_digest"]) == 64
+    assert first_payload["generator_schema_version"] == SCHEMA_VERSION
+    assert first_payload["missing_input_count"] > 0
+
+
+def test_remediation_readiness_input_digest_changes_with_policy_or_generator(
+    tmp_path: Path,
+) -> None:
+    generator = tmp_path / "generator.py"
+    generator.write_text("generator-v1\n", encoding="utf-8")
+    baseline = remediation_readiness_input_provenance(
+        tmp_path,
+        generator_path=generator,
+    )
+
+    policy = tmp_path / "config" / "adaptive_remediation_policy.default.json"
+    policy.parent.mkdir(parents=True)
+    policy.write_text('{"schema_version":"policy-v1"}\n', encoding="utf-8")
+    policy_changed = remediation_readiness_input_provenance(
+        tmp_path,
+        generator_path=generator,
+    )
+    assert policy_changed["input_digest"] != baseline["input_digest"]
+
+    policy.unlink()
+    generator.write_text("generator-v2\n", encoding="utf-8")
+    generator_changed = remediation_readiness_input_provenance(
+        tmp_path,
+        generator_path=generator,
+    )
+    assert generator_changed["input_digest"] != baseline["input_digest"]
+
+
+def test_remediation_readiness_freshness_detects_matching_and_stale_reports(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "reports" / "remediation-readiness-report.json"
+    write_artifacts(root=tmp_path, out=out)
+
+    fresh = check_remediation_readiness_report_freshness(
+        root=tmp_path,
+        report_path=out,
+    )
+    assert fresh["status"] == "fresh"
+    assert fresh["fresh"] is True
+    assert fresh["schema_valid"] is True
+    assert fresh["authority_valid"] is True
+    assert fresh["reasons"] == []
+    assert fresh["repo_mutation"] is False
+    assert fresh["automation_allowed"] is False
+    assert fresh["patch_application_allowed"] is False
+    assert fresh["merge_authorized"] is False
+
+    policy = tmp_path / "config" / "adaptive_remediation_policy.default.json"
+    policy.parent.mkdir(parents=True)
+    policy.write_text('{"schema_version":"policy-v1"}\n', encoding="utf-8")
+    stale = check_remediation_readiness_report_freshness(
+        root=tmp_path,
+        report_path=out,
+    )
+    assert stale["status"] == "stale"
+    assert stale["fresh"] is False
+    assert "input_digest_mismatch" in stale["reasons"]
+
+
+def test_remediation_readiness_freshness_rejects_schema_and_authority_drift(
+    tmp_path: Path,
+) -> None:
+    payload = build_remediation_readiness_report(tmp_path)
+    payload["schema_version"] = "sdetkit.remediation_readiness_report.v0"
+    payload["patch_application_allowed"] = True
+    payload["authority_boundary"]["merge_authorized"] = True
+    payload["rules"]["safe_to_patch"] = True
+
+    result = validate_remediation_readiness_report_freshness(tmp_path, payload)
+
+    assert result["status"] == "stale"
+    assert result["fresh"] is False
+    assert result["schema_valid"] is False
+    assert result["authority_valid"] is False
+    assert "schema_version_mismatch" in result["reasons"]
+    assert "patch_application_allowed_mismatch" in result["reasons"]
+    assert "authority_boundary_merge_authorized_mismatch" in result["reasons"]
+    assert "rules_safe_to_patch_mismatch" in result["reasons"]
+
+
+def test_remediation_readiness_freshness_rejects_missing_invalid_and_non_object(
+    tmp_path: Path,
+) -> None:
+    missing = check_remediation_readiness_report_freshness(
+        root=tmp_path,
+        report_path=tmp_path / "missing.json",
+    )
+    assert missing["fresh"] is False
+    assert "report_missing" in missing["reasons"]
+
+    invalid_path = tmp_path / "invalid.json"
+    invalid_path.write_text("{invalid", encoding="utf-8")
+    invalid = check_remediation_readiness_report_freshness(
+        root=tmp_path,
+        report_path=invalid_path,
+    )
+    assert invalid["fresh"] is False
+    assert "report_invalid_json" in invalid["reasons"]
+
+    non_object_path = tmp_path / "non-object.json"
+    non_object_path.write_text("[]\n", encoding="utf-8")
+    non_object = check_remediation_readiness_report_freshness(
+        root=tmp_path,
+        report_path=non_object_path,
+    )
+    assert non_object["fresh"] is False
+    assert "report_not_object" in non_object["reasons"]
+
+
+def test_remediation_readiness_cli_checks_freshness_without_rewriting(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    from sdetkit.cli import main as cli_main
+
+    out = tmp_path / "reports" / "remediation-readiness-report.json"
+    write_artifacts(root=tmp_path, out=out)
+    original = out.read_text(encoding="utf-8")
+
+    rc = cli_main(
+        [
+            "remediation-readiness-report",
+            "--root",
+            str(tmp_path),
+            "--out",
+            str(out),
+            "--check-freshness",
+            "--format",
+            "text",
+        ]
+    )
+    assert rc == 0
+    stdout = capsys.readouterr().out
+    assert "freshness_status=fresh" in stdout
+    assert "schema_valid=true" in stdout
+    assert "authority_valid=true" in stdout
+    assert out.read_text(encoding="utf-8") == original
+
+    policy = tmp_path / "config" / "adaptive_remediation_policy.default.json"
+    policy.parent.mkdir(parents=True)
+    policy.write_text('{"schema_version":"policy-v1"}\n', encoding="utf-8")
+    rc = cli_main(
+        [
+            "remediation-readiness-report",
+            "--root",
+            str(tmp_path),
+            "--out",
+            str(out),
+            "--check-freshness",
+            "--format",
+            "json",
+        ]
+    )
+    assert rc == 1
+    stale = json.loads(capsys.readouterr().out)
+    assert stale["fresh"] is False
+    assert out.read_text(encoding="utf-8") == original

@@ -968,6 +968,7 @@ Then use stability-aware command discovery:
     )
     remediation_readiness_report.add_argument("--markdown-out", default="")
     remediation_readiness_report.add_argument("--format", choices=["json", "text"], default="json")
+    remediation_readiness_report.add_argument("--check-freshness", action="store_true")
 
     public_command_surface_report = sub.add_parser(
         "public-command-surface-report",
@@ -2168,6 +2169,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             forwarded.extend(["--policy", str(ns.policy)])
         if str(ns.markdown_out):
             forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
         return _run_module_main("sdetkit.remediation_readiness_report", forwarded)
 
     if ns.cmd == "public-command-surface-report":
