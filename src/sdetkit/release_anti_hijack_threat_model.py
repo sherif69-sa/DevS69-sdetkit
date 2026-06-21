@@ -90,6 +90,91 @@ def _git_head_sha(root: Path) -> str:
     return completed.stdout.strip()
 
 
+_WORKFLOW_ANALYSIS_PROGRAM = (
+    "import json, pathlib, re, sys\n"
+    "path = pathlib.Path(sys.argv[1])\n"
+    "result = {\n"
+    "    'workflow_present': False,\n"
+    "    'workflow_dispatch': False,\n"
+    "    'tag_push_release': False,\n"
+    "    'contents_write': False,\n"
+    "    'id_token_write': False,\n"
+    "    'attestations_write': False,\n"
+    "    'publish_auth_material_reference': False,\n"
+    "    'trusted_publishing_action_detected': False,\n"
+    "    'build_provenance_attestation': False,\n"
+    "    'uses_action_count': 0,\n"
+    "    'unpinned_action_count': 0,\n"
+    "}\n"
+    "if path.is_file():\n"
+    "    text = path.read_text(encoding='utf-8', errors='ignore')\n"
+    "    uses = re.findall(r'^\\s*-?\\s*uses:\\s*([^#\\s]+)', text, re.MULTILINE)\n"
+    "    refs = [value.rsplit('@', 1)[-1] if '@' in value else '' for value in uses]\n"
+    "    result.update({\n"
+    "        'workflow_present': bool(text),\n"
+    "        'workflow_dispatch': 'workflow_dispatch:' in text,\n"
+    "        'tag_push_release': 'tags:' in text and 'v*.*.*' in text,\n"
+    "        'contents_write': 'contents: write' in text,\n"
+    "        'id_token_write': 'id-token: write' in text,\n"
+    "        'attestations_write': 'attestations: write' in text,\n"
+    "        'publish_auth_material_reference': (\n"
+    "            ''.join(('PYPI', '_API', '_TO', 'KEN')) in text\n"
+    "            or ''.join(('TWINE', '_PASS', 'WORD')) in text\n"
+    "        ),\n"
+    "        'trusted_publishing_action_detected': 'pypa/gh-action-pypi-publish' in text,\n"
+    "        'build_provenance_attestation': 'actions/attest-build-provenance' in text,\n"
+    "        'uses_action_count': len(uses),\n"
+    "        'unpinned_action_count': sum(\n"
+    "            1 for ref in refs if re.fullmatch(r'[0-9a-fA-F]{40,}', ref) is None\n"
+    "        ),\n"
+    "    })\n"
+    "print(json.dumps(result, sort_keys=True))\n"
+)
+
+
+_WORKFLOW_ANALYSIS_FIELDS = {
+    "workflow_present": bool,
+    "workflow_dispatch": bool,
+    "tag_push_release": bool,
+    "contents_write": bool,
+    "id_token_write": bool,
+    "attestations_write": bool,
+    "publish_auth_material_reference": bool,
+    "trusted_publishing_action_detected": bool,
+    "build_provenance_attestation": bool,
+    "uses_action_count": int,
+    "unpinned_action_count": int,
+}
+
+
+def _analyze_workflow(path: Path) -> dict[str, bool | int]:
+    completed = subprocess.run(
+        [sys.executable, "-c", _WORKFLOW_ANALYSIS_PROGRAM, str(path)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        raise ValueError("release workflow analysis failed")
+    try:
+        payload = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise ValueError("release workflow analysis returned invalid JSON") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("release workflow analysis must return an object")
+
+    normalized: dict[str, bool | int] = {}
+    for field, expected_type in _WORKFLOW_ANALYSIS_FIELDS.items():
+        value = payload.get(field)
+        if expected_type is bool:
+            if not isinstance(value, bool):
+                raise ValueError(f"release workflow analysis field must be bool: {field}")
+        elif not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            raise ValueError(f"release workflow analysis field must be non-negative int: {field}")
+        normalized[field] = value
+    return normalized
+
+
 _FILE_SHA256_PROGRAM = (
     "import hashlib, pathlib, sys; "
     "print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())"
@@ -223,8 +308,8 @@ def build_release_anti_hijack_threat_model(
 ) -> dict[str, Any]:
     repo_root = Path(root).resolve()
     workflow_path = _resolve_input_path(repo_root, workflow)
-    workflow_text = _read_text(workflow_path)
-    workflow_present = bool(workflow_text)
+    workflow_analysis = _analyze_workflow(workflow_path)
+    workflow_present = bool(workflow_analysis["workflow_present"])
     provenance = release_anti_hijack_input_provenance(
         workflow_path,
         root=repo_root,
@@ -232,22 +317,16 @@ def build_release_anti_hijack_threat_model(
         current_head_sha=current_head_sha,
     )
 
-    uses_entries = _uses_entries(workflow_text)
-    unpinned_actions = [entry for entry in uses_entries if not entry["pinned_full_sha"]]
-
-    has_contents_write = "contents: write" in workflow_text
-    has_id_token_write = "id-token: write" in workflow_text
-    has_attestations_write = "attestations: write" in workflow_text
-    has_workflow_dispatch = "workflow_dispatch:" in workflow_text
-    has_tag_push_release = "tags:" in workflow_text and "v*.*.*" in workflow_text
-
-    pypi_auth_marker = "".join(("PYPI", "_API", "_TO", "KEN"))
-    twine_auth_marker = "".join(("TWINE", "_PASS", "WORD"))
-    has_publish_auth_material = (
-        pypi_auth_marker in workflow_text or twine_auth_marker in workflow_text
-    )
-    has_trusted_publishing_action = "pypa/gh-action-pypi-publish" in workflow_text
-    has_attestation_step = "actions/attest-build-provenance" in workflow_text
+    uses_action_count = int(workflow_analysis["uses_action_count"])
+    unpinned_action_count = int(workflow_analysis["unpinned_action_count"])
+    has_contents_write = bool(workflow_analysis["contents_write"])
+    has_id_token_write = bool(workflow_analysis["id_token_write"])
+    has_attestations_write = bool(workflow_analysis["attestations_write"])
+    has_workflow_dispatch = bool(workflow_analysis["workflow_dispatch"])
+    has_tag_push_release = bool(workflow_analysis["tag_push_release"])
+    has_publish_auth_material = bool(workflow_analysis["publish_auth_material_reference"])
+    has_trusted_publishing_action = bool(workflow_analysis["trusted_publishing_action_detected"])
+    has_attestation_step = bool(workflow_analysis["build_provenance_attestation"])
 
     findings: list[dict[str, str]] = []
     positive_controls: list[str] = []
@@ -274,9 +353,9 @@ def build_release_anti_hijack_threat_model(
     else:
         positive_controls.append("release_workflow_present")
 
-    if uses_entries and not unpinned_actions:
+    if uses_action_count and unpinned_action_count == 0:
         positive_controls.append("third_party_actions_pinned_to_full_sha")
-    elif unpinned_actions:
+    elif unpinned_action_count:
         findings.append(
             _finding(
                 finding_id="unpinned_release_actions",
@@ -379,8 +458,8 @@ def build_release_anti_hijack_threat_model(
             "pypi_publish_auth_material_reference": has_publish_auth_material,
             "trusted_publishing_action_detected": has_trusted_publishing_action,
             "build_provenance_attestation": has_attestation_step,
-            "uses_action_count": len(uses_entries),
-            "unpinned_action_count": len(unpinned_actions),
+            "uses_action_count": uses_action_count,
+            "unpinned_action_count": unpinned_action_count,
         },
         "recommended_next_actions": [
             "Review release workflow changes through CODEOWNERS/rulesets.",

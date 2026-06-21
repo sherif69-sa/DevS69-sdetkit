@@ -125,6 +125,31 @@ def test_release_anti_hijack_report_preserves_review_first_findings(
     assert payload["semantic_equivalence_proven"] is False
 
 
+def test_release_workflow_text_is_not_read_in_parent_process(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    workflow = _release_workflow(tmp_path / "release.yml")
+    original_read_text = Path.read_text
+
+    def guarded_read_text(self: Path, *args, **kwargs):
+        if self.resolve() == workflow.resolve():
+            raise AssertionError("parent process must not read release workflow text")
+        return original_read_text(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", guarded_read_text)
+    payload = build_release_anti_hijack_threat_model(
+        workflow,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+
+    assert payload["workflow_present"] is True
+    assert payload["release_controls"]["uses_action_count"] == 4
+    assert payload["release_controls"]["unpinned_action_count"] == 0
+    assert payload["release_controls"]["pypi_publish_auth_material_reference"] is True
+
+
 def test_release_anti_hijack_provenance_is_deterministic(tmp_path: Path) -> None:
     workflow = _release_workflow(tmp_path / "release.yml")
 
