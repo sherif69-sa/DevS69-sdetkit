@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import adoption_learning_report_dashboard
+from sdetkit import adoption_learning_report, adoption_learning_report_dashboard
 
 
 def _report_payload(
@@ -50,7 +50,7 @@ def _report_payload(
         ]
     )
     return {
-        "schema_version": "sdetkit.adoption_learning_report.v1",
+        "schema_version": adoption_learning_report.SCHEMA_VERSION,
         "source_matrix": "/tmp/adoption-real-world-matrix.json",
         "source_matrix_schema_version": ("sdetkit.adoption_real_world_learning_matrix.v1"),
         "source_matrix_status": "review_required",
@@ -134,7 +134,7 @@ def test_dashboard_builds_read_only_candidate_summary(
     assert payload["schema_version"] == ("sdetkit.adoption_learning_report_dashboard.v1")
     assert payload["status"] == "ready"
     assert payload["report_exists"] is True
-    assert payload["source_report_schema_version"] == ("sdetkit.adoption_learning_report.v1")
+    assert payload["source_report_schema_version"] == (adoption_learning_report.SCHEMA_VERSION)
     assert payload["source_repo_count"] == 4
     assert payload["candidate_count"] == 2
     assert payload["top_candidate"]["classification"] == ("weak_proof_command_mapping")
