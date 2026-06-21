@@ -2072,6 +2072,15 @@
     "remediation-readiness-report",
     "workflow-governance-report"
   ],
+  "input_provenance": {
+    "digest_algorithm": "sha256",
+    "generator_schema_version": "sdetkit.public_command_surface_report.v2",
+    "generator_source": "src/sdetkit/public_command_surface_report.py",
+    "input_count": 3,
+    "input_digest": "2ed306fcf20cb4434c41b8d7e7e6fa754b3cab656e9061eaff0d84d65811953e",
+    "source_file": "src/sdetkit/_legacy_cli.py",
+    "source_file_count": 1
+  },
   "merge_authorized": false,
   "operator_summary": {
     "classification_source": "root argparse registration help text",
@@ -2091,7 +2100,7 @@
     "safe_to_patch": false
   },
   "safe_to_patch": false,
-  "schema_version": "sdetkit.public_command_surface_report.v1",
+  "schema_version": "sdetkit.public_command_surface_report.v2",
   "semantic_equivalence_proven": false,
   "source_file": "src/sdetkit/_legacy_cli.py",
   "stable_command_count": 13,

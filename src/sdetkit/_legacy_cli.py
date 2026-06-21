@@ -979,6 +979,7 @@ Then use stability-aware command discovery:
     )
     public_command_surface_report.add_argument("--markdown-out", default="")
     public_command_surface_report.add_argument("--format", choices=["json", "text"], default="json")
+    public_command_surface_report.add_argument("--check-freshness", action="store_true")
 
     product_maturity_radar = sub.add_parser(
         "product-maturity-radar",
@@ -2180,6 +2181,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         ]
         if str(ns.markdown_out):
             forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
         return _run_module_main("sdetkit.public_command_surface_report", forwarded)
 
     if ns.cmd == "product-maturity-radar":
