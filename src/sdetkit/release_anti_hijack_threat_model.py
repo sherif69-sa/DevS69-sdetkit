@@ -90,6 +90,27 @@ def _git_head_sha(root: Path) -> str:
     return completed.stdout.strip()
 
 
+_FILE_SHA256_PROGRAM = (
+    "import hashlib, pathlib, sys; "
+    "print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())"
+)
+
+
+def _file_sha256(path: Path) -> str:
+    if not path.is_file():
+        return hashlib.sha256(b"<missing>").hexdigest()
+    completed = subprocess.run(
+        [sys.executable, "-c", _FILE_SHA256_PROGRAM, str(path)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    fingerprint = completed.stdout.strip()
+    if completed.returncode != 0 or re.fullmatch(r"[0-9a-f]{64}", fingerprint) is None:
+        return ""
+    return fingerprint
+
+
 def _update_input_digest(hasher: Any, label: str, content: bytes) -> None:
     label_bytes = label.encode("utf-8")
     hasher.update(len(label_bytes).to_bytes(8, "big"))
@@ -110,8 +131,8 @@ def release_anti_hijack_input_provenance(
     generator = (
         Path(generator_path).resolve() if generator_path is not None else Path(__file__).resolve()
     )
-    workflow_content = workflow_path.read_bytes() if workflow_path.is_file() else b"<missing>"
-    generator_content = generator.read_bytes() if generator.is_file() else b"<missing>"
+    workflow_fingerprint = _file_sha256(workflow_path)
+    generator_fingerprint = _file_sha256(generator)
     head_sha = _git_head_sha(repo_root) if current_head_sha is None else current_head_sha
 
     evidence_contract = json.dumps(
@@ -124,9 +145,9 @@ def release_anti_hijack_input_provenance(
         ("current_head_sha", head_sha.encode("utf-8")),
         ("evidence_limit_contract", evidence_contract),
         ("generator_schema_version", SCHEMA_VERSION.encode("utf-8")),
-        (GENERATOR_SOURCE_LABEL, generator_content),
+        ("generator_source_sha256", generator_fingerprint.encode("utf-8")),
         ("workflow_path", _display_input_path(repo_root, workflow_path).encode("utf-8")),
-        ("workflow_source", workflow_content),
+        ("workflow_source_sha256", workflow_fingerprint.encode("utf-8")),
     ]
     hasher = hashlib.sha256()
     for label, content in sorted(inputs, key=lambda item: item[0]):
@@ -138,9 +159,9 @@ def release_anti_hijack_input_provenance(
         "input_count": len(inputs),
         "generator_schema_version": SCHEMA_VERSION,
         "generator_source": GENERATOR_SOURCE_LABEL,
-        "generator_source_sha256": hashlib.sha256(generator_content).hexdigest(),
+        "generator_source_sha256": generator_fingerprint,
         "workflow_path": _display_input_path(repo_root, workflow_path),
-        "workflow_source_sha256": hashlib.sha256(workflow_content).hexdigest(),
+        "workflow_source_sha256": workflow_fingerprint,
         "workflow_present": workflow_path.is_file(),
         "current_head_sha": head_sha,
         "current_head_available": bool(head_sha),
@@ -599,12 +620,9 @@ def validate_release_anti_hijack_report_freshness(
         "evidence_limits_valid": evidence_limits_valid,
         "authority_valid": authority_valid,
         "reasons": reasons,
-        "recorded_input_digest": recorded_provenance.get("input_digest", ""),
-        "current_input_digest": expected_provenance.get("input_digest", ""),
-        "recorded_workflow_sha256": recorded_provenance.get("workflow_source_sha256", ""),
-        "current_workflow_sha256": expected_provenance.get("workflow_source_sha256", ""),
-        "recorded_head_sha": recorded_provenance.get("current_head_sha", ""),
-        "current_head_sha": expected_provenance.get("current_head_sha", ""),
+        "expected_input_digest": expected_provenance.get("input_digest", ""),
+        "expected_workflow_sha256": expected_provenance.get("workflow_source_sha256", ""),
+        "expected_head_sha": expected_provenance.get("current_head_sha", ""),
         "reporting_only": True,
         "repo_mutation": False,
         "automation_allowed": False,
@@ -688,12 +706,9 @@ def render_freshness_text(payload: dict[str, Any]) -> str:
             f"{str(bool(payload.get('evidence_limits_valid', False))).lower()}",
             f"authority_valid={str(bool(payload.get('authority_valid', False))).lower()}",
             f"freshness_reasons={reason_text}",
-            f"recorded_input_digest={payload.get('recorded_input_digest', '')}",
-            f"current_input_digest={payload.get('current_input_digest', '')}",
-            f"recorded_workflow_sha256={payload.get('recorded_workflow_sha256', '')}",
-            f"current_workflow_sha256={payload.get('current_workflow_sha256', '')}",
-            f"recorded_head_sha={payload.get('recorded_head_sha', '')}",
-            f"current_head_sha={payload.get('current_head_sha', '')}",
+            f"expected_input_digest={payload.get('expected_input_digest', '')}",
+            f"expected_workflow_sha256={payload.get('expected_workflow_sha256', '')}",
+            f"expected_head_sha={payload.get('expected_head_sha', '')}",
             "reporting_only=true",
             "repo_mutation=false",
             "automation_allowed=false",

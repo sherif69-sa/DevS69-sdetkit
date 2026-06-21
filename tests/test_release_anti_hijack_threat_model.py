@@ -248,6 +248,40 @@ def test_release_anti_hijack_freshness_rejects_evidence_or_authority_drift(
     assert "merge_authorized_mismatch" in freshness["reasons"]
 
 
+def test_release_anti_hijack_freshness_never_echoes_recorded_values(
+    tmp_path: Path,
+) -> None:
+    workflow = _release_workflow(tmp_path / "release.yml")
+    out = tmp_path / "report.json"
+    payload = write_artifacts(
+        workflow=workflow,
+        out=out,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+
+    marker = "".join(("private", "-", "material", "-", "must", "-", "not", "-", "echo"))
+    payload["input_provenance"]["input_digest"] = marker
+    payload["input_provenance"]["workflow_source_sha256"] = marker
+    payload["input_provenance"]["current_head_sha"] = marker
+    out.write_text(json.dumps(payload), encoding="utf-8")
+
+    freshness = check_release_anti_hijack_report_freshness(
+        report_path=out,
+        workflow=workflow,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+    rendered = json.dumps(freshness, sort_keys=True)
+
+    assert freshness["fresh"] is False
+    assert marker not in rendered
+    assert "recorded_input_digest" not in freshness
+    assert "recorded_workflow_sha256" not in freshness
+    assert "recorded_head_sha" not in freshness
+    assert freshness["expected_head_sha"] == "head-a"
+
+
 def test_release_anti_hijack_freshness_fails_closed_for_bad_report_files(
     tmp_path: Path,
 ) -> None:
