@@ -149,6 +149,19 @@ human decisions.
 
 ## Review real-world adoption learning
 
+These commands are intentionally hidden maintainer-only learning lanes. They are absent from
+default root help by design so adopter-facing discovery remains focused:
+
+- `adoption-real-world-learning-matrix`
+- `adoption-learning-report`
+
+Maintainers can reveal both commands with `python -m sdetkit --show-hidden --help`. Direct
+command help remains available through `python -m sdetkit <command> --help`.
+
+Hidden status is a discoverability contract, not action authority. Both commands remain
+review-first and do not authorize proof execution, patch application, branch or pull-request
+creation, security remediation, alert dismissal, or merge.
+
 Maintainers can aggregate read-only observations from a verified matrix of external repository roots, then convert the resulting matrix artifact into a review-first learning report.
 
 First, generate the real-world learning matrix from repository roots whose licenses and local paths have already been verified:
