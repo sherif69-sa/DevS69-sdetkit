@@ -606,6 +606,21 @@ def _looks_like_slug(token: str) -> bool:
     return True
 
 
+def _looks_like_snake_identifier(token: str) -> bool:
+    if len(token) < 20:
+        return False
+    if token.lower() != token:
+        return False
+    if "_" not in token:
+        return False
+    parts = token.split("_")
+    if len(parts) < 3:
+        return False
+    return all(
+        len(part) >= 3 and re.fullmatch(r"[a-z][a-z0-9]*", part) is not None for part in parts
+    )
+
+
 def _looks_like_uuid(token: str) -> bool:
     t = token
     if t.startswith("urn:uuid:"):
@@ -671,6 +686,8 @@ def _scan_text_patterns(rel_path: str, text: str) -> list[Finding]:
             if _looks_like_path(token):
                 continue
             if _looks_like_slug(token):
+                continue
+            if _looks_like_snake_identifier(token):
                 continue
             if _looks_like_uuid(token):
                 continue

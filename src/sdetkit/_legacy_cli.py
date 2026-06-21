@@ -787,6 +787,7 @@ Then use stability-aware command discovery:
         "adoption-learning-report",
         help=argparse.SUPPRESS,
     )
+    adoption_learning_report.add_argument("--root", default=".")
     adoption_learning_report.add_argument("--matrix-json", required=True)
     adoption_learning_report.add_argument("--repo-memory-profile", default="")
     adoption_learning_report.add_argument(
@@ -794,6 +795,7 @@ Then use stability-aware command discovery:
     )
     adoption_learning_report.add_argument("--markdown-out", default="")
     adoption_learning_report.add_argument("--format", choices=["json", "text"], default="json")
+    adoption_learning_report.add_argument("--check-freshness", action="store_true")
 
     release_anti_hijack_threat_model = sub.add_parser(
         "release-anti-hijack-threat-model",
@@ -1693,6 +1695,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "adoption-learning-report":
         forwarded = [
+            "--root",
+            str(ns.root),
             "--matrix-json",
             str(ns.matrix_json),
             "--out",
@@ -1704,6 +1708,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             forwarded.extend(["--repo-memory-profile", str(ns.repo_memory_profile)])
         if str(ns.markdown_out):
             forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
         return _run_module_main("sdetkit.adoption_learning_report", forwarded)
 
     if ns.cmd == "release-anti-hijack-threat-model":

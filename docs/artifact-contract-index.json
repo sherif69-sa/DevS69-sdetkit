@@ -696,7 +696,7 @@
       "id": "adoption-learning-report-json",
       "path": "build/sdetkit/adoption-learning-report.json",
       "produced_by": "python -m sdetkit adoption-learning-report --matrix-json build/sdetkit/adoption-real-world-learning/adoption-real-world-matrix.json --out build/sdetkit/adoption-learning-report.json --format json",
-      "schema_version": "sdetkit.adoption_learning_report.v1",
+      "schema_version": "sdetkit.adoption_learning_report.v2",
       "required_fields": [
         "schema_version",
         "source_matrix",

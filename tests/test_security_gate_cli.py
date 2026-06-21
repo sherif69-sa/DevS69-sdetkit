@@ -244,6 +244,28 @@ def test_security_scan_ignores_uuid_and_hex_digests(tmp_path: Path, capsys) -> N
     assert not any(f.get("rule_id") == "SEC_HIGH_ENTROPY_STRING" for f in findings)
 
 
+def test_security_scan_ignores_structured_snake_case_identifier_but_detects_token(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    token = "".join(("AbCdEfGh", "IjKlMnOp", "QrStUvWx", "Yz012345"))
+    target = tmp_path / "config.json"
+    target.write_text(
+        f'{{\n  "lane": "alpha_component_publish_stage",\n  "TOPSECRET_SAMPLE": "{token}"\n}}\n',
+        encoding="utf-8",
+    )
+
+    assert _run(["scan", "--root", str(tmp_path), "--format", "json", "--fail-on", "none"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    findings = [
+        item for item in payload["findings"] if item["rule_id"] == "SEC_HIGH_ENTROPY_STRING"
+    ]
+
+    assert len(findings) == 1
+    assert findings[0]["path"] == "config.json"
+    assert findings[0]["line"] == 3
+
+
 def test_security_baseline_requires_output(tmp_path: Path, capsys) -> None:
     src = tmp_path / "src"
     src.mkdir()
