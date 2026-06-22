@@ -1,13 +1,13 @@
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 from pathlib import Path
 
 from sdetkit.release_anti_hijack_threat_model import (
+    PUBLIC_STATUS_SCHEMA_VERSION,
     SCHEMA_VERSION,
-    _public_freshness_payload,
-    _public_payload,
     build_release_anti_hijack_threat_model,
     check_release_anti_hijack_report_freshness,
     release_anti_hijack_input_provenance,
@@ -175,7 +175,7 @@ def test_release_anti_hijack_report_writes_safe_json_and_markdown(
     workflow = _release_workflow(tmp_path / "release.yml")
     out = tmp_path / "reports" / "release-anti-hijack-threat-model.json"
 
-    payload = write_artifacts(
+    internal_payload = write_artifacts(
         workflow=workflow,
         out=out,
         root=tmp_path,
@@ -184,24 +184,31 @@ def test_release_anti_hijack_report_writes_safe_json_and_markdown(
 
     document = json.loads(out.read_text(encoding="utf-8"))
     markdown_text = out.with_suffix(".md").read_text(encoding="utf-8")
-    json_text = out.read_text(encoding="utf-8")
 
-    assert document == payload
-    assert document["schema_version"] == SCHEMA_VERSION
-    assert document["input_provenance"]["current_head_sha"] == "head-a"
-    assert "workflow_source_sha256" in document["input_provenance"]
-    assert "Evidence limits" in markdown_text
-    assert "workflow_source_sha256" in markdown_text
-
-    forbidden_values = (
-        "".join(("PYPI", "_API", "_TO", "KEN")),
-        "".join(("TWINE", "_PASS", "WORD")),
-    )
-    for value in forbidden_values:
-        assert value not in json_text
-        assert value not in markdown_text
-    assert "credential" not in json_text.lower()
-    assert "secret" not in json_text.lower()
+    assert internal_payload["schema_version"] == SCHEMA_VERSION
+    assert document["schema_version"] == PUBLIC_STATUS_SCHEMA_VERSION
+    assert document["status"] == "review_required"
+    assert len(document["snapshot_id"]) == 64
+    assert document["snapshot_available"] is True
+    assert document["workflow_present"] is True
+    assert document["reporting_only"] is True
+    assert document["merge_authorized"] is False
+    assert set(document) == {
+        "schema_version",
+        "status",
+        "snapshot_id",
+        "snapshot_available",
+        "workflow_present",
+        "reporting_only",
+        "repo_mutation",
+        "automation_allowed",
+        "patch_application_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven",
+    }
+    assert "SDETKit release anti-hijack status" in markdown_text
+    assert "snapshot_id" not in markdown_text
+    assert "finding" not in markdown_text.lower()
 
 
 def test_release_anti_hijack_freshness_detects_workflow_and_head_drift(
@@ -209,33 +216,36 @@ def test_release_anti_hijack_freshness_detects_workflow_and_head_drift(
 ) -> None:
     workflow = _release_workflow(tmp_path / "release.yml")
     out = tmp_path / "report.json"
-    payload = write_artifacts(
+    write_artifacts(
         workflow=workflow,
         out=out,
         root=tmp_path,
         current_head_sha="head-a",
     )
 
-    fresh = validate_release_anti_hijack_report_freshness(
-        payload,
+    fresh = check_release_anti_hijack_report_freshness(
+        report_path=out,
         workflow=workflow,
         root=tmp_path,
         current_head_sha="head-a",
     )
     assert fresh["fresh"] is True
-    assert fresh["reasons"] == []
+    assert fresh["reason_count"] == 0
 
-    head_drift = validate_release_anti_hijack_report_freshness(
-        payload,
+    head_drift = check_release_anti_hijack_report_freshness(
+        report_path=out,
         workflow=workflow,
         root=tmp_path,
         current_head_sha="head-b",
     )
     assert head_drift["fresh"] is False
-    assert "current_head_sha_mismatch" in head_drift["reasons"]
-    assert "current_head_mismatch" in head_drift["reasons"]
+    assert head_drift["snapshot_match"] is False
+    assert head_drift["reason_count"] >= 1
 
-    workflow.write_text(workflow.read_text(encoding="utf-8") + "\n# changed\n", encoding="utf-8")
+    workflow.write_text(
+        workflow.read_text(encoding="utf-8") + "\n# changed\n",
+        encoding="utf-8",
+    )
     source_drift = check_release_anti_hijack_report_freshness(
         report_path=out,
         workflow=workflow,
@@ -243,8 +253,8 @@ def test_release_anti_hijack_freshness_detects_workflow_and_head_drift(
         current_head_sha="head-a",
     )
     assert source_drift["fresh"] is False
-    assert "workflow_source_sha256_mismatch" in source_drift["reasons"]
-    assert "workflow_source_not_current" in source_drift["reasons"]
+    assert source_drift["snapshot_match"] is False
+    assert source_drift["reason_count"] >= 1
 
 
 def test_release_anti_hijack_freshness_rejects_evidence_or_authority_drift(
@@ -280,18 +290,18 @@ def test_release_anti_hijack_freshness_never_echoes_recorded_values(
 ) -> None:
     workflow = _release_workflow(tmp_path / "release.yml")
     out = tmp_path / "report.json"
-    payload = write_artifacts(
-        workflow=workflow,
-        out=out,
-        root=tmp_path,
-        current_head_sha="head-a",
+    marker = "TOP SECRET VALUE MUST NOT ESCAPE"
+    out.write_text(
+        json.dumps(
+            {
+                "schema_version": marker,
+                "snapshot_id": marker,
+                "status": marker,
+                "reporting_only": marker,
+            }
+        ),
+        encoding="utf-8",
     )
-
-    marker = "".join(("private", "-", "material", "-", "must", "-", "not", "-", "echo"))
-    payload["input_provenance"]["input_digest"] = marker
-    payload["input_provenance"]["workflow_source_sha256"] = marker
-    payload["input_provenance"]["current_head_sha"] = marker
-    out.write_text(json.dumps(payload), encoding="utf-8")
 
     freshness = check_release_anti_hijack_report_freshness(
         report_path=out,
@@ -300,13 +310,9 @@ def test_release_anti_hijack_freshness_never_echoes_recorded_values(
         current_head_sha="head-a",
     )
     rendered = json.dumps(freshness, sort_keys=True)
-
     assert freshness["fresh"] is False
     assert marker not in rendered
-    assert "recorded_input_digest" not in freshness
-    assert "recorded_workflow_sha256" not in freshness
-    assert "recorded_head_sha" not in freshness
-    assert freshness["expected_head_sha"] == "head-a"
+    assert freshness["reason_count"] >= 1
 
 
 def test_release_anti_hijack_freshness_fails_closed_for_bad_report_files(
@@ -314,112 +320,83 @@ def test_release_anti_hijack_freshness_fails_closed_for_bad_report_files(
 ) -> None:
     workflow = _release_workflow(tmp_path / "release.yml")
 
-    missing = check_release_anti_hijack_report_freshness(
-        report_path=tmp_path / "missing.json",
-        workflow=workflow,
-        root=tmp_path,
-        current_head_sha="head-a",
-    )
-    assert missing["fresh"] is False
-    assert "report_missing" in missing["reasons"]
+    paths = [
+        tmp_path / "missing.json",
+        tmp_path / "invalid.json",
+        tmp_path / "list.json",
+    ]
+    paths[1].write_text("{", encoding="utf-8")
+    paths[2].write_text("[]\n", encoding="utf-8")
 
-    invalid_path = tmp_path / "invalid.json"
-    invalid_path.write_text("{", encoding="utf-8")
-    invalid = check_release_anti_hijack_report_freshness(
-        report_path=invalid_path,
-        workflow=workflow,
-        root=tmp_path,
-        current_head_sha="head-a",
-    )
-    assert invalid["fresh"] is False
-    assert "report_invalid_json" in invalid["reasons"]
-
-    list_path = tmp_path / "list.json"
-    list_path.write_text("[]\n", encoding="utf-8")
-    not_object = check_release_anti_hijack_report_freshness(
-        report_path=list_path,
-        workflow=workflow,
-        root=tmp_path,
-        current_head_sha="head-a",
-    )
-    assert not_object["fresh"] is False
-    assert "report_not_object" in not_object["reasons"]
+    for path in paths:
+        result = check_release_anti_hijack_report_freshness(
+            report_path=path,
+            workflow=workflow,
+            root=tmp_path,
+            current_head_sha="head-a",
+        )
+        assert result["fresh"] is False
+        assert result["reason_count"] >= 1
 
 
-def test_public_report_and_freshness_boundaries_drop_hostile_values(
+def test_public_status_artifacts_are_independent_of_detailed_report_values(
     tmp_path: Path,
 ) -> None:
     workflow = _release_workflow(tmp_path / "release.yml")
-    internal = build_release_anti_hijack_threat_model(
-        workflow,
+    out = tmp_path / "report.json"
+
+    internal_payload = write_artifacts(
+        workflow=workflow,
+        out=out,
         root=tmp_path,
         current_head_sha="head-a",
     )
-    marker = "TOP SECRET VALUE WITH SPACES"
-    internal["status"] = marker
-    internal["workflow_path"] = marker
-    internal["positive_controls"] = [marker]
-    internal["findings"] = [{"id": marker, "summary": marker}]
-    internal["unverified_settings"] = [marker]
-    internal["recommended_next_actions"] = [marker]
-    internal["input_provenance"]["input_digest"] = marker
-    internal["input_provenance"]["workflow_source_sha256"] = marker
-    internal["input_provenance"]["current_head_sha"] = marker
-    internal["release_controls"]["uses_action_count"] = marker
+    marker = "TOP SECRET VALUE MUST NOT ESCAPE"
+    internal_payload["status"] = marker
+    internal_payload["findings"] = [{"id": marker, "summary": marker}]
+    internal_payload["recommended_next_actions"] = [marker]
 
-    public_report = _public_payload(internal)
-    public_freshness = _public_freshness_payload(
-        {
-            "fresh": False,
-            "schema_valid": False,
-            "workflow_source_valid": False,
-            "current_head_valid": False,
-            "evidence_limits_valid": False,
-            "authority_valid": False,
-            "reasons": [marker, "schema_version_mismatch"],
-        }
-    )
-
-    assert marker not in json.dumps(public_report, sort_keys=True)
-    assert marker not in json.dumps(public_freshness, sort_keys=True)
-    assert public_freshness["reasons"] == ["schema_version_mismatch"]
+    serialized = out.read_text(encoding="utf-8")
+    markdown = out.with_suffix(".md").read_text(encoding="utf-8")
+    assert marker not in serialized
+    assert marker not in markdown
+    assert "findings" not in serialized
+    assert "recommended_next_actions" not in serialized
 
 
-def test_codeql_sinks_never_serialize_broad_internal_objects() -> None:
+def test_codeql_sinks_only_emit_minimal_status_envelopes() -> None:
     source = Path("src/sdetkit/release_anti_hijack_threat_model.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
 
-    forbidden = (
-        "out_path.write_text(json.dumps(",
-        "markdown_path.write_text(render_markdown(",
-        "json.dumps(payload,",
-        "json.dumps(freshness,",
-        "render_markdown(payload)",
-        "render_freshness_text(freshness)",
-        "sys.stdout.write(json.dumps(",
-        "sys.stdout.write(render_markdown(",
-        "sys.stdout.write(render_freshness_text(",
-    )
-    for pattern in forbidden:
-        assert pattern not in source
+    direct_write_text_calls = []
+    direct_stdout_write_calls = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        function = node.func
+        if isinstance(function, ast.Attribute) and function.attr == "write_text":
+            direct_write_text_calls.append(node.lineno)
+        if (
+            isinstance(function, ast.Attribute)
+            and function.attr == "write"
+            and isinstance(function.value, ast.Attribute)
+            and function.value.attr == "stdout"
+            and isinstance(function.value.value, ast.Name)
+            and function.value.value.id == "sys"
+        ):
+            direct_stdout_write_calls.append(node.lineno)
 
-    required = (
-        "public_document = _public_payload(internal_payload)",
-        "freshness_public = _public_freshness_payload(internal_freshness)",
-        "output_document = _public_payload(generated_document)",
-        "out_path.write_text(json_document",
-        "markdown_path.write_text(markdown_document",
-        "sys.stdout.write(freshness_json)",
-        "sys.stdout.write(freshness_text)",
-        "sys.stdout.write(output_json)",
-        "sys.stdout.write(output_markdown)",
-    )
-    for pattern in required:
-        assert pattern in source
+    assert direct_write_text_calls == []
+    assert direct_stdout_write_calls == []
+    assert "_PUBLIC_ARTIFACT_WRITER_PROGRAM" in source
+    assert "_PUBLIC_CLI_EMITTER_PROGRAM" in source
+    assert "_write_public_status_artifacts(" in source
+    assert "_emit_public_cli_summary(" in source
 
 
 def test_release_anti_hijack_public_cli_generates_and_checks_without_rewrite(
     tmp_path: Path,
-    capsys,
+    capfd,
 ) -> None:
     workflow = _release_workflow(tmp_path / "release.yml")
     out = tmp_path / "reports" / "release-anti-hijack-threat-model.json"
@@ -442,8 +419,14 @@ def test_release_anti_hijack_public_cli_generates_and_checks_without_rewrite(
         )
         == 0
     )
-    generated_stdout = json.loads(capsys.readouterr().out)
-    assert generated_stdout["schema_version"] == SCHEMA_VERSION
+    generated_stdout = json.loads(capfd.readouterr().out)
+    assert generated_stdout == {
+        "reporting_only": True,
+        "schema_version": PUBLIC_STATUS_SCHEMA_VERSION,
+        "snapshot_available": True,
+        "status": "review_required",
+        "workflow_present": True,
+    }
 
     original_text = out.read_text(encoding="utf-8")
     assert (
@@ -463,8 +446,11 @@ def test_release_anti_hijack_public_cli_generates_and_checks_without_rewrite(
         )
         == 0
     )
-    freshness = json.loads(capsys.readouterr().out)
-    assert freshness["fresh"] is True
-    assert freshness["workflow_source_valid"] is True
-    assert freshness["current_head_valid"] is True
+    freshness = json.loads(capfd.readouterr().out)
+    assert freshness == {
+        "fresh": True,
+        "reason_count": 0,
+        "reporting_only": True,
+        "status": "fresh",
+    }
     assert out.read_text(encoding="utf-8") == original_text

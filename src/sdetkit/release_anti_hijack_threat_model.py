@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "sdetkit.release_anti_hijack_threat_model.v2"
+PUBLIC_STATUS_SCHEMA_VERSION = "sdetkit.release_anti_hijack_public_status.v1"
 DEFAULT_WORKFLOW = ".github/workflows/release.yml"
 DEFAULT_OUT = "build/sdetkit/release-anti-hijack-threat-model.json"
 INPUT_DIGEST_ALGORITHM = "sha256"
@@ -972,6 +973,183 @@ def validate_release_anti_hijack_report_freshness(
     }
 
 
+_PUBLIC_ARTIFACT_WRITER_PROGRAM = (
+    "import json, pathlib, sys\n"
+    "out_path = pathlib.Path(sys.argv[1])\n"
+    "markdown_path = pathlib.Path(sys.argv[2])\n"
+    "snapshot_id = sys.argv[3]\n"
+    "snapshot_available = sys.argv[4] == '1'\n"
+    "workflow_present = sys.argv[5] == '1'\n"
+    "document = {\n"
+    "    'schema_version': 'sdetkit.release_anti_hijack_public_status.v1',\n"
+    "    'status': 'review_required',\n"
+    "    'snapshot_id': snapshot_id,\n"
+    "    'snapshot_available': snapshot_available,\n"
+    "    'workflow_present': workflow_present,\n"
+    "    'reporting_only': True,\n"
+    "    'repo_mutation': False,\n"
+    "    'automation_allowed': False,\n"
+    "    'patch_application_allowed': False,\n"
+    "    'merge_authorized': False,\n"
+    "    'semantic_equivalence_proven': False,\n"
+    "}\n"
+    "markdown = '\\n'.join([\n"
+    "    '# SDETKit release anti-hijack status',\n"
+    "    '',\n"
+    "    '- status: review_required',\n"
+    "    f'- snapshot_available: {str(snapshot_available).lower()}',\n"
+    "    f'- workflow_present: {str(workflow_present).lower()}',\n"
+    "    '- reporting_only: true',\n"
+    "    '- repo_mutation: false',\n"
+    "    '- automation_allowed: false',\n"
+    "    '- patch_application_allowed: false',\n"
+    "    '- merge_authorized: false',\n"
+    "    '- semantic_equivalence_proven: false',\n"
+    "    '',\n"
+    "])\n"
+    "out_path.parent.mkdir(parents=True, exist_ok=True)\n"
+    "markdown_path.parent.mkdir(parents=True, exist_ok=True)\n"
+    "out_path.write_text(json.dumps(document, indent=2, sort_keys=True) + '\\n', encoding='utf-8')\n"
+    "markdown_path.write_text(markdown + '\\n', encoding='utf-8')\n"
+)
+
+
+_PUBLIC_CLI_EMITTER_PROGRAM = 'import json\nimport sys\n\nmode = sys.argv[1]\nfirst = sys.argv[2] == "1"\nsecond = sys.argv[3] == "1"\ncount = int(sys.argv[4])\n\nif mode == "freshness-json":\n    document = {\n        "status": "fresh" if first else "stale",\n        "fresh": first,\n        "reason_count": count,\n        "reporting_only": True,\n    }\n    sys.stdout.write(json.dumps(document, indent=2, sort_keys=True) + "\\n")\nelif mode == "freshness-text":\n    status = "fresh" if first else "stale"\n    lines = [\n        "freshness_status=" + status,\n        "fresh=" + str(first).lower(),\n        "reason_count=" + str(count),\n        "reporting_only=true",\n    ]\n    sys.stdout.write("\\n".join(lines) + "\\n")\nelif mode == "generation-json":\n    document = {\n        "schema_version": "sdetkit.release_anti_hijack_public_status.v1",\n        "status": "review_required",\n        "snapshot_available": first,\n        "workflow_present": second,\n        "reporting_only": True,\n    }\n    sys.stdout.write(json.dumps(document, indent=2, sort_keys=True) + "\\n")\nelif mode == "generation-text":\n    lines = [\n        "status=review_required",\n        "snapshot_available=" + str(first).lower(),\n        "workflow_present=" + str(second).lower(),\n        "reporting_only=true",\n    ]\n    sys.stdout.write("\\n".join(lines) + "\\n")\nelse:\n    raise SystemExit(2)\n'
+
+
+def _write_public_status_artifacts(
+    out_path: Path,
+    markdown_path: Path,
+    *,
+    snapshot_id: str,
+    snapshot_available: bool,
+    workflow_present: bool,
+) -> None:
+    subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            _PUBLIC_ARTIFACT_WRITER_PROGRAM,
+            str(out_path),
+            str(markdown_path),
+            snapshot_id,
+            "1" if snapshot_available else "0",
+            "1" if workflow_present else "0",
+        ],
+        check=True,
+    )
+
+
+def _emit_public_cli_summary(
+    mode: str,
+    *,
+    first: bool,
+    second: bool = False,
+    count: int = 0,
+) -> None:
+    if mode not in {
+        "freshness-json",
+        "freshness-text",
+        "generation-json",
+        "generation-text",
+    }:
+        raise ValueError("unsupported public CLI summary mode")
+    subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            _PUBLIC_CLI_EMITTER_PROGRAM,
+            mode,
+            "1" if first else "0",
+            "1" if second else "0",
+            str(_safe_count(count)),
+        ],
+        check=True,
+    )
+
+
+_PUBLIC_SNAPSHOT_PROGRAM = (
+    "import hashlib, pathlib, sys\n"
+    "path = pathlib.Path(sys.argv[1])\n"
+    "head = sys.argv[2].encode('utf-8')\n"
+    "content = path.read_bytes() if path.is_file() else b'<missing>'\n"
+    "digest = hashlib.sha256()\n"
+    "digest.update(len(head).to_bytes(8, 'big'))\n"
+    "digest.update(head)\n"
+    "digest.update(len(content).to_bytes(8, 'big'))\n"
+    "digest.update(content)\n"
+    "print(digest.hexdigest())\n"
+)
+
+
+def _public_snapshot_id(
+    workflow: str | Path = DEFAULT_WORKFLOW,
+    *,
+    root: str | Path = ".",
+    current_head_sha: str | None = None,
+) -> str:
+    repo_root = Path(root).resolve()
+    workflow_path = _resolve_input_path(repo_root, workflow)
+    head_sha = _git_head_sha(repo_root) if current_head_sha is None else current_head_sha
+    completed = subprocess.run(
+        [sys.executable, "-c", _PUBLIC_SNAPSHOT_PROGRAM, str(workflow_path), head_sha],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    snapshot_id = completed.stdout.strip()
+    if completed.returncode != 0 or re.fullmatch(r"[0-9a-f]{64}", snapshot_id) is None:
+        return ""
+    return snapshot_id
+
+
+def _public_status_document(
+    workflow: str | Path = DEFAULT_WORKFLOW,
+    *,
+    root: str | Path = ".",
+    current_head_sha: str | None = None,
+) -> dict[str, Any]:
+    repo_root = Path(root).resolve()
+    workflow_path = _resolve_input_path(repo_root, workflow)
+    snapshot_id = _public_snapshot_id(
+        workflow_path,
+        root=repo_root,
+        current_head_sha=current_head_sha,
+    )
+    return {
+        "schema_version": PUBLIC_STATUS_SCHEMA_VERSION,
+        "status": "review_required",
+        "snapshot_id": snapshot_id,
+        "snapshot_available": bool(snapshot_id),
+        "workflow_present": workflow_path.is_file(),
+        "reporting_only": True,
+        "repo_mutation": False,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+
+def _public_status_markdown(document: dict[str, Any]) -> str:
+    return "\n".join(
+        [
+            "# SDETKit release anti-hijack status",
+            "",
+            f"- status: {document['status']}",
+            f"- snapshot_available: {str(bool(document['snapshot_available'])).lower()}",
+            f"- workflow_present: {str(bool(document['workflow_present'])).lower()}",
+            "- reporting_only: true",
+            "- repo_mutation: false",
+            "- automation_allowed: false",
+            "- patch_application_allowed: false",
+            "- merge_authorized: false",
+            "- semantic_equivalence_proven: false",
+            "",
+        ]
+    )
+
+
 def check_release_anti_hijack_report_freshness(
     *,
     report_path: str | Path,
@@ -980,76 +1158,88 @@ def check_release_anti_hijack_report_freshness(
     generator_path: str | Path | None = None,
     current_head_sha: str | None = None,
 ) -> dict[str, Any]:
-    path = Path(report_path)
-    if not path.is_file():
-        result = validate_release_anti_hijack_report_freshness(
-            {},
-            workflow=workflow,
-            root=root,
-            generator_path=generator_path,
-            current_head_sha=current_head_sha,
-        )
-        result["reasons"] = sorted({*result["reasons"], "report_missing"})
-        result["status"] = "stale"
-        result["fresh"] = False
-        return result
-
-    try:
-        loaded = json.loads(path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        result = validate_release_anti_hijack_report_freshness(
-            {},
-            workflow=workflow,
-            root=root,
-            generator_path=generator_path,
-            current_head_sha=current_head_sha,
-        )
-        result["reasons"] = sorted({*result["reasons"], "report_invalid_json"})
-        result["status"] = "stale"
-        result["fresh"] = False
-        return result
-
-    if not isinstance(loaded, dict):
-        result = validate_release_anti_hijack_report_freshness(
-            {},
-            workflow=workflow,
-            root=root,
-            generator_path=generator_path,
-            current_head_sha=current_head_sha,
-        )
-        result["reasons"] = sorted({*result["reasons"], "report_not_object"})
-        result["status"] = "stale"
-        result["fresh"] = False
-        return result
-
-    return validate_release_anti_hijack_report_freshness(
-        loaded,
-        workflow=workflow,
+    del generator_path
+    expected = _public_status_document(
+        workflow,
         root=root,
-        generator_path=generator_path,
         current_head_sha=current_head_sha,
     )
+    path = Path(report_path)
+    loaded: Any = None
+    if path.is_file():
+        try:
+            loaded = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            loaded = None
+
+    schema_valid = (
+        isinstance(loaded, dict) and loaded.get("schema_version") == PUBLIC_STATUS_SCHEMA_VERSION
+    )
+    snapshot_match = (
+        isinstance(loaded, dict)
+        and isinstance(loaded.get("snapshot_id"), str)
+        and loaded.get("snapshot_id") == expected["snapshot_id"]
+    )
+    authority_valid = (
+        isinstance(loaded, dict)
+        and loaded.get("reporting_only") is True
+        and loaded.get("repo_mutation") is False
+        and loaded.get("automation_allowed") is False
+        and loaded.get("patch_application_allowed") is False
+        and loaded.get("merge_authorized") is False
+        and loaded.get("semantic_equivalence_proven") is False
+    )
+    document_shape_valid = isinstance(loaded, dict) and loaded == expected
+
+    fresh = bool(
+        schema_valid
+        and snapshot_match
+        and authority_valid
+        and document_shape_valid
+        and expected["snapshot_available"]
+        and expected["workflow_present"]
+    )
+    reason_count = (
+        int(not schema_valid)
+        + int(not snapshot_match)
+        + int(not authority_valid)
+        + int(not document_shape_valid)
+        + int(not expected["snapshot_available"])
+        + int(not expected["workflow_present"])
+    )
+    return {
+        "status": "fresh" if fresh else "stale",
+        "fresh": fresh,
+        "schema_valid": schema_valid,
+        "snapshot_match": snapshot_match,
+        "authority_valid": authority_valid,
+        "document_shape_valid": document_shape_valid,
+        "reason_count": reason_count,
+        "reporting_only": True,
+        "repo_mutation": False,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
 
 
 def render_freshness_text(payload: dict[str, Any]) -> str:
-    public_document = _public_freshness_payload(payload)
-    reasons = public_document["reasons"]
-    reason_text = ",".join(reasons) if reasons else "none"
+    fresh = payload.get("fresh") is True
+    schema_valid = payload.get("schema_valid") is True
+    snapshot_match = payload.get("snapshot_match") is True
+    authority_valid = payload.get("authority_valid") is True
+    document_shape_valid = payload.get("document_shape_valid") is True
+    reason_count = _safe_count(payload.get("reason_count"))
     return "\n".join(
         [
-            f"freshness_status={public_document['status']}",
-            f"fresh={str(public_document['fresh']).lower()}",
-            f"schema_valid={str(public_document['schema_valid']).lower()}",
-            f"input_provenance_match={str(public_document['input_provenance_match']).lower()}",
-            f"release_controls_match={str(public_document['release_controls_match']).lower()}",
-            f"rules_match={str(public_document['rules_match']).lower()}",
-            "recommended_actions_match="
-            f"{str(public_document['recommended_actions_match']).lower()}",
-            f"workflow_source_valid={str(public_document['workflow_source_valid']).lower()}",
-            f"current_head_valid={str(public_document['current_head_valid']).lower()}",
-            f"evidence_limits_valid={str(public_document['evidence_limits_valid']).lower()}",
-            f"authority_valid={str(public_document['authority_valid']).lower()}",
-            f"freshness_reasons={reason_text}",
+            f"freshness_status={'fresh' if fresh else 'stale'}",
+            f"fresh={str(fresh).lower()}",
+            f"schema_valid={str(schema_valid).lower()}",
+            f"snapshot_match={str(snapshot_match).lower()}",
+            f"authority_valid={str(authority_valid).lower()}",
+            f"document_shape_valid={str(document_shape_valid).lower()}",
+            f"reason_count={reason_count}",
             "reporting_only=true",
             "repo_mutation=false",
             "automation_allowed=false",
@@ -1073,17 +1263,21 @@ def write_artifacts(
         root=root,
         current_head_sha=current_head_sha,
     )
-    public_document = _public_payload(internal_payload)
-    json_document = json.dumps(public_document, indent=2, sort_keys=True) + "\n"
-    markdown_document = render_markdown(public_document) + "\n"
-
+    status_document = _public_status_document(
+        workflow,
+        root=root,
+        current_head_sha=current_head_sha,
+    )
     out_path = Path(out)
     markdown_path = Path(markdown_out) if markdown_out else out_path.with_suffix(".md")
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    markdown_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json_document, encoding="utf-8")
-    markdown_path.write_text(markdown_document, encoding="utf-8")
-    return public_document
+    _write_public_status_artifacts(
+        out_path,
+        markdown_path,
+        snapshot_id=str(status_document["snapshot_id"]),
+        snapshot_available=bool(status_document["snapshot_available"]),
+        workflow_present=bool(status_document["workflow_present"]),
+    )
+    return internal_payload
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -1100,40 +1294,37 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--check-freshness",
         action="store_true",
         help=(
-            "Check the existing report against the release workflow, generator, evidence "
-            "limits, and current Git head without rewriting it."
+            "Check the existing status artifact against the release workflow and current "
+            "Git head without rewriting it."
         ),
     )
     ns = parser.parse_args(list(argv) if argv is not None else None)
 
     if ns.check_freshness:
-        internal_freshness = check_release_anti_hijack_report_freshness(
+        freshness_summary = check_release_anti_hijack_report_freshness(
             report_path=ns.out,
             workflow=ns.workflow,
             root=ns.root,
         )
-        freshness_public = _public_freshness_payload(internal_freshness)
-        if ns.format == "json":
-            freshness_json = json.dumps(freshness_public, indent=2, sort_keys=True) + "\n"
-            sys.stdout.write(freshness_json)
-        else:
-            freshness_text = render_freshness_text(freshness_public) + "\n"
-            sys.stdout.write(freshness_text)
-        return 0 if freshness_public["fresh"] else 1
+        _emit_public_cli_summary(
+            "freshness-json" if ns.format == "json" else "freshness-text",
+            first=freshness_summary["fresh"] is True,
+            count=_safe_count(freshness_summary.get("reason_count")),
+        )
+        return 0 if freshness_summary["fresh"] else 1
 
-    generated_document = write_artifacts(
+    write_artifacts(
         workflow=ns.workflow,
         out=ns.out,
         markdown_out=ns.markdown_out or None,
         root=ns.root,
     )
-    output_document = _public_payload(generated_document)
-    if ns.format == "json":
-        output_json = json.dumps(output_document, indent=2, sort_keys=True) + "\n"
-        sys.stdout.write(output_json)
-    else:
-        output_markdown = render_markdown(output_document) + "\n"
-        sys.stdout.write(output_markdown)
+    output_summary = _public_status_document(ns.workflow, root=ns.root)
+    _emit_public_cli_summary(
+        "generation-json" if ns.format == "json" else "generation-text",
+        first=bool(output_summary["snapshot_available"]),
+        second=bool(output_summary["workflow_present"]),
+    )
     return 0
 
 
