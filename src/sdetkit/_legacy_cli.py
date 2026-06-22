@@ -801,6 +801,7 @@ Then use stability-aware command discovery:
         "release-anti-hijack-threat-model",
         help=argparse.SUPPRESS,
     )
+    release_anti_hijack_threat_model.add_argument("--root", default=".")
     release_anti_hijack_threat_model.add_argument(
         "--workflow", default=".github/workflows/release.yml"
     )
@@ -811,6 +812,7 @@ Then use stability-aware command discovery:
     release_anti_hijack_threat_model.add_argument(
         "--format", choices=["json", "text"], default="json"
     )
+    release_anti_hijack_threat_model.add_argument("--check-freshness", action="store_true")
 
     issue_queue_classifier = sub.add_parser(
         "issue-queue-classifier",
@@ -1714,6 +1716,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "release-anti-hijack-threat-model":
         forwarded = [
+            "--root",
+            str(ns.root),
             "--workflow",
             str(ns.workflow),
             "--out",
@@ -1723,6 +1727,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         ]
         if str(ns.markdown_out):
             forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
         return _run_module_main("sdetkit.release_anti_hijack_threat_model", forwarded)
 
     if ns.cmd == "issue-queue-classifier":
