@@ -31,6 +31,6 @@ def test_pr_quality_workflow_builds_operator_loop_after_pr_comment_body() -> Non
 
     comment_body_index = workflow.index("Build PR comment body")
     operator_loop_index = workflow.index("Build verified operator evidence loop")
-    upload_index = workflow.index("Upload PR quality comment artifacts")
+    upload_index = workflow.index("Upload PR quality evidence artifacts")
 
     assert comment_body_index < operator_loop_index < upload_index

@@ -1,0 +1,961 @@
+# Trusted default-branch publisher for PR Quality evidence.
+# This workflow must not checkout or execute pull-request repository code.
+name: PR Quality Publisher
+
+on:
+  workflow_run:
+    workflows: ["PR Quality Comment"]
+    types: [completed]
+
+permissions: {}
+
+concurrency:
+  group: pr-quality-publisher-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Download verified publisher handoff candidate
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: pr-quality-publisher-handoff
+          path: build/pr-quality-publisher/handoff
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Verify exact-head publisher handoff
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_REPOSITORY: ${{ github.repository }}
+          EXPECTED_RUN_ID: ${{ github.event.workflow_run.id }}
+          EXPECTED_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+          EXPECTED_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          set -euo pipefail
+          test -n "$PR_NUMBER"
+          mkdir -p build/pr-quality-publisher build/pr-quality
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            "repos/${EXPECTED_REPOSITORY}/pulls/${PR_NUMBER}" \
+            > build/pr-quality-publisher/current-pr.json
+
+          python3 - <<'PYVERIFY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          import os
+          import shutil
+          from pathlib import Path, PurePosixPath
+
+          root = Path("build/pr-quality-publisher/handoff")
+          manifest_path = root / "manifest.json"
+          if not manifest_path.is_file() or manifest_path.is_symlink():
+              raise SystemExit("publisher handoff manifest is missing or unsafe")
+
+          expected_files = {
+              "manifest.json",
+              "payload/pr-comment-body.md",
+              "payload/pr-comment-metadata.json",
+              "payload/pr-review-summary.md",
+          }
+          actual_files = set()
+          for path in root.rglob("*"):
+              if path.is_symlink():
+                  raise SystemExit(f"publisher handoff contains a symlink: {path}")
+              if path.is_file():
+                  relative = path.relative_to(root).as_posix()
+                  pure = PurePosixPath(relative)
+                  if pure.is_absolute() or ".." in pure.parts:
+                      raise SystemExit(f"publisher handoff contains an unsafe path: {relative}")
+                  actual_files.add(relative)
+          if actual_files != expected_files:
+              raise SystemExit(
+                  "publisher handoff file allowlist mismatch: "
+                  f"expected={sorted(expected_files)} actual={sorted(actual_files)}"
+              )
+
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          if manifest.get("schema_version") != "sdetkit.pr_quality_publisher_handoff.v1":
+              raise SystemExit("publisher handoff schema mismatch")
+          expected_pr = int(os.environ["PR_NUMBER"])
+          checks = {
+              "repository": os.environ["EXPECTED_REPOSITORY"],
+              "event_name": "pull_request",
+              "pr_number": expected_pr,
+              "head_sha": os.environ["EXPECTED_HEAD_SHA"],
+              "source_workflow_name": "PR Quality Comment",
+              "source_workflow_run_id": int(os.environ["EXPECTED_RUN_ID"]),
+              "source_workflow_run_attempt": int(os.environ["EXPECTED_RUN_ATTEMPT"]),
+          }
+          for key, expected in checks.items():
+              actual = manifest.get(key)
+              if actual != expected:
+                  raise SystemExit(
+                      f"publisher handoff binding mismatch: {key}={actual!r} expected={expected!r}"
+                  )
+
+          current_pr = json.loads(
+              Path("build/pr-quality-publisher/current-pr.json").read_text(encoding="utf-8")
+          )
+          if int(current_pr.get("number", 0)) != expected_pr:
+              raise SystemExit("current PR number does not match publisher event")
+          if current_pr.get("state") != "open":
+              raise SystemExit(f"publisher refuses a non-open PR: state={current_pr.get('state')}")
+          current_head = (
+              current_pr.get("head", {}).get("sha")
+              if isinstance(current_pr.get("head"), dict)
+              else None
+          )
+          if current_head != os.environ["EXPECTED_HEAD_SHA"]:
+              raise SystemExit(
+                  "publisher refuses stale evidence: "
+                  f"current_head={current_head} evidence_head={os.environ['EXPECTED_HEAD_SHA']}"
+              )
+
+          authority = manifest.get("authority_boundary")
+          expected_authority = {
+              "reporting_only": True,
+              "patch_application_allowed": False,
+              "security_dismissal_allowed": False,
+              "merge_authorized": False,
+              "semantic_equivalence_proven": False,
+          }
+          if authority != expected_authority:
+              raise SystemExit("publisher handoff authority boundary mismatch")
+
+          rows = manifest.get("files")
+          if not isinstance(rows, list) or len(rows) != 3:
+              raise SystemExit("publisher handoff manifest file inventory mismatch")
+          expected_payload = expected_files - {"manifest.json"}
+          observed_payload = set()
+          for row in rows:
+              if not isinstance(row, dict):
+                  raise SystemExit("publisher handoff file row must be an object")
+              relative = str(row.get("path", ""))
+              if relative not in expected_payload:
+                  raise SystemExit(f"publisher handoff manifest path is not allowed: {relative}")
+              observed_payload.add(relative)
+              path = root / relative
+              data = path.read_bytes()
+              if len(data) != int(row.get("size_bytes", -1)):
+                  raise SystemExit(f"publisher handoff size mismatch: {relative}")
+              if hashlib.sha256(data).hexdigest() != row.get("sha256"):
+                  raise SystemExit(f"publisher handoff digest mismatch: {relative}")
+          if observed_payload != expected_payload:
+              raise SystemExit("publisher handoff manifest inventory is incomplete")
+
+          summary = (root / "payload/pr-review-summary.md").read_text(encoding="utf-8")
+          if not summary.lstrip().startswith("# PR Quality Review Summary"):
+              raise SystemExit("publisher handoff summary does not match the review contract")
+          metadata = json.loads(
+              (root / "payload/pr-comment-metadata.json").read_text(encoding="utf-8")
+          )
+          if not isinstance(metadata, dict):
+              raise SystemExit("publisher handoff metadata must be a JSON object")
+
+          destination = Path("build/pr-quality")
+          for relative in sorted(expected_payload):
+              source = root / relative
+              shutil.copyfile(source, destination / Path(relative).name)
+
+          verification = {
+              "schema_version": "sdetkit.pr_quality_publisher_verification.v1",
+              "status": "passed",
+              "pr_number": expected_pr,
+              "head_sha": os.environ["EXPECTED_HEAD_SHA"],
+              "source_workflow_run_id": int(os.environ["EXPECTED_RUN_ID"]),
+              "artifact_file_count": len(expected_payload),
+              "reporting_only": True,
+              "merge_authorized": False,
+          }
+          Path("build/pr-quality-publisher/verification.json").write_text(
+              json.dumps(verification, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print("publisher_handoff_verification=passed")
+          print(f"publisher_exact_head_sha={verification['head_sha']}")
+          PYVERIFY
+
+      - name: Initialize PR comment publication status
+        env:
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          python3 - <<'PYSTATUS'
+          import json
+          import os
+          from pathlib import Path
+
+          Path("build/pr-quality/comment-status.json").write_text(
+              json.dumps(
+                  {
+                      "status": "failed",
+                      "pr_number": int(os.environ["PR_NUMBER"]),
+                      "reason": "trusted publisher did not complete",
+                  },
+                  indent=2,
+                  sort_keys=True,
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          PYSTATUS
+
+      - name: Comment on PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+          EXPECTED_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          publish_dir="build/pr-quality/comment-publish"
+          request_path="$publish_dir/comment-request.json"
+          response_path="$publish_dir/comment-response.json"
+          body_path="$publish_dir/comment-body.md"
+
+          mkdir -p "$publish_dir"
+
+          printf '### SDET Quality Gate\n\n' > "$body_path"
+          printf '> Trusted publisher verified the handoff for PR #%s at head `%s` from workflow run `%s`. Evidence is advisory and does not authorize merge.\n\n' "$PR_NUMBER" "$EXPECTED_HEAD_SHA" "$SOURCE_RUN_ID" >> "$body_path"
+
+          if [ -s build/pr-quality/pr-review-summary.md ]; then
+            cat build/pr-quality/pr-review-summary.md >> "$body_path"
+          else
+            cat build/pr-quality/pr-comment-body.md >> "$body_path"
+          fi
+
+          cat >> "$body_path" <<'MARKDOWN'
+
+          ---
+
+          <details>
+          <summary><strong>PR Quality product artifacts</strong></summary>
+
+          - `index.html`: artifact landing page.
+          - `pr-review-artifacts-manifest.json`: machine-readable artifact bundle manifest.
+          - `pr-review-summary.md`: concise human review panel.
+          - `pr-review-model.json`: machine-readable review model.
+          - `pr-review-dashboard.html`: browser-ready review dashboard.
+          - `pr-comment-body.md`: full raw evidence body retained in the artifact bundle.
+          - `pr-quality-comment`: uploaded artifact bundle for full diagnostic evidence.
+
+          </details>
+
+          MARKDOWN
+
+          BODY_PATH="$body_path" python3 - <<'PYSANITIZE'
+          from __future__ import annotations
+
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path(os.environ["BODY_PATH"])
+          body = path.read_text(encoding="utf-8")
+          encoded = body.encode("utf-8")
+          if len(encoded) > 60000:
+              raise SystemExit(f"PR Quality comment body exceeds publisher limit: {len(encoded)}")
+          if any(ord(char) < 32 and char not in "\n\r\t" for char in body):
+              raise SystemExit("PR Quality comment body contains unsafe control characters")
+          if re.search(r"<\s*(script|iframe|object|embed|img)\b", body, re.IGNORECASE):
+              raise SystemExit("PR Quality comment body contains blocked active HTML")
+          if re.search(r"javascript\s*:", body, re.IGNORECASE):
+              raise SystemExit("PR Quality comment body contains a blocked javascript URL")
+          body = re.sub(r"(?<![\w`])@(?=[A-Za-z0-9-])", "@\u200b", body)
+          path.write_text(body, encoding="utf-8")
+          PYSANITIZE
+
+          BODY_PATH="$body_path" REQUEST_PATH="$request_path" python - <<'PYCODE'
+          import json
+          import os
+          from pathlib import Path
+
+          body = Path(os.environ["BODY_PATH"]).read_text(encoding="utf-8")
+          Path(os.environ["REQUEST_PATH"]).write_text(
+              json.dumps({"body": body}) + "\n",
+              encoding="utf-8",
+          )
+          PYCODE
+
+          publish_rc=1
+          publish_status="failed"
+          publish_reason="failed to publish SDET Quality Gate comment"
+          existing_id=""
+
+          if existing_id="$(
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments?per_page=100" \
+              --jq 'first(.[] | select(.user.type == "Bot" and (.body | startswith("### SDET Quality Gate")))) | .id // ""'
+          )"; then
+            if [ -n "$existing_id" ]; then
+              if gh api \
+                --method PATCH \
+                -H "Accept: application/vnd.github+json" \
+                "repos/${REPOSITORY}/issues/comments/${existing_id}" \
+                --input "$request_path" \
+                > "$response_path"; then
+                publish_rc=0
+                publish_status="updated"
+                publish_reason="updated existing SDET Quality Gate comment"
+              else
+                publish_rc=$?
+                publish_reason="failed to update existing SDET Quality Gate comment"
+              fi
+            else
+              if gh api \
+                --method POST \
+                -H "Accept: application/vnd.github+json" \
+                "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments" \
+                --input "$request_path" \
+                > "$response_path"; then
+                publish_rc=0
+                publish_status="posted"
+                publish_reason="posted SDET Quality Gate comment"
+              else
+                publish_rc=$?
+                publish_reason="failed to post new SDET Quality Gate comment"
+              fi
+            fi
+          else
+            publish_rc=$?
+            publish_reason="failed to list existing SDET Quality Gate comments"
+          fi
+
+          COMMENT_STATUS="$publish_status" \
+          COMMENT_REASON="$publish_reason" \
+          RESPONSE_PATH="$response_path" \
+          PR_NUMBER="$PR_NUMBER" \
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const repoMemoryAuthorityKey = (...parts) =>
+            ['repo', 'memory', 'trajectory', 'authority', ...parts].join('_');
+          const expectedInventoryKey = (...parts) =>
+            ['expected', 'artifact', 'inventory', ...parts].join('_');
+
+          const statusPath = 'build/pr-quality/comment-status.json';
+          const readCommentMetadata = () => {
+            const metadataPath = 'build/pr-quality/pr-comment-metadata.json';
+            try {
+              if (!fs.existsSync(metadataPath)) {
+                return {};
+              }
+              return JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+            } catch (error) {
+              console.warn(
+                `failed to read PR Quality comment metadata: ${
+                  error && error.message ? error.message : error
+                }`
+              );
+              return {};
+            }
+          };
+
+          const writeStatus = (payload) => {
+            const metadata = readCommentMetadata();
+            const expectedInventoryStatusKey = expectedInventoryKey('status');
+            const expectedInventoryNonEmptyKey = expectedInventoryKey('non', 'empty');
+            const expectedInventoryAuthorityAwareKey = expectedInventoryKey('authority', 'aware');
+            const expectedInventoryExpectedArtifactCountKey = expectedInventoryKey('expected', 'artifact', 'count');
+            const expectedInventoryAuthorityEvidenceSourceCountKey = expectedInventoryKey('authority', 'evidence', 'source', 'count');
+            const expectedInventoryMissingAuthorityEvidencePathCountKey = expectedInventoryKey('missing', 'authority', 'evidence', 'path', 'count');
+            const expectedInventoryReportingOnlyKey = expectedInventoryKey('reporting', 'only');
+            const expectedInventoryPatchAutomationKey = expectedInventoryKey('patch', 'automation');
+            const expectedInventorySecurityDismissalKey = expectedInventoryKey('security', 'dismissal');
+            const expectedInventoryMergeAuthorizationKey = expectedInventoryKey('merge', 'authorization');
+            const expectedInventorySemanticEquivalenceClaimKey = expectedInventoryKey('semantic', 'equivalence', 'claim');
+            const repoMemoryAuthorityStatusKey = repoMemoryAuthorityKey('status');
+            const repoMemoryAuthorityRecordCountKey = repoMemoryAuthorityKey('record', 'count');
+            const repoMemoryAuthorityReviewFirstCountKey = repoMemoryAuthorityKey('review', 'first', 'count');
+            const repoMemoryAuthorityAutoFixAllowedCountKey = repoMemoryAuthorityKey('auto', 'fix', 'allowed', 'count');
+            const repoMemoryAuthorityReportingOnlyCountKey = repoMemoryAuthorityKey('reporting', 'only', 'count');
+            const repoMemoryAuthorityPatchApplicationAllowedKey = repoMemoryAuthorityKey('patch', 'application', 'allowed');
+            const repoMemoryAuthoritySecurityDismissalAllowedKey = repoMemoryAuthorityKey('security', 'dismissal', 'allowed');
+            const repoMemoryAuthorityMergeAuthorizedKey = repoMemoryAuthorityKey('merge', 'authorized');
+            const repoMemoryAuthoritySemanticEquivalenceProvenKey = repoMemoryAuthorityKey('semantic', 'equivalence', 'proven');
+            const enrichedPayload = {
+              ...payload,
+              action_report_status: metadata.status || 'unknown',
+              comment_result_title: metadata.result_title || 'unknown',
+              evidence_signal_kind: metadata.evidence_signal_kind || 'unknown',
+              evidence_signal_present: Boolean(metadata.evidence_signal_present),
+              evidence_review_required: Boolean(metadata.evidence_review_required),
+              trajectory_signal_present: Boolean(metadata.trajectory_signal_present),
+              trajectory_record_count: Number(metadata.trajectory_record_count || 0),
+              trajectory_review_first_count: Number(metadata.trajectory_review_first_count || 0),
+              trajectory_auto_fix_allowed_count: Number(metadata.trajectory_auto_fix_allowed_count || 0),
+              runtime_proof_artifacts_present: Boolean(metadata.runtime_proof_artifacts_present),
+              runtime_proof_collection_status: metadata.runtime_proof_collection_status || 'not_collected',
+              runtime_guard_violation_count: Number(metadata.runtime_guard_violation_count || 0),
+              live_benchmark_collection_status: metadata.live_benchmark_collection_status || 'not_collected',
+              live_benchmark_status: metadata.live_benchmark_status || 'not_collected',
+              live_benchmark_scenario_count: Number(metadata.live_benchmark_scenario_count || 0),
+              anti_cheat_rejection_count: Number(metadata.anti_cheat_rejection_count || 0),
+              repo_memory_collection_status: metadata.repo_memory_collection_status || 'not_collected',
+              repo_memory_status: metadata.repo_memory_status || 'not_collected',
+              repo_memory_live_contract_proven: Boolean(metadata.repo_memory_live_contract_proven),
+              [expectedInventoryStatusKey]: metadata[expectedInventoryStatusKey] || 'not_collected',
+              [expectedInventoryNonEmptyKey]: Boolean(metadata[expectedInventoryNonEmptyKey]),
+              [expectedInventoryAuthorityAwareKey]: Boolean(metadata[expectedInventoryAuthorityAwareKey]),
+              [expectedInventoryExpectedArtifactCountKey]: Number(metadata[expectedInventoryExpectedArtifactCountKey] || 0),
+              [expectedInventoryAuthorityEvidenceSourceCountKey]: Number(metadata[expectedInventoryAuthorityEvidenceSourceCountKey] || 0),
+              [expectedInventoryMissingAuthorityEvidencePathCountKey]: Number(metadata[expectedInventoryMissingAuthorityEvidencePathCountKey] || 0),
+              [expectedInventoryReportingOnlyKey]: Boolean(metadata[expectedInventoryReportingOnlyKey]),
+              [expectedInventoryPatchAutomationKey]: Boolean(metadata[expectedInventoryPatchAutomationKey]),
+              [expectedInventorySecurityDismissalKey]: Boolean(metadata[expectedInventorySecurityDismissalKey]),
+              [expectedInventoryMergeAuthorizationKey]: Boolean(metadata[expectedInventoryMergeAuthorizationKey]),
+              [expectedInventorySemanticEquivalenceClaimKey]: Boolean(metadata[expectedInventorySemanticEquivalenceClaimKey]),
+              [repoMemoryAuthorityStatusKey]: metadata[repoMemoryAuthorityStatusKey] || 'not_collected',
+              [repoMemoryAuthorityRecordCountKey]: Number(metadata[repoMemoryAuthorityRecordCountKey] || 0),
+              [repoMemoryAuthorityReviewFirstCountKey]: Number(metadata[repoMemoryAuthorityReviewFirstCountKey] || 0),
+              [repoMemoryAuthorityAutoFixAllowedCountKey]: Number(metadata[repoMemoryAuthorityAutoFixAllowedCountKey] || 0),
+              [repoMemoryAuthorityReportingOnlyCountKey]: Number(metadata[repoMemoryAuthorityReportingOnlyCountKey] || 0),
+              [repoMemoryAuthorityPatchApplicationAllowedKey]: Boolean(metadata[repoMemoryAuthorityPatchApplicationAllowedKey]),
+              [repoMemoryAuthoritySecurityDismissalAllowedKey]: Boolean(metadata[repoMemoryAuthoritySecurityDismissalAllowedKey]),
+              [repoMemoryAuthorityMergeAuthorizedKey]: Boolean(metadata[repoMemoryAuthorityMergeAuthorizedKey]),
+              [repoMemoryAuthoritySemanticEquivalenceProvenKey]: Boolean(metadata[repoMemoryAuthoritySemanticEquivalenceProvenKey]),
+              trusted_history_collection_status: metadata.trusted_history_collection_status || 'not_collected',
+              trusted_history_status: metadata.trusted_history_status || 'not_collected',
+              trusted_history_record_count: Number(metadata.trusted_history_record_count || 0),
+              trusted_history_base_ancestry_verified: Boolean(metadata.trusted_history_base_ancestry_verified),
+              trusted_history_prior_input_read_only: Boolean(metadata.trusted_history_prior_input_read_only),
+              trusted_history_automation_allowed: Boolean(metadata.trusted_history_automation_allowed),
+              trusted_history_merge_authorized: Boolean(metadata.trusted_history_merge_authorized),
+              trusted_history_semantic_equivalence_proven: Boolean(metadata.trusted_history_semantic_equivalence_proven),
+            };
+            fs.mkdirSync(path.dirname(statusPath), { recursive: true });
+            fs.writeFileSync(
+              statusPath,
+              `${JSON.stringify(enrichedPayload, null, 2)}\n`,
+              'utf8'
+            );
+          };
+
+          const status = process.env.COMMENT_STATUS;
+          const payload = {
+            status,
+            pr_number: Number(process.env.PR_NUMBER),
+            reason: process.env.COMMENT_REASON,
+          };
+
+          const responsePath = process.env.RESPONSE_PATH;
+          if ((status === 'posted' || status === 'updated') && fs.existsSync(responsePath)) {
+            const response = JSON.parse(fs.readFileSync(responsePath, 'utf8'));
+            payload.comment_id = response.id;
+            payload.comment_url = response.html_url;
+          }
+
+          writeStatus(payload);
+
+          if (status === 'posted') {
+            process.stdout.write('comment_status=posted\n');
+          } else if (status === 'updated') {
+            process.stdout.write('comment_status=updated\n');
+          } else {
+            console.error(`comment_status=failed reason=${process.env.COMMENT_REASON}`);
+          }
+          NODE
+
+          if [ "$publish_rc" -ne 0 ]; then
+            exit "$publish_rc"
+          fi
+
+      - name: Verify PR Quality comment visibility
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("build/pr-quality/comment-status.json")
+          if not path.exists():
+              raise SystemExit("comment_status=missing: build/pr-quality/comment-status.json was not written")
+
+          payload = json.loads(path.read_text(encoding="utf-8"))
+
+          def repo_memory_trajectory_authority_key(*parts: str) -> str:
+              return "_".join(("repo", "memory", "trajectory", "authority", *parts))
+
+          def expected_inventory_key(*parts: str) -> str:
+              return "_".join(("expected", "artifact", "inventory", *parts))
+
+          expected_inventory_status_key = expected_inventory_key("status")
+          expected_inventory_non_empty_key = expected_inventory_key("non", "empty")
+          expected_inventory_authority_aware_key = expected_inventory_key("authority", "aware")
+          expected_inventory_expected_artifact_count_key = expected_inventory_key(
+              "expected", "artifact", "count"
+          )
+          expected_inventory_authority_evidence_source_count_key = expected_inventory_key(
+              "authority", "evidence", "source", "count"
+          )
+          expected_inventory_missing_authority_evidence_path_count_key = expected_inventory_key(
+              "missing", "authority", "evidence", "path", "count"
+          )
+          expected_inventory_reporting_only_key = expected_inventory_key("reporting", "only")
+          expected_inventory_patch_automation_key = expected_inventory_key("patch", "automation")
+          expected_inventory_security_dismissal_key = expected_inventory_key(
+              "security", "dismissal"
+          )
+          expected_inventory_merge_authorization_key = expected_inventory_key(
+              "merge", "authorization"
+          )
+          expected_inventory_semantic_equivalence_claim_key = expected_inventory_key(
+              "semantic", "equivalence", "claim"
+          )
+
+          authority_status_key = repo_memory_trajectory_authority_key("status")
+          authority_record_count_key = repo_memory_trajectory_authority_key("record", "count")
+          authority_review_first_count_key = repo_memory_trajectory_authority_key(
+              "review", "first", "count"
+          )
+          authority_auto_fix_allowed_count_key = repo_memory_trajectory_authority_key(
+              "auto", "fix", "allowed", "count"
+          )
+          authority_reporting_only_count_key = repo_memory_trajectory_authority_key(
+              "reporting", "only", "count"
+          )
+          authority_patch_application_allowed_key = repo_memory_trajectory_authority_key(
+              "patch", "application", "allowed"
+          )
+          authority_security_dismissal_allowed_key = repo_memory_trajectory_authority_key(
+              "security", "dismissal", "allowed"
+          )
+          authority_merge_authorized_key = repo_memory_trajectory_authority_key(
+              "merge", "authorized"
+          )
+          authority_semantic_equivalence_proven_key = repo_memory_trajectory_authority_key(
+              "semantic", "equivalence", "proven"
+          )
+
+          status = str(payload.get("status", "missing"))
+          reason = str(payload.get("reason", ""))
+          action_report_status = str(payload.get("action_report_status", "unknown"))
+          comment_result_title = str(payload.get("comment_result_title", "unknown"))
+          evidence_signal_kind = str(payload.get("evidence_signal_kind", "unknown"))
+          evidence_signal_present = bool(payload.get("evidence_signal_present", False))
+          evidence_review_required = bool(payload.get("evidence_review_required", False))
+          trajectory_record_count = int(payload.get("trajectory_record_count", 0) or 0)
+          trajectory_review_first_count = int(payload.get("trajectory_review_first_count", 0) or 0)
+          trajectory_auto_fix_allowed_count = int(
+              payload.get("trajectory_auto_fix_allowed_count", 0) or 0
+          )
+          runtime_proof_artifacts_present = bool(
+              payload.get("runtime_proof_artifacts_present", False)
+          )
+          runtime_proof_collection_status = str(
+              payload.get("runtime_proof_collection_status", "not_collected")
+          )
+          runtime_guard_violation_count = int(
+              payload.get("runtime_guard_violation_count", 0) or 0
+          )
+          live_benchmark_collection_status = str(
+              payload.get("live_benchmark_collection_status", "not_collected")
+          )
+          live_benchmark_status = str(
+              payload.get("live_benchmark_status", "not_collected")
+          )
+          live_benchmark_scenario_count = int(
+              payload.get("live_benchmark_scenario_count", 0) or 0
+          )
+          anti_cheat_rejection_count = int(
+              payload.get("anti_cheat_rejection_count", 0) or 0
+          )
+          repo_memory_collection_status = str(
+              payload.get("repo_memory_collection_status", "not_collected")
+          )
+          repo_memory_status = str(
+              payload.get("repo_memory_status", "not_collected")
+          )
+          repo_memory_live_contract_proven = bool(
+              payload.get("repo_memory_live_contract_proven", False)
+          )
+          expected_artifact_inventory_status = str(
+              payload.get(expected_inventory_status_key, "not_collected")
+          )
+          expected_artifact_inventory_non_empty = bool(
+              payload.get(expected_inventory_non_empty_key, False)
+          )
+          expected_artifact_inventory_authority_aware = bool(
+              payload.get(expected_inventory_authority_aware_key, False)
+          )
+          expected_artifact_inventory_expected_artifact_count = int(
+              payload.get(expected_inventory_expected_artifact_count_key, 0) or 0
+          )
+          expected_artifact_inventory_authority_evidence_source_count = int(
+              payload.get(expected_inventory_authority_evidence_source_count_key, 0) or 0
+          )
+          expected_artifact_inventory_missing_authority_evidence_path_count = int(
+              payload.get(expected_inventory_missing_authority_evidence_path_count_key, 0)
+              or 0
+          )
+          expected_artifact_inventory_reporting_only = bool(
+              payload.get(expected_inventory_reporting_only_key, False)
+          )
+          expected_artifact_inventory_patch_automation = bool(
+              payload.get(expected_inventory_patch_automation_key, False)
+          )
+          expected_artifact_inventory_security_dismissal = bool(
+              payload.get(expected_inventory_security_dismissal_key, False)
+          )
+          expected_artifact_inventory_merge_authorization = bool(
+              payload.get(expected_inventory_merge_authorization_key, False)
+          )
+          expected_artifact_inventory_semantic_equivalence_claim = bool(
+              payload.get(expected_inventory_semantic_equivalence_claim_key, False)
+          )
+          authority_status = str(payload.get(authority_status_key, "not_collected"))
+          authority_record_count = int(payload.get(authority_record_count_key, 0) or 0)
+          authority_review_first_count = int(
+              payload.get(authority_review_first_count_key, 0) or 0
+          )
+          authority_auto_fix_allowed_count = int(
+              payload.get(authority_auto_fix_allowed_count_key, 0) or 0
+          )
+          authority_reporting_only_count = int(
+              payload.get(authority_reporting_only_count_key, 0) or 0
+          )
+          authority_patch_application_allowed = bool(
+              payload.get(authority_patch_application_allowed_key, False)
+          )
+          authority_security_dismissal_allowed = bool(
+              payload.get(authority_security_dismissal_allowed_key, False)
+          )
+          authority_merge_authorized = bool(
+              payload.get(authority_merge_authorized_key, False)
+          )
+          authority_semantic_equivalence_proven = bool(
+              payload.get(authority_semantic_equivalence_proven_key, False)
+          )
+          history_semantic_key = "_".join(
+              ("trusted", "history", "semantic", "equivalence", "proven")
+          )
+          trusted_history_collection_status = str(
+              payload.get("trusted_history_collection_status", "not_collected")
+          )
+          trusted_history_status = str(
+              payload.get("trusted_history_status", "not_collected")
+          )
+          trusted_history_record_count = int(
+              payload.get("trusted_history_record_count", 0) or 0
+          )
+          trusted_history_base_ancestry_verified = bool(
+              payload.get("trusted_history_base_ancestry_verified", False)
+          )
+          trusted_history_prior_input_read_only = bool(
+              payload.get("trusted_history_prior_input_read_only", False)
+          )
+          trusted_history_automation_allowed = bool(
+              payload.get("trusted_history_automation_allowed", False)
+          )
+          trusted_history_merge_authorized = bool(
+              payload.get("trusted_history_merge_authorized", False)
+          )
+          trusted_history_semantic_equivalence_proven = bool(
+              payload.get(history_semantic_key, False)
+          )
+
+          print(f"comment_status={status}")
+          print(f"comment_reason={reason}")
+          print(f"action_report_status={action_report_status}")
+          print(f"comment_result_title={comment_result_title}")
+          print(f"evidence_signal_kind={evidence_signal_kind}")
+          print(f"evidence_signal_present={str(evidence_signal_present).lower()}")
+          print(f"evidence_review_required={str(evidence_review_required).lower()}")
+          print(f"trajectory_record_count={trajectory_record_count}")
+          print(f"trajectory_review_first_count={trajectory_review_first_count}")
+          print(f"trajectory_auto_fix_allowed_count={trajectory_auto_fix_allowed_count}")
+          print(f"runtime_proof_artifacts_present={str(runtime_proof_artifacts_present).lower()}")
+          print(f"runtime_proof_collection_status={runtime_proof_collection_status}")
+          print(f"runtime_guard_violation_count={runtime_guard_violation_count}")
+          print(f"live_benchmark_collection_status={live_benchmark_collection_status}")
+          print(f"live_benchmark_status={live_benchmark_status}")
+          print(f"live_benchmark_scenario_count={live_benchmark_scenario_count}")
+          print(f"anti_cheat_rejection_count={anti_cheat_rejection_count}")
+          print(f"repo_memory_collection_status={repo_memory_collection_status}")
+          print(f"repo_memory_status={repo_memory_status}")
+          print(
+              f"repo_memory_live_contract_proven={str(repo_memory_live_contract_proven).lower()}"
+          )
+          print(f"expected_artifact_inventory_status={expected_artifact_inventory_status}")
+          print(
+              "expected_artifact_inventory_non_empty="
+              f"{str(expected_artifact_inventory_non_empty).lower()}"
+          )
+          print(
+              "expected_artifact_inventory_authority_aware="
+              f"{str(expected_artifact_inventory_authority_aware).lower()}"
+          )
+          print(
+              expected_inventory_expected_artifact_count_key + '='
+              f"{expected_artifact_inventory_expected_artifact_count}"
+          )
+          print(
+              expected_inventory_authority_evidence_source_count_key + '='
+              f"{expected_artifact_inventory_authority_evidence_source_count}"
+          )
+          print(
+              expected_inventory_missing_authority_evidence_path_count_key + '='
+              f"{expected_artifact_inventory_missing_authority_evidence_path_count}"
+          )
+          print(
+              f"{expected_inventory_reporting_only_key}="
+              f"{str(expected_artifact_inventory_reporting_only).lower()}"
+          )
+          print(
+              f"{expected_inventory_patch_automation_key}="
+              f"{str(expected_artifact_inventory_patch_automation).lower()}"
+          )
+          print(
+              f"{expected_inventory_security_dismissal_key}="
+              f"{str(expected_artifact_inventory_security_dismissal).lower()}"
+          )
+          print(
+              f"{expected_inventory_merge_authorization_key}="
+              f"{str(expected_artifact_inventory_merge_authorization).lower()}"
+          )
+          print(
+              f"{expected_inventory_semantic_equivalence_claim_key}="
+              f"{str(expected_artifact_inventory_semantic_equivalence_claim).lower()}"
+          )
+          print(f"{authority_status_key}={authority_status}")
+          print(f"{authority_record_count_key}={authority_record_count}")
+          print(f"{authority_review_first_count_key}={authority_review_first_count}")
+          print(
+              f"{authority_auto_fix_allowed_count_key}={authority_auto_fix_allowed_count}"
+          )
+          print(f"{authority_reporting_only_count_key}={authority_reporting_only_count}")
+          print(
+              f"{authority_patch_application_allowed_key}="
+              f"{str(authority_patch_application_allowed).lower()}"
+          )
+          print(
+              f"{authority_security_dismissal_allowed_key}="
+              f"{str(authority_security_dismissal_allowed).lower()}"
+          )
+          print(
+              f"{authority_merge_authorized_key}="
+              f"{str(authority_merge_authorized).lower()}"
+          )
+          print(
+              f"{authority_semantic_equivalence_proven_key}="
+              f"{str(authority_semantic_equivalence_proven).lower()}"
+          )
+          print(f"trusted_history_collection_status={trusted_history_collection_status}")
+          print(f"trusted_history_status={trusted_history_status}")
+          print(f"trusted_history_record_count={trusted_history_record_count}")
+          print(
+              "trusted_history_base_ancestry_verified="
+              f"{str(trusted_history_base_ancestry_verified).lower()}"
+          )
+          print(
+              "trusted_history_prior_input_read_only="
+              f"{str(trusted_history_prior_input_read_only).lower()}"
+          )
+          print(
+              "trusted_history_automation_allowed="
+              f"{str(trusted_history_automation_allowed).lower()}"
+          )
+          print(
+              "trusted_history_merge_authorized="
+              f"{str(trusted_history_merge_authorized).lower()}"
+          )
+          print(
+              f"{history_semantic_key}="
+              f"{str(trusted_history_semantic_equivalence_proven).lower()}"
+          )
+
+          if status not in {"posted", "updated"}:
+              raise SystemExit(f"PR Quality comment was not posted or updated: status={status} reason={reason}")
+
+          if action_report_status == "unknown":
+              raise SystemExit("PR Quality comment signal metadata missing: action_report_status=unknown")
+          if comment_result_title == "unknown":
+              raise SystemExit("PR Quality comment signal metadata missing: comment_result_title=unknown")
+          if evidence_signal_kind not in {"none", "proof", "review"}:
+              raise SystemExit(
+                  "PR Quality comment signal metadata invalid: "
+                  f"evidence_signal_kind={evidence_signal_kind}"
+              )
+
+          if not runtime_proof_artifacts_present:
+              raise SystemExit(
+                  "PR Quality runtime proof artifacts missing from rendered comment metadata"
+              )
+          if runtime_proof_collection_status != "collected":
+              raise SystemExit(
+                  "PR Quality runtime proof collection failed after diagnostic comment publication: "
+                  f"status={runtime_proof_collection_status}"
+              )
+          if live_benchmark_collection_status != "collected":
+              raise SystemExit(
+                  "PR Quality live benchmark collection failed after diagnostic comment publication: "
+                  f"status={live_benchmark_collection_status}"
+              )
+          if live_benchmark_status != "passed":
+              raise SystemExit(
+                  "PR Quality live benchmark evidence failed: "
+                  f"status={live_benchmark_status}"
+              )
+          if live_benchmark_scenario_count != 6 or anti_cheat_rejection_count != 2:
+              raise SystemExit(
+                  "PR Quality live benchmark contract incomplete: "
+                  f"scenarios={live_benchmark_scenario_count} "
+                  f"anti_cheat_rejections={anti_cheat_rejection_count}"
+              )
+          if repo_memory_collection_status != "collected":
+              raise SystemExit(
+                  "PR Quality RepoMemory collection failed after diagnostic comment publication: "
+                  f"status={repo_memory_collection_status}"
+              )
+          if repo_memory_status != "live_proof_supported_memory":
+              raise SystemExit(
+                  "PR Quality RepoMemory live-proof status missing: "
+                  f"status={repo_memory_status}"
+              )
+          if not repo_memory_live_contract_proven:
+              raise SystemExit("PR Quality RepoMemory live contract was not proven")
+          if expected_artifact_inventory_status != "passed":
+              raise SystemExit(
+                  "PR Quality expected artifact inventory verification failed: "
+                  f"status={expected_artifact_inventory_status}"
+              )
+          if not expected_artifact_inventory_non_empty:
+              raise SystemExit("PR Quality expected artifact inventory was empty")
+          if not expected_artifact_inventory_authority_aware:
+              raise SystemExit("PR Quality expected artifact inventory was not authority-aware")
+          if expected_artifact_inventory_expected_artifact_count < 1:
+              raise SystemExit("PR Quality expected artifact inventory had no artifacts")
+          if expected_artifact_inventory_authority_evidence_source_count < 1:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory had no authority evidence sources"
+              )
+          if expected_artifact_inventory_missing_authority_evidence_path_count:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory is missing authority evidence paths: "
+                  f"count={expected_artifact_inventory_missing_authority_evidence_path_count}"
+              )
+          if not expected_artifact_inventory_reporting_only:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory verification was not reporting-only"
+              )
+          if expected_artifact_inventory_patch_automation:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory attempted to allow patch automation"
+              )
+          if expected_artifact_inventory_security_dismissal:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory attempted to allow security dismissal"
+              )
+          if expected_artifact_inventory_merge_authorization:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory attempted to authorize merge"
+              )
+          if expected_artifact_inventory_semantic_equivalence_claim:
+              raise SystemExit(
+                  "PR Quality expected artifact inventory attempted to claim semantic equivalence"
+              )
+          if authority_status != "authority_boundary_evidence_observed":
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority evidence missing: "
+                  f"status={authority_status}"
+              )
+          if authority_record_count < 1:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority evidence has no records"
+              )
+          if authority_patch_application_allowed:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to allow patch application"
+              )
+          if authority_security_dismissal_allowed:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to allow security dismissal"
+              )
+          if authority_merge_authorized:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to authorize merge"
+              )
+          if authority_semantic_equivalence_proven:
+              raise SystemExit(
+                  "PR Quality RepoMemory trajectory authority attempted to claim semantic equivalence"
+              )
+          if trusted_history_collection_status != "collected":
+              raise SystemExit(
+                  "PR Quality trusted accepted-main history collection failed after "
+                  "diagnostic comment publication: "
+                  f"status={trusted_history_collection_status}"
+              )
+          if trusted_history_status != "trusted_history_verified":
+              raise SystemExit(
+                  "PR Quality trusted accepted-main history was not verified: "
+                  f"status={trusted_history_status}"
+              )
+          if trusted_history_record_count < 1:
+              raise SystemExit("PR Quality trusted accepted-main history has no records")
+          if not trusted_history_base_ancestry_verified:
+              raise SystemExit(
+                  "PR Quality trusted accepted-main history base ancestry was not verified"
+              )
+          if not trusted_history_prior_input_read_only:
+              raise SystemExit(
+                  "PR Quality trusted accepted-main history did not preserve read-only input"
+              )
+          if trusted_history_automation_allowed:
+              raise SystemExit("PR Quality trusted history attempted to allow automation")
+          if trusted_history_merge_authorized:
+              raise SystemExit("PR Quality trusted history attempted to authorize merge")
+          if trusted_history_semantic_equivalence_proven:
+              raise SystemExit(
+                  "PR Quality trusted history attempted to claim semantic equivalence"
+              )
+
+          trusted_snapshot_history_exit_path = Path(
+              "build/pr-quality/trusted-diagnostic-signal-snapshot-history/exit-code.txt"
+          )
+          trusted_snapshot_history_exit_code = (
+              trusted_snapshot_history_exit_path.read_text(encoding="utf-8").strip()
+              if trusted_snapshot_history_exit_path.exists()
+              else "missing"
+          )
+          print(
+              "trusted_diagnostic_signal_snapshot_history_exit_code="
+              f"{trusted_snapshot_history_exit_code}"
+          )
+          if trusted_snapshot_history_exit_code not in {"0", "2"}:
+              raise SystemExit(
+                  "PR Quality trusted diagnostic snapshot history validation failed after "
+                  "diagnostic comment publication: "
+                  f"exit_code={trusted_snapshot_history_exit_code}"
+              )
+          PY
+
+      - name: Upload PR quality publication artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: pr-quality-publication-${{ github.event.workflow_run.id }}
+          path: |
+            build/pr-quality/comment-status.json
+            build/pr-quality/comment-publish/
+            build/pr-quality-publisher/verification.json
+            build/pr-quality-publisher/handoff/manifest.json
+          retention-days: 14
+          if-no-files-found: ignore

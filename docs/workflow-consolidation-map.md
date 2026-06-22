@@ -7,7 +7,7 @@ Date: 2026-04-16
 
 Reduce CI/workflow sprawl while preserving release-safety coverage by moving from many overlapping workflows to a smaller, tiered operating model.
 
-Current inventory baseline: **55 workflows** under `.github/workflows` (validated 2026-06-22). The contract layer prevents further unreviewed growth while the repository moves toward the 12-anchor target.
+Current inventory baseline: **56 workflows** under `.github/workflows` (validated 2026-06-22). The contract layer prevents further unreviewed growth while the repository moves toward the 12-anchor target.
 
 ## Target operating model
 
@@ -116,3 +116,8 @@ Move to 12 durable workflows (core + security + release + docs + maintenance), w
 ## Machine-readable plan
 
 See `docs/contracts/workflow-consolidation-plan.v1.json`.
+
+
+## Reviewed trust-boundary growth
+
+The temporary increase from 55 to 56 workflows is an explicitly reviewed security change: `pr-quality-publisher.yml` moves write-capable PR comment publication into a trusted `workflow_run` domain. The durable consolidation target remains 12 primary workflow anchors.

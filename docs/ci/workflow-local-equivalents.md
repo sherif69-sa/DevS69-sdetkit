@@ -775,3 +775,19 @@ python scripts/check_workflow_contracts.py \
 ```
 
 The checker is reporting-only. It does not change branch protection, workflows, permissions, or merge state.
+
+## PR Quality trusted publisher
+
+The publisher has no repository-code local equivalent because it is a GitHub control-plane action.
+Validate the boundary locally with:
+
+```bash
+python -m pytest -q \
+  tests/test_pr_quality_comment_observability_workflow.py \
+  tests/test_pr_quality_publisher_trust_boundary.py \
+  -o addopts=
+```
+
+The evidence workflow remains locally reproducible through the existing PR Quality commands. The
+publisher consumes only the verified handoff artifact and uses the GitHub API to update the PR
+comment.

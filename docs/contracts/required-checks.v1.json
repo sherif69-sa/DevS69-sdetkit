@@ -4,7 +4,7 @@
     "branch_protection_mutation_allowed": false,
     "merge_authorized": false
   },
-  "baseline_main_sha": "931ad70b6c3dfbf27facca6dfb4835e28345d968",
+  "baseline_main_sha": "a7755ecfdcd4eb1f17df486dd251889d6a246ef0",
   "branch": "main",
   "compatibility": {
     "new_context_is_non_required_until_reviewed": true,
