@@ -39,6 +39,10 @@ The publisher rejects stale heads, closed PRs, unknown paths, symlinks, digest m
 control characters, active HTML, JavaScript URLs, and oversized bodies. User mentions are
 neutralized before publication.
 
+Publisher visibility verification consumes only digest-bound metadata copied from the
+minimal handoff. It does not reopen evidence-workflow filesystem paths in the trusted
+publisher workspace.
+
 ## Authority boundary
 
 The handoff and published report are advisory. They do not authorize patch application, security
