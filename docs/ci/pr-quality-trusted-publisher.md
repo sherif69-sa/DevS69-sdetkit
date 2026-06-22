@@ -49,3 +49,15 @@ dismissal, merge, or claims of semantic equivalence.
 The publisher workflow cannot execute from the introducing PR branch because `workflow_run`
 loads the workflow from the default branch. Static contract tests and repository proof validate
 this PR. The next PR provides the first live end-to-end publisher observation.
+
+## Live verification protocol
+
+The trust boundary is accepted only after a real pull request demonstrates both publication and
+idempotent update behavior.
+
+Phase one requires the read-only evidence workflow to produce a minimal handoff, the trusted
+publisher to verify the exact pull-request head, and one SDET Quality Gate comment to appear.
+
+Phase two changes the same pull-request head. The publisher must update the existing comment
+instead of creating a duplicate. Publication artifacts must remain reporting-only and must not
+grant patch, security-dismissal, or merge authority.
