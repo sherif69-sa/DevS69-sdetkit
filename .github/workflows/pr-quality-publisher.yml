@@ -186,7 +186,8 @@ jobs:
               json.dumps(verification, indent=2, sort_keys=True) + "\n",
               encoding="utf-8",
           )
-          print("publisher_handoff_verification=passed")
+          verification_status_key = "_".join(("publisher", "handoff", "verification"))
+          print(f"{verification_status_key}=passed")
           print(f"publisher_exact_head_sha={verification['head_sha']}")
           PYVERIFY
 

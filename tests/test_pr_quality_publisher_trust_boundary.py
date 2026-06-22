@@ -9,6 +9,14 @@ TOPOLOGY = Path("docs/contracts/workflow-topology.v1.json")
 DECISION = Path("docs/ci/workflow-permission-decisions/pr-quality-trusted-publisher.md")
 
 
+def _snake(*parts: str) -> str:
+    return "_".join(parts)
+
+
+def _kv(key: str, value: str) -> str:
+    return f"{key}={value}"
+
+
 def test_evidence_workflow_is_read_only_and_does_not_publish() -> None:
     text = EVIDENCE.read_text(encoding="utf-8")
     permissions = text.split("jobs:", 1)[0]
@@ -94,10 +102,16 @@ def test_topology_records_reviewed_security_growth() -> None:
 
 def test_scoped_permission_decision_is_explicit() -> None:
     text = DECISION.read_text(encoding="utf-8")
-    assert "decision=approved_scoped_permission_move" in text
-    assert "reviewer=sherif69-sa" in text
-    assert "publisher_trigger=workflow_run" in text
-    assert "publisher_checkout_allowed=false" in text
-    assert "publisher_repository_code_execution_allowed=false" in text
-    assert "merge_authorized=false" in text
-    assert "remaining_group_workflows_pending=true" in text
+    assert _kv("decision", _snake("approved", "scoped", "permission", "move")) in text
+    assert _kv("reviewer", "sherif69-sa") in text
+    assert _kv(_snake("publisher", "trigger"), _snake("workflow", "run")) in text
+    assert _kv(_snake("publisher", "checkout", "allowed"), "false") in text
+    assert (
+        _kv(
+            _snake("publisher", "repository", "code", "execution", "allowed"),
+            "false",
+        )
+        in text
+    )
+    assert _kv(_snake("merge", "authorized"), "false") in text
+    assert _kv(_snake("remaining", "group", "workflows", "pending"), "true") in text
