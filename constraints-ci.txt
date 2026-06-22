@@ -3,12 +3,12 @@
 httpx==0.28.1
 build==1.5.0
 check-wheel-contents==0.6.3
-hypothesis==6.155.5
+hypothesis==6.155.7
 mkdocs==1.6.1
 mkdocs-material==9.7.6
 mypy==2.1.0
 pre-commit==4.6.0
-pytest==9.1.0
+pytest==9.1.1
 pytest-asyncio==1.4.0
 pytest-cov==7.1.0
 ruff==0.15.18
