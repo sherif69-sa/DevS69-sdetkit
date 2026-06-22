@@ -981,13 +981,18 @@ def test_pr_quality_workflow_uploads_trusted_diagnostic_snapshot_history_artifac
 def test_pr_quality_snapshot_history_allows_bootstrap_absence_but_fails_invalid_present_history() -> (
     None
 ):
-    text = _workflow_text() + "\n" + _publisher_text()
-    trusted_visibility = text[
-        text.index(
+    evidence = _workflow_text()
+    publisher = _publisher_text()
+    trusted_visibility = evidence[
+        evidence.index(
             "- name: Build trusted diagnostic signal snapshot history visibility"
-        ) : text.index("- name: Build verified operator evidence loop")
+        ) : evidence.index("- name: Build verified operator evidence loop")
     ]
-    verify_visibility = text[text.index("- name: Verify PR Quality comment visibility") :]
+    verify_visibility = publisher[
+        publisher.index("- name: Verify PR Quality comment visibility") : publisher.index(
+            "- name: Upload PR quality publication artifacts"
+        )
+    ]
 
     history_file_count = "_".join(("trusted", "snapshot", "history", "file", "count"))
     assert f"{history_file_count}=0" in trusted_visibility
@@ -998,10 +1003,14 @@ def test_pr_quality_snapshot_history_allows_bootstrap_absence_but_fails_invalid_
     assert "Collection status: `not_collected`" in trusted_visibility
     assert "Collection status: `collection_failed`" in trusted_visibility
     assert "failed validation or is incomplete" in trusted_visibility
-    guard_name = "_".join(("trusted", "snapshot", "history", "exit", "code"))
-    assert f'{guard_name} not in {{"0", "2"}}' in verify_visibility
-    assert "validation failed after " in verify_visibility
-    assert "diagnostic comment publication" in verify_visibility
+
+    snapshot_exit_path = "build/pr-quality/trusted-diagnostic-signal-snapshot-history/exit-code.txt"
+    assert snapshot_exit_path in evidence
+    assert snapshot_exit_path not in verify_visibility
+    assert 'snapshot_history_validation_key = "_".join(' in verify_visibility
+    assert 'snapshot_history_validation_value = "_".join(' in verify_visibility
+    assert 'if trusted_history_collection_status != "collected":' in verify_visibility
+    assert 'if trusted_history_status != "trusted_history_verified":' in verify_visibility
 
 
 def test_pr_quality_snapshot_history_falls_back_to_latest_ancestor_artifact_with_stream() -> None:
