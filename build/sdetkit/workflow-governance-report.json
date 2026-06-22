@@ -36,7 +36,7 @@
     "generator_schema_version": "sdetkit.workflow_governance_report.v2",
     "generator_source": "src/sdetkit/workflow_governance_report.py",
     "input_count": 57,
-    "input_digest": "ae9832af9e09ae9912e6ac0686f23cf5f44855e04a451526eebdb8101bb03548",
+    "input_digest": "c556012db100cdb65c2ef92b28960eda8c60abfd28cd8a1205b53b567813bcda",
     "workflow_file_count": 55
   },
   "merge_authorized": false,
@@ -1163,31 +1163,31 @@
       "action_refs": [
         {
           "action": "actions/checkout",
-          "line": 28,
-          "pinned_to_full_sha": true,
-          "ref": "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
-        },
-        {
-          "action": "actions/checkout",
-          "line": 34,
+          "line": 32,
           "pinned_to_full_sha": true,
           "ref": "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
         },
         {
           "action": "actions/setup-python",
-          "line": 38,
+          "line": 34,
           "pinned_to_full_sha": true,
           "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
         },
         {
           "action": "actions/upload-artifact",
-          "line": 54,
+          "line": 50,
           "pinned_to_full_sha": true,
           "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
         },
         {
           "action": "actions/checkout",
-          "line": 69,
+          "line": 61,
+          "pinned_to_full_sha": true,
+          "ref": "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
+        },
+        {
+          "action": "actions/checkout",
+          "line": 67,
           "pinned_to_full_sha": true,
           "ref": "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
         },
@@ -1199,79 +1199,97 @@
         },
         {
           "action": "actions/upload-artifact",
-          "line": 135,
+          "line": 87,
           "pinned_to_full_sha": true,
           "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
         },
         {
           "action": "actions/checkout",
-          "line": 158,
+          "line": 102,
           "pinned_to_full_sha": true,
           "ref": "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
         },
         {
           "action": "actions/setup-python",
-          "line": 160,
+          "line": 104,
           "pinned_to_full_sha": true,
           "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
         },
         {
           "action": "actions/upload-artifact",
-          "line": 177,
+          "line": 168,
           "pinned_to_full_sha": true,
           "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
         },
         {
           "action": "actions/checkout",
-          "line": 186,
+          "line": 191,
           "pinned_to_full_sha": true,
           "ref": "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
         },
         {
           "action": "actions/setup-python",
-          "line": 188,
+          "line": 193,
           "pinned_to_full_sha": true,
           "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
         },
         {
           "action": "actions/upload-artifact",
-          "line": 224,
+          "line": 210,
           "pinned_to_full_sha": true,
           "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
         },
         {
           "action": "actions/checkout",
-          "line": 240,
+          "line": 219,
           "pinned_to_full_sha": true,
           "ref": "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
         },
         {
           "action": "actions/setup-python",
-          "line": 242,
+          "line": 221,
+          "pinned_to_full_sha": true,
+          "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 257,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/checkout",
+          "line": 273,
+          "pinned_to_full_sha": true,
+          "ref": "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
+        },
+        {
+          "action": "actions/setup-python",
+          "line": 275,
           "pinned_to_full_sha": true,
           "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
         },
         {
           "action": "actions/download-artifact",
-          "line": 247,
+          "line": 280,
           "pinned_to_full_sha": true,
           "ref": "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"
         },
         {
           "action": "actions/checkout",
-          "line": 274,
+          "line": 307,
           "pinned_to_full_sha": true,
           "ref": "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
         },
         {
           "action": "actions/setup-python",
-          "line": 276,
+          "line": 309,
           "pinned_to_full_sha": true,
           "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
         },
         {
           "action": "actions/upload-artifact",
-          "line": 326,
+          "line": 359,
           "pinned_to_full_sha": true,
           "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
         }
@@ -2797,7 +2815,7 @@
           "action": "softprops/action-gh-release",
           "line": 118,
           "pinned_to_full_sha": true,
-          "ref": "b4309332981a82ec1c5618f44dd2e27cc8bfbfda"
+          "ref": "718ea10b132b3b2eba29c1007bb80653f286566b"
         },
         {
           "action": "actions/upload-artifact",

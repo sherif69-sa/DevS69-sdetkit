@@ -7,7 +7,7 @@ Date: 2026-04-16
 
 Reduce CI/workflow sprawl while preserving release-safety coverage by moving from many overlapping workflows to a smaller, tiered operating model.
 
-Current inventory: **43 workflows** under `.github/workflows`.
+Current inventory baseline: **55 workflows** under `.github/workflows` (validated 2026-06-22). The contract layer prevents further unreviewed growth while the repository moves toward the 12-anchor target.
 
 ## Target operating model
 
@@ -83,6 +83,7 @@ Move to 12 durable workflows (core + security + release + docs + maintenance), w
 
 ### Phase A — Baseline and parity
 
+- [x] Establish machine-readable workflow topology and required-check contracts.
 - [ ] Export run-frequency + failure-rate telemetry for all 43 workflows.
 - [ ] Identify duplicate triggers and overlapping job steps.
 - [ ] Define reusable workflow templates for security/dependency/ops bundles.
