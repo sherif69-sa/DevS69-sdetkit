@@ -751,3 +751,27 @@ Workflow command hints extracted from the YAML for operator review:
 |
 python - <<'PY'
 ```
+
+## Workflow contracts
+
+```bash
+python scripts/check_workflow_contracts.py \
+  --root . \
+  --topology-contract docs/contracts/workflow-topology.v1.json \
+  --required-checks-contract docs/contracts/required-checks.v1.json \
+  --out-json build/workflow-contracts/report.json \
+  --out-md build/workflow-contracts/report.md
+```
+
+For an authenticated live required-context comparison:
+
+```bash
+gh api repos/sherif69-sa/DevS69-sdetkit/branches/main/protection/required_status_checks/contexts \
+  > /tmp/devs69-required-contexts.json
+
+python scripts/check_workflow_contracts.py \
+  --root . \
+  --live-required-contexts-json /tmp/devs69-required-contexts.json
+```
+
+The checker is reporting-only. It does not change branch protection, workflows, permissions, or merge state.

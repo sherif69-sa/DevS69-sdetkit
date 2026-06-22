@@ -21,6 +21,39 @@ concurrency:
 
 jobs:
 
+
+  workflow-contracts:
+    name: Workflow contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Validate workflow and required-check contracts
+        run: |
+          mkdir -p build/workflow-contracts
+          python scripts/check_workflow_contracts.py \
+            --root . \
+            --topology-contract docs/contracts/workflow-topology.v1.json \
+            --required-checks-contract docs/contracts/required-checks.v1.json \
+            --out-json build/workflow-contracts/report.json \
+            --out-md build/workflow-contracts/report.md
+
+      - name: Upload workflow contract report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: workflow-contract-report
+          path: build/workflow-contracts/
+          retention-days: 14
+          if-no-files-found: error
+
   repo-audit:
     name: Repo audit report
     runs-on: ubuntu-latest
