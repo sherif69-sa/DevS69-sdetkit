@@ -74,7 +74,7 @@ def test_pr_issue_interaction_review_card_mentions_observed_workflows() -> None:
     assert ".github/workflows/contributor-onboarding-bot.yml" in text
     assert ".github/workflows/maintenance-autopilot.yml" in text
     assert ".github/workflows/pr-helper-bot.yml" in text
-    assert ".github/workflows/pr-quality-comment.yml" in text
+    assert ".github/workflows/pr-quality-publisher.yml" in text
     assert "issues: write" in text
     assert "pull-requests: write" in text
     assert "GitHub API or gh-based PR/issue interaction detected." in text

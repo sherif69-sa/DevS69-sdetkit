@@ -5,14 +5,14 @@
     "patch_application_allowed": false,
     "semantic_equivalence_proven": false
   },
-  "baseline_main_sha": "931ad70b6c3dfbf27facca6dfb4835e28345d968",
+  "baseline_main_sha": "a7755ecfdcd4eb1f17df486dd251889d6a246ef0",
   "budgets": {
-    "maximum_heavy_workflow_count": 7,
+    "maximum_heavy_workflow_count": 8,
     "maximum_metadata_drift_occurrence_count": 18,
     "maximum_metadata_drift_workflow_count": 8,
-    "maximum_monolithic_workflow_count": 6,
+    "maximum_monolithic_workflow_count": 7,
     "maximum_unpinned_action_count": 0,
-    "maximum_workflow_count": 55,
+    "maximum_workflow_count": 56,
     "maximum_write_permission_workflow_count": 32,
     "minimum_reusable_workflow_count": 1,
     "target_primary_workflow_count": 12
@@ -54,6 +54,7 @@
     ".github/workflows/platform-readiness-quality-contract.yml",
     ".github/workflows/pr-helper-bot.yml",
     ".github/workflows/pr-quality-comment.yml",
+    ".github/workflows/pr-quality-publisher.yml",
     ".github/workflows/pre-commit-autoupdate.yml",
     ".github/workflows/premium-gate.yml",
     ".github/workflows/quality.yml",
@@ -96,5 +97,13 @@
     "enterprise-gate.yml",
     "top-tier-reporting-sample.yml"
   ],
+  "reviewed_growth": {
+    "current_workflow_count": 56,
+    "durable_target_primary_workflow_count": 12,
+    "follow_up": "consume canonical CI artifacts and retire duplicate PR Quality execution",
+    "previous_workflow_count": 55,
+    "reason": "isolate PR Quality write authority in a trusted workflow_run publisher",
+    "reviewer": "sherif69-sa"
+  },
   "schema_version": "devs69.workflow_topology.v1"
 }

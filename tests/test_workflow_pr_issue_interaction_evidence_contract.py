@@ -46,7 +46,7 @@ def test_pr_issue_interaction_permission_evidence_keeps_other_groups_separate() 
         ".github/workflows/contributor-onboarding-bot.yml",
         ".github/workflows/maintenance-autopilot.yml",
         ".github/workflows/pr-helper-bot.yml",
-        ".github/workflows/pr-quality-comment.yml",
+        ".github/workflows/pr-quality-publisher.yml",
     ]
 
     assert evidence["authority_boundary"] == {

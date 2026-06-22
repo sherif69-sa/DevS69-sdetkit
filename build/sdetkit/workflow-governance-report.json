@@ -1,13 +1,13 @@
 {
   "actionability_summary": {
-    "finding_count": 16,
-    "ranked_followup_count": 1,
+    "finding_count": 17,
+    "ranked_followup_count": 2,
     "review_first": true,
     "review_required_count": 16,
     "safe_to_patch": false,
     "top_followup": "permissions_least_privilege",
     "top_followup_priority": "P1",
-    "workflow_count": 55
+    "workflow_count": 56
   },
   "advisory_only": true,
   "authority_boundary": {
@@ -17,8 +17,9 @@
     "semantic_equivalence_proven": false
   },
   "automation_allowed": false,
-  "finding_count": 16,
+  "finding_count": 17,
   "finding_counts": {
+    "local_equivalent_command_documented": 1,
     "permissions_least_privilege": 16
   },
   "freshness": {
@@ -35,14 +36,14 @@
     "digest_algorithm": "sha256",
     "generator_schema_version": "sdetkit.workflow_governance_report.v2",
     "generator_source": "src/sdetkit/workflow_governance_report.py",
-    "input_count": 57,
-    "input_digest": "c556012db100cdb65c2ef92b28960eda8c60abfd28cd8a1205b53b567813bcda",
-    "workflow_file_count": 55
+    "input_count": 58,
+    "input_digest": "dcbf200648861b7a0fc4ddbb91d3d8600c7e2add2b0592e65be0427b90b6b15f",
+    "workflow_file_count": 56
   },
   "merge_authorized": false,
   "operator_summary": {
     "next_action": "Review ranked workflow governance followups before making narrow CI hardening PRs.",
-    "ranked_followup_count": 1,
+    "ranked_followup_count": 2,
     "review_first": true,
     "safe_to_patch": false,
     "status": "workflow_governance_report_generated",
@@ -105,7 +106,7 @@
           ".github/workflows/contributor-onboarding-bot.yml",
           ".github/workflows/maintenance-autopilot.yml",
           ".github/workflows/pr-helper-bot.yml",
-          ".github/workflows/pr-quality-comment.yml"
+          ".github/workflows/pr-quality-publisher.yml"
         ]
       },
       {
@@ -363,7 +364,7 @@
         "requires_human_review": true,
         "reviewer_decision_required": true,
         "safe_to_patch": false,
-        "workflow": ".github/workflows/pr-quality-comment.yml"
+        "workflow": ".github/workflows/pr-quality-publisher.yml"
       },
       {
         "granted_write_scopes": [
@@ -678,7 +679,7 @@
         "GitHub API or gh-based PR/issue interaction detected.",
         "PR or issue comment/review API usage detected."
       ],
-      "path": ".github/workflows/pr-quality-comment.yml",
+      "path": ".github/workflows/pr-quality-publisher.yml",
       "recommended_change_type": "permission_reason_review",
       "requires_human_review": true,
       "safe_to_patch": false
@@ -859,7 +860,7 @@
           ".github/workflows/contributor-onboarding-bot.yml",
           ".github/workflows/maintenance-autopilot.yml",
           ".github/workflows/pr-helper-bot.yml",
-          ".github/workflows/pr-quality-comment.yml"
+          ".github/workflows/pr-quality-publisher.yml"
         ]
       },
       {
@@ -915,6 +916,18 @@
         ".github/workflows/pages.yml",
         ".github/workflows/pr-helper-bot.yml"
       ]
+    },
+    {
+      "affected_workflow_count": 1,
+      "finding": "local_equivalent_command_documented",
+      "priority": "P2",
+      "product_reason": "Local equivalents let operators reproduce workflow evidence without depending on GitHub Actions.",
+      "recommended_change_type": "operator_reproducibility_docs",
+      "review_first": true,
+      "safe_to_patch": false,
+      "sample_workflows": [
+        ".github/workflows/pr-quality-publisher.yml"
+      ]
     }
   ],
   "repo_mutation": false,
@@ -934,7 +947,7 @@
   "safe_to_patch": false,
   "schema_version": "sdetkit.workflow_governance_report.v2",
   "semantic_equivalence_proven": false,
-  "workflow_count": 55,
+  "workflow_count": 56,
   "workflows": [
     {
       "action_refs": [
@@ -2555,31 +2568,37 @@
       "action_refs": [
         {
           "action": "actions/checkout",
-          "line": 26,
+          "line": 25,
           "pinned_to_full_sha": true,
           "ref": "9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
         },
         {
           "action": "actions/setup-python",
-          "line": 29,
+          "line": 28,
           "pinned_to_full_sha": true,
           "ref": "a309ff8b426b58ec0e2a45f0f869d46889d02405"
         },
         {
           "action": "actions/upload-artifact",
-          "line": 1057,
+          "line": 1056,
           "pinned_to_full_sha": true,
           "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
         },
         {
           "action": "actions/upload-artifact",
-          "line": 1066,
+          "line": 1065,
           "pinned_to_full_sha": true,
           "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
         },
         {
           "action": "actions/upload-artifact",
-          "line": 1077,
+          "line": 1076,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 1191,
           "pinned_to_full_sha": true,
           "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
         }
@@ -2593,16 +2612,52 @@
         "job_names_unique": "manual_review",
         "local_equivalent_command_documented": "yes",
         "no_secrets_in_pull_request_from_fork": "manual_review",
-        "permissions_least_privilege": "no"
+        "permissions_least_privilege": "yes"
       },
-      "findings": [
-        "permissions_least_privilege"
-      ],
+      "findings": [],
       "mkdocs_build_used": false,
       "path": ".github/workflows/pr-quality-comment.yml",
       "pip_install_lines": [
         "python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e ."
       ],
+      "review_first": true,
+      "safe_to_patch": false,
+      "status": "passed",
+      "upload_artifact_used": true
+    },
+    {
+      "action_refs": [
+        {
+          "action": "actions/download-artifact",
+          "line": 30,
+          "pinned_to_full_sha": true,
+          "ref": "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"
+        },
+        {
+          "action": "actions/upload-artifact",
+          "line": 952,
+          "pinned_to_full_sha": true,
+          "ref": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        }
+      ],
+      "checklist": {
+        "actions_pinned_to_sha": "yes",
+        "artifacts_have_retention": "yes",
+        "cache_key_appropriate": "not_applicable",
+        "docs_build_strict": "not_applicable",
+        "install_uses_constraints": "not_applicable",
+        "job_names_unique": "manual_review",
+        "local_equivalent_command_documented": "no",
+        "no_secrets_in_pull_request_from_fork": "manual_review",
+        "permissions_least_privilege": "no"
+      },
+      "findings": [
+        "local_equivalent_command_documented",
+        "permissions_least_privilege"
+      ],
+      "mkdocs_build_used": false,
+      "path": ".github/workflows/pr-quality-publisher.yml",
+      "pip_install_lines": [],
       "review_first": true,
       "safe_to_patch": false,
       "status": "review_required",

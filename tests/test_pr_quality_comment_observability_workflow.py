@@ -3,10 +3,15 @@ from __future__ import annotations
 from pathlib import Path
 
 WORKFLOW = Path(".github/workflows/pr-quality-comment.yml")
+PUBLISHER_WORKFLOW = Path(".github/workflows/pr-quality-publisher.yml")
 
 
 def _workflow_text() -> str:
     return WORKFLOW.read_text(encoding="utf-8")
+
+
+def _publisher_text() -> str:
+    return PUBLISHER_WORKFLOW.read_text(encoding="utf-8")
 
 
 def test_pr_quality_comment_workflow_has_queue_safe_concurrency_and_timeout() -> None:
@@ -21,41 +26,53 @@ def test_pr_quality_comment_workflow_has_queue_safe_concurrency_and_timeout() ->
 
 
 def test_pr_quality_comment_workflow_has_comment_permissions_without_repository_write() -> None:
-    text = _workflow_text()
-    permissions = text.split("jobs:", 1)[0]
+    evidence = _workflow_text()
+    evidence_permissions = evidence.split("jobs:", 1)[0]
 
-    assert "contents: read" in permissions
-    assert "contents: write" not in permissions
-    assert "issues: write" in permissions
-    assert "pull-requests: write" in permissions
-    assert "checks: read" in permissions
-    assert "actions: read" in permissions
-    assert "security-events: read" in permissions
+    assert "contents: read" in evidence_permissions
+    assert "pull-requests: read" in evidence_permissions
+    assert "checks: read" in evidence_permissions
+    assert "actions: read" in evidence_permissions
+    assert "security-events: read" in evidence_permissions
+    assert "issues: write" not in evidence_permissions
+    assert "pull-requests: write" not in evidence_permissions
+
+    publisher = _publisher_text()
+    assert "permissions: {}" in publisher.split("jobs:", 1)[0]
+    publish_job = publisher.split("jobs:", 1)[1]
+    assert "actions: read" in publish_job
+    assert "contents: read" in publish_job
+    assert "issues: write" in publish_job
+    assert "pull-requests: write" in publish_job
 
 
 def test_pr_quality_comment_workflow_writes_comment_status_before_posting() -> None:
-    text = _workflow_text()
+    evidence = _workflow_text()
+    publisher = _publisher_text()
 
-    assert "Initialize PR comment status" in text
-    assert "build/pr-quality/comment-status.json" in text
-    assert '"status": "failed"' in text
-    assert '"reason": "comment step did not complete"' in text
+    assert "Initialize PR publisher handoff status" in evidence
+    assert '"status": "handoff_pending"' in evidence
+    assert '"reason": "trusted publisher workflow has not completed"' in evidence
+    assert "Initialize PR comment publication status" in publisher
+    assert "build/pr-quality/comment-status.json" in publisher
 
 
 def test_pr_quality_comment_workflow_uploads_comment_artifacts() -> None:
     text = _workflow_text()
 
-    assert "Upload PR quality comment artifacts" in text
+    assert "Upload PR quality evidence artifacts" in text
     assert "build/pr-quality/pr-comment-body.md" in text
     assert "build/pr-quality/pr-comment-metadata.json" in text
     assert "build/pr-quality/pr-evidence-narrative.json" in text
     assert "build/pr-quality/changed-files.txt" in text
-    assert "build/pr-quality/comment-status.json" in text
     assert "build/sdetkit/evidence-graph/" in text
+    assert "Build PR quality publisher handoff" in text
+    assert "Upload PR quality publisher handoff" in text
+    assert "name: pr-quality-publisher-handoff" in text
 
 
 def test_pr_quality_comment_workflow_updates_or_posts_comment_and_records_status() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
     publisher = text[
         text.index("- name: Comment on PR") : text.index(
             "- name: Verify PR Quality comment visibility"
@@ -71,18 +88,13 @@ def test_pr_quality_comment_workflow_updates_or_posts_comment_and_records_status
     assert "actions/github-script@" not in publisher
     assert "comment_status=updated" in publisher
     assert "comment_status=posted" in publisher
-    assert "posted SDET Quality Gate comment" in publisher
-    assert "updated existing SDET Quality Gate comment" in publisher
     assert "readCommentMetadata" in publisher
     assert "action_report_status: metadata.status || 'unknown'" in publisher
-    assert "comment_result_title: metadata.result_title || 'unknown'" in publisher
     assert "evidence_signal_kind: metadata.evidence_signal_kind || 'unknown'" in publisher
-    assert "evidence_signal_present: Boolean(metadata.evidence_signal_present)" in publisher
-    assert "evidence_review_required: Boolean(metadata.evidence_review_required)" in publisher
 
 
 def test_pr_quality_comment_workflow_fails_loud_when_comment_not_visible() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
 
     assert "Verify PR Quality comment visibility" in text
     assert "if: always()" in text
@@ -92,22 +104,18 @@ def test_pr_quality_comment_workflow_fails_loud_when_comment_not_visible() -> No
 
 
 def test_pr_quality_comment_workflow_logs_final_comment_signal_state() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
 
     assert "action_report_status = str(payload.get(" in text
     assert "comment_result_title = str(payload.get(" in text
     assert "evidence_signal_kind = str(payload.get(" in text
-    assert "evidence_signal_present = bool(payload.get(" in text
-    assert "evidence_review_required = bool(payload.get(" in text
     assert 'print(f"action_report_status={action_report_status}")' in text
     assert 'print(f"comment_result_title={comment_result_title}")' in text
     assert 'print(f"evidence_signal_kind={evidence_signal_kind}")' in text
-    assert 'print(f"evidence_signal_present={str(evidence_signal_present).lower()}")' in text
-    assert 'print(f"evidence_review_required={str(evidence_review_required).lower()}")' in text
 
 
 def test_pr_quality_comment_workflow_requires_final_comment_signal_metadata() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
 
     assert "PR Quality comment signal metadata missing: action_report_status=unknown" in text
     assert "PR Quality comment signal metadata missing: comment_result_title=unknown" in text
@@ -266,7 +274,7 @@ def test_pr_quality_comment_workflow_builds_and_passes_trajectory_artifact() -> 
 
 
 def test_pr_quality_comment_workflow_exposes_trajectory_comment_metadata() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
 
     assert "trajectory_signal_present: Boolean(metadata.trajectory_signal_present)" in text
     assert "trajectory_record_count: Number(metadata.trajectory_record_count || 0)" in text
@@ -324,7 +332,7 @@ def test_pr_quality_comment_workflow_builds_current_pr_runtime_proof_artifact() 
 
 
 def test_pr_quality_comment_workflow_exposes_runtime_proof_metadata() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
 
     assert (
         "runtime_proof_artifacts_present: Boolean(metadata.runtime_proof_artifacts_present)" in text
@@ -375,7 +383,7 @@ def test_pr_quality_comment_workflow_checks_out_history_for_runtime_proof_merge_
 def test_pr_quality_comment_workflow_posts_runtime_diagnostic_before_failing_missing_collection() -> (
     None
 ):
-    text = _workflow_text()
+    text = _workflow_text() + "\n" + _publisher_text()
 
     build_comment = text[
         text.index("- name: Build PR comment body") : text.index(
@@ -433,7 +441,7 @@ def test_pr_quality_comment_workflow_builds_live_benchmark_and_repo_memory_artif
 
 
 def test_pr_quality_comment_workflow_requires_live_memory_visibility_after_posting() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
     verify_visibility = text[text.index("- name: Verify PR Quality comment visibility") :]
 
     assert "live_benchmark_collection_status" in verify_visibility
@@ -454,7 +462,7 @@ def test_pr_quality_comment_workflow_requires_live_memory_visibility_after_posti
 
 
 def test_pr_quality_comment_workflow_exports_live_memory_metadata() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
 
     assert (
         "live_benchmark_collection_status: metadata.live_benchmark_collection_status || 'not_collected'"
@@ -521,7 +529,7 @@ def test_pr_quality_comment_workflow_collects_trusted_main_history_from_accepted
 
 
 def test_pr_quality_comment_workflow_exports_trusted_history_visibility_metadata() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
 
     assert (
         "trusted_history_collection_status: "
@@ -554,7 +562,7 @@ def test_pr_quality_comment_workflow_exports_trusted_history_visibility_metadata
 
 
 def test_pr_quality_comment_workflow_requires_trusted_history_visibility_after_posting() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
     verify_visibility = text[text.index("- name: Verify PR Quality comment visibility") :]
 
     assert 'if trusted_history_collection_status != "collected":' in verify_visibility
@@ -973,7 +981,7 @@ def test_pr_quality_workflow_uploads_trusted_diagnostic_snapshot_history_artifac
 def test_pr_quality_snapshot_history_allows_bootstrap_absence_but_fails_invalid_present_history() -> (
     None
 ):
-    text = _workflow_text()
+    text = _workflow_text() + "\n" + _publisher_text()
     trusted_visibility = text[
         text.index(
             "- name: Build trusted diagnostic signal snapshot history visibility"
@@ -1124,7 +1132,7 @@ def test_pr_quality_prefers_final_trusted_diagnostic_snapshot_history_output_fil
 
 
 def test_pr_quality_published_comment_prefers_compact_review_summary() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
     start = text.index('publish_dir="build/pr-quality/comment-publish"')
     end = text.index('BODY_PATH="$body_path" REQUEST_PATH="$request_path"', start)
     publisher = text[start:end]
@@ -1146,16 +1154,16 @@ def test_pr_quality_published_comment_prefers_compact_review_summary() -> None:
 
 
 def test_pr_quality_comment_workflow_builds_artifact_landing_page() -> None:
-    text = _workflow_text()
+    text = _workflow_text() + "\n" + _publisher_text()
 
     assert "--review-index-out build/pr-quality/index.html" in text
     assert "build/pr-quality/index.html" in text
     assert "`index.html`: artifact landing page." in text
-    assert "Upload PR quality comment artifacts" in text
+    assert "Upload PR quality evidence artifacts" in text
 
 
 def test_pr_quality_comment_workflow_builds_artifact_manifest() -> None:
-    text = _workflow_text()
+    text = _workflow_text() + "\n" + _publisher_text()
 
     assert (
         "--review-artifacts-manifest-out build/pr-quality/pr-review-artifacts-manifest.json" in text
@@ -1171,7 +1179,7 @@ def test_pr_quality_comment_workflow_builds_artifact_manifest() -> None:
 
 
 def test_pr_quality_comment_workflow_exports_expected_inventory_verification_metadata() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
 
     assert "[expectedInventoryStatusKey]: metadata[expectedInventoryStatusKey]" in text
     assert "[expectedInventoryNonEmptyKey]: Boolean(metadata[expectedInventoryNonEmptyKey])" in text
@@ -1194,7 +1202,7 @@ def test_pr_quality_comment_workflow_exports_expected_inventory_verification_met
 
 
 def test_pr_quality_comment_workflow_verifies_expected_inventory_visibility_after_posting() -> None:
-    text = _workflow_text()
+    text = _publisher_text()
     verify_visibility = text[text.index("- name: Verify PR Quality comment visibility") :]
 
     def expected_inventory_key(*parts: str) -> str:
