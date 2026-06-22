@@ -487,35 +487,210 @@ def build_release_anti_hijack_threat_model(
     }
 
 
+def _safe_bool(value: Any) -> bool:
+    return value is True
+
+
+def _safe_count(value: Any) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        return 0
+    if value < 0 or value > 10000:
+        return 0
+    return value
+
+
+def _safe_digest(value: Any) -> str:
+    candidate = str(value)
+    if re.fullmatch(r"[0-9a-f]{64}", candidate) is None:
+        return ""
+    return candidate
+
+
+def _safe_identifier(value: Any) -> str:
+    candidate = str(value)
+    if re.fullmatch(r"[0-9A-Za-z._/-]{1,160}", candidate) is None:
+        return ""
+    if candidate.startswith("/") or ".." in Path(candidate).parts:
+        return ""
+    return candidate
+
+
 def _public_payload(payload: dict[str, Any]) -> dict[str, Any]:
-    findings = payload.get("findings")
-    if not isinstance(findings, list):
-        findings = []
-    safe_findings = [item for item in findings if isinstance(item, dict)]
+    provenance_raw = payload.get("input_provenance")
+    if not isinstance(provenance_raw, dict):
+        provenance_raw = {}
+    controls_raw = payload.get("release_controls")
+    if not isinstance(controls_raw, dict):
+        controls_raw = {}
+
+    provenance = {
+        "digest_algorithm": INPUT_DIGEST_ALGORITHM,
+        "input_digest": _safe_digest(provenance_raw.get("input_digest", "")),
+        "input_count": _safe_count(provenance_raw.get("input_count")),
+        "generator_schema_version": SCHEMA_VERSION,
+        "generator_source": GENERATOR_SOURCE_LABEL,
+        "generator_source_sha256": _safe_digest(provenance_raw.get("generator_source_sha256", "")),
+        "workflow_path": _safe_identifier(provenance_raw.get("workflow_path", "")),
+        "workflow_source_sha256": _safe_digest(provenance_raw.get("workflow_source_sha256", "")),
+        "workflow_present": _safe_bool(provenance_raw.get("workflow_present")),
+        "current_head_sha": _safe_identifier(provenance_raw.get("current_head_sha", "")),
+        "current_head_available": _safe_bool(provenance_raw.get("current_head_available")),
+    }
+
+    finding_catalog = {
+        "release_workflow_missing": {
+            "id": "release_workflow_missing",
+            "severity": "high",
+            "surface": "release_workflow",
+            "summary": "Release workflow file was not found.",
+            "recommendation": (
+                "Add or identify the canonical release workflow before assessing publish risk."
+            ),
+        },
+        "unpinned_release_actions": {
+            "id": "unpinned_release_actions",
+            "severity": "high",
+            "surface": "workflow_integrity",
+            "summary": "One or more release workflow actions are not pinned to a full commit SHA.",
+            "recommendation": (
+                "Pin release workflow actions to full commit SHAs and verify each SHA belongs "
+                "to the intended upstream repository."
+            ),
+        },
+        "release_attestation_gap": {
+            "id": "release_attestation_gap",
+            "severity": "medium",
+            "surface": "artifact_provenance",
+            "summary": "Release workflow does not show a complete provenance attestation path.",
+            "recommendation": (
+                "Keep build provenance or artifact attestation evidence attached to release "
+                "runs when release publishing is enabled."
+            ),
+        },
+        "pypi_publish_auth_material_surface": {
+            "id": "pypi_publish_auth_material_surface",
+            "severity": "medium",
+            "surface": "publish_auth_material",
+            "summary": "Release publish path references a PyPI publish authentication environment.",
+            "recommendation": (
+                "Prefer PyPI Trusted Publishing/OIDC when configured; until then, keep "
+                "publish authentication narrowly scoped, rotated, and protected by "
+                "maintainer review."
+            ),
+        },
+        "release_contents_write_scope": {
+            "id": "release_contents_write_scope",
+            "severity": "review",
+            "surface": "workflow_permissions",
+            "summary": "Release workflow requests contents: write.",
+            "recommendation": (
+                "Keep write scope isolated to release workflows and protect release workflow "
+                "changes with CODEOWNERS/rulesets."
+            ),
+        },
+        "manual_release_dispatch_review_surface": {
+            "id": "manual_release_dispatch_review_surface",
+            "severity": "review",
+            "surface": "release_entrypoint",
+            "summary": "Release workflow supports workflow_dispatch.",
+            "recommendation": (
+                "Require operator verification of the requested tag, release preflight output, "
+                "and package version before manual dispatch."
+            ),
+        },
+    }
+    finding_ids: set[str] = set()
+    raw_findings = payload.get("findings")
+    if isinstance(raw_findings, list):
+        for item in raw_findings:
+            if isinstance(item, dict):
+                finding_id = str(item.get("id", ""))
+                if finding_id in finding_catalog:
+                    finding_ids.add(finding_id)
+    findings = [dict(finding_catalog[finding_id]) for finding_id in sorted(finding_ids)]
+
+    status = str(payload.get("status", "review_required"))
+    if status not in {"review_required", "strong"}:
+        status = "review_required"
+
+    workflow_path = _safe_identifier(payload.get("workflow_path", ""))
+    if not workflow_path:
+        workflow_path = provenance["workflow_path"]
+
+    positive_controls = sorted(
+        {
+            str(item)
+            for item in payload.get("positive_controls", [])
+            if str(item) in PUBLIC_POSITIVE_CONTROLS
+        }
+    )
+
+    release_controls = {
+        "workflow_dispatch": _safe_bool(controls_raw.get("workflow_dispatch")),
+        "tag_push_release": _safe_bool(controls_raw.get("tag_push_release")),
+        "contents_write": _safe_bool(controls_raw.get("contents_write")),
+        "id_token_write": _safe_bool(controls_raw.get("id_token_write")),
+        "attestations_write": _safe_bool(controls_raw.get("attestations_write")),
+        "pypi_publish_auth_material_reference": _safe_bool(
+            controls_raw.get("pypi_publish_auth_material_reference")
+        ),
+        "trusted_publishing_action_detected": _safe_bool(
+            controls_raw.get("trusted_publishing_action_detected")
+        ),
+        "build_provenance_attestation": _safe_bool(
+            controls_raw.get("build_provenance_attestation")
+        ),
+        "uses_action_count": _safe_count(controls_raw.get("uses_action_count")),
+        "unpinned_action_count": _safe_count(controls_raw.get("unpinned_action_count")),
+    }
 
     return {
         "schema_version": SCHEMA_VERSION,
-        "input_provenance": dict(payload.get("input_provenance") or {}),
-        "source_relationships": dict(payload.get("source_relationships") or {}),
+        "input_provenance": provenance,
+        "source_relationships": {
+            "workflow_path": workflow_path,
+            "workflow_source_present": provenance["workflow_present"],
+            "workflow_source_digest_bound": bool(
+                provenance["workflow_present"] and provenance["workflow_source_sha256"]
+            ),
+            "generator_source_digest_bound": bool(provenance["generator_source_sha256"]),
+            "current_head_sha": provenance["current_head_sha"],
+            "current_head_bound": provenance["current_head_available"],
+            "permission_evidence_scope": "workflow_yaml_only",
+        },
         "evidence_limits": _evidence_limits(),
-        "status": str(payload.get("status", "review_required")),
-        "workflow_path": str(payload.get("workflow_path", "")),
-        "workflow_present": bool(payload.get("workflow_present")),
-        "positive_controls": sorted(
-            {
-                str(item)
-                for item in payload.get("positive_controls", [])
-                if str(item) in PUBLIC_POSITIVE_CONTROLS
-            }
-        ),
-        "findings": safe_findings,
-        "finding_count": len(safe_findings),
-        "unverified_settings": sorted(
-            str(item) for item in payload.get("unverified_settings", []) if str(item).strip()
-        ),
-        "release_controls": dict(payload.get("release_controls") or {}),
-        "recommended_next_actions": list(payload.get("recommended_next_actions") or []),
-        "rules": dict(payload.get("rules") or {}),
+        "status": status,
+        "workflow_path": workflow_path,
+        "workflow_present": _safe_bool(payload.get("workflow_present")),
+        "positive_controls": positive_controls,
+        "findings": findings,
+        "finding_count": len(findings),
+        "unverified_settings": [
+            "CODEOWNERS enforcement for .github/workflows/release.yml",
+            "GitHub environment protection and required reviewers for publish jobs",
+            "PyPI Trusted Publisher configuration",
+            "branch protection / rulesets for release workflow changes",
+            "repository publish-auth material inventory and rotation status",
+        ],
+        "release_controls": release_controls,
+        "recommended_next_actions": [
+            "Review release workflow changes through CODEOWNERS/rulesets.",
+            "Prefer PyPI Trusted Publishing/OIDC when the PyPI project is configured for it.",
+            "Keep provenance/attestation evidence attached to release runs.",
+            (
+                "Treat publish-auth based publishing as review-required until Trusted "
+                "Publishing is configured."
+            ),
+            "Do not claim release automation is authorized by this report.",
+        ],
+        "rules": {
+            "workflow_read_only": True,
+            "repo_settings_verified": False,
+            "pypi_trusted_publisher_verified": False,
+            "release_workflow_mutated": False,
+            "publish_attempted": False,
+            "review_first": True,
+        },
         "automation_allowed": False,
         "patch_application_allowed": False,
         "merge_authorized": False,
@@ -524,7 +699,93 @@ def _public_payload(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _public_freshness_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    provenance_fields = {
+        "digest_algorithm",
+        "input_digest",
+        "input_count",
+        "generator_schema_version",
+        "generator_source",
+        "generator_source_sha256",
+        "workflow_path",
+        "workflow_source_sha256",
+        "workflow_present",
+        "current_head_sha",
+        "current_head_available",
+    }
+    content_fields = {
+        "status",
+        "workflow_path",
+        "workflow_present",
+        "positive_controls",
+        "findings",
+        "finding_count",
+        "unverified_settings",
+        "release_controls",
+        "recommended_next_actions",
+        "rules",
+        "source_relationships",
+        "evidence_limits",
+    }
+    allowed_reasons = {
+        "report_missing",
+        "report_invalid_json",
+        "report_not_object",
+        "missing_input_provenance",
+        "schema_version_mismatch",
+        "workflow_source_not_current",
+        "current_head_mismatch",
+        "evidence_limits_mismatch",
+        "missing_authority_boundary",
+    }
+    allowed_reasons.update(f"{field}_mismatch" for field in provenance_fields)
+    allowed_reasons.update(f"{field}_mismatch" for field in content_fields)
+    allowed_reasons.update(f"{field}_mismatch" for field in AUTHORITY_FIELDS)
+    allowed_reasons.update(f"authority_boundary_{field}_mismatch" for field in AUTHORITY_FIELDS)
+
+    raw_reasons = payload.get("reasons")
+    reasons = (
+        sorted(
+            {
+                str(reason)
+                for reason in raw_reasons
+                if isinstance(raw_reasons, list) and str(reason) in allowed_reasons
+            }
+        )
+        if isinstance(raw_reasons, list)
+        else []
+    )
+
+    provenance_match = not any(
+        reason == "missing_input_provenance"
+        or reason in {f"{field}_mismatch" for field in provenance_fields}
+        for reason in reasons
+    )
+
+    return {
+        "status": "fresh" if _safe_bool(payload.get("fresh")) else "stale",
+        "fresh": _safe_bool(payload.get("fresh")),
+        "schema_valid": _safe_bool(payload.get("schema_valid")),
+        "input_provenance_match": provenance_match,
+        "release_controls_match": "release_controls_mismatch" not in reasons,
+        "rules_match": "rules_mismatch" not in reasons,
+        "recommended_actions_match": "recommended_next_actions_mismatch" not in reasons,
+        "workflow_source_valid": _safe_bool(payload.get("workflow_source_valid")),
+        "current_head_valid": _safe_bool(payload.get("current_head_valid")),
+        "authority_valid": _safe_bool(payload.get("authority_valid")),
+        "evidence_limits_valid": _safe_bool(payload.get("evidence_limits_valid")),
+        "reasons": reasons,
+        "reporting_only": True,
+        "repo_mutation": False,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+
 def render_markdown(payload: dict[str, Any]) -> str:
+    payload = _public_payload(payload)
     provenance = payload.get("input_provenance")
     if not isinstance(provenance, dict):
         provenance = {}
@@ -771,23 +1032,24 @@ def check_release_anti_hijack_report_freshness(
 
 
 def render_freshness_text(payload: dict[str, Any]) -> str:
-    reasons = payload.get("reasons", [])
-    reason_text = ",".join(str(reason) for reason in reasons) if reasons else "none"
+    public_document = _public_freshness_payload(payload)
+    reasons = public_document["reasons"]
+    reason_text = ",".join(reasons) if reasons else "none"
     return "\n".join(
         [
-            f"freshness_status={payload.get('status', 'stale')}",
-            f"fresh={str(bool(payload.get('fresh', False))).lower()}",
-            f"schema_valid={str(bool(payload.get('schema_valid', False))).lower()}",
-            "workflow_source_valid="
-            f"{str(bool(payload.get('workflow_source_valid', False))).lower()}",
-            f"current_head_valid={str(bool(payload.get('current_head_valid', False))).lower()}",
-            "evidence_limits_valid="
-            f"{str(bool(payload.get('evidence_limits_valid', False))).lower()}",
-            f"authority_valid={str(bool(payload.get('authority_valid', False))).lower()}",
+            f"freshness_status={public_document['status']}",
+            f"fresh={str(public_document['fresh']).lower()}",
+            f"schema_valid={str(public_document['schema_valid']).lower()}",
+            f"input_provenance_match={str(public_document['input_provenance_match']).lower()}",
+            f"release_controls_match={str(public_document['release_controls_match']).lower()}",
+            f"rules_match={str(public_document['rules_match']).lower()}",
+            "recommended_actions_match="
+            f"{str(public_document['recommended_actions_match']).lower()}",
+            f"workflow_source_valid={str(public_document['workflow_source_valid']).lower()}",
+            f"current_head_valid={str(public_document['current_head_valid']).lower()}",
+            f"evidence_limits_valid={str(public_document['evidence_limits_valid']).lower()}",
+            f"authority_valid={str(public_document['authority_valid']).lower()}",
             f"freshness_reasons={reason_text}",
-            f"expected_input_digest={payload.get('expected_input_digest', '')}",
-            f"expected_workflow_sha256={payload.get('expected_workflow_sha256', '')}",
-            f"expected_head_sha={payload.get('expected_head_sha', '')}",
             "reporting_only=true",
             "repo_mutation=false",
             "automation_allowed=false",
@@ -806,21 +1068,22 @@ def write_artifacts(
     root: str | Path = ".",
     current_head_sha: str | None = None,
 ) -> dict[str, Any]:
-    payload = _public_payload(
-        build_release_anti_hijack_threat_model(
-            workflow,
-            root=root,
-            current_head_sha=current_head_sha,
-        )
+    internal_payload = build_release_anti_hijack_threat_model(
+        workflow,
+        root=root,
+        current_head_sha=current_head_sha,
     )
+    public_document = _public_payload(internal_payload)
+    json_document = json.dumps(public_document, indent=2, sort_keys=True) + "\n"
+    markdown_document = render_markdown(public_document) + "\n"
+
     out_path = Path(out)
     markdown_path = Path(markdown_out) if markdown_out else out_path.with_suffix(".md")
-
     out_path.parent.mkdir(parents=True, exist_ok=True)
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    markdown_path.write_text(render_markdown(payload) + "\n", encoding="utf-8")
-    return payload
+    out_path.write_text(json_document, encoding="utf-8")
+    markdown_path.write_text(markdown_document, encoding="utf-8")
+    return public_document
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -844,27 +1107,33 @@ def main(argv: Sequence[str] | None = None) -> int:
     ns = parser.parse_args(list(argv) if argv is not None else None)
 
     if ns.check_freshness:
-        freshness = check_release_anti_hijack_report_freshness(
+        internal_freshness = check_release_anti_hijack_report_freshness(
             report_path=ns.out,
             workflow=ns.workflow,
             root=ns.root,
         )
+        freshness_public = _public_freshness_payload(internal_freshness)
         if ns.format == "json":
-            sys.stdout.write(json.dumps(freshness, indent=2, sort_keys=True) + "\n")
+            freshness_json = json.dumps(freshness_public, indent=2, sort_keys=True) + "\n"
+            sys.stdout.write(freshness_json)
         else:
-            sys.stdout.write(render_freshness_text(freshness) + "\n")
-        return 0 if freshness["fresh"] else 1
+            freshness_text = render_freshness_text(freshness_public) + "\n"
+            sys.stdout.write(freshness_text)
+        return 0 if freshness_public["fresh"] else 1
 
-    payload = write_artifacts(
+    generated_document = write_artifacts(
         workflow=ns.workflow,
         out=ns.out,
         markdown_out=ns.markdown_out or None,
         root=ns.root,
     )
+    output_document = _public_payload(generated_document)
     if ns.format == "json":
-        sys.stdout.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+        output_json = json.dumps(output_document, indent=2, sort_keys=True) + "\n"
+        sys.stdout.write(output_json)
     else:
-        sys.stdout.write(render_markdown(payload) + "\n")
+        output_markdown = render_markdown(output_document) + "\n"
+        sys.stdout.write(output_markdown)
     return 0
 
 

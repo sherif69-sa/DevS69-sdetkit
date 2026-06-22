@@ -6,6 +6,8 @@ from pathlib import Path
 
 from sdetkit.release_anti_hijack_threat_model import (
     SCHEMA_VERSION,
+    _public_freshness_payload,
+    _public_payload,
     build_release_anti_hijack_threat_model,
     check_release_anti_hijack_report_freshness,
     release_anti_hijack_input_provenance,
@@ -342,6 +344,77 @@ def test_release_anti_hijack_freshness_fails_closed_for_bad_report_files(
     )
     assert not_object["fresh"] is False
     assert "report_not_object" in not_object["reasons"]
+
+
+def test_public_report_and_freshness_boundaries_drop_hostile_values(
+    tmp_path: Path,
+) -> None:
+    workflow = _release_workflow(tmp_path / "release.yml")
+    internal = build_release_anti_hijack_threat_model(
+        workflow,
+        root=tmp_path,
+        current_head_sha="head-a",
+    )
+    marker = "TOP SECRET VALUE WITH SPACES"
+    internal["status"] = marker
+    internal["workflow_path"] = marker
+    internal["positive_controls"] = [marker]
+    internal["findings"] = [{"id": marker, "summary": marker}]
+    internal["unverified_settings"] = [marker]
+    internal["recommended_next_actions"] = [marker]
+    internal["input_provenance"]["input_digest"] = marker
+    internal["input_provenance"]["workflow_source_sha256"] = marker
+    internal["input_provenance"]["current_head_sha"] = marker
+    internal["release_controls"]["uses_action_count"] = marker
+
+    public_report = _public_payload(internal)
+    public_freshness = _public_freshness_payload(
+        {
+            "fresh": False,
+            "schema_valid": False,
+            "workflow_source_valid": False,
+            "current_head_valid": False,
+            "evidence_limits_valid": False,
+            "authority_valid": False,
+            "reasons": [marker, "schema_version_mismatch"],
+        }
+    )
+
+    assert marker not in json.dumps(public_report, sort_keys=True)
+    assert marker not in json.dumps(public_freshness, sort_keys=True)
+    assert public_freshness["reasons"] == ["schema_version_mismatch"]
+
+
+def test_codeql_sinks_never_serialize_broad_internal_objects() -> None:
+    source = Path("src/sdetkit/release_anti_hijack_threat_model.py").read_text(encoding="utf-8")
+
+    forbidden = (
+        "out_path.write_text(json.dumps(",
+        "markdown_path.write_text(render_markdown(",
+        "json.dumps(payload,",
+        "json.dumps(freshness,",
+        "render_markdown(payload)",
+        "render_freshness_text(freshness)",
+        "sys.stdout.write(json.dumps(",
+        "sys.stdout.write(render_markdown(",
+        "sys.stdout.write(render_freshness_text(",
+    )
+    for pattern in forbidden:
+        assert pattern not in source
+
+    required = (
+        "public_document = _public_payload(internal_payload)",
+        "freshness_public = _public_freshness_payload(internal_freshness)",
+        "output_document = _public_payload(generated_document)",
+        "out_path.write_text(json_document",
+        "markdown_path.write_text(markdown_document",
+        "sys.stdout.write(freshness_json)",
+        "sys.stdout.write(freshness_text)",
+        "sys.stdout.write(output_json)",
+        "sys.stdout.write(output_markdown)",
+    )
+    for pattern in required:
+        assert pattern in source
 
 
 def test_release_anti_hijack_public_cli_generates_and_checks_without_rewrite(
