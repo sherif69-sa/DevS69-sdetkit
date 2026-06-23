@@ -48,6 +48,17 @@ When an enhancement is identified from customer or user feedback:
 - **GHAS campaign planner** → group aged alerts into campaign slices and record owner + expected completion window.
 - **GHAS CodeQL hotspots** → batch-fix the top rule/path hotspot and re-run the planner to validate backlog reduction.
 
+## Current enhancement candidate from maintenance intake (June 2026)
+
+- **Source issue:** #1786
+- **User pain point:** A successful but malformed GitHub API response can be reported as an authoritative zero in the maintenance command center, allowing queue or security decisions to proceed from invalid evidence.
+- **Acceptance criteria:**
+  1. Valid empty collections continue to render an authoritative zero.
+  2. Successful malformed list payloads and malformed workflow-run envelopes render unavailable or unknown instead of zero.
+  3. Queue actions never proceed from an explicit `available=false` collection state.
+  4. Focused regression tests cover the six collection-integrity findings while preserving the existing pagination fallback.
+- **Expected impact:** More trustworthy maintenance queue decisions and a clear distinction between authoritative zero, unavailable collection state, and malformed API evidence.
+
 ## Continuous maintenance hardening loop
 
 The maintenance system now produces ten recurring artifacts:
