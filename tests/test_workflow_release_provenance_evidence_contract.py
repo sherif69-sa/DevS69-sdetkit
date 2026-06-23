@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from sdetkit.release_anti_hijack_threat_model import build_release_anti_hijack_threat_model
+
 
 def test_release_provenance_permission_evidence_matches_governance_summary() -> None:
     report = json.loads(
@@ -33,9 +35,7 @@ def test_release_provenance_permission_evidence_matches_governance_summary() -> 
 
 
 def test_release_provenance_permission_evidence_uses_release_threat_model() -> None:
-    threat_model = json.loads(
-        Path("build/sdetkit/release-anti-hijack-threat-model.json").read_text(encoding="utf-8")
-    )
+    threat_model = build_release_anti_hijack_threat_model()
     evidence = json.loads(
         Path("build/sdetkit/workflow-permission-release-provenance-evidence.json").read_text(
             encoding="utf-8"
