@@ -822,6 +822,14 @@ Then use stability-aware command discovery:
     issue_queue_classifier.add_argument(
         "--out", default="build/sdetkit/issue-queue-classifier.json"
     )
+    issue_queue_classifier.add_argument("--root", default=".")
+    issue_queue_classifier.add_argument(
+        "--source-run-id",
+        action="append",
+        type=int,
+        default=[],
+    )
+    issue_queue_classifier.add_argument("--check-freshness", action="store_true")
     issue_queue_classifier.add_argument("--format", choices=["json", "text"], default="json")
 
     automation_health = sub.add_parser(
@@ -830,6 +838,14 @@ Then use stability-aware command discovery:
     )
     automation_health.add_argument("--issues-json", required=True)
     automation_health.add_argument("--out", default="build/sdetkit/automation-health.json")
+    automation_health.add_argument("--root", default=".")
+    automation_health.add_argument(
+        "--source-run-id",
+        action="append",
+        type=int,
+        default=[],
+    )
+    automation_health.add_argument("--check-freshness", action="store_true")
     automation_health.add_argument("--format", choices=["json", "text"], default="json")
 
     security_followup_disposition = sub.add_parser(
@@ -909,6 +925,14 @@ Then use stability-aware command discovery:
     maintenance_queue_rollup.add_argument(
         "--out", default="build/sdetkit/maintenance-queue-rollup.json"
     )
+    maintenance_queue_rollup.add_argument("--root", default=".")
+    maintenance_queue_rollup.add_argument(
+        "--source-run-id",
+        action="append",
+        type=int,
+        default=[],
+    )
+    maintenance_queue_rollup.add_argument("--check-freshness", action="store_true")
     maintenance_queue_rollup.add_argument("--format", choices=["json", "text"], default="json")
 
     repo_fit_screen = sub.add_parser(
@@ -1737,9 +1761,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.issues_json),
             "--out",
             str(ns.out),
+            "--root",
+            str(ns.root),
             "--format",
             str(ns.format),
         ]
+        for source_run_id in ns.source_run_id:
+            forwarded.extend(["--source-run-id", str(source_run_id)])
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
         return _run_module_main("sdetkit.issue_queue_classifier", forwarded)
 
     if ns.cmd == "automation-health":
@@ -1748,9 +1778,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.issues_json),
             "--out",
             str(ns.out),
+            "--root",
+            str(ns.root),
             "--format",
             str(ns.format),
         ]
+        for source_run_id in ns.source_run_id:
+            forwarded.extend(["--source-run-id", str(source_run_id)])
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
         return _run_module_main("sdetkit.automation_health", forwarded)
 
     if ns.cmd == "security-followup-disposition":
@@ -1835,9 +1871,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             str(ns.security_followup_json),
             "--out",
             str(ns.out),
+            "--root",
+            str(ns.root),
             "--format",
             str(ns.format),
         ]
+        for source_run_id in ns.source_run_id:
+            forwarded.extend(["--source-run-id", str(source_run_id)])
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
         return _run_module_main("sdetkit.maintenance_queue_rollup", forwarded)
 
     if ns.cmd == "repo-fit-screen":

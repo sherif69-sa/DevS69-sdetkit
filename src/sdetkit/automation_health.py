@@ -8,10 +8,20 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+from . import issue_queue_classifier as issue_queue_report
 from .issue_queue_classifier import classify_issues
+from .report_provenance import (
+    attach_provenance,
+    build_input_provenance,
+    check_report_path,
+    collect_source_run_ids,
+    extract_source_issue_numbers,
+    render_freshness_text,
+)
 
-SCHEMA_VERSION = "sdetkit.automation_health.v1"
+SCHEMA_VERSION = "sdetkit.automation_health.v2"
 DEFAULT_OUT = "build/sdetkit/automation-health.json"
+GENERATOR_SOURCE = "src/sdetkit/automation_health.py"
 
 AUTHORITY_BOUNDARY = {
     "automation_allowed": False,
@@ -191,12 +201,82 @@ def build_automation_health(issues: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def automation_health_input_provenance(
+    *,
+    issues_json: str | Path,
+    root: str | Path = ".",
+    source_run_ids: Sequence[int] = (),
+    generator_path: str | Path | None = None,
+    generated_at: str | None = None,
+    current_head_sha: str | None = None,
+) -> dict[str, Any]:
+    issues_path = Path(issues_json)
+    issues = _load_issues(issues_path)
+    generator = (
+        Path(generator_path).resolve() if generator_path is not None else Path(__file__).resolve()
+    )
+    classifier_source = Path(issue_queue_report.__file__).resolve()
+    return build_input_provenance(
+        schema_version=SCHEMA_VERSION,
+        generator_source=GENERATOR_SOURCE,
+        generator_bytes=generator.read_bytes(),
+        data_inputs={
+            "issues_json": issues_path.read_bytes(),
+            "issue_queue_classifier_source": classifier_source.read_bytes(),
+        },
+        root=root,
+        source_issue_numbers=extract_source_issue_numbers(issues),
+        source_run_ids=collect_source_run_ids(source_run_ids, issues=issues),
+        input_artifact_schemas={
+            "issue_queue_classifier": issue_queue_report.SCHEMA_VERSION,
+        },
+        current_head_sha=current_head_sha,
+        generated_at=generated_at,
+    )
+
+
+def check_automation_health_freshness(
+    *,
+    issues_json: str | Path,
+    report_path: str | Path,
+    root: str | Path = ".",
+    source_run_ids: Sequence[int] = (),
+    generator_path: str | Path | None = None,
+    current_head_sha: str | None = None,
+) -> dict[str, Any]:
+    current = automation_health_input_provenance(
+        issues_json=issues_json,
+        root=root,
+        source_run_ids=source_run_ids,
+        generator_path=generator_path,
+        current_head_sha=current_head_sha,
+    )
+    return check_report_path(
+        report_path,
+        current,
+        expected_schema_version=SCHEMA_VERSION,
+    )
+
+
 def write_automation_health_artifact(
     *,
     issues_json: str | Path,
     out: str | Path = DEFAULT_OUT,
+    root: str | Path = ".",
+    source_run_ids: Sequence[int] = (),
+    generated_at: str | None = None,
+    current_head_sha: str | None = None,
 ) -> dict[str, Any]:
-    payload = build_automation_health(_load_issues(issues_json))
+    issues = _load_issues(issues_json)
+    payload = build_automation_health(issues)
+    provenance = automation_health_input_provenance(
+        issues_json=issues_json,
+        root=root,
+        source_run_ids=source_run_ids,
+        generated_at=generated_at,
+        current_head_sha=current_head_sha,
+    )
+    payload = attach_provenance(payload, provenance)
     out_path = Path(out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -210,10 +290,35 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--issues-json", required=True)
     parser.add_argument("--out", default=DEFAULT_OUT)
+    parser.add_argument("--root", default=".")
+    parser.add_argument("--source-run-id", action="append", type=int, default=[])
     parser.add_argument("--format", choices=["json", "text"], default="json")
+    parser.add_argument(
+        "--check-freshness",
+        action="store_true",
+        help="Check the existing report against current inputs without rewriting it.",
+    )
     ns = parser.parse_args(list(argv) if argv is not None else None)
 
-    payload = write_automation_health_artifact(issues_json=ns.issues_json, out=ns.out)
+    if ns.check_freshness:
+        freshness = check_automation_health_freshness(
+            issues_json=ns.issues_json,
+            report_path=ns.out,
+            root=ns.root,
+            source_run_ids=ns.source_run_id,
+        )
+        if ns.format == "json":
+            sys.stdout.write(json.dumps(freshness, indent=2, sort_keys=True) + "\n")
+        else:
+            sys.stdout.write(render_freshness_text(freshness) + "\n")
+        return 0 if freshness["fresh"] else 1
+
+    payload = write_automation_health_artifact(
+        issues_json=ns.issues_json,
+        out=ns.out,
+        root=ns.root,
+        source_run_ids=ns.source_run_id,
+    )
 
     if ns.format == "json":
         sys.stdout.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
@@ -222,6 +327,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         sys.stdout.write(f"status={payload['status']}\n")
         sys.stdout.write(f"automation_signals={payload['automation_signal_count']}\n")
         sys.stdout.write(f"primary_signal_issue={payload['primary_signal_issue']}\n")
+        sys.stdout.write(f"current_head_sha={payload['current_head_sha']}\n")
+        sys.stdout.write(f"input_digest={payload['input_provenance']['input_digest']}\n")
         sys.stdout.write(f"automation_allowed={str(payload['automation_allowed']).lower()}\n")
         sys.stdout.write(f"merge_authorized={str(payload['merge_authorized']).lower()}\n")
         sys.stdout.write(
