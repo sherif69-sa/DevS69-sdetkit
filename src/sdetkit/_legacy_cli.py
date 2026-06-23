@@ -1047,6 +1047,38 @@ Then use stability-aware command discovery:
     cross_report_consistency.add_argument("--check-freshness", action="store_true")
     cross_report_consistency.add_argument("--format", choices=["json", "text"], default="json")
 
+    report_dependency_graph = sub.add_parser(
+        "report-dependency-graph",
+        help=argparse.SUPPRESS,
+    )
+    report_dependency_graph.add_argument("--root", default=".")
+    report_dependency_graph.add_argument(
+        "--out", default="build/sdetkit/report-dependency-graph.json"
+    )
+    report_dependency_graph.add_argument("--markdown-out", default="")
+    report_dependency_graph.add_argument(
+        "--report-json",
+        action="append",
+        default=[],
+        metavar="REPORT-ID=PATH",
+    )
+    report_dependency_graph.add_argument("--complete", action="store_true")
+    report_dependency_graph.add_argument("--check-freshness", action="store_true")
+    report_dependency_graph.add_argument("--format", choices=["json", "text"], default="json")
+
+    report_dependency_graph_dashboard = sub.add_parser(
+        "report-dependency-graph-dashboard",
+        help=argparse.SUPPRESS,
+    )
+    report_dependency_graph_dashboard.add_argument("--graph-path", required=True)
+    report_dependency_graph_dashboard.add_argument(
+        "--format", choices=["html", "json"], default="html"
+    )
+    report_dependency_graph_dashboard.add_argument(
+        "--out",
+        default="build/sdetkit/report-dependency-graph-dashboard.html",
+    )
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -2303,6 +2335,38 @@ def main(argv: Sequence[str] | None = None) -> int:
         if bool(ns.check_freshness):
             forwarded.append("--check-freshness")
         return _run_module_main("sdetkit.cross_report_consistency", forwarded)
+
+    if ns.cmd == "report-dependency-graph":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.markdown_out):
+            forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        for report_json in ns.report_json:
+            forwarded.extend(["--report-json", str(report_json)])
+        if bool(ns.complete):
+            forwarded.append("--complete")
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
+        return _run_module_main("sdetkit.report_dependency_graph", forwarded)
+
+    if ns.cmd == "report-dependency-graph-dashboard":
+        return _run_module_main(
+            "sdetkit.report_dependency_graph_dashboard",
+            [
+                "--graph-path",
+                str(ns.graph_path),
+                "--format",
+                str(ns.format),
+                "--out",
+                str(ns.out),
+            ],
+        )
 
     if ns.cmd == "fit":
         forwarded = [

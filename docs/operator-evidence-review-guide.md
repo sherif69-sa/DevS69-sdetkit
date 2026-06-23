@@ -379,3 +379,59 @@ reconciled in this first slice.
 All authority fields remain non-authorizing: reporting only, no repository or
 issue mutation, no patch application, no security dismissal, no merge authority,
 and no semantic-equivalence claim.
+
+## Report dependency graph and freshness dashboard
+
+`report-dependency-graph` is a reporting-only projection over the canonical
+`cross_report_consistency.REPORT_SPECS` registry. It also normalizes declared
+Product Maturity Radar dependencies and dependency records embedded in present
+reports. It does not replace the source reports or create a new authority
+boundary.
+
+The graph distinguishes producer schema from public artifact schema. This is
+required for reports such as release anti-hijack, whose internal threat-model
+schema and sanitized public-status schema are intentionally different.
+Dependency edges state whether their expected schema refers to the producer or
+the public artifact.
+
+Use discovery mode for an inventory in which absent reports are partial. Use
+`--complete` only when the supplied report bundle is expected to contain every
+required report. In complete mode, missing or unmapped dependencies block the
+graph. Directed cycles always block because they make freshness ordering
+ambiguous.
+
+```bash
+python -m sdetkit report-dependency-graph \
+  --root . \
+  --out build/sdetkit/report-dependency-graph.json \
+  --format text
+
+python -m sdetkit report-dependency-graph \
+  --root . \
+  --out build/sdetkit/report-dependency-graph.json \
+  --check-freshness \
+  --format text
+
+python -m sdetkit report-dependency-graph-dashboard \
+  --graph-path build/sdetkit/report-dependency-graph.json \
+  --format html \
+  --out build/sdetkit/report-dependency-graph-dashboard.html
+```
+
+The dashboard is static, local-only, and read-only. It escapes report-provided
+text, contains no JavaScript, and never regenerates source reports. Node states,
+edge schema roles, cycles, unmapped dependencies, and source-head bindings are
+review context only.
+
+Every graph and dashboard authority field remains non-authorizing:
+
+```text
+reporting_only=true
+repo_mutation=false
+issue_mutation_allowed=false
+automation_allowed=false
+patch_application_allowed=false
+security_dismissal_allowed=false
+merge_authorized=false
+semantic_equivalence_proven=false
+```
