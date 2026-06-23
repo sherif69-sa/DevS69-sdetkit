@@ -24,6 +24,7 @@ from . import (
     maintenance_queue_rollup,
     maintenance_queue_rollup_dashboard,
     pr_quality_runtime_proof_artifacts,
+    product_maturity_radar,
     professional_naming_cleanup_plan,
     professional_naming_inventory,
     protected_verifier,
@@ -762,6 +763,39 @@ def build_index() -> dict[str, Any]:
                     "primary_signal_issue",
                     "recommended_next_action",
                     "automation_allowed",
+                    "merge_authorized",
+                    "semantic_equivalence_proven",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "product-maturity-radar-json",
+                "path": product_maturity_radar.DEFAULT_OUT,
+                "produced_by": (
+                    "python -m sdetkit product-maturity-radar "
+                    "--root . "
+                    "--out build/sdetkit/product-maturity-radar.json "
+                    "--format json"
+                ),
+                "schema_version": product_maturity_radar.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "generated_at",
+                    "current_head_sha",
+                    "input_digests",
+                    "input_provenance",
+                    "report_status",
+                    "projection_status",
+                    "projection_only",
+                    "source_authority",
+                    "surfaces",
+                    "ranked_upgrade_candidates",
+                    "claim_sources",
+                    "report_dependencies",
+                    "dependency_status",
+                    "automation_allowed",
+                    "patch_application_allowed",
+                    "security_dismissal_allowed",
                     "merge_authorized",
                     "semantic_equivalence_proven",
                 ],

@@ -666,6 +666,34 @@
       "stability": "advanced"
     },
     {
+      "id": "product-maturity-radar-json",
+      "path": "build/sdetkit/product-maturity-radar.json",
+      "produced_by": "python -m sdetkit product-maturity-radar --root . --out build/sdetkit/product-maturity-radar.json --format json",
+      "schema_version": "sdetkit.product_maturity_radar.v2",
+      "required_fields": [
+        "schema_version",
+        "generated_at",
+        "current_head_sha",
+        "input_digests",
+        "input_provenance",
+        "report_status",
+        "projection_status",
+        "projection_only",
+        "source_authority",
+        "surfaces",
+        "ranked_upgrade_candidates",
+        "claim_sources",
+        "report_dependencies",
+        "dependency_status",
+        "automation_allowed",
+        "patch_application_allowed",
+        "security_dismissal_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "issue-queue-classifier-json",
       "path": "build/sdetkit/issue-queue-classifier.json",
       "produced_by": "python -m sdetkit issue-queue-classifier --issues-json <issues.json> --out build/sdetkit/issue-queue-classifier.json --format text",

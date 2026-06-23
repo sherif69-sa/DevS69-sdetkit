@@ -579,3 +579,23 @@ def test_artifact_contract_index_write_index_roundtrip(tmp_path: Path) -> None:
     write_index(out)
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload == build_index()
+
+
+def test_product_maturity_radar_contract_is_registered() -> None:
+    from sdetkit import product_maturity_radar
+
+    payload = build_index()
+    artifacts = {artifact["id"]: artifact for artifact in payload["artifacts"]}
+    contract = artifacts["product-maturity-radar-json"]
+
+    assert contract["path"] == product_maturity_radar.DEFAULT_OUT
+    assert contract["schema_version"] == product_maturity_radar.SCHEMA_VERSION
+    assert {
+        "generated_at",
+        "current_head_sha",
+        "input_provenance",
+        "projection_status",
+        "report_dependencies",
+        "dependency_status",
+        "claim_sources",
+    }.issubset(contract["required_fields"])
