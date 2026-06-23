@@ -19,6 +19,7 @@ from . import (
     diagnostic_signal_snapshot_history,
     diagnostic_worker_trajectory,
     doctor,
+    first_proof_quality_evidence,
     issue_queue_classifier,
     job_queue,
     local_diagnostic_queue_dashboard,
@@ -887,6 +888,51 @@ def build_index() -> dict[str, Any]:
                     "local_only",
                     "read_only",
                     "decision_boundary",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "first-proof-quality-evidence-json",
+                "path": first_proof_quality_evidence.DEFAULT_OUT.as_posix(),
+                "produced_by": (
+                    "python -m sdetkit first-proof-quality-evidence "
+                    "--root . "
+                    "--artifact-dir build/first-proof "
+                    "--out build/sdetkit/first-proof-quality-evidence.json "
+                    "--markdown-out "
+                    "build/sdetkit/first-proof-quality-evidence.md "
+                    "--format json"
+                ),
+                "schema_version": first_proof_quality_evidence.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "generated_at",
+                    "current_head_sha",
+                    "source_issue_numbers",
+                    "source_run_ids",
+                    "input_digests",
+                    "input_provenance",
+                    "tool",
+                    "status",
+                    "report_status",
+                    "artifact_dir",
+                    "source_count",
+                    "source_state_counts",
+                    "head_binding_counts",
+                    "sources",
+                    "findings",
+                    "finding_counts",
+                    "refresh_commands",
+                    "next_allowed_action",
+                    "reporting_only",
+                    "repo_mutation",
+                    "issue_mutation_allowed",
+                    "automation_allowed",
+                    "patch_application_allowed",
+                    "security_dismissal_allowed",
+                    "merge_authorized",
+                    "semantic_equivalence_proven",
+                    "authority_boundary",
                 ],
                 "stability": "advanced",
             },

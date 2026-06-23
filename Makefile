@@ -691,6 +691,10 @@ followup-changelog: venv
 first-proof-readiness-threshold: venv
 	@bash -lc '. .venv/bin/activate && python scripts/check_first_proof_readiness_threshold.py --dashboard build/first-proof/dashboard.json --profiles config/first_proof_readiness_profiles.json --profile $(FIRST_PROOF_READINESS_PROFILE) --out build/first-proof/readiness-threshold.json --format json'
 
+.PHONY: first-proof-quality-evidence
+first-proof-quality-evidence: venv
+	@bash -lc '. .venv/bin/activate && python -m sdetkit first-proof-quality-evidence --root . --artifact-dir build/first-proof --out build/sdetkit/first-proof-quality-evidence.json --markdown-out build/sdetkit/first-proof-quality-evidence.md --format json'
+
 .PHONY: powerfuel-plan-status powerfuel-shadow-log powerfuel-weekly-report powerfuel-retirement-plan powerfuel-contract powerfuel-consolidation-score powerfuel-merge-ready
 powerfuel-plan-status: venv
 	@bash -lc 'echo "Powerfuel plan: docs/powerfuel-execution-plan-2026-05-03.md"'
