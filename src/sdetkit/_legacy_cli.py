@@ -1079,6 +1079,29 @@ Then use stability-aware command discovery:
         default="build/sdetkit/report-dependency-graph-dashboard.html",
     )
 
+    release_readiness_evidence_package = sub.add_parser(
+        "release-readiness-evidence-package",
+        help=argparse.SUPPRESS,
+    )
+    release_readiness_evidence_package.add_argument("--root", default=".")
+    release_readiness_evidence_package.add_argument(
+        "--out-json",
+        default="build/sdetkit/release-readiness-evidence/package.json",
+    )
+    release_readiness_evidence_package.add_argument(
+        "--out-md",
+        default="build/sdetkit/release-readiness-evidence/package.md",
+    )
+    release_readiness_evidence_package.add_argument(
+        "--format",
+        choices=["json", "text"],
+        default="text",
+    )
+    release_readiness_evidence_package.add_argument(
+        "--check-freshness",
+        action="store_true",
+    )
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -2366,6 +2389,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "--out",
                 str(ns.out),
             ],
+        )
+
+    if ns.cmd == "release-readiness-evidence-package":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out-json",
+            str(ns.out_json),
+            "--out-md",
+            str(ns.out_md),
+            "--format",
+            str(ns.format),
+        ]
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
+        return _run_module_main(
+            "sdetkit.release_readiness_evidence_package",
+            forwarded,
         )
 
     if ns.cmd == "fit":
