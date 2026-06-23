@@ -29,6 +29,7 @@ from . import (
     professional_naming_cleanup_plan,
     professional_naming_inventory,
     protected_verifier,
+    release_readiness_evidence_package,
     replayable_benchmark_harness,
     repo_fit_screen,
     repo_memory,
@@ -886,6 +887,52 @@ def build_index() -> dict[str, Any]:
                     "local_only",
                     "read_only",
                     "decision_boundary",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "release-readiness-evidence-package-json",
+                "path": release_readiness_evidence_package.DEFAULT_OUT,
+                "produced_by": (
+                    "python -m sdetkit release-readiness-evidence-package "
+                    "--root . "
+                    "--out-json "
+                    "build/sdetkit/release-readiness-evidence/package.json "
+                    "--out-md "
+                    "build/sdetkit/release-readiness-evidence/package.md "
+                    "--format json"
+                ),
+                "schema_version": release_readiness_evidence_package.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "generated_at",
+                    "current_head_sha",
+                    "source_issue_numbers",
+                    "source_run_ids",
+                    "input_digests",
+                    "input_provenance",
+                    "tool",
+                    "status",
+                    "report_status",
+                    "reporting_only",
+                    "review_first",
+                    "repo_mutation",
+                    "issue_mutation_allowed",
+                    "automation_allowed",
+                    "patch_application_allowed",
+                    "security_dismissal_allowed",
+                    "safe_to_publish",
+                    "release_authorized",
+                    "publish_authorized",
+                    "merge_authorized",
+                    "semantic_equivalence_proven",
+                    "summary",
+                    "required_human_evidence",
+                    "blocked_actions",
+                    "evidence_items",
+                    "proof_commands",
+                    "next_allowed_action",
+                    "authority_boundary",
                 ],
                 "stability": "advanced",
             },

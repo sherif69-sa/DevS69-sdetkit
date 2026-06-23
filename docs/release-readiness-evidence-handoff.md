@@ -91,3 +91,30 @@ check, smoke install, release preflight, provenance attestation, diagnostics
 upload, and post-publish or rollback verification evidence. It is reporting-only
 and does not authorize release, publish, merge, patch automation, security
 dismissal, or semantic-equivalence claims.
+
+## Provenance and freshness contract
+
+The release-readiness evidence package is bound to the current Git HEAD and the
+exact bytes of the inputs that determine its conclusions:
+
+- `Makefile`;
+- `.github/workflows/release.yml`;
+- `docs/release-readiness-evidence-handoff.md`;
+- `docs/artifact-reference.md`.
+
+Generate the package through the root command:
+
+```bash
+python -m sdetkit release-readiness-evidence-package   --root .   --out-json build/sdetkit/release-readiness-evidence/package.json   --out-md build/sdetkit/release-readiness-evidence/package.md   --format json
+```
+
+Verify freshness without regenerating or mutating release state:
+
+```bash
+python -m sdetkit release-readiness-evidence-package   --root .   --out-json build/sdetkit/release-readiness-evidence/package.json   --check-freshness   --format text
+```
+
+A stale result means the recorded input digest, generator bytes, schema, or Git
+HEAD no longer matches the current repository. Freshness is reporting-only; it
+does not authorize release, publishing, merging, patch application, security
+dismissal, workflow reruns, or semantic-equivalence claims.
