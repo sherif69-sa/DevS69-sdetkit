@@ -180,6 +180,7 @@ nav:
       - Rollback and remediation examples: integrations/rollback-remediation-examples.md
       - Release verification records: release-verification.md
       - Docs map: docs-map.md
+      - Curated advanced docs material map: orphan-docs-material-map.md
       - Docs navigation cleanup progress: docs-nav-cleanup-progress.md
       - Archive navigation policy: archive-navigation-policy.md
       - Environment compatibility matrix: environment-compatibility.md

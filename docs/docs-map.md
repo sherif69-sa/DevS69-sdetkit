@@ -52,7 +52,7 @@ Use these pages when SDETKit is being evaluated as a repository doctor rather th
 | --- | --- | --- |
 | Adoption surface | [Adopt in your repository](adoption.md), [Artifact reference](artifact-reference.md) | Detect repo shape and proof surfaces before recommending commands. |
 | Evidence and learning loop | [Investigation operator guide](investigation-operator-guide.md), [Adaptive Diagnosis Intelligence](adaptive-diagnosis.md) | Convert repeated gaps into detector/report/memory upgrades. |
-| Roadmap control panels | [Docs map and organization](docs-map.md), [Artifact reference](artifact-reference.md) | Use radar/report outputs to choose focused PRs; do not replace the roadmap. |
+| Roadmap control panels | [Docs map and organization](docs-map.md), [Curated advanced docs material map](orphan-docs-material-map.md), [Artifact reference](artifact-reference.md) | Use radar/report outputs to choose focused PRs; do not replace the roadmap. |
 
 External repositories remain learning targets, not patch targets. Default posture is no install, no target tests, no mutation, no target PRs/issues, and no endorsement claim.
 
