@@ -3,6 +3,8 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "tools" / "maintenance_command_center.py"
 
@@ -157,3 +159,165 @@ def test_command_center_queue_snapshot_detects_stale_pr_samples() -> None:
     rendered = "\n".join(module._queue_snapshot_lines(live_scan))
     assert "Queue snapshot status: **stale**" in rendered
     assert "Stale open PR samples detected: **1**" in rendered
+
+
+def _payload_client(module, payload):
+    class Client(module.GitHubClient):
+        def _request(self, method, path, payload=None):
+            return response
+
+    response = payload
+    return Client("example", "repo")
+
+
+def test_valid_empty_collections_remain_authoritative_zero() -> None:
+    module = _load_module()
+
+    assert (
+        _payload_client(module, []).paginate(
+            "/repos/example/repo/pulls",
+            {"state": "open"},
+        )
+        == []
+    )
+    assert (
+        _payload_client(module, []).list_without_page(
+            "/repos/example/repo/dependabot/alerts",
+            {"state": "open"},
+        )
+        == []
+    )
+    assert (
+        _payload_client(
+            module,
+            {"workflow_runs": []},
+        ).list_recent_workflow_runs(limit=20)
+        == []
+    )
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"message": "unexpected success payload"},
+        None,
+    ],
+)
+def test_paginate_rejects_malformed_success_payloads(payload) -> None:
+    module = _load_module()
+    client = _payload_client(module, payload)
+
+    with pytest.raises(
+        RuntimeError,
+        match=r"^GitHub API invalid payload GET .*expected list",
+    ):
+        client.paginate(
+            "/repos/example/repo/pulls",
+            {"state": "open"},
+        )
+
+
+def test_list_without_page_rejects_malformed_success_payload() -> None:
+    module = _load_module()
+    client = _payload_client(
+        module,
+        {"message": "unexpected success payload"},
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match=r"^GitHub API invalid payload GET .*expected list",
+    ):
+        client.list_without_page(
+            "/repos/example/repo/dependabot/alerts",
+            {"state": "open"},
+        )
+
+
+@pytest.mark.parametrize(
+    ("payload", "expected"),
+    [
+        (
+            ["unexpected", "list", "envelope"],
+            "object",
+        ),
+        (
+            {"workflow_runs": {"unexpected": "object"}},
+            "workflow_runs list",
+        ),
+        (
+            {},
+            "workflow_runs list",
+        ),
+    ],
+)
+def test_workflow_scan_rejects_malformed_success_payloads(
+    payload,
+    expected,
+) -> None:
+    module = _load_module()
+    client = _payload_client(module, payload)
+
+    with pytest.raises(
+        RuntimeError,
+        match=rf"^GitHub API invalid payload GET .*expected {expected}",
+    ):
+        client.list_recent_workflow_runs(limit=20)
+
+
+def test_queue_snapshot_honors_explicit_unavailability_without_error() -> None:
+    module = _load_module()
+
+    summary = module._queue_snapshot_summary(
+        {
+            "open_pull_requests": {
+                "available": False,
+                "count": None,
+                "items": [],
+                "error": "",
+            },
+            "open_issues_excluding_command_center": {
+                "available": True,
+                "count": 0,
+                "items": [],
+                "error": "",
+            },
+        }
+    )
+
+    assert summary == {
+        "status": "unknown",
+        "open_pr_count": None,
+        "open_issue_count": 0,
+        "stale_open_pr_sample_count": 0,
+        "next_allowed_action": "retry_live_queue_scan",
+    }
+
+
+def test_collect_live_scan_marks_malformed_collections_unavailable() -> None:
+    module = _load_module()
+    client = _payload_client(
+        module,
+        {"message": "unexpected success payload"},
+    )
+
+    live_scan = module._collect_live_scan(
+        client,
+        open_issues=[],
+        command_center_title="Maintenance command center",
+        now_iso="2026-06-23T00:00:00Z",
+    )
+
+    assert live_scan["open_pull_requests"]["available"] is False
+    assert live_scan["open_pull_requests"]["count"] is None
+    assert live_scan["recent_workflow_runs"]["available"] is False
+    assert live_scan["recent_workflow_runs"]["total"] is None
+    assert live_scan["security_alerts"]["code_scanning"]["available"] is False
+    assert live_scan["security_alerts"]["dependabot"]["available"] is False
+    assert live_scan["security_alerts"]["secret_scanning"]["available"] is False
+
+    rendered = "\n".join(module._live_scan_lines(live_scan))
+    assert "Queue snapshot status: **unknown**" in rendered
+    assert "Open pull requests: **unavailable**" in rendered
+    assert "Recent workflow runs: **unavailable**" in rendered
+    assert "GitHub API invalid payload" in rendered

@@ -17,6 +17,17 @@ _utc = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
 DEFAULT_HTTP_TIMEOUT_SECONDS = 30
 
 
+def _invalid_payload_error(
+    *,
+    path: str,
+    expected: str,
+    payload: Any,
+) -> RuntimeError:
+    return RuntimeError(
+        f"GitHub API invalid payload GET {path}: expected {expected}, got {type(payload).__name__}"
+    )
+
+
 def _iso_now() -> str:
     return dt.datetime.now(_utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -69,9 +80,14 @@ class GitHubClient:
             if params:
                 query.update(params)
             qs = urllib.parse.urlencode(query)
-            chunk = self._request("GET", f"{path}?{qs}")
+            request_path = f"{path}?{qs}"
+            chunk = self._request("GET", request_path)
             if not isinstance(chunk, list):
-                break
+                raise _invalid_payload_error(
+                    path=request_path,
+                    expected="list",
+                    payload=chunk,
+                )
             out.extend(chunk)
             if len(chunk) < 100:
                 break
@@ -85,8 +101,15 @@ class GitHubClient:
         if params:
             query.update(params)
         qs = urllib.parse.urlencode(query)
-        chunk = self._request("GET", f"{path}?{qs}")
-        return chunk if isinstance(chunk, list) else []
+        request_path = f"{path}?{qs}"
+        chunk = self._request("GET", request_path)
+        if not isinstance(chunk, list):
+            raise _invalid_payload_error(
+                path=request_path,
+                expected="list",
+                payload=chunk,
+            )
+        return chunk
 
     def list_open_issues(self) -> list[dict[str, Any]]:
         issues = self.paginate(f"/repos/{self.owner}/{self.repo}/issues", {"state": "open"})
@@ -97,14 +120,22 @@ class GitHubClient:
 
     def list_recent_workflow_runs(self, *, limit: int = 20) -> list[dict[str, Any]]:
         per_page = max(min(limit, 100), 1)
-        payload = self._request(
-            "GET",
-            f"/repos/{self.owner}/{self.repo}/actions/runs?per_page={per_page}",
-        )
+        request_path = f"/repos/{self.owner}/{self.repo}/actions/runs?per_page={per_page}"
+        payload = self._request("GET", request_path)
         if not isinstance(payload, dict):
-            return []
-        runs = payload.get("workflow_runs", [])
-        return runs if isinstance(runs, list) else []
+            raise _invalid_payload_error(
+                path=request_path,
+                expected="object",
+                payload=payload,
+            )
+        runs = payload.get("workflow_runs")
+        if not isinstance(runs, list):
+            raise _invalid_payload_error(
+                path=request_path,
+                expected="workflow_runs list",
+                payload=runs,
+            )
+        return runs
 
     def ensure_label(self, *, name: str, color: str, description: str) -> None:
         try:
@@ -419,7 +450,12 @@ def _queue_snapshot_summary(live_scan: dict[str, Any]) -> dict[str, Any]:
     prs = live_scan.get("open_pull_requests") or live_scan.get("pull_requests", {})
     issues = live_scan.get("open_issues_excluding_command_center") or live_scan.get("issues", {})
 
-    if prs.get("error") or issues.get("error"):
+    if (
+        prs.get("available") is False
+        or issues.get("available") is False
+        or prs.get("error")
+        or issues.get("error")
+    ):
         return {
             "status": "unknown",
             "open_pr_count": prs.get("count"),
