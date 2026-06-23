@@ -1028,6 +1028,25 @@ Then use stability-aware command discovery:
     product_maturity_radar.add_argument("--check-freshness", action="store_true")
     product_maturity_radar.add_argument("--format", choices=["json", "text"], default="json")
 
+    cross_report_consistency = sub.add_parser(
+        "cross-report-consistency",
+        help=argparse.SUPPRESS,
+    )
+    cross_report_consistency.add_argument("--root", default=".")
+    cross_report_consistency.add_argument(
+        "--out", default="build/sdetkit/cross-report-consistency.json"
+    )
+    cross_report_consistency.add_argument("--markdown-out", default="")
+    cross_report_consistency.add_argument(
+        "--report-json",
+        action="append",
+        default=[],
+        metavar="REPORT-ID=PATH",
+    )
+    cross_report_consistency.add_argument("--complete", action="store_true")
+    cross_report_consistency.add_argument("--check-freshness", action="store_true")
+    cross_report_consistency.add_argument("--format", choices=["json", "text"], default="json")
+
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
     fit.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
@@ -2265,6 +2284,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         if bool(ns.check_freshness):
             forwarded.append("--check-freshness")
         return _run_module_main("sdetkit.product_maturity_radar", forwarded)
+
+    if ns.cmd == "cross-report-consistency":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--out",
+            str(ns.out),
+            "--format",
+            str(ns.format),
+        ]
+        if str(ns.markdown_out):
+            forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        for report_json in ns.report_json:
+            forwarded.extend(["--report-json", str(report_json)])
+        if bool(ns.complete):
+            forwarded.append("--complete")
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
+        return _run_module_main("sdetkit.cross_report_consistency", forwarded)
 
     if ns.cmd == "fit":
         forwarded = [

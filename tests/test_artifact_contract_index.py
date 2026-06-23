@@ -599,3 +599,29 @@ def test_product_maturity_radar_contract_is_registered() -> None:
         "dependency_status",
         "claim_sources",
     }.issubset(contract["required_fields"])
+
+
+def test_artifact_contract_index_includes_cross_report_consistency() -> None:
+    from sdetkit import cross_report_consistency
+
+    payload = build_index()
+    entries = {item["id"]: item for item in payload["artifacts"]}
+    entry = entries["cross-report-consistency-json"]
+
+    assert entry["path"] == cross_report_consistency.DEFAULT_OUT
+    assert entry["schema_version"] == cross_report_consistency.SCHEMA_VERSION
+    assert entry["stability"] == "advanced"
+    assert {
+        "schema_version",
+        "generated_at",
+        "current_head_sha",
+        "input_provenance",
+        "consistency_status",
+        "report_records",
+        "findings",
+        "finding_counts",
+        "authority_boundary",
+        "automation_allowed",
+        "merge_authorized",
+    }.issubset(set(entry["required_fields"]))
+    assert "python -m sdetkit cross-report-consistency" in entry["produced_by"]
