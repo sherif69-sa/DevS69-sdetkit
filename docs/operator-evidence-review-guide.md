@@ -325,3 +325,23 @@ semantic_equivalence_proven=false
 The dashboard schema is `sdetkit.maintenance_queue_rollup_dashboard.v1`. The default HTML path is `build/sdetkit/maintenance-queue-rollup-dashboard.html`; the recommended JSON path is `build/sdetkit/maintenance-queue-rollup-dashboard.json`.
 
 This dashboard is a read-only review surface. `primary_issue`, `review_required`, and `close_candidate` are prioritization context only and never authorize issue mutation, security dismissal, patch application, proof execution, or merge. Dashboard JSON artifact-contract registration remains a separate follow-up.
+
+
+## Product maturity radar projection trust
+
+`product-maturity-radar` is a reporting-only projection. It does not become the
+source of authority for workflow, adoption, remediation, release, diagnosis, or
+queue claims.
+
+Known dependency reports are discovered at their standard `build/sdetkit` paths.
+Use repeated `--report-json <dependency-id>=<path>` arguments to override those
+paths. Missing reports produce a current but partial projection. A report that
+is present but malformed, schema-incompatible, authority-expanding, bound to a
+different Git head, or missing deterministic provenance invalidates the
+projection.
+
+Run the same command with `--check-freshness` to compare an existing radar with
+the current repository snapshot and dependency-report bytes. The check is
+read-only and returns nonzero for stale or invalid evidence. It never rewrites
+the radar, mutates issues, applies patches, dismisses security findings, or
+authorizes merge.

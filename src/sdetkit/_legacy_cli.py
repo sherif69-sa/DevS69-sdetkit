@@ -1019,6 +1019,13 @@ Then use stability-aware command discovery:
         "--out", default="build/sdetkit/product-maturity-radar.json"
     )
     product_maturity_radar.add_argument("--markdown-out", default="")
+    product_maturity_radar.add_argument(
+        "--report-json",
+        action="append",
+        default=[],
+        metavar="DEPENDENCY=PATH",
+    )
+    product_maturity_radar.add_argument("--check-freshness", action="store_true")
     product_maturity_radar.add_argument("--format", choices=["json", "text"], default="json")
 
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
@@ -2253,6 +2260,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         ]
         if str(ns.markdown_out):
             forwarded.extend(["--markdown-out", str(ns.markdown_out)])
+        for report_json in ns.report_json:
+            forwarded.extend(["--report-json", str(report_json)])
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
         return _run_module_main("sdetkit.product_maturity_radar", forwarded)
 
     if ns.cmd == "fit":

@@ -298,3 +298,198 @@ def test_product_maturity_radar_matches_accepted_candidate_title_drift() -> None
         "ci: continue workflow hardening from governance report findings",
         {"ci: explain workflow permission findings"},
     )
+
+
+def _dependency_report_payload(
+    *,
+    schema_version: str,
+    head: str,
+    input_digest: str = "a" * 64,
+) -> dict:
+    return {
+        "schema_version": schema_version,
+        "current_head_sha": head,
+        "input_provenance": {
+            "digest_algorithm": "sha256",
+            "input_digest": input_digest,
+            "input_count": 1,
+            "generator_schema_version": schema_version,
+            "generator_source": "fixture.py",
+            "generator_sha256": "b" * 64,
+            "generated_at": "2026-06-23T00:00:00Z",
+            "generated_from_head_sha": head,
+            "source_issue_count": 0,
+            "source_issue_numbers": [],
+            "source_run_ids": [],
+            "input_digests": {"fixture": "c" * 64},
+            "input_artifact_schemas": {},
+        },
+        "source_issue_numbers": [],
+        "source_run_ids": [],
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+
+def _write_dependency_reports(
+    root: Path,
+    *,
+    stale_dependency: str = "",
+) -> list[str]:
+    overrides: list[str] = []
+    head, _ = radar_module._resolve_radar_head(root)
+    for dependency_id, spec in radar_module.REPORT_DEPENDENCY_SPECS.items():
+        path = root / str(spec["path"])
+        dependency_head = "f" * 40 if dependency_id == stale_dependency else head
+        payload = _dependency_report_payload(
+            schema_version=str(spec["schema_version"]),
+            head=dependency_head,
+        )
+        _write(path, json.dumps(payload))
+        overrides.append(f"{dependency_id}={path}")
+    return overrides
+
+
+def test_product_maturity_radar_v2_is_partial_without_dependency_reports(
+    tmp_path: Path,
+) -> None:
+    _fixture_repo(tmp_path)
+    payload = build_product_maturity_radar(tmp_path)
+
+    assert payload["schema_version"].endswith(".v2")
+    assert payload["projection_status"] == "partial"
+    assert payload["projection_only"] is True
+    assert payload["source_authority"] is False
+    assert payload["dependency_status"]["missing_dependency_count"] == len(
+        radar_module.REPORT_DEPENDENCY_SPECS
+    )
+    assert payload["dependency_status"]["valid_for_projection"] is True
+    assert len(payload["current_head_sha"]) == 40
+    assert len(payload["input_provenance"]["input_digest"]) == 64
+    assert set(payload["claim_sources"]) == {
+        "adoption",
+        "diagnosis",
+        "docs",
+        "evidence",
+        "learning",
+        "packaging",
+        "remediation",
+        "security_release",
+        "workflow",
+    }
+    assert all("claim_sources" in surface for surface in payload["surfaces"])
+    assert all("claim_sources" in candidate for candidate in payload["ranked_upgrade_candidates"])
+
+
+def test_product_maturity_radar_accepts_current_report_dependencies(
+    tmp_path: Path,
+) -> None:
+    _fixture_repo(tmp_path)
+    overrides = _write_dependency_reports(tmp_path)
+    payload = build_product_maturity_radar(
+        tmp_path,
+        report_json=overrides,
+        generated_at="2026-06-23T00:00:00Z",
+    )
+
+    assert payload["projection_status"] == "current"
+    assert payload["dependency_status"]["fresh_dependency_count"] == len(
+        radar_module.REPORT_DEPENDENCY_SPECS
+    )
+    assert payload["dependency_status"]["missing_dependency_count"] == 0
+    assert payload["dependency_status"]["stale_dependency_count"] == 0
+    assert payload["dependency_status"]["invalid_dependency_count"] == 0
+    assert all(dependency["status"] == "fresh" for dependency in payload["report_dependencies"])
+
+
+def test_product_maturity_radar_invalidates_stale_dependency(
+    tmp_path: Path,
+) -> None:
+    _fixture_repo(tmp_path)
+    overrides = _write_dependency_reports(
+        tmp_path,
+        stale_dependency="workflow_governance",
+    )
+    payload = build_product_maturity_radar(tmp_path, report_json=overrides)
+
+    assert payload["projection_status"] == "invalid"
+    assert payload["report_status"] == "invalid_dependency"
+    workflow = next(
+        dependency
+        for dependency in payload["report_dependencies"]
+        if dependency["id"] == "workflow_governance"
+    )
+    assert workflow["status"] == "stale"
+    assert "dependency_head_mismatch" in workflow["reasons"]
+
+
+def test_product_maturity_radar_freshness_detects_dependency_mutation(
+    tmp_path: Path,
+) -> None:
+    _fixture_repo(tmp_path)
+    overrides = _write_dependency_reports(tmp_path)
+    out = tmp_path / "radar.json"
+
+    write_product_maturity_radar(
+        repo_root=tmp_path,
+        out=out,
+        report_json=overrides,
+        generated_at="2026-06-23T00:00:00Z",
+    )
+    fresh = radar_module.check_product_maturity_radar_freshness(
+        repo_root=tmp_path,
+        report_path=out,
+        report_json=overrides,
+    )
+    assert fresh["fresh"] is True
+    assert fresh["projection_status"] == "current"
+
+    dependency_path = tmp_path / str(
+        radar_module.REPORT_DEPENDENCY_SPECS["automation_health"]["path"]
+    )
+    dependency = json.loads(dependency_path.read_text(encoding="utf-8"))
+    dependency["mutation_probe"] = True
+    dependency_path.write_text(json.dumps(dependency), encoding="utf-8")
+
+    stale = radar_module.check_product_maturity_radar_freshness(
+        repo_root=tmp_path,
+        report_path=out,
+        report_json=overrides,
+    )
+    assert stale["fresh"] is False
+    assert "input_digest_mismatch" in stale["reasons"]
+
+
+def test_product_maturity_radar_cli_freshness_and_report_overrides(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    _fixture_repo(tmp_path)
+    overrides = _write_dependency_reports(tmp_path)
+    out = tmp_path / "radar.json"
+
+    from sdetkit.cli import main as cli_main
+
+    args = [
+        "product-maturity-radar",
+        "--root",
+        str(tmp_path),
+        "--out",
+        str(out),
+    ]
+    for override in overrides:
+        args.extend(["--report-json", override])
+
+    assert cli_main([*args, "--format", "json"]) == 0
+    generated = json.loads(capsys.readouterr().out)
+    assert generated["projection_status"] == "current"
+
+    original = out.read_text(encoding="utf-8")
+    assert cli_main([*args, "--check-freshness", "--format", "text"]) == 0
+    stdout = capsys.readouterr().out
+    assert "freshness_status=fresh" in stdout
+    assert "projection_status=current" in stdout
+    assert out.read_text(encoding="utf-8") == original
