@@ -89,3 +89,128 @@ def test_issue_queue_classifier_writes_artifact(tmp_path: Path) -> None:
     written = json.loads(out.read_text(encoding="utf-8"))
     assert written == payload
     assert written["schema_version"] == SCHEMA_VERSION
+
+
+def test_issue_queue_classifier_provenance_and_freshness_contract(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    from sdetkit.cli import main as cli_main
+    from sdetkit.issue_queue_classifier import (
+        check_issue_queue_classifier_freshness,
+    )
+
+    issues_path = tmp_path / "issues.json"
+    issues_path.write_text(FIXTURE.read_text(encoding="utf-8"), encoding="utf-8")
+    out = tmp_path / "issue-queue-classifier.json"
+
+    payload = write_issue_queue_classifier_artifact(
+        issues_json=issues_path,
+        out=out,
+        root=".",
+        source_run_ids=[101],
+        generated_at="2026-06-23T00:00:00Z",
+    )
+    assert payload["schema_version"].endswith(".v2")
+    assert payload["generated_at"] == "2026-06-23T00:00:00Z"
+    assert len(payload["current_head_sha"]) == 40
+    assert payload["source_issue_numbers"] == sorted(payload["source_issue_numbers"])
+    assert payload["source_run_ids"] == [101]
+    assert payload["input_provenance"]["digest_algorithm"] == "sha256"
+    assert len(payload["input_provenance"]["input_digest"]) == 64
+    assert len(payload["input_provenance"]["generator_sha256"]) == 64
+    assert "issues_json" in payload["input_digests"]
+
+    fresh = check_issue_queue_classifier_freshness(
+        issues_json=issues_path,
+        report_path=out,
+        root=".",
+        source_run_ids=[101],
+    )
+    assert fresh["status"] == "fresh"
+    assert fresh["fresh"] is True
+    assert fresh["reasons"] == []
+    assert fresh["issue_mutation_allowed"] is False
+    assert fresh["merge_authorized"] is False
+
+    original = out.read_text(encoding="utf-8")
+    rc = cli_main(
+        [
+            "issue-queue-classifier",
+            "--issues-json",
+            str(issues_path),
+            "--out",
+            str(out),
+            "--root",
+            ".",
+            "--source-run-id",
+            "101",
+            "--check-freshness",
+            "--format",
+            "text",
+        ]
+    )
+    assert rc == 0
+    assert "freshness_status=fresh" in capsys.readouterr().out
+    assert out.read_text(encoding="utf-8") == original
+
+    issues = json.loads(issues_path.read_text(encoding="utf-8"))
+    issues.append({"number": 9999, "title": "new issue", "state": "open", "labels": []})
+    issues_path.write_text(json.dumps(issues), encoding="utf-8")
+
+    stale = check_issue_queue_classifier_freshness(
+        issues_json=issues_path,
+        report_path=out,
+        root=".",
+        source_run_ids=[101],
+    )
+    assert stale["status"] == "stale"
+    assert stale["fresh"] is False
+    assert "input_digest_mismatch" in stale["reasons"]
+    assert "source_issue_numbers_mismatch" in stale["reasons"]
+
+    rc = cli_main(
+        [
+            "issue-queue-classifier",
+            "--issues-json",
+            str(issues_path),
+            "--out",
+            str(out),
+            "--root",
+            ".",
+            "--source-run-id",
+            "101",
+            "--check-freshness",
+            "--format",
+            "json",
+        ]
+    )
+    assert rc == 1
+    assert json.loads(capsys.readouterr().out)["status"] == "stale"
+    assert out.read_text(encoding="utf-8") == original
+
+
+def test_issue_queue_classifier_freshness_rejects_missing_and_invalid_reports(
+    tmp_path: Path,
+) -> None:
+    from sdetkit.issue_queue_classifier import (
+        check_issue_queue_classifier_freshness,
+    )
+
+    missing = check_issue_queue_classifier_freshness(
+        issues_json=FIXTURE,
+        report_path=tmp_path / "missing.json",
+        root=".",
+    )
+    assert missing["fresh"] is False
+    assert "report_missing" in missing["reasons"]
+
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text("{invalid", encoding="utf-8")
+    result = check_issue_queue_classifier_freshness(
+        issues_json=FIXTURE,
+        report_path=invalid,
+        root=".",
+    )
+    assert result["fresh"] is False
+    assert "report_invalid_json" in result["reasons"]

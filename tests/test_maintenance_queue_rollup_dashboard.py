@@ -442,3 +442,21 @@ def test_project_registers_maintenance_queue_rollup_dashboard_script() -> None:
     )
 
     assert pyproject.count(registration) == 1
+
+
+def test_dashboard_accepts_current_v2_rollup_schema(
+    tmp_path: Path,
+) -> None:
+    from sdetkit import maintenance_queue_rollup
+
+    payload = _rollup_payload()
+    payload["schema_version"] = maintenance_queue_rollup.SCHEMA_VERSION
+    rollup = _write_rollup(
+        tmp_path / "maintenance-queue-rollup-v2.json",
+        payload=payload,
+    )
+    dashboard = maintenance_queue_rollup_dashboard.build_dashboard(
+        rollup,
+        out_path=tmp_path / "dashboard.html",
+    )
+    assert dashboard["source_rollup_schema_version"] == maintenance_queue_rollup.SCHEMA_VERSION

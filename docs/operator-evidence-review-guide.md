@@ -200,6 +200,8 @@ python -m sdetkit maintenance-queue-rollup \
 
 The command always writes the JSON artifact. `--format text` prints a compact operator summary; `--format json` prints the same artifact payload to standard output.
 
+Before relying on an existing classifier, automation-health, or rollup artifact, run the same command with `--check-freshness`. The check is read-only and fails closed when the report is missing, malformed, bound to another Git head, generated from different issue/input bytes, uses unsupported input schemas, or records different source run IDs.
+
 Read these top-level fields first:
 
 - `schema_version`
@@ -247,7 +249,7 @@ merge_authorized=false
 semantic_equivalence_proven=false
 ```
 
-The artifact is registered as `maintenance-queue-rollup-json` at `build/sdetkit/maintenance-queue-rollup.json` with schema `sdetkit.maintenance.queue.rollup.v1`. It is a local reporting artifact and does not apply patches, mutate issues, dismiss security findings, or make a merge decision.
+The artifact is registered as `maintenance-queue-rollup-json` at `build/sdetkit/maintenance-queue-rollup.json` with schema `sdetkit.maintenance.queue.rollup.v2`. The dashboard accepts both legacy v1 and current v2 rollups. The artifact is local and reporting-only; it does not apply patches, mutate issues, dismiss security findings, or make a merge decision.
 
 ## Review the maintenance queue rollup dashboard
 
@@ -280,7 +282,7 @@ sdetkit-maintenance-queue-rollup-dashboard \
   --out build/sdetkit/maintenance-queue-rollup-dashboard.json
 ```
 
-The dashboard accepts only source artifacts using schema `sdetkit.maintenance.queue.rollup.v1`. It validates `queue_item_count`, `review_required_count`, `close_candidate_count`, and `primary_issue` against the ordered `queue_items` before writing output. Missing, malformed, unsupported, inconsistent, or authority-expanding input returns exit code `2`; successful rendering returns `0`.
+The dashboard accepts legacy `sdetkit.maintenance.queue.rollup.v1` and current `sdetkit.maintenance.queue.rollup.v2` source artifacts. It validates `queue_item_count`, `review_required_count`, `close_candidate_count`, and `primary_issue` against the ordered `queue_items` before writing output. Missing, malformed, unsupported, inconsistent, or authority-expanding input returns exit code `2`; successful rendering returns `0`.
 
 Read these dashboard fields first:
 

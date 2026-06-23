@@ -3,12 +3,25 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = "sdetkit.maintenance.queue.rollup.v1"
+from . import automation_health as automation_health_report
+from . import issue_queue_classifier as issue_queue_report
+from . import security_followup_disposition as security_followup_report
+from .report_provenance import (
+    attach_provenance,
+    build_input_provenance,
+    check_report_path,
+    collect_source_run_ids,
+    extract_source_issue_numbers,
+    render_freshness_text,
+)
+
+SCHEMA_VERSION = "sdetkit.maintenance.queue.rollup.v2"
 DEFAULT_OUT = "build/sdetkit/maintenance-queue-rollup.json"
+GENERATOR_SOURCE = "src/sdetkit/maintenance_queue_rollup.py"
 
 AUTHORITY_BOUNDARY = {
     "automation_allowed": False,
@@ -234,18 +247,153 @@ def build_maintenance_queue_rollup(
     }
 
 
+EXPECTED_INPUT_SCHEMAS = {
+    "issue_queue": issue_queue_report.SCHEMA_VERSION,
+    "automation_health": automation_health_report.SCHEMA_VERSION,
+    "security_followup": security_followup_report.SCHEMA_VERSION,
+}
+
+
+def _input_schemas(
+    issue_queue: Mapping[str, Any],
+    automation_health: Mapping[str, Any],
+    security_followup: Mapping[str, Any],
+) -> dict[str, str]:
+    return {
+        "issue_queue": str(issue_queue.get("schema_version", "")),
+        "automation_health": str(automation_health.get("schema_version", "")),
+        "security_followup": str(security_followup.get("schema_version", "")),
+    }
+
+
+def _validate_input_schemas(
+    issue_queue: Mapping[str, Any],
+    automation_health: Mapping[str, Any],
+    security_followup: Mapping[str, Any],
+) -> None:
+    actual = _input_schemas(issue_queue, automation_health, security_followup)
+    mismatches = {
+        key: {"actual": actual.get(key, ""), "expected": expected}
+        for key, expected in EXPECTED_INPUT_SCHEMAS.items()
+        if actual.get(key) != expected
+    }
+    if mismatches:
+        raise ValueError(f"unsupported maintenance queue input schemas: {mismatches}")
+
+
+def maintenance_queue_rollup_input_provenance(
+    *,
+    issue_queue_json: str | Path,
+    automation_health_json: str | Path,
+    security_followup_json: str | Path,
+    root: str | Path = ".",
+    source_run_ids: Sequence[int] = (),
+    generator_path: str | Path | None = None,
+    generated_at: str | None = None,
+    current_head_sha: str | None = None,
+) -> dict[str, Any]:
+    issue_path = Path(issue_queue_json)
+    automation_path = Path(automation_health_json)
+    security_path = Path(security_followup_json)
+    issue_queue = _load_dict(issue_path)
+    automation_health = _load_dict(automation_path)
+    security_followup = _load_dict(security_path)
+    generator = (
+        Path(generator_path).resolve() if generator_path is not None else Path(__file__).resolve()
+    )
+
+    raw_issues = _as_list(issue_queue, "issues")
+    issue_numbers = extract_source_issue_numbers(raw_issues)
+    run_ids = collect_source_run_ids(
+        source_run_ids,
+        payloads=(issue_queue, automation_health, security_followup),
+    )
+    schemas = _input_schemas(issue_queue, automation_health, security_followup)
+
+    return build_input_provenance(
+        schema_version=SCHEMA_VERSION,
+        generator_source=GENERATOR_SOURCE,
+        generator_bytes=generator.read_bytes(),
+        data_inputs={
+            "issue_queue_json": issue_path.read_bytes(),
+            "automation_health_json": automation_path.read_bytes(),
+            "security_followup_json": security_path.read_bytes(),
+        },
+        root=root,
+        source_issue_numbers=issue_numbers,
+        source_run_ids=run_ids,
+        input_artifact_schemas=schemas,
+        current_head_sha=current_head_sha,
+        generated_at=generated_at,
+    )
+
+
+def check_maintenance_queue_rollup_freshness(
+    *,
+    issue_queue_json: str | Path,
+    automation_health_json: str | Path,
+    security_followup_json: str | Path,
+    report_path: str | Path,
+    root: str | Path = ".",
+    source_run_ids: Sequence[int] = (),
+    generator_path: str | Path | None = None,
+    current_head_sha: str | None = None,
+) -> dict[str, Any]:
+    issue_queue = _load_dict(issue_queue_json)
+    automation_health = _load_dict(automation_health_json)
+    security_followup = _load_dict(security_followup_json)
+    current = maintenance_queue_rollup_input_provenance(
+        issue_queue_json=issue_queue_json,
+        automation_health_json=automation_health_json,
+        security_followup_json=security_followup_json,
+        root=root,
+        source_run_ids=source_run_ids,
+        generator_path=generator_path,
+        current_head_sha=current_head_sha,
+    )
+    result = check_report_path(
+        report_path,
+        current,
+        expected_schema_version=SCHEMA_VERSION,
+    )
+    if _input_schemas(issue_queue, automation_health, security_followup) != EXPECTED_INPUT_SCHEMAS:
+        result["reasons"] = sorted(set([*result["reasons"], "input_artifact_schema_mismatch"]))
+        result["status"] = "stale"
+        result["fresh"] = False
+    return result
+
+
 def write_maintenance_queue_rollup_artifact(
     *,
     issue_queue_json: str | Path,
     automation_health_json: str | Path,
     security_followup_json: str | Path,
     out: str | Path = DEFAULT_OUT,
+    root: str | Path = ".",
+    source_run_ids: Sequence[int] = (),
+    generated_at: str | None = None,
+    current_head_sha: str | None = None,
 ) -> dict[str, Any]:
+    issue_queue = _load_dict(issue_queue_json)
+    automation_health = _load_dict(automation_health_json)
+    security_followup = _load_dict(security_followup_json)
+    _validate_input_schemas(issue_queue, automation_health, security_followup)
+
     payload = build_maintenance_queue_rollup(
-        _load_dict(issue_queue_json),
-        _load_dict(automation_health_json),
-        _load_dict(security_followup_json),
+        issue_queue,
+        automation_health,
+        security_followup,
     )
+    provenance = maintenance_queue_rollup_input_provenance(
+        issue_queue_json=issue_queue_json,
+        automation_health_json=automation_health_json,
+        security_followup_json=security_followup_json,
+        root=root,
+        source_run_ids=source_run_ids,
+        generated_at=generated_at,
+        current_head_sha=current_head_sha,
+    )
+    payload = attach_provenance(payload, provenance)
     out_path = Path(out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -261,14 +409,38 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--automation-health-json", required=True)
     parser.add_argument("--security-followup-json", required=True)
     parser.add_argument("--out", default=DEFAULT_OUT)
+    parser.add_argument("--root", default=".")
+    parser.add_argument("--source-run-id", action="append", type=int, default=[])
     parser.add_argument("--format", choices=["json", "text"], default="json")
+    parser.add_argument(
+        "--check-freshness",
+        action="store_true",
+        help="Check the existing report against current inputs without rewriting it.",
+    )
     ns = parser.parse_args(list(argv) if argv is not None else None)
+
+    if ns.check_freshness:
+        freshness = check_maintenance_queue_rollup_freshness(
+            issue_queue_json=ns.issue_queue_json,
+            automation_health_json=ns.automation_health_json,
+            security_followup_json=ns.security_followup_json,
+            report_path=ns.out,
+            root=ns.root,
+            source_run_ids=ns.source_run_id,
+        )
+        if ns.format == "json":
+            sys.stdout.write(json.dumps(freshness, indent=2, sort_keys=True) + "\n")
+        else:
+            sys.stdout.write(render_freshness_text(freshness) + "\n")
+        return 0 if freshness["fresh"] else 1
 
     payload = write_maintenance_queue_rollup_artifact(
         issue_queue_json=ns.issue_queue_json,
         automation_health_json=ns.automation_health_json,
         security_followup_json=ns.security_followup_json,
         out=ns.out,
+        root=ns.root,
+        source_run_ids=ns.source_run_id,
     )
 
     if ns.format == "json":
@@ -278,6 +450,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         sys.stdout.write(f"status={payload['status']}\n")
         sys.stdout.write(f"queue_items={payload['queue_item_count']}\n")
         sys.stdout.write(f"primary_issue={payload['primary_issue']}\n")
+        sys.stdout.write(f"current_head_sha={payload['current_head_sha']}\n")
+        sys.stdout.write(f"input_digest={payload['input_provenance']['input_digest']}\n")
         sys.stdout.write(f"automation_allowed={str(payload['automation_allowed']).lower()}\n")
         sys.stdout.write(f"merge_authorized={str(payload['merge_authorized']).lower()}\n")
         sys.stdout.write(

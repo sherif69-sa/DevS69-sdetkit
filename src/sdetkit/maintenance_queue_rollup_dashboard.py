@@ -13,6 +13,11 @@ from sdetkit import maintenance_queue_rollup
 from sdetkit.atomicio import atomic_write_text
 
 SCHEMA_VERSION = "sdetkit.maintenance_queue_rollup_dashboard.v1"
+LEGACY_SOURCE_SCHEMA_VERSION = "sdetkit.maintenance.queue.rollup.v1"
+SUPPORTED_SOURCE_SCHEMA_VERSIONS = {
+    LEGACY_SOURCE_SCHEMA_VERSION,
+    maintenance_queue_rollup.SCHEMA_VERSION,
+}
 DEFAULT_OUT = Path("build") / "sdetkit" / "maintenance-queue-rollup-dashboard.html"
 
 JsonObject = dict[str, Any]
@@ -60,7 +65,7 @@ def _load_rollup(path: Path) -> JsonObject:
         raise ValueError("expected maintenance queue rollup JSON object")
 
     schema_version = _string(payload.get("schema_version"))
-    if schema_version != maintenance_queue_rollup.SCHEMA_VERSION:
+    if schema_version not in SUPPORTED_SOURCE_SCHEMA_VERSIONS:
         raise ValueError(
             f"unsupported maintenance queue rollup schema: {schema_version or 'missing'}"
         )

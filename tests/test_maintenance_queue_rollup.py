@@ -121,3 +121,136 @@ def test_maintenance_queue_rollup_writes_artifact(tmp_path: Path) -> None:
     written = json.loads(out.read_text(encoding="utf-8"))
     assert written == payload
     assert written["schema_version"] == SCHEMA_VERSION
+
+
+def test_maintenance_queue_rollup_provenance_and_freshness_contract(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    from sdetkit.automation_health import write_automation_health_artifact
+    from sdetkit.cli import main as cli_main
+    from sdetkit.issue_queue_classifier import write_issue_queue_classifier_artifact
+    from sdetkit.maintenance_queue_rollup import (
+        check_maintenance_queue_rollup_freshness,
+    )
+
+    issue_queue_path = tmp_path / "issue-queue.json"
+    automation_path = tmp_path / "automation-health.json"
+    security_path = tmp_path / "security-followup.json"
+    out = tmp_path / "maintenance-queue-rollup.json"
+
+    write_issue_queue_classifier_artifact(
+        issues_json=ISSUES,
+        out=issue_queue_path,
+        root=".",
+        source_run_ids=[303],
+        generated_at="2026-06-23T00:00:00Z",
+    )
+    write_automation_health_artifact(
+        issues_json=ISSUES,
+        out=automation_path,
+        root=".",
+        source_run_ids=[303],
+        generated_at="2026-06-23T00:00:00Z",
+    )
+    security_path.write_text(json.dumps(_payloads()[2]), encoding="utf-8")
+
+    payload = write_maintenance_queue_rollup_artifact(
+        issue_queue_json=issue_queue_path,
+        automation_health_json=automation_path,
+        security_followup_json=security_path,
+        out=out,
+        root=".",
+        source_run_ids=[303],
+        generated_at="2026-06-23T00:00:00Z",
+    )
+    assert payload["schema_version"].endswith(".v2")
+    assert payload["source_run_ids"] == [303]
+    assert len(payload["current_head_sha"]) == 40
+    assert set(payload["input_digests"]) == {
+        "issue_queue_json",
+        "automation_health_json",
+        "security_followup_json",
+    }
+    assert payload["input_provenance"]["input_artifact_schemas"]["issue_queue"].endswith(".v2")
+    assert payload["input_provenance"]["input_artifact_schemas"]["automation_health"].endswith(
+        ".v2"
+    )
+
+    fresh = check_maintenance_queue_rollup_freshness(
+        issue_queue_json=issue_queue_path,
+        automation_health_json=automation_path,
+        security_followup_json=security_path,
+        report_path=out,
+        root=".",
+        source_run_ids=[303],
+    )
+    assert fresh["fresh"] is True
+
+    original = out.read_text(encoding="utf-8")
+    rc = cli_main(
+        [
+            "maintenance-queue-rollup",
+            "--issue-queue-json",
+            str(issue_queue_path),
+            "--automation-health-json",
+            str(automation_path),
+            "--security-followup-json",
+            str(security_path),
+            "--out",
+            str(out),
+            "--root",
+            ".",
+            "--source-run-id",
+            "303",
+            "--check-freshness",
+            "--format",
+            "text",
+        ]
+    )
+    assert rc == 0
+    assert "freshness_status=fresh" in capsys.readouterr().out
+    assert out.read_text(encoding="utf-8") == original
+
+    automation = json.loads(automation_path.read_text(encoding="utf-8"))
+    automation["tampered"] = True
+    automation_path.write_text(json.dumps(automation), encoding="utf-8")
+    stale = check_maintenance_queue_rollup_freshness(
+        issue_queue_json=issue_queue_path,
+        automation_health_json=automation_path,
+        security_followup_json=security_path,
+        report_path=out,
+        root=".",
+        source_run_ids=[303],
+    )
+    assert stale["fresh"] is False
+    assert "input_digest_mismatch" in stale["reasons"]
+
+
+def test_maintenance_queue_rollup_rejects_unsupported_input_schema(
+    tmp_path: Path,
+) -> None:
+    import pytest
+
+    from sdetkit.automation_health import write_automation_health_artifact
+    from sdetkit.issue_queue_classifier import write_issue_queue_classifier_artifact
+
+    issue_queue_path = tmp_path / "issue-queue.json"
+    automation_path = tmp_path / "automation-health.json"
+    security_path = tmp_path / "security-followup.json"
+
+    write_issue_queue_classifier_artifact(issues_json=ISSUES, out=issue_queue_path, root=".")
+    write_automation_health_artifact(issues_json=ISSUES, out=automation_path, root=".")
+    issue_queue = json.loads(issue_queue_path.read_text(encoding="utf-8"))
+    issue_queue["schema_version"] = "sdetkit.issue_queue_classifier.v999"
+    issue_queue_path.write_text(json.dumps(issue_queue), encoding="utf-8")
+    security_path.write_text(json.dumps(_payloads()[2]), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="unsupported maintenance queue input schemas"):
+        write_maintenance_queue_rollup_artifact(
+            issue_queue_json=issue_queue_path,
+            automation_health_json=automation_path,
+            security_followup_json=security_path,
+            out=tmp_path / "rollup.json",
+            root=".",
+        )
