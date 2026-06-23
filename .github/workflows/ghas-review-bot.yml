@@ -18,6 +18,9 @@ jobs:
   ghas-review-digest:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+
       - name: Build and publish GHAS digest
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         env:
@@ -26,6 +29,12 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            const {
+              collectedAlerts,
+              unavailableAlerts,
+              metricOrUnknown,
+              countOrUnknown,
+            } = require(`${process.env.GITHUB_WORKSPACE}/scripts/ghas_tracker_state.js`);
             const weekOf = new Date().toISOString().slice(0, 10);
             const labels = [
               { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
@@ -44,22 +53,21 @@ jobs:
 
             const fallbackNotes = [];
             const dayMs = 24 * 60 * 60 * 1000;
-            const staleWorkflowDays = 14;
             const trackedWorkflows = [
-              'security.yml',
-              'osv-scanner.yml',
-              'dependency-audit.yml',
-              'security-maintenance-bot.yml',
-              'dependency-auto-merge.yml',
-              'sbom.yml',
-              'ghas-review-bot.yml',
-              'ghas-campaign-bot.yml',
-              'ghas-alert-sla-bot.yml',
-              'ghas-metrics-export-bot.yml',
-              'security-configuration-audit-bot.yml',
-              'secret-protection-review-bot.yml',
-              'dependency-review.yml',
-              'dependency-radar-bot.yml',
+              { file: 'security.yml', maxAgeDays: 14 },
+              { file: 'osv-scanner.yml', maxAgeDays: 14 },
+              { file: 'dependency-audit.yml', maxAgeDays: 14 },
+              { file: 'security-maintenance-bot.yml', maxAgeDays: 14 },
+              { file: 'dependency-auto-merge.yml', maxAgeDays: 14 },
+              { file: 'sbom.yml', maxAgeDays: 14 },
+              { file: 'ghas-review-bot.yml', maxAgeDays: 14 },
+              { file: 'ghas-campaign-bot.yml', maxAgeDays: 14 },
+              { file: 'ghas-alert-sla-bot.yml', maxAgeDays: 14 },
+              { file: 'ghas-metrics-export-bot.yml', maxAgeDays: 14 },
+              { file: 'security-configuration-audit-bot.yml', maxAgeDays: 35 },
+              { file: 'secret-protection-review-bot.yml', maxAgeDays: 14 },
+              { file: 'dependency-review.yml', maxAgeDays: 14 },
+              { file: 'dependency-radar-bot.yml', maxAgeDays: 14 },
             ];
 
             const workflowRows = [];
@@ -70,7 +78,8 @@ jobs:
               }
               return Math.max(0, Math.floor((Date.now() - at) / dayMs));
             };
-            for (const workflowFile of trackedWorkflows) {
+            for (const trackedWorkflow of trackedWorkflows) {
+              const workflowFile = trackedWorkflow.file;
               try {
                 const runs = await github.rest.actions.listWorkflowRuns({
                   owner,
@@ -85,7 +94,8 @@ jobs:
                   status: latest ? (latest.conclusion || latest.status || 'unknown') : 'no-runs',
                   updatedAt: latest?.updated_at || 'n/a',
                   ageDays,
-                  stale14d: ageDays !== null ? ageDays >= staleWorkflowDays : null,
+                  maxAgeDays: trackedWorkflow.maxAgeDays,
+                  stale: ageDays !== null ? ageDays >= trackedWorkflow.maxAgeDays : null,
                   url: latest?.html_url || `https://github.com/${owner}/${repo}/actions/workflows/${workflowFile}`,
                 });
               } catch (error) {
@@ -94,7 +104,8 @@ jobs:
                   status: 'inspection-failed',
                   updatedAt: 'n/a',
                   ageDays: null,
-                  stale14d: null,
+                  maxAgeDays: trackedWorkflow.maxAgeDays,
+                  stale: null,
                   url: `https://github.com/${owner}/${repo}/actions/workflows/${workflowFile}`,
                 });
                 fallbackNotes.push(`Unable to inspect ${workflowFile}: ${error.message}`);
@@ -108,7 +119,7 @@ jobs:
               'x-github-api-version': '2022-11-28',
             };
 
-            async function fetchCount(path, label, priority = 'open') {
+            async function fetchAlerts(path, label, priority = 'open') {
               try {
                 const response = await github.request(`GET ${path}`, {
                   owner,
@@ -117,48 +128,25 @@ jobs:
                   per_page: 100,
                   headers,
                 });
-                return {
-                  count: Array.isArray(response.data) ? response.data.length : 0,
-                  note: null,
-                };
+                return collectedAlerts(response.data, label);
               } catch (error) {
-                return {
-                  count: 'unknown',
-                  note: `${label} unavailable: ${error.message}. Add secret GHAS_READ_TOKEN for private security APIs if needed.`,
-                };
+                return unavailableAlerts(label, error);
               }
             }
 
-            async function fetchSecretPushProtectionBypassCount() {
-              try {
-                const response = await github.request('GET /repos/{owner}/{repo}/secret-scanning/alerts', {
-                  owner,
-                  repo,
-                  state: 'open',
-                  per_page: 100,
-                  headers,
-                });
-                const alerts = Array.isArray(response.data) ? response.data : [];
-                return {
-                  count: alerts.filter((alert) => alert.push_protection_bypassed === true).length,
-                  note: null,
-                };
-              } catch (error) {
-                return {
-                  count: 'unknown',
-                  note: `Secret scanning push-protection review unavailable: ${error.message}. Add secret GHAS_READ_TOKEN for private security APIs if needed.`,
-                };
-              }
-            }
+            const codeScanning = await fetchAlerts('/repos/{owner}/{repo}/code-scanning/alerts', 'Code scanning');
+            const dependabot = await fetchAlerts('/repos/{owner}/{repo}/dependabot/alerts', 'Dependabot alerts');
+            const secretScanning = await fetchAlerts('/repos/{owner}/{repo}/secret-scanning/alerts', 'Secret scanning alerts');
+            const pushProtectionBypassed = metricOrUnknown(
+              secretScanning,
+              (alerts) => alerts.filter((alert) => alert.push_protection_bypassed === true).length
+            );
 
-            const codeScanning = await fetchCount('/repos/{owner}/{repo}/code-scanning/alerts', 'Code scanning');
-            const dependabot = await fetchCount('/repos/{owner}/{repo}/dependabot/alerts', 'Dependabot alerts');
-            const secretScanning = await fetchCount('/repos/{owner}/{repo}/secret-scanning/alerts', 'Secret scanning alerts');
-            const pushProtectionBypassed = await fetchSecretPushProtectionBypassCount();
-
-            for (const result of [codeScanning, dependabot, secretScanning, pushProtectionBypassed]) {
+            for (const result of [codeScanning, dependabot, secretScanning]) {
               if (result.note) {
-                fallbackNotes.push(result.note);
+                fallbackNotes.push(
+                  `${result.note}. Add secret GHAS_READ_TOKEN for private security APIs if needed.`
+                );
               }
             }
 
@@ -172,6 +160,11 @@ jobs:
               `- Open secret scanning alerts: **${secretScanning.count}**`,
               `- Secret scanning review queue (push-protection/bypass follow-up): **${pushProtectionBypassed.count}**`,
               '',
+              '## Collection status',
+              `- Code scanning: **${codeScanning.status}**`,
+              `- Dependabot: **${dependabot.status}**`,
+              `- Secret scanning: **${secretScanning.status}**`,
+              '',
               '## Review links',
               `- Code scanning: https://github.com/${owner}/${repo}/security/code-scanning`,
               `- Dependabot: https://github.com/${owner}/${repo}/security/dependabot`,
@@ -179,9 +172,9 @@ jobs:
               `- Security overview: https://github.com/${owner}/${repo}/security`,
               '',
               '## Workflow freshness',
-              '| Workflow | Latest result | Updated at | Age (days) | 14d stale | Link |',
-              '| --- | --- | --- | --- | --- | --- |',
-              ...workflowRows.map((row) => `| ${row.workflow} | ${row.status} | ${row.updatedAt} | ${row.ageDays ?? 'n/a'} | ${row.stale14d === null ? 'n/a' : (row.stale14d ? 'yes' : 'no')} | [open](${row.url}) |`),
+              '| Workflow | Latest result | Updated at | Age (days) | Maximum age (days) | Stale | Link |',
+              '| --- | --- | --- | --- | --- | --- | --- |',
+              ...workflowRows.map((row) => `| ${row.workflow} | ${row.status} | ${row.updatedAt} | ${row.ageDays ?? 'n/a'} | ${row.maxAgeDays} | ${row.stale === null ? 'n/a' : (row.stale ? 'yes' : 'no')} | [open](${row.url}) |`),
               '',
               '## Required follow-up',
               '- [ ] Review every open GHAS alert and document disposition for anything that is still open at the end of the week.',

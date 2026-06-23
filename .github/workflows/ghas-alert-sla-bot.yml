@@ -17,6 +17,9 @@ jobs:
   ghas-alert-sla:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+
       - name: Create GHAS alert SLA tracker issue
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         env:
@@ -25,6 +28,13 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            const {
+              collectedAlerts,
+              unavailableAlerts,
+              metricOrUnknown,
+              countOrUnknown,
+              formatMetric,
+            } = require(`${process.env.GITHUB_WORKSPACE}/scripts/ghas_tracker_state.js`);
             const weekOf = new Date().toISOString().slice(0, 10);
             const labels = [
               { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
@@ -52,16 +62,20 @@ jobs:
 
             async function fetchAlerts(path, label) {
               try {
-                return await github.paginate(`GET ${path}`, {
+                const alerts = await github.paginate(`GET ${path}`, {
                   owner,
                   repo,
                   state: 'open',
                   per_page: 100,
                   headers,
                 });
+                return collectedAlerts(alerts, label);
               } catch (error) {
-                notes.push(`${label} unavailable: ${error.message}. Add GHAS_READ_TOKEN if broader security scopes are required.`);
-                return [];
+                const result = unavailableAlerts(label, error);
+                notes.push(
+                  `${result.note}. Add GHAS_READ_TOKEN if broader security scopes are required.`
+                );
+                return result;
               }
             }
 
@@ -113,27 +127,41 @@ jobs:
             const dependabotAlerts = await fetchAlerts('/repos/{owner}/{repo}/dependabot/alerts', 'Dependabot alerts');
             const secretAlerts = await fetchAlerts('/repos/{owner}/{repo}/secret-scanning/alerts', 'Secret scanning alerts');
 
-            const codeSeverity = summarizeSeverity(
+            const codeSeverity = metricOrUnknown(
               codeAlerts,
-              (alert) => alert.rule?.security_severity_level || alert.rule?.severity || 'unknown'
+              (alerts) => summarizeSeverity(
+                alerts,
+                (alert) => alert.rule?.security_severity_level || alert.rule?.severity || 'unknown'
+              )
             );
-            const dependabotSeverity = summarizeSeverity(
+            const dependabotSeverity = metricOrUnknown(
               dependabotAlerts,
-              (alert) => alert.security_vulnerability?.severity || alert.severity || 'unknown'
+              (alerts) => summarizeSeverity(
+                alerts,
+                (alert) => alert.security_vulnerability?.severity || alert.severity || 'unknown'
+              )
             );
 
-            const secretBypassed = secretAlerts.filter((alert) => alert.push_protection_bypassed === true);
-            const secretBypassedAged = secretBypassed.filter((alert) => ageDays(alert) >= 7).length;
+            const secretBypassed = metricOrUnknown(
+              secretAlerts,
+              (alerts) => alerts.filter((alert) => alert.push_protection_bypassed === true).length
+            );
+            const secretBypassedAged = metricOrUnknown(
+              secretAlerts,
+              (alerts) => alerts.filter(
+                (alert) => alert.push_protection_bypassed === true && ageDays(alert) >= 7
+              ).length
+            );
             const severityOrder = ['critical', 'high', 'medium', 'low', 'warning', 'note', 'unknown'];
-            const highSeverityCodeAged = codeAlerts.filter((alert) => {
+            const highSeverityCodeAged = metricOrUnknown(codeAlerts, (alerts) => alerts.filter((alert) => {
               const severity = alert.rule?.security_severity_level || alert.rule?.severity || 'unknown';
               return ['critical', 'high'].includes(String(severity).toLowerCase()) && ageDays(alert) >= 14;
-            }).length;
-            const criticalDependabotAged = dependabotAlerts.filter((alert) => {
+            }).length);
+            const criticalDependabotAged = metricOrUnknown(dependabotAlerts, (alerts) => alerts.filter((alert) => {
               const severity = alert.security_vulnerability?.severity || alert.severity || 'unknown';
               return ['critical', 'high'].includes(String(severity).toLowerCase()) && ageDays(alert) >= 14;
-            }).length;
-            const oldCodeRules = topOldCodeRules(codeAlerts);
+            }).length);
+            const oldCodeRules = metricOrUnknown(codeAlerts, topOldCodeRules);
 
             const title = `⏱️ GHAS alert SLA tracker (${weekOf})`;
             const body = [
@@ -160,19 +188,26 @@ jobs:
               `- Push-protection bypassed secret alerts aged 7+ days: **${secretBypassedAged}**`,
               '',
               '## Severity slices',
-              ...mapLines(codeSeverity, 'Code scanning severity', severityOrder),
-              ...mapLines(dependabotSeverity, 'Dependabot severity', severityOrder),
+              ...(codeSeverity === 'unknown' ? ['- Code scanning severity: unknown'] : mapLines(codeSeverity, 'Code scanning severity', severityOrder)),
+              ...(dependabotSeverity === 'unknown' ? ['- Dependabot severity: unknown'] : mapLines(dependabotSeverity, 'Dependabot severity', severityOrder)),
               '',
               '## Older CodeQL rules to batch together',
-              ...(oldCodeRules.length
-                ? oldCodeRules.map(([rule, count]) => `- ${rule}: **${count}** alert(s) aged 14+ days`)
-                : ['- No code-scanning rules currently breach the 14+ day SLA window.']),
+              ...(oldCodeRules === 'unknown'
+                ? ['- Code-scanning rule age data: unknown.']
+                : (oldCodeRules.length
+                  ? oldCodeRules.map(([rule, count]) => `- ${rule}: **${count}** alert(s) aged 14+ days`)
+                  : ['- No code-scanning rules currently breach the 14+ day SLA window.'])),
               '',
               '## Suggested execution lane',
               '- [ ] Convert every 14+ day high-severity code or Dependabot alert into an owned issue or PR.',
               '- [ ] Group 14+ day CodeQL alerts by rule into one focused remediation batch and use Copilot Autofix when appropriate.',
               '- [ ] Treat push-protection bypassed secret alerts as same-week work until resolved or explicitly dismissed.',
               '- [ ] Link resulting PRs or follow-up issues back to this SLA tracker for audit history.',
+              '',
+              '## Collection status',
+              `- Code scanning: **${codeAlerts.status}**`,
+              `- Dependabot: **${dependabotAlerts.status}**`,
+              `- Secret scanning: **${secretAlerts.status}**`,
               '',
               '## Review links',
               `- Code scanning: https://github.com/${owner}/${repo}/security/code-scanning`,

@@ -28,6 +28,11 @@ jobs:
             const fs = require('fs');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            const {
+              collectedAlerts,
+              unavailableAlerts,
+              countOrUnknown,
+            } = require(`${process.env.GITHUB_WORKSPACE}/scripts/ghas_tracker_state.js`);
             const monthOf = new Date().toISOString().slice(0, 7);
             const labels = [
               { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
@@ -82,10 +87,20 @@ jobs:
                   repo,
                   headers,
                 });
-                return response.data;
+                if (
+                  response.data === null
+                  || typeof response.data !== 'object'
+                  || Array.isArray(response.data)
+                ) {
+                  const note = 'Repository security configuration returned an invalid payload; reporting unknown.';
+                  notes.push(note);
+                  return { status: 'invalid', configuration: null, note };
+                }
+                return { status: 'collected', configuration: response.data, note: null };
               } catch (error) {
-                notes.push(`Repository security configuration unavailable: ${error.message}`);
-                return null;
+                const note = `Repository security configuration unavailable: ${error.message}`;
+                notes.push(note);
+                return { status: 'unavailable', configuration: null, note };
               }
             }
 
@@ -98,15 +113,22 @@ jobs:
                   per_page: 100,
                   headers,
                 });
-                return Array.isArray(response.data) ? response.data.length : 0;
+                const result = collectedAlerts(response.data, label);
+                if (result.note) {
+                  notes.push(result.note);
+                }
+                return result;
               } catch (error) {
-                notes.push(`${label} unavailable: ${error.message}. Add GHAS_READ_TOKEN if broader security scopes are required.`);
-                return null;
+                const result = unavailableAlerts(label, error);
+                notes.push(
+                  `${result.note}. Add GHAS_READ_TOKEN if broader security scopes are required.`
+                );
+                return result;
               }
             }
-            const formatCount = (count) => (count === null ? 'unavailable' : count);
 
-            const configuration = await fetchConfiguration();
+            const configurationResult = await fetchConfiguration();
+            const configuration = configurationResult.configuration;
             const codeAlerts = await fetchAlerts('/repos/{owner}/{repo}/code-scanning/alerts', 'Code scanning alerts');
             const secretAlerts = await fetchAlerts('/repos/{owner}/{repo}/secret-scanning/alerts', 'Secret scanning alerts');
             const dependabotAlerts = await fetchAlerts('/repos/{owner}/{repo}/dependabot/alerts', 'Dependabot alerts');
@@ -139,6 +161,12 @@ jobs:
               configuration && configuration.dependency_graph_autosubmit_action
                 ? `- Automatic dependency submission: **${configuration.dependency_graph_autosubmit_action}**`
                 : '- Automatic dependency submission: unavailable.',
+              '',
+              '## Collection status',
+              `- Repository security configuration: **${configurationResult.status}**`,
+              `- Code scanning: **${codeAlerts.status}**`,
+              `- Secret scanning: **${secretAlerts.status}**`,
+              `- Dependabot: **${dependabotAlerts.status}**`,
               '',
               '## Open alert snapshot',
               `- Code scanning alerts: **${formatCount(codeAlerts)}**`,

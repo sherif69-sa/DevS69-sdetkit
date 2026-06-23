@@ -67,3 +67,23 @@ Use the GitHub Security tab to review alerts:
 ## Security Control Tower modes
 
 See [security-gate.md](security-gate.md) for offline-first scan/report/fix behavior, optional online scanning, and SARIF output.
+
+## GHAS tracker collection semantics
+
+Security trackers distinguish an **authoritative zero** from an **unknown**
+collection state:
+
+- **Authoritative zero** means the relevant GitHub security API responded
+  successfully with a valid empty alert array.
+- **Unknown** means the API was unavailable, access was denied, or the response
+  payload was not a valid alert array.
+- Any age bucket, severity slice, bypass count, or other derived metric remains
+  `unknown` when its source collection is unknown.
+- Tracker issues include source-specific collection status so operators can
+  distinguish a current empty queue from incomplete evidence.
+- Workflow freshness is cadence-aware; the monthly security-configuration
+  audit uses a 35-day maximum age rather than the weekly 14-day threshold.
+
+These workflows are reporting surfaces. Their output does not authorize alert
+dismissal, security-configuration mutation, workflow reruns, patch automation,
+merge, or semantic-equivalence claims.
