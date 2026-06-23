@@ -190,3 +190,37 @@ make first-proof-readiness-threshold
 ```
 
 Uses `FIRST_PROOF_READINESS_PROFILE` with profiles in `config/first_proof_readiness_profiles.json`.
+
+## First-proof quality evidence bundle
+
+Refresh the three authoritative producer artifacts explicitly:
+
+```bash
+make first-proof-health-score
+make first-proof-dashboard
+make first-proof-readiness-threshold
+```
+
+Then publish one read-only reviewer bundle:
+
+```bash
+make first-proof-quality-evidence
+```
+
+Equivalent root command:
+
+```bash
+python -m sdetkit first-proof-quality-evidence   --root .   --artifact-dir build/first-proof   --out build/sdetkit/first-proof-quality-evidence.json   --markdown-out build/sdetkit/first-proof-quality-evidence.md   --format json
+```
+
+Check whether the bundle still matches the current Git HEAD and exact source
+artifact bytes without refreshing or mutating any producer artifact:
+
+```bash
+python -m sdetkit first-proof-quality-evidence   --root .   --artifact-dir build/first-proof   --out build/sdetkit/first-proof-quality-evidence.json   --check-freshness   --format text
+```
+
+The bundle reports missing, invalid, stale, unbound, contradictory, or failed
+evidence. It does not run the refresh commands and does not authorize merge,
+patch application, security dismissal, workflow reruns, or semantic-equivalence
+claims.

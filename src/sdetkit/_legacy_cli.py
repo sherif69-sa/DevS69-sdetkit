@@ -1079,6 +1079,33 @@ Then use stability-aware command discovery:
         default="build/sdetkit/report-dependency-graph-dashboard.html",
     )
 
+    first_proof_quality_evidence = sub.add_parser(
+        "first-proof-quality-evidence",
+        help=argparse.SUPPRESS,
+    )
+    first_proof_quality_evidence.add_argument("--root", default=".")
+    first_proof_quality_evidence.add_argument(
+        "--artifact-dir",
+        default="build/first-proof",
+    )
+    first_proof_quality_evidence.add_argument(
+        "--out",
+        default="build/sdetkit/first-proof-quality-evidence.json",
+    )
+    first_proof_quality_evidence.add_argument(
+        "--markdown-out",
+        default="build/sdetkit/first-proof-quality-evidence.md",
+    )
+    first_proof_quality_evidence.add_argument(
+        "--check-freshness",
+        action="store_true",
+    )
+    first_proof_quality_evidence.add_argument(
+        "--format",
+        choices=["json", "text"],
+        default="json",
+    )
+
     release_readiness_evidence_package = sub.add_parser(
         "release-readiness-evidence-package",
         help=argparse.SUPPRESS,
@@ -2389,6 +2416,26 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "--out",
                 str(ns.out),
             ],
+        )
+
+    if ns.cmd == "first-proof-quality-evidence":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--artifact-dir",
+            str(ns.artifact_dir),
+            "--out",
+            str(ns.out),
+            "--markdown-out",
+            str(ns.markdown_out),
+            "--format",
+            str(ns.format),
+        ]
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
+        return _run_module_main(
+            "sdetkit.first_proof_quality_evidence",
+            forwarded,
         )
 
     if ns.cmd == "release-readiness-evidence-package":
