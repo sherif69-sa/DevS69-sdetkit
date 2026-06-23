@@ -345,3 +345,37 @@ the current repository snapshot and dependency-report bytes. The check is
 read-only and returns nonzero for stale or invalid evidence. It never rewrites
 the radar, mutates issues, applies patches, dismisses security findings, or
 authorizes merge.
+
+## Cross-report consistency verdict
+
+`cross-report-consistency` reads existing decision-report JSON artifacts and emits
+one reporting-only verdict for schema, Git-head, freshness, and authority-boundary
+agreement. It never regenerates dependency reports.
+
+Discovery mode is the default. Missing report artifacts or legacy trust fields
+produce a `partial` result, while present schema mismatches, foreign or conflicting
+Git heads, stale or invalid dependencies, and explicit authority expansion produce
+a `blocked` result. Use `--complete` only when the requested decision bundle must
+contain every core report.
+
+```bash
+python -m sdetkit cross-report-consistency \
+  --root . \
+  --out build/sdetkit/cross-report-consistency.json \
+  --format json
+
+python -m sdetkit cross-report-consistency \
+  --root . \
+  --out build/sdetkit/cross-report-consistency.json \
+  --check-freshness \
+  --format text
+```
+
+The aggregate schema is `sdetkit.cross_report_consistency.v1`. The output binds to
+the current Git head, generator bytes, artifact-contract index bytes, and every
+known report path, including explicit missing markers. Recommendation text is not
+reconciled in this first slice.
+
+All authority fields remain non-authorizing: reporting only, no repository or
+issue mutation, no patch application, no security dismissal, no merge authority,
+and no semantic-equivalence claim.

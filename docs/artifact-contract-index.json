@@ -666,6 +666,37 @@
       "stability": "advanced"
     },
     {
+      "id": "cross-report-consistency-json",
+      "path": "build/sdetkit/cross-report-consistency.json",
+      "produced_by": "python -m sdetkit cross-report-consistency --root . --out build/sdetkit/cross-report-consistency.json --format json",
+      "schema_version": "sdetkit.cross_report_consistency.v1",
+      "required_fields": [
+        "schema_version",
+        "generated_at",
+        "current_head_sha",
+        "source_issue_numbers",
+        "source_run_ids",
+        "input_digests",
+        "input_provenance",
+        "report_status",
+        "consistency_status",
+        "mode",
+        "report_records",
+        "findings",
+        "finding_counts",
+        "reporting_only",
+        "repo_mutation",
+        "issue_mutation_allowed",
+        "automation_allowed",
+        "patch_application_allowed",
+        "security_dismissal_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven",
+        "authority_boundary"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "product-maturity-radar-json",
       "path": "build/sdetkit/product-maturity-radar.json",
       "produced_by": "python -m sdetkit product-maturity-radar --root . --out build/sdetkit/product-maturity-radar.json --format json",
