@@ -85,6 +85,14 @@ action:
 5. Contradictory evidence produces `invalid` rather than a green verdict.
 6. The read-only evidence workflow and trusted publisher topology remain unchanged.
 
+**Current remediation sub-slice**
+
+- **Title:** Remove duplicate decision-state assignments.
+- **Reason:** Post-merge CodeQL alerts `#1428` through `#1432` identified five locals that were computed twice during the canonical-state refactor.
+- **Scope:** `src/sdetkit/pr_quality_action_report.py`, its focused regression tests, and this roadmap record.
+- **Completion gate:** The five alerts are absent on the remediation PR head, all canonical-state tests remain green, and the trusted publisher files remain unchanged.
+- **Status:** `remediation_in_progress`
+
 ## Continuous maintenance hardening loop
 
 The maintenance system now produces ten recurring artifacts:
