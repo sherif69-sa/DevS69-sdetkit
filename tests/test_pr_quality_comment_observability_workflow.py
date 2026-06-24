@@ -1279,3 +1279,30 @@ def test_pr_quality_inventory_metadata_keys_avoid_raw_high_entropy_literals() ->
         for key in guarded_keys:
             assert f'"{key}"' not in source
             assert f"'{key}'" not in source
+
+
+def test_pr_quality_decision_state_contract_is_canonical() -> None:
+    source = Path("src/sdetkit/pr_quality_action_report.py").read_text(encoding="utf-8")
+    evidence_workflow = _workflow_text()
+    publisher = _publisher_text()
+
+    for state in (
+        "waiting",
+        "blocked",
+        "review",
+        "ready",
+        "stale",
+        "invalid",
+    ):
+        assert f'"{state}"' in source
+
+    assert "canonical_review_state_v1" in source
+    assert '"review_state": review_state' in source
+    assert '"primary_blocker": canonical_blocker' in source
+    assert '"next_action": next_action' in source
+    assert "cat build/pr-quality/pr-review-summary.md" in evidence_workflow
+
+    assert "workflow_run:" in publisher
+    assert "actions/checkout" not in publisher
+    assert "issues: write" in publisher
+    assert "pull-requests: write" in publisher
