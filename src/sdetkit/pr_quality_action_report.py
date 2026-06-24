@@ -2466,6 +2466,25 @@ def _canonical_review_decision(
     )
 
 
+def _review_model_fallback_action(
+    *,
+    status: str,
+    action: str,
+    evidence_review_required: bool,
+    evidence_signal_lines: list[str],
+    stale_only_security_signal: bool,
+) -> str:
+    if stale_only_security_signal:
+        return WAIT_FOR_CODE_SCANNING_REFRESH
+    if status != "green":
+        return action or "review_primary_blocker"
+    if evidence_review_required:
+        return action or "review_listed_evidence"
+    if evidence_signal_lines:
+        return action or "rerun_listed_proof"
+    return "none"
+
+
 def build_pr_quality_review_model(
     *,
     status: str,
@@ -2514,21 +2533,13 @@ def build_pr_quality_review_model(
         or ""
     )
 
-    if stale_only_security_signal:
-        merge_assessment = WAIT_FOR_CODE_SCANNING_REFRESH
-        next_action = WAIT_FOR_CODE_SCANNING_REFRESH
-    elif status != "green":
-        merge_assessment = "do_not_merge_until_blocker_resolved"
-        next_action = action or "review_primary_blocker"
-    elif evidence_review_required:
-        merge_assessment = "human_review_required_before_merge"
-        next_action = action or "review_listed_evidence"
-    elif evidence_signal_lines:
-        merge_assessment = "verify_listed_proof_before_routine_merge"
-        next_action = action or "rerun_listed_proof"
-    else:
-        merge_assessment = "no_sdetkit_action_required"
-        next_action = "none"
+    fallback_action = _review_model_fallback_action(
+        status=status,
+        action=action,
+        evidence_review_required=evidence_review_required,
+        evidence_signal_lines=evidence_signal_lines,
+        stale_only_security_signal=stale_only_security_signal,
+    )
 
     cleared_security_signal = any(
         "Security review cleared for changed code" in line
@@ -2559,11 +2570,6 @@ def build_pr_quality_review_model(
             for command in _as_list(action_report.get("proof_commands"))
             if isinstance(command, str) and command.strip()
         ]
-
-    failed_count = len(_as_list(check_intelligence.get("failed_checks")))
-    required_queued = _required_count(_as_list(check_intelligence.get("queued_checks")))
-    required_startup = _required_count(_as_list(check_intelligence.get("startup_failures")))
-    missing_required = len(_as_list(check_intelligence.get("missing_required_contexts")))
 
     def _check_labels(items: object) -> list[str]:
         labels: list[str] = []
@@ -2614,7 +2620,7 @@ def build_pr_quality_review_model(
 
     primary_title = _string(primary_blocker.get("title") or title)
     primary_surface = _string(primary_blocker.get("surface") or surface)
-    primary_action = _string(primary_blocker.get("action") or action or next_action)
+    primary_action = _string(primary_blocker.get("action") or action or fallback_action)
     primary_code = _string(primary_blocker.get("code"))
     primary_details = _string(
         primary_blocker.get("details")

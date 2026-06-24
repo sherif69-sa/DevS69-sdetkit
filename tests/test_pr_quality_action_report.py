@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import json
 from pathlib import Path
 
@@ -5538,3 +5539,98 @@ def test_review_summary_and_dashboard_share_canonical_decision() -> None:
     assert "- `review_and_decide`" in summary
     assert "| Review state | `ready` |" in dashboard
     assert "| Next reviewer action | `review_and_decide` |" in dashboard
+
+
+def test_review_model_affected_locals_are_assigned_once() -> None:
+    source = Path("src/sdetkit/pr_quality_action_report.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    function = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "build_pr_quality_review_model"
+    )
+
+    counts = {
+        "merge_assessment": 0,
+        "failed_count": 0,
+        "required_queued": 0,
+        "required_startup": 0,
+        "missing_required": 0,
+    }
+
+    def collect_names(target: ast.expr) -> list[str]:
+        if isinstance(target, ast.Name):
+            return [target.id]
+        if isinstance(target, (ast.Tuple, ast.List)):
+            names: list[str] = []
+            for element in target.elts:
+                names.extend(collect_names(element))
+            return names
+        return []
+
+    for node in ast.walk(function):
+        targets: list[ast.expr] = []
+        if isinstance(node, ast.Assign):
+            targets.extend(node.targets)
+        elif isinstance(node, ast.AnnAssign):
+            targets.append(node.target)
+
+        for target in targets:
+            for name in collect_names(target):
+                if name in counts:
+                    counts[name] += 1
+
+    assert counts == {
+        "merge_assessment": 1,
+        "failed_count": 1,
+        "required_queued": 1,
+        "required_startup": 1,
+        "missing_required": 1,
+    }
+
+
+def test_review_model_fallback_action_preserves_blocker_selection() -> None:
+    assert (
+        report._review_model_fallback_action(
+            status="review_required",
+            action="review_security_alert",
+            evidence_review_required=True,
+            evidence_signal_lines=["- review"],
+            stale_only_security_signal=False,
+        )
+        == "review_security_alert"
+    )
+
+    assert (
+        report._review_model_fallback_action(
+            status="green",
+            action="",
+            evidence_review_required=True,
+            evidence_signal_lines=["- review"],
+            stale_only_security_signal=False,
+        )
+        == "review_listed_evidence"
+    )
+
+    assert (
+        report._review_model_fallback_action(
+            status="green",
+            action="",
+            evidence_review_required=False,
+            evidence_signal_lines=["- proof"],
+            stale_only_security_signal=False,
+        )
+        == "rerun_listed_proof"
+    )
+
+    assert (
+        report._review_model_fallback_action(
+            status="green",
+            action="",
+            evidence_review_required=False,
+            evidence_signal_lines=[],
+            stale_only_security_signal=True,
+        )
+        == report.WAIT_FOR_CODE_SCANNING_REFRESH
+    )
