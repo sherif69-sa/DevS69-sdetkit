@@ -3502,7 +3502,7 @@ def test_review_html_dashboard_visualizes_error_state() -> None:
     assert "false" in html
 
 
-def test_review_summary_includes_error_state_mini_triage() -> None:
+def test_review_summary_prioritizes_blocker_and_next_action() -> None:
     model = report.build_pr_quality_review_model(
         status="failed",
         evidence_signal_heading="Evidence review signal",
@@ -3518,7 +3518,10 @@ def test_review_summary_includes_error_state_mini_triage() -> None:
                 "path": "src/example.py",
                 "details": "unused import",
             },
-            "recommended_actions": ["Fix the lint finding.", "Run pre-commit."],
+            "recommended_actions": [
+                "Fix the lint finding.",
+                "Run pre-commit.",
+            ],
             "proof_commands": ["python -m pre_commit run -a"],
         },
         check_intelligence={
@@ -3546,22 +3549,33 @@ def test_review_summary_includes_error_state_mini_triage() -> None:
     )
 
     summary = report.render_pr_quality_review_summary(model)
+    decision_panel = summary[
+        summary.index("## Contributor decision") : summary.index("## Recommended actions")
+    ]
+    rows = [
+        line
+        for line in decision_panel.splitlines()
+        if line.startswith("| ") and line != "| Item | Value |" and line != "|---|---|"
+    ]
 
-    assert "## Mini triage" in summary
-    assert "| Review state | `blocked` |" in summary
-    assert "| First blocker | `Ruff check failed` |" in summary
-    assert "| Recommended action | `fix_lint` |" in summary
-    assert "| Failed checks | `1` |" in summary
-    assert "| Failed check names | `quality` |" in summary
-    assert "| Queued required checks | `1` |" in summary
-    assert "| Queued check names | `gate` |" in summary
-    assert "| Startup failures | `1` |" in summary
-    assert "| Startup failure names | `first-proof` |" in summary
-    assert "| Missing required contexts | `1` |" in summary
-    assert "| Missing context names | `ci` |" in summary
+    assert len(rows) == 6
+    assert "| Review state | `blocked` |" in decision_panel
+    assert "| First blocker | `Ruff check failed` |" in decision_panel
+    assert "| Next action | `fix_lint` |" in decision_panel
+    assert "| Required checks | `1 failed; 1 queued; 1 startup; 1 missing` |" in decision_panel
+    assert "| Security posture | `unavailable` |" in decision_panel
+    assert "| Merge posture | `do_not_merge_until_blocker_resolved` |" in decision_panel
+    assert "Failure vector source" not in decision_panel
+    assert "Actual failure" not in decision_panel
+    assert "Failure type" not in decision_panel
+    assert "Failing command" not in decision_panel
+    assert "Failing test/check" not in decision_panel
+    assert "Failure-vector safe-fix allowed" not in decision_panel
+
     assert "## Recommended actions" in summary
     assert "- Fix the lint finding." in summary
     assert "- Run pre-commit." in summary
+    assert "🧪 Proof to rerun" in summary
     assert "python -m pytest -q tests/test_example.py -o addopts=" in summary
     assert "| Merge authorization | `false` |" in summary
 
@@ -4088,13 +4102,26 @@ def test_review_summary_renders_failure_vector_signal() -> None:
 
     summary = report.render_pr_quality_review_summary(model)
 
-    assert "| Failure vector source | `failed_check` |" in summary
+    decision_panel = summary[
+        summary.index("## Contributor decision") : summary.index("## Recommended actions")
+    ]
+
+    assert "Failure vector source" not in decision_panel
+    assert "Actual failure" not in decision_panel
+    assert "Failure type" not in decision_panel
+    assert "Failing command" not in decision_panel
+    assert "Failing test/check" not in decision_panel
+    assert "Owner hint" not in decision_panel
+    assert "Safe-fix" not in decision_panel
+
+    assert "<summary>🧭 Failure vector deep dive</summary>" in summary
+    assert "| Source | `failed_check` |" in summary
     assert "| Actual failure | `F821 Undefined name `JsonObject`` |" in summary
     assert "| Failure type | `lint` |" in summary
     assert "| Failing command | `python -m pre_commit run -a` |" in summary
     assert "| Failing test/check | `F821` |" in summary
     assert "| Owner hint | `tests/test_pr_quality_action_report.py` |" in summary
-    assert "| Failure-vector safe-fix allowed | `false` |" in summary
+    assert "| Safe-fix allowed | `false` |" in summary
     assert "does not authorize merge" in summary
 
 
@@ -4222,7 +4249,7 @@ def test_pr_quality_review_summary_opens_blocker_sections_and_collapses_noise() 
     assert "<details open>\n<summary>🧭 Failure vector deep dive</summary>" in body
     assert "<details open>\n<summary>🧪 Proof to rerun</summary>" in body
     assert "<details>\n<summary>✅ Passing / queued / missing check evidence</summary>" in body
-    assert "<details>\n<summary>📦 PR Quality product artifacts</summary>" in body
+    assert "📦 PR Quality product artifacts" not in body
     assert "Compare the alert commit SHA with the current PR head." in body
     assert "`src/sdetkit/release_anti_hijack_threat_model.py`" in body
     assert "does not authorize merge" in body
@@ -4277,12 +4304,13 @@ def test_pr_quality_review_summary_normalizes_legacy_green_decision() -> None:
 
     assert "| Review state | `ready` |" in body
     assert "| First blocker | `none` |" in body
-    assert "| Recommended action | `review_and_decide` |" in body
-    assert "| Merge assessment | `automated_proof_complete_human_decision_required` |" in body
+    assert "| Next action | `review_and_decide` |" in body
+    assert "| Merge posture | `automated_proof_complete_human_decision_required` |" in body
     assert "<details>\n<summary>✅ Ready for human decision</summary>" in body
     assert "<details>\n<summary>🧭 Failure vector deep dive</summary>" in body
-    assert "<details>\n<summary>🧪 Proof to rerun</summary>" in body
+    assert "<details>\n<summary>🧪 Optional verification</summary>" in body
     assert "<details open>" not in body
+    assert "🧪 Proof to rerun" not in body
     assert "rerun_proof" not in body
 
 
@@ -5534,7 +5562,7 @@ def test_review_summary_and_dashboard_share_canonical_decision() -> None:
 
     assert "| Review state | `ready` |" in summary
     assert "| First blocker | `none` |" in summary
-    assert "| Recommended action | `review_and_decide` |" in summary
+    assert "| Next action | `review_and_decide` |" in summary
     assert "### Canonical next action" in summary
     assert "- `review_and_decide`" in summary
     assert "| Review state | `ready` |" in dashboard
@@ -5634,3 +5662,116 @@ def test_review_model_fallback_action_preserves_blocker_selection() -> None:
         )
         == report.WAIT_FOR_CODE_SCANNING_REFRESH
     )
+
+
+def test_ready_review_summary_is_contributor_first() -> None:
+    model = report.build_pr_quality_review_model(
+        status="green",
+        evidence_signal_heading="Evidence proof signal",
+        evidence_signal_lines=["- proof signal"],
+        evidence_review_required=False,
+        action_report={
+            "status": "green",
+            "primary_blocker": {},
+            "recommended_actions": [],
+            "proof_commands": [],
+        },
+        check_intelligence={
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+            "code_scanning_review": {
+                "collected": True,
+                "collection_status": "collected",
+                "open_alerts": 0,
+                "current_alerts": 0,
+                "stale_alerts": 0,
+                "current_head_sha": "abc123",
+                "dismissal_allowed": False,
+                "findings": [],
+            },
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "diagnostic_engine",
+                "title": "Diagnostic intelligence evidence changed",
+            },
+            "graph": {
+                "top_blocker": {
+                    "title": "Diagnostic intelligence evidence changed",
+                    "surface": "diagnostic_engine",
+                    "action": "rerun_proof",
+                    "review_first": False,
+                }
+            },
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+    summary = report.render_pr_quality_review_summary(model)
+    decision_panel = summary[
+        summary.index("## Contributor decision") : summary.index("## Adaptive review details")
+    ]
+    rows = [
+        line
+        for line in decision_panel.splitlines()
+        if line.startswith("| ") and line != "| Item | Value |" and line != "|---|---|"
+    ]
+
+    assert len(rows) == 6
+    assert "| Review state | `ready` |" in decision_panel
+    assert "| First blocker | `none` |" in decision_panel
+    assert "| Next action | `review_and_decide` |" in decision_panel
+    assert "| Required checks | `clear` |" in decision_panel
+    assert "| Security posture | `clear` |" in decision_panel
+    assert (
+        "| Merge posture | `automated_proof_complete_human_decision_required` |" in decision_panel
+    )
+    assert "Source status" not in decision_panel
+    assert "Actual failure" not in decision_panel
+    assert "Failure type" not in decision_panel
+    assert "Failing command" not in decision_panel
+    assert "Failing test/check" not in decision_panel
+    assert "Safe-fix" not in decision_panel
+
+    assert "🧪 Optional verification" in summary
+    assert "🧪 Proof to rerun" not in summary
+    assert "python -m pre_commit run -a" in summary
+    assert "🧭 Failure vector deep dive" in summary
+    assert "📦 PR Quality product artifacts" not in summary
+    assert "| Merge authorization | `false` |" in summary
+
+
+def test_contributor_review_panel_summarizes_stale_security() -> None:
+    model = {
+        "decision": {
+            "review_state": "stale",
+            "status": "green",
+            "source_status": "green",
+            "primary_blocker": "Wait for Code Scanning refresh",
+            "next_action": report.WAIT_FOR_CODE_SCANNING_REFRESH,
+            "merge_assessment": report.WAIT_FOR_CODE_SCANNING_REFRESH,
+            "failed_checks": 0,
+            "required_queued_checks": 0,
+            "required_startup_failures": 0,
+            "missing_required_contexts": 0,
+        },
+        "primary_blocker": {
+            "title": "Wait for Code Scanning refresh",
+            "action": report.WAIT_FOR_CODE_SCANNING_REFRESH,
+        },
+        "ghas_blocker_details": {
+            "collected": True,
+            "current_alerts": 0,
+            "stale_alerts": 2,
+        },
+    }
+
+    rows = dict(report._contributor_review_panel_rows(model))
+
+    assert rows["Review state"] == "stale"
+    assert rows["Required checks"] == "clear"
+    assert rows["Security posture"] == ("clear for current head; 2 stale alert(s)")
+    assert rows["Merge posture"] == (report.WAIT_FOR_CODE_SCANNING_REFRESH)
