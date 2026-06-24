@@ -2891,6 +2891,52 @@ def _normalized_review_decision(model: JsonObject) -> JsonObject:
     return decision
 
 
+def _contributor_review_panel_rows(
+    model: JsonObject,
+) -> list[tuple[str, object]]:
+    decision = _normalized_review_decision(model)
+    ghas_details = _as_dict(model.get("ghas_blocker_details"))
+
+    required_counts = [
+        ("failed", _int(decision.get("failed_checks"))),
+        ("queued", _int(decision.get("required_queued_checks"))),
+        ("startup", _int(decision.get("required_startup_failures"))),
+        ("missing", _int(decision.get("missing_required_contexts"))),
+    ]
+    required_parts = [f"{count} {label}" for label, count in required_counts if count > 0]
+    required_summary = "; ".join(required_parts) if required_parts else "clear"
+
+    collected = bool(ghas_details.get("collected", False))
+    current_alerts = _int(ghas_details.get("current_alerts"))
+    stale_alerts = _int(ghas_details.get("stale_alerts"))
+    if not collected:
+        security_summary = "unavailable"
+    elif current_alerts > 0:
+        security_summary = f"{current_alerts} current alert(s)"
+    elif stale_alerts > 0:
+        security_summary = f"clear for current head; {stale_alerts} stale alert(s)"
+    else:
+        security_summary = "clear"
+
+    return [
+        ("Review state", _review_model_state(model)),
+        (
+            "First blocker",
+            _review_model_scalar(decision.get("primary_blocker") or "none"),
+        ),
+        (
+            "Next action",
+            _review_model_scalar(decision.get("next_action") or "none"),
+        ),
+        ("Required checks", required_summary),
+        ("Security posture", security_summary),
+        (
+            "Merge posture",
+            _review_model_scalar(decision.get("merge_assessment") or "unknown"),
+        ),
+    ]
+
+
 def render_pr_quality_review_summary(model: JsonObject) -> str:
     decision = _normalized_review_decision(model)
     authority = _as_dict(model.get("authority_boundary"))
@@ -2953,18 +2999,13 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             "</details>",
         ]
 
-    status = _review_model_scalar(
-        decision.get("source_status") or decision.get("status") or "unknown"
-    )
     failed_total = _count(decision.get("failed_checks"))
     queued_total = _count(decision.get("required_queued_checks"))
     startup_total = _count(decision.get("required_startup_failures"))
     missing_total = _count(decision.get("missing_required_contexts"))
     stale_only_security_signal = bool(decision.get(STALE_ONLY_SECURITY_SIGNAL))
     review_state = _review_model_state(model)
-    first_blocker = _review_model_scalar(decision.get("primary_blocker") or "none")
     first_action = _review_model_scalar(decision.get("next_action") or "none")
-    first_recommended_action = first_action
 
     failure_actual = _review_model_scalar(failure_vector_signal.get("actual_failure") or "none")
     failure_source = _review_model_scalar(failure_vector_signal.get("source") or "none")
@@ -2979,22 +3020,6 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         for item in _as_list(failure_vector_signal.get("affected_files"))
         if isinstance(item, str) and item.strip()
     ]
-
-    artifact_entries = [
-        _as_dict(item)
-        for item in _as_list(model.get("artifact_index"))
-        if _string(_as_dict(item).get("path"))
-    ]
-    artifact_lines = [
-        f"- `{_string(item.get('path'))}` — {_string(item.get('description') or item.get('title') or item.get('surface'))}"
-        for item in artifact_entries
-    ]
-    if not artifact_lines:
-        artifact_lines = [
-            "- `index.html` — artifact landing page",
-            "- `pr-review-model.json` — machine-readable review model",
-            "- `pr-comment-body.md` — raw rendered comment body",
-        ]
 
     active_blocker_open = review_state in {
         "blocked",
@@ -3012,34 +3037,9 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     lines = [
         "# PR Quality Review Summary",
         "",
-        "## Mini triage",
+        "## Contributor decision",
         "",
-        *_markdown_table(
-            [
-                ("Review state", review_state),
-                ("Source status", status),
-                ("First blocker", first_blocker),
-                ("Recommended action", first_recommended_action),
-                ("Failed checks", failed_total),
-                ("Failed check names", _joined(failed_check_names)),
-                ("Queued required checks", queued_total),
-                ("Queued check names", _joined(queued_check_names)),
-                ("Startup failures", startup_total),
-                ("Startup failure names", _joined(startup_failure_names)),
-                ("Missing required contexts", missing_total),
-                ("Missing context names", _joined(missing_context_names)),
-                ("Failure vector source", failure_source),
-                ("Actual failure", failure_actual),
-                ("Failure type", failure_type),
-                ("Failing command", failing_command),
-                ("Failing test/check", failing_test),
-                ("Owner hint", failure_owner),
-                (
-                    "Failure-vector safe-fix allowed",
-                    _review_model_scalar(failure_vector_signal.get("safe_fix_allowed")),
-                ),
-            ]
-        ),
+        *_markdown_table(_contributor_review_panel_rows(model)),
         "",
     ]
 
@@ -3191,6 +3191,9 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     )
     lines.append("")
 
+    proof_section_title = (
+        "🧪 Optional verification" if review_state == "ready" else "🧪 Proof to rerun"
+    )
     proof_body: list[str] = []
     if proof_commands:
         proof_body.extend(["```bash", *proof_commands, "```"])
@@ -3198,7 +3201,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         proof_body.append("`none`")
     lines.extend(
         _details(
-            "🧪 Proof to rerun",
+            proof_section_title,
             proof_body,
             open_by_default=proof_open,
         )
@@ -3217,15 +3220,6 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         _details(
             "✅ Passing / queued / missing check evidence",
             check_body,
-            open_by_default=False,
-        )
-    )
-    lines.append("")
-
-    lines.extend(
-        _details(
-            "📦 PR Quality product artifacts",
-            artifact_lines,
             open_by_default=False,
         )
     )

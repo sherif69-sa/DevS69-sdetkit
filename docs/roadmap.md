@@ -63,7 +63,7 @@ When an enhancement is identified from customer or user feedback:
 
 This program connects contributor preparation, PR evidence, the canonical review model, trusted publication, human review, post-merge verification, and release-readiness handoff without expanding automation authority.
 
-### Active roadmap action
+### Completed roadmap action
 
 ```text
 action:
@@ -73,25 +73,40 @@ action:
   priority=P1
   risk=medium
   value=Give contributors one truthful verdict, one blocker, and one next action across every review surface.
+  status=done
+```
+
+**Closure evidence**
+
+- PRs `#1861` and `#1862` are merged.
+- The post-merge closure audit passed with `150` focused tests.
+- CodeQL alerts `#1428` through `#1432` are fixed without dismissal.
+- The six-state canonical review contract and reporting-only authority boundary remain intact.
+
+### Active roadmap action
+
+```text
+action:
+  id=pr-review-summary
+  lane=Developer workflow
+  title=Publish a contributor-first PR Quality summary
+  priority=P1
+  risk=medium
+  value=Put the contributor decision, blocker, next action, required checks, security posture, and merge posture before internal diagnostics.
   status=in_progress
 ```
 
 **Acceptance criteria**
 
-1. The canonical review state is one of `waiting`, `blocked`, `review`, `ready`, `stale`, or `invalid`.
-2. A `ready` review has no blocker and does not recommend rerunning proof.
-3. Required-check counts match the required-check names shown to contributors.
-4. The review summary, step summary, dashboard, and artifact manifest consume the same state and next action.
-5. Contradictory evidence produces `invalid` rather than a green verdict.
-6. The read-only evidence workflow and trusted publisher topology remain unchanged.
-
-**Current remediation sub-slice**
-
-- **Title:** Remove duplicate decision-state assignments.
-- **Reason:** Post-merge CodeQL alerts `#1428` through `#1432` identified five locals that were computed twice during the canonical-state refactor.
-- **Scope:** `src/sdetkit/pr_quality_action_report.py`, its focused regression tests, and this roadmap record.
-- **Completion gate:** The five alerts are absent on the remediation PR head, all canonical-state tests remain green, and the trusted publisher files remain unchanged.
-- **Status:** `remediation_in_progress`
+1. The first visible contributor panel contains exactly six decision rows.
+2. A `ready` review with no blocker does not show failure-vector language in the primary panel.
+3. Ready-state proof commands are labeled `Optional verification`, not `Proof to rerun`.
+4. Blocked, stale, and invalid reviews show one blocker and one next action before diagnostics.
+5. Failure-vector details remain available in collapsed details and the full artifact bundle.
+6. Product-artifact navigation appears once in the trusted PR comment.
+7. The summary, step summary, dashboard, model, and manifest retain one normalized decision.
+8. Reporting-only authority and security posture remain visible.
+9. The trusted evidence and publisher workflow files remain unchanged.
 
 ## Continuous maintenance hardening loop
 

@@ -1306,3 +1306,28 @@ def test_pr_quality_decision_state_contract_is_canonical() -> None:
     assert "actions/checkout" not in publisher
     assert "issues: write" in publisher
     assert "pull-requests: write" in publisher
+
+
+def test_pr_quality_comment_has_single_artifact_navigation_owner() -> None:
+    source = Path("src/sdetkit/pr_quality_action_report.py").read_text(encoding="utf-8")
+    publisher = _publisher_text()
+
+    summary_start = source.index("def render_pr_quality_review_summary")
+    summary_end = source.index(
+        "\ndef ",
+        summary_start + len("def render_pr_quality_review_summary"),
+    )
+    summary_renderer = source[summary_start:summary_end]
+
+    assert "PR Quality product artifacts" not in summary_renderer
+    assert publisher.count("<summary><strong>PR Quality product artifacts</strong></summary>") == 1
+
+
+def test_pr_quality_contributor_summary_keeps_trusted_topology() -> None:
+    evidence = _workflow_text()
+    publisher = _publisher_text()
+
+    assert 'cat build/pr-quality/pr-review-summary.md >> "$GITHUB_STEP_SUMMARY"' in evidence
+    assert 'cat build/pr-quality/pr-review-summary.md >> "$body_path"' in publisher
+    assert "publisher handoff summary does not match the review contract" in publisher
+    assert "Evidence is advisory and does not authorize merge." in publisher
