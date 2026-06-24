@@ -59,6 +59,32 @@ When an enhancement is identified from customer or user feedback:
   4. Focused regression tests cover the six collection-integrity findings while preserving the existing pagination fallback.
 - **Expected impact:** More trustworthy maintenance queue decisions and a clear distinction between authoritative zero, unavailable collection state, and malformed API evidence.
 
+## Developer workflow program: Contributor Review and Delivery Workflow
+
+This program connects contributor preparation, PR evidence, the canonical review model, trusted publication, human review, post-merge verification, and release-readiness handoff without expanding automation authority.
+
+### Active roadmap action
+
+```text
+action:
+  id=pr-review-state
+  lane=Developer workflow
+  title=Normalize PR Quality decision states
+  priority=P1
+  risk=medium
+  value=Give contributors one truthful verdict, one blocker, and one next action across every review surface.
+  status=in_progress
+```
+
+**Acceptance criteria**
+
+1. The canonical review state is one of `waiting`, `blocked`, `review`, `ready`, `stale`, or `invalid`.
+2. A `ready` review has no blocker and does not recommend rerunning proof.
+3. Required-check counts match the required-check names shown to contributors.
+4. The review summary, step summary, dashboard, and artifact manifest consume the same state and next action.
+5. Contradictory evidence produces `invalid` rather than a green verdict.
+6. The read-only evidence workflow and trusted publisher topology remain unchanged.
+
 ## Continuous maintenance hardening loop
 
 The maintenance system now produces ten recurring artifacts:

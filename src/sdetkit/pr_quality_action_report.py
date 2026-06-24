@@ -14,6 +14,21 @@ from sdetkit.pr_comment_failure_families import render_comment_failure_families
 
 JsonObject = dict[str, Any]
 
+CANONICAL_REVIEW_STATES = (
+    "waiting",
+    "blocked",
+    "review",
+    "ready",
+    "stale",
+    "invalid",
+)
+KNOWN_ACTION_REPORT_STATUSES = {
+    "green",
+    "incomplete",
+    "review_required",
+    "safe_fix_available",
+}
+
 TRUSTED_HISTORY = "_".join(("trusted", "history"))
 FLAKY_TEST_REGISTRY_COLLECTION_STATUS = "_".join(
     ("flaky", "test", "registry", "collection", "status")
@@ -2368,6 +2383,89 @@ def _review_model_ghas_blocker_details(
     }
 
 
+def _canonical_review_state(
+    *,
+    source_status: str,
+    failed_checks: int,
+    required_queued_checks: int,
+    required_startup_failures: int,
+    missing_required_contexts: int,
+    evidence_review_required: bool,
+    stale_only_security_signal: bool,
+) -> str:
+    if stale_only_security_signal:
+        return "stale"
+    if source_status == "green" and (
+        failed_checks > 0
+        or required_queued_checks > 0
+        or required_startup_failures > 0
+        or missing_required_contexts > 0
+    ):
+        return "invalid"
+    if required_queued_checks > 0 and failed_checks == 0 and required_startup_failures == 0:
+        return "waiting"
+    if (
+        failed_checks > 0
+        or required_startup_failures > 0
+        or missing_required_contexts > 0
+        or source_status
+        in {
+            "incomplete",
+            "review_required",
+            "safe_fix_available",
+        }
+    ):
+        return "blocked"
+    if source_status not in KNOWN_ACTION_REPORT_STATUSES:
+        return "invalid"
+    if evidence_review_required:
+        return "review"
+    return "ready"
+
+
+def _canonical_review_decision(
+    *,
+    review_state: str,
+    blocker_title: str,
+    blocker_action: str,
+) -> tuple[str, str, str]:
+    if review_state == "waiting":
+        return (
+            "none",
+            "wait_for_required_checks",
+            "wait_for_required_checks",
+        )
+    if review_state == "blocked":
+        return (
+            blocker_title or "Required contributor proof is blocked",
+            blocker_action or "resolve_primary_blocker",
+            "do_not_merge_until_blocker_resolved",
+        )
+    if review_state == "review":
+        return (
+            "none",
+            "review_listed_evidence",
+            "human_review_required_before_merge",
+        )
+    if review_state == "ready":
+        return (
+            "none",
+            "review_and_decide",
+            "automated_proof_complete_human_decision_required",
+        )
+    if review_state == "stale":
+        return (
+            "Evidence is stale for the current PR head",
+            WAIT_FOR_CODE_SCANNING_REFRESH,
+            WAIT_FOR_CODE_SCANNING_REFRESH,
+        )
+    return (
+        "PR Quality review evidence is internally inconsistent",
+        "repair_review_evidence",
+        "do_not_merge_until_review_model_repaired",
+    )
+
+
 def build_pr_quality_review_model(
     *,
     status: str,
@@ -2481,7 +2579,32 @@ def build_pr_quality_review_model(
             )
             if label:
                 labels.append(label)
-        return labels[:10]
+        return labels
+
+    failed_check_names = _check_labels(check_intelligence.get("failed_checks"))
+    required_queued_check_names = _check_labels(
+        [
+            item
+            for item in _as_list(check_intelligence.get("queued_checks"))
+            if bool(_as_dict(item).get("required", False))
+        ]
+    )
+    required_startup_failure_names = _check_labels(
+        [
+            item
+            for item in _as_list(check_intelligence.get("startup_failures"))
+            if bool(_as_dict(item).get("required", False))
+        ]
+    )
+    missing_required_context_names = [
+        _string(item)
+        for item in _as_list(check_intelligence.get("missing_required_contexts"))
+        if _string(item)
+    ]
+    failed_count = len(failed_check_names)
+    required_queued = len(required_queued_check_names)
+    required_startup = len(required_startup_failure_names)
+    missing_required = len(missing_required_context_names)
 
     recommended_actions = [
         str(item)
@@ -2531,6 +2654,21 @@ def build_pr_quality_review_model(
             "reporting_only": True,
         }
 
+    review_state = _canonical_review_state(
+        source_status=status,
+        failed_checks=failed_count,
+        required_queued_checks=required_queued,
+        required_startup_failures=required_startup,
+        missing_required_contexts=missing_required,
+        evidence_review_required=evidence_review_required,
+        stale_only_security_signal=stale_only_security_signal,
+    )
+    canonical_blocker, next_action, merge_assessment = _canonical_review_decision(
+        review_state=review_state,
+        blocker_title=primary_title,
+        blocker_action=primary_action,
+    )
+
     return {
         "schema_version": "sdetkit.pr_quality.review_model.v2",
         "schema": {
@@ -2538,7 +2676,7 @@ def build_pr_quality_review_model(
             "version": 2,
             "previous_version": "sdetkit.pr_quality.review_model.v1",
             "compatibility": "additive",
-            "decision_logic": "unchanged",
+            "decision_logic": "canonical_review_state_v1",
             "authority_boundary": "reporting_only",
         },
         "generated_by": "sdetkit.pr_quality_action_report",
@@ -2558,16 +2696,16 @@ def build_pr_quality_review_model(
         "recommended_actions": recommended_actions[:10],
         "failure_vector_signal": failure_vector_signal,
         "ghas_blocker_details": ghas_blocker_details,
-        "failed_check_names": _check_labels(check_intelligence.get("failed_checks")),
-        "required_queued_check_names": _check_labels(check_intelligence.get("queued_checks")),
-        "required_startup_failure_names": _check_labels(check_intelligence.get("startup_failures")),
-        "missing_required_context_names": [
-            _string(item)
-            for item in _as_list(check_intelligence.get("missing_required_contexts"))
-            if _string(item)
-        ][:10],
+        "failed_check_names": failed_check_names,
+        "required_queued_check_names": required_queued_check_names,
+        "required_startup_failure_names": required_startup_failure_names,
+        "missing_required_context_names": missing_required_context_names,
         "decision": {
+            "review_state": review_state,
             "status": status,
+            "source_status": status,
+            "state_consistent": review_state != "invalid",
+            "primary_blocker": canonical_blocker,
             "merge_assessment": merge_assessment,
             "next_action": next_action,
             "risk_surface": surface,
@@ -2611,7 +2749,7 @@ def _reviewer_dashboard_lines(
         check_intelligence=check_intelligence,
         evidence_narrative=evidence_narrative,
     )
-    decision = _as_dict(model.get("decision"))
+    decision = _normalized_review_decision(model)
     authority = _as_dict(model.get("authority_boundary"))
     proof_commands = [
         str(command)
@@ -2624,7 +2762,8 @@ def _reviewer_dashboard_lines(
         "",
         "| Item | Value |",
         "|---|---|",
-        f"| SDETKit status | `{_review_model_scalar(decision.get('status'))}` |",
+        f"| Review state | `{_review_model_state(model)}` |",
+        f"| Source status | `{_review_model_scalar(decision.get('source_status') or decision.get('status'))}` |",
         f"| Merge assessment | `{_review_model_scalar(decision.get('merge_assessment'))}` |",
         f"| Next reviewer action | `{_review_model_scalar(decision.get('next_action'))}` |",
         f"| Changed risk surface | `{_markdown_table_value(decision.get('risk_surface'))}` |",
@@ -2667,6 +2806,10 @@ def _reviewer_dashboard_lines(
 
 def _review_model_state(model: JsonObject) -> str:
     decision = _as_dict(model.get("decision"))
+    canonical = _review_model_scalar(decision.get("review_state"))
+    if canonical in CANONICAL_REVIEW_STATES:
+        return canonical
+
     status = _review_model_scalar(decision.get("status") or "unknown")
     failed_total = _int(decision.get("failed_checks"))
     queued_total = _int(decision.get("required_queued_checks"))
@@ -2675,45 +2818,76 @@ def _review_model_state(model: JsonObject) -> str:
     review_first = bool(decision.get("review_first_evidence"))
     stale_only_security_signal = bool(decision.get(STALE_ONLY_SECURITY_SIGNAL))
 
-    needs_attention = (
-        (status != "green" and not stale_only_security_signal)
-        or failed_total > 0
-        or queued_total > 0
-        or startup_total > 0
-        or missing_total > 0
-        or (review_first and not stale_only_security_signal)
-        or stale_only_security_signal
+    return _canonical_review_state(
+        source_status=status,
+        failed_checks=failed_total,
+        required_queued_checks=queued_total,
+        required_startup_failures=startup_total,
+        missing_required_contexts=missing_total,
+        evidence_review_required=review_first,
+        stale_only_security_signal=stale_only_security_signal,
     )
-    is_blocked = (
-        (status != "green" and not stale_only_security_signal)
-        or failed_total > 0
-        or startup_total > 0
-        or missing_total > 0
-    )
-
-    if is_blocked:
-        return "needs_attention"
-    if needs_attention:
-        return "review_required"
-    return "green"
 
 
 def _review_model_state_class(review_state: str) -> str:
-    if review_state == "green":
+    if review_state == "ready":
         return "status-green"
-    if review_state == "review_required":
+    if review_state in {"waiting", "review", "stale"}:
         return "status-review"
     return "status-failed"
 
 
 def _review_model_state_label(review_state: str) -> str:
-    return review_state.replace("_", " ")
+    return {
+        "waiting": "waiting for CI",
+        "blocked": "blocked",
+        "review": "human review required",
+        "ready": "ready for human decision",
+        "stale": "stale evidence",
+        "invalid": "invalid evidence",
+    }.get(review_state, review_state.replace("_", " "))
+
+
+def _normalized_review_decision(model: JsonObject) -> JsonObject:
+    decision = dict(_as_dict(model.get("decision")))
+    review_state = _review_model_state(model)
+    source_status = _review_model_scalar(
+        decision.get("source_status") or decision.get("status") or "unknown"
+    )
+    primary_blocker = _as_dict(model.get("primary_blocker"))
+    blocker_title = _review_model_scalar(
+        decision.get("primary_blocker") or primary_blocker.get("title") or ""
+    )
+    blocker_action = _review_model_scalar(
+        primary_blocker.get("action") or decision.get("next_action") or ""
+    )
+    (
+        canonical_blocker,
+        canonical_action,
+        canonical_merge_assessment,
+    ) = _canonical_review_decision(
+        review_state=review_state,
+        blocker_title=blocker_title,
+        blocker_action=blocker_action,
+    )
+
+    decision.update(
+        {
+            "review_state": review_state,
+            "status": source_status,
+            "source_status": source_status,
+            "state_consistent": review_state != "invalid",
+            "primary_blocker": canonical_blocker,
+            "merge_assessment": canonical_merge_assessment,
+            "next_action": canonical_action,
+        }
+    )
+    return decision
 
 
 def render_pr_quality_review_summary(model: JsonObject) -> str:
-    decision = _as_dict(model.get("decision"))
+    decision = _normalized_review_decision(model)
     authority = _as_dict(model.get("authority_boundary"))
-    primary_blocker = _as_dict(model.get("primary_blocker"))
     failure_vector_signal = _as_dict(model.get("failure_vector_signal"))
     ghas_blocker_details = _as_dict(model.get("ghas_blocker_details"))
     proof_commands = [
@@ -2773,42 +2947,18 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             "</details>",
         ]
 
-    status = _review_model_scalar(decision.get("status") or "unknown")
+    status = _review_model_scalar(
+        decision.get("source_status") or decision.get("status") or "unknown"
+    )
     failed_total = _count(decision.get("failed_checks"))
     queued_total = _count(decision.get("required_queued_checks"))
     startup_total = _count(decision.get("required_startup_failures"))
     missing_total = _count(decision.get("missing_required_contexts"))
-    review_first = bool(decision.get("review_first_evidence"))
     stale_only_security_signal = bool(decision.get(STALE_ONLY_SECURITY_SIGNAL))
-    first_blocker = _review_model_scalar(
-        primary_blocker.get("title") or decision.get("signal_title") or "none"
-    )
-    first_action = _review_model_scalar(
-        primary_blocker.get("action") or decision.get("next_action") or "none"
-    )
-    first_recommended_action = recommended_actions[0] if recommended_actions else first_action
-
-    needs_attention = (
-        (status != "green" and not stale_only_security_signal)
-        or failed_total > 0
-        or queued_total > 0
-        or startup_total > 0
-        or missing_total > 0
-        or (review_first and not stale_only_security_signal)
-        or stale_only_security_signal
-    )
-    is_blocked = (
-        (status != "green" and not stale_only_security_signal)
-        or failed_total > 0
-        or startup_total > 0
-        or missing_total > 0
-    )
-    if is_blocked:
-        review_state = "needs_attention"
-    elif needs_attention:
-        review_state = "review_required"
-    else:
-        review_state = "green"
+    review_state = _review_model_state(model)
+    first_blocker = _review_model_scalar(decision.get("primary_blocker") or "none")
+    first_action = _review_model_scalar(decision.get("next_action") or "none")
+    first_recommended_action = first_action
 
     failure_actual = _review_model_scalar(failure_vector_signal.get("actual_failure") or "none")
     failure_source = _review_model_scalar(failure_vector_signal.get("source") or "none")
@@ -2840,7 +2990,12 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             "- `pr-comment-body.md` — raw rendered comment body",
         ]
 
-    active_blocker_open = is_blocked or (review_first and not stale_only_security_signal)
+    active_blocker_open = review_state in {
+        "blocked",
+        "review",
+        "stale",
+        "invalid",
+    }
     failure_vector_open = active_blocker_open and failure_actual not in {"", "none"}
     proof_open = active_blocker_open and bool(proof_commands)
     ghas_findings = [
@@ -2856,7 +3011,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         *_markdown_table(
             [
                 ("Review state", review_state),
-                ("Status", decision.get("status")),
+                ("Source status", status),
                 ("First blocker", first_blocker),
                 ("Recommended action", first_recommended_action),
                 ("Failed checks", failed_total),
@@ -2902,21 +3057,32 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         f"| Stale-only security signal | `{str(stale_only_security_signal).lower()}` |",
         "",
     ]
-    if recommended_actions:
-        blocker_body.extend(["### Recommended next action", ""])
-        blocker_body.extend(f"- {action}" for action in recommended_actions[:10])
-    else:
-        blocker_body.extend(["### Recommended next action", "", "- none"])
+    blocker_body.extend(
+        [
+            "### Canonical next action",
+            "",
+            f"- `{first_action}`",
+        ]
+    )
+    additional_guidance = [
+        action for action in recommended_actions if action and action != first_action
+    ]
+    if additional_guidance:
+        blocker_body.extend(["", "### Additional guidance", ""])
+        blocker_body.extend(f"- {action}" for action in additional_guidance[:5])
+
+    decision_detail_title = {
+        "waiting": "⏳ Waiting for required checks",
+        "blocked": "🚨 Active blocker / decision details",
+        "review": "👀 Human review required",
+        "ready": "✅ Ready for human decision",
+        "stale": "🟡 Stale evidence / refresh required",
+        "invalid": "❌ Invalid review evidence",
+    }.get(review_state, "Decision details")
 
     lines.extend(
         _details(
-            "🟡 Refresh-pending decision details"
-            if stale_only_security_signal
-            else (
-                "🚨 Active blocker / decision details"
-                if active_blocker_open
-                else "✅ Decision details"
-            ),
+            decision_detail_title,
             blocker_body,
             open_by_default=active_blocker_open,
         )
@@ -3140,7 +3306,7 @@ def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
         expected_paths[0] if expected_paths else "index.html",
     )
 
-    decision = _as_dict(model.get("decision"))
+    decision = _normalized_review_decision(model)
     authority = _as_dict(model.get("authority_boundary"))
 
     return {
@@ -3171,7 +3337,7 @@ def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
 
 
 def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
-    decision = _as_dict(model.get("decision"))
+    decision = _normalized_review_decision(model)
     authority = _as_dict(model.get("authority_boundary"))
 
     review_state = _review_model_state(model)
@@ -3377,7 +3543,7 @@ def render_pr_quality_artifact_index_html(model: JsonObject) -> str:
 
 
 def render_pr_quality_review_html(model: JsonObject) -> str:
-    decision = _as_dict(model.get("decision"))
+    decision = _normalized_review_decision(model)
     authority = _as_dict(model.get("authority_boundary"))
     primary_blocker = _as_dict(model.get("primary_blocker"))
     failure_vector_signal = _as_dict(model.get("failure_vector_signal"))
@@ -3418,64 +3584,58 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         except (TypeError, ValueError):
             return 0
 
-    status = _review_model_scalar(decision.get("status") or "unknown")
+    status = _review_model_scalar(
+        decision.get("source_status") or decision.get("status") or "unknown"
+    )
+    review_state = _review_model_state(model)
+    status_class = _review_model_state_class(review_state)
+    hero_label = _review_model_state_label(review_state)
+    state_caption = {
+        "waiting": (
+            "Required checks are still running. Wait for the named checks "
+            "before changing or merging the pull request."
+        ),
+        "blocked": (
+            "A required proof contract is blocked. Resolve the named blocker "
+            "and rerun the focused proof."
+        ),
+        "review": (
+            "Automated proof is complete, but the listed evidence requires "
+            "human review before merge."
+        ),
+        "ready": (
+            "Automated proof is complete and internally consistent. Review "
+            "scope, risk, and authority before deciding."
+        ),
+        "stale": (
+            "Published evidence does not represent the current pull request "
+            "state. Refresh exact-head evidence before review or merge."
+        ),
+        "invalid": (
+            "The review evidence contradicts itself. Repair the evidence "
+            "model before relying on this verdict."
+        ),
+    }.get(review_state, "Review the current PR Quality evidence.")
+
     next_action = _review_model_scalar(decision.get("next_action") or "unknown")
     merge_assessment = _review_model_scalar(decision.get("merge_assessment") or "unknown")
     risk_surface = _review_model_scalar(decision.get("risk_surface") or "unknown")
     signal = _review_model_scalar(decision.get("comment_signal") or "none")
-    first_blocker = _review_model_scalar(
-        primary_blocker.get("title") or decision.get("signal_title") or "none"
-    )
-    first_action = _review_model_scalar(primary_blocker.get("action") or next_action or "none")
+    first_blocker = _review_model_scalar(decision.get("primary_blocker") or "none")
+    first_action = next_action
 
     failed_total = _count(decision.get("failed_checks"))
     queued_total = _count(decision.get("required_queued_checks"))
     startup_total = _count(decision.get("required_startup_failures"))
     missing_total = _count(decision.get("missing_required_contexts"))
     review_first = bool(decision.get("review_first_evidence"))
-    stale_only_security_signal = bool(decision.get(STALE_ONLY_SECURITY_SIGNAL))
-    needs_attention = (
-        (status != "green" and not stale_only_security_signal)
-        or failed_total > 0
-        or queued_total > 0
-        or startup_total > 0
-        or missing_total > 0
-        or (review_first and not stale_only_security_signal)
-        or stale_only_security_signal
-    )
-    is_blocked = (
-        (status != "green" and not stale_only_security_signal)
-        or failed_total > 0
-        or startup_total > 0
-        or missing_total > 0
-    )
-
-    if is_blocked:
-        status_class = "status-failed"
-        hero_label = "needs attention"
-        state_caption = (
-            "Failure signals are present. Review the mini triage, first blocker, "
-            "recommended action, and proof to rerun before any merge decision."
-        )
-    elif needs_attention:
-        status_class = "status-review"
-        hero_label = "review required"
-        state_caption = (
-            "Review-first evidence is present. Confirm the listed evidence and proof "
-            "before any merge decision."
-        )
-    else:
-        status_class = "status-green"
-        hero_label = "green"
-        state_caption = (
-            "No PR Quality blocker is currently reported. Keep the listed proof and "
-            "authority boundary visible before any merge decision."
-        )
+    needs_attention = review_state != "ready"
 
     hero_class = f"hero {status_class}"
 
     decision_rows = [
-        ("Status", decision.get("status")),
+        ("Review state", review_state),
+        ("Source status", status),
         ("Merge assessment", decision.get("merge_assessment")),
         ("Next action", decision.get("next_action")),
         ("Risk surface", decision.get("risk_surface")),
@@ -3491,9 +3651,9 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
         ("Cleared security signal", decision.get("cleared_security_signal")),
     ]
     blocker_rows = [
-        ("Title", primary_blocker.get("title") or first_blocker),
+        ("Title", first_blocker),
         ("Surface", primary_blocker.get("surface") or risk_surface),
-        ("Action", primary_blocker.get("action") or first_action),
+        ("Action", first_action),
         ("Code", primary_blocker.get("code")),
         ("Path", primary_blocker.get("path")),
         ("Details", primary_blocker.get("details")),
@@ -3589,7 +3749,7 @@ def render_pr_quality_review_html(model: JsonObject) -> str:
     else:
         proof_html = "<p><code>none</code></p>"
 
-    first_recommended_action = recommended_actions[0] if recommended_actions else first_action
+    first_recommended_action = first_action
     triage_html = ""
     if needs_attention:
         triage_html = (

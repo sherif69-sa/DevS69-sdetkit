@@ -3039,9 +3039,10 @@ def test_pr_quality_comment_v3_renders_reviewer_dashboard_top_card() -> None:
     assert "## Reviewer dashboard" in body
     assert "## Reviewer dashboard" in body.split("## Quality summary", maxsplit=1)[0]
     assert "### Decision" in body
-    assert "| SDETKit status | `green` |" in body
-    assert "| Merge assessment | `verify_listed_proof_before_routine_merge` |" in body
-    assert "| Next reviewer action | `rerun_proof` |" in body
+    assert "| Review state | `ready` |" in body
+    assert "| Source status | `green` |" in body
+    assert "| Merge assessment | `automated_proof_complete_human_decision_required` |" in body
+    assert "| Next reviewer action | `review_and_decide` |" in body
     assert "| Changed risk surface | `workflow` |" in body
     assert "| Signal title | Workflow evidence changed |" in body
     assert "| Review-first evidence | `false` |" in body
@@ -3113,9 +3114,13 @@ def test_pr_quality_review_model_is_structured_product_surface() -> None:
 
     assert model["schema_version"] == "sdetkit.pr_quality.review_model.v2"
     assert model["decision"] == {
+        "review_state": "ready",
         "status": "green",
-        "merge_assessment": "verify_listed_proof_before_routine_merge",
-        "next_action": "rerun_proof",
+        "source_status": "green",
+        "state_consistent": True,
+        "primary_blocker": "none",
+        "merge_assessment": ("automated_proof_complete_human_decision_required"),
+        "next_action": "review_and_decide",
         "risk_surface": "diagnostic_engine",
         "signal_title": "Diagnostic intelligence evidence changed",
         "comment_signal": "Evidence proof signal",
@@ -3213,8 +3218,10 @@ def test_write_comment_body_writes_review_model_artifact(tmp_path: Path) -> None
 
     model = json.loads(review_model_out.read_text(encoding="utf-8"))
     assert model["schema_version"] == "sdetkit.pr_quality.review_model.v2"
-    assert model["decision"]["merge_assessment"] == "verify_listed_proof_before_routine_merge"
-    assert model["decision"]["next_action"] == "rerun_proof"
+    assert model["decision"]["merge_assessment"] == (
+        "automated_proof_complete_human_decision_required"
+    )
+    assert model["decision"]["next_action"] == "review_and_decide"
     assert model["decision"]["risk_surface"] == "diagnostic_engine"
     assert model["proof_to_rerun"] == [
         "python -m pytest -q tests/test_adaptive_quality_gate_advisory_alignment.py tests/test_adaptive_failure_bundle.py -o addopts=",
@@ -3308,8 +3315,9 @@ def test_write_comment_body_writes_review_summary_artifact(tmp_path: Path) -> No
 
     summary = review_summary_out.read_text(encoding="utf-8")
     assert "# PR Quality Review Summary" in summary
-    assert "| Merge assessment | `verify_listed_proof_before_routine_merge` |" in summary
-    assert "| Next action | `rerun_proof` |" in summary
+    assert "| Merge assessment | `automated_proof_complete_human_decision_required` |" in summary
+    assert "| Next action | `review_and_decide` |" in summary
+    assert "| First blocker | `none` |" in summary
     assert "| Risk surface | `diagnostic_engine` |" in summary
     assert "```bash" in summary
     assert "python -m pre_commit run -a" in summary
@@ -3402,8 +3410,9 @@ def test_write_comment_body_writes_review_html_dashboard_artifact(tmp_path: Path
     assert "Required queued checks" in html
     assert "Missing required contexts" in html
     assert "white-space: pre-wrap" in html
-    assert "verify_listed_proof_before_routine_merge" in html
-    assert "rerun_proof" in html
+    assert "automated_proof_complete_human_decision_required" in html
+    assert "review_and_decide" in html
+    assert "rerun_proof" not in html
     assert "python -m pre_commit run -a" in html
     assert "Reporting-only" in html
     assert "does not authorize merge" in html
@@ -3461,18 +3470,22 @@ def test_review_html_dashboard_visualizes_error_state() -> None:
 
     html = report.render_pr_quality_review_html(model)
 
-    assert "needs attention" in html
+    assert "blocked" in html
+    assert "fix_lint" in html
     assert "status-failed" in html
     assert 'class="hero status-failed"' in html
     assert 'class="hero-top"' in html
     assert 'class="state-caption"' in html
-    assert "Failure signals are present." in html
+    assert (
+        "A required proof contract is blocked. Resolve the named "
+        "blocker and rerun the focused proof." in html
+    )
     assert "section-kicker" in html
-    assert "Needs Attention" in html
+    assert "Review state" in html
     assert "First blocker" in html
     assert "Ruff check failed" in html
     assert "fix_lint" in html
-    assert "Failure signals" in html
+    assert "Source status" in html
     assert "Failed checks" in html
     assert "quality" in html
     assert "Queued required checks" in html
@@ -3534,9 +3547,9 @@ def test_review_summary_includes_error_state_mini_triage() -> None:
     summary = report.render_pr_quality_review_summary(model)
 
     assert "## Mini triage" in summary
-    assert "| Review state | `needs_attention` |" in summary
+    assert "| Review state | `blocked` |" in summary
     assert "| First blocker | `Ruff check failed` |" in summary
-    assert "| Recommended action | `Fix the lint finding.` |" in summary
+    assert "| Recommended action | `fix_lint` |" in summary
     assert "| Failed checks | `1` |" in summary
     assert "| Failed check names | `quality` |" in summary
     assert "| Queued required checks | `1` |" in summary
@@ -3669,7 +3682,7 @@ def test_review_model_schema_v2_includes_artifact_index_metadata() -> None:
         "version": 2,
         "previous_version": "sdetkit.pr_quality.review_model.v1",
         "compatibility": "additive",
-        "decision_logic": "unchanged",
+        "decision_logic": "canonical_review_state_v1",
         "authority_boundary": "reporting_only",
     }
     assert model["generated_by"] == "sdetkit.pr_quality_action_report"
@@ -3758,41 +3771,50 @@ def _build_review_state_matrix_model(
     )
 
 
-def test_review_surfaces_cover_green_review_required_and_needs_attention_states() -> None:
+def test_review_surfaces_cover_ready_review_and_blocked_states() -> None:
     cases = [
         {
-            "name": "green",
+            "name": "ready",
             "model": _build_review_state_matrix_model(
                 status="green",
                 evidence_review_required=False,
             ),
-            "review_state": "green",
+            "review_state": "ready",
             "class_name": "status-green",
-            "label": "green",
-            "caption": "No PR Quality blocker is currently reported.",
+            "label": "ready for human decision",
+            "caption": (
+                "Automated proof is complete and internally consistent. "
+                "Review scope, risk, and authority before deciding."
+            ),
         },
         {
-            "name": "review_required",
+            "name": "review",
             "model": _build_review_state_matrix_model(
                 status="green",
                 evidence_review_required=True,
             ),
-            "review_state": "review_required",
+            "review_state": "review",
             "class_name": "status-review",
-            "label": "review required",
-            "caption": "Review-first evidence is present.",
+            "label": "human review required",
+            "caption": (
+                "Automated proof is complete, but the listed evidence "
+                "requires human review before merge."
+            ),
         },
         {
-            "name": "needs_attention",
+            "name": "blocked",
             "model": _build_review_state_matrix_model(
                 status="failed",
                 evidence_review_required=False,
                 failed_check=True,
             ),
-            "review_state": "needs_attention",
+            "review_state": "blocked",
             "class_name": "status-failed",
-            "label": "needs attention",
-            "caption": "Failure signals are present.",
+            "label": "blocked",
+            "caption": (
+                "A required proof contract is blocked. Resolve the named "
+                "blocker and rerun the focused proof."
+            ),
         },
     ]
 
@@ -3851,8 +3873,11 @@ def test_review_artifacts_manifest_describes_bundle_contract() -> None:
         "merge_authorization": False,
         "semantic_equivalence_claim": False,
     }
-    assert manifest["decision"]["review_state"] == "green"
-    assert manifest["decision"]["merge_assessment"] == "no_sdetkit_action_required"
+    assert manifest["decision"]["review_state"] == "ready"
+    assert manifest["decision"]["merge_assessment"] == (
+        "automated_proof_complete_human_decision_required"
+    )
+    assert manifest["decision"]["next_action"] == "review_and_decide"
 
     paths = manifest["expected_artifact_paths"]
     assert paths[0] == "index.html"
@@ -4202,11 +4227,11 @@ def test_pr_quality_review_summary_opens_blocker_sections_and_collapses_noise() 
     assert "does not authorize merge" in body
 
 
-def test_pr_quality_review_summary_keeps_green_details_collapsed() -> None:
+def test_pr_quality_review_summary_normalizes_legacy_green_decision() -> None:
     model = {
         "decision": {
             "status": "green",
-            "merge_assessment": "verify_listed_proof_before_routine_merge",
+            "merge_assessment": ("verify_listed_proof_before_routine_merge"),
             "next_action": "rerun_proof",
             "risk_surface": "none",
             "signal_title": "Green",
@@ -4249,10 +4274,15 @@ def test_pr_quality_review_summary_keeps_green_details_collapsed() -> None:
 
     body = report.render_pr_quality_review_summary(model)
 
-    assert "<details>\n<summary>✅ Decision details</summary>" in body
+    assert "| Review state | `ready` |" in body
+    assert "| First blocker | `none` |" in body
+    assert "| Recommended action | `review_and_decide` |" in body
+    assert "| Merge assessment | `automated_proof_complete_human_decision_required` |" in body
+    assert "<details>\n<summary>✅ Ready for human decision</summary>" in body
     assert "<details>\n<summary>🧭 Failure vector deep dive</summary>" in body
     assert "<details>\n<summary>🧪 Proof to rerun</summary>" in body
     assert "<details open>" not in body
+    assert "rerun_proof" not in body
 
 
 def test_review_model_includes_ghas_code_scanning_blocker_details() -> None:
@@ -4633,10 +4663,10 @@ def test_stale_only_ghas_alert_is_refresh_pending_not_active_blocker() -> None:
         ("stale", "only", "security", "signal")
     )
 
-    assert "| Review state | `review_required` |" in body
+    assert "| Review state | `stale` |" in body
     assert f"| Merge assessment | `{wait_for_refresh}` |" in body
     assert "| Stale-only security signal | `true` |" in body
-    assert "🟡 Refresh-pending decision details" in body
+    assert "🟡 Stale evidence / refresh required" in body
     assert "🛡️ GHAS / CodeQL refresh details" in body
     assert "🚨 Active blocker / decision details" not in body
     assert "do_not_merge_until_blocker_resolved" not in body
@@ -5312,3 +5342,199 @@ def test_action_report_renders_trusted_registry_aggregate_without_decision_chang
     assert "Trusted history producer-vetted registry current PR decision input: `false`" in rendered
     assert "Automation allowed by trusted history: `false`" in rendered
     assert "Merge authorized by trusted history: `false`" in rendered
+
+
+def _decision_model(
+    *,
+    status: str = "green",
+    failed_checks: list[dict] | None = None,
+    queued_checks: list[dict] | None = None,
+    startup_failures: list[dict] | None = None,
+    missing_required_contexts: list[str] | None = None,
+    evidence_review_required: bool = False,
+    evidence_signal_lines: list[str] | None = None,
+    primary_blocker: dict | None = None,
+    evidence_narrative: dict | None = None,
+) -> dict:
+    return report.build_pr_quality_review_model(
+        status=status,
+        evidence_signal_heading=(
+            "Evidence review signal" if evidence_review_required else "Evidence proof signal"
+        ),
+        evidence_signal_lines=(
+            evidence_signal_lines
+            if evidence_signal_lines is not None
+            else ["- Proof signal: `present`"]
+        ),
+        evidence_review_required=evidence_review_required,
+        action_report={
+            "primary_blocker": primary_blocker or {},
+            "recommended_actions": [],
+            "proof_commands": [],
+        },
+        check_intelligence={
+            "failed_checks": failed_checks or [],
+            "queued_checks": queued_checks or [],
+            "startup_failures": startup_failures or [],
+            "missing_required_contexts": (missing_required_contexts or []),
+        },
+        evidence_narrative=evidence_narrative or {},
+    )
+
+
+def test_review_model_ready_state_has_no_blocker_or_rerun_action() -> None:
+    model = _decision_model(
+        queued_checks=[
+            {
+                "name": "Full CI lane",
+                "required": False,
+            }
+        ],
+        evidence_narrative={
+            "primary_signal": {
+                "surface": "diagnostic_engine",
+                "title": "Diagnostic intelligence evidence changed",
+            },
+            "graph": {
+                "top_blocker": {
+                    "title": "Diagnostic intelligence evidence changed",
+                    "surface": "diagnostic_engine",
+                    "action": "rerun_proof",
+                }
+            },
+        },
+    )
+
+    decision = model["decision"]
+    assert decision["review_state"] == "ready"
+    assert decision["primary_blocker"] == "none"
+    assert decision["next_action"] == "review_and_decide"
+    assert decision["required_queued_checks"] == 0
+    assert model["required_queued_check_names"] == []
+
+
+def test_review_model_waiting_state_names_only_required_checks() -> None:
+    model = _decision_model(
+        status="incomplete",
+        queued_checks=[
+            {"name": "ci", "required": True},
+            {"name": "Full CI lane", "required": False},
+        ],
+        missing_required_contexts=["ci"],
+        evidence_signal_lines=[],
+    )
+
+    decision = model["decision"]
+    assert decision["review_state"] == "waiting"
+    assert decision["primary_blocker"] == "none"
+    assert decision["next_action"] == "wait_for_required_checks"
+    assert decision["required_queued_checks"] == 1
+    assert model["required_queued_check_names"] == ["ci"]
+
+
+def test_review_model_invalidates_green_status_with_required_queue() -> None:
+    model = _decision_model(
+        status="green",
+        queued_checks=[
+            {
+                "name": "ci",
+                "required": True,
+            }
+        ],
+    )
+
+    decision = model["decision"]
+    assert decision["review_state"] == "invalid"
+    assert decision["state_consistent"] is False
+    assert decision["next_action"] == "repair_review_evidence"
+    assert decision["required_queued_checks"] == 1
+    assert model["required_queued_check_names"] == ["ci"]
+
+
+def test_review_model_invalidates_green_status_with_failed_check() -> None:
+    model = _decision_model(
+        status="green",
+        failed_checks=[{"name": "quality"}],
+        primary_blocker={
+            "title": "Quality check failed",
+            "action": "fix_quality",
+        },
+        evidence_signal_lines=[],
+    )
+
+    decision = model["decision"]
+    assert decision["review_state"] == "invalid"
+    assert decision["state_consistent"] is False
+    assert decision["primary_blocker"] == "PR Quality review evidence is internally inconsistent"
+    assert decision["next_action"] == "repair_review_evidence"
+
+
+def test_review_model_review_state_is_not_a_blocker() -> None:
+    model = _decision_model(
+        evidence_review_required=True,
+        evidence_narrative={
+            "primary_signal": {
+                "surface": "workflow",
+                "title": "Workflow evidence changed",
+            }
+        },
+    )
+
+    decision = model["decision"]
+    assert decision["review_state"] == "review"
+    assert decision["primary_blocker"] == "none"
+    assert decision["next_action"] == "review_listed_evidence"
+    assert decision["merge_assessment"] == "human_review_required_before_merge"
+
+
+def test_review_model_blocked_state_exposes_one_blocker_and_action() -> None:
+    model = _decision_model(
+        status="review_required",
+        failed_checks=[{"name": "ruff"}],
+        primary_blocker={
+            "title": "Ruff lint contract failed",
+            "action": "fix_ruff_failure",
+        },
+        evidence_signal_lines=[],
+    )
+
+    decision = model["decision"]
+    assert decision["review_state"] == "blocked"
+    assert decision["primary_blocker"] == "Ruff lint contract failed"
+    assert decision["next_action"] == "fix_ruff_failure"
+    assert decision["failed_checks"] == 1
+    assert model["failed_check_names"] == ["ruff"]
+
+
+def test_review_summary_and_dashboard_share_canonical_decision() -> None:
+    model = _decision_model()
+
+    summary = report.render_pr_quality_review_summary(model)
+    dashboard = "\n".join(
+        report._reviewer_dashboard_lines(
+            status="green",
+            evidence_signal_heading="Evidence proof signal",
+            evidence_signal_lines=["- Proof signal: `present`"],
+            evidence_review_required=False,
+            action_report={
+                "primary_blocker": {},
+                "recommended_actions": [],
+                "proof_commands": [],
+            },
+            check_intelligence={
+                "failed_checks": [],
+                "queued_checks": [],
+                "startup_failures": [],
+                "missing_required_contexts": [],
+            },
+            evidence_narrative={},
+        )
+    )
+
+    assert "| Review state | `ready` |" in summary
+    assert "| First blocker | `none` |" in summary
+    assert "| Recommended action | `review_and_decide` |" in summary
+    assert "### Canonical next action" in summary
+    assert "- `review_and_decide`" in summary
+    assert "| Review state | `ready` |" in dashboard
+    assert "| Next reviewer action | `review_and_decide` |" in dashboard
