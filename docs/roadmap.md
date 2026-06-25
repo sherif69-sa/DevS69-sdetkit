@@ -105,7 +105,7 @@ action:
 - Product-artifact navigation has one trusted publisher owner.
 - PR Quality publisher and evidence workflow files remain unchanged.
 
-### Active roadmap action
+### Completed roadmap action
 
 ```text
 action:
@@ -115,24 +115,49 @@ action:
   priority=P1
   risk=medium
   value=Carry the exact head-bound contributor review decision into one reporting-only release-readiness packet.
+  status=done
+```
+
+**Closure evidence**
+
+- PR `#1868` is merged at `8ccc7705aa6215163d020db96fb2fc3258450b00`.
+- The post-merge closure audit passed with `183` focused tests.
+- Local targeted security findings are zero.
+- GHAS current review threads are zero; six superseded threads are outdated.
+- The release package schema remains additive `v2`.
+- PR Quality publisher, evidence, and release workflow files remain unchanged.
+
+### Active roadmap action
+
+```text
+action:
+  id=pr-post-merge-proof
+  lane=Release readiness
+  title=Productize post-merge verification evidence
+  priority=P1
+  risk=medium
+  value=Turn repeated external closure scripts into one deterministic, reporting-only repo-native evidence product.
   status=in_progress
 ```
 
 **Acceptance criteria**
 
-1. The release package accepts an optional trusted PR summary and publisher manifest pair.
-2. Both inputs are required together when either input is requested.
-3. Manifest schema, exact head, authority boundary, inventory, size, and SHA-256 are validated.
-4. The summary contains exactly the six canonical contributor decision rows.
-5. Missing, malformed, stale, or digest-mismatched evidence is explicit and requires human review.
-6. A ready and clear PR decision is non-blocking but never authorizes release or publication.
-7. Waiting, blocked, review, stale, and invalid PR states remain release-review blockers.
-8. Summary and manifest bytes participate in provenance and freshness.
-9. Markdown renders collection state, decision fields, source paths, and authority.
-10. Module and root CLI forwarding support the optional pair.
-11. The existing release package schema remains additive `v2`.
-12. Existing behavior and provenance inputs remain stable when the pair is omitted.
-13. PR Quality workflows, trusted publisher, and `release.yml` remain unchanged.
+1. A repo-native command consumes saved PR, status, review-thread, and security evidence.
+2. The command performs local Git reads only and makes no network or GitHub mutations.
+3. PR head, previous main, merge commit, and current main remain distinct.
+4. Merge-commit containment is canonical; PR-head ancestry remains advisory for squash merges.
+5. Changed paths are bounded from previous main through the reported merge commit.
+6. Collection states distinguish collected, missing, malformed, stale, and unavailable.
+7. CI distinguishes success, pending, failure, and unavailable.
+8. GHAS evidence distinguishes current, outdated, resolved, and unavailable threads.
+9. Local security distinguishes authoritative zero from unavailable evidence.
+10. Verified, review-required, and unavailable report states remain explicit.
+11. Protected-path drift blocks verification.
+12. Evidence bytes and Git anchors participate in provenance and freshness.
+13. JSON and Markdown outputs are deterministic.
+14. Module and root CLI forwarding expose the same contract.
+15. The generated artifact index registers the new advanced JSON contract.
+16. Existing PR Quality workflows, release workflow, and authority boundaries remain unchanged.
 
 ## Continuous maintenance hardening loop
 

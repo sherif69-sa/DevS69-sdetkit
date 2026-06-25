@@ -25,6 +25,7 @@ from . import (
     local_diagnostic_queue_dashboard,
     maintenance_queue_rollup,
     maintenance_queue_rollup_dashboard,
+    post_merge_verification,
     pr_quality_runtime_proof_artifacts,
     product_maturity_radar,
     professional_naming_cleanup_plan,
@@ -980,6 +981,24 @@ def build_index() -> dict[str, Any]:
                     "next_allowed_action",
                     "authority_boundary",
                 ],
+                "stability": "advanced",
+            },
+            {
+                "id": "post-merge-verification-json",
+                "path": post_merge_verification.DEFAULT_OUT,
+                "produced_by": (
+                    "python -m sdetkit post-merge-verification "
+                    "--root . "
+                    "--evidence-dir <evidence-dir> "
+                    "--previous-main-sha <sha> "
+                    "--out-json "
+                    "build/sdetkit/post-merge-verification/report.json "
+                    "--out-md "
+                    "build/sdetkit/post-merge-verification/report.md "
+                    "--format json"
+                ),
+                "schema_version": post_merge_verification.SCHEMA_VERSION,
+                "required_fields": list(post_merge_verification.REQUIRED_FIELDS),
                 "stability": "advanced",
             },
             {

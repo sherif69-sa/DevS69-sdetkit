@@ -1106,6 +1106,37 @@ Then use stability-aware command discovery:
         default="json",
     )
 
+    post_merge_verification = sub.add_parser(
+        "post-merge-verification",
+        help=argparse.SUPPRESS,
+    )
+    post_merge_verification.add_argument("--root", default=".")
+    post_merge_verification.add_argument(
+        "--evidence-dir",
+        required=True,
+    )
+    post_merge_verification.add_argument(
+        "--previous-main-sha",
+        required=True,
+    )
+    post_merge_verification.add_argument(
+        "--out-json",
+        default="build/sdetkit/post-merge-verification/report.json",
+    )
+    post_merge_verification.add_argument(
+        "--out-md",
+        default="build/sdetkit/post-merge-verification/report.md",
+    )
+    post_merge_verification.add_argument(
+        "--format",
+        choices=["json", "text"],
+        default="text",
+    )
+    post_merge_verification.add_argument(
+        "--check-freshness",
+        action="store_true",
+    )
+
     release_readiness_evidence_package = sub.add_parser(
         "release-readiness-evidence-package",
         help=argparse.SUPPRESS,
@@ -2443,6 +2474,28 @@ def main(argv: Sequence[str] | None = None) -> int:
             forwarded.append("--check-freshness")
         return _run_module_main(
             "sdetkit.first_proof_quality_evidence",
+            forwarded,
+        )
+
+    if ns.cmd == "post-merge-verification":
+        forwarded = [
+            "--root",
+            str(ns.root),
+            "--evidence-dir",
+            str(ns.evidence_dir),
+            "--previous-main-sha",
+            str(ns.previous_main_sha),
+            "--out-json",
+            str(ns.out_json),
+            "--out-md",
+            str(ns.out_md),
+            "--format",
+            str(ns.format),
+        ]
+        if bool(ns.check_freshness):
+            forwarded.append("--check-freshness")
+        return _run_module_main(
+            "sdetkit.post_merge_verification",
             forwarded,
         )
 
