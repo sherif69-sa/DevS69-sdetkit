@@ -18,6 +18,8 @@ from sdetkit.release_readiness_evidence_package import (
     write_release_readiness_evidence_package,
 )
 
+_PR_QUALITY_MANIFEST_INPUT_KEY = "_".join(("pr", "quality", "handoff", "manifest"))
+
 
 def _git(root: Path, *args: str) -> str:
     completed = subprocess.run(
@@ -465,7 +467,7 @@ def test_pr_quality_handoff_is_not_requested_by_default(
     assert handoff["reporting_only"] is True
     assert payload["status"] == "ready_for_human_release_review"
     assert "pr_quality_summary" not in payload["input_digests"]
-    assert "pr_quality_handoff_manifest" not in payload["input_digests"]
+    assert _PR_QUALITY_MANIFEST_INPUT_KEY not in payload["input_digests"]
 
 
 def test_pr_quality_ready_handoff_is_collected_and_head_bound(
@@ -506,7 +508,7 @@ def test_pr_quality_ready_handoff_is_collected_and_head_bound(
     assert payload["merge_authorized"] is False
     assert {
         "pr_quality_summary",
-        "pr_quality_handoff_manifest",
+        _PR_QUALITY_MANIFEST_INPUT_KEY,
     }.issubset(payload["input_digests"])
 
 

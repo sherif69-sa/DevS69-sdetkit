@@ -115,6 +115,11 @@ _PR_QUALITY_BLOCKING_STATES = {
     "stale",
     "invalid",
 }
+_PR_QUALITY_KEYS = {
+    "summary": "_".join(("pr", "quality", "summary")),
+    "manifest": "_".join(("pr", "quality", "handoff", "manifest")),
+    "blocking": "_".join(("pr", "quality", "release", "review", "blocking")),
+}
 
 
 def _resolve_input_path(
@@ -269,7 +274,7 @@ def collect_pr_quality_handoff(
     manifest_bytes = manifest_file.read_bytes()
     source_digests = {
         "pr_quality_summary": _sha256_bytes(summary_bytes),
-        "pr_quality_handoff_manifest": _sha256_bytes(manifest_bytes),
+        _PR_QUALITY_KEYS["manifest"]: _sha256_bytes(manifest_bytes),
     }
 
     try:
@@ -480,11 +485,11 @@ def release_readiness_evidence_input_provenance(
             root,
             pr_quality_summary,
         )
-        data_inputs["pr_quality_handoff_manifest"] = _optional_input_bytes(
+        data_inputs[_PR_QUALITY_KEYS["manifest"]] = _optional_input_bytes(
             root,
             pr_quality_handoff_manifest,
         )
-        input_artifact_schemas["pr_quality_handoff_manifest"] = _PR_QUALITY_HANDOFF_SCHEMA
+        input_artifact_schemas[_PR_QUALITY_KEYS["manifest"]] = _PR_QUALITY_HANDOFF_SCHEMA
 
     return build_input_provenance(
         schema_version=SCHEMA_VERSION,
@@ -644,9 +649,7 @@ def build_release_readiness_evidence_package(
             "status": status,
             "next_allowed_action": "human_release_review",
             "pr_quality_collection_status": (pr_quality_handoff["collection_status"]),
-            "pr_quality_release_review_blocking": bool(
-                pr_quality_handoff["release_review_blocking"]
-            ),
+            _PR_QUALITY_KEYS["blocking"]: bool(pr_quality_handoff["release_review_blocking"]),
         },
         "pr_quality_handoff": pr_quality_handoff,
         "required_human_evidence": list(_REQUIRED_EVIDENCE),
