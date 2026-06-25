@@ -158,8 +158,9 @@ regenerate evidence only through the reviewed operator workflow.
 - [Release-readiness package sample](examples/release-readiness-evidence-package.sample.json)
 - [Post-merge verification sample](examples/post-merge-verification.sample.json)
 
-The samples use fixed timestamps, low-entropy placeholder SHAs,
-`example.invalid` URLs when a URL is needed, and repository-relative paths.
+The samples use fixed timestamps, explicit `sha256-redacted` digest markers,
+low-entropy placeholder commit SHAs, `example.invalid` URLs when a URL is
+needed, and repository-relative paths.
 They are examples, not current-run evidence.
 
 ## Troubleshooting

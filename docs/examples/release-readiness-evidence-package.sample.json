@@ -124,32 +124,26 @@
   ],
   "generated_at": "2026-01-01T00:00:00Z",
   "input_digests": {
-    ".github/workflows/release.yml": "7777777777777777777777777777777777777777777777777777777777777777",
-    "Makefile": "8888888888888888888888888888888888888888888888888888888888888888",
-    "docs/artifact-reference.md": "9999999999999999999999999999999999999999999999999999999999999999",
-    "docs/release-readiness-evidence-handoff.md": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "pr_quality_handoff_manifest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-    "pr_quality_summary": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ".github/workflows/release.yml": "sha256-redacted",
+    "Makefile": "sha256-redacted",
+    "docs/artifact-reference.md": "sha256-redacted",
+    "docs/release-readiness-evidence-handoff.md": "sha256-redacted"
   },
   "input_provenance": {
     "digest_algorithm": "sha256",
     "generated_at": "2026-01-01T00:00:00Z",
     "generated_from_head_sha": "1111111111111111111111111111111111111111",
     "generator_schema_version": "sdetkit.release_readiness_evidence_package.v2",
-    "generator_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+    "generator_sha256": "sha256-redacted",
     "generator_source": "src/sdetkit/release_readiness_evidence_package.py",
-    "input_artifact_schemas": {
-      "pr_quality_handoff_manifest": "sdetkit.pr_quality_publisher_handoff.v1"
-    },
-    "input_count": 12,
-    "input_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "input_artifact_schemas": {},
+    "input_count": 10,
+    "input_digest": "sha256-redacted",
     "input_digests": {
-      ".github/workflows/release.yml": "7777777777777777777777777777777777777777777777777777777777777777",
-      "Makefile": "8888888888888888888888888888888888888888888888888888888888888888",
-      "docs/artifact-reference.md": "9999999999999999999999999999999999999999999999999999999999999999",
-      "docs/release-readiness-evidence-handoff.md": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "pr_quality_handoff_manifest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-      "pr_quality_summary": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ".github/workflows/release.yml": "sha256-redacted",
+      "Makefile": "sha256-redacted",
+      "docs/artifact-reference.md": "sha256-redacted",
+      "docs/release-readiness-evidence-handoff.md": "sha256-redacted"
     },
     "source_issue_count": 0,
     "source_issue_numbers": [],
@@ -167,29 +161,26 @@
       "security_dismissal_allowed": false,
       "semantic_equivalence_proven": false
     },
-    "available": true,
-    "collection_status": "collected",
-    "first_blocker": "none",
-    "head_matches": true,
-    "head_sha": "1111111111111111111111111111111111111111",
-    "manifest_path": "evidence/handoff-manifest.json",
+    "available": false,
+    "collection_status": "not_requested",
+    "first_blocker": "unknown",
+    "head_matches": false,
+    "head_sha": "",
+    "manifest_path": "",
     "merge_authorized": false,
-    "merge_posture": "automated_proof_complete_human_decision_required",
-    "next_action": "review_and_decide",
+    "merge_posture": "unknown",
+    "next_action": "unknown",
     "publish_authorized": false,
-    "reason": "Trusted PR Quality decision was collected and verified.",
+    "reason": "PR Quality handoff evidence was not requested.",
     "release_authorized": false,
     "release_review_blocking": false,
     "reporting_only": true,
-    "required_checks": "clear",
-    "review_state": "ready",
+    "required_checks": "unknown",
+    "review_state": "unknown",
     "safe_to_publish": false,
-    "security_posture": "clear",
-    "source_digests": {
-      "pr_quality_handoff_manifest": "6666666666666666666666666666666666666666666666666666666666666666",
-      "pr_quality_summary": "5555555555555555555555555555555555555555555555555555555555555555"
-    },
-    "summary_path": "evidence/pr-review-summary.md"
+    "security_posture": "unknown",
+    "source_digests": {},
+    "summary_path": ""
   },
   "proof_commands": [
     "make package-validate",
@@ -224,8 +215,6 @@
   "summary": {
     "missing_evidence_count": 1,
     "next_allowed_action": "human_release_review",
-    "pr_quality_collection_status": "collected",
-    "pr_quality_release_review_blocking": false,
     "present_evidence_count": 7,
     "required_evidence_count": 8,
     "status": "review_required"

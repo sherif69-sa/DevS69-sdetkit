@@ -29,8 +29,7 @@ def serialize_sample(payload: Mapping[str, Any]) -> str:
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
 
-def _digest(character: str) -> str:
-    return character * 64
+REDACTED_DIGEST = "sha256-redacted"
 
 
 def _provenance(
@@ -48,11 +47,11 @@ def _provenance(
     run_ids = list(source_run_ids or [])
     return {
         "digest_algorithm": "sha256",
-        "input_digest": _digest("0"),
+        "input_digest": REDACTED_DIGEST,
         "input_count": input_count,
         "generator_schema_version": schema_version,
         "generator_source": generator_source,
-        "generator_sha256": _digest("4"),
+        "generator_sha256": REDACTED_DIGEST,
         "generated_at": FIXED_GENERATED_AT,
         "generated_from_head_sha": head_sha,
         "source_issue_count": len(issue_numbers),
@@ -145,50 +144,23 @@ def build_release_sample() -> dict[str, Any]:
         ),
     ]
 
-    handoff = {
-        "collection_status": "collected",
-        "available": True,
-        "reason": ("Trusted PR Quality decision was collected and verified."),
-        "summary_path": "evidence/pr-review-summary.md",
-        "manifest_path": "evidence/handoff-manifest.json",
-        "head_sha": RELEASE_HEAD_SHA,
-        "head_matches": True,
-        "review_state": "ready",
-        "first_blocker": "none",
-        "next_action": "review_and_decide",
-        "required_checks": "clear",
-        "security_posture": "clear",
-        "merge_posture": ("automated_proof_complete_human_decision_required"),
-        "release_review_blocking": False,
-        "reporting_only": True,
-        "safe_to_publish": False,
-        "release_authorized": False,
-        "publish_authorized": False,
-        "merge_authorized": False,
-        "source_digests": {
-            "pr_quality_summary": _digest("5"),
-            "pr_quality_handoff_manifest": _digest("6"),
-        },
-        "authority_boundary": dict(release._PR_QUALITY_AUTHORITY_BOUNDARY),
-    }
+    handoff = release._pr_quality_handoff_result(
+        collection_status="not_requested",
+        reason="PR Quality handoff evidence was not requested.",
+    )
 
     input_digests = {
-        ".github/workflows/release.yml": _digest("7"),
-        "Makefile": _digest("8"),
-        "docs/artifact-reference.md": _digest("9"),
-        "docs/release-readiness-evidence-handoff.md": _digest("a"),
-        "pr_quality_summary": _digest("b"),
-        "pr_quality_handoff_manifest": _digest("c"),
+        ".github/workflows/release.yml": REDACTED_DIGEST,
+        "Makefile": REDACTED_DIGEST,
+        "docs/artifact-reference.md": REDACTED_DIGEST,
+        "docs/release-readiness-evidence-handoff.md": (REDACTED_DIGEST),
     }
     provenance = _provenance(
         schema_version=release.SCHEMA_VERSION,
         generator_source=release.GENERATOR_SOURCE,
         head_sha=RELEASE_HEAD_SHA,
         input_digests=input_digests,
-        input_count=12,
-        input_artifact_schemas={
-            "pr_quality_handoff_manifest": ("sdetkit.pr_quality_publisher_handoff.v1")
-        },
+        input_count=10,
     )
 
     payload: dict[str, Any] = {
@@ -215,8 +187,6 @@ def build_release_sample() -> dict[str, Any]:
             "missing_evidence_count": 1,
             "status": "review_required",
             "next_allowed_action": "human_release_review",
-            "pr_quality_collection_status": "collected",
-            "pr_quality_release_review_blocking": False,
         },
         "pr_quality_handoff": handoff,
         "required_human_evidence": list(release._REQUIRED_EVIDENCE),
@@ -242,11 +212,11 @@ def build_release_sample() -> dict[str, Any]:
 
 def build_post_merge_sample() -> dict[str, Any]:
     input_digests = {
-        "evidence:commit_status": _digest("5"),
-        "evidence:pr": _digest("6"),
-        "evidence:review_threads": _digest("7"),
-        "evidence:security": _digest("8"),
-        "previous_main_sha": _digest("9"),
+        "evidence:commit_status": REDACTED_DIGEST,
+        "evidence:pr": REDACTED_DIGEST,
+        "evidence:review_threads": REDACTED_DIGEST,
+        "evidence:security": REDACTED_DIGEST,
+        "previous_main_sha": REDACTED_DIGEST,
     }
     provenance = _provenance(
         schema_version=post_merge.SCHEMA_VERSION,
@@ -380,8 +350,7 @@ def test_release_sample_preserves_schema_and_authority() -> None:
     assert payload["status"] == "review_required"
     assert payload["report_status"] == "review_required"
     assert payload["summary"]["missing_evidence_count"] == 1
-    assert payload["pr_quality_handoff"]["collection_status"] == "collected"
-
+    assert payload["pr_quality_handoff"]["collection_status"] == ("not_requested")
     for key in (
         "repo_mutation",
         "issue_mutation_allowed",
@@ -442,8 +411,19 @@ def test_samples_are_sanitized_and_low_entropy() -> None:
     for pattern in forbidden:
         assert re.search(pattern, all_strings) is None, pattern
 
+    assert (
+        re.search(
+            r"(?<![0-9a-f])[0-9a-f]{64}(?![0-9a-f])",
+            all_strings,
+        )
+        is None
+    )
+
     for payload in payloads:
         assert payload["generated_at"] == FIXED_GENERATED_AT
+        assert payload["input_provenance"]["input_digest"] == (REDACTED_DIGEST)
+        assert payload["input_provenance"]["generator_sha256"] == (REDACTED_DIGEST)
+        assert set(payload["input_digests"].values()) == {REDACTED_DIGEST}
         for value in _walk_strings(payload):
             if value.startswith(("http://", "https://")):
                 assert value.startswith("https://example.invalid/")

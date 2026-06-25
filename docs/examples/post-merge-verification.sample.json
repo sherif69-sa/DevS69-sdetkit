@@ -78,28 +78,28 @@
     }
   },
   "input_digests": {
-    "evidence:commit_status": "5555555555555555555555555555555555555555555555555555555555555555",
-    "evidence:pr": "6666666666666666666666666666666666666666666666666666666666666666",
-    "evidence:review_threads": "7777777777777777777777777777777777777777777777777777777777777777",
-    "evidence:security": "8888888888888888888888888888888888888888888888888888888888888888",
-    "previous_main_sha": "9999999999999999999999999999999999999999999999999999999999999999"
+    "evidence:commit_status": "sha256-redacted",
+    "evidence:pr": "sha256-redacted",
+    "evidence:review_threads": "sha256-redacted",
+    "evidence:security": "sha256-redacted",
+    "previous_main_sha": "sha256-redacted"
   },
   "input_provenance": {
     "digest_algorithm": "sha256",
     "generated_at": "2026-01-01T00:00:00Z",
     "generated_from_head_sha": "3333333333333333333333333333333333333333",
     "generator_schema_version": "sdetkit.post_merge_verification.v1",
-    "generator_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+    "generator_sha256": "sha256-redacted",
     "generator_source": "src/sdetkit/post_merge_verification.py",
     "input_artifact_schemas": {},
     "input_count": 11,
-    "input_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "input_digest": "sha256-redacted",
     "input_digests": {
-      "evidence:commit_status": "5555555555555555555555555555555555555555555555555555555555555555",
-      "evidence:pr": "6666666666666666666666666666666666666666666666666666666666666666",
-      "evidence:review_threads": "7777777777777777777777777777777777777777777777777777777777777777",
-      "evidence:security": "8888888888888888888888888888888888888888888888888888888888888888",
-      "previous_main_sha": "9999999999999999999999999999999999999999999999999999999999999999"
+      "evidence:commit_status": "sha256-redacted",
+      "evidence:pr": "sha256-redacted",
+      "evidence:review_threads": "sha256-redacted",
+      "evidence:security": "sha256-redacted",
+      "previous_main_sha": "sha256-redacted"
     },
     "source_issue_count": 1,
     "source_issue_numbers": [
