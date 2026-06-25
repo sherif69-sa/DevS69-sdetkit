@@ -332,17 +332,37 @@ def _security_summary(
 
     finding_rows = [row for row in findings if isinstance(row, dict)]
     try:
-        warnings = int(counts.get("warn", 0))
-        errors = int(counts.get("error", 0))
+        expected_counts = {
+            "info": int(counts.get("info", 0)),
+            "warn": int(counts.get("warn", 0)),
+            "error": int(counts.get("error", 0)),
+        }
     except (TypeError, ValueError):
         return None
+
+    if any(value < 0 for value in expected_counts.values()):
+        return None
+
+    observed_counts = {"info": 0, "warn": 0, "error": 0}
+    for row in finding_rows:
+        severity = str(row.get("severity", "")).strip().lower()
+        if severity not in observed_counts:
+            return None
+        observed_counts[severity] += 1
+
+    if observed_counts != expected_counts:
+        return None
+
+    blocking_findings = expected_counts["warn"] + expected_counts["error"]
 
     return {
         "collection_status": "collected",
         "available": True,
         "finding_count": len(finding_rows),
-        "warn_count": warnings,
-        "error_count": errors,
+        "info_count": expected_counts["info"],
+        "blocking_finding_count": blocking_findings,
+        "warn_count": expected_counts["warn"],
+        "error_count": expected_counts["error"],
     }
 
 
@@ -591,6 +611,8 @@ def build_post_merge_verification(
         "collection_status": artifacts["security"]["collection_status"],
         "available": False,
         "finding_count": 0,
+        "info_count": 0,
+        "blocking_finding_count": 0,
         "warn_count": 0,
         "error_count": 0,
     }
@@ -625,7 +647,7 @@ def build_post_merge_verification(
             canonical_merge_relation,
             ci_summary["state"] == "success",
             thread_summary["current_count"] == 0,
-            local_security["finding_count"] == 0,
+            local_security["blocking_finding_count"] == 0,
             local_security["warn_count"] == 0,
             local_security["error_count"] == 0,
             not protected_path_drift,
@@ -738,6 +760,8 @@ def render_post_merge_verification_markdown(
         (f"- outdated_ghas_threads: `{threads.get('outdated_count', 0)}`"),
         (f"- resolved_ghas_threads: `{threads.get('resolved_count', 0)}`"),
         (f"- local_security_findings: `{security.get('finding_count', 0)}`"),
+        (f"- local_security_info_findings: `{security.get('info_count', 0)}`"),
+        (f"- local_security_blocking_findings: `{security.get('blocking_finding_count', 0)}`"),
         "",
         "## Changed paths",
         "",
