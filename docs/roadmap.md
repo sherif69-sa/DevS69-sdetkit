@@ -127,7 +127,7 @@ action:
 - The release package schema remains additive `v2`.
 - PR Quality publisher, evidence, and release workflow files remain unchanged.
 
-### Active roadmap action
+### Completed roadmap action
 
 ```text
 action:
@@ -137,27 +137,44 @@ action:
   priority=P1
   risk=medium
   value=Turn repeated external closure scripts into one deterministic, reporting-only repo-native evidence product.
+  status=done
+```
+
+**Closure evidence**
+
+- PR `#1872` is merged at `08f20f2b10ed10fe6bef2b325ab3a34c24a84925`.
+- Corrective PR `#1873` is merged at `82d6bed21361bc0e8e748fa59795aca3cf4478a1`.
+- Repo-native post-merge verification returned `verified` with exact merge containment.
+- The closure run passed `28` targeted tests, mypy across `482` source files, pre-commit, and `proof-after-format`.
+- Local security reported informational findings separately with zero blocking, warning, or error findings.
+- PR Quality publisher, evidence, and release workflow files remain unchanged.
+
+### Active roadmap action
+
+```text
+action:
+  id=release-evidence-recipes
+  lane=Docs and operator experience
+  title=Publish release-evidence recipes and sanitized proof samples
+  priority=P2
+  risk=low
+  value=Turn mature release and post-merge evidence contracts into copy-ready operator recipes and trustworthy proof samples.
   status=in_progress
 ```
 
 **Acceptance criteria**
 
-1. A repo-native command consumes saved PR, status, review-thread, and security evidence.
-2. The command performs local Git reads only and makes no network or GitHub mutations.
-3. PR head, previous main, merge commit, and current main remain distinct.
-4. Merge-commit containment is canonical; PR-head ancestry remains advisory for squash merges.
-5. Changed paths are bounded from previous main through the reported merge commit.
-6. Collection states distinguish collected, missing, malformed, stale, and unavailable.
-7. CI distinguishes success, pending, failure, and unavailable.
-8. GHAS evidence distinguishes current, outdated, resolved, and unavailable threads.
-9. Local security distinguishes authoritative zero from unavailable evidence.
-10. Verified, review-required, and unavailable report states remain explicit.
-11. Protected-path drift blocks verification.
-12. Evidence bytes and Git anchors participate in provenance and freshness.
-13. JSON and Markdown outputs are deterministic.
-14. Module and root CLI forwarding expose the same contract.
-15. The generated artifact index registers the new advanced JSON contract.
-16. Existing PR Quality workflows, release workflow, and authority boundaries remain unchanged.
+1. One curated page provides copy-ready release-package, trusted-handoff, post-merge, and freshness recipes.
+2. Every recipe declares required inputs, output paths, interpretation, and reporting-only authority.
+3. Two checked-in JSON samples are deterministic, schema-valid, and sanitized.
+4. The release sample grants no release, publish, merge, patch, or dismissal authority.
+5. The post-merge sample keeps informational findings visible and blocking findings at zero.
+6. A focused contract test owns canonical sample builders and rejects byte drift.
+7. The test rejects live identities, credentials, absolute user paths, and unsafe URLs.
+8. Artifact reference and evidence showcase link to the recipes and both samples.
+9. MkDocs navigation exposes the recipe page exactly once.
+10. Production report schemas, generators, artifact index, and protected workflows remain unchanged.
+11. Focused tests, strict docs build, mypy, pre-commit, and `proof-after-format` pass.
 
 ## Continuous maintenance hardening loop
 
