@@ -167,3 +167,12 @@ python -m sdetkit post-merge-verification   --root .   --evidence-dir <evidence-
 The command performs local Git reads only. It never calls GitHub, modifies the
 repository, reruns workflows, resolves review threads, dismisses security
 alerts, publishes, releases, or merges.
+
+## Curated recipes and sanitized samples
+
+For copy-ready generation, trusted-handoff, post-merge, freshness, state
+interpretation, and troubleshooting guidance, use
+[Release evidence recipes and sanitized proof samples](release-evidence-recipes.md).
+
+That page is the operator recipe. This handoff page remains the policy and
+review-boundary reference.

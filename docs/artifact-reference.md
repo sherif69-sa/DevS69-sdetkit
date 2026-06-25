@@ -30,6 +30,21 @@ A file that says a fix is possible is not approval to mutate the repository. Mut
 
 For schema-oriented contracts, see [`artifact-contract-index.json`](artifact-contract-index.json). That JSON index is the machine-readable contract inventory; this page is the human map.
 
+## Release evidence recipes and proof samples
+
+Use [Release evidence recipes and sanitized proof samples](release-evidence-recipes.md)
+for copy-ready report commands, collection-state interpretation, freshness
+checks, and troubleshooting.
+
+Committed contract examples:
+
+- [`release-readiness-evidence-package.sample.json`](examples/release-readiness-evidence-package.sample.json)
+- [`post-merge-verification.sample.json`](examples/post-merge-verification.sample.json)
+
+These files are sanitized examples governed by focused exact-byte tests. They
+are not current-run evidence and grant no release, publish, merge, patch, or
+security-dismissal authority.
+
 ## Maintenance autopilot upload set
 
 The `maintenance-autopilot` workflow uploads these files when they are produced:
