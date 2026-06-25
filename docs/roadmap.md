@@ -83,7 +83,7 @@ action:
 - CodeQL alerts `#1428` through `#1432` are fixed without dismissal.
 - The six-state canonical review contract and reporting-only authority boundary remain intact.
 
-### Active roadmap action
+### Completed roadmap action
 
 ```text
 action:
@@ -93,20 +93,46 @@ action:
   priority=P1
   risk=medium
   value=Put the contributor decision, blocker, next action, required checks, security posture, and merge posture before internal diagnostics.
+  status=done
+```
+
+**Closure evidence**
+
+- PR `#1863` is merged at `80db8844915069c7771dab3714cabdabfab2fe9e`.
+- The post-merge closure audit passed with `154` focused tests.
+- The contributor panel contains six canonical rows.
+- Ready-state failure language is absent from the primary panel.
+- Product-artifact navigation has one trusted publisher owner.
+- PR Quality publisher and evidence workflow files remain unchanged.
+
+### Active roadmap action
+
+```text
+action:
+  id=pr-release-handoff
+  lane=Release readiness
+  title=Bind trusted PR Quality decisions into release-readiness evidence
+  priority=P1
+  risk=medium
+  value=Carry the exact head-bound contributor review decision into one reporting-only release-readiness packet.
   status=in_progress
 ```
 
 **Acceptance criteria**
 
-1. The first visible contributor panel contains exactly six decision rows.
-2. A `ready` review with no blocker does not show failure-vector language in the primary panel.
-3. Ready-state proof commands are labeled `Optional verification`, not `Proof to rerun`.
-4. Blocked, stale, and invalid reviews show one blocker and one next action before diagnostics.
-5. Failure-vector details remain available in collapsed details and the full artifact bundle.
-6. Product-artifact navigation appears once in the trusted PR comment.
-7. The summary, step summary, dashboard, model, and manifest retain one normalized decision.
-8. Reporting-only authority and security posture remain visible.
-9. The trusted evidence and publisher workflow files remain unchanged.
+1. The release package accepts an optional trusted PR summary and publisher manifest pair.
+2. Both inputs are required together when either input is requested.
+3. Manifest schema, exact head, authority boundary, inventory, size, and SHA-256 are validated.
+4. The summary contains exactly the six canonical contributor decision rows.
+5. Missing, malformed, stale, or digest-mismatched evidence is explicit and requires human review.
+6. A ready and clear PR decision is non-blocking but never authorizes release or publication.
+7. Waiting, blocked, review, stale, and invalid PR states remain release-review blockers.
+8. Summary and manifest bytes participate in provenance and freshness.
+9. Markdown renders collection state, decision fields, source paths, and authority.
+10. Module and root CLI forwarding support the optional pair.
+11. The existing release package schema remains additive `v2`.
+12. Existing behavior and provenance inputs remain stable when the pair is omitted.
+13. PR Quality workflows, trusted publisher, and `release.yml` remain unchanged.
 
 ## Continuous maintenance hardening loop
 

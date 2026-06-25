@@ -92,6 +92,34 @@ upload, and post-publish or rollback verification evidence. It is reporting-only
 and does not authorize release, publish, merge, patch automation, security
 dismissal, or semantic-equivalence claims.
 
+## Trusted PR Quality decision pair
+
+The release package may ingest the contributor-facing PR decision only when it
+is paired with the trusted publisher handoff manifest:
+
+```bash
+python -m sdetkit release-readiness-evidence-package   --root .   --pr-quality-summary /path/to/pr-review-summary.md   --pr-quality-handoff-manifest /path/to/manifest.json   --out-json build/sdetkit/release-readiness-evidence/package.json   --out-md build/sdetkit/release-readiness-evidence/package.md   --format json
+```
+
+The two arguments are optional, but they must be supplied together. The package
+validates:
+
+- `sdetkit.pr_quality_publisher_handoff.v1`;
+- the exact PR head SHA against the release package head;
+- the strict reporting-only authority boundary;
+- the three-file publisher payload inventory;
+- the recorded size and SHA-256 of `payload/pr-review-summary.md`;
+- exactly six contributor decision rows.
+
+Collection states are `not_requested`, `collected`, `missing`, `malformed`,
+`stale`, and `digest_mismatch`. Any requested evidence that is missing,
+malformed, stale, or mismatched keeps the package in `review_required`.
+
+A collected `ready` decision with no blocker and clear required-check and
+security posture is non-blocking evidence only. It does not set
+`safe_to_publish`, `release_authorized`, `publish_authorized`, or
+`merge_authorized`.
+
 ## Provenance and freshness contract
 
 The release-readiness evidence package is bound to the current Git HEAD and the

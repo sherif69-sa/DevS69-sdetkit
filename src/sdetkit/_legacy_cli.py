@@ -1128,6 +1128,14 @@ Then use stability-aware command discovery:
         "--check-freshness",
         action="store_true",
     )
+    release_readiness_evidence_package.add_argument(
+        "--pr-quality-summary",
+        default=None,
+    )
+    release_readiness_evidence_package.add_argument(
+        "--pr-quality-handoff-manifest",
+        default=None,
+    )
 
     fit = sub.add_parser("fit", help="Risk-based fit recommendation planner")
     fit.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
@@ -2449,6 +2457,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             "--format",
             str(ns.format),
         ]
+        for flag, value in (
+            ("--pr-quality-summary", ns.pr_quality_summary),
+            (
+                "--pr-quality-handoff-manifest",
+                ns.pr_quality_handoff_manifest,
+            ),
+        ):
+            if value:
+                forwarded.extend([flag, str(value)])
         if bool(ns.check_freshness):
             forwarded.append("--check-freshness")
         return _run_module_main(

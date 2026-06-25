@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 from pathlib import Path
@@ -16,6 +17,8 @@ from sdetkit.release_readiness_evidence_package import (
     render_release_readiness_evidence_markdown,
     write_release_readiness_evidence_package,
 )
+
+_PR_QUALITY_MANIFEST_INPUT_KEY = "_".join(("pr", "quality", "handoff", "manifest"))
 
 
 def _git(root: Path, *args: str) -> str:
@@ -99,6 +102,99 @@ jobs:
     _git(root, "add", ".")
     _git(root, "commit", "-qm", "seed release surfaces")
     return _git(root, "rev-parse", "HEAD")
+
+
+def _write_trusted_pr_quality_handoff(
+    root: Path,
+    *,
+    head_sha: str,
+    review_state: str = "ready",
+    first_blocker: str = "none",
+    next_action: str = "review_and_decide",
+    required_checks: str = "clear",
+    security_posture: str = "clear",
+    merge_posture: str = ("automated_proof_complete_human_decision_required"),
+    malformed_summary: bool = False,
+) -> tuple[Path, Path]:
+    summary = root / "pr-review-summary.md"
+    manifest = root / "manifest.json"
+
+    rows = [
+        ("Review state", review_state),
+        ("First blocker", first_blocker),
+        ("Next action", next_action),
+        ("Required checks", required_checks),
+        ("Security posture", security_posture),
+        ("Merge posture", merge_posture),
+    ]
+    if malformed_summary:
+        rows = rows[:-1]
+
+    summary_lines = [
+        "# PR Quality Review Summary",
+        "",
+        "## Contributor decision",
+        "",
+        "| Item | Value |",
+        "|---|---|",
+        *[f"| {label} | `{value}` |" for label, value in rows],
+        "",
+        "## Adaptive review details",
+        "",
+        "<details><summary>Evidence</summary></details>",
+        "",
+    ]
+    summary.write_text(
+        "\n".join(summary_lines),
+        encoding="utf-8",
+    )
+    summary_bytes = summary.read_bytes()
+
+    empty_digest = hashlib.sha256(b"").hexdigest()
+    manifest_payload = {
+        "schema_version": ("sdetkit.pr_quality_publisher_handoff.v1"),
+        "repository": "example/repo",
+        "event_name": "pull_request",
+        "pr_number": 1,
+        "head_sha": head_sha,
+        "source_workflow_name": "PR Quality Comment",
+        "source_workflow_run_id": 101,
+        "source_workflow_run_attempt": 1,
+        "authority_boundary": {
+            "reporting_only": True,
+            "patch_application_allowed": False,
+            "security_dismissal_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+        "files": [
+            {
+                "path": "payload/pr-comment-body.md",
+                "size_bytes": 0,
+                "sha256": empty_digest,
+            },
+            {
+                "path": "payload/pr-comment-metadata.json",
+                "size_bytes": 0,
+                "sha256": empty_digest,
+            },
+            {
+                "path": "payload/pr-review-summary.md",
+                "size_bytes": len(summary_bytes),
+                "sha256": hashlib.sha256(summary_bytes).hexdigest(),
+            },
+        ],
+    }
+    manifest.write_text(
+        json.dumps(
+            manifest_payload,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return summary, manifest
 
 
 def test_release_readiness_evidence_package_reports_release_surfaces(
@@ -355,3 +451,283 @@ def test_artifact_contract_registers_release_readiness_evidence_package() -> Non
         "publish_authorized",
         "merge_authorized",
     }.issubset(set(entry["required_fields"]))
+
+
+def test_pr_quality_handoff_is_not_requested_by_default(
+    tmp_path: Path,
+) -> None:
+    _seed_release_repo(tmp_path)
+
+    payload = build_release_readiness_evidence_package(tmp_path)
+
+    handoff = payload["pr_quality_handoff"]
+    assert handoff["collection_status"] == "not_requested"
+    assert handoff["available"] is False
+    assert handoff["release_review_blocking"] is False
+    assert handoff["reporting_only"] is True
+    assert payload["status"] == "ready_for_human_release_review"
+    assert "pr_quality_summary" not in payload["input_digests"]
+    assert _PR_QUALITY_MANIFEST_INPUT_KEY not in payload["input_digests"]
+
+
+def test_pr_quality_ready_handoff_is_collected_and_head_bound(
+    tmp_path: Path,
+) -> None:
+    head = _seed_release_repo(tmp_path)
+    summary, manifest = _write_trusted_pr_quality_handoff(
+        tmp_path,
+        head_sha=head,
+    )
+
+    payload = build_release_readiness_evidence_package(
+        tmp_path,
+        current_head_sha=head,
+        pr_quality_summary=summary,
+        pr_quality_handoff_manifest=manifest,
+    )
+
+    handoff = payload["pr_quality_handoff"]
+    assert handoff["collection_status"] == "collected"
+    assert handoff["available"] is True
+    assert handoff["head_sha"] == head
+    assert handoff["head_matches"] is True
+    assert handoff["review_state"] == "ready"
+    assert handoff["first_blocker"] == "none"
+    assert handoff["next_action"] == "review_and_decide"
+    assert handoff["required_checks"] == "clear"
+    assert handoff["security_posture"] == "clear"
+    assert handoff["release_review_blocking"] is False
+    assert handoff["safe_to_publish"] is False
+    assert handoff["release_authorized"] is False
+    assert handoff["publish_authorized"] is False
+    assert handoff["merge_authorized"] is False
+    assert payload["status"] == "ready_for_human_release_review"
+    assert payload["safe_to_publish"] is False
+    assert payload["release_authorized"] is False
+    assert payload["publish_authorized"] is False
+    assert payload["merge_authorized"] is False
+    assert {
+        "pr_quality_summary",
+        _PR_QUALITY_MANIFEST_INPUT_KEY,
+    }.issubset(payload["input_digests"])
+
+
+def test_pr_quality_blocked_handoff_requires_release_review(
+    tmp_path: Path,
+) -> None:
+    head = _seed_release_repo(tmp_path)
+    summary, manifest = _write_trusted_pr_quality_handoff(
+        tmp_path,
+        head_sha=head,
+        review_state="blocked",
+        first_blocker="Code scanning alerts remain",
+        next_action="fix_security_findings",
+        security_posture="2 current alert(s)",
+        merge_posture="do_not_merge_until_blocker_resolved",
+    )
+
+    payload = build_release_readiness_evidence_package(
+        tmp_path,
+        current_head_sha=head,
+        pr_quality_summary=summary,
+        pr_quality_handoff_manifest=manifest,
+    )
+
+    handoff = payload["pr_quality_handoff"]
+    assert handoff["collection_status"] == "collected"
+    assert handoff["review_state"] == "blocked"
+    assert handoff["release_review_blocking"] is True
+    assert payload["status"] == "review_required"
+    assert payload["report_status"] == "passed"
+    assert payload["next_allowed_action"] == "human_release_review"
+
+
+def test_pr_quality_stale_head_is_review_required(
+    tmp_path: Path,
+) -> None:
+    head = _seed_release_repo(tmp_path)
+    summary, manifest = _write_trusted_pr_quality_handoff(
+        tmp_path,
+        head_sha="different-head",
+    )
+
+    payload = build_release_readiness_evidence_package(
+        tmp_path,
+        current_head_sha=head,
+        pr_quality_summary=summary,
+        pr_quality_handoff_manifest=manifest,
+    )
+
+    handoff = payload["pr_quality_handoff"]
+    assert handoff["collection_status"] == "stale"
+    assert handoff["head_matches"] is False
+    assert handoff["release_review_blocking"] is True
+    assert payload["status"] == "review_required"
+
+
+def test_pr_quality_digest_mismatch_is_review_required(
+    tmp_path: Path,
+) -> None:
+    head = _seed_release_repo(tmp_path)
+    summary, manifest = _write_trusted_pr_quality_handoff(
+        tmp_path,
+        head_sha=head,
+    )
+    summary.write_text(
+        summary.read_text(encoding="utf-8") + "\ntampered\n",
+        encoding="utf-8",
+    )
+
+    payload = build_release_readiness_evidence_package(
+        tmp_path,
+        current_head_sha=head,
+        pr_quality_summary=summary,
+        pr_quality_handoff_manifest=manifest,
+    )
+
+    handoff = payload["pr_quality_handoff"]
+    assert handoff["collection_status"] == "digest_mismatch"
+    assert handoff["release_review_blocking"] is True
+    assert payload["status"] == "review_required"
+
+
+def test_pr_quality_malformed_summary_is_review_required(
+    tmp_path: Path,
+) -> None:
+    head = _seed_release_repo(tmp_path)
+    summary, manifest = _write_trusted_pr_quality_handoff(
+        tmp_path,
+        head_sha=head,
+        malformed_summary=True,
+    )
+
+    payload = build_release_readiness_evidence_package(
+        tmp_path,
+        current_head_sha=head,
+        pr_quality_summary=summary,
+        pr_quality_handoff_manifest=manifest,
+    )
+
+    handoff = payload["pr_quality_handoff"]
+    assert handoff["collection_status"] == "malformed"
+    assert handoff["release_review_blocking"] is True
+    assert payload["status"] == "review_required"
+
+
+def test_pr_quality_missing_pair_is_review_required(
+    tmp_path: Path,
+) -> None:
+    head = _seed_release_repo(tmp_path)
+    summary, _manifest = _write_trusted_pr_quality_handoff(
+        tmp_path,
+        head_sha=head,
+    )
+
+    payload = build_release_readiness_evidence_package(
+        tmp_path,
+        current_head_sha=head,
+        pr_quality_summary=summary,
+    )
+
+    handoff = payload["pr_quality_handoff"]
+    assert handoff["collection_status"] == "missing"
+    assert handoff["release_review_blocking"] is True
+    assert payload["status"] == "review_required"
+
+
+def test_pr_quality_inputs_participate_in_freshness(
+    tmp_path: Path,
+) -> None:
+    head = _seed_release_repo(tmp_path)
+    summary, manifest = _write_trusted_pr_quality_handoff(
+        tmp_path,
+        head_sha=head,
+    )
+    out_json = tmp_path / DEFAULT_OUT
+
+    write_release_readiness_evidence_package(
+        tmp_path,
+        out_json,
+        pr_quality_summary=summary,
+        pr_quality_handoff_manifest=manifest,
+    )
+
+    fresh = check_release_readiness_evidence_freshness(
+        repo_root=tmp_path,
+        report_path=out_json,
+        pr_quality_summary=summary,
+        pr_quality_handoff_manifest=manifest,
+    )
+    assert fresh["fresh"] is True
+
+    summary.write_text(
+        summary.read_text(encoding="utf-8") + "\nchanged\n",
+        encoding="utf-8",
+    )
+    stale = check_release_readiness_evidence_freshness(
+        repo_root=tmp_path,
+        report_path=out_json,
+        pr_quality_summary=summary,
+        pr_quality_handoff_manifest=manifest,
+    )
+    assert stale["fresh"] is False
+    assert "input_digest_mismatch" in stale["reasons"]
+
+
+def test_pr_quality_handoff_cli_and_root_cli_forwarding(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    head = _seed_release_repo(tmp_path)
+    summary, manifest = _write_trusted_pr_quality_handoff(
+        tmp_path,
+        head_sha=head,
+    )
+
+    module_json = tmp_path / "module-package.json"
+    module_md = tmp_path / "module-package.md"
+    rc = main(
+        [
+            "--root",
+            str(tmp_path),
+            "--out-json",
+            str(module_json),
+            "--out-md",
+            str(module_md),
+            "--pr-quality-summary",
+            str(summary),
+            "--pr-quality-handoff-manifest",
+            str(manifest),
+            "--format",
+            "json",
+        ]
+    )
+    assert rc == 0
+    module_payload = json.loads(capsys.readouterr().out)
+    assert module_payload["pr_quality_handoff"]["collection_status"] == "collected"
+    assert "## PR Quality handoff" in module_md.read_text(encoding="utf-8")
+
+    root_json = tmp_path / "root-package-with-pr.json"
+    root_md = tmp_path / "root-package-with-pr.md"
+    rc = _legacy_cli.main(
+        [
+            "release-readiness-evidence-package",
+            "--root",
+            str(tmp_path),
+            "--out-json",
+            str(root_json),
+            "--out-md",
+            str(root_md),
+            "--pr-quality-summary",
+            str(summary),
+            "--pr-quality-handoff-manifest",
+            str(manifest),
+            "--format",
+            "json",
+        ]
+    )
+    assert rc == 0
+    root_payload = json.loads(capsys.readouterr().out)
+    assert root_payload["pr_quality_handoff"]["collection_status"] == "collected"
+    assert root_json.is_file()
+    assert root_md.is_file()
