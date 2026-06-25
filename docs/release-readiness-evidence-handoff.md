@@ -146,3 +146,24 @@ A stale result means the recorded input digest, generator bytes, schema, or Git
 HEAD no longer matches the current repository. Freshness is reporting-only; it
 does not authorize release, publishing, merging, patch application, security
 dismissal, workflow reruns, or semantic-equivalence claims.
+
+## Post-merge verification product surface
+
+After merge, collect GitHub evidence into a deterministic directory:
+
+```text
+pr.json
+main-status.json
+review-threads.json
+security-check.json
+```
+
+Generate the reporting-only verification artifact:
+
+```bash
+python -m sdetkit post-merge-verification   --root .   --evidence-dir <evidence-dir>   --previous-main-sha <sha>   --out-json build/sdetkit/post-merge-verification/report.json   --out-md build/sdetkit/post-merge-verification/report.md   --format text
+```
+
+The command performs local Git reads only. It never calls GitHub, modifies the
+repository, reruns workflows, resolves review threads, dismisses security
+alerts, publishes, releases, or merges.
