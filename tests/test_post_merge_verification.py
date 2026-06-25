@@ -131,11 +131,15 @@ def _write_evidence(
         }
     }
     finding_rows = findings or []
+    severity_counts = {"info": 0, "warn": 0, "error": 0}
+    for row in finding_rows:
+        severity = str(row.get("severity", "")).strip().lower()
+        if severity not in severity_counts:
+            raise ValueError(f"unsupported test severity: {severity}")
+        severity_counts[severity] += 1
+
     security_payload = {
-        "counts": {
-            "warn": len(finding_rows),
-            "error": 0,
-        },
+        "counts": severity_counts,
         "findings": finding_rows,
     }
 
@@ -370,6 +374,7 @@ def test_local_security_finding_requires_review(
         findings=[
             {
                 "rule_id": "TEST_RULE",
+                "severity": "warn",
                 "path": "src/example.py",
             }
         ],
@@ -384,6 +389,74 @@ def test_local_security_finding_requires_review(
 
     assert payload["status"] == "review_required"
     assert payload["local_security"]["finding_count"] == 1
+
+
+def test_info_only_security_finding_is_non_blocking(
+    tmp_path: Path,
+) -> None:
+    previous, merge_commit = _seed_repo(tmp_path)
+    evidence = _write_evidence(
+        tmp_path,
+        previous_main_sha=previous,
+        merge_commit_sha=merge_commit,
+        findings=[
+            {
+                "rule_id": "SEC_DEBUG_PRINT",
+                "severity": "info",
+                "path": "src/example.py",
+            }
+        ],
+    )
+
+    payload = build_post_merge_verification(
+        tmp_path,
+        evidence_dir=evidence,
+        previous_main_sha=previous,
+        current_head_sha=merge_commit,
+    )
+
+    assert payload["status"] == "verified"
+    assert payload["local_security"]["finding_count"] == 1
+    assert payload["local_security"]["info_count"] == 1
+    assert payload["local_security"]["blocking_finding_count"] == 0
+    assert payload["local_security"]["warn_count"] == 0
+    assert payload["local_security"]["error_count"] == 0
+
+
+def test_security_count_mismatch_is_unavailable(
+    tmp_path: Path,
+) -> None:
+    previous, merge_commit = _seed_repo(tmp_path)
+    evidence = _write_evidence(
+        tmp_path,
+        previous_main_sha=previous,
+        merge_commit_sha=merge_commit,
+        findings=[
+            {
+                "rule_id": "SEC_DEBUG_PRINT",
+                "severity": "info",
+                "path": "src/example.py",
+            }
+        ],
+    )
+
+    security_path = evidence / "security-check.json"
+    security_payload = json.loads(security_path.read_text(encoding="utf-8"))
+    security_payload["counts"]["info"] = 0
+    security_path.write_text(
+        json.dumps(security_payload),
+        encoding="utf-8",
+    )
+
+    payload = build_post_merge_verification(
+        tmp_path,
+        evidence_dir=evidence,
+        previous_main_sha=previous,
+        current_head_sha=merge_commit,
+    )
+
+    assert payload["status"] == "unavailable"
+    assert payload["input_artifacts"]["security"]["collection_status"] == "unavailable"
 
 
 def test_freshness_detects_evidence_drift(tmp_path: Path) -> None:
