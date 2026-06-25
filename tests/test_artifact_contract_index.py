@@ -23,6 +23,7 @@ from sdetkit import (
     local_diagnostic_queue_dashboard,
     maintenance_queue_rollup,
     maintenance_queue_rollup_dashboard,
+    post_merge_verification,
     pr_quality_runtime_proof_artifacts,
     professional_naming_cleanup_plan,
     professional_naming_inventory,
@@ -625,3 +626,17 @@ def test_artifact_contract_index_includes_cross_report_consistency() -> None:
         "merge_authorized",
     }.issubset(set(entry["required_fields"]))
     assert "python -m sdetkit cross-report-consistency" in entry["produced_by"]
+
+
+def test_artifact_contract_index_includes_post_merge_verification_json() -> None:
+    payload = build_index()
+    entries = {item["id"]: item for item in payload["artifacts"]}
+
+    entry = entries["post-merge-verification-json"]
+    assert entry["path"] == post_merge_verification.DEFAULT_OUT
+    assert entry["schema_version"] == post_merge_verification.SCHEMA_VERSION
+    assert entry["stability"] == "advanced"
+    assert set(post_merge_verification.REQUIRED_FIELDS).issubset(set(entry["required_fields"]))
+    assert entry["produced_by"].startswith("python -m sdetkit post-merge-verification ")
+    assert "--evidence-dir <evidence-dir>" in entry["produced_by"]
+    assert "--previous-main-sha <sha>" in entry["produced_by"]
