@@ -239,6 +239,30 @@ action:
 - Security, proof commands, check evidence, and the full authority boundary remain available as focused collapsible sections.
 - The structured review model, trusted producer, trusted publisher, workflow permissions, exact-head verification, and reporting-only authority remain unchanged.
 
+### Completed roadmap action
+
+```text
+action:
+  id=sdet-quality-comment-professional-review-experience
+  lane=Reviewer experience and product surface
+  title=Professionalize the SDET Quality Gate decision surface across canonical states
+  priority=P1
+  risk=low
+  value=Reduce reviewer friction with human labels, state-aware commands, bounded disclosure, and canonical proof presentation without changing decision semantics or authority.
+  status=done
+```
+
+**Closure evidence**
+
+- A read-only accepted-main scenario laboratory rendered `13` meaningful reviewer states and passed `13/13` hard presentation and authority contracts.
+- The first screen now humanizes risk-surface identifiers while preserving raw machine values inside the auditable decision details.
+- Quick actions retain `/check`, `/quality`, `/doctor`, and `/hint`, but promote one state-relevant command and collapse the secondary command set.
+- Security and general verification commands are deduplicated into one canonical proof section.
+- Progressive disclosure preserves established blocked-state proof and current-GHAS visibility while collapsing secondary bot commands and deduplicating executable proof content.
+- Scenario regression tests cover all six canonical review states and preserve reporting-only authority.
+- Canonical review-state selection, merge assessment, evidence collection, workflow permissions, trusted publishing, exact-head verification, patch authority, security-dismissal authority, and merge authority remain unchanged.
+- Multi-blocker model expansion and security-unavailable decision policy remain explicitly out of scope for separate review.
+
 ### Roadmap selection status
 
 ```text
