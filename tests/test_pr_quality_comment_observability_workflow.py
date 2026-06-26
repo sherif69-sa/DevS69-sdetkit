@@ -1331,3 +1331,21 @@ def test_pr_quality_contributor_summary_keeps_trusted_topology() -> None:
     assert 'cat build/pr-quality/pr-review-summary.md >> "$body_path"' in publisher
     assert "publisher handoff summary does not match the review contract" in publisher
     assert "Evidence is advisory and does not authorize merge." in publisher
+
+
+def test_pr_quality_workflow_runs_existing_non_ruff_git_grounded_profile() -> None:
+    text = _workflow_text()
+    start = text.index("python -m sdetkit.isolated_proof_runner")
+    end = text.index(
+        "--out-dir build/pr-quality/runtime-proof/isolated-proof",
+        start,
+    )
+    invocation = text[start:end]
+
+    assert "--inventory-mode base_head" in invocation
+    assert '--base-ref "origin/${{ github.event.pull_request.base.ref }}"' in invocation
+    assert "--head-ref HEAD" in invocation
+    assert "--profile ruff_src_tests" in invocation
+    assert "--profile pre_commit_all" in invocation
+    assert invocation.count("--profile ") == 2
+    assert "--command" not in invocation

@@ -5835,3 +5835,81 @@ def test_failed_check_panel_renders_exact_failure_and_remediation_contract() -> 
     assert "Remediation affected files: `src/sdetkit/example.py`" in rendered
     assert "Remediation proof commands:" in rendered
     assert "python -m pre_commit run -a" in rendered
+
+
+def test_pr_quality_comment_renders_git_grounded_profile_visibility() -> None:
+    from sdetkit import pr_quality_action_report
+
+    lines = pr_quality_action_report._runtime_proof_artifact_lines(
+        {
+            "status": "collected",
+            "isolated_proof": {
+                "status": "passed",
+                "git_inventory_verified": True,
+                "runtime_guard_checked": True,
+                "runtime_guard_passed": True,
+                "runtime_guard_violation_count": 0,
+                "network_boundary_status": "not_requested",
+                "network_isolation_enforced": False,
+                "profiles_executed": 2,
+                "profiles_blocked": 0,
+                "profile_visibility_status": "collected",
+                "profile_review_first_count": 0,
+                "profile_authority_expansion_detected": False,
+                "profile_results": [
+                    {
+                        "profile_id": "ruff_src_tests",
+                        "command": "python -m ruff check src tests",
+                        "status": "passed",
+                        "exit_code": 0,
+                        "timed_out": False,
+                        "workspace_mutated": False,
+                        "runtime_guard_status": "clean",
+                        "inventory_claim_match": True,
+                        "git_inventory_verified": True,
+                        "network_boundary_status": "not_requested",
+                        "network_backend_command_wrapped": False,
+                        "review_first": False,
+                    },
+                    {
+                        "profile_id": "pre_commit_all",
+                        "command": "python -m pre_commit run -a",
+                        "status": "passed",
+                        "exit_code": 0,
+                        "timed_out": False,
+                        "workspace_mutated": False,
+                        "runtime_guard_status": "clean",
+                        "inventory_claim_match": True,
+                        "git_inventory_verified": True,
+                        "network_boundary_status": "not_requested",
+                        "network_backend_command_wrapped": False,
+                        "review_first": False,
+                    },
+                ],
+            },
+            "live_benchmark": {
+                "collection_status": "not_collected",
+                "status": "not_collected",
+            },
+            "repo_memory": {},
+            "trusted_history": {},
+            "trusted_diagnostic_signal_snapshot_history": {},
+            "decision_boundary": {
+                "reporting_only": True,
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "security_dismissal_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        }
+    )
+
+    text = "\n".join(lines)
+    assert "Profile visibility status: `collected`" in text
+    assert "Proof profile results:" in text
+    assert "`ruff_src_tests`: command=`python -m ruff check src tests`" in text
+    assert "`pre_commit_all`: command=`python -m pre_commit run -a`" in text
+    assert "inventory_claim_match=`true`" in text
+    assert "git_inventory_verified=`true`" in text
+    assert "review_first=`false`" in text

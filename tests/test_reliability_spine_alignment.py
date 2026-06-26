@@ -61,7 +61,7 @@ def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
     status_counts = report["status_counts"]
 
     assert status_counts["aligned"] >= 13
-    assert status_counts["partially_aligned"] >= 7
+    assert status_counts["partially_aligned"] >= 6
     assert status_counts.get("planned", 0) == 0
     assert report["next_recommended_pr"] == NEXT_RECOMMENDED_PR
 
@@ -85,7 +85,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert "replayable_benchmark_harness" in gaps_by_module
     assert "repo_memory" not in gaps_by_module
     assert "isolated_proof_runner" in gaps_by_module
-    assert "git_inventory_collector" in gaps_by_module
+    assert "git_inventory_collector" not in gaps_by_module
     assert "network_boundary" not in gaps_by_module
     assert "proof_runtime_guard" in gaps_by_module
     assert "pr_quality_runtime_proof_artifacts" not in gaps_by_module
@@ -108,10 +108,6 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert any("semantic equivalence" in gap for gap in gaps_by_module["protected_verifier"])
     assert not any("network-isolated" in gap for gap in gaps_by_module["isolated_proof_runner"])
     assert any("external filesystem" in gap for gap in gaps_by_module["isolated_proof_runner"])
-    assert any(
-        "narrow allowlisted Ruff proof profile" in gap
-        for gap in gaps_by_module["git_inventory_collector"]
-    )
     assert any("containment" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert not any("PR Quality" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert "repo_memory" not in gaps_by_module
@@ -152,7 +148,7 @@ def test_alignment_closes_pr_quality_registry_visibility_without_authority() -> 
     assert "no-authority" in report.recommended_next_action
 
 
-def test_alignment_closes_exact_failure_gap_and_selects_git_proof_visibility() -> None:
+def test_alignment_closes_exact_failure_and_git_profile_visibility_gaps() -> None:
     components = {item.module: item for item in build_alignment_components()}
 
     adaptive = components["adaptive_diagnosis"]
@@ -168,10 +164,12 @@ def test_alignment_closes_exact_failure_gap_and_selects_git_proof_visibility() -
     assert "existing PR Quality candidate handoff" in scorer.recommended_next_action
     assert "unwired from automation" in scorer.recommended_next_action
 
-    assert inventory.status == "partially_aligned"
-    assert any("narrow allowlisted Ruff proof profile" in gap for gap in inventory.gaps)
-    assert "non-Ruff allowlisted proof profiles" in inventory.recommended_next_action
-    assert NEXT_RECOMMENDED_PR == "feature/git-proof-profile-visibility"
+    assert inventory.status == "aligned"
+    assert inventory.gaps == ()
+    assert "runtime-proof-artifacts.json" in inventory.existing_artifacts
+    assert "pr_quality_action_report" in inventory.integration_points
+    assert "multi-profile visibility" in inventory.recommended_next_action
+    assert NEXT_RECOMMENDED_PR == "none"
 
 
 def test_alignment_markdown_renders_operator_audit() -> None:
@@ -193,7 +191,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert "`replayable_benchmark_harness`: `partially_aligned`" in markdown
     assert "`repo_memory`: `aligned`" in markdown
     assert "`isolated_proof_runner`: `partially_aligned`" in markdown
-    assert "`git_inventory_collector`: `partially_aligned`" in markdown
+    assert "`git_inventory_collector`: `aligned`" in markdown
     assert "`network_boundary`: `aligned`" in markdown
     assert "`proof_runtime_guard`: `partially_aligned`" in markdown
     assert "`pr_quality_runtime_proof_artifacts`: `aligned`" in markdown
