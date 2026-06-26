@@ -6,7 +6,7 @@ pytest-xdist[psutil]==3.8.0
 hypothesis==6.155.7
 PyYAML==6.0.3
 httpx==0.28.1
-ruff==0.15.19
+ruff==0.15.20
 mypy==2.1.0
 pre-commit==4.6.0
 mutmut==3.6.0
