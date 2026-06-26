@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping
 from datetime import datetime, timezone
 from html import escape
@@ -533,3 +534,396 @@ def render_live_evidence_html(snapshot: JsonObject) -> str:
   <p class="boundary">Head binding: <code>{safe(provenance.get("head_binding_status"))}</code> · Generated: <code>{safe(snapshot.get("generated_at_utc"))}</code> · Artifact entrypoint: <code>{safe(provenance.get("artifact_entrypoint"))}</code></p>
 </section>
 """.strip()
+
+
+def render_live_product_dashboard(model: JsonObject) -> str:
+    snapshot = _as_dict(model.get("live_evidence"))
+    if not snapshot:
+        return ""
+
+    provenance = _as_dict(snapshot.get("provenance"))
+    decision = _as_dict(model.get("decision"))
+    authority = _as_dict(snapshot.get("authority_boundary"))
+    facts = [_as_dict(item) for item in _as_list(snapshot.get("facts")) if _as_dict(item)]
+    lineage = [_as_dict(item) for item in _as_list(snapshot.get("lineage")) if _as_dict(item)]
+    artifacts = [
+        _as_dict(item)
+        for item in _as_list(model.get("artifact_index"))
+        if _as_dict(item) and _text(_as_dict(item).get("path"))
+    ]
+
+    def safe(value: object) -> str:
+        return escape(_text(value), quote=True)
+
+    def external_link(url: str, label: str, css_class: str) -> str:
+        if not url:
+            return ""
+        return (
+            f'<a class="{css_class}" href="{safe(url)}" '
+            f'target="_blank" rel="noreferrer">{safe(label)}</a>'
+        )
+
+    review_state = _text(decision.get("review_state"), "unknown")
+    state_label = {
+        "ready": "Ready for human decision",
+        "waiting": "Waiting for CI",
+        "blocked": "Blocked",
+        "review": "Human review required",
+        "stale": "Stale evidence",
+        "invalid": "Invalid evidence",
+    }.get(review_state, review_state.replace("_", " ").title())
+    state_tone = {
+        "ready": "success",
+        "waiting": "waiting",
+        "blocked": "danger",
+        "review": "review",
+        "stale": "warning",
+        "invalid": "danger",
+    }.get(review_state, "neutral")
+
+    facts_by_id = {_text(item.get("id")): item for item in facts if _text(item.get("id"))}
+    metric_specs = [
+        ("Required checks", "required_checks"),
+        ("Security", "security"),
+        ("Runtime proof", "runtime_proof"),
+        ("Artifact inventory", "artifact_inventory"),
+    ]
+    metric_cards = "\n".join(
+        (
+            f'<article class="metric metric-{safe(fact.get("status"))}">'
+            f"<span>{safe(label)}</span>"
+            f"<strong>{safe(fact.get('value') or 'not collected')}</strong>"
+            "</article>"
+        )
+        for label, fact_id in metric_specs
+        for fact in [facts_by_id.get(fact_id, {})]
+    )
+
+    status_counts = {
+        status: sum(_text(item.get("status")) == status for item in facts)
+        for status in ("clear", "attention", "unavailable")
+    }
+
+    fact_cards = "\n".join(
+        (
+            f'<article class="evidence-card" '
+            f'data-id="{safe(item.get("id"))}" '
+            f'data-status="{safe(item.get("status"))}" '
+            f'data-search="{safe(" ".join((_text(item.get("label")), _text(item.get("value")), _text(item.get("source_path")))).lower())}">'
+            '<div class="evidence-card-top">'
+            "<div>"
+            f'<div class="eyebrow">{safe(item.get("source_path"))}</div>'
+            f"<h3>{safe(item.get('label'))}</h3>"
+            "</div>"
+            f'<span class="status-badge {safe(item.get("status"))}">'
+            f"{safe(item.get('status'))}</span>"
+            "</div>"
+            f"<p>{safe(item.get('value'))}</p>"
+            '<div class="evidence-card-actions">'
+            f"<code>{safe(item.get('id'))}</code>"
+            f'<button class="button primary" type="button" '
+            f'data-open-evidence="{safe(item.get("id"))}">'
+            "Open evidence</button>"
+            "</div>"
+            "</article>"
+        )
+        for item in facts
+    )
+    if not fact_cards:
+        fact_cards = (
+            '<div class="empty-state visible">'
+            "No live evidence facts were emitted for this run."
+            "</div>"
+        )
+
+    artifact_cards = "\n".join(
+        (
+            '<article class="artifact-card">'
+            "<div>"
+            f'<div class="eyebrow">{safe(item.get("kind") or item.get("format") or "artifact")}</div>'
+            f"<h3>{safe(item.get('title') or item.get('path'))}</h3>"
+            f"<p>{safe(item.get('description') or item.get('surface') or 'Workflow artifact')}</p>"
+            "</div>"
+            f'<a class="button" href="{safe(item.get("path"))}">'
+            "Open artifact</a>"
+            f"<code>{safe(item.get('path'))}</code>"
+            "</article>"
+        )
+        for item in artifacts
+    )
+    if not artifact_cards:
+        artifact_cards = (
+            '<div class="empty-state visible">'
+            "The review model did not publish an artifact index."
+            "</div>"
+        )
+
+    lineage_rows = "\n".join(
+        (
+            "<tr>"
+            f"<td><strong>{safe(item.get('stage'))}</strong></td>"
+            f"<td><code>{safe(item.get('source_path'))}</code></td>"
+            f"<td>{safe(item.get('description'))}</td>"
+            "</tr>"
+        )
+        for item in lineage
+    )
+
+    decision_rows = [
+        ("Review state", review_state),
+        ("Merge assessment", decision.get("merge_assessment")),
+        ("Next action", decision.get("next_action")),
+        ("Risk surface", decision.get("risk_surface")),
+        ("Signal title", decision.get("signal_title")),
+        ("Head binding", provenance.get("head_binding_status")),
+    ]
+    decision_table = "\n".join(
+        f"<tr><th>{safe(label)}</th><td><code>{safe(value)}</code></td></tr>"
+        for label, value in decision_rows
+    )
+
+    authority_rows = [
+        ("Boundary mode", authority.get("boundary_mode")),
+        ("Patch automation", authority.get("patch_automation")),
+        ("Security dismissal", authority.get("security_dismissal")),
+        ("Merge authorization", authority.get("merge_authorization")),
+        (
+            "Semantic equivalence claim",
+            authority.get("semantic_equivalence_claim"),
+        ),
+    ]
+    authority_table = "\n".join(
+        f"<tr><th>{safe(label)}</th><td><code>{safe(value)}</code></td></tr>"
+        for label, value in authority_rows
+    )
+
+    pr_number = _integer(provenance.get("pr_number"))
+    pr_label = f"PR #{pr_number}" if pr_number else "Pull request"
+    head_sha = _text(provenance.get("head_sha"))
+    head_short = head_sha[:12] if head_sha else "not collected"
+    run_id = _text(provenance.get("workflow_run_id"), "not collected")
+    generated_at = _text(snapshot.get("generated_at_utc"), "not collected")
+    artifact_entrypoint = _text(
+        provenance.get("artifact_entrypoint"),
+        "pr-quality/index.html",
+    )
+
+    top_actions = " ".join(
+        item
+        for item in (
+            external_link(
+                _text(provenance.get("pr_url")),
+                "Open PR",
+                "button",
+            ),
+            external_link(
+                _text(provenance.get("head_commit_url")),
+                f"Head {head_short}",
+                "button",
+            ),
+            external_link(
+                _text(provenance.get("workflow_run_url")),
+                f"Workflow run {run_id}",
+                "button",
+            ),
+            external_link(
+                _text(provenance.get("artifacts_url")),
+                "Download dashboard artifact",
+                "button primary",
+            ),
+        )
+        if item
+    )
+
+    payload = json.dumps(
+        {
+            "snapshot": snapshot,
+            "decision": decision,
+            "facts": facts,
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    ).replace("</", "<\\/")
+
+    template = r"""<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__PAGE_TITLE__</title>
+<style>
+:root{color-scheme:light;--bg:#f4f7fb;--surface:#fff;--surface2:#f8fafc;--surface3:#eef3f8;--text:#172033;--muted:#64748b;--border:#d8e0ea;--accent:#315efb;--accent2:#7c3aed;--success:#14804a;--success-bg:#e9f8ef;--warning:#9a6700;--warning-bg:#fff6d8;--danger:#c9372c;--danger-bg:#ffebe9;--waiting:#0969da;--waiting-bg:#ddf4ff;--review:#7c3aed;--review-bg:#f2eaff;--shadow:0 18px 50px rgba(24,39,75,.09);--radius:18px;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+html[data-theme="dark"]{color-scheme:dark;--bg:#0b1020;--surface:#111827;--surface2:#172033;--surface3:#1f2a3d;--text:#edf2f7;--muted:#9aa8ba;--border:#2d3a50;--accent:#7aa2ff;--accent2:#b28cff;--success:#67d391;--success-bg:#123624;--warning:#f5c451;--warning-bg:#3d3010;--danger:#ff8d85;--danger-bg:#421d20;--waiting:#75baff;--waiting-bg:#112f4d;--review:#c4a7ff;--review-bg:#2e2148;--shadow:0 18px 50px rgba(0,0,0,.32)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 80% -10%,rgba(49,94,251,.12),transparent 32rem),var(--bg);color:var(--text);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{cursor:pointer}a{color:var(--accent)}code{font-family:var(--mono);overflow-wrap:anywhere}
+.app{display:grid;grid-template-columns:280px minmax(0,1fr);min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;overflow:auto;padding:24px 20px;border-right:1px solid var(--border);background:var(--surface)}.brand{display:flex;gap:12px;align-items:center;margin-bottom:28px}.brand-mark{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 8px 24px rgba(49,94,251,.28)}.brand strong{display:block}.brand small{color:var(--muted)}.sidebar h4{margin:24px 0 10px;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase}.nav-link{display:flex;justify-content:space-between;padding:9px 10px;border-radius:10px;color:var(--text);text-decoration:none}.nav-link:hover{background:var(--surface3)}.filter-stack{display:flex;flex-wrap:wrap;gap:7px}.filter-chip{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:6px 9px;border-radius:999px;font-size:12px}.filter-chip span{color:var(--muted);margin-left:4px}.filter-chip.active{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 18%,transparent)}.sidebar-footer{margin-top:30px;color:var(--muted);font-size:12px}
+.main{min-width:0;padding:28px 34px 80px}.topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:24px}.search{flex:1;max-width:620px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:12px;padding:11px 14px;outline:none}.search:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}.top-actions{display:flex;gap:8px;flex-wrap:wrap}.button{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:11px;padding:9px 12px;font-weight:650;text-decoration:none}.button.primary{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.hero{overflow:hidden;position:relative;padding:32px;border:1px solid var(--border);border-radius:24px;background:linear-gradient(135deg,var(--surface),var(--surface2));box-shadow:var(--shadow)}.hero:after{content:"";position:absolute;width:320px;height:320px;right:-130px;top:-180px;border-radius:50%;background:linear-gradient(135deg,rgba(49,94,251,.28),rgba(124,58,237,.18))}.hero>*{position:relative;z-index:1}.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}.eyebrow{color:var(--accent);font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}.hero h1{max-width:880px;margin:8px 0 10px;font-size:clamp(32px,5vw,58px);line-height:1.05;letter-spacing:-.045em}.hero p{max-width:800px;color:var(--muted);font-size:17px}.hero-meta{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.pill{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:7px 10px;font-size:12px}.status-badge{align-self:flex-start;white-space:nowrap;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:800;text-transform:uppercase}.status-badge.success,.status-badge.clear{color:var(--success);background:var(--success-bg)}.status-badge.waiting{color:var(--waiting);background:var(--waiting-bg)}.status-badge.danger,.status-badge.attention{color:var(--danger);background:var(--danger-bg)}.status-badge.review{color:var(--review);background:var(--review-bg)}.status-badge.warning,.status-badge.unavailable{color:var(--warning);background:var(--warning-bg)}
+.metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:22px 0 38px}.metric{padding:20px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}.metric strong{display:block;margin-top:6px;font-size:16px;line-height:1.35}.metric span{color:var(--muted)}.metric-clear{border-color:color-mix(in srgb,var(--success) 35%,var(--border))}.metric-attention{border-color:color-mix(in srgb,var(--danger) 35%,var(--border))}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:42px 0 16px}.section-heading h2{margin:0;font-size:28px}.section-heading p{margin:4px 0 0;color:var(--muted)}
+.evidence-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.evidence-card{display:flex;flex-direction:column;gap:16px;min-height:245px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);padding:18px;transition:.18s}.evidence-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}.evidence-card.hidden{display:none}.evidence-card-top{display:flex;justify-content:space-between;gap:12px}.evidence-card h3{margin:5px 0 0;font-size:18px}.evidence-card p{color:var(--muted);font-size:16px}.evidence-card-actions{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}.evidence-card-actions code{max-width:52%;color:var(--muted);font-size:11px}
+.card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.panel,.artifact-card{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);padding:20px}.panel h3,.artifact-card h3{margin:6px 0}.panel table,.lineage-table{width:100%;border-collapse:collapse}.panel th,.panel td,.lineage-table th,.lineage-table td{padding:10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}.panel th{width:42%;color:var(--muted)}.artifact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.artifact-card{display:grid;gap:12px}.artifact-card p{color:var(--muted)}.artifact-card .button{justify-self:start}.empty-state{display:none;padding:40px;text-align:center;border:1px dashed var(--border);border-radius:var(--radius);color:var(--muted)}.empty-state.visible{display:block}
+dialog{width:min(880px,calc(100vw - 36px));max-height:calc(100vh - 36px);padding:0;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text);box-shadow:0 30px 100px rgba(0,0,0,.35)}dialog::backdrop{background:rgba(8,15,30,.65);backdrop-filter:blur(6px)}.dialog-header{position:sticky;top:0;z-index:4;display:flex;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);background:var(--surface)}.dialog-header h2{margin:0}.dialog-body{padding:20px}.snapshot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.snapshot{padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface2)}.snapshot span{display:block;color:var(--muted);font-size:12px}.raw-panel{max-height:330px;overflow:auto;padding:14px;border-radius:12px;background:var(--surface2);white-space:pre-wrap}
+@media(max-width:1050px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--border)}.metric-grid,.evidence-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:680px){.main{padding:20px}.metric-grid,.evidence-grid,.card-grid,.artifact-grid,.snapshot-grid{grid-template-columns:1fr}.hero{padding:24px}.topbar{align-items:stretch;flex-direction:column}}@media print{.sidebar,.topbar,.button,dialog{display:none!important}.app{display:block}.main{padding:0}.hero,.metric,.evidence-card,.panel,.artifact-card{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-mark">S</div><div><strong>SDET Quality Gate</strong><small>Live review product</small></div></div>
+  <h4>Navigate</h4>
+  <a class="nav-link" href="#overview">Overview <span>01</span></a>
+  <a class="nav-link" href="#live-evidence">Indicators <span>02</span></a>
+  <a class="nav-link" href="#lineage">Evidence lineage <span>03</span></a>
+  <a class="nav-link" href="#artifacts">Artifacts <span>04</span></a>
+  <a class="nav-link" href="#authority">Authority <span>05</span></a>
+  <h4>Indicator status</h4>
+  <div class="filter-stack">
+    <button class="filter-chip active" data-status-filter="all">All <span>__FACT_COUNT__</span></button>
+    <button class="filter-chip" data-status-filter="clear">Clear <span>__CLEAR_COUNT__</span></button>
+    <button class="filter-chip" data-status-filter="attention">Attention <span>__ATTENTION_COUNT__</span></button>
+    <button class="filter-chip" data-status-filter="unavailable">Unavailable <span>__UNAVAILABLE_COUNT__</span></button>
+  </div>
+  <div class="sidebar-footer">Per-run static artifact. Regenerated by the Quality Gate workflow for each exact PR head.</div>
+</aside>
+<main class="main">
+  <div class="topbar">
+    <input id="dashboardSearch" class="search" type="search" placeholder="Search indicators, values, and evidence paths">
+    <div class="top-actions">
+      <button id="themeButton" class="button" type="button">Toggle theme</button>
+      <button id="printButton" class="button" type="button">Print report</button>
+    </div>
+  </div>
+  <section id="overview" class="hero">
+    <div class="hero-top">
+      <div>
+        <div class="eyebrow">SDET Quality Gate — Live Review Dashboard · __PR_LABEL__ · workflow-run evidence</div>
+        <h1>PR Quality Artifact Center</h1>
+        <p>This dashboard is generated from structured evidence for one exact pull-request head. Every indicator names its source artifact; no card is manually maintained status prose.</p>
+      </div>
+      <span class="status-badge __STATE_TONE__">__STATE_LABEL__</span>
+    </div>
+    <div class="hero-meta">
+      <span class="pill">Head <code>__HEAD_SHORT__</code></span>
+      <span class="pill">Run <code>__RUN_ID__</code></span>
+      <span class="pill">Binding <code>__HEAD_BINDING__</code></span>
+      <span class="pill">Generated <code>__GENERATED_AT__</code></span>
+      <span class="pill">Entrypoint <code>__ENTRYPOINT__</code></span>
+    </div>
+    <div class="top-actions" style="margin-top:18px">__TOP_ACTIONS__</div>
+  </section>
+  <section class="metric-grid">__METRIC_CARDS__</section>
+  <section id="live-evidence">
+    <div class="section-heading"><div><h2>Observed indicators</h2><p>Searchable cards derived from the current workflow run.</p></div></div>
+    <div id="indicatorGrid" class="evidence-grid">__FACT_CARDS__</div>
+    <div id="emptyState" class="empty-state">No indicators match the current filter.</div>
+  </section>
+  <section id="lineage">
+    <div class="section-heading"><div><h2>Evidence lineage</h2><p>How collected evidence becomes the published reviewer surface.</p></div></div>
+    <div class="panel"><table class="lineage-table"><thead><tr><th>Stage</th><th>Source</th><th>Role</th></tr></thead><tbody>__LINEAGE_ROWS__</tbody></table></div>
+  </section>
+  <section id="decision">
+    <div class="section-heading"><div><h2>Decision and authority</h2><p>Canonical decision fields remain separate from automation authority.</p></div></div>
+    <div class="card-grid">
+      <article class="panel"><h3>Decision observation</h3><table>__DECISION_TABLE__</table></article>
+      <article id="authority" class="panel"><h3>Authority boundary</h3><table>__AUTHORITY_TABLE__</table><p><strong>Reporting-only.</strong> This dashboard does not authorize merge, patch code, or dismiss security findings.</p></article>
+    </div>
+  </section>
+  <section id="artifacts">
+    <div class="section-heading"><div><h2>Product artifacts</h2><p>Open the exact files emitted in this run-bound bundle.</p></div></div>
+    <div class="artifact-grid">__ARTIFACT_CARDS__</div>
+  </section>
+</main>
+</div>
+<dialog id="evidenceDialog">
+  <div class="dialog-header"><div><div id="dialogSource" class="eyebrow"></div><h2 id="dialogTitle">Evidence detail</h2></div><button class="button" data-close-dialog type="button">Close</button></div>
+  <div class="dialog-body">
+    <div class="snapshot-grid">
+      <div class="snapshot"><span>Status</span><strong id="dialogStatus"></strong></div>
+      <div class="snapshot"><span>Indicator ID</span><strong id="dialogId"></strong></div>
+    </div>
+    <h3>Observed value</h3><p id="dialogValue"></p>
+    <h3>Evidence source</h3><code id="dialogPath"></code>
+    <h3>Raw fact</h3><pre id="dialogRaw" class="raw-panel"></pre>
+    <button id="copyFact" class="button" type="button">Copy raw fact</button>
+  </div>
+</dialog>
+<script type="application/json" id="evidenceData">__FACT_PAYLOAD__</script>
+<script>
+const payload=JSON.parse(document.getElementById("evidenceData").textContent);
+const facts=payload.facts||[];
+const byId=Object.fromEntries(facts.map(item=>[item.id,item]));
+let statusFilter="all";
+const dialog=document.getElementById("evidenceDialog");
+function applyFilters(){
+  const query=document.getElementById("dashboardSearch").value.trim().toLowerCase();
+  let visible=0;
+  document.querySelectorAll(".evidence-card").forEach(card=>{
+    const show=(statusFilter==="all"||card.dataset.status===statusFilter)&&(!query||card.dataset.search.includes(query));
+    card.classList.toggle("hidden",!show);
+    if(show) visible++;
+  });
+  document.getElementById("emptyState").classList.toggle("visible",visible===0);
+}
+function openEvidence(id){
+  const item=byId[id];
+  if(!item) return;
+  document.getElementById("dialogSource").textContent=item.source_path||"unknown source";
+  document.getElementById("dialogTitle").textContent=item.label||"Evidence detail";
+  document.getElementById("dialogStatus").textContent=item.status||"unknown";
+  document.getElementById("dialogId").textContent=item.id||"unknown";
+  document.getElementById("dialogValue").textContent=item.value||"not collected";
+  document.getElementById("dialogPath").textContent=item.source_path||"unknown";
+  document.getElementById("dialogRaw").textContent=JSON.stringify(item,null,2);
+  dialog.dataset.current=id;
+  dialog.showModal();
+}
+document.querySelectorAll("[data-open-evidence]").forEach(button=>button.onclick=()=>openEvidence(button.dataset.openEvidence));
+document.querySelectorAll("[data-status-filter]").forEach(button=>button.onclick=()=>{
+  statusFilter=button.dataset.statusFilter;
+  document.querySelectorAll("[data-status-filter]").forEach(item=>item.classList.toggle("active",item===button));
+  applyFilters();
+});
+document.getElementById("dashboardSearch").oninput=applyFilters;
+document.querySelector("[data-close-dialog]").onclick=()=>dialog.close();
+document.getElementById("themeButton").onclick=()=>{
+  const root=document.documentElement;
+  root.dataset.theme=root.dataset.theme==="dark"?"light":"dark";
+  localStorage.setItem("sdet-live-theme",root.dataset.theme);
+};
+document.getElementById("printButton").onclick=()=>print();
+document.getElementById("copyFact").onclick=async()=>{
+  const item=byId[dialog.dataset.current];
+  if(!item) return;
+  await navigator.clipboard.writeText(JSON.stringify(item,null,2));
+};
+const savedTheme=localStorage.getItem("sdet-live-theme");
+if(savedTheme) document.documentElement.dataset.theme=savedTheme;
+</script>
+</body>
+</html>"""
+
+    replacements = {
+        "__PAGE_TITLE__": "PR Quality Artifact Center",
+        "__PR_LABEL__": safe(pr_label),
+        "__STATE_TONE__": safe(state_tone),
+        "__STATE_LABEL__": safe(state_label),
+        "__HEAD_SHORT__": safe(head_short),
+        "__RUN_ID__": safe(run_id),
+        "__HEAD_BINDING__": safe(provenance.get("head_binding_status")),
+        "__GENERATED_AT__": safe(generated_at),
+        "__ENTRYPOINT__": safe(artifact_entrypoint),
+        "__TOP_ACTIONS__": top_actions,
+        "__METRIC_CARDS__": metric_cards,
+        "__FACT_CARDS__": fact_cards,
+        "__FACT_COUNT__": str(len(facts)),
+        "__CLEAR_COUNT__": str(status_counts["clear"]),
+        "__ATTENTION_COUNT__": str(status_counts["attention"]),
+        "__UNAVAILABLE_COUNT__": str(status_counts["unavailable"]),
+        "__LINEAGE_ROWS__": lineage_rows,
+        "__DECISION_TABLE__": decision_table,
+        "__AUTHORITY_TABLE__": authority_table,
+        "__ARTIFACT_CARDS__": artifact_cards,
+        "__FACT_PAYLOAD__": payload,
+    }
+    for marker, value in replacements.items():
+        template = template.replace(marker, value)
+    return template

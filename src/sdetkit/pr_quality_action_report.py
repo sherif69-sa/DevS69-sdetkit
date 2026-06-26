@@ -15,6 +15,7 @@ from sdetkit.pr_quality_live_dashboard import (
     build_live_evidence_snapshot,
     render_live_evidence_html,
     render_live_evidence_markdown,
+    render_live_product_dashboard,
 )
 
 JsonObject = dict[str, Any]
@@ -5075,11 +5076,9 @@ _BASE_RENDER_PR_QUALITY_ARTIFACT_INDEX_HTML = render_pr_quality_artifact_index_h
 
 
 def render_pr_quality_artifact_index_html(model: JsonObject) -> str:  # type: ignore[no-redef]  # noqa: F811
-    html = _BASE_RENDER_PR_QUALITY_ARTIFACT_INDEX_HTML(model)
-    live_panel = render_live_evidence_html(_as_dict(model.get("live_evidence")))
-    if live_panel and 'id="live-evidence"' not in html:
-        html = _insert_html_after_first_section(html, live_panel)
-    return html
+    if _as_dict(model.get("live_evidence")):
+        return render_live_product_dashboard(model)
+    return _BASE_RENDER_PR_QUALITY_ARTIFACT_INDEX_HTML(model)
 
 
 _BASE_RENDER_COMMENT_BODY = render_comment_body

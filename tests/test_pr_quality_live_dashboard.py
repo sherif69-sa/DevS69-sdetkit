@@ -266,3 +266,72 @@ def test_write_comment_body_carries_snapshot_to_outputs(
     assert result["live_evidence_head_binding_status"] == "verified"
     assert result["live_evidence_fact_count"] == 7
     assert result["live_evidence_reporting_only"] is True
+
+
+def test_product_dashboard_matches_professional_reference_contract() -> None:
+    model = _model()
+    model["live_evidence"] = _snapshot()
+    model["artifact_index"] = [
+        {
+            "path": "pr-review-model.json",
+            "kind": "json",
+            "title": "Review model",
+            "description": "Machine-readable review evidence.",
+        },
+        {
+            "path": "pr-review-dashboard.html",
+            "kind": "html",
+            "title": "Detailed review",
+            "description": "Detailed contributor review surface.",
+        },
+    ]
+
+    dashboard = report.render_pr_quality_artifact_index_html(model)
+
+    assert "<title>PR Quality Artifact Center</title>" in dashboard
+    assert 'class="app"' in dashboard
+    assert 'class="sidebar"' in dashboard
+    assert 'id="dashboardSearch"' in dashboard
+    assert 'id="themeButton"' in dashboard
+    assert 'class="metric-grid"' in dashboard
+    assert 'id="indicatorGrid"' in dashboard
+    assert 'id="evidenceDialog"' in dashboard
+    assert 'data-status-filter="clear"' in dashboard
+    assert 'data-status-filter="attention"' in dashboard
+    assert 'data-status-filter="unavailable"' in dashboard
+    assert "Evidence lineage" in dashboard
+    assert "Product artifacts" in dashboard
+    assert "Decision observation" in dashboard
+    assert "Authority boundary" in dashboard
+    assert "pr-review-model.json" in dashboard
+    assert "pr-review-dashboard.html" in dashboard
+
+
+def test_product_dashboard_is_run_bound_not_fixture_driven() -> None:
+    model = _model()
+    model["live_evidence"] = _snapshot()
+
+    dashboard = report.render_pr_quality_artifact_index_html(model)
+
+    assert "PR #1879" in dashboard
+    assert "Head head-sha" in dashboard
+    assert "Workflow run 123456" in dashboard
+    assert "actions/runs/123456" in dashboard
+    assert "head_binding_status" in dashboard
+    assert "runtime-proof/summary/runtime-proof-artifacts.json" in dashboard
+    assert "Scenario gallery" not in dashboard
+    assert "scenario-results.json" not in dashboard
+
+
+def test_product_dashboard_embeds_interactive_controls() -> None:
+    model = _model()
+    model["live_evidence"] = _snapshot()
+
+    dashboard = report.render_pr_quality_artifact_index_html(model)
+
+    assert "function applyFilters()" in dashboard
+    assert "function openEvidence(id)" in dashboard
+    assert 'localStorage.setItem("sdet-live-theme"' in dashboard
+    assert "navigator.clipboard.writeText" in dashboard
+    assert 'type="application/json" id="evidenceData"' in dashboard
+    assert "No indicators match the current filter." in dashboard

@@ -281,12 +281,14 @@ action:
 - The existing PR Quality producer remains the single evidence source and already uploads `pr-quality-comment`, runtime-proof, failure-intelligence, adaptive-sentinel, and signed publisher-handoff artifacts.
 - `pr-review-model.json` now carries an additive `live_evidence` snapshot with exact PR, head SHA, base SHA, workflow run, run attempt, artifact name, artifact entrypoint, generated timestamp, and head-binding status.
 - Required-check, security, isolated-proof, runtime-guard, live-benchmark, trusted-history, and artifact-inventory indicators are computed from structured workflow artifacts and retain their exact source paths.
-- The PR comment, visual dashboard, artifact center, and artifact manifest render the same snapshot instead of maintaining independent status prose.
+- The PR comment, detailed review HTML, machine manifest, and a full product-style artifact center render the same snapshot instead of maintaining independent status prose.
+- The artifact center adopts the scenario-laboratory interaction model: fixed navigation, hero verdict, KPI cards, searchable and filterable evidence cards, evidence drill-down dialogs, dark mode, print support, artifact navigation, and responsive layouts.
 - The PR comment links reviewers to the exact workflow run and its artifact section, with honest instructions to open `pr-quality/index.html` from the `pr-quality-comment` bundle.
 - Missing GitHub context produces a partial snapshot with no fabricated links, and a head mismatch is reported without changing the canonical review decision.
 - Protected workflows, trusted-publisher permissions, evidence collection, canonical decision logic, patch authority, security-dismissal authority, merge authority, and semantic-equivalence authority remain unchanged.
 
-### Roadmap selection status\n
+### Roadmap selection status
+
 ```text
 roadmap_state:
   patch_ready_action=none
