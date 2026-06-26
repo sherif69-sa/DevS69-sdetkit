@@ -30,7 +30,7 @@ SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE = "_".join(
 NEXT_RECOMMENDED_PR = "/".join(
     (
         "feature",
-        "-".join(("exact", "failure", "extraction", "safe", "remediation")),
+        "-".join(("git", "proof", "profile", "visibility")),
     )
 )
 
@@ -123,7 +123,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "evidence_graph",
                 "trajectory_store",
             ),
-            recommended_next_action="continue hardening exact first-failure extraction",
+            recommended_next_action="preserve canonical exact-failure evidence quality and keep uncertainty review-first",
         ),
         _component(
             module="diagnostic_vector_engine",
@@ -363,14 +363,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
         _component(
             module="adaptive_diagnosis",
             role="classify log symptoms into diagnostic candidates",
-            status="partially_aligned",
+            status="aligned",
             stages=("diagnosis",),
             integration_points=("check_intelligence",),
-            gaps=(
-                "needs stronger exact-failure extraction feedback",
-                "should emit confidence and uncertainty consistently",
-            ),
-            recommended_next_action="harden unknown-failure classification without broad automation",
+            recommended_next_action="preserve confidence-scored exact-failure feedback and keep unknown evidence review-first",
         ),
         _component(
             module="patch_scorer",
@@ -387,7 +383,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "read-only prototype is not wired into maintenance_autopilot",
                 "structural verification does not yet prove semantic equivalence",
             ),
-            recommended_next_action="feed candidates to protected_verifier without changing automation",
+            recommended_next_action="keep the existing PR Quality candidate handoff reporting-only and unwired from automation until semantic proof exists",
         ),
         _component(
             module="protected_verifier",
@@ -429,7 +425,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
             gaps=(
                 "workflow visibility uses Git-derived inventory only for a narrow allowlisted Ruff proof profile",
             ),
-            recommended_next_action="keep Git-derived workflow proof read-only and narrowly scoped",
+            recommended_next_action="expand Git-grounded PR Quality visibility to existing non-Ruff allowlisted proof profiles without changing authority",
         ),
         _component(
             module="network_boundary",

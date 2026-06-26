@@ -167,7 +167,7 @@ Closure evidence:
 - The curated release-evidence recipes, sanitized proof samples, navigation, and focused drift contracts are present on `main`.
 - The selection-correction audit classified `diagnostic-job-local-runner` as already implemented and selected the next unfinished reliability-spine action.
 
-### Active roadmap action
+### Completed roadmap action
 
 ```text
 action:
@@ -177,21 +177,49 @@ action:
   priority=P1
   risk=medium
   value=Give contributors one canonical, confidence-scored first failure and a truthful remediation eligibility decision without expanding automation authority.
+  status=done
+```
+
+**Closure evidence**
+
+- PR `#1875` was squash-merged from head `ccf07bf17a5c06515db2eb05ec2e3b0fa2937066` at accepted-main commit `17876b2c481930161132fec028828813e5e6004c`.
+- The trusted SDET Quality Gate reported `ready`, no first blocker, clear required checks, and clear security posture.
+- The post-merge closure audit verified squash tree identity, exact eight-file scope, and unchanged protected workflows.
+- Accepted-main proof passed `205` focused tests, scoped pre-commit, and `proof-after-format` with a clean isolated worktree.
+- Automation, patch application, security dismissal, merge authorization, and semantic-equivalence authority remain denied.
+
+**Selection correction**
+
+- The PatchScorer to ProtectedVerifier candidate handoff is already implemented by `pr_quality_candidate_visibility`; it must not be duplicated.
+- ProtectedVerifier review-first evidence propagation and verified network isolation already exist.
+- The first explicit unfinished, non-authority-expanding gap is PR Quality workflow visibility for Git-grounded proof profiles beyond the current narrow Ruff profile.
+
+### Active roadmap action
+
+```text
+action:
+  id=git-proof-profile-visibility
+  lane=Protected proof and reviewer evidence
+  title=Expand Git-grounded PR Quality proof visibility beyond the narrow Ruff profile
+  priority=P1
+  risk=medium
+  value=Expose multiple existing allowlisted current-head proof profiles as reporting-only reviewer evidence without claiming semantic equivalence or expanding automation authority.
   status=in_progress
 ```
 
 **Acceptance criteria**
 
-1. Check intelligence emits one canonical exact-failure object with line, tool, kind, bounded context, evidence source, confidence, actionability, and uncertainty.
-2. Traceback failures retain the final owner file, line, function, exception type, and exception message.
-3. Pytest-node, formatter, linter, type-checker, dependency, and review-annotation evidence receive deterministic evidence-quality classifications.
-4. Generic, unknown, incomplete, or uncertain evidence remains review-first.
-5. Formatting-only safe-fix eligibility requires high-confidence actionable evidence, approved repo-owned paths, and no unresolved uncertainty.
-6. A safe-fix candidate still grants no immediate auto-fix, patch application, merge, dismissal, or semantic-equivalence authority.
-7. The contributor-facing SDET Quality Gate panel shows exact-failure confidence, source, actionability, uncertainty, remediation category, strategy, files, proof commands, and authority boundaries.
-8. The existing PR Quality producer and exact-head trusted publisher remain unchanged.
-9. Focused tests cover high-confidence formatting, uncertain formatting, runtime, pytest, protected-path, and unknown evidence.
+1. Current-PR proof remains bound to exact Git-derived changed-file inventory and the current head.
+2. The implementation reuses existing allowlisted profiles instead of accepting arbitrary commands.
+3. PR Quality exposes at least one existing non-Ruff profile from `pre_commit_all` or `mypy_src` alongside `ruff_src_tests`.
+4. Every profile result reports the profile ID, canonical command, exit status, timeout state, workspace mutation state, inventory-claim match, and network-boundary state.
+5. Missing, mixed, timed-out, mutated, inventory-mismatched, or failed profile evidence remains review-first.
+6. ProtectedVerifier may consume the expanded evidence only as structural, reporting-only context.
+7. Patch application, automation, security dismissal, merge authorization, and semantic-equivalence claims remain false.
+8. Existing trusted-publisher exact-head verification and workflow permission boundaries remain unchanged.
+9. Focused tests cover positive, failed, unavailable, inventory-mismatch, and authority-expansion scenarios.
 10. Focused pre-commit and `proof-after-format` pass with a clean worktree.
+
 
 ## Continuous maintenance hardening loop
 
