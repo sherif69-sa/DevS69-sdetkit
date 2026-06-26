@@ -38,3 +38,25 @@ Do not repeat completed work:
 - unknown wrapper first meaningful line extraction is already covered.
 - CLI JSON/Markdown artifact coverage is already covered.
 - workflow permission evidence lane is already complete.
+
+
+## Exact-failure evidence quality and remediation eligibility
+
+The PR Quality check-intelligence path emits one canonical `first_failure` object.
+Its `evidence_quality` block is reporting-only and contains:
+
+- `confidence`: `high`, `medium`, or `low`;
+- `source`: the structured evidence source used to select the failure;
+- `actionable`: whether the evidence identifies a concrete operator starting point;
+- `uncertainty`: bounded reasons the evidence must remain review-first.
+
+Safe-remediation eligibility consumes that same object. Formatting-only evidence is
+a candidate only when the exact failure is high-confidence, actionable, has no
+unresolved uncertainty, and references approved repository-owned paths. Candidate
+status never means that automation, immediate auto-fix, patch application, merge,
+security dismissal, or semantic equivalence is authorized.
+
+The SDET Quality Gate PR comment renders the exact-failure evidence quality,
+remediation category and strategy, affected files, proof commands, and denied
+authority boundaries so contributors can distinguish a mechanical candidate from
+an approved mutation.

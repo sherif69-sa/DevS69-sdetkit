@@ -1032,3 +1032,47 @@ def test_check_intelligence_routes_ruff_b011_advice_to_ruff_not_pytest(
     assert report["primary_blocker"]["title"] == "Ruff lint contract failed"
     assert all("unknown test" not in command for command in report["proof_commands"])
     assert report["automation"]["allowed"] is False
+
+
+def test_canonical_exact_failure_adds_confidence_and_uncertainty_contract() -> None:
+    from sdetkit import check_intelligence
+
+    traceback_log = (
+        "Run python -m pytest -q\n"
+        "Traceback (most recent call last):\n"
+        '  File "/workspace/src/sdetkit/example.py", line 42, in execute\n'
+        '    raise AssertionError("expected stable output")\n'
+        "AssertionError: expected stable output\n"
+    )
+    exact = check_intelligence._canonical_exact_failure(
+        check_intelligence._first_failure_summary(traceback_log)
+    )
+
+    assert exact["line"] == "AssertionError: expected stable output"
+    assert exact["evidence_quality"] == {
+        "confidence": "high",
+        "actionable": True,
+        "source": "traceback_exception",
+        "uncertainty": [],
+        "reporting_only": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+    generic = check_intelligence._canonical_exact_failure(
+        {
+            "line_number": 1,
+            "line": "Step failed",
+            "tool": "unknown",
+            "kind": "failed_step",
+            "context": [],
+        }
+    )
+    assert generic["evidence_quality"]["confidence"] == "medium"
+    assert generic["evidence_quality"]["actionable"] is False
+    assert generic["evidence_quality"]["uncertainty"] == [
+        "failure kind is generic or unknown",
+        "failure tool is unknown",
+    ]

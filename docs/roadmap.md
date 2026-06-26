@@ -149,7 +149,7 @@ action:
 - Local security reported informational findings separately with zero blocking, warning, or error findings.
 - PR Quality publisher, evidence, and release workflow files remain unchanged.
 
-### Active roadmap action
+### Completed roadmap action
 
 ```text
 action:
@@ -158,23 +158,40 @@ action:
   title=Publish release-evidence recipes and sanitized proof samples
   priority=P2
   risk=low
-  value=Turn mature release and post-merge evidence contracts into copy-ready operator recipes and trustworthy proof samples.
+  status=done
+```
+
+Closure evidence:
+
+- PR `#1874` is merged at `c93c360ae99470c33788b95ea3305bb38dcc74b1`.
+- The curated release-evidence recipes, sanitized proof samples, navigation, and focused drift contracts are present on `main`.
+- The selection-correction audit classified `diagnostic-job-local-runner` as already implemented and selected the next unfinished reliability-spine action.
+
+### Active roadmap action
+
+```text
+action:
+  id=exact-failure-extraction-safe-remediation
+  lane=Repo-native diagnosis and remediation control
+  title=Harden exact-failure extraction and safe-remediation visibility in the SDET Quality Gate PR comment
+  priority=P1
+  risk=medium
+  value=Give contributors one canonical, confidence-scored first failure and a truthful remediation eligibility decision without expanding automation authority.
   status=in_progress
 ```
 
 **Acceptance criteria**
 
-1. One curated page provides copy-ready release-package, trusted-handoff, post-merge, and freshness recipes.
-2. Every recipe declares required inputs, output paths, interpretation, and reporting-only authority.
-3. Two checked-in JSON samples are deterministic, schema-valid, and sanitized.
-4. The release sample grants no release, publish, merge, patch, or dismissal authority.
-5. The post-merge sample keeps informational findings visible and blocking findings at zero.
-6. A focused contract test owns canonical sample builders and rejects byte drift.
-7. The test rejects live identities, credentials, absolute user paths, and unsafe URLs.
-8. Artifact reference and evidence showcase link to the recipes and both samples.
-9. MkDocs navigation exposes the recipe page exactly once.
-10. Production report schemas, generators, artifact index, and protected workflows remain unchanged.
-11. Focused tests, strict docs build, mypy, pre-commit, and `proof-after-format` pass.
+1. Check intelligence emits one canonical exact-failure object with line, tool, kind, bounded context, evidence source, confidence, actionability, and uncertainty.
+2. Traceback failures retain the final owner file, line, function, exception type, and exception message.
+3. Pytest-node, formatter, linter, type-checker, dependency, and review-annotation evidence receive deterministic evidence-quality classifications.
+4. Generic, unknown, incomplete, or uncertain evidence remains review-first.
+5. Formatting-only safe-fix eligibility requires high-confidence actionable evidence, approved repo-owned paths, and no unresolved uncertainty.
+6. A safe-fix candidate still grants no immediate auto-fix, patch application, merge, dismissal, or semantic-equivalence authority.
+7. The contributor-facing SDET Quality Gate panel shows exact-failure confidence, source, actionability, uncertainty, remediation category, strategy, files, proof commands, and authority boundaries.
+8. The existing PR Quality producer and exact-head trusted publisher remain unchanged.
+9. Focused tests cover high-confidence formatting, uncertain formatting, runtime, pytest, protected-path, and unknown evidence.
+10. Focused pre-commit and `proof-after-format` pass with a clean worktree.
 
 ## Continuous maintenance hardening loop
 

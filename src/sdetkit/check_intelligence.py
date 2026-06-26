@@ -790,6 +790,84 @@ def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
     return {}
 
 
+_EXACT_FAILURE_HIGH_CONFIDENCE_KINDS = frozenset(
+    {
+        "check_run_annotation",
+        "dependency_resolution",
+        "dependency_vulnerability",
+        "format_drift",
+        "lint_failure",
+        "runtime_failure",
+        "test_failure",
+        "type_contract",
+    }
+)
+
+
+def _canonical_exact_failure(value: JsonObject) -> JsonObject:
+    failure = dict(_as_dict(value))
+    if not failure:
+        return {}
+
+    line = _string(failure.get("line"))
+    tool = _string(failure.get("tool")).lower()
+    kind = _string(failure.get("kind")).lower()
+    traceback = _as_dict(failure.get("traceback"))
+
+    uncertainty: list[str] = []
+    source = "missing"
+    confidence = "low"
+    actionable = False
+
+    if traceback:
+        source = "traceback_exception"
+        confidence = "high"
+        actionable = bool(
+            _string(traceback.get("exception_type")) and _string(traceback.get("exception_message"))
+        )
+        if not _string(traceback.get("owner_file")):
+            uncertainty.append("traceback owner file was not resolved")
+    elif line and kind in _EXACT_FAILURE_HIGH_CONFIDENCE_KINDS:
+        source = {
+            "check_run_annotation": "check_run_annotation",
+            "dependency_resolution": "dependency_log",
+            "dependency_vulnerability": "dependency_audit_summary",
+            "format_drift": "formatter_log",
+            "lint_failure": "linter_rule",
+            "runtime_failure": "runtime_log",
+            "test_failure": "pytest_node",
+            "type_contract": "type_checker_log",
+        }.get(kind, "structured_log")
+        confidence = "high"
+        actionable = True
+    elif line:
+        source = "generic_log_signal"
+        confidence = "medium"
+        actionable = False
+        uncertainty.append("failure kind is generic or unknown")
+    else:
+        uncertainty.append("no actionable failure line was extracted")
+
+    if not tool or tool == "unknown":
+        uncertainty.append("failure tool is unknown")
+        if confidence == "high":
+            confidence = "medium"
+            actionable = False
+
+    failure["evidence_quality"] = {
+        "confidence": confidence,
+        "actionable": actionable,
+        "source": source,
+        "uncertainty": sorted(set(uncertainty)),
+        "reporting_only": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+    return failure
+
+
 def _looks_like_command(line: str) -> bool:
     lowered = line.strip().lower()
     return lowered.startswith(
@@ -1130,6 +1208,7 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
     dependency_audit = _extract_dependency_audit_evidence(log_text)
     if dependency_audit:
         first_failure = _dependency_audit_first_failure(log_text) or first_failure
+    first_failure = _canonical_exact_failure(first_failure)
     diagnostic_text = "\n".join(
         part
         for part in [

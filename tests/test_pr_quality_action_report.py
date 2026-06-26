@@ -5775,3 +5775,63 @@ def test_contributor_review_panel_summarizes_stale_security() -> None:
     assert rows["Required checks"] == "clear"
     assert rows["Security posture"] == ("clear for current head; 2 stale alert(s)")
     assert rows["Merge posture"] == (report.WAIT_FOR_CODE_SCANNING_REFRESH)
+
+
+def test_failed_check_panel_renders_exact_failure_and_remediation_contract() -> None:
+    from sdetkit.pr_quality_action_report import _failed_check_lines
+
+    lines = _failed_check_lines(
+        {
+            "failed_checks": [
+                {
+                    "name": "PR Quality local quality gate",
+                    "diagnosis": {
+                        "code": "PRE_COMMIT_FORMAT_DRIFT",
+                        "title": "Formatting drift",
+                    },
+                    "safe_to_auto_fix": True,
+                    "first_failure": {
+                        "line_number": 14,
+                        "line": "Would reformat: src/sdetkit/example.py",
+                        "tool": "ruff",
+                        "kind": "format_drift",
+                        "context": [],
+                        "evidence_quality": {
+                            "confidence": "high",
+                            "actionable": True,
+                            "source": "formatter_log",
+                            "uncertainty": [],
+                        },
+                    },
+                    "safe_remediation": {
+                        "safe_to_auto_fix": True,
+                        "strategy": "run_pre_commit",
+                        "category": "formatting_only",
+                        "affected_files": ["src/sdetkit/example.py"],
+                        "reason": "Failure is limited to deterministic formatting.",
+                        "proof_commands": ["python -m pre_commit run -a"],
+                        "requires_human_review": True,
+                        "auto_fix_allowed_now": False,
+                        "patch_application_allowed": False,
+                        "merge_authorized": False,
+                    },
+                }
+            ]
+        }
+    )
+    rendered = "\n".join(lines)
+
+    assert "Exact failure confidence: `high`" in rendered
+    assert "Exact failure source: `formatter_log`" in rendered
+    assert "Exact failure actionable: `true`" in rendered
+    assert "Exact failure uncertainty: `none`" in rendered
+    assert "Remediation eligibility: `formatting_only`" in rendered
+    assert "Remediation strategy: `run_pre_commit`" in rendered
+    assert "Safe-fix candidate: `true`" in rendered
+    assert "Human review required: `true`" in rendered
+    assert "Auto-fix allowed now: `false`" in rendered
+    assert "Patch application allowed: `false`" in rendered
+    assert "Merge authorized: `false`" in rendered
+    assert "Remediation affected files: `src/sdetkit/example.py`" in rendered
+    assert "Remediation proof commands:" in rendered
+    assert "python -m pre_commit run -a" in rendered
