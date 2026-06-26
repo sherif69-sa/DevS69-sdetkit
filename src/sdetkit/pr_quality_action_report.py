@@ -15,7 +15,9 @@ from sdetkit.pr_quality_live_dashboard import (
     build_live_evidence_snapshot,
     render_live_evidence_html,
     render_live_evidence_markdown,
-    render_live_product_dashboard,
+)
+from sdetkit.pr_quality_review_experience import (
+    render_pr_quality_review_experience,
 )
 
 JsonObject = dict[str, Any]
@@ -5128,7 +5130,7 @@ def render_pr_quality_artifact_index_html(  # type: ignore[no-redef]  # noqa: F8
     embedded_artifacts: JsonObject | None = None,
 ) -> str:
     if _as_dict(model.get("live_evidence")):
-        return render_live_product_dashboard(
+        return render_pr_quality_review_experience(
             model,
             embedded_artifacts=embedded_artifacts,
         )
