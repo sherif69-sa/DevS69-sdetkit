@@ -857,6 +857,9 @@ def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) ->
         return []
 
     isolated = _as_dict(summary.get("isolated_proof"))
+    profile_results = [
+        _as_dict(item) for item in _as_list(isolated.get("profile_results")) if _as_dict(item)
+    ]
     benchmark = _as_dict(summary.get("live_benchmark"))
     memory = _as_dict(summary.get("repo_memory"))
     trusted_history = _as_dict(summary.get(TRUSTED_HISTORY))
@@ -894,7 +897,41 @@ def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) ->
             f"`{_string(benchmark.get('collection_status') or 'not_collected')}`"
         ),
         f"- Live benchmark status: `{_string(benchmark.get('status') or 'not_collected')}`",
+        (
+            "- Profile visibility status: "
+            f"`{_string(isolated.get('profile_visibility_status') or 'not_collected')}`"
+        ),
+        (f"- Profile review-first results: `{_int(isolated.get('profile_review_first_count'))}`"),
+        (
+            "- Profile authority expansion detected: "
+            f"`{str(bool(isolated.get('profile_authority_expansion_detected', False))).lower()}`"
+        ),
     ]
+
+    if profile_results:
+        lines.append("- Proof profile results:")
+        for profile in profile_results:
+            claim_value = profile.get("inventory_claim_match")
+            claim_status = "not_checked" if claim_value is None else str(bool(claim_value)).lower()
+            lines.append(
+                f"  - `{_string(profile.get('profile_id') or 'unknown')}`: "
+                f"command=`{_string(profile.get('command') or 'unknown')}`, "
+                f"status=`{_string(profile.get('status') or 'unknown')}`, "
+                f"exit_code=`{_int(profile.get('exit_code'))}`, "
+                f"timed_out=`{str(bool(profile.get('timed_out', False))).lower()}`, "
+                "workspace_mutated=`"
+                f"{str(bool(profile.get('workspace_mutated', False))).lower()}`, "
+                f"runtime_guard=`{_string(profile.get('runtime_guard_status') or 'unknown')}`, "
+                f"inventory_claim_match=`{claim_status}`, "
+                "git_inventory_verified=`"
+                f"{str(bool(profile.get('git_inventory_verified', False))).lower()}`, "
+                f"network_boundary=`{_string(profile.get('network_boundary_status') or 'unknown')}`, "
+                "network_wrapped=`"
+                f"{str(bool(profile.get('network_backend_command_wrapped', False))).lower()}`, "
+                f"review_first=`{str(bool(profile.get('review_first', True))).lower()}`"
+            )
+    else:
+        lines.append("- Proof profile results: none")
 
     if benchmark.get("collection_status") == "collected":
         lines.extend(

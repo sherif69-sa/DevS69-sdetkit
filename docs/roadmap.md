@@ -194,7 +194,7 @@ action:
 - ProtectedVerifier review-first evidence propagation and verified network isolation already exist.
 - The first explicit unfinished, non-authority-expanding gap is PR Quality workflow visibility for Git-grounded proof profiles beyond the current narrow Ruff profile.
 
-### Active roadmap action
+### Completed roadmap action
 
 ```text
 action:
@@ -204,21 +204,32 @@ action:
   priority=P1
   risk=medium
   value=Expose multiple existing allowlisted current-head proof profiles as reporting-only reviewer evidence without claiming semantic equivalence or expanding automation authority.
-  status=in_progress
+  status=done
 ```
 
-**Acceptance criteria**
+**Closure evidence**
 
-1. Current-PR proof remains bound to exact Git-derived changed-file inventory and the current head.
-2. The implementation reuses existing allowlisted profiles instead of accepting arbitrary commands.
-3. PR Quality exposes at least one existing non-Ruff profile from `pre_commit_all` or `mypy_src` alongside `ruff_src_tests`.
-4. Every profile result reports the profile ID, canonical command, exit status, timeout state, workspace mutation state, inventory-claim match, and network-boundary state.
-5. Missing, mixed, timed-out, mutated, inventory-mismatched, or failed profile evidence remains review-first.
-6. ProtectedVerifier may consume the expanded evidence only as structural, reporting-only context.
-7. Patch application, automation, security dismissal, merge authorization, and semantic-equivalence claims remain false.
-8. Existing trusted-publisher exact-head verification and workflow permission boundaries remain unchanged.
-9. Focused tests cover positive, failed, unavailable, inventory-mismatch, and authority-expansion scenarios.
-10. Focused pre-commit and `proof-after-format` pass with a clean worktree.
+- PR Quality already executes the allowlisted `ruff_src_tests` and `pre_commit_all` profiles against the same exact Git-derived base/head inventory.
+- The runtime-proof summary now retains a bounded, sanitized result for each executed profile instead of collapsing evidence into counts only.
+- The contributor-facing PR Quality report shows each profile ID, canonical command, status, exit code, timeout state, workspace-mutation state, runtime-guard status, inventory-claim match, Git-inventory verification, network-boundary status, wrapping state, and review-first disposition.
+- Missing, incomplete, failed, timed-out, mutated, inventory-mismatched, or authority-expanding profile evidence remains review-first.
+- The runtime projection remains additive under the existing schema and grants no automation, patch application, security dismissal, merge, or semantic-equivalence authority.
+- The PR Quality producer and trusted publisher workflows remain unchanged.
+
+### Roadmap selection status
+
+```text
+roadmap_state:
+  patch_ready_action=none
+  next_recommended_pr=none
+  automation_expansion_allowed=false
+  merge_authority_expansion_allowed=false
+```
+
+The remaining partially aligned reliability-spine gaps require unavailable semantic-equivalence,
+external-filesystem-containment, process-escape-prevention, or explicit human authority evidence.
+They are capability/review blockers, not safe patch-ready roadmap work, and must not be converted
+into implementation PRs without new evidence.
 
 
 ## Continuous maintenance hardening loop

@@ -969,3 +969,117 @@ def test_runtime_proof_normalizes_missing_registry_history_to_not_collected() ->
     trusted = summary[runtime.TRUSTED_HISTORY]
     assert trusted[runtime.FLAKY_TEST_REGISTRY_COLLECTION_STATUS] == runtime.NOT_COLLECTED
     assert trusted[runtime.FLAKY_TEST_REGISTRY_ENTRY_COUNT] == 0
+
+
+def _multi_profile_isolated_proof() -> dict:
+    proof = _isolated_proof()
+    proof["inventory_claim_match"] = True
+    proof["requested_profiles"] = ["ruff_src_tests", "pre_commit_all"]
+    proof["proof_summary"] = {
+        "requested_count": 2,
+        "executed_count": 2,
+        "blocked_count": 0,
+        "passed_count": 2,
+        "failed_count": 0,
+    }
+    proof["proof_results"] = [
+        {
+            "profile_id": "ruff_src_tests",
+            "command": "python -m ruff check src tests",
+            "status": "passed",
+            "exit_code": 0,
+            "timed_out": False,
+            "workspace_mutated_during_execution": False,
+            "network_backend_command_wrapped": False,
+            "runtime_guard": {
+                "status": "clean",
+                "runtime_guard_violation": False,
+            },
+        },
+        {
+            "profile_id": "pre_commit_all",
+            "command": "python -m pre_commit run -a",
+            "status": "passed",
+            "exit_code": 0,
+            "timed_out": False,
+            "workspace_mutated_during_execution": False,
+            "network_backend_command_wrapped": False,
+            "runtime_guard": {
+                "status": "clean",
+                "runtime_guard_violation": False,
+            },
+        },
+    ]
+    return proof
+
+
+def test_runtime_proof_summary_preserves_bounded_multi_profile_visibility() -> None:
+    summary = build_runtime_proof_artifacts(isolated_proof=_multi_profile_isolated_proof())
+
+    isolated = summary["isolated_proof"]
+    assert isolated["profile_visibility_status"] == COLLECTED
+    assert isolated["requested_profile_ids"] == [
+        "ruff_src_tests",
+        "pre_commit_all",
+    ]
+    assert isolated["profile_review_first_count"] == 0
+    assert isolated["profile_authority_expansion_detected"] is False
+
+    profiles = isolated["profile_results"]
+    assert [item["profile_id"] for item in profiles] == [
+        "ruff_src_tests",
+        "pre_commit_all",
+    ]
+    assert all(item["inventory_claim_match"] is True for item in profiles)
+    assert all(item["git_inventory_verified"] is True for item in profiles)
+    assert all(item["review_first"] is False for item in profiles)
+    assert all(item["automation_allowed"] is False for item in profiles)
+    assert all(item["patch_application_allowed"] is False for item in profiles)
+    assert all(item["security_dismissal_allowed"] is False for item in profiles)
+    assert all(item["merge_authorized"] is False for item in profiles)
+    assert all(item["semantic_equivalence_proven"] is False for item in profiles)
+
+    markdown = render_markdown(summary)
+    assert "Profile visibility status: `collected`" in markdown
+    assert "`ruff_src_tests`: command=`python -m ruff check src tests`" in markdown
+    assert "`pre_commit_all`: command=`python -m pre_commit run -a`" in markdown
+    assert "inventory_claim_match=`true`" in markdown
+    assert "review_first=`false`" in markdown
+    assert "Patch application allowed: `false`" in markdown
+    assert "Security dismissal allowed: `false`" in markdown
+
+
+def test_runtime_proof_profile_visibility_fails_closed_on_untrusted_evidence() -> None:
+    proof = _multi_profile_isolated_proof()
+    proof["inventory_claim_match"] = False
+    proof["decision_boundary"]["git_inventory_verified"] = False
+    proof["proof_results"][1]["status"] = "failed"
+    proof["proof_results"][1]["exit_code"] = 1
+    proof["proof_results"][1]["timed_out"] = True
+    proof["proof_results"][1]["automation_allowed"] = True
+
+    summary = build_runtime_proof_artifacts(isolated_proof=proof)
+    isolated = summary["isolated_proof"]
+
+    assert isolated["profile_visibility_status"] == "review_first"
+    assert isolated["profile_review_first_count"] == 2
+    assert isolated["profile_authority_expansion_detected"] is True
+    assert all(item["review_first"] is True for item in isolated["profile_results"])
+
+    boundary = summary["decision_boundary"]
+    assert boundary["automation_allowed"] is False
+    assert boundary["patch_application_allowed"] is False
+    assert boundary["security_dismissal_allowed"] is False
+    assert boundary["merge_authorized"] is False
+    assert boundary["semantic_equivalence_proven"] is False
+
+
+def test_runtime_proof_profile_visibility_marks_missing_executed_results_incomplete() -> None:
+    proof = _isolated_proof()
+    proof["proof_summary"]["executed_count"] = 1
+    proof["proof_results"] = []
+
+    summary = build_runtime_proof_artifacts(isolated_proof=proof)
+
+    assert summary["isolated_proof"]["profile_visibility_status"] == "incomplete"
+    assert summary["isolated_proof"]["profile_results"] == []

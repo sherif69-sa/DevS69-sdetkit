@@ -27,12 +27,7 @@ SECURITY_FINDING_DIAGNOSIS_MODULE = "_".join(("security", "finding", "diagnosis"
 SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE = "_".join(
     ("security", "reviewed", "disposition", "history")
 )
-NEXT_RECOMMENDED_PR = "/".join(
-    (
-        "feature",
-        "-".join(("git", "proof", "profile", "visibility")),
-    )
-)
+NEXT_RECOMMENDED_PR = "none"
 
 SPINE_STAGES = (
     "evidence",
@@ -410,22 +405,23 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="git_inventory_collector",
-            role="derive changed-file inventories from fixed read-only Git queries",
-            status="partially_aligned",
-            stages=("evidence", "proof", "verifier"),
+            role="derive changed-file inventories from fixed read-only Git queries and expose per-profile current-head proof context",
+            status="aligned",
+            stages=("evidence", "proof", "verifier", "reporting"),
             existing_artifacts=(
                 "git-inventory.json",
                 "git-inventory.md",
+                "runtime-proof-artifacts.json",
+                "runtime-proof-artifacts.md",
             ),
             integration_points=(
                 "isolated_proof_runner",
                 "protected_verifier",
                 "replayable_benchmark_harness",
+                "pr_quality_runtime_proof_artifacts",
+                "pr_quality_action_report",
             ),
-            gaps=(
-                "workflow visibility uses Git-derived inventory only for a narrow allowlisted Ruff proof profile",
-            ),
-            recommended_next_action="expand Git-grounded PR Quality visibility to existing non-Ruff allowlisted proof profiles without changing authority",
+            recommended_next_action="preserve bounded multi-profile visibility and keep proof, patch, and merge authority disabled",
         ),
         _component(
             module="network_boundary",
