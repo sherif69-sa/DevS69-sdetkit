@@ -348,8 +348,8 @@ jobs:
               "",
               (
                   f"> 🔒 Authority: `{boundary}`. "
-                  "Evidence is advisory; a human merge decision "
-                  "is still required."
+                  "Evidence is advisory and does not authorize merge. "
+                  "A human merge decision is still required."
               ),
               "",
           ]

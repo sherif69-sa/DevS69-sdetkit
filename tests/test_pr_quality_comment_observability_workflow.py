@@ -1347,7 +1347,7 @@ def test_pr_quality_contributor_summary_keeps_trusted_topology() -> None:
     assert comment_key_name in publisher
     assert expected_comment_print in publisher
     assert "Open PR Quality Artifact Center" in publisher
-    assert "a human merge decision" in publisher
+    assert "A human merge decision is still required." in publisher
 
 
 def test_pr_quality_workflow_runs_existing_non_ruff_git_grounded_profile() -> None:
