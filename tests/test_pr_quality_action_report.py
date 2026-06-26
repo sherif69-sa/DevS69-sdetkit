@@ -3658,10 +3658,20 @@ def test_write_comment_body_writes_artifact_landing_page(tmp_path: Path) -> None
     index_html = review_index_out.read_text(encoding="utf-8")
     assert "<title>PR Quality Artifact Center</title>" in index_html
     assert "<h1>PR Quality Artifact Center</h1>" in index_html
-    assert 'href="pr-review-dashboard.html"' in index_html
-    assert 'href="pr-review-summary.md"' in index_html
-    assert 'href="pr-review-model.json"' in index_html
-    assert 'href="pr-comment-body.md"' in index_html
+    for artifact_path in (
+        "pr-review-dashboard.html",
+        "pr-review-summary.md",
+        "pr-review-model.json",
+        "pr-review-artifacts-manifest.json",
+        "pr-comment-body.md",
+    ):
+        assert f'data-open-artifact="{artifact_path}"' in index_html
+        assert f'data-download-artifact="{artifact_path}"' in index_html
+        assert f'href="{artifact_path}"' not in index_html
+    assert 'id="artifactDialog"' in index_html
+    assert "content_base64" in index_html
+    assert "URL.createObjectURL" in index_html
+    assert 'new TextDecoder("utf-8")' in index_html
     assert "Reporting-only" in index_html
     assert "does not authorize merge" in index_html
 

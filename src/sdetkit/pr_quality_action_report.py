@@ -4663,8 +4663,15 @@ def write_comment_body(
     review_index_written = False
     if review_index_out is not None:
         review_index_out.parent.mkdir(parents=True, exist_ok=True)
+        embedded_artifacts = _build_embedded_review_artifacts(
+            review_model=review_model,
+            comment_body=body,
+        )
         review_index_out.write_text(
-            render_pr_quality_artifact_index_html(review_model),
+            render_pr_quality_artifact_index_html(
+                review_model,
+                embedded_artifacts=embedded_artifacts,
+            ),
             encoding="utf-8",
         )
         review_index_written = True
@@ -5072,12 +5079,59 @@ def render_pr_quality_review_html(model: JsonObject) -> str:  # type: ignore[no-
     return html
 
 
+def _build_embedded_review_artifacts(
+    *,
+    review_model: JsonObject,
+    comment_body: str,
+) -> JsonObject:
+    manifest = build_pr_quality_artifacts_manifest(review_model)
+    return {
+        "pr-review-dashboard.html": {
+            "mime_type": "text/html;charset=utf-8",
+            "content": render_pr_quality_review_html(review_model),
+        },
+        "pr-review-summary.md": {
+            "mime_type": "text/markdown;charset=utf-8",
+            "content": render_pr_quality_review_summary(review_model),
+        },
+        "pr-review-model.json": {
+            "mime_type": "application/json;charset=utf-8",
+            "content": json.dumps(
+                review_model,
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+        },
+        "pr-review-artifacts-manifest.json": {
+            "mime_type": "application/json;charset=utf-8",
+            "content": json.dumps(
+                manifest,
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+        },
+        "pr-comment-body.md": {
+            "mime_type": "text/markdown;charset=utf-8",
+            "content": comment_body,
+        },
+    }
+
+
 _BASE_RENDER_PR_QUALITY_ARTIFACT_INDEX_HTML = render_pr_quality_artifact_index_html
 
 
-def render_pr_quality_artifact_index_html(model: JsonObject) -> str:  # type: ignore[no-redef]  # noqa: F811
+def render_pr_quality_artifact_index_html(  # type: ignore[no-redef]  # noqa: F811
+    model: JsonObject,
+    *,
+    embedded_artifacts: JsonObject | None = None,
+) -> str:
     if _as_dict(model.get("live_evidence")):
-        return render_live_product_dashboard(model)
+        return render_live_product_dashboard(
+            model,
+            embedded_artifacts=embedded_artifacts,
+        )
     return _BASE_RENDER_PR_QUALITY_ARTIFACT_INDEX_HTML(model)
 
 
