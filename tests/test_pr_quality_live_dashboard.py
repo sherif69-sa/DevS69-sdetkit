@@ -335,3 +335,49 @@ def test_product_dashboard_embeds_interactive_controls() -> None:
     assert "navigator.clipboard.writeText" in dashboard
     assert 'type="application/json" id="evidenceData"' in dashboard
     assert "No indicators match the current filter." in dashboard
+
+
+def test_product_dashboard_routes_bundle_to_workflow_artifacts_url() -> None:
+    model = _model()
+    model["live_evidence"] = _snapshot()
+    model["artifact_index"] = [
+        {
+            "path": "pr-review-dashboard.html",
+            "kind": "html",
+            "title": "Detailed review",
+            "description": "Detailed contributor review surface.",
+        },
+        {
+            "path": "pr-quality-comment",
+            "kind": "github_artifact",
+            "title": "Uploaded artifact bundle",
+            "description": "Full workflow artifact bundle.",
+        },
+    ]
+
+    dashboard = report.render_pr_quality_artifact_index_html(model)
+
+    assert 'href="pr-review-dashboard.html"' in dashboard
+    assert 'href="https://github.com/example/sdetkit/actions/runs/123456#artifacts"' in dashboard
+    assert 'href="pr-quality-comment"' not in dashboard
+    assert "Open workflow artifacts" in dashboard
+
+
+def test_product_dashboard_does_not_fabricate_bundle_file_link_without_run_url() -> None:
+    model = _model()
+    snapshot = _snapshot()
+    snapshot["provenance"]["artifacts_url"] = ""
+    model["live_evidence"] = snapshot
+    model["artifact_index"] = [
+        {
+            "path": "pr-quality-comment",
+            "kind": "github_artifact",
+            "title": "Uploaded artifact bundle",
+            "description": "Full workflow artifact bundle.",
+        }
+    ]
+
+    dashboard = report.render_pr_quality_artifact_index_html(model)
+
+    assert 'href="pr-quality-comment"' not in dashboard
+    assert "Artifact unavailable" in dashboard

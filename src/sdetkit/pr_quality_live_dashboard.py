@@ -636,18 +636,33 @@ def render_live_product_dashboard(model: JsonObject) -> str:
             "</div>"
         )
 
+    def artifact_link(item: JsonObject) -> str:
+        artifact_path = _text(item.get("path"))
+        artifact_kind = _text(item.get("kind") or item.get("format"))
+        if artifact_kind == "github_artifact":
+            artifacts_url = _text(provenance.get("artifacts_url"))
+            if artifacts_url:
+                return external_link(
+                    artifacts_url,
+                    "Open workflow artifacts",
+                    "button",
+                )
+            return '<span class="button">Artifact unavailable</span>'
+        return f'<a class="button" href="{safe(artifact_path)}">Open artifact</a>'
+
     artifact_cards = "\n".join(
-        (
-            '<article class="artifact-card">'
-            "<div>"
-            f'<div class="eyebrow">{safe(item.get("kind") or item.get("format") or "artifact")}</div>'
-            f"<h3>{safe(item.get('title') or item.get('path'))}</h3>"
-            f"<p>{safe(item.get('description') or item.get('surface') or 'Workflow artifact')}</p>"
-            "</div>"
-            f'<a class="button" href="{safe(item.get("path"))}">'
-            "Open artifact</a>"
-            f"<code>{safe(item.get('path'))}</code>"
-            "</article>"
+        "".join(
+            (
+                '<article class="artifact-card">',
+                "<div>",
+                f'<div class="eyebrow">{safe(item.get("kind") or item.get("format") or "artifact")}</div>',
+                f"<h3>{safe(item.get('title') or item.get('path'))}</h3>",
+                f"<p>{safe(item.get('description') or item.get('surface') or 'Workflow artifact')}</p>",
+                "</div>",
+                artifact_link(item),
+                f"<code>{safe(item.get('path'))}</code>",
+                "</article>",
+            )
         )
         for item in artifacts
     )
