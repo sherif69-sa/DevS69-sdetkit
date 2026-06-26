@@ -190,16 +190,21 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="pr_quality_action_report",
-            role="render operator-facing PR Quality status, evidence, trajectory, runtime-proof, trusted-history, and aggregate producer-vetted registry summaries",
+            role="render a reviewer-first interactive PR Quality console over status, evidence, trajectory, runtime proof, trusted history, and aggregate producer-vetted registry summaries",
             status="aligned",
             stages=("reporting", "trajectory", "proof", "history"),
-            existing_artifacts=("pr-comment-body.md", "pr-comment-metadata.json"),
+            existing_artifacts=(
+                "pr-comment-body.md",
+                "pr-comment-metadata.json",
+                "pr-review-summary.md",
+                "pr-review-dashboard.html",
+            ),
             integration_points=(
                 "check_intelligence",
                 "trajectory_store",
                 "pr_quality_runtime_proof_artifacts",
             ),
-            recommended_next_action="keep accepted-main registry context aggregate-only, advisory-only, and no-authority",
+            recommended_next_action="preserve human-readable decisions, conditional evidence disclosure, bot quick-actions, reporting-only authority, and the existing no-authority contract",
         ),
         _component(
             module="pr_quality_runtime_proof_artifacts",

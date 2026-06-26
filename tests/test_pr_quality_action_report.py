@@ -5913,3 +5913,270 @@ def test_pr_quality_comment_renders_git_grounded_profile_visibility() -> None:
     assert "inventory_claim_match=`true`" in text
     assert "git_inventory_verified=`true`" in text
     assert "review_first=`false`" in text
+
+
+def _review_console_ready_model() -> dict:
+    return report.build_pr_quality_review_model(
+        status="green",
+        evidence_signal_heading="Evidence proof signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "green",
+            "primary_blocker": {},
+            "recommended_actions": [],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+            "security_review": {
+                "collected": True,
+                "unresolved_findings": 0,
+            },
+            "code_scanning_review": {
+                "collected": True,
+                "collection_status": "collected",
+                "open_alerts": 0,
+                "current_alerts": 0,
+                "stale_alerts": 0,
+                "current_head_sha": "head-sha",
+                "findings": [],
+            },
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "integration_proof",
+                "surface": "workflow",
+                "title": "Workflow evidence changed",
+            },
+            "graph": {
+                "node_count": 1,
+                "review_first_count": 0,
+                "critical_count": 0,
+                "top_blocker": {
+                    "title": "Workflow evidence changed",
+                    "surface": "workflow",
+                    "action": "rerun_proof",
+                    "review_first": False,
+                },
+            },
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+
+def test_review_summary_is_reviewer_first_and_human_readable() -> None:
+    summary = report.render_pr_quality_review_summary(_review_console_ready_model())
+
+    assert "## Review at a glance" in summary
+    assert "✅ **Ready for human decision**" in summary
+    assert (
+        "**Do this now:** Review the changed evidence and make the final merge decision." in summary
+    )
+    assert "| `/check` | Re-run the standard validation checks |" in summary
+    assert "| `/quality` | Run the full quality and coverage gate |" in summary
+    assert "| `/doctor` | Diagnose the first concrete failure |" in summary
+    assert "| `/hint` | Show the compact reviewer checklist |" in summary
+    assert "<summary>🧾 Machine decision contract</summary>" in summary
+
+    glance = summary[summary.index("## Review at a glance") : summary.index("<details>")]
+    assert "review_and_decide" not in glance
+    assert "automated_proof_complete_human_decision_required" not in glance
+
+
+def test_review_summary_hides_false_failure_panel_on_ready_pr() -> None:
+    summary = report.render_pr_quality_review_summary(_review_console_ready_model())
+
+    assert "<details>\n<summary>🧭 Failure vector deep dive</summary>" in summary
+    assert "No active actionable failure exists for the current PR head." in summary
+    assert "no unknown failure fields are emitted" in summary
+    assert "<summary>🛡️ Security evidence</summary>" in summary
+    assert "GHAS / CodeQL blocker details" not in summary
+
+
+def test_review_summary_opens_blocker_evidence_and_keeps_authority_false() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=True,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {
+                "title": "Ruff check failed",
+                "surface": "workflow",
+                "action": "fix_lint",
+                "code": "ruff",
+                "path": "src/example.py",
+                "details": "unused import",
+            },
+            "recommended_actions": ["Fix the lint finding."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [
+                {
+                    "name": "quality",
+                    "command": "python -m pre_commit run -a",
+                    "actual_failure": "unused import",
+                    "failure_type": "lint",
+                    "failing_test_or_check": "F401",
+                    "owner_hint": "src/example.py",
+                    "affected_files": ["src/example.py"],
+                    "first_failure": {
+                        "line": "F401 unused import",
+                        "line_number": 4,
+                        "tool": "ruff",
+                        "kind": "lint",
+                    },
+                    "diagnosis": {
+                        "code": "RUFF_LINT_FAILURE",
+                        "title": "Ruff lint failed",
+                    },
+                }
+            ],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "workflow",
+                "title": "Workflow evidence changed",
+            },
+            "graph": {
+                "node_count": 1,
+                "review_first_count": 1,
+                "critical_count": 1,
+                "top_blocker": {
+                    "title": "Ruff check failed",
+                    "actual_failure": "unused import",
+                    "surface": "workflow",
+                    "action": "fix_lint",
+                    "review_first": True,
+                },
+            },
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+    summary = report.render_pr_quality_review_summary(model)
+
+    assert "🚨 **Blocked**" in summary
+    assert "<details open>" in summary
+    assert "<summary>🧭 Failure vector deep dive</summary>" in summary
+    assert "| Actual failure | `unused import` |" in summary
+    assert "Do not merge until the named blocker is resolved" in summary
+    assert "| Merge authorization | `false` |" in summary
+    assert "| Patch automation | `false` |" in summary
+    assert "| Security dismissal | `false` |" in summary
+    assert "reporting only" in summary.lower()
+
+
+def test_review_summary_filters_non_commands_from_proof_block() -> None:
+    model = _review_console_ready_model()
+    model["proof_to_rerun"] = [
+        "python -m pre_commit run -a",
+        "Review the current security check annotations for the PR.",
+        "Fix the flagged surface or dismiss a reviewed false positive with a reason.",
+    ]
+
+    summary = report.render_pr_quality_review_summary(model)
+    proof_start = summary.index("<summary>🧪 Optional verification</summary>")
+    proof_section = summary[proof_start : summary.index("</details>", proof_start)]
+
+    assert "python -m pre_commit run -a" in proof_section
+    assert "Review the current security check annotations" not in proof_section
+    assert "Fix the flagged surface" not in proof_section
+
+
+def test_review_summary_enriches_security_failure_from_ghas() -> None:
+    model = {
+        "decision": {
+            "status": "review_required",
+            "merge_assessment": "do_not_merge_until_blocker_resolved",
+            "next_action": "review",
+            "risk_surface": "security",
+            "signal_title": "Security check annotation requires review",
+            "comment_signal": "Evidence review signal",
+            "review_first_evidence": True,
+            "cleared_security_signal": False,
+            "failed_checks": 1,
+            "required_queued_checks": 0,
+            "required_startup_failures": 0,
+            "missing_required_contexts": 0,
+        },
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+        "primary_blocker": {
+            "title": "Security check annotation requires review",
+            "action": "review",
+        },
+        "failure_vector_signal": {
+            "source": "evidence_top_blocker",
+            "actual_failure": "Security check annotation requires review",
+            "failure_type": "unknown",
+            "failing_command": "unknown",
+            "failing_test_or_check": "unknown",
+            "owner_hint": "unknown",
+            "affected_files": [],
+            "safe_fix_candidate": False,
+            "safe_fix_allowed": False,
+            "reporting_only": True,
+        },
+        "ghas_blocker_details": {
+            "collected": True,
+            "collection_status": "collected",
+            "open_alerts": 1,
+            "current_alerts": 1,
+            "stale_alerts": 0,
+            "current_head_sha": "head-sha",
+            "dismissal_allowed": False,
+            "findings": [
+                {
+                    "number": "1448",
+                    "rule_id": "SEC_SECRET_PATTERN",
+                    "severity": "error",
+                    "location": "src/sdetkit/pr_quality_action_report.py:3121",
+                    "freshness": "current",
+                    "message": "Potential hardcoded credential",
+                    "proof_commands": [
+                        "python -m sdetkit security check --root . --format json",
+                        "Review the annotation.",
+                    ],
+                }
+            ],
+        },
+        "recommended_actions": [],
+        "proof_to_rerun": [
+            "python -m sdetkit security check --root . --format json",
+        ],
+        "failed_check_names": ["sdetkit-security-gate"],
+        "required_queued_check_names": [],
+        "required_startup_failure_names": [],
+        "missing_required_context_names": [],
+    }
+
+    summary = report.render_pr_quality_review_summary(model)
+
+    assert (
+        "**Do this now:** Review the current security finding, decide whether "
+        "to fix it or record a reviewed false-positive dismissal, then rerun "
+        "the gate." in summary
+    )
+    assert "| Actual failure | `Potential hardcoded credential` |" in summary
+    assert "| Failure type | `SEC_SECRET_PATTERN` |" in summary
+    assert (
+        "| Failing command | `python -m sdetkit security check --root . --format json` |" in summary
+    )
+    assert "| Failing test/check | `sdetkit-security-gate` |" in summary
+    assert "| Owner hint | `src/sdetkit/pr_quality_action_report.py:3121` |" in summary

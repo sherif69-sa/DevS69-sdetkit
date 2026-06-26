@@ -3060,10 +3060,48 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     authority = _as_dict(model.get("authority_boundary"))
     failure_vector_signal = _as_dict(model.get("failure_vector_signal"))
     ghas_blocker_details = _as_dict(model.get("ghas_blocker_details"))
+
+    def _looks_like_shell_command(value: str) -> bool:
+        parts = value.strip().split()
+        if not parts:
+            return False
+
+        while parts and "=" in parts[0]:
+            name, separator, _assigned_value = parts[0].partition("=")
+            if not separator or not name or not name.replace("_", "").isalnum():
+                break
+            parts = parts[1:]
+
+        if not parts:
+            return False
+
+        executable = parts[0]
+        allowed_executables = {
+            "bash",
+            "gh",
+            "make",
+            "mkdocs",
+            "mypy",
+            "nox",
+            "npm",
+            "pnpm",
+            "poetry",
+            "pre-commit",
+            "pytest",
+            "python",
+            "python3",
+            "ruff",
+            "sh",
+            "tox",
+            "uv",
+            "yarn",
+        }
+        return executable in allowed_executables or executable.startswith("./")
+
     proof_commands = [
-        str(command)
+        str(command).strip()
         for command in _as_list(model.get("proof_to_rerun"))
-        if isinstance(command, str) and command.strip()
+        if isinstance(command, str) and _looks_like_shell_command(command)
     ]
     recommended_actions = [
         str(item)
@@ -3117,6 +3155,34 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             "</details>",
         ]
 
+    def _human_token(value: object) -> str:
+        canonical_value = _review_model_scalar(value or "none")
+        labels = {
+            "review_and_decide": "Review the changed evidence and make the final merge decision",
+            "do_not_merge_until_blocker_resolved": "Do not merge until the named blocker is resolved",
+            "wait_for_required_checks": "Wait for required checks to finish",
+            "review_listed_evidence": "Review the listed evidence before merging",
+            "rerun_listed_proof": "Run the focused verification commands",
+            "refresh_stale_evidence": "Refresh stale evidence and rerun the gate",
+            "repair_invalid_evidence": "Repair the invalid evidence contract",
+            "automated_proof_complete_human_decision_required": (
+                "Automated proof is complete; a human merge decision is still required"
+            ),
+            "merge_blocked_required_checks_incomplete": (
+                "Merge is blocked while required checks are incomplete"
+            ),
+            "do_not_merge_until_evidence_reviewed": (
+                "Do not merge until the review-first evidence is resolved"
+            ),
+            "clear": "Clear",
+            "none": "None",
+            "unavailable": "Unavailable",
+        }
+        return labels.get(
+            canonical_value,
+            canonical_value.replace("_", " ").strip().capitalize(),
+        )
+
     failed_total = _count(decision.get("failed_checks"))
     queued_total = _count(decision.get("required_queued_checks"))
     startup_total = _count(decision.get("required_startup_failures"))
@@ -3124,6 +3190,32 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     stale_only_security_signal = bool(decision.get(STALE_ONLY_SECURITY_SIGNAL))
     review_state = _review_model_state(model)
     first_action = _review_model_scalar(decision.get("next_action") or "none")
+    first_blocker = _review_model_scalar(decision.get("primary_blocker") or "none")
+    merge_assessment = _review_model_scalar(decision.get("merge_assessment") or "unknown")
+    risk_surface = _review_model_scalar(decision.get("risk_surface") or "unknown")
+    signal_title = _review_model_scalar(decision.get("signal_title") or "none")
+
+    panel_rows = dict(_contributor_review_panel_rows(model))
+    required_summary = _review_model_scalar(panel_rows.get("Required checks") or "unknown")
+    security_summary = _review_model_scalar(panel_rows.get("Security posture") or "unknown")
+
+    state_icon = {
+        "waiting": "⏳",
+        "blocked": "🚨",
+        "review": "👀",
+        "ready": "✅",
+        "stale": "🟡",
+        "invalid": "❌",
+    }.get(review_state, "ℹ️")
+    state_label = _review_model_state_label(review_state).capitalize()
+    state_explanation = {
+        "waiting": "Required checks are still running; no merge decision should be made yet.",
+        "blocked": "A required proof contract is failing and blocks merge.",
+        "review": "Automated checks may be green, but named evidence still requires human review.",
+        "ready": "Required checks and security evidence are clear for the current head.",
+        "stale": "The evidence does not match the current head and must be refreshed.",
+        "invalid": "The review evidence contract is inconsistent or incomplete.",
+    }.get(review_state, "Review the evidence below before deciding.")
 
     failure_actual = _review_model_scalar(failure_vector_signal.get("actual_failure") or "none")
     failure_source = _review_model_scalar(failure_vector_signal.get("source") or "none")
@@ -3139,31 +3231,108 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         if isinstance(item, str) and item.strip()
     ]
 
+    ghas_findings = [
+        _as_dict(item) for item in _as_list(ghas_blocker_details.get("findings")) if _as_dict(item)
+    ]
+    if risk_surface == "security" and ghas_findings:
+        primary_security_finding = ghas_findings[0]
+        security_message = _review_model_scalar(primary_security_finding.get("message") or "")
+        security_rule = _review_model_scalar(primary_security_finding.get("rule_id") or "security")
+        security_location = _review_model_scalar(
+            primary_security_finding.get("location") or "unknown"
+        )
+        security_proof = [
+            str(command).strip()
+            for command in _as_list(primary_security_finding.get("proof_commands"))
+            if isinstance(command, str) and _looks_like_shell_command(command)
+        ]
+
+        if security_message:
+            failure_actual = security_message
+        if failure_type in {"", "none", "unknown"}:
+            failure_type = security_rule
+        if failing_command in {"", "none", "unknown"} and security_proof:
+            failing_command = security_proof[0]
+        if failing_test in {"", "none", "unknown"}:
+            failing_test = "sdetkit-security-gate"
+        if failure_owner in {"", "none", "unknown"}:
+            failure_owner = security_location
+
+        security_path = security_location.split(":", 1)[0]
+        if security_path and security_path != "unknown" and security_path not in affected_files:
+            affected_files.insert(0, security_path)
+
+    human_first_action = _human_token(first_action)
+    if first_action == "review" and risk_surface == "security":
+        human_first_action = (
+            "Review the current security finding, decide whether to fix it "
+            "or record a reviewed false-positive dismissal, then rerun the gate"
+        )
+
     active_blocker_open = review_state in {
         "blocked",
         "review",
         "stale",
         "invalid",
     }
-    failure_vector_open = active_blocker_open and failure_actual not in {"", "none"}
+    meaningful_failure_values = {
+        failure_actual,
+        failure_type,
+        failing_command,
+        failing_test,
+    } - {"", "none", "unknown"}
+    show_failure_vector = bool(
+        active_blocker_open
+        and (
+            meaningful_failure_values
+            or failed_total > 0
+            or bool(affected_files)
+            or bool(failure_vector_signal.get("safe_fix_candidate"))
+        )
+    )
     proof_open = active_blocker_open and bool(proof_commands)
-    ghas_findings = [
-        _as_dict(item) for item in _as_list(ghas_blocker_details.get("findings")) if _as_dict(item)
-    ]
     ghas_open = bool(ghas_findings) and (active_blocker_open or stale_only_security_signal)
 
     lines = [
         "# PR Quality Review Summary",
         "",
+        f"> {state_icon} **{state_label}** — {state_explanation}",
+        "",
+        "## Review at a glance",
+        "",
+        "| Area | Result |",
+        "|---|---|",
+        f"| Gate | {state_icon} **{state_label}** |",
+        f"| Required checks | **{_markdown_table_value(_human_token(required_summary))}** |",
+        f"| Security | **{_markdown_table_value(_human_token(security_summary))}** |",
+        f"| Merge guidance | {_markdown_table_value(_human_token(merge_assessment))} |",
+        f"| Risk focus | `{_markdown_table_value(risk_surface)}` — {_markdown_table_value(signal_title)} |",
+        "",
+        f"> **Do this now:** {human_first_action}.",
+        "",
+        "### Quick actions",
+        "",
+        "| Command | Purpose |",
+        "|---|---|",
+        "| `/check` | Re-run the standard validation checks |",
+        "| `/quality` | Run the full quality and coverage gate |",
+        "| `/doctor` | Diagnose the first concrete failure |",
+        "| `/hint` | Show the compact reviewer checklist |",
+        "",
+        "<details>",
+        "<summary>🧾 Machine decision contract</summary>",
+        "",
         "## Contributor decision",
         "",
         *_markdown_table(_contributor_review_panel_rows(model)),
+        "",
+        "</details>",
         "",
     ]
 
     if recommended_actions:
         lines.extend(["## Recommended actions", ""])
-        lines.extend(f"- {action}" for action in recommended_actions[:10])
+        lines.extend(f"- {action}" for action in recommended_actions[:5])
         lines.append("")
 
     lines.extend(["## Adaptive review details", ""])
@@ -3171,23 +3340,23 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     blocker_body = [
         "| Item | Value |",
         "|---|---|",
-        f"| Merge assessment | `{_review_model_scalar(decision.get('merge_assessment'))}` |",
-        f"| Next action | `{_review_model_scalar(decision.get('next_action'))}` |",
-        f"| Risk surface | `{_markdown_table_value(decision.get('risk_surface'))}` |",
-        f"| Signal title | `{_markdown_table_value(decision.get('signal_title'))}` |",
+        f"| Human merge guidance | {_markdown_table_value(_human_token(merge_assessment))} |",
+        f"| Human next action | {_markdown_table_value(human_first_action)} |",
+        f"| Merge assessment | `{_markdown_table_value(merge_assessment)}` |",
+        f"| Next action | `{_markdown_table_value(first_action)}` |",
+        f"| First blocker | `{_markdown_table_value(first_blocker)}` |",
+        f"| Risk surface | `{_markdown_table_value(risk_surface)}` |",
+        f"| Signal title | `{_markdown_table_value(signal_title)}` |",
         f"| Signal | `{_markdown_table_value(decision.get('comment_signal'))}` |",
         f"| Review-first evidence | `{_review_model_scalar(decision.get('review_first_evidence'))}` |",
         f"| Cleared security signal | `{_review_model_scalar(decision.get('cleared_security_signal'))}` |",
         f"| Stale-only security signal | `{str(stale_only_security_signal).lower()}` |",
         "",
+        "### Canonical next action",
+        "",
+        f"- `{first_action}`",
     ]
-    blocker_body.extend(
-        [
-            "### Canonical next action",
-            "",
-            f"- `{first_action}`",
-        ]
-    )
+
     additional_guidance = [
         action for action in recommended_actions if action and action != first_action
     ]
@@ -3202,7 +3371,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         "ready": "✅ Ready for human decision",
         "stale": "🟡 Stale evidence / refresh required",
         "invalid": "❌ Invalid review evidence",
-    }.get(review_state, "Decision details")
+    }.get(review_state, "Decision evidence")
 
     lines.extend(
         _details(
@@ -3213,31 +3382,46 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     )
     lines.append("")
 
-    failure_body = [
-        "| Failure field | Value |",
-        "|---|---|",
-        f"| Source | `{_markdown_table_value(failure_source)}` |",
-        f"| Actual failure | `{_markdown_table_value(failure_actual)}` |",
-        f"| Failure type | `{_markdown_table_value(failure_type)}` |",
-        f"| Failing command | `{_markdown_table_value(failing_command)}` |",
-        f"| Failing test/check | `{_markdown_table_value(failing_test)}` |",
-        f"| Owner hint | `{_markdown_table_value(failure_owner)}` |",
-        f"| Safe-fix candidate | `{_review_model_scalar(failure_vector_signal.get('safe_fix_candidate'))}` |",
-        f"| Safe-fix allowed | `{_review_model_scalar(failure_vector_signal.get('safe_fix_allowed'))}` |",
-        f"| Reporting only | `{_review_model_scalar(failure_vector_signal.get('reporting_only'))}` |",
-    ]
-    if affected_files:
-        failure_body.extend(["", "### Affected files", ""])
-        failure_body.extend(f"- `{item}`" for item in affected_files[:10])
+    if show_failure_vector:
+        failure_body = [
+            "| Failure field | Value |",
+            "|---|---|",
+            f"| Source | `{_markdown_table_value(failure_source)}` |",
+            f"| Actual failure | `{_markdown_table_value(failure_actual)}` |",
+            f"| Failure type | `{_markdown_table_value(failure_type)}` |",
+            f"| Failing command | `{_markdown_table_value(failing_command)}` |",
+            f"| Failing test/check | `{_markdown_table_value(failing_test)}` |",
+            f"| Owner hint | `{_markdown_table_value(failure_owner)}` |",
+            f"| Safe-fix candidate | `{_review_model_scalar(failure_vector_signal.get('safe_fix_candidate'))}` |",
+            f"| Safe-fix allowed | `{_review_model_scalar(failure_vector_signal.get('safe_fix_allowed'))}` |",
+            f"| Reporting only | `{_review_model_scalar(failure_vector_signal.get('reporting_only'))}` |",
+        ]
+        if affected_files:
+            failure_body.extend(["", "### Affected files", ""])
+            failure_body.extend(f"- `{item}`" for item in affected_files[:10])
 
-    lines.extend(
-        _details(
-            "🧭 Failure vector deep dive",
-            failure_body,
-            open_by_default=failure_vector_open,
+        lines.extend(
+            _details(
+                "🧭 Failure vector deep dive",
+                failure_body,
+                open_by_default=True,
+            )
         )
-    )
-    lines.append("")
+        lines.append("")
+    else:
+        no_failure_body = [
+            "> No active actionable failure exists for the current PR head.",
+            "",
+            "The compatibility panel is retained for audit consumers, but no unknown failure fields are emitted.",
+        ]
+        lines.extend(
+            _details(
+                "🧭 Failure vector deep dive",
+                no_failure_body,
+                open_by_default=False,
+            )
+        )
+        lines.append("")
 
     ghas_body = [
         "| Item | Value |",
@@ -3250,11 +3434,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         f"| Current head SHA | `{_markdown_table_value(ghas_blocker_details.get('current_head_sha') or 'unknown')}` |",
         f"| Dismissal allowed | `{_review_model_scalar(ghas_blocker_details.get('dismissal_allowed'))}` |",
     ]
-    if (
-        _int(ghas_blocker_details.get("open_alerts")) > 0
-        and _int(ghas_blocker_details.get("current_alerts")) == 0
-        and _int(ghas_blocker_details.get("stale_alerts")) > 0
-    ):
+    if stale_only_security_signal:
         ghas_body.extend(
             [
                 "",
@@ -3296,13 +3476,18 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             if commands:
                 ghas_body.extend(["", "Proof:", "", "```bash", *commands[:5], "```", ""])
 
+    security_title = (
+        "🛡️ GHAS / CodeQL refresh details"
+        if stale_only_security_signal
+        else (
+            "🛡️ GHAS / CodeQL blocker details"
+            if _int(ghas_blocker_details.get("current_alerts")) > 0
+            else "🛡️ Security evidence"
+        )
+    )
     lines.extend(
         _details(
-            (
-                "🛡️ GHAS / CodeQL refresh details"
-                if stale_only_security_signal
-                else "🛡️ GHAS / CodeQL blocker details"
-            ),
+            security_title,
             ghas_body,
             open_by_default=ghas_open,
         )
@@ -3312,11 +3497,14 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     proof_section_title = (
         "🧪 Optional verification" if review_state == "ready" else "🧪 Proof to rerun"
     )
-    proof_body: list[str] = []
+    proof_body: list[str] = [
+        "> Copy and run the focused commands below when verification is needed.",
+        "",
+    ]
     if proof_commands:
-        proof_body.extend(["```bash", *proof_commands, "```"])
+        proof_body.extend(["```bash", *proof_commands[:5], "```"])
     else:
-        proof_body.append("`none`")
+        proof_body.append("`No additional command is required.`")
     lines.extend(
         _details(
             proof_section_title,
@@ -3343,19 +3531,26 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     )
     lines.append("")
 
+    authority_body = [
+        "| Authority | Value |",
+        "|---|---|",
+        f"| Boundary mode | `{_review_model_scalar(authority.get('boundary_mode'))}` |",
+        f"| Patch automation | `{_review_model_scalar(authority.get('patch_automation'))}` |",
+        f"| Security dismissal | `{_review_model_scalar(authority.get('security_dismissal'))}` |",
+        f"| Merge authorization | `{_review_model_scalar(authority.get('merge_authorization'))}` |",
+        f"| Semantic equivalence claim | `{_review_model_scalar(authority.get('semantic_equivalence_claim'))}` |",
+    ]
     lines.extend(
         [
-            "## Authority boundary",
+            "> 🔒 **Authority boundary:** reporting only. This gate does not authorize merge, patch code, or dismiss security findings.",
             "",
-            "| Authority | Value |",
-            "|---|---|",
-            f"| Boundary mode | `{_review_model_scalar(authority.get('boundary_mode'))}` |",
-            f"| Patch automation | `{_review_model_scalar(authority.get('patch_automation'))}` |",
-            f"| Security dismissal | `{_review_model_scalar(authority.get('security_dismissal'))}` |",
-            f"| Merge authorization | `{_review_model_scalar(authority.get('merge_authorization'))}` |",
-            f"| Semantic equivalence claim | `{_review_model_scalar(authority.get('semantic_equivalence_claim'))}` |",
+            *_details(
+                "🔒 Full authority boundary",
+                authority_body,
+                open_by_default=False,
+            ),
             "",
-            "> This summary is generated from the structured PR Quality review model. It is reporting-only and does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.",
+            "> This summary is generated from the structured PR Quality review model and preserves the existing trusted-publisher contract.",
         ]
     )
 
