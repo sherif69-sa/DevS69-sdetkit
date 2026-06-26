@@ -1071,6 +1071,134 @@ jobs:
             .sdetkit/adaptive-sentinel/
           if-no-files-found: ignore
 
+      - name: Verify PR quality artifact bundle link integrity
+        if: always()
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          from html.parser import HTMLParser
+          from pathlib import Path
+          from urllib.parse import urlparse
+
+          root = Path("build/pr-quality")
+          manifest_path = root / "pr-review-artifacts-manifest.json"
+          index_path = root / "index.html"
+
+          if not manifest_path.is_file():
+              raise SystemExit(
+                  f"PR Quality artifact manifest is missing: {manifest_path}"
+              )
+          if not index_path.is_file():
+              raise SystemExit(
+                  f"PR Quality artifact index is missing: {index_path}"
+              )
+
+          manifest = json.loads(
+              manifest_path.read_text(encoding="utf-8")
+          )
+          artifacts = manifest.get("artifacts")
+          if not isinstance(artifacts, list) or not artifacts:
+              raise SystemExit(
+                  "PR Quality artifact manifest has no artifact entries"
+              )
+
+          local_manifest_paths: list[str] = []
+          for item in artifacts:
+              if not isinstance(item, dict):
+                  raise SystemExit(
+                      "PR Quality artifact manifest contains a non-object entry"
+                  )
+              artifact_path = str(item.get("path") or "").strip()
+              artifact_kind = str(
+                  item.get("kind") or item.get("format") or ""
+              ).strip()
+              if not artifact_path:
+                  raise SystemExit(
+                      "PR Quality artifact manifest contains an empty path"
+                  )
+              if artifact_kind == "github_artifact":
+                  continue
+
+              relative = Path(artifact_path)
+              if relative.is_absolute() or ".." in relative.parts:
+                  raise SystemExit(
+                      "PR Quality artifact manifest contains an unsafe "
+                      f"local path: {artifact_path}"
+                  )
+              local_manifest_paths.append(artifact_path)
+
+          missing_manifest_paths = [
+              artifact_path
+              for artifact_path in local_manifest_paths
+              if not (root / artifact_path).is_file()
+          ]
+          if missing_manifest_paths:
+              raise SystemExit(
+                  "PR Quality artifact manifest references missing files: "
+                  + ", ".join(missing_manifest_paths)
+              )
+
+          class LinkCollector(HTMLParser):
+              def __init__(self) -> None:
+                  super().__init__()
+                  self.hrefs: list[str] = []
+
+              def handle_starttag(
+                  self,
+                  tag: str,
+                  attrs: list[tuple[str, str | None]],
+              ) -> None:
+                  if tag != "a":
+                      return
+                  for name, value in attrs:
+                      if name == "href" and value:
+                          self.hrefs.append(value)
+
+          collector = LinkCollector()
+          collector.feed(index_path.read_text(encoding="utf-8"))
+
+          local_index_links: list[str] = []
+          for href in collector.hrefs:
+              parsed = urlparse(href)
+              if href.startswith("#") or parsed.scheme in {
+                  "http",
+                  "https",
+                  "mailto",
+              }:
+                  continue
+              relative = Path(parsed.path)
+              if relative.is_absolute() or ".." in relative.parts:
+                  raise SystemExit(
+                      "PR Quality artifact index contains an unsafe "
+                      f"local link: {href}"
+                  )
+              local_index_links.append(parsed.path)
+
+          missing_index_links = [
+              href
+              for href in local_index_links
+              if not (root / href).is_file()
+          ]
+          if missing_index_links:
+              raise SystemExit(
+                  "PR Quality artifact index contains dead local links: "
+                  + ", ".join(missing_index_links)
+              )
+
+          print(
+              "artifact_manifest_local_path_count="
+              f"{len(local_manifest_paths)}"
+          )
+          print(
+              "artifact_index_local_link_count="
+              f"{len(local_index_links)}"
+          )
+          integrity_marker = "artifact_bundle_" + "link_integrity=" + "passed"
+          print(integrity_marker)
+          PY
+
       - name: Upload PR quality evidence artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
@@ -1079,6 +1207,7 @@ jobs:
           name: pr-quality-comment
           path: |
             build/pr-quality/index.html
+            build/pr-quality/pr-review-dashboard.html
             build/pr-quality/pr-review-artifacts-manifest.json
             build/pr-quality/pr-comment-body.md
             build/pr-quality/pr-comment-metadata.json

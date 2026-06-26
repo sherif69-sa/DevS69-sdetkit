@@ -1349,3 +1349,34 @@ def test_pr_quality_workflow_runs_existing_non_ruff_git_grounded_profile() -> No
     assert "--profile pre_commit_all" in invocation
     assert invocation.count("--profile ") == 2
     assert "--command" not in invocation
+
+
+def test_pr_quality_comment_workflow_uploads_visual_dashboard_file() -> None:
+    text = _workflow_text()
+    upload_start = text.index("- name: Upload PR quality evidence artifacts")
+    upload_end = text.index(
+        "- name: Build PR quality publisher handoff",
+        upload_start,
+    )
+    upload_step = text[upload_start:upload_end]
+
+    assert "build/pr-quality/index.html" in upload_step
+    assert "build/pr-quality/pr-review-dashboard.html" in upload_step
+    assert "build/pr-quality/pr-review-artifacts-manifest.json" in upload_step
+
+
+def test_pr_quality_comment_workflow_verifies_artifact_links_before_upload() -> None:
+    text = _workflow_text()
+    verify_step = text.index("- name: Verify PR quality artifact bundle link integrity")
+    upload_step = text.index("- name: Upload PR quality evidence artifacts")
+
+    assert verify_step < upload_step
+    verifier = text[verify_step:upload_step]
+    assert "pr-review-artifacts-manifest.json" in verifier
+    assert "index.html" in verifier
+    assert "HTMLParser" in verifier
+    assert 'artifact_kind == "github_artifact"' in verifier
+    assert "missing_manifest_paths" in verifier
+    assert "missing_index_links" in verifier
+    assert '"artifact_bundle_" + "link_integrity=" + "passed"' in verifier
+    assert "print(integrity_marker)" in verifier
