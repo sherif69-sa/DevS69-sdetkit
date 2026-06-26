@@ -555,6 +555,95 @@ def _failed_step_evidence_lines(payload: JsonObject, *, prefix: str = "  - ") ->
     return lines
 
 
+def _exact_failure_quality_lines(
+    payload: JsonObject,
+    *,
+    prefix: str = "  - ",
+) -> list[str]:
+    first_failure = _as_dict(payload.get("first_failure"))
+    quality = _as_dict(first_failure.get("evidence_quality"))
+    if not quality:
+        return []
+
+    confidence = _string(quality.get("confidence") or "unknown")
+    source = _string(quality.get("source") or "unknown")
+    actionable = str(bool(quality.get("actionable", False))).lower()
+    uncertainty = [_string(item) for item in _as_list(quality.get("uncertainty")) if _string(item)]
+
+    lines = [
+        f"{prefix}Exact failure confidence: `{confidence}`",
+        f"{prefix}Exact failure source: `{source}`",
+        f"{prefix}Exact failure actionable: `{actionable}`",
+    ]
+    if uncertainty:
+        lines.append(
+            f"{prefix}Exact failure uncertainty: "
+            + "; ".join(f"`{item}`" for item in uncertainty[:5])
+        )
+    else:
+        lines.append(f"{prefix}Exact failure uncertainty: `none`")
+    return lines
+
+
+def _remediation_eligibility_lines(
+    payload: JsonObject,
+    *,
+    prefix: str = "  - ",
+) -> list[str]:
+    remediation = _as_dict(payload.get("safe_remediation"))
+    if not remediation:
+        return []
+
+    category = _string(remediation.get("category") or "unknown")
+    strategy = _string(remediation.get("strategy") or "unknown")
+    safe = str(bool(remediation.get("safe_to_auto_fix", False))).lower()
+    human_review = str(bool(remediation.get("requires_human_review", True))).lower()
+    auto_fix_now = str(bool(remediation.get("auto_fix_allowed_now", False))).lower()
+    patch_allowed = str(bool(remediation.get("patch_application_allowed", False))).lower()
+    merge_authorized = str(bool(remediation.get("merge_authorized", False))).lower()
+    reason = _string(remediation.get("reason") or "none")
+
+    lines = [
+        f"{prefix}Remediation eligibility: `{category}`",
+        f"{prefix}Remediation strategy: `{strategy}`",
+        f"{prefix}Safe-fix candidate: `{safe}`",
+        f"{prefix}Human review required: `{human_review}`",
+        f"{prefix}Auto-fix allowed now: `{auto_fix_now}`",
+        f"{prefix}Patch application allowed: `{patch_allowed}`",
+        f"{prefix}Merge authorized: `{merge_authorized}`",
+        f"{prefix}Remediation reason: {reason}",
+    ]
+    if bool(remediation.get("safe_to_auto_fix", False)):
+        lines.extend(
+            [
+                f"{prefix}Safe remediation: `{strategy}`",
+                f"{prefix}Safe reason: `{reason}`",
+            ]
+        )
+
+    affected_files = [
+        _string(item) for item in _as_list(remediation.get("affected_files")) if _string(item)
+    ]
+    if affected_files:
+        lines.append(
+            f"{prefix}Remediation affected files: "
+            + ", ".join(f"`{item}`" for item in affected_files[:8])
+        )
+    else:
+        lines.append(f"{prefix}Remediation affected files: `none`")
+
+    proof_commands = [
+        _string(item) for item in _as_list(remediation.get("proof_commands")) if _string(item)
+    ]
+    if proof_commands:
+        lines.append(f"{prefix}Remediation proof commands:")
+        lines.extend(f"{prefix}  - `{item}`" for item in proof_commands[:5])
+    else:
+        lines.append(f"{prefix}Remediation proof commands: `none`")
+
+    return lines
+
+
 def _failed_check_lines(check_intelligence: JsonObject) -> list[str]:
     failed = [_as_dict(item) for item in _as_list(check_intelligence.get("failed_checks"))]
     if not failed:
@@ -578,14 +667,10 @@ def _failed_check_lines(check_intelligence: JsonObject) -> list[str]:
             lines.append(f"  - First failure: `{first_line}`")
             lines.append(f"  - Failure location: `{location}`")
             lines.append(f"  - Failure tool/kind: `{tool}` / `{kind}`")
+        lines.extend(_exact_failure_quality_lines(item))
         lines.extend(_failed_step_evidence_lines(item))
         lines.extend(_artifact_evidence_lines(item))
-        safe_remediation = _as_dict(item.get("safe_remediation"))
-        if bool(safe_remediation.get("safe_to_auto_fix", False)):
-            strategy = _string(safe_remediation.get("strategy") or "unknown")
-            reason = _string(safe_remediation.get("reason") or "approved safe remediation")
-            lines.append(f"  - Safe remediation: `{strategy}`")
-            lines.append(f"  - Safe reason: `{reason}`")
+        lines.extend(_remediation_eligibility_lines(item))
         formatter_files = [
             _string(path) for path in _as_list(item.get("formatter_changed_files")) if _string(path)
         ]
@@ -641,14 +726,10 @@ def _primary_blocker_lines(primary: JsonObject) -> list[str]:
         lines.append(f"- First failure: `{first_line}`")
         lines.append(f"- Failure location: `{location}`")
         lines.append(f"- Failure tool/kind: `{tool}` / `{kind}`")
+    lines.extend(_exact_failure_quality_lines(primary, prefix="- "))
     lines.extend(_failed_step_evidence_lines(primary, prefix="- "))
     lines.extend(_artifact_evidence_lines(primary, prefix="- "))
-    safe_remediation = _as_dict(primary.get("safe_remediation"))
-    if bool(safe_remediation.get("safe_to_auto_fix", False)):
-        strategy = _string(safe_remediation.get("strategy") or "unknown")
-        reason = _string(safe_remediation.get("reason") or "approved safe remediation")
-        lines.append(f"- Safe remediation: `{strategy}`")
-        lines.append(f"- Safe reason: `{reason}`")
+    lines.extend(_remediation_eligibility_lines(primary, prefix="- "))
 
     formatter_files = [
         _string(path) for path in _as_list(primary.get("formatter_changed_files")) if _string(path)

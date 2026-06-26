@@ -195,3 +195,55 @@ def test_safe_remediation_review_first_preserves_no_automation_boundary() -> Non
     assert result["safe_to_auto_fix"] is False
     assert result["strategy"] == "review_first"
     _assert_no_automation_boundary(result)
+
+
+def test_formatting_safe_fix_requires_high_confidence_exact_failure() -> None:
+    from sdetkit.safe_remediation_eligibility import classify_check_failure
+
+    uncertain = classify_check_failure(
+        name="ruff format",
+        diagnosis={"code": "PRE_COMMIT_FORMAT_DRIFT"},
+        first_failure={
+            "line": "Would reformat: src/sdetkit/example.py",
+            "tool": "ruff",
+            "kind": "format_drift",
+            "evidence_quality": {
+                "confidence": "medium",
+                "actionable": False,
+                "source": "generic_log_signal",
+                "uncertainty": ["formatter owner file is uncertain"],
+            },
+        },
+        log_text="Would reformat: src/sdetkit/example.py",
+    )
+
+    assert uncertain["safe_to_auto_fix"] is False
+    assert uncertain["strategy"] == "review_first"
+    assert uncertain["category"] == "review_first"
+    assert uncertain["exact_failure_evidence"]["confidence"] == "medium"
+    assert uncertain["exact_failure_evidence"]["actionable"] is False
+    assert "high-confidence" in uncertain["reason"]
+
+    exact = classify_check_failure(
+        name="ruff format",
+        diagnosis={"code": "PRE_COMMIT_FORMAT_DRIFT"},
+        first_failure={
+            "line": "Would reformat: src/sdetkit/example.py",
+            "tool": "ruff",
+            "kind": "format_drift",
+            "evidence_quality": {
+                "confidence": "high",
+                "actionable": True,
+                "source": "formatter_log",
+                "uncertainty": [],
+            },
+        },
+        log_text="Would reformat: src/sdetkit/example.py",
+    )
+
+    assert exact["safe_to_auto_fix"] is True
+    assert exact["category"] == "formatting_only"
+    assert exact["exact_failure_evidence"]["confidence"] == "high"
+    assert exact["auto_fix_allowed_now"] is False
+    assert exact["patch_application_allowed"] is False
+    assert exact["merge_authorized"] is False
