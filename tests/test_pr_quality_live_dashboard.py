@@ -289,20 +289,20 @@ def test_product_dashboard_matches_professional_reference_contract() -> None:
     dashboard = report.render_pr_quality_artifact_index_html(model)
 
     assert "<title>PR Quality Artifact Center</title>" in dashboard
-    assert 'class="app"' in dashboard
-    assert 'class="sidebar"' in dashboard
-    assert 'id="dashboardSearch"' in dashboard
-    assert 'id="themeButton"' in dashboard
-    assert 'class="metric-grid"' in dashboard
-    assert 'id="indicatorGrid"' in dashboard
-    assert 'id="evidenceDialog"' in dashboard
-    assert 'data-status-filter="clear"' in dashboard
-    assert 'data-status-filter="attention"' in dashboard
-    assert 'data-status-filter="unavailable"' in dashboard
-    assert "Evidence lineage" in dashboard
-    assert "Product artifacts" in dashboard
-    assert "Decision observation" in dashboard
-    assert "Authority boundary" in dashboard
+    assert "Review Experience V2" in dashboard
+    assert 'class="shell"' in dashboard
+    assert 'id="overview"' in dashboard
+    assert 'class="health-grid"' in dashboard
+    assert 'id="review-focus"' in dashboard
+    assert "What needs your attention" in dashboard
+    assert "From collection to review" in dashboard
+    assert 'id="artifactSearch"' in dashboard
+    assert 'id="artifactList"' in dashboard
+    assert "Open only what you need" in dashboard
+    assert "Details stay collapsed" in dashboard
+    assert "Machine decision contract — YAML view" in dashboard
+    assert "Reporting-only authority." in dashboard
+    assert 'class="sidebar"' not in dashboard
     assert "pr-review-model.json" in dashboard
     assert "pr-review-dashboard.html" in dashboard
 
@@ -314,7 +314,7 @@ def test_product_dashboard_is_run_bound_not_fixture_driven() -> None:
     dashboard = report.render_pr_quality_artifact_index_html(model)
 
     assert "PR #1879" in dashboard
-    assert "Head head-sha" in dashboard
+    assert "Head <code>head-sha</code>" in dashboard
     assert "Workflow run 123456" in dashboard
     assert "actions/runs/123456" in dashboard
     assert "head_binding_status" in dashboard
@@ -329,12 +329,17 @@ def test_product_dashboard_embeds_interactive_controls() -> None:
 
     dashboard = report.render_pr_quality_artifact_index_html(model)
 
-    assert "function applyFilters()" in dashboard
-    assert "function openEvidence(id)" in dashboard
-    assert 'localStorage.setItem("sdet-live-theme"' in dashboard
+    assert "function filterArtifacts()" in dashboard
+    assert "function openArtifact(path)" in dashboard
+    assert "function toYaml(value,depth=0)" in dashboard
+    assert "function markdownDocument(source)" in dashboard
+    assert "function moveArtifact(offset)" in dashboard
+    assert 'localStorage.setItem("sdet-review-theme"' in dashboard
     assert "navigator.clipboard.writeText" in dashboard
     assert 'type="application/json" id="evidenceData"' in dashboard
-    assert "No indicators match the current filter." in dashboard
+    assert 'data-artifact-view="formatted"' in dashboard
+    assert 'data-artifact-view="raw"' in dashboard
+    assert 'id="fullscreenArtifact"' in dashboard
 
 
 def test_product_dashboard_routes_bundle_to_workflow_artifacts_url() -> None:
@@ -456,3 +461,60 @@ def test_product_dashboard_never_emits_dead_relative_link_for_unembedded_file() 
 
     assert 'href="not-embedded.json"' not in dashboard
     assert "Download full bundle" in dashboard
+
+
+def test_product_dashboard_json_artifact_is_yaml_first_with_raw_fallback() -> None:
+    model = _model()
+    model["live_evidence"] = _snapshot()
+    model["artifact_index"] = [
+        {
+            "path": "pr-review-model.json",
+            "kind": "json",
+            "title": "Review model",
+            "description": "Machine-readable review evidence.",
+        }
+    ]
+
+    dashboard = report.render_pr_quality_artifact_index_html(
+        model,
+        embedded_artifacts={
+            "pr-review-model.json": {
+                "mime_type": "application/json;charset=utf-8",
+                "content": '{"review":{"state":"ready"}}\n',
+            }
+        },
+    )
+
+    assert "JSON opens as YAML first" in dashboard
+    assert "YAML / Preview" in dashboard
+    assert "Raw source" in dashboard
+    assert "toYaml(JSON.parse(content))" in dashboard
+    assert 'data-open-artifact="pr-review-model.json"' in dashboard
+    assert 'href="pr-review-model.json"' not in dashboard
+
+
+def test_product_dashboard_keeps_technical_depth_collapsed() -> None:
+    model = _model()
+    model["live_evidence"] = _snapshot()
+
+    dashboard = report.render_pr_quality_artifact_index_html(model)
+
+    assert "<details" in dashboard
+    assert "Observed evidence facts" in dashboard
+    assert "Machine decision contract — YAML view" in dashboard
+    assert "contractYaml" in dashboard
+    assert "Copy YAML" in dashboard
+    assert "<details open" not in dashboard
+
+
+def test_product_dashboard_preserves_reporting_only_authority() -> None:
+    model = _model()
+    model["live_evidence"] = _snapshot()
+
+    dashboard = report.render_pr_quality_artifact_index_html(model)
+
+    assert "Reporting-only authority." in dashboard
+    assert "does not authorize merge" in dashboard
+    assert '"merge_authorized": false' in dashboard
+    assert '"patch_automation": false' in dashboard
+    assert '"security_dismissal": false' in dashboard

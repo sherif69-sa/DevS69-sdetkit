@@ -232,33 +232,140 @@ jobs:
 
           mkdir -p "$publish_dir"
 
-          printf '### SDET Quality Gate\n\n' > "$body_path"
-          printf '> Trusted publisher verified the handoff for PR #%s at head `%s` from workflow run `%s`. Evidence is advisory and does not authorize merge.\n\n' "$PR_NUMBER" "$EXPECTED_HEAD_SHA" "$SOURCE_RUN_ID" >> "$body_path"
+          BODY_PATH="$body_path" \
+          PR_NUMBER="$PR_NUMBER" \
+          EXPECTED_HEAD_SHA="$EXPECTED_HEAD_SHA" \
+          SOURCE_RUN_ID="$SOURCE_RUN_ID" \
+          REPOSITORY="$REPOSITORY" \
+          python3 - <<'PYCOMMENT'
+          from __future__ import annotations
 
-          if [ -s build/pr-quality/pr-review-summary.md ]; then
-            cat build/pr-quality/pr-review-summary.md >> "$body_path"
-          else
-            cat build/pr-quality/pr-comment-body.md >> "$body_path"
-          fi
+          import json
+          import os
+          from pathlib import Path
 
-          cat >> "$body_path" <<'MARKDOWN'
+          model = json.loads(
+              Path(
+                  "build/pr-quality/pr-review-model.json"
+              ).read_text(encoding="utf-8")
+          )
+          decision = model.get("decision") or {}
+          snapshot = model.get("live_evidence") or {}
+          provenance = snapshot.get("provenance") or {}
+          authority = snapshot.get("authority_boundary") or {}
+          facts = {
+              str(item.get("id") or ""): item
+              for item in snapshot.get("facts") or []
+              if isinstance(item, dict)
+          }
 
-          ---
+          review_state = str(
+              decision.get("review_state") or "unknown"
+          )
+          state_labels = {
+              "ready": "✅ Ready for human review",
+              "waiting": "⏳ Waiting for CI",
+              "blocked": "⛔ Blocked",
+              "review": "🟣 Human review required",
+              "stale": "⚠️ Stale evidence",
+              "invalid": "❌ Invalid evidence",
+          }
+          status_labels = {
+              "clear": "✅ Clear",
+              "attention": "⚠️ Needs attention",
+              "unavailable": "➖ Unavailable",
+          }
 
-          <details>
-          <summary><strong>PR Quality product artifacts</strong></summary>
+          def fact_status(fact_id: str) -> str:
+              fact = facts.get(fact_id) or {}
+              status = str(
+                  fact.get("status") or "unavailable"
+              )
+              return status_labels.get(
+                  status,
+                  status.replace("_", " ").title(),
+              )
 
-          - `index.html`: artifact landing page.
-          - `pr-review-artifacts-manifest.json`: machine-readable artifact bundle manifest.
-          - `pr-review-summary.md`: concise human review panel.
-          - `pr-review-model.json`: machine-readable review model.
-          - `pr-review-dashboard.html`: browser-ready review dashboard.
-          - `pr-comment-body.md`: full raw evidence body retained in the artifact bundle.
-          - `pr-quality-comment`: uploaded artifact bundle for full diagnostic evidence.
+          repository = os.environ["REPOSITORY"]
+          run_id = os.environ["SOURCE_RUN_ID"]
+          artifact_url = str(
+              provenance.get("artifacts_url")
+              or (
+                  f"https://github.com/{repository}/"
+                  f"actions/runs/{run_id}#artifacts"
+              )
+          )
+          head = os.environ["EXPECTED_HEAD_SHA"]
+          risk = str(
+              decision.get("risk_surface") or "not_collected"
+          ).replace("_", " ").title()
+          boundary = str(
+              authority.get("boundary_mode")
+              or "reporting_only"
+          ).replace("_", " ")
 
-          </details>
-
-          MARKDOWN
+          lines = [
+              "### SDET Quality Gate",
+              "",
+              (
+                  "> Trusted publisher verified the exact-head "
+                  f"handoff for PR #{os.environ['PR_NUMBER']} "
+                  f"at `{head}` from workflow run `{run_id}`."
+              ),
+              "",
+              "## " + state_labels.get(
+                  review_state,
+                  review_state.replace("_", " ").title(),
+              ),
+              "",
+              "| Review signal | Result |",
+              "|---|---|",
+              f"| Exact head | `{head[:12]}` |",
+              (
+                  "| Required checks | "
+                  + fact_status("required_checks")
+                  + " |"
+              ),
+              "| Security | " + fact_status("security") + " |",
+              (
+                  "| Runtime proof | "
+                  + fact_status("runtime_proof")
+                  + " |"
+              ),
+              (
+                  "| Artifact integrity | "
+                  + fact_status("artifact_inventory")
+                  + " |"
+              ),
+              f"| Risk focus | {risk} |",
+              "",
+              (
+                  "**Review the complete evidence dashboard:** "
+                  f"[Open PR Quality Artifact Center]({artifact_url})"
+              ),
+              "",
+              "Entrypoint: `pr-quality/index.html`",
+              "",
+              (
+                  f"> 🔒 Authority: `{boundary}`. "
+                  "Evidence is advisory and does not authorize merge. "
+                  "A human merge decision is still required."
+              ),
+              "",
+          ]
+          Path(os.environ["BODY_PATH"]).write_text(
+              "\n".join(lines),
+              encoding="utf-8",
+          )
+          comment_experience_key = "_".join(
+              ("publisher", "comment", "experience")
+          )
+          print(f"{comment_experience_key}=v2")
+          artifact_reference_key = "_".join(
+              ("publisher", "artifact", "reference")
+          )
+          print(f"{artifact_reference_key}=index_only")
+          PYCOMMENT
 
           BODY_PATH="$body_path" python3 - <<'PYSANITIZE'
           from __future__ import annotations
