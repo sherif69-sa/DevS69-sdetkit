@@ -6075,3 +6075,108 @@ def test_review_summary_opens_blocker_evidence_and_keeps_authority_false() -> No
     assert "| Patch automation | `false` |" in summary
     assert "| Security dismissal | `false` |" in summary
     assert "reporting only" in summary.lower()
+
+
+def test_review_summary_filters_non_commands_from_proof_block() -> None:
+    model = _review_console_ready_model()
+    model["proof_to_rerun"] = [
+        "python -m pre_commit run -a",
+        "Review the current security check annotations for the PR.",
+        "Fix the flagged surface or dismiss a reviewed false positive with a reason.",
+    ]
+
+    summary = report.render_pr_quality_review_summary(model)
+    proof_start = summary.index("<summary>🧪 Optional verification</summary>")
+    proof_section = summary[proof_start : summary.index("</details>", proof_start)]
+
+    assert "python -m pre_commit run -a" in proof_section
+    assert "Review the current security check annotations" not in proof_section
+    assert "Fix the flagged surface" not in proof_section
+
+
+def test_review_summary_enriches_security_failure_from_ghas() -> None:
+    model = {
+        "decision": {
+            "status": "review_required",
+            "merge_assessment": "do_not_merge_until_blocker_resolved",
+            "next_action": "review",
+            "risk_surface": "security",
+            "signal_title": "Security check annotation requires review",
+            "comment_signal": "Evidence review signal",
+            "review_first_evidence": True,
+            "cleared_security_signal": False,
+            "failed_checks": 1,
+            "required_queued_checks": 0,
+            "required_startup_failures": 0,
+            "missing_required_contexts": 0,
+        },
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+        "primary_blocker": {
+            "title": "Security check annotation requires review",
+            "action": "review",
+        },
+        "failure_vector_signal": {
+            "source": "evidence_top_blocker",
+            "actual_failure": "Security check annotation requires review",
+            "failure_type": "unknown",
+            "failing_command": "unknown",
+            "failing_test_or_check": "unknown",
+            "owner_hint": "unknown",
+            "affected_files": [],
+            "safe_fix_candidate": False,
+            "safe_fix_allowed": False,
+            "reporting_only": True,
+        },
+        "ghas_blocker_details": {
+            "collected": True,
+            "collection_status": "collected",
+            "open_alerts": 1,
+            "current_alerts": 1,
+            "stale_alerts": 0,
+            "current_head_sha": "head-sha",
+            "dismissal_allowed": False,
+            "findings": [
+                {
+                    "number": "1448",
+                    "rule_id": "SEC_SECRET_PATTERN",
+                    "severity": "error",
+                    "location": "src/sdetkit/pr_quality_action_report.py:3121",
+                    "freshness": "current",
+                    "message": "Potential hardcoded credential",
+                    "proof_commands": [
+                        "python -m sdetkit security check --root . --format json",
+                        "Review the annotation.",
+                    ],
+                }
+            ],
+        },
+        "recommended_actions": [],
+        "proof_to_rerun": [
+            "python -m sdetkit security check --root . --format json",
+        ],
+        "failed_check_names": ["sdetkit-security-gate"],
+        "required_queued_check_names": [],
+        "required_startup_failure_names": [],
+        "missing_required_context_names": [],
+    }
+
+    summary = report.render_pr_quality_review_summary(model)
+
+    assert (
+        "**Do this now:** Review the current security finding, decide whether "
+        "to fix it or record a reviewed false-positive dismissal, then rerun "
+        "the gate." in summary
+    )
+    assert "| Actual failure | `Potential hardcoded credential` |" in summary
+    assert "| Failure type | `SEC_SECRET_PATTERN` |" in summary
+    assert (
+        "| Failing command | `python -m sdetkit security check --root . --format json` |" in summary
+    )
+    assert "| Failing test/check | `sdetkit-security-gate` |" in summary
+    assert "| Owner hint | `src/sdetkit/pr_quality_action_report.py:3121` |" in summary

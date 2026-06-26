@@ -3060,10 +3060,48 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     authority = _as_dict(model.get("authority_boundary"))
     failure_vector_signal = _as_dict(model.get("failure_vector_signal"))
     ghas_blocker_details = _as_dict(model.get("ghas_blocker_details"))
+
+    def _looks_like_shell_command(value: str) -> bool:
+        parts = value.strip().split()
+        if not parts:
+            return False
+
+        while parts and "=" in parts[0]:
+            name, separator, _assigned_value = parts[0].partition("=")
+            if not separator or not name or not name.replace("_", "").isalnum():
+                break
+            parts = parts[1:]
+
+        if not parts:
+            return False
+
+        executable = parts[0]
+        allowed_executables = {
+            "bash",
+            "gh",
+            "make",
+            "mkdocs",
+            "mypy",
+            "nox",
+            "npm",
+            "pnpm",
+            "poetry",
+            "pre-commit",
+            "pytest",
+            "python",
+            "python3",
+            "ruff",
+            "sh",
+            "tox",
+            "uv",
+            "yarn",
+        }
+        return executable in allowed_executables or executable.startswith("./")
+
     proof_commands = [
-        str(command)
+        str(command).strip()
         for command in _as_list(model.get("proof_to_rerun"))
-        if isinstance(command, str) and command.strip()
+        if isinstance(command, str) and _looks_like_shell_command(command)
     ]
     recommended_actions = [
         str(item)
@@ -3118,7 +3156,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         ]
 
     def _human_token(value: object) -> str:
-        token = _review_model_scalar(value or "none")
+        canonical_value = _review_model_scalar(value or "none")
         labels = {
             "review_and_decide": "Review the changed evidence and make the final merge decision",
             "do_not_merge_until_blocker_resolved": "Do not merge until the named blocker is resolved",
@@ -3140,7 +3178,10 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             "none": "None",
             "unavailable": "Unavailable",
         }
-        return labels.get(token, token.replace("_", " ").strip().capitalize())
+        return labels.get(
+            canonical_value,
+            canonical_value.replace("_", " ").strip().capitalize(),
+        )
 
     failed_total = _count(decision.get("failed_checks"))
     queued_total = _count(decision.get("required_queued_checks"))
@@ -3190,6 +3231,44 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         if isinstance(item, str) and item.strip()
     ]
 
+    ghas_findings = [
+        _as_dict(item) for item in _as_list(ghas_blocker_details.get("findings")) if _as_dict(item)
+    ]
+    if risk_surface == "security" and ghas_findings:
+        primary_security_finding = ghas_findings[0]
+        security_message = _review_model_scalar(primary_security_finding.get("message") or "")
+        security_rule = _review_model_scalar(primary_security_finding.get("rule_id") or "security")
+        security_location = _review_model_scalar(
+            primary_security_finding.get("location") or "unknown"
+        )
+        security_proof = [
+            str(command).strip()
+            for command in _as_list(primary_security_finding.get("proof_commands"))
+            if isinstance(command, str) and _looks_like_shell_command(command)
+        ]
+
+        if security_message:
+            failure_actual = security_message
+        if failure_type in {"", "none", "unknown"}:
+            failure_type = security_rule
+        if failing_command in {"", "none", "unknown"} and security_proof:
+            failing_command = security_proof[0]
+        if failing_test in {"", "none", "unknown"}:
+            failing_test = "sdetkit-security-gate"
+        if failure_owner in {"", "none", "unknown"}:
+            failure_owner = security_location
+
+        security_path = security_location.split(":", 1)[0]
+        if security_path and security_path != "unknown" and security_path not in affected_files:
+            affected_files.insert(0, security_path)
+
+    human_first_action = _human_token(first_action)
+    if first_action == "review" and risk_surface == "security":
+        human_first_action = (
+            "Review the current security finding, decide whether to fix it "
+            "or record a reviewed false-positive dismissal, then rerun the gate"
+        )
+
     active_blocker_open = review_state in {
         "blocked",
         "review",
@@ -3212,9 +3291,6 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         )
     )
     proof_open = active_blocker_open and bool(proof_commands)
-    ghas_findings = [
-        _as_dict(item) for item in _as_list(ghas_blocker_details.get("findings")) if _as_dict(item)
-    ]
     ghas_open = bool(ghas_findings) and (active_blocker_open or stale_only_security_signal)
 
     lines = [
@@ -3232,7 +3308,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         f"| Merge guidance | {_markdown_table_value(_human_token(merge_assessment))} |",
         f"| Risk focus | `{_markdown_table_value(risk_surface)}` — {_markdown_table_value(signal_title)} |",
         "",
-        f"> **Do this now:** {_human_token(first_action)}.",
+        f"> **Do this now:** {human_first_action}.",
         "",
         "### Quick actions",
         "",
@@ -3265,7 +3341,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         "| Item | Value |",
         "|---|---|",
         f"| Human merge guidance | {_markdown_table_value(_human_token(merge_assessment))} |",
-        f"| Human next action | {_markdown_table_value(_human_token(first_action))} |",
+        f"| Human next action | {_markdown_table_value(human_first_action)} |",
         f"| Merge assessment | `{_markdown_table_value(merge_assessment)}` |",
         f"| Next action | `{_markdown_table_value(first_action)}` |",
         f"| First blocker | `{_markdown_table_value(first_blocker)}` |",
