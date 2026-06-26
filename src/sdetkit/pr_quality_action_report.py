@@ -3098,11 +3098,24 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         }
         return executable in allowed_executables or executable.startswith("./")
 
-    proof_commands = [
-        str(command).strip()
-        for command in _as_list(model.get("proof_to_rerun"))
-        if isinstance(command, str) and _looks_like_shell_command(command)
-    ]
+    def _dedupe_commands(commands: list[str]) -> list[str]:
+        unique: list[str] = []
+        seen: set[str] = set()
+        for command in commands:
+            normalized = command.strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            unique.append(normalized)
+        return unique
+
+    proof_commands = _dedupe_commands(
+        [
+            str(command).strip()
+            for command in _as_list(model.get("proof_to_rerun"))
+            if isinstance(command, str) and _looks_like_shell_command(command)
+        ]
+    )
     recommended_actions = [
         str(item)
         for item in _as_list(model.get("recommended_actions"))
@@ -3177,6 +3190,15 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             "clear": "Clear",
             "none": "None",
             "unavailable": "Unavailable",
+            "diagnostic_engine": "Diagnostic engine",
+            "code_quality": "Code quality",
+            "workflow_permissions": "Workflow permissions",
+            "branch_protection": "Branch protection",
+            "review_model": "Review model",
+            "workflow": "Workflow",
+            "security": "Security",
+            "tests": "Tests",
+            "ci": "Continuous integration",
         }
         return labels.get(
             canonical_value,
@@ -3193,6 +3215,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     first_blocker = _review_model_scalar(decision.get("primary_blocker") or "none")
     merge_assessment = _review_model_scalar(decision.get("merge_assessment") or "unknown")
     risk_surface = _review_model_scalar(decision.get("risk_surface") or "unknown")
+    human_risk_surface = _human_token(risk_surface)
     signal_title = _review_model_scalar(decision.get("signal_title") or "none")
 
     panel_rows = dict(_contributor_review_panel_rows(model))
@@ -3217,6 +3240,23 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         "invalid": "The review evidence contract is inconsistent or incomplete.",
     }.get(review_state, "Review the evidence below before deciding.")
 
+    quick_action_catalog = {
+        "/check": "Re-run the standard validation checks",
+        "/quality": "Run the full quality and coverage gate",
+        "/doctor": "Diagnose the first concrete failure",
+        "/hint": "Show the compact reviewer checklist",
+    }
+    quick_action_order = {
+        "waiting": ["/check", "/hint", "/doctor", "/quality"],
+        "blocked": ["/doctor", "/check", "/quality", "/hint"],
+        "review": ["/hint", "/check", "/quality", "/doctor"],
+        "ready": ["/quality", "/check", "/hint", "/doctor"],
+        "stale": ["/check", "/hint", "/doctor", "/quality"],
+        "invalid": ["/doctor", "/check", "/hint", "/quality"],
+    }.get(review_state, ["/check", "/quality", "/doctor", "/hint"])
+    primary_quick_action = quick_action_order[0]
+    secondary_quick_actions = quick_action_order[1:]
+
     failure_actual = _review_model_scalar(failure_vector_signal.get("actual_failure") or "none")
     failure_source = _review_model_scalar(failure_vector_signal.get("source") or "none")
     failure_owner = _review_model_scalar(failure_vector_signal.get("owner_hint") or "none")
@@ -3234,6 +3274,16 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     ghas_findings = [
         _as_dict(item) for item in _as_list(ghas_blocker_details.get("findings")) if _as_dict(item)
     ]
+    security_proof_commands = _dedupe_commands(
+        [
+            str(command).strip()
+            for finding in ghas_findings
+            for command in _as_list(finding.get("proof_commands"))
+            if isinstance(command, str) and _looks_like_shell_command(command)
+        ]
+    )
+    proof_commands = _dedupe_commands([*proof_commands, *security_proof_commands])
+
     if risk_surface == "security" and ghas_findings:
         primary_security_finding = ghas_findings[0]
         security_message = _review_model_scalar(primary_security_finding.get("message") or "")
@@ -3269,7 +3319,8 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             "or record a reviewed false-positive dismissal, then rerun the gate"
         )
 
-    active_blocker_open = review_state in {
+    decision_open = review_state in {
+        "waiting",
         "blocked",
         "review",
         "stale",
@@ -3282,7 +3333,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         failing_test,
     } - {"", "none", "unknown"}
     show_failure_vector = bool(
-        active_blocker_open
+        review_state in {"blocked", "stale", "invalid"}
         and (
             meaningful_failure_values
             or failed_total > 0
@@ -3290,8 +3341,14 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             or bool(failure_vector_signal.get("safe_fix_candidate"))
         )
     )
-    proof_open = active_blocker_open and bool(proof_commands)
-    ghas_open = bool(ghas_findings) and (active_blocker_open or stale_only_security_signal)
+    failure_open = show_failure_vector and review_state in {"blocked", "invalid"}
+
+    # Preserve established reviewer contracts for active blockers:
+    # focused proof and current GHAS evidence remain visible without a click.
+    proof_open = review_state in {"blocked", "review", "stale", "invalid"} and bool(proof_commands)
+    ghas_open = bool(ghas_findings) and (
+        review_state in {"blocked", "review", "stale", "invalid"} or stale_only_security_signal
+    )
 
     lines = [
         "# PR Quality Review Summary",
@@ -3306,18 +3363,29 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         f"| Required checks | **{_markdown_table_value(_human_token(required_summary))}** |",
         f"| Security | **{_markdown_table_value(_human_token(security_summary))}** |",
         f"| Merge guidance | {_markdown_table_value(_human_token(merge_assessment))} |",
-        f"| Risk focus | `{_markdown_table_value(risk_surface)}` — {_markdown_table_value(signal_title)} |",
+        f"| Risk focus | **{_markdown_table_value(human_risk_surface)}** — {_markdown_table_value(signal_title)} |",
         "",
         f"> **Do this now:** {human_first_action}.",
         "",
         "### Quick actions",
         "",
+        f"> **Recommended command:** `{primary_quick_action}` — {quick_action_catalog[primary_quick_action]}.",
+        "",
         "| Command | Purpose |",
         "|---|---|",
-        "| `/check` | Re-run the standard validation checks |",
-        "| `/quality` | Run the full quality and coverage gate |",
-        "| `/doctor` | Diagnose the first concrete failure |",
-        "| `/hint` | Show the compact reviewer checklist |",
+        f"| `{primary_quick_action}` | {quick_action_catalog[primary_quick_action]} |",
+        "",
+        "<details>",
+        "<summary>More bot commands</summary>",
+        "",
+        "| Command | Purpose |",
+        "|---|---|",
+        *[
+            f"| `{command}` | {quick_action_catalog[command]} |"
+            for command in secondary_quick_actions
+        ],
+        "",
+        "</details>",
         "",
         "<details>",
         "<summary>🧾 Machine decision contract</summary>",
@@ -3377,7 +3445,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         _details(
             decision_detail_title,
             blocker_body,
-            open_by_default=active_blocker_open,
+            open_by_default=decision_open,
         )
     )
     lines.append("")
@@ -3404,7 +3472,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             _details(
                 "🧭 Failure vector deep dive",
                 failure_body,
-                open_by_default=True,
+                open_by_default=failure_open,
             )
         )
         lines.append("")
@@ -3474,7 +3542,13 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
                 if isinstance(command, str) and command.strip()
             ]
             if commands:
-                ghas_body.extend(["", "Proof:", "", "```bash", *commands[:5], "```", ""])
+                ghas_body.extend(
+                    [
+                        "",
+                        "> Verification commands are consolidated in the Proof to rerun section.",
+                        "",
+                    ]
+                )
 
     security_title = (
         "🛡️ GHAS / CodeQL refresh details"
