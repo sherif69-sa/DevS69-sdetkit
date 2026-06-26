@@ -61,7 +61,7 @@ def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
     status_counts = report["status_counts"]
 
     assert status_counts["aligned"] >= 13
-    assert status_counts["partially_aligned"] >= 8
+    assert status_counts["partially_aligned"] >= 7
     assert status_counts.get("planned", 0) == 0
     assert report["next_recommended_pr"] == NEXT_RECOMMENDED_PR
 
@@ -102,6 +102,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert FLAKY_TEST_REGISTRY_EVIDENCE_MODULE not in gaps_by_module
     assert SECURITY_FINDING_DIAGNOSIS_MODULE not in gaps_by_module
     assert SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE not in gaps_by_module
+    assert "adaptive_diagnosis" not in gaps_by_module
     assert any("protected_verifier" in gap for gap in gaps_by_module["maintenance_autopilot"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["patch_scorer"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["protected_verifier"])
@@ -151,6 +152,28 @@ def test_alignment_closes_pr_quality_registry_visibility_without_authority() -> 
     assert "no-authority" in report.recommended_next_action
 
 
+def test_alignment_closes_exact_failure_gap_and_selects_git_proof_visibility() -> None:
+    components = {item.module: item for item in build_alignment_components()}
+
+    adaptive = components["adaptive_diagnosis"]
+    scorer = components["patch_scorer"]
+    inventory = components["git_inventory_collector"]
+
+    assert adaptive.status == "aligned"
+    assert adaptive.gaps == ()
+    assert "confidence-scored exact-failure" in adaptive.recommended_next_action
+    assert "review-first" in adaptive.recommended_next_action
+
+    assert scorer.status == "partially_aligned"
+    assert "existing PR Quality candidate handoff" in scorer.recommended_next_action
+    assert "unwired from automation" in scorer.recommended_next_action
+
+    assert inventory.status == "partially_aligned"
+    assert any("narrow allowlisted Ruff proof profile" in gap for gap in inventory.gaps)
+    assert "non-Ruff allowlisted proof profiles" in inventory.recommended_next_action
+    assert NEXT_RECOMMENDED_PR == "feature/git-proof-profile-visibility"
+
+
 def test_alignment_markdown_renders_operator_audit() -> None:
     markdown = render_alignment_markdown(build_alignment_report())
 
@@ -160,6 +183,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert "## Components" in markdown
     assert "`check_intelligence`: `aligned`" in markdown
     assert "`maintenance_autopilot`: `partially_aligned`" in markdown
+    assert "`adaptive_diagnosis`: `aligned`" in markdown
     assert "`trajectory_pattern_insights`: `aligned`" in markdown
     assert "`current_head_failure_bundle`: `aligned`" in markdown
     assert "`remediation_plan_engine`: `aligned`" in markdown
