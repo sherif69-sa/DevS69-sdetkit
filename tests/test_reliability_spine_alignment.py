@@ -500,3 +500,15 @@ def test_alignment_closes_verified_network_backend_contract_without_overclaim() 
     assert memory.status == "aligned"
     assert memory.gaps == ()
     assert "runtime-verified network-boundary evidence" in memory.recommended_next_action
+
+
+def test_alignment_records_reviewer_first_pr_quality_console() -> None:
+    components = {item.module: item for item in build_alignment_components()}
+    report_component = components["pr_quality_action_report"]
+
+    assert report_component.status == "aligned"
+    assert "reviewer-first interactive PR Quality console" in report_component.role
+    assert "pr-review-summary.md" in report_component.existing_artifacts
+    assert "pr-review-dashboard.html" in report_component.existing_artifacts
+    assert "human-readable decisions" in report_component.recommended_next_action
+    assert "reporting-only authority" in report_component.recommended_next_action

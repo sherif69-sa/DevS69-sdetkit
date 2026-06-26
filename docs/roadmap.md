@@ -216,6 +216,29 @@ action:
 - The runtime projection remains additive under the existing schema and grants no automation, patch application, security dismissal, merge, or semantic-equivalence authority.
 - The PR Quality producer and trusted publisher workflows remain unchanged.
 
+### Completed roadmap action
+
+```text
+action:
+  id=sdet-quality-comment-review-console
+  lane=Reviewer experience and product surface
+  title=Turn the SDET Quality Gate PR comment into a reviewer-first interactive console
+  priority=P1
+  risk=medium
+  value=Make the gate immediately understandable and actionable without changing evidence collection, trusted publishing, or authority.
+  status=done
+```
+
+**Closure evidence**
+
+- The decision is presented first in human language with a visible gate state, required-check summary, security posture, merge guidance, risk focus, and one canonical reviewer action.
+- Bot commands `/check`, `/quality`, `/doctor`, and `/hint` are integrated into the comment as quick actions.
+- The raw machine decision contract remains available under progressive disclosure for compatibility and auditability.
+- Green PRs retain the collapsed failure-vector compatibility panel, but it now states that no active actionable failure exists and emits no unknown failure fields.
+- Blocked, review-first, stale, and invalid states automatically open the relevant decision and failure evidence.
+- Security, proof commands, check evidence, and the full authority boundary remain available as focused collapsible sections.
+- The structured review model, trusted producer, trusted publisher, workflow permissions, exact-head verification, and reporting-only authority remain unchanged.
+
 ### Roadmap selection status
 
 ```text
