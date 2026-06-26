@@ -355,12 +355,22 @@ def test_product_dashboard_routes_bundle_to_workflow_artifacts_url() -> None:
         },
     ]
 
-    dashboard = report.render_pr_quality_artifact_index_html(model)
+    dashboard = report.render_pr_quality_artifact_index_html(
+        model,
+        embedded_artifacts={
+            "pr-review-dashboard.html": {
+                "mime_type": "text/html;charset=utf-8",
+                "content": "<!doctype html><title>Detailed review</title>",
+            }
+        },
+    )
 
-    assert 'href="pr-review-dashboard.html"' in dashboard
+    assert 'href="pr-review-dashboard.html"' not in dashboard
+    assert 'data-open-artifact="pr-review-dashboard.html"' in dashboard
+    assert 'data-download-artifact="pr-review-dashboard.html"' in dashboard
     assert 'href="https://github.com/example/sdetkit/actions/runs/123456#artifacts"' in dashboard
     assert 'href="pr-quality-comment"' not in dashboard
-    assert "Open workflow artifacts" in dashboard
+    assert "Download full bundle" in dashboard
 
 
 def test_product_dashboard_does_not_fabricate_bundle_file_link_without_run_url() -> None:
@@ -381,3 +391,68 @@ def test_product_dashboard_does_not_fabricate_bundle_file_link_without_run_url()
 
     assert 'href="pr-quality-comment"' not in dashboard
     assert "Artifact unavailable" in dashboard
+
+
+def test_product_dashboard_embedded_viewer_is_browser_safe_and_self_contained() -> None:
+    model = _model()
+    model["live_evidence"] = _snapshot()
+    model["artifact_index"] = [
+        {
+            "path": "pr-review-model.json",
+            "kind": "json",
+            "title": "Review model",
+            "description": "Machine-readable review evidence.",
+        },
+        {
+            "path": "pr-review-summary.md",
+            "kind": "markdown",
+            "title": "Review summary",
+            "description": "Contributor-facing summary.",
+        },
+    ]
+
+    dashboard = report.render_pr_quality_artifact_index_html(
+        model,
+        embedded_artifacts={
+            "pr-review-model.json": {
+                "mime_type": "application/json;charset=utf-8",
+                "content": '{"status":"ready"}\n',
+            },
+            "pr-review-summary.md": {
+                "mime_type": "text/markdown;charset=utf-8",
+                "content": "# Ready\n",
+            },
+        },
+    )
+
+    assert 'id="artifactDialog"' in dashboard
+    assert 'id="artifactFrame"' in dashboard
+    assert 'id="artifactText"' in dashboard
+    assert "function decodeArtifact(item)" in dashboard
+    assert "function openArtifact(path)" in dashboard
+    assert "function downloadArtifact(path)" in dashboard
+    assert "function openArtifactInNewTab(path)" in dashboard
+    assert "URL.createObjectURL" in dashboard
+    assert 'new TextDecoder("utf-8")' in dashboard
+    assert "content_base64" in dashboard
+    assert "sha256" in dashboard
+    assert 'href="pr-review-model.json"' not in dashboard
+    assert 'href="pr-review-summary.md"' not in dashboard
+
+
+def test_product_dashboard_never_emits_dead_relative_link_for_unembedded_file() -> None:
+    model = _model()
+    model["live_evidence"] = _snapshot()
+    model["artifact_index"] = [
+        {
+            "path": "not-embedded.json",
+            "kind": "json",
+            "title": "Unavailable local artifact",
+            "description": "This file was not embedded.",
+        }
+    ]
+
+    dashboard = report.render_pr_quality_artifact_index_html(model)
+
+    assert 'href="not-embedded.json"' not in dashboard
+    assert "Download full bundle" in dashboard

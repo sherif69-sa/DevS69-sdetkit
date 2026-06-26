@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+from base64 import b64encode
 from collections.abc import Mapping
 from datetime import datetime, timezone
+from hashlib import sha256
 from html import escape
 from os import environ
 from typing import Any
@@ -536,7 +538,11 @@ def render_live_evidence_html(snapshot: JsonObject) -> str:
 """.strip()
 
 
-def render_live_product_dashboard(model: JsonObject) -> str:
+def render_live_product_dashboard(
+    model: JsonObject,
+    *,
+    embedded_artifacts: JsonObject | None = None,
+) -> str:
     snapshot = _as_dict(model.get("live_evidence"))
     if not snapshot:
         return ""
@@ -551,6 +557,26 @@ def render_live_product_dashboard(model: JsonObject) -> str:
         for item in _as_list(model.get("artifact_index"))
         if _as_dict(item) and _text(_as_dict(item).get("path"))
     ]
+    embedded_sources = {
+        _text(path): _as_dict(item)
+        for path, item in (embedded_artifacts or {}).items()
+        if _text(path) and _as_dict(item)
+    }
+    embedded_payload: JsonObject = {}
+    for artifact_path, item in embedded_sources.items():
+        content = item.get("content")
+        if not isinstance(content, str):
+            continue
+        content_bytes = content.encode("utf-8")
+        embedded_payload[artifact_path] = {
+            "mime_type": _text(
+                item.get("mime_type"),
+                "text/plain;charset=utf-8",
+            ),
+            "content_base64": b64encode(content_bytes).decode("ascii"),
+            "size_bytes": len(content_bytes),
+            "sha256": sha256(content_bytes).hexdigest(),
+        }
 
     def safe(value: object) -> str:
         return escape(_text(value), quote=True)
@@ -639,16 +665,35 @@ def render_live_product_dashboard(model: JsonObject) -> str:
     def artifact_link(item: JsonObject) -> str:
         artifact_path = _text(item.get("path"))
         artifact_kind = _text(item.get("kind") or item.get("format"))
+        artifacts_url = _text(provenance.get("artifacts_url"))
         if artifact_kind == "github_artifact":
-            artifacts_url = _text(provenance.get("artifacts_url"))
             if artifacts_url:
                 return external_link(
                     artifacts_url,
-                    "Open workflow artifacts",
+                    "Download full bundle",
                     "button",
                 )
             return '<span class="button">Artifact unavailable</span>'
-        return f'<a class="button" href="{safe(artifact_path)}">Open artifact</a>'
+        if artifact_path == "index.html":
+            return '<a class="button" href="#overview">View dashboard</a>'
+        if artifact_path in embedded_payload:
+            return (
+                '<div class="artifact-actions">'
+                f'<button class="button primary" type="button" '
+                f'data-open-artifact="{safe(artifact_path)}">'
+                "Open artifact</button>"
+                f'<button class="button" type="button" '
+                f'data-download-artifact="{safe(artifact_path)}">'
+                "Download file</button>"
+                "</div>"
+            )
+        if artifacts_url:
+            return external_link(
+                artifacts_url,
+                "Download full bundle",
+                "button",
+            )
+        return '<span class="button">Artifact not embedded</span>'
 
     artifact_cards = "\n".join(
         "".join(
@@ -755,6 +800,7 @@ def render_live_product_dashboard(model: JsonObject) -> str:
             "snapshot": snapshot,
             "decision": decision,
             "facts": facts,
+            "embedded_artifacts": embedded_payload,
         },
         ensure_ascii=False,
         sort_keys=True,
@@ -777,6 +823,7 @@ html[data-theme="dark"]{color-scheme:dark;--bg:#0b1020;--surface:#111827;--surfa
 .evidence-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.evidence-card{display:flex;flex-direction:column;gap:16px;min-height:245px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);padding:18px;transition:.18s}.evidence-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}.evidence-card.hidden{display:none}.evidence-card-top{display:flex;justify-content:space-between;gap:12px}.evidence-card h3{margin:5px 0 0;font-size:18px}.evidence-card p{color:var(--muted);font-size:16px}.evidence-card-actions{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}.evidence-card-actions code{max-width:52%;color:var(--muted);font-size:11px}
 .card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.panel,.artifact-card{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);padding:20px}.panel h3,.artifact-card h3{margin:6px 0}.panel table,.lineage-table{width:100%;border-collapse:collapse}.panel th,.panel td,.lineage-table th,.lineage-table td{padding:10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}.panel th{width:42%;color:var(--muted)}.artifact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.artifact-card{display:grid;gap:12px}.artifact-card p{color:var(--muted)}.artifact-card .button{justify-self:start}.empty-state{display:none;padding:40px;text-align:center;border:1px dashed var(--border);border-radius:var(--radius);color:var(--muted)}.empty-state.visible{display:block}
 dialog{width:min(880px,calc(100vw - 36px));max-height:calc(100vh - 36px);padding:0;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text);box-shadow:0 30px 100px rgba(0,0,0,.35)}dialog::backdrop{background:rgba(8,15,30,.65);backdrop-filter:blur(6px)}.dialog-header{position:sticky;top:0;z-index:4;display:flex;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);background:var(--surface)}.dialog-header h2{margin:0}.dialog-body{padding:20px}.snapshot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.snapshot{padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface2)}.snapshot span{display:block;color:var(--muted);font-size:12px}.raw-panel{max-height:330px;overflow:auto;padding:14px;border-radius:12px;background:var(--surface2);white-space:pre-wrap}
+.artifact-actions{display:flex;gap:8px;flex-wrap:wrap}.artifact-meta{color:var(--muted);font-family:var(--mono);font-size:12px}.artifact-frame{width:100%;height:min(68vh,720px);border:1px solid var(--border);border-radius:12px;background:#fff}.artifact-text{max-height:68vh;overflow:auto;padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:1050px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--border)}.metric-grid,.evidence-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:680px){.main{padding:20px}.metric-grid,.evidence-grid,.card-grid,.artifact-grid,.snapshot-grid{grid-template-columns:1fr}.hero{padding:24px}.topbar{align-items:stretch;flex-direction:column}}@media print{.sidebar,.topbar,.button,dialog{display:none!important}.app{display:block}.main{padding:0}.hero,.metric,.evidence-card,.panel,.artifact-card{box-shadow:none;break-inside:avoid}}
 </style>
 </head>
@@ -861,13 +908,28 @@ dialog{width:min(880px,calc(100vw - 36px));max-height:calc(100vh - 36px);padding
     <button id="copyFact" class="button" type="button">Copy raw fact</button>
   </div>
 </dialog>
+<dialog id="artifactDialog">
+  <div class="dialog-header"><div><div id="artifactDialogPath" class="eyebrow"></div><h2 id="artifactDialogTitle">Artifact viewer</h2></div><button class="button" data-close-artifact-dialog type="button">Close</button></div>
+  <div class="dialog-body">
+    <p id="artifactDialogMeta" class="artifact-meta"></p>
+    <div class="artifact-actions" style="margin-bottom:14px">
+      <button id="openArtifactTab" class="button primary" type="button">Open in new tab</button>
+      <button id="downloadArtifact" class="button" type="button">Download file</button>
+    </div>
+    <iframe id="artifactFrame" class="artifact-frame" title="Embedded artifact viewer" sandbox="allow-scripts"></iframe>
+    <pre id="artifactText" class="artifact-text" hidden></pre>
+  </div>
+</dialog>
 <script type="application/json" id="evidenceData">__FACT_PAYLOAD__</script>
 <script>
 const payload=JSON.parse(document.getElementById("evidenceData").textContent);
 const facts=payload.facts||[];
 const byId=Object.fromEntries(facts.map(item=>[item.id,item]));
+const embeddedArtifacts=payload.embedded_artifacts||{};
 let statusFilter="all";
+let currentArtifactPath="";
 const dialog=document.getElementById("evidenceDialog");
+const artifactDialog=document.getElementById("artifactDialog");
 function applyFilters(){
   const query=document.getElementById("dashboardSearch").value.trim().toLowerCase();
   let visible=0;
@@ -891,7 +953,67 @@ function openEvidence(id){
   dialog.dataset.current=id;
   dialog.showModal();
 }
+function decodeArtifact(item){
+  const binary=atob(item.content_base64||"");
+  const bytes=Uint8Array.from(binary,char=>char.charCodeAt(0));
+  return new TextDecoder("utf-8").decode(bytes);
+}
+function artifactBlob(path){
+  const item=embeddedArtifacts[path];
+  if(!item) return null;
+  return new Blob([decodeArtifact(item)],{type:item.mime_type||"text/plain;charset=utf-8"});
+}
+function openArtifact(path){
+  const item=embeddedArtifacts[path];
+  if(!item) return;
+  const content=decodeArtifact(item);
+  const mime=item.mime_type||"text/plain;charset=utf-8";
+  currentArtifactPath=path;
+  document.getElementById("artifactDialogPath").textContent=path;
+  document.getElementById("artifactDialogTitle").textContent="Artifact viewer";
+  document.getElementById("artifactDialogMeta").textContent=`${mime} · ${item.size_bytes||0} bytes · sha256:${item.sha256||"not collected"}`;
+  const frame=document.getElementById("artifactFrame");
+  const text=document.getElementById("artifactText");
+  if(mime.startsWith("text/html")){
+    text.hidden=true;
+    frame.hidden=false;
+    frame.srcdoc=content;
+  }else{
+    frame.hidden=true;
+    frame.removeAttribute("srcdoc");
+    text.hidden=false;
+    text.textContent=content;
+  }
+  artifactDialog.showModal();
+}
+function downloadArtifact(path){
+  const blob=artifactBlob(path);
+  if(!blob) return;
+  const url=URL.createObjectURL(blob);
+  const anchor=document.createElement("a");
+  anchor.href=url;
+  anchor.download=path.split("/").pop()||"artifact.txt";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function openArtifactInNewTab(path){
+  const blob=artifactBlob(path);
+  if(!blob) return;
+  const url=URL.createObjectURL(blob);
+  const anchor=document.createElement("a");
+  anchor.href=url;
+  anchor.target="_blank";
+  anchor.rel="noopener";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
 document.querySelectorAll("[data-open-evidence]").forEach(button=>button.onclick=()=>openEvidence(button.dataset.openEvidence));
+document.querySelectorAll("[data-open-artifact]").forEach(button=>button.onclick=()=>openArtifact(button.dataset.openArtifact));
+document.querySelectorAll("[data-download-artifact]").forEach(button=>button.onclick=()=>downloadArtifact(button.dataset.downloadArtifact));
 document.querySelectorAll("[data-status-filter]").forEach(button=>button.onclick=()=>{
   statusFilter=button.dataset.statusFilter;
   document.querySelectorAll("[data-status-filter]").forEach(item=>item.classList.toggle("active",item===button));
@@ -899,6 +1021,9 @@ document.querySelectorAll("[data-status-filter]").forEach(button=>button.onclick
 });
 document.getElementById("dashboardSearch").oninput=applyFilters;
 document.querySelector("[data-close-dialog]").onclick=()=>dialog.close();
+document.querySelector("[data-close-artifact-dialog]").onclick=()=>artifactDialog.close();
+document.getElementById("openArtifactTab").onclick=()=>openArtifactInNewTab(currentArtifactPath);
+document.getElementById("downloadArtifact").onclick=()=>downloadArtifact(currentArtifactPath);
 document.getElementById("themeButton").onclick=()=>{
   const root=document.documentElement;
   root.dataset.theme=root.dataset.theme==="dark"?"light":"dark";
