@@ -263,6 +263,30 @@ action:
 - Canonical review-state selection, merge assessment, evidence collection, workflow permissions, trusted publishing, exact-head verification, patch authority, security-dismissal authority, and merge authority remain unchanged.
 - Multi-blocker model expansion and security-unavailable decision policy remain explicitly out of scope for separate review.
 
+### Completed roadmap action
+
+```text
+action:
+  id=sdet-quality-live-evidence-dashboard
+  lane=Reviewer experience and product surface
+  title=Bind the SDET Quality Gate dashboard to live per-run evidence and provenance
+  priority=P1
+  risk=medium
+  value=Replace self-contained status prose with an exact PR/head/run snapshot sourced from check intelligence, security collection, runtime proof, trusted history, and the artifact manifest.
+  status=done
+```
+
+**Closure evidence**
+
+- The existing PR Quality producer remains the single evidence source and already uploads `pr-quality-comment`, runtime-proof, failure-intelligence, adaptive-sentinel, and signed publisher-handoff artifacts.
+- `pr-review-model.json` now carries an additive `live_evidence` snapshot with exact PR, head SHA, base SHA, workflow run, run attempt, artifact name, artifact entrypoint, generated timestamp, and head-binding status.
+- Required-check, security, isolated-proof, runtime-guard, live-benchmark, trusted-history, and artifact-inventory indicators are computed from structured workflow artifacts and retain their exact source paths.
+- The PR comment, detailed review HTML, machine manifest, and a full product-style artifact center render the same snapshot instead of maintaining independent status prose.
+- The artifact center adopts the scenario-laboratory interaction model: fixed navigation, hero verdict, KPI cards, searchable and filterable evidence cards, evidence drill-down dialogs, dark mode, print support, artifact navigation, and responsive layouts.
+- The PR comment links reviewers to the exact workflow run and its artifact section, with honest instructions to open `pr-quality/index.html` from the `pr-quality-comment` bundle.
+- Missing GitHub context produces a partial snapshot with no fabricated links, and a head mismatch is reported without changing the canonical review decision.
+- Protected workflows, trusted-publisher permissions, evidence collection, canonical decision logic, patch authority, security-dismissal authority, merge authority, and semantic-equivalence authority remain unchanged.
+
 ### Roadmap selection status
 
 ```text

@@ -11,6 +11,12 @@ from sdetkit.current_head_failure_bundle import (
     write_current_head_failure_bundle,
 )
 from sdetkit.pr_comment_failure_families import render_comment_failure_families
+from sdetkit.pr_quality_live_dashboard import (
+    build_live_evidence_snapshot,
+    render_live_evidence_html,
+    render_live_evidence_markdown,
+    render_live_product_dashboard,
+)
 
 JsonObject = dict[str, Any]
 
@@ -3706,6 +3712,7 @@ def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
         "expected_artifact_inventory_verification": expected_artifact_inventory_verification,
         "artifacts": artifacts,
         "authority_evidence_sources": authority_evidence_sources,
+        "live_evidence": _as_dict(model.get("live_evidence")),
         "reporting_only": True,
         "authority_boundary": {
             "boundary_mode": _string(authority.get("boundary_mode") or "reporting_only"),
@@ -4616,6 +4623,16 @@ def write_comment_body(
         check_intelligence=check_intelligence,
         evidence_narrative=evidence_narrative,
     )
+    preliminary_manifest = build_pr_quality_artifacts_manifest(review_model)
+    review_model["live_evidence"] = build_live_evidence_snapshot(
+        pr_number=pr_number,
+        head_sha=head_sha,
+        base_sha=base_sha,
+        review_model=review_model,
+        check_intelligence=check_intelligence,
+        runtime_proof_artifacts=runtime_proof_artifacts,
+        artifact_manifest=preliminary_manifest,
+    )
     review_model_written = False
     if review_model_out is not None:
         review_model_out.parent.mkdir(parents=True, exist_ok=True)
@@ -4667,6 +4684,10 @@ def write_comment_body(
         )
         review_artifacts_manifest_written = True
 
+    live_evidence_snapshot = _as_dict(review_model.get("live_evidence"))
+    live_evidence_provenance = _as_dict(live_evidence_snapshot.get("provenance"))
+    live_evidence_facts = _as_list(live_evidence_snapshot.get("facts"))
+
     trajectory_summary = _trajectory_summary(trajectory_records)
     repo_memory_runtime = (
         _as_dict(runtime_proof_artifacts.get("repo_memory")) if runtime_proof_artifacts else {}
@@ -4698,6 +4719,20 @@ def write_comment_body(
         if review_artifacts_manifest_out is not None
         else "",
         "review_artifacts_manifest_written": review_artifacts_manifest_written,
+        "live_evidence_schema_version": _string(live_evidence_snapshot.get("schema_version")),
+        "live_evidence_snapshot_status": _string(
+            live_evidence_snapshot.get("snapshot_status") or "not_collected"
+        ),
+        "live_evidence_workflow_run_id": _string(live_evidence_provenance.get("workflow_run_id")),
+        "live_evidence_head_binding_status": _string(
+            live_evidence_provenance.get("head_binding_status") or "not_collected"
+        ),
+        "live_evidence_fact_count": len(live_evidence_facts),
+        "live_evidence_artifacts_url": _string(live_evidence_provenance.get("artifacts_url")),
+        "live_evidence_reporting_only": bool(
+            _as_dict(live_evidence_snapshot.get("authority_boundary")).get("boundary_mode")
+            == "reporting_only"
+        ),
         expected_inventory_key("status"): _string(
             expected_inventory_verification.get("status") or "not_collected"
         ),
@@ -4952,19 +4987,63 @@ def _authority_evidence_source_index() -> list[JsonObject]:  # type: ignore[no-r
 _BASE_RENDER_PR_QUALITY_REVIEW_SUMMARY = render_pr_quality_review_summary
 
 
+def _insert_markdown_before(
+    body: str,
+    section: str,
+    markers: tuple[str, ...],
+) -> str:
+    if not section:
+        return body
+    for marker in markers:
+        if marker in body:
+            return body.replace(
+                marker,
+                f"\n{section.rstrip()}\n{marker}",
+                1,
+            )
+    return body.rstrip() + "\n\n" + section.rstrip() + "\n"
+
+
 def render_pr_quality_review_summary(model: JsonObject) -> str:  # type: ignore[no-redef]  # noqa: F811
     body = _BASE_RENDER_PR_QUALITY_REVIEW_SUMMARY(model)
-    packet = _as_dict(model.get("workflow_permission_review_evidence_packet"))
-    section = _workflow_permission_review_packet_markdown_lines(packet)
-    if not section or "## Workflow permission review evidence" in body:
-        return body
 
-    rendered_section = "\n".join(section)
-    if "\n## Product artifacts" in body:
-        return body.replace(
-            "\n## Product artifacts", f"\n{rendered_section}\n\n## Product artifacts", 1
+    live_section = render_live_evidence_markdown(_as_dict(model.get("live_evidence")))
+    if live_section and "## Live evidence snapshot" not in body:
+        body = _insert_markdown_before(
+            body,
+            live_section,
+            ("\n## Adaptive review details", "\n## Product artifacts"),
         )
-    return body.rstrip() + "\n\n" + rendered_section + "\n"
+
+    packet = _as_dict(model.get("workflow_permission_review_evidence_packet"))
+    packet_lines = _workflow_permission_review_packet_markdown_lines(packet)
+    if packet_lines and "## Workflow permission review evidence" not in body:
+        body = _insert_markdown_before(
+            body,
+            "\n".join(packet_lines),
+            ("\n## Product artifacts",),
+        )
+
+    return body
+
+
+def _insert_html_after_first_section(
+    html: str,
+    panel: str,
+) -> str:
+    if not panel:
+        return html
+    main_index = html.find("<main")
+    section_end = html.find(
+        "</section>",
+        main_index if main_index >= 0 else 0,
+    )
+    if section_end >= 0:
+        insert_at = section_end + len("</section>")
+        return html[:insert_at] + "\n" + panel + html[insert_at:]
+    if "</main>" in html:
+        return html.replace("</main>", f"{panel}\n</main>", 1)
+    return html + panel
 
 
 _BASE_RENDER_PR_QUALITY_REVIEW_HTML = render_pr_quality_review_html
@@ -4972,14 +5051,34 @@ _BASE_RENDER_PR_QUALITY_REVIEW_HTML = render_pr_quality_review_html
 
 def render_pr_quality_review_html(model: JsonObject) -> str:  # type: ignore[no-redef]  # noqa: F811
     html = _BASE_RENDER_PR_QUALITY_REVIEW_HTML(model)
-    panel = _workflow_permission_review_packet_html(
+
+    live_panel = render_live_evidence_html(_as_dict(model.get("live_evidence")))
+    if live_panel and 'id="live-evidence"' not in html:
+        html = _insert_html_after_first_section(html, live_panel)
+
+    permission_panel = _workflow_permission_review_packet_html(
         _as_dict(model.get("workflow_permission_review_evidence_packet"))
     )
-    if not panel or "Workflow permission review evidence" in html:
-        return html
-    if "</main>" in html:
-        return html.replace("</main>", f"{panel}\n</main>", 1)
+    if permission_panel and "Workflow permission review evidence" not in html:
+        if "</main>" in html:
+            html = html.replace(
+                "</main>",
+                f"{permission_panel}\n</main>",
+                1,
+            )
+        else:
+            html += permission_panel
+
     return html
+
+
+_BASE_RENDER_PR_QUALITY_ARTIFACT_INDEX_HTML = render_pr_quality_artifact_index_html
+
+
+def render_pr_quality_artifact_index_html(model: JsonObject) -> str:  # type: ignore[no-redef]  # noqa: F811
+    if _as_dict(model.get("live_evidence")):
+        return render_live_product_dashboard(model)
+    return _BASE_RENDER_PR_QUALITY_ARTIFACT_INDEX_HTML(model)
 
 
 _BASE_RENDER_COMMENT_BODY = render_comment_body
