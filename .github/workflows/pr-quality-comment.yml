@@ -1071,6 +1071,18 @@ jobs:
             .sdetkit/adaptive-sentinel/
           if-no-files-found: ignore
 
+
+      - name: Refresh self-contained PR quality artifact index
+        if: always()
+        run: |
+          PYTHONPATH=src python -m sdetkit.pr_quality_artifact_index \
+            --review-model build/pr-quality/pr-review-model.json \
+            --review-summary build/pr-quality/pr-review-summary.md \
+            --review-html build/pr-quality/pr-review-dashboard.html \
+            --review-manifest build/pr-quality/pr-review-artifacts-manifest.json \
+            --comment-body build/pr-quality/pr-comment-body.md \
+            --out build/pr-quality/index.html
+
       - name: Verify PR quality artifact bundle link integrity
         if: always()
         run: |

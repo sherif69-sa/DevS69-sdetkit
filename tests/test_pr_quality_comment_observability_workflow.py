@@ -1380,3 +1380,23 @@ def test_pr_quality_comment_workflow_verifies_artifact_links_before_upload() -> 
     assert "missing_index_links" in verifier
     assert '"artifact_bundle_" + "link_integrity=" + "passed"' in verifier
     assert "print(integrity_marker)" in verifier
+
+
+def test_pr_quality_comment_workflow_refreshes_standalone_index_after_appendices() -> None:
+    text = _workflow_text()
+    appendices = text.index("- name: Build PR comment body diagnostic appendices")
+    refresh = text.index("- name: Refresh self-contained PR quality artifact index")
+    verify = text.index("- name: Verify PR quality artifact bundle link integrity")
+    upload = text.index("- name: Upload PR quality evidence artifacts")
+
+    assert appendices < refresh < verify < upload
+
+    refresh_step = text[refresh:verify]
+    assert "if: always()" in refresh_step
+    assert "python -m sdetkit.pr_quality_artifact_index" in refresh_step
+    assert "--review-model build/pr-quality/pr-review-model.json" in refresh_step
+    assert "--review-summary build/pr-quality/pr-review-summary.md" in refresh_step
+    assert "--review-html build/pr-quality/pr-review-dashboard.html" in refresh_step
+    assert "--review-manifest build/pr-quality/pr-review-artifacts-manifest.json" in refresh_step
+    assert "--comment-body build/pr-quality/pr-comment-body.md" in refresh_step
+    assert "--out build/pr-quality/index.html" in refresh_step
