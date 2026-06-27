@@ -107,6 +107,10 @@ def _public_repo_trial_matrix_present(repo_root: Path) -> bool:
     ).is_file()
 
 
+def _public_repo_trial_matrix_report_present(repo_root: Path) -> bool:
+    return (repo_root / "src" / "sdetkit" / "adoption_public_repo_trial_matrix_report.py").is_file()
+
+
 def _detected_strengths(surface: dict[str, Any]) -> list[str]:
     languages = set(_names(surface.get("detected_languages")))
     package_managers = set(_names(surface.get("package_managers")))
@@ -148,6 +152,7 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
     repo_topology_summary_present = _repo_topology_summary_present(repo_root)
     adoption_evidence_bundle_present = _adoption_evidence_bundle_present(repo_root)
     public_repo_trial_matrix_present = _public_repo_trial_matrix_present(repo_root)
+    public_repo_trial_matrix_report_present = _public_repo_trial_matrix_report_present(repo_root)
 
     gaps: list[str] = []
     if languages <= {"python"} and not fixture_matrix_present:
@@ -170,7 +175,7 @@ def _learning_gaps(surface: dict[str, Any], repo_root: Path) -> list[str]:
         gaps.append("add adoption evidence bundle")
     elif not public_repo_trial_matrix_present:
         gaps.append("add public repo trial matrix")
-    else:
+    elif not public_repo_trial_matrix_report_present:
         gaps.append("add public repo trial matrix report")
     return gaps
 

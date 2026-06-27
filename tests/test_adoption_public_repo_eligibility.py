@@ -139,7 +139,7 @@ def test_public_repo_eligibility_writer_records_json(tmp_path: Path) -> None:
 def test_self_learning_advances_to_public_repo_trial_after_eligibility_screen() -> None:
     payload = build_adoption_learning_payload(Path("."))
 
-    assert payload["recommended_next_upgrade"] == "public repo trial matrix report"
+    assert payload["recommended_next_upgrade"] == "review learning gaps"
     assert (
         "add public repo eligibility screen before using third-party repos"
         not in payload["learning_gaps"]
@@ -149,6 +149,6 @@ def test_self_learning_advances_to_public_repo_trial_after_eligibility_screen() 
     assert "add repo topology summary" not in payload["learning_gaps"]
     assert "add adoption evidence bundle" not in payload["learning_gaps"]
     assert "add public repo trial matrix" not in payload["learning_gaps"]
-    assert "add public repo trial matrix report" in payload["learning_gaps"]
+    assert "add public repo trial matrix report" not in payload["learning_gaps"]
     assert payload["authority_boundary"]["automation_allowed"] is False
     assert payload["authority_boundary"]["patch_application_allowed"] is False
