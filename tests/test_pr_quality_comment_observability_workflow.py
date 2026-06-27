@@ -1497,3 +1497,22 @@ def test_action_report_workflow_binds_pr_provenance_to_review_model() -> None:
     assert '--pr-number "${{ github.event.pull_request.number }}"' in command
     assert '--head-sha "${{ github.event.pull_request.head.sha }}"' in command
     assert '--base-sha "${{ github.event.pull_request.base.sha }}"' in command
+
+
+def test_pr_quality_surfaces_publish_workflow_job_and_step_provenance() -> None:
+    producer = _workflow_text()
+    publisher = _publisher_text()
+
+    assert "checks-with-workflow-metadata.json" in producer
+    assert '"head_sha": os.environ.get("HEAD_SHA", "")' in producer
+    assert 'primary_failure.get("workflow_name")' in publisher
+    assert 'primary_failure.get("workflow_run_url")' in publisher
+    assert 'primary_failure.get("job_name")' in publisher
+    assert 'primary_failure.get("job_url")' in publisher
+    assert 'primary_failure.get("step_number")' in publisher
+    assert "| Workflow |" in publisher
+    assert "| Job |" in publisher
+    assert "| Provenance |" in publisher
+    assert "permissions: {}" in publisher.split("jobs:", 1)[0]
+    assert "actions: read" in producer.split("jobs:", 1)[0]
+    assert "contents: write" not in producer.split("jobs:", 1)[0]

@@ -60,6 +60,103 @@ def _write_json(path: Path, payload: JsonObject) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _integer(value: Any) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _normalized_workflow_run(payload: JsonObject) -> JsonObject:
+    if not payload:
+        return {}
+    return {
+        "id": _integer(payload.get("id")),
+        "name": _string(payload.get("name")),
+        "run_number": _integer(payload.get("run_number")),
+        "run_attempt": _integer(payload.get("run_attempt")),
+        "status": _string(payload.get("status")),
+        "conclusion": _string(payload.get("conclusion")),
+        "head_sha": _string(payload.get("head_sha")),
+        "html_url": _string(payload.get("html_url")),
+        "event": _string(payload.get("event")),
+    }
+
+
+def _normalized_workflow_job(payload: JsonObject) -> JsonObject:
+    if not payload:
+        return {}
+    steps: list[JsonObject] = []
+    for raw_step in _as_list(payload.get("steps")):
+        step = _as_dict(raw_step)
+        name = _string(step.get("name"))
+        if not name:
+            continue
+        steps.append(
+            {
+                "name": name,
+                "number": _integer(step.get("number")),
+                "status": _string(step.get("status")),
+                "conclusion": _string(step.get("conclusion")),
+            }
+        )
+    return {
+        "id": _integer(payload.get("id")),
+        "run_id": _integer(payload.get("run_id")),
+        "name": _string(payload.get("name")),
+        "status": _string(payload.get("status")),
+        "conclusion": _string(payload.get("conclusion")),
+        "head_sha": _string(payload.get("head_sha")),
+        "html_url": _string(payload.get("html_url")),
+        "steps": steps,
+    }
+
+
+def _hydrate_checks_payload(*, checks_json: Path, manifest: JsonObject) -> JsonObject:
+    payload = _read_json(checks_json)
+    if isinstance(payload.get("check_runs"), list):
+        records_key = "check_runs"
+    elif isinstance(payload.get("checks"), list):
+        records_key = "checks"
+    else:
+        return payload
+
+    records = [dict(_as_dict(item)) for item in _as_list(payload.get(records_key))]
+    for raw_item in _as_list(manifest.get("logs")):
+        item = _as_dict(raw_item)
+        index = _integer(item.get("record_index"))
+        if index < 0 or index >= len(records):
+            continue
+        record = dict(records[index])
+        workflow_run = _as_dict(item.get("workflow_run"))
+        workflow_job = _as_dict(item.get("workflow_job"))
+        if workflow_run:
+            record["workflow_run"] = workflow_run
+            record["workflow_name"] = _string(workflow_run.get("name"))
+            record["workflow_run_id"] = _integer(workflow_run.get("id"))
+        if workflow_job:
+            record["workflow_job"] = workflow_job
+            record["workflow_job_id"] = _integer(workflow_job.get("id"))
+            record["workflow_job_name"] = _string(workflow_job.get("name"))
+            record["steps"] = _as_list(workflow_job.get("steps"))
+            if _string(workflow_job.get("html_url")):
+                record["details_url"] = _string(workflow_job.get("html_url"))
+        record["failure_provenance_collection"] = {
+            "status": _string(item.get("workflow_metadata_status") or "unavailable"),
+            "reporting_only": True,
+            "patch_application_allowed": False,
+            "automation_allowed": False,
+            "security_dismissal_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        }
+        records[index] = record
+
+    hydrated = dict(payload)
+    hydrated[records_key] = records
+    return hydrated
+
+
 def _slug(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.strip().lower()).strip("-")
     return slug or "check"
@@ -251,6 +348,15 @@ def _workflow_job_evidence_quality(logs: list[JsonObject]) -> JsonObject:
     run_id_present = sum(1 for item in logs if bool(_string(item.get("run_id"))))
     job_id_present = sum(1 for item in logs if bool(_string(item.get("job_id"))))
     check_run_id_present = sum(1 for item in logs if bool(_string(item.get("check_run_id"))))
+    workflow_run_metadata_present = sum(
+        1 for item in logs if bool(_as_dict(item.get("workflow_run")))
+    )
+    workflow_job_metadata_present = sum(
+        1 for item in logs if bool(_as_dict(item.get("workflow_job")))
+    )
+    workflow_job_steps_present = sum(
+        1 for item in logs if bool(_as_list(_as_dict(item.get("workflow_job")).get("steps")))
+    )
     pending_downloads = sum(
         1
         for item in logs
@@ -260,12 +366,22 @@ def _workflow_job_evidence_quality(logs: list[JsonObject]) -> JsonObject:
             or bool(item.get("annotation_collection_supported"))
         )
     )
+    metadata_downloads_pending = max(
+        run_id_present - workflow_run_metadata_present,
+        0,
+    ) + max(job_id_present - workflow_job_metadata_present, 0)
 
     gaps: list[str] = []
-    if pending_downloads:
+    if pending_downloads or metadata_downloads_pending:
         gaps.append("download_script_required")
     if uncollectible:
         gaps.append("uncollectible_failed_checks")
+    if run_id_present > workflow_run_metadata_present:
+        gaps.append("workflow_run_metadata_missing")
+    if job_id_present > workflow_job_metadata_present:
+        gaps.append("workflow_job_metadata_missing")
+    if job_id_present > workflow_job_steps_present:
+        gaps.append("workflow_job_steps_missing")
 
     return {
         "schema_version": WORKFLOW_JOB_EVIDENCE_QUALITY_SCHEMA_VERSION,
@@ -277,8 +393,12 @@ def _workflow_job_evidence_quality(logs: list[JsonObject]) -> JsonObject:
         "run_id_present": run_id_present,
         "job_id_present": job_id_present,
         "check_run_id_present": check_run_id_present,
+        "workflow_run_metadata_present": workflow_run_metadata_present,
+        "workflow_job_metadata_present": workflow_job_metadata_present,
+        "workflow_job_steps_present": workflow_job_steps_present,
         "pending_downloads": pending_downloads,
-        "download_script_required": bool(pending_downloads),
+        "metadata_downloads_pending": metadata_downloads_pending,
+        "download_script_required": bool(pending_downloads or metadata_downloads_pending),
         "evidence_gaps": gaps,
         "reporting_only": True,
         "patch_application_allowed": False,
@@ -296,7 +416,9 @@ def build_failed_check_log_manifest(
     payload = _read_json(checks_json)
     records = _iter_check_records(payload)
     log_dir = out_dir / "failed-check-logs"
+    metadata_dir = out_dir / "workflow-job-metadata"
     log_dir.mkdir(parents=True, exist_ok=True)
+    metadata_dir.mkdir(parents=True, exist_ok=True)
 
     logs: list[JsonObject] = []
     for index, record in enumerate(records):
@@ -309,6 +431,14 @@ def build_failed_check_log_manifest(
         check_run_id = _check_run_id(record, url)
         log_path = log_dir / f"{index + 1:02d}-{_slug(name)}.log"
         annotation_path = log_dir / f"{index + 1:02d}-{_slug(name)}.annotations.json"
+        workflow_run_path = metadata_dir / f"run-{run_id}.json" if run_id else None
+        workflow_job_path = metadata_dir / f"job-{job_id}.json" if job_id else None
+        workflow_run = _normalized_workflow_run(
+            _read_json(workflow_run_path) if workflow_run_path is not None else {}
+        )
+        workflow_job = _normalized_workflow_job(
+            _read_json(workflow_job_path) if workflow_job_path is not None else {}
+        )
         collected = _collect_existing_log(record, log_path)
         annotation_collected = annotation_path.exists() and collected
 
@@ -323,8 +453,16 @@ def build_failed_check_log_manifest(
         else:
             evidence_source = "uncollectible"
 
+        if workflow_run and workflow_job and _as_list(workflow_job.get("steps")):
+            metadata_status = "confirmed"
+        elif workflow_run or workflow_job:
+            metadata_status = "partial"
+        else:
+            metadata_status = "unavailable"
+
         logs.append(
             {
+                "record_index": index,
                 "check_name": name,
                 "status": _check_status(record),
                 "conclusion": _check_conclusion(record),
@@ -339,6 +477,15 @@ def build_failed_check_log_manifest(
                 "evidence_source": evidence_source,
                 "log_path": log_path.as_posix(),
                 "collected": collected,
+                "workflow_run_path": (
+                    workflow_run_path.as_posix() if workflow_run_path is not None else ""
+                ),
+                "workflow_job_path": (
+                    workflow_job_path.as_posix() if workflow_job_path is not None else ""
+                ),
+                "workflow_run": workflow_run,
+                "workflow_job": workflow_job,
+                "workflow_metadata_status": metadata_status,
             }
         )
 
@@ -346,6 +493,7 @@ def build_failed_check_log_manifest(
         "schema_version": SCHEMA_VERSION,
         "checks_source": checks_json.as_posix(),
         "logs_dir": log_dir.as_posix(),
+        "workflow_metadata_dir": metadata_dir.as_posix(),
         "failed_check_count": len(logs),
         "collected_log_count": len([item for item in logs if bool(item.get("collected", False))]),
         "annotation_collected_count": len(
@@ -360,7 +508,9 @@ def render_download_script(manifest: JsonObject) -> str:
     lines = [
         "#!/usr/bin/env bash",
         "set -u",
+        'repository="${GITHUB_REPOSITORY:-${REPOSITORY_OWNER:-}/${REPOSITORY_NAME:-}}"',
         f"mkdir -p {shlex.quote(_string(manifest.get('logs_dir')))}",
+        f"mkdir -p {shlex.quote(_string(manifest.get('workflow_metadata_dir')))}",
         "",
     ]
 
@@ -370,7 +520,48 @@ def render_download_script(manifest: JsonObject) -> str:
         check_run_id = _string(item.get("check_run_id"))
         log_path = _string(item.get("log_path"))
         annotation_path = _string(item.get("annotation_path"))
+        workflow_run_path = _string(item.get("workflow_run_path"))
+        workflow_job_path = _string(item.get("workflow_job_path"))
         collected = bool(item.get("collected", False))
+
+        if run_id and workflow_run_path:
+            quoted_target = shlex.quote(workflow_run_path)
+            quoted_tmp = shlex.quote(f"{workflow_run_path}.tmp")
+            lines.extend(
+                [
+                    f'if [ ! -s {quoted_target} ] && [ -n "$repository" ] && [ "$repository" != "/" ]; then',
+                    (
+                        f'  if gh api -H "Accept: application/vnd.github+json" '
+                        f'"repos/${{repository}}/actions/runs/{run_id}" > {quoted_tmp}; then'
+                    ),
+                    f"    mv {quoted_tmp} {quoted_target}",
+                    "  else",
+                    f"    rm -f {quoted_tmp}",
+                    "  fi",
+                    "fi",
+                    "",
+                ]
+            )
+
+        if job_id and workflow_job_path:
+            quoted_target = shlex.quote(workflow_job_path)
+            quoted_tmp = shlex.quote(f"{workflow_job_path}.tmp")
+            lines.extend(
+                [
+                    f'if [ ! -s {quoted_target} ] && [ -n "$repository" ] && [ "$repository" != "/" ]; then',
+                    (
+                        f'  if gh api -H "Accept: application/vnd.github+json" '
+                        f'"repos/${{repository}}/actions/jobs/{job_id}" > {quoted_tmp}; then'
+                    ),
+                    f"    mv {quoted_tmp} {quoted_target}",
+                    "  else",
+                    f"    rm -f {quoted_tmp}",
+                    "  fi",
+                    "fi",
+                    "",
+                ]
+            )
+
         if not log_path or collected:
             continue
 
@@ -398,10 +589,6 @@ def render_download_script(manifest: JsonObject) -> str:
             quoted_annotations = shlex.quote(annotation_path)
             lines.extend(
                 [
-                    (
-                        "repository="
-                        '"${GITHUB_REPOSITORY:-${REPOSITORY_OWNER:-}/${REPOSITORY_NAME:-}}"'
-                    ),
                     (
                         f'raw_annotations="${{RUNNER_TEMP:-/tmp}}/'
                         f"sdetkit-check-run-{check_run_id}-"
@@ -445,6 +632,11 @@ def write_failed_check_log_artifacts(
         script_path.write_text(render_download_script(manifest), encoding="utf-8")
         script_path.chmod(0o755)
         manifest["download_script"] = script_path.as_posix()
+
+    hydrated_checks_path = out_dir / "checks-with-workflow-metadata.json"
+    hydrated = _hydrate_checks_payload(checks_json=checks_json, manifest=manifest)
+    _write_json(hydrated_checks_path, hydrated)
+    manifest["hydrated_checks_json"] = hydrated_checks_path.as_posix()
 
     manifest_path = out_dir / "check-log-manifest.json"
     manifest["manifest_path"] = manifest_path.as_posix()
