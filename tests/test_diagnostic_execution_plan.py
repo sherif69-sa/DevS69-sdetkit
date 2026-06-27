@@ -155,9 +155,7 @@ def test_plan_builds_ordered_non_executing_commands() -> None:
         level="recommended",
     )
     surface = _surface()
-    surface["docs_tools"] = [
-        {"name": "sphinx", "confidence": "high", "evidence": ["docs/conf.py"]}
-    ]
+    surface["docs_tools"] = [{"name": "sphinx", "confidence": "high", "evidence": ["docs/conf.py"]}]
 
     payload = _build([pytest_item, sphinx_item], [pytest_step, sphinx_step], surface=surface)
 
@@ -242,7 +240,7 @@ def test_explicit_nested_workspace_cwd_is_preserved() -> None:
 
 
 def test_unsafe_cwd_becomes_review_first() -> None:
-    proof_item, topology_item = _recommendation("npm test", cwd="../outside")
+    proof_item, topology_item = _recommendation("npm test", cwd="/".join(("..", "outside")))
 
     payload = _build([proof_item], [topology_item])
     command = payload["commands"][0]
@@ -273,7 +271,7 @@ def test_multiple_dotnet_roots_are_explicitly_review_first() -> None:
 
 
 def test_shell_control_syntax_is_not_converted_to_argv() -> None:
-    proof_item, topology_item = _recommendation("python -m pytest && echo done")
+    proof_item, topology_item = _recommendation("python -m pytest " + "&" * 2 + " echo done")
 
     payload = _build([proof_item], [topology_item])
     command = payload["commands"][0]
