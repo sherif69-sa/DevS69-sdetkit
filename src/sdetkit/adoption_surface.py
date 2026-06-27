@@ -301,6 +301,22 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             purpose="quality",
         )
 
+    sphinx_evidence = ["docs/conf.py"] if _file(root, "docs/conf.py") else []
+    if sphinx_evidence:
+        _add_named(
+            docs_tools,
+            "sphinx",
+            confidence="high",
+            evidence=sphinx_evidence,
+        )
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="docs",
+            command="python -m sphinx -W -b html docs docs/_build/html",
+            confidence="high",
+            purpose="docs",
+        )
+
     if _file(root, "mkdocs.yml"):
         _add_named(
             docs_tools,
@@ -315,7 +331,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             confidence="high",
             purpose="docs",
         )
-    elif _dir(root, "docs"):
+    elif _dir(root, "docs") and not sphinx_evidence:
         _add_named(
             docs_tools,
             "docs_directory",

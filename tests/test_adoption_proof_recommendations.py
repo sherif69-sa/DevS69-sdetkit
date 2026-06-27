@@ -251,3 +251,41 @@ def test_proof_recommendations_classify_tox_as_required_manual_test(
     assert payload["patch_application_allowed"] is False
     assert payload["merge_authorized"] is False
     assert payload["semantic_equivalence_proven"] is False
+
+
+def test_proof_recommendations_classify_sphinx_as_recommended_manual_docs(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "conf.py").write_text(
+        "project = 'Sphinx proof'\n",
+        encoding="utf-8",
+    )
+
+    surface = discover_adoption_surface(tmp_path)
+    payload = build_proof_recommendations_payload(
+        tmp_path,
+        surface_payload=surface,
+    )
+    commands = {str(item["command"]): item for item in payload["proof_recommendations"]}
+
+    assert commands["python -m sphinx -W -b html docs docs/_build/html"] == {
+        "index": 1,
+        "command": "python -m sphinx -W -b html docs docs/_build/html",
+        "surface": "docs",
+        "purpose": "docs",
+        "confidence": "high",
+        "operator_level": "recommended",
+        "execution_policy": "manual_only",
+        "executes_target_code": True,
+        "manual_execution_required": True,
+        "auto_run_allowed": False,
+        "reason": "documentation proof for detected docs surface",
+    }
+    assert payload["summary"]["required_count"] == 0
+    assert payload["summary"]["recommended_count"] == 1
+    assert payload["summary"]["review_first_count"] == 0
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
