@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from sdetkit.adoption_surface import SCHEMA_VERSION, discover_adoption_surface
 
 
@@ -22,6 +24,66 @@ def _commands(payload: dict) -> set[str]:
 def _proof_command(payload: dict, command: str) -> dict:
     commands = {str(item["command"]): item for item in payload["recommended_proof_commands"]}
     return commands[command]
+
+
+@pytest.mark.parametrize(
+    ("files", "expected_manager", "expected_evidence"),
+    [
+        ({"uv.lock": ""}, "uv", {"uv.lock"}),
+        ({"poetry.lock": ""}, "poetry", {"poetry.lock"}),
+        ({"pnpm-lock.yaml": "lockfileVersion: '9.0'\n"}, "pnpm", {"pnpm-lock.yaml"}),
+        ({"yarn.lock": "# yarn lockfile\n"}, "yarn", {"yarn.lock"}),
+        (
+            {
+                "build.gradle.kts": "plugins { java }\n",
+                "gradlew": "#!/usr/bin/env sh\n",
+            },
+            "gradle",
+            {"build.gradle.kts", "gradlew"},
+        ),
+    ],
+)
+def test_adoption_surface_detects_remaining_package_manager_markers(
+    tmp_path: Path,
+    files: dict[str, str],
+    expected_manager: str,
+    expected_evidence: set[str],
+) -> None:
+    for relative_path, content in files.items():
+        _write(tmp_path / relative_path, content)
+
+    payload = discover_adoption_surface(tmp_path)
+    managers = {str(item["name"]): item for item in payload["package_managers"]}
+
+    assert expected_manager in managers
+    assert set(managers[expected_manager]["files"]) == expected_evidence
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "content"),
+    [
+        ("pyproject.toml", "[project]\nname = 'manifest-only'\n"),
+        ("package.json", '{"name": "manifest-only"}\n'),
+    ],
+)
+def test_adoption_surface_does_not_guess_package_manager_from_manifest_alone(
+    tmp_path: Path,
+    relative_path: str,
+    content: str,
+) -> None:
+    _write(tmp_path / relative_path, content)
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert payload["package_managers"] == []
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
 
 
 def test_adoption_surface_detects_python_github_security_and_proof_commands(
@@ -62,6 +124,84 @@ def test_adoption_surface_detects_python_github_security_and_proof_commands(
         _proof_command(payload, "NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict")["purpose"]
         == "docs"
     )
+
+
+@pytest.mark.parametrize(
+    ("python_file", "python_content", "expected_pip_audit_evidence"),
+    [
+        (
+            "pyproject.toml",
+            "[project.optional-dependencies]\nsecurity = ['pip-audit']\n",
+            {"pyproject.toml"},
+        ),
+        (
+            "requirements-security.txt",
+            "pip-audit==2.9.0\n",
+            {"requirements-security.txt"},
+        ),
+    ],
+)
+def test_adoption_surface_security_tool_evidence_is_source_specific(
+    tmp_path: Path,
+    python_file: str,
+    python_content: str,
+    expected_pip_audit_evidence: set[str],
+) -> None:
+    _write(tmp_path / python_file, python_content)
+    _write(
+        tmp_path / ".github" / "workflows" / "codeql.yml",
+        "steps:\n  - uses: github/codeql-action/init@abc\n",
+    )
+    _write(
+        tmp_path / ".github" / "workflows" / "dependency-review.yml",
+        "steps:\n  - uses: actions/dependency-review-action@abc\n",
+    )
+    _write(
+        tmp_path / ".github" / "workflows" / "unrelated.yml",
+        "steps:\n  - run: echo unrelated\n",
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+    tools = {str(item["name"]): item for item in payload["security_tools"]}
+
+    assert set(tools) == {"codeql", "dependency_review", "pip_audit"}
+    assert set(tools["codeql"]["evidence"]) == {".github/workflows/codeql.yml"}
+    assert set(tools["dependency_review"]["evidence"]) == {
+        ".github/workflows/dependency-review.yml"
+    }
+    assert set(tools["pip_audit"]["evidence"]) == expected_pip_audit_evidence
+    assert ".github/workflows/unrelated.yml" not in {
+        evidence for tool in tools.values() for evidence in tool["evidence"]
+    }
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+
+def test_adoption_surface_combines_pip_audit_workflow_and_python_evidence(
+    tmp_path: Path,
+) -> None:
+    _write(
+        tmp_path / "pyproject.toml",
+        "[project.optional-dependencies]\nsecurity = ['pip-audit']\n",
+    )
+    _write(
+        tmp_path / ".github" / "workflows" / "dependency-audit.yml",
+        "steps:\n  - run: python -m pip_audit\n  - run: pip-audit\n",
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+    tools = {str(item["name"]): item for item in payload["security_tools"]}
+
+    assert set(tools["pip_audit"]["evidence"]) == {
+        "pyproject.toml",
+        ".github/workflows/dependency-audit.yml",
+    }
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
 
 
 def test_adoption_surface_marks_unknown_javascript_test_command_review_first(
@@ -142,6 +282,72 @@ def test_adoption_surface_detects_multi_language_evidence_without_running_comman
     assert "mvn test" in _commands(payload)
     assert "dotnet test" in _commands(payload)
     assert payload["artifact_surfaces"] == [{"name": "coverage", "paths": ["coverage.xml"]}]
+
+
+def test_adoption_surface_detects_standard_evidence_artifacts(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "reports" / "coverage.xml", "<coverage />\n")
+    _write(tmp_path / "reports" / "coverage.json", "{}\n")
+    _write(tmp_path / "reports" / "lcov.info", "TN:\n")
+    _write(tmp_path / "reports" / "junit.xml", "<testsuite />\n")
+    _write(tmp_path / "reports" / "junit-unit.xml", "<testsuite />\n")
+    _write(tmp_path / "reports" / "junit_integration.xml", "<testsuite />\n")
+    _write(tmp_path / "security" / "security.sarif", "{}\n")
+    _write(tmp_path / "security" / "codeql.sarif.json", "{}\n")
+    _write(tmp_path / "sbom" / "application.cdx.json", "{}\n")
+    _write(tmp_path / "sbom" / "application.spdx.json", "{}\n")
+    _write(tmp_path / "sbom" / "sbom.xml", "<bom />\n")
+
+    payload = discover_adoption_surface(tmp_path)
+    surfaces = {str(item["name"]): item for item in payload["artifact_surfaces"]}
+
+    assert set(surfaces) == {
+        "coverage",
+        "junit_xml",
+        "sarif",
+        "sbom",
+    }
+    assert surfaces["coverage"]["paths"] == [
+        "reports/coverage.json",
+        "reports/coverage.xml",
+        "reports/lcov.info",
+    ]
+    assert surfaces["junit_xml"]["paths"] == [
+        "reports/junit-unit.xml",
+        "reports/junit.xml",
+        "reports/junit_integration.xml",
+    ]
+    assert surfaces["sarif"]["paths"] == [
+        "security/codeql.sarif.json",
+        "security/security.sarif",
+    ]
+    assert surfaces["sbom"]["paths"] == [
+        "sbom/application.cdx.json",
+        "sbom/application.spdx.json",
+        "sbom/sbom.xml",
+    ]
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+
+def test_adoption_surface_ignores_non_artifacts_and_ignored_tree_artifacts(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "docs" / "example.xml", "<example />\n")
+    _write(tmp_path / "data" / "report.json", "{}\n")
+    _write(tmp_path / "site" / "junit.xml", "<testsuite />\n")
+    _write(tmp_path / "node_modules" / "security.sarif", "{}\n")
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert payload["artifact_surfaces"] == []
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
 
 
 def test_adoption_surface_profiles_external_repo_readiness_without_authority(

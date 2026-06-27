@@ -74,6 +74,13 @@ def _recursive_files(root: Path, pattern: str) -> list[str]:
     return sorted(files)
 
 
+def _recursive_files_for_patterns(
+    root: Path,
+    patterns: Sequence[str],
+) -> list[str]:
+    return sorted({path for pattern in patterns for path in _recursive_files(root, pattern)})
+
+
 def _read_text(root: Path, path: str) -> str:
     try:
         return (root / path).read_text(encoding="utf-8", errors="ignore")
@@ -123,6 +130,11 @@ def _workflow_files(root: Path) -> list[str]:
 
 def _workflow_text(root: Path, files: list[str]) -> str:
     return "\n".join(_read_text(root, path).lower() for path in files)
+
+
+def _files_containing(root: Path, files: list[str], needle: str) -> list[str]:
+    normalized = needle.lower()
+    return sorted(path for path in files if normalized in _read_text(root, path).lower())
 
 
 def _package_json_has_test(root: Path) -> bool:
@@ -206,7 +218,6 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     requirements = _glob_files(root, "requirements*.txt")
     workflows = _workflow_files(root)
-    workflow_text = _workflow_text(root, workflows)
 
     detected_languages: list[dict[str, Any]] = []
     package_managers: list[dict[str, Any]] = []
@@ -404,17 +415,44 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     if _file(root, "Jenkinsfile"):
         _add_named(ci_systems, "jenkins", files=["Jenkinsfile"])
 
-    if "codeql" in workflow_text:
-        _add_named(security_tools, "codeql", confidence="detected", evidence=workflows)
-    if "dependency-review" in workflow_text:
+    codeql_evidence = _files_containing(root, workflows, "codeql")
+    if codeql_evidence:
+        _add_named(
+            security_tools,
+            "codeql",
+            confidence="detected",
+            evidence=codeql_evidence,
+        )
+
+    dependency_review_evidence = _files_containing(
+        root,
+        workflows,
+        "dependency-review",
+    )
+    if dependency_review_evidence:
         _add_named(
             security_tools,
             "dependency_review",
             confidence="detected",
-            evidence=workflows,
+            evidence=dependency_review_evidence,
         )
-    if "pip-audit" in workflow_text or "pip-audit" in python_tool_text:
-        _add_named(security_tools, "pip_audit", confidence="detected", evidence=workflows)
+
+    python_tool_files = [
+        path for path in ["pyproject.toml", *requirements] if (root / path).is_file()
+    ]
+    pip_audit_evidence = sorted(
+        set(
+            _files_containing(root, workflows, "pip-audit")
+            + _files_containing(root, python_tool_files, "pip-audit")
+        )
+    )
+    if pip_audit_evidence:
+        _add_named(
+            security_tools,
+            "pip_audit",
+            confidence="detected",
+            evidence=pip_audit_evidence,
+        )
 
     release_workflows = [
         path
@@ -439,8 +477,57 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             evidence=["CHANGELOG.md"],
         )
 
-    if _file(root, "coverage.xml"):
-        _add_named(artifact_surfaces, "coverage", paths=["coverage.xml"])
+    coverage_artifacts = _recursive_files_for_patterns(
+        root,
+        ("coverage.xml", "coverage.json", "lcov.info"),
+    )
+    if coverage_artifacts:
+        _add_named(
+            artifact_surfaces,
+            "coverage",
+            paths=coverage_artifacts,
+        )
+
+    junit_artifacts = _recursive_files_for_patterns(
+        root,
+        ("junit.xml", "junit-*.xml", "junit_*.xml"),
+    )
+    if junit_artifacts:
+        _add_named(
+            artifact_surfaces,
+            "junit_xml",
+            paths=junit_artifacts,
+        )
+
+    sarif_artifacts = _recursive_files_for_patterns(
+        root,
+        ("*.sarif", "*.sarif.json"),
+    )
+    if sarif_artifacts:
+        _add_named(
+            artifact_surfaces,
+            "sarif",
+            paths=sarif_artifacts,
+        )
+
+    sbom_artifacts = _recursive_files_for_patterns(
+        root,
+        (
+            "*.cdx.json",
+            "*.spdx.json",
+            "sbom.json",
+            "sbom.xml",
+            "bom.json",
+            "bom.xml",
+        ),
+    )
+    if sbom_artifacts:
+        _add_named(
+            artifact_surfaces,
+            "sbom",
+            paths=sbom_artifacts,
+        )
+
     if _dir(root, "dist"):
         _add_named(artifact_surfaces, "python_distribution", paths=["dist/"])
     if _dir(root, "build"):
