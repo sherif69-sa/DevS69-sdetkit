@@ -204,10 +204,10 @@ def test_adoption_surface_fixture_reports_remain_operator_readable(fixture: str)
 def test_adoption_learning_uses_fixture_matrix_as_next_upgrade_source() -> None:
     payload = build_adoption_learning_payload(Path("."))
 
-    assert payload["recommended_next_upgrade"] == "public repo trial matrix report"
+    assert payload["recommended_next_upgrade"] == "review learning gaps"
     assert "fixture repo matrix" in payload["upgrade_candidates"]
     assert "add fixture repo matrix for non-Python repo shapes" not in payload["learning_gaps"]
-    assert payload["recommended_next_upgrade"] == "public repo trial matrix report"
+    assert payload["recommended_next_upgrade"] == "review learning gaps"
     assert "add fixture coverage for non-GitHub CI providers" not in payload["learning_gaps"]
     assert "add fixtures that prove review-first unknown handling" not in payload["learning_gaps"]
     assert "add local external-root smoke before public repo trials" not in payload["learning_gaps"]
@@ -220,7 +220,7 @@ def test_adoption_learning_uses_fixture_matrix_as_next_upgrade_source() -> None:
     assert "add repo topology summary" not in payload["learning_gaps"]
     assert "add adoption evidence bundle" not in payload["learning_gaps"]
     assert "add public repo trial matrix" not in payload["learning_gaps"]
-    assert "add public repo trial matrix report" in payload["learning_gaps"]
+    assert "add public repo trial matrix report" not in payload["learning_gaps"]
 
 
 def test_fixture_matrix_proves_review_first_unknown_handling() -> None:
