@@ -7,6 +7,7 @@ from sdetkit.adoption_evidence_bundle import build_adoption_evidence_bundle_payl
 from sdetkit.adoption_proof_recommendations import build_proof_recommendations_payload
 from sdetkit.adoption_repo_topology import build_repo_topology_payload
 from sdetkit.adoption_surface import write_adoption_surface_artifact
+from sdetkit.diagnostic_execution_plan import build_diagnostic_execution_plan
 
 
 def _write(path: Path, content: str) -> None:
@@ -51,6 +52,12 @@ def test_external_repo_stack_runs_against_target_without_mutating_it(tmp_path: P
         proof_payload=proof,
         topology_payload=topology,
     )
+    plan = build_diagnostic_execution_plan(
+        target,
+        surface_payload=surface,
+        proof_payload=proof,
+        topology_payload=topology,
+    )
 
     assert _snapshot_tree(target) == before
     assert surface_path.is_file()
@@ -70,7 +77,13 @@ def test_external_repo_stack_runs_against_target_without_mutating_it(tmp_path: P
     assert bundle["rules"]["no_auto_execution"] is True
     assert bundle["operator_summary"]["manual_proof_step_count"] >= 1
 
-    for payload in [surface, proof, topology, bundle]:
+    assert plan["rules"]["no_command_execution"] is True
+    assert plan["rules"]["no_target_repo_mutation"] is True
+    assert plan["summary"]["command_count"] >= 1
+    assert all(command["execution_allowed"] is False for command in plan["commands"])
+    assert all(command["cwd"] == "." for command in plan["commands"])
+
+    for payload in [surface, proof, topology, bundle, plan]:
         assert payload["automation_allowed"] is False
         assert payload["patch_application_allowed"] is False
         assert payload["merge_authorized"] is False
