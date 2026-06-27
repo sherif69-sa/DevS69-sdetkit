@@ -106,6 +106,15 @@ def _unknowns(payload: dict[str, object]) -> set[str]:
             set(),
         ),
         (
+            "java_gradle_no_wrapper",
+            {"java"},
+            {"gradle"},
+            set(),
+            set(),
+            {"gradle test"},
+            set(),
+        ),
+        (
             "dotnet_solution",
             {"dotnet"},
             {"nuget"},
@@ -172,6 +181,7 @@ def test_adoption_surface_fixture_matrix_detects_repo_shapes(
         "go_module",
         "rust_cargo",
         "java_maven",
+        "java_gradle_no_wrapper",
         "dotnet_solution",
         "gitlab_python",
         "jenkins_java",
