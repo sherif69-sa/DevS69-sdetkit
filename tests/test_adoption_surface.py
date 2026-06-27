@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from sdetkit.adoption_surface import SCHEMA_VERSION, discover_adoption_surface
 
 
@@ -22,6 +24,66 @@ def _commands(payload: dict) -> set[str]:
 def _proof_command(payload: dict, command: str) -> dict:
     commands = {str(item["command"]): item for item in payload["recommended_proof_commands"]}
     return commands[command]
+
+
+@pytest.mark.parametrize(
+    ("files", "expected_manager", "expected_evidence"),
+    [
+        ({"uv.lock": ""}, "uv", {"uv.lock"}),
+        ({"poetry.lock": ""}, "poetry", {"poetry.lock"}),
+        ({"pnpm-lock.yaml": "lockfileVersion: '9.0'\n"}, "pnpm", {"pnpm-lock.yaml"}),
+        ({"yarn.lock": "# yarn lockfile\n"}, "yarn", {"yarn.lock"}),
+        (
+            {
+                "build.gradle.kts": "plugins { java }\n",
+                "gradlew": "#!/usr/bin/env sh\n",
+            },
+            "gradle",
+            {"build.gradle.kts", "gradlew"},
+        ),
+    ],
+)
+def test_adoption_surface_detects_remaining_package_manager_markers(
+    tmp_path: Path,
+    files: dict[str, str],
+    expected_manager: str,
+    expected_evidence: set[str],
+) -> None:
+    for relative_path, content in files.items():
+        _write(tmp_path / relative_path, content)
+
+    payload = discover_adoption_surface(tmp_path)
+    managers = {str(item["name"]): item for item in payload["package_managers"]}
+
+    assert expected_manager in managers
+    assert set(managers[expected_manager]["files"]) == expected_evidence
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "content"),
+    [
+        ("pyproject.toml", "[project]\nname = 'manifest-only'\n"),
+        ("package.json", '{"name": "manifest-only"}\n'),
+    ],
+)
+def test_adoption_surface_does_not_guess_package_manager_from_manifest_alone(
+    tmp_path: Path,
+    relative_path: str,
+    content: str,
+) -> None:
+    _write(tmp_path / relative_path, content)
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert payload["package_managers"] == []
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
 
 
 def test_adoption_surface_detects_python_github_security_and_proof_commands(
