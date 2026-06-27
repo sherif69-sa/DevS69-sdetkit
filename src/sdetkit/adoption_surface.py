@@ -388,11 +388,12 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             )
         if _file(root, "build.gradle") or _file(root, "build.gradle.kts"):
             _add_named(package_managers, "gradle", files=java_files)
+            gradle_wrapper_detected = _file(root, "gradlew")
             _add_proof_command(
                 recommended_proof_commands,
                 surface="java",
-                command="./gradlew test",
-                confidence="medium",
+                command="./gradlew test" if gradle_wrapper_detected else "gradle test",
+                confidence="high" if gradle_wrapper_detected else "medium",
                 purpose="test",
             )
 

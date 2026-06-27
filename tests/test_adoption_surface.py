@@ -64,6 +64,48 @@ def test_adoption_surface_detects_remaining_package_manager_markers(
 
 
 @pytest.mark.parametrize(
+    ("files", "expected_command", "unexpected_command", "expected_confidence"),
+    [
+        (
+            {"build.gradle": "plugins { id 'java' }\n"},
+            "gradle test",
+            "./gradlew test",
+            "medium",
+        ),
+        (
+            {
+                "build.gradle.kts": "plugins { java }\n",
+                "gradlew": "#!/usr/bin/env sh\n",
+            },
+            "./gradlew test",
+            "gradle test",
+            "high",
+        ),
+    ],
+)
+def test_adoption_surface_grounds_gradle_proof_command_in_wrapper_evidence(
+    tmp_path: Path,
+    files: dict[str, str],
+    expected_command: str,
+    unexpected_command: str,
+    expected_confidence: str,
+) -> None:
+    for relative_path, content in files.items():
+        _write(tmp_path / relative_path, content)
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert "gradle" in _names(payload["package_managers"])
+    assert expected_command in _commands(payload)
+    assert unexpected_command not in _commands(payload)
+    assert _proof_command(payload, expected_command)["confidence"] == expected_confidence
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+
+@pytest.mark.parametrize(
     ("relative_path", "content"),
     [
         ("pyproject.toml", "[project]\nname = 'manifest-only'\n"),
