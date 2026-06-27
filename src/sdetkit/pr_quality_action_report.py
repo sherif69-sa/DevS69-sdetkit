@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -2611,6 +2612,198 @@ def _review_model_fallback_action(
     return "none"
 
 
+def _github_check_run_url(value: object) -> str:
+    raw = _string(value)
+    prefix = "https://api.github.com/repos/"
+    marker = "/check-runs/"
+    if not raw.startswith(prefix) or marker not in raw:
+        return raw
+    repository, check_id = raw.removeprefix(prefix).split(marker, 1)
+    if not repository or not check_id.isdigit():
+        return raw
+    return f"https://github.com/{repository}/runs/{check_id}"
+
+
+def _display_failure_literal(value: str) -> str:
+    rendered = value.strip()
+    if len(rendered) >= 2 and rendered[0] == rendered[-1] and rendered[0] in {"'", '"'}:
+        return rendered[1:-1]
+    return rendered
+
+
+def _parse_pytest_failure_line(value: object) -> JsonObject:
+    line = _string(value)
+    match = re.search(
+        r"\bFAILED\s+(?P<node>\S+::\S+)\s+-\s+(?P<tail>.+)$",
+        line,
+    )
+    if match is None:
+        return {
+            "test_node": "",
+            "source_path": "",
+            "message": "",
+            "expected": "",
+            "observed": "",
+        }
+
+    test_node = match.group("node")
+    tail = match.group("tail").strip()
+    message = tail.split("AssertionError:", 1)[1].strip() if "AssertionError:" in tail else tail
+    values = re.search(
+        r"\bexpected=(?P<expected>'[^']*'|\"[^\"]*\"|[^;]+);"
+        r"\s*observed=(?P<observed>'[^']*'|\"[^\"]*\"|[^;]+)",
+        message,
+    )
+    expected = ""
+    observed = ""
+    if values is not None:
+        expected = _display_failure_literal(values.group("expected"))
+        observed = _display_failure_literal(values.group("observed"))
+
+    return {
+        "test_node": test_node,
+        "source_path": test_node.split("::", 1)[0],
+        "message": message,
+        "expected": expected,
+        "observed": observed,
+    }
+
+
+def _review_model_primary_failure(
+    *,
+    primary_blocker: JsonObject,
+    check_intelligence: JsonObject,
+    proof_commands: list[str],
+) -> JsonObject:
+    first_failure = _as_dict(primary_blocker.get("first_failure"))
+    parsed = _parse_pytest_failure_line(
+        first_failure.get("line") or primary_blocker.get("first_failure_line")
+    )
+    source_path = _string(parsed.get("source_path"))
+    context_rows = [
+        _as_dict(item) for item in _as_list(first_failure.get("context")) if _as_dict(item)
+    ]
+
+    source_line = 0
+    assertion_line = ""
+    context_excerpt: list[str] = []
+    for row in context_rows:
+        text = _string(row.get("text"))
+        if not text:
+            continue
+        if source_path and not source_line:
+            source_match = re.search(
+                rf"{re.escape(source_path)}:(\d+):",
+                text,
+            )
+            if source_match is not None:
+                source_line = int(source_match.group(1))
+        assertion_match = re.search(r"\bassert\s+.+$", text)
+        if assertion_match is not None and not assertion_line:
+            assertion_line = assertion_match.group(0)
+        if "FAILED " in text or "AssertionError" in text or assertion_match is not None:
+            context_excerpt.append(text)
+
+    step_confirmation = _as_dict(primary_blocker.get("job_step_confirmation"))
+    failed_step = _as_dict(primary_blocker.get("failed_step_evidence"))
+    step_name = _string(step_confirmation.get("job_step_name") or failed_step.get("step_name"))
+    step_status = _string(
+        step_confirmation.get("status") or failed_step.get("status") or "unavailable"
+    )
+    evidence_gaps: list[str] = []
+    if not step_name:
+        evidence_gaps.append("job_step_not_captured")
+
+    failed_checks = [
+        _as_dict(item)
+        for item in _as_list(check_intelligence.get("failed_checks"))
+        if _as_dict(item)
+    ]
+    families_by_signature: dict[
+        tuple[str, str, str],
+        JsonObject,
+    ] = {}
+    for check in failed_checks:
+        check_first_failure = _as_dict(check.get("first_failure"))
+        check_parsed = _parse_pytest_failure_line(
+            check_first_failure.get("line") or check.get("first_failure_line")
+        )
+        signature = (
+            _string(check.get("code") or "unknown"),
+            _string(check_parsed.get("test_node")),
+            _string(check_parsed.get("message")),
+        )
+        family = families_by_signature.setdefault(
+            signature,
+            {
+                "failure_code": signature[0],
+                "test_node": signature[1],
+                "message": signature[2],
+                "check_count": 0,
+                "checks": [],
+            },
+        )
+        family["check_count"] = _int(family.get("check_count")) + 1
+        check_name = _string(check.get("name") or check.get("check") or check.get("title"))
+        if check_name:
+            _as_list(family["checks"]).append(check_name)
+
+    families = list(families_by_signature.values())
+    unique_failure_count = len(families)
+    failed_check_count = len(failed_checks)
+    primary_signature = (
+        _string(primary_blocker.get("code") or "unknown"),
+        _string(parsed.get("test_node")),
+        _string(parsed.get("message")),
+    )
+    matrix_occurrence_count = 0
+    primary_family = families_by_signature.get(primary_signature)
+    if primary_family:
+        matrix_occurrence_count = _int(primary_family.get("check_count"))
+    elif failed_check_count:
+        matrix_occurrence_count = 1
+        unique_failure_count = max(unique_failure_count, 1)
+
+    check_api_url = _string(primary_blocker.get("url"))
+    evidence_quality = _as_dict(first_failure.get("evidence_quality"))
+    check_name = _string(
+        primary_blocker.get("check") or primary_blocker.get("name") or primary_blocker.get("title")
+    )
+    reproduction_command = proof_commands[0] if proof_commands else ""
+
+    return {
+        "available": bool(check_name or parsed.get("test_node") or parsed.get("message")),
+        "actionable": bool(evidence_quality.get("actionable", False)),
+        "failure_code": _string(primary_blocker.get("code")),
+        "failure_type": _string(first_failure.get("kind")),
+        "tool": _string(first_failure.get("tool")),
+        "workflow_name": "",
+        "check_name": check_name,
+        "check_url": _github_check_run_url(check_api_url),
+        "check_api_url": check_api_url,
+        "step_name": step_name,
+        "step_evidence_status": step_status,
+        "test_node": _string(parsed.get("test_node")),
+        "source_path": source_path,
+        "source_line": source_line,
+        "message": _string(parsed.get("message")),
+        "assertion_line": assertion_line,
+        "expected": _string(parsed.get("expected")),
+        "observed": _string(parsed.get("observed")),
+        "reproduction_command": reproduction_command,
+        "log_line_number": _int(first_failure.get("line_number")),
+        "context_excerpt": context_excerpt[:6],
+        "failed_check_count": failed_check_count,
+        "unique_failure_count": unique_failure_count,
+        "matrix_occurrence_count": matrix_occurrence_count,
+        "matrix_repetition": (failed_check_count > 1 and unique_failure_count < failed_check_count),
+        "evidence_gaps": evidence_gaps,
+        "families": families,
+        "reporting_only": True,
+        "merge_authorized": False,
+    }
+
+
 def build_pr_quality_review_model(
     *,
     status: str,
@@ -2786,6 +2979,12 @@ def build_pr_quality_review_model(
             "reporting_only": True,
         }
 
+    primary_failure = _review_model_primary_failure(
+        primary_blocker=primary_blocker,
+        check_intelligence=check_intelligence,
+        proof_commands=proof_commands,
+    )
+
     review_state = _canonical_review_state(
         source_status=status,
         failed_checks=failed_count,
@@ -2827,6 +3026,8 @@ def build_pr_quality_review_model(
         },
         "recommended_actions": recommended_actions[:10],
         "failure_vector_signal": failure_vector_signal,
+        "primary_failure": primary_failure,
+        "failure_families": _as_list(primary_failure.get("families")),
         "ghas_blocker_details": ghas_blocker_details,
         "failed_check_names": failed_check_names,
         "required_queued_check_names": required_queued_check_names,

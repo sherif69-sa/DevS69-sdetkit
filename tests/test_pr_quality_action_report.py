@@ -6190,3 +6190,120 @@ def test_review_summary_enriches_security_failure_from_ghas() -> None:
     )
     assert "| Failing test/check | `sdetkit-security-gate` |" in summary
     assert "| Owner hint | `src/sdetkit/pr_quality_action_report.py:3121` |" in summary
+
+
+def test_review_model_promotes_pytest_failure_and_collapses_matrix() -> None:
+    failure_line = (
+        "Validate (ubuntu-latest / py3.12) UNKNOWN STEP "
+        "FAILED tests/test_probe.py::test_probe - "
+        "AssertionError: PR_QUALITY_FORCED_FAILURE_V1: "
+        "expected='ready'; observed='forced'"
+    )
+    first_failure = {
+        "line": failure_line,
+        "line_number": 650,
+        "kind": "test_failure",
+        "tool": "pytest",
+        "evidence_quality": {
+            "actionable": True,
+            "confidence": "high",
+        },
+        "context": [
+            {
+                "line_number": 648,
+                "text": (
+                    "Validate (ubuntu-latest / py3.12) tests/test_probe.py:10: AssertionError"
+                ),
+            },
+            {
+                "line_number": 650,
+                "text": failure_line,
+            },
+            {
+                "line_number": 651,
+                "text": "assert 'forced' == 'ready'",
+            },
+        ],
+    }
+    action = {
+        "status": "review_required",
+        "primary_blocker": {
+            "check": "Validate (ubuntu-latest / py3.12)",
+            "title": "Targeted test behavior failed",
+            "surface": "tests",
+            "code": "PYTEST_ASSERTION_FAILURE",
+            "url": ("https://api.github.com/repos/example/repo/check-runs/123"),
+            "first_failure": first_failure,
+            "first_failure_line": failure_line,
+            "job_step_confirmation": {
+                "status": "missing",
+                "job_step_name": "",
+            },
+        },
+        "proof_commands": [("PYTHONPATH=src python -m pytest -q tests/test_probe.py::test_probe")],
+        "recommended_actions": ["Reproduce the first failing test only."],
+    }
+    failed_checks = []
+    for version in ("3.11", "3.12", "3.13"):
+        failed_checks.append(
+            {
+                "name": f"Validate (ubuntu / py{version})",
+                "code": "PYTEST_ASSERTION_FAILURE",
+                "first_failure": first_failure,
+            }
+        )
+    intelligence = {
+        "failed_checks": failed_checks,
+        "queued_checks": [],
+        "startup_failures": [],
+        "missing_required_contexts": [],
+        "code_scanning_review": {
+            "collected": True,
+            "open_alerts": 0,
+            "current_alerts": 0,
+            "stale_alerts": 0,
+            "findings": [],
+        },
+    }
+    narrative = {
+        "primary_signal": {
+            "surface": "tests",
+            "title": "Targeted test behavior failed",
+        },
+        "graph": {
+            "top_blocker": {
+                "surface": "tests",
+                "title": "Targeted test behavior failed",
+                "action": "review",
+            }
+        },
+        "next_proof": action["proof_commands"],
+    }
+
+    model = report.build_pr_quality_review_model(
+        status="review_required",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=True,
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=narrative,
+    )
+
+    failure = model["primary_failure"]
+    assert failure["available"] is True
+    assert failure["actionable"] is True
+    assert failure["test_node"] == "tests/test_probe.py::test_probe"
+    assert failure["source_path"] == "tests/test_probe.py"
+    assert failure["source_line"] == 10
+    assert failure["message"].startswith("PR_QUALITY_FORCED_FAILURE_V1")
+    assert failure["expected"] == "ready"
+    assert failure["observed"] == "forced"
+    assert failure["reproduction_command"].endswith("tests/test_probe.py::test_probe")
+    assert failure["check_url"] == ("https://github.com/example/repo/runs/123")
+    assert failure["failed_check_count"] == 3
+    assert failure["unique_failure_count"] == 1
+    assert failure["matrix_occurrence_count"] == 3
+    assert failure["matrix_repetition"] is True
+    assert failure["evidence_gaps"] == ["job_step_not_captured"]
+    assert len(model["failure_families"]) == 1

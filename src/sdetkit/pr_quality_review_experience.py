@@ -78,6 +78,7 @@ def render_pr_quality_review_experience(
 
     provenance = _as_dict(snapshot.get("provenance"))
     decision = _as_dict(model.get("decision"))
+    primary_failure = _as_dict(model.get("primary_failure"))
     authority = _as_dict(snapshot.get("authority_boundary") or model.get("authority_boundary"))
     facts = [_as_dict(item) for item in _as_list(snapshot.get("facts")) if _as_dict(item)]
     lineage = [_as_dict(item) for item in _as_list(snapshot.get("lineage")) if _as_dict(item)]
@@ -128,6 +129,24 @@ def render_pr_quality_review_experience(
         fact = facts_by_id.get(fact_id, {})
         status = _text(fact.get("status"), "unavailable")
         value = _text(fact.get("value"), "not collected")
+        if (
+            fact_id == "required_checks"
+            and review_state == "blocked"
+            and bool(primary_failure.get("available"))
+        ):
+            unique_count = max(
+                _integer(primary_failure.get("unique_failure_count")),
+                1,
+            )
+            failed_count = max(
+                _integer(primary_failure.get("failed_check_count")),
+                unique_count,
+            )
+            value = (
+                f"{unique_count} unique failure"
+                + ("" if unique_count == 1 else "s")
+                + f" repeated across {failed_count} checks"
+            )
         metric_cards.append(
             "".join(
                 (
@@ -293,9 +312,89 @@ def render_pr_quality_review_experience(
         if item
     )
 
+    failure_first = ""
+    if review_state == "blocked" and bool(primary_failure.get("available")):
+        unique_count = max(
+            _integer(primary_failure.get("unique_failure_count")),
+            1,
+        )
+        failed_count = max(
+            _integer(primary_failure.get("failed_check_count")),
+            unique_count,
+        )
+        repeated = (
+            f"{unique_count} unique failure"
+            + ("" if unique_count == 1 else "s")
+            + f" repeated across {failed_count} checks"
+        )
+        source_path = _text(primary_failure.get("source_path"))
+        source_line = _integer(primary_failure.get("source_line"))
+        source_location = (
+            f"{source_path}:{source_line}"
+            if source_path and source_line
+            else source_path or "Not captured"
+        )
+        step_name = _text(primary_failure.get("step_name"))
+        step_display = step_name or "Not captured — collector evidence gap"
+        command = _text(primary_failure.get("reproduction_command"))
+        check_name = _text(
+            primary_failure.get("check_name"),
+            "Not captured",
+        )
+        check_url = _text(primary_failure.get("check_url"))
+        check_display = (
+            _external_link(check_url, check_name, "text-link")
+            if check_url
+            else f"<code>{_safe(check_name)}</code>"
+        )
+        gaps = ", ".join(
+            _text(item) for item in _as_list(primary_failure.get("evidence_gaps")) if _text(item)
+        )
+        gap_html = (
+            f'<p class="evidence-gap"><strong>Evidence gap:</strong> {_safe(gaps)}</p>'
+            if gaps
+            else ""
+        )
+        command_html = (
+            "".join(
+                (
+                    '<div class="repro-box">',
+                    f"<code>{_safe(command)}</code>",
+                    f'<button class="button" type="button" data-copy-text="{_safe(command)}">Copy command</button>',
+                    "</div>",
+                )
+            )
+            if command
+            else '<p class="evidence-gap">Reproduction command was not captured.</p>'
+        )
+        failure_first = "".join(
+            (
+                '<section class="section failure-first" id="failure-first">',
+                '<div class="section-heading"><div><div class="eyebrow">First actionable failure</div>',
+                f"<h2>{_safe(repeated)}</h2></div>",
+                "<p>One root cause is collapsed across repeated matrix executions.</p></div>",
+                '<div class="failure-layout"><article class="failure-card">',
+                '<dl class="failure-fields">',
+                f"<div><dt>Check</dt><dd>{check_display}</dd></div>",
+                f"<div><dt>Test</dt><dd><code>{_safe(primary_failure.get('test_node'))}</code></dd></div>",
+                f"<div><dt>Source</dt><dd><code>{_safe(source_location)}</code></dd></div>",
+                f"<div><dt>Step</dt><dd>{_safe(step_display)}</dd></div>",
+                f"<div><dt>Expected</dt><dd><code>{_safe(primary_failure.get('expected'))}</code></dd></div>",
+                f"<div><dt>Observed</dt><dd><code>{_safe(primary_failure.get('observed'))}</code></dd></div>",
+                "</dl>",
+                "<h3>Failure</h3>",
+                f'<pre class="failure-message">{_safe(primary_failure.get("message"))}</pre>',
+                "<h3>Reproduce</h3>",
+                command_html,
+                gap_html,
+                "</article></div></section>",
+            )
+        )
+
     contract_payload = {
         "review": {
             "state": review_state,
+            "primary_failure": primary_failure,
             "head": head_sha,
             "head_binding": _text(
                 provenance.get("head_binding_status"),
@@ -337,6 +436,7 @@ def render_pr_quality_review_experience(
         {
             "snapshot": snapshot,
             "decision": decision,
+            "primary_failure": primary_failure,
             "facts": facts,
             "contract": contract_payload,
             "embedded_artifacts": embedded_payload,
@@ -354,7 +454,7 @@ def render_pr_quality_review_experience(
 <style>
 :root{color-scheme:light;--bg:#f5f7fb;--surface:#fff;--surface-soft:#f8fafc;--surface-strong:#eef2f7;--text:#152033;--muted:#66758a;--border:#d9e1ec;--accent:#315efb;--accent-2:#6d45e8;--clear:#14804a;--clear-bg:#e9f8ef;--attention:#b54708;--attention-bg:#fff2e0;--waiting:#0969da;--waiting-bg:#e5f1ff;--review:#7047eb;--review-bg:#f1ebff;--shadow:0 18px 55px rgba(27,42,78,.09);--radius:22px;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 html[data-theme="dark"]{color-scheme:dark;--bg:#090f1c;--surface:#111a2a;--surface-soft:#152033;--surface-strong:#1d2a40;--text:#edf3fb;--muted:#9aabc0;--border:#2b3950;--accent:#7fa1ff;--accent-2:#b49aff;--clear:#6bdd9b;--clear-bg:#123724;--attention:#ffbd70;--attention-bg:#40280f;--waiting:#82bdff;--waiting-bg:#133456;--review:#c4afff;--review-bg:#30234d;--shadow:0 22px 70px rgba(0,0,0,.34)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 78% -8%,rgba(49,94,251,.13),transparent 34rem),var(--bg);color:var(--text);font:15px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{cursor:pointer}a{color:var(--accent)}code,pre{font-family:var(--mono)}code{overflow-wrap:anywhere}.shell{width:min(1380px,calc(100% - 40px));margin:0 auto;padding:22px 0 88px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 4px 24px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;color:#fff;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 12px 30px rgba(49,94,251,.25)}.brand strong,.brand small{display:block}.brand small{color:var(--muted)}.top-actions,.artifact-actions,.dialog-actions,.view-tabs{display:flex;gap:8px;flex-wrap:wrap}.button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 13px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font-weight:700;text-decoration:none}.button:hover{border-color:var(--accent)}.button.primary{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent-2))}.button.disabled{cursor:not-allowed;color:var(--muted);background:var(--surface-soft)}.hero{padding:46px;border:1px solid var(--border);border-radius:30px;background:linear-gradient(145deg,var(--surface),var(--surface-soft));box-shadow:var(--shadow)}.hero-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(310px,.6fr);gap:38px;align-items:start}.eyebrow{color:var(--accent);font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.hero h1{margin:12px 0 14px;font-size:clamp(38px,5.8vw,72px);line-height:1.02;letter-spacing:-.055em}.hero p{max-width:780px;margin:0;color:var(--muted);font-size:18px}.verdict{padding:24px;border:1px solid var(--border);border-radius:22px;background:var(--surface)}.verdict-label{display:inline-flex;padding:7px 11px;border-radius:999px;font-weight:850}.verdict-label.clear{color:var(--clear);background:var(--clear-bg)}.verdict-label.attention{color:var(--attention);background:var(--attention-bg)}.verdict-label.waiting{color:var(--waiting);background:var(--waiting-bg)}.verdict-label.review{color:var(--review);background:var(--review-bg)}.verdict h2{margin:18px 0 8px;font-size:24px}.verdict p{font-size:14px}.meta-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:25px}.meta-pill{padding:8px 11px;border:1px solid var(--border);border-radius:999px;background:var(--surface);font-size:12px}.health-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:30px 0 52px}.health-card{min-height:170px;padding:23px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}.health-card p{margin:24px 0 0;color:var(--muted)}.health-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.health-top>span{font-weight:800}.health-status{font-size:12px}.health-clear{border-top:4px solid var(--clear)}.health-attention{border-top:4px solid var(--attention)}.health-unavailable{border-top:4px solid var(--muted)}.section{margin-top:58px}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:20px}.section-heading h2{margin:5px 0 0;font-size:32px;letter-spacing:-.025em}.section-heading p{margin:0;color:var(--muted)}.review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.review-panel{padding:28px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}.review-panel span{color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.review-panel h3{margin:10px 0 8px;font-size:24px}.review-panel p{margin:0;color:var(--muted)}.timeline{position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;padding:0;list-style:none}.timeline:before{content:"";position:absolute;left:20px;right:20px;top:14px;height:2px;background:var(--border)}.timeline-item{position:relative;padding:42px 18px 20px;border:1px solid var(--border);border-radius:18px;background:var(--surface)}.timeline-dot{position:absolute;top:6px;left:18px;width:18px;height:18px;border:5px solid var(--surface);border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--accent)}.timeline-item p{color:var(--muted)}.timeline-item code{font-size:11px}.artifact-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.search{width:min(520px,100%);padding:12px 14px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text);outline:none}.search:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}.artifact-list{display:grid;gap:12px}.artifact-row{display:grid;grid-template-columns:52px minmax(0,1fr) 170px auto;align-items:center;gap:18px;padding:19px;border:1px solid var(--border);border-radius:18px;background:var(--surface)}.artifact-row.hidden{display:none}.artifact-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:var(--surface-strong);color:var(--accent);font-size:18px;font-weight:900}.artifact-main h3{margin:0}.artifact-main p{margin:4px 0;color:var(--muted)}.artifact-title-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.format-chip,.status-chip{display:inline-flex;padding:4px 8px;border-radius:999px;background:var(--surface-strong);font-size:11px;font-weight:800;text-transform:uppercase}.artifact-trust span,.artifact-trust small{display:block;color:var(--muted)}.artifact-trust strong{display:block}.artifact-trust small{font-family:var(--mono);font-size:10px}.details-stack{display:grid;gap:12px}.details-card{border:1px solid var(--border);border-radius:18px;background:var(--surface);overflow:hidden}.details-card summary{cursor:pointer;padding:19px 22px;font-size:17px;font-weight:800}.details-body{padding:0 22px 22px}.evidence-table{width:100%;border-collapse:collapse}.evidence-table th,.evidence-table td{padding:12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}.evidence-table th{color:var(--muted)}.status-chip.clear{color:var(--clear);background:var(--clear-bg)}.status-chip.attention{color:var(--attention);background:var(--attention-bg)}.status-chip.unavailable{color:var(--muted)}.contract-grid{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px}.yaml-panel{max-height:520px;overflow:auto;padding:20px;border-radius:16px;background:#0d1727;color:#d9e7ff;white-space:pre-wrap}.authority-list{display:grid;gap:10px}.authority-item{padding:13px;border:1px solid var(--border);border-radius:13px;background:var(--surface-soft)}.authority-item span{display:block;color:var(--muted);font-size:12px}.footer-boundary{margin-top:58px;padding:24px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted)}dialog{width:min(1080px,calc(100vw - 34px));max-height:calc(100vh - 34px);padding:0;border:1px solid var(--border);border-radius:22px;background:var(--surface);color:var(--text);box-shadow:0 34px 110px rgba(0,0,0,.38)}dialog.fullscreen{width:calc(100vw - 20px);height:calc(100vh - 20px);max-height:none}dialog::backdrop{background:rgba(5,10,20,.68);backdrop-filter:blur(6px)}.dialog-header{position:sticky;top:0;z-index:5;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid var(--border);background:var(--surface)}.dialog-header h2{margin:3px 0 0}.dialog-body{padding:20px}.dialog-meta{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.artifact-frame{width:100%;height:min(64vh,760px);border:1px solid var(--border);border-radius:14px;background:#fff}.artifact-text{max-height:64vh;overflow:auto;padding:18px;border:1px solid var(--border);border-radius:14px;background:var(--surface-soft);white-space:pre-wrap;overflow-wrap:anywhere}.view-tab.active{border-color:var(--accent);color:var(--accent)}@media(max-width:980px){.hero-grid,.contract-grid{grid-template-columns:1fr}.health-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.artifact-row{grid-template-columns:48px minmax(0,1fr);}.artifact-trust,.artifact-row>.artifact-actions,.artifact-row>.button{grid-column:2}.timeline:before{display:none}}@media(max-width:620px){.shell{width:min(100% - 24px,1380px)}.hero{padding:28px}.health-grid,.review-grid{grid-template-columns:1fr}.section-heading,.artifact-toolbar,.topbar{align-items:stretch;flex-direction:column}.artifact-row{grid-template-columns:1fr}.artifact-icon,.artifact-trust,.artifact-row>.artifact-actions,.artifact-row>.button{grid-column:1}.hero h1{font-size:40px}}@media print{.topbar,.button,.artifact-toolbar,dialog{display:none!important}.shell{width:100%;padding:0}.hero,.health-card,.review-panel,.artifact-row,.details-card{box-shadow:none;break-inside:avoid}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 78% -8%,rgba(49,94,251,.13),transparent 34rem),var(--bg);color:var(--text);font:15px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{cursor:pointer}a{color:var(--accent)}code,pre{font-family:var(--mono)}code{overflow-wrap:anywhere}.shell{width:min(1380px,calc(100% - 40px));margin:0 auto;padding:22px 0 88px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 4px 24px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;color:#fff;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 12px 30px rgba(49,94,251,.25)}.brand strong,.brand small{display:block}.brand small{color:var(--muted)}.top-actions,.artifact-actions,.dialog-actions,.view-tabs{display:flex;gap:8px;flex-wrap:wrap}.button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 13px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font-weight:700;text-decoration:none}.button:hover{border-color:var(--accent)}.button.primary{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--accent),var(--accent-2))}.button.disabled{cursor:not-allowed;color:var(--muted);background:var(--surface-soft)}.hero{padding:46px;border:1px solid var(--border);border-radius:30px;background:linear-gradient(145deg,var(--surface),var(--surface-soft));box-shadow:var(--shadow)}.hero-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(310px,.6fr);gap:38px;align-items:start}.eyebrow{color:var(--accent);font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.hero h1{margin:12px 0 14px;font-size:clamp(38px,5.8vw,72px);line-height:1.02;letter-spacing:-.055em}.hero p{max-width:780px;margin:0;color:var(--muted);font-size:18px}.verdict{padding:24px;border:1px solid var(--border);border-radius:22px;background:var(--surface)}.verdict-label{display:inline-flex;padding:7px 11px;border-radius:999px;font-weight:850}.verdict-label.clear{color:var(--clear);background:var(--clear-bg)}.verdict-label.attention{color:var(--attention);background:var(--attention-bg)}.verdict-label.waiting{color:var(--waiting);background:var(--waiting-bg)}.verdict-label.review{color:var(--review);background:var(--review-bg)}.verdict h2{margin:18px 0 8px;font-size:24px}.verdict p{font-size:14px}.meta-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:25px}.meta-pill{padding:8px 11px;border:1px solid var(--border);border-radius:999px;background:var(--surface);font-size:12px}.health-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:30px 0 52px}.health-card{min-height:170px;padding:23px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}.health-card p{margin:24px 0 0;color:var(--muted)}.health-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.health-top>span{font-weight:800}.health-status{font-size:12px}.health-clear{border-top:4px solid var(--clear)}.health-attention{border-top:4px solid var(--attention)}.health-unavailable{border-top:4px solid var(--muted)}.section{margin-top:58px}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:20px}.section-heading h2{margin:5px 0 0;font-size:32px;letter-spacing:-.025em}.section-heading p{margin:0;color:var(--muted)}.review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.review-panel{padding:28px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}.review-panel span{color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.review-panel h3{margin:10px 0 8px;font-size:24px}.review-panel p{margin:0;color:var(--muted)}.failure-first{margin-top:30px}.failure-layout{display:grid;gap:18px}.failure-card{padding:28px;border:2px solid var(--attention);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow)}.failure-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 24px}.failure-fields div{padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--surface-soft)}.failure-fields dt{color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase}.failure-fields dd{margin:5px 0 0}.failure-message{padding:18px;border-radius:14px;background:#2a120d;color:#ffd9c7;white-space:pre-wrap;overflow-wrap:anywhere}.repro-box{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--surface-soft)}.repro-box code{min-width:0;overflow-wrap:anywhere}.evidence-gap{margin:14px 0 0;color:var(--attention)}.text-link{font-weight:800}.timeline{position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;padding:0;list-style:none}.timeline:before{content:"";position:absolute;left:20px;right:20px;top:14px;height:2px;background:var(--border)}.timeline-item{position:relative;padding:42px 18px 20px;border:1px solid var(--border);border-radius:18px;background:var(--surface)}.timeline-dot{position:absolute;top:6px;left:18px;width:18px;height:18px;border:5px solid var(--surface);border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--accent)}.timeline-item p{color:var(--muted)}.timeline-item code{font-size:11px}.artifact-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.search{width:min(520px,100%);padding:12px 14px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text);outline:none}.search:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}.artifact-list{display:grid;gap:12px}.artifact-row{display:grid;grid-template-columns:52px minmax(0,1fr) 170px auto;align-items:center;gap:18px;padding:19px;border:1px solid var(--border);border-radius:18px;background:var(--surface)}.artifact-row.hidden{display:none}.artifact-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:var(--surface-strong);color:var(--accent);font-size:18px;font-weight:900}.artifact-main h3{margin:0}.artifact-main p{margin:4px 0;color:var(--muted)}.artifact-title-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.format-chip,.status-chip{display:inline-flex;padding:4px 8px;border-radius:999px;background:var(--surface-strong);font-size:11px;font-weight:800;text-transform:uppercase}.artifact-trust span,.artifact-trust small{display:block;color:var(--muted)}.artifact-trust strong{display:block}.artifact-trust small{font-family:var(--mono);font-size:10px}.details-stack{display:grid;gap:12px}.details-card{border:1px solid var(--border);border-radius:18px;background:var(--surface);overflow:hidden}.details-card summary{cursor:pointer;padding:19px 22px;font-size:17px;font-weight:800}.details-body{padding:0 22px 22px}.evidence-table{width:100%;border-collapse:collapse}.evidence-table th,.evidence-table td{padding:12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}.evidence-table th{color:var(--muted)}.status-chip.clear{color:var(--clear);background:var(--clear-bg)}.status-chip.attention{color:var(--attention);background:var(--attention-bg)}.status-chip.unavailable{color:var(--muted)}.contract-grid{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px}.yaml-panel{max-height:520px;overflow:auto;padding:20px;border-radius:16px;background:#0d1727;color:#d9e7ff;white-space:pre-wrap}.authority-list{display:grid;gap:10px}.authority-item{padding:13px;border:1px solid var(--border);border-radius:13px;background:var(--surface-soft)}.authority-item span{display:block;color:var(--muted);font-size:12px}.footer-boundary{margin-top:58px;padding:24px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted)}dialog{width:min(1080px,calc(100vw - 34px));max-height:calc(100vh - 34px);padding:0;border:1px solid var(--border);border-radius:22px;background:var(--surface);color:var(--text);box-shadow:0 34px 110px rgba(0,0,0,.38)}dialog.fullscreen{width:calc(100vw - 20px);height:calc(100vh - 20px);max-height:none}dialog::backdrop{background:rgba(5,10,20,.68);backdrop-filter:blur(6px)}.dialog-header{position:sticky;top:0;z-index:5;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid var(--border);background:var(--surface)}.dialog-header h2{margin:3px 0 0}.dialog-body{padding:20px}.dialog-meta{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.artifact-frame{width:100%;height:min(64vh,760px);border:1px solid var(--border);border-radius:14px;background:#fff}.artifact-text{max-height:64vh;overflow:auto;padding:18px;border:1px solid var(--border);border-radius:14px;background:var(--surface-soft);white-space:pre-wrap;overflow-wrap:anywhere}.view-tab.active{border-color:var(--accent);color:var(--accent)}@media(max-width:980px){.hero-grid,.contract-grid{grid-template-columns:1fr}.health-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.artifact-row{grid-template-columns:48px minmax(0,1fr);}.artifact-trust,.artifact-row>.artifact-actions,.artifact-row>.button{grid-column:2}.timeline:before{display:none}}@media(max-width:620px){.shell{width:min(100% - 24px,1380px)}.hero{padding:28px}.health-grid,.review-grid{grid-template-columns:1fr}.section-heading,.artifact-toolbar,.topbar{align-items:stretch;flex-direction:column}.artifact-row{grid-template-columns:1fr}.artifact-icon,.artifact-trust,.artifact-row>.artifact-actions,.artifact-row>.button{grid-column:1}.hero h1{font-size:40px}}@media print{.topbar,.button,.artifact-toolbar,dialog{display:none!important}.shell{width:100%;padding:0}.hero,.health-card,.review-panel,.artifact-row,.details-card{box-shadow:none;break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -387,6 +487,7 @@ html[data-theme="dark"]{color-scheme:dark;--bg:#090f1c;--surface:#111a2a;--surfa
     </aside>
   </div>
 </section>
+__FAILURE_FIRST__
 <section class="health-grid">__METRIC_CARDS__</section>
 <section class="section" id="review-focus">
   <div class="section-heading"><div><div class="eyebrow">Reviewer focus</div><h2>What needs your attention</h2></div><p>Decision guidance without duplicating the raw evidence.</p></div>
@@ -450,6 +551,7 @@ function moveArtifact(offset){if(!artifactOrder.length)return;const index=Math.m
 function filterArtifacts(){const query=document.getElementById("artifactSearch").value.trim().toLowerCase();let visible=0;document.querySelectorAll("[data-artifact-search]").forEach(row=>{const show=!query||row.dataset.artifactSearch.includes(query);row.classList.toggle("hidden",!show);if(show)visible++});document.getElementById("artifactCount").textContent=`${visible} artifact${visible===1?"":"s"}`}
 document.querySelectorAll("[data-open-artifact]").forEach(button=>button.onclick=()=>openArtifact(button.dataset.openArtifact));
 document.querySelectorAll("[data-download-artifact]").forEach(button=>button.onclick=()=>downloadArtifact(button.dataset.downloadArtifact));
+document.querySelectorAll("[data-copy-text]").forEach(button=>button.onclick=async()=>navigator.clipboard.writeText(button.dataset.copyText||""));
 document.querySelectorAll("[data-artifact-view]").forEach(button=>button.onclick=()=>{currentArtifactView=button.dataset.artifactView;document.querySelectorAll("[data-artifact-view]").forEach(item=>item.classList.toggle("active",item===button));renderArtifactView()});
 document.querySelector("[data-close-artifact-dialog]").onclick=()=>artifactDialog.close();
 document.getElementById("previousArtifact").onclick=()=>moveArtifact(-1);
@@ -509,6 +611,7 @@ filterArtifacts();
         "__TOP_ACTIONS__": top_actions,
         "__STATE_TONE__": _safe(state_tone),
         "__STATE_LABEL__": _safe(state_label),
+        "__FAILURE_FIRST__": failure_first,
         "__METRIC_CARDS__": "\n".join(metric_cards),
         "__RISK_SURFACE__": _safe(risk_surface.replace("_", " ").title()),
         "__NEXT_ACTION__": _safe(next_action.replace("_", " ").title()),

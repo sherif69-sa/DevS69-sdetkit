@@ -1447,3 +1447,53 @@ def test_pr_quality_publisher_comment_is_compact_and_index_only() -> None:
     assert "pr-review-dashboard.html" not in comment_step
     assert "pr-comment-body.md" not in comment_step
     assert "merge_authorized" not in comment_step
+
+
+def test_publisher_handoff_carries_model_required_by_compact_comment() -> None:
+    evidence = _workflow_text()
+    publisher = _publisher_text()
+
+    handoff_start = evidence.index("- name: Build PR quality publisher handoff")
+    handoff_end = evidence.index(
+        "- name: Upload PR quality publisher handoff",
+        handoff_start,
+    )
+    handoff = evidence[handoff_start:handoff_end]
+
+    verify_start = publisher.index("- name: Verify exact-head publisher handoff")
+    verify_end = publisher.index(
+        "- name: Initialize PR comment publication status",
+        verify_start,
+    )
+    verify = publisher[verify_start:verify_end]
+
+    comment_start = publisher.index("- name: Comment on PR")
+    comment_end = publisher.index(
+        "BODY_PATH=\"$body_path\" python3 - <<'PYSANITIZE'",
+        comment_start,
+    )
+    comment = publisher[comment_start:comment_end]
+
+    assert '"pr-review-model.json",' in handoff
+    assert '"payload/pr-review-model.json",' in verify
+    assert "len(rows) != 4" in verify
+    assert 'Path("build/pr-quality/pr-review-model.json")' in comment
+    assert 'model.get("primary_failure")' in comment
+    assert "First actionable failure" in comment
+    assert "unique failure" in comment
+    assert "reproduction_command" in comment
+    assert "check_url" in comment
+
+
+def test_action_report_workflow_binds_pr_provenance_to_review_model() -> None:
+    evidence = _workflow_text()
+    action_start = evidence.index("PYTHONPATH=src python -m sdetkit.pr_quality_action_report")
+    action_end = evidence.index(
+        "> build/pr-quality/pr-comment-metadata.json",
+        action_start,
+    )
+    command = evidence[action_start:action_end]
+
+    assert '--pr-number "${{ github.event.pull_request.number }}"' in command
+    assert '--head-sha "${{ github.event.pull_request.head.sha }}"' in command
+    assert '--base-sha "${{ github.event.pull_request.base.sha }}"' in command
