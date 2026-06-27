@@ -266,8 +266,10 @@ merge_authorized=false
 semantic_equivalence_proven=false
 ```
 
-This hidden maintainer report is not yet a separately registered artifact
-contract. Artifact-index registration remains an independent follow-up.
+The generated JSON artifact is registered as
+`public-repo-trial-matrix-report-json` at
+`build/sdetkit/public-repo-trial-matrix-report.json`. The Markdown file remains
+an operator-readable companion rather than a separate machine contract.
 
 ## Render the adoption learning dashboard
 
