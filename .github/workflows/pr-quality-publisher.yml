@@ -371,13 +371,38 @@ jobs:
                   if source_path and source_line
                   else source_path or "Not captured"
               )
+              workflow_name = inline(
+                  primary_failure.get("workflow_name")
+              ) or "Not captured"
+              workflow_display = trusted_link(
+                  workflow_name,
+                  primary_failure.get("workflow_run_url"),
+              )
+              job_name = inline(
+                  primary_failure.get("job_name")
+              ) or "Not captured"
+              job_display = trusted_link(
+                  job_name,
+                  primary_failure.get("job_url"),
+              )
               step_name = inline(
                   primary_failure.get("step_name")
+              )
+              step_number = count(
+                  primary_failure.get("step_number")
               )
               if not step_name:
                   step_name = (
                       "Not captured — collector evidence gap"
                   )
+              elif step_number:
+                  step_name = f"{step_name} (step {step_number})"
+              mapping_reason = inline(
+                  primary_failure.get("mapping_reason")
+              ) or "not captured"
+              mapping_confidence = inline(
+                  primary_failure.get("mapping_confidence")
+              ) or "unknown"
               check_name = inline(
                   primary_failure.get("check_name")
               ) or "Not captured"
@@ -420,10 +445,16 @@ jobs:
                       "",
                       "| Field | Evidence |",
                       "|---|---|",
+                      f"| Workflow | {workflow_display} |",
+                      f"| Job | {job_display} |",
                       f"| Check | {check_display} |",
                       f"| Test | `{test_node}` |",
                       f"| Source | `{source_location}` |",
                       f"| Step | {step_name} |",
+                      (
+                          "| Provenance | "
+                          f"`{mapping_reason}` · confidence `{mapping_confidence}` |"
+                      ),
                       f"| Expected | `{expected}` |",
                       f"| Observed | `{observed}` |",
                       "",

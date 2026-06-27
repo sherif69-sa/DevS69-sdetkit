@@ -105,6 +105,7 @@ WAIT_FOR_CODE_SCANNING_REFRESH = "_".join(("wait", "for", "code", "scanning", "r
 
 FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
 JOB_STEP_CONFIRMATION_KEY = "_".join(("job", "step", "confirmation"))
+FAILURE_PROVENANCE_KEY = "_".join(("failure", "provenance"))
 ARTIFACT_EVIDENCE_KEY = "_".join(("artifact", "evidence"))
 
 BANNED_EDUCATIONAL_PHRASES = (
@@ -529,11 +530,17 @@ def _job_step_confirmation_lines(payload: JsonObject, *, prefix: str = "  - ") -
     status = _string(confirmation.get("status") or "unknown")
     source = _string(confirmation.get("source") or "unknown")
     name = _string(confirmation.get("job_step_name"))
+    number = _int(confirmation.get("job_step_number"))
     conclusion = _string(confirmation.get("job_step_conclusion") or "unknown")
+    reason = _string(confirmation.get("mapping_reason") or "unknown")
+    confidence = _string(confirmation.get("mapping_confidence") or "unknown")
     lines = [f"{prefix}Job step confirmation: `{status}`"]
     if name:
-        lines.append(f"{prefix}GitHub job step: `{name}`")
+        label = f"{name} (step {number})" if number else name
+        lines.append(f"{prefix}GitHub job step: `{label}`")
     lines.append(f"{prefix}GitHub job step conclusion: `{conclusion}`")
+    lines.append(f"{prefix}Job step mapping reason: `{reason}`")
+    lines.append(f"{prefix}Job step mapping confidence: `{confidence}`")
     lines.append(f"{prefix}Job step source: `{source}`")
     lines.append(f"{prefix}Job step reporting only: `true`")
     lines.append(f"{prefix}Job step automation allowed: `false`")
@@ -2704,14 +2711,28 @@ def _review_model_primary_failure(
         if "FAILED " in text or "AssertionError" in text or assertion_match is not None:
             context_excerpt.append(text)
 
+    failure_provenance = _as_dict(primary_blocker.get(FAILURE_PROVENANCE_KEY))
+    workflow_provenance = _as_dict(failure_provenance.get("workflow"))
+    job_provenance = _as_dict(failure_provenance.get("job"))
+    provenance_step = _as_dict(failure_provenance.get("step"))
+    provenance_mapping = _as_dict(failure_provenance.get("mapping"))
     step_confirmation = _as_dict(primary_blocker.get("job_step_confirmation"))
     failed_step = _as_dict(primary_blocker.get("failed_step_evidence"))
-    step_name = _string(step_confirmation.get("job_step_name") or failed_step.get("step_name"))
-    step_status = _string(
-        step_confirmation.get("status") or failed_step.get("status") or "unavailable"
+    step_name = _string(
+        provenance_step.get("name")
+        or step_confirmation.get("job_step_name")
+        or failed_step.get("step_name")
     )
-    evidence_gaps: list[str] = []
-    if not step_name:
+    step_status = _string(
+        provenance_mapping.get("status")
+        or step_confirmation.get("status")
+        or failed_step.get("status")
+        or "unavailable"
+    )
+    evidence_gaps = [
+        _string(item) for item in _as_list(failure_provenance.get("evidence_gaps")) if _string(item)
+    ]
+    if not step_name and "job_step_not_captured" not in evidence_gaps:
         evidence_gaps.append("job_step_not_captured")
 
     failed_checks = [
@@ -2765,6 +2786,7 @@ def _review_model_primary_failure(
         unique_failure_count = max(unique_failure_count, 1)
 
     check_api_url = _string(primary_blocker.get("url"))
+    canonical_job_url = _string(job_provenance.get("url"))
     evidence_quality = _as_dict(first_failure.get("evidence_quality"))
     check_name = _string(
         primary_blocker.get("check") or primary_blocker.get("name") or primary_blocker.get("title")
@@ -2777,12 +2799,26 @@ def _review_model_primary_failure(
         "failure_code": _string(primary_blocker.get("code")),
         "failure_type": _string(first_failure.get("kind")),
         "tool": _string(first_failure.get("tool")),
-        "workflow_name": "",
+        "workflow_name": _string(workflow_provenance.get("name")),
+        "workflow_run_id": _int(workflow_provenance.get("run_id")),
+        "workflow_run_attempt": _int(workflow_provenance.get("run_attempt")),
+        "workflow_run_url": _string(workflow_provenance.get("url")),
+        "workflow_exact_head_verified": bool(workflow_provenance.get("exact_head_verified", False)),
+        "job_name": _string(job_provenance.get("name")),
+        "job_id": _int(job_provenance.get("id")),
+        "job_url": canonical_job_url,
         "check_name": check_name,
-        "check_url": _github_check_run_url(check_api_url),
+        "check_url": canonical_job_url or _github_check_run_url(check_api_url),
         "check_api_url": check_api_url,
         "step_name": step_name,
+        "step_number": _int(provenance_step.get("number")),
+        "step_status": _string(provenance_step.get("status")),
+        "step_conclusion": _string(provenance_step.get("conclusion")),
         "step_evidence_status": step_status,
+        "provenance_status": _string(failure_provenance.get("status")),
+        "mapping_reason": _string(provenance_mapping.get("reason")),
+        "mapping_confidence": _string(provenance_mapping.get("confidence")),
+        "mapping_candidate_count": _int(provenance_mapping.get("candidate_count")),
         "test_node": _string(parsed.get("test_node")),
         "source_path": source_path,
         "source_line": source_line,
@@ -2800,7 +2836,11 @@ def _review_model_primary_failure(
         "evidence_gaps": evidence_gaps,
         "families": families,
         "reporting_only": True,
+        "patch_application_allowed": False,
+        "automation_allowed": False,
+        "security_dismissal_allowed": False,
         "merge_authorized": False,
+        "semantic_equivalence_proven": False,
     }
 
 

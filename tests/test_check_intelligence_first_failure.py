@@ -614,3 +614,116 @@ def test_check_intelligence_reports_missing_dependency_audit_artifact(
     assert evidence["expected_artifacts"] == ["pip-audit-report.json"]
     assert evidence["missing_artifacts"] == ["pip-audit-report.json"]
     assert evidence["source"] == "absent"
+
+
+def test_check_intelligence_confirms_single_failed_github_job_step(tmp_path: Path) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Validate (ubuntu-latest / py3.11)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "head_sha": "head-sha",
+                    "details_url": "https://github.com/acme/project/actions/runs/42/job/99",
+                    "workflow_run": {
+                        "id": 42,
+                        "name": "GitHub Actions Advanced Reference",
+                        "run_number": 7,
+                        "run_attempt": 1,
+                        "status": "completed",
+                        "conclusion": "failure",
+                        "head_sha": "head-sha",
+                        "html_url": "https://github.com/acme/project/actions/runs/42",
+                    },
+                    "workflow_job": {
+                        "id": 99,
+                        "run_id": 42,
+                        "name": "Validate (ubuntu-latest / py3.11)",
+                        "status": "completed",
+                        "conclusion": "failure",
+                        "html_url": "https://github.com/acme/project/actions/runs/42/job/99",
+                        "steps": [
+                            {
+                                "name": "Checkout",
+                                "number": 2,
+                                "status": "completed",
+                                "conclusion": "success",
+                            },
+                            {
+                                "name": "Lint + tests",
+                                "number": 6,
+                                "status": "completed",
+                                "conclusion": "failure",
+                            },
+                        ],
+                    },
+                    "log": "FAILED tests/test_probe.py::test_probe - AssertionError: expected='ready'; observed='forced'",
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    failed = intelligence["failed_checks"][0]
+    confirmation = failed[check_intelligence.JOB_STEP_CONFIRMATION_KEY]
+    provenance = failed[check_intelligence.FAILURE_PROVENANCE_KEY]
+
+    assert confirmation["status"] == "confirmed"
+    assert confirmation["mapping_reason"] == "single_failed_job_step"
+    assert confirmation["mapping_confidence"] == "high"
+    assert confirmation["job_step_name"] == "Lint + tests"
+    assert confirmation["job_step_number"] == 6
+    assert provenance["status"] == "confirmed"
+    assert provenance["workflow"]["name"] == "GitHub Actions Advanced Reference"
+    assert provenance["job"]["id"] == 99
+    assert provenance["step"]["name"] == "Lint + tests"
+    assert provenance["evidence_gaps"] == []
+    assert provenance["merge_authorized"] is False
+    report = check_intelligence.build_action_report(intelligence)
+    assert report["primary_blocker"][check_intelligence.FAILURE_PROVENANCE_KEY] == provenance
+
+
+def test_check_intelligence_does_not_guess_between_multiple_failed_job_steps(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Validate",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "head_sha": "head-sha",
+                    "workflow_run": {
+                        "id": 42,
+                        "name": "Reference",
+                        "head_sha": "head-sha",
+                        "html_url": "https://github.com/acme/project/actions/runs/42",
+                    },
+                    "workflow_job": {
+                        "id": 99,
+                        "name": "Validate",
+                        "html_url": "https://github.com/acme/project/actions/runs/42/job/99",
+                        "steps": [
+                            {"name": "Lint", "number": 5, "conclusion": "failure"},
+                            {"name": "Tests", "number": 6, "conclusion": "failure"},
+                        ],
+                    },
+                    "log": "FAILED tests/test_probe.py::test_probe - AssertionError: forced",
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    confirmation = intelligence["failed_checks"][0][check_intelligence.JOB_STEP_CONFIRMATION_KEY]
+    provenance = intelligence["failed_checks"][0][check_intelligence.FAILURE_PROVENANCE_KEY]
+
+    assert confirmation["status"] == "ambiguous"
+    assert confirmation["candidate_count"] == 2
+    assert confirmation["job_step_name"] == ""
+    assert provenance["status"] == "ambiguous"
+    assert "failed_step_not_uniquely_mapped" in provenance["evidence_gaps"]
