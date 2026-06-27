@@ -580,3 +580,40 @@ def test_product_dashboard_is_failure_first_and_actionable() -> None:
     assert 'href="https://github.com/example/repo/runs/123"' in dashboard
     assert "collector evidence gap" in dashboard
     assert 'data-copy-text="PYTHONPATH=src python -m pytest' in dashboard
+
+
+def test_artifact_center_renders_workflow_job_and_exact_step_provenance() -> None:
+    model = _model()
+    model["decision"]["review_state"] = "blocked"
+    model["primary_failure"] = {
+        "available": True,
+        "unique_failure_count": 1,
+        "failed_check_count": 6,
+        "workflow_name": "GitHub Actions Advanced Reference",
+        "workflow_run_url": "https://github.com/acme/project/actions/runs/42",
+        "job_name": "Validate (ubuntu-latest / py3.11)",
+        "job_url": "https://github.com/acme/project/actions/runs/42/job/99",
+        "check_name": "Validate (ubuntu-latest / py3.11)",
+        "check_url": "https://github.com/acme/project/actions/runs/42/job/99",
+        "test_node": "tests/test_probe.py::test_probe",
+        "source_path": "tests/test_probe.py",
+        "source_line": 8,
+        "step_name": "Lint + tests",
+        "step_number": 6,
+        "mapping_reason": "single_failed_job_step",
+        "mapping_confidence": "high",
+        "expected": "ready",
+        "observed": "forced",
+        "message": "PR_QUALITY_FORCED_FAILURE_V1",
+        "reproduction_command": "python -m pytest -q tests/test_probe.py::test_probe",
+        "evidence_gaps": [],
+    }
+    model["live_evidence"] = _snapshot()
+
+    dashboard = report.render_pr_quality_artifact_index_html(model)
+
+    assert "GitHub Actions Advanced Reference" in dashboard
+    assert "Validate (ubuntu-latest / py3.11)" in dashboard
+    assert "Lint + tests (step 6)" in dashboard
+    assert "single_failed_job_step · confidence high" in dashboard
+    assert "Not captured — collector evidence gap" not in dashboard

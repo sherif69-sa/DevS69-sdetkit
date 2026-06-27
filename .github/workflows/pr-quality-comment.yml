@@ -246,6 +246,7 @@ jobs:
                       "status": "completed" if state in {"success", "failure", "error"} else "queued",
                       "conclusion": state_to_conclusion.get(state, state),
                       "url": status.get("target_url") or "",
+                      "head_sha": os.environ.get("HEAD_SHA", ""),
                       "required": context in required_contexts,
                   }
               )
@@ -258,6 +259,7 @@ jobs:
                   "status": "completed",
                   "conclusion": local_conclusion,
                   "log_path": "build/pr-quality/failure-intelligence/quality.log",
+                  "head_sha": os.environ.get("HEAD_SHA", ""),
                   "required": "PR Quality local quality gate" in required_contexts,
               }
           )
@@ -293,7 +295,7 @@ jobs:
           )"
 
           PYTHONPATH=src python -m sdetkit.check_intelligence \
-            --checks-json build/pr-quality/checks/check-runs.json \
+            --checks-json build/pr-quality/check-logs/checks-with-workflow-metadata.json \
             --logs-dir build/pr-quality/check-logs/failed-check-logs \
             --review-threads-json build/pr-quality/security-review/review-threads.json \
             --code-scanning-alerts-json build/pr-quality/code-scanning/alerts.json \

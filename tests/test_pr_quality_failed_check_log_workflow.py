@@ -36,3 +36,20 @@ def test_pr_quality_existing_collector_invocation_carries_check_annotation_evide
     assert workflow.index(
         "bash build/pr-quality/check-logs/download-failed-check-logs.sh"
     ) < workflow.index("python -m sdetkit.check_intelligence")
+
+
+def test_pr_quality_workflow_uses_hydrated_checks_for_intelligence() -> None:
+    workflow = Path(".github/workflows/pr-quality-comment.yml").read_text(encoding="utf-8")
+
+    hydrated = "--checks-json build/pr-quality/check-logs/checks-with-workflow-metadata.json"
+    intelligence = workflow.index("python -m sdetkit.check_intelligence")
+    assert hydrated in workflow
+    assert workflow.index(hydrated) > workflow.index("download-failed-check-logs.sh")
+    assert workflow.index(hydrated) > workflow.index(
+        "python -m sdetkit.failed_check_log_collection"
+    )
+    intelligence_end = workflow.index(
+        "--out-dir build/pr-quality/check-intelligence",
+        intelligence,
+    )
+    assert intelligence < workflow.index(hydrated) < intelligence_end

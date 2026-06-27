@@ -334,8 +334,28 @@ def render_pr_quality_review_experience(
             if source_path and source_line
             else source_path or "Not captured"
         )
+        workflow_name = _text(primary_failure.get("workflow_name"), "Not captured")
+        workflow_url = _text(primary_failure.get("workflow_run_url"))
+        workflow_display = (
+            _external_link(workflow_url, workflow_name, "text-link")
+            if workflow_url
+            else f"<code>{_safe(workflow_name)}</code>"
+        )
+        job_name = _text(primary_failure.get("job_name"), "Not captured")
+        job_url = _text(primary_failure.get("job_url"))
+        job_display = (
+            _external_link(job_url, job_name, "text-link")
+            if job_url
+            else f"<code>{_safe(job_name)}</code>"
+        )
         step_name = _text(primary_failure.get("step_name"))
+        step_number = _integer(primary_failure.get("step_number"))
         step_display = step_name or "Not captured — collector evidence gap"
+        if step_name and step_number:
+            step_display = f"{step_name} (step {step_number})"
+        mapping_reason = _text(primary_failure.get("mapping_reason"), "not captured")
+        mapping_confidence = _text(primary_failure.get("mapping_confidence"), "unknown")
+        mapping_display = f"{mapping_reason} · confidence {mapping_confidence}"
         command = _text(primary_failure.get("reproduction_command"))
         check_name = _text(
             primary_failure.get("check_name"),
@@ -375,10 +395,13 @@ def render_pr_quality_review_experience(
                 "<p>One root cause is collapsed across repeated matrix executions.</p></div>",
                 '<div class="failure-layout"><article class="failure-card">',
                 '<dl class="failure-fields">',
+                f"<div><dt>Workflow</dt><dd>{workflow_display}</dd></div>",
+                f"<div><dt>Job</dt><dd>{job_display}</dd></div>",
                 f"<div><dt>Check</dt><dd>{check_display}</dd></div>",
                 f"<div><dt>Test</dt><dd><code>{_safe(primary_failure.get('test_node'))}</code></dd></div>",
                 f"<div><dt>Source</dt><dd><code>{_safe(source_location)}</code></dd></div>",
                 f"<div><dt>Step</dt><dd>{_safe(step_display)}</dd></div>",
+                f"<div><dt>Provenance</dt><dd>{_safe(mapping_display)}</dd></div>",
                 f"<div><dt>Expected</dt><dd><code>{_safe(primary_failure.get('expected'))}</code></dd></div>",
                 f"<div><dt>Observed</dt><dd><code>{_safe(primary_failure.get('observed'))}</code></dd></div>",
                 "</dl>",
