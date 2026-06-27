@@ -162,6 +162,14 @@ def _quality_proof_command(root: Path) -> str:
     return "python -m pre_commit run -a"
 
 
+def _tox_config_evidence(root: Path) -> list[str]:
+    evidence = ["tox.ini"] if _file(root, "tox.ini") else []
+    pyproject_text = _read_text(root, "pyproject.toml")
+    if any(line.strip() == "[tool.tox]" for line in pyproject_text.splitlines()):
+        evidence.append("pyproject.toml")
+    return evidence
+
+
 def _sanitize_remote_url(url: str) -> str:
     if "://" not in url or "@" not in url:
         return url
@@ -230,10 +238,12 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     recommended_proof_commands: list[dict[str, Any]] = []
     review_first_unknowns: list[str] = []
 
+    tox_evidence = _tox_config_evidence(root)
     python_evidence = [
         path for path in ["pyproject.toml", "setup.cfg", "setup.py"] if _file(root, path)
     ]
     python_evidence.extend(requirements)
+    python_evidence.extend(tox_evidence)
     if _dir(root, "src"):
         python_evidence.append("src/")
     if python_evidence:
@@ -270,8 +280,17 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             confidence="high",
             purpose="test",
         )
-    elif python_evidence:
+    elif python_evidence and not tox_evidence:
         review_first_unknowns.append("Python project detected but test command is not proven")
+
+    if tox_evidence:
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="python",
+            command="python -m tox",
+            confidence="high",
+            purpose="test",
+        )
 
     if _file(root, ".pre-commit-config.yaml"):
         _add_proof_command(

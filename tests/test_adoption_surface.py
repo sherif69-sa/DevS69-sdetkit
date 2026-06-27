@@ -648,3 +648,83 @@ def test_adoption_surface_payload_validator_accepts_docs_and_release_surface_lis
     }
 
     assert validate_adoption_surface_payload(payload) == []
+
+
+@pytest.mark.parametrize(
+    ("files", "expected_evidence"),
+    [
+        (
+            {"tox.ini": "[tox]\nenvlist = py\n"},
+            {"tox.ini"},
+        ),
+        (
+            {
+                "pyproject.toml": (
+                    "[project]\nname = 'tox-project'\n\n[tool.tox]\nenv_list = ['py']\n"
+                )
+            },
+            {"pyproject.toml"},
+        ),
+    ],
+)
+def test_adoption_surface_recommends_tox_from_grounded_config(
+    tmp_path: Path,
+    files: dict[str, str],
+    expected_evidence: set[str],
+) -> None:
+    for relative_path, content in files.items():
+        _write(tmp_path / relative_path, content)
+
+    payload = discover_adoption_surface(tmp_path)
+    command = _proof_command(payload, "python -m tox")
+
+    assert "python" in _names(payload["detected_languages"])
+    assert command == {
+        "surface": "python",
+        "command": "python -m tox",
+        "confidence": "high",
+        "purpose": "test",
+        "executes_untrusted_code": True,
+        "auto_run_allowed": False,
+    }
+    python = {str(item["name"]): item for item in payload["detected_languages"]}["python"]
+    assert expected_evidence <= set(python["evidence"])
+    assert (
+        "Python project detected but test command is not proven"
+        not in payload["review_first_unknowns"]
+    )
+
+
+def test_adoption_surface_does_not_infer_tox_from_dependency_token_alone(
+    tmp_path: Path,
+) -> None:
+    _write(
+        tmp_path / "pyproject.toml",
+        ("[project]\nname = 'tox-dependency-only'\ndependencies = ['tox']\n"),
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert "python -m tox" not in _commands(payload)
+    assert payload["review_first_unknowns"] == [
+        "Python project detected but test command is not proven"
+    ]
+
+
+def test_adoption_surface_deduplicates_tox_proof_across_config_sources(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "tox.ini", "[tox]\nenvlist = py\n")
+    _write(
+        tmp_path / "pyproject.toml",
+        "[project]\nname = 'dual-tox'\n\n[tool.tox]\nenv_list = ['py']\n",
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+    commands = [
+        item for item in payload["recommended_proof_commands"] if item["command"] == "python -m tox"
+    ]
+
+    assert len(commands) == 1
+    python = {str(item["name"]): item for item in payload["detected_languages"]}["python"]
+    assert {"tox.ini", "pyproject.toml"} <= set(python["evidence"])

@@ -214,3 +214,40 @@ def test_self_learning_advances_after_proof_recommendations_exist() -> None:
     assert "add public repo trial matrix report" not in payload["learning_gaps"]
     assert payload["authority_boundary"]["automation_allowed"] is False
     assert payload["authority_boundary"]["patch_application_allowed"] is False
+
+
+def test_proof_recommendations_classify_tox_as_required_manual_test(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        ("[project]\nname = 'tox-proof'\n\n[tool.tox]\nenv_list = ['py']\n"),
+        encoding="utf-8",
+    )
+
+    surface = discover_adoption_surface(tmp_path)
+    payload = build_proof_recommendations_payload(
+        tmp_path,
+        surface_payload=surface,
+    )
+    commands = {str(item["command"]): item for item in payload["proof_recommendations"]}
+
+    assert commands["python -m tox"] == {
+        "index": 1,
+        "command": "python -m tox",
+        "surface": "python",
+        "purpose": "test",
+        "confidence": "high",
+        "operator_level": "required",
+        "execution_policy": "manual_only",
+        "executes_target_code": True,
+        "manual_execution_required": True,
+        "auto_run_allowed": False,
+        "reason": "test proof for detected target repo surface",
+    }
+    assert payload["summary"]["first_manual_command"] == "python -m tox"
+    assert payload["summary"]["required_count"] == 1
+    assert payload["summary"]["review_first_count"] == 0
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
