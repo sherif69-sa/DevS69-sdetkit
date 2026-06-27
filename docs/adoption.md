@@ -154,8 +154,9 @@ default root help by design so adopter-facing discovery remains focused:
 
 - `adoption-real-world-learning-matrix`
 - `adoption-learning-report`
+- `adoption-public-trial-matrix-report`
 
-Maintainers can reveal both commands with `python -m sdetkit --show-hidden --help`. Direct
+Maintainers can reveal these commands with `python -m sdetkit --show-hidden --help`. Direct
 command help remains available through `python -m sdetkit <command> --help`.
 
 Hidden status is a discoverability contract, not action authority. Both commands remain
@@ -215,6 +216,58 @@ semantic_equivalence_proven=false
 ```
 
 The generated JSON artifact is registered as `adoption-learning-report-json` at `build/sdetkit/adoption-learning-report.json`. The Markdown file is an operator-readable companion, not a separate machine schema.
+
+## Render the recorded public trial matrix
+
+Use the dedicated reporting-only lane when the input is the recorded
+`sdetkit.public_repo_trial_matrix.v1` fixture contract rather than a live
+real-world learning matrix:
+
+```bash
+python -m sdetkit adoption-public-trial-matrix-report \
+  --matrix-json tests/fixtures/adoption_public_trials/public_repo_trial_matrix.json \
+  --out build/sdetkit/public-repo-trial-matrix-report.json \
+  --markdown-out build/sdetkit/public-repo-trial-matrix-report.md \
+  --format json
+```
+
+The command reads only the supplied matrix artifact. It does not revisit the
+listed repositories, install dependencies, execute target tests, mutate a
+target, open a target issue or pull request, claim endorsement, or authorize
+an implementation.
+
+Read these JSON fields first:
+
+- `report_status`
+- `input_provenance`
+- `source_matrix`
+- `summary`
+- `trials`
+- `operator_summary`
+- `rules`
+- `authority_boundary`
+
+The report binds the source matrix bytes and current Git head into a SHA-256
+input digest. Its trial list is sorted by repository name so JSON and Markdown
+remain deterministic for the same matrix and head.
+
+The authority boundary remains:
+
+```text
+target_repos_read=false
+install_dependencies=false
+target_tests_executed=false
+target_repo_mutation=false
+target_pr_or_issue_opened=false
+endorsement_claim=false
+automation_allowed=false
+patch_application_allowed=false
+merge_authorized=false
+semantic_equivalence_proven=false
+```
+
+This hidden maintainer report is not yet a separately registered artifact
+contract. Artifact-index registration remains an independent follow-up.
 
 ## Render the adoption learning dashboard
 

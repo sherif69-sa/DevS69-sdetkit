@@ -65,11 +65,11 @@ def test_public_repo_trial_matrix_fixture_contains_no_source_tree() -> None:
     assert all(not file_name.endswith(".py") for file_name in files)
 
 
-def test_self_learning_advances_after_public_repo_trial_matrix_exists() -> None:
+def test_self_learning_advances_after_public_repo_trial_matrix_report_exists() -> None:
     payload = build_adoption_learning_payload(Path("."))
 
-    assert payload["recommended_next_upgrade"] == "public repo trial matrix report"
+    assert payload["recommended_next_upgrade"] == "review learning gaps"
     assert "add public repo trial matrix" not in payload["learning_gaps"]
-    assert "add public repo trial matrix report" in payload["learning_gaps"]
+    assert "add public repo trial matrix report" not in payload["learning_gaps"]
     assert payload["authority_boundary"]["automation_allowed"] is False
     assert payload["authority_boundary"]["patch_application_allowed"] is False
