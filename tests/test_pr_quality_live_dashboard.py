@@ -518,3 +518,65 @@ def test_product_dashboard_preserves_reporting_only_authority() -> None:
     assert '"merge_authorized": false' in dashboard
     assert '"patch_automation": false' in dashboard
     assert '"security_dismissal": false' in dashboard
+
+
+def test_product_dashboard_is_failure_first_and_actionable() -> None:
+    model = _model()
+    model["decision"].update(
+        {
+            "review_state": "blocked",
+            "status": "review_required",
+            "failed_checks": 7,
+            "next_action": "review",
+        }
+    )
+    model["primary_failure"] = {
+        "available": True,
+        "actionable": True,
+        "check_name": "Validate (ubuntu-latest / py3.12)",
+        "check_url": "https://github.com/example/repo/runs/123",
+        "step_name": "",
+        "test_node": (
+            "tests/test_pr_quality_forced_failure_probe.py::"
+            "test_forced_pr_quality_diagnostic_signal"
+        ),
+        "source_path": ("tests/test_pr_quality_forced_failure_probe.py"),
+        "source_line": 10,
+        "message": (
+            "PR_QUALITY_FORCED_FAILURE_V1: "
+            "expected='review-experience-ready'; "
+            "observed='forced-diagnostic-failure'"
+        ),
+        "expected": "review-experience-ready",
+        "observed": "forced-diagnostic-failure",
+        "reproduction_command": (
+            "PYTHONPATH=src python -m pytest -q "
+            "tests/test_pr_quality_forced_failure_probe.py::"
+            "test_forced_pr_quality_diagnostic_signal"
+        ),
+        "failed_check_count": 7,
+        "unique_failure_count": 1,
+        "matrix_occurrence_count": 7,
+        "matrix_repetition": True,
+        "evidence_gaps": ["job_step_not_captured"],
+        "reporting_only": True,
+        "merge_authorized": False,
+    }
+    model["live_evidence"] = _snapshot()
+
+    dashboard = report.render_pr_quality_artifact_index_html(model)
+
+    assert 'id="failure-first"' in dashboard
+    assert dashboard.index('id="failure-first"') < dashboard.index('class="health-grid"')
+    assert "1 unique failure repeated across 7 checks" in dashboard
+    assert "PR_QUALITY_FORCED_FAILURE_V1" in dashboard
+    assert "review-experience-ready" in dashboard
+    assert "forced-diagnostic-failure" in dashboard
+    assert "tests/test_pr_quality_forced_failure_probe.py:10" in dashboard
+    assert (
+        "tests/test_pr_quality_forced_failure_probe.py::"
+        "test_forced_pr_quality_diagnostic_signal" in dashboard
+    )
+    assert 'href="https://github.com/example/repo/runs/123"' in dashboard
+    assert "collector evidence gap" in dashboard
+    assert 'data-copy-text="PYTHONPATH=src python -m pytest' in dashboard
