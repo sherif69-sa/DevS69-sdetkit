@@ -114,6 +114,17 @@ Reviewer decision sentence:
 
 This is a repository-specific captured run. Treat the structure as canonical and the values as situational.
 
+## Sanitized release-evidence contract samples
+
+For deterministic, non-live examples of the two release evidence products, use
+[Release evidence recipes and sanitized proof samples](release-evidence-recipes.md).
+
+- [`release-readiness-evidence-package.sample.json`](examples/release-readiness-evidence-package.sample.json)
+- [`post-merge-verification.sample.json`](examples/post-merge-verification.sample.json)
+
+These examples use fixed timestamps and placeholder identities. Continue to
+treat runtime files under `build/` as the evidence for the current branch.
+
 ## Related pages
 
 - Behavior comparison: [Before/after evidence example](before-after-evidence-example.md)

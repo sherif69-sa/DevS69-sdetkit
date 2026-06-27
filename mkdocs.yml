@@ -155,6 +155,7 @@ nav:
       - Adaptive hosted readiness boundary: adaptive-hosted-readiness-boundary.md
       - Repo adoption scan: repo-adoption-scan.md
       - Artifact reference and generated sample map: artifact-reference.md
+      - Release evidence recipes and proof samples: release-evidence-recipes.md
       - CI artifact walkthrough: ci-artifact-walkthrough.md
       - Remediation cookbook: remediation-cookbook.md
       - Premium quality gate: premium-quality-gate.md

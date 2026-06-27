@@ -1,0 +1,151 @@
+{
+  "authority_boundary": {
+    "automation_allowed": false,
+    "boundary_mode": "reporting_only",
+    "issue_mutation_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "publish_authorized": false,
+    "release_authorized": false,
+    "repo_mutation": false,
+    "reporting_only": true,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false,
+    "workflow_rerun_allowed": false
+  },
+  "automation_allowed": false,
+  "changed_paths": [
+    "src/example.py",
+    "tests/test_example.py"
+  ],
+  "ci": {
+    "available": true,
+    "collection_status": "collected",
+    "contexts": {
+      "ci": "success",
+      "maintenance-autopilot": "success"
+    },
+    "state": "success"
+  },
+  "current_head_sha": "3333333333333333333333333333333333333333",
+  "generated_at": "2026-01-01T00:00:00Z",
+  "ghas_review_threads": {
+    "available": true,
+    "collection_status": "collected",
+    "current_count": 0,
+    "outdated_count": 0,
+    "resolved_count": 0,
+    "state_counts": {
+      "current": 0,
+      "outdated": 0,
+      "resolved": 0,
+      "unavailable": 0
+    }
+  },
+  "git": {
+    "available": true,
+    "collection_status": "collected",
+    "reason": ""
+  },
+  "input_artifacts": {
+    "commit_status": {
+      "available": true,
+      "collection_status": "collected",
+      "name": "commit_status",
+      "path": "evidence/main-status.json",
+      "reason": ""
+    },
+    "pr": {
+      "available": true,
+      "collection_status": "collected",
+      "name": "pr",
+      "path": "evidence/pr.json",
+      "reason": ""
+    },
+    "review_threads": {
+      "available": true,
+      "collection_status": "collected",
+      "name": "review_threads",
+      "path": "evidence/review-threads.json",
+      "reason": ""
+    },
+    "security": {
+      "available": true,
+      "collection_status": "collected",
+      "name": "security",
+      "path": "evidence/security-check.json",
+      "reason": ""
+    }
+  },
+  "input_digests": {
+    "evidence:commit_status": "sha256-redacted",
+    "evidence:pr": "sha256-redacted",
+    "evidence:review_threads": "sha256-redacted",
+    "evidence:security": "sha256-redacted",
+    "previous_main_sha": "sha256-redacted"
+  },
+  "input_provenance": {
+    "digest_algorithm": "sha256",
+    "generated_at": "2026-01-01T00:00:00Z",
+    "generated_from_head_sha": "3333333333333333333333333333333333333333",
+    "generator_schema_version": "sdetkit.post_merge_verification.v1",
+    "generator_sha256": "sha256-redacted",
+    "generator_source": "src/sdetkit/post_merge_verification.py",
+    "input_artifact_schemas": {},
+    "input_count": 11,
+    "input_digest": "sha256-redacted",
+    "input_digests": {
+      "evidence:commit_status": "sha256-redacted",
+      "evidence:pr": "sha256-redacted",
+      "evidence:review_threads": "sha256-redacted",
+      "evidence:security": "sha256-redacted",
+      "previous_main_sha": "sha256-redacted"
+    },
+    "source_issue_count": 1,
+    "source_issue_numbers": [
+      1234
+    ],
+    "source_run_ids": [
+      5678
+    ]
+  },
+  "issue_mutation_allowed": false,
+  "local_security": {
+    "available": true,
+    "blocking_finding_count": 0,
+    "collection_status": "collected",
+    "error_count": 0,
+    "finding_count": 2,
+    "info_count": 2,
+    "warn_count": 0
+  },
+  "merge_authorized": false,
+  "merge_commit_sha": "3333333333333333333333333333333333333333",
+  "merge_relation": "exact_merge_commit",
+  "merged": true,
+  "next_allowed_action": "human_post_merge_review",
+  "patch_application_allowed": false,
+  "pr_base_sha": "1111111111111111111111111111111111111111",
+  "pr_head_sha": "2222222222222222222222222222222222222222",
+  "pr_number": 1234,
+  "pr_state": "closed",
+  "previous_main_sha": "1111111111111111111111111111111111111111",
+  "protected_path_drift": [],
+  "publish_authorized": false,
+  "release_authorized": false,
+  "repo_mutation": false,
+  "report_status": "passed",
+  "reporting_only": true,
+  "schema_version": "sdetkit.post_merge_verification.v1",
+  "security_dismissal_allowed": false,
+  "semantic_equivalence_proven": false,
+  "source_issue_numbers": [
+    1234
+  ],
+  "source_run_ids": [
+    5678
+  ],
+  "status": "verified",
+  "tool": "sdetkit.post_merge_verification",
+  "workflow_rerun_allowed": false
+}

@@ -3658,10 +3658,20 @@ def test_write_comment_body_writes_artifact_landing_page(tmp_path: Path) -> None
     index_html = review_index_out.read_text(encoding="utf-8")
     assert "<title>PR Quality Artifact Center</title>" in index_html
     assert "<h1>PR Quality Artifact Center</h1>" in index_html
-    assert 'href="pr-review-dashboard.html"' in index_html
-    assert 'href="pr-review-summary.md"' in index_html
-    assert 'href="pr-review-model.json"' in index_html
-    assert 'href="pr-comment-body.md"' in index_html
+    for artifact_path in (
+        "pr-review-dashboard.html",
+        "pr-review-summary.md",
+        "pr-review-model.json",
+        "pr-review-artifacts-manifest.json",
+        "pr-comment-body.md",
+    ):
+        assert f'data-open-artifact="{artifact_path}"' in index_html
+        assert f'data-download-artifact="{artifact_path}"' in index_html
+        assert f'href="{artifact_path}"' not in index_html
+    assert 'id="artifactDialog"' in index_html
+    assert "content_base64" in index_html
+    assert "URL.createObjectURL" in index_html
+    assert 'new TextDecoder("utf-8")' in index_html
     assert "Reporting-only" in index_html
     assert "does not authorize merge" in index_html
 
@@ -5775,3 +5785,525 @@ def test_contributor_review_panel_summarizes_stale_security() -> None:
     assert rows["Required checks"] == "clear"
     assert rows["Security posture"] == ("clear for current head; 2 stale alert(s)")
     assert rows["Merge posture"] == (report.WAIT_FOR_CODE_SCANNING_REFRESH)
+
+
+def test_failed_check_panel_renders_exact_failure_and_remediation_contract() -> None:
+    from sdetkit.pr_quality_action_report import _failed_check_lines
+
+    lines = _failed_check_lines(
+        {
+            "failed_checks": [
+                {
+                    "name": "PR Quality local quality gate",
+                    "diagnosis": {
+                        "code": "PRE_COMMIT_FORMAT_DRIFT",
+                        "title": "Formatting drift",
+                    },
+                    "safe_to_auto_fix": True,
+                    "first_failure": {
+                        "line_number": 14,
+                        "line": "Would reformat: src/sdetkit/example.py",
+                        "tool": "ruff",
+                        "kind": "format_drift",
+                        "context": [],
+                        "evidence_quality": {
+                            "confidence": "high",
+                            "actionable": True,
+                            "source": "formatter_log",
+                            "uncertainty": [],
+                        },
+                    },
+                    "safe_remediation": {
+                        "safe_to_auto_fix": True,
+                        "strategy": "run_pre_commit",
+                        "category": "formatting_only",
+                        "affected_files": ["src/sdetkit/example.py"],
+                        "reason": "Failure is limited to deterministic formatting.",
+                        "proof_commands": ["python -m pre_commit run -a"],
+                        "requires_human_review": True,
+                        "auto_fix_allowed_now": False,
+                        "patch_application_allowed": False,
+                        "merge_authorized": False,
+                    },
+                }
+            ]
+        }
+    )
+    rendered = "\n".join(lines)
+
+    assert "Exact failure confidence: `high`" in rendered
+    assert "Exact failure source: `formatter_log`" in rendered
+    assert "Exact failure actionable: `true`" in rendered
+    assert "Exact failure uncertainty: `none`" in rendered
+    assert "Remediation eligibility: `formatting_only`" in rendered
+    assert "Remediation strategy: `run_pre_commit`" in rendered
+    assert "Safe-fix candidate: `true`" in rendered
+    assert "Human review required: `true`" in rendered
+    assert "Auto-fix allowed now: `false`" in rendered
+    assert "Patch application allowed: `false`" in rendered
+    assert "Merge authorized: `false`" in rendered
+    assert "Remediation affected files: `src/sdetkit/example.py`" in rendered
+    assert "Remediation proof commands:" in rendered
+    assert "python -m pre_commit run -a" in rendered
+
+
+def test_pr_quality_comment_renders_git_grounded_profile_visibility() -> None:
+    from sdetkit import pr_quality_action_report
+
+    lines = pr_quality_action_report._runtime_proof_artifact_lines(
+        {
+            "status": "collected",
+            "isolated_proof": {
+                "status": "passed",
+                "git_inventory_verified": True,
+                "runtime_guard_checked": True,
+                "runtime_guard_passed": True,
+                "runtime_guard_violation_count": 0,
+                "network_boundary_status": "not_requested",
+                "network_isolation_enforced": False,
+                "profiles_executed": 2,
+                "profiles_blocked": 0,
+                "profile_visibility_status": "collected",
+                "profile_review_first_count": 0,
+                "profile_authority_expansion_detected": False,
+                "profile_results": [
+                    {
+                        "profile_id": "ruff_src_tests",
+                        "command": "python -m ruff check src tests",
+                        "status": "passed",
+                        "exit_code": 0,
+                        "timed_out": False,
+                        "workspace_mutated": False,
+                        "runtime_guard_status": "clean",
+                        "inventory_claim_match": True,
+                        "git_inventory_verified": True,
+                        "network_boundary_status": "not_requested",
+                        "network_backend_command_wrapped": False,
+                        "review_first": False,
+                    },
+                    {
+                        "profile_id": "pre_commit_all",
+                        "command": "python -m pre_commit run -a",
+                        "status": "passed",
+                        "exit_code": 0,
+                        "timed_out": False,
+                        "workspace_mutated": False,
+                        "runtime_guard_status": "clean",
+                        "inventory_claim_match": True,
+                        "git_inventory_verified": True,
+                        "network_boundary_status": "not_requested",
+                        "network_backend_command_wrapped": False,
+                        "review_first": False,
+                    },
+                ],
+            },
+            "live_benchmark": {
+                "collection_status": "not_collected",
+                "status": "not_collected",
+            },
+            "repo_memory": {},
+            "trusted_history": {},
+            "trusted_diagnostic_signal_snapshot_history": {},
+            "decision_boundary": {
+                "reporting_only": True,
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "security_dismissal_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+            },
+        }
+    )
+
+    text = "\n".join(lines)
+    assert "Profile visibility status: `collected`" in text
+    assert "Proof profile results:" in text
+    assert "`ruff_src_tests`: command=`python -m ruff check src tests`" in text
+    assert "`pre_commit_all`: command=`python -m pre_commit run -a`" in text
+    assert "inventory_claim_match=`true`" in text
+    assert "git_inventory_verified=`true`" in text
+    assert "review_first=`false`" in text
+
+
+def _review_console_ready_model() -> dict:
+    return report.build_pr_quality_review_model(
+        status="green",
+        evidence_signal_heading="Evidence proof signal",
+        evidence_signal_lines=[],
+        evidence_review_required=False,
+        action_report={
+            "status": "green",
+            "primary_blocker": {},
+            "recommended_actions": [],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+            "security_review": {
+                "collected": True,
+                "unresolved_findings": 0,
+            },
+            "code_scanning_review": {
+                "collected": True,
+                "collection_status": "collected",
+                "open_alerts": 0,
+                "current_alerts": 0,
+                "stale_alerts": 0,
+                "current_head_sha": "head-sha",
+                "findings": [],
+            },
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "integration_proof",
+                "surface": "workflow",
+                "title": "Workflow evidence changed",
+            },
+            "graph": {
+                "node_count": 1,
+                "review_first_count": 0,
+                "critical_count": 0,
+                "top_blocker": {
+                    "title": "Workflow evidence changed",
+                    "surface": "workflow",
+                    "action": "rerun_proof",
+                    "review_first": False,
+                },
+            },
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+
+def test_review_summary_is_reviewer_first_and_human_readable() -> None:
+    summary = report.render_pr_quality_review_summary(_review_console_ready_model())
+
+    assert "## Review at a glance" in summary
+    assert "✅ **Ready for human decision**" in summary
+    assert (
+        "**Do this now:** Review the changed evidence and make the final merge decision." in summary
+    )
+    assert "| `/check` | Re-run the standard validation checks |" in summary
+    assert "| `/quality` | Run the full quality and coverage gate |" in summary
+    assert "| `/doctor` | Diagnose the first concrete failure |" in summary
+    assert "| `/hint` | Show the compact reviewer checklist |" in summary
+    assert "<summary>🧾 Machine decision contract</summary>" in summary
+
+    glance = summary[summary.index("## Review at a glance") : summary.index("<details>")]
+    assert "review_and_decide" not in glance
+    assert "automated_proof_complete_human_decision_required" not in glance
+
+
+def test_review_summary_hides_false_failure_panel_on_ready_pr() -> None:
+    summary = report.render_pr_quality_review_summary(_review_console_ready_model())
+
+    assert "<details>\n<summary>🧭 Failure vector deep dive</summary>" in summary
+    assert "No active actionable failure exists for the current PR head." in summary
+    assert "no unknown failure fields are emitted" in summary
+    assert "<summary>🛡️ Security evidence</summary>" in summary
+    assert "GHAS / CodeQL blocker details" not in summary
+
+
+def test_review_summary_opens_blocker_evidence_and_keeps_authority_false() -> None:
+    model = report.build_pr_quality_review_model(
+        status="failed",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=True,
+        action_report={
+            "status": "failed",
+            "primary_blocker": {
+                "title": "Ruff check failed",
+                "surface": "workflow",
+                "action": "fix_lint",
+                "code": "ruff",
+                "path": "src/example.py",
+                "details": "unused import",
+            },
+            "recommended_actions": ["Fix the lint finding."],
+            "proof_commands": ["python -m pre_commit run -a"],
+        },
+        check_intelligence={
+            "failed_checks": [
+                {
+                    "name": "quality",
+                    "command": "python -m pre_commit run -a",
+                    "actual_failure": "unused import",
+                    "failure_type": "lint",
+                    "failing_test_or_check": "F401",
+                    "owner_hint": "src/example.py",
+                    "affected_files": ["src/example.py"],
+                    "first_failure": {
+                        "line": "F401 unused import",
+                        "line_number": 4,
+                        "tool": "ruff",
+                        "kind": "lint",
+                    },
+                    "diagnosis": {
+                        "code": "RUFF_LINT_FAILURE",
+                        "title": "Ruff lint failed",
+                    },
+                }
+            ],
+            "queued_checks": [],
+            "startup_failures": [],
+            "missing_required_contexts": [],
+        },
+        evidence_narrative={
+            "primary_signal": {
+                "kind": "review_signal",
+                "surface": "workflow",
+                "title": "Workflow evidence changed",
+            },
+            "graph": {
+                "node_count": 1,
+                "review_first_count": 1,
+                "critical_count": 1,
+                "top_blocker": {
+                    "title": "Ruff check failed",
+                    "actual_failure": "unused import",
+                    "surface": "workflow",
+                    "action": "fix_lint",
+                    "review_first": True,
+                },
+            },
+            "next_proof": ["python -m pre_commit run -a"],
+        },
+    )
+
+    summary = report.render_pr_quality_review_summary(model)
+
+    assert "🚨 **Blocked**" in summary
+    assert "<details open>" in summary
+    assert "<summary>🧭 Failure vector deep dive</summary>" in summary
+    assert "| Actual failure | `unused import` |" in summary
+    assert "Do not merge until the named blocker is resolved" in summary
+    assert "| Merge authorization | `false` |" in summary
+    assert "| Patch automation | `false` |" in summary
+    assert "| Security dismissal | `false` |" in summary
+    assert "reporting only" in summary.lower()
+
+
+def test_review_summary_filters_non_commands_from_proof_block() -> None:
+    model = _review_console_ready_model()
+    model["proof_to_rerun"] = [
+        "python -m pre_commit run -a",
+        "Review the current security check annotations for the PR.",
+        "Fix the flagged surface or dismiss a reviewed false positive with a reason.",
+    ]
+
+    summary = report.render_pr_quality_review_summary(model)
+    proof_start = summary.index("<summary>🧪 Optional verification</summary>")
+    proof_section = summary[proof_start : summary.index("</details>", proof_start)]
+
+    assert "python -m pre_commit run -a" in proof_section
+    assert "Review the current security check annotations" not in proof_section
+    assert "Fix the flagged surface" not in proof_section
+
+
+def test_review_summary_enriches_security_failure_from_ghas() -> None:
+    model = {
+        "decision": {
+            "status": "review_required",
+            "merge_assessment": "do_not_merge_until_blocker_resolved",
+            "next_action": "review",
+            "risk_surface": "security",
+            "signal_title": "Security check annotation requires review",
+            "comment_signal": "Evidence review signal",
+            "review_first_evidence": True,
+            "cleared_security_signal": False,
+            "failed_checks": 1,
+            "required_queued_checks": 0,
+            "required_startup_failures": 0,
+            "missing_required_contexts": 0,
+        },
+        "authority_boundary": {
+            "boundary_mode": "reporting_only",
+            "patch_automation": False,
+            "security_dismissal": False,
+            "merge_authorization": False,
+            "semantic_equivalence_claim": False,
+        },
+        "primary_blocker": {
+            "title": "Security check annotation requires review",
+            "action": "review",
+        },
+        "failure_vector_signal": {
+            "source": "evidence_top_blocker",
+            "actual_failure": "Security check annotation requires review",
+            "failure_type": "unknown",
+            "failing_command": "unknown",
+            "failing_test_or_check": "unknown",
+            "owner_hint": "unknown",
+            "affected_files": [],
+            "safe_fix_candidate": False,
+            "safe_fix_allowed": False,
+            "reporting_only": True,
+        },
+        "ghas_blocker_details": {
+            "collected": True,
+            "collection_status": "collected",
+            "open_alerts": 1,
+            "current_alerts": 1,
+            "stale_alerts": 0,
+            "current_head_sha": "head-sha",
+            "dismissal_allowed": False,
+            "findings": [
+                {
+                    "number": "1448",
+                    "rule_id": "SEC_SECRET_PATTERN",
+                    "severity": "error",
+                    "location": "src/sdetkit/pr_quality_action_report.py:3121",
+                    "freshness": "current",
+                    "message": "Potential hardcoded credential",
+                    "proof_commands": [
+                        "python -m sdetkit security check --root . --format json",
+                        "Review the annotation.",
+                    ],
+                }
+            ],
+        },
+        "recommended_actions": [],
+        "proof_to_rerun": [
+            "python -m sdetkit security check --root . --format json",
+        ],
+        "failed_check_names": ["sdetkit-security-gate"],
+        "required_queued_check_names": [],
+        "required_startup_failure_names": [],
+        "missing_required_context_names": [],
+    }
+
+    summary = report.render_pr_quality_review_summary(model)
+
+    assert (
+        "**Do this now:** Review the current security finding, decide whether "
+        "to fix it or record a reviewed false-positive dismissal, then rerun "
+        "the gate." in summary
+    )
+    assert "| Actual failure | `Potential hardcoded credential` |" in summary
+    assert "| Failure type | `SEC_SECRET_PATTERN` |" in summary
+    assert (
+        "| Failing command | `python -m sdetkit security check --root . --format json` |" in summary
+    )
+    assert "| Failing test/check | `sdetkit-security-gate` |" in summary
+    assert "| Owner hint | `src/sdetkit/pr_quality_action_report.py:3121` |" in summary
+
+
+def test_review_model_promotes_pytest_failure_and_collapses_matrix() -> None:
+    failure_line = (
+        "Validate (ubuntu-latest / py3.12) UNKNOWN STEP "
+        "FAILED tests/test_probe.py::test_probe - "
+        "AssertionError: PR_QUALITY_FORCED_FAILURE_V1: "
+        "expected='ready'; observed='forced'"
+    )
+    first_failure = {
+        "line": failure_line,
+        "line_number": 650,
+        "kind": "test_failure",
+        "tool": "pytest",
+        "evidence_quality": {
+            "actionable": True,
+            "confidence": "high",
+        },
+        "context": [
+            {
+                "line_number": 648,
+                "text": (
+                    "Validate (ubuntu-latest / py3.12) tests/test_probe.py:10: AssertionError"
+                ),
+            },
+            {
+                "line_number": 650,
+                "text": failure_line,
+            },
+            {
+                "line_number": 651,
+                "text": "assert 'forced' == 'ready'",
+            },
+        ],
+    }
+    action = {
+        "status": "review_required",
+        "primary_blocker": {
+            "check": "Validate (ubuntu-latest / py3.12)",
+            "title": "Targeted test behavior failed",
+            "surface": "tests",
+            "code": "PYTEST_ASSERTION_FAILURE",
+            "url": ("https://api.github.com/repos/example/repo/check-runs/123"),
+            "first_failure": first_failure,
+            "first_failure_line": failure_line,
+            "job_step_confirmation": {
+                "status": "missing",
+                "job_step_name": "",
+            },
+        },
+        "proof_commands": [("PYTHONPATH=src python -m pytest -q tests/test_probe.py::test_probe")],
+        "recommended_actions": ["Reproduce the first failing test only."],
+    }
+    failed_checks = []
+    for version in ("3.11", "3.12", "3.13"):
+        failed_checks.append(
+            {
+                "name": f"Validate (ubuntu / py{version})",
+                "code": "PYTEST_ASSERTION_FAILURE",
+                "first_failure": first_failure,
+            }
+        )
+    intelligence = {
+        "failed_checks": failed_checks,
+        "queued_checks": [],
+        "startup_failures": [],
+        "missing_required_contexts": [],
+        "code_scanning_review": {
+            "collected": True,
+            "open_alerts": 0,
+            "current_alerts": 0,
+            "stale_alerts": 0,
+            "findings": [],
+        },
+    }
+    narrative = {
+        "primary_signal": {
+            "surface": "tests",
+            "title": "Targeted test behavior failed",
+        },
+        "graph": {
+            "top_blocker": {
+                "surface": "tests",
+                "title": "Targeted test behavior failed",
+                "action": "review",
+            }
+        },
+        "next_proof": action["proof_commands"],
+    }
+
+    model = report.build_pr_quality_review_model(
+        status="review_required",
+        evidence_signal_heading="Evidence review signal",
+        evidence_signal_lines=[],
+        evidence_review_required=True,
+        action_report=action,
+        check_intelligence=intelligence,
+        evidence_narrative=narrative,
+    )
+
+    failure = model["primary_failure"]
+    assert failure["available"] is True
+    assert failure["actionable"] is True
+    assert failure["test_node"] == "tests/test_probe.py::test_probe"
+    assert failure["source_path"] == "tests/test_probe.py"
+    assert failure["source_line"] == 10
+    assert failure["message"].startswith("PR_QUALITY_FORCED_FAILURE_V1")
+    assert failure["expected"] == "ready"
+    assert failure["observed"] == "forced"
+    assert failure["reproduction_command"].endswith("tests/test_probe.py::test_probe")
+    assert failure["check_url"] == ("https://github.com/example/repo/runs/123")
+    assert failure["failed_check_count"] == 3
+    assert failure["unique_failure_count"] == 1
+    assert failure["matrix_occurrence_count"] == 3
+    assert failure["matrix_repetition"] is True
+    assert failure["evidence_gaps"] == ["job_step_not_captured"]
+    assert len(model["failure_families"]) == 1

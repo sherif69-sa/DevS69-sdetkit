@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,14 @@ from sdetkit.current_head_failure_bundle import (
     write_current_head_failure_bundle,
 )
 from sdetkit.pr_comment_failure_families import render_comment_failure_families
+from sdetkit.pr_quality_live_dashboard import (
+    build_live_evidence_snapshot,
+    render_live_evidence_html,
+    render_live_evidence_markdown,
+)
+from sdetkit.pr_quality_review_experience import (
+    render_pr_quality_review_experience,
+)
 
 JsonObject = dict[str, Any]
 
@@ -555,6 +564,95 @@ def _failed_step_evidence_lines(payload: JsonObject, *, prefix: str = "  - ") ->
     return lines
 
 
+def _exact_failure_quality_lines(
+    payload: JsonObject,
+    *,
+    prefix: str = "  - ",
+) -> list[str]:
+    first_failure = _as_dict(payload.get("first_failure"))
+    quality = _as_dict(first_failure.get("evidence_quality"))
+    if not quality:
+        return []
+
+    confidence = _string(quality.get("confidence") or "unknown")
+    source = _string(quality.get("source") or "unknown")
+    actionable = str(bool(quality.get("actionable", False))).lower()
+    uncertainty = [_string(item) for item in _as_list(quality.get("uncertainty")) if _string(item)]
+
+    lines = [
+        f"{prefix}Exact failure confidence: `{confidence}`",
+        f"{prefix}Exact failure source: `{source}`",
+        f"{prefix}Exact failure actionable: `{actionable}`",
+    ]
+    if uncertainty:
+        lines.append(
+            f"{prefix}Exact failure uncertainty: "
+            + "; ".join(f"`{item}`" for item in uncertainty[:5])
+        )
+    else:
+        lines.append(f"{prefix}Exact failure uncertainty: `none`")
+    return lines
+
+
+def _remediation_eligibility_lines(
+    payload: JsonObject,
+    *,
+    prefix: str = "  - ",
+) -> list[str]:
+    remediation = _as_dict(payload.get("safe_remediation"))
+    if not remediation:
+        return []
+
+    category = _string(remediation.get("category") or "unknown")
+    strategy = _string(remediation.get("strategy") or "unknown")
+    safe = str(bool(remediation.get("safe_to_auto_fix", False))).lower()
+    human_review = str(bool(remediation.get("requires_human_review", True))).lower()
+    auto_fix_now = str(bool(remediation.get("auto_fix_allowed_now", False))).lower()
+    patch_allowed = str(bool(remediation.get("patch_application_allowed", False))).lower()
+    merge_authorized = str(bool(remediation.get("merge_authorized", False))).lower()
+    reason = _string(remediation.get("reason") or "none")
+
+    lines = [
+        f"{prefix}Remediation eligibility: `{category}`",
+        f"{prefix}Remediation strategy: `{strategy}`",
+        f"{prefix}Safe-fix candidate: `{safe}`",
+        f"{prefix}Human review required: `{human_review}`",
+        f"{prefix}Auto-fix allowed now: `{auto_fix_now}`",
+        f"{prefix}Patch application allowed: `{patch_allowed}`",
+        f"{prefix}Merge authorized: `{merge_authorized}`",
+        f"{prefix}Remediation reason: {reason}",
+    ]
+    if bool(remediation.get("safe_to_auto_fix", False)):
+        lines.extend(
+            [
+                f"{prefix}Safe remediation: `{strategy}`",
+                f"{prefix}Safe reason: `{reason}`",
+            ]
+        )
+
+    affected_files = [
+        _string(item) for item in _as_list(remediation.get("affected_files")) if _string(item)
+    ]
+    if affected_files:
+        lines.append(
+            f"{prefix}Remediation affected files: "
+            + ", ".join(f"`{item}`" for item in affected_files[:8])
+        )
+    else:
+        lines.append(f"{prefix}Remediation affected files: `none`")
+
+    proof_commands = [
+        _string(item) for item in _as_list(remediation.get("proof_commands")) if _string(item)
+    ]
+    if proof_commands:
+        lines.append(f"{prefix}Remediation proof commands:")
+        lines.extend(f"{prefix}  - `{item}`" for item in proof_commands[:5])
+    else:
+        lines.append(f"{prefix}Remediation proof commands: `none`")
+
+    return lines
+
+
 def _failed_check_lines(check_intelligence: JsonObject) -> list[str]:
     failed = [_as_dict(item) for item in _as_list(check_intelligence.get("failed_checks"))]
     if not failed:
@@ -578,14 +676,10 @@ def _failed_check_lines(check_intelligence: JsonObject) -> list[str]:
             lines.append(f"  - First failure: `{first_line}`")
             lines.append(f"  - Failure location: `{location}`")
             lines.append(f"  - Failure tool/kind: `{tool}` / `{kind}`")
+        lines.extend(_exact_failure_quality_lines(item))
         lines.extend(_failed_step_evidence_lines(item))
         lines.extend(_artifact_evidence_lines(item))
-        safe_remediation = _as_dict(item.get("safe_remediation"))
-        if bool(safe_remediation.get("safe_to_auto_fix", False)):
-            strategy = _string(safe_remediation.get("strategy") or "unknown")
-            reason = _string(safe_remediation.get("reason") or "approved safe remediation")
-            lines.append(f"  - Safe remediation: `{strategy}`")
-            lines.append(f"  - Safe reason: `{reason}`")
+        lines.extend(_remediation_eligibility_lines(item))
         formatter_files = [
             _string(path) for path in _as_list(item.get("formatter_changed_files")) if _string(path)
         ]
@@ -641,14 +735,10 @@ def _primary_blocker_lines(primary: JsonObject) -> list[str]:
         lines.append(f"- First failure: `{first_line}`")
         lines.append(f"- Failure location: `{location}`")
         lines.append(f"- Failure tool/kind: `{tool}` / `{kind}`")
+    lines.extend(_exact_failure_quality_lines(primary, prefix="- "))
     lines.extend(_failed_step_evidence_lines(primary, prefix="- "))
     lines.extend(_artifact_evidence_lines(primary, prefix="- "))
-    safe_remediation = _as_dict(primary.get("safe_remediation"))
-    if bool(safe_remediation.get("safe_to_auto_fix", False)):
-        strategy = _string(safe_remediation.get("strategy") or "unknown")
-        reason = _string(safe_remediation.get("reason") or "approved safe remediation")
-        lines.append(f"- Safe remediation: `{strategy}`")
-        lines.append(f"- Safe reason: `{reason}`")
+    lines.extend(_remediation_eligibility_lines(primary, prefix="- "))
 
     formatter_files = [
         _string(path) for path in _as_list(primary.get("formatter_changed_files")) if _string(path)
@@ -776,6 +866,9 @@ def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) ->
         return []
 
     isolated = _as_dict(summary.get("isolated_proof"))
+    profile_results = [
+        _as_dict(item) for item in _as_list(isolated.get("profile_results")) if _as_dict(item)
+    ]
     benchmark = _as_dict(summary.get("live_benchmark"))
     memory = _as_dict(summary.get("repo_memory"))
     trusted_history = _as_dict(summary.get(TRUSTED_HISTORY))
@@ -813,7 +906,41 @@ def _runtime_proof_artifact_lines(runtime_proof_artifacts: JsonObject | None) ->
             f"`{_string(benchmark.get('collection_status') or 'not_collected')}`"
         ),
         f"- Live benchmark status: `{_string(benchmark.get('status') or 'not_collected')}`",
+        (
+            "- Profile visibility status: "
+            f"`{_string(isolated.get('profile_visibility_status') or 'not_collected')}`"
+        ),
+        (f"- Profile review-first results: `{_int(isolated.get('profile_review_first_count'))}`"),
+        (
+            "- Profile authority expansion detected: "
+            f"`{str(bool(isolated.get('profile_authority_expansion_detected', False))).lower()}`"
+        ),
     ]
+
+    if profile_results:
+        lines.append("- Proof profile results:")
+        for profile in profile_results:
+            claim_value = profile.get("inventory_claim_match")
+            claim_status = "not_checked" if claim_value is None else str(bool(claim_value)).lower()
+            lines.append(
+                f"  - `{_string(profile.get('profile_id') or 'unknown')}`: "
+                f"command=`{_string(profile.get('command') or 'unknown')}`, "
+                f"status=`{_string(profile.get('status') or 'unknown')}`, "
+                f"exit_code=`{_int(profile.get('exit_code'))}`, "
+                f"timed_out=`{str(bool(profile.get('timed_out', False))).lower()}`, "
+                "workspace_mutated=`"
+                f"{str(bool(profile.get('workspace_mutated', False))).lower()}`, "
+                f"runtime_guard=`{_string(profile.get('runtime_guard_status') or 'unknown')}`, "
+                f"inventory_claim_match=`{claim_status}`, "
+                "git_inventory_verified=`"
+                f"{str(bool(profile.get('git_inventory_verified', False))).lower()}`, "
+                f"network_boundary=`{_string(profile.get('network_boundary_status') or 'unknown')}`, "
+                "network_wrapped=`"
+                f"{str(bool(profile.get('network_backend_command_wrapped', False))).lower()}`, "
+                f"review_first=`{str(bool(profile.get('review_first', True))).lower()}`"
+            )
+    else:
+        lines.append("- Proof profile results: none")
 
     if benchmark.get("collection_status") == "collected":
         lines.extend(
@@ -2485,6 +2612,198 @@ def _review_model_fallback_action(
     return "none"
 
 
+def _github_check_run_url(value: object) -> str:
+    raw = _string(value)
+    prefix = "https://api.github.com/repos/"
+    marker = "/check-runs/"
+    if not raw.startswith(prefix) or marker not in raw:
+        return raw
+    repository, check_id = raw.removeprefix(prefix).split(marker, 1)
+    if not repository or not check_id.isdigit():
+        return raw
+    return f"https://github.com/{repository}/runs/{check_id}"
+
+
+def _display_failure_literal(value: str) -> str:
+    rendered = value.strip()
+    if len(rendered) >= 2 and rendered[0] == rendered[-1] and rendered[0] in {"'", '"'}:
+        return rendered[1:-1]
+    return rendered
+
+
+def _parse_pytest_failure_line(value: object) -> JsonObject:
+    line = _string(value)
+    match = re.search(
+        r"\bFAILED\s+(?P<node>\S+::\S+)\s+-\s+(?P<tail>.+)$",
+        line,
+    )
+    if match is None:
+        return {
+            "test_node": "",
+            "source_path": "",
+            "message": "",
+            "expected": "",
+            "observed": "",
+        }
+
+    test_node = match.group("node")
+    tail = match.group("tail").strip()
+    message = tail.split("AssertionError:", 1)[1].strip() if "AssertionError:" in tail else tail
+    values = re.search(
+        r"\bexpected=(?P<expected>'[^']*'|\"[^\"]*\"|[^;]+);"
+        r"\s*observed=(?P<observed>'[^']*'|\"[^\"]*\"|[^;]+)",
+        message,
+    )
+    expected = ""
+    observed = ""
+    if values is not None:
+        expected = _display_failure_literal(values.group("expected"))
+        observed = _display_failure_literal(values.group("observed"))
+
+    return {
+        "test_node": test_node,
+        "source_path": test_node.split("::", 1)[0],
+        "message": message,
+        "expected": expected,
+        "observed": observed,
+    }
+
+
+def _review_model_primary_failure(
+    *,
+    primary_blocker: JsonObject,
+    check_intelligence: JsonObject,
+    proof_commands: list[str],
+) -> JsonObject:
+    first_failure = _as_dict(primary_blocker.get("first_failure"))
+    parsed = _parse_pytest_failure_line(
+        first_failure.get("line") or primary_blocker.get("first_failure_line")
+    )
+    source_path = _string(parsed.get("source_path"))
+    context_rows = [
+        _as_dict(item) for item in _as_list(first_failure.get("context")) if _as_dict(item)
+    ]
+
+    source_line = 0
+    assertion_line = ""
+    context_excerpt: list[str] = []
+    for row in context_rows:
+        text = _string(row.get("text"))
+        if not text:
+            continue
+        if source_path and not source_line:
+            source_match = re.search(
+                rf"{re.escape(source_path)}:(\d+):",
+                text,
+            )
+            if source_match is not None:
+                source_line = int(source_match.group(1))
+        assertion_match = re.search(r"\bassert\s+.+$", text)
+        if assertion_match is not None and not assertion_line:
+            assertion_line = assertion_match.group(0)
+        if "FAILED " in text or "AssertionError" in text or assertion_match is not None:
+            context_excerpt.append(text)
+
+    step_confirmation = _as_dict(primary_blocker.get("job_step_confirmation"))
+    failed_step = _as_dict(primary_blocker.get("failed_step_evidence"))
+    step_name = _string(step_confirmation.get("job_step_name") or failed_step.get("step_name"))
+    step_status = _string(
+        step_confirmation.get("status") or failed_step.get("status") or "unavailable"
+    )
+    evidence_gaps: list[str] = []
+    if not step_name:
+        evidence_gaps.append("job_step_not_captured")
+
+    failed_checks = [
+        _as_dict(item)
+        for item in _as_list(check_intelligence.get("failed_checks"))
+        if _as_dict(item)
+    ]
+    families_by_signature: dict[
+        tuple[str, str, str],
+        JsonObject,
+    ] = {}
+    for check in failed_checks:
+        check_first_failure = _as_dict(check.get("first_failure"))
+        check_parsed = _parse_pytest_failure_line(
+            check_first_failure.get("line") or check.get("first_failure_line")
+        )
+        signature = (
+            _string(check.get("code") or "unknown"),
+            _string(check_parsed.get("test_node")),
+            _string(check_parsed.get("message")),
+        )
+        family = families_by_signature.setdefault(
+            signature,
+            {
+                "failure_code": signature[0],
+                "test_node": signature[1],
+                "message": signature[2],
+                "check_count": 0,
+                "checks": [],
+            },
+        )
+        family["check_count"] = _int(family.get("check_count")) + 1
+        check_name = _string(check.get("name") or check.get("check") or check.get("title"))
+        if check_name:
+            _as_list(family["checks"]).append(check_name)
+
+    families = list(families_by_signature.values())
+    unique_failure_count = len(families)
+    failed_check_count = len(failed_checks)
+    primary_signature = (
+        _string(primary_blocker.get("code") or "unknown"),
+        _string(parsed.get("test_node")),
+        _string(parsed.get("message")),
+    )
+    matrix_occurrence_count = 0
+    primary_family = families_by_signature.get(primary_signature)
+    if primary_family:
+        matrix_occurrence_count = _int(primary_family.get("check_count"))
+    elif failed_check_count:
+        matrix_occurrence_count = 1
+        unique_failure_count = max(unique_failure_count, 1)
+
+    check_api_url = _string(primary_blocker.get("url"))
+    evidence_quality = _as_dict(first_failure.get("evidence_quality"))
+    check_name = _string(
+        primary_blocker.get("check") or primary_blocker.get("name") or primary_blocker.get("title")
+    )
+    reproduction_command = proof_commands[0] if proof_commands else ""
+
+    return {
+        "available": bool(check_name or parsed.get("test_node") or parsed.get("message")),
+        "actionable": bool(evidence_quality.get("actionable", False)),
+        "failure_code": _string(primary_blocker.get("code")),
+        "failure_type": _string(first_failure.get("kind")),
+        "tool": _string(first_failure.get("tool")),
+        "workflow_name": "",
+        "check_name": check_name,
+        "check_url": _github_check_run_url(check_api_url),
+        "check_api_url": check_api_url,
+        "step_name": step_name,
+        "step_evidence_status": step_status,
+        "test_node": _string(parsed.get("test_node")),
+        "source_path": source_path,
+        "source_line": source_line,
+        "message": _string(parsed.get("message")),
+        "assertion_line": assertion_line,
+        "expected": _string(parsed.get("expected")),
+        "observed": _string(parsed.get("observed")),
+        "reproduction_command": reproduction_command,
+        "log_line_number": _int(first_failure.get("line_number")),
+        "context_excerpt": context_excerpt[:6],
+        "failed_check_count": failed_check_count,
+        "unique_failure_count": unique_failure_count,
+        "matrix_occurrence_count": matrix_occurrence_count,
+        "matrix_repetition": (failed_check_count > 1 and unique_failure_count < failed_check_count),
+        "evidence_gaps": evidence_gaps,
+        "families": families,
+        "reporting_only": True,
+        "merge_authorized": False,
+    }
+
+
 def build_pr_quality_review_model(
     *,
     status: str,
@@ -2660,6 +2979,12 @@ def build_pr_quality_review_model(
             "reporting_only": True,
         }
 
+    primary_failure = _review_model_primary_failure(
+        primary_blocker=primary_blocker,
+        check_intelligence=check_intelligence,
+        proof_commands=proof_commands,
+    )
+
     review_state = _canonical_review_state(
         source_status=status,
         failed_checks=failed_count,
@@ -2701,6 +3026,8 @@ def build_pr_quality_review_model(
         },
         "recommended_actions": recommended_actions[:10],
         "failure_vector_signal": failure_vector_signal,
+        "primary_failure": primary_failure,
+        "failure_families": _as_list(primary_failure.get("families")),
         "ghas_blocker_details": ghas_blocker_details,
         "failed_check_names": failed_check_names,
         "required_queued_check_names": required_queued_check_names,
@@ -2942,11 +3269,62 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     authority = _as_dict(model.get("authority_boundary"))
     failure_vector_signal = _as_dict(model.get("failure_vector_signal"))
     ghas_blocker_details = _as_dict(model.get("ghas_blocker_details"))
-    proof_commands = [
-        str(command)
-        for command in _as_list(model.get("proof_to_rerun"))
-        if isinstance(command, str) and command.strip()
-    ]
+
+    def _looks_like_shell_command(value: str) -> bool:
+        parts = value.strip().split()
+        if not parts:
+            return False
+
+        while parts and "=" in parts[0]:
+            name, separator, _assigned_value = parts[0].partition("=")
+            if not separator or not name or not name.replace("_", "").isalnum():
+                break
+            parts = parts[1:]
+
+        if not parts:
+            return False
+
+        executable = parts[0]
+        allowed_executables = {
+            "bash",
+            "gh",
+            "make",
+            "mkdocs",
+            "mypy",
+            "nox",
+            "npm",
+            "pnpm",
+            "poetry",
+            "pre-commit",
+            "pytest",
+            "python",
+            "python3",
+            "ruff",
+            "sh",
+            "tox",
+            "uv",
+            "yarn",
+        }
+        return executable in allowed_executables or executable.startswith("./")
+
+    def _dedupe_commands(commands: list[str]) -> list[str]:
+        unique: list[str] = []
+        seen: set[str] = set()
+        for command in commands:
+            normalized = command.strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            unique.append(normalized)
+        return unique
+
+    proof_commands = _dedupe_commands(
+        [
+            str(command).strip()
+            for command in _as_list(model.get("proof_to_rerun"))
+            if isinstance(command, str) and _looks_like_shell_command(command)
+        ]
+    )
     recommended_actions = [
         str(item)
         for item in _as_list(model.get("recommended_actions"))
@@ -2999,6 +3377,43 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
             "</details>",
         ]
 
+    def _human_token(value: object) -> str:
+        canonical_value = _review_model_scalar(value or "none")
+        labels = {
+            "review_and_decide": "Review the changed evidence and make the final merge decision",
+            "do_not_merge_until_blocker_resolved": "Do not merge until the named blocker is resolved",
+            "wait_for_required_checks": "Wait for required checks to finish",
+            "review_listed_evidence": "Review the listed evidence before merging",
+            "rerun_listed_proof": "Run the focused verification commands",
+            "refresh_stale_evidence": "Refresh stale evidence and rerun the gate",
+            "repair_invalid_evidence": "Repair the invalid evidence contract",
+            "automated_proof_complete_human_decision_required": (
+                "Automated proof is complete; a human merge decision is still required"
+            ),
+            "merge_blocked_required_checks_incomplete": (
+                "Merge is blocked while required checks are incomplete"
+            ),
+            "do_not_merge_until_evidence_reviewed": (
+                "Do not merge until the review-first evidence is resolved"
+            ),
+            "clear": "Clear",
+            "none": "None",
+            "unavailable": "Unavailable",
+            "diagnostic_engine": "Diagnostic engine",
+            "code_quality": "Code quality",
+            "workflow_permissions": "Workflow permissions",
+            "branch_protection": "Branch protection",
+            "review_model": "Review model",
+            "workflow": "Workflow",
+            "security": "Security",
+            "tests": "Tests",
+            "ci": "Continuous integration",
+        }
+        return labels.get(
+            canonical_value,
+            canonical_value.replace("_", " ").strip().capitalize(),
+        )
+
     failed_total = _count(decision.get("failed_checks"))
     queued_total = _count(decision.get("required_queued_checks"))
     startup_total = _count(decision.get("required_startup_failures"))
@@ -3006,6 +3421,50 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     stale_only_security_signal = bool(decision.get(STALE_ONLY_SECURITY_SIGNAL))
     review_state = _review_model_state(model)
     first_action = _review_model_scalar(decision.get("next_action") or "none")
+    first_blocker = _review_model_scalar(decision.get("primary_blocker") or "none")
+    merge_assessment = _review_model_scalar(decision.get("merge_assessment") or "unknown")
+    risk_surface = _review_model_scalar(decision.get("risk_surface") or "unknown")
+    human_risk_surface = _human_token(risk_surface)
+    signal_title = _review_model_scalar(decision.get("signal_title") or "none")
+
+    panel_rows = dict(_contributor_review_panel_rows(model))
+    required_summary = _review_model_scalar(panel_rows.get("Required checks") or "unknown")
+    security_summary = _review_model_scalar(panel_rows.get("Security posture") or "unknown")
+
+    state_icon = {
+        "waiting": "⏳",
+        "blocked": "🚨",
+        "review": "👀",
+        "ready": "✅",
+        "stale": "🟡",
+        "invalid": "❌",
+    }.get(review_state, "ℹ️")
+    state_label = _review_model_state_label(review_state).capitalize()
+    state_explanation = {
+        "waiting": "Required checks are still running; no merge decision should be made yet.",
+        "blocked": "A required proof contract is failing and blocks merge.",
+        "review": "Automated checks may be green, but named evidence still requires human review.",
+        "ready": "Required checks and security evidence are clear for the current head.",
+        "stale": "The evidence does not match the current head and must be refreshed.",
+        "invalid": "The review evidence contract is inconsistent or incomplete.",
+    }.get(review_state, "Review the evidence below before deciding.")
+
+    quick_action_catalog = {
+        "/check": "Re-run the standard validation checks",
+        "/quality": "Run the full quality and coverage gate",
+        "/doctor": "Diagnose the first concrete failure",
+        "/hint": "Show the compact reviewer checklist",
+    }
+    quick_action_order = {
+        "waiting": ["/check", "/hint", "/doctor", "/quality"],
+        "blocked": ["/doctor", "/check", "/quality", "/hint"],
+        "review": ["/hint", "/check", "/quality", "/doctor"],
+        "ready": ["/quality", "/check", "/hint", "/doctor"],
+        "stale": ["/check", "/hint", "/doctor", "/quality"],
+        "invalid": ["/doctor", "/check", "/hint", "/quality"],
+    }.get(review_state, ["/check", "/quality", "/doctor", "/hint"])
+    primary_quick_action = quick_action_order[0]
+    secondary_quick_actions = quick_action_order[1:]
 
     failure_actual = _review_model_scalar(failure_vector_signal.get("actual_failure") or "none")
     failure_source = _review_model_scalar(failure_vector_signal.get("source") or "none")
@@ -3021,31 +3480,136 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         if isinstance(item, str) and item.strip()
     ]
 
-    active_blocker_open = review_state in {
+    ghas_findings = [
+        _as_dict(item) for item in _as_list(ghas_blocker_details.get("findings")) if _as_dict(item)
+    ]
+    security_proof_commands = _dedupe_commands(
+        [
+            str(command).strip()
+            for finding in ghas_findings
+            for command in _as_list(finding.get("proof_commands"))
+            if isinstance(command, str) and _looks_like_shell_command(command)
+        ]
+    )
+    proof_commands = _dedupe_commands([*proof_commands, *security_proof_commands])
+
+    if risk_surface == "security" and ghas_findings:
+        primary_security_finding = ghas_findings[0]
+        security_message = _review_model_scalar(primary_security_finding.get("message") or "")
+        security_rule = _review_model_scalar(primary_security_finding.get("rule_id") or "security")
+        security_location = _review_model_scalar(
+            primary_security_finding.get("location") or "unknown"
+        )
+        security_proof = [
+            str(command).strip()
+            for command in _as_list(primary_security_finding.get("proof_commands"))
+            if isinstance(command, str) and _looks_like_shell_command(command)
+        ]
+
+        if security_message:
+            failure_actual = security_message
+        if failure_type in {"", "none", "unknown"}:
+            failure_type = security_rule
+        if failing_command in {"", "none", "unknown"} and security_proof:
+            failing_command = security_proof[0]
+        if failing_test in {"", "none", "unknown"}:
+            failing_test = "sdetkit-security-gate"
+        if failure_owner in {"", "none", "unknown"}:
+            failure_owner = security_location
+
+        security_path = security_location.split(":", 1)[0]
+        if security_path and security_path != "unknown" and security_path not in affected_files:
+            affected_files.insert(0, security_path)
+
+    human_first_action = _human_token(first_action)
+    if first_action == "review" and risk_surface == "security":
+        human_first_action = (
+            "Review the current security finding, decide whether to fix it "
+            "or record a reviewed false-positive dismissal, then rerun the gate"
+        )
+
+    decision_open = review_state in {
+        "waiting",
         "blocked",
         "review",
         "stale",
         "invalid",
     }
-    failure_vector_open = active_blocker_open and failure_actual not in {"", "none"}
-    proof_open = active_blocker_open and bool(proof_commands)
-    ghas_findings = [
-        _as_dict(item) for item in _as_list(ghas_blocker_details.get("findings")) if _as_dict(item)
-    ]
-    ghas_open = bool(ghas_findings) and (active_blocker_open or stale_only_security_signal)
+    meaningful_failure_values = {
+        failure_actual,
+        failure_type,
+        failing_command,
+        failing_test,
+    } - {"", "none", "unknown"}
+    show_failure_vector = bool(
+        review_state in {"blocked", "stale", "invalid"}
+        and (
+            meaningful_failure_values
+            or failed_total > 0
+            or bool(affected_files)
+            or bool(failure_vector_signal.get("safe_fix_candidate"))
+        )
+    )
+    failure_open = show_failure_vector and review_state in {"blocked", "invalid"}
+
+    # Preserve established reviewer contracts for active blockers:
+    # focused proof and current GHAS evidence remain visible without a click.
+    proof_open = review_state in {"blocked", "review", "stale", "invalid"} and bool(proof_commands)
+    ghas_open = bool(ghas_findings) and (
+        review_state in {"blocked", "review", "stale", "invalid"} or stale_only_security_signal
+    )
 
     lines = [
         "# PR Quality Review Summary",
+        "",
+        f"> {state_icon} **{state_label}** — {state_explanation}",
+        "",
+        "## Review at a glance",
+        "",
+        "| Area | Result |",
+        "|---|---|",
+        f"| Gate | {state_icon} **{state_label}** |",
+        f"| Required checks | **{_markdown_table_value(_human_token(required_summary))}** |",
+        f"| Security | **{_markdown_table_value(_human_token(security_summary))}** |",
+        f"| Merge guidance | {_markdown_table_value(_human_token(merge_assessment))} |",
+        f"| Risk focus | **{_markdown_table_value(human_risk_surface)}** — {_markdown_table_value(signal_title)} |",
+        "",
+        f"> **Do this now:** {human_first_action}.",
+        "",
+        "### Quick actions",
+        "",
+        f"> **Recommended command:** `{primary_quick_action}` — {quick_action_catalog[primary_quick_action]}.",
+        "",
+        "| Command | Purpose |",
+        "|---|---|",
+        f"| `{primary_quick_action}` | {quick_action_catalog[primary_quick_action]} |",
+        "",
+        "<details>",
+        "<summary>More bot commands</summary>",
+        "",
+        "| Command | Purpose |",
+        "|---|---|",
+        *[
+            f"| `{command}` | {quick_action_catalog[command]} |"
+            for command in secondary_quick_actions
+        ],
+        "",
+        "</details>",
+        "",
+        "<details>",
+        "<summary>🧾 Machine decision contract</summary>",
         "",
         "## Contributor decision",
         "",
         *_markdown_table(_contributor_review_panel_rows(model)),
         "",
+        "</details>",
+        "",
     ]
 
     if recommended_actions:
         lines.extend(["## Recommended actions", ""])
-        lines.extend(f"- {action}" for action in recommended_actions[:10])
+        lines.extend(f"- {action}" for action in recommended_actions[:5])
         lines.append("")
 
     lines.extend(["## Adaptive review details", ""])
@@ -3053,23 +3617,23 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     blocker_body = [
         "| Item | Value |",
         "|---|---|",
-        f"| Merge assessment | `{_review_model_scalar(decision.get('merge_assessment'))}` |",
-        f"| Next action | `{_review_model_scalar(decision.get('next_action'))}` |",
-        f"| Risk surface | `{_markdown_table_value(decision.get('risk_surface'))}` |",
-        f"| Signal title | `{_markdown_table_value(decision.get('signal_title'))}` |",
+        f"| Human merge guidance | {_markdown_table_value(_human_token(merge_assessment))} |",
+        f"| Human next action | {_markdown_table_value(human_first_action)} |",
+        f"| Merge assessment | `{_markdown_table_value(merge_assessment)}` |",
+        f"| Next action | `{_markdown_table_value(first_action)}` |",
+        f"| First blocker | `{_markdown_table_value(first_blocker)}` |",
+        f"| Risk surface | `{_markdown_table_value(risk_surface)}` |",
+        f"| Signal title | `{_markdown_table_value(signal_title)}` |",
         f"| Signal | `{_markdown_table_value(decision.get('comment_signal'))}` |",
         f"| Review-first evidence | `{_review_model_scalar(decision.get('review_first_evidence'))}` |",
         f"| Cleared security signal | `{_review_model_scalar(decision.get('cleared_security_signal'))}` |",
         f"| Stale-only security signal | `{str(stale_only_security_signal).lower()}` |",
         "",
+        "### Canonical next action",
+        "",
+        f"- `{first_action}`",
     ]
-    blocker_body.extend(
-        [
-            "### Canonical next action",
-            "",
-            f"- `{first_action}`",
-        ]
-    )
+
     additional_guidance = [
         action for action in recommended_actions if action and action != first_action
     ]
@@ -3084,42 +3648,57 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         "ready": "✅ Ready for human decision",
         "stale": "🟡 Stale evidence / refresh required",
         "invalid": "❌ Invalid review evidence",
-    }.get(review_state, "Decision details")
+    }.get(review_state, "Decision evidence")
 
     lines.extend(
         _details(
             decision_detail_title,
             blocker_body,
-            open_by_default=active_blocker_open,
+            open_by_default=decision_open,
         )
     )
     lines.append("")
 
-    failure_body = [
-        "| Failure field | Value |",
-        "|---|---|",
-        f"| Source | `{_markdown_table_value(failure_source)}` |",
-        f"| Actual failure | `{_markdown_table_value(failure_actual)}` |",
-        f"| Failure type | `{_markdown_table_value(failure_type)}` |",
-        f"| Failing command | `{_markdown_table_value(failing_command)}` |",
-        f"| Failing test/check | `{_markdown_table_value(failing_test)}` |",
-        f"| Owner hint | `{_markdown_table_value(failure_owner)}` |",
-        f"| Safe-fix candidate | `{_review_model_scalar(failure_vector_signal.get('safe_fix_candidate'))}` |",
-        f"| Safe-fix allowed | `{_review_model_scalar(failure_vector_signal.get('safe_fix_allowed'))}` |",
-        f"| Reporting only | `{_review_model_scalar(failure_vector_signal.get('reporting_only'))}` |",
-    ]
-    if affected_files:
-        failure_body.extend(["", "### Affected files", ""])
-        failure_body.extend(f"- `{item}`" for item in affected_files[:10])
+    if show_failure_vector:
+        failure_body = [
+            "| Failure field | Value |",
+            "|---|---|",
+            f"| Source | `{_markdown_table_value(failure_source)}` |",
+            f"| Actual failure | `{_markdown_table_value(failure_actual)}` |",
+            f"| Failure type | `{_markdown_table_value(failure_type)}` |",
+            f"| Failing command | `{_markdown_table_value(failing_command)}` |",
+            f"| Failing test/check | `{_markdown_table_value(failing_test)}` |",
+            f"| Owner hint | `{_markdown_table_value(failure_owner)}` |",
+            f"| Safe-fix candidate | `{_review_model_scalar(failure_vector_signal.get('safe_fix_candidate'))}` |",
+            f"| Safe-fix allowed | `{_review_model_scalar(failure_vector_signal.get('safe_fix_allowed'))}` |",
+            f"| Reporting only | `{_review_model_scalar(failure_vector_signal.get('reporting_only'))}` |",
+        ]
+        if affected_files:
+            failure_body.extend(["", "### Affected files", ""])
+            failure_body.extend(f"- `{item}`" for item in affected_files[:10])
 
-    lines.extend(
-        _details(
-            "🧭 Failure vector deep dive",
-            failure_body,
-            open_by_default=failure_vector_open,
+        lines.extend(
+            _details(
+                "🧭 Failure vector deep dive",
+                failure_body,
+                open_by_default=failure_open,
+            )
         )
-    )
-    lines.append("")
+        lines.append("")
+    else:
+        no_failure_body = [
+            "> No active actionable failure exists for the current PR head.",
+            "",
+            "The compatibility panel is retained for audit consumers, but no unknown failure fields are emitted.",
+        ]
+        lines.extend(
+            _details(
+                "🧭 Failure vector deep dive",
+                no_failure_body,
+                open_by_default=False,
+            )
+        )
+        lines.append("")
 
     ghas_body = [
         "| Item | Value |",
@@ -3132,11 +3711,7 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
         f"| Current head SHA | `{_markdown_table_value(ghas_blocker_details.get('current_head_sha') or 'unknown')}` |",
         f"| Dismissal allowed | `{_review_model_scalar(ghas_blocker_details.get('dismissal_allowed'))}` |",
     ]
-    if (
-        _int(ghas_blocker_details.get("open_alerts")) > 0
-        and _int(ghas_blocker_details.get("current_alerts")) == 0
-        and _int(ghas_blocker_details.get("stale_alerts")) > 0
-    ):
+    if stale_only_security_signal:
         ghas_body.extend(
             [
                 "",
@@ -3176,15 +3751,26 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
                 if isinstance(command, str) and command.strip()
             ]
             if commands:
-                ghas_body.extend(["", "Proof:", "", "```bash", *commands[:5], "```", ""])
+                ghas_body.extend(
+                    [
+                        "",
+                        "> Verification commands are consolidated in the Proof to rerun section.",
+                        "",
+                    ]
+                )
 
+    security_title = (
+        "🛡️ GHAS / CodeQL refresh details"
+        if stale_only_security_signal
+        else (
+            "🛡️ GHAS / CodeQL blocker details"
+            if _int(ghas_blocker_details.get("current_alerts")) > 0
+            else "🛡️ Security evidence"
+        )
+    )
     lines.extend(
         _details(
-            (
-                "🛡️ GHAS / CodeQL refresh details"
-                if stale_only_security_signal
-                else "🛡️ GHAS / CodeQL blocker details"
-            ),
+            security_title,
             ghas_body,
             open_by_default=ghas_open,
         )
@@ -3194,11 +3780,14 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     proof_section_title = (
         "🧪 Optional verification" if review_state == "ready" else "🧪 Proof to rerun"
     )
-    proof_body: list[str] = []
+    proof_body: list[str] = [
+        "> Copy and run the focused commands below when verification is needed.",
+        "",
+    ]
     if proof_commands:
-        proof_body.extend(["```bash", *proof_commands, "```"])
+        proof_body.extend(["```bash", *proof_commands[:5], "```"])
     else:
-        proof_body.append("`none`")
+        proof_body.append("`No additional command is required.`")
     lines.extend(
         _details(
             proof_section_title,
@@ -3225,19 +3814,26 @@ def render_pr_quality_review_summary(model: JsonObject) -> str:
     )
     lines.append("")
 
+    authority_body = [
+        "| Authority | Value |",
+        "|---|---|",
+        f"| Boundary mode | `{_review_model_scalar(authority.get('boundary_mode'))}` |",
+        f"| Patch automation | `{_review_model_scalar(authority.get('patch_automation'))}` |",
+        f"| Security dismissal | `{_review_model_scalar(authority.get('security_dismissal'))}` |",
+        f"| Merge authorization | `{_review_model_scalar(authority.get('merge_authorization'))}` |",
+        f"| Semantic equivalence claim | `{_review_model_scalar(authority.get('semantic_equivalence_claim'))}` |",
+    ]
     lines.extend(
         [
-            "## Authority boundary",
+            "> 🔒 **Authority boundary:** reporting only. This gate does not authorize merge, patch code, or dismiss security findings.",
             "",
-            "| Authority | Value |",
-            "|---|---|",
-            f"| Boundary mode | `{_review_model_scalar(authority.get('boundary_mode'))}` |",
-            f"| Patch automation | `{_review_model_scalar(authority.get('patch_automation'))}` |",
-            f"| Security dismissal | `{_review_model_scalar(authority.get('security_dismissal'))}` |",
-            f"| Merge authorization | `{_review_model_scalar(authority.get('merge_authorization'))}` |",
-            f"| Semantic equivalence claim | `{_review_model_scalar(authority.get('semantic_equivalence_claim'))}` |",
+            *_details(
+                "🔒 Full authority boundary",
+                authority_body,
+                open_by_default=False,
+            ),
             "",
-            "> This summary is generated from the structured PR Quality review model. It is reporting-only and does not authorize merge, patch automation, security dismissal, or semantic-equivalence claims.",
+            "> This summary is generated from the structured PR Quality review model and preserves the existing trusted-publisher contract.",
         ]
     )
 
@@ -3319,6 +3915,7 @@ def build_pr_quality_artifacts_manifest(model: JsonObject) -> JsonObject:
         "expected_artifact_inventory_verification": expected_artifact_inventory_verification,
         "artifacts": artifacts,
         "authority_evidence_sources": authority_evidence_sources,
+        "live_evidence": _as_dict(model.get("live_evidence")),
         "reporting_only": True,
         "authority_boundary": {
             "boundary_mode": _string(authority.get("boundary_mode") or "reporting_only"),
@@ -4229,6 +4826,16 @@ def write_comment_body(
         check_intelligence=check_intelligence,
         evidence_narrative=evidence_narrative,
     )
+    preliminary_manifest = build_pr_quality_artifacts_manifest(review_model)
+    review_model["live_evidence"] = build_live_evidence_snapshot(
+        pr_number=pr_number,
+        head_sha=head_sha,
+        base_sha=base_sha,
+        review_model=review_model,
+        check_intelligence=check_intelligence,
+        runtime_proof_artifacts=runtime_proof_artifacts,
+        artifact_manifest=preliminary_manifest,
+    )
     review_model_written = False
     if review_model_out is not None:
         review_model_out.parent.mkdir(parents=True, exist_ok=True)
@@ -4259,8 +4866,15 @@ def write_comment_body(
     review_index_written = False
     if review_index_out is not None:
         review_index_out.parent.mkdir(parents=True, exist_ok=True)
+        embedded_artifacts = _build_embedded_review_artifacts(
+            review_model=review_model,
+            comment_body=body,
+        )
         review_index_out.write_text(
-            render_pr_quality_artifact_index_html(review_model),
+            render_pr_quality_artifact_index_html(
+                review_model,
+                embedded_artifacts=embedded_artifacts,
+            ),
             encoding="utf-8",
         )
         review_index_written = True
@@ -4279,6 +4893,10 @@ def write_comment_body(
             encoding="utf-8",
         )
         review_artifacts_manifest_written = True
+
+    live_evidence_snapshot = _as_dict(review_model.get("live_evidence"))
+    live_evidence_provenance = _as_dict(live_evidence_snapshot.get("provenance"))
+    live_evidence_facts = _as_list(live_evidence_snapshot.get("facts"))
 
     trajectory_summary = _trajectory_summary(trajectory_records)
     repo_memory_runtime = (
@@ -4311,6 +4929,20 @@ def write_comment_body(
         if review_artifacts_manifest_out is not None
         else "",
         "review_artifacts_manifest_written": review_artifacts_manifest_written,
+        "live_evidence_schema_version": _string(live_evidence_snapshot.get("schema_version")),
+        "live_evidence_snapshot_status": _string(
+            live_evidence_snapshot.get("snapshot_status") or "not_collected"
+        ),
+        "live_evidence_workflow_run_id": _string(live_evidence_provenance.get("workflow_run_id")),
+        "live_evidence_head_binding_status": _string(
+            live_evidence_provenance.get("head_binding_status") or "not_collected"
+        ),
+        "live_evidence_fact_count": len(live_evidence_facts),
+        "live_evidence_artifacts_url": _string(live_evidence_provenance.get("artifacts_url")),
+        "live_evidence_reporting_only": bool(
+            _as_dict(live_evidence_snapshot.get("authority_boundary")).get("boundary_mode")
+            == "reporting_only"
+        ),
         expected_inventory_key("status"): _string(
             expected_inventory_verification.get("status") or "not_collected"
         ),
@@ -4565,19 +5197,63 @@ def _authority_evidence_source_index() -> list[JsonObject]:  # type: ignore[no-r
 _BASE_RENDER_PR_QUALITY_REVIEW_SUMMARY = render_pr_quality_review_summary
 
 
+def _insert_markdown_before(
+    body: str,
+    section: str,
+    markers: tuple[str, ...],
+) -> str:
+    if not section:
+        return body
+    for marker in markers:
+        if marker in body:
+            return body.replace(
+                marker,
+                f"\n{section.rstrip()}\n{marker}",
+                1,
+            )
+    return body.rstrip() + "\n\n" + section.rstrip() + "\n"
+
+
 def render_pr_quality_review_summary(model: JsonObject) -> str:  # type: ignore[no-redef]  # noqa: F811
     body = _BASE_RENDER_PR_QUALITY_REVIEW_SUMMARY(model)
-    packet = _as_dict(model.get("workflow_permission_review_evidence_packet"))
-    section = _workflow_permission_review_packet_markdown_lines(packet)
-    if not section or "## Workflow permission review evidence" in body:
-        return body
 
-    rendered_section = "\n".join(section)
-    if "\n## Product artifacts" in body:
-        return body.replace(
-            "\n## Product artifacts", f"\n{rendered_section}\n\n## Product artifacts", 1
+    live_section = render_live_evidence_markdown(_as_dict(model.get("live_evidence")))
+    if live_section and "## Live evidence snapshot" not in body:
+        body = _insert_markdown_before(
+            body,
+            live_section,
+            ("\n## Adaptive review details", "\n## Product artifacts"),
         )
-    return body.rstrip() + "\n\n" + rendered_section + "\n"
+
+    packet = _as_dict(model.get("workflow_permission_review_evidence_packet"))
+    packet_lines = _workflow_permission_review_packet_markdown_lines(packet)
+    if packet_lines and "## Workflow permission review evidence" not in body:
+        body = _insert_markdown_before(
+            body,
+            "\n".join(packet_lines),
+            ("\n## Product artifacts",),
+        )
+
+    return body
+
+
+def _insert_html_after_first_section(
+    html: str,
+    panel: str,
+) -> str:
+    if not panel:
+        return html
+    main_index = html.find("<main")
+    section_end = html.find(
+        "</section>",
+        main_index if main_index >= 0 else 0,
+    )
+    if section_end >= 0:
+        insert_at = section_end + len("</section>")
+        return html[:insert_at] + "\n" + panel + html[insert_at:]
+    if "</main>" in html:
+        return html.replace("</main>", f"{panel}\n</main>", 1)
+    return html + panel
 
 
 _BASE_RENDER_PR_QUALITY_REVIEW_HTML = render_pr_quality_review_html
@@ -4585,14 +5261,81 @@ _BASE_RENDER_PR_QUALITY_REVIEW_HTML = render_pr_quality_review_html
 
 def render_pr_quality_review_html(model: JsonObject) -> str:  # type: ignore[no-redef]  # noqa: F811
     html = _BASE_RENDER_PR_QUALITY_REVIEW_HTML(model)
-    panel = _workflow_permission_review_packet_html(
+
+    live_panel = render_live_evidence_html(_as_dict(model.get("live_evidence")))
+    if live_panel and 'id="live-evidence"' not in html:
+        html = _insert_html_after_first_section(html, live_panel)
+
+    permission_panel = _workflow_permission_review_packet_html(
         _as_dict(model.get("workflow_permission_review_evidence_packet"))
     )
-    if not panel or "Workflow permission review evidence" in html:
-        return html
-    if "</main>" in html:
-        return html.replace("</main>", f"{panel}\n</main>", 1)
+    if permission_panel and "Workflow permission review evidence" not in html:
+        if "</main>" in html:
+            html = html.replace(
+                "</main>",
+                f"{permission_panel}\n</main>",
+                1,
+            )
+        else:
+            html += permission_panel
+
     return html
+
+
+def _build_embedded_review_artifacts(
+    *,
+    review_model: JsonObject,
+    comment_body: str,
+) -> JsonObject:
+    manifest = build_pr_quality_artifacts_manifest(review_model)
+    return {
+        "pr-review-dashboard.html": {
+            "mime_type": "text/html;charset=utf-8",
+            "content": render_pr_quality_review_html(review_model),
+        },
+        "pr-review-summary.md": {
+            "mime_type": "text/markdown;charset=utf-8",
+            "content": render_pr_quality_review_summary(review_model),
+        },
+        "pr-review-model.json": {
+            "mime_type": "application/json;charset=utf-8",
+            "content": json.dumps(
+                review_model,
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+        },
+        "pr-review-artifacts-manifest.json": {
+            "mime_type": "application/json;charset=utf-8",
+            "content": json.dumps(
+                manifest,
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+        },
+        "pr-comment-body.md": {
+            "mime_type": "text/markdown;charset=utf-8",
+            "content": comment_body,
+        },
+    }
+
+
+_BASE_RENDER_PR_QUALITY_ARTIFACT_INDEX_HTML = render_pr_quality_artifact_index_html
+
+
+def render_pr_quality_artifact_index_html(  # type: ignore[no-redef]  # noqa: F811
+    model: JsonObject,
+    *,
+    embedded_artifacts: JsonObject | None = None,
+) -> str:
+    if _as_dict(model.get("live_evidence")):
+        return render_pr_quality_review_experience(
+            model,
+            embedded_artifacts=embedded_artifacts,
+        )
+    return _BASE_RENDER_PR_QUALITY_ARTIFACT_INDEX_HTML(model)
 
 
 _BASE_RENDER_COMMENT_BODY = render_comment_body

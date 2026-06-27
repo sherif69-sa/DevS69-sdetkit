@@ -127,7 +127,7 @@ action:
 - The release package schema remains additive `v2`.
 - PR Quality publisher, evidence, and release workflow files remain unchanged.
 
-### Active roadmap action
+### Completed roadmap action
 
 ```text
 action:
@@ -137,27 +137,171 @@ action:
   priority=P1
   risk=medium
   value=Turn repeated external closure scripts into one deterministic, reporting-only repo-native evidence product.
-  status=in_progress
+  status=done
 ```
 
-**Acceptance criteria**
+**Closure evidence**
 
-1. A repo-native command consumes saved PR, status, review-thread, and security evidence.
-2. The command performs local Git reads only and makes no network or GitHub mutations.
-3. PR head, previous main, merge commit, and current main remain distinct.
-4. Merge-commit containment is canonical; PR-head ancestry remains advisory for squash merges.
-5. Changed paths are bounded from previous main through the reported merge commit.
-6. Collection states distinguish collected, missing, malformed, stale, and unavailable.
-7. CI distinguishes success, pending, failure, and unavailable.
-8. GHAS evidence distinguishes current, outdated, resolved, and unavailable threads.
-9. Local security distinguishes authoritative zero from unavailable evidence.
-10. Verified, review-required, and unavailable report states remain explicit.
-11. Protected-path drift blocks verification.
-12. Evidence bytes and Git anchors participate in provenance and freshness.
-13. JSON and Markdown outputs are deterministic.
-14. Module and root CLI forwarding expose the same contract.
-15. The generated artifact index registers the new advanced JSON contract.
-16. Existing PR Quality workflows, release workflow, and authority boundaries remain unchanged.
+- PR `#1872` is merged at `08f20f2b10ed10fe6bef2b325ab3a34c24a84925`.
+- Corrective PR `#1873` is merged at `82d6bed21361bc0e8e748fa59795aca3cf4478a1`.
+- Repo-native post-merge verification returned `verified` with exact merge containment.
+- The closure run passed `28` targeted tests, mypy across `482` source files, pre-commit, and `proof-after-format`.
+- Local security reported informational findings separately with zero blocking, warning, or error findings.
+- PR Quality publisher, evidence, and release workflow files remain unchanged.
+
+### Completed roadmap action
+
+```text
+action:
+  id=release-evidence-recipes
+  lane=Docs and operator experience
+  title=Publish release-evidence recipes and sanitized proof samples
+  priority=P2
+  risk=low
+  status=done
+```
+
+Closure evidence:
+
+- PR `#1874` is merged at `c93c360ae99470c33788b95ea3305bb38dcc74b1`.
+- The curated release-evidence recipes, sanitized proof samples, navigation, and focused drift contracts are present on `main`.
+- The selection-correction audit classified `diagnostic-job-local-runner` as already implemented and selected the next unfinished reliability-spine action.
+
+### Completed roadmap action
+
+```text
+action:
+  id=exact-failure-extraction-safe-remediation
+  lane=Repo-native diagnosis and remediation control
+  title=Harden exact-failure extraction and safe-remediation visibility in the SDET Quality Gate PR comment
+  priority=P1
+  risk=medium
+  value=Give contributors one canonical, confidence-scored first failure and a truthful remediation eligibility decision without expanding automation authority.
+  status=done
+```
+
+**Closure evidence**
+
+- PR `#1875` was squash-merged from head `ccf07bf17a5c06515db2eb05ec2e3b0fa2937066` at accepted-main commit `17876b2c481930161132fec028828813e5e6004c`.
+- The trusted SDET Quality Gate reported `ready`, no first blocker, clear required checks, and clear security posture.
+- The post-merge closure audit verified squash tree identity, exact eight-file scope, and unchanged protected workflows.
+- Accepted-main proof passed `205` focused tests, scoped pre-commit, and `proof-after-format` with a clean isolated worktree.
+- Automation, patch application, security dismissal, merge authorization, and semantic-equivalence authority remain denied.
+
+**Selection correction**
+
+- The PatchScorer to ProtectedVerifier candidate handoff is already implemented by `pr_quality_candidate_visibility`; it must not be duplicated.
+- ProtectedVerifier review-first evidence propagation and verified network isolation already exist.
+- The first explicit unfinished, non-authority-expanding gap is PR Quality workflow visibility for Git-grounded proof profiles beyond the current narrow Ruff profile.
+
+### Completed roadmap action
+
+```text
+action:
+  id=git-proof-profile-visibility
+  lane=Protected proof and reviewer evidence
+  title=Expand Git-grounded PR Quality proof visibility beyond the narrow Ruff profile
+  priority=P1
+  risk=medium
+  value=Expose multiple existing allowlisted current-head proof profiles as reporting-only reviewer evidence without claiming semantic equivalence or expanding automation authority.
+  status=done
+```
+
+**Closure evidence**
+
+- PR Quality already executes the allowlisted `ruff_src_tests` and `pre_commit_all` profiles against the same exact Git-derived base/head inventory.
+- The runtime-proof summary now retains a bounded, sanitized result for each executed profile instead of collapsing evidence into counts only.
+- The contributor-facing PR Quality report shows each profile ID, canonical command, status, exit code, timeout state, workspace-mutation state, runtime-guard status, inventory-claim match, Git-inventory verification, network-boundary status, wrapping state, and review-first disposition.
+- Missing, incomplete, failed, timed-out, mutated, inventory-mismatched, or authority-expanding profile evidence remains review-first.
+- The runtime projection remains additive under the existing schema and grants no automation, patch application, security dismissal, merge, or semantic-equivalence authority.
+- The PR Quality producer and trusted publisher workflows remain unchanged.
+
+### Completed roadmap action
+
+```text
+action:
+  id=sdet-quality-comment-review-console
+  lane=Reviewer experience and product surface
+  title=Turn the SDET Quality Gate PR comment into a reviewer-first interactive console
+  priority=P1
+  risk=medium
+  value=Make the gate immediately understandable and actionable without changing evidence collection, trusted publishing, or authority.
+  status=done
+```
+
+**Closure evidence**
+
+- The decision is presented first in human language with a visible gate state, required-check summary, security posture, merge guidance, risk focus, and one canonical reviewer action.
+- Bot commands `/check`, `/quality`, `/doctor`, and `/hint` are integrated into the comment as quick actions.
+- The raw machine decision contract remains available under progressive disclosure for compatibility and auditability.
+- Green PRs retain the collapsed failure-vector compatibility panel, but it now states that no active actionable failure exists and emits no unknown failure fields.
+- Blocked, review-first, stale, and invalid states automatically open the relevant decision and failure evidence.
+- Security, proof commands, check evidence, and the full authority boundary remain available as focused collapsible sections.
+- The structured review model, trusted producer, trusted publisher, workflow permissions, exact-head verification, and reporting-only authority remain unchanged.
+
+### Completed roadmap action
+
+```text
+action:
+  id=sdet-quality-comment-professional-review-experience
+  lane=Reviewer experience and product surface
+  title=Professionalize the SDET Quality Gate decision surface across canonical states
+  priority=P1
+  risk=low
+  value=Reduce reviewer friction with human labels, state-aware commands, bounded disclosure, and canonical proof presentation without changing decision semantics or authority.
+  status=done
+```
+
+**Closure evidence**
+
+- A read-only accepted-main scenario laboratory rendered `13` meaningful reviewer states and passed `13/13` hard presentation and authority contracts.
+- The first screen now humanizes risk-surface identifiers while preserving raw machine values inside the auditable decision details.
+- Quick actions retain `/check`, `/quality`, `/doctor`, and `/hint`, but promote one state-relevant command and collapse the secondary command set.
+- Security and general verification commands are deduplicated into one canonical proof section.
+- Progressive disclosure preserves established blocked-state proof and current-GHAS visibility while collapsing secondary bot commands and deduplicating executable proof content.
+- Scenario regression tests cover all six canonical review states and preserve reporting-only authority.
+- Canonical review-state selection, merge assessment, evidence collection, workflow permissions, trusted publishing, exact-head verification, patch authority, security-dismissal authority, and merge authority remain unchanged.
+- Multi-blocker model expansion and security-unavailable decision policy remain explicitly out of scope for separate review.
+
+### Completed roadmap action
+
+```text
+action:
+  id=sdet-quality-live-evidence-dashboard
+  lane=Reviewer experience and product surface
+  title=Bind the SDET Quality Gate dashboard to live per-run evidence and provenance
+  priority=P1
+  risk=medium
+  value=Replace self-contained status prose with an exact PR/head/run snapshot sourced from check intelligence, security collection, runtime proof, trusted history, and the artifact manifest.
+  status=done
+```
+
+**Closure evidence**
+
+- The existing PR Quality producer remains the single evidence source and already uploads `pr-quality-comment`, runtime-proof, failure-intelligence, adaptive-sentinel, and signed publisher-handoff artifacts.
+- `pr-review-model.json` now carries an additive `live_evidence` snapshot with exact PR, head SHA, base SHA, workflow run, run attempt, artifact name, artifact entrypoint, generated timestamp, and head-binding status.
+- Required-check, security, isolated-proof, runtime-guard, live-benchmark, trusted-history, and artifact-inventory indicators are computed from structured workflow artifacts and retain their exact source paths.
+- The PR comment, detailed review HTML, machine manifest, and a full product-style artifact center render the same snapshot instead of maintaining independent status prose.
+- The artifact center adopts the scenario-laboratory interaction model: fixed navigation, hero verdict, KPI cards, searchable and filterable evidence cards, evidence drill-down dialogs, dark mode, print support, artifact navigation, and responsive layouts.
+- The PR comment links reviewers to the exact workflow run and its artifact section, with honest instructions to open `pr-quality/index.html` from the `pr-quality-comment` bundle.
+- Missing GitHub context produces a partial snapshot with no fabricated links, and a head mismatch is reported without changing the canonical review decision.
+- Protected workflows, trusted-publisher permissions, evidence collection, canonical decision logic, patch authority, security-dismissal authority, merge authority, and semantic-equivalence authority remain unchanged.
+
+### Roadmap selection status
+
+```text
+roadmap_state:
+  patch_ready_action=none
+  next_recommended_pr=none
+  automation_expansion_allowed=false
+  merge_authority_expansion_allowed=false
+```
+
+The remaining partially aligned reliability-spine gaps require unavailable semantic-equivalence,
+external-filesystem-containment, process-escape-prevention, or explicit human authority evidence.
+They are capability/review blockers, not safe patch-ready roadmap work, and must not be converted
+into implementation PRs without new evidence.
+
 
 ## Continuous maintenance hardening loop
 

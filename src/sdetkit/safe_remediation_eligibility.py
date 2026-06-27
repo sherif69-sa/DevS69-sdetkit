@@ -135,6 +135,69 @@ UNSAFE_REVIEW_MARKERS = (
 )
 
 
+_EXACT_FAILURE_HIGH_CONFIDENCE_KINDS = frozenset(
+    {
+        "check_run_annotation",
+        "dependency_resolution",
+        "dependency_vulnerability",
+        "format_drift",
+        "lint_failure",
+        "runtime_failure",
+        "test_failure",
+        "type_contract",
+    }
+)
+
+
+def _failure_evidence_quality(first_failure: JsonObject) -> JsonObject:
+    quality = _as_dict(first_failure.get("evidence_quality"))
+    line = _string(first_failure.get("line"))
+    kind = _lower(first_failure.get("kind"))
+
+    confidence = _lower(quality.get("confidence"))
+    if confidence not in {"high", "medium", "low"}:
+        if line and kind in _EXACT_FAILURE_HIGH_CONFIDENCE_KINDS:
+            confidence = "high"
+        elif line:
+            confidence = "medium"
+        else:
+            confidence = "low"
+
+    if "actionable" in quality:
+        actionable = bool(quality.get("actionable"))
+    else:
+        actionable = bool(line and confidence == "high")
+
+    raw_uncertainty = quality.get("uncertainty", [])
+    uncertainty = (
+        sorted({_string(item) for item in raw_uncertainty if _string(item)})
+        if isinstance(raw_uncertainty, list)
+        else []
+    )
+
+    source = _string(quality.get("source") or "legacy_inference")
+    return {
+        "confidence": confidence,
+        "actionable": actionable,
+        "source": source,
+        "uncertainty": uncertainty,
+        "reporting_only": True,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+
+
+def _result_with_failure_evidence(
+    first_failure: JsonObject,
+    **kwargs: Any,
+) -> JsonObject:
+    result = _result(**kwargs)
+    result["exact_failure_evidence"] = _failure_evidence_quality(first_failure)
+    return result
+
+
 def classify_check_failure(
     *,
     name: str = "",
@@ -175,7 +238,8 @@ def classify_check_failure(
     )
 
     if kind == "check_run_annotation":
-        return _result(
+        return _result_with_failure_evidence(
+            first_failure,
             safe_to_auto_fix=False,
             strategy=REVIEW_FIRST_STRATEGY,
             category="review_first",
@@ -185,9 +249,11 @@ def classify_check_failure(
 
     unsafe_signal = _contains_any(combined, UNSAFE_REVIEW_MARKERS)
     formatting_signal = kind == "format_drift" or _contains_any(combined, SAFE_FORMAT_MARKERS)
+    failure_evidence = _failure_evidence_quality(first_failure)
 
     if unsafe_signal:
-        return _result(
+        return _result_with_failure_evidence(
+            first_failure,
             safe_to_auto_fix=False,
             strategy=REVIEW_FIRST_STRATEGY,
             category="review_first",
@@ -196,8 +262,26 @@ def classify_check_failure(
         )
 
     if formatting_signal:
+        if (
+            failure_evidence["confidence"] != "high"
+            or failure_evidence["actionable"] is not True
+            or failure_evidence["uncertainty"]
+        ):
+            return _result_with_failure_evidence(
+                first_failure,
+                safe_to_auto_fix=False,
+                strategy=REVIEW_FIRST_STRATEGY,
+                category="review_first",
+                affected_files=affected_files,
+                reason=(
+                    "Formatting evidence lacks a high-confidence, actionable exact-failure "
+                    "signal without unresolved uncertainty."
+                ),
+            )
+
         if not affected_files:
-            return _result(
+            return _result_with_failure_evidence(
+                first_failure,
                 safe_to_auto_fix=False,
                 strategy=REVIEW_FIRST_STRATEGY,
                 category="review_first",
@@ -206,7 +290,8 @@ def classify_check_failure(
 
         unsafe_files = [value for value in affected_files if not _is_safe_repo_owned_path(value)]
         if unsafe_files:
-            return _result(
+            return _result_with_failure_evidence(
+                first_failure,
                 safe_to_auto_fix=False,
                 strategy=REVIEW_FIRST_STRATEGY,
                 category="review_first",
@@ -214,7 +299,8 @@ def classify_check_failure(
                 reason="Formatting evidence includes files outside approved safe-fix paths.",
             )
 
-        return _result(
+        return _result_with_failure_evidence(
+            first_failure,
             safe_to_auto_fix=True,
             strategy=FORMAT_SAFE_STRATEGY,
             category="formatting_only",
@@ -227,7 +313,8 @@ def classify_check_failure(
             ],
         )
 
-    return _result(
+    return _result_with_failure_evidence(
+        first_failure,
         safe_to_auto_fix=False,
         strategy=REVIEW_FIRST_STRATEGY,
         category="unknown",

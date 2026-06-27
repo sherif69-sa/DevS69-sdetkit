@@ -27,12 +27,7 @@ SECURITY_FINDING_DIAGNOSIS_MODULE = "_".join(("security", "finding", "diagnosis"
 SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE = "_".join(
     ("security", "reviewed", "disposition", "history")
 )
-NEXT_RECOMMENDED_PR = "/".join(
-    (
-        "feature",
-        "-".join(("exact", "failure", "extraction", "safe", "remediation")),
-    )
-)
+NEXT_RECOMMENDED_PR = "none"
 
 SPINE_STAGES = (
     "evidence",
@@ -123,7 +118,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "evidence_graph",
                 "trajectory_store",
             ),
-            recommended_next_action="continue hardening exact first-failure extraction",
+            recommended_next_action="preserve canonical exact-failure evidence quality and keep uncertainty review-first",
         ),
         _component(
             module="diagnostic_vector_engine",
@@ -195,16 +190,21 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="pr_quality_action_report",
-            role="render operator-facing PR Quality status, evidence, trajectory, runtime-proof, trusted-history, and aggregate producer-vetted registry summaries",
+            role="render a reviewer-first interactive PR Quality console over status, evidence, trajectory, runtime proof, trusted history, and aggregate producer-vetted registry summaries",
             status="aligned",
             stages=("reporting", "trajectory", "proof", "history"),
-            existing_artifacts=("pr-comment-body.md", "pr-comment-metadata.json"),
+            existing_artifacts=(
+                "pr-comment-body.md",
+                "pr-comment-metadata.json",
+                "pr-review-summary.md",
+                "pr-review-dashboard.html",
+            ),
             integration_points=(
                 "check_intelligence",
                 "trajectory_store",
                 "pr_quality_runtime_proof_artifacts",
             ),
-            recommended_next_action="keep accepted-main registry context aggregate-only, advisory-only, and no-authority",
+            recommended_next_action="preserve human-readable decisions, conditional evidence disclosure, bot quick-actions, reporting-only authority, and the existing no-authority contract",
         ),
         _component(
             module="pr_quality_runtime_proof_artifacts",
@@ -363,14 +363,10 @@ def build_alignment_components() -> list[AlignmentComponent]:
         _component(
             module="adaptive_diagnosis",
             role="classify log symptoms into diagnostic candidates",
-            status="partially_aligned",
+            status="aligned",
             stages=("diagnosis",),
             integration_points=("check_intelligence",),
-            gaps=(
-                "needs stronger exact-failure extraction feedback",
-                "should emit confidence and uncertainty consistently",
-            ),
-            recommended_next_action="harden unknown-failure classification without broad automation",
+            recommended_next_action="preserve confidence-scored exact-failure feedback and keep unknown evidence review-first",
         ),
         _component(
             module="patch_scorer",
@@ -387,7 +383,7 @@ def build_alignment_components() -> list[AlignmentComponent]:
                 "read-only prototype is not wired into maintenance_autopilot",
                 "structural verification does not yet prove semantic equivalence",
             ),
-            recommended_next_action="feed candidates to protected_verifier without changing automation",
+            recommended_next_action="keep the existing PR Quality candidate handoff reporting-only and unwired from automation until semantic proof exists",
         ),
         _component(
             module="protected_verifier",
@@ -414,22 +410,23 @@ def build_alignment_components() -> list[AlignmentComponent]:
         ),
         _component(
             module="git_inventory_collector",
-            role="derive changed-file inventories from fixed read-only Git queries",
-            status="partially_aligned",
-            stages=("evidence", "proof", "verifier"),
+            role="derive changed-file inventories from fixed read-only Git queries and expose per-profile current-head proof context",
+            status="aligned",
+            stages=("evidence", "proof", "verifier", "reporting"),
             existing_artifacts=(
                 "git-inventory.json",
                 "git-inventory.md",
+                "runtime-proof-artifacts.json",
+                "runtime-proof-artifacts.md",
             ),
             integration_points=(
                 "isolated_proof_runner",
                 "protected_verifier",
                 "replayable_benchmark_harness",
+                "pr_quality_runtime_proof_artifacts",
+                "pr_quality_action_report",
             ),
-            gaps=(
-                "workflow visibility uses Git-derived inventory only for a narrow allowlisted Ruff proof profile",
-            ),
-            recommended_next_action="keep Git-derived workflow proof read-only and narrowly scoped",
+            recommended_next_action="preserve bounded multi-profile visibility and keep proof, patch, and merge authority disabled",
         ),
         _component(
             module="network_boundary",

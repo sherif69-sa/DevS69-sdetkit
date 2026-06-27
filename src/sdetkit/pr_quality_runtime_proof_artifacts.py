@@ -168,12 +168,112 @@ def _read_json(path: Path | None) -> JsonObject:
     return _as_dict(payload)
 
 
+def _isolated_profile_results(evidence: Mapping[str, Any]) -> list[JsonObject]:
+    payload = _as_dict(evidence)
+    if not payload:
+        return []
+
+    decision_boundary = _as_dict(payload.get("decision_boundary"))
+    isolation = _as_dict(payload.get("isolation"))
+    network_boundary = _as_dict(payload.get("network_boundary"))
+    claim_value = payload.get("inventory_claim_match")
+    inventory_claim_match = None if claim_value is None else _bool(claim_value)
+    git_inventory_verified = _bool(decision_boundary.get("git_inventory_verified"))
+
+    boundary_authority_expansion = any(
+        _bool(decision_boundary.get(field))
+        for field in (
+            "automation_allowed",
+            "patch_application_allowed",
+            "security_dismissal_allowed",
+            "merge_authorized",
+            "semantic_equivalence_proven",
+        )
+    )
+
+    profiles: list[JsonObject] = []
+    for raw in _as_list(payload.get("proof_results")):
+        item = _as_dict(raw)
+        if not item:
+            continue
+
+        runtime_guard = _as_dict(item.get("runtime_guard"))
+        authority_expansion = boundary_authority_expansion or any(
+            _bool(item.get(field))
+            for field in (
+                "automation_allowed",
+                "patch_application_allowed",
+                "security_dismissal_allowed",
+                "merge_authorized",
+                "semantic_equivalence_proven",
+            )
+        )
+        status = _string(item.get("status") or "unknown")
+        timed_out = _bool(item.get("timed_out"))
+        workspace_mutated = _bool(item.get("workspace_mutated_during_execution"))
+        runtime_guard_violation = _bool(runtime_guard.get("runtime_guard_violation"))
+        review_first = (
+            status != "passed"
+            or timed_out
+            or workspace_mutated
+            or runtime_guard_violation
+            or inventory_claim_match is False
+            or not git_inventory_verified
+            or authority_expansion
+        )
+
+        profiles.append(
+            {
+                "profile_id": _string(item.get("profile_id") or "unknown"),
+                "command": _string(item.get("command") or "unknown"),
+                "status": status,
+                "exit_code": _int(item.get("exit_code")),
+                "timed_out": timed_out,
+                "workspace_mutated": workspace_mutated,
+                "runtime_guard_status": _string(runtime_guard.get("status") or "unknown"),
+                "runtime_guard_violation": runtime_guard_violation,
+                "inventory_claim_match": inventory_claim_match,
+                "git_inventory_verified": git_inventory_verified,
+                "network_boundary_status": _string(
+                    network_boundary.get("status")
+                    or isolation.get("network_boundary_status")
+                    or "unknown"
+                ),
+                "network_isolation_required": _bool(isolation.get("network_isolation_required")),
+                "network_isolation_enforced": _bool(isolation.get("network_isolation_enforced")),
+                "network_backend": _string(
+                    item.get("network_backend") or network_boundary.get("backend") or "none"
+                ),
+                "network_backend_variant": _string(
+                    item.get("network_backend_variant")
+                    or network_boundary.get("backend_variant")
+                    or "none"
+                ),
+                "network_backend_command_wrapped": _bool(
+                    item.get("network_backend_command_wrapped")
+                ),
+                "review_first": review_first,
+                "reporting_only": True,
+                "automation_allowed": False,
+                "patch_application_allowed": False,
+                "security_dismissal_allowed": False,
+                "merge_authorized": False,
+                "semantic_equivalence_proven": False,
+                "authority_expansion_detected": authority_expansion,
+            }
+        )
+
+    return profiles
+
+
 def _isolated_proof_summary(evidence: Mapping[str, Any]) -> JsonObject:
     payload = _as_dict(evidence)
     if not payload:
         return {
             "collection_status": NOT_COLLECTED,
             "status": NOT_COLLECTED,
+            "profile_visibility_status": NOT_COLLECTED,
+            "profile_results": [],
         }
 
     proof_summary = _as_dict(payload.get("proof_summary"))
@@ -181,11 +281,32 @@ def _isolated_proof_summary(evidence: Mapping[str, Any]) -> JsonObject:
     network_boundary = _as_dict(payload.get("network_boundary"))
     isolation = _as_dict(payload.get("isolation"))
     decision_boundary = _as_dict(payload.get("decision_boundary"))
+    profile_results = _isolated_profile_results(payload)
+    executed_count = _int(proof_summary.get("executed_count"))
+    profile_review_first_count = sum(
+        1 for item in profile_results if _bool(item.get("review_first"))
+    )
+    profile_authority_expansion_detected = any(
+        _bool(item.get("authority_expansion_detected")) for item in profile_results
+    )
+
+    if not profile_results:
+        profile_visibility_status = NOT_COLLECTED if executed_count == 0 else "incomplete"
+    elif len(profile_results) != executed_count:
+        profile_visibility_status = "incomplete"
+    elif profile_review_first_count:
+        profile_visibility_status = "review_first"
+    else:
+        profile_visibility_status = COLLECTED
+
+    claim_value = payload.get("inventory_claim_match")
+    inventory_claim_match = None if claim_value is None else _bool(claim_value)
 
     return {
         "collection_status": COLLECTED,
         "status": _string(payload.get("status") or "unknown"),
         "git_inventory_verified": _bool(decision_boundary.get("git_inventory_verified")),
+        "inventory_claim_match": inventory_claim_match,
         "runtime_guard_checked": _bool(runtime_guard.get("checked")),
         "runtime_guard_passed": _bool(runtime_guard.get("passed")),
         "runtime_guard_violation_count": _int(runtime_guard.get("violation_count")),
@@ -197,10 +318,15 @@ def _isolated_proof_summary(evidence: Mapping[str, Any]) -> JsonObject:
         "network_isolation_enforced": _bool(isolation.get("network_isolation_enforced")),
         "proof_execution_blocked": _bool(isolation.get("proof_execution_blocked")),
         "profiles_requested": _int(proof_summary.get("requested_count")),
-        "profiles_executed": _int(proof_summary.get("executed_count")),
+        "profiles_executed": executed_count,
         "profiles_blocked": _int(proof_summary.get("blocked_count")),
         "profiles_passed": _int(proof_summary.get("passed_count")),
         "profiles_failed": _int(proof_summary.get("failed_count")),
+        "requested_profile_ids": _string_list(payload.get("requested_profiles")),
+        "profile_visibility_status": profile_visibility_status,
+        "profile_review_first_count": profile_review_first_count,
+        "profile_authority_expansion_detected": profile_authority_expansion_detected,
+        "profile_results": profile_results,
     }
 
 
@@ -602,6 +728,8 @@ def build_runtime_proof_artifacts(
             "reporting_only": True,
             "proof_commands_executed_by_renderer": False,
             "automation_allowed": False,
+            "patch_application_allowed": False,
+            "security_dismissal_allowed": False,
             "merge_authorized": False,
             "semantic_equivalence_proven": False,
         },
@@ -657,8 +785,50 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
                 ),
                 f"- Profiles executed: `{_int(isolated.get('profiles_executed'))}`",
                 f"- Profiles blocked: `{_int(isolated.get('profiles_blocked'))}`",
+                (
+                    "- Profile visibility status: "
+                    f"`{_string(isolated.get('profile_visibility_status') or NOT_COLLECTED)}`"
+                ),
+                (
+                    "- Profile review-first results: "
+                    f"`{_int(isolated.get('profile_review_first_count'))}`"
+                ),
+                (
+                    "- Profile authority expansion detected: "
+                    f"`{str(_bool(isolated.get('profile_authority_expansion_detected'))).lower()}`"
+                ),
             ]
         )
+
+        profile_results = [
+            _as_dict(item) for item in _as_list(isolated.get("profile_results")) if _as_dict(item)
+        ]
+        if profile_results:
+            lines.append("- Profile results:")
+            for profile in profile_results:
+                claim_value = profile.get("inventory_claim_match")
+                claim_status = (
+                    "not_checked" if claim_value is None else str(_bool(claim_value)).lower()
+                )
+                lines.append(
+                    f"  - `{_string(profile.get('profile_id') or 'unknown')}`: "
+                    f"command=`{_string(profile.get('command') or 'unknown')}`, "
+                    f"status=`{_string(profile.get('status') or 'unknown')}`, "
+                    f"exit_code=`{_int(profile.get('exit_code'))}`, "
+                    f"timed_out=`{str(_bool(profile.get('timed_out'))).lower()}`, "
+                    "workspace_mutated=`"
+                    f"{str(_bool(profile.get('workspace_mutated'))).lower()}`, "
+                    f"runtime_guard=`{_string(profile.get('runtime_guard_status') or 'unknown')}`, "
+                    f"inventory_claim_match=`{claim_status}`, "
+                    "git_inventory_verified=`"
+                    f"{str(_bool(profile.get('git_inventory_verified'))).lower()}`, "
+                    f"network_boundary=`{_string(profile.get('network_boundary_status') or 'unknown')}`, "
+                    "network_wrapped=`"
+                    f"{str(_bool(profile.get('network_backend_command_wrapped'))).lower()}`, "
+                    f"review_first=`{str(_bool(profile.get('review_first'))).lower()}`"
+                )
+        else:
+            lines.append("- Profile results: none")
 
     lines.extend(
         [
@@ -1113,6 +1283,14 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
                 f"`{str(_bool(boundary.get('proof_commands_executed_by_renderer'))).lower()}`"
             ),
             (f"- Automation allowed: `{str(_bool(boundary.get('automation_allowed'))).lower()}`"),
+            (
+                "- Patch application allowed: "
+                f"`{str(_bool(boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed: "
+                f"`{str(_bool(boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
             (f"- Merge authorized: `{str(_bool(boundary.get('merge_authorized'))).lower()}`"),
             (
                 "- Semantic equivalence proven: "

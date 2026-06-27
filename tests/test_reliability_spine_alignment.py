@@ -61,7 +61,7 @@ def test_alignment_statuses_show_aligned_partial_and_planned_layers() -> None:
     status_counts = report["status_counts"]
 
     assert status_counts["aligned"] >= 13
-    assert status_counts["partially_aligned"] >= 8
+    assert status_counts["partially_aligned"] >= 6
     assert status_counts.get("planned", 0) == 0
     assert report["next_recommended_pr"] == NEXT_RECOMMENDED_PR
 
@@ -85,7 +85,7 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert "replayable_benchmark_harness" in gaps_by_module
     assert "repo_memory" not in gaps_by_module
     assert "isolated_proof_runner" in gaps_by_module
-    assert "git_inventory_collector" in gaps_by_module
+    assert "git_inventory_collector" not in gaps_by_module
     assert "network_boundary" not in gaps_by_module
     assert "proof_runtime_guard" in gaps_by_module
     assert "pr_quality_runtime_proof_artifacts" not in gaps_by_module
@@ -102,15 +102,12 @@ def test_alignment_identifies_safe_automation_gaps() -> None:
     assert FLAKY_TEST_REGISTRY_EVIDENCE_MODULE not in gaps_by_module
     assert SECURITY_FINDING_DIAGNOSIS_MODULE not in gaps_by_module
     assert SECURITY_REVIEWED_DISPOSITION_HISTORY_MODULE not in gaps_by_module
+    assert "adaptive_diagnosis" not in gaps_by_module
     assert any("protected_verifier" in gap for gap in gaps_by_module["maintenance_autopilot"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["patch_scorer"])
     assert any("semantic equivalence" in gap for gap in gaps_by_module["protected_verifier"])
     assert not any("network-isolated" in gap for gap in gaps_by_module["isolated_proof_runner"])
     assert any("external filesystem" in gap for gap in gaps_by_module["isolated_proof_runner"])
-    assert any(
-        "narrow allowlisted Ruff proof profile" in gap
-        for gap in gaps_by_module["git_inventory_collector"]
-    )
     assert any("containment" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert not any("PR Quality" in gap for gap in gaps_by_module["replayable_benchmark_harness"])
     assert "repo_memory" not in gaps_by_module
@@ -151,6 +148,30 @@ def test_alignment_closes_pr_quality_registry_visibility_without_authority() -> 
     assert "no-authority" in report.recommended_next_action
 
 
+def test_alignment_closes_exact_failure_and_git_profile_visibility_gaps() -> None:
+    components = {item.module: item for item in build_alignment_components()}
+
+    adaptive = components["adaptive_diagnosis"]
+    scorer = components["patch_scorer"]
+    inventory = components["git_inventory_collector"]
+
+    assert adaptive.status == "aligned"
+    assert adaptive.gaps == ()
+    assert "confidence-scored exact-failure" in adaptive.recommended_next_action
+    assert "review-first" in adaptive.recommended_next_action
+
+    assert scorer.status == "partially_aligned"
+    assert "existing PR Quality candidate handoff" in scorer.recommended_next_action
+    assert "unwired from automation" in scorer.recommended_next_action
+
+    assert inventory.status == "aligned"
+    assert inventory.gaps == ()
+    assert "runtime-proof-artifacts.json" in inventory.existing_artifacts
+    assert "pr_quality_action_report" in inventory.integration_points
+    assert "multi-profile visibility" in inventory.recommended_next_action
+    assert NEXT_RECOMMENDED_PR == "none"
+
+
 def test_alignment_markdown_renders_operator_audit() -> None:
     markdown = render_alignment_markdown(build_alignment_report())
 
@@ -160,6 +181,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert "## Components" in markdown
     assert "`check_intelligence`: `aligned`" in markdown
     assert "`maintenance_autopilot`: `partially_aligned`" in markdown
+    assert "`adaptive_diagnosis`: `aligned`" in markdown
     assert "`trajectory_pattern_insights`: `aligned`" in markdown
     assert "`current_head_failure_bundle`: `aligned`" in markdown
     assert "`remediation_plan_engine`: `aligned`" in markdown
@@ -169,7 +191,7 @@ def test_alignment_markdown_renders_operator_audit() -> None:
     assert "`replayable_benchmark_harness`: `partially_aligned`" in markdown
     assert "`repo_memory`: `aligned`" in markdown
     assert "`isolated_proof_runner`: `partially_aligned`" in markdown
-    assert "`git_inventory_collector`: `partially_aligned`" in markdown
+    assert "`git_inventory_collector`: `aligned`" in markdown
     assert "`network_boundary`: `aligned`" in markdown
     assert "`proof_runtime_guard`: `partially_aligned`" in markdown
     assert "`pr_quality_runtime_proof_artifacts`: `aligned`" in markdown
@@ -478,3 +500,15 @@ def test_alignment_closes_verified_network_backend_contract_without_overclaim() 
     assert memory.status == "aligned"
     assert memory.gaps == ()
     assert "runtime-verified network-boundary evidence" in memory.recommended_next_action
+
+
+def test_alignment_records_reviewer_first_pr_quality_console() -> None:
+    components = {item.module: item for item in build_alignment_components()}
+    report_component = components["pr_quality_action_report"]
+
+    assert report_component.status == "aligned"
+    assert "reviewer-first interactive PR Quality console" in report_component.role
+    assert "pr-review-summary.md" in report_component.existing_artifacts
+    assert "pr-review-dashboard.html" in report_component.existing_artifacts
+    assert "human-readable decisions" in report_component.recommended_next_action
+    assert "reporting-only authority" in report_component.recommended_next_action

@@ -1146,44 +1146,51 @@ def test_pr_quality_published_comment_prefers_compact_review_summary() -> None:
     end = text.index('BODY_PATH="$body_path" REQUEST_PATH="$request_path"', start)
     publisher = text[start:end]
 
-    assert 'cat build/pr-quality/pr-review-summary.md >> "$body_path"' in publisher
-    assert 'cat build/pr-quality/pr-comment-body.md >> "$body_path"' in publisher
-    assert publisher.index("cat build/pr-quality/pr-review-summary.md") < publisher.index(
-        "cat build/pr-quality/pr-comment-body.md"
-    )
-    assert "PR Quality product artifacts" in publisher
-    assert "`pr-review-model.json`: machine-readable review model." in publisher
-    assert "`pr-review-dashboard.html`: browser-ready review dashboard." in publisher
-    assert (
-        "`pr-comment-body.md`: full raw evidence body retained in the artifact bundle." in publisher
-    )
-    assert (
-        "`pr-quality-comment`: uploaded artifact bundle for full diagnostic evidence." in publisher
-    )
+    comment_key_name = "_".join(("comment", "experience", "key"))
+    expected_comment_print = "".join(('print(f"{', comment_key_name, '}=v2")'))
+    assert comment_key_name in publisher
+    assert expected_comment_print in publisher
+    artifact_key_name = "_".join(("artifact", "reference", "key"))
+    expected_artifact_print = "".join(('print(f"{', artifact_key_name, '}=index_only")'))
+    assert artifact_key_name in publisher
+    assert expected_artifact_print in publisher
+    assert "Open PR Quality Artifact Center" in publisher
+    assert "pr-quality/index.html" in publisher
+    assert 'cat build/pr-quality/pr-review-summary.md >> "$body_path"' not in publisher
+    assert 'cat build/pr-quality/pr-comment-body.md >> "$body_path"' not in publisher
+    assert "PR Quality product artifacts" not in publisher
+    assert "pr-review-dashboard.html" not in publisher
+    assert "pr-comment-body.md" not in publisher
 
 
 def test_pr_quality_comment_workflow_builds_artifact_landing_page() -> None:
-    text = _workflow_text() + "\n" + _publisher_text()
+    evidence = _workflow_text()
+    publisher = _publisher_text()
 
-    assert "--review-index-out build/pr-quality/index.html" in text
-    assert "build/pr-quality/index.html" in text
-    assert "`index.html`: artifact landing page." in text
-    assert "Upload PR quality evidence artifacts" in text
+    assert "--review-index-out build/pr-quality/index.html" in evidence
+    assert "build/pr-quality/index.html" in evidence
+    assert "Upload PR quality evidence artifacts" in evidence
+    assert "Open PR Quality Artifact Center" in publisher
+    assert "pr-quality/index.html" in publisher
+    assert "`index.html`: artifact landing page." not in publisher
 
 
 def test_pr_quality_comment_workflow_builds_artifact_manifest() -> None:
-    text = _workflow_text() + "\n" + _publisher_text()
+    evidence = _workflow_text()
+    publisher = _publisher_text()
 
     assert (
-        "--review-artifacts-manifest-out build/pr-quality/pr-review-artifacts-manifest.json" in text
+        "--review-artifacts-manifest-out "
+        "build/pr-quality/pr-review-artifacts-manifest.json" in evidence
     )
-    assert "build/pr-quality/pr-review-artifacts-manifest.json" in text
-    assert "`pr-review-artifacts-manifest.json`: machine-readable artifact bundle manifest." in text
-    assert text.index("--review-index-out build/pr-quality/index.html") < text.index(
+    assert "build/pr-quality/pr-review-artifacts-manifest.json" in evidence
+    assert "Upload PR quality evidence artifacts" in evidence
+    assert (
+        "`pr-review-artifacts-manifest.json`: "
+        "machine-readable artifact bundle manifest." not in publisher
+    )
+    assert evidence.index("--review-index-out build/pr-quality/index.html") < evidence.index(
         "--review-artifacts-manifest-out build/pr-quality/pr-review-artifacts-manifest.json"
-    )
-    assert text.index("build/pr-quality/index.html") < text.index(
-        "build/pr-quality/pr-review-artifacts-manifest.json"
     )
 
 
@@ -1320,7 +1327,12 @@ def test_pr_quality_comment_has_single_artifact_navigation_owner() -> None:
     summary_renderer = source[summary_start:summary_end]
 
     assert "PR Quality product artifacts" not in summary_renderer
-    assert publisher.count("<summary><strong>PR Quality product artifacts</strong></summary>") == 1
+    assert "PR Quality product artifacts" not in publisher
+    artifact_key_name = "_".join(("artifact", "reference", "key"))
+    expected_artifact_print = "".join(('print(f"{', artifact_key_name, '}=index_only")'))
+    assert artifact_key_name in publisher
+    assert expected_artifact_print in publisher
+    assert publisher.count("pr-quality/index.html") == 1
 
 
 def test_pr_quality_contributor_summary_keeps_trusted_topology() -> None:
@@ -1328,6 +1340,160 @@ def test_pr_quality_contributor_summary_keeps_trusted_topology() -> None:
     publisher = _publisher_text()
 
     assert 'cat build/pr-quality/pr-review-summary.md >> "$GITHUB_STEP_SUMMARY"' in evidence
-    assert 'cat build/pr-quality/pr-review-summary.md >> "$body_path"' in publisher
+    assert 'cat build/pr-quality/pr-review-summary.md >> "$body_path"' not in publisher
     assert "publisher handoff summary does not match the review contract" in publisher
-    assert "Evidence is advisory and does not authorize merge." in publisher
+    comment_key_name = "_".join(("comment", "experience", "key"))
+    expected_comment_print = "".join(('print(f"{', comment_key_name, '}=v2")'))
+    assert comment_key_name in publisher
+    assert expected_comment_print in publisher
+    assert "Open PR Quality Artifact Center" in publisher
+    assert "A human merge decision is still required." in publisher
+
+
+def test_pr_quality_workflow_runs_existing_non_ruff_git_grounded_profile() -> None:
+    text = _workflow_text()
+    start = text.index("python -m sdetkit.isolated_proof_runner")
+    end = text.index(
+        "--out-dir build/pr-quality/runtime-proof/isolated-proof",
+        start,
+    )
+    invocation = text[start:end]
+
+    assert "--inventory-mode base_head" in invocation
+    assert '--base-ref "origin/${{ github.event.pull_request.base.ref }}"' in invocation
+    assert "--head-ref HEAD" in invocation
+    assert "--profile ruff_src_tests" in invocation
+    assert "--profile pre_commit_all" in invocation
+    assert invocation.count("--profile ") == 2
+    assert "--command" not in invocation
+
+
+def test_pr_quality_comment_workflow_uploads_visual_dashboard_file() -> None:
+    text = _workflow_text()
+    upload_start = text.index("- name: Upload PR quality evidence artifacts")
+    upload_end = text.index(
+        "- name: Build PR quality publisher handoff",
+        upload_start,
+    )
+    upload_step = text[upload_start:upload_end]
+
+    assert "build/pr-quality/index.html" in upload_step
+    assert "build/pr-quality/pr-review-dashboard.html" in upload_step
+    assert "build/pr-quality/pr-review-artifacts-manifest.json" in upload_step
+
+
+def test_pr_quality_comment_workflow_verifies_artifact_links_before_upload() -> None:
+    text = _workflow_text()
+    verify_step = text.index("- name: Verify PR quality artifact bundle link integrity")
+    upload_step = text.index("- name: Upload PR quality evidence artifacts")
+
+    assert verify_step < upload_step
+    verifier = text[verify_step:upload_step]
+    assert "pr-review-artifacts-manifest.json" in verifier
+    assert "index.html" in verifier
+    assert "HTMLParser" in verifier
+    assert 'artifact_kind == "github_artifact"' in verifier
+    assert "missing_manifest_paths" in verifier
+    assert "missing_index_links" in verifier
+    assert '"artifact_bundle_" + "link_integrity=" + "passed"' in verifier
+    assert "print(integrity_marker)" in verifier
+
+
+def test_pr_quality_comment_workflow_refreshes_standalone_index_after_appendices() -> None:
+    text = _workflow_text()
+    appendices = text.index("- name: Build PR comment body diagnostic appendices")
+    refresh = text.index("- name: Refresh self-contained PR quality artifact index")
+    verify = text.index("- name: Verify PR quality artifact bundle link integrity")
+    upload = text.index("- name: Upload PR quality evidence artifacts")
+
+    assert appendices < refresh < verify < upload
+
+    refresh_step = text[refresh:verify]
+    assert "if: always()" in refresh_step
+    assert "python -m sdetkit.pr_quality_artifact_index" in refresh_step
+    assert "--review-model build/pr-quality/pr-review-model.json" in refresh_step
+    assert "--review-summary build/pr-quality/pr-review-summary.md" in refresh_step
+    assert "--review-html build/pr-quality/pr-review-dashboard.html" in refresh_step
+    assert "--review-manifest build/pr-quality/pr-review-artifacts-manifest.json" in refresh_step
+    assert "--comment-body build/pr-quality/pr-comment-body.md" in refresh_step
+    assert "--out build/pr-quality/index.html" in refresh_step
+
+
+def test_pr_quality_publisher_comment_is_compact_and_index_only() -> None:
+    publisher = _publisher_text()
+    comment_start = publisher.index("- name: Comment on PR")
+    sanitize_start = publisher.index(
+        "BODY_PATH=\"$body_path\" python3 - <<'PYSANITIZE'",
+        comment_start,
+    )
+    comment_step = publisher[comment_start:sanitize_start]
+
+    assert "pr-review-model.json" in comment_step
+    comment_key_name = "_".join(("comment", "experience", "key"))
+    expected_comment_print = "".join(('print(f"{', comment_key_name, '}=v2")'))
+    assert comment_key_name in comment_step
+    assert expected_comment_print in comment_step
+    artifact_key_name = "_".join(("artifact", "reference", "key"))
+    expected_artifact_print = "".join(('print(f"{', artifact_key_name, '}=index_only")'))
+    assert artifact_key_name in comment_step
+    assert expected_artifact_print in comment_step
+    assert "Open PR Quality Artifact Center" in comment_step
+    assert "pr-quality/index.html" in comment_step
+    assert "| Review signal | Result |" in comment_step
+    assert "Required checks" in comment_step
+    assert "Artifact integrity" in comment_step
+    assert "PR Quality product artifacts" not in comment_step
+    assert 'pr-review-summary.md >> "$body_path"' not in comment_step
+    assert "pr-review-dashboard.html" not in comment_step
+    assert "pr-comment-body.md" not in comment_step
+    assert "merge_authorized" not in comment_step
+
+
+def test_publisher_handoff_carries_model_required_by_compact_comment() -> None:
+    evidence = _workflow_text()
+    publisher = _publisher_text()
+
+    handoff_start = evidence.index("- name: Build PR quality publisher handoff")
+    handoff_end = evidence.index(
+        "- name: Upload PR quality publisher handoff",
+        handoff_start,
+    )
+    handoff = evidence[handoff_start:handoff_end]
+
+    verify_start = publisher.index("- name: Verify exact-head publisher handoff")
+    verify_end = publisher.index(
+        "- name: Initialize PR comment publication status",
+        verify_start,
+    )
+    verify = publisher[verify_start:verify_end]
+
+    comment_start = publisher.index("- name: Comment on PR")
+    comment_end = publisher.index(
+        "BODY_PATH=\"$body_path\" python3 - <<'PYSANITIZE'",
+        comment_start,
+    )
+    comment = publisher[comment_start:comment_end]
+
+    assert '"pr-review-model.json",' in handoff
+    assert '"payload/pr-review-model.json",' in verify
+    assert "len(rows) != 4" in verify
+    assert 'Path("build/pr-quality/pr-review-model.json")' in comment
+    assert 'model.get("primary_failure")' in comment
+    assert "First actionable failure" in comment
+    assert "unique failure" in comment
+    assert "reproduction_command" in comment
+    assert "check_url" in comment
+
+
+def test_action_report_workflow_binds_pr_provenance_to_review_model() -> None:
+    evidence = _workflow_text()
+    action_start = evidence.index("PYTHONPATH=src python -m sdetkit.pr_quality_action_report")
+    action_end = evidence.index(
+        "> build/pr-quality/pr-comment-metadata.json",
+        action_start,
+    )
+    command = evidence[action_start:action_end]
+
+    assert '--pr-number "${{ github.event.pull_request.number }}"' in command
+    assert '--head-sha "${{ github.event.pull_request.head.sha }}"' in command
+    assert '--base-sha "${{ github.event.pull_request.base.sha }}"' in command
