@@ -74,6 +74,13 @@ def _recursive_files(root: Path, pattern: str) -> list[str]:
     return sorted(files)
 
 
+def _recursive_files_for_patterns(
+    root: Path,
+    patterns: Sequence[str],
+) -> list[str]:
+    return sorted({path for pattern in patterns for path in _recursive_files(root, pattern)})
+
+
 def _read_text(root: Path, path: str) -> str:
     try:
         return (root / path).read_text(encoding="utf-8", errors="ignore")
@@ -470,8 +477,57 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             evidence=["CHANGELOG.md"],
         )
 
-    if _file(root, "coverage.xml"):
-        _add_named(artifact_surfaces, "coverage", paths=["coverage.xml"])
+    coverage_artifacts = _recursive_files_for_patterns(
+        root,
+        ("coverage.xml", "coverage.json", "lcov.info"),
+    )
+    if coverage_artifacts:
+        _add_named(
+            artifact_surfaces,
+            "coverage",
+            paths=coverage_artifacts,
+        )
+
+    junit_artifacts = _recursive_files_for_patterns(
+        root,
+        ("junit.xml", "junit-*.xml", "junit_*.xml"),
+    )
+    if junit_artifacts:
+        _add_named(
+            artifact_surfaces,
+            "junit_xml",
+            paths=junit_artifacts,
+        )
+
+    sarif_artifacts = _recursive_files_for_patterns(
+        root,
+        ("*.sarif", "*.sarif.json"),
+    )
+    if sarif_artifacts:
+        _add_named(
+            artifact_surfaces,
+            "sarif",
+            paths=sarif_artifacts,
+        )
+
+    sbom_artifacts = _recursive_files_for_patterns(
+        root,
+        (
+            "*.cdx.json",
+            "*.spdx.json",
+            "sbom.json",
+            "sbom.xml",
+            "bom.json",
+            "bom.xml",
+        ),
+    )
+    if sbom_artifacts:
+        _add_named(
+            artifact_surfaces,
+            "sbom",
+            paths=sbom_artifacts,
+        )
+
     if _dir(root, "dist"):
         _add_named(artifact_surfaces, "python_distribution", paths=["dist/"])
     if _dir(root, "build"):

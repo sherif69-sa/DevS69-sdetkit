@@ -284,6 +284,72 @@ def test_adoption_surface_detects_multi_language_evidence_without_running_comman
     assert payload["artifact_surfaces"] == [{"name": "coverage", "paths": ["coverage.xml"]}]
 
 
+def test_adoption_surface_detects_standard_evidence_artifacts(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "reports" / "coverage.xml", "<coverage />\n")
+    _write(tmp_path / "reports" / "coverage.json", "{}\n")
+    _write(tmp_path / "reports" / "lcov.info", "TN:\n")
+    _write(tmp_path / "reports" / "junit.xml", "<testsuite />\n")
+    _write(tmp_path / "reports" / "junit-unit.xml", "<testsuite />\n")
+    _write(tmp_path / "reports" / "junit_integration.xml", "<testsuite />\n")
+    _write(tmp_path / "security" / "security.sarif", "{}\n")
+    _write(tmp_path / "security" / "codeql.sarif.json", "{}\n")
+    _write(tmp_path / "sbom" / "application.cdx.json", "{}\n")
+    _write(tmp_path / "sbom" / "application.spdx.json", "{}\n")
+    _write(tmp_path / "sbom" / "sbom.xml", "<bom />\n")
+
+    payload = discover_adoption_surface(tmp_path)
+    surfaces = {str(item["name"]): item for item in payload["artifact_surfaces"]}
+
+    assert set(surfaces) == {
+        "coverage",
+        "junit_xml",
+        "sarif",
+        "sbom",
+    }
+    assert surfaces["coverage"]["paths"] == [
+        "reports/coverage.json",
+        "reports/coverage.xml",
+        "reports/lcov.info",
+    ]
+    assert surfaces["junit_xml"]["paths"] == [
+        "reports/junit-unit.xml",
+        "reports/junit.xml",
+        "reports/junit_integration.xml",
+    ]
+    assert surfaces["sarif"]["paths"] == [
+        "security/codeql.sarif.json",
+        "security/security.sarif",
+    ]
+    assert surfaces["sbom"]["paths"] == [
+        "sbom/application.cdx.json",
+        "sbom/application.spdx.json",
+        "sbom/sbom.xml",
+    ]
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+
+def test_adoption_surface_ignores_non_artifacts_and_ignored_tree_artifacts(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "docs" / "example.xml", "<example />\n")
+    _write(tmp_path / "data" / "report.json", "{}\n")
+    _write(tmp_path / "site" / "junit.xml", "<testsuite />\n")
+    _write(tmp_path / "node_modules" / "security.sarif", "{}\n")
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert payload["artifact_surfaces"] == []
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+
 def test_adoption_surface_profiles_external_repo_readiness_without_authority(
     tmp_path: Path,
 ) -> None:
