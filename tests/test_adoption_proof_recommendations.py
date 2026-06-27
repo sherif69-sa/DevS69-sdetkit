@@ -10,7 +10,10 @@ from sdetkit.adoption_proof_recommendations import (
     render_proof_recommendations_text,
     write_proof_recommendations_artifact,
 )
-from sdetkit.adoption_surface import write_adoption_surface_artifact
+from sdetkit.adoption_surface import (
+    discover_adoption_surface,
+    write_adoption_surface_artifact,
+)
 
 
 def test_proof_recommendations_classify_current_repo_commands() -> None:
@@ -28,9 +31,98 @@ def test_proof_recommendations_classify_current_repo_commands() -> None:
     commands = {item["command"]: item for item in payload["proof_recommendations"]}
     assert "python -m pytest -q -o addopts=" in commands
     assert commands["python -m pytest -q -o addopts="]["operator_level"] == "required"
+    assert commands["python -m pytest -q -o addopts="]["confidence"] == "high"
     assert commands["python -m pytest -q -o addopts="]["execution_policy"] == "manual_only"
+    assert payload["summary"]["confidence_counts"]["high"] >= 1
     assert commands["python -m pytest -q -o addopts="]["auto_run_allowed"] is False
     assert all(item["manual_execution_required"] is True for item in commands.values())
+
+
+def test_proof_recommendations_preserve_source_confidence(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\ndependencies = ["pytest"]\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "requirements-test.txt").write_text(
+        "pytest==9.1.1\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "package.json").write_text(
+        json.dumps(
+            {
+                "name": "confidence-fixture",
+                "scripts": {"test": "vitest run"},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "package-lock.json").write_text("{}\n", encoding="utf-8")
+
+    surface = discover_adoption_surface(tmp_path)
+    payload = build_proof_recommendations_payload(
+        tmp_path,
+        surface_payload=surface,
+    )
+    commands = {item["command"]: item for item in payload["proof_recommendations"]}
+
+    assert commands["python -m pytest -q -o addopts="]["confidence"] == "high"
+    assert commands["npm test"]["confidence"] == "medium"
+    assert payload["summary"]["confidence_counts"] == {
+        "high": 1,
+        "medium": 1,
+        "low": 0,
+        "unknown": 0,
+    }
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
+
+
+def test_proof_recommendations_normalize_missing_or_invalid_confidence(
+    tmp_path: Path,
+) -> None:
+    surface = discover_adoption_surface(tmp_path)
+    surface["recommended_proof_commands"] = [
+        {
+            "surface": "custom",
+            "command": "custom proof",
+            "purpose": "test",
+            "executes_untrusted_code": True,
+            "auto_run_allowed": False,
+        },
+        {
+            "surface": "custom",
+            "command": "another proof",
+            "confidence": "UNTRUSTED",
+            "purpose": "quality",
+            "executes_untrusted_code": True,
+            "auto_run_allowed": False,
+        },
+    ]
+
+    payload = build_proof_recommendations_payload(
+        tmp_path,
+        surface_payload=surface,
+    )
+
+    assert [item["confidence"] for item in payload["proof_recommendations"]] == [
+        "unknown",
+        "unknown",
+    ]
+    assert payload["summary"]["confidence_counts"] == {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "unknown": 2,
+    }
+    assert payload["automation_allowed"] is False
+    assert payload["patch_application_allowed"] is False
+    assert payload["merge_authorized"] is False
+    assert payload["semantic_equivalence_proven"] is False
 
 
 def test_proof_recommendations_turn_unknowns_into_review_first_items() -> None:
@@ -82,6 +174,8 @@ def test_proof_recommendations_cli_dispatch_writes_text_summary(
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["schema_version"] == SCHEMA_VERSION
     assert "adoption_proof_recommendations_status=generated" in stdout
+    assert "confidence=high" in stdout
+    assert "confidence_counts=" in stdout
     assert "manual_only=true" in stdout
     assert "auto_run_allowed=false" in stdout
     assert "review_first_count=1" in stdout

@@ -35,6 +35,13 @@ def _purpose(item: dict[str, Any]) -> str:
     return str(item.get("purpose", "unknown")).strip() or "unknown"
 
 
+def _confidence(item: dict[str, Any]) -> str:
+    value = str(item.get("confidence", "unknown")).strip().lower()
+    if value in {"high", "medium", "low"}:
+        return value
+    return "unknown"
+
+
 def _operator_level(item: dict[str, Any]) -> str:
     purpose = _purpose(item)
     surface = _surface(item)
@@ -76,6 +83,7 @@ def _recommendation_from_command(item: dict[str, Any], index: int) -> dict[str, 
         "command": command,
         "surface": _surface(item),
         "purpose": _purpose(item),
+        "confidence": _confidence(item),
         "operator_level": level,
         "execution_policy": "manual_only",
         "executes_target_code": bool(command),
@@ -137,6 +145,10 @@ def build_proof_recommendations_payload(
     recommended_count = sum(
         1 for item in recommendations if item["operator_level"] == "recommended"
     )
+    confidence_counts = {
+        confidence: sum(1 for item in recommendations if item["confidence"] == confidence)
+        for confidence in ("high", "medium", "low", "unknown")
+    }
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -147,6 +159,7 @@ def build_proof_recommendations_payload(
             "required_count": required_count,
             "recommended_count": recommended_count,
             "review_first_count": len(review_first),
+            "confidence_counts": confidence_counts,
         },
         "proof_recommendations": recommendations,
         "review_first_items": review_first,
@@ -196,6 +209,11 @@ def render_proof_recommendations_text(payload: dict[str, Any]) -> str:
         f"required_count={summary['required_count']}",
         f"recommended_count={summary['recommended_count']}",
         f"review_first_count={summary['review_first_count']}",
+        "confidence_counts="
+        + ",".join(
+            f"{confidence}:{summary['confidence_counts'][confidence]}"
+            for confidence in ("high", "medium", "low", "unknown")
+        ),
         "proof_recommendations:",
     ]
 
@@ -205,6 +223,7 @@ def render_proof_recommendations_text(payload: dict[str, Any]) -> str:
             f"level={item['operator_level']}; "
             f"surface={item['surface']}; "
             f"purpose={item['purpose']}; "
+            f"confidence={item['confidence']}; "
             f"manual_only={str(item['manual_execution_required']).lower()}; "
             f"auto_run_allowed={str(item['auto_run_allowed']).lower()}; "
             f"command={item['command']}"
