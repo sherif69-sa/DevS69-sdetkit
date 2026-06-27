@@ -133,7 +133,9 @@ def _validate_sources(
     }
     unknown = sorted(topology_keys - proof_keys)
     if unknown:
-        raise ValueError("adoption repository topology contains commands absent from proof recommendations")
+        raise ValueError(
+            "adoption repository topology contains commands absent from proof recommendations"
+        )
 
 
 def _items(payload: Mapping[str, Any], field: str) -> list[JsonObject]:
@@ -189,7 +191,12 @@ def _safe_relative_cwd(value: str) -> bool:
     if value == ".":
         return True
     path = PurePosixPath(value)
-    return bool(value) and not path.is_absolute() and ".." not in path.parts and value == path.as_posix()
+    return (
+        bool(value)
+        and not path.is_absolute()
+        and ".." not in path.parts
+        and value == path.as_posix()
+    )
 
 
 def _dotnet_cwd(surface_payload: Mapping[str, Any]) -> tuple[str, str, str]:
@@ -303,8 +310,7 @@ def _evidence_references(
             "source": "adoption_proof_recommendations",
             "schema_version": _string(proof_payload.get("schema_version")),
             "location": (
-                "proof_recommendations[index="
-                f"{int(recommendation.get('index', 0) or 0)}]"
+                f"proof_recommendations[index={int(recommendation.get('index', 0) or 0)}]"
             ),
         },
         {
@@ -431,7 +437,9 @@ def build_diagnostic_execution_plan(
     proof_payload: JsonObject | None = None,
     topology_payload: JsonObject | None = None,
 ) -> JsonObject:
-    surface = surface_payload if surface_payload is not None else discover_adoption_surface(repo_root)
+    surface = (
+        surface_payload if surface_payload is not None else discover_adoption_surface(repo_root)
+    )
     proof = (
         proof_payload
         if proof_payload is not None
@@ -634,7 +642,9 @@ def render_diagnostic_execution_plan_text(payload: Mapping[str, Any]) -> str:
         lines.append("- none")
     lines.append("authority_boundary:")
     boundary = _as_dict(payload.get("authority_boundary"))
-    lines.extend(f"- {field}={str(_bool(boundary.get(field))).lower()}" for field in AUTHORITY_FIELDS)
+    lines.extend(
+        f"- {field}={str(_bool(boundary.get(field))).lower()}" for field in AUTHORITY_FIELDS
+    )
     return "\n".join(lines)
 
 
