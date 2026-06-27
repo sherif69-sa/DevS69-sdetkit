@@ -30,6 +30,12 @@ DEPENDENCY_AUDIT_OWNER_FILES = [
 
 FAILED_STEP_EVIDENCE_KEY = "_".join(("failed", "step", "evidence"))
 JOB_STEP_CONFIRMATION_KEY = "_".join(("job", "step", "confirmation"))
+FAILURE_PROVENANCE_KEY = "_".join(("failure", "provenance"))
+FAILURE_PROVENANCE_CONFIRMED_COUNT_KEY = "_".join(("failure", "provenance", "confirmed", "count"))
+FAILURE_PROVENANCE_AMBIGUOUS_COUNT_KEY = "_".join(("failure", "provenance", "ambiguous", "count"))
+FAILURE_PROVENANCE_UNAVAILABLE_COUNT_KEY = "_".join(
+    ("failure", "provenance", "unavailable", "count")
+)
 JOB_STEP_CONFIRMED_COUNT_KEY = "_".join(("job", "step", "confirmed", "count"))
 JOB_STEP_MISMATCH_COUNT_KEY = "_".join(("job", "step", "mismatch", "count"))
 JOB_STEP_UNAVAILABLE_COUNT_KEY = "_".join(("job", "step", "unavailable", "count"))
@@ -1043,61 +1049,246 @@ def _is_failed_job_step(step: JsonObject) -> bool:
 def _step_matches_log_command(step: JsonObject, command: str) -> bool:
     needle = _normal_step_text(command)
     haystack = _normal_step_text(_step_name(step))
-    return bool(needle and haystack and (needle == haystack or needle in haystack))
+    return bool(
+        needle and haystack and (needle == haystack or needle in haystack or haystack in needle)
+    )
 
 
 def _job_step_confirmation(record: JsonObject, failed_step: JsonObject) -> JsonObject:
     command = _string(failed_step.get("command"))
     steps = _job_steps_from_record(record)
+    failed_steps = [step for step in steps if _is_failed_job_step(step)]
+
+    def summary(step: JsonObject) -> JsonObject:
+        return {
+            "name": _step_name(step),
+            "number": int(step.get("number", 0) or 0),
+            "status": _string(step.get("status")),
+            "conclusion": _step_conclusion(step),
+        }
+
     base = {
         "log_command": command,
+        "job_step_count": len(steps),
+        "failed_job_step_count": len(failed_steps),
+        "candidate_count": len(failed_steps),
+        "candidates": [summary(step) for step in failed_steps],
         "reporting_only": True,
+        "patch_application_allowed": False,
         "automation_allowed": False,
+        "security_dismissal_allowed": False,
         "merge_authorized": False,
         "semantic_equivalence_proven": False,
     }
-
-    if not command:
-        return {
-            **base,
-            "status": "missing",
-            "source": "absent",
-            "job_step_name": "",
-            "job_step_conclusion": "",
-            "job_step_count": len(steps),
-            "failed_job_step_count": len([step for step in steps if _is_failed_job_step(step)]),
-        }
 
     if not steps:
         return {
             **base,
             "status": "unavailable",
             "source": "absent",
+            "mapping_reason": "job_steps_not_collected",
+            "mapping_confidence": "none",
             "job_step_name": "",
+            "job_step_number": 0,
+            "job_step_status": "",
             "job_step_conclusion": "",
-            "job_step_count": 0,
-            "failed_job_step_count": 0,
         }
 
-    matched = next((step for step in steps if _step_matches_log_command(step, command)), {})
-    failed_steps = [step for step in steps if _is_failed_job_step(step)]
-    chosen = matched or (failed_steps[0] if failed_steps else {})
+    if command:
+        matches = [step for step in steps if _step_matches_log_command(step, command)]
+        if len(matches) == 1:
+            chosen = matches[0]
+            confirmed = _is_failed_job_step(chosen)
+            return {
+                **base,
+                "status": "confirmed" if confirmed else "mismatch",
+                "source": "github_job_steps",
+                "mapping_reason": (
+                    "unique_log_command_match"
+                    if confirmed
+                    else "log_command_matched_non_failed_step"
+                ),
+                "mapping_confidence": "high",
+                "job_step_name": _step_name(chosen),
+                "job_step_number": int(chosen.get("number", 0) or 0),
+                "job_step_status": _string(chosen.get("status")),
+                "job_step_conclusion": _step_conclusion(chosen),
+            }
+        if len(matches) > 1:
+            return {
+                **base,
+                "status": "ambiguous",
+                "source": "github_job_steps",
+                "mapping_reason": "multiple_job_steps_match_log_command",
+                "mapping_confidence": "low",
+                "job_step_name": "",
+                "job_step_number": 0,
+                "job_step_status": "",
+                "job_step_conclusion": "",
+            }
+        if len(failed_steps) == 1:
+            chosen = failed_steps[0]
+            return {
+                **base,
+                "status": "mismatch",
+                "source": "github_job_steps",
+                "mapping_reason": "log_command_does_not_match_single_failed_job_step",
+                "mapping_confidence": "high",
+                "job_step_name": _step_name(chosen),
+                "job_step_number": int(chosen.get("number", 0) or 0),
+                "job_step_status": _string(chosen.get("status")),
+                "job_step_conclusion": _step_conclusion(chosen),
+            }
 
-    if matched:
-        status = "confirmed" if _is_failed_job_step(matched) else "mismatch"
-    elif failed_steps:
-        status = "mismatch"
-    else:
-        status = "missing"
+    if len(failed_steps) == 1:
+        chosen = failed_steps[0]
+        return {
+            **base,
+            "status": "confirmed",
+            "source": "github_job_steps",
+            "mapping_reason": "single_failed_job_step",
+            "mapping_confidence": "high",
+            "job_step_name": _step_name(chosen),
+            "job_step_number": int(chosen.get("number", 0) or 0),
+            "job_step_status": _string(chosen.get("status")),
+            "job_step_conclusion": _step_conclusion(chosen),
+        }
+
+    if len(failed_steps) > 1:
+        return {
+            **base,
+            "status": "ambiguous",
+            "source": "github_job_steps",
+            "mapping_reason": "multiple_failed_job_steps_without_unique_log_mapping",
+            "mapping_confidence": "low",
+            "job_step_name": "",
+            "job_step_number": 0,
+            "job_step_status": "",
+            "job_step_conclusion": "",
+        }
 
     return {
         **base,
-        "status": status,
+        "status": "missing",
         "source": "github_job_steps",
-        "job_step_name": _step_name(chosen),
-        "job_step_conclusion": _step_conclusion(chosen),
-        "job_step_count": len(steps),
-        "failed_job_step_count": len(failed_steps),
+        "mapping_reason": "no_failed_job_step_metadata",
+        "mapping_confidence": "none",
+        "job_step_name": "",
+        "job_step_number": 0,
+        "job_step_status": "",
+        "job_step_conclusion": "",
+    }
+
+
+def _provenance_int(value: Any) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _failure_provenance(
+    record: JsonObject,
+    confirmation: JsonObject,
+    *,
+    check_name: str,
+) -> JsonObject:
+    workflow = _as_dict(record.get("workflow_run"))
+    job = _as_dict(record.get("workflow_job") or record.get("job"))
+    workflow_name = _string(workflow.get("name") or record.get("workflow_name"))
+    run_id = _provenance_int(workflow.get("id") or record.get("workflow_run_id"))
+    run_attempt = _provenance_int(workflow.get("run_attempt"))
+    job_id = _provenance_int(job.get("id") or record.get("workflow_job_id"))
+    job_name = _string(job.get("name") or record.get("workflow_job_name") or check_name)
+    workflow_url = _string(workflow.get("html_url"))
+    job_url = _string(job.get("html_url"))
+    if not job_url:
+        candidate = _record_url(record)
+        if "/actions/runs/" in candidate and "/job/" in candidate:
+            job_url = candidate
+
+    check_head = _record_head_sha(record)
+    workflow_head = _string(workflow.get("head_sha"))
+    exact_head_verified = bool(check_head and workflow_head and check_head == workflow_head)
+    head_mismatch = bool(check_head and workflow_head and check_head != workflow_head)
+
+    mapping_status = _string(confirmation.get("status") or "unavailable")
+    if head_mismatch:
+        status = "invalid"
+    elif (
+        mapping_status == "confirmed"
+        and workflow_name
+        and run_id
+        and job_id
+        and job_name
+        and job_url
+        and exact_head_verified
+    ):
+        status = "confirmed"
+    elif mapping_status == "ambiguous":
+        status = "ambiguous"
+    else:
+        status = "unavailable"
+
+    gaps: list[str] = []
+    if not workflow_name:
+        gaps.append("workflow_name_not_captured")
+    if not run_id:
+        gaps.append("workflow_run_id_not_captured")
+    if not job_id:
+        gaps.append("workflow_job_id_not_captured")
+    if not job_name:
+        gaps.append("workflow_job_name_not_captured")
+    if not job_url:
+        gaps.append("workflow_job_url_not_captured")
+    if not check_head or not workflow_head:
+        gaps.append("workflow_head_not_verified")
+    elif head_mismatch:
+        gaps.append("workflow_head_mismatch")
+    if mapping_status != "confirmed":
+        gaps.append("failed_step_not_uniquely_mapped")
+
+    return {
+        "schema_version": "sdetkit.pr_quality.failure_provenance.v1",
+        "status": status,
+        "workflow": {
+            "name": workflow_name,
+            "run_id": run_id,
+            "run_number": _provenance_int(workflow.get("run_number")),
+            "run_attempt": run_attempt,
+            "status": _string(workflow.get("status")),
+            "conclusion": _string(workflow.get("conclusion")),
+            "head_sha": workflow_head,
+            "url": workflow_url,
+            "exact_head_verified": exact_head_verified,
+        },
+        "job": {
+            "name": job_name,
+            "id": job_id,
+            "status": _string(job.get("status") or record.get("status")),
+            "conclusion": _string(job.get("conclusion") or record.get("conclusion")),
+            "url": job_url,
+        },
+        "step": {
+            "name": _string(confirmation.get("job_step_name")),
+            "number": _provenance_int(confirmation.get("job_step_number")),
+            "status": _string(confirmation.get("job_step_status")),
+            "conclusion": _string(confirmation.get("job_step_conclusion")),
+        },
+        "mapping": {
+            "status": mapping_status,
+            "reason": _string(confirmation.get("mapping_reason")),
+            "confidence": _string(confirmation.get("mapping_confidence")),
+            "candidate_count": _provenance_int(confirmation.get("candidate_count")),
+            "candidates": _as_list(confirmation.get("candidates")),
+        },
+        "evidence_gaps": gaps,
+        "reporting_only": True,
+        "patch_application_allowed": False,
+        "automation_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
     }
 
 
@@ -1299,6 +1490,11 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
 
     failed_step_evidence = _failed_step_evidence(log_text, first_failure)
     job_step_confirmation = _job_step_confirmation(record, failed_step_evidence)
+    failure_provenance = _failure_provenance(
+        record,
+        job_step_confirmation,
+        check_name=name,
+    )
     artifact_evidence = _artifact_evidence(record, dependency_audit)
     safe_remediation = safe_remediation_eligibility.classify_check_failure(
         name=name,
@@ -1322,6 +1518,7 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
         "first_failure_line": _string(first_failure.get("line")),
         FAILED_STEP_EVIDENCE_KEY: failed_step_evidence,
         JOB_STEP_CONFIRMATION_KEY: job_step_confirmation,
+        FAILURE_PROVENANCE_KEY: failure_provenance,
         ARTIFACT_EVIDENCE_KEY: artifact_evidence,
         "formatter_changed_files": _formatter_changed_files(log_text),
         "referenced_files": _referenced_failure_files(log_text),
@@ -1601,7 +1798,30 @@ def _real_evidence_quality_summary(
         1
         for check in failed_checks
         if _string(_as_dict(check.get(JOB_STEP_CONFIRMATION_KEY)).get("status"))
-        in {"unavailable", "missing"}
+        in {"unavailable", "missing", "ambiguous"}
+    )
+    provenance_expected_count = sum(
+        1
+        for check in failed_checks
+        if _provenance_int(
+            _as_dict(_as_dict(check.get(FAILURE_PROVENANCE_KEY)).get("job")).get("id")
+        )
+    )
+    provenance_confirmed_count = sum(
+        1
+        for check in failed_checks
+        if _string(_as_dict(check.get(FAILURE_PROVENANCE_KEY)).get("status")) == "confirmed"
+    )
+    provenance_ambiguous_count = sum(
+        1
+        for check in failed_checks
+        if _string(_as_dict(check.get(FAILURE_PROVENANCE_KEY)).get("status")) == "ambiguous"
+    )
+    provenance_unavailable_count = sum(
+        1
+        for check in failed_checks
+        if _string(_as_dict(check.get(FAILURE_PROVENANCE_KEY)).get("status"))
+        in {"unavailable", "invalid"}
     )
     artifact_present_count = sum(
         1
@@ -1633,6 +1853,8 @@ def _real_evidence_quality_summary(
         evidence_gaps.append("stale_failed_check_evidence")
     if missing_required_contexts:
         evidence_gaps.append("required_contexts_missing")
+    if provenance_expected_count and provenance_confirmed_count < provenance_expected_count:
+        evidence_gaps.append("failure_provenance_not_confirmed")
 
     return {
         "schema_version": "sdetkit.real_check_evidence_quality.v1",
@@ -1647,6 +1869,10 @@ def _real_evidence_quality_summary(
         JOB_STEP_CONFIRMED_COUNT_KEY: job_step_confirmed_count,
         JOB_STEP_MISMATCH_COUNT_KEY: job_step_mismatch_count,
         JOB_STEP_UNAVAILABLE_COUNT_KEY: job_step_unavailable_count,
+        "failure_provenance_expected_count": provenance_expected_count,
+        FAILURE_PROVENANCE_CONFIRMED_COUNT_KEY: provenance_confirmed_count,
+        FAILURE_PROVENANCE_AMBIGUOUS_COUNT_KEY: provenance_ambiguous_count,
+        FAILURE_PROVENANCE_UNAVAILABLE_COUNT_KEY: provenance_unavailable_count,
         ARTIFACT_PRESENT_COUNT_KEY: artifact_present_count,
         ARTIFACT_MISSING_COUNT_KEY: artifact_missing_count,
         ARTIFACT_UNAVAILABLE_COUNT_KEY: artifact_unavailable_count,
@@ -2025,6 +2251,7 @@ def build_action_report(intelligence: JsonObject) -> JsonObject:
                 "first_failure_line": check.get("first_failure_line", ""),
                 FAILED_STEP_EVIDENCE_KEY: check.get(FAILED_STEP_EVIDENCE_KEY, {}),
                 JOB_STEP_CONFIRMATION_KEY: check.get(JOB_STEP_CONFIRMATION_KEY, {}),
+                FAILURE_PROVENANCE_KEY: check.get(FAILURE_PROVENANCE_KEY, {}),
                 ARTIFACT_EVIDENCE_KEY: check.get(ARTIFACT_EVIDENCE_KEY, {}),
                 "head_sha": check.get("head_sha", ""),
                 "current_pr_head_sha": check.get("current_pr_head_sha", ""),

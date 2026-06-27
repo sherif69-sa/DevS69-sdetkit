@@ -147,6 +147,9 @@ def test_failed_check_log_collection_summarizes_workflow_job_evidence_quality(
     assert quality["evidence_gaps"] == [
         "download_script_required",
         "uncollectible_failed_checks",
+        "workflow_run_metadata_missing",
+        "workflow_job_metadata_missing",
+        "workflow_job_steps_missing",
     ]
     assert quality["reporting_only"] is True
     assert quality["patch_application_allowed"] is False
@@ -225,3 +228,74 @@ def test_failed_check_log_collection_prefers_actions_url_over_check_run_api_url(
     script = Path(manifest["download_script"]).read_text(encoding="utf-8")
     assert "gh run view 26063321385 --job 76628412038 --log-failed" in script
     assert "api.github.com" not in script
+
+
+def test_failed_check_log_collection_hydrates_workflow_job_steps(tmp_path: Path) -> None:
+    checks = _write_json(
+        tmp_path / "check-runs.json",
+        {
+            "check_runs": [
+                {
+                    "name": "Validate (ubuntu-latest / py3.11)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "head_sha": "head-sha",
+                    "details_url": "https://github.com/acme/project/actions/runs/42/job/99",
+                }
+            ]
+        },
+    )
+    out_dir = tmp_path / "check-logs"
+    first = logs.write_failed_check_log_artifacts(checks_json=checks, out_dir=out_dir)
+    row = first["logs"][0]
+    _write_json(
+        Path(row["workflow_run_path"]),
+        {
+            "id": 42,
+            "name": "GitHub Actions Advanced Reference",
+            "run_number": 7,
+            "run_attempt": 1,
+            "status": "completed",
+            "conclusion": "failure",
+            "head_sha": "head-sha",
+            "html_url": "https://github.com/acme/project/actions/runs/42",
+        },
+    )
+    _write_json(
+        Path(row["workflow_job_path"]),
+        {
+            "id": 99,
+            "run_id": 42,
+            "name": "Validate (ubuntu-latest / py3.11)",
+            "status": "completed",
+            "conclusion": "failure",
+            "head_sha": "head-sha",
+            "html_url": "https://github.com/acme/project/actions/runs/42/job/99",
+            "steps": [
+                {"name": "Checkout", "number": 2, "status": "completed", "conclusion": "success"},
+                {
+                    "name": "Lint + tests",
+                    "number": 6,
+                    "status": "completed",
+                    "conclusion": "failure",
+                },
+            ],
+        },
+    )
+
+    second = logs.write_failed_check_log_artifacts(checks_json=checks, out_dir=out_dir)
+    hydrated = json.loads(Path(second["hydrated_checks_json"]).read_text(encoding="utf-8"))
+    record = hydrated["check_runs"][0]
+
+    assert record["workflow_run"]["name"] == "GitHub Actions Advanced Reference"
+    assert record["workflow_job"]["id"] == 99
+    assert record["steps"][1]["name"] == "Lint + tests"
+    assert record["failure_provenance_collection"]["status"] == "confirmed"
+    quality = second[logs.WORKFLOW_JOB_EVIDENCE_QUALITY_KEY]
+    assert quality["workflow_run_metadata_present"] == 1
+    assert quality["workflow_job_metadata_present"] == 1
+    assert quality["workflow_job_steps_present"] == 1
+    assert "workflow_job_metadata_missing" not in quality["evidence_gaps"]
+    script = Path(second["download_script"]).read_text(encoding="utf-8")
+    assert 'actions/runs/42"' in script
+    assert 'actions/jobs/99"' in script

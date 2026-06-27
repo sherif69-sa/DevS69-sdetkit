@@ -6307,3 +6307,69 @@ def test_review_model_promotes_pytest_failure_and_collapses_matrix() -> None:
     assert failure["matrix_repetition"] is True
     assert failure["evidence_gaps"] == ["job_step_not_captured"]
     assert len(model["failure_families"]) == 1
+
+
+def test_review_model_primary_failure_publishes_exact_failure_provenance() -> None:
+    provenance = {
+        "status": "confirmed",
+        "workflow": {
+            "name": "GitHub Actions Advanced Reference",
+            "run_id": 42,
+            "run_attempt": 1,
+            "url": "https://github.com/acme/project/actions/runs/42",
+            "exact_head_verified": True,
+        },
+        "job": {
+            "name": "Validate (ubuntu-latest / py3.11)",
+            "id": 99,
+            "url": "https://github.com/acme/project/actions/runs/42/job/99",
+        },
+        "step": {
+            "name": "Lint + tests",
+            "number": 6,
+            "status": "completed",
+            "conclusion": "failure",
+        },
+        "mapping": {
+            "status": "confirmed",
+            "reason": "single_failed_job_step",
+            "confidence": "high",
+            "candidate_count": 1,
+        },
+        "evidence_gaps": [],
+        "reporting_only": True,
+        "merge_authorized": False,
+    }
+    blocker = {
+        "check": "Validate (ubuntu-latest / py3.11)",
+        "code": "PYTEST_ASSERTION_FAILURE",
+        "url": "https://api.github.com/repos/acme/project/check-runs/123",
+        "first_failure": {
+            "line": "FAILED tests/test_probe.py::test_probe - AssertionError: expected='ready'; observed='forced'",
+            "line_number": 20,
+            "kind": "test_failure",
+            "tool": "pytest",
+            "context": [],
+            "evidence_quality": {"actionable": True},
+        },
+        "failure_provenance": provenance,
+    }
+
+    primary = report._review_model_primary_failure(
+        primary_blocker=blocker,
+        check_intelligence={"failed_checks": [blocker]},
+        proof_commands=["python -m pytest -q tests/test_probe.py::test_probe"],
+    )
+
+    assert primary["workflow_name"] == "GitHub Actions Advanced Reference"
+    assert primary["workflow_run_id"] == 42
+    assert primary["job_name"] == "Validate (ubuntu-latest / py3.11)"
+    assert primary["job_id"] == 99
+    assert primary["check_url"].endswith("/actions/runs/42/job/99")
+    assert primary["step_name"] == "Lint + tests"
+    assert primary["step_number"] == 6
+    assert primary["mapping_reason"] == "single_failed_job_step"
+    assert primary["mapping_confidence"] == "high"
+    assert primary["evidence_gaps"] == []
+    assert primary["patch_application_allowed"] is False
+    assert primary["merge_authorized"] is False
