@@ -728,3 +728,72 @@ def test_adoption_surface_deduplicates_tox_proof_across_config_sources(
     assert len(commands) == 1
     python = {str(item["name"]): item for item in payload["detected_languages"]}["python"]
     assert {"tox.ini", "pyproject.toml"} <= set(python["evidence"])
+
+
+def test_adoption_surface_recommends_sphinx_from_docs_conf(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "docs" / "conf.py", "project = 'Example'\n")
+
+    payload = discover_adoption_surface(tmp_path)
+    tools = {str(item["name"]): item for item in payload["docs_tools"]}
+    command = _proof_command(
+        payload,
+        "python -m sphinx -W -b html docs docs/_build/html",
+    )
+
+    assert tools["sphinx"] == {
+        "name": "sphinx",
+        "confidence": "high",
+        "evidence": ["docs/conf.py"],
+    }
+    assert "docs_directory" not in tools
+    assert command == {
+        "surface": "docs",
+        "command": "python -m sphinx -W -b html docs docs/_build/html",
+        "confidence": "high",
+        "purpose": "docs",
+        "executes_untrusted_code": True,
+        "auto_run_allowed": False,
+    }
+
+
+def test_adoption_surface_does_not_infer_sphinx_from_dependency_token_alone(
+    tmp_path: Path,
+) -> None:
+    _write(
+        tmp_path / "pyproject.toml",
+        "[project]\nname = 'sphinx-token-only'\ndependencies = ['sphinx']\n",
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert "sphinx" not in _names(payload["docs_tools"])
+    assert "python -m sphinx -W -b html docs docs/_build/html" not in _commands(payload)
+
+
+def test_adoption_surface_keeps_sphinx_and_mkdocs_as_distinct_surfaces(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "docs" / "conf.py", "project = 'Example'\n")
+    _write(tmp_path / "mkdocs.yml", "site_name: Example\n")
+
+    payload = discover_adoption_surface(tmp_path)
+    commands = payload["recommended_proof_commands"]
+
+    assert {"sphinx", "mkdocs"} <= _names(payload["docs_tools"])
+    assert "docs_directory" not in _names(payload["docs_tools"])
+    assert (
+        sum(
+            item["command"] == "python -m sphinx -W -b html docs docs/_build/html"
+            for item in commands
+        )
+        == 1
+    )
+    assert (
+        sum(
+            item["command"] == "NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict"
+            for item in commands
+        )
+        == 1
+    )
