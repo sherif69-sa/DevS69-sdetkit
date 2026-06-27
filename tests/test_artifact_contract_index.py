@@ -6,6 +6,7 @@ from pathlib import Path
 from sdetkit import (
     adoption_learning_report,
     adoption_learning_report_dashboard,
+    adoption_public_repo_trial_matrix_report,
     adoption_surface,
     automation_health,
     candidate_collision_checklist,
@@ -461,6 +462,46 @@ def test_artifact_contract_index_includes_adoption_learning_report_json() -> Non
         "adoption-real-world-matrix.json" in entry["produced_by"]
     )
     assert "--out build/sdetkit/adoption-learning-report.json" in entry["produced_by"]
+    assert "--format json" in entry["produced_by"]
+
+
+def test_artifact_contract_index_includes_public_repo_trial_matrix_report_json() -> None:
+    payload = build_index()
+    entries = {item["id"]: item for item in payload["artifacts"]}
+
+    artifact_id = "public-repo-trial-matrix-report-json"
+    assert artifact_id in entries
+
+    entry = entries[artifact_id]
+    assert entry["schema_version"] == adoption_public_repo_trial_matrix_report.SCHEMA_VERSION
+    assert entry["path"] == (adoption_public_repo_trial_matrix_report.DEFAULT_OUT.as_posix())
+    assert entry["stability"] == "advanced"
+
+    assert {
+        "schema_version",
+        "report_status",
+        "input_provenance",
+        "source_matrix",
+        "summary",
+        "trials",
+        "operator_summary",
+        "rules",
+        "reporting_only",
+        "repo_mutation",
+        "automation_allowed",
+        "patch_application_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven",
+        "authority_boundary",
+    }.issubset(set(entry["required_fields"]))
+
+    assert entry["produced_by"].startswith("python -m sdetkit adoption-public-trial-matrix-report ")
+    assert (
+        "--matrix-json "
+        "tests/fixtures/adoption_public_trials/"
+        "public_repo_trial_matrix.json" in entry["produced_by"]
+    )
+    assert "--out build/sdetkit/public-repo-trial-matrix-report.json" in entry["produced_by"]
     assert "--format json" in entry["produced_by"]
 
 

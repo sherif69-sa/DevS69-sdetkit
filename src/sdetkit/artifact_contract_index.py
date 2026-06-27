@@ -6,6 +6,7 @@ from typing import Any
 from . import (
     adoption_learning_report,
     adoption_learning_report_dashboard,
+    adoption_public_repo_trial_matrix_report,
     adoption_surface,
     automation_health,
     candidate_collision_checklist,
@@ -1103,6 +1104,37 @@ def build_index() -> dict[str, Any]:
                     "repo_memory_profile",
                     "operator_summary",
                     "rules",
+                    "automation_allowed",
+                    "patch_application_allowed",
+                    "merge_authorized",
+                    "semantic_equivalence_proven",
+                    "authority_boundary",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "public-repo-trial-matrix-report-json",
+                "path": adoption_public_repo_trial_matrix_report.DEFAULT_OUT.as_posix(),
+                "produced_by": (
+                    "python -m sdetkit adoption-public-trial-matrix-report "
+                    "--matrix-json "
+                    "tests/fixtures/adoption_public_trials/"
+                    "public_repo_trial_matrix.json "
+                    "--out build/sdetkit/public-repo-trial-matrix-report.json "
+                    "--format json"
+                ),
+                "schema_version": (adoption_public_repo_trial_matrix_report.SCHEMA_VERSION),
+                "required_fields": [
+                    "schema_version",
+                    "report_status",
+                    "input_provenance",
+                    "source_matrix",
+                    "summary",
+                    "trials",
+                    "operator_summary",
+                    "rules",
+                    "reporting_only",
+                    "repo_mutation",
                     "automation_allowed",
                     "patch_application_allowed",
                     "merge_authorized",
