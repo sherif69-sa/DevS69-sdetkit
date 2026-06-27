@@ -234,6 +234,38 @@ def test_front_door_story_alignment_across_readme_docs_and_cli_contract() -> Non
     assert "one canonical command path" in contract
 
 
+def test_readme_exposes_secondary_public_stable_operator_lanes() -> None:
+    readme = Path("README.md").read_text(encoding="utf-8")
+
+    canonical_index = readme.index("Canonical first path:")
+    secondary_index = readme.index("| Readiness evidence |")
+    assert canonical_index < secondary_index
+
+    expected_commands = (
+        "python -m sdetkit repo audit . --format json --fail-on none",
+        "python -m sdetkit security scan --fail-on none "
+        "--format sarif --output build/security.sarif "
+        "--sbom-output build/sbom.cdx.json",
+        "python -m sdetkit evidence pack --output .sdetkit/out/evidence.zip",
+    )
+    expected_docs = (
+        "docs/repo-audit.md",
+        "docs/security-gate.md",
+        "docs/artifact-reference.md",
+    )
+
+    assert "| Readiness evidence |" in readme
+    for command in expected_commands:
+        assert f"`{command}`" in readme
+    for docs_path in expected_docs:
+        assert f"]({docs_path})" in readme
+
+    assert (
+        "Secondary lanes cover review, investigation, quality, maintenance, "
+        "and CI automation once the primary gate decision is stable." in readme
+    )
+
+
 def test_cli_reference_keeps_current_surface_and_demotes_transition_appendix() -> None:
     cli_ref = Path("docs/cli.md").read_text(encoding="utf-8")
 
