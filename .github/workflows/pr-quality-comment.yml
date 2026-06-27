@@ -668,6 +668,9 @@ jobs:
             --trajectory-jsonl build/pr-quality/trajectory/trajectory.jsonl \
             --runtime-proof-artifacts build/pr-quality/runtime-proof/summary/runtime-proof-artifacts.json \
             --security-finding-diagnosis build/pr-quality/security-diagnosis/security-finding-diagnosis.json \
+            --pr-number "${{ github.event.pull_request.number }}" \
+            --head-sha "${{ github.event.pull_request.head.sha }}" \
+            --base-sha "${{ github.event.pull_request.base.sha }}" \
             --out build/pr-quality/pr-comment-body.md \
             --review-model-out build/pr-quality/pr-review-model.json \
             --review-summary-out build/pr-quality/pr-review-summary.md \
@@ -1281,6 +1284,7 @@ jobs:
               "pr-comment-body.md",
               "pr-comment-metadata.json",
               "pr-review-summary.md",
+              "pr-review-model.json",
           )
           file_rows = []
           for name in required_names:

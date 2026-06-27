@@ -71,6 +71,7 @@ jobs:
               "payload/pr-comment-body.md",
               "payload/pr-comment-metadata.json",
               "payload/pr-review-summary.md",
+              "payload/pr-review-model.json",
           }
           actual_files = set()
           for path in root.rglob("*"):
@@ -138,7 +139,7 @@ jobs:
               raise SystemExit("publisher handoff authority boundary mismatch")
 
           rows = manifest.get("files")
-          if not isinstance(rows, list) or len(rows) != 3:
+          if not isinstance(rows, list) or len(rows) != 4:
               raise SystemExit("publisher handoff manifest file inventory mismatch")
           expected_payload = expected_files - {"manifest.json"}
           observed_payload = set()
@@ -245,9 +246,9 @@ jobs:
           from pathlib import Path
 
           model = json.loads(
-              Path(
-                  "build/pr-quality/pr-review-model.json"
-              ).read_text(encoding="utf-8")
+              Path("build/pr-quality/pr-review-model.json").read_text(
+                  encoding="utf-8"
+              )
           )
           decision = model.get("decision") or {}
           snapshot = model.get("live_evidence") or {}
@@ -258,6 +259,7 @@ jobs:
               for item in snapshot.get("facts") or []
               if isinstance(item, dict)
           }
+          primary_failure = model.get("primary_failure") or {}
 
           review_state = str(
               decision.get("review_state") or "unknown"
@@ -304,6 +306,27 @@ jobs:
               or "reporting_only"
           ).replace("_", " ")
 
+          def inline(value: object) -> str:
+              return (
+                  str(value or "")
+                  .replace("\n", " ")
+                  .replace("|", "\\|")
+                  .strip()
+              )
+
+          def count(value: object) -> int:
+              try:
+                  return int(value or 0)
+              except (TypeError, ValueError):
+                  return 0
+
+          def trusted_link(label: object, url: object) -> str:
+              rendered_label = inline(label)
+              rendered_url = str(url or "").strip()
+              if rendered_url.startswith("https://github.com/"):
+                  return f"[{rendered_label}]({rendered_url})"
+              return f"`{rendered_label}`"
+
           lines = [
               "### SDET Quality Gate",
               "",
@@ -318,41 +341,158 @@ jobs:
                   review_state.replace("_", " ").title(),
               ),
               "",
-              "| Review signal | Result |",
-              "|---|---|",
-              f"| Exact head | `{head[:12]}` |",
-              (
-                  "| Required checks | "
-                  + fact_status("required_checks")
-                  + " |"
-              ),
-              "| Security | " + fact_status("security") + " |",
-              (
-                  "| Runtime proof | "
-                  + fact_status("runtime_proof")
-                  + " |"
-              ),
-              (
-                  "| Artifact integrity | "
-                  + fact_status("artifact_inventory")
-                  + " |"
-              ),
-              f"| Risk focus | {risk} |",
-              "",
-              (
-                  "**Review the complete evidence dashboard:** "
-                  f"[Open PR Quality Artifact Center]({artifact_url})"
-              ),
-              "",
-              "Entrypoint: `pr-quality/index.html`",
-              "",
-              (
-                  f"> 🔒 Authority: `{boundary}`. "
-                  "Evidence is advisory and does not authorize merge. "
-                  "A human merge decision is still required."
-              ),
-              "",
           ]
+
+          if (
+              review_state == "blocked"
+              and bool(primary_failure.get("available"))
+          ):
+              unique_count = max(
+                  count(primary_failure.get("unique_failure_count")),
+                  1,
+              )
+              failed_count = max(
+                  count(primary_failure.get("failed_check_count")),
+                  unique_count,
+              )
+              repeated = (
+                  f"{unique_count} unique failure"
+                  + ("" if unique_count == 1 else "s")
+                  + f" repeated across {failed_count} checks"
+              )
+              source_path = inline(
+                  primary_failure.get("source_path")
+              )
+              source_line = count(
+                  primary_failure.get("source_line")
+              )
+              source_location = (
+                  f"{source_path}:{source_line}"
+                  if source_path and source_line
+                  else source_path or "Not captured"
+              )
+              step_name = inline(
+                  primary_failure.get("step_name")
+              )
+              if not step_name:
+                  step_name = (
+                      "Not captured — collector evidence gap"
+                  )
+              check_name = inline(
+                  primary_failure.get("check_name")
+              ) or "Not captured"
+              check_display = trusted_link(
+                  check_name,
+                  primary_failure.get("check_url"),
+              )
+              test_node = inline(
+                  primary_failure.get("test_node")
+              ) or "Not captured"
+              expected = inline(
+                  primary_failure.get("expected")
+              ) or "Not captured"
+              observed = inline(
+                  primary_failure.get("observed")
+              ) or "Not captured"
+              message = inline(
+                  primary_failure.get("message")
+              ) or "Failure message not captured"
+              command = str(
+                  primary_failure.get(
+                      "reproduction_command"
+                  )
+                  or ""
+              ).strip()
+              evidence_gaps = [
+                  inline(item)
+                  for item in (
+                      primary_failure.get("evidence_gaps")
+                      or []
+                  )
+                  if inline(item)
+              ]
+
+              lines.extend(
+                  [
+                      f"**{repeated}.**",
+                      "",
+                      "### First actionable failure",
+                      "",
+                      "| Field | Evidence |",
+                      "|---|---|",
+                      f"| Check | {check_display} |",
+                      f"| Test | `{test_node}` |",
+                      f"| Source | `{source_location}` |",
+                      f"| Step | {step_name} |",
+                      f"| Expected | `{expected}` |",
+                      f"| Observed | `{observed}` |",
+                      "",
+                      "**Failure**",
+                      "",
+                      f"> {message}",
+                      "",
+                  ]
+              )
+              if command:
+                  lines.extend(
+                      [
+                          "**Reproduce**",
+                          "",
+                          "```bash",
+                          command,
+                          "```",
+                          "",
+                      ]
+                  )
+              if evidence_gaps:
+                  lines.extend(
+                      [
+                          (
+                              "**Evidence gap:** "
+                              + ", ".join(evidence_gaps)
+                          ),
+                          "",
+                      ]
+                  )
+
+          lines.extend(
+              [
+                  "| Review signal | Result |",
+                  "|---|---|",
+                  f"| Exact head | `{head[:12]}` |",
+                  (
+                      "| Required checks | "
+                      + fact_status("required_checks")
+                      + " |"
+                  ),
+                  "| Security | " + fact_status("security") + " |",
+                  (
+                      "| Runtime proof | "
+                      + fact_status("runtime_proof")
+                      + " |"
+                  ),
+                  (
+                      "| Artifact integrity | "
+                      + fact_status("artifact_inventory")
+                      + " |"
+                  ),
+                  f"| Risk focus | {risk} |",
+                  "",
+                  (
+                      "**Open the complete diagnosis:** "
+                      f"[Open PR Quality Artifact Center]({artifact_url})"
+                  ),
+                  "",
+                  "Entrypoint: `pr-quality/index.html`",
+                  "",
+                  (
+                      f"> 🔒 Authority: `{boundary}`. "
+                      "Evidence is advisory and does not authorize merge. "
+                      "A human merge decision is still required."
+                  ),
+                  "",
+              ]
+          )
           Path(os.environ["BODY_PATH"]).write_text(
               "\n".join(lines),
               encoding="utf-8",
