@@ -70,10 +70,10 @@ Use these lanes when you need to evaluate repository readiness beyond the local 
 
 Authority boundary remains unchanged: `automation_allowed=false`, `patch_application_allowed=false`, `merge_authorized=false`, and `semantic_equivalence_proven=false`.
 
-
 | Lane | Command | Start here when... |
 | --- | --- | --- |
 | Release gate | `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor` | You need a ship/no-ship decision. |
+| Readiness evidence | `python -m sdetkit repo audit . --format json --fail-on none` → `python -m sdetkit security scan --fail-on none --format sarif --output build/security.sarif --sbom-output build/sbom.cdx.json` → `python -m sdetkit evidence pack --output .sdetkit/out/evidence.zip` | You need local repository, security, and bundled evidence. See [Repo Audit](docs/repo-audit.md), [Security Gate](docs/security-gate.md), and [Artifact reference](docs/artifact-reference.md). |
 | Review | `python -m sdetkit review . --no-workspace --format operator-json` | You need operator-facing findings. |
 | Investigation | `python -m sdetkit investigate failure --log build/quality.log --format markdown` | A CI log or PR check needs triage before remediation. |
 | CI-ready | `./ci.sh quick --artifact-dir .sdetkit/out` and `make merge-ready` | You want a local CI-equivalent smoke path. |
