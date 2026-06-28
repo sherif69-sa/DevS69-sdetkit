@@ -429,7 +429,6 @@ def test_artifact_contract_index_includes_local_diagnostic_queue_dashboard_json(
     assert "--out build/local-diagnostic-queue/dashboard.json" in (entry["produced_by"])
 
 
-
 def test_artifact_contract_index_includes_diagnostic_execution_plan_json() -> None:
     payload = build_index()
     entries = {item["id"]: item for item in payload["artifacts"]}
@@ -466,6 +465,7 @@ def test_artifact_contract_index_includes_diagnostic_execution_plan_json() -> No
     assert "--root ." in entry["produced_by"]
     assert "--out build/sdetkit/diagnostic-execution-plan.json" in entry["produced_by"]
     assert "--format json" in entry["produced_by"]
+
 
 def test_artifact_contract_index_includes_adoption_learning_report_json() -> None:
     payload = build_index()
