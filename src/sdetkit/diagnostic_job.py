@@ -7,6 +7,12 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from sdetkit.diagnostic_execution_plan import (
+    SCHEMA_VERSION as DIAGNOSTIC_EXECUTION_PLAN_SCHEMA_VERSION,
+)
+from sdetkit.diagnostic_execution_plan import (
+    validate_diagnostic_execution_plan,
+)
 from sdetkit.diagnostic_vector_engine import (
     ACTUAL_FAILURE,
     DEFAULT_GENERATED_AT,
@@ -23,6 +29,7 @@ from sdetkit.diagnostic_vector_engine import (
 SCHEMA_VERSION = "sdetkit.diagnostic_job.v1"
 WORKER_RESULT_SCHEMA_VERSION = "sdetkit.diagnostic_worker_result.v1"
 REVIEW_HANDOFF_SCHEMA_VERSION = "sdetkit.queue_review_handoff.v1"
+EXECUTION_PLAN_HANDOFF_SCHEMA_VERSION = "sdetkit.diagnostic_execution_plan_handoff.v1"
 JOB_TYPE = "diagnostic_vector"
 WORKER_NAME = "diagnostic_worker"
 EXECUTION_MODE = "local_read_only"
@@ -178,6 +185,190 @@ def validate_job(job: Mapping[str, Any]) -> None:
         raise ValueError("diagnostic worker contract expands authority: " + ", ".join(prohibited))
 
 
+def _repo_slug(value: Any) -> str:
+    normalized = _string(value).lower().replace("\\", "/")
+    if not normalized:
+        return ""
+    if normalized.startswith("git@") and ":" in normalized:
+        normalized = normalized.split(":", 1)[1]
+    elif "://" in normalized:
+        normalized = normalized.split("://", 1)[1]
+        normalized = normalized.split("/", 1)[1] if "/" in normalized else ""
+    normalized = normalized.strip("/")
+    if normalized.endswith(".git"):
+        normalized = normalized[:-4]
+    parts = [part for part in normalized.split("/") if part]
+    return "/".join(parts[-2:]) if len(parts) >= 2 else normalized
+
+
+def _execution_plan_handoff(
+    job: Mapping[str, Any],
+    payload: Mapping[str, Any] | None,
+) -> JsonObject:
+    plan = _as_dict(payload)
+    boundary = _boundary()
+    if not plan:
+        return {
+            "schema_version": EXECUTION_PLAN_HANDOFF_SCHEMA_VERSION,
+            "status": "not_provided",
+            "plan_schema_version": "",
+            "plan_status": "",
+            "repo_identity": {},
+            "source_artifacts": {},
+            "summary": {
+                "command_count": 0,
+                "required_count": 0,
+                "recommended_count": 0,
+                "review_command_count": 0,
+                "review_first_item_count": 0,
+            },
+            "command_evidence": [],
+            "reporting_only": True,
+            "current_pr_decision_input": False,
+            "execution_allowed": False,
+            "decision_boundary": boundary,
+        }
+
+    errors = validate_diagnostic_execution_plan(plan)
+    if errors:
+        raise ValueError("invalid diagnostic execution plan: " + "; ".join(errors))
+    if _string(plan.get("plan_status")) != "generated":
+        raise ValueError("diagnostic execution plan status must be generated")
+
+    policies = _as_dict(plan.get("policies"))
+    required_policies = {
+        "execution_default": "deny",
+        "explicit_execution_authorization_required": True,
+        "workspace_mode": "isolated_copy_required",
+        "source_target_used_as_command_cwd": False,
+        "network_default": "deny",
+        "automatic_dependency_install_allowed": False,
+        "source_target_mutation_allowed": False,
+    }
+    policy_errors = [
+        key for key, expected in required_policies.items() if policies.get(key) != expected
+    ]
+    if policy_errors:
+        raise ValueError(
+            "diagnostic execution plan expands or weakens policy: " + ", ".join(policy_errors)
+        )
+
+    rules = _as_dict(plan.get("rules"))
+    required_rules = (
+        "plan_only",
+        "read_only",
+        "no_command_execution",
+        "no_dependency_install",
+        "no_target_repo_mutation",
+        "no_patch_application",
+    )
+    rule_errors = [key for key in required_rules if rules.get(key) is not True]
+    if rule_errors:
+        raise ValueError(
+            "diagnostic execution plan expands or weakens rules: " + ", ".join(rule_errors)
+        )
+
+    event = _as_dict(job.get("event"))
+    job_repo = _repo_slug(event.get("repo"))
+    repo_identity = _as_dict(plan.get("repo_identity"))
+    plan_repo = _repo_slug(repo_identity.get("remote_url"))
+    if job_repo and plan_repo and job_repo != plan_repo:
+        raise ValueError(
+            "diagnostic execution plan repository identity does not match diagnostic job"
+        )
+
+    commands = [_as_dict(item) for item in _as_list(plan.get("commands"))]
+    review_first_items = _as_list(plan.get("review_first_items"))
+    summary = _as_dict(plan.get("summary"))
+    actual_summary = {
+        "command_count": len(commands),
+        "required_count": sum(
+            _string(item.get("operator_level")) == "required" for item in commands
+        ),
+        "recommended_count": sum(
+            _string(item.get("operator_level")) == "recommended" for item in commands
+        ),
+        "review_command_count": sum(_bool(item.get("review_required")) for item in commands),
+        "review_first_item_count": len(review_first_items),
+    }
+    inconsistent = [
+        key
+        for key, value in actual_summary.items()
+        if isinstance(summary.get(key), bool)
+        or not isinstance(summary.get(key), int)
+        or summary.get(key) != value
+    ]
+    if inconsistent:
+        raise ValueError(
+            "diagnostic execution plan summary does not match plan contents: "
+            + ", ".join(inconsistent)
+        )
+
+    source_artifacts = {
+        _string(name): _string(schema)
+        for name, schema in sorted(_as_dict(plan.get("source_artifacts")).items())
+        if _string(name) and _string(schema)
+    }
+    evidence_rows: list[JsonObject] = []
+    for item in commands:
+        references: list[JsonObject] = []
+        for raw_reference in _as_list(item.get("evidence")):
+            reference = _as_dict(raw_reference)
+            if not reference:
+                continue
+            projected_reference: JsonObject = {
+                "source": _string(reference.get("source")),
+                "schema_version": _string(reference.get("schema_version")),
+            }
+            location = _string(reference.get("location"))
+            if location:
+                projected_reference["location"] = location
+            paths = sorted(
+                {
+                    _string(raw_path)
+                    for raw_path in _as_list(reference.get("paths"))
+                    if _string(raw_path)
+                }
+            )
+            if paths:
+                projected_reference["paths"] = paths
+            references.append(projected_reference)
+        evidence_rows.append(
+            {
+                "step": int(item.get("step", 0) or 0),
+                "command_id": _string(item.get("command_id")),
+                "surface": _string(item.get("surface")) or "unknown",
+                "purpose": _string(item.get("purpose")) or "unknown",
+                "operator_level": _string(item.get("operator_level")) or "review_first",
+                "cwd": _string(item.get("cwd")) or ".",
+                "review_required": _bool(item.get("review_required")),
+                "evidence": references,
+                "execution_allowed": False,
+            }
+        )
+
+    return {
+        "schema_version": EXECUTION_PLAN_HANDOFF_SCHEMA_VERSION,
+        "status": "observed",
+        "plan_schema_version": DIAGNOSTIC_EXECUTION_PLAN_SCHEMA_VERSION,
+        "plan_status": "generated",
+        "repo_identity": {
+            "name": _string(repo_identity.get("name")),
+            "remote_url": _string(repo_identity.get("remote_url")),
+            "job_repo": _string(event.get("repo")),
+            "identity_match_checked": bool(job_repo and plan_repo),
+            "identity_match": not (job_repo and plan_repo) or job_repo == plan_repo,
+        },
+        "source_artifacts": source_artifacts,
+        "summary": actual_summary,
+        "command_evidence": evidence_rows,
+        "reporting_only": True,
+        "current_pr_decision_input": False,
+        "execution_allowed": False,
+        "decision_boundary": boundary,
+    }
+
+
 def _primary_diagnosis(payload: Mapping[str, Any]) -> JsonObject:
     rows = [_as_dict(item) for item in _as_list(payload.get("diagnoses")) if _as_dict(item)]
     if not rows:
@@ -202,6 +393,7 @@ def run_diagnostic_worker(
     pr_quality_action_report: Mapping[str, Any] | None = None,
     security_review: Mapping[str, Any] | None = None,
     runtime_proof_artifacts: Mapping[str, Any] | None = None,
+    diagnostic_execution_plan: Mapping[str, Any] | None = None,
     out_dir: Path,
 ) -> JsonObject:
     validate_job(job)
@@ -214,6 +406,7 @@ def run_diagnostic_worker(
         generated_at=_string(job.get("created_at")) or DEFAULT_GENERATED_AT,
     )
     vector_artifacts = write_diagnostic_vector(vector, out_dir / VECTOR_DIR)
+    execution_plan_handoff = _execution_plan_handoff(job, diagnostic_execution_plan)
     return {
         "schema_version": WORKER_RESULT_SCHEMA_VERSION,
         "job_id": _string(job.get("job_id")),
@@ -223,6 +416,7 @@ def run_diagnostic_worker(
         "execution_mode": EXECUTION_MODE,
         "summary": _as_dict(vector.get("summary")),
         "primary_diagnosis": _primary_diagnosis(vector),
+        "execution_plan_handoff": execution_plan_handoff,
         "output_artifacts": vector_artifacts,
         "decision_boundary": _boundary(),
         "execution": {
@@ -237,6 +431,7 @@ def render_markdown(job: Mapping[str, Any], result: Mapping[str, Any]) -> str:
     summary = _as_dict(result.get("summary"))
     primary = _as_dict(result.get("primary_diagnosis"))
     boundary = _as_dict(result.get("decision_boundary"))
+    execution_plan = _as_dict(result.get("execution_plan_handoff"))
     lines = [
         "## Local diagnostic job evidence",
         "",
@@ -270,6 +465,23 @@ def render_markdown(job: Mapping[str, Any], result: Mapping[str, Any]) -> str:
             f"`{str(_bool(boundary.get('semantic_equivalence_proven'))).lower()}`"
         ),
     ]
+    if _string(execution_plan.get("status")) == "observed":
+        plan_summary = _as_dict(execution_plan.get("summary"))
+        lines.extend(
+            [
+                "",
+                "### Diagnostic execution plan handoff",
+                "",
+                f"- Plan status: `{_string(execution_plan.get('plan_status'))}`",
+                f"- Planned commands: `{int(plan_summary.get('command_count', 0) or 0)}`",
+                (
+                    "- Review-first plan items: "
+                    f"`{int(plan_summary.get('review_first_item_count', 0) or 0)}`"
+                ),
+                "- Commands executed by worker: `false`",
+                "- Execution allowed: `false`",
+            ]
+        )
     if primary:
         lines.extend(
             [
@@ -323,6 +535,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pr-quality-action-report", type=Path)
     parser.add_argument("--security-review", type=Path)
     parser.add_argument("--runtime-proof-artifacts", type=Path)
+    parser.add_argument("--diagnostic-execution-plan", type=Path)
     parser.add_argument("--repo", default="")
     parser.add_argument("--base-sha", default="")
     parser.add_argument("--head-sha", required=True)
@@ -342,6 +555,7 @@ def main(argv: list[str] | None = None) -> int:
         "pr_quality_action_report": str(args.pr_quality_action_report or ""),
         "security_review": str(args.security_review or ""),
         "runtime_proof_artifacts": str(args.runtime_proof_artifacts or ""),
+        "diagnostic_execution_plan": str(args.diagnostic_execution_plan or ""),
     }
     try:
         job = build_diagnostic_job(
@@ -360,6 +574,7 @@ def main(argv: list[str] | None = None) -> int:
             pr_quality_action_report=_read_json(args.pr_quality_action_report),
             security_review=_read_json(args.security_review),
             runtime_proof_artifacts=_read_json(args.runtime_proof_artifacts),
+            diagnostic_execution_plan=_read_json(args.diagnostic_execution_plan),
             out_dir=args.out_dir,
         )
         artifacts = write_artifacts(job, result, out_dir=args.out_dir)
@@ -374,6 +589,7 @@ def main(argv: list[str] | None = None) -> int:
                     "artifacts": artifacts,
                     "job_id": job["job_id"],
                     "summary": result["summary"],
+                    "execution_plan_handoff": result["execution_plan_handoff"],
                     "decision_boundary": result["decision_boundary"],
                 },
                 indent=2,

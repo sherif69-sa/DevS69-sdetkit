@@ -32,6 +32,7 @@ SUPPORTED_INPUTS = frozenset(
         "pr_quality_action_report",
         "security_review",
         "runtime_proof_artifacts",
+        "diagnostic_execution_plan",
         "patch_score",
         "safety_gate_decision",
     }
@@ -338,6 +339,7 @@ def run_queued_diagnostic_job(
             pr_quality_action_report=worker_inputs.get("pr_quality_action_report"),
             security_review=worker_inputs.get("security_review"),
             runtime_proof_artifacts=worker_inputs.get("runtime_proof_artifacts"),
+            diagnostic_execution_plan=worker_inputs.get("diagnostic_execution_plan"),
             out_dir=out_dir,
         )
         worker_result["review_handoff"] = review_handoff

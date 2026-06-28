@@ -13,6 +13,7 @@ DiagnosticJob
   -> deterministic file-backed queue
   -> bounded queue runner
   -> read-only diagnostic worker
+  -> optional non-executing diagnostic execution-plan handoff
   -> diagnostic vector
   -> reporting-only trajectory artifacts
   -> completed or failed queue record
@@ -48,6 +49,9 @@ Each queued `DiagnosticJob` must declare at least one supported evidence input:
 - `pr_quality_action_report`
 - `security_review`
 - `runtime_proof_artifacts`
+- `diagnostic_execution_plan`
+
+When supplied, `diagnostic_execution_plan` must use `sdetkit.diagnostic_execution_plan.v1`, preserve the job repository identity, and retain deny-by-default execution, network, dependency-installation, mutation, patch, automation, and merge policies. The worker validates and summarizes the plan but never executes its commands.
 
 Relative evidence paths are resolved from `--input-root`.
 
@@ -146,6 +150,8 @@ For a completed job, inspect:
 ```
 
 The completed queue record also contains these artifact references.
+
+When a diagnostic execution plan is supplied, `diagnostic-worker-result.json` also contains an `execution_plan_handoff` projection. Review its plan status, repository-identity result, source-artifact schemas, command and review-first counts, and sanitized command evidence. The projection is reporting-only, keeps `execution_allowed=false`, and never executes the planned commands.
 
 The trajectory output is reporting-only:
 
@@ -304,7 +310,7 @@ python -m pytest -q   tests/test_diagnostic_queue_runner_e2e.py   -o addopts=
 Run the focused local queue contract suite:
 
 ```bash
-python -m pytest -q   tests/test_diagnostic_queue_runner_e2e.py   tests/test_diagnostic_queue_runner_cli.py   tests/test_diagnostic_queue_runner.py   tests/test_queued_diagnostic_worker.py   tests/test_diagnostic_worker_trajectory.py   tests/test_job_queue.py   tests/test_diagnostic_job.py   -o addopts=
+python -m pytest -q   tests/test_diagnostic_execution_plan.py   tests/test_diagnostic_queue_runner_e2e.py   tests/test_diagnostic_queue_runner_cli.py   tests/test_diagnostic_queue_runner.py   tests/test_queued_diagnostic_worker.py   tests/test_diagnostic_worker_trajectory.py   tests/test_job_queue.py   tests/test_diagnostic_job.py   -o addopts=
 ```
 
 Then run the repository quality proof:
