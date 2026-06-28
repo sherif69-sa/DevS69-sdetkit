@@ -1,0 +1,32 @@
+{
+  "scenario_id": "execution_plan_handoff_not_provided",
+  "scenario_type": "execution_plan_handoff_nop_pass",
+  "check_intelligence": {
+    "failed_checks": [
+      {
+        "name": "PR Quality local quality gate",
+        "surface": "formatting",
+        "command": "python -m pre_commit run -a",
+        "scope": "pr_owned_only",
+        "diagnosis": {
+          "title": "Pre-commit formatting drift",
+          "surface": "formatting"
+        },
+        "first_failure": {
+          "line": "ruff format..............................Failed",
+          "line_number": 30,
+          "tool": "ruff",
+          "kind": "format_drift"
+        },
+        "safe_to_auto_fix": true,
+        "affected_files": [
+          "src/sdetkit/example.py"
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "command_count": 0,
+    "review_first_item_count": 0
+  }
+}

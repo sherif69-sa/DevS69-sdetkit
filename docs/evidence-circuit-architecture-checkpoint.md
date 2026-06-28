@@ -89,6 +89,20 @@ artifact. Prefer one of these next directions instead:
 - release-readiness packaging
 - narrower usability improvements
 
+## Post-checkpoint benchmark validation
+
+Later diagnostic execution-plan and trajectory-handoff work adds a new contract
+to the existing control plane, but it does not reopen the recursive consumer
+chain. Replayable benchmark scenarios may validate the observed,
+not-provided, and forged-authority outcomes for that contract.
+
+This validation remains reporting-only:
+
+- planned commands are evidence, not executable instructions;
+- trajectory proof command arrays remain empty;
+- benchmark output does not feed current PR decisions or RepoMemory;
+- forged execution authority must fail before trajectory evidence is written.
+
 ## Review checklist for future slices
 
 Before adding another evidence consumer, confirm all of the following:

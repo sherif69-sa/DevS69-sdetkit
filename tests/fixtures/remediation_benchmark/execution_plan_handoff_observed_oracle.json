@@ -1,0 +1,115 @@
+{
+  "scenario_id": "execution_plan_handoff_observed_oracle",
+  "scenario_type": "execution_plan_handoff_oracle_pass",
+  "check_intelligence": {
+    "failed_checks": [
+      {
+        "name": "PR Quality local quality gate",
+        "surface": "formatting",
+        "command": "python -m pre_commit run -a",
+        "scope": "pr_owned_only",
+        "diagnosis": {
+          "title": "Pre-commit formatting drift",
+          "surface": "formatting"
+        },
+        "first_failure": {
+          "line": "ruff format..............................Failed",
+          "line_number": 30,
+          "tool": "ruff",
+          "kind": "format_drift"
+        },
+        "safe_to_auto_fix": true,
+        "affected_files": [
+          "src/sdetkit/example.py"
+        ]
+      }
+    ]
+  },
+  "diagnostic_execution_plan": {
+    "schema_version": "sdetkit.diagnostic_execution_plan.v1",
+    "plan_status": "generated",
+    "repo_root": ".",
+    "repo_identity": {
+      "name": "replayable-benchmark",
+      "git_detected": true,
+      "remote_url": "https://github.com/controlled-fixture/replayable-benchmark.git"
+    },
+    "source_artifacts": {
+      "adoption_surface": "sdetkit.adoption_surface.v1",
+      "adoption_proof_recommendations": "sdetkit.adoption_proof_recommendations.v1",
+      "adoption_repo_topology": "sdetkit.adoption_repo_topology.v1"
+    },
+    "summary": {
+      "command_count": 1,
+      "required_count": 1,
+      "recommended_count": 0,
+      "review_command_count": 0,
+      "review_first_item_count": 0,
+      "recommended_next_action": "review_plan_before_execution"
+    },
+    "commands": [
+      {
+        "step": 1,
+        "command_id": "command-example",
+        "display_command": "python -m pytest -q",
+        "argv": [
+          "python",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "environment": {},
+        "cwd": ".",
+        "surface": "python",
+        "purpose": "test",
+        "operator_level": "required",
+        "review_required": false,
+        "review_reasons": [],
+        "evidence": [
+          {
+            "source": "adoption_surface",
+            "schema_version": "sdetkit.adoption_surface.v1",
+            "paths": [
+              "pyproject.toml"
+            ]
+          }
+        ],
+        "execution_allowed": false
+      }
+    ],
+    "review_first_items": [],
+    "policies": {
+      "execution_default": "deny",
+      "explicit_execution_authorization_required": true,
+      "workspace_mode": "isolated_copy_required",
+      "source_target_used_as_command_cwd": false,
+      "network_default": "deny",
+      "automatic_dependency_install_allowed": false,
+      "source_target_mutation_allowed": false
+    },
+    "rules": {
+      "plan_only": true,
+      "read_only": true,
+      "no_command_execution": true,
+      "no_dependency_install": true,
+      "no_target_repo_mutation": true,
+      "no_patch_application": true
+    },
+    "execution_allowed": false,
+    "automation_allowed": false,
+    "patch_application_allowed": false,
+    "merge_authorized": false,
+    "semantic_equivalence_proven": false,
+    "authority_boundary": {
+      "execution_allowed": false,
+      "automation_allowed": false,
+      "patch_application_allowed": false,
+      "merge_authorized": false,
+      "semantic_equivalence_proven": false
+    }
+  },
+  "expected": {
+    "command_count": 1,
+    "review_first_item_count": 0
+  }
+}

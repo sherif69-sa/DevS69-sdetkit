@@ -1,0 +1,117 @@
+{
+  "authority_expansion_field": "execution_allowed",
+  "check_intelligence": {
+    "failed_checks": [
+      {
+        "affected_files": [
+          "src/sdetkit/example.py"
+        ],
+        "command": "python -m pre_commit run -a",
+        "diagnosis": {
+          "surface": "formatting",
+          "title": "Pre-commit formatting drift"
+        },
+        "first_failure": {
+          "kind": "format_drift",
+          "line": "ruff format..............................Failed",
+          "line_number": 30,
+          "tool": "ruff"
+        },
+        "name": "PR Quality local quality gate",
+        "safe_to_auto_fix": true,
+        "scope": "pr_owned_only",
+        "surface": "formatting"
+      }
+    ]
+  },
+  "diagnostic_execution_plan": {
+    "authority_boundary": {
+      "automation_allowed": false,
+      "execution_allowed": false,
+      "merge_authorized": false,
+      "patch_application_allowed": false,
+      "semantic_equivalence_proven": false
+    },
+    "automation_allowed": false,
+    "commands": [
+      {
+        "argv": [
+          "python",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "command_id": "command-example",
+        "cwd": ".",
+        "display_command": "python -m pytest -q",
+        "environment": {},
+        "evidence": [
+          {
+            "paths": [
+              "pyproject.toml"
+            ],
+            "schema_version": "sdetkit.adoption_surface.v1",
+            "source": "adoption_surface"
+          }
+        ],
+        "execution_allowed": false,
+        "operator_level": "required",
+        "purpose": "test",
+        "review_reasons": [],
+        "review_required": false,
+        "step": 1,
+        "surface": "python"
+      }
+    ],
+    "execution_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "plan_status": "generated",
+    "policies": {
+      "automatic_dependency_install_allowed": false,
+      "execution_default": "deny",
+      "explicit_execution_authorization_required": true,
+      "network_default": "deny",
+      "source_target_mutation_allowed": false,
+      "source_target_used_as_command_cwd": false,
+      "workspace_mode": "isolated_copy_required"
+    },
+    "repo_identity": {
+      "git_detected": true,
+      "name": "replayable-benchmark",
+      "remote_url": "https://github.com/controlled-fixture/replayable-benchmark.git"
+    },
+    "repo_root": ".",
+    "review_first_items": [],
+    "rules": {
+      "no_command_execution": true,
+      "no_dependency_install": true,
+      "no_patch_application": true,
+      "no_target_repo_mutation": true,
+      "plan_only": true,
+      "read_only": true
+    },
+    "schema_version": "sdetkit.diagnostic_execution_plan.v1",
+    "semantic_equivalence_proven": false,
+    "source_artifacts": {
+      "adoption_proof_recommendations": "sdetkit.adoption_proof_recommendations.v1",
+      "adoption_repo_topology": "sdetkit.adoption_repo_topology.v1",
+      "adoption_surface": "sdetkit.adoption_surface.v1"
+    },
+    "summary": {
+      "command_count": 1,
+      "recommended_count": 0,
+      "recommended_next_action": "review_plan_before_execution",
+      "required_count": 1,
+      "review_command_count": 0,
+      "review_first_item_count": 0
+    }
+  },
+  "expected": {
+    "command_count": 1,
+    "review_first_item_count": 0
+  },
+  "expected_error": "command evidence cannot allow execution",
+  "scenario_id": "execution_plan_handoff_authority_unsafe",
+  "scenario_type": "execution_plan_handoff_authority_fail"
+}

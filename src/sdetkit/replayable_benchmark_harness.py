@@ -79,6 +79,23 @@ SECURITY_FRESHNESS_REQUIRED_SCENARIO_TYPES = (
     SECURITY_FRESHNESS_CURRENT_PRIMARY_PASS,
     SECURITY_FRESHNESS_AUTHORITY_FAIL,
 )
+EXECUTION_PLAN_HANDOFF_REPORT_SCHEMA_VERSION = (
+    "sdetkit.replayable_benchmark_harness.execution_plan_handoff.v1"
+)
+EXECUTION_PLAN_HANDOFF_REPORT_MODE = "diagnostic_execution_plan_handoff_fixture"
+EXECUTION_PLAN_HANDOFF_ORACLE_PASS = "execution_plan_handoff_oracle_pass"
+EXECUTION_PLAN_HANDOFF_NOP_PASS = "execution_plan_handoff_nop_pass"
+EXECUTION_PLAN_HANDOFF_AUTHORITY_FAIL = "execution_plan_handoff_authority_fail"
+EXECUTION_PLAN_HANDOFF_SCENARIO_TYPES = {
+    EXECUTION_PLAN_HANDOFF_ORACLE_PASS,
+    EXECUTION_PLAN_HANDOFF_NOP_PASS,
+    EXECUTION_PLAN_HANDOFF_AUTHORITY_FAIL,
+}
+EXECUTION_PLAN_HANDOFF_REQUIRED_SCENARIO_TYPES = (
+    EXECUTION_PLAN_HANDOFF_ORACLE_PASS,
+    EXECUTION_PLAN_HANDOFF_NOP_PASS,
+    EXECUTION_PLAN_HANDOFF_AUTHORITY_FAIL,
+)
 
 SCENARIO_TYPES = {
     "nop_fail",
@@ -513,6 +530,37 @@ def load_security_freshness_scenarios(paths: list[Path]) -> list[JsonObject]:
             raise ValueError(f"security_review is required in {path}")
         if not _as_dict(scenario.get("runtime_proof_artifacts")):
             raise ValueError(f"runtime_proof_artifacts is required in {path}")
+        identifiers.add(scenario_id)
+        scenarios.append(scenario)
+
+    return scenarios
+
+
+def load_execution_plan_handoff_scenarios(paths: list[Path]) -> list[JsonObject]:
+    scenarios: list[JsonObject] = []
+    identifiers: set[str] = set()
+
+    for path in paths:
+        scenario = _read_json_object(path)
+        scenario_id = _string(scenario.get("scenario_id"))
+        scenario_type = _string(scenario.get("scenario_type"))
+        if not scenario_id:
+            raise ValueError(f"scenario_id is required in {path}")
+        if scenario_id in identifiers:
+            raise ValueError(f"duplicate scenario_id: {scenario_id}")
+        if scenario_type not in EXECUTION_PLAN_HANDOFF_SCENARIO_TYPES:
+            raise ValueError(
+                f"unsupported execution-plan handoff scenario_type for {scenario_id}: "
+                f"{scenario_type}"
+            )
+        if not _as_dict(scenario.get("check_intelligence")):
+            raise ValueError(f"check_intelligence is required in {path}")
+        if scenario_type in {
+            EXECUTION_PLAN_HANDOFF_ORACLE_PASS,
+            EXECUTION_PLAN_HANDOFF_AUTHORITY_FAIL,
+        } and not _as_dict(scenario.get("diagnostic_execution_plan")):
+            raise ValueError(f"diagnostic_execution_plan is required in {path}")
+
         identifiers.add(scenario_id)
         scenarios.append(scenario)
 
@@ -1382,6 +1430,298 @@ def build_diagnostic_worker_benchmark_report(scenarios: list[Mapping[str, Any]])
     }
 
 
+def _run_execution_plan_handoff_fixture(
+    scenario: Mapping[str, Any],
+) -> tuple[JsonObject, JsonObject, JsonObject]:
+    scenario_id = _string(scenario.get("scenario_id"))
+    execution_plan = _as_dict(scenario.get("diagnostic_execution_plan"))
+    input_artifacts = {"check_intelligence": f"fixture:{scenario_id}"}
+    if execution_plan:
+        input_artifacts["diagnostic_execution_plan"] = f"fixture:{scenario_id}"
+
+    job = build_diagnostic_job(
+        repo="controlled-fixture/replayable-benchmark",
+        base_sha="fixture-base",
+        head_sha=f"fixture-head-{scenario_id}",
+        event_name="replayable_benchmark",
+        pr_number=0,
+        input_artifacts=input_artifacts,
+    )
+    with tempfile.TemporaryDirectory(
+        prefix="sdetkit-execution-plan-handoff-benchmark-"
+    ) as temp_dir:
+        worker_dir = Path(temp_dir) / "worker"
+        result = run_diagnostic_worker(
+            job,
+            check_intelligence=_as_dict(scenario.get("check_intelligence")),
+            diagnostic_execution_plan=execution_plan or None,
+            out_dir=worker_dir,
+        )
+        vector = _read_json_object(worker_dir / "vector" / "diagnostic-vector.json")
+    return job, result, vector
+
+
+def evaluate_execution_plan_handoff_scenario(
+    scenario: Mapping[str, Any],
+) -> JsonObject:
+    scenario_id = _string(scenario.get("scenario_id"))
+    scenario_type = _string(scenario.get("scenario_type"))
+    if scenario_type not in EXECUTION_PLAN_HANDOFF_SCENARIO_TYPES:
+        raise ValueError(f"unsupported execution-plan handoff scenario_type: {scenario_type}")
+
+    job, worker_result, diagnostic_vector = _run_execution_plan_handoff_fixture(scenario)
+    worker_boundary = _as_dict(worker_result.get("decision_boundary"))
+    worker_handoff = _as_dict(worker_result.get("execution_plan_handoff"))
+    expected = _as_dict(scenario.get("expected"))
+    checks: list[JsonObject] = [
+        _check(
+            name="worker_automation_boundary",
+            passed=not _bool(worker_boundary.get("automation_allowed")),
+            expected=False,
+            actual=_bool(worker_boundary.get("automation_allowed")),
+        ),
+        _check(
+            name="worker_merge_boundary",
+            passed=not _bool(worker_boundary.get("merge_authorized")),
+            expected=False,
+            actual=_bool(worker_boundary.get("merge_authorized")),
+        ),
+        _check(
+            name="worker_semantic_boundary",
+            passed=not _bool(worker_boundary.get("semantic_equivalence_proven")),
+            expected=False,
+            actual=_bool(worker_boundary.get("semantic_equivalence_proven")),
+        ),
+        _check(
+            name="worker_handoff_reporting_only",
+            passed=_bool(worker_handoff.get("reporting_only"))
+            and not _bool(worker_handoff.get("execution_allowed"))
+            and not _bool(worker_handoff.get("current_pr_decision_input")),
+            expected=True,
+            actual=_bool(worker_handoff.get("reporting_only"))
+            and not _bool(worker_handoff.get("execution_allowed"))
+            and not _bool(worker_handoff.get("current_pr_decision_input")),
+        ),
+    ]
+
+    trajectory_records: list[JsonObject] = []
+    observed_error = ""
+
+    if scenario_type == EXECUTION_PLAN_HANDOFF_ORACLE_PASS:
+        trajectory_records = build_worker_trajectory_records(
+            job=job,
+            worker_result=worker_result,
+            diagnostic_vector=diagnostic_vector,
+            repo="controlled-fixture/replayable-benchmark",
+            branch="fixture",
+            commit_sha="fixture-execution-plan-handoff-oracle",
+        )
+        record = _as_dict(trajectory_records[0]) if trajectory_records else {}
+        proof = _as_dict(record.get("proof"))
+        trajectory_handoff = _as_dict(
+            _as_dict(record.get("worker_evidence")).get("execution_plan_handoff")
+        )
+        command_rows = [
+            _as_dict(item)
+            for item in _as_list(trajectory_handoff.get("command_evidence"))
+            if _as_dict(item)
+        ]
+        actual_command_count = _int(
+            _as_dict(trajectory_handoff.get("summary")).get("command_count")
+        )
+        actual_review_first_count = _int(
+            _as_dict(trajectory_handoff.get("summary")).get("review_first_item_count")
+        )
+        checks.extend(
+            [
+                _check(
+                    name="execution_plan_handoff_observed",
+                    passed=_string(trajectory_handoff.get("status")) == "observed",
+                    expected="observed",
+                    actual=_string(trajectory_handoff.get("status")),
+                ),
+                _check(
+                    name="execution_plan_command_count",
+                    passed=actual_command_count == _int(expected.get("command_count")),
+                    expected=_int(expected.get("command_count")),
+                    actual=actual_command_count,
+                ),
+                _check(
+                    name="execution_plan_review_first_count",
+                    passed=actual_review_first_count
+                    == _int(expected.get("review_first_item_count")),
+                    expected=_int(expected.get("review_first_item_count")),
+                    actual=actual_review_first_count,
+                ),
+                _check(
+                    name="execution_plan_commands_non_executable",
+                    passed=bool(command_rows)
+                    and all(not _bool(item.get("execution_allowed")) for item in command_rows),
+                    expected=True,
+                    actual=bool(command_rows)
+                    and all(not _bool(item.get("execution_allowed")) for item in command_rows),
+                ),
+                _check(
+                    name="execution_plan_trajectory_proof_empty",
+                    passed=_as_list(proof.get("commands")) == [],
+                    expected=[],
+                    actual=_as_list(proof.get("commands")),
+                ),
+            ]
+        )
+    elif scenario_type == EXECUTION_PLAN_HANDOFF_NOP_PASS:
+        trajectory_records = build_worker_trajectory_records(
+            job=job,
+            worker_result=worker_result,
+            diagnostic_vector=diagnostic_vector,
+            repo="controlled-fixture/replayable-benchmark",
+            branch="fixture",
+            commit_sha="fixture-execution-plan-handoff-nop",
+        )
+        record = _as_dict(trajectory_records[0]) if trajectory_records else {}
+        proof = _as_dict(record.get("proof"))
+        trajectory_handoff = _as_dict(
+            _as_dict(record.get("worker_evidence")).get("execution_plan_handoff")
+        )
+        summary = _as_dict(trajectory_handoff.get("summary"))
+        checks.extend(
+            [
+                _check(
+                    name="execution_plan_handoff_not_provided",
+                    passed=_string(trajectory_handoff.get("status")) == "not_provided",
+                    expected="not_provided",
+                    actual=_string(trajectory_handoff.get("status")),
+                ),
+                _check(
+                    name="execution_plan_handoff_empty",
+                    passed=_int(summary.get("command_count")) == 0
+                    and _as_list(trajectory_handoff.get("command_evidence")) == [],
+                    expected=True,
+                    actual=_int(summary.get("command_count")) == 0
+                    and _as_list(trajectory_handoff.get("command_evidence")) == [],
+                ),
+                _check(
+                    name="execution_plan_nop_proof_empty",
+                    passed=_as_list(proof.get("commands")) == [],
+                    expected=[],
+                    actual=_as_list(proof.get("commands")),
+                ),
+            ]
+        )
+    else:
+        forged = json.loads(json.dumps(worker_result))
+        forged_handoff = _as_dict(forged.get("execution_plan_handoff"))
+        command_rows = _as_list(forged_handoff.get("command_evidence"))
+        if not command_rows:
+            raise ValueError("execution-plan authority scenario requires command evidence")
+        field = _string(scenario.get("authority_expansion_field")) or "execution_allowed"
+        first_command = _as_dict(command_rows[0])
+        first_command[field] = not _bool(first_command.get(field))
+        expected_error = _string(scenario.get("expected_error"))
+        rejected = False
+        try:
+            build_worker_trajectory_records(
+                job=job,
+                worker_result=forged,
+                diagnostic_vector=diagnostic_vector,
+                repo="controlled-fixture/replayable-benchmark",
+                branch="fixture",
+                commit_sha="fixture-execution-plan-handoff-authority",
+            )
+        except ValueError as exc:
+            observed_error = str(exc)
+            rejected = expected_error in observed_error
+        checks.extend(
+            [
+                _check(
+                    name="forged_execution_plan_authority_rejected",
+                    passed=rejected,
+                    expected=expected_error,
+                    actual=observed_error,
+                ),
+                _check(
+                    name="forged_execution_plan_emits_no_trajectory",
+                    passed=trajectory_records == [],
+                    expected=[],
+                    actual=trajectory_records,
+                ),
+            ]
+        )
+
+    passed = all(_bool(item.get("passed")) for item in checks)
+    return {
+        "scenario_id": scenario_id,
+        "scenario_type": scenario_type,
+        "status": "passed" if passed else "failed",
+        "passed": passed,
+        "attempt_scored": False,
+        "attempt_score": 0,
+        "checks": checks,
+        "execution_plan_handoff_status": _string(worker_handoff.get("status")),
+        "planned_command_count": _int(_as_dict(worker_handoff.get("summary")).get("command_count")),
+        "trajectory_record_count": len(trajectory_records),
+        "observed_error": observed_error,
+    }
+
+
+def build_execution_plan_handoff_benchmark_report(
+    scenarios: list[Mapping[str, Any]],
+) -> JsonObject:
+    results = [evaluate_execution_plan_handoff_scenario(scenario) for scenario in scenarios]
+    type_counts = Counter(_string(item.get("scenario_type")) for item in results)
+    required_present = all(
+        type_counts.get(item, 0) >= 1 for item in EXECUTION_PLAN_HANDOFF_REQUIRED_SCENARIO_TYPES
+    )
+    required_passed = all(
+        any(
+            result.get("scenario_type") == scenario_type and result.get("passed") is True
+            for result in results
+        )
+        for scenario_type in EXECUTION_PLAN_HANDOFF_REQUIRED_SCENARIO_TYPES
+    )
+    passed_count = sum(1 for item in results if item.get("passed") is True)
+    boundary = {
+        "execution_model": "_".join(("read", "only", "execution", "plan", "handoff", "fixture")),
+        "automation_allowed_count": 0,
+        "merge_authorized_count": 0,
+        "semantic_equivalence_claimed_count": 0,
+        "preserved": True,
+        "contributes_to_current_pr_decision": False,
+        "feeds_repo_memory": False,
+        "executes_plan": False,
+        "executes_patch": False,
+        "protected_verifier_semantics_expanded": False,
+    }
+    passed = bool(results) and passed_count == len(results) and required_present and required_passed
+    return {
+        "schema_version": EXECUTION_PLAN_HANDOFF_REPORT_SCHEMA_VERSION,
+        "report_mode": EXECUTION_PLAN_HANDOFF_REPORT_MODE,
+        "status": "passed" if passed else "failed",
+        "scenario_count": len(results),
+        "passed_count": passed_count,
+        "failed_count": len(results) - passed_count,
+        "scenario_type_counts": dict(sorted(type_counts.items())),
+        "replay_manifest": _replay_manifest(results),
+        "required_contract": {
+            "required_scenario_types": list(EXECUTION_PLAN_HANDOFF_REQUIRED_SCENARIO_TYPES),
+            "all_required_present": required_present,
+            "all_required_passed": required_passed,
+            "observed_handoff_pass_rate": _type_rate(results, EXECUTION_PLAN_HANDOFF_ORACLE_PASS),
+            "not_provided_pass_rate": _type_rate(results, EXECUTION_PLAN_HANDOFF_NOP_PASS),
+            "unsafe_authority_rejection_rate": _type_rate(
+                results, EXECUTION_PLAN_HANDOFF_AUTHORITY_FAIL
+            ),
+        },
+        "safety_boundary": boundary,
+        "attempt_scored_count": 0,
+        "scenarios": results,
+        "next_boundary": (
+            "Keep execution-plan handoff benchmark evidence reporting-only; "
+            "do not execute plans or add remediation authority."
+        ),
+    }
+
+
 def _run_security_freshness_worker_fixture(
     scenario: Mapping[str, Any],
 ) -> tuple[JsonObject, JsonObject, JsonObject]:
@@ -1687,6 +2027,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
     is_live = report_mode == LIVE_EVIDENCE_SOURCE
     is_diagnostic_worker = report_mode == DIAGNOSTIC_WORKER_REPORT_MODE
     is_security_freshness = report_mode == SECURITY_FRESHNESS_REPORT_MODE
+    is_execution_plan_handoff = report_mode == EXECUTION_PLAN_HANDOFF_REPORT_MODE
 
     lines = [
         "# Replayable Benchmark Harness report",
@@ -1743,7 +2084,41 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             ]
         )
 
-    if is_security_freshness:
+    if is_execution_plan_handoff:
+        lines.extend(
+            [
+                "## Required execution-plan handoff replay contract",
+                "",
+                (
+                    "- All required scenarios present: "
+                    f"`{str(_bool(required.get('all_required_present'))).lower()}`"
+                ),
+                (
+                    "- All required scenarios passed: "
+                    f"`{str(_bool(required.get('all_required_passed'))).lower()}`"
+                ),
+                (
+                    "- Observed handoff pass rate: "
+                    f"`{float(required.get('observed_handoff_pass_rate', 0.0) or 0.0):.4f}`"
+                ),
+                (
+                    "- Not-provided handoff pass rate: "
+                    f"`{float(required.get('not_provided_pass_rate', 0.0) or 0.0):.4f}`"
+                ),
+                (
+                    "- Unsafe authority rejection rate: "
+                    f"`{float(required.get('unsafe_authority_rejection_rate', 0.0) or 0.0):.4f}`"
+                ),
+                (
+                    "- Current PR decision input: "
+                    f"`{str(_bool(boundary.get('contributes_to_current_pr_decision'))).lower()}`"
+                ),
+                f"- Feeds RepoMemory: `{str(_bool(boundary.get('feeds_repo_memory'))).lower()}`",
+                f"- Executes plan: `{str(_bool(boundary.get('executes_plan'))).lower()}`",
+                "",
+            ]
+        )
+    elif is_security_freshness:
         lines.extend(
             [
                 "## Required security-freshness worker replay contract",
@@ -2001,7 +2376,17 @@ def render_markdown(report: Mapping[str, Any]) -> str:
         )
 
     lines.extend(["", "## Boundary", ""])
-    if is_security_freshness:
+    if is_execution_plan_handoff:
+        lines.extend(
+            [
+                "- This harness replays diagnostic execution-plan handoffs through controlled fixture inputs.",
+                "- It proves observed, not-provided, and forged-authority outcomes.",
+                "- It keeps trajectory proof command arrays empty.",
+                "- It does not execute plans, feed current PR decisions, or feed RepoMemory.",
+                "- It does not apply patches or authorize automation or merge.",
+            ]
+        )
+    elif is_security_freshness:
         lines.extend(
             [
                 "- This harness replays security-freshness DiagnosticWorker behavior through controlled fixture inputs.",
@@ -2078,6 +2463,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Controlled DiagnosticWorker runtime-guard scenario JSON.",
     )
     parser.add_argument(
+        "--execution-plan-handoff-scenario",
+        type=Path,
+        action="append",
+        default=[],
+        help="Controlled diagnostic execution-plan handoff scenario JSON.",
+    )
+    parser.add_argument(
         "--isolated-scenario",
         type=Path,
         action="append",
@@ -2100,7 +2492,21 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
     try:
-        if args.security_freshness_scenario:
+        if args.execution_plan_handoff_scenario:
+            if (
+                args.security_freshness_scenario
+                or args.diagnostic_worker_scenario
+                or args.scenario
+                or args.isolated_scenario
+                or args.isolated_repo_root
+            ):
+                raise ValueError(
+                    "execution-plan handoff scenarios cannot be combined with other benchmark modes"
+                )
+            report = build_execution_plan_handoff_benchmark_report(
+                load_execution_plan_handoff_scenarios(args.execution_plan_handoff_scenario)
+            )
+        elif args.security_freshness_scenario:
             if (
                 args.diagnostic_worker_scenario
                 or args.scenario
