@@ -7,8 +7,12 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from sdetkit.diagnostic_execution_plan import (
+    SCHEMA_VERSION as DIAGNOSTIC_EXECUTION_PLAN_SCHEMA_VERSION,
+)
 from sdetkit.diagnostic_job import (
     EXECUTION_MODE,
+    EXECUTION_PLAN_HANDOFF_SCHEMA_VERSION,
     JOB_TYPE,
     REVIEW_HANDOFF_SCHEMA_VERSION,
     WORKER_NAME,
@@ -99,9 +103,7 @@ def _summary_projection(payload: Mapping[str, Any]) -> JsonObject:
     }
 
 
-def _review_handoff_projection(
-    worker_result: Mapping[str, Any],
-) -> JsonObject:
+def _review_handoff_projection(worker_result: Mapping[str, Any]) -> JsonObject:
     handoff = _as_dict(worker_result.get("review_handoff"))
     if not handoff:
         return {}
@@ -144,6 +146,100 @@ def _review_handoff_projection(
     }
 
 
+def _execution_plan_summary(payload: Mapping[str, Any]) -> JsonObject:
+    fields = (
+        "command_count",
+        "required_count",
+        "recommended_count",
+        "review_command_count",
+        "review_first_item_count",
+    )
+    summary: JsonObject = {}
+    for field in fields:
+        value = payload.get(field)
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            raise ValueError(
+                f"diagnostic execution plan handoff summary.{field} must be a non-negative integer"
+            )
+        summary[field] = value
+    return summary
+
+
+def _execution_plan_handoff_projection(worker_result: Mapping[str, Any]) -> JsonObject:
+    handoff = _as_dict(worker_result.get("execution_plan_handoff"))
+    if not handoff:
+        return {}
+
+    if _string(handoff.get("schema_version")) != EXECUTION_PLAN_HANDOFF_SCHEMA_VERSION:
+        raise ValueError("diagnostic execution plan handoff schema is not supported")
+
+    status = _string(handoff.get("status"))
+    if status not in {"observed", "not_provided"}:
+        raise ValueError("diagnostic execution plan handoff status is not supported")
+    if not _bool(handoff.get("reporting_only")):
+        raise ValueError("diagnostic execution plan handoff must be reporting-only")
+    if _bool(handoff.get("current_pr_decision_input")):
+        raise ValueError("diagnostic execution plan handoff cannot decide the current PR")
+    if _bool(handoff.get("execution_allowed")):
+        raise ValueError("diagnostic execution plan handoff cannot allow execution")
+
+    _assert_false_fields(handoff, source="diagnostic execution plan handoff")
+    boundary = _as_dict(handoff.get("decision_boundary"))
+    _assert_false_fields(boundary, source="diagnostic execution plan handoff")
+    if _bool(boundary.get("execution_allowed")):
+        raise ValueError("diagnostic execution plan handoff expands execution authority")
+
+    summary = _execution_plan_summary(_as_dict(handoff.get("summary")))
+    command_evidence = _as_list(handoff.get("command_evidence"))
+    projected_commands: list[JsonObject] = []
+    for index, raw_command in enumerate(command_evidence, start=1):
+        command = _as_dict(raw_command)
+        if not command:
+            raise ValueError(
+                f"diagnostic execution plan handoff command_evidence[{index}] must be an object"
+            )
+        if not _string(command.get("command_id")):
+            raise ValueError(
+                "diagnostic execution plan handoff "
+                f"command_evidence[{index}].command_id is required"
+            )
+        if _bool(command.get("execution_allowed")):
+            raise ValueError(
+                "diagnostic execution plan handoff command evidence cannot allow execution"
+            )
+        projected_commands.append(copy.deepcopy(command))
+
+    if len(projected_commands) != summary["command_count"]:
+        raise ValueError(
+            "diagnostic execution plan handoff command evidence does not match summary"
+        )
+
+    plan_schema_version = _string(handoff.get("plan_schema_version"))
+    plan_status = _string(handoff.get("plan_status"))
+    if status == "observed":
+        if plan_schema_version != DIAGNOSTIC_EXECUTION_PLAN_SCHEMA_VERSION:
+            raise ValueError("diagnostic execution plan handoff plan schema is not supported")
+        if plan_status != "generated":
+            raise ValueError("diagnostic execution plan handoff plan status must be generated")
+    elif any(summary.values()) or projected_commands:
+        raise ValueError("not-provided diagnostic execution plan handoff must be empty")
+
+    return {
+        "schema_version": EXECUTION_PLAN_HANDOFF_SCHEMA_VERSION,
+        "status": status,
+        "plan_schema_version": plan_schema_version,
+        "plan_status": plan_status,
+        "repo_identity": copy.deepcopy(_as_dict(handoff.get("repo_identity"))),
+        "source_artifacts": copy.deepcopy(_as_dict(handoff.get("source_artifacts"))),
+        "summary": summary,
+        "command_evidence": projected_commands,
+        "reporting_only": True,
+        "current_pr_decision_input": False,
+        "execution_allowed": False,
+        "decision_boundary": copy.deepcopy(boundary),
+    }
+
+
 def validate_worker_handoff(
     *,
     job: Mapping[str, Any],
@@ -179,6 +275,7 @@ def validate_worker_handoff(
         )
 
     _review_handoff_projection(worker_result)
+    _execution_plan_handoff_projection(worker_result)
 
     result_summary = _summary_projection(_as_dict(worker_result.get("summary")))
     vector_summary = _summary_projection(_as_dict(diagnostic_vector.get("summary")))
@@ -224,6 +321,7 @@ def build_worker_trajectory_records(
     )
 
     review_handoff = _review_handoff_projection(worker_result)
+    execution_plan_handoff = _execution_plan_handoff_projection(worker_result)
     records: list[JsonObject] = []
     for base_record in base_records:
         record = copy.deepcopy(base_record)
@@ -271,6 +369,7 @@ def build_worker_trajectory_records(
             "merge_authorized": False,
             "semantic_equivalence_proven": False,
             "review_handoff": copy.deepcopy(review_handoff),
+            "execution_plan_handoff": copy.deepcopy(execution_plan_handoff),
         }
         records.append(record)
     return records
@@ -282,6 +381,9 @@ def build_summary(
     worker_result: Mapping[str, Any],
     trajectory_jsonl: str,
 ) -> JsonObject:
+    execution_plan_handoff = _execution_plan_handoff_projection(worker_result)
+    plan_observed = _string(execution_plan_handoff.get("status")) == "observed"
+    plan_summary = _as_dict(execution_plan_handoff.get("summary"))
     return {
         "schema_version": SCHEMA_VERSION,
         "trajectory_schema_version": TRAJECTORY_SCHEMA_VERSION,
@@ -319,6 +421,11 @@ def build_summary(
                 )
             )
         ),
+        "execution_plan_handoff_count": int(plan_observed),
+        "planned_command_count": _int(plan_summary.get("command_count")) if plan_observed else 0,
+        "execution_plan_review_first_item_count": (
+            _int(plan_summary.get("review_first_item_count")) if plan_observed else 0
+        ),
         "trajectory_jsonl": trajectory_jsonl,
         "reporting_only": True,
         "current_pr_decision_input": False,
@@ -348,6 +455,18 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
             f"`{_int(summary.get('safety_gate_decision_observed_count'))}`"
         ),
         f"- Patch scores retained: `{_int(summary.get('patch_score_observed_count'))}`",
+        (
+            "- Execution-plan handoffs retained: "
+            f"`{_int(summary.get('execution_plan_handoff_count'))}`"
+        ),
+        (
+            "- Planned commands retained as evidence: "
+            f"`{_int(summary.get('planned_command_count'))}`"
+        ),
+        (
+            "- Execution-plan review-first items retained: "
+            f"`{_int(summary.get('execution_plan_review_first_item_count'))}`"
+        ),
         f"- Reporting only: `{str(_bool(summary.get('reporting_only'))).lower()}`",
         (
             "- Current PR decision input: "
@@ -368,7 +487,11 @@ def render_markdown(summary: Mapping[str, Any]) -> str:
             f"`{str(_bool(summary.get('semantic_equivalence_proven'))).lower()}`"
         ),
         "",
-        "- Interpretation: this separate trajectory records the DiagnosticWorkerResult for observation only; it is not consumed by current-run candidate decisions or RepoMemory.",
+        (
+            "- Interpretation: this separate trajectory records the DiagnosticWorkerResult "
+            "for observation only; it is not consumed by current-run candidate decisions "
+            "or RepoMemory."
+        ),
     ]
     return "\n".join(lines).rstrip() + "\n"
 
