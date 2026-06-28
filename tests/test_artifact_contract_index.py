@@ -14,7 +14,6 @@ from sdetkit import (
     candidate_freeze_readiness,
     check_intelligence,
     ci_failure_extractor,
-    diagnostic_execution_plan,
     diagnostic_job,
     diagnostic_signal_snapshot,
     diagnostic_signal_snapshot_history,
@@ -50,10 +49,6 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
     assert payload["schema_version"] == INDEX_SCHEMA_VERSION
 
     entries = {item["id"]: item for item in payload["artifacts"]}
-    assert (
-        entries["diagnostic-execution-plan-json"]["schema_version"]
-        == diagnostic_execution_plan.SCHEMA_VERSION
-    )
     assert (
         entries["diagnostic-signal-snapshot-json"]["schema_version"]
         == diagnostic_signal_snapshot.SCHEMA_VERSION
@@ -427,44 +422,6 @@ def test_artifact_contract_index_includes_local_diagnostic_queue_dashboard_json(
     assert "--queue-path build/local-diagnostic-queue/queue.json" in (entry["produced_by"])
     assert "--format json" in entry["produced_by"]
     assert "--out build/local-diagnostic-queue/dashboard.json" in (entry["produced_by"])
-
-
-def test_artifact_contract_index_includes_diagnostic_execution_plan_json() -> None:
-    payload = build_index()
-    entries = {item["id"]: item for item in payload["artifacts"]}
-
-    artifact_id = "diagnostic-execution-plan-json"
-    assert artifact_id in entries
-
-    entry = entries[artifact_id]
-    assert entry["schema_version"] == diagnostic_execution_plan.SCHEMA_VERSION
-    assert entry["path"] == diagnostic_execution_plan.DEFAULT_OUT
-    assert entry["stability"] == "advanced"
-
-    assert {
-        "schema_version",
-        "plan_status",
-        "repo_identity",
-        "source_artifacts",
-        "summary",
-        "commands",
-        "review_first_items",
-        "policies",
-        "rules",
-        "execution_allowed",
-        "automation_allowed",
-        "patch_application_allowed",
-        "merge_authorized",
-        "semantic_equivalence_proven",
-        "authority_boundary",
-    }.issubset(set(entry["required_fields"]))
-
-    assert entry["produced_by"].startswith(
-        "python -m sdetkit.diagnostic_execution_plan "
-    )
-    assert "--root ." in entry["produced_by"]
-    assert "--out build/sdetkit/diagnostic-execution-plan.json" in entry["produced_by"]
-    assert "--format json" in entry["produced_by"]
 
 
 def test_artifact_contract_index_includes_adoption_learning_report_json() -> None:
