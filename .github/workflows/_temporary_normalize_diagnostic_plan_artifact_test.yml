@@ -1,0 +1,78 @@
+name: Temporary diagnostic plan artifact test normalization
+
+on:
+  push:
+    branches:
+      - feature/register-diagnostic-execution-plan-artifact
+
+permissions:
+  contents: write
+
+jobs:
+  normalize-approved-test:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          ref: feature/register-diagnostic-execution-plan-artifact
+          fetch-depth: 0
+
+      - name: Normalize only the approved test spacing
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("tests/test_artifact_contract_index.py")
+          text = path.read_text(encoding="utf-8")
+          too_many = (
+              '    assert "--out build/local-diagnostic-queue/dashboard.json" in '
+              '(entry["produced_by"])\n\n\n\n'
+              'def test_artifact_contract_index_includes_diagnostic_execution_plan_json()'
+          )
+          normalized_before = (
+              '    assert "--out build/local-diagnostic-queue/dashboard.json" in '
+              '(entry["produced_by"])\n\n\n'
+              'def test_artifact_contract_index_includes_diagnostic_execution_plan_json()'
+          )
+          assert text.count(too_many) == 1
+          text = text.replace(too_many, normalized_before)
+
+          too_few = (
+              '    assert "--format json" in entry["produced_by"]\n\n'
+              'def test_artifact_contract_index_includes_adoption_learning_report_json()'
+          )
+          normalized_after = (
+              '    assert "--format json" in entry["produced_by"]\n\n\n'
+              'def test_artifact_contract_index_includes_adoption_learning_report_json()'
+          )
+          assert text.count(too_few) == 1
+          text = text.replace(too_few, normalized_after)
+          path.write_text(text, encoding="utf-8")
+
+          Path(".github/workflows/_temporary_normalize_diagnostic_plan_artifact_test.yml").unlink()
+          PY
+
+          python -m compileall -q tests/test_artifact_contract_index.py
+          git diff --check
+
+      - name: Commit normalized exact result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "SDETKit Patch Transport"
+          git config user.email "patch-transport@invalid.local"
+          git add -A
+          git commit -m "test(artifacts): normalize diagnostic plan contract coverage"
+          git diff --name-only origin/main...HEAD | sort | tee /tmp/final-files
+          cat > /tmp/expected-final-files <<'EOF'
+          docs/adoption.md
+          docs/artifact-contract-index.json
+          src/sdetkit/artifact_contract_index.py
+          tests/test_artifact_contract_index.py
+          EOF
+          diff -u /tmp/expected-final-files /tmp/final-files
+          git push origin HEAD:feature/register-diagnostic-execution-plan-artifact
