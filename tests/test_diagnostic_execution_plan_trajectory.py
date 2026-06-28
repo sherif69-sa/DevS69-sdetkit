@@ -23,6 +23,31 @@ def _job() -> dict:
     )
 
 
+def _check_intelligence() -> dict:
+    return {
+        "failed_checks": [
+            {
+                "name": "PR Quality local quality gate",
+                "surface": "formatting",
+                "command": "python -m pre_commit run -a",
+                "scope": "pr_owned_only",
+                "diagnosis": {
+                    "title": "Pre-commit formatting drift",
+                    "surface": "formatting",
+                },
+                "first_failure": {
+                    "line": "ruff format..............................Failed",
+                    "line_number": 30,
+                    "tool": "ruff",
+                    "kind": "format_drift",
+                },
+                "safe_to_auto_fix": True,
+                "affected_files": ["src/sdetkit/example.py"],
+            }
+        ]
+    }
+
+
 def _execution_plan() -> dict:
     return {
         "schema_version": "sdetkit.diagnostic_execution_plan.v1",
@@ -35,9 +60,7 @@ def _execution_plan() -> dict:
         },
         "source_artifacts": {
             "adoption_surface": "sdetkit.adoption_surface.v1",
-            "adoption_proof_recommendations": (
-                "sdetkit.adoption_proof_recommendations.v1"
-            ),
+            "adoption_proof_recommendations": ("sdetkit.adoption_proof_recommendations.v1"),
             "adoption_repo_topology": "sdetkit.adoption_repo_topology.v1",
         },
         "summary": {
@@ -109,13 +132,12 @@ def test_trajectory_retains_execution_plan_provenance_without_execution(
     job = _job()
     result = run_diagnostic_worker(
         job,
+        check_intelligence=_check_intelligence(),
         diagnostic_execution_plan=_execution_plan(),
         out_dir=tmp_path / "worker",
     )
     vector = json.loads(
-        (tmp_path / "worker" / "vector" / "diagnostic-vector.json").read_text(
-            encoding="utf-8"
-        )
+        (tmp_path / "worker" / "vector" / "diagnostic-vector.json").read_text(encoding="utf-8")
     )
 
     records = build_worker_trajectory_records(
@@ -156,11 +178,13 @@ def test_trajectory_reports_zero_when_execution_plan_is_not_provided(
     tmp_path: Path,
 ) -> None:
     job = _job()
-    result = run_diagnostic_worker(job, out_dir=tmp_path / "worker")
+    result = run_diagnostic_worker(
+        job,
+        check_intelligence=_check_intelligence(),
+        out_dir=tmp_path / "worker",
+    )
     vector = json.loads(
-        (tmp_path / "worker" / "vector" / "diagnostic-vector.json").read_text(
-            encoding="utf-8"
-        )
+        (tmp_path / "worker" / "vector" / "diagnostic-vector.json").read_text(encoding="utf-8")
     )
     records = build_worker_trajectory_records(
         job=job,
