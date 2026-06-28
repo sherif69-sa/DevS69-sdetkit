@@ -4,9 +4,15 @@ on:
   push:
     branches:
       - feature/register-diagnostic-execution-plan-artifact
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
+
+concurrency:
+  group: temporary-diagnostic-plan-format-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   apply-exact-formatter-correction:
