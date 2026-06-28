@@ -45,6 +45,22 @@ Use the generated `build/sdetkit/adoption-surface.json` to review detected langu
 
 This is an evidence-only handoff. It does not run proof commands, install dependencies, mutate the repository, authorize automation, or authorize merge.
 
+## Build the diagnostic execution plan
+
+Convert the discovered repository surface into a deterministic, non-executing command plan:
+
+```bash
+python -m sdetkit.diagnostic_execution_plan \
+  --root . \
+  --out build/sdetkit/diagnostic-execution-plan.json \
+  --format json
+```
+
+The generated `diagnostic-execution-plan-json` artifact records ordered commands, structured
+arguments, repository-relative working directories, evidence references, expected artifacts,
+timeouts, review reasons, and isolation policies. It does not execute commands or authorize
+execution, automation, dependency installation, target mutation, patch application, or merge.
+
 ## Stage 1 — local proof in the team repo
 
 ```bash
