@@ -956,6 +956,31 @@
       "stability": "advanced"
     },
     {
+      "id": "diagnostic-execution-plan-json",
+      "path": "build/sdetkit/diagnostic-execution-plan.json",
+      "produced_by": "python -m sdetkit.diagnostic_execution_plan --root . --out build/sdetkit/diagnostic-execution-plan.json --format json",
+      "schema_version": "sdetkit.diagnostic_execution_plan.v1",
+      "required_fields": [
+        "schema_version",
+        "plan_status",
+        "repo_root",
+        "repo_identity",
+        "source_artifacts",
+        "summary",
+        "commands",
+        "review_first_items",
+        "policies",
+        "rules",
+        "execution_allowed",
+        "automation_allowed",
+        "patch_application_allowed",
+        "merge_authorized",
+        "semantic_equivalence_proven",
+        "authority_boundary"
+      ],
+      "stability": "advanced"
+    },
+    {
       "id": "adoption-learning-report-json",
       "path": "build/sdetkit/adoption-learning-report.json",
       "produced_by": "python -m sdetkit adoption-learning-report --matrix-json build/sdetkit/adoption-real-world-learning/adoption-real-world-matrix.json --out build/sdetkit/adoption-learning-report.json --format json",

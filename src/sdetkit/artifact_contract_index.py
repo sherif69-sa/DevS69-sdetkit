@@ -15,6 +15,7 @@ from . import (
     check_intelligence,
     ci_failure_extractor,
     cross_report_consistency,
+    diagnostic_execution_plan,
     diagnostic_job,
     diagnostic_signal_snapshot,
     diagnostic_signal_snapshot_history,
@@ -1077,6 +1078,36 @@ def build_index() -> dict[str, Any]:
                     "automation_allowed",
                     "merge_authorized",
                     "semantic_equivalence_proven",
+                ],
+                "stability": "advanced",
+            },
+            {
+                "id": "diagnostic-execution-plan-json",
+                "path": diagnostic_execution_plan.DEFAULT_OUT,
+                "produced_by": (
+                    "python -m sdetkit.diagnostic_execution_plan "
+                    "--root . "
+                    "--out build/sdetkit/diagnostic-execution-plan.json "
+                    "--format json"
+                ),
+                "schema_version": diagnostic_execution_plan.SCHEMA_VERSION,
+                "required_fields": [
+                    "schema_version",
+                    "plan_status",
+                    "repo_root",
+                    "repo_identity",
+                    "source_artifacts",
+                    "summary",
+                    "commands",
+                    "review_first_items",
+                    "policies",
+                    "rules",
+                    "execution_allowed",
+                    "automation_allowed",
+                    "patch_application_allowed",
+                    "merge_authorized",
+                    "semantic_equivalence_proven",
+                    "authority_boundary",
                 ],
                 "stability": "advanced",
             },
