@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from sdetkit.diagnostic_job import (
+    EXECUTION_PLAN_HANDOFF_SCHEMA_VERSION,
     SCHEMA_VERSION,
     WORKER_RESULT_SCHEMA_VERSION,
     build_diagnostic_job,
@@ -26,6 +27,87 @@ def _job() -> dict:
         input_artifacts={"check_intelligence": "build/check-intelligence.json"},
         generated_at="2026-05-27T00:00:00Z",
     )
+
+
+def _execution_plan(
+    *, remote_url: str = "https://github.com/sherif69-sa/DevS69-sdetkit.git"
+) -> dict:
+    return {
+        "schema_version": "sdetkit.diagnostic_execution_plan.v1",
+        "plan_status": "generated",
+        "repo_root": ".",
+        "repo_identity": {
+            "name": "DevS69-sdetkit",
+            "git_detected": True,
+            "remote_url": remote_url,
+        },
+        "source_artifacts": {
+            "adoption_surface": "sdetkit.adoption_surface.v1",
+            "adoption_proof_recommendations": ("sdetkit.adoption_proof_recommendations.v1"),
+            "adoption_repo_topology": "sdetkit.adoption_repo_topology.v1",
+        },
+        "summary": {
+            "command_count": 1,
+            "required_count": 1,
+            "recommended_count": 0,
+            "review_command_count": 0,
+            "review_first_item_count": 0,
+            "recommended_next_action": "review_plan_before_execution",
+        },
+        "commands": [
+            {
+                "step": 1,
+                "command_id": "command-example",
+                "display_command": "python -m pytest -q",
+                "argv": ["python", "-m", "pytest", "-q"],
+                "environment": {},
+                "cwd": ".",
+                "surface": "python",
+                "purpose": "test",
+                "operator_level": "required",
+                "review_required": False,
+                "review_reasons": [],
+                "evidence": [
+                    {
+                        "source": "adoption_surface",
+                        "schema_version": "sdetkit.adoption_surface.v1",
+                        "paths": ["pyproject.toml", "tests/"],
+                    }
+                ],
+                "execution_allowed": False,
+            }
+        ],
+        "review_first_items": [],
+        "policies": {
+            "execution_default": "deny",
+            "explicit_execution_authorization_required": True,
+            "workspace_mode": "isolated_copy_required",
+            "source_target_used_as_command_cwd": False,
+            "network_default": "deny",
+            "automatic_dependency_install_allowed": False,
+            "source_target_mutation_allowed": False,
+        },
+        "rules": {
+            "plan_only": True,
+            "read_only": True,
+            "no_command_execution": True,
+            "no_dependency_install": True,
+            "no_target_repo_mutation": True,
+            "no_patch_application": True,
+        },
+        "execution_allowed": False,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "authority_boundary": {
+            "execution_allowed": False,
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
 
 
 def _formatting_intelligence() -> dict:
@@ -299,3 +381,94 @@ def test_diagnostic_worker_promotes_current_security_evidence_as_non_authorizing
     assert result["decision_boundary"]["current_pr_decision_input"] is False
     assert result["decision_boundary"]["automation_allowed"] is False
     assert result["decision_boundary"]["merge_authorized"] is False
+
+
+def test_diagnostic_worker_projects_execution_plan_without_running_commands(
+    tmp_path: Path,
+) -> None:
+    result = run_diagnostic_worker(
+        _job(),
+        check_intelligence=_formatting_intelligence(),
+        diagnostic_execution_plan=_execution_plan(),
+        out_dir=tmp_path,
+    )
+
+    handoff = result["execution_plan_handoff"]
+    assert handoff["schema_version"] == EXECUTION_PLAN_HANDOFF_SCHEMA_VERSION
+    assert handoff["status"] == "observed"
+    assert handoff["plan_status"] == "generated"
+    assert handoff["summary"]["command_count"] == 1
+    assert handoff["summary"]["review_first_item_count"] == 0
+    assert handoff["repo_identity"]["identity_match"] is True
+    assert handoff["command_evidence"][0]["command_id"] == "command-example"
+    assert handoff["command_evidence"][0]["evidence"][0]["paths"] == [
+        "pyproject.toml",
+        "tests/",
+    ]
+    assert handoff["command_evidence"][0]["execution_allowed"] is False
+    assert handoff["execution_allowed"] is False
+    assert handoff["reporting_only"] is True
+    assert all(value is False for value in handoff["decision_boundary"].values())
+    assert result["execution"]["proof_commands_executed"] is False
+
+    markdown = render_markdown(_job(), result)
+    assert "Diagnostic execution plan handoff" in markdown
+    assert "Commands executed by worker: `false`" in markdown
+
+
+def test_diagnostic_worker_rejects_execution_plan_authority_expansion(
+    tmp_path: Path,
+) -> None:
+    plan = _execution_plan()
+    plan["automation_allowed"] = True
+
+    with pytest.raises(ValueError, match="invalid diagnostic execution plan"):
+        run_diagnostic_worker(
+            _job(),
+            diagnostic_execution_plan=plan,
+            out_dir=tmp_path,
+        )
+
+
+def test_diagnostic_worker_rejects_execution_plan_repository_mismatch(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="repository identity does not match"):
+        run_diagnostic_worker(
+            _job(),
+            diagnostic_execution_plan=_execution_plan(
+                remote_url="https://github.com/example/other.git"
+            ),
+            out_dir=tmp_path,
+        )
+
+
+def test_diagnostic_job_cli_carries_execution_plan_handoff(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    plan_path = tmp_path / "diagnostic-execution-plan.json"
+    plan_path.write_text(json.dumps(_execution_plan()), encoding="utf-8")
+    out_dir = tmp_path / "job"
+
+    rc = main(
+        [
+            "--diagnostic-execution-plan",
+            str(plan_path),
+            "--repo",
+            "sherif69-sa/DevS69-sdetkit",
+            "--head-sha",
+            "head123",
+            "--out-dir",
+            str(out_dir),
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    stdout = json.loads(capsys.readouterr().out)
+    assert stdout["execution_plan_handoff"]["status"] == "observed"
+    persisted = json.loads((out_dir / "diagnostic-worker-result.json").read_text(encoding="utf-8"))
+    assert persisted["execution_plan_handoff"]["summary"]["command_count"] == 1
+    assert persisted["execution"]["proof_commands_executed"] is False
