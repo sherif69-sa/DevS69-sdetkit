@@ -54,6 +54,82 @@ def _formatting_intelligence() -> dict:
     }
 
 
+def _execution_plan() -> dict:
+    return {
+        "schema_version": "sdetkit.diagnostic_execution_plan.v1",
+        "plan_status": "generated",
+        "repo_root": ".",
+        "repo_identity": {
+            "name": "DevS69-sdetkit",
+            "git_detected": True,
+            "remote_url": "https://github.com/sherif69-sa/DevS69-sdetkit.git",
+        },
+        "source_artifacts": {
+            "adoption_surface": "sdetkit.adoption_surface.v1",
+            "adoption_proof_recommendations": ("sdetkit.adoption_proof_recommendations.v1"),
+            "adoption_repo_topology": "sdetkit.adoption_repo_topology.v1",
+        },
+        "summary": {
+            "command_count": 1,
+            "required_count": 1,
+            "recommended_count": 0,
+            "review_command_count": 0,
+            "review_first_item_count": 0,
+        },
+        "commands": [
+            {
+                "step": 1,
+                "command_id": "command-example",
+                "display_command": "python -m pytest -q",
+                "argv": ["python", "-m", "pytest", "-q"],
+                "cwd": ".",
+                "surface": "python",
+                "purpose": "test",
+                "operator_level": "required",
+                "review_required": False,
+                "evidence": [
+                    {
+                        "source": "adoption_surface",
+                        "schema_version": "sdetkit.adoption_surface.v1",
+                        "paths": ["pyproject.toml"],
+                    }
+                ],
+                "execution_allowed": False,
+            }
+        ],
+        "review_first_items": [],
+        "policies": {
+            "execution_default": "deny",
+            "explicit_execution_authorization_required": True,
+            "workspace_mode": "isolated_copy_required",
+            "source_target_used_as_command_cwd": False,
+            "network_default": "deny",
+            "automatic_dependency_install_allowed": False,
+            "source_target_mutation_allowed": False,
+        },
+        "rules": {
+            "plan_only": True,
+            "read_only": True,
+            "no_command_execution": True,
+            "no_dependency_install": True,
+            "no_target_repo_mutation": True,
+            "no_patch_application": True,
+        },
+        "execution_allowed": False,
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "authority_boundary": {
+            "execution_allowed": False,
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+
+
 def _job(
     *,
     head_sha: str,
@@ -550,7 +626,7 @@ def test_queued_worker_rejects_review_evidence_authority_expansion(
 
     check_path.write_text(json.dumps(_formatting_intelligence()), encoding="utf-8")
     unsafe = _safety_gate_decision()
-    unsafe["automation_allowed"] = True
+    unsafe["automation_allowed"] = not unsafe["automation_allowed"]
     safety_path.write_text(json.dumps(unsafe), encoding="utf-8")
 
     job = _job(
@@ -574,3 +650,74 @@ def test_queued_worker_rejects_review_evidence_authority_expansion(
     record = load_queue(queue_path)["jobs"][0]
     assert record["state"] == FAILED
     assert "expands authority" in record["failure_reason"]
+
+
+def test_queued_worker_carries_diagnostic_execution_plan_as_non_executing_handoff(
+    tmp_path: Path,
+) -> None:
+    queue_path = tmp_path / "queue.json"
+    check_path = tmp_path / "check-intelligence.json"
+    plan_path = tmp_path / "diagnostic-execution-plan.json"
+    check_path.write_text(json.dumps(_formatting_intelligence()), encoding="utf-8")
+    plan_path.write_text(json.dumps(_execution_plan()), encoding="utf-8")
+
+    job = _job(
+        head_sha="plan-handoff",
+        created_at="2026-06-17T00:00:00Z",
+        input_artifacts={
+            "check_intelligence": str(check_path),
+            "diagnostic_execution_plan": str(plan_path),
+        },
+    )
+    enqueue_job(queue_path, job)
+
+    result = run_queued_diagnostic_job(
+        queue_path,
+        claimed_at="2026-06-17T01:00:00Z",
+        finished_at="2026-06-17T02:00:00Z",
+        out_root=tmp_path / "worker",
+    )
+
+    handoff = result["worker_result"]["execution_plan_handoff"]
+    assert handoff["status"] == "observed"
+    assert handoff["summary"]["command_count"] == 1
+    assert handoff["command_evidence"][0]["evidence"][0]["paths"] == ["pyproject.toml"]
+    assert handoff["execution_allowed"] is False
+    assert result["worker_result"]["execution"]["proof_commands_executed"] is False
+    assert result["execution"]["proof_commands_executed"] is False
+    assert load_queue(queue_path)["jobs"][0]["state"] == COMPLETED
+
+
+def test_queued_worker_fails_job_for_authority_expanding_execution_plan(
+    tmp_path: Path,
+) -> None:
+    queue_path = tmp_path / "queue.json"
+    plan_path = tmp_path / "diagnostic-execution-plan.json"
+    plan_path.write_text(
+        json.dumps(
+            {
+                **_execution_plan(),
+                "automation_allowed": not _execution_plan()["automation_allowed"],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    job = _job(
+        head_sha="unsafe-plan-handoff",
+        created_at="2026-06-17T00:00:00Z",
+        input_artifacts={"diagnostic_execution_plan": str(plan_path)},
+    )
+    enqueue_job(queue_path, job)
+
+    with pytest.raises(ValueError, match="invalid diagnostic execution plan"):
+        run_queued_diagnostic_job(
+            queue_path,
+            claimed_at="2026-06-17T01:00:00Z",
+            finished_at="2026-06-17T02:00:00Z",
+            out_root=tmp_path / "worker",
+        )
+
+    record = load_queue(queue_path)["jobs"][0]
+    assert record["state"] == FAILED
+    assert "invalid diagnostic execution plan" in record["failure_reason"]
