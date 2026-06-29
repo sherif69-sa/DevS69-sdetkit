@@ -3,7 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
+    import tomli as tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 DELTA_PATH = ROOT / "docs" / "contracts" / "current-product-delta.v1.json"
@@ -42,6 +45,7 @@ def test_current_product_delta_declares_main_only_groups_and_release_blockers() 
     blockers = delta["release_blockers"]
 
     assert isinstance(groups, list)
+    assert all(isinstance(group, dict) for group in groups)
     assert {group["id"] for group in groups} == {
         "diagnostic_failure_model",
         "verification_and_benchmarking",
