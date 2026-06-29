@@ -125,10 +125,12 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
+  "sdetkit.diagnostic_execution_plan",
   "sdetkit.diagnostic_job",
   "sdetkit.diagnostic_worker_trajectory",
   "sdetkit.failure_vector",
   "sdetkit.safety_gate",
+  "sdetkit.trajectory_store",
 ]
 ignore_errors = false
 
