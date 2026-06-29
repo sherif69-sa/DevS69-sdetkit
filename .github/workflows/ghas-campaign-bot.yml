@@ -49,6 +49,7 @@ jobs:
             };
 
             const notes = [];
+            const alertFetchFailures = [];
             const dayMs = 24 * 60 * 60 * 1000;
 
             async function fetchAlerts(path, label) {
@@ -62,7 +63,9 @@ jobs:
                 });
                 return Array.isArray(response.data) ? response.data : [];
               } catch (error) {
-                notes.push(`${label} unavailable: ${error.message}. Add GHAS_READ_TOKEN if broader security scopes are required.`);
+                const message = `${label} unavailable: ${error.message}. Add GHAS_READ_TOKEN if broader security scopes are required.`;
+                notes.push(message);
+                alertFetchFailures.push(message);
                 return [];
               }
             }
@@ -199,6 +202,18 @@ jobs:
               per_page: 100,
             });
             const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('🧭 GHAS campaign planner'));
+            const actionableFindings = codeAlerts.length > 0
+              || secretAlerts.length > 0
+              || codeSummary.autofixHints > 0
+              || secretSummary.bypassed > 0;
+
+            if (!actionableFindings && alertFetchFailures.length === 0) {
+              for (const oldIssue of priorIssues) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+              core.notice('GHAS campaign planner: no actionable open alerts; no issue created.');
+              return;
+            }
 
             for (const oldIssue of priorIssues) {
               if (oldIssue.title !== title) {
