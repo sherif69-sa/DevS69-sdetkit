@@ -139,6 +139,13 @@ module = [
 ]
 ignore_errors = false
 
+[[tool.mypy.overrides]]
+module = [
+  "sdetkit.adoption_proof_recommendations",
+  "sdetkit.adoption_repo_topology",
+]
+ignore_errors = false
+
 [tool.mutmut]
 paths_to_mutate = ["src/sdetkit"]
 tests_dir = ["tests"]
