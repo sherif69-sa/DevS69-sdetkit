@@ -9,6 +9,7 @@ from sdetkit import (
     adoption_public_repo_trial_matrix_report,
     adoption_surface,
     automation_health,
+    benchmark_control_scorecard,
     candidate_collision_checklist,
     candidate_evidence_checklist,
     candidate_freeze_readiness,
@@ -84,6 +85,17 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         entries["replayable-benchmark-report-json"]["schema_version"]
         == replayable_benchmark_harness.SCHEMA_VERSION
     )
+    assert (
+        entries["benchmark-control-scorecard-json"]["schema_version"]
+        == benchmark_control_scorecard.SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "overall_score",
+        "dimension_scores",
+        "reports",
+        "decision_boundary",
+    }.issubset(set(entries["benchmark-control-scorecard-json"]["required_fields"]))
     assert {
         "schema_version",
         "decision",
