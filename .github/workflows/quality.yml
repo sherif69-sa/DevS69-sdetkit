@@ -7,6 +7,16 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "30 4 * * 1"
+  pull_request:
+    paths:
+      - ".github/workflows/quality.yml"
+      - "quality.sh"
+      - "pyproject.toml"
+      - "scripts/check_coverage_truth.py"
+      - "scripts/check_quality_truth_baseline.py"
+      - "docs/contracts/quality-truth-baseline.v1.json"
+      - "tests/test_coverage_truth.py"
+      - "tests/test_quality_truth_baseline.py"
 
 permissions:
   contents: read
@@ -29,23 +39,43 @@ jobs:
             pyproject.toml
             requirements-test.txt
             requirements-docs.txt
+            constraints-ci.txt
 
       - name: Install project + quality tooling
         run: |
           python -m pip install -c constraints-ci.txt -e .[dev,test,docs]
+
       - name: Doctor (ASCII)
-        run: |
-          python -m sdetkit.doctor --ascii
+        run: python -m sdetkit.doctor --ascii
+
       - name: Lint
-        run: |
-          python -m pre_commit run -a
+        run: python -m pre_commit run -a
 
       - name: Feature registry maintenance lane
-        run: |
-          bash quality.sh registry
+        run: bash quality.sh registry
 
-      - name: Tests
+      - name: Whole-package coverage and critical-spine gate
         env:
-          COV_FAIL_UNDER: "95"
+          PYTEST_ADDOPTS: "-n auto"
         run: |
-          bash quality.sh cov
+          mkdir -p build/quality
+          python -m pytest \
+            --cov=sdetkit \
+            --cov-report=term-missing \
+            --cov-report=json:build/quality/coverage-full.json \
+            --cov-fail-under=0
+          python scripts/check_coverage_truth.py \
+            --coverage build/quality/coverage-full.json \
+            --contract docs/contracts/quality-truth-baseline.v1.json \
+            --out build/quality/coverage-truth-check.json
+          python scripts/check_quality_truth_baseline.py \
+            --out build/quality/quality-truth-check.json
+
+      - name: Upload quality truth evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: quality-truth-evidence
+          path: build/quality/
+          retention-days: 30
+          if-no-files-found: error
