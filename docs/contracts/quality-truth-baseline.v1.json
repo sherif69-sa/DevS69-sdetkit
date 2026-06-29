@@ -6,14 +6,26 @@
     "critical_spine": {
       "enforced": true,
       "minimum_percent": 95,
-      "scope_source": "quality.sh"
+      "scope_source": "quality.sh",
+      "files": [
+        "src/sdetkit/__main__.py",
+        "src/sdetkit/_entrypoints.py",
+        "src/sdetkit/_toml.py",
+        "src/sdetkit/atomicio.py",
+        "src/sdetkit/reliability_evidence_pack.py",
+        "src/sdetkit/report.py",
+        "src/sdetkit/roadmap_manifest.py",
+        "src/sdetkit/sqlite_scalar.py",
+        "src/sdetkit/textutil.py"
+      ]
     },
     "whole_package": {
       "measurement_required": true,
       "non_regression_required": true,
       "blocking_threshold_reviewed": false,
       "current_percent": null,
-      "artifact_path": "build/quality/coverage-full.json"
+      "artifact_path": "build/quality/coverage-full.json",
+      "check_artifact_path": "build/quality/coverage-truth-check.json"
     }
   },
   "typing": {
