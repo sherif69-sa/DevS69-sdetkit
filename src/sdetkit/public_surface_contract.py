@@ -101,53 +101,57 @@ def load_public_command_surface_contract() -> dict[str, object]:
     return cast(dict[str, object], loaded)
 
 
+def _string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value if str(item).strip()]
+
+
 def render_root_help_groups() -> str:
-    """Render concise command-family guidance for root CLI help text."""
+    """Render a concise, stability-aware root-help journey.
+
+    The complete command-family inventory remains available in the command-surface
+    documentation and machine-readable contract. Root help intentionally avoids
+    repeating every advanced or transition-era lane.
+    """
+
     contract = load_public_command_surface_contract()
-    canonical_obj = contract.get(
-        "canonical_first_path",
-        [
-            "python -m sdetkit gate fast",
-            "python -m sdetkit gate release",
-            "python -m sdetkit doctor",
-        ],
+    canonical = _string_list(contract.get("canonical_first_path"))
+    next_step = str(
+        contract.get("advanced_supported_next_step", "python -m sdetkit kits list")
     )
-    canonical = canonical_obj if isinstance(canonical_obj, list) else []
-    next_step = contract.get("advanced_supported_next_step", "python -m sdetkit kits list")
-    tier_a = contract.get("tier_a_contract_commands", [])
-    tier_b = contract.get("tier_b_contract_commands", [])
-    best_effort = contract.get("best_effort_compatibility_commands", [])
+    tier_a = _string_list(contract.get("tier_a_contract_commands"))
+    tier_b = _string_list(contract.get("tier_b_contract_commands"))
+    compatibility = _string_list(contract.get("best_effort_compatibility_commands"))
+
     canonical_summary = " -> ".join(
-        cmd.replace("python -m sdetkit ", "") if isinstance(cmd, str) else str(cmd)
-        for cmd in canonical
+        command.replace("python -m sdetkit ", "") for command in canonical
     )
-    lines = [
-        "Command discovery (stability-aware):",
-        "",
-        "  Canonical first-time path (public / stable):",
-        f"    {canonical_summary}",
-        "",
-        "  Frozen command contracts:",
-        f"    Tier A (public/stable): {', '.join(tier_a) if isinstance(tier_a, list) else ''}",
-        f"    Tier B (advanced/supported): {', '.join(tier_b) if isinstance(tier_b, list) else ''}",
-        "    Remaining lanes: best-effort compatibility (subject to change).",
-        (
-            f"      {', '.join(best_effort)}"
-            if isinstance(best_effort, list)
-            else "      legacy compatibility lanes"
-        ),
-        "",
-        "  Then expand deliberately:",
-    ]
-    for family in PUBLIC_SURFACE_CONTRACT:
-        name = family.name.replace("-", " ")
-        lines.append(
-            f"  {name} [{family.stability_tier}]"
-            f" (use first: {'yes' if family.first_time_recommended else 'no'};"
-            f" transition-era: {'yes' if family.transition_legacy_oriented else 'no'}):"
-        )
-        lines.append(f"    {family.role}")
-        lines.append(f"    {', '.join(family.top_level_commands)}")
-        lines.append("")
-    lines.append(f"Next step (advanced but supported): {next_step}")
-    return "\n".join(lines)
+    canonical_commands = " | ".join(canonical)
+
+    return "\n".join(
+        [
+            "Command discovery (stability-aware):",
+            "",
+            "  release confidence canonical path [Public / stable] (use first: yes; transition-era: no):",
+            "    Know if a change is ready to ship.",
+            f"    {canonical_summary}",
+            f"    {canonical_commands}",
+            "",
+            "  Frozen command contracts:",
+            f"    Tier A (public/stable): {', '.join(tier_a)}",
+            f"    Tier B (advanced/supported): {', '.join(tier_b)}",
+            "",
+            "  umbrella kits [Advanced but supported] (use first: no; transition-era: no):",
+            f"    Continue with: {next_step}",
+            "",
+            "  Experimental / incubator:",
+            "    Hidden from the first-run journey; see docs/command-surface.md.",
+            "",
+            "  Compatibility namespace:",
+            f"    {', '.join(compatibility)}",
+            "    Existing aliases remain available; new users should stay on the canonical path.",
+            "",
+            f"Next step (advanced but supported): {next_step}",
+        ]
+    )
