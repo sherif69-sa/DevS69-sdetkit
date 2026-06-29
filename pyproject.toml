@@ -132,6 +132,13 @@ module = [
 ]
 ignore_errors = false
 
+[[tool.mypy.overrides]]
+module = [
+  "sdetkit.diagnostic_execution_plan",
+  "sdetkit.trajectory_store",
+]
+ignore_errors = false
+
 [tool.mutmut]
 paths_to_mutate = ["src/sdetkit"]
 tests_dir = ["tests"]

@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -148,7 +148,7 @@ def _read_json(path: Path | None) -> JsonObject:
     return payload
 
 
-def _write_jsonl(path: Path, records: list[Mapping[str, Any]]) -> None:
+def _write_jsonl(path: Path, records: Sequence[Mapping[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     lines = [json.dumps(record, sort_keys=True) for record in records]
     path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
@@ -618,7 +618,7 @@ def build_trajectory_records(
     return records
 
 
-def summarize_trajectory_records(records: list[Mapping[str, Any]]) -> JsonObject:
+def summarize_trajectory_records(records: Sequence[Mapping[str, Any]]) -> JsonObject:
     return {
         "schema_version": SCHEMA_VERSION,
         "record_count": len(records),
@@ -648,7 +648,7 @@ def summarize_trajectory_records(records: list[Mapping[str, Any]]) -> JsonObject
     }
 
 
-def write_trajectory_records(records: list[Mapping[str, Any]], out: Path) -> JsonObject:
+def write_trajectory_records(records: Sequence[Mapping[str, Any]], out: Path) -> JsonObject:
     _write_jsonl(out, records)
     summary = summarize_trajectory_records(records)
     summary["trajectory_jsonl"] = out.as_posix()
