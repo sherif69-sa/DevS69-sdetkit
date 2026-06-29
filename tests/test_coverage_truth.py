@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT_PATH = ROOT / "scripts/check_coverage_truth.py"
+SCRIPT_PATH = ROOT / "scripts" / "check_coverage_truth.py"
 CONTRACT_PATH = ROOT / "docs/contracts/quality-truth-baseline.v1.json"
 
 
@@ -18,7 +18,12 @@ def _module():
     return module
 
 
-def _coverage(path: Path, *, critical_missing: int = 0, whole_percent: float = 70.0) -> None:
+def _coverage(
+    path: Path,
+    *,
+    critical_missing: int = 0,
+    whole_percent: float = 87.89,
+) -> None:
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
     files = {}
     for critical_path in contract["coverage"]["critical_spine"]["files"]:
@@ -34,8 +39,8 @@ def _coverage(path: Path, *, critical_missing: int = 0, whole_percent: float = 7
             {
                 "files": files,
                 "totals": {
-                    "covered_lines": 700,
-                    "num_statements": 1000,
+                    "covered_lines": 8789,
+                    "num_statements": 10000,
                     "percent_covered": whole_percent,
                 },
             }
@@ -44,7 +49,7 @@ def _coverage(path: Path, *, critical_missing: int = 0, whole_percent: float = 7
     )
 
 
-def test_coverage_truth_preserves_critical_threshold_and_records_whole_package(
+def test_coverage_truth_preserves_critical_and_whole_package_baselines(
     tmp_path: Path,
 ) -> None:
     coverage_path = tmp_path / "coverage.json"
@@ -55,8 +60,9 @@ def test_coverage_truth_preserves_critical_threshold_and_records_whole_package(
     assert payload["ok"] is True
     assert payload["critical_spine"]["percent"] == 100.0
     assert payload["critical_spine"]["minimum_percent"] == 95.0
-    assert payload["whole_package"]["percent"] == 70.0
-    assert payload["whole_package"]["baseline_enforced"] is False
+    assert payload["whole_package"]["percent"] == 87.89
+    assert payload["whole_package"]["baseline_enforced"] is True
+    assert payload["whole_package"]["reviewed_baseline_percent"] == 87.89
 
 
 def test_coverage_truth_rejects_critical_spine_regression(tmp_path: Path) -> None:
@@ -68,6 +74,16 @@ def test_coverage_truth_rejects_critical_spine_regression(tmp_path: Path) -> Non
     assert payload["ok"] is False
     assert payload["critical_spine"]["percent"] == 90.0
     assert payload["checks"]["critical_spine_meets_minimum"] is False
+
+
+def test_coverage_truth_rejects_whole_package_regression(tmp_path: Path) -> None:
+    coverage_path = tmp_path / "coverage.json"
+    _coverage(coverage_path, whole_percent=87.88)
+
+    payload = _module().evaluate_coverage_truth(coverage_path, CONTRACT_PATH)
+
+    assert payload["ok"] is False
+    assert payload["checks"]["whole_package_non_regression"] is False
 
 
 def test_coverage_truth_rejects_missing_critical_file(tmp_path: Path) -> None:
