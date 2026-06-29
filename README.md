@@ -57,8 +57,6 @@ Secondary lanes cover review, investigation, quality, maintenance, and CI automa
 - **Guarded automation path:** remediation and PR automation are explicit opt-in lanes, not the default behavior.
 - **One workflow everywhere:** use the same core commands locally, in CI, and during operator handoff.
 
-## Core operator lanes
-
 ## Real-world learning and governance lanes
 
 The `main` branch includes read-only adoption and learning lanes for understanding real repositories before recommending proof or remediation. These main-only lanes are advisory by default: they collect evidence, classify repo shape, surface review-first unknowns, and produce upgrade candidates for SDETKit itself without installing target dependencies, running target tests, mutating target repositories, or opening target PRs/issues.
@@ -83,11 +81,8 @@ Authority boundary remains unchanged: `automation_allowed=false`, `patch_applica
 | CI-ready | `./ci.sh quick --artifact-dir .sdetkit/out` and `make merge-ready` | You want a local CI-equivalent smoke path. |
 | First proof | `make first-proof` | You are validating this repository's full first-proof bundle. |
 
-For a guided command router, run:
+Guided router: `make upgrade-next`.
 
-```bash
-make upgrade-next
-```
 ## Product proof
 
 <!-- product-proof-start -->
