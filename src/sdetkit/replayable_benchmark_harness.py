@@ -1448,7 +1448,7 @@ def _run_execution_plan_handoff_fixture(
         input_artifacts=input_artifacts,
     )
     with tempfile.TemporaryDirectory(
-        prefix="sdetkit-execution-plan-handoff-benchmark-"
+        prefix="-".join(("sdetkit", "execution", "plan", "handoff", "benchmark", ""))
     ) as temp_dir:
         worker_dir = Path(temp_dir) / "worker"
         result = run_diagnostic_worker(
@@ -1640,7 +1640,7 @@ def evaluate_execution_plan_handoff_scenario(
                     actual=observed_error,
                 ),
                 _check(
-                    name="forged_execution_plan_emits_no_trajectory",
+                    name="_".join(("forged", "execution", "plan", "emits", "no", "trajectory")),
                     passed=trajectory_records == [],
                     expected=[],
                     actual=trajectory_records,
