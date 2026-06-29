@@ -78,7 +78,8 @@ jobs:
             --contract docs/contracts/quality-truth-baseline.v1.json \
             --out build/quality/coverage-truth-check.json
           python scripts/check_quality_truth_baseline.py \
-            --out build/quality/quality-truth-check.json
+            --out build/quality/quality-truth-check.json \
+            --typing-debt-out build/quality/typing-debt-inventory.json
 
       - name: Upload quality truth evidence
         if: always()
