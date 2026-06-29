@@ -17,9 +17,7 @@ def _single_match(pattern: str, content: str, source: str) -> str:
 def test_ruff_version_is_aligned_across_toolchain_surfaces() -> None:
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     constraints = (ROOT / "constraints-ci.txt").read_text(encoding="utf-8")
-    pre_commit = yaml.safe_load(
-        (ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8")
-    )
+    pre_commit = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8"))
 
     pyproject_version = _single_match(
         r'^\s*"ruff==([^"\s]+)"', pyproject, "pyproject.toml"
