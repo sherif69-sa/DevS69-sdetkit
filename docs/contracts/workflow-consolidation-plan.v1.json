@@ -1,7 +1,7 @@
 {
   "plan_id": "sdetkit.workflow-consolidation.v1",
-  "generated_at_utc": "2026-04-16T00:00:00Z",
-  "current_workflow_count": 43,
+  "generated_at_utc": "2026-06-30T00:00:00Z",
+  "current_workflow_count": 56,
   "target_primary_workflow_count": 12,
   "keep_primary": [
     "ci.yml",
@@ -60,6 +60,19 @@
     "kpi-weekly.yml",
     "release-readiness-radar-bot.yml"
   ],
+  "execution_order": [
+    "record_current_topology_and_required_checks",
+    "stop_zero_signal_issue_creation",
+    "consume_canonical_ci_artifacts",
+    "introduce_reusable_workflow_bundles",
+    "retire_only_with_parity_evidence"
+  ],
+  "zero_signal_issue_policy": {
+    "create_issue_when_actionable_finding_count_is_zero": false,
+    "close_existing_tracker_when_findings_reach_zero": true,
+    "preserve_issue_when_source_evidence_is_unavailable": true,
+    "first_enforced_workflow": "ghas-campaign-bot.yml"
+  },
   "phases": [
     "phase1_baseline_and_parity",
     "phase2_bundle_introduction",
@@ -72,6 +85,8 @@
     "max_primary_workflows": 12,
     "duplicate_trigger_reduction_percent": 50,
     "ci_minutes_reduction_percent": 20,
-    "no_coverage_regression": true
+    "no_coverage_regression": true,
+    "zero_signal_generated_issues": 0,
+    "required_check_compatibility_preserved": true
   }
 }
