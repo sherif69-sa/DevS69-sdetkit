@@ -1,0 +1,75 @@
+{
+  "schema_version": "sdetkit.quality_truth_baseline.v1",
+  "generated_on": "2026-06-29",
+  "status": "staged_migration_visible",
+  "coverage": {
+    "critical_spine": {
+      "enforced": true,
+      "minimum_percent": 95,
+      "observed_percent": 96.69,
+      "observed_statement_count": 966,
+      "scope_source": "quality.sh",
+      "files": [
+        "src/sdetkit/__main__.py",
+        "src/sdetkit/_entrypoints.py",
+        "src/sdetkit/_toml.py",
+        "src/sdetkit/atomicio.py",
+        "src/sdetkit/reliability_evidence_pack.py",
+        "src/sdetkit/report.py",
+        "src/sdetkit/roadmap_manifest.py",
+        "src/sdetkit/sqlite_scalar.py",
+        "src/sdetkit/textutil.py"
+      ]
+    },
+    "whole_package": {
+      "measurement_required": true,
+      "non_regression_required": true,
+      "blocking_threshold_reviewed": true,
+      "current_percent": 87.89,
+      "observed_statement_count": 66030,
+      "artifact_path": "build/quality/coverage-full.json",
+      "check_artifact_path": "build/quality/coverage-truth-check.json"
+    }
+  },
+  "typing": {
+    "blanket_package_suppression_present": true,
+    "blanket_module_pattern": "sdetkit.*",
+    "new_unrecorded_suppression_allowed": false,
+    "source_module_count": 486,
+    "typing_debt_module_count": 474,
+    "typing_debt_inventory_sha256": "38e949d397eadffa94385375663b6ff2e9fc6ffe3cbdbac91ea5143565c01ad6",
+    "typing_debt_artifact_path": "build/quality/typing-debt-inventory.json",
+    "explicitly_type_checked_modules": [
+      "sdetkit.adoption_evidence_bundle",
+      "sdetkit.adoption_external_integration",
+      "sdetkit.adoption_learning",
+      "sdetkit.adoption_proof_recommendations",
+      "sdetkit.adoption_public_repo_trial_matrix_report",
+      "sdetkit.adoption_repo_topology",
+      "sdetkit.diagnostic_execution_plan",
+      "sdetkit.diagnostic_job",
+      "sdetkit.diagnostic_worker_trajectory",
+      "sdetkit.failure_vector",
+      "sdetkit.safety_gate",
+      "sdetkit.trajectory_store"
+    ],
+    "migration_complete": false
+  },
+  "runtime": {
+    "declared_python_versions": [
+      "3.10",
+      "3.11",
+      "3.12"
+    ],
+    "canonical_ci_matrix": [
+      "3.11",
+      "3.12"
+    ],
+    "python_310_full_ci_proven": false
+  },
+  "authority_boundary": {
+    "tests_may_be_weakened": false,
+    "quality_gates_may_be_hidden": false,
+    "unmeasured_quality_may_be_claimed": false
+  }
+}
