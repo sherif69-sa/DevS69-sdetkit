@@ -8,7 +8,12 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
     import tomli as tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
-RATCHET_MODULES = {"sdetkit.failure_vector", "sdetkit.safety_gate"}
+RATCHET_MODULES = {
+    "sdetkit.diagnostic_job",
+    "sdetkit.diagnostic_worker_trajectory",
+    "sdetkit.failure_vector",
+    "sdetkit.safety_gate",
+}
 
 
 def _module_names(override: dict[str, object]) -> set[str]:
@@ -20,7 +25,7 @@ def _module_names(override: dict[str, object]) -> set[str]:
     return set()
 
 
-def test_failure_vector_and_safety_gate_are_removed_from_blanket_mypy_suppression() -> None:
+def test_selected_modules_are_removed_from_blanket_mypy_suppression() -> None:
     config = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     overrides = config["tool"]["mypy"]["overrides"]
 

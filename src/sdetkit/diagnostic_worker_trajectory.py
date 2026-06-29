@@ -305,7 +305,7 @@ def build_worker_trajectory_records(
     commit_sha: str = "",
     pr_number: int = 0,
     generated_at: str = DEFAULT_GENERATED_AT,
-) -> list[JsonObject]:
+) -> list[Mapping[str, Any]]:
     validate_worker_handoff(
         job=job,
         worker_result=worker_result,
@@ -322,7 +322,7 @@ def build_worker_trajectory_records(
 
     review_handoff = _review_handoff_projection(worker_result)
     execution_plan_handoff = _execution_plan_handoff_projection(worker_result)
-    records: list[JsonObject] = []
+    records: list[Mapping[str, Any]] = []
     for base_record in base_records:
         record = copy.deepcopy(base_record)
         observed_decision = _as_dict(record.get("decision"))
