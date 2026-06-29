@@ -41,6 +41,9 @@ jobs:
             requirements-docs.txt
             constraints-ci.txt
 
+      - name: Prepare quality evidence directory
+        run: mkdir -p build/quality
+
       - name: Install project + quality tooling
         run: |
           python -m pip install -c constraints-ci.txt -e .[dev,test,docs]
@@ -49,7 +52,14 @@ jobs:
         run: python -m sdetkit.doctor --ascii
 
       - name: Lint
-        run: python -m pre_commit run -a
+        shell: bash
+        run: |
+          set +e
+          python -m pre_commit run -a 2>&1 | tee build/quality/pre-commit.log
+          rc=${PIPESTATUS[0]}
+          git diff --binary > build/quality/pre-commit.diff
+          set -e
+          exit "$rc"
 
       - name: Feature registry maintenance lane
         run: bash quality.sh registry
@@ -58,7 +68,6 @@ jobs:
         env:
           PYTEST_ADDOPTS: "-n auto"
         run: |
-          mkdir -p build/quality
           python -m pytest \
             --cov=sdetkit \
             --cov-report=term-missing \
