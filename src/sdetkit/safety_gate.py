@@ -40,9 +40,9 @@ class FailureVectorLike(Protocol):
 SAFE_FIX_CLASSES = frozenset({"formatter_only", "lint"})
 
 GENERAL_BLOCKED_ACTIONS = (
-    "delete or " "weaken tests",
-    "skip CI or " "verifier checks",
-    "edit workflow gates " "to hide the failure",
+    "delete or " + "weaken tests",
+    "skip CI or " + "verifier checks",
+    "edit workflow gates " + "to hide the failure",
     "modify files outside allowed_files",
 )
 
