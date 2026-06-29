@@ -26,6 +26,7 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const weekOf = new Date().toISOString().slice(0, 10);
+            const generatedBodyMarker = 'This issue is auto-generated to turn open GHAS alerts into actionable remediation campaigns.';
             const labels = [
               { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
               { name: 'security', color: 'b60205', description: 'Security operations and hardening work' },
@@ -61,7 +62,10 @@ jobs:
                   per_page: 100,
                   headers,
                 });
-                return Array.isArray(response.data) ? response.data : [];
+                if (!Array.isArray(response.data)) {
+                  throw new Error('unexpected non-array response');
+                }
+                return response.data;
               } catch (error) {
                 const message = `${label} unavailable: ${error.message}. Add GHAS_READ_TOKEN if broader security scopes are required.`;
                 notes.push(message);
@@ -146,7 +150,7 @@ jobs:
             const ageOrder = ['0-6d', '7-13d', '14-29d', '30+d', 'unknown'];
 
             const body = [
-              'This issue is auto-generated to turn open GHAS alerts into actionable remediation campaigns.',
+              generatedBodyMarker,
               '',
               '## Why this exists',
               '- GitHub security campaigns help teams burn down alert backlogs in focused slices.',
@@ -201,7 +205,10 @@ jobs:
               labels: 'ghas',
               per_page: 100,
             });
-            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('🧭 GHAS campaign planner'));
+            const priorIssues = openIssues.data.filter(
+              (issue) => issue.title.startsWith('🧭 GHAS campaign planner')
+                && issue.body?.startsWith(generatedBodyMarker),
+            );
             const actionableFindings = codeAlerts.length > 0
               || secretAlerts.length > 0
               || codeSummary.autofixHints > 0
