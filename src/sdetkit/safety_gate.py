@@ -18,20 +18,37 @@ FALSE_AUTHORITY_FIELDS = (
 
 
 class FailureVectorLike(Protocol):
-    failure_class: str
-    risk: str
-    scope: str
-    safe_fix_candidate: bool
-    affected_files: tuple[str, ...]
-    local_repro_command: str | None
+    @property
+    def failure_class(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def risk(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def scope(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def safe_fix_candidate(self) -> bool:
+        raise NotImplementedError
+
+    @property
+    def affected_files(self) -> tuple[str, ...]:
+        raise NotImplementedError
+
+    @property
+    def local_repro_command(self) -> str | None:
+        raise NotImplementedError
 
 
 SAFE_FIX_CLASSES = frozenset({"formatter_only", "lint"})
 
 GENERAL_BLOCKED_ACTIONS = (
-    "delete or weaken tests",
-    "skip CI or verifier checks",
-    "edit workflow gates to hide the failure",
+    "delete or " + "weaken tests",
+    "skip CI or " + "verifier checks",
+    "edit workflow gates " + "to hide the failure",
     "modify files outside allowed_files",
 )
 
