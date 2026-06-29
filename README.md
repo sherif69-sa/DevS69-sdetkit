@@ -24,6 +24,10 @@ python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor --format json --out build/doctor.json
 ```
 
+## Release channel
+
+The command above installs the latest published package, `sdetkit==1.0.3`. The repository `main` branch contains additional diagnostic, verification, benchmark, trajectory, and adoption capabilities that remain **main-only** until the next qualified release. See the [current product delta](docs/current-product-delta.md) before using repository documentation as installed-wheel proof.
+
 Generated first-run artifacts:
 
 ```text
@@ -53,11 +57,9 @@ Secondary lanes cover review, investigation, quality, maintenance, and CI automa
 - **Guarded automation path:** remediation and PR automation are explicit opt-in lanes, not the default behavior.
 - **One workflow everywhere:** use the same core commands locally, in CI, and during operator handoff.
 
-## Core operator lanes
-
 ## Real-world learning and governance lanes
 
-SDETKit now includes read-only adoption and learning lanes for understanding real repositories before recommending proof or remediation. These lanes are advisory by default: they collect evidence, classify repo shape, surface review-first unknowns, and produce upgrade candidates for SDETKit itself without installing target dependencies, running target tests, mutating target repositories, or opening target PRs/issues.
+The `main` branch includes read-only adoption and learning lanes for understanding real repositories before recommending proof or remediation. These main-only lanes are advisory by default: they collect evidence, classify repo shape, surface review-first unknowns, and produce upgrade candidates for SDETKit itself without installing target dependencies, running target tests, mutating target repositories, or opening target PRs/issues.
 
 Use these lanes when you need to evaluate repository readiness beyond the local release gate:
 
@@ -79,11 +81,8 @@ Authority boundary remains unchanged: `automation_allowed=false`, `patch_applica
 | CI-ready | `./ci.sh quick --artifact-dir .sdetkit/out` and `make merge-ready` | You want a local CI-equivalent smoke path. |
 | First proof | `make first-proof` | You are validating this repository's full first-proof bundle. |
 
-For a guided command router, run:
+Guided router: `make upgrade-next`.
 
-```bash
-make upgrade-next
-```
 ## Product proof
 
 <!-- product-proof-start -->
@@ -111,6 +110,7 @@ For this repository, `make first-proof` emits `FIRST_PROOF_DECISION=SHIP|NO-SHIP
 
 ## Documentation map
 
+- Current released versus main product delta: [docs/current-product-delta.md](docs/current-product-delta.md)
 - Start in 5 minutes: [docs/start-here-5-minutes.md](docs/start-here-5-minutes.md)
 - Docs index: [docs/index.md](docs/index.md)
 - Operator essentials: [docs/operator-essentials.md](docs/operator-essentials.md)
