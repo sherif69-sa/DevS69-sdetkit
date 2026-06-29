@@ -28,9 +28,7 @@ def test_execution_plan_and_trajectory_store_are_type_checked() -> None:
     overrides = config["tool"]["mypy"]["overrides"]
 
     ratchets = [
-        override
-        for override in overrides
-        if _module_names(override) == PROVENANCE_RATCHET_MODULES
+        override for override in overrides if _module_names(override) == PROVENANCE_RATCHET_MODULES
     ]
     assert len(ratchets) == 1
     assert ratchets[0].get("ignore_errors") is False
