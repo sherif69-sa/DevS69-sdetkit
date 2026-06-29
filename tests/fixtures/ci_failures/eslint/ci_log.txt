@@ -1,0 +1,3 @@
+$ npx eslint .
+src/util.ts:8:5 error 'result' is assigned a value but never used no-unused-vars
+Process completed with exit code 1

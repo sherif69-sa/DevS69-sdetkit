@@ -1,0 +1,3 @@
+$ go vet ./...
+internal/logging/logging.go:27:2: fmt.Printf call has arguments but no formatting directives
+Process completed with exit code 1

@@ -1,0 +1,5 @@
+Run go test ./...
+--- FAIL: TestTotal (0.00s)
+    calculator/calculator_test.go:18: expected 4, got 3
+FAIL	example.com/project/calculator	0.003s
+Process completed with exit code 1

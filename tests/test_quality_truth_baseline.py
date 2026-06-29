@@ -24,8 +24,11 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
 
     assert payload["ok"] is True
     assert all(payload["checks"].values())
-    assert payload["observed"]["source_module_count"] == 486
+    assert payload["observed"]["source_module_count"] == 487
     assert payload["observed"]["typing_debt_module_count"] == 474
+    assert (
+        "sdetkit.failure_vector_adapters" in payload["observed"]["explicitly_type_checked_modules"]
+    )
     assert payload["typing_debt_inventory"]["module_count"] == 474
     assert len(payload["typing_debt_inventory"]["modules"]) == 474
 
