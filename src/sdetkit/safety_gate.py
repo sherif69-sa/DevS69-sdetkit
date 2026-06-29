@@ -19,22 +19,28 @@ FALSE_AUTHORITY_FIELDS = (
 
 class FailureVectorLike(Protocol):
     @property
-    def failure_class(self) -> str: ...
+    def failure_class(self) -> str:
+        raise NotImplementedError
 
     @property
-    def risk(self) -> str: ...
+    def risk(self) -> str:
+        raise NotImplementedError
 
     @property
-    def scope(self) -> str: ...
+    def scope(self) -> str:
+        raise NotImplementedError
 
     @property
-    def safe_fix_candidate(self) -> bool: ...
+    def safe_fix_candidate(self) -> bool:
+        raise NotImplementedError
 
     @property
-    def affected_files(self) -> tuple[str, ...]: ...
+    def affected_files(self) -> tuple[str, ...]:
+        raise NotImplementedError
 
     @property
-    def local_repro_command(self) -> str | None: ...
+    def local_repro_command(self) -> str | None:
+        raise NotImplementedError
 
 
 SAFE_FIX_CLASSES = frozenset({"formatter_only", "lint"})
