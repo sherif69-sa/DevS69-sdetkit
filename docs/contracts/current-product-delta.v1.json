@@ -1,0 +1,72 @@
+{
+  "schema_version": "sdetkit.current_product_delta.v1",
+  "generated_on": "2026-06-29",
+  "released_version": "1.0.3",
+  "released_on": "2026-04-18",
+  "release_candidate_version": "1.1.0",
+  "release_status": "main_ahead_of_published_package",
+  "canonical_first_path": [
+    "python -m sdetkit gate fast",
+    "python -m sdetkit gate release",
+    "python -m sdetkit doctor"
+  ],
+  "published_package_contract": {
+    "channel": "pypi",
+    "version": "1.0.3",
+    "scope": "released",
+    "documentation_must_not_imply_main_only_capabilities_are_published": true
+  },
+  "main_only_capability_groups": [
+    {
+      "id": "diagnostic_failure_model",
+      "stability": "advanced_supported",
+      "capabilities": [
+        "FailureVector extraction and normalized failure contracts",
+        "review-first SafetyGate decisions",
+        "DiagnosticJob and execution-plan handoffs"
+      ]
+    },
+    {
+      "id": "verification_and_benchmarking",
+      "stability": "experimental_incubator",
+      "capabilities": [
+        "isolated proof execution",
+        "protected verifier decisions",
+        "patch scoring and anti-cheat checks",
+        "replayable remediation benchmark scorecards"
+      ]
+    },
+    {
+      "id": "trajectory_and_memory",
+      "stability": "experimental_incubator",
+      "capabilities": [
+        "trajectory storage",
+        "repository memory",
+        "diagnostic learning and pattern insights"
+      ]
+    },
+    {
+      "id": "external_adoption_intelligence",
+      "stability": "advanced_supported",
+      "capabilities": [
+        "read-only repository surface discovery",
+        "proof recommendation generation",
+        "external integration evidence bundles",
+        "public repository trial-matrix reporting"
+      ]
+    }
+  ],
+  "release_blockers": [
+    "reconstruct the full changelog from 1.0.3 to current main",
+    "prove the exact release candidate wheel on Python 3.10, 3.11, and 3.12",
+    "refresh live-adoption proof at the release candidate SHA",
+    "complete workflow and operator-surface consolidation",
+    "replace token-based publishing with reviewed Trusted Publishing configuration"
+  ],
+  "authority_boundary": {
+    "automation_allowed": false,
+    "patch_application_allowed": false,
+    "merge_authorized": false,
+    "semantic_equivalence_proven": false
+  }
+}
