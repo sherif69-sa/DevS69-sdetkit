@@ -24,18 +24,10 @@ def test_failure_vector_and_safety_gate_are_removed_from_blanket_mypy_suppressio
     config = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     overrides = config["tool"]["mypy"]["overrides"]
 
-    blanket = [
-        override
-        for override in overrides
-        if _module_names(override) == {"sdetkit.*"}
-    ]
+    blanket = [override for override in overrides if _module_names(override) == {"sdetkit.*"}]
     assert len(blanket) == 1
     assert blanket[0].get("ignore_errors") is True
 
-    ratchets = [
-        override
-        for override in overrides
-        if _module_names(override) == RATCHET_MODULES
-    ]
+    ratchets = [override for override in overrides if _module_names(override) == RATCHET_MODULES]
     assert len(ratchets) == 1
     assert ratchets[0].get("ignore_errors") is False
