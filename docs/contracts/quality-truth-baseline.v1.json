@@ -35,7 +35,7 @@
     "blanket_package_suppression_present": true,
     "blanket_module_pattern": "sdetkit.*",
     "new_unrecorded_suppression_allowed": false,
-    "source_module_count": 487,
+    "source_module_count": 488,
     "typing_debt_module_count": 474,
     "typing_debt_inventory_sha256": "38e949d397eadffa94385375663b6ff2e9fc6ffe3cbdbac91ea5143565c01ad6",
     "typing_debt_artifact_path": "build/quality/typing-debt-inventory.json",
@@ -51,6 +51,7 @@
       "sdetkit.diagnostic_worker_trajectory",
       "sdetkit.failure_vector",
       "sdetkit.failure_vector_adapters",
+      "sdetkit.protected_proof_chain",
       "sdetkit.safety_gate",
       "sdetkit.trajectory_store"
     ],
