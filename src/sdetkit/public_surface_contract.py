@@ -117,9 +117,7 @@ def render_root_help_groups() -> str:
 
     contract = load_public_command_surface_contract()
     canonical = _string_list(contract.get("canonical_first_path"))
-    next_step = str(
-        contract.get("advanced_supported_next_step", "python -m sdetkit kits list")
-    )
+    next_step = str(contract.get("advanced_supported_next_step", "python -m sdetkit kits list"))
     tier_a = _string_list(contract.get("tier_a_contract_commands"))
     tier_b = _string_list(contract.get("tier_b_contract_commands"))
     compatibility = _string_list(contract.get("best_effort_compatibility_commands"))
