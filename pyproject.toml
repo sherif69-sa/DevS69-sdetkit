@@ -153,6 +153,13 @@ module = [
 ]
 ignore_errors = false
 
+[[tool.mypy.overrides]]
+module = [
+  "sdetkit.adoption_learning",
+  "sdetkit.adoption_public_repo_trial_matrix_report",
+]
+ignore_errors = false
+
 [tool.mutmut]
 paths_to_mutate = ["src/sdetkit"]
 tests_dir = ["tests"]
