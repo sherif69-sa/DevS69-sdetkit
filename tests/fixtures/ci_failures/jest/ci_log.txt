@@ -1,0 +1,8 @@
+Run npm test
+> jest --runInBand
+FAIL src/math.test.ts
+  add
+    ✕ returns the expected total (5 ms)
+
+AssertionError: expected 3 to be 4
+Process completed with exit code 1
