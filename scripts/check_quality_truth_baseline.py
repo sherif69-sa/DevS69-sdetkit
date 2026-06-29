@@ -75,8 +75,7 @@ def evaluate_quality_truth(root: Path, contract_path: Path) -> dict[str, object]
         is bool(typing["blanket_package_suppression_present"]),
         "checked_modules_match": checked == set(typing["explicitly_type_checked_modules"]),
         "source_module_count_matches": len(source_modules) == int(typing["source_module_count"]),
-        "typing_debt_count_matches": len(debt_modules)
-        == int(typing["typing_debt_module_count"]),
+        "typing_debt_count_matches": len(debt_modules) == int(typing["typing_debt_module_count"]),
         "typing_debt_digest_matches": debt_digest == typing["typing_debt_inventory_sha256"],
         "declared_python_versions_match": declared == sorted(runtime["declared_python_versions"]),
         "canonical_ci_versions_match": matrix == sorted(runtime["canonical_ci_matrix"]),
