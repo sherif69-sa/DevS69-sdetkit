@@ -51,9 +51,7 @@ def evaluate_coverage_truth(
     baseline = whole_contract.get("current_percent")
     baseline_reviewed = bool(whole_contract.get("blocking_threshold_reviewed"))
     whole_non_regression = (
-        not baseline_reviewed
-        or baseline is None
-        or whole_percent >= float(baseline)
+        not baseline_reviewed or baseline is None or whole_percent >= float(baseline)
     )
 
     checks = {
