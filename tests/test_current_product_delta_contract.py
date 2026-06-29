@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from importlib import resources
 from pathlib import Path
 
 try:
@@ -9,11 +10,19 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
     import tomli as tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
-DELTA_PATH = ROOT / "docs" / "contracts" / "current-product-delta.v1.json"
+DOCS_DELTA_PATH = ROOT / "docs" / "contracts" / "current-product-delta.v1.json"
+
+
+def _delta_text() -> str:
+    return (
+        resources.files("sdetkit")
+        .joinpath("data/current_product_delta.v1.json")
+        .read_text(encoding="utf-8")
+    )
 
 
 def _delta() -> dict[str, object]:
-    payload = json.loads(DELTA_PATH.read_text(encoding="utf-8"))
+    payload = json.loads(_delta_text())
     assert isinstance(payload, dict)
     return payload
 
@@ -55,6 +64,13 @@ def test_current_product_delta_declares_main_only_groups_and_release_blockers() 
     assert all(group["capabilities"] for group in groups)
     assert isinstance(blockers, list)
     assert len(blockers) >= 5
+
+
+def test_docs_product_delta_copy_matches_packaged_contract_when_present() -> None:
+    if not DOCS_DELTA_PATH.exists():
+        return
+
+    assert json.loads(DOCS_DELTA_PATH.read_text(encoding="utf-8")) == _delta()
 
 
 def test_readme_links_release_delta_and_avoids_unqualified_main_claims() -> None:
