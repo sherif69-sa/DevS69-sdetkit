@@ -123,6 +123,13 @@ module = [
 ]
 ignore_errors = true
 
+[[tool.mypy.overrides]]
+module = [
+  "sdetkit.failure_vector",
+  "sdetkit.safety_gate",
+]
+ignore_errors = false
+
 [tool.mutmut]
 paths_to_mutate = ["src/sdetkit"]
 tests_dir = ["tests"]
