@@ -9,6 +9,7 @@ from sdetkit import (
     adoption_public_repo_trial_matrix_report,
     adoption_surface,
     automation_health,
+    benchmark_control_regression_gate,
     benchmark_control_scorecard,
     candidate_collision_checklist,
     candidate_evidence_checklist,
@@ -96,6 +97,28 @@ def test_artifact_contract_index_schema_versions_are_in_sync() -> None:
         "reports",
         "decision_boundary",
     }.issubset(set(entries["benchmark-control-scorecard-json"]["required_fields"]))
+    assert (
+        entries["benchmark-control-baseline-json"]["schema_version"]
+        == benchmark_control_regression_gate.BASELINE_SCHEMA_VERSION
+    )
+    assert (
+        entries["benchmark-control-regression-report-json"]["schema_version"]
+        == benchmark_control_regression_gate.SCHEMA_VERSION
+    )
+    assert {
+        "schema_version",
+        "baseline_id",
+        "activation",
+        "minimums",
+        "authority_contract",
+    }.issubset(set(entries["benchmark-control-baseline-json"]["required_fields"]))
+    assert {
+        "schema_version",
+        "regression_detected",
+        "checks",
+        "regressions",
+        "decision_boundary",
+    }.issubset(set(entries["benchmark-control-regression-report-json"]["required_fields"]))
     assert {
         "schema_version",
         "decision",
