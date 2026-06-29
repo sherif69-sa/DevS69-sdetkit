@@ -36,7 +36,7 @@ def test_public_surface_alignment_script_passes() -> None:
 def test_public_command_surface_contract_is_machine_readable_and_stable() -> None:
     contract = load_public_command_surface_contract()
     assert contract == json.loads(PUBLIC_COMMAND_CONTRACT.read_text(encoding="utf-8"))
-    assert contract["contract_version"] == 1
+    assert contract["contract_version"] == 2
     assert contract["canonical_first_path"] == [
         "python -m sdetkit gate fast",
         "python -m sdetkit gate release",
@@ -47,6 +47,8 @@ def test_public_command_surface_contract_is_machine_readable_and_stable() -> Non
     assert contract["tier_a_contract_commands"] == ["gate", "doctor", "release"]
     assert "kits" in contract["tier_b_contract_commands"]
     assert "legacy" in contract["best_effort_compatibility_commands"]
+    assert contract["root_help_contract"]["detailed_family_inventory"] is False
+    assert len(contract["primary_documentation_journeys"]) == 4
 
 
 def test_root_help_groups_include_machine_readable_contract_commands() -> None:
@@ -56,7 +58,8 @@ def test_root_help_groups_include_machine_readable_contract_commands() -> None:
         assert command in help_groups
     assert "gate fast -> gate release -> doctor" in help_groups
     assert "Tier A (public/stable): gate, doctor, release" in help_groups
-    assert "Remaining lanes: best-effort compatibility" in help_groups
+    assert "Compatibility namespace:" in help_groups
+    assert "Existing aliases remain available" in help_groups
     assert contract["advanced_supported_next_step"] in help_groups
 
 

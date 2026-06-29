@@ -1,5 +1,5 @@
 {
-  "contract_version": 1,
+  "contract_version": 2,
   "primary_outcome": "know if a change is ready to ship",
   "canonical_first_path": [
     "python -m sdetkit gate fast",
@@ -38,5 +38,38 @@
     "Public / stable",
     "Advanced but supported",
     "Experimental / incubator"
+  ],
+  "root_help_contract": {
+    "detailed_family_inventory": false,
+    "show_canonical_path": true,
+    "show_policy_tiers": true,
+    "show_compatibility_namespace": true,
+    "advanced_inventory_command": "python -m sdetkit kits list",
+    "experimental_inventory_location": "docs/command-surface.md"
+  },
+  "primary_make_targets": [
+    "install",
+    "merge-ready",
+    "first-proof",
+    "package-validate",
+    "release-preflight"
+  ],
+  "primary_documentation_journeys": [
+    {
+      "id": "install_and_decide",
+      "entry": "docs/start-here-5-minutes.md"
+    },
+    {
+      "id": "investigate_failure",
+      "entry": "docs/investigation-operator-guide.md"
+    },
+    {
+      "id": "adopt_ci",
+      "entry": "docs/recommended-ci-flow.md"
+    },
+    {
+      "id": "reference",
+      "entry": "docs/cli.md"
+    }
   ]
 }
