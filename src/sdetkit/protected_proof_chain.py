@@ -200,8 +200,7 @@ def build_protected_proof_chain(
         violations.extend(f"{stage}:{item}" for item in stage_violations)
     if violations:
         raise ValueError(
-            "protected proof artifacts attempted to expand authority: "
-            + ", ".join(violations)
+            "protected proof artifacts attempted to expand authority: " + ", ".join(violations)
         )
     material = _material(repository_text, commit_text, entries)
     return {**material, "chain_id": _sha256(_canonical_json(material))}
