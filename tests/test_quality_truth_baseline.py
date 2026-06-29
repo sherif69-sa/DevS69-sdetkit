@@ -24,6 +24,10 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
 
     assert payload["ok"] is True
     assert all(payload["checks"].values())
+    assert payload["observed"]["source_module_count"] == 486
+    assert payload["observed"]["typing_debt_module_count"] == 474
+    assert payload["typing_debt_inventory"]["module_count"] == 474
+    assert len(payload["typing_debt_inventory"]["modules"]) == 474
 
 
 def test_quality_truth_baseline_keeps_unfinished_migrations_visible() -> None:
@@ -32,8 +36,11 @@ def test_quality_truth_baseline_keeps_unfinished_migrations_visible() -> None:
     assert contract["status"] == "staged_migration_visible"
     assert contract["typing"]["blanket_package_suppression_present"] is True
     assert contract["typing"]["migration_complete"] is False
+    assert contract["typing"]["new_unrecorded_suppression_allowed"] is False
     assert contract["coverage"]["whole_package"]["measurement_required"] is True
-    assert contract["coverage"]["whole_package"]["blocking_threshold_reviewed"] is False
+    assert contract["coverage"]["whole_package"]["blocking_threshold_reviewed"] is True
+    assert contract["coverage"]["whole_package"]["current_percent"] == 87.89
+    assert contract["coverage"]["critical_spine"]["observed_percent"] == 96.69
     assert contract["runtime"]["python_310_full_ci_proven"] is False
 
 
