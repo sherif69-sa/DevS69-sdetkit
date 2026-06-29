@@ -36,6 +36,7 @@ doctor.json
 !.sdetkit/gate.fast.snapshot.json
 !.sdetkit/gate.release.snapshot.json
 !.sdetkit/premium-remediation-scripts.json
+!.sdetkit/benchmark-control-baseline.json
 !.sdetkit/workflows/
 !.sdetkit/workflows/platform_problem.yaml
 

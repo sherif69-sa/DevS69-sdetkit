@@ -1,0 +1,35 @@
+{
+  "activation": {
+    "automatic_updates_allowed": false,
+    "model": "protected_main_merge",
+    "requires_human_review": true
+  },
+  "authority_contract": {
+    "automation_allowed": false,
+    "current_pr_decision_input": false,
+    "executes_patch": false,
+    "executes_plan": false,
+    "expanded_authority_fields": [],
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "reporting_only": true,
+    "semantic_equivalence_proven": false
+  },
+  "baseline_id": "benchmark-control-bootstrap-v1",
+  "minimums": {
+    "dimension_scores": {
+      "report_status": 100.0,
+      "required_contracts": 100.0,
+      "safety_boundaries": 100.0,
+      "scenario_health": 100.0
+    },
+    "overall_score": 100.0,
+    "report_count": 1,
+    "scenario_count": 3,
+    "scenario_pass_rate": 1.0
+  },
+  "required_benchmark_modes": [
+    "diagnostic_execution_plan_handoff_fixture"
+  ],
+  "schema_version": "sdetkit.benchmark_control_baseline.v1"
+}
