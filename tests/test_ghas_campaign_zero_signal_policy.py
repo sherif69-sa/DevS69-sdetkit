@@ -25,8 +25,19 @@ def test_ghas_campaign_does_not_create_zero_signal_issue() -> None:
 def test_ghas_campaign_preserves_unknown_evidence_for_review() -> None:
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
+    assert "if (!Array.isArray(response.data))" in workflow
+    assert "unexpected non-array response" in workflow
     assert "alertFetchFailures.push(message);" in workflow
     assert "alertFetchFailures.length === 0" in workflow
+
+
+def test_ghas_campaign_only_closes_workflow_managed_trackers() -> None:
+    workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+
+    assert "const generatedBodyMarker =" in workflow
+    assert "issue.title.startsWith('🧭 GHAS campaign planner')" in workflow
+    assert "issue.body?.startsWith(generatedBodyMarker)" in workflow
+    assert "const priorIssues = openIssues.data.filter(" in workflow
 
 
 def test_workflow_consolidation_contract_tracks_current_topology_and_policy() -> None:
