@@ -19,12 +19,8 @@ def test_ruff_version_is_aligned_across_toolchain_surfaces() -> None:
     constraints = (ROOT / "constraints-ci.txt").read_text(encoding="utf-8")
     pre_commit = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8"))
 
-    pyproject_version = _single_match(
-        r'^\s*"ruff==([^"\s]+)"', pyproject, "pyproject.toml"
-    )
-    constraints_version = _single_match(
-        r"^ruff==([^\s#]+)", constraints, "constraints-ci.txt"
-    )
+    pyproject_version = _single_match(r'^\s*"ruff==([^"\s]+)"', pyproject, "pyproject.toml")
+    constraints_version = _single_match(r"^ruff==([^\s#]+)", constraints, "constraints-ci.txt")
     ruff_repositories = [
         repository
         for repository in pre_commit["repos"]
