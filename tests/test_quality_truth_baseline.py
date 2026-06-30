@@ -24,13 +24,13 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
 
     assert payload["ok"] is True
     assert all(payload["checks"].values())
-    assert payload["observed"]["source_module_count"] == 488
-    assert payload["observed"]["typing_debt_module_count"] == 474
+    assert payload["observed"]["source_module_count"] == 490
+    assert payload["observed"]["typing_debt_module_count"] == 476
     checked = payload["observed"]["explicitly_type_checked_modules"]
     assert "sdetkit.failure_vector_adapters" in checked
     assert "sdetkit.protected_proof_chain" in checked
-    assert payload["typing_debt_inventory"]["module_count"] == 474
-    assert len(payload["typing_debt_inventory"]["modules"]) == 474
+    assert payload["typing_debt_inventory"]["module_count"] == 476
+    assert len(payload["typing_debt_inventory"]["modules"]) == 476
 
 
 def test_quality_truth_baseline_keeps_unfinished_migrations_visible() -> None:
