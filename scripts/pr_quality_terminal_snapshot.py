@@ -82,9 +82,7 @@ def collect(api: GitHubApi, pr_number: int, head_sha: str, contexts):
         f"repos/{api.repository}/commits/{head_sha}/check-runs",
         "check_runs",
     )
-    statuses = api.request(f"repos/{api.repository}/commits/{head_sha}/status").get(
-        "statuses", []
-    )
+    statuses = api.request(f"repos/{api.repository}/commits/{head_sha}/status").get("statuses", [])
     try:
         alerts = api.paginated(
             f"repos/{api.repository}/code-scanning/alerts?state=open&pr={pr_number}"
@@ -102,11 +100,7 @@ def collect(api: GitHubApi, pr_number: int, head_sha: str, contexts):
             )
             jobs[run["id"]] = run_jobs
             failed_job = next(
-                (
-                    item
-                    for item in run_jobs
-                    if text(item.get("conclusion")).lower() in BLOCKING
-                ),
+                (item for item in run_jobs if text(item.get("conclusion")).lower() in BLOCKING),
                 None,
             )
             if failed_job:
@@ -171,11 +165,7 @@ def poll(api, pr_number, head_sha, contexts, timeout, interval, stable_polls):
         waiting = provisional["pending_workflows"] or provisional["unknown_workflows"]
         waiting = waiting or provisional["pending_required_contexts"]
         waiting = waiting or provisional["unknown_required_contexts"]
-        stable = (
-            stable + 1
-            if not waiting and current == previous
-            else (1 if not waiting else 0)
-        )
+        stable = stable + 1 if not waiting and current == previous else (1 if not waiting else 0)
         previous = current
         result = build_snapshot(stable_poll_count=stable, **common)
         if result["review_state"] == "stale" or stable >= stable_polls:
@@ -217,9 +207,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     contract = json.loads(Path(args.required_checks_contract).read_text())
     contexts = contract.get("contexts", [])
-    if not isinstance(contexts, list) or not all(
-        isinstance(item, str) for item in contexts
-    ):
+    if not isinstance(contexts, list) or not all(isinstance(item, str) for item in contexts):
         raise ValueError("required-check contexts must be strings")
     model = json.loads(Path(args.review_model).read_text())
     result = poll(
