@@ -1,10 +1,11 @@
 {
   "schema_version": "sdetkit.current_product_delta.v1",
-  "generated_on": "2026-06-29",
+  "generated_on": "2026-06-30",
   "released_version": "1.0.3",
   "released_on": "2026-04-18",
+  "project_version": "1.1.0",
   "release_candidate_version": "1.1.0",
-  "release_status": "main_ahead_of_published_package",
+  "release_status": "release_candidate_frozen_not_published",
   "canonical_first_path": [
     "python -m sdetkit gate fast",
     "python -m sdetkit gate release",
@@ -14,7 +15,14 @@
     "channel": "pypi",
     "version": "1.0.3",
     "scope": "released",
-    "documentation_must_not_imply_main_only_capabilities_are_published": true
+    "documentation_must_not_imply_release_candidate_capabilities_are_published": true
+  },
+  "release_candidate_contract": {
+    "version": "1.1.0",
+    "scope": "repository_release_candidate",
+    "publication_claimed": false,
+    "tag_created": false,
+    "public_install_verified": false
   },
   "main_only_capability_groups": [
     {
@@ -23,7 +31,8 @@
       "capabilities": [
         "FailureVector extraction and normalized failure contracts",
         "review-first SafetyGate decisions",
-        "DiagnosticJob and execution-plan handoffs"
+        "DiagnosticJob and execution-plan handoffs",
+        "read-only JavaScript/TypeScript and Go failure adapters"
       ]
     },
     {
@@ -32,6 +41,7 @@
       "capabilities": [
         "isolated proof execution",
         "protected verifier decisions",
+        "protected proof-chain integrity",
         "patch scoring and anti-cheat checks",
         "replayable remediation benchmark scorecards"
       ]
@@ -52,16 +62,17 @@
         "read-only repository surface discovery",
         "proof recommendation generation",
         "external integration evidence bundles",
-        "public repository trial-matrix reporting"
+        "public repository trial-matrix reporting",
+        "SHA-bound release-candidate external acceptance artifacts"
       ]
     }
   ],
   "release_blockers": [
-    "reconstruct the full changelog from 1.0.3 to current main",
-    "prove the exact release candidate wheel on Python 3.10, 3.11, and 3.12",
-    "refresh live-adoption proof at the release candidate SHA",
-    "complete workflow and operator-surface consolidation",
-    "replace token-based publishing with reviewed Trusted Publishing configuration"
+    "verify protected GitHub pypi environment and matching PyPI Trusted Publisher",
+    "merge release-candidate metadata and exact-head acceptance evidence",
+    "create signed v1.1.0 tag",
+    "qualify and publish exact artifacts through the release workflow",
+    "record post-release public verification evidence"
   ],
   "authority_boundary": {
     "automation_allowed": false,
