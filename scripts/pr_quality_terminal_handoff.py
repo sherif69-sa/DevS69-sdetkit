@@ -32,9 +32,7 @@ def verify_handoff(
             relative = candidate.relative_to(root).as_posix()
             pure = PurePosixPath(relative)
             if pure.is_absolute() or ".." in pure.parts:
-                raise ValueError(
-                    f"publisher handoff contains an unsafe path: {relative}"
-                )
+                raise ValueError(f"publisher handoff contains an unsafe path: {relative}")
             actual_files.add(relative)
     if actual_files != expected_files:
         raise ValueError("publisher handoff file allowlist mismatch")
