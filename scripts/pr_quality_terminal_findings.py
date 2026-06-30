@@ -16,23 +16,13 @@ def finding_rows(alerts, head_sha: str, merge_sha: str, pr_number: int):
             if isinstance(alert.get("most_recent_instance"), Mapping)
             else {}
         )
-        location = (
-            instance.get("location")
-            if isinstance(instance.get("location"), Mapping)
-            else {}
-        )
-        message = (
-            instance.get("message")
-            if isinstance(instance.get("message"), Mapping)
-            else {}
-        )
+        location = instance.get("location") if isinstance(instance.get("location"), Mapping) else {}
+        message = instance.get("message") if isinstance(instance.get("message"), Mapping) else {}
         commit_sha, ref = text(instance.get("commit_sha")), text(instance.get("ref"))
         row = {
             "number": number(alert.get("number")),
             "rule_id": text(rule.get("id")),
-            "severity": text(
-                rule.get("security_severity_level") or rule.get("severity")
-            ),
+            "severity": text(rule.get("security_severity_level") or rule.get("severity")),
             "state": text(alert.get("state")),
             "path": text(location.get("path")),
             "start_line": number(location.get("start_line")),
