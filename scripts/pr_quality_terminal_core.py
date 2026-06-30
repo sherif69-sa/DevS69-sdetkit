@@ -71,9 +71,7 @@ def latest_runs(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
         )
         if rank >= old_rank:
             selected[key] = row
-    return sorted(
-        selected.values(), key=lambda item: (canonical(item["name"]), item["id"])
-    )
+    return sorted(selected.values(), key=lambda item: (canonical(item["name"]), item["id"]))
 
 
 def normalized_checks(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
