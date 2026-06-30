@@ -10,11 +10,17 @@ on:
       - "examples/adoption/real-repo/**"
       - "artifacts/adoption/real-repo-golden/**"
       - "docs/real-repo-adoption.md"
+      - "docs/live-adoption-product-proof.md"
+      - "docs/current-product-delta.md"
+      - "docs/contracts/current-product-delta.v1.json"
       - "docs/ci-artifact-walkthrough.md"
       - "scripts/regenerate_real_repo_adoption_goldens.py"
       - "scripts/real_repo_adoption_projection.py"
-      - "tests/test_real_repo_adoption_contracts.py"
-      - "tests/test_real_repo_adoption_regen_helper.py"
+      - "src/sdetkit/data/current_product_delta.v1.json"
+      - "tests/test_current_product_delta_contract.py"
+      - "tests/test_release_candidate_workflow_contract.py"
+      - "pyproject.toml"
+      - "CHANGELOG.md"
       - ".github/workflows/adoption-real-repo-canonical.yml"
 
 permissions:
@@ -25,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version: "3.12"
 
@@ -59,12 +65,12 @@ jobs:
 
           set -e
 
-      - name: Upload canonical replay artifacts
+      - name: Upload SHA-bound canonical replay artifacts
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: adoption-real-repo-canonical
-          retention-days: 7
+          name: adoption-real-repo-canonical-${{ github.sha }}
+          retention-days: 14
           path: |
             examples/adoption/real-repo/build/gate-fast.json
             examples/adoption/real-repo/build/release-preflight.json
