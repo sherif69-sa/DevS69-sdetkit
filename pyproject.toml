@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sdetkit"
-version = "1.0.3"
+version = "1.1.0"
 requires-python = ">=3.10"
 readme = "README.md"
 description = "Operator-grade release confidence and test intelligence platform: deterministic gates, evidence, integration assurance, and failure forensics."
