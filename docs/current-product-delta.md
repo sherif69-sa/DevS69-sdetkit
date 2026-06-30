@@ -1,7 +1,5 @@
 # Current product delta
 
-SDETKit's repository evolves faster than its published package. This page separates released behavior from capabilities that exist only on `main` so operators do not mistake repository documentation for installed-wheel proof.
-
 Contract: [`docs/contracts/current-product-delta.v1.json`](contracts/current-product-delta.v1.json)
 
 ## Release truth
@@ -9,13 +7,15 @@ Contract: [`docs/contracts/current-product-delta.v1.json`](contracts/current-pro
 | Surface | Current truth |
 |---|---|
 | Published package | `sdetkit==1.0.3` |
-| Published release date | 2026-04-18 |
-| Current repository direction | 1.1.0 release-candidate preparation |
-| Release status | `main_ahead_of_published_package` |
+| Repository package metadata | `1.1.0` |
+| Candidate state | frozen, not published |
+| Public 1.1.0 installation | not yet verified |
 
-The installation command in the README intentionally pins the latest published package. Capabilities marked **main-only** below are not claimed to be available from that wheel until a later release is built, verified, and published.
+The README intentionally remains pinned to `sdetkit==1.0.3` until 1.1.0 is published and independently verified.
 
-## Stable released front door
+## Candidate scope
+
+The 1.1.0 candidate contains structured diagnosis, review-first safety decisions, read-only JavaScript/TypeScript and Go adapters, isolated proof, protected proof-chain integrity, trajectory evidence, and adoption intelligence.
 
 The stable first path remains:
 
@@ -25,63 +25,18 @@ python -m sdetkit gate release
 python -m sdetkit doctor
 ```
 
-These commands express the primary product outcome: determine whether a change is ready to ship and retain machine-readable evidence.
+## Exact-head evidence
 
-## Main-only capability groups
+A commit cannot contain its own final SHA. The canonical adoption workflow therefore retains the replay under its stable artifact contract, while GitHub Actions metadata binds that artifact to the workflow run's exact `head_sha`. The tag-driven release workflow separately builds once and qualifies the exact wheel on Python 3.10, 3.11, and 3.12.
 
-### Diagnostic failure model — advanced supported
+## Remaining release gates
 
-- FailureVector extraction and normalized failure contracts.
-- Review-first SafetyGate decisions.
-- DiagnosticJob and execution-plan handoffs.
-
-These capabilities are intended for operator diagnosis. Candidate status does not authorize patch application, merge, security dismissal, or semantic-equivalence claims.
-
-### Verification and benchmarking — experimental incubator
-
-- Isolated proof execution.
-- Protected verifier decisions.
-- Patch scoring and anti-cheat checks.
-- Replayable remediation benchmark scorecards.
-
-These surfaces remain qualification inputs for the next release. They are not described as autonomous remediation authority.
-
-### Trajectory and repository memory — experimental incubator
-
-- Trajectory storage.
-- Repository memory.
-- Diagnostic learning and pattern insights.
-
-These surfaces retain evidence and repeated failure patterns. They do not independently prove a diagnosis or repair.
-
-### External adoption intelligence — advanced supported
-
-- Read-only repository surface discovery.
-- Proof recommendation generation.
-- External integration evidence bundles.
-- Public repository trial-matrix reporting.
-
-External-repository commands remain read-only by default. Recommended proof commands are operator guidance, not commands SDETKit is authorized to run automatically.
-
-## 1.1.0 release blockers
-
-The next release is blocked until all of the following are proven:
-
-1. The changelog accounts for the product delta since 1.0.3.
-2. The exact release-candidate wheel passes clean-room installation and canonical-command smoke tests on Python 3.10, 3.11, and 3.12.
-3. Live-adoption evidence is refreshed at the release-candidate SHA.
-4. Workflow and operator-surface consolidation is complete enough for maintainers and adopters to identify the canonical path.
-5. PyPI publication uses reviewed Trusted Publishing configuration instead of a long-lived upload token.
+1. Verify the protected GitHub `pypi` environment and matching PyPI Trusted Publisher.
+2. Merge the exact-head candidate PR.
+3. Create a signed `v1.1.0` tag.
+4. Complete public publication, digest verification, and clean installation.
+5. Record the completed release in a post-release evidence PR.
 
 ## Authority boundary
 
-The release-delta contract must preserve:
-
-```text
-automation_allowed=false
-patch_application_allowed=false
-merge_authorized=false
-semantic_equivalence_proven=false
-```
-
-Changing any of those values requires a separate security- and verifier-reviewed policy change. This release-truth document cannot authorize it.
+This document does not authorize automated patching, merging, security dismissal, publication, or semantic-equivalence claims.
