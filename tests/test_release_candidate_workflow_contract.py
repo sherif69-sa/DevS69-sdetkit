@@ -7,8 +7,7 @@ def test_candidate_replay_artifact_is_bound_to_pr_head() -> None:
     text = (ROOT / ".github/workflows/adoption-real-repo-canonical.yml").read_text()
 
     assert (
-        "adoption-real-repo-canonical-"
-        "${{ github.event.pull_request.head.sha || github.sha }}"
+        "adoption-real-repo-canonical-${{ github.event.pull_request.head.sha || github.sha }}"
     ) in text
     assert "permissions:\n  contents: read\n" in text
 
