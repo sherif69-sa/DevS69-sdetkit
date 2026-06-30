@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 from pr_quality_terminal_core import BLOCKING, latest_runs, number, text
+from pr_quality_terminal_handoff import verify_handoff
 from pr_quality_terminal_model import build_snapshot, render_comment
 
 
@@ -184,29 +185,6 @@ def poll(api, pr_number, head_sha, contexts, timeout, interval, stable_polls):
         time.sleep(max(interval, 1))
 
 
-def verify_handoff(
-    path: Path, repository: str, pr_number: int, head_sha: str, run_id: int
-):
-    payload = json.loads(path.read_text())
-    expected = {
-        "repository": repository,
-        "pr_number": pr_number,
-        "head_sha": head_sha,
-        "source_workflow_run_id": run_id,
-    }
-    for key, value in expected.items():
-        if payload.get(key) != value:
-            raise ValueError(f"publisher handoff mismatch: {key}")
-    if payload.get("authority_boundary") != {
-        "reporting_only": True,
-        "patch_application_allowed": False,
-        "security_dismissal_allowed": False,
-        "merge_authorized": False,
-        "semantic_equivalence_proven": False,
-    }:
-        raise ValueError("publisher handoff authority mismatch")
-
-
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     for name in (
@@ -221,6 +199,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.add_argument(f"--{name}", required=True)
     parser.add_argument("--pr-number", type=int, required=True)
     parser.add_argument("--source-run-id", type=int, required=True)
+    parser.add_argument("--source-run-attempt", type=int, required=True)
     parser.add_argument("--timeout-seconds", type=int, default=600)
     parser.add_argument("--poll-interval-seconds", type=int, default=15)
     parser.add_argument("--stable-polls", type=int, default=2)
@@ -234,6 +213,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.pr_number,
         args.head_sha,
         args.source_run_id,
+        args.source_run_attempt,
     )
     contract = json.loads(Path(args.required_checks_contract).read_text())
     contexts = contract.get("contexts", [])
