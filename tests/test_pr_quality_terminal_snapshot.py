@@ -10,17 +10,13 @@ MODULE_PATH = ROOT / "scripts" / "pr_quality_terminal_snapshot.py"
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "pr-quality-publisher.yml"
 sys.path.insert(0, str(ROOT / "scripts"))
 
-model_spec = importlib.util.spec_from_file_location(
-    "pr_quality_terminal_model", MODEL_PATH
-)
+model_spec = importlib.util.spec_from_file_location("pr_quality_terminal_model", MODEL_PATH)
 assert model_spec and model_spec.loader
 model = importlib.util.module_from_spec(model_spec)
 sys.modules[model_spec.name] = model
 model_spec.loader.exec_module(model)
 
-spec = importlib.util.spec_from_file_location(
-    "pr_quality_terminal_snapshot", MODULE_PATH
-)
+spec = importlib.util.spec_from_file_location("pr_quality_terminal_snapshot", MODULE_PATH)
 assert spec and spec.loader
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
@@ -109,10 +105,7 @@ def test_race_reproduced_late_ci_failure_is_named_with_first_step() -> None:
     assert result["review_state"] == "blocked"
     assert result["failed_workflows"][0]["workflow_name"] == "CI"
     assert result["failed_workflows"][0]["step_name"] == "Coverage gate"
-    assert (
-        "tests/test_gate.py::test_truth"
-        in result["failed_workflows"][0]["first_failure"]
-    )
+    assert "tests/test_gate.py::test_truth" in result["failed_workflows"][0]["first_failure"]
 
 
 def test_multiple_failures_are_all_rendered_once() -> None:
@@ -217,10 +210,7 @@ def test_stale_security_alert_cannot_be_primary() -> None:
     result = snapshot(security_alerts=[alert])
     assert result["review_state"] == "waiting_or_unknown"
     assert not result["security_findings"]
-    assert (
-        "current_head_relation"
-        in result["incomplete_security_findings"][0]["evidence_gaps"]
-    )
+    assert "current_head_relation" in result["incomplete_security_findings"][0]["evidence_gaps"]
 
 
 def test_latest_rerun_replaces_older_failed_attempt() -> None:
@@ -230,9 +220,7 @@ def test_latest_rerun_replaces_older_failed_attempt() -> None:
     newer = run("CI", conclusion="success", run_id=2)
     newer["workflow_id"] = 99
     newer["run_attempt"] = 2
-    result = snapshot(
-        workflow_runs=[older, newer, run("maintenance-autopilot", run_id=3)]
-    )
+    result = snapshot(workflow_runs=[older, newer, run("maintenance-autopilot", run_id=3)])
     assert result["review_state"] == "ready"
     assert not result["failed_workflows"]
 
