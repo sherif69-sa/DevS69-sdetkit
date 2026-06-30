@@ -8,6 +8,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from sdetkit.pr_quality_terminal_workflows import (
+    collect_and_merge_terminal_snapshot_from_environment,
+)
+
 SCHEMA_VERSION = "sdetkit.pr_quality.failed_check_logs.v1"
 ANNOTATION_SCHEMA_VERSION = "sdetkit.pr_quality.failed_check_annotations.v1"
 
@@ -32,7 +36,9 @@ _SUCCESS_CONCLUSIONS = {
     "success",
 }
 
-_ACTIONS_URL_PATTERN = re.compile(r"/actions/runs/(?P<run_id>[0-9]+)(?:/job/(?P<job_id>[0-9]+))?")
+_ACTIONS_URL_PATTERN = re.compile(
+    r"/actions/runs/(?P<run_id>[0-9]+)(?:/job/(?P<job_id>[0-9]+))?"
+)
 _CHECK_RUN_URL_PATTERN = re.compile(r"/(?:check-runs|runs)/(?P<check_run_id>[0-9]+)")
 
 
@@ -57,7 +63,9 @@ def _read_json(path: Path) -> JsonObject:
 
 def _write_json(path: Path, payload: JsonObject) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
 
 def _integer(value: Any) -> int:
@@ -267,7 +275,9 @@ def _collect_existing_log(record: JsonObject, target: Path) -> bool:
     source = _source_log_path(record)
     if source is not None:
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(source.read_text(encoding="utf-8", errors="ignore"), encoding="utf-8")
+        target.write_text(
+            source.read_text(encoding="utf-8", errors="ignore"), encoding="utf-8"
+        )
         return target.exists() and target.stat().st_size > 0
 
     return False
@@ -336,9 +346,12 @@ def _workflow_job_evidence_quality(logs: list[JsonObject]) -> JsonObject:
     existing_logs_collected = sum(
         1
         for item in logs
-        if bool(item.get("collected")) and _string(item.get("evidence_source")) == "existing_log"
+        if bool(item.get("collected"))
+        and _string(item.get("evidence_source")) == "existing_log"
     )
-    github_actions_supported = sum(1 for item in logs if bool(item.get("download_supported")))
+    github_actions_supported = sum(
+        1 for item in logs if bool(item.get("download_supported"))
+    )
     annotation_supported = sum(
         1 for item in logs if bool(item.get("annotation_collection_supported"))
     )
@@ -347,7 +360,9 @@ def _workflow_job_evidence_quality(logs: list[JsonObject]) -> JsonObject:
     )
     run_id_present = sum(1 for item in logs if bool(_string(item.get("run_id"))))
     job_id_present = sum(1 for item in logs if bool(_string(item.get("job_id"))))
-    check_run_id_present = sum(1 for item in logs if bool(_string(item.get("check_run_id"))))
+    check_run_id_present = sum(
+        1 for item in logs if bool(_string(item.get("check_run_id")))
+    )
     workflow_run_metadata_present = sum(
         1 for item in logs if bool(_as_dict(item.get("workflow_run")))
     )
@@ -355,7 +370,9 @@ def _workflow_job_evidence_quality(logs: list[JsonObject]) -> JsonObject:
         1 for item in logs if bool(_as_dict(item.get("workflow_job")))
     )
     workflow_job_steps_present = sum(
-        1 for item in logs if bool(_as_list(_as_dict(item.get("workflow_job")).get("steps")))
+        1
+        for item in logs
+        if bool(_as_list(_as_dict(item.get("workflow_job")).get("steps")))
     )
     pending_downloads = sum(
         1
@@ -478,10 +495,14 @@ def build_failed_check_log_manifest(
                 "log_path": log_path.as_posix(),
                 "collected": collected,
                 "workflow_run_path": (
-                    workflow_run_path.as_posix() if workflow_run_path is not None else ""
+                    workflow_run_path.as_posix()
+                    if workflow_run_path is not None
+                    else ""
                 ),
                 "workflow_job_path": (
-                    workflow_job_path.as_posix() if workflow_job_path is not None else ""
+                    workflow_job_path.as_posix()
+                    if workflow_job_path is not None
+                    else ""
                 ),
                 "workflow_run": workflow_run,
                 "workflow_job": workflow_job,
@@ -495,7 +516,9 @@ def build_failed_check_log_manifest(
         "logs_dir": log_dir.as_posix(),
         "workflow_metadata_dir": metadata_dir.as_posix(),
         "failed_check_count": len(logs),
-        "collected_log_count": len([item for item in logs if bool(item.get("collected", False))]),
+        "collected_log_count": len(
+            [item for item in logs if bool(item.get("collected", False))]
+        ),
         "annotation_collected_count": len(
             [item for item in logs if bool(item.get("annotation_collected", False))]
         ),
@@ -645,9 +668,13 @@ def write_failed_check_log_artifacts(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="python -m sdetkit.failed_check_log_collection")
+    parser = argparse.ArgumentParser(
+        prog="python -m sdetkit.failed_check_log_collection"
+    )
     parser.add_argument("--checks-json", type=Path)
-    parser.add_argument("--out-dir", type=Path, default=Path("build/pr-quality/check-logs"))
+    parser.add_argument(
+        "--out-dir", type=Path, default=Path("build/pr-quality/check-logs")
+    )
     parser.add_argument(
         "--no-script",
         action="store_true",
@@ -663,7 +690,9 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.sanitize_annotations_json is not None:
         if args.annotation_log_target is None or args.annotation_json_target is None:
-            raise SystemExit("annotation log and JSON targets are required for sanitization")
+            raise SystemExit(
+                "annotation log and JSON targets are required for sanitization"
+            )
         report = sanitize_check_run_annotations(
             raw_annotations_json=args.sanitize_annotations_json,
             annotation_log_target=args.annotation_log_target,
@@ -673,7 +702,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.checks_json is None:
-        raise SystemExit("--checks-json is required unless sanitizing annotations")
+        raise SystemExit(
+            "--checks-json is required unless sanitizing annotations"
+        )
+    collect_and_merge_terminal_snapshot_from_environment(
+        checks_json=args.checks_json,
+        out_dir=args.out_dir,
+    )
     manifest = write_failed_check_log_artifacts(
         checks_json=args.checks_json,
         out_dir=args.out_dir,
