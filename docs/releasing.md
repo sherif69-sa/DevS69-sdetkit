@@ -2,7 +2,7 @@
 
 This project uses semantic versioning and a tag-driven, fail-closed release workflow.
 
-Current published baseline: **v1.0.3**.
+Current baseline release: **v1.0.3**.
 
 ## Version bump rules
 
