@@ -6,10 +6,7 @@ import sys
 from pathlib import Path
 
 MODULE_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "src"
-    / "sdetkit"
-    / "pr_quality_terminal_workflows.py"
+    Path(__file__).resolve().parents[1] / "src" / "sdetkit" / "pr_quality_terminal_workflows.py"
 )
 spec = importlib.util.spec_from_file_location("pr_quality_terminal_workflows", MODULE_PATH)
 assert spec and spec.loader

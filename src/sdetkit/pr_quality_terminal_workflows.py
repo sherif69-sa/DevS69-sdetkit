@@ -40,9 +40,7 @@ def _integer(value: Any) -> int:
 
 
 def canonical_context(value: Any) -> str:
-    return "".join(
-        character.lower() for character in _string(value) if character.isalnum()
-    )
+    return "".join(character.lower() for character in _string(value) if character.isalnum())
 
 
 def normalize_workflow_runs(
@@ -114,7 +112,7 @@ def classify_terminal_snapshot(
     current_head_sha: str,
     stable_poll_count: int,
     required_stable_polls: int,
-    timed_out: bool = Falsl
+    timed_out: bool = False,
     collection_errors: list[str] | None = None,
 ) -> JsonObject:
     errors = list(collection_errors or [])
@@ -144,14 +142,7 @@ def classify_terminal_snapshot(
         and row["conclusion"] not in _SUCCESS_CONCLUSIONS
     ]
     stable = stable_poll_count >= required_stable_polls
-    terminal = (
-        not stale
-        and not pending
-        and not unknown
-        and stable
-        and not timed_out
-        and not errors
-    )
+    terminal = not stale and not pending and not unknown and stable and not timed_out and not errors
     if stale:
         status = "stale"
     elif terminal and failures:
@@ -238,7 +229,7 @@ def collect_terminal_workflow_snapshot(
             OSError,
             subprocess.CalledProcessError,
             json.JSONDecodeError,
-            ValueEError,
+            ValueError,
         ) as exc:
             errors = [f"terminal workflow collection failed: {exc}"]
 
@@ -252,9 +243,7 @@ def collect_terminal_workflow_snapshot(
         )
         signature = workflow_signature(last_rows)
         waiting = bool(
-            provisional["pending_workflows"]
-            or provisional["unknown_workflows"]
-            or errors
+            provisional["pending_workflows"] or provisional["unknown_workflows"] or errors
         )
         if not waiting and signature == previous_signature:
             stable_poll_count += 1
@@ -292,21 +281,13 @@ def merge_terminal_snapshot_into_checks(
     snapshot: JsonObject,
 ) -> JsonObject:
     merged = dict(payload)
-    records_key = (
-        "check_runs" if isinstance(payload.get("check_runs"), list) else "checks"
-    )
-    records = [
-        dict(item) for item in payload.get(records_key, []) if isinstance(item, dict)
-    ]
+    records_key = "check_runs" if isinstance(payload.get("check_runs"), list) else "checks"
+    records = [dict(item) for item in payload.get(records_key, []) if isinstance(item, dict)]
     required_contexts = {
-        canonical_context(item)
-        for item in payload.get("required_contexts", [])
-        if _string(item)
+        canonical_context(item) for item in payload.get("required_contexts", []) if _string(item)
     }
     existing_workflow_ids = {
-        _integer(item.get("workflow_id"))
-        for item in records
-        if _integer(item.get("workflow_id"))
+        _integer(item.get("workflow_id")) for item in records if _integer(item.get("workflow_id"))
     }
 
     for run in snapshot.get("workflow_runs", []):
@@ -373,12 +354,7 @@ def collect_and_merge_terminal_snapshot_from_environment(
         repository = f"{owner}/{name}" if owner and name else ""
     head_sha = _string(os.environ.get("HEAD_SHA"))
     pr_number = _integer(os.environ.get("PR_NUMBER"))
-    if (
-        not repository
-        or not head_sha
-        or pr_number <= 0
-        or not os.environ.get("GH_TOKEN")
-    ):
+    if not repository or not head_sha or pr_number <= 0 or not os.environ.get("GH_TOKEN"):
         return None
 
     snapshot_path = out_dir / "terminal-workflow-snapshot.json"
@@ -394,15 +370,12 @@ def collect_and_merge_terminal_snapshot_from_environment(
             repository=repository,
             pr_number=pr_number,
             head_sha=head_sha,
-            current_workflow=_string(
-                os.environ.get("GITHUB_WORKFLOW") or "PR Quality Comment"
-            ),
+            current_workflow=_string(os.environ.get("GITHUB_WORKFLOW") or "PR Quality Comment"),
             timeout_seconds=max(
                 _integer(os.environ.get("SDETKIT_TERMINAL_TIMEOUT_SECONDS")) or 600, 1
             ),
             poll_interval_seconds=max(
-                _integer(os.environ.get("SDETKIT_TERMINAL_POLL_INTERVAL_SECONDS"))
-                or 15,
+                _integer(os.environ.get("SDETKIT_TERMINAL_POLL_INTERVAL_SECONDS")) or 15,
                 1,
             ),
             required_stable_polls=max(
