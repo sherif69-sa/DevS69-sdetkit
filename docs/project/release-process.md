@@ -1,133 +1,178 @@
 # Release Process
 
-This project follows semantic versioning and a reproducible release flow.
+This project follows semantic versioning and a reproducible, fail-closed release flow.
 
 Current version is taken from `[project].version` in `pyproject.toml`.
 
-Release tags must be `vX.Y.Z` and must match the package version. `CHANGELOG.md` must include a matching heading (for example: `## [X.Y.Z]` or `## vX.Y.Z`).
+Release tags must be `vX.Y.Z` and must match the package version. `CHANGELOG.md` must include a matching heading, for example `## [X.Y.Z]` or `## vX.Y.Z`.
 
-## Versioning Policy
+## Versioning policy
 
-- `0.x`: fast iteration is allowed, but the patch-spec schema stays versioned (`spec_version`).
-- `1.0+`: patch spec is stable; incompatible changes require a new schema version and deprecation window.
+- `0.x`: fast iteration is allowed, but public schemas remain versioned.
+- `1.0+`: incompatible public API, CLI, or artifact-contract changes require a new version and an explicit compatibility plan.
 
-## Release preconditions (before any tag push)
+## Release preconditions
 
-- Repository secret `PYPI_API_TOKEN` must be configured to enable PyPI upload.
-- If `PYPI_API_TOKEN` is not configured, the release workflow still builds artifacts and creates a GitHub Release, but PyPI upload is skipped.
-- The release workflow requires:
-  - `pyproject.toml` `[project].version`
-  - matching heading in `CHANGELOG.md`
-  - tag in the form `vX.Y.Z` that matches version
+Before any release tag is pushed:
 
-## Maintainer path (first public release)
+1. Configure a protected GitHub environment named `pypi`.
+2. Configure the PyPI project `sdetkit` with a GitHub Actions Trusted Publisher for:
+   - owner: `sherif69-sa`
+   - repository: `DevS69-sdetkit`
+   - workflow: `release.yml`
+   - environment: `pypi`
+3. Add required reviewers and deployment protection to the GitHub `pypi` environment.
+4. Do not configure or rely on a long-lived `PYPI_API_TOKEN` for this workflow.
+5. Confirm:
+   - `[project].version` is final;
+   - `CHANGELOG.md` has a matching release heading;
+   - the release tag is `vX.Y.Z` and matches the package version;
+   - current main and all required release-readiness PRs are green.
 
-1. Finalize release metadata for the target version:
-   - update `[project].version` in `pyproject.toml`
-   - add matching heading in `CHANGELOG.md`
-2. Run local preflight (single command):
+Missing or incorrect Trusted Publisher configuration is a release blocker. The workflow does not silently skip PyPI publication and continue to GitHub Release creation.
+
+Manual dispatch accepts only an existing tag matching `vX.Y.Z`. The input is passed through the environment, validated before shell use, and never interpolated directly into a shell script.
+
+## Maintainer path
+
+1. Finalize release metadata:
+   - update `[project].version` in `pyproject.toml`;
+   - add a matching section in `CHANGELOG.md`;
+   - refresh release-candidate adoption and quality evidence.
+2. Run local preflight:
 
    ```bash
    make release-preflight
    ```
 
-   This runs release metadata validation, `doctor --release --skip clean_tree`, artifact build validation, and wheel smoke install.
-3. Generate post-release verification plan and confirm package install string before tagging:
+3. Generate the post-release verification plan and validate the install string:
 
    ```bash
    make release-verify-plan
    python scripts/release_verify_post_publish.py --assert-install-string
    ```
 
-   This validates the canonical external install target (`pip install sdetkit==<version>`) and prints a deterministic verification plan maintainers can execute after publish.
-4. Create and push the tag:
+4. Run focused repository proof:
 
    ```bash
-   git tag vX.Y.Z
+   python -m pre_commit run -a
+   COV_FAIL_UNDER=95 bash quality.sh cov
+   NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict
+   python -m build
+   python -m twine check dist/*
+   python -m check_wheel_contents --ignore W009 dist/*.whl
+   ```
+
+5. Merge the release metadata PR only after required checks are green.
+6. Create and push the signed tag:
+
+   ```bash
+   git tag -s vX.Y.Z -m "Release vX.Y.Z"
    git push origin vX.Y.Z
    ```
-5. Watch `.github/workflows/release.yml` complete.
-6. Verify outcomes:
-   - GitHub Release exists and includes `dist/*` artifacts.
-   - PyPI upload occurred only if `PYPI_API_TOKEN` secret is configured.
-   - Dependency/security workflows are green for the same commit/tag.
 
-## Workflow triggers
+7. Approve the protected `pypi` environment deployment only after reviewing the exact tag, source SHA, distribution manifest, and Python-version qualification jobs.
+8. Watch `.github/workflows/release.yml` complete.
+9. Confirm the public PyPI metadata and distribution digests match the build manifest.
+10. Confirm the public PyPI install verification succeeded.
+11. Confirm the GitHub Release was created only after PyPI verification.
 
-- **Tag push**: automatic for tags matching `v*.*.*`.
-- **Manual dispatch**: `workflow_dispatch` with an existing `tag` input.
+## Workflow contract
 
-The workflow performs:
-1. release metadata preflight (`scripts/release_preflight.py`)
-2. tag/version consistency check (`scripts/check_release_tag_version.py`)
-3. quality gates + coverage
-4. artifact build + metadata checks + wheel smoke test
-5. conditional PyPI upload
-6. provenance attestation + GitHub Release creation
+The release workflow performs these ordered jobs:
 
-## What not to claim before publish is real
+1. **Build**
+   - validate the requested tag before shell use;
+   - check out the existing tag;
+   - validate tag, package version, and changelog metadata;
+   - run coverage and strict docs proof;
+   - build the wheel and sdist exactly once;
+   - record SHA-256 digests in a distribution manifest.
+2. **Qualify exact wheel**
+   - download the immutable build artifact;
+   - install and exercise the exact wheel on Python 3.10, 3.11, and 3.12;
+   - run installed-wheel and canonical command contracts.
+3. **Attest**
+   - attach GitHub build provenance to the qualified distributions.
+4. **Publish to PyPI**
+   - enter the protected `pypi` environment;
+   - request a short-lived OIDC credential through Trusted Publishing;
+   - publish the same qualified files;
+   - generate PyPI publish attestations.
+5. **Verify public publication**
+   - wait for the exact version to appear on PyPI with bounded retries;
+   - compare every published filename and SHA-256 digest with the build manifest;
+   - install the exact version from the public PyPI index and verify metadata and CLI availability.
+6. **Create GitHub Release**
+   - create the GitHub Release only after successful PyPI verification;
+   - attach the exact published distributions and release diagnostics.
 
-Do not claim public PyPI availability until:
-- the release workflow succeeded,
-- the PyPI upload step ran (not skipped), and
-- install from PyPI is verified externally.
+No job rebuilds the distributions after the build job.
 
-## Post-release verification (external-user perspective)
+## What not to claim
 
-Run these in a clean shell after the release workflow shows a successful PyPI upload:
+Do not claim public availability, successful publication, attestation, or release completion until:
+
+- the exact-wheel qualification matrix is green;
+- Trusted Publishing completed successfully;
+- the public PyPI digest and install verification is green;
+- the GitHub Release exists and contains the same distribution files;
+- the tag, source SHA, and distribution manifest agree.
+
+A prediction, workflow configuration, pending environment approval, or successful local build is not publication proof.
+
+## Post-release verification
+
+The workflow performs automated public-index verification. A maintainer should also verify from a separate clean environment:
 
 ```bash
 python -m venv .venv-release-verify
 . .venv-release-verify/bin/activate
 python -m pip install -U pip
-python -m pip install sdetkit==X.Y.Z
+python -m pip install --index-url https://pypi.org/simple/ sdetkit==X.Y.Z
 python -m sdetkit --help
 python -m pip show sdetkit
 ```
 
 Success means:
-- `pip install` resolves from default PyPI index without private index overrides.
-- `python -m sdetkit --help` exits 0 and prints CLI usage.
-- `pip show sdetkit` reports the expected version (`X.Y.Z`).
 
-Also confirm:
-- GitHub Release page for `vX.Y.Z` is present with generated notes and `dist/*` artifacts.
-- PyPI project/version page exists and files include wheel + source tarball.
-- The release workflow job includes a successful **Publish to PyPI** step (not skipped).
-
-Only after all checks pass is it safe to claim public availability.
+- the package resolves from public PyPI without a private index override;
+- the installed version equals `X.Y.Z`;
+- the CLI starts successfully;
+- PyPI contains the wheel and sdist with the expected hashes;
+- PyPI publish attestations are present;
+- the GitHub Release contains the exact qualified artifacts.
 
 ## Record public verification evidence
 
-After completing external-user verification for a real release, add a short record to `docs/release-verification.md` using the page template.
+After a real release is published and externally validated, add a factual record to `docs/release-verification.md` containing:
 
-Keep entries factual and minimal:
-- exact released version
-- exact install and validation commands run
-- verifier environment (OS, Python, pip)
-- success signals + links (PyPI version page and GitHub Release)
-- support path if users cannot install
+- exact version, tag, and source SHA;
+- exact install and validation commands;
+- verifier OS, Python, and pip versions;
+- distribution hashes;
+- PyPI and GitHub Release references;
+- attestation verification result;
+- support path for failed installation.
 
-Do not add a verification entry unless the release was actually published and validated externally.
+Do not add a release-verification entry before publication and clean-room validation actually complete.
 
-## Optional risk-reduction rehearsal (TestPyPI)
+## Optional TestPyPI rehearsal
 
-If maintainers want a dry run before the first real publish, run from local `dist/*` against TestPyPI manually with a separate token:
+A TestPyPI rehearsal must use a separate, explicitly configured Trusted Publisher and protected environment. It is not part of the default production release workflow and must not reuse production release authority.
 
-```bash
-python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple sdetkit==X.Y.Z
-```
-
-This repository does not auto-publish to TestPyPI in CI; this path is an optional rehearsal only.
-
-## Release checklist (required)
-
-Before pushing a release tag, maintainers must complete this checklist:
+## Required release checklist
 
 - [ ] Version updated in `pyproject.toml`.
 - [ ] Matching version heading added in `CHANGELOG.md`.
+- [ ] Current product-delta and release-candidate evidence reviewed.
 - [ ] `make release-preflight` completed successfully.
-- [ ] Post-release verify plan generated and install string validated.
-- [ ] Release tag `vX.Y.Z` pushed and workflow monitored to completion.
-- [ ] External install verification completed before public availability claims.
+- [ ] Full quality, package, and docs proof completed.
+- [ ] GitHub `pypi` environment protection verified.
+- [ ] PyPI Trusted Publisher configuration verified.
+- [ ] Signed tag `vX.Y.Z` pushed.
+- [ ] Exact wheel qualified on Python 3.10, 3.11, and 3.12.
+- [ ] Trusted Publishing and attestations succeeded.
+- [ ] Public PyPI digest and installation verification succeeded.
+- [ ] GitHub Release created after PyPI verification.
+- [ ] External verification record added only after proof.

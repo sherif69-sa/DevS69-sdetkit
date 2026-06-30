@@ -18,7 +18,7 @@
   "patch_application_allowed": false,
   "permission_group": "release_or_provenance",
   "release_threat_model": {
-    "finding_count": 3,
+    "finding_count": 2,
     "review_first": true,
     "status": "review_required",
     "workflow_mutation": false,

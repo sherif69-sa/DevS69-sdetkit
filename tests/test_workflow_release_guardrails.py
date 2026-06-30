@@ -9,14 +9,17 @@ def _workflow(name: str) -> str:
 
 def test_release_workflow_installs_release_dependencies_with_constraints() -> None:
     text = _workflow("release.yml")
+    install_step = text[
+        text.index("      - name: Install release validation dependencies") : text.index(
+            "      - name: Run release quality gates"
+        )
+    ]
 
-    assert (
-        "python -m pip install -c constraints-ci.txt -r requirements-test.txt "
-        "-r requirements-docs.txt -e .[packaging]"
-    ) in text
-    assert (
-        "python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .[packaging]"
-    ) not in text
+    assert "python -m pip install -c constraints-ci.txt" in install_step
+    assert "-r requirements-test.txt" in install_step
+    assert "-r requirements-docs.txt" in install_step
+    assert "-e .[packaging]" in install_step
+    assert "python -m pip install -r requirements-test.txt" not in install_step
 
 
 def test_impact_release_control_uses_least_privilege_permissions_and_constraints() -> None:
