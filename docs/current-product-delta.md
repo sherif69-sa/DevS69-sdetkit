@@ -27,7 +27,7 @@ python -m sdetkit doctor
 
 ## Exact-head evidence
 
-A commit cannot contain its own final SHA. The canonical adoption workflow therefore uploads replay evidence with `GITHUB_SHA` in the artifact name. The tag-driven release workflow separately builds once and qualifies the exact wheel on Python 3.10, 3.11, and 3.12.
+A commit cannot contain its own final SHA. The canonical adoption workflow therefore retains the replay under its stable artifact contract, while GitHub Actions metadata binds that artifact to the workflow run's exact `head_sha`. The tag-driven release workflow separately builds once and qualifies the exact wheel on Python 3.10, 3.11, and 3.12.
 
 ## Remaining release gates
 
