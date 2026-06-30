@@ -1,134 +1,236 @@
-# Local equivalent command:
-#   python -m sdetkit workflow-governance-report --root . --format text
-#   See docs/ci/workflow-local-equivalents.md#release for workflow-specific operator notes.
+# Local equivalent: make release-preflight && python -m build
+# External requirement: protected GitHub environment `pypi`
+# External requirement: PyPI Trusted Publisher bound to release.yml and `pypi`
 name: Release
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    tags: ["v*.*.*"]
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing tag to release (example: v1.0.2)"
+        description: "Existing tag to release (example: v1.1.0)"
         required: true
         type: string
 
 permissions:
-  contents: write
-  id-token: write
-  attestations: write
+  contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release:
+  build:
+    name: Build release distributions
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.tag.outputs.value }}
+      version: ${{ steps.meta.outputs.version }}
+      source-sha: ${{ steps.meta.outputs.source_sha }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
           fetch-depth: 0
-
-      - name: Resolve tag
-        id: resolved
+          persist-credentials: false
+      - name: Resolve and validate tag
+        id: tag
+        env:
+          REQUESTED_TAG: ${{ inputs.tag }}
         shell: bash
         run: |
           set -euo pipefail
           if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
-            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            candidate="$GITHUB_REF_NAME"
           else
-            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+            candidate="${REQUESTED_TAG:-}"
           fi
-
-      - name: Checkout tag (workflow_dispatch)
+          [[ "$candidate" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "Release tag must match vX.Y.Z" >&2
+            exit 1
+          }
+          printf 'value=%s\n' "$candidate" >> "$GITHUB_OUTPUT"
+      - name: Checkout requested tag
         if: ${{ github.ref_type != 'tag' }}
-        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.tag.outputs.value }}
         run: |
-          set -euo pipefail
           git fetch --tags --force origin
-          git checkout "refs/tags/${{ steps.resolved.outputs.tag }}"
-
+          git checkout --detach "refs/tags/${RELEASE_TAG}"
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version: "3.12"
-          cache: "pip"
+          cache: pip
           cache-dependency-path: |
             pyproject.toml
             requirements-test.txt
             requirements-docs.txt
-
-
+            constraints-ci.txt
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        run: |
+          version="$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')"
+          printf 'version=%s\nsource_sha=%s\n' "$version" "$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Install release validation dependencies
+        run: |
+          python -m pip install -c constraints-ci.txt \
+            -r requirements-test.txt -r requirements-docs.txt -e .[packaging]
       - name: Release metadata preflight
-        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.tag.outputs.value }}
         run: |
-          set -euo pipefail
-          mkdir -p build
-          python scripts/release_preflight.py --tag "${{ steps.resolved.outputs.tag }}" --format json --out build/release-preflight.json
-
-      - name: Verify tag matches package version
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/check_release_tag_version.py "${{ steps.resolved.outputs.tag }}"
-      - name: Install + quality gates
-        shell: bash
+          mkdir -p build/release
+          python scripts/release_preflight.py --tag "$RELEASE_TAG" --format json \
+            --out build/release/release-preflight.json
+          python scripts/check_release_tag_version.py "$RELEASE_TAG"
+      - name: Run release quality gates
         env:
           COV_FAIL_UNDER: "95"
         run: |
-          set -euo pipefail
-          python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .[packaging]
           bash quality.sh cov
-
-      - name: Build dist
-        shell: bash
+          NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict
+      - name: Build and validate distributions
+        env:
+          RELEASE_TAG: ${{ steps.tag.outputs.value }}
+          RELEASE_VERSION: ${{ steps.meta.outputs.version }}
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
         run: |
-          set -euo pipefail
+          rm -rf dist build/lib build/bdist.*
           python -m build
           python -m twine check dist/*
           python -m check_wheel_contents --ignore W009 dist/*.whl
-
-      - name: Wheel smoke test
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install -c constraints-ci.txt --force-reinstall dist/*.whl
-          sdetkit --help
-
-      - name: Publish to PyPI when token is configured
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -z "${TWINE_PASSWORD:-}" ]; then
-            echo "PyPI publish skipped: configure repository secret PYPI_API_TOKEN to enable upload."
-            exit 0
-          fi
-          python -m twine upload dist/*
-
-      - name: Attest build provenance
-        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373  # v4.1.1
+          python scripts/build_release_distribution_manifest.py \
+            --tag "$RELEASE_TAG" --version "$RELEASE_VERSION" --source-sha "$SOURCE_SHA" \
+            --out build/release/distribution-manifest.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          subject-path: 'dist/*'
+          name: release-distributions
+          path: |
+            dist/*
+            build/release/*.json
+          retention-days: 30
+          if-no-files-found: error
 
-      - name: Create GitHub Release
+  qualify-wheel:
+    name: Qualify exact wheel (py${{ matrix.python-version }})
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          ref: ${{ needs.build.outputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: release-distributions
+          path: release-candidate
+      - name: Install and exercise exact wheel
+        run: |
+          python -m venv .venv-release
+          . .venv-release/bin/activate
+          wheel="$(find release-candidate/dist -name '*.whl' -print -quit)"
+          test -n "$wheel"
+          python -m pip install -c constraints-ci.txt --force-reinstall "$wheel"
+          python tests/contract/check_installed_wheel.py --python .venv-release/bin/python --repo-root .
+          mkdir -p build/release-qualification
+          python -m sdetkit gate fast --format json --stable-json --out build/release-qualification/gate-fast.json
+          python -m sdetkit gate release --format json --out build/release-qualification/gate-release.json
+          python -m sdetkit doctor --format json --out build/release-qualification/doctor.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: release-qualification-py${{ matrix.python-version }}
+          path: build/release-qualification/
+          retention-days: 30
+          if-no-files-found: error
+
+  attest-github:
+    needs: [build, qualify-wheel]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: release-distributions
+          path: release-candidate
+      - uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373  # v4.1.1
+        with:
+          subject-path: release-candidate/dist/*
+
+  publish-pypi:
+    needs: [build, qualify-wheel, attest-github]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/sdetkit
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: release-distributions
+          path: release-candidate
+      - name: Publish with PyPI Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b  # v1.14.0
+        with:
+          packages-dir: release-candidate/dist/
+          attestations: true
+          print-hash: true
+
+  verify-pypi:
+    needs: [build, publish-pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: release-distributions
+          path: release-candidate
+      - name: Verify public package
+        env:
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          mkdir -p build/release-verification
+          python scripts/verify_pypi_release.py --version "$RELEASE_VERSION" \
+            --manifest release-candidate/build/release/distribution-manifest.json \
+            --out build/release-verification/pypi-release.json
+          python -m pip install --no-cache-dir --index-url https://pypi.org/simple/ "sdetkit==$RELEASE_VERSION"
+          python -m sdetkit --help
+          python -m pip show sdetkit
+
+  github-release:
+    needs: [build, verify-pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: release-distributions
+          path: release-candidate
+      - name: Create GitHub Release after PyPI verification
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b  # v3.0.1
         with:
-          tag_name: ${{ steps.resolved.outputs.tag }}
-          name: ${{ steps.resolved.outputs.tag }}
+          tag_name: ${{ needs.build.outputs.tag }}
+          name: ${{ needs.build.outputs.tag }}
           generate_release_notes: true
           fail_on_unmatched_files: true
-          files: |
-            dist/*
-
-      - name: Upload release diagnostics
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: release-diagnostics
-          path: build/release-preflight.json
-          retention-days: 30
-          if-no-files-found: warn
+          files: release-candidate/dist/*
