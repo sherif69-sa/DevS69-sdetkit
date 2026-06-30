@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping
 from pathlib import Path, PurePosixPath
-from typing import Mapping
 
 from pr_quality_terminal_core import number, text
 

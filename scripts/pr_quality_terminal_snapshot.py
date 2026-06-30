@@ -7,9 +7,9 @@ import subprocess
 import sys
 import time
 import zipfile
+from collections.abc import Mapping, Sequence
 from io import BytesIO
 from pathlib import Path
-from typing import Mapping, Sequence
 
 from pr_quality_terminal_core import BLOCKING, latest_runs, number, text
 from pr_quality_terminal_handoff import verify_handoff

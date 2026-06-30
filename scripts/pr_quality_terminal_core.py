@@ -3,7 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from typing import Any, Mapping, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any
 
 SUCCESS = {"success", "neutral", "skipped"}
 BLOCKING = {"failure", "cancelled", "timed_out", "action_required", "startup_failure"}
