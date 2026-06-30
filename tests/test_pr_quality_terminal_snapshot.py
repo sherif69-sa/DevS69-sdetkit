@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MODEL_PATH = ROOT / "scripts" / "pr_quality_terminal_model.py"
 MODULE_PATH = ROOT / "scripts" / "pr_quality_terminal_snapshot.py"
-WORKFLOW_PATH = ROOT / ".github" / "workflows" / "pr-quality-terminal-publisher.yml"
+WORKFLOW_PATH = ROOT / ".github" / "workflows" / "pr-quality-publisher.yml"
 sys.path.insert(0, str(ROOT / "scripts"))
 
 model_spec = importlib.util.spec_from_file_location(
@@ -47,6 +47,22 @@ def run(
         "run_number": 1,
         "html_url": f"https://github.com/o/r/actions/runs/{run_id}",
         "head_sha": "head",
+    }
+
+
+def check(
+    name: str,
+    *,
+    status: str = "completed",
+    conclusion: str | None = "success",
+    check_id: int = 1,
+):
+    return {
+        "id": check_id,
+        "name": name,
+        "status": status,
+        "conclusion": conclusion,
+        "details_url": f"https://github.com/o/r/runs/{check_id}",
     }
 
 
@@ -93,7 +109,10 @@ def test_race_reproduced_late_ci_failure_is_named_with_first_step() -> None:
     assert result["review_state"] == "blocked"
     assert result["failed_workflows"][0]["workflow_name"] == "CI"
     assert result["failed_workflows"][0]["step_name"] == "Coverage gate"
-    assert "tests/test_gate.py::test_truth" in result["failed_workflows"][0]["first_failure"]
+    assert (
+        "tests/test_gate.py::test_truth"
+        in result["failed_workflows"][0]["first_failure"]
+    )
 
 
 def test_multiple_failures_are_all_rendered_once() -> None:
@@ -125,7 +144,9 @@ def test_pending_timeout_is_incomplete_and_no_ship() -> None:
 
 
 def test_missing_required_context_is_enumerated() -> None:
-    result = snapshot(workflow_runs=[run("maintenance-autopilot", run_id=2)])
+    result = snapshot(
+        workflow_runs=[run("maintenance-autopilot", run_id=2)],
+    )
     assert result["review_state"] == "waiting_or_unknown"
     assert [row["name"] for row in result["missing_required_contexts"]] == ["ci"]
 
@@ -196,7 +217,10 @@ def test_stale_security_alert_cannot_be_primary() -> None:
     result = snapshot(security_alerts=[alert])
     assert result["review_state"] == "waiting_or_unknown"
     assert not result["security_findings"]
-    assert "current_head_relation" in result["incomplete_security_findings"][0]["evidence_gaps"]
+    assert (
+        "current_head_relation"
+        in result["incomplete_security_findings"][0]["evidence_gaps"]
+    )
 
 
 def test_latest_rerun_replaces_older_failed_attempt() -> None:
@@ -270,10 +294,14 @@ def test_polling_waits_through_pending_then_reports_late_failure(monkeypatch) ->
         ]
     )
 
-    monkeypatch.setattr(module, "collect", lambda *args, **kwargs: next(samples))
+    def fake_collect(*args, **kwargs):
+        return next(samples)
+
+    monkeypatch.setattr(module, "collect", fake_collect)
     monkeypatch.setattr(module.time, "sleep", lambda _seconds: None)
+    api = module.GitHubApi(repository="o/r", token="token")
     result = module.poll(
-        module.GitHubApi(repository="o/r", token="token"),
+        api,
         7,
         "head",
         ["ci", "maintenance-autopilot"],
@@ -294,6 +322,7 @@ def test_terminal_publisher_checks_out_only_trusted_default_branch() -> None:
     assert "pull-requests: read" in workflow
     assert "pull-requests: write" not in workflow
     assert "github.event.workflow_run.head_branch" not in workflow
+    assert "name: PR Quality Publisher" in workflow
     assert "scripts/pr_quality_terminal_snapshot.py" in workflow
     assert "--stable-polls 2" in workflow
     assert "merge_authorized=false" in module.render_comment(snapshot())
