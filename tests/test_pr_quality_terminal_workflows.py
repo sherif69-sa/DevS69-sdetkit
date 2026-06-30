@@ -198,3 +198,68 @@ def test_environment_hook_is_disabled_outside_github_actions(
         )
         is None
     )
+
+
+def test_environment_hook_requires_complete_github_context(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.delenv("GITHUB_REPOSITORY", raising=False)
+    monkeypatch.setenv("REPOSITORY_OWNER", "o")
+    monkeypatch.setenv("REPOSITORY_NAME", "r")
+    monkeypatch.delenv("HEAD_SHA", raising=False)
+    monkeypatch.delenv("PR_NUMBER", raising=False)
+    monkeypatch.delenv("GH_TOKEN", raising=False)
+    checks = tmp_path / "checks.json"
+    checks.write_text(json.dumps({"check_runs": []}), encoding="utf-8")
+
+    assert (
+        module.collect_and_merge_terminal_snapshot_from_environment(
+            checks_json=checks,
+            out_dir=tmp_path / "out",
+        )
+        is None
+    )
+
+
+def test_environment_hook_reuses_exact_head_cached_snapshot(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+    monkeypatch.setenv("HEAD_SHA", "head")
+    monkeypatch.setenv("PR_NUMBER", "7")
+    monkeypatch.setenv("GH_TOKEN", "token")
+    monkeypatch.setattr(
+        module,
+        "collect_terminal_workflow_snapshot",
+        lambda **_kwargs: (_ for _ in ()).throw(AssertionError("cache was not reused")),
+    )
+    checks = tmp_path / "checks.json"
+    checks.write_text(
+        json.dumps({"check_runs": [], "required_contexts": ["ci"]}),
+        encoding="utf-8",
+    )
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    cached = snapshot([run("CI")])
+    (out_dir / "terminal-workflow-snapshot.json").write_text(
+        json.dumps(cached),
+        encoding="utf-8",
+    )
+
+    result = module.collect_and_merge_terminal_snapshot_from_environment(
+        checks_json=checks,
+        out_dir=out_dir,
+    )
+    merged = json.loads(checks.read_text(encoding="utf-8"))
+
+    assert result == cached
+    assert merged["terminal_workflow_snapshot"] == cached
+    assert merged["check_runs"][0]["name"] == "CI"
+
+
+def test_integer_normalization_rejects_non_numeric_values() -> None:
+    assert module._integer(object()) == 0
