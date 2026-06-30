@@ -28,51 +28,30 @@
     {
       "id": "diagnostic_failure_model",
       "stability": "advanced_supported",
-      "capabilities": [
-        "FailureVector extraction and normalized failure contracts",
-        "review-first SafetyGate decisions",
-        "DiagnosticJob and execution-plan handoffs",
-        "read-only JavaScript/TypeScript and Go failure adapters"
-      ]
+      "capabilities": ["diagnostic contracts and read-only ecosystem adapters"]
     },
     {
       "id": "verification_and_benchmarking",
       "stability": "experimental_incubator",
-      "capabilities": [
-        "isolated proof execution",
-        "protected verifier decisions",
-        "protected proof-chain integrity",
-        "patch scoring and anti-cheat checks",
-        "replayable remediation benchmark scorecards"
-      ]
+      "capabilities": ["isolated proof, protected verification, and anti-cheat evidence"]
     },
     {
       "id": "trajectory_and_memory",
       "stability": "experimental_incubator",
-      "capabilities": [
-        "trajectory storage",
-        "repository memory",
-        "diagnostic learning and pattern insights"
-      ]
+      "capabilities": ["trajectory storage and repository memory"]
     },
     {
       "id": "external_adoption_intelligence",
       "stability": "advanced_supported",
-      "capabilities": [
-        "read-only repository surface discovery",
-        "proof recommendation generation",
-        "external integration evidence bundles",
-        "public repository trial-matrix reporting",
-        "SHA-bound release-candidate external acceptance artifacts"
-      ]
+      "capabilities": ["read-only adoption intelligence and SHA-bound canonical replay"]
     }
   ],
   "release_blockers": [
-    "verify protected GitHub pypi environment and matching PyPI Trusted Publisher",
-    "merge release-candidate metadata and exact-head acceptance evidence",
-    "create signed v1.1.0 tag",
-    "qualify and publish exact artifacts through the release workflow",
-    "record post-release public verification evidence"
+    "verify the protected pypi environment and Trusted Publisher",
+    "merge exact-head candidate evidence",
+    "create the signed v1.1.0 tag",
+    "publish and verify the exact distributions",
+    "record post-release public evidence"
   ],
   "authority_boundary": {
     "automation_allowed": false,
