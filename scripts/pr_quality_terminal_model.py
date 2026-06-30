@@ -51,9 +51,7 @@ def build_snapshot(
     )
     exact_head = bool(head_sha) and current_head_sha == head_sha
     stable = stable_poll_count >= required_stable_polls
-    terminal_snapshot = (
-        exact_head and not pending and not unknown and stable and not timed_out
-    )
+    terminal_snapshot = exact_head and not pending and not unknown and stable and not timed_out
     if not exact_head:
         snapshot_status, review_state = "stale", "stale"
     elif (
@@ -103,11 +101,7 @@ def build_snapshot(
 
 
 def fact_status(model, fact_id: str) -> str:
-    live = (
-        model.get("live_evidence")
-        if isinstance(model.get("live_evidence"), Mapping)
-        else {}
-    )
+    live = model.get("live_evidence") if isinstance(model.get("live_evidence"), Mapping) else {}
     for item in live.get("facts") or []:
         if isinstance(item, Mapping) and text(item.get("id")) == fact_id:
             return text(item.get("status")) or "unavailable"
@@ -144,12 +138,8 @@ def render_comment(snapshot, review_model=None) -> str:
         "attention": "⚠️ Needs attention",
         "unavailable": "➖ Unavailable",
     }
-    workflow_state = (
-        "✅ Terminal" if snapshot["snapshot_status"] == "terminal" else "⚠️ Incomplete"
-    )
-    decision = (
-        model.get("decision") if isinstance(model.get("decision"), Mapping) else {}
-    )
+    workflow_state = "✅ Terminal" if snapshot["snapshot_status"] == "terminal" else "⚠️ Incomplete"
+    decision = model.get("decision") if isinstance(model.get("decision"), Mapping) else {}
     risk = text(decision.get("risk_surface")) or "not_collected"
     lines = [
         "### SDET Quality Gate",
@@ -219,9 +209,7 @@ def render_comment(snapshot, review_model=None) -> str:
             f"`security alert {item.get('number') or 'unknown'}` — "
             "incomplete provenance: " + ", ".join(item.get("evidence_gaps") or [])
         )
-    missing += [
-        f"`collection error` — {inline(item)}" for item in snapshot["collection_errors"]
-    ]
+    missing += [f"`collection error` — {inline(item)}" for item in snapshot["collection_errors"]]
     if missing:
         lines += [
             "### Pending or missing evidence",
@@ -232,7 +220,7 @@ def render_comment(snapshot, review_model=None) -> str:
     lines += [
         (
             "> 🔒 Authority: `reporting only`. This snapshot does not authorize "
-            "merge, patch application, security dismissal, or semantic-equivalence claims."
+            "merge, patch application, finding disposition, or semantic-equivalence claims."
         ),
         "",
         "`merge_authorized=false`",
