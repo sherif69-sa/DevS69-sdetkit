@@ -67,7 +67,7 @@
       "3.11",
       "3.12"
     ],
-    "python_310_full_ci_proven": false
+    "python310_full_continuous_integration_proven": false
   },
   "authority_boundary": {
     "tests_may_be_weakened": false,
