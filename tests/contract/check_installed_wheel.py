@@ -10,7 +10,9 @@ from pathlib import Path
 from typing import Any, cast
 
 
-def _run(cli_python: Path, repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+def _run(
+    cli_python: Path, repo_root: Path, *args: str
+) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env.pop("CI", None)
     return subprocess.run(
@@ -25,17 +27,25 @@ def _run(cli_python: Path, repo_root: Path, *args: str) -> subprocess.CompletedP
 
 def _load_json(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:
     if proc.stdout.strip() == "":
-        raise AssertionError(f"expected JSON stdout, got empty output; stderr={proc.stderr!r}")
+        raise AssertionError(
+            f"expected JSON stdout, got empty output; stderr={proc.stderr!r}"
+        )
     return cast(dict[str, Any], json.loads(proc.stdout))
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Run installed-wheel CLI contract checks.")
-    parser.add_argument(
-        "--python", required=True, help="Python executable inside the isolated wheel venv."
+    parser = argparse.ArgumentParser(
+        description="Run installed-wheel CLI contract checks."
     )
     parser.add_argument(
-        "--repo-root", default=".", help="Repository root containing example assets."
+        "--python",
+        required=True,
+        help="Python executable inside the isolated wheel venv.",
+    )
+    parser.add_argument(
+        "--repo-root",
+        default=".",
+        help="Repository root containing example assets.",
     )
     ns = parser.parse_args(argv)
 
@@ -47,14 +57,19 @@ def main(argv: list[str] | None = None) -> int:
     def check(name: str, proc: subprocess.CompletedProcess[str]) -> None:
         if proc.returncode != 0:
             failures.append(
-                f"{name} failed with rc={proc.returncode}\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
+                f"{name} failed with rc={proc.returncode}\n"
+                f"stdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
             )
 
     kits = _run(cli_python, repo_root, "kits", "list", "--format", "json")
     check("kits list", kits)
     if kits.returncode == 0:
         payload = _load_json(kits)
-        slugs = [item.get("slug") for item in payload.get("kits", []) if isinstance(item, dict)]
+        slugs = [
+            item.get("slug")
+            for item in payload.get("kits", [])
+            if isinstance(item, dict)
+        ]
         if slugs != ["forensics", "integration", "release", "intelligence"]:
             failures.append(f"kits list returned unexpected slugs: {slugs!r}")
 
@@ -74,7 +89,11 @@ def main(argv: list[str] | None = None) -> int:
         tests = payload.get("tests", [])
         if summary != {"flaky": 1, "stable_failing": 0, "stable_passing": 1}:
             failures.append(f"unexpected flake summary: {summary!r}")
-        if not tests or not isinstance(tests[0], dict) or not tests[0].get("fingerprint"):
+        if (
+            not tests
+            or not isinstance(tests[0], dict)
+            or not tests[0].get("fingerprint")
+        ):
             failures.append(
                 "flake classification did not expose the expected fingerprinted test record"
             )
@@ -114,7 +133,10 @@ def main(argv: list[str] | None = None) -> int:
     if compare.returncode == 0:
         payload = _load_json(compare)
         regression = payload.get("regression_summary", {})
-        if regression.get("changed_failures") != 1 or regression.get("new_failures") != 1:
+        if (
+            regression.get("changed_failures") != 1
+            or regression.get("new_failures") != 1
+        ):
             failures.append(f"unexpected forensics regression summary: {regression!r}")
 
     bundle_path = repo_root / "build" / "installed-wheel-bundle.zip"
