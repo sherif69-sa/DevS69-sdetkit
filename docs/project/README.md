@@ -10,6 +10,7 @@ This directory holds project-level documents that used to live at the repository
 | [Operator workflow](operator-workflow.md) | Single-operator workflow and local check lanes. |
 | [Quality playbook](quality-playbook.md) | Quality gate policy, coverage, lint, and mutation-testing guidance. |
 | [Release process](release-process.md) | Release checklist, tag workflow, and post-release verification. |
+| [Release candidate qualification](release-candidate-qualification.md) | Pre-tag exact-wheel qualification with no publishing authority. |
 | [Enterprise offerings](enterprise-offerings.md) | Open-source core and optional enterprise support boundaries. |
 | [Adaptive investigation roadmap](../roadmap/adaptive-investigation-roadmap.md) | Investigation/autopilot chain roadmap and safety posture. |
 
