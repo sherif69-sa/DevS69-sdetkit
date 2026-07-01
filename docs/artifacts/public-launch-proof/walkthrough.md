@@ -7,7 +7,7 @@ Accessible static walkthrough: a saved pytest CI log is reduced to the first fai
 - source commit: `f367b25b003efebb75dcaa72fd229979be59b8c2`
 - input log: `tests/fixtures/public_failure_demo/ci_log.txt`
 - classification: `test`
-- first failure: `FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: assert 108 == 110`
+- first failure: `FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: total mismatch: expected 110, got 108`
 - affected file: `tests/test_checkout.py`
 - proof command: `PYTHONPATH=src python -m pytest -q tests/test_checkout.py::test_total_includes_tax -o addopts=`
 - review first: `true`
