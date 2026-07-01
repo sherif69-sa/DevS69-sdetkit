@@ -8,12 +8,19 @@ from pathlib import Path
 
 
 def _script_path() -> Path:
-    return Path(__file__).resolve().parent.parent / "tests" / "contract" / "check_installed_wheel.py"
+    return (
+        Path(__file__).resolve().parent.parent
+        / "tests"
+        / "contract"
+        / "check_installed_wheel.py"
+    )
 
 
 def _load_module():
     script = _script_path()
-    spec = importlib.util.spec_from_file_location("check_installed_wheel_contract", script)
+    spec = importlib.util.spec_from_file_location(
+        "check_installed_wheel_contract", script
+    )
     assert spec is not None
     assert spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -38,7 +45,9 @@ def test_main_preserves_virtualenv_python_path(tmp_path: Path, monkeypatch) -> N
     requested_python = Path(".venv-smoke/bin/python")
     calls: list[tuple[Path, tuple[str, ...], str | None]] = []
 
-    def fake_run(cli_python: Path, repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    def fake_run(
+        cli_python: Path, repo_root: Path, *args: str
+    ) -> subprocess.CompletedProcess[str]:
         calls.append((cli_python, args, None))
         if args[:2] == ("integration", "check"):
             payload = {
@@ -78,7 +87,10 @@ def test_main_preserves_virtualenv_python_path(tmp_path: Path, monkeypatch) -> N
         elif args[:2] == ("forensics", "compare"):
             payload = {"regression_summary": {"changed_failures": 1, "new_failures": 1}}
         return subprocess.CompletedProcess(
-            [str(cli_python), "-m", "sdetkit", *args], 0, stdout=json.dumps(payload), stderr=""
+            [str(cli_python), "-m", "sdetkit", *args],
+            0,
+            stdout=json.dumps(payload),
+            stderr="",
         )
 
     monkeypatch.setattr(module, "_run", fake_run)
@@ -103,6 +115,8 @@ def test_run_clears_ci_environment_for_local_smoke(tmp_path: Path, monkeypatch) 
 
     monkeypatch.setattr(module.subprocess, "run", fake_subprocess_run)
 
-    module._run(Path(".venv-smoke/bin/python"), tmp_path, "kits", "list", "--format", "json")
+    module._run(
+        Path(".venv-smoke/bin/python"), tmp_path, "kits", "list", "--format", "json"
+    )
 
     assert captured["CI"] is None

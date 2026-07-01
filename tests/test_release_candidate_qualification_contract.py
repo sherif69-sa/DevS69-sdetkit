@@ -36,8 +36,12 @@ def test_candidate_workflow_builds_once_and_qualifies_exact_wheel() -> None:
     assert 'python-version: ["3.10", "3.11", "3.12"]' in text
     assert "name: release-candidate-distributions" in text
     assert "Install and exercise exact candidate wheel" in text
-    assert 'python -m pip install -c constraints-ci.txt --force-reinstall "$wheel"' in text
-    assert "python -m pip install -c constraints-ci.txt -r requirements-test.txt" in text
+    assert (
+        'python -m pip install -c constraints-ci.txt --force-reinstall "$wheel"' in text
+    )
+    assert (
+        "python -m pip install -c constraints-ci.txt -r requirements-test.txt" in text
+    )
     assert "tests/contract/check_installed_wheel.py" in text
     assert "python -m sdetkit gate fast" in text
     assert "python -m sdetkit gate release" in text
