@@ -13,7 +13,7 @@
     "semantic_equivalence_proven": false
   },
   "diagnosis": {
-    "actual_failure": "FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: assert 108 == 110",
+    "actual_failure": "FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: total mismatch: expected 110, got 108",
     "affected_files": [
       "tests/test_checkout.py"
     ],
@@ -21,7 +21,7 @@
     "confidence": "high",
     "ecosystem": "python",
     "exit_code": 1,
-    "first_meaningful_failure": "FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: assert 108 == 110",
+    "first_meaningful_failure": "FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: total mismatch: expected 110, got 108",
     "investigation_classification": "PYTEST_ASSERTION_FAILURE",
     "proof_command": "PYTHONPATH=src python -m pytest -q tests/test_checkout.py::test_total_includes_tax -o addopts=",
     "tool": "pytest"
@@ -40,9 +40,9 @@
       "",
       "    def test_total_includes_tax():",
       ">       assert calculate_total(100) == 110",
-      "E       assert 108 == 110",
+      "E       AssertionError: total mismatch: expected 110, got 108",
       "",
-      "FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: assert 108 == 110",
+      "FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: total mismatch: expected 110, got 108",
       "=========================== 1 failed, 48 passed in 1.42s =======================",
       "Process completed with exit code 1"
     ]
