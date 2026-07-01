@@ -23,6 +23,9 @@ jobs:
     with:
       scan-args: |-
         -r
+        # This fixture models external-repository discovery only. It is not a
+        # shipped dependency surface and must not create repository security noise.
+        --exclude=tests/fixtures/public_adoption_target
         ./
       fail-on-vuln: false
       upload-sarif: true
