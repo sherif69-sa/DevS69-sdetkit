@@ -1,0 +1,12 @@
+# Fixture-local OSV policy.
+#
+# This directory is a read-only adoption-surface demonstration fixture, not a
+# shipped, installed, or executed project dependency. The repository-level OSV
+# workflow scans recursively from the repository root, so this local policy
+# prevents synthetic dependency metadata from appearing as production alerts.
+#
+# Scope: applies only to manifests in this fixture directory.
+
+[[PackageOverrides]]
+vulnerability.ignore = true
+reason = "Fixture-only public adoption target used by tests and documentation; not a production or release dependency."
