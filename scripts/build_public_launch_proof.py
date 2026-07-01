@@ -199,10 +199,7 @@ def render_walkthrough(failure: dict[str, Any], adoption: dict[str, Any]) -> str
             "",
             f"- dependencies installed: `{str(safety['dependencies_installed']).lower()}`",
             f"- target code executed: `{str(safety['target_code_executed']).lower()}`",
-            (
-                "- target repository mutated: "
-                f"`{str(safety['target_repository_mutated']).lower()}`"
-            ),
+            (f"- target repository mutated: `{str(safety['target_repository_mutated']).lower()}`"),
             f"- automation allowed: `{str(safety['automation_allowed']).lower()}`",
             f"- merge authorized: `{str(safety['merge_authorized']).lower()}`",
             "",
