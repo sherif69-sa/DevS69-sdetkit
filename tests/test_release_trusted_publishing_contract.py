@@ -36,7 +36,7 @@ def test_release_dispatch_input_is_validated_before_shell_use() -> None:
 
     assert "REQUESTED_TAG: ${{ inputs.tag }}" in resolve_step
     assert 'candidate="${REQUESTED_TAG:-}"' in resolve_step
-    assert '[[ "$candidate" =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+$ ]]' in resolve_step
+    assert '[[ "$candidate" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]' in resolve_step
     assert "${{ inputs.tag }}" not in resolve_step.split("run: |", 1)[1]
     assert "Release tag must match vX.Y.Z" in resolve_step
 
@@ -66,6 +66,8 @@ def test_release_workflow_builds_once_and_qualifies_exact_wheel() -> None:
     assert 'python-version: ["3.10", "3.11", "3.12"]' in text
     assert "name: release-distributions" in text
     assert "Install and exercise exact wheel" in text
+    assert 'python -m pip install -c constraints-ci.txt --force-reinstall "$wheel"' in text
+    assert "python -m pip install -c constraints-ci.txt -r requirements-test.txt" in text
     assert "tests/contract/check_installed_wheel.py" in text
     assert "python -m sdetkit gate fast" in text
     assert "python -m sdetkit gate release" in text
