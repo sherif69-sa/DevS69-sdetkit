@@ -53,9 +53,7 @@ def test_candidate_workflow_builds_once_and_qualifies_exact_wheel() -> None:
 
 def test_candidate_wheel_qualification_preserves_clean_checkout() -> None:
     text = _workflow()
-    qualification = text[
-        text.index("  qualify-wheel:") : text.index("  qualification-verdict:")
-    ]
+    qualification = text[text.index("  qualify-wheel:") : text.index("  qualification-verdict:")]
 
     assert "path: release-candidate" not in qualification
     assert "python -m venv .venv-release-candidate" not in qualification
