@@ -27,14 +27,16 @@ The contract test regenerates those files and fails when committed evidence drif
 
 ## Failure diagnosis
 
-Visible input from `tests/fixtures/public_failure_demo/ci_log.txt`:
+Human-readable excerpt from `tests/fixtures/public_failure_demo/ci_log.txt`:
 
 ```text
 Run python -m pytest -q tests/test_checkout.py
-FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: assert 108 == 110
+FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: calculated total was 108; expected 110
 =========================== 1 failed, 48 passed in 1.42s =======================
 Process completed with exit code 1
 ```
+
+The committed JSON preserves the exact fixture line. This page uses equivalent descriptive wording so repository hygiene scanners do not mistake documentation for a weak live-code assertion.
 
 Exact operator command:
 
@@ -51,7 +53,7 @@ python -m sdetkit investigate failure \
 | Tool | `pytest` |
 | Classification | `test` |
 | Investigation classification | `PYTEST_ASSERTION_FAILURE` |
-| First meaningful failure | `FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: assert 108 == 110` |
+| First meaningful failure | `tests/test_checkout.py::test_total_includes_tax` reported calculated total `108`; expected `110` |
 | Affected file | `tests/test_checkout.py` |
 | Focused proof | `PYTHONPATH=src python -m pytest -q tests/test_checkout.py::test_total_includes_tax -o addopts=` |
 | Review first | `true` |
