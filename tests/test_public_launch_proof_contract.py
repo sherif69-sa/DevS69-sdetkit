@@ -94,9 +94,9 @@ def test_committed_public_launch_artifacts_are_fresh(tmp_path: Path) -> None:
     )
 
     for name in ("failure-diagnosis.json", "adoption-story.json", "walkthrough.md"):
-        assert (out_dir / name).read_text(encoding="utf-8") == (
-            ARTIFACT_DIR / name
-        ).read_text(encoding="utf-8")
+        assert (out_dir / name).read_text(encoding="utf-8") == (ARTIFACT_DIR / name).read_text(
+            encoding="utf-8"
+        )
 
 
 def test_public_front_doors_link_the_committed_proof() -> None:
