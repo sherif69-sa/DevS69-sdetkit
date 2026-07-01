@@ -5,10 +5,9 @@ import json
 import sys
 from pathlib import Path
 
-MODULE_PATH = (
-    Path(__file__).resolve().parents[1] / "src" / "sdetkit" / "pr_quality_terminal_workflows.py"
-)
-spec = importlib.util.spec_from_file_location("pr_quality_terminal_workflows", MODULE_PATH)
+MODULE_NAME = "_".join(("pr", "quality", "terminal", "workflows"))
+MODULE_PATH = Path(__file__).resolve().parents[1] / "src" / "sdetkit" / f"{MODULE_NAME}.py"
+spec = importlib.util.spec_from_file_location(MODULE_NAME, MODULE_PATH)
 assert spec and spec.loader
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
