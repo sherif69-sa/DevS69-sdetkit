@@ -3,19 +3,34 @@ from __future__ import annotations
 import importlib.util
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 
+def _script_path() -> Path:
+    return Path(__file__).resolve().parent.parent / "tests" / "contract" / "check_installed_wheel.py"
+
+
 def _load_module():
-    script = (
-        Path(__file__).resolve().parent.parent / "tests" / "contract" / "check_installed_wheel.py"
-    )
+    script = _script_path()
     spec = importlib.util.spec_from_file_location("check_installed_wheel_contract", script)
     assert spec is not None
     assert spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def test_script_exposes_executable_command_line_entrypoint() -> None:
+    proc = subprocess.run(
+        [sys.executable, str(_script_path()), "--help"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert proc.returncode == 0
+    assert "Run installed-wheel CLI contract checks." in proc.stdout
 
 
 def test_main_preserves_virtualenv_python_path(tmp_path: Path, monkeypatch) -> None:
