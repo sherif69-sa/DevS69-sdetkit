@@ -133,9 +133,7 @@ def build_adoption_story_payload(
             "ci_systems": _named(surface["ci_systems"]),
             "security_tools": _named(surface["security_tools"]),
         },
-        "recommended_proof_commands": _proof_commands(
-            surface["recommended_proof_commands"]
-        ),
+        "recommended_proof_commands": _proof_commands(surface["recommended_proof_commands"]),
         "review_first_unknowns": list(surface["review_first_unknowns"]),
         "generated_artifacts": [
             "docs/artifacts/public-launch-proof/failure-diagnosis.json",
@@ -150,16 +148,12 @@ def build_adoption_story_payload(
             "automation_allowed": bool(surface["automation_allowed"]),
             "patch_application_allowed": bool(surface["patch_application_allowed"]),
             "merge_authorized": bool(surface["merge_authorized"]),
-            "semantic_equivalence_proven": bool(
-                surface["semantic_equivalence_proven"]
-            ),
+            "semantic_equivalence_proven": bool(surface["semantic_equivalence_proven"]),
         },
     }
 
 
-def render_walkthrough(
-    failure: dict[str, Any], adoption: dict[str, Any]
-) -> str:
+def render_walkthrough(failure: dict[str, Any], adoption: dict[str, Any]) -> str:
     diagnosis = failure["diagnosis"]
     decision = failure["decision"]
     surfaces = adoption["detected_surfaces"]
@@ -257,7 +251,7 @@ def write_public_launch_proof(
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Build deterministic public failure-diagnosis and adoption proof."
+        description="Build deterministic public failure-diagnosis and adoption proof.",
     )
     parser.add_argument("--source-commit", required=True)
     parser.add_argument("--failure-log", type=Path, default=DEFAULT_FAILURE_LOG)
