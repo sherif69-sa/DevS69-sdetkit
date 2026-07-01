@@ -42,12 +42,12 @@ def test_main_preserves_virtualenv_python_path(tmp_path: Path, monkeypatch) -> N
         calls.append((cli_python, args, None))
         if args[:2] == ("integration", "check"):
             payload = {
-                "summary": {"failed": 1, "passed": False},
-                "checks": [{"kind": "env", "name": "CI"}],
+                "summary": {"failed": 0, "passed": True, "total": 0},
+                "checks": [],
             }
             return subprocess.CompletedProcess(
                 [str(cli_python), "-m", "sdetkit", *args],
-                1,
+                0,
                 stdout=json.dumps(payload),
                 stderr="",
             )
