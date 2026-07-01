@@ -163,6 +163,7 @@ jobs:
           wheel="$(find release-candidate/dist -name '*.whl' -print -quit)"
           test -n "$wheel"
           python -m pip install -c constraints-ci.txt --force-reinstall "$wheel"
+          python -m pip install -c constraints-ci.txt -r requirements-test.txt
           python tests/contract/check_installed_wheel.py \
             --python .venv-release-candidate/bin/python --repo-root .
           mkdir -p build/release-candidate-qualification
