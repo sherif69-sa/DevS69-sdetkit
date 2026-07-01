@@ -1,0 +1,225 @@
+name: Release Candidate Qualification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/release-candidate.yml"
+      - ".github/workflows/release.yml"
+      - "pyproject.toml"
+      - "CHANGELOG.md"
+      - "constraints-ci.txt"
+      - "requirements-test.txt"
+      - "requirements-docs.txt"
+      - "scripts/release_preflight.py"
+      - "scripts/check_release_tag_version.py"
+      - "scripts/build_release_distribution_manifest.py"
+      - "tests/contract/check_installed_wheel.py"
+      - "tests/test_release_candidate_qualification_contract.py"
+      - "docs/project/release-process.md"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/release-candidate.yml"
+      - ".github/workflows/release.yml"
+      - "pyproject.toml"
+      - "CHANGELOG.md"
+      - "constraints-ci.txt"
+      - "requirements-test.txt"
+      - "requirements-docs.txt"
+      - "scripts/release_preflight.py"
+      - "scripts/check_release_tag_version.py"
+      - "scripts/build_release_distribution_manifest.py"
+      - "tests/contract/check_installed_wheel.py"
+      - "tests/test_release_candidate_qualification_contract.py"
+      - "docs/project/release-process.md"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-candidate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build candidate distributions
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      candidate_tag: ${{ steps.meta.outputs.candidate_tag }}
+      source_sha: ${{ steps.meta.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements-test.txt
+            requirements-docs.txt
+            constraints-ci.txt
+      - name: Resolve candidate metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')"
+          printf 'version=%s\ncandidate_tag=v%s\nsource_sha=%s\n' \
+            "$version" "$version" "$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Install qualification dependencies
+        run: |
+          python -m pip install -c constraints-ci.txt -e .[packaging] \
+            -r requirements-test.txt -r requirements-docs.txt
+      - name: Validate candidate metadata
+        env:
+          CANDIDATE_TAG: ${{ steps.meta.outputs.candidate_tag }}
+        run: |
+          mkdir -p build/release-candidate
+          python scripts/release_preflight.py --tag "$CANDIDATE_TAG" --format json \
+            --out build/release-candidate/release-preflight.json
+          python scripts/check_release_tag_version.py "$CANDIDATE_TAG"
+      - name: Run candidate quality gates
+        env:
+          COV_FAIL_UNDER: "95"
+        run: |
+          bash quality.sh cov
+          NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict
+      - name: Build candidate once
+        env:
+          CANDIDATE_TAG: ${{ steps.meta.outputs.candidate_tag }}
+          RELEASE_VERSION: ${{ steps.meta.outputs.version }}
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+        run: |
+          rm -rf dist build/lib build/bdist.*
+          python -m build
+          python -m twine check dist/*
+          python -m check_wheel_contents --ignore W009 dist/*.whl
+          python scripts/build_release_distribution_manifest.py \
+            --tag "$CANDIDATE_TAG" --version "$RELEASE_VERSION" --source-sha "$SOURCE_SHA" \
+            --out build/release-candidate/distribution-manifest.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          payload = {
+              "schema_version": "sdetkit.release_candidate.qualification.v1",
+              "candidate_tag": os.environ["CANDIDATE_TAG"],
+              "version": os.environ["RELEASE_VERSION"],
+              "source_sha": os.environ["SOURCE_SHA"],
+              "qualification_scope": "pre_tag_build_and_exact_wheel",
+              "python_versions": ["3.10", "3.11", "3.12"],
+              "external_settings_verified": False,
+              "publish_authorized": False,
+              "publication_attempted": False,
+              "tag_created": False,
+              "required_external_checks": [
+                  "GitHub environment pypi protection",
+                  "PyPI Trusted Publisher binding",
+              ],
+          }
+          Path("build/release-candidate/candidate-status.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: release-candidate-distributions
+          path: |
+            dist/*
+            build/release-candidate/*.json
+          retention-days: 30
+          if-no-files-found: error
+
+  qualify-wheel:
+    name: Qualify candidate wheel (py${{ matrix.python-version }})
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          ref: ${{ needs.build.outputs.source_sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: release-candidate-distributions
+          path: release-candidate
+      - name: Install and exercise exact candidate wheel
+        run: |
+          python -m venv .venv-release-candidate
+          . .venv-release-candidate/bin/activate
+          wheel="$(find release-candidate/dist -name '*.whl' -print -quit)"
+          test -n "$wheel"
+          python -m pip install -c constraints-ci.txt --force-reinstall "$wheel"
+          python tests/contract/check_installed_wheel.py \
+            --python .venv-release-candidate/bin/python --repo-root .
+          mkdir -p build/release-candidate-qualification
+          python -m sdetkit gate fast --format json --stable-json \
+            --out build/release-candidate-qualification/gate-fast.json
+          python -m sdetkit gate release --format json \
+            --out build/release-candidate-qualification/gate-release.json
+          python -m sdetkit doctor --format json \
+            --out build/release-candidate-qualification/doctor.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: release-candidate-qualification-py${{ matrix.python-version }}
+          path: build/release-candidate-qualification/
+          retention-days: 30
+          if-no-files-found: error
+
+  qualification-verdict:
+    name: Record qualification verdict
+    needs: [build, qualify-wheel]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: "3.12"
+      - name: Emit non-publishing verdict
+        env:
+          CANDIDATE_TAG: ${{ needs.build.outputs.candidate_tag }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+          SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+        run: |
+          mkdir -p build/release-candidate-verdict
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          payload = {
+              "schema_version": "sdetkit.release_candidate.verdict.v1",
+              "status": "repository_qualification_passed",
+              "candidate_tag": os.environ["CANDIDATE_TAG"],
+              "version": os.environ["RELEASE_VERSION"],
+              "source_sha": os.environ["SOURCE_SHA"],
+              "qualified_python_versions": ["3.10", "3.11", "3.12"],
+              "external_settings_verified": False,
+              "publish_authorized": False,
+              "publication_attempted": False,
+              "tag_created": False,
+              "next_action": "verify external publishing settings before creating v1.1.0",
+          }
+          Path("build/release-candidate-verdict/qualification-verdict.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: release-candidate-verdict
+          path: build/release-candidate-verdict/qualification-verdict.json
+          retention-days: 30
+          if-no-files-found: error
