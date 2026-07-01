@@ -29,11 +29,11 @@ def test_failure_demo_exposes_first_failure_and_review_first_boundary() -> None:
         "investigation_classification": "PYTEST_ASSERTION_FAILURE",
         "first_meaningful_failure": (
             "FAILED tests/test_checkout.py::test_total_includes_tax - "
-            "AssertionError: assert 108 == 110"
+            "AssertionError: total mismatch: expected 110, got 108"
         ),
         "actual_failure": (
             "FAILED tests/test_checkout.py::test_total_includes_tax - "
-            "AssertionError: assert 108 == 110"
+            "AssertionError: total mismatch: expected 110, got 108"
         ),
         "affected_files": ["tests/test_checkout.py"],
         "proof_command": (
