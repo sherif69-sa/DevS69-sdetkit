@@ -143,6 +143,7 @@ jobs:
           wheel="$(find release-candidate/dist -name '*.whl' -print -quit)"
           test -n "$wheel"
           python -m pip install -c constraints-ci.txt --force-reinstall "$wheel"
+          python -m pip install -c constraints-ci.txt -r requirements-test.txt
           python tests/contract/check_installed_wheel.py --python .venv-release/bin/python --repo-root .
           mkdir -p build/release-qualification
           python -m sdetkit gate fast --format json --stable-json --out build/release-qualification/gate-fast.json
