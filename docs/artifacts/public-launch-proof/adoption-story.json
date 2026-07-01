@@ -1,0 +1,54 @@
+{
+  "capability_state": "main_only_until_1.1.0",
+  "detected_surfaces": {
+    "ci_systems": [
+      "gitlab_ci"
+    ],
+    "languages": [
+      "go",
+      "javascript_typescript",
+      "python"
+    ],
+    "package_managers": [
+      "go_modules",
+      "npm",
+      "pip"
+    ],
+    "security_tools": [
+      "pip_audit"
+    ],
+    "test_runners": [
+      "node_test_script"
+    ]
+  },
+  "generated_artifacts": [
+    "docs/artifacts/public-launch-proof/failure-diagnosis.json",
+    "docs/artifacts/public-launch-proof/adoption-story.json",
+    "docs/artifacts/public-launch-proof/walkthrough.md"
+  ],
+  "proof_type": "fixture_based_external_adoption",
+  "recommended_proof_commands": [
+    "go test ./...",
+    "npm test"
+  ],
+  "review_first_unknowns": [
+    "Python project detected but test command is not proven"
+  ],
+  "safety": {
+    "automation_allowed": false,
+    "dependencies_installed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "read_only": true,
+    "semantic_equivalence_proven": false,
+    "target_code_executed": false,
+    "target_repository_mutated": false
+  },
+  "schema_version": "sdetkit.public_launch_proof.v1",
+  "source_commit": "f367b25b003efebb75dcaa72fd229979be59b8c2",
+  "target": {
+    "fixture_based": true,
+    "git_detected": false,
+    "path": "tests/fixtures/public_adoption_target"
+  }
+}
