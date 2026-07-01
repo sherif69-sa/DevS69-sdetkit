@@ -87,19 +87,18 @@ def main(argv: list[str] | None = None) -> int:
         "--profile",
         "examples/kits/integration/profile.json",
     )
-    if integration.returncode != 1:
-        failures.append("integration check should fail the bundled local-smoke profile outside CI")
-    else:
+    check("integration check", integration)
+    if integration.returncode == 0:
         payload = _load_json(integration)
         summary = payload.get("summary", {})
-        if summary.get("failed") != 1 or summary.get("passed") is not False:
+        if (
+            summary.get("failed") != 0
+            or summary.get("passed") is not True
+            or summary.get("total") != 0
+        ):
             failures.append(f"unexpected integration summary: {summary!r}")
-        checks = payload.get("checks", [])
-        env_checks = [
-            item for item in checks if isinstance(item, dict) and item.get("kind") == "env"
-        ]
-        if not env_checks or env_checks[0].get("name") != "CI":
-            failures.append(f"unexpected integration env checks: {env_checks!r}")
+        if payload.get("checks") != []:
+            failures.append(f"unexpected integration checks: {payload.get('checks')!r}")
 
     compare = _run(
         cli_python,
