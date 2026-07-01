@@ -18,6 +18,7 @@ def test_candidate_workflow_is_pre_tag_and_non_publishing() -> None:
     assert "pull_request:" in text
     assert "push:" in text
     assert "branches: [main]" in text
+    assert "cancel-in-progress: ${{ github.event_name == 'pull_request' }}" in text
     assert "permissions:\n  contents: read" in text
     assert "id-token: write" not in text
     assert "contents: write" not in text
