@@ -1,45 +1,42 @@
 # Public launch proof
 
-This page is the concise, accessible proof behind SDETKit's public product claim.
+This page demonstrates two current repository capabilities:
 
-It demonstrates two current `main` capabilities:
-
-1. reduce a realistic saved CI failure to the first meaningful failure, affected file, focused proof command, and review-first decision;
+1. reduce a saved CI failure to the first meaningful failure, affected file, focused proof command, and review-first decision;
 2. profile an external-repository fixture without installing dependencies, executing target code, mutating the target, or authorizing a merge.
 
 !!! note "Published package versus main"
-    These artifacts prove repository `main` behavior at source commit `f367b25b003efebb75dcaa72fd229979be59b8c2`. They are **main-only until the qualified 1.1.0 release**. The currently published `1.0.3` wheel must not be treated as proof of these surfaces.
+    This proof records repository `main` behavior at source commit `f367b25b003efebb75dcaa72fd229979be59b8c2`. These capabilities remain **main-only until the qualified 1.1.0 release**. The published `1.0.3` wheel is not proof of these surfaces.
 
-## Reproduce the committed proof
+## Reproduce the proof
 
 ```bash
 python scripts/build_public_launch_proof.py \
   --source-commit f367b25b003efebb75dcaa72fd229979be59b8c2
 ```
 
-Committed outputs:
+Committed repository evidence:
 
-- [Failure-diagnosis JSON](artifacts/public-launch-proof/failure-diagnosis.json)
-- [Fixture-based adoption JSON](artifacts/public-launch-proof/adoption-story.json)
-- [Accessible static walkthrough](artifacts/public-launch-proof/walkthrough.md)
+```text
+docs/artifacts/public-launch-proof/failure-diagnosis.json
+docs/artifacts/public-launch-proof/adoption-story.json
+docs/artifacts/public-launch-proof/walkthrough.md
+```
 
-The contract test regenerates these files and fails when committed evidence drifts from current behavior.
+The contract test regenerates those files and fails when committed evidence drifts. They remain repository evidence rather than built-site pages because `docs/artifacts/**` is intentionally excluded from MkDocs.
 
-## Failure diagnosis demonstration
+## Failure diagnosis
 
-### Visible input
+Visible input from `tests/fixtures/public_failure_demo/ci_log.txt`:
 
 ```text
 Run python -m pytest -q tests/test_checkout.py
-...
 FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: assert 108 == 110
 =========================== 1 failed, 48 passed in 1.42s =======================
 Process completed with exit code 1
 ```
 
-Full fixture: [`tests/fixtures/public_failure_demo/ci_log.txt`](../tests/fixtures/public_failure_demo/ci_log.txt)
-
-### Exact operator command
+Exact operator command:
 
 ```bash
 python -m sdetkit investigate failure \
@@ -47,8 +44,6 @@ python -m sdetkit investigate failure \
   --format json \
   --out build/public-launch-proof/investigation.json
 ```
-
-### Deterministic result
 
 | Field | Evidence |
 |---|---|
@@ -65,13 +60,9 @@ python -m sdetkit investigate failure \
 
 The system diagnoses and recommends proof. It does not claim that a patch is safe, equivalent, or merge-authorized.
 
-## Fixture-based external adoption story
+## Fixture-based adoption story
 
-Target fixture: [`tests/fixtures/public_adoption_target/`](../tests/fixtures/public_adoption_target/)
-
-The fixture intentionally represents a mixed repository with Python, JavaScript/TypeScript, Go, GitLab CI, and `pip-audit` evidence.
-
-Detected surfaces:
+Target fixture path: `tests/fixtures/public_adoption_target/`
 
 | Surface | Result |
 |---|---|
@@ -82,8 +73,6 @@ Detected surfaces:
 | Security | `pip_audit` |
 | Recommended manual proof | `go test ./...`, `npm test` |
 | Review-first unknown | Python project detected but test command is not proven |
-
-Safety evidence:
 
 ```text
 read_only=true
@@ -96,11 +85,11 @@ merge_authorized=false
 semantic_equivalence_proven=false
 ```
 
-The recommended commands are evidence for a human operator. They were not automatically executed against the target.
+The recommended commands were not automatically executed against the target.
 
 ## Accessibility description
 
-This is a text-first static walkthrough. The first panel is a pytest failure log. The second panel highlights the first failing node, affected test file, and focused pytest command. The final panel lists detected mixed-stack repository surfaces and shows every authority or mutation field as false. No information depends on color, animation, or an image.
+This is a text-first static walkthrough. It shows a pytest failure log, the first failing node, the affected file, the focused proof command, detected mixed-stack surfaces, and explicit false authority fields. No information depends on color, animation, or an image.
 
 ## GitHub About field source
 
@@ -108,6 +97,6 @@ This is a text-first static walkthrough. The first panel is a pytest failure log
 
 ## 1.1.0 proof-led announcement draft
 
-> SDETKit 1.1.0 turns saved CI evidence into a first meaningful failure, affected file, focused proof command, and explicit review-first decision. Its adoption profiler can identify Python, JavaScript/TypeScript, Go, CI, and security surfaces without installing target dependencies, executing target code, changing the target repository, or authorizing a merge. The release is published only after exact-wheel qualification, trusted publishing, and public-install verification complete.
+> SDETKit 1.1.0 turns saved CI evidence into a first meaningful failure, affected file, focused proof command, and explicit review-first decision. Its adoption profiler identifies Python, JavaScript/TypeScript, Go, CI, and security surfaces without installing target dependencies, executing target code, changing the target repository, or authorizing a merge.
 
-This announcement remains a draft until the qualified `1.1.0` release workflow succeeds and the public package is verified.
+This remains a draft until the qualified `1.1.0` release workflow succeeds and the public package is verified.
