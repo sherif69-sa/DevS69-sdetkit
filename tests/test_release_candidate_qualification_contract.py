@@ -35,14 +35,30 @@ def test_candidate_workflow_builds_once_and_qualifies_exact_wheel() -> None:
     assert text.count("python -m build") == 1
     assert 'python-version: ["3.10", "3.11", "3.12"]' in text
     assert "name: release-candidate-distributions" in text
-    assert "Install and exercise exact candidate wheel" in text
-    assert 'python -m pip install -c constraints-ci.txt --force-reinstall "$wheel"' in text
-    assert "python -m pip install -c constraints-ci.txt -r requirements-test.txt" in text
+    assert "Install exact candidate wheel in clean-room venv" in text
+    assert 'path: ${{ runner.temp }}/release-candidate' in text
+    assert 'wheel="$(find "$RUNNER_TEMP/release-candidate/dist"' in text
+    assert 'python -m venv "$RUNNER_TEMP/release-candidate-venv"' in text
+    assert '"$RUNNER_TEMP/release-candidate-venv/bin/python" -m pip install' in text
+    assert "-c constraints-ci.txt --force-reinstall \"$wheel\"" in text
+    assert "-c constraints-ci.txt -r requirements-test.txt" in text
+    assert "Exercise installed-wheel product contracts" in text
     assert "tests/contract/check_installed_wheel.py" in text
-    assert "python -m sdetkit gate fast" in text
-    assert "python -m sdetkit gate release" in text
-    assert "python -m sdetkit doctor" in text
+    assert "Run exact-wheel repository gates" in text
+    assert "-m sdetkit gate fast" in text
+    assert "-m sdetkit gate release" in text
+    assert "-m sdetkit doctor" in text
     assert "release-candidate-qualification-py${{ matrix.python-version }}" in text
+
+
+def test_candidate_wheel_qualification_preserves_clean_checkout() -> None:
+    text = _workflow()
+    qualification = text[text.index("  qualify-wheel:") : text.index("  qualification-verdict:")]
+
+    assert "path: release-candidate" not in qualification
+    assert "python -m venv .venv-release-candidate" not in qualification
+    assert "$RUNNER_TEMP/release-candidate" in qualification
+    assert "$RUNNER_TEMP/release-candidate-venv" in qualification
 
 
 def test_candidate_workflow_preserves_release_quality_contracts() -> None:
