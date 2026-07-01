@@ -123,17 +123,22 @@ def test_publisher_visibility_stays_inside_verified_handoff_boundary() -> None:
     publisher = PUBLISHER.read_text(encoding="utf-8")
     evidence = EVIDENCE.read_text(encoding="utf-8")
     visibility = publisher[
-        publisher.index("- name: Verify PR Quality comment visibility") : publisher.index(
-            "- name: Upload PR quality publication artifacts"
-        )
+        publisher.index(
+            "- name: Verify PR Quality comment visibility"
+        ) : publisher.index("- name: Upload PR quality publication artifacts")
     ]
 
-    snapshot_exit_path = "build/pr-quality/trusted-diagnostic-signal-snapshot-history/exit-code.txt"
+    snapshot_exit_path = (
+        "build/pr-quality/trusted-diagnostic-signal-snapshot-history/exit-code.txt"
+    )
 
     assert snapshot_exit_path in evidence
     assert snapshot_exit_path not in visibility
     assert 'snapshot_history_validation_key = "_".join(' in visibility
-    assert '("trusted", "diagnostic", "signal", "snapshot", "history", "validation")' in visibility
+    assert (
+        '("trusted", "diagnostic", "signal", "snapshot", "history", "validation")'
+        in visibility
+    )
     assert 'snapshot_history_validation_value = "_".join(' in visibility
     assert '("represented", "by", "verified", "handoff", "metadata")' in visibility
     assert 'if trusted_history_collection_status != "collected":' in visibility
