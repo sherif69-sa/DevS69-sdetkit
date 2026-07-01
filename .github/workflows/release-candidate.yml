@@ -155,23 +155,32 @@ jobs:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
           name: release-candidate-distributions
-          path: release-candidate
-      - name: Install and exercise exact candidate wheel
+          path: ${{ runner.temp }}/release-candidate
+      - name: Install exact candidate wheel in clean-room venv
         run: |
-          python -m venv .venv-release-candidate
-          . .venv-release-candidate/bin/activate
-          wheel="$(find release-candidate/dist -name '*.whl' -print -quit)"
+          wheel="$(find "$RUNNER_TEMP/release-candidate/dist" -name '*.whl' -print -quit)"
           test -n "$wheel"
-          python -m pip install -c constraints-ci.txt --force-reinstall "$wheel"
-          python -m pip install -c constraints-ci.txt -r requirements-test.txt
-          python tests/contract/check_installed_wheel.py \
-            --python .venv-release-candidate/bin/python --repo-root .
+          python -m venv "$RUNNER_TEMP/release-candidate-venv"
+          "$RUNNER_TEMP/release-candidate-venv/bin/python" -m pip install \
+            -c constraints-ci.txt --force-reinstall "$wheel"
+          "$RUNNER_TEMP/release-candidate-venv/bin/python" -m pip install \
+            -c constraints-ci.txt -r requirements-test.txt
+      - name: Exercise installed-wheel product contracts
+        run: |
+          "$RUNNER_TEMP/release-candidate-venv/bin/python" \
+            tests/contract/check_installed_wheel.py \
+            --python "$RUNNER_TEMP/release-candidate-venv/bin/python" --repo-root .
+      - name: Run exact-wheel repository gates
+        run: |
           mkdir -p build/release-candidate-qualification
-          python -m sdetkit gate fast --format json --stable-json \
+          "$RUNNER_TEMP/release-candidate-venv/bin/python" -m sdetkit gate fast \
+            --format json --stable-json \
             --out build/release-candidate-qualification/gate-fast.json
-          python -m sdetkit gate release --format json \
+          "$RUNNER_TEMP/release-candidate-venv/bin/python" -m sdetkit gate release \
+            --format json \
             --out build/release-candidate-qualification/gate-release.json
-          python -m sdetkit doctor --format json \
+          "$RUNNER_TEMP/release-candidate-venv/bin/python" -m sdetkit doctor \
+            --format json \
             --out build/release-candidate-qualification/doctor.json
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
