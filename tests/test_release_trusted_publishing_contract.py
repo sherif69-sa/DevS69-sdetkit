@@ -20,7 +20,9 @@ def test_release_workflow_uses_trusted_publishing_without_long_lived_token() -> 
     assert "PYPI_API_TOKEN" not in text
     assert "TWINE_PASSWORD" not in text
     assert "Publish with PyPI Trusted Publishing" in text
-    assert "pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b" in text
+    assert (
+        "pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b" in text
+    )
     assert "# v1.14.0" in text
     assert "environment:\n      name: pypi" in text
     assert "permissions:\n      id-token: write" in text
@@ -62,15 +64,17 @@ def test_release_manifest_uses_validated_environment_values() -> None:
 def test_release_workflow_builds_once_and_qualifies_exact_wheel() -> None:
     text = _workflow()
 
-    assert text.count("python -m build") == 2  # local-equivalent comment plus one build step
+    assert (
+        text.count("python -m build") == 2
+    )  # local-equivalent comment plus one build step
     assert 'python-version: ["3.10", "3.11", "3.12"]' in text
     assert "name: release-distributions" in text
     assert "Install exact release wheel in clean-room venv" in text
-    assert 'path: ${{ runner.temp }}/release-candidate' in text
+    assert "path: ${{ runner.temp }}/release-candidate" in text
     assert 'wheel="$(find "$RUNNER_TEMP/release-candidate/dist"' in text
     assert 'python -m venv "$RUNNER_TEMP/release-venv"' in text
     assert '"$RUNNER_TEMP/release-venv/bin/python" -m pip install' in text
-    assert "-c constraints-ci.txt --force-reinstall \"$wheel\"" in text
+    assert '-c constraints-ci.txt --force-reinstall "$wheel"' in text
     assert "-c constraints-ci.txt -r requirements-test.txt" in text
     assert "Exercise installed-wheel product contracts" in text
     assert "tests/contract/check_installed_wheel.py" in text
@@ -102,7 +106,10 @@ def test_release_workflow_attests_publishes_and_verifies_in_order() -> None:
     assert "needs: [build, qualify-wheel, attest-github]" in text
     assert "needs: [build, publish-pypi]" in text
     assert "needs: [build, verify-pypi]" in text
-    assert "actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373" in text
+    assert (
+        "actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373"
+        in text
+    )
     assert "scripts/verify_pypi_release.py" in text
     assert "Create GitHub Release after PyPI verification" in text
 
