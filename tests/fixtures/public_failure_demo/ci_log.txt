@@ -1,0 +1,16 @@
+Run python -m pytest -q tests/test_checkout.py
+============================= test session starts =============================
+collected 49 items
+
+tests/test_checkout.py ...............................................F
+
+=================================== FAILURES ===================================
+________________________ test_total_includes_tax __________________________
+
+    def test_total_includes_tax():
+>       assert calculate_total(100) == 110
+E       AssertionError: total mismatch: expected 110, got 108
+
+FAILED tests/test_checkout.py::test_total_includes_tax - AssertionError: total mismatch: expected 110, got 108
+=========================== 1 failed, 48 passed in 1.42s =======================
+Process completed with exit code 1

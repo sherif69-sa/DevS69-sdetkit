@@ -1,0 +1,8 @@
+stages:
+  - test
+
+proof:
+  stage: test
+  script:
+    - echo "npm test"
+    - echo "go test ./..."

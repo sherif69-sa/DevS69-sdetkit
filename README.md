@@ -54,6 +54,12 @@ authority: review-first; no repository mutation or merge authorization
 
 Start with [`docs/first-failure-triage.md`](docs/first-failure-triage.md) and [`docs/investigation-operator-guide.md`](docs/investigation-operator-guide.md).
 
+## Public launch proof
+
+See the [committed public launch proof](docs/public-launch-proof.md) for a realistic saved pytest failure reduced to its first failing node, affected file, focused proof command, and review-first decision. The same proof includes a fixture-based Python, JavaScript/TypeScript, and Go adoption profile generated without installing target dependencies, executing target code, mutating the target, or authorizing a merge.
+
+The proof is tied to an immutable source commit and is explicitly marked **main-only until the qualified 1.1.0 release**.
+
 ## Decision contract
 
 | Signal | Decision |
@@ -104,6 +110,7 @@ The install command above uses the latest published package, `sdetkit==1.0.3`. T
 - Operator essentials: [docs/operator-essentials.md](docs/operator-essentials.md)
 - Investigation operator guide: [docs/investigation-operator-guide.md](docs/investigation-operator-guide.md)
 - Adaptive diagnosis: [docs/adaptive-diagnosis.md](docs/adaptive-diagnosis.md)
+- Public launch proof: [docs/public-launch-proof.md](docs/public-launch-proof.md)
 - Artifact reference: [docs/artifact-reference.md](docs/artifact-reference.md)
 - Recommended CI flow: [docs/recommended-ci-flow.md](docs/recommended-ci-flow.md)
 - CLI reference: [docs/cli.md](docs/cli.md)
