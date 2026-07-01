@@ -9,9 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = ROOT / "scripts" / "build_public_launch_proof.py"
 ARTIFACT_DIR = ROOT / "docs" / "artifacts" / "public-launch-proof"
 
-spec = importlib.util.spec_from_file_location(
-    "public_launch_proof_builder", SCRIPT_PATH
-)
+spec = importlib.util.spec_from_file_location("public_launch_proof_builder", SCRIPT_PATH)
 assert spec and spec.loader
 builder = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = builder
@@ -20,7 +18,7 @@ spec.loader.exec_module(builder)
 
 def test_failure_demo_exposes_first_failure_and_review_first_boundary() -> None:
     payload = builder.build_failure_demo_payload(
-        source_commit="9cc48c2141de15ee2354d0e2aba1435472c2051f"
+        source_commit="9cc48c2141de15ee2354d0e2aba1435472c2051f",
     )
 
     assert payload["capability_state"] == "main_only_until_1.1.0"
@@ -57,7 +55,7 @@ def test_failure_demo_exposes_first_failure_and_review_first_boundary() -> None:
 
 def test_adoption_story_profiles_fixture_without_execution_or_mutation() -> None:
     payload = builder.build_adoption_story_payload(
-        source_commit="9cc48c2141de15ee2354d0e2aba1435472c2051f"
+        source_commit="9cc48c2141de15ee2354d0e2aba1435472c2051f",
     )
 
     assert payload["detected_surfaces"] == {
