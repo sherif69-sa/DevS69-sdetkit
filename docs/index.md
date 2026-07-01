@@ -54,6 +54,12 @@ decision: review-first
 
 Use [First failure triage](first-failure-triage.md) for the shortest operator path and [Investigation operator guide](investigation-operator-guide.md) for the full safety contract.
 
+## Public launch proof
+
+The [public launch proof](public-launch-proof.md) shows a realistic saved pytest failure reduced to its first failing node, owning file, focused proof command, and review-first decision. It also profiles a fixture-based Python, JavaScript/TypeScript, and Go repository without dependency installation, target-code execution, target mutation, or merge authorization.
+
+The artifacts are reproducible, tied to an immutable source SHA, accessible as text, and marked **main-only until the qualified 1.1.0 release**.
+
 ## Fast start
 
 ```bash
@@ -84,6 +90,7 @@ New teams should stop here first, inspect the evidence, and only then expand int
 - [Operator essentials](operator-essentials.md)
 - [Investigation operator guide](investigation-operator-guide.md)
 - [First failure triage](first-failure-triage.md)
+- [Public launch proof](public-launch-proof.md)
 - [Adaptive Diagnosis Intelligence](adaptive-diagnosis.md)
 - [Artifact reference and generated sample map](artifact-reference.md)
 - [CI artifact walkthrough](ci-artifact-walkthrough.md)
