@@ -28,3 +28,13 @@ def test_public_adoption_fixture_requires_current_go_toolchain() -> None:
     assert _version_tuple(language.group(1)) >= (1, 26)
     assert toolchain is not None
     assert _version_tuple(toolchain.group(1)) >= (1, 26, 4)
+
+
+def test_public_adoption_fixture_declares_local_scanner_policy() -> None:
+    policy_path = FIXTURE / "osv-scanner.toml"
+    policy = policy_path.read_text(encoding="utf-8")
+
+    assert policy_path.is_file()
+    assert "[[PackageOverrides]]" in policy
+    assert "Fixture-only public adoption target" in policy
+    assert "not a production or release dependency" in policy
