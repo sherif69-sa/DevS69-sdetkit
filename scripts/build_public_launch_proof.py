@@ -81,8 +81,7 @@ def build_failure_demo_payload(
                 "--format json --out build/public-launch-proof/investigation.json"
             ),
             "rebuild_committed_proof": (
-                "python scripts/build_public_launch_proof.py "
-                f"--source-commit {commit}"
+                f"python scripts/build_public_launch_proof.py --source-commit {commit}"
             ),
         },
         "diagnosis": {
