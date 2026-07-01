@@ -36,11 +36,11 @@ def test_candidate_workflow_builds_once_and_qualifies_exact_wheel() -> None:
     assert 'python-version: ["3.10", "3.11", "3.12"]' in text
     assert "name: release-candidate-distributions" in text
     assert "Install exact candidate wheel in clean-room venv" in text
-    assert 'path: ${{ runner.temp }}/release-candidate' in text
+    assert "path: ${{ runner.temp }}/release-candidate" in text
     assert 'wheel="$(find "$RUNNER_TEMP/release-candidate/dist"' in text
     assert 'python -m venv "$RUNNER_TEMP/release-candidate-venv"' in text
     assert '"$RUNNER_TEMP/release-candidate-venv/bin/python" -m pip install' in text
-    assert "-c constraints-ci.txt --force-reinstall \"$wheel\"" in text
+    assert '-c constraints-ci.txt --force-reinstall "$wheel"' in text
     assert "-c constraints-ci.txt -r requirements-test.txt" in text
     assert "Exercise installed-wheel product contracts" in text
     assert "tests/contract/check_installed_wheel.py" in text
@@ -53,7 +53,9 @@ def test_candidate_workflow_builds_once_and_qualifies_exact_wheel() -> None:
 
 def test_candidate_wheel_qualification_preserves_clean_checkout() -> None:
     text = _workflow()
-    qualification = text[text.index("  qualify-wheel:") : text.index("  qualification-verdict:")]
+    qualification = text[
+        text.index("  qualify-wheel:") : text.index("  qualification-verdict:")
+    ]
 
     assert "path: release-candidate" not in qualification
     assert "python -m venv .venv-release-candidate" not in qualification
