@@ -7,13 +7,9 @@ from pathlib import Path
 import pytest
 
 MODULE_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "tools"
-    / "render_pr_quality_adaptive_diagnosis.py"
+    Path(__file__).resolve().parents[1] / "tools" / "render_pr_quality_adaptive_diagnosis.py"
 )
-SPEC = importlib.util.spec_from_file_location(
-    "adaptive_diagnosis_renderer", MODULE_PATH
-)
+SPEC = importlib.util.spec_from_file_location("adaptive_diagnosis_renderer", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 renderer = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(renderer)
@@ -70,9 +66,7 @@ def test_render_exposes_adaptive_diagnosis_for_contributors() -> None:
 
 
 def test_render_reads_card_from_primary_failure() -> None:
-    html = renderer.render_from_model(
-        {"primary_failure": {"adaptive_diagnosis": _card()}}
-    )
+    html = renderer.render_from_model({"primary_failure": {"adaptive_diagnosis": _card()}})
     assert "Review first" in html
 
 
@@ -91,9 +85,7 @@ def test_render_rejects_model_without_adaptive_card() -> None:
         renderer.render_from_model({})
 
 
-def test_cli_writes_standalone_html(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_cli_writes_standalone_html(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     model_path = tmp_path / "model.json"
     out = tmp_path / "adaptive-diagnosis.html"
     model_path.write_text(
