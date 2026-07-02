@@ -195,6 +195,7 @@ jobs:
             --gate-release build/release-candidate-qualification/gate-release.json \
             --doctor build/release-candidate-qualification/doctor.json \
             --out build/release-candidate-qualification/qualification-record.json
+          cp scripts/build_release_candidate_qualification.py build/release-candidate-qualification/
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: release-candidate-qualification-py${{ matrix.python-version }}
@@ -207,10 +208,6 @@ jobs:
     needs: [build, qualify-wheel]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
-        with:
-          ref: ${{ needs.build.outputs.source_sha }}
-          persist-credentials: false
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version: "3.12"
@@ -235,8 +232,10 @@ jobs:
           for record in "${records[@]}"; do
             record_args+=(--record "$record")
           done
+          builder="$(find "$RUNNER_TEMP/release-candidate-qualifications" -name build_release_candidate_qualification.py -print -quit)"
+          test -n "$builder"
           # Next action: verify external publishing settings before creating v1.1.0.
-          python scripts/build_release_candidate_qualification.py verdict \
+          python "$builder" verdict \
             "${record_args[@]}" \
             --candidate-tag "$CANDIDATE_TAG" \
             --version "$RELEASE_VERSION" \
