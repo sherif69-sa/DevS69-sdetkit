@@ -168,6 +168,16 @@ module = [
 ]
 ignore_errors = false
 
+[[tool.mypy.overrides]]
+module = [
+  "sdetkit._pr_quality_required_terminal_checks",
+  "sdetkit._pr_quality_required_terminal_merge",
+  "sdetkit._pr_quality_required_terminal_records",
+  "sdetkit._pr_quality_required_terminal_snapshot",
+  "sdetkit.pr_quality_required_terminal",
+]
+ignore_errors = false
+
 [tool.mutmut]
 paths_to_mutate = ["src/sdetkit"]
 tests_dir = ["tests"]
