@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from . import _pr_quality_live_dashboard_core as _core
+from .pr_quality_adaptive_diagnosis import attach_adaptive_diagnosis
 
 JsonObject = dict[str, Any]
 
@@ -137,6 +138,7 @@ def build_live_evidence_snapshot(
     generated_at: str | None = None,
 ) -> JsonObject:
     _enrich_primary_failure(review_model)
+    attach_adaptive_diagnosis(review_model)
     return _core.build_live_evidence_snapshot(
         pr_number=pr_number,
         head_sha=head_sha,
