@@ -19,6 +19,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
 
       - name: Audit workflow governance posture
+        id: governance
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -92,64 +93,88 @@ jobs:
           }
 
           Path('build').mkdir(exist_ok=True)
-          Path('build/workflow-governance-audit.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
-
-          lines = [
-              '# Workflow governance audit',
-              '',
-              'This issue is auto-generated to keep GitHub Actions permissions, pinning, and recovery posture in a reviewable state.',
-              '',
-              '## Snapshot',
-              f"- Workflows scanned: **{summary['workflow_count']}**",
-              f"- Findings: **{len(findings)}**",
-              '',
-              '## Missing top-level permissions',
-          ]
-          lines.extend([f'- ⚠️ {name}' for name in summary['missing_permissions']] or ['- None'])
-          lines.extend(['', '## Unpinned reusable actions'])
-          lines.extend([f"- ⚠️ {item['workflow']} → `{item['target']}`" for item in summary['unpinned_uses']] or ['- None'])
-          lines.extend(['', '## Scheduled workflows missing manual recovery'])
-          lines.extend([f'- ⚠️ {name}' for name in summary['missing_dispatch']] or ['- None'])
-          lines.extend(['', '## pull_request_target usage'])
-          lines.extend([f'- ⚠️ {name}' for name in summary['pr_target']] or ['- None'])
-          lines.extend([
-              '',
-              '## Suggested follow-up',
-              '- [ ] Add least-privilege top-level permissions where missing.',
-              '- [ ] Pin reusable actions to full SHAs for deterministic supply-chain posture.',
-              '- [ ] Ensure scheduled workflows can be re-run manually with `workflow_dispatch`.',
-              '',
-              '## Artifact',
-              '- `build/workflow-governance-audit.json`',
-          ])
-          Path('build/workflow-governance-audit.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          Path('build/workflow-governance-audit.json').write_text(
+              json.dumps(report, indent=2) + '\n',
+              encoding='utf-8',
+          )
           PY
+          python scripts/build_workflow_governance_policy.py \
+            --audit-json build/workflow-governance-audit.json \
+            --policy-json build/workflow-governance-policy.json \
+            --report-markdown build/workflow-governance-audit.md \
+            --github-output "$GITHUB_OUTPUT"
 
-      - name: Upload governance artifact
+      - name: Upload governance artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           retention-days: 14
           name: workflow-governance-audit
           path: |
             build/workflow-governance-audit.json
+            build/workflow-governance-policy.json
             build/workflow-governance-audit.md
 
-      - name: Publish workflow governance issue
+      - name: Reconcile workflow governance tracker
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        env:
+          ACTIONABLE: ${{ steps.governance.outputs.actionable }}
         with:
           script: |
             const fs = require('fs');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const monthOf = new Date().toISOString().slice(0, 7);
-            const title = `🧾 Workflow governance audit (${monthOf})`;
-            const body = fs.readFileSync('build/workflow-governance-audit.md', 'utf8');
+            const actionable = process.env.ACTIONABLE === 'true';
+            const rollingTitle = '🧾 Workflow governance follow-up';
+            const generatedBodyMarker = '<!-- sdetkit:workflow-governance-tracker:v1 -->';
+            const body = `${generatedBodyMarker}\n${fs.readFileSync('build/workflow-governance-audit.md', 'utf8')}`;
+
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            });
+            const managedIssues = openIssues
+              .filter((issue) => !issue.pull_request)
+              .filter((issue) => issue.user?.login === 'github-actions[bot]')
+              .filter((issue) =>
+                issue.title === rollingTitle
+                || issue.title.startsWith('🧾 Workflow governance audit')
+                || issue.body?.startsWith(generatedBodyMarker)
+              );
+            const existing = managedIssues.find((issue) => issue.title === rollingTitle);
+
+            for (const issue of managedIssues) {
+              if (!existing || issue.number !== existing.number) {
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  state: 'closed',
+                  state_reason: 'completed',
+                });
+              }
+            }
+
+            if (!actionable) {
+              if (existing) {
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: existing.number,
+                  state: 'closed',
+                  state_reason: 'completed',
+                });
+              }
+              core.notice('workflow governance has zero actionable findings; artifacts uploaded');
+              return;
+            }
+
             const labels = [
               { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
               { name: 'automation', color: '1d76db', description: 'GitHub Actions and automation work' },
               { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
             ];
-
             for (const label of labels) {
               try {
                 await github.rest.issues.getLabel({ owner, repo, name: label.name });
@@ -158,31 +183,19 @@ jobs:
               }
             }
 
-            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
-              owner,
-              repo,
-              state: 'open',
-              labels: 'maintenance',
-              per_page: 100,
-            });
-            const priorIssues = openIssues
-              .filter((issue) => !issue.pull_request)
-              .filter((issue) => issue.title.startsWith('🧾 Workflow governance audit'));
-
-            for (const oldIssue of priorIssues) {
-              if (oldIssue.title !== title) {
-                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
-              }
-            }
-
-            const existing = priorIssues.find((issue) => issue.title === title);
             if (existing) {
-              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body,
+                labels: ['maintenance', 'automation', 'priority:medium'],
+              });
             } else {
               await github.rest.issues.create({
                 owner,
                 repo,
-                title,
+                title: rollingTitle,
                 body,
                 labels: ['maintenance', 'automation', 'priority:medium'],
               });
