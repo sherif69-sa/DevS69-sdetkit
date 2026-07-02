@@ -47,6 +47,31 @@ The plan currently records:
 
 The 57th workflow, `release-candidate.yml`, is explicitly classified as supporting release qualification. It is read-only and does not grant publication authority.
 
+## Overlap evidence
+
+Generate deterministic JSON and Markdown inventories with:
+
+```bash
+python scripts/build_workflow_overlap_report.py \
+  --out-json build/workflow-overlap/report.json \
+  --out-md build/workflow-overlap/report.md
+```
+
+The report records, for every workflow:
+
+- triggers
+- top-level and job-level permissions
+- effective write scopes
+- job status names
+- uploaded and downloaded artifacts
+- pinned actions
+- normalized proof commands
+- consolidation disposition
+
+It also groups repeated trigger sets, proof commands, actions, and artifact names. Required contexts from `docs/contracts/required-checks.v1.json` are mapped back to their workflow or job evidence.
+
+The report is evidence only. Duplicate commands are candidates for later shadow-mode consolidation, not automatic retirement authority.
+
 ## Migration order
 
 1. Record current topology and required checks.
@@ -62,7 +87,7 @@ The 57th workflow, `release-candidate.yml`, is explicitly classified as supporti
 - [x] Complete and mutually exclusive disposition coverage for all 57 workflows.
 - [x] Zero-finding issue creation prohibited by contract.
 - [ ] Run-frequency and failure-rate telemetry.
-- [ ] Duplicate trigger and proof-command report.
+- [x] Duplicate trigger and proof-command report.
 - [ ] First reusable bundle with shadow parity.
 
 ## Safety boundary
