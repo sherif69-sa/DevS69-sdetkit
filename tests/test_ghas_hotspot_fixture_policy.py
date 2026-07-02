@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,7 +46,7 @@ def test_fixture_only_alerts_are_artifact_only() -> None:
             "repository": "sherif69-sa/DevS69-sdetkit",
             "alerts": alerts,
         },
-        now=datetime(2026, 7, 2, tzinfo=UTC),
+        now=datetime(2026, 7, 2, tzinfo=timezone.utc),
     )
 
     assert snapshot["actionable"] is False
@@ -68,7 +68,7 @@ def test_production_alert_requires_rolling_tracker() -> None:
             "collection_status": "collected",
             "alerts": [_alert("src/sdetkit/security.py")],
         },
-        now=datetime(2026, 7, 2, tzinfo=UTC),
+        now=datetime(2026, 7, 2, tzinfo=timezone.utc),
     )
 
     assert snapshot["actionable"] is True
@@ -86,8 +86,8 @@ def test_collection_failure_fails_closed() -> None:
             "notes": ["API denied"],
             "alerts": [],
         },
-        now=datetime(2026, 7, 2, tzinfo=UTC),
-    )
+        now=datetime(2026, 7, 2, tzinfo=timezone.utc),
+     )
 
     assert snapshot["actionable"] is True
     assert snapshot["actionable_reasons"] == ["code-scanning alert collection is unavailable"]
