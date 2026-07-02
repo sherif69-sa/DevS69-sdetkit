@@ -129,9 +129,7 @@ def test_terminal_failure_replaces_pending_duplicates_and_preserves_name() -> No
     merged = module.merge_required_terminal_snapshot_into_checks(payload, snapshot)
 
     ci_records = [
-        item
-        for item in merged["check_runs"]
-        if base.canonical_context(item.get("name")) == "ci"
+        item for item in merged["check_runs"] if base.canonical_context(item.get("name")) == "ci"
     ]
     assert len(ci_records) == 1
     assert ci_records[0]["name"] == "CI"
