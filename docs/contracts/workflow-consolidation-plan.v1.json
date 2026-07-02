@@ -1,7 +1,8 @@
 {
   "plan_id": "sdetkit.workflow-consolidation.v1",
-  "generated_at_utc": "2026-06-30T00:00:00Z",
-  "current_workflow_count": 56,
+  "generated_at_utc": "2026-07-02T00:00:00Z",
+  "baseline_main_sha": "326a59c4d1294c1c970a4e6848d4c9487c4278c2",
+  "current_workflow_count": 57,
   "target_primary_workflow_count": 12,
   "keep_primary": [
     "ci.yml",
@@ -60,8 +61,43 @@
     "kpi-weekly.yml",
     "release-readiness-radar-bot.yml"
   ],
+  "standalone_supporting": [
+    "adaptive-ops-weekly.yml",
+    "adaptive-sentinel-monitor.yml",
+    "enforce-branch-protection.yml",
+    "first-proof-artifact-publish.yml",
+    "first-proof.yml",
+    "impact-release-control.yml",
+    "legacy-required-status-bridge.yml",
+    "maintenance-autopilot.yml",
+    "maintenance-issue-command-center.yml",
+    "operational-readiness-governance-contract.yml",
+    "platform-readiness-quality-contract.yml",
+    "pr-quality-publisher.yml",
+    "release-candidate.yml",
+    "repo-memory-history.yml"
+  ],
+  "compatibility_bridges": [
+    "legacy-required-status-bridge.yml",
+    "operational-readiness-governance-contract.yml",
+    "platform-readiness-quality-contract.yml"
+  ],
+  "reusable_workflows": [
+    "advanced-github-actions-reference-64.yml"
+  ],
+  "trusted_publishers": [
+    "first-proof-artifact-publish.yml",
+    "pr-quality-publisher.yml"
+  ],
+  "classification_policy": {
+    "disposition_groups_are_complete": true,
+    "disposition_groups_are_mutually_exclusive": true,
+    "metadata_classifications_may_overlap_dispositions": true,
+    "workflow_retirement_requires_parity_evidence": true
+  },
   "execution_order": [
     "record_current_topology_and_required_checks",
+    "enforce_plan_inventory_parity",
     "stop_zero_signal_issue_creation",
     "consume_canonical_ci_artifacts",
     "introduce_reusable_workflow_bundles",
@@ -88,5 +124,11 @@
     "no_coverage_regression": true,
     "zero_signal_generated_issues": 0,
     "required_check_compatibility_preserved": true
+  },
+  "authority_boundary": {
+    "automation_allowed": false,
+    "workflow_retirement_allowed": false,
+    "branch_protection_mutation_allowed": false,
+    "merge_authorized": false
   }
 }
