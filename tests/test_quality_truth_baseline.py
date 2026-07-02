@@ -22,16 +22,36 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     module = _load_script()
     payload = module.evaluate_quality_truth(ROOT, CONTRACT_PATH)
 
-    assert payload["ok"] is True
+    assert payload["ok"] is True, payload["mismatches"]
     assert all(payload["checks"].values())
-    assert payload["observed"]["source_module_count"] == 495
-    assert payload["observed"]["typing_debt_module_count"] == 476
+    assert payload["observed"]["source_module_count"] == 496
+    assert payload["observed"]["typing_debt_module_count"] == 477
     checked = payload["observed"]["explicitly_type_checked_modules"]
     assert "sdetkit.failure_vector_adapters" in checked
     assert "sdetkit.protected_proof_chain" in checked
     assert "sdetkit.pr_quality_required_terminal" in checked
-    assert payload["typing_debt_inventory"]["module_count"] == 476
-    assert len(payload["typing_debt_inventory"]["modules"]) == 476
+    assert payload["typing_debt_inventory"]["module_count"] == 477
+    assert len(payload["typing_debt_inventory"]["modules"]) == 477
+
+
+def test_quality_truth_baseline_reports_machine_readable_mismatches(tmp_path: Path) -> None:
+    module = _load_script()
+    contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+    contract["typing"]["source_module_count"] = 0
+    mismatch_contract = tmp_path / "quality-truth-baseline.json"
+    mismatch_contract.write_text(json.dumps(contract), encoding="utf-8")
+
+    payload = module.evaluate_quality_truth(ROOT, mismatch_contract)
+
+    assert payload["ok"] is False
+    assert payload["mismatches"] == [
+        {
+            "check": "source_module_count_matches",
+            "metric": "source_module_count",
+            "expected": 0,
+            "actual": 496,
+        }
+    ]
 
 
 def test_quality_truth_baseline_keeps_unfinished_migrations_visible() -> None:
