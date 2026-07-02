@@ -13,7 +13,7 @@
     "maximum_monolithic_workflow_count": 7,
     "maximum_unpinned_action_count": 0,
     "maximum_workflow_count": 58,
-    "maximum_write_permission_workflow_count": 32,
+    "maximum_write_permission_workflow_count": 33,
     "minimum_reusable_workflow_count": 1,
     "target_primary_workflow_count": 12
   },
@@ -101,9 +101,11 @@
   ],
   "reviewed_growth": {
     "current_workflow_count": 58,
+    "current_write_permission_workflow_count": 33,
     "durable_target_primary_workflow_count": 12,
     "follow_up": "absorb lifecycle reconciliation into the trusted publisher when event parity can be preserved",
     "previous_workflow_count": 57,
+    "previous_write_permission_workflow_count": 32,
     "reason": "add trusted post-merge PR Quality lifecycle reconciliation without pull-request code execution or comment creation",
     "reviewer": "sherif69-sa"
   },
