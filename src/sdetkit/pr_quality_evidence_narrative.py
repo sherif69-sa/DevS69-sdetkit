@@ -582,11 +582,115 @@ def _green_proof_commands(
     return _dedupe(commands)[:5]
 
 
+_PROOF_EXECUTABLES = {
+    "bash",
+    "gh",
+    "make",
+    "mkdocs",
+    "mypy",
+    "nox",
+    "npm",
+    "pnpm",
+    "poetry",
+    "pre-commit",
+    "pytest",
+    "python",
+    "python3",
+    "ruff",
+    "sh",
+    "tox",
+    "uv",
+    "yarn",
+}
+_CLEANUP_ONLY_EXECUTABLES = {
+    "cat",
+    "cp",
+    "echo",
+    "find",
+    "mkdir",
+    "mv",
+    "printf",
+    "rm",
+    "sed",
+    "touch",
+}
+
+
+def _proof_command_executable(command: str) -> str:
+    parts = command.strip().split()
+    while parts and "=" in parts[0]:
+        name, separator, _value = parts[0].partition("=")
+        if not separator or not name or not name.replace("_", "").isalnum():
+            break
+        parts = parts[1:]
+    return parts[0] if parts else ""
+
+
+def _actionable_proof_command(command: str) -> bool:
+    stripped = command.strip()
+    if not stripped or "\n" in stripped:
+        return False
+    executable = _proof_command_executable(stripped)
+    if executable in _CLEANUP_ONLY_EXECUTABLES:
+        return False
+    if executable == "git" and any(
+        token in stripped for token in (" clean ", " reset --hard", " checkout -- ")
+    ):
+        return False
+    return executable in _PROOF_EXECUTABLES or executable.startswith("./")
+
+
+def _failure_path(failure: JsonObject) -> str:
+    for key in ("path", "failing_file", "owner_hint"):
+        value = str(failure.get(key) or "").strip()
+        if value:
+            return value
+    for key in ("affected_files", "owner_files", "likely_owner_files"):
+        for item in _string_list(failure.get(key)):
+            if item:
+                return item
+
+    match = re.search(
+        r"(?P<path>(?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+\.(?:py|pyi|js|jsx|ts|tsx|go|rs|java))",
+        _failure_text(failure),
+    )
+    return match.group("path") if match is not None else ""
+
+
+def _focused_failure_proof(failure: JsonObject) -> str:
+    text = _failure_text(failure)
+    path = _failure_path(failure)
+    test_node_match = re.search(
+        r"(?P<node>(?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+\.py::[A-Za-z0-9_\[\].:-]+)",
+        text,
+    )
+    if test_node_match is not None:
+        return f"python -m pytest -q {test_node_match.group('node')} -o addopts="
+    if (
+        path
+        and "ruff" in text
+        and any(token in text for token in ("format", "reformat", "would reformat"))
+    ):
+        return f"python -m ruff format --check {path}"
+
+    candidates = [
+        *_string_list(failure.get("proof_commands")),
+        *_string_list(failure.get("recommended_fix")),
+    ]
+    return next(
+        (command.strip() for command in candidates if _actionable_proof_command(command)),
+        "",
+    )
+
+
 def _commands_from_failure(failure: JsonObject) -> list[str]:
-    commands = _string_list(failure.get("proof_commands"))
-    if commands:
-        return commands
-    return _string_list(failure.get("recommended_fix"))[:3]
+    focused = _focused_failure_proof(failure)
+    pre_commit = "python -m pre_commit run -a"
+    if not focused:
+        return [pre_commit]
+    if "pre_commit run -a" in focused or "pre-commit run -a" in focused:
+        return [focused]
+    return [f"{focused} && {pre_commit}"]
 
 
 def _commands_from_nodes(nodes: list[JsonObject]) -> list[str]:
@@ -995,8 +1099,9 @@ def _operator_action(
 ) -> list[str]:
     if failure:
         return [
-            "Fix the primary failed command or contract before treating advisory findings as blockers.",
-            "Use the proof commands below to verify the smallest safe fix.",
+            "Fix the first actionable failure shown above.",
+            "Run the exact proof command below, then push the commit.",
+            "The SDET Quality Gate refreshes automatically on the new PR head.",
         ]
     if quality_ok and nodes:
         return [
