@@ -72,8 +72,7 @@ def build_policy_and_markdown(data: Any) -> tuple[dict[str, Any], str]:
     lines.extend(["", "## Unpinned reusable actions"])
     lines.extend(
         [
-            f"- ⚠️ {item.get('workflow', 'unknown')} → "
-            f"`{item.get('target', 'unknown')}`"
+            f"- ⚠️ {item.get('workflow', 'unknown')} → `{item.get('target', 'unknown')}`"
             for item in unpinned_uses
         ]
         if isinstance(unpinned_uses, list) and unpinned_uses
