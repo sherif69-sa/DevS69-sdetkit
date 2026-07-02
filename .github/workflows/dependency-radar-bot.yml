@@ -33,124 +33,19 @@ jobs:
 
       - name: Generate dependency radar artifacts
         id: radar
+        env:
+          GITHUB_OUTPUT_FILE: ${{ github.output }}
         run: |
           set -euo pipefail
           mkdir -p build
           python -m sdetkit intelligence upgrade-audit --format json --used-in-repo-only --top 10 > build/dependency-radar.json
           python -m sdetkit intelligence upgrade-audit --impact-area runtime-core --repo-usage-tier hot-path --format md > build/runtime-fast-follow.md
-          python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          repo_root = str(Path.cwd())
-
-          def relativize_repo_paths(text: str) -> str:
-              if not text:
-                  return text
-              normalized = text.replace(f"{repo_root}/", "")
-              return normalized.replace(repo_root, ".")
-
-          data = json.loads(Path("build/dependency-radar.json").read_text(encoding="utf-8"))
-          if not isinstance(data, dict):
-              raise SystemExit("dependency radar JSON must be an object")
-          packages_raw = data.get("packages")
-          summary_raw = data.get("summary")
-          evidence_available = isinstance(packages_raw, list) and isinstance(summary_raw, dict)
-          packages = packages_raw[:5] if isinstance(packages_raw, list) else []
-          route_map = packages_raw[:3] if isinstance(packages_raw, list) else []
-          summary = summary_raw if isinstance(summary_raw, dict) else {}
-          actionable_value = summary.get("actionable_packages")
-          actionable_count_valid = isinstance(actionable_value, int) and actionable_value >= 0
-          actionable_count = actionable_value if actionable_count_valid else 0
-          actionable_reasons = []
-          if not evidence_available:
-              actionable_reasons.append("dependency audit evidence unavailable or malformed")
-          if not actionable_count_valid:
-              actionable_reasons.append("actionable package count unavailable or malformed")
-          if actionable_count > 0:
-              actionable_reasons.append(f"actionable dependency packages: {actionable_count}")
-          actionable = bool(actionable_reasons)
-
-          policy = {
-              "schema_version": "sdetkit.dependency_radar.issue_policy.v1",
-              "actionable": actionable,
-              "actionable_package_count": actionable_count,
-              "actionable_finding_count": len(actionable_reasons),
-              "actionable_reasons": actionable_reasons,
-              "evidence_available": evidence_available,
-              "actionable_count_valid": actionable_count_valid,
-              "issue_policy": "rolling_tracker_when_actionable",
-              "zero_finding_issue_creation": False,
-          }
-          Path("build/dependency-radar-policy.json").write_text(
-              json.dumps(policy, indent=2, sort_keys=True) + "\n",
-              encoding="utf-8",
-          )
-
-          lines = [
-              "# Dependency radar",
-              "",
-              f"- Packages audited: **{summary.get('packages_audited', len(packages_raw or []))}**",
-              f"- Actionable packages: **{actionable_count}**",
-              f"- Highest observed risk score: **{summary.get('max_risk_score', 0)}**",
-              f"- Audit evidence available: **{evidence_available}**",
-              "",
-              "## Priority packages",
-          ]
-          if packages:
-              for pkg in packages:
-                  lines.append(
-                      f"- **{pkg['name']}** · impact `{pkg.get('impact_area', 'unknown')}` · usage `{pkg.get('repo_usage_tier', 'unknown')}` · next `{pkg.get('manifest_action', 'watch')}`"
-                  )
-          else:
-              lines.append("- No packages returned by the audit for this scope.")
-          lines.extend(["", "## Validation route map"])
-          if route_map:
-              for pkg in route_map:
-                  validations = ", ".join(pkg.get("validation_commands", [])[:2]) or "n/a"
-                  lines.append(
-                      f"- **{pkg['name']}** → primary `{(pkg.get('validation_commands') or ['n/a'])[0]}`; backups `{validations}`"
-                  )
-          else:
-              lines.append("- No validation routes were emitted for this run.")
-          lines.extend([
-              "",
-              "## Runtime fast-follow watchlist",
-              relativize_repo_paths(
-                  Path("build/runtime-fast-follow.md").read_text(encoding="utf-8").strip()
-              ),
-          ])
-          if actionable:
-              lines.extend([
-                  "",
-                  "## Required follow-up",
-                  *[f"- {reason}" for reason in actionable_reasons],
-                  "",
-                  "A single rolling tracker is created or refreshed for these findings.",
-              ])
-          else:
-              lines.extend([
-                  "",
-                  "## Result",
-                  "- Healthy dependency evidence is retained as workflow artifacts.",
-                  "- No issue is created when the audit reports zero actionable packages.",
-              ])
-          lines.extend([
-              "",
-              "## Recommended follow-up",
-              "- Validate the hottest package lane before merging broad dependency refreshes.",
-              "- Turn recurring runtime-core drift into a scoped enhancement or maintenance PR.",
-              "",
-              "## Artifacts",
-              "- `build/dependency-radar.json`",
-              "- `build/dependency-radar-policy.json`",
-              "- `build/runtime-fast-follow.md`",
-          ])
-          Path("build/dependency-radar.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
-              output.write(f"actionable={'true' if actionable else 'false'}\n")
-          PY
+          python scripts/build_dependency_radar_policy.py \
+            --radar-json build/dependency-radar.json \
+            --runtime-markdown build/runtime-fast-follow.md \
+            --policy-json build/dependency-radar-policy.json \
+            --report-markdown build/dependency-radar.md \
+            --github-output "$GITHUB_OUTPUT"
 
       - name: Upload dependency radar artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
