@@ -32,17 +32,20 @@ jobs:
         run: python -m pip install -c constraints-ci.txt -e .[test]
 
       - name: Run adapter smoke worker
+        id: smoke
         run: |
           set -euo pipefail
           mkdir -p build .sdetkit/agent/template-runs
           python -m sdetkit agent templates run adapter-smoke-worker --output-dir .sdetkit/agent/template-runs/adapter-smoke-worker > build/adapter-smoke-worker-run.json
           python - <<'PY'
           import json
+          import os
           from pathlib import Path
 
           repo_root = Path.cwd()
           payload = json.loads(Path("build/adapter-smoke-worker-run.json").read_text(encoding="utf-8"))
           artifacts = payload.get("artifacts", [])
+
           def display_path(raw: str) -> str:
               artifact = Path(raw)
               try:
@@ -50,32 +53,77 @@ jobs:
               except ValueError:
                   return raw
 
+          status = str(payload.get("status", "unknown")).strip().lower()
+          artifact_names = {Path(str(raw)).name for raw in artifacts}
+          required_artifacts = {"adapter-smoke.json", "adapter-tests.log", "bundle.tar"}
+          missing_required = sorted(required_artifacts - artifact_names)
+          actionable_reasons = []
+          if status != "ok":
+              actionable_reasons.append(f"worker status is {status or 'unknown'}")
+          if missing_required:
+              actionable_reasons.append(
+                  "missing required artifacts: " + ", ".join(missing_required)
+              )
+          actionable = bool(actionable_reasons)
+
+          policy = {
+              "schema_version": "sdetkit.adapter-smoke.issue-policy.v1",
+              "status": status,
+              "actionable": actionable,
+              "actionable_finding_count": len(actionable_reasons),
+              "actionable_reasons": actionable_reasons,
+              "required_artifacts": sorted(required_artifacts),
+              "missing_required_artifacts": missing_required,
+              "issue_policy": "rolling_tracker_when_actionable",
+              "zero_signal_issue_creation": False,
+          }
+          Path("build/adapter-smoke-policy.json").write_text(
+              json.dumps(policy, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+
           lines = [
               "# Adapter smoke pack",
               "",
-              "This issue is auto-generated to keep optional notification adapters productized, smoke-tested, and easy to expand.",
+              "This artifact records optional notification-adapter smoke evidence.",
               "",
               "## Worker status",
-              f"- Status: **{payload.get('status', 'unknown')}**",
+              f"- Status: **{status or 'unknown'}**",
               f"- Artifacts captured: **{len(artifacts)}**",
+              f"- Actionable findings: **{len(actionable_reasons)}**",
               f"- First artifact: `{display_path(artifacts[0])}`" if artifacts else "- First artifact: none",
               "",
-              "## Suggested follow-up",
-              "- [ ] Review adapter route-map output before changing optional integration dependencies.",
-              "- [ ] Keep adapter quickstarts aligned with environment variables and offline defaults.",
-              "- [ ] Use the worker bundle as the baseline before expanding notify channels or plugins.",
+          ]
+          if actionable:
+              lines.extend([
+                  "## Required follow-up",
+                  *[f"- {reason}" for reason in actionable_reasons],
+                  "",
+                  "A single rolling tracker is created or refreshed for these findings.",
+              ])
+          else:
+              lines.extend([
+                  "## Result",
+                  "- Healthy smoke evidence is retained as workflow artifacts.",
+                  "- No issue is created for a zero-signal run.",
+              ])
+          lines.extend([
               "",
               "## Worker artifact highlights",
-          ]
+          ])
           lines.extend([f"- `{display_path(path)}`" for path in artifacts[:3]] or ["- None"])
           lines.extend([
               "",
               "## Artifacts",
               "- `build/adapter-smoke-worker-run.json`",
+              "- `build/adapter-smoke-policy.json`",
               "- `.sdetkit/agent/template-runs/adapter-smoke-worker`",
           ])
 
           Path("build/adapter-smoke.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"actionable={'true' if actionable else 'false'}\n")
+              output.write(f"status={status or 'unknown'}\n")
           PY
 
       - name: Upload adapter smoke artifacts
@@ -85,25 +133,71 @@ jobs:
           retention-days: 7
           path: |
             build/adapter-smoke-worker-run.json
+            build/adapter-smoke-policy.json
             build/adapter-smoke.md
             .sdetkit/agent/template-runs/adapter-smoke-worker
 
-      - name: Create or update adapter smoke issue
+      - name: Reconcile adapter smoke tracker
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        env:
+          ACTIONABLE: ${{ steps.smoke.outputs.actionable }}
         with:
           script: |
             const fs = require('fs');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const weekOf = new Date().toISOString().slice(0, 10);
-            const title = `📣 Adapter smoke pack (${weekOf})`;
-            const body = fs.readFileSync('build/adapter-smoke.md', 'utf8');
+            const actionable = process.env.ACTIONABLE === 'true';
+            const rollingTitle = '📣 Adapter smoke follow-up';
+            const generatedBodyMarker = '<!-- sdetkit:adapter-smoke-tracker:v1 -->';
+            const body = `${generatedBodyMarker}\n${fs.readFileSync('build/adapter-smoke.md', 'utf8')}`;
+
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            });
+            const managedIssues = openIssues
+              .filter((issue) => !issue.pull_request)
+              .filter((issue) => issue.user?.login === 'github-actions[bot]')
+              .filter((issue) =>
+                issue.title === rollingTitle
+                || issue.title.startsWith('📣 Adapter smoke pack')
+                || issue.body?.startsWith(generatedBodyMarker)
+              );
+            const existing = managedIssues.find((issue) => issue.title === rollingTitle);
+
+            for (const issue of managedIssues) {
+              if (!existing || issue.number !== existing.number) {
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  state: 'closed',
+                  state_reason: 'completed',
+                });
+              }
+            }
+
+            if (!actionable) {
+              if (existing) {
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: existing.number,
+                  state: 'closed',
+                  state_reason: 'completed',
+                });
+              }
+              core.notice('adapter smoke healthy; artifacts uploaded; no issue created');
+              return;
+            }
+
             const labels = [
               { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
               { name: 'automation', color: '5319e7', description: 'Automation and worker alignment' },
               { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
             ];
-
             for (const label of labels) {
               try {
                 await github.rest.issues.getLabel({ owner, repo, name: label.name });
@@ -112,31 +206,19 @@ jobs:
               }
             }
 
-            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
-              owner,
-              repo,
-              state: 'open',
-              labels: 'automation',
-              per_page: 100,
-            });
-            const priorIssues = openIssues
-              .filter((issue) => !issue.pull_request)
-              .filter((issue) => issue.title.startsWith('📣 Adapter smoke pack'));
-
-            for (const oldIssue of priorIssues) {
-              if (oldIssue.title !== title) {
-                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
-              }
-            }
-
-            const existing = priorIssues.find((issue) => issue.title === title);
             if (existing) {
-              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body,
+                labels: ['maintenance', 'automation', 'priority:medium'],
+              });
             } else {
               await github.rest.issues.create({
                 owner,
                 repo,
-                title,
+                title: rollingTitle,
                 body,
                 labels: ['maintenance', 'automation', 'priority:medium'],
               });
