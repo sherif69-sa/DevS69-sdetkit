@@ -27,8 +27,7 @@ def test_release_readiness_uses_one_bot_managed_rolling_tracker() -> None:
 
     assert "const rollingTitle = '🚀 Release readiness follow-up';" in workflow
     assert (
-        "const generatedBodyMarker = '<!-- sdetkit:release-readiness-tracker:v1 -->';"
-        in workflow
+        "const generatedBodyMarker = '<!-- sdetkit:release-readiness-tracker:v1 -->';" in workflow
     )
     assert "issue.user?.login === 'github-actions[bot]'" in workflow
     assert "issue.title.startsWith('🚀 Release readiness radar')" in workflow
