@@ -35,9 +35,9 @@
     "blanket_package_suppression_present": true,
     "blanket_module_pattern": "sdetkit.*",
     "new_unrecorded_suppression_allowed": false,
-    "source_module_count": 495,
-    "typing_debt_module_count": 476,
-    "typing_debt_inventory_sha256": "8e16fcef00657284e83176d2a5960a1ab75db8e2180dceb788af7cae52b8e2ee",
+    "source_module_count": 496,
+    "typing_debt_module_count": 477,
+    "typing_debt_inventory_sha256": "39935795c281ea3441634cf9e6d26ddb3d109791e7a9d6e1a2a36e8d8f1f3dcd",
     "typing_debt_artifact_path": "build/quality/typing-debt-inventory.json",
     "explicitly_type_checked_modules": [
       "sdetkit._pr_quality_required_terminal_checks",
@@ -75,8 +75,8 @@
     "python310_full_continuous_integration_proven": false
   },
   "authority_boundary": {
-    "tests_may_be_weake\u006eed": false,
-    "quality_gates_may_be_hid\u0064en": false,
-    "unmeasured_quality_may_be_clai\u006ded": false
+    "tests_may_be_weakened": false,
+    "quality_gates_may_be_hidden": false,
+    "unmeasured_quality_may_be_claimed": false
   }
 }
