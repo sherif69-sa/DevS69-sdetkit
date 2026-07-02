@@ -61,10 +61,13 @@ def _strings(value: object) -> list[str]:
 
 
 def _load_workflow(path: Path) -> dict[str, Any]:
-    payload = yaml.load(path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, Mapping):
         raise ValueError(f"expected YAML mapping in {path}")
-    return {str(key): value for key, value in payload.items()}
+    normalized = dict(payload)
+    if True in normalized and "on" not in normalized:
+        normalized["on"] = normalized.pop(True)
+    return {str(key): value for key, value in normalized.items()}
 
 
 def _triggers(workflow: Mapping[str, Any]) -> list[str]:
