@@ -32,6 +32,7 @@ jobs:
         run: python -m pip install -c constraints-ci.txt -e .[test]
 
       - name: Generate release readiness artifacts
+        id: radar
         run: |
           set -euo pipefail
           mkdir -p build
@@ -39,6 +40,7 @@ jobs:
           python -m sdetkit maintenance --include-check github_automation_check --format json > build/release-readiness-maintenance.json || true
           python - <<'PY'
           import json
+          import os
           import subprocess
           from pathlib import Path
 
@@ -49,9 +51,10 @@ jobs:
               if not path.exists():
                   return {}
               try:
-                  return json.loads(path.read_text(encoding='utf-8'))
+                  payload = json.loads(path.read_text(encoding='utf-8'))
               except json.JSONDecodeError:
                   return {'raw': path.read_text(encoding='utf-8')}
+              return payload if isinstance(payload, dict) else {'raw': payload}
 
           def first_heading(path: Path) -> str:
               if not path.exists():
@@ -104,24 +107,75 @@ jobs:
           ]
 
           doctor_checks = doctor.get('checks', [])
+          doctor_evidence_available = (
+              bool(doctor)
+              and 'raw' not in doctor
+              and isinstance(doctor_checks, list)
+          )
+          if not isinstance(doctor_checks, list):
+              doctor_checks = []
           failing_doctor_checks = [
               item.get('name') or item.get('id') or item.get('key')
               for item in doctor_checks
-              if not item.get('ok', item.get('passed', True))
+              if isinstance(item, dict)
+              and not item.get('ok', item.get('passed', True))
           ]
           automation = maintenance.get('checks', {}).get('github_automation_check', {})
-          missing_workflows = automation.get('details', {}).get('missing_required_workflows', [])
-          missing_configs = automation.get('details', {}).get('missing_configs', [])
+          automation_details = automation.get('details', {}) if isinstance(automation, dict) else {}
+          automation_evidence_available = (
+              bool(maintenance)
+              and 'raw' not in maintenance
+              and isinstance(automation, dict)
+              and isinstance(automation_details, dict)
+          )
+          missing_workflows = automation_details.get('missing_required_workflows', [])
+          missing_configs = automation_details.get('missing_configs', [])
+          if not isinstance(missing_workflows, list):
+              missing_workflows = []
+          if not isinstance(missing_configs, list):
+              missing_configs = []
+
+          missing_release_workflows = [item['path'] for item in workflows if not item['present']]
+          missing_release_assets = [item['path'] for item in assets if not item['present']]
+          actionable_reasons = []
+          if not doctor_evidence_available:
+              actionable_reasons.append('doctor evidence unavailable or malformed')
+          if failing_doctor_checks:
+              actionable_reasons.append(
+                  f"failing doctor checks: {len(failing_doctor_checks)}"
+              )
+          if missing_release_workflows:
+              actionable_reasons.append(
+                  'missing release workflows: ' + ', '.join(missing_release_workflows)
+              )
+          if missing_release_assets:
+              actionable_reasons.append(
+                  'missing release assets: ' + ', '.join(missing_release_assets)
+              )
+          if not automation_evidence_available:
+              actionable_reasons.append('automation evidence unavailable or malformed')
+          if missing_workflows:
+              actionable_reasons.append(
+                  'missing automation workflows: ' + ', '.join(missing_workflows)
+              )
+          if missing_configs:
+              actionable_reasons.append(
+                  'missing automation configs: ' + ', '.join(missing_configs)
+              )
+          actionable = bool(actionable_reasons)
 
           report = {
               'summary': {
                   'doctor_status': doctor.get('status') or doctor.get('summary') or 'unknown',
+                  'doctor_evidence_available': doctor_evidence_available,
+                  'automation_evidence_available': automation_evidence_available,
                   'failing_doctor_checks': len(failing_doctor_checks),
-                  'missing_release_workflows': sum(1 for item in workflows if not item['present']),
-                  'missing_release_assets': sum(1 for item in assets if not item['present']),
+                  'missing_release_workflows': len(missing_release_workflows),
+                  'missing_release_assets': len(missing_release_assets),
                   'dirty_files': len(dirty_files),
                   'missing_automation_workflows': len(missing_workflows),
                   'missing_automation_configs': len(missing_configs),
+                  'actionable_findings': len(actionable_reasons),
               },
               'doctor': {
                   'summary': doctor.get('summary'),
@@ -135,24 +189,41 @@ jobs:
               },
               'dirty_files': dirty_files[:20],
           }
+          policy = {
+              'schema_version': 'sdetkit.release-readiness.issue-policy.v1',
+              'actionable': actionable,
+              'actionable_finding_count': len(actionable_reasons),
+              'actionable_reasons': actionable_reasons,
+              'doctor_evidence_available': doctor_evidence_available,
+              'automation_evidence_available': automation_evidence_available,
+              'issue_policy': 'rolling_tracker_when_actionable',
+              'zero_signal_issue_creation': False,
+          }
 
           (build / 'release-readiness-radar.json').write_text(
-              json.dumps(report, indent=2) + '\n',
+              json.dumps(report, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
+          (build / 'release-readiness-policy.json').write_text(
+              json.dumps(policy, indent=2, sort_keys=True) + '\n',
               encoding='utf-8',
           )
 
           lines = [
               '# Release readiness radar',
               '',
-              "This issue is auto-generated to keep release confidence, publishing posture, and public-facing trust assets visible.",
+              'This artifact keeps release confidence, publishing posture, and public-facing trust assets visible.',
               '',
               '## Snapshot',
               f"- Doctor status: **{report['summary']['doctor_status']}**",
+              f"- Doctor evidence available: **{doctor_evidence_available}**",
+              f"- Automation evidence available: **{automation_evidence_available}**",
               f"- Failing doctor checks: **{report['summary']['failing_doctor_checks']}**",
               f"- Missing release workflows: **{report['summary']['missing_release_workflows']}**",
               f"- Missing release assets: **{report['summary']['missing_release_assets']}**",
               f"- Missing automation workflows: **{report['summary']['missing_automation_workflows']}**",
               f"- Missing automation configs: **{report['summary']['missing_automation_configs']}**",
+              f"- Actionable findings: **{len(actionable_reasons)}**",
               '',
               '## Release workflow coverage',
           ]
@@ -170,27 +241,59 @@ jobs:
               ]
           )
           lines.extend(['', '## Doctor follow-up'])
-          lines.extend([f'- ⚠️ `{item}`' for item in failing_doctor_checks[:10]] or ['- No failing doctor checks were parsed from the JSON output.'])
+          lines.extend(
+              [f'- ⚠️ `{item}`' for item in failing_doctor_checks[:10]]
+              or ['- No failing doctor checks were parsed from the JSON output.']
+          )
           lines.extend(['', '## Automation gaps from maintenance check'])
-          lines.extend([f'- ⚠️ workflow `{item}`' for item in missing_workflows[:10]] or ['- No missing required automation workflows detected.'])
-          lines.extend([f'- ⚠️ config `{item}`' for item in missing_configs[:10]] or ['- No missing automation configs detected.'])
+          lines.extend(
+              [f'- ⚠️ workflow `{item}`' for item in missing_workflows[:10]]
+              or ['- No missing required automation workflows detected.']
+          )
+          lines.extend(
+              [f'- ⚠️ config `{item}`' for item in missing_configs[:10]]
+              or ['- No missing automation configs detected.']
+          )
           lines.extend(['', '## Dirty working tree snapshot'])
-          lines.extend([f'- `{item}`' for item in dirty_files[:10]] or ['- Clean working tree during workflow run.'])
+          lines.extend(
+              [f'- `{item}`' for item in dirty_files[:10]]
+              or ['- Clean working tree during workflow run.']
+          )
+          if actionable:
+              lines.extend([
+                  '',
+                  '## Required follow-up',
+                  *[f'- {reason}' for reason in actionable_reasons],
+                  '',
+                  'A single rolling tracker is created or refreshed for these findings.',
+              ])
+          else:
+              lines.extend([
+                  '',
+                  '## Result',
+                  '- Healthy release-readiness evidence is retained as workflow artifacts.',
+                  '- No issue is created for a zero-signal run.',
+              ])
           lines.extend(
               [
                   '',
                   '## Suggested follow-up',
-                  '- [ ] Keep release docs, roadmap, and changelog aligned before the next publish window.',
-                  '- [ ] Convert any doctor failures or automation gaps into scoped PRs with deterministic validation.',
-                  '- [ ] Review this radar together with the dependency radar and repo optimization issue before a release push.',
+                  '- Keep release docs, roadmap, and changelog aligned before the next publish window.',
+                  '- Convert any doctor failures or automation gaps into scoped PRs with deterministic validation.',
                   '',
                   '## Artifacts',
                   '- `build/release-readiness-radar.json`',
+                  '- `build/release-readiness-policy.json`',
                   '- `build/release-readiness-doctor.json`',
                   '- `build/release-readiness-maintenance.json`',
               ]
           )
-          (build / 'release-readiness-radar.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          (build / 'release-readiness-radar.md').write_text(
+              '\n'.join(lines) + '\n',
+              encoding='utf-8',
+          )
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"actionable={'true' if actionable else 'false'}\n")
           PY
 
       - name: Upload release readiness artifacts
@@ -200,26 +303,72 @@ jobs:
           name: release-readiness-radar
           path: |
             build/release-readiness-radar.json
+            build/release-readiness-policy.json
             build/release-readiness-radar.md
             build/release-readiness-doctor.json
             build/release-readiness-maintenance.json
 
-      - name: Publish release readiness issue
+      - name: Reconcile release readiness tracker
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        env:
+          ACTIONABLE: ${{ steps.radar.outputs.actionable }}
         with:
           script: |
             const fs = require('fs');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const weekOf = new Date().toISOString().slice(0, 10);
-            const title = `🚀 Release readiness radar (${weekOf})`;
-            const body = fs.readFileSync('build/release-readiness-radar.md', 'utf8');
+            const actionable = process.env.ACTIONABLE === 'true';
+            const rollingTitle = '🚀 Release readiness follow-up';
+            const generatedBodyMarker = '<!-- sdetkit:release-readiness-tracker:v1 -->';
+            const body = `${generatedBodyMarker}\n${fs.readFileSync('build/release-readiness-radar.md', 'utf8')}`;
+
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            });
+            const managedIssues = openIssues
+              .filter((issue) => !issue.pull_request)
+              .filter((issue) => issue.user?.login === 'github-actions[bot]')
+              .filter((issue) =>
+                issue.title === rollingTitle
+                || issue.title.startsWith('🚀 Release readiness radar')
+                || issue.body?.startsWith(generatedBodyMarker)
+              );
+            const existing = managedIssues.find((issue) => issue.title === rollingTitle);
+
+            for (const issue of managedIssues) {
+              if (!existing || issue.number !== existing.number) {
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  state: 'closed',
+                  state_reason: 'completed',
+                });
+              }
+            }
+
+            if (!actionable) {
+              if (existing) {
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: existing.number,
+                  state: 'closed',
+                  state_reason: 'completed',
+                });
+              }
+              core.notice('release readiness healthy; artifacts uploaded; no issue created');
+              return;
+            }
+
             const labels = [
               { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
               { name: 'release', color: '5319e7', description: 'Release confidence and readiness work' },
               { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
             ];
-
             for (const label of labels) {
               try {
                 await github.rest.issues.getLabel({ owner, repo, name: label.name });
@@ -228,29 +377,19 @@ jobs:
               }
             }
 
-            const openIssues = await github.rest.issues.listForRepo({
-              owner,
-              repo,
-              state: 'open',
-              labels: 'maintenance',
-              per_page: 100,
-            });
-            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('🚀 Release readiness radar'));
-
-            for (const oldIssue of priorIssues) {
-              if (oldIssue.title !== title) {
-                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
-              }
-            }
-
-            const existing = priorIssues.find((issue) => issue.title === title);
             if (existing) {
-              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body,
+                labels: ['maintenance', 'release', 'priority:medium'],
+              });
             } else {
               await github.rest.issues.create({
                 owner,
                 repo,
-                title,
+                title: rollingTitle,
                 body,
                 labels: ['maintenance', 'release', 'priority:medium'],
               });
