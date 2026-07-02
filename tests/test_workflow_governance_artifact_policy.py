@@ -82,7 +82,10 @@ def test_workflow_uses_one_bot_managed_tracker_and_stays_below_heavy_budget() ->
     assert "python scripts/build_workflow_governance_policy.py" in workflow
     assert "ACTIONABLE: ${{ steps.governance.outputs.actionable }}" in workflow
     assert "const rollingTitle = '🧾 Workflow governance follow-up';" in workflow
-    assert "const generatedBodyMarker = '<!-- sdetkit:workflow-governance-tracker:v1 -->';" in workflow
+    assert (
+        "const generatedBodyMarker = '<!-- sdetkit:workflow-governance-tracker:v1 -->';"
+        in workflow
+    )
     assert "issue.user?.login === 'github-actions[bot]'" in workflow
     assert "issue.title.startsWith('🧾 Workflow governance audit')" in workflow
     assert "state_reason: 'completed'" in workflow
