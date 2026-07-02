@@ -3,19 +3,36 @@ from __future__ import annotations
 import importlib.util
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 
-def _load_module():
-    script = (
+def _script_path() -> Path:
+    return (
         Path(__file__).resolve().parent.parent / "tests" / "contract" / "check_installed_wheel.py"
     )
+
+
+def _load_module():
+    script = _script_path()
     spec = importlib.util.spec_from_file_location("check_installed_wheel_contract", script)
     assert spec is not None
     assert spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def test_script_exposes_executable_command_line_entrypoint() -> None:
+    proc = subprocess.run(
+        [sys.executable, str(_script_path()), "--help"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert proc.returncode == 0
+    assert "Run installed-wheel CLI contract checks." in proc.stdout
 
 
 def test_main_preserves_virtualenv_python_path(tmp_path: Path, monkeypatch) -> None:
@@ -27,12 +44,12 @@ def test_main_preserves_virtualenv_python_path(tmp_path: Path, monkeypatch) -> N
         calls.append((cli_python, args, None))
         if args[:2] == ("integration", "check"):
             payload = {
-                "summary": {"failed": 1, "passed": False},
-                "checks": [{"kind": "env", "name": "CI"}],
+                "summary": {"failed": 0, "passed": True, "total": 0},
+                "checks": [],
             }
             return subprocess.CompletedProcess(
                 [str(cli_python), "-m", "sdetkit", *args],
-                1,
+                0,
                 stdout=json.dumps(payload),
                 stderr="",
             )
@@ -63,7 +80,10 @@ def test_main_preserves_virtualenv_python_path(tmp_path: Path, monkeypatch) -> N
         elif args[:2] == ("forensics", "compare"):
             payload = {"regression_summary": {"changed_failures": 1, "new_failures": 1}}
         return subprocess.CompletedProcess(
-            [str(cli_python), "-m", "sdetkit", *args], 0, stdout=json.dumps(payload), stderr=""
+            [str(cli_python), "-m", "sdetkit", *args],
+            0,
+            stdout=json.dumps(payload),
+            stderr="",
         )
 
     monkeypatch.setattr(module, "_run", fake_run)

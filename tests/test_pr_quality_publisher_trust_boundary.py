@@ -91,12 +91,14 @@ def test_handoff_is_minimal_and_authority_non_authorizing() -> None:
     assert '"semantic_equivalence_proven": False' in evidence
 
 
-def test_topology_records_reviewed_security_growth() -> None:
+def test_topology_keeps_pr_quality_workflows_in_reviewed_inventory() -> None:
     payload = json.loads(TOPOLOGY.read_text(encoding="utf-8"))
-    assert payload["budgets"]["maximum_workflow_count"] == 56
-    assert payload["reviewed_growth"]["previous_workflow_count"] == 55
-    assert payload["reviewed_growth"]["current_workflow_count"] == 56
-    assert "trusted workflow_run publisher" in payload["reviewed_growth"]["reason"]
+    inventory = set(payload["inventory"])
+
+    assert ".github/workflows/pr-quality-comment.yml" in inventory
+    assert ".github/workflows/pr-quality-publisher.yml" in inventory
+    assert payload["budgets"]["maximum_workflow_count"] >= len(inventory)
+    assert payload["reviewed_growth"]["current_workflow_count"] == len(inventory)
     assert payload["reviewed_growth"]["reviewer"] == "sherif69-sa"
 
 

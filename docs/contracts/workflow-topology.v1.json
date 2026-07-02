@@ -5,14 +5,14 @@
     "patch_application_allowed": false,
     "semantic_equivalence_proven": false
   },
-  "baseline_main_sha": "a7755ecfdcd4eb1f17df486dd251889d6a246ef0",
+  "baseline_main_sha": "b6091c6cdee9b1eeb8cbded85292ceb5d460fb3e",
   "budgets": {
     "maximum_heavy_workflow_count": 8,
     "maximum_metadata_drift_occurrence_count": 18,
     "maximum_metadata_drift_workflow_count": 8,
     "maximum_monolithic_workflow_count": 7,
     "maximum_unpinned_action_count": 0,
-    "maximum_workflow_count": 56,
+    "maximum_workflow_count": 57,
     "maximum_write_permission_workflow_count": 32,
     "minimum_reusable_workflow_count": 1,
     "target_primary_workflow_count": 12
@@ -58,6 +58,7 @@
     ".github/workflows/pre-commit-autoupdate.yml",
     ".github/workflows/premium-gate.yml",
     ".github/workflows/quality.yml",
+    ".github/workflows/release-candidate.yml",
     ".github/workflows/release-readiness-radar-bot.yml",
     ".github/workflows/release.yml",
     ".github/workflows/repo-audit.yml",
@@ -98,11 +99,11 @@
     "top-tier-reporting-sample.yml"
   ],
   "reviewed_growth": {
-    "current_workflow_count": 56,
+    "current_workflow_count": 57,
     "durable_target_primary_workflow_count": 12,
     "follow_up": "consume canonical CI artifacts and retire duplicate PR Quality execution",
-    "previous_workflow_count": 55,
-    "reason": "isolate PR Quality write authority in a trusted workflow_run publisher",
+    "previous_workflow_count": 56,
+    "reason": "add read-only pre-tag release candidate qualification without publication authority",
     "reviewer": "sherif69-sa"
   },
   "schema_version": "devs69.workflow_topology.v1"

@@ -32,10 +32,14 @@ def _load_json(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run installed-wheel CLI contract checks.")
     parser.add_argument(
-        "--python", required=True, help="Python executable inside the isolated wheel venv."
+        "--python",
+        required=True,
+        help="Python executable inside the isolated wheel venv.",
     )
     parser.add_argument(
-        "--repo-root", default=".", help="Repository root containing example assets."
+        "--repo-root",
+        default=".",
+        help="Repository root containing example assets.",
     )
     ns = parser.parse_args(argv)
 
@@ -47,7 +51,8 @@ def main(argv: list[str] | None = None) -> int:
     def check(name: str, proc: subprocess.CompletedProcess[str]) -> None:
         if proc.returncode != 0:
             failures.append(
-                f"{name} failed with rc={proc.returncode}\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
+                f"{name} failed with rc={proc.returncode}\n"
+                f"stdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
             )
 
     kits = _run(cli_python, repo_root, "kits", "list", "--format", "json")
@@ -87,19 +92,18 @@ def main(argv: list[str] | None = None) -> int:
         "--profile",
         "examples/kits/integration/profile.json",
     )
-    if integration.returncode != 1:
-        failures.append("integration check should fail the bundled local-smoke profile outside CI")
-    else:
+    check("integration check", integration)
+    if integration.returncode == 0:
         payload = _load_json(integration)
         summary = payload.get("summary", {})
-        if summary.get("failed") != 1 or summary.get("passed") is not False:
+        if (
+            summary.get("failed") != 0
+            or summary.get("passed") is not True
+            or summary.get("total") != 0
+        ):
             failures.append(f"unexpected integration summary: {summary!r}")
-        checks = payload.get("checks", [])
-        env_checks = [
-            item for item in checks if isinstance(item, dict) and item.get("kind") == "env"
-        ]
-        if not env_checks or env_checks[0].get("name") != "CI":
-            failures.append(f"unexpected integration env checks: {env_checks!r}")
+        if payload.get("checks") != []:
+            failures.append(f"unexpected integration checks: {payload.get('checks')!r}")
 
     compare = _run(
         cli_python,
@@ -148,5 +152,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())
