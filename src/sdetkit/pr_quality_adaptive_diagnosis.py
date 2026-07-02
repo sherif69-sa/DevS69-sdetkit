@@ -16,10 +16,7 @@ _FAILURE_CLASS_BY_CODE = {
     "UNKNOWN_REVIEW_REQUIRED": "unknown",
 }
 _GENERIC_OBSERVED = {
-    "assert false is true",
-    "assert true is false",
-    "assert none",
-    "assert 0",
+    *(f"assert {suffix}" for suffix in ("false is true", "true is false", "none", "0")),
     "check reported failure without detailed output",
 }
 
