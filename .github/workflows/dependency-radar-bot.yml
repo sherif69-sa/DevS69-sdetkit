@@ -32,64 +32,18 @@ jobs:
         run: python -m pip install -c constraints-ci.txt -e .
 
       - name: Generate dependency radar artifacts
+        id: radar
         run: |
           set -euo pipefail
           mkdir -p build
           python -m sdetkit intelligence upgrade-audit --format json --used-in-repo-only --top 10 > build/dependency-radar.json
           python -m sdetkit intelligence upgrade-audit --impact-area runtime-core --repo-usage-tier hot-path --format md > build/runtime-fast-follow.md
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          repo_root = str(Path.cwd())
-
-          def relativize_repo_paths(text: str) -> str:
-              if not text:
-                  return text
-              normalized = text.replace(f"{repo_root}/", "")
-              return normalized.replace(repo_root, ".")
-
-          data = json.loads(Path('build/dependency-radar.json').read_text(encoding='utf-8'))
-          packages = data.get('packages', [])[:5]
-          route_map = data.get('packages', [])[:3]
-          summary = data.get('summary', {})
-          lines = [
-              '# Dependency radar',
-              '',
-              f"- Packages audited: **{summary.get('packages_audited', len(data.get('packages', [])))}**",
-              f"- Actionable packages: **{summary.get('actionable_packages', 0)}**",
-              f"- Highest observed risk score: **{summary.get('max_risk_score', 0)}**",
-              '',
-              '## Priority packages',
-          ]
-          if packages:
-              for pkg in packages:
-                  lines.append(
-                      f"- **{pkg['name']}** · impact `{pkg.get('impact_area', 'unknown')}` · usage `{pkg.get('repo_usage_tier', 'unknown')}` · next `{pkg.get('manifest_action', 'watch')}`"
-                  )
-          else:
-              lines.append('- No packages returned by the audit for this scope.')
-          lines.extend(['', '## Validation route map'])
-          if route_map:
-              for pkg in route_map:
-                  validations = ', '.join(pkg.get('validation_commands', [])[:2]) or 'n/a'
-                  lines.append(
-                      f"- **{pkg['name']}** → primary `{(pkg.get('validation_commands') or ['n/a'])[0]}`; backups `{validations}`"
-                  )
-          else:
-              lines.append('- No validation routes were emitted for this run.')
-          lines.extend([
-              '',
-              '## Runtime fast-follow watchlist',
-              relativize_repo_paths(Path('build/runtime-fast-follow.md').read_text(encoding='utf-8').strip()),
-              '',
-              '## Recommended follow-up',
-              '- [ ] Validate the hottest package lane before merging broad dependency refreshes.',
-              '- [ ] Turn any recurring runtime-core drift into a tracked enhancement or maintenance issue.',
-              '- [ ] Link completed upgrade PRs back to this radar issue for traceability.',
-          ])
-          Path('build/dependency-radar.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
-          PY
+          python scripts/build_dependency_radar_policy.py \
+            --radar-json build/dependency-radar.json \
+            --runtime-markdown build/runtime-fast-follow.md \
+            --policy-json build/dependency-radar-policy.json \
+            --report-markdown build/dependency-radar.md \
+            --github-output "$GITHUB_OUTPUT"
 
       - name: Upload dependency radar artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
@@ -98,25 +52,71 @@ jobs:
           retention-days: 7
           path: |
             build/dependency-radar.json
+            build/dependency-radar-policy.json
             build/dependency-radar.md
             build/runtime-fast-follow.md
 
-      - name: Create or update dependency radar issue
+      - name: Reconcile dependency radar tracker
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        env:
+          ACTIONABLE: ${{ steps.radar.outputs.actionable }}
         with:
           script: |
             const fs = require('fs');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const weekOf = new Date().toISOString().slice(0, 10);
-            const title = `📡 Dependency radar + runtime watchlist (${weekOf})`;
-            const body = fs.readFileSync('build/dependency-radar.md', 'utf8');
+            const actionable = process.env.ACTIONABLE === 'true';
+            const rollingTitle = '📡 Dependency radar follow-up';
+            const generatedBodyMarker = '<!-- sdetkit:dependency-radar-tracker:v1 -->';
+            const body = `${generatedBodyMarker}\n${fs.readFileSync('build/dependency-radar.md', 'utf8')}`;
+
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            });
+            const managedIssues = openIssues
+              .filter((issue) => !issue.pull_request)
+              .filter((issue) => issue.user?.login === 'github-actions[bot]')
+              .filter((issue) =>
+                issue.title === rollingTitle
+                || issue.title.startsWith('📡 Dependency radar + runtime watchlist')
+                || issue.body?.startsWith(generatedBodyMarker)
+              );
+            const existing = managedIssues.find((issue) => issue.title === rollingTitle);
+
+            for (const issue of managedIssues) {
+              if (!existing || issue.number !== existing.number) {
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  state: 'closed',
+                  state_reason: 'completed',
+                });
+              }
+            }
+
+            if (!actionable) {
+              if (existing) {
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: existing.number,
+                  state: 'closed',
+                  state_reason: 'completed',
+                });
+              }
+              core.notice('dependency radar has zero actionable packages; artifacts uploaded');
+              return;
+            }
+
             const labels = [
               { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
               { name: 'dependencies', color: '1d76db', description: 'Dependency maintenance and upgrades' },
               { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
             ];
-
             for (const label of labels) {
               try {
                 await github.rest.issues.getLabel({ owner, repo, name: label.name });
@@ -125,31 +125,19 @@ jobs:
               }
             }
 
-            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
-              owner,
-              repo,
-              state: 'open',
-              labels: 'dependencies',
-              per_page: 100,
-            });
-            const priorIssues = openIssues
-              .filter((issue) => !issue.pull_request)
-              .filter((issue) => issue.title.startsWith('📡 Dependency radar + runtime watchlist'));
-
-            for (const oldIssue of priorIssues) {
-              if (oldIssue.title !== title) {
-                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
-              }
-            }
-
-            const existing = priorIssues.find((issue) => issue.title === title);
             if (existing) {
-              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body,
+                labels: ['maintenance', 'dependencies', 'priority:medium'],
+              });
             } else {
               await github.rest.issues.create({
                 owner,
                 repo,
-                title,
+                title: rollingTitle,
                 body,
                 labels: ['maintenance', 'dependencies', 'priority:medium'],
               });
