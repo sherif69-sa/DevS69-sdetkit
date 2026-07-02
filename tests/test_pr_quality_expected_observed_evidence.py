@@ -86,6 +86,42 @@ def test_live_evidence_enriches_budget_expected_and_observed() -> None:
     assert "Not captured" not in html.split("<dt>Expected</dt>", 1)[1].split("</dl>", 1)[0]
 
 
+def test_live_evidence_enriches_quality_truth_baseline_mismatch() -> None:
+    model = _model(
+        {
+            "available": True,
+            "check_name": "GitHub Actions Advanced Reference",
+            "expected": "",
+            "observed": "",
+            "message": "",
+            "test_node": "",
+            "families": [
+                {
+                    "failure_code": "PYTEST_ASSERTION_FAILURE",
+                    "test_node": (
+                        "tests/test_quality_truth_baseline.py::"
+                        "test_quality_truth_baseline_matches_current_repository_configuration"
+                    ),
+                    "message": (
+                        "[{'check': 'source_module_count_matches', "
+                        "'metric': 'source_module_count', "
+                        "'expected': 495, 'actual': 496}]"
+                    ),
+                }
+            ],
+        }
+    )
+
+    _snapshot(model)
+
+    failure = model["primary_failure"]
+    assert failure["expected"] == "source_module_count = 495"
+    assert failure["observed"] == "source_module_count = 496"
+    assert failure["test_node"].endswith(
+        "test_quality_truth_baseline_matches_current_repository_configuration"
+    )
+
+
 def test_live_evidence_preserves_explicit_expected_and_observed() -> None:
     model = _model(
         {
