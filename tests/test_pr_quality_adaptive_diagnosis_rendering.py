@@ -68,9 +68,7 @@ def test_render_exposes_adaptive_diagnosis_for_contributors() -> None:
 
 
 def test_render_reads_card_from_primary_failure() -> None:
-    html = renderer.render_from_model(
-        {"primary_failure": {"adaptive_diagnosis": _card()}}
-    )
+    html = renderer.render_from_model({"primary_failure": {"adaptive_diagnosis": _card()}})
     assert "Review first" in html
 
 
@@ -97,9 +95,7 @@ def test_cli_writes_standalone_html(tmp_path: Path, capsys: pytest.CaptureFixtur
         encoding="utf-8",
     )
 
-    assert renderer.main(
-        ["--review-model", str(model_path), "--out", str(out)]
-    ) == 0
+    assert renderer.main(["--review-model", str(model_path), "--out", str(out)]) == 0
 
     rendered = out.read_text(encoding="utf-8")
     captured = capsys.readouterr().out
