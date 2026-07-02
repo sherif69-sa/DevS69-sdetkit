@@ -71,6 +71,8 @@ jobs:
               ]
               if method != "GET":
                   command.extend(["--method", method])
+              if payload is not None:
+                  command.extend(["--input", "-"])
               command.extend(args)
               completed = subprocess.run(
                   command,
