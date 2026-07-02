@@ -42,6 +42,20 @@ def _inventory_digest(modules: list[str]) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def _mismatch(
+    check: str,
+    metric: str,
+    expected: object,
+    actual: object,
+) -> dict[str, object]:
+    return {
+        "check": check,
+        "metric": metric,
+        "expected": expected,
+        "actual": actual,
+    }
+
+
 def evaluate_quality_truth(root: Path, contract_path: Path) -> dict[str, object]:
     contract = json.loads(contract_path.read_text(encoding="utf-8"))
     pyproject_text = (root / "pyproject.toml").read_text(encoding="utf-8")
@@ -70,29 +84,68 @@ def evaluate_quality_truth(root: Path, contract_path: Path) -> dict[str, object]
     typing = contract["typing"]
     runtime = contract["runtime"]
     critical = contract["coverage"]["critical_spine"]
-    checks = {
-        "blanket_suppression_matches": blanket
-        is bool(typing["blanket_package_suppression_present"]),
-        "checked_modules_match": checked == set(typing["explicitly_type_checked_modules"]),
-        "source_module_count_matches": len(source_modules) == int(typing["source_module_count"]),
-        "typing_debt_count_matches": len(debt_modules) == int(typing["typing_debt_module_count"]),
-        "typing_debt_digest_matches": debt_digest == typing["typing_debt_inventory_sha256"],
-        "declared_python_versions_match": declared == sorted(runtime["declared_python_versions"]),
-        "canonical_ci_versions_match": matrix == sorted(runtime["canonical_ci_matrix"]),
-        "critical_spine_threshold_present": f'COV_FAIL_UNDER: "{critical["minimum_percent"]}"'
-        in ci_text,
-        "whole_package_scope_exists": 'cov_scope="${COV_SCOPE:-core}"' in quality_text,
-        "authority_boundary_preserved": contract["authority_boundary"]
-        == {
-            "tests_may_be_weakened": False,
-            "quality_gates_may_be_hidden": False,
-            "unmeasured_quality_may_be_claimed": False,
-        },
+    expected_authority = {
+        "tests_may_be_weakened": False,
+        "quality_gates_may_be_hidden": False,
+        "unmeasured_quality_may_be_claimed": False,
     }
+    observed_values: dict[str, object] = {
+        "blanket_package_suppression_present": blanket,
+        "explicitly_type_checked_modules": sorted(checked),
+        "source_module_count": len(source_modules),
+        "typing_debt_module_count": len(debt_modules),
+        "typing_debt_inventory_sha256": debt_digest,
+        "declared_python_versions": declared,
+        "canonical_ci_matrix": matrix,
+        "critical_spine_threshold_present": (
+            f'COV_FAIL_UNDER: "{critical["minimum_percent"]}"' in ci_text
+        ),
+        "whole_package_scope_exists": 'cov_scope="${COV_SCOPE:-core}"' in quality_text,
+        "authority_boundary": contract["authority_boundary"],
+    }
+    expected_values: dict[str, object] = {
+        "blanket_package_suppression_present": bool(typing["blanket_package_suppression_present"]),
+        "explicitly_type_checked_modules": sorted(typing["explicitly_type_checked_modules"]),
+        "source_module_count": int(typing["source_module_count"]),
+        "typing_debt_module_count": int(typing["typing_debt_module_count"]),
+        "typing_debt_inventory_sha256": typing["typing_debt_inventory_sha256"],
+        "declared_python_versions": sorted(runtime["declared_python_versions"]),
+        "canonical_ci_matrix": sorted(runtime["canonical_ci_matrix"]),
+        "critical_spine_threshold_present": True,
+        "whole_package_scope_exists": True,
+        "authority_boundary": expected_authority,
+    }
+    check_metrics = {
+        "blanket_suppression_matches": "blanket_package_suppression_present",
+        "checked_modules_match": "explicitly_type_checked_modules",
+        "source_module_count_matches": "source_module_count",
+        "typing_debt_count_matches": "typing_debt_module_count",
+        "typing_debt_digest_matches": "typing_debt_inventory_sha256",
+        "declared_python_versions_match": "declared_python_versions",
+        "canonical_ci_versions_match": "canonical_ci_matrix",
+        "critical_spine_threshold_present": "critical_spine_threshold_present",
+        "whole_package_scope_exists": "whole_package_scope_exists",
+        "authority_boundary_preserved": "authority_boundary",
+    }
+    checks = {
+        check: observed_values[metric] == expected_values[metric]
+        for check, metric in check_metrics.items()
+    }
+    mismatches = [
+        _mismatch(
+            check,
+            metric,
+            expected_values[metric],
+            observed_values[metric],
+        )
+        for check, metric in check_metrics.items()
+        if not checks[check]
+    ]
     return {
         "schema_version": "sdetkit.quality_truth_check.v1",
         "ok": all(checks.values()),
         "checks": checks,
+        "mismatches": mismatches,
         "observed": {
             "blanket_package_suppression_present": blanket,
             "explicitly_type_checked_modules": sorted(checked),
