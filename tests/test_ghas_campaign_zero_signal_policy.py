@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "ghas-campaign-bot.yml"
 PLAN_PATH = ROOT / "docs" / "contracts" / "workflow-consolidation-plan.v1.json"
+TOPOLOGY_PATH = ROOT / "docs" / "contracts" / "workflow-topology.v1.json"
 
 
 def test_ghas_campaign_does_not_create_zero_signal_issue() -> None:
@@ -42,8 +43,9 @@ def test_ghas_campaign_only_closes_workflow_managed_trackers() -> None:
 
 def test_workflow_consolidation_contract_tracks_current_topology_and_policy() -> None:
     plan = json.loads(PLAN_PATH.read_text(encoding="utf-8"))
+    topology = json.loads(TOPOLOGY_PATH.read_text(encoding="utf-8"))
 
-    assert plan["current_workflow_count"] == 56
+    assert plan["current_workflow_count"] == len(topology["inventory"])
     assert plan["target_primary_workflow_count"] == 12
     assert len(plan["keep_primary"]) == 12
     assert plan["zero_signal_issue_policy"] == {

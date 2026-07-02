@@ -1,123 +1,86 @@
 # Workflow Consolidation Map (P0.2)
 
 Status: Active proposal (v1)
-Date: 2026-04-16
+Date: 2026-07-02
 
 ## Objective
 
-Reduce CI/workflow sprawl while preserving release-safety coverage by moving from many overlapping workflows to a smaller, tiered operating model.
+Reduce workflow fan-out while preserving required-check compatibility, evidence quality, and release safety.
 
-Current inventory baseline: **56 workflows** under `.github/workflows` (validated 2026-06-22). The contract layer prevents further unreviewed growth while the repository moves toward the 12-anchor target.
+The current baseline is **57 workflow files**. The durable target remains **12 primary workflows** with specialist behavior moved into reusable or scheduled bundles only after parity proof.
 
-## Target operating model
+## Primary anchors
 
-Move to 12 durable workflows (core + security + release + docs + maintenance), with specialist checks routed through reusable workflows or scheduled jobs.
+1. `ci.yml`
+2. `quality.yml`
+3. `security.yml`
+4. `release.yml`
+5. `repo-audit.yml`
+6. `dependency-review.yml`
+7. `pages.yml`
+8. `docs-link-check.yml`
+9. `weekly-maintenance.yml`
+10. `versioning.yml`
+11. `enterprise-gate.yml`
+12. `top-tier-reporting-sample.yml`
 
-### Keep as primary anchors
+## Enforced inventory model
 
-1. `ci.yml` (core PR/push verification)
-2. `quality.yml` (quality lane + deeper validation)
-3. `security.yml` (security baseline)
-4. `release.yml` (release pipeline)
-5. `repo-audit.yml` (repo health contract)
-6. `dependency-review.yml` (PR dependency risk gate)
-7. `pages.yml` (docs publishing)
-8. `docs-link-check.yml` (docs integrity)
-9. `weekly-maintenance.yml` (scheduled maintenance bundle)
-10. `versioning.yml` (version policy automation)
-11. `enterprise-gate.yml` (enterprise decision lane)
-12. `top-tier-reporting-sample.yml` (portfolio/reporting sample lane)
+Every workflow now has exactly one disposition in `docs/contracts/workflow-consolidation-plan.v1.json`:
 
-### Merge into bundles (retire standalone files after migration)
+- primary anchor
+- planned bundle member
+- retirement candidate requiring parity evidence
+- standalone supporting workflow
 
-- **Security bots bundle** (merge):
-  - `ghas-alert-sla-bot.yml`
-  - `ghas-campaign-bot.yml`
-  - `ghas-codeql-hotspots-bot.yml`
-  - `ghas-metrics-export-bot.yml`
-  - `ghas-review-bot.yml`
-  - `secret-protection-review-bot.yml`
-  - `security-configuration-audit-bot.yml`
-  - `security-maintenance-bot.yml`
-  - `osv-scanner.yml`
-  - `sbom.yml`
+Compatibility bridges, reusable workflows, and trusted publishers are recorded as metadata because those properties may overlap a workflow's disposition.
 
-- **Dependency automation bundle** (merge):
-  - `dependency-audit.yml`
-  - `dependency-auto-merge.yml`
-  - `dependency-radar-bot.yml`
-  - `pre-commit-autoupdate.yml`
+The plan currently records:
 
-- **Platform operations bundle** (merge):
-  - `repo-optimization-bot.yml`
-  - `runtime-watchlist-bot.yml`
-  - `worker-alignment-bot.yml`
-  - `workflow-governance-bot.yml`
-  - `integration-topology-radar-bot.yml`
-  - `maintenance-on-demand.yml`
+- 12 primary workflows
+- 24 planned bundle members
+- 7 retirement candidates
+- 14 standalone supporting workflows
+- 3 compatibility bridges
+- 1 reusable workflow
+- 2 trusted publishers
 
-- **Adoption/comms bundle** (merge):
-  - `pr-helper-bot.yml`
-  - `pr-quality-comment.yml`
-  - `contributor-onboarding-bot.yml`
-  - `docs-experience-bot.yml`
+The 57th workflow, `release-candidate.yml`, is explicitly classified as supporting release qualification. It is read-only and does not grant publication authority.
 
-### Candidate retire/absorb (after parity check)
+## Migration order
 
-- `advanced-github-actions-reference-64.yml` (documentation/reference lane; absorb into docs process)
-- `adapter-smoke-bot.yml` (absorb into `ci.yml` matrix or `quality.yml`)
-- `adoption-real-repo-canonical.yml` (convert to scheduled job in adoption bundle)
-- `premium-gate.yml` (absorb under `quality.yml` strict profile)
-- `mutation-tests.yml` (scheduled strict check under quality bundle)
-- `kpi-weekly.yml` and `release-readiness-radar-bot.yml` (fold under reporting + enterprise gate cadence)
+1. Record current topology and required checks.
+2. Enforce consolidation-plan parity.
+3. Stop zero-signal issue creation.
+4. Measure duplicate triggers and overlapping proof commands.
+5. Introduce one reusable bundle in shadow mode.
+6. Retire only after equivalent artifacts and checks are proven.
 
-## Ownership tags (proposed)
+## Phase A status
 
-- **Platform Engineering:** `ci.yml`, `quality.yml`, `repo-audit.yml`, `versioning.yml`
-- **Security Engineering:** `security.yml`, security bots bundle, `dependency-review.yml`
-- **Release Engineering:** `release.yml`, `enterprise-gate.yml`
-- **Developer Experience / Docs:** `pages.yml`, `docs-link-check.yml`, adoption/comms bundle
-- **Program Ops:** `top-tier-reporting-sample.yml`, reporting/radar scheduled jobs
+- [x] Machine-readable workflow topology and required-check contracts.
+- [x] Complete and mutually exclusive disposition coverage for all 57 workflows.
+- [x] Zero-finding issue creation prohibited by contract.
+- [ ] Run-frequency and failure-rate telemetry.
+- [ ] Duplicate trigger and proof-command report.
+- [ ] First reusable bundle with shadow parity.
 
-## Phased migration checklist (CI-safe)
+## Safety boundary
 
-### Phase A — Baseline and parity
+This phase is reporting-only. It does not remove workflows, rename required checks, change permissions, alter release publishing, or authorize merge.
 
-- [x] Establish machine-readable workflow topology and required-check contracts.
-- [ ] Export run-frequency + failure-rate telemetry for all 43 workflows.
-- [ ] Identify duplicate triggers and overlapping job steps.
-- [ ] Define reusable workflow templates for security/dependency/ops bundles.
+Validate the plan with:
 
-### Phase B — Bundle introduction
+```bash
+python scripts/check_workflow_consolidation_plan.py
+```
 
-- [ ] Add bundled workflows in parallel (no removals yet).
-- [ ] Mirror outputs/artifacts from legacy workflows for parity comparison.
-- [ ] Run 2-week shadow mode and verify no coverage regressions.
+The checker fails on stale workflow counts, missing classifications, duplicate dispositions, primary-anchor drift, unknown metadata references, and unsafe zero-signal policy.
 
-### Phase C — Controlled retirement
+## Success targets
 
-- [ ] Retire merged standalone workflows in batches (security -> dependency -> ops -> adoption).
-- [ ] Keep rollback tags for each retired workflow file for one minor release.
-- [ ] Update all docs, runbooks, and CODEOWNERS references.
-
-### Phase D — Steady-state governance
-
-- [ ] Enforce workflow count budget (target <= 12 primary files).
-- [ ] Add quarterly workflow drift review.
-- [ ] Require consolidation impact note for every new workflow proposal.
-
-## Success metrics
-
-- Workflow file count reduced from 43 to <= 12 primary anchors.
-- Duplicate trigger paths reduced by >= 50%.
-- No loss in gate coverage (quality/security/release readiness).
-- CI minute spend per merged PR reduced by >= 20% after consolidation.
-
-## Machine-readable plan
-
-See `docs/contracts/workflow-consolidation-plan.v1.json`.
-
-
-## Reviewed trust-boundary growth
-
-The temporary increase from 55 to 56 workflows is an explicitly reviewed security change: `pr-quality-publisher.yml` moves write-capable PR comment publication into a trusted `workflow_run` domain. The durable consolidation target remains 12 primary workflow anchors.
+- Primary workflow count remains at or below 12.
+- Duplicate trigger paths decrease by at least 50%.
+- CI minutes per merged PR decrease by at least 20%.
+- Required-check compatibility and gate coverage do not regress.
+- Zero-signal generated issues remain at 0.
