@@ -59,12 +59,13 @@ def merge_required_terminal_snapshot_into_checks(
         records.append(
             {
                 "name": BLOCKER_NAME,
-                "status": "completed",
-                "conclusion": "failure",
+                "status": "queued",
+                "conclusion": "",
                 "head_sha": _string(snapshot.get("expected_head_sha")),
                 "required": True,
                 "log": incomplete_reason(snapshot),
                 "terminal_snapshot_source": True,
+                "terminal_snapshot_incomplete": True,
             }
         )
 
