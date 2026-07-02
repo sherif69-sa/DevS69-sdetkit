@@ -26,8 +26,6 @@ __all__ = [
     "time",
 ]
 
-_snapshot_covers_expected = snapshot_covers_expected
-
 
 def collect_and_merge_terminal_snapshot_from_environment(
     *,
