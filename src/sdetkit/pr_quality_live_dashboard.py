@@ -48,6 +48,11 @@ def _structured_expected_observed(message: str) -> tuple[str, str]:
         expected = row.get("expected")
         if metric and maximum is not None and actual is not None:
             return f"{metric} <= {maximum}", f"{metric} = {actual}"
+        if metric and expected is not None and actual is not None:
+            return (
+                f"{metric} = {_display_failure_literal(expected)}",
+                f"{metric} = {_display_failure_literal(actual)}",
+            )
         if expected is not None and actual is not None:
             return _display_failure_literal(expected), _display_failure_literal(actual)
     return "", ""
