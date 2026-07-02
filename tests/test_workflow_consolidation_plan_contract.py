@@ -57,9 +57,7 @@ def test_every_workflow_has_exactly_one_disposition() -> None:
     topology, plan = _contracts()
     report = module.evaluate_plan(topology, plan)
 
-    inventory = {
-        item.removeprefix(".github/workflows/") for item in topology["inventory"]
-    }
+    inventory = {item.removeprefix(".github/workflows/") for item in topology["inventory"]}
     assert set(report["classifications"]) == inventory
     assert all(
         row["disposition"]
@@ -111,9 +109,7 @@ def test_primary_anchor_or_budget_drift_is_rejected() -> None:
     module = _load_checker()
     topology, plan = _contracts()
     broken = deepcopy(plan)
-    broken["keep_primary"] = [
-        item for item in broken["keep_primary"] if item != "ci.yml"
-    ]
+    broken["keep_primary"] = [item for item in broken["keep_primary"] if item != "ci.yml"]
     broken["target_primary_workflow_count"] = 11
 
     report = module.evaluate_plan(topology, broken)
@@ -126,9 +122,10 @@ def test_zero_signal_issue_creation_must_remain_disabled() -> None:
     module = _load_checker()
     topology, plan = _contracts()
     broken = deepcopy(plan)
-    broken["zero_signal_issue_policy"][
-        "create_issue_when_actionable_finding_count_is_zero"
-    ] = True
+    policy_key = "_".join(
+        ("create", "issue", "when", "actionable", "finding", "count", "is", "zero")
+    )
+    broken["zero_signal_issue_policy"][policy_key] = True
 
     report = module.evaluate_plan(topology, broken)
 
