@@ -14,8 +14,10 @@ on:
       - "scripts/release_preflight.py"
       - "scripts/check_release_tag_version.py"
       - "scripts/build_release_distribution_manifest.py"
+      - "scripts/build_release_candidate_qualification.py"
       - "tests/contract/check_installed_wheel.py"
       - "tests/test_release_candidate_qualification_contract.py"
+      - "tests/test_release_candidate_qualification_evidence.py"
       - "docs/project/release-process.md"
   push:
     branches: [main]
@@ -30,8 +32,10 @@ on:
       - "scripts/release_preflight.py"
       - "scripts/check_release_tag_version.py"
       - "scripts/build_release_distribution_manifest.py"
+      - "scripts/build_release_candidate_qualification.py"
       - "tests/contract/check_installed_wheel.py"
       - "tests/test_release_candidate_qualification_contract.py"
+      - "tests/test_release_candidate_qualification_evidence.py"
       - "docs/project/release-process.md"
 
 permissions:
@@ -182,6 +186,15 @@ jobs:
           "$RUNNER_TEMP/release-candidate-venv/bin/python" -m sdetkit doctor \
             --format json \
             --out build/release-candidate-qualification/doctor.json
+          "$RUNNER_TEMP/release-candidate-venv/bin/python" \
+            scripts/build_release_candidate_qualification.py record \
+            --distribution-manifest \
+              "$RUNNER_TEMP/release-candidate/build/release-candidate/distribution-manifest.json" \
+            --python-version "${{ matrix.python-version }}" \
+            --gate-fast build/release-candidate-qualification/gate-fast.json \
+            --gate-release build/release-candidate-qualification/gate-release.json \
+            --doctor build/release-candidate-qualification/doctor.json \
+            --out build/release-candidate-qualification/qualification-record.json
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: release-candidate-qualification-py${{ matrix.python-version }}
@@ -194,39 +207,40 @@ jobs:
     needs: [build, qualify-wheel]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          ref: ${{ needs.build.outputs.source_sha }}
+          persist-credentials: false
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version: "3.12"
-      - name: Emit non-publishing verdict
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          pattern: release-candidate-qualification-py*
+          path: ${{ runner.temp }}/release-candidate-qualifications
+      - name: Aggregate exact-wheel qualification verdict
         env:
           CANDIDATE_TAG: ${{ needs.build.outputs.candidate_tag }}
           RELEASE_VERSION: ${{ needs.build.outputs.version }}
           SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
         run: |
+          set -euo pipefail
           mkdir -p build/release-candidate-verdict
-          python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          payload = {
-              "schema_version": "sdetkit.release_candidate.verdict.v1",
-              "status": "repository_qualification_passed",
-              "candidate_tag": os.environ["CANDIDATE_TAG"],
-              "version": os.environ["RELEASE_VERSION"],
-              "source_sha": os.environ["SOURCE_SHA"],
-              "qualified_python_versions": ["3.10", "3.11", "3.12"],
-              "external_settings_verified": False,
-              "publish_authorized": False,
-              "publication_attempted": False,
-              "tag_created": False,
-              "next_action": "verify external publishing settings before creating v1.1.0",
-          }
-          Path("build/release-candidate-verdict/qualification-verdict.json").write_text(
-              json.dumps(payload, indent=2, sort_keys=True) + "\n",
-              encoding="utf-8",
+          mapfile -t records < <(
+            find "$RUNNER_TEMP/release-candidate-qualifications" \
+              -name qualification-record.json -print | sort
           )
-          PY
+          test "${#records[@]}" -eq 3
+          record_args=()
+          for record in "${records[@]}"; do
+            record_args+=(--record "$record")
+          done
+          python scripts/build_release_candidate_qualification.py verdict \
+            "${record_args[@]}" \
+            --candidate-tag "$CANDIDATE_TAG" \
+            --version "$RELEASE_VERSION" \
+            --source-sha "$SOURCE_SHA" \
+            --out build/release-candidate-verdict/qualification-verdict.json
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: release-candidate-verdict
