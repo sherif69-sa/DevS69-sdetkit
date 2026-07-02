@@ -73,9 +73,7 @@ def render_adaptive_diagnosis_html(card: JsonObject) -> str:
     )
     completeness = _text(card.get("diagnostic_completeness"), "insufficient").title()
     confidence = _text(card.get("confidence"), "low").title()
-    failure_class = (
-        _text(card.get("failure_class"), "unknown").replace("_", " ").title()
-    )
+    failure_class = _text(card.get("failure_class"), "unknown").replace("_", " ").title()
     decision = "Review first" if bool(card.get("review_first", True)) else "Actionable"
 
     return f"""<!doctype html>
@@ -127,7 +125,7 @@ code{{overflow-wrap:anywhere}}.action{{font-size:1.05rem;font-weight:700}}
 </section>
 <section>
 <h2>Authority boundary</h2>
-<table><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody>{authority_rows}</tbody></table>
+<table><thead><tr><th>Field</th><th>Value</th></thead><tbody>{authority_rows}</tbody></table>
 </section>
 </body>
 </html>
