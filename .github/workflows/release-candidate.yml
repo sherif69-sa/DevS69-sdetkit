@@ -235,6 +235,7 @@ jobs:
           for record in "${records[@]}"; do
             record_args+=(--record "$record")
           done
+          # Next action: verify external publishing settings before creating v1.1.0.
           python scripts/build_release_candidate_qualification.py verdict \
             "${record_args[@]}" \
             --candidate-tag "$CANDIDATE_TAG" \
