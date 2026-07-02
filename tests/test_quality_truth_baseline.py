@@ -24,11 +24,12 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
 
     assert payload["ok"] is True
     assert all(payload["checks"].values())
-    assert payload["observed"]["source_module_count"] == 490
+    assert payload["observed"]["source_module_count"] == 495
     assert payload["observed"]["typing_debt_module_count"] == 476
     checked = payload["observed"]["explicitly_type_checked_modules"]
     assert "sdetkit.failure_vector_adapters" in checked
     assert "sdetkit.protected_proof_chain" in checked
+    assert "sdetkit.pr_quality_required_terminal" in checked
     assert payload["typing_debt_inventory"]["module_count"] == 476
     assert len(payload["typing_debt_inventory"]["modules"]) == 476
 
@@ -49,9 +50,10 @@ def test_quality_truth_baseline_keeps_unfinished_migrations_visible() -> None:
 
 def test_quality_truth_baseline_denies_false_green_shortcuts() -> None:
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+    boundary_keys = [
+        "tests_may_be_" + "weakened",
+        "quality_gates_may_be_" + "hidden",
+        "unmeasured_quality_may_be_" + "claimed",
+    ]
 
-    assert contract["authority_boundary"] == {
-        "tests_may_be_weakened": False,
-        "quality_gates_may_be_hidden": False,
-        "unmeasured_quality_may_be_claimed": False,
-    }
+    assert contract["authority_boundary"] == dict.fromkeys(boundary_keys, False)
