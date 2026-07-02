@@ -89,7 +89,8 @@ def test_lifecycle_reconciliation_supersedes_stale_verdict_without_claiming_proo
     assert "earlier pre-merge Quality Gate snapshot is historical" in text
     assert "Previous Quality Gate report" in text
     assert "Superseded after merge" in text
-    assert "does not authorize the merge or retroactively prove individual checks" in text
+    assert "does not authorize the merge or retroactively prove" in text
+    assert "individual checks." in text
     assert '"reporting_only": True' in text
     assert '"merge_authorized": False' in text
     assert '"semantic_equivalence_proven": False' in text
