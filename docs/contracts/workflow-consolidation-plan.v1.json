@@ -1,8 +1,8 @@
 {
   "plan_id": "sdetkit.workflow-consolidation.v1",
   "generated_at_utc": "2026-07-02T00:00:00Z",
-  "baseline_main_sha": "326a59c4d1294c1c970a4e6848d4c9487c4278c2",
-  "current_workflow_count": 57,
+  "baseline_main_sha": "af5c030d88fcfff4b1386d71b75d3a724c429435",
+  "current_workflow_count": 58,
   "target_primary_workflow_count": 12,
   "keep_primary": [
     "ci.yml",
@@ -73,6 +73,7 @@
     "maintenance-issue-command-center.yml",
     "operational-readiness-governance-contract.yml",
     "platform-readiness-quality-contract.yml",
+    "pr-quality-lifecycle-reconciliation.yml",
     "pr-quality-publisher.yml",
     "release-candidate.yml",
     "repo-memory-history.yml"
@@ -80,13 +81,15 @@
   "compatibility_bridges": [
     "legacy-required-status-bridge.yml",
     "operational-readiness-governance-contract.yml",
-    "platform-readiness-quality-contract.yml"
+    "platform-readiness-quality-contract.yml",
+    "pr-quality-lifecycle-reconciliation.yml"
   ],
   "reusable_workflows": [
     "advanced-github-actions-reference-64.yml"
   ],
   "trusted_publishers": [
     "first-proof-artifact-publish.yml",
+    "pr-quality-lifecycle-reconciliation.yml",
     "pr-quality-publisher.yml"
   ],
   "classification_policy": {

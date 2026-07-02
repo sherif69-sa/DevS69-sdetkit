@@ -5,15 +5,15 @@
     "patch_application_allowed": false,
     "semantic_equivalence_proven": false
   },
-  "baseline_main_sha": "b6091c6cdee9b1eeb8cbded85292ceb5d460fb3e",
+  "baseline_main_sha": "af5c030d88fcfff4b1386d71b75d3a724c429435",
   "budgets": {
     "maximum_heavy_workflow_count": 8,
     "maximum_metadata_drift_occurrence_count": 18,
     "maximum_metadata_drift_workflow_count": 8,
     "maximum_monolithic_workflow_count": 7,
     "maximum_unpinned_action_count": 0,
-    "maximum_workflow_count": 57,
-    "maximum_write_permission_workflow_count": 32,
+    "maximum_workflow_count": 58,
+    "maximum_write_permission_workflow_count": 33,
     "minimum_reusable_workflow_count": 1,
     "target_primary_workflow_count": 12
   },
@@ -54,6 +54,7 @@
     ".github/workflows/platform-readiness-quality-contract.yml",
     ".github/workflows/pr-helper-bot.yml",
     ".github/workflows/pr-quality-comment.yml",
+    ".github/workflows/pr-quality-lifecycle-reconciliation.yml",
     ".github/workflows/pr-quality-publisher.yml",
     ".github/workflows/pre-commit-autoupdate.yml",
     ".github/workflows/premium-gate.yml",
@@ -99,11 +100,13 @@
     "top-tier-reporting-sample.yml"
   ],
   "reviewed_growth": {
-    "current_workflow_count": 57,
+    "current_workflow_count": 58,
+    "current_write_permission_workflow_count": 33,
     "durable_target_primary_workflow_count": 12,
-    "follow_up": "consume canonical CI artifacts and retire duplicate PR Quality execution",
-    "previous_workflow_count": 56,
-    "reason": "add read-only pre-tag release candidate qualification without publication authority",
+    "follow_up": "absorb lifecycle reconciliation into the trusted publisher when event parity can be preserved",
+    "previous_workflow_count": 57,
+    "previous_write_permission_workflow_count": 32,
+    "reason": "add trusted post-merge PR Quality lifecycle reconciliation without pull-request code execution or comment creation",
     "reviewer": "sherif69-sa"
   },
   "schema_version": "devs69.workflow_topology.v1"

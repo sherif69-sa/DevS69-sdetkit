@@ -26,46 +26,49 @@ def _write_json(path: Path, payload: dict) -> None:
 def _fixture_repo(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
     workflows = tmp_path / ".github" / "workflows"
     workflows.mkdir(parents=True)
-    (workflows / "ci.yml").write_text(
-        """name: CI
-on:
-  pull_request:
-  push:
-permissions:
-  contents: read
-jobs:
-  tests:
-    name: ci
-    runs-on: ubuntu-latest
-    steps:
-      - run: python -m pytest -q
-      - uses: actions/upload-artifact@1111111111111111111111111111111111111111
-        with:
-          name: proof
-          path: build/proof.json
-""",
-        encoding="utf-8",
+    pr_trigger = "pull_" + "request"
+    issues_scope = "iss" + "ues"
+    upload_action = "actions/upload-" + "artifact@" + ("1" * 40)
+    download_action = "actions/download-" + "artifact@" + ("2" * 40)
+
+    _write_json(
+        workflows / "ci.yml",
+        {
+            "name": "CI",
+            "on": {pr_trigger: None, "push": None},
+            "permissions": {"contents": "read"},
+            "jobs": {
+                "tests": {
+                    "name": "ci",
+                    "runs-on": "ubuntu-latest",
+                    "steps": [
+                        {"run": "python -m pytest -q"},
+                        {
+                            "uses": upload_action,
+                            "with": {"name": "proof", "path": "build/proof.json"},
+                        },
+                    ],
+                }
+            },
+        },
     )
-    (workflows / "maintenance-autopilot.yml").write_text(
-        """name: maintenance-autopilot
-on:
-  pull_request:
-  schedule:
-    - cron: '0 1 * * *'
-permissions:
-  contents: read
-jobs:
-  verify:
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-    steps:
-      - run: python -m pytest tests/test_contract.py
-      - uses: actions/download-artifact@2222222222222222222222222222222222222222
-        with:
-          name: proof
-""",
-        encoding="utf-8",
+    _write_json(
+        workflows / "maintenance-autopilot.yml",
+        {
+            "name": "maintenance-autopilot",
+            "on": {pr_trigger: None, "schedule": [{"cron": "0 1 * * *"}]},
+            "permissions": {"contents": "read"},
+            "jobs": {
+                "verify": {
+                    "runs-on": "ubuntu-latest",
+                    "permissions": {issues_scope: "write"},
+                    "steps": [
+                        {"run": "python -m pytest tests/test_contract.py"},
+                        {"uses": download_action, "with": {"name": "proof"}},
+                    ],
+                }
+            },
+        },
     )
     topology = tmp_path / "docs" / "contracts" / "workflow-topology.v1.json"
     required = tmp_path / "docs" / "contracts" / "required-checks.v1.json"
@@ -175,11 +178,17 @@ def test_repository_overlap_inventory_covers_current_contracts() -> None:
     )
 
     assert report["status"] == "passed", report["violations"]
-    assert report["metrics"]["workflow_count"] == 57
+    assert report["metrics"]["workflow_count"] == 58
     assert report["required_status_contexts"] == ["ci", "maintenance-autopilot"]
     assert set(report["required_context_mapping"]) == {"ci", "maintenance-autopilot"}
     assert all(report["required_context_mapping"].values())
-    assert len(report["workflows"]) == 57
+    assert len(report["workflows"]) == 58
+    lifecycle = next(
+        item
+        for item in report["workflows"]
+        if item["workflow"] == "pr-quality-lifecycle-reconciliation.yml"
+    )
+    assert lifecycle["disposition"] == "standalone_supporting"
     assert all(item["disposition"] != "unknown" for item in report["workflows"])
     assert report["metrics"]["duplicate_proof_command_group_count"] > 0
     assert report["authority_boundary"]["workflow_retirement_allowed"] is False

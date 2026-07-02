@@ -39,15 +39,19 @@ def test_repository_consolidation_plan_has_complete_parity() -> None:
 
     assert report["status"] == "passed", report["violations"]
     assert report["metrics"] == {
-        "workflow_count": 57,
+        "workflow_count": 58,
         "primary_workflow_count": 12,
         "merge_bundle_workflow_count": 24,
         "retirement_candidate_workflow_count": 7,
-        "standalone_supporting_workflow_count": 14,
-        "compatibility_bridge_workflow_count": 3,
+        "standalone_supporting_workflow_count": 15,
+        "compatibility_bridge_workflow_count": 4,
         "reusable_workflow_count": 1,
-        "trusted_publisher_workflow_count": 2,
+        "trusted_publisher_workflow_count": 3,
     }
+    lifecycle = report["classifications"]["pr-quality-lifecycle-reconciliation.yml"]
+    assert lifecycle["disposition"] == "standalone_supporting"
+    assert lifecycle["compatibility_bridge"] is True
+    assert lifecycle["trusted_publisher"] is True
     assert report["authority_boundary"]["workflow_retirement_allowed"] is False
     assert report["authority_boundary"]["merge_authorized"] is False
 
@@ -98,7 +102,7 @@ def test_stale_declared_workflow_count_is_rejected() -> None:
     module = _load_checker()
     topology, plan = _contracts()
     broken = deepcopy(plan)
-    broken["current_workflow_count"] = 56
+    broken["current_workflow_count"] = 57
 
     report = module.evaluate_plan(topology, broken)
 
