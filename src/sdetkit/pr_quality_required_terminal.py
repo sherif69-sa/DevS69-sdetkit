@@ -18,6 +18,14 @@ from sdetkit._pr_quality_required_terminal_snapshot import (
     time,
 )
 
+__all__ = [
+    "classify_required_terminal_snapshot",
+    "collect_and_merge_terminal_snapshot_from_environment",
+    "collect_required_terminal_snapshot",
+    "merge_required_terminal_snapshot_into_checks",
+    "time",
+]
+
 _snapshot_covers_expected = snapshot_covers_expected
 
 
