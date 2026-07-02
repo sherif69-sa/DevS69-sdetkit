@@ -90,9 +90,7 @@ def test_collection_failure_fails_closed() -> None:
     )
 
     assert snapshot["actionable"] is True
-    assert snapshot["actionable_reasons"] == [
-        "code-scanning alert collection is unavailable"
-    ]
+    assert snapshot["actionable_reasons"] == ["code-scanning alert collection is unavailable"]
     assert "API denied" in markdown
 
 
