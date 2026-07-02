@@ -175,11 +175,18 @@ def test_repository_overlap_inventory_covers_current_contracts() -> None:
     )
 
     assert report["status"] == "passed", report["violations"]
-    assert report["metrics"]["workflow_count"] == 57
+    assert report["metrics"]["workflow_count"] == 58
     assert report["required_status_contexts"] == ["ci", "maintenance-autopilot"]
     assert set(report["required_context_mapping"]) == {"ci", "maintenance-autopilot"}
     assert all(report["required_context_mapping"].values())
-    assert len(report["workflows"]) == 57
+    assert len(report["workflows"]) == 58
+    lifecycle = next(
+        item
+        for item in report["workflows"]
+        if item["workflow"] == "pr-quality-lifecycle-reconciliation.yml"
+    )
+    assert lifecycle["disposition"] == "standalone_supporting"
+    assert lifecycle["compatibility_bridge"] is True
     assert all(item["disposition"] != "unknown" for item in report["workflows"])
     assert report["metrics"]["duplicate_proof_command_group_count"] > 0
     assert report["authority_boundary"]["workflow_retirement_allowed"] is False
