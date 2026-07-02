@@ -11,9 +11,7 @@ WORKFLOW = ROOT / ".github" / "workflows" / "release-candidate.yml"
 
 
 def _module():
-    spec = importlib.util.spec_from_file_location(
-        "build_release_candidate_qualification", SCRIPT
-    )
+    spec = importlib.util.spec_from_file_location("build_release_candidate_qualification", SCRIPT)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -46,9 +44,7 @@ def _evidence(tmp_path: Path) -> dict[str, Path]:
     paths = {}
     for name in ("gate_fast", "gate_release", "doctor"):
         path = tmp_path / f"{name}.json"
-        path.write_text(
-            json.dumps({"status": "passed", "name": name}) + "\n", encoding="utf-8"
-        )
+        path.write_text(json.dumps({"status": "passed", "name": name}) + "\n", encoding="utf-8")
         paths[name] = path
     return paths
 
@@ -86,9 +82,7 @@ def test_python_record_binds_exact_wheel_and_evidence(tmp_path: Path) -> None:
 
 def test_verdict_requires_exact_python_set_and_same_wheel(tmp_path: Path) -> None:
     module = _module()
-    records = [
-        _record(module, tmp_path, version) for version in ("3.10", "3.11", "3.12")
-    ]
+    records = [_record(module, tmp_path, version) for version in ("3.10", "3.11", "3.12")]
 
     verdict = module.build_verdict(
         records=records,
@@ -125,9 +119,7 @@ def test_verdict_rejects_missing_python_record(tmp_path: Path) -> None:
 
 def test_verdict_rejects_wheel_digest_drift(tmp_path: Path) -> None:
     module = _module()
-    records = [
-        _record(module, tmp_path, version) for version in ("3.10", "3.11", "3.12")
-    ]
+    records = [_record(module, tmp_path, version) for version in ("3.10", "3.11", "3.12")]
     drifted = deepcopy(records[1])
     drifted["wheel"] = dict(drifted["wheel"])
     drifted["wheel"]["sha256"] = "d" * 64
@@ -148,9 +140,7 @@ def test_verdict_rejects_wheel_digest_drift(tmp_path: Path) -> None:
 
 def test_verdict_rejects_publication_authority_claim(tmp_path: Path) -> None:
     module = _module()
-    records = [
-        _record(module, tmp_path, version) for version in ("3.10", "3.11", "3.12")
-    ]
+    records = [_record(module, tmp_path, version) for version in ("3.10", "3.11", "3.12")]
     records[0]["publish_authorized"] = True
 
     try:
@@ -175,6 +165,10 @@ def test_workflow_aggregates_exact_matrix_records() -> None:
     assert "pattern: release-candidate-qualification-py*" in workflow
     assert "mapfile -t records" in workflow
     assert 'test "${#records[@]}" -eq 3' in workflow
-    assert "scripts/build_release_candidate_qualification.py verdict" in workflow
+    assert 'python "$builder" verdict' in workflow
+    assert len(workflow.splitlines()) < 250
+    assert "qualification-verdict:" in workflow
+    verdict = workflow.split("  qualification-verdict:", 1)[1]
+    assert "actions/checkout@" not in verdict
     assert "pypa/gh-action-pypi-publish" not in workflow
     assert "softprops/action-gh-release" not in workflow
