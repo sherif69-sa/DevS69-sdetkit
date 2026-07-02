@@ -3,12 +3,8 @@
 name: PR Quality Lifecycle Reconciliation
 
 on:
-  pull_request_target:
-    types: [closed]
   push:
     branches: [main]
-    paths:
-      - ".github/workflows/pr-quality-lifecycle-reconciliation.yml"
   workflow_dispatch:
     inputs:
       pr_number:
@@ -19,18 +15,11 @@ on:
 permissions: {}
 
 concurrency:
-  group: >-
-    pr-quality-lifecycle-${{
-      github.event.pull_request.number || inputs.pr_number || github.run_id
-    }}
+  group: pr-quality-lifecycle-${{ inputs.pr_number || github.sha || github.run_id }}
   cancel-in-progress: false
 
 jobs:
   reconcile:
-    if: >-
-      (github.event_name == 'pull_request_target' && github.event.pull_request.merged == true) ||
-      github.event_name == 'push' ||
-      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -42,7 +31,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
-          EVENT_PR_NUMBER: ${{ github.event.pull_request.number }}
           INPUT_PR_NUMBER: ${{ inputs.pr_number }}
         run: |
           set -euo pipefail
@@ -59,7 +47,6 @@ jobs:
 
           repository = os.environ["REPOSITORY"]
           event_name = os.environ["EVENT_NAME"]
-          event_pr_number = os.environ.get("EVENT_PR_NUMBER", "").strip()
           input_pr_number = os.environ.get("INPUT_PR_NUMBER", "").strip()
 
           def gh_json(*args: str, method: str = "GET", payload: dict[str, Any] | None = None) -> Any:
@@ -89,10 +76,7 @@ jobs:
                   raise ValueError("pull request number must be positive")
               return value
 
-          if event_name == "pull_request_target":
-              candidates = [positive_pr_number(event_pr_number)]
-              source = "merged_pull_request_event"
-          elif input_pr_number:
+          if input_pr_number:
               candidates = [positive_pr_number(input_pr_number)]
               source = "manual_recovery"
           else:
@@ -104,7 +88,7 @@ jobs:
                   for row in rows
                   if isinstance(row, dict) and row.get("merged_at")
               ]
-              source = "trusted_bootstrap_scan"
+              source = "trusted_main_push" if event_name == "push" else "trusted_recovery_scan"
 
           result: dict[str, Any] = {
               "schema_version": "sdetkit.pr_quality_lifecycle_reconciliation.v1",
