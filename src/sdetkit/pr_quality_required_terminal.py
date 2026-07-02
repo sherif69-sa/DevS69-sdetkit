@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from typing import Any
 
 from sdetkit._pr_quality_required_terminal_merge import (
     merge_required_terminal_snapshot_into_checks,
@@ -27,6 +28,32 @@ __all__ = [
 ]
 
 
+def _required_context_contract_path() -> Path:
+    configured = _string(os.environ.get("SDETKIT_REQUIRED_CHECKS_CONTRACT"))
+    return Path(configured or "docs/contracts/required-checks.v1.json")
+
+
+def _required_contexts_from_contract(path: Path) -> list[str]:
+    try:
+        payload: Any = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    if not isinstance(payload, dict):
+        return []
+    return _context_list(payload.get("contexts", []))
+
+
+def _resolve_required_contexts(checks_payload: JsonObject) -> tuple[list[str], str, str]:
+    direct = _context_list(checks_payload.get("required_contexts", []))
+    if direct:
+        return direct, "checks_payload", ""
+    contract_path = _required_context_contract_path()
+    fallback = _required_contexts_from_contract(contract_path)
+    if fallback:
+        return fallback, "repository_contract", str(contract_path)
+    return [], "unavailable", str(contract_path)
+
+
 def collect_and_merge_terminal_snapshot_from_environment(
     *,
     checks_json: Path,
@@ -47,7 +74,14 @@ def collect_and_merge_terminal_snapshot_from_environment(
 
     payload = json.loads(checks_json.read_text(encoding="utf-8"))
     checks_payload = payload if isinstance(payload, dict) else {}
-    expected_contexts = _context_list(checks_payload.get("required_contexts", []))
+    expected_contexts, required_contexts_source, contract_path = _resolve_required_contexts(
+        checks_payload
+    )
+    checks_payload["required_contexts"] = expected_contexts
+    checks_payload["required_contexts_source"] = required_contexts_source
+    if contract_path:
+        checks_payload["required_contexts_contract_path"] = contract_path
+
     snapshot_path = out_dir / "terminal-workflow-snapshot.json"
     snapshot: JsonObject = {}
     if snapshot_path.exists():
@@ -79,6 +113,9 @@ def collect_and_merge_terminal_snapshot_from_environment(
                 2,
             ),
         )
+        snapshot["required_contexts_source"] = required_contexts_source
+        if contract_path:
+            snapshot["required_contexts_contract_path"] = contract_path
         snapshot_path.parent.mkdir(parents=True, exist_ok=True)
         snapshot_path.write_text(
             json.dumps(snapshot, indent=2, sort_keys=True) + "\n",
