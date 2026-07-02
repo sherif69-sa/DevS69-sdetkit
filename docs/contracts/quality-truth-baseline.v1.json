@@ -35,9 +35,9 @@
     "blanket_package_suppression_present": true,
     "blanket_module_pattern": "sdetkit.*",
     "new_unrecorded_suppression_allowed": false,
-    "source_module_count": 496,
-    "typing_debt_module_count": 477,
-    "typing_debt_inventory_sha256": "39935795c281ea3441634cf9e6d26ddb3d109791e7a9d6e1a2a36e8d8f1f3dcd",
+    "source_module_count": 497,
+    "typing_debt_module_count": 478,
+    "typing_debt_inventory_sha256": "17724720314e09ed03953dea8a6982404a1402a6d4c94bac14a77140617f7d14",
     "typing_debt_artifact_path": "build/quality/typing-debt-inventory.json",
     "explicitly_type_checked_modules": [
       "sdetkit._pr_quality_required_terminal_checks",
