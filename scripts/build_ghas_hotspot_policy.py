@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 from collections import Counter
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -40,8 +40,11 @@ def _age(alert: dict[str, Any], now: datetime) -> int:
     except ValueError:
         return 0
     if value.tzinfo is None:
-        value = value.replace(tzinfo=UTC)
-    return max(0, int((now - value.astimezone(UTC)).total_seconds() // 86400))
+        value = value.replace(tzinfo=timezone.utc)
+    return max(
+        0,
+        int((now - value.astimezone(timezone.utc)).total_seconds() // 86400),
+    )
 
 
 def summarize(alerts: list[dict[str, Any]], now: datetime) -> dict[str, Any]:
@@ -97,7 +100,7 @@ def build_policy(payload: Any, now: datetime | None = None) -> tuple[dict[str, A
     data = _dict(payload)
     status = str(data.get("collection_status") or "unavailable")
     alerts = [_dict(item) for item in _list(data.get("alerts")) if _dict(item)]
-    current = now or datetime.now(UTC)
+    current = now or datetime.now(timezone.utc)
     fixture_alerts = [item for item in alerts if is_fixture_path(alert_path(item))]
     production_alerts = [item for item in alerts if not is_fixture_path(alert_path(item))]
     reasons: list[str] = []
