@@ -81,10 +81,7 @@ def test_workflow_uses_one_bot_managed_tracker_and_stays_below_heavy_budget() ->
     assert "python scripts/build_dependency_radar_policy.py" in workflow
     assert "ACTIONABLE: ${{ steps.radar.outputs.actionable }}" in workflow
     assert "const rollingTitle = '📡 Dependency radar follow-up';" in workflow
-    assert (
-        "const generatedBodyMarker = '<!-- sdetkit:dependency-radar-tracker:v1 -->';"
-        in workflow
-    )
+    assert "const generatedBodyMarker = '<!-- sdetkit:dependency-radar-tracker:v1 -->';" in workflow
     assert "issue.user?.login === 'github-actions[bot]'" in workflow
     assert "issue.title.startsWith('📡 Dependency radar + runtime watchlist')" in workflow
     assert "state_reason: 'completed'" in workflow
