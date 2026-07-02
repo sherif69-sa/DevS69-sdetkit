@@ -22,7 +22,7 @@ semantic_equivalence_proven=false
 remaining_group_workflows_pending=true
 
 lifecycle_workflow=.github/workflows/pr-quality-lifecycle-reconciliation.yml
-lifecycle_triggers=["pull_request_target:closed", "workflow_dispatch", "trusted_bootstrap_push"]
+lifecycle_triggers=["trusted_main_push", "workflow_dispatch"]
 lifecycle_write_scopes=["issues: write"]
 lifecycle_pull_request_read_required=true
 lifecycle_checkout_allowed=false
@@ -38,7 +38,8 @@ lifecycle_semantic_equivalence_proven=false
 
 This approval is limited to moving PR Quality comment publication into the trusted publisher
 workflow and reconciling the existing bot-owned Quality Gate comment after GitHub records a pull
-request as merged. The lifecycle workflow may update an existing canonical bot comment, but it may
+request as merged. The lifecycle workflow runs from the trusted default branch after `main` changes
+or through explicit manual recovery. It may update an existing canonical bot comment, but it may
 not create a comment, checkout pull-request code, execute repository code, authorize a merge, or
 claim that the merged state retroactively proves individual checks. It does not approve permission
 changes for contributor onboarding, maintenance autopilot, or PR helper workflows.
