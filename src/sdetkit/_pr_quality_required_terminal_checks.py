@@ -56,15 +56,18 @@ def merge_required_terminal_snapshot_into_checks(
             records.append(authoritative)
 
     if snapshot.get("status") in {"incomplete", "stale"}:
+        genuine_required_failure = bool(snapshot.get("failed_workflow_names"))
         records.append(
             {
                 "name": BLOCKER_NAME,
-                "status": "completed",
-                "conclusion": "failure",
+                "status": "queued" if genuine_required_failure else "completed",
+                "conclusion": "" if genuine_required_failure else "failure",
                 "head_sha": _string(snapshot.get("expected_head_sha")),
                 "required": True,
                 "log": incomplete_reason(snapshot),
                 "terminal_snapshot_source": True,
+                "terminal_snapshot_incomplete": True,
+                "synthetic_failure": not genuine_required_failure,
             }
         )
 
