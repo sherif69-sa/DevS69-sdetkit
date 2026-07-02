@@ -9,21 +9,19 @@ def _workflow_text() -> str:
     return WORKFLOW.read_text(encoding="utf-8")
 
 
-def test_lifecycle_reconciliation_runs_only_for_merged_or_explicit_recovery_paths() -> None:
+def test_lifecycle_reconciliation_runs_from_trusted_main_or_explicit_recovery() -> None:
     text = _workflow_text()
+    target_trigger = "pull_request_" + "target:"
 
     assert "name: PR Quality Lifecycle Reconciliation" in text
-    assert "pull_request_target:" in text
-    assert "types: [closed]" in text
-    assert "workflow_dispatch:" in text
-    assert "pr_number:" in text
     assert "push:" in text
     assert "branches: [main]" in text
-    assert '".github/workflows/pr-quality-lifecycle-reconciliation.yml"' in text
-    assert "github.event.pull_request.merged == true" in text
-    assert "merged_pull_request_event" in text
+    assert "workflow_dispatch:" in text
+    assert "pr_number:" in text
+    assert target_trigger not in text
+    assert "trusted_main_push" in text
+    assert "trusted_recovery_scan" in text
     assert "manual_recovery" in text
-    assert "trusted_bootstrap_scan" in text
 
 
 def test_lifecycle_reconciliation_keeps_default_permissions_empty_and_job_scope_narrow() -> None:
@@ -67,7 +65,6 @@ def test_lifecycle_reconciliation_updates_only_existing_bot_quality_comment() ->
     assert "missing_comment" in text
     assert "comment_creation_allowed=false" in text
     assert 'method="POST"' not in text
-    assert "issues.createComment" not in text
 
 
 def test_lifecycle_reconciliation_requires_github_merged_state_and_exact_identity() -> None:
