@@ -63,6 +63,7 @@ def test_lifecycle_reconciliation_updates_only_existing_bot_quality_comment() ->
     assert 'str(row.get("body") or "").startswith("### SDET Quality Gate")' in text
     assert "repos/{repository}/issues/comments/{comment_id}" in text
     assert 'method="PATCH"' in text
+    assert 'command.extend(["--input", "-"])' in text
     assert "missing_comment" in text
     assert "comment_creation_allowed=false" in text
     assert 'method="POST"' not in text
