@@ -33,8 +33,6 @@ jobs:
 
       - name: Generate dependency radar artifacts
         id: radar
-        env:
-          GITHUB_OUTPUT_FILE: ${{ github.output }}
         run: |
           set -euo pipefail
           mkdir -p build
