@@ -4,7 +4,7 @@ import json
 import sys
 
 from sdetkit import _failed_check_log_collection_core as _core
-from sdetkit.pr_quality_terminal_workflows import (
+from sdetkit.pr_quality_required_terminal import (
     collect_and_merge_terminal_snapshot_from_environment,
 )
 
