@@ -48,9 +48,7 @@ def _wheel_from_manifest(manifest: dict[str, Any]) -> dict[str, object]:
     if not isinstance(rows, list):
         raise ValueError("distribution manifest files must be a list")
     wheels = [
-        row
-        for row in rows
-        if isinstance(row, dict) and str(row.get("name", "")).endswith(".whl")
+        row for row in rows if isinstance(row, dict) and str(row.get("name", "")).endswith(".whl")
     ]
     if len(wheels) != 1:
         raise ValueError("distribution manifest must contain exactly one wheel")
@@ -75,9 +73,7 @@ def build_python_record(
 ) -> dict[str, object]:
     if python_version not in SUPPORTED_PYTHON_VERSIONS:
         raise ValueError(f"unsupported qualification Python version: {python_version}")
-    runtime = (
-        runtime_python_version or f"{sys.version_info.major}.{sys.version_info.minor}"
-    )
+    runtime = runtime_python_version or f"{sys.version_info.major}.{sys.version_info.minor}"
     if runtime != python_version:
         raise ValueError(
             "qualification runtime does not match matrix version: "
@@ -106,8 +102,7 @@ def build_python_record(
         "python_version": python_version,
         "wheel": _wheel_from_manifest(manifest),
         "evidence_artifacts": [
-            _file_evidence(name, evidence_paths[name])
-            for name in sorted(evidence_paths)
+            _file_evidence(name, evidence_paths[name]) for name in sorted(evidence_paths)
         ],
         "clean_room_install": True,
         "installed_wheel_contract": "passed",
@@ -128,9 +123,7 @@ def build_verdict(
     if candidate_tag != f"v{version}":
         raise ValueError("candidate tag and version do not match")
     if not SHA_RE.fullmatch(source_sha):
-        raise ValueError(
-            "source SHA must be a 40-character lowercase hexadecimal value"
-        )
+        raise ValueError("source SHA must be a 40-character lowercase hexadecimal value")
     if len(records) != len(SUPPORTED_PYTHON_VERSIONS):
         raise ValueError("qualification verdict requires exactly three Python records")
 
@@ -148,9 +141,7 @@ def build_verdict(
         if record.get("source_sha") != source_sha:
             raise ValueError("qualification record source SHA mismatch")
         if record.get("external_settings_verified") is not False:
-            raise ValueError(
-                "qualification record must not claim external settings verification"
-            )
+            raise ValueError("qualification record must not claim external settings verification")
         if record.get("publish_authorized") is not False:
             raise ValueError("qualification record must not authorize publication")
         if record.get("publication_attempted") is not False:
@@ -179,9 +170,7 @@ def build_verdict(
         artifacts = record.get("evidence_artifacts")
         if not isinstance(artifacts, list):
             raise ValueError("qualification record evidence artifacts are missing")
-        names = {
-            str(item.get("name", "")) for item in artifacts if isinstance(item, dict)
-        }
+        names = {str(item.get("name", "")) for item in artifacts if isinstance(item, dict)}
         if names != {"gate_fast", "gate_release", "doctor"}:
             raise ValueError("qualification record evidence artifact set mismatch")
 
@@ -191,9 +180,7 @@ def build_verdict(
             f"expected={list(SUPPORTED_PYTHON_VERSIONS)} actual={sorted(observed_versions)}"
         )
     if len(wheel_identities) != 1:
-        raise ValueError(
-            "Python qualification records did not test the same exact wheel"
-        )
+        raise ValueError("Python qualification records did not test the same exact wheel")
 
     wheel_name, wheel_sha256, wheel_size = next(iter(wheel_identities))
     return {
@@ -224,15 +211,11 @@ def build_verdict(
 
 def _write_json(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Build release-candidate qualification evidence"
-    )
+    parser = argparse.ArgumentParser(description="Build release-candidate qualification evidence")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     record = subparsers.add_parser("record")
