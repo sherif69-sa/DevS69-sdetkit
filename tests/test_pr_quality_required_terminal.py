@@ -68,6 +68,22 @@ def test_missing_required_context_contract_fails_closed() -> None:
     assert result["collection_errors"] == ["required check contexts unavailable"]
 
 
+def test_non_required_pending_workflow_does_not_hold_required_snapshot_open() -> None:
+    result = classify(
+        [
+            run("CI"),
+            run("Advanced Reference", status="in_progress", conclusion=None, run_id=2),
+        ],
+        expected=["ci"],
+    )
+
+    assert result["status"] == "passed"
+    assert result["pending_workflow_names"] == []
+    assert result["ignored_non_required_workflow_names"] == ["Advanced Reference"]
+    assert result["workflow_count"] == 1
+    assert result["observed_workflow_count"] == 2
+
+
 def test_publisher_waits_for_late_required_workflow_failure(monkeypatch) -> None:
     security = run("Security", run_id=1)
     failed_ci = run("CI", conclusion="failure", run_id=2)
@@ -100,6 +116,7 @@ def test_publisher_waits_for_late_required_workflow_failure(monkeypatch) -> None
     assert result["missing_expected_contexts"] == []
     assert result["stable_poll_count"] == 2
     assert result["terminal_evidence_complete"] is True
+    assert result["ignored_non_required_workflow_names"] == ["Security"]
 
 
 def test_terminal_failure_replaces_pending_duplicates_and_preserves_name() -> None:
@@ -142,7 +159,7 @@ def test_terminal_failure_replaces_pending_duplicates_and_preserves_name() -> No
     assert merged["terminal_check_snapshot_complete"] is True
 
 
-def test_incomplete_blocker_lists_failed_pending_and_missing_names() -> None:
+def test_incomplete_snapshot_is_waiting_and_lists_only_required_evidence() -> None:
     result = classify(
         [
             run("CI", conclusion="failure"),
@@ -155,16 +172,20 @@ def test_incomplete_blocker_lists_failed_pending_and_missing_names() -> None:
         {"check_runs": [], "required_contexts": ["ci", "maintenance-autopilot"]},
         result,
     )
-    blocker = merged["check_runs"][-1]
+    waiting = merged["check_runs"][-1]
 
     assert result["status"] == "incomplete"
     assert result["failed_workflow_names"] == ["CI"]
-    assert result["pending_workflow_names"] == ["Advanced Reference"]
+    assert result["pending_workflow_names"] == []
+    assert result["ignored_non_required_workflow_names"] == ["Advanced Reference"]
     assert result["missing_expected_contexts"] == ["maintenance-autopilot"]
-    assert blocker["name"] == "PR Quality terminal workflow snapshot"
-    assert "failed workflows: CI" in blocker["log"]
-    assert "pending workflows: Advanced Reference" in blocker["log"]
-    assert "missing required checks: maintenance-autopilot" in blocker["log"]
+    assert waiting["name"] == "PR Quality terminal workflow snapshot"
+    assert waiting["status"] == "queued"
+    assert waiting["conclusion"] == ""
+    assert waiting["terminal_snapshot_incomplete"] is True
+    assert "failed workflows: CI" in waiting["log"]
+    assert "missing required checks: maintenance-autopilot" in waiting["log"]
+    assert "Advanced Reference" not in waiting["log"]
 
 
 def test_environment_hook_uses_required_contexts_and_writes_exact_names(
@@ -206,9 +227,53 @@ def test_environment_hook_uses_required_contexts_and_writes_exact_names(
 
     assert result == expected_snapshot
     assert captured["expected_contexts"] == ["ci", "maintenance-autopilot"]
+    assert merged["required_contexts_source"] == "checks_payload"
     assert merged["terminal_pending_workflow_names"] == ["maintenance-autopilot"]
     assert merged["terminal_missing_required_contexts"] == ["ci"]
     assert merged["terminal_check_snapshot_complete"] is False
+
+
+def test_environment_hook_falls_back_to_versioned_required_check_contract(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+    monkeypatch.setenv("HEAD_SHA", "head")
+    monkeypatch.setenv("PR_NUMBER", "7")
+    monkeypatch.setenv("GH_TOKEN", "token")
+    contract = tmp_path / "required-checks.json"
+    contract.write_text(
+        json.dumps({"contexts": ["ci", "maintenance-autopilot"]}),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("SDETKIT_REQUIRED_CHECKS_CONTRACT", str(contract))
+    expected_snapshot = classify(
+        [run("CI"), run("maintenance-autopilot", run_id=2)],
+        expected=["ci", "maintenance-autopilot"],
+    )
+    captured: dict = {}
+
+    def fake_collect(**kwargs):
+        captured.update(kwargs)
+        return expected_snapshot
+
+    monkeypatch.setattr(module, "collect_required_terminal_snapshot", fake_collect)
+    checks = tmp_path / "checks.json"
+    checks.write_text(json.dumps({"check_runs": [], "required_contexts": []}), encoding="utf-8")
+
+    result = module.collect_and_merge_terminal_snapshot_from_environment(
+        checks_json=checks,
+        out_dir=tmp_path / "out",
+    )
+    merged = json.loads(checks.read_text(encoding="utf-8"))
+
+    assert result is not None
+    assert captured["expected_contexts"] == ["ci", "maintenance-autopilot"]
+    assert merged["required_contexts"] == ["ci", "maintenance-autopilot"]
+    assert merged["required_contexts_source"] == "repository_contract"
+    assert merged["required_contexts_contract_path"] == str(contract)
+    assert result["required_contexts_source"] == "repository_contract"
 
 
 def test_failed_check_collection_routes_through_required_terminal_layer() -> None:
