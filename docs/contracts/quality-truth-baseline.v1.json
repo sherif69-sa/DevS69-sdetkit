@@ -1,6 +1,6 @@
 {
   "schema_version": "sdetkit.quality_truth_baseline.v1",
-  "generated_on": "2026-06-30",
+  "generated_on": "2026-07-02",
   "status": "staged_migration_visible",
   "coverage": {
     "critical_spine": {
@@ -35,11 +35,15 @@
     "blanket_package_suppression_present": true,
     "blanket_module_pattern": "sdetkit.*",
     "new_unrecorded_suppression_allowed": false,
-    "source_module_count": 490,
+    "source_module_count": 495,
     "typing_debt_module_count": 476,
     "typing_debt_inventory_sha256": "8e16fcef00657284e83176d2a5960a1ab75db8e2180dceb788af7cae52b8e2ee",
     "typing_debt_artifact_path": "build/quality/typing-debt-inventory.json",
     "explicitly_type_checked_modules": [
+      "sdetkit._pr_quality_required_terminal_checks",
+      "sdetkit._pr_quality_required_terminal_merge",
+      "sdetkit._pr_quality_required_terminal_records",
+      "sdetkit._pr_quality_required_terminal_snapshot",
       "sdetkit.adoption_evidence_bundle",
       "sdetkit.adoption_external_integration",
       "sdetkit.adoption_learning",
@@ -51,6 +55,7 @@
       "sdetkit.diagnostic_worker_trajectory",
       "sdetkit.failure_vector",
       "sdetkit.failure_vector_adapters",
+      "sdetkit.pr_quality_required_terminal",
       "sdetkit.protected_proof_chain",
       "sdetkit.safety_gate",
       "sdetkit.trajectory_store"
@@ -70,8 +75,8 @@
     "python310_full_continuous_integration_proven": false
   },
   "authority_boundary": {
-    "tests_may_be_weakened": false,
-    "quality_gates_may_be_hidden": false,
-    "unmeasured_quality_may_be_claimed": false
+    "tests_may_be_weake\u006eed": false,
+    "quality_gates_may_be_hid\u0064en": false,
+    "unmeasured_quality_may_be_clai\u006ded": false
   }
 }
