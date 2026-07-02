@@ -81,9 +81,7 @@ def build_policy_and_markdown(
         for package in route_map:
             commands = package.get("validation_commands") or ["n/a"]
             backups = ", ".join(commands[:2]) or "n/a"
-            lines.append(
-                f"- **{package['name']}** → primary `{commands[0]}`; backups `{backups}`"
-            )
+            lines.append(f"- **{package['name']}** → primary `{commands[0]}`; backups `{backups}`")
     else:
         lines.append("- No validation routes were emitted for this run.")
 
