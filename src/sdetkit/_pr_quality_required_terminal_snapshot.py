@@ -41,7 +41,9 @@ def _required_workflow_rows(
     rows: list[JsonObject],
     expected_contexts: list[str],
 ) -> list[JsonObject]:
-    expected = {base.canonical_context(item) for item in _context_list(expected_contexts)}
+    expected = {
+        base.canonical_context(item) for item in _context_list(expected_contexts)
+    }
     latest: dict[str, JsonObject] = {}
     for row in rows:
         key = base.canonical_context(row.get("name"))
@@ -73,7 +75,9 @@ def _missing_expected_contexts(
 ) -> list[str]:
     observed = {base.canonical_context(row.get("name")) for row in rows}
     return [
-        context for context in expected_contexts if base.canonical_context(context) not in observed
+        context
+        for context in expected_contexts
+        if base.canonical_context(context) not in observed
     ]
 
 
@@ -108,7 +112,9 @@ def classify_required_terminal_snapshot(
     )
     missing = _missing_expected_contexts(required_rows, expected)
     required_contexts_available = bool(expected)
-    evidence_complete = bool(required_rows) and required_contexts_available and not missing
+    evidence_complete = (
+        bool(required_rows) and required_contexts_available and not missing
+    )
     if snapshot["status"] != "stale" and not evidence_complete:
         snapshot["status"] = "incomplete"
 
