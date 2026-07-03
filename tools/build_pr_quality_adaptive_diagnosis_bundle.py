@@ -8,15 +8,16 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
+from sdetkit.pr_quality_adaptive_diagnosis import (
+    ADAPTIVE_DIAGNOSIS_BUNDLE_MANIFEST_SCHEMA_VERSION,
+    AUTHORITY_EXPECTATIONS,
+    adaptive_diagnosis_card,
+    build_export,
+    serialize_export,
+    validate_authority,
+)
+
 JsonObject = dict[str, Any]
-AUTHORITY_EXPECTATIONS = {
-    "reporting_only": True,
-    "automation_allowed": False,
-    "patch_application_allowed": False,
-    "security_dismissal_allowed": False,
-    "merge_authorized": False,
-    "semantic_equivalence_proven": False,
-}
 ARTIFACT_NAMES = (
     "adaptive-diagnosis.html",
     "adaptive-diagnosis.md",
@@ -42,31 +43,6 @@ MARKDOWN_RENDERER = _load_sibling(
     "adaptive_diagnosis_markdown_renderer",
     "render_pr_quality_adaptive_diagnosis_markdown.py",
 )
-JSON_EXPORTER = _load_sibling(
-    "adaptive_diagnosis_json_exporter",
-    "export_pr_quality_adaptive_diagnosis_json.py",
-)
-
-
-def _as_dict(value: object) -> JsonObject:
-    return value if isinstance(value, dict) else {}
-
-
-def adaptive_diagnosis_card(model: JsonObject) -> JsonObject:
-    card = _as_dict(model.get("adaptive_diagnosis"))
-    if card:
-        return card
-    return _as_dict(_as_dict(model.get("primary_failure")).get("adaptive_diagnosis"))
-
-
-def validate_authority(card: JsonObject) -> None:
-    mismatches = [
-        f"{field} expected {expected!r}, observed {card.get(field)!r}"
-        for field, expected in AUTHORITY_EXPECTATIONS.items()
-        if card.get(field) is not expected
-    ]
-    if mismatches:
-        raise ValueError("unsafe adaptive diagnosis authority: " + "; ".join(mismatches))
 
 
 def _artifact_record(path: Path) -> JsonObject:
@@ -99,15 +75,14 @@ def build_bundle(model: JsonObject, out_dir: Path) -> JsonObject:
         encoding="utf-8",
         newline="\n",
     )
-    exported = JSON_EXPORTER.build_export(card)
     json_path.write_text(
-        JSON_EXPORTER.serialize_export(exported),
+        serialize_export(build_export(card)),
         encoding="utf-8",
         newline="\n",
     )
 
     manifest = {
-        "schema_version": "sdetkit.adaptive_diagnosis_bundle_manifest.v1",
+        "schema_version": ADAPTIVE_DIAGNOSIS_BUNDLE_MANIFEST_SCHEMA_VERSION,
         "status": "passed",
         "authority_validated": True,
         "authority": dict(AUTHORITY_EXPECTATIONS),
