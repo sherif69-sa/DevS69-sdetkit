@@ -6,7 +6,6 @@ from pathlib import Path
 
 from sdetkit.pr_quality_adaptive_diagnosis import (
     ADAPTIVE_DIAGNOSIS_EXPORT_SCHEMA_VERSION,
-    build_export,
     export_from_model,
     serialize_export,
 )
