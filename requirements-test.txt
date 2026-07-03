@@ -13,4 +13,4 @@ mutmut==3.6.0
 
 # Security scanner transitive dependency floors
 idna==3.18
-filelock==3.29.4
+filelock==3.29.5
