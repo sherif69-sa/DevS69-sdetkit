@@ -54,17 +54,6 @@ MARKDOWN_AUTHORITY_RE = re.compile(
     rf"(?im)^\s*(?:[-*]\s*)?(?P<key>{'|'.join(sorted(AUTHORITY_KEYS))})"
     r"\s*[:=]\s*(?P<value>[^\n]+)$"
 )
-REPOSITORY_IDENTITY_KEYS = (
-    "repository_full_name",
-    "repo_full_name",
-    "repository",
-)
-COMMIT_IDENTITY_KEYS = (
-    "current_head_sha",
-    "source_head_sha",
-    "head_sha",
-    "commit_sha",
-)
 
 DECISION_BOUNDARY: dict[str, bool] = {
     "automation_allowed": False,
@@ -156,46 +145,7 @@ def _identity(repository: str, commit_sha: str) -> tuple[str, str]:
     return repository_text, commit_text.lower()
 
 
-def _identity_claim(value: object) -> str:
-    return value.strip() if isinstance(value, str) else ""
-
-
-def _commit_claim_matches(claim: str, expected: str) -> bool:
-    normalized = claim.lower()
-    if not COMMIT_RE.fullmatch(normalized):
-        return False
-    return (
-        normalized == expected
-        or normalized.startswith(expected)
-        or expected.startswith(normalized)
-    )
-
-
-def _embedded_identity_violations(
-    payload: Mapping[str, object],
-    *,
-    expected_repository: str,
-    expected_commit_sha: str,
-) -> list[str]:
-    violations: list[str] = []
-    for key in REPOSITORY_IDENTITY_KEYS:
-        claim = _identity_claim(payload.get(key))
-        if claim and claim != expected_repository:
-            violations.append(f"{key}={claim}")
-    for key in COMMIT_IDENTITY_KEYS:
-        claim = _identity_claim(payload.get(key))
-        if claim and not _commit_claim_matches(claim, expected_commit_sha):
-            violations.append(f"{key}={claim}")
-    return violations
-
-
-def _entry(
-    stage: str,
-    path: Path,
-    *,
-    expected_repository: str,
-    expected_commit_sha: str,
-) -> tuple[dict[str, object], list[str], list[str]]:
+def _entry(stage: str, path: Path) -> tuple[dict[str, object], list[str]]:
     data = path.read_bytes()
     entry: dict[str, object] = {
         "stage": stage,
@@ -204,29 +154,17 @@ def _entry(
         "size_bytes": len(data),
         "media_type": "application/json" if stage in JSON_STAGES else "text/markdown",
     }
-    identity_violations: list[str] = []
     if stage in JSON_STAGES:
         payload = json.loads(data)
         if not isinstance(payload, dict):
-            raise ValueError(
-                f"expected JSON object for protected proof artifact: {path}"
-            )
-        entry["artifact_schema_version"] = str(
-            payload.get("schema_version") or "unknown"
-        )
-        authority_violations = _json_violations(payload)
-        identity_violations = _embedded_identity_violations(
-            payload,
-            expected_repository=expected_repository,
-            expected_commit_sha=expected_commit_sha,
-        )
+            raise ValueError(f"expected JSON object for protected proof artifact: {path}")
+        entry["artifact_schema_version"] = str(payload.get("schema_version") or "unknown")
+        violations = _json_violations(payload)
     else:
         entry["artifact_schema_version"] = "markdown"
-        authority_violations = _markdown_violations(
-            data.decode("utf-8", errors="replace")
-        )
-    entry["authority_violation_count"] = len(authority_violations)
-    return entry, authority_violations, identity_violations
+        violations = _markdown_violations(data.decode("utf-8", errors="replace"))
+    entry["authority_violation_count"] = len(violations)
+    return entry, violations
 
 
 def _material(
@@ -255,27 +193,14 @@ def build_protected_proof_chain(
     repository_text, commit_text = _identity(repository, commit_sha)
     normalized = _normalize_artifacts(artifacts)
     entries: list[dict[str, object]] = []
-    authority_violations: list[str] = []
-    identity_violations: list[str] = []
+    violations: list[str] = []
     for stage in STAGE_ORDER:
-        entry, stage_authority, stage_identity = _entry(
-            stage,
-            normalized[stage],
-            expected_repository=repository_text,
-            expected_commit_sha=commit_text,
-        )
+        entry, stage_violations = _entry(stage, normalized[stage])
         entries.append(entry)
-        authority_violations.extend(f"{stage}:{item}" for item in stage_authority)
-        identity_violations.extend(f"{stage}:{item}" for item in stage_identity)
-    if authority_violations:
+        violations.extend(f"{stage}:{item}" for item in stage_violations)
+    if violations:
         raise ValueError(
-            "protected proof artifacts attempted to expand authority: "
-            + ", ".join(authority_violations)
-        )
-    if identity_violations:
-        raise ValueError(
-            "protected proof artifact identity mismatch: "
-            + ", ".join(identity_violations)
+            "protected proof artifacts attempted to expand authority: " + ", ".join(violations)
         )
     material = _material(repository_text, commit_text, entries)
     return {**material, "chain_id": _sha256(_canonical_json(material))}
