@@ -5,10 +5,11 @@ from pathlib import Path
 
 import pytest
 
-from sdetkit.protected_proof_chain import STAGE_ORDER, build_protected_proof_chain
+from sdetkit.evidence_binding import build_bound_proof_chain, validate_evidence_binding
+from sdetkit.protected_proof_chain import STAGE_ORDER
 
 REPOSITORY = "owner/repo"
-COMMIT_SHA = "a" * 40
+REVISION = "a" * 40
 
 
 def _artifacts(root: Path) -> dict[str, Path]:
@@ -41,31 +42,34 @@ def _write_claim(path: Path, **claims: object) -> None:
     path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
 
 
-def _build(artifacts: dict[str, Path]) -> dict[str, object]:
-    return build_protected_proof_chain(
-        repository=REPOSITORY,
-        commit_sha=COMMIT_SHA,
-        artifacts=artifacts,
-    )
-
-
-def test_proof_chain_accepts_matching_embedded_identity(tmp_path: Path) -> None:
+def test_binding_accepts_matching_claims(tmp_path: Path) -> None:
     artifacts = _artifacts(tmp_path)
     _write_claim(
         artifacts["proof_result"],
         repository_full_name=REPOSITORY,
-        current_head_sha=COMMIT_SHA,
+        current_head_sha=REVISION,
     )
     _write_claim(
         artifacts["verifier_result"],
         repo_full_name=REPOSITORY,
-        head_sha=COMMIT_SHA[:12],
+        head_sha=REVISION[:12],
     )
 
-    manifest = _build(artifacts)
+    validation = validate_evidence_binding(
+        repository=REPOSITORY,
+        revision=REVISION,
+        artifacts=artifacts,
+    )
+    manifest = build_bound_proof_chain(
+        repository=REPOSITORY,
+        revision=REVISION,
+        artifacts=artifacts,
+    )
 
+    assert validation["status"] == "passed"
+    assert validation["claim_count"] == 4
     assert manifest["repository"] == REPOSITORY
-    assert manifest["commit_sha"] == COMMIT_SHA
+    assert manifest["commit_sha"] == REVISION
 
 
 @pytest.mark.parametrize(
@@ -76,18 +80,22 @@ def test_proof_chain_accepts_matching_embedded_identity(tmp_path: Path) -> None:
         {"head_sha": "invalid-sha-value"},
     ],
 )
-def test_proof_chain_rejects_conflicting_embedded_identity(
+def test_binding_rejects_conflicting_claims(
     tmp_path: Path,
     claim: dict[str, object],
 ) -> None:
     artifacts = _artifacts(tmp_path)
     _write_claim(artifacts["proof_result"], **claim)
 
-    with pytest.raises(ValueError, match="identity mismatch"):
-        _build(artifacts)
+    with pytest.raises(ValueError, match="binding conflict"):
+        build_bound_proof_chain(
+            repository=REPOSITORY,
+            revision=REVISION,
+            artifacts=artifacts,
+        )
 
 
-def test_proof_chain_ignores_nested_historical_identity(tmp_path: Path) -> None:
+def test_binding_ignores_nested_historical_claims(tmp_path: Path) -> None:
     artifacts = _artifacts(tmp_path)
     _write_claim(
         artifacts["trajectory"],
@@ -97,4 +105,11 @@ def test_proof_chain_ignores_nested_historical_identity(tmp_path: Path) -> None:
         },
     )
 
-    assert _build(artifacts)["status"] == "bound_review_first"
+    validation = validate_evidence_binding(
+        repository=REPOSITORY,
+        revision=REVISION,
+        artifacts=artifacts,
+    )
+
+    assert validation["status"] == "passed"
+    assert validation["claim_count"] == 0
