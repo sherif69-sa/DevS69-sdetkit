@@ -3,12 +3,21 @@ from __future__ import annotations
 import ast
 import re
 from collections.abc import Mapping
+from html import escape
 from typing import Any
 
 from . import _pr_quality_live_dashboard_core as _core
 from .pr_quality_adaptive_diagnosis import attach_adaptive_diagnosis
 
 JsonObject = dict[str, Any]
+AUTHORITY_FIELDS = (
+    "reporting_only",
+    "automation_allowed",
+    "patch_application_allowed",
+    "security_dismissal_allowed",
+    "merge_authorized",
+    "semantic_equivalence_proven",
+)
 
 
 def _as_dict(value: object) -> JsonObject:
@@ -24,6 +33,10 @@ def _text(value: object, default: str = "") -> str:
         return default
     rendered = str(value).strip()
     return rendered or default
+
+
+def _markdown_code(value: object, default: str = "") -> str:
+    return _text(value, default).replace("`", "'").replace("\n", " ")
 
 
 def _display_failure_literal(value: object) -> str:
@@ -125,6 +138,163 @@ def _enrich_primary_failure(review_model: JsonObject) -> None:
         primary_failure["test_node"] = test_node
 
 
+def _adaptive_diagnosis_card(value: JsonObject) -> JsonObject:
+    card = _as_dict(value.get("adaptive_diagnosis"))
+    if card:
+        return card
+    return _as_dict(_as_dict(value.get("primary_failure")).get("adaptive_diagnosis"))
+
+
+def _adaptive_diagnosis_markdown(snapshot: JsonObject) -> str:
+    card = _adaptive_diagnosis_card(snapshot)
+    if not card:
+        return ""
+
+    checks = _as_dict(card.get("checks"))
+    lines = [
+        "## Adaptive Diagnosis",
+        "",
+        "| Signal | Value |",
+        "|---|---|",
+        (
+            "| Completeness | "
+            f"`{_markdown_code(card.get('diagnostic_completeness'), 'insufficient')}` |"
+        ),
+        f"| Confidence | `{_markdown_code(card.get('confidence'), 'low')}` |",
+        f"| Failure class | `{_markdown_code(card.get('failure_class'), 'unknown')}` |",
+        (f"| Review first | `{'true' if bool(card.get('review_first', True)) else 'false'}` |"),
+        "",
+        "### Safeguards",
+        "",
+    ]
+    if checks:
+        lines.extend(
+            f"- `{_markdown_code(name)}`: `{'pass' if bool(passed) else 'missing'}`"
+            for name, passed in sorted(checks.items(), key=lambda item: _text(item[0]))
+        )
+    else:
+        lines.append("- No adaptive checks were emitted.")
+
+    for title, key, empty in (
+        ("Owner files", "owner_files", "No owner file was resolved."),
+        ("Focused proof", "proof_commands", "No focused proof command was resolved."),
+        ("Evidence gaps", "evidence_gaps", "No evidence gaps were reported."),
+    ):
+        lines.extend(("", f"### {title}", ""))
+        values = [_text(item) for item in _as_list(card.get(key)) if _text(item)]
+        lines.extend(f"- `{_markdown_code(item)}`" for item in values)
+        if not values:
+            lines.append(f"- {empty}")
+
+    lines.extend(
+        (
+            "",
+            "### Next human action",
+            "",
+            _text(
+                card.get("next_human_action"),
+                "Collect exact failure evidence before changing code.",
+            ),
+            "",
+            "### Authority boundary",
+            "",
+        )
+    )
+    lines.extend(
+        f"- `{field}={'true' if bool(card.get(field, False)) else 'false'}`"
+        for field in AUTHORITY_FIELDS
+    )
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _html_list(values: object, *, empty: str) -> str:
+    items = [_text(item) for item in _as_list(values) if _text(item)]
+    if not items:
+        return f"<p>{escape(empty)}</p>"
+    return "<ul>" + "".join(f"<li><code>{escape(item)}</code></li>" for item in items) + "</ul>"
+
+
+def _adaptive_diagnosis_html(snapshot: JsonObject) -> str:
+    card = _adaptive_diagnosis_card(snapshot)
+    if not card:
+        return ""
+
+    checks = _as_dict(card.get("checks"))
+    check_rows = "".join(
+        "<tr>"
+        f"<td><code>{escape(_text(name))}</code></td>"
+        f"<td>{'Pass' if bool(passed) else 'Missing'}</td>"
+        "</tr>"
+        for name, passed in sorted(checks.items(), key=lambda item: _text(item[0]))
+    )
+    if not check_rows:
+        check_rows = '<tr><td colspan="2">No adaptive checks were emitted.</td></tr>'
+
+    authority_rows = "".join(
+        "<tr>"
+        f"<td><code>{field}</code></td>"
+        f"<td>{'true' if bool(card.get(field, False)) else 'false'}</td>"
+        "</tr>"
+        for field in AUTHORITY_FIELDS
+    )
+    completeness = escape(_text(card.get("diagnostic_completeness"), "insufficient").title())
+    confidence = escape(_text(card.get("confidence"), "low").title())
+    failure_class = escape(_text(card.get("failure_class"), "unknown").replace("_", " ").title())
+    review_first = "Yes" if bool(card.get("review_first", True)) else "No"
+    next_action = escape(
+        _text(
+            card.get("next_human_action"),
+            "Collect exact failure evidence before changing code.",
+        )
+    )
+
+    return "".join(
+        (
+            '<section id="adaptive-diagnosis" class="section adaptive-diagnosis">',
+            '<div class="section-heading"><div>',
+            '<div class="eyebrow">Contributor evidence</div>',
+            "<h2>Adaptive Diagnosis</h2>",
+            "</div><p>The first violated contract, evidence quality, and review-first action.</p>",
+            "</div>",
+            '<div class="review-grid">',
+            f'<article class="review-panel"><span>Completeness</span><h3>{completeness}</h3></article>',
+            f'<article class="review-panel"><span>Confidence</span><h3>{confidence}</h3></article>',
+            f'<article class="review-panel"><span>Failure class</span><h3>{failure_class}</h3></article>',
+            f'<article class="review-panel"><span>Review first</span><h3>{review_first}</h3></article>',
+            "</div>",
+            "<h3>Safeguards</h3>",
+            "<table><thead><tr><th>Check</th><th>Result</th></tr></thead>",
+            f"<tbody>{check_rows}</tbody></table>",
+            "<h3>Owner files</h3>",
+            _html_list(card.get("owner_files"), empty="No owner file was resolved."),
+            "<h3>Focused proof</h3>",
+            _html_list(
+                card.get("proof_commands"),
+                empty="No focused proof command was resolved.",
+            ),
+            "<h3>Evidence gaps</h3>",
+            _html_list(card.get("evidence_gaps"), empty="No evidence gaps were reported."),
+            "<h3>Next human action</h3>",
+            f"<p><strong>{next_action}</strong></p>",
+            "<h3>Authority boundary</h3>",
+            "<table><thead><tr><th>Field</th><th>Value</th></tr></thead>",
+            f"<tbody>{authority_rows}</tbody></table>",
+            "</section>",
+        )
+    )
+
+
+def _inject_adaptive_html(rendered: str, snapshot: JsonObject) -> str:
+    section = _adaptive_diagnosis_html(snapshot)
+    if not rendered or not section:
+        return rendered
+    for marker in ("</main>", "</body>"):
+        if marker in rendered:
+            return rendered.replace(marker, section + marker, 1)
+    return rendered + section
+
+
 def build_live_evidence_snapshot(
     *,
     pr_number: int,
@@ -139,7 +309,7 @@ def build_live_evidence_snapshot(
 ) -> JsonObject:
     _enrich_primary_failure(review_model)
     attach_adaptive_diagnosis(review_model)
-    return _core.build_live_evidence_snapshot(
+    snapshot = _core.build_live_evidence_snapshot(
         pr_number=pr_number,
         head_sha=head_sha,
         base_sha=base_sha,
@@ -150,8 +320,33 @@ def build_live_evidence_snapshot(
         environment=environment,
         generated_at=generated_at,
     )
+    card = _adaptive_diagnosis_card(review_model)
+    if card:
+        snapshot["adaptive_diagnosis"] = dict(card)
+    return snapshot
 
 
-render_live_evidence_markdown = _core.render_live_evidence_markdown
-render_live_evidence_html = _core.render_live_evidence_html
-render_live_product_dashboard = _core.render_live_product_dashboard
+def render_live_evidence_markdown(snapshot: JsonObject) -> str:
+    rendered = _core.render_live_evidence_markdown(snapshot)
+    section = _adaptive_diagnosis_markdown(snapshot)
+    if not rendered:
+        return section
+    if not section:
+        return rendered
+    return rendered.rstrip() + "\n\n" + section
+
+
+def render_live_evidence_html(snapshot: JsonObject) -> str:
+    return _inject_adaptive_html(_core.render_live_evidence_html(snapshot), snapshot)
+
+
+def render_live_product_dashboard(
+    model: JsonObject,
+    *,
+    embedded_artifacts: JsonObject | None = None,
+) -> str:
+    rendered = _core.render_live_product_dashboard(
+        model,
+        embedded_artifacts=embedded_artifacts,
+    )
+    return _inject_adaptive_html(rendered, _as_dict(model.get("live_evidence")))
