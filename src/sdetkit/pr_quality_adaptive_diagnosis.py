@@ -72,7 +72,9 @@ def validate_authority(card: Mapping[str, object]) -> None:
         if card.get(field) is not expected
     ]
     if mismatches:
-        raise ValueError("unsafe adaptive diagnosis authority: " + "; ".join(mismatches))
+        raise ValueError(
+            "unsafe adaptive diagnosis authority: " + "; ".join(mismatches)
+        )
 
 
 def build_export(card: Mapping[str, object]) -> JsonObject:
@@ -98,17 +100,23 @@ def build_export(card: Mapping[str, object]) -> JsonObject:
                 _text(item) for item in _as_list(card.get("owner_files")) if _text(item)
             ],
             "proof_commands": [
-                _text(item) for item in _as_list(card.get("proof_commands")) if _text(item)
+                _text(item)
+                for item in _as_list(card.get("proof_commands"))
+                if _text(item)
             ],
             "evidence_gaps": [
-                _text(item) for item in _as_list(card.get("evidence_gaps")) if _text(item)
+                _text(item)
+                for item in _as_list(card.get("evidence_gaps"))
+                if _text(item)
             ],
             "next_human_action": _text(
                 card.get("next_human_action"),
                 "Collect exact failure evidence before changing code.",
             ),
         },
-        "authority": {field: bool(card.get(field, False)) for field in AUTHORITY_FIELDS},
+        "authority": {
+            field: bool(card.get(field, False)) for field in AUTHORITY_FIELDS
+        },
     }
 
 
@@ -129,11 +137,15 @@ def _family_score(value: object) -> tuple[int, int, int]:
     return (
         1 if _text(family.get("test_node")) else 0,
         1 if _text(family.get("message")) else 0,
-        1 if code and code not in {"UNKNOWN_REVIEW_REQUIRED", "RELEASE_ARTIFACT_INVALID"} else 0,
+        1
+        if code and code not in {"UNKNOWN_REVIEW_REQUIRED", "RELEASE_ARTIFACT_INVALID"}
+        else 0,
     )
 
 
-def _richest_family(primary_failure: JsonObject, review_model: JsonObject) -> JsonObject:
+def _richest_family(
+    primary_failure: JsonObject, review_model: JsonObject
+) -> JsonObject:
     families = [
         _as_dict(item)
         for item in _as_list(
@@ -151,7 +163,9 @@ def _test_source_path(test_node: str) -> str:
 
 def _generic_observation(value: str) -> bool:
     normalized = " ".join(value.lower().split())
-    return normalized in _GENERIC_OBSERVED or normalized.startswith("assert false is true")
+    return normalized in _GENERIC_OBSERVED or normalized.startswith(
+        "assert false is true"
+    )
 
 
 def _failure_class(primary_failure: JsonObject, detail: JsonObject) -> str:
@@ -210,7 +224,8 @@ def attach_adaptive_diagnosis(review_model: JsonObject) -> None:
     proof_commands = _proof_commands(primary_failure)
 
     checks = {
-        "exact_failure_detail_present": bool(message) and not _generic_observation(observed),
+        "exact_failure_detail_present": bool(message)
+        and not _generic_observation(observed),
         "expected_observed_specific": bool(expected)
         and expected != "check completes successfully"
         and bool(observed)
@@ -225,14 +240,18 @@ def attach_adaptive_diagnosis(review_model: JsonObject) -> None:
         "authority_boundary_preserved": _authority_boundary_preserved(primary_failure),
     }
     existing_gaps = [
-        _text(item) for item in _as_list(primary_failure.get("evidence_gaps")) if _text(item)
+        _text(item)
+        for item in _as_list(primary_failure.get("evidence_gaps"))
+        if _text(item)
     ]
     evidence_gaps = list(existing_gaps)
     for check, passed in checks.items():
         if not passed and check not in evidence_gaps:
             evidence_gaps.append(check)
 
-    diagnostic_checks = [name for name in checks if name != "authority_boundary_preserved"]
+    diagnostic_checks = [
+        name for name in checks if name != "authority_boundary_preserved"
+    ]
     passed_count = sum(1 for name in diagnostic_checks if checks[name])
     if passed_count == len(diagnostic_checks):
         completeness = "complete"
