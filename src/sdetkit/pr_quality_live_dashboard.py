@@ -162,18 +162,14 @@ def _adaptive_diagnosis_markdown(snapshot: JsonObject) -> str:
         ),
         f"| Confidence | `{_markdown_code(card.get('confidence'), 'low')}` |",
         f"| Failure class | `{_markdown_code(card.get('failure_class'), 'unknown')}` |",
-        (
-            "| Review first | "
-            f"`{'true' if bool(card.get('review_first', True)) else 'false'}` |"
-        ),
+        (f"| Review first | `{'true' if bool(card.get('review_first', True)) else 'false'}` |"),
         "",
         "### Safeguards",
         "",
     ]
     if checks:
         lines.extend(
-            f"- `{_markdown_code(name)}`: "
-            f"`{'pass' if bool(passed) else 'missing'}`"
+            f"- `{_markdown_code(name)}`: `{'pass' if bool(passed) else 'missing'}`"
             for name, passed in sorted(checks.items(), key=lambda item: _text(item[0]))
         )
     else:
@@ -244,9 +240,7 @@ def _adaptive_diagnosis_html(snapshot: JsonObject) -> str:
     )
     completeness = escape(_text(card.get("diagnostic_completeness"), "insufficient").title())
     confidence = escape(_text(card.get("confidence"), "low").title())
-    failure_class = escape(
-        _text(card.get("failure_class"), "unknown").replace("_", " ").title()
-    )
+    failure_class = escape(_text(card.get("failure_class"), "unknown").replace("_", " ").title())
     review_first = "Yes" if bool(card.get("review_first", True)) else "No"
     next_action = escape(
         _text(
