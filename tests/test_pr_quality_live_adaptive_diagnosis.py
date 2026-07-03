@@ -58,11 +58,12 @@ def _review_model() -> dict[str, object]:
 
 
 def _snapshot(review_model: dict[str, object] | None = None) -> dict[str, object]:
+    model = review_model if review_model is not None else _review_model()
     return build_live_evidence_snapshot(
         pr_number=1984,
         head_sha="a" * 40,
         base_sha="b" * 40,
-        review_model=review_model or _review_model(),
+        review_model=model,
         check_intelligence={"current_head_sha": "a" * 40},
         runtime_proof_artifacts={},
         artifact_manifest={},
@@ -129,7 +130,10 @@ def test_live_html_renders_visible_adaptive_diagnosis() -> None:
 
 
 def test_live_product_dashboard_includes_adaptive_diagnosis() -> None:
-    html = render_live_product_dashboard(_snapshot())
+    model = _review_model()
+    model["live_evidence"] = _snapshot(model)
+
+    html = render_live_product_dashboard(model)
 
     assert html.count('<section id="adaptive-diagnosis"') == 1
     assert "The first violated contract, evidence quality, and review-first action." in html
