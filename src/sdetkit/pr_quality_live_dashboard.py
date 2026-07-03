@@ -346,5 +346,13 @@ def render_live_evidence_html(snapshot: JsonObject) -> str:
     return _inject_adaptive_html(_core.render_live_evidence_html(snapshot), snapshot)
 
 
-def render_live_product_dashboard(snapshot: JsonObject) -> str:
-    return _inject_adaptive_html(_core.render_live_product_dashboard(snapshot), snapshot)
+def render_live_product_dashboard(
+    model: JsonObject,
+    *,
+    embedded_artifacts: JsonObject | None = None,
+) -> str:
+    rendered = _core.render_live_product_dashboard(
+        model,
+        embedded_artifacts=embedded_artifacts,
+    )
+    return _inject_adaptive_html(rendered, _as_dict(model.get("live_evidence")))
