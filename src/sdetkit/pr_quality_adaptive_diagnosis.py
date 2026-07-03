@@ -1,9 +1,29 @@
 from __future__ import annotations
 
+import json
+from collections.abc import Mapping
 from typing import Any
 
 JsonObject = dict[str, Any]
 ADAPTIVE_DIAGNOSIS_SCHEMA_VERSION = "sdetkit.adaptive_diagnosis_card.v1"
+ADAPTIVE_DIAGNOSIS_EXPORT_SCHEMA_VERSION = "sdetkit.adaptive_diagnosis_export.v1"
+ADAPTIVE_DIAGNOSIS_BUNDLE_MANIFEST_SCHEMA_VERSION = "sdetkit.adaptive_diagnosis_bundle_manifest.v1"
+AUTHORITY_FIELDS = (
+    "reporting_only",
+    "automation_allowed",
+    "patch_application_allowed",
+    "security_dismissal_allowed",
+    "merge_authorized",
+    "semantic_equivalence_proven",
+)
+AUTHORITY_EXPECTATIONS = {
+    "reporting_only": True,
+    "automation_allowed": False,
+    "patch_application_allowed": False,
+    "security_dismissal_allowed": False,
+    "merge_authorized": False,
+    "semantic_equivalence_proven": False,
+}
 
 _FAILURE_CLASS_BY_CODE = {
     "PYTEST_ASSERTION_FAILURE": "test",
@@ -34,6 +54,69 @@ def _text(value: object, default: str = "") -> str:
         return default
     rendered = str(value).strip()
     return rendered or default
+
+
+def adaptive_diagnosis_card(model: Mapping[str, object]) -> JsonObject:
+    card = _as_dict(model.get("adaptive_diagnosis"))
+    if card:
+        return card
+    return _as_dict(_as_dict(model.get("primary_failure")).get("adaptive_diagnosis"))
+
+
+def validate_authority(card: Mapping[str, object]) -> None:
+    mismatches = [
+        f"{field} expected {expected!r}, observed {card.get(field)!r}"
+        for field, expected in AUTHORITY_EXPECTATIONS.items()
+        if card.get(field) is not expected
+    ]
+    if mismatches:
+        raise ValueError("unsafe adaptive diagnosis authority: " + "; ".join(mismatches))
+
+
+def build_export(card: Mapping[str, object]) -> JsonObject:
+    checks = {
+        _text(name): bool(value)
+        for name, value in _as_dict(card.get("checks")).items()
+        if _text(name)
+    }
+    return {
+        "schema_version": ADAPTIVE_DIAGNOSIS_EXPORT_SCHEMA_VERSION,
+        "diagnosis": {
+            "status": _text(card.get("status"), "review_first"),
+            "failure_class": _text(card.get("failure_class"), "unknown"),
+            "diagnostic_completeness": _text(card.get("diagnostic_completeness"), "insufficient"),
+            "confidence": _text(card.get("confidence"), "low"),
+            "review_first": bool(card.get("review_first", True)),
+        },
+        "evidence": {
+            "checks": checks,
+            "owner_files": [
+                _text(item) for item in _as_list(card.get("owner_files")) if _text(item)
+            ],
+            "proof_commands": [
+                _text(item) for item in _as_list(card.get("proof_commands")) if _text(item)
+            ],
+            "evidence_gaps": [
+                _text(item) for item in _as_list(card.get("evidence_gaps")) if _text(item)
+            ],
+            "next_human_action": _text(
+                card.get("next_human_action"),
+                "Collect exact failure evidence before changing code.",
+            ),
+        },
+        "authority": {field: bool(card.get(field, False)) for field in AUTHORITY_FIELDS},
+    }
+
+
+def export_from_model(model: Mapping[str, object]) -> JsonObject:
+    card = adaptive_diagnosis_card(model)
+    if not card:
+        raise ValueError("review model has no adaptive diagnosis card")
+    return build_export(card)
+
+
+def serialize_export(payload: Mapping[str, object]) -> str:
+    return json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
 
 
 def _family_score(value: object) -> tuple[int, int, int]:
@@ -105,13 +188,8 @@ def _proof_commands(primary_failure: JsonObject) -> list[str]:
 def _authority_boundary_preserved(primary_failure: JsonObject) -> bool:
     return bool(primary_failure.get("reporting_only", True)) and not any(
         bool(primary_failure.get(field, False))
-        for field in (
-            "automation_allowed",
-            "patch_application_allowed",
-            "security_dismissal_allowed",
-            "merge_authorized",
-            "semantic_equivalence_proven",
-        )
+        for field in AUTHORITY_FIELDS
+        if field != "reporting_only"
     )
 
 
@@ -197,12 +275,7 @@ def attach_adaptive_diagnosis(review_model: JsonObject) -> None:
         "proof_commands": proof_commands,
         "next_human_action": next_human_action,
         "review_first": review_first,
-        "reporting_only": True,
-        "automation_allowed": False,
-        "patch_application_allowed": False,
-        "security_dismissal_allowed": False,
-        "merge_authorized": False,
-        "semantic_equivalence_proven": False,
+        **AUTHORITY_EXPECTATIONS,
     }
     primary_failure["adaptive_diagnosis"] = card
     primary_failure["diagnostic_completeness"] = completeness
