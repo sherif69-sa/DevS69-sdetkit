@@ -126,9 +126,7 @@ def test_verifier_detects_missing_and_unexpected_records(tmp_path: Path) -> None
     manifest_path = bundle_dir / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["artifacts"] = [
-        record
-        for record in manifest["artifacts"]
-        if record["path"] != "adaptive-diagnosis.html"
+        record for record in manifest["artifacts"] if record["path"] != "adaptive-diagnosis.html"
     ]
     manifest["artifacts"].append(
         {
