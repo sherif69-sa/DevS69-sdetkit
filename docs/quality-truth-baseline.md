@@ -32,14 +32,14 @@ The repository must not describe the whole package as 95% covered. The 95% state
 
 ## Typing truth
 
-The repository still has a broad `sdetkit.*` mypy suppression. Twelve diagnostic, safety, trajectory, and adoption modules explicitly opt back into error checking.
+The repository still has a broad `sdetkit.*` mypy suppression. Nineteen diagnostic, safety, trajectory, adoption, and proof modules explicitly opt back into error checking.
 
-Fresh inventory evidence records:
+The reviewed inventory after adding the evidence-binding module records:
 
 ```text
-source_module_count=486
-explicitly_type_checked_module_count=12
-typing_debt_module_count=474
+source_module_count=498
+explicitly_type_checked_module_count=19
+typing_debt_module_count=479
 ```
 
 The complete debt module list is emitted to:
@@ -64,7 +64,7 @@ The package metadata declares Python 3.10, 3.11, and 3.12. Canonical fast and sm
 
 ## Required next steps
 
-1. Reduce the hashed 474-module typing-debt inventory through behavior-focused ratchets.
+1. Reduce the hashed 479-module typing-debt inventory through behavior-focused ratchets.
 2. Keep whole-package coverage at or above the reviewed 87.89% baseline.
 3. Keep the critical reliability spine at or above 95%.
 4. Add Python 3.10 to the exact-wheel qualification route.
