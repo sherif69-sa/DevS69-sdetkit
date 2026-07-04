@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sdetkit._adoption_surface_impl import (
+from sdetkit._adoption_surface_impl_tmp import (
     SCHEMA_VERSION,
     discover_adoption_surface,
     main,
