@@ -42,6 +42,14 @@ If you want to coordinate first, open a scoped proposal with `.github/ISSUE_TEMP
 - Align wording across `README.md`, `CONTRIBUTING.md`, and `docs/first-contribution-quickstart.md`.
 - Improve issue-template prompts so maintainers get reproducible context faster.
 
+### 5) Dependency review documentation
+
+**Good fit when:** dependency-update guidance exists but needs clearer review steps.
+
+- Improve examples in the [dependency review playbook](dependency-review-playbook.md).
+- Clarify which exact-head checks apply to docs, Python package, workflow, or security-scanner updates.
+- Add review wording that helps maintainers keep version-bump PRs narrow.
+
 ## If no starter issue is available
 
 You can still contribute safely:
