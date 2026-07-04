@@ -259,3 +259,33 @@ nav:
           - Product strategy: product-strategy.md
           - Productization map: productization-map.md
           - Design notes: design.md
+          - Governance and org packs: governance-and-org-packs.md
+          - Project structure: project-structure.md
+          - Releasing sdetkit: releasing.md
+          - Packaging/install/release-readiness audit: packaging-readiness-audit.md
+          - Global production transformation playbook: global-production-transformation-playbook.md
+      - Advanced live views:
+          - 🕹️ DevS69 Command HUD — Live Detail View: command-hud-live.md
+          - 🔄 DevS69 Diff-to-Decision — Live Detail View: diff-flow-live.md
+          - 🗺️ DevS69 Repo Map — Live Detail View: repo-map-live.md
+          - DevS69 Visual HUD Showcase: hud-showcase.md
+  - Historical archive (non-primary):
+      - Archive overview: archive/index.md
+      - Transition-era material map: archive/transition-era-material.md
+exclude_docs: |
+  /README.md
+  artifacts/**
+  roadmap/reports/**
+  *-report.md
+  impact-*-*-report.md
+  big-upgrade-report-*.md
+  ultra-upgrade-report-*.md
+  executive-*.md
+  cto-*.md
+  production-*.md
+  kpi-baseline-week-*.md
+  repo-*-20*.md
+  agentos-*.md
+  automation-templates-engine.md
+  integrations-*.md
+  !integrations-and-extension-boundary.md
