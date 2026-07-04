@@ -157,6 +157,7 @@ nav:
       - Artifact reference and generated sample map: artifact-reference.md
       - Release evidence recipes and proof samples: release-evidence-recipes.md
       - CI artifact walkthrough: ci-artifact-walkthrough.md
+      - Pages deployment recovery: pages-deployment-recovery.md
       - Remediation cookbook: remediation-cookbook.md
       - Premium quality gate: premium-quality-gate.md
   - Current reference and discoverability (secondary):
