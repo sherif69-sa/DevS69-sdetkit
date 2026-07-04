@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import sys
 from collections.abc import Sequence
@@ -44,6 +45,20 @@ IGNORED_PARTS = {
     "__pycache__",
     "node_modules",
     "site",
+}
+
+GITLAB_RESERVED_TOP_LEVEL_KEYS = {
+    "after_script",
+    "before_script",
+    "cache",
+    "default",
+    "image",
+    "include",
+    "pages",
+    "services",
+    "stages",
+    "variables",
+    "workflow",
 }
 
 
@@ -109,17 +124,22 @@ def _add_proof_command(
     command: str,
     confidence: str,
     purpose: str,
+    evidence: Sequence[str] | None = None,
+    source: dict[str, Any] | None = None,
 ) -> None:
-    items.append(
-        {
-            "surface": surface,
-            "command": command,
-            "confidence": confidence,
-            "purpose": purpose,
-            "executes_untrusted_code": True,
-            "auto_run_allowed": False,
-        }
-    )
+    item: dict[str, Any] = {
+        "surface": surface,
+        "command": command,
+        "confidence": confidence,
+        "purpose": purpose,
+        "executes_untrusted_code": True,
+        "auto_run_allowed": False,
+    }
+    if evidence:
+        item["evidence"] = list(evidence)
+    if source:
+        item["source"] = dict(source)
+    items.append(item)
 
 
 def _workflow_files(root: Path) -> list[str]:
@@ -237,6 +257,215 @@ def _operator_summary() -> dict[str, str]:
             "Review detected surfaces and manually run trusted proof commands in the target repo."
         ),
     }
+
+
+def _top_level_yaml_key(raw_line: str) -> tuple[str, str] | None:
+    if not raw_line or raw_line.startswith((" ", "\t")):
+        return None
+    stripped = raw_line.strip()
+    if not stripped or stripped.startswith("#") or ":" not in stripped:
+        return None
+    key, value = stripped.split(":", 1)
+    key = key.strip()
+    if not key:
+        return None
+    return key, value.strip()
+
+
+def _strip_literal(value: str) -> str:
+    value = value.strip().rstrip(",")
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    return value
+
+
+def _literal_gitlab_script_values(value: str) -> tuple[list[str], bool]:
+    value = value.strip()
+    if not value:
+        return [], False
+    if value in {"|", ">", "|-", ">-", "|+", ">+"}:
+        return [], True
+    if value.startswith("["):
+        try:
+            parsed = ast.literal_eval(value)
+        except (SyntaxError, ValueError):
+            return [], True
+        if not isinstance(parsed, list) or not all(isinstance(item, str) for item in parsed):
+            return [], True
+        return [item.strip() for item in parsed if item.strip()], False
+    return [_strip_literal(value)], False
+
+
+def _command_is_dynamic(command: str) -> bool:
+    return any(token in command for token in ("$", "`", "*", "&"))
+
+
+def _classify_proof_purpose(command: str) -> str:
+    normalized = command.lower()
+    if any(
+        needle in normalized
+        for needle in (
+            "pip-audit",
+            "pip_audit",
+            "npm audit",
+            "cargo audit",
+            "govulncheck",
+            "bandit",
+            "safety check",
+            "trivy",
+            "semgrep",
+            "codeql",
+        )
+    ):
+        return "security"
+    if any(needle in normalized for needle in ("mypy", "pyright", "tsc", "typecheck", "type-check")):
+        return "type"
+    if any(
+        needle in normalized
+        for needle in ("ruff", "flake8", "eslint", "pylint", "golangci-lint", "clippy")
+    ):
+        return "lint"
+    if any(
+        needle in normalized
+        for needle in (
+            "pytest",
+            "npm test",
+            "pnpm test",
+            "yarn test",
+            "go test",
+            "cargo test",
+            "mvn test",
+            "gradle test",
+            "./gradlew test",
+            "dotnet test",
+            "vitest",
+            "jest",
+        )
+    ):
+        return "test"
+    if any(needle in normalized for needle in ("mkdocs", "sphinx", "docs")):
+        return "docs"
+    return "unknown"
+
+
+def _iter_gitlab_jobs(text: str) -> list[tuple[str, list[str]]]:
+    jobs: list[tuple[str, list[str]]] = []
+    current_name = ""
+    current_block: list[str] = []
+    for raw_line in text.splitlines():
+        parsed = _top_level_yaml_key(raw_line)
+        if parsed is not None:
+            if current_name:
+                jobs.append((current_name, current_block))
+            current_name = parsed[0]
+            current_block = [raw_line]
+            continue
+        if current_name:
+            current_block.append(raw_line)
+    if current_name:
+        jobs.append((current_name, current_block))
+    return jobs
+
+
+def _extract_gitlab_job_script_commands(job_name: str, block: list[str]) -> tuple[list[str], list[str]]:
+    commands: list[str] = []
+    unknowns: list[str] = []
+    in_script = False
+    script_indent = 0
+
+    for raw_line in block[1:]:
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        if stripped.startswith(("extends:", "rules:", "needs:")):
+            unknowns.append(
+                f"GitLab CI job {job_name} uses dynamic or inherited behavior that was not resolved"
+            )
+        if in_script and indent <= script_indent and not stripped.startswith("-"):
+            in_script = False
+        if in_script:
+            if stripped.startswith("-"):
+                command_value = stripped[1:].strip()
+                values, unresolved = _literal_gitlab_script_values(command_value)
+                if unresolved:
+                    unknowns.append(
+                        f"GitLab CI job {job_name} has unresolved script content that was not guessed"
+                    )
+                    continue
+                for command in values:
+                    if _command_is_dynamic(command):
+                        unknowns.append(
+                            f"GitLab CI job {job_name} has dynamic script command that was not guessed"
+                        )
+                    else:
+                        commands.append(command)
+                continue
+            if stripped in {"|", ">", "|-", ">-", "|+", ">+"}:
+                unknowns.append(
+                    f"GitLab CI job {job_name} has multiline script content that was not guessed"
+                )
+            continue
+        if stripped.startswith("script:"):
+            rest = stripped.split(":", 1)[1].strip()
+            if not rest:
+                in_script = True
+                script_indent = indent
+                continue
+            values, unresolved = _literal_gitlab_script_values(rest)
+            if unresolved:
+                unknowns.append(
+                    f"GitLab CI job {job_name} has unresolved script content that was not guessed"
+                )
+                continue
+            for command in values:
+                if _command_is_dynamic(command):
+                    unknowns.append(
+                        f"GitLab CI job {job_name} has dynamic script command that was not guessed"
+                    )
+                else:
+                    commands.append(command)
+    return commands, unknowns
+
+
+def _extract_gitlab_ci_commands(root: Path) -> tuple[list[dict[str, Any]], list[str]]:
+    path = ".gitlab-ci.yml"
+    text = _read_text(root, path)
+    if not text:
+        return [], []
+
+    extracted: list[dict[str, Any]] = []
+    unknowns: list[str] = []
+    for raw_line in text.splitlines():
+        parsed = _top_level_yaml_key(raw_line)
+        if parsed is not None and parsed[0] == "include":
+            unknowns.append("GitLab CI include detected; remote configuration was not resolved")
+
+    for job_name, block in _iter_gitlab_jobs(text):
+        normalized_name = job_name.strip()
+        if (
+            not normalized_name
+            or normalized_name.startswith(".")
+            or normalized_name in GITLAB_RESERVED_TOP_LEVEL_KEYS
+        ):
+            continue
+        if any("&" in line or "*" in line for line in block):
+            unknowns.append(
+                f"GitLab CI job {normalized_name} uses YAML anchor or alias content that was not resolved"
+            )
+            continue
+        commands, job_unknowns = _extract_gitlab_job_script_commands(normalized_name, block)
+        unknowns.extend(job_unknowns)
+        for command in commands:
+            extracted.append(
+                {
+                    "command": command,
+                    "purpose": _classify_proof_purpose(command),
+                    "job": normalized_name,
+                    "file": path,
+                }
+            )
+    return extracted, sorted(set(unknowns))
 
 
 def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
@@ -467,6 +696,22 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         _add_named(ci_systems, "github_actions", files=workflows)
     if _file(root, ".gitlab-ci.yml"):
         _add_named(ci_systems, "gitlab_ci", files=[".gitlab-ci.yml"])
+        gitlab_commands, gitlab_unknowns = _extract_gitlab_ci_commands(root)
+        review_first_unknowns.extend(gitlab_unknowns)
+        for command in gitlab_commands:
+            _add_proof_command(
+                recommended_proof_commands,
+                surface="gitlab_ci",
+                command=str(command["command"]),
+                confidence="medium",
+                purpose=str(command["purpose"]),
+                evidence=[str(command["file"])],
+                source={
+                    "ci_system": "gitlab_ci",
+                    "file": str(command["file"]),
+                    "job": str(command["job"]),
+                },
+            )
     if _file(root, "Jenkinsfile"):
         _add_named(ci_systems, "jenkins", files=["Jenkinsfile"])
 
