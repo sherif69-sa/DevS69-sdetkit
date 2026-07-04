@@ -128,6 +128,15 @@ def _workflow_files(root: Path) -> list[str]:
     )
 
 
+def _owned_script_files(root: Path) -> list[str]:
+    named_scripts = [
+        path
+        for path in ["Makefile", "Taskfile.yml", "Taskfile.yaml", "justfile", "Justfile"]
+        if _file(root, path)
+    ]
+    return sorted(set(named_scripts + _recursive_files(root, "*.sh")))
+
+
 def _workflow_text(root: Path, files: list[str]) -> str:
     return "\n".join(_read_text(root, path).lower() for path in files)
 
@@ -234,6 +243,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     requirements = _glob_files(root, "requirements*.txt")
     workflows = _workflow_files(root)
+    script_files = _owned_script_files(root)
 
     detected_languages: list[dict[str, Any]] = []
     package_managers: list[dict[str, Any]] = []
@@ -497,6 +507,27 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             "pip_audit",
             confidence="detected",
             evidence=pip_audit_evidence,
+        )
+
+    govulncheck_evidence = sorted(
+        set(
+            _files_containing(root, workflows, "govulncheck")
+            + _files_containing(root, script_files, "govulncheck")
+        )
+    )
+    if _file(root, "go.mod") and govulncheck_evidence:
+        _add_named(
+            security_tools,
+            "govulncheck",
+            confidence="detected",
+            evidence=govulncheck_evidence,
+        )
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="go",
+            command="govulncheck ./...",
+            confidence="medium",
+            purpose="security",
         )
 
     release_workflows = [
