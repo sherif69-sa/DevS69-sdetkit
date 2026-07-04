@@ -216,6 +216,7 @@ nav:
       - Contributing and maintenance:
           - Repo tour: repo-tour.md
           - First contribution quickstart: first-contribution-quickstart.md
+          - Dependency review playbook: dependency-review-playbook.md
           - Contributing: contributing.md
           - Starter work inventory: starter-work-inventory.md
           - Maintainer starter-issue hygiene: maintainer-starter-issue-hygiene.md
