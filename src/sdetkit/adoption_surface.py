@@ -145,6 +145,14 @@ def _package_json_has_test(root: Path) -> bool:
     return bool(str(scripts.get("test", "")).strip())
 
 
+def _javascript_test_command(root: Path) -> str:
+    if _file(root, "pnpm-lock.yaml"):
+        return "pnpm test"
+    if _file(root, "yarn.lock"):
+        return "yarn test"
+    return "npm test"
+
+
 def _make_target_exists(root: Path, target: str) -> bool:
     makefile = root / "Makefile"
     if not makefile.is_file():
@@ -364,16 +372,17 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     if _file(root, "yarn.lock"):
         _add_named(package_managers, "yarn", files=["yarn.lock"])
     if _file(root, "package.json") and _package_json_has_test(root):
+        node_test_command = _javascript_test_command(root)
         _add_named(
             test_runners,
             "node_test_script",
             confidence="medium",
-            commands=["npm test"],
+            commands=[node_test_command],
         )
         _add_proof_command(
             recommended_proof_commands,
             surface="javascript_typescript",
-            command="npm test",
+            command=node_test_command,
             confidence="medium",
             purpose="test",
         )
