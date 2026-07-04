@@ -1,0 +1,34 @@
+Run npm test
+
+> example-app@0.1.0 test
+> vitest run
+
+ RUN  v1.6.0 /home/runner/work/example-app/example-app
+
+ ❯ src/cart-total.test.tsx (2 tests | 1 failed) 18ms
+   ✓ totals selected items 4ms
+   × applies coupon discount 8ms
+     → expected 42 to be 40 // Object.is equality
+
+ FAIL  src/cart-total.test.tsx > applies coupon discount
+AssertionError: expected 42 to be 40 // Object.is equality
+
+- Expected
++ Received
+
+- 40
++ 42
+
+ ❯ src/cart-total.test.tsx:14:24
+     12|   const total = applyCoupon(cartTotal(items), "SAVE20")
+     13|
+     14|   expect(total).toBe(40)
+       |                        ^
+     15| })
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  10:21:07
+   Duration  621ms
+
+Process completed with exit code 1
