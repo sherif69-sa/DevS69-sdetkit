@@ -33,6 +33,9 @@ Use `docs/starter-work-inventory.md` for concrete categories mapped to this repo
    - Resolve Ruff/mypy findings without behavior changes.
 4. **CLI/docs alignment**
    - Update docs when command names/options/output changed.
+5. **Dependency review support**
+   - Improve dependency-update review guidance without changing package pins.
+   - Start with the [dependency review playbook](dependency-review-playbook.md).
 
 ## 3) Validate locally before opening a PR
 
