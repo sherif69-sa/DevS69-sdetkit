@@ -17,6 +17,8 @@ Use this page as a concise handoff, then follow the detailed path in [`CONTRIBUT
    - `python -m sdetkit doctor` — environment diagnostics snapshot.
    - Detailed rationale and surrounding guidance: [`CONTRIBUTING.md`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CONTRIBUTING.md#canonical-release-confidence-alignment-check).
 
+Dependency and GitHub Actions update reviewers should also use the [dependency review playbook](dependency-review-playbook.md).
+
 ## What not to change in this docs sprint
 
 - Do not add new product surfaces, kits, bots, workers, or integrations.
