@@ -39,6 +39,33 @@ Before merge, inspect:
 
 Never reuse proof from an older head after a rebase, Dependabot refresh, or `main` movement.
 
+## Refresh handling
+
+When a dependency PR becomes non-mergeable after `main` moves:
+
+- do not force the merge;
+- refresh or rebase the branch through the approved repository flow;
+- re-check the refreshed exact head before merge;
+- keep unrelated human-authored improvements in separate follow-up PRs.
+
+The refreshed head is a new proof target, even when the changed files look identical.
+
+## Merge evidence checklist
+
+Before merging, the final review note or squash description should capture:
+
+```text
+PR: #<number>
+Head: <exact-sha>
+Required statuses:
+- ci=success
+- maintenance-autopilot=success
+Changed surface:
+- <files or dependency group>
+```
+
+If the branch head changes during review, replace the recorded SHA and repeat the proof check.
+
 ## Human follow-up candidates
 
 Create a separate human-authored PR when a dependency update reveals work beyond the version bump:
@@ -49,7 +76,7 @@ Create a separate human-authored PR when a dependency update reveals work beyond
 - a contributor checklist that explains how to validate the changed surface;
 - removal of stale notes after the dependency makes them obsolete.
 
-These follow-up PRs can include human co-authorship when the contributors actually helped design or review the change.
+These follow-up PRs should stay small, reviewable, and independent from the bot-authored version bump.
 
 ## Authority boundary
 
