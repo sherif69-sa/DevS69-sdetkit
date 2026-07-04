@@ -32,6 +32,19 @@ decision=defer_pending_human_review
 - The deploy job uses pinned `actions/deploy-pages`.
 - Existing generated evidence for `deployment_or_oidc` says `requires_human_review=true`, `safe_to_patch=false`, and `next_allowed_action=collect_human_review_evidence`.
 
+## Deployment-stage failure triage note
+
+A Pages deployment can fail after the site artifact is already built and uploaded. Treat this as a deployment-stage signal when the log shows all of the following:
+
+1. `actions/deploy-pages` starts successfully.
+2. The `github-pages` artifact metadata is found.
+3. A Pages deployment is created for a concrete commit SHA.
+4. The final status check returns a deployment failure after creation.
+
+This signature is different from a documentation build failure, missing artifact, permission-reduction finding, or broken link. The first operator action is to verify whether the failure repeats on a later run before changing workflow permissions or build steps.
+
+The Node `punycode` deprecation warning emitted by the action runtime is informational unless a later step turns it into a hard failure.
+
 ## Reviewer decision
 
 Pending.
