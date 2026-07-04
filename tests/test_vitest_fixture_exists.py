@@ -25,7 +25,7 @@ def test_vitest_fixture_is_extracted_as_review_first_javascript_test() -> None:
     assert result.ecosystem == "javascript_typescript"
     assert result.tool == "vitest"
     assert result.vector.failure_class == "test"
-    assert result.vector.affected_files == ("src/cart-total.test.tsx",)
+    assert result.vector.affected_files == ("src/cart-total.test.ts",)
     assert result.vector.local_repro_command == "npm test"
     assert result.vector.exit_code == 1
     assert result.vector.safe_fix_candidate is False
