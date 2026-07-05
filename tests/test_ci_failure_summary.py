@@ -164,9 +164,7 @@ def test_failure_summary_cli_writes_json_and_markdown(
         "failure_observed": True,
         "status": "failure_observed",
     }
-    report = json.loads(
-        (out_dir / "full-suite-failure-summary.json").read_text(encoding="utf-8")
-    )
+    report = json.loads((out_dir / "full-suite-failure-summary.json").read_text(encoding="utf-8"))
     markdown = (out_dir / "full-suite-failure-summary.md").read_text(encoding="utf-8")
     assert report["first_failure"]["name"] == "test_fails"
     assert "# Full-suite failure summary" in markdown
