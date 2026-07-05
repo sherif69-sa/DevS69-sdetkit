@@ -1,0 +1,41 @@
+name: format-pr-2006
+
+on:
+  push:
+    branches:
+      - feat/adoption-gitlab-ci-proof-commands
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: feat/adoption-gitlab-ci-proof-commands
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.12'
+      - name: Install formatter
+        run: python -m pip install 'ruff==0.15.20'
+      - name: Format adoption implementation and remove temporary workflow
+        run: |
+          python -m ruff format src/sdetkit/_adoption_surface_impl_tmp.py
+          rm .github/workflows/format-pr-2006.yml
+      - name: Commit formatter result
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/sdetkit/_adoption_surface_impl_tmp.py .github/workflows/format-pr-2006.yml
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'style(adoption): format temporary implementation'
+          git push origin HEAD:feat/adoption-gitlab-ci-proof-commands
