@@ -20,7 +20,7 @@ def test_full_ci_emits_junit_for_raw_observation_capture_without_extra_test_run(
     assert "--junitxml=${{ runner.temp }}/sdetkit-trusted-test-input/junit.xml" in coverage_block
     assert "- name: Coverage gate" in full_ci
     assert "id: coverage" in full_ci
-    assert full_ci.count("bash quality.sh cov") == 1
+    assert full_ci.count("run: bash quality.sh cov") == 1
     assert "python -m sdetkit.trusted_test_observation_capture" in full_ci
 
 
