@@ -84,7 +84,7 @@ where = ["src"]
 [tool.ruff]
 target-version = "py310"
 line-length = 100
-extend-exclude = ["templates/platform_problem/rich", "src/sdetkit/_adoption_surface_impl_tmp.py"]
+extend-exclude = ["templates/platform_problem/rich"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
