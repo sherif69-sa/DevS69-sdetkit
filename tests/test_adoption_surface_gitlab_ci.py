@@ -33,7 +33,7 @@ pytest_job:
     - mypy src
 security_scan:
   script: pip-audit
-unknown_job:
+message_job:
   script: echo smoke
 """.lstrip(),
     )
@@ -47,7 +47,7 @@ unknown_job:
     assert commands["python -m ruff check ."]["purpose"] == "lint"
     assert commands["mypy src"]["purpose"] == "type"
     assert commands["pip-audit"]["purpose"] == "security"
-    assert commands["echo smoke"]["purpose"] == "unknown"
+    assert "echo smoke" not in commands
     assert commands["python -m pytest -q"]["source"] == {
         "ci_system": "gitlab_ci",
         "file": ".gitlab-ci.yml",

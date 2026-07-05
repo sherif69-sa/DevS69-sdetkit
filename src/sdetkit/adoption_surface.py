@@ -269,6 +269,10 @@ def _command_is_dynamic(command: str) -> bool:
     return any(token in command for token in ("$", "`", "*", "&"))
 
 
+def _command_is_shell_message(command: str) -> bool:
+    return command.lstrip().lower().startswith("echo ")
+
+
 def _classify_proof_purpose(command: str) -> str:
     normalized = command.lower()
     if any(
@@ -365,6 +369,8 @@ def _extract_gitlab_job_script_commands(
                     )
                     continue
                 for command in values:
+                    if _command_is_shell_message(command):
+                        continue
                     if _command_is_dynamic(command):
                         unknowns.append(
                             f"GitLab CI job {job_name} has dynamic script command that was not guessed"
@@ -390,6 +396,8 @@ def _extract_gitlab_job_script_commands(
                 )
                 continue
             for command in values:
+                if _command_is_shell_message(command):
+                    continue
                 if _command_is_dynamic(command):
                     unknowns.append(
                         f"GitLab CI job {job_name} has dynamic script command that was not guessed"
