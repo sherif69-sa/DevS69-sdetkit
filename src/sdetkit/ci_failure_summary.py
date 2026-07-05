@@ -204,10 +204,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
         [
             "## Boundary",
             "",
-            (
-                "- Diagnostic only: "
-                f"`{str(bool(boundary.get('diagnostic_only'))).lower()}`"
-            ),
+            (f"- Diagnostic only: `{str(bool(boundary.get('diagnostic_only'))).lower()}`"),
             (
                 "- Flaky classification performed: "
                 f"`{str(bool(boundary.get('flaky_classification_performed'))).lower()}`"
@@ -216,14 +213,8 @@ def render_markdown(report: Mapping[str, Any]) -> str:
                 "- Failure suppression allowed: "
                 f"`{str(bool(boundary.get('failure_suppression_allowed'))).lower()}`"
             ),
-            (
-                "- Automation allowed: "
-                f"`{str(bool(boundary.get('automation_allowed'))).lower()}`"
-            ),
-            (
-                "- Merge authorized: "
-                f"`{str(bool(boundary.get('merge_authorized'))).lower()}`"
-            ),
+            (f"- Automation allowed: `{str(bool(boundary.get('automation_allowed'))).lower()}`"),
+            (f"- Merge authorized: `{str(bool(boundary.get('merge_authorized'))).lower()}`"),
             "",
         ]
     )
