@@ -49,6 +49,34 @@ Use these source files as the working checklist for future PRs:
 
 Every future PR should state which prompt/source file it is using, which roadmap lane it advances, the expected validation commands, the rollback path, and the next recommended PR.
 
+### Source role matrix
+
+| Source area | Files | Future PR use |
+| --- | --- | --- |
+| Start and authority | `00_index_and_usage.md`, `01_repo_constitution.md`, `02_cto_operating_model.md`, `03_repo_reading_protocol.md` | Confirm the active source set, repo mission, stop rules, and required first read before work starts. |
+| PR control | `04_change_classification_and_pr_cards.md`, `18_review_rubrics.md`, `22_templates_library.md` | Build the PR card, risk class, review verdict, rollback path, and next-step handoff. |
+| Green-main and CI | `05_green_main_and_baseline_gates.md`, `10_ci_workflow_governance.md`, `16_failure_triage_playbook.md`, `17_incident_response_and_recovery.md` | Keep main green, diagnose failed gates, add first-failure artifacts, and recover safely from red CI. |
+| Naming and architecture | `06_naming_constitution.md`, `07_naming_debt_burndown.md`, `15_refactor_and_migration_playbook.md` | Control naming, migrations, module splits, compatibility shims, and cleanup waves. |
+| Tests and fixtures | `08_test_suite_professionalization.md`, `14_feature_development_playbook.md` | Require behavior-first tests, fixtures, regression coverage, and feature acceptance checks. |
+| Docs and source grounding | `09_docs_navigation_governance.md`, `23_source_grounding_and_research_rules.md` | Keep docs discoverable, buildable, linked, and grounded in repo or cited sources. |
+| Dependencies and release | `11_dependency_hygiene.md`, `12_release_and_supply_chain_governance.md` | Protect dependency truth, wheel/sdist quality, smoke installs, and release verification. |
+| Security | `13_security_posture.md` | Guard workflow permissions, protected files, secret-like content, and security gates. |
+| Cadence and KPIs | `19_weekly_monthly_quarterly_cadence.md`, `20_roadmap_and_kpi_system.md` | Keep roadmap progress, KPI targets, and action register current after each meaningful PR. |
+| Local fallback | `21_wsl2_command_book.md` | Provide exact local commands when connector or CI evidence is insufficient. |
+| Active overlay | `24_master_prompt.md` | Anchor diagnosis-first upgrades, control-plane ideas, verifier behavior, and reliability-platform direction. |
+
+### Upgrade execution ladder
+
+| Step | Upgrade slice | Primary source files | Definition of done |
+| ---: | --- | --- | --- |
+| 1 | Full-suite failure visibility | `10_ci_workflow_governance.md`, `16_failure_triage_playbook.md`, `05_green_main_and_baseline_gates.md` | Long pytest/coverage/matrix failures leave a concise artifact with first failure, traceback summary, environment, and reproduction command. |
+| 2 | Merge-readiness monitor | `04_change_classification_and_pr_cards.md`, `05_green_main_and_baseline_gates.md`, `18_review_rubrics.md` | A local or CI artifact reports required checks as green, pending, failed, skipped, or action-required with the next owner action. |
+| 3 | Package footprint guardrail | `12_release_and_supply_chain_governance.md`, `11_dependency_hygiene.md` | Wheel/sdist validation flags duplicate module content, unexpected helper files, missing package data, and public-surface drift before long CI. |
+| 4 | Adoption provider parity | `14_feature_development_playbook.md`, `08_test_suite_professionalization.md`, `24_master_prompt.md` | GitHub Actions, GitLab CI, Jenkins, and local-script proof discovery follow the same read-only/review-first semantics. |
+| 5 | Adoption fixture expansion | `08_test_suite_professionalization.md`, `14_feature_development_playbook.md` | Fixtures cover Python, JavaScript/TypeScript, Go, Rust, Java, .NET, docs, security, release, and mixed-CI repos. |
+| 6 | Operator docs and repair playbooks | `09_docs_navigation_governance.md`, `16_failure_triage_playbook.md`, `21_wsl2_command_book.md` | Docs explain adoption discovery, review-first unknowns, PR repair, clean retriggers, and local fallback commands. |
+| 7 | Roadmap-to-PR traceability | `20_roadmap_and_kpi_system.md`, `04_change_classification_and_pr_cards.md`, `22_templates_library.md` | PR bodies or templates always capture source file, lane, KPI impact, validation, rollback, and next PR. |
+
 ## Completion baseline carried forward
 
 | Completed Adaptive Intelligence lane | Proof surface to protect |
