@@ -330,6 +330,37 @@ jobs:
           PYTEST_ADDOPTS: "-n auto --junitxml=${{ runner.temp }}/sdetkit-trusted-test-input/junit.xml"
         run: bash quality.sh cov
 
+      - name: Build full-suite failure summary
+        id: full_suite_failure_summary
+        if: ${{ always() && steps.coverage.outcome != 'skipped' }}
+        run: |
+          mkdir -p build/full-suite-failure-summary
+          python -m sdetkit.ci_failure_summary \
+            --junit-xml "${RUNNER_TEMP}/sdetkit-trusted-test-input/junit.xml" \
+            --workflow "CI" \
+            --job "Full CI lane" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --head-sha "${GITHUB_SHA}" \
+            --command "bash quality.sh cov" \
+            --event-name "${GITHUB_EVENT_NAME}" \
+            --ref-name "${GITHUB_REF}" \
+            --out-dir build/full-suite-failure-summary \
+            --format json \
+            > build/full-suite-failure-summary-cli.json
+          echo "artifact_written=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload full-suite failure summary artifact
+        if: ${{ always() && steps.coverage.outcome == 'failure' && steps.full_suite_failure_summary.outputs.artifact_written == 'true' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: full-suite-failure-summary
+          path: |
+            build/full-suite-failure-summary/full-suite-failure-summary.json
+            build/full-suite-failure-summary/full-suite-failure-summary.md
+            build/full-suite-failure-summary-cli.json
+          retention-days: 14
+          if-no-files-found: error
+
       - name: Normalize trusted-main test observations
         id: trusted_observations
         if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.coverage.outcome != 'skipped' }}
