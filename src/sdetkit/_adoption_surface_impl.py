@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Compatibility shim for adoption surface implementation imports."""
+
+from __future__ import annotations
 
 from sdetkit._adoption_surface_discovery import (
     SCHEMA_VERSION,
