@@ -24,15 +24,15 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
 
     assert payload["ok"] is True, payload["mismatches"]
     assert all(payload["checks"].values())
-    assert payload["observed"]["source_module_count"] == 498
-    assert payload["observed"]["typing_debt_module_count"] == 479
+    assert payload["observed"]["source_module_count"] == 499
+    assert payload["observed"]["typing_debt_module_count"] == 480
     checked = payload["observed"]["explicitly_type_checked_modules"]
     assert "sdetkit.failure_vector_adapters" in checked
     assert "sdetkit.protected_proof_chain" in checked
     assert "sdetkit.pr_quality_required_terminal" in checked
     inventory = payload["typing_debt_inventory"]
-    assert inventory["module_count"] == 479
-    assert len(inventory["modules"]) == 479
+    assert inventory["module_count"] == 480
+    assert len(inventory["modules"]) == 480
     assert "sdetkit.pr_quality_adaptive_diagnosis" in inventory["modules"]
     assert "sdetkit.evidence_binding" in inventory["modules"]
 
@@ -52,7 +52,7 @@ def test_quality_truth_baseline_reports_machine_readable_mismatches(tmp_path: Pa
             "check": "source_module_count_matches",
             "metric": "source_module_count",
             "expected": 0,
-            "actual": 498,
+            "actual": 499,
         }
     ]
 
