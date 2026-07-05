@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from xml.etree import ElementTree as ET
 
 import pytest
 
@@ -51,7 +50,9 @@ def _summary(junit_xml: Path) -> dict:
     )
 
 
-def test_failure_summary_reports_first_failure_without_changing_outcome(tmp_path: Path) -> None:
+def test_failure_summary_reports_first_failure_without_changing_outcome(
+    tmp_path: Path,
+) -> None:
     report = _summary(_write(tmp_path / "junit.xml", _junit_xml()))
 
     assert report["schema_version"] == SCHEMA_VERSION
@@ -81,10 +82,16 @@ def test_failure_summary_reports_first_failure_without_changing_outcome(tmp_path
     }
 
 
-def test_failure_summary_handles_passing_junit_without_claiming_failure(tmp_path: Path) -> None:
+def test_failure_summary_handles_passing_junit_without_claiming_failure(
+    tmp_path: Path,
+) -> None:
     junit = _write(
         tmp_path / "junit.xml",
-        "<testsuites><testsuite><testcase classname='tests.ok' name='test_ok' /></testsuite></testsuites>",
+        (
+            "<testsuites><testsuite>"
+            "<testcase classname='tests.ok' name='test_ok' />"
+            "</testsuite></testsuites>"
+        ),
     )
 
     report = _summary(junit)
@@ -118,7 +125,10 @@ def test_failure_summary_writes_diagnostic_status_without_junit(
     assert report["decision_boundary"]["failure_suppression_allowed"] is False
 
 
-def test_failure_summary_cli_writes_json_and_markdown(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_failure_summary_cli_writes_json_and_markdown(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     junit = _write(tmp_path / "junit.xml", _junit_xml())
     out_dir = tmp_path / "summary"
 
@@ -154,7 +164,9 @@ def test_failure_summary_cli_writes_json_and_markdown(tmp_path: Path, capsys: py
         "failure_observed": True,
         "status": "failure_observed",
     }
-    report = json.loads((out_dir / "full-suite-failure-summary.json").read_text(encoding="utf-8"))
+    report = json.loads(
+        (out_dir / "full-suite-failure-summary.json").read_text(encoding="utf-8")
+    )
     markdown = (out_dir / "full-suite-failure-summary.md").read_text(encoding="utf-8")
     assert report["first_failure"]["name"] == "test_fails"
     assert "# Full-suite failure summary" in markdown
