@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import Any
 
 from sdetkit.failure_vector import FailureVector, extract_failure_vector
 
@@ -36,6 +38,145 @@ class FailureVectorAdapterResult:
             "target_code_execution": False,
         }
         return payload
+
+
+def extract_ci_failure_summary_vector(
+    report: Mapping[str, Any],
+    *,
+    log_url: str | None = None,
+    environment: str = "github_actions",
+) -> FailureVectorAdapterResult:
+    """Convert a read-only full-suite summary artifact into a FailureVector."""
+
+    source = _summary_mapping(report.get("source"))
+    first_failure = _summary_mapping(report.get("first_failure"))
+    workflow = _summary_text(source.get("workflow")) or "unknown"
+    job = _summary_text(source.get("job")) or "unknown"
+    command = _summary_text(source.get("command")) or "unknown"
+    status = _summary_text(report.get("status")) or "unknown"
+    check = _summary_check_name(workflow, job)
+
+    if not first_failure:
+        vector = FailureVector(
+            check=check,
+            command=command,
+            exit_code=None,
+            failure_class="unknown",
+            risk="high",
+            scope="unknown",
+            reproducible_locally="not_run",
+            safe_fix_candidate=False,
+            first_failing_line=f"{status}: no failed junit testcase observed",
+            affected_files=(),
+            log_url=log_url,
+            local_repro_command=command if command != "unknown" else None,
+            environment=environment,
+            headline_signal=f"{check}: unknown",
+            actual_failure=status,
+            failure_type="unknown",
+            failing_command=command,
+            failing_test_or_check=check,
+            owner_hint=check,
+            safe_fix_allowed=False,
+        )
+        return FailureVectorAdapterResult(
+            vector=vector,
+            ecosystem="python",
+            tool="pytest",
+            confidence="low",
+            uncertainty=(f"ci_failure_summary_status_{status}",),
+        )
+
+    classname = _summary_text(first_failure.get("classname"))
+    name = _summary_text(first_failure.get("name"))
+    message = _summary_text(first_failure.get("message"))
+    text_excerpt = _summary_text(first_failure.get("text_excerpt"))
+    path = _junit_classname_to_path(classname)
+    node = _pytest_node(path, classname, name)
+    first_line = _summary_failure_line(node, message, text_excerpt)
+    vector = FailureVector(
+        check=check,
+        command=command,
+        exit_code=None,
+        failure_class="test",
+        risk="medium",
+        scope="pr_owned_only" if path else "unknown",
+        reproducible_locally="not_run",
+        safe_fix_candidate=False,
+        first_failing_line=first_line,
+        affected_files=(path,) if path else (),
+        log_url=log_url,
+        local_repro_command=_pytest_repro_command(path, name),
+        environment=environment,
+        headline_signal=f"{check}: test",
+        actual_failure=message or _first_summary_line(text_excerpt) or first_line,
+        failure_type="test",
+        failing_command=command,
+        failing_test_or_check=node or check,
+        owner_hint=path or check,
+        safe_fix_allowed=False,
+    )
+    return FailureVectorAdapterResult(
+        vector=vector,
+        ecosystem="python",
+        tool="pytest",
+        confidence="high",
+        uncertainty=(),
+    )
+
+
+def _summary_mapping(value: Any) -> Mapping[str, Any]:
+    return value if isinstance(value, Mapping) else {}
+
+
+def _summary_text(value: Any) -> str:
+    return str(value or "").replace("\r", " ").strip()
+
+
+def _summary_check_name(workflow: str, job: str) -> str:
+    if workflow == "unknown" and job == "unknown":
+        return "full_suite"
+    return f"{workflow}/{job}"
+
+
+def _junit_classname_to_path(classname: str) -> str:
+    if not classname:
+        return ""
+    path = classname.replace(".", "/") + ".py"
+    if path.startswith(("src/", "tests/")):
+        return path
+    return ""
+
+
+def _pytest_node(path: str, classname: str, name: str) -> str:
+    if path and name:
+        return f"{path}::{name}"
+    if name:
+        return name
+    return classname
+
+
+def _summary_failure_line(node: str, message: str, text_excerpt: str) -> str:
+    detail = message or _first_summary_line(text_excerpt)
+    if node and detail:
+        return f"FAILED {node} - {detail}"
+    if node:
+        return f"FAILED {node}"
+    return detail or "FAILED unknown junit testcase"
+
+
+def _first_summary_line(text: str) -> str:
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped:
+            return stripped
+    return ""
+
+
+def _pytest_repro_command(path: str, name: str) -> str | None:
+    if path and name:
+        return f"PYTHONPATH=src python -m pytest -q {path}::{name} -o addopts="
+    return None
 
 
 def extract_ecosystem_failure_vector(
