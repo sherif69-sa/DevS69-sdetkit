@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "sdetkit.adoption_surface.v1"
-
 REQUIRED_LIST_FIELDS = (
     "detected_languages",
     "package_managers",
@@ -21,19 +20,13 @@ REQUIRED_LIST_FIELDS = (
     "recommended_proof_commands",
     "review_first_unknowns",
 )
-
 REQUIRED_FALSE_FIELDS = (
     "automation_allowed",
     "patch_application_allowed",
     "merge_authorized",
     "semantic_equivalence_proven",
 )
-
-REQUIRED_OBJECT_FIELDS = (
-    "repo_identity",
-    "operator_summary",
-)
-
+REQUIRED_OBJECT_FIELDS = ("repo_identity", "operator_summary")
 IGNORED_PARTS = {
     ".git",
     ".mypy_cache",
@@ -44,6 +37,19 @@ IGNORED_PARTS = {
     "__pycache__",
     "node_modules",
     "site",
+}
+GITLAB_RESERVED_TOP_LEVEL_KEYS = {
+    "after_script",
+    "before_script",
+    "cache",
+    "default",
+    "image",
+    "include",
+    "pages",
+    "services",
+    "stages",
+    "variables",
+    "workflow",
 }
 
 
@@ -57,28 +63,6 @@ def _file(root: Path, path: str) -> bool:
 
 def _dir(root: Path, path: str) -> bool:
     return (root / path).is_dir()
-
-
-def _glob_files(root: Path, pattern: str) -> list[str]:
-    return sorted(_rel(root, path) for path in root.glob(pattern) if path.is_file())
-
-
-def _recursive_files(root: Path, pattern: str) -> list[str]:
-    files: list[str] = []
-    for path in root.rglob(pattern):
-        if not path.is_file():
-            continue
-        if any(part in IGNORED_PARTS for part in path.relative_to(root).parts):
-            continue
-        files.append(_rel(root, path))
-    return sorted(files)
-
-
-def _recursive_files_for_patterns(
-    root: Path,
-    patterns: Sequence[str],
-) -> list[str]:
-    return sorted({path for pattern in patterns for path in _recursive_files(root, pattern)})
 
 
 def _read_text(root: Path, path: str) -> str:
@@ -96,10 +80,28 @@ def _read_json(root: Path, path: str) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _glob_files(root: Path, pattern: str) -> list[str]:
+    return sorted(_rel(root, path) for path in root.glob(pattern) if path.is_file())
+
+
+def _recursive_files(root: Path, pattern: str) -> list[str]:
+    files: list[str] = []
+    for path in root.rglob(pattern):
+        if not path.is_file():
+            continue
+        if any(part in IGNORED_PARTS for part in path.relative_to(root).parts):
+            continue
+        files.append(_rel(root, path))
+    return sorted(files)
+
+
+def _recursive_files_for_patterns(root: Path, patterns: Sequence[str]) -> list[str]:
+    return sorted({path for pattern in patterns for path in _recursive_files(root, pattern)})
+
+
 def _add_named(items: list[dict[str, Any]], name: str, **fields: Any) -> None:
-    if any(item.get("name") == name for item in items):
-        return
-    items.append({"name": name, **fields})
+    if not any(item.get("name") == name for item in items):
+        items.append({"name": name, **fields})
 
 
 def _add_proof_command(
@@ -109,17 +111,26 @@ def _add_proof_command(
     command: str,
     confidence: str,
     purpose: str,
+    evidence: Sequence[str] | None = None,
+    source: dict[str, Any] | None = None,
 ) -> None:
-    items.append(
-        {
-            "surface": surface,
-            "command": command,
-            "confidence": confidence,
-            "purpose": purpose,
-            "executes_untrusted_code": True,
-            "auto_run_allowed": False,
-        }
-    )
+    item: dict[str, Any] = {
+        "surface": surface,
+        "command": command,
+        "confidence": confidence,
+        "purpose": purpose,
+        "executes_untrusted_code": True,
+        "auto_run_allowed": False,
+    }
+    if evidence:
+        item["evidence"] = list(evidence)
+    if source:
+        item["source"] = dict(source)
+    if not any(
+        existing.get("surface") == surface and existing.get("command") == command
+        for existing in items
+    ):
+        items.append(item)
 
 
 def _workflow_files(root: Path) -> list[str]:
@@ -129,29 +140,22 @@ def _workflow_files(root: Path) -> list[str]:
 
 
 def _owned_script_files(root: Path) -> list[str]:
-    named_scripts = [
+    named = [
         path
-        for path in ["Makefile", "Taskfile.yml", "Taskfile.yaml", "justfile", "Justfile"]
+        for path in ("Makefile", "Taskfile.yml", "Taskfile.yaml", "justfile", "Justfile")
         if _file(root, path)
     ]
-    return sorted(set(named_scripts + _recursive_files(root, "*.sh")))
+    return sorted(set(named + _recursive_files(root, "*.sh")))
 
 
-def _workflow_text(root: Path, files: list[str]) -> str:
-    return "\n".join(_read_text(root, path).lower() for path in files)
-
-
-def _files_containing(root: Path, files: list[str], needle: str) -> list[str]:
+def _files_containing(root: Path, files: Sequence[str], needle: str) -> list[str]:
     normalized = needle.lower()
     return sorted(path for path in files if normalized in _read_text(root, path).lower())
 
 
 def _package_json_has_test(root: Path) -> bool:
-    payload = _read_json(root, "package.json")
-    scripts = payload.get("scripts")
-    if not isinstance(scripts, dict):
-        return False
-    return bool(str(scripts.get("test", "")).strip())
+    scripts = _read_json(root, "package.json").get("scripts")
+    return isinstance(scripts, dict) and bool(str(scripts.get("test", "")).strip())
 
 
 def _javascript_test_command(root: Path) -> str:
@@ -163,26 +167,24 @@ def _javascript_test_command(root: Path) -> str:
 
 
 def _make_target_exists(root: Path, target: str) -> bool:
-    makefile = root / "Makefile"
-    if not makefile.is_file():
-        return False
-    prefix = f"{target}:"
-    for line in makefile.read_text(encoding="utf-8", errors="ignore").splitlines():
-        if line.startswith(prefix):
-            return True
-    return False
+    return _file(root, "Makefile") and any(
+        line.startswith(f"{target}:") for line in _read_text(root, "Makefile").splitlines()
+    )
 
 
 def _quality_proof_command(root: Path) -> str:
-    if _make_target_exists(root, "proof-after-format"):
-        return "make proof-after-format"
-    return "python -m pre_commit run -a"
+    return (
+        "make proof-after-format"
+        if _make_target_exists(root, "proof-after-format")
+        else "python -m pre_commit run -a"
+    )
 
 
 def _tox_config_evidence(root: Path) -> list[str]:
     evidence = ["tox.ini"] if _file(root, "tox.ini") else []
-    pyproject_text = _read_text(root, "pyproject.toml")
-    if any(line.strip() == "[tool.tox]" for line in pyproject_text.splitlines()):
+    if any(
+        line.strip() == "[tool.tox]" for line in _read_text(root, "pyproject.toml").splitlines()
+    ):
         evidence.append("pyproject.toml")
     return evidence
 
@@ -194,15 +196,10 @@ def _sanitize_remote_url(url: str) -> str:
     return f"{scheme}://{rest.rsplit('@', 1)[-1]}"
 
 
-def _git_detected(root: Path) -> bool:
-    return (root / ".git").exists()
-
-
 def _git_remote_url(root: Path) -> str:
     config = root / ".git" / "config"
     if not config.is_file():
         return ""
-
     in_origin = False
     for raw_line in config.read_text(encoding="utf-8", errors="ignore").splitlines():
         line = raw_line.strip()
@@ -214,18 +211,15 @@ def _git_remote_url(root: Path) -> str:
     return ""
 
 
-def _is_current_sdetkit_repo(root: Path) -> bool:
-    try:
-        return root.resolve() == Path.cwd().resolve()
-    except OSError:
-        return False
-
-
 def _repo_identity(root: Path) -> dict[str, Any]:
+    try:
+        is_current = root.resolve() == Path.cwd().resolve()
+    except OSError:
+        is_current = False
     return {
         "name": root.resolve().name if root.exists() else root.name,
-        "is_current_sdetkit_repo": _is_current_sdetkit_repo(root),
-        "git_detected": _git_detected(root),
+        "is_current_sdetkit_repo": is_current,
+        "git_detected": (root / ".git").exists(),
         "remote_url": _git_remote_url(root),
     }
 
@@ -233,10 +227,222 @@ def _repo_identity(root: Path) -> dict[str, Any]:
 def _operator_summary() -> dict[str, str]:
     return {
         "status": "read_only_profile_generated",
-        "next_action": (
-            "Review detected surfaces and manually run trusted proof commands in the target repo."
-        ),
+        "next_action": "Review detected surfaces and manually run trusted proof commands in the target repo.",
     }
+
+
+def _top_level_yaml_key(raw_line: str) -> tuple[str, str] | None:
+    if not raw_line or raw_line.startswith((" ", "\t")):
+        return None
+    stripped = raw_line.strip()
+    if not stripped or stripped.startswith("#") or ":" not in stripped:
+        return None
+    key, value = stripped.split(":", 1)
+    return (key.strip(), value.strip()) if key.strip() else None
+
+
+def _strip_literal(value: str) -> str:
+    value = value.strip().rstrip(",")
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    return value
+
+
+def _literal_gitlab_script_values(value: str) -> tuple[list[str], bool]:
+    value = value.strip()
+    if not value:
+        return [], False
+    if value in {"|", ">", "|-", ">-", "|+", ">+"}:
+        return [], True
+    if value.startswith("["):
+        try:
+            parsed = json.loads(value.replace("'", '"'))
+        except json.JSONDecodeError:
+            return [], True
+        if not isinstance(parsed, list) or not all(isinstance(item, str) for item in parsed):
+            return [], True
+        return [item.strip() for item in parsed if item.strip()], False
+    return [_strip_literal(value)], False
+
+
+def _command_is_dynamic(command: str) -> bool:
+    return any(token in command for token in ("$", "`", "*", "&"))
+
+
+def _command_is_shell_message(command: str) -> bool:
+    return command.lstrip().lower().startswith("echo ")
+
+
+def _classify_proof_purpose(command: str) -> str:
+    normalized = command.lower()
+    if any(
+        needle in normalized
+        for needle in (
+            "pip-audit",
+            "pip_audit",
+            "npm audit",
+            "cargo audit",
+            "govulncheck",
+            "bandit",
+            "safety check",
+            "trivy",
+            "semgrep",
+            "codeql",
+        )
+    ):
+        return "security"
+    if any(
+        needle in normalized for needle in ("mypy", "pyright", "tsc", "typecheck", "type-check")
+    ):
+        return "type"
+    if any(
+        needle in normalized
+        for needle in ("ruff", "flake8", "eslint", "pylint", "golangci-lint", "clippy")
+    ):
+        return "lint"
+    if any(
+        needle in normalized
+        for needle in (
+            "pytest",
+            "npm test",
+            "pnpm test",
+            "yarn test",
+            "go test",
+            "cargo test",
+            "mvn test",
+            "gradle test",
+            "./gradlew test",
+            "dotnet test",
+            "vitest",
+            "jest",
+        )
+    ):
+        return "test"
+    if any(needle in normalized for needle in ("mkdocs", "sphinx", "docs")):
+        return "docs"
+    return "unknown"
+
+
+def _iter_gitlab_jobs(text: str) -> list[tuple[str, list[str]]]:
+    jobs: list[tuple[str, list[str]]] = []
+    current_name = ""
+    current_block: list[str] = []
+    for raw_line in text.splitlines():
+        parsed = _top_level_yaml_key(raw_line)
+        if parsed is not None:
+            if current_name:
+                jobs.append((current_name, current_block))
+            current_name = parsed[0]
+            current_block = [raw_line]
+            continue
+        if current_name:
+            current_block.append(raw_line)
+    if current_name:
+        jobs.append((current_name, current_block))
+    return jobs
+
+
+def _extract_gitlab_job_script_commands(
+    job_name: str, block: list[str]
+) -> tuple[list[str], list[str]]:
+    commands: list[str] = []
+    unknowns: list[str] = []
+    in_script = False
+    script_indent = 0
+    for raw_line in block[1:]:
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        if stripped.startswith(("extends:", "rules:", "needs:")):
+            unknowns.append(
+                f"GitLab CI job {job_name} uses dynamic or inherited behavior that was not resolved"
+            )
+        if in_script and indent <= script_indent and not stripped.startswith("-"):
+            in_script = False
+        if in_script:
+            if stripped.startswith("-"):
+                values, unresolved = _literal_gitlab_script_values(stripped[1:].strip())
+                if unresolved:
+                    unknowns.append(
+                        f"GitLab CI job {job_name} has unresolved script content that was not guessed"
+                    )
+                    continue
+                for command in values:
+                    if _command_is_shell_message(command):
+                        continue
+                    if _command_is_dynamic(command):
+                        unknowns.append(
+                            f"GitLab CI job {job_name} has dynamic script command that was not guessed"
+                        )
+                    else:
+                        commands.append(command)
+                continue
+            if stripped in {"|", ">", "|-", ">-", "|+", ">+"}:
+                unknowns.append(
+                    f"GitLab CI job {job_name} has multiline script content that was not guessed"
+                )
+            continue
+        if stripped.startswith("script:"):
+            rest = stripped.split(":", 1)[1].strip()
+            if not rest:
+                in_script = True
+                script_indent = indent
+                continue
+            values, unresolved = _literal_gitlab_script_values(rest)
+            if unresolved:
+                unknowns.append(
+                    f"GitLab CI job {job_name} has unresolved script content that was not guessed"
+                )
+                continue
+            for command in values:
+                if _command_is_shell_message(command):
+                    continue
+                if _command_is_dynamic(command):
+                    unknowns.append(
+                        f"GitLab CI job {job_name} has dynamic script command that was not guessed"
+                    )
+                else:
+                    commands.append(command)
+    return commands, unknowns
+
+
+def _extract_gitlab_ci_commands(root: Path) -> tuple[list[dict[str, Any]], list[str]]:
+    path = ".gitlab-ci.yml"
+    text = _read_text(root, path)
+    if not text:
+        return [], []
+    extracted: list[dict[str, Any]] = []
+    unknowns: list[str] = []
+    for raw_line in text.splitlines():
+        parsed = _top_level_yaml_key(raw_line)
+        if parsed is not None and parsed[0] == "include":
+            unknowns.append("GitLab CI include detected; remote configuration was not resolved")
+    for job_name, block in _iter_gitlab_jobs(text):
+        normalized = job_name.strip()
+        if (
+            not normalized
+            or normalized.startswith(".")
+            or normalized in GITLAB_RESERVED_TOP_LEVEL_KEYS
+        ):
+            continue
+        if any("&" in line or "*" in line for line in block):
+            unknowns.append(
+                f"GitLab CI job {normalized} uses YAML anchor or alias content that was not resolved"
+            )
+            continue
+        commands, job_unknowns = _extract_gitlab_job_script_commands(normalized, block)
+        unknowns.extend(job_unknowns)
+        for command in commands:
+            extracted.append(
+                {
+                    "command": command,
+                    "purpose": _classify_proof_purpose(command),
+                    "job": normalized,
+                    "file": path,
+                }
+            )
+    return extracted, sorted(set(unknowns))
 
 
 def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
@@ -244,7 +450,6 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     requirements = _glob_files(root, "requirements*.txt")
     workflows = _workflow_files(root)
     script_files = _owned_script_files(root)
-
     detected_languages: list[dict[str, Any]] = []
     package_managers: list[dict[str, Any]] = []
     test_runners: list[dict[str, Any]] = []
@@ -258,7 +463,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
 
     tox_evidence = _tox_config_evidence(root)
     python_evidence = [
-        path for path in ["pyproject.toml", "setup.cfg", "setup.py"] if _file(root, path)
+        path for path in ("pyproject.toml", "setup.cfg", "setup.py") if _file(root, path)
     ]
     python_evidence.extend(requirements)
     python_evidence.extend(tox_evidence)
@@ -266,30 +471,22 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         python_evidence.append("src/")
     if python_evidence:
         _add_named(
-            detected_languages,
-            "python",
-            confidence="high",
-            evidence=sorted(set(python_evidence)),
+            detected_languages, "python", confidence="high", evidence=sorted(set(python_evidence))
         )
-
     if requirements:
         _add_named(package_managers, "pip", files=requirements)
     if _file(root, "uv.lock"):
         _add_named(package_managers, "uv", files=["uv.lock"])
     if _file(root, "poetry.lock"):
         _add_named(package_managers, "poetry", files=["poetry.lock"])
-
-    python_tool_text = "\n".join(
+    python_text = "\n".join(
         _read_text(root, path)
         for path in ["pyproject.toml", *requirements]
         if (root / path).is_file()
     ).lower()
-    if python_evidence and "pytest" in python_tool_text:
+    if python_evidence and "pytest" in python_text:
         _add_named(
-            test_runners,
-            "pytest",
-            confidence="high",
-            commands=["python -m pytest -q -o addopts="],
+            test_runners, "pytest", confidence="high", commands=["python -m pytest -q -o addopts="]
         )
         _add_proof_command(
             recommended_proof_commands,
@@ -300,7 +497,6 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         )
     elif python_evidence and not tox_evidence:
         review_first_unknowns.append("Python project detected but test command is not proven")
-
     if tox_evidence:
         _add_proof_command(
             recommended_proof_commands,
@@ -309,7 +505,6 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             confidence="high",
             purpose="test",
         )
-
     if _file(root, ".pre-commit-config.yaml"):
         _add_proof_command(
             recommended_proof_commands,
@@ -318,15 +513,8 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             confidence="high",
             purpose="quality",
         )
-
-    sphinx_evidence = ["docs/conf.py"] if _file(root, "docs/conf.py") else []
-    if sphinx_evidence:
-        _add_named(
-            docs_tools,
-            "sphinx",
-            confidence="high",
-            evidence=sphinx_evidence,
-        )
+    if _file(root, "docs/conf.py"):
+        _add_named(docs_tools, "sphinx", confidence="high", evidence=["docs/conf.py"])
         _add_proof_command(
             recommended_proof_commands,
             surface="docs",
@@ -334,7 +522,6 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             confidence="high",
             purpose="docs",
         )
-
     if _file(root, "mkdocs.yml"):
         _add_named(
             docs_tools,
@@ -349,31 +536,23 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             confidence="high",
             purpose="docs",
         )
-    elif _dir(root, "docs") and not sphinx_evidence:
-        _add_named(
-            docs_tools,
-            "docs_directory",
-            confidence="medium",
-            evidence=["docs/"],
-        )
+    elif _dir(root, "docs") and not _file(root, "docs/conf.py"):
+        _add_named(docs_tools, "docs_directory", confidence="medium", evidence=["docs/"])
 
     js_evidence = [
         path
-        for path in [
+        for path in (
             "package.json",
             "package-lock.json",
             "pnpm-lock.yaml",
             "yarn.lock",
             "tsconfig.json",
-        ]
+        )
         if _file(root, path)
     ]
     if js_evidence:
         _add_named(
-            detected_languages,
-            "javascript_typescript",
-            confidence="medium",
-            evidence=js_evidence,
+            detected_languages, "javascript_typescript", confidence="medium", evidence=js_evidence
         )
     if _file(root, "package-lock.json"):
         _add_named(package_managers, "npm", files=["package-lock.json"])
@@ -382,17 +561,12 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     if _file(root, "yarn.lock"):
         _add_named(package_managers, "yarn", files=["yarn.lock"])
     if _file(root, "package.json") and _package_json_has_test(root):
-        node_test_command = _javascript_test_command(root)
-        _add_named(
-            test_runners,
-            "node_test_script",
-            confidence="medium",
-            commands=[node_test_command],
-        )
+        node_command = _javascript_test_command(root)
+        _add_named(test_runners, "node_test_script", confidence="medium", commands=[node_command])
         _add_proof_command(
             recommended_proof_commands,
             surface="javascript_typescript",
-            command=node_test_command,
+            command=node_command,
             confidence="medium",
             purpose="test",
         )
@@ -411,9 +585,8 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             confidence="high",
             purpose="test",
         )
-
     if _file(root, "Cargo.toml"):
-        rust_files = [path for path in ["Cargo.toml", "Cargo.lock"] if _file(root, path)]
+        rust_files = [path for path in ("Cargo.toml", "Cargo.lock") if _file(root, path)]
         _add_named(detected_languages, "rust", confidence="high", evidence=rust_files)
         _add_named(package_managers, "cargo", files=rust_files)
         _add_proof_command(
@@ -423,34 +596,32 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
             confidence="high",
             purpose="test",
         )
-
     java_files = [
         path
-        for path in ["pom.xml", "build.gradle", "build.gradle.kts", "gradlew"]
+        for path in ("pom.xml", "build.gradle", "build.gradle.kts", "gradlew")
         if _file(root, path)
     ]
     if java_files:
         _add_named(detected_languages, "java", confidence="high", evidence=java_files)
-        if _file(root, "pom.xml"):
-            _add_named(package_managers, "maven", files=["pom.xml"])
-            _add_proof_command(
-                recommended_proof_commands,
-                surface="java",
-                command="mvn test",
-                confidence="high",
-                purpose="test",
-            )
-        if _file(root, "build.gradle") or _file(root, "build.gradle.kts"):
-            _add_named(package_managers, "gradle", files=java_files)
-            gradle_wrapper_detected = _file(root, "gradlew")
-            _add_proof_command(
-                recommended_proof_commands,
-                surface="java",
-                command="./gradlew test" if gradle_wrapper_detected else "gradle test",
-                confidence="high" if gradle_wrapper_detected else "medium",
-                purpose="test",
-            )
-
+    if _file(root, "pom.xml"):
+        _add_named(package_managers, "maven", files=["pom.xml"])
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="java",
+            command="mvn test",
+            confidence="high",
+            purpose="test",
+        )
+    if _file(root, "build.gradle") or _file(root, "build.gradle.kts"):
+        _add_named(package_managers, "gradle", files=java_files)
+        has_wrapper = _file(root, "gradlew")
+        _add_proof_command(
+            recommended_proof_commands,
+            surface="java",
+            command="./gradlew test" if has_wrapper else "gradle test",
+            confidence="high" if has_wrapper else "medium",
+            purpose="test",
+        )
     dotnet_files = _recursive_files(root, "*.sln") + _recursive_files(root, "*.csproj")
     if dotnet_files:
         _add_named(detected_languages, "dotnet", confidence="high", evidence=dotnet_files)
@@ -467,31 +638,33 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         _add_named(ci_systems, "github_actions", files=workflows)
     if _file(root, ".gitlab-ci.yml"):
         _add_named(ci_systems, "gitlab_ci", files=[".gitlab-ci.yml"])
+        gitlab_commands, gitlab_unknowns = _extract_gitlab_ci_commands(root)
+        review_first_unknowns.extend(gitlab_unknowns)
+        for command in gitlab_commands:
+            _add_proof_command(
+                recommended_proof_commands,
+                surface="gitlab_ci",
+                command=str(command["command"]),
+                confidence="medium",
+                purpose=str(command["purpose"]),
+                evidence=[str(command["file"])],
+                source={
+                    "ci_system": "gitlab_ci",
+                    "file": str(command["file"]),
+                    "job": str(command["job"]),
+                },
+            )
     if _file(root, "Jenkinsfile"):
         _add_named(ci_systems, "jenkins", files=["Jenkinsfile"])
 
     codeql_evidence = _files_containing(root, workflows, "codeql")
     if codeql_evidence:
+        _add_named(security_tools, "codeql", confidence="detected", evidence=codeql_evidence)
+    dependency_evidence = _files_containing(root, workflows, "dependency-review")
+    if dependency_evidence:
         _add_named(
-            security_tools,
-            "codeql",
-            confidence="detected",
-            evidence=codeql_evidence,
+            security_tools, "dependency_review", confidence="detected", evidence=dependency_evidence
         )
-
-    dependency_review_evidence = _files_containing(
-        root,
-        workflows,
-        "dependency-review",
-    )
-    if dependency_review_evidence:
-        _add_named(
-            security_tools,
-            "dependency_review",
-            confidence="detected",
-            evidence=dependency_review_evidence,
-        )
-
     python_tool_files = [
         path for path in ["pyproject.toml", *requirements] if (root / path).is_file()
     ]
@@ -502,13 +675,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         )
     )
     if pip_audit_evidence:
-        _add_named(
-            security_tools,
-            "pip_audit",
-            confidence="detected",
-            evidence=pip_audit_evidence,
-        )
-
+        _add_named(security_tools, "pip_audit", confidence="detected", evidence=pip_audit_evidence)
     govulncheck_evidence = sorted(
         set(
             _files_containing(root, workflows, "govulncheck")
@@ -517,10 +684,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     )
     if _file(root, "go.mod") and govulncheck_evidence:
         _add_named(
-            security_tools,
-            "govulncheck",
-            confidence="detected",
-            evidence=govulncheck_evidence,
+            security_tools, "govulncheck", confidence="detected", evidence=govulncheck_evidence
         )
         _add_proof_command(
             recommended_proof_commands,
@@ -540,75 +704,23 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     ]
     if release_workflows:
         _add_named(
-            release_surfaces,
-            "release_workflow",
-            confidence="detected",
-            evidence=release_workflows,
+            release_surfaces, "release_workflow", confidence="detected", evidence=release_workflows
         )
     if _file(root, "CHANGELOG.md"):
-        _add_named(
-            release_surfaces,
-            "changelog",
-            confidence="detected",
-            evidence=["CHANGELOG.md"],
-        )
-
-    coverage_artifacts = _recursive_files_for_patterns(
-        root,
-        ("coverage.xml", "coverage.json", "lcov.info"),
-    )
-    if coverage_artifacts:
-        _add_named(
-            artifact_surfaces,
-            "coverage",
-            paths=coverage_artifacts,
-        )
-
-    junit_artifacts = _recursive_files_for_patterns(
-        root,
-        ("junit.xml", "junit-*.xml", "junit_*.xml"),
-    )
-    if junit_artifacts:
-        _add_named(
-            artifact_surfaces,
-            "junit_xml",
-            paths=junit_artifacts,
-        )
-
-    sarif_artifacts = _recursive_files_for_patterns(
-        root,
-        ("*.sarif", "*.sarif.json"),
-    )
-    if sarif_artifacts:
-        _add_named(
-            artifact_surfaces,
-            "sarif",
-            paths=sarif_artifacts,
-        )
-
-    sbom_artifacts = _recursive_files_for_patterns(
-        root,
-        (
-            "*.cdx.json",
-            "*.spdx.json",
-            "sbom.json",
-            "sbom.xml",
-            "bom.json",
-            "bom.xml",
-        ),
-    )
-    if sbom_artifacts:
-        _add_named(
-            artifact_surfaces,
-            "sbom",
-            paths=sbom_artifacts,
-        )
-
+        _add_named(release_surfaces, "changelog", confidence="detected", evidence=["CHANGELOG.md"])
+    for name, patterns in {
+        "coverage": ("coverage.xml", "coverage.json", "lcov.info"),
+        "junit_xml": ("junit.xml", "junit-*.xml", "junit_*.xml"),
+        "sarif": ("*.sarif", "*.sarif.json"),
+        "sbom": ("*.cdx.json", "*.spdx.json", "sbom.json", "sbom.xml", "bom.json", "bom.xml"),
+    }.items():
+        paths = _recursive_files_for_patterns(root, patterns)
+        if paths:
+            _add_named(artifact_surfaces, name, paths=paths)
     if _dir(root, "dist"):
         _add_named(artifact_surfaces, "python_distribution", paths=["dist/"])
     if _dir(root, "build"):
         _add_named(artifact_surfaces, "build_output", paths=["build/"])
-
     return {
         "schema_version": SCHEMA_VERSION,
         "repo_root": root.as_posix(),
@@ -622,8 +734,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         "release_surfaces": sorted(release_surfaces, key=lambda item: item["name"]),
         "artifact_surfaces": sorted(artifact_surfaces, key=lambda item: item["name"]),
         "recommended_proof_commands": sorted(
-            recommended_proof_commands,
-            key=lambda item: (item["surface"], item["command"]),
+            recommended_proof_commands, key=lambda item: (item["surface"], item["command"])
         ),
         "review_first_unknowns": sorted(set(review_first_unknowns)),
         "operator_summary": _operator_summary(),
@@ -637,52 +748,41 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
 def _format_named_items(items: object) -> list[str]:
     if not isinstance(items, list) or not items:
         return ["- none detected"]
-
-    lines: list[str] = []
+    lines = []
     for item in items:
-        if not isinstance(item, dict):
-            continue
-        name = str(item.get("name", "unknown"))
-        confidence = item.get("confidence")
-        suffix = f" ({confidence})" if confidence else ""
-        lines.append(f"- {name}{suffix}")
+        if isinstance(item, dict):
+            suffix = f" ({item['confidence']})" if item.get("confidence") else ""
+            lines.append(f"- {item.get('name', 'unknown')}{suffix}")
     return lines or ["- none detected"]
 
 
 def _format_proof_commands(items: object) -> list[str]:
     if not isinstance(items, list) or not items:
         return ["- none recommended"]
-
-    lines: list[str] = []
+    lines = []
     for item in items:
-        if not isinstance(item, dict):
-            continue
-        command = str(item.get("command", "")).strip()
-        if not command:
-            continue
-        surface = str(item.get("surface", "unknown"))
-        purpose = str(item.get("purpose", "unknown"))
-        auto_run = str(item.get("auto_run_allowed", False)).lower()
-        lines.append(
-            f"- `{command}` — surface={surface}; purpose={purpose}; auto_run_allowed={auto_run}"
-        )
+        if isinstance(item, dict) and str(item.get("command", "")).strip():
+            lines.append(
+                f"- `{item['command']}` - surface={item.get('surface', 'unknown')}; purpose={item.get('purpose', 'unknown')}; auto_run_allowed={str(item.get('auto_run_allowed', False)).lower()}"
+            )
     return lines or ["- none recommended"]
 
 
 def render_adoption_surface_report(payload: dict[str, Any]) -> str:
-    identity = payload.get("repo_identity")
-    repo_identity = identity if isinstance(identity, dict) else {}
-    operator_summary = payload.get("operator_summary")
-    summary = operator_summary if isinstance(operator_summary, dict) else {}
-
+    identity = (
+        payload.get("repo_identity") if isinstance(payload.get("repo_identity"), dict) else {}
+    )
+    summary = (
+        payload.get("operator_summary") if isinstance(payload.get("operator_summary"), dict) else {}
+    )
     lines = [
         "# SDETKit adoption readiness report",
         "",
         "## Repository",
-        f"- name: {repo_identity.get('name', 'unknown')}",
-        f"- git_detected: {str(repo_identity.get('git_detected', False)).lower()}",
-        f"- is_current_sdetkit_repo: {str(repo_identity.get('is_current_sdetkit_repo', False)).lower()}",
-        f"- remote_url: {repo_identity.get('remote_url', '')}",
+        f"- name: {identity.get('name', 'unknown')}",
+        f"- git_detected: {str(identity.get('git_detected', False)).lower()}",
+        f"- is_current_sdetkit_repo: {str(identity.get('is_current_sdetkit_repo', False)).lower()}",
+        f"- remote_url: {identity.get('remote_url', '')}",
         "",
         "## Detected languages",
         *_format_named_items(payload.get("detected_languages")),
@@ -730,9 +830,7 @@ def render_adoption_surface_report(payload: dict[str, Any]) -> str:
 
 
 def write_adoption_surface_artifact(
-    *,
-    repo_root: str | Path = ".",
-    out: str | Path = "build/sdetkit/adoption-surface.json",
+    *, repo_root: str | Path = ".", out: str | Path = "build/sdetkit/adoption-surface.json"
 ) -> dict[str, Any]:
     payload = discover_adoption_surface(repo_root)
     out_path = Path(out)
@@ -751,23 +849,18 @@ def write_adoption_surface_artifact(
 def validate_adoption_surface_payload(payload: object) -> list[str]:
     if not isinstance(payload, dict):
         return ["payload must be a JSON object"]
-
-    errors: list[str] = []
+    errors = []
     if payload.get("schema_version") != SCHEMA_VERSION:
         errors.append(f"schema_version must be {SCHEMA_VERSION}")
-
     for field in REQUIRED_LIST_FIELDS:
         if not isinstance(payload.get(field), list):
             errors.append(f"{field} must be a list")
-
     for field in REQUIRED_OBJECT_FIELDS:
         if not isinstance(payload.get(field), dict):
             errors.append(f"{field} must be an object")
-
     for field in REQUIRED_FALSE_FIELDS:
         if payload.get(field) is not False:
             errors.append(f"{field} must be false")
-
     return errors
 
 
@@ -791,9 +884,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--out", default="build/sdetkit/adoption-surface.json")
     parser.add_argument("--format", choices=["json", "text", "report"], default="json")
     ns = parser.parse_args(list(argv) if argv is not None else None)
-
     summary = write_adoption_surface_artifact(repo_root=ns.root, out=ns.out)
-
     if ns.format == "json":
         sys.stdout.write(json.dumps(summary, indent=2, sort_keys=True) + "\n")
     elif ns.format == "report":
@@ -810,7 +901,3 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"semantic_equivalence_proven={str(summary['semantic_equivalence_proven']).lower()}\n"
         )
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
