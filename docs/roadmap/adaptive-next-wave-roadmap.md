@@ -2,6 +2,53 @@
 
 The Adaptive Intelligence execution plan is complete. This next wave turns the completed adaptive foundation into deeper enterprise analytics, stronger remediation governance, and optional operator-facing product surfaces without weakening the review-first safety model.
 
+## Continuation source bundle
+
+Future roadmap updates must keep the work connected to the active prompt/source bundle, not only to chat memory.
+
+### Active prompt files
+
+- `DevS69_SDETKit_v11_ALIGNMENT_MANIFEST.md` — active file list, precedence, and product interpretation.
+- `DevS69_SDETKit_MASTER_Prompt_v11_FULL_PRODUCT_RELEASE_ROADMAP.md` — full product-release roadmap and product north star.
+- `DevS69_SDETKit_Continuation_Prompt_v11_POST_1829_PRODUCT_RELEASE.md` — restart checkpoint and next implementation slice.
+- `DevS69_SDETKit_New_Chat_Startup_POST_1829.md` — new-chat startup and first verification checklist.
+- `DevS69_SDETKit_FINAL_Master_Prompt_v10_0_POST_1829_PRODUCT_RELEASE_STRICT.md` — historical strict checkpoint retained for compatibility.
+- `24_master_prompt.md` — active operating overlay for repo-native diagnosis, CI modeling, and reliability-platform direction.
+
+### Supporting source files
+
+Use these source files as the working checklist for future PRs:
+
+- `00_index_and_usage.md`
+- `01_repo_constitution.md`
+- `02_cto_operating_model.md`
+- `03_repo_reading_protocol.md`
+- `04_change_classification_and_pr_cards.md`
+- `05_green_main_and_baseline_gates.md`
+- `06_naming_constitution.md`
+- `07_naming_debt_burndown.md`
+- `08_test_suite_professionalization.md`
+- `09_docs_navigation_governance.md`
+- `10_ci_workflow_governance.md`
+- `11_dependency_hygiene.md`
+- `12_release_and_supply_chain_governance.md`
+- `13_security_posture.md`
+- `14_feature_development_playbook.md`
+- `15_refactor_and_migration_playbook.md`
+- `16_failure_triage_playbook.md`
+- `17_incident_response_and_recovery.md`
+- `18_review_rubrics.md`
+- `19_weekly_monthly_quarterly_cadence.md`
+- `20_roadmap_and_kpi_system.md`
+- `21_wsl2_command_book.md`
+- `22_templates_library.md`
+- `23_source_grounding_and_research_rules.md`
+- `24_master_prompt.md`
+
+### Continuation rule
+
+Every future PR should state which prompt/source file it is using, which roadmap lane it advances, the expected validation commands, the rollback path, and the next recommended PR.
+
 ## Completion baseline carried forward
 
 | Completed Adaptive Intelligence lane | Proof surface to protect |
