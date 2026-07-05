@@ -191,13 +191,23 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             ]
         )
     else:
-        lines.extend(["## First failure", "", "No failed or errored testcase was observed.", ""])
+        lines.extend(
+            [
+                "## First failure",
+                "",
+                "No failed or errored testcase was observed.",
+                "",
+            ]
+        )
 
     lines.extend(
         [
             "## Boundary",
             "",
-            f"- Diagnostic only: `{str(bool(boundary.get('diagnostic_only'))).lower()}`",
+            (
+                "- Diagnostic only: "
+                f"`{str(bool(boundary.get('diagnostic_only'))).lower()}`"
+            ),
             (
                 "- Flaky classification performed: "
                 f"`{str(bool(boundary.get('flaky_classification_performed'))).lower()}`"
@@ -206,8 +216,14 @@ def render_markdown(report: Mapping[str, Any]) -> str:
                 "- Failure suppression allowed: "
                 f"`{str(bool(boundary.get('failure_suppression_allowed'))).lower()}`"
             ),
-            f"- Automation allowed: `{str(bool(boundary.get('automation_allowed'))).lower()}`",
-            f"- Merge authorized: `{str(bool(boundary.get('merge_authorized'))).lower()}`",
+            (
+                "- Automation allowed: "
+                f"`{str(bool(boundary.get('automation_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized: "
+                f"`{str(bool(boundary.get('merge_authorized'))).lower()}`"
+            ),
             "",
         ]
     )
