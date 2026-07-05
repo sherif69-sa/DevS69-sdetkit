@@ -1,0 +1,36 @@
+name: inline-adoption-surface-pr-2006
+
+on:
+  push:
+    branches:
+      - feat/adoption-gitlab-ci-proof-commands
+
+permissions:
+  contents: write
+
+jobs:
+  inline:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: feat/adoption-gitlab-ci-proof-commands
+          fetch-depth: 0
+      - name: Inline formatted adoption surface implementation
+        run: |
+          cp src/sdetkit/_adoption_surface_discovery.py src/sdetkit/adoption_surface.py
+          rm -f src/sdetkit/_adoption_surface_discovery.py src/sdetkit/_adoption_surface_impl.py
+          rm -f .github/workflows/inline-adoption-surface-pr-2006.yml
+      - name: Commit inline result
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/sdetkit/adoption_surface.py src/sdetkit/_adoption_surface_discovery.py src/sdetkit/_adoption_surface_impl.py .github/workflows/inline-adoption-surface-pr-2006.yml
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'refactor(adoption): inline formatted adoption surface'
+          git push origin HEAD:feat/adoption-gitlab-ci-proof-commands
