@@ -1,0 +1,63 @@
+name: fix-pr-2006-echo-and-restore
+
+on:
+  push:
+    branches:
+      - feat/adoption-gitlab-ci-proof-commands
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: feat/adoption-gitlab-ci-proof-commands
+          fetch-depth: 0
+      - name: Patch adoption surface and restore workflow
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          source = Path('src/sdetkit/adoption_surface.py')
+          text = source.read_text(encoding='utf-8')
+          old = '''def _command_is_dynamic(command: str) -> bool:\n    return any(token in command for token in ("$", "`", "*", "&"))\n\n\ndef _classify_proof_purpose(command: str) -> str:\n'''
+          new = '''def _command_is_dynamic(command: str) -> bool:\n    return any(token in command for token in ("$", "`", "*", "&"))\n\n\ndef _command_is_shell_message(command: str) -> bool:\n    return command.lstrip().lower().startswith("echo ")\n\n\ndef _classify_proof_purpose(command: str) -> str:\n'''
+          if old not in text and '_command_is_shell_message' not in text:
+              raise SystemExit('expected dynamic-command helper block not found')
+          text = text.replace(old, new)
+          old_block = '''                for command in values:\n                    if _command_is_dynamic(command):\n                        unknowns.append(\n                            f"GitLab CI job {job_name} has dynamic script command that was not guessed"\n                        )\n                    else:\n                        commands.append(command)\n                continue\n'''
+          new_block = '''                for command in values:\n                    if _command_is_shell_message(command):\n                        continue\n                    if _command_is_dynamic(command):\n                        unknowns.append(\n                            f"GitLab CI job {job_name} has dynamic script command that was not guessed"\n                        )\n                    else:\n                        commands.append(command)\n                continue\n'''
+          if old_block in text:
+              text = text.replace(old_block, new_block, 1)
+          old_block2 = '''            for command in values:\n                if _command_is_dynamic(command):\n                    unknowns.append(\n                        f"GitLab CI job {job_name} has dynamic script command that was not guessed"\n                    )\n                else:\n                    commands.append(command)\n'''
+          new_block2 = '''            for command in values:\n                if _command_is_shell_message(command):\n                    continue\n                if _command_is_dynamic(command):\n                    unknowns.append(\n                        f"GitLab CI job {job_name} has dynamic script command that was not guessed"\n                    )\n                else:\n                    commands.append(command)\n'''
+          if old_block2 in text:
+              text = text.replace(old_block2, new_block2, 1)
+          source.write_text(text, encoding='utf-8')
+
+          test = Path('tests/test_adoption_surface_gitlab_ci.py')
+          t = test.read_text(encoding='utf-8')
+          t = t.replace('unknown_job:\n  script: echo smoke', 'message_job:\n  script: echo smoke')
+          t = t.replace('    assert commands["echo smoke"]["purpose"] == "unknown"\n', '    assert "echo smoke" not in commands\n')
+          test.write_text(t, encoding='utf-8')
+          PY
+          python -m ruff format src/sdetkit/adoption_surface.py tests/test_adoption_surface_gitlab_ci.py
+          git fetch origin main
+          git checkout origin/main -- .github/workflows/advanced-github-actions-reference-64.yml
+          rm .github/workflows/fix-pr-2006-echo-and-restore.yml
+      - name: Commit real fix and cleanup
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/sdetkit/adoption_surface.py tests/test_adoption_surface_gitlab_ci.py .github/workflows/advanced-github-actions-reference-64.yml .github/workflows/fix-pr-2006-echo-and-restore.yml
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'fix(adoption): ignore GitLab echo script messages'
+          git push origin HEAD:feat/adoption-gitlab-ci-proof-commands
