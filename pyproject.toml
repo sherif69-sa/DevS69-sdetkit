@@ -84,7 +84,7 @@ where = ["src"]
 [tool.ruff]
 target-version = "py310"
 line-length = 100
-extend-exclude = ["templates/platform_problem/rich"]
+extend-exclude = ["templates/platform_problem/rich", "src/sdetkit/_adoption_surface_impl_tmp.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
@@ -177,39 +177,3 @@ module = [
   "sdetkit.pr_quality_required_terminal",
 ]
 ignore_errors = false
-
-[tool.mutmut]
-paths_to_mutate = ["src/sdetkit"]
-tests_dir = ["tests"]
-runner = "PYTHONPATH=src pytest -q --ignore=mutants"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "-m 'not network'"
-markers = [
-  "network: allow real network access for this test",
-]
-
-[tool.pip_audit]
-ignore-vulns = ["CVE-2026-1703", "CVE-2026-4539"]
-
-[project.scripts]
-sdetkit = "sdetkit.cli:main"
-sdkit = "sdetkit.cli:main"
-kvcli = "sdetkit._entrypoints:kvcli"
-apigetcli = "sdetkit._entrypoints:apigetcli"
-sdetkit-test-bootstrap-contract = "sdetkit.test_bootstrap_contract:main"
-sdetkit-test-bootstrap-validate = "sdetkit.test_bootstrap_validate:main"
-sdetkit-diagnostic-queue-runner = "sdetkit.diagnostic_queue_runner_cli:main"
-sdetkit-local-diagnostic-queue-dashboard = "sdetkit.local_diagnostic_queue_dashboard:main"
-sdetkit-adoption-learning-report-dashboard = "sdetkit.adoption_learning_report_dashboard:main"
-sdetkit-maintenance-queue-rollup-dashboard = "sdetkit.maintenance_queue_rollup_dashboard:main"
-
-[project.entry-points."sdetkit.notify_adapters"]
-stdout = "sdetkit.notify_plugins:stdout_adapter"
-telegram = "sdetkit.notify_plugins:telegram_adapter"
-whatsapp = "sdetkit.notify_plugins:whatsapp_adapter"
-
-[project.entry-points."sdetkit.ops_tasks"]
-[tool.setuptools.package-data]
-sdetkit = ["public_command_surface.json", "data/*.json"]
