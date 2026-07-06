@@ -80,3 +80,19 @@ python -m sdetkit doctor --report-contract --format md --ci --out build/sdetkit/
 ```
 
 `--report-contract` uses the same Doctor checks and exit status, but renders the advisory report contract as JSON or Markdown. The mode keeps automation, patch application, and merge authorization false.
+
+## Artifact bundle
+
+Use `--report-artifact-dir` when CI or an operator needs both machine-readable and human-readable report files in one deterministic directory:
+
+```bash
+python -m sdetkit doctor --report-contract --report-artifact-dir build/sdetkit
+```
+
+The artifact bundle writes:
+
+- `doctor-report.json`
+- `doctor-report.md`
+- `doctor-report-manifest.json`
+
+The manifest schema is `sdetkit.doctor_report_artifact_bundle.v1`. It records the report schema version, report status, output paths, and SHA-256 digests for the JSON and Markdown report files.
