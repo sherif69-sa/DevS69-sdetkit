@@ -82,7 +82,10 @@ def _run_doctor_report_contract(argv: list[str]) -> int | None:
     if output_format == "markdown":
         output_format = "md"
     if output_format not in {"text", "json", "md"}:
-        print("doctor: error: --report-contract supports --format text, json, md, or markdown", file=sys.stderr)
+        print(
+            "doctor: error: --report-contract supports --format text, json, md, or markdown",
+            file=sys.stderr,
+        )
         raise SystemExit(2)
 
     from .. import doctor as doctor_module
