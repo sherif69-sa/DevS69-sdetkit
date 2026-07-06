@@ -29,6 +29,22 @@ def _fixture(name: str) -> str:
             1,
         ),
         ("go_vet", "go_vet", "lint", "internal/logging/logging.go", "go vet ./...", 1),
+        (
+            "maven_test",
+            "maven_test",
+            "test",
+            "src/test/java/com/example/CalculatorTest.java",
+            "mvn test",
+            1,
+        ),
+        (
+            "gradle_test",
+            "gradle_test",
+            "test",
+            "src/test/java/com/example/CalculatorTest.java",
+            "./gradlew test",
+            1,
+        ),
     ],
 )
 def test_cross_ecosystem_adapter_extracts_review_first_failure_vectors(
@@ -85,6 +101,21 @@ def test_unknown_cross_ecosystem_signal_remains_review_first() -> None:
     assert result.tool == "unknown"
     assert result.confidence == "low"
     assert result.uncertainty == ("javascript_failure_not_classified",)
+    assert result.vector.failure_class == "unknown"
+    assert evaluate_failure_vector(result.vector).review_first is True
+
+
+def test_unknown_java_signal_remains_review_first() -> None:
+    result = extract_ecosystem_failure_vector(
+        "Java build stopped without Maven or Gradle test markers",
+        ecosystem="java",
+        check="java-build",
+    )
+
+    assert result.ecosystem == "java"
+    assert result.tool == "unknown"
+    assert result.confidence == "low"
+    assert result.uncertainty == ("java_failure_not_classified",)
     assert result.vector.failure_class == "unknown"
     assert evaluate_failure_vector(result.vector).review_first is True
 
