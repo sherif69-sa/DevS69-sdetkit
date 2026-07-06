@@ -1,0 +1,10 @@
+Run mvn test
+[INFO] --- maven-surefire-plugin:3.2.5:test (default-test) @ calculator ---
+[INFO] Running com.example.CalculatorTest
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.021 s <<< FAILURE! -- in com.example.CalculatorTest
+[ERROR] src/test/java/com/example/CalculatorTest.java:16: expected:<4> but was:<5>
+[ERROR]   at com.example.CalculatorTest.addsTwoNumbers(CalculatorTest.java:16)
+[ERROR] Failures:
+[ERROR]   CalculatorTest.addsTwoNumbers:16 expected:<4> but was:<5>
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
+Process completed with exit code 1
