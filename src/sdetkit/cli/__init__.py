@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import io
 import json
@@ -28,10 +29,11 @@ def _normalize_professional_command_aliases(argv: list[str]) -> list[str]:
 
 def _split_doctor_report_contract_args(
     argv: list[str],
-) -> tuple[bool, str, str | None, list[str]]:
+) -> tuple[bool, str, str | None, str | None, list[str]]:
     enabled = False
     output_format = "text"
     out_path: str | None = None
+    artifact_dir: str | None = None
     inner: list[str] = []
 
     index = 0
@@ -65,17 +67,63 @@ def _split_doctor_report_contract_args(
             out_path = token.split("=", 1)[1]
             index += 1
             continue
+        if token == "--report-artifact-dir":
+            if index + 1 >= len(argv):
+                raise SystemExit(2)
+            artifact_dir = argv[index + 1]
+            index += 2
+            continue
+        if token.startswith("--report-artifact-dir="):
+            artifact_dir = token.split("=", 1)[1]
+            index += 1
+            continue
         inner.append(token)
         index += 1
 
-    return enabled, output_format, out_path, inner
+    return enabled, output_format, out_path, artifact_dir, inner
+
+
+def _sha256_text(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _write_doctor_report_artifact_bundle(
+    artifact_dir: str,
+    contract: dict[str, Any],
+    json_output: str,
+    markdown_output: str,
+) -> None:
+    target = Path(artifact_dir)
+    target.mkdir(parents=True, exist_ok=True)
+
+    outputs = {
+        "json": {
+            "path": "doctor-report.json",
+            "sha256": _sha256_text(json_output),
+        },
+        "markdown": {
+            "path": "doctor-report.md",
+            "sha256": _sha256_text(markdown_output),
+        },
+    }
+    manifest = {
+        "schema_version": "sdetkit.doctor_report_artifact_bundle.v1",
+        "report_schema_version": str(contract.get("schema_version", "")),
+        "status": str(contract.get("status", "")),
+        "outputs": outputs,
+    }
+    manifest_output = json.dumps(manifest, sort_keys=True, indent=2) + "\n"
+
+    (target / "doctor-report.json").write_text(json_output, encoding="utf-8")
+    (target / "doctor-report.md").write_text(markdown_output, encoding="utf-8")
+    (target / "doctor-report-manifest.json").write_text(manifest_output, encoding="utf-8")
 
 
 def _run_doctor_report_contract(argv: list[str]) -> int | None:
     if not argv or argv[0] != "doctor":
         return None
 
-    enabled, output_format, out_path, inner = _split_doctor_report_contract_args(argv[1:])
+    enabled, output_format, out_path, artifact_dir, inner = _split_doctor_report_contract_args(argv[1:])
     if not enabled:
         return None
 
@@ -107,11 +155,17 @@ def _run_doctor_report_contract(argv: list[str]) -> int | None:
         return rc if rc else 2
 
     contract = build_doctor_report_contract(doctor_payload)
-    if output_format == "json":
-        output = json.dumps(contract, sort_keys=True) + "\n"
-    else:
-        output = render_doctor_report_markdown(contract)
+    json_output = json.dumps(contract, sort_keys=True) + "\n"
+    markdown_output = render_doctor_report_markdown(contract)
+    output = json_output if output_format == "json" else markdown_output
 
+    if artifact_dir:
+        _write_doctor_report_artifact_bundle(
+            artifact_dir,
+            contract,
+            json_output,
+            markdown_output,
+        )
     if out_path:
         Path(out_path).write_text(output, encoding="utf-8")
     sys.stdout.write(output)
