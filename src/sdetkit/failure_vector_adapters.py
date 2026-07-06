@@ -15,9 +15,12 @@ JS_TEST = re.compile(
 )
 GO_LOCATION = re.compile(r"(?P<path>[\w./-]+\.go):\d+(?::\d+)?:\s*(?P<check>.+)")
 GO_TEST = re.compile(r"---\s+FAIL:\s+(?P<check>[\w./-]+)")
+JAVA_LOCATION = re.compile(
+    r"(?P<path>[\w./-]+\.java)(?::\d+|:\[\d+(?:,\d+)?\])(?::\s*(?P<check>.+))?"
+)
 COMMAND = re.compile(r"^(?:Run|\$)\s+(?P<command>.+)$", re.MULTILINE)
 EXIT_CODE = re.compile(r"Process completed with exit code (?P<code>\d+)")
-SUPPORTED = frozenset({"auto", "python", "javascript_typescript", "go"})
+SUPPORTED = frozenset({"auto", "python", "javascript_typescript", "go", "java"})
 
 
 @dataclass(frozen=True)
@@ -213,6 +216,8 @@ def extract_ecosystem_failure_vector(
         return _javascript_result(log_text, check, log_url, environment)
     if selected == "go":
         return _go_result(log_text, check, log_url, environment)
+    if selected == "java":
+        return _java_result(log_text, check, log_url, environment)
     return _unknown(log_text, "unknown", check, log_url, environment, "ecosystem_not_identified")
 
 
@@ -226,6 +231,8 @@ def _detect(log_text: str) -> str:
         return "go"
     if any(token in lower for token in ("go test", "go vet")):
         return "go"
+    if _looks_like_java(log_text):
+        return "java"
     if any(token in lower for token in ("pytest", "mypy", "ruff", ".py:")):
         return "python"
     return "unknown"
@@ -301,6 +308,54 @@ def _go_result(
     return _unknown(log_text, "go", check, log_url, environment, "go_failure_not_classified")
 
 
+def _java_result(
+    log_text: str,
+    check: str,
+    log_url: str | None,
+    environment: str,
+) -> FailureVectorAdapterResult:
+    lower = log_text.lower()
+    location = JAVA_LOCATION.search(log_text)
+    if _looks_like_maven_test(lower):
+        return _result(
+            log_text,
+            check,
+            log_url,
+            environment,
+            location,
+            "test",
+            "maven_test",
+            "mvn test",
+            ecosystem="java",
+        )
+    if _looks_like_gradle_test(lower):
+        return _result(
+            log_text,
+            check,
+            log_url,
+            environment,
+            location,
+            "test",
+            "gradle_test",
+            "./gradlew test",
+            ecosystem="java",
+        )
+    if location:
+        return _result(
+            log_text,
+            check,
+            log_url,
+            environment,
+            location,
+            "unknown",
+            "java_toolchain",
+            "mvn test",
+            ("java_failure_class_not_proven",),
+            ecosystem="java",
+        )
+    return _unknown(log_text, "java", check, log_url, environment, "java_failure_not_classified")
+
+
 def _result(
     log_text: str,
     check: str,
@@ -311,6 +366,7 @@ def _result(
     tool: str,
     repro: str,
     uncertainty: tuple[str, ...] = (),
+    ecosystem: str | None = None,
 ) -> FailureVectorAdapterResult:
     path = match.groupdict().get("path", "") if match else ""
     detail = match.groupdict().get("check", "") if match else ""
@@ -340,9 +396,10 @@ def _result(
         owner_hint=path or check,
         safe_fix_allowed=False,
     )
+    inferred_ecosystem = "go" if tool.startswith("go_") else "javascript_typescript"
     return FailureVectorAdapterResult(
         vector=vector,
-        ecosystem="go" if tool.startswith("go_") else "javascript_typescript",
+        ecosystem=ecosystem or inferred_ecosystem,
         tool=tool,
         confidence="medium" if uncertainty else "high",
         uncertainty=uncertainty,
@@ -364,6 +421,40 @@ def _unknown(
         environment=environment,
     )
     return FailureVectorAdapterResult(vector, ecosystem, "unknown", "low", (uncertainty,))
+
+
+def _looks_like_java(log_text: str) -> bool:
+    lower = log_text.lower()
+    return (
+        JAVA_LOCATION.search(log_text) is not None
+        or _looks_like_maven_test(lower)
+        or _looks_like_gradle_test(lower)
+    )
+
+
+def _looks_like_maven_test(lower: str) -> bool:
+    return any(
+        token in lower
+        for token in (
+            "run mvn test",
+            "$ mvn test",
+            "maven-surefire-plugin",
+            "surefire-reports",
+            "tests run:",
+        )
+    )
+
+
+def _looks_like_gradle_test(lower: str) -> bool:
+    return any(
+        token in lower
+        for token in (
+            "run ./gradlew test",
+            "$ ./gradlew test",
+            "> task :test failed",
+            "gradle test executor",
+        )
+    )
 
 
 def _first_failure_line(log_text: str) -> str:
