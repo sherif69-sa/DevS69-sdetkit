@@ -123,7 +123,9 @@ def _run_doctor_report_contract(argv: list[str]) -> int | None:
     if not argv or argv[0] != "doctor":
         return None
 
-    enabled, output_format, out_path, artifact_dir, inner = _split_doctor_report_contract_args(argv[1:])
+    enabled, output_format, out_path, artifact_dir, inner = _split_doctor_report_contract_args(
+        argv[1:]
+    )
     if not enabled:
         return None
 
