@@ -82,21 +82,34 @@ def _severity_rank(severity: str) -> int:
     return {"high": 3, "medium": 2, "low": 1}.get(severity, 0)
 
 
-def _status(payload: Mapping[str, Any], findings: Sequence[Mapping[str, object]]) -> str:
+def _status(
+    payload: Mapping[str, Any],
+    findings: Sequence[Mapping[str, object]],
+    failure_vector_evidence: Mapping[str, object],
+) -> str:
     if findings:
         if any(_string(item.get("severity")) == "high" for item in findings):
             return "blocked"
+        return "review_required"
+    if _int(failure_vector_evidence.get("failure_vector_count")) > 0:
         return "review_required"
     if _bool(payload.get("ok")):
         return "green"
     return "review_required"
 
 
-def _confidence(payload: Mapping[str, Any], findings: Sequence[Mapping[str, object]]) -> str:
+def _confidence(
+    payload: Mapping[str, Any],
+    findings: Sequence[Mapping[str, object]],
+    failure_vector_evidence: Mapping[str, object],
+) -> str:
     quality = _as_mapping(payload.get("quality"))
     evidence_count = _int(quality.get("evidence_count"))
     selected_checks = _int(quality.get("selected_checks"))
+    failure_vector_count = _int(failure_vector_evidence.get("failure_vector_count"))
     if findings and evidence_count > 0:
+        return "high"
+    if failure_vector_count > 0:
         return "high"
     if selected_checks > 0 or findings:
         return "medium"
@@ -161,8 +174,76 @@ def _build_findings(payload: Mapping[str, Any]) -> list[dict[str, object]]:
     )
 
 
+def _dict_of_ints(value: object) -> dict[str, int]:
+    mapping = _as_mapping(value)
+    return {key: _int(raw) for key, raw in sorted(mapping.items()) if _string(key)}
+
+
+def _top_failure_vector(vector_payloads: Sequence[Mapping[str, Any]]) -> dict[str, object]:
+    if not vector_payloads:
+        return {
+            "check": "none",
+            "failure_type": "none",
+            "risk": "none",
+            "headline_signal": "No failure vector evidence supplied",
+            "local_repro_command": "none",
+        }
+
+    rank = {"high": 3, "medium": 2, "low": 1}
+    top = sorted(
+        vector_payloads,
+        key=lambda item: (
+            -rank.get(_string(item.get("risk")), 0),
+            _string(item.get("check")),
+        ),
+    )[0]
+    return {
+        "check": _string(top.get("check"), "unknown"),
+        "failure_type": _string(top.get("failure_type") or top.get("failure_class"), "unknown"),
+        "risk": _string(top.get("risk"), "unknown"),
+        "headline_signal": _string(top.get("headline_signal"), "unknown"),
+        "local_repro_command": _string(top.get("local_repro_command"), "none"),
+    }
+
+
+def _failure_vector_evidence(bundle: Mapping[str, Any] | None) -> dict[str, object]:
+    if not bundle:
+        return {
+            "available": False,
+            "schema_version": "none",
+            "vector_schema_version": "none",
+            "failure_vector_count": 0,
+            "by_failure_class": {},
+            "by_risk": {},
+            "safe_fix_candidate_count": 0,
+            "safe_fix_allowed_count": 0,
+            "review_first_count": 0,
+            "top_failure": _top_failure_vector(()),
+        }
+
+    summary = _as_mapping(bundle.get("summary"))
+    raw_vectors = _as_sequence(bundle.get("failure_vectors"))
+    vector_payloads = [_as_mapping(item) for item in raw_vectors if _as_mapping(item)]
+    return {
+        "available": True,
+        "schema_version": _string(bundle.get("schema_version"), "unknown"),
+        "vector_schema_version": _string(bundle.get("vector_schema_version"), "unknown"),
+        "failure_vector_count": _int(bundle.get("failure_vector_count"), len(vector_payloads)),
+        "by_failure_class": _dict_of_ints(summary.get("by_failure_class")),
+        "by_risk": _dict_of_ints(summary.get("by_risk")),
+        "safe_fix_candidate_count": _int(summary.get("safe_fix_candidate_count")),
+        "safe_fix_allowed_count": sum(
+            1 for vector_payload in vector_payloads if _bool(vector_payload.get("safe_fix_allowed"))
+        ),
+        "review_first_count": _int(summary.get("review_first_count")),
+        "top_failure": _top_failure_vector(vector_payloads),
+    }
+
+
 def _summary(
-    payload: Mapping[str, Any], findings: Sequence[Mapping[str, object]]
+    payload: Mapping[str, Any],
+    findings: Sequence[Mapping[str, object]],
+    failure_vector_evidence: Mapping[str, object],
 ) -> dict[str, object]:
     quality = _as_mapping(payload.get("quality"))
     return {
@@ -174,6 +255,7 @@ def _summary(
         "failed_checks": _int(quality.get("failed_checks")),
         "skipped_checks": _int(quality.get("skipped_checks")),
         "finding_count": len(findings),
+        "failure_vector_count": _int(failure_vector_evidence.get("failure_vector_count")),
     }
 
 
@@ -200,12 +282,18 @@ def _primary_finding(findings: Sequence[Mapping[str, object]]) -> dict[str, obje
     }
 
 
-def _roadmap_alignment(findings: Sequence[Mapping[str, object]]) -> dict[str, object]:
+def _roadmap_alignment(
+    findings: Sequence[Mapping[str, object]],
+    failure_vector_evidence: Mapping[str, object],
+) -> dict[str, object]:
     lanes = sorted(
         {_string(item.get("roadmap_lane")) for item in findings if item.get("roadmap_lane")}
     )
+    if _bool(failure_vector_evidence.get("available")):
+        lanes.append("failure_diagnosis")
     if not lanes:
         lanes = ["green_main"]
+    lanes = sorted(set(lanes))
     return {
         "lanes": lanes,
         "next_best_lane": lanes[0],
@@ -213,23 +301,28 @@ def _roadmap_alignment(findings: Sequence[Mapping[str, object]]) -> dict[str, ob
     }
 
 
-def build_doctor_report_contract(payload: Mapping[str, Any]) -> dict[str, object]:
+def build_doctor_report_contract(
+    payload: Mapping[str, Any],
+    failure_vector_bundle: Mapping[str, Any] | None = None,
+) -> dict[str, object]:
     """Build the professional Doctor report contract from a standard Doctor payload."""
 
     findings = _build_findings(payload)
-    status = _status(payload, findings)
+    failure_vector_evidence = _failure_vector_evidence(failure_vector_bundle)
+    status = _status(payload, findings, failure_vector_evidence)
     contract = {
         "schema_version": SCHEMA_VERSION,
         "status": status,
-        "confidence": _confidence(payload, findings),
-        "summary": _summary(payload, findings),
+        "confidence": _confidence(payload, findings, failure_vector_evidence),
+        "summary": _summary(payload, findings, failure_vector_evidence),
         "primary_finding": _primary_finding(findings),
         "findings": findings,
+        "failure_vector_evidence": failure_vector_evidence,
         "safety_decision": {
             **AUTHORITY_BOUNDARY,
             "reason": "Doctor report is advisory and review-first until proof and verifier boundaries are implemented.",
         },
-        "roadmap_alignment": _roadmap_alignment(findings),
+        "roadmap_alignment": _roadmap_alignment(findings, failure_vector_evidence),
         "proof_commands": sorted(
             {_string(item.get("proof_command")) for item in findings if item.get("proof_command")}
         )
@@ -245,6 +338,8 @@ def render_doctor_report_markdown(contract: Mapping[str, object]) -> str:
     primary = _as_mapping(contract.get("primary_finding"))
     safety = _as_mapping(contract.get("safety_decision"))
     roadmap = _as_mapping(contract.get("roadmap_alignment"))
+    failure_vector_evidence = _as_mapping(contract.get("failure_vector_evidence"))
+    top_failure = _as_mapping(failure_vector_evidence.get("top_failure"))
     findings = [_as_mapping(item) for item in _as_sequence(contract.get("findings"))]
     proof_commands = [
         _string(item) for item in _as_sequence(contract.get("proof_commands")) if _string(item)
@@ -258,6 +353,7 @@ def render_doctor_report_markdown(contract: Mapping[str, object]) -> str:
         f"- confidence: `{_string(contract.get('confidence'), 'low')}`",
         f"- score: `{_int(summary.get('score'))}%`",
         f"- findings: `{_int(summary.get('finding_count'))}`",
+        f"- failure_vectors: `{_int(summary.get('failure_vector_count'))}`",
         "",
         "## Primary Finding",
         f"- title: `{_string(primary.get('title'), 'No finding')}`",
@@ -286,6 +382,17 @@ def render_doctor_report_markdown(contract: Mapping[str, object]) -> str:
 
     lines.extend(
         [
+            "## Failure Vector Evidence",
+            f"- available: `{str(_bool(failure_vector_evidence.get('available'))).lower()}`",
+            f"- schema_version: `{_string(failure_vector_evidence.get('schema_version'), 'none')}`",
+            f"- failure_vector_count: `{_int(failure_vector_evidence.get('failure_vector_count'))}`",
+            f"- safe_fix_candidate_count: `{_int(failure_vector_evidence.get('safe_fix_candidate_count'))}`",
+            f"- safe_fix_allowed_count: `{_int(failure_vector_evidence.get('safe_fix_allowed_count'))}`",
+            f"- review_first_count: `{_int(failure_vector_evidence.get('review_first_count'))}`",
+            f"- top_failure_type: `{_string(top_failure.get('failure_type'), 'none')}`",
+            f"- top_failure_risk: `{_string(top_failure.get('risk'), 'none')}`",
+            f"- top_failure_signal: `{_string(top_failure.get('headline_signal'), 'none')}`",
+            "",
             "## Safety Decision",
             f"- review_first: `{str(_bool(safety.get('review_first'))).lower()}`",
             f"- automation_allowed: `{str(_bool(safety.get('automation_allowed'))).lower()}`",
