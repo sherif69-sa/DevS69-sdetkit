@@ -1,0 +1,14 @@
+Run ./gradlew test
+> Task :compileJava UP-TO-DATE
+> Task :test FAILED
+
+Gradle Test Executor 1 finished executing tests.
+
+com.example.CalculatorTest > addsTwoNumbers FAILED
+    java.lang.AssertionError: expected:<4> but was:<5>
+    at src/test/java/com/example/CalculatorTest.java:22
+
+1 test completed, 1 failed
+
+FAILURE: Build failed with an exception.
+Process completed with exit code 1
