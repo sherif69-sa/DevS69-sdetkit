@@ -124,8 +124,7 @@ def test_green_doctor_report_keeps_next_action_roadmap_aligned() -> None:
     assert report["confidence"] == "medium"
     assert report["primary_finding"]["roadmap_lane"] == "green_main"
     assert (
-        report["primary_finding"]["proof_command"]
-        == "python -m sdetkit doctor --all --format json"
+        report["primary_finding"]["proof_command"] == "python -m sdetkit doctor --all --format json"
     )
     assert report["proof_commands"] == ["python -m sdetkit doctor --all --format json"]
 
