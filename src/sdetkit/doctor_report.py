@@ -55,11 +55,7 @@ def _as_mapping(value: object) -> Mapping[str, Any]:
 
 
 def _as_sequence(value: object) -> Sequence[object]:
-    return (
-        value
-        if isinstance(value, Sequence) and not isinstance(value, (str, bytes))
-        else ()
-    )
+    return value if isinstance(value, Sequence) and not isinstance(value, (str, bytes)) else ()
 
 
 def _string(value: object, default: str = "") -> str:
@@ -86,9 +82,7 @@ def _severity_rank(severity: str) -> int:
     return {"high": 3, "medium": 2, "low": 1}.get(severity, 0)
 
 
-def _status(
-    payload: Mapping[str, Any], findings: Sequence[Mapping[str, object]]
-) -> str:
+def _status(payload: Mapping[str, Any], findings: Sequence[Mapping[str, object]]) -> str:
     if findings:
         if any(_string(item.get("severity")) == "high" for item in findings):
             return "blocked"
@@ -98,9 +92,7 @@ def _status(
     return "review_required"
 
 
-def _confidence(
-    payload: Mapping[str, Any], findings: Sequence[Mapping[str, object]]
-) -> str:
+def _confidence(payload: Mapping[str, Any], findings: Sequence[Mapping[str, object]]) -> str:
     quality = _as_mapping(payload.get("quality"))
     evidence_count = _int(quality.get("evidence_count"))
     selected_checks = _int(quality.get("selected_checks"))
@@ -112,9 +104,7 @@ def _confidence(
 
 
 def _proof_command(check_id: str) -> str:
-    return PROOF_COMMANDS.get(
-        check_id, f"python -m sdetkit doctor --only {check_id} --format json"
-    )
+    return PROOF_COMMANDS.get(check_id, f"python -m sdetkit doctor --only {check_id} --format json")
 
 
 def _finding_from_next_action(item: Mapping[str, Any], index: int) -> dict[str, object]:
@@ -122,9 +112,7 @@ def _finding_from_next_action(item: Mapping[str, Any], index: int) -> dict[str, 
     severity = _string(item.get("severity"), "medium")
     summary = _string(item.get("summary"), "Doctor check requires review")
     fixes = [_string(fix) for fix in _as_sequence(item.get("fix")) if _string(fix)]
-    next_action = (
-        fixes[0] if fixes else "Review the Doctor finding and run focused proof."
-    )
+    next_action = fixes[0] if fixes else "Review the Doctor finding and run focused proof."
     return {
         "id": f"doctor-finding-{index:02d}",
         "check_id": check_id,
@@ -160,9 +148,7 @@ def _why_it_matters(check_id: str) -> str:
 
 def _build_findings(payload: Mapping[str, Any]) -> list[dict[str, object]]:
     findings: list[dict[str, object]] = []
-    for index, raw_item in enumerate(
-        _as_sequence(payload.get("next_actions")), start=1
-    ):
+    for index, raw_item in enumerate(_as_sequence(payload.get("next_actions")), start=1):
         item = _as_mapping(raw_item)
         if item:
             findings.append(_finding_from_next_action(item, index))
@@ -199,9 +185,7 @@ def _primary_finding(findings: Sequence[Mapping[str, object]]) -> dict[str, obje
             "severity": _string(top.get("severity"), "medium"),
             "check_id": _string(top.get("check_id"), "unknown"),
             "roadmap_lane": _string(top.get("roadmap_lane"), "diagnosis_intelligence"),
-            "next_action": _string(
-                top.get("recommended_action"), "Review Doctor output."
-            ),
+            "next_action": _string(top.get("recommended_action"), "Review Doctor output."),
             "proof_command": _string(
                 top.get("proof_command"), "python -m sdetkit doctor --format json"
             ),
@@ -218,11 +202,7 @@ def _primary_finding(findings: Sequence[Mapping[str, object]]) -> dict[str, obje
 
 def _roadmap_alignment(findings: Sequence[Mapping[str, object]]) -> dict[str, object]:
     lanes = sorted(
-        {
-            _string(item.get("roadmap_lane"))
-            for item in findings
-            if item.get("roadmap_lane")
-        }
+        {_string(item.get("roadmap_lane")) for item in findings if item.get("roadmap_lane")}
     )
     if not lanes:
         lanes = ["green_main"]
@@ -251,11 +231,7 @@ def build_doctor_report_contract(payload: Mapping[str, Any]) -> dict[str, object
         },
         "roadmap_alignment": _roadmap_alignment(findings),
         "proof_commands": sorted(
-            {
-                _string(item.get("proof_command"))
-                for item in findings
-                if item.get("proof_command")
-            }
+            {_string(item.get("proof_command")) for item in findings if item.get("proof_command")}
         )
         or ["python -m sdetkit doctor --all --format json"],
     }
@@ -271,9 +247,7 @@ def render_doctor_report_markdown(contract: Mapping[str, object]) -> str:
     roadmap = _as_mapping(contract.get("roadmap_alignment"))
     findings = [_as_mapping(item) for item in _as_sequence(contract.get("findings"))]
     proof_commands = [
-        _string(item)
-        for item in _as_sequence(contract.get("proof_commands"))
-        if _string(item)
+        _string(item) for item in _as_sequence(contract.get("proof_commands")) if _string(item)
     ]
 
     lines = [
@@ -322,9 +296,7 @@ def render_doctor_report_markdown(contract: Mapping[str, object]) -> str:
             "",
             "## Roadmap Alignment",
             "- lanes: "
-            + ", ".join(
-                f"`{_string(lane)}`" for lane in _as_sequence(roadmap.get("lanes"))
-            ),
+            + ", ".join(f"`{_string(lane)}`" for lane in _as_sequence(roadmap.get("lanes"))),
             f"- next_best_lane: `{_string(roadmap.get('next_best_lane'), 'green_main')}`",
             f"- strategy: `{_string(roadmap.get('strategy'), 'continue in small PRs')}`",
             "",
@@ -338,6 +310,4 @@ def render_doctor_report_markdown(contract: Mapping[str, object]) -> str:
 
 def write_doctor_report_contract(contract: Mapping[str, object], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(contract, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    path.write_text(json.dumps(contract, indent=2, sort_keys=True) + "\n", encoding="utf-8")
