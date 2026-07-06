@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
@@ -18,6 +19,10 @@ def _run_sdetkit(repo_root: Path, cwd: Path, *args: str) -> subprocess.Completed
         capture_output=True,
         check=False,
     )
+
+
+def _sha256_text(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
 def test_sdetkit_doctor_report_contract_json_is_review_first(tmp_path: Path) -> None:
@@ -69,3 +74,44 @@ def test_sdetkit_doctor_report_contract_markdown_respects_out_path(tmp_path: Pat
     assert "patch_application_allowed: `false`" in proc.stdout
     assert "merge_authorized: `false`" in proc.stdout
     assert out_path.read_text(encoding="utf-8") == proc.stdout
+
+
+def test_sdetkit_doctor_report_contract_writes_artifact_bundle(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    artifact_dir = tmp_path / "doctor-artifacts"
+
+    proc = _run_sdetkit(
+        repo_root,
+        tmp_path,
+        "doctor",
+        "--report-contract",
+        "--format",
+        "json",
+        "--report-artifact-dir",
+        str(artifact_dir),
+        "--no-workspace",
+    )
+
+    assert proc.returncode == 0, proc.stderr
+    json_path = artifact_dir / "doctor-report.json"
+    markdown_path = artifact_dir / "doctor-report.md"
+    manifest_path = artifact_dir / "doctor-report-manifest.json"
+    assert json_path.read_text(encoding="utf-8") == proc.stdout
+    assert markdown_path.read_text(encoding="utf-8").startswith("# SDETKit Doctor Report")
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest == {
+        "outputs": {
+            "json": {
+                "path": "doctor-report.json",
+                "sha256": _sha256_text(json_path.read_text(encoding="utf-8")),
+            },
+            "markdown": {
+                "path": "doctor-report.md",
+                "sha256": _sha256_text(markdown_path.read_text(encoding="utf-8")),
+            },
+        },
+        "report_schema_version": "sdetkit.doctor_report.v1",
+        "schema_version": "sdetkit.doctor_report_artifact_bundle.v1",
+        "status": "green",
+    }
