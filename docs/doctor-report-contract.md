@@ -61,7 +61,7 @@ The Markdown renderer produces these sections:
 
 The goal is professional operator communication, not ASCII art or rough placeholder output.
 
-## Initial usage
+## Python usage
 
 ```python
 from sdetkit.doctor_report import build_doctor_report_contract, render_doctor_report_markdown
@@ -70,6 +70,13 @@ contract = build_doctor_report_contract(doctor_payload)
 markdown = render_doctor_report_markdown(contract)
 ```
 
-## Follow-up work
+## CLI usage
 
-A later PR should wire this contract into `python -m sdetkit doctor` output after the contract remains stable under focused tests.
+The main `sdetkit` CLI can project standard Doctor output into the report contract without changing default Doctor behavior:
+
+```bash
+python -m sdetkit doctor --report-contract --format json
+python -m sdetkit doctor --report-contract --format md --ci --out build/sdetkit/doctor-report.md
+```
+
+`--report-contract` uses the same Doctor checks and exit status, but renders the advisory report contract as JSON or Markdown. The mode keeps automation, patch application, and merge authorization false.
