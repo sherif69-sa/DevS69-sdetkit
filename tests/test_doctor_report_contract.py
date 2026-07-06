@@ -66,7 +66,10 @@ def test_doctor_report_contract_prioritizes_blocking_findings() -> None:
     assert report["safety_decision"]["patch_application_allowed"] is False
     assert report["safety_decision"]["merge_authorized"] is False
     assert report["safety_decision"]["semantic_equivalence_claim"] is False
-    assert report["roadmap_alignment"]["lanes"] == ["ci_reliability", "developer_workflow"]
+    assert report["roadmap_alignment"]["lanes"] == [
+        "ci_reliability",
+        "developer_workflow",
+    ]
     assert report["proof_commands"] == [
         "python -m pre_commit run -a",
         "python -m sdetkit doctor --ci --format json",
@@ -120,7 +123,10 @@ def test_green_doctor_report_keeps_next_action_roadmap_aligned() -> None:
     assert report["status"] == "green"
     assert report["confidence"] == "medium"
     assert report["primary_finding"]["roadmap_lane"] == "green_main"
-    assert report["primary_finding"]["proof_command"] == "python -m sdetkit doctor --all --format json"
+    assert (
+        report["primary_finding"]["proof_command"]
+        == "python -m sdetkit doctor --all --format json"
+    )
     assert report["proof_commands"] == ["python -m sdetkit doctor --all --format json"]
 
 
