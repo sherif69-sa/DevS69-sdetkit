@@ -24,6 +24,7 @@ The contract is intentionally advisory. It does not authorize automation, patch 
   "summary": {},
   "primary_finding": {},
   "findings": [],
+  "failure_vector_evidence": {},
   "safety_decision": {},
   "roadmap_alignment": {},
   "proof_commands": []
@@ -48,6 +49,20 @@ Every Doctor report preserves the authority boundary:
 
 This keeps Doctor useful without making unsafe claims. Future remediation work can consume the report, but separate SafetyGate, verifier, proof, and trajectory records must still decide whether any action is allowed.
 
+## Failure vector evidence
+
+`build_doctor_report_contract()` accepts an optional `failure_vector_bundle` payload. This lets Doctor summarize existing `sdetkit.failure_vector.bundle.v1` evidence without parsing logs inside the Doctor report layer.
+
+When evidence is supplied, the report includes:
+
+- `failure_vector_count`
+- counts by failure class and risk
+- safe-fix candidate and review-first counts
+- the highest-risk top failure signal
+- the `failure_diagnosis` roadmap lane
+
+Supplying failure-vector evidence can raise a green Doctor payload to `review_required`, because active failure vectors mean the repository still has unresolved diagnosis evidence. The report remains advisory and review-first.
+
 ## Markdown rendering
 
 The Markdown renderer produces these sections:
@@ -55,6 +70,7 @@ The Markdown renderer produces these sections:
 - Status
 - Primary Finding
 - Findings
+- Failure Vector Evidence
 - Safety Decision
 - Roadmap Alignment
 - Proof Commands
@@ -68,6 +84,11 @@ from sdetkit.doctor_report import build_doctor_report_contract, render_doctor_re
 
 contract = build_doctor_report_contract(doctor_payload)
 markdown = render_doctor_report_markdown(contract)
+
+contract_with_failure_vectors = build_doctor_report_contract(
+    doctor_payload,
+    failure_vector_bundle=failure_vector_bundle,
+)
 ```
 
 ## CLI usage
