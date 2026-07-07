@@ -20,20 +20,10 @@ def test_expected_doctor_bundle_outputs_are_deterministic() -> None:
     )
 
 
-def test_expected_doctor_bundle_outputs_can_include_extra_file() -> None:
-    assert expected_doctor_bundle_outputs(include_extra=True) == (
-        "doctor-report.json",
-        "doctor-report.md",
-        "doctor-report-manifest.json",
-        "failure-vector.json",
-    )
-
-
-def test_known_doctor_bundle_outputs_include_base_and_extra_names() -> None:
+def test_known_doctor_bundle_outputs_are_limited_to_base_contract() -> None:
     assert is_known_doctor_bundle_output("doctor-report.json") is True
     assert is_known_doctor_bundle_output("doctor-report.md") is True
     assert is_known_doctor_bundle_output("doctor-report-manifest.json") is True
-    assert is_known_doctor_bundle_output("failure-vector.json") is True
     assert is_known_doctor_bundle_output("other.json") is False
 
 
@@ -42,13 +32,6 @@ def test_missing_doctor_bundle_outputs_reports_stable_order() -> None:
         "doctor-report.md",
         "doctor-report-manifest.json",
     )
-
-
-def test_missing_doctor_bundle_outputs_can_require_extra_file() -> None:
-    assert missing_doctor_bundle_outputs(
-        {"doctor-report.json", "doctor-report.md", "doctor-report-manifest.json"},
-        include_extra=True,
-    ) == ("failure-vector.json",)
 
 
 def test_unknown_doctor_bundle_outputs_reports_sorted_unknown_names() -> None:
@@ -68,8 +51,7 @@ def test_doctor_bundle_directory_snapshot_only_returns_files(tmp_path: Path) -> 
 
 def test_doctor_bundle_output_summary_is_stable() -> None:
     summary = doctor_bundle_output_summary(
-        {"doctor-report.json", "doctor-report.md", "other.json"},
-        include_extra=True,
+        {"doctor-report.json", "doctor-report.md", "other.json"}
     )
 
     assert summary == {
@@ -77,10 +59,9 @@ def test_doctor_bundle_output_summary_is_stable() -> None:
             "doctor-report.json",
             "doctor-report.md",
             "doctor-report-manifest.json",
-            "failure-vector.json",
         ),
         "observed": ("doctor-report.json", "doctor-report.md", "other.json"),
-        "missing": ("doctor-report-manifest.json", "failure-vector.json"),
+        "missing": ("doctor-report-manifest.json",),
         "unknown": ("other.json",),
         "complete": False,
         "clean": False,
