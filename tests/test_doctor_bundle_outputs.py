@@ -50,9 +50,7 @@ def test_doctor_bundle_directory_snapshot_only_returns_files(tmp_path: Path) -> 
 
 
 def test_doctor_bundle_output_summary_is_stable() -> None:
-    summary = doctor_bundle_output_summary(
-        {"doctor-report.json", "doctor-report.md", "other.json"}
-    )
+    summary = doctor_bundle_output_summary({"doctor-report.json", "doctor-report.md", "other.json"})
 
     assert summary == {
         "expected": (
