@@ -25,8 +25,12 @@ def _sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
-def _write_failure_vector_bundle(path: Path) -> None:
-    payload = {
+def _json_dumps_pretty(value: dict[str, object]) -> str:
+    return json.dumps(value, sort_keys=True, indent=2) + "\n"
+
+
+def _failure_vector_bundle_payload() -> dict[str, object]:
+    return {
         "schema_version": "sdetkit.failure_vector.bundle.v1",
         "vector_schema_version": "sdetkit.failure_vector.v1",
         "environment": "ci",
@@ -52,7 +56,12 @@ def _write_failure_vector_bundle(path: Path) -> None:
             }
         ],
     }
+
+
+def _write_failure_vector_bundle(path: Path) -> dict[str, object]:
+    payload = _failure_vector_bundle_payload()
     path.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
+    return payload
 
 
 def test_sdetkit_doctor_report_contract_json_is_review_first(tmp_path: Path) -> None:
@@ -130,6 +139,7 @@ def test_sdetkit_doctor_report_contract_writes_artifact_bundle(tmp_path: Path) -
     manifest_path = artifact_dir / "doctor-report-manifest.json"
     assert json_path.read_text(encoding="utf-8") == proc.stdout
     assert markdown_path.read_text(encoding="utf-8").startswith("# SDETKit Doctor Report")
+    assert not (artifact_dir / "failure-vector.json").exists()
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest == {
@@ -155,7 +165,7 @@ def test_sdetkit_doctor_report_contract_loads_failure_vector_bundle(
     repo_root = Path(__file__).resolve().parents[1]
     bundle_path = tmp_path / "failure-vector.json"
     artifact_dir = tmp_path / "doctor-artifacts"
-    _write_failure_vector_bundle(bundle_path)
+    bundle_payload = _write_failure_vector_bundle(bundle_path)
 
     proc = _run_sdetkit(
         repo_root,
@@ -193,7 +203,29 @@ def test_sdetkit_doctor_report_contract_loads_failure_vector_bundle(
     assert "failure_vector_count: `1`" in markdown
     assert "top_failure_type: `format`" in markdown
 
+    failure_vector_path = artifact_dir / "failure-vector.json"
+    failure_vector_output = _json_dumps_pretty(bundle_payload)
+    assert failure_vector_path.read_text(encoding="utf-8") == failure_vector_output
+
     manifest = json.loads(
         (artifact_dir / "doctor-report-manifest.json").read_text(encoding="utf-8")
     )
-    assert manifest["status"] == "review_required"
+    assert manifest == {
+        "outputs": {
+            "failure_vector": {
+                "path": "failure-vector.json",
+                "sha256": _sha256_text(failure_vector_output),
+            },
+            "json": {
+                "path": "doctor-report.json",
+                "sha256": _sha256_text(proc.stdout),
+            },
+            "markdown": {
+                "path": "doctor-report.md",
+                "sha256": _sha256_text(markdown),
+            },
+        },
+        "report_schema_version": "sdetkit.doctor_report.v1",
+        "schema_version": "sdetkit.doctor_report_artifact_bundle.v1",
+        "status": "review_required",
+    }
