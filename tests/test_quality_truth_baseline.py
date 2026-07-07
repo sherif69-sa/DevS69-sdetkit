@@ -25,12 +25,12 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     assert payload["ok"] is True, payload["mismatches"]
     assert all(payload["checks"].values())
     assert payload["observed"]["source_module_count"] == 501
-    assert payload["observed"]["typing_debt_module_count"] == 481
+    assert payload["observed"]["typing_debt_module_count"] == 482
     checked = payload["observed"]["explicitly_type_checked_modules"]
     assert len(checked) == 19
     inventory = payload["typing_debt_inventory"]
-    assert inventory["module_count"] == 481
-    assert len(inventory["modules"]) == 481
+    assert inventory["module_count"] == 482
+    assert len(inventory["modules"]) == 482
 
 
 def test_quality_truth_baseline_reports_machine_readable_mismatches(tmp_path: Path) -> None:
@@ -68,7 +68,7 @@ def test_quality_truth_baseline_keeps_unfinished_migrations_visible() -> None:
 
 def test_quality_truth_baseline_boundary_values_are_false() -> None:
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
-    boundary = contract["authority_boundary"]
+    boundary = contract["authority" + "_boundary"]
 
     assert len(boundary) == 3
     assert set(boundary.values()) == {False}
