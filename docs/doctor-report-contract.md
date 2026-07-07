@@ -107,17 +107,21 @@ python -m sdetkit doctor --report-contract --failure-vector-bundle build/sdetkit
 
 ## Artifact bundle
 
-Use `--report-artifact-dir` when CI or an operator needs both machine-readable and human-readable report files in one deterministic directory:
+Use `--report-artifact-dir` when CI or an operator needs machine-readable, human-readable, and evidence files in one deterministic directory:
 
 ```bash
 python -m sdetkit doctor --report-contract --report-artifact-dir build/sdetkit
 python -m sdetkit doctor --report-contract --failure-vector-bundle build/sdetkit/failure-vector.json --report-artifact-dir build/sdetkit
 ```
 
-The artifact bundle writes:
+The artifact bundle always writes:
 
 - `doctor-report.json`
 - `doctor-report.md`
 - `doctor-report-manifest.json`
 
-The manifest schema is `sdetkit.doctor_report_artifact_bundle.v1`. It records the report schema version, report status, output paths, and SHA-256 digests for the JSON and Markdown report files.
+When `--failure-vector-bundle` is also supplied, the artifact bundle also writes a deterministic copy:
+
+- `failure-vector.json`
+
+The manifest schema is `sdetkit.doctor_report_artifact_bundle.v1`. It records the report schema version, report status, output paths, and SHA-256 digests for the JSON, Markdown, and optional FailureVector evidence files. This keeps the `build/sdetkit` evidence directory self-contained while preserving review-first authority boundaries.
