@@ -29,11 +29,12 @@ def _normalize_professional_command_aliases(argv: list[str]) -> list[str]:
 
 def _split_doctor_report_contract_args(
     argv: list[str],
-) -> tuple[bool, str, str | None, str | None, list[str]]:
+) -> tuple[bool, str, str | None, str | None, str | None, list[str]]:
     enabled = False
     output_format = "text"
     out_path: str | None = None
     artifact_dir: str | None = None
+    failure_vector_bundle_path: str | None = None
     inner: list[str] = []
 
     index = 0
@@ -77,14 +78,31 @@ def _split_doctor_report_contract_args(
             artifact_dir = token.split("=", 1)[1]
             index += 1
             continue
+        if token == "--failure-vector-bundle":
+            if index + 1 >= len(argv):
+                raise SystemExit(2)
+            failure_vector_bundle_path = argv[index + 1]
+            index += 2
+            continue
+        if token.startswith("--failure-vector-bundle="):
+            failure_vector_bundle_path = token.split("=", 1)[1]
+            index += 1
+            continue
         inner.append(token)
         index += 1
 
-    return enabled, output_format, out_path, artifact_dir, inner
+    return enabled, output_format, out_path, artifact_dir, failure_vector_bundle_path, inner
 
 
 def _sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _load_failure_vector_bundle(path: str) -> dict[str, Any]:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("FailureVector bundle must be a JSON object")
+    return payload
 
 
 def _write_doctor_report_artifact_bundle(
@@ -123,9 +141,14 @@ def _run_doctor_report_contract(argv: list[str]) -> int | None:
     if not argv or argv[0] != "doctor":
         return None
 
-    enabled, output_format, out_path, artifact_dir, inner = _split_doctor_report_contract_args(
-        argv[1:]
-    )
+    (
+        enabled,
+        output_format,
+        out_path,
+        artifact_dir,
+        failure_vector_bundle_path,
+        inner,
+    ) = _split_doctor_report_contract_args(argv[1:])
     if not enabled:
         return None
 
@@ -156,7 +179,18 @@ def _run_doctor_report_contract(argv: list[str]) -> int | None:
         print("doctor: error: could not build report contract from doctor JSON", file=sys.stderr)
         return rc if rc else 2
 
-    contract = build_doctor_report_contract(doctor_payload)
+    failure_vector_bundle = None
+    if failure_vector_bundle_path:
+        try:
+            failure_vector_bundle = _load_failure_vector_bundle(failure_vector_bundle_path)
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            print(f"doctor: error: could not load FailureVector bundle: {exc}", file=sys.stderr)
+            return 2
+
+    contract = build_doctor_report_contract(
+        doctor_payload,
+        failure_vector_bundle=failure_vector_bundle,
+    )
     json_output = json.dumps(contract, sort_keys=True) + "\n"
     markdown_output = render_doctor_report_markdown(contract)
     output = json_output if output_format == "json" else markdown_output

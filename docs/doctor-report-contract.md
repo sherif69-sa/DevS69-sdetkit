@@ -98,9 +98,12 @@ The main `sdetkit` CLI can project standard Doctor output into the report contra
 ```bash
 python -m sdetkit doctor --report-contract --format json
 python -m sdetkit doctor --report-contract --format md --ci --out build/sdetkit/doctor-report.md
+python -m sdetkit doctor --report-contract --failure-vector-bundle build/sdetkit/failure-vector.json
 ```
 
 `--report-contract` uses the same Doctor checks and exit status, but renders the advisory report contract as JSON or Markdown. The mode keeps automation, patch application, and merge authorization false.
+
+`--failure-vector-bundle` is only consumed by the report-contract route. It must point to a prebuilt `sdetkit.failure_vector.bundle.v1` JSON object. The CLI loads it as evidence and passes it to `build_doctor_report_contract(..., failure_vector_bundle=...)`.
 
 ## Artifact bundle
 
@@ -108,6 +111,7 @@ Use `--report-artifact-dir` when CI or an operator needs both machine-readable a
 
 ```bash
 python -m sdetkit doctor --report-contract --report-artifact-dir build/sdetkit
+python -m sdetkit doctor --report-contract --failure-vector-bundle build/sdetkit/failure-vector.json --report-artifact-dir build/sdetkit
 ```
 
 The artifact bundle writes:
