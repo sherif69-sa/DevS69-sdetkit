@@ -8,9 +8,7 @@ import sys
 from pathlib import Path
 
 
-def _run_sdetkit(
-    repo_root: Path, cwd: Path, *args: str
-) -> subprocess.CompletedProcess[str]:
+def _run_sdetkit(repo_root: Path, cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env["PYTHONPATH"] = str(repo_root / "src")
     return subprocess.run(
@@ -131,9 +129,7 @@ def test_sdetkit_doctor_report_contract_writes_artifact_bundle(tmp_path: Path) -
     markdown_path = artifact_dir / "doctor-report.md"
     manifest_path = artifact_dir / "doctor-report-manifest.json"
     assert json_path.read_text(encoding="utf-8") == proc.stdout
-    assert markdown_path.read_text(encoding="utf-8").startswith(
-        "# SDETKit Doctor Report"
-    )
+    assert markdown_path.read_text(encoding="utf-8").startswith("# SDETKit Doctor Report")
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest == {
@@ -185,9 +181,7 @@ def test_sdetkit_doctor_report_contract_loads_failure_vector_bundle(
         "check": "ruff_format",
         "failure_type": "format",
         "headline_signal": "ruff format would reformat one file",
-        "local_repro_command": (
-            "python -m ruff format --check src/sdetkit/cli/__init__.py"
-        ),
+        "local_repro_command": ("python -m ruff format --check src/sdetkit/cli/__init__.py"),
         "risk": "low",
     }
     assert payload["safety_decision"]["automation_allowed"] is False
