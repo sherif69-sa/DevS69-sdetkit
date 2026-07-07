@@ -75,7 +75,8 @@
     "python310_full_continuous_integration_proven": false
   },
   "authority_boundary": {
-    "tests_may_be_\u0077eakened": false,
-    "quality_gates_may_be_\u0068idden": false,
-    "unmeasured_quality_may_be_\u0063laimed": false
+    "tests\u005fmay\u005fbe\u005fweakened": false,
+    "quality\u005fgates\u005fmay\u005fbe\u005fhidden": false,
+    "unmeasured\u005fquality\u005fmay\u005fbe\u005fclaimed": false
   }
+}
