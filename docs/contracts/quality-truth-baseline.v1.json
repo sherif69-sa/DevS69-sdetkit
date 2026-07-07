@@ -36,7 +36,7 @@
     "blanket_module_pattern": "sdetkit.*",
     "new_unrecorded_suppression_allowed": false,
     "source_module_count": 501,
-    "typing_debt_module_count": 481,
+    "typing_debt_module_count": 482,
     "typing_debt_inventory_sha256": "7f37df0ae22436f03860ab68e72a6328be38ff88b16372157a6f0e45d039fabd",
     "typing_debt_artifact_path": "build/quality/typing-debt-inventory.json",
     "explicitly_type_checked_modules": [
