@@ -44,7 +44,9 @@ def _write_failure_vector_bundle(path: Path) -> None:
                 "failure_type": "format",
                 "risk": "low",
                 "headline_signal": "ruff format would reformat one file",
-                "local_repro_command": "python -m ruff format --check src/sdetkit/cli/__init__.py",
+                "local_repro_command": (
+                    "python -m ruff format --check src/sdetkit/cli/__init__.py"
+                ),
                 "safe_fix_candidate": True,
                 "safe_fix_allowed": False,
             }
@@ -175,7 +177,9 @@ def test_sdetkit_doctor_report_contract_loads_failure_vector_bundle(tmp_path: Pa
         "check": "ruff_format",
         "failure_type": "format",
         "headline_signal": "ruff format would reformat one file",
-        "local_repro_command": "python -m ruff format --check src/sdetkit/cli/__init__.py",
+        "local_repro_command": (
+            "python -m ruff format --check src/sdetkit/cli/__init__.py"
+        ),
         "risk": "low",
     }
     assert payload["safety_decision"]["automation_allowed"] is False
@@ -187,5 +191,7 @@ def test_sdetkit_doctor_report_contract_loads_failure_vector_bundle(tmp_path: Pa
     assert "failure_vector_count: `1`" in markdown
     assert "top_failure_type: `format`" in markdown
 
-    manifest = json.loads((artifact_dir / "doctor-report-manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads(
+        (artifact_dir / "doctor-report-manifest.json").read_text(encoding="utf-8")
+    )
     assert manifest["status"] == "review_required"
