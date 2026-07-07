@@ -5,42 +5,32 @@ from pathlib import Path
 REPORT_JSON = "doctor-report.json"
 REPORT_MARKDOWN = "doctor-report.md"
 REPORT_MANIFEST = "doctor-report-manifest.json"
-EXTRA_JSON = "failure-vector.json"
 
 BASE_OUTPUTS = (REPORT_JSON, REPORT_MARKDOWN, REPORT_MANIFEST)
-EXTRA_OUTPUTS = (EXTRA_JSON,)
-ALL_OUTPUTS = (*BASE_OUTPUTS, *EXTRA_OUTPUTS)
 
 
-def expected_doctor_bundle_outputs(*, include_extra: bool = False) -> tuple[str, ...]:
-    """Return the deterministic file set expected from a Doctor artifact bundle."""
+def expected_doctor_bundle_outputs() -> tuple[str, ...]:
+    """Return the deterministic base file set expected from a Doctor artifact bundle."""
 
-    if include_extra:
-        return ALL_OUTPUTS
     return BASE_OUTPUTS
 
 
 def is_known_doctor_bundle_output(filename: str) -> bool:
-    """Return whether a filename belongs to the Doctor artifact bundle contract."""
+    """Return whether a filename belongs to the base Doctor artifact bundle contract."""
 
-    return filename in ALL_OUTPUTS
+    return filename in BASE_OUTPUTS
 
 
-def missing_doctor_bundle_outputs(
-    filenames: set[str],
-    *,
-    include_extra: bool = False,
-) -> tuple[str, ...]:
-    """Return bundle filenames missing from an observed artifact directory."""
+def missing_doctor_bundle_outputs(filenames: set[str]) -> tuple[str, ...]:
+    """Return base bundle filenames missing from an observed artifact directory."""
 
-    expected = expected_doctor_bundle_outputs(include_extra=include_extra)
-    return tuple(filename for filename in expected if filename not in filenames)
+    return tuple(filename for filename in BASE_OUTPUTS if filename not in filenames)
 
 
 def unknown_doctor_bundle_outputs(filenames: set[str]) -> tuple[str, ...]:
     """Return unexpected filenames in stable order."""
 
-    return tuple(sorted(filename for filename in filenames if not is_known_doctor_bundle_output(filename)))
+    return tuple(sorted(filename for filename in filenames if filename not in BASE_OUTPUTS))
 
 
 def doctor_bundle_directory_snapshot(path: str | Path) -> set[str]:
@@ -52,17 +42,13 @@ def doctor_bundle_directory_snapshot(path: str | Path) -> set[str]:
     return {entry.name for entry in target.iterdir() if entry.is_file()}
 
 
-def doctor_bundle_output_summary(
-    filenames: set[str],
-    *,
-    include_extra: bool = False,
-) -> dict[str, object]:
+def doctor_bundle_output_summary(filenames: set[str]) -> dict[str, object]:
     """Summarize observed bundle output names for logs and tests."""
 
-    missing = missing_doctor_bundle_outputs(filenames, include_extra=include_extra)
+    missing = missing_doctor_bundle_outputs(filenames)
     unknown = unknown_doctor_bundle_outputs(filenames)
     return {
-        "expected": expected_doctor_bundle_outputs(include_extra=include_extra),
+        "expected": expected_doctor_bundle_outputs(),
         "observed": tuple(sorted(filenames)),
         "missing": missing,
         "unknown": unknown,
