@@ -8,7 +8,9 @@ import sys
 from pathlib import Path
 
 
-def _run_sdetkit(repo_root: Path, cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+def _run_sdetkit(
+    repo_root: Path, cwd: Path, *args: str
+) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env["PYTHONPATH"] = str(repo_root / "src")
     return subprocess.run(
@@ -79,7 +81,9 @@ def test_sdetkit_doctor_report_contract_json_is_review_first(tmp_path: Path) -> 
     assert payload["proof_commands"] == ["python -m sdetkit doctor --all --format json"]
 
 
-def test_sdetkit_doctor_report_contract_markdown_respects_out_path(tmp_path: Path) -> None:
+def test_sdetkit_doctor_report_contract_markdown_respects_out_path(
+    tmp_path: Path,
+) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     out_path = tmp_path / "doctor-report.md"
 
@@ -127,7 +131,9 @@ def test_sdetkit_doctor_report_contract_writes_artifact_bundle(tmp_path: Path) -
     markdown_path = artifact_dir / "doctor-report.md"
     manifest_path = artifact_dir / "doctor-report-manifest.json"
     assert json_path.read_text(encoding="utf-8") == proc.stdout
-    assert markdown_path.read_text(encoding="utf-8").startswith("# SDETKit Doctor Report")
+    assert markdown_path.read_text(encoding="utf-8").startswith(
+        "# SDETKit Doctor Report"
+    )
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest == {
@@ -147,7 +153,9 @@ def test_sdetkit_doctor_report_contract_writes_artifact_bundle(tmp_path: Path) -
     }
 
 
-def test_sdetkit_doctor_report_contract_loads_failure_vector_bundle(tmp_path: Path) -> None:
+def test_sdetkit_doctor_report_contract_loads_failure_vector_bundle(
+    tmp_path: Path,
+) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     bundle_path = tmp_path / "failure-vector.json"
     artifact_dir = tmp_path / "doctor-artifacts"
