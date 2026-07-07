@@ -98,6 +98,10 @@ def _sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def _json_dumps_pretty(value: dict[str, Any]) -> str:
+    return json.dumps(value, sort_keys=True, indent=2) + "\n"
+
+
 def _load_failure_vector_bundle(path: str) -> dict[str, Any]:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -110,6 +114,7 @@ def _write_doctor_report_artifact_bundle(
     contract: dict[str, Any],
     json_output: str,
     markdown_output: str,
+    failure_vector_bundle: dict[str, Any] | None = None,
 ) -> None:
     target = Path(artifact_dir)
     target.mkdir(parents=True, exist_ok=True)
@@ -124,16 +129,26 @@ def _write_doctor_report_artifact_bundle(
             "sha256": _sha256_text(markdown_output),
         },
     }
+    failure_vector_output = None
+    if failure_vector_bundle is not None:
+        failure_vector_output = _json_dumps_pretty(failure_vector_bundle)
+        outputs["failure_vector"] = {
+            "path": "failure-vector.json",
+            "sha256": _sha256_text(failure_vector_output),
+        }
+
     manifest = {
         "schema_version": "sdetkit.doctor_report_artifact_bundle.v1",
         "report_schema_version": str(contract.get("schema_version", "")),
         "status": str(contract.get("status", "")),
         "outputs": outputs,
     }
-    manifest_output = json.dumps(manifest, sort_keys=True, indent=2) + "\n"
+    manifest_output = _json_dumps_pretty(manifest)
 
     (target / "doctor-report.json").write_text(json_output, encoding="utf-8")
     (target / "doctor-report.md").write_text(markdown_output, encoding="utf-8")
+    if failure_vector_output is not None:
+        (target / "failure-vector.json").write_text(failure_vector_output, encoding="utf-8")
     (target / "doctor-report-manifest.json").write_text(manifest_output, encoding="utf-8")
 
 
@@ -201,6 +216,7 @@ def _run_doctor_report_contract(argv: list[str]) -> int | None:
             contract,
             json_output,
             markdown_output,
+            failure_vector_bundle=failure_vector_bundle,
         )
     if out_path:
         Path(out_path).write_text(output, encoding="utf-8")
