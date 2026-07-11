@@ -37,9 +37,7 @@ def _cargo_audit_evidence(root: Path) -> list[str]:
         return []
 
     config_files = [
-        path
-        for path in (".cargo/audit.toml", "audit.toml")
-        if _core._file(root, path)
+        path for path in (".cargo/audit.toml", "audit.toml") if _core._file(root, path)
     ]
     workflow_files = _core._workflow_files(root)
     script_files = _core._owned_script_files(root)
@@ -85,12 +83,16 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
 
 
 def write_adoption_surface_artifact(
-    *, repo_root: str | Path = ".", out: str | Path = "build/sdetkit/adoption-surface.json"
+    *,
+    repo_root: str | Path = ".",
+    out: str | Path = "build/sdetkit/adoption-surface.json",
 ) -> dict[str, Any]:
     payload = discover_adoption_surface(repo_root)
     out_path = Path(out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    out_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return {
         "schema_version": payload["schema_version"],
         "adoption_surface_json": out_path.as_posix(),
@@ -120,11 +122,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         sys.stdout.write(render_adoption_surface_report(payload) + "\n")
     else:
         sys.stdout.write(f"adoption_surface_json={summary['adoption_surface_json']}\n")
-        sys.stdout.write(f"automation_allowed={str(summary['automation_allowed']).lower()}\n")
+        sys.stdout.write(
+            f"automation_allowed={str(summary['automation_allowed']).lower()}\n"
+        )
         sys.stdout.write(
             f"patch_application_allowed={str(summary['patch_application_allowed']).lower()}\n"
         )
-        sys.stdout.write(f"merge_authorized={str(summary['merge_authorized']).lower()}\n")
+        sys.stdout.write(
+            f"merge_authorized={str(summary['merge_authorized']).lower()}\n"
+        )
         sys.stdout.write(
             f"semantic_equivalence_proven={str(summary['semantic_equivalence_proven']).lower()}\n"
         )
