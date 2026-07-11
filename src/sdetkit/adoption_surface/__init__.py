@@ -8,7 +8,28 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit.adoption_surface import core as _core
-from sdetkit.adoption_surface.core import *  # noqa: F403
+from sdetkit.adoption_surface.core import (
+    REQUIRED_FALSE_FIELDS,
+    REQUIRED_LIST_FIELDS,
+    REQUIRED_OBJECT_FIELDS,
+    SCHEMA_VERSION,
+    render_adoption_surface_report,
+    validate_adoption_surface_artifact,
+    validate_adoption_surface_payload,
+)
+
+__all__ = (
+    "REQUIRED_FALSE_FIELDS",
+    "REQUIRED_LIST_FIELDS",
+    "REQUIRED_OBJECT_FIELDS",
+    "SCHEMA_VERSION",
+    "discover_adoption_surface",
+    "main",
+    "render_adoption_surface_report",
+    "validate_adoption_surface_artifact",
+    "validate_adoption_surface_payload",
+    "write_adoption_surface_artifact",
+)
 
 
 def _cargo_audit_evidence(root: Path) -> list[str]:
@@ -53,7 +74,9 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         purpose="security",
         evidence=evidence,
     )
-    payload["security_tools"] = sorted(payload["security_tools"], key=lambda item: item["name"])
+    payload["security_tools"] = sorted(
+        payload["security_tools"], key=lambda item: item["name"]
+    )
     payload["recommended_proof_commands"] = sorted(
         payload["recommended_proof_commands"],
         key=lambda item: (item["surface"], item["command"]),
@@ -91,8 +114,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ns.format == "json":
         sys.stdout.write(json.dumps(summary, indent=2, sort_keys=True) + "\n")
     elif ns.format == "report":
-        payload = json.loads(Path(summary["adoption_surface_json"]).read_text(encoding="utf-8"))
-        sys.stdout.write(render_adoption_surface_report(payload) + "\n")  # noqa: F405
+        payload = json.loads(
+            Path(summary["adoption_surface_json"]).read_text(encoding="utf-8")
+        )
+        sys.stdout.write(render_adoption_surface_report(payload) + "\n")
     else:
         sys.stdout.write(f"adoption_surface_json={summary['adoption_surface_json']}\n")
         sys.stdout.write(f"automation_allowed={str(summary['automation_allowed']).lower()}\n")
