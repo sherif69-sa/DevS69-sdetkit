@@ -1,0 +1,19 @@
+Run cargo test
+   Compiling calculator v0.1.0 (/home/runner/work/calculator/calculator)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.71s
+     Running unittests src/lib.rs (target/debug/deps/calculator-7c18a7f9)
+
+running 1 test
+test tests::adds_numbers ... FAILED
+
+failures:
+
+---- tests::adds_numbers stdout ----
+thread 'tests::adds_numbers' panicked at src/lib.rs:14:9:
+assertion `left == right` failed
+  left: 3
+ right: 4
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out
+error: test failed, to rerun pass `--lib`
+Process completed with exit code 101

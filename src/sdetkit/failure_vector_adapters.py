@@ -18,9 +18,11 @@ GO_TEST = re.compile(r"---\s+FAIL:\s+(?P<check>[\w./-]+)")
 JAVA_LOCATION = re.compile(
     r"(?P<path>[\w./-]+\.java)(?::\d+|:\[\d+(?:,\d+)?\])(?::\s*(?P<check>.+))?"
 )
+RUST_LOCATION = re.compile(r"(?:-->\s+|at\s+)?(?P<path>[\w./-]+\.rs):\d+:\d+")
+RUST_TEST = re.compile(r"^test\s+(?P<check>[\w:./-]+)\s+\.\.\.\s+FAILED$", re.MULTILINE)
 COMMAND = re.compile(r"^(?:Run|\$)\s+(?P<command>.+)$", re.MULTILINE)
 EXIT_CODE = re.compile(r"Process completed with exit code (?P<code>\d+)")
-SUPPORTED = frozenset({"auto", "python", "javascript_typescript", "go", "java"})
+SUPPORTED = frozenset({"auto", "python", "javascript_typescript", "go", "java", "rust"})
 
 
 @dataclass(frozen=True)
@@ -218,6 +220,8 @@ def extract_ecosystem_failure_vector(
         return _go_result(log_text, check, log_url, environment)
     if selected == "java":
         return _java_result(log_text, check, log_url, environment)
+    if selected == "rust":
+        return _rust_result(log_text, check, log_url, environment)
     return _unknown(log_text, "unknown", check, log_url, environment, "ecosystem_not_identified")
 
 
@@ -227,6 +231,8 @@ def _detect(log_text: str) -> str:
         return "javascript_typescript"
     if any(token in lower for token in ("jest", "vitest", "eslint", "tsc --noemit")):
         return "javascript_typescript"
+    if _looks_like_rust(log_text):
+        return "rust"
     if GO_LOCATION.search(log_text) or GO_TEST.search(log_text):
         return "go"
     if any(token in lower for token in ("go test", "go vet")):
@@ -356,6 +362,55 @@ def _java_result(
     return _unknown(log_text, "java", check, log_url, environment, "java_failure_not_classified")
 
 
+def _rust_result(
+    log_text: str,
+    check: str,
+    log_url: str | None,
+    environment: str,
+) -> FailureVectorAdapterResult:
+    lower = log_text.lower()
+    location = RUST_LOCATION.search(log_text)
+    if _looks_like_cargo_clippy(lower):
+        return _result(
+            log_text,
+            check,
+            log_url,
+            environment,
+            location,
+            "lint",
+            "cargo_clippy",
+            "cargo clippy --all-targets --all-features",
+            ecosystem="rust",
+        )
+    test = RUST_TEST.search(log_text)
+    if test or _looks_like_cargo_test(lower):
+        return _result(
+            log_text,
+            check,
+            log_url,
+            environment,
+            location or test,
+            "test",
+            "cargo_test",
+            "cargo test",
+            ecosystem="rust",
+        )
+    if location:
+        return _result(
+            log_text,
+            check,
+            log_url,
+            environment,
+            location,
+            "unknown",
+            "cargo_toolchain",
+            "cargo test",
+            ("rust_failure_class_not_proven",),
+            ecosystem="rust",
+        )
+    return _unknown(log_text, "rust", check, log_url, environment, "rust_failure_not_classified")
+
+
 def _result(
     log_text: str,
     check: str,
@@ -453,6 +508,41 @@ def _looks_like_gradle_test(lower: str) -> bool:
             "$ ./gradlew test",
             "> task :test failed",
             "gradle test executor",
+        )
+    )
+
+
+def _looks_like_rust(log_text: str) -> bool:
+    lower = log_text.lower()
+    return (
+        RUST_LOCATION.search(log_text) is not None
+        or RUST_TEST.search(log_text) is not None
+        or _looks_like_cargo_test(lower)
+        or _looks_like_cargo_clippy(lower)
+    )
+
+
+def _looks_like_cargo_test(lower: str) -> bool:
+    return any(
+        token in lower
+        for token in (
+            "run cargo test",
+            "$ cargo test",
+            "test result: failed",
+            "running unittests",
+            "panicked at",
+        )
+    )
+
+
+def _looks_like_cargo_clippy(lower: str) -> bool:
+    return any(
+        token in lower
+        for token in (
+            "run cargo clippy",
+            "$ cargo clippy",
+            "cargo clippy --all-targets --all-features",
+            "clippy::",
         )
     )
 

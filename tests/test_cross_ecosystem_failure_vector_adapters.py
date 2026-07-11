@@ -45,6 +45,15 @@ def _fixture(name: str) -> str:
             "./gradlew test",
             1,
         ),
+        ("cargo_test", "cargo_test", "test", "src/lib.rs", "cargo test", 101),
+        (
+            "cargo_clippy",
+            "cargo_clippy",
+            "lint",
+            "src/main.rs",
+            "cargo clippy --all-targets --all-features",
+            101,
+        ),
     ],
 )
 def test_cross_ecosystem_adapter_extracts_review_first_failure_vectors(
@@ -118,6 +127,29 @@ def test_unknown_java_signal_remains_review_first() -> None:
     assert result.uncertainty == ("java_failure_not_classified",)
     assert result.vector.failure_class == "unknown"
     assert evaluate_failure_vector(result.vector).review_first is True
+
+
+def test_unknown_rust_signal_remains_review_first() -> None:
+    result = extract_ecosystem_failure_vector(
+        "Rust build stopped without Cargo test or Clippy markers",
+        ecosystem="rust",
+        check="rust-build",
+    )
+
+    assert result.ecosystem == "rust"
+    assert result.tool == "unknown"
+    assert result.confidence == "low"
+    assert result.uncertainty == ("rust_failure_not_classified",)
+    assert result.vector.failure_class == "unknown"
+    assert evaluate_failure_vector(result.vector).review_first is True
+
+
+def test_cargo_test_is_not_misclassified_as_go_test() -> None:
+    result = extract_ecosystem_failure_vector(_fixture("cargo_test"), check="cargo-test")
+
+    assert result.ecosystem == "rust"
+    assert result.tool == "cargo_test"
+    assert result.vector.local_repro_command == "cargo test"
 
 
 def test_adapter_rejects_unsupported_ecosystem() -> None:
