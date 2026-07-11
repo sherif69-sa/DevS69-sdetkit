@@ -36,9 +36,7 @@ def _cargo_audit_evidence(root: Path) -> list[str]:
     if not _core._file(root, "Cargo.toml"):
         return []
 
-    config_files = [
-        path for path in (".cargo/audit.toml", "audit.toml") if _core._file(root, path)
-    ]
+    config_files = [path for path in (".cargo/audit.toml", "audit.toml") if _core._file(root, path)]
     workflow_files = _core._workflow_files(root)
     script_files = _core._owned_script_files(root)
     command_files = sorted(
@@ -72,9 +70,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         purpose="security",
         evidence=evidence,
     )
-    payload["security_tools"] = sorted(
-        payload["security_tools"], key=lambda item: item["name"]
-    )
+    payload["security_tools"] = sorted(payload["security_tools"], key=lambda item: item["name"])
     payload["recommended_proof_commands"] = sorted(
         payload["recommended_proof_commands"],
         key=lambda item: (item["surface"], item["command"]),
@@ -90,9 +86,7 @@ def write_adoption_surface_artifact(
     payload = discover_adoption_surface(repo_root)
     out_path = Path(out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    out_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return {
         "schema_version": payload["schema_version"],
         "adoption_surface_json": out_path.as_posix(),
@@ -116,21 +110,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ns.format == "json":
         sys.stdout.write(json.dumps(summary, indent=2, sort_keys=True) + "\n")
     elif ns.format == "report":
-        payload = json.loads(
-            Path(summary["adoption_surface_json"]).read_text(encoding="utf-8")
-        )
+        payload = json.loads(Path(summary["adoption_surface_json"]).read_text(encoding="utf-8"))
         sys.stdout.write(render_adoption_surface_report(payload) + "\n")
     else:
         sys.stdout.write(f"adoption_surface_json={summary['adoption_surface_json']}\n")
-        sys.stdout.write(
-            f"automation_allowed={str(summary['automation_allowed']).lower()}\n"
-        )
+        sys.stdout.write(f"automation_allowed={str(summary['automation_allowed']).lower()}\n")
         sys.stdout.write(
             f"patch_application_allowed={str(summary['patch_application_allowed']).lower()}\n"
         )
-        sys.stdout.write(
-            f"merge_authorized={str(summary['merge_authorized']).lower()}\n"
-        )
+        sys.stdout.write(f"merge_authorized={str(summary['merge_authorized']).lower()}\n")
         sys.stdout.write(
             f"semantic_equivalence_proven={str(summary['semantic_equivalence_proven']).lower()}\n"
         )
