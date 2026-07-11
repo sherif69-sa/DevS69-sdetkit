@@ -1,0 +1,16 @@
+Run cargo clippy --all-targets --all-features
+    Checking calculator v0.1.0 (/home/runner/work/calculator/calculator)
+error: this `if` statement can be collapsed
+ --> src/main.rs:8:5
+  |
+8 | /     if ready {
+9 | |         if enabled {
+10| |             run();
+11| |         }
+12| |     }
+  | |_____^
+  |
+  = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#collapsible_if
+  = note: `-D clippy::collapsible-if` implied by `-D warnings`
+error: could not compile `calculator` (bin "calculator" test) due to 1 previous error
+Process completed with exit code 101
