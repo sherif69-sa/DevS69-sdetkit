@@ -285,9 +285,84 @@ def _extend_nested_node_workspaces(payload: dict[str, Any], root: Path) -> None:
             )
 
 
+def _nested_rust_audit_evidence(root: Path, workspace: str) -> list[str]:
+    return [
+        _workspace_path(workspace, path)
+        for path in (".cargo/audit.toml", "audit.toml")
+        if _core._file(root, _workspace_path(workspace, path))
+    ]
+
+
+def _extend_nested_rust_workspaces(payload: dict[str, Any], root: Path) -> None:
+    manifests = _nested_owned_files(root, "Cargo.toml")
+    if not manifests:
+        return
+
+    cargo_files: list[str] = []
+    for manifest in manifests:
+        workspace = _workspace_directory(manifest)
+        workspace_files = [manifest]
+        lockfile = _workspace_path(workspace, "Cargo.lock")
+        if _core._file(root, lockfile):
+            workspace_files.append(lockfile)
+        cargo_files.extend(workspace_files)
+
+        _merge_named_list(
+            payload["test_runners"],
+            "cargo_test",
+            list_field="commands",
+            values=["cargo test"],
+            confidence="high",
+        )
+        _add_workspace_proof_command(
+            payload["recommended_proof_commands"],
+            surface="rust",
+            command="cargo test",
+            confidence="high",
+            purpose="test",
+            file=manifest,
+            working_directory=workspace,
+        )
+
+        audit_evidence = _nested_rust_audit_evidence(root, workspace)
+        if not audit_evidence:
+            continue
+        _merge_named_list(
+            payload["security_tools"],
+            "cargo_audit",
+            list_field="evidence",
+            values=audit_evidence,
+            confidence="detected",
+        )
+        _add_workspace_proof_command(
+            payload["recommended_proof_commands"],
+            surface="rust",
+            command="cargo audit",
+            confidence="medium",
+            purpose="security",
+            file=audit_evidence[0],
+            working_directory=workspace,
+        )
+
+    _merge_named_list(
+        payload["detected_languages"],
+        "rust",
+        list_field="evidence",
+        values=cargo_files,
+        confidence="high",
+    )
+    _merge_named_list(
+        payload["package_managers"],
+        "cargo",
+        list_field="files",
+        values=cargo_files,
+    )
+
+
 def _extend_nested_workspaces(payload: dict[str, Any], root: Path) -> None:
     _extend_nested_python_workspaces(payload, root)
     _extend_nested_node_workspaces(payload, root)
+    _extend_nested_rust_workspaces(payload, root)
 
 
 def _extend_jenkins_pipeline(payload: dict[str, Any], root: Path) -> None:
@@ -327,11 +402,12 @@ def _extend_cargo_audit(payload: dict[str, Any], root: Path) -> None:
     if not evidence:
         return
 
-    _core._add_named(
+    _merge_named_list(
         payload["security_tools"],
         "cargo_audit",
+        list_field="evidence",
+        values=evidence,
         confidence="detected",
-        evidence=evidence,
     )
     _core._add_proof_command(
         payload["recommended_proof_commands"],
@@ -357,9 +433,9 @@ def _proof_sort_key(item: dict[str, Any]) -> tuple[str, str, str, str]:
 def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     payload = _core.discover_adoption_surface(root)
+    _extend_cargo_audit(payload, root)
     _extend_nested_workspaces(payload, root)
     _extend_jenkins_pipeline(payload, root)
-    _extend_cargo_audit(payload, root)
 
     for field in ("detected_languages", "package_managers", "test_runners", "security_tools"):
         payload[field] = sorted(payload[field], key=lambda item: item["name"])
