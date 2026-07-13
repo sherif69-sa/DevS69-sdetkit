@@ -154,6 +154,7 @@ nav:
       - Adaptive anonymized learning import: adaptive-learning-import.md
       - Adaptive hosted readiness boundary: adaptive-hosted-readiness-boundary.md
       - Repo adoption scan: repo-adoption-scan.md
+      - Rust adoption-to-diagnosis proof: rust-adoption-to-diagnosis-proof.md
       - Artifact reference and generated sample map: artifact-reference.md
       - Release evidence recipes and proof samples: release-evidence-recipes.md
       - CI artifact walkthrough: ci-artifact-walkthrough.md
