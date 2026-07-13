@@ -97,6 +97,11 @@ def test_dotnet_workspaces_emit_only_explicit_test_project_proof() -> None:
         "dotnet test Billing.Tests.fsproj",
         "dotnet test Legacy.Tests.vbproj",
     }
+    assert all(
+        item.get("command") != "dotnet test"
+        for item in payload["recommended_proof_commands"]
+        if item.get("surface") == "dotnet"
+    )
     assert payload["review_first_unknowns"] == [
         f".NET project {CATALOG_PROJECT} detected but test-project evidence is not proven"
     ]
@@ -188,6 +193,21 @@ def test_package_reference_proves_test_project_and_malformed_xml_does_not(
     ]
 
 
+def test_solution_only_repo_preserves_generic_dotnet_proof(tmp_path: Path) -> None:
+    (tmp_path / "Product.sln").write_text("\n", encoding="utf-8")
+
+    payload = discover_adoption_surface(tmp_path)
+    languages = _named(payload["detected_languages"])
+    managers = _named(payload["package_managers"])
+    commands = [
+        item for item in payload["recommended_proof_commands"] if item.get("surface") == "dotnet"
+    ]
+
+    assert languages["dotnet"]["evidence"] == ["Product.sln"]
+    assert managers["nuget"]["files"] == ["Product.sln"]
+    assert [item["command"] for item in commands] == ["dotnet test"]
+
+
 def test_dotnet_discovery_ignores_non_owned_top_level_trees(tmp_path: Path) -> None:
     ignored_docs = tmp_path / "docs" / "sample" / "Docs.Tests.csproj"
     ignored_tests = tmp_path / "tests" / "fixture" / "Fixture.Tests.fsproj"
@@ -199,6 +219,7 @@ def test_dotnet_discovery_ignores_non_owned_top_level_trees(tmp_path: Path) -> N
     payload = discover_adoption_surface(tmp_path)
 
     languages = _named(payload["detected_languages"])
+    assert "dotnet" not in languages
     assert "csharp" not in languages
     assert "fsharp" not in languages
     assert "nuget" not in _named(payload["package_managers"])
