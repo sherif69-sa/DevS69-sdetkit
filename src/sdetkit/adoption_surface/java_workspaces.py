@@ -164,9 +164,7 @@ def _nuget_evidence(root: Path, workspace: str) -> list[str]:
     return sorted(set(evidence))
 
 
-def _add_root_dotnet_test_command(
-    payload: dict[str, Any], *, manifest: str, command: str
-) -> None:
+def _add_root_dotnet_test_command(payload: dict[str, Any], *, manifest: str, command: str) -> None:
     for item in payload["recommended_proof_commands"]:
         if (
             item.get("surface") == "dotnet"
