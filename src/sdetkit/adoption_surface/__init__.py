@@ -17,6 +17,7 @@ from sdetkit.adoption_surface.core import (
     validate_adoption_surface_artifact,
     validate_adoption_surface_payload,
 )
+from sdetkit.adoption_surface.jenkins import extract_jenkins_pipeline
 
 __all__ = (
     "REQUIRED_FALSE_FIELDS",
@@ -50,11 +51,46 @@ def _cargo_audit_evidence(root: Path) -> list[str]:
     return sorted(set(config_files + command_files))
 
 
-def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
-    payload = _core.discover_adoption_surface(repo_root)
-    evidence = _cargo_audit_evidence(Path(repo_root))
+def _jenkins_context(stage: str) -> str:
+    return f"stage {stage}" if stage else "pipeline"
+
+
+def _extend_jenkins_pipeline(payload: dict[str, Any], root: Path) -> None:
+    extracted, unknowns = extract_jenkins_pipeline(root)
+    payload["review_first_unknowns"].extend(unknowns)
+
+    for item in extracted:
+        command = str(item.get("command", "")).strip()
+        stage = str(item.get("stage", "")).strip()
+        if not command or _core._command_is_shell_message(command):
+            continue
+        if _core._command_is_dynamic(command):
+            payload["review_first_unknowns"].append(
+                f"Jenkins {_jenkins_context(stage)} has dynamic shell command that was not guessed"
+            )
+            continue
+
+        source: dict[str, Any] = {
+            "ci_system": "jenkins",
+            "file": str(item.get("file", "Jenkinsfile")),
+        }
+        if stage:
+            source["stage"] = stage
+        _core._add_proof_command(
+            payload["recommended_proof_commands"],
+            surface="jenkins",
+            command=command,
+            confidence="medium",
+            purpose=_core._classify_proof_purpose(command),
+            evidence=[str(item.get("file", "Jenkinsfile"))],
+            source=source,
+        )
+
+
+def _extend_cargo_audit(payload: dict[str, Any], root: Path) -> None:
+    evidence = _cargo_audit_evidence(root)
     if not evidence:
-        return payload
+        return
 
     _core._add_named(
         payload["security_tools"],
@@ -70,11 +106,20 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
         purpose="security",
         evidence=evidence,
     )
+
+
+def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
+    root = Path(repo_root)
+    payload = _core.discover_adoption_surface(root)
+    _extend_jenkins_pipeline(payload, root)
+    _extend_cargo_audit(payload, root)
+
     payload["security_tools"] = sorted(payload["security_tools"], key=lambda item: item["name"])
     payload["recommended_proof_commands"] = sorted(
         payload["recommended_proof_commands"],
         key=lambda item: (item["surface"], item["command"]),
     )
+    payload["review_first_unknowns"] = sorted(set(payload["review_first_unknowns"]))
     return payload
 
 
