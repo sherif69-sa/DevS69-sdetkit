@@ -1,0 +1,7 @@
+{
+  "name": "example-web",
+  "private": true,
+  "scripts": {
+    "test": "vitest run"
+  }
+}
