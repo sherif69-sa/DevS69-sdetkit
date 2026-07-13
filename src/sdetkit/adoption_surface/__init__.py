@@ -367,8 +367,7 @@ def _nested_go_security_evidence(root: Path, workspace: str) -> list[str]:
         if _core._file(root, _workspace_path(workspace, path))
     ]
     script_files = [
-        _workspace_path(workspace, path)
-        for path in _core._recursive_files(workspace_root, "*.sh")
+        _workspace_path(workspace, path) for path in _core._recursive_files(workspace_root, "*.sh")
     ]
     workflow_files = [
         _workspace_path(workspace, path)
