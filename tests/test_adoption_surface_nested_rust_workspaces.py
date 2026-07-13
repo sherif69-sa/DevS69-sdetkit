@@ -27,7 +27,9 @@ def _named(items: object) -> dict[str, dict[str, object]]:
     }
 
 
-def _scoped_commands(payload: dict[str, object]) -> dict[str, list[dict[str, object]]]:
+def _scoped_commands(
+    payload: dict[str, object],
+) -> dict[str, list[dict[str, object]]]:
     raw_commands = payload["recommended_proof_commands"]
     assert isinstance(raw_commands, list)
     scoped: dict[str, list[dict[str, object]]] = {}
@@ -84,8 +86,12 @@ def test_nested_rust_workspaces_emit_scoped_test_and_explicit_security_proof() -
     assert _command_names(scoped[CORE_WORKSPACE]) == {"cargo test", "cargo audit"}
     assert _command_names(scoped[WORKER_WORKSPACE]) == {"cargo test"}
 
-    core_test = next(item for item in scoped[CORE_WORKSPACE] if item["command"] == "cargo test")
-    core_audit = next(item for item in scoped[CORE_WORKSPACE] if item["command"] == "cargo audit")
+    core_test = next(
+        item for item in scoped[CORE_WORKSPACE] if item["command"] == "cargo test"
+    )
+    core_audit = next(
+        item for item in scoped[CORE_WORKSPACE] if item["command"] == "cargo audit"
+    )
     worker_test = scoped[WORKER_WORKSPACE][0]
     assert core_test["source"] == _source(CORE_WORKSPACE, "Cargo.toml")
     assert core_audit["source"] == _source(CORE_WORKSPACE, ".cargo/audit.toml")
@@ -96,12 +102,18 @@ def test_nested_rust_workspaces_emit_scoped_test_and_explicit_security_proof() -
     assert payload["patch_application_allowed"] is False
     assert payload["merge_authorized"] is False
     assert payload["semantic_equivalence_proven"] is False
-    assert all(item["auto_run_allowed"] is False for items in scoped.values() for item in items)
+    assert all(
+        item["auto_run_allowed"] is False
+        for items in scoped.values()
+        for item in items
+    )
 
 
 def test_nested_rust_scope_survives_recommendations_and_reports() -> None:
     surface = discover_adoption_surface(FIXTURE)
-    recommendations = build_proof_recommendations_payload(FIXTURE, surface_payload=surface)
+    recommendations = build_proof_recommendations_payload(
+        FIXTURE, surface_payload=surface
+    )
     raw_items = recommendations["proof_recommendations"]
     assert isinstance(raw_items, list)
 
@@ -116,12 +128,24 @@ def test_nested_rust_scope_survives_recommendations_and_reports() -> None:
     assert _command_names(scoped[CORE_WORKSPACE]) == {"cargo test", "cargo audit"}
     assert _command_names(scoped[WORKER_WORKSPACE]) == {"cargo test"}
 
-    core_test = next(item for item in scoped[CORE_WORKSPACE] if item["command"] == "cargo test")
-    core_audit = next(item for item in scoped[CORE_WORKSPACE] if item["command"] == "cargo audit")
+    core_test = next(
+        item for item in scoped[CORE_WORKSPACE] if item["command"] == "cargo test"
+    )
+    core_audit = next(
+        item for item in scoped[CORE_WORKSPACE] if item["command"] == "cargo audit"
+    )
     assert core_test["operator_level"] == "required"
     assert core_audit["operator_level"] == "review_first"
-    assert all(item["execution_policy"] == "manual_only" for items in scoped.values() for item in items)
-    assert all(item["auto_run_allowed"] is False for items in scoped.values() for item in items)
+    assert all(
+        item["execution_policy"] == "manual_only"
+        for items in scoped.values()
+        for item in items
+    )
+    assert all(
+        item["auto_run_allowed"] is False
+        for items in scoped.values()
+        for item in items
+    )
 
     proof_text = render_proof_recommendations_text(recommendations)
     surface_report = render_adoption_surface_report(surface)
@@ -131,7 +155,9 @@ def test_nested_rust_scope_survives_recommendations_and_reports() -> None:
         assert scope in surface_report
 
 
-def test_nested_rust_manifest_alone_does_not_infer_cargo_audit(tmp_path: Path) -> None:
+def test_nested_rust_manifest_alone_does_not_infer_cargo_audit(
+    tmp_path: Path,
+) -> None:
     workspace = tmp_path / "services" / "api"
     workspace.mkdir(parents=True)
     (workspace / "Cargo.toml").write_text(
