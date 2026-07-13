@@ -62,9 +62,7 @@ def test_rust_adoption_to_doctor_vertical_is_review_first(tmp_path: Path) -> Non
     assert "rust" in languages
     assert "cargo" in package_managers
     assert "cargo_audit" in security_tools
-    assert security_tools["cargo_audit"]["evidence"] == [
-        ".github/workflows/security.yml"
-    ]
+    assert security_tools["cargo_audit"]["evidence"] == [".github/workflows/security.yml"]
     assert "cargo test" in commands
     assert "cargo audit" in commands
     assert commands["cargo test"]["auto_run_allowed"] is False
