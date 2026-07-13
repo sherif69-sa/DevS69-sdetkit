@@ -100,15 +100,68 @@ def extend_nested_java_workspaces(payload: dict[str, Any], root: Path) -> None:
         )
 
 
+def _is_repository_owned(path: str) -> bool:
+    parts = Path(path).parts
+    return len(parts) == 1 or parts[0] not in _base._WORKSPACE_IGNORED_TOP_LEVEL
+
+
 def _owned_dotnet_project_manifests(root: Path) -> list[str]:
-    manifests: set[str] = set()
-    for pattern in _PROJECT_PATTERNS:
-        for path in _core._recursive_files(root, pattern):
-            parts = Path(path).parts
-            if len(parts) > 1 and parts[0] in _base._WORKSPACE_IGNORED_TOP_LEVEL:
-                continue
-            manifests.add(path)
+    manifests = {
+        path
+        for pattern in _PROJECT_PATTERNS
+        for path in _core._recursive_files(root, pattern)
+        if _is_repository_owned(path)
+    }
     return sorted(manifests)
+
+
+def _owned_dotnet_solutions(root: Path) -> list[str]:
+    return [path for path in _core._recursive_files(root, "*.sln") if _is_repository_owned(path)]
+
+
+def _replace_named_evidence(
+    items: list[dict[str, Any]],
+    *,
+    name: str,
+    field: str,
+    values: list[str],
+) -> None:
+    existing = next((item for item in items if item.get("name") == name), None)
+    if not values:
+        items[:] = [item for item in items if item.get("name") != name]
+        return
+    if existing is not None:
+        existing[field] = values
+
+
+def _normalize_base_dotnet_detection(
+    payload: dict[str, Any],
+    *,
+    manifests: list[str],
+    solutions: list[str],
+) -> None:
+    owned_evidence = sorted(set([*solutions, *manifests]))
+    _replace_named_evidence(
+        payload["detected_languages"],
+        name="dotnet",
+        field="evidence",
+        values=owned_evidence,
+    )
+    _replace_named_evidence(
+        payload["package_managers"],
+        name="nuget",
+        field="files",
+        values=owned_evidence,
+    )
+
+    preserve_solution_command = bool(solutions and not manifests)
+    if preserve_solution_command:
+        return
+    payload["recommended_proof_commands"] = [
+        item
+        for item in payload["recommended_proof_commands"]
+        if not (item.get("surface") == "dotnet" and item.get("command") == "dotnet test")
+    ]
 
 
 def _local_name(value: str) -> str:
@@ -216,6 +269,8 @@ def _add_dotnet_test_command(
 
 def extend_dotnet_workspaces(payload: dict[str, Any], root: Path) -> None:
     manifests = _owned_dotnet_project_manifests(root)
+    solutions = _owned_dotnet_solutions(root)
+    _normalize_base_dotnet_detection(payload, manifests=manifests, solutions=solutions)
     if not manifests:
         return
 
