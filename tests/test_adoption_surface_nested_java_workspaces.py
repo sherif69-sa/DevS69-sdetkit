@@ -124,7 +124,9 @@ def test_nested_java_scope_survives_recommendations_and_reports() -> None:
         assert scope in surface_report
 
 
-def test_nested_gradle_without_wrapper_stays_review_first(tmp_path: Path) -> None:
+def test_nested_gradle_without_wrapper_keeps_medium_confidence_and_manual_execution(
+    tmp_path: Path,
+) -> None:
     workspace = tmp_path / "services" / "legacy"
     workspace.mkdir(parents=True)
     (workspace / "build.gradle").write_text("plugins { id 'java' }\n", encoding="utf-8")
@@ -144,8 +146,10 @@ def test_nested_gradle_without_wrapper_stays_review_first(tmp_path: Path) -> Non
         for candidate in recommendations["proof_recommendations"]
         if candidate.get("working_directory") == workspace_name
     )
-    assert item["operator_level"] == "review_first"
+    assert item["confidence"] == "medium"
+    assert item["operator_level"] == "required"
     assert item["execution_policy"] == "manual_only"
+    assert item["auto_run_allowed"] is False
 
 
 def test_root_and_nested_maven_commands_remain_distinct(tmp_path: Path) -> None:
