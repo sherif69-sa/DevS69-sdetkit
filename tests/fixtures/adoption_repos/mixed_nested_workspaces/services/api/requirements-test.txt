@@ -1,1 +1,2 @@
 pytest
+Pygments==2.20.0
