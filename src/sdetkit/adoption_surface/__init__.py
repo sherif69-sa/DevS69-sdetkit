@@ -359,9 +359,98 @@ def _extend_nested_rust_workspaces(payload: dict[str, Any], root: Path) -> None:
     )
 
 
+def _nested_go_security_evidence(root: Path, workspace: str) -> list[str]:
+    workspace_root = root / workspace
+    named_files = [
+        _workspace_path(workspace, path)
+        for path in ("Makefile", "Taskfile.yml", "Taskfile.yaml", "justfile", "Justfile")
+        if _core._file(root, _workspace_path(workspace, path))
+    ]
+    script_files = [
+        _workspace_path(workspace, path)
+        for path in _core._recursive_files(workspace_root, "*.sh")
+    ]
+    workflow_files = [
+        _workspace_path(workspace, path)
+        for path in (
+            *_core._glob_files(workspace_root, ".github/workflows/*.yml"),
+            *_core._glob_files(workspace_root, ".github/workflows/*.yaml"),
+        )
+    ]
+    candidates = sorted(set(named_files + script_files + workflow_files))
+    return _core._files_containing(root, candidates, "govulncheck")
+
+
+def _extend_nested_go_workspaces(payload: dict[str, Any], root: Path) -> None:
+    manifests = _nested_owned_files(root, "go.mod")
+    if not manifests:
+        return
+
+    go_files: list[str] = []
+    for manifest in manifests:
+        workspace = _workspace_directory(manifest)
+        workspace_files = [manifest]
+        checksum = _workspace_path(workspace, "go.sum")
+        if _core._file(root, checksum):
+            workspace_files.append(checksum)
+        go_files.extend(workspace_files)
+
+        _merge_named_list(
+            payload["test_runners"],
+            "go_test",
+            list_field="commands",
+            values=["go test ./..."],
+            confidence="high",
+        )
+        _add_workspace_proof_command(
+            payload["recommended_proof_commands"],
+            surface="go",
+            command="go test ./...",
+            confidence="high",
+            purpose="test",
+            file=manifest,
+            working_directory=workspace,
+        )
+
+        security_evidence = _nested_go_security_evidence(root, workspace)
+        if not security_evidence:
+            continue
+        _merge_named_list(
+            payload["security_tools"],
+            "govulncheck",
+            list_field="evidence",
+            values=security_evidence,
+            confidence="detected",
+        )
+        _add_workspace_proof_command(
+            payload["recommended_proof_commands"],
+            surface="go",
+            command="govulncheck ./...",
+            confidence="medium",
+            purpose="security",
+            file=security_evidence[0],
+            working_directory=workspace,
+        )
+
+    _merge_named_list(
+        payload["detected_languages"],
+        "go",
+        list_field="evidence",
+        values=go_files,
+        confidence="high",
+    )
+    _merge_named_list(
+        payload["package_managers"],
+        "go_modules",
+        list_field="files",
+        values=go_files,
+    )
+
+
 def _extend_nested_workspaces(payload: dict[str, Any], root: Path) -> None:
     _extend_nested_python_workspaces(payload, root)
     _extend_nested_node_workspaces(payload, root)
+    _extend_nested_go_workspaces(payload, root)
     _extend_nested_rust_workspaces(payload, root)
 
 
