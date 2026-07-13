@@ -23,9 +23,7 @@ WORKSPACES = {API_WORKSPACE, WORKER_WORKSPACE}
 def _named(items: object) -> dict[str, dict[str, object]]:
     assert isinstance(items, list)
     return {
-        str(item["name"]): item
-        for item in items
-        if isinstance(item, dict) and item.get("name")
+        str(item["name"]): item for item in items if isinstance(item, dict) and item.get("name")
     }
 
 
@@ -67,9 +65,7 @@ def test_nested_go_workspaces_emit_scoped_test_and_explicit_security_proof() -> 
     security_tools = _named(payload["security_tools"])
 
     expected_go_files = {
-        f"{workspace}/{file_name}"
-        for workspace in WORKSPACES
-        for file_name in ("go.mod", "go.sum")
+        f"{workspace}/{file_name}" for workspace in WORKSPACES for file_name in ("go.mod", "go.sum")
     }
     assert set(languages["go"]["evidence"]) == expected_go_files
     assert set(package_managers["go_modules"]["files"]) == expected_go_files
@@ -123,7 +119,9 @@ def test_nested_go_scope_survives_recommendations_and_reports() -> None:
     )
     assert api_test["operator_level"] == "required"
     assert api_security["operator_level"] == "review_first"
-    assert all(item["execution_policy"] == "manual_only" for items in scoped.values() for item in items)
+    assert all(
+        item["execution_policy"] == "manual_only" for items in scoped.values() for item in items
+    )
     assert all(item["auto_run_allowed"] is False for items in scoped.values() for item in items)
 
     proof_text = render_proof_recommendations_text(recommendations)
