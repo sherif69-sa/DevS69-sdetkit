@@ -11,9 +11,7 @@ def _write(path: Path, text: str) -> None:
 
 
 def _proof_commands(payload: dict) -> dict[str, dict]:
-    return {
-        str(item["command"]): item for item in payload["recommended_proof_commands"]
-    }
+    return {str(item["command"]): item for item in payload["recommended_proof_commands"]}
 
 
 def test_adoption_surface_extracts_literal_jenkins_sh_commands_with_stage_context(
@@ -77,9 +75,7 @@ pipeline {
     assert commands["python -m ruff check ."]["source"]["stage"] == "Quality"
     assert commands["pip-audit"]["source"]["stage"] == "Security"
     assert all(command["auto_run_allowed"] is False for command in commands.values())
-    assert all(
-        command["executes_untrusted_code"] is True for command in commands.values()
-    )
+    assert all(command["executes_untrusted_code"] is True for command in commands.values())
     assert payload["review_first_unknowns"] == []
     assert payload["automation_allowed"] is False
     assert payload["patch_application_allowed"] is False
@@ -125,37 +121,20 @@ pipeline {
 
     assert commands == {}
     assert (
-        "Jenkins shared library detected; external pipeline behavior was not resolved"
-        in unknowns
+        "Jenkins shared library detected; external pipeline behavior was not resolved" in unknowns
     )
+    assert "Jenkins scripted node block detected; Groovy behavior was not evaluated" in unknowns
+    assert "Jenkins pipeline uses a dynamic stage declaration that was not resolved" in unknowns
+    assert "Jenkins pipeline has dynamic or unsupported sh content that was not guessed" in unknowns
     assert (
-        "Jenkins scripted node block detected; Groovy behavior was not evaluated"
-        in unknowns
+        "Jenkins stage Dynamic uses a script block; Groovy behavior was not evaluated" in unknowns
     )
-    assert (
-        "Jenkins pipeline uses a dynamic stage declaration that was not resolved"
-        in unknowns
-    )
-    assert (
-        "Jenkins pipeline has dynamic or unsupported sh content that was not guessed"
-        in unknowns
-    )
-    assert (
-        "Jenkins stage Dynamic uses a script block; Groovy behavior was not evaluated"
-        in unknowns
-    )
-    assert (
-        "Jenkins stage Dynamic has dynamic shell command that was not guessed"
-        in unknowns
-    )
+    assert "Jenkins stage Dynamic has dynamic shell command that was not guessed" in unknowns
     assert (
         "Jenkins stage Dynamic has dynamic or unsupported sh content that was not guessed"
         in unknowns
     )
-    assert (
-        "Jenkins stage Dynamic has multiline sh content that was not guessed"
-        in unknowns
-    )
+    assert "Jenkins stage Dynamic has multiline sh content that was not guessed" in unknowns
     assert payload["automation_allowed"] is False
     assert payload["patch_application_allowed"] is False
     assert payload["merge_authorized"] is False
