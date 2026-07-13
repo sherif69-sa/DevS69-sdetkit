@@ -127,9 +127,7 @@ def extract_jenkins_pipeline(root: Path) -> tuple[list[dict[str, Any]], list[str
             current_stage = stage_match.group(2).strip()
             stage_depth = brace_depth + max(1, _brace_delta(raw_line))
         elif _STAGE_CALL_RE.match(raw_line):
-            unknowns.add(
-                "Jenkins pipeline uses a dynamic stage declaration that was not resolved"
-            )
+            unknowns.add("Jenkins pipeline uses a dynamic stage declaration that was not resolved")
 
         if _LIBRARY_RE.match(raw_line):
             unknowns.add(
@@ -140,9 +138,7 @@ def extract_jenkins_pipeline(root: Path) -> tuple[list[dict[str, Any]], list[str
                 f"Jenkins {_context(current_stage)} uses a script block; Groovy behavior was not evaluated"
             )
         if _NODE_BLOCK_RE.match(raw_line):
-            unknowns.add(
-                "Jenkins scripted node block detected; Groovy behavior was not evaluated"
-            )
+            unknowns.add("Jenkins scripted node block detected; Groovy behavior was not evaluated")
 
         command, unresolved = _parse_literal_sh_step(raw_line)
         if command is not None:
