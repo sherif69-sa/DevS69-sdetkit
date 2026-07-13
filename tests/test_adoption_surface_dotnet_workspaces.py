@@ -73,9 +73,7 @@ def test_dotnet_workspaces_emit_only_explicit_test_project_proof() -> None:
         CATALOG_PROJECT,
     }
     assert set(languages["fsharp"]["evidence"]) == {f"{BILLING_WORKSPACE}/Billing.Tests.fsproj"}
-    assert set(languages["visual_basic"]["evidence"]) == {
-        f"{LEGACY_WORKSPACE}/Legacy.Tests.vbproj"
-    }
+    assert set(languages["visual_basic"]["evidence"]) == {f"{LEGACY_WORKSPACE}/Legacy.Tests.vbproj"}
     assert set(managers["nuget"]["files"]) == {
         f"{ORDERS_WORKSPACE}/Orders.Tests.csproj",
         f"{ORDERS_WORKSPACE}/packages.lock.json",
