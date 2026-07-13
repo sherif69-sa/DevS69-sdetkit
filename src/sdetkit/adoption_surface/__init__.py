@@ -394,7 +394,10 @@ def render_adoption_surface_report(payload: dict[str, Any]) -> str:
     lines = _core.render_adoption_surface_report(payload).splitlines()
     start = lines.index("## Recommended proof commands") + 1
     end = lines.index("## Review-first unknowns")
-    lines[start:end] = [*_format_scoped_proof_commands(payload.get("recommended_proof_commands")), ""]
+    lines[start:end] = [
+        *_format_scoped_proof_commands(payload.get("recommended_proof_commands")),
+        "",
+    ]
     return "\n".join(lines)
 
 
