@@ -72,9 +72,7 @@ def test_dotnet_workspaces_emit_only_explicit_test_project_proof() -> None:
         f"{ORDERS_WORKSPACE}/Orders.Tests.csproj",
         CATALOG_PROJECT,
     }
-    assert set(languages["fsharp"]["evidence"]) == {
-        f"{BILLING_WORKSPACE}/Billing.Tests.fsproj"
-    }
+    assert set(languages["fsharp"]["evidence"]) == {f"{BILLING_WORKSPACE}/Billing.Tests.fsproj"}
     assert set(languages["visual_basic"]["evidence"]) == {
         f"{LEGACY_WORKSPACE}/Legacy.Tests.vbproj"
     }
@@ -181,11 +179,7 @@ def test_package_reference_proves_test_project_and_malformed_xml_does_not(
     )
 
     payload = discover_adoption_surface(tmp_path)
-    commands = [
-        item
-        for item in payload["recommended_proof_commands"]
-        if item.get("surface") == "dotnet"
-    ]
+    commands = [item for item in payload["recommended_proof_commands"] if item.get("surface") == "dotnet"]
 
     assert [item["command"] for item in commands] == ["dotnet test Proven.Tests.csproj"]
     assert payload["review_first_unknowns"] == [
