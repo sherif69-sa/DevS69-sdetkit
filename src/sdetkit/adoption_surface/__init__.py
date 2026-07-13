@@ -13,7 +13,6 @@ from sdetkit.adoption_surface.core import (
     REQUIRED_LIST_FIELDS,
     REQUIRED_OBJECT_FIELDS,
     SCHEMA_VERSION,
-    render_adoption_surface_report,
     validate_adoption_surface_artifact,
     validate_adoption_surface_payload,
 )
@@ -31,6 +30,18 @@ __all__ = (
     "validate_adoption_surface_payload",
     "write_adoption_surface_artifact",
 )
+
+_WORKSPACE_IGNORED_TOP_LEVEL = {
+    ".github",
+    "build",
+    "dist",
+    "docs",
+    "examples",
+    "site",
+    "templates",
+    "test",
+    "tests",
+}
 
 
 def _cargo_audit_evidence(root: Path) -> list[str]:
@@ -53,6 +64,230 @@ def _cargo_audit_evidence(root: Path) -> list[str]:
 
 def _jenkins_context(stage: str) -> str:
     return f"stage {stage}" if stage else "pipeline"
+
+
+def _nested_owned_files(root: Path, pattern: str) -> list[str]:
+    return [
+        path
+        for path in _core._recursive_files(root, pattern)
+        if "/" in path and Path(path).parts[0] not in _WORKSPACE_IGNORED_TOP_LEVEL
+    ]
+
+
+def _workspace_directory(path: str) -> str:
+    return Path(path).parent.as_posix()
+
+
+def _workspace_path(workspace: str, name: str) -> str:
+    return f"{workspace}/{name}" if workspace != "." else name
+
+
+def _merge_named_list(
+    items: list[dict[str, Any]],
+    name: str,
+    *,
+    list_field: str,
+    values: Sequence[str],
+    **fields: Any,
+) -> None:
+    normalized = sorted(set(values))
+    existing = next((item for item in items if item.get("name") == name), None)
+    if existing is None:
+        items.append({"name": name, list_field: normalized, **fields})
+        return
+
+    current = existing.get(list_field, [])
+    current_values = [str(value) for value in current] if isinstance(current, list) else []
+    existing[list_field] = sorted(set(current_values + normalized))
+    for key, value in fields.items():
+        existing.setdefault(key, value)
+
+
+def _workspace_source(*, file: str, working_directory: str) -> dict[str, str]:
+    return {
+        "scope": "nested_workspace",
+        "file": file,
+        "working_directory": working_directory,
+    }
+
+
+def _add_workspace_proof_command(
+    items: list[dict[str, Any]],
+    *,
+    surface: str,
+    command: str,
+    confidence: str,
+    purpose: str,
+    file: str,
+    working_directory: str,
+) -> None:
+    for existing in items:
+        source = existing.get("source")
+        existing_directory = (
+            str(source.get("working_directory", "")) if isinstance(source, dict) else ""
+        )
+        if (
+            existing.get("surface") == surface
+            and existing.get("command") == command
+            and existing_directory == working_directory
+        ):
+            return
+
+    items.append(
+        {
+            "surface": surface,
+            "command": command,
+            "confidence": confidence,
+            "purpose": purpose,
+            "executes_untrusted_code": True,
+            "auto_run_allowed": False,
+            "evidence": [file],
+            "source": _workspace_source(file=file, working_directory=working_directory),
+        }
+    )
+
+
+def _extend_nested_python_workspaces(payload: dict[str, Any], root: Path) -> None:
+    manifests = _nested_owned_files(root, "pyproject.toml")
+    requirements = _nested_owned_files(root, "requirements*.txt")
+    workspace_files: dict[str, list[str]] = {}
+    for path in [*manifests, *requirements]:
+        workspace_files.setdefault(_workspace_directory(path), []).append(path)
+
+    if not workspace_files:
+        return
+
+    evidence = sorted({path for paths in workspace_files.values() for path in paths})
+    _merge_named_list(
+        payload["detected_languages"],
+        "python",
+        list_field="evidence",
+        values=evidence,
+        confidence="high",
+    )
+
+    pip_files = sorted(path for path in requirements)
+    uv_files = [
+        _workspace_path(workspace, "uv.lock")
+        for workspace in workspace_files
+        if _core._file(root, _workspace_path(workspace, "uv.lock"))
+    ]
+    poetry_files = [
+        _workspace_path(workspace, "poetry.lock")
+        for workspace in workspace_files
+        if _core._file(root, _workspace_path(workspace, "poetry.lock"))
+    ]
+    if pip_files:
+        _merge_named_list(payload["package_managers"], "pip", list_field="files", values=pip_files)
+    if uv_files:
+        _merge_named_list(payload["package_managers"], "uv", list_field="files", values=uv_files)
+    if poetry_files:
+        _merge_named_list(
+            payload["package_managers"], "poetry", list_field="files", values=poetry_files
+        )
+
+    for workspace, files in sorted(workspace_files.items()):
+        proof_file = next((path for path in files if path.endswith("pyproject.toml")), files[0])
+        text = "\n".join(_core._read_text(root, path) for path in files).lower()
+        if "pytest" not in text:
+            payload["review_first_unknowns"].append(
+                f"Python workspace {workspace} detected but test command is not proven"
+            )
+            continue
+
+        command = "python -m pytest -q -o addopts="
+        _merge_named_list(
+            payload["test_runners"],
+            "pytest",
+            list_field="commands",
+            values=[command],
+            confidence="high",
+        )
+        _add_workspace_proof_command(
+            payload["recommended_proof_commands"],
+            surface="python",
+            command=command,
+            confidence="high",
+            purpose="test",
+            file=proof_file,
+            working_directory=workspace,
+        )
+
+
+def _node_workspace_command(root: Path, workspace: str) -> tuple[str, list[str]]:
+    lockfiles = [
+        name
+        for name in ("pnpm-lock.yaml", "yarn.lock", "package-lock.json")
+        if _core._file(root, _workspace_path(workspace, name))
+    ]
+    if "pnpm-lock.yaml" in lockfiles:
+        return "pnpm test", lockfiles
+    if "yarn.lock" in lockfiles:
+        return "yarn test", lockfiles
+    return "npm test", lockfiles
+
+
+def _extend_nested_node_workspaces(payload: dict[str, Any], root: Path) -> None:
+    manifests = _nested_owned_files(root, "package.json")
+    if not manifests:
+        return
+
+    evidence: list[str] = []
+    manager_files: dict[str, list[str]] = {"npm": [], "pnpm": [], "yarn": []}
+    for manifest in manifests:
+        workspace = _workspace_directory(manifest)
+        command, lockfiles = _node_workspace_command(root, workspace)
+        workspace_lockfiles = [_workspace_path(workspace, name) for name in lockfiles]
+        evidence.extend([manifest, *workspace_lockfiles])
+        if command.startswith("pnpm"):
+            manager_files["pnpm"].extend(workspace_lockfiles)
+        elif command.startswith("yarn"):
+            manager_files["yarn"].extend(workspace_lockfiles)
+        elif workspace_lockfiles:
+            manager_files["npm"].extend(workspace_lockfiles)
+
+        scripts = _core._read_json(root, manifest).get("scripts")
+        has_test = isinstance(scripts, dict) and bool(str(scripts.get("test", "")).strip())
+        if not has_test:
+            payload["review_first_unknowns"].append(
+                f"JavaScript/TypeScript workspace {workspace} detected but test command is not proven"
+            )
+            continue
+
+        _merge_named_list(
+            payload["test_runners"],
+            "node_test_script",
+            list_field="commands",
+            values=[command],
+            confidence="medium",
+        )
+        _add_workspace_proof_command(
+            payload["recommended_proof_commands"],
+            surface="javascript_typescript",
+            command=command,
+            confidence="medium",
+            purpose="test",
+            file=manifest,
+            working_directory=workspace,
+        )
+
+    _merge_named_list(
+        payload["detected_languages"],
+        "javascript_typescript",
+        list_field="evidence",
+        values=evidence,
+        confidence="medium",
+    )
+    for manager, files in manager_files.items():
+        if files:
+            _merge_named_list(
+                payload["package_managers"], manager, list_field="files", values=files
+            )
+
+
+def _extend_nested_workspaces(payload: dict[str, Any], root: Path) -> None:
+    _extend_nested_python_workspaces(payload, root)
+    _extend_nested_node_workspaces(payload, root)
 
 
 def _extend_jenkins_pipeline(payload: dict[str, Any], root: Path) -> None:
@@ -108,19 +343,62 @@ def _extend_cargo_audit(payload: dict[str, Any], root: Path) -> None:
     )
 
 
+def _proof_sort_key(item: dict[str, Any]) -> tuple[str, str, str, str]:
+    source = item.get("source")
+    source_payload = source if isinstance(source, dict) else {}
+    return (
+        str(item.get("surface", "")),
+        str(item.get("command", "")),
+        str(source_payload.get("working_directory", "")),
+        str(source_payload.get("file", "")),
+    )
+
+
 def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     payload = _core.discover_adoption_surface(root)
+    _extend_nested_workspaces(payload, root)
     _extend_jenkins_pipeline(payload, root)
     _extend_cargo_audit(payload, root)
 
-    payload["security_tools"] = sorted(payload["security_tools"], key=lambda item: item["name"])
+    for field in ("detected_languages", "package_managers", "test_runners", "security_tools"):
+        payload[field] = sorted(payload[field], key=lambda item: item["name"])
     payload["recommended_proof_commands"] = sorted(
-        payload["recommended_proof_commands"],
-        key=lambda item: (item["surface"], item["command"]),
+        payload["recommended_proof_commands"], key=_proof_sort_key
     )
     payload["review_first_unknowns"] = sorted(set(payload["review_first_unknowns"]))
     return payload
+
+
+def _format_scoped_proof_commands(items: object) -> list[str]:
+    if not isinstance(items, list) or not items:
+        return ["- none recommended"]
+
+    lines: list[str] = []
+    for item in items:
+        if not isinstance(item, dict) or not str(item.get("command", "")).strip():
+            continue
+        source = item.get("source")
+        source_payload = source if isinstance(source, dict) else {}
+        working_directory = str(source_payload.get("working_directory", "")).strip()
+        scope = f"; working_directory={working_directory}" if working_directory else ""
+        lines.append(
+            f"- `{item['command']}` - surface={item.get('surface', 'unknown')}; "
+            f"purpose={item.get('purpose', 'unknown')}{scope}; "
+            f"auto_run_allowed={str(item.get('auto_run_allowed', False)).lower()}"
+        )
+    return lines or ["- none recommended"]
+
+
+def render_adoption_surface_report(payload: dict[str, Any]) -> str:
+    lines = _core.render_adoption_surface_report(payload).splitlines()
+    start = lines.index("## Recommended proof commands") + 1
+    end = lines.index("## Review-first unknowns")
+    lines[start:end] = [
+        *_format_scoped_proof_commands(payload.get("recommended_proof_commands")),
+        "",
+    ]
+    return "\n".join(lines)
 
 
 def write_adoption_surface_artifact(

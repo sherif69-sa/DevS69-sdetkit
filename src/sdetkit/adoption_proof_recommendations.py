@@ -42,6 +42,11 @@ def _confidence(item: dict[str, Any]) -> str:
     return "unknown"
 
 
+def _source(item: dict[str, Any]) -> dict[str, Any]:
+    source = item.get("source")
+    return dict(source) if isinstance(source, dict) else {}
+
+
 def _operator_level(item: dict[str, Any]) -> str:
     purpose = _purpose(item)
     surface = _surface(item)
@@ -78,7 +83,7 @@ def _reason(item: dict[str, Any]) -> str:
 def _recommendation_from_command(item: dict[str, Any], index: int) -> dict[str, Any]:
     command = _command_text(item)
     level = _operator_level(item)
-    return {
+    recommendation: dict[str, Any] = {
         "index": index,
         "command": command,
         "surface": _surface(item),
@@ -91,6 +96,13 @@ def _recommendation_from_command(item: dict[str, Any], index: int) -> dict[str, 
         "auto_run_allowed": False,
         "reason": _reason(item),
     }
+    source = _source(item)
+    if source:
+        recommendation["source"] = source
+        working_directory = str(source.get("working_directory", "")).strip()
+        if working_directory:
+            recommendation["working_directory"] = working_directory
+    return recommendation
 
 
 def _review_first_items(surface_payload: dict[str, Any]) -> list[dict[str, Any]]:
@@ -218,6 +230,8 @@ def render_proof_recommendations_text(payload: dict[str, Any]) -> str:
     ]
 
     for item in payload["proof_recommendations"]:
+        working_directory = str(item.get("working_directory", "")).strip()
+        scope = f"; working_directory={working_directory}" if working_directory else ""
         lines.append(
             "- "
             f"level={item['operator_level']}; "
@@ -225,7 +239,8 @@ def render_proof_recommendations_text(payload: dict[str, Any]) -> str:
             f"purpose={item['purpose']}; "
             f"confidence={item['confidence']}; "
             f"manual_only={str(item['manual_execution_required']).lower()}; "
-            f"auto_run_allowed={str(item['auto_run_allowed']).lower()}; "
+            f"auto_run_allowed={str(item['auto_run_allowed']).lower()}"
+            f"{scope}; "
             f"command={item['command']}"
         )
 

@@ -1,0 +1,7 @@
+{
+  "name": "example-admin",
+  "private": true,
+  "scripts": {
+    "test": "vitest run"
+  }
+}
