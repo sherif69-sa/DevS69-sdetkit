@@ -103,9 +103,7 @@ def test_nested_rust_workspaces_emit_scoped_test_and_explicit_security_proof() -
     assert payload["merge_authorized"] is False
     assert payload["semantic_equivalence_proven"] is False
     assert all(
-        item["auto_run_allowed"] is False
-        for items in scoped.values()
-        for item in items
+        item["auto_run_allowed"] is False for items in scoped.values() for item in items
     )
 
 
@@ -142,9 +140,7 @@ def test_nested_rust_scope_survives_recommendations_and_reports() -> None:
         for item in items
     )
     assert all(
-        item["auto_run_allowed"] is False
-        for items in scoped.values()
-        for item in items
+        item["auto_run_allowed"] is False for items in scoped.values() for item in items
     )
 
     proof_text = render_proof_recommendations_text(recommendations)
