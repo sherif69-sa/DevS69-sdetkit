@@ -21,7 +21,7 @@ def _brace_delta(raw_line: str) -> int:
     while index < len(raw_line):
         if not quote and raw_line.startswith("//", index):
             break
-        if not quote and raw_line.startswith(("'''", '\"\"\"'), index):
+        if not quote and raw_line.startswith(("'''", '"""'), index):
             marker = raw_line[index : index + 3]
             closing = raw_line.find(marker, index + 3)
             if closing < 0:
@@ -60,7 +60,7 @@ def _parse_literal_sh_step(raw_line: str) -> tuple[str | None, str | None]:
     if parenthesized:
         rest = rest[1:].lstrip()
 
-    if rest.startswith(("'''", '\"\"\"')):
+    if rest.startswith(("'''", '"""')):
         return None, "multiline"
     if not rest or rest[0] not in {"'", '"'}:
         return None, "dynamic_or_unsupported"
@@ -127,7 +127,9 @@ def extract_jenkins_pipeline(root: Path) -> tuple[list[dict[str, Any]], list[str
             current_stage = stage_match.group(2).strip()
             stage_depth = brace_depth + max(1, _brace_delta(raw_line))
         elif _STAGE_CALL_RE.match(raw_line):
-            unknowns.add("Jenkins pipeline uses a dynamic stage declaration that was not resolved")
+            unknowns.add(
+                "Jenkins pipeline uses a dynamic stage declaration that was not resolved"
+            )
 
         if _LIBRARY_RE.match(raw_line):
             unknowns.add(
