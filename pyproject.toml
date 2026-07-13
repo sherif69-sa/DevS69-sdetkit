@@ -151,6 +151,7 @@ ignore_errors = false
 module = [
   "sdetkit.adoption_proof_recommendations",
   "sdetkit.adoption_repo_topology",
+  "sdetkit.adoption_surface.jenkins",
 ]
 ignore_errors = false
 
