@@ -120,8 +120,8 @@ def _unknowns(payload: dict[str, object]) -> set[str]:
             {"nuget"},
             set(),
             set(),
-            {"dotnet test"},
             set(),
+            {".NET project src/Demo/Demo.csproj detected but test-project evidence is not proven"},
         ),
         (
             "gitlab_python",

@@ -8,7 +8,10 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit.adoption_surface import _base
-from sdetkit.adoption_surface.java_workspaces import extend_nested_java_workspaces
+from sdetkit.adoption_surface.java_workspaces import (
+    extend_dotnet_workspaces,
+    extend_nested_java_workspaces,
+)
 
 REQUIRED_FALSE_FIELDS = _base.REQUIRED_FALSE_FIELDS
 REQUIRED_LIST_FIELDS = _base.REQUIRED_LIST_FIELDS
@@ -36,6 +39,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     payload = _base.discover_adoption_surface(root)
     extend_nested_java_workspaces(payload, root)
+    extend_dotnet_workspaces(payload, root)
 
     for field in ("detected_languages", "package_managers", "test_runners", "security_tools"):
         payload[field] = sorted(payload[field], key=lambda item: item["name"])
