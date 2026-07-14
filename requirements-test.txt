@@ -3,14 +3,14 @@ pygments==2.20.0
 pytest-cov==7.1.0
 pytest-asyncio==1.4.0
 pytest-xdist[psutil]==3.8.0
-hypothesis==6.156.1
+hypothesis==6.156.6
 PyYAML==6.0.3
 httpx==0.28.1
-ruff==0.15.20
-mypy==2.1.0
+ruff==0.15.21
+mypy==2.3.0
 pre-commit==4.6.0
 mutmut==3.6.0
 
 # Security scanner transitive dependency floors
 idna==3.18
-filelock==3.29.5
+filelock==3.29.7
