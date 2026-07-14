@@ -54,6 +54,30 @@ def _fixture(name: str) -> str:
             "cargo clippy --all-targets --all-features",
             101,
         ),
+        (
+            "dotnet_xunit",
+            "dotnet_test",
+            "test",
+            "tests/Calculator.Tests/CalculatorTests.cs",
+            "dotnet test tests/Calculator.Tests/Calculator.Tests.csproj",
+            1,
+        ),
+        (
+            "dotnet_nunit_fsharp",
+            "dotnet_test",
+            "test",
+            "tests/Math.Tests/CalculatorTests.fs",
+            "dotnet test tests/Math.Tests/Math.Tests.fsproj",
+            1,
+        ),
+        (
+            "dotnet_mstest_vb",
+            "dotnet_test",
+            "test",
+            "tests/Legacy.Tests/CalculatorTests.vb",
+            "dotnet test tests/Legacy.Tests/Legacy.Tests.vbproj",
+            1,
+        ),
     ],
 )
 def test_cross_ecosystem_adapter_extracts_review_first_failure_vectors(
@@ -142,6 +166,43 @@ def test_unknown_rust_signal_remains_review_first() -> None:
     assert result.uncertainty == ("rust_failure_not_classified",)
     assert result.vector.failure_class == "unknown"
     assert evaluate_failure_vector(result.vector).review_first is True
+
+
+def test_unknown_dotnet_signal_remains_review_first() -> None:
+    result = extract_ecosystem_failure_vector(
+        ".NET build stopped without dotnet test evidence",
+        ecosystem="dotnet",
+        check="dotnet-build",
+    )
+
+    assert result.ecosystem == "dotnet"
+    assert result.tool == "unknown"
+    assert result.confidence == "low"
+    assert result.uncertainty == ("dotnet_failure_not_classified",)
+    assert result.vector.failure_class == "unknown"
+    assert evaluate_failure_vector(result.vector).review_first is True
+
+
+@pytest.mark.parametrize(
+    ("fixture", "expected_test"),
+    [
+        ("dotnet_xunit", "Calculator.Tests.CalculatorTests.AddsNumbers"),
+        ("dotnet_nunit_fsharp", "Math.Tests.CalculatorTests.adds_numbers"),
+        ("dotnet_mstest_vb", "Legacy.Tests.CalculatorTests.AddsNumbers"),
+    ],
+)
+def test_dotnet_adapter_preserves_exact_test_identity(
+    fixture: str,
+    expected_test: str,
+) -> None:
+    result = extract_ecosystem_failure_vector(_fixture(fixture), check=fixture)
+
+    assert result.ecosystem == "dotnet"
+    assert result.tool == "dotnet_test"
+    assert result.vector.failing_test_or_check == expected_test
+    assert result.vector.actual_failure
+    assert result.confidence == "high"
+    assert result.uncertainty == ()
 
 
 def test_cargo_test_is_not_misclassified_as_go_test() -> None:
