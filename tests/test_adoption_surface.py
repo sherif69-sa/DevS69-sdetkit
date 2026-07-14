@@ -65,17 +65,12 @@ def test_adoption_surface_recommended_proof_commands_include_operator_purpose(
 
     assert commands
     assert all(
-        {"surface", "command", "confidence", "purpose"} <= set(command)
-        for command in commands
+        {"surface", "command", "confidence", "purpose"} <= set(command) for command in commands
     )
-    assert (
-        _proof_command(payload, "python -m pytest -q -o addopts=")["purpose"] == "test"
-    )
+    assert _proof_command(payload, "python -m pytest -q -o addopts=")["purpose"] == "test"
     assert _proof_command(payload, "make proof-after-format")["purpose"] == "quality"
     assert (
-        _proof_command(
-            payload, "NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict"
-        )["purpose"]
+        _proof_command(payload, "NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict")["purpose"]
         == "docs"
     )
     assert _proof_command(payload, "npm test")["purpose"] == "test"
@@ -101,9 +96,7 @@ def test_adoption_surface_detects_multi_language_evidence_without_running_comman
     payload = _legacy.discover_adoption_surface(tmp_path)
 
     assert {"go", "rust", "java", "dotnet"} <= _names(payload["detected_languages"])
-    assert {"go_modules", "cargo", "maven", "nuget"} <= _names(
-        payload["package_managers"]
-    )
+    assert {"go_modules", "cargo", "maven", "nuget"} <= _names(payload["package_managers"])
     assert "go test ./..." in _commands(payload)
     assert "cargo test" in _commands(payload)
     assert "mvn test" in _commands(payload)
@@ -112,6 +105,4 @@ def test_adoption_surface_detects_multi_language_evidence_without_running_comman
         ".NET project service/App.csproj detected but test-project evidence is not proven"
         in payload["review_first_unknowns"]
     )
-    assert payload["artifact_surfaces"] == [
-        {"name": "coverage", "paths": ["coverage.xml"]}
-    ]
+    assert payload["artifact_surfaces"] == [{"name": "coverage", "paths": ["coverage.xml"]}]
