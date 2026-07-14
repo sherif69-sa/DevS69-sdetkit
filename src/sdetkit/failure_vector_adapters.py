@@ -43,9 +43,7 @@ DOTNET_PROJECT = re.compile(
 )
 COMMAND = re.compile(r"^(?:Run|\$)\s+(?P<command>.+)$", re.MULTILINE)
 EXIT_CODE = re.compile(r"Process completed with exit code (?P<code>\d+)")
-SUPPORTED = frozenset(
-    {"auto", "python", "javascript_typescript", "go", "java", "rust", "dotnet"}
-)
+SUPPORTED = frozenset({"auto", "python", "javascript_typescript", "go", "java", "rust", "dotnet"})
 
 
 @dataclass(frozen=True)
