@@ -14,7 +14,9 @@ def _write(path: Path, text: str = "") -> None:
 def _named(items: object) -> dict[str, dict[str, object]]:
     assert isinstance(items, list)
     return {
-        str(item["name"]): item for item in items if isinstance(item, dict) and item.get("name")
+        str(item["name"]): item
+        for item in items
+        if isinstance(item, dict) and item.get("name")
     }
 
 
@@ -83,7 +85,9 @@ def test_pnpm_audit_shell_command_preserves_exact_text(tmp_path: Path) -> None:
     assert commands[command]["auto_run_allowed"] is False
 
 
-def test_nested_yarn_audit_package_script_preserves_workspace_context(tmp_path: Path) -> None:
+def test_nested_yarn_audit_package_script_preserves_workspace_context(
+    tmp_path: Path,
+) -> None:
     manifest = tmp_path / "apps" / "web" / "package.json"
     command = "yarn npm audit --all --recursive"
     _write(
@@ -151,7 +155,7 @@ def test_dynamic_and_mutating_javascript_audit_commands_are_review_first(
         "  audit:\n"
         "    steps:\n"
         '      - run: npm audit --audit-level="$AUDIT_LEVEL"\n'
-        "      - run: pnpm audit --fix\n",
+        "      - run: pnpm audit fix\n",
     )
 
     payload = discover_adoption_surface(tmp_path)
@@ -176,7 +180,9 @@ def test_dynamic_and_mutating_javascript_audit_commands_are_review_first(
     )
 
 
-def test_descriptive_or_echoed_audit_text_is_not_a_security_command(tmp_path: Path) -> None:
+def test_descriptive_or_echoed_audit_text_is_not_a_security_command(
+    tmp_path: Path,
+) -> None:
     _write(tmp_path / "package.json", json.dumps({"name": "demo"}))
     workflow = tmp_path / ".github" / "workflows" / "security.yml"
     _write(
