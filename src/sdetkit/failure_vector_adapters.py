@@ -20,9 +20,32 @@ JAVA_LOCATION = re.compile(
 )
 RUST_LOCATION = re.compile(r"(?:-->\s+|at\s+)?(?P<path>[\w./-]+\.rs):\d+:\d+")
 RUST_TEST = re.compile(r"^test\s+(?P<check>[\w:./-]+)\s+\.\.\.\s+FAILED$", re.MULTILINE)
+DOTNET_LOCATION = re.compile(
+    r"(?P<path>(?:src|tests)[/\\][\w./\\-]+\.(?:cs|fs|vb))"
+    r"(?:(?:\(|:line\s+)\d+(?:,\d+)?\)?)",
+    re.IGNORECASE,
+)
+DOTNET_TEST = re.compile(
+    r"^\s*Failed\s+(?P<check>.+?)\s+\[\d+(?:\.\d+)?\s*(?:ms|s)\]\s*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+DOTNET_XUNIT_TEST = re.compile(
+    r"^\s*\[xUnit\.net[^\]]*\]\s+(?P<check>.+?)\s+\[FAIL\]\s*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+DOTNET_TEST_COMMAND = re.compile(
+    r"^(?:Run|\$)\s+(?P<command>dotnet\s+test(?:\s+.+)?)$",
+    re.IGNORECASE | re.MULTILINE,
+)
+DOTNET_PROJECT = re.compile(
+    r"(?P<project>[\w./\\-]+\.(?:csproj|fsproj|vbproj))",
+    re.IGNORECASE,
+)
 COMMAND = re.compile(r"^(?:Run|\$)\s+(?P<command>.+)$", re.MULTILINE)
 EXIT_CODE = re.compile(r"Process completed with exit code (?P<code>\d+)")
-SUPPORTED = frozenset({"auto", "python", "javascript_typescript", "go", "java", "rust"})
+SUPPORTED = frozenset(
+    {"auto", "python", "javascript_typescript", "go", "java", "rust", "dotnet"}
+)
 
 
 @dataclass(frozen=True)
@@ -222,6 +245,8 @@ def extract_ecosystem_failure_vector(
         return _java_result(log_text, check, log_url, environment)
     if selected == "rust":
         return _rust_result(log_text, check, log_url, environment)
+    if selected == "dotnet":
+        return _dotnet_result(log_text, check, log_url, environment)
     return _unknown(log_text, "unknown", check, log_url, environment, "ecosystem_not_identified")
 
 
@@ -237,6 +262,8 @@ def _detect(log_text: str) -> str:
         return "go"
     if any(token in lower for token in ("go test", "go vet")):
         return "go"
+    if _looks_like_dotnet(log_text):
+        return "dotnet"
     if _looks_like_java(log_text):
         return "java"
     if any(token in lower for token in ("pytest", "mypy", "ruff", ".py:")):
@@ -411,6 +438,74 @@ def _rust_result(
     return _unknown(log_text, "rust", check, log_url, environment, "rust_failure_not_classified")
 
 
+def _dotnet_result(
+    log_text: str,
+    check: str,
+    log_url: str | None,
+    environment: str,
+) -> FailureVectorAdapterResult:
+    if not _looks_like_dotnet(log_text):
+        return _unknown(
+            log_text,
+            "dotnet",
+            check,
+            log_url,
+            environment,
+            "dotnet_failure_not_classified",
+        )
+
+    location = DOTNET_LOCATION.search(log_text)
+    test = DOTNET_XUNIT_TEST.search(log_text) or DOTNET_TEST.search(log_text)
+    command_match = DOTNET_TEST_COMMAND.search(log_text)
+    command = command_match.group("command").strip() if command_match else "dotnet test"
+    project_match = DOTNET_PROJECT.search(command)
+    project = _normalize_dotnet_path(project_match.group("project")) if project_match else ""
+    path = _normalize_dotnet_path(location.group("path")) if location else ""
+    test_name = test.group("check").strip() if test else ""
+    first_line = test.group(0).strip() if test else _dotnet_first_failure_line(log_text)
+    actual_failure = _dotnet_failure_detail(log_text) or first_line
+    repro = f"dotnet test {project}" if project else "dotnet test"
+
+    uncertainty = tuple(
+        reason
+        for present, reason in (
+            (bool(project), "dotnet_test_project_not_observed"),
+            (bool(test_name), "dotnet_test_name_not_observed"),
+            (bool(path), "dotnet_source_path_not_observed"),
+        )
+        if not present
+    )
+    vector = FailureVector(
+        check=check,
+        command=command,
+        exit_code=_exit_code(log_text),
+        failure_class="test",
+        risk="medium",
+        scope="unknown",
+        reproducible_locally="not_run",
+        safe_fix_candidate=False,
+        first_failing_line=first_line,
+        affected_files=(path,) if path else (),
+        log_url=log_url,
+        local_repro_command=repro,
+        environment=environment,
+        headline_signal=f"{check}: test",
+        actual_failure=actual_failure,
+        failure_type="test",
+        failing_command=command,
+        failing_test_or_check=test_name or check,
+        owner_hint=path or project or check,
+        safe_fix_allowed=False,
+    )
+    return FailureVectorAdapterResult(
+        vector=vector,
+        ecosystem="dotnet",
+        tool="dotnet_test",
+        confidence="medium" if uncertainty else "high",
+        uncertainty=uncertainty,
+    )
+
+
 def _result(
     log_text: str,
     check: str,
@@ -545,6 +640,78 @@ def _looks_like_cargo_clippy(lower: str) -> bool:
             "clippy::",
         )
     )
+
+
+def _looks_like_dotnet(log_text: str) -> bool:
+    lower = log_text.lower()
+    return (
+        DOTNET_TEST_COMMAND.search(log_text) is not None
+        or DOTNET_TEST.search(log_text) is not None
+        or DOTNET_XUNIT_TEST.search(log_text) is not None
+        or any(
+            token in lower
+            for token in (
+                "test run failed.",
+                "failed!  - failed:",
+                "microsoft.testplatform",
+                "vstest",
+                "[xunit.net",
+            )
+        )
+    )
+
+
+def _normalize_dotnet_path(path: str) -> str:
+    return path.replace("\\", "/")
+
+
+def _dotnet_failure_detail(log_text: str) -> str:
+    lines = [line.strip() for line in log_text.splitlines()]
+    after_error_message = False
+    for line in lines:
+        lower = line.lower()
+        if lower == "error message:":
+            after_error_message = True
+            continue
+        if after_error_message:
+            if not line:
+                continue
+            if lower in {"stack trace:", "standard output messages:"}:
+                break
+            return line
+
+    for line in lines:
+        lower = line.lower()
+        if not line or "process completed with exit code" in lower:
+            continue
+        if any(
+            token in lower
+            for token in (
+                "assert.",
+                "assertion",
+                "expected:",
+                "actual:",
+                "exception",
+            )
+        ):
+            return line
+    return ""
+
+
+def _exit_code(log_text: str) -> int | None:
+    match = EXIT_CODE.search(log_text)
+    return int(match.group("code")) if match else None
+
+
+def _dotnet_first_failure_line(log_text: str) -> str:
+    lines = [line.strip() for line in log_text.splitlines() if line.strip()]
+    for line in lines:
+        lower = line.lower()
+        if lower.startswith("failed ") or lower in {"test run failed.", "test run failed"}:
+            return line
+        if lower.startswith("failed!  - failed:"):
+            return line
+    return lines[0] if lines else "unknown failure"
 
 
 def _first_failure_line(log_text: str) -> str:
