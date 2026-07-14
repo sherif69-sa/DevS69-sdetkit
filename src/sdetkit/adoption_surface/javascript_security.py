@@ -96,7 +96,12 @@ def _is_dynamic_or_composite(command: str) -> bool:
 
 def _requests_mutation(command: str) -> bool:
     normalized = " ".join(command.lower().split())
-    return normalized.startswith("npm audit fix") or "--fix" in normalized.split()
+    return (
+        normalized.startswith(
+            ("npm audit fix", "pnpm audit fix", "yarn audit fix", "yarn npm audit fix")
+        )
+        or "--fix" in normalized.split()
+    )
 
 
 def _literal_security_command(raw_value: str) -> tuple[str, str, str] | None:
@@ -205,7 +210,9 @@ def _extract_package_script_commands(
     return commands, unknowns
 
 
-def _extract_command_file_commands(root: Path) -> tuple[list[dict[str, str]], list[str]]:
+def _extract_command_file_commands(
+    root: Path,
+) -> tuple[list[dict[str, str]], list[str]]:
     commands: list[dict[str, str]] = []
     unknowns: list[str] = []
     for path in _owned_command_files(root):
@@ -247,7 +254,9 @@ def _merge_security_tool(
         )
         return
     current = existing.get("evidence", [])
-    current_values = [str(value) for value in current] if isinstance(current, list) else []
+    current_values = (
+        [str(value) for value in current] if isinstance(current, list) else []
+    )
     existing["evidence"] = sorted(set(current_values + values))
 
 
@@ -274,7 +283,9 @@ def _add_security_proof_command(payload: dict[str, Any], item: dict[str, str]) -
             source_payload["package_manager"] = item["manager"]
             existing["source"] = source_payload
             evidence = existing.get("evidence", [])
-            current = [str(value) for value in evidence] if isinstance(evidence, list) else []
+            current = (
+                [str(value) for value in evidence] if isinstance(evidence, list) else []
+            )
             existing["evidence"] = sorted(set(current + [item["file"]]))
             return
 
