@@ -50,9 +50,7 @@ def _is_repository_owned(path: str) -> bool:
 
 def _owned_package_manifests(root: Path) -> list[str]:
     return [
-        path
-        for path in _core._recursive_files(root, "package.json")
-        if _is_repository_owned(path)
+        path for path in _core._recursive_files(root, "package.json") if _is_repository_owned(path)
     ]
 
 
@@ -254,9 +252,7 @@ def _merge_security_tool(
         )
         return
     current = existing.get("evidence", [])
-    current_values = (
-        [str(value) for value in current] if isinstance(current, list) else []
-    )
+    current_values = [str(value) for value in current] if isinstance(current, list) else []
     existing["evidence"] = sorted(set(current_values + values))
 
 
@@ -283,9 +279,7 @@ def _add_security_proof_command(payload: dict[str, Any], item: dict[str, str]) -
             source_payload["package_manager"] = item["manager"]
             existing["source"] = source_payload
             evidence = existing.get("evidence", [])
-            current = (
-                [str(value) for value in evidence] if isinstance(evidence, list) else []
-            )
+            current = [str(value) for value in evidence] if isinstance(evidence, list) else []
             existing["evidence"] = sorted(set(current + [item["file"]]))
             return
 
