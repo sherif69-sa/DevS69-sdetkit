@@ -372,6 +372,38 @@ def test_explicitly_disabled_nuget_audit_is_review_first(tmp_path: Path) -> None
     )
 
 
+def test_disabled_nuget_audit_overrides_mode_settings(tmp_path: Path) -> None:
+    _write_dotnet_project(tmp_path / "src" / "Api" / "Api.csproj")
+    (tmp_path / "Directory.Build.props").write_text(
+        "<Project><PropertyGroup><NuGetAudit>false</NuGetAudit>"
+        "<NuGetAuditMode>all</NuGetAuditMode></PropertyGroup></Project>\n",
+        encoding="utf-8",
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert "nuget_audit" not in _named(payload["security_tools"])
+    assert (
+        ".NET NuGet audit is explicitly disabled in Directory.Build.props; "
+        "security posture requires review" in payload["review_first_unknowns"]
+    )
+
+
+def test_generic_projects_json_is_not_a_nuget_report(tmp_path: Path) -> None:
+    _write_dotnet_project(tmp_path / "src" / "Api" / "Api.csproj")
+    report = tmp_path / "security" / "generic.json"
+    report.parent.mkdir(parents=True)
+    report.write_text(
+        '{"version": 1, "projects": [{"name": "other", "vulnerabilities": []}]}\n',
+        encoding="utf-8",
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert "nuget_audit" not in _named(payload["security_tools"])
+    assert "nuget_vulnerability_report" not in _named(payload["artifact_surfaces"])
+
+
 def test_solution_only_dotnet_repo_can_surface_explicit_audit_command(tmp_path: Path) -> None:
     (tmp_path / "Product.sln").write_text("\n", encoding="utf-8")
     script = tmp_path / "audit.ps1"
