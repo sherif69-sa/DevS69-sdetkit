@@ -362,11 +362,15 @@ def _is_dotnet_vulnerability_report(payload: object) -> bool:
         for framework in frameworks:
             if not isinstance(framework, dict) or not str(framework.get("framework", "")).strip():
                 continue
-            if any(
-                isinstance(framework.get(field), list)
-                for field in ("topLevelPackages", "transitivePackages")
-            ):
-                return True
+            for field in ("topLevelPackages", "transitivePackages"):
+                packages = framework.get(field)
+                if not isinstance(packages, list):
+                    continue
+                if any(
+                    isinstance(package, dict) and isinstance(package.get("vulnerabilities"), list)
+                    for package in packages
+                ):
+                    return True
     return False
 
 
