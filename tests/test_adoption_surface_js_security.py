@@ -14,9 +14,7 @@ def _write(path: Path, text: str = "") -> None:
 def _named(items: object) -> dict[str, dict[str, object]]:
     assert isinstance(items, list)
     return {
-        str(item["name"]): item
-        for item in items
-        if isinstance(item, dict) and item.get("name")
+        str(item["name"]): item for item in items if isinstance(item, dict) and item.get("name")
     }
 
 
@@ -175,8 +173,7 @@ def test_dynamic_and_mutating_javascript_audit_commands_are_review_first(
     )
     assert (
         "JavaScript package security command for pnpm in .github/workflows/security.yml "
-        "requests dependency mutation and was not recommended"
-        in payload["review_first_unknowns"]
+        "requests dependency mutation and was not recommended" in payload["review_first_unknowns"]
     )
 
 
@@ -187,11 +184,7 @@ def test_descriptive_or_echoed_audit_text_is_not_a_security_command(
     workflow = tmp_path / ".github" / "workflows" / "security.yml"
     _write(
         workflow,
-        "jobs:\n"
-        "  audit:\n"
-        "    steps:\n"
-        "      - name: npm audit\n"
-        '      - run: echo "npm audit"\n',
+        'jobs:\n  audit:\n    steps:\n      - name: npm audit\n      - run: echo "npm audit"\n',
     )
 
     payload = discover_adoption_surface(tmp_path)
