@@ -404,6 +404,23 @@ def test_generic_projects_json_is_not_a_nuget_report(tmp_path: Path) -> None:
     assert "nuget_vulnerability_report" not in _named(payload["artifact_surfaces"])
 
 
+def test_package_inventory_json_is_not_a_vulnerability_report(tmp_path: Path) -> None:
+    _write_dotnet_project(tmp_path / "src" / "Api" / "Api.csproj")
+    report = tmp_path / "security" / "package-inventory.json"
+    report.parent.mkdir(parents=True)
+    report.write_text(
+        '{"version": 1, "projects": [{"path": "src/Api/Api.csproj", '
+        '"frameworks": [{"framework": "net8.0", "topLevelPackages": '
+        '[{"id": "Contoso.Runtime", "resolvedVersion": "1.0.0"}]}]}]}\n',
+        encoding="utf-8",
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+
+    assert "nuget_audit" not in _named(payload["security_tools"])
+    assert "nuget_vulnerability_report" not in _named(payload["artifact_surfaces"])
+
+
 def test_solution_only_dotnet_repo_can_surface_explicit_audit_command(tmp_path: Path) -> None:
     (tmp_path / "Product.sln").write_text("\n", encoding="utf-8")
     script = tmp_path / "audit.ps1"
