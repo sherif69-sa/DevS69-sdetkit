@@ -1,0 +1,10 @@
+name: dependency-security
+
+on:
+  workflow_dispatch:
+
+jobs:
+  nuget-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - run: dotnet package list --project Calculator.Tests.csproj --vulnerable --include-transitive --format json
