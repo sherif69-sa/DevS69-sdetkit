@@ -168,8 +168,8 @@ def test_root_and_nested_dotnet_projects_remain_distinct(tmp_path: Path) -> None
 def test_package_reference_proves_test_project_and_malformed_xml_does_not(
     tmp_path: Path,
 ) -> None:
-    proven = tmp_path / "src" / "Proven.Tests"
-    malformed = tmp_path / "src" / "Malformed.Tests"
+    proven = tmp_path / "services" / "Proven.Tests"
+    malformed = tmp_path / "services" / "Malformed.Tests"
     proven.mkdir(parents=True)
     malformed.mkdir(parents=True)
     (proven / "Proven.Tests.csproj").write_text(
@@ -188,7 +188,7 @@ def test_package_reference_proves_test_project_and_malformed_xml_does_not(
 
     assert [item["command"] for item in commands] == ["dotnet test Proven.Tests.csproj"]
     assert payload["review_first_unknowns"] == [
-        ".NET project src/Malformed.Tests/Malformed.Tests.csproj detected "
+        ".NET project services/Malformed.Tests/Malformed.Tests.csproj detected "
         "but test-project evidence is not proven"
     ]
 
