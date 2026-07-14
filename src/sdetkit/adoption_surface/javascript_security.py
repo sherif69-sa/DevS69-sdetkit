@@ -35,7 +35,8 @@ _ALLOWED_LINE_PREFIXES = {
     "powershell",
     "pwsh",
 }
-_IGNORED_LINE_PREFIXES = ("name:", "description:", "if:", "echo ", "printf ", "write-output ")
+_METADATA_PREFIXES = ("name:", "description:", "if:")
+_SHELL_MESSAGE_COMMANDS = ("echo", "printf", "write-output")
 
 
 def _is_repository_owned(path: str) -> bool:
@@ -67,6 +68,18 @@ def _owned_command_files(root: Path) -> list[str]:
 
 def _clean_line_prefix(prefix: str) -> str:
     return prefix.strip().lower().rstrip("'\"(").strip()
+
+
+def _line_prefix_is_descriptive(prefix: str) -> bool:
+    normalized = prefix.lstrip("- ").strip()
+    if normalized.startswith(_METADATA_PREFIXES):
+        return True
+    return any(
+        normalized == command
+        or normalized.startswith(f"{command} ")
+        or normalized.endswith(f" {command}")
+        for command in _SHELL_MESSAGE_COMMANDS
+    )
 
 
 def _strip_command_suffix(command: str) -> str:
@@ -102,7 +115,7 @@ def _literal_security_command(raw_value: str) -> tuple[str, str, str] | None:
 
     index, _prefix, manager = min(matches, key=lambda item: item[0])
     line_prefix = _clean_line_prefix(stripped[:index])
-    if any(line_prefix.startswith(prefix) for prefix in _IGNORED_LINE_PREFIXES):
+    if _line_prefix_is_descriptive(line_prefix):
         return None
     if line_prefix not in _ALLOWED_LINE_PREFIXES:
         return manager, "", "unresolved"
@@ -132,15 +145,18 @@ def _append_unknown(
     source = _source_label(path, script)
     if reason == "dynamic":
         unknowns.append(
-            f"JavaScript package security command for {manager} in {source} is dynamic and was not guessed"
+            f"JavaScript package security command for {manager} in {source} "
+            "is dynamic and was not guessed"
         )
     elif reason == "mutation":
         unknowns.append(
-            f"JavaScript package security command for {manager} in {source} requests dependency mutation and was not recommended"
+            f"JavaScript package security command for {manager} in {source} "
+            "requests dependency mutation and was not recommended"
         )
     else:
         unknowns.append(
-            f"JavaScript package security command for {manager} in {source} has unresolved command context and was not guessed"
+            f"JavaScript package security command for {manager} in {source} "
+            "has unresolved command context and was not guessed"
         )
 
 
@@ -163,7 +179,8 @@ def _extract_package_script_commands(
                     manager in raw_value.lower() for manager in ("npm", "pnpm", "yarn")
                 ):
                     unknowns.append(
-                        f"JavaScript package security script {script_name} in {manifest} was not a literal supported audit command"
+                        f"JavaScript package security script {script_name} in {manifest} "
+                        "was not a literal supported audit command"
                     )
                 continue
             manager, command, reason = extracted
