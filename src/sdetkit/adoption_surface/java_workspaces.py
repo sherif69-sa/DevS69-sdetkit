@@ -238,17 +238,21 @@ def _dotnet_audit_config_state(text: str) -> tuple[bool, bool]:
     except ET.ParseError:
         return False, False
 
-    enabled = False
-    disabled = False
+    explicit_values: set[str] = set()
+    audit_setting_detected = False
     for element in root.iter():
         name = _local_name(str(element.tag))
         value = (element.text or "").strip().lower()
-        if name == "nugetaudit":
-            enabled = enabled or value == "true"
-            disabled = disabled or value == "false"
+        if name == "nugetaudit" and value in {"true", "false"}:
+            explicit_values.add(value)
         elif name in _DOTNET_AUDIT_ELEMENTS:
-            enabled = True
-    return enabled, disabled and not enabled
+            audit_setting_detected = True
+
+    if "true" in explicit_values:
+        return True, False
+    if "false" in explicit_values:
+        return False, True
+    return audit_setting_detected, False
 
 
 def _dotnet_audit_config_evidence(
@@ -342,14 +346,27 @@ def _dotnet_security_commands(root: Path) -> tuple[list[tuple[str, str]], list[s
     return commands, sorted(set(unknowns))
 
 
-def _contains_vulnerability_shape(value: object) -> bool:
-    if isinstance(value, dict):
-        keys = {str(key).lower() for key in value}
-        if "vulnerabilities" in keys or {"severity", "advisoryurl"}.issubset(keys):
-            return True
-        return any(_contains_vulnerability_shape(item) for item in value.values())
-    if isinstance(value, list):
-        return any(_contains_vulnerability_shape(item) for item in value)
+def _is_dotnet_vulnerability_report(payload: object) -> bool:
+    if not isinstance(payload, dict) or "version" not in payload:
+        return False
+    projects = payload.get("projects")
+    if not isinstance(projects, list):
+        return False
+
+    for project in projects:
+        if not isinstance(project, dict) or not str(project.get("path", "")).strip():
+            continue
+        frameworks = project.get("frameworks")
+        if not isinstance(frameworks, list):
+            continue
+        for framework in frameworks:
+            if not isinstance(framework, dict) or not str(framework.get("framework", "")).strip():
+                continue
+            if any(
+                isinstance(framework.get(field), list)
+                for field in ("topLevelPackages", "transitivePackages")
+            ):
+                return True
     return False
 
 
@@ -362,9 +379,7 @@ def _dotnet_vulnerability_reports(root: Path) -> list[str]:
             payload = json.loads(_core._read_text(root, path))
         except json.JSONDecodeError:
             continue
-        if not isinstance(payload, dict) or not isinstance(payload.get("projects"), list):
-            continue
-        if _contains_vulnerability_shape(payload["projects"]):
+        if _is_dotnet_vulnerability_report(payload):
             reports.append(path)
     return sorted(reports)
 
