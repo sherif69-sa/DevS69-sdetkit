@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,20 @@ _LANGUAGE_BY_SUFFIX = {
     ".vbproj": "visual_basic",
 }
 _CENTRAL_NUGET_FILES = ("Directory.Packages.props", "NuGet.config", "nuget.config")
+_DOTNET_AUDIT_CONFIG_FILES = (
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "NuGet.config",
+    "nuget.config",
+)
+_DOTNET_COMMAND_PATTERNS = ("*.sh", "*.ps1", "*.cmd", "*.bat")
+_DOTNET_AUDIT_ELEMENTS = {
+    "auditsources",
+    "nugetauditlevel",
+    "nugetauditmode",
+    "nugetauditsuppress",
+}
 
 
 def _maven_workspace_command(root: Path, workspace: str) -> tuple[str, str, list[str]]:
@@ -217,6 +232,197 @@ def _nuget_evidence(root: Path, workspace: str) -> list[str]:
     return sorted(set(evidence))
 
 
+def _dotnet_audit_config_state(text: str) -> tuple[bool, bool]:
+    try:
+        root = ET.fromstring(text)
+    except ET.ParseError:
+        return False, False
+
+    enabled = False
+    disabled = False
+    for element in root.iter():
+        name = _local_name(str(element.tag))
+        value = (element.text or "").strip().lower()
+        if name == "nugetaudit":
+            enabled = enabled or value == "true"
+            disabled = disabled or value == "false"
+        elif name in _DOTNET_AUDIT_ELEMENTS:
+            enabled = True
+    return enabled, disabled and not enabled
+
+
+def _dotnet_audit_config_evidence(
+    root: Path,
+    manifests: list[str],
+) -> tuple[list[str], list[str]]:
+    candidates = {name for name in _DOTNET_AUDIT_CONFIG_FILES if _core._file(root, name)}
+    candidates.update(manifests)
+    for manifest in manifests:
+        workspace = _base._workspace_directory(manifest)
+        for ancestor in _workspace_ancestors(workspace):
+            for name in _DOTNET_AUDIT_CONFIG_FILES:
+                path = _base._workspace_path(ancestor, name)
+                if _core._file(root, path):
+                    candidates.add(path)
+
+    enabled: list[str] = []
+    disabled: list[str] = []
+    for path in sorted(candidates):
+        is_enabled, is_disabled = _dotnet_audit_config_state(_core._read_text(root, path))
+        if is_enabled:
+            enabled.append(path)
+        elif is_disabled:
+            disabled.append(path)
+    return enabled, disabled
+
+
+def _is_repository_command_source(path: str) -> bool:
+    parts = Path(path).parts
+    if not parts:
+        return False
+    if parts[:2] == (".github", "workflows"):
+        return True
+    return len(parts) == 1 or parts[0] not in _base._WORKSPACE_IGNORED_TOP_LEVEL
+
+
+def _owned_dotnet_command_files(root: Path) -> list[str]:
+    files = set(_core._workflow_files(root) + _core._owned_script_files(root))
+    for path in (".gitlab-ci.yml", "Jenkinsfile"):
+        if _core._file(root, path):
+            files.add(path)
+    for pattern in _DOTNET_COMMAND_PATTERNS:
+        files.update(_core._recursive_files(root, pattern))
+    return sorted(path for path in files if _is_repository_command_source(path))
+
+
+def _literal_dotnet_security_command(raw_line: str) -> str:
+    lower = raw_line.lower()
+    index = lower.find("dotnet ")
+    if index < 0 or "echo " in lower[:index]:
+        return ""
+
+    command = raw_line[index:].strip()
+    if " #" in command:
+        command = command.split(" #", 1)[0].rstrip()
+    command = command.rstrip("'\"")
+    normalized = " ".join(command.lower().split())
+    vulnerable_list = (
+        normalized.startswith("dotnet package list")
+        or (normalized.startswith("dotnet list ") and " package " in normalized)
+    ) and "--vulnerable" in normalized
+    explicit_restore_audit = normalized.startswith("dotnet restore") and any(
+        token in normalized
+        for token in (
+            "nugetaudit=true",
+            "nugetauditmode=",
+            "nugetauditlevel=",
+        )
+    )
+    return command if vulnerable_list or explicit_restore_audit else ""
+
+
+def _dotnet_security_commands(root: Path) -> tuple[list[tuple[str, str]], list[str]]:
+    commands: list[tuple[str, str]] = []
+    unknowns: list[str] = []
+    seen: set[tuple[str, str]] = set()
+    for path in _owned_dotnet_command_files(root):
+        for raw_line in _core._read_text(root, path).splitlines():
+            command = _literal_dotnet_security_command(raw_line)
+            if not command:
+                continue
+            if _core._command_is_dynamic(command):
+                unknowns.append(
+                    f".NET dependency security command in {path} is dynamic and was not guessed"
+                )
+                continue
+            key = (path, command)
+            if key not in seen:
+                seen.add(key)
+                commands.append(key)
+    return commands, sorted(set(unknowns))
+
+
+def _contains_vulnerability_shape(value: object) -> bool:
+    if isinstance(value, dict):
+        keys = {str(key).lower() for key in value}
+        if "vulnerabilities" in keys or {"severity", "advisoryurl"}.issubset(keys):
+            return True
+        return any(_contains_vulnerability_shape(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_contains_vulnerability_shape(item) for item in value)
+    return False
+
+
+def _dotnet_vulnerability_reports(root: Path) -> list[str]:
+    reports: list[str] = []
+    for path in _core._recursive_files(root, "*.json"):
+        if not _is_repository_owned(path):
+            continue
+        try:
+            payload = json.loads(_core._read_text(root, path))
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(payload, dict) or not isinstance(payload.get("projects"), list):
+            continue
+        if _contains_vulnerability_shape(payload["projects"]):
+            reports.append(path)
+    return sorted(reports)
+
+
+def _extend_dotnet_security_evidence(
+    payload: dict[str, Any],
+    root: Path,
+    manifests: list[str],
+) -> None:
+    config_evidence, disabled_evidence = _dotnet_audit_config_evidence(root, manifests)
+    commands, command_unknowns = _dotnet_security_commands(root)
+    reports = _dotnet_vulnerability_reports(root)
+    command_files = [path for path, _command in commands]
+    evidence = sorted(set([*config_evidence, *command_files, *reports]))
+
+    if evidence:
+        _base._merge_named_list(
+            payload["security_tools"],
+            "nuget_audit",
+            list_field="evidence",
+            values=evidence,
+            confidence="detected",
+        )
+    if reports:
+        _base._merge_named_list(
+            payload["artifact_surfaces"],
+            "nuget_vulnerability_report",
+            list_field="paths",
+            values=reports,
+            confidence="detected",
+        )
+        payload["artifact_surfaces"] = sorted(
+            payload["artifact_surfaces"], key=lambda item: item["name"]
+        )
+
+    for path, command in commands:
+        _core._add_proof_command(
+            payload["recommended_proof_commands"],
+            surface="dotnet",
+            command=command,
+            confidence="high",
+            purpose="security",
+            evidence=[path],
+            source={"scope": "repository_command", "file": path},
+        )
+
+    payload["review_first_unknowns"].extend(command_unknowns)
+    payload["review_first_unknowns"].extend(
+        f".NET NuGet audit is explicitly disabled in {path}; security posture requires review"
+        for path in disabled_evidence
+    )
+    if config_evidence and not commands and not reports:
+        payload["review_first_unknowns"].append(
+            ".NET NuGet audit configuration detected but a literal security proof command "
+            "or saved vulnerability report is not proven"
+        )
+
+
 def _add_root_dotnet_test_command(payload: dict[str, Any], *, manifest: str, command: str) -> None:
     for item in payload["recommended_proof_commands"]:
         if (
@@ -271,6 +477,8 @@ def extend_dotnet_workspaces(payload: dict[str, Any], root: Path) -> None:
     manifests = _owned_dotnet_project_manifests(root)
     solutions = _owned_dotnet_solutions(root)
     _normalize_base_dotnet_detection(payload, manifests=manifests, solutions=solutions)
+    if manifests or solutions:
+        _extend_dotnet_security_evidence(payload, root, manifests)
     if not manifests:
         return
 
