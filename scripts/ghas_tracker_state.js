@@ -80,6 +80,54 @@ function digestAlertMetrics(codeScanning, dependabot, secretScanning) {
   };
 }
 
+function slaAlertMetrics(codeScanning, dependabot, secretScanning, ageDays) {
+  const countAtLeast = (result, days) => metricOrUnknown(
+    result,
+    (alerts) => alerts.filter((alert) => ageDays(alert) >= days).length,
+  );
+  const highSeverityCodeAged = metricOrUnknown(
+    codeScanning,
+    (alerts) => alerts.filter((alert) => {
+      const severity = alert.rule?.security_severity_level || alert.rule?.severity || 'unknown';
+      return ['critical', 'high'].includes(String(severity).toLowerCase()) && ageDays(alert) >= 14;
+    }).length,
+  );
+  const criticalDependabotAged = metricOrUnknown(
+    dependabot,
+    (alerts) => alerts.filter((alert) => {
+      const severity = alert.security_vulnerability?.severity || alert.severity || 'unknown';
+      return ['critical', 'high'].includes(String(severity).toLowerCase()) && ageDays(alert) >= 14;
+    }).length,
+  );
+
+  return {
+    codeScanning: countOrUnknown(codeScanning),
+    dependabot: countOrUnknown(dependabot),
+    secretScanning: countOrUnknown(secretScanning),
+    codeAged7: countAtLeast(codeScanning, 7),
+    codeAged14: countAtLeast(codeScanning, 14),
+    codeAged30: countAtLeast(codeScanning, 30),
+    highSeverityCodeAged,
+    dependabotAged7: countAtLeast(dependabot, 7),
+    dependabotAged14: countAtLeast(dependabot, 14),
+    dependabotAged30: countAtLeast(dependabot, 30),
+    criticalDependabotAged,
+    secretAged7: countAtLeast(secretScanning, 7),
+    secretAged14: countAtLeast(secretScanning, 14),
+    secretAged30: countAtLeast(secretScanning, 30),
+    secretBypassed: metricOrUnknown(
+      secretScanning,
+      (alerts) => alerts.filter((alert) => alert.push_protection_bypassed === true).length,
+    ),
+    secretBypassedAged: metricOrUnknown(
+      secretScanning,
+      (alerts) => alerts.filter(
+        (alert) => alert.push_protection_bypassed === true && ageDays(alert) >= 7,
+      ).length,
+    ),
+  };
+}
+
 module.exports = {
   collectedAlerts,
   unavailableAlerts,
@@ -88,4 +136,5 @@ module.exports = {
   countOrUnknown,
   formatMetric,
   digestAlertMetrics,
+  slaAlertMetrics,
 };

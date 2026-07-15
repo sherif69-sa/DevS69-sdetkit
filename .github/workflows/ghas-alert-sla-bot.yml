@@ -32,8 +32,7 @@ jobs:
               collectedAlerts,
               unavailableAlerts,
               metricOrUnknown,
-              countOrUnknown,
-              formatMetric,
+              slaAlertMetrics,
             } = require(`${process.env.GITHUB_WORKSPACE}/scripts/ghas_tracker_state.js`);
             const weekOf = new Date().toISOString().slice(0, 10);
             const labels = [
@@ -86,10 +85,6 @@ jobs:
               return Math.max(0, Math.floor((Date.now() - createdMs) / dayMs));
             }
 
-            function countAtLeast(alerts, days) {
-              return alerts.filter((alert) => ageDays(alert) >= days).length;
-            }
-
             function summarizeSeverity(alerts, pickSeverity) {
               const counts = new Map();
               for (const alert of alerts) {
@@ -126,6 +121,7 @@ jobs:
             const codeAlerts = await fetchAlerts('/repos/{owner}/{repo}/code-scanning/alerts', 'Code scanning alerts');
             const dependabotAlerts = await fetchAlerts('/repos/{owner}/{repo}/dependabot/alerts', 'Dependabot alerts');
             const secretAlerts = await fetchAlerts('/repos/{owner}/{repo}/secret-scanning/alerts', 'Secret scanning alerts');
+            const slaMetrics = slaAlertMetrics(codeAlerts, dependabotAlerts, secretAlerts, ageDays);
 
             const codeSeverity = metricOrUnknown(
               codeAlerts,
@@ -141,26 +137,7 @@ jobs:
                 (alert) => alert.security_vulnerability?.severity || alert.severity || 'unknown'
               )
             );
-
-            const secretBypassed = metricOrUnknown(
-              secretAlerts,
-              (alerts) => alerts.filter((alert) => alert.push_protection_bypassed === true).length
-            );
-            const secretBypassedAged = metricOrUnknown(
-              secretAlerts,
-              (alerts) => alerts.filter(
-                (alert) => alert.push_protection_bypassed === true && ageDays(alert) >= 7
-              ).length
-            );
             const severityOrder = ['critical', 'high', 'medium', 'low', 'warning', 'note', 'unknown'];
-            const highSeverityCodeAged = metricOrUnknown(codeAlerts, (alerts) => alerts.filter((alert) => {
-              const severity = alert.rule?.security_severity_level || alert.rule?.severity || 'unknown';
-              return ['critical', 'high'].includes(String(severity).toLowerCase()) && ageDays(alert) >= 14;
-            }).length);
-            const criticalDependabotAged = metricOrUnknown(dependabotAlerts, (alerts) => alerts.filter((alert) => {
-              const severity = alert.security_vulnerability?.severity || alert.severity || 'unknown';
-              return ['critical', 'high'].includes(String(severity).toLowerCase()) && ageDays(alert) >= 14;
-            }).length);
             const oldCodeRules = metricOrUnknown(codeAlerts, topOldCodeRules);
 
             const title = `⏱️ GHAS alert SLA tracker (${weekOf})`;
@@ -168,24 +145,24 @@ jobs:
               'This issue is auto-generated to force older GHAS backlog slices into a time-bound remediation lane.',
               '',
               '## SLA snapshot',
-              `- Open code scanning alerts: **${codeAlerts.length}**`,
-              `- Open Dependabot alerts: **${dependabotAlerts.length}**`,
-              `- Open secret scanning alerts: **${secretAlerts.length}**`,
-              `- Secret-scanning alerts with push-protection bypass: **${secretBypassed.length}**`,
+              `- Open code scanning alerts: **${slaMetrics.codeScanning}**`,
+              `- Open Dependabot alerts: **${slaMetrics.dependabot}**`,
+              `- Open secret scanning alerts: **${slaMetrics.secretScanning}**`,
+              `- Secret-scanning alerts with push-protection bypass: **${slaMetrics.secretBypassed}**`,
               '',
               '## Age-based SLA breaches',
-              `- Code scanning aged 7+ days: **${countAtLeast(codeAlerts, 7)}**`,
-              `- Code scanning aged 14+ days: **${countAtLeast(codeAlerts, 14)}**`,
-              `- Code scanning aged 30+ days: **${countAtLeast(codeAlerts, 30)}**`,
-              `- High-severity code scanning alerts aged 14+ days: **${highSeverityCodeAged}**`,
-              `- Dependabot alerts aged 7+ days: **${countAtLeast(dependabotAlerts, 7)}**`,
-              `- Dependabot alerts aged 14+ days: **${countAtLeast(dependabotAlerts, 14)}**`,
-              `- Dependabot alerts aged 30+ days: **${countAtLeast(dependabotAlerts, 30)}**`,
-              `- High/critical Dependabot alerts aged 14+ days: **${criticalDependabotAged}**`,
-              `- Secret scanning alerts aged 7+ days: **${countAtLeast(secretAlerts, 7)}**`,
-              `- Secret scanning alerts aged 14+ days: **${countAtLeast(secretAlerts, 14)}**`,
-              `- Secret scanning alerts aged 30+ days: **${countAtLeast(secretAlerts, 30)}**`,
-              `- Push-protection bypassed secret alerts aged 7+ days: **${secretBypassedAged}**`,
+              `- Code scanning aged 7+ days: **${slaMetrics.codeAged7}**`,
+              `- Code scanning aged 14+ days: **${slaMetrics.codeAged14}**`,
+              `- Code scanning aged 30+ days: **${slaMetrics.codeAged30}**`,
+              `- High-severity code scanning alerts aged 14+ days: **${slaMetrics.highSeverityCodeAged}**`,
+              `- Dependabot alerts aged 7+ days: **${slaMetrics.dependabotAged7}**`,
+              `- Dependabot alerts aged 14+ days: **${slaMetrics.dependabotAged14}**`,
+              `- Dependabot alerts aged 30+ days: **${slaMetrics.dependabotAged30}**`,
+              `- High/critical Dependabot alerts aged 14+ days: **${slaMetrics.criticalDependabotAged}**`,
+              `- Secret scanning alerts aged 7+ days: **${slaMetrics.secretAged7}**`,
+              `- Secret scanning alerts aged 14+ days: **${slaMetrics.secretAged14}**`,
+              `- Secret scanning alerts aged 30+ days: **${slaMetrics.secretAged30}**`,
+              `- Push-protection bypassed secret alerts aged 7+ days: **${slaMetrics.secretBypassedAged}**`,
               '',
               '## Severity slices',
               ...(codeSeverity === 'unknown' ? ['- Code scanning severity: unknown'] : mapLines(codeSeverity, 'Code scanning severity', severityOrder)),

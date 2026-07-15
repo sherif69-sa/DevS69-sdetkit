@@ -149,7 +149,7 @@ def test_workflows_use_shared_state_contract() -> None:
         assert "Collection status" in text
         assert "process.env.GHAS_TOKEN || github.token" in text
 
-    assert "countOrUnknown" in texts["sla"]
+    assert "slaAlertMetrics" in texts["sla"]
     assert "countOrUnknown" in texts["configuration"]
     assert "digestAlertMetrics" in texts["review"]
     assert "return [];" not in texts["sla"]
