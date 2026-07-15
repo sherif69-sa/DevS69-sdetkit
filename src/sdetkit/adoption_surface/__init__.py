@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit.adoption_surface import _base
+from sdetkit.adoption_surface.java_security import extend_java_dependency_security
 from sdetkit.adoption_surface.java_workspaces import (
     extend_dotnet_workspaces,
     extend_nested_java_workspaces,
@@ -43,6 +44,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     payload = _base.discover_adoption_surface(root)
     extend_javascript_package_security(payload, root)
     extend_nested_java_workspaces(payload, root)
+    extend_java_dependency_security(payload, root)
     extend_dotnet_workspaces(payload, root)
 
     for field in ("detected_languages", "package_managers", "test_runners", "security_tools"):

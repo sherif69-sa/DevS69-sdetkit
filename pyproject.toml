@@ -163,6 +163,10 @@ module = "sdetkit.adoption_surface.javascript_security"
 ignore_errors = false
 
 [[tool.mypy.overrides]]
+module = "sdetkit.adoption_surface.java_security"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
 module = [
   "sdetkit.adoption_evidence_bundle",
   "sdetkit.adoption_external_integration",
