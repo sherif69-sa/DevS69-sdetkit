@@ -23,9 +23,7 @@ TEST_SOURCE = "java/test/com/example/CalculatorTest.java"
 def _named(items: object) -> dict[str, dict[str, object]]:
     assert isinstance(items, list)
     return {
-        str(item["name"]): item
-        for item in items
-        if isinstance(item, dict) and item.get("name")
+        str(item["name"]): item for item in items if isinstance(item, dict) and item.get("name")
     }
 
 
