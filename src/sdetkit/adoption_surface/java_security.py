@@ -157,8 +157,7 @@ def _command_start(lowered: str) -> tuple[int, str] | None:
 def _looks_like_dependency_check(text: str) -> bool:
     normalized = "".join(text.lower().split())
     return any(
-        marker in normalized
-        for marker in (*_MAVEN_MARKERS, _GRADLE_MARKER, *_MUTATION_MARKERS)
+        marker in normalized for marker in (*_MAVEN_MARKERS, _GRADLE_MARKER, *_MUTATION_MARKERS)
     )
 
 
@@ -258,8 +257,8 @@ def _add_security_proof_command(
     scope: str,
 ) -> None:
     for existing in payload["recommended_proof_commands"]:
-        source = existing.get("source")
-        source_payload = source if isinstance(source, dict) else {}
+        existing_source = existing.get("source")
+        source_payload = existing_source if isinstance(existing_source, dict) else {}
         if (
             existing.get("surface") == "java"
             and existing.get("command") == command
@@ -273,11 +272,7 @@ def _add_security_proof_command(
                     "scope": scope,
                     "file": file,
                     "package_manager": manager,
-                    **(
-                        {"working_directory": working_directory}
-                        if working_directory != "."
-                        else {}
-                    ),
+                    **({"working_directory": working_directory} if working_directory != "." else {}),
                 }
             return
 
