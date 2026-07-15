@@ -66,6 +66,20 @@ function formatMetric(value) {
   return value;
 }
 
+function digestAlertMetrics(codeScanning, dependabot, secretScanning) {
+  return {
+    codeScanning: countOrUnknown(codeScanning),
+    dependabot: countOrUnknown(dependabot),
+    secretScanning: countOrUnknown(secretScanning),
+    pushProtectionBypassed: formatMetric(
+      metricOrUnknown(
+        secretScanning,
+        (alerts) => alerts.filter((alert) => alert.push_protection_bypassed === true).length,
+      ),
+    ),
+  };
+}
+
 module.exports = {
   collectedAlerts,
   unavailableAlerts,
@@ -73,4 +87,5 @@ module.exports = {
   metricOrUnknown,
   countOrUnknown,
   formatMetric,
+  digestAlertMetrics,
 };
