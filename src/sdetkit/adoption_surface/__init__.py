@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit.adoption_surface import _base
+from sdetkit.adoption_surface import core as _core
 from sdetkit.adoption_surface.java_security import extend_java_dependency_security
 from sdetkit.adoption_surface.java_workspaces import (
     extend_dotnet_workspaces,
@@ -38,10 +39,49 @@ __all__ = (
     "write_adoption_surface_artifact",
 )
 
+_PYTHON_TEST_UNKNOWN = "Python project detected but test command is not proven"
+
+
+def _src_contains_python_sources(root: Path) -> bool:
+    src_root = root / "src"
+    if not src_root.is_dir():
+        return False
+    return bool(_core._recursive_files_for_patterns(src_root, ("*.py", "*.pyi")))
+
+
+def _refine_python_src_evidence(payload: dict[str, Any], root: Path) -> None:
+    if _src_contains_python_sources(root):
+        return
+
+    languages = payload.get("detected_languages")
+    if not isinstance(languages, list):
+        return
+
+    for index, item in enumerate(languages):
+        if not isinstance(item, dict) or item.get("name") != "python":
+            continue
+        evidence = item.get("evidence")
+        if not isinstance(evidence, list) or "src/" not in evidence:
+            return
+
+        filtered = sorted({str(value) for value in evidence if str(value) != "src/"})
+        if filtered:
+            item["evidence"] = filtered
+            return
+
+        del languages[index]
+        unknowns = payload.get("review_first_unknowns")
+        if isinstance(unknowns, list):
+            payload["review_first_unknowns"] = [
+                value for value in unknowns if value != _PYTHON_TEST_UNKNOWN
+            ]
+        return
+
 
 def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     payload = _base.discover_adoption_surface(root)
+    _refine_python_src_evidence(payload, root)
     extend_javascript_package_security(payload, root)
     extend_nested_java_workspaces(payload, root)
     extend_java_dependency_security(payload, root)
