@@ -82,7 +82,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--out", default="build/sdetkit/adoption-surface.json")
-    parser.add_argument("--format", choices=("json", "text", "report"), default="json")
+    parser.add_argument("--format", choices=["json", "text", "report"], default="json")
     ns = parser.parse_args(list(argv) if argv is not None else None)
     summary = write_adoption_surface_artifact(repo_root=ns.root, out=ns.out)
     if ns.format == "json":
