@@ -13,9 +13,7 @@ def _write(path: Path, text: str = "") -> None:
 def _named(items: object) -> dict[str, dict[str, object]]:
     assert isinstance(items, list)
     return {
-        str(item["name"]): item
-        for item in items
-        if isinstance(item, dict) and item.get("name")
+        str(item["name"]): item for item in items if isinstance(item, dict) and item.get("name")
     }
 
 
@@ -92,9 +90,7 @@ def test_nested_gradle_plugin_preserves_workspace_scope(tmp_path: Path) -> None:
     commands = _commands(payload)
     security_command = "./gradlew dependencyCheckAnalyze"
 
-    assert security["owasp_dependency_check"]["evidence"] == [
-        "services/api/build.gradle.kts"
-    ]
+    assert security["owasp_dependency_check"]["evidence"] == ["services/api/build.gradle.kts"]
     assert security_command in commands
     assert commands[security_command]["source"] == {
         "scope": "build_configuration",
@@ -127,9 +123,7 @@ def test_literal_maven_security_command_preserves_exact_repository_text(
     security = _named(payload["security_tools"])
     commands = _commands(payload)
 
-    assert security["owasp_dependency_check"]["evidence"] == [
-        ".github/workflows/security.yml"
-    ]
+    assert security["owasp_dependency_check"]["evidence"] == [".github/workflows/security.yml"]
     assert command in commands
     assert commands[command]["confidence"] == "high"
     assert commands[command]["evidence"] == [".github/workflows/security.yml"]
@@ -187,9 +181,7 @@ jobs:
     commands = _commands(payload)
     unknowns = payload["review_first_unknowns"]
 
-    assert security["owasp_dependency_check"]["evidence"] == [
-        ".github/workflows/security.yml"
-    ]
+    assert security["owasp_dependency_check"]["evidence"] == [".github/workflows/security.yml"]
     assert "./gradlew dependencyCheckAnalyze" not in commands
     assert "./gradlew dependencyCheckUpdate" not in commands
     assert isinstance(unknowns, list)
