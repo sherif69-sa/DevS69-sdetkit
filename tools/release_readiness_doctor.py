@@ -70,10 +70,12 @@ def evaluate_doctor_evidence(payload: object) -> dict[str, Any]:
     schema_version = payload.get("schema_version")
     checks = payload.get("checks")
     current_shape = schema_version == DOCTOR_SCHEMA_VERSION and isinstance(checks, dict)
-    legacy_shape = (
-        schema_version in {None, "", LEGACY_DOCTOR_SCHEMA_VERSION, DOCTOR_SCHEMA_VERSION}
-        and isinstance(checks, list)
-    )
+    legacy_shape = schema_version in {
+        None,
+        "",
+        LEGACY_DOCTOR_SCHEMA_VERSION,
+        DOCTOR_SCHEMA_VERSION,
+    } and isinstance(checks, list)
     evidence_available = current_shape or legacy_shape
     if not evidence_available:
         return {
@@ -84,9 +86,7 @@ def evaluate_doctor_evidence(payload: object) -> dict[str, Any]:
         }
 
     failing_checks = _failing_check_ids(checks)
-    actionable_reasons = (
-        [f"failing doctor checks: {len(failing_checks)}"] if failing_checks else []
-    )
+    actionable_reasons = [f"failing doctor checks: {len(failing_checks)}"] if failing_checks else []
     return {
         "status": _doctor_status(payload, failing_checks),
         "evidence_available": True,
