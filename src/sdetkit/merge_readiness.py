@@ -40,7 +40,9 @@ def _read_json(path: Path) -> JsonObject:
 
 def _write_json(path: Path, payload: JsonObject) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
 
 def _check_state(record: JsonObject, *, stale: bool) -> str:
@@ -248,7 +250,8 @@ def build_merge_readiness(
         "status": overall_state,
         "current_head_sha": current_head_sha,
         "observed_required_checks_green": bool(
-            required_checks and all(item.get("state") == "green" for item in required_checks)
+            required_checks
+            and all(item.get("state") == "green" for item in required_checks)
         ),
         "checks": checks,
         "required_checks": required_checks,
