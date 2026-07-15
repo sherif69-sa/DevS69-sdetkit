@@ -45,8 +45,7 @@ _PYTHON_TEST_UNKNOWN = "Python project detected but test command is not proven"
 def _src_contains_python_files(root: Path) -> bool:
     src_root = root / "src"
     return bool(
-        _core._recursive_files(src_root, "*.py")
-        or _core._recursive_files(src_root, "*.pyi")
+        _core._recursive_files(src_root, "*.py") or _core._recursive_files(src_root, "*.pyi")
     )
 
 
