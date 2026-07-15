@@ -24,15 +24,17 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
 
     assert payload["ok"] is True, payload["mismatches"]
     assert all(payload["checks"].values())
-    assert payload["observed"]["source_module_count"] == 507
+    assert payload["observed"]["source_module_count"] == 508
     assert payload["observed"]["typing_debt_module_count"] == 486
     checked = payload["observed"]["explicitly_type_checked_modules"]
-    assert len(checked) == 21
+    assert len(checked) == 22
+    assert "sdetkit.adoption_surface.java_security" in checked
     assert "sdetkit.adoption_surface.javascript_security" in checked
     assert "sdetkit.adoption_surface.jenkins" in checked
     inventory = payload["typing_debt_inventory"]
     assert inventory["module_count"] == 486
     assert len(inventory["modules"]) == 486
+    assert "sdetkit.adoption_surface.java_security" not in inventory["modules"]
     assert "sdetkit.adoption_surface.javascript_security" not in inventory["modules"]
     assert "sdetkit.adoption_surface.jenkins" not in inventory["modules"]
 
@@ -52,7 +54,7 @@ def test_quality_truth_baseline_reports_machine_readable_mismatches(tmp_path: Pa
             "check": "source_module_count_matches",
             "metric": "source_module_count",
             "expected": 0,
-            "actual": 507,
+            "actual": 508,
         }
     ]
 
