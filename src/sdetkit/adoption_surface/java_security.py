@@ -272,7 +272,9 @@ def _add_security_proof_command(
                     "scope": scope,
                     "file": file,
                     "package_manager": manager,
-                    **({"working_directory": working_directory} if working_directory != "." else {}),
+                    **(
+                        {"working_directory": working_directory} if working_directory != "." else {}
+                    ),
                 }
             return
 
