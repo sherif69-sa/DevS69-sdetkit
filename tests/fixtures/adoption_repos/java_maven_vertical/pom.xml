@@ -18,6 +18,8 @@
     </dependency>
   </dependencies>
   <build>
+    <sourceDirectory>java/main</sourceDirectory>
+    <testSourceDirectory>java/test</testSourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
