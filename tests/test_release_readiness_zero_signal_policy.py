@@ -38,9 +38,13 @@ def test_release_readiness_uses_one_bot_managed_rolling_tracker() -> None:
 def test_release_readiness_requires_complete_evidence_before_suppressing_tracker() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
+    assert "from tools.release_readiness_doctor import evaluate_doctor_evidence" in workflow
+    assert "doctor_evidence = evaluate_doctor_evidence(doctor)" in workflow
+    assert "actionable_reasons = list(doctor_evidence['actionable_reasons'])" in workflow
     assert "doctor_evidence_available" in workflow
     assert "automation_evidence_available" in workflow
-    assert "doctor evidence unavailable or malformed" in workflow
+    assert "doctor evidence unavailable or malformed" not in workflow
+    assert "isinstance(doctor_checks, list)" not in workflow
     assert "automation evidence unavailable or malformed" in workflow
     assert "missing_release_workflows" in workflow
     assert "missing_release_assets" in workflow
@@ -51,7 +55,9 @@ def test_release_readiness_requires_complete_evidence_before_suppressing_tracker
 def test_generated_build_outputs_do_not_create_release_readiness_issue() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
-    policy_start = workflow.index("actionable_reasons = []")
+    policy_start = workflow.index(
+        "actionable_reasons = list(doctor_evidence['actionable_reasons'])"
+    )
     policy_end = workflow.index("actionable = bool(actionable_reasons)")
     policy_block = workflow[policy_start:policy_end]
 
