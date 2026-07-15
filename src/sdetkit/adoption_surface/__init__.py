@@ -12,6 +12,9 @@ from sdetkit.adoption_surface.java_workspaces import (
     extend_dotnet_workspaces,
     extend_nested_java_workspaces,
 )
+from sdetkit.adoption_surface.javascript_security import (
+    extend_javascript_package_security,
+)
 
 REQUIRED_FALSE_FIELDS = _base.REQUIRED_FALSE_FIELDS
 REQUIRED_LIST_FIELDS = _base.REQUIRED_LIST_FIELDS
@@ -38,6 +41,7 @@ __all__ = (
 def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     payload = _base.discover_adoption_surface(root)
+    extend_javascript_package_security(payload, root)
     extend_nested_java_workspaces(payload, root)
     extend_dotnet_workspaces(payload, root)
 
