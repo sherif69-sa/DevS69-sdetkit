@@ -44,6 +44,8 @@ jobs:
           import subprocess
           from pathlib import Path
 
+          from tools.release_readiness_doctor import evaluate_doctor_evidence
+
           repo_root = Path('.')
           build = repo_root / 'build'
 
@@ -106,19 +108,11 @@ jobs:
               for path in release_assets
           ]
 
-          doctor_checks = doctor.get('checks', [])
-          doctor_evidence_available = (
-              bool(doctor)
-              and 'raw' not in doctor
-              and isinstance(doctor_checks, list)
-          )
-          if not isinstance(doctor_checks, list):
-              doctor_checks = []
+          doctor_evidence = evaluate_doctor_evidence(doctor)
+          doctor_status = str(doctor_evidence['status'])
+          doctor_evidence_available = bool(doctor_evidence['evidence_available'])
           failing_doctor_checks = [
-              item.get('name') or item.get('id') or item.get('key')
-              for item in doctor_checks
-              if isinstance(item, dict)
-              and not item.get('ok', item.get('passed', True))
+              str(item) for item in doctor_evidence['failing_checks']
           ]
           automation = maintenance.get('checks', {}).get('github_automation_check', {})
           automation_details = automation.get('details', {}) if isinstance(automation, dict) else {}
@@ -137,13 +131,7 @@ jobs:
 
           missing_release_workflows = [item['path'] for item in workflows if not item['present']]
           missing_release_assets = [item['path'] for item in assets if not item['present']]
-          actionable_reasons = []
-          if not doctor_evidence_available:
-              actionable_reasons.append('doctor evidence unavailable or malformed')
-          if failing_doctor_checks:
-              actionable_reasons.append(
-                  f"failing doctor checks: {len(failing_doctor_checks)}"
-              )
+          actionable_reasons = list(doctor_evidence['actionable_reasons'])
           if missing_release_workflows:
               actionable_reasons.append(
                   'missing release workflows: ' + ', '.join(missing_release_workflows)
@@ -166,7 +154,7 @@ jobs:
 
           report = {
               'summary': {
-                  'doctor_status': doctor.get('status') or doctor.get('summary') or 'unknown',
+                  'doctor_status': doctor_status,
                   'doctor_evidence_available': doctor_evidence_available,
                   'automation_evidence_available': automation_evidence_available,
                   'failing_doctor_checks': len(failing_doctor_checks),
