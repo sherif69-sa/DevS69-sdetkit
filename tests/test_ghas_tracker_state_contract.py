@@ -90,18 +90,85 @@ def test_derived_metrics_remain_unknown_when_collection_is_unknown() -> None:
     )
 
 
+def test_digest_metrics_preserve_authoritative_zero() -> None:
+    result = _node_json(
+        "helper.digestAlertMetrics("
+        "helper.collectedAlerts([], 'Code scanning'), "
+        "helper.collectedAlerts([], 'Dependabot'), "
+        "helper.collectedAlerts([], 'Secret scanning'))"
+    )
+
+    assert result == {
+        "codeScanning": 0,
+        "dependabot": 0,
+        "secretScanning": 0,
+        "pushProtectionBypassed": 0,
+    }
+
+
+def test_digest_metrics_never_leak_null_or_undefined() -> None:
+    result = _node_json(
+        "helper.digestAlertMetrics("
+        "helper.collectedAlerts([{number: 1}, {number: 2}], 'Code scanning'), "
+        "helper.unavailableAlerts('Dependabot', new Error('forbidden')), "
+        "helper.collectedAlerts(null, 'Secret scanning'))"
+    )
+
+    assert result == {
+        "codeScanning": 2,
+        "dependabot": "unknown",
+        "secretScanning": "unknown",
+        "pushProtectionBypassed": "unknown",
+    }
+
+
+def test_digest_metrics_preserve_collected_bypass_count() -> None:
+    result = _node_json(
+        "helper.digestAlertMetrics("
+        "helper.collectedAlerts([], 'Code scanning'), "
+        "helper.collectedAlerts([], 'Dependabot'), "
+        "helper.collectedAlerts(["
+        "{push_protection_bypassed: true}, "
+        "{push_protection_bypassed: false}, "
+        "{push_protection_bypassed: true}], 'Secret scanning'))"
+    )
+
+    assert result == {
+        "codeScanning": 0,
+        "dependabot": 0,
+        "secretScanning": 3,
+        "pushProtectionBypassed": 2,
+    }
+
+
 def test_workflows_use_shared_state_contract() -> None:
     texts = {key: path.read_text(encoding="utf-8") for key, path in WORKFLOWS.items()}
 
     for text in texts.values():
         assert "scripts/ghas_tracker_state.js" in text
-        assert "countOrUnknown" in text
         assert "Collection status" in text
         assert "process.env.GHAS_TOKEN || github.token" in text
 
+    assert "countOrUnknown" in texts["sla"]
+    assert "countOrUnknown" in texts["configuration"]
+    assert "digestAlertMetrics" in texts["review"]
     assert "return [];" not in texts["sla"]
     assert "Array.isArray(response.data) ? response.data.length : 0" not in texts["review"]
     assert "Array.isArray(response.data) ? response.data.length : 0" not in texts["configuration"]
+
+
+def test_review_bot_renders_only_normalized_digest_metrics() -> None:
+    text = WORKFLOWS["review"].read_text(encoding="utf-8")
+
+    assert "const digestMetrics = digestAlertMetrics(" in text
+    assert "${digestMetrics.codeScanning}" in text
+    assert "${digestMetrics.dependabot}" in text
+    assert "${digestMetrics.secretScanning}" in text
+    assert "${digestMetrics.pushProtectionBypassed}" in text
+    assert "${codeScanning.count}" not in text
+    assert "${dependabot.count}" not in text
+    assert "${secretScanning.count}" not in text
+    assert "${pushProtectionBypassed.count}" not in text
 
 
 def test_review_bot_uses_cadence_aware_workflow_freshness() -> None:
