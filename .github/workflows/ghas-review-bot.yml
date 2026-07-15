@@ -32,8 +32,7 @@ jobs:
             const {
               collectedAlerts,
               unavailableAlerts,
-              metricOrUnknown,
-              countOrUnknown,
+              digestAlertMetrics,
             } = require(`${process.env.GITHUB_WORKSPACE}/scripts/ghas_tracker_state.js`);
             const weekOf = new Date().toISOString().slice(0, 10);
             const labels = [
@@ -137,10 +136,7 @@ jobs:
             const codeScanning = await fetchAlerts('/repos/{owner}/{repo}/code-scanning/alerts', 'Code scanning');
             const dependabot = await fetchAlerts('/repos/{owner}/{repo}/dependabot/alerts', 'Dependabot alerts');
             const secretScanning = await fetchAlerts('/repos/{owner}/{repo}/secret-scanning/alerts', 'Secret scanning alerts');
-            const pushProtectionBypassed = metricOrUnknown(
-              secretScanning,
-              (alerts) => alerts.filter((alert) => alert.push_protection_bypassed === true).length
-            );
+            const digestMetrics = digestAlertMetrics(codeScanning, dependabot, secretScanning);
 
             for (const result of [codeScanning, dependabot, secretScanning]) {
               if (result.note) {
@@ -155,10 +151,10 @@ jobs:
               'This issue is auto-generated to keep GitHub Advanced Security review visible and actionable.',
               '',
               '## Alert totals',
-              `- Open code scanning alerts: **${codeScanning.count}**`,
-              `- Open Dependabot alerts: **${dependabot.count}**`,
-              `- Open secret scanning alerts: **${secretScanning.count}**`,
-              `- Secret scanning review queue (push-protection/bypass follow-up): **${pushProtectionBypassed.count}**`,
+              `- Open code scanning alerts: **${digestMetrics.codeScanning}**`,
+              `- Open Dependabot alerts: **${digestMetrics.dependabot}**`,
+              `- Open secret scanning alerts: **${digestMetrics.secretScanning}**`,
+              `- Secret scanning review queue (push-protection/bypass follow-up): **${digestMetrics.pushProtectionBypassed}**`,
               '',
               '## Collection status',
               `- Code scanning: **${codeScanning.status}**`,
