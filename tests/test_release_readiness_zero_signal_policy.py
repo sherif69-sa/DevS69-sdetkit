@@ -55,7 +55,9 @@ def test_release_readiness_requires_complete_evidence_before_suppressing_tracker
 def test_generated_build_outputs_do_not_create_release_readiness_issue() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
 
-    policy_start = workflow.index("actionable_reasons = list(doctor_evidence['actionable_reasons'])")
+    policy_start = workflow.index(
+        "actionable_reasons = list(doctor_evidence['actionable_reasons'])"
+    )
     policy_end = workflow.index("actionable = bool(actionable_reasons)")
     policy_block = workflow[policy_start:policy_end]
 
