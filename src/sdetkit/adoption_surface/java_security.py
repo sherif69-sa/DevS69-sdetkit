@@ -155,8 +155,11 @@ def _command_start(lowered: str) -> tuple[int, str] | None:
 
 
 def _looks_like_dependency_check(text: str) -> bool:
-    normalized = text.lower()
-    return any(marker in normalized for marker in (*_MAVEN_MARKERS, _GRADLE_MARKER))
+    normalized = "".join(text.lower().split())
+    return any(
+        marker in normalized
+        for marker in (*_MAVEN_MARKERS, _GRADLE_MARKER, *_MUTATION_MARKERS)
+    )
 
 
 def _requests_mutation(command: str) -> bool:
@@ -188,13 +191,13 @@ def _literal_security_command(raw_value: str) -> tuple[str, str, str] | None:
         return manager, "", "unresolved"
 
     command = _strip_command_suffix(stripped[index:])
+    if _requests_mutation(command):
+        return manager, "", "mutation"
     normalized = command.lower()
     if manager == "maven" and not any(marker in normalized for marker in _MAVEN_MARKERS):
         return None
     if manager == "gradle" and _GRADLE_MARKER not in "".join(normalized.split()):
         return None
-    if _requests_mutation(command):
-        return manager, "", "mutation"
     if _is_dynamic_or_composite(command):
         return manager, "", "dynamic"
     return manager, command, ""
@@ -300,10 +303,14 @@ def _add_security_proof_command(
 
 
 def extend_java_dependency_security(payload: dict[str, Any], root: Path) -> None:
+    manifests = _owned_java_manifests(root)
+    if not manifests:
+        return
+
     evidence: list[str] = []
     unknowns: list[str] = []
 
-    for manifest in _owned_java_manifests(root):
+    for manifest in manifests:
         configured = _manifest_security_config(root, manifest)
         if configured is None:
             continue
