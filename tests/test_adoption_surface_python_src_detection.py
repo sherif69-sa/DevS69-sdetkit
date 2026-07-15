@@ -16,9 +16,7 @@ def _write(path: Path, text: str = "") -> None:
 def _named(items: object) -> dict[str, dict[str, object]]:
     assert isinstance(items, list)
     return {
-        str(item["name"]): item
-        for item in items
-        if isinstance(item, dict) and item.get("name")
+        str(item["name"]): item for item in items if isinstance(item, dict) and item.get("name")
     }
 
 
@@ -57,7 +55,9 @@ def test_java_src_tree_does_not_imply_python(tmp_path: Path) -> None:
 
     assert set(languages) == {"java"}
     assert "mvn test" in _commands(payload)
-    assert not any("Python project detected" in str(item) for item in payload["review_first_unknowns"])
+    assert not any(
+        "Python project detected" in str(item) for item in payload["review_first_unknowns"]
+    )
     _assert_authority_is_false(payload)
 
 
@@ -73,7 +73,9 @@ def test_typescript_src_tree_does_not_imply_python(tmp_path: Path) -> None:
 
     assert set(languages) == {"javascript_typescript"}
     assert "npm test" in _commands(payload)
-    assert not any("Python project detected" in str(item) for item in payload["review_first_unknowns"])
+    assert not any(
+        "Python project detected" in str(item) for item in payload["review_first_unknowns"]
+    )
     _assert_authority_is_false(payload)
 
 
