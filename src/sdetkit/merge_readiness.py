@@ -65,6 +65,7 @@ def _check_summary(
     *,
     index: int,
     current_head_sha: str,
+    required: bool,
 ) -> JsonObject:
     head_sha = check_intelligence._record_head_sha(record)
     stale = bool(current_head_sha and head_sha and head_sha != current_head_sha)
@@ -73,7 +74,7 @@ def _check_summary(
         "state": _check_state(record, stale=stale),
         "status": check_intelligence._check_status(record),
         "conclusion": check_intelligence._check_conclusion(record),
-        "required": check_intelligence._check_required(record),
+        "required": required,
         "url": check_intelligence._record_url(record),
         "head_sha": head_sha,
         "current_head_sha": current_head_sha,
@@ -113,7 +114,10 @@ def _overall_state(required_checks: list[JsonObject]) -> str:
     return "action_required"
 
 
-def _next_owner_action(overall_state: str, required_checks: list[JsonObject]) -> JsonObject:
+def _next_owner_action(
+    overall_state: str,
+    required_checks: list[JsonObject],
+) -> JsonObject:
     def first(*states: str) -> JsonObject:
         return next(
             (
@@ -215,12 +219,17 @@ def build_merge_readiness(
     checks: list[JsonObject] = []
 
     for index, record in enumerate(records):
-        seen_identities.update(check_intelligence._record_identities(record, index=index))
+        identities = check_intelligence._record_identities(record, index=index)
+        seen_identities.update(identities)
+        required = check_intelligence._check_required(record) or bool(
+            required_contexts.intersection(identities)
+        )
         checks.append(
             _check_summary(
                 record,
                 index=index,
                 current_head_sha=current_head_sha,
+                required=required,
             )
         )
 
