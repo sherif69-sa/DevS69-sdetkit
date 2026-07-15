@@ -33,7 +33,6 @@ jobs:
               unavailableAlerts,
               metricOrUnknown,
               countOrUnknown,
-              formatMetric,
             } = require(`${process.env.GITHUB_WORKSPACE}/scripts/ghas_tracker_state.js`);
             const weekOf = new Date().toISOString().slice(0, 10);
             const labels = [
@@ -127,6 +126,28 @@ jobs:
             const dependabotAlerts = await fetchAlerts('/repos/{owner}/{repo}/dependabot/alerts', 'Dependabot alerts');
             const secretAlerts = await fetchAlerts('/repos/{owner}/{repo}/secret-scanning/alerts', 'Secret scanning alerts');
 
+            const codeAlertCount = countOrUnknown(codeAlerts);
+            const dependabotAlertCount = countOrUnknown(dependabotAlerts);
+            const secretAlertCount = countOrUnknown(secretAlerts);
+            const codeAged7 = metricOrUnknown(codeAlerts, (alerts) => countAtLeast(alerts, 7));
+            const codeAged14 = metricOrUnknown(codeAlerts, (alerts) => countAtLeast(alerts, 14));
+            const codeAged30 = metricOrUnknown(codeAlerts, (alerts) => countAtLeast(alerts, 30));
+            const dependabotAged7 = metricOrUnknown(
+              dependabotAlerts,
+              (alerts) => countAtLeast(alerts, 7)
+            );
+            const dependabotAged14 = metricOrUnknown(
+              dependabotAlerts,
+              (alerts) => countAtLeast(alerts, 14)
+            );
+            const dependabotAged30 = metricOrUnknown(
+              dependabotAlerts,
+              (alerts) => countAtLeast(alerts, 30)
+            );
+            const secretAged7 = metricOrUnknown(secretAlerts, (alerts) => countAtLeast(alerts, 7));
+            const secretAged14 = metricOrUnknown(secretAlerts, (alerts) => countAtLeast(alerts, 14));
+            const secretAged30 = metricOrUnknown(secretAlerts, (alerts) => countAtLeast(alerts, 30));
+
             const codeSeverity = metricOrUnknown(
               codeAlerts,
               (alerts) => summarizeSeverity(
@@ -168,23 +189,23 @@ jobs:
               'This issue is auto-generated to force older GHAS backlog slices into a time-bound remediation lane.',
               '',
               '## SLA snapshot',
-              `- Open code scanning alerts: **${codeAlerts.length}**`,
-              `- Open Dependabot alerts: **${dependabotAlerts.length}**`,
-              `- Open secret scanning alerts: **${secretAlerts.length}**`,
-              `- Secret-scanning alerts with push-protection bypass: **${secretBypassed.length}**`,
+              `- Open code scanning alerts: **${codeAlertCount}**`,
+              `- Open Dependabot alerts: **${dependabotAlertCount}**`,
+              `- Open secret scanning alerts: **${secretAlertCount}**`,
+              `- Secret-scanning alerts with push-protection bypass: **${secretBypassed}**`,
               '',
               '## Age-based SLA breaches',
-              `- Code scanning aged 7+ days: **${countAtLeast(codeAlerts, 7)}**`,
-              `- Code scanning aged 14+ days: **${countAtLeast(codeAlerts, 14)}**`,
-              `- Code scanning aged 30+ days: **${countAtLeast(codeAlerts, 30)}**`,
+              `- Code scanning aged 7+ days: **${codeAged7}**`,
+              `- Code scanning aged 14+ days: **${codeAged14}**`,
+              `- Code scanning aged 30+ days: **${codeAged30}**`,
               `- High-severity code scanning alerts aged 14+ days: **${highSeverityCodeAged}**`,
-              `- Dependabot alerts aged 7+ days: **${countAtLeast(dependabotAlerts, 7)}**`,
-              `- Dependabot alerts aged 14+ days: **${countAtLeast(dependabotAlerts, 14)}**`,
-              `- Dependabot alerts aged 30+ days: **${countAtLeast(dependabotAlerts, 30)}**`,
+              `- Dependabot alerts aged 7+ days: **${dependabotAged7}**`,
+              `- Dependabot alerts aged 14+ days: **${dependabotAged14}**`,
+              `- Dependabot alerts aged 30+ days: **${dependabotAged30}**`,
               `- High/critical Dependabot alerts aged 14+ days: **${criticalDependabotAged}**`,
-              `- Secret scanning alerts aged 7+ days: **${countAtLeast(secretAlerts, 7)}**`,
-              `- Secret scanning alerts aged 14+ days: **${countAtLeast(secretAlerts, 14)}**`,
-              `- Secret scanning alerts aged 30+ days: **${countAtLeast(secretAlerts, 30)}**`,
+              `- Secret scanning alerts aged 7+ days: **${secretAged7}**`,
+              `- Secret scanning alerts aged 14+ days: **${secretAged14}**`,
+              `- Secret scanning alerts aged 30+ days: **${secretAged30}**`,
               `- Push-protection bypassed secret alerts aged 7+ days: **${secretBypassedAged}**`,
               '',
               '## Severity slices',
