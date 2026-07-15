@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit.adoption_surface import _base
+from sdetkit.adoption_surface import core as _core
 from sdetkit.adoption_surface.java_security import extend_java_dependency_security
 from sdetkit.adoption_surface.java_workspaces import (
     extend_dotnet_workspaces,
@@ -38,10 +39,54 @@ __all__ = (
     "write_adoption_surface_artifact",
 )
 
+_PYTHON_TEST_UNKNOWN = "Python project detected but test command is not proven"
+
+
+def _src_contains_python_files(root: Path) -> bool:
+    src_root = root / "src"
+    return bool(
+        _core._recursive_files(src_root, "*.py")
+        or _core._recursive_files(src_root, "*.pyi")
+    )
+
+
+def _remove_unproven_src_python(payload: dict[str, Any], root: Path) -> None:
+    if _src_contains_python_files(root):
+        return
+
+    languages = payload.get("detected_languages")
+    if not isinstance(languages, list):
+        return
+
+    src_only = any(
+        isinstance(item, dict)
+        and item.get("name") == "python"
+        and item.get("evidence") == ["src/"]
+        for item in languages
+    )
+    if not src_only:
+        return
+
+    payload["detected_languages"] = [
+        item
+        for item in languages
+        if not (
+            isinstance(item, dict)
+            and item.get("name") == "python"
+            and item.get("evidence") == ["src/"]
+        )
+    ]
+    unknowns = payload.get("review_first_unknowns")
+    if isinstance(unknowns, list):
+        payload["review_first_unknowns"] = [
+            item for item in unknowns if item != _PYTHON_TEST_UNKNOWN
+        ]
+
 
 def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     payload = _base.discover_adoption_surface(root)
+    _remove_unproven_src_python(payload, root)
     extend_javascript_package_security(payload, root)
     extend_nested_java_workspaces(payload, root)
     extend_java_dependency_security(payload, root)
