@@ -74,7 +74,6 @@ def evaluate_doctor_evidence(payload: object) -> dict[str, Any]:
         None,
         "",
         LEGACY_DOCTOR_SCHEMA_VERSION,
-        DOCTOR_SCHEMA_VERSION,
     } and isinstance(checks, list)
     evidence_available = current_shape or legacy_shape
     if not evidence_available:
