@@ -1,21 +1,31 @@
 {
   "blocked_until_future_wave": [
     {
-      "item": "SafetyGate policy expansion",
-      "reason": "Wave B starts only after FailureVector support matrix is committed and green."
+      "item": "broad automatic patch application",
+      "reason": "FailureVector evidence and SafetyGate eligibility do not authorize mutation; guarded remediation requires repeated benchmark, verifier, and trajectory proof."
     },
     {
-      "item": "TrajectoryStore / RepoMemory expansion",
-      "reason": "Wave C starts only after SafetyGate policy contracts are stable."
+      "item": "automatic merge authorization",
+      "reason": "Diagnosis and verification artifacts remain reporting-only and never authorize merge."
     },
     {
-      "item": "cloud, service, dashboard, or worker orchestration",
-      "reason": "Not allowed until local contracts prove value."
+      "item": "hosted service or cloud infrastructure",
+      "reason": "Local file-backed contracts must demonstrate real adoption demand before hosted infrastructure is justified."
     }
   ],
-  "next_lane_after_completion": "Wave B / SafetyGate policy expansion",
-  "purpose": "Documents the currently supported FailureVector failure classes so future roadmap work does not repeat completed extraction contracts.",
-  "roadmap_lane": "Wave A / FailureVectorEngine",
+  "completed_downstream_capabilities": [
+    "SafetyGate",
+    "TrajectoryStore",
+    "RepoMemory",
+    "ReplayableBenchmarkHarness",
+    "ProtectedVerifier",
+    "PatchScorer",
+    "PRReporter",
+    "local diagnostic queue and worker"
+  ],
+  "next_lane_after_completion": "Cross-provider adoption and real-repository evidence",
+  "purpose": "Documents supported FailureVector classes and points future work toward current platform gaps instead of repeating completed extraction or downstream layers.",
+  "roadmap_lane": "Foundation / FailureVectorEngine",
   "schema_version": "sdetkit.failure_vector.support_matrix.v1",
   "supported_failure_classes": [
     {

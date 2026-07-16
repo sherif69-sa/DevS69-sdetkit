@@ -14,6 +14,16 @@ POLICY_PATH = Path("docs/contracts/safety-gate-policy-matrix.v1.json")
 FAILURE_VECTOR_MATRIX_PATH = Path("docs/contracts/failure-vector-support-matrix.v1.json")
 DOC_PATH = Path("docs/safety-gate-policy-matrix.md")
 
+EXPECTED_DOWNSTREAM_CAPABILITIES = {
+    "TrajectoryStore",
+    "RepoMemory",
+    "ReplayableBenchmarkHarness",
+    "ProtectedVerifier",
+    "PatchScorer",
+    "PRReporter",
+    "local diagnostic queue and worker",
+}
+
 
 @dataclass(frozen=True)
 class MinimalFailureVector:
@@ -39,7 +49,11 @@ def test_safety_gate_policy_matrix_matches_failure_vector_support_matrix() -> No
     }
 
     assert policy["schema_version"] == "sdetkit.safety_gate.policy_matrix.v1"
-    assert policy["roadmap_lane"] == "Wave B / SafetyGate policy expansion"
+    assert policy["roadmap_lane"] == "Foundation / SafetyGate"
+    assert (
+        policy["next_lane_after_completion"]
+        == "Cross-provider adoption and real-repository evidence"
+    )
     assert policy_classes == supported_classes
 
 
@@ -88,12 +102,18 @@ def test_safety_gate_policy_matrix_keeps_global_blocked_actions_aligned() -> Non
     policy = _load_policy()
 
     assert tuple(policy["global_blocked_actions"]) == GENERAL_BLOCKED_ACTIONS
+    assert set(policy["completed_downstream_capabilities"]) == EXPECTED_DOWNSTREAM_CAPABILITIES
 
     blocked_items = {item["item"] for item in policy["blocked_until_future_wave"]}
-    assert "automatic patch application" in blocked_items
-    assert "merge authorization" in blocked_items
-    assert "TrajectoryStore / RepoMemory expansion" in blocked_items
-    assert "cloud, service, dashboard, or worker orchestration" in blocked_items
+    assert blocked_items == {
+        "broad automatic patch application",
+        "automatic merge authorization",
+        "automatic security remediation or dismissal",
+        "automatic release publication",
+        "hosted service or cloud infrastructure",
+    }
+    assert "TrajectoryStore / RepoMemory expansion" not in blocked_items
+    assert "cloud, service, dashboard, or worker orchestration" not in blocked_items
 
 
 def test_safety_gate_policy_matrix_markdown_matches_contract() -> None:
@@ -102,9 +122,12 @@ def test_safety_gate_policy_matrix_markdown_matches_contract() -> None:
 
     assert "SafetyGate policy matrix" in markdown
     assert "docs/contracts/safety-gate-policy-matrix.v1.json" in markdown
-    assert "automatic patch application" in markdown
+    assert "broad automatic patch application" in markdown
     assert "local repro command" in markdown
-    assert "merge authorization" in markdown
+    assert "automatic merge authorization" in markdown
+    assert "Cross-provider adoption and real-repository evidence" in markdown
 
+    for capability in policy["completed_downstream_capabilities"]:
+        assert f"`{capability}`" in markdown
     for row in policy["policy_by_failure_class"]:
         assert f"`{row['failure_class']}`" in markdown

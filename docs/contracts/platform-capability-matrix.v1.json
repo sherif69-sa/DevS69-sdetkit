@@ -1,0 +1,243 @@
+{
+  "active_repository_gaps": [
+    {
+      "exit_criteria": "Literal commands are source-grounded; dynamic configuration remains review-first.",
+      "gap_id": "circleci_proof_discovery",
+      "priority": "P1",
+      "review_first": true,
+      "suggested_owner_files": [
+        "src/sdetkit/adoption_surface",
+        "tests"
+      ],
+      "title": "Add conservative CircleCI proof-command discovery"
+    },
+    {
+      "exit_criteria": "Literal script tasks are classified without evaluating templates or variables.",
+      "gap_id": "azure_devops_proof_discovery",
+      "priority": "P2",
+      "review_first": true,
+      "suggested_owner_files": [
+        "src/sdetkit/adoption_surface",
+        "tests"
+      ],
+      "title": "Add conservative Azure DevOps proof-command discovery"
+    },
+    {
+      "exit_criteria": "Workspace-specific proof commands and failure ownership remain distinct and deterministic.",
+      "gap_id": "mixed_monorepo_vertical",
+      "priority": "P1",
+      "review_first": true,
+      "suggested_owner_files": [
+        "tests",
+        "docs"
+      ],
+      "title": "Prove a mixed-language monorepo operator vertical"
+    },
+    {
+      "exit_criteria": "Metrics use reviewed denominators and do not present predictions as proof.",
+      "gap_id": "real_repository_kpi_evidence",
+      "priority": "P1",
+      "review_first": true,
+      "suggested_owner_files": [
+        "src/sdetkit/adoption_learning_report.py",
+        "docs",
+        "tests"
+      ],
+      "title": "Publish reviewed real-repository product KPI evidence"
+    },
+    {
+      "exit_criteria": "A reversible PR-owned mechanical pattern passes benchmark, verifier, trajectory, and false-authority checks.",
+      "gap_id": "guarded_remediation_promotion",
+      "priority": "P2",
+      "review_first": true,
+      "suggested_owner_files": [
+        "src/sdetkit/safety_gate.py",
+        "src/sdetkit/protected_verifier.py",
+        "tests"
+      ],
+      "title": "Evaluate one narrow safe-remediation policy promotion"
+    }
+  ],
+  "authority_boundary": {
+    "automation_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "publication_authorized": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false
+  },
+  "capabilities": [
+    {
+      "authority": "diagnosis_only",
+      "capability_id": "failure_vector_engine",
+      "owner_files": [
+        "src/sdetkit/failure_vector.py",
+        "src/sdetkit/failure_vector_adapters.py"
+      ],
+      "proof_tests": [
+        "tests/test_failure_vector_extraction.py",
+        "tests/test_cross_ecosystem_failure_vector_adapters.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "FailureVector extraction and classification"
+    },
+    {
+      "authority": "eligibility_decision_only",
+      "capability_id": "safety_gate",
+      "owner_files": [
+        "src/sdetkit/safety_gate.py",
+        "docs/contracts/safety-gate-policy-matrix.v1.json"
+      ],
+      "proof_tests": [
+        "tests/test_safety_gate_policy_matrix.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Review-first safe-fix eligibility"
+    },
+    {
+      "authority": "memory_only",
+      "capability_id": "trajectory_store",
+      "owner_files": [
+        "src/sdetkit/trajectory_store.py"
+      ],
+      "proof_tests": [
+        "tests/test_trajectory_store.py",
+        "tests/test_trajectory_history_report.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "TrajectoryStore action-response-proof history"
+    },
+    {
+      "authority": "advisory_memory_only",
+      "capability_id": "repo_memory",
+      "owner_files": [
+        "src/sdetkit/repo_memory.py"
+      ],
+      "proof_tests": [
+        "tests/test_repo_memory.py",
+        "tests/test_trajectory_pattern_insights.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Repository-specific reviewed memory"
+    },
+    {
+      "authority": "evaluation_only",
+      "capability_id": "replayable_benchmark_harness",
+      "owner_files": [
+        "src/sdetkit/replayable_benchmark_harness.py"
+      ],
+      "proof_tests": [
+        "tests/test_replayable_benchmark_harness.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Replayable remediation benchmark"
+    },
+    {
+      "authority": "verification_only",
+      "capability_id": "protected_verifier",
+      "owner_files": [
+        "src/sdetkit/protected_verifier.py",
+        "src/sdetkit/protected_proof_chain.py"
+      ],
+      "proof_tests": [
+        "tests/test_protected_verifier.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "ProtectedVerifier scope and anti-cheat checks"
+    },
+    {
+      "authority": "scoring_only",
+      "capability_id": "patch_scorer",
+      "owner_files": [
+        "src/sdetkit/patch_scorer.py"
+      ],
+      "proof_tests": [
+        "tests/test_patch_scorer.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "PatchScorer repair quality evaluation"
+    },
+    {
+      "authority": "reporting_only",
+      "capability_id": "pr_reporting",
+      "owner_files": [
+        "src/sdetkit/pr_quality_action_report.py"
+      ],
+      "proof_tests": [
+        "tests/test_pr_quality_failure_vector_report.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "PR Quality diagnosis and next-action reporting"
+    },
+    {
+      "authority": "bounded_local_orchestration",
+      "capability_id": "local_diagnostic_queue",
+      "owner_files": [
+        "src/sdetkit/queued_diagnostic_worker.py",
+        "src/sdetkit/diagnostic_queue_runner_cli.py"
+      ],
+      "proof_tests": [
+        "tests/test_queued_diagnostic_worker.py",
+        "tests/test_diagnostic_queue_runner_e2e.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "File-backed local diagnostic queue and worker"
+    },
+    {
+      "authority": "reporting_only",
+      "capability_id": "merge_readiness",
+      "owner_files": [
+        "src/sdetkit/merge_readiness.py"
+      ],
+      "proof_tests": [
+        "tests/test_merge_readiness.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Exact-head required-check merge readiness"
+    },
+    {
+      "authority": "read_only_discovery_and_diagnosis",
+      "capability_id": "multi_ecosystem_adoption",
+      "owner_files": [
+        "src/sdetkit/adoption_surface",
+        "src/sdetkit/failure_vector_adapters.py"
+      ],
+      "proof_tests": [
+        "tests/test_rust_adoption_vertical.py",
+        "tests/test_java_adoption_vertical.py",
+        "tests/test_dotnet_adoption_vertical.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Read-only multi-ecosystem adoption-to-diagnosis verticals"
+    }
+  ],
+  "external_or_manual_blockers": [
+    {
+      "blocker_id": "release_1_1_0_trusted_publishing",
+      "owner_files": [
+        "docs/current-product-delta.md",
+        ".github/workflows/release.yml"
+      ],
+      "required_human_evidence": [
+        "protected GitHub pypi environment verified",
+        "matching PyPI Trusted Publisher verified",
+        "signed v1.1.0 tag created only after frozen-SHA qualification",
+        "public digest and clean-install verification completed"
+      ],
+      "status": "external_configuration_required",
+      "title": "Qualify and publish sdetkit 1.1.0"
+    }
+  ],
+  "intentionally_blocked": [
+    "broad automatic patch application",
+    "automatic dependency upgrades",
+    "automatic security remediation or dismissal",
+    "automatic release publication",
+    "automatic merge authorization",
+    "semantic-equivalence claims without independent proof",
+    "hosted service or cloud infrastructure without proven local demand"
+  ],
+  "product_stage": "local_first_reliability_platform",
+  "purpose": "Current machine-readable portfolio of implemented platform layers, active gaps, external blockers, and intentionally denied authority.",
+  "schema_version": "sdetkit.platform_capability_matrix.v1"
+}

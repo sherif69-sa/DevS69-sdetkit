@@ -2,7 +2,16 @@
 
 DevS69 SDETKit is an evidence-first release-confidence and repository-diagnosis layer for SDET, QA, DevOps, release, security, and platform teams.
 
-It does not replace test runners, CI providers, security scanners, dependency tools, or release systems. It reads their repository-owned evidence, connects the signals, explains the first meaningful failure, recommends exact proof commands, and preserves review-first boundaries when action is not proven safe.
+It does not replace test runners, CI providers, security scanners, dependency tools, or release systems. It reads repository-owned evidence, connects signals, explains the first meaningful failure, recommends exact proof commands, and preserves review-first boundaries whenever action is not proven safe.
+
+Machine-readable portfolio:
+
+- `docs/contracts/platform-capability-matrix.v1.json`
+
+Supporting policy checkpoints:
+
+- `docs/contracts/failure-vector-support-matrix.v1.json`
+- `docs/contracts/safety-gate-policy-matrix.v1.json`
 
 ## Product promise
 
@@ -12,17 +21,15 @@ For a repository an operator does not yet understand, SDETKit should answer:
 What kind of repository is this?
 Which proof commands and artifact contracts does it already own?
 What failed first, beneath wrapper noise?
-Which files or workflow surfaces most likely own the failure?
+Which files, workspace, or workflow surface owns the failure?
 What should a human run next?
 Which actions are explicitly blocked?
 What evidence should be retained for the next occurrence?
 ```
 
-The product should be ambitious in understanding and conservative in action.
+The product is ambitious in understanding and conservative in action.
 
 ## Stable public first path
-
-The public release-confidence path remains:
 
 ```bash
 python -m sdetkit gate fast
@@ -30,135 +37,124 @@ python -m sdetkit gate release
 python -m sdetkit doctor
 ```
 
-This path answers whether the current change is ready to ship and preserves machine-readable evidence.
-
-After the stable path is working, the read-only repository-doctor expansion begins with:
+The adoption and diagnosis path builds on that stable surface:
 
 ```bash
 python -m sdetkit adoption-surface \
   --root . \
   --out build/sdetkit/adoption-surface.json \
   --format report
+
+python -m sdetkit product-maturity-radar \
+  --root . \
+  --out build/sdetkit/product-maturity-radar.json \
+  --format text
 ```
 
-The adoption artifact should lead into saved-log diagnosis, FailureVector evidence, Doctor or PR Quality reporting, and trajectory learning. Recommended commands remain advisory until an operator runs them in a trusted environment.
+Recommended target-repository commands remain advisory until an operator runs them in a trusted environment.
 
-## End-to-end operator journey
+## Current platform architecture
 
-```text
-repository discovery
-→ evidence-backed proof-command recommendations
-→ saved local or CI failure evidence
-→ FailureVector extraction and classification
-→ SafetyGate and ProtectedVerifier review
-→ Doctor and PR Quality reporting
-→ trajectory and repo-memory learning
-```
-
-A product capability is not complete merely because a detector or parser exists. A complete vertical connects the operator journey from discovery to an actionable, review-first report.
-
-## Product architecture
-
-| Plane | Responsibility | Current product examples | Authority boundary |
+| Plane | Current responsibility | Implemented examples | Authority boundary |
 | --- | --- | --- | --- |
-| Evidence | Collect repository, CI, artifact, dependency, security, and release evidence. | Gate artifacts, adoption surface, failure bundles, manifests, provenance. | Evidence does not authorize mutation. |
-| Diagnosis | Extract the first meaningful failure, classify it, identify affected surfaces, and recommend proof. | FailureVector, cross-ecosystem adapters, CI failure summaries, owner hints. | Unknown or incomplete diagnosis remains review-first. |
-| Safety and verification | Evaluate scope and risk, protect proof integrity, and reject authority expansion or reward hacking. | SafetyGate, ProtectedVerifier, protected proof chain, benchmark rejection scenarios. | Patch, security-dismissal, merge, and semantic-equivalence authority remain false. |
-| Reporting | Present exact decisions, evidence, uncertainty, and next human actions. | Doctor report bundles, PR Quality comments, JSON and Markdown artifacts. | Reported predictions and recommendations are not proof. |
-| Learning | Record action, response, diagnosis, decision, proof, and outcome for future review. | TrajectoryStore, RepoMemory, benchmark and pattern reports. | Historical evidence informs review but does not authorize the current change. |
-| Adapters | Translate language, package-manager, CI-provider, and security-tool evidence into shared contracts. | Python, JavaScript/TypeScript, Go, Java, GitHub Actions, and GitLab CI support. | Target repositories are read-only learning targets by default. |
+| Evidence | Collect repository, CI, artifact, dependency, security, release, and exact-head evidence. | Gate artifacts, adoption surface, failure bundles, check intelligence, merge readiness. | Evidence does not authorize mutation. |
+| Diagnosis | Extract and classify the first meaningful failure and identify owner surfaces. | FailureVector, ecosystem adapters, diagnostic vectors, current-head failure bundles. | Unknown or incomplete diagnosis remains review-first. |
+| Safety | Decide eligibility and block unsafe categories or scope. | SafetyGate and policy matrix. | Eligibility is not patch authority. |
+| Verification | Independently validate scope, proof, and anti-cheat boundaries. | ProtectedVerifier, protected proof chain, replayable benchmark scenarios. | Verification does not authorize merge or publication. |
+| Reporting | Render exact status, evidence, uncertainty, and next human action. | Doctor, PR Quality, action reports, product maturity radar, merge readiness. | Predictions and recommendations are not proof. |
+| Learning | Record reviewed action-response-diagnosis-proof outcomes. | TrajectoryStore, RepoMemory, history and pattern reports. | History informs review; it does not authorize the current change. |
+| Orchestration | Run deterministic local jobs over file-backed artifacts. | Diagnostic queue runner and bounded local workers. | Local orchestration remains non-authorizing. |
+| Adapters | Translate ecosystems and CI providers into shared contracts. | Python, JavaScript/TypeScript, Go, Rust, Java, .NET, GitHub Actions, GitLab CI, Jenkins. | Target repositories stay read-only by default. |
 
-Local deterministic contracts remain the default architecture. Hosted services, distributed queues, or managed dashboards are later deployment choices, not prerequisites for product value.
+Hosted services, distributed queues, or managed dashboards are optional later deployment choices. They are not prerequisites for product value.
 
 ## Current implementation truth
 
-| Surface | Current truth on `main` | Important gap |
+| Capability | Current truth on `main` | Next improvement |
 | --- | --- | --- |
-| Release confidence | Canonical gate and Doctor path is implemented with machine-readable artifacts. | Public package remains `1.0.3`; repository candidate is `1.1.0`. |
-| Adoption discovery | Detects major language, package-manager, CI, security, docs, release, and artifact surfaces. | Provider and security depth is uneven across ecosystems. |
-| CI provider discovery | GitHub Actions and GitLab CI have actionable evidence paths; Jenkins is detected. | Jenkins literal proof commands are not yet extracted. |
-| Failure diagnosis | Python, JavaScript/TypeScript, Go, and Java saved-log adapters normalize into FailureVector evidence. | Rust `cargo test` and `cargo clippy` logs are not yet normalized. |
-| Rust discovery | `Cargo.toml` produces Rust and Cargo detection with a review-first `cargo test` recommendation. | Explicit cargo-audit evidence is not yet reported, and the complete Rust vertical is not proven. |
-| Safety | SafetyGate and ProtectedVerifier enforce reporting-only authority boundaries and anti-cheat checks. | Broad automatic patch application remains intentionally unavailable. |
-| Reporting | Doctor and PR Quality expose structured status, evidence, manifests, and next actions. | More external-repository verticals need public proof through these existing contracts. |
-| Learning | Trajectory, repo-memory, benchmark, and pattern surfaces exist. | Product KPIs need stronger evidence from repeated real-repository use. |
+| FailureVectorEngine | Implemented with shared extraction, classification, artifacts, and cross-ecosystem adapters. | Add evidence precision from more CI providers and mixed workspaces. |
+| SafetyGate | Implemented with narrow mechanical eligibility and review-first blocked classes. | Promote no new category without reviewed trajectory, benchmark, and verifier proof. |
+| TrajectoryStore and RepoMemory | Implemented with file-backed history, pattern, and reviewed learning surfaces. | Build reviewed real-repository denominators and usefulness KPIs. |
+| ReplayableBenchmarkHarness | Implemented with repair evaluation contracts. | Grow scenarios from real adopter failures and mixed repositories. |
+| ProtectedVerifier | Implemented with scope and anti-cheat checks. | Increase independence and evidence coverage before any remediation expansion. |
+| PatchScorer and PR reporting | Implemented with diagnosis, safety, proof, and next-action output. | Improve portfolio-level usefulness evidence. |
+| Local diagnostic queue | Implemented as deterministic file-backed orchestration. | Keep local; do not add hosted infrastructure without demand. |
+| Merge readiness | Implemented for exact-head required-check state and next owner action. | Compose it into broader operator evidence portfolios where useful. |
+| Ecosystem adoption | Complete review-first verticals exist across major language families. | Prove mixed-language monorepos and deepen provider coverage. |
+| Public release | Repository metadata is `1.1.0`; public package remains `1.0.3`. | External configuration required for Trusted Publishing and public verification. |
 
 The detailed release delta remains in [Current product delta](../current-product-delta.md).
 
-## Roadmap rule: release first, then expand vertically
+## Roadmap decision: converge, release, then deepen adoption
 
-The immediate product decision is:
+The active roadmap has three parallel lanes:
 
-1. keep `main` green and deterministic;
-2. publish the maintained product roadmap;
-3. qualify and publish the frozen 1.1.0 release without adding feature scope;
-4. begin the post-1.1 adoption wave with one complete Rust vertical;
-5. deepen CI-provider support through contributor-sized PRs;
-6. expand guarded remediation only after repeated safety evidence exists.
+1. **Repository truth convergence** — keep machine contracts and docs aligned with what is already implemented.
+2. **Release qualification** — complete the frozen 1.1.0 publication only after protected external settings and exact public proof are verified.
+3. **Post-candidate product expansion** — deepen provider and mixed-repository adoption without changing the frozen release candidate.
 
-This separates release completion from feature expansion and prevents the 1.1.0 candidate from becoming a moving target.
+The release lane may be externally blocked while repository-owned, additive, review-first adoption work continues. No new feature may be smuggled into the frozen 1.1.0 candidate.
 
 ## Executable PR ladder
 
-| Order | PR | Product value | Dependencies | Exit criteria |
-| ---: | --- | --- | --- | --- |
-| 1 | **Docs: publish the adoption-first product roadmap** ([#2014](https://github.com/sherif69-sa/DevS69-sdetkit/issues/2014)) | Gives maintainers and contributors one current product shape and an ordered execution plan. | Green `main`. | Roadmap and docs map are aligned; docs proof is green. |
-| 2 | **Release: qualify 1.1.0 artifacts and Trusted Publishing** ([#1928](https://github.com/sherif69-sa/DevS69-sdetkit/issues/1928)) | Converts the mature repository candidate into an independently verified public release. | External GitHub `pypi` environment and PyPI Trusted Publisher verification. | Frozen SHA, exact-wheel qualification, public install verification, provenance, and post-release evidence. |
-| 3 | **Diagnosis: add read-only Rust FailureVector adapters** ([#1937](https://github.com/sherif69-sa/DevS69-sdetkit/issues/1937)) | Extends saved-log diagnosis to `cargo test` and `cargo clippy` without executing target code. | 1.1.0 release completed or explicitly deferred without changing release scope. | Rust tool/class/path/exit-code evidence is fixture-tested; unknown output stays low-confidence and review-first. |
-| 4 | **Adoption: detect explicit cargo-audit security evidence** ([#1946](https://github.com/sherif69-sa/DevS69-sdetkit/issues/1946)) | Makes Rust security posture discoverable from repository-owned evidence. | Existing adoption-surface contract. | cargo-audit is reported only when explicit evidence exists; no install, execution, dismissal, or remediation. |
-| 5 | **Product proof: prove the Rust adoption-to-diagnosis vertical** ([#2045](https://github.com/sherif69-sa/DevS69-sdetkit/issues/2045)) | Demonstrates a complete external-repository journey through shared platform contracts. | #1937 and #1946. | Discovery, proof recommendation, saved-log FailureVector, Doctor/report evidence, safety boundaries, and public proof all pass together. |
-| 6 | **CI integration: extract Jenkins proof commands from declarative pipelines** ([#1945](https://github.com/sherif69-sa/DevS69-sdetkit/issues/1945)) | Turns Jenkins detection into conservative, actionable operator guidance. | Independent contributor lane; does not block the Rust vertical. | Literal commands are classified with source context; dynamic Groovy remains review-first. |
+| Order | PR slice | Product value | Exit criteria |
+| ---: | --- | --- | --- |
+| 1 | **Roadmap: converge platform capability contracts** | Stops future sessions from repeating completed layers or following obsolete issue ladders. | Capability portfolio, checkpoint contracts, roadmap, and strict docs agree; authority remains false. |
+| 2 | **Release: qualify and publish 1.1.0** | Closes the public package delta. | Protected GitHub `pypi` environment, matching PyPI Trusted Publisher, frozen-SHA artifact qualification, signed tag, provenance, digest verification, and clean public install are proven. This lane is `external configuration required`. |
+| 3 | **Adoption: add CircleCI proof-command discovery** | Extends CI-provider evidence using the existing adoption contract. | Literal commands and source context are extracted; orbs, parameters, and dynamic configuration remain review-first; no target execution. |
+| 4 | **Product proof: prove a mixed-language monorepo operator vertical** | Demonstrates workspace-specific discovery, failure ownership, and proof guidance in one realistic repository shape. | Each workspace keeps distinct commands, evidence, FailureVector ownership, Doctor/report output, and review-first boundaries. |
+| 5 | **Metrics: publish reviewed real-repository product KPI evidence** | Replaces implementation-count vanity metrics with operator usefulness and diagnosis precision evidence. | Reviewed denominators, false-positive accounting, exact source provenance, and no prediction-as-proof claims. |
+| 6 | **Adoption: add Azure DevOps proof-command discovery** | Adds another common enterprise CI surface after the provider contract is proven with CircleCI. | Literal script tasks are classified; templates, variables, and remote includes remain review-first. |
+| 7 | **Safety: evaluate one narrow remediation policy promotion** | Tests whether one reversible mechanical pattern is mature enough for bounded assistance. | PR-owned scope, repeated clean trajectories, no-op/oracle/unsafe benchmark scenarios, ProtectedVerifier proof, exact rollback, and zero false authority. No broad auto-fix. |
 
-Each PR must remain small enough to review and prove. Component PRs should not absorb the integration proof that belongs to the following vertical PR.
+Each slice must remain contributor-sized, independently reviewable, and separately proven. Completed components must be extended through their existing contracts rather than recreated under new names.
 
-## Definition of a complete ecosystem vertical
+## Definition of a complete provider or ecosystem vertical
 
-An ecosystem is product-ready only when the supported slice proves all applicable steps:
+A vertical is product-ready only when the supported slice proves all applicable steps:
 
 ```text
-language and package-manager discovery
-proof-command recommendation from repository evidence
-CI-provider or local source context
-saved failure-log normalization
-FailureVector class, tool, paths, and uncertainty
-SafetyGate / authority-boundary preservation
-Doctor or PR Quality report integration
-fixture-backed regression proof
-operator documentation or sanitized public proof
+language, workspace, package-manager, or CI-provider discovery
+→ source-grounded proof-command recommendation
+→ saved local or CI failure evidence
+→ FailureVector class, tool, path, workspace, and uncertainty
+→ SafetyGate decision and blocked authority
+→ ProtectedVerifier or scope/proof integrity evidence where applicable
+→ Doctor or PR Quality report integration
+→ trajectory or reviewed-learning record
+→ fixture-backed regression proof
+→ operator documentation or sanitized public proof
 ```
 
-A detected language without failure diagnosis is partial. A parser without adoption discovery is partial. A report without exact source evidence is partial.
+A detector without actionable evidence is partial. A parser without discovery is partial. A report without exact source evidence is partial. A green result reached by weakened gates is invalid.
 
 ## Release horizons
 
-### 1.1.0 — release-confidence and diagnosis foundation
+### 1.1.0 — frozen release-confidence and diagnosis foundation
 
-Goal: publish the current mature candidate with verified artifacts, provenance, and public installation.
+Goal: publish the current repository candidate with verified artifacts, provenance, and public installation.
 
-No new language or provider feature scope should be added to the frozen candidate.
+Rules:
 
-### 1.2.x — multi-ecosystem adoption verticals
+- no new language, provider, or remediation feature scope enters the candidate;
+- configuration is not proof;
+- the tag is not created or moved before frozen-SHA qualification;
+- release and publication remain human-owned.
 
-Goal: prove Rust end to end, then improve CI-provider depth and mixed-repository behavior using the same shared contracts.
+### 1.2.x — provider and mixed-repository depth
 
-Primary work:
+Goal: add CircleCI first, prove a mixed-language monorepo vertical, publish reviewed KPI evidence, then add Azure DevOps using the same shared contracts.
 
-- Rust FailureVector adapters;
-- explicit Rust security-surface discovery;
-- Rust adoption-to-diagnosis proof;
-- Jenkins proof-command extraction;
-- mixed-repository fixture and confidence improvements driven by real gaps.
+### Later — evidence-backed guarded remediation and enterprise deployment
 
-### Later — guarded remediation and enterprise integration
-
-Goal: promote only narrow, repeatedly proven patterns into bounded remediation policies and add integration depth where real adopters require it.
+Goal: promote only narrow, repeatedly proven mechanical patterns and add hosted deployment only when real adopters need it.
 
 Potential later work:
 
 - reviewed policy packs;
-- additional CI provider adapters;
+- additional CI-provider adapters such as Buildkite or CircleCI server variants;
 - private registry and enterprise artifact guidance;
-- higher-confidence safe candidates for formatting, import ordering, metadata alignment, or docs-link hygiene;
+- independently operated verifier infrastructure;
 - optional hosted reporting after local contracts and demand are proven.
 
 ## Product KPIs
@@ -169,7 +165,8 @@ The roadmap is measured by user trust and operator usefulness, not PR volume.
 public_release_delta
 adoption_surface_detection_coverage
 complete_ecosystem_vertical_count
-multi_language_fixture_coverage
+complete_ci_provider_vertical_count
+mixed_workspace_fixture_coverage
 first_failure_extraction_rate
 diagnosis_precision_rate
 proof_command_actionability_rate
@@ -179,53 +176,56 @@ unsafe_authority_rejection_rate
 safe_fix_false_authority_count
 operator_actionability_score
 external_repo_proof_count
+reviewed_trajectory_count
 open_source_contributor_time_to_first_proof
 ```
 
 Initial operating targets:
 
 - `safe_fix_false_authority_count = 0`;
-- `review_first_boundary_preservation_rate = 100%` for unknown, security, dependency, release, and public-API changes;
-- one complete external-repository vertical before adding another broad ecosystem family;
-- no public capability claim without a committed contract and fresh proof.
+- `review_first_boundary_preservation_rate = 100%` for unknown, security, dependency, release, merge-conflict, and public-API changes;
+- every new provider or ecosystem family has one complete vertical before another broad family begins;
+- no public capability claim without a committed contract and fresh proof;
+- no KPI without a reviewed denominator and source provenance.
 
 ## Selection rules for future PRs
 
 Choose work in this order:
 
 1. red-main, install, security, release, or required-check blockers;
-2. release qualification needed to close the public product delta;
-3. missing link in the active end-to-end ecosystem vertical;
-4. real adopter or contributor pain with a clear proof contract;
-5. provider or ecosystem depth that composes existing contracts;
-6. guarded remediation only when safety evidence supports promotion;
-7. polish that improves adoption without delaying higher-value work.
+2. stale roadmap or governance contracts that cause repeated or unsafe work;
+3. external release qualification when the required human settings are available;
+4. the missing link in the active provider or mixed-repository vertical;
+5. real adopter or contributor pain with a clear proof contract;
+6. reviewed KPI and learning evidence;
+7. guarded remediation only when safety evidence supports promotion;
+8. polish that improves adoption without delaying higher-value work.
 
-Generated tracker noise, stale reports, naming cleanup, and dependency chores remain valid only when they protect green main or strengthen product evidence.
+Generated tracker noise, naming cleanup, dependency chores, and formatting changes remain valid only when they protect green main or strengthen product evidence.
 
-## Non-goals for the next wave
+## Non-goals
 
 - a giant autonomous-agent rewrite;
-- cloud queues or databases before local contracts require them;
+- cloud queues or databases before local demand is proven;
 - broad automatic patch application;
 - automatic dependency upgrades;
 - automatic security remediation or dismissal;
-- automatic release or publish actions;
+- automatic release publication;
+- automatic merge authorization;
 - replacing existing CI, test, scanner, or release tools;
-- separate ecosystem schemas that bypass shared FailureVector, adoption, Doctor, verifier, or trajectory contracts.
+- provider-specific schemas that bypass shared adoption, FailureVector, SafetyGate, verifier, reporter, or trajectory contracts.
 
 ## Authority boundary
 
 The roadmap does not authorize automated patching, merging, publication, security dismissal, or semantic-equivalence claims.
 
-Unless a future independently verified policy explicitly changes the boundary, product artifacts must preserve:
-
 ```text
 automation_allowed=false
 patch_application_allowed=false
 security_dismissal_allowed=false
+publication_authorized=false
 merge_authorized=false
 semantic_equivalence_proven=false
 ```
 
-Human review owns security acceptance, release publication, product direction, and business tradeoffs.
+Human review owns security acceptance, release publication, product direction, policy promotion, and business tradeoffs.

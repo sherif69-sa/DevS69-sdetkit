@@ -1,21 +1,34 @@
 {
   "blocked_until_future_wave": [
     {
-      "item": "automatic patch application",
-      "reason": "SafetyGate can declare eligibility, but patch application remains outside this policy matrix."
+      "item": "broad automatic patch application",
+      "reason": "SafetyGate declares eligibility only; mutation remains blocked until a narrow pattern has repeated benchmark, verifier, trajectory, and rollback proof."
     },
     {
-      "item": "merge authorization",
+      "item": "automatic merge authorization",
       "reason": "SafetyGate decisions never authorize merging."
     },
     {
-      "item": "TrajectoryStore / RepoMemory expansion",
-      "reason": "Wave C starts only after SafetyGate policy contracts are stable."
+      "item": "automatic security remediation or dismissal",
+      "reason": "Security findings remain review-first without an explicitly reviewed and independently verified policy."
     },
     {
-      "item": "cloud, service, dashboard, or worker orchestration",
-      "reason": "Not allowed until local contracts prove value."
+      "item": "automatic release publication",
+      "reason": "Release and Trusted Publishing decisions remain human-owned protected operations."
+    },
+    {
+      "item": "hosted service or cloud infrastructure",
+      "reason": "Local file-backed orchestration is implemented; hosted deployment remains deferred until adoption demand is proven."
     }
+  ],
+  "completed_downstream_capabilities": [
+    "TrajectoryStore",
+    "RepoMemory",
+    "ReplayableBenchmarkHarness",
+    "ProtectedVerifier",
+    "PatchScorer",
+    "PRReporter",
+    "local diagnostic queue and worker"
   ],
   "depends_on": "docs/contracts/failure-vector-support-matrix.v1.json",
   "global_blocked_actions": [
@@ -24,6 +37,7 @@
     "edit workflow gates to hide the failure",
     "modify files outside allowed_files"
   ],
+  "next_lane_after_completion": "Cross-provider adoption and real-repository evidence",
   "policy_by_failure_class": [
     {
       "allowed_files_policy": "affected_files_only",
@@ -91,8 +105,8 @@
       ]
     }
   ],
-  "purpose": "Documents the SafetyGate policy that maps FailureVector classes to safe-fix or review-first outcomes.",
-  "roadmap_lane": "Wave B / SafetyGate policy expansion",
+  "purpose": "Documents the current SafetyGate policy and preserves narrow review-first eligibility without relisting implemented downstream platform layers as future work.",
+  "roadmap_lane": "Foundation / SafetyGate",
   "safe_fix_allowed_only_when": {
     "affected_files": "non_empty",
     "failure_class_in": [
