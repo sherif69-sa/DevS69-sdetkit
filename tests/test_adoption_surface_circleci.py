@@ -125,26 +125,23 @@ jobs:
     unknowns = set(payload["review_first_unknowns"])
 
     assert commands == {}
-    assert (
-        "CircleCI dynamic configuration detected; continuation behavior was not resolved"
-        in unknowns
-    )
-    assert "CircleCI orbs detected; orb behavior was not resolved" in unknowns
-    assert "CircleCI pipeline parameters detected; parameter values were not resolved" in unknowns
-    assert "CircleCI reusable commands detected; command bodies were not expanded" in unknowns
-    assert "CircleCI job build declares parameters that were not resolved" in unknowns
-    assert "CircleCI job build invokes orb step node/test; behavior was not resolved" in unknowns
-    assert (
-        "CircleCI job build invokes reusable command run-tests; behavior was not expanded"
-        in unknowns
-    )
-    assert "CircleCI job build invokes custom step custom-step; behavior was not resolved" in unknowns
-    assert "CircleCI job build has dynamic run content that was not guessed" in unknowns
-    assert (
-        "CircleCI job build step Environment command has dynamic run content that was not guessed"
-        in unknowns
-    )
-    assert "CircleCI job build step Multiline has multiline run content that was not guessed" in unknowns
+    expected_unknowns = {
+        "CircleCI dynamic configuration detected; continuation behavior was not resolved",
+        "CircleCI orbs detected; orb behavior was not resolved",
+        "CircleCI pipeline parameters detected; parameter values were not resolved",
+        "CircleCI reusable commands detected; command bodies were not expanded",
+        "CircleCI job build declares parameters that were not resolved",
+        "CircleCI job build invokes orb step node/test; behavior was not resolved",
+        "CircleCI job build invokes reusable command run-tests; behavior was not expanded",
+        "CircleCI job build invokes custom step custom-step; behavior was not resolved",
+        "CircleCI job build has dynamic run content that was not guessed",
+        (
+            "CircleCI job build step Environment command has dynamic run content "
+            "that was not guessed"
+        ),
+        "CircleCI job build step Multiline has multiline run content that was not guessed",
+    }
+    assert expected_unknowns <= unknowns
     assert payload["automation_allowed"] is False
     assert payload["patch_application_allowed"] is False
     assert payload["merge_authorized"] is False
@@ -159,11 +156,17 @@ def test_circleci_discovery_preserves_existing_ci_provider_behavior(tmp_path: Pa
     )
     _write(
         tmp_path / "Jenkinsfile",
-        "pipeline {\n  stages {\n    stage('Lint') {\n      steps {\n        sh 'ruff check .'\n      }\n    }\n  }\n}\n",
+        (
+            "pipeline {\n  stages {\n    stage('Lint') {\n      steps {\n"
+            "        sh 'ruff check .'\n      }\n    }\n  }\n}\n"
+        ),
     )
     _write(
         tmp_path / ".circleci" / "config.yml",
-        "version: 2.1\njobs:\n  types:\n    docker:\n      - image: cimg/base:stable\n    steps:\n      - run: mypy src\n",
+        (
+            "version: 2.1\njobs:\n  types:\n    docker:\n"
+            "      - image: cimg/base:stable\n    steps:\n      - run: mypy src\n"
+        ),
     )
 
     payload = discover_adoption_surface(tmp_path)
