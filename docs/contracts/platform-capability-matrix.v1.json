@@ -1,17 +1,6 @@
 {
   "active_repository_gaps": [
     {
-      "exit_criteria": "Literal commands are source-grounded; dynamic configuration remains review-first.",
-      "gap_id": "circleci_proof_discovery",
-      "priority": "P1",
-      "review_first": true,
-      "suggested_owner_files": [
-        "src/sdetkit/adoption_surface",
-        "tests"
-      ],
-      "title": "Add conservative CircleCI proof-command discovery"
-    },
-    {
       "exit_criteria": "Literal script tasks are classified without evaluating templates or variables.",
       "gap_id": "azure_devops_proof_discovery",
       "priority": "P2",
@@ -194,6 +183,19 @@
       ],
       "status": "implemented_and_tested",
       "title": "Exact-head required-check merge readiness"
+    },
+    {
+      "authority": "read_only_discovery_only",
+      "capability_id": "circleci_proof_discovery",
+      "owner_files": [
+        "src/sdetkit/adoption_surface/circleci.py",
+        "docs/integrations/circleci-proof-discovery.md"
+      ],
+      "proof_tests": [
+        "tests/test_adoption_surface_circleci.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Conservative CircleCI proof-command discovery"
     },
     {
       "authority": "read_only_discovery_and_diagnosis",
