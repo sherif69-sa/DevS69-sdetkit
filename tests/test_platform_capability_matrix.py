@@ -19,6 +19,7 @@ EXPECTED_CAPABILITIES = {
     "pr_reporting",
     "local_diagnostic_queue",
     "merge_readiness",
+    "circleci_proof_discovery",
     "multi_ecosystem_adoption",
 }
 
@@ -62,7 +63,6 @@ def test_platform_capability_matrix_separates_gaps_and_external_blockers() -> No
 
     gaps = {row["gap_id"]: row for row in payload["active_repository_gaps"]}
     assert {
-        "circleci_proof_discovery",
         "azure_devops_proof_discovery",
         "mixed_monorepo_vertical",
         "real_repository_kpi_evidence",
