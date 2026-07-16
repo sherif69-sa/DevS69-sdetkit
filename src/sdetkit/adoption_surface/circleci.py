@@ -22,9 +22,7 @@ _BUILTIN_STEPS = {
     "unless",
     "when",
 }
-_INLINE_FIELD_RE = re.compile(
-    r"(?:^|,)\s*(?P<key>[A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(?P<value>[^,}]+)"
-)
+_INLINE_FIELD_RE = re.compile(r"(?:^|,)\s*(?P<key>[A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(?P<value>[^,}]+)")
 
 
 def _indent(raw_line: str) -> int:
@@ -42,11 +40,7 @@ def _yaml_key(raw_line: str) -> tuple[str, str] | None:
 
 def _strip_scalar(value: str) -> str:
     normalized = value.strip()
-    if (
-        len(normalized) >= 2
-        and normalized[0] == normalized[-1]
-        and normalized[0] in {"'", '"'}
-    ):
+    if len(normalized) >= 2 and normalized[0] == normalized[-1] and normalized[0] in {"'", '"'}:
         return normalized[1:-1]
     return normalized
 
