@@ -1,6 +1,6 @@
 {
   "schema_version": "sdetkit.quality_truth_baseline.v1",
-  "generated_on": "2026-07-15",
+  "generated_on": "2026-07-17",
   "status": "staged_migration_visible",
   "coverage": {
     "critical_spine": {
@@ -35,9 +35,9 @@
     "blanket_package_suppression_present": true,
     "blanket_module_pattern": "sdetkit.*",
     "new_unrecorded_suppression_allowed": false,
-    "source_module_count": 509,
-    "typing_debt_module_count": 486,
-    "typing_debt_inventory_sha256": "13994dc80de2613e43b325a5cf39b6f22d0cff18c4ac8d4047ed99f57f20609a",
+    "source_module_count": 510,
+    "typing_debt_module_count": 487,
+    "typing_debt_inventory_sha256": "19c733747317a3bf1e439ff1bb27b6539e1224d1bdc5ff7df39de4a62f100707",
     "typing_debt_artifact_path": "build/quality/typing-debt-inventory.json",
     "explicitly_type_checked_modules": [
       "sdetkit._pr_quality_required_terminal_checks",
