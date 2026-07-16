@@ -5,7 +5,9 @@ from pathlib import Path
 
 MATRIX_PATH = Path("docs/contracts/platform-capability-matrix.v1.json")
 ROADMAP_PATH = Path("docs/roadmap/product-roadmap.md")
-FAILURE_VECTOR_MATRIX_PATH = Path("docs/contracts/failure-vector-support-matrix.v1.json")
+FAILURE_VECTOR_MATRIX_PATH = Path(
+    "docs/contracts/failure-vector-support-matrix.v1.json"
+)
 SAFETY_GATE_MATRIX_PATH = Path("docs/contracts/safety-gate-policy-matrix.v1.json")
 
 EXPECTED_CAPABILITIES = {
@@ -77,7 +79,9 @@ def test_platform_capability_matrix_separates_gaps_and_external_blockers() -> No
     }
     release = blockers["release_1_1_0_trusted_publishing"]
     assert release["status"] == "external_configuration_required"
-    assert "matching PyPI Trusted Publisher verified" in release["required_human_evidence"]
+    assert (
+        "matching PyPI Trusted Publisher verified" in release["required_human_evidence"]
+    )
     assert Path("docs/current-product-delta.md") in {
         Path(path) for path in release["owner_files"]
     }
