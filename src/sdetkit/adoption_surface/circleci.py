@@ -42,7 +42,11 @@ def _yaml_key(raw_line: str) -> tuple[str, str] | None:
 
 def _strip_scalar(value: str) -> str:
     normalized = value.strip()
-    if len(normalized) >= 2 and normalized[0] == normalized[-1] and normalized[0] in {"'", '"'}:
+    if (
+        len(normalized) >= 2
+        and normalized[0] == normalized[-1]
+        and normalized[0] in {"'", '"'}
+    ):
         return normalized[1:-1]
     return normalized
 
@@ -161,13 +165,19 @@ def _extract_config(path: Path, relative: str) -> tuple[list[dict[str, Any]], li
             current_job = ""
             in_steps = False
             if section == "setup" and value.lower() == "true":
-                unknowns.add("CircleCI dynamic configuration detected; continuation behavior was not resolved")
+                unknowns.add(
+                    "CircleCI dynamic configuration detected; continuation behavior was not resolved"
+                )
             elif section == "orbs":
                 unknowns.add("CircleCI orbs detected; orb behavior was not resolved")
             elif section == "commands":
-                unknowns.add("CircleCI reusable commands detected; command bodies were not expanded")
+                unknowns.add(
+                    "CircleCI reusable commands detected; command bodies were not expanded"
+                )
             elif section == "parameters":
-                unknowns.add("CircleCI pipeline parameters detected; parameter values were not resolved")
+                unknowns.add(
+                    "CircleCI pipeline parameters detected; parameter values were not resolved"
+                )
             continue
 
         if section != "jobs":
@@ -200,15 +210,18 @@ def _extract_config(path: Path, relative: str) -> tuple[list[dict[str, Any]], li
                 step_name = step
                 if step_name in declared_commands:
                     unknowns.add(
-                        f"CircleCI job {current_job} invokes reusable command {step_name}; behavior was not expanded"
+                        f"CircleCI job {current_job} invokes reusable command {step_name}; "
+                        "behavior was not expanded"
                     )
                 elif "/" in step_name:
                     unknowns.add(
-                        f"CircleCI job {current_job} invokes orb step {step_name}; behavior was not resolved"
+                        f"CircleCI job {current_job} invokes orb step {step_name}; "
+                        "behavior was not resolved"
                     )
                 elif step_name not in _BUILTIN_STEPS:
                     unknowns.add(
-                        f"CircleCI job {current_job} invokes custom step {step_name}; behavior was not resolved"
+                        f"CircleCI job {current_job} invokes custom step {step_name}; "
+                        "behavior was not resolved"
                     )
                 continue
 
@@ -216,15 +229,18 @@ def _extract_config(path: Path, relative: str) -> tuple[list[dict[str, Any]], li
             if step_key != "run":
                 if step_key in declared_commands:
                     unknowns.add(
-                        f"CircleCI job {current_job} invokes reusable command {step_key}; behavior was not expanded"
+                        f"CircleCI job {current_job} invokes reusable command {step_key}; "
+                        "behavior was not expanded"
                     )
                 elif "/" in step_key:
                     unknowns.add(
-                        f"CircleCI job {current_job} invokes orb step {step_key}; behavior was not resolved"
+                        f"CircleCI job {current_job} invokes orb step {step_key}; "
+                        "behavior was not resolved"
                     )
                 elif step_key not in _BUILTIN_STEPS:
                     unknowns.add(
-                        f"CircleCI job {current_job} invokes custom step {step_key}; behavior was not resolved"
+                        f"CircleCI job {current_job} invokes custom step {step_key}; "
+                        "behavior was not resolved"
                     )
                 continue
 
