@@ -42,10 +42,7 @@ def test_failure_vector_support_matrix_contract_is_complete() -> None:
     classes = {row["failure_class"] for row in rows}
 
     assert classes == EXPECTED_CLASSES
-    assert (
-        set(payload["completed_downstream_capabilities"])
-        == EXPECTED_DOWNSTREAM_CAPABILITIES
-    )
+    assert set(payload["completed_downstream_capabilities"]) == EXPECTED_DOWNSTREAM_CAPABILITIES
     for row in rows:
         assert row["default_risk"] in {"low", "medium", "high"}
         assert row["review_policy"]
