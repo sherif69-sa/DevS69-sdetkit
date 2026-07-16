@@ -1,12 +1,13 @@
 # FailureVector support matrix
 
-This page is the Wave A checkpoint for the FailureVectorEngine.
+This page is the maintained foundation checkpoint for the FailureVectorEngine.
 
-It records which failure classes are currently supported, how they should be treated, and what must not be repeated in later PRs.
+It records which failure classes are supported, how they should be treated, which downstream platform layers are already implemented, and which authority remains intentionally denied.
 
-Contract file:
+Contract files:
 
 - `docs/contracts/failure-vector-support-matrix.v1.json`
+- `docs/contracts/platform-capability-matrix.v1.json`
 
 ## Supported failure classes
 
@@ -20,43 +21,49 @@ Contract file:
 | `merge_conflict` | `high` | `False` | `review_first` | CONFLICT line or merge conflict signal |
 | `unknown` | `high` | `False` | `review_first` | first meaningful wrapper line, not generic exit-code fallback |
 
-## Roadmap boundary
+## Current downstream platform truth
 
-Wave A is about extraction and artifact evidence.
+The following layers are already present on `main` and must not be repeatedly scheduled as unopened roadmap waves:
 
-After this matrix is green:
+- `SafetyGate`
+- `TrajectoryStore`
+- `RepoMemory`
+- `ReplayableBenchmarkHarness`
+- `ProtectedVerifier`
+- `PatchScorer`
+- `PRReporter`
+- `local diagnostic queue and worker`
 
-1. Finish any missing FailureVector documentation/indexing only if it is directly related to this support matrix.
-2. Move to Wave B: SafetyGate policy expansion.
-3. Do not start TrajectoryStore, ReplayableBenchmarkHarness, ProtectedVerifier, PRReporter, JobQueue, cloud, service, or dashboard work until their roadmap waves are reached.
+The next lane is **Cross-provider adoption and real-repository evidence**. The platform should now deepen provider coverage, prove mixed-repository journeys, and collect reviewed product KPIs using the existing shared contracts.
 
-## Non-loop rule
+## Intentionally blocked authority
 
-Do not repeat completed work:
+Implemented diagnosis and verification layers do not authorize mutation. The following remain blocked:
 
-- dependency resolver classification is already covered.
-- unknown wrapper first meaningful line extraction is already covered.
-- CLI JSON/Markdown artifact coverage is already covered.
-- workflow permission evidence lane is already complete.
+- broad automatic patch application;
+- automatic merge authorization;
+- hosted service or cloud infrastructure without proven local demand.
 
+A `safe_fix_candidate` value is eligibility evidence only. It is not patch, merge, publication, security-dismissal, or semantic-equivalence authority.
+
+## Do not repeat completed work
+
+- FailureVector extraction and artifact contracts are established.
+- SafetyGate policy is established.
+- Trajectory and repository memory are established.
+- Replayable benchmark and verifier layers are established.
+- PR reporting and file-backed local worker orchestration are established.
+- Dependency resolver classification and unknown-wrapper first-failure extraction are covered.
+
+New PRs should extend current adoption or evidence gaps rather than recreate these components under new names.
 
 ## Exact-failure evidence quality and remediation eligibility
 
-The PR Quality check-intelligence path emits one canonical `first_failure` object.
-Its `evidence_quality` block is reporting-only and contains:
+The PR Quality check-intelligence path emits one canonical `first_failure` object. Its `evidence_quality` block is reporting-only and contains:
 
 - `confidence`: `high`, `medium`, or `low`;
 - `source`: the structured evidence source used to select the failure;
 - `actionable`: whether the evidence identifies a concrete operator starting point;
 - `uncertainty`: bounded reasons the evidence must remain review-first.
 
-Safe-remediation eligibility consumes that same object. Formatting-only evidence is
-a candidate only when the exact failure is high-confidence, actionable, has no
-unresolved uncertainty, and references approved repository-owned paths. Candidate
-status never means that automation, immediate auto-fix, patch application, merge,
-security dismissal, or semantic equivalence is authorized.
-
-The SDET Quality Gate PR comment renders the exact-failure evidence quality,
-remediation category and strategy, affected files, proof commands, and denied
-authority boundaries so contributors can distinguish a mechanical candidate from
-an approved mutation.
+Safe-remediation eligibility consumes that same object. Formatting-only evidence is a candidate only when the exact failure is high-confidence, actionable, has no unresolved uncertainty, and references approved repository-owned paths. Candidate status never means that automation, immediate auto-fix, patch application, merge, security dismissal, publication, or semantic equivalence is authorized.
