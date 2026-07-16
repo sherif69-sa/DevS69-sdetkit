@@ -11,9 +11,7 @@ from sdetkit.safety_gate import (
 )
 
 POLICY_PATH = Path("docs/contracts/safety-gate-policy-matrix.v1.json")
-FAILURE_VECTOR_MATRIX_PATH = Path(
-    "docs/contracts/failure-vector-support-matrix.v1.json"
-)
+FAILURE_VECTOR_MATRIX_PATH = Path("docs/contracts/failure-vector-support-matrix.v1.json")
 DOC_PATH = Path("docs/safety-gate-policy-matrix.md")
 
 EXPECTED_DOWNSTREAM_CAPABILITIES = {
@@ -34,9 +32,7 @@ class MinimalFailureVector:
     scope: str = "pr_owned_only"
     safe_fix_candidate: bool = True
     affected_files: tuple[str, ...] = ("tests/test_widget.py",)
-    local_repro_command: str | None = (
-        "python -m ruff format --check tests/test_widget.py"
-    )
+    local_repro_command: str | None = "python -m ruff format --check tests/test_widget.py"
 
 
 def _load_policy() -> dict[str, object]:
@@ -45,14 +41,11 @@ def _load_policy() -> dict[str, object]:
 
 def test_safety_gate_policy_matrix_matches_failure_vector_support_matrix() -> None:
     policy = _load_policy()
-    failure_vector_matrix = json.loads(
-        FAILURE_VECTOR_MATRIX_PATH.read_text(encoding="utf-8")
-    )
+    failure_vector_matrix = json.loads(FAILURE_VECTOR_MATRIX_PATH.read_text(encoding="utf-8"))
 
     policy_classes = {row["failure_class"] for row in policy["policy_by_failure_class"]}
     supported_classes = {
-        row["failure_class"]
-        for row in failure_vector_matrix["supported_failure_classes"]
+        row["failure_class"] for row in failure_vector_matrix["supported_failure_classes"]
     }
 
     assert policy["schema_version"] == "sdetkit.safety_gate.policy_matrix.v1"
@@ -89,8 +82,7 @@ def test_safety_gate_policy_matrix_matches_current_safe_fix_classes() -> None:
 def test_safety_gate_policy_matrix_matches_runtime_decisions() -> None:
     policy = _load_policy()
     rows = {
-        row["failure_class"]: row["default_decision"]
-        for row in policy["policy_by_failure_class"]
+        row["failure_class"]: row["default_decision"] for row in policy["policy_by_failure_class"]
     }
 
     for failure_class, default_decision in rows.items():
@@ -110,10 +102,7 @@ def test_safety_gate_policy_matrix_keeps_global_blocked_actions_aligned() -> Non
     policy = _load_policy()
 
     assert tuple(policy["global_blocked_actions"]) == GENERAL_BLOCKED_ACTIONS
-    assert (
-        set(policy["completed_downstream_capabilities"])
-        == EXPECTED_DOWNSTREAM_CAPABILITIES
-    )
+    assert set(policy["completed_downstream_capabilities"]) == EXPECTED_DOWNSTREAM_CAPABILITIES
 
     blocked_items = {item["item"] for item in policy["blocked_until_future_wave"]}
     assert blocked_items == {
