@@ -9,6 +9,7 @@ from typing import Any
 
 from sdetkit.adoption_surface import _base
 from sdetkit.adoption_surface import core as _core
+from sdetkit.adoption_surface.circleci import extend_circleci
 from sdetkit.adoption_surface.java_security import extend_java_dependency_security
 from sdetkit.adoption_surface.java_workspaces import (
     extend_dotnet_workspaces,
@@ -82,6 +83,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     payload = _base.discover_adoption_surface(root)
     _refine_python_src_evidence(payload, root)
+    extend_circleci(payload, root)
     extend_javascript_package_security(payload, root)
     extend_nested_java_workspaces(payload, root)
     extend_java_dependency_security(payload, root)
@@ -89,6 +91,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
 
     for field in ("detected_languages", "package_managers", "test_runners", "security_tools"):
         payload[field] = sorted(payload[field], key=lambda item: item["name"])
+    payload["ci_systems"] = sorted(payload["ci_systems"], key=lambda item: item["name"])
     payload["recommended_proof_commands"] = sorted(
         payload["recommended_proof_commands"], key=_base._proof_sort_key
     )
