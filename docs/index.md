@@ -58,7 +58,7 @@ Use [First failure triage](first-failure-triage.md) for the shortest operator pa
 
 The [public launch proof](public-launch-proof.md) shows a realistic saved pytest failure reduced to its first failing node, owning file, focused proof command, and review-first decision. It also profiles a fixture-based Python, JavaScript/TypeScript, and Go repository without dependency installation, target-code execution, target mutation, or merge authorization.
 
-The artifacts are reproducible, tied to an immutable source SHA, accessible as text, and marked **main-only until the qualified 1.1.0 release**.
+The artifacts are reproducible, tied to an immutable source SHA, accessible as text, and marked **main-only until the qualified 1.2.0 release**.
 
 ## Fast start
 
