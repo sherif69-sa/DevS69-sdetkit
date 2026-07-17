@@ -24,15 +24,16 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
 
     assert payload["ok"] is True, payload["mismatches"]
     assert all(payload["checks"].values())
-    assert payload["observed"]["source_module_count"] == 513
+    assert payload["observed"]["source_module_count"] == 514
     assert payload["observed"]["typing_debt_module_count"] == 487
     checked = payload["observed"]["explicitly_type_checked_modules"]
-    assert len(checked) == 26
+    assert len(checked) == 27
     assert "sdetkit.adoption_surface.cpp" in checked
     assert "sdetkit.adoption_surface.cpp_quality_security" in checked
     assert "sdetkit.adoption_surface.java_security" in checked
     assert "sdetkit.adoption_surface.javascript_security" in checked
     assert "sdetkit.adoption_surface.jenkins" in checked
+    assert "sdetkit.cpp_operator_proof" in checked
     assert "sdetkit.failure_vector_cpp" in checked
     assert "sdetkit.merge_readiness" in checked
     inventory = payload["typing_debt_inventory"]
@@ -43,6 +44,7 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     assert "sdetkit.adoption_surface.java_security" not in inventory["modules"]
     assert "sdetkit.adoption_surface.javascript_security" not in inventory["modules"]
     assert "sdetkit.adoption_surface.jenkins" not in inventory["modules"]
+    assert "sdetkit.cpp_operator_proof" not in inventory["modules"]
     assert "sdetkit.failure_vector_cpp" not in inventory["modules"]
     assert "sdetkit.merge_readiness" not in inventory["modules"]
 
@@ -62,7 +64,7 @@ def test_quality_truth_baseline_reports_machine_readable_mismatches(tmp_path: Pa
             "check": "source_module_count_matches",
             "metric": "source_module_count",
             "expected": 0,
-            "actual": 513,
+            "actual": 514,
         }
     ]
 
