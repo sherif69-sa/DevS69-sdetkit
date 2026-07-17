@@ -140,6 +140,10 @@ module = [
 ignore_errors = false
 
 [[tool.mypy.overrides]]
+module = "sdetkit.workspace_failure_ownership"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
 module = "sdetkit.cpp_operator_proof"
 ignore_errors = false
 
