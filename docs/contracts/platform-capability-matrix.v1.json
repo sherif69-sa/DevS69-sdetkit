@@ -1,14 +1,6 @@
 {
   "active_repository_gaps": [
     {
-      "exit_criteria": "A fixture-backed C++ repository composes discovery, advisory commands, saved failure normalization, FailureVector, SafetyGate, ProtectedVerifier, operator reporting, and reviewed learning evidence without expanding authority.",
-      "gap_id": "cpp_complete_operator_proof",
-      "priority": "P1",
-      "review_first": true,
-      "suggested_owner_files": ["tests", "docs", "src/sdetkit"],
-      "title": "Prove the complete C++ adoption-to-diagnosis operator vertical"
-    },
-    {
       "exit_criteria": "Literal script tasks are classified without evaluating templates or variables.",
       "gap_id": "azure_devops_proof_discovery",
       "priority": "P2",
@@ -161,6 +153,14 @@
       "proof_tests": ["tests/test_adoption_surface_cpp_quality_security.py"],
       "status": "implemented_and_tested",
       "title": "Explicit C++ quality and security evidence"
+    },
+    {
+      "authority": "read_only_composed_operator_proof",
+      "capability_id": "cpp_complete_operator_proof",
+      "owner_files": ["src/sdetkit/cpp_operator_proof.py", "docs/cpp-adoption-to-diagnosis-proof.md"],
+      "proof_tests": ["tests/test_cpp_operator_proof.py"],
+      "status": "implemented_and_tested",
+      "title": "Complete C++ adoption-to-diagnosis operator proof"
     },
     {
       "authority": "read_only_discovery_and_diagnosis",
