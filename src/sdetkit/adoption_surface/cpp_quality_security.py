@@ -72,7 +72,9 @@ def _has_cpp(payload: dict[str, Any]) -> bool:
     languages = payload.get("detected_languages")
     if not isinstance(languages, list):
         return False
-    return any(isinstance(item, dict) and item.get("name") == "cpp" for item in languages)
+    return any(
+        isinstance(item, dict) and item.get("name") == "cpp" for item in languages
+    )
 
 
 def _active_lines(text: str) -> list[str]:
@@ -113,7 +115,9 @@ def _strip_command_suffix(command: str) -> str:
 
 
 def _is_dynamic_or_composite(command: str) -> bool:
-    return _core._command_is_dynamic(command) or any(token in command for token in _DYNAMIC_TOKENS)
+    return _core._command_is_dynamic(command) or any(
+        token in command for token in _DYNAMIC_TOKENS
+    )
 
 
 def _config_is_dynamic(value: str) -> bool:
@@ -188,7 +192,9 @@ def _iter_string_values(value: object) -> list[str]:
     return []
 
 
-def _preset_evidence(root: Path, path: str) -> tuple[set[str], set[str], bool, list[str]]:
+def _preset_evidence(
+    root: Path, path: str
+) -> tuple[set[str], set[str], bool, list[str]]:
     document = _core._read_json(root, path)
     if not document:
         return set(), set(), False, []
@@ -218,8 +224,7 @@ def _preset_evidence(root: Path, path: str) -> tuple[set[str], set[str], bool, l
                     tools.add("clang_tidy")
                 else:
                     unknowns.append(
-                        f"C++ clang-tidy configuration in {path} is dynamic or unresolved "
-                        "and was not guessed"
+                        f"C++ clang-tidy configuration in {path} is dynamic or unresolved and was not guessed"
                     )
             if key == "CMAKE_EXPORT_COMPILE_COMMANDS" and _truthy(raw_value):
                 compile_database = True
@@ -237,7 +242,9 @@ def _preset_evidence(root: Path, path: str) -> tuple[set[str], set[str], bool, l
     return tools, sanitizers, compile_database, unknowns
 
 
-def _text_config_evidence(path: str, text: str) -> tuple[set[str], set[str], bool, bool]:
+def _text_config_evidence(
+    path: str, text: str
+) -> tuple[set[str], set[str], bool, bool]:
     active = "\n".join(_active_lines(text))
     tools: set[str] = set()
     if Path(path).name == ".clang-tidy":
@@ -301,7 +308,9 @@ def _working_directory(path: str, workspaces: dict[str, list[str]]) -> str:
     return _cpp._workspace_for_source(path, workspaces)
 
 
-def _merge_security_tool(payload: dict[str, Any], name: str, evidence: list[str]) -> None:
+def _merge_security_tool(
+    payload: dict[str, Any], name: str, evidence: list[str]
+) -> None:
     _base._merge_named_list(
         payload["security_tools"],
         name,
@@ -311,7 +320,9 @@ def _merge_security_tool(payload: dict[str, Any], name: str, evidence: list[str]
     )
 
 
-def _merge_artifact_surface(payload: dict[str, Any], name: str, paths: list[str]) -> None:
+def _merge_artifact_surface(
+    payload: dict[str, Any], name: str, paths: list[str]
+) -> None:
     _base._merge_named_list(
         payload["artifact_surfaces"],
         name,
@@ -330,8 +341,8 @@ def _add_proof_command(
     working_directory: str,
 ) -> None:
     for existing in payload["recommended_proof_commands"]:
-        source = existing.get("source")
-        source_payload = source if isinstance(source, dict) else {}
+        existing_source = existing.get("source")
+        source_payload = existing_source if isinstance(existing_source, dict) else {}
         if (
             existing.get("surface") == "cpp"
             and existing.get("command") == command
@@ -407,8 +418,7 @@ def _command_evidence(
             if sanitizer_tools:
                 if _is_dynamic_or_composite(active):
                     unknowns.append(
-                        f"C++ sanitizer configuration in {path} is dynamic or composite "
-                        "and was not guessed"
+                        f"C++ sanitizer configuration in {path} is dynamic or composite and was not guessed"
                     )
                 else:
                     for tool in sanitizer_tools:
@@ -454,12 +464,13 @@ def _codeql_cpp_workflows(root: Path) -> tuple[list[str], list[str]]:
             for line in active_lines
             if line.lstrip("- ").lower().startswith("languages:") and ":" in line
         ]
-        if any("c-cpp" in value.lower() and "${{" not in value for value in language_values):
+        if any(
+            "c-cpp" in value.lower() and "${{" not in value for value in language_values
+        ):
             evidence.append(path)
         elif language_values:
             unknowns.append(
-                f"CodeQL workflow {path} uses dynamic or non-C/C++ language evidence "
-                "and was not claimed as C++"
+                f"CodeQL workflow {path} uses dynamic or non-C/C++ language evidence and was not claimed as C++"
             )
     return sorted(set(evidence)), sorted(set(unknowns))
 
@@ -485,7 +496,9 @@ def extend_cpp_quality_security(payload: dict[str, Any], root: Path) -> None:
 
     for path in sorted(config_files):
         if Path(path).name == "CMakePresets.json":
-            tools, sanitizers, compile_database, preset_unknowns = _preset_evidence(root, path)
+            tools, sanitizers, compile_database, preset_unknowns = _preset_evidence(
+                root, path
+            )
             for tool in tools:
                 tool_evidence.setdefault(tool, set()).add(path)
             for tool in sanitizers:
@@ -495,9 +508,11 @@ def extend_cpp_quality_security(payload: dict[str, Any], root: Path) -> None:
             unknowns.extend(preset_unknowns)
             continue
 
-        tools, sanitizers, compile_database, clang_format_config = _text_config_evidence(
-            path,
-            _core._read_text(root, path),
+        tools, sanitizers, compile_database, clang_format_config = (
+            _text_config_evidence(
+                path,
+                _core._read_text(root, path),
+            )
         )
         for tool in tools:
             tool_evidence.setdefault(tool, set()).add(path)
@@ -533,7 +548,9 @@ def extend_cpp_quality_security(payload: dict[str, Any], root: Path) -> None:
     unknowns.extend(codeql_unknowns)
 
     for tool in sorted(set(tool_evidence) | set(sanitizer_evidence)):
-        combined = set(tool_evidence.get(tool, set())) | set(sanitizer_evidence.get(tool, set()))
+        combined = set(tool_evidence.get(tool, set())) | set(
+            sanitizer_evidence.get(tool, set())
+        )
         if combined:
             _merge_security_tool(payload, tool, sorted(combined))
 
