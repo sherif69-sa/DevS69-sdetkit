@@ -9,14 +9,6 @@
       "title": "Add conservative Azure DevOps proof-command discovery"
     },
     {
-      "exit_criteria": "Workspace-specific proof commands and failure ownership remain distinct and deterministic.",
-      "gap_id": "mixed_monorepo_vertical",
-      "priority": "P1",
-      "review_first": true,
-      "suggested_owner_files": ["tests", "docs"],
-      "title": "Prove a mixed-language monorepo operator vertical"
-    },
-    {
       "exit_criteria": "Metrics use reviewed denominators and do not present predictions as proof.",
       "gap_id": "real_repository_kpi_evidence",
       "priority": "P1",
@@ -169,6 +161,14 @@
       "proof_tests": ["tests/test_rust_adoption_vertical.py", "tests/test_java_adoption_vertical.py", "tests/test_dotnet_adoption_vertical.py"],
       "status": "implemented_and_tested",
       "title": "Read-only multi-ecosystem adoption-to-diagnosis verticals"
+    },
+    {
+      "authority": "read_only_composed_operator_proof",
+      "capability_id": "mixed_monorepo_operator_proof",
+      "owner_files": ["src/sdetkit/mixed_monorepo_operator_proof.py", "docs/mixed-monorepo-adoption-to-diagnosis-proof.md"],
+      "proof_tests": ["tests/test_mixed_monorepo_operator_proof.py"],
+      "status": "implemented_and_tested",
+      "title": "Complete mixed-language monorepo operator proof"
     }
   ],
   "external_or_manual_blockers": [
