@@ -151,8 +151,7 @@ def _trajectory(workspace_bundle: Mapping[str, Any]) -> JsonObject:
         if _mapping(item)
     ]
     workspaces = Counter(
-        _text(_mapping(item.get("workspace_identity")).get("path")) or "unknown"
-        for item in entries
+        _text(_mapping(item.get("workspace_identity")).get("path")) or "unknown" for item in entries
     )
     kinds = Counter(
         _text(_mapping(item.get("failure_vector")).get("failure_class")) or "unknown"
@@ -267,23 +266,21 @@ def _verify(payload: Mapping[str, Any]) -> JsonObject:
         if _mapping(item)
     ]
     owners = [
-        _text(_mapping(item.get("workspace_identity")).get("path")) or "unknown"
-        for item in entries
+        _text(_mapping(item.get("workspace_identity")).get("path")) or "unknown" for item in entries
     ]
     root_python = any(
-        _text(item.get("surface")) == "python"
-        and not _text(_source(item).get("working_directory"))
+        _text(item.get("surface")) == "python" and not _text(_source(item).get("working_directory"))
         for item in commands
     )
     no_ignored_owner = all(
-        not any(part.lower() in _IGNORED_PARTS for part in Path(_text(_source(item).get("file"))).parts)
+        not any(
+            part.lower() in _IGNORED_PARTS for part in Path(_text(_source(item).get("file"))).parts
+        )
         for item in commands
     )
     protected_review_first = all(
         _truth(
-            _mapping(_mapping(item.get("protected_verifier")).get("decision")).get(
-                "review_first"
-            )
+            _mapping(_mapping(item.get("protected_verifier")).get("decision")).get("review_first")
         )
         for item in entries
     )
