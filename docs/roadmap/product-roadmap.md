@@ -109,7 +109,7 @@ The roadmap must not reopen these accepted lanes unless current evidence proves 
 | Protected diagnosis and proof spine | FailureVectorEngine, SafetyGate, TrajectoryStore, RepoMemory, ReplayableBenchmarkHarness, ProtectedVerifier, PatchScorer, PRReporter, and local JobQueue contracts are connected. |
 | Rust vertical | Rust saved-failure adapters, explicit cargo-audit discovery, and a complete adoption-to-diagnosis proof are complete. |
 | Jenkins command discovery | Conservative literal declarative-pipeline shell-command extraction is complete; dynamic Groovy remains review-first. |
-| CircleCI command discovery | Literal repository-owned `run` commands preserve config, job, and optional step context; orbs, parameters, reusable commands, interpolation, multiline content, execution, and mutation remain review-first or blocked. |
+| CircleCI proof-command discovery | Literal repository-owned `run` commands preserve config, job, and optional step context; orbs, parameters, reusable commands, interpolation, multiline content, execution, and mutation remain review-first or blocked. |
 | Nested workspace support | Python, JavaScript/TypeScript, Go, Rust, Java, and .NET workspace evidence is preserved with path and working-directory context. |
 | Java vertical | Maven/Gradle discovery, saved failure evidence, OWASP Dependency-Check discovery, and end-to-end Doctor proof are complete. |
 | .NET vertical | Project discovery, saved test normalization, NuGet audit evidence, and end-to-end Doctor proof are complete. |
