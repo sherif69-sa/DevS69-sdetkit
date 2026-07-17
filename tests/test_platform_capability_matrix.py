@@ -21,6 +21,7 @@ EXPECTED_CAPABILITIES = {
     "merge_readiness",
     "circleci_proof_discovery",
     "cpp_proof_surface_discovery",
+    "cpp_saved_failure_normalization",
     "multi_ecosystem_adoption",
 }
 
@@ -64,7 +65,7 @@ def test_platform_capability_matrix_separates_gaps_and_external_blockers() -> No
 
     gaps = {row["gap_id"]: row for row in payload["active_repository_gaps"]}
     assert {
-        "cpp_saved_failure_normalization",
+        "cpp_quality_security_evidence",
         "azure_devops_proof_discovery",
         "mixed_monorepo_vertical",
         "real_repository_kpi_evidence",
