@@ -1,0 +1,9 @@
+Run npm test
+FAIL apps/admin/tests/shared.test.ts
+AssertionError: expected true to be false
+
+Run cargo test
+test shared::renders_shared_view ... FAILED
+thread 'shared::renders_shared_view' panicked at crates/native/src/lib.rs:14:5:
+assertion failed: left == right
+Process completed with exit code 1
