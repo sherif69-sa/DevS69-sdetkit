@@ -1,157 +1,117 @@
 # Product roadmap
 
-DevS69 SDETKit is an evidence-first, local-first release-confidence and repository-diagnosis layer for SDET, QA, DevOps, release, security, and platform teams.
+DevS69 SDETKit is an evidence-first, local-first release-confidence and repository-diagnosis layer for SDET, QA, DevOps, release, security, and platform teams. It reads repository-owned evidence, explains the first meaningful failure, recommends exact proof commands, and remains review-first whenever action is not proven safe.
 
-It does not replace test runners, CI providers, security scanners, dependency tools, build systems, or release systems. It reads repository-owned evidence, connects signals, explains the first meaningful failure, recommends exact proof commands, and preserves review-first boundaries whenever action is not proven safe.
-
-Machine-readable portfolio:
+Machine-readable authority:
 
 - `docs/contracts/platform-capability-matrix.v1.json`
-
-Supporting policy checkpoints:
-
 - `docs/contracts/failure-vector-support-matrix.v1.json`
 - `docs/contracts/safety-gate-policy-matrix.v1.json`
 
 ## Product promise
 
-For a repository an operator does not yet understand, SDETKit should answer:
-
 ```text
 What kind of repository is this?
-Which proof commands and artifact contracts does it already own?
-What failed first, beneath wrapper noise?
-Which files, workspaces, or workflow surfaces most likely own the failure?
+Which commands and artifact contracts does it own?
+What failed first beneath wrapper noise?
+Which workspace or workflow surface owns the failure?
 What should a human run next?
-Which actions are explicitly blocked?
-What evidence should be retained for the next occurrence?
+Which actions are blocked?
+What evidence should be retained?
 ```
 
-The product is ambitious in understanding and conservative in action.
+SDETKit is ambitious in understanding and conservative in action. It does not replace CI, test runners, compilers, scanners, build systems, or release systems.
 
-## Stable public first path
+## Stable public path
 
 ```bash
 python -m sdetkit gate fast
 python -m sdetkit gate release
 python -m sdetkit doctor
+python -m sdetkit adoption-surface --root . --out build/sdetkit/adoption-surface.json --format report
 ```
 
-The adoption and diagnosis path builds on that stable surface:
+Target-repository commands remain advisory until a human runs them in a trusted environment.
 
-```bash
-python -m sdetkit adoption-surface \
-  --root . \
-  --out build/sdetkit/adoption-surface.json \
-  --format report
-
-python -m sdetkit product-maturity-radar \
-  --root . \
-  --out build/sdetkit/product-maturity-radar.json \
-  --format text
-```
-
-Recommended target-repository commands remain advisory until an operator runs them in a trusted environment.
-
-## End-to-end operator journey
+## Shared operator journey
 
 ```text
 repository discovery
-→ evidence-backed proof-command recommendations
-→ saved local or CI failure evidence
-→ FailureVector extraction and classification
-→ SafetyGate review
-→ ProtectedVerifier scope and proof checks
-→ Doctor, PR Quality, and merge-readiness reporting
-→ trajectory and RepoMemory learning
+→ workspace-scoped proof recommendations
+→ saved failure evidence
+→ FailureVector
+→ SafetyGate
+→ ProtectedVerifier
+→ Doctor / PR Quality / merge readiness
+→ trajectory / RepoMemory
 ```
 
-A product capability is not complete merely because a detector or parser exists. A complete vertical connects discovery to an actionable, review-first report through shared contracts.
+A detector alone is not a complete product capability. A complete vertical must preserve shared evidence, diagnosis, safety, verification, reporting, and learning contracts.
 
-## Current platform architecture
+## Current architecture
 
-| Plane | Current responsibility | Implemented examples | Authority boundary |
+| Plane | Responsibility | Implemented examples | Boundary |
 | --- | --- | --- | --- |
-| Evidence | Collect repository, CI, artifact, dependency, security, release, topology, and exact-head evidence. | Gate artifacts, adoption surface, workflow governance, failure bundles, manifests, provenance, merge readiness. | Evidence does not authorize mutation. |
-| Diagnosis | Extract and classify the first meaningful failure and identify owner surfaces. | FailureVector, ecosystem adapters, CI failure summaries, current-head failure bundles. | Unknown or incomplete diagnosis remains review-first. |
+| Evidence | Collect repository, CI, artifact, security, release, topology, workspace, and exact-head evidence. | Gate artifacts, adoption surface, failure bundles, manifests, provenance. | Evidence does not authorize mutation. |
+| Diagnosis | Extract the first meaningful failure and likely owner surface. | FailureVector, ecosystem adapters, C++ and workspace-owned saved failures. | Unknown diagnosis remains review-first. |
 | Safety | Decide eligibility and block unsafe categories or scope. | SafetyGate and policy matrix. | Eligibility is not patch authority. |
-| Verification | Independently validate scope, proof, and anti-cheat boundaries. | ProtectedVerifier, protected proof chain, replayable benchmark scenarios. | Verification does not authorize merge or publication. |
-| Reporting | Render exact status, evidence, uncertainty, and next human action. | Doctor, PR Quality, action reports, product maturity radar, workflow governance, merge readiness. | Predictions and recommendations are not proof. |
-| Learning | Record reviewed action-response-diagnosis-proof outcomes. | TrajectoryStore, RepoMemory, history and pattern reports. | History informs review; it does not authorize the current change. |
-| Orchestration | Run deterministic local jobs over file-backed artifacts. | Diagnostic queue runner and bounded local workers. | Local orchestration remains non-authorizing. |
-| Adapters | Translate ecosystems, package managers, build systems, CI providers, and security tools into shared contracts. | Python, JavaScript/TypeScript, Go, Rust, Java, .NET, GitHub Actions, GitLab CI, Jenkins, CircleCI. | Target repositories stay read-only by default. |
-
-Hosted services, distributed queues, or managed dashboards are optional later deployment choices. They are not prerequisites for product value.
+| Verification | Validate scope, proof, and anti-cheat boundaries. | ProtectedVerifier, proof chain, replay benchmark. | Verification does not authorize merge. |
+| Reporting | Render status, uncertainty, and one next human action. | Doctor, PR Quality, workflow governance, merge readiness. | Recommendations are not proof. |
+| Learning | Retain reviewed outcomes. | TrajectoryStore and RepoMemory. | History does not authorize the current change. |
+| Orchestration | Run deterministic local jobs over file-backed artifacts. | Diagnostic queue and bounded workers. | Orchestration remains non-authorizing. |
+| Adapters | Translate ecosystems and providers into shared contracts. | Python, JS/TS, Go, Rust, Java, .NET, C++, GitHub Actions, GitLab, Jenkins, CircleCI. | Target repositories stay read-only by default. |
 
 ## Current implementation truth
 
-| Surface | Current truth on `main` | Highest-value remaining gap |
+| Surface | Current truth after the active PR lands | Highest-value remaining gap |
 | --- | --- | --- |
-| Release confidence | Canonical gate and Doctor paths produce machine-readable release evidence. | Public package remains `1.0.3`; repository candidate `1.1.0` is not publicly verified. |
-| Adoption discovery | Root and nested workspaces are discovered across Python, JavaScript/TypeScript, Go, Rust, Java, and .NET from repository-owned evidence. | C++ is not yet represented as a first-class ecosystem. |
-| CI-provider discovery | GitHub Actions and GitLab CI have actionable evidence paths; conservative Jenkins declarative `sh` and CircleCI literal `run` extraction are implemented. | Azure DevOps and other providers require evidence-backed, review-first adapters. |
-| Failure diagnosis | Saved failures normalize into shared FailureVector evidence for Python, JavaScript/TypeScript, Go, Rust, Java, and .NET supported slices. | C++ compiler, linker, CTest, and common test-output adapters are absent. |
-| Security evidence | Explicit cargo-audit, JavaScript package-audit, NuGet audit, Java dependency-check, GHAS, and repository security evidence can be reported conservatively. | Cross-ecosystem confidence and source-context rules need one shared consistency audit. |
-| Safety and verification | SafetyGate, ProtectedVerifier, proof-chain integrity, isolation, scope checks, and anti-cheat rules exist. | Human-approved action execution needs an explicit authenticated decision and audit contract before implementation. |
-| Reporting | Doctor, PR Quality, workflow-governance, maintenance, release-readiness, and exact-head merge-readiness surfaces exist. | Decision reports need consistent freshness, provenance, classification, and canonical next-action fields. |
-| Learning | TrajectoryStore, RepoMemory, benchmark, and pattern surfaces exist. | Product KPIs need stronger repeated external-repository evidence. |
-| Public command surface | The command inventory exists and compatibility is preserved. | Canonical operator journeys, tier explanations, and family-level help remain uneven. |
-| Product UI | GitHub comments and artifacts provide the current operator surface. | A thin operator UI or GitHub App experience belongs after decision and action contracts stabilize. |
+| Release | Repository candidate `1.1.0` has qualification and provenance paths. | Public package is still `1.0.3`; external publishing settings are unverified. |
+| Ecosystems | Python, JS/TS, Go, Rust, Java, .NET, and C++ have supported evidence paths. | Continue shared-contract consistency audits. |
+| Providers | GitHub Actions, GitLab, Jenkins literal shell, and CircleCI literal run evidence exist. | Azure DevOps needs a conservative adapter. |
+| Mixed workspaces | A complete mixed-language monorepo operator vertical preserves root/nested commands, workspace ownership, ambiguity, Doctor, verifier, and memory evidence. | Reviewed real-repository product KPI evidence is next. |
+| Safety | SafetyGate, ProtectedVerifier, isolation, scope, and anti-cheat checks exist. | Authenticated human decision and audit contracts must precede execution. |
+| Reporting | Doctor, PR Quality, maintenance, release, governance, and exact-head merge readiness exist. | Freshness, provenance, classification, and canonical next-action consistency. |
+| Learning | TrajectoryStore, RepoMemory, benchmark, and patterns exist. | Repeated reviewed external-repository denominators. |
+| UI | GitHub comments and artifacts are the current operator surface. | Thin UI only after decision and audit contracts stabilize. |
 
-The detailed released-versus-main truth remains in [Current product delta](../current-product-delta.md).
+Detailed released-versus-main truth: [Current product delta](../current-product-delta.md).
 
 ## Completed execution chain
 
-The roadmap must not reopen these accepted lanes unless current evidence proves regression:
-
 | Completed lane | Evidence |
 | --- | --- |
-| Protected diagnosis and proof spine | FailureVectorEngine, SafetyGate, TrajectoryStore, RepoMemory, ReplayableBenchmarkHarness, ProtectedVerifier, PatchScorer, PRReporter, and local JobQueue contracts are connected. |
-| Rust vertical | Rust saved-failure adapters, explicit cargo-audit discovery, and a complete adoption-to-diagnosis proof are complete. |
-| Jenkins command discovery | Conservative literal declarative-pipeline shell-command extraction is complete; dynamic Groovy remains review-first. |
-| CircleCI proof-command discovery | Literal repository-owned `run` commands preserve config, job, and optional step context; orbs, parameters, reusable commands, interpolation, multiline content, execution, and mutation remain review-first or blocked. |
-| Nested workspace support | Python, JavaScript/TypeScript, Go, Rust, Java, and .NET workspace evidence is preserved with path and working-directory context. |
-| Java vertical | Maven/Gradle discovery, saved failure evidence, OWASP Dependency-Check discovery, and end-to-end Doctor proof are complete. |
-| .NET vertical | Project discovery, saved test normalization, NuGet audit evidence, and end-to-end Doctor proof are complete. |
-| JavaScript package security | Explicit npm, pnpm, and Yarn audit commands are discovered without executing target code. |
-| Review and merge visibility | Contributor-first PR Quality decisions, release handoff, post-merge verification, proof-profile visibility, and exact-head merge-readiness monitoring are implemented. |
-| Report trust foundation | Workflow-governance freshness and deterministic provenance are implemented for the first major decision report. |
+| Protected diagnosis spine | FailureVector, SafetyGate, TrajectoryStore, RepoMemory, benchmark, ProtectedVerifier, PatchScorer, PRReporter, and JobQueue are connected. |
+| Rust, Java, and .NET verticals | Discovery, saved failures, security evidence, and end-to-end Doctor proof are implemented for supported slices. |
+| C++ vertical | Discovery, compiler/linker/test normalization, explicit quality/security evidence, and complete operator proof are implemented. |
+| Jenkins and CircleCI proof-command discovery | Literal repository-owned command evidence preserves source context; dynamic behavior remains review-first. |
+| Nested workspaces | Workspace path and working-directory identity are preserved across supported ecosystems. |
+| Mixed-language monorepo operator vertical | Root and nested commands, workspace failure ownership, ambiguity, SafetyGate, ProtectedVerifier, Doctor, and observation-only RepoMemory are composed deterministically. |
+| Review visibility | PR Quality, release handoff, post-merge verification, and exact-head merge readiness are implemented. |
 
 ## Selection rule
 
-Choose work in this order:
-
-1. red main, install, security, release, package, or required-check blocker;
-2. 1.1.0 release qualification and public verification;
-3. stale product-control evidence that can cause duplicate or unsafe work;
-4. the missing link in the active complete ecosystem or provider vertical;
-5. cross-report consistency and operator decision quality;
-6. real adopter or contributor pain with a clear proof contract;
-7. human-approved bounded action contracts;
-8. one narrowly proven mechanical automation family;
-9. packaging, documentation, UI, and public-release polish.
-
-Generated tracker noise, naming cleanup, dependency chores, and broad refactors are valid only when they protect green main or strengthen product evidence.
+1. Red main, install, security, package, release, or required-check blocker.
+2. Public 1.1.0 qualification and verification.
+3. Stale product-control evidence that could cause duplicate or unsafe work.
+4. Reviewed real-repository KPI evidence with explicit denominators.
+5. Missing link in an active ecosystem or provider vertical.
+6. Cross-report consistency and operator decision quality.
+7. Human-approved bounded action contracts.
+8. One narrowly proven mechanical automation family.
+9. Packaging, documentation, UI, and public-release polish.
 
 ## Active executable PR ladder
 
-| Order | PR slice | Product value | Exit criteria |
+| Order | Slice | Product value | Exit criteria |
 | ---: | --- | --- | --- |
-| 1 | **Release: qualify and publish 1.1.0** | Closes the public package delta. | Protected GitHub `pypi` environment, matching PyPI Trusted Publisher, frozen-SHA qualification, provenance, digest verification, and clean public install are proven. This lane remains **external configuration required**. |
-| 2 | **Adoption: build the complete C++ vertical** | Adds the next missing first-class ecosystem without reopening completed language lanes. | Four contributor-sized PRs cover discovery, saved-failure normalization, quality/security evidence, and complete operator proof. |
-| 3 | **Product proof: prove a mixed-language monorepo operator vertical** | Demonstrates workspace-specific discovery, failure ownership, and proof guidance in one realistic mixed repository. | Fixture-backed discovery, owner context, saved failure, SafetyGate, ProtectedVerifier, and report output agree. |
-| 4 | **Product evidence: collect reviewed real-repository product KPI evidence** | Replaces anecdotal maturity claims with reviewed denominators and source provenance. | Repeated adopter observations produce reviewable diagnosis, proof-command, boundary-preservation, and actionability metrics. |
-| 5 | **Provider depth: add conservative Azure DevOps proof discovery** | Extends provider evidence without evaluating templates or executing target code. | Literal repository-owned commands and source context are preserved; variables, templates, service connections, and dynamic behavior remain review-first. |
+| 1 | **Release: qualify and publish 1.1.0** | Close the public package delta. | GitHub `pypi` environment, PyPI Trusted Publisher, frozen-SHA qualification, provenance, digest, and clean public install are proven. This remains **external configuration required**. |
+| 2 | **Product evidence: collect reviewed real-repository product KPI evidence** | Replace anecdotal maturity claims with reviewed denominators. | Repeated observations produce source-backed diagnosis, proof-command, boundary, and actionability metrics. |
+| 3 | **Provider depth: conservative Azure DevOps proof discovery** | Extend provider evidence without executing templates. | Literal repository-owned commands and source context are retained; templates, variables, matrices, service connections, and dynamic behavior remain review-first. |
+| 4 | **Safety research: one narrow remediation promotion** | Evaluate a reversible PR-owned mechanical family. | Benchmark, independent verifier, rollback, trajectory, and zero unsafe false-authority decisions are proven before policy changes. |
 
-The detailed phases below explain how these immediate slices compound into the final product. The ladder is a current execution contract, not permission to skip green-main or safety gates.
+## Executable roadmap
 
-## Executable roadmap to final product release
-
-### Phase 0 — Keep accepted main trustworthy
-
-**Status:** operational and continuous.
-
-Exit criteria for every PR:
+### Phase 0 — Keep `main` trustworthy
 
 ```text
 small_scope=true
@@ -163,89 +123,24 @@ rollback_known=true
 protected_surfaces_not_weakened=true
 ```
 
-### Phase 1 — Qualify and publish 1.1.0
+### Phase 1 — Publish 1.1.0
 
-**Active blocker:** [#1928](https://github.com/sherif69-sa/DevS69-sdetkit/issues/1928).
+Active blocker: [#1928](https://github.com/sherif69-sa/DevS69-sdetkit/issues/1928).
 
-Repository code already represents version/tag alignment, build-once artifact reuse, Python 3.10/3.11/3.12 exact-wheel qualification, Trusted Publishing, package attestations, public-install verification, and GitHub-Release ordering.
+1. Freeze the exact candidate SHA.
+2. Refresh external Python, JS/TS, and Go acceptance evidence.
+3. Verify the protected GitHub `pypi` environment.
+4. Verify the matching PyPI Trusted Publisher.
+5. Create the signed tag only after those checks.
+6. Retain qualification, distribution, provenance, and post-publication artifacts.
+7. Verify `sdetkit==1.1.0` installs from public PyPI.
+8. Update release references only after public verification.
 
-Remaining proof is operational, not aspirational:
+SDETKit must not silently tag or publish.
 
-1. freeze and record the exact release-candidate SHA;
-2. refresh external Python, JavaScript/TypeScript, and Go acceptance evidence against that SHA;
-3. explicitly verify the protected GitHub `pypi` environment;
-4. explicitly verify the matching PyPI Trusted Publisher binding;
-5. create the signed `v1.1.0` tag only after those settings are verified;
-6. retain qualification, distribution, provenance, and post-publication artifacts;
-7. verify `sdetkit==1.1.0` installs from public PyPI;
-8. update README release-channel references only after public verification;
-9. record final public evidence in a post-release PR.
+### Phase 2 — Ecosystem consistency
 
-SDETKit must not silently create the release tag or publish the package.
-
-### Phase 2 — Build the complete C++ vertical
-
-**Epic:** [#2090](https://github.com/sherif69-sa/DevS69-sdetkit/issues/2090).
-
-C++ must be delivered as four reviewable PRs.
-
-#### 2A. C++ repository and proof-surface discovery
-
-Detect repository-owned evidence from narrowly supported surfaces:
-
-- `CMakeLists.txt`, `CMakePresets.json`, and CTest ownership;
-- `meson.build` and Meson options;
-- C++ source/header ownership without counting generated or vendored trees;
-- literal configure, build, test, and analysis commands in supported CI or scripts;
-- root and nested workspaces with preserved working-directory context.
-
-Recommendations must be grounded in explicit evidence and remain manual.
-
-#### 2B. Saved C++ failure normalization
-
-Normalize supported saved evidence without invoking target tools:
-
-- GCC, Clang, and fixture-backed MSVC compiler diagnostics;
-- linker failures with conservative ownership hints;
-- CTest and common GoogleTest/Catch2-style saved output;
-- first meaningful failure, tool, class, paths, exit code, and explicit local repro command where known.
-
-Unknown generators, proprietary build systems, and dynamic commands remain low-confidence and review-first.
-
-#### 2C. C++ quality and security evidence
-
-Detect only explicitly configured tools:
-
-- `clang-tidy`;
-- `cppcheck`;
-- Clang/GCC sanitizers;
-- CodeQL C/C++ workflow evidence;
-- optional `clang-format` quality evidence;
-- compile-database references when owned by the repository contract.
-
-A generic C++ source tree must not imply those tools are installed or used.
-
-#### 2D. Complete C++ operator proof
-
-Prove one realistic fixture through:
-
-```text
-discovery
-→ advisory commands
-→ saved compiler or CTest failure
-→ FailureVector
-→ SafetyGate / ProtectedVerifier
-→ Doctor or PR Quality
-→ trajectory / RepoMemory evidence
-```
-
-Publish a sanitized operator page that distinguishes detected, inferred, proven, unsupported, and manual behavior.
-
-### Phase 3 — Cross-ecosystem and provider consistency
-
-Audit Python, JavaScript/TypeScript, Go, Rust, Java, .NET, C++, GitHub Actions, GitLab CI, Jenkins, and CircleCI shared behavior after the C++ vertical lands.
-
-Required consistency dimensions:
+C++, Rust, Java, .NET, and mixed-monorepo proofs are implemented for supported slices. Audit these shared dimensions without creating parallel schemas:
 
 ```text
 workspace_identity
@@ -263,57 +158,27 @@ security_evidence_source
 authority_boundary
 ```
 
-Do not create ecosystem- or provider-specific schemas that bypass shared contracts. Add Azure DevOps or another provider only through a separate evidence-backed, conservative adapter PR.
+### Phase 3 — Reviewed product KPI evidence
 
-### Phase 4 — Trust every decision report
+Required reviewed metrics include discovery precision, first-failure extraction, workspace ownership precision, proof-command actionability, boundary preservation, unsafe-authority rejection, operator actionability, and explicit unavailable/malformed/unsupported denominators. No KPI may be published without source provenance and a reviewed denominator.
 
-Extend freshness and provenance from workflow governance to every report that can influence operator action.
+### Phase 4 — Provider depth
 
-Deliverables:
+Add Azure DevOps only through a conservative adapter PR. Variables, templates, service connections, remote includes, matrices, and dynamic behavior remain unresolved and review-first.
 
-1. deterministic input digests;
-2. generator and schema provenance;
-3. exact-head or explicit snapshot binding;
-4. missing, stale, malformed, and unavailable classifications;
-5. cross-report consistency checks;
-6. no authoritative zero from malformed or unavailable collection state;
-7. one canonical next action per report.
+### Phase 5 — Trust every decision report
 
-### Phase 5 — Operator decision cards
+Require deterministic input digests, generator/schema provenance, exact-head or snapshot binding, missing/stale/malformed/unavailable classifications, cross-report consistency, no authoritative zero from failed collection, and one canonical next action.
 
-Turn recommendations and alerts into reviewable decisions:
+### Phase 6 — Operator decision cards
 
-```text
-current_valid
-stale
-duplicate
-already_fixed
-already_present
-false_positive
-insufficient_evidence
-unsafe
-unsupported
-valuable_now
-valuable_later
-```
+Classifications: `current_valid`, `stale`, `duplicate`, `already_fixed`, `already_present`, `false_positive`, `insufficient_evidence`, `unsafe`, `unsupported`, `valuable_now`, `valuable_later`.
 
-Human choices:
+Human choices: `accept`, `reject`, `defer`, `request_more_evidence`, `mark_duplicate`, `mark_already_done`, `prepare_patch_proposal`.
 
-```text
-accept
-reject
-defer
-request_more_evidence
-mark_duplicate
-mark_already_done
-prepare_patch_proposal
-```
+Every choice records actor, target, exact head, reason, evidence, and timestamp.
 
-Every choice must record actor, target, exact head, reason, evidence, and timestamp.
-
-### Phase 6 — Patch proposal artifacts without application
-
-Generate bounded, reviewable patch proposals while preserving:
+### Phase 7 — Patch proposals without application
 
 ```text
 patch_application_allowed=false
@@ -321,87 +186,25 @@ direct_main_mutation=false
 merge_authorized=false
 ```
 
-A proposal must include target files, expected diff shape, risk, rollback, focused proof, full proof, and verifier requirements.
+A proposal includes target files, expected diff shape, risk, rollback, focused/full proof, and verifier requirements.
 
-### Phase 7 — Human-approved bounded execution
+### Phase 8 — Human-approved bounded execution
 
-Enable execution only after an explicit policy PR proves:
+Require authenticated operator, explicit approval, exact target/scope, reason, dry-run preview, rollback, audit record, ProtectedVerifier, no direct-main mutation, no merge authority, and no automatic dismissal. Initial execution may create or update a branch only.
 
-```text
-authenticated_operator=true
-explicit_approval=true
-exact_target=true
-exact_scope=true
-reason_required=true
-dry_run_preview=true
-rollback_required=true
-audit_record_required=true
-protected_verifier_required=true
-direct_main_mutation=false
-merge_authorized=false
-automatic_dismissal_allowed=false
-```
+### Phase 9 — One mechanical automation family
 
-Initial capability should create or update a branch only. Human review continues to own merge and release decisions.
+Promote only a repeatedly proven reversible family such as formatter-only output, deterministic metadata alignment, or docs-link hygiene. Security, dependency, release, workflow-permission, public-API, and unknown failures remain excluded.
 
-### Phase 8 — One narrow mechanical automation family
+### Phase 10 — Productization
 
-Promote only one repeatedly proven, reversible family, such as formatter-only output, deterministic metadata alignment, or docs-link hygiene.
+Deliver stable installation, canonical CLI journeys, versioned schemas, compatibility/deprecation policy, docs, support boundaries, multi-language/multi-CI proof, and rollback guidance.
 
-Promotion requires fixture coverage, replay benchmarks, verifier independence, rollback, zero unsafe false-authority decisions, and a versioned policy.
+### Phase 11 — Supply chain and thin UI
 
-Security, dependency, release, workflow-permission, public-API, and unknown failures remain excluded from the first automation family.
-
-### Phase 9 — Productization and public command journeys
-
-Deliver:
-
-- stable installation and packaging;
-- canonical CLI journeys and family-level help;
-- versioned schemas and compatibility policy;
-- deprecation and migration policy;
-- docs site, quick start, operator guide, contributor guide, and known limitations;
-- multi-language and multi-CI proof matrix;
-- release rollback and support boundaries.
-
-### Phase 10 — Security and supply-chain release readiness
-
-Require:
-
-```text
-security_policy
-threat_model
-least_privilege_workflows
-full_SHA_action_pins
-dependency_review
-trusted_publishing
-SBOM
-provenance
-attestations
-release_rollback
-post_publish_verification
-```
-
-Security alerts may be explicitly dispositioned by an authenticated human with evidence and reason; silent or automatic dismissal remains forbidden.
-
-### Phase 11 — Thin operator UI and GitHub App experience
-
-Build UI only after report, decision, approval, and audit contracts stabilize.
-
-The first UI should visualize existing contracts rather than invent a parallel control plane:
-
-- repository and release posture;
-- exact first failure;
-- evidence freshness;
-- decision cards;
-- approved action preview;
-- verifier result;
-- trajectory history;
-- rollback and audit record.
+Require security policy, threat model, least privilege, full-SHA pins, dependency review, Trusted Publishing, SBOM, provenance, attestations, rollback, and post-publication verification. UI must visualize existing contracts rather than create a parallel control plane.
 
 ### Phase 12 — Public product release
-
-The product is release-complete only when it has:
 
 ```text
 stable_package=true
@@ -421,25 +224,12 @@ Green CI alone is not a product release.
 
 ## Release horizons
 
-### 1.1.0 — public release-confidence and diagnosis foundation
-
-Publish the frozen candidate with exact artifact qualification, provenance, Trusted Publishing, public installation proof, and post-release evidence. Do not add new ecosystem scope to the candidate.
-
-### 1.2.x — ecosystem consistency, C++, and provider depth
-
-Deliver C++ discovery and saved-failure adapters, complete the C++ vertical, audit shared contracts, and add only evidence-backed provider depth such as Azure DevOps.
-
-### 1.3.x — trusted reports and human decision workflow
-
-Extend report freshness/provenance, cross-report consistency, decision cards, and patch-proposal artifacts.
-
-### Later — guarded action and operator product
-
-Enable human-approved branch actions, one narrow mechanical automation family, stronger product packaging, and the thin operator UI or GitHub App surface.
+- **1.1.0:** frozen public release-confidence and diagnosis foundation.
+- **1.2.x:** reviewed KPI evidence, shared-contract audits, and evidence-backed provider depth such as Azure DevOps. C++ and mixed-monorepo operator proofs are already implemented.
+- **1.3.x:** trusted report provenance, decision cards, and patch-proposal artifacts.
+- **Later:** human-approved branch actions, one mechanical automation family, and a thin operator UI or GitHub App.
 
 ## Product KPIs
-
-Progress is measured by trust and operator usefulness, not PR volume:
 
 ```text
 public_release_delta
@@ -448,11 +238,9 @@ complete_ci_provider_vertical_count
 cpp_vertical_completion
 multi_language_fixture_coverage
 mixed_workspace_fixture_coverage
-adoption_surface_detection_coverage
 first_failure_extraction_rate
 diagnosis_precision_rate
 proof_command_actionability_rate
-mean_time_to_primary_blocker
 report_freshness_coverage
 cross_report_consistency_rate
 review_first_boundary_preservation_rate
@@ -461,34 +249,20 @@ safe_fix_false_authority_count
 operator_actionability_score
 external_repo_proof_count
 reviewed_trajectory_count
-open_source_contributor_time_to_first_proof
 ```
 
-Initial operating targets:
+Targets:
 
 - `safe_fix_false_authority_count = 0`;
 - `review_first_boundary_preservation_rate = 100%` for unknown, security, dependency, release, workflow-permission, merge-conflict, and public-API changes;
-- no new ecosystem family before the active vertical has complete proof or an explicit deferral decision;
 - no public capability claim without a committed contract and fresh evidence;
 - no KPI without a reviewed denominator and source provenance.
 
-## Non-goals for the next wave
+## Non-goals
 
-- a giant autonomous-agent rewrite;
-- cloud queues or databases before local contracts require them;
-- broad automatic patch application;
-- automatic dependency upgrades;
-- automatic security remediation or dismissal;
-- automatic release, tag creation, publication, or merge;
-- executing or mutating external target repositories by default;
-- replacing existing CI, test, compiler, build, scanner, or release tools;
-- ecosystem- or provider-specific schemas that bypass shared platform contracts.
+No giant autonomous rewrite, premature cloud control plane, broad automatic patching, automatic dependency/security/release/merge actions, external repository mutation by default, replacement of established tools, or ecosystem/provider schema that bypasses shared contracts.
 
 ## Authority boundary
-
-The roadmap does not authorize automated patching, merging, publication, security dismissal, or semantic-equivalence claims.
-
-Unless a future independently verified policy explicitly changes a narrow boundary, product artifacts must preserve:
 
 ```text
 automation_allowed=false
@@ -498,5 +272,3 @@ publication_authorized=false
 merge_authorized=false
 semantic_equivalence_proven=false
 ```
-
-Human review owns security acceptance, release publication, product direction, branch-action approval, and business tradeoffs.

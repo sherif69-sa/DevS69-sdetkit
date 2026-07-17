@@ -25,6 +25,7 @@ EXPECTED_CAPABILITIES = {
     "cpp_quality_security_evidence",
     "cpp_complete_operator_proof",
     "multi_ecosystem_adoption",
+    "mixed_monorepo_operator_proof",
 }
 
 AUTHORITY_FIELDS = {
@@ -68,7 +69,6 @@ def test_platform_capability_matrix_separates_gaps_and_external_blockers() -> No
     gaps = {row["gap_id"]: row for row in payload["active_repository_gaps"]}
     assert {
         "azure_devops_proof_discovery",
-        "mixed_monorepo_vertical",
         "real_repository_kpi_evidence",
         "guarded_remediation_promotion",
     } == set(gaps)
