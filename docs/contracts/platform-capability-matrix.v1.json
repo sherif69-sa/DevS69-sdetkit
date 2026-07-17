@@ -1,12 +1,12 @@
 {
   "active_repository_gaps": [
     {
-      "exit_criteria": "clang-tidy, cppcheck, sanitizer, CodeQL C/C++, clang-format, and compile-database claims require explicit repository-owned evidence without running target tools.",
-      "gap_id": "cpp_quality_security_evidence",
+      "exit_criteria": "A fixture-backed C++ repository composes discovery, advisory commands, saved failure normalization, FailureVector, SafetyGate, ProtectedVerifier, operator reporting, and reviewed learning evidence without expanding authority.",
+      "gap_id": "cpp_complete_operator_proof",
       "priority": "P1",
       "review_first": true,
-      "suggested_owner_files": ["src/sdetkit/adoption_surface", "tests", "docs"],
-      "title": "Detect explicit C++ quality and security evidence"
+      "suggested_owner_files": ["tests", "docs", "src/sdetkit"],
+      "title": "Prove the complete C++ adoption-to-diagnosis operator vertical"
     },
     {
       "exit_criteria": "Literal script tasks are classified without evaluating templates or variables.",
@@ -153,6 +153,14 @@
       "proof_tests": ["tests/test_cpp_failure_vector_adapters.py"],
       "status": "implemented_and_tested",
       "title": "Saved C++ compiler, linker, and test failure normalization"
+    },
+    {
+      "authority": "read_only_evidence_only",
+      "capability_id": "cpp_quality_security_evidence",
+      "owner_files": ["src/sdetkit/adoption_surface/cpp_quality_security.py", "docs/integrations/cpp-quality-security-evidence.md"],
+      "proof_tests": ["tests/test_adoption_surface_cpp_quality_security.py"],
+      "status": "implemented_and_tested",
+      "title": "Explicit C++ quality and security evidence"
     },
     {
       "authority": "read_only_discovery_and_diagnosis",
