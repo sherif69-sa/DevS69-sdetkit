@@ -306,7 +306,9 @@ def _test_result(
     elif catch2 is not None or "test cases:" in lower:
         tool = "ctest_catch2" if "ctest" in lower else "catch2"
         test_name = ctest.group("check").strip() if ctest is not None else check
-        first_line = catch2.group(0).strip() if catch2 is not None else _first_failure_line(log_text)
+        first_line = (
+            catch2.group(0).strip() if catch2 is not None else _first_failure_line(log_text)
+        )
     else:
         tool = "ctest"
         test_name = ctest.group("check").strip() if ctest is not None else check
@@ -445,7 +447,7 @@ def _affected_paths(log_text: str) -> tuple[str, ...]:
 
 
 def _normalize_owned_path(raw_path: str) -> str:
-    path = raw_path.strip().strip('"\'').replace("\\", "/")
+    path = raw_path.strip().strip("\"'").replace("\\", "/")
     while path.startswith("./"):
         path = path[2:]
     lower_parts = [part.lower() for part in path.split("/") if part]
