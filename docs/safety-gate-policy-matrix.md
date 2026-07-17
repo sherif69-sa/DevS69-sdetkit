@@ -29,10 +29,14 @@ This decision is eligibility only. SafetyGate does not apply a patch, run privil
 | `formatter_only` | `safe_fix_allowed_if_all_global_conditions_pass` | `affected_files_only` | affected_files is empty, scope is not pr_owned_only, risk is not low, safe_fix_candidate is false, local_repro_command is empty |
 | `lint` | `safe_fix_allowed_if_all_global_conditions_pass` | `affected_files_only` | lint is not mechanically fixable, affected_files is empty, scope is not pr_owned_only, risk is not low, safe_fix_candidate is false, local_repro_command is empty |
 | `test` | `review_first` | `none` | always in current policy |
+| `compile` | `review_first` | `none` | always in current policy |
+| `link` | `review_first` | `none` | always in current policy |
 | `type` | `review_first` | `none` | always in current policy |
 | `dependency` | `review_first` | `none` | always in current policy |
 | `merge_conflict` | `review_first` | `none` | always in current policy |
 | `unknown` | `review_first` | `none` | always in current policy |
+
+Compiler and linker diagnostics may identify likely source ownership and explicit local proof commands, but they remain review-first. They do not become safe-fix candidates merely because the saved evidence is high-confidence.
 
 ## Current downstream platform truth
 
@@ -74,4 +78,4 @@ A narrow mechanical category may be evaluated for guarded remediation only after
 6. PR-owned file scope;
 7. human-reviewed policy change.
 
-Unknown, dependency, security, release, public-API, merge-conflict, and broad test-logic failures remain review-first.
+Unknown, dependency, security, release, public-API, merge-conflict, compiler, linker, and broad test-logic failures remain review-first.
