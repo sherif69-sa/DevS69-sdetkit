@@ -68,51 +68,50 @@
       "allowed_files_policy": "none",
       "default_decision": "review_first",
       "failure_class": "test",
-      "review_first_when": [
-        "always in current policy"
-      ]
+      "review_first_when": ["always in current policy"]
+    },
+    {
+      "allowed_files_policy": "none",
+      "default_decision": "review_first",
+      "failure_class": "compile",
+      "review_first_when": ["always in current policy"]
+    },
+    {
+      "allowed_files_policy": "none",
+      "default_decision": "review_first",
+      "failure_class": "link",
+      "review_first_when": ["always in current policy"]
     },
     {
       "allowed_files_policy": "none",
       "default_decision": "review_first",
       "failure_class": "type",
-      "review_first_when": [
-        "always in current policy"
-      ]
+      "review_first_when": ["always in current policy"]
     },
     {
       "allowed_files_policy": "none",
       "default_decision": "review_first",
       "failure_class": "dependency",
-      "review_first_when": [
-        "always in current policy"
-      ]
+      "review_first_when": ["always in current policy"]
     },
     {
       "allowed_files_policy": "none",
       "default_decision": "review_first",
       "failure_class": "merge_conflict",
-      "review_first_when": [
-        "always in current policy"
-      ]
+      "review_first_when": ["always in current policy"]
     },
     {
       "allowed_files_policy": "none",
       "default_decision": "review_first",
       "failure_class": "unknown",
-      "review_first_when": [
-        "always in current policy"
-      ]
+      "review_first_when": ["always in current policy"]
     }
   ],
   "purpose": "Documents the current SafetyGate policy and preserves narrow review-first eligibility without relisting implemented downstream platform layers as future work.",
   "roadmap_lane": "Foundation / SafetyGate",
   "safe_fix_allowed_only_when": {
     "affected_files": "non_empty",
-    "failure_class_in": [
-      "formatter_only",
-      "lint"
-    ],
+    "failure_class_in": ["formatter_only", "lint"],
     "local_repro_command": "non_empty",
     "risk": "low",
     "safe_fix_candidate": true,

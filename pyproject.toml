@@ -133,7 +133,10 @@ module = [
 ignore_errors = false
 
 [[tool.mypy.overrides]]
-module = "sdetkit.failure_vector_adapters"
+module = [
+  "sdetkit.failure_vector_adapters",
+  "sdetkit.failure_vector_cpp",
+]
 ignore_errors = false
 
 [[tool.mypy.overrides]]

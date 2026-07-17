@@ -8,6 +8,8 @@ DOC_PATH = Path("docs/failure-vector-support-matrix.md")
 
 EXPECTED_CLASSES = {
     "test",
+    "compile",
+    "link",
     "formatter_only",
     "lint",
     "type",
@@ -33,9 +35,8 @@ def test_failure_vector_support_matrix_contract_is_complete() -> None:
 
     assert payload["schema_version"] == "sdetkit.failure_vector.support_matrix.v1"
     assert payload["roadmap_lane"] == "Foundation / FailureVectorEngine"
-    assert (
-        payload["next_lane_after_completion"]
-        == "Cross-provider adoption and real-repository evidence"
+    assert payload["next_lane_after_completion"] == (
+        "Cross-provider adoption and real-repository evidence"
     )
 
     rows = payload["supported_failure_classes"]
