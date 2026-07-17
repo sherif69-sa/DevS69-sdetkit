@@ -32,10 +32,7 @@ def _logs(*relative: str) -> list[Path]:
 
 
 def _by_workspace(payload: dict) -> dict[str, dict]:
-    return {
-        str(item["workspace_identity"]["path"]): item
-        for item in payload["workspace_failures"]
-    }
+    return {str(item["workspace_identity"]["path"]): item for item in payload["workspace_failures"]}
 
 
 def test_saved_failures_keep_workspace_and_evidence_identity() -> None:
@@ -100,9 +97,7 @@ def test_ambiguous_multi_workspace_log_fails_closed() -> None:
         "crates/native",
     ]
     assert result["ownership_confidence"] == "low"
-    assert result["uncertainty"] == [
-        "multiple_workspace_candidates:apps/admin,crates/native"
-    ]
+    assert result["uncertainty"] == ["multiple_workspace_candidates:apps/admin,crates/native"]
     assert result["failure_vector"]["failure_class"] == "unknown"
     assert result["failure_vector"]["adapter"]["confidence"] == "low"
     assert result["failure_vector"]["local_repro_command"] is None

@@ -147,10 +147,7 @@ def normalize_saved_workspace_failure(
         reasons = (
             ("workspace_not_identified",)
             if not candidates
-            else (
-                "multiple_workspace_candidates:"
-                + ",".join(item.path for item in candidates),
-            )
+            else ("multiple_workspace_candidates:" + ",".join(item.path for item in candidates),)
         )
         adapter = _ambiguous_adapter_result(
             log_text,
