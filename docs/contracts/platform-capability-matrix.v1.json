@@ -1,6 +1,17 @@
 {
   "active_repository_gaps": [
     {
+      "exit_criteria": "Saved GCC, Clang, supported MSVC, linker, and CTest evidence maps into the shared FailureVector contract without executing target tools.",
+      "gap_id": "cpp_saved_failure_normalization",
+      "priority": "P1",
+      "review_first": true,
+      "suggested_owner_files": [
+        "src/sdetkit/failure_vector_adapters.py",
+        "tests"
+      ],
+      "title": "Normalize saved C++ compiler, linker, and CTest failures"
+    },
+    {
       "exit_criteria": "Literal script tasks are classified without evaluating templates or variables.",
       "gap_id": "azure_devops_proof_discovery",
       "priority": "P2",
@@ -196,6 +207,18 @@
       ],
       "status": "implemented_and_tested",
       "title": "Conservative CircleCI proof-command discovery"
+    },
+    {
+      "authority": "read_only_discovery_only",
+      "capability_id": "cpp_proof_surface_discovery",
+      "owner_files": [
+        "src/sdetkit/adoption_surface/cpp.py"
+      ],
+      "proof_tests": [
+        "tests/test_adoption_surface_cpp.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Conservative C++ repository and proof-surface discovery"
     },
     {
       "authority": "read_only_discovery_and_diagnosis",
