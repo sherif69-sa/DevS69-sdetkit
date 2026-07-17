@@ -13,13 +13,19 @@ Contract files:
 
 | Failure class | Default risk | Safe-fix candidate | Review policy | First signal contract |
 | --- | --- | --- | --- | --- |
-| `test` | `medium` | `False` | `review_or_focused_proof` | pytest FAILED node id or assertion failure line |
+| `test` | `medium` | `False` | `review_or_focused_proof` | structured test identity or assertion failure line |
+| `compile` | `medium` | `False` | `review_first` | structured compiler source or header diagnostic |
+| `link` | `medium` | `False` | `review_first` | structured linker unresolved or duplicate symbol diagnostic |
 | `formatter_only` | `low` | `True` | `mechanical_safe_fix_allowed_when_pr_owned` | ruff format failed or would be reformatted |
 | `lint` | `medium` | `only mechanically fixable lint such as I001 import sorting` | `safe_fix_only_for_low_risk_mechanical_lint` | ruff rule line or ruff check signal |
 | `type` | `medium` | `False` | `review_first` | mypy file:line error |
 | `dependency` | `high` | `False` | `review_first` | pip resolver failure such as ResolutionImpossible |
 | `merge_conflict` | `high` | `False` | `review_first` | CONFLICT line or merge conflict signal |
 | `unknown` | `high` | `False` | `review_first` | first meaningful wrapper line, not generic exit-code fallback |
+
+C++ saved-evidence normalization supports structured GCC, Clang, selected MSVC, GNU/MSVC linker, CTest, GoogleTest, and Catch2-style failure output. It does not invoke a compiler, linker, build system, or test runner. Local reproduction commands are preserved only when the saved evidence explicitly contains one; the adapter does not invent commands from tool identity alone.
+
+Mixed compiler/linker/test output remains `unknown` with low confidence. Generated, vendored, dependency, and common build-output paths do not create source-ownership claims.
 
 ## Current downstream platform truth
 
