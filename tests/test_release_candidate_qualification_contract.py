@@ -81,5 +81,6 @@ def test_candidate_evidence_keeps_external_authority_unverified() -> None:
     assert '"publish_authorized": False' in text
     assert "GitHub environment pypi protection" in text
     assert "PyPI Trusted Publisher binding" in text
-    assert "verify external publishing settings before creating v1.1.0" in text
+    assert "verify external publishing settings before creating the resolved candidate tag" in text
+    assert "before creating v1.1.0" not in text
     assert "Record qualification verdict" in text
